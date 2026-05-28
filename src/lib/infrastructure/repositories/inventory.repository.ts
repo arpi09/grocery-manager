@@ -6,7 +6,7 @@ import type {
 	LocationCount,
 	UpdateInventoryItemInput
 } from '$lib/domain/inventory-item';
-import { db } from '$lib/infrastructure/db';
+import { db, type AppDatabase } from '$lib/infrastructure/db';
 import { inventoryItemTable } from '$lib/infrastructure/db/schema';
 
 export interface IInventoryRepository {
@@ -36,8 +36,10 @@ function mapRow(row: typeof inventoryItemTable.$inferSelect): InventoryItem {
 }
 
 export class DrizzleInventoryRepository implements IInventoryRepository {
+	constructor(private readonly database: AppDatabase = db) {}
+
 	async findById(userId: string, id: string) {
-		const [row] = await db
+		const [row] = await this.database
 			.select()
 			.from(inventoryItemTable)
 			.where(and(eq(inventoryItemTable.id, id), eq(inventoryItemTable.userId, userId)))
@@ -47,7 +49,7 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 	}
 
 	async findByUserAndLocation(userId: string, location: StorageLocation) {
-		const rows = await db
+		const rows = await this.database
 			.select()
 			.from(inventoryItemTable)
 			.where(
@@ -59,7 +61,7 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 	}
 
 	async findAllByUser(userId: string) {
-		const rows = await db
+		const rows = await this.database
 			.select()
 			.from(inventoryItemTable)
 			.where(eq(inventoryItemTable.userId, userId))
@@ -69,7 +71,7 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 	}
 
 	async findExpiringBefore(userId: string, beforeDate: string) {
-		const rows = await db
+		const rows = await this.database
 			.select()
 			.from(inventoryItemTable)
 			.where(
@@ -86,7 +88,7 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 	}
 
 	async countByLocation(userId: string) {
-		const rows = await db
+		const rows = await this.database
 			.select({
 				location: inventoryItemTable.location,
 				count: sql<number>`count(*)::int`
@@ -103,7 +105,7 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 
 	async create(userId: string, id: string, input: CreateInventoryItemInput) {
 		const now = new Date();
-		const [row] = await db
+		const [row] = await this.database
 			.insert(inventoryItemTable)
 			.values({
 				id,
@@ -123,7 +125,7 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 	}
 
 	async update(userId: string, id: string, input: UpdateInventoryItemInput) {
-		const [row] = await db
+		const [row] = await this.database
 			.update(inventoryItemTable)
 			.set({
 				...(input.name !== undefined && { name: input.name }),
@@ -141,7 +143,7 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 	}
 
 	async delete(userId: string, id: string) {
-		const result = await db
+		const result = await this.database
 			.delete(inventoryItemTable)
 			.where(and(eq(inventoryItemTable.id, id), eq(inventoryItemTable.userId, userId)))
 			.returning();
