@@ -5,6 +5,7 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FormField from '$lib/components/molecules/FormField.svelte';
+	import { THEME_LABELS, THEME_PREFERENCES, type ThemePreference } from '$lib/domain/theme';
 	import { userInitials } from '$lib/domain/user';
 
 	let { data, form } = $props();
@@ -12,6 +13,9 @@
 	const profile = $derived(form?.profile ?? data.profile);
 	const displayName = $derived(form?.values?.displayName ?? profile.displayName ?? '');
 	const initials = $derived(userInitials(profile.displayName, profile.email));
+	const selectedTheme = $derived(
+		(form?.themePreference as ThemePreference | undefined) ?? data.themePreference
+	);
 
 	let avatarInput = $state(data.profile.avatarUrl ?? '');
 	let fileError = $state<string | undefined>(undefined);
@@ -127,6 +131,45 @@
 			<Button type="submit">Spara profil</Button>
 		</form>
 	</Card>
+
+	<Card>
+		<h2 class="section-title">Tema</h2>
+		<p class="section-lead">Välj ljust, mörkt eller följ systemets inställning.</p>
+
+		{#if form?.themeSuccess}
+			<p class="banner success" role="status">Tema sparades.</p>
+		{/if}
+
+		<form
+			method="POST"
+			action="?/updateTheme"
+			class="theme-form"
+			use:enhance={() => {
+				return async ({ update }) => {
+					await update({ invalidateAll: true });
+				};
+			}}
+		>
+			<fieldset class="theme-options">
+				<legend class="sr-only">Tema</legend>
+				{#each THEME_PREFERENCES as preference (preference)}
+					<label class="theme-option">
+						<input
+							type="radio"
+							name="themePreference"
+							value={preference}
+							checked={selectedTheme === preference}
+						/>
+						<span>{THEME_LABELS[preference]}</span>
+					</label>
+				{/each}
+			</fieldset>
+			{#if form?.themeErrors?.themePreference?.[0]}
+				<p class="theme-error" role="alert">{form.themeErrors.themePreference[0]}</p>
+			{/if}
+			<Button type="submit">Spara tema</Button>
+		</form>
+	</Card>
 </AppLayout>
 
 <style>
@@ -186,7 +229,8 @@
 		font-size: 0.9rem;
 	}
 
-	.profile-form {
+	.profile-form,
+	.theme-form {
 		display: flex;
 		flex-direction: column;
 	}
@@ -208,5 +252,50 @@
 
 	.file-label input[type='file'] {
 		font-size: 0.85rem;
+	}
+
+	.section-title {
+		margin: 0 0 var(--space-xs);
+		font-size: 1.1rem;
+	}
+
+	.section-lead {
+		margin: 0 0 var(--space-md);
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+
+	.theme-options {
+		margin: 0 0 var(--space-md);
+		padding: 0;
+		border: 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+	}
+
+	.theme-option {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+	}
+
+	.theme-error {
+		margin: calc(-1 * var(--space-sm)) 0 var(--space-md);
+		color: var(--color-danger, #b42318);
+		font-size: 0.9rem;
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 </style>

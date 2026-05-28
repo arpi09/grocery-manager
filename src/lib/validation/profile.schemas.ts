@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { THEME_PREFERENCES } from '$lib/domain/theme';
 
 const MAX_AVATAR_URL_LENGTH = 150_000;
 
@@ -20,4 +21,8 @@ export const updateProfileSchema = z.object({
 		.refine(isAllowedAvatarUrl, 'Use an https URL or upload an image')
 		.optional()
 		.or(z.literal(''))
+});
+
+export const updateThemeSchema = z.object({
+	themePreference: z.enum(THEME_PREFERENCES)
 });
