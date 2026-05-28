@@ -31,10 +31,22 @@ npm install
 npm run db:migrate
 ```
 
-4. Run the app:
+4. Run the app (auto-restart on `.env` / DB / hooks changes):
 
 ```bash
-npm run dev
+npm run dev:watch
+```
+
+Or start the **AI worktree** from this repo:
+
+```bash
+npm run dev:start:ai
+```
+
+Health check (server should be running):
+
+```bash
+npm run dev:health
 ```
 
 Open [http://localhost:5173](http://localhost:5173), create an account, and start adding items.
