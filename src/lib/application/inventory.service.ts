@@ -1,3 +1,4 @@
+import { EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
 import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 import type {
 	CreateInventoryItemInput,
@@ -31,7 +32,7 @@ export class InventoryService {
 			return { location, count: found?.count ?? 0 };
 		});
 
-		const beforeDate = addDays(new Date(), 7);
+		const beforeDate = addDays(new Date(), EXPIRING_SOON_DAYS);
 		const expiringSoon = await this.repository.findExpiringBefore(
 			userId,
 			beforeDate.toISOString().slice(0, 10)
