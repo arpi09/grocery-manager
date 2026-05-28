@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
 	import type { Snippet } from 'svelte';
 
 	interface Props {
@@ -13,8 +14,8 @@
 <div class="auth">
 	<div class="panel">
 		<div class="brand">
-			<span class="logo" aria-hidden="true">🥬</span>
-			<h1>Home Pantry</h1>
+			<h1 class="sr-only">Home Pantry</h1>
+			<AppLogo size="lg" showWordmark />
 			{#if subtitle}
 				<p>{subtitle}</p>
 			{/if}
@@ -34,6 +35,10 @@
 		background: linear-gradient(160deg, #eef2eb 0%, var(--color-bg) 50%, #f0ebe3 100%);
 	}
 
+	html[data-theme='dark'] .auth {
+		background: linear-gradient(160deg, #1a221d 0%, var(--color-bg) 50%, #161c19 100%);
+	}
+
 	.panel {
 		width: 100%;
 		max-width: 400px;
@@ -49,17 +54,8 @@
 		margin-bottom: var(--space-xl);
 	}
 
-	.logo {
-		font-size: 2.5rem;
-	}
-
-	.brand h1 {
-		margin: var(--space-sm) 0 0;
-		font-size: 1.5rem;
-	}
-
 	.brand p {
-		margin: var(--space-xs) 0 0;
+		margin: var(--space-md) 0 0;
 		color: var(--color-text-muted);
 		font-size: 0.9rem;
 	}

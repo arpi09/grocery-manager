@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
 	import NavIcon from '$lib/components/atoms/NavIcon.svelte';
 	import ProfileMenu from '$lib/components/molecules/ProfileMenu.svelte';
 	import {
@@ -52,7 +53,7 @@
 {#if user}
 	<header class="main-nav top" aria-label="Huvudnavigering">
 		<a href="/" class="brand" aria-label="Home Pantry – Hem">
-			<span class="brand-mark" aria-hidden="true">HP</span>
+			<AppLogo size="sm" />
 			<span class="brand-text">Home Pantry</span>
 		</a>
 
@@ -203,20 +204,6 @@
 	.brand:hover {
 		text-decoration: none;
 		color: var(--color-text);
-	}
-
-	.brand-mark {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 1.85rem;
-		height: 1.85rem;
-		border-radius: 0.55rem;
-		background: var(--color-primary);
-		color: #fff;
-		font-size: 0.68rem;
-		font-weight: 700;
-		letter-spacing: 0.04em;
 	}
 
 	.brand-text {
