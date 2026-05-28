@@ -27,8 +27,8 @@
 	}
 </script>
 
-<AppLayout wide>
-	<AppHeader title="Admin" subtitle="Hantera användare och översikt" user={data.user} />
+<AppLayout wide user={data.user}>
+	<AppHeader title="Admin" subtitle="Hantera användare och översikt" />
 
 	{#if form?.message}
 		<p class="banner" role="alert">{form.message}</p>

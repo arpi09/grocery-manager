@@ -34,7 +34,7 @@ const PGlite_INCREMENTAL_MIGRATIONS = [
 	'0001_user_role.sql',
 	'0002_user_last_seen.sql',
 	'0003_household.sql',
-	'0004_user_profile.sql',
+'0004_user_profile.sql',
 	'0005_app_error.sql'
 ];
 

@@ -2,13 +2,15 @@ import { initDatabase } from '$lib/infrastructure/db';
 import {
 	adminService,
 	authService,
-	profileService,
+profileService,
+	householdService,
 	inventoryService,
 	mealPlanService,
 	petFoodService,
 	petService
 } from '$lib/server/di';
 import { recordUserActivity } from '$lib/server/activity';
+import { resolveHouseholdId } from '$lib/server/household-context';
 import { isAdmin } from '$lib/server/auth';
 import { validateSession } from '$lib/server/session';
 import { recordAppError } from '$lib/server/error-log/record';
@@ -23,6 +25,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.authService = authService;
 	event.locals.profileService = profileService;
 	event.locals.adminService = adminService;
+	event.locals.householdService = householdService;
+	event.locals.householdId = null;
 	event.locals.inventoryService = inventoryService;
 	event.locals.mealPlanService = mealPlanService;
 	event.locals.petService = petService;
@@ -32,6 +36,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (event.locals.user) {
 		await recordUserActivity(event.locals.user.id);
+		event.locals.householdId = await resolveHouseholdId(
+			event.locals.householdService,
+			event.locals.user.id
+		);
 	}
 
 	const { pathname } = event.url;

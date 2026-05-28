@@ -5,7 +5,7 @@ import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	try {
-		const item = await locals.inventoryService.getItem(locals.user!.id, params.id);
+		const item = await locals.inventoryService.getItem(locals.householdId!, params.id);
 		return { item };
 	} catch (e) {
 		if (e instanceof InventoryNotFoundError) {
@@ -34,7 +34,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			await event.locals.inventoryService.updateItem(event.locals.user!.id, event.params.id, {
+			await event.locals.inventoryService.updateItem(event.locals.householdId!, event.params.id, {
 				name: parsed.data.name,
 				location: parsed.data.location,
 				quantity: parsed.data.quantity,
@@ -55,11 +55,11 @@ export const actions: Actions = {
 		let location = 'fridge';
 		try {
 			const item = await event.locals.inventoryService.getItem(
-				event.locals.user!.id,
+				event.locals.householdId!,
 				event.params.id
 			);
 			location = item.location;
-			await event.locals.inventoryService.deleteItem(event.locals.user!.id, event.params.id);
+			await event.locals.inventoryService.deleteItem(event.locals.householdId!, event.params.id);
 		} catch (e) {
 			if (e instanceof InventoryNotFoundError) {
 				error(404, 'Item not found');

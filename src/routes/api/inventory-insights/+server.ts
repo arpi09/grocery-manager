@@ -101,7 +101,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const body = (await request.json().catch(() => ({}))) as { focus?: unknown };
 	const focus = typeof body.focus === 'string' ? body.focus.trim().slice(0, 300) : '';
 
-	const inventory = await locals.inventoryService.listAll(locals.user.id);
+	const inventory = await locals.inventoryService.listAll(locals.householdId!);
 	if (inventory.length === 0) {
 		return json({
 			summary: 'Du har inga varor registrerade ännu.',

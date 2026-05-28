@@ -8,10 +8,25 @@
 	let petModalOpen = $state(false);
 </script>
 
-<AppLayout>
-	<AppHeader title="Settings" user={data.user} />
+<AppLayout user={data.user}>
+	<AppHeader title="Inställningar" />
 	<Card>
 		<p class="email">Signed in as <strong>{data.user?.email}</strong></p>
+
+		{#if data.household}
+			<section class="household-section" aria-labelledby="household-heading">
+				<h2 id="household-heading" class="household-title">Delat hushåll</h2>
+				<p class="household-name">{data.household.name}</p>
+				<ul class="household-members">
+					{#each data.household.members as member}
+						<li>
+							<span class="member-email">{member.email}</span>
+							<span class="member-role">{member.role === 'owner' ? 'Ägare' : 'Medlem'}</span>
+						</li>
+					{/each}
+				</ul>
+			</section>
+		{/if}
 
 		<div class="setting-row">
 			<div>
@@ -97,6 +112,48 @@
 	.email {
 		margin: 0 0 var(--space-lg);
 		color: var(--color-text-muted);
+	}
+
+	.household-section {
+		margin-bottom: var(--space-lg);
+		padding: var(--space-md);
+		background: var(--color-surface-muted);
+		border-radius: var(--radius-md);
+	}
+
+	.household-title {
+		margin: 0 0 var(--space-sm);
+		font-size: 1rem;
+	}
+
+	.household-name {
+		margin: 0 0 var(--space-sm);
+		font-weight: 700;
+	}
+
+	.household-members {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+	}
+
+	.household-members li {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--space-sm);
+		font-size: 0.9rem;
+	}
+
+	.member-email {
+		color: var(--color-text);
+	}
+
+	.member-role {
+		color: var(--color-text-muted);
+		font-size: 0.85rem;
 	}
 
 	.setting-row {

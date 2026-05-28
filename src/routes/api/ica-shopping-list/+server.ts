@@ -112,7 +112,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			? Math.round(body.householdSize)
 			: 2;
 
-	const inventory = await locals.inventoryService.listAll(locals.user.id);
+	const inventory = await locals.inventoryService.listAll(locals.householdId!);
 	const { fromDate, toDate } = upcomingDateRange(10);
 	const [plannedMeals, recipeIdeas] = await Promise.all([
 		locals.mealPlanService.listPlannedMealsByRange(locals.user.id, fromDate, toDate),

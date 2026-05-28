@@ -6,7 +6,7 @@
 	let { data } = $props();
 </script>
 
-<AppLayout>
-	<AppHeader title="Home Pantry" subtitle="What's in your kitchen" user={data.user} />
+<AppLayout user={data.user}>
+	<AppHeader title="Hem" subtitle="Översikt över skafferiet" />
 	<DashboardSummary summary={data.summary} />
 </AppLayout>

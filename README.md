@@ -1,6 +1,6 @@
 # Home Pantry
 
-A simple home grocery inventory app: track what you have in the **fridge**, **freezer**, and **cupboard**. Each account has its own private inventory.
+A simple home grocery inventory app: track what you have in the **fridge**, **freezer**, and **cupboard**. Members of the same **household** share one inventory.
 
 Built with **SvelteKit**, **PostgreSQL**, **Lucia** auth, and **Docker**.
 
@@ -50,6 +50,22 @@ npm run dev:health
 ```
 
 Open [http://localhost:5173](http://localhost:5173), create an account, and start adding items.
+
+### Shared household (local dev)
+
+On startup the app seeds a default household **Hemmet** when `USE_PGLITE=true` (or after `npm run db:migrate` with Postgres):
+
+1. Copy `.env.example` to `.env` and set passwords (never commit `.env`):
+
+```bash
+ADMIN_PASSWORD=your-admin-password
+DEFAULT_MEMBER_PASSWORD=your-member-password
+```
+
+2. Sign in as admin (`ADMIN_EMAIL`, default `arvid.pilhall@me.com`) or the member (`DEFAULT_MEMBER_EMAIL`, default `amanda.derborn@hotmail.com`).
+3. Open **Settings** to see household name and members. Both accounts see the same inventory.
+
+Other users get a personal household **Mitt hushåll** on first login until invited (invite flow is not in v1).
 
 ## Barcode scanning (mobile)
 
@@ -152,7 +168,8 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md) for layers, SOLID boundaries, and Atomi
 - [ ] Edit an item (name, location, quantity, expiry)
 - [ ] Delete an item
 - [ ] Dashboard shows correct counts and expiring items (within 7 days)
-- [ ] Second account cannot see the first account's items
+- [ ] Two users in the same household see the same inventory (admin + default member)
+- [ ] Users in different households do not see each other's items
 
 ## GitHub
 

@@ -9,6 +9,8 @@ import type {
 import { generateId } from '$lib/infrastructure/auth/id';
 import type { IInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
 
+const EXPIRING_SOON_DAYS = 7;
+
 export class InventoryNotFoundError extends Error {
 	constructor() {
 		super('Item not found');
@@ -25,8 +27,8 @@ export interface DashboardSummary {
 export class InventoryService {
 	constructor(private readonly repository: IInventoryRepository) {}
 
-	async getDashboard(userId: string): Promise<DashboardSummary> {
-		const counts = await this.repository.countByLocation(userId);
+	async getDashboard(householdId: string): Promise<DashboardSummary> {
+		const counts = await this.repository.countByLocation(householdId);
 		const countsByLocation = LOCATIONS.map((location) => {
 			const found = counts.find((c) => c.location === location);
 			return { location, count: found?.count ?? 0 };
@@ -34,7 +36,7 @@ export class InventoryService {
 
 		const beforeDate = addDays(new Date(), EXPIRING_SOON_DAYS);
 		const expiringSoon = await this.repository.findExpiringBefore(
-			userId,
+			householdId,
 			beforeDate.toISOString().slice(0, 10)
 		);
 
@@ -43,37 +45,37 @@ export class InventoryService {
 		return { counts: countsByLocation, expiringSoon, totalItems };
 	}
 
-	async listByLocation(userId: string, location: StorageLocation) {
-		return this.repository.findByUserAndLocation(userId, location);
+	async listByLocation(householdId: string, location: StorageLocation) {
+		return this.repository.findByHouseholdAndLocation(householdId, location);
 	}
 
-	async listAll(userId: string) {
-		return this.repository.findAllByUser(userId);
+	async listAll(householdId: string) {
+		return this.repository.findAllByHousehold(householdId);
 	}
 
-	async getItem(userId: string, id: string) {
-		const item = await this.repository.findById(userId, id);
+	async getItem(householdId: string, id: string) {
+		const item = await this.repository.findById(householdId, id);
 		if (!item) {
 			throw new InventoryNotFoundError();
 		}
 		return item;
 	}
 
-	async createItem(userId: string, input: CreateInventoryItemInput) {
+	async createItem(householdId: string, userId: string, input: CreateInventoryItemInput) {
 		const id = generateId();
-		return this.repository.create(userId, id, input);
+		return this.repository.create(householdId, userId, id, input);
 	}
 
-	async updateItem(userId: string, id: string, input: UpdateInventoryItemInput) {
-		const item = await this.repository.update(userId, id, input);
+	async updateItem(householdId: string, id: string, input: UpdateInventoryItemInput) {
+		const item = await this.repository.update(householdId, id, input);
 		if (!item) {
 			throw new InventoryNotFoundError();
 		}
 		return item;
 	}
 
-	async deleteItem(userId: string, id: string) {
-		const deleted = await this.repository.delete(userId, id);
+	async deleteItem(householdId: string, id: string) {
+		const deleted = await this.repository.delete(householdId, id);
 		if (!deleted) {
 			throw new InventoryNotFoundError();
 		}

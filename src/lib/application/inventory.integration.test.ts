@@ -6,6 +6,7 @@ import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integr
 describe('Inventory integration', () => {
 	let integrationDb: IntegrationDbContext;
 	let service: InventoryService;
+	const householdId = 'household-test';
 
 	beforeAll(async () => {
 		integrationDb = await createIntegrationDb();
@@ -21,22 +22,32 @@ describe('Inventory integration', () => {
 		await integrationDb.close();
 	});
 
-	it('creates and lists items through service + repository + database', async () => {
-		await integrationDb.seedUser({ id: 'user-1' });
+	async function seedHouseholdForUser(userId: string) {
+		await integrationDb.seedUser({ id: userId });
+		await integrationDb.seedHousehold({
+			id: householdId,
+			name: 'Test household',
+			members: [{ userId, role: 'owner' }]
+		});
+	}
 
-		const created = await service.createItem('user-1', {
+	it('creates and lists items through service + repository + database', async () => {
+		await seedHouseholdForUser('user-1');
+
+		const created = await service.createItem(householdId, 'user-1', {
 			name: 'Milk',
 			location: 'fridge',
 			quantity: '1',
 			unit: 'L'
 		});
 
-		const listed = await service.listByLocation('user-1', 'fridge');
+		const listed = await service.listByLocation(householdId, 'fridge');
 
 		expect(created.name).toBe('Milk');
 		expect(listed).toHaveLength(1);
 		expect(listed[0]).toMatchObject({
 			id: created.id,
+			householdId,
 			userId: 'user-1',
 			name: 'Milk',
 			location: 'fridge'
@@ -44,7 +55,7 @@ describe('Inventory integration', () => {
 	});
 
 	it('returns dashboard summary with expiring-soon items', async () => {
-		await integrationDb.seedUser({ id: 'user-2' });
+		await seedHouseholdForUser('user-2');
 
 		const soonDate = new Date();
 		soonDate.setDate(soonDate.getDate() + 2);
@@ -52,21 +63,21 @@ describe('Inventory integration', () => {
 		const laterDate = new Date();
 		laterDate.setDate(laterDate.getDate() + 30);
 
-		await service.createItem('user-2', {
+		await service.createItem(householdId, 'user-2', {
 			name: 'Yoghurt',
 			location: 'fridge',
 			quantity: '1',
 			expiresOn: soonDate.toISOString().slice(0, 10)
 		});
 
-		await service.createItem('user-2', {
+		await service.createItem(householdId, 'user-2', {
 			name: 'Rice',
 			location: 'cupboard',
 			quantity: '1',
 			expiresOn: laterDate.toISOString().slice(0, 10)
 		});
 
-		const summary = await service.getDashboard('user-2');
+		const summary = await service.getDashboard(householdId);
 
 		expect(summary.totalItems).toBe(2);
 		expect(summary.expiringSoon).toHaveLength(1);

@@ -85,7 +85,7 @@ export const POST: RequestHandler = async ({ request, locals, fetch }) => {
 	const body = (await request.json().catch(() => ({}))) as { preferences?: unknown };
 	const preferences = typeof body.preferences === 'string' ? body.preferences.trim().slice(0, 300) : '';
 
-	const inventory = await locals.inventoryService.listAll(locals.user.id);
+	const inventory = await locals.inventoryService.listAll(locals.householdId!);
 	if (inventory.length === 0) {
 		return json({
 			recipes: [],

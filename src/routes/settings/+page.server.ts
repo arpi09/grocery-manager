@@ -9,10 +9,14 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ parent, locals }) => {
 	const { user } = await parent();
 	const pets = user ? await locals.petService.listPets(user.id) : [];
+	const household = user
+		? await locals.householdService.getHouseholdForUser(user.id)
+		: null;
 	return {
 		user,
 		petsEnabled: Boolean(user?.petsEnabled),
-		pets
+		pets,
+		household
 	};
 };
 

@@ -8,8 +8,8 @@
 	let petFoodModalOpen = $state(false);
 </script>
 
-<AppLayout>
-	<AppHeader title="Husdjur" subtitle="Dina husdjur hemma" user={data.user} />
+<AppLayout user={data.user}>
+	<AppHeader title="Husdjur" subtitle="Dina husdjur hemma" />
 
 	<section class="pets">
 		<div class="pets-head">

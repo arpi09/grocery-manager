@@ -10,19 +10,32 @@ import { db, type AppDatabase } from '$lib/infrastructure/db';
 import { inventoryItemTable } from '$lib/infrastructure/db/schema';
 
 export interface IInventoryRepository {
-	findById(userId: string, id: string): Promise<InventoryItem | null>;
-	findByUserAndLocation(userId: string, location: StorageLocation): Promise<InventoryItem[]>;
-	findAllByUser(userId: string): Promise<InventoryItem[]>;
-	findExpiringBefore(userId: string, beforeDate: string): Promise<InventoryItem[]>;
-	countByLocation(userId: string): Promise<LocationCount[]>;
-	create(userId: string, id: string, input: CreateInventoryItemInput): Promise<InventoryItem>;
-	update(userId: string, id: string, input: UpdateInventoryItemInput): Promise<InventoryItem | null>;
-	delete(userId: string, id: string): Promise<boolean>;
+	findById(householdId: string, id: string): Promise<InventoryItem | null>;
+	findByHouseholdAndLocation(
+		householdId: string,
+		location: StorageLocation
+	): Promise<InventoryItem[]>;
+	findAllByHousehold(householdId: string): Promise<InventoryItem[]>;
+	findExpiringBefore(householdId: string, beforeDate: string): Promise<InventoryItem[]>;
+	countByLocation(householdId: string): Promise<LocationCount[]>;
+	create(
+		householdId: string,
+		userId: string,
+		id: string,
+		input: CreateInventoryItemInput
+	): Promise<InventoryItem>;
+	update(
+		householdId: string,
+		id: string,
+		input: UpdateInventoryItemInput
+	): Promise<InventoryItem | null>;
+	delete(householdId: string, id: string): Promise<boolean>;
 }
 
 function mapRow(row: typeof inventoryItemTable.$inferSelect): InventoryItem {
 	return {
 		id: row.id,
+		householdId: row.householdId,
 		userId: row.userId,
 		name: row.name,
 		location: row.location as StorageLocation,
@@ -38,45 +51,50 @@ function mapRow(row: typeof inventoryItemTable.$inferSelect): InventoryItem {
 export class DrizzleInventoryRepository implements IInventoryRepository {
 	constructor(private readonly database: AppDatabase = db) {}
 
-	async findById(userId: string, id: string) {
+	async findById(householdId: string, id: string) {
 		const [row] = await this.database
 			.select()
 			.from(inventoryItemTable)
-			.where(and(eq(inventoryItemTable.id, id), eq(inventoryItemTable.userId, userId)))
+			.where(
+				and(eq(inventoryItemTable.id, id), eq(inventoryItemTable.householdId, householdId))
+			)
 			.limit(1);
 
 		return row ? mapRow(row) : null;
 	}
 
-	async findByUserAndLocation(userId: string, location: StorageLocation) {
+	async findByHouseholdAndLocation(householdId: string, location: StorageLocation) {
 		const rows = await this.database
 			.select()
 			.from(inventoryItemTable)
 			.where(
-				and(eq(inventoryItemTable.userId, userId), eq(inventoryItemTable.location, location))
+				and(
+					eq(inventoryItemTable.householdId, householdId),
+					eq(inventoryItemTable.location, location)
+				)
 			)
 			.orderBy(inventoryItemTable.name);
 
 		return rows.map(mapRow);
 	}
 
-	async findAllByUser(userId: string) {
+	async findAllByHousehold(householdId: string) {
 		const rows = await this.database
 			.select()
 			.from(inventoryItemTable)
-			.where(eq(inventoryItemTable.userId, userId))
+			.where(eq(inventoryItemTable.householdId, householdId))
 			.orderBy(inventoryItemTable.name);
 
 		return rows.map(mapRow);
 	}
 
-	async findExpiringBefore(userId: string, beforeDate: string) {
+	async findExpiringBefore(householdId: string, beforeDate: string) {
 		const rows = await this.database
 			.select()
 			.from(inventoryItemTable)
 			.where(
 				and(
-					eq(inventoryItemTable.userId, userId),
+					eq(inventoryItemTable.householdId, householdId),
 					sql`${inventoryItemTable.expiresOn} is not null`,
 					lte(inventoryItemTable.expiresOn, beforeDate),
 					gte(inventoryItemTable.expiresOn, new Date().toISOString().slice(0, 10))
@@ -87,14 +105,14 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 		return rows.map(mapRow);
 	}
 
-	async countByLocation(userId: string) {
+	async countByLocation(householdId: string) {
 		const rows = await this.database
 			.select({
 				location: inventoryItemTable.location,
 				count: sql<number>`count(*)::int`
 			})
 			.from(inventoryItemTable)
-			.where(eq(inventoryItemTable.userId, userId))
+			.where(eq(inventoryItemTable.householdId, householdId))
 			.groupBy(inventoryItemTable.location);
 
 		return rows.map((row) => ({
@@ -103,12 +121,13 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 		}));
 	}
 
-	async create(userId: string, id: string, input: CreateInventoryItemInput) {
+	async create(householdId: string, userId: string, id: string, input: CreateInventoryItemInput) {
 		const now = new Date();
 		const [row] = await this.database
 			.insert(inventoryItemTable)
 			.values({
 				id,
+				householdId,
 				userId,
 				name: input.name,
 				location: input.location,
@@ -124,7 +143,7 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 		return mapRow(row);
 	}
 
-	async update(userId: string, id: string, input: UpdateInventoryItemInput) {
+	async update(householdId: string, id: string, input: UpdateInventoryItemInput) {
 		const [row] = await this.database
 			.update(inventoryItemTable)
 			.set({
@@ -136,16 +155,20 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 				...(input.notes !== undefined && { notes: input.notes }),
 				updatedAt: new Date()
 			})
-			.where(and(eq(inventoryItemTable.id, id), eq(inventoryItemTable.userId, userId)))
+			.where(
+				and(eq(inventoryItemTable.id, id), eq(inventoryItemTable.householdId, householdId))
+			)
 			.returning();
 
 		return row ? mapRow(row) : null;
 	}
 
-	async delete(userId: string, id: string) {
+	async delete(householdId: string, id: string) {
 		const result = await this.database
 			.delete(inventoryItemTable)
-			.where(and(eq(inventoryItemTable.id, id), eq(inventoryItemTable.userId, userId)))
+			.where(
+				and(eq(inventoryItemTable.id, id), eq(inventoryItemTable.householdId, householdId))
+			)
 			.returning();
 
 		return result.length > 0;

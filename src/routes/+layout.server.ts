@@ -1,6 +1,14 @@
+import { isThemePreference } from '$lib/domain/theme';
+import { resolveThemeForRequest } from '$lib/server/theme-cookie';
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({ locals }) => {
+export const load: LayoutServerLoad = async ({ locals, cookies, request }) => {
+	const storedPreference = locals.user?.themePreference;
+	const { preference, resolved } = resolveThemeForRequest(
+		{ cookies, request },
+		isThemePreference(storedPreference ?? '') ? storedPreference : null
+	);
+
 	return {
 		user: locals.user
 			? {
@@ -11,6 +19,8 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 					role: locals.user.role,
 					petsEnabled: Boolean(locals.user.petsEnabled)
 				}
-			: null
+			: null,
+		themePreference: preference,
+		resolvedTheme: resolved
 	};
 };

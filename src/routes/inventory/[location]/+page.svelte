@@ -8,12 +8,8 @@
 	let { data } = $props();
 </script>
 
-<AppLayout>
-	<AppHeader
-		title={LOCATION_LABELS[data.location]}
-		subtitle="Your inventory"
-		user={data.user}
-	/>
+<AppLayout user={data.user}>
+	<AppHeader title={LOCATION_LABELS[data.location]} subtitle="Ditt skafferi" />
 	<LocationTab active={data.location} />
 	<div class="toolbar">
 		<a class="add-btn" href="/item/new?location={data.location}&from=/inventory/{data.location}">+ Add</a>

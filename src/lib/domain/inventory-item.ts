@@ -2,6 +2,7 @@ import type { StorageLocation } from './location';
 
 export interface InventoryItem {
 	id: string;
+	householdId: string;
 	userId: string;
 	name: string;
 	location: StorageLocation;

@@ -8,11 +8,10 @@
 	const todayIso = new Date().toISOString().slice(0, 10);
 </script>
 
-<AppLayout wide>
+<AppLayout wide user={data.user}>
 	<AppHeader
 		title="Planer"
 		subtitle="Planera maltider i kalendern och lagg in ChatGPT-ideer"
-		user={data.user}
 	/>
 
 	<section class="month-nav">

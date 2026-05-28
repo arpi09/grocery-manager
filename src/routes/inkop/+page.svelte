@@ -6,11 +6,7 @@
 	let { data } = $props();
 </script>
 
-<AppLayout>
-	<AppHeader
-		title="Inköp"
-		subtitle="Smart inventariehjälp och ICA-lista"
-		user={data.user}
-	/>
+<AppLayout user={data.user}>
+	<AppHeader title="Inköp" subtitle="Smart inventariehjälp och ICA-lista" />
 	<InkopAssistant />
 </AppLayout>

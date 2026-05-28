@@ -6,7 +6,7 @@
 	let { data, form } = $props();
 </script>
 
-<AppLayout>
-	<AppHeader title="Edit item" user={data.user} />
+<AppLayout user={data.user}>
+	<AppHeader title="Redigera vara" />
 	<AddItemForm item={data.item} errors={form?.errors} />
 </AppLayout>

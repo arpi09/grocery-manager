@@ -8,7 +8,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	const items = await locals.inventoryService.listByLocation(
-		locals.user!.id,
+		locals.householdId!,
 		params.location
 	);
 
