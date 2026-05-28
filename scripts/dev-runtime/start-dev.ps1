@@ -28,7 +28,7 @@ if (-not (Test-Path 'node_modules')) {
 }
 
 if (-not (Test-Path '.env') -and (Test-Path '.env.example')) {
-	Write-Host "No .env found — copy .env.example and set secrets before relying on login/OpenAI."
+	Write-Host 'No .env found - copy .env.example and set secrets before relying on login/OpenAI.'
 }
 
 Write-Host "Starting dev:watch in $target"

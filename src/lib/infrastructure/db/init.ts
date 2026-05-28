@@ -64,7 +64,7 @@ async function getPgliteClient(): Promise<PGlite> {
 				pgliteClient = client;
 				return client;
 			})
-			.catch(async (error) => {
+			.catch(async () => {
 				pgliteInitPromise = null;
 				pgliteClient = null;
 				rmSync(PGlite_DATA_DIR, { recursive: true, force: true });
