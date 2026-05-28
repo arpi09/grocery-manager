@@ -4,6 +4,7 @@ export const userTable = pgTable('user', {
 	id: text('id').primaryKey(),
 	email: text('email').notNull().unique(),
 	passwordHash: text('password_hash').notNull(),
+	role: text('role', { enum: ['user', 'admin'] }).notNull().default('user'),
 	petsEnabled: boolean('pets_enabled').notNull().default(false),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 });
