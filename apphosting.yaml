@@ -1,0 +1,56 @@
+# Firebase App Hosting — Cloud Run settings and environment.
+# Replace placeholder values and create secrets before first deploy.
+# Docs: docs/FIREBASE_DEPLOY.md
+
+runConfig:
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+
+scripts:
+  buildCommand: npm run build
+  runCommand: node build
+
+env:
+  - variable: NODE_ENV
+    value: production
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Production must use real Postgres — never PGlite
+  - variable: USE_PGLITE
+    value: "false"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Public URL of the deployed app (update after first deploy or custom domain)
+  - variable: PUBLIC_ORIGIN
+    value: https://home-pantry--YOUR_FIREBASE_PROJECT_ID.us-central1.hosted.app
+    availability:
+      - BUILD
+      - RUNTIME
+
+  - variable: HOST
+    value: 0.0.0.0
+    availability:
+      - RUNTIME
+
+  # --- Secrets (create with: firebase apphosting:secrets:set SECRET_NAME) ---
+  - variable: DATABASE_URL
+    secret: DATABASE_URL
+
+  - variable: ADMIN_PASSWORD
+    secret: ADMIN_PASSWORD
+
+  - variable: OPENAI_API_KEY
+    secret: OPENAI_API_KEY
+
+  # --- Non-secret config (override in Firebase console if needed) ---
+  - variable: ADMIN_EMAIL
+    value: admin@example.com
+    availability:
+      - RUNTIME

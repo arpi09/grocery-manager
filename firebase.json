@@ -1,0 +1,20 @@
+{
+	"apphosting": [
+		{
+			"backendId": "home-pantry",
+			"rootDir": ".",
+			"ignore": [
+				"node_modules",
+				".git",
+				"data",
+				"test-results",
+				"playwright-report",
+				"blob-report",
+				"playwright/.cache",
+				"firebase-debug.log",
+				"firebase-debug.*.log",
+				".firebase"
+			]
+		}
+	]
+}

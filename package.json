@@ -3,6 +3,9 @@
 	"version": "0.0.1",
 	"private": true,
 	"type": "module",
+	"engines": {
+		"node": ">=20"
+	},
 	"scripts": {
 		"dev": "vite dev --host",
 		"dev:watch": "nodemon --config nodemon.dev.json",
@@ -13,6 +16,9 @@
 		"dev:start:tests": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-runtime/start-dev.ps1 -Worktree tests",
 		"dev:https": "npx cross-env HTTPS=true vite dev --host",
 		"build": "vite build",
+		"build:firebase": "vite build",
+		"start": "node build",
+		"deploy:firebase": "firebase deploy --only apphosting:home-pantry",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
