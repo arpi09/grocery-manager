@@ -17,7 +17,7 @@
 	}
 
 	$effect(() => {
-		if (!browser || !data.themePreference) {
+		if (!browser || !data.user || !data.themePreference) {
 			return;
 		}
 

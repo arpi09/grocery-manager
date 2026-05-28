@@ -19,7 +19,8 @@ describe('AuthService', () => {
 			findByEmail: vi.fn(),
 			create: vi.fn(),
 			findProfileById: vi.fn(),
-			updateProfile: vi.fn()
+			updateProfile: vi.fn(),
+			updateThemePreference: vi.fn()
 		};
 		service = new AuthService(users);
 	});

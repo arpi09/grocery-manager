@@ -11,7 +11,8 @@ describe('ProfileService', () => {
 			findByEmail: vi.fn(),
 			create: vi.fn(),
 			findProfileById: vi.fn(),
-			updateProfile: vi.fn()
+			updateProfile: vi.fn(),
+			updateThemePreference: vi.fn()
 		};
 		service = new ProfileService(users);
 	});
@@ -49,5 +50,20 @@ describe('ProfileService', () => {
 				avatarUrl: 'https://example.com/avatar.png'
 			})
 		).resolves.toEqual(updated);
+	});
+
+	it('updates theme preference', async () => {
+		vi.mocked(users.updateThemePreference).mockResolvedValue('dark');
+
+		await expect(service.setThemePreference('user-1', 'dark')).resolves.toBe('dark');
+		expect(users.updateThemePreference).toHaveBeenCalledWith('user-1', 'dark');
+	});
+
+	it('throws when theme preference update target is missing', async () => {
+		vi.mocked(users.updateThemePreference).mockResolvedValue(null);
+
+		await expect(service.setThemePreference('missing', 'light')).rejects.toBeInstanceOf(
+			ProfileNotFoundError
+		);
 	});
 });

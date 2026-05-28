@@ -2,7 +2,7 @@ import { initDatabase } from '$lib/infrastructure/db';
 import {
 	adminService,
 	authService,
-profileService,
+	profileService,
 	householdService,
 	inventoryService,
 	mealPlanService,
@@ -15,6 +15,8 @@ import { isAdmin } from '$lib/server/auth';
 import { validateSession } from '$lib/server/session';
 import { recordAppError } from '$lib/server/error-log/record';
 import { shouldPersistServerError } from '$lib/server/error-log/should-log';
+import { isThemePreference, prefersDarkFromRequest, resolveTheme } from '$lib/domain/theme';
+import { writeThemeCookie } from '$lib/infrastructure/theme-cookie';
 import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
 
 const publicPaths = new Set(['/login', '/register']);
@@ -58,7 +60,24 @@ export const handle: Handle = async ({ event, resolve }) => {
 		redirect(302, '/');
 	}
 
-	return resolve(event);
+	let resolvedTheme: 'light' | 'dark' = 'light';
+
+	if (isAuthenticated) {
+		const rawPreference = event.locals.user!.themePreference;
+		const preference =
+			rawPreference && isThemePreference(rawPreference) ? rawPreference : 'system';
+		writeThemeCookie(event.cookies, preference);
+		resolvedTheme = resolveTheme(preference, prefersDarkFromRequest(event.request));
+	}
+
+	return resolve(event, {
+		transformPageChunk: ({ html, done }) => {
+			if (!done) {
+				return html;
+			}
+			return html.replaceAll('%pantry.resolvedTheme%', resolvedTheme);
+		}
+	});
 };
 
 export const handleError: HandleServerError = async ({ error, event, status }) => {

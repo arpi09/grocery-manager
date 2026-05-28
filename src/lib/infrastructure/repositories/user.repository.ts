@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { db } from '$lib/infrastructure/db';
 import { userTable } from '$lib/infrastructure/db/schema';
+import type { ThemePreference } from '$lib/domain/theme';
 import type { UserProfile } from '$lib/domain/user';
 
 export interface IUserRepository {
@@ -11,6 +12,7 @@ export interface IUserRepository {
 		id: string,
 		data: { displayName: string | null; avatarUrl: string | null }
 	): Promise<UserProfile | null>;
+	updateThemePreference(id: string, themePreference: ThemePreference): Promise<ThemePreference | null>;
 }
 
 function mapProfile(row: {
@@ -82,5 +84,15 @@ export class DrizzleUserRepository implements IUserRepository {
 			.returning();
 
 		return row ? mapProfile(row) : null;
+	}
+
+	async updateThemePreference(id: string, themePreference: ThemePreference) {
+		const [row] = await db
+			.update(userTable)
+			.set({ themePreference })
+			.where(eq(userTable.id, id))
+			.returning();
+
+		return row?.themePreference ?? null;
 	}
 }

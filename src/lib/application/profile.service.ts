@@ -1,3 +1,4 @@
+import type { ThemePreference } from '$lib/domain/theme';
 import type { UserProfile } from '$lib/domain/user';
 import type { IUserRepository } from '$lib/infrastructure/repositories/user.repository';
 
@@ -24,6 +25,14 @@ export class ProfileService {
 		input: { displayName: string | null; avatarUrl: string | null }
 	): Promise<UserProfile> {
 		const updated = await this.users.updateProfile(userId, input);
+		if (!updated) {
+			throw new ProfileNotFoundError();
+		}
+		return updated;
+	}
+
+	async setThemePreference(userId: string, themePreference: ThemePreference): Promise<ThemePreference> {
+		const updated = await this.users.updateThemePreference(userId, themePreference);
 		if (!updated) {
 			throw new ProfileNotFoundError();
 		}
