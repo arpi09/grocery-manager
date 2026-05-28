@@ -26,6 +26,32 @@ git checkout backup/wip-before-worktree-split -- path/to/file
 git worktree list
 ```
 
+## Dev server (all agents)
+
+**No separate “restart agent” yet** — use automatic reload instead of manual restarts.
+
+| Command | When |
+|---------|------|
+| `npm run dev:watch` | **Default for local dev.** Restarts Vite when `.env`, `hooks.server.ts`, DB init/seed, or `drizzle/` change. |
+| `npm run dev` | Plain Vite (fine if you only edit UI; HMR handles most `.svelte` / route changes). |
+
+### What reloads without restart
+
+- Most `.svelte`, CSS, and many `+page` / `+server` edits → Vite HMR.
+
+### What needs a restart (handled by `dev:watch`)
+
+- `.env` (e.g. `ADMIN_PASSWORD`, `OPENAI_API_KEY`)
+- `src/hooks.server.ts`
+- `src/lib/infrastructure/db/**` (init, seed, schema)
+- `drizzle/*.sql`
+
+### Agent duty
+
+1. If no dev server is running in the project terminal, start **`npm run dev:watch`** in the background (not `dev` only).
+2. After changing env / hooks / DB / migrations, **do not ask the user to restart** — `dev:watch` does it.
+3. Only ask the user if the server failed to start (port in use, crash on boot).
+
 ## Rules
 
 - Stay in assigned paths; stop if you need a file owned by another agent.
