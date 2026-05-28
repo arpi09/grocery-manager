@@ -1,0 +1,6 @@
+{
+	"watch": [".env", "src/hooks.server.ts", "src/lib/infrastructure/db", "drizzle"],
+	"ext": "env,ts,sql",
+	"delay": 500,
+	"exec": "npm run dev"
+}

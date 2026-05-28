@@ -5,7 +5,9 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev --host",
-		"dev:watch": "nodemon --watch .env --watch src/hooks.server.ts --watch src/lib/infrastructure/db --watch drizzle --ext env,ts,sql --delay 500ms --exec \"npm run dev\"",
+		"dev:watch": "nodemon --config nodemon.dev.json",
+		"dev:health": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-runtime/health-check.ps1",
+		"dev:start:ai": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-runtime/start-dev.ps1 -Worktree ai",
 		"dev:https": "npx cross-env HTTPS=true vite dev --host",
 		"build": "vite build",
 		"preview": "vite preview",

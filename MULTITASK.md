@@ -18,6 +18,7 @@ git checkout backup/wip-before-worktree-split -- path/to/file
 
 | Agent | Path | Branch | Latest commit |
 |-------|------|--------|---------------|
+| **Dev runtime** | `home-pantry-dev` | `chore/dev-runtime` | Auto-restart dev server |
 | AI features | `home-pantry` | `feat/openai-enhancements` | OpenAI /inkop |
 | Admin UI | `home-pantry-admin` | `feature/admin-interface` | Admin panel |
 | Tests | `home-pantry-tests` | `feat/integration-test-suite` | Vitest + integration |
@@ -26,9 +27,20 @@ git checkout backup/wip-before-worktree-split -- path/to/file
 git worktree list
 ```
 
-## Dev server (all agents)
+## Dev runtime agent
 
-**No separate “restart agent” yet** — use automatic reload instead of manual restarts.
+**Worktree:** `C:\Users\ArvidPilhall\Projects\home-pantry-dev` · **Branch:** `chore/dev-runtime`  
+Charter: `AGENTS-DEV-RUNTIME.md` (in dev worktree).
+
+Starts and monitors the dev server — **you should not restart manually** when other agents change env/DB/hooks.
+
+```powershell
+cd C:\Users\ArvidPilhall\Projects\home-pantry-dev
+npm run dev:start:ai    # dev:watch on the AI worktree (usual)
+npm run dev:health      # ping localhost:5173
+```
+
+## Dev server (all agents)
 
 | Command | When |
 |---------|------|
