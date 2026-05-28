@@ -11,34 +11,49 @@
 	}
 
 	let { children, wide = false, user = null }: Props = $props();
+
+	let recipeOpen = $state(false);
+
+	function openRecipeIdeas() {
+		recipeOpen = true;
+	}
 </script>
 
 <div class="app">
-	<MainNav {user} />
+	<MainNav {user} onRecipeIdeas={openRecipeIdeas} />
 	<main class:wide-main={wide}>
 		{@render children()}
 	</main>
-	<RecipeAssistant />
+	<RecipeAssistant bind:open={recipeOpen} />
 </div>
 
 <style>
 	.app {
+		--mobile-bottom-nav-height: 4.25rem;
 		min-height: 100vh;
 		padding: var(--space-lg);
-		padding-top: var(--space-md);
-		padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0));
+		padding-top: 0;
+		padding-bottom: calc(
+			var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0) + var(--space-lg)
+		);
 	}
 
 	@media (min-width: 900px) {
 		.app {
-			padding-top: 0;
-			padding-bottom: var(--space-lg);
+			padding-bottom: var(--space-xl);
 		}
 	}
 
 	main {
 		max-width: var(--max-width);
 		margin: 0 auto;
+		padding-top: var(--space-sm);
+	}
+
+	@media (min-width: 900px) {
+		main {
+			padding-top: 0;
+		}
 	}
 
 	.wide-main {

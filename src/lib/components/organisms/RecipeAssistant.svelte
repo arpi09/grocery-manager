@@ -9,7 +9,11 @@
 		steps: string[];
 	}
 
-	let open = $state(false);
+	interface Props {
+		open?: boolean;
+	}
+
+	let { open = $bindable(false) }: Props = $props();
 	let loading = $state(false);
 	let preferences = $state('');
 	let recipes = $state<RecipeSuggestion[]>([]);
@@ -54,18 +58,10 @@
 		}
 	}
 
-	function openAssistant() {
-		open = true;
-	}
-
 	function closeAssistant() {
 		open = false;
 	}
 </script>
-
-<button type="button" class="fab" onclick={openAssistant} aria-label="Get recipe suggestions">
-	Recipe ideas
-</button>
 
 {#if open}
 	<div class="overlay" role="dialog" aria-modal="true" aria-label="Recipe suggestions">
@@ -128,30 +124,10 @@
 {/if}
 
 <style>
-	.fab {
-		position: fixed;
-		left: 50%;
-		bottom: 1.1rem;
-		transform: translateX(-50%);
-		z-index: 25;
-		border: none;
-		border-radius: 999px;
-		padding: 0.75rem 1.25rem;
-		background: var(--color-primary);
-		color: #fff;
-		font-weight: 700;
-		cursor: pointer;
-		box-shadow: var(--shadow-md);
-	}
-
-	.fab:hover {
-		background: var(--color-primary-hover);
-	}
-
 	.overlay {
 		position: fixed;
 		inset: 0;
-		z-index: 40;
+		z-index: 90;
 		background: rgba(20, 30, 26, 0.4);
 		display: grid;
 		place-items: center;
@@ -248,12 +224,5 @@
 	ol {
 		margin: var(--space-sm) 0 0;
 		padding-left: 1.25rem;
-	}
-
-	@media (max-width: 768px) {
-		.fab {
-			bottom: 0.8rem;
-			padding: 0.65rem 1rem;
-		}
 	}
 </style>

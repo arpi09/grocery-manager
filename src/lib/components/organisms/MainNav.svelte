@@ -3,6 +3,7 @@
 	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
 	import NavIcon from '$lib/components/atoms/NavIcon.svelte';
 	import ProfileMenu from '$lib/components/molecules/ProfileMenu.svelte';
+	import RecipeIdeasButton from '$lib/components/molecules/RecipeIdeasButton.svelte';
 	import {
 		NAV_ITEMS,
 		filterNavItems,
@@ -14,9 +15,10 @@
 
 	interface Props {
 		user: (NavUser & { email: string }) | null;
+		onRecipeIdeas?: () => void;
 	}
 
-	let { user }: Props = $props();
+	let { user, onRecipeIdeas }: Props = $props();
 
 	const pathname = $derived(page.url.pathname);
 	const visibleItems = $derived(filterNavItems(NAV_ITEMS, user));
@@ -51,6 +53,15 @@
 <svelte:window onkeydown={onWindowKeydown} />
 
 {#if user}
+	<header class="main-nav mobile-top" aria-label="Sidhuvud">
+		<a href="/" class="brand brand-compact" aria-label="Home Pantry – Hem">
+			<span class="brand-mark" aria-hidden="true">HP</span>
+		</a>
+		{#if onRecipeIdeas}
+			<RecipeIdeasButton compact onclick={onRecipeIdeas} />
+		{/if}
+	</header>
+
 	<header class="main-nav top" aria-label="Huvudnavigering">
 		<a href="/" class="brand" aria-label="Home Pantry – Hem">
 			<AppLogo size="sm" />
@@ -104,6 +115,9 @@
 		</nav>
 
 		<div class="top-actions">
+			{#if onRecipeIdeas}
+				<RecipeIdeasButton onclick={onRecipeIdeas} />
+			{/if}
 			<ProfileMenu {user} />
 		</div>
 	</header>
@@ -183,12 +197,33 @@
 		align-items: center;
 		gap: var(--space-md);
 		min-height: var(--nav-height);
-		margin: calc(-1 * var(--space-lg)) calc(-1 * var(--space-lg)) var(--space-lg);
+		margin: calc(-1 * var(--space-lg)) calc(-1 * var(--space-lg)) var(--space-xl);
 		padding: 0 var(--space-lg);
 		border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
 		background: color-mix(in srgb, var(--color-bg) 82%, transparent);
 		backdrop-filter: blur(18px);
 		-webkit-backdrop-filter: blur(18px);
+	}
+
+	.main-nav.mobile-top {
+		position: sticky;
+		top: 0;
+		z-index: 55;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-sm);
+		min-height: var(--nav-height);
+		margin: calc(-1 * var(--space-lg)) calc(-1 * var(--space-lg)) var(--space-md);
+		padding: 0 var(--space-lg);
+		border-bottom: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent);
+		background: color-mix(in srgb, var(--color-bg) 82%, transparent);
+		backdrop-filter: blur(18px);
+		-webkit-backdrop-filter: blur(18px);
+	}
+
+	.brand-compact {
+		min-height: 2.5rem;
 	}
 
 	.brand {
@@ -262,6 +297,7 @@
 	.top-actions {
 		display: flex;
 		align-items: center;
+		gap: var(--space-sm);
 		flex-shrink: 0;
 	}
 
@@ -456,6 +492,7 @@
 			display: flex;
 		}
 
+		.main-nav.mobile-top,
 		.main-nav.bottom,
 		.sheet-scrim,
 		.more-sheet {

@@ -16,7 +16,14 @@
 
 <style>
 	.page-header {
+		margin-top: var(--space-md);
 		margin-bottom: var(--space-lg);
+	}
+
+	@media (min-width: 900px) {
+		.page-header {
+			margin-top: var(--space-lg);
+		}
 	}
 
 	h1 {
