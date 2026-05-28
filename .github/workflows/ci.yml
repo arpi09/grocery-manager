@@ -22,6 +22,18 @@ jobs:
       - run: npm run lint
       - run: npm run check
       - run: npm test
+      - run: npm run test:integration
+        env:
+          USE_PGLITE: 'true'
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          USE_PGLITE: 'true'
+          ADMIN_EMAIL: e2e-admin@example.com
+          ADMIN_PASSWORD: e2e-ci-password
+          PUBLIC_ORIGIN: http://localhost:5173
+          CI: 'true'
       - run: npm run build
         env:
           DATABASE_URL: postgresql://pantry:pantry@localhost:5432/pantry
+          USE_PGLITE: 'true'

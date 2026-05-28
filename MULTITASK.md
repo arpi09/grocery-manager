@@ -30,5 +30,8 @@ Agent branches are merged into **`master`** for this repo phase. Worktrees may s
 |------|----------|
 | Tests | `npm test`, `npm run test:integration` |
 | Types | `npm run check` |
+| E2E | `npx playwright install chromium`, then `npm run test:e2e` |
 | Admin | `/admin` (admin user via `.env` `ADMIN_*`) |
 | AI | `/inkop` (`OPENAI_API_KEY`) |
+
+**Before push:** `npm test && npm run test:integration && npm run check && npm run test:e2e`
