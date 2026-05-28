@@ -7,6 +7,6 @@
 </script>
 
 <AppLayout>
-	<AppHeader title="Edit item" showPetsNav={Boolean(data.user?.petsEnabled)} />
+	<AppHeader title="Edit item" user={data.user} />
 	<AddItemForm item={data.item} errors={form?.errors} />
 </AppLayout>

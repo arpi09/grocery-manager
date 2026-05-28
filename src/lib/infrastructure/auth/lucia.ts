@@ -15,6 +15,7 @@ export const lucia = new Lucia(adapter, {
 	},
 	getUserAttributes: (attributes) => ({
 		email: attributes.email,
+		role: attributes.role,
 		petsEnabled: Boolean(attributes.petsEnabled)
 	})
 });
@@ -24,7 +25,16 @@ declare module 'lucia' {
 		Lucia: typeof lucia;
 		DatabaseUserAttributes: {
 			email: string;
+			role: string;
 			petsEnabled: boolean;
 		};
+	}
+}
+
+declare module 'lucia' {
+	interface UserAttributes {
+		email: string;
+		role: string;
+		petsEnabled: boolean;
 	}
 }

@@ -7,7 +7,8 @@ const useHttps = process.env.HTTPS === 'true';
 export default defineConfig({
 	plugins: [sveltekit(), ...(useHttps ? [basicSsl()] : [])],
 	test: {
-		include: ['src/**/*.{test,spec}.{js,ts}']
+		include: ['src/**/*.{test,spec}.{js,ts}'],
+		exclude: ['**/*.integration.test.ts']
 	},
 	server: {
 		host: true,

@@ -90,7 +90,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run preview` | Preview production build |
 | `npm run check` | TypeScript / Svelte check |
 | `npm run lint` | ESLint |
-| `npm test` | Vitest unit tests |
+| `npm test` | Vitest test suite |
+| `npm run test:integration` | Integration tests (service + repository + real PGlite DB) |
 | `npm run db:migrate` | Apply database migrations |
 | `npm run db:generate` | Generate migrations from schema |
 

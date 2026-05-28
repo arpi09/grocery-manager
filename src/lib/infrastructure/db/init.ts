@@ -8,6 +8,7 @@ import { PGlite } from '@electric-sql/pglite';
 import postgres from 'postgres';
 import { env } from '$env/dynamic/private';
 import * as schema from './schema';
+import { ensureDefaultAdminUser } from './seed-admin';
 
 export type AppDatabase =
 	| PostgresJsDatabase<typeof schema>
@@ -25,16 +26,30 @@ function usePglite(): boolean {
 	return env.USE_PGLITE === 'true' || env.USE_PGLITE === '1';
 }
 
-async function ensurePgliteSchema(client: PGlite) {
-	const migrationPath = join(process.cwd(), 'drizzle', '0000_init.sql');
+/** Full schema — only on a new PGlite data directory. */
+const PGlite_BASELINE_MIGRATION = '0000_init.sql';
+/** Safe to re-run on every startup (uses IF NOT EXISTS). */
+const PGlite_INCREMENTAL_MIGRATIONS = ['0001_user_role.sql'];
+
+async function runPgliteBaseline(client: PGlite) {
+	const migrationPath = join(process.cwd(), 'drizzle', PGlite_BASELINE_MIGRATION);
 	const sql = readFileSync(migrationPath, 'utf8');
 	await client.exec(sql);
+}
+
+async function runPgliteIncrementalMigrations(client: PGlite) {
+	for (const file of PGlite_INCREMENTAL_MIGRATIONS) {
+		const migrationPath = join(process.cwd(), 'drizzle', file);
+		const sql = readFileSync(migrationPath, 'utf8');
+		await client.exec(sql);
+	}
 }
 
 async function openPglite(): Promise<PGlite> {
 	mkdirSync(join(process.cwd(), 'data'), { recursive: true });
 	const client = new PGlite(PGlite_DATA_DIR);
-	await ensurePgliteSchema(client);
+	await runPgliteBaseline(client);
+	await runPgliteIncrementalMigrations(client);
 	return client;
 }
 
@@ -71,7 +86,9 @@ export async function initDatabase(): Promise<void> {
 		initPromise = (async () => {
 			if (usePglite()) {
 				const client = await getPgliteClient();
+				await runPgliteIncrementalMigrations(client);
 				dbInstance = drizzlePglite({ client, schema });
+				await ensureDefaultAdminUser();
 				return;
 			}
 
@@ -84,6 +101,8 @@ export async function initDatabase(): Promise<void> {
 
 			const sql = postgres(connectionString);
 			dbInstance = drizzlePostgres(sql, { schema });
+
+			await ensureDefaultAdminUser();
 		})().catch((error) => {
 			initPromise = null;
 			throw error;

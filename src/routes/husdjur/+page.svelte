@@ -9,7 +9,7 @@
 </script>
 
 <AppLayout>
-	<AppHeader title="Husdjur" subtitle="Dina husdjur hemma" showPetsNav={Boolean(data.petsEnabled)} />
+	<AppHeader title="Husdjur" subtitle="Dina husdjur hemma" user={data.user} />
 
 	<section class="pets">
 		<div class="pets-head">
