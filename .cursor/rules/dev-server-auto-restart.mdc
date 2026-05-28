@@ -1,0 +1,21 @@
+---
+description: Do not ask the user to restart the dev server; dev-runtime handles it
+alwaysApply: true
+---
+
+# Dev server — no manual restart
+
+- **Never** ask the user to restart the dev server manually (`npm run dev`, "starta om servern", etc.).
+- The **dev-runtime** agent keeps the app running via `dev:watch` (`npm run dev:start:ai` in worktree `home-pantry-dev`).
+
+## After these changes, keep working
+
+When you edit:
+
+- `.env` / `.env.example`
+- `src/hooks.server.ts`
+- `src/lib/infrastructure/db/**`
+
+Do **not** instruct a manual restart. Assume the dev-runtime watcher restarts automatically. Continue with your task (tests, code, commits).
+
+Only mention server issues if something is clearly broken (e.g. port conflict, crash on boot) — then describe the error, not "please restart dev".
