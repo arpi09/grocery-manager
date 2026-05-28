@@ -2,6 +2,8 @@
 
 Agent branches are merged into **`master`** for this repo phase. Worktrees may still exist locally for parallel work.
 
+**Coordination docs:** [AGENT_STATUS.md](./AGENT_STATUS.md) (live agent/branch status) · [OWNERSHIP.md](./OWNERSHIP.md) (file ownership and shared-area rules)
+
 ## Safety backup
 
 | Ref | Commit | Contents |
