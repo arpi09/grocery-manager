@@ -5,7 +5,8 @@ import {
 } from '$lib/validation/pet.schemas';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ parent, locals }) => {
+	const { user } = await parent();
 	const petsEnabled = await locals.petService.getPetsEnabled(locals.user!.id);
 	if (!petsEnabled) {
 		redirect(302, '/settings');
@@ -14,6 +15,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const pets = await locals.petService.listPets(locals.user!.id);
 	const petFood = await locals.petFoodService.listPetFood(locals.user!.id);
 	return {
+		user,
 		petsEnabled,
 		pets,
 		petFood

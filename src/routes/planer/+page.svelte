@@ -12,7 +12,7 @@
 	<AppHeader
 		title="Planer"
 		subtitle="Planera maltider i kalendern och lagg in ChatGPT-ideer"
-		showPetsNav={Boolean(data.user?.petsEnabled)}
+		user={data.user}
 	/>
 
 	<section class="month-nav">

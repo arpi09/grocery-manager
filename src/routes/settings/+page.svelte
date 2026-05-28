@@ -9,7 +9,7 @@
 </script>
 
 <AppLayout>
-	<AppHeader title="Settings" showPetsNav={Boolean(data.user?.petsEnabled)} />
+	<AppHeader title="Settings" user={data.user} />
 	<Card>
 		<p class="email">Signed in as <strong>{data.user?.email}</strong></p>
 

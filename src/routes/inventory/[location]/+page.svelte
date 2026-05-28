@@ -12,7 +12,7 @@
 	<AppHeader
 		title={LOCATION_LABELS[data.location]}
 		subtitle="Your inventory"
-		showPetsNav={Boolean(data.user?.petsEnabled)}
+		user={data.user}
 	/>
 	<LocationTab active={data.location} />
 	<div class="toolbar">
