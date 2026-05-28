@@ -3,14 +3,27 @@
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
+	import { ACTIVE_USER_WINDOW_MS, formatLastSeen } from '$lib/domain/presence';
 
 	let { data, form } = $props();
+
+	const activeWindowMinutes = Math.round(ACTIVE_USER_WINDOW_MS / 60_000);
 
 	function formatDate(value: Date) {
 		return new Intl.DateTimeFormat('sv-SE', {
 			dateStyle: 'medium',
 			timeStyle: 'short'
 		}).format(value);
+	}
+
+	function statusLabel(account: (typeof data.users)[number]) {
+		if (account.isActiveNow) {
+			return 'Aktiv nu';
+		}
+		if (account.hasActiveSession) {
+			return 'Inloggad';
+		}
+		return 'Offline';
 	}
 </script>
 
@@ -27,17 +40,34 @@
 			<p class="stat-value">{data.stats.userCount}</p>
 		</Card>
 		<Card>
+			<p class="stat-label">Aktiva nu</p>
+			<p class="stat-value">{data.stats.activeNowCount}</p>
+			<p class="stat-note">Senaste {activeWindowMinutes} min</p>
+		</Card>
+		<Card>
+			<p class="stat-label">Inloggade sessioner</p>
+			<p class="stat-value">{data.stats.activeSessionCount}</p>
+		</Card>
+		<Card>
 			<p class="stat-label">Inventarieposter</p>
 			<p class="stat-value">{data.stats.inventoryCount}</p>
 		</Card>
-		<Card>
-			<p class="stat-label">Måltidsplaner</p>
-			<p class="stat-value">{data.stats.mealPlanCount}</p>
-		</Card>
-		<Card>
-			<p class="stat-label">Husdjur</p>
-			<p class="stat-value">{data.stats.petCount}</p>
-		</Card>
+	</section>
+
+	<section class="session-mgmt">
+	<Card>
+		<h2>Sessionshantering</h2>
+		<p class="logout-note">
+			Logga ut alla avslutar varje aktiv session, inklusive din egen. Användare måste logga in igen.
+		</p>
+		<form method="POST" action="?/logoutAll" class="logout-all-form">
+			<label>
+				Skriv <strong>yes</strong> för att bekräfta
+				<input name="confirm" required autocomplete="off" placeholder="yes" />
+			</label>
+			<Button type="submit" variant="danger">Logga ut alla</Button>
+		</form>
+	</Card>
 	</section>
 
 	<Card>
@@ -47,6 +77,8 @@
 				<thead>
 					<tr>
 						<th>E-post</th>
+						<th>Status</th>
+						<th>Senast sedd</th>
 						<th>Roll</th>
 						<th>Husdjur</th>
 						<th>Inventarie</th>
@@ -64,6 +96,16 @@
 								{/if}
 							</td>
 							<td>
+								<span
+									class="status-pill"
+									class:active={account.isActiveNow}
+									class:logged-in={!account.isActiveNow && account.hasActiveSession}
+								>
+									{statusLabel(account)}
+								</span>
+							</td>
+							<td>{formatLastSeen(account.lastSeenAt)}</td>
+							<td>
 								<span class:admin-badge={account.role === 'admin'}>
 									{account.role === 'admin' ? 'Admin' : 'Användare'}
 								</span>
@@ -72,6 +114,11 @@
 							<td>{account.inventoryCount}</td>
 							<td>{formatDate(account.createdAt)}</td>
 							<td class="actions">
+								<form method="POST" action="?/logoutUser">
+									<input type="hidden" name="userId" value={account.id} />
+									<Button type="submit" variant="danger">Logga ut</Button>
+								</form>
+
 								{#if account.role === 'admin'}
 									<form method="POST" action="?/setRole">
 										<input type="hidden" name="userId" value={account.id} />
@@ -140,9 +187,46 @@
 		font-weight: 700;
 	}
 
+	.stat-note {
+		margin: 0.2rem 0 0;
+		color: var(--color-text-muted);
+		font-size: 0.75rem;
+	}
+
+	.session-mgmt {
+		margin-bottom: var(--space-lg);
+	}
+
 	h2 {
 		margin: 0 0 var(--space-md);
 		font-size: 1.1rem;
+	}
+
+	.logout-note {
+		margin: 0 0 var(--space-md);
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+
+	.logout-all-form {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-md);
+		align-items: flex-end;
+	}
+
+	.logout-all-form label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		font-size: 0.9rem;
+		min-width: 12rem;
+	}
+
+	.logout-all-form input {
+		padding: 0.6rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
 	}
 
 	.table-wrap {
@@ -173,6 +257,26 @@
 	.you {
 		color: var(--color-text-muted);
 		font-size: 0.85rem;
+	}
+
+	.status-pill {
+		display: inline-block;
+		padding: 0.15rem 0.5rem;
+		border-radius: 999px;
+		background: #eceff1;
+		color: #546e7a;
+		font-weight: 600;
+		font-size: 0.8rem;
+	}
+
+	.status-pill.active {
+		background: #e8f5e9;
+		color: #1b5e20;
+	}
+
+	.status-pill.logged-in {
+		background: #fff8e1;
+		color: #f57f17;
 	}
 
 	.admin-badge {

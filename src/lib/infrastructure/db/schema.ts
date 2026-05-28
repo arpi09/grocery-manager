@@ -6,6 +6,7 @@ export const userTable = pgTable('user', {
 	passwordHash: text('password_hash').notNull(),
 	role: text('role', { enum: ['user', 'admin'] }).notNull().default('user'),
 	petsEnabled: boolean('pets_enabled').notNull().default(false),
+	lastSeenAt: timestamp('last_seen_at', { withTimezone: true, mode: 'date' }),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 });
 

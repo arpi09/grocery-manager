@@ -27,6 +27,7 @@
 	</div>
 	<nav class="nav">
 		<a href="/">Home</a>
+		<a href="/inkop">Inköp</a>
 		<a href="/planer">Planer</a>
 		{#if petsNav}
 			<a href="/husdjur">Husdjur</a>

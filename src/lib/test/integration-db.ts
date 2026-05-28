@@ -12,7 +12,7 @@ export interface IntegrationDbContext {
 	close(): Promise<void>;
 }
 
-const SQL_MIGRATION_FILES = ['0000_init.sql', '0001_user_role.sql'];
+const SQL_MIGRATION_FILES = ['0000_init.sql', '0001_user_role.sql', '0002_user_last_seen.sql'];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
 	"session",

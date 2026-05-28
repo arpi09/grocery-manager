@@ -1,5 +1,11 @@
 import { AdminError } from '$lib/application/admin.service';
-import { adminSetPetsSchema, adminSetRoleSchema } from '$lib/validation/admin.schemas';
+import { lucia } from '$lib/infrastructure/auth/lucia';
+import {
+	adminLogoutAllSchema,
+	adminSetPetsSchema,
+	adminSetRoleSchema,
+	adminUserIdSchema
+} from '$lib/validation/admin.schemas';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -59,6 +65,51 @@ export const actions: Actions = {
 			parsed.data.userId,
 			parsed.data.enabled === 'true'
 		);
+		redirect(302, '/admin');
+	},
+	logoutAll: async ({ request, locals, cookies }) => {
+		const formData = await request.formData();
+		const parsed = adminLogoutAllSchema.safeParse({
+			confirm: formData.get('confirm')
+		});
+
+		if (!parsed.success) {
+			return fail(400, { message: 'Skriv bekräftelse för att logga ut alla.' });
+		}
+
+		const sessionCount = await locals.adminService.logoutAllUsers();
+		const sessionCookie = lucia.createBlankSessionCookie();
+		cookies.set(sessionCookie.name, sessionCookie.value, {
+			path: '/',
+			...sessionCookie.attributes
+		});
+
+		redirect(
+			302,
+			`/login?message=${encodeURIComponent(`Alla användare har loggats ut (${sessionCount} sessioner).`)}`
+		);
+	},
+	logoutUser: async ({ request, locals, cookies }) => {
+		const formData = await request.formData();
+		const parsed = adminUserIdSchema.safeParse({
+			userId: formData.get('userId')
+		});
+
+		if (!parsed.success) {
+			return fail(400, { message: 'Ogiltig användare.' });
+		}
+
+		await locals.adminService.logoutUser(parsed.data.userId);
+
+		if (parsed.data.userId === locals.user!.id) {
+			const sessionCookie = lucia.createBlankSessionCookie();
+			cookies.set(sessionCookie.name, sessionCookie.value, {
+				path: '/',
+				...sessionCookie.attributes
+			});
+			redirect(302, '/login?message=' + encodeURIComponent('Du har loggats ut.'));
+		}
+
 		redirect(302, '/admin');
 	}
 };

@@ -12,3 +12,7 @@ export const adminSetRoleSchema = adminUserIdSchema.extend({
 export const adminSetPetsSchema = adminUserIdSchema.extend({
 	enabled: z.enum(['true', 'false'])
 });
+
+export const adminLogoutAllSchema = z.object({
+	confirm: z.literal('yes')
+});

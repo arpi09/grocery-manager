@@ -7,10 +7,11 @@
 	interface Props {
 		errors?: Record<string, string[]>;
 		message?: string;
+		messageTone?: 'error' | 'info';
 		email?: string;
 	}
 
-	let { errors = {}, message, email = '' }: Props = $props();
+	let { errors = {}, message, messageTone = 'error', email = '' }: Props = $props();
 
 	let submitting = $state(false);
 </script>
@@ -32,7 +33,7 @@
 	}}
 >
 	{#if message}
-		<p class="banner error" role="alert">{message}</p>
+		<p class="banner {messageTone}" role="alert">{message}</p>
 	{/if}
 
 	<FormField
@@ -77,6 +78,11 @@
 	.banner.error {
 		background: #fdeaea;
 		color: var(--color-danger);
+	}
+
+	.banner.info {
+		background: #e8f5e9;
+		color: #1b5e20;
 	}
 
 	.hint {

@@ -29,7 +29,7 @@ function usePglite(): boolean {
 /** Full schema — only on a new PGlite data directory. */
 const PGlite_BASELINE_MIGRATION = '0000_init.sql';
 /** Safe to re-run on every startup (uses IF NOT EXISTS). */
-const PGlite_INCREMENTAL_MIGRATIONS = ['0001_user_role.sql'];
+const PGlite_INCREMENTAL_MIGRATIONS = ['0001_user_role.sql', '0002_user_last_seen.sql'];
 
 async function runPgliteBaseline(client: PGlite) {
 	const migrationPath = join(process.cwd(), 'drizzle', PGlite_BASELINE_MIGRATION);

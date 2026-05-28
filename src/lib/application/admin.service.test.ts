@@ -11,7 +11,9 @@ describe('AdminService', () => {
 			getDashboardStats: vi.fn(),
 			listUsers: vi.fn(),
 			setUserRole: vi.fn(),
-			setUserPetsEnabled: vi.fn()
+			setUserPetsEnabled: vi.fn(),
+			invalidateAllSessions: vi.fn(),
+			invalidateUserSessions: vi.fn()
 		};
 		service = new AdminService(admin);
 	});
@@ -19,6 +21,8 @@ describe('AdminService', () => {
 	it('returns dashboard stats', async () => {
 		const stats = {
 			userCount: 3,
+			activeNowCount: 1,
+			activeSessionCount: 2,
 			inventoryCount: 10,
 			mealPlanCount: 2,
 			petCount: 1
@@ -38,6 +42,9 @@ describe('AdminService', () => {
 				role: 'user' as const,
 				petsEnabled: false,
 				createdAt: new Date(),
+				lastSeenAt: new Date(),
+				isActiveNow: true,
+				hasActiveSession: true,
 				inventoryCount: 5
 			}
 		];

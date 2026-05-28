@@ -34,4 +34,12 @@ export class AdminService {
 	setUserPetsEnabled(userId: string, enabled: boolean) {
 		return this.admin.setUserPetsEnabled(userId, enabled);
 	}
+
+	logoutAllUsers() {
+		return this.admin.invalidateAllSessions();
+	}
+
+	logoutUser(userId: string) {
+		return this.admin.invalidateUserSessions(userId);
+	}
 }
