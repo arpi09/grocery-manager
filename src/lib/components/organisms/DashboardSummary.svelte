@@ -36,6 +36,16 @@
 		{/each}
 	</div>
 
+	<Card href="/inkop" interactive>
+		<div class="ai-card">
+			<span class="ai-icon">✨</span>
+			<div>
+				<h2>AI inventarie & ICA</h2>
+				<p>Få tips om vad som håller på att ta slut och en inköpslista för ICA.</p>
+			</div>
+		</div>
+	</Card>
+
 	{#if summary.expiringSoon.length > 0}
 		<section class="expiring">
 			<h3>Expiring within 7 days</h3>
@@ -95,6 +105,27 @@
 	}
 
 	.location-card p {
+		margin: var(--space-xs) 0 0;
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+	}
+
+	.ai-card {
+		display: flex;
+		align-items: center;
+		gap: var(--space-md);
+	}
+
+	.ai-icon {
+		font-size: 1.75rem;
+	}
+
+	.ai-card h2 {
+		margin: 0;
+		font-size: 1.1rem;
+	}
+
+	.ai-card p {
 		margin: var(--space-xs) 0 0;
 		color: var(--color-text-muted);
 		font-size: 0.875rem;

@@ -63,6 +63,15 @@ OPENAI_API_KEY=your_key_here
 
 Photo product scan also uses the same `OPENAI_API_KEY`.
 
+## AI inventory help & ICA shopping list
+
+Open **Inköp** in the top navigation:
+
+- **Inventarietips** — AI analyzes your stock, expiry dates, meal plan, and saved recipe ideas (Swedish tips).
+- **ICA inköpslista** — suggests products to buy at ICA with quantities, reasons, and links to search on [ica.se](https://www.ica.se/handla/).
+
+Uses the same `OPENAI_API_KEY` as recipes and photo scan.
+
 ## Meal planner calendar
 
 Open **Planer** in the top navigation to manage planned meals in a calendar view.
@@ -90,7 +99,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run preview` | Preview production build |
 | `npm run check` | TypeScript / Svelte check |
 | `npm run lint` | ESLint |
-| `npm test` | Vitest unit tests |
+| `npm test` | Vitest test suite |
+| `npm run test:integration` | Integration tests (service + repository + real PGlite DB) |
 | `npm run db:migrate` | Apply database migrations |
 | `npm run db:generate` | Generate migrations from schema |
 

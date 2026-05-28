@@ -1,11 +1,21 @@
 <script lang="ts">
+	interface NavUser {
+		petsEnabled?: boolean;
+		role?: string;
+	}
+
 	interface Props {
 		title: string;
 		subtitle?: string;
+		user?: NavUser | null;
+		/** @deprecated Pass `user` instead */
 		showPetsNav?: boolean;
 	}
 
-	let { title, subtitle, showPetsNav = false }: Props = $props();
+	let { title, subtitle, user = null, showPetsNav }: Props = $props();
+
+	const petsNav = $derived(Boolean(showPetsNav ?? user?.petsEnabled));
+	const adminNav = $derived(user?.role === 'admin');
 </script>
 
 <header class="header">
@@ -17,9 +27,13 @@
 	</div>
 	<nav class="nav">
 		<a href="/">Home</a>
+		<a href="/inkop">Inköp</a>
 		<a href="/planer">Planer</a>
-		{#if showPetsNav}
+		{#if petsNav}
 			<a href="/husdjur">Husdjur</a>
+		{/if}
+		{#if adminNav}
+			<a href="/admin">Admin</a>
 		{/if}
 		<a href="/settings">Settings</a>
 	</nav>
