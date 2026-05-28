@@ -1,0 +1,16 @@
+import { isStorageLocation } from '$lib/domain/location';
+import { error } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async ({ params, locals }) => {
+	if (!isStorageLocation(params.location)) {
+		error(404, 'Unknown storage location');
+	}
+
+	const items = await locals.inventoryService.listByLocation(
+		locals.user!.id,
+		params.location
+	);
+
+	return { items, location: params.location };
+};

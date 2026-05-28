@@ -1,0 +1,64 @@
+<script lang="ts">
+	interface Props {
+		title: string;
+		subtitle?: string;
+		showPetsNav?: boolean;
+	}
+
+	let { title, subtitle, showPetsNav = false }: Props = $props();
+</script>
+
+<header class="header">
+	<div>
+		<h1>{title}</h1>
+		{#if subtitle}
+			<p class="subtitle">{subtitle}</p>
+		{/if}
+	</div>
+	<nav class="nav">
+		<a href="/">Home</a>
+		<a href="/planer">Planer</a>
+		{#if showPetsNav}
+			<a href="/husdjur">Husdjur</a>
+		{/if}
+		<a href="/settings">Settings</a>
+	</nav>
+</header>
+
+<style>
+	.header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: var(--space-md);
+		margin-bottom: var(--space-lg);
+	}
+
+	h1 {
+		margin: 0;
+		font-size: 1.5rem;
+		font-weight: 700;
+	}
+
+	.subtitle {
+		margin: var(--space-xs) 0 0;
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+
+	.nav {
+		display: flex;
+		gap: var(--space-md);
+		font-size: 0.875rem;
+		font-weight: 600;
+	}
+
+	.nav a {
+		text-decoration: none;
+		color: var(--color-text-muted);
+	}
+
+	.nav a:hover {
+		color: var(--color-primary);
+	}
+</style>

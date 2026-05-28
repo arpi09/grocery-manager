@@ -1,0 +1,36 @@
+<script lang="ts">
+	interface Props {
+		value: string;
+		placeholder?: string;
+	}
+
+	let { value = $bindable(''), placeholder = 'Search items…' }: Props = $props();
+</script>
+
+<div class="search">
+	<span class="icon" aria-hidden="true">⌕</span>
+	<input type="search" {placeholder} bind:value class="search-input" />
+</div>
+
+<style>
+	.search {
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+		padding: 0.5rem 0.85rem;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+	}
+
+	.icon {
+		color: var(--color-text-muted);
+	}
+
+	.search-input {
+		flex: 1;
+		border: none;
+		background: transparent;
+		outline: none;
+	}
+</style>
