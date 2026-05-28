@@ -4,7 +4,9 @@ import { createSession } from '$lib/server/session';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => ({});
+export const load: PageServerLoad = async ({ url }) => ({
+	message: url.searchParams.get('message')
+});
 
 export const actions: Actions = {
 	login: async (event) => {

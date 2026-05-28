@@ -7,10 +7,6 @@
 </script>
 
 <AppLayout>
-	<AppHeader
-		title="Home Pantry"
-		subtitle="What's in your kitchen"
-		showPetsNav={Boolean(data.user?.petsEnabled)}
-	/>
+	<AppHeader title="Home Pantry" subtitle="What's in your kitchen" user={data.user} />
 	<DashboardSummary summary={data.summary} />
 </AppLayout>
