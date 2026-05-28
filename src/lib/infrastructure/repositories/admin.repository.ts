@@ -1,4 +1,7 @@
 import { count, desc, eq, gt } from 'drizzle-orm';
+import type { AppErrorEntry } from '$lib/domain/error-log';
+import { isUserActiveNow } from '$lib/domain/presence';
+import type { UserRole } from '$lib/domain/user';
 import { db } from '$lib/infrastructure/db';
 import {
 	inventoryItemTable,
@@ -7,8 +10,7 @@ import {
 	sessionTable,
 	userTable
 } from '$lib/infrastructure/db/schema';
-import { isUserActiveNow } from '$lib/domain/presence';
-import type { UserRole } from '$lib/domain/user';
+import type { IErrorLogRepository } from '$lib/infrastructure/repositories/error-log.repository';
 
 export interface AdminUserSummary {
 	id: string;
@@ -34,6 +36,7 @@ export interface AdminDashboardStats {
 export interface IAdminRepository {
 	getDashboardStats(): Promise<AdminDashboardStats>;
 	listUsers(): Promise<AdminUserSummary[]>;
+	listRecentErrors(limit: number): Promise<AppErrorEntry[]>;
 	setUserRole(userId: string, role: UserRole): Promise<void>;
 	setUserPetsEnabled(userId: string, enabled: boolean): Promise<void>;
 	invalidateAllSessions(): Promise<number>;
@@ -41,6 +44,7 @@ export interface IAdminRepository {
 }
 
 export class DrizzleAdminRepository implements IAdminRepository {
+	constructor(private readonly errorLog: IErrorLogRepository) {}
 	private async getActiveSessionUserIds(): Promise<Set<string>> {
 		const now = new Date();
 		const rows = await db
@@ -71,6 +75,10 @@ export class DrizzleAdminRepository implements IAdminRepository {
 			mealPlanCount: mealPlans?.count ?? 0,
 			petCount: pets?.count ?? 0
 		};
+	}
+
+	listRecentErrors(limit: number): Promise<AppErrorEntry[]> {
+		return this.errorLog.listRecent(limit);
 	}
 
 	async listUsers(): Promise<AdminUserSummary[]> {

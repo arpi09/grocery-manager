@@ -2,6 +2,7 @@ import { initDatabase } from '$lib/infrastructure/db';
 import {
 	adminService,
 	authService,
+	profileService,
 	inventoryService,
 	mealPlanService,
 	petFoodService,
@@ -10,7 +11,9 @@ import {
 import { recordUserActivity } from '$lib/server/activity';
 import { isAdmin } from '$lib/server/auth';
 import { validateSession } from '$lib/server/session';
-import { redirect, type Handle } from '@sveltejs/kit';
+import { recordAppError } from '$lib/server/error-log/record';
+import { shouldPersistServerError } from '$lib/server/error-log/should-log';
+import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
 
 const publicPaths = new Set(['/login', '/register']);
 
@@ -18,6 +21,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	await initDatabase();
 
 	event.locals.authService = authService;
+	event.locals.profileService = profileService;
 	event.locals.adminService = adminService;
 	event.locals.inventoryService = inventoryService;
 	event.locals.mealPlanService = mealPlanService;
@@ -47,4 +51,19 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	return resolve(event);
+};
+
+export const handleError: HandleServerError = async ({ error, event, status }) => {
+	if (shouldPersistServerError(error, status)) {
+		await recordAppError({
+			error,
+			path: `${event.request.method} ${event.url.pathname}`,
+			userId: event.locals.user?.id ?? null,
+			statusCode: status
+		});
+	}
+
+	return {
+		message: status >= 500 ? 'Ett oväntat fel inträffade.' : 'Något gick fel.'
+	};
 };

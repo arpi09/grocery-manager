@@ -10,6 +10,7 @@ describe('AdminService', () => {
 		admin = {
 			getDashboardStats: vi.fn(),
 			listUsers: vi.fn(),
+			listRecentErrors: vi.fn(),
 			setUserRole: vi.fn(),
 			setUserPetsEnabled: vi.fn(),
 			invalidateAllSessions: vi.fn(),

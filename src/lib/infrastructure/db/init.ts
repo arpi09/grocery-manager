@@ -9,6 +9,7 @@ import postgres from 'postgres';
 import { env } from '$env/dynamic/private';
 import * as schema from './schema';
 import { ensureDefaultAdminUser } from './seed-admin';
+import { ensureDefaultHousehold } from './seed-household';
 
 export type AppDatabase =
 	| PostgresJsDatabase<typeof schema>
@@ -29,7 +30,13 @@ function usePglite(): boolean {
 /** Full schema — only on a new PGlite data directory. */
 const PGlite_BASELINE_MIGRATION = '0000_init.sql';
 /** Safe to re-run on every startup (uses IF NOT EXISTS). */
-const PGlite_INCREMENTAL_MIGRATIONS = ['0001_user_role.sql', '0002_user_last_seen.sql'];
+const PGlite_INCREMENTAL_MIGRATIONS = [
+	'0001_user_role.sql',
+	'0002_user_last_seen.sql',
+	'0003_household.sql',
+	'0004_user_profile.sql',
+	'0005_app_error.sql'
+];
 
 async function runPgliteBaseline(client: PGlite) {
 	const migrationPath = join(process.cwd(), 'drizzle', PGlite_BASELINE_MIGRATION);
@@ -89,6 +96,7 @@ export async function initDatabase(): Promise<void> {
 				await runPgliteIncrementalMigrations(client);
 				dbInstance = drizzlePglite({ client, schema });
 				await ensureDefaultAdminUser();
+				await ensureDefaultHousehold();
 				return;
 			}
 
@@ -103,6 +111,7 @@ export async function initDatabase(): Promise<void> {
 			dbInstance = drizzlePostgres(sql, { schema });
 
 			await ensureDefaultAdminUser();
+			await ensureDefaultHousehold();
 		})().catch((error) => {
 			initPromise = null;
 			throw error;

@@ -17,7 +17,9 @@ describe('AuthService', () => {
 		vi.clearAllMocks();
 		users = {
 			findByEmail: vi.fn(),
-			create: vi.fn()
+			create: vi.fn(),
+			findProfileById: vi.fn(),
+			updateProfile: vi.fn()
 		};
 		service = new AuthService(users);
 	});

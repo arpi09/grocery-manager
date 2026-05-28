@@ -1,5 +1,6 @@
 import { AdminService } from '$lib/application/admin.service';
 import { AuthService } from '$lib/application/auth.service';
+import { ProfileService } from '$lib/application/profile.service';
 import { InventoryService } from '$lib/application/inventory.service';
 import { MealPlanService } from '$lib/application/meal-plan.service';
 import { PetFoodService } from '$lib/application/pet-food.service';
@@ -9,16 +10,19 @@ import { DrizzlePetFoodRepository } from '$lib/infrastructure/repositories/pet-f
 import { DrizzlePetRepository } from '$lib/infrastructure/repositories/pet.repository';
 import { DrizzleInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
 import { DrizzleAdminRepository } from '$lib/infrastructure/repositories/admin.repository';
+import { DrizzleErrorLogRepository } from '$lib/infrastructure/repositories/error-log.repository';
 import { DrizzleUserRepository } from '$lib/infrastructure/repositories/user.repository';
 
 const userRepository = new DrizzleUserRepository();
-const adminRepository = new DrizzleAdminRepository();
+const errorLogRepository = new DrizzleErrorLogRepository();
+const adminRepository = new DrizzleAdminRepository(errorLogRepository);
 const inventoryRepository = new DrizzleInventoryRepository();
 const mealPlanRepository = new DrizzleMealPlanRepository();
 const petRepository = new DrizzlePetRepository();
 const petFoodRepository = new DrizzlePetFoodRepository();
 
 export const authService = new AuthService(userRepository);
+export const profileService = new ProfileService(userRepository);
 export const adminService = new AdminService(adminRepository);
 export const inventoryService = new InventoryService(inventoryRepository);
 export const mealPlanService = new MealPlanService(mealPlanRepository);

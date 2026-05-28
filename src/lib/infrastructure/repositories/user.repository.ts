@@ -1,10 +1,30 @@
 import { eq } from 'drizzle-orm';
 import { db } from '$lib/infrastructure/db';
 import { userTable } from '$lib/infrastructure/db/schema';
+import type { UserProfile } from '$lib/domain/user';
 
 export interface IUserRepository {
 	findByEmail(email: string): Promise<{ id: string; email: string; passwordHash: string } | null>;
 	create(email: string, passwordHash: string, id: string): Promise<{ id: string; email: string }>;
+	findProfileById(id: string): Promise<UserProfile | null>;
+	updateProfile(
+		id: string,
+		data: { displayName: string | null; avatarUrl: string | null }
+	): Promise<UserProfile | null>;
+}
+
+function mapProfile(row: {
+	id: string;
+	email: string;
+	displayName: string | null;
+	avatarUrl: string | null;
+}): UserProfile {
+	return {
+		id: row.id,
+		email: row.email,
+		displayName: row.displayName,
+		avatarUrl: row.avatarUrl
+	};
 }
 
 export class DrizzleUserRepository implements IUserRepository {
@@ -31,5 +51,36 @@ export class DrizzleUserRepository implements IUserRepository {
 		});
 
 		return { id, email: normalizedEmail };
+	}
+
+	async findProfileById(id: string) {
+		const [row] = await db
+			.select({
+				id: userTable.id,
+				email: userTable.email,
+				displayName: userTable.displayName,
+				avatarUrl: userTable.avatarUrl
+			})
+			.from(userTable)
+			.where(eq(userTable.id, id))
+			.limit(1);
+
+		return row ? mapProfile(row) : null;
+	}
+
+	async updateProfile(
+		id: string,
+		data: { displayName: string | null; avatarUrl: string | null }
+	) {
+		const [row] = await db
+			.update(userTable)
+			.set({
+				displayName: data.displayName,
+				avatarUrl: data.avatarUrl
+			})
+			.where(eq(userTable.id, id))
+			.returning();
+
+		return row ? mapProfile(row) : null;
 	}
 }

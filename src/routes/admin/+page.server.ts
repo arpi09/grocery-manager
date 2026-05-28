@@ -6,20 +6,39 @@ import {
 	adminSetRoleSchema,
 	adminUserIdSchema
 } from '$lib/validation/admin.schemas';
+import {
+	ERROR_LOG_ADMIN_LIST_DEFAULT,
+	ERROR_LOG_ADMIN_LIST_MAX
+} from '$lib/domain/error-log';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ parent, locals }) => {
+function parseErrorLogLimit(raw: string | null): number {
+	const parsed = Number(raw ?? ERROR_LOG_ADMIN_LIST_DEFAULT);
+	if (!Number.isFinite(parsed)) {
+		return ERROR_LOG_ADMIN_LIST_DEFAULT;
+	}
+	return Math.min(
+		ERROR_LOG_ADMIN_LIST_MAX,
+		Math.max(1, Math.floor(parsed))
+	);
+}
+
+export const load: PageServerLoad = async ({ parent, locals, url }) => {
 	const { user } = await parent();
-	const [stats, users] = await Promise.all([
+	const errorLimit = parseErrorLogLimit(url.searchParams.get('errorLimit'));
+	const [stats, users, errors] = await Promise.all([
 		locals.adminService.getDashboardStats(),
-		locals.adminService.listUsers()
+		locals.adminService.listUsers(),
+		locals.adminService.listRecentErrors(errorLimit)
 	]);
 
 	return {
 		user,
 		stats,
-		users
+		users,
+		errors,
+		errorLimit
 	};
 };
 

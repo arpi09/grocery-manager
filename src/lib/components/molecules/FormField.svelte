@@ -8,13 +8,13 @@
 		error?: string;
 	}
 
-	let { label, error, id, name, ...rest }: Props = $props();
+	let { label, error, id, name, value = $bindable(''), ...rest }: Props = $props();
 	const fieldId = id ?? name ?? label.toLowerCase().replace(/\s+/g, '-');
 </script>
 
 <div class="field">
 	<Label for={fieldId}>{label}</Label>
-	<Input id={fieldId} {name} error={!!error} {...rest} />
+	<Input id={fieldId} {name} bind:value error={!!error} {...rest} />
 	{#if error}
 		<p class="error" role="alert">{error}</p>
 	{/if}

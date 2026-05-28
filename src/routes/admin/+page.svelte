@@ -54,6 +54,54 @@
 		</Card>
 	</section>
 
+	<section class="error-logs">
+		<Card>
+			<div class="error-logs-header">
+				<h2>Felloggar</h2>
+				<form method="GET" class="error-limit-form">
+					<label>
+						Visa senaste
+						<select name="errorLimit" onchange={(e) => e.currentTarget.form?.requestSubmit()}>
+							{#each [25, 50, 100] as limit}
+								<option value={limit} selected={data.errorLimit === limit}>{limit}</option>
+							{/each}
+						</select>
+					</label>
+				</form>
+			</div>
+			<p class="error-logs-note">
+				Senaste serverfel (max 200 poster / 7 dagar). Lösenord och tokens lagras aldrig.
+			</p>
+			{#if data.errors.length === 0}
+				<p class="error-empty">Inga fel loggade ännu.</p>
+			{:else}
+				<ul class="error-list">
+					{#each data.errors as entry}
+						<li class="error-item">
+							<div class="error-summary">
+								<time datetime={entry.createdAt.toISOString()}>
+									{formatDate(entry.createdAt)}
+								</time>
+								<span class="error-status">{entry.statusCode ?? '—'}</span>
+								<code class="error-path">{entry.path}</code>
+								{#if entry.userId}
+									<span class="error-user">user: {entry.userId}</span>
+								{/if}
+							</div>
+							<p class="error-message">{entry.message}</p>
+							{#if entry.stack}
+								<details>
+									<summary>Stack</summary>
+									<pre>{entry.stack}</pre>
+								</details>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</Card>
+	</section>
+
 	<section class="session-mgmt">
 	<Card>
 		<h2>Sessionshantering</h2>
@@ -191,6 +239,101 @@
 		margin: 0.2rem 0 0;
 		color: var(--color-text-muted);
 		font-size: 0.75rem;
+	}
+
+	.error-logs {
+		margin-bottom: var(--space-lg);
+	}
+
+	.error-logs-header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-md);
+		margin-bottom: var(--space-sm);
+	}
+
+	.error-logs-header h2 {
+		margin: 0;
+	}
+
+	.error-limit-form label {
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+		font-size: 0.9rem;
+	}
+
+	.error-limit-form select {
+		padding: 0.35rem 0.5rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+	}
+
+	.error-logs-note,
+	.error-empty {
+		margin: 0 0 var(--space-md);
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+
+	.error-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-md);
+	}
+
+	.error-item {
+		padding: var(--space-sm) 0;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.error-item:last-child {
+		border-bottom: none;
+	}
+
+	.error-summary {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
+		align-items: baseline;
+		font-size: 0.85rem;
+		color: var(--color-text-muted);
+	}
+
+	.error-status {
+		font-weight: 700;
+		color: #8a1f1f;
+	}
+
+	.error-path {
+		font-size: 0.8rem;
+	}
+
+	.error-user {
+		font-size: 0.8rem;
+	}
+
+	.error-message {
+		margin: var(--space-xs) 0 0;
+		font-weight: 600;
+	}
+
+	.error-item details {
+		margin-top: var(--space-xs);
+	}
+
+	.error-item pre {
+		margin: var(--space-xs) 0 0;
+		padding: var(--space-sm);
+		overflow-x: auto;
+		font-size: 0.75rem;
+		background: #f5f5f5;
+		border-radius: var(--radius-sm);
 	}
 
 	.session-mgmt {

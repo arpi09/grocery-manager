@@ -1,5 +1,10 @@
 <script lang="ts">
+	import HeaderProfileMenu from '$lib/components/molecules/HeaderProfileMenu.svelte';
+
 	interface NavUser {
+		email: string;
+		displayName?: string | null;
+		avatarUrl?: string | null;
 		petsEnabled?: boolean;
 		role?: string;
 	}
@@ -25,18 +30,22 @@
 			<p class="subtitle">{subtitle}</p>
 		{/if}
 	</div>
-	<nav class="nav">
-		<a href="/">Home</a>
-		<a href="/inkop">Inköp</a>
-		<a href="/planer">Planer</a>
-		{#if petsNav}
-			<a href="/husdjur">Husdjur</a>
+	<div class="header-right">
+		<nav class="nav">
+			<a href="/">Home</a>
+			<a href="/inkop">Inköp</a>
+			<a href="/planer">Planer</a>
+			{#if petsNav}
+				<a href="/husdjur">Husdjur</a>
+			{/if}
+			{#if adminNav}
+				<a href="/admin">Admin</a>
+			{/if}
+		</nav>
+		{#if user}
+			<HeaderProfileMenu {user} />
 		{/if}
-		{#if adminNav}
-			<a href="/admin">Admin</a>
-		{/if}
-		<a href="/settings">Settings</a>
-	</nav>
+	</div>
 </header>
 
 <style>
@@ -60,6 +69,12 @@
 		font-size: 0.9rem;
 	}
 
+	.header-right {
+		display: flex;
+		align-items: center;
+		gap: var(--space-md);
+	}
+
 	.nav {
 		display: flex;
 		gap: var(--space-md);
@@ -74,5 +89,20 @@
 
 	.nav a:hover {
 		color: var(--color-primary);
+	}
+
+	@media (max-width: 760px) {
+		.header {
+			flex-direction: column;
+		}
+
+		.header-right {
+			width: 100%;
+			justify-content: space-between;
+		}
+
+		.nav {
+			flex-wrap: wrap;
+		}
 	}
 </style>

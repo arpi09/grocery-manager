@@ -15,6 +15,8 @@ export const lucia = new Lucia(adapter, {
 	},
 	getUserAttributes: (attributes) => ({
 		email: attributes.email,
+		displayName: attributes.displayName,
+		avatarUrl: attributes.avatarUrl,
 		role: attributes.role,
 		petsEnabled: Boolean(attributes.petsEnabled)
 	})
@@ -25,6 +27,8 @@ declare module 'lucia' {
 		Lucia: typeof lucia;
 		DatabaseUserAttributes: {
 			email: string;
+			displayName: string | null;
+			avatarUrl: string | null;
 			role: string;
 			petsEnabled: boolean;
 		};
@@ -34,6 +38,8 @@ declare module 'lucia' {
 declare module 'lucia' {
 	interface UserAttributes {
 		email: string;
+		displayName: string | null;
+		avatarUrl: string | null;
 		role: string;
 		petsEnabled: boolean;
 	}

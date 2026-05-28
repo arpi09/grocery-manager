@@ -1,9 +1,21 @@
-import { pgTable, text, timestamp, numeric, date, index, boolean } from 'drizzle-orm/pg-core';
+import {
+	pgTable,
+	text,
+	timestamp,
+	numeric,
+	date,
+	index,
+	boolean,
+	integer,
+	primaryKey
+} from 'drizzle-orm/pg-core';
 
 export const userTable = pgTable('user', {
 	id: text('id').primaryKey(),
 	email: text('email').notNull().unique(),
 	passwordHash: text('password_hash').notNull(),
+	displayName: text('display_name'),
+	avatarUrl: text('avatar_url'),
 	role: text('role', { enum: ['user', 'admin'] }).notNull().default('user'),
 	petsEnabled: boolean('pets_enabled').notNull().default(false),
 	lastSeenAt: timestamp('last_seen_at', { withTimezone: true, mode: 'date' }),
@@ -18,10 +30,36 @@ export const sessionTable = pgTable('session', {
 	expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull()
 });
 
+export const householdTable = pgTable('household', {
+	id: text('id').primaryKey(),
+	name: text('name').notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+});
+
+export const householdMemberTable = pgTable(
+	'household_member',
+	{
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
+		userId: text('user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		role: text('role', { enum: ['owner', 'member'] }).notNull()
+	},
+	(table) => [
+		primaryKey({ columns: [table.householdId, table.userId] }),
+		index('household_member_user_idx').on(table.userId)
+	]
+);
+
 export const inventoryItemTable = pgTable(
 	'inventory_items',
 	{
 		id: text('id').primaryKey(),
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
 		userId: text('user_id')
 			.notNull()
 			.references(() => userTable.id, { onDelete: 'cascade' }),
@@ -35,8 +73,8 @@ export const inventoryItemTable = pgTable(
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 	},
 	(table) => [
-		index('inventory_user_location_idx').on(table.userId, table.location),
-		index('inventory_user_expires_idx').on(table.userId, table.expiresOn)
+		index('inventory_household_location_idx').on(table.householdId, table.location),
+		index('inventory_household_expires_idx').on(table.householdId, table.expiresOn)
 	]
 );
 
@@ -89,6 +127,20 @@ export const petTable = pgTable(
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 	},
 	(table) => [index('pets_user_created_idx').on(table.userId, table.createdAt)]
+);
+
+export const appErrorTable = pgTable(
+	'app_error',
+	{
+		id: text('id').primaryKey(),
+		message: text('message').notNull(),
+		stack: text('stack'),
+		path: text('path').notNull(),
+		userId: text('user_id'),
+		statusCode: integer('status_code'),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [index('app_error_created_at_idx').on(table.createdAt)]
 );
 
 export const petFoodTable = pgTable(

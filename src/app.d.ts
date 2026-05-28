@@ -1,6 +1,7 @@
 import type { User, Session } from 'lucia';
 import type { AdminService } from '$lib/application/admin.service';
 import type { AuthService } from '$lib/application/auth.service';
+import type { ProfileService } from '$lib/application/profile.service';
 import type { InventoryService } from '$lib/application/inventory.service';
 import type { MealPlanService } from '$lib/application/meal-plan.service';
 import type { PetFoodService } from '$lib/application/pet-food.service';
@@ -12,6 +13,7 @@ declare global {
 			user: User | null;
 			session: Session | null;
 			authService: AuthService;
+			profileService: ProfileService;
 			adminService: AdminService;
 			inventoryService: InventoryService;
 			mealPlanService: MealPlanService;

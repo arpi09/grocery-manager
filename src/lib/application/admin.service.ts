@@ -23,6 +23,10 @@ export class AdminService {
 		return this.admin.listUsers();
 	}
 
+	listRecentErrors(limit: number) {
+		return this.admin.listRecentErrors(limit);
+	}
+
 	async setUserRole(actorId: string, targetUserId: string, role: UserRole) {
 		if (actorId === targetUserId && role !== 'admin') {
 			throw new AdminError('You cannot remove your own admin access');
