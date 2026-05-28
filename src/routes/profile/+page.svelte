@@ -53,7 +53,7 @@
 	}
 </script>
 
-<AppLayout>
+<AppLayout user={data.user}>
 	<AppHeader title="Profil" subtitle="Redigera ditt konto" />
 	<Card>
 		{#if form?.success}
