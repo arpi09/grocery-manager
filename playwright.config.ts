@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from 'node:fs';
+mport { readFileSync, existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
 function loadDotEnv(path = '.env') {
@@ -18,7 +18,8 @@ function loadDotEnv(path = '.env') {
 
 loadDotEnv();
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173';
+const port = process.env.PLAYWRIGHT_PORT ?? '5173';
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${port}`;
 
 export default defineConfig({
 	testDir: 'e2e',
@@ -39,7 +40,7 @@ export default defineConfig({
 		}
 	],
 	webServer: {
-		command: 'npm run dev',
+		command: `npm run dev -- --port ${port}`,
 		url: `${baseURL}/login`,
 		reuseExistingServer: !process.env.CI,
 		timeout: 120_000,
