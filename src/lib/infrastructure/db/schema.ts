@@ -18,6 +18,7 @@ export const userTable = pgTable('user', {
 	avatarUrl: text('avatar_url'),
 	role: text('role', { enum: ['user', 'admin'] }).notNull().default('user'),
 	petsEnabled: boolean('pets_enabled').notNull().default(false),
+	themePreference: text('theme_preference', { enum: ['light', 'dark', 'system'] }).notNull().default('system'),
 	lastSeenAt: timestamp('last_seen_at', { withTimezone: true, mode: 'date' }),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 });

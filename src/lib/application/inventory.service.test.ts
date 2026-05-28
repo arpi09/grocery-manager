@@ -31,6 +31,7 @@ describe('InventoryService', () => {
 			findAllByHousehold: vi.fn(),
 			findExpiringBefore: vi.fn(),
 			countByLocation: vi.fn(),
+			getAnalytics: vi.fn(),
 			create: vi.fn(),
 			update: vi.fn(),
 			delete: vi.fn()

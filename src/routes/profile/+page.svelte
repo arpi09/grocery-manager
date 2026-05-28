@@ -54,7 +54,7 @@
 </script>
 
 <AppLayout>
-	<AppHeader title="Profil" subtitle="Redigera ditt konto" user={data.user} />
+	<AppHeader title="Profil" subtitle="Redigera ditt konto" />
 	<Card>
 		{#if form?.success}
 			<p class="banner success" role="status">Profilen sparades.</p>

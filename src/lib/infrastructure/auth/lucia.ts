@@ -18,7 +18,8 @@ export const lucia = new Lucia(adapter, {
 		displayName: attributes.displayName,
 		avatarUrl: attributes.avatarUrl,
 		role: attributes.role,
-		petsEnabled: Boolean(attributes.petsEnabled)
+		petsEnabled: Boolean(attributes.petsEnabled),
+		themePreference: attributes.themePreference
 	})
 });
 
@@ -31,6 +32,7 @@ declare module 'lucia' {
 			avatarUrl: string | null;
 			role: string;
 			petsEnabled: boolean;
+			themePreference: string;
 		};
 	}
 }
@@ -42,5 +44,6 @@ declare module 'lucia' {
 		avatarUrl: string | null;
 		role: string;
 		petsEnabled: boolean;
+		themePreference: string;
 	}
 }

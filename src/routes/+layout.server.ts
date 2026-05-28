@@ -3,10 +3,12 @@ import { resolveThemeForRequest } from '$lib/server/theme-cookie';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals, cookies, request }) => {
-	const storedPreference = locals.user?.themePreference;
+	const rawPreference = locals.user?.themePreference;
+	const storedPreference =
+		rawPreference && isThemePreference(rawPreference) ? rawPreference : null;
 	const { preference, resolved } = resolveThemeForRequest(
 		{ cookies, request },
-		isThemePreference(storedPreference ?? '') ? storedPreference : null
+		storedPreference
 	);
 
 	return {
