@@ -102,6 +102,27 @@ Open [http://localhost:3000](http://localhost:3000).
 
 > Run migrations inside the app container on first deploy, or run `npm run db:migrate` locally against the same `DATABASE_URL` before starting the app.
 
+## End-to-end tests (Playwright)
+
+Browser tests use **Playwright** — it is **free and open source**. You do **not** need a paid Playwright account or cloud subscription.
+
+**One-time setup** (in this worktree):
+
+```powershell
+npm ci
+npx playwright install chromium
+copy ..\\home-pantry\\.env .env   # needs ADMIN_EMAIL + ADMIN_PASSWORD for login tests
+```
+
+**Run** (starts `npm run dev` automatically unless port 5173 is already in use):
+
+```powershell
+npm run test:e2e
+npm run test:e2e:ui      # optional visual debugger (still free)
+```
+
+Tests cover login redirect, admin sign-in, `/admin`, and navigation to Inköp / Planer. See `AGENTS-E2E.md` for the E2E agent charter.
+
 ## Scripts
 
 | Command | Description |
@@ -113,6 +134,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run lint` | ESLint |
 | `npm test` | Vitest test suite |
 | `npm run test:integration` | Integration tests (service + repository + real PGlite DB) |
+| `npm run test:e2e` | Playwright browser tests |
+| `npm run test:e2e:ui` | Playwright UI mode (debug) |
 | `npm run db:migrate` | Apply database migrations |
 | `npm run db:generate` | Generate migrations from schema |
 
