@@ -1,4 +1,4 @@
-import { EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
+import { EXPIRING_SOON_DAYS, buildLocationBars, type LocationBar } from '$lib/domain/inventory-analytics';
 import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 import type {
 	CreateInventoryItemInput,
@@ -7,9 +7,10 @@ import type {
 	UpdateInventoryItemInput
 } from '$lib/domain/inventory-item';
 import { generateId } from '$lib/infrastructure/auth/id';
-import type { IInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
-
-const EXPIRING_SOON_DAYS = 7;
+import type {
+	IInventoryRepository,
+	InventoryAnalyticsSnapshot
+} from '$lib/infrastructure/repositories/inventory.repository';
 
 export class InventoryNotFoundError extends Error {
 	constructor() {
@@ -22,6 +23,10 @@ export interface DashboardSummary {
 	counts: LocationCount[];
 	expiringSoon: InventoryItem[];
 	totalItems: number;
+}
+
+export interface InventoryAnalytics extends InventoryAnalyticsSnapshot {
+	byLocationBars: LocationBar[];
 }
 
 export class InventoryService {
@@ -43,6 +48,20 @@ export class InventoryService {
 		const totalItems = countsByLocation.reduce((sum, c) => sum + c.count, 0);
 
 		return { counts: countsByLocation, expiringSoon, totalItems };
+	}
+
+	async getAnalytics(householdId: string): Promise<InventoryAnalytics> {
+		const snapshot = await this.repository.getAnalytics(householdId);
+		const countsByLocation = LOCATIONS.map((location) => {
+			const found = snapshot.byLocation.find((c) => c.location === location);
+			return { location, count: found?.count ?? 0 };
+		});
+
+		return {
+			...snapshot,
+			byLocation: countsByLocation,
+			byLocationBars: buildLocationBars(countsByLocation, snapshot.totalItems)
+		};
 	}
 
 	async listByLocation(householdId: string, location: StorageLocation) {

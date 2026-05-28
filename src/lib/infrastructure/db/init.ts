@@ -35,7 +35,8 @@ const PGlite_INCREMENTAL_MIGRATIONS = [
 	'0002_user_last_seen.sql',
 	'0003_household.sql',
 '0004_user_profile.sql',
-	'0005_app_error.sql'
+	'0005_app_error.sql',
+	'0006_user_theme_preference.sql'
 ];
 
 async function runPgliteBaseline(client: PGlite) {

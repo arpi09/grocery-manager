@@ -1,4 +1,5 @@
-import { and, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, eq, gte, isNull, lte, sql } from 'drizzle-orm';
+import { EXPIRING_SOON_DAYS } from '$lib/domain/inventory-analytics';
 import type { StorageLocation } from '$lib/domain/location';
 import type {
 	CreateInventoryItemInput,
@@ -9,6 +10,17 @@ import type {
 import { db, type AppDatabase } from '$lib/infrastructure/db';
 import { inventoryItemTable } from '$lib/infrastructure/db/schema';
 
+export interface InventoryAnalyticsSnapshot {
+	totalItems: number;
+	totalQuantity: string;
+	distinctProducts: number;
+	expiringSoonCount: number;
+	withoutExpiryCount: number;
+	lowStockCount: number;
+	addedLast7Days: number;
+	byLocation: LocationCount[];
+}
+
 export interface IInventoryRepository {
 	findById(householdId: string, id: string): Promise<InventoryItem | null>;
 	findByHouseholdAndLocation(
@@ -18,6 +30,7 @@ export interface IInventoryRepository {
 	findAllByHousehold(householdId: string): Promise<InventoryItem[]>;
 	findExpiringBefore(householdId: string, beforeDate: string): Promise<InventoryItem[]>;
 	countByLocation(householdId: string): Promise<LocationCount[]>;
+	getAnalytics(householdId: string): Promise<InventoryAnalyticsSnapshot>;
 	create(
 		householdId: string,
 		userId: string,
@@ -121,6 +134,62 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 		}));
 	}
 
+
+	async getAnalytics(householdId: string): Promise<InventoryAnalyticsSnapshot> {
+		const today = new Date().toISOString().slice(0, 10);
+		const expiringBefore = addDaysIso(today, EXPIRING_SOON_DAYS);
+		const createdSince = addDays(new Date(), -7);
+		const householdFilter = eq(inventoryItemTable.householdId, householdId);
+
+		const [totalsRow] = await this.database
+			.select({
+				totalItems: sql<number>`count(*)::int`,
+				totalQuantity: sql<string>`coalesce(sum(${inventoryItemTable.quantity}), '0')`,
+				distinctProducts: sql<number>`count(distinct lower(${inventoryItemTable.name}))::int`
+			})
+			.from(inventoryItemTable)
+			.where(householdFilter);
+
+		const [expiringRow] = await this.database
+			.select({ count: sql<number>`count(*)::int` })
+			.from(inventoryItemTable)
+			.where(
+				and(
+					householdFilter,
+					sql`${inventoryItemTable.expiresOn} is not null`,
+					lte(inventoryItemTable.expiresOn, expiringBefore),
+					gte(inventoryItemTable.expiresOn, today)
+				)
+			);
+
+		const [withoutExpiryRow] = await this.database
+			.select({ count: sql<number>`count(*)::int` })
+			.from(inventoryItemTable)
+			.where(and(householdFilter, isNull(inventoryItemTable.expiresOn)));
+
+		const [lowStockRow] = await this.database
+			.select({ count: sql<number>`count(*)::int` })
+			.from(inventoryItemTable)
+			.where(and(householdFilter, sql`${inventoryItemTable.quantity} < 1`));
+
+		const [addedRow] = await this.database
+			.select({ count: sql<number>`count(*)::int` })
+			.from(inventoryItemTable)
+			.where(and(householdFilter, gte(inventoryItemTable.createdAt, createdSince)));
+
+		const byLocation = await this.countByLocation(householdId);
+
+		return {
+			totalItems: totalsRow?.totalItems ?? 0,
+			totalQuantity: totalsRow?.totalQuantity ?? '0',
+			distinctProducts: totalsRow?.distinctProducts ?? 0,
+			expiringSoonCount: expiringRow?.count ?? 0,
+			withoutExpiryCount: withoutExpiryRow?.count ?? 0,
+			lowStockCount: lowStockRow?.count ?? 0,
+			addedLast7Days: addedRow?.count ?? 0,
+			byLocation
+		};
+	}
 	async create(householdId: string, userId: string, id: string, input: CreateInventoryItemInput) {
 		const now = new Date();
 		const [row] = await this.database
@@ -173,4 +242,18 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 
 		return result.length > 0;
 	}
+
+}
+
+function addDays(date: Date, days: number): Date {
+	const result = new Date(date);
+	result.setDate(result.getDate() + days);
+	return result;
+}
+
+function addDaysIso(isoDate: string, days: number): string {
+	const [year, month, day] = isoDate.split('-').map(Number);
+	const date = new Date(year, month - 1, day);
+	date.setDate(date.getDate() + days);
+	return date.toISOString().slice(0, 10);
 }
