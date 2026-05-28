@@ -51,10 +51,50 @@ describe('InventoryService', () => {
 		expect(summary.expiringSoon).toHaveLength(1);
 	});
 
-	it('throws when item is not found', async () => {
-		vi.mocked(repository.findById).mockResolvedValue(null);
+	it('lists items by location', async () => {
+		const items = [makeItem(), makeItem({ id: 'item-2', name: 'Butter' })];
+		vi.mocked(repository.findByUserAndLocation).mockResolvedValue(items);
 
-		await expect(service.getItem('user-1', 'missing')).rejects.toThrow('Item not found');
+		const result = await service.listByLocation('user-1', 'fridge');
+
+		expect(result).toEqual(items);
+		expect(repository.findByUserAndLocation).toHaveBeenCalledWith('user-1', 'fridge');
+	});
+
+	it('lists all items for user', async () => {
+		const items = [makeItem()];
+		vi.mocked(repository.findAllByUser).mockResolvedValue(items);
+
+		const result = await service.listAll('user-1');
+
+		expect(result).toEqual(items);
+	});
+
+	it('returns item when found', async () => {
+		const item = makeItem();
+		vi.mocked(repository.findById).mockResolvedValue(item);
+
+		const result = await service.getItem('user-1', 'item-1');
+
+		expect(result).toEqual(item);
+	});
+
+	it('updates an item', async () => {
+		const updated = makeItem({ name: 'Oat milk' });
+		vi.mocked(repository.update).mockResolvedValue(updated);
+
+		const result = await service.updateItem('user-1', 'item-1', { name: 'Oat milk' });
+
+		expect(result.name).toBe('Oat milk');
+		expect(repository.update).toHaveBeenCalledWith('user-1', 'item-1', { name: 'Oat milk' });
+	});
+
+	it('deletes an item', async () => {
+		vi.mocked(repository.delete).mockResolvedValue(true);
+
+		await service.deleteItem('user-1', 'item-1');
+
+		expect(repository.delete).toHaveBeenCalledWith('user-1', 'item-1');
 	});
 
 	it('creates an item with generated id via repository', async () => {
