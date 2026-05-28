@@ -42,7 +42,13 @@ const PGlite_INCREMENTAL_MIGRATIONS = [
 async function runPgliteBaseline(client: PGlite) {
 	const migrationPath = join(process.cwd(), 'drizzle', PGlite_BASELINE_MIGRATION);
 	const sql = readFileSync(migrationPath, 'utf8');
-	await client.exec(sql);
+	try {
+		await client.exec(sql);
+	} catch (error) {
+		if (!isIgnorablePgliteMigrationError(error)) {
+			throw error;
+		}
+	}
 }
 
 function isIgnorablePgliteMigrationError(error: unknown): boolean {

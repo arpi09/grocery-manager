@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
 	import type { NavUser } from '$lib/navigation/nav-config';
 
 	interface Props {
@@ -61,7 +60,7 @@
 					<a href="/profile" role="menuitem" class="menu-item" onclick={close}>Profil</a>
 				</li>
 				<li role="none">
-					<form method="POST" action="/logout" use:enhance>
+					<form method="POST" action="/logout">
 						<button type="submit" role="menuitem" class="menu-item danger">Logga ut</button>
 					</form>
 				</li>

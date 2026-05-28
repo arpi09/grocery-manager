@@ -12,6 +12,11 @@
 
 	let { errors = {}, message, email = '' }: Props = $props();
 
+	let emailField = $state(email);
+	$effect(() => {
+		emailField = email;
+	});
+
 	let submitting = $state(false);
 </script>
 
@@ -40,7 +45,7 @@
 		name="email"
 		type="email"
 		autocomplete="email"
-		value={email}
+		bind:value={emailField}
 		error={errors.email?.[0]}
 	/>
 	<FormField

@@ -17,3 +17,7 @@ export function writeThemeCookie(cookies: Cookies, preference: ThemePreference):
 		sameSite: 'lax'
 	});
 }
+
+export function clearThemeCookie(cookies: Cookies): void {
+	cookies.delete(THEME_COOKIE_NAME, { path: '/' });
+}
