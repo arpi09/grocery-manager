@@ -23,7 +23,7 @@ _Last verified: 2026-05-28 (local). Re-verify before merge/push._
 |------|--------|
 | **Symptom** | HTTP 500 on `/login` and all pages |
 | **Root cause** | Uncommitted WIP added `drizzle/0003_household.sql` with non-idempotent `ADD CONSTRAINT`, listed in `PGlite_INCREMENTAL_MIGRATIONS`, and migrations ran **twice** per boot (`openPglite` + `initDatabase`). Every dev restart re-applied constraints → PGlite error `constraint … already exists`. |
-| **Fix applied** | Main worktree reset to clean `master` (`62198f5`). `init.ts`: removed duplicate `runPgliteIncrementalMigrations` in `initDatabase` (PGlite path). |
+| **Fix applied** | Main worktree reset to clean `master` (`62198f5`). No code change required on origin — WIP was the cause. |
 | **When restoring household/profile/theme WIP** | Make `0003_household.sql` constraints idempotent (`DO $$ … duplicate_object`) before re-adding to incremental list. |
 | **Verify** | `curl http://localhost:5173/login` → **200**; logged-out `/` → **302** `/login` |
 
@@ -42,9 +42,9 @@ _Last verified: 2026-05-28 (local). Re-verify before merge/push._
 
 | Agent / area | Branch / worktree | Current task | Files changed | Last commit | Last pull/rebase | Test status | Conflict risk | Ready for review | Recommended next step |
 |--------------|-------------------|--------------|---------------|-------------|------------------|-------------|---------------|------------------|----------------------|
-| **Master / dev** | `master` @ main worktree | Clean; 500 fixed | `init.ts` (dup migration fix) | `62198f5` | In sync with `origin/master` | `npm test` ✅ 34; `npm run check` ✅ 0 errors | Low | **Y** (runtime) | Commit `init.ts` fix; split stashes into feature branches |
+| **Master / dev** | `master` @ main worktree | Clean; no 500 | — | `62198f5` | In sync with `origin/master` | `npm test` ✅ 34; `test:integration` ✅ 2; `check` ✅ | Low | **Y** | Merge `chore/e2e-on-master` when approved |
 | **Expiring soon** | `feature/expiring-soon-home` | **Merged** | — | `62198f5` | Pushed = master | ✅ | Low | **Y** | Done |
-| **E2E** | `feat/e2e-playwright` @ `home-pantry-e2e` | Playwright smoke | `e2e/**` | `343de79` | On origin | Agent-reported green | Med | **Y** | `Approved to push feat/e2e-playwright` |
+| **E2E** | `chore/e2e-on-master` (local) | Rebased on `62198f5` + smoke + CI | `e2e/**`, `.github/workflows/ci.yml` | `c85aaa4` | 3 commits ahead of master | `test:e2e` ✅ 7 (local) | Low | **Y** | `Approved to push chore/e2e-on-master` |
 | **Analytics** | `feature/analytics-page` @ `62198f5` | `/statistik` WIP in stash | stash@{0} (base `29ad7a5`) | Branch tip = master; analytics commit `29ad7a5` only in stash | — | TBD after pop | Med | **N** | Pop stash@{0} onto new branch from master; resolve conflicts |
 | **User profile** | `feature/user-profile` @ `dda14b4` | Profile menu WIP | stash@{1}–@{3} | `dda14b4` (behind master) | Rebase needed | TBD | **High** | **N** | Rebase on `62198f5`; commit profile files only |
 | **Shared household** | _(no branch)_ | Schema + inventory | Uncommitted was on master; see stashes | — | — | TBD | **High** | **N** | Create `feature/shared-household` from master; use idempotent `0003` |
@@ -74,7 +74,7 @@ _Last verified: 2026-05-28 (local). Re-verify before merge/push._
 ## Merge order (recommended)
 
 1. Keep **master** green (current state).
-2. **feat/e2e-playwright** — push & PR after approval.
+2. **chore/e2e-on-master** — merge to master & push after approval (supersedes `feat/e2e-playwright` on origin).
 3. **feature/shared-household** — branch + idempotent migrations + tests.
 4. **feature/user-profile** + **feature/profile-dark-theme** (rebase stashes).
 5. **feature/analytics-page** from `stash@{0}` / `29ad7a5` content.
