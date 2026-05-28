@@ -29,7 +29,7 @@ env:
 
   # Public URL of the deployed app (update after first deploy or custom domain)
   - variable: PUBLIC_ORIGIN
-    value: https://home-pantry--YOUR_FIREBASE_PROJECT_ID.us-central1.hosted.app
+    value: https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app
     availability:
       - BUILD
       - RUNTIME
@@ -54,3 +54,4 @@ env:
     value: admin@example.com
     availability:
       - RUNTIME
+
