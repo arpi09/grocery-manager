@@ -1,7 +1,6 @@
 <script lang="ts">
 	interface NavUser {
 		petsEnabled?: boolean;
-		role?: string;
 	}
 
 	interface Props {
@@ -15,7 +14,6 @@
 	let { title, subtitle, user = null, showPetsNav }: Props = $props();
 
 	const petsNav = $derived(Boolean(showPetsNav ?? user?.petsEnabled));
-	const adminNav = $derived(user?.role === 'admin');
 </script>
 
 <header class="header">
@@ -31,9 +29,6 @@
 		<a href="/planer">Planer</a>
 		{#if petsNav}
 			<a href="/husdjur">Husdjur</a>
-		{/if}
-		{#if adminNav}
-			<a href="/admin">Admin</a>
 		{/if}
 		<a href="/settings">Settings</a>
 	</nav>
