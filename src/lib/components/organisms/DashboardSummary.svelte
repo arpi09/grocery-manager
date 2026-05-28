@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Card from '$lib/components/atoms/Card.svelte';
-	import Badge from '$lib/components/atoms/Badge.svelte';
+	import ExpiringSoonSection from '$lib/components/organisms/ExpiringSoonSection.svelte';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import { LOCATION_LABELS, LOCATION_COLORS } from '$lib/domain/location';
 
@@ -36,6 +36,8 @@
 		{/each}
 	</div>
 
+	<ExpiringSoonSection items={summary.expiringSoon} />
+
 	<Card href="/inkop" interactive>
 		<div class="ai-card">
 			<span class="ai-icon">✨</span>
@@ -45,20 +47,6 @@
 			</div>
 		</div>
 	</Card>
-
-	{#if summary.expiringSoon.length > 0}
-		<section class="expiring">
-			<h3>Expiring within 7 days</h3>
-			<ul>
-				{#each summary.expiringSoon as item}
-					<li>
-						<a href="/item/{item.id}/edit">{item.name}</a>
-						<Badge tone="warning">{item.expiresOn}</Badge>
-					</li>
-				{/each}
-			</ul>
-		</section>
-	{/if}
 
 	<a class="add-link" href="/item/new?from=%2F">
 		<span>+ Add item</span>
@@ -129,30 +117,6 @@
 		margin: var(--space-xs) 0 0;
 		color: var(--color-text-muted);
 		font-size: 0.875rem;
-	}
-
-	.expiring h3 {
-		margin: 0 0 var(--space-md);
-		font-size: 1rem;
-	}
-
-	.expiring ul {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-	}
-
-	.expiring li {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: var(--space-sm) var(--space-md);
-		background: var(--color-surface);
-		border-radius: var(--radius-sm);
-		border: 1px solid var(--color-border);
 	}
 
 	.add-link {
