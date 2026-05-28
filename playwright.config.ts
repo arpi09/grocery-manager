@@ -1,4 +1,4 @@
-mport { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
 function loadDotEnv(path = '.env') {

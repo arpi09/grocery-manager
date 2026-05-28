@@ -10,6 +10,6 @@ test.describe('Authentication', () => {
 
 	test('admin can sign in and reach home', async ({ page }) => {
 		await loginAsAdmin(page);
-		await expect(page.getByRole('heading', { name: 'Home Pantry' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Hem' })).toBeVisible();
 	});
 });

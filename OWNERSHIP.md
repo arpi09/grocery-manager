@@ -1,8 +1,8 @@
-# File ownership
+﻿# File ownership
 
 Who may edit which areas in a multi-agent / multi-worktree setup. **One active agent per shared area** unless the user approves overlap.
 
-**Related:** [AGENT_STATUS.md](./AGENT_STATUS.md) · [MULTITASK.md](./MULTITASK.md)
+**Related:** [AGENT_STATUS.md](./AGENT_STATUS.md) ┬╖ [MULTITASK.md](./MULTITASK.md)
 
 ---
 
@@ -13,24 +13,24 @@ Who may edit which areas in a multi-agent / multi-worktree setup. **One active a
 | **Push** | Only after: `Approved to push [branch-name]` |
 | **Out of scope** | Stop work; report in chat; update [AGENT_STATUS.md](./AGENT_STATUS.md) |
 | **Commits** | Small, frequent, single-purpose |
-| **Worktrees** | Proposed in chat with purpose, branch name, allowed paths, conflict risk — **no auto-create** |
-| **Dev runtime agent** | `home-pantry-dev` / `chore/dev-runtime` — scripts and dev tooling only; **no** `src/routes`, application features, merge, or push |
+| **Worktrees** | Proposed in chat with purpose, branch name, allowed paths, conflict risk ΓÇö **no auto-create** |
+| **Dev runtime agent** | `home-pantry-dev` / `chore/dev-runtime` ΓÇö scripts and dev tooling only; **no** `src/routes`, application features, merge, or push |
 
 ---
 
-## Shared areas (high conflict — one agent at a time)
+## Shared areas (high conflict ΓÇö one agent at a time)
 
 | Area | Paths | Typical owners | Notes |
 |------|--------|----------------|-------|
 | **Auth & session** | `src/hooks.server.ts`, `src/lib/server/auth.ts`, `src/lib/server/session.ts`, `src/lib/infrastructure/auth/**`, `src/lib/application/auth.service.ts`, `src/routes/login/**`, `src/routes/register/**`, `src/routes/logout/**` | Admin, profile, household | Lucia/session changes affect everyone |
 | **Routes (layout)** | `src/routes/+layout.*`, `src/app.html`, `src/app.css`, `src/app.d.ts` | Nav, profile, theme | Global layout and theme hooks |
-| **Shared UI / nav** | `src/lib/components/organisms/AppHeader.svelte`, `src/lib/components/templates/AppLayout.svelte`, `src/lib/components/molecules/HeaderProfileMenu.svelte` | Nav-redesign, profile, analytics (nav link) | **Hot zone** — coordinate merges |
+| **Shared UI / nav** | `src/lib/components/organisms/AppHeader.svelte`, `src/lib/components/templates/AppLayout.svelte`, `src/lib/components/molecules/HeaderProfileMenu.svelte` | Nav-redesign, profile, analytics (nav link) | **Hot zone** ΓÇö coordinate merges |
 | **Global config** | `package.json`, `package-lock.json`, `vite.config.ts`, `svelte.config.js`, `tsconfig.json`, `nodemon.dev.json` | Dev-runtime (dev scripts only), E2E (playwright deps), Tests (vitest) | One agent per PR; dev-runtime limited to `dev:*` scripts |
-| **Schema & DB** | `src/lib/infrastructure/db/schema.ts`, `drizzle/**`, `src/lib/infrastructure/db/init.ts`, `src/lib/infrastructure/db/seed-admin.ts` | Feature agents (one migration owner per change) | Serialize migrations (`0004`, `0005`, …) |
+| **Schema & DB** | `src/lib/infrastructure/db/schema.ts`, `drizzle/**`, `src/lib/infrastructure/db/init.ts`, `src/lib/infrastructure/db/seed-admin.ts` | Feature agents (one migration owner per change) | Serialize migrations (`0004`, `0005`, ΓÇª) |
 | **API contracts** | `src/routes/api/**` | AI, analytics, admin | Version/consume carefully |
 | **DI / server wiring** | `src/lib/server/di.ts`, `src/lib/server/openai.ts` | AI, admin | |
 
-**Rule:** If you need a shared area owned by another agent → stop, ask for approval, note blocker in [AGENT_STATUS.md](./AGENT_STATUS.md).
+**Rule:** If you need a shared area owned by another agent ΓåÆ stop, ask for approval, note blocker in [AGENT_STATUS.md](./AGENT_STATUS.md).
 
 ---
 
@@ -38,10 +38,10 @@ Who may edit which areas in a multi-agent / multi-worktree setup. **One active a
 
 | Area | Who | Others |
 |------|-----|--------|
-| **E2E / Playwright** | E2E agent · `home-pantry-e2e` · `e2e/**`, `playwright.config.ts` | Read-only elsewhere |
-| **Dev runtime ops** | Dev-runtime · `scripts/dev-runtime/**`, dev npm scripts | No feature code in `src/**` |
-| **Admin panel** | Admin agent · `src/routes/admin/**`, `admin.service*`, `admin.repository*`, `admin.schemas.ts` | No OpenAI `/inkop` changes |
-| **Vitest suites (canonical)** | Tests worktree · `**/*.test.ts`, `**/*.integration.test.ts`, `src/lib/test/**` | Feature agents may add *focused* tests only with approval |
+| **E2E / Playwright** | E2E agent ┬╖ `home-pantry-e2e` ┬╖ `e2e/**`, `playwright.config.ts` | Read-only elsewhere |
+| **Dev runtime ops** | Dev-runtime ┬╖ `scripts/dev-runtime/**`, dev npm scripts | No feature code in `src/**` |
+| **Admin panel** | Admin agent ┬╖ `src/routes/admin/**`, `admin.service*`, `admin.repository*`, `admin.schemas.ts` | No OpenAI `/inkop` changes |
+| **Vitest suites (canonical)** | Tests worktree ┬╖ `**/*.test.ts`, `**/*.integration.test.ts`, `src/lib/test/**` | Feature agents may add *focused* tests only with approval |
 | **`.env`** | User only | Never commit |
 
 ---
@@ -69,18 +69,18 @@ Who may edit which areas in a multi-agent / multi-worktree setup. **One active a
 
 ```
 master (dda14b4)
-├── home-pantry-admin      → admin (done on master; error-logs branch TBD)
-├── home-pantry-tests      → tests (done on master)
-├── home-pantry-dev        → dev-runtime (ops)
-├── home-pantry-e2e        → playwright
-├── feature/expiring-soon-home   → expiry UI (branch ready)
-├── feature/nav-redesign         → header/nav (done, branch TBD)
-├── feature/admin-error-logs     → admin errors (commit needed)
-└── home-pantry (split WIP!)
-    ├── feature/user-profile
-    ├── feature/analytics-page
-    ├── feature/profile-dark-theme
-    └── feature/shared-household
+Γö£ΓöÇΓöÇ home-pantry-admin      ΓåÆ admin (done on master; error-logs branch TBD)
+Γö£ΓöÇΓöÇ home-pantry-tests      ΓåÆ tests (done on master)
+Γö£ΓöÇΓöÇ home-pantry-dev        ΓåÆ dev-runtime (ops)
+Γö£ΓöÇΓöÇ home-pantry-e2e        ΓåÆ playwright
+Γö£ΓöÇΓöÇ feature/expiring-soon-home   ΓåÆ expiry UI (branch ready)
+Γö£ΓöÇΓöÇ feature/nav-redesign         ΓåÆ header/nav (done, branch TBD)
+Γö£ΓöÇΓöÇ feature/admin-error-logs     ΓåÆ admin errors (commit needed)
+ΓööΓöÇΓöÇ home-pantry (split WIP!)
+    Γö£ΓöÇΓöÇ feature/user-profile
+    Γö£ΓöÇΓöÇ feature/analytics-page
+    Γö£ΓöÇΓöÇ feature/profile-dark-theme
+    ΓööΓöÇΓöÇ feature/shared-household
 ```
 
 ---

@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+﻿import type { Page } from '@playwright/test';
 
 export function adminCredentials() {
 	const email =
@@ -25,4 +25,20 @@ export async function loginAsAdmin(page: Page) {
 	await page.getByLabel('Password').fill(password);
 	await page.getByRole('button', { name: 'Sign in' }).click();
 	await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 });
+}
+
+export async function openMoreNav(page: Page) {
+	await page.getByRole('navigation', { name: /Prim/i }).getByRole('button', { name: 'Mer' }).click();
+}
+
+export async function clickNavHref(page: Page, href: string) {
+	await page.locator(`a[href="${href}"]`).first().click();
+}
+
+export async function clickSecondaryNavHref(page: Page, href: string) {
+	await openMoreNav(page);
+	await page
+		.locator(`#nav-more-desktop a[href="${href}"], #nav-more-sheet a[href="${href}"]`)
+		.first()
+		.click();
 }
