@@ -85,7 +85,7 @@
 			</button>
 
 			{#if open && !isNarrowViewport}
-				<button type="button" class="desktop-backdrop" aria-label="Stäng pantry-meny" onclick={close}></button>
+				<button type="button" class="desktop-backdrop modal-scrim" aria-label="Stäng pantry-meny" onclick={close}></button>
 				<div class="desktop-panel" role="listbox" aria-label="Dina pantries">
 					<p class="panel-label">Byt pantry</p>
 					<ul class="pantry-list">
@@ -299,7 +299,6 @@
 		inset: 0;
 		z-index: 65;
 		border: 0;
-		background: transparent;
 		cursor: default;
 	}
 

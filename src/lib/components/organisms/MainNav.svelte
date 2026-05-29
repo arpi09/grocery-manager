@@ -90,6 +90,14 @@
 	</header>
 
 	<header class="main-nav top" aria-label="Huvudnavigering">
+		{#if moreOpen && !isNarrowViewport}
+			<button
+				type="button"
+				class="desktop-more-backdrop modal-scrim"
+				aria-label="Stäng meny"
+				onclick={closeMore}
+			></button>
+		{/if}
 		<div class="top-brand-row">
 			<a href="/" class="brand" aria-label="Home Pantry – Hem">
 				<AppLogo size="sm" />
@@ -311,11 +319,20 @@
 		position: relative;
 	}
 
+	.desktop-more-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 85;
+		border: 0;
+		cursor: default;
+	}
+
 	.desktop-more-panel {
 		position: absolute;
 		top: calc(100% + 0.35rem);
 		left: 50%;
 		transform: translateX(-50%);
+		z-index: 86;
 		min-width: 12.5rem;
 		padding: var(--space-xs);
 		border: 1px solid var(--color-border);

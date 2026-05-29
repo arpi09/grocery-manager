@@ -115,7 +115,7 @@
 		class:modal-root--center={variant === 'center'}
 	>
 		<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-		<div class="modal-backdrop" onclick={onBackdropClick} aria-hidden="true"></div>
+		<div class="modal-backdrop modal-scrim" onclick={onBackdropClick} aria-hidden="true"></div>
 
 		<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
 		<div
@@ -169,10 +169,6 @@
 		position: fixed;
 		inset: 0;
 		pointer-events: auto;
-		background: var(--modal-scrim);
-		backdrop-filter: blur(var(--modal-scrim-blur));
-		-webkit-backdrop-filter: blur(var(--modal-scrim-blur));
-		animation: modal-backdrop-in 0.2s ease-out;
 	}
 
 	.modal-panel {
@@ -283,15 +279,6 @@
 		padding-top: var(--space-md);
 	}
 
-	@keyframes modal-backdrop-in {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 1;
-		}
-	}
-
 	@keyframes modal-center-in {
 		from {
 			opacity: 0;
@@ -313,7 +300,6 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.modal-backdrop,
 		.modal-panel--center,
 		.modal-panel--sheet {
 			animation: none;
