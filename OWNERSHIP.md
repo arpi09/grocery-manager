@@ -61,6 +61,7 @@ Who may edit which areas in a multi-agent / multi-worktree setup. **One active a
 | **Dark theme** | `feature/profile-dark-theme` | `theme.ts`, `theme-cookie.ts`, `theme.schemas.ts`, theme migration, layout theme class | Nav structure |
 | **Analytics** | `feature/analytics-page` | `routes/statistik/**`, `AnalyticsDashboard.svelte`, `inventory-analytics*` | Admin, inkop |
 | **Shared household** | `feature/shared-household` | Household domain, shared inventory rules, `household.*` tests, inventory service sharing logic | Admin UI |
+| **Dependency health** | `chore/dependency-health-program` | `DEPENDENCY_HEALTH.md`, `docs/DEPENDENCY_HEALTH.md`, `.cursor/rules/dependency-health-agent.mdc` | `package.json`, `package-lock.json`, `src/**` (except read-only grep) |
 | **Coordinator / docs** | `docs/agent-coordination` | `AGENT_STATUS.md`, `OWNERSHIP.md`, `MULTITASK.md` (coordination sections) | No `src/**` |
 
 ---

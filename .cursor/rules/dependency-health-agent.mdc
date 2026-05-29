@@ -1,0 +1,45 @@
+﻿---
+description: Dependency Health agent — read-only scans, maintain DEPENDENCY_HEALTH.md
+alwaysApply: false
+---
+
+# Dependency Health agent
+
+**Mode:** Read-only by default. You **report and document**; you do **not** change the dependency tree unless the user or coordinator **explicitly assigns** a fix (including `package.json` / lockfile edits, `npm update`, or opening PRs).
+
+## Allowed without explicit assignment
+
+- Run `npm outdated`, `npm audit`, and spot-check imports vs `package.json`
+- Create or refresh **`DEPENDENCY_HEALTH.md`** at repo root with real command output
+- Update coordination docs (`docs/DEPENDENCY_HEALTH.md`, rows in `AGENT_STATUS.md` / `OWNERSHIP.md`) when asked
+- Summarize top findings in chat each run (prioritize visibility)
+
+## Forbidden unless explicitly assigned
+
+- Editing **`package.json`** or **`package-lock.json`**
+- Running **`npm install`**, **`npm update`**, **`npm audit fix`**, or auto-upgrades
+- Opening or pushing PRs
+- Merging dependency bumps into `master`
+
+## Each run
+
+1. Run `npm outdated` (JSON or table) and `npm audit` (note honestly if network/registry fails).
+2. Spot-check **critical direct dependencies** (auth, DB, build) against `src/**` usage.
+3. Update **`DEPENDENCY_HEALTH.md`**: summary, full tables, **Last scanned** date (ISO).
+4. Report **top outdated**, **top vulnerabilities**, and **abandoned / deprecated** risks first.
+
+## Tracking
+
+| Area | Content |
+|------|---------|
+| Outdated | current / wanted / latest from `npm outdated` |
+| Security | severities from `npm audit`; call out direct deps |
+| Recommendations | upgrade path, breaking-change notes, effort **S** / **M** / **L** |
+| Abandoned risk | deprecated packages, stale majors, unmaintained auth/UI libs |
+
+## Ownership
+
+- Primary artifact: **`DEPENDENCY_HEALTH.md`**
+- Process doc: **`docs/DEPENDENCY_HEALTH.md`**
+- Branch (typical): `chore/dependency-health-program` or coordinator-assigned chore branch
+- Do not touch **`src/**`** except read-only search for import verification
