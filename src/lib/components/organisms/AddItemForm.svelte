@@ -5,8 +5,9 @@
 	import Input from '$lib/components/atoms/Input.svelte';
 	import BarcodeScanButton from '$lib/components/molecules/BarcodeScanButton.svelte';
 	import BarcodeScannerModal from '$lib/components/organisms/BarcodeScannerModal.svelte';
+	import ItemConsumptionActions from '$lib/components/molecules/ItemConsumptionActions.svelte';
 	import { LOCATIONS, LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
-	import type { BarcodeProduct } from '$lib/domain/barcode-product';
+	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 
 	interface Props {
@@ -56,24 +57,28 @@
 
 		try {
 			const response = await fetch(`/api/barcode/${encodeURIComponent(code)}`);
+			const data = (await response.json()) as BarcodeLookupResult | { message?: string };
+
 			if (!response.ok) {
 				scanMessage =
-					response.status === 404
-						? 'Product not found. Enter the details manually.'
-						: 'Could not look up this barcode. Try again or enter manually.';
+					response.status === 400
+						? 'Ogiltig streckkod. Ange minst 8 siffror.'
+						: 'Kunde inte slå upp streckkoden. Försök igen eller fyll i manuellt.';
 				return;
 			}
 
-			const product = (await response.json()) as BarcodeProduct;
+			const { found, product } = data as BarcodeLookupResult;
 			name = product.name;
 			quantity = product.quantity;
 			unit = product.unit ?? '';
 			if (product.notes) {
 				notes = notes ? `${notes}\n${product.notes}` : product.notes;
 			}
-			scanMessage = `Added details for barcode ${product.barcode}.`;
+			scanMessage = found
+				? `Hittade ${product.name} (${product.barcode}).`
+				: `Okänd streckkod – fyllde i "${product.name}". Justera vid behov.`;
 		} catch {
-			scanMessage = 'Network error while looking up the product.';
+			scanMessage = 'Nätverksfel vid uppslagning av produkten.';
 		} finally {
 			lookupLoading = false;
 		}
@@ -249,6 +254,14 @@
 		<textarea id="notes" name="notes" class="textarea" rows="3" bind:value={notes}></textarea>
 	</div>
 
+	{#if isEdit && item}
+		<section class="consumption-section" aria-label="Förbrukning">
+			<h2 class="section-title">Förbrukning</h2>
+			<p class="section-help">Markera varan som förbrukad eller kastad när den är slut.</p>
+			<ItemConsumptionActions itemId={item.id} />
+		</section>
+	{/if}
+
 	<div class="actions">
 		<Button type="submit" fullWidth>{isEdit ? 'Save changes' : 'Add item'}</Button>
 		{#if isEdit}
@@ -401,5 +414,25 @@
 		flex-direction: column;
 		gap: var(--space-sm);
 		margin-top: var(--space-md);
+	}
+
+	.consumption-section {
+		margin: var(--space-md) 0;
+		padding: var(--space-md);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
+	}
+
+	.section-title {
+		margin: 0 0 var(--space-xs);
+		font-size: 0.95rem;
+		font-weight: 700;
+	}
+
+	.section-help {
+		margin: 0 0 var(--space-sm);
+		font-size: 0.85rem;
+		color: var(--color-text-muted);
 	}
 </style>

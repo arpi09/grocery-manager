@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
 	import BarcodeScannerModal from '$lib/components/organisms/BarcodeScannerModal.svelte';
-	import type { BarcodeProduct } from '$lib/domain/barcode-product';
+	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 
 	interface PetOption {
 		id: string;
@@ -64,24 +64,28 @@
 
 		try {
 			const response = await fetch(`/api/barcode/${encodeURIComponent(code)}`);
+			const data = (await response.json()) as BarcodeLookupResult | { message?: string };
+
 			if (!response.ok) {
 				scanMessage =
-					response.status === 404
-						? 'Could not find this barcode. Enter details manually.'
-						: 'Could not look up this barcode right now.';
+					response.status === 400
+						? 'Ogiltig streckkod. Ange minst 8 siffror.'
+						: 'Kunde inte slå upp streckkoden just nu.';
 				return;
 			}
 
-			const product = (await response.json()) as BarcodeProduct;
+			const { found, product } = data as BarcodeLookupResult;
 			name = product.name;
 			quantity = product.quantity;
 			unit = product.unit ?? '';
 			if (product.notes) {
 				notes = notes ? `${notes}\n${product.notes}` : product.notes;
 			}
-			scanMessage = `Filled from barcode ${product.barcode}.`;
+			scanMessage = found
+				? `Hittade ${product.name} (${product.barcode}).`
+				: `Okänd streckkod – fyllde i "${product.name}".`;
 		} catch {
-			scanMessage = 'Network error while looking up barcode.';
+			scanMessage = 'Nätverksfel vid uppslagning av streckkod.';
 		} finally {
 			lookupLoading = false;
 		}

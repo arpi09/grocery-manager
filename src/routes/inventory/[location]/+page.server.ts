@@ -1,4 +1,6 @@
+import { canEditInventory } from '$lib/domain/household';
 import { isStorageLocation } from '$lib/domain/location';
+import { createInventoryConsumptionActions } from '$lib/server/inventory-consumption-actions';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -12,5 +14,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		params.location
 	);
 
-	return { items, location: params.location };
+	return {
+		items,
+		location: params.location,
+		canWrite: locals.householdRole ? canEditInventory(locals.householdRole) : false
+	};
 };
+
+export const actions = createInventoryConsumptionActions();
