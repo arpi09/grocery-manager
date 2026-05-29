@@ -1,4 +1,4 @@
-﻿# File ownership
+# File ownership
 
 Who may edit which areas in a multi-agent / multi-worktree setup. **One active agent per shared area** unless the user approves overlap.
 
@@ -61,7 +61,7 @@ Who may edit which areas in a multi-agent / multi-worktree setup. **One active a
 | **Dark theme** | `feature/profile-dark-theme` | `theme.ts`, `theme-cookie.ts`, `theme.schemas.ts`, theme migration, layout theme class | Nav structure |
 | **Analytics** | `feature/analytics-page` | `routes/statistik/**`, `AnalyticsDashboard.svelte`, `inventory-analytics*` | Admin, inkop |
 | **Shared household** | `feature/shared-household` | Household domain, shared inventory rules, `household.*` tests, inventory service sharing logic | Admin UI |
-| **Coordinator / docs** | `docs/agent-coordination` | `AGENT_STATUS.md`, `OWNERSHIP.md`, `MULTITASK.md` (coordination sections) | No `src/**` |
+| **Coordinator / docs** | `chore/coordinator-v2`, `docs/agent-coordination` | `AGENT_STATUS.md`, `MERGE_QUEUE.md`, `OWNERSHIP.md`, `MULTITASK.md` (coordination sections) | No `src/**` |
 
 ---
 
