@@ -154,6 +154,8 @@ Tests cover login redirect, admin sign-in, `/admin`, and navigation to Inköp / 
 | `npm run test:e2e:ui` | Playwright UI mode (debug) |
 | `npm run db:migrate` | Apply database migrations |
 | `npm run db:generate` | Generate migrations from schema |
+| `npm run deploy:firebase` | Deploy to Firebase App Hosting |
+| `npm run deploy:firebase:dry` | Preview Firebase deploy (dry run) |
 
 ## Project structure
 
@@ -184,3 +186,7 @@ git push -u origin main
 ```
 
 CI runs lint, check, test, and build on push/PR (see `.github/workflows/ci.yml`).
+
+## Production (Firebase)
+
+Deploy to **Firebase App Hosting** with PostgreSQL (Neon, Supabase, or Cloud SQL). See **[docs/FIREBASE_DEPLOY.md](./docs/FIREBASE_DEPLOY.md)** for first deploy, migrations, secrets, and the GitHub Actions pipeline (`deploy-firebase.yml`).

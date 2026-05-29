@@ -1,0 +1,69 @@
+# Deploy home-pantry to Firebase App Hosting.
+#
+# Required GitHub repository secret:
+#   FIREBASE_TOKEN — CI token from: firebase login:ci
+#     (or use a Google Cloud service account JSON with Firebase Admin / deploy roles)
+#
+# Optional: enable automatic deploys on push to master by adding the secret above.
+# Manual deploy: Actions → Deploy Firebase App Hosting → Run workflow.
+#
+# App Hosting secrets (DATABASE_URL, ADMIN_PASSWORD, etc.) are configured in Firebase,
+# not in GitHub — see docs/FIREBASE_DEPLOY.md.
+
+name: Deploy Firebase App Hosting
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-firebase-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run test:integration
+        env:
+          USE_PGLITE: 'true'
+      - run: npm run build
+        env:
+          DATABASE_URL: postgresql://pantry:pantry@localhost:5432/pantry
+          USE_PGLITE: 'true'
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/master' && secrets.FIREBASE_TOKEN != '')
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Deploy App Hosting backend
+        if: secrets.FIREBASE_TOKEN != ''
+        run: npx firebase deploy --only apphosting:home-pantry --non-interactive --project home-pantry-4bee5
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Skip deploy (no FIREBASE_TOKEN)
+        if: secrets.FIREBASE_TOKEN == ''
+        run: echo "FIREBASE_TOKEN secret is not configured — add it under Settings → Secrets to enable deploy."
