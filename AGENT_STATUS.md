@@ -2,7 +2,7 @@
 
 Live coordination board for parallel agents and feature branches.
 
-**Related:** `OWNERSHIP.md` · `MULTITASK.md`
+**Related:** `OWNERSHIP.md` · `MULTITASK.md` · [DELIVERY_METRICS.md](./DELIVERY_METRICS.md)
 
 _Last verified: 2026-05-29 (local). **`feature/scan-to-add`**: Phase 1–3 (streckkod, kvitto, snabbstart) — not pushed._
 
@@ -14,6 +14,7 @@ _Last verified: 2026-05-29 (local). **`feature/scan-to-add`**: Phase 1–3 (stre
 |------|--------|
 | **Push** | Only after: `Approved to push [branch-name]` |
 | **Dev runtime** | `dev:watch` in main worktree — no manual restart needed |
+| **Delivery metrics** | Coordinator updates [DELIVERY_METRICS.md](./DELIVERY_METRICS.md) after merge / weekly checkpoint |
 
 ---
 
@@ -30,7 +31,7 @@ _Last verified: 2026-05-29 (local). **`feature/scan-to-add`**: Phase 1–3 (stre
 
 | Item | Value |
 |------|--------|
-| **master / origin.master** | `640418d` |
+| **master / origin.master** | `26ba088` |
 | **feature/scan-to-add** | `/scan`, `/scan/kvitto`, `/scan/snabbstart` — MVP scan roadmap |
 
 ---
