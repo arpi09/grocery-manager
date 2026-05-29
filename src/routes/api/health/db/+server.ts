@@ -21,6 +21,6 @@ export const GET: RequestHandler = async () => {
 		return json({ ok: true, backend, userFound: Boolean(row) });
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
-		return json({ ok: false, message }, { status: 500 });
+		return json({ ok: false, backend, message }, { status: 500 });
 	}
 };

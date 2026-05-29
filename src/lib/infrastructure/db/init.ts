@@ -17,6 +17,7 @@ export type AppDatabase =
 
 let dbInstance: AppDatabase | null = null;
 let initPromise: Promise<void> | null = null;
+let postgresClient: ReturnType<typeof postgres> | null = null;
 
 let pgliteClient: PGlite | null = null;
 let pgliteInitPromise: Promise<PGlite> | null = null;
@@ -81,6 +82,34 @@ function createPostgresClient(connectionString: string) {
 		max: 5,
 		ssl: connectionString.includes('sslmode=disable') ? false : 'require'
 	});
+}
+
+async function verifyPostgresConnection(
+	sql: ReturnType<typeof postgres>,
+	attempts = 6
+): Promise<void> {
+	for (let attempt = 1; attempt <= attempts; attempt++) {
+		try {
+			await sql`SELECT 1`;
+			return;
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			const retryable = /ENOENT|ECONNREFUSED|connect/i.test(message);
+			if (!retryable || attempt === attempts) {
+				throw error;
+			}
+			await new Promise((resolve) => setTimeout(resolve, attempt * 400));
+		}
+	}
+}
+
+async function resetPostgresClient(): Promise<void> {
+	if (!postgresClient) {
+		return;
+	}
+	const client = postgresClient;
+	postgresClient = null;
+	await client.end({ timeout: 0 }).catch(() => {});
 }
 
 export function getDatabaseBackend(): DatabaseBackend {
@@ -219,12 +248,15 @@ export async function initDatabase(): Promise<void> {
 
 			try {
 				const sql = createPostgresClient(connectionString);
+				postgresClient = sql;
+				await verifyPostgresConnection(sql);
 				dbInstance = drizzlePostgres(sql, { schema });
-				await sql`SELECT 1`;
 
 				await ensureDefaultAdminUser();
 				await ensureDefaultHousehold();
 			} catch (error) {
+				dbInstance = null;
+				await resetPostgresClient();
 				const hint = connectionString.includes('/cloudsql/')
 					? ' (Cloud SQL socket — check cloudSqlInstances in apphosting.yaml and Cloud SQL Client IAM)'
 					: '';
@@ -232,8 +264,10 @@ export async function initDatabase(): Promise<void> {
 				console.error(`[initDatabase] Postgres connection failed${hint}: ${message}`);
 				throw error;
 			}
-		})().catch((error) => {
+		})().catch(async (error) => {
 			initPromise = null;
+			dbInstance = null;
+			await resetPostgresClient();
 			throw error;
 		});
 	}

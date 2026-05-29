@@ -30,7 +30,7 @@ function isPublicPath(pathname: string): boolean {
 	return (
 		publicPaths.has(pathname) ||
 		isInvitePath(pathname) ||
-		pathname === '/api/health/db'
+		pathname.startsWith('/api/health')
 	);
 }
 
