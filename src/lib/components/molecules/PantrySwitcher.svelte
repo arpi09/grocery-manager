@@ -2,6 +2,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import { enhance } from '$app/forms';
+	import Modal from '$lib/components/molecules/Modal.svelte';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
 	import { householdRoleLabel } from '$lib/domain/household';
 
@@ -15,6 +16,20 @@
 	let open = $state(false);
 	let createOpen = $state(false);
 	let newPantryName = $state('');
+	let isNarrowViewport = $state(false);
+
+	$effect(() => {
+		if (typeof window === 'undefined') {
+			return;
+		}
+		const mq = window.matchMedia('(max-width: 899px)');
+		const sync = () => {
+			isNarrowViewport = mq.matches;
+		};
+		sync();
+		mq.addEventListener('change', sync);
+		return () => mq.removeEventListener('change', sync);
+	});
 
 	const pathname = $derived(page.url.pathname);
 	const displayName = $derived(activeHousehold?.name ?? 'Pantry');
@@ -69,7 +84,7 @@
 				<span class="chevron" aria-hidden="true">▾</span>
 			</button>
 
-			{#if open}
+			{#if open && !isNarrowViewport}
 				<button type="button" class="desktop-backdrop" aria-label="Stäng pantry-meny" onclick={close}></button>
 				<div class="desktop-panel" role="listbox" aria-label="Dina pantries">
 					<p class="panel-label">Byt pantry</p>
@@ -138,9 +153,8 @@
 		<button
 			type="button"
 			class="mobile-trigger"
-			aria-expanded={open}
+			aria-expanded={open && isNarrowViewport}
 			aria-haspopup="dialog"
-			aria-controls="pantry-sheet"
 			aria-label="Byt pantry, nuvarande: {displayName}"
 			onclick={openSheet}
 		>
@@ -149,71 +163,73 @@
 			<span class="chevron" aria-hidden="true">▾</span>
 		</button>
 
-		{#if open}
-			<button type="button" class="sheet-scrim" aria-label="Stäng pantry-meny" onclick={close}></button>
-			<div id="pantry-sheet" class="pantry-sheet" role="dialog" aria-modal="true" aria-label="Byt pantry">
-				<div class="sheet-handle" aria-hidden="true"></div>
-				<h2 class="sheet-title">Byt pantry</h2>
-				<ul class="sheet-list">
-					{#each households as pantry (pantry.id)}
-						<li>
-							{#if pantry.isActive}
-								<span class="sheet-option active" aria-current="true">
+		<Modal
+			open={open && isNarrowViewport}
+			onClose={close}
+			variant="sheet"
+			title="Byt pantry"
+			panelClass="pantry-sheet-panel"
+			bodyClass="pantry-sheet-body"
+		>
+			<ul class="sheet-list">
+				{#each households as pantry (pantry.id)}
+					<li>
+						{#if pantry.isActive}
+							<span class="sheet-option active" aria-current="true">
+								<span class="option-name">{pantry.name}</span>
+								<span class="option-meta">{householdRoleLabel(pantry.role)} · aktiv</span>
+							</span>
+						{:else}
+							<form
+								method="POST"
+								action="/?/switchHousehold"
+								use:enhance={switchEnhance}
+								class="switch-form"
+							>
+								<input type="hidden" name="householdId" value={pantry.id} />
+								<input type="hidden" name="redirectTo" value={pathname} />
+								<button type="submit" class="sheet-option">
 									<span class="option-name">{pantry.name}</span>
-									<span class="option-meta">{householdRoleLabel(pantry.role)} · aktiv</span>
-								</span>
-							{:else}
-								<form
-									method="POST"
-									action="/?/switchHousehold"
-									use:enhance={switchEnhance}
-									class="switch-form"
-								>
-									<input type="hidden" name="householdId" value={pantry.id} />
-									<input type="hidden" name="redirectTo" value={pathname} />
-									<button type="submit" class="sheet-option">
-										<span class="option-name">{pantry.name}</span>
-										<span class="option-meta">{householdRoleLabel(pantry.role)}</span>
-									</button>
-								</form>
-							{/if}
-						</li>
-					{/each}
-				</ul>
+									<span class="option-meta">{householdRoleLabel(pantry.role)}</span>
+								</button>
+							</form>
+						{/if}
+					</li>
+				{/each}
+			</ul>
 
-				{#if createOpen}
-					<form
-						method="POST"
-						action="/?/createHousehold"
-						use:enhance={createEnhance}
-						class="create-form sheet-create"
-					>
-						<input type="hidden" name="redirectTo" value={pathname} />
-						<label class="create-label">
-							Namn på ny pantry
-							<input
-								name="name"
-								type="text"
-								required
-								maxlength="80"
-								placeholder="t.ex. Sommarstuga"
-								bind:value={newPantryName}
-							/>
-						</label>
-						<div class="create-actions">
-							<button type="button" class="text-btn" onclick={() => (createOpen = false)}>
-								Avbryt
-							</button>
-							<button type="submit" class="primary-btn">Skapa pantry</button>
-						</div>
-					</form>
-				{:else}
-					<button type="button" class="create-trigger sheet-create-trigger" onclick={() => (createOpen = true)}>
-						+ Skapa ny pantry
-					</button>
-				{/if}
-			</div>
-		{/if}
+			{#if createOpen}
+				<form
+					method="POST"
+					action="/?/createHousehold"
+					use:enhance={createEnhance}
+					class="create-form sheet-create"
+				>
+					<input type="hidden" name="redirectTo" value={pathname} />
+					<label class="create-label">
+						Namn på ny pantry
+						<input
+							name="name"
+							type="text"
+							required
+							maxlength="80"
+							placeholder="t.ex. Sommarstuga"
+							bind:value={newPantryName}
+						/>
+					</label>
+					<div class="create-actions">
+						<button type="button" class="text-btn" onclick={() => (createOpen = false)}>
+							Avbryt
+						</button>
+						<button type="submit" class="primary-btn">Skapa pantry</button>
+					</div>
+				</form>
+			{:else}
+				<button type="button" class="create-trigger sheet-create-trigger" onclick={() => (createOpen = true)}>
+					+ Skapa ny pantry
+				</button>
+			{/if}
+		</Modal>
 	</div>
 {/if}
 
@@ -457,43 +473,14 @@
 		background: var(--color-primary-hover);
 	}
 
-	.sheet-scrim {
-		position: fixed;
-		inset: 0;
-		z-index: 75;
-		border: 0;
-		background: rgba(0, 0, 0, 0.35);
-		cursor: pointer;
+	:global(.pantry-sheet-panel) {
+		padding-bottom: calc(var(--space-xl) + 4.5rem + env(safe-area-inset-bottom, 0));
 	}
 
-	.pantry-sheet {
-		position: fixed;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		z-index: 80;
-		padding: var(--space-md) var(--space-lg) calc(var(--space-xl) + 4.5rem + env(safe-area-inset-bottom, 0));
-		border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-		background: color-mix(in srgb, var(--color-surface) 94%, transparent);
-		backdrop-filter: blur(24px);
-		-webkit-backdrop-filter: blur(24px);
-		box-shadow: var(--shadow-md);
-		animation: sheet-up 0.28s ease;
-	}
-
-	.sheet-handle {
-		width: 2.5rem;
-		height: 0.25rem;
-		margin: 0 auto var(--space-md);
-		border-radius: 999px;
-		background: var(--color-border);
-	}
-
-	.sheet-title {
-		margin: 0 0 var(--space-md);
-		font-size: 1.125rem;
-		font-weight: 700;
-		letter-spacing: -0.02em;
+	:global(.pantry-sheet-body) {
+		display: flex;
+		flex-direction: column;
+		gap: 0;
 	}
 
 	.sheet-option {
@@ -506,25 +493,12 @@
 		margin-top: var(--space-md);
 	}
 
-	@keyframes sheet-up {
-		from {
-			transform: translateY(100%);
-			opacity: 0.6;
-		}
-		to {
-			transform: translateY(0);
-			opacity: 1;
-		}
-	}
-
 	@media (min-width: 900px) {
 		.desktop-switcher {
 			display: block;
 		}
 
-		.mobile-trigger,
-		.sheet-scrim,
-		.pantry-sheet {
+		.mobile-trigger {
 			display: none;
 		}
 	}
@@ -537,9 +511,4 @@
 		}
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.pantry-sheet {
-			animation: none;
-		}
-	}
 </style>

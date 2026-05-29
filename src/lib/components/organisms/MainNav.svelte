@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
 	import NavIcon from '$lib/components/atoms/NavIcon.svelte';
+	import Modal from '$lib/components/molecules/Modal.svelte';
 	import PantrySwitcher from '$lib/components/molecules/PantrySwitcher.svelte';
 	import ProfileMenu from '$lib/components/molecules/ProfileMenu.svelte';
 	import RecipeIdeasButton from '$lib/components/molecules/RecipeIdeasButton.svelte';
@@ -34,6 +35,20 @@
 	const { primary, secondary } = $derived(splitNavItems(visibleItems));
 
 	let moreOpen = $state(false);
+	let isNarrowViewport = $state(false);
+
+	$effect(() => {
+		if (typeof window === 'undefined') {
+			return;
+		}
+		const mq = window.matchMedia('(max-width: 899px)');
+		const sync = () => {
+			isNarrowViewport = mq.matches;
+		};
+		sync();
+		mq.addEventListener('change', sync);
+		return () => mq.removeEventListener('change', sync);
+	});
 
 	const moreActive = $derived(
 		secondary.some((item) => isNavActive(pathname, item)) ||
@@ -101,7 +116,6 @@
 							class={['nav-link', 'more-trigger', moreActive ? 'active' : ''].filter(Boolean).join(' ')}
 							aria-expanded={moreOpen}
 							aria-haspopup="dialog"
-							aria-controls="nav-more-sheet"
 							onclick={() => (moreOpen ? closeMore() : openMore())}
 						>
 							<NavIcon id="more" />
@@ -153,8 +167,7 @@
 					<button
 						type="button"
 						class={['nav-link', 'tab-btn', moreActive ? 'active' : ''].filter(Boolean).join(' ')}
-						aria-expanded={moreOpen}
-						aria-controls="nav-more-sheet"
+						aria-expanded={moreOpen && isNarrowViewport}
 						onclick={() => (moreOpen ? closeMore() : openMore())}
 					>
 						<NavIcon id="more" />
@@ -165,17 +178,15 @@
 		</ul>
 	</nav>
 
-	{#if moreOpen && secondary.length > 0}
-		<button type="button" class="sheet-scrim" aria-label="Stäng meny" onclick={closeMore}></button>
-		<div
-			id="nav-more-sheet"
-			class="more-sheet"
-			role="dialog"
-			aria-modal="true"
-			aria-label="Fler sidor"
+	{#if secondary.length > 0}
+		<Modal
+			open={moreOpen && isNarrowViewport}
+			onClose={closeMore}
+			variant="sheet"
+			title="Mer"
+			panelClass="nav-more-panel"
+			bodyClass="nav-more-sheet-body"
 		>
-			<div class="sheet-handle" aria-hidden="true"></div>
-			<h2 class="sheet-title">Mer</h2>
 			<ul class="sheet-list">
 				{#each secondary as item (item.href)}
 					{@const active = isNavActive(pathname, item)}
@@ -194,7 +205,7 @@
 					</li>
 				{/each}
 			</ul>
-		</div>
+		</Modal>
 	{/if}
 {/if}
 
@@ -418,43 +429,13 @@
 		font: inherit;
 	}
 
-	.sheet-scrim {
-		position: fixed;
-		inset: 0;
-		z-index: 75;
-		border: 0;
-		background: rgba(0, 0, 0, 0.35);
-		cursor: pointer;
+	:global(.nav-more-panel) {
+		padding-bottom: calc(var(--space-xl) + 4.5rem + env(safe-area-inset-bottom, 0));
 	}
 
-	.more-sheet {
-		position: fixed;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		z-index: 80;
-		padding: var(--space-md) var(--space-lg) calc(var(--space-xl) + 4.5rem + env(safe-area-inset-bottom, 0));
-		border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-		background: color-mix(in srgb, var(--color-surface) 94%, transparent);
-		backdrop-filter: blur(24px);
-		-webkit-backdrop-filter: blur(24px);
-		box-shadow: var(--shadow-md);
-		animation: sheet-up 0.28s ease;
-	}
-
-	.sheet-handle {
-		width: 2.5rem;
-		height: 0.25rem;
-		margin: 0 auto var(--space-md);
-		border-radius: 999px;
-		background: var(--color-border);
-	}
-
-	.sheet-title {
-		margin: 0 0 var(--space-md);
-		font-size: 1.125rem;
-		font-weight: 700;
-		letter-spacing: -0.02em;
+	:global(.nav-more-sheet-body) {
+		display: flex;
+		flex-direction: column;
 	}
 
 	.sheet-list {
@@ -506,26 +487,13 @@
 		color: var(--color-primary);
 	}
 
-	@keyframes sheet-up {
-		from {
-			transform: translateY(100%);
-			opacity: 0.6;
-		}
-		to {
-			transform: translateY(0);
-			opacity: 1;
-		}
-	}
-
 	@media (min-width: 900px) {
 		.main-nav.top {
 			display: flex;
 		}
 
 		.main-nav.mobile-top,
-		.main-nav.bottom,
-		.sheet-scrim,
-		.more-sheet {
+		.main-nav.bottom {
 			display: none;
 		}
 	}
@@ -538,10 +506,8 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.nav-link,
-		.sheet-link,
-		.more-sheet {
+		.sheet-link {
 			transition: none;
-			animation: none;
 		}
 	}
 </style>
