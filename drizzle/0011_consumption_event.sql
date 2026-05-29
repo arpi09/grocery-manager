@@ -1,4 +1,4 @@
-﻿CREATE TABLE IF NOT EXISTS "consumption_event" (
+CREATE TABLE IF NOT EXISTS "consumption_event" (
 	"id" text PRIMARY KEY NOT NULL,
 	"household_id" text NOT NULL,
 	"user_id" text NOT NULL,
