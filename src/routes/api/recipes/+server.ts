@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { getOpenAiApiKey, missingOpenAiKeyMessage } from '$lib/server/openai';
 import type { RequestHandler } from './$types';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
@@ -71,15 +72,9 @@ export const POST: RequestHandler = async ({ request, locals, fetch }) => {
 		return json({ error: 'Unauthorized' }, { status: 401 });
 	}
 
-	const apiKey = process.env.OPENAI_API_KEY;
+	const apiKey = getOpenAiApiKey();
 	if (!apiKey) {
-		return json(
-			{
-				error:
-					'OPENAI_API_KEY is missing. Add it to your .env before generating recipe suggestions.'
-			},
-			{ status: 500 }
-		);
+		return json({ error: missingOpenAiKeyMessage('recipe suggestions') }, { status: 500 });
 	}
 
 	const body = (await request.json().catch(() => ({}))) as { preferences?: unknown };

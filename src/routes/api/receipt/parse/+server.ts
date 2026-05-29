@@ -1,5 +1,6 @@
 import { Buffer } from 'node:buffer';
 import type { ReceiptLine, ReceiptParseResult } from '$lib/domain/receipt-line';
+import { getOpenAiApiKey, missingOpenAiKeyMessage } from '$lib/server/openai';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -34,14 +35,9 @@ export const POST: RequestHandler = async ({ request, locals, fetch }) => {
 		return json({ error: 'Unauthorized' }, { status: 401 });
 	}
 
-	const apiKey = process.env.OPENAI_API_KEY;
+	const apiKey = getOpenAiApiKey();
 	if (!apiKey) {
-		return json(
-			{
-				error: 'OPENAI_API_KEY saknas. Lägg till den i .env för att skanna kvitton.'
-			},
-			{ status: 500 }
-		);
+		return json({ error: missingOpenAiKeyMessage('receipt scan') }, { status: 500 });
 	}
 
 	const formData = await request.formData();
