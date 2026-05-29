@@ -62,7 +62,7 @@ ADMIN_PASSWORD=your-admin-password
 DEFAULT_MEMBER_PASSWORD=your-member-password
 ```
 
-2. Sign in as admin (`ADMIN_EMAIL`, default `arvid.pilhall@me.com`) or the member (`DEFAULT_MEMBER_EMAIL`, default `amanda.derborn@hotmail.com`).
+2. Sign in as admin (`ADMIN_EMAIL`, default `arvid.pilhall@me.com`) or the member (`DEFAULT_MEMBER_EMAIL`, default `amanda.derborn@hotmail.com`). **Use the same password as in `.env`** (`ADMIN_PASSWORD` / `DEFAULT_MEMBER_PASSWORD`). On each dev-server start, those env values are hashed into the database (overwriting any previous hash for that email). If login fails after a PGlite reset or merge, check that `.env` matches what you type—not an old password from before you changed `.env`.
 3. Open **Settings** to see household name and members. Both accounts see the same inventory.
 
 Other users get a personal household **Mitt hushåll** on first login until invited (invite flow is not in v1).
