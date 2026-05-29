@@ -162,11 +162,24 @@ export async function initDatabase(): Promise<void> {
 				);
 			}
 
-			const sql = postgres(connectionString);
-			dbInstance = drizzlePostgres(sql, { schema });
+			try {
+				const sql = postgres(connectionString, {
+					connect_timeout: 15,
+					max: 5
+				});
+				dbInstance = drizzlePostgres(sql, { schema });
+				await sql`SELECT 1`;
 
-			await ensureDefaultAdminUser();
-			await ensureDefaultHousehold();
+				await ensureDefaultAdminUser();
+				await ensureDefaultHousehold();
+			} catch (error) {
+				const hint = connectionString.includes('/cloudsql/')
+					? ' (Cloud SQL socket — check cloudSqlInstances in apphosting.yaml and Cloud SQL Client IAM)'
+					: '';
+				const message = error instanceof Error ? error.message : String(error);
+				console.error(`[initDatabase] Postgres connection failed${hint}: ${message}`);
+				throw error;
+			}
 		})().catch((error) => {
 			initPromise = null;
 			throw error;

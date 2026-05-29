@@ -67,7 +67,7 @@ env:
   # Replace with your admin login email before first deploy (or set in App Hosting → Environment).
   # Seeded/updated on startup together with the ADMIN_PASSWORD secret.
   - variable: ADMIN_EMAIL
-    value: REPLACE_WITH_YOUR_ADMIN_EMAIL
+    value: arvid.pilhall@me.com
     availability:
       - RUNTIME
 
