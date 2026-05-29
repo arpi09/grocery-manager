@@ -250,7 +250,8 @@ Use the existing root `Dockerfile`. Map Cloud Run URL to `PUBLIC_ORIGIN`.
 | Issue | Fix |
 |-------|-----|
 | `db:migrate` only applies 4 migrations | Journal out of sync — run `npm test -- src/lib/infrastructure/db/migrations.test.ts` |
-| Build fails: `DATABASE_URL is not set` | Drizzle config only runs for `db:migrate` locally. App build should not need DB; if it does, set a dummy URL at BUILD time only. |
+| Build fails: `vite` / `npm run build` | Do not set `NODE_ENV=production` at **BUILD** in `apphosting.yaml` — it makes `npm ci` skip devDependencies. Keep `NODE_ENV` on **RUNTIME** only. |
+| Build fails: `DATABASE_URL is not set` | Drizzle config is only for `db:migrate` locally; App Hosting build uses a BUILD-only placeholder URL in `apphosting.yaml`. |
 | 500 on login / DB errors | Check `DATABASE_URL` (socket URL on App Hosting), `cloudSqlInstances` in `apphosting.yaml`, and that migrations ran |
 | Cloud SQL connection refused (local) | Add your IP to authorized networks; confirm public IP and password |
 | App Hosting cannot reach DB | Ensure `cloudSqlInstances` matches connection name; secret uses `/cloudsql/...` host, not public IP |
