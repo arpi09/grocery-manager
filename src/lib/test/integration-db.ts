@@ -27,11 +27,14 @@ const SQL_MIGRATION_FILES = [
 	'0005_app_error.sql',
 	'0006_user_theme_preference.sql',
 	'0007_household_invites_roles.sql',
-	'0008_shopping_list.sql',
+	'0008_shopping_list.sql',
+'0010_active_household.sql',
+	'0011_consumption_event.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
-	"session",
+	"session",
+	"consumption_event",
 	"shopping_list_item",
 	"inventory_items",
 	"meal_plans",

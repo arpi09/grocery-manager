@@ -1,4 +1,4 @@
-﻿import { mkdirSync, readFileSync, rmSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { drizzle as drizzlePostgres } from 'drizzle-orm/postgres-js';
 import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
@@ -44,6 +44,7 @@ const PGlite_INCREMENTAL_MIGRATIONS = [
 	'0006_user_theme_preference.sql',
 	'0007_household_invites_roles.sql',
 	'0008_shopping_list.sql',
+'0010_active_household.sql',
 	'0011_consumption_event.sql'
 ];
 

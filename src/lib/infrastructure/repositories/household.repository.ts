@@ -1,11 +1,12 @@
-import { and, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import type {
 	HouseholdInviteView,
 	HouseholdMemberView,
 	HouseholdRole,
 	HouseholdView,
 	InviteRole,
-	InviteStatus
+	InviteStatus,
+	UserHouseholdSummary
 } from '$lib/domain/household';
 import { db, type AppDatabase } from '$lib/infrastructure/db';
 import {
@@ -37,6 +38,10 @@ export interface InvitePreviewRow {
 
 export interface IHouseholdRepository {
 	findPrimaryHouseholdIdForUser(userId: string): Promise<string | null>;
+	getActiveHouseholdIdForUser(userId: string): Promise<string | null>;
+	setActiveHouseholdId(userId: string, householdId: string | null): Promise<void>;
+	listHouseholdsForUser(userId: string): Promise<UserHouseholdSummary[]>;
+	getHouseholdById(householdId: string): Promise<HouseholdView | null>;
 	getHouseholdForUser(userId: string): Promise<HouseholdView | null>;
 	createHousehold(id: string, name: string): Promise<void>;
 	addMember(householdId: string, userId: string, role: HouseholdRole): Promise<void>;
@@ -75,18 +80,56 @@ export class DrizzleHouseholdRepository implements IHouseholdRepository {
 		const [row] = await this.database
 			.select({ householdId: householdMemberTable.householdId })
 			.from(householdMemberTable)
+			.innerJoin(householdTable, eq(householdMemberTable.householdId, householdTable.id))
 			.where(eq(householdMemberTable.userId, userId))
+			.orderBy(asc(householdTable.name))
 			.limit(1);
 
 		return row?.householdId ?? null;
 	}
 
-	async getHouseholdForUser(userId: string): Promise<HouseholdView | null> {
-		const householdId = await this.findPrimaryHouseholdIdForUser(userId);
-		if (!householdId) {
-			return null;
-		}
+	async getActiveHouseholdIdForUser(userId: string) {
+		const [row] = await this.database
+			.select({ activeHouseholdId: userTable.activeHouseholdId })
+			.from(userTable)
+			.where(eq(userTable.id, userId))
+			.limit(1);
 
+		return row?.activeHouseholdId ?? null;
+	}
+
+	async setActiveHouseholdId(userId: string, householdId: string | null) {
+		await this.database
+			.update(userTable)
+			.set({ activeHouseholdId: householdId })
+			.where(eq(userTable.id, userId));
+	}
+
+	async listHouseholdsForUser(userId: string): Promise<UserHouseholdSummary[]> {
+		const activeId = await this.getActiveHouseholdIdForUser(userId);
+
+		const rows = await this.database
+			.select({
+				id: householdTable.id,
+				name: householdTable.name,
+				role: householdMemberTable.role
+			})
+			.from(householdMemberTable)
+			.innerJoin(householdTable, eq(householdMemberTable.householdId, householdTable.id))
+			.where(eq(householdMemberTable.userId, userId))
+			.orderBy(asc(householdTable.name));
+
+		return rows.map(
+			(row): UserHouseholdSummary => ({
+				id: row.id,
+				name: row.name,
+				role: row.role as HouseholdRole,
+				isActive: row.id === activeId
+			})
+		);
+	}
+
+	async getHouseholdById(householdId: string): Promise<HouseholdView | null> {
 		const [household] = await this.database
 			.select()
 			.from(householdTable)
@@ -120,6 +163,20 @@ export class DrizzleHouseholdRepository implements IHouseholdRepository {
 				})
 			)
 		};
+	}
+
+	async getHouseholdForUser(userId: string): Promise<HouseholdView | null> {
+		const activeId = await this.getActiveHouseholdIdForUser(userId);
+		if (activeId && (await this.hasMember(activeId, userId))) {
+			return this.getHouseholdById(activeId);
+		}
+
+		const householdId = await this.findPrimaryHouseholdIdForUser(userId);
+		if (!householdId) {
+			return null;
+		}
+
+		return this.getHouseholdById(householdId);
 	}
 
 	async createHousehold(id: string, name: string) {

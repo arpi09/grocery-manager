@@ -19,6 +19,9 @@ export const userTable = pgTable('user', {
 	role: text('role', { enum: ['user', 'admin'] }).notNull().default('user'),
 	petsEnabled: boolean('pets_enabled').notNull().default(false),
 	themePreference: text('theme_preference', { enum: ['light', 'dark', 'system'] }).notNull().default('system'),
+	activeHouseholdId: text('active_household_id').references(() => householdTable.id, {
+		onDelete: 'set null'
+	}),
 	lastSeenAt: timestamp('last_seen_at', { withTimezone: true, mode: 'date' }),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 });

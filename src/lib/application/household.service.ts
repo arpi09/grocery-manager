@@ -4,7 +4,8 @@ import {
 	type HouseholdInviteView,
 	type HouseholdRole,
 	type HouseholdView,
-	type InviteRole
+	type InviteRole,
+	type UserHouseholdSummary
 } from '$lib/domain/household';
 import { generateId } from '$lib/infrastructure/auth/id';
 import type { IHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
@@ -74,6 +75,20 @@ export class PendingInviteExistsError extends Error {
 	}
 }
 
+export class HouseholdNotFoundError extends Error {
+	constructor() {
+		super('Pantryn hittades inte.');
+		this.name = 'HouseholdNotFoundError';
+	}
+}
+
+export class NotMemberError extends Error {
+	constructor() {
+		super('Du är inte medlem i denna pantry.');
+		this.name = 'NotMemberError';
+	}
+}
+
 export interface InvitePreview {
 	householdName: string;
 	email: string;
@@ -94,16 +109,75 @@ export class HouseholdService {
 		return this.repository.getHouseholdForUser(userId);
 	}
 
+	async listHouseholdsForUser(userId: string): Promise<UserHouseholdSummary[]> {
+		return this.repository.listHouseholdsForUser(userId);
+	}
+
+	async resolveActiveHouseholdId(userId: string): Promise<string> {
+		await this.ensureAtLeastOneHousehold(userId);
+
+		const activeId = await this.repository.getActiveHouseholdIdForUser(userId);
+		if (activeId && (await this.repository.hasMember(activeId, userId))) {
+			return activeId;
+		}
+
+		const fallbackId = await this.repository.findPrimaryHouseholdIdForUser(userId);
+		if (!fallbackId) {
+			return this.ensureHouseholdForUser(userId);
+		}
+
+		await this.repository.setActiveHouseholdId(userId, fallbackId);
+		return fallbackId;
+	}
+
 	async ensureHouseholdForUser(userId: string): Promise<string> {
-		const existing = await this.repository.findPrimaryHouseholdIdForUser(userId);
-		if (existing) {
-			return existing;
+		return this.resolveActiveHouseholdId(userId);
+	}
+
+	async createHousehold(userId: string, name: string): Promise<string> {
+		const trimmedName = name.trim();
+		if (!trimmedName) {
+			throw new Error('Pantryn måste ha ett namn.');
 		}
 
 		const householdId = generateId();
-		await this.repository.createHousehold(householdId, 'Mitt hushåll');
+		await this.repository.createHousehold(householdId, trimmedName);
 		await this.repository.addMember(householdId, userId, 'owner');
+		await this.repository.setActiveHouseholdId(userId, householdId);
 		return householdId;
+	}
+
+	async switchActiveHousehold(userId: string, householdId: string): Promise<void> {
+		if (!(await this.repository.hasMember(householdId, userId))) {
+			throw new NotMemberError();
+		}
+
+		await this.repository.setActiveHouseholdId(userId, householdId);
+	}
+
+	async leaveHousehold(userId: string, householdId: string): Promise<void> {
+		const role = await this.repository.getMemberRole(householdId, userId);
+		if (!role) {
+			throw new NotMemberError();
+		}
+
+		if (role === 'owner') {
+			const ownerCount = await this.repository.countOwners(householdId);
+			if (ownerCount <= 1) {
+				throw new LastOwnerError();
+			}
+		}
+
+		const removed = await this.repository.removeMember(householdId, userId);
+		if (!removed) {
+			throw new MemberNotFoundError();
+		}
+
+		const activeId = await this.repository.getActiveHouseholdIdForUser(userId);
+		if (activeId === householdId) {
+			const remaining = await this.repository.findPrimaryHouseholdIdForUser(userId);
+			await this.repository.setActiveHouseholdId(userId, remaining);
+		}
 	}
 
 	async getRoleForUser(householdId: string, userId: string): Promise<HouseholdRole | null> {
@@ -151,7 +225,7 @@ export class HouseholdService {
 		return { invite, token };
 	}
 
-	async acceptInvite(token: string, userId: string, userEmail: string): Promise<void> {
+	async acceptInvite(token: string, userId: string, userEmail: string): Promise<string> {
 		const invite = await this.repository.findInviteByToken(token);
 		if (!invite) {
 			throw new InviteNotFoundError();
@@ -169,6 +243,7 @@ export class HouseholdService {
 		}
 
 		await this.repository.acceptInvite(invite.id, userId, invite.role);
+		return invite.householdId;
 	}
 
 	async updateMemberRole(
@@ -252,6 +327,18 @@ export class HouseholdService {
 			status: preview.status,
 			expired: preview.status === 'pending' && preview.expiresAt.getTime() < Date.now()
 		};
+	}
+
+	private async ensureAtLeastOneHousehold(userId: string) {
+		const existing = await this.repository.findPrimaryHouseholdIdForUser(userId);
+		if (existing) {
+			return;
+		}
+
+		const householdId = generateId();
+		await this.repository.createHousehold(householdId, 'Mitt hushåll');
+		await this.repository.addMember(householdId, userId, 'owner');
+		await this.repository.setActiveHouseholdId(userId, householdId);
 	}
 
 	private async requireOwner(householdId: string, userId: string) {

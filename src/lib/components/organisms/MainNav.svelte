@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
 	import NavIcon from '$lib/components/atoms/NavIcon.svelte';
+	import PantrySwitcher from '$lib/components/molecules/PantrySwitcher.svelte';
 	import ProfileMenu from '$lib/components/molecules/ProfileMenu.svelte';
 	import RecipeIdeasButton from '$lib/components/molecules/RecipeIdeasButton.svelte';
 	import {
@@ -12,13 +13,21 @@
 		type NavItem,
 		type NavUser
 	} from '$lib/navigation/nav-config';
+	import type { UserHouseholdSummary } from '$lib/domain/household';
 
 	interface Props {
 		user: (NavUser & { email: string }) | null;
+		households?: UserHouseholdSummary[];
+		activeHousehold?: { id: string; name: string } | null;
 		onRecipeIdeas?: () => void;
 	}
 
-	let { user, onRecipeIdeas }: Props = $props();
+	let {
+		user,
+		households = [],
+		activeHousehold = null,
+		onRecipeIdeas
+	}: Props = $props();
 
 	const pathname = $derived(page.url.pathname);
 	const visibleItems = $derived(filterNavItems(NAV_ITEMS, user));
@@ -57,16 +66,22 @@
 		<a href="/" class="brand brand-compact" aria-label="Home Pantry – Hem">
 			<span class="brand-mark" aria-hidden="true">HP</span>
 		</a>
+		<div class="mobile-top-center">
+			<PantrySwitcher {households} {activeHousehold} />
+		</div>
 		{#if onRecipeIdeas}
 			<RecipeIdeasButton compact onclick={onRecipeIdeas} />
 		{/if}
 	</header>
 
 	<header class="main-nav top" aria-label="Huvudnavigering">
-		<a href="/" class="brand" aria-label="Home Pantry – Hem">
-			<AppLogo size="sm" />
-			<span class="brand-text">Home Pantry</span>
-		</a>
+		<div class="top-brand-row">
+			<a href="/" class="brand" aria-label="Home Pantry – Hem">
+				<AppLogo size="sm" />
+				<span class="brand-text">Home Pantry</span>
+			</a>
+			<PantrySwitcher {households} {activeHousehold} />
+		</div>
 
 		<nav class="desktop-nav" aria-label="Primär navigering">
 			<ul class="desktop-list">
@@ -220,6 +235,21 @@
 		background: color-mix(in srgb, var(--color-bg) 82%, transparent);
 		backdrop-filter: blur(18px);
 		-webkit-backdrop-filter: blur(18px);
+	}
+
+	.mobile-top-center {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		justify-content: center;
+	}
+
+	.top-brand-row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+		flex-shrink: 0;
+		min-width: 0;
 	}
 
 	.brand-compact {
