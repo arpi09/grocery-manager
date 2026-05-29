@@ -153,7 +153,9 @@ Update non-secret values in `apphosting.yaml` or Firebase Console → **App Host
 | `ADMIN_PASSWORD` | yes | Secret — creates/updates admin on startup |
 | `PUBLIC_ORIGIN` | yes | `https://home-pantry--home-pantry-4bee5.REGION.hosted.app` or custom domain |
 | `ORIGIN` | yes (runtime) | Same HTTPS URL as `PUBLIC_ORIGIN` — required by `@sveltejs/adapter-node` for form-action CSRF |
-| `OPENAI_API_KEY` | optional | Recipe suggestions / image scan |
+| `OPENAI_API_KEY` | optional* | Recipe suggestions, receipt scan, **photo product scan** (`/api/product-from-image`) |
+
+\*Photo scan and other AI routes return **503** with a clear JSON error when this secret is missing, invalid, or not granted to the `home-pantry` backend. Create the secret and run `grantaccess` before relying on scan in production.
 | `DEFAULT_MEMBER_EMAIL` | optional | Demo household member |
 | `DEFAULT_MEMBER_PASSWORD` | optional | Demo household member (secret if set) |
 

@@ -180,7 +180,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	});
 
 	if (!result.ok) {
-		return json({ error: result.message }, { status: 502 });
+		return json({ error: result.message }, { status: result.status });
 	}
 
 	const items = parseShoppingList(result.data);

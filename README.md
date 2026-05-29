@@ -89,7 +89,7 @@ OPENAI_API_KEY=your_key_here
 
 3. Open the app and tap **Recipe ideas**.
 
-Photo product scan also uses the same `OPENAI_API_KEY`.
+Photo product scan (`/api/product-from-image`) also uses the same `OPENAI_API_KEY`. In production, set the Firebase App Hosting secret and grant access to backend `home-pantry` (see [docs/FIREBASE_DEPLOY.md](./docs/FIREBASE_DEPLOY.md)).
 
 ## AI inventory help & ICA shopping list
 

@@ -1,10 +1,39 @@
 import { Buffer } from 'node:buffer';
 import { json } from '@sveltejs/kit';
+import {
+	getOpenAiApiKey,
+	missingOpenAiKeyMessage,
+	requestStructuredJsonFromImage
+} from '$lib/server/openai';
 import type { RequestHandler } from './$types';
 
-const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
-const MODEL = 'gpt-4.1-mini';
 const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
+
+const IMAGE_PRODUCT_SCHEMA = {
+	type: 'object',
+	properties: {
+		name: { type: 'string' },
+		quantity: { type: 'string' },
+		unit: { type: 'string' },
+		notes: { type: 'string' },
+		confidence: { type: 'string', enum: ['high', 'medium', 'low'] }
+	},
+	required: ['name', 'quantity', 'unit', 'notes', 'confidence'],
+	additionalProperties: false
+} as const;
+
+const SYSTEM_PROMPT = [
+	'You extract grocery product data from a photo label.',
+	'Output JSON only with:',
+	'{"name":"","quantity":"","unit":"","notes":"","confidence":"high|medium|low"}',
+	'Rules:',
+	'- name: short product name in English',
+	'- quantity: numeric-like string (fallback "1")',
+	'- unit: common short unit or empty string',
+	'- notes: short useful details (brand/flavor/size) or empty string',
+	'- confidence is high when label is very clear, medium when mostly clear, low when uncertain',
+	'- never output markdown code fences'
+].join('\n');
 
 interface ImageProduct {
 	name: string;
@@ -42,119 +71,68 @@ function parseProduct(raw: unknown): ImageProduct | null {
 	};
 }
 
-export const POST: RequestHandler = async ({ request, locals, fetch }) => {
-	if (!locals.user) {
-		return json({ error: 'Unauthorized' }, { status: 401 });
-	}
-
-	const apiKey = process.env.OPENAI_API_KEY;
-	if (!apiKey) {
-		return json(
-			{
-				error:
-					'OPENAI_API_KEY is missing. Add it to your .env before using photo product scan.'
-			},
-			{ status: 500 }
-		);
-	}
-
-	const formData = await request.formData();
-	const image = formData.get('image');
-	if (!(image instanceof File)) {
-		return json({ error: 'No image uploaded.' }, { status: 400 });
-	}
-
-	if (!image.type.startsWith('image/')) {
-		return json({ error: 'Uploaded file must be an image.' }, { status: 400 });
-	}
-
-	if (image.size > MAX_IMAGE_BYTES) {
-		return json({ error: 'Image is too large. Please upload an image under 6 MB.' }, { status: 413 });
-	}
-
-	const bytes = await image.arrayBuffer();
-	const base64 = Buffer.from(bytes).toString('base64');
-	const dataUrl = `data:${image.type};base64,${base64}`;
-
-	const response = await fetch(OPENAI_API_URL, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${apiKey}`
-		},
-		body: JSON.stringify({
-			model: MODEL,
-			input: [
-				{
-					role: 'system',
-					content: [
-						{
-							type: 'input_text',
-							text: [
-								'You extract grocery product data from a photo label.',
-								'Output JSON only with:',
-								'{"name":"","quantity":"","unit":"","notes":"","confidence":"high|medium|low"}',
-								'Rules:',
-								'- name: short product name in English',
-								'- quantity: numeric-like string (fallback "1")',
-								'- unit: common short unit or empty string',
-								'- notes: short useful details (brand/flavor/size) or empty string',
-								'- confidence is high when label is very clear, medium when mostly clear, low when uncertain',
-								'- never output markdown code fences'
-							].join('\n')
-						}
-					]
-				},
-				{
-					role: 'user',
-					content: [
-						{ type: 'input_text', text: 'Extract product fields from this image.' },
-						{ type: 'input_image', image_url: dataUrl }
-					]
-				}
-			],
-			text: {
-				format: {
-					type: 'json_schema',
-					name: 'image_product',
-					schema: {
-						type: 'object',
-						properties: {
-							name: { type: 'string' },
-							quantity: { type: 'string' },
-							unit: { type: 'string' },
-							notes: { type: 'string' },
-							confidence: { type: 'string', enum: ['high', 'medium', 'low'] }
-						},
-						required: ['name', 'quantity', 'unit', 'notes', 'confidence'],
-						additionalProperties: false
-					}
-				}
-			}
-		})
-	});
-
-	if (!response.ok) {
-		const errorText = await response.text();
-		return json(
-			{ error: `OpenAI request failed: ${response.status} ${errorText.slice(0, 300)}` },
-			{ status: 502 }
-		);
-	}
-
-	const payload = (await response.json()) as { output_text?: unknown };
-	const outputText = typeof payload.output_text === 'string' ? payload.output_text : '';
-	let parsed: unknown = null;
+export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
-		parsed = JSON.parse(outputText);
-	} catch {
-		return json({ error: 'Model response was not valid JSON.' }, { status: 502 });
-	}
+		if (!locals.user) {
+			return json({ error: 'Unauthorized' }, { status: 401 });
+		}
 
-	const product = parseProduct(parsed);
-	if (!product) {
-		return json({ error: 'Could not extract product fields from image.' }, { status: 502 });
-	}
+		const apiKey = getOpenAiApiKey();
+		if (!apiKey) {
+			return json(
+				{ error: missingOpenAiKeyMessage('photo product scan') },
+				{ status: 503 }
+			);
+		}
 
-	return json({ product });
+		const formData = await request.formData();
+		const image = formData.get('image');
+		if (!(image instanceof File)) {
+			return json({ error: 'No image uploaded.' }, { status: 400 });
+		}
+
+		if (!image.type.startsWith('image/')) {
+			return json({ error: 'Uploaded file must be an image.' }, { status: 400 });
+		}
+
+		if (image.size > MAX_IMAGE_BYTES) {
+			return json(
+				{ error: 'Image is too large. Please upload an image under 6 MB.' },
+				{ status: 413 }
+			);
+		}
+
+		const bytes = await image.arrayBuffer();
+		const base64 = Buffer.from(bytes).toString('base64');
+		const dataUrl = `data:${image.type};base64,${base64}`;
+
+		const result = await requestStructuredJsonFromImage(apiKey, {
+			systemPrompt: SYSTEM_PROMPT,
+			userPrompt: 'Extract product fields from this image.',
+			imageDataUrl: dataUrl,
+			schemaName: 'image_product',
+			schema: IMAGE_PRODUCT_SCHEMA
+		});
+
+		if (!result.ok) {
+			return json({ error: result.message }, { status: result.status });
+		}
+
+		const product = parseProduct(result.data);
+		if (!product) {
+			return json(
+				{ error: 'Could not extract product fields from image.' },
+				{ status: 502 }
+			);
+		}
+
+		return json({ product });
+	} catch (error) {
+		const detail = error instanceof Error ? error.message : 'unexpected error';
+		console.error('[product-from-image]', detail);
+		return json(
+			{ error: 'Photo product scan failed unexpectedly. Please try again.' },
+			{ status: 503 }
+		);
+	}
 };
