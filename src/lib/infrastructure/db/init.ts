@@ -64,25 +64,47 @@ function parseCloudSqlDatabaseUrl(connectionString: string): {
 	};
 }
 
-/** App Hosting may not mount /cloudsql sockets; use the Cloud SQL Connector instead. */
+/** App Hosting may not mount /cloudsql sockets; prefer connector, then public IP. */
 async function createPostgresClient(connectionString: string) {
 	const cloudSqlHost = extractCloudSqlSocketHost(connectionString);
 	if (cloudSqlHost) {
 		const instanceConnectionName = cloudSqlHost.replace(/^\/cloudsql\//, '');
 		const { username, password, database } = parseCloudSqlDatabaseUrl(connectionString);
-		cloudSqlConnector ??= new Connector();
-		const clientOpts = await cloudSqlConnector.getOptions({
-			instanceConnectionName,
-			ipType: IpAddressTypes.PUBLIC
-		});
-		return postgres({
-			...clientOpts,
-			database,
-			username,
-			password,
-			connect_timeout: 15,
-			max: 5
-		});
+		const publicHost = env.CLOUD_SQL_PUBLIC_HOST?.trim() || '34.158.71.215';
+
+		try {
+			cloudSqlConnector ??= new Connector();
+			const clientOpts = await cloudSqlConnector.getOptions({
+				instanceConnectionName,
+				ipType: IpAddressTypes.PUBLIC
+			});
+			const sql = postgres({
+				...clientOpts,
+				database,
+				username,
+				password,
+				connect_timeout: 15,
+				max: 5
+			});
+			await verifyPostgresConnection(sql, 2);
+			return sql;
+		} catch (connectorError) {
+			const message =
+				connectorError instanceof Error ? connectorError.message : String(connectorError);
+			console.error(
+				`[initDatabase] Cloud SQL connector failed (${message}); falling back to public IP ${publicHost}`
+			);
+			return postgres({
+				host: publicHost,
+				port: 5432,
+				database,
+				username,
+				password,
+				ssl: 'require',
+				connect_timeout: 15,
+				max: 5
+			});
+		}
 	}
 	return postgres(connectionString, {
 		connect_timeout: 15,
