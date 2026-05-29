@@ -191,3 +191,29 @@ export const petFoodTable = pgTable(
 		index('pet_food_user_pet_idx').on(table.userId, table.petId)
 	]
 );
+
+export const shoppingListItemTable = pgTable('shopping_list_item', { id: text('id').primaryKey(), householdId: text('household_id').notNull().references(() => householdTable.id, { onDelete: 'cascade' }), name: text('name').notNull(), quantity: numeric('quantity', { precision: 10, scale: 2 }), unit: text('unit'), checked: boolean('checked').notNull().default(false), sortOrder: integer('sort_order').notNull().default(0), createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(), updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow() }, (table) => [index('shopping_list_household_sort_idx').on(table.householdId, table.sortOrder)]);
+
+export const consumptionEventTable = pgTable(
+	'consumption_event',
+	{
+		id: text('id').primaryKey(),
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
+		userId: text('user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		inventoryItemId: text('inventory_item_id').references(() => inventoryItemTable.id, {
+			onDelete: 'set null'
+		}),
+		productName: text('product_name').notNull(),
+		eventType: text('event_type', { enum: ['consumed', 'discarded', 'expired'] }).notNull(),
+		quantity: numeric('quantity', { precision: 10, scale: 2 }),
+		unit: text('unit'),
+		location: text('location'),
+		notes: text('notes'),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [index('consumption_event_household_created_idx').on(table.householdId, table.createdAt)]
+);

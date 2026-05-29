@@ -5,6 +5,8 @@ import {
 	profileService,
 	householdService,
 	inventoryService,
+	consumptionService,
+	shoppingListService,
 	mealPlanService,
 	petFoodService,
 	petService
@@ -35,6 +37,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.householdId = null;
 	event.locals.householdRole = null;
 	event.locals.inventoryService = inventoryService;
+	event.locals.consumptionService = consumptionService;
+	event.locals.shoppingListService = shoppingListService;
 	event.locals.mealPlanService = mealPlanService;
 	event.locals.petService = petService;
 	event.locals.petFoodService = petFoodService;
@@ -102,6 +106,6 @@ export const handleError: HandleServerError = async ({ error, event, status }) =
 	}
 
 	return {
-		message: status >= 500 ? 'Ett oväntat fel inträffade.' : 'Något gick fel.'
+		message: status >= 500 ? 'Ett ovÃ¤ntat fel intrÃ¤ffade.' : 'NÃ¥got gick fel.'
 	};
 };

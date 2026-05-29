@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, rmSync } from 'node:fs';
+﻿import { mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { drizzle as drizzlePostgres } from 'drizzle-orm/postgres-js';
 import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
@@ -26,8 +26,13 @@ const PGlite_DATA_DIR = join(process.cwd(), 'data', 'pantry');
 function usePglite(): boolean {
 	return env.USE_PGLITE === 'true' || env.USE_PGLITE === '1';
 }
+export type DatabaseBackend = 'pglite' | 'postgres';
 
-/** Full schema — only on a new PGlite data directory. */
+export function getDatabaseBackend(): DatabaseBackend {
+	return usePglite() ? 'pglite' : 'postgres';
+}
+
+/** Full schema â€” only on a new PGlite data directory. */
 const PGlite_BASELINE_MIGRATION = '0000_init.sql';
 /** Safe to re-run on every startup (uses IF NOT EXISTS). */
 const PGlite_INCREMENTAL_MIGRATIONS = [
@@ -37,7 +42,9 @@ const PGlite_INCREMENTAL_MIGRATIONS = [
 	'0004_user_profile.sql',
 	'0005_app_error.sql',
 	'0006_user_theme_preference.sql',
-	'0007_household_invites_roles.sql'
+	'0007_household_invites_roles.sql',
+	'0008_shopping_list.sql',
+	'0011_consumption_event.sql'
 ];
 
 async function runPgliteBaseline(client: PGlite) {
@@ -153,3 +160,4 @@ export function getDb(): AppDatabase {
 	}
 	return dbInstance;
 }
+
