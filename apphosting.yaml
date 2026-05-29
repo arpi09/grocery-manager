@@ -40,6 +40,12 @@ env:
       - BUILD
       - RUNTIME
 
+  # SvelteKit adapter-node: canonical origin for request URLs and CSRF on form actions
+  - variable: ORIGIN
+    value: https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app
+    availability:
+      - RUNTIME
+
   - variable: HOST
     value: 0.0.0.0
     availability:

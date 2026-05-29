@@ -152,6 +152,7 @@ Update non-secret values in `apphosting.yaml` or Firebase Console → **App Host
 | `ADMIN_EMAIL` | yes | Your admin login email (replace `REPLACE_WITH_YOUR_ADMIN_EMAIL` in `apphosting.yaml`) |
 | `ADMIN_PASSWORD` | yes | Secret — creates/updates admin on startup |
 | `PUBLIC_ORIGIN` | yes | `https://home-pantry--home-pantry-4bee5.REGION.hosted.app` or custom domain |
+| `ORIGIN` | yes (runtime) | Same HTTPS URL as `PUBLIC_ORIGIN` — required by `@sveltejs/adapter-node` for form-action CSRF |
 | `OPENAI_API_KEY` | optional | Recipe suggestions / image scan |
 | `DEFAULT_MEMBER_EMAIL` | optional | Demo household member |
 | `DEFAULT_MEMBER_PASSWORD` | optional | Demo household member (secret if set) |
@@ -190,7 +191,7 @@ https://home-pantry--home-pantry-4bee5.REGION.hosted.app
 
 - [ ] Migrations applied (`npm run db:migrate`)
 - [ ] `ADMIN_EMAIL` set to your real admin address
-- [ ] `PUBLIC_ORIGIN` matches live URL (Lucia secure cookies)
+- [ ] `PUBLIC_ORIGIN` and `ORIGIN` match live URL (cookies + form POST / login)
 - [ ] Log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`
 - [ ] Optional: [Custom domain](https://firebase.google.com/docs/app-hosting/custom-domain)
 - [ ] Optional: set `minInstances: 1` in `apphosting.yaml` to reduce cold starts (costs more)
@@ -256,6 +257,7 @@ Use the existing root `Dockerfile`. Map Cloud Run URL to `PUBLIC_ORIGIN`.
 | Cloud SQL connection refused (local) | Add your IP to authorized networks; confirm public IP and password |
 | App Hosting cannot reach DB | Ensure `cloudSqlInstances` matches connection name; secret uses `/cloudsql/...` host, not public IP |
 | Cookies not sticking | Set `PUBLIC_ORIGIN` to exact HTTPS origin; `NODE_ENV=production` enables secure cookies |
+| Login/form POST returns 403 | Set `ORIGIN` (runtime) to the same HTTPS origin as the browser URL; proxy `Host` alone is not enough for adapter-node CSRF |
 | Cold start latency | Increase `minInstances` in `apphosting.yaml` |
 | Blaze billing | App Hosting uses Cloud Run + Cloud Build; free tier limits may not cover production traffic |
 
