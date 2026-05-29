@@ -22,11 +22,16 @@ describe('AdminService', () => {
 	it('returns dashboard stats', async () => {
 		const stats = {
 			userCount: 3,
+			householdCount: 2,
+			membershipCount: 4,
+			inventoryCount: 10,
+			shoppingListItemCount: null,
+			errorCount7Days: 1,
+			errorCountTotal: 5,
 			activeNowCount: 1,
 			activeSessionCount: 2,
-			inventoryCount: 10,
-			mealPlanCount: 2,
-			petCount: 1
+			lastActivityAt: new Date(),
+			databaseBackend: 'pglite' as const
 		};
 		vi.mocked(admin.getDashboardStats).mockResolvedValue(stats);
 

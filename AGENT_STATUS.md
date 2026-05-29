@@ -64,6 +64,7 @@ Set in `.env` (see `.env.example`):
 
 | Branch | Status |
 |--------|--------|
+| `feature/admin-health-usage` | Admin hälsa & användning — utökade dashboard-kort på `/admin` |
 | `feature/admin-interface` | Admin UI (worktree `home-pantry-admin`) - not on master |
 | `feat/integration-test-suite` | Test worktree - largely on master |
 | `docs/agent-coordination` | Stale (1 commit, 22 behind) |

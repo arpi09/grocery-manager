@@ -1,14 +1,13 @@
 <script lang="ts">
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
+	import AdminHealthDashboard from '$lib/components/organisms/AdminHealthDashboard.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
-	import { ACTIVE_USER_WINDOW_MS, formatLastSeen } from '$lib/domain/presence';
+	import { formatLastSeen } from '$lib/domain/presence';
 
 	let { data, form } = $props();
-
-	const activeWindowMinutes = Math.round(ACTIVE_USER_WINDOW_MS / 60_000);
 
 	function formatDate(value: Date) {
 		return new Intl.DateTimeFormat('sv-SE', {
@@ -36,27 +35,9 @@
 		<p class="banner" role="alert">{form.message}</p>
 	{/if}
 
-	<section class="stats">
-		<Card>
-			<p class="stat-label">Användare</p>
-			<p class="stat-value">{data.stats.userCount}</p>
-		</Card>
-		<Card>
-			<p class="stat-label">Aktiva nu</p>
-			<p class="stat-value">{data.stats.activeNowCount}</p>
-			<p class="stat-note">Senaste {activeWindowMinutes} min</p>
-		</Card>
-		<Card>
-			<p class="stat-label">Inloggade sessioner</p>
-			<p class="stat-value">{data.stats.activeSessionCount}</p>
-		</Card>
-		<Card>
-			<p class="stat-label">Inventarieposter</p>
-			<p class="stat-value">{data.stats.inventoryCount}</p>
-		</Card>
-	</section>
+	<AdminHealthDashboard stats={data.stats} />
 
-	<section class="error-logs">
+	<section class="error-logs" id="felloggar">
 		<Card>
 			<div class="error-logs-header">
 				<h2>Felloggar</h2>
@@ -217,31 +198,6 @@
 		border-radius: var(--radius-sm);
 		background: #fde8e8;
 		color: #8a1f1f;
-	}
-
-	.stats {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-		gap: var(--space-md);
-		margin-bottom: var(--space-lg);
-	}
-
-	.stat-label {
-		margin: 0;
-		color: var(--color-text-muted);
-		font-size: 0.85rem;
-	}
-
-	.stat-value {
-		margin: var(--space-xs) 0 0;
-		font-size: 1.75rem;
-		font-weight: 700;
-	}
-
-	.stat-note {
-		margin: 0.2rem 0 0;
-		color: var(--color-text-muted);
-		font-size: 0.75rem;
 	}
 
 	.error-logs {

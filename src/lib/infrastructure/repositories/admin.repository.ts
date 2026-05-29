@@ -1,12 +1,15 @@
-import { count, desc, eq, gt } from 'drizzle-orm';
+import { count, desc, eq, gt, gte, sql } from 'drizzle-orm';
+import { latestLastSeenAt } from '$lib/domain/admin-stats';
+import { ERROR_LOG_RETENTION_MS } from '$lib/domain/error-log';
 import type { AppErrorEntry } from '$lib/domain/error-log';
 import { isUserActiveNow } from '$lib/domain/presence';
 import type { UserRole } from '$lib/domain/user';
-import { db } from '$lib/infrastructure/db';
+import { db, getDatabaseBackend, type DatabaseBackend } from '$lib/infrastructure/db';
 import {
+	appErrorTable,
+	householdMemberTable,
+	householdTable,
 	inventoryItemTable,
-	mealPlanTable,
-	petTable,
 	sessionTable,
 	userTable
 } from '$lib/infrastructure/db/schema';
@@ -26,11 +29,16 @@ export interface AdminUserSummary {
 
 export interface AdminDashboardStats {
 	userCount: number;
+	householdCount: number;
+	membershipCount: number;
+	inventoryCount: number;
+	shoppingListItemCount: number | null;
+	errorCount7Days: number;
+	errorCountTotal: number;
 	activeNowCount: number;
 	activeSessionCount: number;
-	inventoryCount: number;
-	mealPlanCount: number;
-	petCount: number;
+	lastActivityAt: Date | null;
+	databaseBackend: DatabaseBackend;
 }
 
 export interface IAdminRepository {
@@ -41,6 +49,16 @@ export interface IAdminRepository {
 	setUserPetsEnabled(userId: string, enabled: boolean): Promise<void>;
 	invalidateAllSessions(): Promise<number>;
 	invalidateUserSessions(userId: string): Promise<number>;
+}
+
+function readExecuteCount(result: unknown): number {
+	const rows = Array.isArray(result)
+		? result
+		: typeof result === 'object' && result !== null && 'rows' in result
+			? (result as { rows: unknown[] }).rows
+			: [];
+	const row = rows[0] as { count?: number | string } | undefined;
+	return Number(row?.count ?? 0);
 }
 
 export class DrizzleAdminRepository implements IAdminRepository {
@@ -54,26 +72,58 @@ export class DrizzleAdminRepository implements IAdminRepository {
 		return new Set(rows.map((row) => row.userId));
 	}
 
+	private async countShoppingListItems(): Promise<number | null> {
+		try {
+			const result = await db.execute(
+				sql`SELECT COUNT(*)::int AS count FROM shopping_list_item`
+			);
+			return readExecuteCount(result);
+		} catch {
+			return null;
+		}
+	}
+
 	async getDashboardStats(): Promise<AdminDashboardStats> {
-		const [[users], [inventory], [mealPlans], [pets], userRows, activeSessionUserIds] =
-			await Promise.all([
-				db.select({ count: count() }).from(userTable),
-				db.select({ count: count() }).from(inventoryItemTable),
-				db.select({ count: count() }).from(mealPlanTable),
-				db.select({ count: count() }).from(petTable),
-				db.select({ lastSeenAt: userTable.lastSeenAt }).from(userTable),
-				this.getActiveSessionUserIds()
-			]);
+		const errorCutoff = new Date(Date.now() - ERROR_LOG_RETENTION_MS);
+		const [
+			[users],
+			[households],
+			[memberships],
+			[inventory],
+			[errors7Days],
+			[errorsTotal],
+			userRows,
+			activeSessionUserIds,
+			shoppingListItemCount
+		] = await Promise.all([
+			db.select({ count: count() }).from(userTable),
+			db.select({ count: count() }).from(householdTable),
+			db.select({ count: count() }).from(householdMemberTable),
+			db.select({ count: count() }).from(inventoryItemTable),
+			db
+				.select({ count: count() })
+				.from(appErrorTable)
+				.where(gte(appErrorTable.createdAt, errorCutoff)),
+			db.select({ count: count() }).from(appErrorTable),
+			db.select({ lastSeenAt: userTable.lastSeenAt }).from(userTable),
+			this.getActiveSessionUserIds(),
+			this.countShoppingListItems()
+		]);
 
 		const activeNowCount = userRows.filter((row) => isUserActiveNow(row.lastSeenAt)).length;
 
 		return {
 			userCount: users?.count ?? 0,
+			householdCount: households?.count ?? 0,
+			membershipCount: memberships?.count ?? 0,
+			inventoryCount: inventory?.count ?? 0,
+			shoppingListItemCount,
+			errorCount7Days: errors7Days?.count ?? 0,
+			errorCountTotal: errorsTotal?.count ?? 0,
 			activeNowCount,
 			activeSessionCount: activeSessionUserIds.size,
-			inventoryCount: inventory?.count ?? 0,
-			mealPlanCount: mealPlans?.count ?? 0,
-			petCount: pets?.count ?? 0
+			lastActivityAt: latestLastSeenAt(userRows),
+			databaseBackend: getDatabaseBackend()
 		};
 	}
 
