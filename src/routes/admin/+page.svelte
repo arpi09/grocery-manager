@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
+	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import { ACTIVE_USER_WINDOW_MS, formatLastSeen } from '$lib/domain/presence';
@@ -27,9 +28,10 @@
 	}
 </script>
 
-<AppLayout wide user={data.user}>
+<AppLayout user={data.user}>
 	<AppHeader title="Admin" subtitle="Hantera användare och översikt" />
 
+	<PageContainer>
 	{#if form?.message}
 		<p class="banner" role="alert">{form.message}</p>
 	{/if}
@@ -205,6 +207,7 @@
 			</table>
 		</div>
 	</Card>
+	</PageContainer>
 </AppLayout>
 
 <style>

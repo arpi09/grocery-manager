@@ -23,8 +23,9 @@
 	--space-md: 1rem;
 	--space-lg: 1.5rem;
 	--space-xl: 2rem;
-	--max-width: 720px;
-	--max-width-wide: 1280px;
+	--page-max-width: 45rem;
+	--max-width: var(--page-max-width);
+	--max-width-wide: 80rem;
 }
 
 html[data-theme='dark'] {

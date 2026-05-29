@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
+	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import MealPlanCalendar from '$lib/components/organisms/MealPlanCalendar.svelte';
 
 	let { data } = $props();
@@ -8,12 +9,13 @@
 	const todayIso = new Date().toISOString().slice(0, 10);
 </script>
 
-<AppLayout wide user={data.user}>
+<AppLayout user={data.user}>
 	<AppHeader
 		title="Planer"
 		subtitle="Planera måltider i kalendern och lägg in ChatGPT-idéer"
 	/>
 
+	<PageContainer>
 	<section class="planner-grid">
 		<MealPlanCalendar
 			weeks={data.weeks}
@@ -59,6 +61,7 @@
 			{/if}
 		</aside>
 	</section>
+	</PageContainer>
 </AppLayout>
 
 <style>

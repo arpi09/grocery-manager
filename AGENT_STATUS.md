@@ -4,7 +4,7 @@ Live coordination board for parallel agents and feature branches.
 
 **Related:** `OWNERSHIP.md` · `MULTITASK.md`
 
-_Last verified: 2026-05-29 (local). `feature/pantry-invites-roles` and Firebase project id merged to **master** (`eece1e0`)._
+_Last verified: 2026-05-29 (local). `feature/shopping-list` in progress — household inköpslista on `/inkop` (migration `0008`). Layout: `feature/unified-page-layout` uses `AppLayout` → `AppHeader` → `PageContainer` (`--page-max-width: 45rem`)._
 
 ---
 
@@ -36,7 +36,7 @@ _Last verified: 2026-05-29 (local). `feature/pantry-invites-roles` and Firebase 
 
 ## PGlite migrations (incremental)
 
-`0003_household` → `0004_user_profile` → `0005_app_error` → `0006_user_theme_preference` → **`0007_household_invites_roles`**
+`0003_household` → … → **`0007_household_invites_roles`** → **`0008_shopping_list`**
 
 Idempotent runner in `init.ts`. After pull on old PGlite data: remove `data/pantry/` once if migrations fail.
 
@@ -49,6 +49,14 @@ Set in `.env` (see `.env.example`):
 - `ADMIN_EMAIL` / `ADMIN_PASSWORD` — seeded admin
 - `DEFAULT_MEMBER_EMAIL` / `DEFAULT_MEMBER_PASSWORD` — shared household demo member (seeded as **editor**)
 - `USE_PGLITE=true` — local embedded DB
+
+---
+
+## Active feature branch
+
+| Branch | Status |
+|--------|--------|
+| `feature/shopping-list` | Household-scoped inköpslista at `/inkop` (tab Inköpslista + AI & ICA), migration `0008_shopping_list.sql` |
 
 ---
 

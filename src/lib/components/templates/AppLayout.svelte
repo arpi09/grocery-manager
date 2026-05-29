@@ -6,11 +6,10 @@
 
 	interface Props {
 		children: Snippet;
-		wide?: boolean;
 		user?: (NavUser & { email: string }) | null;
 	}
 
-	let { children, wide = false, user = null }: Props = $props();
+	let { children, user = null }: Props = $props();
 
 	let recipeOpen = $state(false);
 
@@ -21,7 +20,7 @@
 
 <div class="app">
 	<MainNav {user} onRecipeIdeas={openRecipeIdeas} />
-	<main class:wide-main={wide}>
+	<main>
 		{@render children()}
 	</main>
 	<RecipeAssistant bind:open={recipeOpen} />
@@ -45,8 +44,7 @@
 	}
 
 	main {
-		max-width: var(--max-width);
-		margin: 0 auto;
+		width: 100%;
 		padding-top: var(--space-sm);
 	}
 
@@ -54,9 +52,5 @@
 		main {
 			padding-top: 0;
 		}
-	}
-
-	.wide-main {
-		max-width: var(--max-width-wide);
 	}
 </style>

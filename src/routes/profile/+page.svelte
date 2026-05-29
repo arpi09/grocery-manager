@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
+	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FormField from '$lib/components/molecules/FormField.svelte';
@@ -59,6 +60,7 @@
 
 <AppLayout user={data.user}>
 	<AppHeader title="Profil" subtitle="Redigera ditt konto" />
+	<PageContainer>
 	<Card>
 		{#if form?.success}
 			<p class="banner success" role="status">Profilen sparades.</p>
@@ -170,6 +172,7 @@
 			<Button type="submit">Spara tema</Button>
 		</form>
 	</Card>
+	</PageContainer>
 </AppLayout>
 
 <style>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
+	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import PetFoodModal from '$lib/components/organisms/PetFoodModal.svelte';
 
@@ -11,6 +12,7 @@
 <AppLayout user={data.user}>
 	<AppHeader title="Husdjur" subtitle="Dina husdjur hemma" />
 
+	<PageContainer>
 	<section class="pets">
 		<div class="pets-head">
 			<h2>Pets at home</h2>
@@ -61,6 +63,7 @@
 		pets={data.pets}
 		submitAction="?/addPetFood"
 	/>
+	</PageContainer>
 </AppLayout>
 
 <style>

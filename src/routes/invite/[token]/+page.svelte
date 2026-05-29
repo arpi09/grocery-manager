@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
+	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import { inviteRoleLabel } from '$lib/domain/household';
@@ -15,6 +16,7 @@
 
 <AppLayout user={data.user}>
 	<AppHeader title="Hushållsinbjudan" />
+	<PageContainer>
 	<Card>
 		{#if !data.preview}
 			<p class="message error">Inbjudan hittades inte eller är ogiltig.</p>
@@ -54,6 +56,7 @@
 			{/if}
 		{/if}
 	</Card>
+	</PageContainer>
 </AppLayout>
 
 <style>

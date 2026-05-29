@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
+	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import DashboardSummary from '$lib/components/organisms/DashboardSummary.svelte';
 
 	let { data } = $props();
@@ -8,5 +9,7 @@
 
 <AppLayout user={data.user}>
 	<AppHeader title="Hem" subtitle="Översikt över skafferiet" />
-	<DashboardSummary summary={data.summary} />
+	<PageContainer>
+		<DashboardSummary summary={data.summary} />
+	</PageContainer>
 </AppLayout>

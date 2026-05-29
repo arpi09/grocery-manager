@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
+	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import LocationTab from '$lib/components/molecules/LocationTab.svelte';
 	import InventoryList from '$lib/components/organisms/InventoryList.svelte';
 	import { LOCATION_LABELS } from '$lib/domain/location';
@@ -10,11 +11,13 @@
 
 <AppLayout user={data.user}>
 	<AppHeader title={LOCATION_LABELS[data.location]} subtitle="Ditt skafferi" />
-	<LocationTab active={data.location} />
-	<div class="toolbar">
-		<a class="add-btn" href="/item/new?location={data.location}&from=/inventory/{data.location}">+ Add</a>
-	</div>
-	<InventoryList items={data.items} location={data.location} />
+	<PageContainer>
+		<LocationTab active={data.location} />
+		<div class="toolbar">
+			<a class="add-btn" href="/item/new?location={data.location}&from=/inventory/{data.location}">+ Add</a>
+		</div>
+		<InventoryList items={data.items} location={data.location} />
+	</PageContainer>
 </AppLayout>
 
 <style>

@@ -16,6 +16,9 @@
 
 <style>
 	.page-header {
+		width: 100%;
+		max-width: var(--page-max-width);
+		margin-inline: auto;
 		margin-top: var(--space-md);
 		margin-bottom: var(--space-lg);
 	}

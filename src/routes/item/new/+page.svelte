@@ -1,11 +1,13 @@
 <script lang="ts">
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
+	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import AddItemForm from '$lib/components/organisms/AddItemForm.svelte';
 
 	let { data, form } = $props();
 </script>
 
 <AppLayout>
+	<PageContainer>
 	<div class="add-item-shell">
 		<div class="modal-card">
 			<div class="modal-top">
@@ -15,6 +17,7 @@
 			<AddItemForm defaultLocation={data.defaultLocation} errors={form?.errors} />
 		</div>
 	</div>
+	</PageContainer>
 </AppLayout>
 
 <style>

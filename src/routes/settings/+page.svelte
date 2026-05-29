@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
+	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import HouseholdSettingsPanel from '$lib/components/organisms/HouseholdSettingsPanel.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import SettingsRow from '$lib/components/molecules/SettingsRow.svelte';
@@ -29,6 +30,7 @@
 		subtitle="Hantera konto, hushåll och appinställningar"
 	/>
 
+	<PageContainer>
 	<div class="settings-page">
 		<SettingsSection title="Konto" description="Ditt inloggade konto och profil">
 			<SettingsRow title={data.user?.email ?? ''} note="Inloggad e-post" />
@@ -101,6 +103,7 @@
 			{/if}
 		</SettingsSection>
 	</div>
+	</PageContainer>
 
 	{#if petModalOpen}
 		<div class="overlay" role="dialog" aria-modal="true" aria-label="Lägg till husdjur">
@@ -137,7 +140,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0;
-		max-width: var(--max-width);
 	}
 
 	.pet-panel {

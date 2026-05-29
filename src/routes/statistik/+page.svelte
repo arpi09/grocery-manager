@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
+	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import AnalyticsDashboard from '$lib/components/organisms/AnalyticsDashboard.svelte';
 
 	let { data } = $props();
@@ -11,5 +12,7 @@
 		title="Så här ser skafferiet ut"
 		subtitle="Snabb överblick — typ haha, men faktiskt användbart"
 	/>
-	<AnalyticsDashboard analytics={data.analytics} />
+	<PageContainer>
+		<AnalyticsDashboard analytics={data.analytics} />
+	</PageContainer>
 </AppLayout>
