@@ -4,7 +4,7 @@ Live coordination board for parallel agents and feature branches.
 
 **Coordinator:** v2 — see [MERGE_QUEUE.md](./MERGE_QUEUE.md) for merge order; max **3** implementation agents in flight.
 
-**Related:** [OWNERSHIP.md](./OWNERSHIP.md) · [MULTITASK.md](./MULTITASK.md) · [.cursor/rules/coordinator-v2.mdc](./.cursor/rules/coordinator-v2.mdc)
+**Related:** [OWNERSHIP.md](./OWNERSHIP.md) · [MULTITASK.md](./MULTITASK.md) · [.cursor/rules/coordinator-v2.mdc](./.cursor/rules/coordinator-v2.mdc) · [DELIVERY_METRICS.md](./DELIVERY_METRICS.md)
 
 _Last verified: 2026-05-29 (local)._
 
@@ -19,6 +19,7 @@ _Last verified: 2026-05-29 (local)._
 | **Merge queue** | Single source of truth: [MERGE_QUEUE.md](./MERGE_QUEUE.md). |
 | **Push** | Only after: `Approved to push [branch-name]` |
 | **Dev runtime** | `dev:watch` in main worktree — no manual restart needed |
+| **Delivery metrics** | Coordinator updates [DELIVERY_METRICS.md](./DELIVERY_METRICS.md) after merge / weekly checkpoint |
 
 ---
 
@@ -58,8 +59,9 @@ _Last verified: 2026-05-29 (local)._
 
 | Item | Value |
 |------|--------|
-| **master / origin.master** | `3fad335` |
-| **Coordinator docs branch** | `chore/coordinator-v2` (this update) |
+| **master / origin.master** | `ee8fcd7` (pre-delivery-metrics merge) |
+| **Coordinator docs branch** | `chore/coordinator-v2` (merged) |
+| **feature/scan-to-add** | `/scan`, `/scan/kvitto`, `/scan/snabbstart` — MVP scan roadmap |
 
 ---
 
