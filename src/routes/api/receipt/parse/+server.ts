@@ -16,21 +16,17 @@ function parseLines(raw: unknown): ReceiptLine[] {
 		return [];
 	}
 
-	return lines
-		.map((entry) => {
-			if (!entry || typeof entry !== 'object') {
-				return null;
-			}
-			const row = entry as Record<string, unknown>;
-			const name = typeof row.name === 'string' ? row.name.trim() : '';
-			const quantity =
-				typeof row.quantity === 'string' && row.quantity.trim() ? row.quantity.trim() : undefined;
-			if (!name) {
-				return null;
-			}
-			return { name, quantity };
-		})
-		.filter((line): line is ReceiptLine => line !== null);
+	const result: ReceiptLine[] = [];
+	for (const entry of lines) {
+		if (!entry || typeof entry !== "object") continue;
+		const row = entry as Record<string, unknown>;
+		const name = typeof row.name === "string" ? row.name.trim() : "";
+		const quantity =
+			typeof row.quantity === "string" && row.quantity.trim() ? row.quantity.trim() : undefined;
+		if (!name) continue;
+		result.push(quantity ? { name, quantity } : { name });
+	}
+	return result;
 }
 
 export const POST: RequestHandler = async ({ request, locals, fetch }) => {

@@ -25,9 +25,7 @@
 		</div>
 		<InventoryList
 			items={data.items}
-			location={data.location}
-			canWrite={data.canWrite}
-			{form}
+			location={data.location}
 		/>
 	</PageContainer>
 </AppLayout>

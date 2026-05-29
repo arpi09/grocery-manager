@@ -1,12 +1,11 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { onMount } from 'svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Label from '$lib/components/atoms/Label.svelte';
 	import Input from '$lib/components/atoms/Input.svelte';
 	import BarcodeScanButton from '$lib/components/molecules/BarcodeScanButton.svelte';
 	import BarcodeScannerModal from '$lib/components/organisms/BarcodeScannerModal.svelte';
-	import ItemConsumptionActions from '$lib/components/molecules/ItemConsumptionActions.svelte';
-	import { LOCATIONS, LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
+		import { LOCATIONS, LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
 	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 
@@ -63,7 +62,7 @@
 				scanMessage =
 					response.status === 400
 						? 'Ogiltig streckkod. Ange minst 8 siffror.'
-						: 'Kunde inte slå upp streckkoden. Försök igen eller fyll i manuellt.';
+						: 'Kunde inte slÃ¥ upp streckkoden. FÃ¶rsÃ¶k igen eller fyll i manuellt.';
 				return;
 			}
 
@@ -76,9 +75,9 @@
 			}
 			scanMessage = found
 				? `Hittade ${product.name} (${product.barcode}).`
-				: `Okänd streckkod – fyllde i "${product.name}". Justera vid behov.`;
+				: `OkÃ¤nd streckkod â€“ fyllde i "${product.name}". Justera vid behov.`;
 		} catch {
-			scanMessage = 'Nätverksfel vid uppslagning av produkten.';
+			scanMessage = 'NÃ¤tverksfel vid uppslagning av produkten.';
 		} finally {
 			lookupLoading = false;
 		}
@@ -181,7 +180,7 @@
 					disabled={imageLookupLoading}
 					onclick={triggerPhotoPicker}
 				>
-					{imageLookupLoading ? 'Analyzing with ChatGPT AI...' : '📸 Scan with ChatGPT AI'}
+					{imageLookupLoading ? 'Analyzing with ChatGPT AI...' : 'ðŸ“¸ Scan with ChatGPT AI'}
 				</Button>
 				<input
 					bind:this={photoInputEl}
@@ -240,7 +239,7 @@
 		</div>
 		<div class="field">
 			<Label for="unit">Unit</Label>
-			<Input id="unit" name="unit" placeholder="pcs, g, L…" bind:value={unit} />
+			<Input id="unit" name="unit" placeholder="pcs, g, Lâ€¦" bind:value={unit} />
 		</div>
 	</div>
 
@@ -254,13 +253,6 @@
 		<textarea id="notes" name="notes" class="textarea" rows="3" bind:value={notes}></textarea>
 	</div>
 
-	{#if isEdit && item}
-		<section class="consumption-section" aria-label="Förbrukning">
-			<h2 class="section-title">Förbrukning</h2>
-			<p class="section-help">Markera varan som förbrukad eller kastad när den är slut.</p>
-			<ItemConsumptionActions itemId={item.id} />
-		</section>
-	{/if}
 
 	<div class="actions">
 		<Button type="submit" fullWidth>{isEdit ? 'Save changes' : 'Add item'}</Button>
