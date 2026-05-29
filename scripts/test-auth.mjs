@@ -1,7 +1,6 @@
 import { PGlite } from '@electric-sql/pglite';
-import { readFileSync, mkdirSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { hash, verify } from '@node-rs/argon2';
 
 const dbPath = join(process.cwd(), 'data', 'pantry');
 mkdirSync(join(process.cwd(), 'data'), { recursive: true });

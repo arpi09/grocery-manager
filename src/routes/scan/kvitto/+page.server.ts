@@ -70,7 +70,7 @@ export const actions: Actions = {
 		}
 
 		const label = `${created} varor`;
-		const target = buildScanReturnUrl(`/inventory/${bulkLocation}`, 'added', label);
+		const target = buildScanReturnUrl(returnTo, 'added', label);
 		redirect(302, target);
 	}
 };

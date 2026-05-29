@@ -53,9 +53,9 @@ async function runPgliteBaseline(client: PGlite) {
 	const sql = readFileSync(migrationPath, 'utf8');
 	try {
 		await client.exec(sql);
-	} catch (error) {
-		if (!isIgnorablePgliteMigrationError(error)) {
-			throw error;
+	} catch (migrationError) {
+		if (!isIgnorablePgliteMigrationError(migrationError)) {
+			throw migrationError;
 		}
 	}
 }
