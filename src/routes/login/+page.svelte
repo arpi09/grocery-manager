@@ -1,5 +1,5 @@
 <script lang="ts">
-	import AuthLayout from '$lib/components/templates/AuthLayout.svelte';
+	import AuthLandingShell from '$lib/components/templates/AuthLandingShell.svelte';
 	import LoginForm from '$lib/components/organisms/LoginForm.svelte';
 	import type { PageProps } from './$types';
 
@@ -8,7 +8,11 @@
 	const message = $derived(form?.message ?? data.message ?? undefined);
 </script>
 
-<AuthLayout title="Sign in" subtitle="Track what's in your kitchen">
+<svelte:head>
+	<title>Logga in · Home Pantry</title>
+</svelte:head>
+
+<AuthLandingShell formTitle="Logga in" formSubtitle="Skafferi · datum · inköp">
 	<LoginForm
 		errors={form?.errors}
 		{message}
@@ -16,4 +20,4 @@
 		email={form?.email}
 		redirectTo={form?.redirectTo ?? data.redirectTo ?? undefined}
 	/>
-</AuthLayout>
+</AuthLandingShell>

@@ -41,7 +41,7 @@
 	{/if}
 
 	<FormField
-		label="Email"
+		label="E-post"
 		name="email"
 		type="email"
 		autocomplete="email"
@@ -49,14 +49,14 @@
 		error={errors.email?.[0]}
 	/>
 	<FormField
-		label="Password"
+		label="Lösenord"
 		name="password"
 		type="password"
 		autocomplete="new-password"
 		error={errors.password?.[0]}
 	/>
 	<FormField
-		label="Confirm password"
+		label="Bekräfta lösenord"
 		name="confirmPassword"
 		type="password"
 		autocomplete="new-password"
@@ -64,11 +64,11 @@
 	/>
 
 	<Button type="submit" fullWidth disabled={submitting}>
-		{submitting ? 'Creating account…' : 'Create account'}
+		{submitting ? 'Skapar konto…' : 'Skapa konto'}
 	</Button>
 
 	<p class="footer">
-		Already have an account? <a href="/login">Sign in</a>
+		Har du konto? <a href="/login">Logga in</a>
 	</p>
 </form>
 
@@ -85,7 +85,7 @@
 	}
 
 	.banner.error {
-		background: #fdeaea;
+		background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
 		color: var(--color-danger);
 	}
 
