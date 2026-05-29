@@ -6,7 +6,7 @@
 	import InventoryList from '$lib/components/organisms/InventoryList.svelte';
 	import { LOCATION_LABELS } from '$lib/domain/location';
 
-	let { data, form } = $props();
+	let { data } = $props();
 </script>
 
 <AppLayout user={data.user}>

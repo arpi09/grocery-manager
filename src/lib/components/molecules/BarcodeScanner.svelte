@@ -89,7 +89,6 @@
 	<p class="error" role="alert">{scannerError}</p>
 {:else}
 	<div class="viewport">
-		<!-- svelte-ignore a11y_media_has_caption -->
 		<video bind:this={videoEl} class="video" playsinline muted></video>
 		{#if scanning}
 			<div class="frame" aria-hidden="true"></div>

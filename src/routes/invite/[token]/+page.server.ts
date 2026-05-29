@@ -6,7 +6,6 @@ import {
 	InviteNotFoundError,
 	InviteNotPendingError
 } from '$lib/application/household.service';
-import { inviteRoleLabel } from '$lib/domain/household';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals, url }) => {

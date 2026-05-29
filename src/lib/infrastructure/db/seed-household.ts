@@ -119,7 +119,6 @@ async function backfillInventoryHouseholdIds() {
 }
 
 export async function ensureDefaultHousehold(): Promise<void> {
-	const db = getDb();
 	await ensureDefaultHouseholdRow();
 
 	const adminId = await findUserIdByEmail(adminEmail());
