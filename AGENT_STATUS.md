@@ -1,10 +1,10 @@
-﻿# Agent status
+# Agent status
 
 Live coordination board for parallel agents and feature branches.
 
 **Related:** `OWNERSHIP.md` · `MULTITASK.md`
 
-_Last verified: 2026-05-28 (local). Feature branch `feature/pantry-invites-roles` in progress._
+_Last verified: 2026-05-29 (local). `feature/pantry-invites-roles` and Firebase project id merged to **master** (`eece1e0`)._
 
 ---
 
@@ -17,32 +17,12 @@ _Last verified: 2026-05-28 (local). Feature branch `feature/pantry-invites-roles
 
 ---
 
-## Active feature branch
+## Recently merged to master
 
-| Item | Value |
-|------|--------|
-| **Branch** | `feature/pantry-invites-roles` |
-| **Scope** | Household roles (`owner` / `editor` / `viewer`), invite links, read-only viewers |
-| **Migration** | `0007_household_invites_roles.sql` — map `member` → `editor`, add `household_invite` |
-
-### Roles
-
-| Roll | Behörighet |
-|------|------------|
-| **Ägare** | Bjud in, ändra roller, ta bort medlemmar, redigera inventering |
-| **Redigera** | Lägga till/ändra/radera varor |
-| **Visa** | Endast läsa inventering |
-
-### UI
-
-- **Inställningar → Delat hushåll** — medlemmar, inbjudningar, rollhantering (ägare)
-- **`/invite/[token]`** — acceptera inbjudan (publik sida, inloggning med rätt e-post)
-
-### Verify locally
-
-1. Logga in som ägare → Inställningar → skapa inbjudan, kopiera länk
-2. Öppna länken i inkognito / annat konto → acceptera
-3. Sätt användare till **Visa** → försök lägga till vara (ska nekas)
+| Branch | Notes |
+|--------|--------|
+| `chore/firebase-project-home-pantry-4bee5` | Firebase project id `home-pantry-4bee5` (`.firebaserc`, `apphosting.yaml`) |
+| `feature/pantry-invites-roles` | Invites + owner/editor/viewer roles, migration `0007` |
 
 ---
 
@@ -50,7 +30,7 @@ _Last verified: 2026-05-28 (local). Feature branch `feature/pantry-invites-roles
 
 | Item | Value |
 |------|--------|
-| **master / origin.master** | `5d8b498` — integrated E2E, household scope, profile, analytics, nav redesign, theme |
+| **master / origin.master** | `eece1e0` - Firebase App Hosting, invites/roles (0007), prior E2E/household/profile/theme |
 
 ---
 
@@ -76,5 +56,7 @@ Set in `.env` (see `.env.example`):
 
 | Branch | Status |
 |--------|--------|
-| `feature/firebase-deploy` | Firebase deploy docs/setup (separate agent) |
-| `fix/logout-500` | Logout fix (ready to merge when approved) |
+| `feature/admin-interface` | Admin UI (worktree `home-pantry-admin`) - not on master |
+| `feat/integration-test-suite` | Test worktree - largely on master |
+| `docs/agent-coordination` | Stale (1 commit, 22 behind) |
+| `feat/e2e-playwright` | Stale E2E docs (2 ahead, 22 behind) |
