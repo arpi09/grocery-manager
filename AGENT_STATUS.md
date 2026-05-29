@@ -4,7 +4,7 @@ Live coordination board for parallel agents and feature branches.
 
 **Coordinator:** v2 — see [MERGE_QUEUE.md](./MERGE_QUEUE.md) for merge order; max **3** implementation agents in flight.
 
-**Related:** [OWNERSHIP.md](./OWNERSHIP.md) · [MULTITASK.md](./MULTITASK.md) · [.cursor/rules/coordinator-v2.mdc](./.cursor/rules/coordinator-v2.mdc) · [DELIVERY_METRICS.md](./DELIVERY_METRICS.md)
+**Related:** [OWNERSHIP.md](./OWNERSHIP.md) · [MULTITASK.md](./MULTITASK.md) · [.cursor/rules/coordinator-v2.mdc](./.cursor/rules/coordinator-v2.mdc) · [DELIVERY_METRICS.md](./DELIVERY_METRICS.md) · [DEPENDENCY_HEALTH.md](./DEPENDENCY_HEALTH.md)
 
 _Last verified: 2026-05-29 (local)._
 
@@ -19,7 +19,7 @@ _Last verified: 2026-05-29 (local)._
 | **Merge queue** | Single source of truth: [MERGE_QUEUE.md](./MERGE_QUEUE.md). |
 | **Push** | Only after: `Approved to push [branch-name]` |
 | **Dev runtime** | `dev:watch` in main worktree — no manual restart needed |
-| **Delivery metrics** | Coordinator updates [DELIVERY_METRICS.md](./DELIVERY_METRICS.md) after merge / weekly checkpoint |
+| **Delivery metrics** | Coordinator updates [DELIVERY_METRICS.md](./DELIVERY_METRICS.md) · [DEPENDENCY_HEALTH.md](./DEPENDENCY_HEALTH.md) after merge / weekly checkpoint |
 
 ---
 
@@ -87,6 +87,12 @@ Set in `.env` (see `.env.example`):
 
 `feature/shopping-list`, `feature/scan-to-add`, `feature/unified-page-layout`, `feature/modal-ux-redesign`, `fix/app-crash`, `fix/login-admin` — see [MERGE_QUEUE.md](./MERGE_QUEUE.md).
 
+
+## Dependency health agent
+
+| Branch | Status |
+|--------|--------|
+| `chore/dependency-health-program` | Read-only scans; maintains [DEPENDENCY_HEALTH.md](./DEPENDENCY_HEALTH.md) — no auto-upgrades |
 ---
 
 ## Historical / stale (no active agent)
