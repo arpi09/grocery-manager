@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { portal } from '$lib/actions/portal';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import {
 		focusInitialElement,
@@ -109,6 +110,7 @@
 
 {#if open}
 	<div
+		use:portal={'body'}
 		class="modal-root"
 		class:modal-root--nested={nested}
 		class:modal-root--sheet={variant === 'sheet'}
@@ -246,6 +248,7 @@
 	.modal-panel--center .modal-body,
 	.modal-panel--sheet .modal-body {
 		overflow: auto;
+		scrollbar-color: var(--color-border) transparent;
 	}
 
 	.modal-panel--center :global(.modal-header) {
