@@ -28,6 +28,56 @@ function usePglite(): boolean {
 }
 export type DatabaseBackend = 'pglite' | 'postgres';
 
+function extractCloudSqlSocketHost(connectionString: string): string | null {
+	const queryStart = connectionString.indexOf('?');
+	if (queryStart === -1) {
+		return null;
+	}
+	const host = new URLSearchParams(connectionString.slice(queryStart + 1)).get('host');
+	return host?.startsWith('/cloudsql/') ? host : null;
+}
+
+function parseCloudSqlDatabaseUrl(connectionString: string): {
+	username: string;
+	password: string;
+	database: string;
+} {
+	const queryStart = connectionString.indexOf('?');
+	const authAndDb = connectionString.slice(connectionString.indexOf('://') + 3, queryStart);
+	const at = authAndDb.lastIndexOf('@');
+	if (at === -1) {
+		throw new Error('Cloud SQL DATABASE_URL must include user credentials before @');
+	}
+	const userPass = authAndDb.slice(0, at);
+	const database = authAndDb.slice(at + 1).replace(/^\//, '');
+	const colon = userPass.indexOf(':');
+	if (colon === -1) {
+		throw new Error('Cloud SQL DATABASE_URL must include user:password');
+	}
+	return {
+		username: decodeURIComponent(userPass.slice(0, colon)),
+		password: decodeURIComponent(userPass.slice(colon + 1)),
+		database: decodeURIComponent(database)
+	};
+}
+
+/** postgres.js rejects `postgresql://user:pass@/db?host=/cloudsql/...` ("Invalid URL"). */
+function createPostgresClient(connectionString: string) {
+	const cloudSqlHost = extractCloudSqlSocketHost(connectionString);
+	if (cloudSqlHost) {
+		const { username, password, database } = parseCloudSqlDatabaseUrl(connectionString);
+		return postgres({
+			host: cloudSqlHost,
+			database,
+			username,
+			password,
+			connect_timeout: 15,
+			max: 5
+		});
+	}
+	return postgres(connectionString, { connect_timeout: 15, max: 5 });
+}
+
 export function getDatabaseBackend(): DatabaseBackend {
 	return usePglite() ? 'pglite' : 'postgres';
 }
@@ -163,10 +213,7 @@ export async function initDatabase(): Promise<void> {
 			}
 
 			try {
-				const sql = postgres(connectionString, {
-					connect_timeout: 15,
-					max: 5
-				});
+				const sql = createPostgresClient(connectionString);
 				dbInstance = drizzlePostgres(sql, { schema });
 				await sql`SELECT 1`;
 
