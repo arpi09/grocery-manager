@@ -2,18 +2,44 @@
 
 Live coordination board for parallel agents and feature branches.
 
-**Related:** `OWNERSHIP.md` · `MULTITASK.md`
+**Coordinator:** v2 — see [MERGE_QUEUE.md](./MERGE_QUEUE.md) for merge order; max **3** implementation agents in flight.
 
-_Last verified: 2026-05-29 (local). **`feature/scan-to-add`**: Phase 1–3 (streckkod, kvitto, snabbstart) — not pushed._
+**Related:** [OWNERSHIP.md](./OWNERSHIP.md) · [MULTITASK.md](./MULTITASK.md) · [.cursor/rules/coordinator-v2.mdc](./.cursor/rules/coordinator-v2.mdc)
+
+_Last verified: 2026-05-29 (local)._
 
 ---
 
-## Coordinator rules
+## Coordinator v2 (this repo)
 
 | Rule | Detail |
 |------|--------|
+| **Agent creation** | **Coordinator only** — no implementation agent or worktree spawned by feature agents. |
+| **WIP limit** | Max **3** concurrent implementation agents (excluding dev-runtime ops). |
+| **Merge queue** | Single source of truth: [MERGE_QUEUE.md](./MERGE_QUEUE.md). |
 | **Push** | Only after: `Approved to push [branch-name]` |
 | **Dev runtime** | `dev:watch` in main worktree — no manual restart needed |
+
+---
+
+## Active work summary (WIP: 3 / 3)
+
+| Slot | Branch | Focus | Status |
+|------|--------|-------|--------|
+| 1 | `feature/modal-blur-consistency` | Modal scrim blur unification | Ready to merge (1 commit ahead of `master`) |
+| 2 | `feature/login-landing-redesign` | Login landing redesign | In progress (1 commit ahead) |
+| 3 | `feature/firebase-pipeline` | Drizzle journal + Firebase CI deploy | **Blocked** — user Cloud SQL setup in progress |
+
+**Paused (do not start new agents until a slot frees):** `feature/admin-health-usage` (diverged), `merge-scan-to-add` (integration branch).
+
+---
+
+## Blockers
+
+| Blocker | Owner | Impact |
+|---------|-------|--------|
+| **Cloud SQL / Firebase deploy path** | User | Holds merge of `feature/firebase-pipeline` and production DB validation |
+| **Diverged branches** | Coordinator | `feature/admin-health-usage`, `merge-scan-to-add` need rebase/split before new impl work |
 
 ---
 
@@ -21,7 +47,9 @@ _Last verified: 2026-05-29 (local). **`feature/scan-to-add`**: Phase 1–3 (stre
 
 | Branch | Notes |
 |--------|--------|
-| `chore/firebase-project-home-pantry-4bee5` | Firebase project id `home-pantry-4bee5` (`.firebaserc`, `apphosting.yaml`) |
+| Modal UX | Shared `Modal` molecule + migration (`5d4045e`, `3fad335`) |
+| `feature/multi-pantry` | Multi-pantry support (`e9ca504`) |
+| `chore/firebase-project-home-pantry-4bee5` | Firebase project id `home-pantry-4bee5` |
 | `feature/pantry-invites-roles` | Invites + owner/editor/viewer roles, migration `0007` |
 
 ---
@@ -30,8 +58,8 @@ _Last verified: 2026-05-29 (local). **`feature/scan-to-add`**: Phase 1–3 (stre
 
 | Item | Value |
 |------|--------|
-| **master / origin.master** | `640418d` |
-| **feature/scan-to-add** | `/scan`, `/scan/kvitto`, `/scan/snabbstart` — MVP scan roadmap |
+| **master / origin.master** | `3fad335` |
+| **Coordinator docs branch** | `chore/coordinator-v2` (this update) |
 
 ---
 
@@ -53,20 +81,17 @@ Set in `.env` (see `.env.example`):
 
 ---
 
-## Active feature branch
+## Branches aligned with master (no open commits)
 
-| Branch | Status |
-|--------|--------|
-| `feature/shopping-list` | Household-scoped inköpslista at `/inkop` (tab Inköpslista + AI & ICA), migration `0008_shopping_list.sql` |
+`feature/shopping-list`, `feature/scan-to-add`, `feature/unified-page-layout`, `feature/modal-ux-redesign`, `fix/app-crash`, `fix/login-admin` — see [MERGE_QUEUE.md](./MERGE_QUEUE.md).
 
 ---
 
-## Other branches (parallel)
+## Historical / stale (no active agent)
 
-| Branch | Status |
+| Branch | Notes |
 |--------|--------|
-| `feature/admin-health-usage` | Admin hälsa & användning — utökade dashboard-kort på `/admin` |
-| `feature/admin-interface` | Admin UI (worktree `home-pantry-admin`) - not on master |
-| `feat/integration-test-suite` | Test worktree - largely on master |
-| `docs/agent-coordination` | Stale (1 commit, 22 behind) |
-| `feat/e2e-playwright` | Stale E2E docs (2 ahead, 22 behind) |
+| `feature/admin-interface` | Admin UI worktree legacy |
+| `feat/integration-test-suite` | Largely on master |
+| `docs/agent-coordination` | Superseded by Coordinator v2 |
+| `feat/e2e-playwright` | Stale E2E docs branch |
