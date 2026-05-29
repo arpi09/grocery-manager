@@ -20,3 +20,5 @@ Thumbs.db
 firebase-debug.log
 firebase-debug.*.log
 .firebase/
+
+node_modules.broken*

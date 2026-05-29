@@ -5,6 +5,7 @@
 			"rootDir": ".",
 			"ignore": [
 				"node_modules",
+				"node_modules.broken*",
 				".git",
 				"data",
 				"test-results",

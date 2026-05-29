@@ -287,3 +287,16 @@ Use the existing root `Dockerfile`. Map Cloud Run URL to `PUBLIC_ORIGIN`.
 - **Authorized networks:** Required only for local `db:migrate` over public IP
 - **SSR:** Cannot use static-only Hosting; App Hosting or Cloud Run is mandatory
 - **PGlite:** Not supported in Cloud Run (ephemeral filesystem); use Postgres
+
+## Troubleshooting deploy CLI errors
+
+If `npm run deploy:firebase` fails immediately with **"An unexpected error has occurred"** (often twice), run with debug and check the end of `firebase-debug.log`:
+
+```powershell
+npx firebase-tools@latest deploy --only apphosting:home-pantry --project home-pantry-4bee5 --debug
+```
+
+**EPERM on `node_modules.broken.*`:** A failed local `npm install` can leave a folder like `node_modules.broken.20260529172544`. Firebase zips the repo root and only ignores `node_modules`, not that rename backup, so Windows file locks cause EPERM. Fix:
+
+1. Close dev servers/terminals using the project, then delete `node_modules.broken*` in the repo root.
+2. `firebase.json` already ignores `node_modules.broken*` for deploy; keep that pattern if you customize ignores.
