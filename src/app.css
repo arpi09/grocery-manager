@@ -25,6 +25,11 @@
 	--space-xl: 2rem;
 	/* Full main column width; horizontal inset comes from AppLayout padding */
 	--page-max-width: none;
+	/* Layering: modals below toasts (120) */
+	--z-modal: 100;
+	--z-modal-nested: 110;
+	--modal-scrim: color-mix(in srgb, var(--color-text) 42%, transparent);
+	--modal-scrim-blur: 4px;
 }
 
 html[data-theme='dark'] {

@@ -6,6 +6,7 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import SettingsRow from '$lib/components/molecules/SettingsRow.svelte';
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
+	import Modal from '$lib/components/molecules/Modal.svelte';
 
 	let { data, form } = $props();
 	let petModalOpen = $state(false);
@@ -105,34 +106,30 @@
 	</div>
 	</PageContainer>
 
-	{#if petModalOpen}
-		<div class="overlay" role="dialog" aria-modal="true" aria-label="Lägg till husdjur">
-			<div class="modal">
-				<div class="modal-head">
-					<h2>Lägg till husdjur</h2>
-					<button type="button" class="close" onclick={() => (petModalOpen = false)} aria-label="Stäng">
-						×
-					</button>
-				</div>
-				<form method="POST" action="?/addPet" class="pet-form">
-					<label>
-						Namn
-						<input name="name" required maxlength="80" placeholder="t.ex. Luna" />
-					</label>
-					<label>
-						Art (valfritt)
-						<input name="species" maxlength="80" placeholder="t.ex. Hund, Katt" />
-					</label>
-					<div class="modal-actions">
-						<Button type="button" variant="secondary" onclick={() => (petModalOpen = false)}>
-							Avbryt
-						</Button>
-						<Button type="submit">Spara</Button>
-					</div>
-				</form>
+	<Modal
+		open={petModalOpen}
+		onClose={() => (petModalOpen = false)}
+		variant="center"
+		title="Lägg till husdjur"
+		panelClass="pet-settings-panel"
+	>
+		<form method="POST" action="?/addPet" class="pet-form">
+			<label>
+				Namn
+				<input name="name" required maxlength="80" placeholder="t.ex. Luna" />
+			</label>
+			<label>
+				Art (valfritt)
+				<input name="species" maxlength="80" placeholder="t.ex. Hund, Katt" />
+			</label>
+			<div class="modal-actions">
+				<Button type="button" variant="secondary" onclick={() => (petModalOpen = false)}>
+					Avbryt
+				</Button>
+				<Button type="submit">Spara</Button>
 			</div>
-		</div>
-	{/if}
+		</form>
+	</Modal>
 </AppLayout>
 
 <style>
@@ -188,47 +185,8 @@
 		font-size: 0.85rem;
 	}
 
-	.overlay {
-		position: fixed;
-		inset: 0;
-		background: rgba(31, 42, 36, 0.45);
-		display: grid;
-		place-items: center;
-		padding: var(--space-md);
-		z-index: 50;
-	}
-
-	.modal {
-		width: min(460px, 100%);
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-lg);
-		padding: var(--space-lg);
-		box-shadow: var(--shadow-md);
-	}
-
-	.modal-head {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: var(--space-md);
-	}
-
-	.modal-head h2 {
-		margin: 0;
-		font-size: 1.1rem;
-	}
-
-	.close {
-		border: 1px solid var(--color-border);
-		background: var(--color-surface);
-		border-radius: 999px;
-		width: 2rem;
-		height: 2rem;
-		cursor: pointer;
-		font-size: 1.1rem;
-		line-height: 1;
-		color: var(--color-text-muted);
+	:global(.pet-settings-panel) {
+		width: min(460px, calc(100vw - 2 * var(--space-md)));
 	}
 
 	.pet-form {

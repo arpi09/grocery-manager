@@ -1,0 +1,328 @@
+<script lang="ts">
+	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
+	import {
+		focusInitialElement,
+		lockBodyScroll,
+		restoreFocus,
+		saveFocus,
+		trapFocus,
+		unlockBodyScroll
+	} from '$lib/utils/modal-a11y';
+	import type { Snippet } from 'svelte';
+
+	type Variant = 'center' | 'sheet';
+
+	interface Props {
+		open: boolean;
+		onClose: () => void;
+		variant?: Variant;
+		dismissible?: boolean;
+		title?: string;
+		subtitle?: string;
+		label?: string;
+		nested?: boolean;
+		panelClass?: string;
+		bodyClass?: string;
+		showSheetHandle?: boolean;
+		children: Snippet;
+		header?: Snippet;
+		footer?: Snippet;
+	}
+
+	let {
+		open,
+		onClose,
+		variant = 'center',
+		dismissible = true,
+		title,
+		subtitle,
+		label,
+		nested = false,
+		panelClass = '',
+		bodyClass = '',
+		showSheetHandle = true,
+		children,
+		header,
+		footer
+	}: Props = $props();
+
+	const titleId = `modal-title-${Math.random().toString(36).slice(2, 9)}`;
+	let dialogEl = $state<HTMLDivElement | null>(null);
+
+	const ariaLabel = $derived(label ?? (title ? undefined : 'Dialog'));
+	const ariaLabelledby = $derived(title ? titleId : undefined);
+
+	function requestClose() {
+		if (!dismissible) {
+			return;
+		}
+		onClose();
+	}
+
+	function onWindowKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape' && open && dismissible) {
+			event.preventDefault();
+			requestClose();
+		}
+	}
+
+	function onBackdropClick() {
+		requestClose();
+	}
+
+	function onPanelClick(event: MouseEvent) {
+		event.stopPropagation();
+	}
+
+	$effect(() => {
+		if (!open) {
+			return;
+		}
+		saveFocus();
+		lockBodyScroll();
+
+		return () => {
+			unlockBodyScroll();
+			restoreFocus();
+		};
+	});
+
+	$effect(() => {
+		if (!open || !dialogEl) {
+			return;
+		}
+		const releaseTrap = trapFocus(dialogEl);
+		const frame = requestAnimationFrame(() => {
+			if (dialogEl) {
+				focusInitialElement(dialogEl);
+			}
+		});
+
+		return () => {
+			cancelAnimationFrame(frame);
+			releaseTrap();
+		};
+	});
+</script>
+
+<svelte:window onkeydown={onWindowKeydown} />
+
+{#if open}
+	<div
+		class="modal-root"
+		class:modal-root--nested={nested}
+		class:modal-root--sheet={variant === 'sheet'}
+		class:modal-root--center={variant === 'center'}
+	>
+		<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+		<div class="modal-backdrop" onclick={onBackdropClick} aria-hidden="true"></div>
+
+		<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+		<div
+			bind:this={dialogEl}
+			class="modal-panel {panelClass}"
+			class:modal-panel--sheet={variant === 'sheet'}
+			class:modal-panel--center={variant === 'center'}
+			role="dialog"
+			aria-modal="true"
+			aria-label={ariaLabel}
+			aria-labelledby={ariaLabelledby}
+			tabindex="-1"
+			onclick={onPanelClick}
+		>
+			{#if variant === 'sheet' && showSheetHandle}
+				<div class="modal-sheet-handle" aria-hidden="true"></div>
+			{/if}
+
+			{#if header}
+				{@render header()}
+			{:else if title}
+				<ModalHeader {title} {subtitle} {titleId} onClose={dismissible ? requestClose : undefined} />
+			{/if}
+
+			<div class="modal-body {bodyClass}">
+				{@render children()}
+			</div>
+
+			{#if footer}
+				<footer class="modal-footer">
+					{@render footer()}
+				</footer>
+			{/if}
+		</div>
+	</div>
+{/if}
+
+<style>
+	.modal-root {
+		position: fixed;
+		inset: 0;
+		z-index: var(--z-modal);
+		pointer-events: none;
+	}
+
+	.modal-root--nested {
+		z-index: var(--z-modal-nested);
+	}
+
+	.modal-backdrop {
+		position: fixed;
+		inset: 0;
+		pointer-events: auto;
+		background: var(--modal-scrim);
+		backdrop-filter: blur(var(--modal-scrim-blur));
+		-webkit-backdrop-filter: blur(var(--modal-scrim-blur));
+		animation: modal-backdrop-in 0.2s ease-out;
+	}
+
+	.modal-panel {
+		position: fixed;
+		pointer-events: auto;
+		display: flex;
+		flex-direction: column;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		box-shadow: var(--shadow-md);
+		color: var(--color-text);
+		max-height: min(88vh, 720px);
+	}
+
+	.modal-panel--center {
+		left: 50%;
+		top: 50%;
+		width: min(560px, calc(100vw - 2 * var(--space-md)));
+		max-height: min(85vh, 720px);
+		transform: translate(-50%, -50%);
+		border-radius: var(--radius-lg);
+		overflow: hidden;
+		animation: modal-center-in 0.2s ease-out;
+	}
+
+	.modal-panel--sheet {
+		left: 0;
+		right: 0;
+		bottom: 0;
+		max-height: min(88vh, 720px);
+		border-bottom: none;
+		border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+		padding-bottom: calc(var(--space-lg) + env(safe-area-inset-bottom, 0));
+		animation: modal-sheet-in 0.24s ease-out;
+	}
+
+	@media (min-width: 768px) {
+		.modal-panel--sheet {
+			left: 50%;
+			right: auto;
+			bottom: auto;
+			top: 50%;
+			width: min(520px, calc(100vw - 2rem));
+			max-height: min(85vh, 680px);
+			transform: translate(-50%, -50%);
+			border-radius: var(--radius-lg);
+			border-bottom: 1px solid var(--color-border);
+			padding-bottom: var(--space-lg);
+			animation: modal-center-in 0.2s ease-out;
+		}
+	}
+
+	.modal-sheet-handle {
+		width: 2.5rem;
+		height: 0.25rem;
+		margin: var(--space-sm) auto 0;
+		border-radius: 999px;
+		background: var(--color-border);
+		flex-shrink: 0;
+	}
+
+	@media (min-width: 768px) {
+		.modal-sheet-handle {
+			display: none;
+		}
+	}
+
+	.modal-body {
+		flex: 1;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.modal-panel--center .modal-body,
+	.modal-panel--sheet .modal-body {
+		overflow: auto;
+	}
+
+	.modal-panel--center :global(.modal-header) {
+		padding: var(--space-lg) var(--space-lg) var(--space-sm);
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.modal-panel--center .modal-body {
+		padding: var(--space-md) var(--space-lg) var(--space-lg);
+	}
+
+	.modal-panel--center:not(:has(:global(.modal-header))) .modal-body {
+		padding: var(--space-lg);
+	}
+
+	.modal-panel--sheet :global(.modal-header) {
+		padding: var(--space-md) var(--space-md) var(--space-sm);
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.modal-panel--sheet .modal-body {
+		padding: 0 var(--space-md) var(--space-md);
+	}
+
+	.modal-panel--sheet:not(:has(:global(.modal-header))) .modal-body {
+		padding: var(--space-md);
+	}
+
+	.modal-footer {
+		flex-shrink: 0;
+		padding-top: var(--space-md);
+	}
+
+	@keyframes modal-backdrop-in {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes modal-center-in {
+		from {
+			opacity: 0;
+			transform: translate(-50%, -46%) scale(0.98);
+		}
+		to {
+			opacity: 1;
+			transform: translate(-50%, -50%) scale(1);
+		}
+	}
+
+	@keyframes modal-sheet-in {
+		from {
+			transform: translateY(100%);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.modal-backdrop,
+		.modal-panel--center,
+		.modal-panel--sheet {
+			animation: none;
+		}
+
+		@media (min-width: 768px) {
+			.modal-panel--sheet {
+				transform: translate(-50%, -50%);
+			}
+		}
+	}
+</style>

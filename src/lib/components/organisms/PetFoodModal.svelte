@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
+	import Modal from '$lib/components/molecules/Modal.svelte';
 	import BarcodeScannerModal from '$lib/components/organisms/BarcodeScannerModal.svelte';
 	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 
@@ -143,151 +144,105 @@
 	}
 </script>
 
-{#if open}
-	<div class="overlay" role="dialog" aria-modal="true" aria-label="Add pet food">
-		<div class="modal">
-			<div class="head">
-				<h2>Add pet food</h2>
-				<button type="button" class="close" onclick={closeModal}>X</button>
-			</div>
-
-			<div class="scan-tabs">
-				<button
-					type="button"
-					class:active={scanMode === 'barcode'}
-					onclick={() => (scanMode = 'barcode')}
-				>
-					Barcode
-				</button>
-				<button
-					type="button"
-					class:active={scanMode === 'photo'}
-					onclick={() => (scanMode = 'photo')}
-				>
-					ChatGPT Photo Scan
-				</button>
-			</div>
-
-			{#if scanMode === 'barcode'}
-				<Button type="button" variant="secondary" onclick={openScanner} disabled={lookupLoading} fullWidth>
-					{lookupLoading ? 'Looking up...' : 'Scan pet food barcode'}
-				</Button>
-			{:else}
-				<Button type="button" variant="primary" onclick={triggerPhotoPicker} disabled={lookupLoading} fullWidth>
-					{lookupLoading ? 'Analyzing...' : 'Scan pet food with photo'}
-				</Button>
-				<input
-					bind:this={photoInputEl}
-					type="file"
-					class="hidden-input"
-					accept="image/*"
-					capture="environment"
-					onchange={handlePhotoSelected}
-				/>
-			{/if}
-
-			{#if scanMessage}
-				<p class="scan-msg">{scanMessage}</p>
-			{/if}
-
-			<form method="POST" action={submitAction} class="form">
-				<label>
-					Food name
-					<input name="name" bind:value={name} placeholder="e.g. Grain-free cat food" required />
-				</label>
-				<div class="row">
-					<label>
-						Quantity
-						<input name="quantity" bind:value={quantity} inputmode="decimal" required />
-					</label>
-					<label>
-						Unit
-						<input name="unit" bind:value={unit} placeholder="kg, g, pcs..." />
-					</label>
-				</div>
-				<label>
-					For pet (optional)
-					<select name="petId" bind:value={petId}>
-						<option value="">Any pet</option>
-						{#each pets as pet}
-							<option value={pet.id}>{pet.name}{pet.species ? ` (${pet.species})` : ''}</option>
-						{/each}
-					</select>
-				</label>
-				<label>
-					Notes (optional)
-					<textarea name="notes" rows="3" bind:value={notes}></textarea>
-				</label>
-
-				<div class="actions">
-					<Button type="button" variant="secondary" onclick={closeModal}>Cancel</Button>
-					<Button type="submit">Save pet food</Button>
-				</div>
-			</form>
-		</div>
+<Modal {open} onClose={closeModal} variant="center" title="Add pet food" panelClass="pet-food-panel">
+	<div class="scan-tabs">
+		<button
+			type="button"
+			class:active={scanMode === 'barcode'}
+			onclick={() => (scanMode = 'barcode')}
+		>
+			Barcode
+		</button>
+		<button type="button" class:active={scanMode === 'photo'} onclick={() => (scanMode = 'photo')}>
+			ChatGPT Photo Scan
+		</button>
 	</div>
-{/if}
 
-{#if scannerOpen}
-	<BarcodeScannerModal open={scannerOpen} onScan={handleBarcodeScanned} onClose={() => (scannerOpen = false)} />
-{/if}
+	{#if scanMode === 'barcode'}
+		<Button type="button" variant="secondary" onclick={openScanner} disabled={lookupLoading} fullWidth>
+			{lookupLoading ? 'Looking up...' : 'Scan pet food barcode'}
+		</Button>
+	{:else}
+		<Button type="button" variant="primary" onclick={triggerPhotoPicker} disabled={lookupLoading} fullWidth>
+			{lookupLoading ? 'Analyzing...' : 'Scan pet food with photo'}
+		</Button>
+		<input
+			bind:this={photoInputEl}
+			type="file"
+			class="hidden-input"
+			accept="image/*"
+			capture="environment"
+			onchange={handlePhotoSelected}
+		/>
+	{/if}
+
+	{#if scanMessage}
+		<p class="scan-msg">{scanMessage}</p>
+	{/if}
+
+	<form method="POST" action={submitAction} class="form">
+		<label>
+			Food name
+			<input name="name" bind:value={name} placeholder="e.g. Grain-free cat food" required />
+		</label>
+		<div class="row">
+			<label>
+				Quantity
+				<input name="quantity" bind:value={quantity} inputmode="decimal" required />
+			</label>
+			<label>
+				Unit
+				<input name="unit" bind:value={unit} placeholder="kg, g, pcs..." />
+			</label>
+		</div>
+		<label>
+			For pet (optional)
+			<select name="petId" bind:value={petId}>
+				<option value="">Any pet</option>
+				{#each pets as pet}
+					<option value={pet.id}>{pet.name}{pet.species ? ` (${pet.species})` : ''}</option>
+				{/each}
+			</select>
+		</label>
+		<label>
+			Notes (optional)
+			<textarea name="notes" rows="3" bind:value={notes}></textarea>
+		</label>
+
+		<div class="actions">
+			<Button type="button" variant="secondary" onclick={closeModal}>Cancel</Button>
+			<Button type="submit">Save pet food</Button>
+		</div>
+	</form>
+</Modal>
+
+<BarcodeScannerModal
+	open={scannerOpen}
+	nested
+	onScan={handleBarcodeScanned}
+	onClose={() => (scannerOpen = false)}
+/>
 
 <style>
-	.overlay {
-		position: fixed;
-		inset: 0;
-		background: rgba(31, 42, 36, 0.45);
-		display: grid;
-		place-items: center;
-		padding: var(--space-md);
-		z-index: 60;
-	}
-
-	.modal {
-		width: min(560px, 100%);
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-lg);
-		padding: var(--space-lg);
-		box-shadow: var(--shadow-md);
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-	}
-
-	.head {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-
-	.head h2 {
-		margin: 0;
-		font-size: 1.1rem;
-	}
-
-	.close {
-		border: 1px solid var(--color-border);
-		background: var(--color-surface);
-		border-radius: 999px;
-		width: 2rem;
-		height: 2rem;
-		cursor: pointer;
+	:global(.pet-food-panel) {
+		width: min(560px, calc(100vw - 2 * var(--space-md)));
 	}
 
 	.scan-tabs {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: var(--space-sm);
+		margin-bottom: var(--space-sm);
 	}
 
 	.scan-tabs button {
 		border: 1px solid var(--color-border);
-		background: #fff;
+		background: var(--color-surface);
 		border-radius: var(--radius-sm);
 		padding: 0.45rem 0.5rem;
 		font-weight: 700;
 		cursor: pointer;
+		color: var(--color-text);
 	}
 
 	.scan-tabs button.active {
@@ -297,7 +252,7 @@
 	}
 
 	.scan-msg {
-		margin: 0;
+		margin: 0 0 var(--space-sm);
 		padding: 0.45rem 0.6rem;
 		background: var(--color-surface-muted);
 		border-radius: var(--radius-sm);
@@ -324,7 +279,8 @@
 		padding: 0.6rem 0.75rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
-		background: #fff;
+		background: var(--color-surface);
+		color: var(--color-text);
 	}
 
 	.row {
