@@ -21,6 +21,25 @@
 	let errorMessage = $state<string | null>(null);
 	let note = $state<string | null>(null);
 
+	function recipeErrorMessage(status: number, serverError?: string): string {
+		if (serverError?.trim()) {
+			return serverError;
+		}
+		if (status === 401) {
+			return 'Du måste vara inloggad för att generera recept.';
+		}
+		if (status === 422) {
+			return 'Kunde inte tolka receptförslagen. Försök igen om en stund.';
+		}
+		if (status === 503) {
+			return 'AI-tjänsten är tillfälligt otillgänglig. Försök igen om en stund.';
+		}
+		if (status === 502) {
+			return 'Kunde inte nå AI-tjänsten just nu. Försök igen om en stund.';
+		}
+		return 'Kunde inte generera recept just nu.';
+	}
+
 	async function generateRecipes() {
 		loading = true;
 		errorMessage = null;
@@ -44,15 +63,19 @@
 			};
 
 			if (!response.ok) {
-				errorMessage = data.error ?? 'Failed to generate recipes.';
+				errorMessage = recipeErrorMessage(response.status, data.error);
 				recipes = [];
 				return;
 			}
 
 			recipes = data.recipes ?? [];
 			note = data.note ?? null;
+
+			if (recipes.length === 0 && !note) {
+				errorMessage = 'Inga recept genererades. Lägg till fler varor och försök igen.';
+			}
 		} catch {
-			errorMessage = 'Network error while generating recipes.';
+			errorMessage = 'Nätverksfel vid generering av recept. Kontrollera anslutningen och försök igen.';
 			recipes = [];
 		} finally {
 			loading = false;
@@ -72,23 +95,23 @@
 	panelClass="recipe-assistant-panel"
 >
 	<p class="helper">
-		Generate meal ideas from your current inventory. Add preferences like "quick dinner" or
-		"vegetarian".
+		Få matidéer utifrån ditt nuvarande lager. Lägg till önskemål som "snabb middag" eller
+		"vegetariskt".
 	</p>
 
-	<label class="label" for="recipe-preferences">Preferences (optional)</label>
+	<label class="label" for="recipe-preferences">Önskemål (valfritt)</label>
 	<textarea
 		id="recipe-preferences"
 		class="textarea"
 		rows="3"
 		maxlength="300"
 		bind:value={preferences}
-		placeholder="Example: under 30 minutes, no dairy"
+		placeholder="Exempel: under 30 minuter, utan mejeri"
 	></textarea>
 
 	<div class="actions">
 		<Button type="button" onclick={generateRecipes} disabled={loading} fullWidth>
-			{loading ? 'Generating...' : 'Generate recipes'}
+			{loading ? 'Genererar...' : 'Generera recept'}
 		</Button>
 	</div>
 
@@ -106,8 +129,8 @@
 				<section class="recipe">
 					<h3>{recipe.title}</h3>
 					<p class="why">{recipe.whyItFits}</p>
-					<p><strong>Use from inventory:</strong> {recipe.ingredientsToUse.join(', ')}</p>
-					<p><strong>Missing:</strong> {recipe.missingIngredients.join(', ') || 'None'}</p>
+					<p><strong>Från lagret:</strong> {recipe.ingredientsToUse.join(', ')}</p>
+					<p><strong>Saknas:</strong> {recipe.missingIngredients.join(', ') || 'Inget'}</p>
 					<ol>
 						{#each recipe.steps as step}
 							<li>{step}</li>

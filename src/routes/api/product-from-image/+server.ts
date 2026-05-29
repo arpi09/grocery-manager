@@ -121,8 +121,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const product = parseProduct(result.data);
 		if (!product) {
 			return json(
-				{ error: 'Could not extract product fields from image.' },
-				{ status: 502 }
+				{ error: 'Kunde inte tolka produktuppgifter från bilden. Prova en tydligare etikett.' },
+				{ status: 422 }
 			);
 		}
 
