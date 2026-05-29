@@ -44,7 +44,7 @@ const PGlite_INCREMENTAL_MIGRATIONS = [
 	'0006_user_theme_preference.sql',
 	'0007_household_invites_roles.sql',
 	'0008_shopping_list.sql',
-'0010_active_household.sql',
+	'0010_active_household.sql',
 	'0011_consumption_event.sql'
 ];
 
@@ -60,15 +60,37 @@ async function runPgliteBaseline(client: PGlite) {
 	}
 }
 
+function migrationErrorMessage(error: unknown): string {
+	if (error instanceof Error) {
+		return [error.message, error.cause instanceof Error ? error.cause.message : ''].join(' ');
+	}
+	return String(error);
+}
+
 function isIgnorablePgliteMigrationError(error: unknown): boolean {
-	const message = error instanceof Error ? error.message : String(error);
-	return /already exists|duplicate key|duplicate_object|duplicate column/i.test(message);
+	const message = migrationErrorMessage(error);
+	return /already exists|duplicate key|duplicate_object|duplicate column|multiple primary keys/i.test(
+		message
+	);
 }
 
 async function runPgliteIncrementalMigrations(client: PGlite) {
 	for (const file of PGlite_INCREMENTAL_MIGRATIONS) {
 		const migrationPath = join(process.cwd(), 'drizzle', file);
 		const sql = readFileSync(migrationPath, 'utf8');
+
+		// Run whole file when it uses PL/pgSQL blocks (splitting on ";" breaks them).
+		if (/\bDO\s+\$\$/i.test(sql)) {
+			try {
+				await client.exec(sql);
+			} catch (error) {
+				if (!isIgnorablePgliteMigrationError(error)) {
+					throw error;
+				}
+			}
+			continue;
+		}
+
 		const statements = sql
 			.split(';')
 			.map((statement) => statement.trim())
@@ -127,7 +149,6 @@ export async function initDatabase(): Promise<void> {
 		initPromise = (async () => {
 			if (usePglite()) {
 				const client = await getPgliteClient();
-				await runPgliteIncrementalMigrations(client);
 				dbInstance = drizzlePglite({ client, schema });
 				await ensureDefaultAdminUser();
 				await ensureDefaultHousehold();
