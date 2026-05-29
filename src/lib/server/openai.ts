@@ -1,8 +1,10 @@
+import { env } from '$env/dynamic/private';
+
 const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
 export const OPENAI_MODEL = 'gpt-4.1-mini';
 
 export function getOpenAiApiKey(): string | null {
-	const key = process.env.OPENAI_API_KEY?.trim();
+	const key = (env.OPENAI_API_KEY ?? process.env.OPENAI_API_KEY)?.trim();
 	return key ? key : null;
 }
 
@@ -16,6 +18,45 @@ export function safeParseModelJson(raw: string): unknown {
 	} catch {
 		return null;
 	}
+}
+
+/** Reads JSON text from Responses API payloads (output_text or output message parts). */
+export function extractResponseOutputText(payload: unknown): string {
+	if (!payload || typeof payload !== 'object') {
+		return '';
+	}
+
+	const record = payload as Record<string, unknown>;
+	if (typeof record.output_text === 'string' && record.output_text.trim()) {
+		return record.output_text;
+	}
+
+	const output = record.output;
+	if (!Array.isArray(output)) {
+		return '';
+	}
+
+	const parts: string[] = [];
+	for (const item of output) {
+		if (!item || typeof item !== 'object') {
+			continue;
+		}
+		const row = item as Record<string, unknown>;
+		if (row.type !== 'message' || !Array.isArray(row.content)) {
+			continue;
+		}
+		for (const block of row.content) {
+			if (!block || typeof block !== 'object') {
+				continue;
+			}
+			const content = block as Record<string, unknown>;
+			if (content.type === 'output_text' && typeof content.text === 'string') {
+				parts.push(content.text);
+			}
+		}
+	}
+
+	return parts.join('');
 }
 
 /** Maps upstream OpenAI HTTP status to a client-facing status. */
@@ -102,9 +143,9 @@ async function postOpenAiStructured(
 		};
 	}
 
-	let payload: { output_text?: unknown };
+	let payload: unknown;
 	try {
-		payload = (await response.json()) as { output_text?: unknown };
+		payload = await response.json();
 	} catch {
 		return {
 			ok: false,
@@ -113,8 +154,25 @@ async function postOpenAiStructured(
 		};
 	}
 
-	const outputText = typeof payload.output_text === 'string' ? payload.output_text : '';
-	return { ok: true, data: safeParseModelJson(outputText) };
+	const outputText = extractResponseOutputText(payload);
+	if (!outputText.trim()) {
+		return {
+			ok: false,
+			status: 422,
+			message: 'OpenAI returned an empty structured response.'
+		};
+	}
+
+	const data = safeParseModelJson(outputText);
+	if (data === null) {
+		return {
+			ok: false,
+			status: 422,
+			message: 'OpenAI returned invalid JSON.'
+		};
+	}
+
+	return { ok: true, data };
 }
 
 export async function requestStructuredJson(
