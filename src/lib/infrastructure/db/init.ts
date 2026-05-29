@@ -1,3 +1,4 @@
+import { Connector, IpAddressTypes } from '@google-cloud/cloud-sql-connector';
 import { mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { drizzle as drizzlePostgres } from 'drizzle-orm/postgres-js';
@@ -18,6 +19,7 @@ export type AppDatabase =
 let dbInstance: AppDatabase | null = null;
 let initPromise: Promise<void> | null = null;
 let postgresClient: ReturnType<typeof postgres> | null = null;
+let cloudSqlConnector: Connector | null = null;
 
 let pgliteClient: PGlite | null = null;
 let pgliteInitPromise: Promise<PGlite> | null = null;
@@ -62,17 +64,22 @@ function parseCloudSqlDatabaseUrl(connectionString: string): {
 	};
 }
 
-/** postgres.js rejects `postgresql://user:pass@/db?host=/cloudsql/...` ("Invalid URL"). */
-function createPostgresClient(connectionString: string) {
+/** App Hosting may not mount /cloudsql sockets; use the Cloud SQL Connector instead. */
+async function createPostgresClient(connectionString: string) {
 	const cloudSqlHost = extractCloudSqlSocketHost(connectionString);
 	if (cloudSqlHost) {
+		const instanceConnectionName = cloudSqlHost.replace(/^\/cloudsql\//, '');
 		const { username, password, database } = parseCloudSqlDatabaseUrl(connectionString);
+		cloudSqlConnector ??= new Connector();
+		const clientOpts = await cloudSqlConnector.getOptions({
+			instanceConnectionName,
+			ipType: IpAddressTypes.PUBLIC
+		});
 		return postgres({
-			host: cloudSqlHost,
+			...clientOpts,
 			database,
 			username,
 			password,
-			ssl: false,
 			connect_timeout: 15,
 			max: 5
 		});
@@ -247,7 +254,7 @@ export async function initDatabase(): Promise<void> {
 			}
 
 			try {
-				const sql = createPostgresClient(connectionString);
+				const sql = await createPostgresClient(connectionString);
 				postgresClient = sql;
 				await verifyPostgresConnection(sql);
 				dbInstance = drizzlePostgres(sql, { schema });
