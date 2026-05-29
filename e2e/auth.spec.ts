@@ -5,7 +5,7 @@ test.describe('Authentication', () => {
 	test('redirects unauthenticated users to login', async ({ page }) => {
 		await page.goto('/');
 		await expect(page).toHaveURL(/\/login/);
-		await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Logga in' })).toBeVisible();
 	});
 
 	test('admin can sign in and reach home', async ({ page }) => {

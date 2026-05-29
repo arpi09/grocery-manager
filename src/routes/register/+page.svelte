@@ -1,11 +1,15 @@
 <script lang="ts">
-	import AuthLayout from '$lib/components/templates/AuthLayout.svelte';
+	import AuthLandingShell from '$lib/components/templates/AuthLandingShell.svelte';
 	import RegisterForm from '$lib/components/organisms/RegisterForm.svelte';
 	import type { PageProps } from './$types';
 
 	let { form }: PageProps = $props();
 </script>
 
-<AuthLayout title="Create account" subtitle="Your pantry, your data">
+<svelte:head>
+	<title>Skapa konto · Home Pantry</title>
+</svelte:head>
+
+<AuthLandingShell formTitle="Skapa konto" formSubtitle="Ditt hushåll, en app">
 	<RegisterForm errors={form?.errors} message={form?.message} email={form?.email} />
-</AuthLayout>
+</AuthLandingShell>

@@ -21,9 +21,9 @@ export async function loginAsAdmin(page: Page) {
 	const { email, password } = adminCredentials();
 
 	await page.goto('/login');
-	await page.getByLabel('Email').fill(email);
-	await page.getByLabel('Password').fill(password);
-	await page.getByRole('button', { name: 'Sign in' }).click();
+	await page.getByLabel('E-post').fill(email);
+	await page.getByLabel('Lösenord').fill(password);
+	await page.getByRole('button', { name: 'Logga in' }).click();
 	await page.waitForURL((url) => url.pathname === '/', { timeout: 15_000 });
 }
 

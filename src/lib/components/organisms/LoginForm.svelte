@@ -47,7 +47,7 @@
 	{/if}
 
 	<FormField
-		label="Email"
+		label="E-post"
 		name="email"
 		type="email"
 		autocomplete="email"
@@ -55,7 +55,7 @@
 		error={errors.email?.[0]}
 	/>
 	<FormField
-		label="Password"
+		label="Lösenord"
 		name="password"
 		type="password"
 		autocomplete="current-password"
@@ -63,14 +63,18 @@
 	/>
 
 	<Button type="submit" fullWidth disabled={submitting}>
-		{submitting ? 'Signing in…' : 'Sign in'}
+		{submitting ? 'Loggar in…' : 'Logga in'}
 	</Button>
 
-	<p class="hint">First time here? <a href="/register">Create an account</a> before signing in.</p>
-
-	<p class="footer">
-		No account? <a href="/register">Register</a>
-	</p>
+	<div class="register-block">
+		<p class="register-lead">Ny här?</p>
+		<a href="/register" class="register-cta">
+			<span class="register-cta-text">Skapa konto</span>
+			<svg class="register-cta-arrow" viewBox="0 0 20 20" aria-hidden="true">
+				<path d="M5 10h10M11 6l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+			</svg>
+		</a>
+	</div>
 </form>
 
 <style>
@@ -86,29 +90,85 @@
 	}
 
 	.banner.error {
-		background: #fdeaea;
+		background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
 		color: var(--color-danger);
 	}
 
 	.banner.info {
-		background: #e8f5e9;
-		color: #1b5e20;
+		background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
+		color: var(--color-primary);
 	}
 
-	.hint {
-		margin: var(--space-md) 0 0;
-		padding: var(--space-sm) var(--space-md);
-		background: var(--color-surface-muted);
-		border-radius: var(--radius-sm);
-		font-size: 0.85rem;
-		color: var(--color-text-muted);
-		text-align: center;
-	}
-
-	.footer {
+	.register-block {
 		margin-top: var(--space-lg);
+		padding-top: var(--space-lg);
+		border-top: 1px solid var(--color-border);
 		text-align: center;
-		font-size: 0.875rem;
+	}
+
+	.register-lead {
+		margin: 0 0 var(--space-sm);
+		font-size: 0.8rem;
 		color: var(--color-text-muted);
+	}
+
+	.register-cta {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-sm);
+		width: 100%;
+		padding: 0.75rem 1.25rem;
+		border-radius: var(--radius-sm);
+		font-weight: 700;
+		font-size: 1rem;
+		text-decoration: none;
+		color: var(--color-text);
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--color-accent) 28%, var(--color-surface-muted)) 0%,
+			var(--color-surface-muted) 55%,
+			color-mix(in srgb, var(--color-primary) 12%, var(--color-surface-muted)) 100%
+		);
+		border: 1px solid color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+		box-shadow: var(--shadow-sm);
+		transition:
+			transform 0.15s ease,
+			box-shadow 0.15s ease,
+			border-color 0.15s ease;
+	}
+
+	.register-cta:hover {
+		text-decoration: none;
+		border-color: var(--color-accent);
+		box-shadow: var(--shadow-md);
+		transform: translateY(-1px);
+	}
+
+	.register-cta:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+
+	.register-cta-arrow {
+		width: 1.1rem;
+		height: 1.1rem;
+		flex-shrink: 0;
+		transition: transform 0.15s ease;
+	}
+
+	.register-cta:hover .register-cta-arrow {
+		transform: translateX(2px);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.register-cta,
+		.register-cta-arrow {
+			transition: none;
+		}
+
+		.register-cta:hover {
+			transform: none;
+		}
 	}
 </style>
