@@ -71,11 +71,16 @@ function createPostgresClient(connectionString: string) {
 			database,
 			username,
 			password,
+			ssl: false,
 			connect_timeout: 15,
 			max: 5
 		});
 	}
-	return postgres(connectionString, { connect_timeout: 15, max: 5 });
+	return postgres(connectionString, {
+		connect_timeout: 15,
+		max: 5,
+		ssl: connectionString.includes('sslmode=disable') ? false : 'require'
+	});
 }
 
 export function getDatabaseBackend(): DatabaseBackend {

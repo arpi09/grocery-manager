@@ -12,5 +12,10 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 export async function verifyPassword(hashValue: string, password: string): Promise<boolean> {
-	return verify(hashValue, password, hashOptions);
+	try {
+		return await verify(hashValue, password, hashOptions);
+	} catch {
+		// Malformed legacy hashes must not surface as 500s during login.
+		return false;
+	}
 }

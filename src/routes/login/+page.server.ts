@@ -1,4 +1,4 @@
-import { AuthError } from '$lib/application/auth.service';
+import { isAuthError } from '$lib/application/auth.service';
 import { loginSchema } from '$lib/validation/auth.schemas';
 import { createSession } from '$lib/server/session';
 import { fail, redirect } from '@sveltejs/kit';
@@ -36,7 +36,7 @@ export const actions: Actions = {
 			const user = await event.locals.authService.login(parsed.data.email, parsed.data.password);
 			await createSession(event, user.id);
 		} catch (error) {
-			if (error instanceof AuthError) {
+			if (isAuthError(error)) {
 				return fail(400, {
 					errors: {},
 					message: error.message,

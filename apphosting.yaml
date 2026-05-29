@@ -65,6 +65,8 @@ env:
 
   - variable: ADMIN_PASSWORD
     secret: ADMIN_PASSWORD
+    availability:
+      - RUNTIME
 
   - variable: OPENAI_API_KEY
     secret: OPENAI_API_KEY

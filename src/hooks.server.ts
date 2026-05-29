@@ -94,6 +94,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 };
 
 export const handleError: HandleServerError = async ({ error, event, status }) => {
+	if (status >= 500) {
+		const message = error instanceof Error ? error.message : String(error);
+		console.error(`[handleError] ${event.request.method} ${event.url.pathname}: ${message}`);
+	}
+
 	if (shouldPersistServerError(error, status)) {
 		await recordAppError({
 			error,
