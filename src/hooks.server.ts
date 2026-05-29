@@ -5,7 +5,6 @@ import {
 	profileService,
 	householdService,
 	inventoryService,
-	consumptionService,
 	shoppingListService,
 	mealPlanService,
 	petFoodService,
