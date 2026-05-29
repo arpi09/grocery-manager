@@ -21,4 +21,6 @@ outputFiles:
 
 metadata:
   framework: sveltekit
+  frameworkVersion: "2.16.0"
   adapterPackageName: "@sveltejs/adapter-node"
+  adapterVersion: "5.5.4"
