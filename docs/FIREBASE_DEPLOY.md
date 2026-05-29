@@ -299,4 +299,6 @@ npx firebase-tools@latest deploy --only apphosting:home-pantry --project home-pa
 **EPERM on `node_modules.broken.*`:** A failed local `npm install` can leave a folder like `node_modules.broken.20260529172544`. Firebase zips the repo root and only ignores `node_modules`, not that rename backup, so Windows file locks cause EPERM. Fix:
 
 1. Close dev servers/terminals using the project, then delete `node_modules.broken*` in the repo root.
-2. `firebase.json` already ignores `node_modules.broken*` for deploy; keep that pattern if you customize ignores.
+2. `firebase.json` ignores `node_modules.broken*` for deploy; keep that pattern if you customize ignores.
+
+**Cloud Build ENOENT on `starter-pack.json`:** The App Hosting ignore list used `"data"`, which also excluded `src/lib/data/` from the deploy zip. Use `"/data"` to ignore only the repo-root PGlite folder.
