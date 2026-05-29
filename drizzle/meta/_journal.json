@@ -27,7 +27,56 @@
 			"idx": 3,
 			"version": "7",
 			"when": 1748611200000,
-			"tag": "0003_app_error",
+			"tag": "0003_household",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "7",
+			"when": 1748697600000,
+			"tag": "0004_user_profile",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "7",
+			"when": 1748784000000,
+			"tag": "0005_app_error",
+			"breakpoints": true
+		},
+		{
+			"idx": 6,
+			"version": "7",
+			"when": 1748870400000,
+			"tag": "0006_user_theme_preference",
+			"breakpoints": true
+		},
+		{
+			"idx": 7,
+			"version": "7",
+			"when": 1748956800000,
+			"tag": "0007_household_invites_roles",
+			"breakpoints": true
+		},
+		{
+			"idx": 8,
+			"version": "7",
+			"when": 1749043200000,
+			"tag": "0008_shopping_list",
+			"breakpoints": true
+		},
+		{
+			"idx": 9,
+			"version": "7",
+			"when": 1749129600000,
+			"tag": "0010_active_household",
+			"breakpoints": true
+		},
+		{
+			"idx": 10,
+			"version": "7",
+			"when": 1749216000000,
+			"tag": "0011_consumption_event",
 			"breakpoints": true
 		}
 	]
