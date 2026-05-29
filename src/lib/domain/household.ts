@@ -17,6 +17,13 @@ export interface HouseholdView {
 	members: HouseholdMemberView[];
 }
 
+export interface UserHouseholdSummary {
+	id: string;
+	name: string;
+	role: HouseholdRole;
+	isActive: boolean;
+}
+
 export interface HouseholdInviteView {
 	id: string;
 	email: string;

@@ -7,6 +7,7 @@ import {
 	InviteExpiredError,
 	InviteNotFoundError,
 	LastOwnerError,
+	NotMemberError,
 	PendingInviteExistsError
 } from './household.service';
 import type { IHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
@@ -18,6 +19,10 @@ describe('HouseholdService', () => {
 	beforeEach(() => {
 		repository = {
 			findPrimaryHouseholdIdForUser: vi.fn(),
+		getActiveHouseholdIdForUser: vi.fn(),
+		setActiveHouseholdId: vi.fn(),
+		listHouseholdsForUser: vi.fn(),
+		getHouseholdById: vi.fn(),
 			getHouseholdForUser: vi.fn(),
 			createHousehold: vi.fn(),
 			addMember: vi.fn(),
@@ -37,6 +42,27 @@ describe('HouseholdService', () => {
 			getInvitePreview: vi.fn()
 		};
 		service = new HouseholdService(repository);
+	});
+
+	it('resolveActiveHouseholdId returns stored active membership', async () => {
+		vi.mocked(repository.findPrimaryHouseholdIdForUser).mockResolvedValue('household-a');
+		vi.mocked(repository.getActiveHouseholdIdForUser).mockResolvedValue('household-b');
+		vi.mocked(repository.hasMember).mockResolvedValue(true);
+		await expect(service.resolveActiveHouseholdId('user-1')).resolves.toBe('household-b');
+	});
+
+	it('switchActiveHousehold rejects non-members', async () => {
+		vi.mocked(repository.hasMember).mockResolvedValue(false);
+		await expect(service.switchActiveHousehold('user-1', 'household-2')).rejects.toBeInstanceOf(NotMemberError);
+	});
+
+	it('listHouseholdsForUser marks active household', async () => {
+		vi.mocked(repository.listHouseholdsForUser).mockResolvedValue([
+			{ id: 'household-1', name: 'Hemma', role: 'owner', isActive: false },
+			{ id: 'household-2', name: 'Stugan', role: 'editor', isActive: true }
+		]);
+		const households = await service.listHouseholdsForUser('user-1');
+		expect(households.find((row) => row.id === 'household-2')?.isActive).toBe(true);
 	});
 
 	it('creates invite when actor is owner', async () => {

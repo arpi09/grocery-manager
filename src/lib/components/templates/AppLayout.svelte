@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { page } from '$app/state';
 	import MainNav from '$lib/components/organisms/MainNav.svelte';
 	import RecipeAssistant from '$lib/components/organisms/RecipeAssistant.svelte';
 	import type { NavUser } from '$lib/navigation/nav-config';
+	import type { UserHouseholdSummary } from '$lib/domain/household';
 
 	interface Props {
 		children: Snippet;
@@ -13,13 +15,18 @@
 
 	let recipeOpen = $state(false);
 
+	const households = $derived((page.data.households ?? []) as UserHouseholdSummary[]);
+	const activeHousehold = $derived(
+		(page.data.activeHousehold ?? null) as { id: string; name: string } | null
+	);
+
 	function openRecipeIdeas() {
 		recipeOpen = true;
 	}
 </script>
 
 <div class="app">
-	<MainNav {user} onRecipeIdeas={openRecipeIdeas} />
+	<MainNav {user} {households} {activeHousehold} onRecipeIdeas={openRecipeIdeas} />
 	<main>
 		{@render children()}
 	</main>
