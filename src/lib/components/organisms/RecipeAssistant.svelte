@@ -68,7 +68,7 @@
 	{open}
 	onClose={closeAssistant}
 	variant="center"
-	title="Recipe suggestions"
+	title="Receptförslag"
 	panelClass="recipe-assistant-panel"
 >
 	<p class="helper">

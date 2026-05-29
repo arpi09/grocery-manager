@@ -29,7 +29,7 @@
 	--z-modal: 100;
 	--z-modal-nested: 110;
 	--modal-scrim: color-mix(in srgb, var(--color-text) 42%, transparent);
-	--modal-scrim-blur: 4px;
+	--modal-scrim-blur: 8px;
 }
 
 html[data-theme='dark'] {

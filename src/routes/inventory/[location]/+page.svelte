@@ -15,17 +15,18 @@
 		<LocationTab active={data.location} />
 		<div class="toolbar">
 			{#if data.canWrite}
-				<a
-					class="add-btn"
-					href="/item/new?location={data.location}&from=/inventory/{data.location}"
-				>
+				{@const addItemHref = `/item/new?location=${data.location}&from=/inventory/${data.location}`}
+				<a class="add-btn add-btn--desktop" href={addItemHref}>+ Lägg till</a>
+				<a class="add-btn add-btn--mobile" href={addItemHref} data-sveltekit-reload>
 					+ Lägg till
 				</a>
 			{/if}
 		</div>
 		<InventoryList
 			items={data.items}
-			location={data.location}
+			location={data.location}
+
+
 		/>
 	</PageContainer>
 </AppLayout>
@@ -47,8 +48,22 @@
 		text-decoration: none;
 	}
 
+	.add-btn--mobile {
+		display: none;
+	}
+
 	.add-btn:hover {
 		background: var(--color-primary-hover);
 		text-decoration: none;
+	}
+
+	@media (max-width: 768px) {
+		.add-btn--desktop {
+			display: none;
+		}
+
+		.add-btn--mobile {
+			display: inline-flex;
+		}
 	}
 </style>
