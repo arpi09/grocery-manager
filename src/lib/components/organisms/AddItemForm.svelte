@@ -1,12 +1,12 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { onMount } from 'svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Label from '$lib/components/atoms/Label.svelte';
 	import Input from '$lib/components/atoms/Input.svelte';
 	import BarcodeScanButton from '$lib/components/molecules/BarcodeScanButton.svelte';
 	import BarcodeScannerModal from '$lib/components/organisms/BarcodeScannerModal.svelte';
-	import { LOCATIONS, LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
-	import type { BarcodeProduct } from '$lib/domain/barcode-product';
+		import { LOCATIONS, LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
+	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 
 	interface Props {
@@ -56,24 +56,28 @@
 
 		try {
 			const response = await fetch(`/api/barcode/${encodeURIComponent(code)}`);
+			const data = (await response.json()) as BarcodeLookupResult | { message?: string };
+
 			if (!response.ok) {
 				scanMessage =
-					response.status === 404
-						? 'Product not found. Enter the details manually.'
-						: 'Could not look up this barcode. Try again or enter manually.';
+					response.status === 400
+						? 'Ogiltig streckkod. Ange minst 8 siffror.'
+						: 'Kunde inte slÃ¥ upp streckkoden. FÃ¶rsÃ¶k igen eller fyll i manuellt.';
 				return;
 			}
 
-			const product = (await response.json()) as BarcodeProduct;
+			const { found, product } = data as BarcodeLookupResult;
 			name = product.name;
 			quantity = product.quantity;
 			unit = product.unit ?? '';
 			if (product.notes) {
 				notes = notes ? `${notes}\n${product.notes}` : product.notes;
 			}
-			scanMessage = `Added details for barcode ${product.barcode}.`;
+			scanMessage = found
+				? `Hittade ${product.name} (${product.barcode}).`
+				: `OkÃ¤nd streckkod â€“ fyllde i "${product.name}". Justera vid behov.`;
 		} catch {
-			scanMessage = 'Network error while looking up the product.';
+			scanMessage = 'NÃ¤tverksfel vid uppslagning av produkten.';
 		} finally {
 			lookupLoading = false;
 		}
@@ -176,7 +180,7 @@
 					disabled={imageLookupLoading}
 					onclick={triggerPhotoPicker}
 				>
-					{imageLookupLoading ? 'Analyzing with ChatGPT AI...' : '📸 Scan with ChatGPT AI'}
+					{imageLookupLoading ? 'Analyzing with ChatGPT AI...' : 'ðŸ“¸ Scan with ChatGPT AI'}
 				</Button>
 				<input
 					bind:this={photoInputEl}
@@ -235,7 +239,7 @@
 		</div>
 		<div class="field">
 			<Label for="unit">Unit</Label>
-			<Input id="unit" name="unit" placeholder="pcs, g, L…" bind:value={unit} />
+			<Input id="unit" name="unit" placeholder="pcs, g, Lâ€¦" bind:value={unit} />
 		</div>
 	</div>
 
@@ -248,6 +252,7 @@
 		<Label for="notes">Notes (optional)</Label>
 		<textarea id="notes" name="notes" class="textarea" rows="3" bind:value={notes}></textarea>
 	</div>
+
 
 	<div class="actions">
 		<Button type="submit" fullWidth>{isEdit ? 'Save changes' : 'Add item'}</Button>
@@ -401,5 +406,25 @@
 		flex-direction: column;
 		gap: var(--space-sm);
 		margin-top: var(--space-md);
+	}
+
+	.consumption-section {
+		margin: var(--space-md) 0;
+		padding: var(--space-md);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
+	}
+
+	.section-title {
+		margin: 0 0 var(--space-xs);
+		font-size: 0.95rem;
+		font-weight: 700;
+	}
+
+	.section-help {
+		margin: 0 0 var(--space-sm);
+		font-size: 0.85rem;
+		color: var(--color-text-muted);
 	}
 </style>

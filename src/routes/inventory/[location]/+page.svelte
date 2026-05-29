@@ -6,7 +6,7 @@
 	import InventoryList from '$lib/components/organisms/InventoryList.svelte';
 	import { LOCATION_LABELS } from '$lib/domain/location';
 
-	let { data } = $props();
+	let { data, form } = $props();
 </script>
 
 <AppLayout user={data.user}>
@@ -14,9 +14,19 @@
 	<PageContainer>
 		<LocationTab active={data.location} />
 		<div class="toolbar">
-			<a class="add-btn" href="/item/new?location={data.location}&from=/inventory/{data.location}">+ Add</a>
+			{#if data.canWrite}
+				<a
+					class="add-btn"
+					href="/item/new?location={data.location}&from=/inventory/{data.location}"
+				>
+					+ Lägg till
+				</a>
+			{/if}
 		</div>
-		<InventoryList items={data.items} location={data.location} />
+		<InventoryList
+			items={data.items}
+			location={data.location}
+		/>
 	</PageContainer>
 </AppLayout>
 

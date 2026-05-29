@@ -10,11 +10,11 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	}
 
 	try {
-		const product = await lookupService.lookup(params.code);
-		return json(product);
+		const result = await lookupService.lookupWithFallback(params.code);
+		return json(result);
 	} catch (e) {
 		if (e instanceof BarcodeNotFoundError) {
-			error(404, 'Product not found');
+			error(400, 'Invalid barcode');
 		}
 		throw e;
 	}

@@ -6,9 +6,10 @@
 
 	interface Props {
 		summary: DashboardSummary;
+		canWrite?: boolean;
 	}
 
-	let { summary }: Props = $props();
+	let { summary, canWrite = false }: Props = $props();
 
 	const locationIcons: Record<string, string> = {
 		fridge: '❄',
@@ -48,9 +49,14 @@
 		</div>
 	</Card>
 
-	<a class="add-link" href="/item/new?from=%2F">
-		<span>+ Add item</span>
-	</a>
+	{#if canWrite}
+		<div class="cta-row">
+			<a class="scan-link" href="/scan?from=%2F">📷 Skanna</a>
+			<a class="add-link" href="/item/new?from=%2F">
+				<span>+ Lägg till vara</span>
+			</a>
+		</div>
+	{/if}
 </section>
 
 <style>
@@ -119,15 +125,35 @@
 		font-size: 0.875rem;
 	}
 
+	.cta-row {
+		display: grid;
+		gap: var(--space-sm);
+	}
+
+	.scan-link,
 	.add-link {
 		display: flex;
 		justify-content: center;
 		padding: var(--space-md);
-		background: var(--color-primary);
-		color: #fff;
 		font-weight: 600;
 		border-radius: var(--radius-md);
 		text-decoration: none;
+	}
+
+	.scan-link {
+		border: 1px solid var(--color-primary);
+		color: var(--color-primary);
+		background: var(--color-surface);
+	}
+
+	.scan-link:hover {
+		background: var(--color-surface-muted);
+		text-decoration: none;
+	}
+
+	.add-link {
+		background: var(--color-primary);
+		color: #fff;
 	}
 
 	.add-link:hover {
