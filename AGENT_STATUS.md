@@ -4,7 +4,7 @@ Live coordination board for parallel agents and feature branches.
 
 **Related:** `OWNERSHIP.md` · `MULTITASK.md`
 
-_Last verified: 2026-05-29 (local). `feature/shopping-list` in progress — household inköpslista on `/inkop` (migration `0008`). Layout: `feature/unified-page-layout` uses `AppLayout` → `AppHeader` → `PageContainer` (`--page-max-width: 45rem`)._
+_Last verified: 2026-05-29 (local). **`feature/scan-to-add`**: Phase 1–3 (streckkod, kvitto, snabbstart) — not pushed._
 
 ---
 
@@ -30,7 +30,8 @@ _Last verified: 2026-05-29 (local). `feature/shopping-list` in progress — hous
 
 | Item | Value |
 |------|--------|
-| **master / origin.master** | `eece1e0` - Firebase App Hosting, invites/roles (0007), prior E2E/household/profile/theme |
+| **master / origin.master** | `640418d` |
+| **feature/scan-to-add** | `/scan`, `/scan/kvitto`, `/scan/snabbstart` — MVP scan roadmap |
 
 ---
 
