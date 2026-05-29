@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 const { mockEnv } = vi.hoisted(() => ({
 	mockEnv: { OPENAI_API_KEY: undefined as string | undefined }
@@ -18,29 +18,13 @@ import {
 } from './openai';
 
 describe('getOpenAiApiKey', () => {
-	const originalProcessKey = process.env.OPENAI_API_KEY;
-
 	beforeEach(() => {
 		mockEnv.OPENAI_API_KEY = undefined;
-		delete process.env.OPENAI_API_KEY;
-	});
-
-	afterEach(() => {
-		if (originalProcessKey === undefined) {
-			delete process.env.OPENAI_API_KEY;
-		} else {
-			process.env.OPENAI_API_KEY = originalProcessKey;
-		}
 	});
 
 	it('reads OPENAI_API_KEY from SvelteKit env', () => {
 		mockEnv.OPENAI_API_KEY = '  sk-sveltekit  ';
 		expect(getOpenAiApiKey()).toBe('sk-sveltekit');
-	});
-
-	it('falls back to process.env when SvelteKit env is unset', () => {
-		process.env.OPENAI_API_KEY = 'sk-process';
-		expect(getOpenAiApiKey()).toBe('sk-process');
 	});
 
 	it('returns null when no key is configured', () => {

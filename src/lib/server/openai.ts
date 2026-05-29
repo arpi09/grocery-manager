@@ -4,7 +4,7 @@ const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
 export const OPENAI_MODEL = 'gpt-4.1-mini';
 
 export function getOpenAiApiKey(): string | null {
-	const key = (env.OPENAI_API_KEY ?? process.env.OPENAI_API_KEY)?.trim();
+	const key = env.OPENAI_API_KEY?.trim();
 	return key ? key : null;
 }
 
