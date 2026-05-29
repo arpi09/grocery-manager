@@ -4,8 +4,16 @@ import { createSession } from '$lib/server/session';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
+function safeRedirect(value: string | null): string | null {
+	if (value && value.startsWith('/') && !value.startsWith('//')) {
+		return value;
+	}
+	return null;
+}
+
 export const load: PageServerLoad = async ({ url }) => ({
-	message: url.searchParams.get('message')
+	message: url.searchParams.get('message'),
+	redirectTo: safeRedirect(url.searchParams.get('redirect'))
 });
 
 export const actions: Actions = {
@@ -17,9 +25,12 @@ export const actions: Actions = {
 			return fail(400, {
 				errors: parsed.error.flatten().fieldErrors,
 				message: 'Please fix the errors below.',
-				email: String(formData.email ?? '')
+				email: String(formData.email ?? ''),
+				redirectTo: safeRedirect(String(formData.redirectTo ?? ''))
 			});
 		}
+
+		const redirectTo = safeRedirect(String(formData.redirectTo ?? ''));
 
 		try {
 			const user = await event.locals.authService.login(parsed.data.email, parsed.data.password);
@@ -29,12 +40,13 @@ export const actions: Actions = {
 				return fail(400, {
 					errors: {},
 					message: error.message,
-					email: parsed.data.email
+					email: parsed.data.email,
+					redirectTo
 				});
 			}
 			throw error;
 		}
 
-		redirect(302, '/');
+		redirect(302, redirectTo ?? '/');
 	}
 };

@@ -3,28 +3,153 @@
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
+	import {
+		householdRoleLabel,
+		inviteRoleLabel,
+		isHouseholdOwner
+	} from '$lib/domain/household';
 
-	let { data } = $props();
+	let { data, form } = $props();
 	let petModalOpen = $state(false);
+	let copiedInviteLink = $state(false);
+
+	const inviteLink = $derived(form?.inviteLink ?? null);
+	const householdError = $derived(form?.householdError ?? null);
+	const inviteFieldErrors = $derived(form?.inviteErrors ?? {});
+
+	async function copyInviteLink(link: string) {
+		await navigator.clipboard.writeText(link);
+		copiedInviteLink = true;
+		setTimeout(() => {
+			copiedInviteLink = false;
+		}, 2000);
+	}
+
+	function canManageMember(memberUserId: string, memberRole: string) {
+		if (!data.isOwner || memberUserId === data.user?.id) {
+			return false;
+		}
+		if (memberRole === 'owner') {
+			const ownerCount = data.household?.members.filter((m) => m.role === 'owner').length ?? 0;
+			return ownerCount > 1;
+		}
+		return true;
+	}
 </script>
 
 <AppLayout user={data.user}>
 	<AppHeader title="Inställningar" />
 	<Card>
-		<p class="email">Signed in as <strong>{data.user?.email}</strong></p>
+		<p class="email">Inloggad som <strong>{data.user?.email}</strong></p>
 
 		{#if data.household}
 			<section class="household-section" aria-labelledby="household-heading">
 				<h2 id="household-heading" class="household-title">Delat hushåll</h2>
 				<p class="household-name">{data.household.name}</p>
+
+				<h3 class="subsection-title">Medlemmar</h3>
 				<ul class="household-members">
 					{#each data.household.members as member}
 						<li>
-							<span class="member-email">{member.email}</span>
-							<span class="member-role">{member.role === 'owner' ? 'Ägare' : 'Medlem'}</span>
+							<div class="member-info">
+								<span class="member-email">{member.email}</span>
+								{#if member.displayName}
+									<span class="member-display">{member.displayName}</span>
+								{/if}
+							</div>
+							<div class="member-actions">
+								<span class="member-role">{householdRoleLabel(member.role)}</span>
+								{#if canManageMember(member.userId, member.role)}
+									<form method="POST" action="?/updateMemberRole" class="inline-form">
+										<input type="hidden" name="userId" value={member.userId} />
+										<select name="role" aria-label="Roll för {member.email}">
+											<option value="owner" selected={member.role === 'owner'}>Ägare</option>
+											<option value="editor" selected={member.role === 'editor'}>Redigera</option>
+											<option value="viewer" selected={member.role === 'viewer'}>Visa</option>
+										</select>
+										<Button type="submit" variant="secondary">Spara</Button>
+									</form>
+									<form method="POST" action="?/removeMember" class="inline-form">
+										<input type="hidden" name="userId" value={member.userId} />
+										<Button type="submit" variant="danger">Ta bort</Button>
+									</form>
+								{/if}
+							</div>
 						</li>
 					{/each}
 				</ul>
+
+				{#if data.isOwner}
+					<h3 class="subsection-title">Bjud in</h3>
+					<p class="household-note">
+						Kopiera länken och skicka till personen. Ingen e-post skickas automatiskt.
+					</p>
+
+					{#if householdError}
+						<p class="banner error" role="alert">{householdError}</p>
+					{/if}
+
+					<form method="POST" action="?/createInvite" class="invite-form">
+						<label>
+							E-post
+							<input
+								name="email"
+								type="email"
+								required
+								placeholder="namn@example.com"
+								autocomplete="email"
+							/>
+							{#if inviteFieldErrors.email?.[0]}
+								<span class="field-error">{inviteFieldErrors.email[0]}</span>
+							{/if}
+						</label>
+						<label>
+							Roll
+							<select name="role" required>
+								<option value="editor">{inviteRoleLabel('editor')}</option>
+								<option value="viewer">{inviteRoleLabel('viewer')}</option>
+							</select>
+						</label>
+						<Button type="submit">Skicka inbjudan</Button>
+					</form>
+
+					{#if inviteLink}
+						<div class="invite-link-box">
+							<p class="invite-link-label">Inbjudningslänk</p>
+							<div class="invite-link-row">
+								<input readonly value={inviteLink} class="invite-link-input" />
+								<Button type="button" variant="secondary" onclick={() => copyInviteLink(inviteLink)}>
+									{copiedInviteLink ? 'Kopierad!' : 'Kopiera'}
+								</Button>
+							</div>
+						</div>
+					{/if}
+
+					{#if data.pendingInvites.length > 0}
+						<h3 class="subsection-title">Väntande inbjudningar</h3>
+						<ul class="pending-invites">
+							{#each data.pendingInvites as invite}
+								<li>
+									<div>
+										<span class="member-email">{invite.email}</span>
+										<span class="member-role">{inviteRoleLabel(invite.role)}</span>
+									</div>
+									<form method="POST" action="?/revokeInvite">
+										<input type="hidden" name="inviteId" value={invite.id} />
+										<Button type="submit" variant="danger">Återkalla</Button>
+									</form>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				{:else if data.householdRole}
+					<p class="household-note">
+						Din roll: {householdRoleLabel(data.householdRole)}.
+						{#if !isHouseholdOwner(data.householdRole)}
+							Endast ägare kan bjuda in och hantera medlemmar.
+						{/if}
+					</p>
+				{/if}
 			</section>
 		{/if}
 
@@ -127,33 +252,148 @@
 	}
 
 	.household-name {
-		margin: 0 0 var(--space-sm);
+		margin: 0 0 var(--space-md);
 		font-weight: 700;
 	}
 
-	.household-members {
+	.subsection-title {
+		margin: var(--space-md) 0 var(--space-sm);
+		font-size: 0.95rem;
+	}
+
+	.household-note {
+		margin: 0 0 var(--space-sm);
+		color: var(--color-text-muted);
+		font-size: 0.86rem;
+	}
+
+	.household-members,
+	.pending-invites {
 		list-style: none;
 		margin: 0;
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.35rem;
+		gap: 0.5rem;
 	}
 
-	.household-members li {
+	.household-members li,
+	.pending-invites li {
 		display: flex;
 		justify-content: space-between;
+		align-items: center;
 		gap: var(--space-sm);
 		font-size: 0.9rem;
+		padding: var(--space-sm);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+	}
+
+	.member-info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
 	}
 
 	.member-email {
 		color: var(--color-text);
+		font-weight: 600;
+	}
+
+	.member-display {
+		color: var(--color-text-muted);
+		font-size: 0.82rem;
+	}
+
+	.member-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-sm);
 	}
 
 	.member-role {
 		color: var(--color-text-muted);
 		font-size: 0.85rem;
+	}
+
+	.inline-form {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+	}
+
+	.inline-form select {
+		padding: 0.35rem 0.5rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		font-size: 0.85rem;
+	}
+
+	.invite-form {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		margin-bottom: var(--space-md);
+	}
+
+	.invite-form label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		font-size: 0.9rem;
+	}
+
+	.invite-form input,
+	.invite-form select {
+		padding: 0.6rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+	}
+
+	.field-error {
+		color: var(--color-danger);
+		font-size: 0.82rem;
+	}
+
+	.invite-link-box {
+		margin-bottom: var(--space-md);
+		padding: var(--space-sm);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+	}
+
+	.invite-link-label {
+		margin: 0 0 var(--space-sm);
+		font-size: 0.85rem;
+		font-weight: 600;
+	}
+
+	.invite-link-row {
+		display: flex;
+		gap: var(--space-sm);
+	}
+
+	.invite-link-input {
+		flex: 1;
+		padding: 0.5rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		font-size: 0.85rem;
+	}
+
+	.banner {
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-sm);
+		margin: 0 0 var(--space-sm);
+		font-size: 0.875rem;
+	}
+
+	.banner.error {
+		background: #fdeaea;
+		color: var(--color-danger);
 	}
 
 	.setting-row {
@@ -295,6 +535,20 @@
 
 		.setting-actions {
 			flex-wrap: wrap;
+		}
+
+		.household-members li,
+		.pending-invites li {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		.member-actions {
+			width: 100%;
+		}
+
+		.invite-link-row {
+			flex-direction: column;
 		}
 
 		.pet-list li {

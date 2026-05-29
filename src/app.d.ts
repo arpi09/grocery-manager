@@ -7,6 +7,7 @@ import type { InventoryService } from '$lib/application/inventory.service';
 import type { MealPlanService } from '$lib/application/meal-plan.service';
 import type { PetFoodService } from '$lib/application/pet-food.service';
 import type { PetService } from '$lib/application/pet.service';
+import type { HouseholdRole } from '$lib/domain/household';
 
 declare global {
 	namespace App {
@@ -14,6 +15,7 @@ declare global {
 			user: User | null;
 			session: Session | null;
 			householdId: string | null;
+			householdRole: HouseholdRole | null;
 			authService: AuthService;
 			profileService: ProfileService;
 			adminService: AdminService;

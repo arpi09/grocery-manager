@@ -13,7 +13,7 @@ export interface IntegrationDbContext {
 	seedHousehold(household: {
 		id?: string;
 		name?: string;
-		members: Array<{ userId: string; role: 'owner' | 'member' }>;
+		members: Array<{ userId: string; role: 'owner' | 'editor' | 'viewer' | 'member' }>;
 	}): Promise<string>;
 	close(): Promise<void>;
 }
@@ -25,7 +25,8 @@ const SQL_MIGRATION_FILES = [
 	'0003_household.sql',
 	'0004_user_profile.sql',
 	'0005_app_error.sql',
-	'0006_user_theme_preference.sql'
+	'0006_user_theme_preference.sql',
+	'0007_household_invites_roles.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
@@ -35,6 +36,7 @@ TRUNCATE TABLE
 	"recipe_ideas",
 	"pet_food_items",
 	"pets",
+	"household_invite",
 	"household_member",
 	"household",
 	"app_error",
@@ -80,7 +82,7 @@ export async function createIntegrationDb(): Promise<IntegrationDbContext> {
 					household.members.map((m) => ({
 						householdId: id,
 						userId: m.userId,
-						role: m.role
+						role: m.role === 'member' ? 'editor' : m.role
 					}))
 				);
 			}

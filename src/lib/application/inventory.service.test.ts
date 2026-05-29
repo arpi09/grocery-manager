@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { InventoryService } from './inventory.service';
+import { InventoryReadOnlyError, InventoryService } from './inventory.service';
 import type { IInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
 import type { InventoryItem } from '$lib/domain/inventory-item';
 
@@ -85,7 +85,12 @@ describe('InventoryService', () => {
 		const updated = makeItem({ name: 'Oat milk' });
 		vi.mocked(repository.update).mockResolvedValue(updated);
 
-		const result = await service.updateItem('household-1', 'item-1', { name: 'Oat milk' });
+		const result = await service.updateItem(
+			'household-1',
+			'item-1',
+			{ name: 'Oat milk' },
+			'owner'
+		);
 
 		expect(result.name).toBe('Oat milk');
 		expect(repository.update).toHaveBeenCalledWith('household-1', 'item-1', { name: 'Oat milk' });
@@ -94,7 +99,7 @@ describe('InventoryService', () => {
 	it('deletes an item', async () => {
 		vi.mocked(repository.delete).mockResolvedValue(true);
 
-		await service.deleteItem('household-1', 'item-1');
+		await service.deleteItem('household-1', 'item-1', 'editor');
 
 		expect(repository.delete).toHaveBeenCalledWith('household-1', 'item-1');
 	});
@@ -103,11 +108,16 @@ describe('InventoryService', () => {
 		const created = makeItem({ name: 'Sugar', location: 'cupboard' });
 		vi.mocked(repository.create).mockResolvedValue(created);
 
-		const result = await service.createItem('household-1', 'user-1', {
-			name: 'Sugar',
-			location: 'cupboard',
-			quantity: '1'
-		});
+		const result = await service.createItem(
+			'household-1',
+			'user-1',
+			{
+				name: 'Sugar',
+				location: 'cupboard',
+				quantity: '1'
+			},
+			'editor'
+		);
 
 		expect(result.name).toBe('Sugar');
 		expect(repository.create).toHaveBeenCalledWith(
@@ -116,5 +126,34 @@ describe('InventoryService', () => {
 			expect.any(String),
 			expect.objectContaining({ name: 'Sugar', location: 'cupboard' })
 		);
+	});
+
+	it('rejects create for viewer role', async () => {
+		await expect(
+			service.createItem(
+				'household-1',
+				'user-1',
+				{ name: 'Sugar', location: 'cupboard', quantity: '1' },
+				'viewer'
+			)
+		).rejects.toBeInstanceOf(InventoryReadOnlyError);
+
+		expect(repository.create).not.toHaveBeenCalled();
+	});
+
+	it('rejects update for viewer role', async () => {
+		await expect(
+			service.updateItem('household-1', 'item-1', { name: 'Blocked' }, 'viewer')
+		).rejects.toBeInstanceOf(InventoryReadOnlyError);
+
+		expect(repository.update).not.toHaveBeenCalled();
+	});
+
+	it('rejects delete for viewer role', async () => {
+		await expect(service.deleteItem('household-1', 'item-1', 'viewer')).rejects.toBeInstanceOf(
+			InventoryReadOnlyError
+		);
+
+		expect(repository.delete).not.toHaveBeenCalled();
 	});
 });

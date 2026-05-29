@@ -1,9 +1,12 @@
 import { InventoryNotFoundError } from '$lib/application/inventory.service';
+import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
+	requireInventoryWriteAccess(locals.householdRole);
+
 	try {
 		const item = await locals.inventoryService.getItem(locals.householdId!, params.id);
 		return { item };
@@ -27,6 +30,8 @@ function parseItemForm(formData: FormData) {
 
 export const actions: Actions = {
 	save: async (event) => {
+		requireInventoryWriteAccess(event.locals.householdRole);
+
 		const parsed = parseItemForm(await event.request.formData());
 
 		if (!parsed.success) {
@@ -34,14 +39,19 @@ export const actions: Actions = {
 		}
 
 		try {
-			await event.locals.inventoryService.updateItem(event.locals.householdId!, event.params.id, {
-				name: parsed.data.name,
-				location: parsed.data.location,
-				quantity: parsed.data.quantity,
-				unit: parsed.data.unit || null,
-				expiresOn: parsed.data.expiresOn || null,
-				notes: parsed.data.notes || null
-			});
+			await event.locals.inventoryService.updateItem(
+				event.locals.householdId!,
+				event.params.id,
+				{
+					name: parsed.data.name,
+					location: parsed.data.location,
+					quantity: parsed.data.quantity,
+					unit: parsed.data.unit || null,
+					expiresOn: parsed.data.expiresOn || null,
+					notes: parsed.data.notes || null
+				},
+				event.locals.householdRole!
+			);
 		} catch (e) {
 			if (e instanceof InventoryNotFoundError) {
 				error(404, 'Item not found');
@@ -52,6 +62,8 @@ export const actions: Actions = {
 		redirect(302, `/inventory/${parsed.data.location}`);
 	},
 	delete: async (event) => {
+		requireInventoryWriteAccess(event.locals.householdRole);
+
 		let location = 'fridge';
 		try {
 			const item = await event.locals.inventoryService.getItem(
@@ -59,7 +71,11 @@ export const actions: Actions = {
 				event.params.id
 			);
 			location = item.location;
-			await event.locals.inventoryService.deleteItem(event.locals.householdId!, event.params.id);
+			await event.locals.inventoryService.deleteItem(
+				event.locals.householdId!,
+				event.params.id,
+				event.locals.householdRole!
+			);
 		} catch (e) {
 			if (e instanceof InventoryNotFoundError) {
 				error(404, 'Item not found');

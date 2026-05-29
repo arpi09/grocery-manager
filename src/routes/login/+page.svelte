@@ -14,5 +14,6 @@
 		{message}
 		messageTone={data.message ? 'info' : 'error'}
 		email={form?.email}
+		redirectTo={form?.redirectTo ?? data.redirectTo ?? undefined}
 	/>
 </AuthLayout>

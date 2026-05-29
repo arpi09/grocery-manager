@@ -35,7 +35,7 @@ describe('Shared household inventory', () => {
 			name: 'Hemmet',
 			members: [
 				{ userId: 'user-admin', role: 'owner' },
-				{ userId: 'user-member', role: 'member' }
+				{ userId: 'user-member', role: 'editor' }
 			]
 		});
 
@@ -45,11 +45,16 @@ describe('Shared household inventory', () => {
 		expect(adminHouseholdId).toBe(DEFAULT_HOUSEHOLD_ID);
 		expect(memberHouseholdId).toBe(DEFAULT_HOUSEHOLD_ID);
 
-		await inventoryService.createItem(DEFAULT_HOUSEHOLD_ID, 'user-admin', {
-			name: 'Shared milk',
-			location: 'fridge',
-			quantity: '1'
-		});
+		await inventoryService.createItem(
+			DEFAULT_HOUSEHOLD_ID,
+			'user-admin',
+			{
+				name: 'Shared milk',
+				location: 'fridge',
+				quantity: '1'
+			},
+			'owner'
+		);
 
 		const adminItems = await inventoryService.listByLocation(DEFAULT_HOUSEHOLD_ID, 'fridge');
 		const memberItems = await inventoryService.listByLocation(DEFAULT_HOUSEHOLD_ID, 'fridge');
@@ -72,11 +77,16 @@ describe('Shared household inventory', () => {
 			members: [{ userId: 'user-b', role: 'owner' }]
 		});
 
-		await inventoryService.createItem('household-a', 'user-a', {
-			name: 'Only in A',
-			location: 'cupboard',
-			quantity: '1'
-		});
+		await inventoryService.createItem(
+			'household-a',
+			'user-a',
+			{
+				name: 'Only in A',
+				location: 'cupboard',
+				quantity: '1'
+			},
+			'owner'
+		);
 
 		const itemsA = await inventoryService.listAll('household-a');
 		const itemsB = await inventoryService.listAll('household-b');

@@ -1,9 +1,12 @@
 import { isStorageLocation } from '$lib/domain/location';
+import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, locals }) => {
+	requireInventoryWriteAccess(locals.householdRole);
+
 	const locationParam = url.searchParams.get('location');
 	const fromParam = url.searchParams.get('from');
 	const defaultLocation =
@@ -26,6 +29,8 @@ function parseItemForm(formData: FormData) {
 
 export const actions: Actions = {
 	create: async (event) => {
+		requireInventoryWriteAccess(event.locals.householdRole);
+
 		const parsed = parseItemForm(await event.request.formData());
 
 		if (!parsed.success) {
@@ -36,13 +41,14 @@ export const actions: Actions = {
 			event.locals.householdId!,
 			event.locals.user!.id,
 			{
-			name: parsed.data.name,
-			location: parsed.data.location,
-			quantity: parsed.data.quantity,
-			unit: parsed.data.unit || null,
-			expiresOn: parsed.data.expiresOn || null,
-			notes: parsed.data.notes || null
-			}
+				name: parsed.data.name,
+				location: parsed.data.location,
+				quantity: parsed.data.quantity,
+				unit: parsed.data.unit || null,
+				expiresOn: parsed.data.expiresOn || null,
+				notes: parsed.data.notes || null
+			},
+			event.locals.householdRole!
 		);
 
 		redirect(302, `/inventory/${parsed.data.location}`);

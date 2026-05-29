@@ -46,11 +46,38 @@ export const householdMemberTable = pgTable(
 		userId: text('user_id')
 			.notNull()
 			.references(() => userTable.id, { onDelete: 'cascade' }),
-		role: text('role', { enum: ['owner', 'member'] }).notNull()
+		role: text('role', { enum: ['owner', 'editor', 'viewer'] }).notNull()
 	},
 	(table) => [
 		primaryKey({ columns: [table.householdId, table.userId] }),
 		index('household_member_user_idx').on(table.userId)
+	]
+);
+
+export const householdInviteTable = pgTable(
+	'household_invite',
+	{
+		id: text('id').primaryKey(),
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
+		email: text('email').notNull(),
+		role: text('role', { enum: ['editor', 'viewer'] }).notNull(),
+		token: text('token').notNull().unique(),
+		invitedByUserId: text('invited_by_user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		status: text('status', { enum: ['pending', 'accepted', 'revoked'] })
+			.notNull()
+			.default('pending'),
+		expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' })
+			.notNull()
+			.defaultNow()
+	},
+	(table) => [
+		index('household_invite_household_idx').on(table.householdId),
+		index('household_invite_token_idx').on(table.token)
 	]
 );
 

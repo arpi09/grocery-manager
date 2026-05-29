@@ -1,3 +1,4 @@
+import { canEditInventory, type HouseholdRole } from '$lib/domain/household';
 import { EXPIRING_SOON_DAYS, buildLocationBars, type LocationBar } from '$lib/domain/inventory-analytics';
 import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 import type {
@@ -16,6 +17,13 @@ export class InventoryNotFoundError extends Error {
 	constructor() {
 		super('Item not found');
 		this.name = 'InventoryNotFoundError';
+	}
+}
+
+export class InventoryReadOnlyError extends Error {
+	constructor() {
+		super('Du har endast läsbehörighet i detta hushåll.');
+		this.name = 'InventoryReadOnlyError';
 	}
 }
 
@@ -80,12 +88,24 @@ export class InventoryService {
 		return item;
 	}
 
-	async createItem(householdId: string, userId: string, input: CreateInventoryItemInput) {
+	async createItem(
+		householdId: string,
+		userId: string,
+		input: CreateInventoryItemInput,
+		actorRole: HouseholdRole
+	) {
+		assertInventoryWritable(actorRole);
 		const id = generateId();
 		return this.repository.create(householdId, userId, id, input);
 	}
 
-	async updateItem(householdId: string, id: string, input: UpdateInventoryItemInput) {
+	async updateItem(
+		householdId: string,
+		id: string,
+		input: UpdateInventoryItemInput,
+		actorRole: HouseholdRole
+	) {
+		assertInventoryWritable(actorRole);
 		const item = await this.repository.update(householdId, id, input);
 		if (!item) {
 			throw new InventoryNotFoundError();
@@ -93,11 +113,18 @@ export class InventoryService {
 		return item;
 	}
 
-	async deleteItem(householdId: string, id: string) {
+	async deleteItem(householdId: string, id: string, actorRole: HouseholdRole) {
+		assertInventoryWritable(actorRole);
 		const deleted = await this.repository.delete(householdId, id);
 		if (!deleted) {
 			throw new InventoryNotFoundError();
 		}
+	}
+}
+
+function assertInventoryWritable(actorRole: HouseholdRole): void {
+	if (!canEditInventory(actorRole)) {
+		throw new InventoryReadOnlyError();
 	}
 }
 

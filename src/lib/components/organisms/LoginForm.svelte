@@ -9,9 +9,10 @@
 		message?: string;
 		messageTone?: 'error' | 'info';
 		email?: string;
+		redirectTo?: string;
 	}
 
-	let { errors = {}, message, messageTone = 'error', email = '' }: Props = $props();
+	let { errors = {}, message, messageTone = 'error', email = '', redirectTo }: Props = $props();
 
 	let emailField = $state(email);
 	$effect(() => {
@@ -39,6 +40,10 @@
 >
 	{#if message}
 		<p class="banner {messageTone}" role="alert">{message}</p>
+	{/if}
+
+	{#if redirectTo}
+		<input type="hidden" name="redirectTo" value={redirectTo} />
 	{/if}
 
 	<FormField

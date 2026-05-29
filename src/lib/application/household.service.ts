@@ -1,6 +1,91 @@
-import type { HouseholdView } from '$lib/domain/household';
+import { randomBytes } from 'node:crypto';
+import {
+	isHouseholdOwner,
+	type HouseholdInviteView,
+	type HouseholdRole,
+	type HouseholdView,
+	type InviteRole
+} from '$lib/domain/household';
 import { generateId } from '$lib/infrastructure/auth/id';
 import type { IHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
+
+const INVITE_EXPIRY_DAYS = 7;
+
+export class HouseholdForbiddenError extends Error {
+	constructor(message = 'Endast ägare kan utföra denna åtgärd.') {
+		super(message);
+		this.name = 'HouseholdForbiddenError';
+	}
+}
+
+export class InviteNotFoundError extends Error {
+	constructor() {
+		super('Inbjudan hittades inte.');
+		this.name = 'InviteNotFoundError';
+	}
+}
+
+export class InviteExpiredError extends Error {
+	constructor() {
+		super('Inbjudan har gått ut.');
+		this.name = 'InviteExpiredError';
+	}
+}
+
+export class InviteNotPendingError extends Error {
+	constructor() {
+		super('Inbjudan är inte längre giltig.');
+		this.name = 'InviteNotPendingError';
+	}
+}
+
+export class InviteEmailMismatchError extends Error {
+	constructor() {
+		super('Logga in med samma e-postadress som inbjudan skickades till.');
+		this.name = 'InviteEmailMismatchError';
+	}
+}
+
+export class AlreadyMemberError extends Error {
+	constructor() {
+		super('Användaren är redan medlem i hushållet.');
+		this.name = 'AlreadyMemberError';
+	}
+}
+
+export class MemberNotFoundError extends Error {
+	constructor() {
+		super('Medlemmen hittades inte.');
+		this.name = 'MemberNotFoundError';
+	}
+}
+
+export class LastOwnerError extends Error {
+	constructor() {
+		super('Det måste finnas minst en ägare i hushållet.');
+		this.name = 'LastOwnerError';
+	}
+}
+
+export class PendingInviteExistsError extends Error {
+	constructor() {
+		super('Det finns redan en väntande inbjudan till denna e-postadress.');
+		this.name = 'PendingInviteExistsError';
+	}
+}
+
+export interface InvitePreview {
+	householdName: string;
+	email: string;
+	role: InviteRole;
+	status: 'pending' | 'accepted' | 'revoked';
+	expired: boolean;
+}
+
+export interface CreateInviteResult {
+	invite: HouseholdInviteView;
+	token: string;
+}
 
 export class HouseholdService {
 	constructor(private readonly repository: IHouseholdRepository) {}
@@ -20,4 +105,174 @@ export class HouseholdService {
 		await this.repository.addMember(householdId, userId, 'owner');
 		return householdId;
 	}
+
+	async getRoleForUser(householdId: string, userId: string): Promise<HouseholdRole | null> {
+		return this.repository.getMemberRole(householdId, userId);
+	}
+
+	async createInvite(
+		householdId: string,
+		actorUserId: string,
+		email: string,
+		role: InviteRole
+	): Promise<CreateInviteResult> {
+		await this.requireOwner(householdId, actorUserId);
+
+		const normalizedEmail = email.trim().toLowerCase();
+		if (await this.repository.isMemberByEmail(householdId, normalizedEmail)) {
+			throw new AlreadyMemberError();
+		}
+
+		const pending = await this.repository.findPendingInviteByEmail(householdId, normalizedEmail);
+		if (pending) {
+			throw new PendingInviteExistsError();
+		}
+
+		const id = generateId();
+		const token = randomBytes(32).toString('base64url');
+		const expiresAt = addDays(new Date(), INVITE_EXPIRY_DAYS);
+
+		const created = await this.repository.createInvite({
+			id,
+			householdId,
+			email: normalizedEmail,
+			role,
+			token,
+			invitedByUserId: actorUserId,
+			expiresAt
+		});
+
+		const invites = await this.repository.listPendingInvites(householdId);
+		const invite = invites.find((row) => row.id === created.id);
+		if (!invite) {
+			throw new Error('Failed to load created invite');
+		}
+
+		return { invite, token };
+	}
+
+	async acceptInvite(token: string, userId: string, userEmail: string): Promise<void> {
+		const invite = await this.repository.findInviteByToken(token);
+		if (!invite) {
+			throw new InviteNotFoundError();
+		}
+
+		this.assertInviteAcceptable(invite.status, invite.expiresAt);
+
+		const normalizedUserEmail = userEmail.trim().toLowerCase();
+		if (normalizedUserEmail !== invite.email) {
+			throw new InviteEmailMismatchError();
+		}
+
+		if (await this.repository.hasMember(invite.householdId, userId)) {
+			throw new AlreadyMemberError();
+		}
+
+		await this.repository.acceptInvite(invite.id, userId, invite.role);
+	}
+
+	async updateMemberRole(
+		householdId: string,
+		actorUserId: string,
+		targetUserId: string,
+		role: HouseholdRole
+	): Promise<void> {
+		await this.requireOwner(householdId, actorUserId);
+
+		const currentRole = await this.repository.getMemberRole(householdId, targetUserId);
+		if (!currentRole) {
+			throw new MemberNotFoundError();
+		}
+
+		if (currentRole === 'owner' && role !== 'owner') {
+			const ownerCount = await this.repository.countOwners(householdId);
+			if (ownerCount <= 1) {
+				throw new LastOwnerError();
+			}
+		}
+
+		const updated = await this.repository.updateMemberRole(householdId, targetUserId, role);
+		if (!updated) {
+			throw new MemberNotFoundError();
+		}
+	}
+
+	async removeMember(
+		householdId: string,
+		actorUserId: string,
+		targetUserId: string
+	): Promise<void> {
+		await this.requireOwner(householdId, actorUserId);
+
+		const currentRole = await this.repository.getMemberRole(householdId, targetUserId);
+		if (!currentRole) {
+			throw new MemberNotFoundError();
+		}
+
+		if (currentRole === 'owner') {
+			const ownerCount = await this.repository.countOwners(householdId);
+			if (ownerCount <= 1) {
+				throw new LastOwnerError();
+			}
+		}
+
+		const removed = await this.repository.removeMember(householdId, targetUserId);
+		if (!removed) {
+			throw new MemberNotFoundError();
+		}
+	}
+
+	async listPendingInvites(
+		householdId: string,
+		actorUserId: string
+	): Promise<HouseholdInviteView[]> {
+		await this.requireOwner(householdId, actorUserId);
+		return this.repository.listPendingInvites(householdId);
+	}
+
+	async revokeInvite(householdId: string, actorUserId: string, inviteId: string): Promise<void> {
+		await this.requireOwner(householdId, actorUserId);
+
+		const revoked = await this.repository.revokePendingInvite(householdId, inviteId);
+		if (!revoked) {
+			throw new InviteNotFoundError();
+		}
+	}
+
+	async getInvitePreview(token: string): Promise<InvitePreview> {
+		const preview = await this.repository.getInvitePreview(token);
+		if (!preview) {
+			throw new InviteNotFoundError();
+		}
+
+		return {
+			householdName: preview.householdName,
+			email: preview.email,
+			role: preview.role,
+			status: preview.status,
+			expired: preview.status === 'pending' && preview.expiresAt.getTime() < Date.now()
+		};
+	}
+
+	private async requireOwner(householdId: string, userId: string) {
+		const role = await this.repository.getMemberRole(householdId, userId);
+		if (!role || !isHouseholdOwner(role)) {
+			throw new HouseholdForbiddenError();
+		}
+	}
+
+	private assertInviteAcceptable(status: string, expiresAt: Date) {
+		if (status !== 'pending') {
+			throw new InviteNotPendingError();
+		}
+		if (expiresAt.getTime() < Date.now()) {
+			throw new InviteExpiredError();
+		}
+	}
+}
+
+function addDays(date: Date, days: number): Date {
+	const result = new Date(date);
+	result.setDate(result.getDate() + days);
+	return result;
 }

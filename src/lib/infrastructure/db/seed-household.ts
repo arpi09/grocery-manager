@@ -90,7 +90,7 @@ async function ensureDefaultHouseholdRow() {
 	}
 }
 
-async function ensureMemberInHousehold(userId: string, role: 'owner' | 'member') {
+async function ensureMemberInHousehold(userId: string, role: 'owner' | 'editor') {
 	const db = getDb();
 	await db
 		.insert(householdMemberTable)
@@ -129,7 +129,7 @@ export async function ensureDefaultHousehold(): Promise<void> {
 		await ensureMemberInHousehold(adminId, 'owner');
 	}
 	if (memberId) {
-		await ensureMemberInHousehold(memberId, 'member');
+		await ensureMemberInHousehold(memberId, 'editor');
 	}
 
 	await backfillInventoryHouseholdIds();

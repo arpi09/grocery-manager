@@ -34,12 +34,17 @@ describe('Inventory integration', () => {
 	it('creates and lists items through service + repository + database', async () => {
 		await seedHouseholdForUser('user-1');
 
-		const created = await service.createItem(householdId, 'user-1', {
-			name: 'Milk',
-			location: 'fridge',
-			quantity: '1',
-			unit: 'L'
-		});
+		const created = await service.createItem(
+			householdId,
+			'user-1',
+			{
+				name: 'Milk',
+				location: 'fridge',
+				quantity: '1',
+				unit: 'L'
+			},
+			'owner'
+		);
 
 		const listed = await service.listByLocation(householdId, 'fridge');
 
@@ -63,19 +68,29 @@ describe('Inventory integration', () => {
 		const laterDate = new Date();
 		laterDate.setDate(laterDate.getDate() + 30);
 
-		await service.createItem(householdId, 'user-2', {
-			name: 'Yoghurt',
-			location: 'fridge',
-			quantity: '1',
-			expiresOn: soonDate.toISOString().slice(0, 10)
-		});
+		await service.createItem(
+			householdId,
+			'user-2',
+			{
+				name: 'Yoghurt',
+				location: 'fridge',
+				quantity: '1',
+				expiresOn: soonDate.toISOString().slice(0, 10)
+			},
+			'owner'
+		);
 
-		await service.createItem(householdId, 'user-2', {
-			name: 'Rice',
-			location: 'cupboard',
-			quantity: '1',
-			expiresOn: laterDate.toISOString().slice(0, 10)
-		});
+		await service.createItem(
+			householdId,
+			'user-2',
+			{
+				name: 'Rice',
+				location: 'cupboard',
+				quantity: '1',
+				expiresOn: laterDate.toISOString().slice(0, 10)
+			},
+			'owner'
+		);
 
 		const summary = await service.getDashboard(householdId);
 
