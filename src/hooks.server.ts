@@ -26,6 +26,14 @@ function isInvitePath(pathname: string): boolean {
 	return pathname.startsWith('/invite/');
 }
 
+function isPublicPath(pathname: string): boolean {
+	return (
+		publicPaths.has(pathname) ||
+		isInvitePath(pathname) ||
+		pathname === '/api/health/db'
+	);
+}
+
 export const handle: Handle = async ({ event, resolve }) => {
 	await initDatabase();
 
@@ -58,7 +66,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	const { pathname } = event.url;
-	const isPublic = publicPaths.has(pathname) || isInvitePath(pathname);
+	const isPublic = isPublicPath(pathname);
 	const isAuthenticated = !!event.locals.user;
 
 	if (!isAuthenticated && !isPublic) {
