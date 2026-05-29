@@ -2,6 +2,11 @@
 # Replace placeholder values and create secrets before first deploy.
 # Docs: docs/FIREBASE_DEPLOY.md
 
+# Mounts Cloud SQL Auth Proxy Unix socket at /cloudsql/CONNECTION_NAME.
+# DATABASE_URL secret must use that socket (see docs/FIREBASE_DEPLOY.md).
+cloudSqlInstances:
+  - home-pantry-4bee5:europe-west4:home-pantry-4bee5-instance
+
 runConfig:
   minInstances: 0
   maxInstances: 10

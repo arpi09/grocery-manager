@@ -11,7 +11,7 @@ This guide deploys the SvelteKit SSR app (Lucia auth + PostgreSQL) to **Firebase
 | Firebase Hosting + Cloud Functions | ⚠️ Possible | Community adapters exist; more config, cold starts, less maintained than App Hosting. |
 | Static Hosting only | ❌ Not suitable | App requires SSR (Lucia sessions, `hooks.server.ts`, API routes). |
 
-**Database:** The app uses **PostgreSQL** in production (`DATABASE_URL`). PGlite (`USE_PGLITE=true`) is **dev-only**. Firebase does not replace Postgres — use **Cloud SQL for PostgreSQL**, **Neon**, or **Supabase** and set `DATABASE_URL` as a secret.
+**Database:** The app uses **PostgreSQL** in production (`DATABASE_URL`). PGlite (`USE_PGLITE=true`) is **dev-only**. This project uses **Cloud SQL for PostgreSQL** in GCP project `home-pantry-4bee5` (see [Database](#database)).
 
 **Firestore / Realtime Database:** Not required. Do not migrate unless you explicitly want to.
 
@@ -36,40 +36,67 @@ Firebase CLI is a **devDependency** in this repo — use `npx firebase` or the n
    - Artifact Registry API
    - Secret Manager API
 
-### 2. PostgreSQL and migrations
+### 2. Database (Cloud SQL)
+
+| Setting | Value |
+|---------|--------|
+| Project | `home-pantry-4bee5` |
+| Instance | `home-pantry-4bee5-instance` |
+| Region | `europe-west4` (match App Hosting) |
+| Connection name | `home-pantry-4bee5:europe-west4:home-pantry-4bee5-instance` |
+| Database / user | `pantry` / `pantry_app` |
 
 Run migrations **before** the first app deploy so the schema is complete on an empty database.
 
-#### Option A — Neon / Supabase (simplest)
-
-1. Create a project at [neon.tech](https://neon.tech) or [supabase.com](https://supabase.com)
-2. Copy the connection string (must include `?sslmode=require` for Neon)
-3. From your machine:
-
-```bash
-cd /path/to/home-pantry
-export DATABASE_URL="postgresql://user:pass@host/db?sslmode=require"
-npm run db:migrate
-```
-
-`npm run db:migrate` uses Drizzle's journal (`drizzle/meta/_journal.json`) and applies **all** SQL files (`0000_init` through `0011_consumption_event`). Verify locally with:
+`npm run db:migrate` uses Drizzle's journal (`drizzle/meta/_journal.json`) and applies **all** SQL files (`0000_init` through `0011_consumption_event`). Verify the journal with:
 
 ```bash
 npm test -- src/lib/infrastructure/db/migrations.test.ts
 ```
 
-#### Option B — Cloud SQL for PostgreSQL
+#### App Hosting ↔ Cloud SQL (`apphosting.yaml`)
 
-1. Create a Cloud SQL PostgreSQL instance in the **same region** as App Hosting (e.g. `europe-west4`)
-2. Create database `pantry` and user
-3. For production, use [VPC connector / private IP](https://firebase.google.com/docs/app-hosting/vpc-networks) in `apphosting.yaml` so Cloud Run can reach Cloud SQL
-4. Run migrations from Cloud Shell or a machine with network access:
+`apphosting.yaml` lists the instance under `cloudSqlInstances`. App Hosting mounts a Unix socket at:
 
-```bash
-DATABASE_URL="postgresql://..." npm run db:migrate
+```
+/cloudsql/home-pantry-4bee5:europe-west4:home-pantry-4bee5-instance
 ```
 
-**Recommendation:** Start with **Neon** or **Supabase** for fastest setup; move to Cloud SQL later if you need everything in GCP.
+Set the **`DATABASE_URL` secret** (not in git) to a URL that uses that socket (works with `postgres` / Drizzle):
+
+```
+postgresql://pantry_app:YOUR_PASSWORD@/pantry?host=/cloudsql/home-pantry-4bee5:europe-west4:home-pantry-4bee5-instance
+```
+
+`USE_PGLITE` must stay `false` in `apphosting.yaml` (already set).
+
+If you use **private IP only** (no socket), configure [VPC access](https://firebase.google.com/docs/app-hosting/vpc-networks) in `runConfig.vpcAccess` and put the private IP host in `DATABASE_URL` instead — only needed when not using `cloudSqlInstances`.
+
+#### Local migrations (public IP)
+
+1. GCP Console → **Cloud SQL** → `home-pantry-4bee5-instance` → **Connections** → **Authorized networks** → add your current public IP.
+2. In `.env` (never commit):
+
+```bash
+USE_PGLITE=false
+DATABASE_URL=postgresql://pantry_app:YOUR_PASSWORD@34.158.71.215:5432/pantry
+```
+
+3. Migrate:
+
+```bash
+# Bash
+npm run db:migrate
+
+# Windows (loads .env)
+powershell -File scripts/db-migrate-cloudsql.ps1 -FromEnvFile
+```
+
+Public IP may change; update authorized networks if migrate fails with a connection timeout.
+
+#### Alternative hosts (Neon / Supabase)
+
+Any Postgres URL works if you set `DATABASE_URL` accordingly and run `npm run db:migrate` before deploy. Remove or adjust `cloudSqlInstances` in `apphosting.yaml` if you are not on Cloud SQL.
 
 ### 3. Firebase CLI login (local)
 
@@ -100,7 +127,7 @@ If you already have `firebase.json` / `apphosting.yaml` from this repo, init may
 
 Never commit `.env` or service account keys.
 
-Create secrets (CLI prompts for values):
+Create secrets (CLI prompts for values). For `DATABASE_URL`, paste the **socket** URL from [Database](#database) (not the public IP URL).
 
 ```bash
 npx firebase apphosting:secrets:set DATABASE_URL --project home-pantry-4bee5
@@ -111,9 +138,9 @@ npx firebase apphosting:secrets:set OPENAI_API_KEY --project home-pantry-4bee5
 Grant App Hosting access (CLI usually offers this during `secrets:set`):
 
 ```bash
-npx firebase apphosting:secrets:grantaccess DATABASE_URL --backend home-pantry
-npx firebase apphosting:secrets:grantaccess ADMIN_PASSWORD --backend home-pantry
-npx firebase apphosting:secrets:grantaccess OPENAI_API_KEY --backend home-pantry
+npx firebase apphosting:secrets:grantaccess DATABASE_URL --backend home-pantry --project home-pantry-4bee5
+npx firebase apphosting:secrets:grantaccess ADMIN_PASSWORD --backend home-pantry --project home-pantry-4bee5
+npx firebase apphosting:secrets:grantaccess OPENAI_API_KEY --backend home-pantry --project home-pantry-4bee5
 ```
 
 Update non-secret values in `apphosting.yaml` or Firebase Console → **App Hosting → home-pantry → Settings → Environment**:
@@ -121,7 +148,7 @@ Update non-secret values in `apphosting.yaml` or Firebase Console → **App Host
 | Variable | Required | Notes |
 |----------|----------|-------|
 | `USE_PGLITE` | yes | Must be `false` in production |
-| `DATABASE_URL` | yes | Secret — Postgres connection string |
+| `DATABASE_URL` | yes | Secret — Cloud SQL socket URL (see [Database](#database)) |
 | `ADMIN_EMAIL` | yes | Your admin login email (replace `REPLACE_WITH_YOUR_ADMIN_EMAIL` in `apphosting.yaml`) |
 | `ADMIN_PASSWORD` | yes | Secret — creates/updates admin on startup |
 | `PUBLIC_ORIGIN` | yes | `https://home-pantry--home-pantry-4bee5.REGION.hosted.app` or custom domain |
@@ -224,7 +251,9 @@ Use the existing root `Dockerfile`. Map Cloud Run URL to `PUBLIC_ORIGIN`.
 |-------|-----|
 | `db:migrate` only applies 4 migrations | Journal out of sync — run `npm test -- src/lib/infrastructure/db/migrations.test.ts` |
 | Build fails: `DATABASE_URL is not set` | Drizzle config only runs for `db:migrate` locally. App build should not need DB; if it does, set a dummy URL at BUILD time only. |
-| 500 on login / DB errors | Check `DATABASE_URL`, SSL mode, and that migrations ran |
+| 500 on login / DB errors | Check `DATABASE_URL` (socket URL on App Hosting), `cloudSqlInstances` in `apphosting.yaml`, and that migrations ran |
+| Cloud SQL connection refused (local) | Add your IP to authorized networks; confirm public IP and password |
+| App Hosting cannot reach DB | Ensure `cloudSqlInstances` matches connection name; secret uses `/cloudsql/...` host, not public IP |
 | Cookies not sticking | Set `PUBLIC_ORIGIN` to exact HTTPS origin; `NODE_ENV=production` enables secure cookies |
 | Cold start latency | Increase `minInstances` in `apphosting.yaml` |
 | Blaze billing | App Hosting uses Cloud Run + Cloud Build; free tier limits may not cover production traffic |
@@ -235,7 +264,8 @@ Use the existing root `Dockerfile`. Map Cloud Run URL to `PUBLIC_ORIGIN`.
 |------|---------|
 | `firebase.json` | App Hosting backend id and deploy ignore list |
 | `.firebaserc` | Firebase project id |
-| `apphosting.yaml` | Cloud Run sizing, build/run commands, env + secrets |
+| `apphosting.yaml` | Cloud Run sizing, `cloudSqlInstances`, build/run commands, env + secrets |
+| `scripts/db-migrate-cloudsql.ps1` | Windows helper to run `db:migrate` from `.env` |
 | `.apphosting/bundle.yaml` | SvelteKit adapter-node output hints for App Hosting |
 | `.github/workflows/deploy-firebase.yml` | CI verify + deploy |
 | `Dockerfile` | Optional Cloud Run container build |
@@ -251,6 +281,8 @@ Use the existing root `Dockerfile`. Map Cloud Run URL to `PUBLIC_ORIGIN`.
 ## Blockers (user-owned)
 
 - **Billing:** Blaze plan required
-- **Region:** Pick App Hosting region near Postgres (latency + VPC if using Cloud SQL)
+- **Region:** App Hosting and Cloud SQL should share a region (`europe-west4`)
+- **Secrets:** `DATABASE_URL`, `ADMIN_PASSWORD`, and optionally `OPENAI_API_KEY` must exist before deploy
+- **Authorized networks:** Required only for local `db:migrate` over public IP
 - **SSR:** Cannot use static-only Hosting; App Hosting or Cloud Run is mandatory
 - **PGlite:** Not supported in Cloud Run (ephemeral filesystem); use Postgres
