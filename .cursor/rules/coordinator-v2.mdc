@@ -5,7 +5,8 @@ alwaysApply: false
 
 # Coordinator v2
 
-- **Merge order:** Read and update [MERGE_QUEUE.md](../../MERGE_QUEUE.md) before starting or merging feature work.
+- **Delivery (default):** Trunk on `master` — no PRs. See [docs/CI_CD.md](../../docs/CI_CD.md).
+- **Work order:** [MERGE_QUEUE.md](../../MERGE_QUEUE.md) when present — sequencing for parallel agents, not GitHub PRs.
 - **Live status:** [AGENT_STATUS.md](../../AGENT_STATUS.md) — active slots, blockers, base SHA.
 - **Ownership:** [OWNERSHIP.md](../../OWNERSHIP.md) — shared areas; one agent per hot zone.
 - **Complexity:** [COMPLEXITY_REPORT.md](../../COMPLEXITY_REPORT.md) — structural hotspots; refresh via [complexity-agent.mdc](./complexity-agent.mdc) (read-only, no auto-refactors).
@@ -14,8 +15,8 @@ alwaysApply: false
 
 1. **Only the coordinator** creates implementation agents or worktrees. Implementation agents do not spawn peers.
 2. **WIP limit:** Max **3** implementation agents (dev-runtime excluded).
-3. **Push:** Only after user says `Approved to push [branch-name]`.
-4. **Before merge:** Rebase on `master`; run `npm test`, `npm run test:integration`, `npm run check`; E2E if auth/UI touched.
+3. **Push to `master`:** After G0 (`npm run check && npm test`; E2E if auth/UI touched) — `git commit` + `git push origin master`. CI/CD runs automatically; **never** instruct the user to open a PR unless they ask.
+4. **Before push:** Pull/rebase on latest `master` if others may have pushed; run the G0 checklist above.
 5. **No manual dev restart** when `dev:watch` is running (see `dev-server-auto-restart.mdc`).
 
 ## When blocked

@@ -27,7 +27,7 @@ _Last updated: 2026-05-29 (Coordinator v2)._
 | Branch | Feature | Status | Tests (if known) | Conflict risk | Notes |
 |--------|---------|--------|------------------|---------------|-------|
 | `feature/modal-blur-consistency` | Unify modal scrim blur on overlay dismiss layers | Ready for review / merge | Not run this session | **Low** — `app.css`, `Modal.svelte`, nav/menus | 1 commit ahead; based on current `master`. |
-| `feature/login-landing-redesign` | Product-style login landing + auth shell | In progress (1 commit ahead) | E2E auth specs touched — run `npm run test:e2e` before merge | **Medium** — `login/**`, `register/**`, shared auth components, `e2e/auth.spec.ts` | Rebase onto latest `master` before merge PR. |
+| `feature/login-landing-redesign` | Product-style login landing + auth shell | In progress (1 commit ahead) | E2E auth specs touched — run `npm run test:e2e` before push | **Medium** — `login/**`, `register/**`, shared auth components, `e2e/auth.spec.ts` | Rebase onto latest `master` before push to trunk. |
 | `feature/firebase-pipeline` | Drizzle `_journal.json` fix + GitHub Firebase deploy pipeline | Open; **not** on `master` | Add/run `migrations.test.ts` + CI when merging | **High** — `package-lock.json`, `drizzle/meta`, `.github/workflows`, `apphosting.yaml` | User **Cloud SQL setup in progress** — infra blocker. |
 | `feature/admin-health-usage` | Admin health/usage dashboard (+ accidental scan WIP on branch) | **Stale / diverged** | Unknown | **High** — admin routes, `init.ts`, scan routes | Rebase onto `master` or extract admin-only commits. |
 
@@ -59,10 +59,10 @@ These local branches match `master` (already merged or reset); safe to delete lo
 
 ---
 
-## Pre-merge checklist (each PR)
+## Pre-push checklist (trunk — no PR)
 
-1. Rebase onto latest `master`.
-2. `npm test && npm run test:integration && npm run check`
-3. Touching auth/login: `npm run test:e2e`
+1. Rebase onto latest `master` if the branch diverged.
+2. **G0:** `npm run check && npm test` (+ `npm run test:integration` if DB touched).
+3. Touching auth/login: `npm run test:e2e` before push.
 4. Touching drizzle/deploy: run migration tests; confirm Firebase / Cloud SQL secrets with user.
-5. User approval: **`Approved to push [branch-name]`** before push (see OWNERSHIP).
+5. `git commit` + `git push origin master` — **Release** workflow runs G1→G2→G3 automatically ([`docs/CI_CD.md`](./docs/CI_CD.md)). No GitHub PR required.

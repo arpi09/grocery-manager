@@ -200,14 +200,20 @@ https://home-pantry--home-pantry-4bee5.REGION.hosted.app
 
 ## Ongoing pipeline (GitHub Actions)
 
-Workflow: [`.github/workflows/deploy-firebase.yml`](../.github/workflows/deploy-firebase.yml)
+Trunk-baserad CI/CD (ingen PR): **[`docs/CI_CD.md`](./CI_CD.md)**.
+
+| Workflow | Gate | Trigger |
+|----------|------|---------|
+| [`.github/workflows/release.yml`](../.github/workflows/release.yml) | G1 `quality` → G2 `e2e` → G3 `deploy` | Push till `master`/`main`; `workflow_dispatch` (nödläge) |
 
 | Trigger | Behavior |
 |---------|----------|
-| Push to `master` | Runs check + test + build; **deploys** if `FIREBASE_TOKEN` secret is set |
-| **workflow_dispatch** | Same verify job, then deploy (or skip deploy step if token missing) |
+| Push to `master`/`main` | G1 → G2 → G3 automatiskt (deploy om `FIREBASE_TOKEN` finns) |
+| **workflow_dispatch** on **Release** | Samma kedja; *Skip E2E* endast vid nödläge |
 
-The deploy job uses the **`production`** GitHub Environment — add optional required reviewers there for manual approval before each deploy.
+The deploy job uses the **`production`** GitHub Environment — optional required reviewers there (solo dev: lämna tomt för helt automatisk deploy).
+
+**Firebase Console auto-deploy:** stäng av GitHub-integration i App Hosting om Actions ska vara enda källan — undvik dubbel deploy.
 
 ### GitHub secrets to add
 
@@ -222,13 +228,13 @@ Alternative (not wired in the default workflow): a Google Cloud **service accoun
 1. Merge this branch to `master`
 2. Add `FIREBASE_TOKEN` in GitHub repo secrets
 3. (Optional) Configure **Environments → production** with required reviewers
-4. Push to `master` or run **Deploy Firebase App Hosting** manually from the Actions tab
+4. Push to `master` (Release workflow: quality → e2e → deploy) or run **Release** manually from Actions
 
 App Hosting runtime secrets (`DATABASE_URL`, `ADMIN_PASSWORD`, etc.) stay in **Firebase Secret Manager**, not GitHub.
 
 ### Alternative: Firebase Console GitHub integration
 
-Firebase Console → App Hosting → **home-pantry** → Settings → **GitHub** can also connect the repo for rollouts. The GitHub Actions workflow above is the repo-native option and runs tests before deploy.
+Firebase Console → App Hosting → **home-pantry** → Settings → **GitHub** can connect the repo for rollouts. **Use either Console auto-deploy or the Actions `release.yml` workflow — not both.** Actions is recommended (tests before deploy).
 
 ## Alternative: Cloud Run via Docker
 
@@ -272,7 +278,7 @@ Use the existing root `Dockerfile`. Map Cloud Run URL to `PUBLIC_ORIGIN`.
 | `apphosting.yaml` | Cloud Run sizing, `cloudSqlInstances`, build/run commands, env + secrets |
 | `scripts/db-migrate-cloudsql.ps1` | Windows helper to run `db:migrate` from `.env` |
 | `.apphosting/bundle.yaml` | SvelteKit adapter-node output hints for App Hosting |
-| `.github/workflows/deploy-firebase.yml` | CI verify + deploy |
+| `.github/workflows/ci.yml`, `e2e.yml`, `deploy.yml` | Tiered CI/CD (see `docs/CI_CD.md`) |
 | `Dockerfile` | Optional Cloud Run container build |
 | `.dockerignore` | Smaller Docker context |
 

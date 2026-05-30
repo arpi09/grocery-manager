@@ -9,6 +9,7 @@ How [DELIVERY_METRICS.md](../DELIVERY_METRICS.md) fits the coordinator stack.
 | [AGENT_STATUS.md](../AGENT_STATUS.md) | Live board: active branches, env, merge notes | Yes |
 | `MERGE_QUEUE.md` | Ordered merge intent, conflict risk, pause rules | **No** — on `chore/coordinator-v2` until merged |
 | [DELIVERY_METRICS.md](../DELIVERY_METRICS.md) | Historical flow: time through stages, reworks, test honesty | This PR |
+| [docs/CI_CD.md](./CI_CD.md) | Trunk-based G0–G3, push `master` → auto deploy (no PR) | Yes |
 | `docs/ARCHITECTURE_HEALTH.md` | Periodic architecture audit | **Pending** |
 | [COMPLEXITY_REPORT.md](../COMPLEXITY_REPORT.md) | Structural hotspots, merge friction | This program |
 
@@ -22,7 +23,7 @@ flowchart LR
   AH[ARCHITECTURE_HEALTH] -.-> DM
 ```
 
-- **MERGE_QUEUE** answers *what should merge next and why* (risk, infra blockers).
+- **MERGE_QUEUE** answers *what should land on `master` next and why* (risk, infra blockers) — agent sequencing, not GitHub PRs.
 - **AGENT_STATUS** answers *what is active right now* (branches, base SHA, env).
 - **DELIVERY_METRICS** answers *how long did flow take and where did we stall* — updated **after** integration, not instead of the live boards.
 - **ARCHITECTURE_HEALTH** (when added) supplies structural findings; the coordinator may reference them in weekly summary bottlenecks, not as a substitute for per-feature rows.

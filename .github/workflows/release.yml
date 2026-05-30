@@ -1,0 +1,111 @@
+# Trunk-based release pipeline (master/main only)
+# push → G1 quality → G2 e2e → G3 deploy (needs chain, no PR required)
+#
+# Required secret: FIREBASE_TOKEN (npx firebase login:ci)
+# Runtime secrets stay in Firebase — see docs/FIREBASE_DEPLOY.md
+
+name: Release
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      skip_e2e:
+        description: Skip E2E (emergency deploy only — use rarely)
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+      - run: npm run check
+      - run: npm test
+      - run: npm run test:integration
+        env:
+          USE_PGLITE: 'true'
+      - run: npm run build
+        env:
+          DATABASE_URL: postgresql://pantry:pantry@localhost:5432/pantry
+          USE_PGLITE: 'true'
+
+  e2e:
+    name: e2e
+    needs: quality
+    if: github.event_name == 'push' || inputs.skip_e2e != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm run test:e2e
+        env:
+          USE_PGLITE: 'true'
+          ADMIN_EMAIL: e2e-admin@example.com
+          ADMIN_PASSWORD: e2e-ci-password
+          PUBLIC_ORIGIN: http://localhost:5173
+          CI: 'true'
+
+  deploy:
+    name: deploy
+    needs: [quality, e2e]
+    if: >
+      always() &&
+      needs.quality.result == 'success' &&
+      (needs.e2e.result == 'success' || needs.e2e.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Deploy App Hosting backend
+        if: secrets.FIREBASE_TOKEN != ''
+        run: npm run deploy:firebase -- --non-interactive --project home-pantry-4bee5
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Skip deploy (no FIREBASE_TOKEN)
+        if: secrets.FIREBASE_TOKEN == ''
+        run: |
+          echo "::notice::FIREBASE_TOKEN is not set — quality and E2E passed but deploy was skipped."
+          echo "Add FIREBASE_TOKEN under Settings → Secrets and variables → Actions,"
+          echo "or deploy locally: npm run deploy:firebase"
+          echo "See docs/CI_CD.md and docs/FIREBASE_DEPLOY.md"

@@ -21,7 +21,8 @@
 		"deploy:firebase": "npx firebase-tools@latest deploy --only apphosting:home-pantry",
 		"deploy:firebase:dry": "npx firebase-tools@latest deploy --only apphosting:home-pantry --dry-run --non-interactive",
 		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo ''",
+		"prepare": "svelte-kit sync || echo '' && husky",
+		"lint:staged": "lint-staged",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"lint": "eslint .",
 		"format": "prettier --write .",
@@ -48,6 +49,8 @@
 		"eslint-plugin-svelte": "^2.46.1",
 		"firebase-tools": "^14.27.0",
 		"globals": "^15.14.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^15.4.3",
 		"nodemon": "^3.1.14",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",
@@ -68,5 +71,9 @@
 		"lucia": "^3.2.2",
 		"postgres": "^3.4.5",
 		"zod": "^3.24.1"
+	},
+	"lint-staged": {
+		"*.{js,ts,mjs,cjs}": "eslint --fix",
+		"*.{svelte,svelte.ts,svelte.js}": "eslint --fix"
 	}
 }

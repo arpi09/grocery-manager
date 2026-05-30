@@ -10,7 +10,7 @@ Measure **flow efficiency** from idea through implementation, test, and integrat
 
 | Track | Do not optimize for |
 |-------|---------------------|
-| Time in each stage (implement → review → integrate) | Lines of code |
+| Time in each stage (implement → test → push → deploy) | Lines of code |
 | Rework and merge friction (conflicts, test gaps) | Number of agents |
 | Test status before/at merge | Raw commit count |
 
