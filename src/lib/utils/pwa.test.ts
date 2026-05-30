@@ -1,4 +1,4 @@
-﻿import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
 	INSTALL_BANNER_DISMISSED_KEY,
 	canTriggerInstallPrompt,
@@ -8,17 +8,22 @@ import {
 	shouldOfferInstallExperience
 } from './pwa';
 
-function withUserAgent(userAgent: string, run: () => void) {
-	const spy = vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(userAgent);
+function withUserAgent(ua: string, run: () => void) {
+	vi.stubGlobal('navigator', { userAgent: ua });
 	try {
 		run();
 	} finally {
-		spy.mockRestore();
+		vi.unstubAllGlobals();
 	}
 }
 
 describe('pwa utils', () => {
-	it('reports non-standalone in jsdom', () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it('reports non-standalone without matchMedia', () => {
+		vi.stubGlobal('matchMedia', undefined);
 		expect(isStandaloneDisplay()).toBe(false);
 	});
 
@@ -32,11 +37,13 @@ describe('pwa utils', () => {
 	it('detects Android user agent', () => {
 		withUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8)', () => {
 			expect(isAndroidDevice()).toBe(true);
+			expect(isIosDevice()).toBe(false);
 		});
 	});
 
 	it('offers install when mobile and not standalone', () => {
 		withUserAgent('Mozilla/5.0 (Linux; Android 14)', () => {
+			vi.stubGlobal('matchMedia', () => ({ matches: false }));
 			expect(shouldOfferInstallExperience()).toBe(true);
 		});
 	});
