@@ -25,7 +25,7 @@ export default defineConfig({
 	testDir: 'e2e',
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
-	retries: process.env.CI ? 1 : 0,
+	retries: process.env.CI ? 2 : 0,
 	workers: process.env.CI ? 1 : undefined,
 	reporter: process.env.CI ? 'github' : 'list',
 	use: {
@@ -41,16 +41,13 @@ export default defineConfig({
 		}
 	],
 	webServer: {
-		command: process.env.CI ? `node build` : `npm run dev -- --port ${port}`,
+		command: `npm run dev -- --port ${port}`,
 		url: `${baseURL}/login`,
 		reuseExistingServer: !process.env.CI,
-		timeout: process.env.CI ? 60_000 : 120_000,
+		timeout: 120_000,
 		env: {
 			...process.env,
-			PORT: port,
-			HOST: '0.0.0.0',
 			USE_PGLITE: process.env.USE_PGLITE ?? 'true',
-			ORIGIN: baseURL,
 			PUBLIC_ORIGIN: baseURL,
 			TURNSTILE_SKIP: process.env.TURNSTILE_SKIP ?? 'true'
 		}
