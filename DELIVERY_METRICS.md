@@ -38,7 +38,7 @@ Dates and durations below come from **local git** (`git log`, merge reflog). Rev
 | Login landing redesign (`feature/login-landing-redesign`) | 2026-05-29 | — | ~minutes (commit 13:59) | unknown | not merged | ~1 | 1 | — | 0 | **Open** — E2E auth touched; run `npm run test:e2e` before merge |
 | Coordinator v2 (`chore/coordinator-v2`) | 2026-05-29 | — | ~minutes (docs commit 14:03) | unknown | not on `master` | ~1 | 1 | — | 0 | N/A (docs); includes `MERGE_QUEUE.md` |
 | Architecture health report | — | — | — | — | — | — | 0 | — | — | **Pending** — `docs/ARCHITECTURE_HEALTH.md` not created yet |
-| Security review (deploy/auth surface) | — | — | — | — | — | — | — | — | — | **Not started** in git; track when scheduled |
+| Security review (deploy/auth surface) | 2026-05-30 | — | initial scan | — | — | Security agent | — | — | — | **Active** — [SECURITY_REPORT.md](./SECURITY_REPORT.md); deploy **blocked** (drizzle-orm high) until fix or approval |
 
 _Commits counted on feature branch vs merge-base where applicable (`git rev-list branch ^base`)._
 

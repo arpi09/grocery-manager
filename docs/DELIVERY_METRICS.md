@@ -12,6 +12,7 @@ How [DELIVERY_METRICS.md](../DELIVERY_METRICS.md) fits the coordinator stack.
 | [docs/CI_CD.md](./CI_CD.md) | Trunk-based G0–G3, push `master` → auto deploy (no PR) | Yes |
 | `docs/ARCHITECTURE_HEALTH.md` | Periodic architecture audit | **Pending** |
 | [COMPLEXITY_REPORT.md](../COMPLEXITY_REPORT.md) | Structural hotspots, merge friction | This program |
+| [SECURITY_REPORT.md](../SECURITY_REPORT.md) | Deploy gate, auth/API/deps findings | Active — [docs/SECURITY_AGENT.md](./SECURITY_AGENT.md) |
 
 ## How they work together
 
