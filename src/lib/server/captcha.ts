@@ -1,4 +1,4 @@
-import { PUBLIC_TURNSTILE_SITE_KEY } from '$env/static/public';
+import { env as publicEnv } from '$env/dynamic/public';
 import { env } from '$env/dynamic/private';
 
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
@@ -28,7 +28,7 @@ export function getTurnstileSiteKeyForClient(): string {
 	if (isTurnstileSkipEnabled()) {
 		return '';
 	}
-	const key = PUBLIC_TURNSTILE_SITE_KEY?.trim();
+	const key = publicEnv.PUBLIC_TURNSTILE_SITE_KEY?.trim();
 	return key ? key : '';
 }
 
