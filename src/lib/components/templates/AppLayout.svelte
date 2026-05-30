@@ -7,7 +7,9 @@
 	import RecipeAssistant from '$lib/components/organisms/RecipeAssistant.svelte';
 	import ScanFab from '$lib/components/molecules/ScanFab.svelte';
 	import InventoryScanToast from '$lib/components/molecules/InventoryScanToast.svelte';
+	import ActivationCelebration from '$lib/components/organisms/ActivationCelebration.svelte';
 	import OnboardingGuide from '$lib/components/organisms/OnboardingGuide.svelte';
+	import PostOnboardingSurvey from '$lib/components/organisms/PostOnboardingSurvey.svelte';
 	import { canEditInventory } from '$lib/domain/household';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { isStorageLocation } from '$lib/domain/location';
@@ -66,6 +68,8 @@
 	{/if}
 	<RecipeAssistant bind:open={recipeOpen} />
 	<OnboardingGuide />
+	<PostOnboardingSurvey />
+	<ActivationCelebration />
 </div>
 
 <style>

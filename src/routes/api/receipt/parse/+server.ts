@@ -11,6 +11,7 @@ import {
 } from '$lib/utils/receipt-file';
 import { json } from '@sveltejs/kit';
 import { translate } from '$lib/i18n/messages';
+import { recordProductEvent } from '$lib/server/product-events';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -77,5 +78,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	const result: ReceiptParseResult = { lines };
+	recordProductEvent(locals.pmfService, {
+		userId: auth.user.id,
+		householdId: locals.householdId,
+		eventType: 'receipt_parsed',
+		metadata: { lineCount: lines.length, stage: 'parse' }
+	});
 	return json(result);
 };

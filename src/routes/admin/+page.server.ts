@@ -10,9 +10,21 @@ import {
 	ERROR_LOG_ADMIN_LIST_DEFAULT,
 	ERROR_LOG_ADMIN_LIST_MAX
 } from '$lib/domain/error-log';
+import {
+	PRODUCT_FEEDBACK_LIST_DEFAULT,
+	PRODUCT_FEEDBACK_LIST_MAX
+} from '$lib/domain/product-feedback';
 import { fail, redirect } from '@sveltejs/kit';
 import { translate } from '$lib/i18n/messages';
 import type { Actions, PageServerLoad } from './$types';
+
+function parseFeedbackLimit(raw: string | null): number {
+	const parsed = Number(raw ?? PRODUCT_FEEDBACK_LIST_DEFAULT);
+	if (!Number.isFinite(parsed)) {
+		return PRODUCT_FEEDBACK_LIST_DEFAULT;
+	}
+	return Math.min(PRODUCT_FEEDBACK_LIST_MAX, Math.max(1, Math.floor(parsed)));
+}
 
 function parseErrorLogLimit(raw: string | null): number {
 	const parsed = Number(raw ?? ERROR_LOG_ADMIN_LIST_DEFAULT);
@@ -28,10 +40,13 @@ function parseErrorLogLimit(raw: string | null): number {
 export const load: PageServerLoad = async ({ parent, locals, url }) => {
 	const { user } = await parent();
 	const errorLimit = parseErrorLogLimit(url.searchParams.get('errorLimit'));
-	const [stats, users, errors] = await Promise.all([
+	const feedbackLimit = parseFeedbackLimit(url.searchParams.get('feedbackLimit'));
+	const [stats, users, errors, pmfMetrics, productFeedback] = await Promise.all([
 		locals.adminService.getDashboardStats(),
 		locals.adminService.listUsers(),
-		locals.adminService.listRecentErrors(errorLimit)
+		locals.adminService.listRecentErrors(errorLimit),
+		locals.pmfService.getGlobalMetrics(),
+		locals.productFeedbackService.listRecent(feedbackLimit)
 	]);
 
 	return {
@@ -39,7 +54,10 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		stats,
 		users,
 		errors,
-		errorLimit
+		errorLimit,
+		feedbackLimit,
+		pmfMetrics,
+		productFeedback
 	};
 };
 

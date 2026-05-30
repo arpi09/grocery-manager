@@ -3,10 +3,12 @@
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import AdminHealthDashboard from '$lib/components/organisms/AdminHealthDashboard.svelte';
+	import PmfDashboard from '$lib/components/organisms/PmfDashboard.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import { formatLastSeen } from '$lib/domain/presence';
+	import type { ChurnReason } from '$lib/domain/product-feedback';
 
 	let { data, form } = $props();
 
@@ -38,6 +40,49 @@
 	{/if}
 
 	<AdminHealthDashboard stats={data.stats} />
+	<PmfDashboard metrics={data.pmfMetrics} />
+
+	<section class="product-feedback" id="feedback">
+		<Card>
+			<div class="feedback-header">
+				<h2>{t('admin.feedback.title')}</h2>
+				<form method="GET" class="feedback-limit-form">
+					<label>
+						{t('admin.showLatest')}
+						<select name="feedbackLimit" onchange={(e) => e.currentTarget.form?.requestSubmit()}>
+							{#each [25, 50, 100] as limit}
+								<option value={limit} selected={data.feedbackLimit === limit}>{limit}</option>
+							{/each}
+						</select>
+					</label>
+				</form>
+			</div>
+			<p class="feedback-note">{t('admin.feedback.note')}</p>
+			{#if data.productFeedback.length === 0}
+				<p class="feedback-empty">{t('admin.feedback.empty')}</p>
+			{:else}
+				<ul class="feedback-list">
+					{#each data.productFeedback as entry}
+						<li class="feedback-item">
+							<div class="feedback-summary">
+								<time datetime={entry.createdAt.toISOString()}>
+									{formatDate(entry.createdAt)}
+								</time>
+								<span class="feedback-source">{entry.source}</span>
+								{#if entry.churnReason}
+									<span class="feedback-reason">
+										{t(`feedback.churnReasons.${entry.churnReason as ChurnReason}`)}
+									</span>
+								{/if}
+								<span class="feedback-user">{entry.userEmail}</span>
+							</div>
+							<p class="feedback-message">{entry.message}</p>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</Card>
+	</section>
 
 	<section class="error-logs" id="felloggar">
 		<Card>
@@ -200,6 +245,81 @@
 		border-radius: var(--radius-sm);
 		background: #fde8e8;
 		color: #8a1f1f;
+	}
+
+	.product-feedback {
+		margin-bottom: var(--space-lg);
+	}
+
+	.feedback-header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-md);
+		margin-bottom: var(--space-sm);
+	}
+
+	.feedback-header h2 {
+		margin: 0;
+	}
+
+	.feedback-limit-form label {
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+		font-size: 0.9rem;
+	}
+
+	.feedback-limit-form select {
+		padding: 0.35rem 0.5rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+	}
+
+	.feedback-note,
+	.feedback-empty {
+		margin: 0 0 var(--space-md);
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+
+	.feedback-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-md);
+	}
+
+	.feedback-item {
+		padding: var(--space-sm) 0;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.feedback-item:last-child {
+		border-bottom: none;
+	}
+
+	.feedback-summary {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
+		align-items: baseline;
+		font-size: 0.85rem;
+		color: var(--color-text-muted);
+	}
+
+	.feedback-reason {
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	.feedback-message {
+		margin: 0.35rem 0 0;
+		font-size: 0.9rem;
+		white-space: pre-wrap;
 	}
 
 	.error-logs {

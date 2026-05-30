@@ -84,6 +84,10 @@ export class InventoryService {
 		return this.repository.findAllByHousehold(householdId);
 	}
 
+	async listExpiringBefore(householdId: string, beforeDate: string) {
+		return this.repository.findExpiringBefore(householdId, beforeDate);
+	}
+
 	async getItem(householdId: string, id: string) {
 		const item = await this.repository.findById(householdId, id);
 		if (!item) {

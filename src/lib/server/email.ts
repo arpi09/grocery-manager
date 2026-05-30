@@ -1,6 +1,7 @@
 import { env } from '$env/dynamic/private';
 import { Resend } from 'resend';
 import { inviteRoleLabel, type InviteRole } from '$lib/domain/household';
+import { getAppOrigin } from '$lib/server/origin';
 
 const DEFAULT_FROM = 'Home Pantry <onboarding@resend.dev>';
 const RESEND_DOCS_URL = 'https://resend.com/docs/send-with-nextjs';
@@ -301,6 +302,212 @@ export async function sendHouseholdInviteEmail(options: {
 	locale?: 'sv';
 }): Promise<SendEmailResult> {
 	const content = buildHouseholdInviteEmailContent(options);
+	return sendEmail({
+		to: options.to,
+		subject: content.subject,
+		html: content.html,
+		text: content.text
+	});
+}
+
+export interface ExpiryReminderEmailItem {
+	name: string;
+	locationLabel: string;
+	expiresOnLabel: string;
+	daysLeftLabel: string;
+}
+
+export interface ExpiryReminderEmailSection {
+	householdName: string;
+	items: ExpiryReminderEmailItem[];
+}
+
+export interface ExpiryReminderEmailContent {
+	subject: string;
+	html: string;
+	text: string;
+}
+
+export function buildExpiryReminderEmailContent(options: {
+	recipientName: string;
+	days: number;
+	inventoryUrl: string;
+	sections: ExpiryReminderEmailSection[];
+}): ExpiryReminderEmailContent {
+	const { recipientName, days, inventoryUrl, sections } = options;
+	const totalItems = sections.reduce((sum, section) => sum + section.items.length, 0);
+	const subject =
+		totalItems === 1
+			? '1 vara går snart ut — Home Pantry'
+			: `${totalItems} varor går snart ut — Home Pantry`;
+	const headline =
+		totalItems === 1 ? '1 vara går snart ut' : `${totalItems} varor går snart ut`;
+	const preheader = `Hej ${recipientName}! Här är varor som går ut inom ${days} dagar.`;
+
+	const textSections = sections
+		.map((section) => {
+			const lines = section.items.map(
+				(item) =>
+					`- ${item.name} (${item.locationLabel}) — ${item.expiresOnLabel}, ${item.daysLeftLabel}`
+			);
+			return [`${section.householdName}:`, ...lines].join('\n');
+		})
+		.join('\n\n');
+
+	const text = [
+		`Hej ${recipientName}!`,
+		``,
+		headline,
+		``,
+		`Följande varor i ditt hushåll går ut inom ${days} dagar:`,
+		``,
+		textSections,
+		``,
+		`Öppna skafferiet:`,
+		inventoryUrl,
+		``,
+		`Du får det här mejlet eftersom du aktiverat utgångspåminnelser i Home Pantry. Stäng av dem under Inställningar.`,
+		``,
+		`Vänliga hälsningar,`,
+		`Home Pantry`
+	].join('\n');
+
+	const html = buildExpiryReminderEmailHtml({
+		headline,
+		preheader,
+		recipientName,
+		days,
+		inventoryUrl,
+		sections
+	});
+
+	return { subject, html, text };
+}
+
+function buildExpiryReminderEmailHtml(options: {
+	headline: string;
+	preheader: string;
+	recipientName: string;
+	days: number;
+	inventoryUrl: string;
+	sections: ExpiryReminderEmailSection[];
+}): string {
+	const { headline, preheader, recipientName, days, inventoryUrl, sections } = options;
+	const safeHeadline = escapeHtml(headline);
+	const safePreheader = escapeHtml(preheader);
+	const safeName = escapeHtml(recipientName);
+	const safeUrl = escapeHtml(inventoryUrl);
+
+	const sectionBlocks = sections
+		.map((section) => {
+			const safeHousehold = escapeHtml(section.householdName);
+			const rows = section.items
+				.map((item) => {
+					const safeName = escapeHtml(item.name);
+					const safeLocation = escapeHtml(item.locationLabel);
+					const safeExpiry = escapeHtml(item.expiresOnLabel);
+					const safeDaysLeft = escapeHtml(item.daysLeftLabel);
+					return `<tr>
+  <td style="padding:12px 0;border-bottom:1px solid ${EMAIL.border};">
+    <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:${EMAIL.text};">${safeName}</p>
+    <p style="margin:0;font-size:13px;line-height:1.5;color:${EMAIL.textMuted};">${safeLocation} · ${safeExpiry} · <strong style="color:${EMAIL.accent};">${safeDaysLeft}</strong></p>
+  </td>
+</tr>`;
+				})
+				.join('');
+			return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:0 0 24px;">
+  <tr>
+    <td style="padding:0 0 8px;">
+      <p style="margin:0;font-size:13px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:${EMAIL.textMuted};">${safeHousehold}</p>
+    </td>
+  </tr>
+  ${rows}
+</table>`;
+		})
+		.join('');
+
+	return `<!DOCTYPE html>
+<html lang="sv" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="color-scheme" content="light" />
+  <title>${safeHeadline}</title>
+</head>
+<body style="margin:0;padding:0;background-color:${EMAIL.bg};font-family:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">${safePreheader}&nbsp;&zwnj;&nbsp;&zwnj;</div>
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:${EMAIL.bg};">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;background-color:${EMAIL.surface};border:1px solid ${EMAIL.border};border-radius:16px;overflow:hidden;">
+          <tr>
+            <td style="background-color:${EMAIL.primary};padding:28px 32px 24px;text-align:center;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 12px;">
+                <tr>
+                  <td style="width:44px;height:44px;background-color:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.35);border-radius:12px;text-align:center;vertical-align:middle;font-size:15px;font-weight:700;letter-spacing:-0.04em;color:#ffffff;line-height:44px;">HP</td>
+                </tr>
+              </table>
+              <p style="margin:0;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.85);">Home Pantry</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px 32px 8px;">
+              <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;line-height:1.25;color:${EMAIL.text};">${safeHeadline}</h1>
+              <p style="margin:0 0 20px;font-size:16px;line-height:1.6;color:${EMAIL.text};">
+                Hej <strong>${safeName}</strong>! Här är varor som går ut inom <strong>${days} dagar</strong>.
+              </p>
+              ${sectionBlocks}
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:0 32px 32px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="border-radius:10px;background-color:${EMAIL.primary};">
+                    <a href="${safeUrl}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:16px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;background-color:${EMAIL.primary};">Öppna skafferiet</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 32px 32px;border-top:1px solid ${EMAIL.border};">
+              <p style="margin:24px 0 0;font-size:12px;line-height:1.5;color:${EMAIL.textMuted};">
+                Du får det här mejlet eftersom du aktiverat utgångspåminnelser i Home Pantry. Stäng av dem under Inställningar.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px 32px 28px;background-color:${EMAIL.surfaceMuted};border-top:1px solid ${EMAIL.border};">
+              <p style="margin:0;font-size:12px;line-height:1.5;color:${EMAIL.textMuted};text-align:center;">
+                Vänliga hälsningar,<br />
+                <strong style="color:${EMAIL.text};font-weight:600;">Home Pantry</strong>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+export async function sendExpiryReminderEmail(options: {
+	to: string;
+	recipientName: string;
+	days: number;
+	sections: ExpiryReminderEmailSection[];
+	inventoryUrl?: string;
+}): Promise<SendEmailResult> {
+	const inventoryUrl = options.inventoryUrl ?? `${getAppOrigin()}/hem`;
+	const content = buildExpiryReminderEmailContent({
+		recipientName: options.recipientName,
+		days: options.days,
+		inventoryUrl,
+		sections: options.sections
+	});
 	return sendEmail({
 		to: options.to,
 		subject: content.subject,

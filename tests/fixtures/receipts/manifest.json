@@ -1,0 +1,50 @@
+{
+	"version": 1,
+	"targetCount": 20,
+	"description": "Kvitto-PDF testpack — ICA, Kivra och Willys. Committed synthetic-*.pdf for CI; real PDFs are gitignored.",
+	"slots": [
+		{ "file": "ica-01.pdf", "store": "ica", "lineCountMin": 5, "lineCountMax": 45, "notes": "ICA butikskvitto, text-PDF" },
+		{ "file": "ica-02.pdf", "store": "ica", "lineCountMin": 5, "lineCountMax": 45, "notes": "ICA butikskvitto, text-PDF" },
+		{ "file": "ica-03.pdf", "store": "ica", "lineCountMin": 5, "lineCountMax": 45, "notes": "ICA butikskvitto, text-PDF" },
+		{ "file": "ica-04.pdf", "store": "ica", "lineCountMin": 5, "lineCountMax": 45, "notes": "ICA butikskvitto, text-PDF" },
+		{ "file": "ica-05.pdf", "store": "ica", "lineCountMin": 5, "lineCountMax": 45, "notes": "ICA butikskvitto, text-PDF" },
+		{ "file": "ica-06.pdf", "store": "ica", "lineCountMin": 5, "lineCountMax": 45, "notes": "ICA butikskvitto, text-PDF" },
+		{ "file": "ica-07.pdf", "store": "ica", "lineCountMin": 5, "lineCountMax": 45, "notes": "ICA butikskvitto, text-PDF" },
+		{ "file": "kivra-01.pdf", "store": "kivra", "lineCountMin": 5, "lineCountMax": 45, "notes": "Kivra digitalt kvitto (Coop/ICA/Willys m.fl.)" },
+		{ "file": "kivra-02.pdf", "store": "kivra", "lineCountMin": 5, "lineCountMax": 45, "notes": "Kivra digitalt kvitto" },
+		{ "file": "kivra-03.pdf", "store": "kivra", "lineCountMin": 5, "lineCountMax": 45, "notes": "Kivra digitalt kvitto" },
+		{ "file": "kivra-04.pdf", "store": "kivra", "lineCountMin": 5, "lineCountMax": 45, "notes": "Kivra digitalt kvitto" },
+		{ "file": "kivra-05.pdf", "store": "kivra", "lineCountMin": 5, "lineCountMax": 45, "notes": "Kivra digitalt kvitto" },
+		{ "file": "kivra-06.pdf", "store": "kivra", "lineCountMin": 5, "lineCountMax": 45, "notes": "Kivra digitalt kvitto" },
+		{ "file": "kivra-07.pdf", "store": "kivra", "lineCountMin": 5, "lineCountMax": 45, "notes": "Kivra digitalt kvitto" },
+		{ "file": "willys-01.pdf", "store": "willys", "lineCountMin": 5, "lineCountMax": 45, "notes": "Willys kvitto, text-PDF" },
+		{ "file": "willys-02.pdf", "store": "willys", "lineCountMin": 5, "lineCountMax": 45, "notes": "Willys kvitto, text-PDF" },
+		{ "file": "willys-03.pdf", "store": "willys", "lineCountMin": 5, "lineCountMax": 45, "notes": "Willys kvitto, text-PDF" },
+		{ "file": "willys-04.pdf", "store": "willys", "lineCountMin": 5, "lineCountMax": 45, "notes": "Willys kvitto, text-PDF" },
+		{ "file": "willys-05.pdf", "store": "willys", "lineCountMin": 5, "lineCountMax": 45, "notes": "Willys kvitto, text-PDF" },
+		{ "file": "willys-06.pdf", "store": "willys", "lineCountMin": 5, "lineCountMax": 45, "notes": "Willys kvitto, text-PDF" }
+	],
+	"committedSynthetic": [
+		{
+			"file": "synthetic-ica-01.pdf",
+			"store": "ica",
+			"lineCountMin": 5,
+			"lineCountMax": 15,
+			"notes": "Minimal text-PDF for CI — regenerate via scripts/generate-synthetic-receipt-pdfs.mjs"
+		},
+		{
+			"file": "synthetic-willys-01.pdf",
+			"store": "willys",
+			"lineCountMin": 5,
+			"lineCountMax": 15,
+			"notes": "Minimal text-PDF for CI"
+		},
+		{
+			"file": "synthetic-kivra-01.pdf",
+			"store": "kivra",
+			"lineCountMin": 5,
+			"lineCountMax": 15,
+			"notes": "Minimal text-PDF for CI"
+		}
+	]
+}

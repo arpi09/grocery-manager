@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { getContext } from 'svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
@@ -9,6 +10,11 @@
 	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
 	import { t, type MessageKey } from '$lib/i18n';
 	import { OPEN_RECIPE_IDEAS } from '$lib/navigation/app-layout-context';
+	import {
+		ONBOARDING_PROGRESS_EVENT,
+		getActivationProgress,
+		type ActivationProgress
+	} from '$lib/utils/onboarding';
 
 	interface Props {
 		summary: DashboardSummary;
@@ -23,6 +29,27 @@
 	const returnTo = APP_HOME_PATH;
 	const from = $derived(encodeURIComponent(returnTo));
 
+	let activationProgress = $state<ActivationProgress>(getActivationProgress());
+
+	function refreshActivationProgress() {
+		if (!browser) {
+			return;
+		}
+		activationProgress = getActivationProgress();
+	}
+
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+
+		refreshActivationProgress();
+
+		const onProgress = () => refreshActivationProgress();
+		window.addEventListener(ONBOARDING_PROGRESS_EVENT, onProgress);
+		return () => window.removeEventListener(ONBOARDING_PROGRESS_EVENT, onProgress);
+	});
+
 	const greeting = $derived(
 		displayName?.trim()
 			? t('home.greeting', { name: displayName.trim() })
@@ -31,6 +58,26 @@
 
 	const tagline = $derived(
 		summary.totalItems === 0 ? t('home.taglineEmpty') : t('home.tagline')
+	);
+
+	const emptyPrimaryHref = $derived(
+		activationProgress.path === 'receipt'
+			? `/scan/kvitto?from=${from}`
+			: `/scan?mode=barcode&from=${from}`
+	);
+
+	const emptyPrimaryLabel = $derived(
+		activationProgress.path === 'receipt' ? t('home.emptyActionReceipt') : t('home.emptyActionBarcode')
+	);
+
+	const emptySecondaryHref = $derived(
+		activationProgress.path === 'receipt'
+			? `/scan?mode=barcode&from=${from}`
+			: `/scan/kvitto?from=${from}`
+	);
+
+	const emptySecondaryLabel = $derived(
+		activationProgress.path === 'receipt' ? t('home.emptyActionBarcode') : t('home.emptyActionReceipt')
 	);
 
 	const expiringPreview = $derived(summary.expiringSoon.slice(0, 3));
@@ -56,14 +103,22 @@
 	{#if summary.totalItems === 0}
 		{#if canWrite}
 			<EmptyState
-				iconId="box"
+				iconId="barcode"
 				title={t('home.emptyTitle')}
 				description={t('home.emptyDescription')}
-				actionLabel={t('home.emptyAction')}
-				actionHref={`/scan?mode=barcode&from=${from}`}
-				secondaryActionLabel={t('home.chipManual')}
-				secondaryActionHref={`/item/new?from=${from}`}
+				actionLabel={emptyPrimaryLabel}
+				actionHref={emptyPrimaryHref}
+				secondaryActionLabel={emptySecondaryLabel}
+				secondaryActionHref={emptySecondaryHref}
 			/>
+			{#if activationProgress.inProgress && activationProgress.path === 'barcode' && activationProgress.barcodeCount > 0}
+				<p class="activation-progress" role="status">
+					{t('onboarding.barcodeProgress', {
+						count: activationProgress.barcodeCount,
+						goal: activationProgress.barcodeGoal
+					})}
+				</p>
+			{/if}
 		{:else}
 			<Card>
 				<p class="readonly-empty">{t('home.readonlyEmpty')}</p>
@@ -159,6 +214,14 @@
 		font-size: 0.95rem;
 		line-height: 1.45;
 		max-width: 36ch;
+	}
+
+	.activation-progress {
+		margin: calc(-1 * var(--space-md)) 0 0;
+		text-align: center;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--color-primary);
 	}
 
 	.scan-zone {

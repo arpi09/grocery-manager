@@ -11,6 +11,7 @@ import {
 	generateShoppingSuggestions,
 	suggestionToListItem
 } from '$lib/server/shopping-suggestions';
+import { recordProductEvent } from '$lib/server/product-events';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -171,6 +172,16 @@ export const actions: Actions = {
 				event.locals.householdRole!,
 				generated.items.map(suggestionToListItem)
 			);
+
+			recordProductEvent(event.locals.pmfService, {
+				userId: event.locals.user!.id,
+				householdId,
+				eventType: 'fill_suggestions_added',
+				metadata: {
+					added: result.added,
+					skipped: result.skipped
+				}
+			});
 
 			return {
 				fillSuccess: {

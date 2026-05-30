@@ -1,11 +1,28 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
 	import '../app.css';
 	import NavigationProgress from '$lib/components/molecules/NavigationProgress.svelte';
 	import { resolveTheme, type ThemePreference } from '$lib/domain/theme';
 	import { initLocale } from '$lib/i18n';
+	import { pwaInfo } from 'virtual:pwa-info';
+	import { initPwaInstallListeners } from '$lib/utils/pwa';
 
 	let { children, data } = $props();
+
+	const webManifestLink = $derived(pwaInfo ? pwaInfo.webManifest.linkTag : '');
+
+	onMount(() => {
+		initPwaInstallListeners();
+
+		if (!pwaInfo) {
+			return;
+		}
+
+		void import('virtual:pwa-register').then(({ registerSW }) => {
+			registerSW({ immediate: true });
+		});
+	});
 
 	// SSR: effects do not run on the server; sync init uses layout load locale (cookie).
 	initLocale(data.locale);
@@ -42,6 +59,10 @@
 		return () => media.removeEventListener('change', onChange);
 	});
 </script>
+
+<svelte:head>
+	{@html webManifestLink}
+</svelte:head>
 
 <NavigationProgress />
 {@render children()}

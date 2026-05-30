@@ -18,6 +18,12 @@ export const userTable = pgTable('user', {
 	avatarUrl: text('avatar_url'),
 	role: text('role', { enum: ['user', 'admin'] }).notNull().default('user'),
 	petsEnabled: boolean('pets_enabled').notNull().default(false),
+	expiryRemindersEnabled: boolean('expiry_reminders_enabled').notNull().default(false),
+	expiryReminderDays: integer('expiry_reminder_days').notNull().default(7),
+	expiryReminderLastSentAt: timestamp('expiry_reminder_last_sent_at', {
+		withTimezone: true,
+		mode: 'date'
+	}),
 	themePreference: text('theme_preference', { enum: ['light', 'dark', 'system'] }).notNull().default('system'),
 	activeHouseholdId: text('active_household_id').references(() => householdTable.id, {
 		onDelete: 'set null'
@@ -196,6 +202,60 @@ export const petFoodTable = pgTable(
 );
 
 export const shoppingListItemTable = pgTable('shopping_list_item', { id: text('id').primaryKey(), householdId: text('household_id').notNull().references(() => householdTable.id, { onDelete: 'cascade' }), name: text('name').notNull(), quantity: numeric('quantity', { precision: 10, scale: 2 }), unit: text('unit'), checked: boolean('checked').notNull().default(false), sortOrder: integer('sort_order').notNull().default(0), createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(), updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow() }, (table) => [index('shopping_list_household_sort_idx').on(table.householdId, table.sortOrder)]);
+
+export const productEventTable = pgTable(
+	'product_event',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		householdId: text('household_id').references(() => householdTable.id, {
+			onDelete: 'set null'
+		}),
+		eventType: text('event_type', {
+			enum: ['scan_completed', 'receipt_parsed', 'fill_suggestions_added']
+		}).notNull(),
+		metadata: text('metadata'),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('product_event_user_created_idx').on(table.userId, table.createdAt),
+		index('product_event_type_created_idx').on(table.eventType, table.createdAt),
+		index('product_event_household_created_idx').on(table.householdId, table.createdAt)
+	]
+);
+
+export const productFeedbackTable = pgTable(
+	'product_feedback',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		householdId: text('household_id').references(() => householdTable.id, {
+			onDelete: 'set null'
+		}),
+		source: text('source', { enum: ['settings', 'post_onboarding'] }).notNull(),
+		churnReason: text('churn_reason', {
+			enum: [
+				'forgot_habit',
+				'too_much_work',
+				'missing_feature',
+				'privacy_trust',
+				'other_app',
+				'notifications',
+				'other'
+			]
+		}),
+		message: text('message').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('product_feedback_created_idx').on(table.createdAt),
+		index('product_feedback_user_created_idx').on(table.userId, table.createdAt)
+	]
+);
 
 export const consumptionEventTable = pgTable(
 	'consumption_event',

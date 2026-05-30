@@ -109,7 +109,7 @@
 		"greeting": "Hi, {name}",
 		"greetingNeutral": "Your pantry",
 		"tagline": "Scan an item to stay on top of things",
-		"taglineEmpty": "Add your first item — it only takes a few seconds",
+		"taglineEmpty": "One receipt or a few barcodes is enough to get started",
 		"scanCardTitle": "Scan item",
 		"scanCardSubtitle": "Barcode — the fastest way to add",
 		"chipReceipt": "Receipt",
@@ -117,8 +117,10 @@
 		"chipManual": "Manual",
 		"locationsTitle": "Your locations",
 		"totalTracked": "{count} items total",
-		"emptyTitle": "Empty pantry",
-		"emptyDescription": "Get started — scan your first item and track expiry dates.",
+		"emptyTitle": "Get started",
+		"emptyDescription": "Scan one receipt or five barcodes — you do not need to fill the entire pantry.",
+		"emptyActionBarcode": "Scan barcode",
+		"emptyActionReceipt": "Upload receipt",
 		"emptyAction": "Scan now",
 		"expiringMore": "+{count} more expiring soon",
 		"recipeHint": "Recipe ideas",
@@ -215,6 +217,10 @@
 			"editProfile": "Edit profile",
 			"editProfileNote": "Name, photo and theme"
 		},
+		"legal": {
+			"privacyLink": "Privacy & AI",
+			"privacyNote": "Data, AI and your rights"
+		},
 		"household": {
 			"title": "Household",
 			"description": "Shared household, members and invitations"
@@ -242,6 +248,98 @@
 			"title": "Show introduction again",
 			"note": "Walk through the welcome guide for the app.",
 			"start": "Start guide"
+		},
+		"installApp": {
+			"title": "Add to home screen",
+			"note": "Install the app as a shortcut on iPhone or Android."
+		},
+		"expiryReminders": {
+			"title": "Expiring item reminders",
+			"note": "Weekly email with items expiring soon in your households. Opt-in only.",
+			"enable": "Send email reminders",
+			"daysLabel": "Show items expiring within",
+			"daysOption": "{days} days"
+		},
+		"plan": {
+			"title": "Plan",
+			"description": "Subscription (coming soon)",
+			"currentTier": "Current plan",
+			"currentFree": "Free",
+			"comingSoon": "Billing is not enabled yet. We will tell you before Pro is charged.",
+			"freeLimitsTitle": "Free includes",
+			"freeLimitsItems": "{items} pantry items · {members} household members · {aiScans} AI scans/mo · {receipts} receipt PDF/mo · {smartFill} smart fill/week",
+			"proTitle": "Pro will include",
+			"proUnlimitedAi": "Unlimited AI scanning",
+			"proUnlimitedReceipt": "Unlimited receipt PDF",
+			"proUnlimitedSmartFill": "Unlimited smart shopping fill",
+			"proInsights": "AI insights and full statistics",
+			"proMembers": "More household members (up to {max})",
+			"priceHint": "Planned around {monthly} SEK/month or {yearly} SEK/year.",
+			"learnMore": "Learn more about pricing",
+			"learnMoreNote": "Summary on the website"
+		},
+		"feedback": {
+			"title": "Give feedback",
+			"description": "Help us understand what works — and why you do not use the app more often.",
+			"messageLabel": "Why do you not use the app more often?",
+			"messageTooShort": "Please write at least a few words.",
+			"thanks": "Thanks — your feedback was saved."
+		}
+	},
+	"feedback": {
+		"churnQuestion": "What is the main reason? (optional)",
+		"churnOptional": "Pick a reason (optional)",
+		"messageOptional": "Add detail (optional)",
+		"messagePlaceholder": "e.g. forget the app, too much effort to scan, use Bring instead…",
+		"submit": "Send feedback",
+		"churnReasons": {
+			"forgot_habit": "Forget / no habit",
+			"too_much_work": "Too much effort / friction",
+			"missing_feature": "Missing a feature",
+			"privacy_trust": "Privacy / trust",
+			"other_app": "Using another app",
+			"notifications": "Notifications / reminders",
+			"other": "Other"
+		},
+		"postOnboarding": {
+			"title": "Quick question",
+			"subtitle": "Optional — helps us improve",
+			"skip": "Skip",
+			"thanks": "Thanks for your feedback!"
+		}
+	},
+	"pwa": {
+		"page": {
+			"title": "Add to home screen",
+			"subtitle": "Quick shortcut to your pantry — like an app, without the App Store."
+		},
+		"guide": {
+			"title": "Install Home Pantry",
+			"lead": "Add a home screen shortcut to open your pantry in one tap — camera and offline work better in the installed view.",
+			"alreadyInstalled": "You are already using the installed app. Nice!",
+			"iosTitle": "iPhone (Safari)",
+			"iosStep1": "Open homepantry.com in Safari (not an in-app browser from other apps).",
+			"iosStep2": "Tap the Share button (square with arrow up).",
+			"iosStep3": "Choose Add to Home Screen and confirm.",
+			"iosHint": "On iPad: same steps in Safari.",
+			"androidTitle": "Android (Chrome)",
+			"androidStep1": "Open the app in Chrome.",
+			"androidStep2": "Tap the menu (⋮) in the top right.",
+			"androidStep3": "Choose Install app or Add to Home screen.",
+			"androidHint": "If you do not see Install app, use Add to Home screen in the menu.",
+			"desktopNote": "On desktop, use the app in your browser. Mobile with a home screen icon works best."
+		},
+		"install": {
+			"cta": "Install app",
+			"accepted": "Install started — follow your browser’s dialog.",
+			"dismissed": "Install cancelled. You can follow the steps below instead."
+		},
+		"banner": {
+			"aria": "Tip: add the app to your home screen",
+			"title": "Add to home screen",
+			"body": "Open your pantry faster — one tap from your home screen.",
+			"cta": "How to install",
+			"dismiss": "Not now"
 		}
 	},
 	"inventory": {
@@ -507,7 +605,61 @@
 		"statActiveNow": "Active now",
 		"statRecentWindow": "Last {minutes} min",
 		"statLoggedInSessions": "Logged-in sessions",
-		"statLastActivity": "Last activity"
+		"statLastActivity": "Last activity",
+		"feedback": {
+			"title": "User feedback",
+			"note": "Churn signals from settings and a short post-onboarding survey. Complements interviews — see docs/USER_INTERVIEWS.md.",
+			"empty": "No feedback yet."
+		}
+	},
+	"pmf": {
+		"title": "PMF metrics",
+		"subtitle": "Product-market fit — weekly review per competitive analysis",
+		"noData": "No data yet",
+		"minutesValue": "{count} min",
+		"target": "Target: {value}",
+		"retentionEligible": "Based on {count} users who reached the period",
+		"eventsTitle": "Instrumented events (total)",
+		"eventsNote": "Stored in your own database — no third-party analytics.",
+		"events": {
+			"scanCompleted": "scan_completed",
+			"receiptParsed": "receipt_parsed",
+			"fillSuggestionsAdded": "fill_suggestions_added"
+		},
+		"activation": {
+			"label": "Activation",
+			"detail": "{activated} of {total} users",
+			"definition": "≥10 items or 1 receipt within 24 h of signup"
+		},
+		"firstScan": {
+			"label": "Time to first scan",
+			"definition": "Median minutes from signup to first barcode/receipt scan",
+			"target": "Target: <{minutes} min median"
+		},
+		"weeklyScan": {
+			"label": "Weekly scan rate",
+			"detail": "{scanners} of {wau} WAU",
+			"definition": "Share of weekly active users who scanned something in the last 7 days"
+		},
+		"d7": {
+			"label": "D7 retention",
+			"definition": "Share who returned at least 7 days after signup"
+		},
+		"d30": {
+			"label": "D30 retention",
+			"definition": "Share who returned at least 30 days after signup",
+			"target": "Target: {early} early, {mature} mature"
+		},
+		"multiMember": {
+			"label": "Households 2+ active",
+			"detail": "{multi} of {total} active households",
+			"definition": "Share of active households with at least two active members (7 days)"
+		},
+		"smartFill": {
+			"label": "Smart fill / list",
+			"detail": "{count} WAU used smart fill",
+			"definition": "Share of weekly active users who added AI suggestions to the shopping list"
+		}
 	},
 	"invite": {
 		"title": "Household invitation",
@@ -529,7 +681,7 @@
 		"title": "Quick start",
 		"subtitle": "Mark what you have at home",
 		"readonly": "You have read-only access.",
-		"lead": "Quick start — mark what you already have at home. You can always scan instead.",
+		"lead": "Want to fill in faster? Tick what you already have — or scan a receipt or barcode instead.",
 		"defaultLocation": "Default location for selected:",
 		"allCategory": "All {label}",
 		"addCount": "Add {count} {count, plural, one {item} other {items}}",
@@ -619,7 +771,16 @@
 	"onboarding": {
 		"welcome": "Welcome to Home Pantry",
 		"stepOf": "Step {current} of {total}",
-		"welcomeBody": "Keep track of what you have at home — fridge, freezer and cupboard. See what is expiring soon and avoid duplicate purchases.",
+		"welcomeBody": "Keep track of what you have at home — without filling the entire pantry at once. Start with one receipt or a few barcodes.",
+		"chooseTitle": "Choose how to begin",
+		"chooseBody": "One receipt adds many items at once. Five barcodes is enough if you want to try the scan flow.",
+		"ctaReceipt": "Scan receipt",
+		"ctaBarcode": "Scan 5 items",
+		"barcodeProgress": "{count} of {goal} barcodes",
+		"skipLater": "I'll do it later",
+		"celebrateTitle": "Great start!",
+		"celebrateBody": "You have added your first items. Keep going at your own pace — scan more whenever it suits you.",
+		"celebrateCta": "Continue",
 		"scanTitle": "Scan items",
 		"scanBody": "Scan barcodes with the camera to add items in seconds. Find the scan button at the bottom on mobile.",
 		"locationsTitle": "Three locations",

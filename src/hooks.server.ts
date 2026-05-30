@@ -8,7 +8,9 @@ import {
 	shoppingListService,
 	mealPlanService,
 	petFoodService,
-	petService
+	petService,
+	pmfService,
+	productFeedbackService
 } from '$lib/server/di';
 import { recordUserActivity } from '$lib/server/activity';
 import { resolveHouseholdId } from '$lib/server/household-context';
@@ -21,7 +23,8 @@ import { translate } from '$lib/i18n/messages';
 import { writeThemeCookie } from '$lib/infrastructure/theme-cookie';
 import { writeLocaleCookie } from '$lib/infrastructure/locale-cookie';
 import { resolveLocaleForRequest } from '$lib/server/locale';
-import { isMarketingPath } from '$lib/marketing/routes';
+import { expiryReminderService } from '$lib/server/di';
+import { isMarketingPath, redirectsAuthenticatedFromMarketing } from '$lib/marketing/routes';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
 
@@ -36,7 +39,8 @@ function isPublicPath(pathname: string): boolean {
 		publicPaths.has(pathname) ||
 		isInvitePath(pathname) ||
 		isMarketingPath(pathname) ||
-		pathname.startsWith('/api/health')
+		pathname.startsWith('/api/health') ||
+		pathname.startsWith('/api/cron/')
 	);
 }
 
@@ -54,6 +58,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.mealPlanService = mealPlanService;
 	event.locals.petService = petService;
 	event.locals.petFoodService = petFoodService;
+	event.locals.pmfService = pmfService;
+	event.locals.productFeedbackService = productFeedbackService;
 
 	const locale = resolveLocaleForRequest(event.cookies, event.request);
 	event.locals.locale = locale;
@@ -63,6 +69,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (event.locals.user) {
 		await recordUserActivity(event.locals.user.id);
+		void expiryReminderService.maybeSendReminderForUser(event.locals.user.id).catch((error) => {
+			const message = error instanceof Error ? error.message : String(error);
+			console.warn(`[expiry-reminder] login check failed for ${event.locals.user!.id}: ${message}`);
+		});
 		event.locals.householdId = await resolveHouseholdId(
 			event.locals.householdService,
 			event.locals.user.id
@@ -83,7 +93,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		redirect(302, '/login');
 	}
 
-	if (isAuthenticated && isMarketingPath(pathname)) {
+	if (isAuthenticated && redirectsAuthenticatedFromMarketing(pathname)) {
 		redirect(302, APP_HOME_PATH);
 	}
 

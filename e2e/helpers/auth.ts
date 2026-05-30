@@ -1,4 +1,4 @@
-﻿import { expect, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { LOCALE_COOKIE_NAME, LOCALE_STORAGE_KEY } from '../../src/lib/i18n/locale';
 
 const ONBOARDING_VERSION_KEY = 'home-pantry-onboarding-version';
@@ -82,23 +82,30 @@ export async function loginAsAdmin(page: Page) {
 
 	await prepareE2eBrowserState(page);
 
-	await page.goto('/login');
-	await page.waitForLoadState('networkidle');
-	await expect(page.getByTestId('login-submit')).toBeVisible();
+	const browser = page.context().browser();
+	if (!browser) {
+		throw new Error('loginAsAdmin requires a browser-backed page');
+	}
 
-	const emailInput = page.locator('input[name="email"]');
-	const passwordInput = page.locator('input[name="password"]');
+	const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173';
+	const noJsContext = await browser.newContext({ baseURL, javaScriptEnabled: false });
+	const loginPage = await noJsContext.newPage();
 
-	await fillBoundInput(emailInput, email);
-	await fillBoundInput(passwordInput, password);
+	await loginPage.goto('/login');
+	await loginPage.locator('input[name="email"]').fill(email);
+	await loginPage.locator('input[name="password"]').fill(password);
 
 	await Promise.all([
-		page.waitForURL((url) => url.pathname === '/hem', { timeout: 20_000, waitUntil: 'commit' }),
-		page.getByTestId('login-submit').click()
+		loginPage.waitForURL((url) => url.pathname === '/hem', { timeout: 20_000 }),
+		loginPage.getByTestId('login-submit').click()
 	]);
 
-	await expect(page.locator("section.home")).toBeVisible({ timeout: 20_000 });
-	await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+	await page.context().addCookies(await noJsContext.cookies());
+	await noJsContext.close();
+
+	await page.goto('/hem');
+	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
+	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 	await dismissOnboardingModalIfOpen(page);
 }
 

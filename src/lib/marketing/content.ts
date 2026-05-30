@@ -23,6 +23,23 @@ export interface MarketingFaqItem {
 	answer: string;
 }
 
+export interface MarketingComparisonRow {
+	competitor: string;
+	theirStrength: string;
+	homePantry: string;
+}
+
+export interface MarketingComparison {
+	title: string;
+	lead: string;
+	disclaimer: string;
+	themColumn: string;
+	usColumn: string;
+	rows: MarketingComparisonRow[];
+	ctaTitle: string;
+	ctaLead: string;
+}
+
 export interface MarketingContent {
 	siteName: string;
 	tagline: string;
@@ -55,6 +72,7 @@ export interface MarketingContent {
 		lead: string;
 		items: MarketingFeature[];
 	};
+	comparison: MarketingComparison;
 	howItWorks: {
 		title: string;
 		lead: string;
@@ -88,7 +106,8 @@ const sv: MarketingContent = {
 	nav: [
 		{ href: '/funktioner', label: 'Funktioner' },
 		{ href: '/sa-fungerar-det', label: 'Så fungerar det' },
-		{ href: '/faq', label: 'FAQ' }
+		{ href: '/faq', label: 'FAQ' },
+		{ href: '/privacy', label: 'Integritet' }
 	],
 	cta: {
 		openApp: 'Öppna appen',
@@ -151,6 +170,39 @@ const sv: MarketingContent = {
 			}
 		]
 	},
+	comparison: {
+		title: 'Jämfört med andra appar du redan känner',
+		lead: 'Ärlig bild — vi vill inte sälja in något du redan har löst bra. Här är när Home Pantry kompletterar eller skiljer sig.',
+		disclaimer:
+			'Bring!, ICA och Matdags är starka produkter i sina nischer. Vi fokuserar på butiksneutralt skafferi med lager som sanningskälla — inte på stammisrabatter eller gamification.',
+		themColumn: 'Det de gör bra',
+		usColumn: 'Det Home Pantry lägger till',
+		rows: [
+			{
+				competitor: 'Bring!',
+				theirStrength:
+					'Marknadsledande delad inköpslista och sync mellan familjemedlemmar — enkelt och välkänt i Norden.',
+				homePantry:
+					'Skafferi, lager per plats, utgångsdatum och skanning så inköpslistan speglar vad som faktiskt finns i kylen — inte bara vad ni tänkt köpa.'
+			},
+			{
+				competitor: 'ICA-appen',
+				theirStrength:
+					'Gratis för stammisar, erbjudanden, butikskarta och inköpslista kopplad till ICA-handel.',
+				homePantry:
+					'Ett skafferi för hela hushållet, butiksneutralt — samma lager oavsett kedja, utan att lista och skafferi lever i olika världar.'
+			},
+			{
+				competitor: 'Matdags',
+				theirStrength:
+					'Liknande löfte i Sverige: foto, kvitto, streckkod, påminnelser och recept från det du har hemma.',
+				homePantry:
+					'Webb först, PDF-kvitto, måltidsplan kopplad till lager och hushållssync — utan krav på spelifiering eller att byta till native-app dag ett.'
+			}
+		],
+		ctaTitle: 'Prova butiksneutralt skafferi',
+		ctaLead: 'Öppna appen eller logga in — kom igång med ett kvitto eller några streckkoder.'
+	},
 	howItWorks: {
 		title: 'Så fungerar det',
 		lead: 'Tre enkla steg från kaos i skåpen till full överblick.',
@@ -182,7 +234,7 @@ const sv: MarketingContent = {
 			{
 				question: 'Kostar Home Pantry något?',
 				answer:
-					'Du kan skapa konto och börja använda appen gratis. Vi meddelar i förväg om betalda planer tillkommer.'
+					'Du kan skapa konto och använda appen gratis med en generös kärnplan (lager, manuell lista, två hushållsmedlemmar). AI-tunga funktioner får begränsningar i gratisplanen; en Pro-plan med obegränsad AI och fler medlemmar kommer senare — vi meddelar i förväg innan något debiteras. Läs mer på /priser.'
 			},
 			{
 				question: 'Fungerar det utan streckkod?',
@@ -197,7 +249,17 @@ const sv: MarketingContent = {
 			{
 				question: 'Var lagras min data?',
 				answer:
-					'Din data lagras säkert i molnet kopplat till ditt konto. Du kan när som helst ta bort ditt konto i inställningarna.'
+					'Din data lagras säkert i molnet kopplat till ditt konto och hushåll. Läs mer i vår integritetspolicy — där beskriver vi även AI och dina GDPR-rättigheter.'
+			},
+			{
+				question: 'Hur används AI i appen?',
+				answer:
+					'AI (OpenAI) hjälper till att tolka kvitto, föreslå varor och ge inköps- och receptidéer. Vi skickar bara det som behövs för funktionen och använder API på ett sätt som inte tränar OpenAI:s modeller. Se integritetspolicyn för detaljer.'
+			},
+			{
+				question: 'Kan jag lägga till Home Pantry på hemskärmen?',
+				answer:
+					'Ja. Öppna appen i Safari (iPhone) eller Chrome (Android) och välj Lägg till på hemskärmen / Installera app. I appen under Inställningar → Lägg till på hemskärmen finns steg-för-steg-guide. På dator fungerar appen i webbläsaren.'
 			}
 		],
 		contactLabel: 'Hittar du inte svaret?',
@@ -223,13 +285,157 @@ const en: MarketingContent = {
 	nav: [
 		{ href: '/funktioner', label: 'Features' },
 		{ href: '/sa-fungerar-det', label: 'How it works' },
-		{ href: '/faq', label: 'FAQ' }
+		{ href: '/faq', label: 'FAQ' },
+		{ href: '/privacy', label: 'Privacy' }
 	],
 	cta: {
 		openApp: 'Open app',
 		login: 'Log in',
 		register: 'Create account',
 		tryFree: 'Get started free'
+	},
+	comparison: {
+		title: 'Compared to apps you may already use',
+		lead: 'An honest view — we are not here to replace what already works for you. Here is when Home Pantry complements or differs.',
+		disclaimer:
+			'Bring!, ICA and Matdags are strong in their niches. We focus on a store-neutral pantry with inventory as source of truth — not loyalty discounts or gamification.',
+		themColumn: 'What they do well',
+		usColumn: 'What Home Pantry adds',
+		rows: [
+			{
+				competitor: 'Bring!',
+				theirStrength:
+					'Market-leading shared shopping lists and family sync — simple and familiar in the Nordics.',
+				homePantry:
+					'Pantry inventory by location, expiry dates and scanning so the list reflects what is actually in the fridge — not just what you plan to buy.'
+			},
+			{
+				competitor: 'ICA app',
+				theirStrength: 'Free for loyalty members, offers, store maps and a shopping list tied to ICA.',
+				homePantry:
+					'One household pantry, store-neutral — same inventory whether you shop ICA, Willys or Lidl, without list and pantry living in separate worlds.'
+			},
+			{
+				competitor: 'Matdags',
+				theirStrength:
+					'Similar promise in Sweden: photo, receipt, barcode, reminders and recipes from what you have at home.',
+				homePantry:
+					'Web-first, PDF receipts, meal plan tied to inventory and household sync — without gamification or switching to a native app on day one.'
+			}
+		],
+		ctaTitle: 'Try a store-neutral pantry',
+		ctaLead: 'Open the app or log in — start with one receipt or a few barcodes.'
+	},
+	landing: {
+		heroTitle: 'Scan first. Stop guessing what is at home.',
+		heroLead:
+			'Home Pantry is built around fast capture — barcode, receipt or photo — so you always know what is in fridge, freezer and cupboard.',
+		heroSecondary:
+			'Plan meals, get warnings before items expire, and let the shopping list fill from what you actually have.',
+		featuresTitle: 'Everything you need in the kitchen',
+		featuresLead: 'From scanning to shopping — without spreadsheets and duplicate buys.',
+		stepsTitle: 'Up and running in three steps',
+		stepsLead: 'No complicated setup. Scan what you have at home today.',
+		finalCtaTitle: 'Ready to take control of your pantry?',
+		finalCtaLead: 'Log in or create an account — it only takes a minute.'
+	},
+	features: {
+		title: 'Features',
+		lead: 'Built for everyday kitchen use — fast, clear and low friction.',
+		items: [
+			{
+				icon: 'barcode',
+				title: 'Barcode scanning',
+				description: 'Scan items in seconds. The app fills in name and location so you type less.'
+			},
+			{
+				icon: 'receipt',
+				title: 'Receipt & photo',
+				description: 'Photograph a receipt or shelf — AI helps parse and add multiple items at once.'
+			},
+			{
+				icon: 'box',
+				title: 'Fridge, freezer & cupboard',
+				description: 'See stock by location with clear colours. Filter, search and stay organised.'
+			},
+			{
+				icon: 'sparkle',
+				title: 'Smart shopping list',
+				description: 'Fill the list from inventory, expiry dates and meal plan — shop what you actually need.'
+			},
+			{
+				icon: 'home',
+				title: 'Household together',
+				description: 'Invite family or roommates. Everyone sees the same pantry and shopping list in real time.'
+			},
+			{
+				icon: 'users',
+				title: 'Meal plan & recipes',
+				description: 'Plan the week and get recipe ideas from what is already at home.'
+			}
+		]
+	},
+	howItWorks: {
+		title: 'How it works',
+		lead: 'Three simple steps from messy cupboards to full overview.',
+		steps: [
+			{
+				step: 1,
+				title: 'Scan what you have',
+				description: 'Use barcode, receipt or photo to register items in fridge, freezer or cupboard.'
+			},
+			{
+				step: 2,
+				title: 'Track stock & dates',
+				description: 'See what you have, what expires soon and what to use first.'
+			},
+			{
+				step: 3,
+				title: 'Shop smart',
+				description: 'Fill the shopping list manually or let the app suggest what is missing — then head to the store.'
+			}
+		]
+	},
+	faq: {
+		title: 'Frequently asked questions',
+		lead: 'Answers to what we hear most often. More help will appear here over time.',
+		items: [
+			{
+				question: 'Does Home Pantry cost anything?',
+				answer:
+					'You can create an account and use the app free on a generous core plan (inventory, manual list, two household members). AI-heavy features will have limits on the free plan; a Pro plan with unlimited AI and more members is coming later — we will notify you before any charge. See /priser for more.'
+			},
+			{
+				question: 'Does it work without a barcode?',
+				answer: 'Yes. Add items manually, scan a receipt or take a photo when the barcode is missing.'
+			},
+			{
+				question: 'Can several people in the household share one pantry?',
+				answer: 'Yes. Invite members to your household to share inventory, shopping list and meal plan.'
+			},
+			{
+				question: 'Where is my data stored?',
+				answer:
+					'Your data is stored securely in the cloud linked to your account and household. See our privacy policy for AI and GDPR details.'
+			},
+			{
+				question: 'How is AI used in the app?',
+				answer:
+					'AI (OpenAI) helps parse receipts, suggest items and give shopping and recipe ideas. We only send what is needed for the feature and use the API in a way that does not train OpenAI models. See the privacy policy for details.'
+			},
+			{
+				question: 'Can I add Home Pantry to my home screen?',
+				answer:
+					'Yes. Open the app in Safari (iPhone) or Chrome (Android) and choose Add to Home Screen / Install app. In the app, go to Settings → Add to home screen for step-by-step instructions. On desktop, use the app in your browser.'
+			}
+		],
+		contactLabel: 'Cannot find your answer?',
+		contactLead: 'Email us and we will get back to you as soon as we can.',
+		contactEmail: 'hello@homepantry.com'
+	},
+	footer: {
+		tagline: 'Scan first. Shop smart.',
+		rights: '© Home Pantry. All rights reserved.'
 	}
 };
 

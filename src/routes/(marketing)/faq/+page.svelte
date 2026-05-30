@@ -1,9 +1,12 @@
 <script lang="ts">
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
+	import { getPrivacyContent } from '$lib/marketing/privacy-content';
+	import type { MarketingLocale } from '$lib/marketing/content';
 
 	let { data } = $props();
 
 	const { marketing: content, loginUrl, registerUrl } = data;
+	const privacyLinkLabel = getPrivacyContent(data.marketingLocale as MarketingLocale).title;
 </script>
 
 <svelte:head>
@@ -26,6 +29,11 @@
 				<p>{item.answer}</p>
 			</details>
 		{/each}
+		<p class="privacy-crosslink">
+			<a href="/priser">Priser & planer</a>
+			·
+			<a href="/privacy">{privacyLinkLabel}</a>
+		</p>
 	</div>
 </section>
 
@@ -100,6 +108,21 @@
 		color: var(--color-text-muted);
 		line-height: var(--line-height-body);
 		font-size: var(--font-size-body-sm);
+	}
+
+	.privacy-crosslink {
+		margin: var(--space-lg) 0 0;
+		font-size: var(--font-size-body-sm);
+	}
+
+	.privacy-crosslink a {
+		color: var(--color-primary);
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.privacy-crosslink a:hover {
+		text-decoration: underline;
 	}
 
 	.contact {

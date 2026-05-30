@@ -1,0 +1,32 @@
+{
+	"name": "Home Pantry",
+	"short_name": "Home Pantry",
+	"description": "Skanna, lagra och handla smart — kyl, frys och skafferi i en app.",
+	"start_url": "/hem",
+	"scope": "/",
+	"display": "standalone",
+	"orientation": "portrait",
+	"theme_color": "#3d6b4f",
+	"background_color": "#f7f5f0",
+	"lang": "sv",
+	"icons": [
+		{
+			"src": "/favicon.svg",
+			"sizes": "192x192",
+			"type": "image/svg+xml",
+			"purpose": "any"
+		},
+		{
+			"src": "/favicon.svg",
+			"sizes": "512x512",
+			"type": "image/svg+xml",
+			"purpose": "any"
+		},
+		{
+			"src": "/favicon.svg",
+			"sizes": "512x512",
+			"type": "image/svg+xml",
+			"purpose": "maskable"
+		}
+	]
+}

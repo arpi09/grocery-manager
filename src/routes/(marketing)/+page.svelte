@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Barcode, Camera, Refrigerator } from '@lucide/svelte';
+	import ComparisonTable from '$lib/components/marketing/ComparisonTable.svelte';
 	import MarketingButtonLink from '$lib/components/marketing/MarketingButtonLink.svelte';
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
 	import MarketingFeatureCard from '$lib/components/marketing/MarketingFeatureCard.svelte';
@@ -7,7 +8,7 @@
 
 	let { data } = $props();
 
-	const { marketing: content, loginUrl, registerUrl } = data;
+	const { marketing: content, loginUrl, registerUrl, hero } = data;
 	const previewFeatures = content.features.items.slice(0, 3);
 </script>
 
@@ -26,13 +27,14 @@
 <section class="hero">
 	<div class="hero-inner">
 		<p class="eyebrow label-caps">{content.siteName}</p>
-		<h1 class="hero-title">{content.landing.heroTitle}</h1>
-		<p class="hero-lead">{content.landing.heroLead}</p>
-		<p class="hero-secondary">{content.landing.heroSecondary}</p>
+		<h1 class="hero-title">{hero.heroTitle}</h1>
+		<p class="hero-lead">{hero.heroLead}</p>
+		<p class="hero-secondary">{hero.heroSecondary}</p>
 
 		<div class="hero-actions">
 			<MarketingButtonLink href={loginUrl}>{content.cta.openApp}</MarketingButtonLink>
-			<MarketingButtonLink href={registerUrl} variant="secondary">{content.cta.tryFree}</MarketingButtonLink>
+			<MarketingButtonLink href={loginUrl} variant="secondary">{content.cta.login}</MarketingButtonLink>
+			<a href={registerUrl} class="hero-register">{content.cta.tryFree}</a>
 		</div>
 
 		<ul class="hero-highlights" aria-label="Huvudfunktioner">
@@ -86,6 +88,21 @@
 		<p class="section-link">
 			<a href="/funktioner">Se alla funktioner →</a>
 		</p>
+	</div>
+</section>
+
+<section id="jamforelse" class="section">
+	<div class="section-inner">
+		<header class="section-header">
+			<h2>{content.comparison.title}</h2>
+			<p>{content.comparison.lead}</p>
+		</header>
+		<ComparisonTable comparison={content.comparison} />
+		<p class="comparison-disclaimer">{content.comparison.disclaimer}</p>
+		<div class="comparison-cta">
+			<MarketingButtonLink href={loginUrl}>{content.cta.openApp}</MarketingButtonLink>
+			<a href={loginUrl} class="comparison-login">{content.cta.login}</a>
+		</div>
 	</div>
 </section>
 
@@ -163,8 +180,20 @@
 	.hero-actions {
 		display: flex;
 		flex-wrap: wrap;
-		gap: var(--space-md);
+		align-items: center;
+		gap: var(--space-md) var(--space-lg);
 		margin-top: var(--space-lg);
+	}
+
+	.hero-register {
+		color: var(--color-text-muted);
+		font-weight: 500;
+		text-decoration: none;
+		font-size: var(--font-size-body-sm);
+	}
+
+	.hero-register:hover {
+		color: var(--color-primary);
 	}
 
 	.hero-highlights {
@@ -303,5 +332,32 @@
 
 	.section-link a:hover {
 		text-decoration: underline;
+	}
+
+	.comparison-disclaimer {
+		margin: var(--space-lg) 0 0;
+		font-size: var(--font-size-body-sm);
+		color: var(--color-text-muted);
+		max-width: 58ch;
+		line-height: var(--line-height-body);
+	}
+
+	.comparison-cta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-md) var(--space-lg);
+		margin-top: var(--space-lg);
+	}
+
+	.comparison-login {
+		color: var(--color-text-muted);
+		font-weight: 500;
+		text-decoration: none;
+		font-size: var(--font-size-body-sm);
+	}
+
+	.comparison-login:hover {
+		color: var(--color-primary);
 	}
 </style>

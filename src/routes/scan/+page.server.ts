@@ -2,6 +2,7 @@ import { isStorageLocation } from '$lib/domain/location';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { buildScanReturnUrl, type ScanToastKind } from '$lib/utils/scan-toast';
+import { recordProductEvent } from '$lib/server/product-events';
 import { fail, redirect } from '@sveltejs/kit';
 import { canEditInventory } from '$lib/domain/household';
 import type { Actions, PageServerLoad } from './$types';
@@ -60,6 +61,14 @@ export const actions: Actions = {
 		const safeReturn =
 			returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : '/';
 		const productFound = formData.get('productFound') === '1';
+
+		recordProductEvent(event.locals.pmfService, {
+			userId: event.locals.user!.id,
+			householdId: event.locals.householdId,
+			eventType: 'scan_completed',
+			metadata: { source: 'barcode', productFound }
+		});
+
 		const toastKind: ScanToastKind = productFound ? 'added' : 'unknown';
 		const target =
 			safeReturn === '/' || safeReturn.startsWith('/inventory/')

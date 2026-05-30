@@ -1,4 +1,4 @@
-import type { User, Session } from 'lucia';
+﻿import type { User, Session } from 'lucia';
 import type { AdminService } from '$lib/application/admin.service';
 import type { AuthService } from '$lib/application/auth.service';
 import type { ProfileService } from '$lib/application/profile.service';
@@ -8,8 +8,14 @@ import type { InventoryService } from '$lib/application/inventory.service';
 import type { MealPlanService } from '$lib/application/meal-plan.service';
 import type { PetFoodService } from '$lib/application/pet-food.service';
 import type { PetService } from '$lib/application/pet.service';
+import type { PmfService } from '$lib/application/pmf.service';
+import type { ProductFeedbackService } from '$lib/application/product-feedback.service';
 import type { HouseholdRole } from '$lib/domain/household';
 import type { Locale } from '$lib/i18n/locale';
+
+/// <reference types="@vite-pwa/sveltekit" />
+/// <reference types="vite-plugin-pwa/info" />
+/// <reference types="vite-plugin-pwa/vanillajs" />
 
 declare global {
 	namespace App {
@@ -28,6 +34,8 @@ declare global {
 			mealPlanService: MealPlanService;
 			petService: PetService;
 			petFoodService: PetFoodService;
+			pmfService: PmfService;
+			productFeedbackService: ProductFeedbackService;
 		}
 	}
 }

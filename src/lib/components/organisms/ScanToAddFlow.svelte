@@ -4,7 +4,8 @@
 	import Spinner from '$lib/components/atoms/Spinner.svelte';
 	import BarcodeScanner from '$lib/components/molecules/BarcodeScanner.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
-	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
+	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
+	import { recordBarcodeActivation } from '$lib/utils/onboarding';
 	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
@@ -191,7 +192,12 @@
 		<form
 			method="POST"
 			action="?/create"
-			use:enhance={bindSubmitting((v) => (saveSubmitting = v))}
+			use:enhance={bindSubmittingWithRedirect(
+				(v) => (saveSubmitting = v),
+				async () => {
+					recordBarcodeActivation();
+				}
+			)}
 			class="save-form"
 		>
 			<input type="hidden" name="barcode" value={barcode} />

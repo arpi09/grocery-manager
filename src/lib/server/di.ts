@@ -16,6 +16,12 @@ import { DrizzleInventoryRepository } from '$lib/infrastructure/repositories/inv
 import { DrizzleAdminRepository } from '$lib/infrastructure/repositories/admin.repository';
 import { DrizzleErrorLogRepository } from '$lib/infrastructure/repositories/error-log.repository';
 import { DrizzleUserRepository } from '$lib/infrastructure/repositories/user.repository';
+import { DrizzlePmfRepository } from '$lib/infrastructure/repositories/pmf.repository';
+import { DrizzleExpiryReminderRepository } from '$lib/infrastructure/repositories/expiry-reminder.repository';
+import { PmfService } from '$lib/application/pmf.service';
+import { ExpiryReminderService } from '$lib/application/expiry-reminder.service';
+import { DrizzleProductFeedbackRepository } from '$lib/infrastructure/repositories/product-feedback.repository';
+import { ProductFeedbackService } from '$lib/application/product-feedback.service';
 
 const userRepository = new DrizzleUserRepository();
 const errorLogRepository = new DrizzleErrorLogRepository();
@@ -26,6 +32,9 @@ const shoppingListRepository = new DrizzleShoppingListRepository();
 const mealPlanRepository = new DrizzleMealPlanRepository();
 const petRepository = new DrizzlePetRepository();
 const petFoodRepository = new DrizzlePetFoodRepository();
+const pmfRepository = new DrizzlePmfRepository();
+const expiryReminderRepository = new DrizzleExpiryReminderRepository();
+const productFeedbackRepository = new DrizzleProductFeedbackRepository();
 
 export const authService = new AuthService(userRepository);
 export const profileService = new ProfileService(userRepository);
@@ -36,3 +45,10 @@ export const shoppingListService = new ShoppingListService(shoppingListRepositor
 export const mealPlanService = new MealPlanService(mealPlanRepository);
 export const petService = new PetService(petRepository);
 export const petFoodService = new PetFoodService(petFoodRepository);
+export const pmfService = new PmfService(pmfRepository);
+export const expiryReminderService = new ExpiryReminderService(
+	expiryReminderRepository,
+	householdService,
+	inventoryService
+);
+export const productFeedbackService = new ProductFeedbackService(productFeedbackRepository);

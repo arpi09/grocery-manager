@@ -78,6 +78,27 @@
 			"when": 1749216000000,
 			"tag": "0011_consumption_event",
 			"breakpoints": true
+		},
+		{
+			"idx": 11,
+			"version": "7",
+			"when": 1749302400000,
+			"tag": "0012_product_event",
+			"breakpoints": true
+		},
+		{
+			"idx": 12,
+			"version": "7",
+			"when": 1749388800000,
+			"tag": "0013_expiry_reminders",
+			"breakpoints": true
+		},
+		{
+			"idx": 13,
+			"version": "7",
+			"when": 1749475200000,
+			"tag": "0014_product_feedback",
+			"breakpoints": true
 		}
 	]
 }

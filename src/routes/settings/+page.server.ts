@@ -3,6 +3,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { mapHouseholdErrorToFail } from '$lib/application/household-errors';
 import { translate } from '$lib/i18n/messages';
 import { isHouseholdOwner } from '$lib/domain/household';
+import { DEFAULT_PLAN_TIER } from '$lib/domain/plan';
 import { householdInviteEmailWarning, sendHouseholdInviteEmail } from '$lib/server/email';
 import { getAppOrigin } from '$lib/server/origin';
 import {
@@ -17,6 +18,9 @@ import {
 	deletePetSchema,
 	updatePetsEnabledSchema
 } from '$lib/validation/pet.schemas';
+import { updateExpiryRemindersSchema } from '$lib/validation/expiry-reminder.schemas';
+import { submitProductFeedbackSchema } from '$lib/validation/product-feedback.schemas';
+import { expiryReminderService } from '$lib/server/di';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ parent, locals }) => {
@@ -30,10 +34,16 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		user && householdId && isOwner
 			? await locals.householdService.listPendingInvites(householdId, user.id)
 			: [];
+	const expirySettings = user
+		? await expiryReminderService.getSettings(user.id)
+		: { enabled: false, days: 7 as const, lastSentAt: null };
 
 	return {
 		user,
+		planTier: DEFAULT_PLAN_TIER,
 		petsEnabled: Boolean(user?.petsEnabled),
+		expiryRemindersEnabled: expirySettings.enabled,
+		expiryReminderDays: expirySettings.days,
 		pets,
 		household,
 		householdRole,
@@ -43,6 +53,46 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 };
 
 export const actions: Actions = {
+	submitProductFeedback: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const parsed = submitProductFeedbackSchema.safeParse({
+			source: formData.get('source'),
+			churnReason: formData.get('churnReason'),
+			message: formData.get('message') ?? ''
+		});
+
+		if (!parsed.success) {
+			return fail(400, { feedbackErrors: parsed.error.flatten().fieldErrors });
+		}
+
+		await locals.productFeedbackService.submit({
+			userId: locals.user!.id,
+			householdId: locals.householdId,
+			source: parsed.data.source,
+			churnReason: parsed.data.churnReason ?? null,
+			message: parsed.data.message
+		});
+
+		return { feedbackSuccess: true };
+	},
+	updateExpiryReminders: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const parsed = updateExpiryRemindersSchema.safeParse({
+			enabled: formData.get('enabled'),
+			days: formData.get('days')
+		});
+
+		if (!parsed.success) {
+			return fail(400, { expiryReminderErrors: parsed.error.flatten().fieldErrors });
+		}
+
+		await expiryReminderService.updateSettings(
+			locals.user!.id,
+			parsed.data.enabled === 'true',
+			Number(parsed.data.days) as 3 | 7
+		);
+		redirect(302, '/settings');
+	},
 	togglePets: async ({ request, locals }) => {
 		const formData = await request.formData();
 		const parsed = updatePetsEnabledSchema.safeParse({

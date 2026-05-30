@@ -7,55 +7,38 @@
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
-	import { LOCATION_COLORS } from '$lib/domain/location';
 	import { t } from '$lib/i18n';
 	import {
 		ONBOARDING_REPLAY_EVENT,
 		dismissOnboarding,
+		getActivationProgress,
 		isOnboardingExcludedPath,
+		setActivationPath,
 		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
 
 	interface Step {
+		id: 'welcome' | 'choose';
 		title: string;
 		subtitle: string;
 		body: string;
 		iconId: FeatureIconId;
-		highlight?: 'locations' | 'scan';
 	}
 
 	const steps = $derived<Step[]>([
 		{
+			id: 'welcome',
 			title: t('onboarding.welcome'),
-			subtitle: t('onboarding.stepOf', { current: 1, total: 5 }),
+			subtitle: t('onboarding.stepOf', { current: 1, total: 2 }),
 			body: t('onboarding.welcomeBody'),
 			iconId: 'home'
 		},
 		{
-			title: t('onboarding.scanTitle'),
-			subtitle: t('onboarding.stepOf', { current: 2, total: 5 }),
-			body: t('onboarding.scanBody'),
-			iconId: 'barcode',
-			highlight: 'scan'
-		},
-		{
-			title: t('onboarding.locationsTitle'),
-			subtitle: t('onboarding.stepOf', { current: 3, total: 5 }),
-			body: t('onboarding.locationsBody'),
-			iconId: 'cupboard',
-			highlight: 'locations'
-		},
-		{
-			title: t('onboarding.shareTitle'),
-			subtitle: t('onboarding.stepOf', { current: 4, total: 5 }),
-			body: t('onboarding.shareBody'),
-			iconId: 'users'
-		},
-		{
-			title: t('onboarding.readyTitle'),
-			subtitle: t('onboarding.stepOf', { current: 5, total: 5 }),
-			body: t('onboarding.readyBody'),
-			iconId: 'check'
+			id: 'choose',
+			title: t('onboarding.chooseTitle'),
+			subtitle: t('onboarding.stepOf', { current: 2, total: 2 }),
+			body: t('onboarding.chooseBody'),
+			iconId: 'barcode'
 		}
 	]);
 
@@ -66,6 +49,7 @@
 	const currentStep = $derived(steps[stepIndex]);
 	const isFirstStep = $derived(stepIndex === 0);
 	const isLastStep = $derived(stepIndex === steps.length - 1);
+	const activationProgress = $derived(browser ? getActivationProgress() : null);
 
 	function tryOpenGuide() {
 		if (!browser || isOnboardingExcludedPath(pathname) || !shouldShowOnboarding()) {
@@ -84,14 +68,8 @@
 		closeGuide();
 	}
 
-	function finishGuide() {
-		dismissOnboarding();
-		closeGuide();
-	}
-
 	function goNext() {
 		if (isLastStep) {
-			finishGuide();
 			return;
 		}
 		stepIndex += 1;
@@ -104,10 +82,18 @@
 		stepIndex -= 1;
 	}
 
-	async function tryScan() {
+	async function chooseReceipt() {
+		setActivationPath('receipt');
 		dismissOnboarding();
 		closeGuide();
-		await goto(`/scan?from=${encodeURIComponent(APP_HOME_PATH)}`);
+		await goto(`/scan/kvitto?from=${encodeURIComponent(APP_HOME_PATH)}`);
+	}
+
+	async function chooseBarcode() {
+		setActivationPath('barcode');
+		dismissOnboarding();
+		closeGuide();
+		await goto(`/scan?mode=barcode&from=${encodeURIComponent(APP_HOME_PATH)}`);
 	}
 
 	$effect(() => {
@@ -148,7 +134,9 @@
 	{#snippet header()}
 		<ModalHeader title={currentStep.title} subtitle={currentStep.subtitle}>
 			{#snippet actions()}
-				<button type="button" class="skip-link" onclick={skipGuide}>{t('common.skip')}</button>
+				<button type="button" class="skip-link" onclick={skipGuide}>
+					{t('onboarding.skipLater')}
+				</button>
 			{/snippet}
 		</ModalHeader>
 	{/snippet}
@@ -159,27 +147,24 @@
 		</div>
 		<p class="step-body">{currentStep.body}</p>
 
-		{#if currentStep.highlight === 'locations'}
-			<ul class="location-preview" aria-label={t('onboarding.locationsAria')}>
-				<li>
-					<span class="dot" style="background: {LOCATION_COLORS.fridge}"></span>
-					{t('onboarding.fridgeShort')}
-				</li>
-				<li>
-					<span class="dot" style="background: {LOCATION_COLORS.freezer}"></span>
-					{t('onboarding.freezerShort')}
-				</li>
-				<li>
-					<span class="dot" style="background: {LOCATION_COLORS.cupboard}"></span>
-					{t('onboarding.cupboardShort')}
-				</li>
-			</ul>
-		{/if}
+		{#if currentStep.id === 'choose'}
+			{#if activationProgress?.inProgress && activationProgress.path === 'barcode' && activationProgress.barcodeCount > 0}
+				<p class="progress-note" role="status">
+					{t('onboarding.barcodeProgress', {
+						count: activationProgress.barcodeCount,
+						goal: activationProgress.barcodeGoal
+					})}
+				</p>
+			{/if}
 
-		{#if currentStep.highlight === 'scan'}
-			<Button type="button" variant="secondary" fullWidth onclick={tryScan}>
-				{t('onboarding.tryScan')}
-			</Button>
+			<div class="path-actions">
+				<Button type="button" fullWidth onclick={chooseReceipt}>
+					{t('onboarding.ctaReceipt')}
+				</Button>
+				<Button type="button" variant="secondary" fullWidth onclick={chooseBarcode}>
+					{t('onboarding.ctaBarcode')}
+				</Button>
+			</div>
 		{/if}
 	</div>
 
@@ -188,7 +173,8 @@
 			<div class="step-dots" role="tablist" aria-label={t('onboarding.stepsAria')}>
 				{#each steps as step, index (index)}
 					<span
-						aria-label={step.title} class="dot-indicator"
+						aria-label={step.title}
+						class="dot-indicator"
 						class:active={index === stepIndex}
 						aria-current={index === stepIndex ? 'step' : undefined}
 					></span>
@@ -199,9 +185,15 @@
 				<Button type="button" variant="ghost" disabled={isFirstStep} onclick={goBack}>
 					{t('common.previous')}
 				</Button>
-				<Button type="button" onclick={goNext}>
-					{isLastStep ? t('common.getStarted') : t('common.next')}
-				</Button>
+				{#if isLastStep}
+					<Button type="button" variant="ghost" onclick={skipGuide}>
+						{t('onboarding.skipLater')}
+					</Button>
+				{:else}
+					<Button type="button" onclick={goNext}>
+						{t('common.next')}
+					</Button>
+				{/if}
 			</div>
 		</div>
 	{/snippet}
@@ -255,30 +247,21 @@
 		color: var(--color-text);
 	}
 
-	.location-preview {
-		list-style: none;
+	.progress-note {
 		margin: 0;
-		padding: 0;
-		display: grid;
-		gap: var(--space-sm);
-	}
-
-	.location-preview li {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
 		padding: var(--space-sm) var(--space-md);
-		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
 		background: var(--color-surface-muted);
+		font-size: 0.9375rem;
 		font-weight: 600;
+		color: var(--color-primary);
+		text-align: center;
 	}
 
-	.dot {
-		width: 0.75rem;
-		height: 0.75rem;
-		border-radius: 999px;
-		flex-shrink: 0;
+	.path-actions {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
 	}
 
 	.onboarding-footer {

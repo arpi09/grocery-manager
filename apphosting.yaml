@@ -33,7 +33,9 @@ env:
       - BUILD
       - RUNTIME
 
-  # Public URL of the deployed app (update after first deploy or custom domain)
+  # Public URL of the deployed app — update to https://homepantry.com after custom domain
+  # is connected (Firebase Console → App Hosting → home-pantry → Custom domains).
+  # See docs/CUSTOM_DOMAIN.md. PUBLIC_ORIGIN and ORIGIN must match the canonical HTTPS origin.
   - variable: PUBLIC_ORIGIN
     value: https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app
     availability:

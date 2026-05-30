@@ -5,7 +5,8 @@
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import DigitalReceiptGuide from '$lib/components/molecules/DigitalReceiptGuide.svelte';
 	import ImageSourcePicker from '$lib/components/molecules/ImageSourcePicker.svelte';
-	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
+	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
+	import { recordReceiptActivation } from '$lib/utils/onboarding';
 	import {
 		prepareReceiptFileForUpload,
 		RECEIPT_CAMERA_ACCEPT,
@@ -162,7 +163,12 @@
 		<form
 			method="POST"
 			action="?/bulkCreate"
-			use:enhance={bindSubmitting((v) => (bulkSubmitting = v))}
+			use:enhance={bindSubmittingWithRedirect(
+				(v) => (bulkSubmitting = v),
+				async () => {
+					recordReceiptActivation();
+				}
+			)}
 		>
 			<input type="hidden" name="returnTo" value={returnTo} />
 			<ul class="line-list">

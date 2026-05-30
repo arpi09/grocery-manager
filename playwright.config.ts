@@ -50,6 +50,7 @@ export default defineConfig({
 			PORT: port,
 			HOST: '0.0.0.0',
 			USE_PGLITE: process.env.USE_PGLITE ?? 'true',
+			ORIGIN: baseURL,
 			PUBLIC_ORIGIN: baseURL,
 			TURNSTILE_SKIP: process.env.TURNSTILE_SKIP ?? 'true'
 		}

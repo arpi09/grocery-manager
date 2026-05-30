@@ -1,22 +1,43 @@
 import { env as publicEnv } from '$env/dynamic/public';
 
+/** Fallback when no env or request origin (SSR/build). Update via PUBLIC_ORIGIN in production. */
 const DEFAULT_APP_URL = 'https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app';
+
+function trimOrigin(value: string | undefined): string | undefined {
+	const trimmed = value?.trim();
+	return trimmed ? trimmed.replace(/\/$/, '') : undefined;
+}
 
 /** Canonical app origin for marketing CTAs (login/register). */
 export function resolveAppOrigin(requestOrigin?: string): string {
-	const configured = publicEnv.PUBLIC_APP_URL?.trim();
-	if (configured) {
-		return configured.replace(/\/$/, '');
+	const configuredAppUrl = trimOrigin(publicEnv.PUBLIC_APP_URL);
+	if (configuredAppUrl) {
+		return configuredAppUrl;
 	}
-	if (requestOrigin) {
-		return requestOrigin.replace(/\/$/, '');
+
+	const publicOrigin = trimOrigin(publicEnv.PUBLIC_ORIGIN);
+	if (publicOrigin) {
+		return publicOrigin;
 	}
+
+	const request = trimOrigin(requestOrigin);
+	if (request) {
+		return request;
+	}
+
 	return DEFAULT_APP_URL;
+}
+
+/** Absolute canonical URL for marketing pages (SEO og:url, link rel=canonical). */
+export function marketingCanonicalUrl(pathname: string, requestOrigin?: string): string {
+	const origin = resolveAppOrigin(requestOrigin);
+	const path = pathname === '/' ? '' : pathname.replace(/\/$/, '');
+	return `${origin}${path}`;
 }
 
 export function appLoginUrl(requestOrigin?: string): string {
 	const origin = resolveAppOrigin(requestOrigin);
-	if (requestOrigin && origin === requestOrigin.replace(/\/$/, '')) {
+	if (requestOrigin && origin === trimOrigin(requestOrigin)) {
 		return '/login';
 	}
 	return `${origin}/login`;
@@ -24,7 +45,7 @@ export function appLoginUrl(requestOrigin?: string): string {
 
 export function appRegisterUrl(requestOrigin?: string): string {
 	const origin = resolveAppOrigin(requestOrigin);
-	if (requestOrigin && origin === requestOrigin.replace(/\/$/, '')) {
+	if (requestOrigin && origin === trimOrigin(requestOrigin)) {
 		return '/register';
 	}
 	return `${origin}/register`;

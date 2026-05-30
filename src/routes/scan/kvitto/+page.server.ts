@@ -2,6 +2,7 @@ import { canEditInventory } from '$lib/domain/household';
 import { isStorageLocation, type StorageLocation } from '$lib/domain/location';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { buildScanReturnUrl } from '$lib/utils/scan-toast';
+import { recordProductEvent } from '$lib/server/product-events';
 import { error, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -70,6 +71,12 @@ export const actions: Actions = {
 		}
 
 		const label = `${created} varor`;
+		recordProductEvent(event.locals.pmfService, {
+			userId: event.locals.user!.id,
+			householdId: event.locals.householdId,
+			eventType: 'receipt_parsed',
+			metadata: { itemsAdded: created }
+		});
 		const target = buildScanReturnUrl(returnTo, 'added', label);
 		redirect(302, target);
 	}

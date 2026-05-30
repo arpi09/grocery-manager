@@ -11,6 +11,10 @@ vite.config.ts.timestamp-*
 .DS_Store
 Thumbs.db
 
+# Receipt PDF testpack — real customer PDFs stay local (synthetic-*.pdf committed for CI)
+/tests/fixtures/receipts/*.pdf
+!/tests/fixtures/receipts/synthetic-*.pdf
+
 /test-results/
 /playwright-report/
 /blob-report/

@@ -109,7 +109,7 @@
 		"greeting": "Hej, {name}",
 		"greetingNeutral": "Ditt skafferi",
 		"tagline": "Skanna en vara för att hålla koll",
-		"taglineEmpty": "Lägg till din första vara — det tar bara några sekunder",
+		"taglineEmpty": "Ett kvitto eller några streckkoder räcker för att komma igång",
 		"scanCardTitle": "Skanna vara",
 		"scanCardSubtitle": "Streckkod — snabbast sättet att lägga till",
 		"chipReceipt": "Kvitto",
@@ -117,8 +117,10 @@
 		"chipManual": "Manuellt",
 		"locationsTitle": "Dina platser",
 		"totalTracked": "{count} varor totalt",
-		"emptyTitle": "Tomt skafferi",
-		"emptyDescription": "Kom igång — skanna din första vara och håll koll på utgångsdatum.",
+		"emptyTitle": "Kom igång",
+		"emptyDescription": "Skanna ett kvitto eller fem streckkoder — du behöver inte fylla hela skafferiet.",
+		"emptyActionBarcode": "Skanna streckkod",
+		"emptyActionReceipt": "Ladda upp kvitto",
 		"emptyAction": "Skanna nu",
 		"expiringMore": "+{count} till går ut snart",
 		"recipeHint": "Receptidéer",
@@ -215,6 +217,10 @@
 			"editProfile": "Redigera profil",
 			"editProfileNote": "Namn, bild och tema"
 		},
+		"legal": {
+			"privacyLink": "Integritet & AI",
+			"privacyNote": "Data, AI och dina rättigheter"
+		},
 		"household": {
 			"title": "Hushåll",
 			"description": "Delat hushåll, medlemmar och inbjudningar"
@@ -242,6 +248,98 @@
 			"title": "Visa introduktion igen",
 			"note": "Gå igenom välkomstguiden för appen.",
 			"start": "Starta guide"
+		},
+		"installApp": {
+			"title": "Lägg till på hemskärmen",
+			"note": "Installera appen som genväg på iPhone eller Android."
+		},
+		"expiryReminders": {
+			"title": "Påminnelser om utgående varor",
+			"note": "Veckovis e-post med varor som går ut snart i dina hushåll. Kräver opt-in.",
+			"enable": "Skicka e-postpåminnelser",
+			"daysLabel": "Visa varor som går ut inom",
+			"daysOption": "{days} dagar"
+		},
+		"plan": {
+			"title": "Plan",
+			"description": "Prenumeration (kommer snart)",
+			"currentTier": "Nuvarande plan",
+			"currentFree": "Gratis",
+			"comingSoon": "Betalning är inte aktiverad ännu. Du får veta i förväg innan Pro debiteras.",
+			"freeLimitsTitle": "Gratis inkluderar",
+			"freeLimitsItems": "{items} lagerrader · {members} hushållsmedlemmar · {aiScans} AI-skannar/mån · {receipts} kvitto-PDF/mån · {smartFill} smart fill/vecka",
+			"proTitle": "Pro kommer att ge",
+			"proUnlimitedAi": "Obegränsad AI-skannning",
+			"proUnlimitedReceipt": "Obegränsad kvitto-PDF",
+			"proUnlimitedSmartFill": "Obegränsad smart inköpslista",
+			"proInsights": "AI-insikter och full statistik",
+			"proMembers": "Fler hushållsmedlemmar (upp till {max})",
+			"priceHint": "Planerat cirka {monthly} kr/mån eller {yearly} kr/år.",
+			"learnMore": "Läs mer om priser",
+			"learnMoreNote": "Sammanfattning på webbplatsen"
+		},
+		"feedback": {
+			"title": "Ge feedback",
+			"description": "Hjälp oss förstå vad som funkar — och varför du inte använder appen oftare.",
+			"messageLabel": "Varför använder du inte appen oftare?",
+			"messageTooShort": "Skriv minst några ord så vi förstår.",
+			"thanks": "Tack — din feedback är sparad."
+		}
+	},
+	"feedback": {
+		"churnQuestion": "Vad är huvudorsaken? (valfritt)",
+		"churnOptional": "Välj orsak (valfritt)",
+		"messageOptional": "Förtydliga gärna (valfritt)",
+		"messagePlaceholder": "T.ex. glömmer appen, för mycket jobb att scanna, använder Bring istället…",
+		"submit": "Skicka feedback",
+		"churnReasons": {
+			"forgot_habit": "Glömmer / ingen vana",
+			"too_much_work": "För mycket jobb / friktion",
+			"missing_feature": "Saknar en funktion",
+			"privacy_trust": "Integritet / förtroende",
+			"other_app": "Använder annan app",
+			"notifications": "Notiser / påminnelser",
+			"other": "Annat"
+		},
+		"postOnboarding": {
+			"title": "En snabb fråga",
+			"subtitle": "Valfritt — hjälper oss förbättra appen",
+			"skip": "Hoppa över",
+			"thanks": "Tack för din feedback!"
+		}
+	},
+	"pwa": {
+		"page": {
+			"title": "Lägg till på hemskärmen",
+			"subtitle": "Snabb genväg till skafferiet — som en app, utan App Store."
+		},
+		"guide": {
+			"title": "Installera Home Pantry",
+			"lead": "Lägg till en genväg på hemskärmen så öppnar du skafferiet med ett tryck — kameran och offline-läge fungerar bättre i den installerade vyn.",
+			"alreadyInstalled": "Du använder redan den installerade appen. Bra jobbat!",
+			"iosTitle": "iPhone (Safari)",
+			"iosStep1": "Öppna homepantry.com i Safari (inte inbyggd webbläsare i andra appar).",
+			"iosStep2": "Tryck på Dela-knappen (fyrkant med pil uppåt).",
+			"iosStep3": "Välj Lägg till på hemskärmen och bekräfta.",
+			"iosHint": "På iPad: samma steg i Safari.",
+			"androidTitle": "Android (Chrome)",
+			"androidStep1": "Öppna appen i Chrome.",
+			"androidStep2": "Tryck på menyn (⋮) uppe till höger.",
+			"androidStep3": "Välj Installera app eller Lägg till på startskärmen.",
+			"androidHint": "Om du inte ser Installera app, använd Lägg till på startskärmen i menyn.",
+			"desktopNote": "På dator använder du appen i webbläsaren. Mobil med hemskärmsikon ger bäst upplevelse."
+		},
+		"install": {
+			"cta": "Installera app",
+			"accepted": "Installation startad — följ webbläsarens dialog.",
+			"dismissed": "Installation avbruten. Du kan följa stegen nedan i stället."
+		},
+		"banner": {
+			"aria": "Tips: lägg till appen på hemskärmen",
+			"title": "Lägg till på hemskärmen",
+			"body": "Öppna skafferiet snabbare — en tryckning från hemskärmen.",
+			"cta": "Visa hur",
+			"dismiss": "Inte nu"
 		}
 	},
 	"inventory": {
@@ -508,7 +606,61 @@
 		"statActiveNow": "Aktiva nu",
 		"statRecentWindow": "Senaste {minutes} min",
 		"statLoggedInSessions": "Inloggade sessioner",
-		"statLastActivity": "Senaste aktivitet"
+		"statLastActivity": "Senaste aktivitet",
+		"feedback": {
+			"title": "Användarfeedback",
+			"note": "Churn-röster från inställningar och kort enkät efter introduktion. Kompletterar intervjuer — se docs/USER_INTERVIEWS.md.",
+			"empty": "Ingen feedback ännu."
+		}
+	},
+	"pmf": {
+		"title": "PMF-mätetal",
+		"subtitle": "Product-market fit — veckovis granskning enligt konkurrensanalysen",
+		"noData": "Ingen data ännu",
+		"minutesValue": "{count} min",
+		"target": "Mål: {value}",
+		"retentionEligible": "Baserat på {count} användare som nått perioden",
+		"eventsTitle": "Instrumenterade händelser (totalt)",
+		"eventsNote": "Lagras i er egen databas — inga tredjeparts-analytics.",
+		"events": {
+			"scanCompleted": "scan_completed",
+			"receiptParsed": "receipt_parsed",
+			"fillSuggestionsAdded": "fill_suggestions_added"
+		},
+		"activation": {
+			"label": "Aktivering",
+			"detail": "{activated} av {total} användare",
+			"definition": "≥10 varor eller 1 kvitto inom 24 h efter registrering"
+		},
+		"firstScan": {
+			"label": "Tid till första scan",
+			"definition": "Median minuter från registrering till första streckkod/kvitto",
+			"target": "Mål: <{minutes} min median"
+		},
+		"weeklyScan": {
+			"label": "Veckoscan-rate",
+			"detail": "{scanners} av {wau} WAU",
+			"definition": "Andel veckoaktiva användare som scannat något senaste 7 dagarna"
+		},
+		"d7": {
+			"label": "D7 retention",
+			"definition": "Andel som varit tillbaka minst 7 dagar efter registrering"
+		},
+		"d30": {
+			"label": "D30 retention",
+			"definition": "Andel som varit tillbaka minst 30 dagar efter registrering",
+			"target": "Mål: {early} tidigt, {mature} moget"
+		},
+		"multiMember": {
+			"label": "Hushåll 2+ aktiva",
+			"detail": "{multi} av {total} aktiva hushåll",
+			"definition": "Andel aktiva hushåll med minst två aktiva medlemmar (7 dagar)"
+		},
+		"smartFill": {
+			"label": "Smart fill / lista",
+			"detail": "{count} WAU använde smart fill",
+			"definition": "Andel veckoaktiva som lagt till AI-förslag på inköpslistan"
+		}
 	},
 	"invite": {
 		"title": "Hushållsinbjudan",
@@ -530,7 +682,7 @@
 		"title": "Snabbstart",
 		"subtitle": "Markera det du har hemma",
 		"readonly": "Du har endast läsbehörighet.",
-		"lead": "Snabbstart — markera det du redan har hemma. Du kan alltid skanna istället.",
+		"lead": "Vill du fylla i snabbare? Markera det du redan har — eller skanna kvitto/streckkod direkt.",
 		"defaultLocation": "Standardplats för valda:",
 		"allCategory": "Alla {label}",
 		"addCount": "Lägg till {count} {count, plural, one {vara} other {varor}}",
@@ -620,7 +772,16 @@
 	"onboarding": {
 		"welcome": "Välkommen till Home Pantry",
 		"stepOf": "Steg {current} av {total}",
-		"welcomeBody": "Håll koll på vad du har hemma — i kyl, frys och skafferi. Se vad som snart går ut och slipp dubbelköp.",
+		"welcomeBody": "Håll koll på vad du har hemma — utan att fylla hela skafferiet på en gång. Börja med ett kvitto eller några streckkoder.",
+		"chooseTitle": "Välj hur du vill börja",
+		"chooseBody": "Ett kvitto ger många varor på en gång. Fem streckkoder räcker om du vill testa skanningsflödet.",
+		"ctaReceipt": "Skanna kvitto",
+		"ctaBarcode": "Skanna 5 varor",
+		"barcodeProgress": "{count} av {goal} streckkoder",
+		"skipLater": "Jag gör det senare",
+		"celebrateTitle": "Bra start!",
+		"celebrateBody": "Du har lagt till dina första varor. Fortsätt i din takt — skanna fler när det passar.",
+		"celebrateCta": "Fortsätt",
 		"scanTitle": "Skanna varor",
 		"scanBody": "Skanna streckkoder med kameran för att lägga till varor på några sekunder. Du hittar skanna-knappen längst ner på mobilen.",
 		"locationsTitle": "Tre platser",

@@ -14,12 +14,27 @@
 	import { ONBOARDING_REPLAY_EVENT, resetOnboarding } from '$lib/utils/onboarding';
 	import LanguageSwitcher from '$lib/components/molecules/LanguageSwitcher.svelte';
 	import { t } from '$lib/i18n';
+	import { FREE_LIMITS, PRICE_HYPOTHESIS_SEK, PRO_LIMITS } from '$lib/domain/plan';
+	import { CHURN_REASONS } from '$lib/domain/product-feedback';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 
 	let { data, form } = $props();
 	let petModalOpen = $state(false);
 	let copiedInviteLink = $state(false);
 	let petsToggleSubmitting = $state(false);
+	let expiryRemindersSubmitting = $state(false);
+	let expiryRemindersEnabled = $state(data.expiryRemindersEnabled);
+	let expiryReminderDays = $state(String(data.expiryReminderDays));
 	let addPetSubmitting = $state(false);
+	let feedbackSubmitting = $state(false);
+
+	const feedbackErrors = $derived(form?.feedbackErrors ?? {});
+	const feedbackSuccess = $derived(form?.feedbackSuccess === true);
+
+	$effect(() => {
+		expiryRemindersEnabled = data.expiryRemindersEnabled;
+		expiryReminderDays = String(data.expiryReminderDays);
+	});
 
 	const inviteLink = $derived(form?.inviteLink ?? null);
 	const inviteEmailWarning = $derived(form?.inviteEmailWarning ?? null);
@@ -52,7 +67,8 @@
 	<div class="settings-page">
 		<SettingsSection title={t('settings.account.title')} description={t('settings.account.description')}>
 			<SettingsRow title={data.user?.email ?? ''} note={t('settings.account.loggedInEmail')} />
-			<SettingsRow href="/profile" title={t('settings.account.editProfile')} note={t('settings.account.editProfileNote')} last />
+			<SettingsRow href="/profile" title={t('settings.account.editProfile')} note={t('settings.account.editProfileNote')} />
+			<SettingsRow href="/privacy" title={t('settings.legal.privacyLink')} note={t('settings.legal.privacyNote')} last />
 		</SettingsSection>
 
 		{#if data.household}
@@ -83,6 +99,47 @@
 				last={false}
 			>
 				<LanguageSwitcher />
+			</SettingsRow>
+
+			<SettingsRow
+				title={t('settings.expiryReminders.title')}
+				note={t('settings.expiryReminders.note')}
+				last={false}
+			>
+				<form
+					method="POST"
+					action="?/updateExpiryReminders"
+					class="expiry-reminders-form"
+					use:enhance={bindSubmitting((v) => (expiryRemindersSubmitting = v))}
+				>
+					<input type="hidden" name="enabled" value={expiryRemindersEnabled ? 'true' : 'false'} />
+					<label class="expiry-toggle">
+						<input
+							type="checkbox"
+							checked={expiryRemindersEnabled}
+							onchange={(event) => {
+								expiryRemindersEnabled = event.currentTarget.checked;
+								event.currentTarget.form?.requestSubmit();
+							}}
+						/>
+						<span>{t('settings.expiryReminders.enable')}</span>
+					</label>
+					<label class="expiry-days">
+						<span>{t('settings.expiryReminders.daysLabel')}</span>
+						<select
+							name="days"
+							disabled={!expiryRemindersEnabled}
+							bind:value={expiryReminderDays}
+							onchange={(event) => event.currentTarget.form?.requestSubmit()}
+						>
+							<option value="3">{t('settings.expiryReminders.daysOption', { days: 3 })}</option>
+							<option value="7">{t('settings.expiryReminders.daysOption', { days: 7 })}</option>
+						</select>
+					</label>
+					{#if expiryRemindersSubmitting}
+						<span class="expiry-saving">{t('common.saving')}</span>
+					{/if}
+				</form>
 			</SettingsRow>
 
 			<SettingsRow
@@ -144,6 +201,12 @@
 				</div>
 			{/if}
 			<SettingsRow
+				href="/install-app"
+				title={t('settings.installApp.title')}
+				note={t('settings.installApp.note')}
+				last={false}
+			/>
+			<SettingsRow
 				title={t('settings.onboarding.title')}
 				note={t('settings.onboarding.note')}
 				last
@@ -152,6 +215,97 @@
 					{t('settings.onboarding.start')}
 				</Button>
 			</SettingsRow>
+		</SettingsSection>
+
+		<SettingsSection
+			title={t('settings.plan.title')}
+			description={t('settings.plan.description')}
+		>
+			<SettingsRow
+				title={t('settings.plan.currentTier')}
+				note={t('settings.plan.currentFree')}
+				last={false}
+			/>
+			<div class="plan-panel">
+				<h3 class="plan-heading">{t('settings.plan.freeLimitsTitle')}</h3>
+				<p class="plan-copy">
+					{t('settings.plan.freeLimitsItems', {
+						items: FREE_LIMITS.maxInventoryItems,
+						members: FREE_LIMITS.maxHouseholdMembers,
+						aiScans: FREE_LIMITS.aiScansPerMonth,
+						receipts: FREE_LIMITS.receiptPdfParsesPerMonth,
+						smartFill: FREE_LIMITS.smartFillPerWeek
+					})}
+				</p>
+				<h3 class="plan-heading">{t('settings.plan.proTitle')}</h3>
+				<ul class="plan-pro-list">
+					<li>{t('settings.plan.proUnlimitedAi')}</li>
+					<li>{t('settings.plan.proUnlimitedReceipt')}</li>
+					<li>{t('settings.plan.proUnlimitedSmartFill')}</li>
+					<li>{t('settings.plan.proInsights')}</li>
+					<li>
+						{t('settings.plan.proMembers', { max: PRO_LIMITS.maxHouseholdMembers ?? 6 })}
+					</li>
+				</ul>
+				<p class="plan-copy plan-muted">
+					{t('settings.plan.priceHint', {
+						monthly: PRICE_HYPOTHESIS_SEK.monthly,
+						yearly: PRICE_HYPOTHESIS_SEK.yearly
+					})}
+				</p>
+				<p class="plan-copy plan-muted">{t('settings.plan.comingSoon')}</p>
+			</div>
+			<SettingsRow
+				href="/priser"
+				title={t('settings.plan.learnMore')}
+				note={t('settings.plan.learnMoreNote')}
+				last={false}
+			/>
+		</SettingsSection>
+
+		<SettingsSection
+			title={t('settings.feedback.title')}
+			description={t('settings.feedback.description')}
+		>
+			{#if feedbackSuccess}
+				<div class="feedback-panel">
+					<FeedbackBanner tone="success" message={t('settings.feedback.thanks')} />
+				</div>
+			{/if}
+			<form
+				method="POST"
+				action="?/submitProductFeedback"
+				class="feedback-form"
+				use:enhance={bindSubmitting((v) => (feedbackSubmitting = v))}
+			>
+				<input type="hidden" name="source" value="settings" />
+				<label class="feedback-field">
+					<span>{t('feedback.churnQuestion')}</span>
+					<select name="churnReason">
+						<option value="">{t('feedback.churnOptional')}</option>
+						{#each CHURN_REASONS as reason}
+							<option value={reason}>{t(`feedback.churnReasons.${reason}`)}</option>
+						{/each}
+					</select>
+				</label>
+				<label class="feedback-field">
+					<span>{t('settings.feedback.messageLabel')}</span>
+					<textarea
+						name="message"
+						required
+						minlength="3"
+						maxlength="2000"
+						rows="4"
+						placeholder={t('feedback.messagePlaceholder')}
+					></textarea>
+					{#if feedbackErrors.message?.[0]}
+						<p class="feedback-error" role="alert">{t('settings.feedback.messageTooShort')}</p>
+					{/if}
+				</label>
+				<Button type="submit" loading={feedbackSubmitting} loadingLabel={t('common.saving')}>
+					{t('feedback.submit')}
+				</Button>
+			</form>
 		</SettingsSection>
 	</div>
 	</PageContainer>
@@ -194,6 +348,48 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0;
+	}
+
+	.expiry-reminders-form {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--space-sm);
+		min-width: min(100%, 240px);
+	}
+
+	.expiry-toggle {
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+		font-size: 0.9rem;
+		cursor: pointer;
+	}
+
+	.expiry-days {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		font-size: 0.9rem;
+		width: 100%;
+	}
+
+	.expiry-days select {
+		padding: 0.55rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		color: var(--color-text);
+	}
+
+	.expiry-days select:disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+	}
+
+	.expiry-saving {
+		font-size: 0.85rem;
+		color: var(--color-text-muted);
 	}
 
 	.pet-panel {
@@ -272,6 +468,79 @@
 		justify-content: flex-end;
 		gap: var(--space-sm);
 		margin-top: var(--space-sm);
+	}
+
+	.plan-panel {
+		padding: var(--space-md) var(--space-lg);
+		border-top: 1px solid var(--color-border);
+	}
+
+	.plan-heading {
+		margin: 0 0 var(--space-sm);
+		font-size: 0.9rem;
+		font-weight: 600;
+	}
+
+	.plan-heading:not(:first-child) {
+		margin-top: var(--space-md);
+	}
+
+	.plan-copy {
+		margin: 0;
+		font-size: 0.86rem;
+		color: var(--color-text-muted);
+		line-height: 1.45;
+	}
+
+	.plan-muted {
+		margin-top: var(--space-sm);
+	}
+
+	.plan-pro-list {
+		margin: 0;
+		padding-left: 1.1rem;
+		font-size: 0.86rem;
+		color: var(--color-text-muted);
+		line-height: 1.45;
+	}
+
+	.plan-pro-list li + li {
+		margin-top: 0.25rem;
+	}
+
+	.feedback-panel {
+		padding: var(--space-md) var(--space-lg);
+		border-top: 1px solid var(--color-border);
+	}
+
+	.feedback-form {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-md);
+		padding: var(--space-md) var(--space-lg);
+	}
+
+	.feedback-field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		font-size: 0.9rem;
+	}
+
+	.feedback-field select,
+	.feedback-field textarea {
+		padding: 0.6rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		color: var(--color-text);
+		font: inherit;
+	}
+
+	.feedback-error {
+		margin: 0;
+		font-size: 0.82rem;
+		color: var(--color-danger, #b42318);
 	}
 
 	@media (max-width: 640px) {
