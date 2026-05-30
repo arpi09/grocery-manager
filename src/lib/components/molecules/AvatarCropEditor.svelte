@@ -74,9 +74,7 @@
 	}
 
 	$effect(() => {
-		params;
-		image;
-		canvasEl;
+		if (!canvasEl || !image) return;
 		renderPreview();
 	});
 

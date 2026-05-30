@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, type Locale } from '$lib/i18n/locale';
+import type { Locale } from '$lib/i18n/locale';
 import { translate } from '$lib/i18n/messages';
 
 export const SCAN_TOAST_PARAM = 'scan';

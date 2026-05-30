@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import Toast from '$lib/components/molecules/Toast.svelte';
-	import { getLocale, t } from '$lib/i18n';
+	import { getLocale } from '$lib/i18n';
 	import {
 		SCAN_TOAST_NAME_PARAM,
 		SCAN_TOAST_PARAM,

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('pdf-parse', () => ({
 	PDFParse: class {
-		constructor(_options: unknown) {}
+		constructor(_options: unknown) { void _options; }
 
 		async getText() {
 			return {

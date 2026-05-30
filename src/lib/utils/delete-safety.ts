@@ -3,7 +3,7 @@
  */
 
 import { DEFAULT_LOCALE, type Locale } from '$lib/i18n/locale';
-import { translate, type MessageKey } from '$lib/i18n/messages';
+import { translate } from '$lib/i18n/messages';
 
 export type DeleteSafetyTier = 1 | 2 | 3 | 4;
 
