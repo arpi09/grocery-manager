@@ -5,7 +5,7 @@ alwaysApply: false
 
 # Delivery metrics
 
-- After a feature is **merged to `master`** (or explicitly parked), update [DELIVERY_METRICS.md](../../DELIVERY_METRICS.md): per-feature row with dates, stage times (use `~` when approximate), commits/conflicts/reworks from git, and honest test status.
+- After a feature is **merged to `master`** (or explicitly parked), update [private/DELIVERY_METRICS.md](../../private/DELIVERY_METRICS.md): per-feature row with dates, stage times (use `~` when approximate), commits/conflicts/reworks from git, and honest test status.
 - On **coordinator checkpoint** (weekly or post-merge batch), refresh the **weekly summary** section in the same file.
 - **Do not** treat LOC, commit count, or number of agents as success metrics; use them only as friction signals (rework, merge pain).
-- Keep [AGENT_STATUS.md](../../AGENT_STATUS.md) as live queue/status; [MERGE_QUEUE.md](../../MERGE_QUEUE.md) as ordered merge intent when present on the branch.
+- Keep [private/AGENT_STATUS.md](../../private/AGENT_STATUS.md) as live queue/status; [private/MERGE_QUEUE.md](../../private/MERGE_QUEUE.md) as ordered merge intent when present locally.

@@ -2,7 +2,7 @@
 
 **Ingen PR krävs.** Agenter och du pushar direkt till `master`. GitHub Actions kör kvalitet → E2E → deploy automatiskt.
 
-**Relaterat:** [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md) · [DELIVERY_METRICS.md](./DELIVERY_METRICS.md)
+**Relaterat:** [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md)
 
 ---
 

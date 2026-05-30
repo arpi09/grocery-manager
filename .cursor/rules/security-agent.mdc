@@ -1,5 +1,5 @@
 ---
-description: Security agent — read-only scans, deploy gate; maintain SECURITY_REPORT.md and SECURITY_DEPLOYMENT_CHECKLIST.md
+description: Security agent — read-only scans, deploy gate; maintain private/SECURITY_REPORT.md and private/SECURITY_DEPLOYMENT_CHECKLIST.md
 alwaysApply: false
 ---
 
@@ -18,10 +18,10 @@ Continuous security monitoring across code, dependencies, configuration, CI/CD, 
 ## Allowed without explicit assignment
 
 - Read-only analysis of `src/**`, `.github/workflows/**`, `apphosting.yaml`, `firebase.json`, `.env.example`, CI docs, and coordination docs
-- Create or refresh **`SECURITY_REPORT.md`** and **`SECURITY_DEPLOYMENT_CHECKLIST.md`** at repo root with real findings
-- Update process doc **`docs/SECURITY_AGENT.md`** and coordination rows in `OWNERSHIP.md` / `AGENT_MAP.md` when asked
+- Create or refresh **`private/SECURITY_REPORT.md`** and **`private/SECURITY_DEPLOYMENT_CHECKLIST.md`** with real findings
+- Update process doc **`private/docs/SECURITY_AGENT.md`** and coordination rows in `private/OWNERSHIP.md` / `private/AGENT_MAP.md` when asked
 - Review every merge/deploy candidate and report **pass** / **blocked** / **needs review**
-- Cross-reference **`DEPENDENCY_HEALTH.md`** for npm audit items (do not duplicate fix work — escalate to Dependency Health → coordinator → impl agent)
+- Cross-reference **`private/DEPENDENCY_HEALTH.md`** for npm audit items (do not duplicate fix work — escalate to Dependency Health → coordinator → impl agent)
 - Summarize top risks and deploy status in chat each run
 
 ## Forbidden unless explicitly assigned
@@ -40,7 +40,7 @@ Scan and report on:
 
 | Area | What to look for |
 |------|------------------|
-| **Dependencies** | `npm audit` findings via `DEPENDENCY_HEALTH.md`; direct runtime vulns (e.g. `drizzle-orm`) |
+| **Dependencies** | `npm audit` findings via `private/DEPENDENCY_HEALTH.md`; direct runtime vulns (e.g. `drizzle-orm`) |
 | **Secrets in git** | Committed `.env`, API keys, passwords, tokens in source or docs |
 | **Auth & session** | `hooks.server.ts`, Lucia/session, login/register/logout, admin gate |
 | **API exposure** | `/api/**` auth guards, OpenAI routes, health endpoints, barcode lookup |
@@ -65,14 +65,14 @@ Scan and report on:
 | **Secrets in git or CI logs** | **Always block** — rotate and remove before any deploy |
 | **Uncertain** | **Block** — classify as high until clarified |
 
-Each finding in **`SECURITY_REPORT.md`** must include **`blocks deployment: yes/no`** with justification.
+Each finding in **`private/SECURITY_REPORT.md`** must include **`blocks deployment: yes/no`** with justification.
 
 ## Deploy candidate review (each run)
 
 For every merge/deploy candidate (typically `master` HEAD or coordinator-specified SHA):
 
 1. Identify candidate SHA and changed paths (git log/diff when available).
-2. Run checklist in **`SECURITY_DEPLOYMENT_CHECKLIST.md`**.
+2. Run checklist in **`private/SECURITY_DEPLOYMENT_CHECKLIST.md`**.
 3. Set executive summary: **deploy: pass / blocked / needs review**.
 4. Note uncommitted or unpushed local work as **not on candidate until pushed**.
 
@@ -97,24 +97,24 @@ For every merge/deploy candidate (typically `master` HEAD or coordinator-specifi
 
 ## Each run
 
-1. Read **`DEPENDENCY_HEALTH.md`**, **`.github/workflows/release.yml`**, **`DEPLOYMENT_POLICY.md`**, **`RELEASE_PIPELINE.md`**, **`hooks.server.ts`**, API routes under `src/routes/api/**`, auth/register/invite paths.
+1. Read **`private/DEPENDENCY_HEALTH.md`**, **`.github/workflows/release.yml`**, **`private/DEPLOYMENT_POLICY.md`**, **`private/RELEASE_PIPELINE.md`**, **`hooks.server.ts`**, API routes under `src/routes/api/**`, auth/register/invite paths.
 2. Grep for secrets patterns (`.env` committed, `sk-`, `re_`, hardcoded passwords).
 3. Verify OpenAI routes use **`api-guards`** (`requireUser`, `requireOpenAiKey`).
 4. Check Turnstile, Resend, CSRF/origin, invite token flow, upload limits, admin seed.
-5. Update **`SECURITY_REPORT.md`**: executive summary, ≥12 findings, deploy candidate status; set **Last scanned** (ISO date).
-6. Ensure **`SECURITY_DEPLOYMENT_CHECKLIST.md`** is current and links to policy docs.
+5. Update **`private/SECURITY_REPORT.md`**: executive summary, ≥12 findings, deploy candidate status; set **Last scanned** (ISO date).
+6. Ensure **`private/SECURITY_DEPLOYMENT_CHECKLIST.md`** is current and links to policy docs.
 7. Report **deploy status**, **top 3 blockers** (if any), and **coordinator actions** in chat.
 
 ## Output contract
 
-Maintain at repo root:
+Maintain under **`private/`**:
 
 | File | Structure |
 |------|-----------|
-| **`SECURITY_REPORT.md`** | Executive summary (status, risk, deploy pass/blocked/needs review); Findings (severity, files, description, exploit scenario, fix, blocks deploy, owner) |
-| **`SECURITY_DEPLOYMENT_CHECKLIST.md`** | Pre-deploy checkbox list; links to `DEPLOYMENT_POLICY.md` and `RELEASE_PIPELINE.md` |
+| **`private/SECURITY_REPORT.md`** | Executive summary (status, risk, deploy pass/blocked/needs review); Findings (severity, files, description, exploit scenario, fix, blocks deploy, owner) |
+| **`private/SECURITY_DEPLOYMENT_CHECKLIST.md`** | Pre-deploy checkbox list; links to `private/DEPLOYMENT_POLICY.md` and `private/RELEASE_PIPELINE.md` |
 
-Process doc: **`docs/SECURITY_AGENT.md`** (cadence and coordinator invocation).
+Process doc: **`private/docs/SECURITY_AGENT.md`** (cadence and coordinator invocation).
 
 ## Tracking
 
@@ -127,7 +127,7 @@ Process doc: **`docs/SECURITY_AGENT.md`** (cadence and coordinator invocation).
 
 ## Ownership
 
-- Primary artifacts: **`SECURITY_REPORT.md`**, **`SECURITY_DEPLOYMENT_CHECKLIST.md`**
-- Process doc: **`docs/SECURITY_AGENT.md`**
+- Primary artifacts: **`private/SECURITY_REPORT.md`**, **`private/SECURITY_DEPLOYMENT_CHECKLIST.md`**
+- Process doc: **`private/docs/SECURITY_AGENT.md`**
 - Branch (typical): `chore/security-agent-program` or coordinator-assigned chore branch
 - Do not touch **`src/**`** except read-only search and verification

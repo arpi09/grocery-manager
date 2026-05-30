@@ -1,5 +1,5 @@
 ---
-description: Pipeline/Release agent — CI/CD, deploy safety, rollback; maintain DEPLOYMENT_POLICY.md and RELEASE_PIPELINE.md
+description: Pipeline/Release agent — CI/CD, deploy safety, rollback; maintain private/DEPLOYMENT_POLICY.md and private/RELEASE_PIPELINE.md
 alwaysApply: false
 ---
 
@@ -14,8 +14,8 @@ Own CI/CD pipeline, release automation, deployment safety, and rollback strategy
 ## Allowed without explicit assignment
 
 - Read-only analysis of `.github/workflows/**`, `apphosting.yaml`, `firebase.json`, `package.json` scripts, CI docs, and coordination docs
-- Create or refresh **`DEPLOYMENT_POLICY.md`** and **`RELEASE_PIPELINE.md`** at repo root with accurate, current pipeline state
-- Update process doc **`docs/PIPELINE_AGENT.md`** and coordination rows in `OWNERSHIP.md` when asked
+- Create or refresh **`private/DEPLOYMENT_POLICY.md`** and **`private/RELEASE_PIPELINE.md`** with accurate, current pipeline state
+- Update process doc **`private/docs/PIPELINE_AGENT.md`** and coordination rows in `private/OWNERSHIP.md` when asked
 - Propose or edit **`.github/workflows/*.yml`**, `apphosting.yaml`, husky/CI hooks when assigned or when fixing documented pipeline gaps
 - Classify change risk (low / medium / high) and recommend **fast path** vs **guarded path**
 - Request specific smoke tests from the **E2E agent** (do not rewrite E2E coverage broadly without approval)
@@ -45,7 +45,7 @@ Own CI/CD pipeline, release automation, deployment safety, and rollback strategy
 
 ## Relationship to Security agent
 
-- **Security agent** owns [SECURITY_REPORT.md](../../SECURITY_REPORT.md) and [SECURITY_DEPLOYMENT_CHECKLIST.md](../../SECURITY_DEPLOYMENT_CHECKLIST.md)
+- **Security agent** owns [private/SECURITY_REPORT.md](../../private/SECURITY_REPORT.md) and [private/SECURITY_DEPLOYMENT_CHECKLIST.md](../../private/SECURITY_DEPLOYMENT_CHECKLIST.md)
 - Security **blocked** status is a **hard deploy blocker** for G3 — same weight as failed G1/G2
 - Pipeline agent consumes security gate before treating a release as deploy-ready; does not implement product security fixes
 - Coordinator invokes Security agent before deploy; Pipeline agent may add CI audit steps when assigned
@@ -59,9 +59,9 @@ Own CI/CD pipeline, release automation, deployment safety, and rollback strategy
 
 ## Rules
 
-1. **No direct production deployment** until **`DEPLOYMENT_POLICY.md`** exists and is current (policy is the authority).
+1. **No direct production deployment** until **`private/DEPLOYMENT_POLICY.md`** exists and is current (policy is the authority).
 2. **No secrets** exposed or committed — GitHub Actions secrets and Firebase Secret Manager only.
-3. **No high-risk change** may auto-deploy without guarded-path approval (see `DEPLOYMENT_POLICY.md`).
+3. **No high-risk change** may auto-deploy without guarded-path approval (see `private/DEPLOYMENT_POLICY.md`).
 4. **If uncertain**, classify as **high risk**.
 5. Do **not** modify product code unless required for pipeline integration **and** approved.
 6. **Trunk-based delivery:** push to `master` → Actions; **no PR workflow** unless user explicitly asks.
@@ -71,21 +71,21 @@ Own CI/CD pipeline, release automation, deployment safety, and rollback strategy
 1. Read **`.github/workflows/release.yml`**, [`docs/CI_CD.md`](../../docs/CI_CD.md), [`docs/FIREBASE_DEPLOY.md`](../../docs/FIREBASE_DEPLOY.md).
 2. Verify gate table (G0–G3) matches workflow jobs: `quality` → `e2e` → `deploy`.
 3. Check secrets posture: `FIREBASE_TOKEN` in GitHub; runtime secrets in Firebase only.
-4. Update **`DEPLOYMENT_POLICY.md`**: authority, environments, risk tiers, rollback, incident deploy.
-5. Update **`RELEASE_PIPELINE.md`**: diagram, gate table, test mapping, fast/guarded tree, agent playbook.
+4. Update **`private/DEPLOYMENT_POLICY.md`**: authority, environments, risk tiers, rollback, incident deploy.
+5. Update **`private/RELEASE_PIPELINE.md`**: diagram, gate table, test mapping, fast/guarded tree, agent playbook.
 6. Set **Last reviewed** (ISO date) in both root docs.
 7. Report **pipeline status**, **risk summary** for any in-flight change, and **coordinator actions** in chat.
 
 ## Output contract
 
-Maintain at repo root:
+Maintain under **`private/`**:
 
 | File | Structure |
 |------|-----------|
-| **`DEPLOYMENT_POLICY.md`** | Authority, environments, risk classification, auto-deploy rules, secrets, rollback, incident deploy, coordinator triggers |
-| **`RELEASE_PIPELINE.md`** | Mermaid G0–G3, gate table, fast/guarded decision tree, test suite mapping, workflow refs, agent playbook, blockers |
+| **`private/DEPLOYMENT_POLICY.md`** | Authority, environments, risk classification, auto-deploy rules, secrets, rollback, incident deploy, coordinator triggers |
+| **`private/RELEASE_PIPELINE.md`** | Mermaid G0–G3, gate table, fast/guarded decision tree, test suite mapping, workflow refs, agent playbook, blockers |
 
-Process doc: **`docs/PIPELINE_AGENT.md`** (cadence and coordinator invocation).
+Process doc: **`private/docs/PIPELINE_AGENT.md`** (cadence and coordinator invocation).
 
 ## Tracking
 
@@ -99,7 +99,7 @@ Process doc: **`docs/PIPELINE_AGENT.md`** (cadence and coordinator invocation).
 
 ## Ownership
 
-- Primary artifacts: **`DEPLOYMENT_POLICY.md`**, **`RELEASE_PIPELINE.md`**
-- Process doc: **`docs/PIPELINE_AGENT.md`**
+- Primary artifacts: **`private/DEPLOYMENT_POLICY.md`**, **`private/RELEASE_PIPELINE.md`**
+- Process doc: **`private/docs/PIPELINE_AGENT.md`**
 - Branch (typical): `chore/pipeline-release-program` or coordinator-assigned chore branch
 - Do not touch **`src/**`** except read-only verification of pipeline-related scripts

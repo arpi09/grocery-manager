@@ -1,5 +1,5 @@
 ---
-description: Complexity agent — read-only scans, maintain COMPLEXITY_REPORT.md
+description: Complexity agent — read-only scans, maintain private/COMPLEXITY_REPORT.md
 alwaysApply: false
 ---
 
@@ -14,8 +14,8 @@ Continuously monitor codebase complexity and identify areas that slow future dev
 ## Allowed without explicit assignment
 
 - Read-only analysis of `src/**`, config, CI, and coordination docs
-- Create or refresh **`COMPLEXITY_REPORT.md`** at repo root with real findings
-- Update process doc **`docs/COMPLEXITY_REPORT.md`** and coordination rows in `OWNERSHIP.md` when asked
+- Create or refresh **`private/COMPLEXITY_REPORT.md`** with real findings
+- Update process doc **`private/docs/COMPLEXITY_REPORT.md`** and coordination rows in `private/OWNERSHIP.md` when asked
 - Summarize top hotspots in chat each run (prioritize severity and merge risk)
 
 ## Forbidden unless explicitly assigned
@@ -39,7 +39,7 @@ Scan and report on:
 | **Duplicated patterns** | Modal/viewport logic, API auth checks, OpenAI route boilerplate, form action error mapping |
 | **Coupling** | `hooks.server.ts`, `app.d.ts`, `di.ts`, schema, shared nav/layout |
 | **Frequently changed files** | `git log --since`, `git shortlog`, or coordinator docs when git unavailable |
-| **Agent-touch hotspots** | Paths in `OWNERSHIP.md` shared areas |
+| **Agent-touch hotspots** | Paths in `private/OWNERSHIP.md` shared areas |
 | **Deep dependency chains** | `routes` → `locals` → `di` → repositories → `db` |
 | **Conflict-prone areas** | Migrations, `package-lock.json`, global CSS, modal/nav, Firebase deploy |
 
@@ -54,12 +54,12 @@ Scan and report on:
    git log --since="6 months ago" --name-only --pretty=format: | sort | uniq -c | sort -rn | head -30
    git log --oneline -- src/lib/infrastructure/db/init.ts
    ```
-6. Update **`COMPLEXITY_REPORT.md`**: summary table, ≥10 detailed findings, recommended refactors, coordinator notes; set **Last scanned** (ISO date).
+6. Update **`private/COMPLEXITY_REPORT.md`**: summary table, ≥10 detailed findings, recommended refactors, coordinator notes; set **Last scanned** (ISO date).
 7. Report **top 3 hotspots** in chat with severity and suggested coordinator action.
 
 ## Output contract
 
-Maintain **`COMPLEXITY_REPORT.md`** at repo root using this structure exactly:
+Maintain **`private/COMPLEXITY_REPORT.md`** using this structure exactly:
 
 ```markdown
 # COMPLEXITY_REPORT.md
@@ -86,11 +86,11 @@ Severity: **low** / **medium** / **high** — justify honestly from size, coupli
 | Hotspots | Top 10 table ranked by future friction |
 | Findings | 10–15+ detailed entries across layers |
 | Refactors | Coordinator-prioritized; agent does not implement |
-| Coordinator notes | Overlap with `OWNERSHIP.md` shared areas |
+| Coordinator notes | Overlap with `private/OWNERSHIP.md` shared areas |
 
 ## Ownership
 
-- Primary artifact: **`COMPLEXITY_REPORT.md`**
-- Process doc: **`docs/COMPLEXITY_REPORT.md`**
+- Primary artifact: **`private/COMPLEXITY_REPORT.md`**
+- Process doc: **`private/docs/COMPLEXITY_REPORT.md`**
 - Branch (typical): `chore/complexity-agent-program` or coordinator-assigned chore branch
 - Do not touch **`src/**`** except read-only search and line-count scripts

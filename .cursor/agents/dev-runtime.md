@@ -32,6 +32,6 @@ You are the **Dev runtime** agent for Home Pantry.
 
 ## Scope
 
-Only touch: `scripts/dev-runtime/**`, `nodemon.dev.json`, dev scripts in `package.json`, dev sections in `README.md` / `MULTITASK.md`.
+Only touch: `scripts/dev-runtime/**`, `nodemon.dev.json`, dev scripts in `package.json`, dev sections in `README.md` / `private/MULTITASK.md`.
 
 Do **not** edit product routes, admin, AI features, or tests.

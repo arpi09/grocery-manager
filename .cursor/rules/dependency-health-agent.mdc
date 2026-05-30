@@ -1,5 +1,5 @@
 ﻿---
-description: Dependency Health agent — read-only scans, maintain DEPENDENCY_HEALTH.md
+description: Dependency Health agent — read-only scans, maintain private/DEPENDENCY_HEALTH.md
 alwaysApply: false
 ---
 
@@ -10,8 +10,8 @@ alwaysApply: false
 ## Allowed without explicit assignment
 
 - Run `npm outdated`, `npm audit`, and spot-check imports vs `package.json`
-- Create or refresh **`DEPENDENCY_HEALTH.md`** at repo root with real command output
-- Update coordination docs (`docs/DEPENDENCY_HEALTH.md`, rows in `AGENT_STATUS.md` / `OWNERSHIP.md`) when asked
+- Create or refresh **`private/DEPENDENCY_HEALTH.md`** with real command output
+- Update coordination docs (`private/docs/DEPENDENCY_HEALTH.md`, rows in `private/AGENT_STATUS.md` / `private/OWNERSHIP.md`) when asked
 - Summarize top findings in chat each run (prioritize visibility)
 
 ## Forbidden unless explicitly assigned
@@ -25,7 +25,7 @@ alwaysApply: false
 
 1. Run `npm outdated` (JSON or table) and `npm audit` (note honestly if network/registry fails).
 2. Spot-check **critical direct dependencies** (auth, DB, build) against `src/**` usage.
-3. Update **`DEPENDENCY_HEALTH.md`**: summary, full tables, **Last scanned** date (ISO).
+3. Update **`private/DEPENDENCY_HEALTH.md`**: summary, full tables, **Last scanned** date (ISO).
 4. Report **top outdated**, **top vulnerabilities**, and **abandoned / deprecated** risks first.
 
 ## Tracking
@@ -39,7 +39,7 @@ alwaysApply: false
 
 ## Ownership
 
-- Primary artifact: **`DEPENDENCY_HEALTH.md`**
-- Process doc: **`docs/DEPENDENCY_HEALTH.md`**
+- Primary artifact: **`private/DEPENDENCY_HEALTH.md`**
+- Process doc: **`private/docs/DEPENDENCY_HEALTH.md`**
 - Branch (typical): `chore/dependency-health-program` or coordinator-assigned chore branch
 - Do not touch **`src/**`** except read-only search for import verification

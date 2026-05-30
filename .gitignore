@@ -22,3 +22,23 @@ firebase-debug.*.log
 .firebase/
 
 node_modules.broken*
+
+# Internal / security documentation (local + coordinator only)
+SECURITY_REPORT.md
+SECURITY_DEPLOYMENT_CHECKLIST.md
+DEPLOYMENT_POLICY.md
+RELEASE_PIPELINE.md
+AGENT_MAP.md
+COMPLEXITY_REPORT.md
+DEPENDENCY_HEALTH.md
+MERGE_QUEUE.md
+OWNERSHIP.md
+DELIVERY_METRICS.md
+AGENT_STATUS.md
+MULTITASK.md
+docs/SECURITY_AGENT.md
+docs/PIPELINE_AGENT.md
+docs/COMPLEXITY_REPORT.md
+docs/DEPENDENCY_HEALTH.md
+docs/DELIVERY_METRICS.md
+private/
