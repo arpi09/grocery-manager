@@ -24,6 +24,7 @@ export function bindSubmittingWithRedirect(
 		return async ({ result, update }) => {
 			setSubmitting(false);
 			if (result.type === 'redirect') {
+				await update({ invalidateAll: true });
 				await onRedirect(result.location);
 				return;
 			}

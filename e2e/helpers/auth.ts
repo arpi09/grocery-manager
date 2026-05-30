@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+﻿import { expect, type Page } from '@playwright/test';
 import { LOCALE_COOKIE_NAME, LOCALE_STORAGE_KEY } from '../../src/lib/i18n/locale';
 
 const ONBOARDING_VERSION_KEY = 'home-pantry-onboarding-version';
@@ -70,7 +70,7 @@ async function fillBoundInput(input: import('@playwright/test').Locator, value: 
 }
 
 export async function dismissOnboardingModalIfOpen(page: Page) {
-	const skip = page.getByRole('button', { name: 'Hoppa ?ver' });
+	const skip = page.getByRole('button', { name: /Hoppa/i });
 	if (await skip.isVisible().catch(() => false)) {
 		await skip.click();
 		await expect(skip).toBeHidden({ timeout: 5_000 });
@@ -93,7 +93,7 @@ export async function loginAsAdmin(page: Page) {
 	await fillBoundInput(passwordInput, password);
 
 	await Promise.all([
-		page.waitForURL((url) => url.pathname !== '/login', { timeout: 20_000 }),
+		page.waitForURL((url) => url.pathname === '/hem', { timeout: 20_000, waitUntil: 'commit' }),
 		page.getByTestId('login-submit').click()
 	]);
 
@@ -103,7 +103,7 @@ export async function loginAsAdmin(page: Page) {
 }
 
 function appNavigation(page: Page) {
-	return page.getByRole('navigation', { name: /Prim?r|Mobil/i });
+	return page.getByRole('navigation', { name: /Prim/i });
 }
 
 export async function openMoreNav(page: Page) {

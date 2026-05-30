@@ -7,7 +7,7 @@ test.describe('Authentication', () => {
 		await page.goto('/');
 		await expect(page).toHaveURL('/');
 		await expect(page.getByRole('heading', { level: 1 })).toContainText(/Skanna/i);
-		await expect(page.getByRole('link', { name: 'Logga in' })).toBeVisible();
+		await expect(page.getByRole('banner').getByRole('link', { name: 'Logga in' })).toBeVisible();
 	});
 
 	test('admin can sign in and reach home', async ({ page }) => {

@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { goto } from '$app/navigation';
-	import Button from '$lib/components/atoms/Button.svelte';
+		import Button from '$lib/components/atoms/Button.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import FormField from '$lib/components/molecules/FormField.svelte';
 	import TurnstileWidget from '$lib/components/molecules/TurnstileWidget.svelte';
-	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
+	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -29,10 +28,7 @@
 	method="POST"
 	action="?/register"
 	class="form"
-	use:enhance={bindSubmittingWithRedirect(
-		(v) => (submitting = v),
-		(location) => goto(location, { invalidateAll: true })
-	)}
+	use:enhance={bindSubmitting((v) => (submitting = v))}
 >
 	{#if message}
 		<FeedbackBanner tone="error" message={message} />
