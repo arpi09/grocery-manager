@@ -1,11 +1,6 @@
-import { fail, redirect } from '@sveltejs/kit';
-import {
-	AlreadyMemberError,
-	InviteEmailMismatchError,
-	InviteExpiredError,
-	InviteNotFoundError,
-	InviteNotPendingError
-} from '$lib/application/household.service';
+import { redirect } from '@sveltejs/kit';
+import { InviteNotFoundError } from '$lib/application/household.service';
+import { mapHouseholdErrorToFail } from '$lib/application/household-errors';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals, url }) => {
@@ -43,19 +38,6 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 	};
 };
 
-function acceptError(error: unknown) {
-	if (error instanceof InviteNotFoundError) {
-		return fail(404, { acceptError: error.message });
-	}
-	if (error instanceof InviteNotPendingError || error instanceof InviteExpiredError) {
-		return fail(400, { acceptError: error.message });
-	}
-	if (error instanceof InviteEmailMismatchError || error instanceof AlreadyMemberError) {
-		return fail(400, { acceptError: error.message });
-	}
-	throw error;
-}
-
 export const actions: Actions = {
 	accept: async ({ params, locals }) => {
 		if (!locals.user) {
@@ -69,7 +51,7 @@ export const actions: Actions = {
 				locals.user.email
 			);
 		} catch (error) {
-			return acceptError(error);
+			return mapHouseholdErrorToFail(error, 'acceptError');
 		}
 
 		redirect(302, '/');

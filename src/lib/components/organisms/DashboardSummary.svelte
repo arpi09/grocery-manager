@@ -141,23 +141,24 @@
 	}
 
 	.scan-link {
+		background: var(--color-primary);
+		color: #fff;
+		border: none;
+	}
+
+	.scan-link:hover {
+		background: var(--color-primary-hover);
+		text-decoration: none;
+	}
+
+	.add-link {
 		border: 1px solid var(--color-primary);
 		color: var(--color-primary);
 		background: var(--color-surface);
 	}
 
-	.scan-link:hover {
-		background: var(--color-surface-muted);
-		text-decoration: none;
-	}
-
-	.add-link {
-		background: var(--color-primary);
-		color: #fff;
-	}
-
 	.add-link:hover {
-		background: var(--color-primary-hover);
+		background: var(--color-surface-muted);
 		text-decoration: none;
 	}
 </style>

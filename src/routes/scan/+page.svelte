@@ -2,31 +2,31 @@
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
+	import ScanModeHub from '$lib/components/molecules/ScanModeHub.svelte';
 	import ScanToAddFlow from '$lib/components/organisms/ScanToAddFlow.svelte';
 
 	let { data, form } = $props();
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title="Skanna" subtitle="Lägg till vara med streckkod" />
+	<AppHeader title="Skanna" subtitle="Välj hur du vill lägga till varor" />
 	<PageContainer>
+		{#if data.canWrite}
+			<ScanModeHub returnTo={data.returnTo} defaultLocation={data.defaultLocation} />
+		{/if}
 		{#if !data.canWrite}
 			<p class="readonly" role="status">
 				Du har endast läsbehörighet i detta hushåll och kan inte lägga till varor.
 			</p>
 		{:else}
-			<ScanToAddFlow
-				defaultLocation={data.defaultLocation}
-				returnTo={data.returnTo}
-				errors={form?.errors}
-			/>
-		{/if}
-		{#if data.canWrite}
-			<p class="alt">
-				<a href="/scan/kvitto?from={encodeURIComponent(data.returnTo)}">🧾 Skanna kvitto</a>
-				·
-				<a href="/scan/snabbstart?from={encodeURIComponent(data.returnTo)}">Snabbstart</a>
-			</p>
+			<section class="barcode-section" aria-labelledby="barcode-scan-heading">
+				<h2 id="barcode-scan-heading">Streckkod</h2>
+				<ScanToAddFlow
+					defaultLocation={data.defaultLocation}
+					returnTo={data.returnTo}
+					errors={form?.errors}
+				/>
+			</section>
 		{/if}
 		<p class="back">
 			<a href={data.returnTo}>← Tillbaka</a>
@@ -43,14 +43,13 @@
 		color: var(--color-text-muted);
 	}
 
-	.alt {
-		margin: var(--space-lg) 0 0;
-		font-size: 0.9rem;
+	.barcode-section {
+		margin-top: var(--space-lg);
 	}
 
-	.alt a {
-		color: var(--color-primary);
-		font-weight: 600;
+	.barcode-section h2 {
+		margin: 0 0 var(--space-md);
+		font-size: 1.1rem;
 	}
 
 	.back {

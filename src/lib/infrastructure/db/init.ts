@@ -147,7 +147,10 @@ export function getDatabaseBackend(): DatabaseBackend {
 
 /** Full schema â€” only on a new PGlite data directory. */
 const PGlite_BASELINE_MIGRATION = '0000_init.sql';
-/** Safe to re-run on every startup (uses IF NOT EXISTS). */
+/**
+ * Safe to re-run on every startup (uses IF NOT EXISTS).
+ * Drizzle journal has no `0009_*` tag (sequence jumps 0008 → 0010_active_household).
+ */
 const PGlite_INCREMENTAL_MIGRATIONS = [
 	'0001_user_role.sql',
 	'0002_user_last_seen.sql',

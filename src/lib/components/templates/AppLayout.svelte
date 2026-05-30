@@ -3,6 +3,10 @@
 	import { page } from '$app/state';
 	import MainNav from '$lib/components/organisms/MainNav.svelte';
 	import RecipeAssistant from '$lib/components/organisms/RecipeAssistant.svelte';
+	import ScanFab from '$lib/components/molecules/ScanFab.svelte';
+	import InventoryScanToast from '$lib/components/molecules/InventoryScanToast.svelte';
+	import { canEditInventory } from '$lib/domain/household';
+	import { isStorageLocation } from '$lib/domain/location';
 	import type { NavUser } from '$lib/navigation/nav-config';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
 
@@ -20,6 +24,26 @@
 		(page.data.activeHousehold ?? null) as { id: string; name: string } | null
 	);
 
+	const canWrite = $derived(
+		page.data.householdRole ? canEditInventory(page.data.householdRole) : false
+	);
+
+	const showScanFab = $derived.by(() => {
+		if (!canWrite || page.url.pathname.startsWith('/scan')) {
+			return false;
+		}
+		return page.url.pathname === '/' || page.url.pathname.startsWith('/inventory/');
+	});
+
+	const scanFabHref = $derived.by(() => {
+		const from = encodeURIComponent(`${page.url.pathname}${page.url.search}`);
+		const inventoryMatch = page.url.pathname.match(/^\/inventory\/([^/]+)$/);
+		if (inventoryMatch && isStorageLocation(inventoryMatch[1])) {
+			return `/scan?location=${inventoryMatch[1]}&from=${from}`;
+		}
+		return `/scan?from=${from}`;
+	});
+
 	function openRecipeIdeas() {
 		recipeOpen = true;
 	}
@@ -30,6 +54,10 @@
 	<main>
 		{@render children()}
 	</main>
+	<InventoryScanToast />
+	{#if showScanFab}
+		<ScanFab {canWrite} href={scanFabHref} />
+	{/if}
 	<RecipeAssistant bind:open={recipeOpen} />
 </div>
 

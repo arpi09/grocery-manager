@@ -1,10 +1,7 @@
 import { Buffer } from 'node:buffer';
 import { json } from '@sveltejs/kit';
-import {
-	getOpenAiApiKey,
-	missingOpenAiKeyMessage,
-	requestStructuredJsonFromImage
-} from '$lib/server/openai';
+import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
+import { requestStructuredJsonFromImage } from '$lib/server/openai';
 import type { RequestHandler } from './$types';
 
 const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
@@ -73,17 +70,16 @@ function parseProduct(raw: unknown): ImageProduct | null {
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
-		if (!locals.user) {
-			return json({ error: 'Unauthorized' }, { status: 401 });
+		const auth = requireUser(locals);
+		if (!auth.authorized) {
+			return auth.response;
 		}
 
-		const apiKey = getOpenAiApiKey();
-		if (!apiKey) {
-			return json(
-				{ error: missingOpenAiKeyMessage('photo product scan') },
-				{ status: 503 }
-			);
+		const apiKeyOrResponse = requireOpenAiKey('photo product scan', 503);
+		if (typeof apiKeyOrResponse !== 'string') {
+			return apiKeyOrResponse;
 		}
+		const apiKey = apiKeyOrResponse;
 
 		const formData = await request.formData();
 		const image = formData.get('image');

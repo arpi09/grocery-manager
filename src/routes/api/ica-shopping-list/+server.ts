@@ -5,7 +5,8 @@ import {
 	formatRecipeIdeaLines,
 	upcomingDateRange
 } from '$lib/server/inventory-context';
-import { getOpenAiApiKey, missingOpenAiKeyMessage, requestStructuredJson } from '$lib/server/openai';
+import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
+import { requestStructuredJson } from '$lib/server/openai';
 import type { RequestHandler } from './$types';
 
 const ICA_CATEGORIES = [
@@ -92,14 +93,16 @@ function parseNote(input: unknown): string | null {
 }
 
 export const POST: RequestHandler = async ({ request, locals }) => {
-	if (!locals.user) {
-		return json({ error: 'Unauthorized' }, { status: 401 });
+	const auth = requireUser(locals);
+	if (!auth.authorized) {
+		return auth.response;
 	}
 
-	const apiKey = getOpenAiApiKey();
-	if (!apiKey) {
-		return json({ error: missingOpenAiKeyMessage('ICA shopping list') }, { status: 500 });
+	const apiKeyOrResponse = requireOpenAiKey('ICA shopping list');
+	if (typeof apiKeyOrResponse !== 'string') {
+		return apiKeyOrResponse;
 	}
+	const apiKey = apiKeyOrResponse;
 
 	const body = (await request.json().catch(() => ({}))) as {
 		preferences?: unknown;
@@ -115,8 +118,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const inventory = await locals.inventoryService.listAll(locals.householdId!);
 	const { fromDate, toDate } = upcomingDateRange(10);
 	const [plannedMeals, recipeIdeas] = await Promise.all([
-		locals.mealPlanService.listPlannedMealsByRange(locals.user.id, fromDate, toDate),
-		locals.mealPlanService.listRecipeIdeas(locals.user.id, 8)
+		locals.mealPlanService.listPlannedMealsByRange(auth.user.id, fromDate, toDate),
+		locals.mealPlanService.listRecipeIdeas(auth.user.id, 8)
 	]);
 
 	const userPrompt = [

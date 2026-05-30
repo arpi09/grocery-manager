@@ -15,6 +15,7 @@
 		type NavUser
 	} from '$lib/navigation/nav-config';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
+	import { subscribeNarrowViewport } from '$lib/utils/use-narrow-viewport';
 
 	interface Props {
 		user: (NavUser & { email: string }) | null;
@@ -37,18 +38,9 @@
 	let moreOpen = $state(false);
 	let isNarrowViewport = $state(false);
 
-	$effect(() => {
-		if (typeof window === 'undefined') {
-			return;
-		}
-		const mq = window.matchMedia('(max-width: 899px)');
-		const sync = () => {
-			isNarrowViewport = mq.matches;
-		};
-		sync();
-		mq.addEventListener('change', sync);
-		return () => mq.removeEventListener('change', sync);
-	});
+	$effect(() => subscribeNarrowViewport((matches) => {
+		isNarrowViewport = matches;
+	}));
 
 	const moreActive = $derived(
 		secondary.some((item) => isNavActive(pathname, item)) ||
@@ -93,7 +85,7 @@
 		{#if moreOpen && !isNarrowViewport}
 			<button
 				type="button"
-				class="desktop-more-backdrop modal-scrim"
+				class="desktop-more-backdrop nav-dropdown-scrim"
 				aria-label="Stäng meny"
 				onclick={closeMore}
 			></button>
@@ -264,6 +256,8 @@
 	}
 
 	.top-brand-row {
+		position: relative;
+		z-index: 1;
 		display: flex;
 		align-items: center;
 		gap: var(--space-sm);
@@ -297,6 +291,8 @@
 	}
 
 	.desktop-nav {
+		position: relative;
+		z-index: 1;
 		flex: 1;
 		min-width: 0;
 	}
@@ -322,7 +318,7 @@
 	.desktop-more-backdrop {
 		position: fixed;
 		inset: 0;
-		z-index: 85;
+		z-index: 0;
 		border: 0;
 		cursor: default;
 	}
@@ -353,6 +349,8 @@
 	}
 
 	.top-actions {
+		position: relative;
+		z-index: 1;
 		display: flex;
 		align-items: center;
 		gap: var(--space-sm);

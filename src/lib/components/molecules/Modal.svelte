@@ -1,4 +1,5 @@
 <script lang="ts">
+	/** Shared modal primitive — frozen API; see docs/MODAL_CONTRACT.md before changing behavior. */
 	import { portal } from '$lib/actions/portal';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import {

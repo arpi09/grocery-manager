@@ -4,15 +4,29 @@
 		description: string;
 		actionLabel: string;
 		actionHref: string;
+		secondaryActionLabel?: string;
+		secondaryActionHref?: string;
 	}
 
-	let { title, description, actionLabel, actionHref }: Props = $props();
+	let {
+		title,
+		description,
+		actionLabel,
+		actionHref,
+		secondaryActionLabel,
+		secondaryActionHref
+	}: Props = $props();
 </script>
 
 <div class="empty">
 	<h2>{title}</h2>
 	<p>{description}</p>
-	<a class="action" href={actionHref}>{actionLabel}</a>
+	<div class="actions">
+		<a class="action action-primary" href={actionHref}>{actionLabel}</a>
+		{#if secondaryActionLabel && secondaryActionHref}
+			<a class="action action-secondary" href={secondaryActionHref}>{secondaryActionLabel}</a>
+		{/if}
+	</div>
 </div>
 
 <style>
@@ -34,17 +48,37 @@
 		color: var(--color-text-muted);
 	}
 
+	.actions {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--space-sm);
+	}
+
 	.action {
 		display: inline-flex;
 		padding: 0.65rem 1.1rem;
-		background: var(--color-primary);
-		color: #fff;
 		font-weight: 600;
 		border-radius: var(--radius-sm);
 		text-decoration: none;
 	}
 
-	.action:hover {
+	.action-primary {
+		background: var(--color-primary);
+		color: #fff;
+	}
+
+	.action-primary:hover {
 		background: var(--color-primary-hover);
+	}
+
+	.action-secondary {
+		background: var(--color-surface);
+		color: var(--color-primary);
+		border: 1px solid var(--color-primary);
+	}
+
+	.action-secondary:hover {
+		background: var(--color-surface-muted);
 	}
 </style>

@@ -30,6 +30,8 @@
 	--z-modal-nested: 110;
 	--modal-scrim: color-mix(in srgb, var(--color-text) 42%, transparent);
 	--modal-scrim-blur: 8px;
+	/* Nav flyouts: dim page only — no blur (dropdown ≠ modal) */
+	--nav-dropdown-scrim: color-mix(in srgb, var(--color-text) 20%, transparent);
 }
 
 html[data-theme='dark'] {
@@ -113,6 +115,18 @@ textarea {
 
 @media (prefers-reduced-motion: reduce) {
 	.modal-scrim {
+		animation: none;
+	}
+}
+
+/* Nav dropdown dismiss layer — below header, dim only */
+.nav-dropdown-scrim {
+	background: var(--nav-dropdown-scrim);
+	animation: modal-scrim-in 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.nav-dropdown-scrim {
 		animation: none;
 	}
 }

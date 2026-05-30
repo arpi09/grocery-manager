@@ -1,9 +1,6 @@
 import { json } from '@sveltejs/kit';
-import {
-	getOpenAiApiKey,
-	missingOpenAiKeyMessage,
-	requestStructuredJson
-} from '$lib/server/openai';
+import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
+import { requestStructuredJson } from '$lib/server/openai';
 import {
 	parseRecipeSuggestions,
 	RECIPE_SUGGESTIONS_SCHEMA
@@ -14,14 +11,16 @@ const PARSE_ERROR_MESSAGE =
 	'Kunde inte tolka receptförslagen från AI. Försök igen om en stund.';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
-	if (!locals.user) {
-		return json({ error: 'Unauthorized' }, { status: 401 });
+	const auth = requireUser(locals);
+	if (!auth.authorized) {
+		return auth.response;
 	}
 
-	const apiKey = getOpenAiApiKey();
-	if (!apiKey) {
-		return json({ error: missingOpenAiKeyMessage('recipe suggestions') }, { status: 500 });
+	const apiKeyOrResponse = requireOpenAiKey('recipe suggestions');
+	if (typeof apiKeyOrResponse !== 'string') {
+		return apiKeyOrResponse;
 	}
+	const apiKey = apiKeyOrResponse;
 
 	const body = (await request.json().catch(() => ({}))) as { preferences?: unknown };
 	const preferences = typeof body.preferences === 'string' ? body.preferences.trim().slice(0, 300) : '';
@@ -80,7 +79,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: PARSE_ERROR_MESSAGE }, { status: 422 });
 	}
 
-	const savedIdeas = await locals.mealPlanService.storeGeneratedIdeas(locals.user.id, recipes);
+	const savedIdeas = await locals.mealPlanService.storeGeneratedIdeas(auth.user.id, recipes);
 
 	return json({ recipes: savedIdeas });
 };

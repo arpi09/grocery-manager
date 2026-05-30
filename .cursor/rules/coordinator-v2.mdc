@@ -8,6 +8,7 @@ alwaysApply: false
 - **Merge order:** Read and update [MERGE_QUEUE.md](../../MERGE_QUEUE.md) before starting or merging feature work.
 - **Live status:** [AGENT_STATUS.md](../../AGENT_STATUS.md) — active slots, blockers, base SHA.
 - **Ownership:** [OWNERSHIP.md](../../OWNERSHIP.md) — shared areas; one agent per hot zone.
+- **Complexity:** [COMPLEXITY_REPORT.md](../../COMPLEXITY_REPORT.md) — structural hotspots; refresh via [complexity-agent.mdc](./complexity-agent.mdc) (read-only, no auto-refactors).
 
 ## Rules
 

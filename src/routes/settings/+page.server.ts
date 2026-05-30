@@ -1,12 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
-import {
-	AlreadyMemberError,
-	HouseholdForbiddenError,
-	InviteNotFoundError,
-	LastOwnerError,
-	MemberNotFoundError,
-	PendingInviteExistsError
-} from '$lib/application/household.service';
+import { mapHouseholdErrorToFail } from '$lib/application/household-errors';
 import { isHouseholdOwner } from '$lib/domain/household';
 import {
 	createHouseholdInviteSchema,
@@ -43,25 +36,6 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		pendingInvites
 	};
 };
-
-function householdActionError(error: unknown) {
-	if (error instanceof HouseholdForbiddenError) {
-		return fail(403, { householdError: error.message });
-	}
-	if (error instanceof AlreadyMemberError) {
-		return fail(400, { householdError: error.message });
-	}
-	if (error instanceof PendingInviteExistsError) {
-		return fail(400, { householdError: error.message });
-	}
-	if (error instanceof LastOwnerError) {
-		return fail(400, { householdError: error.message });
-	}
-	if (error instanceof MemberNotFoundError || error instanceof InviteNotFoundError) {
-		return fail(404, { householdError: error.message });
-	}
-	throw error;
-}
 
 export const actions: Actions = {
 	togglePets: async ({ request, locals }) => {
@@ -129,7 +103,7 @@ export const actions: Actions = {
 			const inviteLink = `${url.origin}/invite/${token}`;
 			return { inviteLink };
 		} catch (error) {
-			return householdActionError(error);
+			return mapHouseholdErrorToFail(error);
 		}
 	},
 	revokeInvite: async ({ request, locals }) => {
@@ -149,7 +123,7 @@ export const actions: Actions = {
 				parsed.data.inviteId
 			);
 		} catch (error) {
-			return householdActionError(error);
+			return mapHouseholdErrorToFail(error);
 		}
 
 		redirect(302, '/settings');
@@ -173,7 +147,7 @@ export const actions: Actions = {
 				parsed.data.role
 			);
 		} catch (error) {
-			return householdActionError(error);
+			return mapHouseholdErrorToFail(error);
 		}
 
 		redirect(302, '/settings');
@@ -195,7 +169,7 @@ export const actions: Actions = {
 				parsed.data.userId
 			);
 		} catch (error) {
-			return householdActionError(error);
+			return mapHouseholdErrorToFail(error);
 		}
 
 		redirect(302, '/settings');

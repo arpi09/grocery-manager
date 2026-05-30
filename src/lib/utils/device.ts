@@ -1,3 +1,6 @@
+/** Scan/mobile layout breakpoint — not used for MainNav/PantrySwitcher (see `NAV_NARROW_MAX_PX`). */
+export const MOBILE_MAX_WIDTH_PX = 768;
+
 /** True when the app is running in a browser context. */
 export function isBrowser(): boolean {
 	return typeof window !== 'undefined';
@@ -23,7 +26,7 @@ export function isMobileDevice(): boolean {
 	}
 
 	return (
-		window.matchMedia('(max-width: 768px)').matches &&
+		window.matchMedia(`(max-width: ${MOBILE_MAX_WIDTH_PX}px)`).matches &&
 		(navigator.maxTouchPoints > 0 || 'ontouchstart' in window)
 	);
 }

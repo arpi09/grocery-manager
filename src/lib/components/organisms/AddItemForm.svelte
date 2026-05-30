@@ -5,7 +5,9 @@
 	import Input from '$lib/components/atoms/Input.svelte';
 	import BarcodeScanButton from '$lib/components/molecules/BarcodeScanButton.svelte';
 	import BarcodeScannerModal from '$lib/components/organisms/BarcodeScannerModal.svelte';
-		import { LOCATIONS, LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
+	import ProductPhotoScanPicker from '$lib/components/molecules/ProductPhotoScanPicker.svelte';
+	import { consumePhotoScanPrefill } from '$lib/utils/photo-scan-prefill';
+	import { LOCATIONS, LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
 	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 
@@ -62,7 +64,7 @@
 				scanMessage =
 					response.status === 400
 						? 'Ogiltig streckkod. Ange minst 8 siffror.'
-						: 'Kunde inte slÃ¥ upp streckkoden. FÃ¶rsÃ¶k igen eller fyll i manuellt.';
+						: 'Kunde inte slå upp streckkoden. Försök igen eller fyll i manuellt.';
 				return;
 			}
 
@@ -75,73 +77,25 @@
 			}
 			scanMessage = found
 				? `Hittade ${product.name} (${product.barcode}).`
-				: `OkÃ¤nd streckkod â€“ fyllde i "${product.name}". Justera vid behov.`;
+				: `Okänd streckkod – fyllde i "${product.name}". Justera vid behov.`;
 		} catch {
-			scanMessage = 'NÃ¤tverksfel vid uppslagning av produkten.';
+			scanMessage = 'Nätverksfel vid uppslagning av produkten.';
 		} finally {
 			lookupLoading = false;
 		}
 	}
 
-	function triggerPhotoPicker() {
-		scanMessage = null;
-		photoInputEl?.click();
-	}
-
-	async function handlePhotoSelected(event: Event) {
-		const input = event.currentTarget as HTMLInputElement;
-		const file = input.files?.[0];
-		if (!file) {
-			return;
-		}
-
-		imageLookupLoading = true;
-		scanMessage = null;
-
-		try {
-			const formData = new FormData();
-			formData.append('image', file);
-
-			const response = await fetch('/api/product-from-image', {
-				method: 'POST',
-				body: formData
-			});
-
-			const data = (await response.json()) as {
-				error?: string;
-				product?: {
-					name: string;
-					quantity: string;
-					unit: string | null;
-					notes: string | null;
-					confidence: 'high' | 'medium' | 'low';
-				};
-			};
-
-			if (!response.ok || !data.product) {
-				scanMessage = data.error ?? 'Could not read the product from this photo.';
-				return;
-			}
-
-			name = data.product.name;
-			quantity = data.product.quantity || '1';
-			unit = data.product.unit ?? '';
-			if (data.product.notes) {
-				notes = notes ? `${notes}\n${data.product.notes}` : data.product.notes;
-			}
-
-			const confidenceLabel =
-				data.product.confidence === 'high'
-					? 'high'
-					: data.product.confidence === 'medium'
-						? 'medium'
-						: 'low';
-			scanMessage = `Filled fields from product photo (confidence: ${confidenceLabel}). Please review before saving.`;
-		} catch {
-			scanMessage = 'Network error while analyzing the photo.';
-		} finally {
-			imageLookupLoading = false;
-			input.value = '';
+	function handlePhotoProduct(product: {
+		name: string;
+		quantity: string;
+		unit: string | null;
+		notes: string | null;
+	}) {
+		name = product.name;
+		quantity = product.quantity || '1';
+		unit = product.unit ?? '';
+		if (product.notes) {
+			notes = notes ? `${notes}\n${product.notes}` : product.notes;
 		}
 	}
 </script>
@@ -149,51 +103,28 @@
 <form method="POST" action={isEdit ? '?/save' : '?/create'} class="form">
 	{#if !isEdit}
 		<div class="barcode-row">
-			<div class="scan-title-row">
-				<p class="scan-title">Choose scan mode</p>
-				<span class="ai-badge">NEW: ChatGPT Vision</span>
-			</div>
-			<div class="scan-method-tabs" role="tablist" aria-label="Scan method">
+			<p class="scan-title">Hur vill du fylla i varan?</p>
+			<div class="scan-method-tabs" role="tablist" aria-label="Skanningsläge">
 				<button
 					type="button"
 					class="scan-tab {scanMethod === 'barcode' ? 'active' : ''}"
 					onclick={() => (scanMethod = 'barcode')}
 				>
-					Barcode
+					Streckkod
 				</button>
 				<button
 					type="button"
-					class="scan-tab scan-tab-ai {scanMethod === 'photo' ? 'active' : ''}"
+					class="scan-tab {scanMethod === 'photo' ? 'active' : ''}"
 					onclick={() => (scanMethod = 'photo')}
 				>
-					ChatGPT AI Scan
+					Foto
 				</button>
 			</div>
 
 			{#if scanMethod === 'barcode'}
 				<BarcodeScanButton onclick={openScanner} loading={lookupLoading} />
 			{:else}
-				<Button
-					type="button"
-					variant="primary"
-					class="scan-btn ai-scan-btn"
-					disabled={imageLookupLoading}
-					onclick={triggerPhotoPicker}
-				>
-					{imageLookupLoading ? 'Analyzing with ChatGPT AI...' : 'ðŸ“¸ Scan with ChatGPT AI'}
-				</Button>
-				<input
-					bind:this={photoInputEl}
-					type="file"
-					accept="image/*"
-					capture="environment"
-					class="sr-input"
-					onchange={handlePhotoSelected}
-				/>
-				<p class="scan-help">
-					Take a clear photo of the product label and ChatGPT Vision will prefill item details for
-					you.
-				</p>
+				<ProductPhotoScanPicker onProduct={handlePhotoProduct} />
 			{/if}
 		</div>
 		{#if scanMessage}
@@ -202,7 +133,7 @@
 	{/if}
 
 	<div class="field name-field">
-		<Label for="name">Name</Label>
+		<Label for="name">Namn</Label>
 		<Input id="name" name="name" bind:value={name} error={!!errors.name} required />
 		{#if errors.name}
 			<p class="error">{errors.name[0]}</p>
@@ -210,7 +141,7 @@
 	</div>
 
 	<div class="field">
-		<Label for="location">Location</Label>
+		<Label for="location">Plats</Label>
 		<select id="location" name="location" class="select" bind:value={location}>
 			{#each LOCATIONS as loc}
 				<option value={loc}>{LOCATION_LABELS[loc]}</option>
@@ -223,7 +154,7 @@
 
 	<div class="row">
 		<div class="field">
-			<Label for="quantity">Quantity</Label>
+			<Label for="quantity">Mängd</Label>
 			<Input
 				id="quantity"
 				name="quantity"
@@ -238,26 +169,26 @@
 			{/if}
 		</div>
 		<div class="field">
-			<Label for="unit">Unit</Label>
-			<Input id="unit" name="unit" placeholder="pcs, g, Lâ€¦" bind:value={unit} />
+			<Label for="unit">Enhet</Label>
+			<Input id="unit" name="unit" placeholder="st, g, L…" bind:value={unit} />
 		</div>
 	</div>
 
 	<div class="field">
-		<Label for="expiresOn">Expires on (optional)</Label>
+		<Label for="expiresOn">Bäst före (valfritt)</Label>
 		<Input id="expiresOn" name="expiresOn" type="date" value={item?.expiresOn ?? ''} />
 	</div>
 
 	<div class="field">
-		<Label for="notes">Notes (optional)</Label>
+		<Label for="notes">Anteckningar (valfritt)</Label>
 		<textarea id="notes" name="notes" class="textarea" rows="3" bind:value={notes}></textarea>
 	</div>
 
 
 	<div class="actions">
-		<Button type="submit" fullWidth>{isEdit ? 'Save changes' : 'Add item'}</Button>
+		<Button type="submit" fullWidth>{isEdit ? 'Spara ändringar' : 'Lägg till vara'}</Button>
 		{#if isEdit}
-			<Button type="submit" formaction="?/delete" variant="danger" fullWidth>Delete item</Button>
+			<Button type="submit" formaction="?/delete" variant="danger" fullWidth>Ta bort vara</Button>
 		{/if}
 	</div>
 </form>
@@ -285,28 +216,11 @@
 		gap: var(--space-sm);
 	}
 
-	.scan-title-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-sm);
-	}
-
 	.scan-title {
 		margin: 0;
 		font-size: 0.85rem;
 		font-weight: 700;
 		color: var(--color-text-muted);
-	}
-
-	.ai-badge {
-		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.02em;
-		padding: 0.2rem 0.5rem;
-		border-radius: 999px;
-		background: linear-gradient(90deg, #6b7fd4 0%, #3d6b4f 100%);
-		color: #fff;
 	}
 
 	.scan-tab {
@@ -324,25 +238,6 @@
 		color: var(--color-primary);
 	}
 
-	.scan-tab-ai {
-		position: relative;
-		overflow: hidden;
-	}
-
-	.scan-tab-ai::before {
-		content: '';
-		position: absolute;
-		inset: 0;
-		background: linear-gradient(110deg, rgba(107, 127, 212, 0.15) 0%, rgba(61, 107, 79, 0.15) 100%);
-		opacity: 0;
-		transition: opacity 0.2s ease;
-	}
-
-	.scan-tab-ai:hover::before,
-	.scan-tab-ai.active::before {
-		opacity: 1;
-	}
-
 	.barcode-row :global(.tooltip-wrap),
 	.barcode-row :global(.scan-btn) {
 		width: 100%;
@@ -355,25 +250,6 @@
 		border-radius: var(--radius-sm);
 		font-size: 0.875rem;
 		color: var(--color-text-muted);
-	}
-
-	.scan-help {
-		margin: 0;
-		font-size: 0.8rem;
-		color: var(--color-text-muted);
-	}
-
-	:global(.ai-scan-btn) {
-		background: linear-gradient(100deg, #6b7fd4 0%, #3d6b4f 100%);
-		border: none;
-	}
-
-	:global(.ai-scan-btn:hover:not(:disabled)) {
-		filter: brightness(1.06);
-	}
-
-	.sr-input {
-		display: none;
 	}
 
 	.field {

@@ -46,7 +46,7 @@
 	</button>
 
 	{#if open}
-		<button type="button" class="backdrop modal-scrim" aria-label="Stäng meny" onclick={close}></button>
+		<button type="button" class="backdrop nav-dropdown-scrim" aria-label="Stäng meny" onclick={close}></button>
 		<div id={menuId} class="panel" role="menu">
 			<div class="panel-header" role="presentation">
 				<span class="avatar large" aria-hidden="true">{initials(user.email)}</span>
@@ -72,6 +72,7 @@
 <style>
 	.profile-menu {
 		position: relative;
+		z-index: 1;
 	}
 
 	.avatar-btn {
@@ -114,7 +115,7 @@
 	.backdrop {
 		position: fixed;
 		inset: 0;
-		z-index: 80;
+		z-index: 0;
 		border: 0;
 		cursor: default;
 	}

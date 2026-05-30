@@ -5,6 +5,7 @@
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
 	import { householdRoleLabel } from '$lib/domain/household';
+	import { subscribeNarrowViewport } from '$lib/utils/use-narrow-viewport';
 
 	interface Props {
 		households: UserHouseholdSummary[];
@@ -18,18 +19,9 @@
 	let newPantryName = $state('');
 	let isNarrowViewport = $state(false);
 
-	$effect(() => {
-		if (typeof window === 'undefined') {
-			return;
-		}
-		const mq = window.matchMedia('(max-width: 899px)');
-		const sync = () => {
-			isNarrowViewport = mq.matches;
-		};
-		sync();
-		mq.addEventListener('change', sync);
-		return () => mq.removeEventListener('change', sync);
-	});
+	$effect(() => subscribeNarrowViewport((matches) => {
+		isNarrowViewport = matches;
+	}));
 
 	const pathname = $derived(page.url.pathname);
 	const displayName = $derived(activeHousehold?.name ?? 'Pantry');
@@ -85,7 +77,7 @@
 			</button>
 
 			{#if open && !isNarrowViewport}
-				<button type="button" class="desktop-backdrop modal-scrim" aria-label="Stäng pantry-meny" onclick={close}></button>
+				<button type="button" class="desktop-backdrop nav-dropdown-scrim" aria-label="Stäng pantry-meny" onclick={close}></button>
 				<div class="desktop-panel" role="listbox" aria-label="Dina pantries">
 					<p class="panel-label">Byt pantry</p>
 					<ul class="pantry-list">
@@ -236,6 +228,7 @@
 <style>
 	.pantry-switcher {
 		position: relative;
+		z-index: 1;
 		min-width: 0;
 	}
 
@@ -297,7 +290,7 @@
 	.desktop-backdrop {
 		position: fixed;
 		inset: 0;
-		z-index: 65;
+		z-index: 0;
 		border: 0;
 		cursor: default;
 	}

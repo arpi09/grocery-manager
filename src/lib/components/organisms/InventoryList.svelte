@@ -8,9 +8,18 @@
 	interface Props {
 		items: InventoryItem[];
 		location: StorageLocation;
+		canWrite?: boolean;
 	}
 
-	let { items, location }: Props = $props();
+	let { items, location, canWrite = false }: Props = $props();
+
+	const inventoryPath = $derived(`/inventory/${location}`);
+	const scanHref = $derived(
+		`/scan?location=${location}&from=${encodeURIComponent(inventoryPath)}`
+	);
+	const manualAddHref = $derived(
+		`/item/new?location=${location}&from=${encodeURIComponent(inventoryPath)}`
+	);
 
 	let query = $state('');
 
@@ -24,12 +33,16 @@
 
 	{#if filtered.length === 0}
 		<EmptyState
-			title={query ? 'No matches' : `Nothing in the ${LOCATION_LABELS[location].toLowerCase()}`}
+			title={query ? 'Inga träffar' : `Tomt i ${LOCATION_LABELS[location].toLowerCase()}`}
 			description={query
-				? 'Try a different search term.'
-				: `Add your first item to the ${LOCATION_LABELS[location].toLowerCase()}.`}
-			actionLabel={`Add to ${LOCATION_LABELS[location].toLowerCase()}`}
-			actionHref={`/item/new?location=${location}&from=${encodeURIComponent(`/inventory/${location}`)}`}
+				? 'Prova ett annat sökord.'
+				: canWrite
+					? `Skanna en vara eller lägg till manuellt i ${LOCATION_LABELS[location].toLowerCase()}.`
+					: `Det finns inga varor i ${LOCATION_LABELS[location].toLowerCase()} ännu.`}
+			actionLabel={canWrite ? 'Skanna' : 'Tillbaka till hem'}
+			actionHref={canWrite ? scanHref : '/'}
+			secondaryActionLabel={canWrite ? 'Lägg till manuellt' : undefined}
+			secondaryActionHref={canWrite ? manualAddHref : undefined}
 		/>
 	{:else}
 		<ul>

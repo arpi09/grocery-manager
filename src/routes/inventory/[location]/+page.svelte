@@ -15,19 +15,18 @@
 		<LocationTab active={data.location} />
 		<div class="toolbar">
 			{#if data.canWrite}
-				{@const addItemHref = `/item/new?location=${data.location}&from=/inventory/${data.location}`}
+				{@const inventoryPath = `/inventory/${data.location}`}
+				{@const from = encodeURIComponent(inventoryPath)}
+				{@const addItemHref = `/item/new?location=${data.location}&from=${from}`}
+				{@const scanHref = `/scan?location=${data.location}&from=${from}`}
+				<a class="scan-btn" href={scanHref}>📷 Skanna</a>
 				<a class="add-btn add-btn--desktop" href={addItemHref}>+ Lägg till</a>
 				<a class="add-btn add-btn--mobile" href={addItemHref} data-sveltekit-reload>
 					+ Lägg till
 				</a>
 			{/if}
 		</div>
-		<InventoryList
-			items={data.items}
-			location={data.location}
-
-
-		/>
+		<InventoryList items={data.items} location={data.location} canWrite={data.canWrite} />
 	</PageContainer>
 </AppLayout>
 
@@ -35,7 +34,25 @@
 	.toolbar {
 		display: flex;
 		justify-content: flex-end;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
 		margin: var(--space-md) 0;
+	}
+
+	.scan-btn {
+		display: inline-flex;
+		padding: 0.5rem 1rem;
+		border: 1px solid var(--color-primary);
+		color: var(--color-primary);
+		background: var(--color-surface);
+		font-weight: 600;
+		border-radius: var(--radius-sm);
+		text-decoration: none;
+	}
+
+	.scan-btn:hover {
+		background: var(--color-surface-muted);
+		text-decoration: none;
 	}
 
 	.add-btn {

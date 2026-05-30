@@ -10,6 +10,7 @@ How [DELIVERY_METRICS.md](../DELIVERY_METRICS.md) fits the coordinator stack.
 | `MERGE_QUEUE.md` | Ordered merge intent, conflict risk, pause rules | **No** — on `chore/coordinator-v2` until merged |
 | [DELIVERY_METRICS.md](../DELIVERY_METRICS.md) | Historical flow: time through stages, reworks, test honesty | This PR |
 | `docs/ARCHITECTURE_HEALTH.md` | Periodic architecture audit | **Pending** |
+| [COMPLEXITY_REPORT.md](../COMPLEXITY_REPORT.md) | Structural hotspots, merge friction | This program |
 
 ## How they work together
 

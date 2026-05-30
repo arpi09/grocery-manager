@@ -27,12 +27,12 @@
 	class="scan-btn"
 	disabled={loading}
 	onclick={onclick}
-	aria-label="Scan barcode with camera"
+	aria-label="Skanna streckkod med kameran"
 >
 	{#if loading}
-		Looking up…
+		Slår upp…
 	{:else}
-		📷 Scan barcode
+		📷 Skanna streckkod
 	{/if}
 </Button>
 

@@ -1,6 +1,6 @@
 import { Buffer } from 'node:buffer';
 import type { ReceiptLine, ReceiptParseResult } from '$lib/domain/receipt-line';
-import { getOpenAiApiKey, missingOpenAiKeyMessage } from '$lib/server/openai';
+import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -31,14 +31,16 @@ function parseLines(raw: unknown): ReceiptLine[] {
 }
 
 export const POST: RequestHandler = async ({ request, locals, fetch }) => {
-	if (!locals.user) {
-		return json({ error: 'Unauthorized' }, { status: 401 });
+	const auth = requireUser(locals);
+	if (!auth.authorized) {
+		return auth.response;
 	}
 
-	const apiKey = getOpenAiApiKey();
-	if (!apiKey) {
-		return json({ error: missingOpenAiKeyMessage('receipt scan') }, { status: 500 });
+	const apiKeyOrResponse = requireOpenAiKey('receipt scan');
+	if (typeof apiKeyOrResponse !== 'string') {
+		return apiKeyOrResponse;
 	}
+	const apiKey = apiKeyOrResponse;
 
 	const formData = await request.formData();
 	const image = formData.get('image');
