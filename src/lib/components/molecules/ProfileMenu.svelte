@@ -416,12 +416,16 @@
 	}
 
 	:global(.profile-sheet-panel) {
-		padding-bottom: calc(var(--space-xl) + var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0));
+		max-height: min(85vh, 640px);
 	}
 
 	:global(.profile-sheet-body) {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
+		min-height: 0;
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		overscroll-behavior: contain;
 	}
 </style>

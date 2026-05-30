@@ -75,11 +75,21 @@
 	.btn-secondary {
 		background: var(--color-surface-muted);
 		color: var(--color-text);
+		border: 1px solid var(--color-border);
+	}
+
+	.btn-secondary:hover:not(:disabled) {
+		background: color-mix(in srgb, var(--color-surface-muted) 80%, var(--color-border));
 	}
 
 	.btn-ghost {
 		background: transparent;
-		color: var(--color-primary);
+		color: var(--color-text-muted);
+	}
+
+	.btn-ghost:hover:not(:disabled) {
+		color: var(--color-text);
+		background: var(--color-surface-muted);
 	}
 
 	.btn-danger {

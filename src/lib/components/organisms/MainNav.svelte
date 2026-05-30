@@ -38,9 +38,10 @@
 </script>
 
 {#if user}
-	<div class="main-nav-shell">
-		<div class="main-nav-mobile">
+	<div class="main-nav-mobile">
+		<div class="main-nav-shell">
 			<MainNavMobile
+				section="header"
 				{user}
 				{households}
 				{activeHousehold}
@@ -52,7 +53,21 @@
 				onCloseMore={closeMore}
 			/>
 		</div>
-		<div class="main-nav-desktop">
+		<MainNavMobile
+			section="bottom"
+			{user}
+			{households}
+			{activeHousehold}
+			{onRecipeIdeas}
+			{primary}
+			{secondary}
+			{moreOpen}
+			onToggleMore={toggleMore}
+			onCloseMore={closeMore}
+		/>
+	</div>
+	<div class="main-nav-desktop">
+		<div class="main-nav-shell">
 			<MainNavDesktop
 				{user}
 				{households}
@@ -72,7 +87,7 @@
 	.main-nav-shell {
 		position: sticky;
 		top: 0;
-		z-index: 200;
+		z-index: var(--z-nav-header);
 		width: 100%;
 		max-width: 100%;
 		min-width: 0;

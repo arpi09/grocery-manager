@@ -5,6 +5,7 @@
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import ExpiringSoonSection from '$lib/components/organisms/ExpiringSoonSection.svelte';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
+	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
 	import { t, type MessageKey } from '$lib/i18n';
 	import { OPEN_RECIPE_IDEAS } from '$lib/navigation/app-layout-context';
@@ -19,7 +20,7 @@
 
 	const openRecipeIdeas = getContext<(() => void) | undefined>(OPEN_RECIPE_IDEAS);
 
-	const returnTo = '/';
+	const returnTo = APP_HOME_PATH;
 	const from = $derived(encodeURIComponent(returnTo));
 
 	const greeting = $derived(

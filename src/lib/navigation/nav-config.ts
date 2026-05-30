@@ -1,4 +1,5 @@
 import type { MessageKey } from '$lib/i18n/messages';
+import { APP_HOME_PATH } from './app-home';
 
 export type NavIconId =
 	| 'home'
@@ -50,7 +51,7 @@ export interface NavItem {
 
 /** Single source of truth for app navigation (account routes live in ProfileMenu only) */
 export const NAV_ITEMS: NavItem[] = [
-	{ href: '/', labelKey: 'nav.home', icon: 'home', primary: true, match: 'exact' },
+	{ href: APP_HOME_PATH, labelKey: 'nav.home', icon: 'home', primary: true, match: 'exact' },
 	{
 		href: '/inventory/fridge',
 		labelKey: 'nav.inventory',
@@ -85,8 +86,8 @@ export function isNavActive(pathname: string, item: NavItem): boolean {
 	if (item.match === 'prefix') {
 		return pathname === item.href || pathname.startsWith(`${item.href}/`);
 	}
-	if (item.href === '/') {
-		return pathname === '/';
+	if (item.href === APP_HOME_PATH) {
+		return pathname === APP_HOME_PATH;
 	}
 	return pathname === item.href;
 }

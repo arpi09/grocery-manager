@@ -1,3 +1,5 @@
+import { isMarketingPath } from '$lib/marketing/routes';
+
 /** Current onboarding tour version — bump to show the guide again for returning users. */
 export const ONBOARDING_VERSION = 1;
 
@@ -9,6 +11,9 @@ export const ONBOARDING_REPLAY_EVENT = 'home-pantry-onboarding-replay';
 const EXCLUDED_PATH_PREFIXES = ['/admin', '/login', '/register'] as const;
 
 export function isOnboardingExcludedPath(pathname: string): boolean {
+	if (isMarketingPath(pathname)) {
+		return true;
+	}
 	return EXCLUDED_PATH_PREFIXES.some(
 		(prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
 	);

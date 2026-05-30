@@ -15,7 +15,7 @@ export const RECEIPT_LINES_SCHEMA = {
 					name: { type: 'string' },
 					quantity: { type: 'string' }
 				},
-				required: ['name'],
+				required: ['name', 'quantity'],
 				additionalProperties: false
 			}
 		}
@@ -29,7 +29,7 @@ export const RECEIPT_SYSTEM_PROMPT = [
 	'Returnera JSON: {"lines":[{"name":"","quantity":""}]}',
 	'Regler:',
 	'- name: kort svenskt produktnamn (ingen rabatt/MOMS/total/kortrad)',
-	'- quantity: valfri mängd som sträng (t.ex. "2" eller "1.5 kg"), utelämna om oklart',
+	'- quantity: mängd som sträng (t.ex. "2" eller "1.5 kg"), tom sträng om oklart',
 	'- hoppa över icke-mat, pant, erbjudanden och butiksinfo',
 	'- max 40 rader'
 ].join('\n');

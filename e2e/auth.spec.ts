@@ -2,11 +2,12 @@ import { test, expect } from '@playwright/test';
 import { loginAsAdmin, prepareE2eBrowserState } from './helpers/auth';
 
 test.describe('Authentication', () => {
-	test('redirects unauthenticated users to login', async ({ page }) => {
+	test('shows marketing landing for unauthenticated visitors', async ({ page }) => {
 		await prepareE2eBrowserState(page);
 		await page.goto('/');
-		await expect(page).toHaveURL(/\/login/);
-		await expect(page.getByRole('heading', { name: 'Logga in' })).toBeVisible();
+		await expect(page).toHaveURL('/');
+		await expect(page.getByRole('heading', { level: 1 })).toContainText(/Skanna/i);
+		await expect(page.getByRole('link', { name: 'Logga in' })).toBeVisible();
 	});
 
 	test('admin can sign in and reach home', async ({ page }) => {

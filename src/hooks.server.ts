@@ -21,6 +21,8 @@ import { translate } from '$lib/i18n/messages';
 import { writeThemeCookie } from '$lib/infrastructure/theme-cookie';
 import { writeLocaleCookie } from '$lib/infrastructure/locale-cookie';
 import { resolveLocaleForRequest } from '$lib/server/locale';
+import { isMarketingPath } from '$lib/marketing/routes';
+import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
 
 const publicPaths = new Set(['/login', '/register']);
@@ -33,6 +35,7 @@ function isPublicPath(pathname: string): boolean {
 	return (
 		publicPaths.has(pathname) ||
 		isInvitePath(pathname) ||
+		isMarketingPath(pathname) ||
 		pathname.startsWith('/api/health')
 	);
 }
@@ -80,12 +83,16 @@ export const handle: Handle = async ({ event, resolve }) => {
 		redirect(302, '/login');
 	}
 
-	if (isAuthenticated && isPublic && !isInvitePath(pathname)) {
-		redirect(302, '/');
+	if (isAuthenticated && isMarketingPath(pathname)) {
+		redirect(302, APP_HOME_PATH);
+	}
+
+	if (isAuthenticated && publicPaths.has(pathname) && !isInvitePath(pathname)) {
+		redirect(302, APP_HOME_PATH);
 	}
 
 	if (pathname.startsWith('/admin') && isAuthenticated && !isAdmin(event.locals.user)) {
-		redirect(302, '/');
+		redirect(302, APP_HOME_PATH);
 	}
 
 	let resolvedTheme: 'light' | 'dark' = 'light';

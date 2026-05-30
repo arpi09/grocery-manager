@@ -6,6 +6,7 @@
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
+	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { LOCATION_COLORS } from '$lib/domain/location';
 	import { t } from '$lib/i18n';
 	import {
@@ -106,7 +107,7 @@
 	async function tryScan() {
 		dismissOnboarding();
 		closeGuide();
-		await goto('/scan?from=%2F');
+		await goto(`/scan?from=${encodeURIComponent(APP_HOME_PATH)}`);
 	}
 
 	$effect(() => {

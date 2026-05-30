@@ -9,6 +9,7 @@
 	import InventoryScanToast from '$lib/components/molecules/InventoryScanToast.svelte';
 	import OnboardingGuide from '$lib/components/organisms/OnboardingGuide.svelte';
 	import { canEditInventory } from '$lib/domain/household';
+	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { isStorageLocation } from '$lib/domain/location';
 	import type { NavUser } from '$lib/navigation/nav-config';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
@@ -35,7 +36,7 @@
 		if (!canWrite || page.url.pathname.startsWith('/scan')) {
 			return false;
 		}
-		return page.url.pathname === '/';
+		return page.url.pathname === APP_HOME_PATH;
 	});
 
 	const scanFabHref = $derived.by(() => {

@@ -7,6 +7,7 @@ import {
 	leaveHouseholdSchema,
 	switchHouseholdSchema
 } from '$lib/validation/household.schemas';
+import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { fail, redirect } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 
@@ -44,7 +45,7 @@ export async function switchHouseholdAction(event: RequestEvent) {
 		redirect(302, redirectTo);
 	}
 
-	redirect(302, '/');
+	redirect(302, APP_HOME_PATH);
 }
 
 export async function createHouseholdAction(event: RequestEvent) {
@@ -66,7 +67,7 @@ export async function createHouseholdAction(event: RequestEvent) {
 		redirect(302, redirectTo);
 	}
 
-	redirect(302, '/');
+	redirect(302, APP_HOME_PATH);
 }
 
 export async function leaveHouseholdAction(event: RequestEvent) {

@@ -6,6 +6,7 @@ import {
 	resetOnboarding,
 	shouldShowOnboarding
 } from './onboarding';
+import { APP_HOME_PATH } from '$lib/navigation/app-home';
 
 describe('onboarding helpers', () => {
 	let storage: Record<string, string>;
@@ -53,7 +54,9 @@ describe('onboarding helpers', () => {
 		expect(isOnboardingExcludedPath('/admin/users')).toBe(true);
 		expect(isOnboardingExcludedPath('/login')).toBe(true);
 		expect(isOnboardingExcludedPath('/register')).toBe(true);
-		expect(isOnboardingExcludedPath('/')).toBe(false);
+		expect(isOnboardingExcludedPath('/')).toBe(true);
+		expect(isOnboardingExcludedPath('/funktioner')).toBe(true);
+		expect(isOnboardingExcludedPath(APP_HOME_PATH)).toBe(false);
 		expect(isOnboardingExcludedPath('/scan')).toBe(false);
 	});
 });

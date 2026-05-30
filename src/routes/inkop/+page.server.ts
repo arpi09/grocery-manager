@@ -6,6 +6,11 @@ import {
 } from '$lib/application/shopping-list.service';
 import { parseAddShoppingListItem } from '$lib/validation/shopping-list.schemas';
 import { translate } from '$lib/i18n/messages';
+import { getOpenAiApiKey, missingOpenAiKeyMessage } from '$lib/server/openai';
+import {
+	generateShoppingSuggestions,
+	suggestionToListItem
+} from '$lib/server/shopping-suggestions';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -114,6 +119,69 @@ export const actions: Actions = {
 		}
 
 		return { success: true };
+	},
+	fillFromPantry: async (event) => {
+		requireInventoryWriteAccess(event.locals.householdRole);
+		const householdId = event.locals.householdId;
+		const locale = event.locals.locale;
+		if (!householdId) error(400, translate(locale, 'errors.household.noHousehold'));
+
+		const apiKey = getOpenAiApiKey();
+		if (!apiKey) {
+			return fail(503, {
+				fillError: missingOpenAiKeyMessage('shopping suggestions')
+			});
+		}
+
+		const formData = await event.request.formData();
+		const preferencesRaw = formData.get('preferences');
+		const householdSizeRaw = formData.get('householdSize');
+		const preferences =
+			typeof preferencesRaw === 'string' ? preferencesRaw.trim().slice(0, 300) : '';
+		const householdSizeParsed = Number(householdSizeRaw);
+		const householdSize =
+			Number.isFinite(householdSizeParsed) &&
+			householdSizeParsed >= 1 &&
+			householdSizeParsed <= 8
+				? Math.round(householdSizeParsed)
+				: 2;
+
+		const generated = await generateShoppingSuggestions(
+			{
+				apiKey,
+				householdId,
+				userId: event.locals.user!.id,
+				inventoryService: event.locals.inventoryService,
+				mealPlanService: event.locals.mealPlanService
+			},
+			{ preferences, householdSize }
+		);
+
+		if (!generated.ok) {
+			const message =
+				generated.message === 'parse_failed'
+					? translate(locale, 'errors.api.suggestionsFailed')
+					: generated.message;
+			return fail(generated.status, { fillError: message });
+		}
+
+		try {
+			const result = await event.locals.shoppingListService.addSuggestedItems(
+				householdId,
+				event.locals.householdRole!,
+				generated.items.map(suggestionToListItem)
+			);
+
+			return {
+				fillSuccess: {
+					added: result.added,
+					skipped: result.skipped,
+					note: generated.note
+				}
+			};
+		} catch (err) {
+			return handleServiceError(err);
+		}
 	}
 };
 

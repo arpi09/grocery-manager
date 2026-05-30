@@ -1,5 +1,6 @@
 import { isAuthError } from '$lib/application/auth.service';
 import { loginSchema } from '$lib/validation/auth.schemas';
+import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { createSession } from '$lib/server/session';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
@@ -47,6 +48,6 @@ export const actions: Actions = {
 			throw error;
 		}
 
-		redirect(302, redirectTo ?? '/');
+		redirect(302, redirectTo ?? APP_HOME_PATH);
 	}
 };

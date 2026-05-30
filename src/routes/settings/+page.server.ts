@@ -1,3 +1,4 @@
+import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { fail, redirect } from '@sveltejs/kit';
 import { mapHouseholdErrorToFail } from '$lib/application/household-errors';
 import { translate } from '$lib/i18n/messages';
@@ -224,6 +225,6 @@ export const actions: Actions = {
 			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
 		}
 
-		redirect(302, '/');
+		redirect(302, APP_HOME_PATH);
 	}
 };

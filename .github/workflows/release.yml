@@ -22,6 +22,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    outputs:
+      source: ${{ steps.filter.outputs.source }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            source:
+              - '**'
+              - '!docs/**'
+              - '!**/*.md'
+              - '!.cursor/**'
+
   quality:
     name: quality
     runs-on: ubuntu-latest
@@ -48,12 +66,20 @@ jobs:
           DATABASE_URL: postgresql://pantry:pantry@localhost:5432/pantry
           USE_PGLITE: 'true'
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sveltekit-build
+          path: build/
+          retention-days: 1
+
   e2e:
     name: e2e
-    needs: quality
-    if: github.event_name == 'push' || inputs.skip_e2e != true
+    needs: [quality, changes]
+    if: >
+      inputs.skip_e2e != true &&
+      (github.event_name == 'workflow_dispatch' || needs.changes.outputs.source == 'true')
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
@@ -65,7 +91,24 @@ jobs:
 
       - run: npm ci
 
-      - run: npx playwright install --with-deps chromium
+      - uses: actions/download-artifact@v4
+        with:
+          name: sveltekit-build
+          path: build/
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
 
       - run: npm run test:e2e
         env:
@@ -78,24 +121,18 @@ jobs:
 
   deploy:
     name: deploy
-    needs: [quality, e2e]
+    needs: [quality, e2e, changes]
     if: >
       always() &&
       needs.quality.result == 'success' &&
-      (needs.e2e.result == 'success' || needs.e2e.result == 'skipped')
+      (needs.e2e.result == 'success' || needs.e2e.result == 'skipped') &&
+      (github.event_name == 'workflow_dispatch' || needs.changes.outputs.source == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production
 
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-
-      - run: npm ci
 
       - name: Deploy App Hosting backend
         run: |
@@ -106,6 +143,6 @@ jobs:
             echo "See docs/CI_CD.md and docs/FIREBASE_DEPLOY.md"
             exit 0
           fi
-          npm run deploy:firebase -- --non-interactive --project home-pantry-4bee5
+          npx firebase-tools@latest deploy --only apphosting:home-pantry --non-interactive --project home-pantry-4bee5
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}

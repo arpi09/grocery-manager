@@ -5,6 +5,7 @@
 	import PantrySwitcher from '$lib/components/molecules/PantrySwitcher.svelte';
 	import ProfileMenu from '$lib/components/molecules/ProfileMenu.svelte';
 	import RecipeIdeasButton from '$lib/components/molecules/RecipeIdeasButton.svelte';
+	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { t } from '$lib/i18n';
 	import { isNavActive, type NavItem, type NavUser } from '$lib/navigation/nav-config';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
@@ -54,7 +55,7 @@
 
 <header class="desktop-header" aria-label={t('nav.primaryNav')}>
 	<div class="desktop-header-inner">
-		<a href="/" class="desktop-brand" aria-label={t('nav.brandHome')}>
+		<a href={APP_HOME_PATH} class="desktop-brand" aria-label={t('nav.brandHome')}>
 			<AppLogo size="sm" />
 			<span class="desktop-brand-text">{t('nav.brandName')}</span>
 		</a>

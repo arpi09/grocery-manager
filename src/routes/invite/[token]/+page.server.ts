@@ -1,3 +1,4 @@
+import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { redirect } from '@sveltejs/kit';
 import { InviteNotFoundError } from '$lib/application/household.service';
 import { mapHouseholdErrorToFail } from '$lib/application/household-errors';
@@ -54,6 +55,6 @@ export const actions: Actions = {
 			return mapHouseholdErrorToFail(error, 'acceptError', locals.locale);
 		}
 
-		redirect(302, '/');
+		redirect(302, APP_HOME_PATH);
 	}
 };

@@ -69,8 +69,8 @@ async function fillBoundInput(input: import('@playwright/test').Locator, value: 
 	await expect(input).toHaveValue(value);
 }
 
-async function dismissOnboardingModalIfOpen(page: Page) {
-	const skip = page.getByRole('button', { name: 'Hoppa över' });
+export async function dismissOnboardingModalIfOpen(page: Page) {
+	const skip = page.getByRole('button', { name: 'Hoppa ?ver' });
 	if (await skip.isVisible().catch(() => false)) {
 		await skip.click();
 		await expect(skip).toBeHidden({ timeout: 5_000 });
@@ -102,14 +102,17 @@ export async function loginAsAdmin(page: Page) {
 	await dismissOnboardingModalIfOpen(page);
 }
 
+function appNavigation(page: Page) {
+	return page.getByRole('navigation', { name: /Prim?r|Mobil/i });
+}
+
 export async function openMoreNav(page: Page) {
-	await page.getByRole('navigation', { name: /Prim/i }).getByRole('button', { name: 'Mer' }).click();
+	await appNavigation(page).getByRole('button', { name: 'Mer' }).click();
 }
 
 export async function clickNavHref(page: Page, href: string) {
 	await dismissOnboardingModalIfOpen(page);
-	const nav = page.getByRole('navigation', { name: /Prim/i });
-	await nav.locator(`a[href="${href}"]`).click();
+	await appNavigation(page).locator(`a[href="${href}"]`).click();
 }
 
 export async function clickSecondaryNavHref(page: Page, href: string) {

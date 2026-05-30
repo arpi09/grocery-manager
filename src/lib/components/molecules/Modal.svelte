@@ -200,6 +200,7 @@
 		right: 0;
 		bottom: 0;
 		max-height: min(88vh, 720px);
+		overflow: hidden;
 		border-bottom: none;
 		border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 		padding-bottom: calc(var(--space-lg) + env(safe-area-inset-bottom, 0));
@@ -246,7 +247,9 @@
 
 	.modal-panel--center .modal-body,
 	.modal-panel--sheet .modal-body {
-		overflow: auto;
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		overscroll-behavior: contain;
 		scrollbar-color: var(--color-border) transparent;
 	}
 
