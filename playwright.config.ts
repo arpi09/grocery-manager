@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
 function loadDotEnv(path = '.env') {
@@ -30,6 +30,7 @@ export default defineConfig({
 	reporter: process.env.CI ? 'github' : 'list',
 	use: {
 		baseURL,
+		locale: 'sv-SE',
 		trace: 'on-first-retry',
 		screenshot: 'only-on-failure'
 	},

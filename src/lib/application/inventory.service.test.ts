@@ -28,6 +28,7 @@ describe('InventoryService', () => {
 		repository = {
 			findById: vi.fn(),
 			findByHouseholdAndLocation: vi.fn(),
+			findFinishedByHouseholdAndLocation: vi.fn(),
 			findAllByHousehold: vi.fn(),
 			findExpiringBefore: vi.fn(),
 			countByLocation: vi.fn(),
@@ -155,5 +156,25 @@ describe('InventoryService', () => {
 		);
 
 		expect(repository.delete).not.toHaveBeenCalled();
+	});
+
+	it('marks an item as finished by setting quantity to zero', async () => {
+		const item = makeItem();
+		const finished = makeItem({ quantity: '0' });
+		vi.mocked(repository.findById).mockResolvedValue(item);
+		vi.mocked(repository.update).mockResolvedValue(finished);
+
+		const result = await service.markAsFinished('household-1', 'item-1', 'editor');
+
+		expect(result.quantity).toBe('0');
+		expect(repository.update).toHaveBeenCalledWith('household-1', 'item-1', { quantity: '0' });
+	});
+
+	it('rejects mark as finished for viewer role', async () => {
+		await expect(service.markAsFinished('household-1', 'item-1', 'viewer')).rejects.toBeInstanceOf(
+			InventoryReadOnlyError
+		);
+
+		expect(repository.findById).not.toHaveBeenCalled();
 	});
 });

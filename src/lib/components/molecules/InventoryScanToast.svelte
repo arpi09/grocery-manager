@@ -1,20 +1,21 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import Toast from '$lib/components/molecules/Toast.svelte';
+	import { getLocale, t } from '$lib/i18n';
 	import {
 		SCAN_TOAST_NAME_PARAM,
 		SCAN_TOAST_PARAM,
 		parseScanToastKind,
 		scanToastMessage
 	} from '$lib/utils/scan-toast';
-	import { goto } from '$app/navigation';
 
 	let dismissed = $state(false);
 
 	const toastKind = $derived(parseScanToastKind($page.url.searchParams.get(SCAN_TOAST_PARAM)));
 	const productName = $derived($page.url.searchParams.get(SCAN_TOAST_NAME_PARAM) ?? '');
 	const message = $derived(
-		toastKind ? scanToastMessage(toastKind, productName) : ''
+		toastKind ? scanToastMessage(getLocale(), toastKind, productName) : ''
 	);
 	const visible = $derived(Boolean(toastKind && message && !dismissed));
 

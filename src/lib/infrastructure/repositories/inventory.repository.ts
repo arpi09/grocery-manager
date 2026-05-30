@@ -1,4 +1,4 @@
-import { and, eq, gte, isNull, lte, sql } from 'drizzle-orm';
+import { and, eq, gt, gte, isNull, lte, sql } from 'drizzle-orm';
 import { EXPIRING_SOON_DAYS } from '$lib/domain/inventory-analytics';
 import type { StorageLocation } from '$lib/domain/location';
 import type {
@@ -27,6 +27,10 @@ export interface IInventoryRepository {
 		householdId: string,
 		location: StorageLocation
 	): Promise<InventoryItem[]>;
+	findFinishedByHouseholdAndLocation(
+		householdId: string,
+		location: StorageLocation
+	): Promise<InventoryItem[]>;
 	findAllByHousehold(householdId: string): Promise<InventoryItem[]>;
 	findExpiringBefore(householdId: string, beforeDate: string): Promise<InventoryItem[]>;
 	countByLocation(householdId: string): Promise<LocationCount[]>;
@@ -43,6 +47,10 @@ export interface IInventoryRepository {
 		input: UpdateInventoryItemInput
 	): Promise<InventoryItem | null>;
 	delete(householdId: string, id: string): Promise<boolean>;
+}
+
+function activeQuantityFilter() {
+	return gt(inventoryItemTable.quantity, '0');
 }
 
 function mapRow(row: typeof inventoryItemTable.$inferSelect): InventoryItem {
@@ -83,10 +91,27 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 			.where(
 				and(
 					eq(inventoryItemTable.householdId, householdId),
-					eq(inventoryItemTable.location, location)
+					eq(inventoryItemTable.location, location),
+					activeQuantityFilter()
 				)
 			)
 			.orderBy(inventoryItemTable.name);
+
+		return rows.map(mapRow);
+	}
+
+	async findFinishedByHouseholdAndLocation(householdId: string, location: StorageLocation) {
+		const rows = await this.database
+			.select()
+			.from(inventoryItemTable)
+			.where(
+				and(
+					eq(inventoryItemTable.householdId, householdId),
+					eq(inventoryItemTable.location, location),
+					sql`${inventoryItemTable.quantity} <= 0`
+				)
+			)
+			.orderBy(inventoryItemTable.updatedAt);
 
 		return rows.map(mapRow);
 	}
@@ -95,7 +120,7 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 		const rows = await this.database
 			.select()
 			.from(inventoryItemTable)
-			.where(eq(inventoryItemTable.householdId, householdId))
+			.where(and(eq(inventoryItemTable.householdId, householdId), activeQuantityFilter()))
 			.orderBy(inventoryItemTable.name);
 
 		return rows.map(mapRow);
@@ -108,6 +133,7 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 			.where(
 				and(
 					eq(inventoryItemTable.householdId, householdId),
+					activeQuantityFilter(),
 					sql`${inventoryItemTable.expiresOn} is not null`,
 					lte(inventoryItemTable.expiresOn, beforeDate),
 					gte(inventoryItemTable.expiresOn, new Date().toISOString().slice(0, 10))
@@ -125,7 +151,7 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 				count: sql<number>`count(*)::int`
 			})
 			.from(inventoryItemTable)
-			.where(eq(inventoryItemTable.householdId, householdId))
+			.where(and(eq(inventoryItemTable.householdId, householdId), activeQuantityFilter()))
 			.groupBy(inventoryItemTable.location);
 
 		return rows.map((row) => ({
@@ -139,7 +165,10 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 		const today = new Date().toISOString().slice(0, 10);
 		const expiringBefore = addDaysIso(today, EXPIRING_SOON_DAYS);
 		const createdSince = addDays(new Date(), -7);
-		const householdFilter = eq(inventoryItemTable.householdId, householdId);
+		const householdFilter = and(
+			eq(inventoryItemTable.householdId, householdId),
+			activeQuantityFilter()
+		);
 
 		const [totalsRow] = await this.database
 			.select({

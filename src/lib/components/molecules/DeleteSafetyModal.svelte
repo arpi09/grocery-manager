@@ -5,6 +5,7 @@
 	import type { Snippet } from 'svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
+	import { getLocale, t } from '$lib/i18n';
 	import {
 		deleteModalVariant,
 		getDeleteCopy,
@@ -64,14 +65,15 @@
 	let isNarrow = $state(false);
 	let typedInput = $state('');
 
-	const copy = $derived(getDeleteCopy(tier, context, copyOptions));
+	const locale = $derived(getLocale());
+	const copy = $derived(getDeleteCopy(tier, context, copyOptions, locale));
 	const modalTitle = $derived(title ?? copy.title);
 	const modalDescription = $derived(description ?? copy.description);
 	const modalConfirmLabel = $derived(confirmLabel ?? copy.confirmLabel);
 	const targetName = $derived(confirmationTarget ?? copyOptions.confirmationTarget ?? '');
 	const requiresTypedConfirmation = $derived(tier === 4 && Boolean(targetName));
 	const typedValid = $derived(
-		!requiresTypedConfirmation || isTypedConfirmationValid(typedInput, targetName)
+		!requiresTypedConfirmation || isTypedConfirmationValid(typedInput, targetName, locale)
 	);
 	const modalVariant = $derived(deleteModalVariant(isNarrow));
 	const usesEmbeddedForm = $derived(Boolean(formAction));
@@ -119,7 +121,7 @@
 			{/if}
 			{#if requiresTypedConfirmation}
 				<label class="typed-label">
-					{copy.typedConfirmationLabel ?? 'Bekräftelse'}
+					{copy.typedConfirmationLabel ?? t('common.confirmation')}
 					<span class="typed-hint">{copy.typedConfirmationHint}</span>
 					<input
 						name={typedConfirmationFieldName}
@@ -128,7 +130,7 @@
 						required
 						autocomplete="off"
 						placeholder={copy.typedConfirmationPlaceholder ?? targetName}
-						aria-label={copy.typedConfirmationLabel ?? 'Bekräftelse'}
+						aria-label={copy.typedConfirmationLabel ?? t('common.confirmation')}
 					/>
 				</label>
 			{/if}
@@ -157,7 +159,7 @@
 		{/if}
 		{#if requiresTypedConfirmation}
 			<label class="typed-label">
-				{copy.typedConfirmationLabel ?? 'Bekräftelse'}
+				{copy.typedConfirmationLabel ?? t('common.confirmation')}
 				<span class="typed-hint">{copy.typedConfirmationHint}</span>
 				<input
 					type="text"
@@ -165,7 +167,7 @@
 					required
 					autocomplete="off"
 					placeholder={copy.typedConfirmationPlaceholder ?? targetName}
-					aria-label={copy.typedConfirmationLabel ?? 'Bekräftelse'}
+					aria-label={copy.typedConfirmationLabel ?? t('common.confirmation')}
 				/>
 			</label>
 		{/if}

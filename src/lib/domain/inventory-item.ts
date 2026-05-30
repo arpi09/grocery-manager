@@ -36,3 +36,8 @@ export interface LocationCount {
 	location: StorageLocation;
 	count: number;
 }
+
+export function isItemFinished(item: Pick<InventoryItem, 'quantity'>): boolean {
+	const quantity = Number(item.quantity);
+	return !Number.isNaN(quantity) && quantity <= 0;
+}

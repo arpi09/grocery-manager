@@ -3,7 +3,9 @@
 	import { page } from '$app/state';
 	import { enhance } from '$app/forms';
 	import Modal from '$lib/components/molecules/Modal.svelte';
+	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
+	import { getLocale, t } from '$lib/i18n';
 	import { householdRoleLabel } from '$lib/domain/household';
 	import { subscribeNarrowViewport } from '$lib/utils/use-narrow-viewport';
 
@@ -68,25 +70,27 @@
 				class="pantry-trigger"
 				aria-expanded={open}
 				aria-haspopup="listbox"
-				aria-label="Byt pantry, nuvarande: {displayName}"
+				aria-label={t('pantry.switchAria', { name: displayName })}
 				onclick={() => (open ? close() : (open = true))}
 			>
-				<span class="pantry-icon" aria-hidden="true">🏠</span>
+				<span class="pantry-icon" aria-hidden="true">
+					<FeatureIcon id="home" size={18} />
+				</span>
 				<span class="pantry-name">{displayName}</span>
 				<span class="chevron" aria-hidden="true">▾</span>
 			</button>
 
 			{#if open && !isNarrowViewport}
-				<button type="button" class="desktop-backdrop nav-dropdown-scrim" aria-label="Stäng pantry-meny" onclick={close}></button>
-				<div class="desktop-panel" role="listbox" aria-label="Dina pantries">
-					<p class="panel-label">Byt pantry</p>
+				<button type="button" class="desktop-backdrop nav-dropdown-scrim" aria-label={t('pantry.closeMenu')} onclick={close}></button>
+				<div class="desktop-panel" role="listbox" aria-label={t('pantry.listAria')}>
+					<p class="panel-label label-caps">{t('pantry.switchTitle')}</p>
 					<ul class="pantry-list">
 						{#each households as pantry (pantry.id)}
 							<li>
 								{#if pantry.isActive}
 									<span class="pantry-option active" aria-current="true">
 										<span class="option-name">{pantry.name}</span>
-										<span class="option-meta">{householdRoleLabel(pantry.role)} · aktiv</span>
+										<span class="option-meta">{householdRoleLabel(pantry.role, getLocale())} · {t('pantry.activeSuffix')}</span>
 									</span>
 								{:else}
 									<form
@@ -99,7 +103,7 @@
 										<input type="hidden" name="redirectTo" value={pathname} />
 										<button type="submit" class="pantry-option" role="option">
 											<span class="option-name">{pantry.name}</span>
-											<span class="option-meta">{householdRoleLabel(pantry.role)}</span>
+											<span class="option-meta">{householdRoleLabel(pantry.role, getLocale())}</span>
 										</button>
 									</form>
 								{/if}
@@ -115,26 +119,26 @@
 						>
 							<input type="hidden" name="redirectTo" value={pathname} />
 							<label class="create-label">
-								Namn
+								{t('common.name')}
 								<input
 									name="name"
 									type="text"
 									required
 									maxlength="80"
-									placeholder="t.ex. Sommarstuga"
+									placeholder={t('pantry.namePlaceholder')}
 									bind:value={newPantryName}
 								/>
 							</label>
 							<div class="create-actions">
 								<button type="button" class="text-btn" onclick={() => (createOpen = false)}>
-									Avbryt
+									{t('common.cancel')}
 								</button>
-								<button type="submit" class="primary-btn">Skapa</button>
+								<button type="submit" class="primary-btn">{t('common.create')}</button>
 							</div>
 						</form>
 					{:else}
 						<button type="button" class="create-trigger" onclick={() => (createOpen = true)}>
-							+ Skapa ny pantry
+							+ {t('pantry.createNew')}
 						</button>
 					{/if}
 				</div>
@@ -147,10 +151,12 @@
 			class="mobile-trigger"
 			aria-expanded={open && isNarrowViewport}
 			aria-haspopup="dialog"
-			aria-label="Byt pantry, nuvarande: {displayName}"
+			aria-label={t('pantry.switchAria', { name: displayName })}
 			onclick={openSheet}
 		>
-			<span class="pantry-icon" aria-hidden="true">🏠</span>
+			<span class="pantry-icon" aria-hidden="true">
+				<FeatureIcon id="home" size={18} />
+			</span>
 			<span class="pantry-name">{displayName}</span>
 			<span class="chevron" aria-hidden="true">▾</span>
 		</button>
@@ -159,7 +165,7 @@
 			open={open && isNarrowViewport}
 			onClose={close}
 			variant="sheet"
-			title="Byt pantry"
+			title={t('pantry.switchTitle')}
 			panelClass="pantry-sheet-panel"
 			bodyClass="pantry-sheet-body"
 		>
@@ -169,7 +175,7 @@
 						{#if pantry.isActive}
 							<span class="sheet-option active" aria-current="true">
 								<span class="option-name">{pantry.name}</span>
-								<span class="option-meta">{householdRoleLabel(pantry.role)} · aktiv</span>
+								<span class="option-meta">{householdRoleLabel(pantry.role, getLocale())} · {t('pantry.activeSuffix')}</span>
 							</span>
 						{:else}
 							<form
@@ -199,7 +205,7 @@
 				>
 					<input type="hidden" name="redirectTo" value={pathname} />
 					<label class="create-label">
-						Namn på ny pantry
+						{t('pantry.newName')}
 						<input
 							name="name"
 							type="text"
@@ -237,12 +243,9 @@
 		position: relative;
 	}
 
-	.mobile-trigger {
-		display: inline-flex;
-	}
-
 	.pantry-trigger,
 	.mobile-trigger {
+		display: inline-flex;
 		align-items: center;
 		gap: 0.35rem;
 		min-height: 2.75rem;
@@ -255,6 +258,7 @@
 		font-weight: 600;
 		cursor: pointer;
 		max-width: 100%;
+		min-width: 0;
 	}
 
 	.pantry-trigger:hover,
@@ -269,9 +273,11 @@
 	}
 
 	.pantry-icon {
-		font-size: 0.95rem;
-		line-height: 1;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		flex-shrink: 0;
+		color: var(--color-primary);
 	}
 
 	.pantry-name {
@@ -314,11 +320,6 @@
 	.panel-label {
 		margin: 0 0 var(--space-xs);
 		padding: 0 0.35rem;
-		font-size: 0.72rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: var(--color-text-muted);
 	}
 
 	.pantry-list,

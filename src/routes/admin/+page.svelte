@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getLocale, t } from '$lib/i18n';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import AdminHealthDashboard from '$lib/components/organisms/AdminHealthDashboard.svelte';
@@ -10,7 +11,8 @@
 	let { data, form } = $props();
 
 	function formatDate(value: Date) {
-		return new Intl.DateTimeFormat('sv-SE', {
+		const tag = getLocale() === 'sv' ? 'sv-SE' : 'en-GB';
+		return new Intl.DateTimeFormat(tag, {
 			dateStyle: 'medium',
 			timeStyle: 'short'
 		}).format(value);
@@ -18,17 +20,17 @@
 
 	function statusLabel(account: (typeof data.users)[number]) {
 		if (account.isActiveNow) {
-			return 'Aktiv nu';
+			return t('admin.activeNow');
 		}
 		if (account.hasActiveSession) {
-			return 'Inloggad';
+			return t('admin.loggedIn');
 		}
-		return 'Offline';
+		return t('admin.offline');
 	}
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title="Admin" subtitle="Hantera användare och översikt" />
+	<AppHeader title={t('admin.title')} subtitle={t('admin.subtitle')} />
 
 	<PageContainer>
 	{#if form?.message}
@@ -40,10 +42,10 @@
 	<section class="error-logs" id="felloggar">
 		<Card>
 			<div class="error-logs-header">
-				<h2>Felloggar</h2>
+				<h2>{t('admin.errorLogs')}</h2>
 				<form method="GET" class="error-limit-form">
 					<label>
-						Visa senaste
+						{t('admin.showLatest')}
 						<select name="errorLimit" onchange={(e) => e.currentTarget.form?.requestSubmit()}>
 							{#each [25, 50, 100] as limit}
 								<option value={limit} selected={data.errorLimit === limit}>{limit}</option>
@@ -53,10 +55,10 @@
 				</form>
 			</div>
 			<p class="error-logs-note">
-				Senaste serverfel (max 200 poster / 7 dagar). Lösenord och tokens lagras aldrig.
+				{t('admin.errorLogsNote')}
 			</p>
 			{#if data.errors.length === 0}
-				<p class="error-empty">Inga fel loggade ännu.</p>
+				<p class="error-empty">{t('admin.noErrors')}</p>
 			{:else}
 				<ul class="error-list">
 					{#each data.errors as entry}
@@ -74,7 +76,7 @@
 							<p class="error-message">{entry.message}</p>
 							{#if entry.stack}
 								<details>
-									<summary>Stack</summary>
+									<summary>{t('admin.stack')}</summary>
 									<pre>{entry.stack}</pre>
 								</details>
 							{/if}
@@ -87,34 +89,34 @@
 
 	<section class="session-mgmt">
 	<Card>
-		<h2>Sessionshantering</h2>
+		<h2>{t('admin.sessionManagement')}</h2>
 		<p class="logout-note">
-			Logga ut alla avslutar varje aktiv session, inklusive din egen. Användare måste logga in igen.
+			{t('admin.logoutAllNote')}
 		</p>
 		<form method="POST" action="?/logoutAll" class="logout-all-form">
 			<label>
-				Skriv <strong>yes</strong> för att bekräfta
+				{t('admin.confirmYes', { yes: 'yes' })}
 				<input name="confirm" required autocomplete="off" placeholder="yes" />
 			</label>
-			<Button type="submit" variant="danger">Logga ut alla</Button>
+			<Button type="submit" variant="danger">{t('admin.logoutAll')}</Button>
 		</form>
 	</Card>
 	</section>
 
 	<Card>
-		<h2>Användare</h2>
+		<h2>{t('admin.users')}</h2>
 		<div class="table-wrap">
 			<table>
 				<thead>
 					<tr>
-						<th>E-post</th>
-						<th>Status</th>
-						<th>Senast sedd</th>
-						<th>Roll</th>
-						<th>Husdjur</th>
-						<th>Inventarie</th>
-						<th>Skapad</th>
-						<th>Åtgärder</th>
+						<th>{t('admin.email')}</th>
+						<th>{t('admin.status')}</th>
+						<th>{t('admin.lastSeen')}</th>
+						<th>{t('admin.roleCol')}</th>
+						<th>{t('admin.petsCol')}</th>
+						<th>{t('admin.inventoryCol')}</th>
+						<th>{t('admin.createdCol')}</th>
+						<th>{t('admin.actionsCol')}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -123,7 +125,7 @@
 							<td>
 								{account.email}
 								{#if account.id === data.user?.id}
-									<span class="you">(du)</span>
+									<span class="you">{t('admin.you')}</span>
 								{/if}
 							</td>
 							<td>
@@ -138,16 +140,16 @@
 							<td>{formatLastSeen(account.lastSeenAt)}</td>
 							<td>
 								<span class:admin-badge={account.role === 'admin'}>
-									{account.role === 'admin' ? 'Admin' : 'Användare'}
+									{account.role === 'admin' ? t('admin.title') : t('admin.userRole')}
 								</span>
 							</td>
-							<td>{account.petsEnabled ? 'På' : 'Av'}</td>
+							<td>{account.petsEnabled ? t('admin.on') : t('admin.off')}</td>
 							<td>{account.inventoryCount}</td>
 							<td>{formatDate(account.createdAt)}</td>
 							<td class="actions">
 								<form method="POST" action="?/logoutUser">
 									<input type="hidden" name="userId" value={account.id} />
-									<Button type="submit" variant="danger">Logga ut</Button>
+									<Button type="submit" variant="danger">{t('admin.logoutUser')}</Button>
 								</form>
 
 								{#if account.role === 'admin'}
@@ -159,14 +161,14 @@
 											variant="secondary"
 											disabled={account.id === data.user?.id}
 										>
-											Ta bort admin
+											{t('admin.removeAdmin')}
 										</Button>
 									</form>
 								{:else}
 									<form method="POST" action="?/setRole">
 										<input type="hidden" name="userId" value={account.id} />
 										<input type="hidden" name="role" value="admin" />
-										<Button type="submit" variant="secondary">Gör admin</Button>
+										<Button type="submit" variant="secondary">{t('admin.makeAdmin')}</Button>
 									</form>
 								{/if}
 
@@ -178,7 +180,7 @@
 										value={account.petsEnabled ? 'false' : 'true'}
 									/>
 									<Button type="submit" variant="secondary">
-										{account.petsEnabled ? 'Stäng av husdjur' : 'Aktivera husdjur'}
+										{account.petsEnabled ? t('admin.disablePets') : t('admin.enablePets')}
 									</Button>
 								</form>
 							</td>

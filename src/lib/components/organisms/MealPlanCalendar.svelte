@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import CalendarDayCell from '$lib/components/molecules/CalendarDayCell.svelte';
 	import CalendarDaySheet from '$lib/components/molecules/CalendarDaySheet.svelte';
 	import {
@@ -69,24 +70,24 @@
 	}
 </script>
 
-<section class="calendar-shell" aria-label="Månadskalender">
+<section class="calendar-shell" aria-label={t('planer.calendarAria')}>
 	<header class="month-nav">
 		<a
 			href="/planer?month={previousMonth}"
 			class="nav-btn"
-			aria-label="Föregående månad"
+			aria-label={t('planer.prevMonth')}
 		>
 			<span class="nav-icon" aria-hidden="true">←</span>
-			<span class="nav-text">Förra</span>
+			<span class="nav-text">{t('planer.prevMonthShort')}</span>
 		</a>
 
 		<div class="month-title-wrap">
 			<h2>{monthLabel}</h2>
-			<a href="/planer" class="today-link">Idag</a>
+			<a href="/planer" class="today-link">{t('common.today')}</a>
 		</div>
 
-		<a href="/planer?month={nextMonth}" class="nav-btn" aria-label="Nästa månad">
-			<span class="nav-text">Nästa</span>
+		<a href="/planer?month={nextMonth}" class="nav-btn" aria-label={t('planer.nextMonth')}>
+			<span class="nav-text">{t('common.next')}</span>
 			<span class="nav-icon" aria-hidden="true">→</span>
 		</a>
 	</header>
@@ -94,7 +95,7 @@
 	<div
 		class="calendar-card"
 		role="region"
-		aria-label="Kalendergrid, svep vänster eller höger för att byta månad"
+		aria-label={t('planer.gridAria')}
 		ontouchstart={onTouchStart}
 		ontouchend={onTouchEnd}
 	>

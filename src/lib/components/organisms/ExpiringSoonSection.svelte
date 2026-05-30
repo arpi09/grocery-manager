@@ -5,37 +5,35 @@
 	import {
 		EXPIRING_SOON_DAYS,
 		daysUntilExpiry,
-		formatDaysLeftSv,
-		formatExpiryDateSv
+		formatDaysLeft,
+		formatExpiryDate
 	} from '$lib/domain/expiry';
-	import type { StorageLocation } from '$lib/domain/location';
 	import { LOCATION_COLORS } from '$lib/domain/location';
+	import { getLocale, t } from '$lib/i18n';
+	import { locationLabel } from '$lib/i18n/domain-labels';
 
 	interface Props {
 		items: InventoryItem[];
+		showEmpty?: boolean;
 	}
 
-	let { items }: Props = $props();
-
-	const locationLabelsSv: Record<StorageLocation, string> = {
-		fridge: 'Kylskåp',
-		freezer: 'Frys',
-		cupboard: 'Skafferi'
-	};
+	let { items, showEmpty = true }: Props = $props();
 </script>
 
 <section class="expiring-soon" aria-labelledby="expiring-soon-heading">
 	<header class="header">
-		<h2 id="expiring-soon-heading">Går ut snart</h2>
-		<p class="subtitle">Inom {EXPIRING_SOON_DAYS} dagar</p>
+		<h2 id="expiring-soon-heading">{t('expiring.title')}</h2>
+		<p class="subtitle">{t('expiring.subtitle', { days: EXPIRING_SOON_DAYS })}</p>
 	</header>
 
 	{#if items.length === 0}
-		<Card>
-			<p class="empty">
-				Inget går ut de närmaste {EXPIRING_SOON_DAYS} dagarna — bra jobbat!
-			</p>
-		</Card>
+		{#if showEmpty}
+			<Card>
+				<p class="empty">
+					{t('expiring.empty', { days: EXPIRING_SOON_DAYS })}
+				</p>
+			</Card>
+		{/if}
 	{:else}
 		<ul class="list">
 			{#each items as item (item.id)}
@@ -50,16 +48,16 @@
 										class="location"
 										style="color: {LOCATION_COLORS[item.location]}"
 									>
-										{locationLabelsSv[item.location]}
+										{locationLabel(getLocale(), item.location)}
 									</span>
 									{#if item.expiresOn}
 										<span class="dot" aria-hidden="true">·</span>
-										<span>{formatExpiryDateSv(item.expiresOn)}</span>
+										<span>{formatExpiryDate(item.expiresOn, getLocale())}</span>
 									{/if}
 								</p>
 							</div>
 							{#if item.expiresOn && daysLeft !== null}
-								<Badge tone="warning">{formatDaysLeftSv(daysLeft)}</Badge>
+								<Badge tone="warning">{formatDaysLeft(daysLeft, getLocale())}</Badge>
 							{/if}
 						</div>
 					</Card>

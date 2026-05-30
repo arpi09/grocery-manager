@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { BrowserMultiFormatReader } from '@zxing/browser';
 	import { onDestroy } from 'svelte';
 	import { canAccessCamera, BARCODE_HTTPS_HINT } from '$lib/utils/device';
@@ -43,7 +44,7 @@
 		try {
 			const devices = await BrowserMultiFormatReader.listVideoInputDevices();
 			if (devices.length === 0) {
-				scannerError = 'Ingen kamera hittades på enheten.';
+				scannerError = t('scanFlow.noCamera');
 				scanning = false;
 				return;
 			}
@@ -68,8 +69,7 @@
 
 			stopScanner = () => controls.stop();
 		} catch {
-			scannerError =
-				'Kunde inte öppna kameran. Tillåt kameraåtkomst i webbläsarens inställningar.';
+			scannerError = t('scanFlow.cameraDenied');
 			cleanup();
 		}
 	}

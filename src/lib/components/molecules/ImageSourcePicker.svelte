@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import Button from '$lib/components/atoms/Button.svelte';
 
 	interface Props {
 		cameraLabel: string;
 		fileLabel: string;
 		accept?: string;
+		cameraAccept?: string;
 		disabled?: boolean;
 		onSelect: (file: File) => void;
 	}
@@ -13,6 +15,7 @@
 		cameraLabel,
 		fileLabel,
 		accept = 'image/*',
+		cameraAccept = 'image/*',
 		disabled = false,
 		onSelect
 	}: Props = $props();
@@ -30,7 +33,7 @@
 	}
 </script>
 
-<div class="picker" role="group" aria-label="Välj kvitto eller bildkälla">
+<div class="picker" role="group" aria-label={t('receipt.pickSourceAria')}>
 	<Button
 		type="button"
 		variant="primary"
@@ -56,7 +59,7 @@
 <input
 	bind:this={cameraInputEl}
 	type="file"
-	{accept}
+	accept={cameraAccept}
 	capture="environment"
 	class="sr-input"
 	{disabled}

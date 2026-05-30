@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import BarcodeScannerModal from '$lib/components/organisms/BarcodeScannerModal.svelte';
@@ -70,8 +71,8 @@
 			if (!response.ok) {
 				scanMessage =
 					response.status === 400
-						? 'Ogiltig streckkod. Ange minst 8 siffror.'
-						: 'Kunde inte slå upp streckkoden just nu.';
+						? t('item.invalidBarcode')
+						: t('pets.lookupFailed');
 				return;
 			}
 
@@ -83,10 +84,10 @@
 				notes = notes ? `${notes}\n${product.notes}` : product.notes;
 			}
 			scanMessage = found
-				? `Hittade ${product.name} (${product.barcode}).`
-				: `Okänd streckkod – fyllde i "${product.name}".`;
+				? t('pets.foundProduct', { name: product.name, barcode: product.barcode })
+				: t('pets.unknownBarcode', { name: product.name });
 		} catch {
-			scanMessage = 'Nätverksfel vid uppslagning av streckkod.';
+			scanMessage = t('pets.lookupNetwork');
 		} finally {
 			lookupLoading = false;
 		}
@@ -123,7 +124,7 @@
 			};
 
 			if (!response.ok || !data.product) {
-				scanMessage = data.error ?? 'Could not read product from image.';
+				scanMessage = data.error ?? t('pets.photoReadFailed');
 				return;
 			}
 
@@ -134,9 +135,9 @@
 				notes = notes ? `${notes}\n${data.product.notes}` : data.product.notes;
 			}
 
-			scanMessage = `Filled from photo scan (${data.product.confidence} confidence).`;
+			scanMessage = t('pets.photoFilled', { confidence: data.product.confidence });
 		} catch {
-			scanMessage = 'Network error while scanning image.';
+			scanMessage = t('pets.photoNetworkError');
 		} finally {
 			lookupLoading = false;
 			input.value = '';
@@ -144,27 +145,27 @@
 	}
 </script>
 
-<Modal {open} onClose={closeModal} variant="center" title="Add pet food" panelClass="pet-food-panel">
+<Modal {open} onClose={closeModal} variant="center" title={t('pets.modalTitle')} panelClass="pet-food-panel">
 	<div class="scan-tabs">
 		<button
 			type="button"
 			class:active={scanMode === 'barcode'}
 			onclick={() => (scanMode = 'barcode')}
 		>
-			Barcode
+			{t('pets.barcodeTab')}
 		</button>
 		<button type="button" class:active={scanMode === 'photo'} onclick={() => (scanMode = 'photo')}>
-			ChatGPT Photo Scan
+			{t('pets.photoTab')}
 		</button>
 	</div>
 
 	{#if scanMode === 'barcode'}
 		<Button type="button" variant="secondary" onclick={openScanner} disabled={lookupLoading} fullWidth>
-			{lookupLoading ? 'Looking up...' : 'Scan pet food barcode'}
+			{lookupLoading ? t('common.lookup') : t('pets.scanBarcodeBtn')}
 		</Button>
 	{:else}
 		<Button type="button" variant="primary" onclick={triggerPhotoPicker} disabled={lookupLoading} fullWidth>
-			{lookupLoading ? 'Analyzing...' : 'Scan pet food with photo'}
+			{lookupLoading ? t('pets.analyzing') : t('pets.scanPhotoBtn')}
 		</Button>
 		<input
 			bind:this={photoInputEl}
@@ -182,36 +183,36 @@
 
 	<form method="POST" action={submitAction} class="form">
 		<label>
-			Food name
-			<input name="name" bind:value={name} placeholder="e.g. Grain-free cat food" required />
+			{t('pets.foodName')}
+			<input name="name" bind:value={name} placeholder={t('pets.foodNamePlaceholder')} required />
 		</label>
 		<div class="row">
 			<label>
-				Quantity
+				{t('common.quantity')}
 				<input name="quantity" bind:value={quantity} inputmode="decimal" required />
 			</label>
 			<label>
-				Unit
-				<input name="unit" bind:value={unit} placeholder="kg, g, pcs..." />
+				{t('common.unit')}
+				<input name="unit" bind:value={unit} placeholder={t('item.unitPlaceholder')} />
 			</label>
 		</div>
 		<label>
-			For pet (optional)
+			{t('pets.forPetOptional')}
 			<select name="petId" bind:value={petId}>
-				<option value="">Any pet</option>
+				<option value="">{t('pets.anyPet')}</option>
 				{#each pets as pet}
 					<option value={pet.id}>{pet.name}{pet.species ? ` (${pet.species})` : ''}</option>
 				{/each}
 			</select>
 		</label>
 		<label>
-			Notes (optional)
+			{t('common.notes')} ({t('common.optional')})
 			<textarea name="notes" rows="3" bind:value={notes}></textarea>
 		</label>
 
 		<div class="actions">
-			<Button type="button" variant="secondary" onclick={closeModal}>Cancel</Button>
-			<Button type="submit">Save pet food</Button>
+			<Button type="button" variant="secondary" onclick={closeModal}>{t('common.cancel')}</Button>
+			<Button type="submit">{t('pets.savePetFood')}</Button>
 		</div>
 	</form>
 </Modal>

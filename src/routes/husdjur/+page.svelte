@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
@@ -11,17 +12,17 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title="Husdjur" subtitle="Dina husdjur hemma" />
+	<AppHeader title={t('pets.title')} subtitle={t('pets.subtitle')} />
 
 	<PageContainer>
 	<section class="pets">
 		<div class="pets-head">
-			<h2>Pets at home</h2>
-			<Button type="button" onclick={() => (petFoodModalOpen = true)}>Scan pet food</Button>
+			<h2>{t('pets.atHome')}</h2>
+			<Button type="button" onclick={() => (petFoodModalOpen = true)}>{t('pets.scanFood')}</Button>
 		</div>
 
 		{#if data.pets.length === 0}
-			<p>Inga husdjur tillagda an. Ga till Settings for att lagga till.</p>
+			<p>{t('pets.emptyPets')}</p>
 		{:else}
 			<ul>
 				{#each data.pets as pet}
@@ -37,9 +38,9 @@
 	</section>
 
 	<section class="pets food">
-		<h2>Pet food inventory</h2>
+		<h2>{t('pets.foodInventory')}</h2>
 		{#if data.petFood.length === 0}
-			<p>No pet food added yet. Use the scan button above.</p>
+			<p>{t('pets.emptyFood')}</p>
 		{:else}
 			<ul>
 				{#each data.petFood as food}
@@ -53,8 +54,8 @@
 							context="petFood"
 							copyOptions={{ itemName: food.name }}
 							action="?/deletePetFood"
-							label="Ta bort"
-							ariaLabel={`Ta bort ${food.name}`}
+							label={t('common.delete')}
+							ariaLabel={t('pets.removeFoodNamed', { name: food.name })}
 						>
 							<input type="hidden" name="id" value={food.id} />
 						</DeleteConfirmButton>

@@ -33,20 +33,20 @@ export function setLocale(locale: Locale): void {
 	document.documentElement.lang = locale;
 }
 
+/** Apply locale from SSR layout data (cookie). Server locale wins over any stale client storage. */
 export function initLocale(serverLocale: Locale): void {
+	if (!isLocale(serverLocale)) {
+		return;
+	}
+
 	currentLocale = serverLocale;
 
 	if (!browser) {
 		return;
 	}
 
-	const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
-	if (stored && isLocale(stored) && stored !== serverLocale) {
-		setLocale(stored);
-		return;
-	}
-
 	localStorage.setItem(LOCALE_STORAGE_KEY, serverLocale);
+	writeClientLocaleCookie(serverLocale);
 	document.documentElement.lang = serverLocale;
 }
 

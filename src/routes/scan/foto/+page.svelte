@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { t } from '$lib/i18n';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
@@ -31,34 +32,32 @@
 
 	function continueToForm() {
 		const from = encodeURIComponent(data.returnTo);
-		void goto(
-			`/item/new?location=${data.defaultLocation}&from=${from}`
-		);
+		void goto(`/item/new?location=${data.defaultLocation}&from=${from}`);
 	}
 </script>
 
 <AppLayout user={data.user}>
 	<AppHeader
-		title="Fota produkt"
-		subtitle="AI läser etiketten och fyller i uppgifter"
+		title={t('photoScan.title')}
+		subtitle={t('photoScan.subtitle')}
 		backHref={hubHref}
-		backLabel="Alla skanningslägen"
+		backLabel={t('scan.allModes')}
 	/>
 	<PageContainer>
 		{#if !data.canWrite}
 			<p class="readonly" role="status">
-				Du har endast läsbehörighet i detta hushåll och kan inte lägga till varor.
+				{t('scan.readonly')}
 			</p>
 		{:else}
 			<ProductPhotoScanPicker onProduct={handleProduct} />
 			{#if ready}
 				<div class="continue">
 					<Button type="button" fullWidth onclick={continueToForm}>
-						Fortsätt och granska
+						{t('photoScan.continueReview')}
 					</Button>
 				</div>
 			{/if}
-			<ScanFlowFooter cancelHref={data.returnTo} cancelLabel="Avbryt" />
+			<ScanFlowFooter cancelHref={data.returnTo} cancelLabel={t('common.cancel')} />
 		{/if}
 	</PageContainer>
 </AppLayout>

@@ -12,9 +12,9 @@
 	const headingId = $derived(`settings-${title.toLowerCase().replace(/\s+/g, '-')}`);
 </script>
 
-<section class="settings-section" aria-labelledby={headingId}>
+	<section class="settings-section" aria-labelledby={headingId}>
 	<header class="section-header">
-		<h2 id={headingId}>{title}</h2>
+		<h2 id={headingId} class="label-caps">{title}</h2>
 		{#if description}
 			<p class="section-description">{description}</p>
 		{/if}
@@ -40,11 +40,6 @@
 
 	.section-header h2 {
 		margin: 0;
-		font-size: 0.78rem;
-		font-weight: 600;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-		color: var(--color-text-muted);
 	}
 
 	.section-description {

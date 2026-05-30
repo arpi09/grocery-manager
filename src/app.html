@@ -7,6 +7,15 @@
 				if (theme.indexOf('%pantry.') !== 0) {
 					document.documentElement.dataset.theme = theme;
 				}
+				var locale = '%pantry.locale%';
+				if (locale === 'en' || locale === 'sv') {
+					document.documentElement.lang = locale;
+					return;
+				}
+				var match = document.cookie.match(/(?:^|; )home-pantry-locale=([^;]+)/);
+				if (match && (match[1] === 'en' || match[1] === 'sv')) {
+					document.documentElement.lang = match[1];
+				}
 			})();
 		</script>
 		<meta charset="utf-8" />

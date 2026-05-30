@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
@@ -8,11 +9,11 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title="Snabbstart" subtitle="Markera det du har hemma" />
+	<AppHeader title={t('starter.title')} subtitle={t('starter.subtitle')} />
 	<PageContainer>
 		{#if !data.canWrite}
-			<p class="readonly" role="status">Du har endast läsbehörighet.</p>
-			<p><a href={data.returnTo}>← Tillbaka</a></p>
+			<p class="readonly" role="status">{t('starter.readonly')}</p>
+			<p><a href={data.returnTo}>← {t('common.back')}</a></p>
 		{:else}
 			<StarterPackFlow returnTo={data.returnTo} />
 		{/if}

@@ -58,7 +58,7 @@
 		error={errors.password?.[0]}
 	/>
 
-	<Button type="submit" fullWidth disabled={submitting}>
+	<Button type="submit" fullWidth disabled={submitting} data-testid="login-submit">
 		{submitting ? t('auth.login.submitting') : t('auth.login.submit')}
 	</Button>
 
@@ -111,34 +111,27 @@
 		width: 100%;
 		padding: 0.75rem 1.25rem;
 		border-radius: var(--radius-sm);
-		font-weight: 700;
-		font-size: 1rem;
+		font-weight: 600;
+		font-size: var(--font-size-body);
 		text-decoration: none;
 		color: var(--color-text);
-		background: linear-gradient(
-			135deg,
-			color-mix(in srgb, var(--color-accent) 28%, var(--color-surface-muted)) 0%,
-			var(--color-surface-muted) 55%,
-			color-mix(in srgb, var(--color-primary) 12%, var(--color-surface-muted)) 100%
-		);
-		border: 1px solid color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+		background: var(--color-surface-muted);
+		border: 1px solid var(--color-border);
 		box-shadow: var(--shadow-sm);
 		transition:
-			transform 0.15s ease,
-			box-shadow 0.15s ease,
+			background 0.15s ease,
 			border-color 0.15s ease;
 	}
 
 	.register-cta:hover {
 		text-decoration: none;
-		border-color: var(--color-accent);
-		box-shadow: var(--shadow-md);
-		transform: translateY(-1px);
+		background: color-mix(in srgb, var(--color-surface-muted) 85%, var(--color-border));
+		border-color: color-mix(in srgb, var(--color-text-muted) 35%, var(--color-border));
 	}
 
 	.register-cta:focus-visible {
-		outline: 2px solid var(--color-primary);
-		outline-offset: 2px;
+		outline: var(--focus-ring-width) solid var(--focus-ring-color);
+		outline-offset: var(--focus-ring-offset);
 	}
 
 	.register-cta-arrow {
@@ -153,13 +146,8 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.register-cta,
 		.register-cta-arrow {
 			transition: none;
-		}
-
-		.register-cta:hover {
-			transform: none;
 		}
 	}
 </style>

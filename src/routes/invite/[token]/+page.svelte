@@ -1,57 +1,57 @@
 <script lang="ts">
+	import { getLocale, t } from '$lib/i18n';
+	import { inviteRoleLabel } from '$lib/domain/household';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
-	import { inviteRoleLabel } from '$lib/domain/household';
 
 	let { data, form } = $props();
 
 	const acceptError = $derived(form?.acceptError ?? null);
 	const loginHref = $derived(
-		`/login?redirect=${encodeURIComponent(data.redirectTo)}&message=${encodeURIComponent('Logga in med samma e-postadress som inbjudan skickades till.')}`
+		`/login?redirect=${encodeURIComponent(data.redirectTo)}&message=${encodeURIComponent(t('invite.loginRedirectMessage'))}`
 	);
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title="Hushållsinbjudan" />
+	<AppHeader title={t('invite.title')} />
 	<PageContainer>
 	<Card>
 		{#if !data.preview}
-			<p class="message error">Inbjudan hittades inte eller är ogiltig.</p>
+			<p class="message error">{t('invite.notFound')}</p>
 		{:else}
-			<h2 class="title">Du är inbjuden till {data.preview.householdName}</h2>
+			<h2 class="title">{t('invite.invitedTo', { name: data.preview.householdName })}</h2>
 			<p class="detail">
-				Roll: <strong>{inviteRoleLabel(data.preview.role)}</strong>
+				{t('invite.roleLabel')} <strong>{inviteRoleLabel(data.preview.role, getLocale())}</strong>
 			</p>
 			<p class="detail">
-				E-post: <strong>{data.preview.email}</strong>
+				{t('invite.emailLabel')} <strong>{data.preview.email}</strong>
 			</p>
 
 			{#if data.preview.status === 'accepted'}
-				<p class="message info">Inbjudan har redan accepterats.</p>
+				<p class="message info">{t('invite.alreadyAccepted')}</p>
 			{:else if data.preview.status === 'revoked'}
-				<p class="message error">Inbjudan har återkallats.</p>
+				<p class="message error">{t('invite.revoked')}</p>
 			{:else if data.preview.expired}
-				<p class="message error">Inbjudan har gått ut.</p>
+				<p class="message error">{t('invite.expired')}</p>
 			{:else if !data.user}
 				<p class="message info">
-					Logga in med kontot {data.preview.email} för att acceptera inbjudan.
+					{t('invite.loginPrompt', { email: data.preview.email })}
 				</p>
-				<a class="login-link" href={loginHref}>Logga in</a>
+				<a class="login-link" href={loginHref}>{t('invite.loginLink')}</a>
 			{:else if !data.emailMatches}
 				<p class="message error">
-					Du är inloggad som {data.user.email}, men inbjudan gäller {data.preview.email}.
-					Logga in med rätt konto.
+					{t('invite.wrongAccount', { current: data.user.email, expected: data.preview.email })}
 				</p>
-				<a class="login-link" href={loginHref}>Byt konto</a>
+				<a class="login-link" href={loginHref}>{t('invite.switchAccount')}</a>
 			{:else if data.canAccept}
 				{#if acceptError}
 					<p class="message error" role="alert">{acceptError}</p>
 				{/if}
 				<form method="POST" action="?/accept">
-					<Button type="submit" fullWidth>Acceptera inbjudan</Button>
+					<Button type="submit" fullWidth>{t('invite.accept')}</Button>
 				</form>
 			{/if}
 		{/if}

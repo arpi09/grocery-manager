@@ -51,7 +51,7 @@ export const actions: Actions = {
 				locals.user.email
 			);
 		} catch (error) {
-			return mapHouseholdErrorToFail(error, 'acceptError');
+			return mapHouseholdErrorToFail(error, 'acceptError', locals.locale);
 		}
 
 		redirect(302, '/');

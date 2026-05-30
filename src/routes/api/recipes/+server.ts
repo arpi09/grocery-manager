@@ -5,12 +5,11 @@ import {
 	parseRecipeSuggestions,
 	RECIPE_SUGGESTIONS_SCHEMA
 } from '$lib/server/recipe-suggestions';
+import { translate } from '$lib/i18n/messages';
 import type { RequestHandler } from './$types';
 
-const PARSE_ERROR_MESSAGE =
-	'Kunde inte tolka receptförslagen från AI. Försök igen om en stund.';
-
 export const POST: RequestHandler = async ({ request, locals }) => {
+	const locale = locals.locale;
 	const auth = requireUser(locals);
 	if (!auth.authorized) {
 		return auth.response;
@@ -29,7 +28,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (inventory.length === 0) {
 		return json({
 			recipes: [],
-			note: 'Inga varor i lagret ännu. Lägg till varor först, sedan kan du generera recept.'
+			note: translate(locale, 'recipe.noInventoryNote')
 		});
 	}
 
@@ -76,7 +75,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	const recipes = parseRecipeSuggestions(result.data);
 	if (recipes.length === 0) {
-		return json({ error: PARSE_ERROR_MESSAGE }, { status: 422 });
+		return json({ error: translate(locale, 'recipe.parseFromAi') }, { status: 422 });
 	}
 
 	const savedIdeas = await locals.mealPlanService.storeGeneratedIdeas(auth.user.id, recipes);

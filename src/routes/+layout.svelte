@@ -1,12 +1,16 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import '../app.css';
+	import NavigationProgress from '$lib/components/molecules/NavigationProgress.svelte';
 	import { resolveTheme, type ThemePreference } from '$lib/domain/theme';
 	import { initLocale } from '$lib/i18n';
 
 	let { children, data } = $props();
 
-	$effect(() => {
+	// SSR: effects do not run on the server; sync init uses layout load locale (cookie).
+	initLocale(data.locale);
+
+	$effect.pre(() => {
 		initLocale(data.locale);
 	});
 
@@ -39,4 +43,5 @@
 	});
 </script>
 
+<NavigationProgress />
 {@render children()}

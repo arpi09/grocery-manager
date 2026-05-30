@@ -11,6 +11,7 @@ import {
 	ERROR_LOG_ADMIN_LIST_MAX
 } from '$lib/domain/error-log';
 import { fail, redirect } from '@sveltejs/kit';
+import { translate } from '$lib/i18n/messages';
 import type { Actions, PageServerLoad } from './$types';
 
 function parseErrorLogLimit(raw: string | null): number {
@@ -93,7 +94,7 @@ export const actions: Actions = {
 		});
 
 		if (!parsed.success) {
-			return fail(400, { message: 'Skriv bekräftelse för att logga ut alla.' });
+			return fail(400, { message: translate(locals.locale, 'admin.logoutConfirmRequired') });
 		}
 
 		const sessionCount = await locals.adminService.logoutAllUsers();
@@ -105,7 +106,7 @@ export const actions: Actions = {
 
 		redirect(
 			302,
-			`/login?message=${encodeURIComponent(`Alla användare har loggats ut (${sessionCount} sessioner).`)}`
+			`/login?message=${encodeURIComponent(translate(locals.locale, 'admin.loggedOutAll', { count: sessionCount }))}`
 		);
 	},
 	logoutUser: async ({ request, locals, cookies }) => {
@@ -115,7 +116,7 @@ export const actions: Actions = {
 		});
 
 		if (!parsed.success) {
-			return fail(400, { message: 'Ogiltig användare.' });
+			return fail(400, { message: translate(locals.locale, 'admin.invalidUser') });
 		}
 
 		await locals.adminService.logoutUser(parsed.data.userId);
@@ -126,7 +127,7 @@ export const actions: Actions = {
 				path: '/',
 				...sessionCookie.attributes
 			});
-			redirect(302, '/login?message=' + encodeURIComponent('Du har loggats ut.'));
+			redirect(302, '/login?message=' + encodeURIComponent(translate(locals.locale, 'admin.loggedOut')));
 		}
 
 		redirect(302, '/admin');

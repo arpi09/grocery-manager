@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
@@ -37,12 +38,12 @@
 	let note = $state<string | null>(null);
 
 	const insightTypeLabels: Record<string, string> = {
-		expiring: 'Utgår snart',
-		running_low: 'Håller på att ta slut',
-		use_soon: 'Använd snart',
-		restock: 'Fyll på',
-		meal_plan: 'Måltidsplan',
-		tip: 'Tips'
+		expiring: t('shopping.insightExpiring'),
+		running_low: t('shopping.insightRunningLow'),
+		use_soon: t('shopping.insightUseSoon'),
+		restock: t('shopping.insightRestock'),
+		meal_plan: t('shopping.insightMealPlan'),
+		tip: t('shopping.insightTip')
 	};
 
 	const priorityTone = (priority: string) => {
@@ -73,7 +74,7 @@
 			};
 
 			if (!response.ok) {
-				errorMessage = data.error ?? 'Kunde inte hämta inventarietips.';
+				errorMessage = data.error ?? t('shopping.insightsError');
 				return;
 			}
 
@@ -81,7 +82,7 @@
 			insights = data.insights ?? [];
 			note = data.note ?? null;
 		} catch {
-			errorMessage = 'Nätverksfel vid hämtning av tips.';
+			errorMessage = t('shopping.insightsNetwork');
 		} finally {
 			loadingInsights = false;
 		}
@@ -104,7 +105,7 @@
 			};
 
 			if (!response.ok) {
-				errorMessage = data.error ?? 'Kunde inte skapa ICA-lista.';
+				errorMessage = data.error ?? t('shopping.icaError');
 				return;
 			}
 
@@ -112,7 +113,7 @@
 			icaNote = data.note ?? null;
 			checked = {};
 		} catch {
-			errorMessage = 'Nätverksfel vid skapande av inköpslista.';
+			errorMessage = t('shopping.icaNetwork');
 		} finally {
 			loadingIca = false;
 		}
@@ -144,11 +145,10 @@
 
 <section class="assistant">
 	<p class="intro">
-		AI analyserar ditt skafferi, utgångsdatum och måltidsplan — och föreslår en inköpslista anpassad
-		för ICA.
+		{t('shopping.assistantIntro')}
 	</p>
 
-	<div class="tabs" role="tablist" aria-label="Inköpsassistent">
+	<div class="tabs" role="tablist" aria-label={t('shopping.assistantAria')}>
 		<button
 			type="button"
 			class:active={activeTab === 'insights'}
@@ -156,7 +156,7 @@
 			aria-selected={activeTab === 'insights'}
 			onclick={() => (activeTab = 'insights')}
 		>
-			Inventarietips
+			{t('shopping.insightsTab')}
 		</button>
 		<button
 			type="button"
@@ -165,29 +165,29 @@
 			aria-selected={activeTab === 'ica'}
 			onclick={() => (activeTab = 'ica')}
 		>
-			ICA inköpslista
+			{t('shopping.icaTab')}
 		</button>
 	</div>
 
 	{#if activeTab === 'insights'}
 		<div class="panel" role="tabpanel">
-			<label class="label" for="insight-focus">Fokus (valfritt)</label>
+			<label class="label" for="insight-focus">{t('shopping.focusOptional')}</label>
 			<textarea
 				id="insight-focus"
 				class="textarea"
 				rows="2"
 				maxlength="300"
 				bind:value={focus}
-				placeholder="T.ex. vad ska jag laga i helgen? Vad bör jag använda först?"
+				placeholder={t('shopping.focusPlaceholder')}
 			></textarea>
 			<Button
 				type="button"
 				onclick={generateInsights}
 				loading={loadingInsights}
-				loadingLabel="Tänker…"
+				loadingLabel={t('common.thinking')}
 				fullWidth
 			>
-				Få inventarietips
+				{t('shopping.generateInsightsBtn')}
 			</Button>
 
 			{#if summary}
@@ -214,7 +214,7 @@
 							<p>{insight.detail}</p>
 							{#if insight.relatedItems.length > 0}
 								<p class="related">
-									<strong>Varor:</strong> {insight.relatedItems.join(', ')}
+									<strong>{t('shopping.relatedItems')}</strong> {insight.relatedItems.join(', ')}
 								</p>
 							{/if}
 						</li>
@@ -224,17 +224,17 @@
 		</div>
 	{:else}
 		<div class="panel" role="tabpanel">
-			<label class="label" for="ica-preferences">Preferenser (valfritt)</label>
+			<label class="label" for="ica-preferences">{t('shopping.preferences')}</label>
 			<textarea
 				id="ica-preferences"
 				class="textarea"
 				rows="2"
 				maxlength="300"
 				bind:value={preferences}
-				placeholder="T.ex. vegetariskt, budget, glutenfritt, barnfamilj"
+				placeholder={t('shopping.preferencesPlaceholder')}
 			></textarea>
 
-			<label class="label" for="household-size">Antal personer i hushållet</label>
+			<label class="label" for="household-size">{t('shopping.householdSizeLabel')}</label>
 			<input
 				id="household-size"
 				class="number-input"
@@ -248,10 +248,10 @@
 				type="button"
 				onclick={generateIcaList}
 				loading={loadingIca}
-				loadingLabel="Tänker…"
+				loadingLabel={t('common.thinking')}
 				fullWidth
 			>
-				Skapa ICA-inköpslista
+				{t('shopping.createIcaList')}
 			</Button>
 
 			{#if icaNote}
@@ -261,7 +261,7 @@
 			{#if icaItems.length > 0}
 				<div class="ica-actions">
 					<Button type="button" variant="secondary" onclick={copyIcaList}>
-						Kopiera checklista
+						{t('shopping.copyChecklist')}
 					</Button>
 				</div>
 
@@ -290,7 +290,7 @@
 										target="_blank"
 										rel="noopener noreferrer"
 									>
-										Sök på ICA →
+										{t('shopping.searchOnIca')}
 									</a>
 								</li>
 							{/each}

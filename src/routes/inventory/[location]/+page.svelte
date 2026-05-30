@@ -2,93 +2,125 @@
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
+	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
 	import LocationTab from '$lib/components/molecules/LocationTab.svelte';
 	import InventoryList from '$lib/components/organisms/InventoryList.svelte';
-	import { LOCATION_LABELS } from '$lib/domain/location';
+	import { getLocale, t } from '$lib/i18n';
+	import { locationLabel } from '$lib/i18n/domain-labels';
 
 	let { data } = $props();
+
+	const inventoryPath = $derived(`/inventory/${data.location}`);
+	const from = $derived(encodeURIComponent(inventoryPath));
+	const addItemHref = $derived(`/item/new?location=${data.location}&from=${from}`);
+	const scanHref = $derived(`/scan?mode=barcode&location=${data.location}&from=${from}`);
+
+	const activeCount = $derived(data.items.length);
+	const totalCount = $derived(data.items.length + data.finishedItems.length);
+	const hasInventory = $derived(totalCount > 0);
+
+	const headerSubtitle = $derived(
+		hasInventory
+			? t('inventory.itemCountSubtitle', { count: activeCount })
+			: t('inventory.subtitle')
+	);
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title={LOCATION_LABELS[data.location]} subtitle="Ditt skafferi" />
+	<AppHeader
+		title={locationLabel(getLocale(), data.location)}
+		subtitle={headerSubtitle}
+	/>
+
 	<PageContainer>
-		<LocationTab active={data.location} />
-		<div class="toolbar">
-			{#if data.canWrite}
-				{@const inventoryPath = `/inventory/${data.location}`}
-				{@const from = encodeURIComponent(inventoryPath)}
-				{@const addItemHref = `/item/new?location=${data.location}&from=${from}`}
-				{@const scanHref = `/scan?mode=barcode&location=${data.location}&from=${from}`}
-				<a class="scan-btn scan-btn--desktop" href={scanHref}>📷 Skanna</a>
-				<a class="add-btn add-btn--desktop" href={addItemHref}>+ Lägg till</a>
-				<a class="add-btn add-btn--mobile" href={addItemHref} data-sveltekit-reload>
-					+ Lägg till
-				</a>
+		<div class="inventory-page">
+			<LocationTab active={data.location} />
+
+			{#if data.canWrite && hasInventory}
+				<div class="action-row">
+					<a class="scan-primary" href={scanHref}>
+						<FeatureIcon id="barcode" size={18} />
+						{t('inventory.scanItem')}
+					</a>
+					<a class="manual-secondary" href={addItemHref} data-sveltekit-reload>
+						{t('inventory.addManual')}
+					</a>
+				</div>
 			{/if}
+
+			<InventoryList
+				items={data.items}
+				finishedItems={data.finishedItems}
+				location={data.location}
+				canWrite={data.canWrite}
+				{hasInventory}
+			/>
 		</div>
-		<InventoryList items={data.items} location={data.location} canWrite={data.canWrite} />
 	</PageContainer>
 </AppLayout>
 
 <style>
-	.toolbar {
+	.inventory-page {
 		display: flex;
-		justify-content: flex-end;
-		flex-wrap: wrap;
+		flex-direction: column;
+		gap: var(--space-lg);
+	}
+
+	.action-row {
+		display: flex;
+		align-items: stretch;
 		gap: var(--space-sm);
-		margin: var(--space-md) 0;
 	}
 
-	.scan-btn {
+	.scan-primary {
+		flex: 1 1 60%;
 		display: inline-flex;
-		padding: 0.5rem 1rem;
-		border: 1px solid var(--color-primary);
-		color: var(--color-primary);
-		background: var(--color-surface);
-		font-weight: 600;
-		border-radius: var(--radius-sm);
-		text-decoration: none;
-		min-height: 2.75rem;
 		align-items: center;
-	}
-
-	@media (max-width: 768px) {
-		.scan-btn--desktop {
-			display: none;
-		}
-	}
-
-	.scan-btn:hover {
-		background: var(--color-surface-muted);
+		justify-content: center;
+		gap: var(--space-sm);
+		min-height: 2.75rem;
+		padding: 0.65rem 1rem;
+		font-weight: 700;
+		font-size: 0.95rem;
+		border-radius: var(--radius-md);
 		text-decoration: none;
-	}
-
-	.add-btn {
-		display: inline-flex;
-		padding: 0.5rem 1rem;
 		background: var(--color-primary);
 		color: #fff;
-		font-weight: 600;
-		border-radius: var(--radius-sm);
-		text-decoration: none;
+		box-shadow: var(--shadow-sm);
 	}
 
-	.add-btn--mobile {
-		display: none;
-	}
-
-	.add-btn:hover {
+	.scan-primary:hover {
 		background: var(--color-primary-hover);
 		text-decoration: none;
 	}
 
-	@media (max-width: 768px) {
-		.add-btn--desktop {
-			display: none;
-		}
+	.manual-secondary {
+		flex: 0 0 auto;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2.75rem;
+		padding: 0.65rem 0.85rem;
+		font-weight: 600;
+		font-size: 0.85rem;
+		border-radius: var(--radius-md);
+		text-decoration: none;
+		color: var(--color-text-muted);
+		background: transparent;
+		border: 1px solid var(--color-border);
+		white-space: nowrap;
+	}
 
-		.add-btn--mobile {
-			display: inline-flex;
+	.manual-secondary:hover {
+		color: var(--color-text);
+		border-color: var(--color-border);
+		background: var(--color-surface-muted);
+		text-decoration: none;
+	}
+
+	@media (min-width: 560px) {
+		.action-row {
+			max-width: 28rem;
 		}
 	}
 </style>

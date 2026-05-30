@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import ImageSourcePicker from '$lib/components/molecules/ImageSourcePicker.svelte';
 
 	interface ProductFromImage {
@@ -17,6 +18,12 @@
 
 	let loading = $state(false);
 	let message = $state<string | null>(null);
+
+	function confidenceLabel(confidence: ProductFromImage['confidence']): string {
+		if (confidence === 'high') return t('photoScan.confidenceHigh');
+		if (confidence === 'medium') return t('photoScan.confidenceMedium');
+		return t('photoScan.confidenceLow');
+	}
 
 	async function handlePhotoSelected(file: File) {
 		loading = true;
@@ -37,20 +44,16 @@
 			};
 
 			if (!response.ok || !data.product) {
-				message = data.error ?? 'Kunde inte läsa produkten från bilden. Försök med en tydligare bild.';
+				message = data.error ?? t('photoScan.readFailed');
 				return;
 			}
 
-			const confidenceLabel =
-				data.product.confidence === 'high'
-					? 'hög'
-					: data.product.confidence === 'medium'
-						? 'medel'
-						: 'låg';
-			message = `Fyllde i uppgifter från fotot (säkerhet: ${confidenceLabel}). Kontrollera innan du sparar.`;
+			message = t('photoScan.filledFromPhoto', {
+				confidence: confidenceLabel(data.product.confidence)
+			});
 			onProduct?.(data.product);
 		} catch {
-			message = 'Nätverksfel vid analys av bilden.';
+			message = t('photoScan.networkError');
 		} finally {
 			loading = false;
 		}
@@ -58,13 +61,13 @@
 </script>
 
 <ImageSourcePicker
-	cameraLabel={loading ? 'Läser produkten…' : '📷 Fota produkt'}
-	fileLabel={loading ? 'Läser produkten…' : '📁 Välj bild från filer'}
+	cameraLabel={loading ? t('photoScan.reading') : t('photoScan.title')}
+	fileLabel={loading ? t('photoScan.reading') : t('photoScan.pickFile')}
 	disabled={loading}
 	onSelect={handlePhotoSelected}
 />
 <p class="help">
-	Ta en tydlig bild av produktetiketten så fyller vi i namn, mängd och enhet åt dig.
+	{t('photoScan.pickHint')}
 </p>
 {#if message}
 	<p class="status" role="status">{message}</p>

@@ -1,3 +1,9 @@
+import { DEFAULT_LOCALE, type Locale } from '$lib/i18n/locale';
+import {
+	householdRoleLabelI18n,
+	inviteRoleLabelI18n
+} from '$lib/i18n/domain-labels';
+
 export type HouseholdRole = 'owner' | 'editor' | 'viewer';
 
 export type InviteRole = 'editor' | 'viewer';
@@ -42,22 +48,13 @@ export function isHouseholdOwner(role: HouseholdRole): boolean {
 	return role === 'owner';
 }
 
-export function householdRoleLabel(role: HouseholdRole): string {
-	switch (role) {
-		case 'owner':
-			return 'Ägare';
-		case 'editor':
-			return 'Redigera';
-		case 'viewer':
-			return 'Visa';
-	}
+export function householdRoleLabel(
+	role: HouseholdRole,
+	locale: Locale = DEFAULT_LOCALE
+): string {
+	return householdRoleLabelI18n(locale, role);
 }
 
-export function inviteRoleLabel(role: InviteRole): string {
-	switch (role) {
-		case 'editor':
-			return 'Redigera';
-		case 'viewer':
-			return 'Visa';
-	}
+export function inviteRoleLabel(role: InviteRole, locale: Locale = DEFAULT_LOCALE): string {
+	return inviteRoleLabelI18n(locale, role);
 }

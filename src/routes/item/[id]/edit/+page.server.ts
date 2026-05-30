@@ -84,5 +84,25 @@ export const actions: Actions = {
 		}
 
 		redirect(302, `/inventory/${location}`);
+	},
+	markAsFinished: async (event) => {
+		requireInventoryWriteAccess(event.locals.householdRole);
+
+		let location = 'fridge';
+		try {
+			const item = await event.locals.inventoryService.markAsFinished(
+				event.locals.householdId!,
+				event.params.id,
+				event.locals.householdRole!
+			);
+			location = item.location;
+		} catch (e) {
+			if (e instanceof InventoryNotFoundError) {
+				error(404, 'Item not found');
+			}
+			throw e;
+		}
+
+		redirect(302, `/inventory/${location}`);
 	}
 };

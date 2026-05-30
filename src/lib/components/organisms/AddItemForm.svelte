@@ -8,7 +8,9 @@
 	import ProductPhotoScanPicker from '$lib/components/molecules/ProductPhotoScanPicker.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 
-	import { LOCATIONS, LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
+	import { getLocale, t } from '$lib/i18n';
+	import { locationLabel } from '$lib/i18n/domain-labels';
+	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 
@@ -64,8 +66,8 @@
 			if (!response.ok) {
 				scanMessage =
 					response.status === 400
-						? 'Ogiltig streckkod. Ange minst 8 siffror.'
-						: 'Kunde inte slå upp streckkoden. Försök igen eller fyll i manuellt.';
+						? t('item.invalidBarcode')
+						: t('item.lookupFailed');
 				return;
 			}
 
@@ -77,10 +79,10 @@
 				notes = notes ? `${notes}\n${product.notes}` : product.notes;
 			}
 			scanMessage = found
-				? `Hittade ${product.name} (${product.barcode}).`
-				: `Okänd streckkod – fyllde i "${product.name}". Justera vid behov.`;
+				? t('item.foundProduct', { name: product.name, barcode: product.barcode })
+				: t('item.unknownBarcodeFilled', { name: product.name });
 		} catch {
-			scanMessage = 'Nätverksfel vid uppslagning av produkten.';
+			scanMessage = t('item.lookupNetwork');
 		} finally {
 			lookupLoading = false;
 		}
@@ -104,21 +106,21 @@
 <form method="POST" action={isEdit ? '?/save' : '?/create'} class="form">
 	{#if !isEdit}
 		<div class="barcode-row">
-			<p class="scan-title">Hur vill du fylla i varan?</p>
-			<div class="scan-method-tabs" role="tablist" aria-label="Skanningsläge">
+			<p class="scan-title">{t('item.howToFill')}</p>
+			<div class="scan-method-tabs" role="tablist" aria-label={t('item.scanModeAria')}>
 				<button
 					type="button"
 					class="scan-tab {scanMethod === 'barcode' ? 'active' : ''}"
 					onclick={() => (scanMethod = 'barcode')}
 				>
-					Streckkod
+					{t('item.barcodeTab')}
 				</button>
 				<button
 					type="button"
 					class="scan-tab {scanMethod === 'photo' ? 'active' : ''}"
 					onclick={() => (scanMethod = 'photo')}
 				>
-					Foto
+					{t('item.photoTab')}
 				</button>
 			</div>
 
@@ -134,7 +136,7 @@
 	{/if}
 
 	<div class="field name-field">
-		<Label for="name">Namn</Label>
+		<Label for="name">{t('common.name')}</Label>
 		<Input id="name" name="name" bind:value={name} error={!!errors.name} required />
 		{#if errors.name}
 			<p class="error">{errors.name[0]}</p>
@@ -142,10 +144,10 @@
 	</div>
 
 	<div class="field">
-		<Label for="location">Plats</Label>
+		<Label for="location">{t('common.place')}</Label>
 		<select id="location" name="location" class="select" bind:value={location}>
 			{#each LOCATIONS as loc}
-				<option value={loc}>{LOCATION_LABELS[loc]}</option>
+				<option value={loc}>{locationLabel(getLocale(), loc)}</option>
 			{/each}
 		</select>
 		{#if errors.location}
@@ -155,7 +157,7 @@
 
 	<div class="row">
 		<div class="field">
-			<Label for="quantity">Mängd</Label>
+			<Label for="quantity">{t('common.quantity')}</Label>
 			<Input
 				id="quantity"
 				name="quantity"
@@ -170,13 +172,13 @@
 			{/if}
 		</div>
 		<div class="field">
-			<Label for="unit">Enhet</Label>
-			<Input id="unit" name="unit" placeholder="st, g, L…" bind:value={unit} />
+			<Label for="unit">{t('common.unit')}</Label>
+			<Input id="unit" name="unit" placeholder={t('item.unitPlaceholder')} bind:value={unit} />
 		</div>
 	</div>
 
 	<div class="field">
-		<Label for="expiresOn">Bäst före (valfritt)</Label>
+		<Label for="expiresOn">{t('item.bestBefore')}</Label>
 		<Input id="expiresOn" name="expiresOn" type="date" value={item?.expiresOn ?? ''} />
 	</div>
 
@@ -187,16 +189,30 @@
 
 
 	<div class="actions">
-		<Button type="submit" fullWidth>{isEdit ? 'Spara ändringar' : 'Lägg till vara'}</Button>
+		<Button type="submit" fullWidth>{isEdit ? t('item.saveChanges') : t('item.addSubmit')}</Button>
 		{#if isEdit}
+			<DeleteConfirmButton
+				tier={2}
+				context="inventoryItemFinished"
+				copyOptions={{ itemName: name || item?.name }}
+				action="?/markAsFinished"
+				variant="secondary"
+				fullWidth
+				label={t('item.markFinished')}
+				ariaLabel={t('item.markFinishedNamed', {
+					name: name || item?.name || t('common.unknownProduct')
+				})}
+			/>
 			<DeleteConfirmButton
 				tier={2}
 				context="inventoryItem"
 				copyOptions={{ itemName: name || item?.name }}
 				action="?/delete"
 				fullWidth
-				label="Ta bort vara"
-				ariaLabel={`Ta bort ${name || item?.name || 'vara'}`}
+				label={t('item.deleteItem')}
+				ariaLabel={t('item.deleteItemNamed', {
+					name: name || item?.name || t('common.unknownProduct')
+				})}
 			/>
 		{/if}
 	</div>

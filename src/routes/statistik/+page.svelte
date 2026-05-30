@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
@@ -8,10 +9,7 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader
-		title="Så här ser skafferiet ut"
-		subtitle="Snabb överblick — typ haha, men faktiskt användbart"
-	/>
+	<AppHeader title={t('stats.title')} subtitle={t('stats.subtitle')} />
 	<PageContainer>
 		<AnalyticsDashboard analytics={data.analytics} />
 	</PageContainer>

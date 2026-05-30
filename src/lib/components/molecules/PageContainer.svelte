@@ -17,5 +17,6 @@
 		width: 100%;
 		max-width: var(--page-max-width);
 		min-width: 0;
+		margin-inline: auto;
 	}
 </style>

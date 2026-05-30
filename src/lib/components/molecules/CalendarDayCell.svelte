@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import type { PlannedMeal } from '$lib/domain/meal-plan';
 	import { mealSourceVariant, splitVisibleMeals } from '$lib/domain/calendar-display';
 
@@ -27,12 +28,12 @@
 	class:outside={!day.isCurrentMonth}
 	class:today={isToday}
 	role="group"
-	aria-label="{day.dayOfMonth} {day.isCurrentMonth ? '' : '(annan månad)'}"
+	aria-label="{day.dayOfMonth} {day.isCurrentMonth ? '' : t('planer.otherMonth')}"
 >
-	<button type="button" class="day-head" onclick={() => onOpen(day)} aria-label="Öppna {day.date}">
+	<button type="button" class="day-head" onclick={() => onOpen(day)} aria-label={t('planer.openDay', { date: day.date })}>
 		<span class="day-number" aria-hidden="true">{day.dayOfMonth}</span>
 		{#if day.meals.length > 0}
-			<span class="meal-count" aria-label="{day.meals.length} måltider">{day.meals.length}</span>
+			<span class="meal-count" aria-label={t('planer.mealsCount', { count: day.meals.length })}>{day.meals.length}</span>
 		{/if}
 	</button>
 
@@ -55,7 +56,7 @@
 			Visa alla ({day.meals.length})
 		</button>
 	{:else if day.meals.length === 0}
-		<button type="button" class="add-hint" onclick={() => onOpen(day)} aria-label="Lägg till måltid">
+		<button type="button" class="add-hint" onclick={() => onOpen(day)} aria-label={t('planer.addMeal')}>
 			<span aria-hidden="true">+</span>
 		</button>
 	{/if}

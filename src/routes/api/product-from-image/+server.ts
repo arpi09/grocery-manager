@@ -1,5 +1,6 @@
 import { Buffer } from 'node:buffer';
 import { json } from '@sveltejs/kit';
+import { translate } from '$lib/i18n/messages';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requestStructuredJsonFromImage } from '$lib/server/openai';
 import type { RequestHandler } from './$types';
@@ -117,7 +118,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const product = parseProduct(result.data);
 		if (!product) {
 			return json(
-				{ error: 'Kunde inte tolka produktuppgifter från bilden. Prova en tydligare etikett.' },
+				{ error: translate(locals.locale, 'errors.api.productImageParse') },
 				{ status: 422 }
 			);
 		}

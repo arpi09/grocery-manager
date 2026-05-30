@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { translate } from '$lib/i18n/messages';
 import {
 	formatInventoryLines,
 	formatPlannedMealLines,
@@ -107,9 +108,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const inventory = await locals.inventoryService.listAll(locals.householdId!);
 	if (inventory.length === 0) {
 		return json({
-			summary: 'Du har inga varor registrerade ännu.',
+			summary: translate(locals.locale, 'errors.api.insightsEmpty'),
 			insights: [],
-			note: 'Lägg till varor i kyl, frys eller skafferi för att få smarta tips.'
+			note: translate(locals.locale, 'errors.api.insightsAddItems')
 		});
 	}
 
@@ -187,13 +188,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	if (!summary && insights.length === 0) {
 		return json(
-			{ error: 'Kunde inte tolka AI-svaret. Försök igen om en stund.' },
+			{ error: translate(locals.locale, 'errors.api.insightsParse') },
 			{ status: 502 }
 		);
 	}
 
 	return json({
-		summary: summary || 'Här är dina senaste inventarietips.',
+		summary: summary || translate(locals.locale, 'errors.api.insightsSummary'),
 		insights
 	});
 };

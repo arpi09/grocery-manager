@@ -6,9 +6,17 @@
 	import DigitalReceiptGuide from '$lib/components/molecules/DigitalReceiptGuide.svelte';
 	import ImageSourcePicker from '$lib/components/molecules/ImageSourcePicker.svelte';
 	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
+	import {
+		prepareReceiptFileForUpload,
+		RECEIPT_CAMERA_ACCEPT,
+		RECEIPT_FILE_ACCEPT,
+		ReceiptFileError
+	} from '$lib/utils/receipt-file';
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
 	import type { ReceiptLine } from '$lib/domain/receipt-line';
-	import { LOCATIONS, LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
+	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
+	import { getLocale, t } from '$lib/i18n';
+	import { locationLabel } from '$lib/i18n/domain-labels';
 
 	interface Props {
 		returnTo: string;
@@ -28,26 +36,41 @@
 	const hubHref = $derived(`/scan?from=${encodeURIComponent(returnTo)}`);
 	const cancelHref = $derived(hubHref);
 
-	async function handleImage(file: File) {
+	function receiptFileErrorMessage(error: ReceiptFileError): string {
+		if (error.code === 'too_large') {
+			return t('receipt.formats.tooLarge');
+		}
+		if (error.code === 'processing_failed') {
+			return t('receipt.formats.processingFailed');
+		}
+		return t('receipt.formats.unsupported');
+	}
+
+	async function handleReceiptFile(file: File) {
 		parsing = true;
 		parseError = null;
 
-		if (!file.type.startsWith('image/')) {
+		let uploadFile: File;
+		try {
+			uploadFile = await prepareReceiptFileForUpload(file);
+		} catch (error) {
 			parseError =
-				'Just nu behövs en bildfil — spara kvittot som bild eller ta en skärmdump om du har PDF.';
+				error instanceof ReceiptFileError
+					? receiptFileErrorMessage(error)
+					: t('receipt.formats.unsupported');
 			parsing = false;
 			return;
 		}
 
 		try {
 			const formData = new FormData();
-			formData.append('image', file);
+			formData.append('image', uploadFile);
 
 			const response = await fetch('/api/receipt/parse', { method: 'POST', body: formData });
 			const data = (await response.json()) as { error?: string; lines?: ReceiptLine[] };
 
 			if (!response.ok || !data.lines?.length) {
-				parseError = data.error ?? 'Hoppsan — kunde inte läsa kvittot. Prova en tydligare bild.';
+				parseError = data.error ?? t('receipt.parseFailed');
 				return;
 			}
 
@@ -55,7 +78,7 @@
 			selected = Object.fromEntries(data.lines.map((_, i) => [i, true]));
 			step = 'review';
 		} catch {
-			parseError = 'Hoppsan — nätverksfel. Kontrollera anslutningen och försök igen.';
+			parseError = t('receipt.networkError');
 		} finally {
 			parsing = false;
 		}
@@ -87,8 +110,7 @@
 {#if step === 'upload'}
 	<section>
 		<p class="lead">
-			Har du kvittot i en app? Spara eller dela det som bild och ladda upp — eller fota ett papperskvitto.
-			Vi föreslår varor du kan lägga till.
+			{t('receiptBulk.lead')}
 		</p>
 
 		<DigitalReceiptGuide />
@@ -96,42 +118,45 @@
 		{#if parsing}
 			<FeedbackBanner
 				tone="info"
-				message="Läser kvittot… det tar oftast några sekunder."
+				message={t('receipt.readingStatus')}
 			/>
 		{/if}
 
 		<ImageSourcePicker
-			cameraLabel={parsing ? 'Läser kvitto…' : '📷 Fota papperskvitto'}
-			fileLabel={parsing ? 'Läser kvitto…' : '📁 Välj från filer'}
-			accept="image/*,application/pdf"
+			cameraLabel={parsing ? t('receipt.reading') : t('receiptBulk.cameraPaper')}
+			fileLabel={parsing ? t('receipt.reading') : t('receipt.pickFile')}
+			accept={RECEIPT_FILE_ACCEPT}
+			cameraAccept={RECEIPT_CAMERA_ACCEPT}
 			disabled={parsing}
-			onSelect={handleImage}
+			onSelect={handleReceiptFile}
 		/>
+
+		<p class="hint">{t('receipt.formats.hint')}</p>
 
 		{#if parseError}
 			<FeedbackBanner tone="error" message={parseError} />
 		{/if}
 
-		<p class="hint">Kräver OPENAI_API_KEY i serverns .env.</p>
+		<p class="hint">{t('receiptBulk.apiKeyHint')}</p>
 	</section>
 
-	<ScanFlowFooter cancelHref={cancelHref} cancelLabel="Avbryt" />
+	<ScanFlowFooter cancelHref={cancelHref} cancelLabel={t('common.cancel')} />
 {:else}
 	<section>
-		<h2 class="title">Välj varor ({selectedCount} av {lines.length})</h2>
+		<h2 class="title">{t('receiptBulk.selectItems', { selected: selectedCount, total: lines.length })}</h2>
 
 		<div class="bulk-location">
-			<span>Plats för alla valda:</span>
+			<span>{t('receiptBulk.locationForAll')}</span>
 			<select bind:value={bulkLocation}>
 				{#each LOCATIONS as loc (loc)}
-					<option value={loc}>{LOCATION_LABELS[loc]}</option>
+					<option value={loc}>{locationLabel(getLocale(), loc)}</option>
 				{/each}
 			</select>
 		</div>
 
 		<div class="select-actions">
-			<button type="button" class="link-btn" onclick={() => toggleAll(true)}>Markera alla</button>
-			<button type="button" class="link-btn" onclick={() => toggleAll(false)}>Avmarkera alla</button>
+			<button type="button" class="link-btn" onclick={() => toggleAll(true)}>{t('common.selectAll')}</button>
+			<button type="button" class="link-btn" onclick={() => toggleAll(false)}>{t('common.deselectAll')}</button>
 		</div>
 
 		<form
@@ -161,20 +186,20 @@
 			</ul>
 
 			<div class="actions">
-				<Button type="button" variant="secondary" onclick={requestNewImage}>Ny bild</Button>
+				<Button type="button" variant="secondary" onclick={requestNewImage}>{t('common.newImage')}</Button>
 				<Button
 					type="submit"
 					disabled={selectedCount === 0}
 					loading={bulkSubmitting}
-					loadingLabel="Sparar till skafferiet…"
+					loadingLabel={t('receipt.saving')}
 				>
-					Lägg till {selectedCount} {selectedCount === 1 ? 'vara' : 'varor'}
+					{t('receiptBulk.addCount', { count: selectedCount })}
 				</Button>
 			</div>
 		</form>
 	</section>
 
-	<ScanFlowFooter cancelHref={cancelHref} cancelLabel="Avbryt" />
+	<ScanFlowFooter cancelHref={cancelHref} cancelLabel={t('common.cancel')} />
 
 	<DeleteSafetyModal
 		open={discardReviewOpen}

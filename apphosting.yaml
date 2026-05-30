@@ -51,6 +51,12 @@ env:
     availability:
       - RUNTIME
 
+  # adapter-node default is 512K; profile avatars post resized JPEG data URLs (~700 KB max).
+  - variable: BODY_SIZE_LIMIT
+    value: "1M"
+    availability:
+      - RUNTIME
+
   # Build phase only â€” vite build does not connect; satisfies tools that read DATABASE_URL.
   - variable: DATABASE_URL
     value: postgresql://build:build@127.0.0.1:5432/build

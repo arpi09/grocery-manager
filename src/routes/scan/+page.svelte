@@ -3,24 +3,19 @@
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import ScanModeHub from '$lib/components/molecules/ScanModeHub.svelte';
+	import ScanModeTabs from '$lib/components/molecules/ScanModeTabs.svelte';
 	import ScanToAddFlow from '$lib/components/organisms/ScanToAddFlow.svelte';
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
 	import { t } from '$lib/i18n';
 
 	let { data, form } = $props();
 
-	const fromEncoded = $derived(encodeURIComponent(data.returnTo));
-	const locationQuery = $derived(
-		data.defaultLocation ? `&location=${data.defaultLocation}` : ''
-	);
-	const hubHref = $derived(`/scan?from=${fromEncoded}${locationQuery}`);
 	const isBarcodeMode = $derived(data.scanMode === 'barcode');
 
 	const title = $derived(isBarcodeMode ? t('scan.barcodeTitle') : t('scan.title'));
 	const subtitle = $derived(
 		isBarcodeMode ? t('scan.barcodeSubtitle') : t('scan.subtitle')
 	);
-	const backLabel = $derived(isBarcodeMode ? t('scan.allModes') : t('common.back'));
 	const cancelLabel = $derived(isBarcodeMode ? t('scan.cancelBack') : t('scan.cancel'));
 </script>
 
@@ -28,10 +23,15 @@
 	<AppHeader
 		{title}
 		{subtitle}
-		backHref={isBarcodeMode ? hubHref : data.returnTo}
-		{backLabel}
+		backHref={data.returnTo}
+		backLabel={t('common.back')}
 	/>
 	<PageContainer>
+		<ScanModeTabs
+			active={isBarcodeMode ? 'barcode' : null}
+			returnTo={data.returnTo}
+			defaultLocation={data.defaultLocation}
+		/>
 		{#if !data.canWrite}
 			<p class="readonly" role="status">
 				{t('scan.readonly')}
@@ -40,7 +40,7 @@
 			<ScanToAddFlow
 				defaultLocation={data.defaultLocation}
 				returnTo={data.returnTo}
-				cancelHref={hubHref}
+				cancelHref={data.returnTo}
 				errors={form?.errors}
 			/>
 			<ScanFlowFooter cancelHref={data.returnTo} {cancelLabel} />

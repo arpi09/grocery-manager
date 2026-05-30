@@ -7,7 +7,10 @@
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import FormField from '$lib/components/molecules/FormField.svelte';
-	import { THEME_LABELS, THEME_PREFERENCES, type ThemePreference } from '$lib/domain/theme';
+	import ProfileAvatarUpload from '$lib/components/organisms/ProfileAvatarUpload.svelte';
+	import { THEME_PREFERENCES, type ThemePreference } from '$lib/domain/theme';
+	import { themeLabel } from '$lib/i18n/domain-labels';
+	import { getLocale, t } from '$lib/i18n';
 	import { userInitials } from '$lib/domain/user';
 
 	let { data, form } = $props();
@@ -19,67 +22,34 @@
 		(form?.themePreference as ThemePreference | undefined) ?? data.themePreference
 	);
 
-	let avatarInput = $state(data.profile.avatarUrl ?? '');
-	let fileError = $state<string | undefined>(undefined);
+	let avatarUrl = $state<string | null>(data.profile.avatarUrl ?? null);
 	let profileSubmitting = $state(false);
 	let themeSubmitting = $state(false);
 
-	const MAX_FILE_BYTES = 100_000;
+	$effect(() => {
+		avatarUrl = data.profile.avatarUrl ?? null;
+	});
 
-	async function onAvatarFileSelected(event: Event) {
-		const input = event.currentTarget as HTMLInputElement;
-		const file = input.files?.[0];
-		fileError = undefined;
-		if (!file) {
-			return;
-		}
+	const avatarFormError = $derived(
+		form?.avatarErrors?.avatarUrl?.[0] as string | undefined
+	);
 
-		if (!file.type.startsWith('image/')) {
-			fileError = 'Välj en bildfil (PNG, JPEG, GIF eller WebP).';
-			input.value = '';
-			return;
-		}
-
-		if (file.size > MAX_FILE_BYTES) {
-			fileError = 'Bilden får vara högst 100 KB.';
-			input.value = '';
-			return;
-		}
-
-		const reader = new FileReader();
-		reader.onload = () => {
-			if (typeof reader.result === 'string') {
-				avatarInput = reader.result;
-			}
-		};
-		reader.readAsDataURL(file);
-	}
-
-	function clearAvatar() {
-		avatarInput = '';
-		fileError = undefined;
-	}
+	const showAvatarSuccess = $derived(Boolean(form?.avatarSuccess));
+	const showProfileSuccess = $derived(Boolean(form?.success) && !form?.avatarSuccess);
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title="Profil" subtitle="Redigera ditt konto" />
+	<AppHeader title={t('profile.title')} subtitle={t('profile.subtitle')} />
 	<PageContainer>
 	<Card>
-		{#if form?.success}
-			<FeedbackBanner tone="success" message="Snyggt — profilen är uppdaterad!" />
+		{#if showProfileSuccess}
+			<FeedbackBanner tone="success" message={t('profile.updated')} />
+		{/if}
+		{#if showAvatarSuccess}
+			<FeedbackBanner tone="success" message={t('profile.avatarUpdated')} />
 		{/if}
 
-		<div class="preview">
-			{#if avatarInput}
-				<img class="preview-avatar" src={avatarInput} alt="" />
-			{:else}
-				<span class="preview-initials" aria-hidden="true">{initials}</span>
-			{/if}
-			<div>
-				<p class="preview-name">{profile.displayName?.trim() || 'Inget visningsnamn'}</p>
-				<p class="preview-email">{profile.email}</p>
-			</div>
-		</div>
+		<ProfileAvatarUpload bind:avatarUrl {initials} error={avatarFormError} />
 
 		<form
 			method="POST"
@@ -97,17 +67,17 @@
 			}}
 		>
 			<FormField
-				label="Visningsnamn"
+				label={t('profile.displayName')}
 				name="displayName"
 				type="text"
 				autocomplete="name"
 				value={displayName}
 				error={form?.errors?.displayName?.[0]}
-				placeholder="t.ex. Arvid"
+				placeholder={t('profile.displayNamePlaceholder')}
 			/>
 
 			<FormField
-				label="E-post"
+				label={t('common.email')}
 				name="email"
 				type="email"
 				value={profile.email}
@@ -115,41 +85,20 @@
 				disabled
 			/>
 
-			<FormField
-				label="Profilbild (URL)"
-				name="avatarUrl"
-				type="url"
-				bind:value={avatarInput}
-				error={form?.errors?.avatarUrl?.[0] ?? fileError}
-				placeholder="https://..."
-			/>
+			<input type="hidden" name="avatarUrl" value={avatarUrl ?? ''} />
 
-			<div class="upload-row">
-				<label class="file-label">
-					Ladda upp bild
-					<input
-						type="file"
-						accept="image/png,image/jpeg,image/gif,image/webp"
-						onchange={onAvatarFileSelected}
-					/>
-				</label>
-				{#if avatarInput}
-					<Button type="button" variant="secondary" onclick={clearAvatar}>Ta bort bild</Button>
-				{/if}
-			</div>
-
-			<Button type="submit" loading={profileSubmitting} loadingLabel="Sparar…">
-				Spara profil
+			<Button type="submit" loading={profileSubmitting} loadingLabel={t('common.saving')}>
+				{t('profile.saveProfile')}
 			</Button>
 		</form>
 	</Card>
 
 	<Card>
-		<h2 class="section-title">Tema</h2>
-		<p class="section-lead">Välj ljust, mörkt eller följ systemets inställning.</p>
+		<h2 class="section-title">{t('profile.themeTitle')}</h2>
+		<p class="section-lead">{t('profile.themeLead')}</p>
 
 		{#if form?.themeSuccess}
-			<FeedbackBanner tone="success" message="Tema sparat — ser bra ut!" />
+			<FeedbackBanner tone="success" message={t('profile.themeSaved')} />
 		{/if}
 
 		<form
@@ -168,7 +117,7 @@
 			}}
 		>
 			<fieldset class="theme-options">
-				<legend class="sr-only">Tema</legend>
+				<legend class="sr-only">{t('profile.themeTitle')}</legend>
 				{#each THEME_PREFERENCES as preference (preference)}
 					<label class="theme-option">
 						<input
@@ -177,87 +126,24 @@
 							value={preference}
 							checked={selectedTheme === preference}
 						/>
-						<span>{THEME_LABELS[preference]}</span>
+						<span>{themeLabel(getLocale(), preference)}</span>
 					</label>
 				{/each}
 			</fieldset>
 			{#if form?.themeErrors?.themePreference?.[0]}
 				<p class="theme-error" role="alert">{form.themeErrors.themePreference[0]}</p>
 			{/if}
-			<Button type="submit" loading={themeSubmitting} loadingLabel="Sparar�">Spara tema</Button>
+			<Button type="submit" loading={themeSubmitting} loadingLabel={t('common.saving')}>{t('profile.saveTheme')}</Button>
 		</form>
 	</Card>
 	</PageContainer>
 </AppLayout>
 
 <style>
-	.preview {
-		display: flex;
-		align-items: center;
-		gap: var(--space-md);
-		margin-bottom: var(--space-lg);
-		padding: var(--space-md);
-		background: var(--color-surface-muted);
-		border-radius: var(--radius-md);
-	}
-
-	.preview-avatar,
-	.preview-initials {
-		width: 3.5rem;
-		height: 3.5rem;
-		border-radius: 999px;
-		flex-shrink: 0;
-	}
-
-	.preview-avatar {
-		object-fit: cover;
-		border: 1px solid var(--color-border);
-	}
-
-	.preview-initials {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		font-weight: 700;
-		color: var(--color-primary);
-	}
-
-	.preview-name {
-		margin: 0;
-		font-weight: 700;
-	}
-
-	.preview-email {
-		margin: 0.2rem 0 0;
-		color: var(--color-text-muted);
-		font-size: 0.9rem;
-	}
-
 	.profile-form,
 	.theme-form {
 		display: flex;
 		flex-direction: column;
-	}
-
-	.upload-row {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: var(--space-sm);
-		margin: calc(-1 * var(--space-sm)) 0 var(--space-md);
-	}
-
-	.file-label {
-		display: inline-flex;
-		flex-direction: column;
-		gap: 0.35rem;
-		font-size: 0.9rem;
-	}
-
-	.file-label input[type='file'] {
-		font-size: 0.85rem;
 	}
 
 	.section-title {

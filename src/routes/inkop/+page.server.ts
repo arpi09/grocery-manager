@@ -5,6 +5,7 @@ import {
 	ShoppingListReadOnlyError
 } from '$lib/application/shopping-list.service';
 import { parseAddShoppingListItem } from '$lib/validation/shopping-list.schemas';
+import { translate } from '$lib/i18n/messages';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -37,7 +38,7 @@ export const actions: Actions = {
 	add: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);
 		const householdId = event.locals.householdId;
-		if (!householdId) error(400, 'Inget hushåll valt');
+		if (!householdId) error(400, translate(event.locals.locale, 'errors.household.noHousehold'));
 
 		const parsed = parseAddShoppingListItem(
 			Object.fromEntries(await event.request.formData())
@@ -61,9 +62,10 @@ export const actions: Actions = {
 	toggle: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);
 		const householdId = event.locals.householdId;
-		if (!householdId) error(400, 'Inget hushåll valt');
+		if (!householdId) error(400, translate(event.locals.locale, 'errors.household.noHousehold'));
 		const id = (await event.request.formData()).get('id');
-		if (!id || typeof id !== 'string') return fail(400, { message: 'Saknar rad-id' });
+		if (!id || typeof id !== 'string')
+			return fail(400, { message: translate(event.locals.locale, 'errors.shopping.missingRowId') });
 
 		try {
 			await event.locals.shoppingListService.toggleChecked(
@@ -80,9 +82,10 @@ export const actions: Actions = {
 	remove: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);
 		const householdId = event.locals.householdId;
-		if (!householdId) error(400, 'Inget hushåll valt');
+		if (!householdId) error(400, translate(event.locals.locale, 'errors.household.noHousehold'));
 		const id = (await event.request.formData()).get('id');
-		if (!id || typeof id !== 'string') return fail(400, { message: 'Saknar rad-id' });
+		if (!id || typeof id !== 'string')
+			return fail(400, { message: translate(event.locals.locale, 'errors.shopping.missingRowId') });
 
 		try {
 			await event.locals.shoppingListService.removeItem(
@@ -99,7 +102,7 @@ export const actions: Actions = {
 	clearChecked: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);
 		const householdId = event.locals.householdId;
-		if (!householdId) error(400, 'Inget hushåll valt');
+		if (!householdId) error(400, translate(event.locals.locale, 'errors.household.noHousehold'));
 
 		try {
 			await event.locals.shoppingListService.clearChecked(

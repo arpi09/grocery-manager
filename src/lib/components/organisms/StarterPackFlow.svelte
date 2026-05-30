@@ -2,7 +2,9 @@
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import starterItems from '$lib/data/starter-pack.json';
-	import { LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
+	import type { StorageLocation } from '$lib/domain/location';
+	import { getLocale, t } from '$lib/i18n';
+	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { dismissStarterPack } from '$lib/utils/starter-pack-dismiss';
 
 	interface StarterItem {
@@ -25,11 +27,11 @@
 
 	const selectedCount = $derived(items.filter((_, i) => selected[i]).length);
 
-	const categories = [
-		{ id: 'kyl', label: 'Kyl' },
-		{ id: 'frys', label: 'Frys' },
-		{ id: 'skafferi', label: 'Skafferi' }
-	] as const;
+	const categories = $derived([
+		{ id: 'kyl', label: t('onboarding.fridgeShort') },
+		{ id: 'frys', label: t('onboarding.freezerShort') },
+		{ id: 'skafferi', label: t('onboarding.cupboardShort') }
+	] as const);
 
 	function toggleCategory(category: string, checked: boolean) {
 		const next = { ...selected };
@@ -48,17 +50,15 @@
 </script>
 
 <section>
-	<p class="lead">
-		Snabbstart — markera det du redan har hemma. Du kan alltid skanna istället.
-	</p>
+	<p class="lead">{t('starter.lead')}</p>
 
 	<div class="defaults">
 		<label>
-			Standardplats för valda:
+			{t('starter.defaultLocation')}
 			<select bind:value={defaultLocation}>
-				<option value="fridge">{LOCATION_LABELS.fridge}</option>
-				<option value="freezer">{LOCATION_LABELS.freezer}</option>
-				<option value="cupboard">{LOCATION_LABELS.cupboard}</option>
+				<option value="fridge">{locationLabel(getLocale(), 'fridge')}</option>
+				<option value="freezer">{locationLabel(getLocale(), 'freezer')}</option>
+				<option value="cupboard">{locationLabel(getLocale(), 'cupboard')}</option>
 			</select>
 		</label>
 	</div>
@@ -66,7 +66,7 @@
 	<div class="category-actions">
 		{#each categories as cat (cat.id)}
 			<button type="button" class="link-btn" onclick={() => toggleCategory(cat.id, true)}>
-				Alla {cat.label}
+				{t('starter.allCategory', { label: cat.label })}
 			</button>
 		{/each}
 	</div>
@@ -99,7 +99,7 @@
 							}}
 						/>
 						<span>{item.name}</span>
-						<span class="cat">{LOCATION_LABELS[item.location]}</span>
+						<span class="cat">{locationLabel(getLocale(), item.location)}</span>
 					</label>
 					{#if selected[index]}
 						<input type="hidden" name={`name_${index}`} value={item.name} />
@@ -110,14 +110,17 @@
 		</ul>
 
 		<div class="actions">
-			<Button type="button" variant="secondary" onclick={skip}>Hoppa över</Button>
+			<Button type="button" variant="secondary" onclick={skip}>{t('common.skip')}</Button>
 			<Button type="submit" disabled={selectedCount === 0}>
-				Lägg till {selectedCount} {selectedCount === 1 ? 'vara' : 'varor'}
+				{t('starter.addCount', { count: selectedCount })}
 			</Button>
 		</div>
 	</form>
 
-	<p class="hint">Du kan alltid skanna istället via <a href="/scan">Skanna</a>.</p>
+	<p class="hint">
+		{t('starter.hint')}
+		<a href="/scan">{t('starter.scanLink')}</a>.
+	</p>
 </section>
 
 <style>
@@ -128,69 +131,71 @@
 
 	.defaults label {
 		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: var(--space-sm);
+		flex-direction: column;
+		gap: 0.35rem;
 		font-size: 0.9rem;
+		margin-bottom: var(--space-md);
 	}
 
 	.defaults select {
-		padding: 0.4rem 0.6rem;
-		border-radius: var(--radius-sm);
+		padding: 0.5rem 0.75rem;
 		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
 	}
 
 	.category-actions {
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--space-sm);
-		margin: var(--space-md) 0;
+		margin-bottom: var(--space-md);
 	}
 
 	.link-btn {
+		background: none;
 		border: none;
-		background: var(--color-surface-muted);
-		padding: 0.35rem 0.65rem;
-		border-radius: var(--radius-sm);
-		font-size: 0.8rem;
+		color: var(--color-primary);
 		font-weight: 600;
 		cursor: pointer;
-		color: var(--color-primary);
+		padding: 0;
+		font-size: 0.875rem;
 	}
 
 	.item-list {
 		list-style: none;
-		margin: 0 0 var(--space-lg);
+		margin: 0 0 var(--space-md);
 		padding: 0;
-		max-height: 50vh;
-		overflow-y: auto;
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-xs);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		overflow: hidden;
+	}
+
+	.item-list li {
+		border-bottom: 1px solid var(--color-border);
+		padding: var(--space-sm) var(--space-md);
+	}
+
+	.item-list li:last-child {
+		border-bottom: none;
 	}
 
 	.item-list label {
 		display: flex;
 		align-items: center;
 		gap: var(--space-sm);
-		padding: var(--space-sm);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-sm);
+		cursor: pointer;
 	}
 
 	.cat {
 		margin-left: auto;
-		font-size: 0.75rem;
+		font-size: 0.8rem;
 		color: var(--color-text-muted);
 	}
 
 	.actions {
 		display: flex;
 		gap: var(--space-sm);
-	}
-
-	.actions :global(.btn) {
-		flex: 1;
+		flex-wrap: wrap;
 	}
 
 	.hint {

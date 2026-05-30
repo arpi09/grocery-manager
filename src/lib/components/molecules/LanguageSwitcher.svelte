@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import { LOCALES, getLocale, setLocale, t, type Locale } from '$lib/i18n';
 
 	interface Props {
@@ -11,8 +12,9 @@
 	const activeLocale = $derived(getLocale());
 	const ariaLabel = $derived(t('settings.language.label'));
 
-	function selectLocale(locale: Locale) {
+	async function selectLocale(locale: Locale) {
 		setLocale(locale);
+		await invalidateAll();
 	}
 </script>
 

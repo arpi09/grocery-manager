@@ -50,15 +50,15 @@
 
 	<PageContainer>
 	<div class="settings-page">
-		<SettingsSection title="Konto" description="Ditt inloggade konto och profil">
-			<SettingsRow title={data.user?.email ?? ''} note="Inloggad e-post" />
-			<SettingsRow href="/profile" title="Redigera profil" note="Namn, bild och tema" last />
+		<SettingsSection title={t('settings.account.title')} description={t('settings.account.description')}>
+			<SettingsRow title={data.user?.email ?? ''} note={t('settings.account.loggedInEmail')} />
+			<SettingsRow href="/profile" title={t('settings.account.editProfile')} note={t('settings.account.editProfileNote')} last />
 		</SettingsSection>
 
 		{#if data.household}
 			<SettingsSection
-				title="Hushåll"
-				description="Delat hushåll, medlemmar och inbjudningar"
+				title={t('settings.household.title')}
+				description={t('settings.household.description')}
 			>
 				<HouseholdSettingsPanel
 					household={data.household}
@@ -76,7 +76,7 @@
 			</SettingsSection>
 		{/if}
 
-		<SettingsSection title="App" description="Funktioner och preferenser">
+		<SettingsSection title={t('settings.app.title')} description={t('settings.app.description')}>
 			<SettingsRow
 				title={t('settings.language.title')}
 				note={t('settings.language.description')}
@@ -86,8 +86,8 @@
 			</SettingsRow>
 
 			<SettingsRow
-				title="Husdjur"
-				note="Aktivera för att visa Husdjur i menyn och hantera dina husdjur."
+				title={t('settings.pets.title')}
+				note={t('settings.pets.note')}
 				last={false}
 			>
 				<form
@@ -102,21 +102,21 @@
 						loading={petsToggleSubmitting}
 						loadingLabel={t('common.saving')}
 					>
-						{data.petsEnabled ? 'Stäng av' : 'Slå på'}
+						{data.petsEnabled ? t('settings.pets.disable') : t('settings.pets.enable')}
 					</Button>
 				</form>
 				{#if data.petsEnabled}
 					<Button type="button" variant="secondary" onclick={() => (petModalOpen = true)}>
-						+ Lägg till husdjur
+						{t('settings.pets.add')}
 					</Button>
 				{/if}
 			</SettingsRow>
 
 			{#if data.petsEnabled}
 				<div class="pet-panel">
-					<h3 class="pet-heading">Dina husdjur</h3>
+					<h3 class="pet-heading">{t('settings.pets.heading')}</h3>
 					{#if data.pets.length === 0}
-						<p class="pet-empty">Inga husdjur tillagda ännu.</p>
+						<p class="pet-empty">{t('settings.pets.empty')}</p>
 					{:else}
 						<ul class="pet-list">
 							{#each data.pets as pet, index (pet.id)}
@@ -132,8 +132,8 @@
 										context="pet"
 										copyOptions={{ itemName: pet.name }}
 										action="?/deletePet"
-										label="Ta bort"
-										ariaLabel={`Ta bort husdjur ${pet.name}`}
+										label={t('settings.pets.remove')}
+										ariaLabel={t('settings.pets.removeNamed', { name: pet.name })}
 									>
 										<input type="hidden" name="id" value={pet.id} />
 									</DeleteConfirmButton>
@@ -144,12 +144,12 @@
 				</div>
 			{/if}
 			<SettingsRow
-				title="Visa introduktion igen"
-				note="Gå igenom välkomstguiden för appen."
+				title={t('settings.onboarding.title')}
+				note={t('settings.onboarding.note')}
 				last
 			>
 				<Button type="button" variant="secondary" onclick={replayOnboardingGuide}>
-					Starta guide
+					{t('settings.onboarding.start')}
 				</Button>
 			</SettingsRow>
 		</SettingsSection>
@@ -160,7 +160,7 @@
 		open={petModalOpen}
 		onClose={() => (petModalOpen = false)}
 		variant="center"
-		title="Lägg till husdjur"
+		title={t('settings.pets.modalTitle')}
 		panelClass="pet-settings-panel"
 	>
 		<form
@@ -170,12 +170,12 @@
 			use:enhance={bindSubmitting((v) => (addPetSubmitting = v))}
 		>
 			<label>
-				Namn
-				<input name="name" required maxlength="80" placeholder="t.ex. Luna" />
+				{t('common.name')}
+				<input name="name" required maxlength="80" placeholder={t('settings.pets.namePlaceholder')} />
 			</label>
 			<label>
-				Art (valfritt)
-				<input name="species" maxlength="80" placeholder="t.ex. Hund, Katt" />
+				{t('settings.pets.speciesOptional')}
+				<input name="species" maxlength="80" placeholder={t('settings.pets.speciesPlaceholder')} />
 			</label>
 			<div class="modal-actions">
 				<Button type="button" variant="secondary" onclick={() => (petModalOpen = false)}>

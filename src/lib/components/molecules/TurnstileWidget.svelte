@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		siteKey: string;
@@ -68,7 +69,7 @@
 <div
 	bind:this={container}
 	class="turnstile"
-	aria-label={labelledBy ? undefined : 'Bekräfta att du inte är en robot'}
+	aria-label={labelledBy ? undefined : t('auth.register.captchaLabel')}
 	aria-labelledby={labelledBy}
 ></div>
 

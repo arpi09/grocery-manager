@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { translate } from '$lib/i18n/messages';
 import {
 	formatInventoryLines,
 	formatPlannedMealLines,
@@ -189,7 +190,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const items = parseShoppingList(result.data);
 	if (items.length === 0) {
 		return json(
-			{ error: 'Kunde inte skapa inköpslista från AI-svaret. Försök igen.' },
+			{ error: translate(locals.locale, 'errors.api.icaFailed') },
 			{ status: 502 }
 		);
 	}

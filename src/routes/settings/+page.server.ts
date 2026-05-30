@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { mapHouseholdErrorToFail } from '$lib/application/household-errors';
+import { translate } from '$lib/i18n/messages';
 import { isHouseholdOwner } from '$lib/domain/household';
 import { householdInviteEmailWarning, sendHouseholdInviteEmail } from '$lib/server/email';
 import { getAppOrigin } from '$lib/server/origin';
@@ -119,7 +120,7 @@ export const actions: Actions = {
 				inviteEmailWarning: !emailResult.ok ? householdInviteEmailWarning(emailResult) : undefined
 			};
 		} catch (error) {
-			return mapHouseholdErrorToFail(error);
+			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
 		}
 	},
 	revokeInvite: async ({ request, locals }) => {
@@ -129,7 +130,9 @@ export const actions: Actions = {
 		});
 
 		if (!parsed.success) {
-			return fail(400, { householdError: 'Ogiltig inbjudan.' });
+			return fail(400, {
+				householdError: translate(locals.locale, 'errors.household.invalidInvite')
+			});
 		}
 
 		try {
@@ -139,7 +142,7 @@ export const actions: Actions = {
 				parsed.data.inviteId
 			);
 		} catch (error) {
-			return mapHouseholdErrorToFail(error);
+			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
 		}
 
 		redirect(302, '/settings');
@@ -152,7 +155,9 @@ export const actions: Actions = {
 		});
 
 		if (!parsed.success) {
-			return fail(400, { householdError: 'Ogiltig roll.' });
+			return fail(400, {
+				householdError: translate(locals.locale, 'errors.household.invalidRole')
+			});
 		}
 
 		try {
@@ -163,7 +168,7 @@ export const actions: Actions = {
 				parsed.data.role
 			);
 		} catch (error) {
-			return mapHouseholdErrorToFail(error);
+			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
 		}
 
 		redirect(302, '/settings');
@@ -175,7 +180,9 @@ export const actions: Actions = {
 		});
 
 		if (!parsed.success) {
-			return fail(400, { householdError: 'Ogiltig medlem.' });
+			return fail(400, {
+				householdError: translate(locals.locale, 'errors.household.invalidMember')
+			});
 		}
 
 		try {
@@ -185,7 +192,7 @@ export const actions: Actions = {
 				parsed.data.userId
 			);
 		} catch (error) {
-			return mapHouseholdErrorToFail(error);
+			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
 		}
 
 		redirect(302, '/settings');
@@ -198,8 +205,12 @@ export const actions: Actions = {
 		});
 
 		if (!parsed.success) {
+			const confirmError = parsed.error.flatten().fieldErrors.confirmName?.[0];
 			return fail(400, {
-				householdError: parsed.error.flatten().fieldErrors.confirmName?.[0] ?? 'Ogiltig bekräftelse.'
+				householdError:
+					confirmError === 'Skriv hushållets namn eller TA BORT för att bekräfta'
+						? translate(locals.locale, 'errors.validation.deleteConfirm')
+						: translate(locals.locale, 'errors.household.invalidConfirm')
 			});
 		}
 
@@ -210,7 +221,7 @@ export const actions: Actions = {
 				parsed.data.confirmName
 			);
 		} catch (error) {
-			return mapHouseholdErrorToFail(error);
+			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
 		}
 
 		redirect(302, '/');

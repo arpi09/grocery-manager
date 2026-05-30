@@ -76,6 +76,10 @@ export class InventoryService {
 		return this.repository.findByHouseholdAndLocation(householdId, location);
 	}
 
+	async listFinishedByLocation(householdId: string, location: StorageLocation) {
+		return this.repository.findFinishedByHouseholdAndLocation(householdId, location);
+	}
+
 	async listAll(householdId: string) {
 		return this.repository.findAllByHousehold(householdId);
 	}
@@ -119,6 +123,21 @@ export class InventoryService {
 		if (!deleted) {
 			throw new InventoryNotFoundError();
 		}
+	}
+
+	async markAsFinished(householdId: string, id: string, actorRole: HouseholdRole) {
+		assertInventoryWritable(actorRole);
+		const item = await this.repository.findById(householdId, id);
+		if (!item) {
+			throw new InventoryNotFoundError();
+		}
+
+		const updated = await this.repository.update(householdId, id, { quantity: '0' });
+		if (!updated) {
+			throw new InventoryNotFoundError();
+		}
+
+		return updated;
 	}
 }
 

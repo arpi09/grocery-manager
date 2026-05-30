@@ -1,3 +1,5 @@
+import type { MessageKey } from '$lib/i18n/messages';
+
 export type NavIconId =
 	| 'home'
 	| 'inventory'
@@ -13,15 +15,29 @@ export type NavRole = 'admin';
 
 export type NavMatch = 'exact' | 'prefix';
 
+export type NavLabelKey = Extract<
+	MessageKey,
+	| 'nav.home'
+	| 'nav.inventory'
+	| 'nav.shopping'
+	| 'nav.plans'
+	| 'nav.stats'
+	| 'nav.pets'
+	| 'nav.admin'
+	| 'nav.more'
+>;
+
 export interface NavUser {
 	email?: string;
+	displayName?: string | null;
+	avatarUrl?: string | null;
 	role?: string;
 	petsEnabled?: boolean;
 }
 
 export interface NavItem {
 	href: string;
-	label: string;
+	labelKey: NavLabelKey;
 	icon: NavIconId;
 	/** Shown in mobile tab bar and desktop primary row */
 	primary?: boolean;
@@ -32,22 +48,21 @@ export interface NavItem {
 	match?: NavMatch;
 }
 
-/** Single source of truth for app navigation */
+/** Single source of truth for app navigation (account routes live in ProfileMenu only) */
 export const NAV_ITEMS: NavItem[] = [
-	{ href: '/', label: 'Hem', icon: 'home', primary: true, match: 'exact' },
+	{ href: '/', labelKey: 'nav.home', icon: 'home', primary: true, match: 'exact' },
 	{
 		href: '/inventory/fridge',
-		label: 'Skafferi',
+		labelKey: 'nav.inventory',
 		icon: 'inventory',
 		primary: true,
 		match: 'prefix'
 	},
-	{ href: '/inkop', label: 'Inköp', icon: 'shopping', primary: true, match: 'prefix' },
-	{ href: '/planer', label: 'Planer', icon: 'calendar', match: 'prefix' },
-	{ href: '/statistik', label: 'Statistik', icon: 'chart', match: 'prefix' },
-	{ href: '/settings', label: 'Inställningar', icon: 'settings', match: 'prefix' },
-	{ href: '/husdjur', label: 'Husdjur', icon: 'paw', requiresPets: true, match: 'prefix' },
-	{ href: '/admin', label: 'Admin', icon: 'shield', roles: ['admin'], match: 'prefix' }
+	{ href: '/inkop', labelKey: 'nav.shopping', icon: 'shopping', primary: true, match: 'prefix' },
+	{ href: '/planer', labelKey: 'nav.plans', icon: 'calendar', match: 'prefix' },
+	{ href: '/statistik', labelKey: 'nav.stats', icon: 'chart', match: 'prefix' },
+	{ href: '/husdjur', labelKey: 'nav.pets', icon: 'paw', requiresPets: true, match: 'prefix' },
+	{ href: '/admin', labelKey: 'nav.admin', icon: 'shield', roles: ['admin'], match: 'prefix' }
 ];
 
 export function isNavItemVisible(item: NavItem, user: NavUser | null | undefined): boolean {

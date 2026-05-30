@@ -5,6 +5,7 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
+	import { t } from '$lib/i18n';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { getDeleteCopy } from '$lib/utils/delete-safety';
 
@@ -24,7 +25,7 @@
 	const undoMessage = $derived(
 		undoPayload
 			? getDeleteCopy(1, 'shoppingListItem', { itemName: undoPayload.name }).undoToastMessage ??
-					'Rad borttagen'
+					t('delete.shoppingItem.undo')
 			: ''
 	);
 
@@ -75,25 +76,25 @@
 	}
 </script>
 
-<section class="panel" aria-label="Inköpslista">
-	<p class="intro">Gemensam lista för hushållet. Alla med redigeringsbehörighet kan uppdatera den.</p>
+<section class="panel" aria-label={t('shopping.listAria')}>
+	<p class="intro">{t('shopping.intro')}</p>
 
 	{#if canEdit}
 		<form method="POST" action="?/add" use:enhance class="add-form">
-			<label class="label" for="shopping-name">Lägg till</label>
+			<label class="label" for="shopping-name">{t('shopping.addLabel')}</label>
 			<div class="add-row">
-				<input id="shopping-name" name="name" required maxlength="200" placeholder="Vara" />
-				<input name="quantity" inputmode="decimal" placeholder="Antal" aria-label="Antal" />
-				<input name="unit" maxlength="40" placeholder="Enhet" aria-label="Enhet" />
-				<Button type="submit">Lägg till</Button>
+				<input id="shopping-name" name="name" required maxlength="200" placeholder={t('shopping.itemPlaceholder')} />
+				<input name="quantity" inputmode="decimal" placeholder={t('shopping.quantityPlaceholder')} aria-label={t('shopping.quantityPlaceholder')} />
+				<input name="unit" maxlength="40" placeholder={t('shopping.unitPlaceholder')} aria-label={t('shopping.unitPlaceholder')} />
+				<Button type="submit">{t('shopping.addLabel')}</Button>
 			</div>
 		</form>
 	{:else}
-		<p class="readonly">Du har endast läsbehörighet i detta hushåll.</p>
+		<p class="readonly">{t('inventory.readonly')}</p>
 	{/if}
 
 	{#if items.length === 0}
-		<p class="empty">Listan är tom.</p>
+		<p class="empty">{t('shopping.emptyList')}</p>
 	{:else}
 		<ul class="list">
 			{#each unchecked as item (item.id)}
@@ -113,7 +114,7 @@
 							action="?/remove"
 							submitEnhance={createRemoveEnhance(item)}
 							label="×"
-							ariaLabel={`Ta bort ${formatLine(item)}`}
+							ariaLabel={t('shopping.removeLine', { line: formatLine(item) })}
 							class="remove-trigger"
 						>
 							<input type="hidden" name="id" value={item.id} />
@@ -128,7 +129,7 @@
 		{#if checked.length > 0}
 			<div class="checked-block">
 				<div class="checked-head">
-					<h2>Avbockade</h2>
+					<h2>{t('shopping.checkedHeading')}</h2>
 					{#if canEdit}
 						<DeleteConfirmButton
 							tier={3}
@@ -136,8 +137,8 @@
 							copyOptions={{ count: checked.length }}
 							action="?/clearChecked"
 							variant="secondary"
-							label="Rensa avbockade"
-							ariaLabel="Rensa alla avbockade rader"
+							label={t('delete.clearChecked.confirm')}
+							ariaLabel={t('shopping.clearCheckedAria')}
 						/>
 					{/if}
 				</div>
@@ -171,9 +172,9 @@
 			class="undo-btn"
 			disabled={undoSubmitting}
 			onclick={undoRemove}
-			aria-label={undoCopy.undoActionLabel ?? 'Ångra'}
+			aria-label={undoCopy.undoActionLabel ?? t('common.undo')}
 		>
-			{undoCopy.undoActionLabel ?? 'Ångra'}
+			{undoCopy.undoActionLabel ?? t('common.undo')}
 		</button>
 	</div>
 {/if}

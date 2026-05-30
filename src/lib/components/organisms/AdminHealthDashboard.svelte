@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Card from '$lib/components/atoms/Card.svelte';
 	import { ACTIVE_USER_WINDOW_MS, formatLastSeen } from '$lib/domain/presence';
+	import { t } from '$lib/i18n';
 	import type { AdminDashboardStats } from '$lib/infrastructure/repositories/admin.repository';
 
 	interface Props {
@@ -15,62 +16,62 @@
 
 <section class="health-dashboard" aria-labelledby="health-dashboard-heading">
 	<div class="dashboard-header">
-		<h2 id="health-dashboard-heading">Hälsa & användning</h2>
-		<span class="db-badge" title="Aktiv databasmotor">{databaseLabel}</span>
+		<h2 id="health-dashboard-heading">{t('admin.healthTitle')}</h2>
+		<span class="db-badge" title={t('admin.dbEngine')}>{databaseLabel}</span>
 	</div>
 
 	<div class="stats-grid">
 		<Card>
-			<p class="stat-label">Användare</p>
+			<p class="stat-label">{t('admin.statUsers')}</p>
 			<p class="stat-value">{stats.userCount}</p>
 		</Card>
 
 		<Card>
-			<p class="stat-label">Hushåll / pantries</p>
+			<p class="stat-label">{t('admin.statHouseholds')}</p>
 			<p class="stat-value">{stats.householdCount}</p>
 		</Card>
 
 		<Card>
-			<p class="stat-label">Medlemskap</p>
+			<p class="stat-label">{t('admin.statMemberships')}</p>
 			<p class="stat-value">{stats.membershipCount}</p>
 		</Card>
 
 		<Card>
-			<p class="stat-label">Inventarie</p>
+			<p class="stat-label">{t('admin.statInventory')}</p>
 			<p class="stat-value">{stats.inventoryCount}</p>
 		</Card>
 
 		{#if stats.shoppingListItemCount !== null}
 			<Card>
-				<p class="stat-label">Inköpslista</p>
+				<p class="stat-label">{t('admin.statShopping')}</p>
 				<p class="stat-value">{stats.shoppingListItemCount}</p>
 			</Card>
 		{/if}
 
 		<Card>
-			<p class="stat-label">Fel (7 dagar)</p>
+			<p class="stat-label">{t('admin.statErrors7d')}</p>
 			<p class="stat-value">{stats.errorCount7Days}</p>
 		</Card>
 
 		<Card href="#felloggar" interactive>
-			<p class="stat-label">Fel (totalt)</p>
+			<p class="stat-label">{t('admin.statErrorsTotal')}</p>
 			<p class="stat-value">{stats.errorCountTotal}</p>
-			<p class="stat-note">Visa felloggar ↓</p>
+			<p class="stat-note">{t('admin.viewErrorLogs')}</p>
 		</Card>
 
 		<Card>
-			<p class="stat-label">Aktiva nu</p>
+			<p class="stat-label">{t('admin.statActiveNow')}</p>
 			<p class="stat-value">{stats.activeNowCount}</p>
-			<p class="stat-note">Senaste {activeWindowMinutes} min</p>
+			<p class="stat-note">{t('admin.statRecentWindow', { minutes: activeWindowMinutes })}</p>
 		</Card>
 
 		<Card>
-			<p class="stat-label">Inloggade sessioner</p>
+			<p class="stat-label">{t('admin.statLoggedInSessions')}</p>
 			<p class="stat-value">{stats.activeSessionCount}</p>
 		</Card>
 
 		<Card>
-			<p class="stat-label">Senaste aktivitet</p>
+			<p class="stat-label">{t('admin.statLastActivity')}</p>
 			<p class="stat-value stat-value--compact">{formatLastSeen(stats.lastActivityAt)}</p>
 		</Card>
 	</div>

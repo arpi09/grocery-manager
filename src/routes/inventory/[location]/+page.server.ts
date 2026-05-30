@@ -12,9 +12,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		locals.householdId!,
 		params.location
 	);
+	const finishedItems = await locals.inventoryService.listFinishedByLocation(
+		locals.householdId!,
+		params.location
+	);
 
 	return {
 		items,
+		finishedItems,
 		location: params.location,
 		canWrite: locals.householdRole ? canEditInventory(locals.householdRole) : false
 	};

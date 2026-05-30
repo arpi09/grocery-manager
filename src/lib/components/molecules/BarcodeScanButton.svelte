@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import { onMount } from 'svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
 	import { canAccessCamera, BARCODE_HTTPS_HINT } from '$lib/utils/device';
 
 	interface Props {
@@ -26,22 +28,23 @@
 	variant="secondary"
 	class="scan-btn"
 	loading={loading}
-	loadingLabel="Slår upp…"
+	loadingLabel={t('common.lookup')}
 	onclick={onclick}
-	aria-label="Skanna streckkod med kameran"
+	aria-label={t('scanFlow.barcodeCamera')}
 >
-	📷 Skanna streckkod
+	<FeatureIcon id="barcode" size={18} />
+	{t('scanFlow.barcodeFab')}
 </Button>
 
 <style>
 	.https-hint {
 		margin: 0 0 var(--space-sm);
 		padding: var(--space-sm) var(--space-md);
-		background: #fff8e6;
-		border: 1px solid #f0d2a8;
+		background: color-mix(in srgb, var(--color-accent) 18%, var(--color-surface));
+		border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-border));
 		border-radius: var(--radius-sm);
 		font-size: 0.8rem;
-		color: #8a5a12;
+		color: color-mix(in srgb, var(--color-text) 70%, #6b4a12);
 		line-height: 1.4;
 	}
 

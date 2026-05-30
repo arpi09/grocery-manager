@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
+	import { t } from '$lib/i18n';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteSafetyModal from '$lib/components/molecules/DeleteSafetyModal.svelte';
 	import {
@@ -37,7 +38,7 @@
 		variant = 'danger',
 		fullWidth = false,
 		class: className = '',
-		label = 'Ta bort',
+		label = t('common.delete'),
 		ariaLabel,
 		confirmLoading = false,
 		children
@@ -86,10 +87,10 @@
 	{@render children?.()}
 
 	{#if tier === 1 && inlineConfirming}
-		<div class="inline-confirm" role="group" aria-label="Bekräfta borttagning">
+		<div class="inline-confirm" role="group" aria-label={t('common.confirmDelete')}>
 			<span class="inline-confirm-text">{copy.title}</span>
 			<Button type="button" variant="secondary" onclick={cancelInline}>Avbryt</Button>
-			<Button type="button" variant="danger" onclick={confirmInline} aria-label="Bekräfta borttagning">
+			<Button type="button" variant="danger" onclick={confirmInline} aria-label={t('common.confirmDelete')}>
 				{copy.confirmLabel}
 			</Button>
 		</div>

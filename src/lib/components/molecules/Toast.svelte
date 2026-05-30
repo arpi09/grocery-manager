@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		message: string;
@@ -32,7 +33,7 @@
 	<div class="toast" role="status" aria-live="polite">
 		<p>{message}</p>
 		{#if onDismiss}
-			<button type="button" class="dismiss" onclick={() => { show = false; onDismiss?.(); }} aria-label="Stäng">
+			<button type="button" class="dismiss" onclick={() => { show = false; onDismiss?.(); }} aria-label={t('common.close')}>
 				×
 			</button>
 		{/if}

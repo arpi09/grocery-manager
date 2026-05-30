@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { setContext } from 'svelte';
 	import { page } from '$app/state';
+	import { OPEN_RECIPE_IDEAS } from '$lib/navigation/app-layout-context';
 	import MainNav from '$lib/components/organisms/MainNav.svelte';
 	import RecipeAssistant from '$lib/components/organisms/RecipeAssistant.svelte';
 	import ScanFab from '$lib/components/molecules/ScanFab.svelte';
@@ -33,7 +35,7 @@
 		if (!canWrite || page.url.pathname.startsWith('/scan')) {
 			return false;
 		}
-		return page.url.pathname === '/' || page.url.pathname.startsWith('/inventory/');
+		return page.url.pathname === '/';
 	});
 
 	const scanFabHref = $derived.by(() => {
@@ -48,6 +50,8 @@
 	function openRecipeIdeas() {
 		recipeOpen = true;
 	}
+
+	setContext(OPEN_RECIPE_IDEAS, openRecipeIdeas);
 </script>
 
 <div class="app">
@@ -65,10 +69,11 @@
 
 <style>
 	.app {
-		--mobile-bottom-nav-height: 4.25rem;
 		min-height: 100vh;
-		padding: var(--space-lg);
-		padding-top: 0;
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		padding: 0;
 		padding-bottom: calc(
 			var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0) + var(--space-lg)
 		);
@@ -82,12 +87,14 @@
 
 	main {
 		width: 100%;
-		padding-top: var(--space-sm);
+		min-width: 0;
+		padding: var(--space-sm) var(--space-lg) var(--space-lg);
 	}
 
 	@media (min-width: 900px) {
 		main {
 			padding-top: 0;
+			scroll-margin-top: var(--header-height-desktop);
 		}
 	}
 </style>

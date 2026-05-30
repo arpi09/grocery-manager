@@ -10,6 +10,7 @@
 		inviteRoleLabel,
 		isHouseholdOwner
 	} from '$lib/domain/household';
+	import { getLocale, t } from '$lib/i18n';
 	import type { HouseholdInviteView, HouseholdRole, HouseholdView } from '$lib/domain/household';
 
 	interface Props {
@@ -76,7 +77,7 @@
 	</div>
 
 	<div class="subsection">
-		<h3 class="subsection-title">Medlemmar</h3>
+		<h3 class="subsection-title">{t('household.members')}</h3>
 		<ul class="member-list">
 			{#each household.members as member, index (member.userId)}
 				<li class:last={index === household.members.length - 1}>
@@ -87,24 +88,24 @@
 						{/if}
 					</div>
 					<div class="member-actions">
-						<span class="member-role">{householdRoleLabel(member.role)}</span>
+						<span class="member-role">{householdRoleLabel(member.role, getLocale())}</span>
 						{#if canManageMember(member.userId, member.role)}
 							<form method="POST" action="?/updateMemberRole" class="inline-form">
 								<input type="hidden" name="userId" value={member.userId} />
-								<select name="role" aria-label="Roll för {member.email}">
-									<option value="owner" selected={member.role === 'owner'}>Ägare</option>
-									<option value="editor" selected={member.role === 'editor'}>Redigera</option>
-									<option value="viewer" selected={member.role === 'viewer'}>Visa</option>
+								<select name="role" aria-label={t('household.roleFor', { email: member.email })}>
+									<option value="owner" selected={member.role === 'owner'}>{t('household.roleOwner')}</option>
+									<option value="editor" selected={member.role === 'editor'}>{t('household.roleEditor')}</option>
+									<option value="viewer" selected={member.role === 'viewer'}>{t('household.roleViewer')}</option>
 								</select>
-								<Button type="submit" variant="secondary">Spara</Button>
+								<Button type="submit" variant="secondary">{t('common.save')}</Button>
 							</form>
 							<DeleteConfirmButton
 								tier={3}
 								context="householdMember"
 								copyOptions={{ itemName: member.email }}
 								action="?/removeMember"
-								label="Ta bort"
-								ariaLabel={`Ta bort medlem ${member.email}`}
+								label={t('common.delete')}
+								ariaLabel={t('household.removeMember', { email: member.email })}
 								class="inline-form"
 							>
 								<input type="hidden" name="userId" value={member.userId} />
@@ -118,9 +119,9 @@
 
 	{#if isOwner}
 		<div class="subsection">
-			<h3 class="subsection-title">Bjud in</h3>
+			<h3 class="subsection-title">{t('household.invite')}</h3>
 			<p class="subsection-note">
-				Skicka en inbjudan via e-post. Du kan också kopiera länken manuellt nedan.
+				{t('household.inviteNote')}
 			</p>
 
 			{#if householdError}
@@ -128,7 +129,7 @@
 			{/if}
 
 			{#if inviteSent}
-				<FeedbackBanner tone="success" message="Inbjudan skickad — kolla inkorgen!" />
+				<FeedbackBanner tone="success" message={t('household.inviteSent')} />
 			{/if}
 
 			<form
@@ -138,7 +139,7 @@
 				use:enhance={bindSubmitting((v) => (inviteSubmitting = v))}
 			>
 				<label>
-					E-post
+					{t('common.email')}
 					<input
 						name="email"
 						type="email"
@@ -151,14 +152,14 @@
 					{/if}
 				</label>
 				<label>
-					Roll
+					{t('common.role')}
 					<select name="role" required>
-						<option value="editor">{inviteRoleLabel('editor')}</option>
-						<option value="viewer">{inviteRoleLabel('viewer')}</option>
+						<option value="editor">{inviteRoleLabel('editor', getLocale())}</option>
+						<option value="viewer">{inviteRoleLabel('viewer', getLocale())}</option>
 					</select>
 				</label>
-				<Button type="submit" loading={inviteSubmitting} loadingLabel="Skickar inbjudan…">
-					Skicka inbjudan
+				<Button type="submit" loading={inviteSubmitting} loadingLabel={t('household.sendingInvite')}>
+					{t('household.sendInvite')}
 				</Button>
 			</form>
 
@@ -168,32 +169,32 @@
 
 			{#if inviteLink}
 				<div class="invite-link-box">
-					<p class="invite-link-label">Inbjudningslänk</p>
+					<p class="invite-link-label">{t('household.inviteLink')}</p>
 					<div class="invite-link-row">
 						<input readonly value={inviteLink} class="invite-link-input" />
 						<Button type="button" variant="secondary" onclick={() => onCopyInviteLink(inviteLink)}>
-							{copiedInviteLink ? 'Kopierad!' : 'Kopiera'}
+							{copiedInviteLink ? t('common.copied') : t('common.copy')}
 						</Button>
 					</div>
 				</div>
 			{/if}
 
 			{#if pendingInvites.length > 0}
-				<h3 class="subsection-title">Väntande inbjudningar</h3>
+				<h3 class="subsection-title">{t('household.pendingInvites')}</h3>
 				<ul class="pending-list">
 					{#each pendingInvites as invite (invite.id)}
 						<li>
 							<div>
 								<span class="member-email">{invite.email}</span>
-								<span class="member-role">{inviteRoleLabel(invite.role)}</span>
+								<span class="member-role">{inviteRoleLabel(invite.role, getLocale())}</span>
 							</div>
 							<DeleteConfirmButton
 								tier={2}
 								context="inviteRevoke"
 								copyOptions={{ itemName: invite.email }}
 								action="?/revokeInvite"
-								label="Återkalla"
-								ariaLabel={`Återkalla inbjudan till ${invite.email}`}
+								label={t('household.revoke')}
+								ariaLabel={t('household.revokeNamed', { email: invite.email })}
 							>
 								<input type="hidden" name="inviteId" value={invite.id} />
 							</DeleteConfirmButton>
@@ -204,29 +205,26 @@
 		</div>
 	{:else if householdRole}
 		<p class="role-note">
-			Din roll: {householdRoleLabel(householdRole)}.
+			{t('household.yourRole', { role: householdRoleLabel(householdRole, getLocale()) })}
 			{#if !isHouseholdOwner(householdRole)}
-				Endast ägare kan bjuda in och hantera medlemmar.
+				{t('household.ownerOnly')}
 			{/if}
 		</p>
 	{/if}
 
 	{#if isOwner}
 		<div class="danger-zone">
-			<h3 class="subsection-title danger-title">Farozon</h3>
+			<h3 class="subsection-title danger-title">{t('household.dangerZone')}</h3>
 			<p class="danger-note">
-				Ta bort hushållet permanent. All inventering, inköpslista och förbrukningshistorik
-				för detta hushåll raderas. Väntande inbjudningar tas bort.
+				{t('household.deleteWarning')}
 			</p>
 			{#if otherMemberCount > 0}
 				<p class="danger-warning" role="status">
-					{otherMemberCount}
-					{otherMemberCount === 1 ? 'annan medlem' : 'andra medlemmar'} förlorar åtkomst
-					omedelbart.
+					{t('household.otherMembersLoseAccess', { count: otherMemberCount })}
 				</p>
 			{/if}
 			<Button type="button" variant="danger" class="danger-btn" onclick={openDeleteModal}>
-				Ta bort hushåll
+				{t('household.deleteHousehold')}
 			</Button>
 		</div>
 	{/if}
@@ -245,7 +243,7 @@
 	formAction="?/deleteHousehold"
 	submitEnhance={bindSubmitting((v) => (deleteSubmitting = v))}
 	confirmLoading={deleteSubmitting}
-	loadingLabel="Tar bort hushållet…"
+	loadingLabel={t('household.deletingHousehold')}
 >
 	{#snippet fields()}
 		<input type="hidden" name="householdId" value={household.id} />

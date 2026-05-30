@@ -3,9 +3,11 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import { LOCATION_COLORS } from '$lib/domain/location';
+	import { t } from '$lib/i18n';
 	import {
 		ONBOARDING_REPLAY_EVENT,
 		dismissOnboarding,
@@ -17,44 +19,44 @@
 		title: string;
 		subtitle: string;
 		body: string;
-		icon: string;
+		iconId: FeatureIconId;
 		highlight?: 'locations' | 'scan';
 	}
 
-	const steps: Step[] = [
+	const steps = $derived<Step[]>([
 		{
-			title: 'Välkommen till Home Pantry',
-			subtitle: 'Steg 1 av 5',
-			body: 'Håll koll på vad du har hemma — i kyl, frys och skafferi. Se vad som snart går ut och slipp dubbelköp.',
-			icon: '🏠'
+			title: t('onboarding.welcome'),
+			subtitle: t('onboarding.stepOf', { current: 1, total: 5 }),
+			body: t('onboarding.welcomeBody'),
+			iconId: 'home'
 		},
 		{
-			title: 'Skanna varor',
-			subtitle: 'Steg 2 av 5',
-			body: 'Skanna streckkoder med kameran för att lägga till varor på några sekunder. Du hittar skanna-knappen längst ner på mobilen.',
-			icon: '📷',
+			title: t('onboarding.scanTitle'),
+			subtitle: t('onboarding.stepOf', { current: 2, total: 5 }),
+			body: t('onboarding.scanBody'),
+			iconId: 'barcode',
 			highlight: 'scan'
 		},
 		{
-			title: 'Tre platser',
-			subtitle: 'Steg 3 av 5',
-			body: 'Dela upp lagret efter var varorna står. Tryck på en plats på startsidan för att se och redigera innehållet.',
-			icon: '🫙',
+			title: t('onboarding.locationsTitle'),
+			subtitle: t('onboarding.stepOf', { current: 3, total: 5 }),
+			body: t('onboarding.locationsBody'),
+			iconId: 'cupboard',
 			highlight: 'locations'
 		},
 		{
-			title: 'Dela hushåll',
-			subtitle: 'Steg 4 av 5',
-			body: 'Bjud in familj eller sambo under Inställningar. Byt mellan hushåll via menyn högst upp om du har flera skafferier.',
-			icon: '👥'
+			title: t('onboarding.shareTitle'),
+			subtitle: t('onboarding.stepOf', { current: 4, total: 5 }),
+			body: t('onboarding.shareBody'),
+			iconId: 'users'
 		},
 		{
-			title: 'Du är redo!',
-			subtitle: 'Steg 5 av 5',
-			body: 'Börja med att skanna några varor eller lägg till manuellt. Guiden visas bara en gång — du kan alltid öppna den igen under Inställningar.',
-			icon: '✅'
+			title: t('onboarding.readyTitle'),
+			subtitle: t('onboarding.stepOf', { current: 5, total: 5 }),
+			body: t('onboarding.readyBody'),
+			iconId: 'check'
 		}
-	];
+	]);
 
 	let open = $state(false);
 	let stepIndex = $state(0);
@@ -145,42 +147,44 @@
 	{#snippet header()}
 		<ModalHeader title={currentStep.title} subtitle={currentStep.subtitle}>
 			{#snippet actions()}
-				<button type="button" class="skip-link" onclick={skipGuide}>Hoppa över</button>
+				<button type="button" class="skip-link" onclick={skipGuide}>{t('common.skip')}</button>
 			{/snippet}
 		</ModalHeader>
 	{/snippet}
 
 	<div class="step-content">
-		<div class="step-icon" aria-hidden="true">{currentStep.icon}</div>
+		<div class="step-icon" aria-hidden="true">
+			<FeatureIcon id={currentStep.iconId} size={32} />
+		</div>
 		<p class="step-body">{currentStep.body}</p>
 
 		{#if currentStep.highlight === 'locations'}
-			<ul class="location-preview" aria-label="Lagringsplatser">
+			<ul class="location-preview" aria-label={t('onboarding.locationsAria')}>
 				<li>
 					<span class="dot" style="background: {LOCATION_COLORS.fridge}"></span>
-					Kyl
+					{t('onboarding.fridgeShort')}
 				</li>
 				<li>
 					<span class="dot" style="background: {LOCATION_COLORS.freezer}"></span>
-					Frys
+					{t('onboarding.freezerShort')}
 				</li>
 				<li>
 					<span class="dot" style="background: {LOCATION_COLORS.cupboard}"></span>
-					Skafferi
+					{t('onboarding.cupboardShort')}
 				</li>
 			</ul>
 		{/if}
 
 		{#if currentStep.highlight === 'scan'}
 			<Button type="button" variant="secondary" fullWidth onclick={tryScan}>
-				Prova skanna
+				{t('onboarding.tryScan')}
 			</Button>
 		{/if}
 	</div>
 
 	{#snippet footer()}
 		<div class="onboarding-footer">
-			<div class="step-dots" role="tablist" aria-label="Introduktionssteg">
+			<div class="step-dots" role="tablist" aria-label={t('onboarding.stepsAria')}>
 				{#each steps as step, index (index)}
 					<span
 						aria-label={step.title} class="dot-indicator"
@@ -192,10 +196,10 @@
 
 			<div class="footer-actions">
 				<Button type="button" variant="ghost" disabled={isFirstStep} onclick={goBack}>
-					Tillbaka
+					{t('common.previous')}
 				</Button>
 				<Button type="button" onclick={goNext}>
-					{isLastStep ? 'Kom igång' : 'Nästa'}
+					{isLastStep ? t('common.getStarted') : t('common.next')}
 				</Button>
 			</div>
 		</div>
@@ -233,8 +237,14 @@
 	}
 
 	.step-icon {
-		font-size: 2.5rem;
-		line-height: 1;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 3.25rem;
+		height: 3.25rem;
+		border-radius: var(--radius-md);
+		background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-muted));
+		color: var(--color-primary);
 	}
 
 	.step-body {

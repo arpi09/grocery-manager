@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import AddItemForm from '$lib/components/organisms/AddItemForm.svelte';
 	import type { StorageLocation } from '$lib/domain/location';
@@ -16,7 +17,7 @@
 	open={true}
 	onClose={onClose}
 	variant="center"
-	title="Lägg till vara"
+	title={t('item.addTitle')}
 	panelClass="add-item-panel"
 >
 	<AddItemForm {defaultLocation} {errors} />

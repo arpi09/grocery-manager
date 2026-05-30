@@ -3,6 +3,7 @@ import {
 	type BarcodeProduct,
 	unknownBarcodeProductName
 } from '$lib/domain/barcode-product';
+import { DEFAULT_LOCALE, type Locale } from '$lib/i18n/locale';
 import { fetchProductByBarcode } from '$lib/infrastructure/barcode/open-food-facts.client';
 
 export class BarcodeNotFoundError extends Error {
@@ -21,7 +22,10 @@ export class BarcodeLookupService {
 		return result.product;
 	}
 
-	async lookupWithFallback(barcode: string): Promise<BarcodeLookupResult> {
+	async lookupWithFallback(
+		barcode: string,
+		locale: Locale = DEFAULT_LOCALE
+	): Promise<BarcodeLookupResult> {
 		const normalized = barcode.replace(/\D/g, '');
 		if (normalized.length < 8) {
 			throw new BarcodeNotFoundError();
@@ -36,7 +40,7 @@ export class BarcodeLookupService {
 			found: false,
 			product: {
 				barcode: normalized,
-				name: unknownBarcodeProductName(normalized),
+				name: unknownBarcodeProductName(normalized, locale),
 				quantity: '1',
 				unit: null,
 				notes: null

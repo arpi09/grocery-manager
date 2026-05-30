@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
@@ -27,18 +28,18 @@
 			return serverError;
 		}
 		if (status === 401) {
-			return 'Du måste vara inloggad för att generera recept.';
+			return t('recipe.notLoggedIn');
 		}
 		if (status === 422) {
-			return 'Kunde inte tolka receptförslagen. Försök igen om en stund.';
+			return t('recipe.parseFailed');
 		}
 		if (status === 503) {
-			return 'AI-tjänsten är tillfälligt otillgänglig. Försök igen om en stund.';
+			return t('recipe.serviceUnavailable');
 		}
 		if (status === 502) {
-			return 'Kunde inte nå AI-tjänsten just nu. Försök igen om en stund.';
+			return t('recipe.reachFailed');
 		}
-		return 'Hoppsan — kunde inte generera recept just nu. Försök igen.';
+		return t('recipe.generateFailed');
 	}
 
 	async function generateRecipes() {
@@ -73,10 +74,10 @@
 			note = data.note ?? null;
 
 			if (recipes.length === 0 && !note) {
-				errorMessage = 'Inga recept genererades. Lägg till fler varor och försök igen.';
+				errorMessage = t('recipe.noneGenerated');
 			}
 		} catch {
-			errorMessage = 'Nätverksfel vid generering av recept. Kontrollera anslutningen och försök igen.';
+			errorMessage = t('recipe.networkError');
 			recipes = [];
 		} finally {
 			loading = false;
@@ -92,27 +93,26 @@
 	{open}
 	onClose={closeAssistant}
 	variant="center"
-	title="Receptförslag"
+	title={t('recipe.title')}
 	panelClass="recipe-assistant-panel"
 >
 	<p class="helper">
-		Få matidéer utifrån ditt nuvarande lager. Lägg till önskemål som "snabb middag" eller
-		"vegetariskt".
+		{t('recipe.intro')}
 	</p>
 
-	<label class="label" for="recipe-preferences">Önskemål (valfritt)</label>
+	<label class="label" for="recipe-preferences">{t('recipe.preferences')}</label>
 	<textarea
 		id="recipe-preferences"
 		class="textarea"
 		rows="3"
 		maxlength="300"
 		bind:value={preferences}
-		placeholder="Exempel: under 30 minuter, utan mejeri"
+		placeholder={t('recipe.preferencesPlaceholder')}
 	></textarea>
 
 	<div class="actions">
-		<Button type="button" onclick={generateRecipes} loading={loading} loadingLabel="Tänker…" fullWidth>
-			Generera recept
+		<Button type="button" onclick={generateRecipes} loading={loading} loadingLabel={t('common.thinking')} fullWidth>
+			{t('recipe.generateBtn')}
 		</Button>
 	</div>
 
@@ -130,8 +130,8 @@
 				<section class="recipe">
 					<h3>{recipe.title}</h3>
 					<p class="why">{recipe.whyItFits}</p>
-					<p><strong>Från lagret:</strong> {recipe.ingredientsToUse.join(', ')}</p>
-					<p><strong>Saknas:</strong> {recipe.missingIngredients.join(', ') || 'Inget'}</p>
+					<p><strong>{t('recipe.fromStock')}</strong> {recipe.ingredientsToUse.join(', ')}</p>
+					<p><strong>{t('planer.missingLabel')}</strong> {recipe.missingIngredients.join(', ') || t('common.none')}</p>
 					<ol>
 						{#each recipe.steps as step}
 							<li>{step}</li>

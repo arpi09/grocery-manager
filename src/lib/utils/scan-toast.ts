@@ -1,16 +1,22 @@
+import { DEFAULT_LOCALE, type Locale } from '$lib/i18n/locale';
+import { translate } from '$lib/i18n/messages';
+
 export const SCAN_TOAST_PARAM = 'scan';
 export const SCAN_TOAST_NAME_PARAM = 'scanName';
 
 export type ScanToastKind = 'added' | 'unknown';
 
-export function scanToastMessage(kind: ScanToastKind, productName: string): string {
-	const label = productName.trim() || 'Varan';
+export function scanToastMessage(
+	locale: Locale,
+	kind: ScanToastKind,
+	productName: string
+): string {
+	const label = productName.trim() || translate(locale, 'common.unknownProduct');
 	if (kind === 'unknown') {
-		return `Bra jobbat — "${label}" finns nu i skafferiet (okänd streckkod).`;
+		return translate(locale, 'scanFlow.toastAddedUnknown', { label });
 	}
-	return `Klart! "${label}" ligger nu i skafferiet.`;
+	return translate(locale, 'scanFlow.toastAdded', { label });
 }
-
 export function parseScanToastKind(value: string | null): ScanToastKind | null {
 	if (value === 'added' || value === 'unknown') {
 		return value;

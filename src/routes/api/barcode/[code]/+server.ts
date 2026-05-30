@@ -10,7 +10,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	}
 
 	try {
-		const result = await lookupService.lookupWithFallback(params.code);
+		const result = await lookupService.lookupWithFallback(params.code, locals.locale);
 		return json(result);
 	} catch (e) {
 		if (e instanceof BarcodeNotFoundError) {

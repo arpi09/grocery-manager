@@ -1,8 +1,11 @@
 <script lang="ts">
 	import Card from '$lib/components/atoms/Card.svelte';
+	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import type { InventoryAnalytics } from '$lib/application/inventory.service';
 	import { EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
 	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
+	import { getLocale, t } from '$lib/i18n';
+	import { locationLabel } from '$lib/i18n/domain-labels';
 
 	interface Props {
 		analytics: InventoryAnalytics;
@@ -10,16 +13,10 @@
 
 	let { analytics }: Props = $props();
 
-	const locationLabelsSv: Record<StorageLocation, string> = {
-		fridge: 'Kylskåp',
-		freezer: 'Frys',
-		cupboard: 'Skafferi'
-	};
-
-	const locationIcons: Record<StorageLocation, string> = {
-		fridge: '❄',
-		freezer: '🧊',
-		cupboard: '🫙'
+	const locationIcons: Record<StorageLocation, FeatureIconId> = {
+		fridge: 'fridge',
+		freezer: 'freezer',
+		cupboard: 'cupboard'
 	};
 
 	function formatTotalQuantity(value: string): string {
@@ -35,10 +32,10 @@
 	<div class="hero">
 		<p class="hero-number">{analytics.totalItems}</p>
 		<p class="hero-label">
-			{analytics.totalItems === 1 ? 'rad i skafferiet' : 'rader i skafferiet'}
+			{analytics.totalItems === 1 ? t('inventory.rowSingular') : t('inventory.rowPlural')}
 			{#if analytics.totalItems > 0}
 				<span class="hero-muted">
-					({formatTotalQuantity(analytics.totalQuantity)} enheter totalt)
+					{t('stats.totalUnits', { count: formatTotalQuantity(analytics.totalQuantity) })}
 				</span>
 			{/if}
 		</p>
@@ -47,32 +44,32 @@
 	<div class="stat-grid">
 		<Card>
 			<p class="stat-value">{analytics.distinctProducts}</p>
-			<p class="stat-label">Unika produkter</p>
+			<p class="stat-label">{t('stats.uniqueProducts')}</p>
 		</Card>
 		<Card>
 			<p class="stat-value">{analytics.expiringSoonCount}</p>
-			<p class="stat-label">Går ut inom {EXPIRING_SOON_DAYS} dagar</p>
+			<p class="stat-label">{t('stats.expiringWithin', { days: EXPIRING_SOON_DAYS })}</p>
 		</Card>
 		<Card>
 			<p class="stat-value">{analytics.addedLast7Days}</p>
-			<p class="stat-label">Tillagda senaste veckan</p>
+			<p class="stat-label">{t('stats.addedLastWeek')}</p>
 		</Card>
 		<Card>
 			<p class="stat-value">{analytics.withoutExpiryCount}</p>
-			<p class="stat-label">Utan utgångsdatum</p>
+			<p class="stat-label">{t('stats.withoutExpiry')}</p>
 		</Card>
 		{#if analytics.lowStockCount > 0}
 			<Card>
 				<p class="stat-value">{analytics.lowStockCount}</p>
-				<p class="stat-label">Lågt saldo (&lt; 1)</p>
+				<p class="stat-label">{t('stats.lowStock')}</p>
 			</Card>
 		{/if}
 	</div>
 
 	<Card>
-		<h2 class="section-title">Per förvaringsplats</h2>
+		<h2 class="section-title label-caps">{t('stats.byLocation')}</h2>
 		{#if analytics.totalItems === 0}
-			<p class="empty">Inget inlagt än — börja på startsidan så fylls statistiken på.</p>
+			<p class="empty">{t('stats.empty')}</p>
 		{:else}
 			<ul class="bars">
 				{#each analytics.byLocationBars as bar}
@@ -80,9 +77,9 @@
 						<div class="bar-header">
 							<span class="bar-label">
 								<span class="icon" style="color: {LOCATION_COLORS[bar.location]}">
-									{locationIcons[bar.location]}
+									<FeatureIcon id={locationIcons[bar.location]} size={18} />
 								</span>
-								{locationLabelsSv[bar.location]}
+								{locationLabel(getLocale(), bar.location)}
 							</span>
 							<span class="bar-count">{bar.count}</span>
 						</div>
@@ -158,8 +155,6 @@
 
 	.section-title {
 		margin: 0 0 var(--space-md);
-		font-size: 1rem;
-		font-weight: 600;
 	}
 
 	.empty {

@@ -7,6 +7,8 @@
 	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
 	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
+	import { getLocale, t } from '$lib/i18n';
+	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { addRecentScan, getRecentScans, type RecentScan } from '$lib/utils/recent-scans';
 	import { isDesktopDevice } from '$lib/utils/device';
 
@@ -18,12 +20,6 @@
 	}
 
 	let { defaultLocation, returnTo, cancelHref, errors = {} }: Props = $props();
-
-	const locationLabels: Record<StorageLocation, string> = {
-		fridge: 'Kyl',
-		freezer: 'Frys',
-		cupboard: 'Skafferi'
-	};
 
 	type Step = 'scan' | 'confirm';
 
@@ -75,7 +71,7 @@
 	async function lookupBarcode(code: string) {
 		const trimmed = code.trim();
 		if (trimmed.length < 8) {
-			lookupError = 'Hoppsan — ange en giltig streckkod (minst 8 siffror).';
+			lookupError = t('scanFlow.invalidBarcodeManual');
 			return;
 		}
 
@@ -91,14 +87,14 @@
 				lookupError =
 					'message' in data && data.message
 						? data.message
-						: 'Hoppsan — kunde inte slå upp streckkoden. Försök igen eller ange manuellt.';
+						: t('scanFlow.lookupFailed');
 				scannerActive = step === 'scan';
 				return;
 			}
 
 			await applyLookupResult(data as BarcodeLookupResult);
 		} catch {
-			lookupError = 'Hoppsan — nätverksfel. Kontrollera anslutningen och försök igen.';
+			lookupError = t('scanFlow.networkError');
 			scannerActive = step === 'scan';
 		} finally {
 			lookupLoading = false;
@@ -131,8 +127,8 @@
 			<BarcodeScanner active={scannerActive && !lookupLoading} onScan={handleScan} />
 			{#if lookupLoading}
 				<div class="lookup-overlay" role="status" aria-live="polite">
-					<Spinner size="md" label="Slår upp produkt" />
-					<p>Slår upp produkt…</p>
+					<Spinner size="md" label={t('scanFlow.lookupProduct')} />
+					<p>{t('scanFlow.lookupProduct')}…</p>
 				</div>
 			{/if}
 		</div>
@@ -143,7 +139,7 @@
 
 		{#if isDesktopDevice()}
 			<div class="manual">
-				<label for="manual-barcode">Eller ange streckkod manuellt</label>
+				<label for="manual-barcode">{t('scanFlow.manualBarcode')}</label>
 				<div class="manual-row">
 					<input
 						id="manual-barcode"
@@ -157,9 +153,9 @@
 						variant="secondary"
 						onclick={handleManualLookup}
 						loading={lookupLoading}
-						loadingLabel="Söker…"
+						loadingLabel={t('common.searching')}
 					>
-						Sök
+						{t('common.search')}
 					</Button>
 				</div>
 			</div>
@@ -167,7 +163,7 @@
 
 		{#if recentScans.length > 0}
 			<div class="recent">
-				<h3>Senaste skanningar</h3>
+				<h3>{t('scanFlow.recentScans')}</h3>
 				<ul>
 					{#each recentScans as scan}
 						<li>
@@ -185,12 +181,12 @@
 	<section class="confirm-step">
 		{#if !productFound}
 			<p class="unknown-banner" role="status">
-				Produkten hittades inte i databasen. Kontrollera namnet innan du sparar.
+				{t('scanFlow.productNotFoundBanner')}
 			</p>
 		{/if}
 
 		<p class="product-name">{name}</p>
-		<p class="barcode-label">Streckkod: {barcode}</p>
+		<p class="barcode-label">{t('scanFlow.barcodeLabel', { barcode })}</p>
 
 		<form
 			method="POST"
@@ -203,12 +199,12 @@
 			<input type="hidden" name="productFound" value={productFound ? '1' : '0'} />
 
 			<fieldset class="locations">
-				<legend>Var ska varan ligga?</legend>
+				<legend>{t('scanFlow.whereLocation')}</legend>
 				<div class="location-grid">
 					{#each LOCATIONS as loc}
 						<label class="location-option">
 							<input type="radio" name="location" value={loc} bind:group={location} />
-							<span>{locationLabels[loc]}</span>
+							<span>{locationLabel(getLocale(), loc)}</span>
 						</label>
 					{/each}
 				</div>
@@ -220,25 +216,25 @@
 			{#if showMore}
 				<div class="more-fields">
 					<label>
-						Namn
+						{t('common.name')}
 						<input name="name" bind:value={name} required />
 					</label>
 					<div class="row">
 						<label>
-							Antal
+							{t('common.quantity')}
 							<input name="quantity" bind:value={quantity} inputmode="decimal" required />
 						</label>
 						<label>
-							Enhet
-							<input name="unit" bind:value={unit} placeholder="st, g, L…" />
+							{t('common.unit')}
+							<input name="unit" bind:value={unit} placeholder={t('item.unitPlaceholder')} />
 						</label>
 					</div>
 					<label>
-						Går ut (valfritt)
+						{t('scanFlow.expiresOptional')}
 						<input name="expiresOn" type="date" bind:value={expiresOn} />
 					</label>
 					<label>
-						Anteckningar
+						{t('common.notes')}
 						<textarea name="notes" rows="2" bind:value={notes}></textarea>
 					</label>
 				</div>
@@ -256,14 +252,14 @@
 
 			<div class="actions">
 				{#if cancelHref}
-					<a class="cancel-link" href={cancelHref}>Avbryt</a>
+					<a class="cancel-link" href={cancelHref}>{t('common.cancel')}</a>
 				{/if}
-				<Button type="button" variant="ghost" onclick={resetToScan}>Skanna igen</Button>
+				<Button type="button" variant="ghost" onclick={resetToScan}>{t('scanFlow.scanAgain')}</Button>
 				<Button type="button" variant="secondary" onclick={() => (showMore = !showMore)}>
-					{showMore ? 'Dölj detaljer' : 'Mer'}
+					{showMore ? t('scanFlow.hideDetails') : t('common.moreDetails')}
 				</Button>
-				<Button type="submit" fullWidth loading={saveSubmitting} loadingLabel="Sparar till skafferiet…">
-					Spara
+				<Button type="submit" fullWidth loading={saveSubmitting} loadingLabel={t('scanFlow.saving')}>
+					{t('common.save')}
 				</Button>
 			</div>
 		</form>

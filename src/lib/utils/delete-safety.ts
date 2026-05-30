@@ -1,13 +1,9 @@
 /**
  * Tiered deletion safety guards (severity 1 → 4).
- *
- * | Tier | Severity   | Examples                         | Guard pattern                                      |
- * |------|------------|----------------------------------|----------------------------------------------------|
- * | 1    | Light      | Shopping list line               | Inline confirm or undo toast after delete          |
- * | 2    | Standard   | Pantry item, invite, meal        | Modal: "Ta bort [namn]?" + Avbryt / Ta bort        |
- * | 3    | Strong     | Member, pet, bulk clear          | Modal + consequence text + destructive confirm     |
- * | 4    | Critical   | Delete household                 | Modal + type name or TA BORT + member warnings      |
  */
+
+import { DEFAULT_LOCALE, type Locale } from '$lib/i18n/locale';
+import { translate, type MessageKey } from '$lib/i18n/messages';
 
 export type DeleteSafetyTier = 1 | 2 | 3 | 4;
 
@@ -15,6 +11,7 @@ export type DeleteSafetyContext =
 	| 'shoppingListItem'
 	| 'shoppingListClearChecked'
 	| 'inventoryItem'
+	| 'inventoryItemFinished'
 	| 'householdMember'
 	| 'householdDelete'
 	| 'inviteRevoke'
@@ -26,18 +23,14 @@ export type DeleteSafetyContext =
 
 export interface DeleteCopyOptions {
 	itemName?: string;
-	/** Bulk operations — number of rows affected. */
 	count?: number;
-	/** Tier 4 — household name the user must type (or TA BORT). */
 	confirmationTarget?: string;
-	/** Tier 4 — warn when other members lose access. */
 	otherMemberCount?: number;
 }
 
 export interface DeleteSafetyCopy {
 	title: string;
 	description: string;
-	/** Shown for tier 3+ when impact needs emphasis. */
 	consequence?: string;
 	confirmLabel: string;
 	cancelLabel: string;
@@ -48,163 +41,184 @@ export interface DeleteSafetyCopy {
 	undoActionLabel?: string;
 }
 
-const CANCEL = 'Avbryt';
-
-function namedItemPhrase(itemName?: string): string {
-	return itemName?.trim() ? `"${itemName.trim()}"` : 'den här posten';
+function namedItemPhrase(locale: Locale, itemName?: string): string {
+	return itemName?.trim() ? `"${itemName.trim()}"` : translate(locale, 'common.unknownItem');
 }
 
 export function isTypedConfirmationValid(
 	input: string,
-	confirmationTarget: string
+	confirmationTarget: string,
+	locale: Locale = DEFAULT_LOCALE
 ): boolean {
 	const normalized = input.trim();
-	return normalized === confirmationTarget.trim() || normalized === 'TA BORT';
+	const deleteWord = translate(locale, 'common.typeDeleteConfirm');
+	return normalized === confirmationTarget.trim() || normalized === deleteWord;
 }
 
 export function getDeleteCopy(
 	tier: DeleteSafetyTier,
 	context: DeleteSafetyContext,
-	options: DeleteCopyOptions = {}
+	options: DeleteCopyOptions = {},
+	locale: Locale = DEFAULT_LOCALE
 ): DeleteSafetyCopy {
 	const { itemName, count, confirmationTarget, otherMemberCount = 0 } = options;
-	const named = namedItemPhrase(itemName);
+	const named = namedItemPhrase(locale, itemName);
+	const cancelLabel = translate(locale, 'common.cancel');
+	const deleteLabel = translate(locale, 'common.delete');
+	const undoLabel = translate(locale, 'common.undo');
+	const confirmLabel = translate(locale, 'common.confirmation');
 
 	switch (context) {
 		case 'shoppingListItem':
 			return {
-				title: 'Ta bort rad?',
-				description: `Raden ${named} tas bort från inköpslistan.`,
-				confirmLabel: 'Ta bort',
-				cancelLabel: CANCEL,
+				title: translate(locale, 'delete.shoppingItem.title'),
+				description: translate(locale, 'delete.shoppingItem.description', { name: named }),
+				confirmLabel: deleteLabel,
+				cancelLabel,
 				undoToastMessage: itemName
-					? `${itemName.trim()} borttagen från listan`
-					: 'Rad borttagen från listan',
-				undoActionLabel: 'Ångra'
+					? translate(locale, 'delete.shoppingItem.undoNamed', { name: itemName.trim() })
+					: translate(locale, 'delete.shoppingItem.undo'),
+				undoActionLabel: undoLabel
 			};
 
 		case 'shoppingListClearChecked': {
 			const n = count ?? 0;
 			return {
-				title: 'Rensa avbockade?',
+				title: translate(locale, 'delete.clearChecked.title'),
 				description:
 					n > 0
-						? `${n} avbockade ${n === 1 ? 'rad tas' : 'rader tas'} bort permanent.`
-						: 'Alla avbockade rader tas bort permanent.',
-				consequence: 'Detta går inte att ångra.',
-				confirmLabel: 'Rensa avbockade',
-				cancelLabel: CANCEL
+						? translate(locale, 'delete.clearChecked.description', { count: n })
+						: translate(locale, 'delete.clearChecked.descriptionAll'),
+				consequence: translate(locale, 'delete.clearChecked.consequence'),
+				confirmLabel: translate(locale, 'delete.clearChecked.confirm'),
+				cancelLabel
 			};
 		}
 
 		case 'inventoryItem':
 			return {
-				title: itemName ? `Ta bort ${itemName.trim()}?` : 'Ta bort vara?',
-				description: `Varan ${named} tas bort från skafferiet.`,
-				confirmLabel: 'Ta bort',
-				cancelLabel: CANCEL
+				title: itemName
+					? translate(locale, 'delete.inventoryItem.titleNamed', { name: itemName.trim() })
+					: translate(locale, 'delete.inventoryItem.title'),
+				description: translate(locale, 'delete.inventoryItem.description', { name: named }),
+				confirmLabel: deleteLabel,
+				cancelLabel
+			};
+
+		case 'inventoryItemFinished':
+			return {
+				title: itemName
+					? translate(locale, 'delete.inventoryItemFinished.titleNamed', { name: itemName.trim() })
+					: translate(locale, 'delete.inventoryItemFinished.title'),
+				description: translate(locale, 'delete.inventoryItemFinished.description', { name: named }),
+				confirmLabel: translate(locale, 'delete.inventoryItemFinished.confirm'),
+				cancelLabel
 			};
 
 		case 'householdMember':
 			return {
-				title: itemName ? `Ta bort ${itemName.trim()}?` : 'Ta bort medlem?',
-				description: `Medlemmen ${named} förlorar åtkomst till hushållet.`,
-				consequence: 'Personen måste bjudas in igen för att komma tillbaka.',
-				confirmLabel: 'Ta bort medlem',
-				cancelLabel: CANCEL
+				title: itemName
+					? translate(locale, 'delete.householdMember.titleNamed', { name: itemName.trim() })
+					: translate(locale, 'delete.householdMember.title'),
+				description: translate(locale, 'delete.householdMember.description', { name: named }),
+				consequence: translate(locale, 'delete.householdMember.consequence'),
+				confirmLabel: translate(locale, 'delete.householdMember.confirm'),
+				cancelLabel
 			};
 
 		case 'householdDelete': {
 			const memberWarning =
 				otherMemberCount > 0
-					? `${otherMemberCount} ${
-							otherMemberCount === 1 ? 'annan medlem' : 'andra medlemmar'
-						} förlorar åtkomst omedelbart.`
+					? translate(locale, 'delete.household.otherMembers', { count: otherMemberCount })
 					: undefined;
 			return {
-				title: 'Ta bort hushåll',
-				description:
-					'Detta går inte att ångra. All inventering, inköpslista och förbrukningshistorik för hushållet raderas.',
+				title: translate(locale, 'delete.household.title'),
+				description: translate(locale, 'delete.household.description'),
 				consequence: memberWarning,
-				confirmLabel: 'Ta bort permanent',
-				cancelLabel: CANCEL,
-				typedConfirmationLabel: 'Bekräftelse',
+				confirmLabel: translate(locale, 'delete.household.confirm'),
+				cancelLabel,
+				typedConfirmationLabel: confirmLabel,
 				typedConfirmationHint: confirmationTarget
-					? `Skriv ${confirmationTarget} eller TA BORT för att bekräfta.`
-					: 'Skriv hushållets namn eller TA BORT för att bekräfta.',
+					? translate(locale, 'delete.household.typedHint', { name: confirmationTarget })
+					: translate(locale, 'delete.household.typedHintGeneric'),
 				typedConfirmationPlaceholder: confirmationTarget
 			};
 		}
 
 		case 'inviteRevoke':
 			return {
-				title: itemName ? `Återkalla inbjudan?` : 'Återkalla inbjudan?',
+				title: translate(locale, 'delete.invite.title'),
 				description: itemName
-					? `Inbjudan till ${itemName.trim()} tas bort. Länken slutar fungera.`
-					: 'Inbjudan tas bort och länken slutar fungera.',
-				confirmLabel: 'Återkalla',
-				cancelLabel: CANCEL
+					? translate(locale, 'delete.invite.description', { name: itemName.trim() })
+					: translate(locale, 'delete.invite.descriptionGeneric'),
+				confirmLabel: translate(locale, 'delete.invite.confirm'),
+				cancelLabel
 			};
 
 		case 'pet':
 			return {
-				title: itemName ? `Ta bort ${itemName.trim()}?` : 'Ta bort husdjur?',
-				description: `Husdjuret ${named} och tillhörande matloggar tas bort.`,
-				consequence: 'Detta går inte att ångra.',
-				confirmLabel: 'Ta bort husdjur',
-				cancelLabel: CANCEL
+				title: itemName
+					? translate(locale, 'delete.pet.titleNamed', { name: itemName.trim() })
+					: translate(locale, 'delete.pet.title'),
+				description: translate(locale, 'delete.pet.description', { name: named }),
+				consequence: translate(locale, 'delete.pet.consequence'),
+				confirmLabel: translate(locale, 'delete.pet.confirm'),
+				cancelLabel
 			};
 
 		case 'petFood':
 			return {
-				title: itemName ? `Ta bort ${itemName.trim()}?` : 'Ta bort mat?',
-				description: `Matposten ${named} tas bort från husdjursförrådet.`,
-				confirmLabel: 'Ta bort',
-				cancelLabel: CANCEL
+				title: itemName
+					? translate(locale, 'delete.petFood.titleNamed', { name: itemName.trim() })
+					: translate(locale, 'delete.petFood.title'),
+				description: translate(locale, 'delete.petFood.description', { name: named }),
+				confirmLabel: deleteLabel,
+				cancelLabel
 			};
 
 		case 'plannedMeal':
 			return {
-				title: itemName ? `Ta bort ${itemName.trim()}?` : 'Ta bort måltid?',
-				description: `Måltiden ${named} tas bort från veckoplanen.`,
-				confirmLabel: 'Ta bort',
-				cancelLabel: CANCEL
+				title: itemName
+					? translate(locale, 'delete.plannedMeal.titleNamed', { name: itemName.trim() })
+					: translate(locale, 'delete.plannedMeal.title'),
+				description: translate(locale, 'delete.plannedMeal.description', { name: named }),
+				confirmLabel: deleteLabel,
+				cancelLabel
 			};
 
 		case 'receiptDiscardReview': {
 			const n = count ?? 0;
 			return {
-				title: 'Kasta granskning?',
+				title: translate(locale, 'delete.receiptReview.title'),
 				description:
 					n > 0
-						? `${n} identifierade ${n === 1 ? 'vara försvinner' : 'varor försvinner'} om du väljer ny bild.`
-						: 'Den parsade kvittolistan försvinner om du väljer ny bild.',
-				consequence: 'Du måste fotografera eller välja kvittot igen.',
-				confirmLabel: 'Kasta och välj ny bild',
-				cancelLabel: CANCEL
+						? translate(locale, 'delete.receiptReview.description', { count: n })
+						: translate(locale, 'delete.receiptReview.descriptionEmpty'),
+				consequence: translate(locale, 'delete.receiptReview.consequence'),
+				confirmLabel: translate(locale, 'delete.receiptReview.confirm'),
+				cancelLabel
 			};
 		}
 
 		default:
 			if (tier >= 3) {
 				return {
-					title: 'Ta bort?',
-					description: 'Den valda posten tas bort permanent.',
-					consequence: 'Detta går inte att ångra.',
-					confirmLabel: 'Ta bort',
-					cancelLabel: CANCEL
+					title: translate(locale, 'delete.generic.title'),
+					description: translate(locale, 'delete.generic.descriptionPermanent'),
+					consequence: translate(locale, 'delete.generic.consequence'),
+					confirmLabel: deleteLabel,
+					cancelLabel
 				};
 			}
 			return {
-				title: 'Ta bort?',
-				description: 'Är du säker på att du vill ta bort detta?',
-				confirmLabel: 'Ta bort',
-				cancelLabel: CANCEL
+				title: translate(locale, 'delete.generic.title'),
+				description: translate(locale, 'delete.generic.descriptionSimple'),
+				confirmLabel: deleteLabel,
+				cancelLabel
 			};
 	}
 }
 
-/** Modal variant: bottom sheet on narrow viewports, centered dialog otherwise. */
 export function deleteModalVariant(isNarrow: boolean): 'sheet' | 'center' {
 	return isNarrow ? 'sheet' : 'center';
 }

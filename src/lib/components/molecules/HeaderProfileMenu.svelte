@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { userInitials } from '$lib/domain/user';
+	import { t } from '$lib/i18n';
 
 	interface ProfileUser {
 		email: string;
@@ -50,7 +51,7 @@
 	<button
 		type="button"
 		class="avatar-btn"
-		aria-label="Kontomeny"
+		aria-label={t('nav.accountMenu')}
 		aria-expanded={open}
 		aria-haspopup="menu"
 		onclick={() => (open = !open)}
@@ -65,8 +66,8 @@
 	{#if open}
 		<div class="dropdown" role="menu">
 			<p class="dropdown-label">{label}</p>
-			<a href="/profile" role="menuitem" onclick={() => (open = false)}>Redigera profil</a>
-			<a href="/settings" role="menuitem" onclick={() => (open = false)}>Inställningar</a>
+			<a href="/profile" role="menuitem" onclick={() => (open = false)}>{t('settings.account.editProfile')}</a>
+			<a href="/settings" role="menuitem" onclick={() => (open = false)}>{t('nav.settings')}</a>
 		</div>
 	{/if}
 </div>

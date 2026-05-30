@@ -1,25 +1,27 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
+
 	/** Visual product story for the login landing — icons + CSS mock panels only. */
-	const features = [
-		{ id: 'fridge', label: 'Kyl', color: 'var(--color-fridge)' },
-		{ id: 'freezer', label: 'Frys', color: 'var(--color-freezer)' },
-		{ id: 'cupboard', label: 'Skafferi', color: 'var(--color-cupboard)' },
-		{ id: 'expiry', label: 'Utgår snart', color: 'var(--color-accent)' },
-		{ id: 'shopping', label: 'Inköpslista', color: 'var(--color-primary)' },
-		{ id: 'scan', label: 'Skanna', color: 'var(--color-primary)' },
-		{ id: 'household', label: 'Hushåll', color: 'var(--color-text-muted)' }
-	] as const;
+	const features = $derived([
+		{ id: 'fridge', label: t('onboarding.fridgeShort'), color: 'var(--color-fridge)' },
+		{ id: 'freezer', label: t('onboarding.freezerShort'), color: 'var(--color-freezer)' },
+		{ id: 'cupboard', label: t('onboarding.cupboardShort'), color: 'var(--color-cupboard)' },
+		{ id: 'expiry', label: t('onboarding.landingExpiring'), color: 'var(--color-accent)' },
+		{ id: 'shopping', label: t('onboarding.landingShopping'), color: 'var(--color-primary)' },
+		{ id: 'scan', label: t('dashboard.scan'), color: 'var(--color-primary)' },
+		{ id: 'household', label: t('onboarding.landingHousehold'), color: 'var(--color-text-muted)' }
+	] as const);
 </script>
 
 <div class="showcase" aria-hidden="true">
-	<p class="headline">Ditt skafferi, samlat</p>
+	<p class="headline">{t('onboarding.landingHeadline')}</p>
 
 	<div class="mobile-strip">
-		<span class="strip-item" style="--strip: var(--color-fridge)">Kyl</span>
-		<span class="strip-item" style="--strip: var(--color-freezer)">Frys</span>
-		<span class="strip-item" style="--strip: var(--color-cupboard)">Skafferi</span>
-		<span class="strip-item" style="--strip: var(--color-accent)">Datum</span>
-		<span class="strip-item" style="--strip: var(--color-primary)">Inköp</span>
+		<span class="strip-item" style="--strip: var(--color-fridge)">{t('onboarding.fridgeShort')}</span>
+		<span class="strip-item" style="--strip: var(--color-freezer)">{t('onboarding.freezerShort')}</span>
+		<span class="strip-item" style="--strip: var(--color-cupboard)">{t('onboarding.cupboardShort')}</span>
+		<span class="strip-item" style="--strip: var(--color-accent)">{t('common.dates')}</span>
+		<span class="strip-item" style="--strip: var(--color-primary)">{t('nav.shopping')}</span>
 	</div>
 
 	<div class="bento">
@@ -47,7 +49,7 @@
 
 		<div class="mock mock-expiry">
 			<span class="expiry-ring" aria-hidden="true"></span>
-			<span class="mock-caption">3 snart</span>
+			<span class="mock-caption">{t('onboarding.landingExpiringCount', { count: 3 })}</span>
 		</div>
 
 		{#each features as feature (feature.id)}

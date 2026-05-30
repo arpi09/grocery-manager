@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
@@ -34,7 +35,7 @@
 	}
 
 	const sheetLabel = $derived(
-		day ? `Måltider ${formatCalendarDayLabel(day.date)}` : 'Måltider'
+		day ? t('planer.mealsTitleDate', { date: formatCalendarDayLabel(day.date) }) : t('planer.mealsTitle')
 	);
 </script>
 
@@ -43,31 +44,31 @@
 		{#snippet header()}
 			<ModalHeader
 				title={formatCalendarDayLabel(day.date)}
-				subtitle={`${day.meals.length} planerade måltider`}
+				subtitle={t('planer.plannedCount', { count: day.meals.length })}
 				onClose={onClose}
 			/>
 		{/snippet}
 
-		<section class="add-section" aria-label="Lägg till måltid">
-			<h3>Lägg till måltid</h3>
+		<section class="add-section" aria-label={t('planer.addMeal')}>
+			<h3>{t('planer.addMeal')}</h3>
 			<form method="POST" action="?/create" class="create-form">
 				<input type="hidden" name="month" value={month} />
 				<input type="hidden" name="plannedDate" value={day.date} />
 				<input type="hidden" name="notes" value="" />
-				<label class="sr-only" for="new-meal-title">Måltid</label>
+				<label class="sr-only" for="new-meal-title">{t('planer.mealsTitle')}</label>
 				<input
 					id="new-meal-title"
 					type="text"
 					name="title"
-					placeholder="Måltidstitel"
+					placeholder={t('planer.mealTitle')}
 					required
 				/>
-				<Button type="submit" fullWidth>Lägg till</Button>
+				<Button type="submit" fullWidth>{t('shopping.addLabel')}</Button>
 			</form>
 		</section>
 
 		{#if day.meals.length === 0}
-			<p class="empty">Inga måltider planerade denna dag.</p>
+			<p class="empty">{t('planer.emptyDay')}</p>
 		{:else}
 			<ul class="meal-list">
 				{#each day.meals as meal (meal.id)}
@@ -93,18 +94,18 @@
 									<input type="hidden" name="month" value={month} />
 									<input type="hidden" name="id" value={meal.id} />
 									<label>
-										Titel
+										{t('common.titleField')}
 										<input name="title" value={meal.title} required />
 									</label>
 									<label>
-										Datum
+										{t('common.date')}
 										<input type="date" name="plannedDate" value={meal.plannedDate} required />
 									</label>
 									<label>
-										Anteckningar
+										{t('common.notes')}
 										<textarea name="notes" rows="2">{meal.notes ?? ''}</textarea>
 									</label>
-									<Button type="submit" fullWidth>Spara</Button>
+									<Button type="submit" fullWidth>{t('common.save')}</Button>
 								</form>
 								<DeleteConfirmButton
 									tier={2}
@@ -112,8 +113,8 @@
 									copyOptions={{ itemName: meal.title }}
 									action="?/delete"
 									fullWidth
-									label="Ta bort"
-									ariaLabel={`Ta bort måltid ${meal.title}`}
+									label={t('common.delete')}
+									ariaLabel={t('planer.removeMeal', { title: meal.title })}
 									class="delete-form"
 								>
 									<input type="hidden" name="month" value={month} />

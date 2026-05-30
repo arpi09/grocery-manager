@@ -1,6 +1,26 @@
 import { fail } from '@sveltejs/kit';
-import { updateProfileSchema, updateThemeSchema } from '$lib/validation/profile.schemas';
+import { translate, type MessageKey } from '$lib/i18n/messages';
+import { updateProfileSchema, updateThemeSchema, saveAvatarSchema } from '$lib/validation/profile.schemas';
 import type { Actions, PageServerLoad } from './$types';
+
+function translateFieldErrors(
+	locale: App.Locals['locale'],
+	errors: Record<string, string[] | undefined>
+): Record<string, string[]> {
+	const translated: Record<string, string[]> = {};
+
+	for (const [field, messages] of Object.entries(errors)) {
+		if (!messages?.length) {
+			continue;
+		}
+
+		translated[field] = messages.map((message) =>
+			message.startsWith('profile.') ? translate(locale, message as MessageKey) : message
+		);
+	}
+
+	return translated;
+}
 
 export const load: PageServerLoad = async ({ parent, locals }) => {
 	const { user, themePreference } = await parent();
@@ -22,7 +42,7 @@ export const actions: Actions = {
 
 		if (!parsed.success) {
 			return fail(400, {
-				errors: parsed.error.flatten().fieldErrors,
+				errors: translateFieldErrors(locals.locale, parsed.error.flatten().fieldErrors),
 				values: {
 					displayName: String(formData.get('displayName') ?? ''),
 					avatarUrl: String(formData.get('avatarUrl') ?? '')
@@ -41,6 +61,43 @@ export const actions: Actions = {
 		return {
 			success: true as const,
 			profile
+		};
+	},
+	saveAvatar: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const parsed = saveAvatarSchema.safeParse({
+			avatarUrl: String(formData.get('avatarUrl') ?? '')
+		});
+
+		if (!parsed.success) {
+			return fail(400, {
+				avatarErrors: translateFieldErrors(locals.locale, parsed.error.flatten().fieldErrors),
+				avatarAction: 'save' as const
+			});
+		}
+
+		const avatarUrl = parsed.data.avatarUrl.trim();
+		const current = await locals.profileService.getProfile(locals.user!.id);
+		const profile = await locals.profileService.updateProfile(locals.user!.id, {
+			displayName: current.displayName,
+			avatarUrl
+		});
+
+		return {
+			avatarSuccess: true as const,
+			avatarUrl: profile.avatarUrl
+		};
+	},
+	removeAvatar: async ({ locals }) => {
+		const current = await locals.profileService.getProfile(locals.user!.id);
+		const profile = await locals.profileService.updateProfile(locals.user!.id, {
+			displayName: current.displayName,
+			avatarUrl: null
+		});
+
+		return {
+			avatarSuccess: true as const,
+			avatarUrl: profile.avatarUrl
 		};
 	},
 	updateTheme: async ({ request, locals }) => {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
@@ -10,10 +11,7 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader
-		title="Planer"
-		subtitle="Planera måltider i kalendern och lägg in ChatGPT-idéer"
-	/>
+	<AppHeader title={t('planer.title')} subtitle={t('planer.subtitle')} />
 
 	<PageContainer>
 	<section class="planner-grid">
@@ -26,21 +24,21 @@
 			{todayIso}
 		/>
 
-		<aside class="ideas-card" aria-label="Receptidéer">
-			<h3>ChatGPT-receptidéer</h3>
+		<aside class="ideas-card" aria-label={t('planer.ideasAria')}>
+			<h3>{t('planer.ideasTitle')}</h3>
 			<p class="ideas-sub">
-				Genererade idéer från ditt lager. Välj datum och lägg till i kalendern.
+				{t('planer.ideasIntro')}
 			</p>
 			{#if data.ideas.length === 0}
-				<p class="empty">Inga genererade idéer ännu. Använd knappen Receptidéer först.</p>
+				<p class="empty">{t('planer.ideasEmpty')}</p>
 			{:else}
 				<div class="idea-list">
 					{#each data.ideas as idea (idea.id)}
 						<details class="idea-item">
 							<summary>{idea.title}</summary>
 							<p>{idea.whyItFits}</p>
-							<p><strong>Använd:</strong> {idea.ingredientsToUse.join(', ')}</p>
-							<p><strong>Saknas:</strong> {idea.missingIngredients.join(', ') || 'Inget'}</p>
+							<p><strong>{t('planer.usesLabel')}</strong> {idea.ingredientsToUse.join(', ')}</p>
+							<p><strong>{t('planer.missingLabel')}</strong> {idea.missingIngredients.join(', ') || t('common.none')}</p>
 							<ol>
 								{#each idea.steps as step}
 									<li>{step}</li>
@@ -50,10 +48,10 @@
 								<input type="hidden" name="month" value={data.month} />
 								<input type="hidden" name="ideaId" value={idea.id} />
 								<label>
-									Planera datum
+									{t('planer.scheduleDate')}
 									<input type="date" name="plannedDate" required />
 								</label>
-								<button type="submit">Lägg till i kalender</button>
+								<button type="submit">{t('planer.addToCalendar')}</button>
 							</form>
 						</details>
 					{/each}
