@@ -1,6 +1,5 @@
 import type { AiRateLimitService } from '$lib/application/ai-rate-limit.service';
 import {
-	aiUsageKindForPlanLimit,
 	buildPlanLimitsSnapshot,
 	evaluatePlanLimit,
 	getTierLimit,
@@ -100,3 +99,4 @@ export class PlanLimitsService {
 		}
 	}
 }
+
