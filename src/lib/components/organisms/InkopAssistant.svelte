@@ -298,6 +298,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-md);
+		min-width: 0;
 	}
 
 	.intro {
@@ -456,5 +457,46 @@
 	.ica-link {
 		font-size: 0.875rem;
 		font-weight: 600;
+	}
+
+	@media (max-width: 640px) {
+		.tabs {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: var(--space-xs);
+		}
+
+		.tabs button {
+			min-height: 2.75rem;
+			padding: 0.5rem 0.65rem;
+			font-size: 0.875rem;
+			text-align: center;
+		}
+
+		.panel {
+			padding: var(--space-sm);
+		}
+
+		.insight-head {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		.badges {
+			flex-wrap: wrap;
+		}
+
+		.ica-actions {
+			justify-content: stretch;
+		}
+
+		.ica-actions :global(.btn) {
+			width: 100%;
+			min-height: 2.75rem;
+		}
+
+		.ica-group li {
+			min-width: 0;
+		}
 	}
 </style>

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import ImageSourcePicker from '$lib/components/molecules/ImageSourcePicker.svelte';
+	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
 	import type { ReceiptLine } from '$lib/domain/receipt-line';
 	import { LOCATIONS, LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
 
@@ -17,12 +19,10 @@
 	let bulkLocation = $state<StorageLocation>('cupboard');
 	let step = $state<'upload' | 'review'>('upload');
 
-	async function handleImage(event: Event) {
-		const file = (event.currentTarget as HTMLInputElement).files?.[0];
-		if (!file) {
-			return;
-		}
+	const hubHref = $derived(`/scan?from=${encodeURIComponent(returnTo)}`);
+	const cancelHref = $derived(hubHref);
 
+	async function handleImage(file: File) {
 		parsing = true;
 		parseError = null;
 
@@ -57,20 +57,23 @@
 
 {#if step === 'upload'}
 	<section>
-		<p class="lead">Ta ett foto av kvittot — vi föreslår varor du kan lägga till i skafferiet.</p>
+		<p class="lead">Fota kvittot eller välj en bild från dina filer — vi föreslår varor du kan lägga till.</p>
 
-		<label class="upload">
-			<span class="upload-label">{parsing ? 'Läser kvitto…' : 'Välj eller ta bild av kvitto'}</span>
-			<input type="file" accept="image/*" capture="environment" disabled={parsing} onchange={handleImage} />
-		</label>
+		<ImageSourcePicker
+			cameraLabel={parsing ? 'Läser kvitto…' : '📷 Fota kvitto'}
+			fileLabel={parsing ? 'Läser kvitto…' : '📁 Välj kvitto (bild)'}
+			disabled={parsing}
+			onSelect={handleImage}
+		/>
 
 		{#if parseError}
 			<p class="error" role="alert">{parseError}</p>
 		{/if}
 
 		<p class="hint">Kräver OPENAI_API_KEY i serverns .env.</p>
-		<a class="back" href="/scan?from={encodeURIComponent(returnTo)}">← Streckkodsskanning</a>
 	</section>
+
+	<ScanFlowFooter cancelHref={cancelHref} cancelLabel="Avbryt" />
 {:else}
 	<section>
 		<h2 class="title">Välj varor ({selectedCount} av {lines.length})</h2>
@@ -119,6 +122,8 @@
 			</div>
 		</form>
 	</section>
+
+	<ScanFlowFooter cancelHref={cancelHref} cancelLabel="Avbryt" />
 {/if}
 
 <style>
@@ -127,21 +132,8 @@
 		color: var(--color-text-muted);
 	}
 
-	.upload {
-		display: block;
-		padding: var(--space-lg);
-		border: 2px dashed var(--color-border);
-		border-radius: var(--radius-md);
-		text-align: center;
-		cursor: pointer;
-	}
-
-	.upload input {
-		display: block;
-		margin: var(--space-sm) auto 0;
-	}
-
 	.error {
+		margin-top: var(--space-md);
 		color: var(--color-danger);
 		font-size: 0.875rem;
 	}
@@ -150,13 +142,6 @@
 		margin-top: var(--space-md);
 		font-size: 0.8rem;
 		color: var(--color-text-muted);
-	}
-
-	.back {
-		display: inline-block;
-		margin-top: var(--space-lg);
-		color: var(--color-primary);
-		font-weight: 600;
 	}
 
 	.title {
@@ -192,6 +177,7 @@
 		font-weight: 600;
 		cursor: pointer;
 		padding: 0;
+		min-height: 2.75rem;
 	}
 
 	.line-list {
@@ -232,5 +218,6 @@
 
 	.actions :global(.btn) {
 		flex: 1;
+		min-height: 2.75rem;
 	}
 </style>

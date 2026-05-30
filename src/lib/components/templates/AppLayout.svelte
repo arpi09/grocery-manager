@@ -40,9 +40,9 @@
 		const from = encodeURIComponent(`${page.url.pathname}${page.url.search}`);
 		const inventoryMatch = page.url.pathname.match(/^\/inventory\/([^/]+)$/);
 		if (inventoryMatch && isStorageLocation(inventoryMatch[1])) {
-			return `/scan?location=${inventoryMatch[1]}&from=${from}`;
+			return `/scan?mode=barcode&location=${inventoryMatch[1]}&from=${from}`;
 		}
-		return `/scan?from=${from}`;
+		return `/scan?mode=barcode&from=${from}`;
 	});
 
 	function openRecipeIdeas() {

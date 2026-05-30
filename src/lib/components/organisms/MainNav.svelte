@@ -71,14 +71,17 @@
 {#if user}
 	<header class="main-nav mobile-top" aria-label="Sidhuvud">
 		<a href="/" class="brand brand-compact" aria-label="Home Pantry – Hem">
-			<span class="brand-mark" aria-hidden="true">HP</span>
+			<AppLogo size="sm" />
 		</a>
 		<div class="mobile-top-center">
 			<PantrySwitcher {households} {activeHousehold} />
 		</div>
-		{#if onRecipeIdeas}
-			<RecipeIdeasButton compact onclick={onRecipeIdeas} />
-		{/if}
+		<div class="mobile-top-actions">
+			{#if onRecipeIdeas}
+				<RecipeIdeasButton compact onclick={onRecipeIdeas} />
+			{/if}
+			<ProfileMenu {user} />
+		</div>
 	</header>
 
 	<header class="main-nav top" aria-label="Huvudnavigering">
@@ -205,6 +208,19 @@
 					</li>
 				{/each}
 			</ul>
+			<div class="sheet-account">
+				<p class="sheet-account-label">Konto</p>
+				<a
+					href="/profile"
+					class={['sheet-link', pathname.startsWith('/profile') ? 'active' : ''].filter(Boolean).join(' ')}
+					onclick={closeMore}
+				>
+					<span class="sheet-icon-wrap">
+						<NavIcon id="settings" />
+					</span>
+					<span class="sheet-label">Profil</span>
+				</a>
+			</div>
 		</Modal>
 	{/if}
 {/if}
@@ -253,6 +269,13 @@
 		min-width: 0;
 		display: flex;
 		justify-content: center;
+	}
+
+	.mobile-top-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.15rem;
+		flex-shrink: 0;
 	}
 
 	.top-brand-row {
@@ -500,6 +523,25 @@
 
 	.sheet-link.active .sheet-icon-wrap {
 		color: var(--color-primary);
+	}
+
+	.sheet-account {
+		margin-top: var(--space-md);
+		padding-top: var(--space-md);
+		border-top: 1px solid var(--color-border);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
+	}
+
+	.sheet-account-label {
+		margin: 0 0 var(--space-xs);
+		padding: 0 0.85rem;
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--color-text-muted);
 	}
 
 	@media (min-width: 900px) {

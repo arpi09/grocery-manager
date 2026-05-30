@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
 	AlreadyMemberError,
+	DeleteHouseholdConfirmationError,
 	HouseholdForbiddenError,
+	HouseholdNotFoundError,
 	InviteNotFoundError,
 	LastOwnerError
 } from '$lib/application/household.service';
@@ -29,6 +31,16 @@ describe('mapHouseholdErrorToFail', () => {
 	it('maps last owner constraint to 400', () => {
 		const result = mapHouseholdErrorToFail(new LastOwnerError());
 		expect(result.status).toBe(400);
+	});
+
+	it('maps delete confirmation mismatch to 400', () => {
+		const result = mapHouseholdErrorToFail(new DeleteHouseholdConfirmationError());
+		expect(result.status).toBe(400);
+	});
+
+	it('maps missing household to 404', () => {
+		const result = mapHouseholdErrorToFail(new HouseholdNotFoundError());
+		expect(result.status).toBe(404);
 	});
 
 	it('rethrows unknown errors', () => {

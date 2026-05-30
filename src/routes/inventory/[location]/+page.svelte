@@ -18,8 +18,8 @@
 				{@const inventoryPath = `/inventory/${data.location}`}
 				{@const from = encodeURIComponent(inventoryPath)}
 				{@const addItemHref = `/item/new?location=${data.location}&from=${from}`}
-				{@const scanHref = `/scan?location=${data.location}&from=${from}`}
-				<a class="scan-btn" href={scanHref}>📷 Skanna</a>
+				{@const scanHref = `/scan?mode=barcode&location=${data.location}&from=${from}`}
+				<a class="scan-btn scan-btn--desktop" href={scanHref}>📷 Skanna</a>
 				<a class="add-btn add-btn--desktop" href={addItemHref}>+ Lägg till</a>
 				<a class="add-btn add-btn--mobile" href={addItemHref} data-sveltekit-reload>
 					+ Lägg till
@@ -48,6 +48,14 @@
 		font-weight: 600;
 		border-radius: var(--radius-sm);
 		text-decoration: none;
+		min-height: 2.75rem;
+		align-items: center;
+	}
+
+	@media (max-width: 768px) {
+		.scan-btn--desktop {
+			display: none;
+		}
 	}
 
 	.scan-btn:hover {

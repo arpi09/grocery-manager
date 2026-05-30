@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
+	import Modal from '$lib/components/molecules/Modal.svelte';
 	import {
 		householdRoleLabel,
 		inviteRoleLabel,
@@ -34,6 +35,27 @@
 		onCopyInviteLink,
 		copiedInviteLink
 	}: Props = $props();
+
+	let deleteModalOpen = $state(false);
+	let deleteConfirmName = $state('');
+
+	const otherMemberCount = $derived(
+		household.members.filter((member) => member.userId !== currentUserId).length
+	);
+
+	function openDeleteModal() {
+		deleteConfirmName = '';
+		deleteModalOpen = true;
+	}
+
+	function closeDeleteModal() {
+		deleteModalOpen = false;
+		deleteConfirmName = '';
+	}
+
+	const deleteConfirmValid = $derived(
+		deleteConfirmName.trim() === household.name || deleteConfirmName.trim() === 'TA BORT'
+	);
 
 	function canManageMember(memberUserId: string, memberRole: string) {
 		if (!isOwner || memberUserId === currentUserId) {
@@ -163,7 +185,66 @@
 			{/if}
 		</p>
 	{/if}
+
+	{#if isOwner}
+		<div class="danger-zone">
+			<h3 class="subsection-title danger-title">Farozon</h3>
+			<p class="danger-note">
+				Ta bort hushållet permanent. All inventering, inköpslista och förbrukningshistorik
+				för detta hushåll raderas. Väntande inbjudningar tas bort.
+			</p>
+			{#if otherMemberCount > 0}
+				<p class="danger-warning" role="status">
+					{otherMemberCount}
+					{otherMemberCount === 1 ? 'annan medlem' : 'andra medlemmar'} förlorar åtkomst
+					omedelbart.
+				</p>
+			{/if}
+			<Button type="button" variant="danger" class="danger-btn" onclick={openDeleteModal}>
+				Ta bort hushåll
+			</Button>
+		</div>
+	{/if}
 </div>
+
+<Modal
+	open={deleteModalOpen}
+	onClose={closeDeleteModal}
+	variant="center"
+	title="Ta bort hushåll"
+	panelClass="delete-household-panel"
+>
+	<p class="modal-lead">
+		Detta går inte att ångra. Skriv <strong>{household.name}</strong> eller
+		<strong>TA BORT</strong> för att bekräfta.
+	</p>
+	{#if otherMemberCount > 0}
+		<p class="modal-warning">
+			Alla {otherMemberCount}
+			{otherMemberCount === 1 ? 'annan medlem' : 'andra medlemmar'} tas bort från hushållet.
+		</p>
+	{/if}
+	<form method="POST" action="?/deleteHousehold" class="delete-form">
+		<input type="hidden" name="householdId" value={household.id} />
+		<label>
+			Bekräftelse
+			<input
+				name="confirmName"
+				type="text"
+				required
+				autocomplete="off"
+				placeholder={household.name}
+				bind:value={deleteConfirmName}
+			/>
+		</label>
+		<div class="modal-actions">
+			<Button type="button" variant="secondary" onclick={closeDeleteModal}>Avbryt</Button>
+			<Button type="submit" variant="danger" disabled={!deleteConfirmValid}>
+				Ta bort permanent
+			</Button>
+		</div>
+	</form>
+</Modal>
 
 <style>
 	.household-panel {
@@ -350,6 +431,68 @@
 		color: var(--color-warning, #ca8a04);
 	}
 
+	.danger-zone {
+		margin-top: var(--space-md);
+		padding-top: var(--space-md);
+		border-top: 1px solid color-mix(in srgb, var(--color-danger) 35%, var(--color-border));
+	}
+
+	.danger-title {
+		color: var(--color-danger);
+	}
+
+	.danger-note,
+	.danger-warning,
+	.modal-lead,
+	.modal-warning {
+		margin: 0 0 var(--space-sm);
+		color: var(--color-text-muted);
+		font-size: 0.84rem;
+		line-height: 1.45;
+	}
+
+	.danger-warning,
+	.modal-warning {
+		color: var(--color-danger);
+		font-weight: 600;
+	}
+
+	:global(.danger-btn) {
+		width: 100%;
+	}
+
+	:global(.delete-household-panel) {
+		width: min(460px, calc(100vw - 2 * var(--space-md)));
+	}
+
+	.delete-form {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+	}
+
+	.delete-form label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		font-size: 0.9rem;
+	}
+
+	.delete-form input {
+		padding: 0.6rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		color: var(--color-text);
+	}
+
+	.modal-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--space-sm);
+		margin-top: var(--space-sm);
+	}
+
 	@media (max-width: 640px) {
 		.member-list li,
 		.pending-list li {
@@ -364,6 +507,11 @@
 
 		.invite-link-row {
 			flex-direction: column;
+		}
+
+		.modal-actions {
+			flex-direction: column-reverse;
+			align-items: stretch;
 		}
 	}
 </style>

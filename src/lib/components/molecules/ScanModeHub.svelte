@@ -10,10 +10,11 @@
 
 	const from = $derived(encodeURIComponent(returnTo));
 	const locationQuery = $derived(defaultLocation ? `&location=${defaultLocation}` : '');
+	const barcodeHref = $derived(`/scan?mode=barcode&from=${from}${locationQuery}`);
 </script>
 
 <div class="hub" role="navigation" aria-label="Skanningslägen">
-	<Card href={`/scan?from=${from}${locationQuery}`} interactive class="tile tile-primary">
+	<Card href={barcodeHref} interactive class="tile tile-primary">
 		<span class="icon" aria-hidden="true">📷</span>
 		<h2>Streckkod</h2>
 		<p>Skanna EAN och lägg till direkt.</p>

@@ -1,7 +1,9 @@
 import { fail } from '@sveltejs/kit';
 import {
 	AlreadyMemberError,
+	DeleteHouseholdConfirmationError,
 	HouseholdForbiddenError,
+	HouseholdNotFoundError,
 	InviteEmailMismatchError,
 	InviteExpiredError,
 	InviteNotFoundError,
@@ -35,8 +37,11 @@ export function mapHouseholdErrorToFail(
 	if (error instanceof InviteNotFoundError) {
 		return failWithField(404, field, error.message);
 	}
-	if (error instanceof MemberNotFoundError) {
+	if (error instanceof MemberNotFoundError || error instanceof HouseholdNotFoundError) {
 		return failWithField(404, field, error.message);
+	}
+	if (error instanceof DeleteHouseholdConfirmationError) {
+		return failWithField(400, field, error.message);
 	}
 	if (
 		error instanceof AlreadyMemberError ||

@@ -4,12 +4,15 @@
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import ProductPhotoScanPicker from '$lib/components/molecules/ProductPhotoScanPicker.svelte';
+	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import { savePhotoScanPrefill } from '$lib/utils/photo-scan-prefill';
 
 	let { data } = $props();
 
 	let ready = $state(false);
+
+	const hubHref = $derived(`/scan?from=${encodeURIComponent(data.returnTo)}`);
 
 	function handleProduct(product: {
 		name: string;
@@ -35,7 +38,12 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title="Fota produkt" subtitle="AI läser etiketten och fyller i uppgifter" />
+	<AppHeader
+		title="Fota produkt"
+		subtitle="AI läser etiketten och fyller i uppgifter"
+		backHref={hubHref}
+		backLabel="Alla skanningslägen"
+	/>
 	<PageContainer>
 		{#if !data.canWrite}
 			<p class="readonly" role="status">
@@ -50,10 +58,8 @@
 					</Button>
 				</div>
 			{/if}
+			<ScanFlowFooter cancelHref={data.returnTo} cancelLabel="Avbryt" />
 		{/if}
-		<p class="back">
-			<a href="/scan?from={encodeURIComponent(data.returnTo)}">← Alla skanningslägen</a>
-		</p>
 	</PageContainer>
 </AppLayout>
 
@@ -70,12 +76,7 @@
 		margin-top: var(--space-lg);
 	}
 
-	.back {
-		margin: var(--space-lg) 0 0;
-	}
-
-	.back a {
-		color: var(--color-text-muted);
-		font-weight: 600;
+	.continue :global(.btn) {
+		min-height: 2.75rem;
 	}
 </style>

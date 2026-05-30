@@ -66,4 +66,19 @@
 		border-color: var(--color-primary);
 		color: #fff;
 	}
+
+	@media (max-width: 640px) {
+		.tabs {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: var(--space-xs);
+		}
+
+		.tabs button {
+			min-height: 2.75rem;
+			padding: 0.5rem 0.65rem;
+			font-size: 0.875rem;
+			text-align: center;
+		}
+	}
 </style>

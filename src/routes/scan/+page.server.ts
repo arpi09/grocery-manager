@@ -11,12 +11,14 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
 	const locationParam = url.searchParams.get('location');
 	const fromParam = url.searchParams.get('from');
+	const modeParam = url.searchParams.get('mode');
 	const defaultLocation =
 		locationParam && isStorageLocation(locationParam) ? locationParam : 'fridge';
 	const returnTo =
 		fromParam && fromParam.startsWith('/') && !fromParam.startsWith('//') ? fromParam : '/';
+	const scanMode = modeParam === 'barcode' ? 'barcode' : 'hub';
 
-	return { defaultLocation, returnTo, canWrite };
+	return { defaultLocation, returnTo, canWrite, scanMode };
 };
 
 function parseItemForm(formData: FormData) {

@@ -71,6 +71,7 @@ export interface IHouseholdRepository {
 	): Promise<boolean>;
 	removeMember(householdId: string, userId: string): Promise<boolean>;
 	getInvitePreview(token: string): Promise<InvitePreviewRow | null>;
+	deleteHousehold(householdId: string): Promise<boolean>;
 }
 
 export class DrizzleHouseholdRepository implements IHouseholdRepository {
@@ -438,6 +439,24 @@ export class DrizzleHouseholdRepository implements IHouseholdRepository {
 					eq(householdMemberTable.userId, userId)
 				)
 			);
+
+		return true;
+	}
+
+	async deleteHousehold(householdId: string) {
+		const [existing] = await this.database
+			.select({ id: householdTable.id })
+			.from(householdTable)
+			.where(eq(householdTable.id, householdId))
+			.limit(1);
+
+		if (!existing) {
+			return false;
+		}
+
+		await this.database.transaction(async (tx) => {
+			await tx.delete(householdTable).where(eq(householdTable.id, householdId));
+		});
 
 		return true;
 	}

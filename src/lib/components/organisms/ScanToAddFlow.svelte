@@ -10,10 +10,11 @@
 	interface Props {
 		defaultLocation: StorageLocation;
 		returnTo: string;
+		cancelHref?: string;
 		errors?: Record<string, string[]>;
 	}
 
-	let { defaultLocation, returnTo, errors = {} }: Props = $props();
+	let { defaultLocation, returnTo, cancelHref, errors = {} }: Props = $props();
 
 	const locationLabels: Record<StorageLocation, string> = {
 		fridge: 'Kyl',
@@ -122,8 +123,6 @@
 
 {#if step === 'scan'}
 	<section class="scan-step">
-		<p class="lead">Rikta kameran mot streckkoden på förpackningen.</p>
-
 		{#if lookupLoading}
 			<p class="status" role="status">Slår upp produkt…</p>
 		{/if}
@@ -242,6 +241,9 @@
 			{/if}
 
 			<div class="actions">
+				{#if cancelHref}
+					<a class="cancel-link" href={cancelHref}>Avbryt</a>
+				{/if}
 				<Button type="button" variant="ghost" onclick={resetToScan}>Skanna igen</Button>
 				<Button type="button" variant="secondary" onclick={() => (showMore = !showMore)}>
 					{showMore ? 'Dölj detaljer' : 'Mer'}
@@ -253,12 +255,6 @@
 {/if}
 
 <style>
-	.lead {
-		margin: 0 0 var(--space-md);
-		color: var(--color-text-muted);
-		font-size: 0.9rem;
-	}
-
 	.status {
 		margin: 0 0 var(--space-sm);
 		font-size: 0.875rem;
@@ -433,5 +429,20 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
+	}
+
+	.cancel-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2.75rem;
+		color: var(--color-text-muted);
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.cancel-link:hover {
+		color: var(--color-text);
+		text-decoration: none;
 	}
 </style>

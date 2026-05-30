@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from '$lib/components/atoms/Button.svelte';
+	import ImageSourcePicker from '$lib/components/molecules/ImageSourcePicker.svelte';
 
 	interface ProductFromImage {
 		name: string;
@@ -17,20 +17,8 @@
 
 	let loading = $state(false);
 	let message = $state<string | null>(null);
-	let photoInputEl = $state<HTMLInputElement | null>(null);
 
-	function triggerPhotoPicker() {
-		message = null;
-		photoInputEl?.click();
-	}
-
-	async function handlePhotoSelected(event: Event) {
-		const input = event.currentTarget as HTMLInputElement;
-		const file = input.files?.[0];
-		if (!file) {
-			return;
-		}
-
+	async function handlePhotoSelected(file: File) {
 		loading = true;
 		message = null;
 
@@ -65,27 +53,15 @@
 			message = 'Nätverksfel vid analys av bilden.';
 		} finally {
 			loading = false;
-			input.value = '';
 		}
 	}
 </script>
 
-<Button
-	type="button"
-	variant="primary"
-	class="photo-scan-btn"
+<ImageSourcePicker
+	cameraLabel={loading ? 'Analyserar bild…' : '📷 Fota produkt'}
+	fileLabel={loading ? 'Analyserar bild…' : '📁 Välj bild från filer'}
 	disabled={loading}
-	onclick={triggerPhotoPicker}
->
-	{loading ? 'Analyserar bild…' : '📸 Fota produkt'}
-</Button>
-<input
-	bind:this={photoInputEl}
-	type="file"
-	accept="image/*"
-	capture="environment"
-	class="sr-input"
-	onchange={handlePhotoSelected}
+	onSelect={handlePhotoSelected}
 />
 <p class="help">
 	Ta en tydlig bild av produktetiketten så fyller vi i namn, mängd och enhet åt dig.
@@ -95,16 +71,8 @@
 {/if}
 
 <style>
-	:global(.photo-scan-btn) {
-		width: 100%;
-	}
-
-	.sr-input {
-		display: none;
-	}
-
 	.help {
-		margin: var(--space-sm) 0 0;
+		margin: var(--space-md) 0 0;
 		font-size: 0.85rem;
 		color: var(--color-text-muted);
 	}

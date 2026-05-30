@@ -29,3 +29,11 @@ export const removeMemberSchema = z.object({
 export const revokeInviteSchema = z.object({
 	inviteId: z.string().min(1)
 });
+
+export const deleteHouseholdSchema = z.object({
+	householdId: z.string().min(1, 'Ogiltig pantry'),
+	confirmName: z
+		.string()
+		.trim()
+		.min(1, 'Skriv hushållets namn eller TA BORT för att bekräfta')
+});

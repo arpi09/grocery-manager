@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
 	AlreadyMemberError,
+	DeleteHouseholdConfirmationError,
 	HouseholdForbiddenError,
+	HouseholdNotFoundError,
 	HouseholdService,
 	InviteEmailMismatchError,
 	InviteExpiredError,
@@ -39,7 +41,8 @@ describe('HouseholdService', () => {
 			revokePendingInvite: vi.fn(),
 			updateMemberRole: vi.fn(),
 			removeMember: vi.fn(),
-			getInvitePreview: vi.fn()
+			getInvitePreview: vi.fn(),
+			deleteHousehold: vi.fn()
 		};
 		service = new HouseholdService(repository);
 	});
@@ -231,5 +234,71 @@ describe('HouseholdService', () => {
 		await expect(
 			service.createInvite('household-1', 'owner-1', 'member@example.com', 'editor')
 		).rejects.toBeInstanceOf(AlreadyMemberError);
+	});
+
+	it('deletes household when owner confirms with household name', async () => {
+		vi.mocked(repository.getMemberRole).mockResolvedValue('owner');
+		vi.mocked(repository.getHouseholdById).mockResolvedValue({
+			id: 'household-1',
+			name: 'Hemmet',
+			members: []
+		});
+		vi.mocked(repository.getActiveHouseholdIdForUser).mockResolvedValue('household-1');
+		vi.mocked(repository.listHouseholdsForUser).mockResolvedValue([
+			{ id: 'household-1', name: 'Hemmet', role: 'owner', isActive: true },
+			{ id: 'household-2', name: 'Stugan', role: 'owner', isActive: false }
+		]);
+		vi.mocked(repository.deleteHousehold).mockResolvedValue(true);
+
+		await service.deleteHousehold('household-1', 'owner-1', 'Hemmet');
+
+		expect(repository.deleteHousehold).toHaveBeenCalledWith('household-1');
+		expect(repository.setActiveHouseholdId).toHaveBeenCalledWith('owner-1', 'household-2');
+	});
+
+	it('accepts TA BORT as delete confirmation', async () => {
+		vi.mocked(repository.getMemberRole).mockResolvedValue('owner');
+		vi.mocked(repository.getHouseholdById).mockResolvedValue({
+			id: 'household-1',
+			name: 'Hemmet',
+			members: []
+		});
+		vi.mocked(repository.getActiveHouseholdIdForUser).mockResolvedValue(null);
+		vi.mocked(repository.deleteHousehold).mockResolvedValue(true);
+
+		await service.deleteHousehold('household-1', 'owner-1', 'TA BORT');
+
+		expect(repository.deleteHousehold).toHaveBeenCalledWith('household-1');
+		expect(repository.setActiveHouseholdId).not.toHaveBeenCalled();
+	});
+
+	it('rejects delete from non-owner', async () => {
+		vi.mocked(repository.getMemberRole).mockResolvedValue('editor');
+
+		await expect(
+			service.deleteHousehold('household-1', 'editor-1', 'Hemmet')
+		).rejects.toBeInstanceOf(HouseholdForbiddenError);
+	});
+
+	it('rejects delete with wrong confirmation', async () => {
+		vi.mocked(repository.getMemberRole).mockResolvedValue('owner');
+		vi.mocked(repository.getHouseholdById).mockResolvedValue({
+			id: 'household-1',
+			name: 'Hemmet',
+			members: []
+		});
+
+		await expect(
+			service.deleteHousehold('household-1', 'owner-1', 'fel namn')
+		).rejects.toBeInstanceOf(DeleteHouseholdConfirmationError);
+	});
+
+	it('throws when household to delete is missing', async () => {
+		vi.mocked(repository.getMemberRole).mockResolvedValue('owner');
+		vi.mocked(repository.getHouseholdById).mockResolvedValue(null);
+
+		await expect(
+			service.deleteHousehold('missing', 'owner-1', 'TA BORT')
+		).rejects.toBeInstanceOf(HouseholdNotFoundError);
 	});
 });

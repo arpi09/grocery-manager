@@ -2,12 +2,17 @@
 	interface Props {
 		title: string;
 		subtitle?: string;
+		backHref?: string;
+		backLabel?: string;
 	}
 
-	let { title, subtitle }: Props = $props();
+	let { title, subtitle, backHref, backLabel = 'Tillbaka' }: Props = $props();
 </script>
 
 <header class="page-header">
+	{#if backHref}
+		<a class="back-link" href={backHref}>← {backLabel}</a>
+	{/if}
 	<h1>{title}</h1>
 	{#if subtitle}
 		<p class="subtitle">{subtitle}</p>
@@ -26,6 +31,22 @@
 		.page-header {
 			margin-top: var(--space-lg);
 		}
+	}
+
+	.back-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+		margin-bottom: var(--space-xs);
+		color: var(--color-primary);
+		font-weight: 600;
+		font-size: 0.9rem;
+		text-decoration: none;
+	}
+
+	.back-link:hover {
+		text-decoration: none;
+		opacity: 0.85;
 	}
 
 	h1 {

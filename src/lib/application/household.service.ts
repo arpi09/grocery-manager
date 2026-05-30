@@ -89,6 +89,13 @@ export class NotMemberError extends Error {
 	}
 }
 
+export class DeleteHouseholdConfirmationError extends Error {
+	constructor() {
+		super('Bekräftelsen matchar inte. Skriv hushållets namn eller TA BORT.');
+		this.name = 'DeleteHouseholdConfirmationError';
+	}
+}
+
 export interface InvitePreview {
 	householdName: string;
 	email: string;
@@ -153,6 +160,42 @@ export class HouseholdService {
 		}
 
 		await this.repository.setActiveHouseholdId(userId, householdId);
+	}
+
+	async deleteHousehold(
+		householdId: string,
+		actorUserId: string,
+		confirmName: string
+	): Promise<void> {
+		await this.requireOwner(householdId, actorUserId);
+
+		const household = await this.repository.getHouseholdById(householdId);
+		if (!household) {
+			throw new HouseholdNotFoundError();
+		}
+
+		const normalizedConfirm = confirmName.trim();
+		if (normalizedConfirm !== household.name && normalizedConfirm !== 'TA BORT') {
+			throw new DeleteHouseholdConfirmationError();
+		}
+
+		const activeId = await this.repository.getActiveHouseholdIdForUser(actorUserId);
+		const wasActive = activeId === householdId;
+		let fallbackId: string | null = null;
+
+		if (wasActive) {
+			const households = await this.repository.listHouseholdsForUser(actorUserId);
+			fallbackId = households.find((row) => row.id !== householdId)?.id ?? null;
+		}
+
+		const deleted = await this.repository.deleteHousehold(householdId);
+		if (!deleted) {
+			throw new HouseholdNotFoundError();
+		}
+
+		if (wasActive) {
+			await this.repository.setActiveHouseholdId(actorUserId, fallbackId);
+		}
 	}
 
 	async leaveHousehold(userId: string, householdId: string): Promise<void> {

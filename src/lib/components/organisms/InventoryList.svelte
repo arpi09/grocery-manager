@@ -15,7 +15,7 @@
 
 	const inventoryPath = $derived(`/inventory/${location}`);
 	const scanHref = $derived(
-		`/scan?location=${location}&from=${encodeURIComponent(inventoryPath)}`
+		`/scan?mode=barcode&location=${location}&from=${encodeURIComponent(inventoryPath)}`
 	);
 	const manualAddHref = $derived(
 		`/item/new?location=${location}&from=${encodeURIComponent(inventoryPath)}`

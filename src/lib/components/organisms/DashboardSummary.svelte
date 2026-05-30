@@ -51,7 +51,7 @@
 
 	{#if canWrite}
 		<div class="cta-row">
-			<a class="scan-link" href="/scan?from=%2F">📷 Skanna</a>
+			<a class="scan-link scan-link--desktop" href="/scan?mode=barcode&from=%2F">📷 Skanna</a>
 			<a class="add-link" href="/item/new?from=%2F">
 				<span>+ Lägg till vara</span>
 			</a>
@@ -144,6 +144,14 @@
 		background: var(--color-primary);
 		color: #fff;
 		border: none;
+		min-height: 2.75rem;
+		align-items: center;
+	}
+
+	@media (max-width: 768px) {
+		.scan-link--desktop {
+			display: none;
+		}
 	}
 
 	.scan-link:hover {

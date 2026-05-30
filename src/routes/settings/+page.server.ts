@@ -5,6 +5,7 @@ import { householdInviteEmailWarning, sendHouseholdInviteEmail } from '$lib/serv
 import { getAppOrigin } from '$lib/server/origin';
 import {
 	createHouseholdInviteSchema,
+	deleteHouseholdSchema,
 	removeMemberSchema,
 	revokeInviteSchema,
 	updateMemberRoleSchema
@@ -188,5 +189,30 @@ export const actions: Actions = {
 		}
 
 		redirect(302, '/settings');
+	},
+	deleteHousehold: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const parsed = deleteHouseholdSchema.safeParse({
+			householdId: formData.get('householdId'),
+			confirmName: formData.get('confirmName')
+		});
+
+		if (!parsed.success) {
+			return fail(400, {
+				householdError: parsed.error.flatten().fieldErrors.confirmName?.[0] ?? 'Ogiltig bekräftelse.'
+			});
+		}
+
+		try {
+			await locals.householdService.deleteHousehold(
+				parsed.data.householdId,
+				locals.user!.id,
+				parsed.data.confirmName
+			);
+		} catch (error) {
+			return mapHouseholdErrorToFail(error);
+		}
+
+		redirect(302, '/');
 	}
 };

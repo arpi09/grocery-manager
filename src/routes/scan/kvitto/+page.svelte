@@ -5,10 +5,17 @@
 	import ReceiptBulkAddFlow from '$lib/components/organisms/ReceiptBulkAddFlow.svelte';
 
 	let { data } = $props();
+
+	const hubHref = $derived(`/scan?from=${encodeURIComponent(data.returnTo)}`);
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title="Skanna kvitto" subtitle="Lägg till flera varor på en gång" />
+	<AppHeader
+		title="Skanna kvitto"
+		subtitle="Lägg till flera varor på en gång"
+		backHref={hubHref}
+		backLabel="Alla skanningslägen"
+	/>
 	<PageContainer>
 		{#if !data.canWrite}
 			<p class="readonly" role="status">

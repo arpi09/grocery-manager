@@ -60,6 +60,9 @@
 					<a href="/profile" role="menuitem" class="menu-item" onclick={close}>Profil</a>
 				</li>
 				<li role="none">
+					<a href="/settings" role="menuitem" class="menu-item" onclick={close}>Inställningar</a>
+				</li>
+				<li role="none">
 					<form method="POST" action="/logout">
 						<button type="submit" role="menuitem" class="menu-item danger">Logga ut</button>
 					</form>
