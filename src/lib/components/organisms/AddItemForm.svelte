@@ -5,8 +5,7 @@
 	import Input from '$lib/components/atoms/Input.svelte';
 	import BarcodeScanButton from '$lib/components/molecules/BarcodeScanButton.svelte';
 	import BarcodeScannerModal from '$lib/components/organisms/BarcodeScannerModal.svelte';
-	import ProductPhotoScanPicker from '$lib/components/molecules/ProductPhotoScanPicker.svelte';
-	import { consumePhotoScanPrefill } from '$lib/utils/photo-scan-prefill';
+	import ProductPhotoScanPicker from '$lib/components/molecules/ProductPhotoScanPicker.svelte';
 	import { LOCATIONS, LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
 	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
@@ -28,11 +27,9 @@
 	let location = $state<StorageLocation>(item?.location ?? defaultLocation);
 
 	let scannerOpen = $state(false);
-	let lookupLoading = $state(false);
-	let imageLookupLoading = $state(false);
+	let lookupLoading = $state(false);
 	let scanMessage = $state<string | null>(null);
-	let scanMethod = $state<'barcode' | 'photo'>('barcode');
-	let photoInputEl = $state<HTMLInputElement | null>(null);
+	let scanMethod = $state<'barcode' | 'photo'>('barcode');
 
 	onMount(() => {
 		name = item?.name ?? '';
