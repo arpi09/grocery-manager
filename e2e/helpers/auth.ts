@@ -3,6 +3,7 @@ import { LOCALE_COOKIE_NAME, LOCALE_STORAGE_KEY } from '../../src/lib/i18n/local
 
 const ONBOARDING_VERSION_KEY = 'home-pantry-onboarding-version';
 const ONBOARDING_DISMISSED_KEY = 'home-pantry-onboarding-dismissed';
+const ACTIVATION_RECEIPT_KEY = 'home-pantry-activation-receipt-done';
 const ONBOARDING_VERSION = '1';
 const E2E_LOCALE = 'sv';
 
@@ -35,9 +36,18 @@ export async function prepareE2eBrowserState(page: Page) {
 	]);
 
 	await page.addInitScript(
-		({ versionKey, dismissedKey, version, localeStorageKey, localeCookieName, locale }) => {
+		({
+			versionKey,
+			dismissedKey,
+			version,
+			activationReceiptKey,
+			localeStorageKey,
+			localeCookieName,
+			locale
+		}) => {
 			localStorage.setItem(versionKey, version);
 			localStorage.setItem(dismissedKey, '1');
+			localStorage.setItem(activationReceiptKey, '1');
 			localStorage.setItem(localeStorageKey, locale);
 			document.cookie = `${localeCookieName}=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
 		},
@@ -45,12 +55,12 @@ export async function prepareE2eBrowserState(page: Page) {
 			versionKey: ONBOARDING_VERSION_KEY,
 			dismissedKey: ONBOARDING_DISMISSED_KEY,
 			version: ONBOARDING_VERSION,
+			activationReceiptKey: ACTIVATION_RECEIPT_KEY,
 			localeStorageKey: LOCALE_STORAGE_KEY,
 			localeCookieName: LOCALE_COOKIE_NAME,
 			locale: E2E_LOCALE
 		}
 	);
-
 }
 
 async function fillBoundInput(input: import('@playwright/test').Locator, value: string) {
@@ -70,11 +80,23 @@ async function fillBoundInput(input: import('@playwright/test').Locator, value: 
 }
 
 export async function dismissOnboardingModalIfOpen(page: Page) {
-	const skip = page.getByRole('button', { name: /Hoppa/i });
-	if (await skip.isVisible().catch(() => false)) {
-		await skip.click();
-		await expect(skip).toBeHidden({ timeout: 5_000 });
+	for (let attempt = 0; attempt < 3; attempt++) {
+		const modal = page.locator('.modal-root');
+		if (!(await modal.isVisible().catch(() => false))) {
+			return;
+		}
+
+		const skip = page.getByRole('button', { name: /senare|Hoppa/i }).first();
+		if (await skip.isVisible().catch(() => false)) {
+			await skip.click();
+		} else {
+			await page.keyboard.press('Escape');
+		}
+
+		await page.waitForTimeout(250);
 	}
+
+	await expect(page.locator('.modal-root')).toBeHidden({ timeout: 10_000 });
 }
 
 export async function loginAsAdmin(page: Page) {
@@ -82,28 +104,21 @@ export async function loginAsAdmin(page: Page) {
 
 	await prepareE2eBrowserState(page);
 
-	const browser = page.context().browser();
-	if (!browser) {
-		throw new Error('loginAsAdmin requires a browser-backed page');
-	}
+	await page.goto('/login');
+	await page.waitForLoadState('networkidle');
+	await expect(page.getByTestId('login-submit')).toBeVisible();
 
-	const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173';
-	const noJsContext = await browser.newContext({ baseURL, javaScriptEnabled: false });
-	const loginPage = await noJsContext.newPage();
+	const emailInput = page.locator('input[name="email"]');
+	const passwordInput = page.locator('input[name="password"]');
 
-	await loginPage.goto('/login');
-	await loginPage.locator('input[name="email"]').fill(email);
-	await loginPage.locator('input[name="password"]').fill(password);
+	await fillBoundInput(emailInput, email);
+	await fillBoundInput(passwordInput, password);
 
 	await Promise.all([
-		loginPage.waitForURL((url) => url.pathname === '/hem', { timeout: 20_000 }),
-		loginPage.getByTestId('login-submit').click()
+		page.waitForURL((url) => url.pathname === '/hem', { timeout: 20_000, waitUntil: 'commit' }),
+		page.getByTestId('login-submit').click()
 	]);
 
-	await page.context().addCookies(await noJsContext.cookies());
-	await noJsContext.close();
-
-	await page.goto('/hem');
 	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
 	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 	await dismissOnboardingModalIfOpen(page);

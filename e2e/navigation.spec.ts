@@ -1,5 +1,6 @@
-﻿import { test, expect } from '@playwright/test';
-import { clickNavHref, dismissOnboardingModalIfOpen, loginAsAdmin, openMoreNav } from './helpers/auth';
+import { test, expect } from '@playwright/test';
+import { clickNavHref, dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
+
 test.describe('Navigation', () => {
 	test.beforeEach(async ({ page }) => {
 		await loginAsAdmin(page);
@@ -25,10 +26,10 @@ test.describe('Navigation', () => {
 		const bottomNav = page.getByRole('navigation', { name: /Mobil/i });
 		await expect(bottomNav).toBeVisible();
 
-		await bottomNav.getByRole('link', { name: 'Inköp' }).click();
+		await bottomNav.getByRole('link', { name: /Ink/i }).click();
 		await expect(page).toHaveURL(/\/inkop/);
 
-		await openMoreNav(page);
+		await bottomNav.getByRole('button', { name: 'Mer' }).click();
 		const moreSheet = page.locator('#nav-more-sheet');
 		await expect(moreSheet).toBeVisible();
 		await moreSheet.getByRole('link', { name: 'Planer' }).click();
