@@ -5,6 +5,7 @@
 	import RecipeAssistant from '$lib/components/organisms/RecipeAssistant.svelte';
 	import ScanFab from '$lib/components/molecules/ScanFab.svelte';
 	import InventoryScanToast from '$lib/components/molecules/InventoryScanToast.svelte';
+	import OnboardingGuide from '$lib/components/organisms/OnboardingGuide.svelte';
 	import { canEditInventory } from '$lib/domain/household';
 	import { isStorageLocation } from '$lib/domain/location';
 	import type { NavUser } from '$lib/navigation/nav-config';
@@ -59,6 +60,7 @@
 		<ScanFab {canWrite} href={scanFabHref} />
 	{/if}
 	<RecipeAssistant bind:open={recipeOpen} />
+	<OnboardingGuide />
 </div>
 
 <style>

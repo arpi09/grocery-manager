@@ -7,6 +7,8 @@
 	import SettingsRow from '$lib/components/molecules/SettingsRow.svelte';
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
+	import { browser } from '$app/environment';
+	import { ONBOARDING_REPLAY_EVENT, resetOnboarding } from '$lib/utils/onboarding';
 
 	let { data, form } = $props();
 	let petModalOpen = $state(false);
@@ -22,6 +24,13 @@
 		setTimeout(() => {
 			copiedInviteLink = false;
 		}, 2000);
+	}
+
+	function replayOnboardingGuide() {
+		resetOnboarding();
+		if (browser) {
+			window.dispatchEvent(new Event(ONBOARDING_REPLAY_EVENT));
+		}
 	}
 </script>
 
@@ -62,7 +71,7 @@
 			<SettingsRow
 				title="Husdjur"
 				note="Aktivera för att visa Husdjur i menyn och hantera dina husdjur."
-				last={!data.petsEnabled}
+				last={false}
 			>
 				<form method="POST" action="?/togglePets">
 					<input type="hidden" name="enabled" value={data.petsEnabled ? 'false' : 'true'} />
@@ -102,6 +111,15 @@
 					{/if}
 				</div>
 			{/if}
+			<SettingsRow
+				title="Visa introduktion igen"
+				note="Gå igenom välkomstguiden för appen."
+				last
+			>
+				<Button type="button" variant="secondary" onclick={replayOnboardingGuide}>
+					Starta guide
+				</Button>
+			</SettingsRow>
 		</SettingsSection>
 	</div>
 	</PageContainer>
