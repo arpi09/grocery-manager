@@ -97,15 +97,14 @@ jobs:
       - run: npm ci
 
       - name: Deploy App Hosting backend
-        if: secrets.FIREBASE_TOKEN != ''
-        run: npm run deploy:firebase -- --non-interactive --project home-pantry-4bee5
+        run: |
+          if [ -z "$FIREBASE_TOKEN" ]; then
+            echo "::notice::FIREBASE_TOKEN is not set — quality and E2E passed but deploy was skipped."
+            echo "Add FIREBASE_TOKEN under Settings → Secrets and variables → Actions,"
+            echo "or deploy locally: npm run deploy:firebase"
+            echo "See docs/CI_CD.md and docs/FIREBASE_DEPLOY.md"
+            exit 0
+          fi
+          npm run deploy:firebase -- --non-interactive --project home-pantry-4bee5
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-
-      - name: Skip deploy (no FIREBASE_TOKEN)
-        if: secrets.FIREBASE_TOKEN == ''
-        run: |
-          echo "::notice::FIREBASE_TOKEN is not set — quality and E2E passed but deploy was skipped."
-          echo "Add FIREBASE_TOKEN under Settings → Secrets and variables → Actions,"
-          echo "or deploy locally: npm run deploy:firebase"
-          echo "See docs/CI_CD.md and docs/FIREBASE_DEPLOY.md"
