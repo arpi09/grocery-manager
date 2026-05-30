@@ -112,7 +112,7 @@
 			return;
 		}
 
-		pathname;
+		void pathname;
 		tryOpenGuide();
 	});
 
@@ -181,9 +181,9 @@
 	{#snippet footer()}
 		<div class="onboarding-footer">
 			<div class="step-dots" role="tablist" aria-label="Introduktionssteg">
-				{#each steps as _, index (index)}
+				{#each steps as step, index (index)}
 					<span
-						class="dot-indicator"
+						aria-label={step.title} class="dot-indicator"
 						class:active={index === stepIndex}
 						aria-current={index === stepIndex ? 'step' : undefined}
 					></span>
