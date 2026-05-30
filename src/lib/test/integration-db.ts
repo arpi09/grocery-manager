@@ -29,11 +29,16 @@ const SQL_MIGRATION_FILES = [
 	'0007_household_invites_roles.sql',
 	'0008_shopping_list.sql',
 '0010_active_household.sql',
-	'0011_consumption_event.sql'
+	'0011_consumption_event.sql',
+	'0012_product_event.sql',
+	'0013_expiry_reminders.sql',
+	'0014_product_feedback.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
 	"session",
+	"product_feedback",
+	"product_event",
 	"consumption_event",
 	"shopping_list_item",
 	"inventory_items",
