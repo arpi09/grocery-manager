@@ -10,7 +10,7 @@
 
 	let { children, data } = $props();
 
-	const webManifestLink = $derived(pwaInfo ? pwaInfo.webManifest.linkTag : '');
+	const webManifest = $derived(pwaInfo?.webManifest);
 
 	onMount(() => {
 		initPwaInstallListeners();
@@ -61,7 +61,9 @@
 </script>
 
 <svelte:head>
-	{@html webManifestLink}
+	{#if webManifest}
+		<link rel="manifest" href={webManifest.href} crossorigin={webManifest.useCredentials ? 'use-credentials' : undefined} />
+	{/if}
 </svelte:head>
 
 <NavigationProgress />
