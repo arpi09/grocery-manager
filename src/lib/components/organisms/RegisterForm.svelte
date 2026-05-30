@@ -3,14 +3,16 @@
 	import { goto } from '$app/navigation';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import FormField from '$lib/components/molecules/FormField.svelte';
+	import TurnstileWidget from '$lib/components/molecules/TurnstileWidget.svelte';
 
 	interface Props {
 		errors?: Record<string, string[]>;
 		message?: string;
 		email?: string;
+		turnstileSiteKey?: string;
 	}
 
-	let { errors = {}, message, email = '' }: Props = $props();
+	let { errors = {}, message, email = '', turnstileSiteKey = '' }: Props = $props();
 
 	let emailField = $state(email);
 	$effect(() => {
@@ -63,6 +65,11 @@
 		error={errors.confirmPassword?.[0]}
 	/>
 
+	{#if turnstileSiteKey}
+		<p class="turnstile-label" id="turnstile-label">Bekräfta att du inte är en robot</p>
+		<TurnstileWidget siteKey={turnstileSiteKey} labelledBy="turnstile-label" />
+	{/if}
+
 	<Button type="submit" fullWidth disabled={submitting}>
 		{submitting ? 'Skapar konto…' : 'Skapa konto'}
 	</Button>
@@ -92,6 +99,12 @@
 	.footer {
 		margin-top: var(--space-lg);
 		text-align: center;
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+	}
+
+	.turnstile-label {
+		margin: 0 0 var(--space-sm);
 		font-size: 0.875rem;
 		color: var(--color-text-muted);
 	}

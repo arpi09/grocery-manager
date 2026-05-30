@@ -15,6 +15,7 @@
 	let copiedInviteLink = $state(false);
 
 	const inviteLink = $derived(form?.inviteLink ?? null);
+	const inviteEmailWarning = $derived(form?.inviteEmailWarning ?? null);
 	const householdError = $derived(form?.householdError ?? null);
 	const inviteFieldErrors = $derived(form?.inviteErrors ?? {});
 
@@ -61,6 +62,7 @@
 					{householdError}
 					{inviteFieldErrors}
 					{inviteLink}
+					{inviteEmailWarning}
 					copiedInviteLink={copiedInviteLink}
 					onCopyInviteLink={copyInviteLink}
 				/>

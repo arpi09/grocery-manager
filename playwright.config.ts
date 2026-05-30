@@ -47,7 +47,8 @@ export default defineConfig({
 		env: {
 			...process.env,
 			USE_PGLITE: process.env.USE_PGLITE ?? 'true',
-			PUBLIC_ORIGIN: baseURL
+			PUBLIC_ORIGIN: baseURL,
+			TURNSTILE_SKIP: process.env.TURNSTILE_SKIP ?? 'true'
 		}
 	}
 });

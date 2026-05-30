@@ -73,6 +73,7 @@ jobs:
           ADMIN_EMAIL: e2e-admin@example.com
           ADMIN_PASSWORD: e2e-ci-password
           PUBLIC_ORIGIN: http://localhost:5173
+          TURNSTILE_SKIP: 'true'
           CI: 'true'
 
   deploy:

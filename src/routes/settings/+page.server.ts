@@ -1,6 +1,8 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { mapHouseholdErrorToFail } from '$lib/application/household-errors';
 import { isHouseholdOwner } from '$lib/domain/household';
+import { householdInviteEmailWarning, sendHouseholdInviteEmail } from '$lib/server/email';
+import { getAppOrigin } from '$lib/server/origin';
 import {
 	createHouseholdInviteSchema,
 	removeMemberSchema,
@@ -94,14 +96,27 @@ export const actions: Actions = {
 		}
 
 		try {
-			const { token } = await locals.householdService.createInvite(
+			const { invite, token } = await locals.householdService.createInvite(
 				locals.householdId!,
 				locals.user!.id,
 				parsed.data.email,
 				parsed.data.role
 			);
-			const inviteLink = `${url.origin}/invite/${token}`;
-			return { inviteLink };
+			const household = await locals.householdService.getHouseholdForUser(locals.user!.id);
+			const inviterName = locals.user!.displayName?.trim() || locals.user!.email;
+			const inviteUrl = `${getAppOrigin(url.origin)}/invite/${token}`;
+			const emailResult = await sendHouseholdInviteEmail({
+				to: invite.email,
+				inviterName,
+				householdName: household?.name ?? 'Pantry',
+				inviteUrl,
+				role: invite.role
+			});
+
+			return {
+				inviteLink: inviteUrl,
+				inviteEmailWarning: !emailResult.ok ? householdInviteEmailWarning(emailResult) : undefined
+			};
 		} catch (error) {
 			return mapHouseholdErrorToFail(error);
 		}

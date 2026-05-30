@@ -1,10 +1,13 @@
 import { isAuthError } from '$lib/application/auth.service';
+import { getTurnstileSiteKeyForClient, verifyTurnstileToken } from '$lib/server/captcha';
 import { registerSchema } from '$lib/validation/auth.schemas';
 import { createSession } from '$lib/server/session';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => ({});
+export const load: PageServerLoad = async () => ({
+	turnstileSiteKey: getTurnstileSiteKeyForClient()
+});
 
 export const actions: Actions = {
 	register: async (event) => {
@@ -16,6 +19,16 @@ export const actions: Actions = {
 				errors: parsed.error.flatten().fieldErrors,
 				message: 'Please fix the errors below.',
 				email: String(formData.email ?? '')
+			});
+		}
+
+		const captchaToken = String(formData['cf-turnstile-response'] ?? '');
+		const captcha = await verifyTurnstileToken(captchaToken, event.getClientAddress());
+		if (!captcha.ok) {
+			return fail(400, {
+				errors: {},
+				message: captcha.message,
+				email: parsed.data.email
 			});
 		}
 

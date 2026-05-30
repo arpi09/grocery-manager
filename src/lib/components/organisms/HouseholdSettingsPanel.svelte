@@ -16,6 +16,7 @@
 		householdError: string | null;
 		inviteFieldErrors: Record<string, string[] | undefined>;
 		inviteLink: string | null;
+		inviteEmailWarning: string | null;
 		onCopyInviteLink: (link: string) => void;
 		copiedInviteLink: boolean;
 	}
@@ -29,6 +30,7 @@
 		householdError,
 		inviteFieldErrors,
 		inviteLink,
+		inviteEmailWarning,
 		onCopyInviteLink,
 		copiedInviteLink
 	}: Props = $props();
@@ -88,7 +90,7 @@
 		<div class="subsection">
 			<h3 class="subsection-title">Bjud in</h3>
 			<p class="subsection-note">
-				Kopiera länken och skicka till personen. Ingen e-post skickas automatiskt.
+				Skicka en inbjudan via e-post. Du kan också kopiera länken manuellt nedan.
 			</p>
 
 			{#if householdError}
@@ -118,6 +120,10 @@
 				</label>
 				<Button type="submit">Skicka inbjudan</Button>
 			</form>
+
+			{#if inviteEmailWarning}
+				<p class="banner warning" role="status">{inviteEmailWarning}</p>
+			{/if}
 
 			{#if inviteLink}
 				<div class="invite-link-box">
@@ -337,6 +343,11 @@
 	.banner.error {
 		background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
 		color: var(--color-danger);
+	}
+
+	.banner.warning {
+		background: color-mix(in srgb, var(--color-warning, #ca8a04) 12%, var(--color-surface));
+		color: var(--color-warning, #ca8a04);
 	}
 
 	@media (max-width: 640px) {

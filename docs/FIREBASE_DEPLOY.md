@@ -133,6 +133,8 @@ Create secrets (CLI prompts for values). For `DATABASE_URL`, paste the **socket*
 npx firebase apphosting:secrets:set DATABASE_URL --project home-pantry-4bee5
 npx firebase apphosting:secrets:set ADMIN_PASSWORD --project home-pantry-4bee5
 npx firebase apphosting:secrets:set OPENAI_API_KEY --project home-pantry-4bee5
+npx firebase apphosting:secrets:set RESEND_API_KEY --project home-pantry-4bee5
+npx firebase apphosting:secrets:set TURNSTILE_SECRET_KEY --project home-pantry-4bee5
 ```
 
 Grant App Hosting access (CLI usually offers this during `secrets:set`):
@@ -141,6 +143,8 @@ Grant App Hosting access (CLI usually offers this during `secrets:set`):
 npx firebase apphosting:secrets:grantaccess DATABASE_URL --backend home-pantry --project home-pantry-4bee5
 npx firebase apphosting:secrets:grantaccess ADMIN_PASSWORD --backend home-pantry --project home-pantry-4bee5
 npx firebase apphosting:secrets:grantaccess OPENAI_API_KEY --backend home-pantry --project home-pantry-4bee5
+npx firebase apphosting:secrets:grantaccess RESEND_API_KEY --backend home-pantry --project home-pantry-4bee5
+npx firebase apphosting:secrets:grantaccess TURNSTILE_SECRET_KEY --backend home-pantry --project home-pantry-4bee5
 ```
 
 Update non-secret values in `apphosting.yaml` or Firebase Console → **App Hosting → home-pantry → Settings → Environment**:
@@ -154,6 +158,10 @@ Update non-secret values in `apphosting.yaml` or Firebase Console → **App Host
 | `PUBLIC_ORIGIN` | yes | `https://home-pantry--home-pantry-4bee5.REGION.hosted.app` or custom domain |
 | `ORIGIN` | yes (runtime) | Same HTTPS URL as `PUBLIC_ORIGIN` — required by `@sveltejs/adapter-node` for form-action CSRF |
 | `OPENAI_API_KEY` | optional* | Recipe suggestions, receipt scan, **photo product scan** (`/api/product-from-image`) |
+| `RESEND_API_KEY` | optional | Household invite email via Resend — see [`EMAIL.md`](./EMAIL.md) |
+| `TURNSTILE_SECRET_KEY` | yes (prod) | Turnstile server verification on `/register` — see [`CAPTCHA.md`](./CAPTCHA.md) |
+| `PUBLIC_TURNSTILE_SITE_KEY` | yes (prod) | Turnstile widget site key — set in `apphosting.yaml` or Firebase Console (BUILD + RUNTIME) |
+| `RESEND_FROM` | optional | Sender address; defaults to `Home Pantry <onboarding@resend.dev>` until domain verified |
 
 \*Photo scan and other AI routes return **503** with a clear JSON error when this secret is missing, invalid, or not granted to the `home-pantry` backend. Create the secret and run `grantaccess` before relying on scan in production.
 | `DEFAULT_MEMBER_EMAIL` | optional | Demo household member |
@@ -286,7 +294,7 @@ Use the existing root `Dockerfile`. Map Cloud Run URL to `PUBLIC_ORIGIN`.
 
 - Do **not** commit `.env`, service account JSON, or API keys
 - `firebase-debug.log` and `.firebase/` are gitignored
-- Use Secret Manager for `DATABASE_URL`, `ADMIN_PASSWORD`, `OPENAI_API_KEY`
+- Use Secret Manager for `DATABASE_URL`, `ADMIN_PASSWORD`, `OPENAI_API_KEY`, `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`
 - Rotate `ADMIN_PASSWORD` after first login in production
 
 ## Blockers (user-owned)

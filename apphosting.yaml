@@ -73,12 +73,35 @@ env:
     availability:
       - RUNTIME
 
+  - variable: RESEND_API_KEY
+    secret: RESEND_API_KEY
+    availability:
+      - RUNTIME
+
+  - variable: TURNSTILE_SECRET_KEY
+    secret: TURNSTILE_SECRET_KEY
+    availability:
+      - RUNTIME
+
   # --- Non-secret config (override in Firebase console if needed) ---
   # Replace with your admin login email before first deploy (or set in App Hosting → Environment).
   # Seeded/updated on startup together with the ADMIN_PASSWORD secret.
   - variable: ADMIN_EMAIL
     value: arvid.pilhall@me.com
     availability:
+      - RUNTIME
+
+  # Resend sender — use onboarding@resend.dev until a domain is verified (see docs/EMAIL.md)
+  - variable: RESEND_FROM
+    value: Home Pantry <onboarding@resend.dev>
+    availability:
+      - RUNTIME
+
+  # Cloudflare Turnstile site key (public) — set to your widget key; see docs/CAPTCHA.md
+  - variable: PUBLIC_TURNSTILE_SITE_KEY
+    value: REPLACE_WITH_TURNSTILE_SITE_KEY
+    availability:
+      - BUILD
       - RUNTIME
 
   # Optional demo household member (omit or override in console)

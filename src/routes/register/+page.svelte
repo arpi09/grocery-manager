@@ -3,7 +3,7 @@
 	import RegisterForm from '$lib/components/organisms/RegisterForm.svelte';
 	import type { PageProps } from './$types';
 
-	let { form }: PageProps = $props();
+	let { data, form }: PageProps = $props();
 </script>
 
 <svelte:head>
@@ -11,5 +11,10 @@
 </svelte:head>
 
 <AuthLandingShell formTitle="Skapa konto" formSubtitle="Ditt hushåll, en app">
-	<RegisterForm errors={form?.errors} message={form?.message} email={form?.email} />
+	<RegisterForm
+		errors={form?.errors}
+		message={form?.message}
+		email={form?.email}
+		turnstileSiteKey={data.turnstileSiteKey}
+	/>
 </AuthLandingShell>
