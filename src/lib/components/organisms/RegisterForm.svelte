@@ -2,8 +2,11 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import FormField from '$lib/components/molecules/FormField.svelte';
 	import TurnstileWidget from '$lib/components/molecules/TurnstileWidget.svelte';
+	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		errors?: Record<string, string[]>;
@@ -26,24 +29,17 @@
 	method="POST"
 	action="?/register"
 	class="form"
-	use:enhance={() => {
-		submitting = true;
-		return async ({ result, update }) => {
-			submitting = false;
-			if (result.type === 'redirect') {
-				await goto(result.location, { invalidateAll: true });
-				return;
-			}
-			await update();
-		};
-	}}
+	use:enhance={bindSubmittingWithRedirect(
+		(v) => (submitting = v),
+		(location) => goto(location, { invalidateAll: true })
+	)}
 >
 	{#if message}
-		<p class="banner error" role="alert">{message}</p>
+		<FeedbackBanner tone="error" message={message} />
 	{/if}
 
 	<FormField
-		label="E-post"
+		label={t('auth.email')}
 		name="email"
 		type="email"
 		autocomplete="email"
@@ -51,14 +47,14 @@
 		error={errors.email?.[0]}
 	/>
 	<FormField
-		label="Lösenord"
+		label={t('auth.password')}
 		name="password"
 		type="password"
 		autocomplete="new-password"
 		error={errors.password?.[0]}
 	/>
 	<FormField
-		label="Bekräfta lösenord"
+		label={t('auth.confirmPassword')}
 		name="confirmPassword"
 		type="password"
 		autocomplete="new-password"
@@ -66,16 +62,16 @@
 	/>
 
 	{#if turnstileSiteKey}
-		<p class="turnstile-label" id="turnstile-label">Bekräfta att du inte är en robot</p>
+		<p class="turnstile-label" id="turnstile-label">{t('auth.register.captchaLabel')}</p>
 		<TurnstileWidget siteKey={turnstileSiteKey} labelledBy="turnstile-label" />
 	{/if}
 
-	<Button type="submit" fullWidth disabled={submitting}>
-		{submitting ? 'Skapar konto…' : 'Skapa konto'}
+	<Button type="submit" fullWidth loading={submitting} loadingLabel={t('auth.register.submitting')}>
+		{t('auth.register.submit')}
 	</Button>
 
 	<p class="footer">
-		Har du konto? <a href="/login">Logga in</a>
+		{t('auth.register.hasAccount')} <a href="/login">{t('auth.register.loginLink')}</a>
 	</p>
 </form>
 
@@ -84,23 +80,23 @@
 		width: 100%;
 	}
 
-	.banner {
-		padding: var(--space-sm) var(--space-md);
-		border-radius: var(--radius-sm);
-		margin: 0 0 var(--space-md);
-		font-size: 0.875rem;
-	}
-
-	.banner.error {
-		background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
-		color: var(--color-danger);
-	}
-
 	.footer {
 		margin-top: var(--space-lg);
 		text-align: center;
 		font-size: 0.875rem;
 		color: var(--color-text-muted);
+	}
+
+	@media (max-width: 899px) {
+		.footer {
+			margin-top: var(--space-md);
+			font-size: 0.8125rem;
+		}
+
+		.turnstile-label {
+			margin-bottom: var(--space-xs);
+			font-size: 0.8125rem;
+		}
 	}
 
 	.turnstile-label {

@@ -3,16 +3,23 @@
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import HouseholdSettingsPanel from '$lib/components/organisms/HouseholdSettingsPanel.svelte';
+	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
+	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
 	import SettingsRow from '$lib/components/molecules/SettingsRow.svelte';
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import { browser } from '$app/environment';
 	import { ONBOARDING_REPLAY_EVENT, resetOnboarding } from '$lib/utils/onboarding';
+	import LanguageSwitcher from '$lib/components/molecules/LanguageSwitcher.svelte';
+	import { t } from '$lib/i18n';
 
 	let { data, form } = $props();
 	let petModalOpen = $state(false);
 	let copiedInviteLink = $state(false);
+	let petsToggleSubmitting = $state(false);
+	let addPetSubmitting = $state(false);
 
 	const inviteLink = $derived(form?.inviteLink ?? null);
 	const inviteEmailWarning = $derived(form?.inviteEmailWarning ?? null);
@@ -37,8 +44,8 @@
 
 <AppLayout user={data.user}>
 	<AppHeader
-		title="Inställningar"
-		subtitle="Hantera konto, hushåll och appinställningar"
+		title={t('settings.title')}
+		subtitle={t('settings.subtitle')}
 	/>
 
 	<PageContainer>
@@ -71,13 +78,30 @@
 
 		<SettingsSection title="App" description="Funktioner och preferenser">
 			<SettingsRow
+				title={t('settings.language.title')}
+				note={t('settings.language.description')}
+				last={false}
+			>
+				<LanguageSwitcher />
+			</SettingsRow>
+
+			<SettingsRow
 				title="Husdjur"
 				note="Aktivera för att visa Husdjur i menyn och hantera dina husdjur."
 				last={false}
 			>
-				<form method="POST" action="?/togglePets">
+				<form
+					method="POST"
+					action="?/togglePets"
+					use:enhance={bindSubmitting((v) => (petsToggleSubmitting = v))}
+				>
 					<input type="hidden" name="enabled" value={data.petsEnabled ? 'false' : 'true'} />
-					<Button type="submit" variant={data.petsEnabled ? 'secondary' : 'primary'}>
+					<Button
+						type="submit"
+						variant={data.petsEnabled ? 'secondary' : 'primary'}
+						loading={petsToggleSubmitting}
+						loadingLabel={t('common.saving')}
+					>
 						{data.petsEnabled ? 'Stäng av' : 'Slå på'}
 					</Button>
 				</form>
@@ -103,10 +127,16 @@
 											<span class="species">{pet.species}</span>
 										{/if}
 									</div>
-									<form method="POST" action="?/deletePet">
+									<DeleteConfirmButton
+										tier={3}
+										context="pet"
+										copyOptions={{ itemName: pet.name }}
+										action="?/deletePet"
+										label="Ta bort"
+										ariaLabel={`Ta bort husdjur ${pet.name}`}
+									>
 										<input type="hidden" name="id" value={pet.id} />
-										<Button type="submit" variant="danger">Ta bort</Button>
-									</form>
+									</DeleteConfirmButton>
 								</li>
 							{/each}
 						</ul>
@@ -133,7 +163,12 @@
 		title="Lägg till husdjur"
 		panelClass="pet-settings-panel"
 	>
-		<form method="POST" action="?/addPet" class="pet-form">
+		<form
+			method="POST"
+			action="?/addPet"
+			class="pet-form"
+			use:enhance={bindSubmitting((v) => (addPetSubmitting = v))}
+		>
 			<label>
 				Namn
 				<input name="name" required maxlength="80" placeholder="t.ex. Luna" />
@@ -144,9 +179,11 @@
 			</label>
 			<div class="modal-actions">
 				<Button type="button" variant="secondary" onclick={() => (petModalOpen = false)}>
-					Avbryt
+					{t('common.cancel')}
 				</Button>
-				<Button type="submit">Spara</Button>
+				<Button type="submit" loading={addPetSubmitting} loadingLabel={t('common.saving')}>
+					{t('common.save')}
+				</Button>
 			</div>
 		</form>
 	</Modal>

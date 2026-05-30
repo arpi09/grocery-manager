@@ -6,9 +6,9 @@ export type ScanToastKind = 'added' | 'unknown';
 export function scanToastMessage(kind: ScanToastKind, productName: string): string {
 	const label = productName.trim() || 'Varan';
 	if (kind === 'unknown') {
-		return `"${label}" sparades (okänd streckkod).`;
+		return `Bra jobbat — "${label}" finns nu i skafferiet (okänd streckkod).`;
 	}
-	return `"${label}" lades till i skafferiet.`;
+	return `Klart! "${label}" ligger nu i skafferiet.`;
 }
 
 export function parseScanToastKind(value: string | null): ScanToastKind | null {

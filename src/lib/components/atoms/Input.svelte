@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { HTMLInputAttributes } from 'svelte/elements';
 
-	interface Props extends HTMLInputAttributes {
+	interface Props extends Omit<HTMLInputAttributes, 'value'> {
 		error?: boolean;
+		value?: string;
 	}
 
 	let {

@@ -30,7 +30,7 @@
 	}
 </script>
 
-<div class="picker" role="group" aria-label="Välj bildkälla">
+<div class="picker" role="group" aria-label="Välj kvitto eller bildkälla">
 	<Button
 		type="button"
 		variant="primary"

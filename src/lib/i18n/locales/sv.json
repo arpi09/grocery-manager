@@ -1,0 +1,136 @@
+{
+	"common": {
+		"save": "Spara",
+		"cancel": "Avbryt",
+		"back": "Tillbaka",
+		"saving": "Sparar…",
+		"close": "Stäng",
+		"more": "Mer",
+		"account": "Konto",
+		"profile": "Profil",
+		"item": "vara",
+		"items": "varor",
+		"errorUnexpected": "Ett oväntat fel inträffade.",
+		"errorGeneric": "Något gick fel."
+	},
+	"nav": {
+		"home": "Hem",
+		"inventory": "Skafferi",
+		"shopping": "Inköp",
+		"plans": "Planer",
+		"stats": "Statistik",
+		"settings": "Inställningar",
+		"pets": "Husdjur",
+		"admin": "Admin",
+		"more": "Mer",
+		"account": "Konto",
+		"profile": "Profil",
+		"logout": "Logga ut",
+		"accountMenu": "Kontomeny",
+		"roleAdmin": "Administratör",
+		"roleMember": "Medlem",
+		"closeMenu": "Stäng meny",
+		"brandHome": "Home Pantry – Hem",
+		"primaryNav": "Primär navigering",
+		"mobileNav": "Mobilnavigering",
+		"header": "Sidhuvud",
+		"brandName": "Home Pantry",
+		"morePages": "Fler sidor",
+		"language": "Språk"
+	},
+	"auth": {
+		"email": "E-post",
+		"password": "Lösenord",
+		"confirmPassword": "Bekräfta lösenord",
+		"login": {
+			"title": "Logga in",
+			"subtitle": "Skafferi · datum · inköp",
+			"submit": "Logga in",
+			"submitting": "Loggar in…",
+			"pageTitle": "Logga in · Home Pantry",
+			"newHere": "Ny här?",
+			"createAccount": "Skapa konto"
+		},
+		"register": {
+			"title": "Skapa konto",
+			"subtitle": "Ditt hushåll, en app",
+			"submit": "Skapa konto",
+			"submitting": "Skapar konto…",
+			"pageTitle": "Skapa konto · Home Pantry",
+			"hasAccount": "Har du konto?",
+			"loginLink": "Logga in",
+			"captchaLabel": "Bekräfta att du inte är en robot"
+		}
+	},
+	"dashboard": {
+		"title": "Hem",
+		"subtitle": "Översikt över skafferiet",
+		"totalTracked": "{count} varor spårade",
+		"itemCount": "{count} {count, plural, one {vara} other {varor}}",
+		"aiTitle": "AI inventarie & ICA",
+		"aiDescription": "Få tips om vad som håller på att ta slut och en inköpslista för ICA.",
+		"scan": "Skanna",
+		"addItem": "Lägg till vara"
+	},
+	"location": {
+		"fridge": "Kylskåp",
+		"freezer": "Frys",
+		"cupboard": "Skafferi"
+	},
+	"scan": {
+		"title": "Skanna",
+		"subtitle": "Välj hur du vill lägga till varor",
+		"barcodeTitle": "Streckkod",
+		"barcodeSubtitle": "Rikta kameran mot streckkoden på förpackningen",
+		"allModes": "Alla skanningslägen",
+		"readonly": "Du har endast läsbehörighet i detta hushåll och kan inte lägga till varor.",
+		"cancelBack": "Avbryt och gå tillbaka",
+		"cancel": "Avbryt",
+		"hubAria": "Skanningslägen",
+		"modes": {
+			"barcode": {
+				"title": "Streckkod",
+				"description": "Skanna EAN och lägg till direkt."
+			},
+			"receipt": {
+				"title": "Kvitto",
+				"description": "Digitalt kvitto eller pappersfoto — flera varor på en gång."
+			},
+			"photo": {
+				"title": "Foto",
+				"description": "Fota etiketten och fyll i uppgifter automatiskt."
+			}
+		},
+		"receiptPage": {
+			"title": "Skanna kvitto",
+			"subtitle": "Lägg till flera varor på en gång",
+			"readonly": "Du har endast läsbehörighet och kan inte lägga till varor från kvitto."
+		},
+		"receiptGuide": {
+			"title": "Har du kvittot digitalt?",
+			"hide": "Dölj",
+			"show": "Visa",
+			"intro": "Många appar sparar kvitton — exportera som PDF eller bild och ladda upp här.",
+			"step1": "Öppna appen där kvittot finns (t.ex. Kivra, bank, e-post, Wallet)",
+			"step2": "Öppna kvittot → Spara, Dela eller Ladda ner som PDF eller bild",
+			"step3": "Kom tillbaka hit och välj Välj från filer",
+			"examplesLabel": "Vanliga källor",
+			"examplesAria": "Exempel på appar med digitala kvitton",
+			"kivraTitle": "Visa steg för Kivra",
+			"kivraStep1": "Öppna Kivra och hitta kvittot under inköp eller dokument.",
+			"kivraStep2": "Tryck på kvittot och välj dela eller spara — ofta som PDF.",
+			"kivraStep3": "Om du får PDF: spara den och välj filen här, eller ta en skärmdump som bild."
+		}
+	},
+	"settings": {
+		"title": "Inställningar",
+		"subtitle": "Hantera konto, hushåll och appinställningar",
+		"language": {
+			"title": "Språk",
+			"description": "Välj visningsspråk för appen.",
+			"label": "Språk",
+			"sv": "Svenska",
+			"en": "English"
+		}
+	}
+}

@@ -17,7 +17,10 @@ import { validateSession } from '$lib/server/session';
 import { recordAppError } from '$lib/server/error-log/record';
 import { shouldPersistServerError } from '$lib/server/error-log/should-log';
 import { isThemePreference, prefersDarkFromRequest, resolveTheme } from '$lib/domain/theme';
+import { translate } from '$lib/i18n/messages';
 import { writeThemeCookie } from '$lib/infrastructure/theme-cookie';
+import { writeLocaleCookie } from '$lib/infrastructure/locale-cookie';
+import { resolveLocaleForRequest } from '$lib/server/locale';
 import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
 
 const publicPaths = new Set(['/login', '/register']);
@@ -48,6 +51,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.mealPlanService = mealPlanService;
 	event.locals.petService = petService;
 	event.locals.petFoodService = petFoodService;
+
+	const locale = resolveLocaleForRequest(event.cookies, event.request);
+	event.locals.locale = locale;
+	writeLocaleCookie(event.cookies, locale);
 
 	await validateSession(event);
 
@@ -82,6 +89,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	let resolvedTheme: 'light' | 'dark' = 'light';
+	const resolvedLocale = locale;
 
 	if (isAuthenticated) {
 		const rawPreference = event.locals.user!.themePreference;
@@ -96,7 +104,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 			if (!done) {
 				return html;
 			}
-			return html.replaceAll('%pantry.resolvedTheme%', resolvedTheme);
+			return html
+				.replaceAll('%pantry.resolvedTheme%', resolvedTheme)
+				.replaceAll('%pantry.locale%', resolvedLocale);
 		}
 	});
 };
@@ -116,7 +126,12 @@ export const handleError: HandleServerError = async ({ error, event, status }) =
 		});
 	}
 
+	const locale = event.locals.locale ?? 'sv';
+
 	return {
-		message: status >= 500 ? 'Ett ovÃ¤ntat fel intrÃ¤ffade.' : 'NÃ¥got gick fel.'
+		message:
+			status >= 500
+				? translate(locale, 'common.errorUnexpected')
+				: translate(locale, 'common.errorGeneric')
 	};
 };

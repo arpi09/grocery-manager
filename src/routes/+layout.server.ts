@@ -3,9 +3,12 @@ import { resolveThemeForRequest } from '$lib/server/theme-cookie';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals, request }) => {
+	const locale = locals.locale;
+
 	if (!locals.user) {
 		return {
 			user: null,
+			locale,
 			themePreference: null,
 			resolvedTheme: null,
 			households: [],
@@ -33,6 +36,7 @@ export const load: LayoutServerLoad = async ({ locals, request }) => {
 	}));
 
 	return {
+		locale,
 		user: {
 			id: locals.user.id,
 			email: locals.user.email,

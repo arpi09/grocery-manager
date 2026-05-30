@@ -73,7 +73,10 @@ describe('buildHouseholdInviteEmailContent', () => {
 		expect(content.subject).toContain('Mitt hushåll');
 		expect(content.text).toContain('Redigera');
 		expect(content.text).toContain('https://app.example/invite/abc');
+		expect(content.text).toContain('Du är inbjuden till Mitt hushåll');
+		expect(content.html).toContain('Du är inbjuden till Mitt hushåll');
 		expect(content.html).toContain('Acceptera inbjudan');
+		expect(content.html).toContain('#3d6b4f');
 		expect(content.html).not.toContain('<script');
 	});
 });

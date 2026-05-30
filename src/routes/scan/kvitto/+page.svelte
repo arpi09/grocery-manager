@@ -3,6 +3,7 @@
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import ReceiptBulkAddFlow from '$lib/components/organisms/ReceiptBulkAddFlow.svelte';
+	import { t } from '$lib/i18n';
 
 	let { data } = $props();
 
@@ -11,17 +12,17 @@
 
 <AppLayout user={data.user}>
 	<AppHeader
-		title="Skanna kvitto"
-		subtitle="Lägg till flera varor på en gång"
+		title={t('scan.receiptPage.title')}
+		subtitle={t('scan.receiptPage.subtitle')}
 		backHref={hubHref}
-		backLabel="Alla skanningslägen"
+		backLabel={t('scan.allModes')}
 	/>
 	<PageContainer>
 		{#if !data.canWrite}
 			<p class="readonly" role="status">
-				Du har endast läsbehörighet och kan inte lägga till varor från kvitto.
+				{t('scan.receiptPage.readonly')}
 			</p>
-			<p><a href={data.returnTo}>← Tillbaka</a></p>
+			<p><a href={data.returnTo}>← {t('common.back')}</a></p>
 		{:else}
 			<ReceiptBulkAddFlow returnTo={data.returnTo} />
 		{/if}

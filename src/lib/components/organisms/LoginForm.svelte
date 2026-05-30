@@ -2,7 +2,10 @@
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import FormField from '$lib/components/molecules/FormField.svelte';
+	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		errors?: Record<string, string[]>;
@@ -26,20 +29,13 @@
 	method="POST"
 	action="?/login"
 	class="form"
-	use:enhance={() => {
-		submitting = true;
-		return async ({ result, update }) => {
-			submitting = false;
-			if (result.type === 'redirect') {
-				await goto(result.location, { invalidateAll: true });
-				return;
-			}
-			await update();
-		};
-	}}
+	use:enhance={bindSubmittingWithRedirect(
+		(v) => (submitting = v),
+		(location) => goto(location, { invalidateAll: true })
+	)}
 >
 	{#if message}
-		<p class="banner {messageTone}" role="alert">{message}</p>
+		<FeedbackBanner tone={messageTone === 'info' ? 'info' : 'error'} message={message} />
 	{/if}
 
 	{#if redirectTo}
@@ -47,7 +43,7 @@
 	{/if}
 
 	<FormField
-		label="E-post"
+		label={t('auth.email')}
 		name="email"
 		type="email"
 		autocomplete="email"
@@ -55,7 +51,7 @@
 		error={errors.email?.[0]}
 	/>
 	<FormField
-		label="Lösenord"
+		label={t('auth.password')}
 		name="password"
 		type="password"
 		autocomplete="current-password"
@@ -63,13 +59,13 @@
 	/>
 
 	<Button type="submit" fullWidth disabled={submitting}>
-		{submitting ? 'Loggar in…' : 'Logga in'}
+		{submitting ? t('auth.login.submitting') : t('auth.login.submit')}
 	</Button>
 
 	<div class="register-block">
-		<p class="register-lead">Ny här?</p>
+		<p class="register-lead">{t('auth.login.newHere')}</p>
 		<a href="/register" class="register-cta">
-			<span class="register-cta-text">Skapa konto</span>
+			<span class="register-cta-text">{t('auth.login.createAccount')}</span>
 			<svg class="register-cta-arrow" viewBox="0 0 20 20" aria-hidden="true">
 				<path d="M5 10h10M11 6l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
 			</svg>
@@ -82,28 +78,23 @@
 		width: 100%;
 	}
 
-	.banner {
-		padding: var(--space-sm) var(--space-md);
-		border-radius: var(--radius-sm);
-		margin: 0 0 var(--space-md);
-		font-size: 0.875rem;
-	}
-
-	.banner.error {
-		background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
-		color: var(--color-danger);
-	}
-
-	.banner.info {
-		background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
-		color: var(--color-primary);
-	}
-
 	.register-block {
 		margin-top: var(--space-lg);
 		padding-top: var(--space-lg);
 		border-top: 1px solid var(--color-border);
 		text-align: center;
+	}
+
+	@media (max-width: 899px) {
+		.register-block {
+			margin-top: var(--space-md);
+			padding-top: var(--space-md);
+		}
+
+		.register-cta {
+			padding: 0.625rem 1rem;
+			font-size: 0.9375rem;
+		}
 	}
 
 	.register-lead {

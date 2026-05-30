@@ -2,8 +2,13 @@
 	import { browser } from '$app/environment';
 	import '../app.css';
 	import { resolveTheme, type ThemePreference } from '$lib/domain/theme';
+	import { initLocale } from '$lib/i18n';
 
 	let { children, data } = $props();
+
+	$effect(() => {
+		initLocale(data.locale);
+	});
 
 	function applyResolvedTheme(preference: ThemePreference) {
 		if (!browser) {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Spinner from '$lib/components/atoms/Spinner.svelte';
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 
@@ -7,20 +8,38 @@
 	interface Props extends HTMLButtonAttributes {
 		variant?: Variant;
 		fullWidth?: boolean;
+		loading?: boolean;
+		/** Shown next to spinner while `loading` is true. Falls back to button label. */
+		loadingLabel?: string;
 		children: Snippet;
 	}
 
 	let {
 		variant = 'primary',
 		fullWidth = false,
+		loading = false,
+		loadingLabel,
 		class: className = '',
+		disabled = false,
 		children,
 		...rest
 	}: Props = $props();
 </script>
 
-<button class="btn btn-{variant} {fullWidth ? 'btn-full' : ''} {className}" {...rest}>
-	{@render children()}
+<button
+	class="btn btn-{variant} {fullWidth ? 'btn-full' : ''} {className}"
+	disabled={disabled || loading}
+	aria-busy={loading || undefined}
+	{...rest}
+>
+	{#if loading}
+		<Spinner size="sm" label={loadingLabel ?? 'Bearbetar'} />
+		{#if loadingLabel}
+			<span>{loadingLabel}</span>
+		{/if}
+	{:else}
+		{@render children()}
+	{/if}
 </button>
 
 <style>

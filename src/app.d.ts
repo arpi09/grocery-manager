@@ -9,10 +9,12 @@ import type { MealPlanService } from '$lib/application/meal-plan.service';
 import type { PetFoodService } from '$lib/application/pet-food.service';
 import type { PetService } from '$lib/application/pet.service';
 import type { HouseholdRole } from '$lib/domain/household';
+import type { Locale } from '$lib/i18n/locale';
 
 declare global {
 	namespace App {
 		interface Locals {
+			locale: Locale;
 			user: User | null;
 			session: Session | null;
 			householdId: string | null;
@@ -21,7 +23,7 @@ declare global {
 			profileService: ProfileService;
 			adminService: AdminService;
 			householdService: HouseholdService;
-			inventoryService: InventoryService;
+			inventoryService: InventoryService;
 			shoppingListService: ShoppingListService;
 			mealPlanService: MealPlanService;
 			petService: PetService;

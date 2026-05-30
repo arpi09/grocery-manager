@@ -5,7 +5,9 @@
 	import Input from '$lib/components/atoms/Input.svelte';
 	import BarcodeScanButton from '$lib/components/molecules/BarcodeScanButton.svelte';
 	import BarcodeScannerModal from '$lib/components/organisms/BarcodeScannerModal.svelte';
-	import ProductPhotoScanPicker from '$lib/components/molecules/ProductPhotoScanPicker.svelte';
+	import ProductPhotoScanPicker from '$lib/components/molecules/ProductPhotoScanPicker.svelte';
+	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
+
 	import { LOCATIONS, LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
 	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
@@ -27,9 +29,11 @@
 	let location = $state<StorageLocation>(item?.location ?? defaultLocation);
 
 	let scannerOpen = $state(false);
-	let lookupLoading = $state(false);
+	let lookupLoading = $state(false);
+
 	let scanMessage = $state<string | null>(null);
-	let scanMethod = $state<'barcode' | 'photo'>('barcode');
+	let scanMethod = $state<'barcode' | 'photo'>('barcode');
+
 
 	onMount(() => {
 		name = item?.name ?? '';
@@ -185,7 +189,15 @@
 	<div class="actions">
 		<Button type="submit" fullWidth>{isEdit ? 'Spara ändringar' : 'Lägg till vara'}</Button>
 		{#if isEdit}
-			<Button type="submit" formaction="?/delete" variant="danger" fullWidth>Ta bort vara</Button>
+			<DeleteConfirmButton
+				tier={2}
+				context="inventoryItem"
+				copyOptions={{ itemName: name || item?.name }}
+				action="?/delete"
+				fullWidth
+				label="Ta bort vara"
+				ariaLabel={`Ta bort ${name || item?.name || 'vara'}`}
+			/>
 		{/if}
 	</div>
 </form>

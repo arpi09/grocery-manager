@@ -2,7 +2,8 @@
 	import Card from '$lib/components/atoms/Card.svelte';
 	import ExpiringSoonSection from '$lib/components/organisms/ExpiringSoonSection.svelte';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
-	import { LOCATION_LABELS, LOCATION_COLORS } from '$lib/domain/location';
+	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
+	import { t, type MessageKey } from '$lib/i18n';
 
 	interface Props {
 		summary: DashboardSummary;
@@ -10,6 +11,10 @@
 	}
 
 	let { summary, canWrite = false }: Props = $props();
+
+	function locationLabel(location: StorageLocation): string {
+		return t(`location.${location}` as MessageKey);
+	}
 
 	const locationIcons: Record<string, string> = {
 		fridge: '❄',
@@ -20,7 +25,7 @@
 
 <section class="dashboard">
 	<div class="stats">
-		<p class="total">{summary.totalItems} items tracked</p>
+		<p class="total">{t('dashboard.totalTracked', { count: summary.totalItems })}</p>
 	</div>
 
 	<div class="grid">
@@ -29,8 +34,8 @@
 				<div class="location-card">
 					<span class="icon" style="color: {LOCATION_COLORS[location]}">{locationIcons[location]}</span>
 					<div>
-						<h2>{LOCATION_LABELS[location]}</h2>
-						<p>{count} {count === 1 ? 'item' : 'items'}</p>
+						<h2>{locationLabel(location)}</h2>
+						<p>{t('dashboard.itemCount', { count })}</p>
 					</div>
 				</div>
 			</Card>
@@ -43,17 +48,17 @@
 		<div class="ai-card">
 			<span class="ai-icon">✨</span>
 			<div>
-				<h2>AI inventarie & ICA</h2>
-				<p>Få tips om vad som håller på att ta slut och en inköpslista för ICA.</p>
+				<h2>{t('dashboard.aiTitle')}</h2>
+				<p>{t('dashboard.aiDescription')}</p>
 			</div>
 		</div>
 	</Card>
 
 	{#if canWrite}
 		<div class="cta-row">
-			<a class="scan-link scan-link--desktop" href="/scan?mode=barcode&from=%2F">📷 Skanna</a>
+			<a class="scan-link scan-link--desktop" href="/scan?mode=barcode&from=%2F">📷 {t('dashboard.scan')}</a>
 			<a class="add-link" href="/item/new?from=%2F">
-				<span>+ Lägg till vara</span>
+				<span>+ {t('dashboard.addItem')}</span>
 			</a>
 		</div>
 	{/if}

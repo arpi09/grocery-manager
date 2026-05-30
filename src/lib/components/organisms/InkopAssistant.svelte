@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Badge from '$lib/components/atoms/Badge.svelte';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 
 	type Tab = 'insights' | 'ica';
 
@@ -179,8 +180,14 @@
 				bind:value={focus}
 				placeholder="T.ex. vad ska jag laga i helgen? Vad bör jag använda först?"
 			></textarea>
-			<Button type="button" onclick={generateInsights} disabled={loadingInsights} fullWidth>
-				{loadingInsights ? 'Analyserar...' : 'Få inventarietips'}
+			<Button
+				type="button"
+				onclick={generateInsights}
+				loading={loadingInsights}
+				loadingLabel="Tänker…"
+				fullWidth
+			>
+				Få inventarietips
 			</Button>
 
 			{#if summary}
@@ -237,8 +244,14 @@
 				bind:value={householdSize}
 			/>
 
-			<Button type="button" onclick={generateIcaList} disabled={loadingIca} fullWidth>
-				{loadingIca ? 'Skapar lista...' : 'Skapa ICA-inköpslista'}
+			<Button
+				type="button"
+				onclick={generateIcaList}
+				loading={loadingIca}
+				loadingLabel="Tänker…"
+				fullWidth
+			>
+				Skapa ICA-inköpslista
 			</Button>
 
 			{#if icaNote}
@@ -289,7 +302,7 @@
 	{/if}
 
 	{#if errorMessage}
-		<p class="error">{errorMessage}</p>
+		<FeedbackBanner tone="error" message={errorMessage} />
 	{/if}
 </section>
 
@@ -363,11 +376,6 @@
 	.note {
 		margin: 0;
 		color: var(--color-text-muted);
-	}
-
-	.error {
-		margin: 0;
-		color: var(--color-danger);
 	}
 
 	.insight-list {

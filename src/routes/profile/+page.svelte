@@ -5,6 +5,7 @@
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import FormField from '$lib/components/molecules/FormField.svelte';
 	import { THEME_LABELS, THEME_PREFERENCES, type ThemePreference } from '$lib/domain/theme';
 	import { userInitials } from '$lib/domain/user';
@@ -20,6 +21,8 @@
 
 	let avatarInput = $state(data.profile.avatarUrl ?? '');
 	let fileError = $state<string | undefined>(undefined);
+	let profileSubmitting = $state(false);
+	let themeSubmitting = $state(false);
 
 	const MAX_FILE_BYTES = 100_000;
 
@@ -63,7 +66,7 @@
 	<PageContainer>
 	<Card>
 		{#if form?.success}
-			<p class="banner success" role="status">Profilen sparades.</p>
+			<FeedbackBanner tone="success" message="Snyggt — profilen är uppdaterad!" />
 		{/if}
 
 		<div class="preview">
@@ -83,8 +86,13 @@
 			action="?/save"
 			class="profile-form"
 			use:enhance={() => {
+				profileSubmitting = true;
 				return async ({ update }) => {
-					await update({ invalidateAll: true });
+					try {
+						await update({ invalidateAll: true });
+					} finally {
+						profileSubmitting = false;
+					}
 				};
 			}}
 		>
@@ -130,7 +138,9 @@
 				{/if}
 			</div>
 
-			<Button type="submit">Spara profil</Button>
+			<Button type="submit" loading={profileSubmitting} loadingLabel="Sparar…">
+				Spara profil
+			</Button>
 		</form>
 	</Card>
 
@@ -139,7 +149,7 @@
 		<p class="section-lead">Välj ljust, mörkt eller följ systemets inställning.</p>
 
 		{#if form?.themeSuccess}
-			<p class="banner success" role="status">Tema sparades.</p>
+			<FeedbackBanner tone="success" message="Tema sparat — ser bra ut!" />
 		{/if}
 
 		<form
@@ -147,8 +157,13 @@
 			action="?/updateTheme"
 			class="theme-form"
 			use:enhance={() => {
+				themeSubmitting = true;
 				return async ({ update }) => {
-					await update({ invalidateAll: true });
+					try {
+						await update({ invalidateAll: true });
+					} finally {
+						themeSubmitting = false;
+					}
 				};
 			}}
 		>
@@ -169,25 +184,13 @@
 			{#if form?.themeErrors?.themePreference?.[0]}
 				<p class="theme-error" role="alert">{form.themeErrors.themePreference[0]}</p>
 			{/if}
-			<Button type="submit">Spara tema</Button>
+			<Button type="submit" loading={themeSubmitting} loadingLabel="Sparar�">Spara tema</Button>
 		</form>
 	</Card>
 	</PageContainer>
 </AppLayout>
 
 <style>
-	.banner {
-		margin: 0 0 var(--space-md);
-		padding: 0.65rem 0.75rem;
-		border-radius: var(--radius-sm);
-		font-size: 0.9rem;
-	}
-
-	.banner.success {
-		background: #e8f5ee;
-		color: #1f5c3f;
-	}
-
 	.preview {
 		display: flex;
 		align-items: center;

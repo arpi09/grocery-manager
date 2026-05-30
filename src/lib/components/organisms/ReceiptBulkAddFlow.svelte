@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import DeleteSafetyModal from '$lib/components/molecules/DeleteSafetyModal.svelte';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
+	import DigitalReceiptGuide from '$lib/components/molecules/DigitalReceiptGuide.svelte';
 	import ImageSourcePicker from '$lib/components/molecules/ImageSourcePicker.svelte';
+	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
 	import type { ReceiptLine } from '$lib/domain/receipt-line';
 	import { LOCATIONS, LOCATION_LABELS, type StorageLocation } from '$lib/domain/location';
@@ -18,6 +22,8 @@
 	let selected = $state<Record<number, boolean>>({});
 	let bulkLocation = $state<StorageLocation>('cupboard');
 	let step = $state<'upload' | 'review'>('upload');
+	let bulkSubmitting = $state(false);
+	let discardReviewOpen = $state(false);
 
 	const hubHref = $derived(`/scan?from=${encodeURIComponent(returnTo)}`);
 	const cancelHref = $derived(hubHref);
@@ -25,6 +31,13 @@
 	async function handleImage(file: File) {
 		parsing = true;
 		parseError = null;
+
+		if (!file.type.startsWith('image/')) {
+			parseError =
+				'Just nu behövs en bildfil — spara kvittot som bild eller ta en skärmdump om du har PDF.';
+			parsing = false;
+			return;
+		}
 
 		try {
 			const formData = new FormData();
@@ -34,7 +47,7 @@
 			const data = (await response.json()) as { error?: string; lines?: ReceiptLine[] };
 
 			if (!response.ok || !data.lines?.length) {
-				parseError = data.error ?? 'Kunde inte läsa kvittot.';
+				parseError = data.error ?? 'Hoppsan — kunde inte läsa kvittot. Prova en tydligare bild.';
 				return;
 			}
 
@@ -42,7 +55,7 @@
 			selected = Object.fromEntries(data.lines.map((_, i) => [i, true]));
 			step = 'review';
 		} catch {
-			parseError = 'Nätverksfel vid kvittoläsning.';
+			parseError = 'Hoppsan — nätverksfel. Kontrollera anslutningen och försök igen.';
 		} finally {
 			parsing = false;
 		}
@@ -53,21 +66,50 @@
 	}
 
 	const selectedCount = $derived(lines.filter((_, i) => selected[i]).length);
+
+	function requestNewImage() {
+		if (lines.length > 0) {
+			discardReviewOpen = true;
+			return;
+		}
+		resetToUpload();
+	}
+
+	function resetToUpload() {
+		discardReviewOpen = false;
+		lines = [];
+		selected = {};
+		step = 'upload';
+		parseError = null;
+	}
 </script>
 
 {#if step === 'upload'}
 	<section>
-		<p class="lead">Fota kvittot eller välj en bild från dina filer — vi föreslår varor du kan lägga till.</p>
+		<p class="lead">
+			Har du kvittot i en app? Spara eller dela det som bild och ladda upp — eller fota ett papperskvitto.
+			Vi föreslår varor du kan lägga till.
+		</p>
+
+		<DigitalReceiptGuide />
+
+		{#if parsing}
+			<FeedbackBanner
+				tone="info"
+				message="Läser kvittot… det tar oftast några sekunder."
+			/>
+		{/if}
 
 		<ImageSourcePicker
-			cameraLabel={parsing ? 'Läser kvitto…' : '📷 Fota kvitto'}
-			fileLabel={parsing ? 'Läser kvitto…' : '📁 Välj kvitto (bild)'}
+			cameraLabel={parsing ? 'Läser kvitto…' : '📷 Fota papperskvitto'}
+			fileLabel={parsing ? 'Läser kvitto…' : '📁 Välj från filer'}
+			accept="image/*,application/pdf"
 			disabled={parsing}
 			onSelect={handleImage}
 		/>
 
 		{#if parseError}
-			<p class="error" role="alert">{parseError}</p>
+			<FeedbackBanner tone="error" message={parseError} />
 		{/if}
 
 		<p class="hint">Kräver OPENAI_API_KEY i serverns .env.</p>
@@ -92,7 +134,11 @@
 			<button type="button" class="link-btn" onclick={() => toggleAll(false)}>Avmarkera alla</button>
 		</div>
 
-		<form method="POST" action="?/bulkCreate" use:enhance>
+		<form
+			method="POST"
+			action="?/bulkCreate"
+			use:enhance={bindSubmitting((v) => (bulkSubmitting = v))}
+		>
 			<input type="hidden" name="returnTo" value={returnTo} />
 			<ul class="line-list">
 				{#each lines as line, index (index)}
@@ -115,8 +161,13 @@
 			</ul>
 
 			<div class="actions">
-				<Button type="button" variant="secondary" onclick={() => (step = 'upload')}>Ny bild</Button>
-				<Button type="submit" disabled={selectedCount === 0}>
+				<Button type="button" variant="secondary" onclick={requestNewImage}>Ny bild</Button>
+				<Button
+					type="submit"
+					disabled={selectedCount === 0}
+					loading={bulkSubmitting}
+					loadingLabel="Sparar till skafferiet…"
+				>
 					Lägg till {selectedCount} {selectedCount === 1 ? 'vara' : 'varor'}
 				</Button>
 			</div>
@@ -124,18 +175,21 @@
 	</section>
 
 	<ScanFlowFooter cancelHref={cancelHref} cancelLabel="Avbryt" />
+
+	<DeleteSafetyModal
+		open={discardReviewOpen}
+		onClose={() => (discardReviewOpen = false)}
+		tier={3}
+		context="receiptDiscardReview"
+		copyOptions={{ count: lines.length }}
+		onConfirm={resetToUpload}
+	/>
 {/if}
 
 <style>
 	.lead {
 		margin: 0 0 var(--space-lg);
 		color: var(--color-text-muted);
-	}
-
-	.error {
-		margin-top: var(--space-md);
-		color: var(--color-danger);
-		font-size: 0.875rem;
 	}
 
 	.hint {

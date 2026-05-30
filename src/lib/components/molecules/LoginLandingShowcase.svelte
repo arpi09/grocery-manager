@@ -14,6 +14,14 @@
 <div class="showcase" aria-hidden="true">
 	<p class="headline">Ditt skafferi, samlat</p>
 
+	<div class="mobile-strip">
+		<span class="strip-item" style="--strip: var(--color-fridge)">Kyl</span>
+		<span class="strip-item" style="--strip: var(--color-freezer)">Frys</span>
+		<span class="strip-item" style="--strip: var(--color-cupboard)">Skafferi</span>
+		<span class="strip-item" style="--strip: var(--color-accent)">Datum</span>
+		<span class="strip-item" style="--strip: var(--color-primary)">Inköp</span>
+	</div>
+
 	<div class="bento">
 		<div class="mock mock-pantry">
 			<div class="mock-header">
@@ -95,6 +103,46 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-lg);
+	}
+
+	.mobile-strip {
+		display: none;
+	}
+
+	@media (max-width: 899px) {
+		.showcase {
+			gap: var(--space-sm);
+			align-items: center;
+		}
+
+		.headline {
+			font-size: 0.8125rem;
+			font-weight: 600;
+			letter-spacing: -0.01em;
+			color: var(--color-text-muted);
+			text-align: center;
+		}
+
+		.bento {
+			display: none;
+		}
+
+		.mobile-strip {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			gap: 0.35rem;
+		}
+
+		.strip-item {
+			font-size: 0.65rem;
+			font-weight: 600;
+			padding: 0.2rem 0.55rem;
+			border-radius: 999px;
+			color: var(--strip);
+			background: color-mix(in srgb, var(--strip) 12%, var(--color-surface));
+			border: 1px solid color-mix(in srgb, var(--strip) 28%, var(--color-border));
+		}
 	}
 
 	.headline {

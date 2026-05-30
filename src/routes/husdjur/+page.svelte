@@ -3,6 +3,7 @@
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import PetFoodModal from '$lib/components/organisms/PetFoodModal.svelte';
 
 	let { data } = $props();
@@ -47,10 +48,16 @@
 							<strong>{food.name}</strong>
 							<span>{food.quantity}{food.unit ? ` ${food.unit}` : ''}</span>
 						</div>
-						<form method="POST" action="?/deletePetFood">
+						<DeleteConfirmButton
+							tier={2}
+							context="petFood"
+							copyOptions={{ itemName: food.name }}
+							action="?/deletePetFood"
+							label="Ta bort"
+							ariaLabel={`Ta bort ${food.name}`}
+						>
 							<input type="hidden" name="id" value={food.id} />
-							<Button type="submit" variant="danger">Delete</Button>
-						</form>
+						</DeleteConfirmButton>
 					</li>
 				{/each}
 			</ul>

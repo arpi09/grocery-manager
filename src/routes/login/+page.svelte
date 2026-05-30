@@ -1,18 +1,22 @@
 <script lang="ts">
 	import AuthLandingShell from '$lib/components/templates/AuthLandingShell.svelte';
 	import LoginForm from '$lib/components/organisms/LoginForm.svelte';
+	import { t } from '$lib/i18n';
 	import type { PageProps } from './$types';
 
 	let { data, form }: PageProps = $props();
 
 	const message = $derived(form?.message ?? data.message ?? undefined);
+	const pageTitle = $derived(t('auth.login.pageTitle'));
+	const formTitle = $derived(t('auth.login.title'));
+	const formSubtitle = $derived(t('auth.login.subtitle'));
 </script>
 
 <svelte:head>
-	<title>Logga in · Home Pantry</title>
+	<title>{pageTitle}</title>
 </svelte:head>
 
-<AuthLandingShell formTitle="Logga in" formSubtitle="Skafferi · datum · inköp">
+<AuthLandingShell {formTitle} {formSubtitle}>
 	<LoginForm
 		errors={form?.errors}
 		{message}

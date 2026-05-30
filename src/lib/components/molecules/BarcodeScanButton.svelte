@@ -25,15 +25,12 @@
 	type="button"
 	variant="secondary"
 	class="scan-btn"
-	disabled={loading}
+	loading={loading}
+	loadingLabel="Slår upp…"
 	onclick={onclick}
 	aria-label="Skanna streckkod med kameran"
 >
-	{#if loading}
-		Slår upp…
-	{:else}
-		📷 Skanna streckkod
-	{/if}
+	📷 Skanna streckkod
 </Button>
 
 <style>

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 
 	interface RecipeSuggestion {
@@ -37,7 +38,7 @@
 		if (status === 502) {
 			return 'Kunde inte nå AI-tjänsten just nu. Försök igen om en stund.';
 		}
-		return 'Kunde inte generera recept just nu.';
+		return 'Hoppsan — kunde inte generera recept just nu. Försök igen.';
 	}
 
 	async function generateRecipes() {
@@ -110,13 +111,13 @@
 	></textarea>
 
 	<div class="actions">
-		<Button type="button" onclick={generateRecipes} disabled={loading} fullWidth>
-			{loading ? 'Genererar...' : 'Generera recept'}
+		<Button type="button" onclick={generateRecipes} loading={loading} loadingLabel="Tänker…" fullWidth>
+			Generera recept
 		</Button>
 	</div>
 
 	{#if errorMessage}
-		<p class="error">{errorMessage}</p>
+		<FeedbackBanner tone="error" message={errorMessage} />
 	{/if}
 
 	{#if note}
@@ -170,11 +171,6 @@
 
 	.actions {
 		margin-bottom: var(--space-md);
-	}
-
-	.error {
-		color: var(--color-danger);
-		margin: 0 0 var(--space-md);
 	}
 
 	.note {

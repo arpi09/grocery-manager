@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import Spinner from '$lib/components/atoms/Spinner.svelte';
 	import BarcodeScanner from '$lib/components/molecules/BarcodeScanner.svelte';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
+	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
 	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { addRecentScan, getRecentScans, type RecentScan } from '$lib/utils/recent-scans';
@@ -40,6 +43,7 @@
 	let notes = $state('');
 	let location = $state<StorageLocation>(defaultLocation);
 	let expiresOn = $state('');
+	let saveSubmitting = $state(false);
 
 	$effect(() => {
 		recentScans = getRecentScans();
@@ -71,7 +75,7 @@
 	async function lookupBarcode(code: string) {
 		const trimmed = code.trim();
 		if (trimmed.length < 8) {
-			lookupError = 'Ange en giltig streckkod (minst 8 siffror).';
+			lookupError = 'Hoppsan — ange en giltig streckkod (minst 8 siffror).';
 			return;
 		}
 
@@ -87,14 +91,14 @@
 				lookupError =
 					'message' in data && data.message
 						? data.message
-						: 'Kunde inte slå upp streckkoden. Försök igen eller ange manuellt.';
+						: 'Hoppsan — kunde inte slå upp streckkoden. Försök igen eller ange manuellt.';
 				scannerActive = step === 'scan';
 				return;
 			}
 
 			await applyLookupResult(data as BarcodeLookupResult);
 		} catch {
-			lookupError = 'Nätverksfel vid uppslagning. Kontrollera anslutningen.';
+			lookupError = 'Hoppsan — nätverksfel. Kontrollera anslutningen och försök igen.';
 			scannerActive = step === 'scan';
 		} finally {
 			lookupLoading = false;
@@ -123,15 +127,19 @@
 
 {#if step === 'scan'}
 	<section class="scan-step">
-		{#if lookupLoading}
-			<p class="status" role="status">Slår upp produkt…</p>
-		{/if}
+		<div class="scanner-wrap" aria-busy={lookupLoading}>
+			<BarcodeScanner active={scannerActive && !lookupLoading} onScan={handleScan} />
+			{#if lookupLoading}
+				<div class="lookup-overlay" role="status" aria-live="polite">
+					<Spinner size="md" label="Slår upp produkt" />
+					<p>Slår upp produkt…</p>
+				</div>
+			{/if}
+		</div>
 
 		{#if lookupError}
-			<p class="error" role="alert">{lookupError}</p>
+			<FeedbackBanner tone="error" message={lookupError} />
 		{/if}
-
-		<BarcodeScanner active={scannerActive && !lookupLoading} onScan={handleScan} />
 
 		{#if isDesktopDevice()}
 			<div class="manual">
@@ -144,7 +152,13 @@
 						bind:value={manualBarcode}
 						placeholder="7310862000003"
 					/>
-					<Button type="button" variant="secondary" onclick={handleManualLookup} disabled={lookupLoading}>
+					<Button
+						type="button"
+						variant="secondary"
+						onclick={handleManualLookup}
+						loading={lookupLoading}
+						loadingLabel="Söker…"
+					>
 						Sök
 					</Button>
 				</div>
@@ -181,7 +195,7 @@
 		<form
 			method="POST"
 			action="?/create"
-			use:enhance
+			use:enhance={bindSubmitting((v) => (saveSubmitting = v))}
 			class="save-form"
 		>
 			<input type="hidden" name="barcode" value={barcode} />
@@ -248,23 +262,37 @@
 				<Button type="button" variant="secondary" onclick={() => (showMore = !showMore)}>
 					{showMore ? 'Dölj detaljer' : 'Mer'}
 				</Button>
-				<Button type="submit" fullWidth>Spara</Button>
+				<Button type="submit" fullWidth loading={saveSubmitting} loadingLabel="Sparar till skafferiet…">
+					Spara
+				</Button>
 			</div>
 		</form>
 	</section>
 {/if}
 
 <style>
-	.status {
-		margin: 0 0 var(--space-sm);
-		font-size: 0.875rem;
-		color: var(--color-text-muted);
+	.scanner-wrap {
+		position: relative;
 	}
 
-	.error {
-		margin: 0 0 var(--space-sm);
-		font-size: 0.85rem;
-		color: var(--color-danger);
+	.lookup-overlay {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-sm);
+		background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+		border-radius: var(--radius-md);
+		z-index: 2;
+	}
+
+	.lookup-overlay p {
+		margin: 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
 	}
 
 	.manual {

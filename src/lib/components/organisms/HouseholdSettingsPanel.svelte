@@ -1,6 +1,10 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
-	import Modal from '$lib/components/molecules/Modal.svelte';
+	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
+	import DeleteSafetyModal from '$lib/components/molecules/DeleteSafetyModal.svelte';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
+	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
 	import {
 		householdRoleLabel,
 		inviteRoleLabel,
@@ -37,25 +41,22 @@
 	}: Props = $props();
 
 	let deleteModalOpen = $state(false);
-	let deleteConfirmName = $state('');
+	let inviteSubmitting = $state(false);
+	let deleteSubmitting = $state(false);
+
+	const inviteSent = $derived(Boolean(inviteLink && !householdError && !inviteEmailWarning));
 
 	const otherMemberCount = $derived(
 		household.members.filter((member) => member.userId !== currentUserId).length
 	);
 
 	function openDeleteModal() {
-		deleteConfirmName = '';
 		deleteModalOpen = true;
 	}
 
 	function closeDeleteModal() {
 		deleteModalOpen = false;
-		deleteConfirmName = '';
 	}
-
-	const deleteConfirmValid = $derived(
-		deleteConfirmName.trim() === household.name || deleteConfirmName.trim() === 'TA BORT'
-	);
 
 	function canManageMember(memberUserId: string, memberRole: string) {
 		if (!isOwner || memberUserId === currentUserId) {
@@ -97,10 +98,17 @@
 								</select>
 								<Button type="submit" variant="secondary">Spara</Button>
 							</form>
-							<form method="POST" action="?/removeMember" class="inline-form">
+							<DeleteConfirmButton
+								tier={3}
+								context="householdMember"
+								copyOptions={{ itemName: member.email }}
+								action="?/removeMember"
+								label="Ta bort"
+								ariaLabel={`Ta bort medlem ${member.email}`}
+								class="inline-form"
+							>
 								<input type="hidden" name="userId" value={member.userId} />
-								<Button type="submit" variant="danger">Ta bort</Button>
-							</form>
+							</DeleteConfirmButton>
 						{/if}
 					</div>
 				</li>
@@ -116,10 +124,19 @@
 			</p>
 
 			{#if householdError}
-				<p class="banner error" role="alert">{householdError}</p>
+				<FeedbackBanner tone="error" message={householdError} />
 			{/if}
 
-			<form method="POST" action="?/createInvite" class="invite-form">
+			{#if inviteSent}
+				<FeedbackBanner tone="success" message="Inbjudan skickad — kolla inkorgen!" />
+			{/if}
+
+			<form
+				method="POST"
+				action="?/createInvite"
+				class="invite-form"
+				use:enhance={bindSubmitting((v) => (inviteSubmitting = v))}
+			>
 				<label>
 					E-post
 					<input
@@ -140,11 +157,13 @@
 						<option value="viewer">{inviteRoleLabel('viewer')}</option>
 					</select>
 				</label>
-				<Button type="submit">Skicka inbjudan</Button>
+				<Button type="submit" loading={inviteSubmitting} loadingLabel="Skickar inbjudan…">
+					Skicka inbjudan
+				</Button>
 			</form>
 
 			{#if inviteEmailWarning}
-				<p class="banner warning" role="status">{inviteEmailWarning}</p>
+				<FeedbackBanner tone="warning" message={inviteEmailWarning} />
 			{/if}
 
 			{#if inviteLink}
@@ -168,10 +187,16 @@
 								<span class="member-email">{invite.email}</span>
 								<span class="member-role">{inviteRoleLabel(invite.role)}</span>
 							</div>
-							<form method="POST" action="?/revokeInvite">
+							<DeleteConfirmButton
+								tier={2}
+								context="inviteRevoke"
+								copyOptions={{ itemName: invite.email }}
+								action="?/revokeInvite"
+								label="Återkalla"
+								ariaLabel={`Återkalla inbjudan till ${invite.email}`}
+							>
 								<input type="hidden" name="inviteId" value={invite.id} />
-								<Button type="submit" variant="danger">Återkalla</Button>
-							</form>
+							</DeleteConfirmButton>
 						</li>
 					{/each}
 				</ul>
@@ -207,44 +232,25 @@
 	{/if}
 </div>
 
-<Modal
+<DeleteSafetyModal
 	open={deleteModalOpen}
 	onClose={closeDeleteModal}
-	variant="center"
-	title="Ta bort hushåll"
-	panelClass="delete-household-panel"
+	tier={4}
+	context="householdDelete"
+	copyOptions={{
+		confirmationTarget: household.name,
+		otherMemberCount
+	}}
+	confirmationTarget={household.name}
+	formAction="?/deleteHousehold"
+	submitEnhance={bindSubmitting((v) => (deleteSubmitting = v))}
+	confirmLoading={deleteSubmitting}
+	loadingLabel="Tar bort hushållet…"
 >
-	<p class="modal-lead">
-		Detta går inte att ångra. Skriv <strong>{household.name}</strong> eller
-		<strong>TA BORT</strong> för att bekräfta.
-	</p>
-	{#if otherMemberCount > 0}
-		<p class="modal-warning">
-			Alla {otherMemberCount}
-			{otherMemberCount === 1 ? 'annan medlem' : 'andra medlemmar'} tas bort från hushållet.
-		</p>
-	{/if}
-	<form method="POST" action="?/deleteHousehold" class="delete-form">
+	{#snippet fields()}
 		<input type="hidden" name="householdId" value={household.id} />
-		<label>
-			Bekräftelse
-			<input
-				name="confirmName"
-				type="text"
-				required
-				autocomplete="off"
-				placeholder={household.name}
-				bind:value={deleteConfirmName}
-			/>
-		</label>
-		<div class="modal-actions">
-			<Button type="button" variant="secondary" onclick={closeDeleteModal}>Avbryt</Button>
-			<Button type="submit" variant="danger" disabled={!deleteConfirmValid}>
-				Ta bort permanent
-			</Button>
-		</div>
-	</form>
-</Modal>
+	{/snippet}
+</DeleteSafetyModal>
 
 <style>
 	.household-panel {
@@ -414,23 +420,6 @@
 		color: var(--color-text);
 	}
 
-	.banner {
-		padding: var(--space-sm) var(--space-md);
-		border-radius: var(--radius-sm);
-		margin: 0 0 var(--space-sm);
-		font-size: 0.875rem;
-	}
-
-	.banner.error {
-		background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
-		color: var(--color-danger);
-	}
-
-	.banner.warning {
-		background: color-mix(in srgb, var(--color-warning, #ca8a04) 12%, var(--color-surface));
-		color: var(--color-warning, #ca8a04);
-	}
-
 	.danger-zone {
 		margin-top: var(--space-md);
 		padding-top: var(--space-md);
@@ -442,55 +431,20 @@
 	}
 
 	.danger-note,
-	.danger-warning,
-	.modal-lead,
-	.modal-warning {
+	.danger-warning {
 		margin: 0 0 var(--space-sm);
 		color: var(--color-text-muted);
 		font-size: 0.84rem;
 		line-height: 1.45;
 	}
 
-	.danger-warning,
-	.modal-warning {
+	.danger-warning {
 		color: var(--color-danger);
 		font-weight: 600;
 	}
 
 	:global(.danger-btn) {
 		width: 100%;
-	}
-
-	:global(.delete-household-panel) {
-		width: min(460px, calc(100vw - 2 * var(--space-md)));
-	}
-
-	.delete-form {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-	}
-
-	.delete-form label {
-		display: flex;
-		flex-direction: column;
-		gap: 0.35rem;
-		font-size: 0.9rem;
-	}
-
-	.delete-form input {
-		padding: 0.6rem 0.75rem;
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-sm);
-		background: var(--color-surface);
-		color: var(--color-text);
-	}
-
-	.modal-actions {
-		display: flex;
-		justify-content: flex-end;
-		gap: var(--space-sm);
-		margin-top: var(--space-sm);
 	}
 
 	@media (max-width: 640px) {
@@ -507,11 +461,6 @@
 
 		.invite-link-row {
 			flex-direction: column;
-		}
-
-		.modal-actions {
-			flex-direction: column-reverse;
-			align-items: stretch;
 		}
 	}
 </style>

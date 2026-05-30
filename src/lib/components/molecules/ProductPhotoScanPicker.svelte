@@ -58,8 +58,8 @@
 </script>
 
 <ImageSourcePicker
-	cameraLabel={loading ? 'Analyserar bild…' : '📷 Fota produkt'}
-	fileLabel={loading ? 'Analyserar bild…' : '📁 Välj bild från filer'}
+	cameraLabel={loading ? 'Läser produkten…' : '📷 Fota produkt'}
+	fileLabel={loading ? 'Läser produkten…' : '📁 Välj bild från filer'}
 	disabled={loading}
 	onSelect={handlePhotoSelected}
 />

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
+	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import { formatCalendarDayLabel, mealSourceVariant } from '$lib/domain/calendar-display';
@@ -105,11 +106,19 @@
 									</label>
 									<Button type="submit" fullWidth>Spara</Button>
 								</form>
-								<form method="POST" action="?/delete" class="delete-form">
+								<DeleteConfirmButton
+									tier={2}
+									context="plannedMeal"
+									copyOptions={{ itemName: meal.title }}
+									action="?/delete"
+									fullWidth
+									label="Ta bort"
+									ariaLabel={`Ta bort måltid ${meal.title}`}
+									class="delete-form"
+								>
 									<input type="hidden" name="month" value={month} />
 									<input type="hidden" name="id" value={meal.id} />
-									<Button type="submit" variant="danger" fullWidth>Ta bort</Button>
-								</form>
+								</DeleteConfirmButton>
 							</div>
 						{/if}
 					</li>
@@ -244,7 +253,8 @@
 		color: var(--color-text-muted);
 	}
 
-	.delete-form {
+	:global(.delete-form) {
 		margin: 0;
+		width: 100%;
 	}
 </style>

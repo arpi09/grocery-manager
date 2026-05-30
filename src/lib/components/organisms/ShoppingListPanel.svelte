@@ -1,17 +1,77 @@
 ﻿<script lang="ts">
-	import Button from '$lib/components/atoms/Button.svelte';
-	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
+	import type { SubmitFunction } from '@sveltejs/kit';
+	import Button from '$lib/components/atoms/Button.svelte';
+	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
+	import Toast from '$lib/components/molecules/Toast.svelte';
+	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
+	import { getDeleteCopy } from '$lib/utils/delete-safety';
 
 	let { items, canEdit }: { items: ShoppingListItem[]; canEdit: boolean } = $props();
 
 	const unchecked = $derived(items.filter((item) => !item.checked));
 	const checked = $derived(items.filter((item) => item.checked));
 
+	let undoPayload = $state<{
+		name: string;
+		quantity: string | null;
+		unit: string | null;
+	} | null>(null);
+	let undoSubmitting = $state(false);
+
+	const undoCopy = $derived(getDeleteCopy(1, 'shoppingListItem'));
+	const undoMessage = $derived(
+		undoPayload
+			? getDeleteCopy(1, 'shoppingListItem', { itemName: undoPayload.name }).undoToastMessage ??
+					'Rad borttagen'
+			: ''
+	);
+
 	function formatLine(item: ShoppingListItem): string {
 		if (item.quantity && item.unit) return `${item.quantity} ${item.unit} ${item.name}`;
 		if (item.quantity) return `${item.quantity} ${item.name}`;
 		return item.name;
+	}
+
+	function createRemoveEnhance(item: ShoppingListItem): SubmitFunction {
+		return () => {
+			const snapshot = {
+				name: item.name,
+				quantity: item.quantity,
+				unit: item.unit
+			};
+			return async ({ update }) => {
+				await update();
+				undoPayload = snapshot;
+			};
+		};
+	}
+
+	async function undoRemove() {
+		if (!undoPayload) {
+			return;
+		}
+		undoSubmitting = true;
+		const formData = new FormData();
+		formData.set('name', undoPayload.name);
+		if (undoPayload.quantity) {
+			formData.set('quantity', undoPayload.quantity);
+		}
+		if (undoPayload.unit) {
+			formData.set('unit', undoPayload.unit);
+		}
+		try {
+			await fetch('?/add', { method: 'POST', body: formData });
+			undoPayload = null;
+			await invalidateAll();
+		} finally {
+			undoSubmitting = false;
+		}
+	}
+
+	function dismissUndo() {
+		undoPayload = null;
 	}
 </script>
 
@@ -46,10 +106,18 @@
 								<span>{formatLine(item)}</span>
 							</label>
 						</form>
-						<form method="POST" action="?/remove" use:enhance>
+						<DeleteConfirmButton
+							tier={1}
+							context="shoppingListItem"
+							copyOptions={{ itemName: item.name }}
+							action="?/remove"
+							submitEnhance={createRemoveEnhance(item)}
+							label="×"
+							ariaLabel={`Ta bort ${formatLine(item)}`}
+							class="remove-trigger"
+						>
 							<input type="hidden" name="id" value={item.id} />
-							<button type="submit" class="remove" aria-label="Ta bort">×</button>
-						</form>
+						</DeleteConfirmButton>
 					{:else}
 						<span>{formatLine(item)}</span>
 					{/if}
@@ -62,9 +130,15 @@
 				<div class="checked-head">
 					<h2>Avbockade</h2>
 					{#if canEdit}
-						<form method="POST" action="?/clearChecked" use:enhance>
-							<Button type="submit" variant="secondary">Rensa avbockade</Button>
-						</form>
+						<DeleteConfirmButton
+							tier={3}
+							context="shoppingListClearChecked"
+							copyOptions={{ count: checked.length }}
+							action="?/clearChecked"
+							variant="secondary"
+							label="Rensa avbockade"
+							ariaLabel="Rensa alla avbockade rader"
+						/>
 					{/if}
 				</div>
 				<ul class="list checked">
@@ -88,6 +162,21 @@
 		{/if}
 	{/if}
 </section>
+
+{#if undoPayload}
+	<div class="undo-toast-wrap">
+		<Toast message={undoMessage ?? ''} visible={true} durationMs={8000} onDismiss={dismissUndo} />
+		<button
+			type="button"
+			class="undo-btn"
+			disabled={undoSubmitting}
+			onclick={undoRemove}
+			aria-label={undoCopy.undoActionLabel ?? 'Ångra'}
+		>
+			{undoCopy.undoActionLabel ?? 'Ångra'}
+		</button>
+	</div>
+{/if}
 
 <style>
 	.panel {
@@ -159,20 +248,21 @@
 		margin: 0;
 	}
 
+	:global(.remove-trigger .btn) {
+		border: none;
+		background: transparent;
+		font-size: 1.25rem;
+		line-height: 1;
+		padding: 0.15rem 0.35rem;
+		min-height: auto;
+		color: var(--color-text-muted);
+	}
+
 	.check-row {
 		display: flex;
 		align-items: center;
 		gap: var(--space-sm);
 		cursor: pointer;
-	}
-
-	.remove {
-		border: none;
-		background: transparent;
-		font-size: 1.25rem;
-		line-height: 1;
-		cursor: pointer;
-		color: var(--color-text-muted);
 	}
 
 	.checked-head {
@@ -185,6 +275,34 @@
 	.checked-head h2 {
 		margin: 0;
 		font-size: 1rem;
+	}
+
+	.undo-toast-wrap {
+		position: fixed;
+		left: 50%;
+		bottom: calc(var(--space-lg) + env(safe-area-inset-bottom, 0px));
+		transform: translateX(-50%);
+		z-index: 121;
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+	}
+
+	.undo-btn {
+		border: none;
+		border-radius: var(--radius-sm);
+		padding: 0.45rem 0.75rem;
+		font-weight: 600;
+		font-size: 0.85rem;
+		background: #fff;
+		color: var(--color-text);
+		cursor: pointer;
+		box-shadow: var(--shadow-md);
+	}
+
+	.undo-btn:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 
 	@media (max-width: 640px) {
@@ -220,10 +338,7 @@
 			min-height: 2.75rem;
 		}
 
-		.remove {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
+		:global(.remove-trigger .btn) {
 			min-width: 2.75rem;
 			min-height: 2.75rem;
 		}

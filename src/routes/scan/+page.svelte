@@ -5,6 +5,7 @@
 	import ScanModeHub from '$lib/components/molecules/ScanModeHub.svelte';
 	import ScanToAddFlow from '$lib/components/organisms/ScanToAddFlow.svelte';
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
+	import { t } from '$lib/i18n';
 
 	let { data, form } = $props();
 
@@ -14,21 +15,26 @@
 	);
 	const hubHref = $derived(`/scan?from=${fromEncoded}${locationQuery}`);
 	const isBarcodeMode = $derived(data.scanMode === 'barcode');
+
+	const title = $derived(isBarcodeMode ? t('scan.barcodeTitle') : t('scan.title'));
+	const subtitle = $derived(
+		isBarcodeMode ? t('scan.barcodeSubtitle') : t('scan.subtitle')
+	);
+	const backLabel = $derived(isBarcodeMode ? t('scan.allModes') : t('common.back'));
+	const cancelLabel = $derived(isBarcodeMode ? t('scan.cancelBack') : t('scan.cancel'));
 </script>
 
 <AppLayout user={data.user}>
 	<AppHeader
-		title={isBarcodeMode ? 'Streckkod' : 'Skanna'}
-		subtitle={isBarcodeMode
-			? 'Rikta kameran mot streckkoden på förpackningen'
-			: 'Välj hur du vill lägga till varor'}
+		{title}
+		{subtitle}
 		backHref={isBarcodeMode ? hubHref : data.returnTo}
-		backLabel={isBarcodeMode ? 'Alla skanningslägen' : 'Tillbaka'}
+		{backLabel}
 	/>
 	<PageContainer>
 		{#if !data.canWrite}
 			<p class="readonly" role="status">
-				Du har endast läsbehörighet i detta hushåll och kan inte lägga till varor.
+				{t('scan.readonly')}
 			</p>
 		{:else if isBarcodeMode}
 			<ScanToAddFlow
@@ -37,10 +43,10 @@
 				cancelHref={hubHref}
 				errors={form?.errors}
 			/>
-			<ScanFlowFooter cancelHref={data.returnTo} cancelLabel="Avbryt och gå tillbaka" />
+			<ScanFlowFooter cancelHref={data.returnTo} {cancelLabel} />
 		{:else}
 			<ScanModeHub returnTo={data.returnTo} defaultLocation={data.defaultLocation} />
-			<ScanFlowFooter cancelHref={data.returnTo} cancelLabel="Avbryt" />
+			<ScanFlowFooter cancelHref={data.returnTo} cancelLabel={t('scan.cancel')} />
 		{/if}
 	</PageContainer>
 </AppLayout>

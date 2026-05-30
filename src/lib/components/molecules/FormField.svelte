@@ -3,9 +3,10 @@
 	import Input from '$lib/components/atoms/Input.svelte';
 	import type { HTMLInputAttributes } from 'svelte/elements';
 
-	interface Props extends HTMLInputAttributes {
+	interface Props extends Omit<HTMLInputAttributes, 'value'> {
 		label: string;
 		error?: string;
+		value?: string;
 	}
 
 	let { label, error, id, name, value = $bindable(''), ...rest }: Props = $props();

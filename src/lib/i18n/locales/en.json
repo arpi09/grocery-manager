@@ -1,0 +1,136 @@
+{
+	"common": {
+		"save": "Save",
+		"cancel": "Cancel",
+		"back": "Back",
+		"saving": "Saving…",
+		"close": "Close",
+		"more": "More",
+		"account": "Account",
+		"profile": "Profile",
+		"item": "item",
+		"items": "items",
+		"errorUnexpected": "An unexpected error occurred.",
+		"errorGeneric": "Something went wrong."
+	},
+	"nav": {
+		"home": "Home",
+		"inventory": "Pantry",
+		"shopping": "Shopping",
+		"plans": "Plans",
+		"stats": "Statistics",
+		"settings": "Settings",
+		"pets": "Pets",
+		"admin": "Admin",
+		"more": "More",
+		"account": "Account",
+		"profile": "Profile",
+		"logout": "Log out",
+		"accountMenu": "Account menu",
+		"roleAdmin": "Administrator",
+		"roleMember": "Member",
+		"closeMenu": "Close menu",
+		"brandHome": "Home Pantry – Home",
+		"primaryNav": "Primary navigation",
+		"mobileNav": "Mobile navigation",
+		"header": "Header",
+		"brandName": "Home Pantry",
+		"morePages": "More pages",
+		"language": "Language"
+	},
+	"auth": {
+		"email": "Email",
+		"password": "Password",
+		"confirmPassword": "Confirm password",
+		"login": {
+			"title": "Log in",
+			"subtitle": "Pantry · dates · shopping",
+			"submit": "Log in",
+			"submitting": "Logging in…",
+			"pageTitle": "Log in · Home Pantry",
+			"newHere": "New here?",
+			"createAccount": "Create account"
+		},
+		"register": {
+			"title": "Create account",
+			"subtitle": "Your household, one app",
+			"submit": "Create account",
+			"submitting": "Creating account…",
+			"pageTitle": "Create account · Home Pantry",
+			"hasAccount": "Already have an account?",
+			"loginLink": "Log in",
+			"captchaLabel": "Confirm you are not a robot"
+		}
+	},
+	"dashboard": {
+		"title": "Home",
+		"subtitle": "Overview of your pantry",
+		"totalTracked": "{count} items tracked",
+		"itemCount": "{count} {count, plural, one {item} other {items}}",
+		"aiTitle": "AI inventory & ICA",
+		"aiDescription": "Get tips on what is running low and a shopping list for ICA.",
+		"scan": "Scan",
+		"addItem": "Add item"
+	},
+	"location": {
+		"fridge": "Fridge",
+		"freezer": "Freezer",
+		"cupboard": "Cupboard"
+	},
+	"scan": {
+		"title": "Scan",
+		"subtitle": "Choose how you want to add items",
+		"barcodeTitle": "Barcode",
+		"barcodeSubtitle": "Point the camera at the barcode on the package",
+		"allModes": "All scan modes",
+		"readonly": "You have read-only access in this household and cannot add items.",
+		"cancelBack": "Cancel and go back",
+		"cancel": "Cancel",
+		"hubAria": "Scan modes",
+		"modes": {
+			"barcode": {
+				"title": "Barcode",
+				"description": "Scan EAN and add directly."
+			},
+			"receipt": {
+				"title": "Receipt",
+				"description": "Digital receipt or paper photo — multiple items at once."
+			},
+			"photo": {
+				"title": "Photo",
+				"description": "Photograph the label and fill in details automatically."
+			}
+		},
+		"receiptPage": {
+			"title": "Scan receipt",
+			"subtitle": "Add multiple items at once",
+			"readonly": "You have read-only access and cannot add items from a receipt."
+		},
+		"receiptGuide": {
+			"title": "Do you have the receipt digitally?",
+			"hide": "Hide",
+			"show": "Show",
+			"intro": "Many apps store receipts — export as PDF or image and upload here.",
+			"step1": "Open the app where the receipt is (e.g. Kivra, bank, email, Wallet)",
+			"step2": "Open the receipt → Save, Share or Download as PDF or image",
+			"step3": "Come back here and choose Select from files",
+			"examplesLabel": "Common sources",
+			"examplesAria": "Examples of apps with digital receipts",
+			"kivraTitle": "Show steps for Kivra",
+			"kivraStep1": "Open Kivra and find the receipt under purchases or documents.",
+			"kivraStep2": "Tap the receipt and choose share or save — often as PDF.",
+			"kivraStep3": "If you get a PDF: save it and select the file here, or take a screenshot as an image."
+		}
+	},
+	"settings": {
+		"title": "Settings",
+		"subtitle": "Manage account, household and app preferences",
+		"language": {
+			"title": "Language",
+			"description": "Choose the display language for the app.",
+			"label": "Language",
+			"sv": "Svenska",
+			"en": "English"
+		}
+	}
+}
