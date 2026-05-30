@@ -101,7 +101,8 @@
 			"pageTitle": "Create account · Home Pantry",
 			"hasAccount": "Already have an account?",
 			"loginLink": "Log in",
-			"captchaLabel": "Confirm you are not a robot"
+			"captchaLabel": "Confirm you are not a robot",
+			"captchaLoadError": "Captcha could not load. Refresh the page and try again."
 		}
 	},
 	"home": {
@@ -276,7 +277,30 @@
 			"proMembers": "More household members (up to {max})",
 			"priceHint": "Planned around {monthly} SEK/month or {yearly} SEK/year.",
 			"learnMore": "Learn more about pricing",
-			"learnMoreNote": "Summary on the website"
+			"learnMoreNote": "Summary on the website",
+			"usageTitle": "Your usage (Free)",
+			"usageCount": "{used}/{limit}",
+			"usageUnlimited": "Unlimited",
+			"usage": {
+				"inventory": "Pantry items",
+				"members": "Household members",
+				"aiScans": "AI scans (month)",
+				"receipts": "Receipt PDF (month)",
+				"smartFill": "Smart fill (week)"
+			},
+			"limitBanner": {
+				"body": "You've hit a limit on the Free plan: {detail}",
+				"generic": "You've hit a limit on the Free plan.",
+				"upgradeCta": "See Pro and pricing",
+				"comingSoonNote": "Billing is not enabled yet — we'll tell you before anything is charged."
+			},
+			"limitDetail": {
+				"inventory": "maximum pantry items",
+				"members": "maximum household members",
+				"aiScans": "AI scans this month",
+				"receipts": "receipt PDF parses this month",
+				"smartFill": "smart fill runs this week"
+			}
 		},
 		"feedback": {
 			"title": "Give feedback",
@@ -417,7 +441,10 @@
 		"householdSizeLabel": "People in household",
 		"fillSuccess": "{count} {count, plural, one {item added} other {items added}} to the list.",
 		"fillPartialSuccess": "{added} {added, plural, one {item added} other {items added}}. {skipped} already on the list.",
-		"fillAllDuplicates": "All {count} suggestions were already on the list."
+		"fillAllDuplicates": "All {count} suggestions were already on the list.",
+		"exportList": "Copy list",
+		"exportListAria": "Copy unchecked items to clipboard for Bring or other apps",
+		"exportEmpty": "Nothing to copy — all items are checked off"
 	},
 	"planer": {
 		"title": "Plans",
@@ -616,11 +643,28 @@
 		"title": "PMF metrics",
 		"subtitle": "Product-market fit — weekly review per competitive analysis",
 		"noData": "No data yet",
+		"belowTarget": "Below target",
 		"minutesValue": "{count} min",
 		"target": "Target: {value}",
 		"retentionEligible": "Based on {count} users who reached the period",
 		"eventsTitle": "Instrumented events (total)",
 		"eventsNote": "Stored in your own database — no third-party analytics.",
+		"summary": {
+			"title": "Weekly summary",
+			"period": "Comparing week ending {current} vs previous week ({previous})",
+			"onTarget": "{onTarget} of {total} metrics on target",
+			"allOnTarget": "All tracked metrics meet or exceed target — good week.",
+			"belowTargetTitle": "Needs attention this week",
+			"targetValue": "target {value}"
+		},
+		"delta": {
+			"unknown": "No prior-week data",
+			"flat": "Unchanged week over week",
+			"rateUp": "+{points} pp vs last week",
+			"rateDown": "−{points} pp vs last week",
+			"minutesUp": "−{count} min vs last week",
+			"minutesDown": "+{count} min vs last week"
+		},
 		"events": {
 			"scanCompleted": "scan_completed",
 			"receiptParsed": "receipt_parsed",
@@ -746,6 +790,9 @@
 		"scanAgain": "Scan again",
 		"expiresOptional": "Expires (optional)",
 		"recentScans": "Recent scans",
+		"quickPicks": "Scan again quickly",
+		"editNameHint": "Adjust the name if needed",
+		"moreOptions": "Expiry date and notes",
 		"manualBarcode": "Or enter barcode manually",
 		"scannerHint": "Point the camera at the product barcode."
 	},
@@ -764,7 +811,15 @@
 		"preferences": "Preferences (optional)",
 		"preferencesPlaceholder": "Example: under 30 minutes, no dairy",
 		"fromStock": "From stock:",
+		"portions": "Number of servings",
+		"portionsHint": "All recipes are scaled to this many servings.",
 		"generateBtn": "Generate recipes",
+		"addMissingBtn": "Add missing to shopping list",
+		"addMissingSuccess": "Added {count} items to the shopping list.",
+		"addMissingPartial": "Added {added}, {skipped} were already on the list.",
+		"addMissingNone": "All missing items were already on the shopping list.",
+		"addMissingFailed": "Could not add to the shopping list. Try again.",
+		"noMissingToAdd": "No missing ingredients to add.",
 		"newBadge": "New",
 		"label": "Recipe ideas"
 	},
@@ -915,6 +970,10 @@
 		}
 	},
 	"errors": {
+		"plan": {
+			"inventoryLimit": "You've reached the maximum pantry items on the Free plan. Upgrade to Pro or remove items.",
+			"membersLimit": "The Free plan allows up to two household members. Upgrade to Pro for more."
+		},
 		"household": {
 			"forbidden": "Only owners can perform this action.",
 			"inviteNotFound": "Invitation not found.",
@@ -955,7 +1014,10 @@
 			"receiptParseStatus": "Could not read the receipt ({status}). Try a clearer file.",
 			"receiptAiFailed": "Could not parse the AI response.",
 			"receiptNoItems": "No items found on the receipt. Try a sharper photo, another PDF, or another angle.",
-			"missingRowId": "Missing row id"
+			"missingRowId": "Missing row id",
+			"aiRateLimitAiScan": "You've used all {limit} AI scans this month on the Free plan. Upgrade to Pro or wait until next month.",
+			"aiRateLimitReceiptPdf": "You've used all {limit} receipt PDF parses this month on the Free plan. Upgrade to Pro or wait until next month.",
+			"aiRateLimitSmartFill": "You've used all {limit} smart fill runs this week on the Free plan. Upgrade to Pro or wait until next week."
 		},
 		"shopping": {
 			"missingRowId": "Missing row id"

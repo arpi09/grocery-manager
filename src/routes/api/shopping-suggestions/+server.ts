@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { translate } from '$lib/i18n/messages';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
+import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { generateShoppingSuggestions } from '$lib/server/shopping-suggestions';
 import type { RequestHandler } from './$types';
 
@@ -13,6 +14,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const apiKeyOrResponse = requireOpenAiKey('shopping suggestions');
 	if (typeof apiKeyOrResponse !== 'string') {
 		return apiKeyOrResponse;
+	}
+
+	const quotaResponse = await requireAiQuota(locals, 'smart_fill', auth.user.id);
+	if (quotaResponse) {
+		return quotaResponse;
 	}
 
 	const body = (await request.json().catch(() => ({}))) as {

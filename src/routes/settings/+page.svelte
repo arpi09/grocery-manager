@@ -15,8 +15,10 @@
 	import LanguageSwitcher from '$lib/components/molecules/LanguageSwitcher.svelte';
 	import { t } from '$lib/i18n';
 	import { FREE_LIMITS, PRICE_HYPOTHESIS_SEK, PRO_LIMITS } from '$lib/domain/plan';
+	import { planLimitUsageLabelKey } from '$lib/domain/plan-limits';
 	import { CHURN_REASONS } from '$lib/domain/product-feedback';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
+	import PlanLimitBanner from '$lib/components/molecules/PlanLimitBanner.svelte';
 
 	let { data, form } = $props();
 	let petModalOpen = $state(false);
@@ -221,12 +223,32 @@
 			title={t('settings.plan.title')}
 			description={t('settings.plan.description')}
 		>
+			{#if data.planLimits}
+				<PlanLimitBanner snapshot={data.planLimits} />
+			{/if}
 			<SettingsRow
 				title={t('settings.plan.currentTier')}
 				note={t('settings.plan.currentFree')}
 				last={false}
 			/>
 			<div class="plan-panel">
+				{#if data.planLimits}
+					<h3 class="plan-heading">{t('settings.plan.usageTitle')}</h3>
+					<ul class="plan-usage-list">
+						{#each data.planLimits.limits as row (row.key)}
+							<li class:at-limit={row.atLimit}>
+								<span class="plan-usage-label">{t(planLimitUsageLabelKey(row.key))}</span>
+								<span class="plan-usage-value">
+									{#if row.limit === null}
+										{t('settings.plan.usageUnlimited')}
+									{:else}
+										{t('settings.plan.usageCount', { used: row.used, limit: row.limit })}
+									{/if}
+								</span>
+							</li>
+						{/each}
+					</ul>
+				{/if}
 				<h3 class="plan-heading">{t('settings.plan.freeLimitsTitle')}</h3>
 				<p class="plan-copy">
 					{t('settings.plan.freeLimitsItems', {
@@ -506,6 +528,30 @@
 
 	.plan-pro-list li + li {
 		margin-top: 0.25rem;
+	}
+
+	.plan-usage-list {
+		list-style: none;
+		margin: 0 0 var(--space-md);
+		padding: 0;
+	}
+
+	.plan-usage-list li {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--space-md);
+		padding: var(--space-xs) 0;
+		font-size: 0.875rem;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.plan-usage-list li.at-limit .plan-usage-value {
+		color: var(--color-danger);
+		font-weight: 600;
+	}
+
+	.plan-usage-label {
+		color: var(--color-text-muted);
 	}
 
 	.feedback-panel {

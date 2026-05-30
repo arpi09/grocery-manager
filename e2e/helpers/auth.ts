@@ -1,4 +1,4 @@
-﻿import { expect, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { LOCALE_COOKIE_NAME, LOCALE_STORAGE_KEY } from '../../src/lib/i18n/locale';
 
 const ONBOARDING_VERSION_KEY = 'home-pantry-onboarding-version';
@@ -6,13 +6,16 @@ const ONBOARDING_DISMISSED_KEY = 'home-pantry-onboarding-dismissed';
 const ONBOARDING_VERSION = '1';
 const E2E_LOCALE = 'sv';
 
+function pickEnv(value: string | undefined): string | undefined {
+	const trimmed = value?.trim();
+	return trimmed ? trimmed : undefined;
+}
+
 export function adminCredentials() {
 	const email =
-		process.env.E2E_ADMIN_EMAIL?.trim() ||
-		process.env.ADMIN_EMAIL?.trim() ||
-		'arvid.pilhall@me.com';
+		pickEnv(process.env.E2E_ADMIN_EMAIL) ?? pickEnv(process.env.ADMIN_EMAIL) ?? 'e2e-admin@example.com';
 	const password =
-		process.env.E2E_ADMIN_PASSWORD?.trim() || process.env.ADMIN_PASSWORD?.trim() || '';
+		pickEnv(process.env.E2E_ADMIN_PASSWORD) ?? pickEnv(process.env.ADMIN_PASSWORD) ?? 'e2e-ci-password';
 
 	if (!password) {
 		throw new Error(
@@ -23,7 +26,16 @@ export function adminCredentials() {
 	return { email, password };
 }
 
-export async function prepareE2eBrowserState(page: Page) {
+export function uniqueE2eEmail(prefix = 'e2e-user') {
+	const stamp = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+	return `${prefix}-${stamp}@example.com`;
+}
+
+export function e2eUserPassword() {
+	return process.env.E2E_USER_PASSWORD?.trim() || 'e2e-test-password-9';
+}
+
+async function applyE2eLocale(page: Page) {
 	const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5173';
 
 	await page.context().addCookies([
@@ -35,22 +47,52 @@ export async function prepareE2eBrowserState(page: Page) {
 	]);
 
 	await page.addInitScript(
-		({ versionKey, dismissedKey, version, localeStorageKey, localeCookieName, locale }) => {
-			localStorage.setItem(versionKey, version);
-			localStorage.setItem(dismissedKey, '1');
+		({ localeStorageKey, localeCookieName, locale }) => {
 			localStorage.setItem(localeStorageKey, locale);
 			document.cookie = `${localeCookieName}=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
 		},
 		{
-			versionKey: ONBOARDING_VERSION_KEY,
-			dismissedKey: ONBOARDING_DISMISSED_KEY,
-			version: ONBOARDING_VERSION,
 			localeStorageKey: LOCALE_STORAGE_KEY,
 			localeCookieName: LOCALE_COOKIE_NAME,
 			locale: E2E_LOCALE
 		}
 	);
+}
 
+/** Locale only ? onboarding and activation state stay fresh (new-user flows). */
+export async function prepareFreshUserBrowserState(page: Page) {
+	await applyE2eLocale(page);
+
+	await page.addInitScript(() => {
+		for (const key of [
+			'home-pantry-onboarding-version',
+			'home-pantry-onboarding-dismissed',
+			'home-pantry-activation-path',
+			'home-pantry-activation-barcode-count',
+			'home-pantry-activation-receipt-done',
+			'home-pantry-celebration-pending',
+			'home-pantry-post-onboarding-survey-pending',
+			'home-pantry-post-onboarding-survey-dismissed'
+		]) {
+			localStorage.removeItem(key);
+		}
+	});
+}
+
+export async function prepareE2eBrowserState(page: Page) {
+	await applyE2eLocale(page);
+
+	await page.addInitScript(
+		({ versionKey, dismissedKey, version }) => {
+			localStorage.setItem(versionKey, version);
+			localStorage.setItem(dismissedKey, '1');
+		},
+		{
+			versionKey: ONBOARDING_VERSION_KEY,
+			dismissedKey: ONBOARDING_DISMISSED_KEY,
+			version: ONBOARDING_VERSION
+		}
+	);
 }
 
 async function fillBoundInput(input: import('@playwright/test').Locator, value: string) {
@@ -70,21 +112,54 @@ async function fillBoundInput(input: import('@playwright/test').Locator, value: 
 }
 
 export async function dismissOnboardingModalIfOpen(page: Page) {
-	const skip = page.getByRole('button', { name: /Hoppa/i });
+	const skip = page.getByRole('button', { name: /Hoppa|senare/i });
 	if (await skip.isVisible().catch(() => false)) {
 		await skip.click();
 		await expect(skip).toBeHidden({ timeout: 5_000 });
 	}
 }
 
-export async function loginAsAdmin(page: Page) {
-	const { email, password } = adminCredentials();
+export async function expectOnboardingGuideVisible(page: Page) {
+	await expect(
+		page.getByRole('heading', { name: /V\u00e4lkommen till Home Pantry/i })
+	).toBeVisible({ timeout: 10_000 });
+	await expect(page.getByRole('button', { name: /Jag g\u00f6r det senare/i })).toBeVisible();
+}
 
+export async function registerNewUser(
+	page: Page,
+	options: { email?: string; password?: string } = {}
+) {
+	const email = options.email ?? uniqueE2eEmail();
+	const password = options.password ?? e2eUserPassword();
+
+	await prepareFreshUserBrowserState(page);
+
+	await page.goto('/register');
+	await expect(page.getByTestId('register-submit')).toBeVisible({ timeout: 15_000 });
+	await expect(page.getByTestId('register-turnstile')).toHaveCount(0);
+
+	const passwordInput = page.locator('input[name="password"]');
+	const confirmInput = page.locator('input[name="confirmPassword"]');
+	const emailInput = page.locator('input[name="email"]');
+
+	await fillBoundInput(passwordInput, password);
+	await fillBoundInput(confirmInput, password);
+	await fillBoundInput(emailInput, email);
+
+	await page.getByTestId('register-submit').click();
+	await page.waitForURL((url) => url.pathname === '/hem', { timeout: 30_000, waitUntil: 'commit' });
+
+	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
+
+	return { email, password };
+}
+
+export async function loginWithCredentials(page: Page, email: string, password: string) {
 	await prepareE2eBrowserState(page);
 
 	await page.goto('/login');
-	await page.waitForLoadState('networkidle');
-	await expect(page.getByTestId('login-submit')).toBeVisible();
+	await expect(page.getByTestId('login-submit')).toBeVisible({ timeout: 15_000 });
 
 	const emailInput = page.locator('input[name="email"]');
 	const passwordInput = page.locator('input[name="password"]');
@@ -92,13 +167,16 @@ export async function loginAsAdmin(page: Page) {
 	await fillBoundInput(emailInput, email);
 	await fillBoundInput(passwordInput, password);
 
-	await Promise.all([
-		page.waitForURL((url) => url.pathname === '/hem', { timeout: 20_000, waitUntil: 'commit' }),
-		page.getByTestId('login-submit').click()
-	]);
+	await page.getByTestId('login-submit').click();
+	await page.waitForURL((url) => url.pathname === '/hem', { timeout: 30_000, waitUntil: 'commit' });
 
-	await expect(page.locator("section.home")).toBeVisible({ timeout: 20_000 });
-	await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
+	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+}
+
+export async function loginAsAdmin(page: Page) {
+	const { email, password } = adminCredentials();
+	await loginWithCredentials(page, email, password);
 	await dismissOnboardingModalIfOpen(page);
 }
 
@@ -122,3 +200,5 @@ export async function clickSecondaryNavHref(page: Page, href: string) {
 		.first()
 		.click();
 }
+
+

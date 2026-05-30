@@ -151,7 +151,7 @@ const PGlite_BASELINE_MIGRATION = '0000_init.sql';
  * Safe to re-run on every startup (uses IF NOT EXISTS).
  * Drizzle journal has no `0009_*` tag (sequence jumps 0008 → 0010_active_household).
  */
-const PGlite_INCREMENTAL_MIGRATIONS = [
+const INCREMENTAL_MIGRATIONS = [
 	'0001_user_role.sql',
 	'0002_user_last_seen.sql',
 	'0003_household.sql',
@@ -164,7 +164,8 @@ const PGlite_INCREMENTAL_MIGRATIONS = [
 	'0011_consumption_event.sql',
 	'0012_product_event.sql',
 	'0013_expiry_reminders.sql',
-	'0014_product_feedback.sql'
+	'0014_product_feedback.sql',
+	'0015_ai_usage.sql'
 ];
 
 async function runPgliteBaseline(client: PGlite) {
@@ -173,7 +174,7 @@ async function runPgliteBaseline(client: PGlite) {
 	try {
 		await client.exec(sql);
 	} catch (migrationError) {
-		if (!isIgnorablePgliteMigrationError(migrationError)) {
+		if (!isIgnorableMigrationError(migrationError)) {
 			throw migrationError;
 		}
 	}
@@ -186,24 +187,26 @@ function migrationErrorMessage(error: unknown): string {
 	return String(error);
 }
 
-function isIgnorablePgliteMigrationError(error: unknown): boolean {
+function isIgnorableMigrationError(error: unknown): boolean {
 	const message = migrationErrorMessage(error);
 	return /already exists|duplicate key|duplicate_object|duplicate column|multiple primary keys/i.test(
 		message
 	);
 }
 
-async function runPgliteIncrementalMigrations(client: PGlite) {
-	for (const file of PGlite_INCREMENTAL_MIGRATIONS) {
+async function runIncrementalMigrationFiles(
+	runStatement: (statement: string) => Promise<void>
+): Promise<void> {
+	for (const file of INCREMENTAL_MIGRATIONS) {
 		const migrationPath = join(process.cwd(), 'drizzle', file);
 		const sql = readFileSync(migrationPath, 'utf8');
 
 		// Run whole file when it uses PL/pgSQL blocks (splitting on ";" breaks them).
 		if (/\bDO\s+\$\$/i.test(sql)) {
 			try {
-				await client.exec(sql);
+				await runStatement(sql);
 			} catch (error) {
-				if (!isIgnorablePgliteMigrationError(error)) {
+				if (!isIgnorableMigrationError(error)) {
 					throw error;
 				}
 			}
@@ -217,14 +220,26 @@ async function runPgliteIncrementalMigrations(client: PGlite) {
 
 		for (const statement of statements) {
 			try {
-				await client.exec(`${statement};`);
+				await runStatement(`${statement};`);
 			} catch (error) {
-				if (!isIgnorablePgliteMigrationError(error)) {
+				if (!isIgnorableMigrationError(error)) {
 					throw error;
 				}
 			}
 		}
 	}
+}
+
+async function runPgliteIncrementalMigrations(client: PGlite) {
+	await runIncrementalMigrationFiles(async (statement) => {
+		await client.exec(statement);
+	});
+}
+
+async function runPostgresIncrementalMigrations(client: ReturnType<typeof postgres>) {
+	await runIncrementalMigrationFiles(async (statement) => {
+		await client.unsafe(statement);
+	});
 }
 
 async function openPglite(): Promise<PGlite> {
@@ -285,6 +300,7 @@ export async function initDatabase(): Promise<void> {
 				const sql = await createPostgresClient(connectionString);
 				postgresClient = sql;
 				await verifyPostgresConnection(sql);
+				await runPostgresIncrementalMigrations(sql);
 				dbInstance = drizzlePostgres(sql, { schema });
 
 				await ensureDefaultAdminUser();

@@ -8,6 +8,10 @@
 	import { t } from '$lib/i18n';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { getDeleteCopy } from '$lib/utils/delete-safety';
+	import {
+		formatShoppingListExport,
+		formatShoppingListExportLine
+	} from '$lib/utils/shopping-list-export';
 
 	let { items, canEdit }: { items: ShoppingListItem[]; canEdit: boolean } = $props();
 
@@ -20,6 +24,7 @@
 		unit: string | null;
 	} | null>(null);
 	let undoSubmitting = $state(false);
+	let exportCopied = $state(false);
 
 	const undoCopy = $derived(getDeleteCopy(1, 'shoppingListItem'));
 	const undoMessage = $derived(
@@ -30,9 +35,19 @@
 	);
 
 	function formatLine(item: ShoppingListItem): string {
-		if (item.quantity && item.unit) return `${item.quantity} ${item.unit} ${item.name}`;
-		if (item.quantity) return `${item.quantity} ${item.name}`;
-		return item.name;
+		return formatShoppingListExportLine(item);
+	}
+
+	async function copyExportList() {
+		const text = formatShoppingListExport(items);
+		if (!text) {
+			return;
+		}
+		await navigator.clipboard.writeText(text);
+		exportCopied = true;
+		setTimeout(() => {
+			exportCopied = false;
+		}, 2000);
 	}
 
 	function createRemoveEnhance(item: ShoppingListItem): SubmitFunction {
@@ -77,7 +92,20 @@
 </script>
 
 <section class="panel" aria-label={t('shopping.listAria')}>
-	<p class="intro">{t('shopping.intro')}</p>
+	<div class="panel-head">
+		<p class="intro">{t('shopping.intro')}</p>
+		{#if items.length > 0}
+			<Button
+				type="button"
+				variant="secondary"
+				disabled={unchecked.length === 0}
+				aria-label={unchecked.length === 0 ? t('shopping.exportEmpty') : t('shopping.exportListAria')}
+				onclick={copyExportList}
+			>
+				{exportCopied ? t('common.copied') : t('shopping.exportList')}
+			</Button>
+		{/if}
+	</div>
 
 	{#if canEdit}
 		<form method="POST" action="?/add" use:enhance class="add-form">
@@ -197,6 +225,19 @@
 		color: var(--color-text-muted);
 	}
 
+	.panel-head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--space-sm);
+		flex-wrap: wrap;
+	}
+
+	.panel-head .intro {
+		flex: 1;
+		min-width: 12rem;
+	}
+
 	.add-form {
 		display: flex;
 		flex-direction: column;
@@ -309,6 +350,16 @@
 	@media (max-width: 640px) {
 		.panel {
 			padding: var(--space-sm);
+		}
+
+		.panel-head {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.panel-head :global(.btn) {
+			width: 100%;
+			min-height: 2.75rem;
 		}
 
 		.add-row {

@@ -38,9 +38,19 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		? await expiryReminderService.getSettings(user.id)
 		: { enabled: false, days: 7 as const, lastSentAt: null };
 
+	const planTier = DEFAULT_PLAN_TIER;
+	const planLimits = user
+		? await locals.planLimitsService.getSnapshot({
+				userId: user.id,
+				householdId,
+				tier: planTier
+			})
+		: null;
+
 	return {
 		user,
-		planTier: DEFAULT_PLAN_TIER,
+		planTier,
+		planLimits,
 		petsEnabled: Boolean(user?.petsEnabled),
 		expiryRemindersEnabled: expirySettings.enabled,
 		expiryReminderDays: expirySettings.days,

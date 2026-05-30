@@ -66,7 +66,7 @@
 	{#if showScanFab}
 		<ScanFab {canWrite} href={scanFabHref} />
 	{/if}
-	<RecipeAssistant bind:open={recipeOpen} />
+	<RecipeAssistant bind:open={recipeOpen} canEdit={canWrite} />
 	<OnboardingGuide />
 	<PostOnboardingSurvey />
 	<ActivationCelebration />

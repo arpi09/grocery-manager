@@ -20,13 +20,24 @@ loadDotEnv();
 
 const port = process.env.PLAYWRIGHT_PORT ?? '5173';
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${port}`;
+const turnstileBypass = process.env.TURNSTILE_BYPASS ?? process.env.TURNSTILE_SKIP ?? 'true';
+
+function pickEnv(value: string | undefined): string | undefined {
+	const trimmed = value?.trim();
+	return trimmed ? trimmed : undefined;
+}
+const e2eAdminEmail = pickEnv(process.env.E2E_ADMIN_EMAIL) ?? 'e2e-admin@example.com';
+const e2eAdminPassword = pickEnv(process.env.E2E_ADMIN_PASSWORD) ?? 'e2e-ci-password';
+
+process.env.ADMIN_EMAIL = e2eAdminEmail;
+process.env.ADMIN_PASSWORD = e2eAdminPassword;
 
 export default defineConfig({
 	testDir: 'e2e',
-	fullyParallel: true,
+	fullyParallel: false,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
-	workers: process.env.CI ? 1 : undefined,
+	workers: 1,
 	reporter: process.env.CI ? 'github' : 'list',
 	use: {
 		baseURL,
@@ -49,7 +60,15 @@ export default defineConfig({
 			...process.env,
 			USE_PGLITE: process.env.USE_PGLITE ?? 'true',
 			PUBLIC_ORIGIN: baseURL,
-			TURNSTILE_SKIP: process.env.TURNSTILE_SKIP ?? 'true'
+			ADMIN_EMAIL: e2eAdminEmail,
+			ADMIN_PASSWORD: e2eAdminPassword,
+			TURNSTILE_SKIP: turnstileBypass,
+			TURNSTILE_BYPASS: turnstileBypass
 		}
 	}
 });
+
+
+
+
+

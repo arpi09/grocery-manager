@@ -11,6 +11,7 @@
 	let { siteKey, labelledBy }: Props = $props();
 
 	let container = $state<HTMLDivElement | null>(null);
+	let loadFailed = $state(false);
 	let widgetId: string | undefined;
 
 	function removeWidget() {
@@ -30,10 +31,23 @@
 				return;
 			}
 			removeWidget();
+			loadFailed = false;
 			widgetId = window.turnstile.render(container, {
 				sitekey: siteKey,
 				theme: 'auto',
-				size: 'flexible'
+				size: 'flexible',
+				callback: () => {
+					loadFailed = false;
+				},
+				'expired-callback': () => {
+					if (widgetId && window.turnstile) {
+						window.turnstile.reset(widgetId);
+					}
+				},
+				'error-callback': (code) => {
+					console.warn(`[turnstile] Widget error: ${code ?? 'unknown'}`);
+					loadFailed = true;
+				}
 			});
 		};
 
@@ -72,11 +86,20 @@
 	aria-label={labelledBy ? undefined : t('auth.register.captchaLabel')}
 	aria-labelledby={labelledBy}
 ></div>
+{#if loadFailed}
+	<p class="load-error" role="alert">{t('auth.register.captchaLoadError')}</p>
+{/if}
 
 <style>
 	.turnstile {
 		margin-bottom: var(--space-md);
 		min-height: 65px;
 		width: 100%;
+	}
+
+	.load-error {
+		margin: calc(-1 * var(--space-sm)) 0 var(--space-md);
+		font-size: 0.875rem;
+		color: var(--color-danger, #b42318);
 	}
 </style>

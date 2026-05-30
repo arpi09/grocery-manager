@@ -99,6 +99,13 @@
 			"when": 1749475200000,
 			"tag": "0014_product_feedback",
 			"breakpoints": true
+		},
+		{
+			"idx": 14,
+			"version": "7",
+			"when": 1749561600000,
+			"tag": "0015_ai_usage",
+			"breakpoints": true
 		}
 	]
 }

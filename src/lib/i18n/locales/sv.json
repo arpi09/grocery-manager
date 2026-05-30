@@ -101,7 +101,8 @@
 			"pageTitle": "Skapa konto · Home Pantry",
 			"hasAccount": "Har du konto?",
 			"loginLink": "Logga in",
-			"captchaLabel": "Bekräfta att du inte är en robot"
+			"captchaLabel": "Bekräfta att du inte är en robot",
+			"captchaLoadError": "Captcha kunde inte laddas. Uppdatera sidan och försök igen."
 		}
 	},
 	"home": {
@@ -276,7 +277,30 @@
 			"proMembers": "Fler hushållsmedlemmar (upp till {max})",
 			"priceHint": "Planerat cirka {monthly} kr/mån eller {yearly} kr/år.",
 			"learnMore": "Läs mer om priser",
-			"learnMoreNote": "Sammanfattning på webbplatsen"
+			"learnMoreNote": "Sammanfattning på webbplatsen",
+			"usageTitle": "Din användning (Gratis)",
+			"usageCount": "{used}/{limit}",
+			"usageUnlimited": "Obegränsat",
+			"usage": {
+				"inventory": "Lagerrader",
+				"members": "Hushållsmedlemmar",
+				"aiScans": "AI-skannar (månad)",
+				"receipts": "Kvitto-PDF (månad)",
+				"smartFill": "Smart fill (vecka)"
+			},
+			"limitBanner": {
+				"body": "Du har nått en gräns på Gratis-planen: {detail}",
+				"generic": "Du har nått en gräns på Gratis-planen.",
+				"upgradeCta": "Se Pro och priser",
+				"comingSoonNote": "Betalning aktiveras senare — du får veta innan något debiteras."
+			},
+			"limitDetail": {
+				"inventory": "max antal lagerrader",
+				"members": "max antal hushållsmedlemmar",
+				"aiScans": "AI-skannar den här månaden",
+				"receipts": "kvitto-PDF den här månaden",
+				"smartFill": "smart fill den här veckan"
+			}
 		},
 		"feedback": {
 			"title": "Ge feedback",
@@ -417,7 +441,10 @@
 		"householdSizeLabel": "Antal personer i hushållet",
 		"fillSuccess": "{count} {count, plural, one {vara lades} other {varor lades}} till på listan.",
 		"fillPartialSuccess": "{added} {added, plural, one {vara lades} other {varor lades}} till. {skipped} fanns redan på listan.",
-		"fillAllDuplicates": "Alla {count} förslag fanns redan på listan."
+		"fillAllDuplicates": "Alla {count} förslag fanns redan på listan.",
+		"exportList": "Kopiera lista",
+		"exportListAria": "Kopiera oavbockade varor till urklipp för Bring eller andra appar",
+		"exportEmpty": "Inget att kopiera — alla varor är avbockade"
 	},
 	"planer": {
 		"title": "Planer",
@@ -617,11 +644,28 @@
 		"title": "PMF-mätetal",
 		"subtitle": "Product-market fit — veckovis granskning enligt konkurrensanalysen",
 		"noData": "Ingen data ännu",
+		"belowTarget": "Under mål",
 		"minutesValue": "{count} min",
 		"target": "Mål: {value}",
 		"retentionEligible": "Baserat på {count} användare som nått perioden",
 		"eventsTitle": "Instrumenterade händelser (totalt)",
 		"eventsNote": "Lagras i er egen databas — inga tredjeparts-analytics.",
+		"summary": {
+			"title": "Veckosammanfattning",
+			"period": "Jämför vecka till {current} mot föregående vecka ({previous})",
+			"onTarget": "{onTarget} av {total} mätetal på mål",
+			"allOnTarget": "Alla spårade mätetal ligger på eller över mål — bra vecka.",
+			"belowTargetTitle": "Kräver uppmärksamhet denna vecka",
+			"targetValue": "mål {value}"
+		},
+		"delta": {
+			"unknown": "Ingen föregående data",
+			"flat": "Oförändrat vecka mot vecka",
+			"rateUp": "+{points} pp vs förra veckan",
+			"rateDown": "−{points} pp vs förra veckan",
+			"minutesUp": "−{count} min vs förra veckan",
+			"minutesDown": "+{count} min vs förra veckan"
+		},
 		"events": {
 			"scanCompleted": "scan_completed",
 			"receiptParsed": "receipt_parsed",
@@ -747,6 +791,9 @@
 		"scanAgain": "Skanna igen",
 		"expiresOptional": "Går ut (valfritt)",
 		"recentScans": "Senaste skanningar",
+		"quickPicks": "Skanna igen snabbt",
+		"editNameHint": "Justera namnet om det behövs",
+		"moreOptions": "Utgångsdatum och anteckningar",
 		"manualBarcode": "Eller ange streckkod manuellt",
 		"scannerHint": "Rikta kameran mot produktens streckkod."
 	},
@@ -765,7 +812,15 @@
 		"preferences": "Önskemål (valfritt)",
 		"preferencesPlaceholder": "Exempel: under 30 minuter, utan mejeri",
 		"fromStock": "Från lagret:",
+		"portions": "Antal portioner",
+		"portionsHint": "Alla recept skalas till detta antal portioner.",
 		"generateBtn": "Generera recept",
+		"addMissingBtn": "Lägg saknade på inköpslista",
+		"addMissingSuccess": "{count} varor lades till på inköpslistan.",
+		"addMissingPartial": "{added} lades till, {skipped} fanns redan på listan.",
+		"addMissingNone": "Alla saknade varor fanns redan på inköpslistan.",
+		"addMissingFailed": "Kunde inte lägga till på inköpslistan. Försök igen.",
+		"noMissingToAdd": "Inga saknade ingredienser att lägga till.",
 		"newBadge": "Ny",
 		"label": "Receptidéer"
 	},
@@ -916,6 +971,10 @@
 		}
 	},
 	"errors": {
+		"plan": {
+			"inventoryLimit": "Du har nått max antal lagerrader på Gratis-planen. Uppgradera till Pro eller ta bort varor.",
+			"membersLimit": "Gratis-planen tillåter max två hushållsmedlemmar. Uppgradera till Pro för fler."
+		},
 		"household": {
 			"forbidden": "Endast ägare kan utföra denna åtgärd.",
 			"inviteNotFound": "Inbjudan hittades inte.",
@@ -956,7 +1015,10 @@
 			"receiptParseStatus": "Kunde inte läsa kvittot ({status}). Försök med en tydligare fil.",
 			"receiptAiFailed": "Kunde inte tolka svaret från AI.",
 			"receiptNoItems": "Inga varor hittades på kvittot. Prova en skarpare bild, annan PDF eller annan vinkel.",
-			"missingRowId": "Saknar rad-id"
+			"missingRowId": "Saknar rad-id",
+			"aiRateLimitAiScan": "Du har använt alla {limit} AI-skannar den här månaden på Gratis-planen. Uppgradera till Pro eller vänta till nästa månad.",
+			"aiRateLimitReceiptPdf": "Du har använt alla {limit} kvitto-PDF den här månaden på Gratis-planen. Uppgradera till Pro eller vänta till nästa månad.",
+			"aiRateLimitSmartFill": "Du har använt alla {limit} smart fill den här veckan på Gratis-planen. Uppgradera till Pro eller vänta till nästa vecka."
 		},
 		"shopping": {
 			"missingRowId": "Saknar rad-id"

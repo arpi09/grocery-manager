@@ -68,6 +68,154 @@ export interface PmfMetricSnapshot {
 	eventCounts: Record<ProductEventType, number>;
 }
 
+export const PMF_TRACKED_METRIC_KEYS = [
+	'activationRate',
+	'medianTimeToFirstScanMinutes',
+	'weeklyScanRate',
+	'd7Retention',
+	'd30Retention',
+	'multiMemberHouseholdRate',
+	'smartFillWeeklyRate'
+] as const;
+
+export type PmfTrackedMetricKey = (typeof PMF_TRACKED_METRIC_KEYS)[number];
+
+export type PmfMetricDeltaDirection = 'up' | 'down' | 'flat' | 'unknown';
+
+export interface PmfMetricStatus {
+	key: PmfTrackedMetricKey;
+	current: number | null;
+	previous: number | null;
+	delta: number | null;
+	deltaDirection: PmfMetricDeltaDirection;
+	onTarget: boolean;
+	target: number;
+	higherIsBetter: boolean;
+}
+
+export interface PmfWeeklyReview {
+	currentWeekEnd: Date;
+	previousWeekEnd: Date;
+	current: PmfMetricSnapshot;
+	previous: PmfMetricSnapshot;
+	metrics: PmfMetricStatus[];
+	belowTarget: PmfMetricStatus[];
+	onTargetCount: number;
+	totalTracked: number;
+}
+
+const PMF_METRIC_CONFIG: Record<
+	PmfTrackedMetricKey,
+	{ target: number; higherIsBetter: boolean }
+> = {
+	activationRate: { target: PMF_TARGETS.activationRate, higherIsBetter: true },
+	medianTimeToFirstScanMinutes: {
+		target: PMF_TARGETS.medianTimeToFirstScanMinutes,
+		higherIsBetter: false
+	},
+	weeklyScanRate: { target: PMF_TARGETS.weeklyScanRate, higherIsBetter: true },
+	d7Retention: { target: PMF_TARGETS.d7Retention, higherIsBetter: true },
+	d30Retention: { target: PMF_TARGETS.d30RetentionEarly, higherIsBetter: true },
+	multiMemberHouseholdRate: {
+		target: PMF_TARGETS.multiMemberHouseholdRate,
+		higherIsBetter: true
+	},
+	smartFillWeeklyRate: { target: PMF_TARGETS.smartFillWeeklyRate, higherIsBetter: true }
+};
+
+const RATE_DELTA_EPSILON = 0.001;
+const MINUTES_DELTA_EPSILON = 0.1;
+
+export function getTrackedMetricValue(
+	snapshot: PmfMetricSnapshot,
+	key: PmfTrackedMetricKey
+): number | null {
+	return snapshot[key];
+}
+
+export function isTrackedMetricOnTarget(
+	key: PmfTrackedMetricKey,
+	value: number | null
+): boolean {
+	if (value === null) {
+		return false;
+	}
+
+	const { target, higherIsBetter } = PMF_METRIC_CONFIG[key];
+	return higherIsBetter ? value >= target : value <= target;
+}
+
+export function computeMetricDelta(
+	key: PmfTrackedMetricKey,
+	current: number | null,
+	previous: number | null
+): Pick<PmfMetricStatus, 'delta' | 'deltaDirection'> {
+	const { higherIsBetter } = PMF_METRIC_CONFIG[key];
+
+	if (current === null || previous === null) {
+		return { delta: null, deltaDirection: 'unknown' };
+	}
+
+	const rawDelta = current - previous;
+	const improvementDelta = higherIsBetter ? rawDelta : -rawDelta;
+	const epsilon = key === 'medianTimeToFirstScanMinutes' ? MINUTES_DELTA_EPSILON : RATE_DELTA_EPSILON;
+
+	if (Math.abs(improvementDelta) < epsilon) {
+		return { delta: rawDelta, deltaDirection: 'flat' };
+	}
+
+	return {
+		delta: rawDelta,
+		deltaDirection: improvementDelta > 0 ? 'up' : 'down'
+	};
+}
+
+export function buildMetricStatus(
+	key: PmfTrackedMetricKey,
+	current: PmfMetricSnapshot,
+	previous: PmfMetricSnapshot
+): PmfMetricStatus {
+	const currentValue = getTrackedMetricValue(current, key);
+	const previousValue = getTrackedMetricValue(previous, key);
+	const { target, higherIsBetter } = PMF_METRIC_CONFIG[key];
+	const { delta, deltaDirection } = computeMetricDelta(key, currentValue, previousValue);
+
+	return {
+		key,
+		current: currentValue,
+		previous: previousValue,
+		delta,
+		deltaDirection,
+		onTarget: isTrackedMetricOnTarget(key, currentValue),
+		target,
+		higherIsBetter
+	};
+}
+
+export function buildWeeklyReview(
+	current: PmfMetricSnapshot,
+	previous: PmfMetricSnapshot,
+	currentWeekEnd: Date,
+	previousWeekEnd: Date
+): PmfWeeklyReview {
+	const metrics = PMF_TRACKED_METRIC_KEYS.map((key) =>
+		buildMetricStatus(key, current, previous)
+	);
+	const belowTarget = metrics.filter((metric) => !metric.onTarget);
+	const onTargetCount = metrics.length - belowTarget.length;
+
+	return {
+		currentWeekEnd,
+		previousWeekEnd,
+		current,
+		previous,
+		metrics,
+		belowTarget,
+		onTargetCount,
+		totalTracked: metrics.length
+	};
+}
+
 export function isScanEventType(eventType: ProductEventType): boolean {
 	return SCAN_EVENT_TYPES.includes(eventType);
 }

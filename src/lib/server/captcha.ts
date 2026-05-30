@@ -1,13 +1,17 @@
 import { env as publicEnv } from '$env/dynamic/public';
 import { env } from '$env/dynamic/private';
+import type { MessageKey } from '$lib/i18n/messages';
 
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
-export const CAPTCHA_VERIFY_FAILED_MESSAGE = 'Captcha verifierades inte. Försök igen.';
-export const CAPTCHA_NOT_CONFIGURED_MESSAGE =
-	'Captcha är inte konfigurerad. Kontakta administratören.';
+/** Cloudflare dummy keys — always pass; any hostname. See docs/CAPTCHA.md */
+export const TURNSTILE_TEST_SITE_KEY = '1x00000000000000000000AA';
+export const TURNSTILE_TEST_SECRET_KEY = '1x0000000000000000000000000000000AA';
 
-export type TurnstileVerifyResult = { ok: true } | { ok: false; message: string };
+export const CAPTCHA_FAILED_KEY = 'captcha.failed' satisfies MessageKey;
+export const CAPTCHA_NOT_CONFIGURED_KEY = 'captcha.notConfigured' satisfies MessageKey;
+
+export type TurnstileVerifyResult = { ok: true } | { ok: false; messageKey: MessageKey };
 
 interface TurnstileVerifyResponse {
 	success: boolean;
@@ -19,8 +23,20 @@ export function getTurnstileSecretKey(): string | null {
 	return key ? key : null;
 }
 
+function isTruthyEnvFlag(value: string | undefined): boolean {
+	return value?.trim().toLowerCase() === 'true';
+}
+
+/** Skip Turnstile in non-production when TURNSTILE_SKIP or TURNSTILE_BYPASS is true (E2E/CI). */
 export function isTurnstileSkipEnabled(): boolean {
-	return env.TURNSTILE_SKIP?.trim().toLowerCase() === 'true';
+	return (
+		isTruthyEnvFlag(env.TURNSTILE_SKIP) || isTruthyEnvFlag(env.TURNSTILE_BYPASS)
+	);
+}
+
+/** Registration expects Turnstile unless CI/local bypass is enabled. */
+export function isTurnstileRequiredForRegistration(): boolean {
+	return !isTurnstileSkipEnabled();
 }
 
 /** Public site key for the register widget; empty when skip is enabled or key is missing. */
@@ -42,9 +58,9 @@ export async function verifyTurnstileToken(
 ): Promise<TurnstileVerifyResult> {
 	if (isTurnstileSkipEnabled()) {
 		if (isProduction()) {
-			console.error('[turnstile] TURNSTILE_SKIP is set in production — bypass ignored');
+			console.error('[turnstile] TURNSTILE_SKIP/TURNSTILE_BYPASS is set in production — bypass ignored');
 		} else {
-			console.warn('[turnstile] Skipping verification (TURNSTILE_SKIP=true)');
+			console.warn('[turnstile] Skipping verification (TURNSTILE_SKIP/TURNSTILE_BYPASS)');
 			return { ok: true };
 		}
 	}
@@ -58,11 +74,11 @@ export async function verifyTurnstileToken(
 				'[turnstile] TURNSTILE_SECRET_KEY is missing — set TURNSTILE_SKIP=true for local dev'
 			);
 		}
-		return { ok: false, message: CAPTCHA_NOT_CONFIGURED_MESSAGE };
+		return { ok: false, messageKey: CAPTCHA_NOT_CONFIGURED_KEY };
 	}
 
 	if (!token.trim()) {
-		return { ok: false, message: CAPTCHA_VERIFY_FAILED_MESSAGE };
+		return { ok: false, messageKey: CAPTCHA_FAILED_KEY };
 	}
 
 	let response: Response;
@@ -82,7 +98,7 @@ export async function verifyTurnstileToken(
 	} catch (error) {
 		const detail = error instanceof Error ? error.message : 'network error';
 		console.error(`[turnstile] Verification request failed: ${detail}`);
-		return { ok: false, message: CAPTCHA_VERIFY_FAILED_MESSAGE };
+		return { ok: false, messageKey: CAPTCHA_FAILED_KEY };
 	}
 
 	let payload: TurnstileVerifyResponse;
@@ -90,13 +106,13 @@ export async function verifyTurnstileToken(
 		payload = (await response.json()) as TurnstileVerifyResponse;
 	} catch {
 		console.error('[turnstile] Verification returned unreadable JSON');
-		return { ok: false, message: CAPTCHA_VERIFY_FAILED_MESSAGE };
+		return { ok: false, messageKey: CAPTCHA_FAILED_KEY };
 	}
 
 	if (!response.ok || !payload.success) {
 		const codes = payload['error-codes']?.join(', ') ?? 'unknown';
 		console.warn(`[turnstile] Verification failed: ${codes}`);
-		return { ok: false, message: CAPTCHA_VERIFY_FAILED_MESSAGE };
+		return { ok: false, messageKey: CAPTCHA_FAILED_KEY };
 	}
 
 	return { ok: true };

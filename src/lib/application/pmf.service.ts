@@ -2,7 +2,9 @@ import type {
 	IPmfRepository,
 	RecordProductEventInput
 } from '$lib/infrastructure/repositories/pmf.repository';
-import type { PmfMetricSnapshot } from '$lib/domain/pmf';
+import { buildWeeklyReview, type PmfMetricSnapshot, type PmfWeeklyReview } from '$lib/domain/pmf';
+
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 export class PmfService {
 	constructor(private readonly repository: IPmfRepository) {}
@@ -13,5 +15,15 @@ export class PmfService {
 
 	getGlobalMetrics(now?: Date): Promise<PmfMetricSnapshot> {
 		return this.repository.getGlobalMetrics(now);
+	}
+
+	async getWeeklyReview(now = new Date()): Promise<PmfWeeklyReview> {
+		const previousWeekEnd = new Date(now.getTime() - WEEK_MS);
+		const [current, previous] = await Promise.all([
+			this.repository.getGlobalMetrics(now),
+			this.repository.getGlobalMetrics(previousWeekEnd)
+		]);
+
+		return buildWeeklyReview(current, previous, now, previousWeekEnd);
 	}
 }

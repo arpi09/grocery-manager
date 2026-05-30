@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-		import Button from '$lib/components/atoms/Button.svelte';
+	import Button from '$lib/components/atoms/Button.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import FormField from '$lib/components/molecules/FormField.svelte';
 	import TurnstileWidget from '$lib/components/molecules/TurnstileWidget.svelte';
@@ -12,9 +12,19 @@
 		message?: string;
 		email?: string;
 		turnstileSiteKey?: string;
+		/** True when Turnstile is required (not CI/local bypass). */
+		captchaRequired?: boolean;
 	}
 
-	let { errors = {}, message, email = '', turnstileSiteKey = '' }: Props = $props();
+	let {
+		errors = {},
+		message,
+		email = '',
+		turnstileSiteKey = '',
+		captchaRequired = false
+	}: Props = $props();
+
+	const captchaMisconfigured = $derived(captchaRequired && !turnstileSiteKey);
 
 	let emailField = $state(email);
 	$effect(() => {
@@ -30,7 +40,9 @@
 	class="form"
 	use:enhance={bindSubmitting((v) => (submitting = v))}
 >
-	{#if message}
+	{#if captchaMisconfigured}
+		<FeedbackBanner tone="error" message={t('captcha.notConfigured')} />
+	{:else if message}
 		<FeedbackBanner tone="error" message={message} />
 	{/if}
 
@@ -58,11 +70,20 @@
 	/>
 
 	{#if turnstileSiteKey}
-		<p class="turnstile-label" id="turnstile-label">{t('auth.register.captchaLabel')}</p>
-		<TurnstileWidget siteKey={turnstileSiteKey} labelledBy="turnstile-label" />
+		<div data-testid="register-turnstile">
+			<p class="turnstile-label" id="turnstile-label">{t('auth.register.captchaLabel')}</p>
+			<TurnstileWidget siteKey={turnstileSiteKey} labelledBy="turnstile-label" />
+		</div>
 	{/if}
 
-	<Button type="submit" fullWidth loading={submitting} loadingLabel={t('auth.register.submitting')}>
+	<Button
+		type="submit"
+		fullWidth
+		loading={submitting}
+		loadingLabel={t('auth.register.submitting')}
+		disabled={captchaMisconfigured}
+		data-testid="register-submit"
+	>
 		{t('auth.register.submit')}
 	</Button>
 

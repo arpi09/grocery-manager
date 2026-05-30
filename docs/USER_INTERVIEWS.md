@@ -26,7 +26,7 @@ Efter 10 intervjuer: fyll i **Syntes** längst ner och prioritera topp 3 produkt
 |-------|-----|
 | **Vänner & familj** | 3–4 hushåll, 30 min video eller fika |
 | **Reddit** | t.ex. r/sweden, r/ZeroWaste — kort post: "testar svensk skafferapp, söker 30 min feedback (ej reklam)" |
-| **Facebook-grupper** | matsvinn, föräldrar, meal prep, lokala kö-grupper |
+| **Facebook-grupper** | matsvinn, föräldrar, meal prep, lokala kö-grupper — se [`LAUNCH_PLAYBOOK.md`](./LAUNCH_PLAYBOOK.md) |
 | **Befintliga användare** | Fråga i app via feedback + erbjud 30 min om de lämnar e-post (GDPR: spara bara med samtycke) |
 
 **Urval:** blanda nybörjare (testat 1 gång) och de som använt 1–2 veckor. Undvik bara "superfans" — du vill höra churn.

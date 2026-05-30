@@ -7,6 +7,7 @@ import {
 import { parseAddShoppingListItem } from '$lib/validation/shopping-list.schemas';
 import { translate } from '$lib/i18n/messages';
 import { getOpenAiApiKey, missingOpenAiKeyMessage } from '$lib/server/openai';
+import { checkAiQuotaForAction } from '$lib/server/ai-rate-limit';
 import {
 	generateShoppingSuggestions,
 	suggestionToListItem
@@ -132,6 +133,11 @@ export const actions: Actions = {
 			return fail(503, {
 				fillError: missingOpenAiKeyMessage('shopping suggestions')
 			});
+		}
+
+		const quota = await checkAiQuotaForAction(event.locals, 'smart_fill', event.locals.user!.id);
+		if (quota.denied) {
+			return fail(429, { fillError: quota.message });
 		}
 
 		const formData = await event.request.formData();

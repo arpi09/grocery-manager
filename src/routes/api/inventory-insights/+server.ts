@@ -7,6 +7,7 @@ import {
 	upcomingDateRange
 } from '$lib/server/inventory-context';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
+import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { requestStructuredJson } from '$lib/server/openai';
 import type { RequestHandler } from './$types';
 
@@ -101,6 +102,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return apiKeyOrResponse;
 	}
 	const apiKey = apiKeyOrResponse;
+
+	const quotaResponse = await requireAiQuota(locals, 'ai_scan', auth.user.id);
+	if (quotaResponse) {
+		return quotaResponse;
+	}
 
 	const body = (await request.json().catch(() => ({}))) as { focus?: unknown };
 	const focus = typeof body.focus === 'string' ? body.focus.trim().slice(0, 300) : '';

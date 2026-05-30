@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	DEFAULT_PLAN_TIER,
 	FREE_LIMITS,
+	getAiLimit,
 	isProTier,
 	PRICE_HYPOTHESIS_SEK,
 	STRIPE_READINESS_GATES
@@ -18,6 +19,8 @@ describe('plan', () => {
 		expect(FREE_LIMITS.maxInventoryItems).toBeGreaterThan(0);
 		expect(FREE_LIMITS.maxHouseholdMembers).toBe(2);
 		expect(FREE_LIMITS.aiScansPerMonth).toBeGreaterThan(0);
+		expect(getAiLimit('free', 'ai_scan')).toBe(FREE_LIMITS.aiScansPerMonth);
+		expect(getAiLimit('pro', 'ai_scan')).toBeNull();
 	});
 
 	it('anchors price hypothesis within competitor band', () => {

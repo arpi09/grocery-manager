@@ -144,6 +144,10 @@ Copy lives in `src/lib/marketing/content.ts` with Swedish (`sv`) as primary. Eng
 
 Marketing layout sets `<link rel="canonical">` and `og:url` from `PUBLIC_ORIGIN` (fallback: request origin). Landing page (`/`) adds `<title>`, `description`, Open Graph, and Twitter card meta tags in `(marketing)/+page.svelte`.
 
+## Community launch UTM
+
+When visitors land with standard UTM query params (`utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`), marketing layout CTAs forward them to `/login` and `/register`. See [`LAUNCH_PLAYBOOK.md`](./LAUNCH_PLAYBOOK.md) for channel links and naming.
+
 ## Auth / public paths
 
 `hooks.server.ts` treats marketing paths as public (no redirect to `/login`). Logged-in users visiting marketing URLs are redirected to `/hem`.

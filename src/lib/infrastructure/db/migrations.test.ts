@@ -50,7 +50,8 @@ describe('drizzle migrations', () => {
 			'0011_consumption_event.sql',
 			'0012_product_event.sql',
 			'0013_expiry_reminders.sql',
-			'0014_product_feedback.sql'
+			'0014_product_feedback.sql',
+			'0015_ai_usage.sql'
 		];
 
 		expect(pgliteFiles).toEqual(sqlFiles);

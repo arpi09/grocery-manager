@@ -2,7 +2,7 @@
 
 *Version: maj 2026. Punkt 6 i [90_DAY_ROADMAP.md](./90_DAY_ROADMAP.md). Källa: [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 12 (Monetisering) och punkt 15.6.*
 
-**Status:** Hypotes dokumenterad. Ingen betalvägg, ingen Stripe SDK. Gränser i kod (`src/lib/domain/plan.ts`) förbereder framtida enforcement.
+**Status:** Hypotes dokumenterad. Ingen betalvägg, ingen Stripe SDK. Gränser i kod (`src/lib/domain/plan.ts`); **UI + AI-enforcement** via `PlanLimitsService` / `AiRateLimitService` (ingen Stripe än).
 
 ---
 
@@ -136,7 +136,9 @@ Konstanter: `STRIPE_READINESS_GATES` i `plan.ts`.
 | Fil | Syfte |
 |-----|--------|
 | `src/lib/domain/plan.ts` | `PlanTier`, `FREE_LIMITS`, `PRO_LIMITS`, prishypotes, Stripe-gates |
-| `src/routes/settings/+page.svelte` | Visar plan (Free), Pro-fördelar, länk till `/priser` |
+| `src/routes/settings/+page.svelte` | Visar plan (Free), Pro-fördelar, **användning mot gränser**, uppgraderingsbanner vid tak, länk `/priser` |
+| `src/lib/application/plan-limits.service.ts` | Delad snapshot/check för UI och icke-AI-gränser (lager, medlemmar) |
+| `src/lib/application/ai-rate-limit.service.ts` | Månads/vecka-räknare för AI (samma `FREE_LIMITS`) |
 | `src/routes/(marketing)/priser/+page.svelte` | Publik sammanfattning |
 
 **Nästa fas (Stripe):**

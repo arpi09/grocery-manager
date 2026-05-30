@@ -68,3 +68,20 @@ export const DEFAULT_PLAN_TIER: PlanTier = 'free';
 export function isProTier(tier: PlanTier): boolean {
 	return tier === 'pro';
 }
+
+export type AiUsageKind = 'ai_scan' | 'receipt_pdf' | 'smart_fill';
+
+/** Returns null when the tier has no cap (Pro). */
+export function getAiLimit(tier: PlanTier, kind: AiUsageKind): number | null {
+	if (isProTier(tier)) {
+		return null;
+	}
+	switch (kind) {
+		case 'ai_scan':
+			return FREE_LIMITS.aiScansPerMonth;
+		case 'receipt_pdf':
+			return FREE_LIMITS.receiptPdfParsesPerMonth;
+		case 'smart_fill':
+			return FREE_LIMITS.smartFillPerWeek;
+	}
+}

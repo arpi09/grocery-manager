@@ -1,14 +1,47 @@
 import { describe, expect, it } from 'vitest';
 import {
 	ACTIVATION_ITEM_THRESHOLD,
+	buildMetricStatus,
+	buildWeeklyReview,
 	computeActivationRate,
+	computeMetricDelta,
 	computeMultiMemberHouseholdRate,
 	computeRetentionRate,
 	computeSmartFillWeeklyRate,
 	computeWeeklyScanRate,
+	isTrackedMetricOnTarget,
 	isUserActivated,
-	medianMinutesToFirstScan
+	medianMinutesToFirstScan,
+	PMF_TARGETS,
+	type PmfMetricSnapshot
 } from './pmf';
+
+function emptySnapshot(overrides: Partial<PmfMetricSnapshot> = {}): PmfMetricSnapshot {
+	return {
+		activationRate: 0,
+		activatedUsers: 0,
+		eligibleUsers: 0,
+		medianTimeToFirstScanMinutes: null,
+		weeklyScanRate: 0,
+		wauCount: 0,
+		weeklyScanners: 0,
+		d7Retention: 0,
+		d7EligibleUsers: 0,
+		d30Retention: 0,
+		d30EligibleUsers: 0,
+		multiMemberHouseholdRate: 0,
+		activeHouseholds: 0,
+		multiMemberActiveHouseholds: 0,
+		smartFillWeeklyRate: 0,
+		weeklyFillUsers: 0,
+		eventCounts: {
+			scan_completed: 0,
+			receipt_parsed: 0,
+			fill_suggestions_added: 0
+		},
+		...overrides
+	};
+}
 
 describe('pmf activation', () => {
 	it('activates when item threshold is met within 24h', () => {
@@ -179,5 +212,74 @@ describe('pmf retention and usage rates', () => {
 			rate: 0.5,
 			weeklyFillUsers: 1
 		});
+	});
+});
+
+describe('pmf weekly review', () => {
+	it('flags metrics below PMF targets', () => {
+		expect(isTrackedMetricOnTarget('activationRate', PMF_TARGETS.activationRate)).toBe(true);
+		expect(isTrackedMetricOnTarget('activationRate', PMF_TARGETS.activationRate - 0.01)).toBe(
+			false
+		);
+		expect(
+			isTrackedMetricOnTarget(
+				'medianTimeToFirstScanMinutes',
+				PMF_TARGETS.medianTimeToFirstScanMinutes
+			)
+		).toBe(true);
+		expect(
+			isTrackedMetricOnTarget(
+				'medianTimeToFirstScanMinutes',
+				PMF_TARGETS.medianTimeToFirstScanMinutes + 1
+			)
+		).toBe(false);
+		expect(isTrackedMetricOnTarget('medianTimeToFirstScanMinutes', null)).toBe(false);
+	});
+
+	it('computes week-over-week deltas with direction', () => {
+		const activationUp = computeMetricDelta('activationRate', 0.5, 0.4);
+		expect(activationUp.deltaDirection).toBe('up');
+		expect(activationUp.delta).toBeCloseTo(0.1);
+
+		const activationDown = computeMetricDelta('activationRate', 0.3, 0.4);
+		expect(activationDown.deltaDirection).toBe('down');
+		expect(activationDown.delta).toBeCloseTo(-0.1);
+
+		expect(computeMetricDelta('medianTimeToFirstScanMinutes', 2, 5)).toEqual({
+			delta: -3,
+			deltaDirection: 'up'
+		});
+		expect(computeMetricDelta('medianTimeToFirstScanMinutes', null, 5)).toEqual({
+			delta: null,
+			deltaDirection: 'unknown'
+		});
+	});
+
+	it('builds weekly review with below-target summary', () => {
+		const current = emptySnapshot({
+			activationRate: 0.5,
+			d7Retention: 0.1,
+			d30Retention: 0.2,
+			medianTimeToFirstScanMinutes: 2
+		});
+		const previous = emptySnapshot({
+			activationRate: 0.45,
+			d7Retention: 0.12,
+			d30Retention: 0.18,
+			medianTimeToFirstScanMinutes: 4
+		});
+		const currentWeekEnd = new Date('2026-05-30T12:00:00Z');
+		const previousWeekEnd = new Date('2026-05-23T12:00:00Z');
+
+		const review = buildWeeklyReview(current, previous, currentWeekEnd, previousWeekEnd);
+
+		expect(review.onTargetCount).toBe(3);
+		expect(review.belowTarget.map((metric) => metric.key)).toEqual([
+			'weeklyScanRate',
+			'd7Retention',
+			'multiMemberHouseholdRate',
+			'smartFillWeeklyRate'
+		]);
+		expect(buildMetricStatus('activationRate', current, previous).deltaDirection).toBe('up');
 	});
 });

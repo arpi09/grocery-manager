@@ -41,11 +41,11 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 	const { user } = await parent();
 	const errorLimit = parseErrorLogLimit(url.searchParams.get('errorLimit'));
 	const feedbackLimit = parseFeedbackLimit(url.searchParams.get('feedbackLimit'));
-	const [stats, users, errors, pmfMetrics, productFeedback] = await Promise.all([
+	const [stats, users, errors, pmfWeeklyReview, productFeedback] = await Promise.all([
 		locals.adminService.getDashboardStats(),
 		locals.adminService.listUsers(),
 		locals.adminService.listRecentErrors(errorLimit),
-		locals.pmfService.getGlobalMetrics(),
+		locals.pmfService.getWeeklyReview(),
 		locals.productFeedbackService.listRecent(feedbackLimit)
 	]);
 
@@ -56,7 +56,7 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		errors,
 		errorLimit,
 		feedbackLimit,
-		pmfMetrics,
+		pmfWeeklyReview,
 		productFeedback
 	};
 };

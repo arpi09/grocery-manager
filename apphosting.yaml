@@ -105,7 +105,8 @@ env:
     availability:
       - RUNTIME
 
-  # Cloudflare Turnstile site key (public) â€” set to your widget key; see docs/CAPTCHA.md
+  # Cloudflare Turnstile site key (public) — must match a widget whose hostnames include
+  # home-pantry--home-pantry-4bee5.europe-west4.hosted.app (+ homepantry.com when live); see docs/CAPTCHA.md
   - variable: PUBLIC_TURNSTILE_SITE_KEY
     value: 0x4AAAAAADZUXk7XZddZ9HBf
     availability:

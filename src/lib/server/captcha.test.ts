@@ -1,10 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockEnv } = vi.hoisted(() => ({
+const { mockEnv, mockPublicEnv } = vi.hoisted(() => ({
 	mockEnv: {
 		TURNSTILE_SECRET_KEY: undefined as string | undefined,
 		TURNSTILE_SKIP: undefined as string | undefined,
+		TURNSTILE_BYPASS: undefined as string | undefined,
 		NODE_ENV: undefined as string | undefined
+	},
+	mockPublicEnv: {
+		PUBLIC_TURNSTILE_SITE_KEY: undefined as string | undefined
 	}
 }));
 
@@ -12,11 +16,18 @@ vi.mock('$env/dynamic/private', () => ({
 	env: mockEnv
 }));
 
+vi.mock('$env/dynamic/public', () => ({
+	env: mockPublicEnv
+}));
+
 import {
-	CAPTCHA_NOT_CONFIGURED_MESSAGE,
-	CAPTCHA_VERIFY_FAILED_MESSAGE,
+	CAPTCHA_FAILED_KEY,
+	CAPTCHA_NOT_CONFIGURED_KEY,
 	getTurnstileSecretKey,
+	getTurnstileSiteKeyForClient,
+	isTurnstileRequiredForRegistration,
 	isTurnstileSkipEnabled,
+	TURNSTILE_TEST_SECRET_KEY,
 	verifyTurnstileToken
 } from './captcha';
 
@@ -35,9 +46,33 @@ describe('getTurnstileSecretKey', () => {
 	});
 });
 
+describe('getTurnstileSiteKeyForClient', () => {
+	beforeEach(() => {
+		mockEnv.TURNSTILE_SKIP = undefined;
+		mockEnv.TURNSTILE_BYPASS = undefined;
+		mockPublicEnv.PUBLIC_TURNSTILE_SITE_KEY = undefined;
+	});
+
+	it('returns empty when bypass is enabled', () => {
+		mockEnv.TURNSTILE_SKIP = 'true';
+		mockPublicEnv.PUBLIC_TURNSTILE_SITE_KEY = 'site-key';
+		expect(getTurnstileSiteKeyForClient()).toBe('');
+	});
+
+	it('returns trimmed site key when configured', () => {
+		mockPublicEnv.PUBLIC_TURNSTILE_SITE_KEY = '  0xabc  ';
+		expect(getTurnstileSiteKeyForClient()).toBe('0xabc');
+	});
+
+	it('returns empty when site key is missing', () => {
+		expect(getTurnstileSiteKeyForClient()).toBe('');
+	});
+});
+
 describe('isTurnstileSkipEnabled', () => {
 	beforeEach(() => {
 		mockEnv.TURNSTILE_SKIP = undefined;
+		mockEnv.TURNSTILE_BYPASS = undefined;
 	});
 
 	it('returns true when TURNSTILE_SKIP=true', () => {
@@ -45,9 +80,27 @@ describe('isTurnstileSkipEnabled', () => {
 		expect(isTurnstileSkipEnabled()).toBe(true);
 	});
 
+	it('returns true when TURNSTILE_BYPASS=true', () => {
+		mockEnv.TURNSTILE_BYPASS = 'true';
+		expect(isTurnstileSkipEnabled()).toBe(true);
+	});
+
 	it('returns false otherwise', () => {
 		mockEnv.TURNSTILE_SKIP = 'false';
+		mockEnv.TURNSTILE_BYPASS = 'false';
 		expect(isTurnstileSkipEnabled()).toBe(false);
+	});
+});
+
+describe('isTurnstileRequiredForRegistration', () => {
+	it('is false when bypass is enabled', () => {
+		mockEnv.TURNSTILE_SKIP = 'true';
+		expect(isTurnstileRequiredForRegistration()).toBe(false);
+	});
+
+	it('is true when bypass is disabled', () => {
+		mockEnv.TURNSTILE_SKIP = undefined;
+		expect(isTurnstileRequiredForRegistration()).toBe(true);
 	});
 });
 
@@ -94,14 +147,14 @@ describe('verifyTurnstileToken', () => {
 
 		const result = await verifyTurnstileToken('token');
 
-		expect(result).toEqual({ ok: false, message: CAPTCHA_NOT_CONFIGURED_MESSAGE });
+		expect(result).toEqual({ ok: false, messageKey: CAPTCHA_NOT_CONFIGURED_KEY });
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
 	it('fails when token is empty', async () => {
 		const result = await verifyTurnstileToken('   ');
 
-		expect(result).toEqual({ ok: false, message: CAPTCHA_VERIFY_FAILED_MESSAGE });
+		expect(result).toEqual({ ok: false, messageKey: CAPTCHA_FAILED_KEY });
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
@@ -136,7 +189,7 @@ describe('verifyTurnstileToken', () => {
 
 		const result = await verifyTurnstileToken('bad-token');
 
-		expect(result).toEqual({ ok: false, message: CAPTCHA_VERIFY_FAILED_MESSAGE });
+		expect(result).toEqual({ ok: false, messageKey: CAPTCHA_FAILED_KEY });
 	});
 
 	it('fails on network error', async () => {
@@ -144,6 +197,15 @@ describe('verifyTurnstileToken', () => {
 
 		const result = await verifyTurnstileToken('token');
 
-		expect(result).toEqual({ ok: false, message: CAPTCHA_VERIFY_FAILED_MESSAGE });
+		expect(result).toEqual({ ok: false, messageKey: CAPTCHA_FAILED_KEY });
+	});
+
+	it('accepts Cloudflare always-pass test secret', async () => {
+		mockEnv.TURNSTILE_SECRET_KEY = TURNSTILE_TEST_SECRET_KEY;
+		vi.unstubAllGlobals();
+
+		const result = await verifyTurnstileToken('XXXX.DUMMY.TOKEN.XXXX');
+
+		expect(result).toEqual({ ok: true });
 	});
 });

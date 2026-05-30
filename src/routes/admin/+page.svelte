@@ -40,7 +40,7 @@
 	{/if}
 
 	<AdminHealthDashboard stats={data.stats} />
-	<PmfDashboard metrics={data.pmfMetrics} />
+	<PmfDashboard review={data.pmfWeeklyReview} />
 
 	<section class="product-feedback" id="feedback">
 		<Card>

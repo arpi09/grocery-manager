@@ -2,6 +2,7 @@ import { Buffer } from 'node:buffer';
 import { json } from '@sveltejs/kit';
 import { translate } from '$lib/i18n/messages';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
+import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { requestStructuredJsonFromImage } from '$lib/server/openai';
 import type { RequestHandler } from './$types';
 
@@ -81,6 +82,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return apiKeyOrResponse;
 		}
 		const apiKey = apiKeyOrResponse;
+
+		const quotaResponse = await requireAiQuota(locals, 'ai_scan', auth.user.id);
+		if (quotaResponse) {
+			return quotaResponse;
+		}
 
 		const formData = await request.formData();
 		const image = formData.get('image');

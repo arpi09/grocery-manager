@@ -117,6 +117,7 @@ jobs:
           ADMIN_PASSWORD: e2e-ci-password
           PUBLIC_ORIGIN: http://localhost:5173
           TURNSTILE_SKIP: 'true'
+          TURNSTILE_BYPASS: 'true'
           CI: 'true'
 
   deploy:

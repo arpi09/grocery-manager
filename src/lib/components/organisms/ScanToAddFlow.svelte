@@ -10,7 +10,12 @@
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
-	import { addRecentScan, getRecentScans, type RecentScan } from '$lib/utils/recent-scans';
+	import {
+		getFavoriteProduct,
+		saveFavoriteProduct
+	} from '$lib/utils/favorite-products';
+	import { addRecentScan } from '$lib/utils/recent-scans';
+	import { getScanQuickPicks, type ScanQuickPick } from '$lib/utils/scan-quick-picks';
 	import { isDesktopDevice } from '$lib/utils/device';
 
 	interface Props {
@@ -31,7 +36,8 @@
 	let productFound = $state(true);
 	let manualBarcode = $state('');
 	let showMore = $state(false);
-	let recentScans = $state<RecentScan[]>([]);
+	let quickPicks = $state<ScanQuickPick[]>([]);
+	let nameInputRef = $state<HTMLInputElement | null>(null);
 
 	let barcode = $state('');
 	let name = $state('');
@@ -42,8 +48,28 @@
 	let expiresOn = $state('');
 	let saveSubmitting = $state(false);
 
+	function applyProductFields(fields: {
+		barcode: string;
+		name: string;
+		quantity: string;
+		unit: string;
+		notes: string;
+		found: boolean;
+	}) {
+		barcode = fields.barcode;
+		name = fields.name;
+		quantity = fields.quantity;
+		unit = fields.unit;
+		notes = fields.notes;
+		productFound = fields.found;
+	}
+
+	function refreshQuickPicks() {
+		quickPicks = getScanQuickPicks();
+	}
+
 	$effect(() => {
-		recentScans = getRecentScans();
+		refreshQuickPicks();
 	});
 
 	function resetToScan() {
@@ -57,15 +83,35 @@
 	}
 
 	async function applyLookupResult(result: BarcodeLookupResult) {
-		barcode = result.product.barcode;
-		name = result.product.name;
-		quantity = result.product.quantity;
-		unit = result.product.unit ?? '';
-		notes = result.product.notes ?? '';
-		productFound = result.found;
-		addRecentScan({ barcode: result.product.barcode, name: result.product.name });
-		recentScans = getRecentScans();
+		const cached = getFavoriteProduct(result.product.barcode);
+		applyProductFields({
+			barcode: result.product.barcode,
+			name: cached?.name ?? result.product.name,
+			quantity: cached?.quantity ?? result.product.quantity,
+			unit: cached?.unit ?? result.product.unit ?? '',
+			notes: cached?.notes ?? result.product.notes ?? '',
+			found: result.found || !!cached
+		});
+		addRecentScan({ barcode: result.product.barcode, name: name });
+		refreshQuickPicks();
 		scannerActive = false;
+		showMore = false;
+		step = 'confirm';
+	}
+
+	function applyCachedProduct(cached: NonNullable<ReturnType<typeof getFavoriteProduct>>) {
+		applyProductFields({
+			barcode: cached.barcode,
+			name: cached.name,
+			quantity: cached.quantity,
+			unit: cached.unit ?? '',
+			notes: cached.notes ?? '',
+			found: true
+		});
+		addRecentScan({ barcode: cached.barcode, name: cached.name });
+		refreshQuickPicks();
+		scannerActive = false;
+		showMore = false;
 		step = 'confirm';
 	}
 
@@ -73,6 +119,13 @@
 		const trimmed = code.trim();
 		if (trimmed.length < 8) {
 			lookupError = t('scanFlow.invalidBarcodeManual');
+			return;
+		}
+
+		const cached = getFavoriteProduct(trimmed);
+		if (cached) {
+			lookupError = null;
+			applyCachedProduct(cached);
 			return;
 		}
 
@@ -110,20 +163,60 @@
 		void lookupBarcode(manualBarcode);
 	}
 
-	async function handleRecentSelect(scan: RecentScan) {
-		barcode = scan.barcode;
-		name = scan.name;
-		quantity = '1';
-		unit = '';
-		notes = '';
-		productFound = true;
+	function handleQuickPickSelect(pick: ScanQuickPick) {
+		const cached = getFavoriteProduct(pick.barcode);
+		if (cached) {
+			applyCachedProduct(cached);
+			return;
+		}
+
+		applyProductFields({
+			barcode: pick.barcode,
+			name: pick.name,
+			quantity: pick.quantity,
+			unit: pick.unit ?? '',
+			notes: '',
+			found: true
+		});
+		addRecentScan({ barcode: pick.barcode, name: pick.name });
+		refreshQuickPicks();
 		scannerActive = false;
+		showMore = false;
 		step = 'confirm';
+	}
+
+	function persistFavoriteProduct() {
+		saveFavoriteProduct({
+			barcode,
+			name,
+			quantity,
+			unit: unit || null,
+			notes: notes || null
+		});
+		refreshQuickPicks();
 	}
 </script>
 
 {#if step === 'scan'}
 	<section class="scan-step">
+		{#if quickPicks.length > 0}
+			<div class="quick-picks">
+				<h3>{t('scanFlow.quickPicks')}</h3>
+				<div class="quick-picks-row">
+					{#each quickPicks as pick (pick.barcode)}
+						<button
+							type="button"
+							class="quick-pick"
+							class:quick-pick-favorite={pick.source === 'favorite'}
+							onclick={() => handleQuickPickSelect(pick)}
+						>
+							<span class="quick-pick-name">{pick.name}</span>
+						</button>
+					{/each}
+				</div>
+			</div>
+		{/if}
+
 		<div class="scanner-wrap" aria-busy={lookupLoading}>
 			<BarcodeScanner active={scannerActive && !lookupLoading} onScan={handleScan} />
 			{#if lookupLoading}
@@ -162,21 +255,6 @@
 			</div>
 		{/if}
 
-		{#if recentScans.length > 0}
-			<div class="recent">
-				<h3>{t('scanFlow.recentScans')}</h3>
-				<ul>
-					{#each recentScans as scan}
-						<li>
-							<button type="button" class="recent-btn" onclick={() => handleRecentSelect(scan)}>
-								<span class="recent-name">{scan.name}</span>
-								<span class="recent-code">{scan.barcode}</span>
-							</button>
-						</li>
-					{/each}
-				</ul>
-			</div>
-		{/if}
 	</section>
 {:else}
 	<section class="confirm-step">
@@ -186,7 +264,6 @@
 			</p>
 		{/if}
 
-		<p class="product-name">{name}</p>
 		<p class="barcode-label">{t('scanFlow.barcodeLabel', { barcode })}</p>
 
 		<form
@@ -195,6 +272,7 @@
 			use:enhance={bindSubmittingWithRedirect(
 				(v) => (saveSubmitting = v),
 				async () => {
+					persistFavoriteProduct();
 					recordBarcodeActivation();
 				}
 			)}
@@ -203,6 +281,32 @@
 			<input type="hidden" name="barcode" value={barcode} />
 			<input type="hidden" name="returnTo" value={returnTo} />
 			<input type="hidden" name="productFound" value={productFound ? '1' : '0'} />
+
+			<div class="quick-edit">
+				<label for="scan-product-name">
+					{t('common.name')}
+					{#if !productFound}
+						<span class="edit-hint">{t('scanFlow.editNameHint')}</span>
+					{/if}
+				</label>
+				<input
+					id="scan-product-name"
+					name="name"
+					bind:value={name}
+					bind:this={nameInputRef}
+					required
+				/>
+				<div class="row">
+					<label>
+						{t('common.quantity')}
+						<input name="quantity" bind:value={quantity} inputmode="decimal" required />
+					</label>
+					<label>
+						{t('common.unit')}
+						<input name="unit" bind:value={unit} placeholder={t('item.unitPlaceholder')} />
+					</label>
+				</div>
+			</div>
 
 			<fieldset class="locations">
 				<legend>{t('scanFlow.whereLocation')}</legend>
@@ -222,20 +326,6 @@
 			{#if showMore}
 				<div class="more-fields">
 					<label>
-						{t('common.name')}
-						<input name="name" bind:value={name} required />
-					</label>
-					<div class="row">
-						<label>
-							{t('common.quantity')}
-							<input name="quantity" bind:value={quantity} inputmode="decimal" required />
-						</label>
-						<label>
-							{t('common.unit')}
-							<input name="unit" bind:value={unit} placeholder={t('item.unitPlaceholder')} />
-						</label>
-					</div>
-					<label>
 						{t('scanFlow.expiresOptional')}
 						<input name="expiresOn" type="date" bind:value={expiresOn} />
 					</label>
@@ -245,11 +335,8 @@
 					</label>
 				</div>
 			{:else}
-				<input type="hidden" name="name" value={name} />
-				<input type="hidden" name="quantity" value={quantity} />
-				<input type="hidden" name="unit" value={unit} />
-				<input type="hidden" name="notes" value={notes} />
 				<input type="hidden" name="expiresOn" value="" />
+				<input type="hidden" name="notes" value={notes} />
 			{/if}
 
 			{#if errors.name}
@@ -262,7 +349,7 @@
 				{/if}
 				<Button type="button" variant="ghost" onclick={resetToScan}>{t('scanFlow.scanAgain')}</Button>
 				<Button type="button" variant="secondary" onclick={() => (showMore = !showMore)}>
-					{showMore ? t('scanFlow.hideDetails') : t('common.moreDetails')}
+					{showMore ? t('scanFlow.hideDetails') : t('scanFlow.moreOptions')}
 				</Button>
 				<Button type="submit" fullWidth loading={saveSubmitting} loadingLabel={t('scanFlow.saving')}>
 					{t('common.save')}
@@ -323,45 +410,50 @@
 		background: var(--color-surface);
 	}
 
-	.recent {
-		margin-top: var(--space-lg);
+	.quick-picks {
+		margin-bottom: var(--space-md);
 	}
 
-	.recent h3 {
+	.quick-picks h3 {
 		margin: 0 0 var(--space-sm);
 		font-size: 0.95rem;
+		font-weight: 600;
 	}
 
-	.recent ul {
-		list-style: none;
-		margin: 0;
-		padding: 0;
+	.quick-picks-row {
 		display: flex;
-		flex-direction: column;
-		gap: var(--space-xs);
+		flex-wrap: nowrap;
+		gap: var(--space-sm);
+		overflow-x: auto;
+		padding-bottom: 0.15rem;
+		-webkit-overflow-scrolling: touch;
 	}
 
-	.recent-btn {
-		width: 100%;
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 0.15rem;
-		padding: 0.6rem 0.75rem;
+	.quick-pick {
+		flex: 0 0 auto;
+		max-width: min(14rem, 70vw);
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.35rem;
+		padding: 0.45rem 0.85rem;
 		border: 1px solid var(--color-border);
-		border-radius: var(--radius-sm);
+		border-radius: 999px;
 		background: var(--color-surface);
 		cursor: pointer;
 		text-align: left;
 	}
 
-	.recent-name {
-		font-weight: 600;
+	.quick-pick-favorite {
+		border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
 	}
 
-	.recent-code {
-		font-size: 0.8rem;
-		color: var(--color-text-muted);
+	.quick-pick-name {
+		font-size: 0.875rem;
+		font-weight: 600;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.unknown-banner {
@@ -374,16 +466,40 @@
 		color: #8a5a12;
 	}
 
-	.product-name {
-		margin: 0;
-		font-size: 1.35rem;
-		font-weight: 700;
-	}
-
 	.barcode-label {
-		margin: var(--space-xs) 0 var(--space-lg);
+		margin: 0 0 var(--space-md);
 		font-size: 0.85rem;
 		color: var(--color-text-muted);
+	}
+
+	.quick-edit {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		margin-bottom: var(--space-lg);
+	}
+
+	.quick-edit label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		font-size: 0.9rem;
+		font-weight: 600;
+	}
+
+	.edit-hint {
+		font-size: 0.8rem;
+		font-weight: 500;
+		color: var(--color-text-muted);
+	}
+
+	.quick-edit input {
+		padding: 0.65rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		font-size: 1.05rem;
+		font-weight: 600;
 	}
 
 	.locations {

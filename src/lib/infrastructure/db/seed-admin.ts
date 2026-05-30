@@ -8,7 +8,8 @@ import { userTable } from '$lib/infrastructure/db/schema';
 const DEFAULT_ADMIN_EMAIL = 'arvid.pilhall@me.com';
 
 function adminEmail(): string {
-	return (env.ADMIN_EMAIL ?? DEFAULT_ADMIN_EMAIL).trim().toLowerCase();
+	const raw = env.ADMIN_EMAIL?.trim();
+	return (raw ? raw : DEFAULT_ADMIN_EMAIL).toLowerCase();
 }
 
 function adminPassword(): string | null {
@@ -63,3 +64,4 @@ export async function ensureDefaultAdminUser(): Promise<void> {
 		await db.update(userTable).set(updates).where(eq(userTable.id, existing.id));
 	}
 }
+

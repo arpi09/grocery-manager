@@ -14,11 +14,18 @@ Checklista från [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 15
 | 8 | Landningssida A/B-copy mot Bring/ICA/Matdags med ärliga jämförelser | **Klar** | #6 "Varför inte bara ICA?" | Hero A/B (`?hero=b`, cookie, `PUBLIC_LANDING_VARIANT`), jämförelsetabell på `/`, se `docs/MARKETING_SITE.md` |
 | 9 | 10 användarintervjuer (SV hushåll) — vad gjorde dem churna? | **Klar (kit + insamling)** | — | `docs/USER_INTERVIEWS.md`, feedback i inställningar + `/admin`; 10 intervjuer körs av ägaren |
 | 10 | Kvitto-PDF testpack — 20 riktiga ICA/Kivra/Willys-PDF | **Klar (infrastruktur; ägare fyller på riktiga PDF)** | — | Se [RECEIPT_TEST_PACK.md](./RECEIPT_TEST_PACK.md), `tests/fixtures/receipts/`, syntetiska CI-fixtures |
-| 11 | Rate limits på AI — skydda kostnad och missbruk | Väntar | #5 Smart fill stabil & billig | |
-| 12 | "Dela lista" export — minst clipboard-format för Bring | Väntar | Should #8 Export/delning | |
-| 13 | Launch i 2–3 communities (matsvinn, föräldrar, meal prep) | Väntar | — | |
+| 11 | Rate limits på AI — skydda kostnad och missbruk | **Klar** | #5 Smart fill stabil & billig | `ai_usage`-tabell, `FREE_LIMITS` på kvitto/smart fill/insights/foto |
+| 12 | "Dela lista" export — minst clipboard-format för Bring | **Klar** | Should #8 Export/delning | `formatShoppingListExport` + "Kopiera lista" i `ShoppingListPanel`, i18n sv/en |
+| 13 | Launch i 2–3 communities (matsvinn, föräldrar, meal prep) | **Klar (kit)** | — | `docs/LAUNCH_PLAYBOOK.md`, UTM på marketing-CTA → login/register |
 | 14 | Veckovis retention-granskning — en metric dashboard du faktiskt läser | Väntar | #7 Analytics för PMF | Dashboard finns — etablera veckorutin |
-| 15 | Beslut dag 90: dubbla ner på webb+SV eller starta Capacitor-wrapper | Väntar | Should #12 App Store wrapper | Baserat på D30 |
+| 15 | Beslut dag 90: dubbla ner på webb+SV eller starta Capacitor-wrapper | **Klar (dokument)** | Should #12 App Store wrapper | [DAY_90_DECISION.md](./DAY_90_DECISION.md) — ägaren fyller checklista dag 90 |
+| 16 | E2E critical flows — registrering, login, scan, inköp | **Klar** | — | `e2e/critical-flows.spec.ts`, `TURNSTILE_BYPASS`, [`E2E.md`](./E2E.md) |
+| 17 | Scan-kvalitet SV — senaste varor, snabb redigering, favoriter | **Klar** | Must #4 Scan-kvalitet SV | Snabbval-chips, inline redigering, `favorite-products.ts` localStorage-cache |
+| 18 | Freemium enforcement UI — gränser synliga i inställningar/plan | **Klar** | Must #10 Enkel prissättning | `PlanLimitsService` + `PlanLimitBanner`, användningsrader, uppgraderings-CTA `/priser`; AI-räknare via `AiRateLimitService` (#11) |
+| 19 | Recept från lager v2 — strikt lager, portioner, mindre hallucination | Väntar | Must #11 Recept från lager v2 | |
+| 20 | Registration captcha fix — Turnstile prod + test mode CI | **Klar** | — | `PUBLIC_TURNSTILE_SITE_KEY` i apphosting, widget + verify, i18n-fel, domän-whitelist i CAPTCHA.md |
+
+*Punkt 16–20 är tillägg utöver original-listan (15 punkter) i COMPETITIVE_ANALYSIS §15 — kopplade till Must-roadmap, e2e och prod-fixar.*
 
 ## Punkt 1 — levererat
 
@@ -31,7 +38,7 @@ Checklista från [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 15
 ## Punkt 6 — levererat
 
 - **Dokumentation:** [PRICING.md](./PRICING.md) — Free vs Pro, AI-enhetsekonomi, Stripe-triggers, kommunikation
-- **Kod:** `src/lib/domain/plan.ts` — gränser, prishypotes, gates (ingen enforcement än)
+- **Kod:** `src/lib/domain/plan.ts` — gränser, prishypotes, gates; **enforcement** via `AiRateLimitService`
 - **App:** Inställningar → sektion Plan (Free, Pro-fördelar, länk `/priser`)
 - **Marknad:** `/priser` stub, FAQ-svar uppdaterat
 
@@ -89,6 +96,19 @@ Checklista från [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 15
 - **Admin:** `/admin` → sektion *Användarfeedback*; PMF-mätetal i samma vy
 - **Kvar hos ägare:** genomför 10 intervjuer manuellt och fyll syntes i guiden
 
+## Punkt 11 — levererat
+
+- **Gränser:** `FREE_LIMITS` i `plan.ts` — 15 AI-skannar/mån, 5 kvitto-PDF/mån, 2 smart fill/vecka
+- **Lagring:** `ai_usage`-tabell (hushållsscope, vecka/månad per typ)
+- **API:** 429 + i18n på `/api/receipt/parse`, `/api/shopping-suggestions`, `/api/inventory-insights`, `/api/product-from-image`; smart fill-form på `/inkop`
+- **Pro:** obegränsat (tier `pro` i `plan.ts` — alla konton Free tills Stripe)
+
+## Punkt 13 — levererat (kit)
+
+- **Playbook:** [`LAUNCH_PLAYBOOK.md`](./LAUNCH_PLAYBOOK.md) — kanaler (matsvinn, föräldrar, meal prep), postmallar SV/EN, UTM-konvention, PMF-mätetal, tidsplan, launch-logg
+- **Kod:** `src/lib/marketing/utm-params.ts` — bevarar `utm_*` från landnings-URL på marketing-CTA (`/login`, `/register`)
+- **Kvar hos ägare:** posta i 2–3 communities, föra launch-logg, syntes efter 2–4 veckor
+
 ## Punkt 10 — levererat (infrastruktur)
 
 - **Fixtures:** `tests/fixtures/receipts/` — manifest med 20 platser (ICA/Kivra/Willys), 3 syntetiska text-PDF:er för CI
@@ -98,9 +118,55 @@ Checklista från [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 15
 - **Dokumentation:** [RECEIPT_TEST_PACK.md](./RECEIPT_TEST_PACK.md) — anonymisering, insamling, körning
 - **Kvar hos ägare:** lägg till 20 anonymiserade riktiga PDF:er lokalt enligt manifest
 
+## Punkt 20 — levererat
+
+- **Prod:** `PUBLIC_TURNSTILE_SITE_KEY` i `apphosting.yaml` (BUILD + RUNTIME); `TURNSTILE_SECRET_KEY` som App Hosting-secret
+- **Kod:** `TurnstileWidget`, token `cf-turnstile-response`, server `verifyTurnstileToken`, i18n `captcha.*` / `auth.register.captcha*`
+- **UX:** tydliga fel (laddning, verifiering, saknad konfig); submit inaktiverad när site key saknas
+- **Docs:** [`CAPTCHA.md`](./CAPTCHA.md) — domän-whitelist, Cloudflare test keys, felsökning prod
+- **CI:** `TURNSTILE_SKIP` + `TURNSTILE_BYPASS`; unit test mot Cloudflare always-pass test secret
+- **Kvar hos ägare:** bekräfta Cloudflare-widget hostnames + redeploy efter secret/key-ändringar
+
+## Punkt 16 — levererat
+
+- **Register:** Playwright register-flow med `TURNSTILE_BYPASS` / `TURNSTILE_SKIP` (server skip i test/CI, ignoreras i prod)
+- **Kritiska flöden:** login → `/hem`, onboarding för ny användare, smart fill på `/inkop`, scan-hub på `/scan`, marketing `/` + `/login` HTTP 200
+- **Dokumentation:** [`E2E.md`](./E2E.md); CI env i `.github/workflows/release.yml`
+- **Tester:** 6 nya i `e2e/critical-flows.spec.ts` (14 E2E totalt, befintliga 8 oförändrade)
+
 ## Punkt 7 — levererat (dokumentation + kod)
 
 - **Guide:** [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md) — Firebase Console, DNS (A/TXT/CNAME), SSL, www→apex, env, verifiering
 - **Env:** `.env.example` och `apphosting.yaml` kommenterade för `https://homepantry.com`
 - **Kod:** `marketingCanonicalUrl` / `PUBLIC_ORIGIN` för canonical + `og:url`; inbjudningsmail via befintlig `getAppOrigin()`
 - **Kvar hos ägare:** koppla domän i Firebase Console och uppdatera `PUBLIC_ORIGIN` + `ORIGIN` efter SSL är aktivt
+
+## Punkt 19 — levererat
+
+- **Prompt:** `recipe-prompt.ts` — svenska system-/användarprompt, portioner (1–8), strikt lagerlista, färre påhittade varor
+- **Sanering:** `sanitizeRecipesAgainstInventory` flyttar icke-lagervaror från `ingredientsToUse` till `missingIngredients`
+- **API:** `POST /api/recipes` tar `portions`; `POST /api/recipes/add-missing` lägger saknade på inköpslistan
+- **UI:** `RecipeAssistant` — portionsfält, knapp *Lägg saknade på inköpslista* (vid redigeringsbehörighet)
+- **Tester:** `recipe-prompt.test.ts`
+
+## Punkt 17 — levererat
+
+- **Snabbval:** Horisontella chips överst i streckkodsflödet — favoritprodukter (localStorage) + senaste skanningar, deduplicerat
+- **Snabb redigering:** Namn, mängd och enhet alltid redigerbara direkt efter scan; okända produkter får fokus på namnfält
+- **Favorit-cache:** `favorite-products.ts` sparar användarens senaste namn/mängd per streckkod; träff före API-uppslag
+- **i18n:** sv + en (`scanFlow.quickPicks`, `editNameHint`, `moreOptions`)
+- **Tester:** `favorite-products.test.ts`, `recent-scans.test.ts`, `scan-quick-picks.test.ts`
+
+## Punkt 14 — levererat
+
+- **Veckosammanfattning:** `/admin` → PMF-dashboard med sammanfattningskort överst
+- **WoW-delta:** varje mätetal jämförs mot samma beräkning 7 dagar tillbaka (procentenheter / minuter)
+- **Målmarkering:** kort under `PMF_TARGETS` markeras visuellt; sammanfattning listar det som kräver uppmärksamhet
+- **Rutin:** granska veckosammanfattningen varje vecka — ingen separat e-post (dashboard räcker)
+
+## Punkt 15 — levererat (dokument)
+
+- **Beslutsramverk:** [`DAY_90_DECISION.md`](./DAY_90_DECISION.md) — webb+SV vs Capacitor baserat på D30 och PMF-trösklar (CA §13, `pmf.ts`)
+- **Innehåll:** beslutsmatris (scenario A/B/hybrid), kvalitativa inputs (intervjuer, feedback), kostnad/risk
+- **Checklista:** ifyllbar mall för ägare vid dag 90 (mätetal, beslut, top 3 actions)
+- **Kvar hos ägare:** fyll i checklista med data från `/admin` och fatta väg A eller B

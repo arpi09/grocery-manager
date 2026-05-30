@@ -64,7 +64,7 @@
 
 
 
-<div class="hub" role="navigation" aria-label={t('scan.hubAria')}>
+<div class="hub">
 
 
 

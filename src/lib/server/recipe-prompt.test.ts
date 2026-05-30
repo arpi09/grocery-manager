@@ -1,0 +1,165 @@
+import { describe, expect, it } from 'vitest';
+import type { InventoryItem } from '$lib/domain/inventory-item';
+import {
+	buildRecipeSystemPrompt,
+	buildRecipeUserPrompt,
+	clampRecipePortions,
+	formatRecipeInventoryLines,
+	ingredientMatchesInventory,
+	inventoryNameList,
+	missingIngredientToListItem,
+	parseMissingIngredientsPayload,
+	sanitizeRecipeAgainstInventory,
+	sanitizeRecipesAgainstInventory
+} from './recipe-prompt';
+
+function makeItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
+	return {
+		id: '1',
+		householdId: 'h1',
+		userId: 'u1',
+		name: 'Mjölk',
+		location: 'fridge',
+		quantity: '1',
+		unit: 'l',
+		expiresOn: '2026-06-01',
+		notes: null,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+		...overrides
+	};
+}
+
+describe('clampRecipePortions', () => {
+	it('defaults invalid values to 4', () => {
+		expect(clampRecipePortions(undefined)).toBe(4);
+		expect(clampRecipePortions(NaN)).toBe(4);
+	});
+
+	it('clamps to 1–8', () => {
+		expect(clampRecipePortions(0)).toBe(1);
+		expect(clampRecipePortions(12)).toBe(8);
+		expect(clampRecipePortions(3.7)).toBe(4);
+	});
+});
+
+describe('formatRecipeInventoryLines', () => {
+	it('formats Swedish inventory lines with expiry', () => {
+		const lines = formatRecipeInventoryLines([makeItem()]);
+		expect(lines).toContain('Mjölk: 1 l i fridge');
+		expect(lines).toContain('utgår 2026-06-01');
+	});
+
+	it('returns empty marker when no items', () => {
+		expect(formatRecipeInventoryLines([])).toBe('(tomt lager)');
+	});
+});
+
+describe('buildRecipe prompts', () => {
+	it('includes portion count and strict inventory rules in system prompt', () => {
+		const prompt = buildRecipeSystemPrompt(6);
+		expect(prompt).toContain('6 portioner');
+		expect(prompt).toContain('ENDAST varor från lagret');
+		expect(prompt).toContain('exakta varunamn');
+	});
+
+	it('includes portions and preferences in user prompt', () => {
+		const user = buildRecipeUserPrompt('- Mjölk: 1 l i fridge', 2, 'vegetariskt');
+		expect(user).toContain('Antal portioner: 2');
+		expect(user).toContain('Mjölk');
+		expect(user).toContain('vegetariskt');
+	});
+});
+
+describe('ingredientMatchesInventory', () => {
+	const names = ['Mjölk', 'Ägg'];
+
+	it('matches exact and partial names', () => {
+		expect(ingredientMatchesInventory('mjölk', names)).toBe(true);
+		expect(ingredientMatchesInventory('ägg', names)).toBe(true);
+	});
+
+	it('rejects unknown ingredients', () => {
+		expect(ingredientMatchesInventory('basilika', names)).toBe(false);
+	});
+});
+
+describe('sanitizeRecipeAgainstInventory', () => {
+	const inventory = inventoryNameList([makeItem({ name: 'Pasta' }), makeItem({ name: 'Tomat' })]);
+
+	it('keeps only inventory-backed ingredients and moves others to missing', () => {
+		const sanitized = sanitizeRecipeAgainstInventory(
+			{
+				title: 'Pasta',
+				whyItFits: 'Passar lagret',
+				ingredientsToUse: ['Pasta', 'Basilika'],
+				missingIngredients: ['Olivolja'],
+				steps: ['Koka pasta']
+			},
+			inventory
+		);
+
+		expect(sanitized?.ingredientsToUse).toEqual(['Pasta']);
+		expect(sanitized?.missingIngredients).toContain('Basilika');
+		expect(sanitized?.missingIngredients).toContain('Olivolja');
+	});
+
+	it('drops recipes with no valid inventory ingredients', () => {
+		expect(
+			sanitizeRecipeAgainstInventory(
+				{
+					title: 'X',
+					whyItFits: 'Y',
+					ingredientsToUse: ['Basilika'],
+					missingIngredients: [],
+					steps: ['Steg']
+				},
+				inventory
+			)
+		).toBeNull();
+	});
+
+	it('sanitizes a list and caps at four', () => {
+		const recipes = sanitizeRecipesAgainstInventory(
+			[
+				{
+					title: 'A',
+					whyItFits: 'B',
+					ingredientsToUse: ['Pasta'],
+					missingIngredients: [],
+					steps: ['1']
+				},
+				{
+					title: 'B',
+					whyItFits: 'C',
+					ingredientsToUse: ['Lök'],
+					missingIngredients: [],
+					steps: ['2']
+				}
+			],
+			inventory
+		);
+		expect(recipes).toHaveLength(1);
+		expect(recipes[0]?.title).toBe('A');
+	});
+});
+
+describe('parseMissingIngredientsPayload', () => {
+	it('dedupes and trims ingredient names', () => {
+		expect(
+			parseMissingIngredientsPayload({
+				ingredients: ['  Basilika ', 'basilika', '', 3, 'Olivolja']
+			})
+		).toEqual(['Basilika', 'Olivolja']);
+	});
+});
+
+describe('missingIngredientToListItem', () => {
+	it('creates a shopping list row with default quantity', () => {
+		expect(missingIngredientToListItem('Basilika')).toEqual({
+			name: 'Basilika',
+			quantity: '1 st',
+			unit: null
+		});
+	});
+});

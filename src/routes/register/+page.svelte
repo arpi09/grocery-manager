@@ -21,5 +21,6 @@
 		message={form?.message}
 		email={form?.email}
 		turnstileSiteKey={data.turnstileSiteKey}
+		captchaRequired={data.captchaRequired}
 	/>
 </AuthLandingShell>

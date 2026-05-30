@@ -22,6 +22,10 @@ import { PmfService } from '$lib/application/pmf.service';
 import { ExpiryReminderService } from '$lib/application/expiry-reminder.service';
 import { DrizzleProductFeedbackRepository } from '$lib/infrastructure/repositories/product-feedback.repository';
 import { ProductFeedbackService } from '$lib/application/product-feedback.service';
+import { DrizzleAiUsageRepository } from '$lib/infrastructure/repositories/ai-usage.repository';
+import { AiRateLimitService } from '$lib/application/ai-rate-limit.service';
+import { PlanLimitsService } from '$lib/application/plan-limits.service';
+import { DrizzlePlanLimitsRepository } from '$lib/infrastructure/repositories/plan-limits.repository';
 
 const userRepository = new DrizzleUserRepository();
 const errorLogRepository = new DrizzleErrorLogRepository();
@@ -35,6 +39,8 @@ const petFoodRepository = new DrizzlePetFoodRepository();
 const pmfRepository = new DrizzlePmfRepository();
 const expiryReminderRepository = new DrizzleExpiryReminderRepository();
 const productFeedbackRepository = new DrizzleProductFeedbackRepository();
+const aiUsageRepository = new DrizzleAiUsageRepository();
+const planLimitsRepository = new DrizzlePlanLimitsRepository();
 
 export const authService = new AuthService(userRepository);
 export const profileService = new ProfileService(userRepository);
@@ -52,3 +58,5 @@ export const expiryReminderService = new ExpiryReminderService(
 	inventoryService
 );
 export const productFeedbackService = new ProductFeedbackService(productFeedbackRepository);
+export const aiRateLimitService = new AiRateLimitService(aiUsageRepository);
+export const planLimitsService = new PlanLimitsService(planLimitsRepository, aiRateLimitService);

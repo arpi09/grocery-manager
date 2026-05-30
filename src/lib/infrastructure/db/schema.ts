@@ -7,7 +7,8 @@ import {
 	index,
 	boolean,
 	integer,
-	primaryKey
+	primaryKey,
+	uniqueIndex
 } from 'drizzle-orm/pg-core';
 
 export const userTable = pgTable('user', {
@@ -254,6 +255,27 @@ export const productFeedbackTable = pgTable(
 	(table) => [
 		index('product_feedback_created_idx').on(table.createdAt),
 		index('product_feedback_user_created_idx').on(table.userId, table.createdAt)
+	]
+);
+
+export const aiUsageTable = pgTable(
+	'ai_usage',
+	{
+		id: text('id').primaryKey(),
+		scopeId: text('scope_id').notNull(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		kind: text('kind', { enum: ['ai_scan', 'receipt_pdf', 'smart_fill'] }).notNull(),
+		periodKey: text('period_key').notNull(),
+		count: integer('count').notNull().default(1),
+		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' })
+			.notNull()
+			.defaultNow()
+	},
+	(table) => [
+		uniqueIndex('ai_usage_scope_kind_period_idx').on(table.scopeId, table.kind, table.periodKey),
+		index('ai_usage_user_updated_idx').on(table.userId, table.updatedAt)
 	]
 );
 

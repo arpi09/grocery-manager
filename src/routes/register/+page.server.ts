@@ -1,5 +1,10 @@
 import { isAuthError } from '$lib/application/auth.service';
-import { getTurnstileSiteKeyForClient, verifyTurnstileToken } from '$lib/server/captcha';
+import {
+	getTurnstileSiteKeyForClient,
+	isTurnstileRequiredForRegistration,
+	verifyTurnstileToken
+} from '$lib/server/captcha';
+import { translate } from '$lib/i18n/messages';
 import { registerSchema } from '$lib/validation/auth.schemas';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { createSession } from '$lib/server/session';
@@ -7,7 +12,8 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => ({
-	turnstileSiteKey: getTurnstileSiteKeyForClient()
+	turnstileSiteKey: getTurnstileSiteKeyForClient(),
+	captchaRequired: isTurnstileRequiredForRegistration()
 });
 
 export const actions: Actions = {
@@ -28,7 +34,7 @@ export const actions: Actions = {
 		if (!captcha.ok) {
 			return fail(400, {
 				errors: {},
-				message: captcha.message,
+				message: translate(event.locals.locale, captcha.messageKey),
 				email: parsed.data.email
 			});
 		}

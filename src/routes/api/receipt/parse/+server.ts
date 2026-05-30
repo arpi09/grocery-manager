@@ -1,6 +1,7 @@
 import { Buffer } from 'node:buffer';
 import type { ReceiptParseResult } from '$lib/domain/receipt-line';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
+import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { extractPdfText } from '$lib/server/receipt-pdf';
 import { parseReceiptFromImage, parseReceiptFromText, parseReceiptLines } from '$lib/server/receipt-parse';
 import {
@@ -44,6 +45,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			{ error: translate(locals.locale, 'errors.api.receiptUnsupported') },
 			{ status: 400 }
 		);
+	}
+
+	const usageKind = isReceiptPdf(mimeType) ? 'receipt_pdf' : 'ai_scan';
+	const quotaResponse = await requireAiQuota(locals, usageKind, auth.user.id);
+	if (quotaResponse) {
+		return quotaResponse;
 	}
 
 	let aiResult;
