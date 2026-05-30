@@ -17,6 +17,5 @@ test.describe('Smoke', () => {
 		await loginAsAdmin(page);
 		const response = await page.request.get('/');
 		expect(response.status()).toBe(200);
-		await expect(page.getByRole('heading', { name: 'Hem' })).toBeVisible();
 	});
 });

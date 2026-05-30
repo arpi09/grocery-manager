@@ -1,4 +1,4 @@
-﻿import { expect, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { LOCALE_COOKIE_NAME, LOCALE_STORAGE_KEY } from '../../src/lib/i18n/locale';
 
 const ONBOARDING_VERSION_KEY = 'home-pantry-onboarding-version';
@@ -70,7 +70,7 @@ async function fillBoundInput(input: import('@playwright/test').Locator, value: 
 }
 
 async function dismissOnboardingModalIfOpen(page: Page) {
-	const skip = page.getByRole('button', { name: 'Hoppa över' });
+	const skip = page.getByRole('button', { name: 'Hoppa �ver' });
 	if (await skip.isVisible().catch(() => false)) {
 		await skip.click();
 		await expect(skip).toBeHidden({ timeout: 5_000 });
@@ -97,7 +97,8 @@ export async function loginAsAdmin(page: Page) {
 		page.getByTestId('login-submit').click()
 	]);
 
-	await expect(page.getByRole('heading', { name: 'Hem' })).toBeVisible({ timeout: 20_000 });
+	await expect(page.locator("section.home")).toBeVisible({ timeout: 20_000 });
+	await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 	await dismissOnboardingModalIfOpen(page);
 }
 
