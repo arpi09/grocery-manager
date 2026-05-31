@@ -10,11 +10,12 @@ import {
 function mockTurnstile() {
 	const render = vi.fn().mockReturnValue('widget-1');
 	const remove = vi.fn();
+	const reset = vi.fn();
 	const ready = vi.fn((callback: () => void) => callback());
 
-	window.turnstile = { render, remove, ready };
+	window.turnstile = { render, remove, reset, ready };
 
-	return { render, remove, ready };
+	return { render, remove, reset, ready };
 }
 
 async function flushTurnstileMount(): Promise<void> {
