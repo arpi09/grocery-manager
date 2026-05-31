@@ -40,9 +40,9 @@ Enligt [RECEIPT_TEST_PACK.md](./RECEIPT_TEST_PACK.md). Kör `npm run test:receip
 
 ---
 
-## 6. Bekräfta custom domain (om ej live)
+## 6. Custom domain (valfritt — ej kopplad än)
 
-[CUSTOM_DOMAIN.md](./CUSTOM_DOMAIN.md): Firebase Console, `PUBLIC_ORIGIN`/`ORIGIN`, Turnstile-hostnames. Utan live domän blir launch och SEO svagare.
+Prod kör idag på `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app`. Framtida `homepantry.com`: [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md) (Firebase Console, `PUBLIC_ORIGIN`/`ORIGIN`, Turnstile-hostnames).
 
 ---
 

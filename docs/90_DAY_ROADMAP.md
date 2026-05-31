@@ -12,7 +12,7 @@ Checklista från [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 15
 | 4 | PWA + installguide för iPhone/Android | **Klar** | #2 PWA + hemskärm | `@vite-pwa/sveltekit`, manifest, `/install-app`, banner på `/hem`, FAQ |
 | 5 | Implementera utgångspåminnelse (e-post minimum) | **Klar** | #3 Utgångspåminnelser | Veckovis digest, opt-in i inställningar, cron-API |
 | 6 | Prissättningshypotes — dokumentera Pro-gränser; stripe senare | **Klar** | — | `docs/PRICING.md`, `plan.ts`, `/priser`, inställningar Plan |
-| 7 | homepantry.com live på en domän (Firebase custom domain) | **Klar (dokumenterat + kod redo)** | — | Domän kopplas i Firebase Console av ägare — se [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md) |
+| 7 | homepantry.com live på en domän (Firebase custom domain) | **Framtid (guide klar; domän ej kopplad)** | — | Prod idag: `*.hosted.app` — se [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md) när domän finns |
 | 8 | Landningssida A/B-copy mot Bring/ICA/Matdags med ärliga jämförelser | **Klar** | #6 "Varför inte bara ICA?" | Hero A/B (`?hero=b`, cookie, `PUBLIC_LANDING_VARIANT`), jämförelsetabell på `/`, se `docs/MARKETING_SITE.md` |
 | 9 | 10 användarintervjuer (SV hushåll) — vad gjorde dem churna? | **Klar (kit + insamling)** | — | `docs/USER_INTERVIEWS.md`, feedback i inställningar + `/admin`; 10 intervjuer körs av ägaren |
 | 10 | Kvitto-PDF testpack — 20 riktiga ICA/Kivra/Willys-PDF | **Klar (infrastruktur; ägare fyller på riktiga PDF)** | — | Se [RECEIPT_TEST_PACK.md](./RECEIPT_TEST_PACK.md), `tests/fixtures/receipts/`, syntetiska CI-fixtures |
@@ -28,6 +28,8 @@ Checklista från [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 15
 | 20 | Registration captcha fix — Turnstile prod + test mode CI | **Klar** | — | `PUBLIC_TURNSTILE_SITE_KEY` i apphosting, widget + verify, i18n-fel, domän-whitelist i CAPTCHA.md |
 
 *Punkt 16–20 är tillägg utöver original-listan (15 punkter) i COMPETITIVE_ANALYSIS §15 — kopplade till Must-roadmap, e2e och prod-fixar.*
+
+**Arkiv nedan:** leveransdetaljer per punkt. Aktiv status och fas-gates: [`ROADMAP.md`](./ROADMAP.md).
 
 ## Punkt 1 — levererat
 
@@ -63,20 +65,7 @@ Checklista från [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 15
 
 ## Punkt 2 — spec (historisk)
 
-**Mål:** Förenkla första sessionen så nya användare når aktivering utan att känna att de måste "fylla hela skafferiet".
-
-**Acceptanskriterier:**
-
-1. **Onboarding-flöde** leder tydligt till *antingen* kvittoscan *eller* 5 streckkoder — inte full inventering.
-2. **Copy/UI** tar bort "fyll skafferiet"-känslan; hero/CTA/onboarding-guide visar två enkla vägar.
-3. **Progressindikator** i första sessionen: "0/5 streckkoder" eller "Ladda upp kvitto".
-4. **Aktiveringsmål** (från PMF): ≥10 varor *eller* 1 kvitto inom 24 h — onboarding ska optimeras mot detta, inte total lagersstorlek.
-5. **Must-roadmap #1:** första scan inom 5 min, mål 10 varor — aligna copy men sänk friktion (5 streckkoder räcker som väg).
-6. **Mätning:** befintliga PMF-events ska visa förbättrad median "tid till första scan" efter lansering.
-
-**Filer att troligen röra:** `OnboardingGuide.svelte`, `HomeDashboard.svelte`, `StarterPackFlow.svelte`, `ScanModeHub.svelte`, i18n (`onboarding.*`), ev. `onboarding.ts`.
-
-**Ej i scope:** PWA, notiser, paywall, Capacitor.
+Levererat — se *Punkt 2 — levererat* ovan och [ROADMAP.md § Fas 0](./ROADMAP.md#fas-0-klar--90-dagar-punkter-120).
 
 ## Punkt 5 — levererat
 
@@ -100,7 +89,7 @@ Checklista från [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 15
    Kontrollera att `RESEND_API_KEY` och `PUBLIC_ORIGIN`/`ORIGIN` redan matchar live-URL (se [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md)). Redeploy efter nya secrets.
 3. **GitHub** → *Settings* → *Secrets and variables* → *Actions*:
    - **Secret:** `CRON_SECRET` — samma sträng som i Firebase
-   - **Variable:** `PRODUCTION_URL` — kanonisk prod-URL **utan** avslutande `/`, t.ex. `https://homepantry.com` eller `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app` (samma host som `PUBLIC_ORIGIN`)
+   - **Variable:** `PRODUCTION_URL` — kanonisk prod-URL **utan** avslutande `/`: `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app` (samma host som `PUBLIC_ORIGIN`)
 4. **Verifiera:** *Actions* → **Expiry reminders cron** → *Run workflow*. Förväntat: HTTP 200 och JSON `{ "ok": true, ... }`.
 5. **Schema:** workflow körs automatiskt varje **måndag 07:00 UTC**. Påverkar inte **Release**-pipelinen (separat workflow, ingen `push`-trigger).
 
@@ -149,14 +138,14 @@ Checklista från [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 15
 - **Register:** Playwright register-flow med `TURNSTILE_BYPASS` / `TURNSTILE_SKIP` (server skip i test/CI, ignoreras i prod)
 - **Kritiska flöden:** login → `/hem`, onboarding för ny användare, smart fill på `/inkop`, scan-hub på `/scan`, marketing `/` + `/login` HTTP 200
 - **Dokumentation:** [`E2E.md`](./E2E.md); CI env i `.github/workflows/release.yml`
-- **Tester:** 6 nya i `e2e/critical-flows.spec.ts` (14 E2E totalt, befintliga 8 oförändrade)
+- **Tester:** se [`E2E.md`](./E2E.md) (23 tester i 8 spec-filer)
 
-## Punkt 7 — levererat (dokumentation + kod)
+## Punkt 7 — guide klar (domän ej kopplad än)
 
 - **Guide:** [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md) — Firebase Console, DNS (A/TXT/CNAME), SSL, www→apex, env, verifiering
-- **Env:** `.env.example` och `apphosting.yaml` kommenterade för `https://homepantry.com`
+- **Prod idag:** `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app` i `.env.example` och `apphosting.yaml`
 - **Kod:** `marketingCanonicalUrl` / `PUBLIC_ORIGIN` för canonical + `og:url`; inbjudningsmail via befintlig `getAppOrigin()`
-- **Kvar hos ägare:** koppla domän i Firebase Console och uppdatera `PUBLIC_ORIGIN` + `ORIGIN` efter SSL är aktivt
+- **Kvar hos ägare (valfritt):** skaffa och koppla `homepantry.com` i Firebase Console; uppdatera `PUBLIC_ORIGIN` + `ORIGIN` efter SSL
 
 ## Punkt 19 — levererat
 

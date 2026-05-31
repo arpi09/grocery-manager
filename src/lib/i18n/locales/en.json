@@ -103,7 +103,7 @@
 			"loginLink": "Log in",
 			"captchaLabel": "Confirm you are not a robot",
 			"captchaLoadError": "Captcha could not load. Refresh the page and try again.",
-			"captchaDomainError": "Captcha could not load for this website address. Try https://homepantry.com/register or contact support."
+			"captchaDomainError": "Captcha could not load for this website address. Try https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app/register or contact support."
 		}
 	},
 	"home": {
@@ -361,7 +361,7 @@
 			"lead": "Add a home screen shortcut to open your pantry in one tap — camera and offline work better in the installed view.",
 			"alreadyInstalled": "You are already using the installed app. Nice!",
 			"iosTitle": "iPhone (Safari)",
-			"iosStep1": "Open homepantry.com in Safari (not an in-app browser from other apps).",
+			"iosStep1": "Open home-pantry--home-pantry-4bee5.europe-west4.hosted.app in Safari (not an in-app browser from other apps).",
 			"iosStep2": "Tap the Share button (square with arrow up).",
 			"iosStep3": "Choose Add to Home Screen and confirm.",
 			"iosHint": "On iPad: same steps in Safari.",

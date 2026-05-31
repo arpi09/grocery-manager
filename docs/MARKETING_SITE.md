@@ -54,13 +54,13 @@ npm run dev
 | Variable | Purpose |
 |----------|---------|
 | `PUBLIC_APP_URL` | Optional. Base URL for “Öppna appen” / “Logga in” when marketing and app are on **different domains**. Defaults to production hosted URL when unset on server; uses same origin in dev. |
-| `PUBLIC_ORIGIN` | Existing — canonical origin for emails/CSRF (unchanged). |
+| `PUBLIC_ORIGIN` | Canonical origin for emails, CSRF, and marketing SEO (`canonical`, `og:url`). **Production:** `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app`. **Dev:** `http://localhost:5173`. |
 | `PUBLIC_LANDING_VARIANT` | Optional. `a` or `b` — default hero when no `?hero=` or cookie (see Landing hero A/B). |
 
-Example for split domains later:
+Example for split domains later (not used today — single hosted.app deploy):
 
 ```bash
-# Marketing at https://homepantry.com, app at Firebase hosted URL
+# Marketing at homepantry.com (future — domän ej kopplad än), app at Firebase hosted URL
 PUBLIC_APP_URL=https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app
 ```
 
@@ -76,17 +76,27 @@ npm run build
 npm run deploy:firebase   # or CI deploy job
 ```
 
-## Custom domain: homepantry.com
+## Production URL (current)
 
-**Full setup guide:** [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md) — DNS, SSL, env vars, and post-cutover checks.
+Marketing and app share one Firebase App Hosting deploy:
 
-### A. Single domain (recommended for v1)
-
-Point **homepantry.com** (and `www`) to Firebase App Hosting backend **home-pantry**:
+**`https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app`**
 
 - `/` → marketing landing  
 - `/login`, `/hem`, `/scan`, … → app  
-- One SSL cert, one deploy, path-based routing only.
+- Set `PUBLIC_ORIGIN` and `ORIGIN` to the URL above (already in `apphosting.yaml`).  
+- Leave `PUBLIC_APP_URL` unset so CTAs use relative `/login`.  
+- Marketing `canonical` / `og:url` meta tags use `PUBLIC_ORIGIN` via `src/lib/marketing/app-url.ts` (fallback: hosted.app constant in code).
+
+## Custom domain: homepantry.com (future, optional)
+
+> **Domän ej kopplad än.** Brand name *homepantry.com* appears in copy and vision docs; live traffic uses `*.hosted.app` until DNS is attached.
+
+**Full setup guide (when you own the domain):** [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md) — DNS, SSL, env vars, and post-cutover checks.
+
+### A. Single domain (recommended when custom domain goes live)
+
+Point **homepantry.com** (and `www`) to Firebase App Hosting backend **home-pantry** — same path layout as today on hosted.app.
 
 After the domain is connected, set in production:
 
@@ -95,21 +105,21 @@ PUBLIC_ORIGIN=https://homepantry.com
 ORIGIN=https://homepantry.com
 ```
 
-Leave `PUBLIC_APP_URL` unset so CTAs use relative `/login`. Marketing `canonical` / `og:url` meta tags use `PUBLIC_ORIGIN` via `src/lib/marketing/app-url.ts`.
+Leave `PUBLIC_APP_URL` unset so CTAs use relative `/login`.
 
 ### B. Split domains (marketing vs app)
 
 | Domain | Serves |
 |--------|--------|
-| `homepantry.com` | Marketing (this repo, `(marketing)` routes only) |
-| `app.homepantry.com` or current `*.hosted.app` | Full app |
+| `homepantry.com` | Marketing (future — domän ej kopplad än) |
+| `app.homepantry.com` or current `*.hosted.app` | Full app (today: hosted.app URL above) |
 
 Requires either:
 
 1. **Two Firebase App Hosting backends** (or Hosting + App Hosting) with separate builds/env, plus `PUBLIC_APP_URL` on the marketing site, or  
 2. **Reverse proxy / CDN rules** routing `/login`, `/hem`, `/api/*`, etc. to the app backend and `/`, `/funktioner`, … to marketing.
 
-For v1, **option A** is recommended: one custom domain, minimal ops.
+For v1 today, **one hosted.app URL** is enough; custom domain is optional later.
 
 ## Landing hero A/B (item #8)
 

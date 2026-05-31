@@ -1,6 +1,6 @@
 # E2E tests (Playwright)
 
-End-to-end coverage for critical user journeys. Roadmap item **#16** in [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md).
+End-to-end coverage for critical user journeys. **23 tests** across 8 spec files. Roadmap item **#16** in [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md).
 
 ## Run locally (CI pattern)
 
@@ -64,7 +64,7 @@ See [`CAPTCHA.md`](./CAPTCHA.md) for production Turnstile setup.
 | `e2e/shopping.spec.ts` | Smart fill, list add/check |
 | `e2e/smoke.spec.ts` | Basic HTTP smoke |
 | `e2e/navigation.spec.ts` | Nav + mobile sheet |
-| `e2e/admin.spec.ts` | Admin dashboard |
+| `e2e/z-admin.spec.ts` | Admin dashboard (körs sist i CI) |
 
 ## Fixtures (`e2e/fixtures/`)
 

@@ -1,6 +1,6 @@
 # Ny utvecklare / ny Cursor-installation
 
-Kort guide för att komma igång med **Home Pantry** utan koordinator-specifika filer (de ligger i gitignorerad `private/` och kopieras vid kontobyte — se `private/CURSOR_MIGRATION.md` lokalt om du har backup).
+Kort guide för att komma igång med **Home Pantry**. Koordinator-specifika filer (agentkartor, säkerhetsrapporter, engineering intelligence) ligger i gitignorerad [`private/`](../private/) — se [`docs/README.md`](./README.md). Vid kontobyte: `private/CURSOR_MIGRATION.md` lokalt om du har backup.
 
 ## Förutsättningar
 

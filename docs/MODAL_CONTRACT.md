@@ -1,6 +1,6 @@
 # Modal component contract
 
-`src/lib/components/molecules/Modal.svelte` is the shared dialog primitive. **Do not change focus trap, portal, or variant behavior without coordinator approval** — many features depend on stable semantics.
+`src/lib/components/molecules/Modal.svelte` is the shared dialog primitive. **Do not change focus trap, portal, or variant behavior without explicit maintainer approval** — many features depend on stable semantics.
 
 ## Frozen API (props)
 

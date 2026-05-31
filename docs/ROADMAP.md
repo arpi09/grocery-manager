@@ -45,7 +45,7 @@ Sammanfattning av [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md). Tekniskt arbete i 
 | 13 | Launch playbook | Klar (kit) | Ägare: 2–3 communities |
 | 14 | Veckovis PMF-rutin | Klar (dashboard) | Ägare: faktisk veckogranskning |
 | 15 | Beslut dag 90 (dokument) | Klar | Checklista i DAY_90_DECISION |
-| 16 | E2E critical flows | Klar | 17 tester, [E2E.md](./E2E.md) |
+| 16 | E2E critical flows | Klar | 23 tester, [E2E.md](./E2E.md) |
 | 17 | Scan-kvalitet SV | Klar | Favoriter, senaste, snabb edit |
 | 18 | Freemium UI / gränser | Klar | PlanLimits, banners |
 | 19 | Recept från lager v2 | Klar | Portioner, saknade → lista |
@@ -64,7 +64,7 @@ Sammanfattning av [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md). Tekniskt arbete i 
 | 3 | Scan add (streckkod manuellt) | ✅ E2E |
 | 4 | Smart fill `/inkop` (`fillFromPantry`) | ✅ E2E + fixture |
 | 5 | Inga 500 på `/hem`, `/inkop`, `/scan/kvitto`, `/settings` (migrationer 0012–0018) | ✅ init.ts + integration |
-| 6 | E2E critical flows (page.route-mocks, ingen OpenAI i CI) | ✅ 22 tester — [E2E.md](./E2E.md) |
+| 6 | E2E critical flows (page.route-mocks, ingen OpenAI i CI) | ✅ 23 tester — [E2E.md](./E2E.md) |
 | 7 | `receipt-parse.test.ts` + integration + receipt fixtures | ✅ |
 | 8 | Quality gate: check, test, integration, e2e, build | ✅ CI Release |
 

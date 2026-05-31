@@ -1,8 +1,12 @@
-# Custom domain — homepantry.com
+# Custom domain — homepantry.com (future, optional)
+
+> **Status:** `homepantry.com` is **not connected** yet. Production today runs on  
+> **`https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app`** with `PUBLIC_ORIGIN` / `ORIGIN` set to that URL (see `apphosting.yaml`).  
+> Use this guide **only when** you own the domain and want to attach it in Firebase Console.
 
 Step-by-step guide to serve Home Pantry on **homepantry.com** (and `www`) via Firebase App Hosting. DNS and domain attachment are done in Firebase Console and at your domain registrar — this repo documents the process and holds the code/env prep.
 
-**Recommended setup (v1):** one domain, one deploy — marketing at `/` and app at `/login`, `/hem`, etc. See [`MARKETING_SITE.md`](./MARKETING_SITE.md).
+**Target setup (when domain is live):** one domain, one deploy — marketing at `/` and app at `/login`, `/hem`, etc. See [`MARKETING_SITE.md`](./MARKETING_SITE.md).
 
 Official reference: [Connect a custom domain (Firebase App Hosting)](https://firebase.google.com/docs/app-hosting/custom-domain).
 
@@ -11,7 +15,7 @@ Official reference: [Connect a custom domain (Firebase App Hosting)](https://fir
 ## Before you start
 
 - [ ] App already deploys to Firebase App Hosting backend **`home-pantry`** (see [`FIREBASE_DEPLOY.md`](./FIREBASE_DEPLOY.md)).
-- [ ] You own **homepantry.com** and can edit DNS at the registrar (e.g. Google Domains, Cloudflare, Loopia).
+- [ ] You **own** **homepantry.com** (or another apex domain) and can edit DNS at the registrar (e.g. Google Domains, Cloudflare, Loopia).
 - [ ] Decide canonical host: **`https://homepantry.com`** (apex, recommended) with `www` redirecting to apex.
 
 ---

@@ -244,10 +244,14 @@ export function computeActivationRate(facts: UserActivationFacts[]): {
 	};
 }
 
+function dateMs(value: Date | string): number {
+	return value instanceof Date ? value.getTime() : new Date(value).getTime();
+}
+
 export function medianMinutesToFirstScan(facts: FirstScanFacts[]): number | null {
 	const deltas = facts
 		.filter((row) => row.firstScanAt !== null)
-		.map((row) => (row.firstScanAt!.getTime() - row.registeredAt.getTime()) / 60_000)
+		.map((row) => (dateMs(row.firstScanAt!) - dateMs(row.registeredAt)) / 60_000)
 		.filter((minutes) => minutes >= 0)
 		.sort((a, b) => a - b);
 
@@ -268,7 +272,7 @@ export function isWeeklyActive(lastSeenAt: Date | null, now: Date, windowMs = WA
 		return false;
 	}
 
-	return lastSeenAt.getTime() >= now.getTime() - windowMs;
+	return dateMs(lastSeenAt) >= now.getTime() - windowMs;
 }
 
 export function computeWeeklyScanRate(
@@ -301,7 +305,7 @@ export function computeRetentionRate(
 ): { rate: number; eligibleUsers: number } {
 	const retentionMs = retentionDays * 24 * 60 * 60 * 1000;
 	const eligible = users.filter(
-		(user) => now.getTime() - user.createdAt.getTime() >= retentionMs
+		(user) => now.getTime() - dateMs(user.createdAt) >= retentionMs
 	);
 
 	if (eligible.length === 0) {
@@ -313,7 +317,7 @@ export function computeRetentionRate(
 			return false;
 		}
 
-		return user.lastSeenAt.getTime() - user.createdAt.getTime() >= retentionMs;
+		return dateMs(user.lastSeenAt) - dateMs(user.createdAt) >= retentionMs;
 	});
 
 	return {

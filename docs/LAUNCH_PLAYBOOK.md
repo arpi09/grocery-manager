@@ -39,7 +39,7 @@ Välj **en primär** och **en–två sekundära** kanaler. Kör dem **staggered*
 
 ## Kanaler — konkreta förslag
 
-Verifiera alltid **gruppregler** och moderators riktlinjer innan post. Länka till `https://homepantry.com` (eller din live-domän enligt [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md)).
+Verifiera alltid **gruppregler** och moderators riktlinjer innan post. Länka till prod-URL:en `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app` (ev. framtida custom domain: [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md)).
 
 ### Matsvinn
 
@@ -84,7 +84,7 @@ Använd **konsekventa** UTM-parametrar på alla länkar i community-poster. Det 
 ### Bas-URL
 
 ```
-https://homepantry.com/?utm_source=facebook&utm_medium=community&utm_campaign=matsvinn_w12
+https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app/?utm_source=facebook&utm_medium=community&utm_campaign=matsvinn_w12
 ```
 
 **Djuplänkar (valfritt):**
@@ -99,7 +99,7 @@ https://homepantry.com/?utm_source=facebook&utm_medium=community&utm_campaign=ma
 Exempel med alla UTM + install:
 
 ```
-https://homepantry.com/install-app?utm_source=facebook&utm_medium=community&utm_campaign=matsvinn_w12&utm_content=post_install_tip
+https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app/install-app?utm_source=facebook&utm_medium=community&utm_campaign=matsvinn_w12&utm_content=post_install_tip
 ```
 
 ### Vad som händer i produkten
@@ -177,7 +177,7 @@ Byt ut `[LÄNK]` mot din UTM-länk. Håll ton enligt [`BRAND.md`](./BRAND.md): v
 
 > I'm building a store-neutral pantry app for Swedish households (barcode + receipt PDF, fridge/freezer/cupboard, expiry, shared household). Looking for 5–10 testers for 2 weeks — not a sales pitch, free to try. Would value honest friction feedback on first session.
 >
-> https://homepantry.com/?utm_source=reddit&utm_medium=community&utm_campaign=zerowaste_w12
+> https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app/?utm_source=reddit&utm_medium=community&utm_campaign=zerowaste_w12
 >
 > Happy to answer questions in comments.
 
@@ -248,7 +248,7 @@ Alla mål och definitioner finns i kod (`src/lib/domain/pmf.ts`) och på **`/adm
 
 | Dag | Aktivitet |
 |-----|-----------|
-| **−3** | Välj 2–3 kanaler; skriv UTM-länkar; kontrollera att `homepantry.com` + `/privacy` är live |
+| **−3** | Välj 2–3 kanaler; skriv UTM-länkar; kontrollera att hosted.app-URL + `/privacy` är live |
 | **0** | Posta **primär** (Mall A); pinna egen kommentar med install-tip |
 | **1–3** | Svara alla kommentarer; bjud in 3–5 till kort DM-samtal om [`USER_INTERVIEWS.md`](./USER_INTERVIEWS.md) |
 | **7** | Läs `/admin` PMF; justera copy om aktivering < baslinje |

@@ -1,4 +1,4 @@
-﻿import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import type { CreateShoppingListItemInput, ShoppingListItem } from '$lib/domain/shopping-list-item';
 import { db, type AppDatabase } from '$lib/infrastructure/db';
 import { shoppingListItemTable } from '$lib/infrastructure/db/schema';
@@ -25,7 +25,7 @@ function mapRow(row: typeof shoppingListItemTable.$inferSelect): ShoppingListIte
 		name: row.name,
 		quantity: row.quantity,
 		unit: row.unit,
-		checked: row.checked,
+		checked: Boolean(row.checked),
 		sortOrder: row.sortOrder,
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt

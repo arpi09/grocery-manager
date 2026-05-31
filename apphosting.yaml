@@ -33,9 +33,9 @@ env:
       - BUILD
       - RUNTIME
 
-  # Public URL of the deployed app — update to https://homepantry.com after custom domain
-  # is connected (Firebase Console → App Hosting → home-pantry → Custom domains).
-  # See docs/CUSTOM_DOMAIN.md. PUBLIC_ORIGIN and ORIGIN must match the canonical HTTPS origin.
+  # Public URL of the deployed app (current production). PUBLIC_ORIGIN and ORIGIN must match
+  # the canonical HTTPS origin users open in the browser. Optional future custom domain:
+  # docs/CUSTOM_DOMAIN.md (homepantry.com — not connected yet).
   - variable: PUBLIC_ORIGIN
     value: https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app
     availability:
@@ -106,7 +106,7 @@ env:
       - RUNTIME
 
   # Cloudflare Turnstile site key (public) — must match a widget whose hostnames include
-  # home-pantry--home-pantry-4bee5.europe-west4.hosted.app (+ homepantry.com when live); see docs/CAPTCHA.md
+  # Widget hostnames: localhost + home-pantry--home-pantry-4bee5.europe-west4.hosted.app; see docs/CAPTCHA.md
   - variable: PUBLIC_TURNSTILE_SITE_KEY
     value: 0x4AAAAAADZUXk7XZddZ9HBf
     availability:

@@ -82,6 +82,8 @@
 			};
 		}
 
+		const onScriptError = () => markLoadFailed();
+
 		let script = document.getElementById(TURNSTILE_SCRIPT_ID) as HTMLScriptElement | null;
 
 		if (!script) {
@@ -90,7 +92,7 @@
 			script.src = TURNSTILE_SCRIPT_SRC;
 			script.async = true;
 			script.defer = true;
-			script.addEventListener('error', () => markLoadFailed());
+			script.addEventListener('error', onScriptError);
 			document.head.appendChild(script);
 		}
 
@@ -102,7 +104,7 @@
 		return () => {
 			cancelled = true;
 			script?.removeEventListener('load', onScriptLoad);
-			script?.removeEventListener('error', markLoadFailed);
+			script?.removeEventListener('error', onScriptError);
 			removeWidget();
 		};
 	});

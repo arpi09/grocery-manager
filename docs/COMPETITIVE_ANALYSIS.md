@@ -24,7 +24,7 @@
 | **Scan-kvalitet SV** | Favoriter, senaste varor, snabb redigering | Minskar OFF-frustration; fortfarande svagare än dedikerade barcode-DB |
 | **Kvitto-PDF** | Bild + PDF, OpenAI-parse, E2E med mock | **Synthetic CI-fixtures**; riktig ICA/Kivra-korpus hos ägare ej i repo |
 | **Marknadswebb** | Hero A/B, jämförelsetabell, `/priser`, UTM | Tydligare mot ICA/Bring/Matdags; **launch i communities** = ägaruppgift |
-| **E2E** | 17 tester (kritiska flöden + kvitto + auth) | Höjer deploy-säkerhet; kvittoparse i prod ej fullt täckt i E2E |
+| **E2E** | 23 tester (8 spec-filer, se [E2E.md](./E2E.md)) | Höjer deploy-säkerhet; kvittoparse i prod ej fullt täckt i E2E |
 
 ### Fortfarande ej shipped (kritiska gap)
 

@@ -31,7 +31,7 @@ jobs:
             exit 1
           fi
           if [ -z "${PRODUCTION_URL:-}" ]; then
-            echo "::error::GitHub repository variable PRODUCTION_URL is not set (e.g. https://homepantry.com)."
+            echo "::error::GitHub repository variable PRODUCTION_URL is not set (e.g. https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app)."
             exit 1
           fi
 

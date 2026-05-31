@@ -226,7 +226,7 @@ https://home-pantry--home-pantry-4bee5.REGION.hosted.app
 - [ ] `ADMIN_EMAIL` set to your real admin address
 - [ ] `PUBLIC_ORIGIN` and `ORIGIN` match live URL (cookies + form POST / login)
 - [ ] Log in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`
-- [ ] Optional: [Custom domain](./CUSTOM_DOMAIN.md) (`homepantry.com`)
+- [ ] Optional (future): [Custom domain](./CUSTOM_DOMAIN.md) — `homepantry.com` not connected yet
 - [ ] Optional: set `minInstances: 1` in `apphosting.yaml` to reduce cold starts (costs more)
 
 ## Ongoing pipeline (GitHub Actions)

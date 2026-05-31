@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
 import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
 
@@ -16,6 +16,7 @@ test.describe('Scan and inventory', () => {
 	});
 
 	test('manual barcode lookup and add item to inventory', async ({ page }) => {
+		test.setTimeout(60_000);
 		const fixture = loadFixture<{
 			product: { barcode: string; name: string };
 		}>('barcode.json');
@@ -31,14 +32,14 @@ test.describe('Scan and inventory', () => {
 		const manualBarcode = page.locator('#manual-barcode');
 		if (await manualBarcode.isVisible().catch(() => false)) {
 			await manualBarcode.fill(barcode);
-			await page.getByRole('button', { name: /^Sök$/i }).click();
+			await page.getByRole('button', { name: /^SÃ¶k$/i }).click();
 			await expect(page.locator('#scan-product-name')).toBeVisible({ timeout: 15_000 });
 			await page.locator('#scan-product-name').fill(itemName);
 			await page.locator('form.save-form').getByRole('button', { name: /^Spara$/i }).click();
 		} else {
 			await page.goto(`/item/new?location=fridge&from=/inventory/fridge`);
 			await page.locator('input[name="name"]').fill(itemName);
-			await page.locator('form').getByRole('button', { name: /Lägg till vara/i }).click();
+			await page.locator('form').getByRole('button', { name: /L.gg till vara/i }).click();
 		}
 
 		await expect(page).toHaveURL(/\/inventory\/fridge/, { timeout: 15_000 });

@@ -6,18 +6,18 @@ Home Pantry uses [Cloudflare Turnstile](https://www.cloudflare.com/products/turn
 
 1. Sign in to the [Cloudflare dashboard](https://dash.cloudflare.com/).
 2. Go to **Turnstile** → **Add site**.
-3. Choose **Managed** widget type and add **every hostname** that serves `/register` (domain whitelist — missing hostnames break prod). Use the **exact hostname** from the browser address bar (no `https://`, no path). Add **all four** production hostnames even if you only use one URL day-to-day:
+3. Choose **Managed** widget type and add **every hostname** that serves `/register` (domain whitelist — missing hostnames break prod). Use the **exact hostname** from the browser address bar (no `https://`, no path). Production today uses **only these two** hostnames:
 
    | Hostname | When users hit it |
    |----------|-------------------|
    | `localhost` | Local dev |
-   | `home-pantry--home-pantry-4bee5.europe-west4.hosted.app` | Firebase App Hosting default URL |
-   | `homepantry.com` | Custom domain (apex) |
-   | `www.homepantry.com` | Custom domain (`www` redirect or direct) |
+   | `home-pantry--home-pantry-4bee5.europe-west4.hosted.app` | Firebase App Hosting (current production URL) |
 
    **Cloudflare Console steps:** Turnstile → your widget → **Settings** → **Hostname Management** → **Add Hostnames** → paste each row above → **Save**. Changes apply within ~1 minute (hard-refresh `/register` after).
 
-   Common mistake: adding only `hosted.app` or `homepantry.com` while testing on the other URL — Turnstile matches the **full** hostname only.
+   Common mistake: adding only `hosted.app` (partial) instead of the **full** hostname above — Turnstile matches the exact host only.
+
+   **Future (optional):** after `homepantry.com` is connected in Firebase, add `homepantry.com` and `www.homepantry.com` to the same widget — see [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md). That domain is **not** live today.
 4. Copy the **Site key** and **Secret key** (pair must belong to the same widget).
 
 If a hostname is missing, Turnstile returns error **110200** (invalid domain): the widget label appears, a red *Captcha kunde inte laddas för den här webbadressen* message shows, and submit is disabled. Browser console: `[turnstile] Widget error: 110200`. Inspect `data-turnstile-error-code="110200"` on the error line.
@@ -87,7 +87,7 @@ npx firebase apphosting:secrets:grantaccess TURNSTILE_SECRET_KEY --backend home-
 
 ## Troubleshooting prod registration
 
-1. Confirm widget hostnames include the exact URL users open (hosted.app or custom domain).
+1. Confirm widget hostnames include the exact URL users open (`home-pantry--home-pantry-4bee5.europe-west4.hosted.app` or `localhost` for dev).
 2. Confirm `PUBLIC_TURNSTILE_SITE_KEY` in deployed build matches the widget site key (BUILD + RUNTIME in `apphosting.yaml` or Firebase Console).
 3. Confirm `TURNSTILE_SECRET_KEY` secret exists and matches the same widget (`firebase apphosting:secrets:describe TURNSTILE_SECRET_KEY`).
 4. Redeploy after env/secret changes.
@@ -96,7 +96,7 @@ npx firebase apphosting:secrets:grantaccess TURNSTILE_SECRET_KEY --backend home-
 
 ## Verify after deploy
 
-1. Open `/register` in an incognito window on the production URL (hosted.app or custom domain).
+1. Open `/register` in an incognito window on `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app/register`.
 2. Confirm **Bekräfta att du inte är en robot** / **Confirm you are not a robot** and the Turnstile widget render below the password fields.
 3. If misconfigured, a red banner (*Captcha är inte konfigurerad*) appears and submit is disabled.
 4. DevTools → Network: `https://challenges.cloudflare.com/turnstile/v0/api.js` loads with status 200.

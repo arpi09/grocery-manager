@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import type { SubmitFunction } from '@sveltejs/kit';
@@ -86,6 +86,13 @@
 		}
 	}
 
+	
+	const toggleEnhance: SubmitFunction = () => {
+		return async ({ update }) => {
+			await update({ reset: false, invalidateAll: true });
+		};
+	};
+
 	function dismissUndo() {
 		undoPayload = null;
 	}
@@ -128,7 +135,7 @@
 			{#each unchecked as item (item.id)}
 				<li>
 					{#if canEdit}
-						<form method="POST" action="?/toggle" use:enhance class="row-form">
+						<form method="POST" action="?/toggle" data-sveltekit-reload class="row-form">
 							<input type="hidden" name="id" value={item.id} />
 							<label class="check-row">
 								<input type="checkbox" onchange={(e) => e.currentTarget.form?.requestSubmit()} />
@@ -141,7 +148,7 @@
 							copyOptions={{ itemName: item.name }}
 							action="?/remove"
 							submitEnhance={createRemoveEnhance(item)}
-							label="×"
+							label="�"
 							ariaLabel={t('shopping.removeLine', { line: formatLine(item) })}
 							class="remove-trigger"
 						>
@@ -174,7 +181,7 @@
 					{#each checked as item (item.id)}
 						<li>
 							{#if canEdit}
-								<form method="POST" action="?/toggle" use:enhance class="row-form">
+								<form method="POST" action="?/toggle" data-sveltekit-reload class="row-form">
 									<input type="hidden" name="id" value={item.id} />
 									<label class="check-row">
 										<input type="checkbox" checked onchange={(e) => e.currentTarget.form?.requestSubmit()} />
