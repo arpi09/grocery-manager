@@ -76,6 +76,10 @@ describe('createTurnstileMount', () => {
 		document.head.innerHTML = '';
 		resetTurnstileScriptCacheForTests();
 		delete window.turnstile;
+		vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+			callback(0);
+			return 0;
+		});
 		mockTurnstile();
 	});
 
@@ -113,6 +117,10 @@ describe('createTurnstileMount', () => {
 
 	it('retries render once before timeout error', async () => {
 		vi.useFakeTimers();
+		vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+			callback(0);
+			return 0;
+		});
 		const node = document.createElement('div');
 		const onError = vi.fn();
 		const { render } = mockTurnstile();

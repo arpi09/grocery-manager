@@ -219,12 +219,22 @@ export function createTurnstileMount(
 			}
 		};
 
-		if (window.turnstile.ready) {
-			window.turnstile.ready(runRender);
-			return;
-		}
+		const renderAfterLayout = () => {
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => {
+					if (cancelled || !window.turnstile) {
+						return;
+					}
+					if (window.turnstile.ready) {
+						window.turnstile.ready(runRender);
+						return;
+					}
+					runRender();
+				});
+			});
+		};
 
-		runRender();
+		renderAfterLayout();
 	}
 
 	function startLoadAndRender(loadAttempt = 0) {

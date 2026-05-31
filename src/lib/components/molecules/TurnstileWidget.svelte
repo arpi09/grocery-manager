@@ -3,7 +3,6 @@
 	import { createTurnstileMount, type TurnstileMountHandle } from '$lib/client/turnstile-mount';
 	import { getTurnstileLoadErrorMessageKey } from '$lib/domain/turnstile-errors';
 	import { t } from '$lib/i18n';
-	import { tick } from 'svelte';
 
 	interface Props {
 		siteKey: string;
@@ -22,21 +21,12 @@
 		loadFailed = true;
 	}
 
-	function waitForLayout(): Promise<void> {
-		return new Promise((resolve) => {
-			requestAnimationFrame(() => {
-				requestAnimationFrame(() => resolve());
-			});
-		});
-	}
-
 	function turnstileMountAction(node: HTMLDivElement, key: string) {
 		if (!browser) {
 			return;
 		}
 
 		let handle: TurnstileMountHandle | undefined;
-		let destroyed = false;
 		let activeKey = key;
 
 		const callbacks = {
@@ -47,26 +37,19 @@
 			onError: markLoadFailed
 		};
 
-		const startMount = async () => {
-			await tick();
-			if (destroyed) {
-				return;
-			}
-			await waitForLayout();
-			if (destroyed) {
-				return;
-			}
-
-			if (!activeKey.trim()) {
+		const mount = (nextKey: string) => {
+			if (!nextKey.trim()) {
+				handle?.destroy();
+				handle = undefined;
 				markLoadFailed('missing-key');
 				return;
 			}
 
 			handle?.destroy();
-			handle = createTurnstileMount(node, { siteKey: activeKey, ...callbacks });
+			handle = createTurnstileMount(node, { siteKey: nextKey, ...callbacks });
 		};
 
-		void startMount();
+		mount(activeKey);
 
 		return {
 			update(newKey: string) {
@@ -74,20 +57,9 @@
 					return;
 				}
 				activeKey = newKey;
-				if (!newKey.trim()) {
-					handle?.destroy();
-					handle = undefined;
-					markLoadFailed('missing-key');
-					return;
-				}
-				if (handle) {
-					handle.rerender({ siteKey: newKey, ...callbacks });
-					return;
-				}
-				void startMount();
+				mount(newKey);
 			},
 			destroy() {
-				destroyed = true;
 				handle?.destroy();
 				handle = undefined;
 			}
