@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { createTurnstileMount } from '$lib/client/turnstile-mount';
 	import { getTurnstileLoadErrorMessageKey } from '$lib/domain/turnstile-errors';
 	import { t } from '$lib/i18n';
 
@@ -11,107 +12,57 @@
 
 	let { siteKey, labelledBy, loadFailed = $bindable(false) }: Props = $props();
 
-	let container = $state<HTMLDivElement | null>(null);
 	let errorCode = $state<string | undefined>(undefined);
-	let widgetId: string | undefined;
 
 	const loadErrorMessage = $derived(t(getTurnstileLoadErrorMessageKey(errorCode)));
-
-	const TURNSTILE_SCRIPT_ID = 'cf-turnstile-script';
-	const TURNSTILE_SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-
-	function removeWidget() {
-		if (widgetId && window.turnstile) {
-			window.turnstile.remove(widgetId);
-			widgetId = undefined;
-		}
-	}
 
 	function markLoadFailed(code?: string) {
 		errorCode = code;
 		loadFailed = true;
 	}
 
-	$effect(() => {
-		if (!browser || !siteKey || !container) {
+	function turnstileMountAction(node: HTMLDivElement, key: string) {
+		if (!browser) {
 			return;
 		}
 
-		let cancelled = false;
+		if (!key.trim()) {
+			markLoadFailed('missing-key');
+			return;
+		}
 
-		const renderWidget = () => {
-			if (cancelled || !container || !window.turnstile) {
-				return;
-			}
-			removeWidget();
-			loadFailed = false;
-			errorCode = undefined;
-			widgetId = window.turnstile.render(container, {
-				sitekey: siteKey,
-				theme: 'auto',
-				size: 'flexible',
-				callback: () => {
-					loadFailed = false;
-					errorCode = undefined;
-				},
-				'expired-callback': () => {
-					if (widgetId && window.turnstile) {
-						window.turnstile.reset(widgetId);
-					}
-				},
-				'error-callback': (code) => {
-					console.warn(`[turnstile] Widget error: ${code ?? 'unknown'}`);
-					markLoadFailed(code);
+		const callbacks = {
+			onSuccess: () => {
+				errorCode = undefined;
+				loadFailed = false;
+			},
+			onError: markLoadFailed
+		};
+
+		let handle = createTurnstileMount(node, { siteKey: key, ...callbacks });
+
+		return {
+			update(newKey: string) {
+				if (newKey === key) {
+					return;
 				}
-			});
-		};
-
-		const onScriptLoad = () => {
-			if (window.turnstile?.ready) {
-				window.turnstile.ready(renderWidget);
-				return;
+				key = newKey;
+				if (!newKey.trim()) {
+					handle.destroy();
+					markLoadFailed('missing-key');
+					return;
+				}
+				handle.rerender({ siteKey: newKey, ...callbacks });
+			},
+			destroy() {
+				handle.destroy();
 			}
-			renderWidget();
 		};
-
-		if (window.turnstile) {
-			onScriptLoad();
-			return () => {
-				cancelled = true;
-				removeWidget();
-			};
-		}
-
-		const onScriptError = () => markLoadFailed();
-
-		let script = document.getElementById(TURNSTILE_SCRIPT_ID) as HTMLScriptElement | null;
-
-		if (!script) {
-			script = document.createElement('script');
-			script.id = TURNSTILE_SCRIPT_ID;
-			script.src = TURNSTILE_SCRIPT_SRC;
-			script.async = true;
-			script.defer = true;
-			script.addEventListener('error', onScriptError);
-			document.head.appendChild(script);
-		}
-
-		script.addEventListener('load', onScriptLoad);
-		if (window.turnstile) {
-			onScriptLoad();
-		}
-
-		return () => {
-			cancelled = true;
-			script?.removeEventListener('load', onScriptLoad);
-			script?.removeEventListener('error', onScriptError);
-			removeWidget();
-		};
-	});
+	}
 </script>
 
 <div
-	bind:this={container}
+	use:turnstileMountAction={siteKey}
 	class="turnstile"
 	aria-label={labelledBy ? undefined : t('auth.register.captchaLabel')}
 	aria-labelledby={labelledBy}

@@ -11,6 +11,10 @@ describe('getTurnstileLoadErrorMessageKey', () => {
 		);
 	});
 
+	it('maps missing site key to not-configured copy', () => {
+		expect(getTurnstileLoadErrorMessageKey('missing-key')).toBe('captcha.notConfigured');
+	});
+
 	it('falls back to generic load error', () => {
 		expect(getTurnstileLoadErrorMessageKey('300030')).toBe('auth.register.captchaLoadError');
 		expect(getTurnstileLoadErrorMessageKey(undefined)).toBe('auth.register.captchaLoadError');

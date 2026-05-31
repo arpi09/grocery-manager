@@ -7,5 +7,8 @@ export function getTurnstileLoadErrorMessageKey(errorCode?: string): MessageKey 
 	if (errorCode === TURNSTILE_INVALID_DOMAIN_CODE) {
 		return 'auth.register.captchaDomainError';
 	}
+	if (errorCode === 'missing-key') {
+		return 'captcha.notConfigured';
+	}
 	return 'auth.register.captchaLoadError';
 }
