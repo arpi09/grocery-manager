@@ -24,7 +24,11 @@ export function hasTurnstileWidgetContent(node: HTMLElement): boolean {
 
 function whenTurnstileReady(): Promise<void> {
 	return new Promise((resolve) => {
-		if (window.turnstile?.ready) {
+		const script = document.getElementById(TURNSTILE_SCRIPT_ID) as HTMLScriptElement | null;
+		const hasAsyncDefer = Boolean(script?.async || script?.defer);
+
+		// Cloudflare throws if ready() is used with async/defer on the script tag.
+		if (window.turnstile?.ready && !hasAsyncDefer) {
 			window.turnstile.ready(resolve);
 			return;
 		}
@@ -83,7 +87,12 @@ export function loadTurnstileScript(): Promise<void> {
 	}
 
 	const promise = new Promise<void>((resolve, reject) => {
-		const existing = document.getElementById(TURNSTILE_SCRIPT_ID) as HTMLScriptElement | null;
+		let existing = document.getElementById(TURNSTILE_SCRIPT_ID) as HTMLScriptElement | null;
+
+		if (existing?.async || existing?.defer) {
+			existing.remove();
+			existing = null;
+		}
 
 		if (existing) {
 			waitForTurnstileGlobal(existing).then(resolve, reject);
@@ -93,8 +102,6 @@ export function loadTurnstileScript(): Promise<void> {
 		const script = document.createElement('script');
 		script.id = TURNSTILE_SCRIPT_ID;
 		script.src = TURNSTILE_SCRIPT_SRC;
-		script.async = true;
-		script.defer = true;
 		document.head.appendChild(script);
 		waitForTurnstileGlobal(script).then(resolve, reject);
 	});
@@ -225,7 +232,9 @@ export function createTurnstileMount(
 					if (cancelled || !window.turnstile) {
 						return;
 					}
-					if (window.turnstile.ready) {
+					const script = document.getElementById(TURNSTILE_SCRIPT_ID) as HTMLScriptElement | null;
+					const hasAsyncDefer = Boolean(script?.async || script?.defer);
+					if (window.turnstile.ready && !hasAsyncDefer) {
 						window.turnstile.ready(runRender);
 						return;
 					}
