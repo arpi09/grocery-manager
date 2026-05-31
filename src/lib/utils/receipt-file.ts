@@ -178,7 +178,11 @@ export async function prepareReceiptFileForUpload(file: File): Promise<File> {
 		throw new ReceiptFileError('too_large');
 	}
 
-	const mime = resolveReceiptMimeType(file.type, file.name);
+	let mime = resolveReceiptMimeType(file.type, file.name);
+	if (!mime && file.size > 0) {
+		const header = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+		mime = detectReceiptMimeFromBytes(header);
+	}
 	if (!mime) {
 		throw new ReceiptFileError('unsupported');
 	}

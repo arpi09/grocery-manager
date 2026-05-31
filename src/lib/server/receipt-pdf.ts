@@ -22,7 +22,9 @@ export async function extractPdfText(bytes: Uint8Array): Promise<PdfTextExtracti
 		}
 
 		return { ok: true, text };
-	} catch {
+	} catch (error) {
+		const detail = error instanceof Error ? error.message : String(error);
+		console.error(`[receipt] pdf-parse failed: ${detail.slice(0, 300)}`);
 		return { ok: false, reason: 'failed' };
 	} finally {
 		await parser?.destroy().catch(() => undefined);

@@ -102,3 +102,31 @@ git add tests/fixtures/receipts/synthetic-*.pdf
 | `too_short` vid extraktion | PDF saknar textlager — prova annat kvitto eller OCR-PDF |
 | AI returnerar tom `lines` | Kvittoinnehåll icke-mat — justera förväntan i manifest `notes` |
 | `--strict` failar | Fyll saknade platser i manifest.json |
+
+## Prod-checklista (Firebase App Hosting)
+
+E2E **mockar** `/api/receipt/parse` och sätter `E2E_MOCK_AI=true` — prod kör hela kedjan (PDF → text → OpenAI). Symtom och åtgärder:
+
+| Symtom i UI | Trolig orsak | Åtgärd |
+|-------------|--------------|--------|
+| «AI-tjänsten är inte tillgänglig just nu» | `OPENAI_API_KEY` saknas eller backend saknar `grantaccess` | `powershell -File scripts/setup-openai-secret.ps1` eller [FIREBASE_DEPLOY.md § Secrets](./FIREBASE_DEPLOY.md#5-secrets-and-environment) |
+| «Du har använt alla {n} kvitto-PDF…» | Gratis-gräns (5/mån) | Vänta till nästa månad eller testa med annan användare |
+| «PDF:en verkar vara en skanning utan läsbar text» | Bild-PDF utan textlager | Screenshot eller fota kvittot |
+| «Kunde inte läsa PDF:en» | `pdf-parse` krasch (sällsynt) | Kolla Cloud Run-loggar `[receipt] pdf-parse failed` |
+| «Inga varor hittades på kvittot» | OpenAI svarade men inga matrader | Annan PDF/vinkel; kör lokalt med nyckel (nedan) |
+| Generiskt nätverksfel | Icke-JSON-svar (t.ex. 413 body limit) | PDF &lt; 1 MB i prod (`BODY_SIZE_LIMIT`); större filer → bild |
+
+**Verifiera secret (läser inte värdet):**
+
+```bash
+npx firebase apphosting:secrets:describe OPENAI_API_KEY --project home-pantry-4bee5
+```
+
+**Lokal reproduktion (samma kod som prod):**
+
+```powershell
+$env:OPENAI_API_KEY = "sk-..."   # från .env
+npm test -- src/lib/server/receipt-pdf-fixtures.test.ts
+```
+
+Alla `ica-*.pdf` / `kivra-*.pdf` lokalt ska ge `extractPdfText ok: true` och OpenAI-integration `returns valid lines structure`.

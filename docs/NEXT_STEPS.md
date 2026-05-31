@@ -91,7 +91,7 @@ När kohort tillåter: fyll checklista i [DAY_90_DECISION.md](./DAY_90_DECISION.
 | `PUBLIC_TURNSTILE_SITE_KEY` | `apphosting.yaml` (BUILD + RUNTIME) | **Ja** (registrering) | Turnstile-widget på `/register` |
 | `TURNSTILE_SECRET_KEY` | Secret Manager + `apphosting.yaml` | **Ja** (registrering) | Serververifiering vid registrering — se [CAPTCHA.md](./CAPTCHA.md) |
 | `CRON_SECRET` | Secret Manager + `apphosting.yaml` | **Ja** (cron) | Veckovis utgångspåminnelse (`POST /api/cron/expiry-reminders`) |
-| `OPENAI_API_KEY` | Secret Manager + `apphosting.yaml` | Nej (deploy går) | AI-recept, kvittoscan, foto-produktscan — **503** utan nyckel |
+| `OPENAI_API_KEY` | Secret Manager + `apphosting.yaml` | Nej (deploy går) | AI-recept, kvittoscan, foto-produktscan — **503** utan nyckel; kör `scripts/setup-openai-secret.ps1` |
 | `RESEND_API_KEY` | Secret Manager + `apphosting.yaml` | Nej (deploy går) | Hushållsinbjudan via e-post — se [EMAIL.md](./EMAIL.md) |
 | `RESEND_FROM` | `apphosting.yaml` (env, ej secret) | Nej | Avsändaradress; default `onboarding@resend.dev` |
 | `PUBLIC_VAPID_PUBLIC_KEY` | `apphosting.yaml` (BUILD + RUNTIME) | Nej (deploy går) | Web Push (PWA) — se [PWA.md](./PWA.md), [VAPID_SETUP.md](./VAPID_SETUP.md) |
