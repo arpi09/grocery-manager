@@ -22,6 +22,16 @@ Konservativ städning: minska brus för agenter/människor utan att ta bort prod
 | `docs/90_DAY_ROADMAP.md` | Pekare till ROADMAP; trimmat historisk punkt-2-spec; uppdaterat punkt-16 |
 | `docs/COMPETITIVE_ANALYSIS.md` | E2E-rad: 23 tester + länk |
 
+## WIP 3 — ICA-integration borttagen (31 maj 2026)
+
+| Ändring | Detalj |
+|---------|--------|
+| `src/routes/api/ica-shopping-list/` | API-rutt borttagen (fanns redan ej på disk; UI borttaget tidigare) |
+| `README.md` | Sektion om ICA inköpslista → smart fill via `/api/shopping-suggestions` |
+| `scripts/build-locale-extensions.mjs` | ICA-nycklar (`icaTab`, `generateIca`, `openIca`, `icaFailed`, m.fl.) borttagna |
+
+**Kvar medvetet (ej ICA-integration):** kvitto-fixtures `synthetic-ica-01.pdf`, marknads-/konkurrent-copy om ICA som butik, `inventory-insights` API (inventarietips, ej butiks-API).
+
 ## Medvetet kvar (för riskabelt eller fortfarande relevant)
 
 - **`homepantry.com` i copy/env/marketing** — framtida domän och kontaktmail; prod kör `*.hosted.app` (dokumenterat i CUSTOM_DOMAIN / NEXT_STEPS)
@@ -30,7 +40,6 @@ Konservativ städning: minska brus för agenter/människor utan att ta bort prod
 - **`.cursor/rules/pipeline-release-agent.mdc`** — refererar fortfarande `admin.spec.ts` (regel-fil; ej ändrad i denna pass)
 - **Svelte-varningar (37 st)** — befintliga `$state`-/a11y-varningar; inga fel efter `npm run check`
 - **Duplicerade Windows-sökvägar i git** (`e2e\auth.spec.ts` vs `e2e/auth.spec.ts`) — samma filer; kräver git-normalisering, ej denna pass
-- **ICA API-rutter** (`/api/ica-shopping-list`) — fortfarande i kod/README; produktfeature, ej borttagen
 
 ## Verifiering
 

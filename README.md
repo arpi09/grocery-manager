@@ -49,6 +49,8 @@ Health check (server should be running):
 npm run dev:health
 ```
 
+**AI coordinator:** roles, WIP, and agent spawn rules — [`docs/CURSOR_COORDINATOR.md`](docs/CURSOR_COORDINATOR.md) (plus local `private/NEW_CURSOR_AGENT_START.md` for environment and cost tracking).
+
 Open [http://localhost:5173](http://localhost:5173), create an account, and start adding items.
 
 ### Shared household (local dev)
@@ -91,12 +93,9 @@ OPENAI_API_KEY=your_key_here
 
 Photo product scan (`/api/product-from-image`) also uses the same `OPENAI_API_KEY`. In production, set the Firebase App Hosting secret and grant access to backend `home-pantry` (see [docs/FIREBASE_DEPLOY.md](./docs/FIREBASE_DEPLOY.md)).
 
-## AI inventory help & ICA shopping list
+## Smart shopping list (Inköp)
 
-Open **Inköp** in the top navigation:
-
-- **Inventarietips** — AI analyzes your stock, expiry dates, meal plan, and saved recipe ideas (Swedish tips).
-- **ICA inköpslista** — suggests products to buy at ICA with quantities, reasons, and links to search on [ica.se](https://www.ica.se/handla/).
+Open **Inköp** in the top navigation for the shared household list and **Fyll på från skafferiet** — AI suggests items from your inventory, expiry dates, and meal plan via `/api/shopping-suggestions` and adds them to the list.
 
 Uses the same `OPENAI_API_KEY` as recipes and photo scan.
 

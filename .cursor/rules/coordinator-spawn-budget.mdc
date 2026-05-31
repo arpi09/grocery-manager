@@ -1,0 +1,43 @@
+---
+description: Coordinator spawn budget — proposal required before every new agent
+alwaysApply: false
+---
+
+# Coordinator spawn budget
+
+Mandatory for **coordinator sessions** only. Full artifact: [private/SPAWN_BUDGET.md](../../private/SPAWN_BUDGET.md). Personal account mode: [coordinator-personal-cost-mode.mdc](./coordinator-personal-cost-mode.mdc).
+
+## Before every spawn
+
+1. Fill the **spawn proposal** in SPAWN_BUDGET (outcome, duration, category S/M/L/XL, ROI H/M/L, files, why not existing agents).
+2. **No proposal → no spawn** — except dev-runtime and a single P0 fix-agent when prod/CI is red.
+3. Log a row in SPAWN_BUDGET **tracking table** at spawn; close with outcome + ROI when the slot ends.
+
+## Cost categories (pre-spawn estimate)
+
+| Cat | USD |
+|-----|-----|
+| S | < $5 |
+| M | $5–$20 |
+| L | $20–$50 |
+| XL | > $50 |
+
+## XL gate (all YES)
+
+Business value (P0/P1/roadmap) · no existing agent can do it (WIP≤3, OWNERSHIP) · feature priority over merge queue.
+
+Otherwise split into M/L or defer to Monday checkpoint.
+
+## Defaults
+
+- Small focused agents; one outcome per spawn.
+- No large exploratory swarms or parallel explore on the same hot zone.
+- WIP≤3 (see [coordinator-v2.mdc](./coordinator-v2.mdc)); one agent per hot zone.
+
+## Pause spawns when
+
+No merge ≥3 days with active agents · no measurable progress ≥48 h on same blocker · On-Demand >$200/week without prod merge · WIP>3.
+
+## Weekly
+
+Roll up spawn counts vs [AI_COST_REPORT.md](../../private/AI_COST_REPORT.md); update ENGINEERING_INTELLIGENCE checkpoint.

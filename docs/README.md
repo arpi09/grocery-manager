@@ -4,6 +4,14 @@ Filer i `docs/` är avsedda för produkt, deploy och utveckling i det publika re
 
 **Intern styrning ligger inte här.** Koordinatorinstruktioner, agentkartor, säkerhetsrapporter och engineering intelligence finns i gitignorerad mappen [`private/`](../private/) (lokal kopia — committas aldrig). Se [`ONBOARDING_DEVELOPER.md`](./ONBOARDING_DEVELOPER.md) för ny utvecklare; vid Cursor-kontobyte: `private/CURSOR_MIGRATION.md` lokalt.
 
+## Cursor & AI-koordinator
+
+| Dokument | Innehåll |
+|----------|----------|
+| [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md) | Coordinator-roll, WIP 3, spawn-proposal, agent-typer, Multitask (publik, svenska) |
+
+Komplettera med `private/NEW_CURSOR_AGENT_START.md` lokalt (miljö, första prompt, kostnad).
+
 ## Produkt & strategi
 
 | Dokument | Innehåll |

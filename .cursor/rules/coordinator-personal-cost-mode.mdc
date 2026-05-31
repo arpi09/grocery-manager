@@ -1,0 +1,27 @@
+---
+description: Personal Cost Optimization Mode — personal Cursor coordinator sessions; shipped value per AI dollar
+alwaysApply: false
+---
+
+# Coordinator — Personal Cost Optimization Mode
+
+For **personal Cursor account** coordinator sessions on Home Pantry. Full docs: [ENGINEERING_INTELLIGENCE.md](../../private/ENGINEERING_INTELLIGENCE.md#personal-cost-optimization-mode) · [SPAWN_BUDGET.md](../../private/SPAWN_BUDGET.md) · [AI_VALUE_DASHBOARD.md](../../private/AI_VALUE_DASHBOARD.md).
+
+> **Core principle:** *Shipped value per dollar, not agent activity.*
+
+**Hard guardrail:** On-Demand **$150–200/week**. Flag >**$200** without prod merge → pause explore/shell; max 1 feature-agent.
+
+## 10 priorities (operational)
+
+1. **Value per dollar** — track merged/deployed features, not agent count.
+2. **Finish before starting** — merge/deploy open work before new P1 spawn.
+3. **WIP caps** — 3 impl · 1 planner · 1 integration · 1 dev-runtime · 1 governance.
+4. **One hot zone = one agent** — i18n, settings, `di.ts`, migrations, `hooks.server.ts`.
+5. **Spawn proposal mandatory** — outcome · P0/P1/P2 · stop condition · S/M/L/XL · why not existing agent ([SPAWN_BUDGET](../../private/SPAWN_BUDGET.md)).
+6. **Coordinator-only spawn** — no proposal → no spawn (except dev-runtime + single P0 fix when CI/prod red).
+7. **Cost bands + XL gate** — split XL unless P0/P1 value + WIP clear + no hot-zone collision.
+8. **Model policy** — default `auto`; `composer-2.5-fast` single bounded slice only.
+9. **Cadence** — E2E: one batch/week after feature-freeze. Docs/intelligence: Monday only.
+10. **Weekly rollup** — CSV → AI_COST → [AI_VALUE_DASHBOARD](../../private/AI_VALUE_DASHBOARD.md) + SPAWN_BUDGET.
+
+Also applies: [coordinator-spawn-budget.mdc](./coordinator-spawn-budget.mdc) · [coordinator-v2.mdc](./coordinator-v2.mdc).
