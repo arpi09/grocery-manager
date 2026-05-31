@@ -14,6 +14,7 @@ Thumbs.db
 # Receipt PDF testpack — real customer PDFs stay local (synthetic-*.pdf committed for CI)
 /tests/fixtures/receipts/*.pdf
 !/tests/fixtures/receipts/synthetic-*.pdf
+/tests/fixtures/receipts/SOURCES.local.json
 
 /test-results/
 /playwright-report/

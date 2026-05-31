@@ -60,6 +60,7 @@ See [`CAPTCHA.md`](./CAPTCHA.md) for production Turnstile setup.
 | `e2e/critical-flows.spec.ts` | Register, login, admin login, onboarding, marketing HTTP 200 |
 | `e2e/auth.spec.ts` | Marketing landing, admin login |
 | `e2e/receipt.spec.ts` | Receipt upload → review → bulk add |
+| `e2e/receipt-real-fixtures.spec.ts` | Local real PDF uploads (skipped in CI without fixtures) |
 | `e2e/scan-inventory.spec.ts` | Scan hub, barcode add, `/inventory/fridge` |
 | `e2e/shopping.spec.ts` | Smart fill, list add/check |
 | `e2e/smoke.spec.ts` | Basic HTTP smoke |
@@ -75,6 +76,16 @@ See [`CAPTCHA.md`](./CAPTCHA.md) for production Turnstile setup.
 | `barcode.json` | `mockBarcodeLookup()` |
 
 PDF uploads use `tests/fixtures/receipts/synthetic-ica-01.pdf` only as a valid file; parse responses are stubbed so CI never needs `OPENAI_API_KEY`.
+
+### Local real receipt PDFs
+
+Optional regression with **gitignored** fixtures (`ica-*.pdf`, `kivra-*.pdf`, `willys-*.pdf` under `tests/fixtures/receipts/`):
+
+| Spec | Behavior |
+|------|----------|
+| `e2e/receipt-real-fixtures.spec.ts` | One test per real PDF on disk; `mockReceiptParse()` keeps CI safe (no OpenAI) |
+
+If no real PDFs are present (typical CI), the whole describe block is **skipped**. Install PDFs locally per [RECEIPT_TEST_PACK.md](./RECEIPT_TEST_PACK.md) — never commit them.
 
 ## Helpers
 
