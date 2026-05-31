@@ -1,7 +1,6 @@
 import { json } from '@sveltejs/kit';
 
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
-import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { requestStructuredJson, translateOpenAiError } from '$lib/server/openai';
 
 import {
