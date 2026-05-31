@@ -94,8 +94,8 @@ När kohort tillåter: fyll checklista i [DAY_90_DECISION.md](./DAY_90_DECISION.
 | `OPENAI_API_KEY` | Secret Manager + `apphosting.yaml` | Nej (deploy går) | AI-recept, kvittoscan, foto-produktscan — **503** utan nyckel |
 | `RESEND_API_KEY` | Secret Manager + `apphosting.yaml` | Nej (deploy går) | Hushållsinbjudan via e-post — se [EMAIL.md](./EMAIL.md) |
 | `RESEND_FROM` | `apphosting.yaml` (env, ej secret) | Nej | Avsändaradress; default `onboarding@resend.dev` |
-| `PUBLIC_VAPID_PUBLIC_KEY` | **Saknas i `apphosting.yaml`** — lägg till BUILD + RUNTIME | Nej (deploy går) | Web Push (PWA) — se [PWA.md](./PWA.md) |
-| `VAPID_PRIVATE_KEY` | **Saknas i `apphosting.yaml`** — Secret Manager | Nej (deploy går) | Web Push-signering |
+| `PUBLIC_VAPID_PUBLIC_KEY` | `apphosting.yaml` (BUILD + RUNTIME) | Nej (deploy går) | Web Push (PWA) — se [PWA.md](./PWA.md), [VAPID_SETUP.md](./VAPID_SETUP.md) |
+| `VAPID_PRIVATE_KEY` | Secret Manager + `apphosting.yaml` | Nej (deploy går) | Web Push-signering — **sätt secret i Firebase** (se [VAPID_SETUP.md](./VAPID_SETUP.md)) |
 | `VAPID_CONTACT` | Valfri env | Nej | VAPID subject; default `PUBLIC_ORIGIN` |
 
 **Skapa/uppdatera secrets (Firebase CLI):**
@@ -111,7 +111,7 @@ npx firebase apphosting:secrets:grantaccess SECRET_NAME --backend home-pantry --
 npx firebase apphosting:secrets:describe SECRET_NAME --project home-pantry-4bee5
 ```
 
-**Lokal dev:** kopiera `.env.example` → `.env` och fyll i tomma rader. Resend/Turnstile/VAPID-dokumentation: [EMAIL.md](./EMAIL.md), [CAPTCHA.md](./CAPTCHA.md), [PWA.md](./PWA.md). Turnstile + Resend: `powershell -File scripts/setup-resend-turnstile-secrets.ps1`.
+**Lokal dev:** kopiera `.env.example` → `.env` och fyll i tomma rader. Resend/Turnstile/VAPID-dokumentation: [EMAIL.md](./EMAIL.md), [CAPTCHA.md](./CAPTCHA.md), [PWA.md](./PWA.md), [VAPID_SETUP.md](./VAPID_SETUP.md). Turnstile + Resend: `powershell -File scripts/setup-resend-turnstile-secrets.ps1`.
 
 **Prioritet före nästa prod-smoke `/register`:** bekräfta Turnstile-widget hostnames i Cloudflare (exakt `home-pantry--home-pantry-4bee5.europe-west4.hosted.app`) och att `TURNSTILE_SECRET_KEY` matchar samma widget som `PUBLIC_TURNSTILE_SITE_KEY`.
 

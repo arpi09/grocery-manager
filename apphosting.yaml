@@ -91,6 +91,11 @@ env:
     availability:
       - RUNTIME
 
+  - variable: VAPID_PRIVATE_KEY
+    secret: VAPID_PRIVATE_KEY
+    availability:
+      - RUNTIME
+
   # --- Non-secret config (override in Firebase console if needed) ---
   # Replace with your admin login email before first deploy (or set in App Hosting â†’ Environment).
   # Seeded/updated on startup together with the ADMIN_PASSWORD secret.
@@ -109,6 +114,13 @@ env:
   # Widget hostnames: localhost + home-pantry--home-pantry-4bee5.europe-west4.hosted.app; see docs/CAPTCHA.md
   - variable: PUBLIC_TURNSTILE_SITE_KEY
     value: 0x4AAAAAADZUXk7XZddZ9HBf
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Web Push VAPID public key — pair with VAPID_PRIVATE_KEY secret; see docs/VAPID_SETUP.md
+  - variable: PUBLIC_VAPID_PUBLIC_KEY
+    value: BPVXBW-3E3QzFlBeMJS-KYLr6bjleTmgqhyiTIzHzLnaQxQhuICXNeqKueFfGlGBJDgOHQK1z73CHf0xn-GJsdI
     availability:
       - BUILD
       - RUNTIME
