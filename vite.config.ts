@@ -55,7 +55,8 @@ export default defineConfig({
 	],
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}'],
-		exclude: ['**/*.integration.test.ts']
+		exclude: ['**/*.integration.test.ts'],
+		environmentMatchGlobs: [['src/lib/client/**', 'happy-dom']]
 	},
 	server: {
 		host: true,

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { createTurnstileMount } from '$lib/client/turnstile-mount';
+	import { createTurnstileMount, type TurnstileMountHandle } from '$lib/client/turnstile-mount';
 	import { getTurnstileLoadErrorMessageKey } from '$lib/domain/turnstile-errors';
 	import { t } from '$lib/i18n';
+	import { tick } from 'svelte';
 
 	interface Props {
 		siteKey: string;
@@ -21,15 +22,22 @@
 		loadFailed = true;
 	}
 
+	function waitForLayout(): Promise<void> {
+		return new Promise((resolve) => {
+			requestAnimationFrame(() => {
+				requestAnimationFrame(() => resolve());
+			});
+		});
+	}
+
 	function turnstileMountAction(node: HTMLDivElement, key: string) {
 		if (!browser) {
 			return;
 		}
 
-		if (!key.trim()) {
-			markLoadFailed('missing-key');
-			return;
-		}
+		let handle: TurnstileMountHandle | undefined;
+		let destroyed = false;
+		let activeKey = key;
 
 		const callbacks = {
 			onSuccess: () => {
@@ -39,23 +47,49 @@
 			onError: markLoadFailed
 		};
 
-		let handle = createTurnstileMount(node, { siteKey: key, ...callbacks });
+		const startMount = async () => {
+			await tick();
+			if (destroyed) {
+				return;
+			}
+			await waitForLayout();
+			if (destroyed) {
+				return;
+			}
+
+			if (!activeKey.trim()) {
+				markLoadFailed('missing-key');
+				return;
+			}
+
+			handle?.destroy();
+			handle = createTurnstileMount(node, { siteKey: activeKey, ...callbacks });
+		};
+
+		void startMount();
 
 		return {
 			update(newKey: string) {
-				if (newKey === key) {
+				if (newKey === activeKey) {
 					return;
 				}
-				key = newKey;
+				activeKey = newKey;
 				if (!newKey.trim()) {
-					handle.destroy();
+					handle?.destroy();
+					handle = undefined;
 					markLoadFailed('missing-key');
 					return;
 				}
-				handle.rerender({ siteKey: newKey, ...callbacks });
+				if (handle) {
+					handle.rerender({ siteKey: newKey, ...callbacks });
+					return;
+				}
+				void startMount();
 			},
 			destroy() {
-				handle.destroy();
+				destroyed = true;
+				handle?.destroy();
+				handle = undefined;
 			}
 		};
 	}

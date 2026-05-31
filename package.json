@@ -53,6 +53,7 @@
 		"eslint-plugin-svelte": "^2.46.1",
 		"firebase-tools": "^14.27.0",
 		"globals": "^15.14.0",
+		"happy-dom": "^20.9.0",
 		"husky": "^9.1.7",
 		"lint-staged": "^15.4.3",
 		"nodemon": "^3.1.14",

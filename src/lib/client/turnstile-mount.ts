@@ -2,9 +2,23 @@ export const TURNSTILE_SCRIPT_ID = 'cf-turnstile-script';
 export const TURNSTILE_SCRIPT_SRC =
 	'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
-const RENDER_CHECK_MS = 8_000;
+const RENDER_CHECK_MS = 15_000;
+const SCRIPT_WAIT_MS = 30_000;
+const SCRIPT_POLL_MS = 100;
+const MAX_RENDER_ATTEMPTS = 2;
 
 let scriptLoadPromise: Promise<void> | null = null;
+
+/** @internal Resets cached script load state between unit tests. */
+export function resetTurnstileScriptCacheForTests(): void {
+	scriptLoadPromise = null;
+}
+
+export function hasTurnstileWidgetContent(node: HTMLElement): boolean {
+	return Boolean(
+		node.querySelector('iframe') || node.querySelector('input[name="cf-turnstile-response"]')
+	);
+}
 
 function whenTurnstileReady(): Promise<void> {
 	return new Promise((resolve) => {
@@ -13,6 +27,42 @@ function whenTurnstileReady(): Promise<void> {
 			return;
 		}
 		resolve();
+	});
+}
+
+function waitForTurnstileGlobal(script: HTMLScriptElement): Promise<void> {
+	return new Promise((resolve, reject) => {
+		let settled = false;
+
+		const finish = () => {
+			if (settled || !window.turnstile) {
+				return;
+			}
+			settled = true;
+			cleanup();
+			whenTurnstileReady().then(resolve, reject);
+		};
+
+		const onTimeout = () => {
+			if (settled) {
+				return;
+			}
+			settled = true;
+			cleanup();
+			reject(new Error('turnstile script load failed'));
+		};
+
+		const cleanup = () => {
+			clearTimeout(timeoutId);
+			clearInterval(pollId);
+			script.removeEventListener('load', finish);
+		};
+
+		script.addEventListener('load', finish, { once: true });
+		const pollId = setInterval(finish, SCRIPT_POLL_MS);
+		const timeoutId = setTimeout(onTimeout, SCRIPT_WAIT_MS);
+
+		finish();
 	});
 }
 
@@ -31,23 +81,10 @@ export function loadTurnstileScript(): Promise<void> {
 	}
 
 	scriptLoadPromise = new Promise((resolve, reject) => {
-		const finish = () => {
-			whenTurnstileReady().then(resolve, reject);
-		};
-
 		const existing = document.getElementById(TURNSTILE_SCRIPT_ID) as HTMLScriptElement | null;
 
 		if (existing) {
-			if (window.turnstile) {
-				finish();
-				return;
-			}
-			existing.addEventListener('load', finish, { once: true });
-			existing.addEventListener(
-				'error',
-				() => reject(new Error('turnstile script load failed')),
-				{ once: true }
-			);
+			waitForTurnstileGlobal(existing).then(resolve, reject);
 			return;
 		}
 
@@ -56,13 +93,13 @@ export function loadTurnstileScript(): Promise<void> {
 		script.src = TURNSTILE_SCRIPT_SRC;
 		script.async = true;
 		script.defer = true;
-		script.addEventListener('load', finish, { once: true });
 		script.addEventListener(
 			'error',
 			() => reject(new Error('turnstile script load failed')),
 			{ once: true }
 		);
 		document.head.appendChild(script);
+		waitForTurnstileGlobal(script).then(resolve, reject);
 	});
 
 	return scriptLoadPromise;
@@ -86,6 +123,7 @@ export function createTurnstileMount(
 	let widgetId: string | undefined;
 	let cancelled = false;
 	let renderCheckTimer: ReturnType<typeof setTimeout> | undefined;
+	let renderAttempt = 0;
 	let currentParams = params;
 
 	function clearRenderCheck() {
@@ -109,13 +147,17 @@ export function createTurnstileMount(
 			if (cancelled) {
 				return;
 			}
-			const hasWidgetContent =
-				node.querySelector('iframe') ||
-				node.querySelector('input[name="cf-turnstile-response"]');
-			if (!hasWidgetContent) {
-				console.warn('[turnstile] Widget did not mount within timeout');
-				currentParams.onError?.('timeout');
+			if (hasTurnstileWidgetContent(node)) {
+				return;
 			}
+			if (renderAttempt + 1 < MAX_RENDER_ATTEMPTS) {
+				console.warn('[turnstile] Widget not visible; retrying render');
+				renderAttempt += 1;
+				renderWidget();
+				return;
+			}
+			console.warn('[turnstile] Widget did not mount within timeout');
+			currentParams.onError?.('timeout');
 		}, RENDER_CHECK_MS);
 	}
 
@@ -132,33 +174,53 @@ export function createTurnstileMount(
 
 		removeWidget();
 
-		try {
-			widgetId = window.turnstile.render(node, {
-				sitekey: key,
-				theme: 'auto',
-				size: 'flexible',
-				callback: () => {
-					clearRenderCheck();
-					currentParams.onSuccess?.();
-				},
-				'expired-callback': () => {
-					if (widgetId && window.turnstile) {
-						window.turnstile.reset(widgetId);
+		const runRender = () => {
+			if (cancelled || !window.turnstile) {
+				return;
+			}
+
+			try {
+				widgetId = window.turnstile.render(node, {
+					sitekey: key,
+					theme: 'auto',
+					size: 'flexible',
+					callback: () => {
+						clearRenderCheck();
+						renderAttempt = 0;
+						currentParams.onSuccess?.();
+					},
+					'expired-callback': () => {
+						if (widgetId && window.turnstile) {
+							window.turnstile.reset(widgetId);
+						}
+					},
+					'error-callback': (code) => {
+						clearRenderCheck();
+						console.warn(`[turnstile] Widget error: ${code ?? 'unknown'}`);
+						currentParams.onError?.(code);
 					}
-				},
-				'error-callback': (code) => {
-					clearRenderCheck();
-					console.warn(`[turnstile] Widget error: ${code ?? 'unknown'}`);
-					currentParams.onError?.(code);
+				});
+				scheduleRenderCheck();
+			} catch (error) {
+				clearRenderCheck();
+				const detail = error instanceof Error ? error.message : 'render failed';
+				console.error(`[turnstile] render() threw: ${detail}`);
+				if (renderAttempt + 1 < MAX_RENDER_ATTEMPTS) {
+					console.warn('[turnstile] render() failed; retrying once');
+					renderAttempt += 1;
+					renderWidget();
+					return;
 				}
-			});
-			scheduleRenderCheck();
-		} catch (error) {
-			clearRenderCheck();
-			const detail = error instanceof Error ? error.message : 'render failed';
-			console.error(`[turnstile] render() threw: ${detail}`);
-			currentParams.onError?.('render-failed');
+				currentParams.onError?.('render-failed');
+			}
+		};
+
+		if (window.turnstile.ready) {
+			window.turnstile.ready(runRender);
+			return;
 		}
+
+		runRender();
 	}
 
 	void loadTurnstileScript()
@@ -169,7 +231,7 @@ export function createTurnstileMount(
 		})
 		.catch(() => {
 			if (!cancelled) {
-				currentParams.onError?.();
+				currentParams.onError?.('script-load-failed');
 			}
 		});
 
@@ -180,6 +242,7 @@ export function createTurnstileMount(
 		},
 		rerender(nextParams: TurnstileMountCallbacks) {
 			currentParams = nextParams;
+			renderAttempt = 0;
 			renderWidget();
 		}
 	};
