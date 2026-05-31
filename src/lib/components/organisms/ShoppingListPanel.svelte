@@ -87,11 +87,6 @@
 	}
 
 	
-	const toggleEnhance: SubmitFunction = () => {
-		return async ({ update }) => {
-			await update({ reset: false, invalidateAll: true });
-		};
-	};
 
 	function dismissUndo() {
 		undoPayload = null;
