@@ -44,6 +44,9 @@ jobs:
     name: quality
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # Required so $env/static/public exposes PUBLIC_TURNSTILE_SITE_KEY during svelte-check/build
+      PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
 
     steps:
       - uses: actions/checkout@v4
@@ -115,9 +118,11 @@ jobs:
           USE_PGLITE: 'true'
           ADMIN_EMAIL: e2e-admin@example.com
           ADMIN_PASSWORD: e2e-ci-password
-          PUBLIC_ORIGIN: http://localhost:5173
+          PUBLIC_ORIGIN: http://localhost:5190
+          PLAYWRIGHT_PORT: '5190'
           TURNSTILE_SKIP: 'true'
           TURNSTILE_BYPASS: 'true'
+          E2E_MOCK_AI: 'true'
           CI: 'true'
 
   deploy:
