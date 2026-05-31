@@ -79,4 +79,42 @@ När kohort tillåter: fyll checklista i [DAY_90_DECISION.md](./DAY_90_DECISION.
 
 ---
 
+## P1 — Secrets readiness (ägare, Firebase App Hosting)
+
+*Uppdaterad 31 maj 2026. Inga hemligheter i git — skapa värden lokalt eller i Secret Manager.*
+
+| Secret / env | Var i prod | Krävs för deploy? | Krävs för feature |
+|--------------|------------|-------------------|-------------------|
+| `DATABASE_URL` | Secret Manager + `apphosting.yaml` | **Ja** | All data |
+| `ADMIN_PASSWORD` | Secret Manager + `apphosting.yaml` | **Ja** | Admin-inloggning |
+| `PUBLIC_ORIGIN` / `ORIGIN` | `apphosting.yaml` (BUILD/RUNTIME) | **Ja** | CSRF, länkar i mejl |
+| `PUBLIC_TURNSTILE_SITE_KEY` | `apphosting.yaml` (BUILD + RUNTIME) | **Ja** (registrering) | Turnstile-widget på `/register` |
+| `TURNSTILE_SECRET_KEY` | Secret Manager + `apphosting.yaml` | **Ja** (registrering) | Serververifiering vid registrering — se [CAPTCHA.md](./CAPTCHA.md) |
+| `CRON_SECRET` | Secret Manager + `apphosting.yaml` | **Ja** (cron) | Veckovis utgångspåminnelse (`POST /api/cron/expiry-reminders`) |
+| `OPENAI_API_KEY` | Secret Manager + `apphosting.yaml` | Nej (deploy går) | AI-recept, kvittoscan, foto-produktscan — **503** utan nyckel |
+| `RESEND_API_KEY` | Secret Manager + `apphosting.yaml` | Nej (deploy går) | Hushållsinbjudan via e-post — se [EMAIL.md](./EMAIL.md) |
+| `RESEND_FROM` | `apphosting.yaml` (env, ej secret) | Nej | Avsändaradress; default `onboarding@resend.dev` |
+| `PUBLIC_VAPID_PUBLIC_KEY` | **Saknas i `apphosting.yaml`** — lägg till BUILD + RUNTIME | Nej (deploy går) | Web Push (PWA) — se [PWA.md](./PWA.md) |
+| `VAPID_PRIVATE_KEY` | **Saknas i `apphosting.yaml`** — Secret Manager | Nej (deploy går) | Web Push-signering |
+| `VAPID_CONTACT` | Valfri env | Nej | VAPID subject; default `PUBLIC_ORIGIN` |
+
+**Skapa/uppdatera secrets (Firebase CLI):**
+
+```bash
+npx firebase apphosting:secrets:set SECRET_NAME --project home-pantry-4bee5
+npx firebase apphosting:secrets:grantaccess SECRET_NAME --backend home-pantry --project home-pantry-4bee5
+```
+
+**Verifiera utan att läsa värden:**
+
+```bash
+npx firebase apphosting:secrets:describe SECRET_NAME --project home-pantry-4bee5
+```
+
+**Lokal dev:** kopiera `.env.example` → `.env` och fyll i tomma rader. Resend/Turnstile/VAPID-dokumentation: [EMAIL.md](./EMAIL.md), [CAPTCHA.md](./CAPTCHA.md), [PWA.md](./PWA.md). Turnstile + Resend: `powershell -File scripts/setup-resend-turnstile-secrets.ps1`.
+
+**Prioritet före nästa prod-smoke `/register`:** bekräfta Turnstile-widget hostnames i Cloudflare (exakt `home-pantry--home-pantry-4bee5.europe-west4.hosted.app`) och att `TURNSTILE_SECRET_KEY` matchar samma widget som `PUBLIC_TURNSTILE_SITE_KEY`.
+
+---
+
 *Peeka här varje vecka; detaljer och prioritering i [ROADMAP.md](./ROADMAP.md).*
