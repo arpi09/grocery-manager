@@ -20,8 +20,12 @@ import {
 } from '$lib/validation/pet.schemas';
 import { updateExpiryRemindersSchema } from '$lib/validation/expiry-reminder.schemas';
 import { submitProductFeedbackSchema } from '$lib/validation/product-feedback.schemas';
+import { joinWaitlistSchema } from '$lib/validation/waitlist.schemas';
 import { expiryReminderService } from '$lib/server/di';
+import { DrizzlePushSubscriptionRepository } from '$lib/infrastructure/repositories/push-subscription.repository';
 import type { Actions, PageServerLoad } from './$types';
+
+const pushRepository = new DrizzlePushSubscriptionRepository();
 
 export const load: PageServerLoad = async ({ parent, locals }) => {
 	const { user } = await parent();
@@ -54,6 +58,7 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		petsEnabled: Boolean(user?.petsEnabled),
 		expiryRemindersEnabled: expirySettings.enabled,
 		expiryReminderDays: expirySettings.days,
+		pushNotificationsEnabled: user ? await pushRepository.isPushEnabled(user.id) : false,
 		pets,
 		household,
 		householdRole,
@@ -84,6 +89,31 @@ export const actions: Actions = {
 		});
 
 		return { feedbackSuccess: true };
+	},
+	joinProWaitlist: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const emailFromForm = formData.get('email');
+		const parsed = joinWaitlistSchema.safeParse({
+			email: typeof emailFromForm === 'string' && emailFromForm.trim()
+				? emailFromForm
+				: locals.user!.email,
+			source: 'settings'
+		});
+
+		if (!parsed.success) {
+			return fail(400, { waitlistErrors: parsed.error.flatten().fieldErrors });
+		}
+
+		const result = await locals.waitlistService.join({
+			email: parsed.data.email,
+			userId: locals.user!.id,
+			source: parsed.data.source
+		});
+
+		return {
+			waitlistSuccess: true,
+			waitlistAlreadySignedUp: result === 'exists'
+		};
 	},
 	updateExpiryReminders: async ({ request, locals }) => {
 		const formData = await request.formData();

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { parseReceiptLines, RECEIPT_LINES_SCHEMA } from './receipt-parse';
+import {
+	isOpenAiSchemaFailure,
+	normalizeReceiptAiPayload,
+	parseReceiptLines,
+	RECEIPT_LINES_SCHEMA
+} from './receipt-parse';
 
 function assertStrictOpenAiSchema(schema: Record<string, unknown>, path = '$'): void {
 	if (schema.type === 'object') {
@@ -55,5 +60,65 @@ describe('parseReceiptLines', () => {
 
 	it('drops empty quantity strings from strict model output', () => {
 		expect(parseReceiptLines({ lines: [{ name: ' Ägg ', quantity: '' }] })).toEqual([{ name: 'Ägg' }]);
+	});
+
+	it('coerces numeric quantity to string', () => {
+		expect(parseReceiptLines({ lines: [{ name: 'Mjölk', quantity: 2 }] })).toEqual([
+			{ name: 'Mjölk', quantity: '2' }
+		]);
+	});
+
+	it('coerces numeric name to string', () => {
+		expect(parseReceiptLines({ lines: [{ name: 123, quantity: '1' }] })).toEqual([
+			{ name: '123', quantity: '1' }
+		]);
+	});
+
+	it('ignores extra fields from model output', () => {
+		expect(
+			parseReceiptLines({
+				lines: [{ name: 'Bröd', quantity: '1', price: 29.9, sku: 'abc' }]
+			})
+		).toEqual([{ name: 'Bröd', quantity: '1' }]);
+	});
+});
+
+describe('normalizeReceiptAiPayload', () => {
+	it('coerces line field types', () => {
+		expect(
+			normalizeReceiptAiPayload({
+				lines: [{ name: '  Ost ', quantity: 3, extra: true }]
+			})
+		).toEqual({
+			lines: [{ name: 'Ost', quantity: '3' }]
+		});
+	});
+});
+
+describe('isOpenAiSchemaFailure', () => {
+	it('detects schema-related OpenAI errors', () => {
+		expect(
+			isOpenAiSchemaFailure({
+				ok: false,
+				status: 422,
+				messageKey: 'errors.api.openAiInvalidJson'
+			})
+		).toBe(true);
+		expect(
+			isOpenAiSchemaFailure({
+				ok: false,
+				status: 502,
+				messageKey: 'errors.api.openAiRequestFailed',
+				logDetail: 'Invalid json_schema for response'
+			})
+		).toBe(true);
+		expect(
+			isOpenAiSchemaFailure({
+				ok: false,
+				status: 503,
+				messageKey: 'errors.api.openAiRateLimit',
+				logDetail: 'OpenAI rate limit reached'
+			})
+		).toBe(false);
 	});
 });

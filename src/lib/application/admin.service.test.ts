@@ -47,6 +47,7 @@ describe('AdminService', () => {
 				email: 'a@example.com',
 				role: 'user' as const,
 				petsEnabled: false,
+				signupUtmSource: 'facebook',
 				createdAt: new Date(),
 				lastSeenAt: new Date(),
 				isActiveNow: true,

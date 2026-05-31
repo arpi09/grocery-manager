@@ -20,6 +20,7 @@ export interface AdminUserSummary {
 	email: string;
 	role: UserRole;
 	petsEnabled: boolean;
+	signupUtmSource: string | null;
 	createdAt: Date;
 	lastSeenAt: Date | null;
 	isActiveNow: boolean;
@@ -139,6 +140,7 @@ export class DrizzleAdminRepository implements IAdminRepository {
 					email: userTable.email,
 					role: userTable.role,
 					petsEnabled: userTable.petsEnabled,
+					signupUtmSource: userTable.signupUtmSource,
 					createdAt: userTable.createdAt,
 					lastSeenAt: userTable.lastSeenAt
 				})
@@ -163,6 +165,7 @@ export class DrizzleAdminRepository implements IAdminRepository {
 			email: user.email,
 			role: user.role as UserRole,
 			petsEnabled: user.petsEnabled,
+			signupUtmSource: user.signupUtmSource,
 			createdAt: user.createdAt,
 			lastSeenAt: user.lastSeenAt,
 			isActiveNow: isUserActiveNow(user.lastSeenAt),

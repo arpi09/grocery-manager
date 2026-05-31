@@ -1,0 +1,19 @@
+{
+	"note": "E2E mock — ingen OpenAI i CI",
+	"items": [
+		{
+			"name": "E2E Smartfill Mjölk",
+			"quantity": "1",
+			"category": "Mejeri",
+			"reason": "Test",
+			"priority": "high"
+		},
+		{
+			"name": "E2E Smartfill Banan",
+			"quantity": "2",
+			"category": "Frukt & grönt",
+			"reason": "Test",
+			"priority": "medium"
+		}
+	]
+}

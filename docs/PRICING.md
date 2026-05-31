@@ -1,6 +1,6 @@
 # Prissättningshypotes — Home Pantry
 
-*Version: maj 2026. Punkt 6 i [90_DAY_ROADMAP.md](./90_DAY_ROADMAP.md). Källa: [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 12 (Monetisering) och punkt 15.6.*
+*Version: maj 2026. Punkt 6 i [90_DAY_ROADMAP.md](./90_DAY_ROADMAP.md). Master roadmap: [ROADMAP.md](./ROADMAP.md).*
 
 **Status:** Hypotes dokumenterad. Ingen betalvägg, ingen Stripe SDK. Gränser i kod (`src/lib/domain/plan.ts`); **UI + AI-enforcement** via `PlanLimitsService` / `AiRateLimitService` (ingen Stripe än).
 
@@ -162,7 +162,8 @@ Konstanter: `STRIPE_READINESS_GATES` i `plan.ts`.
 ## 9. Relaterade dokument
 
 - [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) — §12 Monetisering, §15 punkt 6  
-- [90_DAY_ROADMAP.md](./90_DAY_ROADMAP.md) — checklista  
+- [ROADMAP.md](./ROADMAP.md) — Fas 1 Stripe / paywall
+- [90_DAY_ROADMAP.md](./90_DAY_ROADMAP.md) — checklista (fas 0)  
 - [BRAND.md](./BRAND.md) — ton vid paywall-copy  
 - `src/lib/marketing/content.ts` — FAQ-svar om pris
 

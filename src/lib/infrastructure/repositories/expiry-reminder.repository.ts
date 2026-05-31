@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, or } from 'drizzle-orm';
 import { db } from '$lib/infrastructure/db';
 import { userTable } from '$lib/infrastructure/db/schema';
 import {
@@ -18,6 +18,7 @@ export interface ExpiryReminderUser {
 	email: string;
 	displayName: string | null;
 	settings: ExpiryReminderSettings;
+	pushNotificationsEnabled: boolean;
 }
 
 export interface IExpiryReminderRepository {
@@ -84,16 +85,23 @@ export class DrizzleExpiryReminderRepository implements IExpiryReminderRepositor
 				displayName: userTable.displayName,
 				expiryRemindersEnabled: userTable.expiryRemindersEnabled,
 				expiryReminderDays: userTable.expiryReminderDays,
-				expiryReminderLastSentAt: userTable.expiryReminderLastSentAt
+				expiryReminderLastSentAt: userTable.expiryReminderLastSentAt,
+				pushNotificationsEnabled: userTable.pushNotificationsEnabled
 			})
 			.from(userTable)
-			.where(eq(userTable.expiryRemindersEnabled, true));
+			.where(
+				or(
+					eq(userTable.expiryRemindersEnabled, true),
+					eq(userTable.pushNotificationsEnabled, true)
+				)
+			);
 
 		return rows.map((row) => ({
 			id: row.id,
 			email: row.email,
 			displayName: row.displayName,
-			settings: mapSettings(row)
+			settings: mapSettings(row),
+			pushNotificationsEnabled: row.pushNotificationsEnabled
 		}));
 	}
 
@@ -105,7 +113,8 @@ export class DrizzleExpiryReminderRepository implements IExpiryReminderRepositor
 				displayName: userTable.displayName,
 				expiryRemindersEnabled: userTable.expiryRemindersEnabled,
 				expiryReminderDays: userTable.expiryReminderDays,
-				expiryReminderLastSentAt: userTable.expiryReminderLastSentAt
+				expiryReminderLastSentAt: userTable.expiryReminderLastSentAt,
+				pushNotificationsEnabled: userTable.pushNotificationsEnabled
 			})
 			.from(userTable)
 			.where(eq(userTable.id, userId))
@@ -119,7 +128,8 @@ export class DrizzleExpiryReminderRepository implements IExpiryReminderRepositor
 			id: row.id,
 			email: row.email,
 			displayName: row.displayName,
-			settings: mapSettings(row)
+			settings: mapSettings(row),
+			pushNotificationsEnabled: row.pushNotificationsEnabled
 		};
 	}
 

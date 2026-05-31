@@ -135,6 +135,7 @@ npx firebase apphosting:secrets:set ADMIN_PASSWORD --project home-pantry-4bee5
 npx firebase apphosting:secrets:set OPENAI_API_KEY --project home-pantry-4bee5
 npx firebase apphosting:secrets:set RESEND_API_KEY --project home-pantry-4bee5
 npx firebase apphosting:secrets:set TURNSTILE_SECRET_KEY --project home-pantry-4bee5
+npx firebase apphosting:secrets:set CRON_SECRET --project home-pantry-4bee5
 ```
 
 Grant App Hosting access (CLI usually offers this during `secrets:set`):
@@ -145,6 +146,7 @@ npx firebase apphosting:secrets:grantaccess ADMIN_PASSWORD --backend home-pantry
 npx firebase apphosting:secrets:grantaccess OPENAI_API_KEY --backend home-pantry --project home-pantry-4bee5
 npx firebase apphosting:secrets:grantaccess RESEND_API_KEY --backend home-pantry --project home-pantry-4bee5
 npx firebase apphosting:secrets:grantaccess TURNSTILE_SECRET_KEY --backend home-pantry --project home-pantry-4bee5
+npx firebase apphosting:secrets:grantaccess CRON_SECRET --backend home-pantry --project home-pantry-4bee5
 ```
 
 Update non-secret values in `apphosting.yaml` or Firebase Console â†’ **App Hosting â†’ home-pantry â†’ Settings â†’ Environment**:
@@ -162,6 +164,7 @@ Update non-secret values in `apphosting.yaml` or Firebase Console â†’ **App
 | `TURNSTILE_SECRET_KEY` | yes (prod) | Turnstile server verification on `/register` â€” see [`CAPTCHA.md`](./CAPTCHA.md) |
 | `PUBLIC_TURNSTILE_SITE_KEY` | yes (prod) | Turnstile widget site key â€” set in `apphosting.yaml` or Firebase Console (BUILD + RUNTIME) |
 | `RESEND_FROM` | optional | Sender address; defaults to `Home Pantry <onboarding@resend.dev>` until domain verified |
+| `CRON_SECRET` | yes (prod cron) | Bearer for `POST /api/cron/expiry-reminders` — set in Secret Manager; same value as GitHub Actions secret — see [90_DAY_ROADMAP.md § punkt 5](./90_DAY_ROADMAP.md#ägare--github-actions--firebase-prod) |
 
 \*Photo scan and other AI routes return **503** with a clear JSON error when this secret is missing, invalid, or not granted to the `home-pantry` backend. Create the secret and run `grantaccess` before relying on scan in production.
 | `DEFAULT_MEMBER_EMAIL` | optional | Demo household member |

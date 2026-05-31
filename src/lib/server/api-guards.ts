@@ -1,5 +1,7 @@
 import { json } from '@sveltejs/kit';
-import { getOpenAiApiKey, missingOpenAiKeyMessage } from '$lib/server/openai';
+import type { Locale } from '$lib/i18n/locale';
+import { translate } from '$lib/i18n/messages';
+import { getOpenAiApiKey, OPENAI_NOT_CONFIGURED_KEY } from '$lib/server/openai';
 
 type AuthenticatedLocals = App.Locals & { user: NonNullable<App.Locals['user']> };
 
@@ -12,7 +14,10 @@ export function requireUser(locals: App.Locals): RequireUserResult {
 	if (!locals.user) {
 		return {
 			authorized: false,
-			response: json({ error: 'Unauthorized' }, { status: 401 })
+			response: json(
+				{ error: translate(locals.locale, 'errors.api.unauthorized') },
+				{ status: 401 }
+			)
 		};
 	}
 	return { authorized: true, user: locals.user };
@@ -22,10 +27,10 @@ export function requireUser(locals: App.Locals): RequireUserResult {
  * Returns a JSON response when OPENAI_API_KEY is unset.
  * Status defaults to 500; product-from-image uses 503.
  */
-export function requireOpenAiKey(feature: string, status: 500 | 503 = 500) {
+export function requireOpenAiKey(locale: Locale, _feature: string, status: 500 | 503 = 500) {
 	const apiKey = getOpenAiApiKey();
 	if (!apiKey) {
-		return json({ error: missingOpenAiKeyMessage(feature) }, { status });
+		return json({ error: translate(locale, OPENAI_NOT_CONFIGURED_KEY) }, { status });
 	}
 	return apiKey;
 }

@@ -1,0 +1,44 @@
+import { describe, expect, it } from 'vitest';
+import {
+	dedupeMissingIngredients,
+	formatAddMissingFeedback,
+	type AddMissingApiResult
+} from './recipe-add-missing';
+
+describe('dedupeMissingIngredients', () => {
+	it('merges lists and dedupes case-insensitively', () => {
+		expect(
+			dedupeMissingIngredients([
+				['Basilika', 'Olivolja'],
+				['basilika', ' Citron ']
+			])
+		).toEqual(['Basilika', 'Olivolja', 'Citron']);
+	});
+
+	it('caps at 24 unique ingredients', () => {
+		const lists = [Array.from({ length: 30 }, (_, index) => `Ingrediens ${index + 1}`)];
+		expect(dedupeMissingIngredients(lists)).toHaveLength(24);
+	});
+});
+
+describe('formatAddMissingFeedback', () => {
+	it('formats success with count', () => {
+		const result: AddMissingApiResult = { ok: true, added: 3, skipped: 0 };
+		expect(formatAddMissingFeedback('sv', result)).toContain('3');
+	});
+
+	it('formats partial and none states', () => {
+		expect(
+			formatAddMissingFeedback('sv', { ok: true, added: 1, skipped: 2 })
+		).toContain('1');
+		expect(formatAddMissingFeedback('en', { ok: true, added: 0, skipped: 2 })).toMatch(
+			/already/i
+		);
+	});
+
+	it('falls back to failed message', () => {
+		expect(formatAddMissingFeedback('sv', { ok: false, added: 0, skipped: 0 })).toContain(
+			'Kunde inte'
+		);
+	});
+});

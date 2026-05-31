@@ -32,11 +32,18 @@ const SQL_MIGRATION_FILES = [
 	'0011_consumption_event.sql',
 	'0012_product_event.sql',
 	'0013_expiry_reminders.sql',
-	'0014_product_feedback.sql'
+	'0014_product_feedback.sql',
+	'0015_ai_usage.sql',
+	'0016_waitlist_email.sql',
+	'0017_push_subscriptions.sql',
+	'0018_user_signup_utm.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
 	"session",
+	"push_subscription",
+	"waitlist_email",
+	"ai_usage",
 	"product_feedback",
 	"product_event",
 	"consumption_event",

@@ -1,6 +1,57 @@
 # Konkurrensanalys — Home Pantry
 
-*Version: maj 2026. Baserad på kodbas (`docs/BRAND.md`, `docs/MARKETING_SITE.md`, `src/lib/marketing/content.ts`) och öppna källor om marknaden.*
+*Version: maj 2026 (senast reviderad 31 maj 2026). Baserad på kodbas (`docs/BRAND.md`, `docs/MARKETING_SITE.md`, `src/lib/marketing/content.ts`) och öppna källor om marknaden.*
+
+> **Produktroadmap efter 90 dagar:** [ROADMAP.md](./ROADMAP.md) · **Nästa 30 dagar (ägare):** [NEXT_STEPS.md](./NEXT_STEPS.md)
+
+---
+
+## Nuvarande läge (uppdaterad 31 maj 2026)
+
+**Home Pantry är inte färdig och har inte product-market fit än.** Den första 90-dagarsplanen ([`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md)) är i praktiken genomförd: onboarding, PWA, PMF-mätetal, e-postutgångspåminnelser, rate limits, marknadswebb, prishypotes och m.m. är levererade i kod. Det som saknas är **bevisad retention**, **betalande användare** och **vardagsvana** — inte fler Must-features i isolation.
+
+### Shipped sedan analysen skrevs
+
+| Område | Status nu | Konkurrensposition |
+|--------|-----------|-------------------|
+| **PMF-instrumentering** | `/admin` med aktivering, D7/D30, veckoscan, WoW-delta | Få indie-konkurrenter visar detta internt; ger oss datadriven iteration |
+| **Onboarding scan-first** | 2-stegs guide, kvitto eller 5 streckkoder, aktiveringsfirande | Minskar höns-ägg-problemet; Matdags har liknande men native onboarding |
+| **PWA + installguide** | Manifest, `/install-app`, banner på `/hem` | Delvis stänger webb-only-gap; **inte** samma som App Store + push |
+| **E-post utgångspåminnelser** | Veckodigest, opt-in, cron | Matdags har **native push**; vi har en kanal, inte full parity |
+| **AI rate limits + Free-gränser** | `AiRateLimitService`, UI i inställningar | Skyddar enhetsekonomi; **Stripe/checkout saknas** — ingen intäkt |
+| **Smart inköpslista** | AI-fill, export till clipboard (Bring-format) | Differentiator vs Bring/ICA; Matdags har lista utan samma plan+lager-koppling |
+| **Recept från lager v2** | Strikt lagerprompt, portioner, saknade → inköpslista | Närmare Matbotten på plan — men **retention** avgör om det märks |
+| **Scan-kvalitet SV** | Favoriter, senaste varor, snabb redigering | Minskar OFF-frustration; fortfarande svagare än dedikerade barcode-DB |
+| **Kvitto-PDF** | Bild + PDF, OpenAI-parse, E2E med mock | **Synthetic CI-fixtures**; riktig ICA/Kivra-korpus hos ägare ej i repo |
+| **Marknadswebb** | Hero A/B, jämförelsetabell, `/priser`, UTM | Tydligare mot ICA/Bring/Matdags; **launch i communities** = ägaruppgift |
+| **E2E** | 17 tester (kritiska flöden + kvitto + auth) | Höjer deploy-säkerhet; kvittoparse i prod ej fullt täckt i E2E |
+
+### Fortfarande ej shipped (kritiska gap)
+
+| Gap | Konsekvens vs konkurrenter |
+|-----|---------------------------|
+| **Native iOS/Android + push** | Matdags och FreshKeeper vinner vardagsvana och utgångspåminnelser i bakgrunden |
+| **Stripe / Pro-betalning** | Alla konton Free; AI-kostnad växer utan intäkt |
+| **D30-retention på mål** | PMF-dashboard finns — **målen är inte nådda** (data fylls av ägare) |
+| **Riktig kvitto-PDF-korpus i CI** | Risk för regress i ICA/Kivra-format i produktion |
+| **Web push** | E-post räcker inte för alla; PWA-notiser ej implementerade |
+
+### Reviderade hot och möjligheter
+
+**Hot (oförändrat eller skärpt):**
+
+- **Matdags 🔴** — Fortfarande närmaste 1:1-konkurrent. Vår stack har nu PDF + plan+lager + hushåll, men **distribution (App Store) och push** går fortfarande till dem om retention inte håller.
+- **ICA/Bring 🔴/🟠** — Marknadswebben adresserar “varför inte bara ICA?”; **vanan** hos majoriteten kvarstår.
+- **FreshKeeper 🟡→🟠** — Stiger om de lanserar Android + kvitto med native notiser.
+
+**Möjligheter (stärkta av levererat arbete):**
+
+- **Kvitto-PDF + Kivra-guide** — Fortfarande sällsynt globalt; kan bli tydlig huvudstory om parsing-kvalitet bevisas med riktiga PDF:er.
+- **Butiksneutral lager-sanningskälla** — Smart fill + recept från faktiskt lager skiljer från Bring och ren måltidsplanering.
+- **Datadriven iteration** — PMF-dashboard + intervjukit + feedback i appen gör att solo-byggaren kan prioritera retention före feature-paritet.
+- **Freemium redo i kod** — Gränser och rate limits på plats; **intäkt** kräver bara Stripe + betalande kohort (se [PRICING.md](./PRICING.md)).
+
+**Ärlig slutsats:** Feature-bredden närmar sig Matdags på papper, men **retention och betalning** är fortfarande huvudgapet — inte streckkod eller kvitto i sig. Se avsnitt 13 (PMF-kriterier) och [ROADMAP.md](./ROADMAP.md) fas 1.
 
 ---
 
@@ -46,15 +97,15 @@ Marknadswebben (`homepantry.com` / `/funktioner`) betonar: streckkod, kvitto & f
 | **Marknadswebb** | Shipped v1 | Landing, funktioner, hur det funkar, FAQ |
 | **Deploy** | Shipped | Firebase App Hosting, en pipeline |
 | **Native iOS/Android** | Ej shipped | Endast webb/PWA-liknande upplevelse |
-| **Push-notiser** | Ej shipped | Inga utgångspåminnelser i bakgrunden |
+| **Push-notiser** | Ej shipped | **E-post** utgångsdigest shipped; ingen OS/web push i bakgrunden |
 | **Butikspriser / erbjudanden** | Ej shipped | Medvetet bort från ICA-integration |
 | **Offline** | Begränsat | Kräver nät för AI och sync |
 
 ### 2.3 Planerat / marknadsfört men tunt eller framtida
 
 - **Engelsk marknadswebb** — struktur i `content.ts`, copy mest stub.
-- **Betalning** — ingen implementerad paywall i kod; FAQ lovar förhandsinfo.
-- **Automatisk påminnelse** — utgång visas i appen, men inte som OS-notis.
+- **Betalning** — gränser och rate limits i kod; **ingen Stripe/checkout**; FAQ lovar förhandsinfo.
+- **Automatisk påminnelse** — e-postdigest shipped; web push och OS-notis saknas.
 - **“Gratis för alltid”** — affärsmodell ej låst i produkt.
 
 ### 2.4 Teknisk differentiering (ärligt)
@@ -302,7 +353,7 @@ quadrantChart
 | Kvitto från ICA/Kivra utan manuell matris | Matdags ja; Bring nej; ICA lagrar i Kivra men importerar inte till lager | PDF/bild + Kivra-guide — **differentiator om det funkar bra** |
 | Butiksneutral (ICA + Willys + Lidl) | Retailer-appar låsta | Tydlig messaging |
 | Familj sync utan stammiskonto | ICA kräver stammis; Bring bra men utan expiry | Hushåll med roller |
-| Påminnelse innan utgång | Webb HP saknar push; Matdags har | **Kritisk lucka att stänga** |
+| Påminnelse innan utgång | HP har e-post; Matdags har native push | **Web push eller native** kvar som kritisk lucka |
 | Svenska produktnamn vid scan | OFF svag; Matdags investerar i AI | Egen produktcache / manuell override |
 | Prispress i inflationstider | Matpriskollen stark; lager-appar svaga | Senare: “köp bara det som saknas” räcker för många |
 | Integritet / inte sälja data | Plan to Eat säljer inte data; Matpriskollen annonser | Privacy-first, EU-hosting-story |
@@ -385,7 +436,9 @@ Enperson som bara vill ha en papperlös lista; användare som kräver perfekt sv
 
 Prioriterat mot konkurrentgap och solo-kapacitet.
 
-### Must (0–3 månader)
+**OBS (31 maj 2026):** Must-fasen är i stort sett levererad. Se [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md), avsnitt *Nuvarande läge* ovan och aktiv master-roadmap [`ROADMAP.md`](./ROADMAP.md).
+
+### Must (0–3 månader) — historik, i stort sett klart
 
 1. **Onboarding som mäter aktivering** — första scan inom 5 min, mål 10 varor.
 2. **PWA + “Lägg till på hemskärm”** + tydlig iOS/Android-installationsguide (webb).
@@ -403,7 +456,7 @@ Prioriterat mot konkurrentgap och solo-kapacitet.
 11. **Recept från lager v2** — färre hallucinationer, portioner.
 12. **App Store wrapper** (Capacitor/TWA) om retention kräver det.
 
-### Later (6–12 månader)
+### Later (6–12 månader) — se ROADMAP.md fas 2
 
 13. Native notiser, offline-läsning.
 14. Prisjämförelse / erbjudande (endast om tydlig partner — annars skip).
@@ -460,7 +513,14 @@ Du behöver **inte:** eget lagerhus, butiksavtal, kundtjänst 24/7, eller native
 
 ---
 
-## 15. Vad du ska göra — nästa 90 dagar (max 15 punkter)
+## 15. Ursprunglig 90-dagarslista (historik)
+
+Punkterna 1–15 (plus tillägg 16–20) är dokumenterade i [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md) som **klara eller ägaruppgifter**.
+
+**Nästa steg:** [`NEXT_STEPS.md`](./NEXT_STEPS.md) och [`ROADMAP.md`](./ROADMAP.md) fas 1–2 — retention, Stripe-gate, kvitto-korpus, launch, dag-90-beslut.
+
+<details>
+<summary>Originalpunktlista (1–15)</summary>
 
 1. **Sätt PMF-mätetal** i kod/analytics (aktivering, scan, retention).
 2. **Förenkla första sessionen** — kvitto ELLER 5 streckkoder, inte “fyll hela skafferiet”.
@@ -478,19 +538,21 @@ Du behöver **inte:** eget lagerhus, butiksavtal, kundtjänst 24/7, eller native
 14. **Veckovis retention-granskning** — en metric dashboard du faktiskt läser.
 15. **Beslut dag 90:** dubbla ner på webb+SV **eller** starta Capacitor-wrapper — baserat på D30, inte magkänsla.
 
+</details>
+
 ---
 
 ## 16. Slutsats — kan Home Pantry bli en framgång?
 
-**Ja, i en nisch** — om du accepterar att du inte blir “nästa ICA-app”, utan **det butiksneutrala skafferiet för svenska hushåll som redan vill scanna**. Framgång kräver:
+**Ja, i en nisch — men inte ännu bevisat.** Efter 90 dagars leverans har produkten feature-paritet mot Matdags på flera axlar (kvitto, plan, hushåll, smart lista), men saknar PMF-signaler (retention, betalande, vardagsvana). Framgång kräver nu:
 
-- Snabbare **vardagsvana** (notiser, hemskärm, kvitto som wow-moment).
-- **Tydligare SV-differentiering** mot Matdags (PDF, plan+lager, ton/brand).
-- **Bevisad retention**, inte bara feature-paritet.
-- **Hållbar AI-enhetsekonomi** när betalväggen kommer.
+- **Retention först** — veckoscan, D30, intervjusyntes; e-post är start, push/native om data motiverar.
+- **Tydlig Matdags-differentiering** — PDF/Kivra, plan+lager, butiksneutral (copy finns; distribution saknas).
+- **Stripe när gates uppfylls** — annars växer AI-kostnad utan intäkt ([PRICING.md](./PRICING.md)).
+- **Dag-90-beslut** — webb+SV vs Capacitor ([DAY_90_DECISION.md](./DAY_90_DECISION.md)).
 
-Som solo/indie är din unfair advantage **fokus och integritet**, inte datamängd eller butiksrabatter. Dubbla ner på det.
+Som solo/indie är unfair advantage **fokus, integritet och datadriven prioritering** — inte App Store-budget eller stammisrabatter.
 
 ---
 
-*Källor: projektdokumentation maj 2026; publika pris-/funktionssidor för Matdags, Bring, NoWaste, Pantry Check, ICA, Coop, Matpriskollen, Matbotten, Mealime, Plan to Eat, AnyList, OurGroceries, Too Good To Go; App Store/Google Play-sammanfattningar.*
+*Källor: projektdokumentation maj 2026 (reviderad 31 maj 2026); publika pris-/funktionssidor för Matdags, Bring, NoWaste, Pantry Check, ICA, Coop, Matpriskollen, Matbotten, Mealime, Plan to Eat, AnyList, OurGroceries, Too Good To Go; App Store/Google Play-sammanfattningar.*

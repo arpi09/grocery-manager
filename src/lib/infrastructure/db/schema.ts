@@ -25,11 +25,16 @@ export const userTable = pgTable('user', {
 		withTimezone: true,
 		mode: 'date'
 	}),
+	pushNotificationsEnabled: boolean('push_notifications_enabled').notNull().default(false),
 	themePreference: text('theme_preference', { enum: ['light', 'dark', 'system'] }).notNull().default('system'),
 	activeHouseholdId: text('active_household_id').references(() => householdTable.id, {
 		onDelete: 'set null'
 	}),
 	lastSeenAt: timestamp('last_seen_at', { withTimezone: true, mode: 'date' }),
+	signupUtmSource: text('signup_utm_source'),
+	signupUtmMedium: text('signup_utm_medium'),
+	signupUtmCampaign: text('signup_utm_campaign'),
+	signupUtmContent: text('signup_utm_content'),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 });
 
@@ -276,6 +281,39 @@ export const aiUsageTable = pgTable(
 	(table) => [
 		uniqueIndex('ai_usage_scope_kind_period_idx').on(table.scopeId, table.kind, table.periodKey),
 		index('ai_usage_user_updated_idx').on(table.userId, table.updatedAt)
+	]
+);
+
+export const waitlistEmailTable = pgTable(
+	'waitlist_email',
+	{
+		id: text('id').primaryKey(),
+		email: text('email').notNull(),
+		userId: text('user_id').references(() => userTable.id, { onDelete: 'set null' }),
+		source: text('source', { enum: ['priser', 'settings'] }).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		uniqueIndex('waitlist_email_email_idx').on(table.email),
+		index('waitlist_email_created_idx').on(table.createdAt)
+	]
+);
+
+export const pushSubscriptionTable = pgTable(
+	'push_subscription',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		endpoint: text('endpoint').notNull(),
+		p256dh: text('p256dh').notNull(),
+		auth: text('auth').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		uniqueIndex('push_subscription_endpoint_idx').on(table.endpoint),
+		index('push_subscription_user_idx').on(table.userId)
 	]
 );
 

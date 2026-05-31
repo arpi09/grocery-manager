@@ -1,8 +1,8 @@
 # Beslut dag 90 — webb+SV eller Capacitor?
 
-*Version: maj 2026. Punkt 15 i [90_DAY_ROADMAP.md](./90_DAY_ROADMAP.md). Källa: [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 13 (PMF-mätetal), avsnitt 11 Should #12, punkt 15.15.*
+*Version: maj 2026. Punkt 15 i [90_DAY_ROADMAP.md](./90_DAY_ROADMAP.md). Källa: [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 13 (PMF-mätetal), avsnitt 11 Should #12, punkt 15.15. Master roadmap: [ROADMAP.md](./ROADMAP.md).*
 
-**Status:** Beslutsramverk dokumenterat. Själva beslutet fattas av ägaren vid dag 90 — fyll i checklistan längst ner.
+**Status:** Beslutsramverk dokumenterat. Preliminär avläsning kan göras när som helst; formellt beslut vid dag 90 — fyll i checklistan längst ner.
 
 ---
 
@@ -114,6 +114,36 @@ Se CA §8 (Webb-only-risk) och §11 Should #12.
 
 ---
 
+## Preliminär avläsning (mall — fyll i löpande)
+
+*Första ifyllnad rekommenderas **31 maj 2026** eller när `d30EligibleUsers ≥ 30`. Uppdatera månadsvis tills formell checklista (§7) signeras.*
+
+**Senast ifylld:** _______________  
+**Data per:** _______________ (export/screenshot från `/admin`)
+
+| Mätetal | Faktiskt värde | Mål | På mål? | Tolkning (1 rad) |
+|---------|----------------|-----|---------|------------------|
+| Aktivering (24 h) | _____ % | >40 % | ☐ Ja ☐ Nej | |
+| Median tid till första scan | _____ min | <3 min | ☐ Ja ☐ Nej | |
+| Veckoscan-rate | _____ % | >30 % | ☐ Ja ☐ Nej | |
+| D7-retention | _____ % | >20 % | ☐ Ja ☐ Nej | |
+| **D30-retention** | _____ % | >15 % / >25 % | ☐ Ja ☐ Nej | |
+| d30EligibleUsers | _____ | ≥30 rekomm. | ☐ Ja ☐ Nej | |
+| Hushåll 2+ aktiva | _____ % | >50 % | ☐ Ja ☐ Nej | |
+| Smart fill / vecka | _____ % | >20 % | ☐ Ja ☐ Nej | |
+
+**Preliminär väg (ej bindande):** ☐ A Webb+SV ☐ B Capacitor ☐ Hybrid ☐ För tidigt (kohort <30)
+
+**Största gap just nu (max 3):**
+
+1. ___________________________________________________________________________
+2. ___________________________________________________________________________
+3. ___________________________________________________________________________
+
+**Nästa 30 dagar (länka till [NEXT_STEPS.md](./NEXT_STEPS.md)):** _______________
+
+---
+
 ## 7. Checklista för ägare — fyll i vid dag 90
 
 **Datum beslut:** _______________  
@@ -168,3 +198,5 @@ _______________________________________________________________________________
 - PWA idag: [PWA.md](./PWA.md)
 - Prissättning: [PRICING.md](./PRICING.md)
 - Konkurrens & roadmap Must/Should: [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) §11–13
+- Master roadmap: [ROADMAP.md](./ROADMAP.md)
+- Nästa 30 dagar: [NEXT_STEPS.md](./NEXT_STEPS.md)

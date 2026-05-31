@@ -104,9 +104,22 @@ https://homepantry.com/install-app?utm_source=facebook&utm_medium=community&utm_
 
 ### Vad som händer i produkten
 
-Om besökaren landar med UTM i query string **bevaras** standard-UTM (`utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`) på marketing-CTA-länkar till `/login` och `/register` (se `src/lib/marketing/utm-params.ts`). Det underlättar senare koppling om du loggar query vid registrering.
+Om besökaren landar med UTM i query string **bevaras** standard-UTM (`utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`) på marketing-CTA-länkar till `/login` och `/register` (se `src/lib/marketing/utm-params.ts`).
 
-**Kvar att bygga (valfritt senare):** spara UTM i `user`- eller `product_event`-rad vid signup — tills dess: anteckna launch-vecka manuellt i admin när du jämför kohorter.
+Vid **registrering** sparas `utm_source`, `utm_medium`, `utm_campaign` och `utm_content` (inte `utm_term`) på användarraden:
+
+1. Besökaren når `/register` med UTM i URL (direkt eller via marketing-CTA).
+2. Servern sätter en httpOnly-cookie (`hp_signup_utm`, 30 dagar) så UTM finns kvar om användaren byter sida innan signup.
+3. Vid lyckad registrering skrivs värdena till kolumnerna `signup_utm_*` i tabellen `user`; cookien raderas.
+
+### Läsa UTM i admin
+
+1. Logga in som admin och öppna **`/admin`**.
+2. I tabellen **Användare** finns kolumnen **UTM source** (`signup_utm_source`) — t.ex. `facebook`, `reddit`, `instagram`.
+3. Tom cell (`—`) = registrerad utan sparad källa (äldre konto eller ingen UTM i länk).
+4. För kampanjdetaljer (`utm_medium`, `utm_campaign`, `utm_content`) finns värdena i databasen på samma rad (`signup_utm_medium`, `signup_utm_campaign`, `signup_utm_content`) tills admin-UI utökas; för launch räcker ofta **source + registreringsdatum** i tabellen.
+
+**Tips:** filtrera manuellt på registreringsvecka (kolumnen **Skapad**) och jämför antal per UTM source med din launch-logg nedan.
 
 ---
 

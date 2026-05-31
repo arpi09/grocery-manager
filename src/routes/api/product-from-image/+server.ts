@@ -3,7 +3,7 @@ import { json } from '@sveltejs/kit';
 import { translate } from '$lib/i18n/messages';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
-import { requestStructuredJsonFromImage } from '$lib/server/openai';
+import { requestStructuredJsonFromImage, translateOpenAiError } from '$lib/server/openai';
 import type { RequestHandler } from './$types';
 
 const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
@@ -77,7 +77,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return auth.response;
 		}
 
-		const apiKeyOrResponse = requireOpenAiKey('photo product scan', 503);
+		const apiKeyOrResponse = requireOpenAiKey(locals.locale, 'photo product scan', 503);
 		if (typeof apiKeyOrResponse !== 'string') {
 			return apiKeyOrResponse;
 		}
@@ -91,16 +91,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const formData = await request.formData();
 		const image = formData.get('image');
 		if (!(image instanceof File)) {
-			return json({ error: 'No image uploaded.' }, { status: 400 });
+			return json(
+				{ error: translate(locals.locale, 'errors.api.productImageNoFile') },
+				{ status: 400 }
+			);
 		}
 
 		if (!image.type.startsWith('image/')) {
-			return json({ error: 'Uploaded file must be an image.' }, { status: 400 });
+			return json(
+				{ error: translate(locals.locale, 'errors.api.productImageNotImage') },
+				{ status: 400 }
+			);
 		}
 
 		if (image.size > MAX_IMAGE_BYTES) {
 			return json(
-				{ error: 'Image is too large. Please upload an image under 6 MB.' },
+				{ error: translate(locals.locale, 'errors.api.productImageTooLarge') },
 				{ status: 413 }
 			);
 		}
@@ -118,7 +124,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 
 		if (!result.ok) {
-			return json({ error: result.message }, { status: result.status });
+			return json({ error: translateOpenAiError(locals.locale, result) }, { status: result.status });
 		}
 
 		const product = parseProduct(result.data);
@@ -134,7 +140,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const detail = error instanceof Error ? error.message : 'unexpected error';
 		console.error('[product-from-image]', detail);
 		return json(
-			{ error: 'Photo product scan failed unexpectedly. Please try again.' },
+			{ error: translate(locals.locale, 'errors.api.productImageUnexpected') },
 			{ status: 503 }
 		);
 	}

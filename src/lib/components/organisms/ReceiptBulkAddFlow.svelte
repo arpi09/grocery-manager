@@ -18,6 +18,8 @@
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
+	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 
 	interface Props {
 		returnTo: string;
@@ -106,6 +108,18 @@
 		step = 'upload';
 		parseError = null;
 	}
+
+	onMount(() => {
+		if (!browser) return;
+		if (!import.meta.env.DEV) return;
+		(
+			window as Window & { __hpE2eReceiptUpload?: (file: File) => Promise<void> }
+		).__hpE2eReceiptUpload = handleReceiptFile;
+		return () => {
+			delete (window as Window & { __hpE2eReceiptUpload?: (file: File) => Promise<void> })
+				.__hpE2eReceiptUpload;
+		};
+	});
 </script>
 
 {#if step === 'upload'}
@@ -135,7 +149,9 @@
 		<p class="hint">{t('receipt.formats.hint')}</p>
 
 		{#if parseError}
-			<FeedbackBanner tone="error" message={parseError} />
+			<div data-testid="receipt-parse-error">
+				<FeedbackBanner tone="error" message={parseError} />
+			</div>
 		{/if}
 
 		<p class="hint">{t('receiptBulk.apiKeyHint')}</p>
@@ -143,7 +159,7 @@
 
 	<ScanFlowFooter cancelHref={cancelHref} cancelLabel={t('common.cancel')} />
 {:else}
-	<section>
+	<section data-testid="receipt-review">
 		<h2 class="title">{t('receiptBulk.selectItems', { selected: selectedCount, total: lines.length })}</h2>
 
 		<div class="bulk-location">
@@ -171,11 +187,17 @@
 			)}
 		>
 			<input type="hidden" name="returnTo" value={returnTo} />
-			<ul class="line-list">
+			<ul class="line-list" data-testid="receipt-line-list">
 				{#each lines as line, index (index)}
-					<li>
+					<li data-testid="receipt-line-{index}">
 						<label class="line-row">
-							<input type="checkbox" name="selected" value={index} checked={selected[index]} onchange={(e) => {
+							<input
+								type="checkbox"
+								data-testid="receipt-line-checkbox-{index}"
+								name="selected"
+								value={index}
+								checked={selected[index]}
+								onchange={(e) => {
 								selected[index] = (e.currentTarget as HTMLInputElement).checked;
 							}} />
 							<span class="line-name">{line.name}</span>
@@ -195,6 +217,7 @@
 				<Button type="button" variant="secondary" onclick={requestNewImage}>{t('common.newImage')}</Button>
 				<Button
 					type="submit"
+					data-testid="receipt-bulk-submit"
 					disabled={selectedCount === 0}
 					loading={bulkSubmitting}
 					loadingLabel={t('receipt.saving')}

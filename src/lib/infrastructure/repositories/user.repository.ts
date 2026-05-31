@@ -1,12 +1,18 @@
 import { eq } from 'drizzle-orm';
 import { db } from '$lib/infrastructure/db';
 import { userTable } from '$lib/infrastructure/db/schema';
+import type { SignupUtm } from '$lib/domain/signup-utm';
 import type { ThemePreference } from '$lib/domain/theme';
 import type { UserProfile } from '$lib/domain/user';
 
 export interface IUserRepository {
 	findByEmail(email: string): Promise<{ id: string; email: string; passwordHash: string } | null>;
-	create(email: string, passwordHash: string, id: string): Promise<{ id: string; email: string }>;
+	create(
+		email: string,
+		passwordHash: string,
+		id: string,
+		signupUtm?: SignupUtm | null
+	): Promise<{ id: string; email: string }>;
 	findProfileById(id: string): Promise<UserProfile | null>;
 	updateProfile(
 		id: string,
@@ -44,12 +50,16 @@ export class DrizzleUserRepository implements IUserRepository {
 		return row ?? null;
 	}
 
-	async create(email: string, passwordHash: string, id: string) {
+	async create(email: string, passwordHash: string, id: string, signupUtm?: SignupUtm | null) {
 		const normalizedEmail = email.toLowerCase();
 		await db.insert(userTable).values({
 			id,
 			email: normalizedEmail,
-			passwordHash
+			passwordHash,
+			signupUtmSource: signupUtm?.source ?? null,
+			signupUtmMedium: signupUtm?.medium ?? null,
+			signupUtmCampaign: signupUtm?.campaign ?? null,
+			signupUtmContent: signupUtm?.content ?? null
 		});
 
 		return { id, email: normalizedEmail };

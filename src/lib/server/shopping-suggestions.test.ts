@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	normalizeShoppingItemName,
 	parseShoppingSuggestions,
+	parseSuggestionQuantity,
 	suggestionToListItem
 } from './shopping-suggestions';
 
@@ -41,7 +42,16 @@ describe('parseShoppingSuggestions', () => {
 			reason: 'Behövs',
 			priority: 'high'
 		});
-		expect(item).toEqual({ name: 'Mjölk', quantity: '1 l', unit: null });
+		expect(item).toEqual({ name: 'Mjölk', quantity: '1', unit: 'l' });
+	});
+});
+
+describe('parseSuggestionQuantity', () => {
+	it('splits number and unit for common Swedish grocery strings', () => {
+		expect(parseSuggestionQuantity('1 st')).toEqual({ quantity: '1', unit: 'st' });
+		expect(parseSuggestionQuantity('1 kg')).toEqual({ quantity: '1', unit: 'kg' });
+		expect(parseSuggestionQuantity('500 g')).toEqual({ quantity: '500', unit: 'g' });
+		expect(parseSuggestionQuantity('2,5 l')).toEqual({ quantity: '2.5', unit: 'l' });
 	});
 });
 

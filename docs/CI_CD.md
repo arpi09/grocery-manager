@@ -64,6 +64,7 @@ När uppgiften är klar eller användaren säger *commit push deploy*:
 | Fil | Namn (UI) | Trigger |
 |-----|-----------|---------|
 | [`.github/workflows/release.yml`](../.github/workflows/release.yml) | **Release** | `push` → `master`/`main`; `workflow_dispatch` (nödläge) |
+| [`.github/workflows/expiry-reminders-cron.yml`](../.github/workflows/expiry-reminders-cron.yml) | **Expiry reminders cron** | `schedule` måndag 07:00 UTC; `workflow_dispatch` |
 
 Jobbkedja: `quality` → `e2e` → `deploy` (`needs:` — inga `workflow_run`-länkar).
 
@@ -97,7 +98,9 @@ Om du aktiverar status checks på `master` körs de automatiskt vid push — for
 | Plats | Namn | Syfte |
 |-------|------|--------|
 | GitHub Actions | `FIREBASE_TOKEN` | `firebase login:ci` — deploy från Actions |
-| Firebase Secret Manager | `DATABASE_URL`, `ADMIN_PASSWORD`, `OPENAI_API_KEY`, … | Runtime i App Hosting |
+| GitHub Actions (secret) | `CRON_SECRET` | Bearer för veckocron `POST /api/cron/expiry-reminders` — måste matcha Firebase |
+| GitHub Actions (variable) | `PRODUCTION_URL` | Prod-appens bas-URL (samma som `PUBLIC_ORIGIN`, utan `/` på slutet) |
+| Firebase Secret Manager | `DATABASE_URL`, `ADMIN_PASSWORD`, `OPENAI_API_KEY`, `CRON_SECRET`, … | Runtime i App Hosting |
 
 Utan `FIREBASE_TOKEN` körs G1+G2 ändå; G3 **skippar** med tydlig loggrad.
 
@@ -141,6 +144,7 @@ npm run deploy:firebase
 | Fil | Roll |
 |-----|------|
 | `.github/workflows/release.yml` | G1 → G2 → G3 |
+| `.github/workflows/expiry-reminders-cron.yml` | Veckovis utgångspåminnelse i prod (oberoende av release) |
 | `.husky/pre-commit` | lint-staged (G0) |
 | `apphosting.yaml` | Firebase build/run |
 | `docs/FIREBASE_DEPLOY.md` | Infra, secrets, första deploy |

@@ -19,6 +19,13 @@
 	import { CHURN_REASONS } from '$lib/domain/product-feedback';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import PlanLimitBanner from '$lib/components/molecules/PlanLimitBanner.svelte';
+	import {
+		isPushSupported,
+		pushErrorMessage,
+		subscribeToExpiryPush,
+		unsubscribeFromExpiryPush
+	} from '$lib/utils/push-notifications';
+	import ProWaitlistForm from '$lib/components/marketing/ProWaitlistForm.svelte';
 
 	let { data, form } = $props();
 	let petModalOpen = $state(false);
@@ -27,6 +34,10 @@
 	let expiryRemindersSubmitting = $state(false);
 	let expiryRemindersEnabled = $state(data.expiryRemindersEnabled);
 	let expiryReminderDays = $state(String(data.expiryReminderDays));
+	let pushNotificationsEnabled = $state(data.pushNotificationsEnabled);
+	let pushNotificationsSubmitting = $state(false);
+	let pushNotificationsError = $state<string | null>(null);
+	let pushSupported = $state(false);
 	let addPetSubmitting = $state(false);
 	let feedbackSubmitting = $state(false);
 
@@ -36,6 +47,13 @@
 	$effect(() => {
 		expiryRemindersEnabled = data.expiryRemindersEnabled;
 		expiryReminderDays = String(data.expiryReminderDays);
+		pushNotificationsEnabled = data.pushNotificationsEnabled;
+	});
+
+	$effect(() => {
+		if (browser) {
+			pushSupported = isPushSupported();
+		}
 	});
 
 	const inviteLink = $derived(form?.inviteLink ?? null);
@@ -55,6 +73,30 @@
 		resetOnboarding();
 		if (browser) {
 			window.dispatchEvent(new Event(ONBOARDING_REPLAY_EVENT));
+		}
+	}
+
+	async function togglePushNotifications(enabled: boolean) {
+		pushNotificationsError = null;
+		pushNotificationsSubmitting = true;
+		try {
+			if (enabled) {
+				const result = await subscribeToExpiryPush();
+				if (!result.ok) {
+					pushNotificationsError = pushErrorMessage(result.reason);
+					pushNotificationsEnabled = false;
+					return;
+				}
+				pushNotificationsEnabled = true;
+			} else {
+				await unsubscribeFromExpiryPush();
+				pushNotificationsEnabled = false;
+			}
+		} catch {
+			pushNotificationsError = pushErrorMessage('failed');
+			pushNotificationsEnabled = false;
+		} finally {
+			pushNotificationsSubmitting = false;
 		}
 	}
 </script>
@@ -142,6 +184,35 @@
 						<span class="expiry-saving">{t('common.saving')}</span>
 					{/if}
 				</form>
+			</SettingsRow>
+
+			<SettingsRow
+				title={t('settings.pushNotifications.title')}
+				note={t('settings.pushNotifications.note')}
+				last={false}
+			>
+				<div class="push-notifications-control">
+					<label class="expiry-toggle">
+						<input
+							type="checkbox"
+							checked={pushNotificationsEnabled}
+							disabled={!pushSupported || pushNotificationsSubmitting}
+							onchange={(event) => {
+								void togglePushNotifications(event.currentTarget.checked);
+							}}
+						/>
+						<span>{t('settings.pushNotifications.enable')}</span>
+					</label>
+					{#if !pushSupported}
+						<p class="push-hint">{t('settings.pushNotifications.unsupported')}</p>
+					{/if}
+					{#if pushNotificationsSubmitting}
+						<span class="expiry-saving">{t('common.saving')}</span>
+					{/if}
+					{#if pushNotificationsError}
+						<p class="push-error" role="alert">{pushNotificationsError}</p>
+					{/if}
+				</div>
 			</SettingsRow>
 
 			<SettingsRow
@@ -276,6 +347,19 @@
 					})}
 				</p>
 				<p class="plan-copy plan-muted">{t('settings.plan.comingSoon')}</p>
+				<ProWaitlistForm
+					action="?/joinProWaitlist"
+					source="settings"
+					title={t('settings.plan.waitlistTitle')}
+					description={t('settings.plan.waitlistDescription')}
+					emailLabel={t('settings.plan.waitlistEmailLabel')}
+					submitLabel={t('settings.plan.waitlistSubmitLabel')}
+					successMessage={t('settings.plan.waitlistSuccess')}
+					existsMessage={t('settings.plan.waitlistExists')}
+					email={data.user?.email ?? ''}
+					emailReadonly
+					{form}
+				/>
 			</div>
 			<SettingsRow
 				href="/priser"
@@ -412,6 +496,26 @@
 	.expiry-saving {
 		font-size: 0.85rem;
 		color: var(--color-text-muted);
+	}
+
+	.push-notifications-control {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.push-hint,
+	.push-error {
+		margin: 0;
+		font-size: 0.85rem;
+	}
+
+	.push-hint {
+		color: var(--color-text-muted);
+	}
+
+	.push-error {
+		color: var(--color-danger, #b42318);
 	}
 
 	.pet-panel {

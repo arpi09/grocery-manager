@@ -1,17 +1,22 @@
 <script lang="ts">
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
+	import ProWaitlistForm from '$lib/components/marketing/ProWaitlistForm.svelte';
 	import { getPricingContent } from '$lib/marketing/pricing-content';
 	import type { MarketingLocale } from '$lib/marketing/content';
 
-	let { data } = $props();
+	let { data, form } = $props();
 
 	const pricing = getPricingContent(data.marketingLocale as MarketingLocale);
 	const { marketing: content, loginUrl, registerUrl } = data;
 </script>
 
 <svelte:head>
-	<title>{pricing.title} — {content.siteName}</title>
-	<meta name="description" content={pricing.lead} />
+	<title>{pricing.meta.title}</title>
+	<meta name="description" content={pricing.meta.description} />
+	<meta property="og:title" content={pricing.meta.ogTitle} />
+	<meta property="og:description" content={pricing.meta.ogDescription} />
+	<meta name="twitter:title" content={pricing.meta.ogTitle} />
+	<meta name="twitter:description" content={pricing.meta.ogDescription} />
 </svelte:head>
 
 <section class="page-hero">
@@ -58,6 +63,18 @@
 
 		<h2>{pricing.stripeNoteTitle}</h2>
 		<p>{pricing.stripeNoteBody}</p>
+
+		<ProWaitlistForm
+			action="?/joinProWaitlist"
+			source="priser"
+			title={pricing.waitlistTitle}
+			description={pricing.waitlistDescription}
+			emailLabel={pricing.waitlistEmailLabel}
+			submitLabel={pricing.waitlistSubmitLabel}
+			successMessage={pricing.waitlistSuccess}
+			existsMessage={pricing.waitlistExists}
+			{form}
+		/>
 
 		<p class="faq-crosslink">
 			<a href={pricing.faqHref}>{pricing.faqLinkLabel}</a>

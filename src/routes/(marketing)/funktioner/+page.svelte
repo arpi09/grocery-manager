@@ -8,8 +8,12 @@
 </script>
 
 <svelte:head>
-	<title>{content.features.title} — {content.siteName}</title>
-	<meta name="description" content={content.features.lead} />
+	<title>{content.features.meta.title} — {content.siteName}</title>
+	<meta name="description" content={content.features.meta.description} />
+	<meta property="og:title" content={content.features.meta.ogTitle} />
+	<meta property="og:description" content={content.features.meta.ogDescription} />
+	<meta name="twitter:title" content={content.features.meta.ogTitle} />
+	<meta name="twitter:description" content={content.features.meta.ogDescription} />
 </svelte:head>
 
 <section class="page-hero">

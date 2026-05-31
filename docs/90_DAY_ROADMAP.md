@@ -1,5 +1,7 @@
 # 90-dagars roadmap — Home Pantry
 
+> **Status (31 maj 2026): Fas 0 i stort sett klar.** Aktiv plan: [`ROADMAP.md`](./ROADMAP.md) · Nästa 30 dagar: [`NEXT_STEPS.md`](./NEXT_STEPS.md)
+
 Checklista från [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 15, med status och koppling till Must-roadmap (avsnitt 11).
 
 | # | Uppgift | Status | Must-roadmap | Anteckning |
@@ -17,12 +19,12 @@ Checklista från [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 15
 | 11 | Rate limits på AI — skydda kostnad och missbruk | **Klar** | #5 Smart fill stabil & billig | `ai_usage`-tabell, `FREE_LIMITS` på kvitto/smart fill/insights/foto |
 | 12 | "Dela lista" export — minst clipboard-format för Bring | **Klar** | Should #8 Export/delning | `formatShoppingListExport` + "Kopiera lista" i `ShoppingListPanel`, i18n sv/en |
 | 13 | Launch i 2–3 communities (matsvinn, föräldrar, meal prep) | **Klar (kit)** | — | `docs/LAUNCH_PLAYBOOK.md`, UTM på marketing-CTA → login/register |
-| 14 | Veckovis retention-granskning — en metric dashboard du faktiskt läser | Väntar | #7 Analytics för PMF | Dashboard finns — etablera veckorutin |
+| 14 | Veckovis retention-granskning — en metric dashboard du faktiskt läser | **Klar** | #7 Analytics för PMF | Dashboard + WoW; ägare: veckorutin |
 | 15 | Beslut dag 90: dubbla ner på webb+SV eller starta Capacitor-wrapper | **Klar (dokument)** | Should #12 App Store wrapper | [DAY_90_DECISION.md](./DAY_90_DECISION.md) — ägaren fyller checklista dag 90 |
 | 16 | E2E critical flows — registrering, login, scan, inköp | **Klar** | — | `e2e/critical-flows.spec.ts`, `TURNSTILE_BYPASS`, [`E2E.md`](./E2E.md) |
 | 17 | Scan-kvalitet SV — senaste varor, snabb redigering, favoriter | **Klar** | Must #4 Scan-kvalitet SV | Snabbval-chips, inline redigering, `favorite-products.ts` localStorage-cache |
 | 18 | Freemium enforcement UI — gränser synliga i inställningar/plan | **Klar** | Must #10 Enkel prissättning | `PlanLimitsService` + `PlanLimitBanner`, användningsrader, uppgraderings-CTA `/priser`; AI-räknare via `AiRateLimitService` (#11) |
-| 19 | Recept från lager v2 — strikt lager, portioner, mindre hallucination | Väntar | Must #11 Recept från lager v2 | |
+| 19 | Recept från lager v2 — strikt lager, portioner, mindre hallucination | **Klar** | Must #11 Recept från lager v2 | `recipe-prompt.ts`, add-missing → lista |
 | 20 | Registration captcha fix — Turnstile prod + test mode CI | **Klar** | — | `PUBLIC_TURNSTILE_SITE_KEY` i apphosting, widget + verify, i18n-fel, domän-whitelist i CAPTCHA.md |
 
 *Punkt 16–20 är tillägg utöver original-listan (15 punkter) i COMPETITIVE_ANALYSIS §15 — kopplade till Must-roadmap, e2e och prod-fixar.*
@@ -82,10 +84,25 @@ Checklista från [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) avsnitt 15
 - **Tröskel:** 3 eller 7 dagar innan utgång (standard 7)
 - **Innehåll:** Svensk HTML-e-post (Resend) med varor per hushåll användaren tillhör + CTA till `/hem`
 - **Intervall:** Max en digest per 7 dagar och användare (`expiry_reminder_last_sent_at`)
-- **Prod-trigger:** Schemalagd `POST /api/cron/expiry-reminders` med `Authorization: Bearer $CRON_SECRET` (t.ex. GitHub Actions cron måndag 08:00 UTC, eller Cloud Scheduler)
+- **Prod-trigger:** Schemalagd `POST /api/cron/expiry-reminders` med `Authorization: Bearer $CRON_SECRET` — workflow [`.github/workflows/expiry-reminders-cron.yml`](../.github/workflows/expiry-reminders-cron.yml) (måndag 07:00 UTC) eller t.ex. Cloud Scheduler
 - **Dev/fallback:** Vid inloggning körs samma veckovisa kontroll i bakgrunden (om ≥7 dagar sedan senaste)
-- **Env:** `RESEND_API_KEY`, `RESEND_FROM`, `CRON_SECRET`, `ORIGIN`/`PUBLIC_ORIGIN` (länkar i mejl)
+- **Env (Firebase App Hosting):** `RESEND_API_KEY`, `RESEND_FROM`, `CRON_SECRET`, `PUBLIC_ORIGIN`/`ORIGIN` (länkar i mejl)
 - **Tester:** `expiry-reminder.test.ts` för urvalslogik
+
+### Ägare — GitHub Actions + Firebase (prod)
+
+1. **Generera hemlighet:** starkt `CRON_SECRET` (t.ex. `openssl rand -hex 32`). Samma värde ska gälla i Firebase och GitHub.
+2. **Firebase** (projekt `home-pantry-4bee5`, backend `home-pantry`):
+   ```bash
+   npx firebase apphosting:secrets:set CRON_SECRET --project home-pantry-4bee5
+   npx firebase apphosting:secrets:grantaccess CRON_SECRET --backend home-pantry --project home-pantry-4bee5
+   ```
+   Kontrollera att `RESEND_API_KEY` och `PUBLIC_ORIGIN`/`ORIGIN` redan matchar live-URL (se [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md)). Redeploy efter nya secrets.
+3. **GitHub** → *Settings* → *Secrets and variables* → *Actions*:
+   - **Secret:** `CRON_SECRET` — samma sträng som i Firebase
+   - **Variable:** `PRODUCTION_URL` — kanonisk prod-URL **utan** avslutande `/`, t.ex. `https://homepantry.com` eller `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app` (samma host som `PUBLIC_ORIGIN`)
+4. **Verifiera:** *Actions* → **Expiry reminders cron** → *Run workflow*. Förväntat: HTTP 200 och JSON `{ "ok": true, ... }`.
+5. **Schema:** workflow körs automatiskt varje **måndag 07:00 UTC**. Påverkar inte **Release**-pipelinen (separat workflow, ingen `push`-trigger).
 
 
 ## Punkt 9 — levererat (kit + insamling)

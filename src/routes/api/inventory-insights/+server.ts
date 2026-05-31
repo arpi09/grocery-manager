@@ -8,7 +8,7 @@ import {
 } from '$lib/server/inventory-context';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
-import { requestStructuredJson } from '$lib/server/openai';
+import { requestStructuredJson, translateOpenAiError } from '$lib/server/openai';
 import type { RequestHandler } from './$types';
 
 const INSIGHT_TYPES = [
@@ -97,7 +97,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return auth.response;
 	}
 
-	const apiKeyOrResponse = requireOpenAiKey('inventory insights');
+	const apiKeyOrResponse = requireOpenAiKey(locals.locale, 'inventory insights');
 	if (typeof apiKeyOrResponse !== 'string') {
 		return apiKeyOrResponse;
 	}
@@ -186,7 +186,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	});
 
 	if (!result.ok) {
-		return json({ error: result.message }, { status: result.status });
+		return json({ error: translateOpenAiError(locals.locale, result) }, { status: result.status });
 	}
 
 	const summary = parseSummary(result.data);

@@ -14,7 +14,7 @@ import {
 	mapOpenAiFailureStatus,
 	missingOpenAiKeyMessage,
 	OPENAI_MODEL,
-	openAiFailureMessage
+	openAiFailureMessageKey
 } from './openai';
 
 describe('getOpenAiApiKey', () => {
@@ -52,11 +52,18 @@ describe('mapOpenAiFailureStatus', () => {
 	});
 });
 
-describe('openAiFailureMessage', () => {
-	it('explains invalid API key without leaking secret details', () => {
-		const message = openAiFailureMessage(401, '{"error":"invalid_api_key"}');
-		expect(message).toContain('OPENAI_API_KEY');
-		expect(message).not.toContain('sk-');
+describe('openAiFailureMessageKey', () => {
+	it('maps auth errors to unauthorized key', () => {
+		expect(openAiFailureMessageKey(401)).toBe('errors.api.openAiUnauthorized');
+		expect(openAiFailureMessageKey(403)).toBe('errors.api.openAiUnauthorized');
+	});
+
+	it('maps rate limit to rate limit key', () => {
+		expect(openAiFailureMessageKey(429)).toBe('errors.api.openAiRateLimit');
+	});
+
+	it('maps other failures to generic request failed key', () => {
+		expect(openAiFailureMessageKey(502)).toBe('errors.api.openAiRequestFailed');
 	});
 });
 

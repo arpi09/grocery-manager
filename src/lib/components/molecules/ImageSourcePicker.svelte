@@ -31,6 +31,18 @@
 		}
 		input.value = '';
 	}
+
+	$effect(() => {
+		const inputs = [cameraInputEl, fileInputEl].filter(Boolean) as HTMLInputElement[];
+		for (const input of inputs) {
+			input.addEventListener('change', handleChange);
+		}
+		return () => {
+			for (const input of inputs) {
+				input.removeEventListener('change', handleChange);
+			}
+		};
+	});
 </script>
 
 <div class="picker" role="group" aria-label={t('receipt.pickSourceAria')}>
@@ -44,16 +56,17 @@
 	>
 		{cameraLabel}
 	</Button>
-	<Button
-		type="button"
-		variant="secondary"
-		fullWidth
-		class="picker-btn"
-		{disabled}
-		onclick={() => fileInputEl?.click()}
-	>
+	<label class="file-picker-btn btn btn-secondary btn-full picker-btn" class:is-disabled={disabled}>
 		{fileLabel}
-	</Button>
+		<input
+			bind:this={fileInputEl}
+			type="file"
+			{accept}
+	class="sr-input"
+	data-testid="receipt-file-input"
+	{disabled}
+/>
+	</label>
 </div>
 
 <input
@@ -63,15 +76,6 @@
 	capture="environment"
 	class="sr-input"
 	{disabled}
-	onchange={handleChange}
-/>
-<input
-	bind:this={fileInputEl}
-	type="file"
-	{accept}
-	class="sr-input"
-	{disabled}
-	onchange={handleChange}
 />
 
 <style>
@@ -83,6 +87,20 @@
 
 	:global(.picker-btn) {
 		min-height: 2.75rem;
+	}
+
+	.file-picker-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		margin: 0;
+	}
+
+	.file-picker-btn.is-disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+		pointer-events: none;
 	}
 
 	.sr-input {

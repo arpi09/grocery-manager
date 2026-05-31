@@ -1,9 +1,15 @@
 <script lang="ts">
-	import { t } from '$lib/i18n';
+	import { t, getLocale } from '$lib/i18n';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
+	import Toast from '$lib/components/molecules/Toast.svelte';
 	import { DEFAULT_RECIPE_PORTIONS } from '$lib/domain/recipe';
+	import {
+		addMissingIngredientsToList,
+		dedupeMissingIngredients,
+		formatAddMissingFeedback
+	} from '$lib/utils/recipe-add-missing';
 
 	interface RecipeSuggestion {
 		title: string;
@@ -25,8 +31,12 @@
 	let recipes = $state<RecipeSuggestion[]>([]);
 	let errorMessage = $state<string | null>(null);
 	let note = $state<string | null>(null);
-	let listFeedback = $state<string | null>(null);
-	let addingMissingFor = $state<string | null>(null);
+	let addingMissingKey = $state<string | null>(null);
+	let toastMessage = $state<string | null>(null);
+
+	const allMissingIngredients = $derived(
+		dedupeMissingIngredients(recipes.map((recipe) => recipe.missingIngredients))
+	);
 
 	function recipeErrorMessage(status: number, serverError?: string): string {
 		if (serverError?.trim()) {
@@ -51,7 +61,7 @@
 		loading = true;
 		errorMessage = null;
 		note = null;
-		listFeedback = null;
+		toastMessage = null;
 
 		try {
 			const response = await fetch('/api/recipes', {
@@ -91,47 +101,29 @@
 		}
 	}
 
-	async function addMissingToList(recipe: RecipeSuggestion) {
-		if (!canEdit || recipe.missingIngredients.length === 0) {
+	async function addMissingToList(ingredients: string[], actionKey: string) {
+		if (!canEdit || ingredients.length === 0) {
 			return;
 		}
 
-		addingMissingFor = recipe.title;
-		listFeedback = null;
+		addingMissingKey = actionKey;
 		errorMessage = null;
 
-		try {
-			const response = await fetch('/api/recipes/add-missing', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ ingredients: recipe.missingIngredients })
-			});
+		const result = await addMissingIngredientsToList(ingredients);
+		toastMessage = formatAddMissingFeedback(getLocale(), result);
+		addingMissingKey = null;
+	}
 
-			const data = (await response.json()) as {
-				error?: string;
-				added?: number;
-				skipped?: number;
-			};
+	function addRecipeMissing(recipe: RecipeSuggestion) {
+		return addMissingToList(recipe.missingIngredients, recipe.title);
+	}
 
-			if (!response.ok) {
-				listFeedback = data.error ?? t('recipe.addMissingFailed');
-				return;
-			}
+	function addAllMissing() {
+		return addMissingToList(allMissingIngredients, '__all__');
+	}
 
-			const added = data.added ?? 0;
-			const skipped = data.skipped ?? 0;
-			if (added === 0 && skipped > 0) {
-				listFeedback = t('recipe.addMissingNone');
-			} else if (skipped > 0) {
-				listFeedback = t('recipe.addMissingPartial', { added, skipped });
-			} else {
-				listFeedback = t('recipe.addMissingSuccess', { count: added });
-			}
-		} catch {
-			listFeedback = t('recipe.addMissingFailed');
-		} finally {
-			addingMissingFor = null;
-		}
+	function dismissToast() {
+		toastMessage = null;
 	}
 
 	function closeAssistant() {
@@ -181,33 +173,48 @@
 		<FeedbackBanner tone="error" message={errorMessage} />
 	{/if}
 
-	{#if listFeedback}
-		<FeedbackBanner tone="success" message={listFeedback} />
-	{/if}
-
 	{#if note}
 		<p class="note">{note}</p>
 	{/if}
 
 	{#if recipes.length > 0}
+		{#if canEdit && allMissingIngredients.length > 0}
+			<div class="batch-action">
+				<Button
+					type="button"
+					loading={addingMissingKey === '__all__'}
+					loadingLabel={t('common.loading')}
+					onclick={addAllMissing}
+					fullWidth
+				>
+					{t('recipe.addAllMissingBtn', { count: allMissingIngredients.length })}
+				</Button>
+			</div>
+		{/if}
+
 		<div class="result-list">
 			{#each recipes as recipe}
 				<section class="recipe">
 					<h3>{recipe.title}</h3>
 					<p class="why">{recipe.whyItFits}</p>
 					<p><strong>{t('recipe.fromStock')}</strong> {recipe.ingredientsToUse.join(', ')}</p>
-					<p><strong>{t('planer.missingLabel')}</strong> {recipe.missingIngredients.join(', ') || t('common.none')}</p>
-					{#if canEdit && recipe.missingIngredients.length > 0}
-						<Button
-							type="button"
-							variant="secondary"
-							loading={addingMissingFor === recipe.title}
-							loadingLabel={t('common.loading')}
-							onclick={() => addMissingToList(recipe)}
-						>
-							{t('recipe.addMissingBtn')}
-						</Button>
-					{/if}
+					<div class="missing-row">
+						<p class="missing-text">
+							<strong>{t('planer.missingLabel')}</strong>
+							{recipe.missingIngredients.join(', ') || t('common.none')}
+						</p>
+						{#if canEdit && recipe.missingIngredients.length > 0}
+							<Button
+								type="button"
+								variant="secondary"
+								loading={addingMissingKey === recipe.title}
+								loadingLabel={t('common.loading')}
+								onclick={() => addRecipeMissing(recipe)}
+							>
+								{t('recipe.addMissingBtnCount', { count: recipe.missingIngredients.length })}
+							</Button>
+						{/if}
+					</div>
 					<ol>
 						{#each recipe.steps as step}
 							<li>{step}</li>
@@ -218,6 +225,10 @@
 		</div>
 	{/if}
 </Modal>
+
+{#if toastMessage}
+	<Toast message={toastMessage} visible={true} onDismiss={dismissToast} />
+{/if}
 
 <style>
 	:global(.recipe-assistant-panel) {
@@ -265,6 +276,10 @@
 		margin-bottom: var(--space-md);
 	}
 
+	.batch-action {
+		margin-bottom: var(--space-md);
+	}
+
 	.note {
 		margin: 0 0 var(--space-md);
 		color: var(--color-text-muted);
@@ -290,6 +305,29 @@
 	.why {
 		margin: 0 0 var(--space-sm);
 		color: var(--color-text-muted);
+	}
+
+	.missing-row {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		margin: var(--space-xs) 0 var(--space-sm);
+	}
+
+	.missing-text {
+		margin: 0;
+	}
+
+	@media (min-width: 520px) {
+		.missing-row {
+			flex-direction: row;
+			align-items: flex-start;
+			justify-content: space-between;
+		}
+
+		.missing-row :global(.btn) {
+			flex-shrink: 0;
+		}
 	}
 
 	ol {

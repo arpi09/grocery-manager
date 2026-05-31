@@ -1,11 +1,16 @@
 <script lang="ts">
-	import { t } from '$lib/i18n';
+	import { t, getLocale } from '$lib/i18n';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
+	import Toast from '$lib/components/molecules/Toast.svelte';
 	import { formatCalendarDayLabel, mealSourceVariant } from '$lib/domain/calendar-display';
-	import type { PlannedMeal } from '$lib/domain/meal-plan';
+	import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
+	import {
+		addMissingIngredientsToList,
+		formatAddMissingFeedback
+	} from '$lib/utils/recipe-add-missing';
 
 	interface DayData {
 		date: string;
@@ -18,11 +23,15 @@
 		open: boolean;
 		day: DayData | null;
 		month: string;
+		ideasById?: Record<string, RecipeIdea>;
+		canEdit?: boolean;
 		onClose: () => void;
 	}
 
-	let { open, day, month, onClose }: Props = $props();
+	let { open, day, month, ideasById = {}, canEdit = false, onClose }: Props = $props();
 	let expandedMealId = $state<string | null>(null);
+	let addingMissingKey = $state<string | null>(null);
+	let toastMessage = $state<string | null>(null);
 
 	$effect(() => {
 		if (!open) {
@@ -37,6 +46,29 @@
 	const sheetLabel = $derived(
 		day ? t('planer.mealsTitleDate', { date: formatCalendarDayLabel(day.date) }) : t('planer.mealsTitle')
 	);
+
+	function linkedIdea(meal: PlannedMeal): RecipeIdea | null {
+		if (!meal.ideaId) {
+			return null;
+		}
+		return ideasById[meal.ideaId] ?? null;
+	}
+
+	async function addMissingFromMeal(meal: PlannedMeal) {
+		const idea = linkedIdea(meal);
+		if (!canEdit || !idea || idea.missingIngredients.length === 0) {
+			return;
+		}
+
+		addingMissingKey = meal.id;
+		const result = await addMissingIngredientsToList(idea.missingIngredients);
+		toastMessage = formatAddMissingFeedback(getLocale(), result);
+		addingMissingKey = null;
+	}
+
+	function dismissToast() {
+		toastMessage = null;
+	}
 </script>
 
 {#if day}
@@ -90,6 +122,35 @@
 
 						{#if expandedMealId === meal.id}
 							<div class="meal-detail">
+								{#if linkedIdea(meal)}
+									{@const idea = linkedIdea(meal)!}
+									<div class="idea-ingredients">
+										<p>
+											<strong>{t('planer.usesLabel')}</strong>
+											{idea.ingredientsToUse.join(', ')}
+										</p>
+										<div class="missing-row">
+											<p class="missing-text">
+												<strong>{t('planer.missingLabel')}</strong>
+												{idea.missingIngredients.join(', ') || t('common.none')}
+											</p>
+											{#if canEdit && idea.missingIngredients.length > 0}
+												<Button
+													type="button"
+													variant="secondary"
+													loading={addingMissingKey === meal.id}
+													loadingLabel={t('common.loading')}
+													onclick={() => addMissingFromMeal(meal)}
+													fullWidth
+												>
+													{t('recipe.addMissingBtnCount', {
+														count: idea.missingIngredients.length
+													})}
+												</Button>
+											{/if}
+										</div>
+									</div>
+								{/if}
 								<form method="POST" action="?/update" class="edit-form">
 									<input type="hidden" name="month" value={month} />
 									<input type="hidden" name="id" value={meal.id} />
@@ -127,6 +188,10 @@
 			</ul>
 		{/if}
 	</Modal>
+{/if}
+
+{#if toastMessage}
+	<Toast message={toastMessage} visible={true} onDismiss={dismissToast} />
 {/if}
 
 <style>
@@ -236,6 +301,29 @@
 		flex-direction: column;
 		gap: var(--space-sm);
 		border-top: 1px solid var(--color-border);
+	}
+
+	.idea-ingredients {
+		padding-top: var(--space-sm);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
+	}
+
+	.idea-ingredients p {
+		margin: 0;
+		font-size: 0.84rem;
+	}
+
+	.missing-row {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+	}
+
+	.missing-text {
+		margin: 0;
+		font-size: 0.84rem;
 	}
 
 	.edit-form {

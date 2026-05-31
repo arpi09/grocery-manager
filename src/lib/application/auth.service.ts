@@ -1,3 +1,4 @@
+import type { SignupUtm } from '$lib/domain/signup-utm';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { hashPassword, verifyPassword } from '$lib/infrastructure/auth/password';
 import type { IUserRepository } from '$lib/infrastructure/repositories/user.repository';
@@ -18,7 +19,7 @@ export function isAuthError(error: unknown): error is AuthError {
 export class AuthService {
 	constructor(private readonly users: IUserRepository) {}
 
-	async register(email: string, password: string) {
+	async register(email: string, password: string, signupUtm?: SignupUtm | null) {
 		const existing = await this.users.findByEmail(email);
 		if (existing) {
 			throw new AuthError('An account with this email already exists');
@@ -26,7 +27,7 @@ export class AuthService {
 
 		const passwordHash = await hashPassword(password);
 		const id = generateId();
-		return this.users.create(email, passwordHash, id);
+		return this.users.create(email, passwordHash, id, signupUtm);
 	}
 
 	async login(email: string, password: string) {

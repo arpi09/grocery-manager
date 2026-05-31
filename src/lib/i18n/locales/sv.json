@@ -261,6 +261,18 @@
 			"daysLabel": "Visa varor som går ut inom",
 			"daysOption": "{days} dagar"
 		},
+		"pushNotifications": {
+			"title": "Webbläsarnotiser",
+			"note": "Veckovis notis i webbläsaren när varor går ut snart. Kräver HTTPS och tillåtelse.",
+			"enable": "Aktivera webbläsarnotiser",
+			"unsupported": "Webbläsaren stödjer inte push-notiser.",
+			"errors": {
+				"unsupported": "Webbläsaren stödjer inte push-notiser.",
+				"denied": "Notiser blockerades. Tillåt notiser i webbläsarinställningarna.",
+				"notConfigured": "Push-notiser är inte konfigurerade på servern ännu.",
+				"failed": "Kunde inte aktivera notiser. Försök igen."
+			}
+		},
 		"plan": {
 			"title": "Plan",
 			"description": "Prenumeration (kommer snart)",
@@ -300,7 +312,13 @@
 				"aiScans": "AI-skannar den här månaden",
 				"receipts": "kvitto-PDF den här månaden",
 				"smartFill": "smart fill den här veckan"
-			}
+			},
+			"waitlistTitle": "Meddela mig när Pro lanseras",
+			"waitlistDescription": "Ingen betalning aktiveras förrän vi meddelat dig. Lämna din e-post så hör vi av oss innan Pro går live.",
+			"waitlistEmailLabel": "E-post",
+			"waitlistSubmitLabel": "Meddela mig",
+			"waitlistSuccess": "Tack! Vi hör av oss innan Pro lanseras.",
+			"waitlistExists": "Du står redan på listan."
 		},
 		"feedback": {
 			"title": "Ge feedback",
@@ -610,6 +628,7 @@
 		"roleCol": "Roll",
 		"petsCol": "Husdjur",
 		"inventoryCol": "Inventarie",
+		"utmSourceCol": "UTM-källa",
 		"createdCol": "Skapad",
 		"actionsCol": "Åtgärder",
 		"you": "(du)",
@@ -638,6 +657,29 @@
 			"title": "Användarfeedback",
 			"note": "Churn-röster från inställningar och kort enkät efter introduktion. Kompletterar intervjuer — se docs/USER_INTERVIEWS.md.",
 			"empty": "Ingen feedback ännu."
+		},
+		"waitlist": {
+			"title": "Pro-intresse (waitlist)",
+			"note": "E-post från /priser och Inställningar. Gate för Stripe: ≥50 enligt docs/PRICING.md §6.",
+			"count": "{count} registrerade (mål: {target})",
+			"empty": "Ingen waitlist ännu.",
+			"source": "Källa"
+		},
+		"aiUsage": {
+			"title": "AI-användning",
+			"note": "Aggregerat från rate-limit-räknare. Inga hushålls-ID eller användardata — endast antal.",
+			"monthlyTotal": "Totalt denna månad",
+			"periodDays": "Senaste {days} dagarna",
+			"topHouseholdsTitle": "Topp-hushåll (30 dagar)",
+			"topHouseholdsNote": "Rankat efter totala AI-anrop. Hushållsidentitet visas inte.",
+			"rank": "#{rank}",
+			"usageCount": "{count} anrop",
+			"empty": "Ingen AI-användning registrerad ännu.",
+			"kinds": {
+				"ai_scan": "AI-skannar",
+				"receipt_pdf": "Kvitto-PDF",
+				"smart_fill": "Smart fill"
+			}
 		}
 	},
 	"pmf": {
@@ -816,7 +858,9 @@
 		"portionsHint": "Alla recept skalas till detta antal portioner.",
 		"generateBtn": "Generera recept",
 		"addMissingBtn": "Lägg saknade på inköpslista",
-		"addMissingSuccess": "{count} varor lades till på inköpslistan.",
+		"addMissingBtnCount": "Lägg {count} saknade på inköpslista",
+		"addAllMissingBtn": "Lägg alla saknade på inköpslista ({count})",
+		"addMissingSuccess": "{count} {count, plural, one {vara lades} other {varor lades}} till på inköpslistan.",
 		"addMissingPartial": "{added} lades till, {skipped} fanns redan på listan.",
 		"addMissingNone": "Alla saknade varor fanns redan på inköpslistan.",
 		"addMissingFailed": "Kunde inte lägga till på inköpslistan. Försök igen.",
@@ -879,6 +923,10 @@
 		"today": "Går ut idag",
 		"oneDayLeft": "1 dag kvar",
 		"daysLeft": "{count} dagar kvar"
+	},
+	"pushNotifications": {
+		"expiryTitle": "Varor går ut snart",
+		"expiryBody": "{count} varor går ut inom {days} dagar"
 	},
 	"calendar": {
 		"mon": "Mån",
@@ -1001,6 +1049,19 @@
 			"deleteConfirm": "Skriv hushållets namn eller TA BORT för att bekräfta"
 		},
 		"api": {
+			"unauthorized": "Du måste vara inloggad.",
+			"openAiNotConfigured": "AI-tjänsten är inte tillgänglig just nu. Försök igen senare.",
+			"openAiUnauthorized": "AI-tjänsten är tillfälligt otillgänglig. Försök igen om en stund.",
+			"openAiRateLimit": "AI-tjänsten är upptagen just nu. Vänta en stund och försök igen.",
+			"openAiRequestFailed": "Kunde inte få svar från AI-tjänsten. Försök igen om en stund.",
+			"openAiNetworkError": "Kunde inte nå AI-tjänsten. Kontrollera anslutningen och försök igen.",
+			"openAiUnreadableResponse": "Kunde inte läsa AI-tjänstens svar. Försök igen.",
+			"openAiEmptyResponse": "AI-tjänsten returnerade inget svar. Försök igen.",
+			"openAiInvalidJson": "Kunde inte tolka AI-tjänstens svar. Försök igen.",
+			"productImageNoFile": "Ingen bild laddades upp.",
+			"productImageNotImage": "Filen måste vara en bild.",
+			"productImageTooLarge": "Bilden är för stor (max 6 MB).",
+			"productImageUnexpected": "Kunde inte läsa produkten från bilden. Försök igen.",
 			"suggestionsFailed": "Kunde inte skapa inköpsförslag från AI-svaret. Försök igen.",
 			"insightsEmpty": "Du har inga varor registrerade ännu.",
 			"insightsSummary": "Här är dina senaste inventarietips.",

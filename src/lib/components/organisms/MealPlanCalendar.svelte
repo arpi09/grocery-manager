@@ -6,7 +6,7 @@
 		CALENDAR_VISIBLE_MEALS,
 		CALENDAR_WEEKDAY_LABELS
 	} from '$lib/domain/calendar-display';
-	import type { PlannedMeal } from '$lib/domain/meal-plan';
+	import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
 
 	interface DayData {
 		date: string;
@@ -22,9 +22,20 @@
 		previousMonth: string;
 		nextMonth: string;
 		todayIso: string;
+		ideasById?: Record<string, RecipeIdea>;
+		canEdit?: boolean;
 	}
 
-	let { weeks, month, monthLabel, previousMonth, nextMonth, todayIso }: Props = $props();
+	let {
+		weeks,
+		month,
+		monthLabel,
+		previousMonth,
+		nextMonth,
+		todayIso,
+		ideasById = {},
+		canEdit = false
+	}: Props = $props();
 
 	let selectedDay = $state<DayData | null>(null);
 	let sheetOpen = $state(false);
@@ -115,7 +126,14 @@
 	</div>
 </section>
 
-<CalendarDaySheet open={sheetOpen} day={selectedDay} {month} onClose={closeSheet} />
+<CalendarDaySheet
+	open={sheetOpen}
+	day={selectedDay}
+	{month}
+	{ideasById}
+	{canEdit}
+	onClose={closeSheet}
+/>
 
 <style>
 	.calendar-shell {

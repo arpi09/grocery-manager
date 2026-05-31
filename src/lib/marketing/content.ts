@@ -70,6 +70,12 @@ export interface MarketingContent {
 	features: {
 		title: string;
 		lead: string;
+		meta: {
+			title: string;
+			description: string;
+			ogTitle: string;
+			ogDescription: string;
+		};
 		items: MarketingFeature[];
 	};
 	comparison: MarketingComparison;
@@ -96,12 +102,12 @@ const sv: MarketingContent = {
 	siteName: 'Home Pantry',
 	tagline: 'Skanna först. Håll koll på skafferiet. Handla smart.',
 	meta: {
-		title: 'Home Pantry — Skanna, lagra och handla smart',
+		title: 'Home Pantry — Butiksneutralt skafferi med skanning & kvitto-PDF',
 		description:
-			'Home Pantry hjälper dig hålla koll på kyl, frys och skafferi med streckkodsskanning, utgångsdatum och smart inköpslista.',
-		ogTitle: 'Home Pantry — Ditt skafferi i fickan',
+			'Webbapp för kyl, frys och skafferi: streckkod, kvitto-PDF och smart inköpslista. Butiksneutralt — till skillnad från Matdags och ICA, utan spelifiering. Gratis att börja.',
+		ogTitle: 'Home Pantry — Skanna kvitto, slipp gissa vad som finns hemma',
 		ogDescription:
-			'Skanna varor, följ utgångsdatum och fyll på inköpslistan automatiskt. Gratis att komma igång.'
+			'Butiksneutralt skafferi med PDF-kvitto, utgångsdatum och hushållssync. Webb först — gratis att komma igång.'
 	},
 	nav: [
 		{ href: '/funktioner', label: 'Funktioner' },
@@ -131,6 +137,14 @@ const sv: MarketingContent = {
 	features: {
 		title: 'Funktioner',
 		lead: 'Byggt för vardagen i köket — snabbt, tydligt och utan onödig friktion.',
+		meta: {
+			title: 'Funktioner — skanning, kvitto-PDF & smart inköpslista',
+			description:
+				'Streckkod, kvitto-PDF, utgångsdatum, måltidsplan och hushållssync — butiksneutralt skafferi som kompletterar Bring och Matdags.',
+			ogTitle: 'Home Pantry funktioner — lager som sanningskälla',
+			ogDescription:
+				'PDF-kvitto, AI-skannar och inköpslista kopplad till lager. Webb först, utan spelifiering.'
+		},
 		items: [
 			{
 				icon: 'barcode',
@@ -276,11 +290,12 @@ const en: MarketingContent = {
 	...sv,
 	tagline: 'Scan first. Know your pantry. Shop smarter.',
 	meta: {
-		title: 'Home Pantry — Scan, track and shop smarter',
+		title: 'Home Pantry — Store-neutral pantry with scanning & receipt PDF',
 		description:
-			'Home Pantry helps you manage fridge, freezer and cupboard with barcode scanning, expiry dates and a smart shopping list.',
-		ogTitle: 'Home Pantry — Your pantry in your pocket',
-		ogDescription: 'Scan items, track expiry dates and fill your shopping list automatically. Free to get started.'
+			'Web app for fridge, freezer and cupboard: barcode, receipt PDF and smart shopping list. Store-neutral — unlike Matdags and ICA, without gamification. Free to start.',
+		ogTitle: 'Home Pantry — Scan receipts, stop guessing what is at home',
+		ogDescription:
+			'Store-neutral pantry with PDF receipts, expiry dates and household sync. Web-first — free to get started.'
 	},
 	nav: [
 		{ href: '/funktioner', label: 'Features' },
@@ -342,6 +357,14 @@ const en: MarketingContent = {
 	features: {
 		title: 'Features',
 		lead: 'Built for everyday kitchen use — fast, clear and low friction.',
+		meta: {
+			title: 'Features — scanning, receipt PDF & smart shopping list',
+			description:
+				'Barcode, receipt PDF, expiry dates, meal plan and household sync — store-neutral pantry that complements Bring and Matdags.',
+			ogTitle: 'Home Pantry features — inventory as source of truth',
+			ogDescription:
+				'PDF receipts, AI scans and shopping list tied to inventory. Web-first, without gamification.'
+		},
 		items: [
 			{
 				icon: 'barcode',

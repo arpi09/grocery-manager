@@ -1,0 +1,45 @@
+# Weekly expiry reminder emails (production only).
+# Independent of release.yml — no quality/e2e/deploy; no shared concurrency group.
+#
+# GitHub: secret CRON_SECRET, variable PRODUCTION_URL
+# Firebase: same CRON_SECRET via apphosting secrets — see docs/90_DAY_ROADMAP.md § Punkt 5
+
+name: Expiry reminders cron
+
+on:
+  schedule:
+    # Monday 07:00 UTC
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+jobs:
+  expiry-reminders:
+    name: expiry-reminders
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: POST /api/cron/expiry-reminders
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "::error::GitHub secret CRON_SECRET is not set."
+            exit 1
+          fi
+          if [ -z "${PRODUCTION_URL:-}" ]; then
+            echo "::error::GitHub repository variable PRODUCTION_URL is not set (e.g. https://homepantry.com)."
+            exit 1
+          fi
+
+          base="${PRODUCTION_URL%/}"
+          url="${base}/api/cron/expiry-reminders"
+          echo "POST ${url}"
+
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Accept: application/json" \
+            "${url}"

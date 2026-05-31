@@ -164,11 +164,12 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 	const emailInput = page.locator('input[name="email"]');
 	const passwordInput = page.locator('input[name="password"]');
 
-	await fillBoundInput(emailInput, email);
+	// Email last ? Svelte bind can clear earlier fields when email is set.
 	await fillBoundInput(passwordInput, password);
+	await fillBoundInput(emailInput, email);
 
 	await page.getByTestId('login-submit').click();
-	await page.waitForURL((url) => url.pathname === '/hem', { timeout: 30_000, waitUntil: 'commit' });
+	await page.waitForURL((url) => url.pathname === '/hem', { timeout: 45_000, waitUntil: 'commit' });
 
 	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
 	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

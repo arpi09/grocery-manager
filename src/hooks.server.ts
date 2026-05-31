@@ -12,7 +12,9 @@ import {
 	pmfService,
 	productFeedbackService,
 	aiRateLimitService,
-	planLimitsService
+	aiUsageAdminService,
+	planLimitsService,
+	waitlistService
 } from '$lib/server/di';
 import { recordUserActivity } from '$lib/server/activity';
 import { resolveHouseholdId } from '$lib/server/household-context';
@@ -64,6 +66,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.productFeedbackService = productFeedbackService;
 	event.locals.planLimitsService = planLimitsService;
 	event.locals.aiRateLimitService = aiRateLimitService;
+	event.locals.aiUsageAdminService = aiUsageAdminService;
+	event.locals.waitlistService = waitlistService;
 
 	const locale = resolveLocaleForRequest(event.cookies, event.request);
 	event.locals.locale = locale;

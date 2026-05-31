@@ -165,7 +165,10 @@ const INCREMENTAL_MIGRATIONS = [
 	'0012_product_event.sql',
 	'0013_expiry_reminders.sql',
 	'0014_product_feedback.sql',
-	'0015_ai_usage.sql'
+	'0015_ai_usage.sql',
+	'0016_waitlist_email.sql',
+	'0017_push_subscriptions.sql',
+	'0018_user_signup_utm.sql'
 ];
 
 async function runPgliteBaseline(client: PGlite) {

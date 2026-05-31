@@ -12,5 +12,6 @@ test.describe('Authentication', () => {
 
 	test('admin can sign in and reach home', async ({ page }) => {
 		await loginAsAdmin(page);
+		await expect(page.locator('section.home')).toBeVisible();
 	});
 });

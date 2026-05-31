@@ -18,7 +18,8 @@ function loadDotEnv(path = '.env') {
 
 loadDotEnv();
 
-const port = process.env.PLAYWRIGHT_PORT ?? '5173';
+/** Dedicated port so E2E does not collide with a running `npm run dev` on 5173. */
+const port = process.env.PLAYWRIGHT_PORT ?? '5190';
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${port}`;
 const turnstileBypass = process.env.TURNSTILE_BYPASS ?? process.env.TURNSTILE_SKIP ?? 'true';
 
@@ -33,6 +34,7 @@ process.env.ADMIN_EMAIL = e2eAdminEmail;
 process.env.ADMIN_PASSWORD = e2eAdminPassword;
 
 export default defineConfig({
+	globalSetup: './e2e/global-setup.ts',
 	testDir: 'e2e',
 	fullyParallel: false,
 	forbidOnly: !!process.env.CI,
@@ -42,6 +44,7 @@ export default defineConfig({
 	use: {
 		baseURL,
 		locale: 'sv-SE',
+		viewport: { width: 1400, height: 900 },
 		trace: 'on-first-retry',
 		screenshot: 'only-on-failure'
 	},
@@ -52,10 +55,10 @@ export default defineConfig({
 		}
 	],
 	webServer: {
-		command: `npm run dev -- --port ${port}`,
+		command: `npx svelte-kit sync && npm run dev -- --port ${port}`,
 		url: `${baseURL}/login`,
-		reuseExistingServer: !process.env.CI,
-		timeout: 120_000,
+		reuseExistingServer: false,
+		timeout: 180_000,
 		env: {
 			...process.env,
 			USE_PGLITE: process.env.USE_PGLITE ?? 'true',
@@ -63,7 +66,8 @@ export default defineConfig({
 			ADMIN_EMAIL: e2eAdminEmail,
 			ADMIN_PASSWORD: e2eAdminPassword,
 			TURNSTILE_SKIP: turnstileBypass,
-			TURNSTILE_BYPASS: turnstileBypass
+			TURNSTILE_BYPASS: turnstileBypass,
+			E2E_MOCK_AI: process.env.E2E_MOCK_AI ?? 'true'
 		}
 	}
 });

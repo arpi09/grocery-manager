@@ -3,6 +3,7 @@
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import AdminHealthDashboard from '$lib/components/organisms/AdminHealthDashboard.svelte';
+	import AdminAiUsageDashboard from '$lib/components/organisms/AdminAiUsageDashboard.svelte';
 	import PmfDashboard from '$lib/components/organisms/PmfDashboard.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
@@ -40,7 +41,43 @@
 	{/if}
 
 	<AdminHealthDashboard stats={data.stats} />
+	<AdminAiUsageDashboard summary={data.aiUsage} />
 	<PmfDashboard review={data.pmfWeeklyReview} />
+
+	<section class="pro-waitlist" id="waitlist">
+		<Card>
+			<div class="waitlist-header">
+				<h2>{t('admin.waitlist.title')}</h2>
+				<form method="GET" class="waitlist-limit-form">
+					<label>
+						{t('admin.showLatest')}
+						<select name="waitlistLimit" onchange={(e) => e.currentTarget.form?.requestSubmit()}>
+							{#each [25, 50, 100] as limit}
+								<option value={limit} selected={data.waitlistLimit === limit}>{limit}</option>
+							{/each}
+						</select>
+					</label>
+				</form>
+			</div>
+			<p class="waitlist-note">{t('admin.waitlist.note')}</p>
+			<p class="waitlist-count">
+				{t('admin.waitlist.count', { count: data.waitlistCount, target: data.waitlistTarget })}
+			</p>
+			{#if data.waitlistEntries.length === 0}
+				<p class="waitlist-empty">{t('admin.waitlist.empty')}</p>
+			{:else}
+				<ul class="waitlist-list">
+					{#each data.waitlistEntries as entry}
+						<li class="waitlist-item">
+							<time datetime={entry.createdAt.toISOString()}>{formatDate(entry.createdAt)}</time>
+							<span class="waitlist-source">{entry.source}</span>
+							<span class="waitlist-email">{entry.email}</span>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</Card>
+	</section>
 
 	<section class="product-feedback" id="feedback">
 		<Card>
@@ -160,6 +197,7 @@
 						<th>{t('admin.roleCol')}</th>
 						<th>{t('admin.petsCol')}</th>
 						<th>{t('admin.inventoryCol')}</th>
+						<th>{t('admin.utmSourceCol')}</th>
 						<th>{t('admin.createdCol')}</th>
 						<th>{t('admin.actionsCol')}</th>
 					</tr>
@@ -190,6 +228,7 @@
 							</td>
 							<td>{account.petsEnabled ? t('admin.on') : t('admin.off')}</td>
 							<td>{account.inventoryCount}</td>
+							<td>{account.signupUtmSource ?? '—'}</td>
 							<td>{formatDate(account.createdAt)}</td>
 							<td class="actions">
 								<form method="POST" action="?/logoutUser">
@@ -249,6 +288,79 @@
 
 	.product-feedback {
 		margin-bottom: var(--space-lg);
+	}
+
+	.pro-waitlist {
+		margin-bottom: var(--space-lg);
+	}
+
+	.waitlist-header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-md);
+		margin-bottom: var(--space-sm);
+	}
+
+	.waitlist-header h2 {
+		margin: 0;
+	}
+
+	.waitlist-limit-form label {
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+		font-size: 0.9rem;
+	}
+
+	.waitlist-limit-form select {
+		padding: 0.35rem 0.5rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+	}
+
+	.waitlist-note,
+	.waitlist-empty,
+	.waitlist-count {
+		margin: 0 0 var(--space-md);
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+
+	.waitlist-count {
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	.waitlist-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.waitlist-item {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm) var(--space-md);
+		padding: var(--space-sm) 0;
+		border-bottom: 1px solid var(--color-border);
+		font-size: 0.9rem;
+	}
+
+	.waitlist-item:last-child {
+		border-bottom: none;
+	}
+
+	.waitlist-source {
+		text-transform: uppercase;
+		font-size: 0.75rem;
+		letter-spacing: 0.04em;
+		color: var(--color-text-muted);
+	}
+
+	.waitlist-email {
+		font-weight: 500;
 	}
 
 	.feedback-header {

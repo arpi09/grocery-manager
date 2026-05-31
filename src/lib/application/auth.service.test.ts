@@ -36,7 +36,23 @@ describe('AuthService', () => {
 		expect(users.create).toHaveBeenCalledWith(
 			'test@example.com',
 			'hashed-password',
-			expect.any(String)
+			expect.any(String),
+			undefined
+		);
+	});
+
+	it('passes signup UTM to user create', async () => {
+		vi.mocked(users.findByEmail).mockResolvedValue(null);
+		vi.mocked(users.create).mockResolvedValue({ id: 'user-1', email: 'test@example.com' });
+
+		const signupUtm = { source: 'reddit', medium: 'community', campaign: 'matsvinn_w12' };
+		await service.register('test@example.com', 'secret123', signupUtm);
+
+		expect(users.create).toHaveBeenCalledWith(
+			'test@example.com',
+			'hashed-password',
+			expect.any(String),
+			signupUtm
 		);
 	});
 

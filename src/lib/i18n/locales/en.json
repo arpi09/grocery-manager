@@ -261,6 +261,18 @@
 			"daysLabel": "Show items expiring within",
 			"daysOption": "{days} days"
 		},
+		"pushNotifications": {
+			"title": "Browser notifications",
+			"note": "Weekly browser notification when items expire soon. Requires HTTPS and permission.",
+			"enable": "Enable browser notifications",
+			"unsupported": "This browser does not support push notifications.",
+			"errors": {
+				"unsupported": "This browser does not support push notifications.",
+				"denied": "Notifications were blocked. Allow notifications in your browser settings.",
+				"notConfigured": "Push notifications are not configured on the server yet.",
+				"failed": "Could not enable notifications. Try again."
+			}
+		},
 		"plan": {
 			"title": "Plan",
 			"description": "Subscription (coming soon)",
@@ -300,7 +312,13 @@
 				"aiScans": "AI scans this month",
 				"receipts": "receipt PDF parses this month",
 				"smartFill": "smart fill runs this week"
-			}
+			},
+			"waitlistTitle": "Notify me when Pro launches",
+			"waitlistDescription": "Billing will not start until we tell you. Leave your email and we will reach out before Pro goes live.",
+			"waitlistEmailLabel": "Email",
+			"waitlistSubmitLabel": "Notify me",
+			"waitlistSuccess": "Thanks! We will reach out before Pro launches.",
+			"waitlistExists": "You are already on the list."
 		},
 		"feedback": {
 			"title": "Give feedback",
@@ -609,6 +627,7 @@
 		"roleCol": "Role",
 		"petsCol": "Pets",
 		"inventoryCol": "Inventory",
+		"utmSourceCol": "UTM source",
 		"createdCol": "Created",
 		"actionsCol": "Actions",
 		"you": "(you)",
@@ -637,6 +656,29 @@
 			"title": "User feedback",
 			"note": "Churn signals from settings and a short post-onboarding survey. Complements interviews — see docs/USER_INTERVIEWS.md.",
 			"empty": "No feedback yet."
+		},
+		"waitlist": {
+			"title": "Pro interest (waitlist)",
+			"note": "Emails from /priser and Settings. Stripe gate: ≥50 per docs/PRICING.md §6.",
+			"count": "{count} signed up (target: {target})",
+			"empty": "No waitlist entries yet.",
+			"source": "Source"
+		},
+		"aiUsage": {
+			"title": "AI usage",
+			"note": "Aggregated from rate-limit counters. No household IDs or user data — counts only.",
+			"monthlyTotal": "Total this month",
+			"periodDays": "Last {days} days",
+			"topHouseholdsTitle": "Top households (30 days)",
+			"topHouseholdsNote": "Ranked by total AI calls. Household identity is not shown.",
+			"rank": "#{rank}",
+			"usageCount": "{count} calls",
+			"empty": "No AI usage recorded yet.",
+			"kinds": {
+				"ai_scan": "AI scans",
+				"receipt_pdf": "Receipt PDF",
+				"smart_fill": "Smart fill"
+			}
 		}
 	},
 	"pmf": {
@@ -815,7 +857,9 @@
 		"portionsHint": "All recipes are scaled to this many servings.",
 		"generateBtn": "Generate recipes",
 		"addMissingBtn": "Add missing to shopping list",
-		"addMissingSuccess": "Added {count} items to the shopping list.",
+		"addMissingBtnCount": "Add {count} missing to shopping list",
+		"addAllMissingBtn": "Add all missing to shopping list ({count})",
+		"addMissingSuccess": "{count} {count, plural, one {item added} other {items added}} to the shopping list.",
 		"addMissingPartial": "Added {added}, {skipped} were already on the list.",
 		"addMissingNone": "All missing items were already on the shopping list.",
 		"addMissingFailed": "Could not add to the shopping list. Try again.",
@@ -878,6 +922,10 @@
 		"today": "Expires today",
 		"oneDayLeft": "1 day left",
 		"daysLeft": "{count} days left"
+	},
+	"pushNotifications": {
+		"expiryTitle": "Items expiring soon",
+		"expiryBody": "{count} items expire within {days} days"
 	},
 	"calendar": {
 		"mon": "Mon",
@@ -1000,6 +1048,19 @@
 			"deleteConfirm": "Type the household name or DELETE to confirm"
 		},
 		"api": {
+			"unauthorized": "You must be logged in.",
+			"openAiNotConfigured": "AI service is not available right now. Try again later.",
+			"openAiUnauthorized": "AI service is temporarily unavailable. Try again in a moment.",
+			"openAiRateLimit": "AI service is busy right now. Wait a moment and try again.",
+			"openAiRequestFailed": "Could not get a response from the AI service. Try again in a moment.",
+			"openAiNetworkError": "Could not reach the AI service. Check your connection and try again.",
+			"openAiUnreadableResponse": "Could not read the AI service response. Try again.",
+			"openAiEmptyResponse": "The AI service returned an empty response. Try again.",
+			"openAiInvalidJson": "Could not parse the AI service response. Try again.",
+			"productImageNoFile": "No image uploaded.",
+			"productImageNotImage": "The file must be an image.",
+			"productImageTooLarge": "Image is too large (max 6 MB).",
+			"productImageUnexpected": "Could not read the product from the image. Try again.",
 			"suggestionsFailed": "Could not create shopping suggestions from the AI response. Try again.",
 			"insightsEmpty": "You have no items registered yet.",
 			"insightsSummary": "Here are your latest inventory tips.",

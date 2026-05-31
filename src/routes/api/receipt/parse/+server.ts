@@ -2,6 +2,7 @@ import { Buffer } from 'node:buffer';
 import type { ReceiptParseResult } from '$lib/domain/receipt-line';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
+import { e2eMockReceiptParse, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 import { extractPdfText } from '$lib/server/receipt-pdf';
 import { parseReceiptFromImage, parseReceiptFromText, parseReceiptLines } from '$lib/server/receipt-parse';
 import {
@@ -13,6 +14,7 @@ import {
 import { json } from '@sveltejs/kit';
 import { translate } from '$lib/i18n/messages';
 import { recordProductEvent } from '$lib/server/product-events';
+import { openAiErrorLogDetail, translateOpenAiError } from '$lib/server/openai';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -20,12 +22,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!auth.authorized) {
 		return auth.response;
 	}
-
-	const apiKeyOrResponse = requireOpenAiKey('receipt scan');
-	if (typeof apiKeyOrResponse !== 'string') {
-		return apiKeyOrResponse;
-	}
-	const apiKey = apiKeyOrResponse;
 
 	const formData = await request.formData();
 	const upload = formData.get('image');
@@ -53,6 +49,24 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return quotaResponse;
 	}
 
+	if (isE2eMockAiEnabled()) {
+		const lines = e2eMockReceiptParse();
+		const result: ReceiptParseResult = { lines };
+		recordProductEvent(locals.pmfService, {
+			userId: auth.user.id,
+			householdId: locals.householdId,
+			eventType: 'receipt_parsed',
+			metadata: { lineCount: lines.length, stage: 'parse', e2eMock: true }
+		});
+		return json(result);
+	}
+
+	const apiKeyOrResponse = requireOpenAiKey(locals.locale, 'receipt scan');
+	if (typeof apiKeyOrResponse !== 'string') {
+		return apiKeyOrResponse;
+	}
+	const apiKey = apiKeyOrResponse;
+
 	let aiResult;
 
 	if (isReceiptPdf(mimeType)) {
@@ -73,11 +87,21 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	if (!aiResult.ok) {
-		return json({ error: aiResult.message }, { status: aiResult.status });
+		console.error(
+			`[receipt] OpenAI parse failed (${aiResult.status}): ${openAiErrorLogDetail(aiResult).slice(0, 500)}`
+		);
+		return json(
+			{ error: translateOpenAiError(locals.locale, aiResult) },
+			{ status: aiResult.status }
+		);
 	}
 
 	const lines = parseReceiptLines(aiResult.data);
 	if (lines.length === 0) {
+		console.error(
+			'[receipt] Parsed zero lines from AI payload:',
+			JSON.stringify(aiResult.data).slice(0, 800)
+		);
 		return json(
 			{ error: translate(locals.locale, 'errors.api.receiptNoItems') },
 			{ status: 422 }

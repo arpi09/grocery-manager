@@ -1,8 +1,14 @@
+import type { AdminAiUsageSummary } from '$lib/domain/ai-usage-admin';
+import {
+	ADMIN_AI_USAGE_PERIOD_DAYS,
+	ADMIN_AI_USAGE_TOP_HOUSEHOLDS,
+	emptyAdminUsageByKind
+} from '$lib/domain/ai-usage-admin';
 import type { AiUsageKind } from '$lib/domain/ai-usage';
 import { generateId } from '$lib/infrastructure/auth/id';
-import { db } from '$lib/infrastructure/db';
+import { db, type AppDatabase } from '$lib/infrastructure/db';
 import { aiUsageTable } from '$lib/infrastructure/db/schema';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, gte, notLike, sql } from 'drizzle-orm';
 
 export interface ConsumeAiUsageInput {
 	scopeId: string;
@@ -11,14 +17,24 @@ export interface ConsumeAiUsageInput {
 	periodKey: string;
 }
 
+export interface AdminAiUsageSummaryInput {
+	since: Date;
+	monthStart: Date;
+	monthKey: string;
+	topLimit?: number;
+}
+
 export interface IAiUsageRepository {
 	getCount(input: Pick<ConsumeAiUsageInput, 'scopeId' | 'kind' | 'periodKey'>): Promise<number>;
 	increment(input: ConsumeAiUsageInput): Promise<number>;
+	getAdminSummary(input: AdminAiUsageSummaryInput): Promise<AdminAiUsageSummary>;
 }
 
 export class DrizzleAiUsageRepository implements IAiUsageRepository {
+	constructor(private readonly database: AppDatabase = db) {}
+
 	async getCount(input: Pick<ConsumeAiUsageInput, 'scopeId' | 'kind' | 'periodKey'>): Promise<number> {
-		const rows = await db
+		const rows = await this.database
 			.select({ count: aiUsageTable.count })
 			.from(aiUsageTable)
 			.where(
@@ -34,7 +50,7 @@ export class DrizzleAiUsageRepository implements IAiUsageRepository {
 	}
 
 	async increment(input: ConsumeAiUsageInput): Promise<number> {
-		const rows = await db
+		const rows = await this.database
 			.insert(aiUsageTable)
 			.values({
 				id: generateId(),
@@ -55,5 +71,53 @@ export class DrizzleAiUsageRepository implements IAiUsageRepository {
 			.returning();
 
 		return rows[0]?.count ?? 1;
+	}
+
+	async getAdminSummary(input: AdminAiUsageSummaryInput): Promise<AdminAiUsageSummary> {
+		const topLimit = input.topLimit ?? ADMIN_AI_USAGE_TOP_HOUSEHOLDS;
+
+		const [kindRows, topRows, monthlyRows] = await Promise.all([
+			this.database
+				.select({
+					kind: aiUsageTable.kind,
+					total: sql<number>`coalesce(sum(${aiUsageTable.count}), 0)`.mapWith(Number)
+				})
+				.from(aiUsageTable)
+				.where(gte(aiUsageTable.updatedAt, input.since))
+				.groupBy(aiUsageTable.kind),
+			this.database
+				.select({
+					total: sql<number>`coalesce(sum(${aiUsageTable.count}), 0)`.mapWith(Number)
+				})
+				.from(aiUsageTable)
+				.where(
+					and(
+						gte(aiUsageTable.updatedAt, input.since),
+						notLike(aiUsageTable.scopeId, 'user:%')
+					)
+				)
+				.groupBy(aiUsageTable.scopeId)
+				.orderBy(sql`sum(${aiUsageTable.count}) desc`)
+				.limit(topLimit),
+			this.database
+				.select({
+					total: sql<number>`coalesce(sum(${aiUsageTable.count}), 0)`.mapWith(Number)
+				})
+				.from(aiUsageTable)
+				.where(gte(aiUsageTable.updatedAt, input.monthStart))
+		]);
+
+		const byKind = emptyAdminUsageByKind();
+		for (const row of kindRows) {
+			byKind[row.kind] = row.total;
+		}
+
+		return {
+			periodDays: ADMIN_AI_USAGE_PERIOD_DAYS,
+			byKind,
+			topHouseholdCounts: topRows.map((row) => row.total),
+			monthlyTotal: monthlyRows[0]?.total ?? 0,
+			monthKey: input.monthKey
+		};
 	}
 }

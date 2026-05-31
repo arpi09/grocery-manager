@@ -5,6 +5,7 @@ import {
 	formatRecipeIdeaLines,
 	upcomingDateRange
 } from '$lib/server/inventory-context';
+import type { MessageKey } from '$lib/i18n/messages';
 import { requestStructuredJson } from '$lib/server/openai';
 import type { InventoryService } from '$lib/application/inventory.service';
 import type { MealPlanService } from '$lib/application/meal-plan.service';
@@ -110,11 +111,36 @@ export function parseShoppingSuggestionNote(input: unknown): string | null {
 	return typeof note === 'string' && note.trim() ? note.trim() : null;
 }
 
+/** Splits AI quantity strings like "1 st" / "500 g" into DB numeric + unit. */
+export function parseSuggestionQuantity(raw: string): {
+	quantity: string | null;
+	unit: string | null;
+} {
+	const trimmed = raw.trim();
+	if (!trimmed) {
+		return { quantity: null, unit: null };
+	}
+
+	const match = trimmed.match(/^(\d+(?:[.,]\d+)?)\s*(.*)$/u);
+	if (match) {
+		const quantity = match[1].replace(',', '.');
+		const unit = match[2].trim() || null;
+		return { quantity, unit };
+	}
+
+	if (/^\d+(?:[.,]\d+)?$/u.test(trimmed)) {
+		return { quantity: trimmed.replace(',', '.'), unit: null };
+	}
+
+	return { quantity: null, unit: trimmed };
+}
+
 export function suggestionToListItem(suggestion: ShoppingSuggestion): CreateShoppingListItemInput {
+	const { quantity, unit } = parseSuggestionQuantity(suggestion.quantity);
 	return {
 		name: suggestion.name,
-		quantity: suggestion.quantity,
-		unit: null
+		quantity,
+		unit
 	};
 }
 
@@ -137,7 +163,7 @@ export interface GenerateShoppingSuggestionsDeps {
 
 export type GenerateShoppingSuggestionsResult =
 	| { ok: true; items: ShoppingSuggestion[]; note: string | null }
-	| { ok: false; status: number; message: string };
+	| { ok: false; status: number; messageKey: MessageKey };
 
 export async function generateShoppingSuggestions(
 	deps: GenerateShoppingSuggestionsDeps,
@@ -197,12 +223,12 @@ export async function generateShoppingSuggestions(
 	});
 
 	if (!result.ok) {
-		return { ok: false, status: result.status, message: result.message };
+		return { ok: false, status: result.status, messageKey: result.messageKey };
 	}
 
 	const items = parseShoppingSuggestions(result.data);
 	if (items.length === 0) {
-		return { ok: false, status: 502, message: 'parse_failed' };
+		return { ok: false, status: 502, messageKey: 'errors.api.suggestionsFailed' };
 	}
 
 	return {

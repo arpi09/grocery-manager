@@ -35,5 +35,14 @@ test.describe('Mobile navigation', () => {
 		await bottomNav.getByRole('link', { name: /Ink/i }).click();
 		await expect(page).toHaveURL(/\/inkop/);
 	});
+
+	test('home page has no stray template literal text on mobile', async ({ page }) => {
+		await page.goto('/hem');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page.locator('section.home')).toBeVisible();
+		await expect(page.locator('.app')).not.toContainText('`n');
+		await expect(page.locator('.app')).not.toContainText('`t');
+	});
 });
 

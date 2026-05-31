@@ -14,6 +14,8 @@ import {
 	PRODUCT_FEEDBACK_LIST_DEFAULT,
 	PRODUCT_FEEDBACK_LIST_MAX
 } from '$lib/domain/product-feedback';
+import { WAITLIST_LIST_DEFAULT, WAITLIST_LIST_MAX } from '$lib/domain/waitlist';
+import { STRIPE_READINESS_GATES } from '$lib/domain/plan';
 import { fail, redirect } from '@sveltejs/kit';
 import { translate } from '$lib/i18n/messages';
 import type { Actions, PageServerLoad } from './$types';
@@ -37,16 +39,29 @@ function parseErrorLogLimit(raw: string | null): number {
 	);
 }
 
+function parseWaitlistLimit(raw: string | null): number {
+	const parsed = Number(raw ?? WAITLIST_LIST_DEFAULT);
+	if (!Number.isFinite(parsed)) {
+		return WAITLIST_LIST_DEFAULT;
+	}
+	return Math.min(WAITLIST_LIST_MAX, Math.max(1, Math.floor(parsed)));
+}
+
 export const load: PageServerLoad = async ({ parent, locals, url }) => {
 	const { user } = await parent();
 	const errorLimit = parseErrorLogLimit(url.searchParams.get('errorLimit'));
 	const feedbackLimit = parseFeedbackLimit(url.searchParams.get('feedbackLimit'));
-	const [stats, users, errors, pmfWeeklyReview, productFeedback] = await Promise.all([
+	const waitlistLimit = parseWaitlistLimit(url.searchParams.get('waitlistLimit'));
+	const [stats, users, errors, pmfWeeklyReview, productFeedback, waitlistCount, waitlistEntries, aiUsage] =
+		await Promise.all([
 		locals.adminService.getDashboardStats(),
 		locals.adminService.listUsers(),
 		locals.adminService.listRecentErrors(errorLimit),
 		locals.pmfService.getWeeklyReview(),
-		locals.productFeedbackService.listRecent(feedbackLimit)
+		locals.productFeedbackService.listRecent(feedbackLimit),
+		locals.waitlistService.count(),
+		locals.waitlistService.listRecent(waitlistLimit),
+		locals.aiUsageAdminService.getSummary()
 	]);
 
 	return {
@@ -56,8 +71,13 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		errors,
 		errorLimit,
 		feedbackLimit,
+		waitlistLimit,
+		waitlistCount,
+		waitlistTarget: STRIPE_READINESS_GATES.payingWaitlistMin,
+		waitlistEntries,
 		pmfWeeklyReview,
-		productFeedback
+		productFeedback,
+		aiUsage
 	};
 };
 

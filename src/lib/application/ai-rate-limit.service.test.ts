@@ -10,7 +10,8 @@ describe('AiRateLimitService', () => {
 	beforeEach(() => {
 		repository = {
 			getCount: vi.fn(),
-			increment: vi.fn()
+			increment: vi.fn(),
+			getAdminSummary: vi.fn()
 		};
 		service = new AiRateLimitService(repository);
 	});

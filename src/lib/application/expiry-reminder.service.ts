@@ -9,6 +9,13 @@ import { locationLabel } from '$lib/i18n/domain-labels';
 import type { HouseholdService } from '$lib/application/household.service';
 import type { InventoryService } from '$lib/application/inventory.service';
 import { sendExpiryReminderEmail } from '$lib/server/email';
+import {
+	deletePushSubscriptionById,
+	DrizzlePushSubscriptionRepository
+} from '$lib/infrastructure/repositories/push-subscription.repository';
+import { sendPushNotification } from '$lib/server/push';
+import { translate } from '$lib/i18n/messages';
+import { getAppOrigin } from '$lib/server/origin';
 import type {
 	ExpiryReminderUser,
 	IExpiryReminderRepository
@@ -33,6 +40,8 @@ export interface ExpiryReminderBatchResult {
 }
 
 export class ExpiryReminderService {
+	private readonly pushRepository = new DrizzlePushSubscriptionRepository();
+
 	constructor(
 		private readonly repository: IExpiryReminderRepository,
 		private readonly householdService: HouseholdService,
@@ -79,7 +88,10 @@ export class ExpiryReminderService {
 	}
 
 	private async processUserReminder(user: ExpiryReminderUser): Promise<ExpiryReminderRunResult> {
-		if (!user.settings.enabled) {
+		const emailEnabled = user.settings.enabled;
+		const pushEnabled = user.pushNotificationsEnabled;
+
+		if (!emailEnabled && !pushEnabled) {
 			return { status: 'skipped', reason: 'disabled' };
 		}
 
@@ -94,29 +106,85 @@ export class ExpiryReminderService {
 			return { status: 'skipped', reason: 'no_items' };
 		}
 
-		const emailResult = await sendExpiryReminderEmail({
-			to: user.email,
-			recipientName: user.displayName?.trim() || user.email,
-			days: user.settings.days,
-			sections: sections.map((section) => ({
-				householdName: section.householdName,
-				items: section.items.map((item) => ({
-					name: item.name,
-					locationLabel: locationLabel('sv', item.location),
-					expiresOnLabel: item.expiresOn ? formatExpiryDate(item.expiresOn, 'sv') : '',
-					daysLeftLabel: item.expiresOn
-						? formatDaysLeftSv(daysUntilExpiry(item.expiresOn))
-						: ''
-				}))
-			}))
-		});
+		let sentAny = false;
+		const failures: string[] = [];
 
-		if (!emailResult.ok) {
-			return { status: 'failed', reason: emailResult.reason };
+		if (emailEnabled) {
+			const emailResult = await sendExpiryReminderEmail({
+				to: user.email,
+				recipientName: user.displayName?.trim() || user.email,
+				days: user.settings.days,
+				sections: sections.map((section) => ({
+					householdName: section.householdName,
+					items: section.items.map((item) => ({
+						name: item.name,
+						locationLabel: locationLabel('sv', item.location),
+						expiresOnLabel: item.expiresOn ? formatExpiryDate(item.expiresOn, 'sv') : '',
+						daysLeftLabel: item.expiresOn
+							? formatDaysLeftSv(daysUntilExpiry(item.expiresOn))
+							: ''
+					}))
+				}))
+			});
+
+			if (emailResult.ok) {
+				sentAny = true;
+			} else {
+				failures.push(emailResult.reason);
+			}
 		}
 
-		await this.repository.markReminderSent(user.id);
-		return { status: 'sent', itemCount };
+		if (pushEnabled) {
+			const pushResult = await this.sendExpiryPush(user.id, itemCount, user.settings.days);
+			if (pushResult.ok) {
+				sentAny = true;
+			} else if (pushResult.reason !== 'no_subscriptions') {
+				failures.push(pushResult.reason);
+			}
+		}
+
+		if (sentAny) {
+			await this.repository.markReminderSent(user.id);
+			return { status: 'sent', itemCount };
+		}
+
+		return { status: 'failed', reason: failures.join('; ') || 'No delivery channel succeeded' };
+	}
+
+	private async sendExpiryPush(
+		userId: string,
+		itemCount: number,
+		days: ExpiryReminderDays
+	): Promise<{ ok: true } | { ok: false; reason: string }> {
+		const subscriptions = await this.pushRepository.listByUserId(userId);
+		if (subscriptions.length === 0) {
+			return { ok: false, reason: 'no_subscriptions' };
+		}
+
+		const locale = 'sv';
+		const payload = {
+			title: translate(locale, 'pushNotifications.expiryTitle'),
+			body: translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days }),
+			url: `${getAppOrigin() || ''}/hem`,
+			tag: 'home-pantry-expiry'
+		};
+
+		let delivered = 0;
+		for (const subscription of subscriptions) {
+			const result = await sendPushNotification(subscription, payload);
+			if (result.ok) {
+				delivered += 1;
+				continue;
+			}
+			if (result.statusCode === 404 || result.statusCode === 410) {
+				await deletePushSubscriptionById(subscription.id);
+			}
+		}
+
+		if (delivered > 0) {
+			return { ok: true };
+		}
+		return { ok: false, reason: 'Push delivery failed' };
 	}
 
 	private async buildHouseholdSections(

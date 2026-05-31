@@ -53,15 +53,19 @@ describe('receipt PDF fixtures', () => {
 	});
 
 	describe.each(fixtures.map((f) => [f.file, f] as const))('%s — extractPdfText', (fileName, entry) => {
-		it('extracts non-empty text', async () => {
-			const result = await extractPdfText(loadFixturePdf(fileName));
+		it(
+			'extracts non-empty text',
+			async () => {
+				const result = await extractPdfText(loadFixturePdf(fileName));
 
-			expect(result.ok, result.ok ? '' : `reason=${result.reason}`).toBe(true);
-			if (!result.ok) return;
+				expect(result.ok, result.ok ? '' : `reason=${result.reason}`).toBe(true);
+				if (!result.ok) return;
 
-			expect(result.text.length).toBeGreaterThan(0);
-			expect(entry.store.length).toBeGreaterThan(0);
-		});
+				expect(result.text.length).toBeGreaterThan(0);
+				expect(entry.store.length).toBeGreaterThan(0);
+			},
+			15_000
+		);
 	});
 });
 

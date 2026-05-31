@@ -10,6 +10,9 @@ export default defineConfig({
 		sveltekit(),
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
+			workbox: {
+				importScripts: ['push-sw.js']
+			},
 			includeAssets: ['favicon.svg', 'manifest.webmanifest'],
 			manifest: {
 				name: 'Home Pantry',

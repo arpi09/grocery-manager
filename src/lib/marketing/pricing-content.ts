@@ -17,6 +17,18 @@ export interface PricingContent {
 	title: string;
 	lead: string;
 	comingSoonNote: string;
+	meta: {
+		title: string;
+		description: string;
+		ogTitle: string;
+		ogDescription: string;
+	};
+	waitlistTitle: string;
+	waitlistDescription: string;
+	waitlistEmailLabel: string;
+	waitlistSubmitLabel: string;
+	waitlistSuccess: string;
+	waitlistExists: string;
 	freeTitle: string;
 	proTitle: string;
 	priceHypothesisTitle: string;
@@ -45,6 +57,21 @@ const sv: PricingContent = {
 	lead: 'Home Pantry är gratis att komma igång. Betalning kommer först när vi ser att produkten levererar värde — och du får veta i förväg.',
 	comingSoonNote:
 		'Ingen betalvägg är aktiv ännu. Alla konton kör Free-planen medan vi finslipar gränser och väntar på rätt tillfälle för prenumeration.',
+	meta: {
+		title: 'Priser — Home Pantry (Gratis & Pro)',
+		description:
+			'Generös gratisplan med lager och inköpslista. Pro (~39 kr/mån) kommer senare med obegränsad AI och kvitto-PDF — butiksneutralt skafferi utan betalvägg än.',
+		ogTitle: 'Home Pantry — Gratis skafferi, Pro kommer snart',
+		ogDescription:
+			'Jämför Free vs Pro: lager, AI-skannar och kvitto-PDF. Vi meddelar innan något debiteras — ingen Stripe än.'
+	},
+	waitlistTitle: 'Meddela mig när Pro lanseras',
+	waitlistDescription:
+		'Vi aktiverar inte betalning förrän produkten bevisat värde. Lämna e-post så hör vi av oss innan Pro går live — inget debiteras nu.',
+	waitlistEmailLabel: 'E-post',
+	waitlistSubmitLabel: 'Meddela mig',
+	waitlistSuccess: 'Tack! Vi hör av oss innan Pro lanseras.',
+	waitlistExists: 'Du står redan på listan — vi hör av oss innan Pro lanseras.',
 	freeTitle: 'Gratis',
 	proTitle: 'Pro (kommer snart)',
 	priceHypothesisTitle: 'Prishypotes',
@@ -93,6 +120,21 @@ const en: PricingContent = {
 	lead: 'Home Pantry is free to get started. Paid plans come only when the product proves its value — and we will tell you in advance.',
 	comingSoonNote:
 		'No paywall is active yet. Every account runs the Free plan while we finalize limits and timing for subscriptions.',
+	meta: {
+		title: 'Pricing — Home Pantry (Free & Pro)',
+		description:
+			'Generous free tier with pantry and shopping list. Pro (~39 SEK/month) coming later with unlimited AI and receipt PDF — store-neutral pantry, no paywall yet.',
+		ogTitle: 'Home Pantry — Free pantry, Pro coming soon',
+		ogDescription:
+			'Compare Free vs Pro: inventory, AI scans and receipt PDF. We notify before any charge — no Stripe yet.'
+	},
+	waitlistTitle: 'Notify me when Pro launches',
+	waitlistDescription:
+		'We will not enable billing until the product proves its value. Leave your email and we will reach out before Pro goes live — nothing is charged now.',
+	waitlistEmailLabel: 'Email',
+	waitlistSubmitLabel: 'Notify me',
+	waitlistSuccess: 'Thanks! We will reach out before Pro launches.',
+	waitlistExists: 'You are already on the list — we will reach out before Pro launches.',
 	freeTitle: 'Free',
 	proTitle: 'Pro (coming soon)',
 	priceHypothesisTitle: 'Planned pricing',
