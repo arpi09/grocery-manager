@@ -6,13 +6,23 @@ Home Pantry uses [Cloudflare Turnstile](https://www.cloudflare.com/products/turn
 
 1. Sign in to the [Cloudflare dashboard](https://dash.cloudflare.com/).
 2. Go to **Turnstile** → **Add site**.
-3. Choose **Managed** widget type and add **every hostname** that serves `/register` (domain whitelist — missing hostnames break prod):
-   - `localhost` (local dev)
-   - `home-pantry--home-pantry-4bee5.europe-west4.hosted.app` (Firebase App Hosting default URL)
-   - `homepantry.com` and `www.homepantry.com` (when custom domain is connected — see [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md))
+3. Choose **Managed** widget type and add **every hostname** that serves `/register` (domain whitelist — missing hostnames break prod). Use the **exact hostname** from the browser address bar (no `https://`, no path). Add **all four** production hostnames even if you only use one URL day-to-day:
+
+   | Hostname | When users hit it |
+   |----------|-------------------|
+   | `localhost` | Local dev |
+   | `home-pantry--home-pantry-4bee5.europe-west4.hosted.app` | Firebase App Hosting default URL |
+   | `homepantry.com` | Custom domain (apex) |
+   | `www.homepantry.com` | Custom domain (`www` redirect or direct) |
+
+   **Cloudflare Console steps:** Turnstile → your widget → **Settings** → **Hostname Management** → **Add Hostnames** → paste each row above → **Save**. Changes apply within ~1 minute (hard-refresh `/register` after).
+
+   Common mistake: adding only `hosted.app` or `homepantry.com` while testing on the other URL — Turnstile matches the **full** hostname only.
 4. Copy the **Site key** and **Secret key** (pair must belong to the same widget).
 
-If a hostname is missing, Turnstile returns error **110200** (invalid domain): the widget label appears but no challenge loads and registration fails with *Captcha verifierades inte* / *Captcha could not load*.
+If a hostname is missing, Turnstile returns error **110200** (invalid domain): the widget label appears, a red *Captcha kunde inte laddas för den här webbadressen* message shows, and submit is disabled. Browser console: `[turnstile] Widget error: 110200`. Inspect `data-turnstile-error-code="110200"` on the error line.
+
+If the widget loads but submit fails with *Captcha verifierades inte*, the **secret key** does not match the site key widget — re-copy both keys from the same Turnstile widget and update `TURNSTILE_SECRET_KEY` + `PUBLIC_TURNSTILE_SITE_KEY`, then redeploy.
 
 ## Local development
 
@@ -63,6 +73,7 @@ npx firebase apphosting:secrets:grantaccess TURNSTILE_SECRET_KEY --backend home-
 |-----|----|----|
 | `auth.register.captchaLabel` | Bekräfta att du inte är en robot | Confirm you are not a robot |
 | `auth.register.captchaLoadError` | Captcha kunde inte laddas… | Captcha could not load… |
+| `auth.register.captchaDomainError` | Captcha kunde inte laddas för den här webbadressen… | Captcha could not load for this website address… |
 | `captcha.failed` | Captcha verifierades inte… | Captcha was not verified… |
 | `captcha.notConfigured` | Captcha är inte konfigurerad… | Captcha is not configured… |
 

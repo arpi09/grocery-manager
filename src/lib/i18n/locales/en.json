@@ -102,7 +102,8 @@
 			"hasAccount": "Already have an account?",
 			"loginLink": "Log in",
 			"captchaLabel": "Confirm you are not a robot",
-			"captchaLoadError": "Captcha could not load. Refresh the page and try again."
+			"captchaLoadError": "Captcha could not load. Refresh the page and try again.",
+			"captchaDomainError": "Captcha could not load for this website address. Try https://homepantry.com/register or contact support."
 		}
 	},
 	"home": {

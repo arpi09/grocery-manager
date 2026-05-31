@@ -135,7 +135,13 @@ export async function verifyTurnstileToken(
 
 	if (!response.ok || !payload.success) {
 		const codes = payload['error-codes']?.join(', ') ?? 'unknown';
-		console.warn(`[turnstile] Verification failed: ${codes}`);
+		const hint =
+			codes.includes('invalid-input-secret') || codes.includes('missing-input-secret')
+				? ' — check TURNSTILE_SECRET_KEY matches the widget'
+				: codes.includes('invalid-input-response')
+					? ' — token missing/expired or site key mismatch'
+					: '';
+		console.warn(`[turnstile] Verification failed: ${codes}${hint}`);
 		return { ok: false, messageKey: CAPTCHA_FAILED_KEY };
 	}
 

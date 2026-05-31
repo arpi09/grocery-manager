@@ -102,7 +102,8 @@
 			"hasAccount": "Har du konto?",
 			"loginLink": "Logga in",
 			"captchaLabel": "Bekräfta att du inte är en robot",
-			"captchaLoadError": "Captcha kunde inte laddas. Uppdatera sidan och försök igen."
+			"captchaLoadError": "Captcha kunde inte laddas. Uppdatera sidan och försök igen.",
+			"captchaDomainError": "Captcha kunde inte laddas för den här webbadressen. Prova https://homepantry.com/register eller kontakta support."
 		}
 	},
 	"home": {

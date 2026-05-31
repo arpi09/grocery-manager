@@ -1,17 +1,21 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { getTurnstileLoadErrorMessageKey } from '$lib/domain/turnstile-errors';
 	import { t } from '$lib/i18n';
 
 	interface Props {
 		siteKey: string;
 		labelledBy?: string;
+		loadFailed?: boolean;
 	}
 
-	let { siteKey, labelledBy }: Props = $props();
+	let { siteKey, labelledBy, loadFailed = $bindable(false) }: Props = $props();
 
 	let container = $state<HTMLDivElement | null>(null);
-	let loadFailed = $state(false);
+	let errorCode = $state<string | undefined>(undefined);
 	let widgetId: string | undefined;
+
+	const loadErrorMessage = $derived(t(getTurnstileLoadErrorMessageKey(errorCode)));
 
 	const TURNSTILE_SCRIPT_ID = 'cf-turnstile-script';
 	const TURNSTILE_SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
@@ -23,7 +27,8 @@
 		}
 	}
 
-	function markLoadFailed() {
+	function markLoadFailed(code?: string) {
+		errorCode = code;
 		loadFailed = true;
 	}
 
@@ -40,12 +45,14 @@
 			}
 			removeWidget();
 			loadFailed = false;
+			errorCode = undefined;
 			widgetId = window.turnstile.render(container, {
 				sitekey: siteKey,
 				theme: 'auto',
 				size: 'flexible',
 				callback: () => {
 					loadFailed = false;
+					errorCode = undefined;
 				},
 				'expired-callback': () => {
 					if (widgetId && window.turnstile) {
@@ -54,7 +61,7 @@
 				},
 				'error-callback': (code) => {
 					console.warn(`[turnstile] Widget error: ${code ?? 'unknown'}`);
-					loadFailed = true;
+					markLoadFailed(code);
 				}
 			});
 		};
@@ -83,7 +90,7 @@
 			script.src = TURNSTILE_SCRIPT_SRC;
 			script.async = true;
 			script.defer = true;
-			script.addEventListener('error', markLoadFailed);
+			script.addEventListener('error', () => markLoadFailed());
 			document.head.appendChild(script);
 		}
 
@@ -108,7 +115,12 @@
 	aria-labelledby={labelledBy}
 ></div>
 {#if loadFailed}
-	<p class="load-error" role="alert">{t('auth.register.captchaLoadError')}</p>
+	<p class="load-error" role="alert" data-turnstile-error-code={errorCode ?? 'unknown'}>
+		{loadErrorMessage}
+		{#if import.meta.env.DEV && errorCode}
+			<span class="debug-code"> ({errorCode})</span>
+		{/if}
+	</p>
 {/if}
 
 <style>
@@ -122,5 +134,10 @@
 		margin: calc(-1 * var(--space-sm)) 0 var(--space-md);
 		font-size: 0.875rem;
 		color: var(--color-danger, #b42318);
+	}
+
+	.debug-code {
+		font-family: ui-monospace, monospace;
+		font-size: 0.8125rem;
 	}
 </style>

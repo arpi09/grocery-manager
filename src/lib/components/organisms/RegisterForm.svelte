@@ -33,6 +33,7 @@
 	});
 
 	let submitting = $state(false);
+	let captchaLoadFailed = $state(false);
 </script>
 
 <form
@@ -73,7 +74,11 @@
 	{#if captchaUi.showWidget}
 		<div data-testid="register-turnstile">
 			<p class="turnstile-label" id="turnstile-label">{t('auth.register.captchaLabel')}</p>
-			<TurnstileWidget siteKey={turnstileSiteKey} labelledBy="turnstile-label" />
+			<TurnstileWidget
+				siteKey={turnstileSiteKey}
+				labelledBy="turnstile-label"
+				bind:loadFailed={captchaLoadFailed}
+			/>
 		</div>
 	{/if}
 
@@ -82,7 +87,7 @@
 		fullWidth
 		loading={submitting}
 		loadingLabel={t('auth.register.submitting')}
-		disabled={captchaUi.disableSubmit}
+		disabled={captchaUi.disableSubmit || captchaLoadFailed}
 		data-testid="register-submit"
 	>
 		{t('auth.register.submit')}
