@@ -6,6 +6,8 @@ const RENDER_CHECK_MS = 15_000;
 const SCRIPT_WAIT_MS = 30_000;
 const SCRIPT_POLL_MS = 100;
 const MAX_RENDER_ATTEMPTS = 2;
+const MAX_SCRIPT_LOAD_ATTEMPTS = 2;
+const SCRIPT_LOAD_RETRY_MS = 500;
 
 let scriptLoadPromise: Promise<void> | null = null;
 
@@ -80,7 +82,7 @@ export function loadTurnstileScript(): Promise<void> {
 		return scriptLoadPromise;
 	}
 
-	scriptLoadPromise = new Promise((resolve, reject) => {
+	const promise = new Promise<void>((resolve, reject) => {
 		const existing = document.getElementById(TURNSTILE_SCRIPT_ID) as HTMLScriptElement | null;
 
 		if (existing) {
@@ -93,16 +95,18 @@ export function loadTurnstileScript(): Promise<void> {
 		script.src = TURNSTILE_SCRIPT_SRC;
 		script.async = true;
 		script.defer = true;
-		script.addEventListener(
-			'error',
-			() => reject(new Error('turnstile script load failed')),
-			{ once: true }
-		);
 		document.head.appendChild(script);
 		waitForTurnstileGlobal(script).then(resolve, reject);
 	});
 
-	return scriptLoadPromise;
+	scriptLoadPromise = promise;
+	promise.catch(() => {
+		if (scriptLoadPromise === promise) {
+			scriptLoadPromise = null;
+		}
+	});
+
+	return promise;
 }
 
 export type TurnstileMountCallbacks = {
@@ -223,17 +227,30 @@ export function createTurnstileMount(
 		runRender();
 	}
 
-	void loadTurnstileScript()
-		.then(() => {
-			if (!cancelled) {
-				renderWidget();
-			}
-		})
-		.catch(() => {
-			if (!cancelled) {
+	function startLoadAndRender(loadAttempt = 0) {
+		void loadTurnstileScript()
+			.then(() => {
+				if (!cancelled) {
+					renderWidget();
+				}
+			})
+			.catch(() => {
+				if (cancelled) {
+					return;
+				}
+				if (window.turnstile) {
+					renderWidget();
+					return;
+				}
+				if (loadAttempt + 1 < MAX_SCRIPT_LOAD_ATTEMPTS) {
+					setTimeout(() => startLoadAndRender(loadAttempt + 1), SCRIPT_LOAD_RETRY_MS);
+					return;
+				}
 				currentParams.onError?.('script-load-failed');
-			}
-		});
+			});
+	}
+
+	startLoadAndRender();
 
 	return {
 		destroy() {
