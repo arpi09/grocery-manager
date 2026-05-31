@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { t } from '$lib/i18n';
 
@@ -14,6 +13,9 @@
 	let loadFailed = $state(false);
 	let widgetId: string | undefined;
 
+	const TURNSTILE_SCRIPT_ID = 'cf-turnstile-script';
+	const TURNSTILE_SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+
 	function removeWidget() {
 		if (widgetId && window.turnstile) {
 			window.turnstile.remove(widgetId);
@@ -21,13 +23,19 @@
 		}
 	}
 
-	onMount(() => {
+	function markLoadFailed() {
+		loadFailed = true;
+	}
+
+	$effect(() => {
 		if (!browser || !siteKey || !container) {
 			return;
 		}
 
+		let cancelled = false;
+
 		const renderWidget = () => {
-			if (!container || !window.turnstile) {
+			if (cancelled || !container || !window.turnstile) {
 				return;
 			}
 			removeWidget();
@@ -51,30 +59,43 @@
 			});
 		};
 
-		if (window.turnstile) {
+		const onScriptLoad = () => {
+			if (window.turnstile?.ready) {
+				window.turnstile.ready(renderWidget);
+				return;
+			}
 			renderWidget();
-			return removeWidget;
+		};
+
+		if (window.turnstile) {
+			onScriptLoad();
+			return () => {
+				cancelled = true;
+				removeWidget();
+			};
 		}
 
-		const scriptId = 'cf-turnstile-script';
-		let script = document.getElementById(scriptId) as HTMLScriptElement | null;
+		let script = document.getElementById(TURNSTILE_SCRIPT_ID) as HTMLScriptElement | null;
 
 		if (!script) {
 			script = document.createElement('script');
-			script.id = scriptId;
-			script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+			script.id = TURNSTILE_SCRIPT_ID;
+			script.src = TURNSTILE_SCRIPT_SRC;
 			script.async = true;
 			script.defer = true;
+			script.addEventListener('error', markLoadFailed);
 			document.head.appendChild(script);
 		}
 
-		script.addEventListener('load', renderWidget);
+		script.addEventListener('load', onScriptLoad);
 		if (window.turnstile) {
-			renderWidget();
+			onScriptLoad();
 		}
 
 		return () => {
-			script?.removeEventListener('load', renderWidget);
+			cancelled = true;
+			script?.removeEventListener('load', onScriptLoad);
+			script?.removeEventListener('error', markLoadFailed);
 			removeWidget();
 		};
 	});

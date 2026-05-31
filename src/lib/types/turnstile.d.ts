@@ -11,6 +11,7 @@ interface TurnstileInstance {
 	render(container: HTMLElement, options: TurnstileRenderOptions): string;
 	remove(widgetId: string): void;
 	reset(widgetId: string): void;
+	ready?: (callback: () => void) => void;
 }
 
 interface Window {

@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockEnv, mockPublicEnv } = vi.hoisted(() => ({
+const { mockEnv, mockPublicEnv, mockStaticPublicEnv } = vi.hoisted(() => ({
 	mockEnv: {
 		TURNSTILE_SECRET_KEY: undefined as string | undefined,
 		TURNSTILE_SKIP: undefined as string | undefined,
@@ -8,6 +8,9 @@ const { mockEnv, mockPublicEnv } = vi.hoisted(() => ({
 		NODE_ENV: undefined as string | undefined
 	},
 	mockPublicEnv: {
+		PUBLIC_TURNSTILE_SITE_KEY: undefined as string | undefined
+	},
+	mockStaticPublicEnv: {
 		PUBLIC_TURNSTILE_SITE_KEY: undefined as string | undefined
 	}
 }));
@@ -20,6 +23,8 @@ vi.mock('$env/dynamic/public', () => ({
 	env: mockPublicEnv
 }));
 
+vi.mock('$env/static/public', () => mockStaticPublicEnv);
+
 import {
 	CAPTCHA_FAILED_KEY,
 	CAPTCHA_NOT_CONFIGURED_KEY,
@@ -28,7 +33,8 @@ import {
 	isTurnstileRequiredForRegistration,
 	isTurnstileSkipEnabled,
 	TURNSTILE_TEST_SECRET_KEY,
-	verifyTurnstileToken
+	verifyTurnstileToken,
+	warnIfTurnstileMisconfigured
 } from './captcha';
 
 describe('getTurnstileSecretKey', () => {
@@ -50,18 +56,32 @@ describe('getTurnstileSiteKeyForClient', () => {
 	beforeEach(() => {
 		mockEnv.TURNSTILE_SKIP = undefined;
 		mockEnv.TURNSTILE_BYPASS = undefined;
+		mockEnv.NODE_ENV = undefined;
 		mockPublicEnv.PUBLIC_TURNSTILE_SITE_KEY = undefined;
+		mockStaticPublicEnv.PUBLIC_TURNSTILE_SITE_KEY = undefined;
 	});
 
-	it('returns empty when bypass is enabled', () => {
+	it('returns empty when bypass is enabled in non-production', () => {
 		mockEnv.TURNSTILE_SKIP = 'true';
 		mockPublicEnv.PUBLIC_TURNSTILE_SITE_KEY = 'site-key';
 		expect(getTurnstileSiteKeyForClient()).toBe('');
 	});
 
-	it('returns trimmed site key when configured', () => {
+	it('returns site key in production even when bypass is enabled', () => {
+		mockEnv.TURNSTILE_SKIP = 'true';
+		mockEnv.NODE_ENV = 'production';
+		mockPublicEnv.PUBLIC_TURNSTILE_SITE_KEY = 'prod-site-key';
+		expect(getTurnstileSiteKeyForClient()).toBe('prod-site-key');
+	});
+
+	it('returns trimmed site key from dynamic public env', () => {
 		mockPublicEnv.PUBLIC_TURNSTILE_SITE_KEY = '  0xabc  ';
 		expect(getTurnstileSiteKeyForClient()).toBe('0xabc');
+	});
+
+	it('falls back to static public env when dynamic is missing', () => {
+		mockStaticPublicEnv.PUBLIC_TURNSTILE_SITE_KEY = 'static-key';
+		expect(getTurnstileSiteKeyForClient()).toBe('static-key');
 	});
 
 	it('returns empty when site key is missing', () => {
@@ -93,14 +113,61 @@ describe('isTurnstileSkipEnabled', () => {
 });
 
 describe('isTurnstileRequiredForRegistration', () => {
-	it('is false when bypass is enabled', () => {
+	beforeEach(() => {
+		mockEnv.NODE_ENV = undefined;
+		mockEnv.TURNSTILE_SKIP = undefined;
+	});
+
+	it('is false when bypass is enabled in non-production', () => {
 		mockEnv.TURNSTILE_SKIP = 'true';
 		expect(isTurnstileRequiredForRegistration()).toBe(false);
 	});
 
-	it('is true when bypass is disabled', () => {
+	it('is true when bypass is disabled in non-production', () => {
 		mockEnv.TURNSTILE_SKIP = undefined;
 		expect(isTurnstileRequiredForRegistration()).toBe(true);
+	});
+
+	it('is always true in production even when bypass is enabled', () => {
+		mockEnv.NODE_ENV = 'production';
+		mockEnv.TURNSTILE_SKIP = 'true';
+		expect(isTurnstileRequiredForRegistration()).toBe(true);
+	});
+});
+
+describe('warnIfTurnstileMisconfigured', () => {
+	const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+	beforeEach(() => {
+		mockEnv.NODE_ENV = 'production';
+		mockEnv.TURNSTILE_SKIP = undefined;
+		mockPublicEnv.PUBLIC_TURNSTILE_SITE_KEY = undefined;
+		mockStaticPublicEnv.PUBLIC_TURNSTILE_SITE_KEY = undefined;
+		errorSpy.mockClear();
+	});
+
+	afterAll(() => {
+		errorSpy.mockRestore();
+	});
+
+	it('logs when production register load has no site key', () => {
+		warnIfTurnstileMisconfigured('register load');
+
+		expect(errorSpy).toHaveBeenCalledWith(
+			'[turnstile] PUBLIC_TURNSTILE_SITE_KEY missing (register load) — widget hidden on /register'
+		);
+	});
+
+	it('does not log when site key is configured', () => {
+		mockPublicEnv.PUBLIC_TURNSTILE_SITE_KEY = '0xabc';
+		warnIfTurnstileMisconfigured('register load');
+		expect(errorSpy).not.toHaveBeenCalled();
+	});
+
+	it('does not log outside production', () => {
+		mockEnv.NODE_ENV = 'test';
+		warnIfTurnstileMisconfigured('register load');
+		expect(errorSpy).not.toHaveBeenCalled();
 	});
 });
 

@@ -4,6 +4,7 @@
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import FormField from '$lib/components/molecules/FormField.svelte';
 	import TurnstileWidget from '$lib/components/molecules/TurnstileWidget.svelte';
+	import { getRegisterCaptchaUiState } from '$lib/domain/register-captcha-ui';
 	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
 	import { t } from '$lib/i18n';
 
@@ -24,7 +25,7 @@
 		captchaRequired = false
 	}: Props = $props();
 
-	const captchaMisconfigured = $derived(captchaRequired && !turnstileSiteKey);
+	const captchaUi = $derived(getRegisterCaptchaUiState(turnstileSiteKey, captchaRequired));
 
 	let emailField = $state(email);
 	$effect(() => {
@@ -40,7 +41,7 @@
 	class="form"
 	use:enhance={bindSubmitting((v) => (submitting = v))}
 >
-	{#if captchaMisconfigured}
+	{#if captchaUi.showMisconfiguredBanner}
 		<FeedbackBanner tone="error" message={t('captcha.notConfigured')} />
 	{:else if message}
 		<FeedbackBanner tone="error" message={message} />
@@ -69,7 +70,7 @@
 		error={errors.confirmPassword?.[0]}
 	/>
 
-	{#if turnstileSiteKey}
+	{#if captchaUi.showWidget}
 		<div data-testid="register-turnstile">
 			<p class="turnstile-label" id="turnstile-label">{t('auth.register.captchaLabel')}</p>
 			<TurnstileWidget siteKey={turnstileSiteKey} labelledBy="turnstile-label" />
@@ -81,7 +82,7 @@
 		fullWidth
 		loading={submitting}
 		loadingLabel={t('auth.register.submitting')}
-		disabled={captchaMisconfigured}
+		disabled={captchaUi.disableSubmit}
 		data-testid="register-submit"
 	>
 		{t('auth.register.submit')}

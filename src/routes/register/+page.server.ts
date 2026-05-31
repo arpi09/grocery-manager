@@ -1,20 +1,54 @@
 import { isAuthError } from '$lib/application/auth.service';
 import {
-	getTurnstileSiteKeyForClient,
-	isTurnstileRequiredForRegistration,
-	verifyTurnstileToken
-} from '$lib/server/captcha';
+	SIGNUP_UTM_COOKIE,
+	SIGNUP_UTM_COOKIE_MAX_AGE,
+	hasSignupUtm,
+	resolveSignupUtm,
+	serializeSignupUtmCookie
+} from '$lib/marketing/signup-utm';
+	import {
+		getTurnstileSiteKeyForClient,
+		isTurnstileRequiredForRegistration,
+		verifyTurnstileToken,
+		warnIfTurnstileMisconfigured
+	} from '$lib/server/captcha';
 import { translate } from '$lib/i18n/messages';
 import { registerSchema } from '$lib/validation/auth.schemas';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { createSession } from '$lib/server/session';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, type Cookies } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => ({
-	turnstileSiteKey: getTurnstileSiteKeyForClient(),
-	captchaRequired: isTurnstileRequiredForRegistration()
-});
+function persistSignupUtmCookie(
+	cookies: Cookies,
+	url: URL,
+	cookieValue: string | undefined
+) {
+	const utm = resolveSignupUtm({
+		searchParams: url.searchParams,
+		cookieValue
+	});
+	if (!hasSignupUtm(utm)) {
+		return;
+	}
+	cookies.set(SIGNUP_UTM_COOKIE, serializeSignupUtmCookie(utm), {
+		path: '/',
+		maxAge: SIGNUP_UTM_COOKIE_MAX_AGE,
+		httpOnly: true,
+		sameSite: 'lax'
+	});
+}
+
+export const load: PageServerLoad = async ({ url, cookies }) => {
+	persistSignupUtmCookie(cookies, url, cookies.get(SIGNUP_UTM_COOKIE));
+
+	warnIfTurnstileMisconfigured('register load');
+
+	return {
+		turnstileSiteKey: getTurnstileSiteKeyForClient(),
+		captchaRequired: isTurnstileRequiredForRegistration()
+	};
+};
 
 export const actions: Actions = {
 	register: async (event) => {
@@ -39,12 +73,19 @@ export const actions: Actions = {
 			});
 		}
 
+		const signupUtm = resolveSignupUtm({
+			searchParams: event.url.searchParams,
+			cookieValue: event.cookies.get(SIGNUP_UTM_COOKIE)
+		});
+
 		try {
 			const user = await event.locals.authService.register(
 				parsed.data.email,
-				parsed.data.password
+				parsed.data.password,
+				signupUtm
 			);
 			await createSession(event, user.id);
+			event.cookies.delete(SIGNUP_UTM_COOKIE, { path: '/' });
 		} catch (error) {
 			if (isAuthError(error)) {
 				return fail(400, {

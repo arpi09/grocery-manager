@@ -1,3 +1,4 @@
+import { PUBLIC_TURNSTILE_SITE_KEY as staticTurnstileSiteKey } from '$env/static/public';
 import { env as publicEnv } from '$env/dynamic/public';
 import { env } from '$env/dynamic/private';
 import type { MessageKey } from '$lib/i18n/messages';
@@ -34,22 +35,45 @@ export function isTurnstileSkipEnabled(): boolean {
 	);
 }
 
-/** Registration expects Turnstile unless CI/local bypass is enabled. */
+/** Registration expects Turnstile unless CI/local bypass is enabled (always required in production). */
 export function isTurnstileRequiredForRegistration(): boolean {
+	if (isProduction()) {
+		return true;
+	}
 	return !isTurnstileSkipEnabled();
 }
 
-/** Public site key for the register widget; empty when skip is enabled or key is missing. */
+function resolveTurnstileSiteKey(): string {
+	const key = (
+		staticTurnstileSiteKey ||
+		publicEnv.PUBLIC_TURNSTILE_SITE_KEY ||
+		process.env.PUBLIC_TURNSTILE_SITE_KEY
+	)?.trim();
+	return key ? key : '';
+}
+
+/** Public site key for the register widget; empty when skip is enabled (non-prod only) or key is missing. */
 export function getTurnstileSiteKeyForClient(): string {
-	if (isTurnstileSkipEnabled()) {
+	if (!isProduction() && isTurnstileSkipEnabled()) {
 		return '';
 	}
-	const key = publicEnv.PUBLIC_TURNSTILE_SITE_KEY?.trim();
-	return key ? key : '';
+	return resolveTurnstileSiteKey();
 }
 
 function isProduction(): boolean {
 	return env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production';
+}
+
+/** Log once per request when prod register loads without a site key. */
+export function warnIfTurnstileMisconfigured(context: string): void {
+	if (!isProduction() || !isTurnstileRequiredForRegistration()) {
+		return;
+	}
+	if (!resolveTurnstileSiteKey()) {
+		console.error(
+			`[turnstile] PUBLIC_TURNSTILE_SITE_KEY missing (${context}) — widget hidden on /register`
+		);
+	}
 }
 
 export async function verifyTurnstileToken(
