@@ -146,6 +146,32 @@ Files:
 
 The comparison block uses honest copy from `docs/COMPETITIVE_ANALYSIS.md` (section 4 + messaging). Anchor: `/#jamforelse`.
 
+### Measuring hero A/B conversion
+
+Events land in `product_event` with metadata `{ "variant": "a"|"b" }`:
+
+| Event | When |
+|-------|------|
+| `landing_view` | Server-side on `/` load (once per 30 min session per variant) |
+| `register_click` | Client click on “Prova gratis” / register CTA |
+| `signup_complete` | Successful `/register` action |
+
+**Evaluate weekly** (same cadence as [PMF_WEEKLY.md](./PMF_WEEKLY.md)): compare signup rate (`signup_complete / landing_view`) and register-click rate per variant. Example SQL against prod:
+
+```sql
+SELECT
+  metadata::json->>'variant' AS variant,
+  event_type,
+  COUNT(*) AS events
+FROM product_event
+WHERE event_type IN ('landing_view', 'register_click', 'signup_complete')
+  AND created_at >= NOW() - INTERVAL '7 days'
+GROUP BY 1, 2
+ORDER BY 1, 2;
+```
+
+Pick the winner when one variant has materially higher signup rate with comparable traffic (roughly ≥100 views per arm). Tie or low volume → keep default `a`.
+
 ## i18n
 
 Copy lives in `src/lib/marketing/content.ts` with Swedish (`sv`) as primary. English (`en`) mirrors comparison and shared sections. Hero A/B strings live in `landing-variants.ts`.

@@ -6,6 +6,7 @@ import {
 	computeWeeklyScanRate,
 	medianMinutesToFirstScan,
 	type PmfMetricSnapshot,
+	type PmfProductEventType,
 	type ProductEventType,
 	WAU_WINDOW_MS
 } from '$lib/domain/pmf';
@@ -20,7 +21,7 @@ import {
 import { and, eq, gte, inArray, sql } from 'drizzle-orm';
 
 export interface RecordProductEventInput {
-	userId: string;
+	userId: string | null;
 	householdId: string | null;
 	eventType: ProductEventType;
 	metadata?: Record<string, unknown>;
@@ -160,19 +161,15 @@ export class DrizzlePmfRepository implements IPmfRepository {
 			new Set(weeklyFillRows.map((row) => row.userId))
 		);
 
-		const eventCounts: Record<ProductEventType, number> = {
+		const eventCounts: Record<PmfProductEventType, number> = {
 			scan_completed: 0,
 			receipt_parsed: 0,
 			fill_suggestions_added: 0
 		};
 
 		for (const row of eventCountRows) {
-			if (
-				row.eventType === 'scan_completed' ||
-				row.eventType === 'receipt_parsed' ||
-				row.eventType === 'fill_suggestions_added'
-			) {
-				eventCounts[row.eventType] = row.count ?? 0;
+			if (row.eventType in eventCounts) {
+				eventCounts[row.eventType as PmfProductEventType] = row.count ?? 0;
 			}
 		}
 

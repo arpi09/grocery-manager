@@ -28,6 +28,8 @@
 
 Underliggande råtal (eligible, WAU, event counts) visas i samma panel.
 
+**Hero A/B (landning `/`):** Jämför `signup_complete / landing_view` per variant i `product_event` (metadata `variant`). Se [MARKETING_SITE.md § Measuring hero A/B conversion](./MARKETING_SITE.md#measuring-hero-ab-conversion). Utvärdera månadsvis tillsammans med PMF — välj vinnande copy när signup-rate skiljer sig tydligt vid jämförbar trafik.
+
 ### 3. WoW-mall (5 min)
 
 Fyll i efter varje genomgång (kopiera rad per vecka):

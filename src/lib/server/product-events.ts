@@ -2,7 +2,7 @@ import type { PmfService } from '$lib/application/pmf.service';
 import type { ProductEventType } from '$lib/domain/pmf';
 
 export interface RecordProductEventOptions {
-	userId: string;
+	userId: string | null;
 	householdId: string | null;
 	eventType: ProductEventType;
 	metadata?: Record<string, unknown>;

@@ -1,6 +1,9 @@
 /** localStorage key — dismissible install banner on /hem */
 export const INSTALL_BANNER_DISMISSED_KEY = 'home-pantry-install-banner-dismissed';
 
+/** Re-show banner after this interval (matches landing variant cookie TTL). */
+export const INSTALL_BANNER_DISMISS_MS = 90 * 24 * 60 * 60 * 1000;
+
 export type InstallPromptOutcome = 'accepted' | 'dismissed' | 'unavailable';
 
 export interface BeforeInstallPromptEvent extends Event {
@@ -98,12 +101,23 @@ export function isInstallBannerDismissed(): boolean {
 	if (typeof localStorage === 'undefined') {
 		return false;
 	}
-	return localStorage.getItem(INSTALL_BANNER_DISMISSED_KEY) === '1';
+	const raw = localStorage.getItem(INSTALL_BANNER_DISMISSED_KEY);
+	if (!raw) {
+		return false;
+	}
+	if (raw === '1') {
+		return true;
+	}
+	const dismissedAt = Number(raw);
+	if (Number.isNaN(dismissedAt)) {
+		return false;
+	}
+	return Date.now() - dismissedAt < INSTALL_BANNER_DISMISS_MS;
 }
 
 export function dismissInstallBanner(): void {
 	if (typeof localStorage === 'undefined') {
 		return;
 	}
-	localStorage.setItem(INSTALL_BANNER_DISMISSED_KEY, '1');
+	localStorage.setItem(INSTALL_BANNER_DISMISSED_KEY, String(Date.now()));
 }

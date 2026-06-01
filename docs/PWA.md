@@ -22,7 +22,7 @@ SvelteKit’s built-in service worker registration is disabled in `svelte.config
 
 - **Guide:** `/install-app` (`InstallAppGuide.svelte`) — iOS Safari + Android Chrome steps, `beforeinstallprompt` CTA when supported
 - **Settings:** Inställningar → *Lägg till på hemskärmen*
-- **Home:** dismissible banner on `/hem` for mobile browsers not in `display-mode: standalone`
+- **Home:** dismissible banner on `/hem` for mobile browsers not in `display-mode: standalone` (90-day dismiss TTL; tracks `pwa_banner_dismiss` / `pwa_banner_install_click` in `product_event`)
 - **Marketing FAQ:** `/faq` — install question (SV + EN)
 
 ## Firebase App Hosting

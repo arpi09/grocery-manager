@@ -37,7 +37,8 @@ const SQL_MIGRATION_FILES = [
 	'0016_waitlist_email.sql',
 	'0017_push_subscriptions.sql',
 	'0018_user_signup_utm.sql',
-	'0019_app_settings.sql'
+	'0019_app_settings.sql',
+	'0020_product_event_anonymous.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE

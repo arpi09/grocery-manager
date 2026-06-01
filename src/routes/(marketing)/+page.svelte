@@ -5,11 +5,16 @@
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
 	import MarketingFeatureCard from '$lib/components/marketing/MarketingFeatureCard.svelte';
 	import MarketingStepCard from '$lib/components/marketing/MarketingStepCard.svelte';
+	import { trackProductEvent } from '$lib/client/product-events';
 
 	let { data } = $props();
 
 	const { marketing: content, loginUrl, registerUrl, hero } = data;
 	const previewFeatures = content.features.items.slice(0, 3);
+
+	function trackRegisterClick() {
+		void trackProductEvent('register_click', { variant: data.landingVariant });
+	}
 </script>
 
 <svelte:head>
@@ -34,7 +39,7 @@
 		<div class="hero-actions">
 			<MarketingButtonLink href={loginUrl}>{content.cta.openApp}</MarketingButtonLink>
 			<MarketingButtonLink href={loginUrl} variant="secondary">{content.cta.login}</MarketingButtonLink>
-			<a href={registerUrl} class="hero-register">{content.cta.tryFree}</a>
+			<a href={registerUrl} class="hero-register" onclick={trackRegisterClick}>{content.cta.tryFree}</a>
 		</div>
 
 		<ul class="hero-highlights" aria-label="Huvudfunktioner">
@@ -130,6 +135,7 @@
 	primaryHref={loginUrl}
 	secondaryLabel={content.cta.register}
 	secondaryHref={registerUrl}
+	onRegisterClick={trackRegisterClick}
 />
 
 <style>

@@ -8,9 +8,18 @@
 		primaryHref: string;
 		secondaryLabel?: string;
 		secondaryHref?: string;
+		onRegisterClick?: () => void;
 	}
 
-	let { title, lead, primaryLabel, primaryHref, secondaryLabel, secondaryHref }: Props = $props();
+	let {
+		title,
+		lead,
+		primaryLabel,
+		primaryHref,
+		secondaryLabel,
+		secondaryHref,
+		onRegisterClick
+	}: Props = $props();
 </script>
 
 <section class="cta-section">
@@ -22,7 +31,9 @@
 		<div class="actions">
 			<MarketingButtonLink href={primaryHref}>{primaryLabel}</MarketingButtonLink>
 			{#if secondaryLabel && secondaryHref}
-				<MarketingButtonLink href={secondaryHref} variant="secondary">{secondaryLabel}</MarketingButtonLink>
+				<MarketingButtonLink href={secondaryHref} variant="secondary" onclick={onRegisterClick}>
+					{secondaryLabel}
+				</MarketingButtonLink>
 			{/if}
 		</div>
 	</div>

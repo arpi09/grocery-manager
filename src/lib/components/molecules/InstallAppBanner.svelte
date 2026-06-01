@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import MarketingButtonLink from '$lib/components/marketing/MarketingButtonLink.svelte';
+	import { trackProductEvent } from '$lib/client/product-events';
 	import { t } from '$lib/i18n';
 	import {
 		dismissInstallBanner,
@@ -24,6 +25,11 @@
 	function handleDismiss() {
 		dismissInstallBanner();
 		visible = false;
+		void trackProductEvent('pwa_banner_dismiss');
+	}
+
+	function handleInstallClick() {
+		void trackProductEvent('pwa_banner_install_click');
 	}
 </script>
 
@@ -34,7 +40,7 @@
 			<p>{t('pwa.banner.body')}</p>
 		</div>
 		<div class="banner-actions">
-			<MarketingButtonLink href={installHref} variant="primary">
+			<MarketingButtonLink href={installHref} variant="primary" onclick={handleInstallClick}>
 				{t('pwa.banner.cta')}
 			</MarketingButtonLink>
 			<Button type="button" variant="secondary" onclick={handleDismiss}>

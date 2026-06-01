@@ -134,6 +134,13 @@
 			"when": 1749907200000,
 			"tag": "0019_app_settings",
 			"breakpoints": true
+		},
+		{
+			"idx": 19,
+			"version": "7",
+			"when": 1749993600000,
+			"tag": "0020_product_event_anonymous",
+			"breakpoints": true
 		}
 	]
 }

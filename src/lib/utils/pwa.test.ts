@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
 	INSTALL_BANNER_DISMISSED_KEY,
+	INSTALL_BANNER_DISMISS_MS,
 	canTriggerInstallPrompt,
 	isAndroidDevice,
+	isInstallBannerDismissed,
 	isIosDevice,
 	isStandaloneDisplay,
 	shouldOfferInstallExperience
@@ -54,5 +56,22 @@ describe('pwa utils', () => {
 
 	it('exports stable banner storage key', () => {
 		expect(INSTALL_BANNER_DISMISSED_KEY).toBe('home-pantry-install-banner-dismissed');
+	});
+
+	it('treats legacy dismiss flag as dismissed', () => {
+		vi.stubGlobal('localStorage', {
+			getItem: (key: string) => (key === INSTALL_BANNER_DISMISSED_KEY ? '1' : null),
+			setItem: vi.fn()
+		});
+		expect(isInstallBannerDismissed()).toBe(true);
+	});
+
+	it('expires dismiss after configured interval', () => {
+		const stale = String(Date.now() - INSTALL_BANNER_DISMISS_MS - 1);
+		vi.stubGlobal('localStorage', {
+			getItem: (key: string) => (key === INSTALL_BANNER_DISMISSED_KEY ? stale : null),
+			setItem: vi.fn()
+		});
+		expect(isInstallBannerDismissed()).toBe(false);
 	});
 });

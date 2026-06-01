@@ -6,6 +6,13 @@ import {
 	warnIfTurnstileMisconfigured
 } from '$lib/server/captcha';
 import { translate } from '$lib/i18n/messages';
+import {
+	LANDING_VARIANT_COOKIE,
+	resolveLandingVariant
+} from '$lib/marketing/landing-variants';
+import { env as publicEnv } from '$env/dynamic/public';
+import { getOrSetAnalyticsVisitorId } from '$lib/server/analytics-visitor';
+import { recordSignupCompleteEvent } from '$lib/server/marketing-analytics';
 import { registerSchema } from '$lib/validation/auth.schemas';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { createSession } from '$lib/server/session';
@@ -48,6 +55,16 @@ export const actions: Actions = {
 			const user = await event.locals.authService.register(
 				parsed.data.email,
 				parsed.data.password
+			);
+			const variant = resolveLandingVariant({
+				cookieVariant: event.cookies.get(LANDING_VARIANT_COOKIE),
+				envVariant: publicEnv.PUBLIC_LANDING_VARIANT
+			});
+			recordSignupCompleteEvent(
+				event.locals.pmfService,
+				user.id,
+				variant,
+				getOrSetAnalyticsVisitorId(event.cookies)
 			);
 			await createSession(event, user.id);
 		} catch (error) {

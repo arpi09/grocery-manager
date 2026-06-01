@@ -379,9 +379,9 @@
 			"dismissed": "Install cancelled. You can follow the steps below instead."
 		},
 		"banner": {
-			"aria": "Tip: add the app to your home screen",
-			"title": "Add to home screen",
-			"body": "Open your pantry faster — one tap from your home screen.",
+			"aria": "Tip: install Skaffu on your home screen",
+			"title": "Install Skaffu on your home screen",
+			"body": "Get faster access to your pantry — scan, plan meals and expiry alerts straight from the icon.",
 			"cta": "How to install",
 			"dismiss": "Not now"
 		}

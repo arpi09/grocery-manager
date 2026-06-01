@@ -379,9 +379,9 @@
 			"dismissed": "Installation avbruten. Du kan följa stegen nedan i stället."
 		},
 		"banner": {
-			"aria": "Tips: lägg till appen på hemskärmen",
-			"title": "Lägg till på hemskärmen",
-			"body": "Öppna skafferiet snabbare — en tryckning från hemskärmen.",
+			"aria": "Tips: installera Skaffu på hemskärmen",
+			"title": "Installera Skaffu på hemskärmen",
+			"body": "Få snabbare tillgång till skafferiet — skanna, planera och få utgångsvarningar direkt från ikonen.",
 			"cta": "Visa hur",
 			"dismiss": "Inte nu"
 		}

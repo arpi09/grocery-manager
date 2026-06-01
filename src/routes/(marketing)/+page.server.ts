@@ -5,6 +5,8 @@ import {
 	LANDING_VARIANT_COOKIE,
 	resolveLandingVariant
 } from '$lib/marketing/landing-variants';
+import { pmfService } from '$lib/server/di';
+import { recordMarketingEvent } from '$lib/server/marketing-analytics';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, cookies, parent }) => {
@@ -25,6 +27,13 @@ export const load: PageServerLoad = async ({ url, cookies, parent }) => {
 			sameSite: 'lax'
 		});
 	}
+
+	recordMarketingEvent({
+		pmfService,
+		cookies,
+		eventType: 'landing_view',
+		variant
+	});
 
 	return {
 		landingVariant: variant,

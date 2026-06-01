@@ -7,13 +7,14 @@
 		href: string;
 		variant?: Variant;
 		fullWidth?: boolean;
+		onclick?: () => void;
 		children: Snippet;
 	}
 
-	let { href, variant = 'primary', fullWidth = false, children }: Props = $props();
+	let { href, variant = 'primary', fullWidth = false, onclick, children }: Props = $props();
 </script>
 
-<a class="btn-link btn-{variant} {fullWidth ? 'btn-full' : ''}" {href}>
+<a class="btn-link btn-{variant} {fullWidth ? 'btn-full' : ''}" {href} {onclick}>
 	{@render children()}
 </a>
 

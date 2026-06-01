@@ -1,8 +1,21 @@
 export const PRODUCT_EVENT_TYPES = [
 	'scan_completed',
 	'receipt_parsed',
+	'fill_suggestions_added',
+	'landing_view',
+	'register_click',
+	'signup_complete',
+	'pwa_banner_dismiss',
+	'pwa_banner_install_click'
+] as const;
+
+export const PMF_PRODUCT_EVENT_TYPES = [
+	'scan_completed',
+	'receipt_parsed',
 	'fill_suggestions_added'
 ] as const;
+
+export type PmfProductEventType = (typeof PMF_PRODUCT_EVENT_TYPES)[number];
 
 export type ProductEventType = (typeof PRODUCT_EVENT_TYPES)[number];
 
@@ -65,7 +78,7 @@ export interface PmfMetricSnapshot {
 	multiMemberActiveHouseholds: number;
 	smartFillWeeklyRate: number;
 	weeklyFillUsers: number;
-	eventCounts: Record<ProductEventType, number>;
+	eventCounts: Record<PmfProductEventType, number>;
 }
 
 export const PMF_TRACKED_METRIC_KEYS = [

@@ -213,14 +213,21 @@ export const productEventTable = pgTable(
 	'product_event',
 	{
 		id: text('id').primaryKey(),
-		userId: text('user_id')
-			.notNull()
-			.references(() => userTable.id, { onDelete: 'cascade' }),
+		userId: text('user_id').references(() => userTable.id, { onDelete: 'cascade' }),
 		householdId: text('household_id').references(() => householdTable.id, {
 			onDelete: 'set null'
 		}),
 		eventType: text('event_type', {
-			enum: ['scan_completed', 'receipt_parsed', 'fill_suggestions_added']
+			enum: [
+				'scan_completed',
+				'receipt_parsed',
+				'fill_suggestions_added',
+				'landing_view',
+				'register_click',
+				'signup_complete',
+				'pwa_banner_dismiss',
+				'pwa_banner_install_click'
+			]
 		}).notNull(),
 		metadata: text('metadata'),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
