@@ -14,7 +14,7 @@
 <div class="auth">
 	<div class="panel">
 		<div class="brand">
-			<h1 class="sr-only">Home Pantry</h1>
+			<h1 class="sr-only">Skaffu</h1>
 			<AppLogo size="lg" showWordmark />
 			{#if subtitle}
 				<p>{subtitle}</p>

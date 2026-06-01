@@ -11,7 +11,7 @@
 		class?: ClassValue;
 	}
 
-	let { size = 'md', showWordmark = false, wordmark = 'Home Pantry', href, class: className }: Props = $props();
+	let { size = 'md', showWordmark = false, wordmark = 'Skaffu', href, class: className }: Props = $props();
 
 	const markSizes: Record<Size, string> = {
 		sm: '1.85rem',

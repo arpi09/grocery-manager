@@ -72,11 +72,11 @@
 		"roleAdmin": "Administrator",
 		"roleMember": "Member",
 		"closeMenu": "Close menu",
-		"brandHome": "Home Pantry – Home",
+		"brandHome": "Skaffu – Home",
 		"primaryNav": "Primary navigation",
 		"mobileNav": "Mobile navigation",
 		"header": "Header",
-		"brandName": "Home Pantry",
+		"brandName": "Skaffu",
 		"morePages": "More pages",
 		"language": "Language"
 	},
@@ -89,7 +89,7 @@
 			"subtitle": "Pantry · dates · shopping",
 			"submit": "Log in",
 			"submitting": "Logging in…",
-			"pageTitle": "Log in · Home Pantry",
+			"pageTitle": "Log in · Skaffu",
 			"newHere": "New here?",
 			"createAccount": "Create account"
 		},
@@ -98,7 +98,7 @@
 			"subtitle": "Your household, one app",
 			"submit": "Create account",
 			"submitting": "Creating account…",
-			"pageTitle": "Create account · Home Pantry",
+			"pageTitle": "Create account · Skaffu",
 			"hasAccount": "Already have an account?",
 			"loginLink": "Log in",
 			"captchaLabel": "Confirm you are not a robot",
@@ -357,7 +357,7 @@
 			"subtitle": "Quick shortcut to your pantry — like an app, without the App Store."
 		},
 		"guide": {
-			"title": "Install Home Pantry",
+			"title": "Install Skaffu",
 			"lead": "Add a home screen shortcut to open your pantry in one tap — camera and offline work better in the installed view.",
 			"alreadyInstalled": "You are already using the installed app. Nice!",
 			"iosTitle": "iPhone (Safari)",
@@ -876,7 +876,7 @@
 		"label": "Recipe ideas"
 	},
 	"onboarding": {
-		"welcome": "Welcome to Home Pantry",
+		"welcome": "Welcome to Skaffu",
 		"stepOf": "Step {current} of {total}",
 		"welcomeBody": "Keep track of what you have at home — without filling the entire pantry at once. Start with one receipt or a few barcodes.",
 		"chooseTitle": "Choose how to begin",

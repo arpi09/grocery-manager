@@ -20,7 +20,7 @@ function getVapidSubject(): string {
 	if (contact) {
 		return contact;
 	}
-	return getAppOrigin() || 'mailto:support@homepantry.com';
+	return getAppOrigin() || 'mailto:support@skaffu.com';
 }
 
 export function isPushConfigured(): boolean {

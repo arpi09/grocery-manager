@@ -15,8 +15,8 @@ export default defineConfig({
 			},
 			includeAssets: ['favicon.svg', 'manifest.webmanifest'],
 			manifest: {
-				name: 'Home Pantry',
-				short_name: 'Home Pantry',
+				name: 'Skaffu',
+				short_name: 'Skaffu',
 				description:
 					'Skanna, lagra och handla smart — kyl, frys och skafferi i en app.',
 				theme_color: '#3d6b4f',

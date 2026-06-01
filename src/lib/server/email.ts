@@ -14,7 +14,7 @@ export {
 	isEmailSendingDisabledFailure
 } from '$lib/application/app-settings.service';
 
-const DEFAULT_FROM = 'Home Pantry <onboarding@resend.dev>';
+const DEFAULT_FROM = 'Skaffu <onboarding@resend.dev>';
 const RESEND_DOCS_URL = 'https://resend.com/docs/send-with-nextjs';
 
 export function getResendApiKey(): string | null {
@@ -179,17 +179,17 @@ export function buildHouseholdInviteEmailContent(options: {
 }): HouseholdInviteEmailContent {
 	const { inviterName, householdName, inviteUrl, role } = options;
 	const roleLabel = inviteRoleLabel(role);
-	const subject = `${inviterName} bjöd in dig till ${householdName} i Home Pantry`;
+	const subject = `${inviterName} bjöd in dig till ${householdName} i Skaffu`;
 	const headline = `Du är inbjuden till ${householdName}`;
-	const preheader = `${inviterName} bjöd in dig till Home Pantry — håll koll på skafferi, datum och inköp tillsammans.`;
+	const preheader = `${inviterName} bjöd in dig till Skaffu — håll koll på skafferi, datum och inköp tillsammans.`;
 
 	const text = [
 		`Hej!`,
 		``,
 		headline,
 		``,
-		`${inviterName} har bjudit in dig till hushållet "${householdName}" i Home Pantry.`,
-		`Home Pantry hjälper er hålla koll på skafferi, utgångsdatum och inköpslistor — tillsammans i samma hushåll.`,
+		`${inviterName} har bjudit in dig till hushållet "${householdName}" i Skaffu.`,
+		`Skaffu hjälper er hålla koll på skafferi, utgångsdatum och inköpslistor — tillsammans i samma hushåll.`,
 		`Du får rollen ${roleLabel}.`,
 		``,
 		`Acceptera inbjudan:`,
@@ -198,7 +198,7 @@ export function buildHouseholdInviteEmailContent(options: {
 		`Länken gäller i 7 dagar. Om du inte förväntade dig detta kan du ignorera mejlet.`,
 		``,
 		`Vänliga hälsningar,`,
-		`Home Pantry`
+		`Skaffu`
 	].join('\n');
 
 	const html = buildHouseholdInviteEmailHtml({
@@ -257,7 +257,7 @@ function buildHouseholdInviteEmailHtml(options: {
                   <td style="width:44px;height:44px;background-color:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.35);border-radius:12px;text-align:center;vertical-align:middle;font-size:15px;font-weight:700;letter-spacing:-0.04em;color:#ffffff;line-height:44px;">HP</td>
                 </tr>
               </table>
-              <p style="margin:0;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.85);">Home Pantry</p>
+              <p style="margin:0;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.85);">Skaffu</p>
             </td>
           </tr>
           <tr>
@@ -268,7 +268,7 @@ function buildHouseholdInviteEmailHtml(options: {
                 <strong style="color:${EMAIL.text};">${safeHousehold}</strong>.
               </p>
               <p style="margin:0 0 24px;font-size:15px;line-height:1.55;color:${EMAIL.textMuted};">
-                Home Pantry hjälper er hålla koll på skafferi, utgångsdatum och inköpslistor — tillsammans i samma hushåll.
+                Skaffu hjälper er hålla koll på skafferi, utgångsdatum och inköpslistor — tillsammans i samma hushåll.
               </p>
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px;">
                 <tr>
@@ -308,7 +308,7 @@ function buildHouseholdInviteEmailHtml(options: {
             <td style="padding:20px 32px 28px;background-color:${EMAIL.surfaceMuted};border-top:1px solid ${EMAIL.border};">
               <p style="margin:0;font-size:12px;line-height:1.5;color:${EMAIL.textMuted};text-align:center;">
                 Vänliga hälsningar,<br />
-                <strong style="color:${EMAIL.text};font-weight:600;">Home Pantry</strong>
+                <strong style="color:${EMAIL.text};font-weight:600;">Skaffu</strong>
               </p>
             </td>
           </tr>
@@ -365,8 +365,8 @@ export function buildExpiryReminderEmailContent(options: {
 	const totalItems = sections.reduce((sum, section) => sum + section.items.length, 0);
 	const subject =
 		totalItems === 1
-			? '1 vara går snart ut — Home Pantry'
-			: `${totalItems} varor går snart ut — Home Pantry`;
+			? '1 vara går snart ut — Skaffu'
+			: `${totalItems} varor går snart ut — Skaffu`;
 	const headline =
 		totalItems === 1 ? '1 vara går snart ut' : `${totalItems} varor går snart ut`;
 	const preheader = `Hej ${recipientName}! Här är varor som går ut inom ${days} dagar.`;
@@ -393,10 +393,10 @@ export function buildExpiryReminderEmailContent(options: {
 		`Öppna skafferiet:`,
 		inventoryUrl,
 		``,
-		`Du får det här mejlet eftersom du aktiverat utgångspåminnelser i Home Pantry. Stäng av dem under Inställningar.`,
+		`Du får det här mejlet eftersom du aktiverat utgångspåminnelser i Skaffu. Stäng av dem under Inställningar.`,
 		``,
 		`Vänliga hälsningar,`,
-		`Home Pantry`
+		`Skaffu`
 	].join('\n');
 
 	const html = buildExpiryReminderEmailHtml({
@@ -475,7 +475,7 @@ function buildExpiryReminderEmailHtml(options: {
                   <td style="width:44px;height:44px;background-color:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.35);border-radius:12px;text-align:center;vertical-align:middle;font-size:15px;font-weight:700;letter-spacing:-0.04em;color:#ffffff;line-height:44px;">HP</td>
                 </tr>
               </table>
-              <p style="margin:0;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.85);">Home Pantry</p>
+              <p style="margin:0;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.85);">Skaffu</p>
             </td>
           </tr>
           <tr>
@@ -501,7 +501,7 @@ function buildExpiryReminderEmailHtml(options: {
           <tr>
             <td style="padding:0 32px 32px;border-top:1px solid ${EMAIL.border};">
               <p style="margin:24px 0 0;font-size:12px;line-height:1.5;color:${EMAIL.textMuted};">
-                Du får det här mejlet eftersom du aktiverat utgångspåminnelser i Home Pantry. Stäng av dem under Inställningar.
+                Du får det här mejlet eftersom du aktiverat utgångspåminnelser i Skaffu. Stäng av dem under Inställningar.
               </p>
             </td>
           </tr>
@@ -509,7 +509,7 @@ function buildExpiryReminderEmailHtml(options: {
             <td style="padding:20px 32px 28px;background-color:${EMAIL.surfaceMuted};border-top:1px solid ${EMAIL.border};">
               <p style="margin:0;font-size:12px;line-height:1.5;color:${EMAIL.textMuted};text-align:center;">
                 Vänliga hälsningar,<br />
-                <strong style="color:${EMAIL.text};font-weight:600;">Home Pantry</strong>
+                <strong style="color:${EMAIL.text};font-weight:600;">Skaffu</strong>
               </p>
             </td>
           </tr>

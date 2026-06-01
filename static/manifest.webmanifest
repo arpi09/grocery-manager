@@ -1,6 +1,6 @@
 {
-	"name": "Home Pantry",
-	"short_name": "Home Pantry",
+	"name": "Skaffu",
+	"short_name": "Skaffu",
 	"description": "Skanna, lagra och handla smart — kyl, frys och skafferi i en app.",
 	"start_url": "/hem",
 	"scope": "/",

@@ -72,11 +72,11 @@
 		"roleAdmin": "Administratör",
 		"roleMember": "Medlem",
 		"closeMenu": "Stäng meny",
-		"brandHome": "Home Pantry – Hem",
+		"brandHome": "Skaffu – Hem",
 		"primaryNav": "Primär navigering",
 		"mobileNav": "Mobilnavigering",
 		"header": "Sidhuvud",
-		"brandName": "Home Pantry",
+		"brandName": "Skaffu",
 		"morePages": "Fler sidor",
 		"language": "Språk"
 	},
@@ -89,7 +89,7 @@
 			"subtitle": "Skafferi · datum · inköp",
 			"submit": "Logga in",
 			"submitting": "Loggar in…",
-			"pageTitle": "Logga in · Home Pantry",
+			"pageTitle": "Logga in · Skaffu",
 			"newHere": "Ny här?",
 			"createAccount": "Skapa konto"
 		},
@@ -98,7 +98,7 @@
 			"subtitle": "Ditt hushåll, en app",
 			"submit": "Skapa konto",
 			"submitting": "Skapar konto…",
-			"pageTitle": "Skapa konto · Home Pantry",
+			"pageTitle": "Skapa konto · Skaffu",
 			"hasAccount": "Har du konto?",
 			"loginLink": "Logga in",
 			"captchaLabel": "Bekräfta att du inte är en robot",
@@ -357,7 +357,7 @@
 			"subtitle": "Snabb genväg till skafferiet — som en app, utan App Store."
 		},
 		"guide": {
-			"title": "Installera Home Pantry",
+			"title": "Installera Skaffu",
 			"lead": "Lägg till en genväg på hemskärmen så öppnar du skafferiet med ett tryck — kameran och offline-läge fungerar bättre i den installerade vyn.",
 			"alreadyInstalled": "Du använder redan den installerade appen. Bra jobbat!",
 			"iosTitle": "iPhone (Safari)",
@@ -877,7 +877,7 @@
 		"label": "Receptidéer"
 	},
 	"onboarding": {
-		"welcome": "Välkommen till Home Pantry",
+		"welcome": "Välkommen till Skaffu",
 		"stepOf": "Steg {current} av {total}",
 		"welcomeBody": "Håll koll på vad du har hemma — utan att fylla hela skafferiet på en gång. Börja med ett kvitto eller några streckkoder.",
 		"chooseTitle": "Välj hur du vill börja",

@@ -121,7 +121,7 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 
 export async function expectOnboardingGuideVisible(page: Page) {
 	await expect(
-		page.getByRole('heading', { name: /V\u00e4lkommen till Home Pantry/i })
+		page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
 	).toBeVisible({ timeout: 10_000 });
 	await expect(page.getByRole('button', { name: /Jag g\u00f6r det senare/i })).toBeVisible();
 }

@@ -64,7 +64,7 @@ describe('getEmailFrom', () => {
 	});
 
 	it('defaults to Resend onboarding address', () => {
-		expect(getEmailFrom()).toBe('Home Pantry <onboarding@resend.dev>');
+		expect(getEmailFrom()).toBe('Skaffu <onboarding@resend.dev>');
 	});
 });
 
@@ -154,7 +154,7 @@ describe('sendEmail', () => {
 		expect(result).toEqual({ ok: true, id: 'msg_1' });
 		expect(mockSend).toHaveBeenCalledWith(
 			expect.objectContaining({
-				from: 'Home Pantry <onboarding@resend.dev>',
+				from: 'Skaffu <onboarding@resend.dev>',
 				to: 'guest@example.com',
 				subject: 'Test'
 			})

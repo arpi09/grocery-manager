@@ -1,7 +1,7 @@
 /* Push notification handlers — loaded by the vite-pwa service worker via importScripts. */
 self.addEventListener('push', (event) => {
 	const payload = parsePushPayload(event);
-	const title = payload.title || 'Home Pantry';
+	const title = payload.title || 'Skaffu';
 	const options = {
 		body: payload.body || '',
 		tag: payload.tag || 'home-pantry-expiry',

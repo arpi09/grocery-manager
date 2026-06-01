@@ -20,7 +20,7 @@ export interface PrivacyContent {
 const sv: PrivacyContent = {
 	title: 'Integritet & AI',
 	lead:
-		'Här beskriver vi vilken data Home Pantry samlar in, hur vi använder AI, och vilka rättigheter du har enligt GDPR. Vi skriver rakt på sak — inga onödiga juridiska omvägar.',
+		'Här beskriver vi vilken data Skaffu samlar in, hur vi använder AI, och vilka rättigheter du har enligt GDPR. Vi skriver rakt på sak — inga onödiga juridiska omvägar.',
 	updatedLabel: 'Senast uppdaterad',
 	updatedDate: '30 maj 2026',
 	faqLinkLabel: 'Vanliga frågor',
@@ -28,10 +28,10 @@ const sv: PrivacyContent = {
 	sections: [
 		{
 			id: 'operator',
-			title: 'Vem driver Home Pantry?',
+			title: 'Vem driver Skaffu?',
 			paragraphs: [
-				'Home Pantry är en indie-produkt utvecklad och drivet av Arvid Pilhall (enskild utvecklare). Tjänsten riktar sig till hushåll som vill hålla koll på skafferiet.',
-				'Frågor om integritet, AI eller dina uppgifter: hello@homepantry.com'
+				'Skaffu är en indie-produkt utvecklad och drivet av Arvid Pilhall (enskild utvecklare). Tjänsten riktar sig till hushåll som vill hålla koll på skafferiet.',
+				'Frågor om integritet, AI eller dina uppgifter: hello@skaffu.com'
 			]
 		},
 		{
@@ -52,7 +52,7 @@ const sv: PrivacyContent = {
 			title: 'Rättslig grund & dina rättigheter (GDPR)',
 			paragraphs: [
 				'Vi behandlar personuppgifter för att tillhandahålla tjänsten (avtal), för säker drift och felsökning (berättigat intresse), och i vissa fall utifrån ditt samtycke (t.ex. när du aktivt laddar upp kvitto eller foto för AI-tolkning).',
-				'Du har rätt att få tillgång till, rätta och i vissa fall begränsa behandlingen av dina uppgifter. Kontakta oss på hello@homepantry.com om du vill utöva dina rättigheter.',
+				'Du har rätt att få tillgång till, rätta och i vissa fall begränsa behandlingen av dina uppgifter. Kontakta oss på hello@skaffu.com om du vill utöva dina rättigheter.',
 				'Hushållsägare kan ta bort hela hushållet och tillhörande data under Inställningar → Hushåll. Självbetjäning för att radera hela kontot kommer — tills dess, maila oss så hjälper vi dig radera kontot och kopplad data.',
 				'Vi säljer inte dina personuppgifter och delar dem inte med annonsörer.'
 			]
@@ -110,7 +110,7 @@ const sv: PrivacyContent = {
 const en: PrivacyContent = {
 	title: 'Privacy & AI',
 	lead:
-		'How Home Pantry collects and uses your data, how AI features work, and your rights under GDPR. Plain language — no unnecessary legalese.',
+		'How Skaffu collects and uses your data, how AI features work, and your rights under GDPR. Plain language — no unnecessary legalese.',
 	updatedLabel: 'Last updated',
 	updatedDate: '30 May 2026',
 	faqLinkLabel: 'FAQ',
@@ -118,10 +118,10 @@ const en: PrivacyContent = {
 	sections: [
 		{
 			id: 'operator',
-			title: 'Who operates Home Pantry?',
+			title: 'Who operates Skaffu?',
 			paragraphs: [
-				'Home Pantry is an indie product built and operated by Arvid Pilhall (solo developer). The service is for households managing pantry inventory.',
-				'Privacy, AI or data questions: hello@homepantry.com'
+				'Skaffu is an indie product built and operated by Arvid Pilhall (solo developer). The service is for households managing pantry inventory.',
+				'Privacy, AI or data questions: hello@skaffu.com'
 			]
 		},
 		{
@@ -142,7 +142,7 @@ const en: PrivacyContent = {
 			title: 'Legal basis & your rights (GDPR)',
 			paragraphs: [
 				'We process personal data to provide the service (contract), for secure operation and debugging (legitimate interest), and sometimes with your consent (e.g. when you upload a receipt or photo for AI parsing).',
-				'You may access, rectify or restrict processing where applicable. Contact hello@homepantry.com to exercise your rights.',
+				'You may access, rectify or restrict processing where applicable. Contact hello@skaffu.com to exercise your rights.',
 				'Household owners can delete the household and related data under Settings → Household. Self-service full account deletion is coming — until then, email us and we will help remove your account and data.',
 				'We do not sell your personal data or share it with advertisers.'
 			]
