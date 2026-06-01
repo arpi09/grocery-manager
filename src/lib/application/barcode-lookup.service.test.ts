@@ -29,7 +29,7 @@ describe('BarcodeLookupService', () => {
 		const result = await service.lookup('7310862000003');
 
 		expect(result).toEqual(product);
-		expect(fetchProductByBarcode).toHaveBeenCalledWith('7310862000003');
+		expect(fetchProductByBarcode).toHaveBeenCalledWith('7310862000003', 'sv');
 	});
 
 	it('lookupWithFallback returns found:true when product exists', async () => {
@@ -45,17 +45,42 @@ describe('BarcodeLookupService', () => {
 		const result = await service.lookupWithFallback('731-086-2000003');
 
 		expect(result).toEqual({ found: true, product });
-		expect(fetchProductByBarcode).toHaveBeenCalledWith('7310862000003');
+		expect(fetchProductByBarcode).toHaveBeenCalledWith('7310862000003', 'sv');
 	});
 
 	it('lookupWithFallback returns found:false with unknown name when not in database', async () => {
 		vi.mocked(fetchProductByBarcode).mockResolvedValue(null);
 
-		const result = await service.lookupWithFallback('7310862000003');
+		const result = await service.lookupWithFallback('0000000000000');
 
 		expect(result.found).toBe(false);
-		expect(result.product.barcode).toBe('7310862000003');
-		expect(result.product.name).toBe(unknownBarcodeProductName('7310862000003'));
+		expect(result.product.barcode).toBe('0000000000000');
+		expect(result.product.name).toBe(unknownBarcodeProductName('0000000000000'));
+	});
+
+	it('lookupWithFallback uses Swedish override when Open Food Facts misses', async () => {
+		vi.mocked(fetchProductByBarcode).mockResolvedValue(null);
+
+		const result = await service.lookupWithFallback('7310100683519');
+
+		expect(result.found).toBe(true);
+		expect(result.product.name).toBe('Felix Ketchup');
+	});
+
+	it('lookupWithFallback applies Swedish override name on top of Open Food Facts', async () => {
+		vi.mocked(fetchProductByBarcode).mockResolvedValue({
+			barcode: '7310100683519',
+			name: 'Ketchup',
+			quantity: '1',
+			unit: null,
+			notes: null
+		});
+
+		const result = await service.lookupWithFallback('7310100683519');
+
+		expect(result.found).toBe(true);
+		expect(result.product.name).toBe('Felix Ketchup');
+		expect(result.product.notes).toBe('Brand: Felix');
 	});
 
 	it('lookupWithFallback throws for short barcodes', async () => {

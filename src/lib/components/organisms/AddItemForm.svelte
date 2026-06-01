@@ -13,6 +13,7 @@
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
+	import { getFavoriteProduct } from '$lib/utils/favorite-products';
 
 	interface Props {
 		item?: InventoryItem;
@@ -56,8 +57,21 @@
 
 	async function handleBarcodeScanned(code: string) {
 		scannerOpen = false;
-		lookupLoading = true;
 		scanMessage = null;
+
+		const cached = getFavoriteProduct(code);
+		if (cached) {
+			name = cached.name;
+			quantity = cached.quantity;
+			unit = cached.unit ?? '';
+			if (cached.notes) {
+				notes = notes ? `${notes}\n${cached.notes}` : cached.notes;
+			}
+			scanMessage = t('item.foundProduct', { name: cached.name, barcode: cached.barcode });
+			return;
+		}
+
+		lookupLoading = true;
 
 		try {
 			const response = await fetch(`/api/barcode/${encodeURIComponent(code)}`);

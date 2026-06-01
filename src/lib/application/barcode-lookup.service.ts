@@ -5,6 +5,11 @@ import {
 } from '$lib/domain/barcode-product';
 import { DEFAULT_LOCALE, type Locale } from '$lib/i18n/locale';
 import { fetchProductByBarcode } from '$lib/infrastructure/barcode/open-food-facts.client';
+import {
+	applySwedishProductOverride,
+	getSwedishProductOverride,
+	swedishOverrideToProduct
+} from '$lib/infrastructure/barcode/swedish-product-overrides';
 
 export class BarcodeNotFoundError extends Error {
 	constructor() {
@@ -31,9 +36,21 @@ export class BarcodeLookupService {
 			throw new BarcodeNotFoundError();
 		}
 
-		const product = await fetchProductByBarcode(normalized);
-		if (product) {
-			return { found: true, product };
+		const override = locale === 'sv' ? getSwedishProductOverride(normalized) : null;
+		const offProduct = await fetchProductByBarcode(normalized, locale);
+
+		if (offProduct) {
+			return {
+				found: true,
+				product: override ? applySwedishProductOverride(offProduct, override) : offProduct
+			};
+		}
+
+		if (override) {
+			return {
+				found: true,
+				product: swedishOverrideToProduct(normalized, override)
+			};
 		}
 
 		return {

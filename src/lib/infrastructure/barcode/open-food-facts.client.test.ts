@@ -11,6 +11,27 @@ describe('fetchProductByBarcode', () => {
 		expect(result).toBeNull();
 	});
 
+	it('prefers Swedish product name when locale is sv', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn().mockResolvedValue({
+				ok: true,
+				json: async () => ({
+					status: 1,
+					product: {
+						product_name_sv: 'Mellanmjölk',
+						product_name_en: 'Semi-skimmed milk',
+						brands: 'Arla',
+						quantity: '1 L'
+					}
+				})
+			})
+		);
+
+		const result = await fetchProductByBarcode('7310865001864', 'sv');
+		expect(result?.name).toBe('Mellanmjölk');
+	});
+
 	it('maps Open Food Facts response to product', async () => {
 		vi.stubGlobal(
 			'fetch',

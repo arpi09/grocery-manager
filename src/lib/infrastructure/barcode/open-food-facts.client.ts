@@ -1,10 +1,10 @@
 import type { BarcodeProduct } from '$lib/domain/barcode-product';
+import { resolveOffProductName, type OffProductNameFields } from '$lib/domain/off-product-name';
+import { DEFAULT_LOCALE, type Locale } from '$lib/i18n/locale';
 
 interface OffProductResponse {
 	status: number;
-	product?: {
-		product_name?: string;
-		product_name_en?: string;
+	product?: OffProductNameFields & {
 		brands?: string;
 		quantity?: string;
 	};
@@ -12,7 +12,10 @@ interface OffProductResponse {
 
 const OFF_API = 'https://world.openfoodfacts.org/api/v2/product';
 
-export async function fetchProductByBarcode(barcode: string): Promise<BarcodeProduct | null> {
+export async function fetchProductByBarcode(
+	barcode: string,
+	locale: Locale = DEFAULT_LOCALE
+): Promise<BarcodeProduct | null> {
 	const normalized = barcode.replace(/\D/g, '');
 	if (normalized.length < 8) {
 		return null;
@@ -31,10 +34,7 @@ export async function fetchProductByBarcode(barcode: string): Promise<BarcodePro
 		return null;
 	}
 
-	const name =
-		data.product.product_name?.trim() ||
-		data.product.product_name_en?.trim() ||
-		`Product ${normalized}`;
+	const name = resolveOffProductName(data.product, normalized, locale);
 
 	const { quantity, unit } = parseQuantity(data.product.quantity);
 	const brandNote = data.product.brands?.trim();

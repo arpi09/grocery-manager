@@ -24,11 +24,11 @@
 | **Marknad** | Hero A/B + analytics; cookie consent (variant B) |
 | **PMF** | **Ej uppnådd** — mätetal fylls och följs; inga påhittade siffror i docs |
 
-**Ägare (parallellt, blockerar inte kod):** användarintervjuer, veckovis PMF-granskning (e-postcron underlättar), metrics-uppföljning i `/admin`. Se [NEXT_STEPS.md](./NEXT_STEPS.md).
+**Ägare (parallellt, blockerar inte kod):** användarintervjuer, veckovis PMF-granskning (e-postcron underlättar), metrics-uppföljning i `/admin`, hero A/B-beslut när data räcker, launch i communities. Se [NEXT_STEPS.md](./NEXT_STEPS.md).
 
 **Väntar medvetet:** Stripe/Checkout, Capacitor/App Store — tills PMF-gates och [PRICING.md](./PRICING.md) motiverar.
 
-**Nästa kod (utan Stripe):** SEO (SV), valfri web push *"handla idag"*, hero A/B-beslut när data räcker.
+**Nästa kod (utan Stripe):** Fas 1-svans (kvitto-PDF, SEO, web push *handla idag*, recept-polish) levererad. **Fas 2-kod utan PMF-gate:** svensk scan-kvalitet, receipt-fixtures i CI när ägare fyller testpack, admin/e2e-polish.
 
 ---
 
@@ -121,7 +121,7 @@ Alla punkter gröna; Fas 1 (retention, launch, PMF) är aktiv.
 | **Veckovis PMF-granskning (ägare)** | Dashboard + **e-postcron till ägare** | Ägare: rutin varje måndag (parallellt) |
 | **Intervjusyntes → produkt** | Kit + feedback i app | Ägare: ≥3/10 intervjuer, syntes |
 | **E-post utgång** | Levererat; Resend verifierad | Mät opt-in/öppning |
-| **Web push (PWA)** | **Utgång (expiry) levererat** | Valfritt: *"handla idag"* — efter baseline |
+| **Web push (PWA)** | **Utgång (expiry) + handla idag levererat** | Mät opt-in; fler triggers senare |
 | **PWA-installation** | Banner + `/install-app` | Mät standalone; copy vid behov |
 
 ### P1 — Stripe och paywall — **väntar**
@@ -158,8 +158,8 @@ Alla punkter gröna; Fas 1 (retention, launch, PMF) är aktiv.
 | **skaffu.com live** | ✅ | SEO, UTM, copy konsekvent *Skaffu* |
 | Launch enligt playbook | Kit klar | Ägare: ≥1 community |
 | Messaging: PDF/Kivra, plan+lager, butiksneutral | Copy + jämförelsetabell | Distribution |
-| **SEO** | Ej prioriterat klart | *"skafferi app"*, *"minska matsvinn"* — **nästa kod** |
-| **Hero A/B** | Live + analytics | **Beslut när data räcker** — inte magkänsla |
+| **SEO** | Grund + *skafferi app* / *minska matsvinn* copy | UTM, fler landningssidor vid behov |
+| **Hero A/B** | Live + analytics | **Beslut när data räcker** — ägare, inte kod |
 
 ### P1 — Prestanda och AI-kostnad
 
@@ -188,7 +188,7 @@ Starta **endast** om Fas 1-mätetal eller [DAY_90_DECISION.md](./DAY_90_DECISION
 | **Capacitor / App Store** | D30 ≥15 % + kvalitativ push/app-store-begäran | **Väntar** |
 | **Native push-notiser** | Efter Capacitor eller TWA | Web push expiry finns |
 | Offline-läsning | Retention på mobil utan nät | Senare |
-| Svensk produktcache / override | Scan-fel i intervjuer | Senare |
+| Svensk produktcache / override | Scan-fel, OFF saknar svenska | **Påbörjad** — locale-namn + kuraterad override-lista |
 | Prisjämförelse / affiliate | Tydlig partner | Skip (CA) |
 | B2B (BRF, kommuner) | Efter B2C PMF | Senare |
 
@@ -227,7 +227,7 @@ flowchart TD
     A[Fas 0 klar] --> B[Fas 1: retention + launch + PMF]
     B --> C{Mätetal på mål?}
     C -->|Nej| D[Ägare: intervjuer + veckorutin parallellt]
-    C -->|Nej| E[Kod: SEO, push handla idag, hero A/B]
+    C -->|Nej| E[Kod: scan-kvalitet, receipt-CI, admin-polish]
     D --> B
     E --> B
     C -->|D30 + gates| F{Stripe?}
