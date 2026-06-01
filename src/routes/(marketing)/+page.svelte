@@ -103,6 +103,20 @@
 	</div>
 </section>
 
+<section class="section muted" id="minska-matsvinn">
+	<div class="section-inner">
+		<header class="section-header">
+			<h2>{content.landing.wasteReductionTitle}</h2>
+			<p>{content.landing.wasteReductionLead}</p>
+		</header>
+		<ul class="waste-points">
+			{#each content.landing.wasteReductionPoints as point (point)}
+				<li>{point}</li>
+			{/each}
+		</ul>
+	</div>
+</section>
+
 <section id="jamforelse" class="section">
 	<div class="section-inner">
 		<header class="section-header">
@@ -345,6 +359,18 @@
 
 	.section-link a:hover {
 		text-decoration: underline;
+	}
+
+	.waste-points {
+		margin: var(--space-lg) 0 0;
+		padding-left: 1.25rem;
+		max-width: 52ch;
+		color: var(--color-text);
+		line-height: var(--line-height-body);
+	}
+
+	.waste-points li + li {
+		margin-top: var(--space-sm);
 	}
 
 	.comparison-disclaimer {

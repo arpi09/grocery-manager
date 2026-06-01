@@ -62,6 +62,9 @@ export interface MarketingContent {
 		heroSecondary: string;
 		featuresTitle: string;
 		featuresLead: string;
+		wasteReductionTitle: string;
+		wasteReductionLead: string;
+		wasteReductionPoints: string[];
 		stepsTitle: string;
 		stepsLead: string;
 		finalCtaTitle: string;
@@ -141,6 +144,14 @@ const sv: MarketingContent = {
 			'Planera måltider, få varningar innan varor går ut och låt inköpslistan fylla på sig utifrån det du faktiskt har.',
 		featuresTitle: 'Allt du behöver i köket',
 		featuresLead: 'Från skanning till inköp — utan kalkylark och dubbelköp.',
+		wasteReductionTitle: 'Skafferi-app som hjälper dig minska matsvinn',
+		wasteReductionLead:
+			'När kyl, frys och skafferi syns på ett ställe blir det lättare att handla rätt mängd, använda det som går ut snart och slippa dubbelköp.',
+		wasteReductionPoints: [
+			'Utgångsdatum och varningar innan varor hinner bli dåliga.',
+			'Recept och inköpslista utifrån det som faktiskt finns hemma.',
+			'Kvitto-PDF och skanning — snabb start utan att fylla hela skafferiet manuellt.'
+		],
 		stepsTitle: 'Igång på tre steg',
 		stepsLead: 'Ingen krånglig setup. Skanna det du har hemma redan idag.',
 		finalCtaTitle: 'Redo att ta kontroll över skafferiet?',
@@ -180,7 +191,7 @@ const sv: MarketingContent = {
 				icon: 'sparkle',
 				title: 'Smart inköpslista',
 				description:
-					'Fyll på listan utifrån lager, utgångsdatum och måltidsplan — så du handlar det som faktiskt behövs.'
+					'Fyll på listan utifrån lager, utgångsdatum och måltidsplan — minska matsvinn genom att handla det som faktiskt behövs.'
 			},
 			{
 				icon: 'home',
@@ -273,6 +284,11 @@ const sv: MarketingContent = {
 				'Svar om gratisplan, kvittoskanning, hushåll och GDPR. Kontakta hello@skaffu.com vid fler frågor.'
 		},
 		items: [
+			{
+				question: 'Hur hjälper Skaffu mig minska matsvinn?',
+				answer:
+					'Skaffu är en skafferi-app byggd kring lager som sanningskälla: du ser utgångsdatum, får varningar innan varor går ut och kan låta recept och inköpslista utgå från det som redan finns hemma — så mindre mat kastas och färre dubbelköp.'
+			},
 			{
 				question: 'Kostar Skaffu något?',
 				answer:
@@ -377,6 +393,14 @@ const en: MarketingContent = {
 			'Plan meals, get warnings before items expire, and let the shopping list fill from what you actually have.',
 		featuresTitle: 'Everything you need in the kitchen',
 		featuresLead: 'From scanning to shopping — without spreadsheets and duplicate buys.',
+		wasteReductionTitle: 'Pantry app that helps you reduce food waste',
+		wasteReductionLead:
+			'When fridge, freezer and cupboard are visible in one place it is easier to buy the right amount, use items before they expire and avoid duplicate purchases.',
+		wasteReductionPoints: [
+			'Expiry dates and warnings before food goes bad.',
+			'Recipes and shopping list based on what you actually have at home.',
+			'Receipt PDF and scanning — quick start without manually filling the whole pantry.'
+		],
 		stepsTitle: 'Up and running in three steps',
 		stepsLead: 'No complicated setup. Scan what you have at home today.',
 		finalCtaTitle: 'Ready to take control of your pantry?',
@@ -467,6 +491,11 @@ const en: MarketingContent = {
 				'Answers about the free plan, receipt scanning, households and GDPR. Contact hello@skaffu.com for more.'
 		},
 		items: [
+			{
+				question: 'How does Skaffu help me reduce food waste?',
+				answer:
+					'Skaffu is a pantry app built around inventory as source of truth: you see expiry dates, get warnings before items go bad, and can base recipes and shopping lists on what is already at home — so less food is thrown away and fewer duplicate buys.'
+			},
 			{
 				question: 'Does Skaffu cost anything?',
 				answer:

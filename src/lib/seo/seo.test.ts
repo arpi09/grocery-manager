@@ -19,6 +19,7 @@ import {
 	shouldIndexPath,
 	SITEMAP_ENTRIES
 } from './seo';
+import { getMarketingContent } from '$lib/marketing/content';
 
 describe('shouldIndexPath', () => {
 	it('indexes marketing and auth paths', () => {
@@ -79,5 +80,23 @@ describe('buildLandingJsonLd', () => {
 		expect(schemas).toHaveLength(2);
 		expect(schemas[0]['@type']).toBe('WebApplication');
 		expect(schemas[1]['@type']).toBe('Organization');
+	});
+});
+
+describe('marketing SEO keywords (sv)', () => {
+	it('includes skafferi-app and minska matsvinn in primary meta and landing copy', () => {
+		const content = getMarketingContent('sv');
+		const haystack = [
+			content.meta.title,
+			content.meta.description,
+			content.landing.wasteReductionTitle,
+			content.landing.wasteReductionLead,
+			content.faq.items[0]?.question ?? ''
+		]
+			.join(' ')
+			.toLowerCase();
+
+		expect(haystack).toContain('skafferi-app');
+		expect(haystack).toContain('minska matsvinn');
 	});
 });
