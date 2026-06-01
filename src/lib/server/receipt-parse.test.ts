@@ -4,6 +4,7 @@ import {
 	isOpenAiSchemaFailure,
 	normalizeReceiptAiPayload,
 	parseReceiptLines,
+	preprocessReceiptText,
 	receiptLineToInventoryAmount,
 	RECEIPT_LINES_SCHEMA
 } from './receipt-parse';
@@ -38,6 +39,19 @@ function assertStrictOpenAiSchema(schema: Record<string, unknown>, path = '$'): 
 describe('RECEIPT_LINES_SCHEMA', () => {
 	it('lists every property as required for OpenAI strict json_schema', () => {
 		assertStrictOpenAiSchema(RECEIPT_LINES_SCHEMA);
+	});
+});
+
+describe('preprocessReceiptText', () => {
+	it('strips totals, payment and common non-food rows', () => {
+		const raw =
+			'ICA Supermarket MJOLK 1L 15.90 DISKMEDEL 750ML 24.90 TOTALT 549.08 SEK BETALAT KORT 549.08';
+		expect(preprocessReceiptText(raw)).toBe('ICA Supermarket MJOLK 1L 15.90');
+	});
+
+	it('removes moms and rabatt noise', () => {
+		const raw = 'BROD FIL 25.00 RABATT STAMMIS -15.00 MOMS 12% 42.18 SUMMA 128.30';
+		expect(preprocessReceiptText(raw)).toBe('BROD FIL 25.00');
 	});
 });
 

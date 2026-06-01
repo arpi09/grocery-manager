@@ -52,6 +52,25 @@ export const RECEIPT_SYSTEM_PROMPT = [
 	'- max 40 rader'
 ].join('\n');
 
+/** Receipt footer/header tokens stripped before text-based OpenAI parse. */
+const RECEIPT_TEXT_NOISE_PATTERNS = [
+	/\b(?:dis(?:k)?medel|toalettpapper|tvättmedel|tvattmedel|servetter|blöjor|blojor)\b[\d\s.,:%mlg-]*/gi,
+	/\b(?:total(?:t)?|summa|att\s+betala)\b[\d\s.,:-]*(?:sek|kr)?/gi,
+	/\bmoms\s*\d+\s*%[\d\s.,:-]*/gi,
+	/\b(?:betalt|betalat|betal(?:as)?)(?:\s+kort)?[\d\s.,:-]*/gi,
+	/\brabatt\b[\w\s.-]*?-?\d+[.,]?\d*/gi,
+	/\b(?:kvitto\s*\d{4}[-/]\d{2}[-/]\d{2}|org\.?\s*nr|pant\s*\d+|stammis|kort\s*\d+|visa|mastercard|swish|kontant|varav\s+moms|öresutjämning|oresutjamning)\b[\d\s.,:-]*/gi
+];
+
+/** Removes totals, payment lines and common non-food rows from extracted PDF text. */
+export function preprocessReceiptText(raw: string): string {
+	let cleaned = raw;
+	for (const pattern of RECEIPT_TEXT_NOISE_PATTERNS) {
+		cleaned = cleaned.replace(pattern, ' ');
+	}
+	return cleaned.replace(/\s+/g, ' ').trim();
+}
+
 function coerceReceiptName(value: unknown): string {
 	if (typeof value === 'string') {
 		return value.trim();
@@ -224,12 +243,13 @@ export async function parseReceiptFromImage(apiKey: string, imageDataUrl: string
 }
 
 export async function parseReceiptFromText(apiKey: string, receiptText: string) {
+	const cleaned = preprocessReceiptText(receiptText);
 	return requestReceiptStructuredJson(apiKey, {
 		systemPrompt: RECEIPT_SYSTEM_PROMPT,
 		userPrompt: [
 			'Lista matvaror från detta kvitto.',
 			'Kvittoinnehåll:',
-			receiptText.slice(0, 12_000)
+			cleaned.slice(0, 12_000)
 		].join('\n\n')
 	});
 }
