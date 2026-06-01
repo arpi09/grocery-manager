@@ -892,6 +892,7 @@
 		"portionsHint": "All recipes are scaled to this many servings.",
 		"generateBtn": "Generate recipes",
 		"addMissingBtn": "Add missing to shopping list",
+		"addMissingBtnShort": "Add to list ({count})",
 		"addMissingBtnCount": "Add {count} missing to shopping list",
 		"addAllMissingBtn": "Add all missing to shopping list ({count})",
 		"addMissingSuccess": "{count} {count, plural, one {item added} other {items added}} to the shopping list.",

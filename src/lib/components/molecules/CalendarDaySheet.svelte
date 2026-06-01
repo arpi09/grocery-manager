@@ -2,6 +2,7 @@
 	import { t, getLocale } from '$lib/i18n';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
@@ -10,7 +11,8 @@
 	import {
 		addMissingIngredientsToList,
 		dedupeMissingIngredients,
-		formatAddMissingFeedback
+		presentAddMissingFeedback,
+		type AddMissingFeedbackTone
 	} from '$lib/utils/recipe-add-missing';
 
 	interface DayData {
@@ -33,6 +35,7 @@
 	let expandedMealId = $state<string | null>(null);
 	let addingMissingKey = $state<string | null>(null);
 	let toastMessage = $state<string | null>(null);
+	let feedbackBanner = $state<{ message: string; tone: AddMissingFeedbackTone } | null>(null);
 
 	$effect(() => {
 		if (!open) {
@@ -65,26 +68,34 @@
 		return ideasById[meal.ideaId] ?? null;
 	}
 
+	function showAddMissingResult(result: Awaited<ReturnType<typeof addMissingIngredientsToList>>) {
+		const presented = presentAddMissingFeedback(getLocale(), result);
+		toastMessage = presented.message;
+		feedbackBanner = presented;
+	}
+
 	async function addAllMissingForDay() {
 		if (!canEdit || dayMissingIngredients.length === 0) {
 			return;
 		}
 
 		addingMissingKey = '__all__';
-		const result = await addMissingIngredientsToList(dayMissingIngredients);
-		toastMessage = formatAddMissingFeedback(getLocale(), result);
+		feedbackBanner = null;
+		showAddMissingResult(await addMissingIngredientsToList(dayMissingIngredients));
 		addingMissingKey = null;
 	}
 
-	async function addMissingFromMeal(meal: PlannedMeal) {
+	async function addMissingFromMeal(meal: PlannedMeal, event?: MouseEvent) {
+		event?.preventDefault();
+		event?.stopPropagation();
 		const idea = linkedIdea(meal);
 		if (!canEdit || !idea || idea.missingIngredients.length === 0) {
 			return;
 		}
 
 		addingMissingKey = meal.id;
-		const result = await addMissingIngredientsToList(idea.missingIngredients);
-		toastMessage = formatAddMissingFeedback(getLocale(), result);
+		feedbackBanner = null;
+		showAddMissingResult(await addMissingIngredientsToList(idea.missingIngredients));
 		addingMissingKey = null;
 	}
 
@@ -124,6 +135,9 @@
 		{#if day.meals.length === 0}
 			<p class="empty">{t('planer.emptyDay')}</p>
 		{:else}
+			{#if feedbackBanner}
+				<FeedbackBanner tone={feedbackBanner.tone} message={feedbackBanner.message} />
+			{/if}
 			{#if canEdit && dayMissingIngredients.length > 0}
 				<div class="day-batch-action">
 					<Button
@@ -139,51 +153,49 @@
 			{/if}
 			<ul class="meal-list">
 				{#each day.meals as meal (meal.id)}
+					{@const idea = linkedIdea(meal)}
 					<li class="meal-card" class:expanded={expandedMealId === meal.id}>
-						<button
-							type="button"
-							class="meal-summary"
-							aria-expanded={expandedMealId === meal.id}
-							onclick={() => toggleMeal(meal.id)}
-						>
-							<span
-								class="source-dot"
-								class:source-dot-idea={mealSourceVariant(meal.ideaId) === 'idea'}
-								aria-hidden="true"
-							></span>
-							<span class="meal-title">{meal.title}</span>
-							<span class="chevron" aria-hidden="true">{expandedMealId === meal.id ? '−' : '+'}</span>
-						</button>
+						<div class="meal-summary-row">
+							<button
+								type="button"
+								class="meal-summary"
+								aria-expanded={expandedMealId === meal.id}
+								onclick={() => toggleMeal(meal.id)}
+							>
+								<span
+									class="source-dot"
+									class:source-dot-idea={mealSourceVariant(meal.ideaId) === 'idea'}
+									aria-hidden="true"
+								></span>
+								<span class="meal-title">{meal.title}</span>
+								<span class="chevron" aria-hidden="true">{expandedMealId === meal.id ? '−' : '+'}</span>
+							</button>
+							{#if canEdit && idea && idea.missingIngredients.length > 0}
+								<Button
+									type="button"
+									variant="secondary"
+									class="summary-add-btn"
+									loading={addingMissingKey === meal.id}
+									loadingLabel={t('common.loading')}
+									onclick={(event) => addMissingFromMeal(meal, event)}
+								>
+									{t('recipe.addMissingBtnShort', { count: idea.missingIngredients.length })}
+								</Button>
+							{/if}
+						</div>
 
 						{#if expandedMealId === meal.id}
 							<div class="meal-detail">
-								{#if linkedIdea(meal)}
-									{@const idea = linkedIdea(meal)!}
+								{#if idea}
 									<div class="idea-ingredients">
 										<p>
 											<strong>{t('planer.usesLabel')}</strong>
 											{idea.ingredientsToUse.join(', ')}
 										</p>
-										<div class="missing-row">
-											<p class="missing-text">
-												<strong>{t('planer.missingLabel')}</strong>
-												{idea.missingIngredients.join(', ') || t('common.none')}
-											</p>
-											{#if canEdit && idea.missingIngredients.length > 0}
-												<Button
-													type="button"
-													variant="secondary"
-													loading={addingMissingKey === meal.id}
-													loadingLabel={t('common.loading')}
-													onclick={() => addMissingFromMeal(meal)}
-													fullWidth
-												>
-													{t('recipe.addMissingBtnCount', {
-														count: idea.missingIngredients.length
-													})}
-												</Button>
-											{/if}
-										</div>
+										<p class="missing-text">
+											<strong>{t('planer.missingLabel')}</strong>
+											{idea.missingIngredients.join(', ') || t('common.none')}
+										</p>
 									</div>
 								{/if}
 								<form method="POST" action="?/update" class="edit-form">
@@ -293,11 +305,19 @@
 		overflow: hidden;
 	}
 
+	.meal-summary-row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-xs);
+		padding-right: var(--space-sm);
+	}
+
 	.meal-summary {
 		display: flex;
 		align-items: center;
 		gap: var(--space-sm);
-		width: 100%;
+		flex: 1;
+		min-width: 0;
 		min-height: 2.75rem;
 		padding: var(--space-sm) var(--space-md);
 		border: none;
@@ -306,6 +326,13 @@
 		text-align: left;
 		color: inherit;
 		font-weight: 600;
+	}
+
+	.meal-summary-row :global(.summary-add-btn) {
+		flex-shrink: 0;
+		font-size: 0.75rem;
+		padding: 0.35rem 0.5rem;
+		min-height: 2rem;
 	}
 
 	.source-dot {
@@ -352,12 +379,6 @@
 	.idea-ingredients p {
 		margin: 0;
 		font-size: 0.84rem;
-	}
-
-	.missing-row {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
 	}
 
 	.missing-text {

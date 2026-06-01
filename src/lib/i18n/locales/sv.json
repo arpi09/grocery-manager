@@ -893,6 +893,7 @@
 		"portionsHint": "Alla recept skalas till detta antal portioner.",
 		"generateBtn": "Generera recept",
 		"addMissingBtn": "Lägg saknade på inköpslista",
+		"addMissingBtnShort": "Lägg på lista ({count})",
 		"addMissingBtnCount": "Lägg {count} saknade på inköpslista",
 		"addAllMissingBtn": "Lägg alla saknade på inköpslista ({count})",
 		"addMissingSuccess": "{count} {count, plural, one {vara lades} other {varor lades}} till på inköpslistan.",

@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import { fetchMealPlanIdeas } from '$lib/client/planer-data';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
@@ -10,7 +11,8 @@
 	import {
 		addMissingIngredientsToList,
 		dedupeMissingIngredients,
-		formatAddMissingFeedback
+		presentAddMissingFeedback,
+		type AddMissingFeedbackTone
 	} from '$lib/utils/recipe-add-missing';
 
 	interface Props {
@@ -29,6 +31,7 @@
 	let loadError = $state(false);
 	let addingMissingKey = $state<string | null>(null);
 	let toastMessage = $state<string | null>(null);
+	let feedbackBanner = $state<{ message: string; tone: AddMissingFeedbackTone } | null>(null);
 
 	const allMissingIngredients = $derived(
 		dedupeMissingIngredients(ideas.map((idea) => idea.missingIngredients))
@@ -45,25 +48,33 @@
 		}
 	});
 
+	function showAddMissingResult(result: Awaited<ReturnType<typeof addMissingIngredientsToList>>) {
+		const presented = presentAddMissingFeedback(getLocale(), result);
+		toastMessage = presented.message;
+		feedbackBanner = presented;
+	}
+
 	async function addAllMissing() {
 		if (!canEdit || allMissingIngredients.length === 0) {
 			return;
 		}
 
 		addingMissingKey = '__all__';
-		const result = await addMissingIngredientsToList(allMissingIngredients);
-		toastMessage = formatAddMissingFeedback(getLocale(), result);
+		feedbackBanner = null;
+		showAddMissingResult(await addMissingIngredientsToList(allMissingIngredients));
 		addingMissingKey = null;
 	}
 
-	async function addMissingFromIdea(idea: RecipeIdea) {
+	async function addMissingFromIdea(idea: RecipeIdea, event?: MouseEvent) {
+		event?.preventDefault();
+		event?.stopPropagation();
 		if (!canEdit || idea.missingIngredients.length === 0) {
 			return;
 		}
 
 		addingMissingKey = idea.id;
-		const result = await addMissingIngredientsToList(idea.missingIngredients);
-		toastMessage = formatAddMissingFeedback(getLocale(), result);
+		feedbackBanner = null;
+		showAddMissingResult(await addMissingIngredientsToList(idea.missingIngredients));
 		addingMissingKey = null;
 	}
 
@@ -85,6 +96,9 @@
 	{:else if ideas.length === 0}
 		<p class="empty">{t('planer.ideasEmpty')}</p>
 	{:else}
+		{#if feedbackBanner}
+			<FeedbackBanner tone={feedbackBanner.tone} message={feedbackBanner.message} />
+		{/if}
 		{#if canEdit && allMissingIngredients.length > 0}
 			<div class="batch-action">
 				<Button
@@ -101,26 +115,27 @@
 		<div class="idea-list">
 			{#each ideas as idea (idea.id)}
 				<details class="idea-item">
-					<summary>{idea.title}</summary>
-					<p>{idea.whyItFits}</p>
-					<p><strong>{t('planer.usesLabel')}</strong> {idea.ingredientsToUse.join(', ')}</p>
-					<div class="missing-row">
-						<p class="missing-text">
-							<strong>{t('planer.missingLabel')}</strong>
-							{idea.missingIngredients.join(', ') || t('common.none')}
-						</p>
+					<summary class="idea-summary">
+						<span class="idea-title">{idea.title}</span>
 						{#if canEdit && idea.missingIngredients.length > 0}
 							<Button
 								type="button"
 								variant="secondary"
+								class="summary-add-btn"
 								loading={addingMissingKey === idea.id}
 								loadingLabel={t('common.loading')}
-								onclick={() => addMissingFromIdea(idea)}
+								onclick={(event) => addMissingFromIdea(idea, event)}
 							>
-								{t('recipe.addMissingBtnCount', { count: idea.missingIngredients.length })}
+								{t('recipe.addMissingBtnShort', { count: idea.missingIngredients.length })}
 							</Button>
 						{/if}
-					</div>
+					</summary>
+					<p>{idea.whyItFits}</p>
+					<p><strong>{t('planer.usesLabel')}</strong> {idea.ingredientsToUse.join(', ')}</p>
+					<p class="missing-text">
+						<strong>{t('planer.missingLabel')}</strong>
+						{idea.missingIngredients.join(', ') || t('common.none')}
+					</p>
 					<ol>
 						{#each idea.steps as step}
 							<li>{step}</li>
@@ -189,13 +204,27 @@
 		background: var(--color-surface-muted);
 	}
 
-	.idea-item summary {
+	.idea-summary {
 		cursor: pointer;
 		font-weight: 700;
 		font-size: 0.92rem;
 		min-height: 2.75rem;
 		display: flex;
 		align-items: center;
+		gap: var(--space-sm);
+		list-style: none;
+	}
+
+	.idea-title {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.idea-summary :global(.summary-add-btn) {
+		flex-shrink: 0;
+		font-size: 0.78rem;
+		padding: 0.35rem 0.55rem;
+		min-height: 2rem;
 	}
 
 	.idea-item p {
@@ -203,15 +232,8 @@
 		font-size: 0.85rem;
 	}
 
-	.missing-row {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-		margin: var(--space-xs) 0;
-	}
-
 	.missing-text {
-		margin: 0;
+		margin: var(--space-xs) 0;
 		font-size: 0.85rem;
 	}
 

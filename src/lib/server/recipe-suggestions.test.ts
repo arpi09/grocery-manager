@@ -39,4 +39,21 @@ describe('parseRecipeSuggestions', () => {
 		expect(parseRecipeSuggestions(null)).toEqual([]);
 		expect(parseRecipeSuggestions({ recipes: 'nope' })).toEqual([]);
 	});
+
+	it('rejects recipes with hallucinated extra fields', () => {
+		expect(
+			parseRecipeSuggestions({
+				recipes: [
+					{
+						title: 'Pasta',
+						whyItFits: 'Tomater',
+						ingredientsToUse: ['pasta'],
+						missingIngredients: [],
+						steps: ['Koka'],
+						hallucinatedPantryItem: 'Kycklingfilé'
+					}
+				]
+			})
+		).toHaveLength(0);
+	});
 });

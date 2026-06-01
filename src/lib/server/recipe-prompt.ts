@@ -34,7 +34,7 @@ export function formatRecipeInventoryLines(items: InventoryItem[]): string {
 			const unit = item.unit ? ` ${item.unit}` : '';
 			const expires = item.expiresOn ? `, utgår ${item.expiresOn}` : '';
 			const notes = item.notes ? ` (anteckning: ${item.notes})` : '';
-			return `- ${item.name}: ${item.quantity}${unit} i ${item.location}${expires}${notes}`;
+			return `- [${item.id}] ${item.name}: ${item.quantity}${unit} i ${item.location}${expires}${notes}`;
 		})
 		.join('\n');
 }
@@ -43,9 +43,13 @@ export function buildRecipeSystemPrompt(portions: number): string {
 	return [
 		'Du är en praktisk svensk matlagningsassistent för hemmet.',
 		`Skapa upp till 4 recept för exakt ${portions} portioner.`,
-		'Använd ENDAST varor från lagret nedan — hitta inte på varor som inte listas.',
-		'Fältet ingredientsToUse får bara innehålla exakta varunamn från lagerlistan (samma stavning).',
+		'Lagerlistan (med [id] och varunamn) är den ENDA tillåtna källan för huvudingredienser.',
+		'Hitta ALDRIG på varor, varumärken eller ingredienser som inte finns i lagerlistan.',
+		'Fältet ingredientsToUse får bara innehålla exakta varunamn från lagerlistan (kopiera tecken för tecken, utan [id]).',
+		'Om en ingrediens inte finns i lagret: lägg den INTE i ingredientsToUse — använd missingIngredients eller utelämna.',
 		'missingIngredients är endast för små tillbehör som inte finns i lagret (kryddor, olja, citron osv.) — aldrig huvudingredienser som redan finns i lagret.',
+		'Vid osäkerhet om exakt varunamn: välj närmaste listade namn eller utelämna — gissa inte och skriv inte "okänd" i ingredientsToUse.',
+		`Skala alla mängder i steps linjärt för exakt ${portions} portioner (inga fasta "4 portioner" om portions skiljer sig).`,
 		'Prioritera varor med utgångsdatum och minska matsvinn.',
 		'All text ska vara på svenska (sv-SE): title, whyItFits, ingredientsToUse, missingIngredients, steps.',
 		'Varje recept ska innehålla:',
@@ -77,14 +81,25 @@ export function buildRecipeUserPrompt(
 }
 
 export function ingredientMatchesInventory(ingredient: string, inventoryNames: string[]): boolean {
+	return resolveIngredientToInventoryName(ingredient, inventoryNames) !== null;
+}
+
+/** Map model ingredient text to the canonical inventory name, or null if not in stock. */
+export function resolveIngredientToInventoryName(
+	ingredient: string,
+	inventoryNames: string[]
+): string | null {
 	const norm = normalizeIngredientName(ingredient);
 	if (!norm) {
-		return false;
+		return null;
 	}
-	return inventoryNames.some((name) => {
+	for (const name of inventoryNames) {
 		const inv = normalizeIngredientName(name);
-		return inv === norm || inv.includes(norm) || norm.includes(inv);
-	});
+		if (inv === norm || inv.includes(norm) || norm.includes(inv)) {
+			return name.trim();
+		}
+	}
+	return null;
 }
 
 export function sanitizeRecipeAgainstInventory(
@@ -106,8 +121,11 @@ export function sanitizeRecipeAgainstInventory(
 		if (!trimmed) {
 			continue;
 		}
-		if (ingredientMatchesInventory(trimmed, inventoryNames)) {
-			ingredientsToUse.push(trimmed);
+		const canonical = resolveIngredientToInventoryName(trimmed, inventoryNames);
+		if (canonical) {
+			if (!ingredientsToUse.includes(canonical)) {
+				ingredientsToUse.push(canonical);
+			}
 		} else {
 			missingSet.add(trimmed);
 		}

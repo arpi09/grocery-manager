@@ -9,6 +9,7 @@ import {
 	inventoryNameList,
 	missingIngredientToListItem,
 	parseMissingIngredientsPayload,
+	resolveIngredientToInventoryName,
 	sanitizeRecipeAgainstInventory,
 	sanitizeRecipesAgainstInventory
 } from './recipe-prompt';
@@ -44,10 +45,23 @@ describe('clampRecipePortions', () => {
 });
 
 describe('formatRecipeInventoryLines', () => {
-	it('formats Swedish inventory lines with expiry', () => {
-		const lines = formatRecipeInventoryLines([makeItem()]);
-		expect(lines).toContain('Mjölk: 1 l i fridge');
+	it('formats Swedish inventory lines with id and expiry', () => {
+		const lines = formatRecipeInventoryLines([makeItem({ id: 'inv-mjolk-1' })]);
+		expect(lines).toContain('[inv-mjolk-1] Mjölk: 1 l i fridge');
 		expect(lines).toContain('utgår 2026-06-01');
+	});
+
+	it('includes realistic Swedish product names and ids in prompt context', () => {
+		const items = [
+			makeItem({ id: 'inv-falukorv', name: 'Falukorv', quantity: '400', unit: 'g' }),
+			makeItem({ id: 'inv-creme', name: 'Crème fraîche 15%', quantity: '2', unit: 'dl' })
+		];
+		const lines = formatRecipeInventoryLines(items);
+		const user = buildRecipeUserPrompt(lines, 4, '');
+		expect(lines).toContain('[inv-falukorv] Falukorv');
+		expect(lines).toContain('[inv-creme] Crème fraîche 15%');
+		expect(user).toContain('Falukorv');
+		expect(user).toContain('enda tillåtna källor');
 	});
 
 	it('returns empty marker when no items', () => {
@@ -59,8 +73,10 @@ describe('buildRecipe prompts', () => {
 	it('includes portion count and strict inventory rules in system prompt', () => {
 		const prompt = buildRecipeSystemPrompt(6);
 		expect(prompt).toContain('6 portioner');
-		expect(prompt).toContain('ENDAST varor från lagret');
+		expect(prompt).toContain('ENDA tillåtna källan');
+		expect(prompt).toContain('Hitta ALDRIG på varor');
 		expect(prompt).toContain('exakta varunamn');
+		expect(prompt).toContain('linjärt');
 	});
 
 	it('includes portions and preferences in user prompt', () => {
@@ -72,7 +88,7 @@ describe('buildRecipe prompts', () => {
 });
 
 describe('ingredientMatchesInventory', () => {
-	const names = ['Mjölk', 'Ägg'];
+	const names = ['Mjölk', 'Ägg', 'Falukorv'];
 
 	it('matches exact and partial names', () => {
 		expect(ingredientMatchesInventory('mjölk', names)).toBe(true);
@@ -81,6 +97,11 @@ describe('ingredientMatchesInventory', () => {
 
 	it('rejects unknown ingredients', () => {
 		expect(ingredientMatchesInventory('basilika', names)).toBe(false);
+	});
+
+	it('resolves to canonical inventory spelling', () => {
+		expect(resolveIngredientToInventoryName('falukorv', names)).toBe('Falukorv');
+		expect(resolveIngredientToInventoryName('Kycklingfilé', names)).toBeNull();
 	});
 });
 
@@ -102,6 +123,26 @@ describe('sanitizeRecipeAgainstInventory', () => {
 		expect(sanitized?.ingredientsToUse).toEqual(['Pasta']);
 		expect(sanitized?.missingIngredients).toContain('Basilika');
 		expect(sanitized?.missingIngredients).toContain('Olivolja');
+	});
+
+	it('maps fuzzy stock names to canonical inventory labels', () => {
+		const inventory = inventoryNameList([
+			makeItem({ name: 'Falukorv' }),
+			makeItem({ name: 'Matlagningsgrädde 15%' })
+		]);
+		const sanitized = sanitizeRecipeAgainstInventory(
+			{
+				title: 'Korvstroganoff',
+				whyItFits: 'Passar lagret',
+				ingredientsToUse: ['falukorv', 'Matlagningsgrädde', 'Lök'],
+				missingIngredients: [],
+				steps: ['Stek korv']
+			},
+			inventory
+		);
+
+		expect(sanitized?.ingredientsToUse).toEqual(['Falukorv', 'Matlagningsgrädde 15%']);
+		expect(sanitized?.missingIngredients).toContain('Lök');
 	});
 
 	it('drops recipes with no valid inventory ingredients', () => {

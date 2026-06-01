@@ -94,3 +94,26 @@ export function formatAddMissingFeedback(locale: Locale, result: AddMissingApiRe
 	}
 	return translate(locale, 'recipe.addMissingSuccess', { count: added });
 }
+
+export type AddMissingFeedbackTone = 'success' | 'warning' | 'error';
+
+export function addMissingFeedbackTone(result: AddMissingApiResult): AddMissingFeedbackTone {
+	if (!result.ok) {
+		return 'error';
+	}
+	if (result.added === 0 && result.skipped > 0) {
+		return 'warning';
+	}
+	return 'success';
+}
+
+/** Toast text plus inline banner tone for panels/modals. */
+export function presentAddMissingFeedback(
+	locale: Locale,
+	result: AddMissingApiResult
+): { message: string; tone: AddMissingFeedbackTone } {
+	return {
+		message: formatAddMissingFeedback(locale, result),
+		tone: addMissingFeedbackTone(result)
+	};
+}

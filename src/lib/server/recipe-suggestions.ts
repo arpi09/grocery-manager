@@ -6,6 +6,14 @@ export interface RecipeSuggestion {
 	steps: string[];
 }
 
+const RECIPE_OBJECT_KEYS = new Set([
+	'title',
+	'whyItFits',
+	'ingredientsToUse',
+	'missingIngredients',
+	'steps'
+]);
+
 export const RECIPE_SUGGESTIONS_SCHEMA = {
 	type: 'object',
 	properties: {
@@ -55,6 +63,9 @@ export function parseRecipeSuggestions(input: unknown): RecipeSuggestion[] {
 			}
 
 			const candidate = recipe as Record<string, unknown>;
+			if (Object.keys(candidate).some((key) => !RECIPE_OBJECT_KEYS.has(key))) {
+				return null;
+			}
 			const title = typeof candidate.title === 'string' ? candidate.title.trim() : '';
 			const whyItFits =
 				typeof candidate.whyItFits === 'string' ? candidate.whyItFits.trim() : '';

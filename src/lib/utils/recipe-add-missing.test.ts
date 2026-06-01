@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	dedupeMissingIngredients,
 	formatAddMissingFeedback,
+	presentAddMissingFeedback,
 	type AddMissingApiResult
 } from './recipe-add-missing';
 
@@ -40,5 +41,18 @@ describe('formatAddMissingFeedback', () => {
 		expect(formatAddMissingFeedback('sv', { ok: false, added: 0, skipped: 0 })).toContain(
 			'Kunde inte'
 		);
+	});
+});
+
+describe('presentAddMissingFeedback', () => {
+	it('returns success tone when items were added', () => {
+		const presented = presentAddMissingFeedback('sv', { ok: true, added: 2, skipped: 0 });
+		expect(presented.tone).toBe('success');
+		expect(presented.message).toContain('2');
+	});
+
+	it('returns warning tone when everything was already on the list', () => {
+		const presented = presentAddMissingFeedback('en', { ok: true, added: 0, skipped: 3 });
+		expect(presented.tone).toBe('warning');
 	});
 });

@@ -8,7 +8,8 @@
 	import {
 		addMissingIngredientsToList,
 		dedupeMissingIngredients,
-		formatAddMissingFeedback
+		presentAddMissingFeedback,
+		type AddMissingFeedbackTone
 	} from '$lib/utils/recipe-add-missing';
 
 	interface RecipeSuggestion {
@@ -33,6 +34,7 @@
 	let note = $state<string | null>(null);
 	let addingMissingKey = $state<string | null>(null);
 	let toastMessage = $state<string | null>(null);
+	let feedbackBanner = $state<{ message: string; tone: AddMissingFeedbackTone } | null>(null);
 
 	const allMissingIngredients = $derived(
 		dedupeMissingIngredients(recipes.map((recipe) => recipe.missingIngredients))
@@ -62,6 +64,7 @@
 		errorMessage = null;
 		note = null;
 		toastMessage = null;
+		feedbackBanner = null;
 
 		try {
 			const response = await fetch('/api/recipes', {
@@ -108,9 +111,14 @@
 
 		addingMissingKey = actionKey;
 		errorMessage = null;
+		feedbackBanner = null;
 
-		const result = await addMissingIngredientsToList(ingredients);
-		toastMessage = formatAddMissingFeedback(getLocale(), result);
+		const presented = presentAddMissingFeedback(
+			getLocale(),
+			await addMissingIngredientsToList(ingredients)
+		);
+		toastMessage = presented.message;
+		feedbackBanner = presented;
 		addingMissingKey = null;
 	}
 
@@ -178,6 +186,9 @@
 	{/if}
 
 	{#if recipes.length > 0}
+		{#if feedbackBanner}
+			<FeedbackBanner tone={feedbackBanner.tone} message={feedbackBanner.message} />
+		{/if}
 		{#if canEdit && allMissingIngredients.length > 0}
 			<div class="batch-action">
 				<Button
@@ -195,26 +206,27 @@
 		<div class="result-list">
 			{#each recipes as recipe}
 				<section class="recipe">
-					<h3>{recipe.title}</h3>
-					<p class="why">{recipe.whyItFits}</p>
-					<p><strong>{t('recipe.fromStock')}</strong> {recipe.ingredientsToUse.join(', ')}</p>
-					<div class="missing-row">
-						<p class="missing-text">
-							<strong>{t('planer.missingLabel')}</strong>
-							{recipe.missingIngredients.join(', ') || t('common.none')}
-						</p>
+					<div class="recipe-header">
+						<h3>{recipe.title}</h3>
 						{#if canEdit && recipe.missingIngredients.length > 0}
 							<Button
 								type="button"
 								variant="secondary"
+								class="recipe-add-btn"
 								loading={addingMissingKey === recipe.title}
 								loadingLabel={t('common.loading')}
 								onclick={() => addRecipeMissing(recipe)}
 							>
-								{t('recipe.addMissingBtnCount', { count: recipe.missingIngredients.length })}
+								{t('recipe.addMissingBtnShort', { count: recipe.missingIngredients.length })}
 							</Button>
 						{/if}
 					</div>
+					<p class="why">{recipe.whyItFits}</p>
+					<p><strong>{t('recipe.fromStock')}</strong> {recipe.ingredientsToUse.join(', ')}</p>
+					<p class="missing-text">
+						<strong>{t('planer.missingLabel')}</strong>
+						{recipe.missingIngredients.join(', ') || t('common.none')}
+					</p>
 					<ol>
 						{#each recipe.steps as step}
 							<li>{step}</li>
@@ -298,8 +310,22 @@
 		background: var(--color-surface-muted);
 	}
 
+	.recipe-header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--space-sm);
+		margin-bottom: var(--space-xs);
+	}
+
 	h3 {
-		margin: 0 0 var(--space-xs);
+		margin: 0;
+		flex: 1;
+		min-width: 0;
+	}
+
+	.recipe-header :global(.recipe-add-btn) {
+		flex-shrink: 0;
 	}
 
 	.why {
@@ -307,27 +333,8 @@
 		color: var(--color-text-muted);
 	}
 
-	.missing-row {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-		margin: var(--space-xs) 0 var(--space-sm);
-	}
-
 	.missing-text {
-		margin: 0;
-	}
-
-	@media (min-width: 520px) {
-		.missing-row {
-			flex-direction: row;
-			align-items: flex-start;
-			justify-content: space-between;
-		}
-
-		.missing-row :global(.btn) {
-			flex-shrink: 0;
-		}
+		margin: var(--space-xs) 0 var(--space-sm);
 	}
 
 	ol {
