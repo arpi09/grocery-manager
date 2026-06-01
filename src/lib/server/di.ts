@@ -31,6 +31,7 @@ import { DrizzleWaitlistRepository } from '$lib/infrastructure/repositories/wait
 import { WaitlistService } from '$lib/application/waitlist.service';
 import { DrizzleAppSettingsRepository } from '$lib/infrastructure/repositories/app-settings.repository';
 import { AppSettingsService } from '$lib/application/app-settings.service';
+import { PmfDigestService } from '$lib/application/pmf-digest.service';
 
 const userRepository = new DrizzleUserRepository();
 const errorLogRepository = new DrizzleErrorLogRepository();
@@ -70,3 +71,8 @@ export const aiUsageAdminService = new AiUsageAdminService(aiUsageRepository);
 export const planLimitsService = new PlanLimitsService(planLimitsRepository, aiRateLimitService);
 export const waitlistService = new WaitlistService(waitlistRepository);
 export const appSettingsService = new AppSettingsService(appSettingsRepository);
+export const pmfDigestService = new PmfDigestService(
+	pmfService,
+	adminService,
+	waitlistService
+);

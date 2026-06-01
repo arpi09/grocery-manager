@@ -63,6 +63,45 @@ Spara kort: datum, metric, åtgärd. Uppdatera **Senaste snapshot** nedan vid be
 
 ---
 
+## Automation (veckomejl)
+
+Varje **måndag 08:00 UTC** kör GitHub Actions `pmf-weekly-cron.yml` → `POST /api/cron/pmf-weekly` mot prod (samma `CRON_SECRET` som utgångspåminnelser, en timme efter expiry-cron kl 07:00).
+
+Mejlet innehåller:
+
+- Hälsa (användare, hushåll, lager, fel, pro-waitlist)
+- Alla sju PMF-metrics vs mål + WoW-delta (samma beräkning som `/admin`)
+- **En** föreslagen åtgärd (första metric under mål enligt PMF-prioritet)
+- Länk till [`/admin`](https://skaffu.com/admin)
+
+### Miljövariabler (Firebase App Hosting)
+
+| Variabel | Syfte |
+|----------|--------|
+| `CRON_SECRET` | Secret — samma som expiry-cron |
+| `PMF_DIGEST_TO` | Mottagare (t.ex. `arvid.pilhall@me.com`) |
+| `RESEND_API_KEY` | Secret — redan satt |
+| `RESEND_FROM` | `Skaffu <hello@skaffu.com>` — redan satt |
+
+**Bypass:** PMF-digest använder `sendOwnerPmfDigest()` som **kringgår** `EMAIL_SENDING_DISABLED` och admin-reglaget — endast till adressen i `PMF_DIGEST_TO`. Användarinbjudningar påverkas inte.
+
+WoW-delta beräknas live (nu vs förra veckan) — ingen separat snapshot-lagring behövs; samma logik som PMF-panelen.
+
+### Manuell körning
+
+```powershell
+# GitHub → Actions → PMF weekly cron → Run workflow
+# Eller lokalt mot prod (CRON_SECRET + PRODUCTION_URL):
+curl -X POST -H "Authorization: Bearer $env:CRON_SECRET" https://skaffu.com/api/cron/pmf-weekly
+```
+
+### Första mejl
+
+- Kräver deploy med koden + `PMF_DIGEST_TO` i Firebase.
+- Första schemalagda körning: **nästa måndag 08:00 UTC** efter merge/deploy (eller kör `workflow_dispatch` direkt).
+
+---
+
 ## CLI-snapshot (valfritt)
 
 Om du har Cloud SQL `DATABASE_URL` i `.env` (read-only räcker):

@@ -27,6 +27,12 @@ export function getEmailFrom(): string {
 	return from || DEFAULT_FROM;
 }
 
+/** Owner PMF digest recipient — when set, cron digest bypasses EMAIL_SENDING_DISABLED. */
+export function getPmfDigestTo(): string | null {
+	const to = env.PMF_DIGEST_TO?.trim();
+	return to ? to : null;
+}
+
 export function missingResendKeyMessage(): string {
 	return 'RESEND_API_KEY saknas. Lägg till den i din .env (se .env.example).';
 }
@@ -541,6 +547,55 @@ export async function sendExpiryReminderEmail(options: {
 		html: content.html,
 		text: content.text
 	});
+}
+
+/**
+ * Owner PMF weekly digest — bypasses EMAIL_SENDING_DISABLED and admin email toggle.
+ * Only sends when PMF_DIGEST_TO is configured and matches `input.to` (cron-only path).
+ */
+export async function sendOwnerPmfDigest(input: SendEmailInput): Promise<SendEmailResult> {
+	const allowedTo = getPmfDigestTo();
+	if (!allowedTo) {
+		const reason = 'PMF_DIGEST_TO is not configured';
+		console.warn(`[email] ${reason}; skipped PMF digest`);
+		return { ok: false, reason };
+	}
+
+	if (input.to !== allowedTo) {
+		const reason = 'PMF digest recipient does not match PMF_DIGEST_TO';
+		console.warn(`[email] ${reason}; skipped send to ${input.to}`);
+		return { ok: false, reason };
+	}
+
+	const apiKey = getResendApiKey();
+	if (!apiKey) {
+		const reason = 'RESEND_API_KEY is not configured';
+		console.warn(`[email] ${reason}; skipped PMF digest to ${input.to}`);
+		return { ok: false, reason };
+	}
+
+	console.info(
+		`[email] Sending PMF digest to ${input.to} via Resend (bypasses EMAIL_SENDING_DISABLED)`
+	);
+	const resend = new Resend(apiKey);
+	const { data, error } = await resend.emails.send({
+		from: getEmailFrom(),
+		to: input.to,
+		subject: input.subject,
+		html: input.html,
+		text: input.text
+	});
+
+	if (error) {
+		const reason = resendErrorMessage(error);
+		const statusCode = resendErrorStatusCode(error);
+		const statusSuffix = statusCode ? ` (HTTP ${statusCode})` : '';
+		console.error(`[email] Failed to send PMF digest to ${input.to}: ${reason}${statusSuffix}`);
+		return { ok: false, reason, statusCode };
+	}
+
+	console.info(`[email] PMF digest sent to ${input.to}${data?.id ? ` (id: ${data.id})` : ''}`);
+	return { ok: true, id: data?.id };
 }
 
 function escapeHtml(value: string): string {

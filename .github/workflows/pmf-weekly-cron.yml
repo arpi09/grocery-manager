@@ -1,0 +1,45 @@
+# Weekly PMF digest email to owner (production only).
+# Runs after expiry-reminders-cron (Monday 08:00 UTC vs 07:00 UTC).
+#
+# GitHub: secret CRON_SECRET, variable PRODUCTION_URL (https://skaffu.com)
+# Firebase: CRON_SECRET + PMF_DIGEST_TO + RESEND_API_KEY — see docs/PMF_WEEKLY.md
+
+name: PMF weekly cron
+
+on:
+  schedule:
+    # Monday 08:00 UTC (after expiry reminders at 07:00)
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+jobs:
+  pmf-weekly:
+    name: pmf-weekly
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: POST /api/cron/pmf-weekly
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "::error::GitHub secret CRON_SECRET is not set."
+            exit 1
+          fi
+          if [ -z "${PRODUCTION_URL:-}" ]; then
+            echo "::error::GitHub repository variable PRODUCTION_URL is not set (e.g. https://skaffu.com)."
+            exit 1
+          fi
+
+          base="${PRODUCTION_URL%/}"
+          url="${base}/api/cron/pmf-weekly"
+          echo "POST ${url}"
+
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Accept: application/json" \
+            "${url}"

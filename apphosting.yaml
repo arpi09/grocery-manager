@@ -114,6 +114,12 @@ env:
     availability:
       - RUNTIME
 
+  # Owner PMF weekly digest — bypasses EMAIL_SENDING_DISABLED when cron calls sendOwnerPmfDigest
+  - variable: PMF_DIGEST_TO
+    value: arvid.pilhall@me.com
+    availability:
+      - RUNTIME
+
   # Cloudflare Turnstile site key (public) — must match a widget whose hostnames include
   # Widget hostnames: localhost + hosted.app (+ skaffu.com after domain live); see docs/CAPTCHA.md
   - variable: PUBLIC_TURNSTILE_SITE_KEY

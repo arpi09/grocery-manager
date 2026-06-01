@@ -4,6 +4,7 @@ Home Pantry sends transactional email via [Resend](https://resend.com):
 
 - **Household invites** when an owner invites someone by email
 - **Expiry reminders** (weekly cron) for users who opt in under Settings
+- **PMF weekly digest** (Monday cron) to owner — see [PMF_WEEKLY.md](./PMF_WEEKLY.md#automation)
 
 ## Global kill switch (default: off)
 
@@ -17,6 +18,8 @@ Outbound email is **disabled by default**. Nothing is sent via Resend until an a
 Both must allow sending: admin toggle **on** and `EMAIL_SENDING_DISABLED` **not** set to `true`.
 
 When disabled, `sendEmail` returns early (warn log only). Invites still work — copy the invite link from Settings. Expiry reminder cron does not fail loudly; push notifications still deliver if enabled.
+
+**Exception:** `sendOwnerPmfDigest()` (PMF weekly cron) bypasses the kill switch when `PMF_DIGEST_TO` is set — owner digest only, not user invites. Requires `RESEND_API_KEY` and verified `RESEND_FROM` (`hello@skaffu.com`).
 
 After verifying a custom domain in Resend:
 

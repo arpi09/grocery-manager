@@ -4,7 +4,8 @@ const { mockEnv, mockSend, mockIsEmailSendingEnabled } = vi.hoisted(() => ({
 	mockEnv: {
 		RESEND_API_KEY: undefined as string | undefined,
 		RESEND_FROM: undefined as string | undefined,
-		EMAIL_SENDING_DISABLED: undefined as string | undefined
+		EMAIL_SENDING_DISABLED: undefined as string | undefined,
+		PMF_DIGEST_TO: undefined as string | undefined
 	},
 	mockSend: vi.fn(),
 	mockIsEmailSendingEnabled: vi.fn().mockResolvedValue(true)
@@ -35,6 +36,8 @@ import {
 	missingResendKeyMessage,
 	sendEmail,
 	sendHouseholdInviteEmail,
+	sendOwnerPmfDigest,
+	getPmfDigestTo,
 	EMAIL_SENDING_DISABLED_REASON
 } from './email';
 
@@ -223,5 +226,61 @@ describe('householdInviteEmailWarning', () => {
 		expect(warning).toContain('Domain not verified');
 
 		process.env.NODE_ENV = previousNodeEnv;
+	});
+});
+
+describe('sendOwnerPmfDigest', () => {
+	beforeEach(() => {
+		mockSend.mockClear();
+		mockEnv.RESEND_API_KEY = 're_test';
+		mockEnv.RESEND_FROM = 'Skaffu <hello@skaffu.com>';
+		mockEnv.EMAIL_SENDING_DISABLED = 'true';
+		mockEnv.PMF_DIGEST_TO = 'owner@example.com';
+		mockIsEmailSendingEnabled.mockResolvedValue(false);
+		mockSend.mockResolvedValue({ data: { id: 'pmf-digest-id' }, error: null });
+	});
+
+	it('sends even when EMAIL_SENDING_DISABLED and admin toggle are off', async () => {
+		const result = await sendOwnerPmfDigest({
+			to: 'owner@example.com',
+			subject: 'PMF test',
+			html: '<p>test</p>',
+			text: 'test'
+		});
+
+		expect(result).toEqual({ ok: true, id: 'pmf-digest-id' });
+		expect(mockSend).toHaveBeenCalledWith(
+			expect.objectContaining({
+				from: 'Skaffu <hello@skaffu.com>',
+				to: 'owner@example.com'
+			})
+		);
+	});
+
+	it('rejects recipient that does not match PMF_DIGEST_TO', async () => {
+		const result = await sendOwnerPmfDigest({
+			to: 'other@example.com',
+			subject: 'PMF test',
+			html: '<p>test</p>',
+			text: 'test'
+		});
+
+		expect(result.ok).toBe(false);
+		expect(mockSend).not.toHaveBeenCalled();
+	});
+
+	it('no-ops when PMF_DIGEST_TO is unset', async () => {
+		mockEnv.PMF_DIGEST_TO = undefined;
+		expect(getPmfDigestTo()).toBeNull();
+
+		const result = await sendOwnerPmfDigest({
+			to: 'owner@example.com',
+			subject: 'PMF test',
+			html: '<p>test</p>',
+			text: 'test'
+		});
+
+		expect(result.ok).toBe(false);
+		expect(mockSend).not.toHaveBeenCalled();
 	});
 });
