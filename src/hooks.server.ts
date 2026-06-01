@@ -44,7 +44,8 @@ function isPublicPath(pathname: string): boolean {
 		isInvitePath(pathname) ||
 		isMarketingPath(pathname) ||
 		pathname.startsWith('/api/health') ||
-		pathname.startsWith('/api/cron/')
+		pathname.startsWith('/api/cron/') ||
+		pathname === '/api/push/vapid-public-key'
 	);
 }
 
