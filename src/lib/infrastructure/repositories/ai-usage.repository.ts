@@ -22,6 +22,7 @@ export interface AdminAiUsageSummaryInput {
 	monthStart: Date;
 	monthKey: string;
 	topLimit?: number;
+	periodDays?: number;
 }
 
 export interface IAiUsageRepository {
@@ -126,7 +127,7 @@ export class DrizzleAiUsageRepository implements IAiUsageRepository {
 		}
 
 		return {
-			periodDays: ADMIN_AI_USAGE_PERIOD_DAYS,
+			periodDays: input.periodDays ?? ADMIN_AI_USAGE_PERIOD_DAYS,
 			byKind,
 			monthlyByKind,
 			topHouseholdCounts: topRows.map((row) => row.total),

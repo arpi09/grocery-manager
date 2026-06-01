@@ -97,6 +97,7 @@
 			"submit": "Logga in",
 			"submitting": "Loggar in…",
 			"pageTitle": "Logga in · Skaffu",
+			"metaDescription": "Logga in på Skaffu — skafferi-app för kyl, frys och inköp. Minska matsvinn med smart lagerhållning och utgångsdatum.",
 			"newHere": "Ny här?",
 			"createAccount": "Skapa konto"
 		},
@@ -639,6 +640,7 @@
 			"aria": "Adminavsnitt",
 			"overview": "Översikt",
 			"analytics": "Analys",
+			"aiUsage": "AI-användning",
 			"feedback": "Feedback & waitlist"
 		},
 		"sessionManagement": "Sessionshantering",
@@ -704,7 +706,17 @@
 			"budgetNearLimit": "Nära månadstak.",
 			"budgetExceeded": "Månadstak nått — nya AI-anrop blockeras tills nästa månad.",
 			"periodDays": "Senaste {days} dagarna",
-			"topHouseholdsTitle": "Topp-hushåll (30 dagar)",
+			"periodToggle": "Välj tidsperiod",
+			"periodOption": "{days} dagar",
+			"monthlyKind": "{count} denna månad",
+			"rateLimitsTitle": "Free-gränser (rate limits)",
+			"rateLimitsNote": "Per hushåll enligt AiRateLimitService — kompletterar aggregerad användning ovan.",
+			"rateLimitValue": "max {limit} / {period}",
+			"periods": {
+				"month": "månad",
+				"week": "vecka"
+			},
+			"topHouseholdsTitle": "Topp-hushåll ({days} dagar)",
 			"topHouseholdsNote": "Rankat efter totala AI-anrop. Hushållsidentitet visas inte.",
 			"rank": "#{rank}",
 			"usageCount": "{count} anrop",

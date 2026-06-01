@@ -97,6 +97,7 @@
 			"submit": "Log in",
 			"submitting": "Logging in…",
 			"pageTitle": "Log in · Skaffu",
+			"metaDescription": "Log in to Skaffu — pantry app for fridge, freezer and shopping. Reduce food waste with smart inventory and expiry tracking.",
 			"newHere": "New here?",
 			"createAccount": "Create account"
 		},
@@ -638,6 +639,7 @@
 			"aria": "Admin sections",
 			"overview": "Overview",
 			"analytics": "Analytics",
+			"aiUsage": "AI usage",
 			"feedback": "Feedback & waitlist"
 		},
 		"sessionManagement": "Session management",
@@ -703,7 +705,17 @@
 			"budgetNearLimit": "Near monthly cap.",
 			"budgetExceeded": "Monthly cap reached — new AI calls are blocked until next month.",
 			"periodDays": "Last {days} days",
-			"topHouseholdsTitle": "Top households (30 days)",
+			"periodToggle": "Select time period",
+			"periodOption": "{days} days",
+			"monthlyKind": "{count} this month",
+			"rateLimitsTitle": "Free tier limits (rate limits)",
+			"rateLimitsNote": "Per household via AiRateLimitService — complements aggregated usage above.",
+			"rateLimitValue": "max {limit} / {period}",
+			"periods": {
+				"month": "month",
+				"week": "week"
+			},
+			"topHouseholdsTitle": "Top households ({days} days)",
 			"topHouseholdsNote": "Ranked by total AI calls. Household identity is not shown.",
 			"rank": "#{rank}",
 			"usageCount": "{count} calls",

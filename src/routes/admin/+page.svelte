@@ -10,6 +10,7 @@
 		type AdminTab
 	} from '$lib/components/organisms/admin/AdminSectionTabs.svelte';
 	import AdminAnalyticsPanel from '$lib/components/organisms/admin/AdminAnalyticsPanel.svelte';
+	import AdminAiUsagePanel from '$lib/components/organisms/admin/AdminAiUsagePanel.svelte';
 	import AdminUsersPanel from '$lib/components/organisms/admin/AdminUsersPanel.svelte';
 	import AdminErrorLogsPanel from '$lib/components/organisms/admin/AdminErrorLogsPanel.svelte';
 	import AdminFeedbackPanel from '$lib/components/organisms/admin/AdminFeedbackPanel.svelte';
@@ -23,6 +24,8 @@
 	let { data, form } = $props();
 	let emailSendingSubmitting = $state(false);
 	let emailSendingEnabled = $state(data.emailSending.enabledInApp);
+	/** Value from the latest toggle click — used at submit time before DOM/state flush. */
+	let emailSendingSubmitEnabled: boolean | undefined = $state(undefined);
 	let emailSendingForm: HTMLFormElement | undefined = $state();
 
 	const activeTab = $derived(parseAdminTab($page.url.searchParams.get('tab') ?? data.tab));
@@ -73,7 +76,14 @@
 						action="?/setEmailSending"
 						class="email-settings-form"
 						bind:this={emailSendingForm}
-						use:enhance={bindSubmitting((v) => (emailSendingSubmitting = v))}
+						use:enhance={bindSubmitting(
+							(v) => (emailSendingSubmitting = v),
+							(formData) => {
+								const enabled = emailSendingSubmitEnabled ?? emailSendingEnabled;
+								formData.set('enabled', enabled ? 'true' : 'false');
+								emailSendingSubmitEnabled = undefined;
+							}
+						)}
 					>
 						<input type="hidden" name="enabled" value={emailSendingEnabled ? 'true' : 'false'} />
 						<Toggle
@@ -81,6 +91,7 @@
 							disabled={emailSendingSubmitting || data.emailSending.envDisabled}
 							label={t('admin.emailSending.enable')}
 							onchange={(enabled) => {
+								emailSendingSubmitEnabled = enabled;
 								emailSendingEnabled = enabled;
 								emailSendingForm?.requestSubmit();
 							}}
@@ -114,6 +125,8 @@
 			</section>
 		{:else if activeTab === 'analytics'}
 			<AdminAnalyticsPanel active={true} />
+		{:else if activeTab === 'aiUsage'}
+			<AdminAiUsagePanel active={true} />
 		{:else if activeTab === 'users' && data.user}
 			<AdminUsersPanel active={true} currentUserId={data.user.id} />
 		{:else if activeTab === 'logs'}

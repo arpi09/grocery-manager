@@ -50,16 +50,35 @@
 				<p class="stat-value">{summary.byKind[kind]}</p>
 				<p class="stat-note">
 					{t('admin.aiUsage.periodDays', { days: summary.periodDays })}
+					· {t('admin.aiUsage.monthlyKind', { count: summary.monthlyByKind[kind] })}
 				</p>
 			</Card>
 		{/each}
 	</div>
 
 	<Card>
-		<h3>{t('admin.aiUsage.topHouseholdsTitle')}</h3>
-		<p class="top-note">{t('admin.aiUsage.topHouseholdsNote')}</p>
+		<h3>{t('admin.aiUsage.rateLimitsTitle')}</h3>
+		<p class="section-note">{t('admin.aiUsage.rateLimitsNote')}</p>
+		<ul class="rate-limits">
+			{#each summary.freeTierLimits as limit}
+				<li>
+					<span class="rate-kind">{t(`admin.aiUsage.kinds.${limit.kind}`)}</span>
+					<span class="rate-value">
+						{t('admin.aiUsage.rateLimitValue', {
+							limit: limit.limit,
+							period: t(`admin.aiUsage.periods.${limit.period}`)
+						})}
+					</span>
+				</li>
+			{/each}
+		</ul>
+	</Card>
+
+	<Card>
+		<h3>{t('admin.aiUsage.topHouseholdsTitle', { days: summary.periodDays })}</h3>
+		<p class="section-note">{t('admin.aiUsage.topHouseholdsNote')}</p>
 		{#if summary.topHouseholdCounts.length === 0}
-			<p class="top-empty">{t('admin.aiUsage.empty')}</p>
+			<p class="section-empty">{t('admin.aiUsage.empty')}</p>
 		{:else}
 			<ol class="top-list">
 				{#each summary.topHouseholdCounts as count, index}
@@ -149,11 +168,42 @@
 		font-size: 1rem;
 	}
 
-	.top-note,
-	.top-empty {
+	.section-note,
+	.section-empty {
 		margin: 0 0 var(--space-md);
 		color: var(--color-text-muted);
 		font-size: 0.9rem;
+	}
+
+	.rate-limits {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+	}
+
+	.rate-limits li {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
+		justify-content: space-between;
+		padding: var(--space-xs) 0;
+		border-bottom: 1px solid var(--color-border);
+		font-size: 0.9rem;
+	}
+
+	.rate-limits li:last-child {
+		border-bottom: none;
+	}
+
+	.rate-kind {
+		font-weight: 600;
+	}
+
+	.rate-value {
+		color: var(--color-text-muted);
 	}
 
 	.top-list {

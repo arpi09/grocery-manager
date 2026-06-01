@@ -187,4 +187,41 @@ describe('DrizzleAiUsageRepository.getAdminSummary', () => {
 		expect(summary.topHouseholdCounts).toEqual([15, 3]);
 		expect(summary.topHouseholdCounts.every((value) => typeof value === 'number')).toBe(true);
 	});
+
+	it('respects a shorter rolling window for byKind totals', async () => {
+		const sevenDaysAgo = new Date(NOW.getTime() - 7 * 86_400_000);
+		const eightDaysAgo = new Date(NOW.getTime() - 8 * 86_400_000);
+
+		await seedUsage([
+			{
+				id: 'recent',
+				scopeId: 'house-recent',
+				userId: 'user-1',
+				kind: 'ai_scan',
+				periodKey: '2026-05',
+				count: 4,
+				updatedAt: sevenDaysAgo
+			},
+			{
+				id: 'old',
+				scopeId: 'house-old',
+				userId: 'user-1',
+				kind: 'ai_scan',
+				periodKey: '2026-05',
+				count: 99,
+				updatedAt: eightDaysAgo
+			}
+		]);
+
+		const summary = await repository.getAdminSummary({
+			since: new Date(NOW.getTime() - 7 * 86_400_000),
+			monthStart: MONTH_START,
+			monthKey: '2026-05',
+			topLimit: 5,
+			periodDays: 7
+		});
+
+		expect(summary.byKind.ai_scan).toBe(4);
+		expect(summary.periodDays).toBe(7);
+	});
 });

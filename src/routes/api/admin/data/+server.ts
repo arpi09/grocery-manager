@@ -9,11 +9,12 @@ import {
 	PRODUCT_FEEDBACK_LIST_MAX
 } from '$lib/domain/product-feedback';
 import { STRIPE_READINESS_GATES } from '$lib/domain/plan';
+import { parseAdminAiUsagePeriodDays } from '$lib/domain/ai-usage-admin';
 import { WAITLIST_LIST_DEFAULT, WAITLIST_LIST_MAX } from '$lib/domain/waitlist';
 import { requireAdmin } from '$lib/server/api-guards';
 import type { RequestHandler } from './$types';
 
-const SECTIONS = ['analytics', 'users', 'errors', 'errorStack', 'feedback', 'waitlist'] as const;
+const SECTIONS = ['analytics', 'ai-usage', 'users', 'errors', 'errorStack', 'feedback', 'waitlist'] as const;
 type AdminSection = (typeof SECTIONS)[number];
 
 function parseLimit(
@@ -67,11 +68,13 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 
 	switch (sectionParam) {
 		case 'analytics': {
-			const [pmfWeeklyReview, aiUsage] = await Promise.all([
-				locals.pmfService.getWeeklyReview(),
-				locals.aiUsageAdminService.getSummary()
-			]);
-			return json({ pmfWeeklyReview, aiUsage });
+			const pmfWeeklyReview = await locals.pmfService.getWeeklyReview();
+			return json({ pmfWeeklyReview });
+		}
+		case 'ai-usage': {
+			const periodDays = parseAdminAiUsagePeriodDays(url.searchParams.get('days'));
+			const aiUsage = await locals.aiUsageAdminService.getSummary(periodDays);
+			return json({ aiUsage });
 		}
 		case 'users': {
 			const limit = parseLimit(
