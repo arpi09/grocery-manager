@@ -107,6 +107,7 @@
 			"submit": "Create account",
 			"submitting": "Creating account…",
 			"pageTitle": "Create account · Skaffu",
+			"metaDescription": "Create a free Skaffu account. Pantry app with scanning and receipt PDF — track your household inventory and reduce food waste.",
 			"hasAccount": "Already have an account?",
 			"loginLink": "Log in",
 			"captchaLabel": "Confirm you are not a robot",
