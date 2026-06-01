@@ -54,6 +54,8 @@ Same as email expiry digest:
 
 Uses the email reminder window (3 or 7 days) when email reminders are enabled; push-only users default to 7 days until they also enable email (shared `expiry_reminder_days` column).
 
+Optional **Shop today** push: opt-in under **Inställningar → Handla idag** (requires browser notifications). Daily cron `POST /api/cron/shopping-push` (GitHub Actions 06:00 UTC) when the user has unchecked shopping-list items.
+
 ### Limitations vs native push (Capacitor / App Store)
 
 | | Web Push (PWA) | Native push |

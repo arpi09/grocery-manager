@@ -40,6 +40,9 @@
 	let pushNotificationsEnabled = $state(data.pushNotificationsEnabled);
 	let pushNotificationsSubmitting = $state(false);
 	let pushNotificationsError = $state<string | null>(null);
+	let shoppingPushEnabled = $state(data.shoppingPushEnabled);
+	let shoppingPushSubmitting = $state(false);
+	let shoppingPushForm: HTMLFormElement | undefined = $state();
 	let pushSupported = $state(false);
 	let addPetSubmitting = $state(false);
 	let feedbackSubmitting = $state(false);
@@ -52,6 +55,7 @@
 		expiryRemindersEnabled = data.expiryRemindersEnabled;
 		expiryReminderDays = String(data.expiryReminderDays);
 		pushNotificationsEnabled = data.pushNotificationsEnabled;
+		shoppingPushEnabled = data.shoppingPushEnabled;
 	});
 
 	$effect(() => {
@@ -240,6 +244,43 @@
 						<p class="push-error" role="alert">{pushNotificationsError}</p>
 					{/if}
 				</div>
+			</SettingsRow>
+
+			<SettingsRow
+				title={t('settings.shoppingPush.title')}
+				note={t('settings.shoppingPush.note')}
+				last={false}
+			>
+				<form
+					method="POST"
+					action="?/updateShoppingPush"
+					bind:this={shoppingPushForm}
+					use:enhance={bindSubmitting((v) => (shoppingPushSubmitting = v))}
+				>
+					<input type="hidden" name="enabled" value={shoppingPushEnabled ? 'true' : 'false'} />
+					<Toggle
+						checked={shoppingPushEnabled}
+						disabled={
+							shoppingPushSubmitting ||
+							!pushSupported ||
+							(!pushNotificationsEnabled && !shoppingPushEnabled)
+						}
+						label={t('settings.shoppingPush.enable')}
+						onchange={(enabled) => {
+							if (enabled && !pushNotificationsEnabled) {
+								return;
+							}
+							shoppingPushEnabled = enabled;
+							shoppingPushForm?.requestSubmit();
+						}}
+					/>
+					{#if pushSupported && !pushNotificationsEnabled}
+						<p class="push-hint">{t('settings.shoppingPush.requiresPush')}</p>
+					{/if}
+					{#if shoppingPushSubmitting}
+						<span class="expiry-saving">{t('common.saving')}</span>
+					{/if}
+				</form>
 			</SettingsRow>
 
 			<SettingsRow

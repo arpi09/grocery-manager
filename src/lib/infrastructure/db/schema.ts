@@ -26,6 +26,11 @@ export const userTable = pgTable('user', {
 		mode: 'date'
 	}),
 	pushNotificationsEnabled: boolean('push_notifications_enabled').notNull().default(false),
+	shoppingPushEnabled: boolean('shopping_push_enabled').notNull().default(false),
+	shoppingPushLastSentAt: timestamp('shopping_push_last_sent_at', {
+		withTimezone: true,
+		mode: 'date'
+	}),
 	themePreference: text('theme_preference', { enum: ['light', 'dark', 'system'] }).notNull().default('system'),
 	activeHouseholdId: text('active_household_id').references(() => householdTable.id, {
 		onDelete: 'set null'

@@ -56,7 +56,8 @@ describe('drizzle migrations', () => {
 			'0017_push_subscriptions.sql',
 			'0018_user_signup_utm.sql',
 			'0019_app_settings.sql',
-			'0020_product_event_anonymous.sql'
+			'0020_product_event_anonymous.sql',
+			'0021_shopping_push.sql'
 		];
 
 		expect(pgliteFiles).toEqual(sqlFiles);

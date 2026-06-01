@@ -19,9 +19,10 @@ import {
 	updatePetsEnabledSchema
 } from '$lib/validation/pet.schemas';
 import { updateExpiryRemindersSchema } from '$lib/validation/expiry-reminder.schemas';
+import { updateShoppingPushSchema } from '$lib/validation/shopping-push.schemas';
 import { submitProductFeedbackSchema } from '$lib/validation/product-feedback.schemas';
 import { joinWaitlistSchema } from '$lib/validation/waitlist.schemas';
-import { expiryReminderService } from '$lib/server/di';
+import { expiryReminderService, shoppingPushService } from '$lib/server/di';
 import { DrizzlePushSubscriptionRepository } from '$lib/infrastructure/repositories/push-subscription.repository';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -41,6 +42,9 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 	const expirySettings = user
 		? await expiryReminderService.getSettings(user.id)
 		: { enabled: false, days: 7 as const, lastSentAt: null };
+	const shoppingPushSettings = user
+		? await shoppingPushService.getSettings(user.id)
+		: { enabled: false, lastSentAt: null };
 
 	const planTier = DEFAULT_PLAN_TIER;
 	const planLimits = user
@@ -59,6 +63,7 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		expiryRemindersEnabled: expirySettings.enabled,
 		expiryReminderDays: expirySettings.days,
 		pushNotificationsEnabled: user ? await pushRepository.isPushEnabled(user.id) : false,
+		shoppingPushEnabled: shoppingPushSettings.enabled,
 		pets,
 		household,
 		householdRole,
@@ -131,6 +136,27 @@ export const actions: Actions = {
 			parsed.data.enabled === 'true',
 			Number(parsed.data.days) as 3 | 7
 		);
+		redirect(302, '/settings');
+	},
+	updateShoppingPush: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const parsed = updateShoppingPushSchema.safeParse({
+			enabled: formData.get('enabled')
+		});
+
+		if (!parsed.success) {
+			return fail(400, { shoppingPushErrors: parsed.error.flatten().fieldErrors });
+		}
+
+		const enabled = parsed.data.enabled === 'true';
+		if (enabled) {
+			const hasPush = await pushRepository.isPushEnabled(locals.user!.id);
+			if (!hasPush) {
+				return fail(400, { shoppingPushError: 'push_required' });
+			}
+		}
+
+		await shoppingPushService.updateSettings(locals.user!.id, enabled);
 		redirect(302, '/settings');
 	},
 	togglePets: async ({ request, locals }) => {
