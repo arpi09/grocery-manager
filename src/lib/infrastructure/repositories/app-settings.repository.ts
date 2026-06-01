@@ -1,8 +1,7 @@
 import { APP_SETTING_EMAIL_SENDING_ENABLED } from '$lib/domain/app-settings';
-import { getDb } from '$lib/infrastructure/db';
+import { db as defaultDb, type AppDatabase } from '$lib/infrastructure/db';
 import { appSettingsTable } from '$lib/infrastructure/db/schema';
 import { eq } from 'drizzle-orm';
-import type { AppDatabase } from '$lib/infrastructure/db/init';
 
 export interface IAppSettingsRepository {
 	getBoolean(key: string): Promise<boolean | null>;
@@ -12,7 +11,7 @@ export interface IAppSettingsRepository {
 }
 
 export class DrizzleAppSettingsRepository implements IAppSettingsRepository {
-	constructor(private readonly db: AppDatabase = getDb()) {}
+	constructor(private readonly db: AppDatabase = defaultDb) {}
 
 	async getBoolean(key: string): Promise<boolean | null> {
 		const rows = await this.db
