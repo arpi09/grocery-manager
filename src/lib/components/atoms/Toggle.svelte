@@ -1,0 +1,149 @@
+<script lang="ts">
+	interface Props {
+		checked?: boolean;
+		disabled?: boolean;
+		label?: string;
+		size?: 'sm' | 'md';
+		id?: string;
+		/** Accessible name when no visible label is provided. */
+		'aria-label'?: string;
+		onchange?: (checked: boolean) => void;
+	}
+
+	let {
+		checked = false,
+		disabled = false,
+		label,
+		size = 'md',
+		id,
+		'aria-label': ariaLabel,
+		onchange
+	}: Props = $props();
+
+	const switchId = $derived(id ?? (label ? undefined : ariaLabel?.replace(/\s+/g, '-').toLowerCase()));
+
+	function toggle() {
+		if (disabled) return;
+		onchange?.(!checked);
+	}
+
+	function onKeydown(event: KeyboardEvent) {
+		if (event.key === ' ' || event.key === 'Enter') {
+			event.preventDefault();
+			toggle();
+		}
+	}
+</script>
+
+<label class={['toggle', size === 'sm' ? 'toggle-sm' : 'toggle-md', disabled ? 'toggle-disabled' : ''].filter(Boolean).join(' ')}>
+	<button
+		type="button"
+		role="switch"
+		id={switchId}
+		class="toggle-switch"
+		aria-checked={checked}
+		aria-label={label ? undefined : ariaLabel}
+		{disabled}
+		onclick={toggle}
+		onkeydown={onKeydown}
+	>
+		<span class="toggle-track" aria-hidden="true">
+			<span class="toggle-thumb"></span>
+		</span>
+	</button>
+	{#if label}
+		<span class="toggle-label">{label}</span>
+	{/if}
+</label>
+
+<style>
+	.toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-sm);
+		cursor: pointer;
+		user-select: none;
+	}
+
+	.toggle-disabled {
+		cursor: not-allowed;
+		opacity: 0.55;
+	}
+
+	.toggle-switch {
+		flex-shrink: 0;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		cursor: inherit;
+		border-radius: 999px;
+	}
+
+	.toggle-switch:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+
+	.toggle-switch:disabled {
+		cursor: not-allowed;
+	}
+
+	.toggle-track {
+		display: block;
+		position: relative;
+		border-radius: 999px;
+		background: var(--color-border);
+		transition: background-color 0.2s ease;
+	}
+
+	.toggle-switch[aria-checked='true'] .toggle-track {
+		background: var(--color-primary);
+	}
+
+	.toggle-thumb {
+		display: block;
+		border-radius: 50%;
+		background: #fff;
+		box-shadow: 0 1px 3px rgba(31, 42, 36, 0.22);
+		transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.toggle-md .toggle-track {
+		width: 2.75rem;
+		height: 1.5rem;
+		padding: 0.125rem;
+	}
+
+	.toggle-md .toggle-thumb {
+		width: 1.25rem;
+		height: 1.25rem;
+		transform: translateX(0);
+	}
+
+	.toggle-md .toggle-switch[aria-checked='true'] .toggle-thumb {
+		transform: translateX(1.25rem);
+	}
+
+	.toggle-sm .toggle-track {
+		width: 2.25rem;
+		height: 1.25rem;
+		padding: 0.125rem;
+	}
+
+	.toggle-sm .toggle-thumb {
+		width: 1rem;
+		height: 1rem;
+		transform: translateX(0);
+	}
+
+	.toggle-sm .toggle-switch[aria-checked='true'] .toggle-thumb {
+		transform: translateX(1rem);
+	}
+
+	.toggle-label {
+		font-size: 0.9rem;
+		line-height: 1.35;
+		color: var(--color-text);
+	}
+</style>

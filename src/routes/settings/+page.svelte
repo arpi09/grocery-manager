@@ -14,6 +14,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { ONBOARDING_REPLAY_EVENT, resetOnboarding } from '$lib/utils/onboarding';
 	import LanguageSwitcher from '$lib/components/molecules/LanguageSwitcher.svelte';
+	import Toggle from '$lib/components/atoms/Toggle.svelte';
 	import { t } from '$lib/i18n';
 	import { FREE_LIMITS, PRICE_HYPOTHESIS_SEK, PRO_LIMITS } from '$lib/domain/plan';
 	import { planLimitUsageLabelKey } from '$lib/domain/plan-limits';
@@ -42,6 +43,7 @@
 	let pushSupported = $state(false);
 	let addPetSubmitting = $state(false);
 	let feedbackSubmitting = $state(false);
+	let expiryRemindersForm: HTMLFormElement | undefined = $state();
 
 	const feedbackErrors = $derived(form?.feedbackErrors ?? {});
 	const feedbackSuccess = $derived(form?.feedbackSuccess === true);
@@ -180,20 +182,18 @@
 					method="POST"
 					action="?/updateExpiryReminders"
 					class="expiry-reminders-form"
+					bind:this={expiryRemindersForm}
 					use:enhance={bindSubmitting((v) => (expiryRemindersSubmitting = v))}
 				>
 					<input type="hidden" name="enabled" value={expiryRemindersEnabled ? 'true' : 'false'} />
-					<label class="expiry-toggle">
-						<input
-							type="checkbox"
-							checked={expiryRemindersEnabled}
-							onchange={(event) => {
-								expiryRemindersEnabled = event.currentTarget.checked;
-								event.currentTarget.form?.requestSubmit();
-							}}
-						/>
-						<span>{t('settings.expiryReminders.enable')}</span>
-					</label>
+					<Toggle
+						checked={expiryRemindersEnabled}
+						label={t('settings.expiryReminders.enable')}
+						onchange={(enabled) => {
+							expiryRemindersEnabled = enabled;
+							expiryRemindersForm?.requestSubmit();
+						}}
+					/>
 					<label class="expiry-days">
 						<span>{t('settings.expiryReminders.daysLabel')}</span>
 						<select
@@ -218,17 +218,14 @@
 				last={false}
 			>
 				<div class="push-notifications-control">
-					<label class="expiry-toggle">
-						<input
-							type="checkbox"
-							checked={pushNotificationsEnabled}
-							disabled={!pushSupported || pushNotificationsSubmitting}
-							onchange={(event) => {
-								void togglePushNotifications(event.currentTarget.checked);
-							}}
-						/>
-						<span>{t('settings.pushNotifications.enable')}</span>
-					</label>
+					<Toggle
+						checked={pushNotificationsEnabled}
+						disabled={!pushSupported || pushNotificationsSubmitting}
+						label={t('settings.pushNotifications.enable')}
+						onchange={(enabled) => {
+							void togglePushNotifications(enabled);
+						}}
+					/>
 					{#if !pushSupported}
 						<p class="push-hint">{t('settings.pushNotifications.unsupported')}</p>
 					{/if}
@@ -488,14 +485,6 @@
 		align-items: flex-start;
 		gap: var(--space-sm);
 		min-width: min(100%, 240px);
-	}
-
-	.expiry-toggle {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		font-size: 0.9rem;
-		cursor: pointer;
 	}
 
 	.expiry-days {
