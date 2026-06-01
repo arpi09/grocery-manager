@@ -32,6 +32,10 @@ export interface IPmfRepository {
 	getGlobalMetrics(now?: Date): Promise<PmfMetricSnapshot>;
 }
 
+function userIdsFromEventRows(rows: Array<{ userId: string | null }>): Set<string> {
+	return new Set(rows.map((row) => row.userId).filter((id): id is string => id != null));
+}
+
 export class DrizzlePmfRepository implements IPmfRepository {
 	async recordEvent(input: RecordProductEventInput): Promise<void> {
 		await db.insert(productEventTable).values({
@@ -123,7 +127,9 @@ export class DrizzlePmfRepository implements IPmfRepository {
 			activationItemRows.map((row) => [row.userId, row.count ?? 0])
 		);
 		const receiptActivatedUsers = new Set(
-			receiptActivationRows.map((row) => row.userId)
+			receiptActivationRows
+				.map((row) => row.userId)
+				.filter((id): id is string => id != null)
 		);
 
 		const activationFacts = users.map((user) => ({
@@ -136,7 +142,9 @@ export class DrizzlePmfRepository implements IPmfRepository {
 		const activation = computeActivationRate(activationFacts);
 
 		const firstScanByUser = new Map(
-			firstScanRows.map((row) => [row.userId, row.firstAt])
+			firstScanRows
+				.filter((row): row is typeof row & { userId: string; firstAt: Date } => row.userId != null)
+				.map((row) => [row.userId, row.firstAt])
 		);
 		const firstScanFacts = users.map((user) => ({
 			userId: user.id,
@@ -149,17 +157,14 @@ export class DrizzlePmfRepository implements IPmfRepository {
 				.filter((user) => user.lastSeenAt && user.lastSeenAt >= wauSince)
 				.map((user) => user.id)
 		);
-		const weeklyScannerUserIds = new Set(weeklyScanRows.map((row) => row.userId));
+		const weeklyScannerUserIds = userIdsFromEventRows(weeklyScanRows);
 		const weeklyScan = computeWeeklyScanRate(wauUserIds, weeklyScannerUserIds);
 
 		const d7 = computeRetentionRate(users, 7, now);
 		const d30 = computeRetentionRate(users, 30, now);
 
 		const multiMember = computeMultiMemberHouseholdRate(householdMembers, now);
-		const smartFill = computeSmartFillWeeklyRate(
-			wauUserIds,
-			new Set(weeklyFillRows.map((row) => row.userId))
-		);
+		const smartFill = computeSmartFillWeeklyRate(wauUserIds, userIdsFromEventRows(weeklyFillRows));
 
 		const eventCounts: Record<PmfProductEventType, number> = {
 			scan_completed: 0,
