@@ -1,9 +1,10 @@
 import { test, expect, type Page } from '@playwright/test';
 import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
-import { DEFAULT_HOUSEHOLD_ID } from '../src/lib/infrastructure/db/seed-household';
 import { PANTRY_CREATE_ACTION, PANTRY_SWITCH_ACTION } from '../src/lib/navigation/app-home';
 
 const E2E_SECOND_PANTRY = 'E2E Testhem';
+/** Matches `DEFAULT_HOUSEHOLD_ID` in seed-household.ts (seeded in PGlite for e2e). */
+const SEEDED_HOUSEHOLD_ID = 'household-hemmet';
 
 function switcherTrigger(page: Page, mode: 'desktop' | 'mobile') {
 	const root = page.locator(mode === 'desktop' ? '.main-nav-desktop' : '.main-nav-mobile');
@@ -42,7 +43,7 @@ test.describe('Household switcher', () => {
 		);
 
 		const switchBack = await page.request.post(PANTRY_SWITCH_ACTION, {
-			form: { householdId: DEFAULT_HOUSEHOLD_ID, redirectTo: '/inkop' }
+			form: { householdId: SEEDED_HOUSEHOLD_ID, redirectTo: '/inkop' }
 		});
 		expect(switchBack.status()).toBe(302);
 		expect(switchBack.headers()['location']).toBe('/inkop');
@@ -60,7 +61,7 @@ test.describe('Household switcher', () => {
 		await dismissOnboardingModalIfOpen(page);
 
 		const badSwitch = await page.request.post('/?/switchHousehold', {
-			form: { householdId: DEFAULT_HOUSEHOLD_ID, redirectTo: '/hem' }
+			form: { householdId: SEEDED_HOUSEHOLD_ID, redirectTo: '/hem' }
 		});
 		expect(badSwitch.status()).toBeGreaterThanOrEqual(400);
 	});
