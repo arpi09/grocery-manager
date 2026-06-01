@@ -71,7 +71,7 @@
 			<button
 				type="button"
 				class="pantry-trigger"
-				data-testid="pantry-switcher-trigger"
+				data-testid="pantry-switcher-trigger-desktop"
 				aria-expanded={open}
 				aria-haspopup="listbox"
 				aria-label={t('pantry.switchAria', { name: displayName })}
@@ -153,7 +153,7 @@
 		<button
 			type="button"
 			class="mobile-trigger"
-			data-testid="pantry-switcher-trigger"
+			data-testid="pantry-switcher-trigger-mobile"
 			aria-expanded={open && isNarrowViewport}
 			aria-haspopup="dialog"
 			aria-label={t('pantry.switchAria', { name: displayName })}
