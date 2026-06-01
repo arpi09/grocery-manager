@@ -60,18 +60,20 @@
 
 {#if section === 'header'}
 	<header class="mobile-header" aria-label={t('nav.header')}>
-		<a href={APP_HOME_PATH} class="mobile-brand" aria-label={t('nav.brandHome')}>
-			<AppLogo size="sm" />
-			<span class="mobile-brand-text">{t('nav.brandName')}</span>
-		</a>
-		<div class="mobile-header-center">
-			<PantrySwitcher {households} {activeHousehold} />
+		<div class="mobile-header-top">
+			<a href={APP_HOME_PATH} class="mobile-brand" aria-label={t('nav.brandHome')}>
+				<AppLogo size="sm" />
+				<span class="mobile-brand-text">{t('nav.brandName')}</span>
+			</a>
+			<div class="mobile-header-actions">
+				{#if onRecipeIdeas}
+					<RecipeIdeasButton iconOnly onclick={onRecipeIdeas} />
+				{/if}
+				<ProfileMenu {user} />
+			</div>
 		</div>
-		<div class="mobile-header-actions">
-			{#if onRecipeIdeas}
-				<RecipeIdeasButton compact onclick={onRecipeIdeas} />
-			{/if}
-			<ProfileMenu {user} />
+		<div class="mobile-header-context">
+			<PantrySwitcher {households} {activeHousehold} />
 		</div>
 	</header>
 {:else}
@@ -86,10 +88,13 @@
 						aria-current={active ? 'page' : undefined}
 						tabindex={moreOpen ? -1 : undefined}
 					>
-						<span class="tab-icon">
+						<span class="tab-icon" aria-hidden="true">
 							<NavIcon id={item.icon} />
 						</span>
 						<span class="tab-label">{t(item.labelKey)}</span>
+						{#if active}
+							<span class="tab-indicator" aria-hidden="true"></span>
+						{/if}
 					</a>
 				</li>
 			{/each}
@@ -103,10 +108,13 @@
 						data-testid="mobile-nav-more"
 						onclick={onToggleMore}
 					>
-						<span class="tab-icon">
+						<span class="tab-icon" aria-hidden="true">
 							<NavIcon id="more" />
 						</span>
 						<span class="tab-label">{t('nav.more')}</span>
+						{#if moreActive}
+							<span class="tab-indicator" aria-hidden="true"></span>
+						{/if}
 					</button>
 				</li>
 			{/if}
@@ -130,21 +138,26 @@
 <style>
 	.mobile-header {
 		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
+		padding: var(--space-xs) var(--space-md) var(--space-sm);
+	}
+
+	.mobile-header-top {
+		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: var(--space-xs);
-		min-height: var(--nav-height);
-		padding: 0 var(--space-md);
+		gap: var(--space-sm);
+		min-height: 2.75rem;
 	}
 
 	.mobile-brand {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.4rem;
+		gap: 0.45rem;
 		min-height: 2.75rem;
 		min-width: 0;
-		flex-shrink: 0;
-		max-width: 38%;
+		flex: 1;
 		color: var(--color-text);
 		text-decoration: none;
 	}
@@ -155,26 +168,40 @@
 	}
 
 	.mobile-brand-text {
-		font-size: 0.78rem;
+		font-size: 0.875rem;
 		font-weight: 700;
 		letter-spacing: -0.02em;
-		line-height: 1.1;
+		line-height: 1.15;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
-	.mobile-header-center {
-		flex: 1;
-		min-width: 0;
+	.mobile-header-context {
 		display: flex;
+		min-width: 0;
+	}
+
+	.mobile-header-context :global(.pantry-switcher) {
+		width: 100%;
+	}
+
+	.mobile-header-context :global(.mobile-trigger) {
+		width: 100%;
 		justify-content: center;
+		max-width: 100%;
+	}
+
+	.mobile-header-context :global(.pantry-name) {
+		flex: 1;
+		max-width: none;
+		text-align: center;
 	}
 
 	.mobile-header-actions {
 		display: flex;
 		align-items: center;
-		gap: 0.1rem;
+		gap: var(--space-xs);
 		flex-shrink: 0;
 	}
 
@@ -200,7 +227,7 @@
 		min-height: var(--mobile-bottom-nav-height);
 		list-style: none;
 		margin: 0;
-		padding: 0.2rem 0.35rem;
+		padding: 0.15rem var(--space-sm) 0.25rem;
 	}
 
 	.mobile-bottom-list > li {
@@ -210,20 +237,21 @@
 	}
 
 	.nav-tab {
+		position: relative;
 		display: flex;
 		flex: 1;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 0.12rem;
+		gap: 0.1rem;
 		width: 100%;
 		min-height: 2.75rem;
-		padding: 0.4rem 0.2rem;
+		padding: 0.35rem 0.15rem 0.45rem;
 		border: 0;
-		border-radius: var(--radius-sm);
+		border-radius: var(--radius-md);
 		background: transparent;
 		color: var(--color-text-muted);
-		font-size: 0.65rem;
+		font-size: 0.625rem;
 		font-weight: 600;
 		text-decoration: none;
 		cursor: pointer;
@@ -238,12 +266,15 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 1.75rem;
-		height: 1.75rem;
-		border-radius: 999px;
+		width: 1.5rem;
+		height: 1.5rem;
 		flex-shrink: 0;
 		pointer-events: none;
-		transition: background-color 0.2s ease;
+	}
+
+	.tab-icon :global(.nav-icon) {
+		width: 1.375rem;
+		height: 1.375rem;
 	}
 
 	.tab-label {
@@ -251,7 +282,19 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-		line-height: 1.2;
+		line-height: 1.15;
+		pointer-events: none;
+	}
+
+	.tab-indicator {
+		position: absolute;
+		bottom: 0.2rem;
+		left: 50%;
+		width: 1.125rem;
+		height: 0.1875rem;
+		border-radius: 999px;
+		background: var(--color-primary);
+		transform: translateX(-50%);
 		pointer-events: none;
 	}
 
@@ -267,10 +310,11 @@
 
 	.nav-tab.active {
 		color: var(--color-primary);
+		font-weight: 700;
 	}
 
-	.nav-tab.active .tab-icon {
-		background: var(--nav-active-bg);
+	.nav-tab.active .tab-icon :global(.nav-icon) {
+		stroke-width: 2.25;
 	}
 
 	:global(.nav-more-panel) {
@@ -288,8 +332,7 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.nav-tab,
-		.tab-icon {
+		.nav-tab {
 			transition: none;
 		}
 	}

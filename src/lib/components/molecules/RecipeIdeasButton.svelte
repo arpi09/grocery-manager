@@ -4,25 +4,34 @@
 	interface Props {
 		onclick?: () => void;
 		compact?: boolean;
+		iconOnly?: boolean;
 	}
 
-	let { onclick, compact = false }: Props = $props();
+	let { onclick, compact = false, iconOnly = false }: Props = $props();
 </script>
 
 <button
 	type="button"
 	class="recipe-ideas-btn"
 	class:compact
+	class:icon-only={iconOnly}
 	{onclick}
 	aria-label={t('planer.recipeIdeasAria')}
 >
-	<span class="inner">
+	{#if iconOnly}
 		<span class="icon" aria-hidden="true">
-			<Sparkles size={18} strokeWidth={2} />
+			<Sparkles size={20} strokeWidth={2} />
 		</span>
-		<span class="label">{t('recipe.label')}</span>
-		<span class="badge">{t('recipe.newBadge')}</span>
-	</span>
+		<span class="badge-dot" aria-hidden="true"></span>
+	{:else}
+		<span class="inner">
+			<span class="icon" aria-hidden="true">
+				<Sparkles size={18} strokeWidth={2} />
+			</span>
+			<span class="label">{t('recipe.label')}</span>
+			<span class="badge">{t('recipe.newBadge')}</span>
+		</span>
+	{/if}
 </button>
 
 <style>
@@ -85,6 +94,33 @@
 	.compact .icon :global(svg) {
 		width: 16px;
 		height: 16px;
+	}
+
+	.icon-only {
+		position: relative;
+		justify-content: center;
+		min-width: 2.75rem;
+		min-height: 2.75rem;
+		padding: 0;
+		border-radius: var(--radius-sm);
+	}
+
+	.icon-only .icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.badge-dot {
+		position: absolute;
+		top: 0.35rem;
+		right: 0.35rem;
+		width: 0.5rem;
+		height: 0.5rem;
+		border: 2px solid var(--color-surface);
+		border-radius: 999px;
+		background: var(--color-accent);
+		pointer-events: none;
 	}
 
 	.recipe-ideas-btn:hover {
