@@ -2,7 +2,7 @@
 
 > **Teststrategi:** Se [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) för testing diamond-modellen (unit / integration / E2E, ägarskap och risk).
 
-End-to-end coverage for critical user journeys. **23 tests** across 8 spec files. Roadmap item **#16** in [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md).
+End-to-end coverage for critical user journeys. **22 tests** across 9 spec files (plus optional local real-PDF tests). Roadmap item **#16** in [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md).
 
 ## Run locally (CI pattern)
 
@@ -45,27 +45,28 @@ See [`CAPTCHA.md`](./CAPTCHA.md) for production Turnstile setup.
 | # | Flow | Spec | Mocked? |
 |---|------|------|---------|
 | 1 | Register → `/hem` | `critical-flows.spec.ts` | Turnstile bypass (real DB) |
-| 2 | Login → `/hem` | `critical-flows.spec.ts`, `auth.spec.ts` | — |
+| 2 | Login → `/hem` | `critical-flows.spec.ts` | — |
+| 2b | Admin login → dashboard | `auth.spec.ts`, `z-admin.spec.ts` | — |
 | 3 | Receipt PDF → lines → bulk add | `receipt.spec.ts` | `POST /api/receipt/parse` |
 | 4 | Receipt image → lines | `receipt.spec.ts` | Same parse mock |
 | 5 | Barcode manual add on `/scan` | `scan-inventory.spec.ts` | `GET /api/barcode/*` |
 | 6 | Smart fill inköpslista | `shopping.spec.ts` | `E2E_MOCK_AI` + `e2e/fixtures/shopping-suggestions.json` |
 | 7 | Shopping list add + check off | `shopping.spec.ts` | — |
 | 8 | Onboarding for new user | `critical-flows.spec.ts` | — |
-| 9 | Marketing `/`, `/login`, `/register` 200 | `critical-flows.spec.ts`, `smoke.spec.ts` | — |
+| 9 | Marketing `/`, `/login`, `/register` HTTP smoke | `smoke.spec.ts` | — |
 | 10 | Inventory location loads | `scan-inventory.spec.ts` | — |
 
 ## Spec files
 
 | File | Focus |
 |------|--------|
-| `e2e/critical-flows.spec.ts` | Register, login, admin login, onboarding, marketing HTTP 200 |
+| `e2e/critical-flows.spec.ts` | Register, login redirect, onboarding |
 | `e2e/auth.spec.ts` | Marketing landing, admin login |
 | `e2e/receipt.spec.ts` | Receipt upload → review → bulk add |
 | `e2e/receipt-real-fixtures.spec.ts` | Local real PDF uploads (skipped in CI without fixtures) |
 | `e2e/scan-inventory.spec.ts` | Scan hub, barcode add, `/inventory/fridge` |
 | `e2e/shopping.spec.ts` | Smart fill, list add/check |
-| `e2e/smoke.spec.ts` | Basic HTTP smoke |
+| `e2e/smoke.spec.ts` | Basic HTTP smoke (`/`, `/login`, `/register`, authenticated `/`) |
 | `e2e/navigation.spec.ts` | Nav + mobile sheet |
 | `e2e/z-admin.spec.ts` | Admin dashboard (körs sist i CI) |
 

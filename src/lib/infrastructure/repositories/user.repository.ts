@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { db } from '$lib/infrastructure/db';
+import { db as defaultDb, type AppDatabase } from '$lib/infrastructure/db';
 import { userTable } from '$lib/infrastructure/db/schema';
 import type { SignupUtm } from '$lib/domain/signup-utm';
 import type { ThemePreference } from '$lib/domain/theme';
@@ -36,8 +36,10 @@ function mapProfile(row: {
 }
 
 export class DrizzleUserRepository implements IUserRepository {
+	constructor(private readonly db: AppDatabase = defaultDb) {}
+
 	async findByEmail(email: string) {
-		const [row] = await db
+		const [row] = await this.db
 			.select({
 				id: userTable.id,
 				email: userTable.email,
@@ -52,7 +54,7 @@ export class DrizzleUserRepository implements IUserRepository {
 
 	async create(email: string, passwordHash: string, id: string, signupUtm?: SignupUtm | null) {
 		const normalizedEmail = email.toLowerCase();
-		await db.insert(userTable).values({
+		await this.db.insert(userTable).values({
 			id,
 			email: normalizedEmail,
 			passwordHash,
@@ -66,7 +68,7 @@ export class DrizzleUserRepository implements IUserRepository {
 	}
 
 	async findProfileById(id: string) {
-		const [row] = await db
+		const [row] = await this.db
 			.select({
 				id: userTable.id,
 				email: userTable.email,
@@ -84,7 +86,7 @@ export class DrizzleUserRepository implements IUserRepository {
 		id: string,
 		data: { displayName: string | null; avatarUrl: string | null }
 	) {
-		const [row] = await db
+		const [row] = await this.db
 			.update(userTable)
 			.set({
 				displayName: data.displayName,
@@ -97,7 +99,7 @@ export class DrizzleUserRepository implements IUserRepository {
 	}
 
 	async updateThemePreference(id: string, themePreference: ThemePreference) {
-		const [row] = await db
+		const [row] = await this.db
 			.update(userTable)
 			.set({ themePreference })
 			.where(eq(userTable.id, id))
