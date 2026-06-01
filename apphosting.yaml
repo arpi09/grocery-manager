@@ -47,6 +47,12 @@ env:
     availability:
       - RUNTIME
 
+  # Legacy hosted.app — still used during skaffu.com transition; baked into kit.csrf.trustedOrigins at build
+  - variable: LEGACY_APP_ORIGIN
+    value: https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app
+    availability:
+      - BUILD
+
   - variable: HOST
     value: 0.0.0.0
     availability:
