@@ -61,9 +61,20 @@ npx firebase apphosting:secrets:grantaccess RESEND_API_KEY --backend home-pantry
 2. Update `RESEND_FROM` to use that domain.
 3. Clear `EMAIL_SENDING_DISABLED` and enable sending in `/admin`.
 
-## skaffu.com (efter Firebase Connected)
+## skaffu.com (prod live — mejl fortfarande av)
 
-**Gör inte detta förrän `skaffu.com` är Connected i Firebase App Hosting** (DNS + SSL). Tills dess: prod behåller `onboarding@resend.dev` och `EMAIL_SENDING_DISABLED=true`.
+**Status jun 2026:** `https://skaffu.com` är **Connected** (Firebase + SSL). `PUBLIC_ORIGIN` / `ORIGIN` pekar på skaffu.com. **Utgående mejl är fortfarande av** — prod använder `onboarding@resend.dev` och `EMAIL_SENDING_DISABLED=true` tills du medvetet aktiverar.
+
+### Ägare — checklista innan enable
+
+| # | Steg | Var | Klar? |
+|---|------|-----|-------|
+| 1 | Lägg till domän | [Resend → Domains](https://resend.com/domains) → `skaffu.com` | ☐ ägare |
+| 2 | DNS (SPF, DKIM, ev. DMARC) | Cloudflare → **skaffu.com** → DNS | ☐ ägare |
+| 3 | Vänta **Verified** i Resend | Resend dashboard | ☐ ägare |
+| 4 | Sätt `RESEND_FROM` | Firebase App Hosting env: `Skaffu <hello@skaffu.com>` | ☐ efter (3) |
+| 5 | **Inte än:** `EMAIL_SENDING_DISABLED=false` | `apphosting.yaml` + `/admin` toggle | medvetet av |
+| 6 | Testinbjudan | Inställningar → bjud in → länk `https://skaffu.com/invite/...` | efter (5) |
 
 ### 1. Verifiera domän i Resend
 
@@ -90,14 +101,14 @@ RESEND_FROM=Skaffu <hello@skaffu.com>
 
 Lokal `.env` — se kommenterade rader i `.env.example`.
 
-### 3. Uppdatera prod (efter Verified + skaffu.com live)
+### 3. Uppdatera prod (efter Resend Verified)
 
 Ordning:
 
-1. Sätt `PUBLIC_ORIGIN` + `ORIGIN` till `https://skaffu.com` ([SKAFFU_DOMAIN_MIGRATION.md](./SKAFFU_DOMAIN_MIGRATION.md)).
-2. Uppdatera `RESEND_FROM` i Firebase App Hosting (eller secret om ni flyttar dit).
+1. ~~`PUBLIC_ORIGIN` + `ORIGIN` → `https://skaffu.com`~~ **Klart** ([SKAFFU_DOMAIN_MIGRATION.md](./SKAFFU_DOMAIN_MIGRATION.md)).
+2. Uppdatera `RESEND_FROM` i Firebase App Hosting till `Skaffu <hello@skaffu.com>` (efter Resend **Verified**).
 3. **Fortfarande av:** lämna `EMAIL_SENDING_DISABLED=true` tills du medvetet slår på mejl.
-4. När du vill skicka: sätt `EMAIL_SENDING_DISABLED=false` **och** slå på **Email sending** i `/admin`.
+4. När du vill skicka: sätt `EMAIL_SENDING_DISABLED=false` **och** slå på **Email sending** i `/admin` — **gör inte detta i samma deploy som DNS-test**; verifiera en testinbjudan först.
 
 ### 4. Test efter enable
 

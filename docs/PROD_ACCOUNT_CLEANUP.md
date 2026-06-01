@@ -8,11 +8,20 @@ Admin-UI (`/admin`) har **ingen** “radera användare”-knapp — bara logga u
 |------|--------|
 | E-post | `smoke-test-20260601-cursor@example.com` |
 | Prod-URL | `https://skaffu.com` |
+| Status | **Raderad 2026-06-01** via `scripts/delete-prod-user-by-email.mjs` (Cloud SQL, lokal `DATABASE_URL`) |
+
+### Snabb radering (agent / ägare med DATABASE_URL)
+
+```powershell
+node --env-file=.env scripts/delete-prod-user-by-email.mjs smoke-test-20260601-cursor@example.com
+```
+
+Kräver prod-`DATABASE_URL` i `.env` (Cloud SQL public IP + auktoriserat nätverk, eller Cloud Shell). Verifiera: `SELECT id FROM "user" WHERE email = '...';` → 0 rader.
 
 ### Steg 1 — verifiera i admin (valfritt)
 
 1. Logga in som admin → [`/admin`](https://skaffu.com/admin) (kräver prod `ADMIN_PASSWORD` i Firebase — skiljer sig från lokal `.env`).
-2. Sök e-post i användartabellen. **Verifierat 2026-06-01:** kontot finns (registrerat via prod-smoke).
+2. Sök e-post i användartabellen. **2026-06-01:** kontot fanns efter prod-smoke; ska **inte** synas efter radering ovan.
 3. **Logga ut användare** stoppar bara sessioner — raderar inte kontot.
 
 ### Steg 2 — radera i Cloud SQL (ägare)

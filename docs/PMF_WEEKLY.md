@@ -8,7 +8,7 @@
 
 ### 1. Öppna dashboard (5 min)
 
-1. Logga in som admin → [`/admin`](https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app/admin).
+1. Logga in som admin → [`/admin`](https://skaffu.com/admin).
 2. **Hälsa:** användare, hushåll, lagerposter, fel senaste 7 dagar.
 3. **PMF-panel:** veckosammanfattning + WoW-delta (pil upp/ner/platt per metric).
 
@@ -53,8 +53,8 @@ Pro-waitlist (mål ≥50): _____ / 50
 
 ### 4. Pro-waitlist + feedback (5 min)
 
-1. [`/admin#waitlist`](https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app/admin#waitlist) — jämför mot [PRICING.md §6](./PRICING.md) (mål ≥50).
-2. [`/admin#feedback`](https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app/admin#feedback) — nya churn-/friktionskommentarer.
+1. [`/admin#waitlist`](https://skaffu.com/admin#waitlist) — jämför mot [PRICING.md §6](./PRICING.md) (mål ≥50).
+2. [`/admin#feedback`](https://skaffu.com/admin#feedback) — nya churn-/friktionskommentarer.
 3. Uppdatera [USER_INTERVIEWS.md § Syntes](./USER_INTERVIEWS.md) om ny intervju gjorts.
 
 ### 5. Logga (5 min)
@@ -77,16 +77,16 @@ Skriver JSON till stdout — samma siffror som PMF-panelen i `/admin`.
 
 ## Senaste snapshot (prod Cloud SQL)
 
-*Datum: **2026-06-01** (måndag). Källa: Cloud SQL read-only via integrationstest ovan; prod `/admin`-login med lokal `.env`-lösenord gav «Invalid email or password» (secret skiljer sig).*
+*Datum: **2026-06-01** (måndag). Källa: `pmf-snapshot.integration.test.ts` mot prod `DATABASE_URL` (08:42 UTC). Smoke-testkonto raderat samma dag — siffror nedan **efter** radering. `/admin` via curl misslyckas om lokal `ADMIN_PASSWORD` ≠ Firebase secret.*
 
 ### Hälsa
 
 | | Värde |
 |---|------|
-| Användare | 30 |
+| Användare | 29 |
 | Hushåll | 29 |
 | Lagerposter | 6 |
-| Aktiva nu | 0 |
+| Aktiva nu | 1 |
 | Fel (7 d) | 83 |
 | Pro-waitlist | 0 / 50 |
 
@@ -94,21 +94,27 @@ Skriver JSON till stdout — samma siffror som PMF-panelen i `/admin`.
 
 | Metric | Nu | Mål | WoW Δ |
 |--------|-----|-----|-------|
-| Aktivering | 6,7 % (2/30) | 40 % | flat |
-| Tid första scan | 693 min | ≤3 min | flat |
-| Veckoscan-rate | 6,9 % (2/29 WAU) | 30 % | flat |
+| Aktivering | 3,4 % (1/29) | 40 % | flat |
+| Tid första scan | 1385 min | ≤3 min | flat |
+| Veckoscan-rate | 3,6 % (1/28 WAU) | 30 % | flat |
 | D7 | 0 % (0 eligible) | 20 % | flat |
 | D30 | 0 % (0 eligible) | 15 % | flat |
-| Flera medlemmar | 3,4 % (1/29) | 50 % | flat |
-| Smart fill | 3,4 % (1/29) | 20 % | flat |
+| Flera medlemmar | 3,6 % (1/28) | 50 % | flat |
+| Smart fill | 3,6 % (1/28) | 20 % | flat |
 
 **Event counts (7 d):** scan 0 · kvitto 7 · smart fill 2
 
+### WoW (jämfört med föregående vecka i panelen)
+
+Alla sju metrics: **flat** (ingen föregående veckodata med förändring i `deltaDirection`). Baslinje fortfarande för tidig för D7/D30 (0 eligible).
+
+*Intradag:* före smoke-radering var aktivering 6,7 % (2/30) — smoke-kontot var en av två aktiverade; radering sänkte aktivering till 3,4 % utan att ändra WoW-flaggan.
+
 ### Föreslagen åtgärd (vecka 2026-06-01)
 
-**Metric:** Aktivering (6,7 % vs 40 %).
+**Metric:** Aktivering (3,4 % vs 40 %).
 
-**En åtgärd:** Prioritera onboarding-friktion — kör 2 intervjuer med registrerade som inte nått 10 varor ([USER_INTERVIEWS.md](./USER_INTERVIEWS.md)); notera om kvitto vs streckkod blockerar.
+**En åtgärd:** Prioritera onboarding-friktion — kör 2 intervjuer med registrerade som inte nått 10 varor ([USER_INTERVIEWS.md](./USER_INTERVIEWS.md)); notera om kvitto vs streckkod blockerar. Publicera launch-post ([LAUNCH_POST_DRAFT.md](./LAUNCH_POST_DRAFT.md)) med UTM för att mäta nya registreringar.
 
 ---
 
