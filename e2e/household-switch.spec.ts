@@ -13,6 +13,21 @@ function switcherTrigger(page: Page, mode: 'desktop' | 'mobile') {
 	);
 }
 
+async function expectActionRedirect(
+	response: Awaited<ReturnType<Page['request']['post']>>,
+	location: string
+) {
+	if ([302, 303].includes(response.status())) {
+		expect(response.headers()['location']).toBe(location);
+		return;
+	}
+
+	expect(response.status()).toBe(200);
+	const body = (await response.json()) as { type?: string; location?: string };
+	expect(body.type).toBe('redirect');
+	expect(body.location).toBe(location);
+}
+
 test.describe('Household switcher', () => {
 	test.setTimeout(90_000);
 
@@ -32,8 +47,7 @@ test.describe('Household switcher', () => {
 		const create = await page.request.post(PANTRY_CREATE_ACTION, {
 			form: { name: E2E_SECOND_PANTRY, redirectTo: '/inkop' }
 		});
-		expect(create.status()).toBe(302);
-		expect(create.headers()['location']).toBe('/inkop');
+		await expectActionRedirect(create, '/inkop');
 
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
@@ -45,8 +59,7 @@ test.describe('Household switcher', () => {
 		const switchBack = await page.request.post(PANTRY_SWITCH_ACTION, {
 			form: { householdId: SEEDED_HOUSEHOLD_ID, redirectTo: '/inkop' }
 		});
-		expect(switchBack.status()).toBe(302);
-		expect(switchBack.headers()['location']).toBe('/inkop');
+		await expectActionRedirect(switchBack, '/inkop');
 
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
@@ -56,14 +69,19 @@ test.describe('Household switcher', () => {
 		);
 	});
 
-	test('marketing root does not expose pantry switch actions', async ({ page }) => {
+	test('marketing root does not run pantry switch actions', async ({ page }) => {
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
 
+		const before = await switcherTrigger(page, 'desktop').getAttribute('aria-label');
 		const badSwitch = await page.request.post('/?/switchHousehold', {
 			form: { householdId: SEEDED_HOUSEHOLD_ID, redirectTo: '/hem' }
 		});
-		expect(badSwitch.status()).toBeGreaterThanOrEqual(400);
+		expect(badSwitch.status()).toBe(200);
+
+		await page.goto('/inkop');
+		await dismissOnboardingModalIfOpen(page);
+		await expect(switcherTrigger(page, 'desktop')).toHaveAttribute('aria-label', before!);
 	});
 });
 
@@ -82,7 +100,7 @@ test.describe('Household switcher (mobile)', () => {
 		const create = await page.request.post(PANTRY_CREATE_ACTION, {
 			form: { name: E2E_SECOND_PANTRY, redirectTo: '/planer' }
 		});
-		expect(create.status()).toBe(302);
+		await expectActionRedirect(create, '/planer');
 
 		await page.goto('/planer');
 		await dismissOnboardingModalIfOpen(page);
