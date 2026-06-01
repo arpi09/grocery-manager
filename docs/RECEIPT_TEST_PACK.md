@@ -64,7 +64,7 @@ node scripts/validate-receipt-fixtures.mjs --strict
 | Manifest-platser ifyllda | **11 / 20** |
 | Extra ICA-arkiv (beskrivande filnamn) | **13** |
 | Riktiga PDF:er totalt lokalt | **24** |
-| Committed syntetiska (CI) | 3 |
+| Committed syntetiska (CI) | 5 |
 
 Saknas fortfarande: `kivra-05` … `kivra-07`, alla `willys-*.pdf`.
 
