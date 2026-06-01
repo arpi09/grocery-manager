@@ -21,7 +21,18 @@ Manuell checklista efter G3-deploy (Firebase App Hosting). E2E och CI använder 
 
 ## Snabb curl (VAPID)
 
-Ersätt `BASE` med prod-URL (samma som `PUBLIC_ORIGIN`, utan avslutande `/`):
+Ersätt `BASE` med prod-URL (samma som `PUBLIC_ORIGIN`, utan avslutande `/`).
+
+**Idag:** `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app`  
+**Efter domänbyte:** `https://skaffu.com` — se [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md).
+
+```bash
+# Exempel (hosted.app):
+# BASE=https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app
+
+# Exempel (efter skaffu.com är Connected):
+# BASE=https://skaffu.com
+```
 
 ```bash
 curl -sS "$BASE/api/push/vapid-public-key"

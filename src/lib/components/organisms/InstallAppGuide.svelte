@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import { t } from '$lib/i18n';
 	import {
@@ -29,6 +30,7 @@
 	const showIos = $derived(shouldOfferInstallExperience() && isIosDevice());
 	const showAndroid = $derived(shouldOfferInstallExperience() && isAndroidDevice());
 	const showDesktopNote = $derived(!isIosDevice() && !isAndroidDevice());
+	const installHostname = $derived($page.url.hostname);
 
 	function refreshInstallState() {
 		canInstall = canTriggerInstallPrompt();
@@ -83,7 +85,7 @@
 				<div class="platform-block">
 					<h3>{t('pwa.guide.iosTitle')}</h3>
 					<ol>
-						<li>{t('pwa.guide.iosStep1')}</li>
+						<li>{t('pwa.guide.iosStep1', { hostname: installHostname })}</li>
 						<li>{t('pwa.guide.iosStep2')}</li>
 						<li>{t('pwa.guide.iosStep3')}</li>
 					</ol>

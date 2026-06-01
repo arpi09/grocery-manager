@@ -17,7 +17,7 @@ Home Pantry uses [Cloudflare Turnstile](https://www.cloudflare.com/products/turn
 
    Common mistake: adding only `hosted.app` (partial) instead of the **full** hostname above — Turnstile matches the exact host only.
 
-   **Future (optional):** after `homepantry.com` is connected in Firebase, add `homepantry.com` and `www.homepantry.com` to the same widget — see [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md). That domain is **not** live today.
+   **Future (after skaffu.com is Connected):** add `skaffu.com` and `www.skaffu.com` to the same widget — see [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md). Keep hosted.app hostname during transition.
 4. Copy the **Site key** and **Secret key** (pair must belong to the same widget).
 
 If a hostname is missing, Turnstile returns error **110200** (invalid domain): the widget label appears, a red *Captcha kunde inte laddas för den här webbadressen* message shows, and submit is disabled. Browser console: `[turnstile] Widget error: 110200`. Inspect `data-turnstile-error-code="110200"` on the error line.

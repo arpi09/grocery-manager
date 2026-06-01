@@ -1,11 +1,13 @@
 # Domänstrategi — Home Pantry (svensk marknad)
 
-*Version: maj 2026 (reviderad efter produktägarfeedback). Utgår från `docs/BRAND.md`, `docs/COMPETITIVE_ANALYSIS.md`, `docs/MARKETING_SITE.md` och nuvarande prod på Firebase App Hosting.*
+*Version: jun 2026 **v3** — primär domän **`skaffu.com`**. Utgår från `docs/BRAND.md`, `docs/COMPETITIVE_ANALYSIS.md`, `docs/MARKETING_SITE.md` och nuvarande prod på Firebase App Hosting.*
 
 > **Status idag:** `homepantry.com` är **upptagen** (parkerings-IP). Prod kör på  
 > `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app` tills en egen domän köps och kopplas ([`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md)).
 
 > **Intern kodbas** kan fortsätta heta `home-pantry` / **Home Pantry** i UI — **publik domän behöver inte matcha** repo eller engelskt produktnamn.
+
+> **Beslut v3 (jun 2026):** Primär publik domän **`skaffu.com`**. Registrering planeras via **Cloudflare Registrar** (`.se` stöds inte där — se [Skaffu v3](#skaffu--produktbeslut-v3-jun-2026)).
 
 ---
 
@@ -26,17 +28,59 @@ Ny riktning: **professionellt**, **rent svenskt uttal**, **kort**, **ingen obsky
 
 ---
 
-## Sammanfattning (ny rekommendation)
+## Sammanfattning (v3 — gällande)
 
 | Prioritet | Domän | Varför i ett nötskal |
 |-----------|-------|----------------------|
-| **1 — Primär** | **`skannhem.se`** | Kort svensk sammansättning (*skanna* + *hem*), scan-first, uttalbart, proffsigt — matchar tagline och GTM. |
-| **2 — Backup** | **`hemlagret.se`** | Tydlig produktkategori (hemmets lager), varmt/köksnära utan engelska, skiljer från Matdags. |
-| **3 — Backup** | **`laghem.se`** | Kort varumärkesbar form (*lager* + *hem*), lätt att säga — kräver en rad förklaring i hero. |
+| **1 — Primär** | **`skaffu.com`** | Kort varumärke (*skafferi* → *skaffu*), gulligt men minnesvärt, funkar SV+EN; registreras via Cloudflare. |
+| **2 — Defensiv (senare)** | **`skaffu.se`** | Svensk TLD om/när ni vill — **inte** via Cloudflare Registrar (se v3). |
+| **3 — Arkiv (v2)** | `skannhem.se`, `hemlagret.se`, `laghem.se` | Tidigare shortlist — ersatt som primär av Skaffu-beslutet. |
 
 **Undvik som primär:** allt med *pantry*, `*dags*` (Matdags), generiska `skafferiet.*` (catering), `*koll*` nära **Skafferikoll** (`skafferikoll.se` — aktiv konkurrent), `hemkoll.*` (bostadstjänst på `hemkoll.com`), `mathem`/`matlager` (dagligvaru-/logistikassociation).
 
-*Tillgänglighet = **hintar** (DNS maj 2026) — bekräfta alltid hos registrar (Internetstiftelsen, Loopia, Cloudflare, Porkbun).*
+*Tillgänglighet = **hintar** (DNS jun 2026) — bekräfta alltid hos registrar. **`skaffu.com` / `skaffu.se`:** båda **NXDOMAIN** vid senaste kontroll.*
+
+---
+
+## Skaffu — produktbeslut v3 (jun 2026)
+
+### Varför Skaffu + `.com`
+
+| | |
+|--|--|
+| **Namn** | *Skaffu* — diminutiv av *skafferi*, lätt att säga (*SKAFF-oo*), “hip” på svenska och begripligt internationellt. |
+| **Domän** | **`skaffu.com`** — primär apex; användaren registrerar via **Cloudflare** (en registrar, DNS + ev. CDN i samma konto). |
+| **`.se` senare?** | Cloudflare **erbjuder inte** `.se`-registrering. Vill ni ha `skaffu.se` senare: **Internetstiftelsen**, **Loopia**, Porkbun m.fl. — planen **nu** är `.com` via Cloudflare. |
+| **Repo / intern** | **`home-pantry`** oförändrat; Firebase-projekt och kod behöver inte byta namn. |
+
+### DNS-hint (jun 2026)
+
+| Domän | DNS-hint |
+|-------|----------|
+| `skaffu.com` | **NXDOMAIN** (`Resolve-DnsName`, jun 2026) |
+| `skaffu.se` | **NXDOMAIN** (samma kontroll) |
+
+*Bekräfta ledighet i Cloudflare Registrar innan köp — DNS-hint är inte garanti.*
+
+### Brand och copy (exempel)
+
+| Kontext | Exempel |
+|---------|---------|
+| **Uttal / URL** | *Skaffu punkt com* |
+| **Hero** | *”Skaffu — skafferiet du faktiskt har koll på.”* |
+| **Undertitel** | *Skanna först. Håll koll. Handla smart — utan att gissa.* (kan ligga kvar från `BRAND.md`) |
+| **App Store / undertitel** | *Home Pantry* med *”av Skaffu”* eller *Skaffu — hemma i skafferiet* tills full rebrand. |
+| **Kort pitch** | *Skaffu är lagret hemma: skanna, se vad som finns, få en smart inköpslista.* |
+
+Ton: varm, köksnära, lite lekfull — balansera med tydlig nytta i hero så det inte bara känns “gulligt”.
+
+### Risker
+
+| Risk | Kommentar |
+|------|-----------|
+| **Ljudlikhet Skaffa** | [Skaffa](https://skaffa.fo) (Färöarna, matleverans) — annan marknad/TLD men liknande uttal; tydlig svensk copy och visuellt varumärke minskar förväxling. |
+| **“Cute”-ton** | *Skaffu* kan upplevas mindre enterprise än t.ex. `skannhem` — kompensera med proffsig produktcopy, integritetspolicy och stabil UX. |
+| **`.com` vs `.se` för SV-ICP** | Vissa användare förväntar `.se`; överväg defensiv `skaffu.se` när registrar är vald (ej Cloudflare). |
 
 ---
 
@@ -60,17 +104,17 @@ Ny riktning: **professionellt**, **rent svenskt uttal**, **kort**, **ingen obsky
 
 ### TLD
 
-| TLD | Rekommendation |
-|-----|----------------|
-| **`.se`** | Primär — lokal trust, SV-ICP |
-| **`.com`** | Defensiv backup om ledig (`skannhem.com` gav NXDOMAIN-hint maj 2026) |
+| TLD | Rekommendation (v3) |
+|-----|---------------------|
+| **`.com`** | **Primär apex** — `skaffu.com` via Cloudflare Registrar |
+| **`.se`** | Defensiv / lokal trust senare — registrera hos Internetstiftelsen, Loopia m.fl. (ej Cloudflare Registrar) |
 | **`.app`** | Endast redirect/skydd — inte apex för mormor-testet |
 
 ### Intern vs publikt namn
 
 - Repo, Firebase-projekt och kod: **`home-pantry`** — oförändrat.
-- Publik domän + marknads-URL: **nytt svenskt namn** (tabell ovan).
-- App Store / UI: kan visa *Home Pantry* med undertitel på svenska (*”Skanna hemma”*) tills/fullständig rebrand.
+- Publik domän + marknads-URL: **`skaffu.com`** (varumärke *Skaffu*).
+- App Store / UI: kan visa *Home Pantry* med undertitel kopplad till *Skaffu* tills full rebrand.
 
 ---
 
@@ -267,13 +311,15 @@ Poäng: **Proffsighet**, **SV-uttal**, **Brand fit** (scan-first, butiksneutral)
 
 ---
 
-## 5. Tillgänglighetskontroll — toppkandidater (maj 2026)
+## 5. Tillgänglighetskontroll — toppkandidater (jun 2026)
 
 Metod: `Resolve-DnsName` (Windows) + webbsökning. **Registrar kan visa annat.**
 
 | Domän | DNS-hint | Webbsök / konkurrens |
 |-------|----------|----------------------|
-| `skannhem.se` | **NXDOMAIN** | Ingen etablerad aktör hittad |
+| **`skaffu.com`** | **NXDOMAIN** (jun 2026) | Primär v3 — verifiera i Cloudflare Registrar |
+| **`skaffu.se`** | **NXDOMAIN** (jun 2026) | Defensiv `.se` — ej Cloudflare-registrering |
+| `skannhem.se` | **NXDOMAIN** | Ingen etablerad aktör hittad (v2-arkiv) |
 | `skannhem.com` | **NXDOMAIN** | — |
 | `hemlagret.se` | **NXDOMAIN** | Ej förväxlas med `mittlager.se` (upptagen) |
 | `laghem.se` | **NXDOMAIN** | — |
@@ -290,31 +336,26 @@ Metod: `Resolve-DnsName` (Windows) + webbsökning. **Registrar kan visa annat.**
 
 ---
 
-## 6. Rekommendation (ny)
+## 6. Rekommendation (v3 — gällande)
 
-### Primär: **`skannhem.se`**
+### Primär: **`skaffu.com`**
 
-1. **Professionellt och svenskt** — inga lånord; två klara stavelser.
-2. **Minnesvärt** — speglar tagline (*Skanna först*) och kärnflöde (streckkod, kvitto, foto).
-3. **Brand fit** — butiksneutral “hem”; rymmer kyl, frys, skafferi utan att låsa till en plats.
-4. **Konkurrens** — avstår från Matdags-`*dags*`, Skafferikoll-`*koll*`, Pantrist-ljud, ICA-lista-namn.
-5. **Indie-budget** — en `.se` + ev. `skannhem.com` som defensiv (~200–400 kr/år).
-6. **Repo** — `home-pantry` oförändrat; marknad kan säga *”Skannhem — skanna det du har hemma”* med Home Pantry som undertitel tills rebrand.
+1. **Produktbeslut** — kort, minnesvärt varumärke (*skafferi* → *skaffu*), SV+EN-vänligt.
+2. **Registrar** — köp och DNS via **Cloudflare** (plan enligt produktägare).
+3. **`.se`** — Cloudflare stödjer inte `.se`; vid behov senare: Internetstiftelsen / Loopia för `skaffu.se` (DNS-hint NXDOMAIN jun 2026).
+4. **Repo** — **`home-pantry`** oförändrat internt; publikt *Skaffu* på `skaffu.com`.
+5. **Riskmedvetenhet** — ljudlikhet **Skaffa** (FO); håll copy tydligt svensk hushållstjänst; balansera “cute” med proffsig UX.
 
-**Kommunikationsexempel:** *Skannhem punkt se* · Hero: *”Skanna hemma. Handla smart — utan att gissa.”*
+**Kommunikationsexempel:** *Skaffu punkt com* · Hero: *”Skaffu — skafferiet du faktiskt har koll på.”*
 
-### Backup 1: **`hemlagret.se`**
+### Defensiv (valfritt, senare)
 
-Välj om ni vill betona **lager/inventering** framför scan i domänen — mer “seriös hushållstjänst”, något längre i tal.
-
-### Backup 2: **`laghem.se`**
-
-Välj om ni prioriterar **kort varumärke** och accepterar en extra förklaringsrad i hero/App Store.
-
-### Defensiv (valfritt)
-
-- `skannhem.com` om ledig i registrar (DNS-hint NXDOMAIN maj 2026).
+- **`skaffu.se`** — lokal trust; annan registrar än Cloudflare.
 - **Registrera inte** `hemkoll.se` om ni expanderar internationellt — krock med bostads-`hemkoll.com`.
+
+### Arkiv (v2 — ej primär längre)
+
+- `skannhem.se`, `hemlagret.se`, `laghem.se` — kvar i listor ovan som research; ersatta av Skaffu-beslutet.
 
 ### Vad ni bör undvika (uppdaterat)
 
@@ -334,25 +375,27 @@ Välj om ni prioriterar **kort varumärke** och accepterar en extra förklarings
 
 ## 7. Beslutschecklista (ägare)
 
-- [ ] Smaka på topp 3 i tal: **skannhem**, **hemlagret**, **laghem** (telefon-test med 2–3 användare).
-- [ ] Verifiera ledighet i registrar för primär + backup.
-- [ ] Köp primär `.se` (+ ev. defensiv `.com`).
-- [ ] Besluta publikt produktnamn vs intern `Home Pantry` (undertitel vs rebrand).
-- [ ] Koppla custom domain i Firebase ([`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md)).
+- [x] Primär domän vald: **`skaffu.com`** (jun 2026 v3).
+- [ ] Verifiera `skaffu.com` ledig i **Cloudflare Registrar** (DNS-hint NXDOMAIN jun 2026).
+- [ ] Registrera **`skaffu.com`** via Cloudflare; planera ev. `skaffu.se` separat (Internetstiftelsen / Loopia) om önskat.
+- [ ] Smaka på *Skaffu* i tal (telefon-test); notera risk vs **Skaffa** och “cute”-ton.
+- [ ] Besluta publikt *Skaffu* vs intern **Home Pantry** i UI (undertitel vs rebrand).
+- [ ] Koppla custom domain i Firebase ([`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md)).
 - [ ] Uppdatera `PUBLIC_ORIGIN` / `ORIGIN`; Turnstile hostnames ([`CAPTCHA.md`](./CAPTCHA.md)).
-- [ ] Uppdatera marknads-copy/UTM när apex står.
+- [ ] Uppdatera marknads-copy/UTM till `skaffu.com` när apex står.
 
 ---
 
 ## 8. Efter köp: Firebase, miljövariabler och Turnstile
 
-Oförändrat tekniskt flöde — se [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md), [`CAPTCHA.md`](./CAPTCHA.md), [`EMAIL.md`](./EMAIL.md). **En domän, en deploy** (`/` marknad, `/login` app).
+Oförändrat tekniskt flöde — se [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md), [`CAPTCHA.md`](./CAPTCHA.md), [`EMAIL.md`](./EMAIL.md). **En domän, en deploy** (`/` marknad, `/login` app).
 
 ---
 
 ## Relaterade dokument
 
-- [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md) — teknisk koppling Firebase
+- [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md) — steg-för-steg skaffu.com (Cloudflare + Firebase)
+- [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md) — generisk custom domain-guide (äldre homepantry-exempel)
 - [`CAPTCHA.md`](./CAPTCHA.md) — Turnstile hostnames vid domänbyte
 - [`COMPETITIVE_ANALYSIS.md`](./COMPETITIVE_ANALYSIS.md) — Matdags, Skafferikoll, SEO, GTM
 - [`BRAND.md`](./BRAND.md) — ton och visuellt varumärke
@@ -365,4 +408,5 @@ Oförändrat tekniskt flöde — se [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md), [`
 | Version | Innehåll |
 |---------|----------|
 | v1 (maj 2026) | `homepantry.se`, `hemskafferiet.se`, `hemmapantry.se` som toppval |
-| **v2 (maj 2026)** | Omprövning efter SV produktägarfeedback; ny lista utan *pantry*; primär **`skannhem.se`** |
+| v2 (maj 2026) | Omprövning efter SV produktägarfeedback; ny lista utan *pantry*; primär **`skannhem.se`** |
+| **v3 (jun 2026)** | Primär **`skaffu.com`** via Cloudflare; *Skaffu*-varumärke; `.se` senare via annan registrar; repo **`home-pantry`** oförändrat |

@@ -103,7 +103,7 @@
 			"loginLink": "Logga in",
 			"captchaLabel": "Bekräfta att du inte är en robot",
 			"captchaLoadError": "Captcha kunde inte laddas. Uppdatera sidan och försök igen.",
-			"captchaDomainError": "Captcha kunde inte laddas för den här webbadressen. Prova https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app/register eller kontakta support."
+			"captchaDomainError": "Captcha kunde inte laddas för den här webbadressen. Prova att öppna appen via den officiella webbadressen eller kontakta support."
 		}
 	},
 	"home": {
@@ -361,7 +361,7 @@
 			"lead": "Lägg till en genväg på hemskärmen så öppnar du skafferiet med ett tryck — kameran och offline-läge fungerar bättre i den installerade vyn.",
 			"alreadyInstalled": "Du använder redan den installerade appen. Bra jobbat!",
 			"iosTitle": "iPhone (Safari)",
-			"iosStep1": "Öppna home-pantry--home-pantry-4bee5.europe-west4.hosted.app i Safari (inte inbyggd webbläsare i andra appar).",
+			"iosStep1": "Öppna {hostname} i Safari (inte inbyggd webbläsare i andra appar).",
 			"iosStep2": "Tryck på Dela-knappen (fyrkant med pil uppåt).",
 			"iosStep3": "Välj Lägg till på hemskärmen och bekräfta.",
 			"iosHint": "På iPad: samma steg i Safari.",

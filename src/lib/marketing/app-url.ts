@@ -1,7 +1,7 @@
 import { env as publicEnv } from '$env/dynamic/public';
 
-/** Fallback when no env or request origin (SSR/build). Update via PUBLIC_ORIGIN in production. */
-const DEFAULT_APP_URL = 'https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app';
+/** Dev/SSR fallback when PUBLIC_ORIGIN is unset — production must set PUBLIC_ORIGIN (see apphosting.yaml). */
+const DEFAULT_APP_URL = 'http://localhost:5173';
 
 function trimOrigin(value: string | undefined): string | undefined {
 	const trimmed = value?.trim();

@@ -37,6 +37,10 @@ describe('resolveAppOrigin', () => {
 	it('falls back to request origin', () => {
 		expect(resolveAppOrigin('https://homepantry.com')).toBe('https://homepantry.com');
 	});
+
+	it('falls back to localhost when no env or request origin', () => {
+		expect(resolveAppOrigin()).toBe('http://localhost:5173');
+	});
 });
 
 describe('marketingCanonicalUrl', () => {
