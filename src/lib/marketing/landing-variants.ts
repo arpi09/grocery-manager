@@ -49,17 +49,19 @@ export function isLandingHeroVariant(value: string | null | undefined): value is
 	return value === 'a' || value === 'b';
 }
 
-/** Query `?hero=` wins, then cookie, then `PUBLIC_LANDING_VARIANT`, default `a`. */
+/** Query `?hero=` wins, then cookie (if allowed), then `PUBLIC_LANDING_VARIANT`, default `a`. */
 export function resolveLandingVariant(input: {
 	queryHero?: string | null;
 	cookieVariant?: string | null;
 	envVariant?: string | null;
+	/** When false, `landing_variant` cookie is ignored (essential-only / no consent yet). */
+	allowVariantCookie?: boolean;
 }): LandingHeroVariant {
 	const fromQuery = input.queryHero?.trim().toLowerCase();
 	if (isLandingHeroVariant(fromQuery)) {
 		return fromQuery;
 	}
-	if (isLandingHeroVariant(input.cookieVariant)) {
+	if (input.allowVariantCookie !== false && isLandingHeroVariant(input.cookieVariant)) {
 		return input.cookieVariant;
 	}
 	const fromEnv = input.envVariant?.trim().toLowerCase();

@@ -56,6 +56,12 @@
 		"date": "Datum",
 		"titleField": "Titel"
 	},
+	"cookieConsent": {
+		"message": "Vi använder cookies för inloggning och för att förbättra sidan.",
+		"privacyLink": "Läs integritetspolicyn",
+		"accept": "Godkänn",
+		"essentialOnly": "Endast nödvändiga"
+	},
 	"nav": {
 		"home": "Hem",
 		"inventory": "Skafferi",

@@ -11,6 +11,8 @@ import {
 	resolveLandingVariant
 } from '$lib/marketing/landing-variants';
 import { env as publicEnv } from '$env/dynamic/public';
+import { hasAnalyticsConsent } from '$lib/cookie-consent';
+import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { getOrSetAnalyticsVisitorId } from '$lib/server/analytics-visitor';
 import { recordSignupCompleteEvent } from '$lib/server/marketing-analytics';
 import { registerSchema } from '$lib/validation/auth.schemas';
@@ -56,15 +58,17 @@ export const actions: Actions = {
 				parsed.data.email,
 				parsed.data.password
 			);
+			const analyticsAllowed = hasAnalyticsConsent(readCookieConsent(event.cookies));
 			const variant = resolveLandingVariant({
 				cookieVariant: event.cookies.get(LANDING_VARIANT_COOKIE),
-				envVariant: publicEnv.PUBLIC_LANDING_VARIANT
+				envVariant: publicEnv.PUBLIC_LANDING_VARIANT,
+				allowVariantCookie: analyticsAllowed
 			});
 			recordSignupCompleteEvent(
 				event.locals.pmfService,
 				user.id,
 				variant,
-				getOrSetAnalyticsVisitorId(event.cookies)
+				analyticsAllowed ? getOrSetAnalyticsVisitorId(event.cookies) : null
 			);
 			await createSession(event, user.id);
 		} catch (error) {

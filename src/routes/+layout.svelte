@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import '../app.css';
+	import CookieConsentBanner from '$lib/components/molecules/CookieConsentBanner.svelte';
 	import NavigationProgress from '$lib/components/molecules/NavigationProgress.svelte';
 	import { resolveTheme, type ThemePreference } from '$lib/domain/theme';
 	import { initLocale } from '$lib/i18n';
@@ -68,3 +69,4 @@
 
 <NavigationProgress />
 {@render children()}
+<CookieConsentBanner cookieConsent={data.cookieConsent ?? null} />

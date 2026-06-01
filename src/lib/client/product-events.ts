@@ -1,3 +1,5 @@
+import { hasClientAnalyticsConsent } from '$lib/client/cookie-consent';
+
 const CLIENT_EVENT_TYPES = [
 	'register_click',
 	'pwa_banner_dismiss',
@@ -11,10 +13,16 @@ export interface TrackProductEventOptions {
 	metadata?: Record<string, unknown>;
 }
 
+const PUBLIC_CLIENT_EVENTS = new Set<ClientProductEventType>(['register_click']);
+
 export async function trackProductEvent(
 	eventType: ClientProductEventType,
 	metadata?: Record<string, unknown>
 ): Promise<void> {
+	if (PUBLIC_CLIENT_EVENTS.has(eventType) && !hasClientAnalyticsConsent()) {
+		return;
+	}
+
 	try {
 		await fetch('/api/product-events', {
 			method: 'POST',

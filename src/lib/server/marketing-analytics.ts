@@ -1,6 +1,8 @@
 import type { Cookies } from '@sveltejs/kit';
 import type { PmfService } from '$lib/application/pmf.service';
 import type { ProductEventType } from '$lib/domain/pmf';
+import { hasAnalyticsConsent } from '$lib/cookie-consent';
+import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import type { LandingHeroVariant } from '$lib/marketing/landing-variants';
 import { getOrSetAnalyticsVisitorId } from '$lib/server/analytics-visitor';
 import { recordProductEvent } from '$lib/server/product-events';
@@ -18,7 +20,14 @@ export interface RecordMarketingEventOptions {
 }
 
 export function recordMarketingEvent(options: RecordMarketingEventOptions): void {
+	if (!hasAnalyticsConsent(readCookieConsent(options.cookies))) {
+		return;
+	}
+
 	const visitorId = getOrSetAnalyticsVisitorId(options.cookies);
+	if (!visitorId) {
+		return;
+	}
 
 	if (options.eventType === 'landing_view') {
 		if (options.cookies.get(LANDING_VIEW_SESSION_COOKIE) === options.variant) {

@@ -1,9 +1,11 @@
 import { isThemePreference } from '$lib/domain/theme';
+import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { resolveThemeForRequest } from '$lib/server/theme-cookie';
 import type { LayoutServerLoad } from './$types';
 
-export const load: LayoutServerLoad = async ({ locals, request }) => {
+export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 	const locale = locals.locale;
+	const cookieConsent = readCookieConsent(cookies);
 
 	if (!locals.user) {
 		return {
@@ -13,7 +15,8 @@ export const load: LayoutServerLoad = async ({ locals, request }) => {
 			resolvedTheme: null,
 			households: [],
 			activeHousehold: null,
-			householdRole: null
+			householdRole: null,
+			cookieConsent
 		};
 	}
 
@@ -37,6 +40,7 @@ export const load: LayoutServerLoad = async ({ locals, request }) => {
 
 	return {
 		locale,
+		cookieConsent,
 		user: {
 			id: locals.user.id,
 			email: locals.user.email,

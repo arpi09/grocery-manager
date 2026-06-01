@@ -20,6 +20,12 @@ describe('resolveLandingVariant', () => {
 	it('defaults to a for unknown values', () => {
 		expect(resolveLandingVariant({ queryHero: 'x', cookieVariant: 'z' })).toBe('a');
 	});
+
+	it('skips cookie when allowVariantCookie is false', () => {
+		expect(
+			resolveLandingVariant({ cookieVariant: 'b', allowVariantCookie: false, envVariant: 'a' })
+		).toBe('a');
+	});
 });
 
 describe('getLandingHeroCopy', () => {

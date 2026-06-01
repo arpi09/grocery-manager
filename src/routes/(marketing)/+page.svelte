@@ -5,12 +5,18 @@
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
 	import MarketingFeatureCard from '$lib/components/marketing/MarketingFeatureCard.svelte';
 	import MarketingStepCard from '$lib/components/marketing/MarketingStepCard.svelte';
+	import { writeLandingVariantSession } from '$lib/client/landing-variant-session';
 	import { trackProductEvent } from '$lib/client/product-events';
+	import { onMount } from 'svelte';
 
 	let { data } = $props();
 
 	const { marketing: content, loginUrl, registerUrl, hero } = data;
 	const previewFeatures = content.features.items.slice(0, 3);
+
+	onMount(() => {
+		writeLandingVariantSession(data.landingVariant);
+	});
 
 	function trackRegisterClick() {
 		void trackProductEvent('register_click', { variant: data.landingVariant });

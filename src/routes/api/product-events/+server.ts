@@ -1,4 +1,6 @@
 import { json } from '@sveltejs/kit';
+import { hasAnalyticsConsent } from '$lib/cookie-consent';
+import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { PRODUCT_EVENT_TYPES, type ProductEventType } from '$lib/domain/pmf';
 import {
 	isLandingHeroVariant,
@@ -25,12 +27,13 @@ function isAllowedEventType(value: unknown): value is ProductEventType {
 
 function resolveVariant(
 	bodyVariant: unknown,
-	cookieVariant: string | undefined
+	cookieVariant: string | undefined,
+	allowVariantCookie: boolean
 ): LandingHeroVariant {
 	if (typeof bodyVariant === 'string' && isLandingHeroVariant(bodyVariant)) {
 		return bodyVariant;
 	}
-	if (isLandingHeroVariant(cookieVariant)) {
+	if (allowVariantCookie && isLandingHeroVariant(cookieVariant)) {
 		return cookieVariant;
 	}
 	return 'a';
@@ -60,6 +63,14 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 		return json({ ok: false, error: 'Unauthorized' }, { status: 401 });
 	}
 
+	const consent = readCookieConsent(cookies);
+	const analyticsAllowed = hasAnalyticsConsent(consent);
+
+	if (isPublic && !locals.user && !analyticsAllowed) {
+		return json({ ok: true, skipped: true });
+	}
+
+	const allowVariantCookie = analyticsAllowed;
 	const visitorId = getOrSetAnalyticsVisitorId(cookies);
 	const metadata =
 		body.metadata && typeof body.metadata === 'object' && !Array.isArray(body.metadata)
@@ -67,7 +78,11 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 			: {};
 
 	if (eventType === 'register_click') {
-		metadata.variant = resolveVariant(metadata.variant, cookies.get(LANDING_VARIANT_COOKIE));
+		metadata.variant = resolveVariant(
+			metadata.variant,
+			cookies.get(LANDING_VARIANT_COOKIE),
+			allowVariantCookie
+		);
 	}
 
 	recordProductEvent(locals.pmfService, {
@@ -76,7 +91,7 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 		eventType,
 		metadata: {
 			...metadata,
-			visitorId
+			...(visitorId ? { visitorId } : {})
 		}
 	});
 

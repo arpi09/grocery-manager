@@ -56,6 +56,12 @@
 		"date": "Date",
 		"titleField": "Title"
 	},
+	"cookieConsent": {
+		"message": "We use cookies for login and to improve the site.",
+		"privacyLink": "Read privacy policy",
+		"accept": "Accept",
+		"essentialOnly": "Essential only"
+	},
 	"nav": {
 		"home": "Home",
 		"inventory": "Pantry",
