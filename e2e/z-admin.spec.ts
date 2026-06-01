@@ -14,7 +14,7 @@ test.describe('Admin', () => {
 		await expect(page.getByRole('heading', { name: 'Admin', level: 1 })).toBeVisible({
 			timeout: 15_000
 		});
-		await expect(page.getByRole('heading', { name: /Anv.ndare/i, level: 2 })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Hälsa & användning/i, level: 2 })).toBeVisible({
 			timeout: 15_000
 		});
 	});
