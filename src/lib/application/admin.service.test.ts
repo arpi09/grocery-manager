@@ -11,6 +11,8 @@ describe('AdminService', () => {
 			getDashboardStats: vi.fn(),
 			listUsers: vi.fn(),
 			listRecentErrors: vi.fn(),
+			listRecentErrorSummaries: vi.fn(),
+			getErrorStack: vi.fn(),
 			setUserRole: vi.fn(),
 			setUserPetsEnabled: vi.fn(),
 			invalidateAllSessions: vi.fn(),
@@ -40,7 +42,7 @@ describe('AdminService', () => {
 		expect(result).toEqual(stats);
 	});
 
-	it('lists users', async () => {
+	it('lists users with pagination', async () => {
 		const users = [
 			{
 				id: 'user-1',
@@ -55,11 +57,12 @@ describe('AdminService', () => {
 				inventoryCount: 5
 			}
 		];
-		vi.mocked(admin.listUsers).mockResolvedValue(users);
+		vi.mocked(admin.listUsers).mockResolvedValue({ users, total: 1 });
 
-		const result = await service.listUsers();
+		const result = await service.listUsers(25, 0);
 
-		expect(result).toEqual(users);
+		expect(result).toEqual({ users, total: 1 });
+		expect(admin.listUsers).toHaveBeenCalledWith(25, 0);
 	});
 
 	it('sets user role when actor is not the target', async () => {

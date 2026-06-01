@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { Locale } from '$lib/i18n/locale';
 import { translate } from '$lib/i18n/messages';
+import { isAdmin } from '$lib/server/auth';
 import { getOpenAiApiKey, OPENAI_NOT_CONFIGURED_KEY } from '$lib/server/openai';
 
 type AuthenticatedLocals = App.Locals & { user: NonNullable<App.Locals['user']> };
@@ -21,6 +22,24 @@ export function requireUser(locals: App.Locals): RequireUserResult {
 		};
 	}
 	return { authorized: true, user: locals.user };
+}
+
+/** Returns 401/403 JSON when the session user is missing or not admin. */
+export function requireAdmin(locals: App.Locals): RequireUserResult {
+	const auth = requireUser(locals);
+	if (!auth.authorized) {
+		return auth;
+	}
+	if (!isAdmin(auth.user)) {
+		return {
+			authorized: false,
+			response: json(
+				{ error: translate(locals.locale, 'errors.api.unauthorized') },
+				{ status: 403 }
+			)
+		};
+	}
+	return auth;
 }
 
 /**

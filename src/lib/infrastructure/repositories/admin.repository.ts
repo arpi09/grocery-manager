@@ -1,7 +1,7 @@
 import { count, desc, eq, gt, gte, sql } from 'drizzle-orm';
 import { latestLastSeenAt } from '$lib/domain/admin-stats';
 import { ERROR_LOG_RETENTION_MS } from '$lib/domain/error-log';
-import type { AppErrorEntry } from '$lib/domain/error-log';
+import type { AppErrorEntry, AppErrorSummary } from '$lib/domain/error-log';
 import { isUserActiveNow } from '$lib/domain/presence';
 import type { UserRole } from '$lib/domain/user';
 import { db, getDatabaseBackend, type DatabaseBackend } from '$lib/infrastructure/db';
@@ -44,8 +44,10 @@ export interface AdminDashboardStats {
 
 export interface IAdminRepository {
 	getDashboardStats(): Promise<AdminDashboardStats>;
-	listUsers(): Promise<AdminUserSummary[]>;
+	listUsers(limit: number, offset: number): Promise<{ users: AdminUserSummary[]; total: number }>;
 	listRecentErrors(limit: number): Promise<AppErrorEntry[]>;
+	listRecentErrorSummaries(limit: number): Promise<AppErrorSummary[]>;
+	getErrorStack(id: string): Promise<string | null>;
 	setUserRole(userId: string, role: UserRole): Promise<void>;
 	setUserPetsEnabled(userId: string, enabled: boolean): Promise<void>;
 	invalidateAllSessions(): Promise<number>;
@@ -132,8 +134,16 @@ export class DrizzleAdminRepository implements IAdminRepository {
 		return this.errorLog.listRecent(limit);
 	}
 
-	async listUsers(): Promise<AdminUserSummary[]> {
-		const [users, inventoryCounts, activeSessionUserIds] = await Promise.all([
+	listRecentErrorSummaries(limit: number): Promise<AppErrorSummary[]> {
+		return this.errorLog.listRecentSummaries(limit);
+	}
+
+	getErrorStack(id: string): Promise<string | null> {
+		return this.errorLog.getStack(id);
+	}
+
+	async listUsers(limit: number, offset: number): Promise<{ users: AdminUserSummary[]; total: number }> {
+		const [users, inventoryCounts, activeSessionUserIds, [totalRow]] = await Promise.all([
 			db
 				.select({
 					id: userTable.id,
@@ -145,7 +155,9 @@ export class DrizzleAdminRepository implements IAdminRepository {
 					lastSeenAt: userTable.lastSeenAt
 				})
 				.from(userTable)
-				.orderBy(desc(userTable.createdAt)),
+				.orderBy(desc(userTable.createdAt))
+				.limit(limit)
+				.offset(offset),
 			db
 				.select({
 					userId: inventoryItemTable.userId,
@@ -153,25 +165,29 @@ export class DrizzleAdminRepository implements IAdminRepository {
 				})
 				.from(inventoryItemTable)
 				.groupBy(inventoryItemTable.userId),
-			this.getActiveSessionUserIds()
+			this.getActiveSessionUserIds(),
+			db.select({ count: count() }).from(userTable)
 		]);
 
 		const countByUser = new Map(
 			inventoryCounts.map((row) => [row.userId, Number(row.count)])
 		);
 
-		return users.map((user) => ({
-			id: user.id,
-			email: user.email,
-			role: user.role as UserRole,
-			petsEnabled: user.petsEnabled,
-			signupUtmSource: user.signupUtmSource,
-			createdAt: user.createdAt,
-			lastSeenAt: user.lastSeenAt,
-			isActiveNow: isUserActiveNow(user.lastSeenAt),
-			hasActiveSession: activeSessionUserIds.has(user.id),
-			inventoryCount: countByUser.get(user.id) ?? 0
-		}));
+		return {
+			total: totalRow?.count ?? 0,
+			users: users.map((user) => ({
+				id: user.id,
+				email: user.email,
+				role: user.role as UserRole,
+				petsEnabled: user.petsEnabled,
+				signupUtmSource: user.signupUtmSource,
+				createdAt: user.createdAt,
+				lastSeenAt: user.lastSeenAt,
+				isActiveNow: isUserActiveNow(user.lastSeenAt),
+				hasActiveSession: activeSessionUserIds.has(user.id),
+				inventoryCount: countByUser.get(user.id) ?? 0
+			}))
+		};
 	}
 
 	async setUserRole(userId: string, role: UserRole) {

@@ -53,7 +53,7 @@
 			<p class="stat-value">{stats.errorCount7Days}</p>
 		</Card>
 
-		<Card href="#felloggar" interactive>
+		<Card href="/admin?tab=logs" interactive>
 			<p class="stat-label">{t('admin.statErrorsTotal')}</p>
 			<p class="stat-value">{stats.errorCountTotal}</p>
 			<p class="stat-note">{t('admin.viewErrorLogs')}</p>

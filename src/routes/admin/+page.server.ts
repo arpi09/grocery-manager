@@ -7,81 +7,24 @@ import {
 	adminSetRoleSchema,
 	adminUserIdSchema
 } from '$lib/validation/admin.schemas';
-import {
-	ERROR_LOG_ADMIN_LIST_DEFAULT,
-	ERROR_LOG_ADMIN_LIST_MAX
-} from '$lib/domain/error-log';
-import {
-	PRODUCT_FEEDBACK_LIST_DEFAULT,
-	PRODUCT_FEEDBACK_LIST_MAX
-} from '$lib/domain/product-feedback';
-import { WAITLIST_LIST_DEFAULT, WAITLIST_LIST_MAX } from '$lib/domain/waitlist';
-import { STRIPE_READINESS_GATES } from '$lib/domain/plan';
 import { appSettingsService } from '$lib/server/di';
 import { fail, redirect } from '@sveltejs/kit';
 import { translate } from '$lib/i18n/messages';
 import type { Actions, PageServerLoad } from './$types';
 
-function parseFeedbackLimit(raw: string | null): number {
-	const parsed = Number(raw ?? PRODUCT_FEEDBACK_LIST_DEFAULT);
-	if (!Number.isFinite(parsed)) {
-		return PRODUCT_FEEDBACK_LIST_DEFAULT;
-	}
-	return Math.min(PRODUCT_FEEDBACK_LIST_MAX, Math.max(1, Math.floor(parsed)));
-}
-
-function parseErrorLogLimit(raw: string | null): number {
-	const parsed = Number(raw ?? ERROR_LOG_ADMIN_LIST_DEFAULT);
-	if (!Number.isFinite(parsed)) {
-		return ERROR_LOG_ADMIN_LIST_DEFAULT;
-	}
-	return Math.min(
-		ERROR_LOG_ADMIN_LIST_MAX,
-		Math.max(1, Math.floor(parsed))
-	);
-}
-
-function parseWaitlistLimit(raw: string | null): number {
-	const parsed = Number(raw ?? WAITLIST_LIST_DEFAULT);
-	if (!Number.isFinite(parsed)) {
-		return WAITLIST_LIST_DEFAULT;
-	}
-	return Math.min(WAITLIST_LIST_MAX, Math.max(1, Math.floor(parsed)));
-}
-
 export const load: PageServerLoad = async ({ parent, locals, url }) => {
 	const { user } = await parent();
-	const errorLimit = parseErrorLogLimit(url.searchParams.get('errorLimit'));
-	const feedbackLimit = parseFeedbackLimit(url.searchParams.get('feedbackLimit'));
-	const waitlistLimit = parseWaitlistLimit(url.searchParams.get('waitlistLimit'));
-	const [stats, users, errors, pmfWeeklyReview, productFeedback, waitlistCount, waitlistEntries, aiUsage, emailSending] =
-		await Promise.all([
+	const tab = url.searchParams.get('tab');
+	const [stats, emailSending] = await Promise.all([
 		locals.adminService.getDashboardStats(),
-		locals.adminService.listUsers(),
-		locals.adminService.listRecentErrors(errorLimit),
-		locals.pmfService.getWeeklyReview(),
-		locals.productFeedbackService.listRecent(feedbackLimit),
-		locals.waitlistService.count(),
-		locals.waitlistService.listRecent(waitlistLimit),
-		locals.aiUsageAdminService.getSummary(),
 		appSettingsService.getEmailSendingStatus()
 	]);
 
 	return {
 		user,
 		stats,
-		users,
-		errors,
-		errorLimit,
-		feedbackLimit,
-		waitlistLimit,
-		waitlistCount,
-		waitlistTarget: STRIPE_READINESS_GATES.payingWaitlistMin,
-		waitlistEntries,
-		pmfWeeklyReview,
-		productFeedback,
-		aiUsage,
-		emailSending
+		emailSending,
+		tab
 	};
 };
 

@@ -15,6 +15,11 @@ export interface AppErrorEntry {
 	createdAt: Date;
 }
 
+/** Admin list row without stack payload (loaded on demand). */
+export type AppErrorSummary = Omit<AppErrorEntry, 'stack'> & {
+	hasStack: boolean;
+};
+
 export interface RecordAppErrorInput {
 	message: string;
 	stack?: string | null;
