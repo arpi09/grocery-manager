@@ -183,7 +183,11 @@
 					action="?/updateExpiryReminders"
 					class="expiry-reminders-form"
 					bind:this={expiryRemindersForm}
-					use:enhance={bindSubmitting((v) => (expiryRemindersSubmitting = v))}
+					use:enhance={bindSubmitting(
+						(v) => (expiryRemindersSubmitting = v),
+						(formData) =>
+							formData.set('enabled', expiryRemindersEnabled ? 'true' : 'false')
+					)}
 				>
 					<input type="hidden" name="enabled" value={expiryRemindersEnabled ? 'true' : 'false'} />
 					<Toggle

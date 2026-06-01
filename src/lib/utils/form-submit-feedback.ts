@@ -1,8 +1,12 @@
 import type { SubmitFunction } from '@sveltejs/kit';
 
 /** SvelteKit `use:enhance` helper — toggles submitting while the action runs. */
-export function bindSubmitting(setSubmitting: (value: boolean) => void): SubmitFunction {
-	return () => {
+export function bindSubmitting(
+	setSubmitting: (value: boolean) => void,
+	syncFormData?: (formData: FormData) => void
+): SubmitFunction {
+	return ({ formData }) => {
+		syncFormData?.(formData);
 		setSubmitting(true);
 		return async ({ update }) => {
 			try {
