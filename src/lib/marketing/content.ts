@@ -99,13 +99,13 @@ export interface MarketingContent {
 }
 
 const sv: MarketingContent = {
-	siteName: 'Home Pantry',
-	tagline: 'Skanna först. Håll koll på skafferiet. Handla smart.',
+	siteName: 'Skaffu',
+	tagline: 'Skafferi, kyl och inköp på ett ställe.',
 	meta: {
-		title: 'Home Pantry — Butiksneutralt skafferi med skanning & kvitto-PDF',
+		title: 'Skaffu — butiksneutralt skafferi med skanning & kvitto-PDF',
 		description:
 			'Webbapp för kyl, frys och skafferi: streckkod, kvitto-PDF och smart inköpslista. Butiksneutralt — till skillnad från Matdags och ICA, utan spelifiering. Gratis att börja.',
-		ogTitle: 'Home Pantry — Skanna kvitto, slipp gissa vad som finns hemma',
+		ogTitle: 'Skaffu — skanna kvitto, slipp gissa vad som finns hemma',
 		ogDescription:
 			'Butiksneutralt skafferi med PDF-kvitto, utgångsdatum och hushållssync. Webb först — gratis att komma igång.'
 	},
@@ -122,9 +122,9 @@ const sv: MarketingContent = {
 		tryFree: 'Kom igång gratis'
 	},
 	landing: {
-		heroTitle: 'Skanna först. Slipp gissa vad som finns hemma.',
+		heroTitle: 'Skaffu — skafferiet du faktiskt har koll på.',
 		heroLead:
-			'Home Pantry är byggt kring snabb registrering — streckkod, kvitto eller foto — så du alltid vet vad som finns i kyl, frys och skafferi.',
+			'Skaffu är byggt kring snabb registrering — streckkod, kvitto eller foto — så du alltid vet vad som finns i kyl, frys och skafferi.',
 		heroSecondary:
 			'Planera måltider, få varningar innan varor går ut och låt inköpslistan fylla på sig utifrån det du faktiskt har.',
 		featuresTitle: 'Allt du behöver i köket',
@@ -141,7 +141,7 @@ const sv: MarketingContent = {
 			title: 'Funktioner — skanning, kvitto-PDF & smart inköpslista',
 			description:
 				'Streckkod, kvitto-PDF, utgångsdatum, måltidsplan och hushållssync — butiksneutralt skafferi som kompletterar Bring och Matdags.',
-			ogTitle: 'Home Pantry funktioner — lager som sanningskälla',
+			ogTitle: 'Skaffu funktioner — lager som sanningskälla',
 			ogDescription:
 				'PDF-kvitto, AI-skannar och inköpslista kopplad till lager. Webb först, utan spelifiering.'
 		},
@@ -186,11 +186,11 @@ const sv: MarketingContent = {
 	},
 	comparison: {
 		title: 'Jämfört med andra appar du redan känner',
-		lead: 'Ärlig bild — vi vill inte sälja in något du redan har löst bra. Här är när Home Pantry kompletterar eller skiljer sig.',
+		lead: 'Ärlig bild — vi vill inte sälja in något du redan har löst bra. Här är när Skaffu kompletterar eller skiljer sig.',
 		disclaimer:
 			'Bring!, ICA och Matdags är starka produkter i sina nischer. Vi fokuserar på butiksneutralt skafferi med lager som sanningskälla — inte på stammisrabatter eller gamification.',
 		themColumn: 'Det de gör bra',
-		usColumn: 'Det Home Pantry lägger till',
+		usColumn: 'Det Skaffu lägger till',
 		rows: [
 			{
 				competitor: 'Bring!',
@@ -246,7 +246,7 @@ const sv: MarketingContent = {
 		lead: 'Svar på det vi oftast får höra. Mer hjälp kommer här framöver.',
 		items: [
 			{
-				question: 'Kostar Home Pantry något?',
+				question: 'Kostar Skaffu något?',
 				answer:
 					'Du kan skapa konto och använda appen gratis med en generös kärnplan (lager, manuell lista, två hushållsmedlemmar). AI-tunga funktioner får begränsningar i gratisplanen; en Pro-plan med obegränsad AI och fler medlemmar kommer senare — vi meddelar i förväg innan något debiteras. Läs mer på /priser.'
 			},
@@ -271,29 +271,29 @@ const sv: MarketingContent = {
 					'AI (OpenAI) hjälper till att tolka kvitto, föreslå varor och ge inköps- och receptidéer. Vi skickar bara det som behövs för funktionen och använder API på ett sätt som inte tränar OpenAI:s modeller. Se integritetspolicyn för detaljer.'
 			},
 			{
-				question: 'Kan jag lägga till Home Pantry på hemskärmen?',
+				question: 'Kan jag lägga till Skaffu på hemskärmen?',
 				answer:
 					'Ja. Öppna appen i Safari (iPhone) eller Chrome (Android) och välj Lägg till på hemskärmen / Installera app. I appen under Inställningar → Lägg till på hemskärmen finns steg-för-steg-guide. På dator fungerar appen i webbläsaren.'
 			}
 		],
 		contactLabel: 'Hittar du inte svaret?',
 		contactLead: 'Skriv till oss så återkommer vi så snart vi kan.',
-		contactEmail: 'hello@homepantry.com'
+		contactEmail: 'hello@skaffu.com'
 	},
 	footer: {
-		tagline: 'Skanna först. Handla smart.',
-		rights: '© Home Pantry. Alla rättigheter förbehållna.'
+		tagline: 'Skafferi, kyl och inköp på ett ställe.',
+		rights: '© Skaffu. Alla rättigheter förbehållna.'
 	}
 };
 
 const en: MarketingContent = {
 	...sv,
-	tagline: 'Scan first. Know your pantry. Shop smarter.',
+	tagline: 'Pantry, fridge and shopping in one place.',
 	meta: {
-		title: 'Home Pantry — Store-neutral pantry with scanning & receipt PDF',
+		title: 'Skaffu — Store-neutral pantry with scanning & receipt PDF',
 		description:
 			'Web app for fridge, freezer and cupboard: barcode, receipt PDF and smart shopping list. Store-neutral — unlike Matdags and ICA, without gamification. Free to start.',
-		ogTitle: 'Home Pantry — Scan receipts, stop guessing what is at home',
+		ogTitle: 'Skaffu — Scan receipts, stop guessing what is at home',
 		ogDescription:
 			'Store-neutral pantry with PDF receipts, expiry dates and household sync. Web-first — free to get started.'
 	},
@@ -311,11 +311,11 @@ const en: MarketingContent = {
 	},
 	comparison: {
 		title: 'Compared to apps you may already use',
-		lead: 'An honest view — we are not here to replace what already works for you. Here is when Home Pantry complements or differs.',
+		lead: 'An honest view — we are not here to replace what already works for you. Here is when Skaffu complements or differs.',
 		disclaimer:
 			'Bring!, ICA and Matdags are strong in their niches. We focus on a store-neutral pantry with inventory as source of truth — not loyalty discounts or gamification.',
 		themColumn: 'What they do well',
-		usColumn: 'What Home Pantry adds',
+		usColumn: 'What Skaffu adds',
 		rows: [
 			{
 				competitor: 'Bring!',
@@ -342,9 +342,9 @@ const en: MarketingContent = {
 		ctaLead: 'Open the app or log in — start with one receipt or a few barcodes.'
 	},
 	landing: {
-		heroTitle: 'Scan first. Stop guessing what is at home.',
+		heroTitle: 'Skaffu — the pantry you actually keep track of.',
 		heroLead:
-			'Home Pantry is built around fast capture — barcode, receipt or photo — so you always know what is in fridge, freezer and cupboard.',
+			'Skaffu is built around fast capture — barcode, receipt or photo — so you always know what is in fridge, freezer and cupboard.',
 		heroSecondary:
 			'Plan meals, get warnings before items expire, and let the shopping list fill from what you actually have.',
 		featuresTitle: 'Everything you need in the kitchen',
@@ -361,7 +361,7 @@ const en: MarketingContent = {
 			title: 'Features — scanning, receipt PDF & smart shopping list',
 			description:
 				'Barcode, receipt PDF, expiry dates, meal plan and household sync — store-neutral pantry that complements Bring and Matdags.',
-			ogTitle: 'Home Pantry features — inventory as source of truth',
+			ogTitle: 'Skaffu features — inventory as source of truth',
 			ogDescription:
 				'PDF receipts, AI scans and shopping list tied to inventory. Web-first, without gamification.'
 		},
@@ -424,7 +424,7 @@ const en: MarketingContent = {
 		lead: 'Answers to what we hear most often. More help will appear here over time.',
 		items: [
 			{
-				question: 'Does Home Pantry cost anything?',
+				question: 'Does Skaffu cost anything?',
 				answer:
 					'You can create an account and use the app free on a generous core plan (inventory, manual list, two household members). AI-heavy features will have limits on the free plan; a Pro plan with unlimited AI and more members is coming later — we will notify you before any charge. See /priser for more.'
 			},
@@ -447,18 +447,18 @@ const en: MarketingContent = {
 					'AI (OpenAI) helps parse receipts, suggest items and give shopping and recipe ideas. We only send what is needed for the feature and use the API in a way that does not train OpenAI models. See the privacy policy for details.'
 			},
 			{
-				question: 'Can I add Home Pantry to my home screen?',
+				question: 'Can I add Skaffu to my home screen?',
 				answer:
 					'Yes. Open the app in Safari (iPhone) or Chrome (Android) and choose Add to Home Screen / Install app. In the app, go to Settings → Add to home screen for step-by-step instructions. On desktop, use the app in your browser.'
 			}
 		],
 		contactLabel: 'Cannot find your answer?',
 		contactLead: 'Email us and we will get back to you as soon as we can.',
-		contactEmail: 'hello@homepantry.com'
+		contactEmail: 'hello@skaffu.com'
 	},
 	footer: {
-		tagline: 'Scan first. Shop smart.',
-		rights: '© Home Pantry. All rights reserved.'
+		tagline: 'Pantry, fridge and shopping in one place.',
+		rights: '© Skaffu. All rights reserved.'
 	}
 };
 

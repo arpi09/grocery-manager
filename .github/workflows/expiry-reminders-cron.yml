@@ -3,6 +3,11 @@
 #
 # GitHub: secret CRON_SECRET, variable PRODUCTION_URL
 # Firebase: same CRON_SECRET via apphosting secrets — see docs/90_DAY_ROADMAP.md § Punkt 5
+#
+# TODO (efter skaffu.com Connected i Firebase): uppdatera repo variable PRODUCTION_URL till
+#   https://skaffu.com
+# Tills dess: https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app (samma som PUBLIC_ORIGIN)
+# Se docs/SKAFFU_DOMAIN_MIGRATION.md
 
 name: Expiry reminders cron
 

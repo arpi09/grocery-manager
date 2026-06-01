@@ -25,7 +25,7 @@
 <header class="header">
 	<div class="inner">
 		<a href="/" class="brand" aria-label={content.siteName} onclick={closeMenu}>
-			<AppLogo size="sm" showWordmark />
+			<AppLogo size="sm" showWordmark wordmark={content.siteName} />
 		</a>
 
 		<nav class="nav-desktop" aria-label="Webbplats">

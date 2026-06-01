@@ -13,9 +13,9 @@ export interface LandingHeroCopy {
 const heroByVariant: Record<MarketingLocale, Record<LandingHeroVariant, LandingHeroCopy>> = {
 	sv: {
 		a: {
-			heroTitle: 'Skanna först. Slipp gissa vad som finns hemma.',
+			heroTitle: 'Skaffu — skafferiet du faktiskt har koll på.',
 			heroLead:
-				'Home Pantry är byggt kring snabb registrering — streckkod, kvitto eller foto — så du alltid vet vad som finns i kyl, frys och skafferi.',
+				'Skaffu är byggt kring snabb registrering — streckkod, kvitto eller foto — så du alltid vet vad som finns i kyl, frys och skafferi.',
 			heroSecondary:
 				'Planera måltider, få varningar innan varor går ut och låt inköpslistan fylla på sig utifrån det du faktiskt har.'
 		},
@@ -29,9 +29,9 @@ const heroByVariant: Record<MarketingLocale, Record<LandingHeroVariant, LandingH
 	},
 	en: {
 		a: {
-			heroTitle: 'Scan first. Stop guessing what is at home.',
+			heroTitle: 'Skaffu — the pantry you actually keep track of.',
 			heroLead:
-				'Home Pantry is built around fast capture — barcode, receipt or photo — so you always know what is in fridge, freezer and cupboard.',
+				'Skaffu is built around fast capture — barcode, receipt or photo — so you always know what is in fridge, freezer and cupboard.',
 			heroSecondary:
 				'Plan meals, get warnings before items expire, and let the shopping list fill from what you actually have.'
 		},

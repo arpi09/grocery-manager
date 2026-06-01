@@ -58,6 +58,23 @@ Typiska posttyper (exakt host + värde kommer från konsolen):
    - Välj **Redirect to existing website** / **Omdirigera till befintlig webbplats** och peka på **`skaffu.com`** om Firebase erbjuder det (rekommenderat för SEO).
    - Annars: lägg till som egen domän på samma backend (båda fungerar; canonical styrs av `PUBLIC_ORIGIN`).
 
+### www → apex (rekommenderat)
+
+**Mål:** `https://www.skaffu.com` ska alltid redirecta till `https://skaffu.com` (en canonical URL).
+
+**Firebase (enklast):**
+
+1. console.firebase.google.com → **home-pantry-4bee5** → **Build** → **App Hosting** → **home-pantry**
+2. **Custom domains** → **Add custom domain**
+3. Ange **`www.skaffu.com`** → **Continue**
+4. Välj **Redirect to an existing website** / **Omdirigera till befintlig webbplats**
+5. Mål: **`skaffu.com`** (apex måste redan vara **Connected**)
+6. **Save** — Firebase sköter redirect + certifikat för www
+
+**Alternativ (Cloudflare):** Page Rule eller Redirect Rule: `www.skaffu.com/*` → `https://skaffu.com/$1` (301). Använd bara om du *inte* la www i Firebase.
+
+**Verifiera:** `curl -I https://www.skaffu.com/` ska ge `301`/`302` med `Location: https://skaffu.com/`.
+
 9. Låt Firebase-sidan vara öppen — du behöver posterna i steg 3.
 
 Officiell referens: [Connect a custom domain (App Hosting)](https://firebase.google.com/docs/app-hosting/custom-domain).

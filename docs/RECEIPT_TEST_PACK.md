@@ -21,6 +21,8 @@ Riktiga kvitton **committas inte** — de ligger lokalt i `tests/fixtures/receip
 | Kivra | 7 | `kivra-01.pdf` … `kivra-07.pdf` |
 | Willys | 6 | `willys-01.pdf` … `willys-06.pdf` |
 
+**Willys är valfritt.** Har du inga Willys-kvitton i Kivra (vanligt) — blockera inte insamlingen. Använd i stället **Coop, Hemköp, Lidl, City Gross** eller annan kedja med text-PDF; döp filerna `willys-*.pdf` enligt manifest eller byt etikett i `notes` om du vill spåra källan. Målet är **butiks-/formatvariation**, inte Willys specifikt.
+
 Blanda gärna: korta/långa kvitton, många/få rader, olika datumformat.
 
 ## Framdrift (lokal insamling)
@@ -41,14 +43,14 @@ CI kör **5 syntetiska** (`synthetic-*.pdf`) — committade i repot. Riktiga PDF
 | `kivra-05.pdf` | Kivra-export, medelstort kvitto (10–25 rader), annan butik än Toftanäs/Gunnesbo |
 | `kivra-06.pdf` | Kivra, kort kvitto (≤10 rader) |
 | `kivra-07.pdf` | Kivra, långt kvitto (30+ rader) eller annat datumformat |
-| `willys-01.pdf` | Willys text-PDF, standard storlek |
-| `willys-02.pdf` | Willys, många rabatt-/kampanjrader |
-| `willys-03.pdf` | Willys, få rader (snabbhandling) |
-| `willys-04.pdf` | Willys, annan butik/region om möjligt |
-| `willys-05.pdf` | Willys via app-export (inte skannat) |
-| `willys-06.pdf` | Willys, äldre datumformat eller dubbelsidigt layout |
+| `willys-01.pdf` | Text-PDF, standard storlek (Willys **eller** Coop/Hemköp m.fl.) |
+| `willys-02.pdf` | Många rabatt-/kampanjrader |
+| `willys-03.pdf` | Få rader (snabbhandling) |
+| `willys-04.pdf` | Annan butik/region om möjligt |
+| `willys-05.pdf` | App-export (inte skannat) |
+| `willys-06.pdf` | Äldre datumformat eller ovanlig layout |
 
-**Tips:** Willys-appen och kvittokiosken ger text-PDF:er. Kivra: exportera från inkorgen som PDF. Anonymisera PII enligt avsnittet nedan.
+**Tips:** Willys-app/kiosk, **Coop-app**, **Hemköp**, butikens e-postkvitto eller Kivra-export som PDF — allt med textlager fungerar. Saknar du Willys helt: fyll `willys-*`-platserna med andra kedjor. Anonymisera PII enligt avsnittet nedan.
 
 Validera efter insamling:
 
@@ -103,7 +105,7 @@ Dubbletter från ICA-export (`(1)` i källfilnamn) får suffix `-b`.
 3. **Källa**
    - **ICA:** spara kvitto från ICA-appen eller e-post som PDF
    - **Kivra:** exportera/spara digitalt kvitto som PDF från Kivra
-   - **Willys:** Willys-app eller kvitto-PDF från butik
+   - **Willys (valfritt):** Willys-app eller kvitto-PDF — **Coop, Hemköp, Lidl** m.fl. fungerar lika bra om Willys saknas i Kivra
 4. **Redigera vid behov:** öppna PDF i Preview/Acrobat och sudda PII, eller skriv ut → skanna om du måste (behåll textlager om möjligt).
 
 Om du bara har skannade bild-PDF:er utan textlager fungerar de fortfarande som manuella fall, men CI-testerna fokuserar på **text-PDF** (`extractPdfText`). Bildkvitton testas via befintlig bild-API-väg.

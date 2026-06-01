@@ -6,11 +6,12 @@
 	interface Props {
 		size?: Size;
 		showWordmark?: boolean;
+		wordmark?: string;
 		href?: string;
 		class?: ClassValue;
 	}
 
-	let { size = 'md', showWordmark = false, href, class: className }: Props = $props();
+	let { size = 'md', showWordmark = false, wordmark = 'Home Pantry', href, class: className }: Props = $props();
 
 	const markSizes: Record<Size, string> = {
 		sm: '1.85rem',
@@ -51,13 +52,13 @@
 			<path class="mark-leaf-vein" d="M21.5 14.1c.7-.35 1.15-.9 1.25-1.55" stroke-width="0.9" />
 		</svg>
 		{#if showWordmark}
-			<span class="wordmark" aria-hidden="true">Home Pantry</span>
+			<span class="wordmark" aria-hidden="true">{wordmark}</span>
 		{/if}
 	</span>
 {/snippet}
 
 {#if href}
-	<a {href} class="app-logo-link" aria-label="Home Pantry">
+	<a {href} class="app-logo-link" aria-label={wordmark}>
 		{@render logoContent()}
 	</a>
 {:else}

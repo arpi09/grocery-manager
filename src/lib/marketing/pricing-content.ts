@@ -54,14 +54,14 @@ const proFeatureLabelsSv: Record<ProFeatureKey, string> = {
 
 const sv: PricingContent = {
 	title: 'Priser & planer',
-	lead: 'Home Pantry är gratis att komma igång. Betalning kommer först när vi ser att produkten levererar värde — och du får veta i förväg.',
+	lead: 'Skaffu är gratis att komma igång. Betalning kommer först när vi ser att produkten levererar värde — och du får veta i förväg.',
 	comingSoonNote:
 		'Ingen betalvägg är aktiv ännu. Alla konton kör Free-planen medan vi finslipar gränser och väntar på rätt tillfälle för prenumeration.',
 	meta: {
-		title: 'Priser — Home Pantry (Gratis & Pro)',
+		title: 'Priser — Skaffu (Gratis & Pro)',
 		description:
 			'Generös gratisplan med lager och inköpslista. Pro (~39 kr/mån) kommer senare med obegränsad AI och kvitto-PDF — butiksneutralt skafferi utan betalvägg än.',
-		ogTitle: 'Home Pantry — Gratis skafferi, Pro kommer snart',
+		ogTitle: 'Skaffu — Gratis skafferi, Pro kommer snart',
 		ogDescription:
 			'Jämför Free vs Pro: lager, AI-skannar och kvitto-PDF. Vi meddelar innan något debiteras — ingen Stripe än.'
 	},
@@ -117,14 +117,14 @@ const sv: PricingContent = {
 const en: PricingContent = {
 	...sv,
 	title: 'Pricing & plans',
-	lead: 'Home Pantry is free to get started. Paid plans come only when the product proves its value — and we will tell you in advance.',
+	lead: 'Skaffu is free to get started. Paid plans come only when the product proves its value — and we will tell you in advance.',
 	comingSoonNote:
 		'No paywall is active yet. Every account runs the Free plan while we finalize limits and timing for subscriptions.',
 	meta: {
-		title: 'Pricing — Home Pantry (Free & Pro)',
+		title: 'Pricing — Skaffu (Free & Pro)',
 		description:
 			'Generous free tier with pantry and shopping list. Pro (~39 SEK/month) coming later with unlimited AI and receipt PDF — store-neutral pantry, no paywall yet.',
-		ogTitle: 'Home Pantry — Free pantry, Pro coming soon',
+		ogTitle: 'Skaffu — Free pantry, Pro coming soon',
 		ogDescription:
 			'Compare Free vs Pro: inventory, AI scans and receipt PDF. We notify before any charge — no Stripe yet.'
 	},
