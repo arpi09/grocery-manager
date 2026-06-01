@@ -120,7 +120,16 @@ async function fillBoundInput(input: import('@playwright/test').Locator, value: 
 	await expect(input).toHaveValue(value);
 }
 
+export async function dismissCookieConsentIfOpen(page: Page) {
+	const dialog = page.locator('[aria-labelledby="cookie-consent-title"]');
+	if (await dialog.isVisible().catch(() => false)) {
+		await page.getByRole("button", { name: /Endast n.dv.ndiga|Godk.nn/i }).first().click();
+		await dialog.waitFor({ state: "hidden", timeout: 10_000 }).catch(() => {});
+	}
+}
+
 export async function dismissOnboardingModalIfOpen(page: Page) {
+	await dismissCookieConsentIfOpen(page);
 	const skip = page.getByRole('button', { name: /Jag gör det senare|Hoppa|senare/i });
 	if (await skip.isVisible().catch(() => false)) {
 		await skip.click();

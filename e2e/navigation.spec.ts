@@ -35,7 +35,7 @@ test.describe('Mobile navigation', () => {
 
 		const bottomNav = page.getByRole('navigation', { name: /Mobil/i });
 		await expect(bottomNav).toBeVisible();
-		await bottomNav.getByRole('link', { name: /Ink/i }).click();
+		await bottomNav.locator('a[href="/inkop"]').click();
 		await expect(page).toHaveURL(/\/inkop/);
 	});
 
