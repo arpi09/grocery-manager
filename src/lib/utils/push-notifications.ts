@@ -23,8 +23,24 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 	return output;
 }
 
+async function postPushJson<T>(url: string, body: unknown): Promise<{ ok: true; data: T } | { ok: false; status: number }> {
+	const response = await fetch(url, {
+		method: 'POST',
+		credentials: 'same-origin',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(body)
+	});
+
+	if (!response.ok) {
+		return { ok: false, status: response.status };
+	}
+
+	const data = (await response.json()) as T;
+	return { ok: true, data };
+}
+
 async function fetchVapidPublicKey(): Promise<string> {
-	const response = await fetch('/api/push/vapid-public-key');
+	const response = await fetch('/api/push/vapid-public-key', { credentials: 'same-origin' });
 	if (!response.ok) {
 		throw new Error('push_not_configured');
 	}
@@ -66,17 +82,16 @@ export async function subscribeToExpiryPush(): Promise<PushSubscribeResult> {
 			return { ok: false, reason: 'failed' };
 		}
 
-		const response = await fetch('/api/push/subscribe', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				endpoint: json.endpoint,
-				keys: { p256dh: json.keys.p256dh, auth: json.keys.auth }
-			})
+		const response = await postPushJson<{ ok?: boolean }>('/api/push/subscribe', {
+			endpoint: json.endpoint,
+			keys: { p256dh: json.keys.p256dh, auth: json.keys.auth }
 		});
 
 		if (!response.ok) {
 			return { ok: false, reason: response.status === 503 ? 'not_configured' : 'failed' };
+		}
+		if (response.data.ok !== true) {
+			return { ok: false, reason: 'failed' };
 		}
 
 		return { ok: true };
@@ -99,12 +114,47 @@ export async function unsubscribeFromExpiryPush(): Promise<void> {
 		return;
 	}
 
-	await fetch('/api/push/unsubscribe', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ endpoint: subscription.endpoint })
-	});
+	await postPushJson('/api/push/unsubscribe', { endpoint: subscription.endpoint });
 	await subscription.unsubscribe();
+}
+
+/** Re-register an existing browser subscription with the server (e.g. after reload drift). */
+export async function resyncExistingPushSubscription(): Promise<PushSubscribeResult> {
+	if (!isPushSupported()) {
+		return { ok: false, reason: 'unsupported' };
+	}
+	if (Notification.permission !== 'granted') {
+		return { ok: false, reason: 'denied' };
+	}
+
+	try {
+		const registration = await navigator.serviceWorker.ready;
+		const subscription = await registration.pushManager.getSubscription();
+		if (!subscription) {
+			return { ok: false, reason: 'failed' };
+		}
+
+		const json = subscription.toJSON();
+		if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
+			return { ok: false, reason: 'failed' };
+		}
+
+		const response = await postPushJson<{ ok?: boolean }>('/api/push/subscribe', {
+			endpoint: json.endpoint,
+			keys: { p256dh: json.keys.p256dh, auth: json.keys.auth }
+		});
+
+		if (!response.ok) {
+			return { ok: false, reason: response.status === 503 ? 'not_configured' : 'failed' };
+		}
+		if (response.data.ok !== true) {
+			return { ok: false, reason: 'failed' };
+		}
+
+		return { ok: true };
+	} catch {
+		return { ok: false, reason: 'failed' };
+	}
 }
 
 export function pushErrorMessage(reason: PushSubscribeFailureReason): string {

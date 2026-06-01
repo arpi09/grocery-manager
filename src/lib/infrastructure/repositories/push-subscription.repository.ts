@@ -1,5 +1,5 @@
 import { and, eq } from 'drizzle-orm';
-import { db } from '$lib/infrastructure/db';
+import { db as defaultDb, type AppDatabase } from '$lib/infrastructure/db';
 import { pushSubscriptionTable, userTable } from '$lib/infrastructure/db/schema';
 import { generateId } from '$lib/infrastructure/auth/id';
 
@@ -24,8 +24,10 @@ export interface IPushSubscriptionRepository {
 }
 
 export class DrizzlePushSubscriptionRepository implements IPushSubscriptionRepository {
+	constructor(private readonly db: AppDatabase = defaultDb) {}
+
 	async listByUserId(userId: string): Promise<PushSubscriptionRecord[]> {
-		return db
+		return this.db
 			.select({
 				id: pushSubscriptionTable.id,
 				userId: pushSubscriptionTable.userId,
@@ -41,14 +43,14 @@ export class DrizzlePushSubscriptionRepository implements IPushSubscriptionRepos
 		userId: string,
 		subscription: { endpoint: string; p256dh: string; auth: string }
 	): Promise<void> {
-		const existing = await db
+		const existing = await this.db
 			.select({ id: pushSubscriptionTable.id })
 			.from(pushSubscriptionTable)
 			.where(eq(pushSubscriptionTable.endpoint, subscription.endpoint))
 			.limit(1);
 
 		if (existing[0]) {
-			await db
+			await this.db
 				.update(pushSubscriptionTable)
 				.set({
 					userId,
@@ -59,7 +61,7 @@ export class DrizzlePushSubscriptionRepository implements IPushSubscriptionRepos
 			return;
 		}
 
-		await db.insert(pushSubscriptionTable).values({
+		await this.db.insert(pushSubscriptionTable).values({
 			id: generateId(),
 			userId,
 			endpoint: subscription.endpoint,
@@ -69,33 +71,41 @@ export class DrizzlePushSubscriptionRepository implements IPushSubscriptionRepos
 	}
 
 	async removeByEndpoint(userId: string, endpoint: string): Promise<void> {
-		await db
+		await this.db
 			.delete(pushSubscriptionTable)
 			.where(and(eq(pushSubscriptionTable.userId, userId), eq(pushSubscriptionTable.endpoint, endpoint)));
 	}
 
 	async removeAllForUser(userId: string): Promise<void> {
-		await db.delete(pushSubscriptionTable).where(eq(pushSubscriptionTable.userId, userId));
+		await this.db.delete(pushSubscriptionTable).where(eq(pushSubscriptionTable.userId, userId));
 	}
 
 	async setPushEnabled(userId: string, enabled: boolean): Promise<void> {
-		await db
+		await this.db
 			.update(userTable)
 			.set({ pushNotificationsEnabled: enabled })
 			.where(eq(userTable.id, userId));
 	}
 
 	async isPushEnabled(userId: string): Promise<boolean> {
-		const [row] = await db
+		const subscriptions = await this.listByUserId(userId);
+		const enabled = subscriptions.length > 0;
+
+		const [row] = await this.db
 			.select({ pushNotificationsEnabled: userTable.pushNotificationsEnabled })
 			.from(userTable)
 			.where(eq(userTable.id, userId))
 			.limit(1);
-		return Boolean(row?.pushNotificationsEnabled);
+
+		if (Boolean(row?.pushNotificationsEnabled) !== enabled) {
+			await this.setPushEnabled(userId, enabled);
+		}
+
+		return enabled;
 	}
 }
 
 /** Users opted in to email or browser push expiry reminders. */
 export async function deletePushSubscriptionById(id: string): Promise<void> {
-	await db.delete(pushSubscriptionTable).where(eq(pushSubscriptionTable.id, id));
+	await defaultDb.delete(pushSubscriptionTable).where(eq(pushSubscriptionTable.id, id));
 }

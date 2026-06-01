@@ -11,6 +11,7 @@
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import { browser } from '$app/environment';
+	import { invalidateAll } from '$app/navigation';
 	import { ONBOARDING_REPLAY_EVENT, resetOnboarding } from '$lib/utils/onboarding';
 	import LanguageSwitcher from '$lib/components/molecules/LanguageSwitcher.svelte';
 	import { t } from '$lib/i18n';
@@ -22,6 +23,7 @@
 	import {
 		isPushSupported,
 		pushErrorMessage,
+		resyncExistingPushSubscription,
 		subscribeToExpiryPush,
 		unsubscribeFromExpiryPush
 	} from '$lib/utils/push-notifications';
@@ -56,6 +58,28 @@
 		}
 	});
 
+	$effect(() => {
+		if (!browser || !pushSupported || pushNotificationsSubmitting || data.pushNotificationsEnabled) {
+			return;
+		}
+
+		void (async () => {
+			if (Notification.permission !== 'granted') {
+				return;
+			}
+			const registration = await navigator.serviceWorker.ready;
+			const subscription = await registration.pushManager.getSubscription();
+			if (!subscription) {
+				return;
+			}
+
+			const result = await resyncExistingPushSubscription();
+			if (result.ok) {
+				await invalidateAll();
+			}
+		})();
+	});
+
 	const inviteLink = $derived(form?.inviteLink ?? null);
 	const inviteEmailWarning = $derived(form?.inviteEmailWarning ?? null);
 	const householdError = $derived(form?.householdError ?? null);
@@ -88,9 +112,11 @@
 					return;
 				}
 				pushNotificationsEnabled = true;
+				await invalidateAll();
 			} else {
 				await unsubscribeFromExpiryPush();
 				pushNotificationsEnabled = false;
+				await invalidateAll();
 			}
 		} catch {
 			pushNotificationsError = pushErrorMessage('failed');

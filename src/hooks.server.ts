@@ -30,7 +30,7 @@ import { resolveLocaleForRequest } from '$lib/server/locale';
 import { expiryReminderService } from '$lib/server/di';
 import { isMarketingPath, redirectsAuthenticatedFromMarketing } from '$lib/marketing/routes';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
-import { redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
+import { redirect, json, type Handle, type HandleServerError } from '@sveltejs/kit';
 
 const publicPaths = new Set(['/login', '/register']);
 
@@ -98,6 +98,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const isAuthenticated = !!event.locals.user;
 
 	if (!isAuthenticated && !isPublic) {
+		if (pathname.startsWith('/api/')) {
+			return json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+		}
 		redirect(302, '/login');
 	}
 
