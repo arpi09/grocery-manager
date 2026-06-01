@@ -1,17 +1,43 @@
-# Produktroadmap — Home Pantry
+# Produktroadmap — Skaffu
 
-*Master roadmap efter 90-dagarsfasen. Version: 31 maj 2026.*
+*Master roadmap efter 90-dagarsfasen. Version: 1 jun 2026.*
 
-**Relaterat:** [NEXT_STEPS.md](./NEXT_STEPS.md) (ägare, nästa 30 dagar) · [90_DAY_ROADMAP.md](./90_DAY_ROADMAP.md) (fas 0, arkiv) · [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) · [DAY_90_DECISION.md](./DAY_90_DECISION.md) · [PRICING.md](./PRICING.md)
+**Relaterat:** [NEXT_STEPS.md](./NEXT_STEPS.md) (ägare, nästa 30 dagar) · [90_DAY_ROADMAP.md](./90_DAY_ROADMAP.md) (fas 0, arkiv) · [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) · [DAY_90_DECISION.md](./DAY_90_DECISION.md) · [PRICING.md](./PRICING.md) · [DOMAIN_STRATEGY.md](./DOMAIN_STRATEGY.md)
+
+---
+
+## Status jun 2026
+
+**Fas 0 är i stort sett klar.** **Fas 1 pågår:** retention, launch och PMF-mätning — inte fler Must-features i isolation.
+
+| Område | Status |
+|--------|--------|
+| **Prod** | [skaffu.com](https://skaffu.com) live (apex + www→apex); intern repo `home-pantry` oförändrat |
+| **Varumärke** | Skaffu-rebrand, SSR-optimering (admin + sidor) |
+| **Kvitto** | Per-rad plats (AI + heuristik); testpack-infra kvar — ägare fyller riktiga PDF |
+| **Aktivering** | Förbättrad onboarding |
+| **Plan → lista** | Ett-klicks-flöde plan → inköpslista |
+| **AI-kostnad** | Månadstak + guardrails |
+| **PMF-rutin** | Dashboard `/admin` + veckovis e-postcron till ägare |
+| **E-post** | Resend verifierad; `EMAIL_SENDING_ENABLED`-väg |
+| **PWA / push** | Installbanner; web push för utgång (expiry) |
+| **Marknad** | Hero A/B + analytics; cookie consent (variant B) |
+| **PMF** | **Ej uppnådd** — mätetal fylls och följs; inga påhittade siffror i docs |
+
+**Ägare (parallellt, blockerar inte kod):** användarintervjuer, veckovis PMF-granskning (e-postcron underlättar), metrics-uppföljning i `/admin`. Se [NEXT_STEPS.md](./NEXT_STEPS.md).
+
+**Väntar medvetet:** Stripe/Checkout, Capacitor/App Store — tills PMF-gates och [PRICING.md](./PRICING.md) motiverar.
+
+**Nästa kod (utan Stripe):** SEO (SV), valfri web push *"handla idag"*, hero A/B-beslut när data räcker.
 
 ---
 
 ## Inte klart = produkt
 
-Home Pantry är **inte färdig** och har **inte product-market fit** förrän mätetalen i [COMPETITIVE_ANALYSIS.md avsnitt 13](./COMPETITIVE_ANALYSIS.md#13-mätetal-för-product-market-fit) hålls över tid — särskilt:
+Skaffu är **inte färdig** och har **inte product-market fit** förrän mätetalen i [COMPETITIVE_ANALYSIS.md avsnitt 13](./COMPETITIVE_ANALYSIS.md#13-mätetal-för-product-market-fit) hålls över tid — särskilt:
 
-| Kriterium | Mål | Status (31 maj 2026) |
-|-----------|-----|----------------------|
+| Kriterium | Mål | Status (jun 2026) |
+|-----------|-----|-------------------|
 | Aktivering (24 h) | >40 % | Mät — fyll i `/admin` |
 | Median tid till första scan | <3 min | Mät |
 | Veckoscan-rate | >30 % | Mät |
@@ -24,27 +50,43 @@ Feature-leverans utan retention räknas **inte** som produkt klar. Se [DAY_90_DE
 
 ---
 
+## Nuvarande fas: Fas 1 — Retention, launch, PMF-mätning
+
+Prioritet: **bevisa värde och vana** innan Stripe, native eller fler features.
+
+### Ägare — löpande parallellt (inga gates för kod)
+
+| Aktivitet | Frekvens | Anteckning |
+|-----------|----------|------------|
+| Veckovis PMF-granskning | Varje måndag ~30 min | `/admin` + checklista [PMF_WEEKLY.md](./PMF_WEEKLY.md); **veckovis e-post till ägare** (cron) som påminnelse |
+| Användarintervjuer + syntes | Löpande | [USER_INTERVIEWS.md](./USER_INTERVIEWS.md); blockerar inte deploy |
+| Metrics vs mål | Löpande | Dashboard; fyll i tabellen ovan när kohort tillåter |
+| Launch i communities | Enligt playbook | [LAUNCH_PLAYBOOK.md](./LAUNCH_PLAYBOOK.md) |
+| Riktiga kvitto-PDF lokalt | Löpande | [RECEIPT_TEST_PACK.md](./RECEIPT_TEST_PACK.md) |
+
+---
+
 ## Fas 0 (klar) — 90 dagar, punkter 1–20
 
-Sammanfattning av [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md). Tekniskt arbete i kod är i stort sett klart; **ägaruppgifter** (intervjuer, launch, riktiga PDF:er, domän, dag-90-beslut) pågår eller väntar data.
+Sammanfattning av [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md). Tekniskt arbete i kod är klart; **ägaruppgifter** (intervjuer, launch, riktiga PDF:er) fortsätter parallellt utan att blockera Fas 1-kod.
 
 | # | Uppgift | Status | Anteckning |
 |---|---------|--------|------------|
 | 1 | PMF-mätetal i analytics | Klar | `/admin`, `product_event`, WoW-delta |
-| 2 | Onboarding scan-first | Klar | Kvitto eller 5 streckkoder |
-| 3 | Integritet + AI-policy | Klar | `/privacy`, FAQ |
+| 2 | Onboarding scan-first | Klar (+ förbättrad jun 2026) | Kvitto eller 5 streckkoder |
+| 3 | Integritet + AI-policy | Klar | `/privacy`, FAQ; cookie consent B |
 | 4 | PWA + installguide | Klar | `/install-app`, banner |
-| 5 | Utgångspåminnelse (e-post) | Klar | GH Actions cron (mån 07 UTC), opt-in — se [90_DAY § punkt 5](./90_DAY_ROADMAP.md#punkt-5--levererat) |
-| 6 | Prissättningshypotes | Klar | [PRICING.md](./PRICING.md); Stripe ej |
-| 7 | Custom domain | Klar (kod + docs) | Ägare: Firebase Console |
-| 8 | Landning A/B + jämförelse | Klar | Hero variant, ICA/Bring/Matdags |
-| 9 | Intervjukit | Klar (kit) | Ägare: 10 samtal + syntes |
-| 10 | Kvitto-PDF testpack | Klar (infra) | Ägare: riktiga PDF lokalt; CI = syntetiska |
-| 11 | AI rate limits | Klar | `AiRateLimitService` |
+| 5 | Utgångspåminnelse (e-post) | Klar | GH Actions cron; Resend + `EMAIL_SENDING_ENABLED` |
+| 6 | Prissättningshypotes | Klar | [PRICING.md](./PRICING.md); Stripe **väntar** |
+| 7 | Custom domain | **Klar (skaffu.com)** | Live jun 2026; www→apex — [DOMAIN_STRATEGY.md](./DOMAIN_STRATEGY.md) |
+| 8 | Landning A/B + jämförelse | Klar | Hero A/B + analytics; ICA/Bring/Matdags |
+| 9 | Intervjukit | Klar (kit) | Ägare: samtal + syntes (parallellt) |
+| 10 | Kvitto-PDF testpack | Klar (infra) | Per-rad plats; ägare: riktiga PDF |
+| 11 | AI rate limits | Klar (+ månadstak jun 2026) | `AiRateLimitService`, budget guardrails |
 | 12 | Lista-export (Bring-format) | Klar | Clipboard i inköpslista |
-| 13 | Launch playbook | Klar (kit) | Ägare: 2–3 communities |
-| 14 | Veckovis PMF-rutin | Klar (dashboard) | Ägare: faktisk veckogranskning |
-| 15 | Beslut dag 90 (dokument) | Klar | Checklista i DAY_90_DECISION |
+| 13 | Launch playbook | Klar (kit) | Ägare: communities |
+| 14 | Veckovis PMF-rutin | Klar (dashboard + e-postcron) | Ägare: faktisk granskning |
+| 15 | Beslut dag 90 (dokument) | Klar | [DAY_90_DECISION.md](./DAY_90_DECISION.md) |
 | 16 | E2E critical flows | Klar | 23 tester, [E2E.md](./E2E.md) |
 | 17 | Scan-kvalitet SV | Klar | Favoriter, senaste, snabb edit |
 | 18 | Freemium UI / gränser | Klar | PlanLimits, banners |
@@ -53,93 +95,102 @@ Sammanfattning av [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md). Tekniskt arbete i 
 
 ---
 
-## Fas 1.0 — Kvalitet (P0)
+## Fas 1.0 — Kvalitet (P0) — gate passerad
 
-**Gate:** Alla punkter nedan ska vara gröna innan Fas 1 (retention, launch, Stripe) startar. E2E-detaljer: [E2E.md](./E2E.md).
+Alla punkter gröna; Fas 1 (retention, launch, PMF) är aktiv.
 
 | # | Kriterium | Status |
 |---|-----------|--------|
-| 1 | Kvitto: PDF/bild → parse → rader → bulk add (inga tysta fel) | ✅ Kod + E2E |
-| 2 | Register/login med Turnstile (vitlista/bypass) + tydliga fel | ✅ E2E + [CAPTCHA.md](./CAPTCHA.md) |
-| 3 | Scan add (streckkod manuellt) | ✅ E2E |
-| 4 | Smart fill `/inkop` (`fillFromPantry`) | ✅ E2E + fixture |
-| 5 | Inga 500 på `/hem`, `/inkop`, `/scan/kvitto`, `/settings` (migrationer 0012–0018) | ✅ init.ts + integration |
-| 6 | E2E critical flows (page.route-mocks, ingen OpenAI i CI) | ✅ 23 tester — [E2E.md](./E2E.md) |
-| 7 | `receipt-parse.test.ts` + integration + receipt fixtures | ✅ |
-| 8 | Quality gate: check, test, integration, e2e, build | ✅ CI Release |
+| 1 | Kvitto: PDF/bild → parse → rader → bulk add | ✅ Kod + E2E; per-rad plats jun 2026 |
+| 2 | Register/login med Turnstile + tydliga fel | ✅ E2E + [CAPTCHA.md](./CAPTCHA.md) |
+| 3 | Scan add (streckkod) | ✅ E2E |
+| 4 | Smart fill `/inkop` | ✅ E2E |
+| 5 | Inga 500 på kärn-sidor | ✅ |
+| 6 | E2E critical flows | ✅ [E2E.md](./E2E.md) |
+| 7 | `receipt-parse.test.ts` + fixtures | ✅ |
+| 8 | Quality gate CI | ✅ |
 
 ---
 
-## Fas 1 (månad 4–6) — Retention, intäkt, kvalitet
-
-Prioritet: **bevisa värde och vana** innan fler features eller App Store.
+## Fas 1 (månad 4–6) — Retention, launch, PMF-mätning
 
 ### P1 — Retention och återbesök
 
-| Initiativ | Varför | Leverans |
-|-----------|--------|----------|
-| **Veckovis PMF-granskning (ägare)** | Dashboard utan rutin ger ingen PMF | Varje måndag: `/admin` veckosammanfattning, 1 åtgärd |
-| **Intervjusyntes → produkt** | Kvalitativ churn förstår siffror | Uppdatera [USER_INTERVIEWS.md](./USER_INTERVIEWS.md); fixa topp-1 friktion |
-| **E-post utgång: opt-in + copy** | Kanal finns; adoption okänd | Mät öppning/klick; A/B ämnesrad; Pro-ingår när Stripe |
-| **Web push (PWA)** | E-post räcker inte för alla; billigare än native | Service worker + permission; utgång + "handla idag" — **efter** e-post baseline |
-| **PWA-installation** | Matdags vinner via app-ikon | Mät standalone; förbättra banner/copy på `/hem` |
+| Initiativ | Status (jun 2026) | Nästa |
+|-----------|-------------------|-------|
+| **Veckovis PMF-granskning (ägare)** | Dashboard + **e-postcron till ägare** | Ägare: rutin varje måndag (parallellt) |
+| **Intervjusyntes → produkt** | Kit + feedback i app | Ägare: ≥3/10 intervjuer, syntes |
+| **E-post utgång** | Levererat; Resend verifierad | Mät opt-in/öppning |
+| **Web push (PWA)** | **Utgång (expiry) levererat** | Valfritt: *"handla idag"* — efter baseline |
+| **PWA-installation** | Banner + `/install-app` | Mät standalone; copy vid behov |
 
-### P1 — Stripe och paywall
+### P1 — Stripe och paywall — **väntar**
 
-| Initiativ | Varför | Gate |
-|-----------|--------|------|
-| **Stripe Checkout + webhook** | AI-kostnad utan intäkt | [PRICING.md §6](./PRICING.md): D30 ≥15 %, rate limits klara, köpvillkor |
-| **Pro tier enforcement** | Gränser finns; alla är Free | `plan_tier` på hushåll; Customer Portal senare |
-| **Intresse/waitlist** | Validera pris före full launch | Klar — CTA på `/priser` + Inställningar; admin-lista |
-| **Grace period policy** | Befintliga användare vid launch | Beslut dokumenteras i PRICING |
+| Initiativ | Gate |
+|-----------|------|
+| Stripe Checkout + webhook | [PRICING.md §6](./PRICING.md): D30 ≥15 %, rate limits klara, köpvillkor |
+| Pro tier enforcement | Efter Checkout |
+| Intresse/waitlist | Klar — CTA `/priser` + admin |
+| Grace period policy | Beslut i PRICING vid launch |
 
-### P1 — Recept → lista (polish)
+*Ingen Stripe-arbete i kod förrän gates och PMF-data motiverar.*
 
-| Initiativ | Varför |
-|-----------|--------|
-| **Plan → inköpslista i ett flöde** | Differentiator vs Bring; v2-kärna finns |
-| **Färre steg "lägg saknade"** | Minska friktion efter RecipeAssistant |
-| **Kvalitet: hallucinationer** | Fortsatt prompt/test mot riktiga lager |
+### P1 — Recept → lista
+
+| Initiativ | Status (jun 2026) |
+|-----------|-------------------|
+| **Plan → inköpslista i ett flöde** | ✅ Levererat |
+| Färre steg "lägg saknade" | Polish vid intervjufriktion |
+| Kvalitet: hallucinationer | Prompt/test mot riktiga lager |
 
 ### P1 — Kvitto-PDF i CI
 
-| Initiativ | Varför |
-|-----------|--------|
-| **≥15 anonymiserade riktiga PDF** | Synthetic fixtures täcker inte ICA/Kivra-layout |
-| **Parse-regression i CI** | `receipt-parse.test.ts` + fixtures utan OpenAI där möjligt |
-| **Ägare: fyll [RECEIPT_TEST_PACK.md](./RECEIPT_TEST_PACK.md)** | Blockerar prod-kvalitet |
+| Initiativ | Status (jun 2026) |
+|-----------|-------------------|
+| Per-rad plats (AI + heuristik) | ✅ Levererat |
+| ≥15 anonymiserade riktiga PDF | Ägare: [RECEIPT_TEST_PACK.md](./RECEIPT_TEST_PACK.md) (parallellt) |
+| Parse-regression i CI | Synthetic fixtures; utöka med riktiga PDF |
 
-### P1 — Marknad: Matdags-differentiering
+### P1 — Marknad: differentiering och Skaffu
 
-| Initiativ | Varför |
-|-----------|--------|
-| **Launch enligt [LAUNCH_PLAYBOOK.md](./LAUNCH_PLAYBOOK.md)** | Distribution saknas trots copy |
-| **Messaging: PDF/Kivra, plan+lager, butiksneutral** | CA §10; inte gamification-paritet |
-| **SEO: "skafferi app", "minska matsvinn"** | Långsiktig SV-kanal |
-| **Hero A/B utvärdering** | Välj vinnare efter konvertering, inte magkänsla |
+| Initiativ | Status (jun 2026) | Nästa |
+|-----------|-------------------|-------|
+| **skaffu.com live** | ✅ | SEO, UTM, copy konsekvent *Skaffu* |
+| Launch enligt playbook | Kit klar | Ägare: ≥1 community |
+| Messaging: PDF/Kivra, plan+lager, butiksneutral | Copy + jämförelsetabell | Distribution |
+| **SEO** | Ej prioriterat klart | *"skafferi app"*, *"minska matsvinn"* — **nästa kod** |
+| **Hero A/B** | Live + analytics | **Beslut när data räcker** — inte magkänsla |
 
 ### P1 — Prestanda och AI-kostnad
 
-| Initiativ | Varför |
+| Initiativ | Status (jun 2026) |
+|-----------|-------------------|
+| Månadstak OpenAI + alert | ✅ Guardrails |
+| Admin: AI-användning | Kompletterar rate limits |
+| Billigare modell per endpoint | Utvärdera vid behov |
+
+### P1 — Teknik / trust (jun 2026)
+
+| Initiativ | Status |
 |-----------|--------|
-| **Månadstak OpenAI + alert** | Solo; ingen överraskningsfaktura |
-| **Admin: AI-användning per hushåll/typ** | Kompletterar rate limits |
-| **Billigare modell för enkla jobb** | Kvitto vs foto vs fill — utvärdera per endpoint |
+| Skaffu-rebrand + SSR-optimering | ✅ |
+| Cookie consent (variant B) | ✅ |
+| Logout CSRF (hosted.app / prod) | ✅ (om deployad) |
 
 ---
 
-## Fas 2 (månad 6–12) — Distribution och djup
+## Fas 2 (månad 6–12) — Distribution och djup — **väntar**
 
 Starta **endast** om Fas 1-mätetal eller [DAY_90_DECISION.md](./DAY_90_DECISION.md) motiverar det.
 
-| Initiativ | Trigger | Anteckning |
-|-----------|---------|------------|
-| **Capacitor / App Store** | D30 ≥15 % + kvalitativ push/app-store-begäran | Spike 1 vecka före full commit |
-| **Native push-notiser** | Efter Capacitor eller TWA | Utgång, hushållsaktivitet |
-| **Offline-läsning (read-only lager)** | Retention på mobil utan nät | Senare |
-| **Svensk produktcache / override** | Scan-fel toppar i intervjuer | Egen DB eller crowd |
-| **Prisjämförelse / affiliate** | Endast om tydlig partner | Annars skip (CA) |
-| **B2B (BRF, kommuner)** | Efter B2C PMF | Lång sales cycle |
+| Initiativ | Trigger | Status jun 2026 |
+|-----------|---------|-----------------|
+| **Capacitor / App Store** | D30 ≥15 % + kvalitativ push/app-store-begäran | **Väntar** |
+| **Native push-notiser** | Efter Capacitor eller TWA | Web push expiry finns |
+| Offline-läsning | Retention på mobil utan nät | Senare |
+| Svensk produktcache / override | Scan-fel i intervjuer | Senare |
+| Prisjämförelse / affiliate | Tydlig partner | Skip (CA) |
+| B2B (BRF, kommuner) | Efter B2C PMF | Senare |
 
 ---
 
@@ -147,10 +198,10 @@ Starta **endast** om Fas 1-mätetal eller [DAY_90_DECISION.md](./DAY_90_DECISION
 
 | Aktivitet | Frekvens | Referens |
 |-----------|----------|----------|
-| PMF-dashboard granskning | Veckovis | `/admin` |
-| Intervjuer / feedback-syntes | Löpande | [USER_INTERVIEWS.md](./USER_INTERVIEWS.md), `/admin` feedback |
+| PMF-dashboard + ägar-e-post | Veckovis | `/admin`, cron |
+| Intervjuer / feedback-syntes | Parallellt (ägare) | [USER_INTERVIEWS.md](./USER_INTERVIEWS.md) |
 | Launch-logg och UTM | Per kampanj | [LAUNCH_PLAYBOOK.md](./LAUNCH_PLAYBOOK.md) |
-| Konkurrensbevakning (Matdags, FreshKeeper) | Kvartalsvis | [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) |
+| Konkurrensbevakning | Kvartalsvis | [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) |
 | AI-kostnad vs användare | Månadsvis | [PRICING.md](./PRICING.md) |
 | Dag-90 / kvartalsbeslut | Vid gate | [DAY_90_DECISION.md](./DAY_90_DECISION.md) |
 
@@ -158,12 +209,14 @@ Starta **endast** om Fas 1-mätetal eller [DAY_90_DECISION.md](./DAY_90_DECISION
 
 ## Veckovis PMF-rutin (ägare)
 
-*Varje måndag, ~30 min. Detaljerad checklista: [PMF_WEEKLY.md](./PMF_WEEKLY.md). Kompletterar [NEXT_STEPS.md §2](./NEXT_STEPS.md#2-etablera-veckorutin-varje-måndag-30-min).*
+*Varje måndag, ~30 min. Detaljerad checklista: [PMF_WEEKLY.md](./PMF_WEEKLY.md). Veckovis sammanfattning skickas även via e-postcron (påminnelse). Kompletterar [NEXT_STEPS.md §2](./NEXT_STEPS.md#2-etablera-veckorutin-varje-måndag-30-min).*
 
 1. Öppna `/admin` → PMF-dashboard: veckosammanfattning, WoW-delta, metrics vs mål.
 2. Välj **en** metric under mål → skriv **en** konkret åtgärd (produkt, copy eller support).
 3. Kontrollera **Pro-waitlist** (`/admin#waitlist`) mot [PRICING.md §6](./PRICING.md) (mål ≥50).
 4. Logga kort: datum, metric, åtgärd (valfri anteckning).
+
+*Intervjuer och djupare metrics-uppföljning körs parallellt — de blockerar inte veckorutinen eller kodleverans.*
 
 ---
 
@@ -171,17 +224,18 @@ Starta **endast** om Fas 1-mätetal eller [DAY_90_DECISION.md](./DAY_90_DECISION
 
 ```mermaid
 flowchart TD
-    A[Fas 0 klar] --> B{D30 och aktivering?}
-    B -->|Under mål| C[Fas 1: retention + intervjuer + kvitto-kvalitet]
-    B -->|På mål| D{Push / App Store i feedback?}
-    D -->|Ja| E[Fas 2: Capacitor-spike]
-    D -->|Nej| F[Fas 1: Stripe + marknad]
-    C --> G{Stripe-gates?}
-    G -->|Ja| H[Checkout live]
-    G -->|Nej| C
-    F --> G
+    A[Fas 0 klar] --> B[Fas 1: retention + launch + PMF]
+    B --> C{Mätetal på mål?}
+    C -->|Nej| D[Ägare: intervjuer + veckorutin parallellt]
+    C -->|Nej| E[Kod: SEO, push handla idag, hero A/B]
+    D --> B
+    E --> B
+    C -->|D30 + gates| F{Stripe?}
+    F -->|Ja| G[Checkout — senare]
+    F -->|Nej| B
+    C -->|D30 + push-begäran| H[Capacitor — väntar]
 ```
 
 ---
 
-*Senast uppdaterad: 31 maj 2026. Uppdatera när Fas 1-punkter levereras eller PMF-data ändrar prioritet.*
+*Senast uppdaterad: 1 jun 2026. Uppdatera när Fas 1-punkter levereras eller PMF-data ändrar prioritet.*
