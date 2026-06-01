@@ -3,8 +3,13 @@ import { LOCALE_COOKIE_NAME, LOCALE_STORAGE_KEY } from '../../src/lib/i18n/local
 
 const ONBOARDING_VERSION_KEY = 'home-pantry-onboarding-version';
 const ONBOARDING_DISMISSED_KEY = 'home-pantry-onboarding-dismissed';
+const ACTIVATION_RECEIPT_KEY = 'home-pantry-activation-receipt-done';
+const CELEBRATION_PENDING_KEY = 'home-pantry-celebration-pending';
 const ONBOARDING_VERSION = '1';
 const E2E_LOCALE = 'sv';
+
+/** Must stay below Playwright test timeout (see playwright.config / per-spec setTimeout). */
+export const E2E_AUTH_NAV_TIMEOUT_MS = 45_000;
 
 function pickEnv(value: string | undefined): string | undefined {
 	const trimmed = value?.trim();
@@ -83,14 +88,18 @@ export async function prepareE2eBrowserState(page: Page) {
 	await applyE2eLocale(page);
 
 	await page.addInitScript(
-		({ versionKey, dismissedKey, version }) => {
+		({ versionKey, dismissedKey, version, activationReceiptKey, celebrationKey }) => {
 			localStorage.setItem(versionKey, version);
 			localStorage.setItem(dismissedKey, '1');
+			localStorage.setItem(activationReceiptKey, '1');
+			localStorage.removeItem(celebrationKey);
 		},
 		{
 			versionKey: ONBOARDING_VERSION_KEY,
 			dismissedKey: ONBOARDING_DISMISSED_KEY,
-			version: ONBOARDING_VERSION
+			version: ONBOARDING_VERSION,
+			activationReceiptKey: ACTIVATION_RECEIPT_KEY,
+			celebrationKey: CELEBRATION_PENDING_KEY
 		}
 	);
 }
@@ -112,11 +121,17 @@ async function fillBoundInput(input: import('@playwright/test').Locator, value: 
 }
 
 export async function dismissOnboardingModalIfOpen(page: Page) {
-	const skip = page.getByRole('button', { name: /Hoppa|senare/i });
+	const skip = page.getByRole('button', { name: /Jag gör det senare|Hoppa|senare/i });
 	if (await skip.isVisible().catch(() => false)) {
 		await skip.click();
 		await expect(skip).toBeHidden({ timeout: 5_000 });
 	}
+}
+
+async function waitForAppHome(page: Page) {
+	await page.waitForURL((url) => url.pathname === '/hem', {
+		timeout: E2E_AUTH_NAV_TIMEOUT_MS
+	});
 }
 
 export async function expectOnboardingGuideVisible(page: Page) {
@@ -147,8 +162,9 @@ export async function registerNewUser(
 	await fillBoundInput(confirmInput, password);
 	await fillBoundInput(emailInput, email);
 
+	const navigatedHome = waitForAppHome(page);
 	await page.getByTestId('register-submit').click();
-	await page.waitForURL((url) => url.pathname === '/hem', { timeout: 30_000, waitUntil: 'commit' });
+	await navigatedHome;
 
 	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
 
@@ -168,8 +184,20 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 	await fillBoundInput(passwordInput, password);
 	await fillBoundInput(emailInput, email);
 
+	const navigatedHome = waitForAppHome(page);
 	await page.getByTestId('login-submit').click();
-	await page.waitForURL((url) => url.pathname === '/hem', { timeout: 45_000, waitUntil: 'commit' });
+
+	try {
+		await navigatedHome;
+	} catch (error) {
+		const loginError = page.getByRole('alert');
+		if (await loginError.isVisible().catch(() => false)) {
+			throw new Error(`Login failed: ${(await loginError.textContent())?.trim() ?? 'unknown error'}`, {
+				cause: error
+			});
+		}
+		throw error;
+	}
 
 	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
 	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

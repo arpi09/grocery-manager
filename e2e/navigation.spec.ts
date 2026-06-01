@@ -2,6 +2,8 @@ import { test, expect } from '@playwright/test';
 import { clickNavHref, dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
 
 test.describe('Navigation', () => {
+	test.setTimeout(60_000);
+
 	test.beforeEach(async ({ page }) => {
 		await loginAsAdmin(page);
 	});
@@ -20,6 +22,7 @@ test.describe('Navigation', () => {
 });
 
 test.describe('Mobile navigation', () => {
+	test.setTimeout(60_000);
 	test.use({ viewport: { width: 390, height: 844 } });
 
 	test.beforeEach(async ({ page }) => {

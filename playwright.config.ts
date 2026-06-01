@@ -41,12 +41,15 @@ export default defineConfig({
 	retries: process.env.CI ? 2 : 0,
 	workers: 1,
 	reporter: process.env.CI ? 'github' : 'list',
+	timeout: process.env.CI ? 60_000 : 30_000,
 	use: {
 		baseURL,
 		locale: 'sv-SE',
 		viewport: { width: 1400, height: 900 },
 		trace: 'on-first-retry',
-		screenshot: 'only-on-failure'
+		screenshot: 'only-on-failure',
+		actionTimeout: 15_000,
+		navigationTimeout: process.env.CI ? 60_000 : 30_000
 	},
 	projects: [
 		{
