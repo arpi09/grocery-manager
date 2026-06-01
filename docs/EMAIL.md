@@ -66,7 +66,7 @@ npx firebase apphosting:secrets:grantaccess RESEND_API_KEY --backend home-pantry
 
 ## skaffu.com (prod live — mejl fortfarande av)
 
-**Status jun 2026:** `https://skaffu.com` är **Connected** (Firebase + SSL). `PUBLIC_ORIGIN` / `ORIGIN` pekar på skaffu.com. **Resend-domän skaffu.com är Verified** (DKIM ok). `RESEND_FROM` är `Skaffu <hello@skaffu.com>`. **Utgående mejl är fortfarande av** — `EMAIL_SENDING_DISABLED=true` tills du medvetet aktiverar.
+**Status jun 2026:** `https://skaffu.com` är **Connected** (Firebase + SSL). `PUBLIC_ORIGIN` / `ORIGIN` pekar på skaffu.com. **Resend-domän skaffu.com är Verified** (DKIM ok). `RESEND_FROM` är `Skaffu <hello@skaffu.com>`. **`EMAIL_SENDING_DISABLED=false` i prod** — utskick tillåts när admin-reglaget **Email sending** är på i `/admin`.
 
 ### Ägare — checklista innan enable
 
@@ -76,8 +76,8 @@ npx firebase apphosting:secrets:grantaccess RESEND_API_KEY --backend home-pantry
 | 2 | DNS (SPF, DKIM, ev. DMARC) | Cloudflare → **skaffu.com** → DNS | ☑ |
 | 3 | Vänta **Verified** i Resend | Resend dashboard | ☑ |
 | 4 | Sätt `RESEND_FROM` | Firebase App Hosting env: `Skaffu <hello@skaffu.com>` | ☑ |
-| 5 | **Inte än:** `EMAIL_SENDING_DISABLED=false` | `apphosting.yaml` + `/admin` toggle | medvetet av |
-| 6 | Testinbjudan | Inställningar → bjud in → länk `https://skaffu.com/invite/...` | efter (5) |
+| 5 | `EMAIL_SENDING_DISABLED=false` | `apphosting.yaml` (deploy) + `/admin` toggle | ☑ |
+| 6 | Testinbjudan | Inställningar → bjud in → länk `https://skaffu.com/invite/...` | efter deploy + toggle |
 
 ### 1. Verifiera domän i Resend
 
@@ -110,8 +110,8 @@ Ordning:
 
 1. ~~`PUBLIC_ORIGIN` + `ORIGIN` → `https://skaffu.com`~~ **Klart** ([SKAFFU_DOMAIN_MIGRATION.md](./SKAFFU_DOMAIN_MIGRATION.md)).
 2. ~~Uppdatera `RESEND_FROM` i Firebase App Hosting till `Skaffu <hello@skaffu.com>`~~ **Klart** (jun 2026).
-3. **Fortfarande av:** lämna `EMAIL_SENDING_DISABLED=true` tills du medvetet slår på mejl.
-4. När du vill skicka: sätt `EMAIL_SENDING_DISABLED=false` **och** slå på **Email sending** i `/admin` — **gör inte detta i samma deploy som DNS-test**; verifiera en testinbjudan först.
+3. ~~Lämna `EMAIL_SENDING_DISABLED=true` tills du medvetet slår på mejl.~~ **Klart** — `EMAIL_SENDING_DISABLED=false` i `apphosting.yaml`.
+4. Efter deploy: slå på **Email sending** i `/admin` och verifiera en testinbjudan.
 
 ### 4. Test efter enable
 

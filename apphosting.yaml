@@ -116,7 +116,7 @@ env:
       - RUNTIME
 
   - variable: EMAIL_SENDING_DISABLED
-    value: "true"
+    value: "false"
     availability:
       - RUNTIME
 
