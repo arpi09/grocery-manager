@@ -28,6 +28,11 @@
 	const imageUrl = $derived(ogImageUrl ?? marketingOgImageUrl());
 	const ogLocale = $derived(locale === 'en' ? 'en_US' : 'sv_SE');
 	const jsonLdBlocks = $derived(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []);
+
+	function jsonLdScriptTag(block: Record<string, unknown>): string {
+		const close = '</' + 'script>';
+		return '<script type="application/ld+json">' + JSON.stringify(block) + close;
+	}
 </script>
 
 <svelte:head>
@@ -51,6 +56,6 @@
 	<meta name="twitter:image" content={imageUrl} />
 	{#each jsonLdBlocks as block, index (index)}
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-		{@html `<script type="application/ld+json">${JSON.stringify(block)}</script>`}
+		{@html jsonLdScriptTag(block)}
 	{/each}
 </svelte:head>
