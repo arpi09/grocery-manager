@@ -127,6 +127,13 @@
 			"when": 1749820800000,
 			"tag": "0018_user_signup_utm",
 			"breakpoints": true
+		},
+		{
+			"idx": 18,
+			"version": "7",
+			"when": 1749907200000,
+			"tag": "0019_app_settings",
+			"breakpoints": true
 		}
 	]
 }

@@ -1,15 +1,23 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-const { mockEnv, mockSend } = vi.hoisted(() => ({
+const { mockEnv, mockSend, mockIsEmailSendingEnabled } = vi.hoisted(() => ({
 	mockEnv: {
 		RESEND_API_KEY: undefined as string | undefined,
-		RESEND_FROM: undefined as string | undefined
+		RESEND_FROM: undefined as string | undefined,
+		EMAIL_SENDING_DISABLED: undefined as string | undefined
 	},
-	mockSend: vi.fn()
+	mockSend: vi.fn(),
+	mockIsEmailSendingEnabled: vi.fn().mockResolvedValue(true)
 }));
 
 vi.mock('$env/dynamic/private', () => ({
 	env: mockEnv
+}));
+
+vi.mock('$lib/server/di', () => ({
+	appSettingsService: {
+		isEmailSendingEnabled: mockIsEmailSendingEnabled
+	}
 }));
 
 vi.mock('resend', () => ({
@@ -26,7 +34,8 @@ import {
 	isResendSandboxRecipientError,
 	missingResendKeyMessage,
 	sendEmail,
-	sendHouseholdInviteEmail
+	sendHouseholdInviteEmail,
+	EMAIL_SENDING_DISABLED_REASON
 } from './email';
 
 describe('getResendApiKey', () => {
@@ -84,6 +93,8 @@ describe('buildHouseholdInviteEmailContent', () => {
 describe('sendEmail', () => {
 	beforeEach(() => {
 		mockEnv.RESEND_API_KEY = undefined;
+		mockEnv.EMAIL_SENDING_DISABLED = undefined;
+		mockIsEmailSendingEnabled.mockResolvedValue(true);
 		mockSend.mockReset();
 	});
 
@@ -96,6 +107,36 @@ describe('sendEmail', () => {
 		});
 
 		expect(result).toEqual({ ok: false, reason: 'RESEND_API_KEY is not configured' });
+		expect(mockSend).not.toHaveBeenCalled();
+	});
+
+	it('no-ops when admin email sending is disabled', async () => {
+		mockEnv.RESEND_API_KEY = 're_test';
+		mockIsEmailSendingEnabled.mockResolvedValue(false);
+
+		const result = await sendEmail({
+			to: 'guest@example.com',
+			subject: 'Test',
+			html: '<p>Hej</p>',
+			text: 'Hej'
+		});
+
+		expect(result).toEqual({ ok: false, reason: EMAIL_SENDING_DISABLED_REASON });
+		expect(mockSend).not.toHaveBeenCalled();
+	});
+
+	it('no-ops when EMAIL_SENDING_DISABLED env is set', async () => {
+		mockEnv.RESEND_API_KEY = 're_test';
+		mockEnv.EMAIL_SENDING_DISABLED = 'true';
+
+		const result = await sendEmail({
+			to: 'guest@example.com',
+			subject: 'Test',
+			html: '<p>Hej</p>',
+			text: 'Hej'
+		});
+
+		expect(result).toEqual({ ok: false, reason: EMAIL_SENDING_DISABLED_REASON });
 		expect(mockSend).not.toHaveBeenCalled();
 	});
 
@@ -140,6 +181,15 @@ describe('sendEmail', () => {
 });
 
 describe('householdInviteEmailWarning', () => {
+	it('returns undefined when email sending is globally disabled', () => {
+		expect(
+			householdInviteEmailWarning({
+				ok: false,
+				reason: EMAIL_SENDING_DISABLED_REASON
+			})
+		).toBeUndefined();
+	});
+
 	it('explains missing API key', () => {
 		const warning = householdInviteEmailWarning({
 			ok: false,

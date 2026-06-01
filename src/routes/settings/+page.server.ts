@@ -208,7 +208,9 @@ export const actions: Actions = {
 
 			return {
 				inviteLink: inviteUrl,
-				inviteEmailWarning: !emailResult.ok ? householdInviteEmailWarning(emailResult) : undefined
+				inviteEmailWarning: emailResult.ok
+					? undefined
+					: householdInviteEmailWarning(emailResult)
 			};
 		} catch (error) {
 			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);

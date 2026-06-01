@@ -36,7 +36,8 @@ const SQL_MIGRATION_FILES = [
 	'0015_ai_usage.sql',
 	'0016_waitlist_email.sql',
 	'0017_push_subscriptions.sql',
-	'0018_user_signup_utm.sql'
+	'0018_user_signup_utm.sql',
+	'0019_app_settings.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
@@ -57,6 +58,7 @@ TRUNCATE TABLE
 	"household_member",
 	"household",
 	"app_error",
+	"app_settings",
 	"user"
 RESTART IDENTITY CASCADE;
 `;

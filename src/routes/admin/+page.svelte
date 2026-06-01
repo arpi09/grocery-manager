@@ -8,10 +8,20 @@
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
+	import Toggle from '$lib/components/atoms/Toggle.svelte';
+	import { enhance } from '$app/forms';
+	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
 	import { formatLastSeen } from '$lib/domain/presence';
 	import type { ChurnReason } from '$lib/domain/product-feedback';
 
 	let { data, form } = $props();
+	let emailSendingSubmitting = $state(false);
+	let emailSendingEnabled = $state(data.emailSending.enabledInApp);
+	let emailSendingForm: HTMLFormElement | undefined = $state();
+
+	$effect(() => {
+		emailSendingEnabled = data.emailSending.enabledInApp;
+	});
 
 	function formatDate(value: Date) {
 		const tag = getLocale() === 'sv' ? 'sv-SE' : 'en-GB';
@@ -43,6 +53,46 @@
 	<AdminHealthDashboard stats={data.stats} />
 	<AdminAiUsageDashboard summary={data.aiUsage} />
 	<PmfDashboard review={data.pmfWeeklyReview} />
+
+	<section class="email-settings">
+		<Card>
+			<h2>{t('admin.emailSending.title')}</h2>
+			<p class="email-settings-note">{t('admin.emailSending.note')}</p>
+			{#if data.emailSending.envDisabled}
+				<p class="email-settings-env" role="status">
+					{t('admin.emailSending.envDisabled')}
+				</p>
+			{/if}
+			<form
+				method="POST"
+				action="?/setEmailSending"
+				class="email-settings-form"
+				bind:this={emailSendingForm}
+				use:enhance={bindSubmitting((v) => (emailSendingSubmitting = v))}
+			>
+				<input type="hidden" name="enabled" value={emailSendingEnabled ? 'true' : 'false'} />
+				<Toggle
+					checked={emailSendingEnabled}
+					disabled={emailSendingSubmitting || data.emailSending.envDisabled}
+					label={t('admin.emailSending.enable')}
+					onchange={(enabled) => {
+						emailSendingEnabled = enabled;
+						emailSendingForm?.requestSubmit();
+					}}
+				/>
+				<p class="email-settings-status">
+					{t('admin.emailSending.status', {
+						state: data.emailSending.effective
+							? t('admin.on')
+							: t('admin.off')
+					})}
+				</p>
+				{#if emailSendingSubmitting}
+					<span class="email-settings-saving">{t('common.saving')}</span>
+				{/if}
+			</form>
+		</Card>
+	</section>
 
 	<section class="pro-waitlist" id="waitlist">
 		<Card>
@@ -284,6 +334,39 @@
 		border-radius: var(--radius-sm);
 		background: #fde8e8;
 		color: #8a1f1f;
+	}
+
+	.email-settings {
+		margin-bottom: var(--space-lg);
+	}
+
+	.email-settings-note,
+	.email-settings-env,
+	.email-settings-status,
+	.email-settings-saving {
+		margin: 0 0 var(--space-md);
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+
+	.email-settings-env {
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-sm);
+		background: #fff8e1;
+		color: #7a5c00;
+	}
+
+	.email-settings-form {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--space-sm);
+	}
+
+	.email-settings-status {
+		margin-bottom: 0;
+		font-weight: 600;
+		color: var(--color-text);
 	}
 
 	.product-feedback {

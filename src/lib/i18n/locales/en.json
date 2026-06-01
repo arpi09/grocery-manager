@@ -653,6 +653,13 @@
 		"statRecentWindow": "Last {minutes} min",
 		"statLoggedInSessions": "Logged-in sessions",
 		"statLastActivity": "Last activity",
+		"emailSending": {
+			"title": "Email sending",
+			"note": "Controls all outbound email (household invites, expiry reminders). Off by default until a verified domain is in place.",
+			"enable": "Enable email sending",
+			"status": "Effective status: {state}",
+			"envDisabled": "EMAIL_SENDING_DISABLED is set in environment variables — sending stays blocked until removed, even when the toggle is on."
+		},
 		"feedback": {
 			"title": "User feedback",
 			"note": "Churn signals from settings and a short post-onboarding survey. Complements interviews — see docs/USER_INTERVIEWS.md.",

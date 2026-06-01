@@ -2,6 +2,17 @@ import { env } from '$env/dynamic/private';
 import { Resend } from 'resend';
 import { inviteRoleLabel, type InviteRole } from '$lib/domain/household';
 import { getAppOrigin } from '$lib/server/origin';
+import {
+	EMAIL_SENDING_DISABLED_REASON,
+	isEmailSendingDisabledByEnv
+} from '$lib/application/app-settings.service';
+import { appSettingsService } from '$lib/server/di';
+
+export {
+	EMAIL_SENDING_DISABLED_REASON,
+	isEmailSendingDisabledByEnv,
+	isEmailSendingDisabledFailure
+} from '$lib/application/app-settings.service';
 
 const DEFAULT_FROM = 'Home Pantry <onboarding@resend.dev>';
 const RESEND_DOCS_URL = 'https://resend.com/docs/send-with-nextjs';
@@ -59,7 +70,11 @@ function sanitizeEmailErrorDetail(reason: string): string | null {
 	return trimmed.slice(0, 200);
 }
 
-export function householdInviteEmailWarning(result: SendEmailFailure): string {
+export function householdInviteEmailWarning(result: SendEmailFailure): string | undefined {
+	if (result.reason === EMAIL_SENDING_DISABLED_REASON) {
+		return undefined;
+	}
+
 	const base = 'Inbjudan skapad men e-post kunde inte skickas.';
 
 	if (result.reason === 'RESEND_API_KEY is not configured') {
@@ -95,6 +110,18 @@ export interface SendEmailInput {
 }
 
 export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
+	if (isEmailSendingDisabledByEnv()) {
+		console.warn(
+			`[email] EMAIL_SENDING_DISABLED is set; skipped send to ${input.to}`
+		);
+		return { ok: false, reason: EMAIL_SENDING_DISABLED_REASON };
+	}
+
+	if (!(await appSettingsService.isEmailSendingEnabled())) {
+		console.warn(`[email] Email sending is disabled in admin settings; skipped send to ${input.to}`);
+		return { ok: false, reason: EMAIL_SENDING_DISABLED_REASON };
+	}
+
 	const apiKey = getResendApiKey();
 	if (!apiKey) {
 		const reason = 'RESEND_API_KEY is not configured';

@@ -29,6 +29,8 @@ import { PlanLimitsService } from '$lib/application/plan-limits.service';
 import { DrizzlePlanLimitsRepository } from '$lib/infrastructure/repositories/plan-limits.repository';
 import { DrizzleWaitlistRepository } from '$lib/infrastructure/repositories/waitlist.repository';
 import { WaitlistService } from '$lib/application/waitlist.service';
+import { DrizzleAppSettingsRepository } from '$lib/infrastructure/repositories/app-settings.repository';
+import { AppSettingsService } from '$lib/application/app-settings.service';
 
 const userRepository = new DrizzleUserRepository();
 const errorLogRepository = new DrizzleErrorLogRepository();
@@ -45,6 +47,7 @@ const productFeedbackRepository = new DrizzleProductFeedbackRepository();
 const aiUsageRepository = new DrizzleAiUsageRepository();
 const planLimitsRepository = new DrizzlePlanLimitsRepository();
 const waitlistRepository = new DrizzleWaitlistRepository();
+const appSettingsRepository = new DrizzleAppSettingsRepository();
 
 export const authService = new AuthService(userRepository);
 export const profileService = new ProfileService(userRepository);
@@ -66,3 +69,4 @@ export const aiRateLimitService = new AiRateLimitService(aiUsageRepository);
 export const aiUsageAdminService = new AiUsageAdminService(aiUsageRepository);
 export const planLimitsService = new PlanLimitsService(planLimitsRepository, aiRateLimitService);
 export const waitlistService = new WaitlistService(waitlistRepository);
+export const appSettingsService = new AppSettingsService(appSettingsRepository);

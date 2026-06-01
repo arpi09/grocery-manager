@@ -654,6 +654,13 @@
 		"statRecentWindow": "Senaste {minutes} min",
 		"statLoggedInSessions": "Inloggade sessioner",
 		"statLastActivity": "Senaste aktivitet",
+		"emailSending": {
+			"title": "E-postutskick",
+			"note": "Styr alla utgående e-post (hushållsinbjudningar, utgångspåminnelser). Av som standard tills en verifierad domän är på plats.",
+			"enable": "Aktivera e-postutskick",
+			"status": "Faktisk status: {state}",
+			"envDisabled": "EMAIL_SENDING_DISABLED är satt i miljövariabler — utskick blockeras tills variabeln tas bort, även om reglaget är på."
+		},
 		"feedback": {
 			"title": "Användarfeedback",
 			"note": "Churn-röster från inställningar och kort enkät efter introduktion. Kompletterar intervjuer — se docs/USER_INTERVIEWS.md.",

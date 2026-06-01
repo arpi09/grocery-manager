@@ -8,7 +8,7 @@ import { daysUntilExpiry, formatExpiryDate } from '$lib/domain/expiry';
 import { locationLabel } from '$lib/i18n/domain-labels';
 import type { HouseholdService } from '$lib/application/household.service';
 import type { InventoryService } from '$lib/application/inventory.service';
-import { sendExpiryReminderEmail } from '$lib/server/email';
+import { sendExpiryReminderEmail, isEmailSendingDisabledFailure } from '$lib/server/email';
 import {
 	deletePushSubscriptionById,
 	DrizzlePushSubscriptionRepository
@@ -129,7 +129,7 @@ export class ExpiryReminderService {
 
 			if (emailResult.ok) {
 				sentAny = true;
-			} else {
+			} else if (!isEmailSendingDisabledFailure(emailResult)) {
 				failures.push(emailResult.reason);
 			}
 		}

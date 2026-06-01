@@ -110,6 +110,11 @@ env:
     availability:
       - RUNTIME
 
+  - variable: EMAIL_SENDING_DISABLED
+    value: "true"
+    availability:
+      - RUNTIME
+
   # Cloudflare Turnstile site key (public) — must match a widget whose hostnames include
   # Widget hostnames: localhost + home-pantry--home-pantry-4bee5.europe-west4.hosted.app; see docs/CAPTCHA.md
   - variable: PUBLIC_TURNSTILE_SITE_KEY

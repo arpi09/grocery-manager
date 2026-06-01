@@ -317,6 +317,12 @@ export const pushSubscriptionTable = pgTable(
 	]
 );
 
+export const appSettingsTable = pgTable('app_settings', {
+	key: text('key').primaryKey(),
+	value: text('value').notNull(),
+	updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+});
+
 export const consumptionEventTable = pgTable(
 	'consumption_event',
 	{

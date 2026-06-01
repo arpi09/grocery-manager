@@ -2,6 +2,7 @@ import { AdminError } from '$lib/application/admin.service';
 import { lucia } from '$lib/infrastructure/auth/lucia';
 import {
 	adminLogoutAllSchema,
+	adminSetEmailSendingSchema,
 	adminSetPetsSchema,
 	adminSetRoleSchema,
 	adminUserIdSchema
@@ -16,6 +17,7 @@ import {
 } from '$lib/domain/product-feedback';
 import { WAITLIST_LIST_DEFAULT, WAITLIST_LIST_MAX } from '$lib/domain/waitlist';
 import { STRIPE_READINESS_GATES } from '$lib/domain/plan';
+import { appSettingsService } from '$lib/server/di';
 import { fail, redirect } from '@sveltejs/kit';
 import { translate } from '$lib/i18n/messages';
 import type { Actions, PageServerLoad } from './$types';
@@ -52,7 +54,7 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 	const errorLimit = parseErrorLogLimit(url.searchParams.get('errorLimit'));
 	const feedbackLimit = parseFeedbackLimit(url.searchParams.get('feedbackLimit'));
 	const waitlistLimit = parseWaitlistLimit(url.searchParams.get('waitlistLimit'));
-	const [stats, users, errors, pmfWeeklyReview, productFeedback, waitlistCount, waitlistEntries, aiUsage] =
+	const [stats, users, errors, pmfWeeklyReview, productFeedback, waitlistCount, waitlistEntries, aiUsage, emailSending] =
 		await Promise.all([
 		locals.adminService.getDashboardStats(),
 		locals.adminService.listUsers(),
@@ -61,7 +63,8 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		locals.productFeedbackService.listRecent(feedbackLimit),
 		locals.waitlistService.count(),
 		locals.waitlistService.listRecent(waitlistLimit),
-		locals.aiUsageAdminService.getSummary()
+		locals.aiUsageAdminService.getSummary(),
+		appSettingsService.getEmailSendingStatus()
 	]);
 
 	return {
@@ -77,11 +80,25 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		waitlistEntries,
 		pmfWeeklyReview,
 		productFeedback,
-		aiUsage
+		aiUsage,
+		emailSending
 	};
 };
 
 export const actions: Actions = {
+	setEmailSending: async ({ request }) => {
+		const formData = await request.formData();
+		const parsed = adminSetEmailSendingSchema.safeParse({
+			enabled: formData.get('enabled')
+		});
+
+		if (!parsed.success) {
+			return fail(400, { message: 'Invalid email sending update.' });
+		}
+
+		await appSettingsService.setEmailSendingEnabled(parsed.data.enabled === 'true');
+		redirect(302, '/admin');
+	},
 	setRole: async ({ request, locals }) => {
 		const formData = await request.formData();
 		const parsed = adminSetRoleSchema.safeParse({
