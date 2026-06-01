@@ -46,7 +46,7 @@ export class AiUsageAdminService {
 	}
 
 	async isMonthlyBudgetExceeded(now = new Date()): Promise<boolean> {
-		const summary = await this.getSummary(now);
+		const summary = await this.getSummary(ADMIN_AI_USAGE_PERIOD_DAYS, now);
 		return summary.budgetExceeded;
 	}
 }
