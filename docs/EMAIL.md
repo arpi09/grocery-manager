@@ -63,16 +63,16 @@ npx firebase apphosting:secrets:grantaccess RESEND_API_KEY --backend home-pantry
 
 ## skaffu.com (prod live — mejl fortfarande av)
 
-**Status jun 2026:** `https://skaffu.com` är **Connected** (Firebase + SSL). `PUBLIC_ORIGIN` / `ORIGIN` pekar på skaffu.com. **Utgående mejl är fortfarande av** — prod använder `onboarding@resend.dev` och `EMAIL_SENDING_DISABLED=true` tills du medvetet aktiverar.
+**Status jun 2026:** `https://skaffu.com` är **Connected** (Firebase + SSL). `PUBLIC_ORIGIN` / `ORIGIN` pekar på skaffu.com. **Resend-domän skaffu.com är Verified** (DKIM ok). `RESEND_FROM` är `Skaffu <hello@skaffu.com>`. **Utgående mejl är fortfarande av** — `EMAIL_SENDING_DISABLED=true` tills du medvetet aktiverar.
 
 ### Ägare — checklista innan enable
 
 | # | Steg | Var | Klar? |
 |---|------|-----|-------|
-| 1 | Lägg till domän | [Resend → Domains](https://resend.com/domains) → `skaffu.com` | ☐ ägare |
-| 2 | DNS (SPF, DKIM, ev. DMARC) | Cloudflare → **skaffu.com** → DNS | ☐ ägare |
-| 3 | Vänta **Verified** i Resend | Resend dashboard | ☐ ägare |
-| 4 | Sätt `RESEND_FROM` | Firebase App Hosting env: `Skaffu <hello@skaffu.com>` | ☐ efter (3) |
+| 1 | Lägg till domän | [Resend → Domains](https://resend.com/domains) → `skaffu.com` | ☑ |
+| 2 | DNS (SPF, DKIM, ev. DMARC) | Cloudflare → **skaffu.com** → DNS | ☑ |
+| 3 | Vänta **Verified** i Resend | Resend dashboard | ☑ |
+| 4 | Sätt `RESEND_FROM` | Firebase App Hosting env: `Skaffu <hello@skaffu.com>` | ☑ |
 | 5 | **Inte än:** `EMAIL_SENDING_DISABLED=false` | `apphosting.yaml` + `/admin` toggle | medvetet av |
 | 6 | Testinbjudan | Inställningar → bjud in → länk `https://skaffu.com/invite/...` | efter (5) |
 
@@ -106,7 +106,7 @@ Lokal `.env` — se kommenterade rader i `.env.example`.
 Ordning:
 
 1. ~~`PUBLIC_ORIGIN` + `ORIGIN` → `https://skaffu.com`~~ **Klart** ([SKAFFU_DOMAIN_MIGRATION.md](./SKAFFU_DOMAIN_MIGRATION.md)).
-2. Uppdatera `RESEND_FROM` i Firebase App Hosting till `Skaffu <hello@skaffu.com>` (efter Resend **Verified**).
+2. ~~Uppdatera `RESEND_FROM` i Firebase App Hosting till `Skaffu <hello@skaffu.com>`~~ **Klart** (jun 2026).
 3. **Fortfarande av:** lämna `EMAIL_SENDING_DISABLED=true` tills du medvetet slår på mejl.
 4. När du vill skicka: sätt `EMAIL_SENDING_DISABLED=false` **och** slå på **Email sending** i `/admin` — **gör inte detta i samma deploy som DNS-test**; verifiera en testinbjudan först.
 

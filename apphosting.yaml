@@ -105,7 +105,7 @@ env:
 
   # Resend sender â€” use onboarding@resend.dev until a domain is verified (see docs/EMAIL.md)
   - variable: RESEND_FROM
-    value: Skaffu <onboarding@resend.dev>
+    value: Skaffu <hello@skaffu.com>
     availability:
       - RUNTIME
 
