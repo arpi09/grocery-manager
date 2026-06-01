@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { enhance } from '$app/forms';
-	import { getLocale, t } from '$lib/i18n';
+	import { t } from '$lib/i18n';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import AdminHealthDashboard from '$lib/components/organisms/AdminHealthDashboard.svelte';
