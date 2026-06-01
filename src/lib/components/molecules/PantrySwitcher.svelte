@@ -8,7 +8,7 @@
 	import { getLocale, t } from '$lib/i18n';
 	import { householdRoleLabel } from '$lib/domain/household';
 	import { PANTRY_CREATE_ACTION, PANTRY_SWITCH_ACTION } from '$lib/navigation/app-home';
-	import { subscribeNarrowViewport } from '$lib/utils/use-narrow-viewport';
+	import { NAV_NARROW_MEDIA_QUERY, subscribeNarrowViewport } from '$lib/utils/use-narrow-viewport';
 
 	interface Props {
 		households: UserHouseholdSummary[];
@@ -20,7 +20,9 @@
 	let open = $state(false);
 	let createOpen = $state(false);
 	let newPantryName = $state('');
-	let isNarrowViewport = $state(false);
+	let isNarrowViewport = $state(
+		typeof window !== 'undefined' ? window.matchMedia(NAV_NARROW_MEDIA_QUERY).matches : false
+	);
 
 	$effect(() => subscribeNarrowViewport((matches) => {
 		isNarrowViewport = matches;
@@ -69,6 +71,7 @@
 			<button
 				type="button"
 				class="pantry-trigger"
+				data-testid="pantry-switcher-trigger"
 				aria-expanded={open}
 				aria-haspopup="listbox"
 				aria-label={t('pantry.switchAria', { name: displayName })}
@@ -83,7 +86,7 @@
 
 			{#if open && !isNarrowViewport}
 				<button type="button" class="desktop-backdrop nav-dropdown-scrim" aria-label={t('pantry.closeMenu')} onclick={close}></button>
-				<div class="desktop-panel" role="listbox" aria-label={t('pantry.listAria')}>
+				<div class="desktop-panel" role="listbox" data-testid="pantry-switcher-menu" aria-label={t('pantry.listAria')}>
 					<p class="panel-label label-caps">{t('pantry.switchTitle')}</p>
 					<ul class="pantry-list">
 						{#each households as pantry (pantry.id)}
@@ -150,6 +153,7 @@
 		<button
 			type="button"
 			class="mobile-trigger"
+			data-testid="pantry-switcher-trigger"
 			aria-expanded={open && isNarrowViewport}
 			aria-haspopup="dialog"
 			aria-label={t('pantry.switchAria', { name: displayName })}
@@ -170,6 +174,7 @@
 			panelClass="pantry-sheet-panel"
 			bodyClass="pantry-sheet-body"
 		>
+			<div data-testid="pantry-switcher-menu">
 			<ul class="sheet-list">
 				{#each households as pantry (pantry.id)}
 					<li>
@@ -196,6 +201,7 @@
 					</li>
 				{/each}
 			</ul>
+			</div>
 
 			{#if createOpen}
 				<form

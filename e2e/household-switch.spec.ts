@@ -1,5 +1,6 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
 import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
+import { PANTRY_CREATE_ACTION, PANTRY_SWITCH_ACTION } from '../src/lib/navigation/app-home';
 
 const E2E_SECOND_PANTRY = 'E2E Testhem';
 
@@ -9,55 +10,62 @@ function navRoot(page: Page, mode: 'desktop' | 'mobile'): Locator {
 
 async function openPantrySwitcher(page: Page, mode: 'desktop' | 'mobile') {
 	const root = navRoot(page, mode);
-	const trigger = root.getByRole('button', { name: /Byt pantry/i });
+	const trigger = root.getByTestId('pantry-switcher-trigger');
 	await expect(trigger).toBeVisible();
 	await trigger.click();
 
-	if (mode === 'desktop') {
-		await expect(root.getByRole('listbox', { name: /Dina pantries/i })).toBeVisible();
-		return;
-	}
-
-	await expect(page.getByRole('dialog', { name: /Byt pantry/i })).toBeVisible();
+	const menu =
+		mode === 'desktop'
+			? root.getByTestId('pantry-switcher-menu')
+			: page.getByTestId('pantry-switcher-menu');
+	await expect(menu).toBeVisible({ timeout: 10_000 });
 }
 
 async function ensureSecondPantry(page: Page, mode: 'desktop' | 'mobile') {
 	await openPantrySwitcher(page, mode);
-	const root = navRoot(page, mode);
+	const menu =
+		mode === 'desktop'
+			? navRoot(page, mode).getByTestId('pantry-switcher-menu')
+			: page.getByTestId('pantry-switcher-menu');
 
-	const existing = mode === 'desktop'
-		? root.getByRole('option', { name: E2E_SECOND_PANTRY })
-		: page.getByRole('dialog', { name: /Byt pantry/i }).getByRole('button', { name: E2E_SECOND_PANTRY, exact: true });
+	const existing =
+		mode === 'desktop'
+			? menu.getByRole('option', { name: E2E_SECOND_PANTRY })
+			: menu.getByRole('button', { name: E2E_SECOND_PANTRY, exact: true });
 
 	if (await existing.isVisible().catch(() => false)) {
 		return;
 	}
 
-	const createScope = mode === 'desktop' ? root : page.getByRole('dialog', { name: /Byt pantry/i });
-	await createScope.getByRole('button', { name: /Skapa ny pantry/i }).click();
-	await createScope.locator('input[name="name"]').fill(E2E_SECOND_PANTRY);
-	await createScope.getByRole('button', { name: /^Skapa$/i }).click();
+	await menu.getByRole('button', { name: /Skapa ny pantry/i }).click();
+	await menu.locator('input[name="name"]').fill(E2E_SECOND_PANTRY);
+	await menu.getByRole('button', { name: /^Skapa$/i }).click();
 
 	await expect(
-		navRoot(page, mode).getByRole('button', { name: new RegExp(`Byt pantry, nuvarande: ${E2E_SECOND_PANTRY}`) })
-	).toBeVisible({ timeout: 15_000 });
+		navRoot(page, mode).getByTestId('pantry-switcher-trigger')
+	).toHaveAttribute('aria-label', new RegExp(`Byt pantry, nuvarande: ${E2E_SECOND_PANTRY}`), {
+		timeout: 15_000
+	});
 }
 
 async function switchToPantry(page: Page, mode: 'desktop' | 'mobile', name: string) {
 	await openPantrySwitcher(page, mode);
+	const menu =
+		mode === 'desktop'
+			? navRoot(page, mode).getByTestId('pantry-switcher-menu')
+			: page.getByTestId('pantry-switcher-menu');
 
 	if (mode === 'desktop') {
-		await navRoot(page, mode).getByRole('option', { name }).click();
+		await menu.getByRole('option', { name }).click();
 	} else {
-		await page
-			.getByRole('dialog', { name: /Byt pantry/i })
-			.getByRole('button', { name, exact: true })
-			.click();
+		await menu.getByRole('button', { name, exact: true }).click();
 	}
 
 	await expect(
-		navRoot(page, mode).getByRole('button', { name: new RegExp(`Byt pantry, nuvarande: ${name}`) })
-	).toBeVisible({ timeout: 15_000 });
+		navRoot(page, mode).getByTestId('pantry-switcher-trigger')
+	).toHaveAttribute('aria-label', new RegExp(`Byt pantry, nuvarande: ${name}`), {
+		timeout: 15_000
+	});
 }
 
 test.describe('Household switcher', () => {
@@ -67,12 +75,19 @@ test.describe('Household switcher', () => {
 		await loginAsAdmin(page);
 	});
 
+	test('forms post to /hem actions from any app page', async ({ page }) => {
+		await page.goto('/inkop');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(navRoot(page, 'desktop').locator(`form[action="${PANTRY_SWITCH_ACTION}"]`).first()).toBeAttached();
+		await expect(navRoot(page, 'desktop').locator(`form[action="${PANTRY_CREATE_ACTION}"]`).first()).toBeAttached();
+	});
+
 	test('switches pantry from a non-home page (desktop)', async ({ page }) => {
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
 
-		const initialTrigger = navRoot(page, 'desktop')
-			.getByRole('button', { name: /Byt pantry, nuvarande:/i });
+		const initialTrigger = navRoot(page, 'desktop').getByTestId('pantry-switcher-trigger');
 		const initialName = (await initialTrigger.getAttribute('aria-label'))?.replace(
 			/^Byt pantry, nuvarande: /,
 			''
@@ -103,10 +118,9 @@ test.describe('Household switcher (mobile)', () => {
 		await switchToPantry(page, 'mobile', E2E_SECOND_PANTRY);
 
 		await expect(page).toHaveURL(/\/planer/);
-		await expect(
-			navRoot(page, 'mobile').getByRole('button', {
-				name: new RegExp(`Byt pantry, nuvarande: ${E2E_SECOND_PANTRY}`)
-			})
-		).toBeVisible();
+		await expect(navRoot(page, 'mobile').getByTestId('pantry-switcher-trigger')).toHaveAttribute(
+			'aria-label',
+			new RegExp(`Byt pantry, nuvarande: ${E2E_SECOND_PANTRY}`)
+		);
 	});
 });
