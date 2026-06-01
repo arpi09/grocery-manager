@@ -3,6 +3,7 @@ import {
 	isOpenAiSchemaFailure,
 	normalizeReceiptAiPayload,
 	parseReceiptLines,
+	receiptLineToInventoryAmount,
 	RECEIPT_LINES_SCHEMA
 } from './receipt-parse';
 
@@ -81,6 +82,43 @@ describe('parseReceiptLines', () => {
 			})
 		).toEqual([{ name: 'Bröd', quantity: '1' }]);
 	});
+
+	it('parses ICA-style package size into quantity and unit', () => {
+		expect(
+			parseReceiptLines({
+				lines: [{ name: 'Coca-Cola', quantity: '1.5', unit: 'l' }]
+			})
+		).toEqual([{ name: 'Coca-Cola', quantity: '1.5', unit: 'l' }]);
+	});
+
+	it('normalizes comma decimals and unit casing', () => {
+		expect(
+			parseReceiptLines({
+				lines: [{ name: 'Cola', quantity: '1,5', unit: ' L ' }]
+			})
+		).toEqual([{ name: 'Cola', quantity: '1.5', unit: 'l' }]);
+	});
+
+	it('drops empty unit from output', () => {
+		expect(parseReceiptLines({ lines: [{ name: 'Ägg', quantity: '12', unit: '' }] })).toEqual([
+			{ name: 'Ägg', quantity: '12' }
+		]);
+	});
+});
+
+describe('receiptLineToInventoryAmount', () => {
+	it('defaults missing fields to quantity 1', () => {
+		expect(receiptLineToInventoryAmount({ name: 'Bröd' })).toEqual({
+			quantity: '1',
+			unit: null
+		});
+	});
+
+	it('maps Cola package size to inventory', () => {
+		expect(
+			receiptLineToInventoryAmount({ name: 'Coca-Cola', quantity: '1.5', unit: 'l' })
+		).toEqual({ quantity: '1.5', unit: 'l' });
+	});
 });
 
 describe('normalizeReceiptAiPayload', () => {
@@ -90,7 +128,7 @@ describe('normalizeReceiptAiPayload', () => {
 				lines: [{ name: '  Ost ', quantity: 3, extra: true }]
 			})
 		).toEqual({
-			lines: [{ name: 'Ost', quantity: '3' }]
+			lines: [{ name: 'Ost', quantity: '3', unit: '' }]
 		});
 	});
 });

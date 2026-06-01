@@ -18,9 +18,10 @@ export const RECEIPT_LINES_SCHEMA = {
 				type: 'object',
 				properties: {
 					name: { type: 'string' },
-					quantity: { type: 'string' }
+					quantity: { type: 'string' },
+					unit: { type: 'string' }
 				},
-				required: ['name', 'quantity'],
+				required: ['name', 'quantity', 'unit'],
 				additionalProperties: false
 			}
 		}
@@ -30,11 +31,16 @@ export const RECEIPT_LINES_SCHEMA = {
 } as const;
 
 export const RECEIPT_SYSTEM_PROMPT = [
-	'Du läser svenska butikskvitton och extraherar livsmedelsrader.',
-	'Returnera JSON: {"lines":[{"name":"","quantity":""}]}',
+	'Du läser svenska butikskvitton (ICA, Maxi, Kivra, Willys m.fl.) och extraherar livsmedelsrader.',
+	'Returnera JSON: {"lines":[{"name":"","quantity":"","unit":""}]}',
 	'Regler:',
-	'- name: kort svenskt produktnamn (ingen rabatt/MOMS/total/kortrad)',
-	'- quantity: mängd som sträng (t.ex. "2" eller "1.5 kg"), tom sträng om oklart',
+	'- name: kort produktnamn utan storlek/vikt (t.ex. "Coca-Cola", inte "Coca-Cola 1,5L")',
+	'- quantity: numerisk mängd som sträng med punkt som decimal (t.ex. "1", "1.5", "0.45")',
+	'  - Synlig förpackning på raden (1,5L, 500 g, 1 kg): sätt quantity till storleken, unit till enheten',
+	'  - Flera stycken utan tydlig storlek: antal köpta (t.ex. "2") och unit "st" eller tom',
+	'  - Lösvikt: vikten i quantity, unit "kg"',
+	'  - En vara utan storlek: quantity "1", unit tom',
+	'- unit: l, ml, kg, g, st, pack — tom sträng om okänd',
 	'- hoppa över icke-mat, pant, erbjudanden och butiksinfo',
 	'- max 40 rader'
 ].join('\n');
@@ -51,13 +57,31 @@ function coerceReceiptName(value: unknown): string {
 
 function coerceReceiptQuantity(value: unknown): string | undefined {
 	if (typeof value === 'string') {
-		const trimmed = value.trim();
+		const trimmed = value.trim().replace(',', '.');
 		return trimmed ? trimmed : undefined;
 	}
 	if (typeof value === 'number' && Number.isFinite(value)) {
 		return String(value);
 	}
 	return undefined;
+}
+
+function coerceReceiptUnit(value: unknown): string | undefined {
+	if (typeof value === 'string') {
+		const trimmed = value.trim().toLowerCase();
+		return trimmed ? trimmed : undefined;
+	}
+	return undefined;
+}
+
+/** Maps a parsed receipt line to inventory quantity + unit. */
+export function receiptLineToInventoryAmount(line: ReceiptLine): {
+	quantity: string;
+	unit: string | null;
+} {
+	const quantity = line.quantity?.trim() || '1';
+	const unit = line.unit?.trim() || null;
+	return { quantity, unit };
 }
 
 /** Normalizes model output before line parsing (coerce types, ignore extra fields). */
@@ -81,11 +105,9 @@ export function normalizeReceiptAiPayload(raw: unknown): unknown {
 				name: coerceReceiptName(row.name)
 			};
 			const quantity = coerceReceiptQuantity(row.quantity);
-			if (quantity) {
-				normalized.quantity = quantity;
-			} else {
-				normalized.quantity = '';
-			}
+			normalized.quantity = quantity ?? '';
+			const unit = coerceReceiptUnit(row.unit);
+			normalized.unit = unit ?? '';
 			return normalized;
 		})
 	};
@@ -108,8 +130,12 @@ export function parseReceiptLines(raw: unknown): ReceiptLine[] {
 		const row = entry as Record<string, unknown>;
 		const name = coerceReceiptName(row.name);
 		const quantity = coerceReceiptQuantity(row.quantity);
+		const unit = coerceReceiptUnit(row.unit);
 		if (!name) continue;
-		result.push(quantity ? { name, quantity } : { name });
+		const line: ReceiptLine = { name };
+		if (quantity) line.quantity = quantity;
+		if (unit) line.unit = unit;
+		result.push(line);
 	}
 
 	return result;

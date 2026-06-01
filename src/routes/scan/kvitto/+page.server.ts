@@ -1,6 +1,7 @@
 import { canEditInventory } from '$lib/domain/household';
 import { isStorageLocation, type StorageLocation } from '$lib/domain/location';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
+import { receiptLineToInventoryAmount } from '$lib/server/receipt-parse';
 import { buildScanReturnUrl } from '$lib/utils/scan-toast';
 import { recordProductEvent } from '$lib/server/product-events';
 import { error, redirect } from '@sveltejs/kit';
@@ -51,8 +52,13 @@ export const actions: Actions = {
 				continue;
 			}
 			const quantityRaw = formData.get(`quantity_${index}`);
-			const quantity =
-				typeof quantityRaw === 'string' && quantityRaw.trim() ? quantityRaw.trim() : '1';
+			const unitRaw = formData.get(`unit_${index}`);
+			const { quantity, unit } = receiptLineToInventoryAmount({
+				name: name.trim(),
+				quantity:
+					typeof quantityRaw === 'string' && quantityRaw.trim() ? quantityRaw.trim() : undefined,
+				unit: typeof unitRaw === 'string' && unitRaw.trim() ? unitRaw.trim() : undefined
+			});
 
 			await event.locals.inventoryService.createItem(
 				event.locals.householdId!,
@@ -61,7 +67,7 @@ export const actions: Actions = {
 					name: name.trim(),
 					location: bulkLocation,
 					quantity,
-					unit: null,
+					unit,
 					expiresOn: null,
 					notes: null
 				},

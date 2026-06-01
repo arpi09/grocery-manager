@@ -118,6 +118,12 @@
 
 	const selectedCount = $derived(lines.filter((_, i) => selected[i]).length);
 
+	function formatLineAmount(line: ReceiptLine): string {
+		if (!line.quantity && !line.unit) return '';
+		if (line.quantity && line.unit) return `${line.quantity} ${line.unit}`;
+		return line.quantity ?? line.unit ?? '';
+	}
+
 	function requestNewImage() {
 		if (lines.length > 0) {
 			discardReviewOpen = true;
@@ -228,13 +234,14 @@
 								selected[index] = (e.currentTarget as HTMLInputElement).checked;
 							}} />
 							<span class="line-name">{line.name}</span>
-							{#if line.quantity}
-								<span class="line-qty">{line.quantity}</span>
+							{#if formatLineAmount(line)}
+								<span class="line-qty">{formatLineAmount(line)}</span>
 							{/if}
 						</label>
 						{#if selected[index]}
 							<input type="hidden" name={`name_${index}`} value={line.name} />
 							<input type="hidden" name={`quantity_${index}`} value={line.quantity ?? '1'} />
+							<input type="hidden" name={`unit_${index}`} value={line.unit ?? ''} />
 						{/if}
 					</li>
 				{/each}
