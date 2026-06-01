@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
+	import { fetchCheckedShoppingItems } from '$lib/client/shopping-data';
 	import { t } from '$lib/i18n';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { getDeleteCopy } from '$lib/utils/delete-safety';
@@ -13,10 +15,25 @@
 		formatShoppingListExportLine
 	} from '$lib/utils/shopping-list-export';
 
-	let { items, canEdit }: { items: ShoppingListItem[]; canEdit: boolean } = $props();
+	let {
+		items,
+		checkedCount = 0,
+		canEdit
+	}: { items: ShoppingListItem[]; checkedCount?: number; canEdit: boolean } = $props();
 
 	const unchecked = $derived(items.filter((item) => !item.checked));
-	const checked = $derived(items.filter((item) => item.checked));
+	let checked = $state<ShoppingListItem[]>([]);
+	let checkedLoaded = $state(false);
+	let loadingChecked = $state(false);
+	let showChecked = $state(false);
+
+	$effect.pre(() => {
+		checked = [];
+		checkedLoaded = false;
+		showChecked = false;
+	});
+
+	const visibleChecked = $derived(showChecked ? checked : []);
 
 	let undoPayload = $state<{
 		name: string;
@@ -38,8 +55,37 @@
 		return formatShoppingListExportLine(item);
 	}
 
+	async function ensureCheckedLoaded() {
+		if (checkedLoaded || checkedCount === 0 || !browser) {
+			return;
+		}
+
+		loadingChecked = true;
+		try {
+			const page = await fetchCheckedShoppingItems();
+			checked = page.items;
+			checkedLoaded = true;
+		} finally {
+			loadingChecked = false;
+		}
+	}
+
+	async function toggleCheckedSection() {
+		const next = !showChecked;
+		showChecked = next;
+		if (next) {
+			await ensureCheckedLoaded();
+		}
+	}
+
+	async function allItemsForExport(): Promise<ShoppingListItem[]> {
+		await ensureCheckedLoaded();
+		return [...unchecked, ...checked];
+	}
+
 	async function copyExportList() {
-		const text = formatShoppingListExport(items);
+		const exportItems = await allItemsForExport();
+		const text = formatShoppingListExport(exportItems);
 		if (!text) {
 			return;
 		}
@@ -96,11 +142,11 @@
 <section class="panel" aria-label={t('shopping.listAria')}>
 	<div class="panel-head">
 		<p class="intro">{t('shopping.intro')}</p>
-		{#if items.length > 0}
+		{#if items.length > 0 || checkedCount > 0}
 			<Button
 				type="button"
 				variant="secondary"
-				disabled={unchecked.length === 0}
+				disabled={unchecked.length === 0 && checkedCount === 0}
 				aria-label={unchecked.length === 0 ? t('shopping.exportEmpty') : t('shopping.exportListAria')}
 				onclick={copyExportList}
 			>
@@ -123,7 +169,7 @@
 		<p class="readonly">{t('inventory.readonly')}</p>
 	{/if}
 
-	{#if items.length === 0}
+	{#if items.length === 0 && checkedCount === 0}
 		<p class="empty">{t('shopping.emptyList')}</p>
 	{:else}
 		<ul class="list">
@@ -143,7 +189,7 @@
 							copyOptions={{ itemName: item.name }}
 							action="?/remove"
 							submitEnhance={createRemoveEnhance(item)}
-							label="×"
+							label=""
 							ariaLabel={t('shopping.removeLine', { line: formatLine(item) })}
 							class="remove-trigger"
 						>
@@ -156,15 +202,23 @@
 			{/each}
 		</ul>
 
-		{#if checked.length > 0}
+		{#if checkedCount > 0}
 			<div class="checked-block">
 				<div class="checked-head">
-					<h2>{t('shopping.checkedHeading')}</h2>
-					{#if canEdit}
+					<button type="button" class="checked-toggle" onclick={toggleCheckedSection}>
+						<h2>
+							{loadingChecked && showChecked
+								? t('common.loading')
+								: showChecked
+									? t('shopping.hideChecked')
+									: t('shopping.showChecked', { count: checkedCount })}
+						</h2>
+					</button>
+					{#if canEdit && showChecked && visibleChecked.length > 0}
 						<DeleteConfirmButton
 							tier={3}
 							context="shoppingListClearChecked"
-							copyOptions={{ count: checked.length }}
+							copyOptions={{ count: visibleChecked.length }}
 							action="?/clearChecked"
 							variant="secondary"
 							label={t('delete.clearChecked.confirm')}
@@ -172,23 +226,25 @@
 						/>
 					{/if}
 				</div>
-				<ul class="list checked">
-					{#each checked as item (item.id)}
-						<li>
-							{#if canEdit}
-								<form method="POST" action="?/toggle" data-sveltekit-reload class="row-form">
-									<input type="hidden" name="id" value={item.id} />
-									<label class="check-row">
-										<input type="checkbox" checked onchange={(e) => e.currentTarget.form?.requestSubmit()} />
-										<span>{formatLine(item)}</span>
-									</label>
-								</form>
-							{:else}
-								<span class="done">{formatLine(item)}</span>
-							{/if}
-						</li>
-					{/each}
-				</ul>
+				{#if showChecked}
+					<ul class="list checked">
+						{#each visibleChecked as item (item.id)}
+							<li>
+								{#if canEdit}
+									<form method="POST" action="?/toggle" data-sveltekit-reload class="row-form">
+										<input type="hidden" name="id" value={item.id} />
+										<label class="check-row">
+											<input type="checkbox" checked onchange={(e) => e.currentTarget.form?.requestSubmit()} />
+											<span>{formatLine(item)}</span>
+										</label>
+									</form>
+								{:else}
+									<span class="done">{formatLine(item)}</span>
+								{/if}
+							</li>
+						{/each}
+					</ul>
+				{/if}
 			</div>
 		{/if}
 	{/if}
@@ -319,6 +375,19 @@
 	.checked-head h2 {
 		margin: 0;
 		font-size: 1rem;
+	}
+
+	.checked-toggle {
+		border: none;
+		background: transparent;
+		padding: 0;
+		cursor: pointer;
+		text-align: left;
+		color: inherit;
+	}
+
+	.checked-toggle:hover h2 {
+		color: var(--color-primary);
 	}
 
 	.undo-toast-wrap {

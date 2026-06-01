@@ -28,6 +28,9 @@ describe('InventoryService', () => {
 		repository = {
 			findById: vi.fn(),
 			findByHouseholdAndLocation: vi.fn(),
+			findByHouseholdAndLocationPaginated: vi.fn(),
+			countActiveByLocation: vi.fn(),
+			countFinishedByLocation: vi.fn(),
 			findFinishedByHouseholdAndLocation: vi.fn(),
 			findAllByHousehold: vi.fn(),
 			findExpiringBefore: vi.fn(),

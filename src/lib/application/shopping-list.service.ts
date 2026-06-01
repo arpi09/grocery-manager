@@ -30,6 +30,18 @@ export class ShoppingListService {
 		return this.repository.listByHousehold(householdId);
 	}
 
+	listUncheckedItems(householdId: string) {
+		return this.repository.listUncheckedByHousehold(householdId);
+	}
+
+	listCheckedItems(householdId: string) {
+		return this.repository.listCheckedByHousehold(householdId);
+	}
+
+	countCheckedItems(householdId: string) {
+		return this.repository.countCheckedByHousehold(householdId);
+	}
+
 	async addItem(householdId: string, role: HouseholdRole, input: CreateShoppingListItemInput) {
 		if (!canEditInventory(role)) throw new ShoppingListReadOnlyError();
 		return this.repository.create(

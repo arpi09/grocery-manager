@@ -1,5 +1,6 @@
 import { canEditInventory, type HouseholdRole } from '$lib/domain/household';
 import { EXPIRING_SOON_DAYS, buildLocationBars, type LocationBar } from '$lib/domain/inventory-analytics';
+import { INVENTORY_LIST_DEFAULT } from '$lib/domain/inventory-list';
 import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 import type {
 	CreateInventoryItemInput,
@@ -74,6 +75,28 @@ export class InventoryService {
 
 	async listByLocation(householdId: string, location: StorageLocation) {
 		return this.repository.findByHouseholdAndLocation(householdId, location);
+	}
+
+	async listByLocationPaginated(
+		householdId: string,
+		location: StorageLocation,
+		limit = INVENTORY_LIST_DEFAULT,
+		offset = 0
+	) {
+		return this.repository.findByHouseholdAndLocationPaginated(
+			householdId,
+			location,
+			limit,
+			offset
+		);
+	}
+
+	async countActiveByLocation(householdId: string, location: StorageLocation) {
+		return this.repository.countActiveByLocation(householdId, location);
+	}
+
+	async countFinishedByLocation(householdId: string, location: StorageLocation) {
+		return this.repository.countFinishedByLocation(householdId, location);
 	}
 
 	async listFinishedByLocation(householdId: string, location: StorageLocation) {

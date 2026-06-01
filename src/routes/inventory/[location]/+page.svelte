@@ -15,8 +15,8 @@
 	const addItemHref = $derived(`/item/new?location=${data.location}&from=${from}`);
 	const scanHref = $derived(`/scan?mode=barcode&location=${data.location}&from=${from}`);
 
-	const activeCount = $derived(data.items.length);
-	const totalCount = $derived(data.items.length + data.finishedItems.length);
+	const activeCount = $derived(data.activeTotal);
+	const totalCount = $derived(data.activeTotal + data.finishedTotal);
 	const hasInventory = $derived(totalCount > 0);
 
 	const headerSubtitle = $derived(
@@ -50,7 +50,8 @@
 
 			<InventoryList
 				items={data.items}
-				finishedItems={data.finishedItems}
+				activeTotal={data.activeTotal}
+				finishedTotal={data.finishedTotal}
 				location={data.location}
 				canWrite={data.canWrite}
 				{hasInventory}

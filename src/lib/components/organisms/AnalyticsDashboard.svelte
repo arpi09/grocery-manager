@@ -1,18 +1,27 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import type { InventoryAnalytics } from '$lib/application/inventory.service';
+	import { fetchStatistikAnalytics } from '$lib/client/statistik-data';
 	import { EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
 	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
 
-	interface Props {
-		analytics: InventoryAnalytics;
-	}
+	let analytics = $state<InventoryAnalytics | null>(null);
+	let loading = $state(true);
+	let loadError = $state(false);
 
-	let { analytics }: Props = $props();
-
+	onMount(async () => {
+		try {
+			analytics = await fetchStatistikAnalytics();
+		} catch {
+			loadError = true;
+		} finally {
+			loading = false;
+		}
+	});
 	const locationIcons: Record<StorageLocation, FeatureIconId> = {
 		fridge: 'fridge',
 		freezer: 'freezer',
@@ -28,8 +37,12 @@
 	}
 </script>
 
-<section class="analytics">
-	<div class="hero">
+{#if loading}
+	<p class="loading">{t('common.loading')}</p>
+{:else if loadError || !analytics}
+	<p class="loading">{t('common.errorGeneric')}</p>
+{:else}
+<section class="analytics">	<div class="hero">
 		<p class="hero-number">{analytics.totalItems}</p>
 		<p class="hero-label">
 			{analytics.totalItems === 1 ? t('inventory.rowSingular') : t('inventory.rowPlural')}
@@ -95,10 +108,16 @@
 		{/if}
 	</Card>
 </section>
+{/if}
 
 <style>
-	.analytics {
-		display: flex;
+	.loading {
+		margin: 0;
+		color: var(--color-text-muted);
+		font-size: 0.95rem;
+	}
+
+	.analytics {		display: flex;
 		flex-direction: column;
 		gap: var(--space-lg);
 	}

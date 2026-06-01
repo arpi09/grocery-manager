@@ -10,6 +10,10 @@ export type RequireUserResult =
 	| { authorized: false; response: Response }
 	| { authorized: true; user: NonNullable<App.Locals['user']> };
 
+export type RequireHouseholdResult =
+	| { authorized: false; response: Response }
+	| { authorized: true; user: NonNullable<App.Locals['user']>; householdId: string };
+
 /** Returns a 401 JSON response when the session user is missing. */
 export function requireUser(locals: App.Locals): RequireUserResult {
 	if (!locals.user) {
@@ -22,6 +26,24 @@ export function requireUser(locals: App.Locals): RequireUserResult {
 		};
 	}
 	return { authorized: true, user: locals.user };
+}
+
+/** Returns 401/400 JSON when the session user or active household is missing. */
+export function requireHousehold(locals: App.Locals): RequireHouseholdResult {
+	const auth = requireUser(locals);
+	if (!auth.authorized) {
+		return auth;
+	}
+	if (!locals.householdId) {
+		return {
+			authorized: false,
+			response: json(
+				{ error: translate(locals.locale, 'errors.household.noHousehold') },
+				{ status: 400 }
+			)
+		};
+	}
+	return { authorized: true, user: auth.user, householdId: locals.householdId };
 }
 
 /** Returns 401/403 JSON when the session user is missing or not admin. */

@@ -27,6 +27,14 @@ export interface IInventoryRepository {
 		householdId: string,
 		location: StorageLocation
 	): Promise<InventoryItem[]>;
+	findByHouseholdAndLocationPaginated(
+		householdId: string,
+		location: StorageLocation,
+		limit: number,
+		offset: number
+	): Promise<InventoryItem[]>;
+	countActiveByLocation(householdId: string, location: StorageLocation): Promise<number>;
+	countFinishedByLocation(householdId: string, location: StorageLocation): Promise<number>;
 	findFinishedByHouseholdAndLocation(
 		householdId: string,
 		location: StorageLocation
@@ -98,6 +106,59 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 			.orderBy(inventoryItemTable.name);
 
 		return rows.map(mapRow);
+	}
+
+	async findByHouseholdAndLocationPaginated(
+		householdId: string,
+		location: StorageLocation,
+		limit: number,
+		offset: number
+	) {
+		const rows = await this.database
+			.select()
+			.from(inventoryItemTable)
+			.where(
+				and(
+					eq(inventoryItemTable.householdId, householdId),
+					eq(inventoryItemTable.location, location),
+					activeQuantityFilter()
+				)
+			)
+			.orderBy(inventoryItemTable.name)
+			.limit(limit)
+			.offset(offset);
+
+		return rows.map(mapRow);
+	}
+
+	async countActiveByLocation(householdId: string, location: StorageLocation) {
+		const [row] = await this.database
+			.select({ count: sql<number>`count(*)::int` })
+			.from(inventoryItemTable)
+			.where(
+				and(
+					eq(inventoryItemTable.householdId, householdId),
+					eq(inventoryItemTable.location, location),
+					activeQuantityFilter()
+				)
+			);
+
+		return row?.count ?? 0;
+	}
+
+	async countFinishedByLocation(householdId: string, location: StorageLocation) {
+		const [row] = await this.database
+			.select({ count: sql<number>`count(*)::int` })
+			.from(inventoryItemTable)
+			.where(
+				and(
+					eq(inventoryItemTable.householdId, householdId),
+					eq(inventoryItemTable.location, location),
+					sql`${inventoryItemTable.quantity} <= 0`
+				)
+			);
+
+		return row?.count ?? 0;
 	}
 
 	async findFinishedByHouseholdAndLocation(householdId: string, location: StorageLocation) {

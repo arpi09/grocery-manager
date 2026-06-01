@@ -1,8 +1,14 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import Button from '$lib/components/atoms/Button.svelte';
 	import ItemRow from '$lib/components/molecules/ItemRow.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import SearchInput from '$lib/components/molecules/SearchInput.svelte';
 	import type { FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
+	import {
+		fetchInventoryActivePage,
+		fetchInventoryFinished
+	} from '$lib/client/inventory-data';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
@@ -10,7 +16,8 @@
 
 	interface Props {
 		items: InventoryItem[];
-		finishedItems?: InventoryItem[];
+		activeTotal: number;
+		finishedTotal: number;
 		location: StorageLocation;
 		canWrite?: boolean;
 		hasInventory?: boolean;
@@ -18,7 +25,8 @@
 
 	let {
 		items,
-		finishedItems = [],
+		activeTotal,
+		finishedTotal,
 		location,
 		canWrite = false,
 		hasInventory = true
@@ -34,15 +42,28 @@
 
 	let query = $state('');
 	let showFinished = $state(false);
+	let loadedItems = $state<InventoryItem[]>([]);
+	let finishedItems = $state<InventoryItem[]>([]);
+	let loadingMore = $state(false);
+	let loadingFinished = $state(false);
+	let finishedLoaded = $state(false);
+
+	$effect.pre(() => {
+		loadedItems = items;
+		finishedItems = [];
+		finishedLoaded = false;
+		showFinished = false;
+	});
 
 	const filtered = $derived(
-		items.filter((item) => item.name.toLowerCase().includes(query.toLowerCase()))
+		loadedItems.filter((item) => item.name.toLowerCase().includes(query.toLowerCase()))
 	);
 	const filteredFinished = $derived(
 		showFinished
 			? finishedItems.filter((item) => item.name.toLowerCase().includes(query.toLowerCase()))
 			: []
 	);
+	const hasMoreActive = $derived(loadedItems.length < activeTotal);
 	const hasVisibleItems = $derived(filtered.length > 0 || filteredFinished.length > 0);
 	const isSearchEmpty = $derived(query.length > 0 && !hasVisibleItems);
 
@@ -65,22 +86,59 @@
 		freezer: 'freezer',
 		cupboard: 'cupboard'
 	};
+
+	async function loadMoreActive() {
+		if (!browser || loadingMore || !hasMoreActive) {
+			return;
+		}
+
+		loadingMore = true;
+		try {
+			const page = await fetchInventoryActivePage(location, loadedItems.length);
+			loadedItems = [...loadedItems, ...page.items];
+		} finally {
+			loadingMore = false;
+		}
+	}
+
+	async function toggleFinished() {
+		const next = !showFinished;
+		showFinished = next;
+
+		if (!next || finishedLoaded || finishedTotal === 0 || !browser) {
+			return;
+		}
+
+		loadingFinished = true;
+		try {
+			const page = await fetchInventoryFinished(location);
+			finishedItems = page.items;
+			finishedLoaded = true;
+		} finally {
+			loadingFinished = false;
+		}
+	}
 </script>
 
 <div class="list">
 	{#if hasInventory}
 		<div class="filter-row">
 			<SearchInput bind:value={query} placeholder={t('inventory.searchPlaceholder')} />
-			{#if finishedItems.length > 0}
+			{#if finishedTotal > 0}
 				<div class="filter-meta">
 					<button
 						type="button"
 						class="finished-chip"
 						aria-pressed={showFinished}
-						onclick={() => (showFinished = !showFinished)}
+						disabled={loadingFinished}
+						onclick={toggleFinished}
 					>
-						{showFinished ? t('inventory.hideFinished') : t('inventory.showFinished')}
-						<span class="finished-count">{finishedItems.length}</span>
+						{loadingFinished
+							? t('common.loading')
+							: showFinished
+								? t('inventory.hideFinished')
+								: t('inventory.showFinished')}
+						<span class="finished-count">{finishedTotal}</span>
 					</button>
 				</div>
 			{/if}
@@ -109,6 +167,20 @@
 				<li><ItemRow {item} {canWrite} finished={false} /></li>
 			{/each}
 		</ul>
+
+		{#if hasMoreActive && query.length === 0}
+			<div class="load-more-row">
+				<Button
+					type="button"
+					variant="secondary"
+					loading={loadingMore}
+					loadingLabel={t('common.loading')}
+					onclick={loadMoreActive}
+				>
+					{t('common.loadMore')}
+				</Button>
+			</div>
+		{/if}
 
 		{#if filteredFinished.length > 0}
 			<h2 class="finished-heading">{t('inventory.finishedSection')}</h2>
@@ -156,9 +228,14 @@
 		text-decoration-color: color-mix(in srgb, var(--color-text-muted) 45%, transparent);
 	}
 
-	.finished-chip:hover {
+	.finished-chip:hover:not(:disabled) {
 		color: var(--color-primary);
 		text-decoration-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
+	}
+
+	.finished-chip:disabled {
+		opacity: 0.7;
+		cursor: wait;
 	}
 
 	.finished-chip[aria-pressed='true'] {
@@ -185,6 +262,11 @@
 	.finished-chip[aria-pressed='true'] .finished-count {
 		background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface));
 		color: var(--color-primary);
+	}
+
+	.load-more-row {
+		display: flex;
+		justify-content: center;
 	}
 
 	.finished-heading {

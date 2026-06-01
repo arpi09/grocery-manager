@@ -1,0 +1,2 @@
+export const INVENTORY_LIST_DEFAULT = 50;
+export const INVENTORY_LIST_MAX = 200;

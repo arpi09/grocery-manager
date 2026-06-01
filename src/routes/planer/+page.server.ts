@@ -62,7 +62,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		toIsoDate(gridStart),
 		toIsoDate(gridEnd)
 	);
-	const ideas = await locals.mealPlanService.listRecipeIdeas(locals.user!.id, 12);
 
 	const mealsByDate = new Map<string, typeof meals>();
 	for (const meal of meals) {
@@ -104,8 +103,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		monthLabel: monthStart.toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' }),
 		previousMonth,
 		nextMonth,
-		weeks,
-		ideas
+		weeks
 	};
 };
 

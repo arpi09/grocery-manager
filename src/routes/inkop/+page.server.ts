@@ -27,13 +27,17 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 	const { user } = await parent();
 	const householdId = locals.householdId;
 	if (!householdId) {
-		return { user, items: [], canEdit: false };
+		return { user, items: [], checkedCount: 0, canEdit: false };
 	}
 
-	const items = await locals.shoppingListService.listItems(householdId);
+	const [items, checkedCount] = await Promise.all([
+		locals.shoppingListService.listUncheckedItems(householdId),
+		locals.shoppingListService.countCheckedItems(householdId)
+	]);
 	return {
 		user,
 		items,
+		checkedCount,
 		canEdit: !!locals.householdRole && canEditInventory(locals.householdRole)
 	};
 };

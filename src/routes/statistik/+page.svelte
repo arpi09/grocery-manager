@@ -11,6 +11,6 @@
 <AppLayout user={data.user}>
 	<AppHeader title={t('stats.title')} subtitle={t('stats.subtitle')} />
 	<PageContainer>
-		<AnalyticsDashboard analytics={data.analytics} />
+		<AnalyticsDashboard />
 	</PageContainer>
 </AppLayout>

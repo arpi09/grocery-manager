@@ -9,6 +9,9 @@ describe('ShoppingListService', () => {
 	beforeEach(() => {
 		repository = {
 			listByHousehold: vi.fn(),
+			listUncheckedByHousehold: vi.fn(),
+			listCheckedByHousehold: vi.fn(),
+			countCheckedByHousehold: vi.fn(),
 			findById: vi.fn(),
 			create: vi.fn(),
 			setChecked: vi.fn(),

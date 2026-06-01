@@ -1,10 +1,13 @@
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, eq, sql } from 'drizzle-orm';
 import type { CreateShoppingListItemInput, ShoppingListItem } from '$lib/domain/shopping-list-item';
 import { db, type AppDatabase } from '$lib/infrastructure/db';
 import { shoppingListItemTable } from '$lib/infrastructure/db/schema';
 
 export interface IShoppingListRepository {
 	listByHousehold(householdId: string): Promise<ShoppingListItem[]>;
+	listUncheckedByHousehold(householdId: string): Promise<ShoppingListItem[]>;
+	listCheckedByHousehold(householdId: string): Promise<ShoppingListItem[]>;
+	countCheckedByHousehold(householdId: string): Promise<number>;
 	findById(householdId: string, id: string): Promise<ShoppingListItem | null>;
 	create(
 		householdId: string,
@@ -42,6 +45,48 @@ export class DrizzleShoppingListRepository implements IShoppingListRepository {
 			.where(eq(shoppingListItemTable.householdId, householdId))
 			.orderBy(asc(shoppingListItemTable.sortOrder), asc(shoppingListItemTable.createdAt));
 		return rows.map(mapRow);
+	}
+
+	async listUncheckedByHousehold(householdId: string) {
+		const rows = await this.database
+			.select()
+			.from(shoppingListItemTable)
+			.where(
+				and(
+					eq(shoppingListItemTable.householdId, householdId),
+					eq(shoppingListItemTable.checked, false)
+				)
+			)
+			.orderBy(asc(shoppingListItemTable.sortOrder), asc(shoppingListItemTable.createdAt));
+		return rows.map(mapRow);
+	}
+
+	async listCheckedByHousehold(householdId: string) {
+		const rows = await this.database
+			.select()
+			.from(shoppingListItemTable)
+			.where(
+				and(
+					eq(shoppingListItemTable.householdId, householdId),
+					eq(shoppingListItemTable.checked, true)
+				)
+			)
+			.orderBy(asc(shoppingListItemTable.sortOrder), asc(shoppingListItemTable.createdAt));
+		return rows.map(mapRow);
+	}
+
+	async countCheckedByHousehold(householdId: string) {
+		const [row] = await this.database
+			.select({ count: sql<number>`count(*)::int` })
+			.from(shoppingListItemTable)
+			.where(
+				and(
+					eq(shoppingListItemTable.householdId, householdId),
+					eq(shoppingListItemTable.checked, true)
+				)
+			);
+
+		return row?.count ?? 0;
 	}
 
 	async findById(householdId: string, id: string) {
