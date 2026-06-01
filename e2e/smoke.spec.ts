@@ -13,6 +13,11 @@ test.describe('Smoke', () => {
 		expect(response.status()).toBe(200);
 	});
 
+	test('register page responds OK', async ({ request }) => {
+		const response = await request.get('/register');
+		expect(response.status()).toBe(200);
+	});
+
 	test('authenticated dashboard responds OK', async ({ page }) => {
 		await loginAsAdmin(page);
 		const response = await page.request.get('/');

@@ -39,7 +39,7 @@ flowchart TB
 |------|-----|-----|--------|-----------|
 | **G0** | Före commit (agenter) | `npm run check && npm test` + husky `lint-staged` | ~1–2 min | Lokalt |
 | **G1** | Push till `master` | `lint`, `check`, `test`, `test:integration` (PGlite), `build` | ~3–6 min | G2 |
-| **G2** | Efter G1 | Playwright E2E (5 spec-filer, PGlite) | ~8–15 min | G3 |
+| **G2** | Efter G1 | Playwright E2E (9 spec-filer, PGlite) | ~8–15 min | G3 |
 | **G3** | Efter G2 | `npm run deploy:firebase` | ~5–20 min | Produktion |
 
 **Total tid (typiskt):** ~15–25 min från push till live — inget manuellt steg.
@@ -133,9 +133,10 @@ npm run deploy:firebase
 
 | Idé | Status |
 |-----|--------|
-| Path filters (skippa E2E på ren dokumentation) | Ej implementerat |
+| Path filters (skippa E2E på ren dokumentation) | **Implementerat** — `changes`-jobb i [`release.yml`](../.github/workflows/release.yml) (`dorny/paths-filter@v3`) |
 | Delade npm-cache artifacts mellan jobb | Ej implementerat |
 | Preview deploy per commit | Ej implementerat |
+| Post-deploy prod-smoke (curl) | Manuell checklista — [`PROD_SMOKE.md`](./PROD_SMOKE.md) |
 
 ---
 

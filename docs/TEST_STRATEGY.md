@@ -25,7 +25,7 @@ Home Pantry följer en **testing diamond** — inte en klassisk testpyramid i bl
 ```mermaid
 flowchart TB
   subgraph diamond["Testing diamond"]
-    E2E["E2E — få, kritiska resor<br/>23 tester · G2 gate"]
+    E2E["E2E — få, kritiska resor<br/>22 tester · G2 gate"]
     INT["Integration — primärt lager<br/>*.integration.test.ts · G1"]
     UNIT["Unit — snabba, fokuserade<br/>*.test.ts · G0/G1"]
   end
@@ -38,7 +38,7 @@ CI-kedjan i [`release.yml`](../.github/workflows/release.yml):
 |------|-----------|------------------|
 | **G0** (lokalt) | `npm run check && npm test` | Commit-kvalitet |
 | **G1** (quality) | `npm test` + `npm run test:integration` | G2 |
-| **G2** (e2e) | `npm run test:e2e` (23 tester, `E2E_MOCK_AI=true`) | G3 |
+| **G2** (e2e) | `npm run test:e2e` (22 tester, `E2E_MOCK_AI=true`) | G3 |
 | **G3** (deploy) | Firebase App Hosting | Produktion |
 
 ---
@@ -105,8 +105,8 @@ Prefer integration tests when they give confidence across multiple units.
 |--------|---------|-------------------|
 | Inventory / household | `inventory.integration.test.ts`, `household.*.integration.test.ts` | Service + PGlite repository |
 | Shopping list | `shopping-list.integration.test.ts` | CRUD + listlogik mot DB |
-| Push subscriptions | `push-subscription.repository.integration.test.ts` | Repository + schema |
-| Auth / admin services | `auth.service.test.ts`, `admin.service.test.ts` | Ofta service + mock/repository — flytta mot integration när DB behövs |
+| Push subscriptions | `push-subscription.repository.integration.test.ts`, `push.integration.test.ts` | Repository + push API routes |
+| Auth / admin services | `auth.service.test.ts`, `auth.integration.test.ts`, `admin.service.test.ts` | Unit + PGlite persistence |
 
 **Kör:** `USE_PGLITE=true npm run test:integration` (samma som G1 i CI). Config: `vitest.integration.config.ts`, mönster `**/*.integration.test.ts`.
 
@@ -129,7 +129,7 @@ E2E must cover:
 - critical regression flows
 - admin-critical flow if admin is production-relevant
 
-**Home Pantry (23 tester, 9 spec-filer):**
+**Home Pantry (22 tester, 9 spec-filer):**
 
 | Flöde | Spec |
 |-------|------|
@@ -138,7 +138,7 @@ E2E must cover:
 | Streckkod / scan / inventory | `scan-inventory.spec.ts` |
 | Inköpslista + smart fill | `shopping.spec.ts` |
 | Navigation (desktop + mobil) | `navigation.spec.ts` |
-| Marketing smoke | `smoke.spec.ts`, `critical-flows.spec.ts` |
+| Marketing smoke | `smoke.spec.ts` |
 | Admin dashboard | `z-admin.spec.ts` |
 | Riktiga kvitto-PDF (lokal, optional) | `receipt-real-fixtures.spec.ts` |
 
@@ -245,7 +245,7 @@ A feature is not done unless:
 3. **E2E-bedömning:** auth/UI/nav/kvitto? → `USE_PGLITE=true npm run test:e2e` lokalt; annars dokumentera varför E2E inte behövs
 4. **Kvitto:** syntetiska fixtures i CI; riktiga PDF enligt [`RECEIPT_TEST_PACK.md`](./RECEIPT_TEST_PACK.md) lokalt
 5. **Migration:** `npm test -- src/lib/infrastructure/db/migrations.test.ts` vid schemaändring
-6. **Prod Turnstile:** manuell `/register`-smoke vid captcha-ändring (E2E täcker inte prod-widget)
+6. **Prod smoke:** manuell checklista efter deploy — [`PROD_SMOKE.md`](./PROD_SMOKE.md) (admin, Turnstile `/register`, push, VAPID GET)
 
 ---
 
