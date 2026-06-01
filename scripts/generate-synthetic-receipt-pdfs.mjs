@@ -84,6 +84,54 @@ const fixtures = [
 			'KVARTSMJOLK 18.90',
 			'ATT BETALA 224.30'
 		]
+	},
+	{
+		file: 'synthetic-ica-02.pdf',
+		lines: [
+			'Maxi ICA Toftanas',
+			'Org.nr 556012-5790',
+			'KVITTO 2026-04-22 14:32',
+			'KYCKLINGFILE 500G 69.90',
+			'PASTA PENNE 500G 12.90',
+			'KROSSADE TOMATER 14.50',
+			'LOK GUL 1ST 4.90',
+			'VITLOK 1ST 6.50',
+			'GRADDFIL 15% 500ML 22.90',
+			'SMOR NORDBRENT 500G 54.90',
+			'OST PRAG 26% 200G 32.90',
+			'YOGHURT GREK 500G 28.90',
+			'BANANER 1KG 19.90',
+			'APPLEN ROYAL GALA 1KG 24.90',
+			'Kaffe Gevalia 500G 89.90',
+			'TE EARL GREY 20ST 29.90',
+			'DISKMEDEL 750ML 24.90',
+			'TOALETTPAPPER 8R 49.90',
+			'RABATT STAMMIS -15.00',
+			'MOMS 12% 42.18',
+			'TOTALT 549.08 SEK',
+			'BETALAT KORT 549.08'
+		]
+	},
+	{
+		file: 'synthetic-kivra-02.pdf',
+		lines: [
+			'Kivra',
+			'Digitalt kvitto fran ICA Supermarket Varnhem',
+			'Butik: ICA Supermarket Varnhem',
+			'Datum: 2026-04-15',
+			'ARTIKEL BELOPP',
+			'FILMJOlk 3% 1L 18.90',
+			'FIL 12% 1L 19.90',
+			'AGGL 12FR FRIGARD 42.90',
+			'SMOR 82% 500G 56.90',
+			'FALUKORV 800G 39.90',
+			'POTATIS FAST 2KG 24.90',
+			'LOK ROT 1KG 14.90',
+			'MOROTTER 1KG 12.90',
+			'CITRON 4ST 15.90',
+			'BRÖD LEVAIN 500G 32.90',
+			'Att betala 280.00 SEK'
+		]
 	}
 ];
 

@@ -61,6 +61,54 @@ npx firebase apphosting:secrets:grantaccess RESEND_API_KEY --backend home-pantry
 2. Update `RESEND_FROM` to use that domain.
 3. Clear `EMAIL_SENDING_DISABLED` and enable sending in `/admin`.
 
+## skaffu.com (efter Firebase Connected)
+
+**Gör inte detta förrän `skaffu.com` är Connected i Firebase App Hosting** (DNS + SSL). Tills dess: prod behåller `onboarding@resend.dev` och `EMAIL_SENDING_DISABLED=true`.
+
+### 1. Verifiera domän i Resend
+
+1. [Resend → Domains](https://resend.com/domains) → **Add domain** → `skaffu.com`.
+2. Resend visar DNS-poster (SPF, DKIM, ev. DMARC). Lägg in dem i **Cloudflare DNS** (samma konto som domänen).
+3. Vänta tills status **Verified** (ofta 15 min–några timmar).
+
+`www.skaffu.com` behövs normalt **inte** för avsändare om `RESEND_FROM` använder apex (`@skaffu.com`). Lägg till subdomän i Resend bara om du vill skicka från t.ex. `hello@www.skaffu.com`.
+
+### 2. Välj avsändaradress
+
+| Adress | Användning |
+|--------|------------|
+| `Skaffu <hello@skaffu.com>` | Transaktionellt (inbjudan, utgångspåminnelser) — **rekommenderat** |
+| `Skaffu <onboarding@skaffu.com>` | Alternativ om `hello@` redan används |
+| `Home Pantry <hello@skaffu.com>` | Behåll varumärke Home Pantry i visningsnamn |
+
+Exempel efter verifiering:
+
+```bash
+# Firebase Secret Manager / App Hosting env (inte förrän domän Verified)
+RESEND_FROM=Skaffu <hello@skaffu.com>
+```
+
+Lokal `.env` — se kommenterade rader i `.env.example`.
+
+### 3. Uppdatera prod (efter Verified + skaffu.com live)
+
+Ordning:
+
+1. Sätt `PUBLIC_ORIGIN` + `ORIGIN` till `https://skaffu.com` ([SKAFFU_DOMAIN_MIGRATION.md](./SKAFFU_DOMAIN_MIGRATION.md)).
+2. Uppdatera `RESEND_FROM` i Firebase App Hosting (eller secret om ni flyttar dit).
+3. **Fortfarande av:** lämna `EMAIL_SENDING_DISABLED=true` tills du medvetet slår på mejl.
+4. När du vill skicka: sätt `EMAIL_SENDING_DISABLED=false` **och** slå på **Email sending** i `/admin`.
+
+### 4. Test efter enable
+
+| Steg | Kontroll |
+|------|----------|
+| Kill switch | Default off — ingen Resend-trafik |
+| Invite | Inställningar → bjud in → mejl till valfri mottagare (kräver verified domain) |
+| Länkar | Invite-URL ska peka på `https://skaffu.com/invite/...` (kräver steg 3.1) |
+
+Se även [SKAFFU_DOMAIN_MIGRATION.md §7](./SKAFFU_DOMAIN_MIGRATION.md) och [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md).
+
 ## Testing
 
 | Check | How |

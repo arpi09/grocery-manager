@@ -7,8 +7,10 @@ Fixtures för regressionstester av PDF-textextraktion och kvittoparsning.
 | Fil | Butik | Syfte |
 |-----|-------|-------|
 | `synthetic-ica-01.pdf` | ICA | Minimal text-PDF, körs i CI |
+| `synthetic-ica-02.pdf` | ICA | Långt kvitto (~20 rader), CI |
 | `synthetic-willys-01.pdf` | Willys | Minimal text-PDF, körs i CI |
 | `synthetic-kivra-01.pdf` | Kivra | Minimal text-PDF, körs i CI |
+| `synthetic-kivra-02.pdf` | Kivra | ICA Supermarket via Kivra, CI |
 
 Regenerera syntetiska PDF:er:
 

@@ -45,6 +45,20 @@
 			"lineCountMin": 5,
 			"lineCountMax": 15,
 			"notes": "Minimal text-PDF for CI"
+		},
+		{
+			"file": "synthetic-ica-02.pdf",
+			"store": "ica",
+			"lineCountMin": 15,
+			"lineCountMax": 25,
+			"notes": "Long ICA-style receipt — many product lines, CI regression"
+		},
+		{
+			"file": "synthetic-kivra-02.pdf",
+			"store": "kivra",
+			"lineCountMin": 10,
+			"lineCountMax": 20,
+			"notes": "Kivra export with ICA Supermarket header — CI regression"
 		}
 	]
 }
