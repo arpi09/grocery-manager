@@ -40,7 +40,8 @@ describe('requireAiQuota', () => {
 		const locals = {
 			locale: 'en',
 			householdId: 'house-1',
-			aiRateLimitService: { tryConsume }
+			aiRateLimitService: { tryConsume },
+			aiUsageAdminService: { isMonthlyBudgetExceeded: vi.fn().mockResolvedValue(false) }
 		} as unknown as App.Locals;
 
 		const result = await requireAiQuota(locals, 'ai_scan', 'user-1');

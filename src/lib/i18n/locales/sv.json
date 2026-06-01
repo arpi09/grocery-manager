@@ -694,7 +694,7 @@
 			"title": "AI-användning",
 			"note": "Aggregerat från rate-limit-räknare. Inga hushålls-ID eller användardata — endast antal.",
 			"monthlyTotal": "Totalt denna månad",
-			"budgetEstimate": "Uppskattad kostnad {month}: ca ${spend} av ${budget} (baserat på antal AI-anrop).",
+			"budgetEstimate": "Uppskattad kostnad {month}: ca {spend} USD av {budget} USD (baserat på antal AI-anrop).",
 			"budgetNearLimit": "Nära månadstak.",
 			"budgetExceeded": "Månadstak nått — nya AI-anrop blockeras tills nästa månad.",
 			"periodDays": "Senaste {days} dagarna",

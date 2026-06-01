@@ -17,6 +17,26 @@
 	</div>
 	<p class="ai-usage-note">{t('admin.aiUsage.note')}</p>
 
+	{#if summary.budgetUsd !== null}
+		<p
+			class="budget-banner"
+			class:budget-warn={summary.budgetNearLimit}
+			class:budget-over={summary.budgetExceeded}
+			role="status"
+		>
+			{t('admin.aiUsage.budgetEstimate', {
+				spend: summary.estimatedMonthlyUsd.toFixed(2),
+				budget: summary.budgetUsd.toFixed(2),
+				month: summary.monthKey
+			})}
+			{#if summary.budgetExceeded}
+				{' '}{t('admin.aiUsage.budgetExceeded')}
+			{:else if summary.budgetNearLimit}
+				{' '}{t('admin.aiUsage.budgetNearLimit')}
+			{/if}
+		</p>
+	{/if}
+
 	<div class="stats-grid">
 		<Card>
 			<p class="stat-label">{t('admin.aiUsage.monthlyTotal')}</p>
@@ -76,6 +96,27 @@
 		margin: 0 0 var(--space-md);
 		color: var(--color-text-muted);
 		font-size: 0.9rem;
+	}
+
+	.budget-banner {
+		margin: 0 0 var(--space-md);
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-sm);
+		font-size: 0.875rem;
+		line-height: 1.45;
+		background: var(--color-surface-muted);
+		border: 1px solid var(--color-border);
+	}
+
+	.budget-warn {
+		border-color: color-mix(in srgb, var(--color-warning, #c9a227) 50%, var(--color-border));
+		background: color-mix(in srgb, var(--color-warning, #c9a227) 8%, var(--color-surface-muted));
+	}
+
+	.budget-over {
+		border-color: color-mix(in srgb, var(--color-danger, #c44) 45%, var(--color-border));
+		background: color-mix(in srgb, var(--color-danger, #c44) 10%, var(--color-surface-muted));
+		font-weight: 600;
 	}
 
 	.stats-grid {

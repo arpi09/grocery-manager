@@ -1,4 +1,4 @@
-import type { AdminAiUsageSummary } from '$lib/domain/ai-usage-admin';
+import type { AdminAiUsageRepositorySummary } from '$lib/domain/ai-usage-admin';
 import {
 	ADMIN_AI_USAGE_PERIOD_DAYS,
 	ADMIN_AI_USAGE_TOP_HOUSEHOLDS,
@@ -27,7 +27,7 @@ export interface AdminAiUsageSummaryInput {
 export interface IAiUsageRepository {
 	getCount(input: Pick<ConsumeAiUsageInput, 'scopeId' | 'kind' | 'periodKey'>): Promise<number>;
 	increment(input: ConsumeAiUsageInput): Promise<number>;
-	getAdminSummary(input: AdminAiUsageSummaryInput): Promise<AdminAiUsageSummary>;
+	getAdminSummary(input: AdminAiUsageSummaryInput): Promise<AdminAiUsageRepositorySummary>;
 }
 
 export class DrizzleAiUsageRepository implements IAiUsageRepository {
@@ -73,10 +73,10 @@ export class DrizzleAiUsageRepository implements IAiUsageRepository {
 		return rows[0]?.count ?? 1;
 	}
 
-	async getAdminSummary(input: AdminAiUsageSummaryInput): Promise<AdminAiUsageSummary> {
+	async getAdminSummary(input: AdminAiUsageSummaryInput): Promise<AdminAiUsageRepositorySummary> {
 		const topLimit = input.topLimit ?? ADMIN_AI_USAGE_TOP_HOUSEHOLDS;
 
-		const [kindRows, topRows, monthlyRows] = await Promise.all([
+		const [kindRows, topRows, monthlyRows, monthlyKindRows] = await Promise.all([
 			this.database
 				.select({
 					kind: aiUsageTable.kind,
@@ -104,7 +104,15 @@ export class DrizzleAiUsageRepository implements IAiUsageRepository {
 					total: sql<number>`coalesce(sum(${aiUsageTable.count}), 0)`.mapWith(Number)
 				})
 				.from(aiUsageTable)
+				.where(gte(aiUsageTable.updatedAt, input.monthStart)),
+			this.database
+				.select({
+					kind: aiUsageTable.kind,
+					total: sql<number>`coalesce(sum(${aiUsageTable.count}), 0)`.mapWith(Number)
+				})
+				.from(aiUsageTable)
 				.where(gte(aiUsageTable.updatedAt, input.monthStart))
+				.groupBy(aiUsageTable.kind)
 		]);
 
 		const byKind = emptyAdminUsageByKind();
@@ -112,9 +120,15 @@ export class DrizzleAiUsageRepository implements IAiUsageRepository {
 			byKind[row.kind] = row.total;
 		}
 
+		const monthlyByKind = emptyAdminUsageByKind();
+		for (const row of monthlyKindRows) {
+			monthlyByKind[row.kind] = row.total;
+		}
+
 		return {
 			periodDays: ADMIN_AI_USAGE_PERIOD_DAYS,
 			byKind,
+			monthlyByKind,
 			topHouseholdCounts: topRows.map((row) => row.total),
 			monthlyTotal: monthlyRows[0]?.total ?? 0,
 			monthKey: input.monthKey

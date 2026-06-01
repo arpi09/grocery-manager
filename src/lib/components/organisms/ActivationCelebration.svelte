@@ -1,12 +1,15 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
+	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { t } from '$lib/i18n';
 	import {
 		clearCelebrationPending,
+		getActivationProgress,
 		isOnboardingExcludedPath,
 		shouldShowCelebration
 	} from '$lib/utils/onboarding';
@@ -14,6 +17,7 @@
 	let open = $state(false);
 
 	const pathname = $derived(page.url.pathname);
+	const fromHome = $derived(encodeURIComponent(APP_HOME_PATH));
 
 	function tryOpenCelebration() {
 		if (!browser || isOnboardingExcludedPath(pathname) || !shouldShowCelebration()) {
@@ -28,6 +32,21 @@
 		open = false;
 	}
 
+	async function goScan() {
+		closeCelebration();
+		const path = getActivationProgress().path === 'receipt' ? '/scan/kvitto' : '/scan';
+		const query =
+			getActivationProgress().path === 'receipt'
+				? `?from=${fromHome}`
+				: `?mode=barcode&from=${fromHome}`;
+		await goto(`${path}${query}`);
+	}
+
+	async function goShopping() {
+		closeCelebration();
+		await goto('/inkop');
+	}
+
 	$effect(() => {
 		if (!browser) {
 			return;
@@ -35,15 +54,6 @@
 
 		void pathname;
 		tryOpenCelebration();
-	});
-
-	$effect(() => {
-		if (!browser || !open) {
-			return;
-		}
-
-		const timer = window.setTimeout(closeCelebration, 4000);
-		return () => window.clearTimeout(timer);
 	});
 </script>
 
@@ -60,9 +70,17 @@
 			<FeatureIcon id="check" size={36} />
 		</div>
 		<p>{t('onboarding.celebrateBody')}</p>
-		<Button type="button" fullWidth onclick={closeCelebration}>
-			{t('onboarding.celebrateCta')}
-		</Button>
+		<div class="celebration-actions">
+			<Button type="button" fullWidth onclick={goScan}>
+				{t('onboarding.celebrateCtaScan')}
+			</Button>
+			<Button type="button" variant="secondary" fullWidth onclick={goShopping}>
+				{t('onboarding.celebrateCtaShopping')}
+			</Button>
+		</div>
+		<button type="button" class="dismiss-link" onclick={closeCelebration}>
+			{t('onboarding.celebrateDismiss')}
+		</button>
 	</div>
 </Modal>
 
@@ -96,6 +114,23 @@
 		font-size: 1rem;
 		line-height: 1.5;
 		color: var(--color-text-muted);
-		max-width: 28ch;
+		max-width: 32ch;
+	}
+
+	.celebration-actions {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		width: 100%;
+	}
+
+	.dismiss-link {
+		border: none;
+		background: none;
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
+		cursor: pointer;
+		padding: var(--space-xs);
+		text-decoration: underline;
 	}
 </style>

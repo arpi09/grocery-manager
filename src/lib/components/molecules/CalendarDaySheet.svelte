@@ -9,6 +9,7 @@
 	import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
 	import {
 		addMissingIngredientsToList,
+		dedupeMissingIngredients,
 		formatAddMissingFeedback
 	} from '$lib/utils/recipe-add-missing';
 
@@ -47,11 +48,32 @@
 		day ? t('planer.mealsTitleDate', { date: formatCalendarDayLabel(day.date) }) : t('planer.mealsTitle')
 	);
 
+	const dayMissingIngredients = $derived(
+		day
+			? dedupeMissingIngredients(
+					day.meals
+						.map((meal) => linkedIdea(meal)?.missingIngredients ?? [])
+						.filter((list) => list.length > 0)
+				)
+			: []
+	);
+
 	function linkedIdea(meal: PlannedMeal): RecipeIdea | null {
 		if (!meal.ideaId) {
 			return null;
 		}
 		return ideasById[meal.ideaId] ?? null;
+	}
+
+	async function addAllMissingForDay() {
+		if (!canEdit || dayMissingIngredients.length === 0) {
+			return;
+		}
+
+		addingMissingKey = '__all__';
+		const result = await addMissingIngredientsToList(dayMissingIngredients);
+		toastMessage = formatAddMissingFeedback(getLocale(), result);
+		addingMissingKey = null;
 	}
 
 	async function addMissingFromMeal(meal: PlannedMeal) {
@@ -102,6 +124,19 @@
 		{#if day.meals.length === 0}
 			<p class="empty">{t('planer.emptyDay')}</p>
 		{:else}
+			{#if canEdit && dayMissingIngredients.length > 0}
+				<div class="day-batch-action">
+					<Button
+						type="button"
+						fullWidth
+						loading={addingMissingKey === '__all__'}
+						loadingLabel={t('common.loading')}
+						onclick={addAllMissingForDay}
+					>
+						{t('recipe.addAllMissingBtn', { count: dayMissingIngredients.length })}
+					</Button>
+				</div>
+			{/if}
 			<ul class="meal-list">
 				{#each day.meals as meal (meal.id)}
 					<li class="meal-card" class:expanded={expandedMealId === meal.id}>
@@ -202,6 +237,10 @@
 	h3 {
 		margin: 0 0 var(--space-sm);
 		font-size: 0.9rem;
+	}
+
+	.day-batch-action {
+		margin-bottom: var(--space-md);
 	}
 
 	.add-section {

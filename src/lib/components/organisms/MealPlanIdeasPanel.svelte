@@ -9,6 +9,7 @@
 	import { getLocale, t } from '$lib/i18n';
 	import {
 		addMissingIngredientsToList,
+		dedupeMissingIngredients,
 		formatAddMissingFeedback
 	} from '$lib/utils/recipe-add-missing';
 
@@ -29,6 +30,10 @@
 	let addingMissingKey = $state<string | null>(null);
 	let toastMessage = $state<string | null>(null);
 
+	const allMissingIngredients = $derived(
+		dedupeMissingIngredients(ideas.map((idea) => idea.missingIngredients))
+	);
+
 	onMount(async () => {
 		try {
 			ideas = await fetchMealPlanIdeas();
@@ -39,6 +44,17 @@
 			loading = false;
 		}
 	});
+
+	async function addAllMissing() {
+		if (!canEdit || allMissingIngredients.length === 0) {
+			return;
+		}
+
+		addingMissingKey = '__all__';
+		const result = await addMissingIngredientsToList(allMissingIngredients);
+		toastMessage = formatAddMissingFeedback(getLocale(), result);
+		addingMissingKey = null;
+	}
 
 	async function addMissingFromIdea(idea: RecipeIdea) {
 		if (!canEdit || idea.missingIngredients.length === 0) {
@@ -69,6 +85,19 @@
 	{:else if ideas.length === 0}
 		<p class="empty">{t('planer.ideasEmpty')}</p>
 	{:else}
+		{#if canEdit && allMissingIngredients.length > 0}
+			<div class="batch-action">
+				<Button
+					type="button"
+					fullWidth
+					loading={addingMissingKey === '__all__'}
+					loadingLabel={t('common.loading')}
+					onclick={addAllMissing}
+				>
+					{t('recipe.addAllMissingBtn', { count: allMissingIngredients.length })}
+				</Button>
+			</div>
+		{/if}
 		<div class="idea-list">
 			{#each ideas as idea (idea.id)}
 				<details class="idea-item">
@@ -141,6 +170,10 @@
 		margin: 0;
 		color: var(--color-text-muted);
 		font-size: 0.9rem;
+	}
+
+	.batch-action {
+		margin-bottom: var(--space-md);
 	}
 
 	.idea-list {
