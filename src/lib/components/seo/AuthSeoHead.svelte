@@ -1,6 +1,6 @@
 <script lang="ts">
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
-	import { marketingOgImageUrl, SITE_NAME } from '$lib/seo/seo';
+	import { marketingOgImageUrl } from '$lib/seo/seo';
 
 	interface Props {
 		title: string;

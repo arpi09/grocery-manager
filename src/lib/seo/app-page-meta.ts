@@ -11,59 +11,60 @@ const LOCATION_LABELS: Record<string, Record<Locale, string>> = {
 	other: { sv: 'Övrigt', en: 'Other' }
 };
 
-function suffix(locale: Locale): string {
+function suffix(): string {
 	return ` · ${SITE_NAME}`;
 }
 
 /** Human-readable document title for authenticated app routes. */
 export function resolveAppPageTitle(pathname: string, locale: Locale): string {
 	if (pathname === APP_HOME_PATH) {
-		return translate(locale, 'dashboard.title') + suffix(locale);
+		return translate(locale, 'dashboard.title') + suffix();
 	}
 	if (pathname.startsWith('/inventory/')) {
 		const segment = pathname.split('/')[2];
 		if (segment && isStorageLocation(segment)) {
 			const label = LOCATION_LABELS[segment]?.[locale] ?? segment;
-			return `${label}${suffix(locale)}`;
+			return `${label}${suffix()}`;
 		}
-		return translate(locale, 'inventory.title') + suffix(locale);
+		return translate(locale, 'inventory.title') + suffix();
 	}
 	if (pathname.startsWith('/inkop')) {
-		return translate(locale, 'shopping.title') + suffix(locale);
+		return translate(locale, 'shopping.title') + suffix();
 	}
 	if (pathname.startsWith('/planer')) {
-		return translate(locale, 'planer.title') + suffix(locale);
+		return translate(locale, 'planer.title') + suffix();
 	}
 	if (pathname.startsWith('/statistik')) {
-		return translate(locale, 'stats.title') + suffix(locale);
+		return translate(locale, 'stats.title') + suffix();
 	}
 	if (pathname.startsWith('/settings')) {
-		return translate(locale, 'settings.title') + suffix(locale);
+		return translate(locale, 'settings.title') + suffix();
 	}
 	if (pathname.startsWith('/profile')) {
-		return translate(locale, 'profile.title') + suffix(locale);
+		return translate(locale, 'profile.title') + suffix();
 	}
 	if (pathname.startsWith('/husdjur')) {
-		return translate(locale, 'pets.title') + suffix(locale);
+		return translate(locale, 'pets.title') + suffix();
 	}
 	if (pathname.startsWith('/admin')) {
-		return translate(locale, 'admin.title') + suffix(locale);
+		return translate(locale, 'admin.title') + suffix();
 	}
 	if (pathname.startsWith('/scan')) {
-		return translate(locale, 'scan.title') + suffix(locale);
+		return translate(locale, 'scan.title') + suffix();
 	}
 	if (pathname.startsWith('/item/new')) {
-		return translate(locale, 'item.addTitle') + suffix(locale);
+		return translate(locale, 'item.addTitle') + suffix();
 	}
 	if (pathname.match(/^\/item\/[^/]+\/edit/)) {
-		return translate(locale, 'item.editTitle') + suffix(locale);
+		return translate(locale, 'item.editTitle') + suffix();
 	}
 	if (pathname.startsWith('/install-app')) {
-		return translate(locale, 'pwa.page.title') + suffix(locale);
+		return translate(locale, 'pwa.page.title') + suffix();
 	}
 	if (pathname.startsWith('/invite/')) {
-		return translate(locale, 'invite.title') + suffix(locale);
+		return translate(locale, 'invite.title') + suffix();
 	}
 
 	return SITE_NAME;
 }
+
