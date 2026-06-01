@@ -1,5 +1,7 @@
 # E2E tests (Playwright)
 
+> **Teststrategi:** Se [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) för testing diamond-modellen (unit / integration / E2E, ägarskap och risk).
+
 End-to-end coverage for critical user journeys. **23 tests** across 8 spec files. Roadmap item **#16** in [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md).
 
 ## Run locally (CI pattern)

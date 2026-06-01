@@ -31,6 +31,7 @@ Komplettera med `private/NEW_CURSOR_AGENT_START.md` lokalt (miljö, första prom
 
 | Dokument | Innehåll |
 |----------|----------|
+| [TEST_STRATEGY.md](./TEST_STRATEGY.md) | Testing diamond — unit / integration / E2E, risk, agent-ägarskap |
 | [CI_CD.md](./CI_CD.md) | Trunk → GitHub Actions → deploy |
 | [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md) | App Hosting, secrets, Cloud SQL |
 | [CUSTOM_DOMAIN.md](./CUSTOM_DOMAIN.md) | Framtida custom domain (homepantry.com — ej kopplad) |

@@ -78,7 +78,7 @@ Coordinator kan anropa begränsade typer, t.ex. `explore`, `shell`, `generalPurp
 | **E2E efter freeze** | En avgränsad E2E-batch per vecka när feature-arbetet är fryst — inte XL E2E mitt i sprint |
 | **Finish before starting** | Stäng/merge öppet arbete innan ny P1-feature-spawn |
 | **Coordinator-only spawn** | Implementation-agenter spawnar inte peers |
-| **G0 före push** | `npm run check && npm test` (E2E om auth/UI berörts) — se [`CI_CD.md`](./CI_CD.md) |
+| **G0 före push** | `npm run check && npm test` (E2E om auth/UI berörts) — se [`CI_CD.md`](./CI_CD.md), [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) |
 | **Security före deploy** | Security-agent → `private/SECURITY_REPORT.md` måste vara grön nog för G3 |
 
 Övriga WIP-slots (när coordinator använder dem): 1 planner (read-only explore), 1 integration (merge/konflikt), 1 governance-skannning — se koordinatorregler; detaljer och experimentlogg i `private/WIP1_TEST_LOG.md`.
@@ -134,6 +134,8 @@ Exakta dollar-gränser och vecko-CSV: [`private/ENGINEERING_INTELLIGENCE.md`](..
 
 **Princip:** shipped value per insats, inte agent-aktivitet. Färre parallella agenter med tydligt utfall slår många halvfärdiga slots.
 
+**Teststrategi:** Alla implementation-, E2E- och governance-agenter ska följa [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) (testing diamond). Feature-agenter äger unit/integration för sin zon; E2E-agenten äger kritiska resor och G2-täckning; integration-agenten verifierar täckning före merge; pipeline- och security-agenterna mappar testlager mot risk (G0–G3). Skapa inte pyramid-tester i blindo — integration är primärlagret, E2E sparsamt men djupt.
+
 ---
 
 ## Känslig styrning (`private/`)
@@ -186,5 +188,6 @@ Du är coordinator. Fråga innan commit, push eller spawn. WIP 3 aktiv: max 3 im
 |-----|-----|
 | [`ONBOARDING_DEVELOPER.md`](./ONBOARDING_DEVELOPER.md) | Ny utvecklare (mänsklig) |
 | [`CI_CD.md`](./CI_CD.md) | G0–G3, trunk på `master` |
+| [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) | Testing diamond, risk, DoD |
 | [`E2E.md`](./E2E.md) | Playwright-setup |
 | [`README.md`](./README.md) (docs/) | Hela doc-index |
