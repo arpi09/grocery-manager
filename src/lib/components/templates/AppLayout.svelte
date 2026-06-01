@@ -2,6 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import { setContext } from 'svelte';
 	import { page } from '$app/state';
+	import AppSeoHead from '$lib/components/seo/AppSeoHead.svelte';
 	import { OPEN_RECIPE_IDEAS } from '$lib/navigation/app-layout-context';
 	import MainNav from '$lib/components/organisms/MainNav.svelte';
 	import RecipeAssistant from '$lib/components/organisms/RecipeAssistant.svelte';
@@ -55,7 +56,11 @@
 	}
 
 	setContext(OPEN_RECIPE_IDEAS, openRecipeIdeas);
+
+	const locale = $derived((page.data.locale === 'en' ? 'en' : 'sv') as 'sv' | 'en');
 </script>
+
+<AppSeoHead {locale} />
 
 <div class="app">
 	<MainNav {user} {households} {activeHousehold} onRecipeIdeas={openRecipeIdeas} />

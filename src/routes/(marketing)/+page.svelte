@@ -5,14 +5,17 @@
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
 	import MarketingFeatureCard from '$lib/components/marketing/MarketingFeatureCard.svelte';
 	import MarketingStepCard from '$lib/components/marketing/MarketingStepCard.svelte';
+	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
 	import { writeLandingVariantSession } from '$lib/client/landing-variant-session';
 	import { trackProductEvent } from '$lib/client/product-events';
+	import { buildLandingJsonLd } from '$lib/seo/seo';
 	import { onMount } from 'svelte';
 
 	let { data } = $props();
 
-	const { marketing: content, loginUrl, registerUrl, hero } = data;
+	const { marketing: content, loginUrl, registerUrl, hero, canonicalUrl, marketingLocale } = data;
 	const previewFeatures = content.features.items.slice(0, 3);
+	const jsonLd = buildLandingJsonLd(canonicalUrl, content.meta.description);
 
 	onMount(() => {
 		writeLandingVariantSession(data.landingVariant);
@@ -23,17 +26,15 @@
 	}
 </script>
 
-<svelte:head>
-	<title>{content.meta.title}</title>
-	<meta name="description" content={content.meta.description} />
-	<meta property="og:title" content={content.meta.ogTitle} />
-	<meta property="og:description" content={content.meta.ogDescription} />
-	<meta property="og:type" content="website" />
-	<meta property="og:locale" content="sv_SE" />
-	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content={content.meta.ogTitle} />
-	<meta name="twitter:description" content={content.meta.ogDescription} />
-</svelte:head>
+<MarketingSeoHead
+	title={content.meta.title}
+	description={content.meta.description}
+	ogTitle={content.meta.ogTitle}
+	ogDescription={content.meta.ogDescription}
+	{canonicalUrl}
+	locale={marketingLocale}
+	{jsonLd}
+/>
 
 <section class="hero">
 	<div class="hero-inner">

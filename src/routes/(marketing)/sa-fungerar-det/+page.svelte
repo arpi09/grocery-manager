@@ -1,16 +1,21 @@
 <script lang="ts">
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
 	import MarketingStepCard from '$lib/components/marketing/MarketingStepCard.svelte';
+	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
 
 	let { data } = $props();
 
-	const { marketing: content, loginUrl, registerUrl } = data;
+	const { marketing: content, loginUrl, registerUrl, canonicalUrl, marketingLocale } = data;
 </script>
 
-<svelte:head>
-	<title>{content.howItWorks.title} — {content.siteName}</title>
-	<meta name="description" content={content.howItWorks.lead} />
-</svelte:head>
+<MarketingSeoHead
+	title={content.howItWorks.meta.title}
+	description={content.howItWorks.meta.description}
+	ogTitle={content.howItWorks.meta.ogTitle}
+	ogDescription={content.howItWorks.meta.ogDescription}
+	{canonicalUrl}
+	locale={marketingLocale}
+/>
 
 <section class="page-hero">
 	<div class="inner">

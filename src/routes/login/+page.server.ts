@@ -1,3 +1,4 @@
+import { marketingCanonicalUrl } from '$lib/marketing/app-url';
 import { isAuthError } from '$lib/application/auth.service';
 import { loginSchema } from '$lib/validation/auth.schemas';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
@@ -14,7 +15,8 @@ function safeRedirect(value: string | null): string | null {
 
 export const load: PageServerLoad = async ({ url }) => ({
 	message: url.searchParams.get('message'),
-	redirectTo: safeRedirect(url.searchParams.get('redirect'))
+	redirectTo: safeRedirect(url.searchParams.get('redirect')),
+	canonicalUrl: marketingCanonicalUrl('/login', url.origin)
 });
 
 export const actions: Actions = {

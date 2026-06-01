@@ -1,3 +1,4 @@
+import { marketingCanonicalUrl } from '$lib/marketing/app-url';
 import { isAuthError } from '$lib/application/auth.service';
 import {
 	getTurnstileSiteKeyForClient,
@@ -21,12 +22,13 @@ import { createSession } from '$lib/server/session';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ url }) => {
 	warnIfTurnstileMisconfigured('register load');
 
 	return {
 		turnstileSiteKey: getTurnstileSiteKeyForClient(),
-		captchaRequired: isTurnstileRequiredForRegistration()
+		captchaRequired: isTurnstileRequiredForRegistration(),
+		canonicalUrl: marketingCanonicalUrl('/register', url.origin)
 	};
 };
 

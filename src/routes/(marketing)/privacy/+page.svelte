@@ -1,4 +1,5 @@
 <script lang="ts">
+	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
 	import { getPrivacyContent } from '$lib/marketing/privacy-content';
 	import type { MarketingLocale } from '$lib/marketing/content';
 
@@ -7,10 +8,14 @@
 	const privacy = getPrivacyContent(data.marketingLocale as MarketingLocale);
 </script>
 
-<svelte:head>
-	<title>{privacy.title} — {data.marketing.siteName}</title>
-	<meta name="description" content={privacy.lead} />
-</svelte:head>
+<MarketingSeoHead
+	title={privacy.meta.title}
+	description={privacy.meta.description}
+	ogTitle={privacy.meta.ogTitle}
+	ogDescription={privacy.meta.ogDescription}
+	canonicalUrl={data.canonicalUrl}
+	locale={data.marketingLocale}
+/>
 
 <section class="page-hero">
 	<div class="inner">

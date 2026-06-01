@@ -43,6 +43,8 @@ function isPublicPath(pathname: string): boolean {
 		publicPaths.has(pathname) ||
 		isInvitePath(pathname) ||
 		isMarketingPath(pathname) ||
+		pathname === '/robots.txt' ||
+		pathname === '/sitemap.xml' ||
 		pathname.startsWith('/api/health') ||
 		pathname.startsWith('/api/cron/') ||
 		pathname === '/api/push/vapid-public-key' ||

@@ -1,23 +1,24 @@
 <script lang="ts">
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
 	import ProWaitlistForm from '$lib/components/marketing/ProWaitlistForm.svelte';
+	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
 	import { getPricingContent } from '$lib/marketing/pricing-content';
 	import type { MarketingLocale } from '$lib/marketing/content';
 
 	let { data, form } = $props();
 
 	const pricing = getPricingContent(data.marketingLocale as MarketingLocale);
-	const { marketing: content, loginUrl, registerUrl } = data;
+	const { marketing: content, loginUrl, registerUrl, canonicalUrl, marketingLocale } = data;
 </script>
 
-<svelte:head>
-	<title>{pricing.meta.title}</title>
-	<meta name="description" content={pricing.meta.description} />
-	<meta property="og:title" content={pricing.meta.ogTitle} />
-	<meta property="og:description" content={pricing.meta.ogDescription} />
-	<meta name="twitter:title" content={pricing.meta.ogTitle} />
-	<meta name="twitter:description" content={pricing.meta.ogDescription} />
-</svelte:head>
+<MarketingSeoHead
+	title={pricing.meta.title}
+	description={pricing.meta.description}
+	ogTitle={pricing.meta.ogTitle}
+	ogDescription={pricing.meta.ogDescription}
+	{canonicalUrl}
+	locale={marketingLocale}
+/>
 
 <section class="page-hero">
 	<div class="inner">

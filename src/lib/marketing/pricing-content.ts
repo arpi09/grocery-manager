@@ -58,10 +58,10 @@ const sv: PricingContent = {
 	comingSoonNote:
 		'Ingen betalvägg är aktiv ännu. Alla konton kör Free-planen medan vi finslipar gränser och väntar på rätt tillfälle för prenumeration.',
 	meta: {
-		title: 'Priser — Skaffu (Gratis & Pro)',
+		title: 'Priser — Skaffu skafferi-app (Gratis & Pro)',
 		description:
-			'Generös gratisplan med lager och inköpslista. Pro (~39 kr/mån) kommer senare med obegränsad AI och kvitto-PDF — butiksneutralt skafferi utan betalvägg än.',
-		ogTitle: 'Skaffu — Gratis skafferi, Pro kommer snart',
+			'Generös gratisplan med lager och inköpslista. Pro (~39 kr/mån) kommer senare — skafferi-app utan betalvägg än. Minska matsvinn gratis idag.',
+		ogTitle: 'Skaffu — Gratis skafferi-app, Pro kommer snart',
 		ogDescription:
 			'Jämför Free vs Pro: lager, AI-skannar och kvitto-PDF. Vi meddelar innan något debiteras — ingen Stripe än.'
 	},

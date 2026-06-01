@@ -82,11 +82,23 @@ export interface MarketingContent {
 	howItWorks: {
 		title: string;
 		lead: string;
+		meta: {
+			title: string;
+			description: string;
+			ogTitle: string;
+			ogDescription: string;
+		};
 		steps: MarketingStep[];
 	};
 	faq: {
 		title: string;
 		lead: string;
+		meta: {
+			title: string;
+			description: string;
+			ogTitle: string;
+			ogDescription: string;
+		};
 		items: MarketingFaqItem[];
 		contactLabel: string;
 		contactLead: string;
@@ -102,12 +114,12 @@ const sv: MarketingContent = {
 	siteName: 'Skaffu',
 	tagline: 'Skafferi, kyl och inköp på ett ställe.',
 	meta: {
-		title: 'Skaffu — butiksneutralt skafferi med skanning & kvitto-PDF',
+		title: 'Skaffu — skafferi-app för hela hushållet | minska matsvinn',
 		description:
-			'Webbapp för kyl, frys och skafferi: streckkod, kvitto-PDF och smart inköpslista. Butiksneutralt — till skillnad från Matdags och ICA, utan spelifiering. Gratis att börja.',
-		ogTitle: 'Skaffu — skanna kvitto, slipp gissa vad som finns hemma',
+			'Skafferi-app med skanning, kvitto-PDF och smart inköpslista. Håll koll på kyl, frys och skafferi — minska matsvinn med utgångsdatum och hushållssync. Gratis att börja.',
+		ogTitle: 'Skaffu — skafferi-app som minskar matsvinn',
 		ogDescription:
-			'Butiksneutralt skafferi med PDF-kvitto, utgångsdatum och hushållssync. Webb först — gratis att komma igång.'
+			'Skanna kvitto, följ utgångsdatum och handla smart. Butiksneutralt skafferi för hela hushållet — webb först, gratis att komma igång.'
 	},
 	nav: [
 		{ href: '/funktioner', label: 'Funktioner' },
@@ -220,6 +232,14 @@ const sv: MarketingContent = {
 	howItWorks: {
 		title: 'Så fungerar det',
 		lead: 'Tre enkla steg från kaos i skåpen till full överblick.',
+		meta: {
+			title: 'Så fungerar Skaffu — skafferi-app i tre steg',
+			description:
+				'Skanna varor, följ utgångsdatum och handla smart. Så kommer du igång med Skaffu — skafferi-appen som hjälper dig minska matsvinn.',
+			ogTitle: 'Så fungerar Skaffu — från skanning till smart inköp',
+			ogDescription:
+				'Streckkod, kvitto eller foto → lager per plats → inköpslista. Tre steg till bättre koll på skafferiet.'
+		},
 		steps: [
 			{
 				step: 1,
@@ -244,6 +264,14 @@ const sv: MarketingContent = {
 	faq: {
 		title: 'Vanliga frågor',
 		lead: 'Svar på det vi oftast får höra. Mer hjälp kommer här framöver.',
+		meta: {
+			title: 'FAQ — Skaffu skafferi-app',
+			description:
+				'Vanliga frågor om Skaffu: pris, streckkod, hushållssync, AI och dataskydd. Skafferi-app för att minska matsvinn.',
+			ogTitle: 'Skaffu FAQ — skafferi, pris och integritet',
+			ogDescription:
+				'Svar om gratisplan, kvittoskanning, hushåll och GDPR. Kontakta hello@skaffu.com vid fler frågor.'
+		},
 		items: [
 			{
 				question: 'Kostar Skaffu något?',
@@ -290,12 +318,12 @@ const en: MarketingContent = {
 	...sv,
 	tagline: 'Pantry, fridge and shopping in one place.',
 	meta: {
-		title: 'Skaffu — Store-neutral pantry with scanning & receipt PDF',
+		title: 'Skaffu — pantry app for the whole household | reduce food waste',
 		description:
-			'Web app for fridge, freezer and cupboard: barcode, receipt PDF and smart shopping list. Store-neutral — unlike Matdags and ICA, without gamification. Free to start.',
-		ogTitle: 'Skaffu — Scan receipts, stop guessing what is at home',
+			'Pantry app with scanning, receipt PDF and smart shopping list. Track fridge, freezer and cupboard — reduce food waste with expiry dates and household sync. Free to start.',
+		ogTitle: 'Skaffu — pantry app that reduces food waste',
 		ogDescription:
-			'Store-neutral pantry with PDF receipts, expiry dates and household sync. Web-first — free to get started.'
+			'Scan receipts, track expiry dates and shop smart. Store-neutral pantry for the whole household — web-first, free to get started.'
 	},
 	nav: [
 		{ href: '/funktioner', label: 'Features' },
@@ -401,6 +429,14 @@ const en: MarketingContent = {
 	howItWorks: {
 		title: 'How it works',
 		lead: 'Three simple steps from messy cupboards to full overview.',
+		meta: {
+			title: 'How Skaffu works — pantry app in three steps',
+			description:
+				'Scan items, track expiry dates and shop smart. Get started with Skaffu — the pantry app that helps reduce food waste.',
+			ogTitle: 'How Skaffu works — from scanning to smart shopping',
+			ogDescription:
+				'Barcode, receipt or photo → inventory by location → shopping list. Three steps to a better pantry.'
+		},
 		steps: [
 			{
 				step: 1,
@@ -422,6 +458,14 @@ const en: MarketingContent = {
 	faq: {
 		title: 'Frequently asked questions',
 		lead: 'Answers to what we hear most often. More help will appear here over time.',
+		meta: {
+			title: 'FAQ — Skaffu pantry app',
+			description:
+				'Common questions about Skaffu: pricing, barcodes, household sync, AI and privacy. Pantry app to reduce food waste.',
+			ogTitle: 'Skaffu FAQ — pantry, pricing and privacy',
+			ogDescription:
+				'Answers about the free plan, receipt scanning, households and GDPR. Contact hello@skaffu.com for more.'
+		},
 		items: [
 			{
 				question: 'Does Skaffu cost anything?',

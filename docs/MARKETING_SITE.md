@@ -54,7 +54,7 @@ npm run dev
 | Variable | Purpose |
 |----------|---------|
 | `PUBLIC_APP_URL` | Optional. Base URL for “Öppna appen” / “Logga in” when marketing and app are on **different domains**. Defaults to production hosted URL when unset on server; uses same origin in dev. |
-| `PUBLIC_ORIGIN` | Canonical origin for emails, CSRF, and marketing SEO (`canonical`, `og:url`). **Production:** `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app`. **Dev:** `http://localhost:5173`. |
+| `PUBLIC_ORIGIN` | Canonical origin for emails, CSRF, and marketing SEO (`canonical`, `og:url`). **Production:** `https://skaffu.com`. **Dev:** `http://localhost:5173`. |
 | `PUBLIC_LANDING_VARIANT` | Optional. `a` or `b` — default hero when no `?hero=` or cookie (see Landing hero A/B). |
 
 Example for split domains later (not used today — single hosted.app deploy):
@@ -178,7 +178,45 @@ Copy lives in `src/lib/marketing/content.ts` with Swedish (`sv`) as primary. Eng
 
 ## SEO
 
-Marketing layout sets `<link rel="canonical">` and `og:url` from `PUBLIC_ORIGIN` (fallback: request origin). Landing page (`/`) adds `<title>`, `description`, Open Graph, and Twitter card meta tags in `(marketing)/+page.svelte`.
+Canonical URLs, Open Graph, Twitter cards, and JSON-LD use **`PUBLIC_ORIGIN`** via `src/lib/marketing/app-url.ts` (production: `https://skaffu.com`).
+
+### Shared components
+
+| File | Role |
+|------|------|
+| `src/lib/components/seo/MarketingSeoHead.svelte` | Marketing pages: title, description, canonical, hreflang sv/en, OG/Twitter, optional JSON-LD |
+| `src/lib/components/seo/AuthSeoHead.svelte` | `/login`, `/register` — indexable with light meta |
+| `src/lib/components/seo/AppSeoHead.svelte` | App shell via `AppLayout` — per-route titles, `noindex` on private routes |
+| `src/lib/seo/seo.ts` | Sitemap entries, robots rules, OG image path, landing JSON-LD helpers |
+
+### Indexable pages (marketing + auth)
+
+| Path | Meta source |
+|------|-------------|
+| `/` | `content.meta` + WebApplication & Organization JSON-LD |
+| `/funktioner` | `content.features.meta` |
+| `/sa-fungerar-det` | `content.howItWorks.meta` |
+| `/faq` | `content.faq.meta` |
+| `/priser` | `pricing-content.ts` meta |
+| `/privacy` | `privacy-content.ts` meta |
+| `/login`, `/register` | i18n `auth.*.metaDescription` |
+
+Keywords in Swedish copy include **skafferi-app** and **minska matsvinn**. English locale mirrors meta where pages are bilingual (cookie-based locale on same URL).
+
+### Technical SEO
+
+| URL | Purpose |
+|-----|---------|
+| `/sitemap.xml` | Dynamic sitemap — `/`, `/funktioner`, `/sa-fungerar-det`, `/faq`, `/priser`, `/privacy`, `/login`, `/register` (not `/hem`) |
+| `/robots.txt` | Allow `/`; disallow `/admin`, `/api/`, `/hem`, `/settings`, `/inventory`, `/inkop`, `/planer`, `/statistik`, `/scan`, `/profile`, `/item`, `/husdjur`, `/invite`, `/install-app`, `/logout`; `Sitemap:` points to canonical origin |
+
+OG image: `/og-skaffu.svg` (absolute URL via `PUBLIC_ORIGIN`).
+
+PWA manifest (`static/manifest.webmanifest`): name/description aligned with Skaffu brand.
+
+### App routes (noindex)
+
+Authenticated routes (`/hem`, `/inventory/*`, `/inkop`, `/admin`, etc.) get sensible `<title>` tags but `robots: noindex, nofollow` via `AppSeoHead`.
 
 ## Community launch UTM
 

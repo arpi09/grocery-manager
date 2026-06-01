@@ -1,18 +1,23 @@
 <script lang="ts">
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
+	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
 	import { getPrivacyContent } from '$lib/marketing/privacy-content';
 	import type { MarketingLocale } from '$lib/marketing/content';
 
 	let { data } = $props();
 
-	const { marketing: content, loginUrl, registerUrl } = data;
+	const { marketing: content, loginUrl, registerUrl, canonicalUrl, marketingLocale } = data;
 	const privacyLinkLabel = getPrivacyContent(data.marketingLocale as MarketingLocale).title;
 </script>
 
-<svelte:head>
-	<title>{content.faq.title} — {content.siteName}</title>
-	<meta name="description" content={content.faq.lead} />
-</svelte:head>
+<MarketingSeoHead
+	title={content.faq.meta.title}
+	description={content.faq.meta.description}
+	ogTitle={content.faq.meta.ogTitle}
+	ogDescription={content.faq.meta.ogDescription}
+	{canonicalUrl}
+	locale={marketingLocale}
+/>
 
 <section class="page-hero">
 	<div class="inner">

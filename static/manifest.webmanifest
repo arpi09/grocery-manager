@@ -1,7 +1,7 @@
 {
 	"name": "Skaffu",
 	"short_name": "Skaffu",
-	"description": "Skanna, lagra och handla smart — kyl, frys och skafferi i en app.",
+	"description": "Skafferi-app: skanna, följ utgångsdatum och minska matsvinn — kyl, frys och skafferi i en app.",
 	"start_url": "/hem",
 	"scope": "/",
 	"display": "standalone",

@@ -10,6 +10,12 @@ export interface PrivacySection {
 export interface PrivacyContent {
 	title: string;
 	lead: string;
+	meta: {
+		title: string;
+		description: string;
+		ogTitle: string;
+		ogDescription: string;
+	};
 	updatedLabel: string;
 	updatedDate: string;
 	faqLinkLabel: string;
@@ -21,6 +27,14 @@ const sv: PrivacyContent = {
 	title: 'Integritet & AI',
 	lead:
 		'Här beskriver vi vilken data Skaffu samlar in, hur vi använder AI, och vilka rättigheter du har enligt GDPR. Vi skriver rakt på sak — inga onödiga juridiska omvägar.',
+	meta: {
+		title: 'Integritet & AI — Skaffu',
+		description:
+			'Integritetspolicy för Skaffu skafferi-app: GDPR, AI (OpenAI), cookies och dina rättigheter. Dataskydd utan reklamspårning.',
+		ogTitle: 'Skaffu integritet — GDPR och AI-policy',
+		ogDescription:
+			'Vilken data vi samlar, hur AI används och hur du utövar dina rättigheter. Kontakt: hello@skaffu.com'
+	},
 	updatedLabel: 'Senast uppdaterad',
 	updatedDate: '30 maj 2026',
 	faqLinkLabel: 'Vanliga frågor',
@@ -112,6 +126,14 @@ const en: PrivacyContent = {
 	title: 'Privacy & AI',
 	lead:
 		'How Skaffu collects and uses your data, how AI features work, and your rights under GDPR. Plain language — no unnecessary legalese.',
+	meta: {
+		title: 'Privacy & AI — Skaffu',
+		description:
+			'Privacy policy for the Skaffu pantry app: GDPR, AI (OpenAI), cookies and your rights. No ad tracking.',
+		ogTitle: 'Skaffu privacy — GDPR and AI policy',
+		ogDescription:
+			'What data we collect, how AI is used and how to exercise your rights. Contact: hello@skaffu.com'
+	},
 	updatedLabel: 'Last updated',
 	updatedDate: '30 May 2026',
 	faqLinkLabel: 'FAQ',

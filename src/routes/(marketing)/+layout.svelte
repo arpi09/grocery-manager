@@ -14,11 +14,6 @@
 	});
 </script>
 
-<svelte:head>
-	<link rel="canonical" href={data.canonicalUrl} />
-	<meta property="og:url" content={data.canonicalUrl} />
-</svelte:head>
-
 <div class="marketing-shell">
 	<MarketingHeader
 		content={data.marketing}
