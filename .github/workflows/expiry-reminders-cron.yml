@@ -1,13 +1,8 @@
 # Weekly expiry reminder emails (production only).
 # Independent of release.yml — no quality/e2e/deploy; no shared concurrency group.
 #
-# GitHub: secret CRON_SECRET, variable PRODUCTION_URL
+# GitHub: secret CRON_SECRET, variable PRODUCTION_URL (https://skaffu.com — same as PUBLIC_ORIGIN)
 # Firebase: same CRON_SECRET via apphosting secrets — see docs/90_DAY_ROADMAP.md § Punkt 5
-#
-# TODO (efter skaffu.com Connected i Firebase): uppdatera repo variable PRODUCTION_URL till
-#   https://skaffu.com
-# Tills dess: https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app (samma som PUBLIC_ORIGIN)
-# Se docs/SKAFFU_DOMAIN_MIGRATION.md
 
 name: Expiry reminders cron
 
@@ -36,7 +31,7 @@ jobs:
             exit 1
           fi
           if [ -z "${PRODUCTION_URL:-}" ]; then
-            echo "::error::GitHub repository variable PRODUCTION_URL is not set (e.g. https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app)."
+            echo "::error::GitHub repository variable PRODUCTION_URL is not set (e.g. https://skaffu.com)."
             exit 1
           fi
 

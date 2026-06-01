@@ -2,7 +2,7 @@
 
 Steg-för-steg för produktägaren: köp **skaffu.com** via Cloudflare, koppla till Firebase App Hosting, uppdatera miljövariabler och Turnstile. Repo och Firebase-projekt heter fortfarande **`home-pantry`** internt — publik URL blir **`https://skaffu.com`**.
 
-> **Status idag:** Prod kör på `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app`. **Sätt inte `PUBLIC_ORIGIN` till skaffu.com i `apphosting.yaml` förrän DNS + SSL är Connected** — annars blir canonical-länkar, mejl och CSRF fel.
+> **Status (jun 2026):** **`skaffu.com` apex Connected** (DNS + SSL). Prod canonical: `https://skaffu.com` (`PUBLIC_ORIGIN` / `ORIGIN` i `apphosting.yaml`). Legacy `*.hosted.app` fungerar fortfarande under övergång. **`www.skaffu.com`:** A verifierad; Firebase TXT `fah-claim=016-02-ad0e5672-af71-48b4-8153-5c12ce506756` saknas ännu i Cloudflare — blockerar inte apex.
 
 Relaterat: [`DOMAIN_STRATEGY.md`](./DOMAIN_STRATEGY.md) · [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md) · [`CAPTCHA.md`](./CAPTCHA.md) · [`EMAIL.md`](./EMAIL.md) · [`PROD_SMOKE.md`](./PROD_SMOKE.md)
 
@@ -15,7 +15,7 @@ Relaterat: [`DOMAIN_STRATEGY.md`](./DOMAIN_STRATEGY.md) · [`CUSTOM_DOMAIN.md`](
 | 1 | Cloudflare Registrar | Köp `skaffu.com` |
 | 2 | Firebase Console | Lägg till custom domain → få DNS-poster |
 | 3 | Cloudflare DNS | Lägg in A / TXT / CNAME enligt Firebase |
-| 4 | Vänta | Verifiering + SSL (15 min – några timmar) |
+| 4 | Vänta | Verifiering + SSL (15 min – några timmar) — **✅ apex `skaffu.com` Connected (jun 2026)** |
 | 5 | Firebase env | `PUBLIC_ORIGIN` + `ORIGIN` → `https://skaffu.com`, redeploy |
 | 6 | Cloudflare Turnstile | Lägg till `skaffu.com` (+ ev. `www`) som hostname |
 | 7 | Resend (valfritt) | Verifiera avsändardomän för mejl |

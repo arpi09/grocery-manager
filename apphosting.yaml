@@ -35,17 +35,15 @@ env:
 
   # Public URL of the deployed app (current production). PUBLIC_ORIGIN and ORIGIN must match
   # the canonical HTTPS origin users open in the browser.
-  # Target custom domain: skaffu.com — keep hosted.app here until DNS + SSL Connected;
-  # then set both to https://skaffu.com and redeploy (docs/SKAFFU_DOMAIN_MIGRATION.md).
   - variable: PUBLIC_ORIGIN
-    value: https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app
+    value: https://skaffu.com
     availability:
       - BUILD
       - RUNTIME
 
   # SvelteKit adapter-node: canonical origin for request URLs and CSRF on form actions
   - variable: ORIGIN
-    value: https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app
+    value: https://skaffu.com
     availability:
       - RUNTIME
 

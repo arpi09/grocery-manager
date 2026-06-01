@@ -7,11 +7,11 @@ Admin-UI (`/admin`) har **ingen** “radera användare”-knapp — bara logga u
 | Fält | Värde |
 |------|--------|
 | E-post | `smoke-test-20260601-cursor@example.com` |
-| Prod-URL | `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app` |
+| Prod-URL | `https://skaffu.com` |
 
 ### Steg 1 — verifiera i admin (valfritt)
 
-1. Logga in som admin → [`/admin`](https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app/admin) (kräver prod `ADMIN_PASSWORD` i Firebase — skiljer sig från lokal `.env`).
+1. Logga in som admin → [`/admin`](https://skaffu.com/admin) (kräver prod `ADMIN_PASSWORD` i Firebase — skiljer sig från lokal `.env`).
 2. Sök e-post i användartabellen. **Verifierat 2026-06-01:** kontot finns (registrerat via prod-smoke).
 3. **Logga ut användare** stoppar bara sessioner — raderar inte kontot.
 

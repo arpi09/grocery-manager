@@ -23,15 +23,11 @@ Manuell checklista efter G3-deploy (Firebase App Hosting). E2E och CI använder 
 
 Ersätt `BASE` med prod-URL (samma som `PUBLIC_ORIGIN`, utan avslutande `/`).
 
-**Idag:** `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app`  
-**Efter domänbyte:** `https://skaffu.com` — se [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md).
+**Prod (default):** `https://skaffu.com`  
+**Legacy hosted.app:** `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app` — se [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md).
 
 ```bash
-# Exempel (hosted.app):
-# BASE=https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app
-
-# Exempel (efter skaffu.com är Connected):
-# BASE=https://skaffu.com
+BASE=https://skaffu.com
 ```
 
 ```bash
