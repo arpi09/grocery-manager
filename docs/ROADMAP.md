@@ -28,7 +28,7 @@
 
 **Väntar medvetet:** Stripe/Checkout, Capacitor/App Store — tills PMF-gates och [PRICING.md](./PRICING.md) motiverar.
 
-**Nästa kod (utan Stripe):** Fas 1-svans (kvitto-PDF, SEO, web push *handla idag*, recept-polish) levererad. **Fas 2-kod utan PMF-gate:** svensk scan-kvalitet, receipt-fixtures i CI när ägare fyller testpack, admin/e2e-polish.
+**Nästa kod (utan Stripe):** Fas 1-svans levererad (kvitto-PDF, SEO, push *handla idag*, recept-polish, mobilnav). **P2 (pågår / kod utan PMF-gate):** svensk produktcache/override, receipt-fixtures i CI när ägare fyller testpack, admin/e2e-polish. **P3/P4:** se nedan — nästa nivå efter P2.
 
 ---
 
@@ -186,11 +186,79 @@ Starta **endast** om Fas 1-mätetal eller [DAY_90_DECISION.md](./DAY_90_DECISION
 | Initiativ | Trigger | Status jun 2026 |
 |-----------|---------|-----------------|
 | **Capacitor / App Store** | D30 ≥15 % + kvalitativ push/app-store-begäran | **Väntar** |
-| **Native push-notiser** | Efter Capacitor eller TWA | Web push expiry finns |
+| **Native push-notiser** | Efter Capacitor eller TWA | Web push expiry + handla idag finns |
 | Offline-läsning | Retention på mobil utan nät | Senare |
-| Svensk produktcache / override | Scan-fel, OFF saknar svenska | **Påbörjad** — locale-namn + kuraterad override-lista |
+| Svensk produktcache / override | Scan-fel, OFF saknar svenska | **Påbörjad (P2)** — locale-namn + kuraterad override-lista |
 | Prisjämförelse / affiliate | Tydlig partner | Skip (CA) |
-| B2B (BRF, kommuner) | Efter B2C PMF | Senare |
+| B2B (BRF, kommuner) | Efter B2C PMF | Senare (P4) |
+
+---
+
+## P2 (nu) — Kodvåg utan Stripe/Capacitor
+
+*Slutför innan P3 startar i kod. Ägare-intervjuer/A/B/launch körs parallellt.*
+
+| Initiativ | Gate | Status jun 2026 | Insats | Användarvärde |
+|-----------|------|-----------------|--------|---------------|
+| Svensk produktcache + override | Scan-fel i intervjuer | **Påbörjad** | M | Snabbare scan, färre fel namn |
+| Kvitto-PDF regression (riktiga fixtures) | Ägare fyller [RECEIPT_TEST_PACK](./RECEIPT_TEST_PACK.md) | Synthetic CI ✅ | S→M | Färre ICA/Kivra-surprises i prod |
+| Admin / toggle / e2e-polish | Trust, drift | Löpande | S | Färre friktion för ägare |
+| Mobilnav + header | UX-retention | ✅ ae350ee | S | Tydligare PWA-vardag |
+
+**P2 exit-gate (kod):** produktcache v1 i prod + ≥15/20 receipt-fixtures i CI *eller* explicit beslut att vänta på ägare-PDF utan att blockera P3.
+
+---
+
+## P3 (månad 6–9) — Nästa stora kodvåg: **killer feature**
+
+*Bygger på det som är live: skaffu.com, kvitto per plats, plan→lista, smart fill, web push, SEO, hushåll.*
+
+**Starta P3-kod när:** P2 exit-gate + minst en av: D30 trendar mot ≥10 % (3 veckor WoW), ≥30 % aktiva hushåll med 2+ medlemmar, eller intervjusyntes pekar på *samma* retention-hål (t.ex. "vet inte vad jag ska laga av det som går ut").
+
+**Stripe:** fortfarande **väntar** ([PRICING.md](./PRICING.md)) — P3 ska öka retention/vana, inte monetisera direkt.
+
+### Killer feature-kandidater (välj 1 som huvudspår)
+
+| # | Kandidat | Differentiering vs AnyList / Bring / Mealime / Matdags | Insats | Användarvärde |
+|---|----------|--------------------------------------------------------|--------|---------------|
+| **A** | **Utgångsstyrd veckoplan — "Ät det först"** | Bring/AnyList: ingen lager-sanningskälla. Mealime: recept utan *ditt* lager. Matdags: liknande men native+gamification; Skaffu: **butiksneutral**, plan→lista redan ✅, koppla *utgående varor* → förslag på 3–5 måltider/vecka → ett klick till lista | **L** (4–6 v) | Veckovana: öppna appen måndag → "så här äter ni bort risken" |
+| **B** | **Kvitto-autopilot — återkommande köp → lager** | Få listappar lär sig *vad du faktiskt handlat* från PDF/Kivra. Matdags har kvitto→lager; vi dubblerar med **mönster** (samma ICA-rad varje vecka → förslag att fylla på) + smart fill | **L–XL** | Mindre manuell scan; lager "fyller sig" efter handel |
+
+**Rekommenderat huvudspår: A — "Ät det först".** Rationale: utnyttjar utgång + plan + lista + push som redan finns; tydlig demo i video/SEO (*minska matsvinn*); svårare för Bring att kopiera utan lager. B är stark moat men kräver mer kvitto-kvalitet (P2) — bra som **P3.1** efter A:s MVP.
+
+### P3 — leveranspaket (kod)
+
+| Initiativ | Gate | Insats | Värde |
+|-----------|------|--------|-------|
+| **"Ät det först"-veckovy** (A) | P3 start + utgångsdata i lager | L | Retention D7/D30; tydlig Skaffu-story |
+| Förslag 3–5 måltider från utgående + befintligt lager (AI guardrailad) | Samma | M | Konkret värde utan ny datakälla |
+| Ett klick: veckovy → plan → inköpslista (utöka befintligt flöde) | Plan→lista ✅ | S | Färre steg vs Mealime |
+| Push/e-post: "3 saker går ut — här är veckans förslag" | Web push ✅ | M | Återbesök utan native |
+| Kvitto-mönster v1 (B, begränsat) | ≥15/20 PDF i CI *eller* hög parse-träff i prod | M | Kompletterar A; minskar scan-trötthet |
+| Capacitor | **Ej P3** — [DAY_90_DECISION](./DAY_90_DECISION.md) | — | Väntar D30 + kvalitativ app-begäran |
+
+**P3 exit-gate:** ≥25 % av aktiva hushåll använder veckovy eller plan→lista 2+ ggr/vecka *eller* D30 ≥15 % med kohort ≥50 användare; annars iterera A innan P4.
+
+---
+
+## P4 (månad 9–18) — Stretch / plattform
+
+*Ambitiös nivå efter P3 bevisat värde. Ägare hanterar ASO, partnerskap, B2B-försäljning.*
+
+**Starta P4 när:** P3 exit-gate + tydlig pull (intervjuer: "vill ha i fickan hela tiden", "kan ni hämta kvitto automatiskt?", hushåll >2 driver >50 % aktivitet).
+
+### Killer stretch-kandidater
+
+| # | Kandidat | Plattformsroll | Insats | Värde |
+|---|----------|----------------|--------|-------|
+| **C** | **Capacitor + OS-push + delad widget** | Stänger gap mot Matdags/FreshKeeper i *vardagsvana* | XL | D30, App Store-närvaro |
+| **D** | **Kivra / e-post-ingång för kvitto** (med samtycke) | *Automatisk* sanning — få indie-konkurrenter i SV | XL | Moat; minskar aktiveringsfriktion |
+| **E** | **Öppen hushålls-API / export** (Bring + JSON) | Plattform: Skaffu som lager-sanningskälla för andra verktyg | L–M | B2B/expat; ej kärn-PMF |
+| **F** | **B2B pilot** (BRF, förskola, matsvinn-projekt) | Distribution utan App Store-ads | M (sälj) + L (kod) | Volym; efter B2C PMF |
+
+**Rekommenderad P4-sekvens:** **C först** om D30 < mål och användare ber om app — annars **D** om kvitto är #1 i intervjuer och P2/P3 parsing håller. **F** endast om B2C D30 ≥25 %.
+
+**Stripe i P4:** endast om [PRICING.md §6](./PRICING.md)-gates uppfylls *och* killer-värde (A eller C) ger återkommande vana — annars fortsatt vänta.
 
 ---
 
@@ -233,9 +301,13 @@ flowchart TD
     C -->|D30 + gates| F{Stripe?}
     F -->|Ja| G[Checkout — senare]
     F -->|Nej| B
-    C -->|D30 + push-begäran| H[Capacitor — väntar]
+    C -->|D30 + push-begäran| H[Capacitor — P4]
+    C -->|P2 klar + retention-signal| I[P3: Ät det först]
+    I --> J{P3 exit?}
+    J -->|Ja| K[P4: native eller Kivra]
+    J -->|Nej| I
 ```
 
 ---
 
-*Senast uppdaterad: 1 jun 2026. Uppdatera när Fas 1-punkter levereras eller PMF-data ändrar prioritet.*
+*Senast uppdaterad: 1 jun 2026 (P3/P4, mobilnav merge). Uppdatera när Fas 1-punkter levereras eller PMF-data ändrar prioritet.*
