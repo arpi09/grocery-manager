@@ -20,6 +20,10 @@
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import {
+		readReceiptBulkLocation,
+		writeReceiptBulkLocation
+	} from '$lib/utils/receipt-bulk-location';
 
 	interface Props {
 		returnTo: string;
@@ -31,6 +35,7 @@
 	let parseError = $state<string | null>(null);
 	let lines = $state<ReceiptLine[]>([]);
 	let selected = $state<Record<number, boolean>>({});
+	let lineLocations = $state<Record<number, StorageLocation>>({});
 	let bulkLocation = $state<StorageLocation>('cupboard');
 	let step = $state<'upload' | 'review'>('upload');
 	let bulkSubmitting = $state(false);
@@ -104,12 +109,40 @@
 
 			lines = data.lines;
 			selected = Object.fromEntries(data.lines.map((_, i) => [i, true]));
+			lineLocations = Object.fromEntries(data.lines.map((line, i) => [i, line.location]));
+			bulkLocation = modeLocation(data.lines.map((l) => l.location)) ?? 'cupboard';
 			step = 'review';
 		} catch {
 			parseError = t('receipt.networkError');
 		} finally {
 			parsing = false;
 		}
+	}
+
+	function modeLocation(locations: StorageLocation[]): StorageLocation | undefined {
+		if (locations.length === 0) return undefined;
+		const counts = new Map<StorageLocation, number>();
+		for (const loc of locations) {
+			counts.set(loc, (counts.get(loc) ?? 0) + 1);
+		}
+		let best: StorageLocation = locations[0];
+		let bestCount = 0;
+		for (const [loc, count] of counts) {
+			if (count > bestCount) {
+				best = loc;
+				bestCount = count;
+			}
+		}
+		return best;
+	}
+
+	function applyBulkLocationToSelected() {
+		lineLocations = {
+			...lineLocations,
+			...Object.fromEntries(
+				lines.map((_, i) => (selected[i] ? [i, bulkLocation] : [])).filter((entry) => entry.length === 2)
+			)
+		};
 	}
 
 	function toggleAll(checked: boolean) {
@@ -136,12 +169,22 @@
 		discardReviewOpen = false;
 		lines = [];
 		selected = {};
+		lineLocations = {};
 		step = 'upload';
 		parseError = null;
 	}
 
+	$effect(() => {
+		if (!browser) return;
+		writeReceiptBulkLocation(bulkLocation);
+	});
+
 	onMount(() => {
 		if (!browser) return;
+		const stored = readReceiptBulkLocation();
+		if (stored) {
+			bulkLocation = stored;
+		}
 		if (!import.meta.env.DEV) return;
 		(
 			window as Window & { __hpE2eReceiptUpload?: (file: File) => Promise<void> }
@@ -197,7 +240,14 @@
 
 		<div class="bulk-location">
 			<span>{t('receiptBulk.locationForAll')}</span>
-			<select bind:value={bulkLocation}>
+			<select
+				bind:value={bulkLocation}
+				onchange={() => {
+					applyBulkLocationToSelected();
+					writeReceiptBulkLocation(bulkLocation);
+				}}
+				data-testid="receipt-bulk-location"
+			>
 				{#each LOCATIONS as loc (loc)}
 					<option value={loc}>{locationLabel(getLocale(), loc)}</option>
 				{/each}
@@ -223,25 +273,47 @@
 			<ul class="line-list" data-testid="receipt-line-list">
 				{#each lines as line, index (index)}
 					<li data-testid="receipt-line-{index}">
-						<label class="line-row">
-							<input
-								type="checkbox"
-								data-testid="receipt-line-checkbox-{index}"
-								name="selected"
-								value={index}
-								checked={selected[index]}
-								onchange={(e) => {
-								selected[index] = (e.currentTarget as HTMLInputElement).checked;
-							}} />
-							<span class="line-name">{line.name}</span>
-							{#if formatLineAmount(line)}
-								<span class="line-qty">{formatLineAmount(line)}</span>
-							{/if}
-						</label>
+						<div class="line-main">
+							<label class="line-row">
+								<input
+									type="checkbox"
+									data-testid="receipt-line-checkbox-{index}"
+									name="selected"
+									value={index}
+									checked={selected[index]}
+									onchange={(e) => {
+									selected[index] = (e.currentTarget as HTMLInputElement).checked;
+								}} />
+								<span class="line-name">{line.name}</span>
+								{#if formatLineAmount(line)}
+									<span class="line-qty">{formatLineAmount(line)}</span>
+								{/if}
+							</label>
+							<label class="line-location">
+								<span class="line-location-label">{t('receiptBulk.locationPerItem')}</span>
+								<select
+									data-testid="receipt-line-location-{index}"
+									value={lineLocations[index] ?? line.location}
+									onchange={(e) => {
+										lineLocations[index] = (e.currentTarget as HTMLSelectElement)
+											.value as StorageLocation;
+									}}
+								>
+									{#each LOCATIONS as loc (loc)}
+										<option value={loc}>{locationLabel(getLocale(), loc)}</option>
+									{/each}
+								</select>
+							</label>
+						</div>
 						{#if selected[index]}
 							<input type="hidden" name={`name_${index}`} value={line.name} />
 							<input type="hidden" name={`quantity_${index}`} value={line.quantity ?? '1'} />
 							<input type="hidden" name={`unit_${index}`} value={line.unit ?? ''} />
+							<input
+								type="hidden"
+								name={`location_${index}`}
+								value={lineLocations[index] ?? line.location}
+							/>
 						{/if}
 					</li>
 				{/each}
@@ -345,6 +417,32 @@
 	.line-qty {
 		font-size: 0.8rem;
 		color: var(--color-text-muted);
+	}
+
+	.line-main {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-sm);
+		justify-content: space-between;
+	}
+
+	.line-location {
+		display: flex;
+		align-items: center;
+		gap: var(--space-xs);
+		font-size: 0.85rem;
+	}
+
+	.line-location-label {
+		color: var(--color-text-muted);
+		white-space: nowrap;
+	}
+
+	.line-location select {
+		padding: 0.35rem 0.5rem;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
 	}
 
 	li {

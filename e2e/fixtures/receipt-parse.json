@@ -1,7 +1,7 @@
 {
 	"lines": [
-		{ "name": "Mjölk 3%", "quantity": "2", "unit": "l" },
-		{ "name": "Bröd", "quantity": "1", "unit": "" },
-		{ "name": "Coca-Cola", "quantity": "1.5", "unit": "l" }
+		{ "name": "Mjölk 3%", "quantity": "2", "unit": "l", "location": "fridge" },
+		{ "name": "Bröd", "quantity": "1", "unit": "", "location": "cupboard" },
+		{ "name": "Coca-Cola", "quantity": "1.5", "unit": "l", "location": "cupboard" }
 	]
 }

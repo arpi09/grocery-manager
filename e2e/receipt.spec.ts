@@ -64,7 +64,7 @@ test.describe('Receipt flow', () => {
 
 	test('bulk add selected items redirects with success feedback', async ({ page }) => {
 		await mockReceiptParse(page, {
-			body: { lines: [{ name: 'E2E Testvara', quantity: '1' }] }
+			body: { lines: [{ name: 'E2E Testvara', quantity: '1', unit: '', location: 'fridge' }] }
 		});
 
 		await loginAsAdmin(page);

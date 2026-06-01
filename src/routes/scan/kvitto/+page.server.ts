@@ -1,3 +1,4 @@
+import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
 import { canEditInventory } from '$lib/domain/household';
 import { isStorageLocation, type StorageLocation } from '$lib/domain/location';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
@@ -32,10 +33,6 @@ export const actions: Actions = {
 				? returnToRaw
 				: '/';
 
-		const bulkRaw = formData.get('bulkLocation');
-		const bulkLocation: StorageLocation =
-			typeof bulkRaw === 'string' && isStorageLocation(bulkRaw) ? bulkRaw : 'cupboard';
-
 		const selected = formData
 			.getAll('selected')
 			.map((v) => Number(v))
@@ -57,15 +54,22 @@ export const actions: Actions = {
 				name: name.trim(),
 				quantity:
 					typeof quantityRaw === 'string' && quantityRaw.trim() ? quantityRaw.trim() : undefined,
-				unit: typeof unitRaw === 'string' && unitRaw.trim() ? unitRaw.trim() : undefined
+				unit: typeof unitRaw === 'string' && unitRaw.trim() ? unitRaw.trim() : undefined,
+				location: 'cupboard'
 			});
+
+			const locationRaw = formData.get(`location_${index}`);
+			const location: StorageLocation =
+				typeof locationRaw === 'string' && isStorageLocation(locationRaw)
+					? locationRaw
+					: resolveReceiptLineLocation(name.trim(), locationRaw);
 
 			await event.locals.inventoryService.createItem(
 				event.locals.householdId!,
 				event.locals.user!.id,
 				{
 					name: name.trim(),
-					location: bulkLocation,
+					location,
 					quantity,
 					unit,
 					expiresOn: null,

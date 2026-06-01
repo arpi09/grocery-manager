@@ -1,4 +1,6 @@
+import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
 import type { ReceiptLine } from '$lib/domain/receipt-line';
+import { isStorageLocation } from '$lib/domain/location';
 import {
 	openAiErrorLogDetail,
 	OPENAI_EMPTY_RESPONSE_KEY,
@@ -19,9 +21,10 @@ export const RECEIPT_LINES_SCHEMA = {
 				properties: {
 					name: { type: 'string' },
 					quantity: { type: 'string' },
-					unit: { type: 'string' }
+					unit: { type: 'string' },
+					location: { type: 'string', enum: ['fridge', 'freezer', 'cupboard'] }
 				},
-				required: ['name', 'quantity', 'unit'],
+				required: ['name', 'quantity', 'unit', 'location'],
 				additionalProperties: false
 			}
 		}
@@ -32,7 +35,7 @@ export const RECEIPT_LINES_SCHEMA = {
 
 export const RECEIPT_SYSTEM_PROMPT = [
 	'Du läser svenska butikskvitton (ICA, Maxi, Kivra, Willys m.fl.) och extraherar livsmedelsrader.',
-	'Returnera JSON: {"lines":[{"name":"","quantity":"","unit":""}]}',
+	'Returnera JSON: {"lines":[{"name":"","quantity":"","unit":"","location":""}]}',
 	'Regler:',
 	'- name: kort produktnamn utan storlek/vikt (t.ex. "Coca-Cola", inte "Coca-Cola 1,5L")',
 	'- quantity: numerisk mängd som sträng med punkt som decimal (t.ex. "1", "1.5", "0.45")',
@@ -41,6 +44,10 @@ export const RECEIPT_SYSTEM_PROMPT = [
 	'  - Lösvikt: vikten i quantity, unit "kg"',
 	'  - En vara utan storlek: quantity "1", unit tom',
 	'- unit: l, ml, kg, g, st, pack — tom sträng om okänd',
+	'- location: fridge | freezer | cupboard (förvaring hemma)',
+	'  - fridge: mejeri, kött, fisk, chark, färdigrätter (t.ex. pasta bolognese), färska grönsaker, ägg, mat som ska kylas',
+	'  - freezer: frysta varor, glass, djupfryst',
+	'  - cupboard: torrvaror (ris, pasta torr, mjöl), konserver, kryddor, kaffe, te, drycker som inte kräver kyl',
 	'- hoppa över icke-mat, pant, erbjudanden och butiksinfo',
 	'- max 40 rader'
 ].join('\n');
@@ -70,6 +77,14 @@ function coerceReceiptUnit(value: unknown): string | undefined {
 	if (typeof value === 'string') {
 		const trimmed = value.trim().toLowerCase();
 		return trimmed ? trimmed : undefined;
+	}
+	return undefined;
+}
+
+function coerceReceiptLocation(value: unknown): string | undefined {
+	if (typeof value === 'string') {
+		const trimmed = value.trim().toLowerCase();
+		return isStorageLocation(trimmed) ? trimmed : undefined;
 	}
 	return undefined;
 }
@@ -108,6 +123,8 @@ export function normalizeReceiptAiPayload(raw: unknown): unknown {
 			normalized.quantity = quantity ?? '';
 			const unit = coerceReceiptUnit(row.unit);
 			normalized.unit = unit ?? '';
+			const location = coerceReceiptLocation(row.location);
+			normalized.location = location ?? '';
 			return normalized;
 		})
 	};
@@ -132,7 +149,10 @@ export function parseReceiptLines(raw: unknown): ReceiptLine[] {
 		const quantity = coerceReceiptQuantity(row.quantity);
 		const unit = coerceReceiptUnit(row.unit);
 		if (!name) continue;
-		const line: ReceiptLine = { name };
+		const line: ReceiptLine = {
+			name,
+			location: resolveReceiptLineLocation(name, row.location)
+		};
 		if (quantity) line.quantity = quantity;
 		if (unit) line.unit = unit;
 		result.push(line);

@@ -832,7 +832,8 @@
 		"lead": "Have the receipt in an app? Upload the PDF or image directly — or photograph a paper receipt. We suggest items you can add.",
 		"cameraPaper": "Photograph paper receipt",
 		"selectItems": "Select items ({selected} of {total})",
-		"locationForAll": "Location for all selected:",
+		"locationForAll": "Set location for all selected:",
+		"locationPerItem": "Location:",
 		"addCount": "Add {count} {count, plural, one {item} other {items}}",
 		"apiKeyHint": "Requires OPENAI_API_KEY in server .env."
 	},

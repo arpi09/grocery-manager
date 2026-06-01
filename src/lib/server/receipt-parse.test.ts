@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { guessStorageLocation } from '$lib/domain/guess-storage-location';
 import {
 	isOpenAiSchemaFailure,
 	normalizeReceiptAiPayload,
@@ -50,8 +51,8 @@ describe('parseReceiptLines', () => {
 				]
 			})
 		).toEqual([
-			{ name: 'Mjölk', quantity: '2' },
-			{ name: 'Bröd' }
+			{ name: 'Mjölk', quantity: '2', location: 'fridge' },
+			{ name: 'Bröd', location: 'cupboard' }
 		]);
 	});
 
@@ -59,19 +60,46 @@ describe('parseReceiptLines', () => {
 		expect(parseReceiptLines({ lines: [{ name: '   ' }, { quantity: '1' }] })).toEqual([]);
 	});
 
+	it('uses AI location when valid', () => {
+		expect(
+			parseReceiptLines({
+				lines: [{ name: 'Pasta Bolognese', quantity: '1', unit: '', location: 'fridge' }]
+			})
+		).toEqual([{ name: 'Pasta Bolognese', quantity: '1', location: 'fridge' }]);
+	});
+
+	it('falls back to heuristic when location missing or invalid', () => {
+		expect(parseReceiptLines({ lines: [{ name: 'Pasta Bolognese', quantity: '1', unit: '' }] })).toEqual([
+			{ name: 'Pasta Bolognese', quantity: '1', location: 'fridge' }
+		]);
+		expect(parseReceiptLines({ lines: [{ name: 'Basmatiris', quantity: '1', unit: 'kg' }] })).toEqual([
+			{ name: 'Basmatiris', quantity: '1', unit: 'kg', location: 'cupboard' }
+		]);
+		expect(parseReceiptLines({ lines: [{ name: 'Frysta ärtor', quantity: '1', unit: 'kg' }] })).toEqual([
+			{ name: 'Frysta ärtor', quantity: '1', unit: 'kg', location: 'freezer' }
+		]);
+		expect(
+			parseReceiptLines({
+				lines: [{ name: 'Ris', quantity: '1', unit: 'kg', location: 'not-a-place' }]
+			})
+		).toEqual([{ name: 'Ris', quantity: '1', unit: 'kg', location: 'cupboard' }]);
+	});
+
 	it('drops empty quantity strings from strict model output', () => {
-		expect(parseReceiptLines({ lines: [{ name: ' Ägg ', quantity: '' }] })).toEqual([{ name: 'Ägg' }]);
+		expect(parseReceiptLines({ lines: [{ name: ' Ägg ', quantity: '' }] })).toEqual([
+			{ name: 'Ägg', location: 'fridge' }
+		]);
 	});
 
 	it('coerces numeric quantity to string', () => {
 		expect(parseReceiptLines({ lines: [{ name: 'Mjölk', quantity: 2 }] })).toEqual([
-			{ name: 'Mjölk', quantity: '2' }
+			{ name: 'Mjölk', quantity: '2', location: 'fridge' }
 		]);
 	});
 
 	it('coerces numeric name to string', () => {
 		expect(parseReceiptLines({ lines: [{ name: 123, quantity: '1' }] })).toEqual([
-			{ name: '123', quantity: '1' }
+			{ name: '123', quantity: '1', location: 'cupboard' }
 		]);
 	});
 
@@ -80,7 +108,7 @@ describe('parseReceiptLines', () => {
 			parseReceiptLines({
 				lines: [{ name: 'Bröd', quantity: '1', price: 29.9, sku: 'abc' }]
 			})
-		).toEqual([{ name: 'Bröd', quantity: '1' }]);
+		).toEqual([{ name: 'Bröd', quantity: '1', location: 'cupboard' }]);
 	});
 
 	it('parses ICA-style package size into quantity and unit', () => {
@@ -88,7 +116,7 @@ describe('parseReceiptLines', () => {
 			parseReceiptLines({
 				lines: [{ name: 'Coca-Cola', quantity: '1.5', unit: 'l' }]
 			})
-		).toEqual([{ name: 'Coca-Cola', quantity: '1.5', unit: 'l' }]);
+		).toEqual([{ name: 'Coca-Cola', quantity: '1.5', unit: 'l', location: 'cupboard' }]);
 	});
 
 	it('normalizes comma decimals and unit casing', () => {
@@ -96,19 +124,19 @@ describe('parseReceiptLines', () => {
 			parseReceiptLines({
 				lines: [{ name: 'Cola', quantity: '1,5', unit: ' L ' }]
 			})
-		).toEqual([{ name: 'Cola', quantity: '1.5', unit: 'l' }]);
+		).toEqual([{ name: 'Cola', quantity: '1.5', unit: 'l', location: 'cupboard' }]);
 	});
 
 	it('drops empty unit from output', () => {
 		expect(parseReceiptLines({ lines: [{ name: 'Ägg', quantity: '12', unit: '' }] })).toEqual([
-			{ name: 'Ägg', quantity: '12' }
+			{ name: 'Ägg', quantity: '12', location: 'fridge' }
 		]);
 	});
 });
 
 describe('receiptLineToInventoryAmount', () => {
 	it('defaults missing fields to quantity 1', () => {
-		expect(receiptLineToInventoryAmount({ name: 'Bröd' })).toEqual({
+		expect(receiptLineToInventoryAmount({ name: 'Bröd', location: 'cupboard' })).toEqual({
 			quantity: '1',
 			unit: null
 		});
@@ -116,7 +144,7 @@ describe('receiptLineToInventoryAmount', () => {
 
 	it('maps Cola package size to inventory', () => {
 		expect(
-			receiptLineToInventoryAmount({ name: 'Coca-Cola', quantity: '1.5', unit: 'l' })
+			receiptLineToInventoryAmount({ name: 'Coca-Cola', quantity: '1.5', unit: 'l', location: 'cupboard' })
 		).toEqual({ quantity: '1.5', unit: 'l' });
 	});
 });
@@ -128,8 +156,16 @@ describe('normalizeReceiptAiPayload', () => {
 				lines: [{ name: '  Ost ', quantity: 3, extra: true }]
 			})
 		).toEqual({
-			lines: [{ name: 'Ost', quantity: '3', unit: '' }]
+			lines: [{ name: 'Ost', quantity: '3', unit: '', location: '' }]
 		});
+	});
+});
+
+describe('guessStorageLocation (receipt heuristic)', () => {
+	it('matches receipt-parse fallback expectations', () => {
+		expect(guessStorageLocation('Pasta Bolognese')).toBe('fridge');
+		expect(guessStorageLocation('Basmatiris')).toBe('cupboard');
+		expect(guessStorageLocation('Frysta ärtor')).toBe('freezer');
 	});
 });
 
