@@ -7,6 +7,7 @@
 	import type { UserHouseholdSummary } from '$lib/domain/household';
 	import { getLocale, t } from '$lib/i18n';
 	import { householdRoleLabel } from '$lib/domain/household';
+	import { PANTRY_CREATE_ACTION, PANTRY_SWITCH_ACTION } from '$lib/navigation/app-home';
 	import { subscribeNarrowViewport } from '$lib/utils/use-narrow-viewport';
 
 	interface Props {
@@ -95,7 +96,7 @@
 								{:else}
 									<form
 										method="POST"
-										action="/?/switchHousehold"
+										action={PANTRY_SWITCH_ACTION}
 										use:enhance={switchEnhance}
 										class="switch-form"
 									>
@@ -113,7 +114,7 @@
 					{#if createOpen}
 						<form
 							method="POST"
-							action="/?/createHousehold"
+							action={PANTRY_CREATE_ACTION}
 							use:enhance={createEnhance}
 							class="create-form"
 						>
@@ -180,7 +181,7 @@
 						{:else}
 							<form
 								method="POST"
-								action="/?/switchHousehold"
+								action={PANTRY_SWITCH_ACTION}
 								use:enhance={switchEnhance}
 								class="switch-form"
 							>
@@ -199,7 +200,7 @@
 			{#if createOpen}
 				<form
 					method="POST"
-					action="/?/createHousehold"
+					action={PANTRY_CREATE_ACTION}
 					use:enhance={createEnhance}
 					class="create-form sheet-create"
 				>
