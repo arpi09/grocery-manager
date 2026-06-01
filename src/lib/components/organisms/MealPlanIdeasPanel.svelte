@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
-	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
+	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import { fetchMealPlanIdeas } from '$lib/client/planer-data';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
@@ -97,7 +97,7 @@
 		<p class="empty">{t('planer.ideasEmpty')}</p>
 	{:else}
 		{#if feedbackBanner}
-			<FeedbackBanner tone={feedbackBanner.tone} message={feedbackBanner.message} />
+			<AddMissingFeedback feedback={feedbackBanner} />
 		{/if}
 		{#if canEdit && allMissingIngredients.length > 0}
 			<div class="batch-action">

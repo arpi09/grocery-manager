@@ -54,5 +54,11 @@ describe('presentAddMissingFeedback', () => {
 	it('returns warning tone when everything was already on the list', () => {
 		const presented = presentAddMissingFeedback('en', { ok: true, added: 0, skipped: 3 });
 		expect(presented.tone).toBe('warning');
+		expect(presented.showListLink).toBe(false);
+	});
+
+	it('offers list link after successful add', () => {
+		const presented = presentAddMissingFeedback('sv', { ok: true, added: 2, skipped: 0 });
+		expect(presented.showListLink).toBe(true);
 	});
 });

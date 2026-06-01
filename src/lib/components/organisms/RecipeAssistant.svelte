@@ -2,6 +2,7 @@
 	import { t, getLocale } from '$lib/i18n';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
+	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import { DEFAULT_RECIPE_PORTIONS } from '$lib/domain/recipe';
@@ -187,7 +188,7 @@
 
 	{#if recipes.length > 0}
 		{#if feedbackBanner}
-			<FeedbackBanner tone={feedbackBanner.tone} message={feedbackBanner.message} />
+			<AddMissingFeedback feedback={feedbackBanner} />
 		{/if}
 		{#if canEdit && allMissingIngredients.length > 0}
 			<div class="batch-action">

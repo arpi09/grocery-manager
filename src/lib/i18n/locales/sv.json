@@ -283,6 +283,12 @@
 				"failed": "Kunde inte aktivera notiser. Försök igen."
 			}
 		},
+		"shoppingPush": {
+			"title": "Handla idag",
+			"note": "Daglig notis på morgonen när du har varor kvar på inköpslistan. Kräver webbläsarnotiser ovan.",
+			"enable": "Påminn mig att handla",
+			"requiresPush": "Aktivera webbläsarnotiser ovan först."
+		},
 		"plan": {
 			"title": "Plan",
 			"description": "Prenumeration (kommer snart)",
@@ -913,6 +919,7 @@
 		"addMissingPartial": "{added} lades till, {skipped} fanns redan på listan.",
 		"addMissingNone": "Alla saknade varor fanns redan på inköpslistan.",
 		"addMissingFailed": "Kunde inte lägga till på inköpslistan. Försök igen.",
+		"viewShoppingList": "Visa inköpslistan →",
 		"noMissingToAdd": "Inga saknade ingredienser att lägga till.",
 		"newBadge": "Ny",
 		"label": "Receptidéer"
@@ -977,7 +984,9 @@
 	},
 	"pushNotifications": {
 		"expiryTitle": "Varor går ut snart",
-		"expiryBody": "{count} varor går ut inom {days} dagar"
+		"expiryBody": "{count} varor går ut inom {days} dagar",
+		"shoppingTitle": "Dags att handla?",
+		"shoppingBody": "{count} varor väntar på inköpslistan"
 	},
 	"calendar": {
 		"mon": "Mån",

@@ -20,5 +20,14 @@ describe('guessStorageLocation', () => {
 	it('sends dairy to fridge', () => {
 		expect(guessStorageLocation('Mjölk 3%')).toBe('fridge');
 		expect(guessStorageLocation('Goudaost')).toBe('fridge');
+		expect(guessStorageLocation('GRADDFIL 15%')).toBe('fridge');
+		expect(guessStorageLocation('Filmjölk 3%')).toBe('fridge');
+	});
+
+	it('classifies common receipt abbreviations', () => {
+		expect(guessStorageLocation('KYCKLINGFILE 500G')).toBe('fridge');
+		expect(guessStorageLocation('FALUKORV 800G')).toBe('fridge');
+		expect(guessStorageLocation('LAX FILE')).toBe('fridge');
+		expect(guessStorageLocation('PASTA SPAGHETTI')).toBe('cupboard');
 	});
 });

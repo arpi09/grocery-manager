@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { t, getLocale } from '$lib/i18n';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
-	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
@@ -136,7 +136,7 @@
 			<p class="empty">{t('planer.emptyDay')}</p>
 		{:else}
 			{#if feedbackBanner}
-				<FeedbackBanner tone={feedbackBanner.tone} message={feedbackBanner.message} />
+				<AddMissingFeedback feedback={feedbackBanner} />
 			{/if}
 			{#if canEdit && dayMissingIngredients.length > 0}
 				<div class="day-batch-action">

@@ -107,13 +107,20 @@ export function addMissingFeedbackTone(result: AddMissingApiResult): AddMissingF
 	return 'success';
 }
 
+export interface AddMissingFeedbackPresentation {
+	message: string;
+	tone: AddMissingFeedbackTone;
+	showListLink: boolean;
+}
+
 /** Toast text plus inline banner tone for panels/modals. */
 export function presentAddMissingFeedback(
 	locale: Locale,
 	result: AddMissingApiResult
-): { message: string; tone: AddMissingFeedbackTone } {
+): AddMissingFeedbackPresentation {
 	return {
 		message: formatAddMissingFeedback(locale, result),
-		tone: addMissingFeedbackTone(result)
+		tone: addMissingFeedbackTone(result),
+		showListLink: result.ok && result.added > 0
 	};
 }

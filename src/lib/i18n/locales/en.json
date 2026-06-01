@@ -283,6 +283,12 @@
 				"failed": "Could not enable notifications. Try again."
 			}
 		},
+		"shoppingPush": {
+			"title": "Shop today",
+			"note": "Daily morning notification when unchecked items remain on your shopping list. Requires browser notifications above.",
+			"enable": "Remind me to shop",
+			"requiresPush": "Enable browser notifications above first."
+		},
 		"plan": {
 			"title": "Plan",
 			"description": "Subscription (coming soon)",
@@ -912,6 +918,7 @@
 		"addMissingPartial": "Added {added}, {skipped} were already on the list.",
 		"addMissingNone": "All missing items were already on the shopping list.",
 		"addMissingFailed": "Could not add to the shopping list. Try again.",
+		"viewShoppingList": "View shopping list →",
 		"noMissingToAdd": "No missing ingredients to add.",
 		"newBadge": "New",
 		"label": "Recipe ideas"
@@ -976,7 +983,9 @@
 	},
 	"pushNotifications": {
 		"expiryTitle": "Items expiring soon",
-		"expiryBody": "{count} items expire within {days} days"
+		"expiryBody": "{count} items expire within {days} days",
+		"shoppingTitle": "Time to shop?",
+		"shoppingBody": "{count} items on your shopping list"
 	},
 	"calendar": {
 		"mon": "Mon",
