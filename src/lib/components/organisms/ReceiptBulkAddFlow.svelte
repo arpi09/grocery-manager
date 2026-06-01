@@ -49,6 +49,31 @@
 		return t('receipt.formats.unsupported');
 	}
 
+	function receiptParseFailureMessage(response: Response, data: { error?: string }): string {
+		if (data.error) {
+			return data.error;
+		}
+		if (response.status >= 500) {
+			return t('errors.api.openAiNotConfigured');
+		}
+		return t('errors.api.receiptParseStatus', { status: response.status });
+	}
+
+	async function readReceiptParseResponse(response: Response): Promise<{
+		lines?: ReceiptLine[];
+		error?: string;
+	}> {
+		const contentType = response.headers.get('content-type') ?? '';
+		if (!contentType.includes('application/json')) {
+			return {};
+		}
+		try {
+			return (await response.json()) as { lines?: ReceiptLine[]; error?: string };
+		} catch {
+			return {};
+		}
+	}
+
 	async function handleReceiptFile(file: File) {
 		parsing = true;
 		parseError = null;
@@ -70,10 +95,10 @@
 			formData.append('image', uploadFile);
 
 			const response = await fetch('/api/receipt/parse', { method: 'POST', body: formData });
-			const data = (await response.json()) as { error?: string; lines?: ReceiptLine[] };
+			const data = await readReceiptParseResponse(response);
 
 			if (!response.ok || !data.lines?.length) {
-				parseError = data.error ?? t('receipt.parseFailed');
+				parseError = receiptParseFailureMessage(response, data);
 				return;
 			}
 
@@ -154,7 +179,9 @@
 			</div>
 		{/if}
 
-		<p class="hint">{t('receiptBulk.apiKeyHint')}</p>
+		{#if import.meta.env.DEV}
+			<p class="hint">{t('receiptBulk.apiKeyHint')}</p>
+		{/if}
 	</section>
 
 	<ScanFlowFooter cancelHref={cancelHref} cancelLabel={t('common.cancel')} />

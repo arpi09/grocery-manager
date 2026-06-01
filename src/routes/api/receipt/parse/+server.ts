@@ -61,7 +61,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json(result);
 	}
 
-	const apiKeyOrResponse = requireOpenAiKey(locals.locale, 'receipt scan');
+	const apiKeyOrResponse = requireOpenAiKey(locals.locale, 'receipt scan', 503);
 	if (typeof apiKeyOrResponse !== 'string') {
 		return apiKeyOrResponse;
 	}
@@ -72,6 +72,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (isReceiptPdf(mimeType)) {
 		const pdfText = await extractPdfText(bytes);
 		if (!pdfText.ok) {
+			console.warn(`[receipt] PDF text extraction failed: reason=${pdfText.reason}`);
 			const errorKey =
 				pdfText.reason === 'failed'
 					? 'errors.api.receiptPdfExtractFailed'
