@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { page } from '$app/state';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
@@ -46,14 +47,15 @@
 
 	const returnTo = APP_HOME_PATH;
 	const from = $derived(encodeURIComponent(returnTo));
+	const userId = $derived(page.data.user?.id ?? null);
 
-	let activationProgress = $state<ActivationProgress>(getActivationProgress());
+	let activationProgress = $state<ActivationProgress>(getActivationProgress(null));
 
 	function refreshActivationProgress() {
 		if (!browser) {
 			return;
 		}
-		activationProgress = getActivationProgress();
+		activationProgress = getActivationProgress(userId);
 	}
 
 	$effect(() => {
@@ -61,6 +63,7 @@
 			return;
 		}
 
+		void userId;
 		refreshActivationProgress();
 
 		const onProgress = () => refreshActivationProgress();

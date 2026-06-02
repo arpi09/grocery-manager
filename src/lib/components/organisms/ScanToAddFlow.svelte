@@ -5,6 +5,7 @@
 	import BarcodeScanner from '$lib/components/molecules/BarcodeScanner.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
+	import { page } from '$app/state';
 	import { recordBarcodeActivation } from '$lib/utils/onboarding';
 	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
@@ -273,7 +274,7 @@
 				(v) => (saveSubmitting = v),
 				async () => {
 					persistFavoriteProduct();
-					recordBarcodeActivation();
+					recordBarcodeActivation(page.data.user?.id);
 				}
 			)}
 			class="save-form"

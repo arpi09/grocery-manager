@@ -6,6 +6,7 @@
 	import DigitalReceiptGuide from '$lib/components/molecules/DigitalReceiptGuide.svelte';
 	import ImageSourcePicker from '$lib/components/molecules/ImageSourcePicker.svelte';
 	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
+	import { page } from '$app/state';
 	import { recordReceiptActivation } from '$lib/utils/onboarding';
 	import {
 		prepareReceiptFileForUpload,
@@ -265,7 +266,7 @@
 			use:enhance={bindSubmittingWithRedirect(
 				(v) => (bulkSubmitting = v),
 				async () => {
-					recordReceiptActivation();
+					recordReceiptActivation(page.data.user?.id);
 				}
 			)}
 		>

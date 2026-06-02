@@ -17,10 +17,11 @@
 	let open = $state(false);
 
 	const pathname = $derived(page.url.pathname);
+	const userId = $derived(page.data.user?.id ?? null);
 	const fromHome = $derived(encodeURIComponent(APP_HOME_PATH));
 
 	function tryOpenCelebration() {
-		if (!browser || isOnboardingExcludedPath(pathname) || !shouldShowCelebration()) {
+		if (!browser || !userId || isOnboardingExcludedPath(pathname) || !shouldShowCelebration(userId)) {
 			open = false;
 			return;
 		}
@@ -28,15 +29,15 @@
 	}
 
 	function closeCelebration() {
-		clearCelebrationPending();
+		clearCelebrationPending(userId);
 		open = false;
 	}
 
 	async function goScan() {
 		closeCelebration();
-		const path = getActivationProgress().path === 'receipt' ? '/scan/kvitto' : '/scan';
+		const path = getActivationProgress(userId).path === 'receipt' ? '/scan/kvitto' : '/scan';
 		const query =
-			getActivationProgress().path === 'receipt'
+			getActivationProgress(userId).path === 'receipt'
 				? `?from=${fromHome}`
 				: `?mode=barcode&from=${fromHome}`;
 		await goto(`${path}${query}`);
@@ -53,6 +54,7 @@
 		}
 
 		void pathname;
+		void userId;
 		tryOpenCelebration();
 	});
 </script>

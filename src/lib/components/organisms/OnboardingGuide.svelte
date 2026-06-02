@@ -7,52 +7,76 @@
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
-	import { t } from '$lib/i18n';
+	import { t, type MessageKey } from '$lib/i18n';
 	import {
 		ONBOARDING_REPLAY_EVENT,
+		ONBOARDING_STEP_COUNT,
 		dismissOnboarding,
 		getActivationProgress,
 		isOnboardingExcludedPath,
 		setActivationPath,
 		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
+	import {
+		canGoBackOnboarding,
+		getEncourageKeyForStepIndex,
+		isLastOnboardingStep,
+		type OnboardingEncourageKey,
+		type OnboardingStepId
+	} from '$lib/utils/onboarding-steps';
 
 	interface Step {
-		id: 'welcome' | 'choose';
-		title: string;
-		subtitle: string;
-		body: string;
+		id: OnboardingStepId;
+		titleKey: MessageKey;
+		bodyKey: MessageKey;
 		iconId: FeatureIconId;
 	}
 
-	const steps = $derived<Step[]>([
+	const stepDefinitions: Step[] = [
+		{ id: 'welcome', titleKey: 'onboarding.welcome', bodyKey: 'onboarding.welcomeBody', iconId: 'home' },
+		{ id: 'scan', titleKey: 'onboarding.scanTitle', bodyKey: 'onboarding.scanBody', iconId: 'barcode' },
 		{
-			id: 'welcome',
-			title: t('onboarding.welcome'),
-			subtitle: t('onboarding.stepOf', { current: 1, total: 2 }),
-			body: t('onboarding.welcomeBody'),
-			iconId: 'home'
+			id: 'expiry',
+			titleKey: 'onboarding.expiryTitle',
+			bodyKey: 'onboarding.expiryBody',
+			iconId: 'sparkle'
 		},
 		{
-			id: 'choose',
-			title: t('onboarding.chooseTitle'),
-			subtitle: t('onboarding.stepOf', { current: 2, total: 2 }),
-			body: t('onboarding.chooseBody'),
-			iconId: 'barcode'
-		}
-	]);
+			id: 'meals',
+			titleKey: 'onboarding.mealsTitle',
+			bodyKey: 'onboarding.mealsBody',
+			iconId: 'box'
+		},
+		{ id: 'ready', titleKey: 'onboarding.readyTitle', bodyKey: 'onboarding.readyBody', iconId: 'check' }
+	];
 
 	let open = $state(false);
 	let stepIndex = $state(0);
 
 	const pathname = $derived(page.url.pathname);
+	const userId = $derived(page.data.user?.id ?? null);
+
+	const steps = $derived(
+		stepDefinitions.map((step, index) => ({
+			...step,
+			title: t(step.titleKey),
+			subtitle: t('onboarding.stepOf', { current: index + 1, total: ONBOARDING_STEP_COUNT }),
+			body: t(step.bodyKey)
+		}))
+	);
+
 	const currentStep = $derived(steps[stepIndex]);
 	const isFirstStep = $derived(stepIndex === 0);
-	const isLastStep = $derived(stepIndex === steps.length - 1);
-	const activationProgress = $derived(browser ? getActivationProgress() : null);
+	const isLastStep = $derived(isLastOnboardingStep(stepIndex));
+	const encourageKey = $derived(getEncourageKeyForStepIndex(stepIndex));
+	const encourageCopy = $derived(
+		encourageKey ? t(`onboarding.${encourageKey}` as `onboarding.${OnboardingEncourageKey}`) : null
+	);
+	const activationProgress = $derived(browser && userId ? getActivationProgress(userId) : null);
+	const canGoBack = $derived(canGoBackOnboarding(stepIndex));
 
 	function tryOpenGuide() {
-		if (!browser || isOnboardingExcludedPath(pathname) || !shouldShowOnboarding()) {
+		if (!browser || !userId || isOnboardingExcludedPath(pathname) || !shouldShowOnboarding(userId)) {
 			return;
 		}
 		stepIndex = 0;
@@ -64,7 +88,7 @@
 	}
 
 	function skipGuide() {
-		dismissOnboarding();
+		dismissOnboarding(userId);
 		closeGuide();
 	}
 
@@ -82,16 +106,27 @@
 		stepIndex -= 1;
 	}
 
+	function finishGuide() {
+		dismissOnboarding(userId);
+		closeGuide();
+	}
+
 	async function chooseReceipt() {
-		setActivationPath('receipt');
-		dismissOnboarding();
+		if (!userId) {
+			return;
+		}
+		setActivationPath('receipt', userId);
+		dismissOnboarding(userId);
 		closeGuide();
 		await goto(`/scan/kvitto?from=${encodeURIComponent(APP_HOME_PATH)}`);
 	}
 
 	async function chooseBarcode() {
-		setActivationPath('barcode');
-		dismissOnboarding();
+		if (!userId) {
+			return;
+		}
+		setActivationPath('barcode', userId);
+		dismissOnboarding(userId);
 		closeGuide();
 		await goto(`/scan?mode=barcode&from=${encodeURIComponent(APP_HOME_PATH)}`);
 	}
@@ -102,6 +137,7 @@
 		}
 
 		void pathname;
+		void userId;
 		tryOpenGuide();
 	});
 
@@ -111,7 +147,7 @@
 		}
 
 		const onReplay = () => {
-			if (isOnboardingExcludedPath(pathname)) {
+			if (!userId || isOnboardingExcludedPath(pathname)) {
 				return;
 			}
 			stepIndex = 0;
@@ -130,24 +166,33 @@
 	dismissible={true}
 	panelClass="onboarding-panel"
 	bodyClass="onboarding-body"
+	label={t('onboarding.dialogAria')}
 >
 	{#snippet header()}
 		<ModalHeader title={currentStep.title} subtitle={currentStep.subtitle}>
 			{#snippet actions()}
 				<button type="button" class="skip-link" onclick={skipGuide}>
-					{t('onboarding.skipLater')}
+					{t('onboarding.skip')}
 				</button>
 			{/snippet}
 		</ModalHeader>
 	{/snippet}
 
 	<div class="step-content">
+		{#if encourageCopy}
+			<p class="encourage" role="status">{encourageCopy}</p>
+		{/if}
+
 		<div class="step-icon" aria-hidden="true">
 			<FeatureIcon id={currentStep.iconId} size={32} />
 		</div>
 		<p class="step-body">{currentStep.body}</p>
 
-		{#if currentStep.id === 'choose'}
+		{#if currentStep.id === 'scan'}
+			<p class="scan-hint">{t('onboarding.scanHint')}</p>
+		{/if}
+
+		{#if currentStep.id === 'ready'}
 			{#if activationProgress?.inProgress && activationProgress.path === 'barcode' && activationProgress.barcodeCount > 0}
 				<p class="progress-note" role="status">
 					{t('onboarding.barcodeProgress', {
@@ -182,12 +227,12 @@
 			</div>
 
 			<div class="footer-actions">
-				<Button type="button" variant="ghost" disabled={isFirstStep} onclick={goBack}>
+				<Button type="button" variant="ghost" disabled={!canGoBack} onclick={goBack}>
 					{t('common.previous')}
 				</Button>
 				{#if isLastStep}
-					<Button type="button" variant="ghost" onclick={skipGuide}>
-						{t('onboarding.skipLater')}
+					<Button type="button" onclick={finishGuide}>
+						{t('onboarding.getStarted')}
 					</Button>
 				{:else}
 					<Button type="button" onclick={goNext}>
@@ -229,6 +274,15 @@
 		gap: var(--space-md);
 	}
 
+	.encourage {
+		margin: 0;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-align: center;
+		line-height: 1.4;
+	}
+
 	.step-icon {
 		display: inline-flex;
 		align-items: center;
@@ -245,6 +299,13 @@
 		font-size: 1rem;
 		line-height: 1.55;
 		color: var(--color-text);
+	}
+
+	.scan-hint {
+		margin: 0;
+		font-size: 0.9375rem;
+		color: var(--color-text-muted);
+		line-height: 1.45;
 	}
 
 	.progress-note {

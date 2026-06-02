@@ -110,7 +110,11 @@
 	}
 
 	function replayOnboardingGuide() {
-		resetOnboarding();
+		const userId = data.user?.id;
+		if (!userId) {
+			return;
+		}
+		resetOnboarding(userId);
 		if (browser) {
 			window.dispatchEvent(new Event(ONBOARDING_REPLAY_EVENT));
 		}

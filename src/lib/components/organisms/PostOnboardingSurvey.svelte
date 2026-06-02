@@ -20,9 +20,10 @@
 	let submitted = $state(false);
 
 	const pathname = $derived(page.url.pathname);
+	const userId = $derived(page.data.user?.id ?? null);
 
 	function tryOpenSurvey() {
-		if (!browser || isOnboardingExcludedPath(pathname) || !shouldShowPostOnboardingSurvey()) {
+		if (!browser || !userId || isOnboardingExcludedPath(pathname) || !shouldShowPostOnboardingSurvey(userId)) {
 			open = false;
 			return;
 		}
@@ -30,14 +31,14 @@
 	}
 
 	function skipSurvey() {
-		dismissPostOnboardingSurvey();
+		dismissPostOnboardingSurvey(userId);
 		open = false;
 	}
 
 	function onSubmitted() {
 		submitted = true;
-		clearPostOnboardingSurveyPending();
-		dismissPostOnboardingSurvey();
+		clearPostOnboardingSurveyPending(userId);
+		dismissPostOnboardingSurvey(userId);
 		open = false;
 	}
 
@@ -47,6 +48,7 @@
 		}
 
 		void pathname;
+		void userId;
 		tryOpenSurvey();
 	});
 </script>

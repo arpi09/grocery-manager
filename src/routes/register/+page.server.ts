@@ -86,6 +86,6 @@ export const actions: Actions = {
 			throw error;
 		}
 
-		redirect(302, APP_HOME_PATH);
+		redirect(302, `${APP_HOME_PATH}?freshAccount=1`);
 	}
 };

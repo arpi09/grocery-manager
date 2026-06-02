@@ -17,6 +17,9 @@ import {
 } from './onboarding';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 
+const TEST_USER_A = 'user-a';
+const TEST_USER_B = 'user-b';
+
 describe('onboarding helpers', () => {
 	let storage: Record<string, string>;
 
@@ -37,35 +40,46 @@ describe('onboarding helpers', () => {
 		vi.unstubAllGlobals();
 	});
 
-	it('shows onboarding when nothing is stored', () => {
-		expect(shouldShowOnboarding()).toBe(true);
+	it('shows onboarding when nothing is stored for a user', () => {
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(true);
+	});
+
+	it('requires userId to evaluate onboarding visibility', () => {
+		expect(shouldShowOnboarding()).toBe(false);
+		expect(shouldShowOnboarding(null)).toBe(false);
 	});
 
 	it('hides onboarding after completion for the current version', () => {
-		completeOnboarding();
-		expect(shouldShowOnboarding()).toBe(false);
+		completeOnboarding(TEST_USER_A);
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
 	});
 
 	it('shows onboarding again when version changes', () => {
-		completeOnboarding();
-		storage['home-pantry-onboarding-version'] = String(ONBOARDING_VERSION - 1);
-		expect(shouldShowOnboarding()).toBe(true);
+		completeOnboarding(TEST_USER_A);
+		storage[`home-pantry-onboarding-version:${TEST_USER_A}`] = String(ONBOARDING_VERSION - 1);
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(true);
 	});
 
-	it('reset clears stored onboarding state', () => {
-		completeOnboarding();
-		recordBarcodeActivation();
-		resetOnboarding();
-		expect(shouldShowOnboarding()).toBe(true);
-		expect(getActivationProgress().barcodeCount).toBe(0);
+	it('keeps onboarding state scoped per user on the same device', () => {
+		completeOnboarding(TEST_USER_A);
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
+		expect(shouldShowOnboarding(TEST_USER_B)).toBe(true);
+	});
+
+	it('reset clears stored onboarding state for one user', () => {
+		completeOnboarding(TEST_USER_A);
+		recordBarcodeActivation(TEST_USER_A);
+		resetOnboarding(TEST_USER_A);
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(true);
+		expect(getActivationProgress(TEST_USER_A).barcodeCount).toBe(0);
 	});
 
 	it('queues post-onboarding survey after completion', () => {
-		expect(shouldShowPostOnboardingSurvey()).toBe(false);
-		completeOnboarding();
-		expect(shouldShowPostOnboardingSurvey()).toBe(true);
-		dismissPostOnboardingSurvey();
-		expect(shouldShowPostOnboardingSurvey()).toBe(false);
+		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
+		completeOnboarding(TEST_USER_A);
+		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(true);
+		dismissPostOnboardingSurvey(TEST_USER_A);
+		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
 	});
 
 	it('excludes admin and auth routes', () => {
@@ -102,40 +116,46 @@ describe('activation progress', () => {
 
 	it('tracks barcode scans toward the goal', () => {
 		for (let i = 0; i < ACTIVATION_BARCODE_GOAL - 1; i++) {
-			expect(recordBarcodeActivation()).toBe(false);
+			expect(recordBarcodeActivation(TEST_USER_A)).toBe(false);
 		}
 
-		const progress = getActivationProgress();
+		const progress = getActivationProgress(TEST_USER_A);
 		expect(progress.barcodeCount).toBe(ACTIVATION_BARCODE_GOAL - 1);
 		expect(progress.inProgress).toBe(true);
-		expect(isActivationComplete()).toBe(false);
+		expect(isActivationComplete(TEST_USER_A)).toBe(false);
 	});
 
 	it('completes activation after five barcodes', () => {
 		for (let i = 0; i < ACTIVATION_BARCODE_GOAL; i++) {
-			recordBarcodeActivation();
+			recordBarcodeActivation(TEST_USER_A);
 		}
 
-		expect(isActivationComplete()).toBe(true);
-		expect(getActivationProgress().isComplete).toBe(true);
-		expect(shouldShowOnboarding()).toBe(false);
-		expect(shouldShowCelebration()).toBe(true);
+		expect(isActivationComplete(TEST_USER_A)).toBe(true);
+		expect(getActivationProgress(TEST_USER_A).isComplete).toBe(true);
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
+		expect(shouldShowCelebration(TEST_USER_A)).toBe(true);
 
-		clearCelebrationPending();
-		expect(shouldShowCelebration()).toBe(false);
+		clearCelebrationPending(TEST_USER_A);
+		expect(shouldShowCelebration(TEST_USER_A)).toBe(false);
 	});
 
 	it('completes activation after one receipt import', () => {
-		expect(recordReceiptActivation()).toBe(true);
-		expect(getActivationProgress().receiptDone).toBe(true);
-		expect(isActivationComplete()).toBe(true);
-		expect(shouldShowCelebration()).toBe(true);
+		expect(recordReceiptActivation(TEST_USER_A)).toBe(true);
+		expect(getActivationProgress(TEST_USER_A).receiptDone).toBe(true);
+		expect(isActivationComplete(TEST_USER_A)).toBe(true);
+		expect(shouldShowCelebration(TEST_USER_A)).toBe(true);
 	});
 
 	it('does not increment barcode progress after activation is complete', () => {
-		recordReceiptActivation();
-		clearCelebrationPending();
-		recordBarcodeActivation();
-		expect(getActivationProgress().barcodeCount).toBe(0);
+		recordReceiptActivation(TEST_USER_A);
+		clearCelebrationPending(TEST_USER_A);
+		recordBarcodeActivation(TEST_USER_A);
+		expect(getActivationProgress(TEST_USER_A).barcodeCount).toBe(0);
+	});
+
+	it('isolates activation progress between users', () => {
+		recordBarcodeActivation(TEST_USER_A);
+		expect(getActivationProgress(TEST_USER_A).barcodeCount).toBe(1);
+		expect(getActivationProgress(TEST_USER_B).barcodeCount).toBe(0);
 	});
 });

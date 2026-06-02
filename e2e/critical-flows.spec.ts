@@ -8,7 +8,7 @@ import {
 test.describe('Critical flows', () => {
 	test('register creates account with captcha bypass and lands on /hem', async ({ page }) => {
 		await registerNewUser(page);
-		await expect(page).toHaveURL('/hem');
+		await expect(page).toHaveURL(/\/hem(\?freshAccount=1)?$/);
 	});
 
 	test('login redirects to /hem', async ({ page }) => {

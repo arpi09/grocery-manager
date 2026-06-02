@@ -1,12 +1,59 @@
 import { expect, type Page } from '@playwright/test';
 import { LOCALE_COOKIE_NAME, LOCALE_STORAGE_KEY } from '../../src/lib/i18n/locale';
 
-const ONBOARDING_VERSION_KEY = 'home-pantry-onboarding-version';
-const ONBOARDING_DISMISSED_KEY = 'home-pantry-onboarding-dismissed';
-const ACTIVATION_RECEIPT_KEY = 'home-pantry-activation-receipt-done';
-const CELEBRATION_PENDING_KEY = 'home-pantry-celebration-pending';
-const ONBOARDING_VERSION = '1';
+const ONBOARDING_VERSION = '2';
 const E2E_LOCALE = 'sv';
+/** Locale only — onboarding and activation state stay fresh (new-user flows). */
+export async function prepareFreshUserBrowserState(page: Page) {
+	await applyE2eLocale(page);
+
+	await page.addInitScript(() => {
+		const keysToRemove: string[] = [];
+		for (let index = 0; index < localStorage.length; index += 1) {
+			const key = localStorage.key(index);
+			if (key?.startsWith('home-pantry-onboarding-')) {
+				keysToRemove.push(key);
+			}
+		}
+		for (const key of keysToRemove) {
+			localStorage.removeItem(key);
+		}
+	});
+}
+
+export async function prepareE2eBrowserState(page: Page) {
+	await applyE2eLocale(page);
+
+	await page.addInitScript(
+		({ version, activationReceiptKey, celebrationKey }) => {
+			const keysToRemove: string[] = [];
+			for (let index = 0; index < localStorage.length; index += 1) {
+				const key = localStorage.key(index);
+				if (key?.startsWith('home-pantry-onboarding-')) {
+					keysToRemove.push(key);
+				}
+			}
+			for (const key of keysToRemove) {
+				localStorage.removeItem(key);
+			}
+
+			const markCompleteForUser = (userId: string) => {
+				localStorage.setItem(`home-pantry-onboarding-version:${userId}`, version);
+				localStorage.setItem(`home-pantry-onboarding-dismissed:${userId}`, '1');
+				localStorage.setItem(`${activationReceiptKey}:${userId}`, '1');
+				localStorage.removeItem(`${celebrationKey}:${userId}`);
+			};
+
+			(window as Window & { __hpMarkOnboardingComplete?: (userId: string) => void }).__hpMarkOnboardingComplete =
+				markCompleteForUser;
+		},
+		{
+			version: ONBOARDING_VERSION,
+			activationReceiptKey: 'home-pantry-onboarding-activation-receipt-done',
+			celebrationKey: 'home-pantry-onboarding-celebration-pending'
+		}
+	);
+}
 
 /** Must stay below Playwright test timeout (see playwright.config / per-spec setTimeout). */
 export const E2E_AUTH_NAV_TIMEOUT_MS = 45_000;
@@ -64,46 +111,6 @@ async function applyE2eLocale(page: Page) {
 	);
 }
 
-/** Locale only ? onboarding and activation state stay fresh (new-user flows). */
-export async function prepareFreshUserBrowserState(page: Page) {
-	await applyE2eLocale(page);
-
-	await page.addInitScript(() => {
-		for (const key of [
-			'home-pantry-onboarding-version',
-			'home-pantry-onboarding-dismissed',
-			'home-pantry-activation-path',
-			'home-pantry-activation-barcode-count',
-			'home-pantry-activation-receipt-done',
-			'home-pantry-celebration-pending',
-			'home-pantry-post-onboarding-survey-pending',
-			'home-pantry-post-onboarding-survey-dismissed'
-		]) {
-			localStorage.removeItem(key);
-		}
-	});
-}
-
-export async function prepareE2eBrowserState(page: Page) {
-	await applyE2eLocale(page);
-
-	await page.addInitScript(
-		({ versionKey, dismissedKey, version, activationReceiptKey, celebrationKey }) => {
-			localStorage.setItem(versionKey, version);
-			localStorage.setItem(dismissedKey, '1');
-			localStorage.setItem(activationReceiptKey, '1');
-			localStorage.removeItem(celebrationKey);
-		},
-		{
-			versionKey: ONBOARDING_VERSION_KEY,
-			dismissedKey: ONBOARDING_DISMISSED_KEY,
-			version: ONBOARDING_VERSION,
-			activationReceiptKey: ACTIVATION_RECEIPT_KEY,
-			celebrationKey: CELEBRATION_PENDING_KEY
-		}
-	);
-}
-
 async function fillBoundInput(input: import('@playwright/test').Locator, value: string) {
 	await input.click();
 	await input.fill(value);
@@ -149,7 +156,8 @@ export async function expectOnboardingGuideVisible(page: Page) {
 	await expect(
 		page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
 	).toBeVisible({ timeout: 10_000 });
-	await expect(page.getByRole('button', { name: /Jag g\u00f6r det senare/i })).toBeVisible();
+	await expect(page.getByRole('button', { name: /Hoppa \u00f6ver/i })).toBeVisible();
+	await expect(page.getByText(/Steg 1 av 5/i)).toBeVisible();
 }
 
 export async function registerNewUser(
