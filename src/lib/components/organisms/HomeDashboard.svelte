@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { getContext } from 'svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
+	import EatFirstSection from '$lib/components/organisms/EatFirstSection.svelte';
 	import ExpiringSoonSection from '$lib/components/organisms/ExpiringSoonSection.svelte';
+	import MealTimeSuggestions from '$lib/components/organisms/MealTimeSuggestions.svelte';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
+	import { getTimeOfDay, timeOfDayGreetingKey } from '$lib/domain/meal-slot';
 	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
 	import { t, type MessageKey } from '$lib/i18n';
-	import { OPEN_RECIPE_IDEAS } from '$lib/navigation/app-layout-context';
 	import {
 		ONBOARDING_PROGRESS_EVENT,
 		getActivationProgress,
@@ -23,8 +24,6 @@
 	}
 
 	let { summary, canWrite = false, displayName = null }: Props = $props();
-
-	const openRecipeIdeas = getContext<(() => void) | undefined>(OPEN_RECIPE_IDEAS);
 
 	const returnTo = APP_HOME_PATH;
 	const from = $derived(encodeURIComponent(returnTo));
@@ -50,14 +49,16 @@
 		return () => window.removeEventListener(ONBOARDING_PROGRESS_EVENT, onProgress);
 	});
 
+	const greetingKey = $derived(timeOfDayGreetingKey(getTimeOfDay()));
+
 	const greeting = $derived(
 		displayName?.trim()
-			? t('home.greeting', { name: displayName.trim() })
+			? t(greetingKey, { name: displayName.trim() })
 			: t('home.greetingNeutral')
 	);
 
 	const tagline = $derived(
-		summary.totalItems === 0 ? t('home.taglineEmpty') : t('home.tagline')
+		summary.totalItems === 0 ? t('home.taglineEmpty') : t('home.taglineEngaged')
 	);
 
 	const emptyPrimaryHref = $derived(
@@ -79,9 +80,6 @@
 	const emptySecondaryLabel = $derived(
 		activationProgress.path === 'receipt' ? t('home.emptyActionBarcode') : t('home.emptyActionReceipt')
 	);
-
-	const expiringPreview = $derived(summary.expiringSoon.slice(0, 3));
-	const expiringOverflow = $derived(Math.max(0, summary.expiringSoon.length - 3));
 
 	const locationIcons: Record<StorageLocation, FeatureIconId> = {
 		fridge: 'fridge',
@@ -125,6 +123,10 @@
 			</Card>
 		{/if}
 	{:else}
+		<EatFirstSection expiringItems={summary.expiringSoon} canEdit={canWrite} />
+
+		<MealTimeSuggestions hasInventory={summary.totalItems > 0} />
+
 		{#if canWrite}
 			<section class="scan-zone" aria-labelledby="home-scan-heading">
 				<h2 id="home-scan-heading" class="sr-only">{t('home.scanCardTitle')}</h2>
@@ -170,26 +172,11 @@
 			</div>
 		</section>
 
-		{#if expiringPreview.length > 0}
+		{#if summary.expiringSoon.length > 0}
 			<div class="expiring-block">
-				<ExpiringSoonSection items={expiringPreview} showEmpty={false} />
-				{#if expiringOverflow > 0}
-					<p class="expiring-more">{t('home.expiringMore', { count: expiringOverflow })}</p>
-				{/if}
+				<ExpiringSoonSection items={summary.expiringSoon} showEmpty={false} />
 			</div>
 		{/if}
-	{/if}
-
-	{#if openRecipeIdeas && summary.totalItems > 0}
-		<button type="button" class="recipe-hint" onclick={openRecipeIdeas}>
-			<span class="recipe-icon" aria-hidden="true">
-				<FeatureIcon id="sparkle" size={20} />
-			</span>
-			<span class="recipe-copy">
-				<span class="recipe-title">{t('home.recipeHint')}</span>
-				<span class="recipe-desc">{t('home.recipeHintDescription')}</span>
-			</span>
-		</button>
 	{/if}
 </section>
 
@@ -213,7 +200,7 @@
 		color: var(--color-text-muted);
 		font-size: 0.95rem;
 		line-height: 1.45;
-		max-width: 36ch;
+		max-width: 42ch;
 	}
 
 	.activation-progress {
@@ -395,62 +382,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
-	}
-
-	.expiring-more {
-		margin: 0;
-		padding-left: var(--space-xs);
-		font-size: 0.875rem;
-		color: var(--color-text-muted);
-	}
-
-	.recipe-hint {
-		display: flex;
-		align-items: center;
-		gap: var(--space-md);
-		width: 100%;
-		padding: var(--space-md) var(--space-lg);
-		background: transparent;
-		border: 1px dashed var(--color-border);
-		border-radius: var(--radius-md);
-		cursor: pointer;
-		text-align: left;
-		color: inherit;
-		transition:
-			border-color 0.15s,
-			background 0.15s;
-	}
-
-	.recipe-hint:hover {
-		border-color: var(--color-primary);
-		background: var(--color-surface-muted);
-	}
-
-	.recipe-icon {
-		flex-shrink: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: var(--color-primary);
-		opacity: 0.9;
-	}
-
-	.recipe-copy {
-		display: flex;
-		flex-direction: column;
-		gap: 0.1rem;
-		min-width: 0;
-	}
-
-	.recipe-title {
-		font-size: 0.9375rem;
-		font-weight: 600;
-		color: var(--color-text);
-	}
-
-	.recipe-desc {
-		font-size: 0.8125rem;
-		color: var(--color-text-muted);
 	}
 
 	@media (min-width: 560px) {
