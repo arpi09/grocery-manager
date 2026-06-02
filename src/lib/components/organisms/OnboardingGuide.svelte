@@ -52,6 +52,7 @@
 
 	let open = $state(false);
 	let stepIndex = $state(0);
+	let stepDirection = $state<'forward' | 'back'>('forward');
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
@@ -96,6 +97,7 @@
 		if (isLastStep) {
 			return;
 		}
+		stepDirection = 'forward';
 		stepIndex += 1;
 	}
 
@@ -103,6 +105,7 @@
 		if (isFirstStep) {
 			return;
 		}
+		stepDirection = 'back';
 		stepIndex -= 1;
 	}
 
@@ -118,7 +121,7 @@
 		setActivationPath('receipt', userId);
 		dismissOnboarding(userId);
 		closeGuide();
-		await goto(`/scan/kvitto?from=${encodeURIComponent(APP_HOME_PATH)}`);
+		await goto(`/scan/kvitto?from=${encodeURIComponent(`/scan?from=${encodeURIComponent(APP_HOME_PATH)}`)}`);
 	}
 
 	async function chooseBarcode() {
@@ -128,7 +131,7 @@
 		setActivationPath('barcode', userId);
 		dismissOnboarding(userId);
 		closeGuide();
-		await goto(`/scan?mode=barcode&from=${encodeURIComponent(APP_HOME_PATH)}`);
+		await goto(`/scan?mode=barcode&from=${encodeURIComponent(`/scan?from=${encodeURIComponent(APP_HOME_PATH)}`)}`);
 	}
 
 	$effect(() => {
@@ -167,6 +170,7 @@
 	panelClass="onboarding-panel"
 	bodyClass="onboarding-body"
 	label={t('onboarding.dialogAria')}
+	showSheetHandle={false}
 >
 	{#snippet header()}
 		<ModalHeader title={currentStep.title} subtitle={currentStep.subtitle}>
@@ -178,13 +182,24 @@
 		</ModalHeader>
 	{/snippet}
 
-	<div class="step-content">
+	<div class="step-content" class:step-forward={stepDirection === 'forward'} class:step-back={stepDirection === 'back'}>
+		<div class="progress-track" aria-hidden="true">
+			<div
+				class="progress-fill"
+				style={`width: ${((stepIndex + 1) / ONBOARDING_STEP_COUNT) * 100}%`}
+			></div>
+		</div>
+
 		{#if encourageCopy}
 			<p class="encourage" role="status">{encourageCopy}</p>
 		{/if}
 
-		<div class="step-icon" aria-hidden="true">
-			<FeatureIcon id={currentStep.iconId} size={32} />
+		<div class="step-visual" aria-hidden="true">
+			<div class="step-icon-ring">
+				<div class="step-icon">
+					<FeatureIcon id={currentStep.iconId} size={36} />
+				</div>
+			</div>
 		</div>
 		<p class="step-body">{currentStep.body}</p>
 
@@ -249,8 +264,42 @@
 		width: min(520px, calc(100vw - 2 * var(--space-md)));
 	}
 
+	@media (max-width: 767px) {
+		:global(.onboarding-panel) {
+			left: 0 !important;
+			right: 0 !important;
+			top: 0 !important;
+			bottom: 0 !important;
+			width: 100% !important;
+			max-height: 100dvh !important;
+			height: 100dvh;
+			transform: none !important;
+			border-radius: 0 !important;
+			border: 0;
+			animation: onboarding-fullscreen-in 0.32s ease-out;
+		}
+
+		:global(.onboarding-panel .modal-body) {
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+		}
+	}
+
 	:global(.onboarding-body) {
 		padding-top: var(--space-sm);
+		flex: 1;
+	}
+
+	@keyframes onboarding-fullscreen-in {
+		from {
+			opacity: 0;
+			transform: translateY(12px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
 	.skip-link {
@@ -272,6 +321,117 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-md);
+		flex: 1;
+		animation: step-enter 0.35s ease-out;
+	}
+
+	.step-content.step-forward {
+		animation-name: step-enter-forward;
+	}
+
+	.step-content.step-back {
+		animation-name: step-enter-back;
+	}
+
+	.progress-track {
+		width: 100%;
+		height: 0.35rem;
+		border-radius: 999px;
+		background: var(--color-surface-muted);
+		overflow: hidden;
+	}
+
+	.progress-fill {
+		height: 100%;
+		border-radius: inherit;
+		background: linear-gradient(
+			90deg,
+			var(--color-primary),
+			color-mix(in srgb, var(--color-primary) 70%, #7dd3fc)
+		);
+		transition: width 0.35s ease;
+	}
+
+	.step-visual {
+		display: flex;
+		justify-content: center;
+		padding: var(--space-md) 0;
+	}
+
+	.step-icon-ring {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 5.5rem;
+		height: 5.5rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface-muted));
+		animation: icon-pulse 2.4s ease-in-out infinite;
+	}
+
+	.step-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 3.75rem;
+		height: 3.75rem;
+		border-radius: var(--radius-md);
+		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+		color: var(--color-primary);
+		box-shadow: 0 8px 24px color-mix(in srgb, var(--color-primary) 18%, transparent);
+	}
+
+	@keyframes step-enter-forward {
+		from {
+			opacity: 0;
+			transform: translateX(1.25rem);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+
+	@keyframes step-enter-back {
+		from {
+			opacity: 0;
+			transform: translateX(-1.25rem);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+
+	@keyframes icon-pulse {
+		0%,
+		100% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.04);
+		}
+	}
+
+	@keyframes step-enter {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.step-content,
+		.step-icon-ring,
+		:global(.onboarding-panel) {
+			animation: none;
+		}
+
+		.progress-fill {
+			transition: none;
+		}
 	}
 
 	.encourage {
@@ -281,17 +441,6 @@
 		color: var(--color-primary);
 		text-align: center;
 		line-height: 1.4;
-	}
-
-	.step-icon {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 3.25rem;
-		height: 3.25rem;
-		border-radius: var(--radius-md);
-		background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-muted));
-		color: var(--color-primary);
 	}
 
 	.step-body {
