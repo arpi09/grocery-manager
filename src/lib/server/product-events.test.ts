@@ -2,13 +2,28 @@ import { describe, expect, it, vi } from 'vitest';
 import { PmfService } from '$lib/application/pmf.service';
 import { recordProductEvent } from './product-events';
 
+function mockPmfRepository(overrides: Partial<{
+	recordEvent: ReturnType<typeof vi.fn>;
+	getGlobalMetrics: ReturnType<typeof vi.fn>;
+	hasHouseholdEvent: ReturnType<typeof vi.fn>;
+	countUserScanEvents: ReturnType<typeof vi.fn>;
+	getUserCreatedAt: ReturnType<typeof vi.fn>;
+}> = {}) {
+	return {
+		recordEvent: vi.fn(),
+		getGlobalMetrics: vi.fn(),
+		hasHouseholdEvent: vi.fn(),
+		countUserScanEvents: vi.fn(),
+		getUserCreatedAt: vi.fn(),
+		...overrides
+	};
+}
+
 describe('recordProductEvent', () => {
 	it('delegates to pmf service without blocking', async () => {
-		const repository = {
-			recordEvent: vi.fn().mockResolvedValue(undefined),
-			getGlobalMetrics: vi.fn(),
-			hasHouseholdEvent: vi.fn()
-		};
+		const repository = mockPmfRepository({
+			recordEvent: vi.fn().mockResolvedValue(undefined)
+		});
 		const service = new PmfService(repository);
 
 		recordProductEvent(service, {
@@ -27,11 +42,9 @@ describe('recordProductEvent', () => {
 	});
 
 	it('swallows repository errors', async () => {
-		const repository = {
-			recordEvent: vi.fn().mockRejectedValue(new Error('db down')),
-			getGlobalMetrics: vi.fn(),
-			hasHouseholdEvent: vi.fn()
-		};
+		const repository = mockPmfRepository({
+			recordEvent: vi.fn().mockRejectedValue(new Error('db down'))
+		});
 		const service = new PmfService(repository);
 		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
