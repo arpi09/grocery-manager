@@ -149,6 +149,30 @@ npx firebase apphosting:secrets:grantaccess TURNSTILE_SECRET_KEY --backend home-
 npx firebase apphosting:secrets:grantaccess CRON_SECRET --backend home-pantry --project home-pantry-4bee5
 ```
 
+
+
+### Optional secrets (Google OAuth, demo account)
+
+These are **not** required for deploy. `apphosting.yaml` keeps their bindings commented out until the secrets exist in Secret Manager; otherwise Cloud Build fails at the preparer step with `secretmanager.versions.get` denied.
+
+| Secret | When you need it |
+|--------|------------------|
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google sign-in on login/register (`isGoogleOAuthConfigured()` hides the button when unset) |
+| `DEMO_ACCOUNT_PASSWORD` | Demo household seed and `POST /api/cron/reset-demo` (see [`DEMO_ACCOUNT.md`](./DEMO_ACCOUNT.md)) |
+
+Create each secret, grant the `home-pantry` backend access, then uncomment the matching `env` entries in `apphosting.yaml` and redeploy:
+
+```bash
+npx firebase apphosting:secrets:set GOOGLE_CLIENT_ID --project home-pantry-4bee5
+npx firebase apphosting:secrets:grantaccess GOOGLE_CLIENT_ID --backend home-pantry --project home-pantry-4bee5
+
+npx firebase apphosting:secrets:set GOOGLE_CLIENT_SECRET --project home-pantry-4bee5
+npx firebase apphosting:secrets:grantaccess GOOGLE_CLIENT_SECRET --backend home-pantry --project home-pantry-4bee5
+
+npx firebase apphosting:secrets:set DEMO_ACCOUNT_PASSWORD --project home-pantry-4bee5
+npx firebase apphosting:secrets:grantaccess DEMO_ACCOUNT_PASSWORD --backend home-pantry --project home-pantry-4bee5
+```
+
 Update non-secret values in `apphosting.yaml` or Firebase Console â†’ **App Hosting â†’ home-pantry â†’ Settings â†’ Environment**:
 
 | Variable | Required | Notes |

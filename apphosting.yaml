@@ -96,15 +96,23 @@ env:
     availability:
       - RUNTIME
 
-  - variable: GOOGLE_CLIENT_ID
-    secret: GOOGLE_CLIENT_ID
-    availability:
-      - RUNTIME
-
-  - variable: GOOGLE_CLIENT_SECRET
-    secret: GOOGLE_CLIENT_SECRET
-    availability:
-      - RUNTIME
+  # Optional Google OAuth — app hides Google login when unset (isGoogleOAuthConfigured).
+  # Uncomment after creating secrets and granting backend access (see docs/FIREBASE_DEPLOY.md):
+  #
+  # npx firebase apphosting:secrets:set GOOGLE_CLIENT_ID --project home-pantry-4bee5
+  # npx firebase apphosting:secrets:grantaccess GOOGLE_CLIENT_ID --backend home-pantry --project home-pantry-4bee5
+  # npx firebase apphosting:secrets:set GOOGLE_CLIENT_SECRET --project home-pantry-4bee5
+  # npx firebase apphosting:secrets:grantaccess GOOGLE_CLIENT_SECRET --backend home-pantry --project home-pantry-4bee5
+  #
+  # - variable: GOOGLE_CLIENT_ID
+  #   secret: GOOGLE_CLIENT_ID
+  #   availability:
+  #     - RUNTIME
+  #
+  # - variable: GOOGLE_CLIENT_SECRET
+  #   secret: GOOGLE_CLIENT_SECRET
+  #   availability:
+  #     - RUNTIME
 
   - variable: VAPID_PRIVATE_KEY
     secret: VAPID_PRIVATE_KEY
@@ -160,13 +168,18 @@ env:
   #   secret: DEFAULT_MEMBER_PASSWORD
 
 
-  # Sales demo account (see docs/DEMO_ACCOUNT.md) — set secret before enabling cron reset-demo
+  # Sales demo account (see docs/DEMO_ACCOUNT.md) — password secret only needed for seed/cron reset-demo
   - variable: DEMO_ACCOUNT_EMAIL
     value: demo@skaffu.com
     availability:
       - RUNTIME
 
-  - variable: DEMO_ACCOUNT_PASSWORD
-    secret: DEMO_ACCOUNT_PASSWORD
-    availability:
-      - RUNTIME
+  # Uncomment after setting secret and grantaccess (see docs/FIREBASE_DEPLOY.md):
+  #
+  # npx firebase apphosting:secrets:set DEMO_ACCOUNT_PASSWORD --project home-pantry-4bee5
+  # npx firebase apphosting:secrets:grantaccess DEMO_ACCOUNT_PASSWORD --backend home-pantry --project home-pantry-4bee5
+  #
+  # - variable: DEMO_ACCOUNT_PASSWORD
+  #   secret: DEMO_ACCOUNT_PASSWORD
+  #   availability:
+  #     - RUNTIME
