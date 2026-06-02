@@ -185,41 +185,27 @@ export async function registerNewUser(
 export async function loginWithCredentials(page: Page, email: string, password: string) {
 	await prepareE2eBrowserState(page);
 
-	await page.goto('/login');
-	await expect(page.getByTestId('login-submit')).toBeVisible({ timeout: 15_000 });
+	const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190';
+	const loginResponse = await page.request.post(`${baseURL}/login?/login`, {
+		form: { email, password },
+		maxRedirects: 0
+	});
 
-	const emailInput = page.locator('input[name="email"]');
-	const passwordInput = page.locator('input[name="password"]');
-
-	await fillBoundInput(emailInput, email);
-	await fillBoundInput(passwordInput, password);
-
-	await dismissCookieConsentIfOpen(page);
-
-	const loginActionDone = page.waitForResponse(
-		(res) =>
-			res.request().method() === 'POST' &&
-			res.url().includes('/login') &&
-			res.status() < 500,
-		{ timeout: E2E_AUTH_NAV_TIMEOUT_MS }
-	);
-	const navigatedHome = waitForAppHome(page);
-	await page.getByTestId('login-submit').click();
-	await loginActionDone;
-
-	try {
-		await navigatedHome;
-	} catch (error) {
+	const status = loginResponse.status();
+	if (status !== 302 && status !== 303) {
 		const loginError = page.getByRole('alert');
+		await page.goto('/login');
 		if (await loginError.isVisible().catch(() => false)) {
-			throw new Error(`Login failed: ${(await loginError.textContent())?.trim() ?? 'unknown error'}`, {
-				cause: error
-			});
+			throw new Error(
+				`Login failed: ${(await loginError.textContent())?.trim() ?? 'unknown error'} (HTTP ${status})`
+			);
 		}
-		throw error;
+		throw new Error(`Login action failed with HTTP ${status}`);
 	}
 
-	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
+	await page.goto('/hem');
+	await dismissCookieConsentIfOpen(page);
+	await expect(page.locator('section.home')).toBeVisible({ timeout: E2E_AUTH_NAV_TIMEOUT_MS });
 	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 }
 
