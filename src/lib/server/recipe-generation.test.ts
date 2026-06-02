@@ -123,8 +123,14 @@ describe('generateRecipesWithRefinement', () => {
 
 		const draftUser = requestJson.mock.calls[0]?.[1]?.userPrompt ?? '';
 		const refineUser = requestJson.mock.calls[1]?.[1]?.userPrompt ?? '';
+		const draftSystem = requestJson.mock.calls[0]?.[1]?.systemPrompt ?? '';
+		const refineSystem = requestJson.mock.calls[1]?.[1]?.systemPrompt ?? '';
 		expect(draftUser).toContain('Ät det först');
+		expect(draftUser).toContain('realistiska svenska vardagsrätter');
 		expect(refineUser).toContain('går ut snart');
+		expect(refineUser).toContain('naturligt i en trovärdig svensk rätt');
+		expect(draftSystem).toContain('baguette');
+		expect(refineSystem).toContain('orealistiska kombinationer');
 	});
 
 	it('returns error when draft is empty and refinement fails', async () => {

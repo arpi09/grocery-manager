@@ -11,6 +11,7 @@ import {
 	inventoryNameList,
 	missingIngredientToListItem,
 	parseMissingIngredientsPayload,
+	RECIPE_CULINARY_REALISM_RULES,
 	resolveIngredientToInventoryName,
 	sanitizeRecipeAgainstInventory,
 	sanitizeRecipesAgainstInventory
@@ -79,6 +80,19 @@ describe('buildRecipe prompts', () => {
 		expect(prompt).toContain('Hitta ALDRIG på varor');
 		expect(prompt).toContain('exakta varunamn');
 		expect(prompt).toContain('linjärt');
+	});
+
+	it('includes culinary realism constraints in draft and refinement system prompts', () => {
+		const draft = buildRecipeSystemPrompt(4);
+		const refine = buildRecipeRefinementSystemPrompt(4);
+
+		for (const rule of RECIPE_CULINARY_REALISM_RULES) {
+			expect(draft).toContain(rule);
+			expect(refine).toContain(rule);
+		}
+
+		expect(refine).toContain('baguette med blåbärssylt');
+		expect(refine).toContain('frukost, fika, lunch eller middag');
 	});
 
 	it('includes portions and preferences in user prompt', () => {

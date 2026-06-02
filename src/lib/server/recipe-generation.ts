@@ -54,7 +54,8 @@ function eatFirstContext(expiringItemNames: string[]): string {
 	}
 	return [
 		'Prioritera att använda dessa varor som går ut snart (minst en per recept om möjligt):',
-		expiringItemNames.map((name) => `- ${name}`).join('\n')
+		expiringItemNames.map((name) => `- ${name}`).join('\n'),
+		'Varje utgående vara ska ingå naturligt i en trovärdig svensk rätt — kombinera inte utgående varor slumpmässigt bara för att båda går ut snart.'
 	].join('\n');
 }
 
@@ -62,7 +63,7 @@ function eatFirstPreferences(preferences: string, expiringItemNames: string[]): 
 	const parts: string[] = [];
 	if (expiringItemNames.length > 0) {
 		parts.push(
-			`Fokus "Ät det först": prioritera varor som går ut snart (${expiringItemNames.slice(0, 8).join(', ')})`
+			`Fokus "Ät det först": prioritera varor som går ut snart (${expiringItemNames.slice(0, 8).join(', ')}) i realistiska svenska vardagsrätter — inte konstiga påläggs- eller syltkombinationer som middag`
 		);
 	}
 	if (preferences.trim()) {

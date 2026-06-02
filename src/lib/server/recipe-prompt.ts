@@ -9,6 +9,16 @@ import type { RecipeSuggestion } from '$lib/server/recipe-suggestions';
 
 export { DEFAULT_RECIPE_PORTIONS, MAX_RECIPE_PORTIONS, MIN_RECIPE_PORTIONS };
 
+/** Shared culinary rules for draft + refinement LLM passes (exported for tests). */
+export const RECIPE_CULINARY_REALISM_RULES = [
+	'Föreslå endast realistiska svenska vardagsmåltider, frukost, lunch eller fika — inga absurda kombinationer.',
+	'Varje recept ska vara en sammanhängande rätt: alla huvudingredienser ska naturligt passa i samma måltidstyp.',
+	'Kombinera inte söta pålägg (sylt, marmelad, choklad, godis) med bröd/baguette som middagsrätt — det är OK som frukost, macka eller fika.',
+	'Använd utgående varor som en naturlig del av rätten, inte bara lista dem bredvid orelaterade ingredienser.',
+	'Bröd och baguette: macka, smörgås, croutons, brödpudding eller tillbehör — inte som huvudrätt med sylt om lagret räcker till vanlig matlagning.',
+	'Undvik att blanda efterrätt/konservering (sylt, dessert) med huvudrätter om inte ett etablerat svenskt recept stödjer det (pannkakor med sylt — inte "baguette med blåbärssylt" som middag).'
+] as const;
+
 export function clampRecipePortions(value: unknown): number {
 	if (typeof value !== 'number' || !Number.isFinite(value)) {
 		return DEFAULT_RECIPE_PORTIONS;
@@ -51,6 +61,7 @@ export function buildRecipeSystemPrompt(portions: number): string {
 		'Vid osäkerhet om exakt varunamn: välj närmaste listade namn eller utelämna — gissa inte och skriv inte "okänd" i ingredientsToUse.',
 		`Skala alla mängder i steps linjärt för exakt ${portions} portioner (inga fasta "4 portioner" om portions skiljer sig).`,
 		'Prioritera varor med utgångsdatum och minska matsvinn.',
+		...RECIPE_CULINARY_REALISM_RULES,
 		'All text ska vara på svenska (sv-SE): title, whyItFits, ingredientsToUse, missingIngredients, steps.',
 		'Varje recept ska innehålla:',
 		'- title (kort rättnamn)',
@@ -90,6 +101,9 @@ export function buildRecipeRefinementSystemPrompt(portions: number): string {
 		'Förbättra title till naturliga svenska rättnamn (ingen engelska, inga varumärken som inte finns i lagret).',
 		'Justera steps så mängder och instruktioner matchar portionerna linjärt.',
 		'Behåll whyItFits kort och relevant — nämn utgående varor om de används.',
+		...RECIPE_CULINARY_REALISM_RULES,
+		'Ta bort eller skriv om recept med orealistiska kombinationer (t.ex. "baguette med blåbärssylt" som middagsrätt när lagret räcker till vanlig matlagning).',
+		'Se till att titel, steg och ingredienser hör ihop som frukost, fika, lunch eller middag.',
 		'Returnera samma JSON-struktur som utkastet, med samma antal recept (eller färre om ett utkast är omöjligt).',
 		'{"recipes":[{"title":"","whyItFits":"","ingredientsToUse":[],"missingIngredients":[],"steps":[]}]}',
 		'Inga markdown-kodblock eller förklaringar utanför JSON.'
