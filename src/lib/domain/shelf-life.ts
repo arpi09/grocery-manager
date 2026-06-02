@@ -15,11 +15,15 @@ function addDaysIso(from: Date, days: number): string {
 	return date.toISOString().slice(0, 10);
 }
 
-export function guessShelfLife(name: string, _location: StorageLocation) {
+export function guessShelfLife(name: string, location: StorageLocation) {
 	const normalized = name.toLowerCase();
+	const freezerBonus = location === 'freezer' ? 90 : 0;
 	for (const [keyword, days] of Object.entries(HEURISTIC_DAYS)) {
 		if (normalized.includes(keyword)) {
-			return { expiresOn: addDaysIso(new Date(), days), source: 'ai_inferred' as ExpiresOnSource };
+			return {
+				expiresOn: addDaysIso(new Date(), days + freezerBonus),
+				source: 'ai_inferred' as ExpiresOnSource
+			};
 		}
 	}
 	return null;
