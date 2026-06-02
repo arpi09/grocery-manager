@@ -81,6 +81,14 @@ describe('ShoppingPushService', () => {
 		expect(repository.markPushSent).toHaveBeenCalledWith('user-1');
 	});
 
+	it('persists shopping push opt-in via updateSettings', async () => {
+		await service.updateSettings('user-1', true);
+		expect(repository.updateSettings).toHaveBeenCalledWith('user-1', true);
+
+		await service.updateSettings('user-1', false);
+		expect(repository.updateSettings).toHaveBeenCalledWith('user-1', false);
+	});
+
 	it('skips when shopping list is empty', async () => {
 		shoppingListService.listUncheckedItems.mockResolvedValueOnce([]);
 		repository.listOptedInUsers.mockResolvedValueOnce([optedInUser]);

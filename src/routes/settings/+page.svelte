@@ -263,7 +263,11 @@
 					method="POST"
 					action="?/updateShoppingPush"
 					bind:this={shoppingPushForm}
-					use:enhance={bindSubmitting((v) => (shoppingPushSubmitting = v))}
+					use:enhance={bindSubmitting(
+						(v) => (shoppingPushSubmitting = v),
+						(formData) =>
+							formData.set('enabled', shoppingPushEnabled ? 'true' : 'false')
+					)}
 				>
 					<input type="hidden" name="enabled" value={shoppingPushEnabled ? 'true' : 'false'} />
 					<Toggle
