@@ -22,8 +22,11 @@ test.describe('Critical flows', () => {
 		await expect(page).toHaveURL('/hem');
 	});
 
-	test('fresh registration skips blocking onboarding modal on scan hub', async ({ page }) => {
+	test('fresh registration shows dismissible onboarding on scan hub', async ({ page }) => {
 		await registerNewUser(page);
+		await expect(page).toHaveURL(/\/scan(\?.*mode=barcode)?$/);
+		await expectOnboardingGuideVisible(page);
+		await page.getByRole('button', { name: /Hoppa \u00f6ver/i }).click();
 		await expect(
 			page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
 		).toHaveCount(0);
