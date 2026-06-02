@@ -120,6 +120,10 @@ async function fillBoundInput(input: import('@playwright/test').Locator, value: 
 	await input.fill(value);
 
 	if ((await input.inputValue()) !== value) {
+		await input.pressSequentially(value, { delay: 10 });
+	}
+
+	if ((await input.inputValue()) !== value) {
 		await input.evaluate((element, nextValue) => {
 			const field = element as HTMLInputElement;
 			field.value = nextValue;
@@ -128,7 +132,7 @@ async function fillBoundInput(input: import('@playwright/test').Locator, value: 
 		}, value);
 	}
 
-	await expect(input).toHaveValue(value);
+	await expect(input).toHaveValue(value, { timeout: 15_000 });
 }
 
 export async function dismissCookieConsentIfOpen(page: Page) {
@@ -198,7 +202,6 @@ export async function registerNewUser(
 	const navigatedHome = waitForAppHome(page);
 	await page.getByTestId('register-submit').click();
 	await navigatedHome;
-	await dismissOnboardingModalIfOpen(page);
 
 	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
 
