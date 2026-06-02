@@ -5,7 +5,16 @@ import {
 	registerNewUser
 } from './helpers/auth';
 
-const ACTION_TOAST_PARAM = 'actionToast';
+async function waitForSettingsAction(page: import('@playwright/test').Page, action: string) {
+	const response = await page.waitForResponse(
+		(res) =>
+			res.request().method() === 'POST' &&
+			res.url().includes('/settings') &&
+			res.url().includes(action),
+		{ timeout: 20_000 }
+	);
+	expect(response.ok()).toBeTruthy();
+}
 
 test.describe('Settings', () => {
 	test('expiry email reminder toggle persists after reload', async ({ page }) => {
@@ -19,28 +28,18 @@ test.describe('Settings', () => {
 		await expect(expirySwitch).toBeVisible({ timeout: 15_000 });
 		await expect(expirySwitch).toHaveAttribute('aria-checked', 'false');
 
-		const saved = page.waitForURL(
-			(url) =>
-				url.pathname === '/settings' &&
-				url.searchParams.get(ACTION_TOAST_PARAM) === 'settingsSaved',
-			{ timeout: 20_000 }
-		);
+		const saveOn = waitForSettingsAction(page, 'updateExpiryReminders');
 		await expirySwitch.click();
-		await saved;
+		await saveOn;
 		await expect(expirySwitch).toHaveAttribute('aria-checked', 'true');
 
 		await page.reload();
 		await dismissOnboardingModalIfOpen(page);
 		await expect(expirySwitch).toHaveAttribute('aria-checked', 'true');
 
-		const savedOff = page.waitForURL(
-			(url) =>
-				url.pathname === '/settings' &&
-				url.searchParams.get(ACTION_TOAST_PARAM) === 'settingsSaved',
-			{ timeout: 20_000 }
-		);
+		const saveOff = waitForSettingsAction(page, 'updateExpiryReminders');
 		await expirySwitch.click();
-		await savedOff;
+		await saveOff;
 		await page.reload();
 		await dismissOnboardingModalIfOpen(page);
 		await expect(expirySwitch).toHaveAttribute('aria-checked', 'false');
