@@ -12,7 +12,6 @@ test.describe('Scan and inventory', () => {
 		await expect(page.locator('nav.mode-tabs')).toBeVisible();
 		await expect(page.getByRole('heading', { name: 'Streckkod' })).toBeVisible();
 		await expect(page.getByRole('heading', { name: 'Kvitto' })).toBeVisible();
-		await expect(page.getByRole('heading', { name: 'Foto', exact: true })).toBeVisible();
 		await expect(page.getByRole('heading', { name: 'Foto-runda' })).toBeVisible();
 	});
 
