@@ -152,6 +152,7 @@
 		"chipReceipt": "Receipt",
 		"chipPhoto": "Photo",
 		"chipManual": "Manual",
+		"moreAddWays": "More ways to add",
 		"locationsTitle": "Your locations",
 		"totalTracked": "{count} items total",
 		"emptyTitle": "Get started",
@@ -317,6 +318,12 @@
 			"daysLabel": "Show items expiring within",
 			"daysOption": "{days} days"
 		},
+		"autoExpiredGrace": {
+			"title": "Auto-expired items",
+			"note": "Items move to a separate tab after the best-before date plus a grace period. Nothing is deleted automatically.",
+			"daysLabel": "Days after expiry before auto-move",
+			"daysOption": "{days} days"
+		},
 		"pushNotifications": {
 			"title": "Browser notifications",
 			"note": "Weekly browser notification when items expire soon. Requires HTTPS and permission.",
@@ -467,6 +474,14 @@
 		"rowPlural": "rows in the pantry",
 		"showFinished": "Show finished",
 		"hideFinished": "Hide finished",
+		"showAutoExpired": "Expired (auto)",
+		"hideAutoExpired": "Hide expired (auto)",
+		"autoExpiredSection": "Expired items (automatic)",
+		"autoExpiredNote": "Moved here {days} days after the best-before date. Review and remove or mark as used.",
+		"autoExpiredBadge": "Expired",
+		"aiExpiryBadge": "AI guess",
+		"clearAutoExpired": "Clear all expired",
+		"clearAutoExpiredAria": "Remove all {count} auto-expired items",
 		"finishedBadge": "Finished",
 		"finishedSection": "Finished items",
 		"searchPlaceholder": "Search items…",
@@ -475,6 +490,17 @@
 		"photoRound": "Photo round",
 		"itemActionsNamed": "Actions for {name}",
 		"editItem": "Edit"
+	},
+	"consume": {
+		"logUsage": "Log usage",
+		"intro": "How much of {name} did you use? ({stock} left)",
+		"presetsAria": "Quick amount",
+		"presetLite": "A little (~10%)",
+		"presetHalf": "Half",
+		"presetAll": "All",
+		"customLabel": "Custom amount",
+		"customPlaceholder": "e.g. 50",
+		"confirm": "Log usage"
 	},
 	"item": {
 		"addTitle": "Add item",
@@ -531,9 +557,15 @@
 	},
 	"planer": {
 		"title": "Plans",
-		"subtitle": "Plan meals in the calendar and add ChatGPT ideas",
+		"subtitle": "Plan the week around what expires — same pantry as home",
+		"contextTitle": "Plan around expiring items",
+		"contextLead": "The calendar ties to your pantry and Eat First on home. Schedule meals on days when items expire soon.",
+		"contextExpiring": "{count} items expiring within {days} days",
+		"contextNoExpiring": "Nothing urgent expiring within {days} days — good time to plan from stock.",
+		"contextPlanned": "{count} meals in this calendar view",
+		"contextHomeLink": "Go to home & Eat First",
 		"ideasAria": "Recipe ideas",
-		"ideasIntro": "Generated ideas from your stock. Pick a date and add to the calendar.",
+		"ideasIntro": "Ideas from your stock, prioritising what expires. Pick a date and add to the calendar.",
 		"ideasEmpty": "No generated ideas yet. Use the Recipe ideas button first.",
 		"usesLabel": "Use:",
 		"addToCalendar": "Add to calendar",
@@ -1175,6 +1207,12 @@
 			"description": "Item {name} will be removed from the active list but can be shown under \"Show finished\".",
 			"confirm": "Mark as finished"
 		},
+		"inventoryAutoExpiredBulk": {
+			"title": "Clear auto-expired items?",
+			"description": "{count} expired {count, plural, one {item will} other {items will}} be removed and logged as waste.",
+			"consequence": "Review the list first if anything is still usable.",
+			"confirm": "Clear expired"
+		},
 		"householdMember": {
 			"title": "Remove member?",
 			"titleNamed": "Remove {name}?",
@@ -1316,7 +1354,11 @@
 		"itemDeletedGeneric": "Item removed",
 		"itemFinished": "{label} marked as finished",
 		"itemFinishedGeneric": "Item marked as finished",
+		"itemPartiallyConsumed": "{label} updated — remainder still in pantry",
+		"itemPartiallyConsumedGeneric": "Usage logged — pantry quantity updated",
 		"settingsSaved": "Settings saved",
+		"autoExpiredCleared": "{label} expired items cleared",
+		"autoExpiredClearedGeneric": "Expired items cleared",
 		"petAdded": "{label} added",
 		"petAddedGeneric": "Pet added",
 		"petRemoved": "{label} removed",

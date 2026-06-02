@@ -48,6 +48,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: var(--space-sm);
+		min-height: 2.75rem;
 		padding: 0.65rem 1.1rem;
 		border-radius: var(--radius-sm);
 		border: none;

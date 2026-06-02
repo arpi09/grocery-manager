@@ -192,11 +192,14 @@
 					</div>
 					<span class="scan-arrow" aria-hidden="true">→</span>
 				</a>
-				<div class="chips">
-					<a class="chip" href="/scan/kvitto?from={from}">{t('home.chipReceipt')}</a>
-					<a class="chip" href="/scan/foto?from={from}">{t('home.chipPhoto')}</a>
-					<a class="chip" href="/item/new?from={from}">{t('home.chipManual')}</a>
-				</div>
+				<details class="more-ways">
+					<summary>{t('home.moreAddWays')}</summary>
+					<nav class="more-ways-links" aria-label={t('home.moreAddWays')}>
+						<a href="/scan/kvitto?from={from}">{t('home.chipReceipt')}</a>
+						<a href="/scan/foto?from={from}">{t('home.chipPhoto')}</a>
+						<a href="/item/new?from={from}">{t('home.chipManual')}</a>
+					</nav>
+				</details>
 			</section>
 		{:else}
 			<p class="readonly-hint">{t('home.readonlyHint')}</p>
@@ -342,31 +345,48 @@
 		font-weight: 600;
 	}
 
-	.chips {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-sm);
-	}
-
-	.chip {
-		display: inline-flex;
-		align-items: center;
-		min-height: 2.25rem;
-		padding: 0.4rem 0.85rem;
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: var(--color-text);
-		background: var(--color-surface);
+	.more-ways {
 		border: 1px solid var(--color-border);
-		border-radius: 999px;
-		text-decoration: none;
-		transition:
-			border-color 0.15s,
-			background 0.15s;
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
 	}
 
-	.chip:hover {
-		border-color: var(--color-primary);
+	.more-ways summary {
+		cursor: pointer;
+		padding: 0.65rem var(--space-md);
+		font-weight: 600;
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		list-style: none;
+	}
+
+	.more-ways summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.more-ways[open] summary {
+		color: var(--color-text);
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.more-ways-links {
+		display: flex;
+		flex-direction: column;
+		padding: var(--space-xs) 0;
+	}
+
+	.more-ways-links a {
+		display: flex;
+		align-items: center;
+		min-height: 2.75rem;
+		padding: 0 var(--space-md);
+		font-weight: 600;
+		font-size: 0.875rem;
+		color: var(--color-primary);
+		text-decoration: none;
+	}
+
+	.more-ways-links a:hover {
 		background: var(--color-surface-muted);
 		text-decoration: none;
 	}

@@ -236,7 +236,6 @@
 							<div class="btn-row">
 								<Button
 									type="button"
-									variant="secondary"
 									loading={schedulingKey === idea.id}
 									loadingLabel={t('common.loading')}
 									onclick={() => scheduleIdea(idea)}
@@ -247,7 +246,7 @@
 								{#if idea.missingIngredients.length > 0}
 									<Button
 										type="button"
-										variant="secondary"
+										variant="ghost"
 										loading={addingMissingKey === idea.id}
 										loadingLabel={t('common.loading')}
 										onclick={() => addMissing(idea)}

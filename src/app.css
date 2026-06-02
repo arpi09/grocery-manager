@@ -194,3 +194,32 @@ button:focus:not(:focus-visible),
 a:focus:not(:focus-visible) {
 	outline: none;
 }
+
+/* Tertiary actions — one per section; not full Button chrome (see docs/UX_GUIDELINES.md) */
+.text-action {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 2.75rem;
+	padding: 0.35rem 0.5rem;
+	border: none;
+	border-radius: var(--radius-sm);
+	background: transparent;
+	color: var(--color-primary);
+	font: inherit;
+	font-weight: 600;
+	font-size: var(--font-size-body-sm);
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+	cursor: pointer;
+}
+
+.text-action:hover:not(:disabled) {
+	color: var(--color-primary-hover);
+}
+
+.text-action:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+	text-decoration: none;
+}

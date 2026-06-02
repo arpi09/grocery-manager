@@ -40,9 +40,8 @@
 			</span>
 		</header>
 		<p class="hint">{t(slotHints[mealSlot])}</p>
-		<button type="button" class="cta" onclick={openRecipeIdeas}>
-			<span>{t('home.mealSuggestionsCta')}</span>
-			<span aria-hidden="true">→</span>
+		<button type="button" class="meal-link" onclick={openRecipeIdeas}>
+			{t('home.mealSuggestionsCta')}
 		</button>
 	</section>
 {/if}
@@ -91,23 +90,24 @@
 		line-height: 1.45;
 	}
 
-	.cta {
-		display: flex;
+	.meal-link {
+		display: inline-flex;
 		align-items: center;
-		justify-content: space-between;
-		width: 100%;
-		padding: var(--space-md) var(--space-lg);
+		min-height: 2.75rem;
+		margin-top: var(--space-xs);
+		padding: 0;
 		border: none;
-		border-radius: var(--radius-md);
-		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
-		color: var(--color-text);
+		background: transparent;
+		color: var(--color-primary);
+		font: inherit;
 		font-weight: 600;
 		font-size: 0.9375rem;
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
 		cursor: pointer;
-		transition: background 0.15s;
 	}
 
-	.cta:hover {
-		background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface));
+	.meal-link:hover {
+		color: var(--color-primary-hover);
 	}
 </style>

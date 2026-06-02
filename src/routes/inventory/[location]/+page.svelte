@@ -17,7 +17,7 @@
 	const photoRoundHref = $derived(`/inventory/foto?from=${from}`);
 
 	const activeCount = $derived(data.activeTotal);
-	const totalCount = $derived(data.activeTotal + data.finishedTotal);
+	const totalCount = $derived(data.activeTotal + data.autoExpiredTotal + data.finishedTotal);
 	const hasInventory = $derived(totalCount > 0);
 
 	const headerSubtitle = $derived(
@@ -48,7 +48,6 @@
 					</a>
 				</div>
 				<a class="photo-round-link" href={photoRoundHref}>
-					<FeatureIcon id="photo" size={18} />
 					{t('inventory.photoRound')}
 				</a>
 			{/if}
@@ -56,7 +55,9 @@
 			<InventoryList
 				items={data.items}
 				activeTotal={data.activeTotal}
+				autoExpiredTotal={data.autoExpiredTotal}
 				finishedTotal={data.finishedTotal}
+				autoExpiredGraceDays={data.autoExpiredGraceDays}
 				location={data.location}
 				canWrite={data.canWrite}
 				{hasInventory}
@@ -125,22 +126,18 @@
 	}
 
 	.photo-round-link {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: var(--space-sm);
+		align-self: flex-start;
 		min-height: 2.75rem;
-		padding: 0.55rem 1rem;
+		padding: 0.35rem 0.15rem;
 		font-weight: 600;
-		font-size: 0.9rem;
-		border-radius: var(--radius-md);
-		text-decoration: none;
+		font-size: 0.875rem;
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
 		color: var(--color-primary);
-		border: 1px dashed var(--color-border);
 	}
 
 	.photo-round-link:hover {
-		background: var(--color-surface-muted);
+		color: var(--color-primary-hover);
 		text-decoration: none;
 	}
 

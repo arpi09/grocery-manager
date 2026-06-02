@@ -4,6 +4,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import { fetchCheckedShoppingItems } from '$lib/client/shopping-data';
@@ -170,20 +171,9 @@
 </script>
 
 <section class="panel" aria-label={t('shopping.listAria')}>
-	<div class="panel-head">
+	{#if items.length > 0 || checkedCount > 0}
 		<p class="intro">{t('shopping.intro')}</p>
-		{#if items.length > 0 || checkedCount > 0}
-			<Button
-				type="button"
-				variant="secondary"
-				disabled={unchecked.length === 0 && checkedCount === 0}
-				aria-label={unchecked.length === 0 ? t('shopping.exportEmpty') : t('shopping.exportListAria')}
-				onclick={copyExportList}
-			>
-				{exportCopied ? t('common.copied') : t('shopping.exportList')}
-			</Button>
-		{/if}
-	</div>
+	{/if}
 
 	{#if canEdit}
 		<form
@@ -195,12 +185,25 @@
 			)}
 			class="add-form"
 		>
-			<label class="label" for="shopping-name">{t('shopping.addLabel')}</label>
 			<div class="add-row">
-				<input id="shopping-name" name="name" required maxlength="200" placeholder={t('shopping.itemPlaceholder')} />
+				<input
+					id="shopping-name"
+					name="name"
+					required
+					maxlength="200"
+					placeholder={t('shopping.itemPlaceholder')}
+					aria-label={t('shopping.itemPlaceholder')}
+				/>
 				<input name="quantity" inputmode="decimal" placeholder={t('shopping.quantityPlaceholder')} aria-label={t('shopping.quantityPlaceholder')} />
 				<input name="unit" maxlength="40" placeholder={t('shopping.unitPlaceholder')} aria-label={t('shopping.unitPlaceholder')} />
-				<Button type="submit" loading={addSubmitting} loadingLabel={t('common.saving')}>{t('shopping.addLabel')}</Button>
+				<Button
+					type="submit"
+					loading={addSubmitting}
+					loadingLabel={t('common.saving')}
+					aria-label={t('shopping.addLabel')}
+				>
+					+
+				</Button>
 			</div>
 		</form>
 	{:else}
@@ -208,7 +211,7 @@
 	{/if}
 
 	{#if items.length === 0 && checkedCount === 0}
-		<p class="empty">{t('shopping.emptyList')}</p>
+		<EmptyState title={t('shopping.emptyList')} description={t('shopping.intro')} />
 	{:else}
 		<ul class="list">
 			{#each unchecked as item (item.id)}
@@ -226,6 +229,7 @@
 							context="shoppingListItem"
 							copyOptions={{ itemName: item.name }}
 							action="?/remove"
+							variant="ghost"
 							submitEnhance={createRemoveEnhance(item)}
 							label="×"
 							ariaLabel={t('shopping.removeLine', { line: formatLine(item) })}
@@ -259,8 +263,9 @@
 							copyOptions={{ count: visibleChecked.length }}
 							action="?/clearChecked"
 							submitEnhance={createClearCheckedEnhance()}
-							variant="secondary"
+							variant="ghost"
 							label={t('delete.clearChecked.confirm')}
+							class="clear-checked-action"
 							ariaLabel={t('shopping.clearCheckedAria')}
 						/>
 					{/if}
@@ -284,6 +289,20 @@
 						{/each}
 					</ul>
 				{/if}
+			</div>
+		{/if}
+
+		{#if canEdit}
+			<div class="panel-footer">
+				<button
+					type="button"
+					class="text-action"
+					disabled={unchecked.length === 0 && checkedCount === 0}
+					aria-label={unchecked.length === 0 ? t('shopping.exportEmpty') : t('shopping.exportListAria')}
+					onclick={copyExportList}
+				>
+					{exportCopied ? t('common.copied') : t('shopping.exportList')}
+				</button>
 			</div>
 		{/if}
 	{/if}
@@ -318,33 +337,29 @@
 	}
 
 	.intro,
-	.empty,
 	.readonly {
 		margin: 0;
 		color: var(--color-text-muted);
 	}
 
-	.panel-head {
+	.panel-footer {
 		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		gap: var(--space-sm);
-		flex-wrap: wrap;
+		justify-content: flex-end;
+		padding-top: var(--space-xs);
+		border-top: 1px solid var(--color-border);
 	}
 
-	.panel-head .intro {
-		flex: 1;
-		min-width: 12rem;
+	:global(.clear-checked-action .btn) {
+		min-height: auto;
+		padding: 0.25rem 0.5rem;
+		font-size: 0.8125rem;
+		font-weight: 600;
 	}
 
 	.add-form {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
-	}
-
-	.label {
-		font-weight: 600;
 	}
 
 	.add-row {
@@ -464,18 +479,8 @@
 			padding: var(--space-sm);
 		}
 
-		.panel-head {
-			flex-direction: column;
-			align-items: stretch;
-		}
-
-		.panel-head :global(.btn) {
-			width: 100%;
-			min-height: 2.75rem;
-		}
-
 		.add-row {
-			grid-template-columns: 1fr 1fr;
+			grid-template-columns: 1fr 1fr auto;
 		}
 
 		.add-row input:first-of-type {
@@ -489,9 +494,17 @@
 		}
 
 		.add-row :global(.btn) {
-			grid-column: 1 / -1;
+			grid-row: 2;
+			min-width: 2.75rem;
+			padding-inline: 0.85rem;
+		}
+
+		.panel-footer {
+			justify-content: stretch;
+		}
+
+		.panel-footer .text-action {
 			width: 100%;
-			min-height: 2.75rem;
 		}
 
 		.list li {
@@ -512,9 +525,5 @@
 			align-items: stretch;
 		}
 
-		.checked-head :global(.btn) {
-			width: 100%;
-			min-height: 2.75rem;
-		}
 	}
 </style>

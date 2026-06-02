@@ -308,7 +308,7 @@
 					<input type="hidden" name="enabled" value={data.petsEnabled ? 'false' : 'true'} />
 					<Button
 						type="submit"
-						variant={data.petsEnabled ? 'secondary' : 'primary'}
+						variant={data.petsEnabled ? 'ghost' : 'primary'}
 						loading={petsToggleSubmitting}
 						loadingLabel={t('common.saving')}
 					>
@@ -316,9 +316,9 @@
 					</Button>
 				</form>
 				{#if data.petsEnabled}
-					<Button type="button" variant="secondary" onclick={() => (petModalOpen = true)}>
+					<button type="button" class="text-action" onclick={() => (petModalOpen = true)}>
 						{t('settings.pets.add')}
-					</Button>
+					</button>
 				{/if}
 			</SettingsRow>
 
@@ -359,14 +359,10 @@
 				note={t('settings.installApp.note')}
 				last={false}
 			/>
-			<SettingsRow
-				title={t('settings.onboarding.title')}
-				note={t('settings.onboarding.note')}
-				last
-			>
-				<Button type="button" variant="secondary" onclick={replayOnboardingGuide}>
+			<SettingsRow title={t('settings.onboarding.title')} note={t('settings.onboarding.note')} last>
+				<button type="button" class="text-action" onclick={replayOnboardingGuide}>
 					{t('settings.onboarding.start')}
-				</Button>
+				</button>
 			</SettingsRow>
 		</SettingsSection>
 
