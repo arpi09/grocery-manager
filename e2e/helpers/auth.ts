@@ -146,18 +146,18 @@ export async function dismissCookieConsentIfOpen(page: Page) {
 export async function dismissOnboardingModalIfOpen(page: Page) {
 	await dismissCookieConsentIfOpen(page);
 
-	for (let attempt = 0; attempt < 3; attempt += 1) {
+	for (let attempt = 0; attempt < 5; attempt += 1) {
 		const skip = page.getByRole('button', {
-			name: /Hoppa över|Jag gör det senare|Inte nu|Skip/i
+			name: /Hoppa \u00f6ver|Jag g\u00f6r det senare|Inte nu|Skip/i
 		});
 		if (!(await skip.first().isVisible().catch(() => false))) {
 			break;
 		}
-		await skip.first().click();
+		await skip.first().click({ force: true });
 		await page
-			.locator('[role="dialog"]')
+			.locator('[role="dialog"], .modal-root')
 			.first()
-			.waitFor({ state: 'hidden', timeout: 5_000 })
+			.waitFor({ state: 'hidden', timeout: 10_000 })
 			.catch(() => {});
 	}
 }

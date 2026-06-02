@@ -12,9 +12,9 @@ test.describe('Settings', () => {
 		await page.goto('/settings');
 		await dismissOnboardingModalIfOpen(page);
 
-		await expect(page.getByRole('heading', { name: /Inställningar|Settings/i })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Inst\u00e4llningar|Settings/i })).toBeVisible({
 			timeout: 15_000
 		});
-		await expect(page.getByRole('switch', { name: /Skicka e-postpåminnelser|Send email reminders/i })).toBeVisible();
+		await expect(page.getByRole('switch', { name: /Skicka e-postp\u00e5minnelser|Send email reminders/i })).toBeVisible();
 	});
 });

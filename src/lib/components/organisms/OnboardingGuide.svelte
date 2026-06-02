@@ -80,9 +80,6 @@
 		if (!browser || !userId || isOnboardingExcludedPath(pathname) || !shouldShowOnboarding(userId)) {
 			return;
 		}
-		if (page.url.searchParams.get('freshAccount') === '1') {
-			return;
-		}
 		stepIndex = 0;
 		open = true;
 	}
