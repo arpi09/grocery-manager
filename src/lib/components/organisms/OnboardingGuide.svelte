@@ -8,12 +8,14 @@
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
+	import { isPostRegisterScanPath } from '$lib/navigation/post-register';
 	import { t, type MessageKey } from '$lib/i18n';
 	import {
 		ONBOARDING_REPLAY_EVENT,
 		ONBOARDING_STEP_COUNT,
 		dismissOnboarding,
 		getActivationProgress,
+		getSignupAt,
 		isOnboardingExcludedPath,
 		setActivationPath,
 		shouldShowOnboarding
@@ -80,6 +82,16 @@
 		if (!browser || !userId || isOnboardingExcludedPath(pathname) || !shouldShowOnboarding(userId)) {
 			return;
 		}
+		if (page.url.searchParams.get('freshAccount') === '1') {
+			return;
+		}
+		// Fast-start scan path: guide is opt-in from settings, not a blocking modal on /scan.
+		if (
+			getSignupAt(userId) &&
+			isPostRegisterScanPath(pathname, page.url.searchParams)
+		) {
+			return;
+		}
 		stepIndex = 0;
 		open = true;
 	}
@@ -100,7 +112,7 @@
 			source === 'quickstart' ? 'onboarding_quickstart' : 'onboarding_skipped'
 		);
 
-		if (pathname.startsWith('/scan')) {
+		if (pathname.startsWith('/scan') || source === 'skip') {
 			return;
 		}
 

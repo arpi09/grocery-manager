@@ -62,6 +62,7 @@
 		}
 
 		markSignupAt(userId);
+		completeOnboarding(userId);
 		const url = new URL(page.url);
 		url.searchParams.delete('freshAccount');
 		const next = `${url.pathname}${url.search}${url.hash}`;

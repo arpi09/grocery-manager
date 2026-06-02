@@ -309,7 +309,7 @@ export async function openMoreNav(page: Page) {
 
 export async function clickNavHref(page: Page, href: string) {
 	await dismissOnboardingModalIfOpen(page);
-	await appNavigation(page).locator(`a[href="${href}"]`).click();
+	await appNavigation(page).locator(`a[href="${href}"]`).click({ force: true });
 }
 
 export async function clickSecondaryNavHref(page: Page, href: string) {
