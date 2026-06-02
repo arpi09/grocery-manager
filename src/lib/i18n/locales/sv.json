@@ -560,20 +560,20 @@
 		"exportEmpty": "Inget att kopiera — alla varor är avbockade"
 	},
 	"receiptAutopilot": {
-		"title": "Fr�n dina kvitton",
+		"title": "Från dina kvitton",
 		"ariaLabel": "Kvitto-autopilot",
-		"intro": "�terkommande varor fr�n dina kvittoimport ? l�gg till i lagret med ett tryck.",
-		"emptyTitle": "Inga m�nster �n",
-		"emptyDescription": "Importera n�gra kvitton s� l�r vi oss vad du handlar ofta.",
+		"intro": "Återkommande varor från dina kvittoimport — lägg till i lagret med ett tryck.",
+		"emptyTitle": "Inga mönster än",
+		"emptyDescription": "Importera några kvitton så lär vi oss vad du handlar ofta.",
 		"emptyAction": "Importera kvitto",
-		"recurringMeta": "K�pt {count} g�nger � senast {quantity}",
-		"addToPantry": "L�gg till i lager",
+		"recurringMeta": "Köpt {count} gånger · senast {quantity}",
+		"addToPantry": "Lägg till i lager",
 		"dismiss": "Inte nu",
 		"acceptSuccess": "{name} lades till i lagret",
-		"acceptFailed": "Kunde inte l�gga till varan. F�rs�k igen.",
-		"dismissFailed": "Kunde inte d�lja f�rslaget. F�rs�k igen.",
-		"notFound": "F�rslaget �r inte l�ngre tillg�ngligt.",
-		"invalidKey": "Ogiltigt f�rslag."
+		"acceptFailed": "Kunde inte lägga till varan. Försök igen.",
+		"dismissFailed": "Kunde inte dölja förslaget. Försök igen.",
+		"notFound": "Förslaget är inte längre tillgängligt.",
+		"invalidKey": "Ogiltigt förslag."
 	},
 	"planer": {
 		"title": "Planer",
