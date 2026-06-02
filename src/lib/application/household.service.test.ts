@@ -42,7 +42,9 @@ describe('HouseholdService', () => {
 			updateMemberRole: vi.fn(),
 			removeMember: vi.fn(),
 			getInvitePreview: vi.fn(),
-			deleteHousehold: vi.fn()
+			deleteHousehold: vi.fn(),
+			getAutoExpiredGraceDays: vi.fn(),
+			updateAutoExpiredGraceDays: vi.fn()
 		};
 		service = new HouseholdService(repository);
 	});

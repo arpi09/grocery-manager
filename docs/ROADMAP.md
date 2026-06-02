@@ -21,6 +21,7 @@
 | **PMF-rutin** | Dashboard `/admin` + veckovis e-postcron till ägare |
 | **E-post** | Resend verifierad; `EMAIL_SENDING_ENABLED`-väg |
 | **PWA / push** | Installbanner; web push för utgång (expiry) |
+| **Auto-expired** | Utgångna varor i egen flik efter respit; AI-gissad hållbarhet vid tillägg |
 | **Marknad** | Hero A/B + analytics; cookie consent (variant B) |
 | **PMF** | **Ej uppnådd** — mätetal fylls och följs; inga påhittade siffror i docs |
 
@@ -122,6 +123,7 @@ Alla punkter gröna; Fas 1 (retention, launch, PMF) är aktiv.
 | **Intervjusyntes → produkt** | Kit + feedback i app | Ägare: ≥3/10 intervjuer, syntes |
 | **E-post utgång** | Levererat; Resend verifierad | Mät opt-in/öppning |
 | **Web push (PWA)** | **Utgång (expiry) + handla idag levererat** | Mät opt-in; fler triggers senare |
+| **Auto-expired tab** | Levererat | Grace 3/7/14 dagar; bulk-rensning; AI-hållbarhetsgissning |
 | **PWA-installation** | Banner + `/install-app` | Mät standalone; copy vid behov |
 
 ### P1 — Stripe och paywall — **väntar**

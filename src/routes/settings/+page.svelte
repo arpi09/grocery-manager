@@ -61,6 +61,9 @@
 	$effect(() => {
 		expiryRemindersEnabled = data.expiryRemindersEnabled;
 		expiryReminderDays = String(data.expiryReminderDays);
+		if (data.autoExpiredGraceDays !== null) {
+			autoExpiredGraceDays = String(data.autoExpiredGraceDays);
+		}
 		pushNotificationsEnabled = data.pushNotificationsEnabled;
 		shoppingPushEnabled = data.shoppingPushEnabled;
 	});
@@ -232,6 +235,44 @@
 					{/if}
 				</form>
 			</SettingsRow>
+
+			{#if data.autoExpiredGraceDays != null}
+				<SettingsRow
+					title={t('settings.autoExpiredGrace.title')}
+					note={t('settings.autoExpiredGrace.note')}
+					last={false}
+				>
+					<form
+						method="POST"
+						action="?/updateAutoExpiredGrace"
+						class="expiry-reminders-form"
+						bind:this={autoExpiredGraceForm}
+						use:enhance={bindSubmitting((v) => (autoExpiredGraceSubmitting = v))}
+					>
+						<label class="expiry-days">
+							<span>{t('settings.autoExpiredGrace.daysLabel')}</span>
+							<select
+								name="days"
+								bind:value={autoExpiredGraceDays}
+								onchange={(event) => event.currentTarget.form?.requestSubmit()}
+							>
+								<option value="3">
+									{t('settings.autoExpiredGrace.daysOption', { days: 3 })}
+								</option>
+								<option value="7">
+									{t('settings.autoExpiredGrace.daysOption', { days: 7 })}
+								</option>
+								<option value="14">
+									{t('settings.autoExpiredGrace.daysOption', { days: 14 })}
+								</option>
+							</select>
+						</label>
+						{#if autoExpiredGraceSubmitting}
+							<span class="expiry-saving">{t('common.saving')}</span>
+						{/if}
+					</form>
+				</SettingsRow>
+			{/if}
 
 			<SettingsRow
 				title={t('settings.pushNotifications.title')}
