@@ -264,6 +264,21 @@ Starta **endast** om Fas 1-mätetal eller [DAY_90_DECISION.md](./DAY_90_DECISION
 
 ---
 
+## Idéer & parking lot (ägare)
+
+*Expansionsidéer utanför nuvarande P2–P4. Sparas här så de inte konkurrerar med PMF-arbetet. **Rekommenderade satsningar oförändrade:** P3 **A** ("Ät det först") + **B** (kvitto-autopilot) — se [P3](#p3-månad-69--nästa-stora-kodvåg-killer-feature) ovan.*
+
+| # | Idé | Beskrivning | Bedömning | Varför |
+|---|-----|-------------|-----------|--------|
+| **G** | **Recept från ICA, Coop, Arla m.fl.** | Samla in recept från butiker och varumärken; visa i avancerad sök och register tillsammans med befintligt lager/recept. | **Later** | Nära dagens recept→plan→lista men kräver partnerskap eller scraping med **juridisk/API-risk**; P3 A löser "vad ska jag laga?" från *eget lager* utan extern katalog. |
+| **H** | **Forum, reviews och dela** | Community: recensioner, diskussion och delning av listor/recept/måltider mellan användare. | **Later** | Utanför kärnan (lager-sanningskälla); **moderation**, trust & safety och retention-fokus krockar med litet team före PMF. Revisit om intervjuer visar tydlig pull efter P3. |
+| **I** | **Restauranglista med reviews** | Samlad restaurangdata och omdömen från TripAdvisor, Google m.fl. i appen. | **Nej** | **Ingen fit** med Skaffu (hemma-skafferi, matsvinn); aggregator-TOS och API-kostnad utan moat. Matdags/Yelp-domän — inte vår wedge. |
+| **J** | **IBS / mag-relaterat (Belly Balance-liknande)** | Hälsa kring mag/tarm, matdagbok och triggers; ev. **separat app** med befintlig Skaffu-inloggning som SSO. | **Separat produkt** | Annat problem (symtom, medicinsk känslighet) än lager/plan; kan dela auth men **ej samma roadmap** — kräver egen compliance, innehåll och PMF. |
+
+*Om en idé får stark pull i intervjuer: dokumentera i [USER_INTERVIEWS.md](./USER_INTERVIEWS.md) och ompröva efter P3 exit-gate — utan att flytta fokus från A + B.*
+
+---
+
 ## Löpande (alltid)
 
 | Aktivitet | Frekvens | Referens |
@@ -312,4 +327,4 @@ flowchart TD
 
 ---
 
-*Senast uppdaterad: 1 jun 2026 (P3/P4, mobilnav merge). Uppdatera när Fas 1-punkter levereras eller PMF-data ändrar prioritet.*
+*Senast uppdaterad: 2 jun 2026 (idéer & parking lot G–J). Uppdatera när Fas 1-punkter levereras eller PMF-data ändrar prioritet.*
