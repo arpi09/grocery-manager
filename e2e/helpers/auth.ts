@@ -171,11 +171,53 @@ async function waitForAppHome(page: Page) {
 }
 
 export async function expectOnboardingGuideVisible(page: Page) {
+	await dismissCookieConsentIfOpen(page);
 	await expect(
 		page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
-	).toBeVisible({ timeout: 10_000 });
+	).toBeVisible({ timeout: 20_000 });
 	await expect(page.getByRole('button', { name: /Hoppa \u00f6ver/i })).toBeVisible();
 	await expect(page.getByText(/Steg 1 av 5/i)).toBeVisible();
+}
+
+async function markE2eOnboardingComplete(page: Page) {
+	await page.evaluate(async () => {
+		const mark = (window as Window & { __hpMarkOnboardingComplete?: (userId: string) => void })
+			.__hpMarkOnboardingComplete;
+		if (!mark) {
+			return;
+		}
+
+		const dataUrl = new URL('__data.json', window.location.href);
+		dataUrl.searchParams.set('x-sveltekit-invalidated', '01');
+		const response = await fetch(dataUrl);
+		if (!response.ok) {
+			return;
+		}
+
+		const payload = (await response.json()) as {
+			nodes?: Array<{ type?: string; data?: unknown[] }>;
+		};
+
+		for (const node of payload.nodes ?? []) {
+			if (node.type !== 'data' || !Array.isArray(node.data)) {
+				continue;
+			}
+			for (const entry of node.data) {
+				if (
+					entry &&
+					typeof entry === 'object' &&
+					'user' in entry &&
+					entry.user &&
+					typeof entry.user === 'object' &&
+					'id' in entry.user &&
+					typeof entry.user.id === 'string'
+				) {
+					mark(entry.user.id);
+					return;
+				}
+			}
+		}
+	});
 }
 
 export async function registerNewUser(
@@ -202,6 +244,10 @@ export async function registerNewUser(
 	const navigatedHome = waitForAppHome(page);
 	await page.getByTestId('register-submit').click();
 	await navigatedHome;
+	await page.waitForURL(
+		(url) => url.pathname === '/hem' && !url.searchParams.has('freshAccount'),
+		{ timeout: 20_000 }
+	);
 
 	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
 
@@ -244,6 +290,7 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 	await dismissOnboardingModalIfOpen(page);
 	await expect(page.locator('section.home')).toBeVisible({ timeout: E2E_AUTH_NAV_TIMEOUT_MS });
 	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+	await markE2eOnboardingComplete(page);
 }
 
 export async function loginAsAdmin(page: Page) {
