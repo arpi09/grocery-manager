@@ -32,8 +32,12 @@ export class AuthService {
 
 	async login(email: string, password: string) {
 		const user = await this.users.findByEmail(email);
-		if (!user) {
+		if (!user || !user.passwordHash) {
 			throw new AuthError('Invalid email or password');
+		}
+
+		if (user.mustResetPassword) {
+			throw new AuthError('Password reset required. Check your email for a reset link.');
 		}
 
 		const valid = await verifyPassword(user.passwordHash, password);
@@ -41,6 +45,6 @@ export class AuthService {
 			throw new AuthError('Invalid email or password');
 		}
 
-		return { id: user.id, email: user.email };
+		return { id: user.id, email: user.email, mustResetPassword: user.mustResetPassword };
 	}
 }

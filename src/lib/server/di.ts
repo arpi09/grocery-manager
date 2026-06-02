@@ -1,5 +1,7 @@
 ﻿import { AdminService } from '$lib/application/admin.service';
 import { AuthService } from '$lib/application/auth.service';
+import { PasswordResetService } from '$lib/application/password-reset.service';
+import { OAuthService } from '$lib/application/oauth.service';
 import { ProfileService } from '$lib/application/profile.service';
 import { ShoppingListService } from '$lib/application/shopping-list.service';
 import { InventoryService } from '$lib/application/inventory.service';
@@ -16,6 +18,8 @@ import { DrizzleInventoryRepository } from '$lib/infrastructure/repositories/inv
 import { DrizzleAdminRepository } from '$lib/infrastructure/repositories/admin.repository';
 import { DrizzleErrorLogRepository } from '$lib/infrastructure/repositories/error-log.repository';
 import { DrizzleUserRepository } from '$lib/infrastructure/repositories/user.repository';
+import { DrizzlePasswordResetRepository } from '$lib/infrastructure/repositories/password-reset.repository';
+import { DrizzleAdminActionRepository } from '$lib/infrastructure/repositories/admin-action.repository';
 import { DrizzlePmfRepository } from '$lib/infrastructure/repositories/pmf.repository';
 import { DrizzleExpiryReminderRepository } from '$lib/infrastructure/repositories/expiry-reminder.repository';
 import { DrizzleShoppingPushRepository } from '$lib/infrastructure/repositories/shopping-push.repository';
@@ -36,6 +40,8 @@ import { AppSettingsService } from '$lib/application/app-settings.service';
 import { PmfDigestService } from '$lib/application/pmf-digest.service';
 
 const userRepository = new DrizzleUserRepository();
+const passwordResetRepository = new DrizzlePasswordResetRepository();
+const adminActionRepository = new DrizzleAdminActionRepository();
 const errorLogRepository = new DrizzleErrorLogRepository();
 const adminRepository = new DrizzleAdminRepository(errorLogRepository);
 const householdRepository = new DrizzleHouseholdRepository();
@@ -54,8 +60,14 @@ const waitlistRepository = new DrizzleWaitlistRepository();
 const appSettingsRepository = new DrizzleAppSettingsRepository();
 
 export const authService = new AuthService(userRepository);
+export const passwordResetService = new PasswordResetService(userRepository, passwordResetRepository);
+export const oauthService = new OAuthService(userRepository);
 export const profileService = new ProfileService(userRepository);
-export const adminService = new AdminService(adminRepository);
+export const adminService = new AdminService(
+	adminRepository,
+	passwordResetService,
+	adminActionRepository
+);
 export const householdService = new HouseholdService(householdRepository);
 export const inventoryService = new InventoryService(inventoryRepository);
 export const shoppingListService = new ShoppingListService(shoppingListRepository);

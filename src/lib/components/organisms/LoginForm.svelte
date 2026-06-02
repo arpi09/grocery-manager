@@ -4,6 +4,7 @@
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import FormField from '$lib/components/molecules/FormField.svelte';
 	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
+	import GoogleSignInButton from '$lib/components/molecules/GoogleSignInButton.svelte';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -12,9 +13,21 @@
 		messageTone?: 'error' | 'info';
 		email?: string;
 		redirectTo?: string;
+		googleOAuthEnabled?: boolean;
 	}
 
-	let { errors = {}, message, messageTone = 'error', email = '', redirectTo }: Props = $props();
+	let {
+		errors = {},
+		message,
+		messageTone = 'error',
+		email = '',
+		redirectTo,
+		googleOAuthEnabled = false
+	}: Props = $props();
+
+	const googleHref = $derived(
+		redirectTo ? `/auth/google?redirectTo=${encodeURIComponent(redirectTo)}` : '/auth/google'
+	);
 
 	let emailField = $state(email);
 	$effect(() => {
@@ -54,9 +67,18 @@
 		error={errors.password?.[0]}
 	/>
 
+	<p class="forgot-row">
+		<a href="/forgot-password">{t('auth.login.forgotPassword')}</a>
+	</p>
+
 	<Button type="submit" fullWidth disabled={submitting} data-testid="login-submit">
 		{submitting ? t('auth.login.submitting') : t('auth.login.submit')}
 	</Button>
+
+	{#if googleOAuthEnabled}
+		<div class="oauth-divider" aria-hidden="true">{t('auth.google.or')}</div>
+		<GoogleSignInButton href={googleHref} />
+	{/if}
 
 	<div class="register-block">
 		<p class="register-lead">{t('auth.login.newHere')}</p>
@@ -72,6 +94,19 @@
 <style>
 	.form {
 		width: 100%;
+	}
+
+	.forgot-row {
+		margin: calc(-1 * var(--space-xs)) 0 var(--space-md);
+		text-align: right;
+		font-size: 0.85rem;
+	}
+
+	.oauth-divider {
+		margin: var(--space-md) 0;
+		text-align: center;
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
 	}
 
 	.register-block {

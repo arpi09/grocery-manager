@@ -2,6 +2,8 @@ import { initDatabase } from '$lib/infrastructure/db';
 import {
 	adminService,
 	authService,
+	passwordResetService,
+	oauthService,
 	profileService,
 	householdService,
 	inventoryService,
@@ -32,7 +34,15 @@ import { isMarketingPath, redirectsAuthenticatedFromMarketing } from '$lib/marke
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { redirect, json, type Handle, type HandleServerError } from '@sveltejs/kit';
 
-const publicPaths = new Set(['/login', '/register']);
+const publicPaths = new Set(['/login', '/register', '/forgot-password']);
+
+function isPasswordResetPath(pathname: string): boolean {
+	return pathname.startsWith('/reset-password/');
+}
+
+function isGoogleAuthPath(pathname: string): boolean {
+	return pathname === '/auth/google' || pathname.startsWith('/auth/google/');
+}
 
 function isInvitePath(pathname: string): boolean {
 	return pathname.startsWith('/invite/');
@@ -41,6 +51,8 @@ function isInvitePath(pathname: string): boolean {
 function isPublicPath(pathname: string): boolean {
 	return (
 		publicPaths.has(pathname) ||
+		isPasswordResetPath(pathname) ||
+		isGoogleAuthPath(pathname) ||
 		isInvitePath(pathname) ||
 		isMarketingPath(pathname) ||
 		pathname === '/robots.txt' ||
@@ -57,6 +69,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	await initDatabase();
 
 	event.locals.authService = authService;
+	event.locals.passwordResetService = passwordResetService;
+	event.locals.oauthService = oauthService;
 	event.locals.profileService = profileService;
 	event.locals.adminService = adminService;
 	event.locals.householdService = householdService;
@@ -113,7 +127,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 		redirect(302, APP_HOME_PATH);
 	}
 
-	if (isAuthenticated && publicPaths.has(pathname) && !isInvitePath(pathname)) {
+	if (
+		isAuthenticated &&
+		publicPaths.has(pathname) &&
+		!isInvitePath(pathname) &&
+		!isPasswordResetPath(pathname)
+	) {
 		redirect(302, APP_HOME_PATH);
 	}
 

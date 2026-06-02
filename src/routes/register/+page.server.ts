@@ -19,6 +19,7 @@ import { recordSignupCompleteEvent } from '$lib/server/marketing-analytics';
 import { registerSchema } from '$lib/validation/auth.schemas';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { createSession } from '$lib/server/session';
+import { isGoogleOAuthConfigured } from '$lib/server/google-oauth';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -28,6 +29,7 @@ export const load: PageServerLoad = async ({ url }) => {
 	return {
 		turnstileSiteKey: getTurnstileSiteKeyForClient(),
 		captchaRequired: isTurnstileRequiredForRegistration(),
+		googleOAuthEnabled: isGoogleOAuthConfigured(),
 		canonicalUrl: marketingCanonicalUrl('/register', url.origin)
 	};
 };

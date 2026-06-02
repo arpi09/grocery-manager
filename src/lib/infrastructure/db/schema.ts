@@ -14,7 +14,8 @@ import {
 export const userTable = pgTable('user', {
 	id: text('id').primaryKey(),
 	email: text('email').notNull().unique(),
-	passwordHash: text('password_hash').notNull(),
+	passwordHash: text('password_hash'),
+	mustResetPassword: boolean('must_reset_password').notNull().default(false),
 	displayName: text('display_name'),
 	avatarUrl: text('avatar_url'),
 	role: text('role', { enum: ['user', 'admin'] }).notNull().default('user'),
@@ -40,8 +41,57 @@ export const userTable = pgTable('user', {
 	signupUtmMedium: text('signup_utm_medium'),
 	signupUtmCampaign: text('signup_utm_campaign'),
 	signupUtmContent: text('signup_utm_content'),
+	isDemo: boolean('is_demo').notNull().default(false),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 });
+
+export const oauthAccountTable = pgTable(
+	'oauth_account',
+	{
+		providerId: text('provider_id').notNull(),
+		providerUserId: text('provider_user_id').notNull(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' })
+	},
+	(table) => [
+		primaryKey({ columns: [table.providerId, table.providerUserId] }),
+		index('oauth_account_user_idx').on(table.userId)
+	]
+);
+
+export const passwordResetTokenTable = pgTable(
+	'password_reset_token',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		tokenHash: text('token_hash').notNull(),
+		expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+		usedAt: timestamp('used_at', { withTimezone: true, mode: 'date' }),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('password_reset_token_user_idx').on(table.userId),
+		index('password_reset_token_hash_idx').on(table.tokenHash)
+	]
+);
+
+export const adminActionLogTable = pgTable(
+	'admin_action_log',
+	{
+		id: text('id').primaryKey(),
+		actorUserId: text('actor_user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		action: text('action').notNull(),
+		targetUserId: text('target_user_id').references(() => userTable.id, { onDelete: 'set null' }),
+		metadata: text('metadata'),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [index('admin_action_log_created_idx').on(table.createdAt)]
+);
 
 export const sessionTable = pgTable('session', {
 	id: text('id').primaryKey(),

@@ -3,6 +3,8 @@ import type { InventoryItem } from '$lib/domain/inventory-item';
 import {
 	buildRecipeSystemPrompt,
 	buildRecipeUserPrompt,
+	buildRecipeRefinementSystemPrompt,
+	buildRecipeRefinementUserPrompt,
 	clampRecipePortions,
 	formatRecipeInventoryLines,
 	ingredientMatchesInventory,
@@ -84,6 +86,24 @@ describe('buildRecipe prompts', () => {
 		expect(user).toContain('Antal portioner: 2');
 		expect(user).toContain('Mjölk');
 		expect(user).toContain('vegetariskt');
+	});
+});
+
+describe('buildRecipeRefinement prompts', () => {
+	it('includes editor instructions and draft context', () => {
+		const system = buildRecipeRefinementSystemPrompt(4);
+		expect(system).toContain('matredaktör');
+		expect(system).toContain('4 portioner');
+		expect(system).toContain('hallucinerade');
+
+		const user = buildRecipeRefinementUserPrompt(
+			'{"recipes":[]}',
+			'- [id] Mjölk: 1 l',
+			4,
+			'Prioritera utgående varor'
+		);
+		expect(user).toContain('Utkast att granska');
+		expect(user).toContain('Prioritera utgående varor');
 	});
 });
 

@@ -3,6 +3,7 @@ import { isAuthError } from '$lib/application/auth.service';
 import { loginSchema } from '$lib/validation/auth.schemas';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { createSession } from '$lib/server/session';
+import { isGoogleOAuthConfigured } from '$lib/server/google-oauth';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -16,6 +17,7 @@ function safeRedirect(value: string | null): string | null {
 export const load: PageServerLoad = async ({ url }) => ({
 	message: url.searchParams.get('message'),
 	redirectTo: safeRedirect(url.searchParams.get('redirect')),
+	googleOAuthEnabled: isGoogleOAuthConfigured(),
 	canonicalUrl: marketingCanonicalUrl('/login', url.origin)
 });
 

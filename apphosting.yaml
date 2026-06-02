@@ -96,6 +96,16 @@ env:
     availability:
       - RUNTIME
 
+  - variable: GOOGLE_CLIENT_ID
+    secret: GOOGLE_CLIENT_ID
+    availability:
+      - RUNTIME
+
+  - variable: GOOGLE_CLIENT_SECRET
+    secret: GOOGLE_CLIENT_SECRET
+    availability:
+      - RUNTIME
+
   - variable: VAPID_PRIVATE_KEY
     secret: VAPID_PRIVATE_KEY
     availability:

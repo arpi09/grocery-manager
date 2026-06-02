@@ -119,8 +119,13 @@
 		"ariaLabel": "Startsida",
 		"greeting": "Hej, {name}",
 		"greetingNeutral": "Ditt skafferi",
+		"greetingMorning": "God morgon, {name}",
+		"greetingDay": "Hej, {name}",
+		"greetingEvening": "God kväll, {name}",
+		"greetingNight": "Hej, {name}",
 		"tagline": "Skanna en vara för att hålla koll",
 		"taglineEmpty": "Ett kvitto eller några streckkoder räcker för att komma igång",
+		"taglineEngaged": "Här är dagens förslag utifrån lagret och klockan",
 		"scanCardTitle": "Skanna vara",
 		"scanCardSubtitle": "Streckkod — snabbast sättet att lägga till",
 		"chipReceipt": "Kvitto",
@@ -136,6 +141,18 @@
 		"expiringMore": "+{count} till går ut snart",
 		"recipeHint": "Receptidéer",
 		"recipeHintDescription": "Baserat på det du har hemma",
+		"mealSuggestionsTitle": "Vad blir det idag?",
+		"mealSuggestionsCta": "Visa receptförslag",
+		"mealSlot": {
+			"breakfast": "Frukost",
+			"lunch": "Lunch",
+			"dinner": "Middag",
+			"evening": "Kväll"
+		},
+		"mealHintBreakfast": "Starta dagen med något från kylen — vi föreslår frukost utifrån lagret.",
+		"mealHintLunch": "Dags för lunch? Se vad som passar med det du har hemma.",
+		"mealHintDinner": "Middagsdags — recept som använder lagret och minskar svinn.",
+		"mealHintEvening": "En enkel kvällsrätt eller mellanmål från det som finns hemma.",
 		"readonlyHint": "Du har läsbehörighet — be en administratör lägga till varor.",
 		"readonlyEmpty": "Skafferiet är tomt. Be en administratör lägga till varor."
 	},
@@ -892,6 +909,20 @@
 		"moreOptions": "Utgångsdatum och anteckningar",
 		"manualBarcode": "Eller ange streckkod manuellt",
 		"scannerHint": "Rikta kameran mot produktens streckkod."
+	},
+	"eatFirst": {
+		"badge": "Minska svinn",
+		"title": "Ät det först",
+		"subtitle": "Förslag på måltider som prioriterar varor som går ut inom en vecka.",
+		"expiringLabel": "Går ut snart",
+		"noExpiring": "Inga varor går ut inom en vecka — bra jobbat!",
+		"generateBtn": "Få veckoförslag",
+		"suggestionsTitle": "Dina förslag",
+		"addToPlan": "Lägg i plan",
+		"generateFailed": "Kunde inte generera förslag just nu. Försök igen.",
+		"noneGenerated": "Inga förslag kunde genereras. Lägg till fler varor och försök igen.",
+		"scheduleSuccess": "{title} planerad {date}.",
+		"scheduleFailed": "Kunde inte lägga till i planen. Försök igen."
 	},
 	"recipe": {
 		"title": "Receptförslag",

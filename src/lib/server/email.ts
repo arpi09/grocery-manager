@@ -326,6 +326,84 @@ function buildHouseholdInviteEmailHtml(options: {
 </html>`;
 }
 
+export interface PasswordResetEmailContent {
+	subject: string;
+	html: string;
+	text: string;
+}
+
+export function buildPasswordResetEmailContent(options: {
+	resetUrl: string;
+	locale?: 'sv' | 'en';
+}): PasswordResetEmailContent {
+	const locale = options.locale ?? 'sv';
+	const isSv = locale === 'sv';
+	const subject = isSv ? 'Återställ lösenord · Skaffu' : 'Reset your password · Skaffu';
+	const headline = isSv ? 'Återställ ditt lösenord' : 'Reset your password';
+	const preheader = isSv
+		? 'Länken gäller i 1 timme och kan bara användas en gång.'
+		: 'This link is valid for 1 hour and can only be used once.';
+	const cta = isSv ? 'Välj nytt lösenord' : 'Choose a new password';
+	const body = isSv
+		? 'Vi fick en begäran om att återställa lösenordet för ditt Skaffu-konto. Om du inte begärde detta kan du ignorera mejlet.'
+		: 'We received a request to reset the password for your Skaffu account. If you did not request this, you can ignore this email.';
+	const footer = isSv
+		? 'Länken gäller i 1 timme. Efter att du valt nytt lösenord kan den inte användas igen.'
+		: 'The link is valid for 1 hour. After you set a new password it cannot be used again.';
+
+	const text = [
+		headline,
+		'',
+		body,
+		'',
+		`${cta}:`,
+		options.resetUrl,
+		'',
+		footer,
+		'',
+		'Skaffu'
+	].join('\n');
+
+	const safeHeadline = escapeHtml(headline);
+	const safePreheader = escapeHtml(preheader);
+	const safeUrl = escapeHtml(options.resetUrl);
+	const safeBody = escapeHtml(body);
+	const safeFooter = escapeHtml(footer);
+
+	const html = `<!DOCTYPE html>
+<html lang="${locale}">
+<head><meta charset="utf-8" /><title>${safeHeadline}</title></head>
+<body style="margin:0;padding:24px;font-family:system-ui,sans-serif;background:${EMAIL.bg};color:${EMAIL.text};">
+  <div style="display:none;max-height:0;overflow:hidden;">${safePreheader}</div>
+  <div style="max-width:560px;margin:0 auto;background:${EMAIL.surface};border:1px solid ${EMAIL.border};border-radius:16px;padding:32px;">
+    <h1 style="margin:0 0 16px;font-size:22px;">${safeHeadline}</h1>
+    <p style="margin:0 0 24px;line-height:1.55;color:${EMAIL.textMuted};">${safeBody}</p>
+    <p style="margin:0 0 24px;"><a href="${safeUrl}" style="display:inline-block;padding:12px 24px;background:${EMAIL.primary};color:#fff;text-decoration:none;border-radius:8px;font-weight:600;">${escapeHtml(cta)}</a></p>
+    <p style="margin:0;font-size:13px;color:${EMAIL.textMuted};">${safeFooter}</p>
+  </div>
+</body>
+</html>`;
+
+	return { subject, html, text };
+}
+
+export async function sendPasswordResetEmail(options: {
+	to: string;
+	resetUrl: string;
+	locale?: 'sv' | 'en';
+}): Promise<SendEmailResult> {
+	const content = buildPasswordResetEmailContent({
+		resetUrl: options.resetUrl,
+		locale: options.locale
+	});
+	return sendEmail({
+		to: options.to,
+		subject: content.subject,
+		html: content.html,
+		text: content.text
+	});
+}
+
 export async function sendHouseholdInviteEmail(options: {
 	to: string;
 	inviterName: string;

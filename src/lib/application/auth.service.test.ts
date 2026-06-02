@@ -17,7 +17,11 @@ describe('AuthService', () => {
 		vi.clearAllMocks();
 		users = {
 			findByEmail: vi.fn(),
+			findById: vi.fn(),
 			create: vi.fn(),
+			createOAuthUser: vi.fn(),
+			updatePasswordHash: vi.fn(),
+			setMustResetPassword: vi.fn(),
 			findProfileById: vi.fn(),
 			updateProfile: vi.fn(),
 			updateThemePreference: vi.fn()
@@ -60,12 +64,17 @@ describe('AuthService', () => {
 		vi.mocked(users.findByEmail).mockResolvedValue({
 			id: 'user-1',
 			email: 'test@example.com',
-			passwordHash: 'stored-hash'
+			passwordHash: 'stored-hash',
+			mustResetPassword: false
 		});
 
 		const result = await service.login('test@example.com', 'secret123');
 
-		expect(result).toEqual({ id: 'user-1', email: 'test@example.com' });
+		expect(result).toEqual({
+			id: 'user-1',
+			email: 'test@example.com',
+			mustResetPassword: false
+		});
 		expect(verifyPassword).toHaveBeenCalledWith('stored-hash', 'secret123');
 	});
 });

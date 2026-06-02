@@ -161,6 +161,21 @@
 							<td>{account.signupUtmSource ?? '—'}</td>
 							<td>{formatDate(account.createdAt)}</td>
 							<td class="actions">
+								<form method="POST" action="?/sendPasswordReset">
+									<input type="hidden" name="userId" value={account.id} />
+									<Button type="submit" variant="secondary">
+										{t('admin.sendPasswordReset')}
+									</Button>
+								</form>
+
+								<form method="POST" action="?/sendPasswordReset">
+									<input type="hidden" name="userId" value={account.id} />
+									<input type="hidden" name="forceReset" value="true" />
+									<Button type="submit" variant="secondary">
+										{t('admin.forcePasswordReset')}
+									</Button>
+								</form>
+
 								<form method="POST" action="?/logoutUser">
 									<input type="hidden" name="userId" value={account.id} />
 									<Button type="submit" variant="danger">{t('admin.logoutUser')}</Button>

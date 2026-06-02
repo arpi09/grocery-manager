@@ -1,9 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AdminService } from './admin.service';
+import type { PasswordResetService } from './password-reset.service';
 import type { IAdminRepository } from '$lib/infrastructure/repositories/admin.repository';
+import type { IAdminActionRepository } from '$lib/infrastructure/repositories/admin-action.repository';
 
 describe('AdminService', () => {
 	let admin: IAdminRepository;
+	let passwordReset: PasswordResetService;
+	let adminActions: IAdminActionRepository;
 	let service: AdminService;
 
 	beforeEach(() => {
@@ -18,7 +22,13 @@ describe('AdminService', () => {
 			invalidateAllSessions: vi.fn(),
 			invalidateUserSessions: vi.fn()
 		};
-		service = new AdminService(admin);
+		passwordReset = {
+			requestReset: vi.fn(),
+			resetPassword: vi.fn(),
+			adminTriggerReset: vi.fn().mockResolvedValue({ sent: true })
+		} as unknown as PasswordResetService;
+		adminActions = { logAction: vi.fn().mockResolvedValue(undefined) };
+		service = new AdminService(admin, passwordReset, adminActions);
 	});
 
 	it('returns dashboard stats', async () => {

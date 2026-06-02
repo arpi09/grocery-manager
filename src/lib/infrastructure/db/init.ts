@@ -171,7 +171,9 @@ const INCREMENTAL_MIGRATIONS = [
 	'0018_user_signup_utm.sql',
 	'0019_app_settings.sql',
 	'0020_product_event_anonymous.sql',
-	'0021_shopping_push.sql'
+	'0021_shopping_push.sql',
+	'0022_user_is_demo.sql',
+	'0023_auth_password_reset_oauth.sql'
 ];
 
 async function runPgliteBaseline(client: PGlite) {

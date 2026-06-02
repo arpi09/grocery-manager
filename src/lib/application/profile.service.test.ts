@@ -9,7 +9,11 @@ describe('ProfileService', () => {
 	beforeEach(() => {
 		users = {
 			findByEmail: vi.fn(),
+			findById: vi.fn(),
 			create: vi.fn(),
+			createOAuthUser: vi.fn(),
+			updatePasswordHash: vi.fn(),
+			setMustResetPassword: vi.fn(),
 			findProfileById: vi.fn(),
 			updateProfile: vi.fn(),
 			updateThemePreference: vi.fn()

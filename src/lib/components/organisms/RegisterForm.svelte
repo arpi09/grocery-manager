@@ -4,6 +4,7 @@
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import FormField from '$lib/components/molecules/FormField.svelte';
 	import TurnstileWidget from '$lib/components/molecules/TurnstileWidget.svelte';
+	import GoogleSignInButton from '$lib/components/molecules/GoogleSignInButton.svelte';
 	import { getRegisterCaptchaUiState } from '$lib/domain/register-captcha-ui';
 	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
 	import { t } from '$lib/i18n';
@@ -15,6 +16,7 @@
 		turnstileSiteKey?: string;
 		/** True when Turnstile is required (not CI/local bypass). */
 		captchaRequired?: boolean;
+		googleOAuthEnabled?: boolean;
 	}
 
 	let {
@@ -22,7 +24,8 @@
 		message,
 		email = '',
 		turnstileSiteKey = '',
-		captchaRequired = false
+		captchaRequired = false,
+		googleOAuthEnabled = false
 	}: Props = $props();
 
 	const captchaUi = $derived(getRegisterCaptchaUiState(turnstileSiteKey, captchaRequired));
@@ -93,6 +96,11 @@
 		{t('auth.register.submit')}
 	</Button>
 
+	{#if googleOAuthEnabled}
+		<div class="oauth-divider" aria-hidden="true">{t('auth.google.or')}</div>
+		<GoogleSignInButton href="/auth/google" />
+	{/if}
+
 	<p class="footer">
 		{t('auth.register.hasAccount')} <a href="/login">{t('auth.register.loginLink')}</a>
 	</p>
@@ -101,6 +109,13 @@
 <style>
 	.form {
 		width: 100%;
+	}
+
+	.oauth-divider {
+		margin: var(--space-md) 0;
+		text-align: center;
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
 	}
 
 	.footer {

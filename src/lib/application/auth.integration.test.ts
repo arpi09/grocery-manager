@@ -45,7 +45,8 @@ describe('Auth integration', () => {
 
 		expect(row?.id).toBe(result.id);
 		expect(row?.passwordHash).not.toBe('secret123');
-		expect(await verifyPassword(row!.passwordHash, 'secret123')).toBe(true);
+		expect(row?.passwordHash).toBeTruthy();
+		expect(await verifyPassword(row!.passwordHash!, 'secret123')).toBe(true);
 	});
 
 	it('logs in with credentials stored in the database', async () => {

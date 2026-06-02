@@ -1,9 +1,11 @@
 import type { AppErrorSummary } from '$lib/domain/error-log';
 import type { UserRole } from '$lib/domain/user';
+import type { PasswordResetService } from '$lib/application/password-reset.service';
 import type {
 	AdminDashboardStats,
 	IAdminRepository
 } from '$lib/infrastructure/repositories/admin.repository';
+import type { IAdminActionRepository } from '$lib/infrastructure/repositories/admin-action.repository';
 
 export class AdminError extends Error {
 	constructor(message: string) {
@@ -13,7 +15,11 @@ export class AdminError extends Error {
 }
 
 export class AdminService {
-	constructor(private readonly admin: IAdminRepository) {}
+	constructor(
+		private readonly admin: IAdminRepository,
+		private readonly passwordReset: PasswordResetService,
+		private readonly adminActions: IAdminActionRepository
+	) {}
 
 	getDashboardStats(): Promise<AdminDashboardStats> {
 		return this.admin.getDashboardStats();
@@ -53,5 +59,27 @@ export class AdminService {
 
 	logoutUser(userId: string) {
 		return this.admin.invalidateUserSessions(userId);
+	}
+
+	async sendPasswordResetEmail(
+		actorId: string,
+		targetUserId: string,
+		options?: { forceReset?: boolean }
+	) {
+		if (options?.forceReset) {
+			await this.admin.invalidateUserSessions(targetUserId);
+		}
+
+		const result = await this.passwordReset.adminTriggerReset(targetUserId, options);
+		await this.adminActions.logAction({
+			actorUserId: actorId,
+			action: 'password_reset_email',
+			targetUserId,
+			metadata: {
+				forceReset: Boolean(options?.forceReset),
+				sent: result.sent
+			}
+		});
+		return result;
 	}
 }

@@ -80,6 +80,41 @@ export function buildRecipeUserPrompt(
 	return parts.join('\n\n');
 }
 
+export function buildRecipeRefinementSystemPrompt(portions: number): string {
+	return [
+		'Du är en svensk matredaktör som granskar AI-genererade recept mot ett hushålls lager.',
+		`Mål: förbättra ett utkast till exakt ${portions} portioner utan att hitta på nya varor.`,
+		'Validera ingredientsToUse mot lagerlistan — ta bort hallucinerade eller felstavade varor.',
+		'Korrigera till exakta lagernamn (svenska, tecken för tecken som i listan).',
+		'Flytta varor som inte finns i lagret till missingIngredients (aldrig i ingredientsToUse).',
+		'Förbättra title till naturliga svenska rättnamn (ingen engelska, inga varumärken som inte finns i lagret).',
+		'Justera steps så mängder och instruktioner matchar portionerna linjärt.',
+		'Behåll whyItFits kort och relevant — nämn utgående varor om de används.',
+		'Returnera samma JSON-struktur som utkastet, med samma antal recept (eller färre om ett utkast är omöjligt).',
+		'{"recipes":[{"title":"","whyItFits":"","ingredientsToUse":[],"missingIngredients":[],"steps":[]}]}',
+		'Inga markdown-kodblock eller förklaringar utanför JSON.'
+	].join('\n');
+}
+
+export function buildRecipeRefinementUserPrompt(
+	draftJson: string,
+	inventoryLines: string,
+	portions: number,
+	extraContext?: string
+): string {
+	const parts = [
+		`Antal portioner: ${portions}`,
+		'Lager (enda tillåtna källor för ingredientsToUse):',
+		inventoryLines,
+		'Utkast att granska och förbättra:',
+		draftJson
+	];
+	if (extraContext?.trim()) {
+		parts.push(extraContext.trim());
+	}
+	return parts.join('\n\n');
+}
+
 export function ingredientMatchesInventory(ingredient: string, inventoryNames: string[]): boolean {
 	return resolveIngredientToInventoryName(ingredient, inventoryNames) !== null;
 }

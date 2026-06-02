@@ -1,6 +1,8 @@
 ﻿import type { User, Session } from 'lucia';
 import type { AdminService } from '$lib/application/admin.service';
 import type { AuthService } from '$lib/application/auth.service';
+import type { PasswordResetService } from '$lib/application/password-reset.service';
+import type { OAuthService } from '$lib/application/oauth.service';
 import type { ProfileService } from '$lib/application/profile.service';
 import type { HouseholdService } from '$lib/application/household.service';
 import type { ShoppingListService } from '$lib/application/shopping-list.service';
@@ -30,6 +32,8 @@ declare global {
 			householdId: string | null;
 			householdRole: HouseholdRole | null;
 			authService: AuthService;
+			passwordResetService: PasswordResetService;
+			oauthService: OAuthService;
 			profileService: ProfileService;
 			adminService: AdminService;
 			householdService: HouseholdService;

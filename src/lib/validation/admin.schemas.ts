@@ -20,3 +20,7 @@ export const adminSetEmailSendingSchema = z.object({
 export const adminLogoutAllSchema = z.object({
 	confirm: z.literal('yes')
 });
+
+export const adminPasswordResetSchema = adminUserIdSchema.extend({
+	forceReset: z.enum(['true', 'false']).optional()
+});
