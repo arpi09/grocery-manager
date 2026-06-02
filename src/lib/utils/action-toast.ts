@@ -162,6 +162,25 @@ export function appendActionToast(path: string, kind: ActionToastKind, label?: s
 	return `${url.pathname}${url.search}${url.hash}`;
 }
 
+export type ActionToastTone = 'success' | 'info' | 'neutral';
+
+/** Visual tone for action feedback — purpose-driven, not points overload. */
+export function actionToastTone(kind: ActionToastKind): ActionToastTone {
+	switch (kind) {
+		case 'itemDeleted':
+		case 'mealDeleted':
+		case 'petRemoved':
+		case 'petFoodRemoved':
+		case 'memberRemoved':
+		case 'inviteRevoked':
+		case 'pantryLeft':
+		case 'shoppingCleared':
+			return 'info';
+		default:
+			return 'success';
+	}
+}
+
 export function actionToastMessage(
 	locale: Locale,
 	kind: ActionToastKind,

@@ -149,7 +149,7 @@
 	}
 </script>
 
-<section id="eat-first" class="eat-first" aria-labelledby="eat-first-heading">
+<section id="eat-first" class="eat-first motion-fade-in" aria-labelledby="eat-first-heading">
 	<div class="hero-card">
 		<div class="hero-copy">
 			<span class="hero-badge">{t('eatFirst.badge')}</span>
@@ -162,7 +162,7 @@
 	</div>
 
 	{#if previewItems.length > 0}
-		<ul class="expiring-chips" aria-label={t('eatFirst.expiringLabel')}>
+		<ul class="expiring-chips motion-stagger-children" aria-label={t('eatFirst.expiringLabel')}>
 			{#each previewItems as item (item.id)}
 				{@const daysLeft = item.expiresOn ? daysUntilExpiry(item.expiresOn) : null}
 				<li>

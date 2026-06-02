@@ -4,7 +4,7 @@
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import MilestonesSection from '$lib/components/molecules/MilestonesSection.svelte';
 	import type { StatistikDashboard } from '$lib/application/statistik.service';
-	import type { MilestoneState } from '$lib/domain/gamification';
+	import { ZERO_WASTE_STREAK_CELEBRATION, type MilestoneState } from '$lib/domain/gamification';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { maxWeeklyCount } from '$lib/domain/statistik';
 	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
@@ -90,7 +90,13 @@
 			<p class="section-lead">{t('stats.impactLead')}</p>
 			<div class="impact-grid">
 				<div><p class="impact-value">{formatOptional(impact.consumedThisWeek)}</p><p class="impact-label">{t('stats.usedBeforeExpiry')}</p></div>
-				<div><p class="impact-value">{formatOptional(impact.zeroWasteWeeks)}</p><p class="impact-label">{t('stats.zeroWasteWeeks')}</p></div>
+				<div
+					class="impact-streak"
+					class:impact-streak-active={(impact.zeroWasteWeeks ?? 0) >= ZERO_WASTE_STREAK_CELEBRATION}
+				>
+					<p class="impact-value">{formatOptional(impact.zeroWasteWeeks)}</p>
+					<p class="impact-label">{t('stats.zeroWasteWeeks')}</p>
+				</div>
 				<div><p class="impact-value">{analytics.distinctProducts}</p><p class="impact-label">{t('stats.uniqueProducts')}</p></div>
 			</div>
 			{#if !impact.hasConsumptionData}<p class="muted">{t('stats.impactPlaceholder')}</p>{/if}
@@ -173,6 +179,14 @@
 	.impact-grid, .trends, .actions { display: grid; gap: var(--space-md); }
 	.impact-grid { grid-template-columns: repeat(3, 1fr); text-align: center; }
 	.impact-value { margin: 0; font-size: 1.5rem; font-weight: 700; }
+	.impact-streak-active .impact-value {
+		color: var(--color-primary);
+	}
+	.impact-streak-active {
+		padding: var(--space-xs);
+		border-radius: var(--radius-md);
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface-muted));
+	}
 	.trend-bars, .bars { list-style: none; margin: var(--space-md) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-sm); }
 	.trend-row, .bar-header { display: flex; justify-content: space-between; font-size: 0.85rem; }
 	.track { height: 0.45rem; background: var(--color-border); border-radius: var(--radius-sm); overflow: hidden; }

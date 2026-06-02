@@ -57,4 +57,9 @@
 	}
 </script>
 
-<Toast {message} {visible} onDismiss={handleDismiss} />
+<Toast
+	{message}
+	{visible}
+	celebrate={celebrateKind === 'zeroWasteStreak' || celebrateKind === 'eatFirstRitual'}
+	onDismiss={handleDismiss}
+/>

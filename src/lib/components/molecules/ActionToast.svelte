@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import Toast from '$lib/components/molecules/Toast.svelte';
+	import Toast, { type ToastVariant } from '$lib/components/molecules/Toast.svelte';
 	import { getLocale } from '$lib/i18n';
 	import {
 		ACTION_TOAST_LABEL_PARAM,
 		ACTION_TOAST_PARAM,
 		actionToastMessage,
+		actionToastTone,
 		parseActionToastKind
 	} from '$lib/utils/action-toast';
+
+	const ACTION_TOAST_DURATION_MS = 5500;
 
 	let dismissed = $state(false);
 
@@ -18,6 +21,20 @@
 		toastKind ? actionToastMessage(getLocale(), toastKind, label) : ''
 	);
 	const visible = $derived(Boolean(toastKind && message && !dismissed));
+
+	const variant = $derived.by((): ToastVariant => {
+		if (!toastKind) {
+			return 'default';
+		}
+		const tone = actionToastTone(toastKind);
+		if (tone === 'success') {
+			return 'success';
+		}
+		if (tone === 'info') {
+			return 'info';
+		}
+		return 'default';
+	});
 
 	function clearToastParam() {
 		const url = new URL(page.url);
@@ -33,4 +50,12 @@
 	}
 </script>
 
-<Toast {message} {visible} onDismiss={handleDismiss} />
+<Toast
+	{message}
+	{visible}
+	{variant}
+	size="action"
+	durationMs={ACTION_TOAST_DURATION_MS}
+	tapToDismiss={true}
+	onDismiss={handleDismiss}
+/>

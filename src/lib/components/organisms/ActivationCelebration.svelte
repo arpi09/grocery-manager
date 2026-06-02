@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import CelebrationBurst from '$lib/components/atoms/CelebrationBurst.svelte';
 	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
@@ -68,7 +69,8 @@
 	title={t('onboarding.celebrateTitle')}
 >
 	<div class="celebration-body">
-		<div class="celebration-icon" aria-hidden="true">
+		<CelebrationBurst active={open} />
+		<div class="celebration-icon motion-fade-in" aria-hidden="true">
 			<FeatureIcon id="check" size={36} />
 		</div>
 		<p>{t('onboarding.celebrateBody')}</p>
@@ -92,15 +94,19 @@
 	}
 
 	.celebration-body {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		gap: var(--space-md);
 		padding: var(--space-sm) var(--space-md) var(--space-md);
 		text-align: center;
+		overflow: hidden;
 	}
 
 	.celebration-icon {
+		position: relative;
+		z-index: 1;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -109,6 +115,24 @@
 		border-radius: 999px;
 		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface-muted));
 		color: var(--color-primary);
+		box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 8%, transparent);
+		animation: celebrate-icon-glow 2s ease-in-out infinite;
+	}
+
+	@keyframes celebrate-icon-glow {
+		0%,
+		100% {
+			box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 8%, transparent);
+		}
+		50% {
+			box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-primary) 4%, transparent);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.celebration-icon {
+			animation: none;
+		}
 	}
 
 	.celebration-body p {

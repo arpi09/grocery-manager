@@ -13,7 +13,13 @@ export default defineConfig({
 			workbox: {
 				importScripts: ['push-sw.js']
 			},
-			includeAssets: ['favicon.svg', 'manifest.webmanifest'],
+			includeAssets: [
+				'favicon.svg',
+				'manifest.webmanifest',
+				'pwa/icon-192.png',
+				'pwa/icon-512.png',
+				'pwa/apple-touch-icon.png'
+			],
 			manifest: {
 				name: 'Skaffu',
 				short_name: 'Skaffu',
@@ -27,21 +33,21 @@ export default defineConfig({
 				lang: 'sv',
 				icons: [
 					{
-						src: '/favicon.svg',
+						src: '/pwa/icon-192.png',
 						sizes: '192x192',
-						type: 'image/svg+xml',
+						type: 'image/png',
 						purpose: 'any'
 					},
 					{
-						src: '/favicon.svg',
+						src: '/pwa/icon-512.png',
 						sizes: '512x512',
-						type: 'image/svg+xml',
+						type: 'image/png',
 						purpose: 'any'
 					},
 					{
-						src: '/favicon.svg',
+						src: '/pwa/icon-512.png',
 						sizes: '512x512',
-						type: 'image/svg+xml',
+						type: 'image/png',
 						purpose: 'maskable'
 					}
 				]

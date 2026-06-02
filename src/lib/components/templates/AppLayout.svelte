@@ -78,7 +78,11 @@
 		{#if showDemoBanner}
 			<DemoAccountBanner />
 		{/if}
-		{@render children()}
+		{#key page.url.pathname}
+			<div class="page-content motion-page-enter">
+				{@render children()}
+			</div>
+		{/key}
 	</main>
 	<InventoryScanToast />
 	<ActionToast />
@@ -103,6 +107,11 @@
 		width: 100%;
 		min-width: 0;
 		padding: 0 var(--page-padding-x) var(--space-lg);
+	}
+
+	.page-content {
+		width: 100%;
+		min-width: 0;
 	}
 
 	@media (min-width: 900px) {
