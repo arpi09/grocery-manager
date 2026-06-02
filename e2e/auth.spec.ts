@@ -8,8 +8,8 @@ test.describe('Authentication', () => {
 		await prepareE2eBrowserState(page);
 		await page.goto('/');
 		await expect(page).toHaveURL('/');
-		await expect(page.getByRole('banner').getByText('Skaffu')).toBeVisible();
-		await expect(page.getByRole('heading', { level: 1 })).toContainText(/skafferi|koll på/i);
+		await expect(page.getByRole('banner').getByRole('link', { name: 'Skaffu' })).toBeVisible();
+		await expect(page.getByRole('heading', { level: 1 })).toContainText(/skafferi|butiksneutralt|koll på/i);
 		await expect(page.getByRole('banner').getByRole('link', { name: 'Logga in' })).toBeVisible();
 	});
 
