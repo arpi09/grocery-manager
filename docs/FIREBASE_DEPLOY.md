@@ -284,6 +284,9 @@ The deploy job uses the **`production`** GitHub Environment â€” optional re
 |--------|----------------|
 | `FIREBASE_TOKEN` | Run `npx firebase login:ci` locally and paste the token into **Settings â†’ Secrets and variables â†’ Actions** |
 
+| DEPLOY_NOTIFY_WEBHOOK_URL (optional) | ntfy topic URL, Discord webhook, or Slack incoming webhook — push on deploy success; see [docs/CI_CD.md § Mobilnotis](./CI_CD.md#mobilnotis-vid-deploy) |
+| DEPLOY_TELEGRAM_BOT_TOKEN + DEPLOY_TELEGRAM_CHAT_ID (optional) | Telegram bot push instead of or in addition to webhook |
+
 Alternative (not wired in the default workflow): a Google Cloud **service account JSON** with Firebase/App Hosting deploy permissions, stored as `FIREBASE_SERVICE_ACCOUNT` and passed to `google-github-actions/auth` â€” use if you prefer service accounts over CI tokens.
 
 ### Enable CI deploys

@@ -100,11 +100,70 @@ Om du aktiverar status checks på `master` körs de automatiskt vid push — for
 | GitHub Actions | `FIREBASE_TOKEN` | `firebase login:ci` — deploy från Actions |
 | GitHub Actions (secret) | `CRON_SECRET` | Bearer för veckocron `POST /api/cron/expiry-reminders` — måste matcha Firebase |
 | GitHub Actions (variable) | `PRODUCTION_URL` | Prod-appens bas-URL (samma som `PUBLIC_ORIGIN`, utan `/` på slutet). **`https://skaffu.com`** — se [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md). |
+| GitHub Actions (valfritt) | `DEPLOY_NOTIFY_WEBHOOK_URL` | Push-notis efter lyckad deploy — ntfy, Discord, Slack m.m. (se [Mobilnotis vid deploy](#mobilnotis-vid-deploy)) |
+| GitHub Actions (valfritt) | `DEPLOY_TELEGRAM_BOT_TOKEN` + `DEPLOY_TELEGRAM_CHAT_ID` | Telegram-push efter lyckad deploy (alternativ till webhook) |
 | Firebase Secret Manager | `DATABASE_URL`, `ADMIN_PASSWORD`, `OPENAI_API_KEY`, `CRON_SECRET`, … | Runtime i App Hosting |
 
 Utan `FIREBASE_TOKEN` körs G1+G2 ändå; G3 **skippar** med tydlig loggrad.
 
 **Firebase Console → App Hosting → GitHub auto-deploy:** stäng av om du använder Actions-kedjan — undvik **dubbel deploy**. En källa: **Actions vid push till `master`**.
+
+---
+
+## Mobilnotis vid deploy
+
+Du kan få notis på mobilen när **deploy-jobbet lyckas** (efter Firebase deploy, inte bara när quality/e2e är klart).
+
+### Alternativ utan kod (rekommenderas att prova först)
+
+| Metod | Fördelar | Nackdelar |
+|-------|----------|-----------|
+| **[GitHub Mobile](https://github.com/mobile)** (iOS/Android) | Ingen konfiguration i repot | Notiser för *hela* workflow-körningen, inte bara deploy; kan bli mycket vid varje push |
+| **GitHub e-post** | Zero setup | Samma som ovan — alla Actions-events; kolla spam; ingen ren "deploy klar"-push |
+| **GitHub → Watch → Custom → Actions** | Finare filter i appen | Fortfarande workflow-nivå, inte deploy-specifik |
+
+**GitHub Mobile — snabbstart:**
+
+1. Installera appen och logga in.
+2. Gå till repot **home-pantry** → **Watch** → **Custom**.
+3. Kryssa i **Actions** (och ev. **Releases** om du använder det senare).
+4. Aktivera push-notiser för GitHub i telefonens systeminställningar.
+
+Du får då notis när **Release**-workflowen är klar (grön eller röd). Det är nära nog för många, men skiljer inte deploy från enbart testfel.
+
+### Push-notis bara vid lyckad deploy (rekommenderat)
+
+Workflow-steg **Notify deploy success** i [`release.yml`](../.github/workflows/release.yml) körs **endast** när Firebase-deploy faktiskt lyckades (`FIREBASE_TOKEN` satt och deploy OK). Ingen secret = steget hoppar tyst över.
+
+#### A) ntfy.sh (enklast för mobil-push)
+
+Gratis app ([ntfy](https://ntfy.sh/app)) med riktiga push-notiser. Ett enda GitHub-secret.
+
+1. Välj ett unikt topic-namn (t.ex. `skaffu-deploy-dittnamn`).
+2. Installera **ntfy** på mobilen och **Subscribe** till samma topic.
+3. GitHub → **Settings → Secrets and variables → Actions → New repository secret**
+   - Namn: `DEPLOY_NOTIFY_WEBHOOK_URL`
+   - Värde: `https://ntfy.sh/skaffu-deploy-dittnamn`
+4. Nästa lyckade deploy → push-notis: *"Skaffu deploy lyckades"* med commit och Actions-länk.
+
+Topic-namnet är offentligt om någon gissar det — använd ett svårgissat namn eller [ntfy access tokens](https://docs.ntfy.sh/publish/#access-tokens) om du vill låsa publicering.
+
+#### B) Telegram
+
+1. Skapa bot via [@BotFather](https://t.me/BotFather) → spara **bot token**.
+2. Skicka ett meddelande till boten; hämta **chat id** (t.ex. via `https://api.telegram.org/bot<TOKEN>/getUpdates`).
+3. Lägg till GitHub-secrets:
+   - `DEPLOY_TELEGRAM_BOT_TOKEN`
+   - `DEPLOY_TELEGRAM_CHAT_ID`
+
+#### C) Discord eller Slack
+
+1. Skapa en **Incoming Webhook** i kanalen du vill ha notiser i.
+2. Sätt `DEPLOY_NOTIFY_WEBHOOK_URL` till webhook-URL:en (Discord `discord.com/api/webhooks/…`, Slack `hooks.slack.com/…`).
+
+Workflowen känner igen ntfy, Discord och Slack automatiskt. Andra URL:er får generisk JSON (`text`, `url`, `commit`).
+
+**Obs:** Notis-steget använder `continue-on-error: true` — en trasig webhook ska inte markera deploy som misslyckad.
 
 ---
 
