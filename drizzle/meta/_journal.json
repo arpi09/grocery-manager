@@ -162,6 +162,13 @@
 			"when": 1750252800000,
 			"tag": "0023_auth_password_reset_oauth",
 			"breakpoints": true
+		},
+		{
+			"idx": 23,
+			"version": "7",
+			"when": 1750339200000,
+			"tag": "0024_auto_expired_grace",
+			"breakpoints": true
 		}
 	]
 }
