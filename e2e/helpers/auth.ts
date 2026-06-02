@@ -139,8 +139,10 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 
 async function waitForAppHome(page: Page) {
 	await page.waitForURL((url) => url.pathname === '/hem', {
-		timeout: E2E_AUTH_NAV_TIMEOUT_MS
+		timeout: E2E_AUTH_NAV_TIMEOUT_MS,
+		waitUntil: 'commit'
 	});
+	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
 }
 
 export async function expectOnboardingGuideVisible(page: Page) {
@@ -167,9 +169,9 @@ export async function registerNewUser(
 	const confirmInput = page.locator('input[name="confirmPassword"]');
 	const emailInput = page.locator('input[name="email"]');
 
+	await fillBoundInput(emailInput, email);
 	await fillBoundInput(passwordInput, password);
 	await fillBoundInput(confirmInput, password);
-	await fillBoundInput(emailInput, email);
 
 	const navigatedHome = waitForAppHome(page);
 	await page.getByTestId('register-submit').click();
@@ -192,8 +194,18 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 	await fillBoundInput(emailInput, email);
 	await fillBoundInput(passwordInput, password);
 
+	await dismissCookieConsentIfOpen(page);
+
+	const loginActionDone = page.waitForResponse(
+		(res) =>
+			res.request().method() === 'POST' &&
+			res.url().includes('/login') &&
+			res.status() < 500,
+		{ timeout: E2E_AUTH_NAV_TIMEOUT_MS }
+	);
 	const navigatedHome = waitForAppHome(page);
 	await page.getByTestId('login-submit').click();
+	await loginActionDone;
 
 	try {
 		await navigatedHome;
