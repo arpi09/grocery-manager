@@ -163,7 +163,24 @@
 		"recipeHint": "Recipe ideas",
 		"recipeHintDescription": "Based on what you have at home",
 		"readonlyHint": "You have read-only access — ask an admin to add items.",
-		"readonlyEmpty": "The pantry is empty. Ask an admin to add items."
+		"readonlyEmpty": "The pantry is empty. Ask an admin to add items.",
+		"greetingMorning": "Good morning, {name}",
+		"greetingDay": "Hi, {name}",
+		"greetingEvening": "Good evening, {name}",
+		"greetingNight": "Hi, {name}",
+		"taglineEngaged": "Today's suggestions based on your pantry and the time of day",
+		"mealSuggestionsTitle": "What's for today?",
+		"mealSuggestionsCta": "Show recipe suggestions",
+		"mealHintBreakfast": "Start the day with something from the fridge — breakfast ideas from your pantry.",
+		"mealHintLunch": "Lunch time? See what fits with what you have at home.",
+		"mealHintDinner": "Dinner time — recipes that use your pantry and reduce waste.",
+		"mealHintEvening": "A simple evening meal or snack from what's already at home.",
+		"mealSlot": {
+			"breakfast": "Breakfast",
+			"lunch": "Lunch",
+			"dinner": "Dinner",
+			"evening": "Evening"
+		}
 	},
 	"dashboard": {
 		"title": "Home",
@@ -1060,6 +1077,20 @@
 		"activeSuffix": "active",
 		"createNew": "+ Create new pantry",
 		"namePlaceholder": "e.g. Summer house"
+	},
+	"eatFirst": {
+		"title": "Eat it first",
+		"subtitle": "Use expiring items before they go to waste — get meal ideas from your pantry.",
+		"badge": "Expiring soon",
+		"expiringLabel": "Expiring items",
+		"noExpiring": "Nothing urgent right now — great job staying on top of dates.",
+		"generateBtn": "Suggest meals",
+		"generateFailed": "Could not generate suggestions. Try again.",
+		"noneGenerated": "No suggestions right now — add a few more items or try again later.",
+		"suggestionsTitle": "Meal ideas",
+		"addToPlan": "Add to meal plan",
+		"scheduleSuccess": "{title} planned for {date}",
+		"scheduleFailed": "Could not add to the meal plan. Try again."
 	},
 	"demo": {
 		"banner": {

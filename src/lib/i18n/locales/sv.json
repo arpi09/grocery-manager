@@ -163,7 +163,24 @@
 		"recipeHint": "Receptidéer",
 		"recipeHintDescription": "Baserat på det du har hemma",
 		"readonlyHint": "Du har läsbehörighet — be en administratör lägga till varor.",
-		"readonlyEmpty": "Skafferiet är tomt. Be en administratör lägga till varor."
+		"readonlyEmpty": "Skafferiet är tomt. Be en administratör lägga till varor.",
+		"greetingMorning": "God morgon, {name}",
+		"greetingDay": "Hej, {name}",
+		"greetingEvening": "God kväll, {name}",
+		"greetingNight": "Hej, {name}",
+		"taglineEngaged": "Här är dagens förslag utifrån lagret och klockan",
+		"mealSuggestionsTitle": "Vad blir det idag?",
+		"mealSuggestionsCta": "Visa receptförslag",
+		"mealHintBreakfast": "Starta dagen med något från kylen — vi föreslår frukost utifrån lagret.",
+		"mealHintLunch": "Dags för lunch? Se vad som passar med det du har hemma.",
+		"mealHintDinner": "Middagsdags — recept som använder lagret och minskar svinn.",
+		"mealHintEvening": "En enkel kvällsrätt eller mellanmål från det som finns hemma.",
+		"mealSlot": {
+			"breakfast": "Frukost",
+			"lunch": "Lunch",
+			"dinner": "Middag",
+			"evening": "Kväll"
+		}
 	},
 	"dashboard": {
 		"title": "Hem",
@@ -1060,6 +1077,20 @@
 		"activeSuffix": "aktiv",
 		"createNew": "+ Skapa ny pantry",
 		"namePlaceholder": "t.ex. Sommarstuga"
+	},
+	"eatFirst": {
+		"title": "Ät det först",
+		"subtitle": "Använd varor som går ut snart — få måltidsförslag utifrån lagret.",
+		"badge": "Går ut snart",
+		"expiringLabel": "Varor som går ut",
+		"noExpiring": "Inget brådskande just nu — bra koll på datumen.",
+		"generateBtn": "Föreslå måltider",
+		"generateFailed": "Kunde inte skapa förslag. Försök igen.",
+		"noneGenerated": "Inga förslag just nu — lägg till fler varor eller försök igen senare.",
+		"suggestionsTitle": "Måltidsidéer",
+		"addToPlan": "Lägg i matplan",
+		"scheduleSuccess": "{title} inplanerad {date}",
+		"scheduleFailed": "Kunde inte lägga till i matplanen. Försök igen."
 	},
 	"demo": {
 		"banner": {
