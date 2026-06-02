@@ -1,20 +1,20 @@
 # Teststrategi — Testing Diamond (Home Pantry)
 
-*Senast: 2026-06-01. Operativ testpolicy för agenter och utvecklare.*
+*Senast: 2026-06-02. Operativ testpolicy för agenter och utvecklare.*
 
 Home Pantry följer en **testing diamond** — inte en klassisk testpyramid i blindo.
 
 | Lager | Roll | Kommando |
 |-------|------|----------|
 | **Unit** | Fokuserade, snabba — men inte överdrivna | `npm test` |
-| **Integration** | **Primärt testlager** — verkligt beteende mot PGlite/DB | `npm run test:integration` |
-| **E2E** | Färre, men djupa kritiska användarflöden | `npm run test:e2e` |
+| **Integration** | **Måste fånga regressioner** — actions, services, repos, form/toggles, auth | `npm run test:integration` |
+| **E2E** | **Få större resor** — smoke för kritiska journeys, inte varje toggle/reload | `npm run test:e2e` |
 
 **Principer:**
 
-- Följ inte testpyramiden blint (för många enhetstester, för få integrationstester).
-- Skapa inte överdrivet sköra unit-tester för implementationdetaljer.
-- Skapa inte för många långsamma E2E-tester — varje E2E ska vara stabil och högvärd.
+- Integration först vid CRUD, inställningar, pantry-switch, push/expiry — inte Playwright-detaljer.
+- E2E testar större flöden (registrering → hem, kvitto, scan, sidor laddar) — inte persistence efter reload för varje switch.
+- Unit för ren domän/validering; `form-submit-feedback.test.ts` för enhance/syncFormData-race, integration för DB-persistens.
 
 **Relaterat:** [`E2E.md`](./E2E.md) · [`RECEIPT_TEST_PACK.md`](./RECEIPT_TEST_PACK.md) · [`CI_CD.md`](./CI_CD.md) · [`.github/workflows/release.yml`](../.github/workflows/release.yml)
 
@@ -25,7 +25,7 @@ Home Pantry följer en **testing diamond** — inte en klassisk testpyramid i bl
 ```mermaid
 flowchart TB
   subgraph diamond["Testing diamond"]
-    E2E["E2E — få, kritiska resor<br/>22 tester · G2 gate"]
+    E2E["E2E — få, kritiska resor<br/>~20 tester · G2 gate"]
     INT["Integration — primärt lager<br/>*.integration.test.ts · G1"]
     UNIT["Unit — snabba, fokuserade<br/>*.test.ts · G0/G1"]
   end
@@ -38,7 +38,7 @@ CI-kedjan i [`release.yml`](../.github/workflows/release.yml):
 |------|-----------|------------------|
 | **G0** (lokalt) | `npm run check && npm test` | Commit-kvalitet |
 | **G1** (quality) | `npm test` + `npm run test:integration` | G2 |
-| **G2** (e2e) | `npm run test:e2e` (22 tester, `E2E_MOCK_AI=true`) | G3 |
+| **G2** (e2e) | `npm run test:e2e` (~20 tester, `E2E_MOCK_AI=true`) | G3 |
 | **G3** (deploy) | Firebase App Hosting | Produktion |
 
 ---
@@ -81,81 +81,44 @@ Unit tests should be:
 
 ---
 
-## Integration Tests
+## Integration Tests (primärt — måste fånga buggar)
 
-Integration tests are the primary testing layer.
+**Skall täcka:** server actions och deras formData/schema, services + repos mot PGlite, toggle/form-persistens, auth, pantry `?/switchHousehold` / `?/createHousehold` på `/hem`.
 
-Use integration tests for:
-
-- API behavior
-- service + database interaction
-- frontend component + state behavior
-- feature workflows below full browser level
-- auth/permission behavior
-- AI feature boundaries with mocked providers
-- validation and error handling
-
-Integration tests should verify real behavior, not internals.
-
-Prefer integration tests when they give confidence across multiple units.
-
-**Home Pantry-exempel:**
+**Skall inte ersättas av E2E:** inställnings-switchar, reload-persistens, POST-action detaljer.
 
 | Område | Fil(er) | Vad som verifieras |
 |--------|---------|-------------------|
-| Inventory / household | `inventory.integration.test.ts`, `household.*.integration.test.ts` | Service + PGlite repository |
-| Shopping list | `shopping-list.integration.test.ts` | CRUD + listlogik mot DB |
-| Push subscriptions | `push-subscription.repository.integration.test.ts`, `push.integration.test.ts` | Repository + push API routes |
-| Auth / admin services | `auth.service.test.ts`, `auth.integration.test.ts`, `admin.service.test.ts` | Unit + PGlite persistence |
+| Inställningar / toggles | `settings.integration.test.ts`, `form-submit-feedback.test.ts` | `updateExpiryReminders` / `updateShoppingPush` + DB; syncFormData-race |
+| Pantry switch | `pantry-actions.integration.test.ts`, `household.multi-pantry.integration.test.ts` | Actions på `/hem`, aktiv household i DB |
+| Inventory / household | `inventory.integration.test.ts`, `household.*.integration.test.ts` | Service + PGlite |
+| App admin email | `app-settings.integration.test.ts` | Admin e-post toggle i DB |
+| Shopping / push | `shopping-list.integration.test.ts`, `push*.integration.test.ts` | Lista, push API |
 
-**Kör:** `USE_PGLITE=true npm run test:integration` (samma som G1 i CI). Config: `vitest.integration.config.ts`, mönster `**/*.integration.test.ts`.
+**Kör:** `USE_PGLITE=true npm run test:integration` (G1). Config: `vitest.integration.config.ts`.
 
 **Kvitto / AI i CI:** integration + enhet täcker PDF-textextraktion och parse-schema; OpenAI anropas **inte** i CI. Riktiga PDF:er och valfri OpenAI-integration körs lokalt — se [`RECEIPT_TEST_PACK.md`](./RECEIPT_TEST_PACK.md).
 
 ---
 
-## E2E Tests
+## E2E Tests (få större flöden)
 
-E2E tests should be fewer but high-value.
-
-Use E2E tests for critical user journeys only.
-
-E2E must cover:
-
-- signup/login if applicable
-- core onboarding flow
-- primary happy path
-- most important feature flow
-- critical regression flows
-- admin-critical flow if admin is production-relevant
-
-**Home Pantry (22 tester, 9 spec-filer):**
+E2E = kritiska **user journeys** i riktig browser — inte varje inställning, toggle-reload eller action-POST i detalj.
 
 | Flöde | Spec |
 |-------|------|
 | Registrering → `/hem`, login, onboarding | `critical-flows.spec.ts`, `auth.spec.ts` |
 | Kvitto PDF/bild → rader → bulk add | `receipt.spec.ts` |
-| Streckkod / scan / inventory | `scan-inventory.spec.ts` |
+| Scan hub / streckkod / inventory | `scan-inventory.spec.ts` |
 | Inköpslista + smart fill | `shopping.spec.ts` |
-| Navigation (desktop + mobil) | `navigation.spec.ts` |
-| Marketing smoke | `smoke.spec.ts` |
-| Admin dashboard | `z-admin.spec.ts` |
-| Riktiga kvitto-PDF (lokal, optional) | `receipt-real-fixtures.spec.ts` |
+| Navigation | `navigation.spec.ts` |
+| Inställningar **laddar** (inte toggle-persistens) | `settings.spec.ts` |
+| Pantry switcher **syns** (inte create/switch i detalj) | `household-switch.spec.ts` |
+| Marketing smoke, admin | `smoke.spec.ts`, `z-admin.spec.ts` |
 
-E2E tests should be:
+**Flytta till integration, inte E2E:** settings toggle efter reload, `updateExpiryReminders` race, pantry POST + aktiv household — se `settings.integration.test.ts`, `pantry-actions.integration.test.ts`.
 
-- stable
-- realistic
-- focused on user behavior
-- run before release
-- used as deployment gates for critical flows
-
-Avoid E2E tests for:
-
-- every edge case
-- visual details
-- small component behavior
-- logic better covered by integration tests
+E2E ska vara stabila, få, och högvärd. Undvik waits för reload-persistens — fixa i integration i stället.
 
 **CI-mockning:** `E2E_MOCK_AI=true` stubbar kvittoparse och smart fill; Turnstile bypassas (`TURNSTILE_BYPASS` / `TURNSTILE_SKIP`). Ingen `OPENAI_API_KEY` i G2.
 

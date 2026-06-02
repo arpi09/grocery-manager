@@ -2,7 +2,7 @@
 
 > **Teststrategi:** Se [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) för testing diamond-modellen (unit / integration / E2E, ägarskap och risk).
 
-End-to-end coverage for critical user journeys. **22 tests** across 9 spec files (plus optional local real-PDF tests). Roadmap item **#16** in [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md).
+End-to-end coverage for critical user journeys. **~20 tests** across 11 spec files (plus optional local real-PDF tests). Settings/pantry persistence lives in integration tests — see [`TEST_STRATEGY.md`](./TEST_STRATEGY.md). Roadmap item **#16** in [`90_DAY_ROADMAP.md`](./90_DAY_ROADMAP.md).
 
 ## Run locally (CI pattern)
 
@@ -69,6 +69,8 @@ See [`CAPTCHA.md`](./CAPTCHA.md) for production Turnstile setup.
 | `e2e/smoke.spec.ts` | Basic HTTP smoke (`/`, `/login`, `/register`, authenticated `/`) |
 | `e2e/navigation.spec.ts` | Nav + mobile sheet |
 | `e2e/z-admin.spec.ts` | Admin dashboard (körs sist i CI) |
+| `e2e/settings.spec.ts` | Settings page loads (toggles tested in integration) |
+| `e2e/household-switch.spec.ts` | Pantry switcher visible on `/hem` (actions in integration) |
 
 ## Fixtures (`e2e/fixtures/`)
 

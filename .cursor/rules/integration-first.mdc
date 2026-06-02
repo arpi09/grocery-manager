@@ -1,0 +1,13 @@
+---
+description: Prefer integration tests for settings, CRUD, and form actions
+globs:
+  - src/routes/**/+page.server.ts
+  - src/lib/application/**
+  - src/lib/server/**
+---
+
+# Integration first (settings & CRUD)
+
+- **Integration (`*.integration.test.ts`)** — server actions, services, repos, toggles, auth, pantry switch. Must catch regressions (e.g. settings toggle + `bindSubmitting` / `syncFormData` + PGlite persistence).
+- **E2E** — few critical journeys only (register/login → hem, scan hub, receipt smoke, settings page loads). Do **not** add reload/toggle persistence E2E for settings.
+- New settings or household behavior: extend `settings.integration.test.ts`, `pantry-actions.integration.test.ts`, or domain service integration — not Playwright detail tests.
