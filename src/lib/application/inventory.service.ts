@@ -1,10 +1,5 @@
 import { canEditInventory, type HouseholdRole } from '$lib/domain/household';
 import {
-	DEFAULT_AUTO_EXPIRED_GRACE_DAYS,
-	normalizeAutoExpiredGraceDays,
-	type AutoExpiredGraceDays
-} from '$lib/domain/auto-expired';
-import {
 	formatNumericQuantity,
 	resolveConsumptionAmount,
 	type ConsumptionPreset
@@ -21,13 +16,10 @@ import type {
 import { generateId } from '$lib/infrastructure/auth/id';
 import type {
 	IInventoryRepository,
-	InventoryAnalyticsSnapshot,
-	InventoryListContext
+	InventoryAnalyticsSnapshot
 } from '$lib/infrastructure/repositories/inventory.repository';
-import type { IHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
 import type { IConsumptionRepository } from '$lib/infrastructure/repositories/consumption.repository';
 import { resolveWasteEventType } from '$lib/domain/gamification';
-import { inferShelfLife } from '$lib/server/shelf-life-inference';
 
 export class InventoryNotFoundError extends Error {
 	constructor() {
@@ -68,54 +60,34 @@ export interface InventoryAnalytics extends InventoryAnalyticsSnapshot {
 export class InventoryService {
 	constructor(
 		private readonly repository: IInventoryRepository,
-		private readonly consumptionRepository?: IConsumptionRepository,
-		private readonly householdRepository?: IHouseholdRepository
+		private readonly consumptionRepository?: IConsumptionRepository
 	) {}
 
-	async getAutoExpiredGraceDays(householdId: string): Promise<AutoExpiredGraceDays> {
-		if (!this.householdRepository) return DEFAULT_AUTO_EXPIRED_GRACE_DAYS;
-		return this.householdRepository.getAutoExpiredGraceDays(householdId);
-	}
-
-	async updateAutoExpiredGraceDays(householdId: string, days: number, actorRole: HouseholdRole) {
-		assertInventoryWritable(actorRole);
-		if (!this.householdRepository) return DEFAULT_AUTO_EXPIRED_GRACE_DAYS;
-		const normalized = normalizeAutoExpiredGraceDays(days);
-		await this.householdRepository.updateAutoExpiredGraceDays(householdId, normalized);
-		return normalized;
-	}
-
-	private async listContext(householdId: string): Promise<InventoryListContext> {
-		return { graceDays: await this.getAutoExpiredGraceDays(householdId) };
-	}
-
 	async getDashboard(householdId: string): Promise<DashboardSummary> {
-		const context = await this.listContext(householdId);
-		const counts = await this.repository.countByLocation(householdId, context);
+		const counts = await this.repository.countByLocation(householdId);
 		const countsByLocation = LOCATIONS.map((location) => {
 			const found = counts.find((c) => c.location === location);
 			return { location, count: found?.count ?? 0 };
 		});
+
 		const beforeDate = addDays(new Date(), EXPIRING_SOON_DAYS);
 		const expiringSoon = await this.repository.findExpiringBefore(
 			householdId,
-			beforeDate.toISOString().slice(0, 10),
-			context
+			beforeDate.toISOString().slice(0, 10)
 		);
-		return {
-			counts: countsByLocation,
-			expiringSoon,
-			totalItems: countsByLocation.reduce((sum, c) => sum + c.count, 0)
-		};
+
+		const totalItems = countsByLocation.reduce((sum, c) => sum + c.count, 0);
+
+		return { counts: countsByLocation, expiringSoon, totalItems };
 	}
 
 	async getAnalytics(householdId: string): Promise<InventoryAnalytics> {
-		const context = await this.listContext(householdId);
-		const snapshot = await this.repository.getAnalytics(householdId, context);
+		const snapshot = await this.repository.getAnalytics(householdId);
 		const countsByLocation = LOCATIONS.map((location) => {
 			const found = snapshot.byLocation.find((c) => c.location === location);
 			return { location, count: found?.count ?? 0 };
 		});
+
 		return {
 			...snapshot,
 			byLocation: countsByLocation,
@@ -124,11 +96,7 @@ export class InventoryService {
 	}
 
 	async listByLocation(householdId: string, location: StorageLocation) {
-		return this.repository.findByHouseholdAndLocation(
-			householdId,
-			location,
-			await this.listContext(householdId)
-		);
+		return this.repository.findByHouseholdAndLocation(householdId, location);
 	}
 
 	async listByLocationPaginated(
@@ -141,33 +109,12 @@ export class InventoryService {
 			householdId,
 			location,
 			limit,
-			offset,
-			await this.listContext(householdId)
+			offset
 		);
 	}
 
 	async countActiveByLocation(householdId: string, location: StorageLocation) {
-		return this.repository.countActiveByLocation(
-			householdId,
-			location,
-			await this.listContext(householdId)
-		);
-	}
-
-	async countAutoExpiredByLocation(householdId: string, location: StorageLocation) {
-		return this.repository.countAutoExpiredByLocation(
-			householdId,
-			location,
-			await this.listContext(householdId)
-		);
-	}
-
-	async listAutoExpiredByLocation(householdId: string, location: StorageLocation) {
-		return this.repository.findAutoExpiredByHouseholdAndLocation(
-			householdId,
-			location,
-			await this.listContext(householdId)
-		);
+		return this.repository.countActiveByLocation(householdId, location);
 	}
 
 	async countFinishedByLocation(householdId: string, location: StorageLocation) {
@@ -179,20 +126,18 @@ export class InventoryService {
 	}
 
 	async listAll(householdId: string) {
-		return this.repository.findAllByHousehold(householdId, await this.listContext(householdId));
+		return this.repository.findAllByHousehold(householdId);
 	}
 
 	async listExpiringBefore(householdId: string, beforeDate: string) {
-		return this.repository.findExpiringBefore(
-			householdId,
-			beforeDate,
-			await this.listContext(householdId)
-		);
+		return this.repository.findExpiringBefore(householdId, beforeDate);
 	}
 
 	async getItem(householdId: string, id: string) {
 		const item = await this.repository.findById(householdId, id);
-		if (!item) throw new InventoryNotFoundError();
+		if (!item) {
+			throw new InventoryNotFoundError();
+		}
 		return item;
 	}
 
@@ -204,22 +149,7 @@ export class InventoryService {
 	) {
 		assertInventoryWritable(actorRole);
 		const id = generateId();
-		let expiresOn = input.expiresOn ?? null;
-		let expiresOnSource = input.expiresOnSource ?? null;
-		if (expiresOn) {
-			expiresOnSource = 'user_set';
-		} else if (input.inferExpiry !== false) {
-			const inferred = await inferShelfLife({ name: input.name, location: input.location });
-			if (inferred) {
-				expiresOn = inferred.expiresOn;
-				expiresOnSource = inferred.source;
-			}
-		}
-		return this.repository.create(householdId, userId, id, {
-			...input,
-			expiresOn,
-			expiresOnSource
-		});
+		return this.repository.create(householdId, userId, id, input);
 	}
 
 	async updateItem(
@@ -229,19 +159,25 @@ export class InventoryService {
 		actorRole: HouseholdRole
 	) {
 		assertInventoryWritable(actorRole);
-		const patch: UpdateInventoryItemInput = { ...input };
-		if (input.expiresOn !== undefined) {
-			patch.expiresOnSource = input.expiresOn ? 'user_set' : null;
+		const item = await this.repository.update(householdId, id, input);
+		if (!item) {
+			throw new InventoryNotFoundError();
 		}
-		const item = await this.repository.update(householdId, id, patch);
-		if (!item) throw new InventoryNotFoundError();
 		return item;
 	}
 
-	async deleteItem(householdId: string, id: string, userId: string, actorRole: HouseholdRole) {
+	async deleteItem(
+		householdId: string,
+		id: string,
+		userId: string,
+		actorRole: HouseholdRole
+	) {
 		assertInventoryWritable(actorRole);
 		const item = await this.repository.findById(householdId, id);
-		if (!item) throw new InventoryNotFoundError();
+		if (!item) {
+			throw new InventoryNotFoundError();
+		}
+
 		if (this.consumptionRepository) {
 			const eventType = resolveWasteEventType(item);
 			if (eventType) {
@@ -254,8 +190,11 @@ export class InventoryService {
 				});
 			}
 		}
+
 		const deleted = await this.repository.delete(householdId, id);
-		if (!deleted) throw new InventoryNotFoundError();
+		if (!deleted) {
+			throw new InventoryNotFoundError();
+		}
 	}
 
 	async consumeItem(
@@ -304,34 +243,12 @@ export class InventoryService {
 			options.preset || options.customAmount ? options : { preset: 'all' };
 		return (await this.consumeItem(householdId, id, userId, actorRole, consumeOptions)).item;
 	}
-
-	async bulkDiscardAutoExpired(
-		householdId: string,
-		location: StorageLocation,
-		userId: string,
-		actorRole: HouseholdRole
-	): Promise<number> {
-		assertInventoryWritable(actorRole);
-		const items = await this.listAutoExpiredByLocation(householdId, location);
-		let removed = 0;
-		for (const item of items) {
-			if (this.consumptionRepository) {
-				await this.consumptionRepository.record({
-					id: generateId(),
-					householdId,
-					userId,
-					item,
-					eventType: 'expired'
-				});
-			}
-			if (await this.repository.delete(householdId, item.id)) removed++;
-		}
-		return removed;
-	}
 }
 
 function assertInventoryWritable(actorRole: HouseholdRole): void {
-	if (!canEditInventory(actorRole)) throw new InventoryReadOnlyError();
+	if (!canEditInventory(actorRole)) {
+		throw new InventoryReadOnlyError();
+	}
 }
 
 function addDays(date: Date, days: number): Date {

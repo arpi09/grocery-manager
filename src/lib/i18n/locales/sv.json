@@ -152,6 +152,7 @@
 		"chipReceipt": "Kvitto",
 		"chipPhoto": "Foto",
 		"chipManual": "Manuellt",
+		"moreAddWays": "Fler s\u00e4tt att l\u00e4gga till",
 		"locationsTitle": "Dina platser",
 		"totalTracked": "{count} varor totalt",
 		"emptyTitle": "Kom ig?ng",
@@ -545,7 +546,7 @@
 	},
 	"planer": {
 		"title": "Planer",
-		"subtitle": "Planera veckan kring det som gÃ¥r ut â€” samma lager som pÃ¥ hem",
+		"subtitle": "Planera veckan kring det som går ut ? samma lager som på hem",
 		"ideasAria": "Receptid?er",
 		"ideasIntro": "Genererade id?er fr?n ditt lager. V?lj datum och l?gg till i kalendern.",
 		"ideasEmpty": "Inga genererade id?er ?nnu. Anv?nd knappen Receptid?er f?rst.",
@@ -570,12 +571,12 @@
 		"scheduleDate": "Planera datum",
 		"prevMonthShort": "F?rra",
 		"emptyDay": "Inga m?ltider planerade denna dag.",
-		"contextTitle": "Planera kring utgÃ¥ende varor",
-		"contextLead": "Kalendern kopplas till Ã„t det fÃ¶rst pÃ¥ hem.",
-		"contextExpiring": "{count} varor gÃ¥r ut inom {days} dagar",
-		"contextNoExpiring": "Inget brÃ¥dskande utgÃ¥ende inom {days} dagar.",
-		"contextPlanned": "{count} mÃ¥ltider i denna kalendervy",
-		"contextHomeLink": "Till hem & Ã„t det fÃ¶rst"
+		"contextTitle": "Planera kring utgående varor",
+		"contextLead": "Kalendern kopplas till Ät det först på hem.",
+		"contextExpiring": "{count} varor går ut inom {days} dagar",
+		"contextNoExpiring": "Inget brådskande utgående inom {days} dagar.",
+		"contextPlanned": "{count} måltider i denna kalendervy",
+		"contextHomeLink": "Till hem & Ät det först"
 	},
 	"stats": {
 		"title": "Ditt skafferi i siffror",
@@ -1343,8 +1344,8 @@
 		"itemFinished": "{label} markerad som slut",
 		"itemFinishedGeneric": "Vara markerad som slut",
 		"settingsSaved": "Inst?llningar sparade",
-		"autoExpiredCleared": "{label} utgï¿½ngna varor rensade",
-		"autoExpiredClearedGeneric": "Utgï¿½ngna varor rensade",
+		"autoExpiredCleared": "{label} utg?ngna varor rensade",
+		"autoExpiredClearedGeneric": "Utg?ngna varor rensade",
 		"petAdded": "{label} tillagd",
 		"petAddedGeneric": "Husdjur tillagt",
 		"petRemoved": "{label} borttaget",
@@ -1373,18 +1374,18 @@
 		"adminPasswordResetSent": "E-post f?r ?terst?llning skickad",
 		"pushEnabled": "Webbl?sarnotiser aktiverade",
 		"pushDisabled": "Webbl?sarnotiser avaktiverade",
-		"itemPartiallyConsumed": "{label} uppdaterad â€” resten finns kvar i lagret",
-		"itemPartiallyConsumedGeneric": "FÃ¶rbrukning loggad â€” mÃ¤ngden i lagret Ã¤r uppdaterad"
+		"itemPartiallyConsumed": "{label} uppdaterad ? resten finns kvar i lagret",
+		"itemPartiallyConsumedGeneric": "Förbrukning loggad ? mängden i lagret är uppdaterad"
 	},
 	"consume": {
-		"logUsage": "Logga fÃ¶rbrukning",
-		"intro": "Hur mycket av {name} har ni anvÃ¤nt? ({stock} kvar)",
-		"presetsAria": "Snabbval fÃ¶r mÃ¤ngd",
+		"logUsage": "Logga förbrukning",
+		"intro": "Hur mycket av {name} har ni använt? ({stock} kvar)",
+		"presetsAria": "Snabbval för mängd",
 		"presetLite": "Lite (~10%)",
 		"presetHalf": "Halv",
 		"presetAll": "Allt",
-		"customLabel": "Egen mÃ¤ngd",
+		"customLabel": "Egen mängd",
 		"customPlaceholder": "t.ex. 50",
-		"confirm": "Logga anvÃ¤ndning"
+		"confirm": "Logga användning"
 	}
 }
