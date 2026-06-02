@@ -16,7 +16,7 @@
 	import PostOnboardingSurvey from '$lib/components/organisms/PostOnboardingSurvey.svelte';
 	import { canEditInventory } from '$lib/domain/household';
 	import DemoAccountBanner from '$lib/components/molecules/DemoAccountBanner.svelte';
-	import { completeOnboarding, markSignupAt } from '$lib/utils/onboarding';
+	import { markSignupAt } from '$lib/utils/onboarding';
 	import type { NavUser } from '$lib/navigation/nav-config';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
 
