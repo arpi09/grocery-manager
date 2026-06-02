@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { fly } from 'svelte/transition';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import ItemRow from '$lib/components/molecules/ItemRow.svelte';
@@ -57,6 +58,14 @@
 	let loadingFinished = $state(false);
 	let autoExpiredLoaded = $state(false);
 	let finishedLoaded = $state(false);
+	let reduceMotion = $state(true);
+
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+		reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	});
 
 	$effect.pre(() => {
 		loadedItems = items;
@@ -214,8 +223,16 @@
 		/>
 	{:else}
 		<ul class="item-list" aria-label={t('inventory.listAria')}>
-			{#each filtered as item (item.id)}
-				<li><ItemRow {item} {canWrite} finished={false} autoExpired={false} /></li>
+			{#each filtered as item, index (item.id)}
+				{#if reduceMotion}
+					<li><ItemRow {item} {canWrite} finished={false} autoExpired={false} /></li>
+				{:else}
+					<li
+						in:fly={{ y: 8, duration: 220, delay: Math.min(index, 8) * 35 }}
+					>
+						<ItemRow {item} {canWrite} finished={false} autoExpired={false} />
+					</li>
+				{/if}
 			{/each}
 		</ul>
 

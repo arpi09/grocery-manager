@@ -1174,6 +1174,8 @@
 	"gamification": {
 		"stripTitle": "Your week",
 		"zeroWasteWeeks": "Zero-waste weeks",
+		"streakBadge": "Streak",
+		"milestonesProgress": "{done} of {total} achieved",
 		"consumedThisWeek": "Used this week",
 		"eatFirstRitual": "Eat-first ritual",
 		"eatFirstProgress": "{done} of {goal} planned this week",

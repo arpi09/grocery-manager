@@ -3,6 +3,7 @@ import {
 	ACTION_TOAST_LABEL_PARAM,
 	ACTION_TOAST_PARAM,
 	actionToastMessage,
+	actionToastTone,
 	appendActionToast,
 	parseActionToastKind
 } from './action-toast';
@@ -27,5 +28,11 @@ describe('action-toast', () => {
 		expect(actionToastMessage('en', 'itemCreated', 'Milk')).toContain('Milk');
 		expect(actionToastMessage('en', 'settingsSaved')).toContain('Settings');
 		expect(actionToastMessage('sv', 'shoppingAdded')).toContain('inköpslistan');
+	});
+
+	it('maps toast kinds to visual tones', () => {
+		expect(actionToastTone('itemCreated')).toBe('success');
+		expect(actionToastTone('itemDeleted')).toBe('info');
+		expect(actionToastTone('shoppingCleared')).toBe('info');
 	});
 });

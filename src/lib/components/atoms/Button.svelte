@@ -27,7 +27,7 @@
 </script>
 
 <button
-	class="btn btn-{variant} {fullWidth ? 'btn-full' : ''} {className}"
+	class="btn btn-{variant} motion-press {fullWidth ? 'btn-full' : ''} {className}"
 	disabled={disabled || loading}
 	aria-busy={loading || undefined}
 	{...rest}

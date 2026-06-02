@@ -201,6 +201,7 @@ a:focus:not(:focus-visible) {
 	align-items: center;
 	justify-content: center;
 	min-height: 2.75rem;
+	transition: transform var(--motion-duration-fast) var(--motion-ease-out);
 	padding: 0.35rem 0.5rem;
 	border: none;
 	border-radius: var(--radius-sm);
@@ -218,8 +219,110 @@ a:focus:not(:focus-visible) {
 	color: var(--color-primary-hover);
 }
 
+
 .text-action:disabled {
 	opacity: 0.55;
 	cursor: not-allowed;
 	text-decoration: none;
+}
+
+/* Motion utilities — CSS-only; respect prefers-reduced-motion */
+:root {
+	--motion-duration-fast: 0.15s;
+	--motion-duration-normal: 0.24s;
+	--motion-duration-slow: 0.42s;
+	--motion-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+	--motion-ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+.motion-fade-in {
+	animation: motion-fade-in var(--motion-duration-normal) var(--motion-ease-out) both;
+}
+
+.motion-slide-up {
+	animation: motion-slide-up var(--motion-duration-normal) var(--motion-ease-out) both;
+}
+
+.motion-page-enter {
+	animation: motion-page-enter var(--motion-duration-normal) var(--motion-ease-out) both;
+}
+
+.motion-stagger-children > * {
+	animation: motion-fade-in var(--motion-duration-normal) var(--motion-ease-out) both;
+}
+
+.motion-stagger-children > *:nth-child(1) {
+	animation-delay: 0ms;
+}
+.motion-stagger-children > *:nth-child(2) {
+	animation-delay: 40ms;
+}
+.motion-stagger-children > *:nth-child(3) {
+	animation-delay: 80ms;
+}
+.motion-stagger-children > *:nth-child(4) {
+	animation-delay: 120ms;
+}
+.motion-stagger-children > *:nth-child(5) {
+	animation-delay: 160ms;
+}
+.motion-stagger-children > *:nth-child(6) {
+	animation-delay: 200ms;
+}
+.motion-stagger-children > *:nth-child(7) {
+	animation-delay: 240ms;
+}
+.motion-stagger-children > *:nth-child(8) {
+	animation-delay: 280ms;
+}
+.motion-stagger-children > *:nth-child(n + 9) {
+	animation-delay: 320ms;
+}
+
+.motion-press:active:not(:disabled) {
+	transform: scale(0.97);
+}
+
+@keyframes motion-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes motion-slide-up {
+	from {
+		opacity: 0;
+		transform: translate(-50%, 12px);
+	}
+	to {
+		opacity: 1;
+		transform: translate(-50%, 0);
+	}
+}
+
+@keyframes motion-page-enter {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.motion-fade-in,
+	.motion-slide-up,
+	.motion-page-enter,
+	.motion-stagger-children > * {
+		animation: none;
+	}
+
+	.motion-press:active:not(:disabled) {
+		transform: none;
+	}
 }

@@ -1163,6 +1163,8 @@
 	"gamification": {
 		"stripTitle": "Din vecka",
 		"zeroWasteWeeks": "Veckor utan svinn",
+		"streakBadge": "Streak",
+		"milestonesProgress": "{done} av {total} uppn�dda",
 		"consumedThisWeek": "Förbrukade denna vecka",
 		"eatFirstRitual": "Ät det först-ritual",
 		"eatFirstProgress": "{done} av {goal} inplanerade denna vecka",
