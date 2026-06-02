@@ -1,5 +1,7 @@
 import { and, eq, gt, gte, isNull, lte, sql } from 'drizzle-orm';
 import { EXPIRING_SOON_DAYS } from '$lib/domain/inventory-analytics';
+import { startOfWeek } from '$lib/domain/statistik';
+import type { WeeklyCount } from '$lib/domain/statistik';
 import type { StorageLocation } from '$lib/domain/location';
 import type {
 	CreateInventoryItemInput,
@@ -43,6 +45,11 @@ export interface IInventoryRepository {
 	findExpiringBefore(householdId: string, beforeDate: string): Promise<InventoryItem[]>;
 	countByLocation(householdId: string): Promise<LocationCount[]>;
 	getAnalytics(householdId: string): Promise<InventoryAnalyticsSnapshot>;
+	weeklyAddedCounts(
+		householdId: string,
+		weekCount: number,
+		referenceDate?: Date
+	): Promise<WeeklyCount[]>;
 	create(
 		householdId: string,
 		userId: string,
@@ -280,6 +287,33 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 			byLocation
 		};
 	}
+
+	async weeklyAddedCounts(
+		householdId: string,
+		weekCount: number,
+		referenceDate: Date = new Date()
+	): Promise<WeeklyCount[]> {
+		const earliestWeek = startOfWeek(referenceDate);
+		earliestWeek.setUTCDate(earliestWeek.getUTCDate() - (weekCount - 1) * 7);
+
+		const rows = await this.database
+			.select({
+				weekStart: sql<string>`to_char(date_trunc('week', ${inventoryItemTable.createdAt}), 'YYYY-MM-DD')`,
+				count: sql<number>`count(*)::int`
+			})
+			.from(inventoryItemTable)
+			.where(
+				and(
+					eq(inventoryItemTable.householdId, householdId),
+					gte(inventoryItemTable.createdAt, earliestWeek)
+				)
+			)
+			.groupBy(sql`date_trunc('week', ${inventoryItemTable.createdAt})`)
+			.orderBy(sql`date_trunc('week', ${inventoryItemTable.createdAt})`);
+
+		return rows.map((row) => ({ weekStart: row.weekStart, count: row.count }));
+	}
+
 	async create(householdId: string, userId: string, id: string, input: CreateInventoryItemInput) {
 		const now = new Date();
 		const [row] = await this.database

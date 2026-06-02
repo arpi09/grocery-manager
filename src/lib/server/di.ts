@@ -14,7 +14,9 @@ import { DrizzlePetRepository } from '$lib/infrastructure/repositories/pet.repos
 import { HouseholdService } from '$lib/application/household.service';
 import { DrizzleHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
 import { DrizzleShoppingListRepository } from '$lib/infrastructure/repositories/shopping-list.repository';
+import { DrizzleConsumptionRepository } from '$lib/infrastructure/repositories/consumption.repository';
 import { DrizzleInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
+import { StatistikService } from '$lib/application/statistik.service';
 import { DrizzleAdminRepository } from '$lib/infrastructure/repositories/admin.repository';
 import { DrizzleErrorLogRepository } from '$lib/infrastructure/repositories/error-log.repository';
 import { DrizzleUserRepository } from '$lib/infrastructure/repositories/user.repository';
@@ -45,6 +47,7 @@ const adminActionRepository = new DrizzleAdminActionRepository();
 const errorLogRepository = new DrizzleErrorLogRepository();
 const adminRepository = new DrizzleAdminRepository(errorLogRepository);
 const householdRepository = new DrizzleHouseholdRepository();
+const consumptionRepository = new DrizzleConsumptionRepository();
 const inventoryRepository = new DrizzleInventoryRepository();
 const shoppingListRepository = new DrizzleShoppingListRepository();
 const mealPlanRepository = new DrizzleMealPlanRepository();
@@ -69,7 +72,12 @@ export const adminService = new AdminService(
 	adminActionRepository
 );
 export const householdService = new HouseholdService(householdRepository);
-export const inventoryService = new InventoryService(inventoryRepository);
+export const inventoryService = new InventoryService(inventoryRepository, consumptionRepository);
+export const statistikService = new StatistikService(
+	inventoryService,
+	inventoryRepository,
+	consumptionRepository
+);
 export const shoppingListService = new ShoppingListService(shoppingListRepository);
 export const mealPlanService = new MealPlanService(mealPlanRepository);
 export const petService = new PetService(petRepository);

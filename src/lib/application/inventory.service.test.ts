@@ -36,6 +36,7 @@ describe('InventoryService', () => {
 			findExpiringBefore: vi.fn(),
 			countByLocation: vi.fn(),
 			getAnalytics: vi.fn(),
+			weeklyAddedCounts: vi.fn(),
 			create: vi.fn(),
 			update: vi.fn(),
 			delete: vi.fn()
@@ -167,16 +168,16 @@ describe('InventoryService', () => {
 		vi.mocked(repository.findById).mockResolvedValue(item);
 		vi.mocked(repository.update).mockResolvedValue(finished);
 
-		const result = await service.markAsFinished('household-1', 'item-1', 'editor');
+		const result = await service.markAsFinished('household-1', 'item-1', 'user-1', 'editor');
 
 		expect(result.quantity).toBe('0');
 		expect(repository.update).toHaveBeenCalledWith('household-1', 'item-1', { quantity: '0' });
 	});
 
 	it('rejects mark as finished for viewer role', async () => {
-		await expect(service.markAsFinished('household-1', 'item-1', 'viewer')).rejects.toBeInstanceOf(
-			InventoryReadOnlyError
-		);
+		await expect(
+			service.markAsFinished('household-1', 'item-1', 'user-1', 'viewer')
+		).rejects.toBeInstanceOf(InventoryReadOnlyError);
 
 		expect(repository.findById).not.toHaveBeenCalled();
 	});

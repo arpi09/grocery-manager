@@ -1,0 +1,103 @@
+import { and, eq, gte, inArray, sql } from 'drizzle-orm';
+import type { InventoryItem } from '$lib/domain/inventory-item';
+import type { WeeklyCount } from '$lib/domain/statistik';
+import { startOfWeek } from '$lib/domain/statistik';
+import { db, type AppDatabase } from '$lib/infrastructure/db';
+import { consumptionEventTable } from '$lib/infrastructure/db/schema';
+
+export type ConsumptionEventType = 'consumed' | 'discarded' | 'expired';
+
+export interface RecordConsumptionInput {
+	id: string;
+	householdId: string;
+	userId: string;
+	item: InventoryItem;
+	eventType?: ConsumptionEventType;
+}
+
+export interface IConsumptionRepository {
+	record(input: RecordConsumptionInput): Promise<void>;
+	countByEventTypeSince(
+		householdId: string,
+		eventTypes: ConsumptionEventType[],
+		since: Date
+	): Promise<number>;
+	weeklyCountsByEventType(
+		householdId: string,
+		eventTypes: ConsumptionEventType[],
+		weekCount: number,
+		referenceDate?: Date
+	): Promise<WeeklyCount[]>;
+}
+
+export class DrizzleConsumptionRepository implements IConsumptionRepository {
+	constructor(private readonly database: AppDatabase = db) {}
+
+	async record(input: RecordConsumptionInput): Promise<void> {
+		const { id, householdId, userId, item, eventType = 'consumed' } = input;
+		await this.database.insert(consumptionEventTable).values({
+			id,
+			householdId,
+			userId,
+			inventoryItemId: item.id,
+			productName: item.name,
+			eventType,
+			quantity: item.quantity,
+			unit: item.unit,
+			location: item.location,
+			notes: null,
+			createdAt: new Date()
+		});
+	}
+
+	async countByEventTypeSince(
+		householdId: string,
+		eventTypes: ConsumptionEventType[],
+		since: Date
+	): Promise<number> {
+		if (eventTypes.length === 0) return 0;
+
+		const [row] = await this.database
+			.select({ count: sql<number>`count(*)::int` })
+			.from(consumptionEventTable)
+			.where(
+				and(
+					eq(consumptionEventTable.householdId, householdId),
+					inArray(consumptionEventTable.eventType, eventTypes),
+					gte(consumptionEventTable.createdAt, since)
+				)
+			);
+
+		return row?.count ?? 0;
+	}
+
+	async weeklyCountsByEventType(
+		householdId: string,
+		eventTypes: ConsumptionEventType[],
+		weekCount: number,
+		referenceDate: Date = new Date()
+	): Promise<WeeklyCount[]> {
+		if (eventTypes.length === 0) return [];
+
+		const earliestWeek = startOfWeek(referenceDate);
+		earliestWeek.setUTCDate(earliestWeek.getUTCDate() - (weekCount - 1) * 7);
+
+		const rows = await this.database
+			.select({
+				weekStart: sql<string>`to_char(date_trunc('week', ${consumptionEventTable.createdAt}), 'YYYY-MM-DD')`,
+				count: sql<number>`count(*)::int`
+			})
+			.from(consumptionEventTable)
+			.where(
+				and(
+					eq(consumptionEventTable.householdId, householdId),
+					inArray(consumptionEventTable.eventType, eventTypes),
+					gte(consumptionEventTable.createdAt, earliestWeek)
+				)
+			)
+			.groupBy(sql`date_trunc('week', ${consumptionEventTable.createdAt})`)
+			.orderBy(sql`date_trunc('week', ${consumptionEventTable.createdAt})`);
+
+		return rows.map((row) => ({ weekStart: row.weekStart, count: row.count }));
+	}
+}

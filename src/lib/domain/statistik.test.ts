@@ -1,0 +1,66 @@
+import { describe, it, expect } from 'vitest';
+import {
+	buildLastNWeekBars,
+	computeWeekOverWeek,
+	computeZeroWasteStreak,
+	maxWeeklyCount,
+	startOfWeek,
+	toIsoDate
+} from './statistik';
+
+describe('statistik domain', () => {
+	const referenceDate = new Date('2026-06-02T12:00:00Z');
+
+	it('starts weeks on Monday', () => {
+		const monday = startOfWeek(new Date('2026-06-04T12:00:00Z'));
+		expect(monday.getUTCDay()).toBe(1);
+		expect(toIsoDate(monday)).toBe('2026-06-01');
+	});
+
+	it('builds four week bars with zero-filled gaps', () => {
+		const currentWeek = startOfWeek(referenceDate);
+		const previousWeek = new Date(currentWeek);
+		previousWeek.setUTCDate(previousWeek.getUTCDate() - 7);
+
+		const bars = buildLastNWeekBars(
+			[{ weekStart: toIsoDate(previousWeek), count: 3 }],
+			4,
+			referenceDate
+		);
+
+		expect(bars).toHaveLength(4);
+		expect(bars[2].count).toBe(3);
+		expect(bars[3].label).toBe('current');
+	});
+
+	it('computes week-over-week delta', () => {
+		const wow = computeWeekOverWeek([
+			{ weekStart: '2026-05-11', count: 2, label: 'w1' },
+			{ weekStart: '2026-05-18', count: 4, label: 'w2' },
+			{ weekStart: '2026-05-25', count: 1, label: 'w3' },
+			{ weekStart: '2026-06-01', count: 3, label: 'current' }
+		]);
+
+		expect(wow).toEqual({ thisWeek: 3, lastWeek: 1, delta: 2, deltaPercent: 200 });
+	});
+
+	it('counts consecutive zero-waste weeks from the end', () => {
+		expect(
+			computeZeroWasteStreak([
+				{ weekStart: '2026-05-11', count: 1, label: 'w1' },
+				{ weekStart: '2026-05-18', count: 0, label: 'w2' },
+				{ weekStart: '2026-05-25', count: 0, label: 'w3' },
+				{ weekStart: '2026-06-01', count: 0, label: 'current' }
+			])
+		).toBe(3);
+	});
+
+	it('finds max bar height for chart scaling', () => {
+		expect(
+			maxWeeklyCount([
+				{ weekStart: '2026-05-25', count: 2, label: 'w1' },
+				{ weekStart: '2026-06-01', count: 5, label: 'current' }
+			])
+		).toBe(5);
+	});
+});

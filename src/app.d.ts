@@ -7,6 +7,7 @@ import type { ProfileService } from '$lib/application/profile.service';
 import type { HouseholdService } from '$lib/application/household.service';
 import type { ShoppingListService } from '$lib/application/shopping-list.service';
 import type { InventoryService } from '$lib/application/inventory.service';
+import type { StatistikService } from '$lib/application/statistik.service';
 import type { MealPlanService } from '$lib/application/meal-plan.service';
 import type { PetFoodService } from '$lib/application/pet-food.service';
 import type { PetService } from '$lib/application/pet.service';
@@ -38,6 +39,7 @@ declare global {
 			adminService: AdminService;
 			householdService: HouseholdService;
 			inventoryService: InventoryService;
+			statistikService: StatistikService;
 			shoppingListService: ShoppingListService;
 			mealPlanService: MealPlanService;
 			petService: PetService;

@@ -13,6 +13,7 @@ import type {
 	IInventoryRepository,
 	InventoryAnalyticsSnapshot
 } from '$lib/infrastructure/repositories/inventory.repository';
+import type { IConsumptionRepository } from '$lib/infrastructure/repositories/consumption.repository';
 
 export class InventoryNotFoundError extends Error {
 	constructor() {
@@ -39,7 +40,10 @@ export interface InventoryAnalytics extends InventoryAnalyticsSnapshot {
 }
 
 export class InventoryService {
-	constructor(private readonly repository: IInventoryRepository) {}
+	constructor(
+		private readonly repository: IInventoryRepository,
+		private readonly consumptionRepository?: IConsumptionRepository
+	) {}
 
 	async getDashboard(householdId: string): Promise<DashboardSummary> {
 		const counts = await this.repository.countByLocation(householdId);
@@ -152,16 +156,26 @@ export class InventoryService {
 		}
 	}
 
-	async markAsFinished(householdId: string, id: string, actorRole: HouseholdRole) {
+	async markAsFinished(
+		householdId: string,
+		id: string,
+		userId: string,
+		actorRole: HouseholdRole
+	) {
 		assertInventoryWritable(actorRole);
 		const item = await this.repository.findById(householdId, id);
-		if (!item) {
-			throw new InventoryNotFoundError();
-		}
+		if (!item) throw new InventoryNotFoundError();
 
 		const updated = await this.repository.update(householdId, id, { quantity: '0' });
-		if (!updated) {
-			throw new InventoryNotFoundError();
+		if (!updated) throw new InventoryNotFoundError();
+
+		if (this.consumptionRepository) {
+			await this.consumptionRepository.record({
+				id: generateId(),
+				householdId,
+				userId,
+				item
+			});
 		}
 
 		return updated;

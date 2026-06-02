@@ -7,6 +7,7 @@ import {
 	profileService,
 	householdService,
 	inventoryService,
+	statistikService,
 	shoppingListService,
 	mealPlanService,
 	petFoodService,
@@ -77,6 +78,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.householdId = null;
 	event.locals.householdRole = null;
 	event.locals.inventoryService = inventoryService;
+	event.locals.statistikService = statistikService;
 	event.locals.shoppingListService = shoppingListService;
 	event.locals.mealPlanService = mealPlanService;
 	event.locals.petService = petService;

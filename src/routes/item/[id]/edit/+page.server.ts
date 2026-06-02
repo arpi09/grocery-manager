@@ -97,6 +97,7 @@ export const actions: Actions = {
 			const item = await event.locals.inventoryService.markAsFinished(
 				event.locals.householdId!,
 				event.params.id,
+				event.locals.user!.id,
 				event.locals.householdRole!
 			);
 			location = item.location;
