@@ -5,16 +5,19 @@
 	import ScanModeTabs from '$lib/components/molecules/ScanModeTabs.svelte';
 	import ReceiptBulkAddFlow from '$lib/components/organisms/ReceiptBulkAddFlow.svelte';
 	import { t } from '$lib/i18n';
+	import { scanHubHref } from '$lib/utils/scan-nav';
 
 	let { data } = $props();
+
+	const hubHref = $derived(scanHubHref(data.returnTo));
 </script>
 
 <AppLayout user={data.user}>
 	<AppHeader
 		title={t('scan.receiptPage.title')}
 		subtitle={t('scan.receiptPage.subtitle')}
-		backHref={data.returnTo}
-		backLabel={t('common.back')}
+		backHref={hubHref}
+		backLabel={t('scan.allModes')}
 	/>
 	<PageContainer>
 		<ScanModeTabs active="receipt" returnTo={data.returnTo} />

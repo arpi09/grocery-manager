@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
+	import { scanHubHref, scanSubFlowFrom } from '$lib/utils/scan-nav';
 
-	export type ScanModeTab = 'barcode' | 'receipt' | 'photo' | 'manual';
+	export type ScanModeTab = 'hub' | 'barcode' | 'receipt' | 'photoRound' | 'manual';
 
 	interface Props {
 		active: ScanModeTab | null;
@@ -12,32 +13,38 @@
 
 	let { active, returnTo, defaultLocation, showManual = true }: Props = $props();
 
-	const from = $derived(encodeURIComponent(returnTo));
+	const hubHref = $derived(scanHubHref(returnTo));
+	const subFlowFrom = $derived(scanSubFlowFrom(returnTo));
 	const locationQuery = $derived(defaultLocation ? `&location=${defaultLocation}` : '');
 
 	const tabs = $derived.by(() => {
 		const items: { id: ScanModeTab; href: string; label: string }[] = [
 			{
+				id: 'hub',
+				href: hubHref,
+				label: t('scan.title')
+			},
+			{
 				id: 'barcode',
-				href: `/scan?mode=barcode&from=${from}${locationQuery}`,
+				href: `${hubHref}&mode=barcode${locationQuery}`,
 				label: t('scan.modes.barcode')
 			},
 			{
 				id: 'receipt',
-				href: `/scan/kvitto?from=${from}`,
+				href: `/scan/kvitto?from=${subFlowFrom}`,
 				label: t('scan.modes.receipt')
 			},
 			{
-				id: 'photo',
-				href: `/scan/foto?from=${from}${locationQuery}`,
-				label: t('scan.modes.photo')
+				id: 'photoRound',
+				href: `/inventory/foto?from=${encodeURIComponent(subFlowFrom)}${locationQuery ? `&location=${defaultLocation}` : ''}`,
+				label: t('photoRound.title')
 			}
 		];
 
 		if (showManual) {
 			items.push({
 				id: 'manual',
-				href: `/item/new?from=${from}${locationQuery}`,
+				href: `/item/new?from=${encodeURIComponent(subFlowFrom)}${locationQuery}`,
 				label: t('scan.modes.manual')
 			});
 		}

@@ -89,8 +89,8 @@
 
 	const emptyPrimaryHref = $derived(
 		activationProgress.path === 'receipt'
-			? `/scan/kvitto?from=${from}`
-			: `/scan?mode=barcode&from=${from}`
+			? `/scan/kvitto?from=${encodeURIComponent(`/scan?from=${from}`)}`
+			: `/scan?mode=barcode&from=${encodeURIComponent(`/scan?from=${from}`)}`
 	);
 
 	const emptyPrimaryLabel = $derived(
@@ -99,8 +99,8 @@
 
 	const emptySecondaryHref = $derived(
 		activationProgress.path === 'receipt'
-			? `/scan?mode=barcode&from=${from}`
-			: `/scan/kvitto?from=${from}`
+			? `/scan?mode=barcode&from=${encodeURIComponent(`/scan?from=${from}`)}`
+			: `/scan/kvitto?from=${encodeURIComponent(`/scan?from=${from}`)}`
 	);
 
 	const emptySecondaryLabel = $derived(
@@ -193,12 +193,12 @@
 		{#if canWrite}
 			<section class="scan-zone" aria-labelledby="home-scan-heading">
 				<h2 id="home-scan-heading" class="sr-only">{t('home.scanCardTitle')}</h2>
-				<a class="scan-card" href="/scan?mode=barcode&from={from}">
+				<a class="scan-card" href="/scan?from={from}">
 					<span class="scan-icon" aria-hidden="true">
 						<FeatureIcon id="barcode" size={22} />
 					</span>
 					<div class="scan-copy">
-						<span class="scan-title">{t('home.scanCardTitle')}</span>
+						<span class="scan-title">{t('scan.title')}</span>
 						<span class="scan-subtitle">{t('home.scanCardSubtitle')}</span>
 					</div>
 					<span class="scan-arrow" aria-hidden="true">→</span>
@@ -206,8 +206,9 @@
 				<details class="more-ways">
 					<summary>{t('home.moreAddWays')}</summary>
 					<nav class="more-ways-links" aria-label={t('home.moreAddWays')}>
-						<a href="/scan/kvitto?from={from}">{t('home.chipReceipt')}</a>
-						<a href="/scan/foto?from={from}">{t('home.chipPhoto')}</a>
+						<a href="/scan?mode=barcode&from={encodeURIComponent(`/scan?from=${from}`)}">{t('home.chipBarcode')}</a>
+						<a href="/scan/kvitto?from={encodeURIComponent(`/scan?from=${from}`)}">{t('home.chipReceipt')}</a>
+						<a href="/inventory/foto?from={encodeURIComponent(`/scan?from=${from}`)}">{t('home.chipPhotoRound')}</a>
 						<a href="/item/new?from={from}">{t('home.chipManual')}</a>
 					</nav>
 				</details>

@@ -7,28 +7,32 @@
 	import ScanToAddFlow from '$lib/components/organisms/ScanToAddFlow.svelte';
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
 	import { t } from '$lib/i18n';
+	import { scanHubHref } from '$lib/utils/scan-nav';
 
 	let { data, form } = $props();
 
 	const isBarcodeMode = $derived(data.scanMode === 'barcode');
+	const hubHref = $derived(scanHubHref(data.returnTo));
 
 	const title = $derived(isBarcodeMode ? t('scan.barcodeTitle') : t('scan.title'));
 	const subtitle = $derived(
 		isBarcodeMode ? t('scan.barcodeSubtitle') : t('scan.subtitle')
 	);
 	const cancelLabel = $derived(isBarcodeMode ? t('scan.cancelBack') : t('scan.cancel'));
+	const backHref = $derived(isBarcodeMode ? hubHref : data.returnTo);
+	const backLabel = $derived(isBarcodeMode ? t('scan.allModes') : t('common.back'));
 </script>
 
 <AppLayout user={data.user}>
 	<AppHeader
 		{title}
 		{subtitle}
-		backHref={data.returnTo}
-		backLabel={t('common.back')}
+		{backHref}
+		{backLabel}
 	/>
 	<PageContainer>
 		<ScanModeTabs
-			active={isBarcodeMode ? 'barcode' : null}
+			active={isBarcodeMode ? 'barcode' : 'hub'}
 			returnTo={data.returnTo}
 			defaultLocation={data.defaultLocation}
 		/>
