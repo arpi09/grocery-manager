@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 import {
 	dismissOnboardingModalIfOpen,
 	expectOnboardingGuideVisible,
@@ -40,3 +40,4 @@ test.describe('Critical flows', () => {
 		await expect(page).toHaveURL(/\/scan(\?.*mode=barcode)?$/);
 	});
 });
+
