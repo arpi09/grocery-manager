@@ -11,6 +11,16 @@ export interface InventoryFinishedPage {
 	total: number;
 }
 
+export interface InventoryAutoExpiredPage {
+	items: InventoryItem[];
+	total: number;
+}
+
+export interface InventoryAutoExpiredPage {
+	items: InventoryItem[];
+	total: number;
+}
+
 export async function fetchInventoryActivePage(
 	location: StorageLocation,
 	offset = 0,
@@ -43,4 +53,28 @@ export async function fetchInventoryFinished(
 	}
 
 	return (await response.json()) as InventoryFinishedPage;
+}
+
+export async function fetchInventoryAutoExpired(
+	location: StorageLocation
+): Promise<InventoryAutoExpiredPage> {
+	const search = new URLSearchParams({ section: 'autoExpired', location });
+	const response = await fetch(`/api/inventory/data?${search}`);
+	if (!response.ok) {
+		throw new Error(`Inventory data request failed (${response.status})`);
+	}
+
+	return (await response.json()) as InventoryAutoExpiredPage;
+}
+
+export async function fetchInventoryAutoExpired(
+	location: StorageLocation
+): Promise<InventoryAutoExpiredPage> {
+	const search = new URLSearchParams({ section: 'autoExpired', location });
+	const response = await fetch(`/api/inventory/data?${search}`);
+	if (!response.ok) {
+		throw new Error(`Inventory data request failed (${response.status})`);
+	}
+
+	return (await response.json()) as InventoryAutoExpiredPage;
 }

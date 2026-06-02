@@ -17,7 +17,7 @@
 	const photoRoundHref = $derived(`/inventory/foto?from=${from}`);
 
 	const activeCount = $derived(data.activeTotal);
-	const totalCount = $derived(data.activeTotal + data.finishedTotal);
+	const totalCount = $derived(data.activeTotal + data.autoExpiredTotal + data.finishedTotal);
 	const hasInventory = $derived(totalCount > 0);
 
 	const headerSubtitle = $derived(
@@ -55,7 +55,9 @@
 			<InventoryList
 				items={data.items}
 				activeTotal={data.activeTotal}
+				autoExpiredTotal={data.autoExpiredTotal}
 				finishedTotal={data.finishedTotal}
+				autoExpiredGraceDays={data.autoExpiredGraceDays}
 				location={data.location}
 				canWrite={data.canWrite}
 				{hasInventory}

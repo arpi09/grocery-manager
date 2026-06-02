@@ -27,6 +27,7 @@ function makeItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
 		quantity: '1',
 		unit: 'l',
 		expiresOn: '2026-06-01',
+		expiresOnSource: null,
 		notes: null,
 		createdAt: new Date(),
 		updatedAt: new Date(),
@@ -50,7 +51,8 @@ describe('clampRecipePortions', () => {
 describe('formatRecipeInventoryLines', () => {
 	it('formats Swedish inventory lines with id and expiry', () => {
 		const lines = formatRecipeInventoryLines([makeItem({ id: 'inv-mjolk-1' })]);
-		expect(lines).toContain('[inv-mjolk-1] Mjölk: 1 l i fridge');
+		expect(lines).toContain('[inv-mjolk-1] Mjölk: 1 l kvar i fridge');
+		expect(lines).toContain('typisk måltidsmängd');
 		expect(lines).toContain('utgår 2026-06-01');
 	});
 

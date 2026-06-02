@@ -3,7 +3,7 @@ import { appendActionToast } from '$lib/utils/action-toast';
 import { fail, redirect } from '@sveltejs/kit';
 import { mapHouseholdErrorToFail } from '$lib/application/household-errors';
 import { translate } from '$lib/i18n/messages';
-import { isHouseholdOwner } from '$lib/domain/household';
+import { canEditInventory, isHouseholdOwner } from '$lib/domain/household';
 import { DEFAULT_PLAN_TIER } from '$lib/domain/plan';
 import { householdInviteEmailWarning, sendHouseholdInviteEmail } from '$lib/server/email';
 import { getAppOrigin } from '$lib/server/origin';
@@ -20,6 +20,8 @@ import {
 	updatePetsEnabledSchema
 } from '$lib/validation/pet.schemas';
 import { updateExpiryRemindersSchema } from '$lib/validation/expiry-reminder.schemas';
+import { updateAutoExpiredGraceSchema } from '$lib/validation/auto-expired.schemas';
+import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { updateShoppingPushSchema } from '$lib/validation/shopping-push.schemas';
 import { submitProductFeedbackSchema } from '$lib/validation/product-feedback.schemas';
 import { joinWaitlistSchema } from '$lib/validation/waitlist.schemas';
@@ -46,6 +48,10 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 	const shoppingPushSettings = user
 		? await shoppingPushService.getSettings(user.id)
 		: { enabled: false, lastSentAt: null };
+	const autoExpiredGraceDays =
+		householdId && householdRole && canEditInventory(householdRole)
+			? await locals.inventoryService.getAutoExpiredGraceDays(householdId)
+			: null;
 
 	const planTier = DEFAULT_PLAN_TIER;
 	const planLimits = user
@@ -65,6 +71,7 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		expiryReminderDays: expirySettings.days,
 		pushNotificationsEnabled: user ? await pushRepository.isPushEnabled(user.id) : false,
 		shoppingPushEnabled: shoppingPushSettings.enabled,
+		autoExpiredGraceDays,
 		pets,
 		household,
 		householdRole,
@@ -136,6 +143,25 @@ export const actions: Actions = {
 			locals.user!.id,
 			parsed.data.enabled === 'true',
 			Number(parsed.data.days) as 3 | 7
+		);
+		redirect(302, appendActionToast('/settings', 'settingsSaved'));
+	},
+	updateAutoExpiredGrace: async ({ request, locals }) => {
+		requireInventoryWriteAccess(locals.householdRole);
+
+		const formData = await request.formData();
+		const parsed = updateAutoExpiredGraceSchema.safeParse({
+			days: formData.get('days')
+		});
+
+		if (!parsed.success) {
+			return fail(400, { autoExpiredGraceErrors: parsed.error.flatten().fieldErrors });
+		}
+
+		await locals.inventoryService.updateAutoExpiredGraceDays(
+			locals.householdId!,
+			Number(parsed.data.days),
+			locals.householdRole!
 		);
 		redirect(302, appendActionToast('/settings', 'settingsSaved'));
 	},

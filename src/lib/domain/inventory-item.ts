@@ -1,3 +1,4 @@
+import type { ExpiresOnSource } from './auto-expired';
 import type { StorageLocation } from './location';
 
 export interface InventoryItem {
@@ -9,6 +10,7 @@ export interface InventoryItem {
 	quantity: string;
 	unit: string | null;
 	expiresOn: string | null;
+	expiresOnSource: ExpiresOnSource | null;
 	notes: string | null;
 	createdAt: Date;
 	updatedAt: Date;
@@ -20,6 +22,8 @@ export interface CreateInventoryItemInput {
 	quantity: string;
 	unit?: string | null;
 	expiresOn?: string | null;
+	expiresOnSource?: ExpiresOnSource | null;
+	inferExpiry?: boolean;
 	notes?: string | null;
 }
 
@@ -29,6 +33,7 @@ export interface UpdateInventoryItemInput {
 	quantity?: string;
 	unit?: string | null;
 	expiresOn?: string | null;
+	expiresOnSource?: ExpiresOnSource | null;
 	notes?: string | null;
 }
 

@@ -9,9 +9,10 @@
 		item: InventoryItem;
 		canWrite?: boolean;
 		finished?: boolean;
+		autoExpired?: boolean;
 	}
 
-	let { item, canWrite = false, finished = false }: Props = $props();
+	let { item, canWrite = false, finished = false, autoExpired = false }: Props = $props();
 
 	let menuOpen = $state(false);
 	let consumeOpen = $state(false);
@@ -52,7 +53,7 @@
 	});
 </script>
 
-<article class="row" class:finished>
+<article class="row" class:finished class:autoExpired={autoExpired}>
 	<div class="content">
 		<div class="primary-line">
 			<a href="/item/{item.id}/edit" class="name">{item.name}</a>
@@ -100,10 +101,18 @@
 			<span class="quantity">{formatQuantity(item)}</span>
 			{#if finished}
 				<Badge tone="default">{t('inventory.finishedBadge')}</Badge>
+			{:else if autoExpired}
+				<Badge tone="warning">{t('inventory.autoExpiredBadge')}</Badge>
+				{#if item.expiresOn}
+					<Badge tone="default">{formatExpiryDate(item.expiresOn, getLocale())}</Badge>
+				{/if}
 			{:else if item.expiresOn}
 				<Badge tone={expiryTone(item.expiresOn)}>
 					{formatExpiryDate(item.expiresOn, getLocale())}
 				</Badge>
+				{#if item.expiresOnSource === 'ai_inferred'}
+					<Badge tone="default">{t('inventory.aiExpiryBadge')}</Badge>
+				{/if}
 			{/if}
 		</div>
 
@@ -126,6 +135,11 @@
 		border-style: dashed;
 		box-shadow: none;
 		background: color-mix(in srgb, var(--color-surface-muted) 45%, var(--color-surface));
+	}
+
+	.row.autoExpired {
+		border-color: color-mix(in srgb, var(--color-warning) 35%, var(--color-border));
+		background: color-mix(in srgb, var(--color-warning) 6%, var(--color-surface));
 	}
 
 	.content {

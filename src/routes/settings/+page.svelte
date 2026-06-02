@@ -38,6 +38,10 @@
 	let expiryRemindersSubmitting = $state(false);
 	let expiryRemindersEnabled = $state(data.expiryRemindersEnabled);
 	let expiryReminderDays = $state(String(data.expiryReminderDays));
+	let autoExpiredGraceSubmitting = $state(false);
+	let autoExpiredGraceDays = $state(
+		data.autoExpiredGraceDays !== null ? String(data.autoExpiredGraceDays) : '7'
+	);
 	let pushNotificationsEnabled = $state(data.pushNotificationsEnabled);
 	let pushNotificationsSubmitting = $state(false);
 	let pushNotificationsError = $state<string | null>(null);
@@ -48,6 +52,7 @@
 	let addPetSubmitting = $state(false);
 	let feedbackSubmitting = $state(false);
 	let expiryRemindersForm: HTMLFormElement | undefined = $state();
+	let autoExpiredGraceForm: HTMLFormElement | undefined = $state();
 	let pushToastMessage = $state<string | null>(null);
 
 	const feedbackErrors = $derived(form?.feedbackErrors ?? {});

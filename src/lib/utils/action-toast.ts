@@ -10,6 +10,7 @@ export type ActionToastKind =
 	| 'itemDeleted'
 	| 'itemFinished'
 	| 'itemPartiallyConsumed'
+	| 'autoExpiredCleared'
 	| 'settingsSaved'
 	| 'petAdded'
 	| 'petRemoved'

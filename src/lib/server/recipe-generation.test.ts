@@ -15,6 +15,7 @@ function makeItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
 		quantity: '1',
 		unit: 'l',
 		expiresOn: '2026-06-03',
+		expiresOnSource: null,
 		notes: null,
 		createdAt: new Date(),
 		updatedAt: new Date(),

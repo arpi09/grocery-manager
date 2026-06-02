@@ -12,6 +12,7 @@ function makeItem(name: string, expiresOn: string): InventoryItem {
 		quantity: '1',
 		unit: null,
 		expiresOn,
+		expiresOnSource: null,
 		notes: null,
 		createdAt: new Date(),
 		updatedAt: new Date()
