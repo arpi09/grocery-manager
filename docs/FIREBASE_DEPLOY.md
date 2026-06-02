@@ -173,6 +173,67 @@ npx firebase apphosting:secrets:set DEMO_ACCOUNT_PASSWORD --project home-pantry-
 npx firebase apphosting:secrets:grantaccess DEMO_ACCOUNT_PASSWORD --backend home-pantry --project home-pantry-4bee5
 ```
 
+### Google Sign-In (OAuth)
+
+Google login is **not** Firebase Authentication. The app uses a server-side OAuth 2.0 PKCE flow ([Arctic](https://arcticjs.dev/)) with Lucia sessions and PostgreSQL (`oauth_account` links). Routes: `GET /auth/google` → Google → `GET /auth/google/callback`. The button on `/login` and `/register` appears only when both `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set (`isGoogleOAuthConfigured()`).
+
+**GitHub Actions:** no repo secrets for Google OAuth — credentials live in Firebase App Hosting Secret Manager (or local `.env`).
+
+#### 1. Google Cloud Console (OAuth client)
+
+Use the same GCP project as Firebase: **`home-pantry-4bee5`**.
+
+1. [Google Cloud Console](https://console.cloud.google.com/) → project **home-pantry-4bee5** → **APIs & Services** → **OAuth consent screen**.
+   - User type: **External** (or Internal for Workspace-only testing).
+   - Add scopes: `openid`, `email`, `profile` (the app requests these).
+   - Add test users while the app is in **Testing** publishing status.
+2. **Credentials** → **Create credentials** → **OAuth client ID** → type **Web application**.
+3. Copy **Client ID** and **Client secret** (these become `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`).
+
+You do **not** need to enable **Google** under Firebase Console → **Authentication** → **Sign-in method** for this app.
+
+#### 2. Authorized redirect URIs
+
+Redirect URI must match `getAppOrigin()` + `/auth/google/callback` (`src/lib/server/google-oauth.ts`). `getAppOrigin()` prefers `ORIGIN`, then `PUBLIC_ORIGIN` (see `src/lib/server/origin.ts`).
+
+| Environment | Typical `getAppOrigin()` | Redirect URI |
+|-------------|--------------------------|--------------|
+| Vite dev (`npm run dev`, port 5173) | Set `ORIGIN=http://localhost:5173` (or leave `ORIGIN` unset and use `PUBLIC_ORIGIN`) | `http://localhost:5173/auth/google/callback` |
+| Production (`apphosting.yaml`) | `https://skaffu.com` | `https://skaffu.com/auth/google/callback` |
+| Legacy hosted.app (optional) | `https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app` | same host + `/auth/google/callback` |
+
+Add every host you actually use to **Authorized redirect URIs**. Mismatch causes Google’s `redirect_uri_mismatch` error.
+
+**Authorized JavaScript origins** (optional but useful for dev): same origins without path, e.g. `http://localhost:5173`, `https://skaffu.com`.
+
+#### 3. Production: Secret Manager + `apphosting.yaml`
+
+1. Create secrets and grant the App Hosting backend (commands in [Optional secrets](#optional-secrets-google-oauth-demo-account) above).
+2. Uncomment the `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` `env` blocks in `apphosting.yaml` (they stay commented until secrets exist — otherwise deploy fails at the preparer step).
+3. Redeploy (push to `main` or manual rollout). Confirm `PUBLIC_ORIGIN` / `ORIGIN` in `apphosting.yaml` match the redirect URI host.
+
+#### 4. Local development
+
+In `.env` (from `.env.example`):
+
+```env
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+ORIGIN=http://localhost:5173
+PUBLIC_ORIGIN=http://localhost:5173
+```
+
+Restart is handled by the dev watcher when `.env` changes.
+
+#### 5. Verify
+
+1. Open `/login` — **Continue with Google** should appear when env vars are set.
+2. Click it → Google account picker → redirect back to `/hem` (or `redirectTo` if provided).
+3. New users: account row + `oauth_account` link; returning users: existing session.
+4. If the button is missing: both env vars unset or empty.
+5. If Google shows `redirect_uri_mismatch`: fix redirect URI vs `ORIGIN`/`PUBLIC_ORIGIN`.
+6. If callback shows “Google sign-in failed”: check server logs; common causes are wrong client secret, consent screen not configured, or unverified email on the Google account.
+
 Update non-secret values in `apphosting.yaml` or Firebase Console â†’ **App Hosting â†’ home-pantry â†’ Settings â†’ Environment**:
 
 | Variable | Required | Notes |
