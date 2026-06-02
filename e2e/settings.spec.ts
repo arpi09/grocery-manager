@@ -4,7 +4,8 @@ import {
 	prepareE2eBrowserState,
 	registerNewUser
 } from './helpers/auth';
-import { ACTION_TOAST_PARAM } from '../src/lib/utils/action-toast';
+
+const ACTION_TOAST_PARAM = 'actionToast';
 
 test.describe('Settings', () => {
 	test('expiry email reminder toggle persists after reload', async ({ page }) => {
