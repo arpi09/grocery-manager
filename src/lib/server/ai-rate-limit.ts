@@ -5,6 +5,7 @@ import type { Locale } from '$lib/i18n/locale';
 import { translate } from '$lib/i18n/messages';
 import type { AiRateLimitService, TryConsumeAiUsageResult } from '$lib/application/ai-rate-limit.service';
 import type { AiUsageKind } from '$lib/domain/ai-usage';
+import { DEFAULT_PLAN_TIER } from '$lib/domain/plan';
 
 export function aiRateLimitErrorMessage(locale: Locale, snapshot: AiRateLimitSnapshot): string {
 	return translate(locale, planLimitErrorKey(planLimitKeyForAiUsageKind(snapshot.kind)), {
@@ -49,7 +50,7 @@ export async function requireAiQuota(
 		householdId: locals.householdId,
 		userId,
 		kind,
-		tier: locals.planTier
+		tier: locals.planTier ?? DEFAULT_PLAN_TIER
 	});
 
 	if (!result.allowed) {
@@ -82,7 +83,7 @@ export async function checkAiQuotaForAction(
 		householdId: locals.householdId,
 		userId,
 		kind,
-		tier: locals.planTier
+		tier: locals.planTier ?? DEFAULT_PLAN_TIER
 	});
 
 	if (!result.allowed) {
