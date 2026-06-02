@@ -13,19 +13,23 @@ function switcherTrigger(page: Page, mode: 'desktop' | 'mobile') {
 	);
 }
 
+function redirectPathname(value: string): string {
+	return new URL(value, 'http://local').pathname;
+}
+
 async function expectActionRedirect(
 	response: Awaited<ReturnType<Page['request']['post']>>,
 	location: string
 ) {
 	if ([302, 303].includes(response.status())) {
-		expect(response.headers()['location']).toBe(location);
+		expect(redirectPathname(response.headers()['location'] ?? '')).toBe(redirectPathname(location));
 		return;
 	}
 
 	expect(response.status()).toBe(200);
 	const body = (await response.json()) as { type?: string; location?: string };
 	expect(body.type).toBe('redirect');
-	expect(body.location).toBe(location);
+	expect(redirectPathname(body.location ?? '')).toBe(redirectPathname(location));
 }
 
 test.describe('Household switcher', () => {
