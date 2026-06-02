@@ -9,7 +9,8 @@ describe('PmfService', () => {
 	beforeEach(() => {
 		repository = {
 			recordEvent: vi.fn(),
-			getGlobalMetrics: vi.fn()
+			getGlobalMetrics: vi.fn(),
+			hasHouseholdEvent: vi.fn()
 		};
 		service = new PmfService(repository);
 	});

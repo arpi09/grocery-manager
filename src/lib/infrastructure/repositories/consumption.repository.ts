@@ -17,6 +17,10 @@ export interface RecordConsumptionInput {
 
 export interface IConsumptionRepository {
 	record(input: RecordConsumptionInput): Promise<void>;
+	countByEventTypes(
+		householdId: string,
+		eventTypes: ConsumptionEventType[]
+	): Promise<number>;
 	countByEventTypeSince(
 		householdId: string,
 		eventTypes: ConsumptionEventType[],
@@ -48,6 +52,25 @@ export class DrizzleConsumptionRepository implements IConsumptionRepository {
 			notes: null,
 			createdAt: new Date()
 		});
+	}
+
+	async countByEventTypes(
+		householdId: string,
+		eventTypes: ConsumptionEventType[]
+	): Promise<number> {
+		if (eventTypes.length === 0) return 0;
+
+		const [row] = await this.database
+			.select({ count: sql<number>`count(*)::int` })
+			.from(consumptionEventTable)
+			.where(
+				and(
+					eq(consumptionEventTable.householdId, householdId),
+					inArray(consumptionEventTable.eventType, eventTypes)
+				)
+			);
+
+		return row?.count ?? 0;
 	}
 
 	async countByEventTypeSince(

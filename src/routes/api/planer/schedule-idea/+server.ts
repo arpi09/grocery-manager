@@ -36,13 +36,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			parsed.data.plannedDate
 		);
 
+		const celebration = await locals.gamificationService.detectEatFirstRitualCelebration(
+			auth.user.id
+		);
+
 		return json({
 			ok: true,
 			meal: {
 				id: meal.id,
 				title: meal.title,
 				plannedDate: meal.plannedDate
-			}
+			},
+			celebration
 		});
 	} catch {
 		return json(

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { InventoryReadOnlyError, InventoryService } from './inventory.service';
+import type { IConsumptionRepository } from '$lib/infrastructure/repositories/consumption.repository';
 import type { IInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
 import type { InventoryItem } from '$lib/domain/inventory-item';
 
@@ -22,6 +23,7 @@ function makeItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
 
 describe('InventoryService', () => {
 	let repository: IInventoryRepository;
+	let consumptionRepository: IConsumptionRepository;
 	let service: InventoryService;
 
 	beforeEach(() => {
@@ -41,7 +43,13 @@ describe('InventoryService', () => {
 			update: vi.fn(),
 			delete: vi.fn()
 		};
-		service = new InventoryService(repository);
+		consumptionRepository = {
+			record: vi.fn(),
+			countByEventTypes: vi.fn(),
+			countByEventTypeSince: vi.fn(),
+			weeklyCountsByEventType: vi.fn()
+		};
+		service = new InventoryService(repository, consumptionRepository);
 	});
 
 	it('returns dashboard summary with location counts', async () => {
@@ -102,11 +110,41 @@ describe('InventoryService', () => {
 	});
 
 	it('deletes an item', async () => {
+		const item = makeItem();
+		vi.mocked(repository.findById).mockResolvedValue(item);
 		vi.mocked(repository.delete).mockResolvedValue(true);
 
-		await service.deleteItem('household-1', 'item-1', 'editor');
+		await service.deleteItem('household-1', 'item-1', 'user-1', 'editor');
 
 		expect(repository.delete).toHaveBeenCalledWith('household-1', 'item-1');
+	});
+
+	it('records discarded waste when deleting an active item', async () => {
+		const item = makeItem({ expiresOn: null });
+		vi.mocked(repository.findById).mockResolvedValue(item);
+		vi.mocked(repository.delete).mockResolvedValue(true);
+
+		await service.deleteItem('household-1', 'item-1', 'user-1', 'editor');
+
+		expect(consumptionRepository.record).toHaveBeenCalledWith(
+			expect.objectContaining({
+				householdId: 'household-1',
+				userId: 'user-1',
+				eventType: 'discarded'
+			})
+		);
+	});
+
+	it('records expired waste when deleting a past-date item', async () => {
+		const item = makeItem({ expiresOn: '2020-01-01' });
+		vi.mocked(repository.findById).mockResolvedValue(item);
+		vi.mocked(repository.delete).mockResolvedValue(true);
+
+		await service.deleteItem('household-1', 'item-1', 'user-1', 'editor');
+
+		expect(consumptionRepository.record).toHaveBeenCalledWith(
+			expect.objectContaining({ eventType: 'expired' })
+		);
 	});
 
 	it('creates an item with generated id via repository', async () => {
@@ -155,9 +193,9 @@ describe('InventoryService', () => {
 	});
 
 	it('rejects delete for viewer role', async () => {
-		await expect(service.deleteItem('household-1', 'item-1', 'viewer')).rejects.toBeInstanceOf(
-			InventoryReadOnlyError
-		);
+		await expect(
+			service.deleteItem('household-1', 'item-1', 'user-1', 'viewer')
+		).rejects.toBeInstanceOf(InventoryReadOnlyError);
 
 		expect(repository.delete).not.toHaveBeenCalled();
 	});

@@ -14,6 +14,7 @@ import type {
 	InventoryAnalyticsSnapshot
 } from '$lib/infrastructure/repositories/inventory.repository';
 import type { IConsumptionRepository } from '$lib/infrastructure/repositories/consumption.repository';
+import { resolveWasteEventType } from '$lib/domain/gamification';
 
 export class InventoryNotFoundError extends Error {
 	constructor() {
@@ -148,8 +149,31 @@ export class InventoryService {
 		return item;
 	}
 
-	async deleteItem(householdId: string, id: string, actorRole: HouseholdRole) {
+	async deleteItem(
+		householdId: string,
+		id: string,
+		userId: string,
+		actorRole: HouseholdRole
+	) {
 		assertInventoryWritable(actorRole);
+		const item = await this.repository.findById(householdId, id);
+		if (!item) {
+			throw new InventoryNotFoundError();
+		}
+
+		if (this.consumptionRepository) {
+			const eventType = resolveWasteEventType(item);
+			if (eventType) {
+				await this.consumptionRepository.record({
+					id: generateId(),
+					householdId,
+					userId,
+					item,
+					eventType
+				});
+			}
+		}
+
 		const deleted = await this.repository.delete(householdId, id);
 		if (!deleted) {
 			throw new InventoryNotFoundError();

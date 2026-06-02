@@ -3,14 +3,23 @@
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
+	import EngagementStrip from '$lib/components/molecules/EngagementStrip.svelte';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import EatFirstSection from '$lib/components/organisms/EatFirstSection.svelte';
 	import ExpiringSoonSection from '$lib/components/organisms/ExpiringSoonSection.svelte';
 	import MealTimeSuggestions from '$lib/components/organisms/MealTimeSuggestions.svelte';
+	import type { EngagementStrip as EngagementStripData } from '$lib/application/gamification.service';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
+	import { ZERO_WASTE_STREAK_CELEBRATION, type GamificationCelebrationKind } from '$lib/domain/gamification';
 	import { getTimeOfDay, timeOfDayGreetingKey } from '$lib/domain/meal-slot';
 	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
-	import { t, type MessageKey } from '$lib/i18n';
+	import { getLocale, t, type MessageKey } from '$lib/i18n';
+	import { celebrationMessage } from '$lib/utils/gamification-celebrate';
+	import {
+		markCelebrationShown,
+		shouldShowCelebration
+	} from '$lib/utils/gamification-celebrations';
 	import {
 		ONBOARDING_PROGRESS_EVENT,
 		getActivationProgress,
@@ -19,11 +28,21 @@
 
 	interface Props {
 		summary: DashboardSummary;
+		engagement: EngagementStripData;
+		celebration?: GamificationCelebrationKind | null;
 		canWrite?: boolean;
 		displayName?: string | null;
+		householdId?: string | null;
 	}
 
-	let { summary, canWrite = false, displayName = null }: Props = $props();
+	let {
+		summary,
+		engagement,
+		celebration = null,
+		canWrite = false,
+		displayName = null,
+		householdId = null
+	}: Props = $props();
 
 	const returnTo = APP_HOME_PATH;
 	const from = $derived(encodeURIComponent(returnTo));
@@ -90,6 +109,29 @@
 	function locationShortLabel(location: StorageLocation): string {
 		return t(`location.${location}Short` as MessageKey);
 	}
+
+	let showCelebrationBanner = $state(false);
+	let celebrationMessageText = $state('');
+
+	$effect(() => {
+		if (!browser || !celebration || !householdId) {
+			showCelebrationBanner = false;
+			celebrationMessageText = '';
+			return;
+		}
+
+		if (!shouldShowCelebration(celebration, householdId)) {
+			showCelebrationBanner = false;
+			celebrationMessageText = '';
+			return;
+		}
+
+		celebrationMessageText = celebrationMessage(getLocale(), celebration, {
+			count: ZERO_WASTE_STREAK_CELEBRATION
+		});
+		showCelebrationBanner = true;
+		markCelebrationShown(celebration, householdId);
+	});
 </script>
 
 <section class="home" aria-label={t('home.ariaLabel')}>
@@ -97,6 +139,10 @@
 		<h1>{greeting}</h1>
 		<p class="tagline">{tagline}</p>
 	</header>
+
+	{#if showCelebrationBanner}
+		<FeedbackBanner tone="success" message={celebrationMessageText} />
+	{/if}
 
 	{#if summary.totalItems === 0}
 		{#if canWrite}
@@ -123,7 +169,13 @@
 			</Card>
 		{/if}
 	{:else}
-		<EatFirstSection expiringItems={summary.expiringSoon} canEdit={canWrite} />
+		<EngagementStrip {engagement} />
+
+		<EatFirstSection
+			expiringItems={summary.expiringSoon}
+			canEdit={canWrite}
+			householdId={householdId}
+		/>
 
 		<MealTimeSuggestions hasInventory={summary.totalItems > 0} />
 

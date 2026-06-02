@@ -8,6 +8,7 @@ import {
 	householdService,
 	inventoryService,
 	statistikService,
+	gamificationService,
 	shoppingListService,
 	mealPlanService,
 	petFoodService,
@@ -79,6 +80,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.householdRole = null;
 	event.locals.inventoryService = inventoryService;
 	event.locals.statistikService = statistikService;
+	event.locals.gamificationService = gamificationService;
 	event.locals.shoppingListService = shoppingListService;
 	event.locals.mealPlanService = mealPlanService;
 	event.locals.petService = petService;

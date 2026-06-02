@@ -30,6 +30,7 @@ export interface RecordProductEventInput {
 export interface IPmfRepository {
 	recordEvent(input: RecordProductEventInput): Promise<void>;
 	getGlobalMetrics(now?: Date): Promise<PmfMetricSnapshot>;
+	hasHouseholdEvent(householdId: string, eventType: ProductEventType): Promise<boolean>;
 }
 
 function userIdsFromEventRows(rows: Array<{ userId: string | null }>): Set<string> {
@@ -198,5 +199,19 @@ export class DrizzlePmfRepository implements IPmfRepository {
 			weeklyFillUsers: smartFill.weeklyFillUsers,
 			eventCounts
 		};
+	}
+
+	async hasHouseholdEvent(householdId: string, eventType: ProductEventType) {
+		const [row] = await db
+			.select({ count: sql<number>`count(*)::int` })
+			.from(productEventTable)
+			.where(
+				and(
+					eq(productEventTable.householdId, householdId),
+					eq(productEventTable.eventType, eventType)
+				)
+			);
+
+		return (row?.count ?? 0) > 0;
 	}
 }

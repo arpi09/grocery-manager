@@ -2,7 +2,9 @@
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
+	import MilestonesSection from '$lib/components/molecules/MilestonesSection.svelte';
 	import type { StatistikDashboard } from '$lib/application/statistik.service';
+	import type { MilestoneState } from '$lib/domain/gamification';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { maxWeeklyCount } from '$lib/domain/statistik';
 	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
@@ -11,9 +13,10 @@
 
 	interface Props {
 		dashboard: StatistikDashboard;
+		milestones?: MilestoneState[];
 	}
 
-	let { dashboard }: Props = $props();
+	let { dashboard, milestones = [] }: Props = $props();
 	const { analytics, addedTrend, addedWeekOverWeek, impact } = $derived(dashboard);
 	const isEmpty = $derived(analytics.totalItems === 0);
 	const addedMax = $derived(maxWeeklyCount(addedTrend));
@@ -92,6 +95,10 @@
 			</div>
 			{#if !impact.hasConsumptionData}<p class="muted">{t('stats.impactPlaceholder')}</p>{/if}
 		</Card>
+
+		{#if milestones.length > 0}
+			<MilestonesSection {milestones} />
+		{/if}
 
 		<div class="trends">
 			<Card>

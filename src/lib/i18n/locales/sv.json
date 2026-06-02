@@ -1078,6 +1078,26 @@
 		"createNew": "+ Skapa ny pantry",
 		"namePlaceholder": "t.ex. Sommarstuga"
 	},
+	"gamification": {
+		"stripTitle": "Din vecka",
+		"zeroWasteWeeks": "Veckor utan svinn",
+		"consumedThisWeek": "Förbrukade denna vecka",
+		"eatFirstRitual": "Ät det först-ritual",
+		"eatFirstProgress": "{done} av {goal} inplanerade denna vecka",
+		"eatFirstSuggestions": "{count} förslag denna vecka",
+		"viewStats": "Statistik",
+		"eatFirstLink": "Ät det först",
+		"placeholder": "Markera varor som förbrukade när ni använder dem ? då fylls siffrorna i här.",
+		"celebrateFirstConsumption": "Första varan markerad som förbrukad ? bra start mot matsvinn.",
+		"celebrateZeroWasteStreak": "{count} veckor utan svinn i rad ? fortsätt i samma takt.",
+		"celebrateEatFirstRitual": "Ät det först-måltid i planen ? ni gör utgående varor till middag.",
+		"milestonesTitle": "Små vinster",
+		"milestonePantry10": "10 varor i skafferiet",
+		"milestoneFirstPlan": "Första veckoplanen",
+		"milestoneFirstReceipt": "Första kvittot",
+		"milestoneFirstConsumption": "Första förbrukningen",
+		"milestoneZeroWaste3": "3 veckor utan svinn"
+	},
 	"eatFirst": {
 		"title": "Ã„t det fÃ¶rst",
 		"subtitle": "AnvÃ¤nd varor som gÃ¥r ut snart â€” fÃ¥ mÃ¥ltidsfÃ¶rslag utifrÃ¥n lagret.",

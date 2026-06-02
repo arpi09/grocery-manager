@@ -10,6 +10,11 @@
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
 	import { getLocale, t } from '$lib/i18n';
+	import { celebrationMessage } from '$lib/utils/gamification-celebrate';
+	import {
+		markCelebrationShown,
+		shouldShowCelebration
+	} from '$lib/utils/gamification-celebrations';
 	import {
 		addMissingIngredientsToList,
 		presentAddMissingFeedback,
@@ -19,9 +24,10 @@
 	interface Props {
 		expiringItems: InventoryItem[];
 		canEdit?: boolean;
+		householdId?: string | null;
 	}
 
-	let { expiringItems, canEdit = false }: Props = $props();
+	let { expiringItems, canEdit = false, householdId = null }: Props = $props();
 
 	let loading = $state(false);
 	let suggestions = $state<RecipeIdea[]>([]);
@@ -105,7 +111,11 @@
 				body: JSON.stringify({ ideaId: idea.id, plannedDate })
 			});
 
-			const data = (await response.json()) as { error?: string; ok?: boolean };
+			const data = (await response.json()) as {
+				error?: string;
+				ok?: boolean;
+				celebration?: 'eatFirstRitual';
+			};
 
 			if (!response.ok) {
 				errorMessage = data.error ?? t('eatFirst.scheduleFailed');
@@ -113,6 +123,15 @@
 			}
 
 			toastMessage = t('eatFirst.scheduleSuccess', { title: idea.title, date: plannedDate });
+
+			if (
+				data.celebration === 'eatFirstRitual' &&
+				householdId &&
+				shouldShowCelebration('eatFirstRitual', householdId)
+			) {
+				toastMessage = `${toastMessage} ${celebrationMessage(getLocale(), 'eatFirstRitual')}`;
+				markCelebrationShown('eatFirstRitual', householdId);
+			}
 		} catch {
 			errorMessage = t('eatFirst.scheduleFailed');
 		} finally {
@@ -130,7 +149,7 @@
 	}
 </script>
 
-<section class="eat-first" aria-labelledby="eat-first-heading">
+<section id="eat-first" class="eat-first" aria-labelledby="eat-first-heading">
 	<div class="hero-card">
 		<div class="hero-copy">
 			<span class="hero-badge">{t('eatFirst.badge')}</span>

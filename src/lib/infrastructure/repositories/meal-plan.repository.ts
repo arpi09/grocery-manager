@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte } from 'drizzle-orm';
+import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import { db } from '$lib/infrastructure/db';
 import { mealPlanTable, recipeIdeaTable } from '$lib/infrastructure/db/schema';
 import { generateId } from '$lib/infrastructure/auth/id';
@@ -18,6 +18,9 @@ export interface IMealPlanRepository {
 	listRecipeIdeas(userId: string, limit: number): Promise<RecipeIdea[]>;
 	createRecipeIdeas(userId: string, ideas: CreateRecipeIdeaInput[]): Promise<RecipeIdea[]>;
 	getRecipeIdeaById(userId: string, ideaId: string): Promise<RecipeIdea | null>;
+	countRecipeIdeasSince(userId: string, since: Date): Promise<number>;
+	countPlannedMealsSince(userId: string, since: Date): Promise<number>;
+	hasAnyPlannedMeal(userId: string): Promise<boolean>;
 }
 
 function parseStringArray(raw: string): string[] {
@@ -160,5 +163,32 @@ export class DrizzleMealPlanRepository implements IMealPlanRepository {
 			.limit(1);
 
 		return row ? mapRecipeIdea(row) : null;
+	}
+
+	async countRecipeIdeasSince(userId: string, since: Date) {
+		const [row] = await db
+			.select({ count: sql<number>`count(*)::int` })
+			.from(recipeIdeaTable)
+			.where(and(eq(recipeIdeaTable.userId, userId), gte(recipeIdeaTable.createdAt, since)));
+
+		return row?.count ?? 0;
+	}
+
+	async countPlannedMealsSince(userId: string, since: Date) {
+		const [row] = await db
+			.select({ count: sql<number>`count(*)::int` })
+			.from(mealPlanTable)
+			.where(and(eq(mealPlanTable.userId, userId), gte(mealPlanTable.createdAt, since)));
+
+		return row?.count ?? 0;
+	}
+
+	async hasAnyPlannedMeal(userId: string) {
+		const [row] = await db
+			.select({ count: sql<number>`count(*)::int` })
+			.from(mealPlanTable)
+			.where(eq(mealPlanTable.userId, userId));
+
+		return (row?.count ?? 0) > 0;
 	}
 }

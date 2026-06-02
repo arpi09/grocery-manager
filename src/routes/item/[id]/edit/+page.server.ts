@@ -2,6 +2,7 @@ import { InventoryNotFoundError } from '$lib/application/inventory.service';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { appendActionToast } from '$lib/utils/action-toast';
+import { appendCelebration } from '$lib/utils/gamification-celebrate';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -77,6 +78,7 @@ export const actions: Actions = {
 			await event.locals.inventoryService.deleteItem(
 				event.locals.householdId!,
 				event.params.id,
+				event.locals.user!.id,
 				event.locals.householdRole!
 			);
 		} catch (e) {
@@ -109,6 +111,14 @@ export const actions: Actions = {
 			throw e;
 		}
 
-		redirect(302, appendActionToast(`/inventory/${location}`, 'itemFinished', itemName));
+		const celebration = await event.locals.gamificationService.detectMarkFinishedCelebration(
+			event.locals.householdId!
+		);
+		let redirectPath = appendActionToast(`/inventory/${location}`, 'itemFinished', itemName);
+		if (celebration) {
+			redirectPath = appendCelebration(redirectPath, celebration);
+		}
+
+		redirect(302, redirectPath);
 	}
 };

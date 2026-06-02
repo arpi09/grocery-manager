@@ -6,7 +6,7 @@
 	import TurnstileWidget from '$lib/components/molecules/TurnstileWidget.svelte';
 	import GoogleSignInButton from '$lib/components/molecules/GoogleSignInButton.svelte';
 	import { getRegisterCaptchaUiState } from '$lib/domain/register-captcha-ui';
-	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
+	import { resetOnboarding } from '$lib/utils/onboarding';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -43,7 +43,19 @@
 	method="POST"
 	action="?/register"
 	class="form"
-	use:enhance={bindSubmitting((v) => (submitting = v))}
+	use:enhance={() => {
+		submitting = true;
+		return async ({ result, update }) => {
+			try {
+				await update();
+				if (result.type === 'redirect') {
+					resetOnboarding();
+				}
+			} finally {
+				submitting = false;
+			}
+		};
+	}}
 >
 	{#if captchaUi.showMisconfiguredBanner}
 		<FeedbackBanner tone="error" message={t('captcha.notConfigured')} />

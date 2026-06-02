@@ -43,6 +43,8 @@ export const GET: RequestHandler = async (event) => {
 		return loginError('Google sign-in is not configured');
 	}
 
+	let isNewUser = false;
+
 	try {
 		const tokens = await google.validateAuthorizationCode(code, codeVerifier);
 		const idToken = tokens.idToken();
@@ -51,6 +53,8 @@ export const GET: RequestHandler = async (event) => {
 		if (!result.ok) {
 			return loginError('Google sign-in failed. Please try again.');
 		}
+
+		isNewUser = result.isNewUser;
 
 		if (result.isNewUser) {
 			const analyticsAllowed = hasAnalyticsConsent(readCookieConsent(cookies));
@@ -76,5 +80,8 @@ export const GET: RequestHandler = async (event) => {
 		redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')
 			? redirectTo
 			: APP_HOME_PATH;
-	redirect(302, destination);
+	const freshAccountSuffix = isNewUser
+		? `${destination.includes('?') ? '&' : '?'}freshAccount=1`
+		: '';
+	redirect(302, `${destination}${freshAccountSuffix}`);
 };

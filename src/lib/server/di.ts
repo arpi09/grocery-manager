@@ -16,6 +16,7 @@ import { DrizzleHouseholdRepository } from '$lib/infrastructure/repositories/hou
 import { DrizzleShoppingListRepository } from '$lib/infrastructure/repositories/shopping-list.repository';
 import { DrizzleConsumptionRepository } from '$lib/infrastructure/repositories/consumption.repository';
 import { DrizzleInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
+import { GamificationService } from '$lib/application/gamification.service';
 import { StatistikService } from '$lib/application/statistik.service';
 import { DrizzleAdminRepository } from '$lib/infrastructure/repositories/admin.repository';
 import { DrizzleErrorLogRepository } from '$lib/infrastructure/repositories/error-log.repository';
@@ -77,6 +78,12 @@ export const statistikService = new StatistikService(
 	inventoryService,
 	inventoryRepository,
 	consumptionRepository
+);
+export const gamificationService = new GamificationService(
+	statistikService,
+	consumptionRepository,
+	mealPlanRepository,
+	pmfRepository
 );
 export const shoppingListService = new ShoppingListService(shoppingListRepository);
 export const mealPlanService = new MealPlanService(mealPlanRepository);

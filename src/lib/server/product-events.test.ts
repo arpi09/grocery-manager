@@ -6,7 +6,8 @@ describe('recordProductEvent', () => {
 	it('delegates to pmf service without blocking', async () => {
 		const repository = {
 			recordEvent: vi.fn().mockResolvedValue(undefined),
-			getGlobalMetrics: vi.fn()
+			getGlobalMetrics: vi.fn(),
+			hasHouseholdEvent: vi.fn()
 		};
 		const service = new PmfService(repository);
 
@@ -28,7 +29,8 @@ describe('recordProductEvent', () => {
 	it('swallows repository errors', async () => {
 		const repository = {
 			recordEvent: vi.fn().mockRejectedValue(new Error('db down')),
-			getGlobalMetrics: vi.fn()
+			getGlobalMetrics: vi.fn(),
+			hasHouseholdEvent: vi.fn()
 		};
 		const service = new PmfService(repository);
 		const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

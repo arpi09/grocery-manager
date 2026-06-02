@@ -12,8 +12,11 @@
 		<InstallAppBanner />
 		<HomeDashboard
 			summary={data.summary}
+			engagement={data.engagement}
+			celebration={data.celebration}
 			canWrite={data.canWrite}
 			displayName={data.user?.displayName}
+			householdId={data.activeHousehold?.id ?? null}
 		/>
 	</PageContainer>
 </AppLayout>

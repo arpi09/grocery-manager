@@ -43,7 +43,10 @@ describe('MealPlanService', () => {
 			deletePlannedMeal: vi.fn(),
 			listRecipeIdeas: vi.fn(),
 			createRecipeIdeas: vi.fn(),
-			getRecipeIdeaById: vi.fn()
+			getRecipeIdeaById: vi.fn(),
+			countRecipeIdeasSince: vi.fn(),
+			countPlannedMealsSince: vi.fn(),
+			hasAnyPlannedMeal: vi.fn()
 		};
 		service = new MealPlanService(repository);
 	});

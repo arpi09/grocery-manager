@@ -1078,6 +1078,26 @@
 		"createNew": "+ Create new pantry",
 		"namePlaceholder": "e.g. Summer house"
 	},
+	"gamification": {
+		"stripTitle": "Your week",
+		"zeroWasteWeeks": "Zero-waste weeks",
+		"consumedThisWeek": "Used this week",
+		"eatFirstRitual": "Eat-first ritual",
+		"eatFirstProgress": "{done} of {goal} planned this week",
+		"eatFirstSuggestions": "{count} suggestions this week",
+		"viewStats": "Statistics",
+		"eatFirstLink": "Eat it first",
+		"placeholder": "Mark items as finished when you use them — your impact shows up here.",
+		"celebrateFirstConsumption": "First item marked as used — a solid start against food waste.",
+		"celebrateZeroWasteStreak": "{count} zero-waste weeks in a row — keep the rhythm going.",
+		"celebrateEatFirstRitual": "Eat-first meal on the plan — you're turning expiring items into dinner.",
+		"milestonesTitle": "Small wins",
+		"milestonePantry10": "10 items in the pantry",
+		"milestoneFirstPlan": "First weekly plan",
+		"milestoneFirstReceipt": "First receipt scanned",
+		"milestoneFirstConsumption": "First item marked as used",
+		"milestoneZeroWaste3": "3 zero-waste weeks"
+	},
 	"eatFirst": {
 		"title": "Eat it first",
 		"subtitle": "Use expiring items before they go to waste — get meal ideas from your pantry.",
