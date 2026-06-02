@@ -1151,5 +1151,42 @@
 		"shopping": {
 			"missingRowId": "Missing row id"
 		}
+	},
+	"actionToast": {
+		"itemCreated": "{label} added",
+		"itemCreatedGeneric": "Item added",
+		"itemUpdated": "{label} updated",
+		"itemUpdatedGeneric": "Item updated",
+		"itemDeleted": "{label} removed",
+		"itemDeletedGeneric": "Item removed",
+		"itemFinished": "{label} marked as finished",
+		"itemFinishedGeneric": "Item marked as finished",
+		"settingsSaved": "Settings saved",
+		"petAdded": "{label} added",
+		"petAddedGeneric": "Pet added",
+		"petRemoved": "{label} removed",
+		"petRemovedGeneric": "Pet removed",
+		"petFoodAdded": "Pet food added",
+		"petFoodRemoved": "Pet food removed",
+		"memberUpdated": "Member updated",
+		"memberRemoved": "Member removed",
+		"inviteRevoked": "Invitation revoked",
+		"mealCreated": "{label} added to the meal plan",
+		"mealCreatedGeneric": "Meal added",
+		"mealUpdated": "{label} updated",
+		"mealUpdatedGeneric": "Meal updated",
+		"mealDeleted": "{label} removed",
+		"mealDeletedGeneric": "Meal removed",
+		"mealScheduled": "{label} scheduled",
+		"mealScheduledGeneric": "Meal scheduled",
+		"pantrySwitched": "Switched to {label}",
+		"pantrySwitchedGeneric": "Pantry switched",
+		"pantryCreated": "{label} created",
+		"pantryCreatedGeneric": "Pantry created",
+		"pantryLeft": "You left the pantry",
+		"shoppingAdded": "Added to shopping list",
+		"shoppingCleared": "Shopping list cleared",
+		"adminSaved": "Admin settings saved",
+		"adminPasswordResetSent": "Password reset email sent"
 	}
 }

@@ -19,6 +19,7 @@ export const lucia = new Lucia(adapter, {
 		avatarUrl: attributes.avatarUrl,
 		role: attributes.role,
 		petsEnabled: Boolean(attributes.petsEnabled),
+		isDemo: Boolean(attributes.isDemo),
 		expiryRemindersEnabled: Boolean(attributes.expiryRemindersEnabled),
 		expiryReminderDays: attributes.expiryReminderDays,
 		themePreference: attributes.themePreference
@@ -34,6 +35,7 @@ declare module 'lucia' {
 			avatarUrl: string | null;
 			role: string;
 			petsEnabled: boolean;
+			isDemo: boolean;
 			expiryRemindersEnabled: boolean;
 			expiryReminderDays: number;
 			themePreference: string;
@@ -48,6 +50,7 @@ declare module 'lucia' {
 		avatarUrl: string | null;
 		role: string;
 		petsEnabled: boolean;
+		isDemo: boolean;
 		expiryRemindersEnabled: boolean;
 		expiryReminderDays: number;
 		themePreference: string;

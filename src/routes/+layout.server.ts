@@ -47,7 +47,8 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			displayName: locals.user.displayName,
 			avatarUrl: locals.user.avatarUrl,
 			role: locals.user.role,
-			petsEnabled: Boolean(locals.user.petsEnabled)
+			petsEnabled: Boolean(locals.user.petsEnabled),
+			isDemo: Boolean(locals.user.isDemo)
 		},
 		themePreference: preference,
 		resolvedTheme: resolved,
