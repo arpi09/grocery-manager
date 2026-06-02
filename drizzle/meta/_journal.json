@@ -169,6 +169,13 @@
 			"when": 1750339200000,
 			"tag": "0024_auto_expired_grace",
 			"breakpoints": true
+		},
+		{
+			"idx": 24,
+			"version": "7",
+			"when": 1750425600000,
+			"tag": "0025_receipt_purchase_pattern",
+			"breakpoints": true
 		}
 	]
 }

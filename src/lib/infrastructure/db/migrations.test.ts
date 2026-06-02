@@ -60,7 +60,8 @@ describe('drizzle migrations', () => {
 			'0021_shopping_push.sql',
 			'0022_user_is_demo.sql',
 			'0023_auth_password_reset_oauth.sql',
-			'0024_auto_expired_grace.sql'
+			'0024_auto_expired_grace.sql',
+			'0025_receipt_purchase_pattern.sql'
 		];
 
 		expect(pgliteFiles).toEqual(sqlFiles);
