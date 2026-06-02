@@ -74,6 +74,7 @@ test.describe('Receipt flow', () => {
 		await uploadReceiptPdf(page, FIXTURE_PDF);
 
 		await expect(page.getByTestId('receipt-line-0')).toBeVisible({ timeout: 15_000 });
+		await dismissOnboardingModalIfOpen(page);
 		await page.getByTestId('receipt-bulk-submit').click();
 
 		await expect(page).toHaveURL(/\/hem/, { timeout: 15_000 });

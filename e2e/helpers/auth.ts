@@ -137,10 +137,20 @@ export async function dismissCookieConsentIfOpen(page: Page) {
 
 export async function dismissOnboardingModalIfOpen(page: Page) {
 	await dismissCookieConsentIfOpen(page);
-	const skip = page.getByRole('button', { name: /Jag gör det senare|Hoppa|senare/i });
-	if (await skip.isVisible().catch(() => false)) {
-		await skip.click();
-		await expect(skip).toBeHidden({ timeout: 5_000 });
+
+	for (let attempt = 0; attempt < 3; attempt += 1) {
+		const skip = page.getByRole('button', {
+			name: /Hoppa över|Jag gör det senare|Inte nu|Skip/i
+		});
+		if (!(await skip.first().isVisible().catch(() => false))) {
+			break;
+		}
+		await skip.first().click();
+		await page
+			.locator('[role="dialog"]')
+			.first()
+			.waitFor({ state: 'hidden', timeout: 5_000 })
+			.catch(() => {});
 	}
 }
 
@@ -184,6 +194,7 @@ export async function registerNewUser(
 	const navigatedHome = waitForAppHome(page);
 	await page.getByTestId('register-submit').click();
 	await navigatedHome;
+	await dismissOnboardingModalIfOpen(page);
 
 	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
 
@@ -223,6 +234,7 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 	}
 
 	await dismissCookieConsentIfOpen(page);
+	await dismissOnboardingModalIfOpen(page);
 	await expect(page.locator('section.home')).toBeVisible({ timeout: E2E_AUTH_NAV_TIMEOUT_MS });
 	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 }
