@@ -97,7 +97,11 @@ env:
       - RUNTIME
 
   # Google OAuth — app hides Google login when unset (isGoogleOAuthConfigured).
-  # Secrets: docs/FIREBASE_DEPLOY.md — grantaccess required on backend home-pantry.
+  # Create secrets and grant backend access (see docs/FIREBASE_DEPLOY.md):
+  # npx firebase apphosting:secrets:set GOOGLE_CLIENT_ID --project home-pantry-4bee5
+  # npx firebase apphosting:secrets:grantaccess GOOGLE_CLIENT_ID --backend home-pantry --project home-pantry-4bee5
+  # npx firebase apphosting:secrets:set GOOGLE_CLIENT_SECRET --project home-pantry-4bee5
+  # npx firebase apphosting:secrets:grantaccess GOOGLE_CLIENT_SECRET --backend home-pantry --project home-pantry-4bee5
   - variable: GOOGLE_CLIENT_ID
     secret: GOOGLE_CLIENT_ID
     availability:
