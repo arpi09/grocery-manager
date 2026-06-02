@@ -89,7 +89,9 @@ export class DrizzlePasswordResetRepository implements IPasswordResetRepository 
 		return Number(row?.count ?? 0);
 	}
 
-	async countRecentForIp(_ipKey: string, _since: Date) {
+	async countRecentForIp(ipKey: string, since: Date) {
+		void ipKey;
+		void since;
 		// IP tracking is handled in-memory via auth-rate-limit; DB column omitted for privacy.
 		return 0;
 	}

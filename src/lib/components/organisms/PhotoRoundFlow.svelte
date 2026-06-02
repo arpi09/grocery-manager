@@ -12,7 +12,6 @@
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
 
 	interface Props {
 		returnTo: string;
@@ -136,8 +135,9 @@
 
 	function removeLine(id: number) {
 		lines = lines.filter((line) => line.id !== id);
-		const { [id]: _removed, ...rest } = selected;
-		selected = rest;
+		const next = { ...selected };
+		delete next[id];
+		selected = next;
 	}
 
 	function toggleAll(checked: boolean) {
