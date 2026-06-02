@@ -1,4 +1,4 @@
-﻿import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
 import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
 
@@ -12,7 +12,8 @@ test.describe('Scan and inventory', () => {
 		await expect(page.locator('nav.mode-tabs')).toBeVisible();
 		await expect(page.getByRole('heading', { name: 'Streckkod' })).toBeVisible();
 		await expect(page.getByRole('heading', { name: 'Kvitto' })).toBeVisible();
-		await expect(page.getByRole('heading', { name: 'Foto' })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Foto', exact: true })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Foto-runda' })).toBeVisible();
 	});
 
 	test('manual barcode lookup and add item to inventory', async ({ page }) => {
@@ -32,7 +33,7 @@ test.describe('Scan and inventory', () => {
 		const manualBarcode = page.locator('#manual-barcode');
 		if (await manualBarcode.isVisible().catch(() => false)) {
 			await manualBarcode.fill(barcode);
-			await page.getByRole('button', { name: /^SÃ¶k$/i }).click();
+			await page.getByRole('button', { name: /^Sök$/i }).click();
 			await expect(page.locator('#scan-product-name')).toBeVisible({ timeout: 15_000 });
 			await page.locator('#scan-product-name').fill(itemName);
 			await page.locator('form.save-form').getByRole('button', { name: /^Spara$/i }).click();
