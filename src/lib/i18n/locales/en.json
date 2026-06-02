@@ -919,6 +919,8 @@
 		"analyzing": "Analyzing shelf…",
 		"changeZone": "Change zone",
 		"parseFailed": "Could not read items from the photos. Try clearer images.",
+		"uploadTooLarge": "Photos are too large together (max 18 MB). Remove a photo or use smaller images.",
+		"serverError": "The server could not analyze the photos. Try again in a moment.",
 		"noItems": "No visible items found. Try more angles or better lighting.",
 		"networkError": "Network error during photo round.",
 		"reviewTitle": "Review ({selected} of {total})",

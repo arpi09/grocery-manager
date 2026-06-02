@@ -17,7 +17,7 @@ New-Item -ItemType File -Path $tempFile -Force | Out-Null
 
 Write-Host @"
 
-OpenAI API-nyckel för App Hosting (kvittoscan, foto-produktscan, recept).
+OpenAI API-nyckel för App Hosting (kvittoscan, foto-runda, foto-produktscan, recept).
 
 1) Notepad öppnas med en tom fil.
 2) Klistra in nyckeln (sk-...) på en rad, spara (Ctrl+S) och stäng Notepad.

@@ -6,7 +6,7 @@ import { translate } from '$lib/i18n/messages';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { e2eMockPhotoRoundParse, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
-import { translateOpenAiError } from '$lib/server/openai';
+import { translateOpenAiError, missingOpenAiKeyMessage } from '$lib/server/openai';
 import { isPhotoRoundZone, parsePhotoRoundFromImages } from '$lib/server/photo-round-parse';
 import { recordProductEvent } from '$lib/server/product-events';
 import type { RequestHandler } from './$types';
@@ -72,6 +72,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	const apiKeyOrResponse = requireOpenAiKey(locals.locale, 'photo inventory round', 503);
 	if (typeof apiKeyOrResponse !== 'string') {
+		console.error(missingOpenAiKeyMessage('photo inventory round'));
 		return apiKeyOrResponse;
 	}
 	const apiKey = apiKeyOrResponse;

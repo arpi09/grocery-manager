@@ -58,9 +58,9 @@ env:
     availability:
       - RUNTIME
 
-  # adapter-node default is 512K; profile avatars post resized JPEG data URLs (~700 KB max).
+  # adapter-node default is 512K. Foto-runda accepts up to 3×6 MB images per request.
   - variable: BODY_SIZE_LIMIT
-    value: "1M"
+    value: "20M"
     availability:
       - RUNTIME
 

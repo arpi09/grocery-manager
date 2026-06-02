@@ -7,7 +7,7 @@
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
 	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
 	import type { PhotoRoundDetectedItem } from '$lib/domain/photo-round';
-	import { PHOTO_ROUND_MAX_IMAGES } from '$lib/domain/photo-round';
+	import { PHOTO_ROUND_MAX_IMAGES, PHOTO_ROUND_MAX_TOTAL_BYTES } from '$lib/domain/photo-round';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
@@ -82,14 +82,39 @@
 
 	function parseFailureMessage(response: Response, data: { error?: string }): string {
 		if (data.error) return data.error;
+		if (response.status === 413) {
+			return t('photoRound.uploadTooLarge');
+		}
 		if (response.status >= 500) {
-			return t('errors.api.openAiNotConfigured');
+			return t('photoRound.serverError');
 		}
 		return t('photoRound.parseFailed');
 	}
 
+	async function readPhotoRoundParseResponse(response: Response): Promise<{
+		items?: PhotoRoundDetectedItem[];
+		error?: string;
+	}> {
+		const contentType = response.headers.get('content-type') ?? '';
+		if (!contentType.includes('application/json')) {
+			return {};
+		}
+		try {
+			return (await response.json()) as { items?: PhotoRoundDetectedItem[]; error?: string };
+		} catch {
+			return {};
+		}
+	}
+
 	async function analyzePhotos() {
 		if (!zone || photos.length === 0) return;
+
+		const totalBytes = photos.reduce((sum, photo) => sum + photo.file.size, 0);
+		if (totalBytes > PHOTO_ROUND_MAX_TOTAL_BYTES) {
+			parseError = t('photoRound.uploadTooLarge');
+			return;
+		}
+
 		parsing = true;
 		parseError = null;
 
@@ -101,12 +126,7 @@
 
 		try {
 			const response = await fetch('/api/inventory/photo-scan', { method: 'POST', body: formData });
-			const contentType = response.headers.get('content-type') ?? '';
-			const data: { items?: PhotoRoundDetectedItem[]; error?: string } = contentType.includes(
-				'application/json'
-			)
-				? await response.json()
-				: {};
+			const data = await readPhotoRoundParseResponse(response);
 
 			if (!response.ok || !data.items) {
 				parseError = parseFailureMessage(response, data);

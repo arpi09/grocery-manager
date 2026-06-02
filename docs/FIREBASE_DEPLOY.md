@@ -183,14 +183,22 @@ Update non-secret values in `apphosting.yaml` or Firebase Console â†’ **App
 | `ADMIN_PASSWORD` | yes | Secret â€” creates/updates admin on startup |
 | `PUBLIC_ORIGIN` | yes | `https://home-pantry--home-pantry-4bee5.REGION.hosted.app` or custom domain |
 | `ORIGIN` | yes (runtime) | Same HTTPS URL as `PUBLIC_ORIGIN` â€” required by `@sveltejs/adapter-node` for form-action CSRF |
-| `OPENAI_API_KEY` | optional* | Recipe suggestions, receipt scan, **photo product scan** (`/api/product-from-image`) |
+| `OPENAI_API_KEY` | optional* | Recipe suggestions, receipt scan, **foto-runda** (`/api/inventory/photo-scan`), photo product scan (`/api/product-from-image`) |
 | `RESEND_API_KEY` | optional | Household invite email via Resend â€” see [`EMAIL.md`](./EMAIL.md) |
 | `TURNSTILE_SECRET_KEY` | yes (prod) | Turnstile server verification on `/register` â€” see [`CAPTCHA.md`](./CAPTCHA.md) |
 | `PUBLIC_TURNSTILE_SITE_KEY` | yes (prod) | Turnstile widget site key â€” set in `apphosting.yaml` or Firebase Console (BUILD + RUNTIME) |
 | `RESEND_FROM` | optional | Sender address; defaults to `Home Pantry <onboarding@resend.dev>` until domain verified |
 | `CRON_SECRET` | yes (prod cron) | Bearer for `POST /api/cron/expiry-reminders` — set in Secret Manager; same value as GitHub Actions secret — see [90_DAY_ROADMAP.md § punkt 5](./90_DAY_ROADMAP.md#ägare--github-actions--firebase-prod) |
 
-\*Photo scan and other AI routes return **503** with a clear JSON error when this secret is missing, invalid, or not granted to the `home-pantry` backend. Create the secret and run `grantaccess` before relying on scan in production.
+\*Photo scan, foto-runda, and other AI routes return **503** with a clear JSON error when this secret is missing, invalid, or not granted to the `home-pantry` backend. Create the secret and run `grantaccess` before relying on scan in production.
+
+Quick setup (Windows):
+
+```powershell
+powershell -File scripts/setup-openai-secret.ps1
+```
+
+| `BODY_SIZE_LIMIT` | yes (runtime) | Adapter-node request body cap. Must be **≥ 20M** for foto-runda (up to 3×6 MB images). Set in `apphosting.yaml`. Receipt PDF scan still works best under ~1 MB. |
 | `DEFAULT_MEMBER_EMAIL` | optional | Demo household member |
 | `DEFAULT_MEMBER_PASSWORD` | optional | Demo household member (secret if set) |
 
@@ -322,6 +330,8 @@ Use the existing root `Dockerfile`. Map Cloud Run URL to `PUBLIC_ORIGIN`.
 | Cookies not sticking | Set `PUBLIC_ORIGIN` to exact HTTPS origin; `NODE_ENV=production` enables secure cookies |
 | Login/form POST returns 403 | Set `ORIGIN` (runtime) to the same HTTPS origin as the browser URL; proxy `Host` alone is not enough for adapter-node CSRF |
 | Cold start latency | Increase `minInstances` in `apphosting.yaml` |
+| Foto-runda: «AI-tjänsten är inte tillgänglig» | `OPENAI_API_KEY` missing or backend lacks `grantaccess` — run `scripts/setup-openai-secret.ps1` and redeploy |
+| Foto-runda fails with generic server error / 413 | Request exceeded `BODY_SIZE_LIMIT` — ensure `apphosting.yaml` has `BODY_SIZE_LIMIT: "20M"` and redeploy |
 | Blaze billing | App Hosting uses Cloud Run + Cloud Build; free tier limits may not cover production traffic |
 
 ## Files in this setup
