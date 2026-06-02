@@ -13,6 +13,14 @@ export class PmfService {
 		return this.repository.recordEvent(input);
 	}
 
+	countUserScanEvents(userId: string): Promise<number> {
+		return this.repository.countUserScanEvents(userId);
+	}
+
+	getUserCreatedAt(userId: string): Promise<Date | null> {
+		return this.repository.getUserCreatedAt(userId);
+	}
+
 	getGlobalMetrics(now?: Date): Promise<PmfMetricSnapshot> {
 		return this.repository.getGlobalMetrics(now);
 	}

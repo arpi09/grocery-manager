@@ -62,12 +62,36 @@ export const actions: Actions = {
 			returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : '/';
 		const productFound = formData.get('productFound') === '1';
 
+		const userId = event.locals.user!.id;
+		const priorScanCount = await event.locals.pmfService.countUserScanEvents(userId);
+		const isFirstScan = priorScanCount === 0;
+		const createdAt = isFirstScan ? await event.locals.pmfService.getUserCreatedAt(userId) : null;
+		const secondsSinceSignup =
+			createdAt !== null
+				? Math.max(0, Math.round((Date.now() - createdAt.getTime()) / 1000))
+				: undefined;
+
 		recordProductEvent(event.locals.pmfService, {
-			userId: event.locals.user!.id,
+			userId,
 			householdId: event.locals.householdId,
 			eventType: 'scan_completed',
-			metadata: { source: 'barcode', productFound }
+			metadata: {
+				source: 'barcode',
+				productFound,
+				...(isFirstScan && secondsSinceSignup !== undefined
+					? { firstScan: true, secondsSinceSignup }
+					: {})
+			}
 		});
+
+		if (isFirstScan && secondsSinceSignup !== undefined) {
+			recordProductEvent(event.locals.pmfService, {
+				userId,
+				householdId: event.locals.householdId,
+				eventType: 'first_scan',
+				metadata: { source: 'barcode', secondsSinceSignup, productFound }
+			});
+		}
 
 		const toastKind: ScanToastKind = productFound ? 'added' : 'unknown';
 		const target =

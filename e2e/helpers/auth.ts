@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import { LOCALE_COOKIE_NAME, LOCALE_STORAGE_KEY } from '../../src/lib/i18n/locale';
 
-const ONBOARDING_VERSION = '2';
+const ONBOARDING_VERSION = '3';
 const E2E_LOCALE = 'sv';
 /** Locale only — onboarding and activation state stay fresh (new-user flows). */
 export async function prepareFreshUserBrowserState(page: Page) {
@@ -162,12 +162,18 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 	}
 }
 
-async function waitForAppHome(page: Page) {
-	await page.waitForURL((url) => url.pathname === '/hem', {
-		timeout: E2E_AUTH_NAV_TIMEOUT_MS,
-		waitUntil: 'commit'
-	});
-	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
+async function waitForPostRegisterScan(page: Page) {
+	await page.waitForURL(
+		(url) => url.pathname === '/scan' && url.searchParams.get('mode') === 'barcode',
+		{
+			timeout: E2E_AUTH_NAV_TIMEOUT_MS,
+			waitUntil: 'commit'
+		}
+	);
+	await page.waitForURL(
+		(url) => url.pathname === '/scan' && !url.searchParams.has('freshAccount'),
+		{ timeout: 20_000 }
+	);
 }
 
 export async function expectOnboardingGuideVisible(page: Page) {
@@ -176,7 +182,7 @@ export async function expectOnboardingGuideVisible(page: Page) {
 		page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
 	).toBeVisible({ timeout: 20_000 });
 	await expect(page.getByRole('button', { name: /Hoppa \u00f6ver/i })).toBeVisible();
-	await expect(page.getByText(/Steg 1 av 5/i)).toBeVisible();
+	await expect(page.getByText(/Steg 1 av 2/i)).toBeVisible();
 }
 
 async function markE2eOnboardingComplete(page: Page) {
@@ -241,15 +247,9 @@ export async function registerNewUser(
 	await fillBoundInput(passwordInput, password);
 	await fillBoundInput(confirmInput, password);
 
-	const navigatedHome = waitForAppHome(page);
+	const navigatedToScan = waitForPostRegisterScan(page);
 	await page.getByTestId('register-submit').click();
-	await navigatedHome;
-	await page.waitForURL(
-		(url) => url.pathname === '/hem' && !url.searchParams.has('freshAccount'),
-		{ timeout: 20_000 }
-	);
-
-	await expect(page.locator('section.home')).toBeVisible({ timeout: 20_000 });
+	await navigatedToScan;
 
 	return { email, password };
 }

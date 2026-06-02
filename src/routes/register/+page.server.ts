@@ -17,7 +17,7 @@ import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { getOrSetAnalyticsVisitorId } from '$lib/server/analytics-visitor';
 import { recordSignupCompleteEvent } from '$lib/server/marketing-analytics';
 import { registerSchema } from '$lib/validation/auth.schemas';
-import { APP_HOME_PATH } from '$lib/navigation/app-home';
+import { POST_REGISTER_SCAN_PATH } from '$lib/navigation/post-register';
 import { createSession } from '$lib/server/session';
 import { isGoogleOAuthConfigured } from '$lib/server/google-oauth';
 import { fail, redirect } from '@sveltejs/kit';
@@ -86,6 +86,6 @@ export const actions: Actions = {
 			throw error;
 		}
 
-		redirect(302, `${APP_HOME_PATH}?freshAccount=1`);
+		redirect(302, POST_REGISTER_SCAN_PATH);
 	}
 };

@@ -31,6 +31,8 @@ export interface IPmfRepository {
 	recordEvent(input: RecordProductEventInput): Promise<void>;
 	getGlobalMetrics(now?: Date): Promise<PmfMetricSnapshot>;
 	hasHouseholdEvent(householdId: string, eventType: ProductEventType): Promise<boolean>;
+	countUserScanEvents(userId: string): Promise<number>;
+	getUserCreatedAt(userId: string): Promise<Date | null>;
 }
 
 function userIdsFromEventRows(rows: Array<{ userId: string | null }>): Set<string> {
@@ -213,5 +215,26 @@ export class DrizzlePmfRepository implements IPmfRepository {
 			);
 
 		return (row?.count ?? 0) > 0;
+	}
+
+	async countUserScanEvents(userId: string): Promise<number> {
+		const [row] = await db
+			.select({ count: sql<number>`count(*)::int` })
+			.from(productEventTable)
+			.where(
+				and(eq(productEventTable.userId, userId), eq(productEventTable.eventType, 'scan_completed'))
+			);
+
+		return row?.count ?? 0;
+	}
+
+	async getUserCreatedAt(userId: string): Promise<Date | null> {
+		const [row] = await db
+			.select({ createdAt: userTable.createdAt })
+			.from(userTable)
+			.where(eq(userTable.id, userId))
+			.limit(1);
+
+		return row?.createdAt ?? null;
 	}
 }

@@ -6,6 +6,7 @@
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
+	import { trackProductEvent } from '$lib/client/product-events';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { t, type MessageKey } from '$lib/i18n';
 	import {
@@ -33,22 +34,21 @@
 	}
 
 	const stepDefinitions: Step[] = [
-		{ id: 'welcome', titleKey: 'onboarding.welcome', bodyKey: 'onboarding.welcomeBody', iconId: 'home' },
-		{ id: 'scan', titleKey: 'onboarding.scanTitle', bodyKey: 'onboarding.scanBody', iconId: 'barcode' },
 		{
-			id: 'expiry',
-			titleKey: 'onboarding.expiryTitle',
-			bodyKey: 'onboarding.expiryBody',
-			iconId: 'sparkle'
+			id: 'welcome',
+			titleKey: 'onboarding.welcome',
+			bodyKey: 'onboarding.welcomeBodyShort',
+			iconId: 'barcode'
 		},
 		{
-			id: 'meals',
-			titleKey: 'onboarding.mealsTitle',
-			bodyKey: 'onboarding.mealsBody',
-			iconId: 'box'
-		},
-		{ id: 'ready', titleKey: 'onboarding.readyTitle', bodyKey: 'onboarding.readyBody', iconId: 'check' }
+			id: 'ready',
+			titleKey: 'onboarding.readyTitle',
+			bodyKey: 'onboarding.readyBody',
+			iconId: 'check'
+		}
 	];
+
+	const scanQuickStartPath = `/scan?mode=barcode&from=${encodeURIComponent(APP_HOME_PATH)}`;
 
 	let open = $state(false);
 	let stepIndex = $state(0);
@@ -88,9 +88,31 @@
 		open = false;
 	}
 
-	function skipGuide() {
+	async function goToScanQuickStart(source: 'skip' | 'quickstart') {
+		if (!userId) {
+			return;
+		}
+
+		setActivationPath('barcode', userId);
 		dismissOnboarding(userId);
 		closeGuide();
+		void trackProductEvent(
+			source === 'quickstart' ? 'onboarding_quickstart' : 'onboarding_skipped'
+		);
+
+		if (pathname.startsWith('/scan')) {
+			return;
+		}
+
+		await goto(scanQuickStartPath);
+	}
+
+	function skipGuide() {
+		void goToScanQuickStart('skip');
+	}
+
+	function quickStart() {
+		void goToScanQuickStart('quickstart');
 	}
 
 	function goNext() {
@@ -110,8 +132,7 @@
 	}
 
 	function finishGuide() {
-		dismissOnboarding(userId);
-		closeGuide();
+		void goToScanQuickStart('skip');
 	}
 
 	async function chooseReceipt() {
@@ -131,7 +152,7 @@
 		setActivationPath('barcode', userId);
 		dismissOnboarding(userId);
 		closeGuide();
-		await goto(`/scan?mode=barcode&from=${encodeURIComponent(`/scan?from=${encodeURIComponent(APP_HOME_PATH)}`)}`);
+		await goto(scanQuickStartPath);
 	}
 
 	$effect(() => {
@@ -203,8 +224,15 @@
 		</div>
 		<p class="step-body">{currentStep.body}</p>
 
-		{#if currentStep.id === 'scan'}
-			<p class="scan-hint">{t('onboarding.scanHint')}</p>
+		{#if currentStep.id === 'welcome'}
+			<ul class="quick-points" aria-label={t('onboarding.quickPointsAria')}>
+				<li>{t('onboarding.quickPointScan')}</li>
+				<li>{t('onboarding.quickPointExpiry')}</li>
+				<li>{t('onboarding.quickPointMeals')}</li>
+			</ul>
+			<Button type="button" fullWidth onclick={quickStart} data-testid="onboarding-quickstart">
+				{t('onboarding.quickStart')}
+			</Button>
 		{/if}
 
 		{#if currentStep.id === 'ready'}
@@ -218,11 +246,11 @@
 			{/if}
 
 			<div class="path-actions">
-				<Button type="button" fullWidth onclick={chooseReceipt}>
-					{t('onboarding.ctaReceipt')}
+				<Button type="button" fullWidth onclick={chooseBarcode}>
+					{t('onboarding.ctaBarcodeFirst')}
 				</Button>
-				<Button type="button" variant="secondary" fullWidth onclick={chooseBarcode}>
-					{t('onboarding.ctaBarcode')}
+				<Button type="button" variant="secondary" fullWidth onclick={chooseReceipt}>
+					{t('onboarding.ctaReceipt')}
 				</Button>
 			</div>
 		{/if}
@@ -450,8 +478,12 @@
 		color: var(--color-text);
 	}
 
-	.scan-hint {
+	.quick-points {
 		margin: 0;
+		padding-left: 1.25rem;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
 		font-size: 0.9375rem;
 		color: var(--color-text-muted);
 		line-height: 1.45;

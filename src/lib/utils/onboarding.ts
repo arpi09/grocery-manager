@@ -1,7 +1,7 @@
 import { isMarketingPath } from '$lib/marketing/routes';
 
 /** Current onboarding tour version — bump to show the guide again for returning users. */
-export const ONBOARDING_VERSION = 2;
+export const ONBOARDING_VERSION = 3;
 
 export { ONBOARDING_STEP_COUNT } from '$lib/utils/onboarding-steps';
 
@@ -13,6 +13,7 @@ const ACTIVATION_PATH_SUFFIX = 'activation-path';
 const ACTIVATION_BARCODE_COUNT_SUFFIX = 'activation-barcode-count';
 const ACTIVATION_RECEIPT_SUFFIX = 'activation-receipt-done';
 const CELEBRATION_PENDING_SUFFIX = 'celebration-pending';
+const SIGNUP_AT_SUFFIX = 'signup-at';
 
 /** Legacy keys (pre user-scoped storage) — cleared on reset without userId. */
 const LEGACY_KEYS = [
@@ -150,10 +151,46 @@ function clearUserOnboardingKeys(userId: string): void {
 		ACTIVATION_RECEIPT_SUFFIX,
 		CELEBRATION_PENDING_SUFFIX,
 		POST_ONBOARDING_SURVEY_PENDING_SUFFIX,
-		POST_ONBOARDING_SURVEY_DISMISSED_SUFFIX
+		POST_ONBOARDING_SURVEY_DISMISSED_SUFFIX,
+		SIGNUP_AT_SUFFIX
 	]) {
 		localStorage.removeItem(storageKey(suffix, userId));
 	}
+}
+
+export function markSignupAt(userId?: string | null): void {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	if (localStorage.getItem(storageKey(SIGNUP_AT_SUFFIX, userId))) {
+		return;
+	}
+
+	localStorage.setItem(storageKey(SIGNUP_AT_SUFFIX, userId), String(Date.now()));
+}
+
+export function getSignupAt(userId?: string | null): number | null {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return null;
+	}
+
+	const raw = localStorage.getItem(storageKey(SIGNUP_AT_SUFFIX, userId));
+	if (!raw) {
+		return null;
+	}
+
+	const parsed = Number(raw);
+	return Number.isFinite(parsed) ? parsed : null;
+}
+
+export function secondsSinceSignup(userId?: string | null): number | null {
+	const signupAt = getSignupAt(userId);
+	if (signupAt === null) {
+		return null;
+	}
+
+	return Math.max(0, Math.round((Date.now() - signupAt) / 1000));
 }
 
 export function resetOnboarding(userId?: string | null): void {

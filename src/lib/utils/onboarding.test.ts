@@ -7,14 +7,17 @@ import {
 	getActivationProgress,
 	isActivationComplete,
 	isOnboardingExcludedPath,
+	markSignupAt,
 	recordBarcodeActivation,
 	recordReceiptActivation,
 	resetOnboarding,
+	secondsSinceSignup,
 	shouldShowCelebration,
 	shouldShowOnboarding,
 	shouldShowPostOnboardingSurvey,
 	dismissPostOnboardingSurvey
 } from './onboarding';
+import { POST_REGISTER_SCAN_PATH } from '../navigation/post-register';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 
 const TEST_USER_A = 'user-a';
@@ -91,6 +94,21 @@ describe('onboarding helpers', () => {
 		expect(isOnboardingExcludedPath('/funktioner')).toBe(true);
 		expect(isOnboardingExcludedPath(APP_HOME_PATH)).toBe(false);
 		expect(isOnboardingExcludedPath('/scan')).toBe(false);
+	});
+
+	it('auto-completes onboarding for fresh-account fast start', () => {
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(true);
+		markSignupAt(TEST_USER_A);
+		completeOnboarding(TEST_USER_A);
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
+		expect(secondsSinceSignup(TEST_USER_A)).toBeGreaterThanOrEqual(0);
+	});
+
+	it('routes new registrations to barcode scan hub', () => {
+		const url = new URL(`https://skaffu.com${POST_REGISTER_SCAN_PATH}`);
+		expect(url.pathname).toBe('/scan');
+		expect(url.searchParams.get('mode')).toBe('barcode');
+		expect(url.searchParams.get('freshAccount')).toBe('1');
 	});
 });
 

@@ -6,7 +6,7 @@
 	import TurnstileWidget from '$lib/components/molecules/TurnstileWidget.svelte';
 	import GoogleSignInButton from '$lib/components/molecules/GoogleSignInButton.svelte';
 	import { getRegisterCaptchaUiState } from '$lib/domain/register-captcha-ui';
-	import { resetOnboarding } from '$lib/utils/onboarding';
+	import { POST_REGISTER_SCAN_OAUTH_REDIRECT } from '$lib/navigation/post-register';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -39,7 +39,16 @@
 
 	let submitting = $state(false);
 	let captchaLoadFailed = $state(false);
+
+	const googleHref = $derived(
+		`/auth/google?redirectTo=${encodeURIComponent(POST_REGISTER_SCAN_OAUTH_REDIRECT)}`
+	);
 </script>
+
+{#if googleOAuthEnabled}
+	<GoogleSignInButton href={googleHref} />
+	<div class="oauth-divider" aria-hidden="true">{t('auth.google.or')}</div>
+{/if}
 
 <form
 	method="POST"
@@ -47,12 +56,9 @@
 	class="form"
 	use:enhance={() => {
 		submitting = true;
-		return async ({ result, update }) => {
+		return async ({ update }) => {
 			try {
 				await update();
-				if (result.type === 'redirect') {
-					resetOnboarding();
-				}
 			} finally {
 				submitting = false;
 			}
@@ -109,11 +115,6 @@
 	>
 		{t('auth.register.submit')}
 	</Button>
-
-	{#if googleOAuthEnabled}
-		<div class="oauth-divider" aria-hidden="true">{t('auth.google.or')}</div>
-		<GoogleSignInButton href="/auth/google" />
-	{/if}
 
 	<p class="footer">
 		{t('auth.register.hasAccount')} <a href="/login">{t('auth.register.loginLink')}</a>

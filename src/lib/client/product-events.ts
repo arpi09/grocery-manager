@@ -2,6 +2,8 @@ import { hasClientAnalyticsConsent } from '$lib/client/cookie-consent';
 
 const CLIENT_EVENT_TYPES = [
 	'register_click',
+	'onboarding_skipped',
+	'onboarding_quickstart',
 	'pwa_banner_dismiss',
 	'pwa_banner_install_click'
 ] as const;

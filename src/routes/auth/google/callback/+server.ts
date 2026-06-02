@@ -1,5 +1,6 @@
 import { createGoogleClient, getGoogleClientId } from '$lib/server/google-oauth';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
+import { POST_REGISTER_SCAN_OAUTH_REDIRECT } from '$lib/navigation/post-register';
 import { createSession } from '$lib/server/session';
 import { recordSignupCompleteEvent } from '$lib/server/marketing-analytics';
 import {
@@ -79,7 +80,9 @@ export const GET: RequestHandler = async (event) => {
 	const destination =
 		redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')
 			? redirectTo
-			: APP_HOME_PATH;
+			: isNewUser
+				? POST_REGISTER_SCAN_OAUTH_REDIRECT
+				: APP_HOME_PATH;
 	const freshAccountSuffix = isNewUser
 		? `${destination.includes('?') ? '&' : '?'}freshAccount=1`
 		: '';

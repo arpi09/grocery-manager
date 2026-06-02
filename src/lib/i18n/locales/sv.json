@@ -1098,6 +1098,13 @@
 	"onboarding": {
 		"welcome": "VÃ¤lkommen till Skaffu",
 		"stepOf": "Steg {current} av {total}",
+		"welcomeBodyShort": "Tre saker på 10 sekunder ? sedan får du värde direkt.",
+		"quickStart": "Snabbstart ? hoppa över guiden",
+		"quickPointsAria": "Det här kan du göra direkt",
+		"quickPointScan": "Skanna streckkod eller kvitto",
+		"quickPointExpiry": "Se vad som går ut snart på startsidan",
+		"quickPointMeals": "Planera middagar när du vill",
+		"ctaBarcodeFirst": "Skanna din första vara",
 		"welcomeBody": "Skaffu hjÃ¤lper dig hÃ¥lla koll pÃ¥ mat hemma â€” sÃ¥ du handlar smartare, minskar svinn och lagar mat utifrÃ¥n det du redan har.",
 		"ctaReceipt": "Skanna kvitto",
 		"ctaBarcode": "Skanna 5 varor",

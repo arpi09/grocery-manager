@@ -289,6 +289,9 @@ export const productEventTable = pgTable(
 				'landing_view',
 				'register_click',
 				'signup_complete',
+				'onboarding_skipped',
+				'onboarding_quickstart',
+				'first_scan',
 				'pwa_banner_dismiss',
 				'pwa_banner_install_click',
 				'receipt_autopilot_accepted'
