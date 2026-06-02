@@ -99,7 +99,8 @@
 			"pageTitle": "Log in · Skaffu",
 			"metaDescription": "Log in to Skaffu — pantry app for fridge, freezer and shopping. Reduce food waste with smart inventory and expiry tracking.",
 			"newHere": "New here?",
-			"createAccount": "Create account"
+			"createAccount": "Create account",
+			"forgotPassword": "Forgot password?"
 		},
 		"register": {
 			"title": "Create account",
@@ -113,6 +114,31 @@
 			"captchaLabel": "Confirm you are not a robot",
 			"captchaLoadError": "Captcha could not load. Refresh the page and try again.",
 			"captchaDomainError": "Captcha could not load for this website address. Try opening the app via the official website URL or contact support."
+		},
+		"google": {
+			"continue": "Continue with Google",
+			"or": "or"
+		},
+		"forgotPassword": {
+			"title": "Reset password",
+			"subtitle": "We will email you a reset link",
+			"lead": "Enter the email for your account. If it exists, you will receive a link to choose a new password.",
+			"submit": "Send reset link",
+			"submitting": "Sending…",
+			"success": "If an account exists for that email, a reset link has been sent.",
+			"backToLogin": "Back to log in",
+			"pageTitle": "Reset password · Skaffu",
+			"metaDescription": "Reset your Skaffu password."
+		},
+		"resetPassword": {
+			"title": "Choose new password",
+			"subtitle": "Enter a new password for your account",
+			"submit": "Save new password",
+			"submitting": "Saving…",
+			"invalidToken": "This reset link is invalid or has expired.",
+			"requestNew": "Request a new link",
+			"pageTitle": "New password · Skaffu",
+			"metaDescription": "Set a new password for your Skaffu account."
 		}
 	},
 	"home": {
@@ -515,16 +541,46 @@
 		"emptyDay": "No meals planned for this day."
 	},
 	"stats": {
-		"title": "How your pantry looks",
-		"subtitle": "Quick overview — kind of fun, but actually useful",
+		"title": "Your pantry in numbers",
+		"subtitle": "Overview, trends, and how you reduce food waste",
+		"overviewHeading": "Statistics overview",
+		"heroLabel": "Key metrics",
+		"itemsInPantry": "Items in pantry",
+		"expiringThisWeek": "Expiring soon",
 		"uniqueProducts": "Unique products",
-		"expiringWithin": "Expiring within {days} days",
+		"expiringWithin": "Within {days} days",
 		"addedLastWeek": "Added last week",
+		"consumedThisWeek": "Used this week",
+		"vsLastWeek": "{delta} vs last week",
+		"noConsumptionYet": "Mark items as finished when you use them",
 		"withoutExpiry": "No expiry date",
 		"lowStock": "Low stock (< 1)",
 		"totalUnits": "({count} units total)",
 		"byLocation": "By storage location",
-		"empty": "Nothing logged yet — start on the home screen and stats will fill in."
+		"empty": "Nothing logged yet — start on the home screen and stats will fill in.",
+		"emptyTitle": "No statistics yet",
+		"emptyDescription": "Scan or photograph your pantry to get a clear picture of stock and expiring items.",
+		"emptyActionScan": "Scan your first item",
+		"emptyActionPhoto": "Photograph your pantry",
+		"impactTitle": "Reduce food waste",
+		"impactLead": "Every item you use before it expires counts — more finished marks mean better insight.",
+		"usedBeforeExpiry": "Used this week",
+		"zeroWasteWeeks": "Zero-waste weeks",
+		"impactPlaceholder": "Mark items as finished when you use them — impact numbers will fill in over time.",
+		"addedTrendTitle": "Items added",
+		"addedTrendLead": "Last four weeks",
+		"consumedTrendTitle": "Items used",
+		"consumedTrendLead": "Items marked as finished",
+		"consumedTrendEmpty": "No history yet — mark items as finished when you use them.",
+		"trendCurrentWeek": "This week",
+		"eatFirstCta": "Eat it first",
+		"eatFirstLead": "See expiring items and meal suggestions on the home screen.",
+		"scanCta": "Add more items",
+		"scanLead": "Keep inventory up to date with scan or photo.",
+		"proBadge": "Pro coming soon",
+		"proTitle": "Deeper insights with Pro",
+		"proLead": "AI insights, longer history, and smarter suggestions — no charges until payment is enabled.",
+		"footnoteMissingExpiry": "{count} items have no expiry date — add dates for better expiry alerts."
 	},
 	"profile": {
 		"title": "Profile",
@@ -736,7 +792,9 @@
 				"receipt_pdf": "Receipt PDF",
 				"smart_fill": "Smart fill"
 			}
-		}
+		},
+		"sendPasswordReset": "Send password reset",
+		"forcePasswordReset": "Force password reset"
 	},
 	"pmf": {
 		"title": "PMF metrics",
@@ -1231,6 +1289,8 @@
 		"shoppingAdded": "Added to shopping list",
 		"shoppingCleared": "Shopping list cleared",
 		"adminSaved": "Admin settings saved",
-		"adminPasswordResetSent": "Password reset email sent"
+		"adminPasswordResetSent": "Password reset email sent",
+		"pushEnabled": "Browser notifications enabled",
+		"pushDisabled": "Browser notifications disabled"
 	}
 }

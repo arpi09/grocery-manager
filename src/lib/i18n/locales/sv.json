@@ -99,7 +99,8 @@
 			"pageTitle": "Logga in · Skaffu",
 			"metaDescription": "Logga in på Skaffu — skafferi-app för kyl, frys och inköp. Minska matsvinn med smart lagerhållning och utgångsdatum.",
 			"newHere": "Ny här?",
-			"createAccount": "Skapa konto"
+			"createAccount": "Skapa konto",
+			"forgotPassword": "Glömt lösenord?"
 		},
 		"register": {
 			"title": "Skapa konto",
@@ -113,6 +114,31 @@
 			"captchaLabel": "Bekräfta att du inte är en robot",
 			"captchaLoadError": "Captcha kunde inte laddas. Uppdatera sidan och försök igen.",
 			"captchaDomainError": "Captcha kunde inte laddas för den här webbadressen. Prova att öppna appen via den officiella webbadressen eller kontakta support."
+		},
+		"google": {
+			"continue": "Fortsätt med Google",
+			"or": "eller"
+		},
+		"forgotPassword": {
+			"title": "Återställ lösenord",
+			"subtitle": "Vi skickar en återställningslänk via e-post",
+			"lead": "Ange e-postadressen för ditt konto. Om den finns får du en länk för att välja nytt lösenord.",
+			"submit": "Skicka återställningslänk",
+			"submitting": "Skickar…",
+			"success": "Om ett konto finns för den adressen har en återställningslänk skickats.",
+			"backToLogin": "Tillbaka till inloggning",
+			"pageTitle": "Återställ lösenord · Skaffu",
+			"metaDescription": "Återställ ditt Skaffu-lösenord."
+		},
+		"resetPassword": {
+			"title": "Välj nytt lösenord",
+			"subtitle": "Ange ett nytt lösenord för ditt konto",
+			"submit": "Spara nytt lösenord",
+			"submitting": "Sparar…",
+			"invalidToken": "Länken är ogiltig eller har gått ut.",
+			"requestNew": "Begär ny länk",
+			"pageTitle": "Nytt lösenord · Skaffu",
+			"metaDescription": "Välj nytt lösenord för ditt Skaffu-konto."
 		}
 	},
 	"home": {
@@ -515,16 +541,46 @@
 		"emptyDay": "Inga måltider planerade denna dag."
 	},
 	"stats": {
-		"title": "Så här ser skafferiet ut",
-		"subtitle": "Snabb överblick — typ haha, men faktiskt användbart",
+		"title": "Ditt skafferi i siffror",
+		"subtitle": "Överblick, trender och hur ni minskar matsvinn",
+		"overviewHeading": "Statistiköversikt",
+		"heroLabel": "Nyckeltal",
+		"itemsInPantry": "Varor i skafferiet",
+		"expiringThisWeek": "Går ut snart",
 		"uniqueProducts": "Unika produkter",
-		"expiringWithin": "Går ut inom {days} dagar",
+		"expiringWithin": "Inom {days} dagar",
 		"addedLastWeek": "Tillagda senaste veckan",
+		"consumedThisWeek": "Förbrukade denna vecka",
+		"vsLastWeek": "{delta} mot förra veckan",
+		"noConsumptionYet": "Markera varor som slut när ni använder dem",
 		"withoutExpiry": "Utan utgångsdatum",
 		"lowStock": "Lågt saldo (< 1)",
 		"totalUnits": "({count} enheter totalt)",
 		"byLocation": "Per förvaringsplats",
-		"empty": "Inget inlagt än — börja på startsidan så fylls statistiken på."
+		"empty": "Inget inlagt än — börja på startsidan så fylls statistiken på.",
+		"emptyTitle": "Ingen statistik ännu",
+		"emptyDescription": "Scanna eller fota ditt skafferi så får du en tydlig bild av lagret och utgående varor.",
+		"emptyActionScan": "Scanna första varan",
+		"emptyActionPhoto": "Fota skafferiet",
+		"impactTitle": "Minska matsvinn",
+		"impactLead": "Varje vara ni hinner använda innan den går ut räknas — fler markeringar ger bättre insikt.",
+		"usedBeforeExpiry": "Förbrukade denna vecka",
+		"zeroWasteWeeks": "Veckor utan svinn",
+		"impactPlaceholder": "Markera varor som slut när ni använder dem — då fylls impact-siffrorna på.",
+		"addedTrendTitle": "Tillagda varor",
+		"addedTrendLead": "Senaste fyra veckorna",
+		"consumedTrendTitle": "Förbrukade varor",
+		"consumedTrendLead": "Varor markerade som slut",
+		"consumedTrendEmpty": "Ingen historik än — markera varor som slut när ni använder dem.",
+		"trendCurrentWeek": "Denna vecka",
+		"eatFirstCta": "Ät det först",
+		"eatFirstLead": "Se utgående varor och få måltidsförslag på startsidan.",
+		"scanCta": "Lägg till fler varor",
+		"scanLead": "Håll lagret uppdaterat med scan eller foto.",
+		"proBadge": "Pro kommer snart",
+		"proTitle": "Djupare insikter med Pro",
+		"proLead": "AI-insikter, längre historik och smartare förslag — utan att debiteras förrän betalning aktiveras.",
+		"footnoteMissingExpiry": "{count} varor saknar utgångsdatum — lägg till datum för bättre utgångsvarningar."
 	},
 	"profile": {
 		"title": "Profil",
@@ -736,7 +792,9 @@
 				"receipt_pdf": "Kvitto-PDF",
 				"smart_fill": "Smart fill"
 			}
-		}
+		},
+		"sendPasswordReset": "Skicka återställningslänk",
+		"forcePasswordReset": "Tvinga lösenordsbyte"
 	},
 	"pmf": {
 		"title": "PMF-mätetal",
@@ -1231,6 +1289,8 @@
 		"shoppingAdded": "Tillagd på inköpslistan",
 		"shoppingCleared": "Inköpslistan rensad",
 		"adminSaved": "Admininställningar sparade",
-		"adminPasswordResetSent": "E-post för återställning skickad"
+		"adminPasswordResetSent": "E-post för återställning skickad",
+		"pushEnabled": "Webbläsarnotiser aktiverade",
+		"pushDisabled": "Webbläsarnotiser avaktiverade"
 	}
 }
