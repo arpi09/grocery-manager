@@ -34,7 +34,7 @@
 
 <style>
 	.section-title {
-		margin: 0 0 var(--space-sm);
+		margin: var(--space-md) 0 var(--space-sm);
 		padding: 0 0.25rem;
 	}
 

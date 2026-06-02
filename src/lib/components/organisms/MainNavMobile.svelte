@@ -324,6 +324,10 @@
 		max-height: min(85vh, 640px);
 	}
 
+	:global(.nav-more-panel .modal-header) {
+		padding: var(--space-lg) var(--space-md) var(--space-md);
+	}
+
 	:global(.nav-more-sheet-body) {
 		display: flex;
 		flex-direction: column;
@@ -331,7 +335,7 @@
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
 		overscroll-behavior: contain;
-		padding-top: var(--space-xs);
+		padding: var(--space-sm) var(--space-md) var(--space-lg);
 	}
 
 	@media (prefers-reduced-motion: reduce) {
