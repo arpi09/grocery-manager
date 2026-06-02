@@ -76,7 +76,9 @@ describe('InventoryService', () => {
 		const result = await service.listByLocation('household-1', 'fridge');
 
 		expect(result).toEqual(items);
-		expect(repository.findByHouseholdAndLocation).toHaveBeenCalledWith('household-1', 'fridge');
+		expect(repository.findByHouseholdAndLocation).toHaveBeenCalledWith('household-1', 'fridge', {
+			graceDays: 7
+		});
 	});
 
 	it('lists all items for household', async () => {
