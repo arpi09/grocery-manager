@@ -169,6 +169,7 @@ export class DrizzlePmfRepository implements IPmfRepository {
 		const eventCounts: Record<PmfProductEventType, number> = {
 			scan_completed: 0,
 			receipt_parsed: 0,
+			photo_round_parsed: 0,
 			fill_suggestions_added: 0
 		};
 

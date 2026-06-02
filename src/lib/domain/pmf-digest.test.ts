@@ -33,6 +33,7 @@ function emptySnapshot(overrides: Partial<PmfMetricSnapshot> = {}): PmfMetricSna
 		eventCounts: {
 			scan_completed: 0,
 			receipt_parsed: 0,
+			photo_round_parsed: 0,
 			fill_suggestions_added: 0
 		},
 		...overrides
@@ -123,6 +124,7 @@ describe('buildPmfDigestEmailContent', () => {
 			eventCounts: {
 				scan_completed: 0,
 				receipt_parsed: 7,
+				photo_round_parsed: 0,
 				fill_suggestions_added: 2
 			}
 		});

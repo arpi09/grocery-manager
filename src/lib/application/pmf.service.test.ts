@@ -34,6 +34,7 @@ describe('PmfService', () => {
 		eventCounts: {
 			scan_completed: 3,
 			receipt_parsed: 1,
+			photo_round_parsed: 0,
 			fill_suggestions_added: 2
 		}
 	};
