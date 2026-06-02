@@ -11,17 +11,24 @@ export function normalizeAutoExpiredGraceDays(value: number): AutoExpiredGraceDa
 		: DEFAULT_AUTO_EXPIRED_GRACE_DAYS;
 }
 
+function formatIsoDateLocal(date: Date): string {
+	const y = date.getFullYear();
+	const m = String(date.getMonth() + 1).padStart(2, '0');
+	const d = String(date.getDate()).padStart(2, '0');
+	return `${y}-${m}-${d}`;
+}
+
 export function autoExpiredCutoffDate(graceDays: number, today = new Date()): string {
 	const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 	start.setDate(start.getDate() - graceDays);
-	return start.toISOString().slice(0, 10);
+	return formatIsoDateLocal(start);
 }
 
 export function subtractDaysIso(isoDate: string, days: number): string {
 	const [year, month, day] = isoDate.split('-').map(Number);
 	const date = new Date(year, month - 1, day);
 	date.setDate(date.getDate() - days);
-	return date.toISOString().slice(0, 10);
+	return formatIsoDateLocal(date);
 }
 
 export function isAutoExpired(

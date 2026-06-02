@@ -26,15 +26,19 @@ export async function prepareE2eBrowserState(page: Page) {
 
 	await page.addInitScript(
 		({ version, activationReceiptKey, celebrationKey }) => {
-			const keysToRemove: string[] = [];
-			for (let index = 0; index < localStorage.length; index += 1) {
-				const key = localStorage.key(index);
-				if (key?.startsWith('home-pantry-onboarding-')) {
-					keysToRemove.push(key);
-				}
-			}
-			for (const key of keysToRemove) {
-				localStorage.removeItem(key);
+			// Only clear legacy (non user-scoped) keys — wiping per-user keys re-opens the guide on every navigation.
+			const legacyPrefixes = [
+				'home-pantry-onboarding-version',
+				'home-pantry-onboarding-dismissed',
+				'home-pantry-activation-path',
+				'home-pantry-activation-barcode-count',
+				'home-pantry-activation-receipt-done',
+				'home-pantry-celebration-pending',
+				'home-pantry-post-onboarding-survey-pending',
+				'home-pantry-post-onboarding-survey-dismissed'
+			];
+			for (const prefix of legacyPrefixes) {
+				localStorage.removeItem(prefix);
 			}
 
 			const markCompleteForUser = (userId: string) => {
