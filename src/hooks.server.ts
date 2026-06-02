@@ -18,7 +18,8 @@ import {
 	aiRateLimitService,
 	aiUsageAdminService,
 	planLimitsService,
-	waitlistService
+	waitlistService,
+	purchasePatternService
 } from '$lib/server/di';
 import { recordUserActivity } from '$lib/server/activity';
 import { resolveHouseholdId } from '$lib/server/household-context';
@@ -91,6 +92,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.aiRateLimitService = aiRateLimitService;
 	event.locals.aiUsageAdminService = aiUsageAdminService;
 	event.locals.waitlistService = waitlistService;
+	event.locals.purchasePatternService = purchasePatternService;
 
 	const locale = resolveLocaleForRequest(event.cookies, event.request);
 	event.locals.locale = locale;

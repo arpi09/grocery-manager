@@ -1,0 +1,107 @@
+import { and, eq, gte } from 'drizzle-orm';
+import type { StorageLocation } from '$lib/domain/location';
+import {
+	normalizeReceiptProductName,
+	RECEIPT_PATTERN_WINDOW_DAYS,
+	type RecordReceiptPurchaseLineInput,
+	type ReceiptPurchaseLineRecord
+} from '$lib/domain/purchase-pattern';
+import { db, type AppDatabase } from '$lib/infrastructure/db';
+import {
+	inventoryItemTable,
+	receiptPatternDismissalTable,
+	receiptPurchaseLineTable
+} from '$lib/infrastructure/db/schema';
+import { generateId } from '$lib/infrastructure/auth/id';
+
+export interface IPurchasePatternRepository {
+	insertLines(lines: RecordReceiptPurchaseLineInput[]): Promise<void>;
+	listRecentLines(householdId: string, since: Date): Promise<ReceiptPurchaseLineRecord[]>;
+	listDismissedKeys(householdId: string): Promise<Set<string>>;
+	dismissPattern(householdId: string, normalizedKey: string): Promise<void>;
+	listInventoryNormalizedKeys(householdId: string): Promise<Set<string>>;
+}
+
+function mapLine(row: typeof receiptPurchaseLineTable.$inferSelect): ReceiptPurchaseLineRecord {
+	return {
+		id: row.id,
+		householdId: row.householdId,
+		userId: row.userId,
+		importBatchId: row.importBatchId,
+		productName: row.productName,
+		normalizedKey: row.normalizedKey,
+		barcode: row.barcode,
+		location: row.location as StorageLocation,
+		quantity: row.quantity,
+		unit: row.unit,
+		createdAt: row.createdAt
+	};
+}
+
+export class DrizzlePurchasePatternRepository implements IPurchasePatternRepository {
+	constructor(private readonly database: AppDatabase = db) {}
+
+	async insertLines(lines: RecordReceiptPurchaseLineInput[]): Promise<void> {
+		if (lines.length === 0) return;
+
+		await this.database.insert(receiptPurchaseLineTable).values(
+			lines.map((line) => ({
+				id: generateId(),
+				householdId: line.householdId,
+				userId: line.userId,
+				importBatchId: line.importBatchId,
+				productName: line.productName.trim(),
+				normalizedKey: normalizeReceiptProductName(line.productName),
+				barcode: line.barcode ?? null,
+				location: line.location,
+				quantity: line.quantity ?? null,
+				unit: line.unit ?? null
+			}))
+		);
+	}
+
+	async listRecentLines(householdId: string, since: Date): Promise<ReceiptPurchaseLineRecord[]> {
+		const rows = await this.database
+			.select()
+			.from(receiptPurchaseLineTable)
+			.where(
+				and(
+					eq(receiptPurchaseLineTable.householdId, householdId),
+					gte(receiptPurchaseLineTable.createdAt, since)
+				)
+			);
+
+		return rows.map(mapLine);
+	}
+
+	async listDismissedKeys(householdId: string): Promise<Set<string>> {
+		const rows = await this.database
+			.select({ normalizedKey: receiptPatternDismissalTable.normalizedKey })
+			.from(receiptPatternDismissalTable)
+			.where(eq(receiptPatternDismissalTable.householdId, householdId));
+
+		return new Set(rows.map((row) => row.normalizedKey));
+	}
+
+	async dismissPattern(householdId: string, normalizedKey: string): Promise<void> {
+		await this.database
+			.insert(receiptPatternDismissalTable)
+			.values({ householdId, normalizedKey })
+			.onConflictDoNothing();
+	}
+
+	async listInventoryNormalizedKeys(householdId: string): Promise<Set<string>> {
+		const rows = await this.database
+			.select({ name: inventoryItemTable.name })
+			.from(inventoryItemTable)
+			.where(eq(inventoryItemTable.householdId, householdId));
+
+		return new Set(rows.map((row) => normalizeReceiptProductName(row.name)));
+	}
+}
+
+export function purchasePatternLookbackDate(now: Date = new Date()): Date {
+	const since = new Date(now);
+	since.setDate(since.getDate() - RECEIPT_PATTERN_WINDOW_DAYS);
+	return since;
+}

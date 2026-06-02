@@ -10,17 +10,19 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ locals }) => {
 	const householdId = locals.householdId!;
 	const userId = locals.user!.id;
-	const [summary, engagement, celebration] = await Promise.all([
+	const [summary, engagement, celebration, receiptAutopilotSuggestions] = await Promise.all([
 		locals.inventoryService.getDashboard(householdId),
 		locals.gamificationService.getEngagementStrip(householdId, userId),
-		locals.gamificationService.detectZeroWasteCelebration(householdId)
+		locals.gamificationService.detectZeroWasteCelebration(householdId),
+		locals.purchasePatternService.getSuggestions(householdId)
 	]);
 	const canWrite = locals.householdRole ? canEditInventory(locals.householdRole) : false;
 	return {
 		summary,
 		engagement,
 		celebration: celebration as GamificationCelebrationKind | null,
-		canWrite
+		canWrite,
+		receiptAutopilotSuggestions
 	};
 };
 

@@ -17,6 +17,7 @@
 			canWrite={data.canWrite}
 			displayName={data.user?.displayName}
 			householdId={data.activeHousehold?.id ?? null}
+			receiptAutopilotSuggestions={data.receiptAutopilotSuggestions}
 		/>
 	</PageContainer>
 </AppLayout>

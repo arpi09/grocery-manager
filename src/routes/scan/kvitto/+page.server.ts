@@ -5,6 +5,7 @@ import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { receiptLineToInventoryAmount } from '$lib/server/receipt-parse';
 import { buildScanReturnUrl } from '$lib/utils/scan-toast';
 import { recordProductEvent } from '$lib/server/product-events';
+import { generateId } from '$lib/infrastructure/auth/id';
 import { error, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -43,6 +44,17 @@ export const actions: Actions = {
 		}
 
 		let created = 0;
+		const importBatchId = generateId();
+		const purchaseLines: Array<{
+			householdId: string;
+			userId: string;
+			importBatchId: string;
+			productName: string;
+			location: StorageLocation;
+			quantity: string | null;
+			unit: string | null;
+		}> = [];
+
 		for (const index of selected) {
 			const name = formData.get(`name_${index}`);
 			if (typeof name !== 'string' || !name.trim()) {
@@ -77,7 +89,20 @@ export const actions: Actions = {
 				},
 				event.locals.householdRole!
 			);
+			purchaseLines.push({
+				householdId: event.locals.householdId!,
+				userId: event.locals.user!.id,
+				importBatchId,
+				productName: name.trim(),
+				location,
+				quantity,
+				unit: unit ?? null
+			});
 			created++;
+		}
+
+		if (purchaseLines.length > 0) {
+			await event.locals.purchasePatternService.recordReceiptImport(purchaseLines);
 		}
 
 		const label = `${created} varor`;

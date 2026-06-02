@@ -7,7 +7,8 @@ export const PRODUCT_EVENT_TYPES = [
 	'register_click',
 	'signup_complete',
 	'pwa_banner_dismiss',
-	'pwa_banner_install_click'
+	'pwa_banner_install_click',
+	'receipt_autopilot_accepted'
 ] as const;
 
 export const PMF_PRODUCT_EVENT_TYPES = [

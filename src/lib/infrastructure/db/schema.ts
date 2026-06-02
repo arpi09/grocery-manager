@@ -286,7 +286,8 @@ export const productEventTable = pgTable(
 				'register_click',
 				'signup_complete',
 				'pwa_banner_dismiss',
-				'pwa_banner_install_click'
+				'pwa_banner_install_click',
+				'receipt_autopilot_accepted'
 			]
 		}).notNull(),
 		metadata: text('metadata'),
@@ -389,6 +390,45 @@ export const appSettingsTable = pgTable('app_settings', {
 	value: text('value').notNull(),
 	updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 });
+
+export const receiptPurchaseLineTable = pgTable(
+	'receipt_purchase_line',
+	{
+		id: text('id').primaryKey(),
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
+		userId: text('user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		importBatchId: text('import_batch_id').notNull(),
+		productName: text('product_name').notNull(),
+		normalizedKey: text('normalized_key').notNull(),
+		barcode: text('barcode'),
+		location: text('location', { enum: ['fridge', 'freezer', 'cupboard'] }).notNull(),
+		quantity: numeric('quantity', { precision: 10, scale: 2 }),
+		unit: text('unit'),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('receipt_purchase_line_household_key_idx').on(table.householdId, table.normalizedKey),
+		index('receipt_purchase_line_household_created_idx').on(table.householdId, table.createdAt)
+	]
+);
+
+export const receiptPatternDismissalTable = pgTable(
+	'receipt_pattern_dismissal',
+	{
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
+		normalizedKey: text('normalized_key').notNull(),
+		dismissedAt: timestamp('dismissed_at', { withTimezone: true, mode: 'date' })
+			.notNull()
+			.defaultNow()
+	},
+	(table) => [primaryKey({ columns: [table.householdId, table.normalizedKey] })]
+);
 
 export const consumptionEventTable = pgTable(
 	'consumption_event',

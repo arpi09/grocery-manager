@@ -26,6 +26,8 @@
 		getActivationProgress,
 		type ActivationProgress
 	} from '$lib/utils/onboarding';
+	import type { ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
+	import ReceiptAutopilotSection from '$lib/components/organisms/ReceiptAutopilotSection.svelte';
 
 	interface Props {
 		summary: DashboardSummary;
@@ -34,6 +36,7 @@
 		canWrite?: boolean;
 		displayName?: string | null;
 		householdId?: string | null;
+		receiptAutopilotSuggestions?: ReceiptPatternSuggestion[];
 	}
 
 	let {
@@ -42,7 +45,8 @@
 		celebration = null,
 		canWrite = false,
 		displayName = null,
-		householdId = null
+		householdId = null,
+		receiptAutopilotSuggestions = []
 	}: Props = $props();
 
 	const returnTo = APP_HOME_PATH;
@@ -181,6 +185,10 @@
 		/>
 
 		<MealTimeSuggestions hasInventory={summary.totalItems > 0} />
+
+		{#if canWrite}
+			<ReceiptAutopilotSection suggestions={receiptAutopilotSuggestions} canEdit={canWrite} />
+		{/if}
 
 		{#if canWrite}
 			<section class="scan-zone" aria-labelledby="home-scan-heading">

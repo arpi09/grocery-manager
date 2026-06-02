@@ -41,6 +41,8 @@ import { WaitlistService } from '$lib/application/waitlist.service';
 import { DrizzleAppSettingsRepository } from '$lib/infrastructure/repositories/app-settings.repository';
 import { AppSettingsService } from '$lib/application/app-settings.service';
 import { PmfDigestService } from '$lib/application/pmf-digest.service';
+import { DrizzlePurchasePatternRepository } from '$lib/infrastructure/repositories/purchase-pattern.repository';
+import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
 
 const userRepository = new DrizzleUserRepository();
 const passwordResetRepository = new DrizzlePasswordResetRepository();
@@ -63,6 +65,8 @@ const planLimitsRepository = new DrizzlePlanLimitsRepository();
 const waitlistRepository = new DrizzleWaitlistRepository();
 const appSettingsRepository = new DrizzleAppSettingsRepository();
 
+const purchasePatternRepository = new DrizzlePurchasePatternRepository();
+
 export const authService = new AuthService(userRepository);
 export const passwordResetService = new PasswordResetService(userRepository, passwordResetRepository);
 export const oauthService = new OAuthService(userRepository);
@@ -77,6 +81,10 @@ export const inventoryService = new InventoryService(
 	inventoryRepository,
 	consumptionRepository,
 	householdRepository
+);
+export const purchasePatternService = new PurchasePatternService(
+	purchasePatternRepository,
+	inventoryService
 );
 export const statistikService = new StatistikService(
 	inventoryService,

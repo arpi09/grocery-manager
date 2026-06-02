@@ -236,7 +236,7 @@ Starta **endast** om Fas 1-mätetal eller [DAY_90_DECISION.md](./DAY_90_DECISION
 | Förslag 3–5 måltider från utgående + befintligt lager (AI guardrailad) | Samma | M | Konkret värde utan ny datakälla |
 | Ett klick: veckovy → plan → inköpslista (utöka befintligt flöde) | Plan→lista ✅ | S | Färre steg vs Mealime |
 | Push/e-post: "3 saker går ut — här är veckans förslag" | Web push ✅ | M | Återbesök utan native |
-| Kvitto-mönster v1 (B, begränsat) | ≥15/20 PDF i CI *eller* hög parse-träff i prod | M | Kompletterar A; minskar scan-trötthet |
+| Kvitto-mönster v1 (B, begränsat) | ✅ **Live jun 2026** — heuristik från kvittohistorik; förslag på `/hem` + `/inkop` | M | Kompletterar A; minskar scan-trötthet |
 | Capacitor | **Ej P3** — [DAY_90_DECISION](./DAY_90_DECISION.md) | — | Väntar D30 + kvalitativ app-begäran |
 
 **P3 exit-gate:** ≥25 % av aktiva hushåll använder veckovy eller plan→lista 2+ ggr/vecka *eller* D30 ≥15 % med kohort ≥50 användare; annars iterera A innan P4.

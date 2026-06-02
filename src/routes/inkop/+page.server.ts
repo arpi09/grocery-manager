@@ -27,18 +27,20 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 	const { user } = await parent();
 	const householdId = locals.householdId;
 	if (!householdId) {
-		return { user, items: [], checkedCount: 0, canEdit: false };
+		return { user, items: [], checkedCount: 0, canEdit: false, receiptAutopilotSuggestions: [] };
 	}
 
-	const [items, checkedCount] = await Promise.all([
+	const [items, checkedCount, receiptAutopilotSuggestions] = await Promise.all([
 		locals.shoppingListService.listUncheckedItems(householdId),
-		locals.shoppingListService.countCheckedItems(householdId)
+		locals.shoppingListService.countCheckedItems(householdId),
+		locals.purchasePatternService.getSuggestions(householdId)
 	]);
 	return {
 		user,
 		items,
 		checkedCount,
-		canEdit: !!locals.householdRole && canEditInventory(locals.householdRole)
+		canEdit: !!locals.householdRole && canEditInventory(locals.householdRole),
+		receiptAutopilotSuggestions
 	};
 };
 

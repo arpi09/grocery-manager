@@ -42,7 +42,8 @@ const SQL_MIGRATION_FILES = [
 	'0021_shopping_push.sql',
 	'0022_user_is_demo.sql',
 	'0023_auth_password_reset_oauth.sql',
-	'0024_auto_expired_grace.sql'
+	'0024_auto_expired_grace.sql',
+	'0025_receipt_purchase_pattern.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
@@ -53,6 +54,8 @@ TRUNCATE TABLE
 	"product_feedback",
 	"product_event",
 	"consumption_event",
+	"receipt_pattern_dismissal",
+	"receipt_purchase_line",
 	"shopping_list_item",
 	"inventory_items",
 	"meal_plans",

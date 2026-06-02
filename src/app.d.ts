@@ -18,6 +18,7 @@ import type { PlanLimitsService } from '$lib/application/plan-limits.service';
 import type { AiRateLimitService } from '$lib/application/ai-rate-limit.service';
 import type { AiUsageAdminService } from '$lib/application/ai-usage-admin.service';
 import type { WaitlistService } from '$lib/application/waitlist.service';
+import type { PurchasePatternService } from '$lib/application/purchase-pattern.service';
 import type { HouseholdRole } from '$lib/domain/household';
 import type { Locale } from '$lib/i18n/locale';
 
@@ -52,6 +53,7 @@ declare global {
 			aiRateLimitService: AiRateLimitService;
 			aiUsageAdminService: AiUsageAdminService;
 			waitlistService: WaitlistService;
+			purchasePatternService: PurchasePatternService;
 		}
 	}
 }
