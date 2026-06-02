@@ -19,6 +19,7 @@ export type DeleteSafetyContext =
 	| 'petFood'
 	| 'plannedMeal'
 	| 'receiptDiscardReview'
+	| 'photoRoundDiscardReview'
 	| 'generic';
 
 export interface DeleteCopyOptions {
@@ -196,6 +197,20 @@ export function getDeleteCopy(
 						: translate(locale, 'delete.receiptReview.descriptionEmpty'),
 				consequence: translate(locale, 'delete.receiptReview.consequence'),
 				confirmLabel: translate(locale, 'delete.receiptReview.confirm'),
+				cancelLabel
+			};
+		}
+
+		case 'photoRoundDiscardReview': {
+			const n = count ?? 0;
+			return {
+				title: translate(locale, 'delete.photoRoundReview.title'),
+				description:
+					n > 0
+						? translate(locale, 'delete.photoRoundReview.description', { count: n })
+						: translate(locale, 'delete.photoRoundReview.descriptionEmpty'),
+				consequence: translate(locale, 'delete.photoRoundReview.consequence'),
+				confirmLabel: translate(locale, 'delete.photoRoundReview.confirm'),
 				cancelLabel
 			};
 		}

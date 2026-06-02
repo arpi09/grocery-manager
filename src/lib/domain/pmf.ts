@@ -1,6 +1,7 @@
 export const PRODUCT_EVENT_TYPES = [
 	'scan_completed',
 	'receipt_parsed',
+	'photo_round_parsed',
 	'fill_suggestions_added',
 	'landing_view',
 	'register_click',
@@ -12,6 +13,7 @@ export const PRODUCT_EVENT_TYPES = [
 export const PMF_PRODUCT_EVENT_TYPES = [
 	'scan_completed',
 	'receipt_parsed',
+	'photo_round_parsed',
 	'fill_suggestions_added'
 ] as const;
 
@@ -19,7 +21,11 @@ export type PmfProductEventType = (typeof PMF_PRODUCT_EVENT_TYPES)[number];
 
 export type ProductEventType = (typeof PRODUCT_EVENT_TYPES)[number];
 
-export const SCAN_EVENT_TYPES: ProductEventType[] = ['scan_completed', 'receipt_parsed'];
+export const SCAN_EVENT_TYPES: ProductEventType[] = [
+	'scan_completed',
+	'receipt_parsed',
+	'photo_round_parsed'
+];
 
 export const ACTIVATION_WINDOW_MS = 24 * 60 * 60 * 1000;
 export const ACTIVATION_ITEM_THRESHOLD = 10;

@@ -6,7 +6,10 @@ import {
 	type ShoppingSuggestion
 } from '$lib/server/shopping-suggestions';
 import { parseReceiptLines } from '$lib/server/receipt-parse';
+import { parsePhotoRoundItems } from '$lib/server/photo-round-parse';
 import type { ReceiptLine } from '$lib/domain/receipt-line';
+import type { StorageLocation } from '$lib/domain/location';
+import type { PhotoRoundDetectedItem } from '$lib/domain/photo-round';
 
 export function isE2eMockAiEnabled(): boolean {
 	return process.env.E2E_MOCK_AI === 'true';
@@ -49,4 +52,19 @@ function loadReceiptParseFixture(): ReceiptLine[] {
 /** Deterministic receipt parse for Playwright (no OPENAI_API_KEY). */
 export function e2eMockReceiptParse(): ReceiptLine[] {
 	return loadReceiptParseFixture();
+}
+
+function loadPhotoRoundParseFixture(zone: StorageLocation): PhotoRoundDetectedItem[] {
+	const path = join(process.cwd(), 'e2e/fixtures/photo-round-parse.json');
+	const raw = JSON.parse(readFileSync(path, 'utf8')) as unknown;
+	const items = parsePhotoRoundItems(raw, zone);
+	if (items.length === 0) {
+		throw new Error('e2e/fixtures/photo-round-parse.json produced zero items');
+	}
+	return items;
+}
+
+/** Deterministic photo-round parse for Playwright (no OPENAI_API_KEY). */
+export function e2eMockPhotoRoundParse(zone: StorageLocation): PhotoRoundDetectedItem[] {
+	return loadPhotoRoundParseFixture(zone);
 }

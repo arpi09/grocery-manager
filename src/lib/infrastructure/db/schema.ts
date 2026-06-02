@@ -276,6 +276,7 @@ export const productEventTable = pgTable(
 			enum: [
 				'scan_completed',
 				'receipt_parsed',
+				'photo_round_parsed',
 				'fill_suggestions_added',
 				'landing_view',
 				'register_click',

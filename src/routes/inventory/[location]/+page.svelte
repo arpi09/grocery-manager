@@ -14,6 +14,7 @@
 	const from = $derived(encodeURIComponent(inventoryPath));
 	const addItemHref = $derived(`/item/new?location=${data.location}&from=${from}`);
 	const scanHref = $derived(`/scan?mode=barcode&location=${data.location}&from=${from}`);
+	const photoRoundHref = $derived(`/inventory/foto?from=${from}`);
 
 	const activeCount = $derived(data.activeTotal);
 	const totalCount = $derived(data.activeTotal + data.finishedTotal);
@@ -46,6 +47,10 @@
 						{t('inventory.addManual')}
 					</a>
 				</div>
+				<a class="photo-round-link" href={photoRoundHref}>
+					<FeatureIcon id="photo" size={18} />
+					{t('inventory.photoRound')}
+				</a>
 			{/if}
 
 			<InventoryList
@@ -115,6 +120,26 @@
 	.manual-secondary:hover {
 		color: var(--color-text);
 		border-color: var(--color-border);
+		background: var(--color-surface-muted);
+		text-decoration: none;
+	}
+
+	.photo-round-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-sm);
+		min-height: 2.75rem;
+		padding: 0.55rem 1rem;
+		font-weight: 600;
+		font-size: 0.9rem;
+		border-radius: var(--radius-md);
+		text-decoration: none;
+		color: var(--color-primary);
+		border: 1px dashed var(--color-border);
+	}
+
+	.photo-round-link:hover {
 		background: var(--color-surface-muted);
 		text-decoration: none;
 	}

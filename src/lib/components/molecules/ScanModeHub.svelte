@@ -140,6 +140,30 @@
 
 
 
+	<Card href={`/inventory/foto?from=${from}`} interactive class="tile">
+
+
+
+		<span class="icon-wrap" aria-hidden="true">
+
+			<FeatureIcon id="photo" size={24} />
+
+		</span>
+
+
+
+		<h2>{t('photoRound.title')}</h2>
+
+
+
+		<p>{t('scan.modeTiles.photoRound.description')}</p>
+
+
+
+	</Card>
+
+
+
 </div>
 
 

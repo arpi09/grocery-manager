@@ -1,0 +1,16 @@
+{
+	"items": [
+		{
+			"name": "Mjölk",
+			"quantity": "1",
+			"unit": "l",
+			"confidence": "high"
+		},
+		{
+			"name": "Ägg",
+			"quantity": "12",
+			"unit": "st",
+			"confidence": "medium"
+		}
+	]
+}
