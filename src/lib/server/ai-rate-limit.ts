@@ -1,7 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { AiRateLimitSnapshot } from '$lib/domain/ai-usage';
 import { planLimitErrorKey, planLimitKeyForAiUsageKind } from '$lib/domain/plan-limits';
-import { DEFAULT_PLAN_TIER } from '$lib/domain/plan';
 import type { Locale } from '$lib/i18n/locale';
 import { translate } from '$lib/i18n/messages';
 import type { AiRateLimitService, TryConsumeAiUsageResult } from '$lib/application/ai-rate-limit.service';
@@ -50,7 +49,7 @@ export async function requireAiQuota(
 		householdId: locals.householdId,
 		userId,
 		kind,
-		tier: DEFAULT_PLAN_TIER
+		tier: locals.planTier
 	});
 
 	if (!result.allowed) {
@@ -83,7 +82,7 @@ export async function checkAiQuotaForAction(
 		householdId: locals.householdId,
 		userId,
 		kind,
-		tier: DEFAULT_PLAN_TIER
+		tier: locals.planTier
 	});
 
 	if (!result.allowed) {

@@ -4,7 +4,8 @@ import { fail, redirect } from '@sveltejs/kit';
 import { mapHouseholdErrorToFail } from '$lib/application/household-errors';
 import { translate } from '$lib/i18n/messages';
 import { canEditInventory, isHouseholdOwner } from '$lib/domain/household';
-import { DEFAULT_PLAN_TIER } from '$lib/domain/plan';
+import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
+import { isStripeCheckoutConfigured } from '$lib/server/stripe';
 import { householdInviteEmailWarning, sendHouseholdInviteEmail } from '$lib/server/email';
 import { getAppOrigin } from '$lib/server/origin';
 import {
@@ -31,7 +32,7 @@ import type { Actions, PageServerLoad } from './$types';
 
 const pushRepository = new DrizzlePushSubscriptionRepository();
 
-export const load: PageServerLoad = async ({ parent, locals }) => {
+export const load: PageServerLoad = async ({ parent, locals, url }) => {
 	const { user } = await parent();
 	const pets = user ? await locals.petService.listPets(user.id) : [];
 	const household = user ? await locals.householdService.getHouseholdForUser(user.id) : null;
@@ -53,7 +54,7 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 			? await locals.inventoryService.getAutoExpiredGraceDays(householdId)
 			: null;
 
-	const planTier = DEFAULT_PLAN_TIER;
+	const planTier = locals.planTier ?? DEFAULT_PLAN_TIER;
 	const planLimits = user
 		? await locals.planLimitsService.getSnapshot({
 				userId: user.id,
@@ -62,10 +63,16 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 			})
 		: null;
 
+	const checkout = url.searchParams.get('checkout');
+
 	return {
 		user,
 		planTier,
 		planLimits,
+		stripeCheckoutEnabled: isStripeCheckoutConfigured(),
+		isPro: isProTier(planTier),
+		checkoutStatus:
+			checkout === 'success' ? ('success' as const) : checkout === 'cancel' ? ('cancel' as const) : null,
 		petsEnabled: Boolean(user?.petsEnabled),
 		expiryRemindersEnabled: expirySettings.enabled,
 		expiryReminderDays: expirySettings.days,

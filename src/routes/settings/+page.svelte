@@ -21,6 +21,7 @@
 	import { CHURN_REASONS } from '$lib/domain/product-feedback';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import PlanLimitBanner from '$lib/components/molecules/PlanLimitBanner.svelte';
+	import ProUpgradePanel from '$lib/components/molecules/ProUpgradePanel.svelte';
 	import {
 		isPushSupported,
 		pushErrorMessage,
@@ -418,18 +419,18 @@
 
 		<SettingsSection
 			title={t('settings.plan.title')}
-			description={t('settings.plan.description')}
+			description={data.isPro ? t('settings.plan.descriptionPro') : t('settings.plan.description')}
 		>
 			{#if data.planLimits}
-				<PlanLimitBanner snapshot={data.planLimits} />
+				<PlanLimitBanner snapshot={data.planLimits} stripeCheckoutEnabled={data.stripeCheckoutEnabled} />
 			{/if}
 			<SettingsRow
 				title={t('settings.plan.currentTier')}
-				note={t('settings.plan.currentFree')}
+				note={data.isPro ? t('settings.plan.currentPro') : t('settings.plan.currentFree')}
 				last={false}
 			/>
-			<div class="plan-panel">
-				{#if data.planLimits}
+			<div class="plan-panel" id="plan-upgrade">
+				{#if data.planLimits && !data.isPro}
 					<h3 class="plan-heading">{t('settings.plan.usageTitle')}</h3>
 					<ul class="plan-usage-list">
 						{#each data.planLimits.limits as row (row.key)}
@@ -472,20 +473,26 @@
 						yearly: PRICE_HYPOTHESIS_SEK.yearly
 					})}
 				</p>
-				<p class="plan-copy plan-muted">{t('settings.plan.comingSoon')}</p>
-				<ProWaitlistForm
-					action="?/joinProWaitlist"
-					source="settings"
-					title={t('settings.plan.waitlistTitle')}
-					description={t('settings.plan.waitlistDescription')}
-					emailLabel={t('settings.plan.waitlistEmailLabel')}
-					submitLabel={t('settings.plan.waitlistSubmitLabel')}
-					successMessage={t('settings.plan.waitlistSuccess')}
-					existsMessage={t('settings.plan.waitlistExists')}
-					email={data.user?.email ?? ''}
-					emailReadonly
-					{form}
-				/>
+				{#if data.isPro}
+					<p class="plan-copy plan-muted">{t('settings.plan.proActive')}</p>
+				{:else if data.stripeCheckoutEnabled}
+					<ProUpgradePanel isOwner={data.isOwner} checkoutStatus={data.checkoutStatus} />
+				{:else}
+					<p class="plan-copy plan-muted">{t('settings.plan.comingSoon')}</p>
+					<ProWaitlistForm
+						action="?/joinProWaitlist"
+						source="settings"
+						title={t('settings.plan.waitlistTitle')}
+						description={t('settings.plan.waitlistDescription')}
+						emailLabel={t('settings.plan.waitlistEmailLabel')}
+						submitLabel={t('settings.plan.waitlistSubmitLabel')}
+						successMessage={t('settings.plan.waitlistSuccess')}
+						existsMessage={t('settings.plan.waitlistExists')}
+						email={data.user?.email ?? ''}
+						emailReadonly
+						{form}
+					/>
+				{/if}
 			</div>
 			<SettingsRow
 				href="/priser"
