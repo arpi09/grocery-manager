@@ -4,7 +4,6 @@
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import type { StatistikDashboard } from '$lib/application/statistik.service';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
-	import { EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
 	import { maxWeeklyCount } from '$lib/domain/statistik';
 	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
