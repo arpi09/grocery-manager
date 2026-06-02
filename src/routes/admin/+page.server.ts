@@ -2,6 +2,7 @@ import { AdminError } from '$lib/application/admin.service';
 import { lucia } from '$lib/infrastructure/auth/lucia';
 import {
 	adminLogoutAllSchema,
+	adminPasswordResetSchema,
 	adminSetEmailSendingSchema,
 	adminSetPetsSchema,
 	adminSetRoleSchema,
@@ -9,6 +10,7 @@ import {
 } from '$lib/validation/admin.schemas';
 import { appSettingsService } from '$lib/server/di';
 import { fail, redirect } from '@sveltejs/kit';
+import { appendActionToast } from '$lib/utils/action-toast';
 import { translate } from '$lib/i18n/messages';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -40,7 +42,7 @@ export const actions: Actions = {
 		}
 
 		await appSettingsService.setEmailSendingEnabled(parsed.data.enabled === 'true');
-		redirect(302, '/admin');
+		redirect(302, appendActionToast('/admin', 'adminSaved'));
 	},
 	setRole: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -66,7 +68,7 @@ export const actions: Actions = {
 			throw error;
 		}
 
-		redirect(302, '/admin');
+		redirect(302, appendActionToast('/admin', 'adminSaved'));
 	},
 	setPets: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -83,7 +85,7 @@ export const actions: Actions = {
 			parsed.data.userId,
 			parsed.data.enabled === 'true'
 		);
-		redirect(302, '/admin');
+		redirect(302, appendActionToast('/admin', 'adminSaved'));
 	},
 	logoutAll: async ({ request, locals, cookies }) => {
 		const formData = await request.formData();
@@ -107,6 +109,23 @@ export const actions: Actions = {
 			`/login?message=${encodeURIComponent(translate(locals.locale, 'admin.loggedOutAll', { count: sessionCount }))}`
 		);
 	},
+	sendPasswordReset: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const parsed = adminPasswordResetSchema.safeParse({
+			userId: formData.get('userId'),
+			forceReset: formData.get('forceReset')
+		});
+
+		if (!parsed.success) {
+			return fail(400, { message: translate(locals.locale, 'admin.invalidUser') });
+		}
+
+		await locals.adminService.sendPasswordResetEmail(locals.user!.id, parsed.data.userId, {
+			forceReset: parsed.data.forceReset === 'true'
+		});
+
+		redirect(302, appendActionToast('/admin?tab=users', 'adminPasswordResetSent'));
+	},
 	logoutUser: async ({ request, locals, cookies }) => {
 		const formData = await request.formData();
 		const parsed = adminUserIdSchema.safeParse({
@@ -128,6 +147,6 @@ export const actions: Actions = {
 			redirect(302, '/login?message=' + encodeURIComponent(translate(locals.locale, 'admin.loggedOut')));
 		}
 
-		redirect(302, '/admin');
+		redirect(302, appendActionToast('/admin', 'adminSaved'));
 	}
 };

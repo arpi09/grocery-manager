@@ -15,7 +15,7 @@ import {
 	type ShoppingSuggestion
 } from '$lib/server/shopping-suggestions';
 import { recordProductEvent } from '$lib/server/product-events';
-import { error, fail, redirect } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 type SmartFillResult =
@@ -95,7 +95,7 @@ export const actions: Actions = {
 			return handleServiceError(err);
 		}
 
-		throw redirect(303, '/inkop');
+		return { success: true };
 	},
 	remove: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);

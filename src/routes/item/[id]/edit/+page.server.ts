@@ -1,6 +1,7 @@
 import { InventoryNotFoundError } from '$lib/application/inventory.service';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { itemSchema } from '$lib/validation/inventory.schemas';
+import { appendActionToast } from '$lib/utils/action-toast';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -59,18 +60,20 @@ export const actions: Actions = {
 			throw e;
 		}
 
-		redirect(302, `/inventory/${parsed.data.location}`);
+		redirect(302, appendActionToast(`/inventory/${parsed.data.location}`, 'itemUpdated', parsed.data.name));
 	},
 	delete: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);
 
 		let location = 'fridge';
+		let itemName = '';
 		try {
 			const item = await event.locals.inventoryService.getItem(
 				event.locals.householdId!,
 				event.params.id
 			);
 			location = item.location;
+			itemName = item.name;
 			await event.locals.inventoryService.deleteItem(
 				event.locals.householdId!,
 				event.params.id,
@@ -83,12 +86,13 @@ export const actions: Actions = {
 			throw e;
 		}
 
-		redirect(302, `/inventory/${location}`);
+		redirect(302, appendActionToast(`/inventory/${location}`, 'itemDeleted', itemName));
 	},
 	markAsFinished: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);
 
 		let location = 'fridge';
+		let itemName = '';
 		try {
 			const item = await event.locals.inventoryService.markAsFinished(
 				event.locals.householdId!,
@@ -96,6 +100,7 @@ export const actions: Actions = {
 				event.locals.householdRole!
 			);
 			location = item.location;
+			itemName = item.name;
 		} catch (e) {
 			if (e instanceof InventoryNotFoundError) {
 				error(404, 'Item not found');
@@ -103,6 +108,6 @@ export const actions: Actions = {
 			throw e;
 		}
 
-		redirect(302, `/inventory/${location}`);
+		redirect(302, appendActionToast(`/inventory/${location}`, 'itemFinished', itemName));
 	}
 };

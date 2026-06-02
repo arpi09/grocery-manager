@@ -144,6 +144,7 @@
 					<form method="POST" action="?/scheduleIdea" class="schedule-form">
 						<input type="hidden" name="month" value={month} />
 						<input type="hidden" name="ideaId" value={idea.id} />
+						<input type="hidden" name="title" value={idea.title} />
 						<label>
 							{t('planer.scheduleDate')}
 							<input type="date" name="plannedDate" required />

@@ -7,6 +7,7 @@
 	import MainNav from '$lib/components/organisms/MainNav.svelte';
 	import RecipeAssistant from '$lib/components/organisms/RecipeAssistant.svelte';
 	import ScanFab from '$lib/components/molecules/ScanFab.svelte';
+	import ActionToast from '$lib/components/molecules/ActionToast.svelte';
 	import InventoryScanToast from '$lib/components/molecules/InventoryScanToast.svelte';
 	import ActivationCelebration from '$lib/components/organisms/ActivationCelebration.svelte';
 	import OnboardingGuide from '$lib/components/organisms/OnboardingGuide.svelte';
@@ -14,6 +15,7 @@
 	import { canEditInventory } from '$lib/domain/household';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { isStorageLocation } from '$lib/domain/location';
+	import DemoAccountBanner from '$lib/components/molecules/DemoAccountBanner.svelte';
 	import type { NavUser } from '$lib/navigation/nav-config';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
 
@@ -58,6 +60,7 @@
 	setContext(OPEN_RECIPE_IDEAS, openRecipeIdeas);
 
 	const locale = $derived((page.data.locale === 'en' ? 'en' : 'sv') as 'sv' | 'en');
+	const showDemoBanner = $derived(Boolean(page.data.user?.isDemo));
 </script>
 
 <AppSeoHead {locale} />
@@ -65,9 +68,13 @@
 <div class="app">
 	<MainNav {user} {households} {activeHousehold} onRecipeIdeas={openRecipeIdeas} />
 	<main>
+		{#if showDemoBanner}
+			<DemoAccountBanner />
+		{/if}
 		{@render children()}
 	</main>
 	<InventoryScanToast />
+	<ActionToast />
 	{#if showScanFab}
 		<ScanFab {canWrite} href={scanFabHref} />
 	{/if}

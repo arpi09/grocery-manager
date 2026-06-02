@@ -227,6 +227,7 @@
 								>
 									<input type="hidden" name="month" value={month} />
 									<input type="hidden" name="id" value={meal.id} />
+									<input type="hidden" name="title" value={meal.title} />
 								</DeleteConfirmButton>
 							</div>
 						{/if}

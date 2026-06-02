@@ -29,6 +29,7 @@
 		unsubscribeFromExpiryPush
 	} from '$lib/utils/push-notifications';
 	import ProWaitlistForm from '$lib/components/marketing/ProWaitlistForm.svelte';
+	import Toast from '$lib/components/molecules/Toast.svelte';
 
 	let { data, form } = $props();
 	let petModalOpen = $state(false);
@@ -47,6 +48,7 @@
 	let addPetSubmitting = $state(false);
 	let feedbackSubmitting = $state(false);
 	let expiryRemindersForm: HTMLFormElement | undefined = $state();
+	let pushToastMessage = $state<string | null>(null);
 
 	const feedbackErrors = $derived(form?.feedbackErrors ?? {});
 	const feedbackSuccess = $derived(form?.feedbackSuccess === true);
@@ -118,10 +120,12 @@
 					return;
 				}
 				pushNotificationsEnabled = true;
+				pushToastMessage = t('actionToast.pushEnabled');
 				await invalidateAll();
 			} else {
 				await unsubscribeFromExpiryPush();
 				pushNotificationsEnabled = false;
+				pushToastMessage = t('actionToast.pushDisabled');
 				await invalidateAll();
 			}
 		} catch {
@@ -130,6 +134,10 @@
 		} finally {
 			pushNotificationsSubmitting = false;
 		}
+	}
+
+	function dismissPushToast() {
+		pushToastMessage = null;
 	}
 </script>
 
@@ -515,6 +523,10 @@
 			</div>
 		</form>
 	</Modal>
+
+{#if pushToastMessage}
+	<Toast message={pushToastMessage} visible={true} onDismiss={dismissPushToast} />
+{/if}
 </AppLayout>
 
 <style>

@@ -18,6 +18,28 @@ export function bindSubmitting(
 	};
 }
 
+/** Like `bindSubmitting`, but invokes a callback after a successful non-redirect result. */
+export function bindSubmittingWithToast(
+	setSubmitting: (value: boolean) => void,
+	onSuccess: () => void,
+	syncFormData?: (formData: FormData) => void
+): SubmitFunction {
+	return ({ formData }) => {
+		syncFormData?.(formData);
+		setSubmitting(true);
+		return async ({ result, update }) => {
+			try {
+				await update();
+				if (result.type === 'success') {
+					onSuccess();
+				}
+			} finally {
+				setSubmitting(false);
+			}
+		};
+	};
+}
+
 /** Like `bindSubmitting`, but handles redirect results without a full page reload. */
 export function bindSubmittingWithRedirect(
 	setSubmitting: (value: boolean) => void,

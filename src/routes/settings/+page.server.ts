@@ -1,4 +1,5 @@
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
+import { appendActionToast } from '$lib/utils/action-toast';
 import { fail, redirect } from '@sveltejs/kit';
 import { mapHouseholdErrorToFail } from '$lib/application/household-errors';
 import { translate } from '$lib/i18n/messages';
@@ -136,7 +137,7 @@ export const actions: Actions = {
 			parsed.data.enabled === 'true',
 			Number(parsed.data.days) as 3 | 7
 		);
-		redirect(302, '/settings');
+		redirect(302, appendActionToast('/settings', 'settingsSaved'));
 	},
 	updateShoppingPush: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -157,7 +158,7 @@ export const actions: Actions = {
 		}
 
 		await shoppingPushService.updateSettings(locals.user!.id, enabled);
-		redirect(302, '/settings');
+		redirect(302, appendActionToast('/settings', 'settingsSaved'));
 	},
 	togglePets: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -170,7 +171,7 @@ export const actions: Actions = {
 		}
 
 		await locals.petService.setPetsEnabled(locals.user!.id, parsed.data.enabled === 'true');
-		redirect(302, '/settings');
+		redirect(302, appendActionToast('/settings', 'settingsSaved'));
 	},
 	addPet: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -188,7 +189,7 @@ export const actions: Actions = {
 			parsed.data.name,
 			parsed.data.species || null
 		);
-		redirect(302, '/settings');
+		redirect(302, appendActionToast('/settings', 'petAdded', parsed.data.name));
 	},
 	deletePet: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -200,8 +201,11 @@ export const actions: Actions = {
 			return fail(400, { errors: parsed.error.flatten().fieldErrors });
 		}
 
+		const pets = await locals.petService.listPets(locals.user!.id);
+		const pet = pets.find((entry) => entry.id === parsed.data.id);
+
 		await locals.petService.deletePet(locals.user!.id, parsed.data.id);
-		redirect(302, '/settings');
+		redirect(302, appendActionToast('/settings', 'petRemoved', pet?.name));
 	},
 	createInvite: async ({ request, locals, url }) => {
 		const formData = await request.formData();
@@ -264,7 +268,7 @@ export const actions: Actions = {
 			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
 		}
 
-		redirect(302, '/settings');
+		redirect(302, appendActionToast('/settings', 'inviteRevoked'));
 	},
 	updateMemberRole: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -290,7 +294,7 @@ export const actions: Actions = {
 			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
 		}
 
-		redirect(302, '/settings');
+		redirect(302, appendActionToast('/settings', 'memberUpdated'));
 	},
 	removeMember: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -314,7 +318,7 @@ export const actions: Actions = {
 			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
 		}
 
-		redirect(302, '/settings');
+		redirect(302, appendActionToast('/settings', 'memberRemoved'));
 	},
 	deleteHousehold: async ({ request, locals }) => {
 		const formData = await request.formData();

@@ -1,4 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
+import { appendActionToast } from '$lib/utils/action-toast';
 import {
 	createPetFoodSchema,
 	deletePetFoodSchema
@@ -45,7 +46,7 @@ export const actions: Actions = {
 			notes: parsed.data.notes || null
 		});
 
-		redirect(302, '/husdjur');
+		redirect(302, appendActionToast('/husdjur', 'petFoodAdded'));
 	},
 	deletePetFood: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -58,6 +59,6 @@ export const actions: Actions = {
 		}
 
 		await locals.petFoodService.deletePetFood(locals.user!.id, parsed.data.id);
-		redirect(302, '/husdjur');
+		redirect(302, appendActionToast('/husdjur', 'petFoodRemoved'));
 	}
 };

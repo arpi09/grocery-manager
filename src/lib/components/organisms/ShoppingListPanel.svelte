@@ -10,6 +10,7 @@
 	import { t } from '$lib/i18n';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { getDeleteCopy } from '$lib/utils/delete-safety';
+	import { bindSubmittingWithToast } from '$lib/utils/form-submit-feedback';
 	import {
 		formatShoppingListExport,
 		formatShoppingListExportLine
@@ -42,6 +43,8 @@
 	} | null>(null);
 	let undoSubmitting = $state(false);
 	let exportCopied = $state(false);
+	let successToastMessage = $state<string | null>(null);
+	let addSubmitting = $state(false);
 
 	const undoCopy = $derived(getDeleteCopy(1, 'shoppingListItem'));
 	const undoMessage = $derived(
@@ -110,6 +113,33 @@
 		};
 	}
 
+	function createToggleEnhance(): SubmitFunction {
+		return () => async ({ result, update }) => {
+			await update();
+			if (result.type === 'success') {
+				await invalidateAll();
+			}
+		};
+	}
+
+	function showSuccessToast(message: string) {
+		successToastMessage = message;
+	}
+
+	function dismissSuccessToast() {
+		successToastMessage = null;
+	}
+
+	function createClearCheckedEnhance(): SubmitFunction {
+		return () => async ({ result, update }) => {
+			await update();
+			if (result.type === 'success') {
+				showSuccessToast(t('actionToast.shoppingCleared'));
+				await invalidateAll();
+			}
+		};
+	}
+
 	async function undoRemove() {
 		if (!undoPayload) {
 			return;
@@ -156,13 +186,21 @@
 	</div>
 
 	{#if canEdit}
-		<form method="POST" action="?/add" use:enhance class="add-form">
+		<form
+			method="POST"
+			action="?/add"
+			use:enhance={bindSubmittingWithToast(
+				(v) => (addSubmitting = v),
+				() => showSuccessToast(t('actionToast.shoppingAdded'))
+			)}
+			class="add-form"
+		>
 			<label class="label" for="shopping-name">{t('shopping.addLabel')}</label>
 			<div class="add-row">
 				<input id="shopping-name" name="name" required maxlength="200" placeholder={t('shopping.itemPlaceholder')} />
 				<input name="quantity" inputmode="decimal" placeholder={t('shopping.quantityPlaceholder')} aria-label={t('shopping.quantityPlaceholder')} />
 				<input name="unit" maxlength="40" placeholder={t('shopping.unitPlaceholder')} aria-label={t('shopping.unitPlaceholder')} />
-				<Button type="submit">{t('shopping.addLabel')}</Button>
+				<Button type="submit" loading={addSubmitting} loadingLabel={t('common.saving')}>{t('shopping.addLabel')}</Button>
 			</div>
 		</form>
 	{:else}
@@ -176,7 +214,7 @@
 			{#each unchecked as item (item.id)}
 				<li>
 					{#if canEdit}
-						<form method="POST" action="?/toggle" data-sveltekit-reload class="row-form">
+						<form method="POST" action="?/toggle" class="row-form" use:enhance={createToggleEnhance()}>
 							<input type="hidden" name="id" value={item.id} />
 							<label class="check-row">
 								<input type="checkbox" onchange={(e) => e.currentTarget.form?.requestSubmit()} />
@@ -220,6 +258,7 @@
 							context="shoppingListClearChecked"
 							copyOptions={{ count: visibleChecked.length }}
 							action="?/clearChecked"
+							submitEnhance={createClearCheckedEnhance()}
 							variant="secondary"
 							label={t('delete.clearChecked.confirm')}
 							ariaLabel={t('shopping.clearCheckedAria')}
@@ -231,7 +270,7 @@
 						{#each visibleChecked as item (item.id)}
 							<li>
 								{#if canEdit}
-									<form method="POST" action="?/toggle" data-sveltekit-reload class="row-form">
+									<form method="POST" action="?/toggle" class="row-form" use:enhance={createToggleEnhance()}>
 										<input type="hidden" name="id" value={item.id} />
 										<label class="check-row">
 											<input type="checkbox" checked onchange={(e) => e.currentTarget.form?.requestSubmit()} />
@@ -263,6 +302,8 @@
 			{undoCopy.undoActionLabel ?? t('common.undo')}
 		</button>
 	</div>
+{:else if successToastMessage}
+	<Toast message={successToastMessage} visible={true} onDismiss={dismissSuccessToast} />
 {/if}
 
 <style>

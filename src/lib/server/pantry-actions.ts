@@ -8,6 +8,7 @@ import {
 	switchHouseholdSchema
 } from '$lib/validation/household.schemas';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
+import { appendActionToast } from '$lib/utils/action-toast';
 import { fail, redirect } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 
@@ -40,12 +41,15 @@ export async function switchHouseholdAction(event: RequestEvent) {
 		return pantryActionError(error);
 	}
 
+	const households = await event.locals.householdService.listHouseholdsForUser(event.locals.user!.id);
+	const switched = households.find((entry) => entry.id === parsed.data.householdId);
+
 	const redirectTo = formData.get('redirectTo');
 	if (typeof redirectTo === 'string' && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
-		redirect(302, redirectTo);
+		redirect(302, appendActionToast(redirectTo, 'pantrySwitched', switched?.name));
 	}
 
-	redirect(302, APP_HOME_PATH);
+	redirect(302, appendActionToast(APP_HOME_PATH, 'pantrySwitched', switched?.name));
 }
 
 export async function createHouseholdAction(event: RequestEvent) {
@@ -64,10 +68,10 @@ export async function createHouseholdAction(event: RequestEvent) {
 
 	const redirectTo = formData.get('redirectTo');
 	if (typeof redirectTo === 'string' && redirectTo.startsWith('/') && !redirectTo.startsWith('//')) {
-		redirect(302, redirectTo);
+		redirect(302, appendActionToast(redirectTo, 'pantryCreated', parsed.data.name));
 	}
 
-	redirect(302, APP_HOME_PATH);
+	redirect(302, appendActionToast(APP_HOME_PATH, 'pantryCreated', parsed.data.name));
 }
 
 export async function leaveHouseholdAction(event: RequestEvent) {
@@ -89,5 +93,5 @@ export async function leaveHouseholdAction(event: RequestEvent) {
 		return pantryActionError(error);
 	}
 
-	redirect(302, '/settings');
+	redirect(302, appendActionToast('/settings', 'pantryLeft'));
 }

@@ -1,4 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
+import { appendActionToast } from '$lib/utils/action-toast';
 import {
 	createMealSchema,
 	deleteMealSchema,
@@ -131,7 +132,7 @@ export const actions: Actions = {
 			notes: parsed.data.notes || null
 		});
 
-		redirect(302, monthRedirectTarget(month));
+		redirect(302, appendActionToast(monthRedirectTarget(month), 'mealCreated', parsed.data.title));
 	},
 	update: async ({ request, locals }) => {
 		const formData = await request.formData();
@@ -153,11 +154,12 @@ export const actions: Actions = {
 			notes: parsed.data.notes || null
 		});
 
-		redirect(302, monthRedirectTarget(month));
+		redirect(302, appendActionToast(monthRedirectTarget(month), 'mealUpdated', parsed.data.title));
 	},
 	delete: async ({ request, locals }) => {
 		const formData = await request.formData();
 		const month = String(formData.get('month') ?? '');
+		const title = String(formData.get('title') ?? '');
 		const parsed = deleteMealSchema.safeParse({
 			id: formData.get('id')
 		});
@@ -167,11 +169,12 @@ export const actions: Actions = {
 		}
 
 		await locals.mealPlanService.deletePlannedMeal(locals.user!.id, parsed.data.id);
-		redirect(302, monthRedirectTarget(month));
+		redirect(302, appendActionToast(monthRedirectTarget(month), 'mealDeleted', title));
 	},
 	scheduleIdea: async ({ request, locals }) => {
 		const formData = await request.formData();
 		const month = String(formData.get('month') ?? '');
+		const title = String(formData.get('title') ?? '');
 		const parsed = scheduleIdeaSchema.safeParse({
 			ideaId: formData.get('ideaId'),
 			plannedDate: formData.get('plannedDate')
@@ -186,6 +189,6 @@ export const actions: Actions = {
 			parsed.data.ideaId,
 			parsed.data.plannedDate
 		);
-		redirect(302, monthRedirectTarget(month));
+		redirect(302, appendActionToast(monthRedirectTarget(month), 'mealScheduled', title));
 	}
 };

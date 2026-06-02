@@ -1,6 +1,7 @@
 import { isStorageLocation } from '$lib/domain/location';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { itemSchema } from '$lib/validation/inventory.schemas';
+import { appendActionToast } from '$lib/utils/action-toast';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -51,6 +52,6 @@ export const actions: Actions = {
 			event.locals.householdRole!
 		);
 
-		redirect(302, `/inventory/${parsed.data.location}`);
+		redirect(302, appendActionToast(`/inventory/${parsed.data.location}`, 'itemCreated', parsed.data.name));
 	}
 };
