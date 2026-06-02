@@ -150,7 +150,9 @@
 		"scanCardTitle": "Scan item",
 		"scanCardSubtitle": "Barcode — the fastest way to add",
 		"chipReceipt": "Receipt",
+		"chipBarcode": "Barcode",
 		"chipPhoto": "Photo",
+		"chipPhotoRound": "Photo round",
 		"chipManual": "Manual",
 		"moreAddWays": "More ways to add",
 		"locationsTitle": "Your locations",
@@ -723,7 +725,15 @@
 		"deletingHousehold": "Deleting household…",
 		"removeMember": "Remove member {email}",
 		"defaultName": "My household",
-		"roleOwnerLabel": "Owner"
+		"roleOwnerLabel": "Owner",
+		"editName": "Rename",
+		"editNameNote": "The name is visible to everyone in the household.",
+		"savingName": "Saving…",
+		"shareInvite": "Share invite link",
+		"shareInviteNote": "Create a link anyone with an account can use to join.",
+		"generatingShareLink": "Creating link…",
+		"shareLink": "Share",
+		"shareInviteLabel": "Share link"
 	},
 	"pets": {
 		"title": "Pets",
@@ -954,7 +964,9 @@
 		"wrongAccount": "You are logged in as {current}, but the invitation is for {expected}. Log in with the correct account.",
 		"switchAccount": "Switch account",
 		"accept": "Accept invitation",
-		"loginRedirectMessage": "Log in with the same email address the invitation was sent to."
+		"loginRedirectMessage": "Log in with the same email address the invitation was sent to.",
+		"shareLead": "Anyone with a Skaffu account can join with this link.",
+		"shareAccept": "Join household"
 	},
 	"starter": {
 		"title": "Quick start",
@@ -1046,6 +1058,7 @@
 		"barcodeModal": "Scan barcode",
 		"noCamera": "No camera found on this device.",
 		"cameraDenied": "Could not open the camera. Allow camera access in your browser settings.",
+		"flipCamera": "Flip camera",
 		"addModalTitle": "Add item",
 		"toastAdded": "Done! \"{label}\" is now in your pantry.",
 		"toastAddedUnknown": "Nice — \"{label}\" is in your pantry (unknown barcode).",
@@ -1425,6 +1438,8 @@
 		"pantryCreated": "{label} created",
 		"pantryCreatedGeneric": "Pantry created",
 		"pantryLeft": "You left the pantry",
+		"householdRenamed": "Household renamed to {label}",
+		"householdRenamedGeneric": "Household name saved",
 		"shoppingAdded": "Added to shopping list",
 		"shoppingCleared": "Shopping list cleared",
 		"adminSaved": "Admin settings saved",

@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { HouseholdService } from './household.service';
 import { InventoryService, InventoryReadOnlyError } from './inventory.service';
+import { SHARE_INVITE_EMAIL } from '$lib/domain/household';
 import { DrizzleHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
 import { DrizzleInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
 import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integration-db';
@@ -129,5 +130,45 @@ describe('Household invites integration', () => {
 		);
 
 		expect(created.name).toBe('Editor item');
+	});
+
+	it('renames household for owner and editor', async () => {
+		await integrationDb.seedUser({ id: 'owner-1', email: 'owner@example.com' });
+		await integrationDb.seedUser({ id: 'editor-1', email: 'editor@example.com' });
+		await integrationDb.seedHousehold({
+			id: householdId,
+			name: 'Old name',
+			members: [
+				{ userId: 'owner-1', role: 'owner' },
+				{ userId: 'editor-1', role: 'editor' }
+			]
+		});
+
+		await householdService.updateHouseholdName(householdId, 'editor-1', 'Editor rename');
+		let household = await householdService.getHouseholdForUser('editor-1');
+		expect(household?.name).toBe('Editor rename');
+
+		await householdService.updateHouseholdName(householdId, 'owner-1', 'Owner rename');
+		household = await householdService.getHouseholdForUser('owner-1');
+		expect(household?.name).toBe('Owner rename');
+	});
+
+	it('creates share invite link token reusable until revoked', async () => {
+		await seedOwnerAndHousehold();
+		await integrationDb.seedUser({ id: 'guest-1', email: 'guest@example.com' });
+
+		const first = await householdService.createShareInvite(householdId, 'owner-1', 'viewer');
+		const second = await householdService.createShareInvite(householdId, 'owner-1', 'viewer');
+
+		expect(first.token).toBeTruthy();
+		expect(second.token).toBe(first.token);
+
+		await householdService.acceptInvite(first.token, 'guest-1', 'guest@example.com');
+
+		const role = await householdService.getRoleForUser(householdId, 'guest-1');
+		expect(role).toBe('viewer');
+
+		const pending = await householdService.listPendingInvites(householdId, 'owner-1');
+		expect(pending.some((row) => row.email === SHARE_INVITE_EMAIL)).toBe(false);
 	});
 });

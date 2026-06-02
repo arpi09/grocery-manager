@@ -26,9 +26,13 @@
 			<p class="detail">
 				{t('invite.roleLabel')} <strong>{inviteRoleLabel(data.preview.role, getLocale())}</strong>
 			</p>
-			<p class="detail">
-				{t('invite.emailLabel')} <strong>{data.preview.email}</strong>
-			</p>
+			{#if data.isShareInvite}
+				<p class="detail share-lead">{t('invite.shareLead')}</p>
+			{:else}
+				<p class="detail">
+					{t('invite.emailLabel')} <strong>{data.preview.email}</strong>
+				</p>
+			{/if}
 
 			{#if data.preview.status === 'accepted'}
 				<p class="message info">{t('invite.alreadyAccepted')}</p>
@@ -38,7 +42,9 @@
 				<p class="message error">{t('invite.expired')}</p>
 			{:else if !data.user}
 				<p class="message info">
-					{t('invite.loginPrompt', { email: data.preview.email })}
+					{data.isShareInvite
+						? t('invite.shareLead')
+						: t('invite.loginPrompt', { email: data.preview.email })}
 				</p>
 				<a class="login-link" href={loginHref}>{t('invite.loginLink')}</a>
 			{:else if !data.emailMatches}
@@ -51,7 +57,9 @@
 					<p class="message error" role="alert">{acceptError}</p>
 				{/if}
 				<form method="POST" action="?/accept">
-					<Button type="submit" fullWidth>{t('invite.accept')}</Button>
+					<Button type="submit" fullWidth>
+						{data.isShareInvite ? t('invite.shareAccept') : t('invite.accept')}
+					</Button>
 				</form>
 			{/if}
 		{/if}
@@ -69,6 +77,10 @@
 		margin: 0 0 var(--space-sm);
 		color: var(--color-text-muted);
 		font-size: 0.9rem;
+	}
+
+	.share-lead {
+		color: var(--color-text);
 	}
 
 	.message {

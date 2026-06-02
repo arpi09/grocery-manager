@@ -49,6 +49,7 @@ export interface IHouseholdRepository {
 	getHouseholdById(householdId: string): Promise<HouseholdView | null>;
 	getHouseholdForUser(userId: string): Promise<HouseholdView | null>;
 	createHousehold(id: string, name: string): Promise<void>;
+	updateHouseholdName(householdId: string, name: string): Promise<boolean>;
 	addMember(householdId: string, userId: string, role: HouseholdRole): Promise<void>;
 	hasMember(householdId: string, userId: string): Promise<boolean>;
 	getMemberRole(householdId: string, userId: string): Promise<HouseholdRole | null>;
@@ -465,6 +466,26 @@ export class DrizzleHouseholdRepository implements IHouseholdRepository {
 			.update(householdTable)
 			.set({ autoExpiredGraceDays: days })
 			.where(eq(householdTable.id, householdId));
+	}
+
+	async updateHouseholdName(householdId: string, name: string) {
+		const trimmed = name.trim();
+		const [existing] = await this.database
+			.select({ id: householdTable.id })
+			.from(householdTable)
+			.where(eq(householdTable.id, householdId))
+			.limit(1);
+
+		if (!existing) {
+			return false;
+		}
+
+		await this.database
+			.update(householdTable)
+			.set({ name: trimmed })
+			.where(eq(householdTable.id, householdId));
+
+		return true;
 	}
 
 	async deleteHousehold(householdId: string) {

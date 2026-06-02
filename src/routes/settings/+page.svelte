@@ -101,13 +101,37 @@
 	const inviteEmailWarning = $derived(form?.inviteEmailWarning ?? null);
 	const householdError = $derived(form?.householdError ?? null);
 	const inviteFieldErrors = $derived(form?.inviteErrors ?? {});
+	const householdNameErrors = $derived(
+		(form as { householdNameErrors?: Record<string, string[] | undefined> } | null)
+			?.householdNameErrors ?? {}
+	);
 
 	async function copyInviteLink(link: string) {
+		if (!browser) return;
 		await navigator.clipboard.writeText(link);
 		copiedInviteLink = true;
 		setTimeout(() => {
 			copiedInviteLink = false;
 		}, 2000);
+	}
+
+	async function shareInviteLink(link: string) {
+		if (!browser || !navigator.share) {
+			await copyInviteLink(link);
+			return;
+		}
+		try {
+			await navigator.share({
+				title: t('household.shareInvite'),
+				text: t('household.shareInviteNote'),
+				url: link
+			});
+		} catch (error) {
+			if (error instanceof DOMException && error.name === 'AbortError') {
+				return;
+			}
+			await copyInviteLink(link);
+		}
 	}
 
 	function replayOnboardingGuide() {
@@ -183,8 +207,10 @@
 					{inviteFieldErrors}
 					{inviteLink}
 					{inviteEmailWarning}
+					{householdNameErrors}
 					copiedInviteLink={copiedInviteLink}
 					onCopyInviteLink={copyInviteLink}
+					onShareInviteLink={shareInviteLink}
 				/>
 			</SettingsSection>
 		{/if}

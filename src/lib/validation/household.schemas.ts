@@ -9,6 +9,14 @@ export const createHouseholdSchema = z.object({
 	name: z.string().trim().min(1, 'Ange ett namn').max(80, 'Namnet är för långt')
 });
 
+export const updateHouseholdSchema = z.object({
+	name: z.string().trim().min(1, 'Ange ett namn').max(80, 'Namnet är för långt')
+});
+
+export const createShareInviteSchema = z.object({
+	role: z.enum(['editor', 'viewer'])
+});
+
 export const switchHouseholdSchema = z.object({
 	householdId: z.string().min(1, 'Ogiltig pantry')
 });

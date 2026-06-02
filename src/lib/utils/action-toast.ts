@@ -26,6 +26,7 @@ export type ActionToastKind =
 	| 'pantrySwitched'
 	| 'pantryCreated'
 	| 'pantryLeft'
+	| 'householdRenamed'
 	| 'shoppingAdded'
 	| 'shoppingCleared'
 	| 'adminSaved'
@@ -118,6 +119,10 @@ const ACTION_TOAST_KEYS: Record<
 	pantryLeft: {
 		withLabel: 'actionToast.pantryLeft',
 		generic: 'actionToast.pantryLeft'
+	},
+	householdRenamed: {
+		withLabel: 'actionToast.householdRenamed',
+		generic: 'actionToast.householdRenamedGeneric'
 	},
 	shoppingAdded: {
 		withLabel: 'actionToast.shoppingAdded',

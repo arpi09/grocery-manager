@@ -10,9 +10,11 @@ import { householdInviteEmailWarning, sendHouseholdInviteEmail } from '$lib/serv
 import { getAppOrigin } from '$lib/server/origin';
 import {
 	createHouseholdInviteSchema,
+	createShareInviteSchema,
 	deleteHouseholdSchema,
 	removeMemberSchema,
 	revokeInviteSchema,
+	updateHouseholdSchema,
 	updateMemberRoleSchema
 } from '$lib/validation/household.schemas';
 import {
@@ -239,6 +241,63 @@ export const actions: Actions = {
 
 		await locals.petService.deletePet(locals.user!.id, parsed.data.id);
 		redirect(302, appendActionToast('/settings', 'petRemoved', pet?.name));
+	},
+	updateHousehold: async ({ request, locals }) => {
+		if (!canEditInventory(locals.householdRole!)) {
+			return fail(403, {
+				householdError: translate(locals.locale, 'errors.household.forbidden')
+			});
+		}
+
+		const formData = await request.formData();
+		const parsed = updateHouseholdSchema.safeParse({
+			name: formData.get('name')
+		});
+
+		if (!parsed.success) {
+			return fail(400, {
+				householdNameErrors: parsed.error.flatten().fieldErrors,
+				householdError:
+					parsed.error.flatten().fieldErrors.name?.[0] ?? 'Ogiltigt namn.'
+			});
+		}
+
+		try {
+			await locals.householdService.updateHouseholdName(
+				locals.householdId!,
+				locals.user!.id,
+				parsed.data.name
+			);
+		} catch (error) {
+			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
+		}
+
+		redirect(302, appendActionToast('/settings', 'householdRenamed', parsed.data.name));
+	},
+	createShareInvite: async ({ request, locals, url }) => {
+		const formData = await request.formData();
+		const parsed = createShareInviteSchema.safeParse({
+			role: formData.get('role')
+		});
+
+		if (!parsed.success) {
+			return fail(400, {
+				householdError: translate(locals.locale, 'errors.household.invalidRole')
+			});
+		}
+
+		try {
+			const { token } = await locals.householdService.createShareInvite(
+				locals.householdId!,
+				locals.user!.id,
+				parsed.data.role
+			);
+			const inviteUrl = `${getAppOrigin(url.origin)}/invite/${token}`;
+
+			return { inviteLink: inviteUrl };
+		} catch (error) {
+			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
+		}
 	},
 	createInvite: async ({ request, locals, url }) => {
 		const formData = await request.formData();

@@ -27,6 +27,7 @@ describe('HouseholdService', () => {
 		getHouseholdById: vi.fn(),
 			getHouseholdForUser: vi.fn(),
 			createHousehold: vi.fn(),
+			updateHouseholdName: vi.fn(),
 			addMember: vi.fn(),
 			hasMember: vi.fn(),
 			getMemberRole: vi.fn(),
@@ -302,5 +303,22 @@ describe('HouseholdService', () => {
 		await expect(
 			service.deleteHousehold('missing', 'owner-1', 'TA BORT')
 		).rejects.toBeInstanceOf(HouseholdNotFoundError);
+	});
+
+	it('updates household name when actor can edit inventory', async () => {
+		vi.mocked(repository.getMemberRole).mockResolvedValue('editor');
+		vi.mocked(repository.updateHouseholdName).mockResolvedValue(true);
+
+		await service.updateHouseholdName('household-1', 'editor-1', '  Nytt namn  ');
+
+		expect(repository.updateHouseholdName).toHaveBeenCalledWith('household-1', 'Nytt namn');
+	});
+
+	it('rejects household rename from viewer', async () => {
+		vi.mocked(repository.getMemberRole).mockResolvedValue('viewer');
+
+		await expect(
+			service.updateHouseholdName('household-1', 'viewer-1', 'Namn')
+		).rejects.toBeInstanceOf(HouseholdForbiddenError);
 	});
 });

@@ -48,6 +48,13 @@ export function isHouseholdOwner(role: HouseholdRole): boolean {
 	return role === 'owner';
 }
 
+/** Open share-link invites — any logged-in user may accept. */
+export const SHARE_INVITE_EMAIL = '*';
+
+export function isShareInviteEmail(email: string): boolean {
+	return email.trim() === SHARE_INVITE_EMAIL;
+}
+
 export function householdRoleLabel(
 	role: HouseholdRole,
 	locale: Locale = DEFAULT_LOCALE

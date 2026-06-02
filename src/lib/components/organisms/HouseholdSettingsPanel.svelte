@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { browser } from '$app/environment';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import DeleteSafetyModal from '$lib/components/molecules/DeleteSafetyModal.svelte';
@@ -8,7 +9,9 @@
 	import {
 		householdRoleLabel,
 		inviteRoleLabel,
-		isHouseholdOwner
+		isHouseholdOwner,
+		isShareInviteEmail,
+		canEditInventory
 	} from '$lib/domain/household';
 	import { getLocale, t } from '$lib/i18n';
 	import type { HouseholdInviteView, HouseholdRole, HouseholdView } from '$lib/domain/household';
@@ -23,7 +26,9 @@
 		inviteFieldErrors: Record<string, string[] | undefined>;
 		inviteLink: string | null;
 		inviteEmailWarning: string | null;
+		householdNameErrors?: Record<string, string[] | undefined>;
 		onCopyInviteLink: (link: string) => void;
+		onShareInviteLink?: (link: string) => void;
 		copiedInviteLink: boolean;
 	}
 
@@ -37,13 +42,24 @@
 		inviteFieldErrors,
 		inviteLink,
 		inviteEmailWarning,
+		householdNameErrors = {},
 		onCopyInviteLink,
+		onShareInviteLink,
 		copiedInviteLink
 	}: Props = $props();
 
 	let deleteModalOpen = $state(false);
 	let inviteSubmitting = $state(false);
+	let shareInviteSubmitting = $state(false);
+	let renameSubmitting = $state(false);
 	let deleteSubmitting = $state(false);
+	let householdName = $state(household.name);
+
+	$effect(() => {
+		householdName = household.name;
+	});
+
+	const canEditName = $derived(householdRole ? canEditInventory(householdRole) : false);
 
 	const inviteSent = $derived(Boolean(inviteLink && !householdError && !inviteEmailWarning));
 
@@ -73,7 +89,35 @@
 
 <div class="household-panel">
 	<div class="household-intro">
-		<p class="household-name">{household.name}</p>
+		{#if canEditName}
+			<form
+				method="POST"
+				action="?/updateHousehold"
+				class="rename-form"
+				use:enhance={bindSubmitting((v) => (renameSubmitting = v))}
+			>
+				<label class="rename-label">
+					{t('household.editName')}
+					<input
+						name="name"
+						type="text"
+						required
+						maxlength="80"
+						bind:value={householdName}
+						aria-invalid={householdNameErrors.name?.[0] ? 'true' : undefined}
+					/>
+					{#if householdNameErrors.name?.[0]}
+						<span class="field-error">{householdNameErrors.name[0]}</span>
+					{/if}
+				</label>
+				<p class="subsection-note">{t('household.editNameNote')}</p>
+				<Button type="submit" loading={renameSubmitting} loadingLabel={t('household.savingName')}>
+					{t('common.save')}
+				</Button>
+			</form>
+		{:else}
+			<p class="household-name">{household.name}</p>
+		{/if}
 	</div>
 
 	<div class="subsection">
@@ -175,9 +219,41 @@
 						<Button type="button" variant="secondary" onclick={() => onCopyInviteLink(inviteLink)}>
 							{copiedInviteLink ? t('common.copied') : t('common.copy')}
 						</Button>
+						{#if onShareInviteLink && browser && typeof navigator !== 'undefined' && 'share' in navigator}
+							<Button type="button" variant="secondary" onclick={() => onShareInviteLink?.(inviteLink)}>
+								{t('household.shareLink')}
+							</Button>
+						{/if}
 					</div>
 				</div>
 			{/if}
+
+			<div class="subsection share-invite">
+				<h3 class="subsection-title">{t('household.shareInvite')}</h3>
+				<p class="subsection-note">{t('household.shareInviteNote')}</p>
+				<form
+					method="POST"
+					action="?/createShareInvite"
+					class="share-invite-form"
+					use:enhance={bindSubmitting((v) => (shareInviteSubmitting = v))}
+				>
+					<label>
+						{t('common.role')}
+						<select name="role" required>
+							<option value="editor">{inviteRoleLabel('editor', getLocale())}</option>
+							<option value="viewer">{inviteRoleLabel('viewer', getLocale())}</option>
+						</select>
+					</label>
+					<Button
+						type="submit"
+						variant="secondary"
+						loading={shareInviteSubmitting}
+						loadingLabel={t('household.generatingShareLink')}
+					>
+						{t('household.shareInvite')}
+					</Button>
+				</form>
+			</div>
 
 			{#if pendingInvites.length > 0}
 				<h3 class="subsection-title">{t('household.pendingInvites')}</h3>
@@ -185,7 +261,11 @@
 					{#each pendingInvites as invite (invite.id)}
 						<li>
 							<div>
-								<span class="member-email">{invite.email}</span>
+								<span class="member-email">
+									{isShareInviteEmail(invite.email)
+										? t('household.shareInviteLabel')
+										: invite.email}
+								</span>
 								<span class="member-role">{inviteRoleLabel(invite.role, getLocale())}</span>
 							</div>
 							<DeleteConfirmButton
@@ -265,6 +345,56 @@
 		margin: 0;
 		font-weight: 700;
 		font-size: 1rem;
+	}
+
+	.rename-form {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+	}
+
+	.rename-label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		font-size: 0.9rem;
+		font-weight: 600;
+	}
+
+	.rename-label input {
+		padding: 0.6rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		color: var(--color-text);
+		font-weight: 400;
+	}
+
+	.share-invite {
+		margin-top: var(--space-md);
+		padding-top: var(--space-md);
+		border-top: 1px solid var(--color-border);
+	}
+
+	.share-invite-form {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+	}
+
+	.share-invite-form label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		font-size: 0.9rem;
+	}
+
+	.share-invite-form select {
+		padding: 0.6rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		color: var(--color-text);
 	}
 
 	.subsection {

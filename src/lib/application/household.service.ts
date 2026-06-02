@@ -1,6 +1,9 @@
 import { randomBytes } from 'node:crypto';
 import {
+	canEditInventory,
 	isHouseholdOwner,
+	isShareInviteEmail,
+	SHARE_INVITE_EMAIL,
 	type HouseholdInviteView,
 	type HouseholdRole,
 	type HouseholdView,
@@ -154,6 +157,27 @@ export class HouseholdService {
 		return householdId;
 	}
 
+	async updateHouseholdName(
+		householdId: string,
+		actorUserId: string,
+		name: string
+	): Promise<void> {
+		const role = await this.repository.getMemberRole(householdId, actorUserId);
+		if (!role || !canEditInventory(role)) {
+			throw new HouseholdForbiddenError();
+		}
+
+		const trimmedName = name.trim();
+		if (!trimmedName) {
+			throw new Error('Pantryn måste ha ett namn.');
+		}
+
+		const updated = await this.repository.updateHouseholdName(householdId, trimmedName);
+		if (!updated) {
+			throw new HouseholdNotFoundError();
+		}
+	}
+
 	async switchActiveHousehold(userId: string, householdId: string): Promise<void> {
 		if (!(await this.repository.hasMember(householdId, userId))) {
 			throw new NotMemberError();
@@ -268,6 +292,45 @@ export class HouseholdService {
 		return { invite, token };
 	}
 
+	async createShareInvite(
+		householdId: string,
+		actorUserId: string,
+		role: InviteRole
+	): Promise<CreateInviteResult> {
+		await this.requireOwner(householdId, actorUserId);
+
+		const pending = await this.repository.findPendingInviteByEmail(householdId, SHARE_INVITE_EMAIL);
+		if (pending) {
+			const invites = await this.repository.listPendingInvites(householdId);
+			const invite = invites.find((row) => row.id === pending.id);
+			if (invite) {
+				return { invite, token: pending.token };
+			}
+		}
+
+		const id = generateId();
+		const token = randomBytes(32).toString('base64url');
+		const expiresAt = addDays(new Date(), INVITE_EXPIRY_DAYS);
+
+		const created = await this.repository.createInvite({
+			id,
+			householdId,
+			email: SHARE_INVITE_EMAIL,
+			role,
+			token,
+			invitedByUserId: actorUserId,
+			expiresAt
+		});
+
+		const invites = await this.repository.listPendingInvites(householdId);
+		const invite = invites.find((row) => row.id === created.id);
+		if (!invite) {
+			throw new Error('Failed to load created invite');
+		}
+
+		return { invite, token };
+	}
+
 	async acceptInvite(token: string, userId: string, userEmail: string): Promise<string> {
 		const invite = await this.repository.findInviteByToken(token);
 		if (!invite) {
@@ -277,7 +340,10 @@ export class HouseholdService {
 		this.assertInviteAcceptable(invite.status, invite.expiresAt);
 
 		const normalizedUserEmail = userEmail.trim().toLowerCase();
-		if (normalizedUserEmail !== invite.email) {
+		if (
+			!isShareInviteEmail(invite.email) &&
+			normalizedUserEmail !== invite.email.trim().toLowerCase()
+		) {
 			throw new InviteEmailMismatchError();
 		}
 

@@ -1,3 +1,4 @@
+import { isShareInviteEmail } from '$lib/domain/household';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { redirect } from '@sveltejs/kit';
 import { InviteNotFoundError } from '$lib/application/household.service';
@@ -14,15 +15,21 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 				preview: null,
 				token: params.token,
 				redirectTo: url.pathname,
-				user: locals.user
+				user: locals.user,
+				isShareInvite: false,
+				emailMatches: false,
+				canAccept: false
 			};
 		}
 		throw error;
 	}
 
 	const user = locals.user;
+	const isShareInvite = preview ? isShareInviteEmail(preview.email) : false;
 	const emailMatches =
-		user && user.email.trim().toLowerCase() === preview.email.trim().toLowerCase();
+		user &&
+		(isShareInvite ||
+			user.email.trim().toLowerCase() === preview.email.trim().toLowerCase());
 	const canAccept =
 		!!user &&
 		emailMatches &&
@@ -34,6 +41,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		token: params.token,
 		redirectTo: url.pathname,
 		user,
+		isShareInvite,
 		emailMatches,
 		canAccept
 	};
