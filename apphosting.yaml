@@ -159,3 +159,14 @@ env:
   # - variable: DEFAULT_MEMBER_PASSWORD
   #   secret: DEFAULT_MEMBER_PASSWORD
 
+
+  # Sales demo account (see docs/DEMO_ACCOUNT.md) — set secret before enabling cron reset-demo
+  - variable: DEMO_ACCOUNT_EMAIL
+    value: demo@skaffu.com
+    availability:
+      - RUNTIME
+
+  - variable: DEMO_ACCOUNT_PASSWORD
+    secret: DEMO_ACCOUNT_PASSWORD
+    availability:
+      - RUNTIME
