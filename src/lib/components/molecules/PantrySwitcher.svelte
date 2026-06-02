@@ -105,7 +105,7 @@
 									>
 										<input type="hidden" name="householdId" value={pantry.id} />
 										<input type="hidden" name="redirectTo" value={pathname} />
-										<button type="submit" class="pantry-option" role="option">
+										<button type="submit" class="pantry-option" role="option" aria-selected="false">
 											<span class="option-name">{pantry.name}</span>
 											<span class="option-meta">{householdRoleLabel(pantry.role, getLocale())}</span>
 										</button>
