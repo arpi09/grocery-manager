@@ -32,7 +32,9 @@
 
 	let emailField = $state(email);
 	$effect(() => {
-		emailField = email;
+		if (email) {
+			emailField = email;
+		}
 	});
 
 	let submitting = $state(false);
