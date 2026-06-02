@@ -7,8 +7,8 @@ import {
 
 test.describe('Settings', () => {
 	test('settings page loads for authenticated user', async ({ page }) => {
-		await registerNewUser(page);
 		await prepareE2eBrowserState(page);
+		await registerNewUser(page);
 		await page.goto('/settings');
 		await dismissOnboardingModalIfOpen(page);
 
