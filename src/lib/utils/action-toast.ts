@@ -54,6 +54,10 @@ const ACTION_TOAST_KEYS: Record<
 		withLabel: 'actionToast.itemPartiallyConsumed',
 		generic: 'actionToast.itemPartiallyConsumedGeneric'
 	},
+	autoExpiredCleared: {
+		withLabel: 'actionToast.autoExpiredCleared',
+		generic: 'actionToast.autoExpiredClearedGeneric'
+	},
 	settingsSaved: {
 		withLabel: 'actionToast.settingsSaved',
 		generic: 'actionToast.settingsSaved'

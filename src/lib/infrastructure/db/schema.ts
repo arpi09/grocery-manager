@@ -104,6 +104,7 @@ export const sessionTable = pgTable('session', {
 export const householdTable = pgTable('household', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
+	autoExpiredGraceDays: integer('auto_expired_grace_days').notNull().default(7),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 });
 
@@ -166,6 +167,9 @@ export const inventoryItemTable = pgTable(
 		quantity: numeric('quantity', { precision: 10, scale: 2 }).notNull().default('1'),
 		unit: text('unit'),
 		expiresOn: date('expires_on', { mode: 'string' }),
+		expiresOnSource: text('expires_on_source', {
+			enum: ['user_set', 'ai_inferred', 'default_heuristic']
+		}),
 		notes: text('notes'),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()

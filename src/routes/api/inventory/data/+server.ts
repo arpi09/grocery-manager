@@ -4,7 +4,7 @@ import { isStorageLocation } from '$lib/domain/location';
 import { requireHousehold } from '$lib/server/api-guards';
 import type { RequestHandler } from './$types';
 
-const SECTIONS = ['active', 'finished'] as const;
+const SECTIONS = ['active', 'finished', 'autoExpired'] as const;
 type InventorySection = (typeof SECTIONS)[number];
 
 function parseLimit(raw: string | null, defaultValue: number, max: number): number {
@@ -66,6 +66,18 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 		const [items, total] = await Promise.all([
 			locals.inventoryService.listByLocationPaginated(householdId, location, limit, offset),
 			locals.inventoryService.countActiveByLocation(householdId, location)
+		]);
+
+		return json({
+			items: items.map(serializeItem),
+			total
+		});
+	}
+
+	if (sectionParam === 'autoExpired') {
+		const [items, total] = await Promise.all([
+			locals.inventoryService.listAutoExpiredByLocation(householdId, location),
+			locals.inventoryService.countAutoExpiredByLocation(householdId, location)
 		]);
 
 		return json({

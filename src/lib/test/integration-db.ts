@@ -41,7 +41,8 @@ const SQL_MIGRATION_FILES = [
 	'0020_product_event_anonymous.sql',
 	'0021_shopping_push.sql',
 	'0022_user_is_demo.sql',
-	'0023_auth_password_reset_oauth.sql'
+	'0023_auth_password_reset_oauth.sql',
+	'0024_auto_expired_grace.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE

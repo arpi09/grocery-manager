@@ -1,4 +1,9 @@
 import { and, asc, eq } from 'drizzle-orm';
+import {
+	DEFAULT_AUTO_EXPIRED_GRACE_DAYS,
+	normalizeAutoExpiredGraceDays,
+	type AutoExpiredGraceDays
+} from '$lib/domain/auto-expired';
 import type {
 	HouseholdInviteView,
 	HouseholdMemberView,
@@ -72,6 +77,8 @@ export interface IHouseholdRepository {
 	removeMember(householdId: string, userId: string): Promise<boolean>;
 	getInvitePreview(token: string): Promise<InvitePreviewRow | null>;
 	deleteHousehold(householdId: string): Promise<boolean>;
+	getAutoExpiredGraceDays(householdId: string): Promise<AutoExpiredGraceDays>;
+	updateAutoExpiredGraceDays(householdId: string, days: AutoExpiredGraceDays): Promise<void>;
 }
 
 export class DrizzleHouseholdRepository implements IHouseholdRepository {
@@ -441,6 +448,23 @@ export class DrizzleHouseholdRepository implements IHouseholdRepository {
 			);
 
 		return true;
+	}
+
+	async getAutoExpiredGraceDays(householdId: string): Promise<AutoExpiredGraceDays> {
+		const [row] = await this.database
+			.select({ autoExpiredGraceDays: householdTable.autoExpiredGraceDays })
+			.from(householdTable)
+			.where(eq(householdTable.id, householdId))
+			.limit(1);
+
+		return normalizeAutoExpiredGraceDays(row?.autoExpiredGraceDays ?? DEFAULT_AUTO_EXPIRED_GRACE_DAYS);
+	}
+
+	async updateAutoExpiredGraceDays(householdId: string, days: AutoExpiredGraceDays) {
+		await this.database
+			.update(householdTable)
+			.set({ autoExpiredGraceDays: days })
+			.where(eq(householdTable.id, householdId));
 	}
 
 	async deleteHousehold(householdId: string) {

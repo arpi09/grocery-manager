@@ -12,6 +12,7 @@ export type DeleteSafetyContext =
 	| 'shoppingListClearChecked'
 	| 'inventoryItem'
 	| 'inventoryItemFinished'
+	| 'inventoryAutoExpiredBulk'
 	| 'householdMember'
 	| 'householdDelete'
 	| 'inviteRevoke'
@@ -115,6 +116,17 @@ export function getDeleteCopy(
 				confirmLabel: translate(locale, 'delete.inventoryItemFinished.confirm'),
 				cancelLabel
 			};
+
+		case 'inventoryAutoExpiredBulk': {
+			const n = count ?? 0;
+			return {
+				title: translate(locale, 'delete.inventoryAutoExpiredBulk.title'),
+				description: translate(locale, 'delete.inventoryAutoExpiredBulk.description', { count: n }),
+				consequence: translate(locale, 'delete.inventoryAutoExpiredBulk.consequence'),
+				confirmLabel: translate(locale, 'delete.inventoryAutoExpiredBulk.confirm'),
+				cancelLabel
+			};
+		}
 
 		case 'householdMember':
 			return {

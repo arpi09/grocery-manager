@@ -73,7 +73,11 @@ export const adminService = new AdminService(
 	adminActionRepository
 );
 export const householdService = new HouseholdService(householdRepository);
-export const inventoryService = new InventoryService(inventoryRepository, consumptionRepository);
+export const inventoryService = new InventoryService(
+	inventoryRepository,
+	consumptionRepository,
+	householdRepository
+);
 export const statistikService = new StatistikService(
 	inventoryService,
 	inventoryRepository,
