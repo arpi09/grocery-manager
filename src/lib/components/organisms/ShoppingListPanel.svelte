@@ -227,7 +227,7 @@
 							copyOptions={{ itemName: item.name }}
 							action="?/remove"
 							submitEnhance={createRemoveEnhance(item)}
-							label=""
+							label="Ã—"
 							ariaLabel={t('shopping.removeLine', { line: formatLine(item) })}
 							class="remove-trigger"
 						>
