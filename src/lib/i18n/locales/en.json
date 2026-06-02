@@ -344,10 +344,22 @@
 		},
 		"plan": {
 			"title": "Plan",
-			"description": "Subscription (coming soon)",
+			"description": "Subscription (Free)",
+			"descriptionPro": "Subscription (Pro)",
 			"currentTier": "Current plan",
 			"currentFree": "Free",
+			"currentPro": "Pro",
 			"comingSoon": "Billing is not enabled yet. We will tell you before Pro is charged.",
+			"proActive": "Your household has Pro — unlimited AI, receipt PDF, smart fill, and more members.",
+			"upgradeDescription": "Upgrade your household to Pro via Stripe Checkout (test mode until you switch to live keys).",
+			"upgradeMonthly": "Upgrade — {price} SEK/month",
+			"upgradeYearly": "Upgrade — {price} SEK/year",
+			"upgradeLoading": "Opening checkout…",
+			"upgradeError": "Could not start checkout. Try again.",
+			"upgradeOwnerOnly": "Only the household owner can start an upgrade.",
+			"upgradeTestNote": "Test mode: use card 4242 4242 4242 4242 in Stripe Checkout.",
+			"checkoutSuccess": "Thanks! If payment succeeded, Pro activates within a few seconds.",
+			"checkoutCancel": "Checkout was cancelled. You can try again anytime.",
 			"freeLimitsTitle": "Free includes",
 			"freeLimitsItems": "{items} pantry items · {members} household members · {aiScans} AI scans/mo · {receipts} receipt PDF/mo · {smartFill} smart fill/week",
 			"proTitle": "Pro will include",
@@ -373,6 +385,7 @@
 				"body": "You've hit a limit on the Free plan: {detail}",
 				"generic": "You've hit a limit on the Free plan.",
 				"upgradeCta": "See Pro and pricing",
+				"upgradeCheckoutCta": "Upgrade to Pro",
 				"comingSoonNote": "Billing is not enabled yet — we'll tell you before anything is charged."
 			},
 			"limitDetail": {
@@ -1299,6 +1312,11 @@
 		}
 	},
 	"errors": {
+		"billing": {
+			"notConfigured": "Billing is not configured on the server yet.",
+			"ownerRequired": "Only the household owner can upgrade to Pro.",
+			"alreadyPro": "This household already has Pro."
+		},
 		"plan": {
 			"inventoryLimit": "You've reached the maximum pantry items on the Free plan. Upgrade to Pro or remove items.",
 			"membersLimit": "The Free plan allows up to two household members. Upgrade to Pro for more."

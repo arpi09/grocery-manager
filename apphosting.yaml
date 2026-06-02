@@ -183,3 +183,30 @@ env:
   #   secret: DEMO_ACCOUNT_PASSWORD
   #   availability:
   #     - RUNTIME
+
+  # Stripe (Pro checkout) — see docs/STRIPE.md. Uncomment after creating secrets:
+  #
+  # npx firebase apphosting:secrets:set STRIPE_SECRET_KEY --project home-pantry-4bee5
+  # npx firebase apphosting:secrets:grantaccess STRIPE_SECRET_KEY --backend home-pantry --project home-pantry-4bee5
+  # npx firebase apphosting:secrets:set STRIPE_WEBHOOK_SECRET --project home-pantry-4bee5
+  # npx firebase apphosting:secrets:grantaccess STRIPE_WEBHOOK_SECRET --backend home-pantry --project home-pantry-4bee5
+  #
+  # - variable: STRIPE_SECRET_KEY
+  #   secret: STRIPE_SECRET_KEY
+  #   availability:
+  #     - RUNTIME
+  #
+  # - variable: STRIPE_WEBHOOK_SECRET
+  #   secret: STRIPE_WEBHOOK_SECRET
+  #   availability:
+  #     - RUNTIME
+  #
+  # Price IDs are not secrets — set in App Hosting env after creating Products in Stripe Dashboard:
+  # - variable: STRIPE_PRICE_ID_MONTHLY
+  #   value: price_...
+  #   availability:
+  #     - RUNTIME
+  # - variable: STRIPE_PRICE_ID_YEARLY
+  #   value: price_...
+  #   availability:
+  #     - RUNTIME

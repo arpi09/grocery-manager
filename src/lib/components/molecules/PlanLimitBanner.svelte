@@ -9,10 +9,11 @@
 
 	interface Props {
 		snapshot: PlanLimitsSnapshot;
+		stripeCheckoutEnabled?: boolean;
 		class?: string;
 	}
 
-	let { snapshot, class: className = '' }: Props = $props();
+	let { snapshot, stripeCheckoutEnabled = false, class: className = '' }: Props = $props();
 
 	const primaryKey = $derived(snapshot.blockedKeys[0] as PlanLimitKey | undefined);
 	const detailMessage = $derived(
@@ -29,10 +30,16 @@
 	<div class="plan-limit-banner {className}">
 		<FeedbackBanner tone="warning" message={bannerMessage} />
 		<div class="plan-limit-actions">
-			<a class="plan-upgrade-link" href="/priser">
-				{t('settings.plan.limitBanner.upgradeCta')}
-			</a>
-			<p class="plan-limit-note">{t('settings.plan.limitBanner.comingSoonNote')}</p>
+			{#if stripeCheckoutEnabled}
+				<a class="plan-upgrade-link" href="/settings#plan-upgrade">
+					{t('settings.plan.limitBanner.upgradeCheckoutCta')}
+				</a>
+			{:else}
+				<a class="plan-upgrade-link" href="/priser">
+					{t('settings.plan.limitBanner.upgradeCta')}
+				</a>
+				<p class="plan-limit-note">{t('settings.plan.limitBanner.comingSoonNote')}</p>
+			{/if}
 		</div>
 	</div>
 {/if}

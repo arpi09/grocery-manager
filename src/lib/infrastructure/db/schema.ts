@@ -105,6 +105,10 @@ export const householdTable = pgTable('household', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
 	autoExpiredGraceDays: integer('auto_expired_grace_days').notNull().default(7),
+	planTier: text('plan_tier', { enum: ['free', 'pro'] }).notNull().default('free'),
+	stripeCustomerId: text('stripe_customer_id'),
+	stripeSubscriptionId: text('stripe_subscription_id'),
+	stripeSubscriptionStatus: text('stripe_subscription_status'),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 });
 

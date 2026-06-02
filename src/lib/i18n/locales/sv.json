@@ -338,7 +338,7 @@
 		},
 		"plan": {
 			"title": "Plan",
-			"description": "Prenumeration (kommer snart)",
+			"description": "Prenumeration (Gratis)",
 			"currentTier": "Nuvarande plan",
 			"currentFree": "Gratis",
 			"comingSoon": "Betalning är inte aktiverad ännu. Du får veta i förväg innan Pro debiteras.",
@@ -367,7 +367,8 @@
 				"body": "Du har nått en gräns på Gratis-planen: {detail}",
 				"generic": "Du har nått en gräns på Gratis-planen.",
 				"upgradeCta": "Se Pro och priser",
-				"comingSoonNote": "Betalning aktiveras senare — du får veta innan något debiteras."
+				"comingSoonNote": "Betalning aktiveras senare — du får veta innan något debiteras.",
+				"upgradeCheckoutCta": "Uppgradera till Pro"
 			},
 			"limitDetail": {
 				"inventory": "max antal lagerrader",
@@ -381,7 +382,19 @@
 			"waitlistEmailLabel": "E-post",
 			"waitlistSubmitLabel": "Meddela mig",
 			"waitlistSuccess": "Tack! Vi hör av oss innan Pro lanseras.",
-			"waitlistExists": "Du står redan på listan."
+			"waitlistExists": "Du står redan på listan.",
+			"descriptionPro": "Prenumeration (Pro)",
+			"currentPro": "Pro",
+			"proActive": "Ditt hushåll har Pro — obegränsad AI, kvitto-PDF, smart fill och fler medlemmar.",
+			"upgradeDescription": "Uppgradera hushållet till Pro via Stripe Checkout (testläge tills du byter till live-nycklar).",
+			"upgradeMonthly": "Uppgradera — {price} kr/mån",
+			"upgradeYearly": "Uppgradera — {price} kr/år",
+			"upgradeLoading": "Öppnar betalning…",
+			"upgradeError": "Kunde inte starta betalningen. Försök igen.",
+			"upgradeOwnerOnly": "Endast hushållets ägare kan starta uppgradering.",
+			"upgradeTestNote": "Testläge: använd kort 4242 4242 4242 4242 i Stripe Checkout.",
+			"checkoutSuccess": "Tack! Om betalningen gick igenom aktiveras Pro inom någon sekund.",
+			"checkoutCancel": "Betalningen avbröts. Du kan försöka igen när du vill."
 		},
 		"feedback": {
 			"title": "Ge feedback",
@@ -545,20 +558,20 @@
 		"exportEmpty": "Inget att kopiera — alla varor är avbockade"
 	},
 	"receiptAutopilot": {
-		"title": "Fr�n dina kvitton",
+		"title": "Fr�n dina kvitton",
 		"ariaLabel": "Kvitto-autopilot",
-		"intro": "�terkommande varor fr�n dina kvittoimport ? l�gg till i lagret med ett tryck.",
-		"emptyTitle": "Inga m�nster �n",
-		"emptyDescription": "Importera n�gra kvitton s� l�r vi oss vad du handlar ofta.",
+		"intro": "�terkommande varor fr�n dina kvittoimport ? l�gg till i lagret med ett tryck.",
+		"emptyTitle": "Inga m�nster �n",
+		"emptyDescription": "Importera n�gra kvitton s� l�r vi oss vad du handlar ofta.",
 		"emptyAction": "Importera kvitto",
-		"recurringMeta": "K�pt {count} g�nger � senast {quantity}",
-		"addToPantry": "L�gg till i lager",
+		"recurringMeta": "K�pt {count} g�nger � senast {quantity}",
+		"addToPantry": "L�gg till i lager",
 		"dismiss": "Inte nu",
 		"acceptSuccess": "{name} lades till i lagret",
-		"acceptFailed": "Kunde inte l�gga till varan. F�rs�k igen.",
-		"dismissFailed": "Kunde inte d�lja f�rslaget. F�rs�k igen.",
-		"notFound": "F�rslaget �r inte l�ngre tillg�ngligt.",
-		"invalidKey": "Ogiltigt f�rslag."
+		"acceptFailed": "Kunde inte l�gga till varan. F�rs�k igen.",
+		"dismissFailed": "Kunde inte d�lja f�rslaget. F�rs�k igen.",
+		"notFound": "F�rslaget �r inte l�ngre tillg�ngligt.",
+		"invalidKey": "Ogiltigt f�rslag."
 	},
 	"planer": {
 		"title": "Planer",
@@ -1288,6 +1301,11 @@
 		}
 	},
 	"errors": {
+		"billing": {
+			"notConfigured": "Betalning är inte konfigurerad på servern ännu.",
+			"ownerRequired": "Endast hushållets ägare kan uppgradera till Pro.",
+			"alreadyPro": "Hushållet har redan Pro."
+		},
 		"plan": {
 			"inventoryLimit": "Du har nått max antal lagerrader på Gratis-planen. Uppgradera till Pro eller ta bort varor.",
 			"membersLimit": "Gratis-planen tillåter max två hushållsmedlemmar. Uppgradera till Pro för fler."

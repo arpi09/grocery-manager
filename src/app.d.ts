@@ -18,8 +18,10 @@ import type { PlanLimitsService } from '$lib/application/plan-limits.service';
 import type { AiRateLimitService } from '$lib/application/ai-rate-limit.service';
 import type { AiUsageAdminService } from '$lib/application/ai-usage-admin.service';
 import type { WaitlistService } from '$lib/application/waitlist.service';
+import type { BillingService } from '$lib/application/billing.service';
 import type { PurchasePatternService } from '$lib/application/purchase-pattern.service';
 import type { HouseholdRole } from '$lib/domain/household';
+import type { PlanTier } from '$lib/domain/plan';
 import type { Locale } from '$lib/i18n/locale';
 
 /// <reference types="@vite-pwa/sveltekit" />
@@ -34,6 +36,7 @@ declare global {
 			session: Session | null;
 			householdId: string | null;
 			householdRole: HouseholdRole | null;
+			planTier: PlanTier;
 			authService: AuthService;
 			passwordResetService: PasswordResetService;
 			oauthService: OAuthService;
@@ -53,6 +56,7 @@ declare global {
 			aiRateLimitService: AiRateLimitService;
 			aiUsageAdminService: AiUsageAdminService;
 			waitlistService: WaitlistService;
+			billingService: BillingService;
 			purchasePatternService: PurchasePatternService;
 		}
 	}

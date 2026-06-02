@@ -19,6 +19,7 @@ import {
 	aiUsageAdminService,
 	planLimitsService,
 	waitlistService,
+	billingService,
 	purchasePatternService
 } from '$lib/server/di';
 import { recordUserActivity } from '$lib/server/activity';
@@ -33,6 +34,7 @@ import { writeThemeCookie } from '$lib/infrastructure/theme-cookie';
 import { writeLocaleCookie } from '$lib/infrastructure/locale-cookie';
 import { resolveLocaleForRequest } from '$lib/server/locale';
 import { expiryReminderService } from '$lib/server/di';
+import { DEFAULT_PLAN_TIER } from '$lib/domain/plan';
 import { isMarketingPath, redirectsAuthenticatedFromMarketing } from '$lib/marketing/routes';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { redirect, json, type Handle, type HandleServerError } from '@sveltejs/kit';
@@ -64,7 +66,8 @@ function isPublicPath(pathname: string): boolean {
 		pathname.startsWith('/api/cron/') ||
 		pathname === '/api/push/vapid-public-key' ||
 		pathname === '/api/product-events' ||
-		pathname === '/api/cookie-consent'
+		pathname === '/api/cookie-consent' ||
+		pathname === '/api/stripe/webhook'
 	);
 }
 
@@ -79,6 +82,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.householdService = householdService;
 	event.locals.householdId = null;
 	event.locals.householdRole = null;
+	event.locals.planTier = DEFAULT_PLAN_TIER;
 	event.locals.inventoryService = inventoryService;
 	event.locals.statistikService = statistikService;
 	event.locals.gamificationService = gamificationService;
@@ -92,6 +96,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.aiRateLimitService = aiRateLimitService;
 	event.locals.aiUsageAdminService = aiUsageAdminService;
 	event.locals.waitlistService = waitlistService;
+	event.locals.billingService = billingService;
 	event.locals.purchasePatternService = purchasePatternService;
 
 	const locale = resolveLocaleForRequest(event.cookies, event.request);
@@ -115,6 +120,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 				event.locals.householdId,
 				event.locals.user.id
 			);
+			event.locals.planTier = await billingService.getPlanTier(event.locals.householdId);
 		}
 	}
 
