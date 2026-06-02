@@ -27,6 +27,9 @@ firebase-debug.*.log
 .firebase/
 
 node_modules.broken*
+node_modules.bak*
+check-out.txt
+check-output.txt
 
 # Internal / security documentation (local + coordinator only)
 SECURITY_REPORT.md

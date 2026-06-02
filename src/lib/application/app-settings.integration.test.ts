@@ -1,7 +1,17 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppSettingsService } from '$lib/application/app-settings.service';
 import { DrizzleAppSettingsRepository } from '$lib/infrastructure/repositories/app-settings.repository';
 import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integration-db';
+
+const { mockEnv } = vi.hoisted(() => ({
+	mockEnv: {
+		EMAIL_SENDING_DISABLED: undefined as string | undefined
+	}
+}));
+
+vi.mock('$env/dynamic/private', () => ({
+	env: mockEnv
+}));
 
 describe('App settings integration', () => {
 	let integrationDb: IntegrationDbContext;
@@ -15,6 +25,7 @@ describe('App settings integration', () => {
 	}, 30_000);
 
 	beforeEach(async () => {
+		mockEnv.EMAIL_SENDING_DISABLED = undefined;
 		await integrationDb.reset();
 	});
 

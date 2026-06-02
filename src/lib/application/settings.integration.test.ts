@@ -1,7 +1,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DrizzleExpiryReminderRepository } from '$lib/infrastructure/repositories/expiry-reminder.repository';
+import { DrizzleHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
 import { DrizzleShoppingPushRepository } from '$lib/infrastructure/repositories/shopping-push.repository';
 import { updateExpiryRemindersSchema } from '$lib/validation/expiry-reminder.schemas';
+import { updateAutoExpiredGraceSchema } from '$lib/validation/auto-expired.schemas';
 import { updateShoppingPushSchema } from '$lib/validation/shopping-push.schemas';
 import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integration-db';
 
@@ -39,14 +41,33 @@ async function applyUpdateShoppingPush(userId: string, formData: FormData, repo:
 	await repo.updateSettings(userId, parsed.data.enabled === 'true');
 }
 
+async function applyUpdateAutoExpiredGrace(
+	householdId: string,
+	formData: FormData,
+	repo: DrizzleHouseholdRepository
+) {
+	const parsed = updateAutoExpiredGraceSchema.safeParse({
+		days: formData.get('days')
+	});
+	expect(parsed.success).toBe(true);
+	if (!parsed.success) return;
+
+	await repo.updateAutoExpiredGraceDays(
+		householdId,
+		Number(parsed.data.days) as 3 | 7 | 14
+	);
+}
+
 describe('Settings persistence integration', () => {
 	let expiryRepo: DrizzleExpiryReminderRepository;
 	let shoppingPushRepo: DrizzleShoppingPushRepository;
+	let householdRepo: DrizzleHouseholdRepository;
 
 	beforeAll(async () => {
 		integrationDb = await createIntegrationDb();
 		expiryRepo = new DrizzleExpiryReminderRepository();
 		shoppingPushRepo = new DrizzleShoppingPushRepository();
+		householdRepo = new DrizzleHouseholdRepository(integrationDb.db);
 	}, 30_000);
 
 	beforeEach(async () => {
@@ -113,5 +134,26 @@ describe('Settings persistence integration', () => {
 		await applyUpdateShoppingPush('user-1', formData, shoppingPushRepo);
 
 		expect((await shoppingPushRepo.getSettings('user-1')).enabled).toBe(false);
+	});
+
+	it('persists auto-expired grace days from validated form data', async () => {
+		await integrationDb.seedUser({ id: 'user-1', email: 'user@example.com' });
+		await integrationDb.seedHousehold({
+			id: 'household-settings-grace',
+			name: 'Grace settings',
+			members: [{ userId: 'user-1', role: 'owner' }]
+		});
+
+		const formData = new FormData();
+		formData.set('days', '14');
+
+		await applyUpdateAutoExpiredGrace('household-settings-grace', formData, householdRepo);
+
+		expect(await householdRepo.getAutoExpiredGraceDays('household-settings-grace')).toBe(14);
+	});
+
+	it('rejects invalid auto-expired grace days in schema', () => {
+		const parsed = updateAutoExpiredGraceSchema.safeParse({ days: '99' });
+		expect(parsed.success).toBe(false);
 	});
 });
