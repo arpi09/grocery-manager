@@ -12,21 +12,27 @@ vi.mock('$env/dynamic/private', () => ({
 
 import { env } from '$env/dynamic/private';
 
+const testEnv = env as { EMAIL_SENDING_DISABLED?: string };
+
 describe('isEmailSendingDisabledByEnv', () => {
 	afterEach(() => {
-		env.EMAIL_SENDING_DISABLED = undefined;
+		delete testEnv.EMAIL_SENDING_DISABLED;
 	});
 
 	it('treats unset, false, and empty as not disabled', () => {
-		for (const value of [undefined, '', 'false', 'FALSE', '0', 'no']) {
-			env.EMAIL_SENDING_DISABLED = value;
+		for (const value of [undefined, '', 'false', 'FALSE', '0', 'no'] as const) {
+			if (value === undefined) {
+				delete testEnv.EMAIL_SENDING_DISABLED;
+			} else {
+				testEnv.EMAIL_SENDING_DISABLED = value;
+			}
 			expect(isEmailSendingDisabledByEnv()).toBe(false);
 		}
 	});
 
 	it('treats true and 1 as disabled', () => {
-		for (const value of ['true', 'TRUE', '1']) {
-			env.EMAIL_SENDING_DISABLED = value;
+		for (const value of ['true', 'TRUE', '1'] as const) {
+			testEnv.EMAIL_SENDING_DISABLED = value;
 			expect(isEmailSendingDisabledByEnv()).toBe(true);
 		}
 	});
