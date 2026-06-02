@@ -35,6 +35,12 @@
 	--space-md: 1rem;
 	--space-lg: 1.5rem;
 	--space-xl: 2rem;
+	/* Page rhythm — layout shell, headers, stacked sections */
+	--page-padding-x: var(--space-md);
+	--page-section-gap: var(--space-lg);
+	--content-bottom-safe: calc(
+		var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0) + var(--space-md)
+	);
 	/* Mobile: full width; desktop header/content share centered max width */
 	--page-max-width: none;
 	/* Layering: modals below toasts (120) */
@@ -98,6 +104,9 @@ body {
 	:root {
 		--page-max-width: 68rem;
 		--nav-height: var(--header-height-desktop);
+		--page-padding-x: var(--space-lg);
+		--page-section-gap: var(--space-xl);
+		--content-bottom-safe: var(--space-xl);
 	}
 }
 

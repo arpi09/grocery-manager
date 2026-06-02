@@ -184,7 +184,8 @@
 	.home {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-xl);
+		gap: var(--page-section-gap);
+		padding-top: var(--space-xs);
 	}
 
 	.hero h1 {

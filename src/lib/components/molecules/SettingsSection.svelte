@@ -26,7 +26,7 @@
 
 <style>
 	.settings-section {
-		margin-bottom: var(--space-xl);
+		margin-bottom: var(--page-section-gap);
 	}
 
 	.settings-section:last-child {

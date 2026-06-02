@@ -24,13 +24,14 @@
 		width: 100%;
 		max-width: var(--page-max-width);
 		margin-inline: auto;
-		margin-top: var(--space-md);
-		margin-bottom: var(--space-lg);
+		margin-top: 0;
+		margin-bottom: var(--page-section-gap);
+		padding-top: var(--space-sm);
 	}
 
 	@media (min-width: 900px) {
 		.page-header {
-			margin-top: var(--space-lg);
+			padding-top: var(--space-md);
 		}
 	}
 

@@ -144,7 +144,7 @@
 		max-width: var(--page-max-width);
 		min-width: 0;
 		margin-inline: auto;
-		padding: 0 var(--space-lg);
+		padding: 0 var(--page-padding-x);
 		min-height: var(--header-height-desktop);
 	}
 

@@ -152,9 +152,10 @@
 </section>
 
 <style>
-	.statistik { display: flex; flex-direction: column; gap: var(--space-lg); }
+	.statistik { display: flex; flex-direction: column; gap: var(--page-section-gap); }
 	.hero-grid { display: grid; gap: var(--space-md); grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	@media (min-width: 768px) { .hero-grid { grid-template-columns: repeat(4, 1fr); } .trends { grid-template-columns: 1fr 1fr; } .actions { grid-template-columns: 1fr 1fr; } }
+	@media (max-width: 479px) { .impact-grid { grid-template-columns: 1fr; gap: var(--space-sm); } }
 	:global(.hero-card) { text-align: center; padding: var(--space-md); }
 	:global(.hero-primary) { background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface)); }
 	.hero-value { margin: 0; font-size: 2rem; font-weight: 800; color: var(--color-primary); font-variant-numeric: tabular-nums; }

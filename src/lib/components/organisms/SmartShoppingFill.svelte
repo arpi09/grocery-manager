@@ -100,7 +100,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-md);
-		margin-bottom: var(--space-md);
 		padding: var(--space-md);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);

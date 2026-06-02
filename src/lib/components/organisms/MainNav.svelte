@@ -94,7 +94,7 @@
 		background: var(--nav-surface);
 		border-bottom: 1px solid var(--nav-border);
 		box-shadow: var(--nav-header-shadow);
-		margin-bottom: var(--space-md);
+		margin-bottom: var(--space-sm);
 	}
 
 	.main-nav-mobile {
@@ -115,7 +115,7 @@
 		}
 
 		.main-nav-shell {
-			margin-bottom: var(--space-xl);
+			margin-bottom: var(--space-lg);
 		}
 	}
 </style>

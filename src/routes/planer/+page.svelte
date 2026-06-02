@@ -48,7 +48,7 @@
 	.planner-grid {
 		display: grid;
 		grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
-		gap: var(--space-md);
+		gap: var(--page-section-gap);
 		align-items: start;
 		min-width: 0;
 	}

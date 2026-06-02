@@ -139,8 +139,8 @@
 	.mobile-header {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-xs);
-		padding: var(--space-xs) var(--space-md) var(--space-sm);
+		gap: 0;
+		padding: var(--space-xs) var(--page-padding-x) 0;
 	}
 
 	.mobile-header-top {
@@ -180,6 +180,9 @@
 	.mobile-header-context {
 		display: flex;
 		min-width: 0;
+		padding: var(--space-xs) 0 var(--space-sm);
+		margin-top: var(--space-xs);
+		border-top: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
 	}
 
 	.mobile-header-context :global(.pantry-switcher) {
