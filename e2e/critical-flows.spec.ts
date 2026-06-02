@@ -1,4 +1,4 @@
-﻿import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import {
 	dismissOnboardingModalIfOpen,
 	expectOnboardingGuideVisible,
@@ -37,7 +37,10 @@ test.describe('Critical flows', () => {
 		await registerNewUser(page);
 		await page.goto('/settings');
 		await dismissOnboardingModalIfOpen(page);
-		await page.getByRole('button', { name: /Starta guide/i }).click();
+		await expect(page.getByRole('heading', { name: /Inst�llningar|Settings/i })).toBeVisible({
+			timeout: 15_000
+		});
+		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click();
 		await expectOnboardingGuideVisible(page);
 		await page.getByTestId('onboarding-quickstart').click();
 		await expect(page).toHaveURL(/\/scan(\?.*mode=barcode)?$/);
