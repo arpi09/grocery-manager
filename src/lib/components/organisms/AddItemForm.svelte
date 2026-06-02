@@ -6,6 +6,7 @@
 	import BarcodeScanButton from '$lib/components/molecules/BarcodeScanButton.svelte';
 	import BarcodeScannerModal from '$lib/components/organisms/BarcodeScannerModal.svelte';
 	import ProductPhotoScanPicker from '$lib/components/molecules/ProductPhotoScanPicker.svelte';
+	import ConsumeItemPanel from '$lib/components/molecules/ConsumeItemPanel.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 
 	import { getLocale, t } from '$lib/i18n';
@@ -205,18 +206,9 @@
 	<div class="actions">
 		<Button type="submit" fullWidth>{isEdit ? t('item.saveChanges') : t('item.addSubmit')}</Button>
 		{#if isEdit}
-			<DeleteConfirmButton
-				tier={2}
-				context="inventoryItemFinished"
-				copyOptions={{ itemName: name || item?.name }}
-				action="?/markAsFinished"
-				variant="secondary"
-				fullWidth
-				label={t('item.markFinished')}
-				ariaLabel={t('item.markFinishedNamed', {
-					name: name || item?.name || t('common.unknownProduct')
-				})}
-			/>
+			{#if item}
+				<ConsumeItemPanel {item} action="?/markAsFinished" variant="form" />
+			{/if}
 			<DeleteConfirmButton
 				tier={2}
 				context="inventoryItem"

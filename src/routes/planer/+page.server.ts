@@ -58,11 +58,15 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const gridStart = startOfCalendarGrid(monthStart);
 	const gridEnd = endOfCalendarGrid(monthEnd);
 
-	const meals = await locals.mealPlanService.listPlannedMealsByRange(
-		locals.user!.id,
-		toIsoDate(gridStart),
-		toIsoDate(gridEnd)
-	);
+	const householdId = locals.householdId!;
+	const [meals, dashboard] = await Promise.all([
+		locals.mealPlanService.listPlannedMealsByRange(
+			locals.user!.id,
+			toIsoDate(gridStart),
+			toIsoDate(gridEnd)
+		),
+		locals.inventoryService.getDashboard(householdId)
+	]);
 
 	const mealsByDate = new Map<string, typeof meals>();
 	for (const meal of meals) {
@@ -104,7 +108,9 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		monthLabel: monthStart.toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' }),
 		previousMonth,
 		nextMonth,
-		weeks
+		weeks,
+		expiringSoon: dashboard.expiringSoon,
+		plannedMealCount: meals.length
 	};
 };
 

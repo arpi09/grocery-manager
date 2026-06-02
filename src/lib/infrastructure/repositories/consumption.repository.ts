@@ -13,6 +13,9 @@ export interface RecordConsumptionInput {
 	userId: string;
 	item: InventoryItem;
 	eventType?: ConsumptionEventType;
+	consumedQuantity?: string;
+	consumedUnit?: string | null;
+	notes?: string | null;
 }
 
 export interface IConsumptionRepository {
@@ -38,7 +41,16 @@ export class DrizzleConsumptionRepository implements IConsumptionRepository {
 	constructor(private readonly database: AppDatabase = db) {}
 
 	async record(input: RecordConsumptionInput): Promise<void> {
-		const { id, householdId, userId, item, eventType = 'consumed' } = input;
+		const {
+			id,
+			householdId,
+			userId,
+			item,
+			eventType = 'consumed',
+			consumedQuantity,
+			consumedUnit,
+			notes = null
+		} = input;
 		await this.database.insert(consumptionEventTable).values({
 			id,
 			householdId,
@@ -46,10 +58,10 @@ export class DrizzleConsumptionRepository implements IConsumptionRepository {
 			inventoryItemId: item.id,
 			productName: item.name,
 			eventType,
-			quantity: item.quantity,
-			unit: item.unit,
+			quantity: consumedQuantity ?? item.quantity,
+			unit: consumedUnit ?? item.unit,
 			location: item.location,
-			notes: null,
+			notes,
 			createdAt: new Date()
 		});
 	}

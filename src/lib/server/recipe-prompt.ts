@@ -3,6 +3,7 @@ import {
 	MAX_RECIPE_PORTIONS,
 	MIN_RECIPE_PORTIONS
 } from '$lib/domain/recipe';
+import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
 import type { InventoryItem } from '$lib/domain/inventory-item';
 import type { CreateShoppingListItemInput } from '$lib/domain/shopping-list-item';
 import type { RecipeSuggestion } from '$lib/server/recipe-suggestions';
@@ -34,6 +35,11 @@ export function inventoryNameList(items: InventoryItem[]): string[] {
 	return items.map((item) => item.name.trim()).filter(Boolean);
 }
 
+export function typicalPortionUse(stock: number, portions: number): number {
+	const perPortion = stock / Math.max(portions, 1);
+	return Math.max(Math.min(perPortion * 0.35, stock * 0.25), stock * 0.05);
+}
+
 export function formatRecipeInventoryLines(items: InventoryItem[]): string {
 	if (items.length === 0) {
 		return '(tomt lager)';
@@ -44,7 +50,12 @@ export function formatRecipeInventoryLines(items: InventoryItem[]): string {
 			const unit = item.unit ? ` ${item.unit}` : '';
 			const expires = item.expiresOn ? `, utgår ${item.expiresOn}` : '';
 			const notes = item.notes ? ` (anteckning: ${item.notes})` : '';
-			return `- [${item.id}] ${item.name}: ${item.quantity}${unit} i ${item.location}${expires}${notes}`;
+			const stock = parseNumericQuantity(item.quantity);
+			const portionHint =
+				stock !== null
+					? `, typisk måltidsmängd ca ${Math.round(typicalPortionUse(stock, DEFAULT_RECIPE_PORTIONS))}${unit}`
+					: '';
+			return `- [${item.id}] ${item.name}: ${item.quantity}${unit} kvar i ${item.location}${portionHint}${expires}${notes}`;
 		})
 		.join('\n');
 }
@@ -61,6 +72,8 @@ export function buildRecipeSystemPrompt(portions: number): string {
 		'Vid osäkerhet om exakt varunamn: välj närmaste listade namn eller utelämna — gissa inte och skriv inte "okänd" i ingredientsToUse.',
 		`Skala alla mängder i steps linjärt för exakt ${portions} portioner (inga fasta "4 portioner" om portions skiljer sig).`,
 		'Prioritera varor med utgångsdatum och minska matsvinn.',
+		'Använd realistiska delmängder från lagret — recept ska inte förbruka hela förpackningen om kvantiteten räcker till flera måltider.',
+		'Behandla inte en vara som slut eller "behöver köpas" bara för att ett recept använder en liten del.',
 		...RECIPE_CULINARY_REALISM_RULES,
 		'All text ska vara på svenska (sv-SE): title, whyItFits, ingredientsToUse, missingIngredients, steps.',
 		'Varje recept ska innehålla:',

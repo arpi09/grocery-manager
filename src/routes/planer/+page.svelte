@@ -8,6 +8,7 @@
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import MealPlanCalendar from '$lib/components/organisms/MealPlanCalendar.svelte';
 	import MealPlanIdeasPanel from '$lib/components/organisms/MealPlanIdeasPanel.svelte';
+	import PlanerContextBanner from '$lib/components/molecules/PlanerContextBanner.svelte';
 
 	let { data } = $props();
 
@@ -27,6 +28,10 @@
 	<AppHeader title={t('planer.title')} subtitle={t('planer.subtitle')} />
 
 	<PageContainer>
+		<PlanerContextBanner
+			expiringSoon={data.expiringSoon}
+			plannedMealCount={data.plannedMealCount}
+		/>
 		<section class="planner-grid">
 			<MealPlanCalendar
 				weeks={data.weeks}

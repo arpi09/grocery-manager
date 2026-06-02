@@ -131,3 +131,4 @@ Shared tokens: `--page-padding-x`, `--page-section-gap`, `--color-primary` — s
 | Date | Change |
 |------|--------|
 | 2026-06-02 | Initial guidelines + button hierarchy; audit of hem, inventory, inköp, settings, statistik |
+| 2026-06-02 | Partial consumption (lite/halv/egen mängd); Planer banner tied to hem/expiry |

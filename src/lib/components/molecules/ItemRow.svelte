@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Badge from '$lib/components/atoms/Badge.svelte';
-	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
+	import ConsumeItemPanel from '$lib/components/molecules/ConsumeItemPanel.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { daysUntilExpiry, formatExpiryDate, EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
 	import { getLocale, t } from '$lib/i18n';
@@ -14,6 +14,7 @@
 	let { item, canWrite = false, finished = false }: Props = $props();
 
 	let menuOpen = $state(false);
+	let consumeOpen = $state(false);
 
 	function formatQuantity(item: InventoryItem) {
 		const unit = item.unit ? ` ${item.unit}` : '';
@@ -27,6 +28,7 @@
 
 	function closeMenu() {
 		menuOpen = false;
+		consumeOpen = false;
 	}
 
 	$effect(() => {
@@ -75,16 +77,18 @@
 								{t('inventory.editItem')}
 							</a>
 							{#if !finished}
-								<DeleteConfirmButton
-									tier={1}
-									context="inventoryItemFinished"
-									copyOptions={{ itemName: item.name }}
-									action="/item/{item.id}/edit?/markAsFinished"
-									variant="ghost"
-									label={t('item.markFinished')}
-									ariaLabel={t('item.markFinishedNamed', { name: item.name })}
-									class="menu-action"
-								/>
+								<button type="button" class="menu-item menu-consume" onclick={() => (consumeOpen = true)}>
+									{t('consume.logUsage')}
+								</button>
+								{#if consumeOpen}
+									<div class="consume-wrap">
+										<ConsumeItemPanel
+											{item}
+											action="/item/{item.id}/edit?/markAsFinished"
+											onClose={closeMenu}
+										/>
+									</div>
+								{/if}
 							{/if}
 						</div>
 					{/if}
@@ -223,14 +227,16 @@
 		text-decoration: none;
 	}
 
-	.menu-panel :global(.menu-action) {
-		display: block;
+	.menu-consume {
 		width: 100%;
-		justify-content: flex-start;
-		padding: 0.55rem 0.65rem;
-		min-height: auto;
-		font-size: 0.875rem;
-		font-weight: 600;
-		border-radius: var(--radius-sm);
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		text-align: left;
+		font-family: inherit;
+	}
+
+	.consume-wrap {
+		padding: 0 var(--space-xs) var(--space-xs);
 	}
 </style>

@@ -9,6 +9,7 @@ export type ActionToastKind =
 	| 'itemUpdated'
 	| 'itemDeleted'
 	| 'itemFinished'
+	| 'itemPartiallyConsumed'
 	| 'settingsSaved'
 	| 'petAdded'
 	| 'petRemoved'
@@ -48,6 +49,10 @@ const ACTION_TOAST_KEYS: Record<
 	itemFinished: {
 		withLabel: 'actionToast.itemFinished',
 		generic: 'actionToast.itemFinishedGeneric'
+	},
+	itemPartiallyConsumed: {
+		withLabel: 'actionToast.itemPartiallyConsumed',
+		generic: 'actionToast.itemPartiallyConsumedGeneric'
 	},
 	settingsSaved: {
 		withLabel: 'actionToast.settingsSaved',

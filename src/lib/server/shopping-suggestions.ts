@@ -204,6 +204,7 @@ export async function generateShoppingSuggestions(
 		'Product names must be common Swedish grocery terms (brand optional, realistic sizes).',
 		'Suggest items that are missing, running low, needed for planned meals, or common staples worth restocking.',
 		'Do not duplicate what the user clearly already has in sufficient quantity.',
+		'Do NOT suggest restocking when inventory still shows a meaningful amount left after partial use.',
 		'Group mentally by grocery store departments.',
 		'Respond in Swedish for name, quantity, and reason.',
 		'Return JSON only:',

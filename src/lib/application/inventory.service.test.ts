@@ -212,6 +212,20 @@ describe('InventoryService', () => {
 		expect(repository.update).toHaveBeenCalledWith('household-1', 'item-1', { quantity: '0' });
 	});
 
+	it('records partial consumption without zeroing stock', async () => {
+		const item = makeItem({ quantity: '500', unit: 'g' });
+		const updated = makeItem({ quantity: '450', unit: 'g' });
+		vi.mocked(repository.findById).mockResolvedValue(item);
+		vi.mocked(repository.update).mockResolvedValue(updated);
+
+		const result = await service.consumeItem('household-1', 'item-1', 'user-1', 'editor', {
+			preset: 'lite'
+		});
+
+		expect(result.finished).toBe(false);
+		expect(result.item.quantity).toBe('450');
+	});
+
 	it('rejects mark as finished for viewer role', async () => {
 		await expect(
 			service.markAsFinished('household-1', 'item-1', 'user-1', 'viewer')

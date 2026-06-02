@@ -545,7 +545,7 @@
 	},
 	"planer": {
 		"title": "Planer",
-		"subtitle": "Planera m?ltider i kalendern och l?gg in ChatGPT-id?er",
+		"subtitle": "Planera veckan kring det som går ut — samma lager som på hem",
 		"ideasAria": "Receptid?er",
 		"ideasIntro": "Genererade id?er fr?n ditt lager. V?lj datum och l?gg till i kalendern.",
 		"ideasEmpty": "Inga genererade id?er ?nnu. Anv?nd knappen Receptid?er f?rst.",
@@ -569,7 +569,13 @@
 		"missingLabel": "Saknas:",
 		"scheduleDate": "Planera datum",
 		"prevMonthShort": "F?rra",
-		"emptyDay": "Inga m?ltider planerade denna dag."
+		"emptyDay": "Inga m?ltider planerade denna dag.",
+		"contextTitle": "Planera kring utgående varor",
+		"contextLead": "Kalendern kopplas till Ät det först på hem.",
+		"contextExpiring": "{count} varor går ut inom {days} dagar",
+		"contextNoExpiring": "Inget brådskande utgående inom {days} dagar.",
+		"contextPlanned": "{count} måltider i denna kalendervy",
+		"contextHomeLink": "Till hem & Ät det först"
 	},
 	"stats": {
 		"title": "Ditt skafferi i siffror",
@@ -1337,8 +1343,8 @@
 		"itemFinished": "{label} markerad som slut",
 		"itemFinishedGeneric": "Vara markerad som slut",
 		"settingsSaved": "Inst?llningar sparade",
-		"autoExpiredCleared": "{label} utg�ngna varor rensade",
-		"autoExpiredClearedGeneric": "Utg�ngna varor rensade",
+		"autoExpiredCleared": "{label} utg�ngna varor rensade",
+		"autoExpiredClearedGeneric": "Utg�ngna varor rensade",
 		"petAdded": "{label} tillagd",
 		"petAddedGeneric": "Husdjur tillagt",
 		"petRemoved": "{label} borttaget",
@@ -1366,6 +1372,19 @@
 		"adminSaved": "Admininst?llningar sparade",
 		"adminPasswordResetSent": "E-post f?r ?terst?llning skickad",
 		"pushEnabled": "Webbl?sarnotiser aktiverade",
-		"pushDisabled": "Webbl?sarnotiser avaktiverade"
+		"pushDisabled": "Webbl?sarnotiser avaktiverade",
+		"itemPartiallyConsumed": "{label} uppdaterad — resten finns kvar i lagret",
+		"itemPartiallyConsumedGeneric": "Förbrukning loggad — mängden i lagret är uppdaterad"
+	},
+	"consume": {
+		"logUsage": "Logga förbrukning",
+		"intro": "Hur mycket av {name} har ni använt? ({stock} kvar)",
+		"presetsAria": "Snabbval för mängd",
+		"presetLite": "Lite (~10%)",
+		"presetHalf": "Halv",
+		"presetAll": "Allt",
+		"customLabel": "Egen mängd",
+		"customPlaceholder": "t.ex. 50",
+		"confirm": "Logga användning"
 	}
 }

@@ -1,4 +1,8 @@
-import { InventoryNotFoundError } from '$lib/application/inventory.service';
+import {
+	InvalidConsumptionAmountError,
+	InventoryNotFoundError
+} from '$lib/application/inventory.service';
+import { consumeItemSchema } from '$lib/validation/consumption.schemas';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { appendActionToast } from '$lib/utils/action-toast';
@@ -93,32 +97,45 @@ export const actions: Actions = {
 	markAsFinished: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);
 
+		const formData = await event.request.formData();
+		const parsed = consumeItemSchema.safeParse({
+			consumptionPreset: formData.get('consumptionPreset') || undefined,
+			consumptionAmount: formData.get('consumptionAmount') || undefined
+		});
+		if (!parsed.success) {
+			return fail(400, { consumeErrors: parsed.error.flatten().fieldErrors });
+		}
+
 		let location = 'fridge';
 		let itemName = '';
+		let toastKind: 'itemFinished' | 'itemPartiallyConsumed' = 'itemFinished';
 		try {
-			const item = await event.locals.inventoryService.markAsFinished(
+			const result = await event.locals.inventoryService.consumeItem(
 				event.locals.householdId!,
 				event.params.id,
 				event.locals.user!.id,
-				event.locals.householdRole!
+				event.locals.householdRole!,
+				{ preset: parsed.data.preset, customAmount: parsed.data.customAmount }
 			);
-			location = item.location;
-			itemName = item.name;
+			location = result.item.location;
+			itemName = result.item.name;
+			if (!result.finished) toastKind = 'itemPartiallyConsumed';
 		} catch (e) {
-			if (e instanceof InventoryNotFoundError) {
-				error(404, 'Item not found');
+			if (e instanceof InventoryNotFoundError) error(404, 'Item not found');
+			if (e instanceof InvalidConsumptionAmountError) {
+				return fail(400, { consumeErrors: { consumptionAmount: ['invalid'] } });
 			}
 			throw e;
 		}
 
-		const celebration = await event.locals.gamificationService.detectMarkFinishedCelebration(
-			event.locals.householdId!
-		);
-		let redirectPath = appendActionToast(`/inventory/${location}`, 'itemFinished', itemName);
-		if (celebration) {
-			redirectPath = appendCelebration(redirectPath, celebration);
-		}
-
+		const celebration =
+			toastKind === 'itemFinished'
+				? await event.locals.gamificationService.detectMarkFinishedCelebration(
+						event.locals.householdId!
+					)
+				: null;
+		let redirectPath = appendActionToast(`/inventory/${location}`, toastKind, itemName);
+		if (celebration) redirectPath = appendCelebration(redirectPath, celebration);
 		redirect(302, redirectPath);
 	}
 };
