@@ -188,22 +188,32 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 	const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190';
 	const loginResponse = await page.request.post(`${baseURL}/login?/login`, {
 		form: { email, password },
+		headers: {
+			accept: 'application/json',
+			'x-sveltekit-action': 'true'
+		},
 		maxRedirects: 0
 	});
 
 	const status = loginResponse.status();
-	if (status !== 302 && status !== 303) {
-		const loginError = page.getByRole('alert');
-		await page.goto('/login');
-		if (await loginError.isVisible().catch(() => false)) {
-			throw new Error(
-				`Login failed: ${(await loginError.textContent())?.trim() ?? 'unknown error'} (HTTP ${status})`
-			);
+	if (status === 200) {
+		const result = (await loginResponse.json().catch(() => null)) as {
+			type?: string;
+			location?: string;
+			message?: string;
+		} | null;
+		if (result?.type === 'redirect') {
+			await page.goto(result.location ?? '/hem');
+		} else {
+			throw new Error(`Login failed: ${result?.message ?? JSON.stringify(result)}`);
 		}
+	} else if (status === 302 || status === 303) {
+		const location = loginResponse.headers()['location'] ?? '/hem';
+		await page.goto(location.startsWith('http') ? location : `${baseURL}${location}`);
+	} else {
 		throw new Error(`Login action failed with HTTP ${status}`);
 	}
 
-	await page.goto('/hem');
 	await dismissCookieConsentIfOpen(page);
 	await expect(page.locator('section.home')).toBeVisible({ timeout: E2E_AUTH_NAV_TIMEOUT_MS });
 	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
