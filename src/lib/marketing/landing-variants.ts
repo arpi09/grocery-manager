@@ -13,34 +13,34 @@ export interface LandingHeroCopy {
 const heroByVariant: Record<MarketingLocale, Record<LandingHeroVariant, LandingHeroCopy>> = {
 	sv: {
 		a: {
-			heroTitle: 'Skaffu — skafferiet du faktiskt har koll på.',
+			heroTitle: 'Skafferiet du faktiskt har koll på.',
 			heroLead:
-				'Skaffu är byggt kring snabb registrering — streckkod, kvitto eller foto — så du alltid vet vad som finns i kyl, frys och skafferi.',
+				'Skanna in det du har hemma på sekunder — streckkod, kvitto eller foto — och se kyl, frys och skafferi på ett ställe.',
 			heroSecondary:
-				'Planera måltider, få varningar innan varor går ut och låt inköpslistan fylla på sig utifrån det du faktiskt har.'
+				'Ät det som går ut först, planera måltider och låt inköpslistan fylla på sig från lager som sanningskälla.'
 		},
 		b: {
 			heroTitle: 'Butiksneutralt skafferi för hela hushållet.',
 			heroLead:
-				'Oavsett om du handlar på ICA, Willys, Coop eller Lidl — ett gemensamt lager, utgångsdatum och inköpslista som speglar vad som faktiskt finns hemma.',
+				'Oavsett ICA, Willys, Coop eller Lidl — ett gemensamt lager, utgångsdatum och inköpslista som speglar vad som faktiskt finns hemma.',
 			heroSecondary:
-				'Webb först: skanna streckkod, foto eller PDF-kvitto från Kivra utan att byta matkedja eller stammiskonto.'
+				'Kvitto-autopilot från Kivra, Ät det först och webb först — utan stammiskonto eller matkedja som låser in dig.'
 		}
 	},
 	en: {
 		a: {
-			heroTitle: 'Skaffu — the pantry you actually keep track of.',
+			heroTitle: 'The pantry you actually keep track of.',
 			heroLead:
-				'Skaffu is built around fast capture — barcode, receipt or photo — so you always know what is in fridge, freezer and cupboard.',
+				'Scan what you have at home in seconds — barcode, receipt or photo — and see fridge, freezer and cupboard in one place.',
 			heroSecondary:
-				'Plan meals, get warnings before items expire, and let the shopping list fill from what you actually have.'
+				'Eat what expires first, plan meals and let the shopping list fill from inventory as source of truth.'
 		},
 		b: {
 			heroTitle: 'Store-neutral pantry for the whole household.',
 			heroLead:
-				'Whether you shop at ICA, Willys, Coop or Lidl — one shared inventory, expiry dates and shopping list based on what is actually at home.',
+				'Whether ICA, Willys, Coop or Lidl — one shared inventory, expiry dates and shopping list based on what is actually at home.',
 			heroSecondary:
-				'Web-first: scan barcodes, photos or PDF receipts from Kivra without switching retailer or loyalty accounts.'
+				'Receipt autopilot from Kivra, Eat First and web-first — no loyalty account or retailer lock-in.'
 		}
 	}
 };

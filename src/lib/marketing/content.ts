@@ -18,6 +18,17 @@ export interface MarketingStep {
 	description: string;
 }
 
+export interface MarketingStat {
+	value: string;
+	label: string;
+}
+
+export interface MarketingDifferentiator {
+	title: string;
+	description: string;
+	tag: string;
+}
+
 export interface MarketingFaqItem {
 	question: string;
 	answer: string;
@@ -60,6 +71,10 @@ export interface MarketingContent {
 		heroTitle: string;
 		heroLead: string;
 		heroSecondary: string;
+		stats: MarketingStat[];
+		differentiatorsTitle: string;
+		differentiatorsLead: string;
+		differentiators: MarketingDifferentiator[];
 		featuresTitle: string;
 		featuresLead: string;
 		wasteReductionTitle: string;
@@ -117,12 +132,12 @@ const sv: MarketingContent = {
 	siteName: 'Skaffu',
 	tagline: 'Skafferi, kyl och inköp på ett ställe.',
 	meta: {
-		title: 'Skaffu — skafferi-app för hela hushållet | minska matsvinn',
+		title: 'Skaffu — skafferi du har koll på | skanna, ät först, minska svinn',
 		description:
-			'Skafferi-app med skanning, kvitto-PDF och smart inköpslista. Håll koll på kyl, frys och skafferi — minska matsvinn med utgångsdatum och hushållssync. Gratis att börja.',
-		ogTitle: 'Skaffu — skafferi-app som minskar matsvinn',
+			'Skanna skafferiet med streckkod, kvitto eller foto. Ät det först, planera måltider och handla butiksneutralt — lager som sanningskälla för hela hushållet. Prova gratis.',
+		ogTitle: 'Skaffu — lager, utgångsdatum och smart inköp',
 		ogDescription:
-			'Skanna kvitto, följ utgångsdatum och handla smart. Butiksneutralt skafferi för hela hushållet — webb först, gratis att komma igång.'
+			'Från kvitto-autopilot till Ät det först: ett skafferi som speglar vad som faktiskt finns hemma. Webb först, gratis att börja på skaffu.com.'
 	},
 	nav: [
 		{ href: '/funktioner', label: 'Funktioner' },
@@ -139,11 +154,45 @@ const sv: MarketingContent = {
 	landing: {
 		heroTitle: 'Skaffu — skafferiet du faktiskt har koll på.',
 		heroLead:
-			'Skaffu är byggt kring snabb registrering — streckkod, kvitto eller foto — så du alltid vet vad som finns i kyl, frys och skafferi.',
+			'Skanna in det du har hemma på sekunder. Se kyl, frys och skafferi på ett ställe — och ät det som går ut innan det blir matsvinn.',
 		heroSecondary:
-			'Planera måltider, få varningar innan varor går ut och låt inköpslistan fylla på sig utifrån det du faktiskt har.',
+			'Lager som sanningskälla, kvitto-autopilot och inköpslista som fylls från det du faktiskt har — butiksneutralt, utan stammiskonto.',
+		stats: [
+			{ value: '3', label: 'sätt att komma igång — streckkod, kvitto, foto' },
+			{ value: '1', label: 'gemensamt lager för hela hushållet' },
+			{ value: '0', label: 'krav på matkedja eller stammisapp' }
+		],
+		differentiatorsTitle: 'Byggt för att du ska äta upp — inte köpa dubbelt',
+		differentiatorsLead:
+			'Skaffu fyller luckan mellan inköpslistor och det som faktiskt står i skåpen. Här är det som skiljer oss från Bring och ICA.',
+		differentiators: [
+			{
+				tag: 'Sanningskälla',
+				title: 'Lager som stämmer',
+				description:
+					'Inköpslistan speglar kyl, frys och skafferi — inte bara vad ni tänkt handla. Mindre dubbelköp, mer koll.'
+			},
+			{
+				tag: 'Ät det först',
+				title: 'Utgång innan det blir svinn',
+				description:
+					'Varningar och prioritering så du använder det som går ut snart — innan det hamnar i soporna.'
+			},
+			{
+				tag: 'Kvitto-autopilot',
+				title: 'PDF och foto från Kivra',
+				description:
+					'Ladda upp kvitto eller fotografera hyllan — AI hjälper till att fylla skafferiet utan manuell admin.'
+			},
+			{
+				tag: 'Butiksneutral',
+				title: 'Samma skafferi överallt',
+				description:
+					'ICA, Willys, Coop eller Lidl — ett hushåll, ett lager. Ingen kedja låser in din data.'
+			}
+		],
 		featuresTitle: 'Allt du behöver i köket',
-		featuresLead: 'Från skanning till inköp — utan kalkylark och dubbelköp.',
+		featuresLead: 'Från skanning till inköp — snabbt, tydligt och utan onödig friktion.',
 		wasteReductionTitle: 'Skafferi-app som hjälper dig minska matsvinn',
 		wasteReductionLead:
 			'När kyl, frys och skafferi syns på ett ställe blir det lättare att handla rätt mängd, använda det som går ut snart och slippa dubbelköp.',
@@ -154,8 +203,8 @@ const sv: MarketingContent = {
 		],
 		stepsTitle: 'Igång på tre steg',
 		stepsLead: 'Ingen krånglig setup. Skanna det du har hemma redan idag.',
-		finalCtaTitle: 'Redo att ta kontroll över skafferiet?',
-		finalCtaLead: 'Logga in eller skapa konto — det tar bara en minut.'
+		finalCtaTitle: 'Redo att slippa gissa i skafferiet?',
+		finalCtaLead: 'Prova gratis på en minut — eller logga in om du redan har konto.'
 	},
 	features: {
 		title: 'Funktioner',
@@ -388,11 +437,42 @@ const en: MarketingContent = {
 	landing: {
 		heroTitle: 'Skaffu — the pantry you actually keep track of.',
 		heroLead:
-			'Skaffu is built around fast capture — barcode, receipt or photo — so you always know what is in fridge, freezer and cupboard.',
+			'Scan what you have at home in seconds. See fridge, freezer and cupboard in one place — and eat what expires before it becomes waste.',
 		heroSecondary:
-			'Plan meals, get warnings before items expire, and let the shopping list fill from what you actually have.',
+			'Inventory as source of truth, receipt autopilot and a shopping list filled from what you actually have — store-neutral, no loyalty lock-in.',
+		stats: [
+			{ value: '3', label: 'ways to get started — barcode, receipt, photo' },
+			{ value: '1', label: 'shared pantry for the whole household' },
+			{ value: '0', label: 'retailer or loyalty app required' }
+		],
+		differentiatorsTitle: 'Built so you eat up — not buy twice',
+		differentiatorsLead:
+			'Skaffu bridges shopping lists and what is actually in your cupboards. Here is what sets us apart from Bring and ICA.',
+		differentiators: [
+			{
+				tag: 'Source of truth',
+				title: 'Inventory that matches',
+				description:
+					'Your shopping list reflects fridge, freezer and cupboard — not just planned buys. Less duplicate shopping.'
+			},
+			{
+				tag: 'Eat first',
+				title: 'Expiry before waste',
+				description: 'Warnings and prioritisation so you use items before they go bad.'
+			},
+			{
+				tag: 'Receipt autopilot',
+				title: 'PDF and photo from Kivra',
+				description: 'Upload receipts or photograph shelves — AI helps fill the pantry without manual admin.'
+			},
+			{
+				tag: 'Store-neutral',
+				title: 'Same pantry everywhere',
+				description: 'ICA, Willys, Coop or Lidl — one household, one inventory. No chain lock-in.'
+			}
+		],
 		featuresTitle: 'Everything you need in the kitchen',
-		featuresLead: 'From scanning to shopping — without spreadsheets and duplicate buys.',
+		featuresLead: 'From scanning to shopping — fast, clear and low friction.',
 		wasteReductionTitle: 'Pantry app that helps you reduce food waste',
 		wasteReductionLead:
 			'When fridge, freezer and cupboard are visible in one place it is easier to buy the right amount, use items before they expire and avoid duplicate purchases.',
@@ -403,8 +483,8 @@ const en: MarketingContent = {
 		],
 		stepsTitle: 'Up and running in three steps',
 		stepsLead: 'No complicated setup. Scan what you have at home today.',
-		finalCtaTitle: 'Ready to take control of your pantry?',
-		finalCtaLead: 'Log in or create an account — it only takes a minute.'
+		finalCtaTitle: 'Ready to stop guessing what is in the pantry?',
+		finalCtaLead: 'Try free in a minute — or log in if you already have an account.'
 	},
 	features: {
 		title: 'Features',
