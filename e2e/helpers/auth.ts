@@ -189,9 +189,8 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 	const emailInput = page.locator('input[name="email"]');
 	const passwordInput = page.locator('input[name="password"]');
 
-	// Email last ? Svelte bind can clear earlier fields when email is set.
-	await fillBoundInput(passwordInput, password);
 	await fillBoundInput(emailInput, email);
+	await fillBoundInput(passwordInput, password);
 
 	const navigatedHome = waitForAppHome(page);
 	await page.getByTestId('login-submit').click();
