@@ -192,7 +192,7 @@ export async function expectOnboardingGuideVisible(page: Page) {
 	await expect(
 		page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
 	).toBeVisible({ timeout: 20_000 });
-	await expect(page.getByRole('button', { name: /Hoppa \u00f6ver/i })).toBeVisible();
+	await expect(page.getByTestId('onboarding-skip')).toBeVisible();
 	await expect(page.getByText(/Steg 1 av 2/i)).toBeVisible();
 }
 
