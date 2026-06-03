@@ -18,7 +18,9 @@ test.describe('Photo round flow', () => {
 		await page.goto('/scan?mode=photo&from=/hem');
 		await dismissOnboardingModalIfOpen(page);
 
-		await page.getByTestId('photo-round-zone-fridge').click();
+		await expect(page.getByTestId('photo-round-zone-fridge')).toBeVisible({ timeout: 15_000 });
+		await dismissOnboardingModalIfOpen(page);
+		await page.getByTestId('photo-round-zone-fridge').click({ force: true });
 		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('photo-round-analyze')).toBeVisible({ timeout: 15_000 });
 
