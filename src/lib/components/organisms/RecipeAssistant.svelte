@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { t, getLocale } from '$lib/i18n';
+	import { markFirstRecipeWinIfNeeded } from '$lib/utils/first-recipe-celebration';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
@@ -95,6 +97,10 @@
 
 			recipes = data.recipes ?? [];
 			note = data.note ?? null;
+
+			if (recipes.length > 0 && markFirstRecipeWinIfNeeded(page.data.user?.id)) {
+				toastMessage = t('recipe.firstWinToast');
+			}
 
 			if (recipes.length === 0 && !note) {
 				errorMessage = t('recipe.noneGenerated');
