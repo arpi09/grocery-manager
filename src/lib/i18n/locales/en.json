@@ -172,6 +172,9 @@
 		"greetingEvening": "Good evening, {name}",
 		"greetingNight": "Hi, {name}",
 		"taglineEngaged": "Today's suggestions based on your pantry and the time of day",
+		"eatFirstSummary": "Eat first ({count})",
+		"locationsSummary": "Locations · {count} items",
+		"receiptAutopilotSummary": "Receipt suggestions ({count})",
 		"mealSuggestionsTitle": "What's for today?",
 		"mealSuggestionsCta": "Show recipe suggestions",
 		"mealHintBreakfast": "Start the day with something from the fridge — breakfast ideas from your pantry.",
@@ -263,6 +266,23 @@
 	"settings": {
 		"title": "Settings",
 		"subtitle": "Manage account, household and app preferences",
+		"nav": {
+			"aria": "Jump to section",
+			"account": "Account",
+			"household": "Household",
+			"notifications": "Notifications",
+			"app": "App",
+			"plan": "Plan",
+			"feedback": "Feedback"
+		},
+		"notifications": {
+			"title": "Notifications",
+			"description": "Email, browser and shopping reminders"
+		},
+		"more": {
+			"title": "More options",
+			"summary": "Install app, guide and pets"
+		},
 		"language": {
 			"title": "Language",
 			"description": "Choose the display language for the app.",
@@ -345,6 +365,7 @@
 			"requiresPush": "Enable browser notifications above first."
 		},
 		"plan": {
+			"compareSummary": "Compare Free and Pro",
 			"title": "Plan",
 			"description": "Subscription (Free)",
 			"descriptionPro": "Subscription (Pro)",
@@ -894,7 +915,26 @@
 			}
 		},
 		"sendPasswordReset": "Send password reset",
-		"forcePasswordReset": "Force password reset"
+		"forcePasswordReset": "Force password reset",
+		"funnel": {
+			"title": "Funnel / PMF",
+			"subtitle": "Top-of-funnel KPIs from product_event (visits, signup, first scan, D1).",
+			"periodToggle": "Select funnel period",
+			"periodOption": "{days} days",
+			"periodRange": "{start} – {end}",
+			"visits": "Visits",
+			"visitsSourceLanding": "landing_view events",
+			"visitsSourceProxy": "Unique active users (no landing views in period)",
+			"signups": "Registrations",
+			"signupsNote": "signup_complete events",
+			"firstScans": "First scan",
+			"firstScansNote": "Users with first scan/receipt in period",
+			"d1Retention": "D1 retention",
+			"d1Detail": "{retained} of {eligible} eligible signups",
+			"conversionSignup": "Signup rate: {rate}",
+			"conversionFirstScan": "First-scan rate: {rate}",
+			"conversionD1": "D1 rate (eligible cohort): {rate}"
+		}
 	},
 	"pmf": {
 		"title": "PMF metrics",
