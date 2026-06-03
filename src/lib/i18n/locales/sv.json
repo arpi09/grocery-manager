@@ -184,9 +184,9 @@
 		"moreAddWays": "Fler s?tt att l?gga till",
 		"chipBarcode": "Streckkod",
 		"chipPhotoRound": "Foto-runda",
-		"eatFirstSummary": "Ät först ({count})",
-		"locationsSummary": "Platser · {count} varor",
-		"receiptAutopilotSummary": "Kvitto-förslag ({count})"
+		"eatFirstSummary": "?t f?rst ({count})",
+		"locationsSummary": "Platser ? {count} varor",
+		"receiptAutopilotSummary": "Kvitto-f?rslag ({count})"
 	},
 	"dashboard": {
 		"title": "Hem",
@@ -400,7 +400,7 @@
 			"upgradeTestNote": "Testl?ge: anv?nd kort 4242 4242 4242 4242 i Stripe Checkout.",
 			"checkoutSuccess": "Tack! Om betalningen gick igenom aktiveras Pro inom n?gon sekund.",
 			"checkoutCancel": "Betalningen avbr?ts. Du kan f?rs?ka igen n?r du vill.",
-			"compareSummary": "Jämför Gratis och Pro"
+			"compareSummary": "J?mf?r Gratis och Pro"
 		},
 		"feedback": {
 			"title": "Ge feedback",
@@ -418,7 +418,7 @@
 		"nav": {
 			"aria": "Hoppa till avsnitt",
 			"account": "Konto",
-			"household": "Hushåll",
+			"household": "Hush�ll",
 			"notifications": "Notiser",
 			"app": "App",
 			"plan": "Plan",
@@ -426,10 +426,10 @@
 		},
 		"notifications": {
 			"title": "Notiser",
-			"description": "E-post, webbläsare och handla-påminnelser"
+			"description": "E-post, webbl�sare och handla-p�minnelser"
 		},
 		"more": {
-			"title": "Fler alternativ",
+			"title": "Fler val",
 			"summary": "Installera app, guide och husdjur"
 		}
 	},
@@ -906,23 +906,23 @@
 		"sendPasswordReset": "Skicka ?terst?llningsl?nk",
 		"forcePasswordReset": "Tvinga l?senordsbyte",
 		"funnel": {
-			"title": "Tratt / PMF",
-			"subtitle": "Topptratt-KPI:er fr�n product_event (bes�k, registrering, f�rsta scan, D1).",
-			"periodToggle": "V�lj trattperiod",
-			"periodOption": "{days} dagar",
+			"title": "Funnel / PMF",
+			"subtitle": "Top-of-funnel KPIs from product_event (visits, signup, first scan, D1).",
+			"periodToggle": "Select funnel period",
+			"periodOption": "{days} days",
 			"periodRange": "{start} ? {end}",
-			"visits": "Bes�k",
-			"visitsSourceLanding": "landing_view-h�ndelser",
-			"visitsSourceProxy": "Unika aktiva anv�ndare (inga landningsvisningar i perioden)",
-			"signups": "Registreringar",
-			"signupsNote": "signup_complete-h�ndelser",
-			"firstScans": "F�rsta scan",
-			"firstScansNote": "Anv�ndare med f�rsta scan/kvitto i perioden",
-			"d1Retention": "D1-retention",
-			"d1Detail": "{retained} av {eligible} ber�ttigade registreringar",
-			"conversionSignup": "Registreringsgrad: {rate}",
-			"conversionFirstScan": "F�rsta-scan-grad: {rate}",
-			"conversionD1": "D1-grad (ber�ttigad kohort): {rate}"
+			"visits": "Visits",
+			"visitsSourceLanding": "landing_view events",
+			"visitsSourceProxy": "Unique active users (no landing views in period)",
+			"signups": "Registrations",
+			"signupsNote": "signup_complete events",
+			"firstScans": "First scan",
+			"firstScansNote": "Users with first scan/receipt in period",
+			"d1Retention": "D1 retention",
+			"d1Detail": "{retained} of {eligible} eligible signups",
+			"conversionSignup": "Signup rate: {rate}",
+			"conversionFirstScan": "First-scan rate: {rate}",
+			"conversionD1": "D1 rate (eligible cohort): {rate}"
 		}
 	},
 	"pmf": {
@@ -989,34 +989,6 @@
 			"label": "Smart fill / lista",
 			"detail": "{count} WAU anv?nde smart fill",
 			"definition": "Andel veckoaktiva som lagt till AI-f?rslag p? ink?pslistan"
-		},
-		"funnel": {
-			"title": "Funnel / PMF",
-			"subtitle": "K?rnfunnel fr?n landning till ?terkomst dag 1",
-			"periodToggle": "V?lj funnel-period",
-			"periodOption": "Senaste {days} dagarna",
-			"periodRange": "{start} ? {end} ({days} dagar)",
-			"ratio": "{numerator} / {denominator} = {percent}",
-			"ratioUnavailable": "{numerator} / {denominator}",
-			"visits": {
-				"label": "Bes?k",
-				"definition": "landing_view p? / (serverside, max en g?ng per 30 min session)",
-				"proxyDefinition": "Proxy: unika inloggade anv?ndare med valfri product_event under perioden (inga landing_view ?n)",
-				"proxyNote": "Gap: inga landing_view i perioden ? proxy tills marknadsf?rings-events finns."
-			},
-			"signups": {
-				"label": "Registreringar",
-				"definition": "signup_complete efter lyckad registrering"
-			},
-			"firstScan": {
-				"label": "F?rsta scan",
-				"definition": "Anv?ndare vars f?rsta scan_completed, receipt_parsed, photo_round_parsed eller first_scan intr?ffade under perioden"
-			},
-			"d1": {
-				"label": "D1-retention",
-				"detail": "{retained} av {eligible} ber?ttigade registreringar",
-				"definition": "Aktivitet (product_event) b?de registreringsdagen och n?sta kalenderdag (UTC); ber?ttigade n?r dag+1 passerat"
-			}
 		}
 	},
 	"invite": {
