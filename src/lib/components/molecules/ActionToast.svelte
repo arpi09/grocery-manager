@@ -21,9 +21,9 @@
 	const remaining = $derived(page.url.searchParams.get(ACTION_TOAST_REMAINING_PARAM) ?? undefined);
 
 	$effect(() => {
-		toastKind;
-		label;
-		remaining;
+		void toastKind;
+		void label;
+		void remaining;
 		dismissed = false;
 	});
 	const message = $derived(
