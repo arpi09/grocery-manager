@@ -589,6 +589,14 @@
 		"finishedBadge": "Finished",
 		"finishedSection": "Finished items",
 		"searchPlaceholder": "Search items…",
+		"filterToolbarAria": "Filter and sort inventory",
+		"expiryFilterLabel": "Expiry filter",
+		"expiryFilterAll": "All items",
+		"expiryFilterSoon": "Expiring soon",
+		"expiryFilterDated": "With expiry date",
+		"sortLabel": "Sort by",
+		"sortName": "Name",
+		"sortExpiry": "Expiry date",
 		"tabsAria": "Storage locations",
 		"listAria": "Items in this location",
 		"photoRound": "Photo round",
@@ -643,6 +651,7 @@
 		"addLabel": "Add",
 		"itemPlaceholder": "Item",
 		"emptyList": "The list is empty.",
+		"searchPlaceholder": "Search list…",
 		"checkedHeading": "Checked off",
 		"showChecked": "Show checked ({count})",
 		"hideChecked": "Hide checked",
@@ -1258,7 +1267,9 @@
 		"noMissingToAdd": "No missing ingredients to add.",
 		"newBadge": "New",
 		"label": "Recipe ideas",
-		"firstWinToast": "Woohoo — your first recipe ideas are here! Cooking just got easier."
+		"firstWinToast": "Woohoo — your first recipe ideas are here! Cooking just got easier.",
+		"stepsTitle": "Steps",
+		"stepsAria": "Cooking steps for {title}"
 	},
 	"onboarding": {
 		"welcome": "Welcome to Skaffu",

@@ -5,6 +5,7 @@
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
+	import RecipeStepsPanel from '$lib/components/molecules/RecipeStepsPanel.svelte';
 	import Toast, { type ToastVariant } from '$lib/components/molecules/Toast.svelte';
 	import { formatCalendarDayLabel, mealSourceVariant } from '$lib/domain/calendar-display';
 	import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
@@ -199,6 +200,7 @@
 											<strong>{t('planer.missingLabel')}</strong>
 											{idea.missingIngredients.join(', ') || t('common.none')}
 										</p>
+										<RecipeStepsPanel steps={idea.steps} recipeTitle={idea.title} />
 									</div>
 								{/if}
 								<form method="POST" action="?/update" class="edit-form">

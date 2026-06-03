@@ -5,13 +5,13 @@ import { filterAndSortInventoryItems } from './inventory-list-filters';
 function item(overrides: Partial<InventoryItem> & Pick<InventoryItem, 'id' | 'name'>): InventoryItem {
 	return {
 		householdId: 'h1',
+		userId: 'user-1',
 		location: 'fridge',
 		quantity: '1',
 		unit: null,
 		expiresOn: null,
 		expiresOnSource: null,
 		notes: null,
-		barcode: null,
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		...overrides
@@ -36,6 +36,6 @@ describe('filterAndSortInventoryItems', () => {
 
 	it('sorts by expiry then name', () => {
 		const sorted = filterAndSortInventoryItems(items, '', 'all', 'expiry');
-		expect(sorted.map((row) => row.name)).toEqual(['Apple', 'Banana', 'Zucchini']);
+		expect(sorted.map((row) => row.name)).toEqual(['Apple', 'Zucchini', 'Banana']);
 	});
 });

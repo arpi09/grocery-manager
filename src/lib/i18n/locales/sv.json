@@ -572,6 +572,14 @@
 		"finishedBadge": "Slut",
 		"finishedSection": "Slut på varor",
 		"searchPlaceholder": "Sök varor…",
+		"filterToolbarAria": "Filtrera och sortera varor",
+		"expiryFilterLabel": "Bäst-före-filter",
+		"expiryFilterAll": "Alla varor",
+		"expiryFilterSoon": "Går ut snart",
+		"expiryFilterDated": "Med datum",
+		"sortLabel": "Sortera",
+		"sortName": "Namn",
+		"sortExpiry": "Bäst före",
 		"tabsAria": "Förvaringsplatser",
 		"listAria": "Varor i förvaringsplatsen",
 		"photoRound": "Foto-runda",
@@ -623,6 +631,7 @@
 		"addLabel": "Lägg till",
 		"itemPlaceholder": "Vara",
 		"emptyList": "Listan är tom.",
+		"searchPlaceholder": "Sök i listan…",
 		"checkedHeading": "Avbockade",
 		"showChecked": "Visa avbockade ({count})",
 		"hideChecked": "Dölj avbockade",
@@ -1238,7 +1247,9 @@
 		"mealIntentFriday": "Fredag",
 		"mealIntentMealPrep": "Matlådor",
 		"noSuitableInventoryNote": "Vi hittade inget i lagret som passar matlagning (t.ex. bara städ eller djurfoder). Lägg till matvaror och försök igen.",
-		"firstWinToast": "Wohooo — dina första receptidéer är här! Nu blir det lättare att laga gott."
+		"firstWinToast": "Wohooo — dina första receptidéer är här! Nu blir det lättare att laga gott.",
+		"stepsTitle": "Steg",
+		"stepsAria": "Tillagningssteg för {title}"
 	},
 	"onboarding": {
 		"welcome": "Välkommen till Skaffu",

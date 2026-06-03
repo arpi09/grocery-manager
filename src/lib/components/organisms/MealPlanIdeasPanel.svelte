@@ -3,9 +3,11 @@
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
+	import RecipeStepsPanel from '$lib/components/molecules/RecipeStepsPanel.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import { fetchMealPlanIdeas } from '$lib/client/planer-data';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
+	import { normalizeRecipeIdeas, type RecipeIdeaLoad } from '$lib/utils/meal-plan-ideas';
 	import { canEditInventory } from '$lib/domain/household';
 	import { getLocale, t } from '$lib/i18n';
 	import {
@@ -17,7 +19,7 @@
 
 	interface Props {
 		month: string;
-		initialIdeas?: RecipeIdea[];
+		initialIdeas?: RecipeIdeaLoad[];
 		onIdeasChange?: (ideas: RecipeIdea[]) => void;
 	}
 
@@ -27,7 +29,7 @@
 		page.data.householdRole ? canEditInventory(page.data.householdRole) : false
 	);
 
-	let ideas = $state<RecipeIdea[]>(initialIdeas);
+	let ideas = $state<RecipeIdea[]>(normalizeRecipeIdeas(initialIdeas));
 	let loading = $state(initialIdeas.length === 0);
 	let loadError = $state(false);
 	let addingMissingKey = $state<string | null>(null);
@@ -142,11 +144,7 @@
 						<strong>{t('planer.missingLabel')}</strong>
 						{idea.missingIngredients.join(', ') || t('common.none')}
 					</p>
-					<ol>
-						{#each idea.steps as step}
-							<li>{step}</li>
-						{/each}
-					</ol>
+					<RecipeStepsPanel steps={idea.steps} recipeTitle={idea.title} />
 					<form method="POST" action="?/scheduleIdea" class="schedule-form">
 						<input type="hidden" name="month" value={month} />
 						<input type="hidden" name="ideaId" value={idea.id} />

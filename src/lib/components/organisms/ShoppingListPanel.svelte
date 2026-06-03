@@ -5,6 +5,7 @@
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
+	import SearchInput from '$lib/components/molecules/SearchInput.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import { fetchCheckedShoppingItems } from '$lib/client/shopping-data';
@@ -23,7 +24,17 @@
 		canEdit
 	}: { items: ShoppingListItem[]; checkedCount?: number; canEdit: boolean } = $props();
 
-	const unchecked = $derived(items.filter((item) => !item.checked));
+	let listQuery = $state('');
+
+	const unchecked = $derived(
+		items.filter((item) => {
+			if (item.checked) {
+				return false;
+			}
+			const q = listQuery.trim().toLowerCase();
+			return !q || item.name.toLowerCase().includes(q);
+		})
+	);
 	let checked = $state<ShoppingListItem[]>([]);
 	let checkedLoaded = $state(false);
 	let loadingChecked = $state(false);
@@ -35,7 +46,14 @@
 		showChecked = false;
 	});
 
-	const visibleChecked = $derived(showChecked ? checked : []);
+	const visibleChecked = $derived(
+		showChecked
+			? checked.filter((item) => {
+					const q = listQuery.trim().toLowerCase();
+					return !q || item.name.toLowerCase().includes(q);
+				})
+			: []
+	);
 
 	let undoPayload = $state<{
 		name: string;
@@ -213,6 +231,7 @@
 	{#if items.length === 0 && checkedCount === 0}
 		<EmptyState title={t('shopping.emptyList')} description={t('shopping.intro')} />
 	{:else}
+		<SearchInput bind:value={listQuery} placeholder={t('shopping.searchPlaceholder')} />
 		<ul class="list">
 			{#each unchecked as item (item.id)}
 				<li>

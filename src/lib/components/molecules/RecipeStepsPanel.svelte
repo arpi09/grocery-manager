@@ -10,7 +10,7 @@
 
 	const hasSteps = $derived(steps.length > 0);
 	const useAccordion = $derived(steps.length > 4);
-	let expandedStep = $state<number | null>(useAccordion ? 0 : null);
+	let expandedStep = $state<number | null>(null);
 </script>
 
 {#if hasSteps}

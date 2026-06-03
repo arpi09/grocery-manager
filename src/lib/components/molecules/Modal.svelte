@@ -248,9 +248,9 @@
 	}
 
 	.modal-panel--sheet {
-		left: 0;
-		right: 0;
-		bottom: 0;
+		position: relative;
+		width: 100%;
+		max-width: 100%;
 		max-height: min(88vh, 720px);
 		overflow: hidden;
 		border-bottom: none;

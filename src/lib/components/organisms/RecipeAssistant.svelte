@@ -6,6 +6,7 @@
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
+	import RecipeStepsPanel from '$lib/components/molecules/RecipeStepsPanel.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import { DEFAULT_RECIPE_PORTIONS, DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
 	import {
@@ -254,11 +255,7 @@
 						<strong>{t('planer.missingLabel')}</strong>
 						{recipe.missingIngredients.join(', ') || t('common.none')}
 					</p>
-					<ol>
-						{#each recipe.steps as step}
-							<li>{step}</li>
-						{/each}
-					</ol>
+					<RecipeStepsPanel steps={recipe.steps} recipeTitle={recipe.title} />
 				</section>
 			{/each}
 		</div>
