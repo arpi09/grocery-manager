@@ -9,6 +9,9 @@
 	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
 	import SettingsRow from '$lib/components/molecules/SettingsRow.svelte';
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
+	import SettingsSectionNav, {
+		type SettingsNavItem
+	} from '$lib/components/molecules/SettingsSectionNav.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import { browser } from '$app/environment';
 	import { invalidateAll } from '$app/navigation';
@@ -176,6 +179,20 @@
 	function dismissPushToast() {
 		pushToastMessage = null;
 	}
+
+	const settingsNavItems = $derived.by((): SettingsNavItem[] => {
+		const items: SettingsNavItem[] = [
+			{ id: 'settings-account', label: t('settings.nav.account') },
+			...(data.household
+				? [{ id: 'settings-household', label: t('settings.nav.household') }]
+				: []),
+			{ id: 'settings-notifications', label: t('settings.nav.notifications') },
+			{ id: 'settings-app', label: t('settings.nav.app') },
+			{ id: 'settings-plan', label: t('settings.nav.plan') },
+			{ id: 'settings-feedback', label: t('settings.nav.feedback') }
+		];
+		return items;
+	});
 </script>
 
 <AppLayout user={data.user}>
@@ -186,7 +203,13 @@
 
 	<PageContainer>
 	<div class="settings-page">
-		<SettingsSection title={t('settings.account.title')} description={t('settings.account.description')}>
+		<SettingsSectionNav items={settingsNavItems} />
+
+		<SettingsSection
+			id="settings-account"
+			title={t('settings.account.title')}
+			description={t('settings.account.description')}
+		>
 			<SettingsRow title={data.user?.email ?? ''} note={t('settings.account.loggedInEmail')} />
 			<SettingsRow href="/profile" title={t('settings.account.editProfile')} note={t('settings.account.editProfileNote')} />
 			<SettingsRow href="/privacy" title={t('settings.legal.privacyLink')} note={t('settings.legal.privacyNote')} last />
@@ -194,6 +217,7 @@
 
 		{#if data.household}
 			<SettingsSection
+				id="settings-household"
 				title={t('settings.household.title')}
 				description={t('settings.household.description')}
 			>
@@ -215,15 +239,11 @@
 			</SettingsSection>
 		{/if}
 
-		<SettingsSection title={t('settings.app.title')} description={t('settings.app.description')}>
-			<SettingsRow
-				title={t('settings.language.title')}
-				note={t('settings.language.description')}
-				last={false}
-			>
-				<LanguageSwitcher />
-			</SettingsRow>
-
+		<SettingsSection
+			id="settings-notifications"
+			title={t('settings.notifications.title')}
+			description={t('settings.notifications.description')}
+		>
 			<SettingsRow
 				title={t('settings.expiryReminders.title')}
 				note={t('settings.expiryReminders.note')}
@@ -334,7 +354,7 @@
 			<SettingsRow
 				title={t('settings.shoppingPush.title')}
 				note={t('settings.shoppingPush.note')}
-				last={false}
+				last
 			>
 				<form
 					method="POST"
@@ -371,7 +391,24 @@
 					{/if}
 				</form>
 			</SettingsRow>
+		</SettingsSection>
 
+		<SettingsSection
+			id="settings-app"
+			title={t('settings.app.title')}
+			description={t('settings.app.description')}
+		>
+			<SettingsRow
+				title={t('settings.language.title')}
+				note={t('settings.language.description')}
+				last={false}
+			>
+				<LanguageSwitcher />
+			</SettingsRow>
+
+			<details class="settings-disclosure">
+				<summary class="settings-disclosure-summary">{t('settings.more.summary')}</summary>
+				<div class="settings-disclosure-body">
 			<SettingsRow
 				title={t('settings.pets.title')}
 				note={t('settings.pets.note')}
@@ -441,9 +478,12 @@
 					{t('settings.onboarding.start')}
 				</button>
 			</SettingsRow>
+				</div>
+			</details>
 		</SettingsSection>
 
 		<SettingsSection
+			id="settings-plan"
 			title={t('settings.plan.title')}
 			description={data.isPro ? t('settings.plan.descriptionPro') : t('settings.plan.description')}
 		>
@@ -455,8 +495,8 @@
 				note={data.isPro ? t('settings.plan.currentPro') : t('settings.plan.currentFree')}
 				last={false}
 			/>
-			<div class="plan-panel" id="plan-upgrade">
-				{#if data.planLimits && !data.isPro}
+			{#if data.planLimits && !data.isPro}
+				<div class="plan-panel plan-usage-panel">
 					<h3 class="plan-heading">{t('settings.plan.usageTitle')}</h3>
 					<ul class="plan-usage-list">
 						{#each data.planLimits.limits as row (row.key)}
@@ -472,63 +512,69 @@
 							</li>
 						{/each}
 					</ul>
-				{/if}
-				<h3 class="plan-heading">{t('settings.plan.freeLimitsTitle')}</h3>
-				<p class="plan-copy">
-					{t('settings.plan.freeLimitsItems', {
-						items: FREE_LIMITS.maxInventoryItems,
-						members: FREE_LIMITS.maxHouseholdMembers,
-						aiScans: FREE_LIMITS.aiScansPerMonth,
-						receipts: FREE_LIMITS.receiptPdfParsesPerMonth,
-						smartFill: FREE_LIMITS.smartFillPerWeek
-					})}
-				</p>
-				<h3 class="plan-heading">{t('settings.plan.proTitle')}</h3>
-				<ul class="plan-pro-list">
-					<li>{t('settings.plan.proUnlimitedAi')}</li>
-					<li>{t('settings.plan.proUnlimitedReceipt')}</li>
-					<li>{t('settings.plan.proUnlimitedSmartFill')}</li>
-					<li>{t('settings.plan.proInsights')}</li>
-					<li>
-						{t('settings.plan.proMembers', { max: PRO_LIMITS.maxHouseholdMembers ?? 6 })}
-					</li>
-				</ul>
-				<p class="plan-copy plan-muted">
-					{t('settings.plan.priceHint', {
-						monthly: PRICE_HYPOTHESIS_SEK.monthly,
-						yearly: PRICE_HYPOTHESIS_SEK.yearly
-					})}
-				</p>
-				{#if data.isPro}
-					<p class="plan-copy plan-muted">{t('settings.plan.proActive')}</p>
-				{:else if data.stripeCheckoutEnabled}
-					<ProUpgradePanel isOwner={data.isOwner} checkoutStatus={data.checkoutStatus} />
-				{:else}
-					<p class="plan-copy plan-muted">{t('settings.plan.comingSoon')}</p>
-					<ProWaitlistForm
-						action="?/joinProWaitlist"
-						source="settings"
-						title={t('settings.plan.waitlistTitle')}
-						description={t('settings.plan.waitlistDescription')}
-						emailLabel={t('settings.plan.waitlistEmailLabel')}
-						submitLabel={t('settings.plan.waitlistSubmitLabel')}
-						successMessage={t('settings.plan.waitlistSuccess')}
-						existsMessage={t('settings.plan.waitlistExists')}
-						email={data.user?.email ?? ''}
-						emailReadonly
-						{form}
-					/>
-				{/if}
-			</div>
+				</div>
+			{/if}
+			<details class="settings-disclosure plan-compare">
+				<summary class="settings-disclosure-summary">{t('settings.plan.compareSummary')}</summary>
+				<div class="plan-panel" id="plan-upgrade">
+					<h3 class="plan-heading">{t('settings.plan.freeLimitsTitle')}</h3>
+					<p class="plan-copy">
+						{t('settings.plan.freeLimitsItems', {
+							items: FREE_LIMITS.maxInventoryItems,
+							members: FREE_LIMITS.maxHouseholdMembers,
+							aiScans: FREE_LIMITS.aiScansPerMonth,
+							receipts: FREE_LIMITS.receiptPdfParsesPerMonth,
+							smartFill: FREE_LIMITS.smartFillPerWeek
+						})}
+					</p>
+					<h3 class="plan-heading">{t('settings.plan.proTitle')}</h3>
+					<ul class="plan-pro-list">
+						<li>{t('settings.plan.proUnlimitedAi')}</li>
+						<li>{t('settings.plan.proUnlimitedReceipt')}</li>
+						<li>{t('settings.plan.proUnlimitedSmartFill')}</li>
+						<li>{t('settings.plan.proInsights')}</li>
+						<li>
+							{t('settings.plan.proMembers', { max: PRO_LIMITS.maxHouseholdMembers ?? 6 })}
+						</li>
+					</ul>
+					<p class="plan-copy plan-muted">
+						{t('settings.plan.priceHint', {
+							monthly: PRICE_HYPOTHESIS_SEK.monthly,
+							yearly: PRICE_HYPOTHESIS_SEK.yearly
+						})}
+					</p>
+					{#if data.isPro}
+						<p class="plan-copy plan-muted">{t('settings.plan.proActive')}</p>
+					{:else if data.stripeCheckoutEnabled}
+						<ProUpgradePanel isOwner={data.isOwner} checkoutStatus={data.checkoutStatus} />
+					{:else}
+						<p class="plan-copy plan-muted">{t('settings.plan.comingSoon')}</p>
+						<ProWaitlistForm
+							action="?/joinProWaitlist"
+							source="settings"
+							title={t('settings.plan.waitlistTitle')}
+							description={t('settings.plan.waitlistDescription')}
+							emailLabel={t('settings.plan.waitlistEmailLabel')}
+							submitLabel={t('settings.plan.waitlistSubmitLabel')}
+							successMessage={t('settings.plan.waitlistSuccess')}
+							existsMessage={t('settings.plan.waitlistExists')}
+							email={data.user?.email ?? ''}
+							emailReadonly
+							{form}
+						/>
+					{/if}
+				</div>
+			</details>
 			<SettingsRow
 				href="/priser"
 				title={t('settings.plan.learnMore')}
 				note={t('settings.plan.learnMoreNote')}
-				last={false}
+				last
 			/>
 		</SettingsSection>
 
 		<SettingsSection
+			id="settings-feedback"
 			title={t('settings.feedback.title')}
 			description={t('settings.feedback.description')}
 		>
@@ -617,6 +663,45 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0;
+	}
+
+	.settings-disclosure {
+		border-top: 1px solid var(--color-border);
+	}
+
+	.settings-disclosure-summary {
+		display: flex;
+		align-items: center;
+		min-height: 2.75rem;
+		padding: var(--space-md) var(--space-lg);
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--color-text);
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.settings-disclosure-summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.settings-disclosure-summary::after {
+		content: '▾';
+		margin-left: auto;
+		color: var(--color-text-muted);
+		transition: transform 0.15s;
+	}
+
+	.settings-disclosure[open] .settings-disclosure-summary::after {
+		transform: rotate(180deg);
+	}
+
+	.settings-disclosure-body :global(.settings-row:last-child) {
+		border-bottom: none;
+	}
+
+	.plan-compare .plan-panel {
+		border-top: none;
 	}
 
 	.expiry-reminders-form {

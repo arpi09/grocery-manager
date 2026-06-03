@@ -83,6 +83,27 @@
 		summary.totalItems === 0 ? t('home.taglineEmpty') : t('home.taglineEngaged')
 	);
 
+	const hasExpiring = $derived(summary.expiringSoon.length > 0);
+	const expiringCount = $derived(summary.expiringSoon.length);
+
+	let locationsOpen = $state(false);
+	let eatFirstOpen = $state(true);
+	let receiptAutopilotOpen = $state(false);
+
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+		eatFirstOpen = hasExpiring;
+		const mq = window.matchMedia('(min-width: 560px)');
+		const syncLocations = () => {
+			locationsOpen = mq.matches;
+		};
+		syncLocations();
+		mq.addEventListener('change', syncLocations);
+		return () => mq.removeEventListener('change', syncLocations);
+	});
+
 	const emptyPrimaryHref = $derived(
 		activationProgress.path === 'receipt'
 			? scanModeHref('receipt', returnTo)
@@ -136,7 +157,7 @@
 </script>
 
 <section class="home" aria-label={t('home.ariaLabel')}>
-	<header class="hero">
+	<header class="hero" class:hero--engaged={summary.totalItems > 0}>
 		<h1>{greeting}</h1>
 		<p class="tagline">{tagline}</p>
 	</header>
@@ -170,12 +191,6 @@
 			</Card>
 		{/if}
 	{:else}
-		<EatFirstSection
-			expiringItems={summary.expiringSoon}
-			canEdit={canWrite}
-			householdId={householdId}
-		/>
-
 		{#if canWrite}
 			<section class="scan-zone" aria-labelledby="home-scan-heading">
 				<h2 id="home-scan-heading" class="sr-only">{t('home.scanCardTitle')}</h2>
@@ -197,11 +212,26 @@
 			<p class="readonly-hint">{t('home.readonlyHint')}</p>
 		{/if}
 
-		<section class="status-zone" aria-labelledby="home-locations-heading">
-			<div class="status-header">
-				<h2 id="home-locations-heading">{t('home.locationsTitle')}</h2>
-				<span class="total-badge">{t('home.totalTracked', { count: summary.totalItems })}</span>
-			</div>
+		<details class="home-disclosure" bind:open={eatFirstOpen}>
+			<summary>
+				{#if hasExpiring}
+					{t('home.eatFirstSummary', { count: expiringCount })}
+				{:else}
+					{t('eatFirst.title')}
+				{/if}
+			</summary>
+			<EatFirstSection
+				compact
+				expiringItems={summary.expiringSoon}
+				canEdit={canWrite}
+				householdId={householdId}
+			/>
+		</details>
+
+		<details class="home-disclosure" bind:open={locationsOpen}>
+			<summary>
+				{t('home.locationsSummary', { count: summary.totalItems })}
+			</summary>
 			<div class="locations">
 				{#each summary.counts as { location, count }}
 					<Card href="/inventory/{location}" interactive class="location-card">
@@ -217,10 +247,19 @@
 					</Card>
 				{/each}
 			</div>
-		</section>
+		</details>
 
 		{#if canWrite && receiptAutopilotSuggestions.length > 0}
-			<ReceiptAutopilotSection suggestions={receiptAutopilotSuggestions} canEdit={canWrite} />
+			<details class="home-disclosure" bind:open={receiptAutopilotOpen}>
+				<summary>
+					{t('home.receiptAutopilotSummary', { count: receiptAutopilotSuggestions.length })}
+				</summary>
+				<ReceiptAutopilotSection
+					suggestions={receiptAutopilotSuggestions}
+					canEdit={canWrite}
+					compact
+				/>
+			</details>
 		{/if}
 	{/if}
 </section>
@@ -229,8 +268,14 @@
 	.home {
 		display: flex;
 		flex-direction: column;
-		gap: var(--page-section-gap);
+		gap: var(--space-md);
 		padding-top: var(--space-xs);
+	}
+
+	@media (min-width: 560px) {
+		.home {
+			gap: var(--page-section-gap);
+		}
 	}
 
 	.hero h1 {
@@ -247,6 +292,62 @@
 		font-size: 0.95rem;
 		line-height: 1.45;
 		max-width: 42ch;
+	}
+
+	@media (max-width: 559px) {
+		.hero--engaged .tagline {
+			display: none;
+		}
+
+		.hero--engaged h1 {
+			font-size: 1.35rem;
+		}
+	}
+
+	.home-disclosure {
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		box-shadow: var(--shadow-sm);
+		overflow: hidden;
+	}
+
+	.home-disclosure > summary {
+		display: flex;
+		align-items: center;
+		min-height: 2.75rem;
+		padding: var(--space-md) var(--space-lg);
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--color-text);
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.home-disclosure > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.home-disclosure > summary::after {
+		content: '▾';
+		margin-left: auto;
+		color: var(--color-text-muted);
+		transition: transform 0.15s;
+	}
+
+	.home-disclosure[open] > summary::after {
+		transform: rotate(180deg);
+	}
+
+	.home-disclosure > :global(.eat-first),
+	.home-disclosure > .locations,
+	.home-disclosure > :global(.autopilot) {
+		padding: 0 var(--space-md) var(--space-md);
+		border-top: 1px solid var(--color-border);
+	}
+
+	.home-disclosure > :global(.eat-first) {
+		padding-top: var(--space-md);
 	}
 
 	.activation-progress {
@@ -358,29 +459,6 @@
 		color: var(--color-text-muted);
 		font-size: 0.9375rem;
 		line-height: 1.5;
-	}
-
-	.status-header {
-		display: flex;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: var(--space-md);
-		margin-bottom: var(--space-md);
-	}
-
-	.status-header h2 {
-		margin: 0;
-		font-size: var(--font-size-label);
-		font-weight: var(--font-weight-label);
-		color: var(--color-text-muted);
-		text-transform: uppercase;
-		letter-spacing: var(--letter-spacing-label);
-	}
-
-	.total-badge {
-		font-size: 0.8125rem;
-		font-weight: 500;
-		color: var(--color-text-muted);
 	}
 
 	.locations {

@@ -183,7 +183,10 @@
 		},
 		"moreAddWays": "Fler sätt att lägga till",
 		"chipBarcode": "Streckkod",
-		"chipPhotoRound": "Foto-runda"
+		"chipPhotoRound": "Foto-runda",
+		"eatFirstSummary": "Ät först ({count})",
+		"locationsSummary": "Platser · {count} varor",
+		"receiptAutopilotSummary": "Kvitto-förslag ({count})"
 	},
 	"dashboard": {
 		"title": "Hem",
@@ -396,7 +399,8 @@
 			"upgradeOwnerOnly": "Endast hushållets ägare kan starta uppgradering.",
 			"upgradeTestNote": "Testläge: använd kort 4242 4242 4242 4242 i Stripe Checkout.",
 			"checkoutSuccess": "Tack! Om betalningen gick igenom aktiveras Pro inom någon sekund.",
-			"checkoutCancel": "Betalningen avbröts. Du kan försöka igen när du vill."
+			"checkoutCancel": "Betalningen avbröts. Du kan försöka igen när du vill.",
+			"compareSummary": "Jämför Gratis och Pro"
 		},
 		"feedback": {
 			"title": "Ge feedback",
@@ -410,6 +414,23 @@
 			"note": "Varor flyttas till en egen flik efter bäst-före-datum plus en respitperiod. Inget raderas automatiskt.",
 			"daysLabel": "Dagar efter utgång innan auto-flytt",
 			"daysOption": "{days} dagar"
+		},
+		"nav": {
+			"aria": "Hoppa till avsnitt",
+			"account": "Konto",
+			"household": "Hushåll",
+			"notifications": "Notiser",
+			"app": "App",
+			"plan": "Plan",
+			"feedback": "Feedback"
+		},
+		"notifications": {
+			"title": "Notiser",
+			"description": "E-post, webbläsare och handla-påminnelser"
+		},
+		"more": {
+			"title": "Fler alternativ",
+			"summary": "Installera app, guide och husdjur"
 		}
 	},
 	"feedback": {

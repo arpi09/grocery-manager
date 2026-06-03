@@ -26,9 +26,10 @@
 		expiringItems: InventoryItem[];
 		canEdit?: boolean;
 		householdId?: string | null;
+		compact?: boolean;
 	}
 
-	let { expiringItems, canEdit = false, householdId = null }: Props = $props();
+	let { expiringItems, canEdit = false, householdId = null, compact = false }: Props = $props();
 
 	let loading = $state(false);
 	let mealIntent = $state<MealIntent>(DEFAULT_MEAL_INTENT);
@@ -155,17 +156,27 @@
 	}
 </script>
 
-<section id="eat-first" class="eat-first motion-fade-in" aria-labelledby="eat-first-heading">
-	<div class="hero-card">
-		<div class="hero-copy">
-			<span class="hero-badge">{t('eatFirst.badge')}</span>
-			<h2 id="eat-first-heading">{t('eatFirst.title')}</h2>
-			<p class="hero-sub">{t('eatFirst.subtitle')}</p>
+<section
+	id="eat-first"
+	class="eat-first motion-fade-in"
+	class:compact
+	aria-labelledby="eat-first-heading"
+>
+	{#if !compact}
+		<div class="hero-card">
+			<div class="hero-copy">
+				<span class="hero-badge">{t('eatFirst.badge')}</span>
+				<h2 id="eat-first-heading">{t('eatFirst.title')}</h2>
+				<p class="hero-sub">{t('eatFirst.subtitle')}</p>
+			</div>
+			<span class="hero-icon" aria-hidden="true">
+				<FeatureIcon id="sparkle" size={28} />
+			</span>
 		</div>
-		<span class="hero-icon" aria-hidden="true">
-			<FeatureIcon id="sparkle" size={28} />
-		</span>
-	</div>
+	{:else}
+		<h2 id="eat-first-heading" class="sr-only">{t('eatFirst.title')}</h2>
+		<p class="hero-sub compact-sub">{t('eatFirst.subtitle')}</p>
+	{/if}
 
 	{#if previewItems.length > 0}
 		<ul class="expiring-chips motion-stagger-children" aria-label={t('eatFirst.expiringLabel')}>
@@ -189,23 +200,51 @@
 	{/if}
 
 	{#if canEdit}
-		<fieldset class="intent-fieldset">
-			<legend>{t('recipe.mealIntentLabel')}</legend>
-			<div class="intent-presets" role="group" aria-label={t('recipe.mealIntentAria')}>
-				<label class="intent-preset">
-					<input type="radio" name="eat-first-intent" value="quick" bind:group={mealIntent} />
-					<span>{t('recipe.mealIntentQuick')}</span>
-				</label>
-				<label class="intent-preset">
-					<input type="radio" name="eat-first-intent" value="friday" bind:group={mealIntent} />
-					<span>{t('recipe.mealIntentFriday')}</span>
-				</label>
-				<label class="intent-preset">
-					<input type="radio" name="eat-first-intent" value="meal_prep" bind:group={mealIntent} />
-					<span>{t('recipe.mealIntentMealPrep')}</span>
-				</label>
-			</div>
-		</fieldset>
+		{#if compact}
+			<details class="intent-disclosure">
+				<summary>{t('recipe.mealIntentLabel')}</summary>
+				<fieldset class="intent-fieldset">
+					<legend class="sr-only">{t('recipe.mealIntentLabel')}</legend>
+					<div class="intent-presets" role="group" aria-label={t('recipe.mealIntentAria')}>
+						<label class="intent-preset">
+							<input type="radio" name="eat-first-intent" value="quick" bind:group={mealIntent} />
+							<span>{t('recipe.mealIntentQuick')}</span>
+						</label>
+						<label class="intent-preset">
+							<input type="radio" name="eat-first-intent" value="friday" bind:group={mealIntent} />
+							<span>{t('recipe.mealIntentFriday')}</span>
+						</label>
+						<label class="intent-preset">
+							<input
+								type="radio"
+								name="eat-first-intent"
+								value="meal_prep"
+								bind:group={mealIntent}
+							/>
+							<span>{t('recipe.mealIntentMealPrep')}</span>
+						</label>
+					</div>
+				</fieldset>
+			</details>
+		{:else}
+			<fieldset class="intent-fieldset">
+				<legend>{t('recipe.mealIntentLabel')}</legend>
+				<div class="intent-presets" role="group" aria-label={t('recipe.mealIntentAria')}>
+					<label class="intent-preset">
+						<input type="radio" name="eat-first-intent" value="quick" bind:group={mealIntent} />
+						<span>{t('recipe.mealIntentQuick')}</span>
+					</label>
+					<label class="intent-preset">
+						<input type="radio" name="eat-first-intent" value="friday" bind:group={mealIntent} />
+						<span>{t('recipe.mealIntentFriday')}</span>
+					</label>
+					<label class="intent-preset">
+						<input type="radio" name="eat-first-intent" value="meal_prep" bind:group={mealIntent} />
+						<span>{t('recipe.mealIntentMealPrep')}</span>
+					</label>
+				</div>
+			</fieldset>
+		{/if}
 		<div class="actions">
 			<Button
 				type="button"
@@ -299,6 +338,38 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-md);
+	}
+
+	.eat-first.compact {
+		gap: var(--space-sm);
+	}
+
+	.compact-sub {
+		margin: 0 0 var(--space-xs);
+		font-size: 0.875rem;
+	}
+
+	.intent-disclosure {
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface-muted);
+	}
+
+	.intent-disclosure summary {
+		min-height: 2.75rem;
+		padding: var(--space-sm) var(--space-md);
+		font-size: 0.875rem;
+		font-weight: 600;
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.intent-disclosure summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.intent-disclosure .intent-fieldset {
+		padding: 0 var(--space-md) var(--space-md);
 	}
 
 	.hero-card {

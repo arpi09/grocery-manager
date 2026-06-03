@@ -2,17 +2,18 @@
 	import type { Snippet } from 'svelte';
 
 	interface Props {
+		id: string;
 		title: string;
 		description?: string;
 		children: Snippet;
 	}
 
-	let { title, description, children }: Props = $props();
+	let { id, title, description, children }: Props = $props();
 
-	const headingId = $derived(`settings-${title.toLowerCase().replace(/\s+/g, '-')}`);
+	const headingId = $derived(`${id}-heading`);
 </script>
 
-	<section class="settings-section" aria-labelledby={headingId}>
+<section class="settings-section" {id} aria-labelledby={headingId} style="scroll-margin-top: 4.5rem;">
 	<header class="section-header">
 		<h2 id={headingId} class="label-caps">{title}</h2>
 		{#if description}
