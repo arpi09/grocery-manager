@@ -214,7 +214,13 @@
 		<p class="lead">{t('photoRound.zoneLead')}</p>
 		<div class="zone-grid" role="group" aria-label={t('photoRound.zoneAria')}>
 			{#each LOCATIONS as loc (loc)}
-				<Button type="button" variant="secondary" fullWidth onclick={() => selectZone(loc)}>
+				<Button
+					type="button"
+					variant="secondary"
+					fullWidth
+					data-testid="photo-round-zone-{loc}"
+					onclick={() => selectZone(loc)}
+				>
 					{locationLabel(getLocale(), loc)}
 				</Button>
 			{/each}

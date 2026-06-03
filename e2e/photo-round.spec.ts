@@ -18,7 +18,8 @@ test.describe('Photo round flow', () => {
 		await page.goto('/scan?mode=photo&from=/hem');
 		await dismissOnboardingModalIfOpen(page);
 
-		await page.getByRole('button', { name: 'Kylskåp' }).click();
+		await page.getByTestId('photo-round-zone-fridge').click();
+		await expect(page.getByTestId('photo-round-analyze')).toBeVisible({ timeout: 15_000 });
 
 		const fileInput = page.getByTestId('receipt-file-input');
 		await expect(fileInput).toBeAttached({ timeout: 15_000 });
@@ -32,8 +33,7 @@ test.describe('Photo round flow', () => {
 		});
 		await expect(page.getByTestId('photo-round-thumbnails')).toBeVisible({ timeout: 10_000 });
 
-		const analyzeButton = page.getByTestId('photo-round-analyze');
-		await analyzeButton.click();
+		await page.getByTestId('photo-round-analyze').click();
 
 		const parseResponse = await parseDone;
 		expect(parseResponse.ok()).toBe(true);
