@@ -1,6 +1,15 @@
 import type { StorageLocation } from '$lib/domain/location';
+import { APP_HOME_PATH } from '$lib/navigation/app-home';
 
 export type ScanMode = 'hub' | 'barcode' | 'receipt' | 'photo';
+
+/** Safe in-app return path from a `from` query param. */
+export function parseScanReturnTo(fromParam: string | null): string {
+	if (fromParam && fromParam.startsWith('/') && !fromParam.startsWith('//')) {
+		return fromParam;
+	}
+	return APP_HOME_PATH;
+}
 
 export function parseScanMode(value: string | null): ScanMode {
 	if (value === 'barcode' || value === 'receipt' || value === 'photo') {

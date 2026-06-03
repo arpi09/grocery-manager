@@ -112,9 +112,8 @@
 			lines = data.lines;
 			selected = Object.fromEntries(data.lines.map((_, i) => [i, true]));
 			lineLocations = Object.fromEntries(data.lines.map((line, i) => [i, line.location]));
-			bulkLocation = modeLocation(data.lines.map((l) => l.location)) ?? 'cupboard';
+			bulkLocation = modeLocation(data.lines.map((l) => l.location)) ?? data.lines[0]?.location ?? 'cupboard';
 			locationOverrides = new Set();
-			applyBulkLocationToSelected();
 			step = 'review';
 		} catch {
 			parseError = t('receipt.networkError');
@@ -303,7 +302,7 @@
 										const checked = (e.currentTarget as HTMLInputElement).checked;
 										selected[index] = checked;
 										if (checked && !locationOverrides.has(index)) {
-											lineLocations[index] = bulkLocation;
+											lineLocations[index] = lines[index].location;
 										}
 									}} />
 								<span class="line-name">{line.name}</span>

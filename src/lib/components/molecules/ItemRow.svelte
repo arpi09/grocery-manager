@@ -89,18 +89,17 @@
 								{t('inventory.editItem')}
 							</a>
 							{#if !finished}
-								<button type="button" class="menu-item menu-consume" onclick={() => (consumeOpen = true)}>
+								<button
+									type="button"
+									class="menu-item menu-consume"
+									onclick={(event) => {
+										event.stopPropagation();
+										consumeOpen = true;
+										menuOpen = true;
+									}}
+								>
 									{t('consume.logUsage')}
 								</button>
-								{#if consumeOpen}
-									<div class="consume-wrap">
-										<ConsumeItemPanel
-											{item}
-											action="/item/{item.id}/edit?/markAsFinished"
-											onClose={closeMenu}
-										/>
-									</div>
-								{/if}
 							{/if}
 						</div>
 					{/if}
@@ -129,6 +128,16 @@
 
 		{#if item.notes}
 			<p class="notes" title={item.notes}>{item.notes}</p>
+		{/if}
+
+		{#if canWrite && consumeOpen && !finished}
+			<div class="consume-overlay">
+				<ConsumeItemPanel
+					{item}
+					action="/item/{item.id}/edit?/markAsFinished"
+					onClose={closeMenu}
+				/>
+			</div>
 		{/if}
 	</div>
 </article>
@@ -280,7 +289,11 @@
 		font-family: inherit;
 	}
 
-	.consume-wrap {
-		padding: 0 var(--space-xs) var(--space-xs);
+	.consume-overlay {
+		margin-top: var(--space-sm);
+		padding: var(--space-sm);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
 	}
 </style>

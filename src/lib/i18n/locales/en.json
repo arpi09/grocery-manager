@@ -1291,12 +1291,10 @@
 		"ctaBarcodeFirst": "Scan your first item",
 		"barcodeProgress": "{count} of {goal} barcodes",
 		"skipLater": "I'll do it later",
-		"celebrateTitle": "Woohoo!",
-		"celebrateWoohoo": "You got started with the app — woohoo!",
-		"celebrateBody": "You are already making everyday life easier. Keep going when you like — or stay on home for a moment and enjoy the win.",
+		"celebrateTitle": "Nice start!",
+		"celebrateBody": "Your first items are in. Scan more whenever you are ready.",
 		"celebrateCtaScan": "Scan more items",
-		"celebrateCtaShopping": "Open shopping list",
-		"celebrateDismiss": "Stay on home",
+		"celebrateDismiss": "Go to home",
 		"locationsTitle": "Three locations",
 		"locationsBody": "Split your stock by where items are stored. Tap a location on the home screen to view and edit contents.",
 		"shareTitle": "Share household",
@@ -1360,6 +1358,7 @@
 		"suggestionsTitle": "Meal ideas",
 		"addToPlan": "Add to meal plan",
 		"scheduleSuccess": "{title} planned for {date}",
+		"scheduledLabel": "Planned",
 		"scheduleFailed": "Could not add to the meal plan. Try again."
 	},
 	"demo": {

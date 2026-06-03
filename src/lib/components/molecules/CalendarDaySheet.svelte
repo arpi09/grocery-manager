@@ -5,7 +5,7 @@
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
-	import Toast from '$lib/components/molecules/Toast.svelte';
+	import Toast, { type ToastVariant } from '$lib/components/molecules/Toast.svelte';
 	import { formatCalendarDayLabel, mealSourceVariant } from '$lib/domain/calendar-display';
 	import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
 	import {
@@ -35,6 +35,7 @@
 	let expandedMealId = $state<string | null>(null);
 	let addingMissingKey = $state<string | null>(null);
 	let toastMessage = $state<string | null>(null);
+	let toastVariant = $state<ToastVariant>('default');
 	let feedbackBanner = $state<{ message: string; tone: AddMissingFeedbackTone } | null>(null);
 
 	$effect(() => {
@@ -71,6 +72,8 @@
 	function showAddMissingResult(result: Awaited<ReturnType<typeof addMissingIngredientsToList>>) {
 		const presented = presentAddMissingFeedback(getLocale(), result);
 		toastMessage = presented.message;
+		toastVariant =
+			presented.tone === 'error' ? 'error' : presented.tone === 'warning' ? 'info' : 'success';
 		feedbackBanner = presented;
 	}
 
@@ -239,7 +242,7 @@
 {/if}
 
 {#if toastMessage}
-	<Toast message={toastMessage} visible={true} onDismiss={dismissToast} />
+	<Toast message={toastMessage} visible={true} variant={toastVariant} onDismiss={dismissToast} />
 {/if}
 
 <style>

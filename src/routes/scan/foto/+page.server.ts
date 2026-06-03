@@ -1,16 +1,14 @@
 import { isStorageLocation } from '$lib/domain/location';
-import { canEditInventory } from '$lib/domain/household';
+import { redirect } from '@sveltejs/kit';
+import { parseScanReturnTo, scanModeHref } from '$lib/utils/scan-nav';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url, locals }) => {
-	const canWrite = locals.householdRole ? canEditInventory(locals.householdRole) : false;
-
+/** Legacy route — canonical barcode scan lives on `/scan?mode=barcode`. */
+export const load: PageServerLoad = async ({ url }) => {
 	const locationParam = url.searchParams.get('location');
-	const fromParam = url.searchParams.get('from');
-	const defaultLocation =
-		locationParam && isStorageLocation(locationParam) ? locationParam : 'fridge';
-	const returnTo =
-		fromParam && fromParam.startsWith('/') && !fromParam.startsWith('//') ? fromParam : '/';
+	const returnTo = parseScanReturnTo(url.searchParams.get('from'));
+	const location =
+		locationParam && isStorageLocation(locationParam) ? locationParam : undefined;
 
-	return { defaultLocation, returnTo, canWrite };
+	redirect(302, scanModeHref('barcode', returnTo, location ? { location } : undefined));
 };

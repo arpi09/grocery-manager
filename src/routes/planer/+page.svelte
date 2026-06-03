@@ -3,6 +3,7 @@
 	import { t } from '$lib/i18n';
 	import { canEditInventory } from '$lib/domain/household';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
+	import { ideasByIdFromList } from '$lib/utils/meal-plan-ideas';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
@@ -17,10 +18,10 @@
 		page.data.householdRole ? canEditInventory(page.data.householdRole) : false
 	);
 
-	let ideasById = $state<Record<string, RecipeIdea>>({});
+	let ideasById = $state<Record<string, RecipeIdea>>(ideasByIdFromList(data.recipeIdeas));
 
 	function handleIdeasChange(ideas: RecipeIdea[]) {
-		ideasById = Object.fromEntries(ideas.map((idea) => [idea.id, idea]));
+		ideasById = ideasByIdFromList(ideas);
 	}
 </script>
 
@@ -44,7 +45,11 @@
 				{canEdit}
 			/>
 
-			<MealPlanIdeasPanel month={data.month} onIdeasChange={handleIdeasChange} />
+			<MealPlanIdeasPanel
+				month={data.month}
+				initialIdeas={data.recipeIdeas}
+				onIdeasChange={handleIdeasChange}
+			/>
 		</section>
 	</PageContainer>
 </AppLayout>

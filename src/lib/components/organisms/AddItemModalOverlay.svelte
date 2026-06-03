@@ -6,11 +6,12 @@
 
 	interface Props {
 		defaultLocation: StorageLocation;
+		returnTo?: string;
 		errors?: Record<string, string[]>;
 		onClose: () => void;
 	}
 
-	let { defaultLocation, errors, onClose }: Props = $props();
+	let { defaultLocation, returnTo, errors, onClose }: Props = $props();
 </script>
 
 <Modal
@@ -20,7 +21,7 @@
 	title={t('item.addTitle')}
 	panelClass="add-item-panel"
 >
-	<AddItemForm {defaultLocation} {errors} />
+	<AddItemForm {defaultLocation} {returnTo} {errors} />
 </Modal>
 
 <style>

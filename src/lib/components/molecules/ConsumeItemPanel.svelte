@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Input from '$lib/components/atoms/Input.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
@@ -29,6 +30,15 @@
 
 	let customAmount = $state('');
 	let selectedPreset = $state<'lite' | 'half' | 'all' | ''>('');
+
+	const submitConsume: SubmitFunction = () => {
+		return async ({ result, update }) => {
+			await update();
+			if (result.type === 'success' || result.type === 'redirect') {
+				onClose?.();
+			}
+		};
+	};
 </script>
 
 <form
@@ -37,8 +47,7 @@
 	{action}
 	class="consume-panel"
 	class:consume-panel--form={variant === 'form'}
-	onsubmit={() => onClose?.()}
-	use:enhance
+	use:enhance={submitConsume}
 >
 	<p class="lead">{t('consume.intro', { name: item.name, stock: stockLabel })}</p>
 

@@ -1,4 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
+import { MEAL_PLAN_IDEAS_MAX } from '$lib/domain/meal-plan-display';
 import { appendActionToast } from '$lib/utils/action-toast';
 import {
 	createMealSchema,
@@ -58,14 +59,12 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const gridStart = startOfCalendarGrid(monthStart);
 	const gridEnd = endOfCalendarGrid(monthEnd);
 
+	const userId = locals.user!.id;
 	const householdId = locals.householdId!;
-	const [meals, dashboard] = await Promise.all([
-		locals.mealPlanService.listPlannedMealsByRange(
-			locals.user!.id,
-			toIsoDate(gridStart),
-			toIsoDate(gridEnd)
-		),
-		locals.inventoryService.getDashboard(householdId)
+	const [meals, dashboard, recipeIdeas] = await Promise.all([
+		locals.mealPlanService.listPlannedMealsByRange(userId, toIsoDate(gridStart), toIsoDate(gridEnd)),
+		locals.inventoryService.getDashboard(householdId),
+		locals.mealPlanService.listRecipeIdeas(userId, MEAL_PLAN_IDEAS_MAX)
 	]);
 
 	const mealsByDate = new Map<string, typeof meals>();
@@ -110,7 +109,11 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		nextMonth,
 		weeks,
 		expiringSoon: dashboard.expiringSoon,
-		plannedMealCount: meals.length
+		plannedMealCount: meals.length,
+		recipeIdeas: recipeIdeas.map((idea) => ({
+			...idea,
+			createdAt: idea.createdAt.toISOString()
+		}))
 	};
 };
 

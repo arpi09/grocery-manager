@@ -44,9 +44,10 @@
 	);
 	/* Mobile: full width; desktop header/content share centered max width */
 	--page-max-width: none;
-	/* Layering: modals below toasts (120) */
+	/* Layering: modals below toasts */
 	--z-modal: 100;
 	--z-modal-nested: 110;
+	--z-toast: 120;
 	--modal-scrim: color-mix(in srgb, var(--color-text) 42%, transparent);
 	--modal-scrim-blur: 8px;
 	/* Nav flyouts: dim page only — no blur (dropdown ≠ modal) */

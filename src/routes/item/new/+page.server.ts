@@ -1,7 +1,8 @@
 import { isStorageLocation } from '$lib/domain/location';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { itemSchema } from '$lib/validation/inventory.schemas';
-import { appendActionToast } from '$lib/utils/action-toast';
+import { buildScanReturnUrl } from '$lib/utils/scan-toast';
+import { parseScanReturnTo } from '$lib/utils/scan-nav';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -12,8 +13,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const fromParam = url.searchParams.get('from');
 	const defaultLocation =
 		locationParam && isStorageLocation(locationParam) ? locationParam : 'fridge';
-	const returnTo =
-		fromParam && fromParam.startsWith('/') && !fromParam.startsWith('//') ? fromParam : '/';
+	const returnTo = parseScanReturnTo(fromParam);
 
 	return { defaultLocation, returnTo };
 };
@@ -32,7 +32,8 @@ export const actions: Actions = {
 	create: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);
 
-		const parsed = parseItemForm(await event.request.formData());
+		const formData = await event.request.formData();
+		const parsed = parseItemForm(formData);
 
 		if (!parsed.success) {
 			return fail(400, { errors: parsed.error.flatten().fieldErrors });
@@ -52,6 +53,11 @@ export const actions: Actions = {
 			event.locals.householdRole!
 		);
 
-		redirect(302, appendActionToast(`/inventory/${parsed.data.location}`, 'itemCreated', parsed.data.name));
+		const returnToRaw = formData.get('returnTo');
+		const safeReturn = parseScanReturnTo(
+			typeof returnToRaw === 'string' ? returnToRaw : null
+		);
+
+		redirect(302, buildScanReturnUrl(safeReturn, 'added', parsed.data.name));
 	}
 };

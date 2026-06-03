@@ -5,7 +5,7 @@ import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { receiptLineToInventoryAmount } from '$lib/server/receipt-parse';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { buildScanReturnUrl, type ScanToastKind } from '$lib/utils/scan-toast';
-import { parseScanMode } from '$lib/utils/scan-nav';
+import { parseScanMode, parseScanReturnTo } from '$lib/utils/scan-nav';
 import { recordProductEvent } from '$lib/server/product-events';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { error, fail, redirect } from '@sveltejs/kit';
@@ -17,11 +17,10 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const locationParam = url.searchParams.get('location');
 	const fromParam = url.searchParams.get('from');
 	const modeParam = url.searchParams.get('mode');
-	const defaultLocation =
-		locationParam && isStorageLocation(locationParam) ? locationParam : 'fridge';
-	const returnTo =
-		fromParam && fromParam.startsWith('/') && !fromParam.startsWith('//') ? fromParam : '/';
 	const scanMode = parseScanMode(modeParam);
+	const defaultLocation =
+		locationParam && isStorageLocation(locationParam) ? locationParam : null;
+	const returnTo = parseScanReturnTo(fromParam);
 
 	return { defaultLocation, returnTo, canWrite, scanMode };
 };
@@ -39,16 +38,12 @@ function parseItemForm(formData: FormData) {
 async function bulkCreateFromForm(
 	event: import('@sveltejs/kit').RequestEvent,
 	formData: FormData,
-	defaultReturnTo: string,
 	eventType: 'receipt_parsed' | 'photo_round_parsed',
 	recordPurchases: boolean
 ) {
 	requireInventoryWriteAccess(event.locals.householdRole);
 	const returnToRaw = formData.get('returnTo');
-	const returnTo =
-		typeof returnToRaw === 'string' && returnToRaw.startsWith('/') && !returnToRaw.startsWith('//')
-			? returnToRaw
-			: defaultReturnTo;
+	const returnTo = parseScanReturnTo(typeof returnToRaw === 'string' ? returnToRaw : null);
 
 	const selected = formData
 		.getAll('selected')
@@ -78,19 +73,19 @@ async function bulkCreateFromForm(
 		}
 		const quantityRaw = formData.get(`quantity_${index}`);
 		const unitRaw = formData.get(`unit_${index}`);
-		const { quantity, unit } = receiptLineToInventoryAmount({
-			name: name.trim(),
-			quantity:
-				typeof quantityRaw === 'string' && quantityRaw.trim() ? quantityRaw.trim() : undefined,
-			unit: typeof unitRaw === 'string' && unitRaw.trim() ? unitRaw.trim() : undefined,
-			location: 'cupboard'
-		});
-
 		const locationRaw = formData.get(`location_${index}`);
 		const location: StorageLocation =
 			typeof locationRaw === 'string' && isStorageLocation(locationRaw)
 				? locationRaw
 				: resolveReceiptLineLocation(name.trim(), locationRaw);
+
+		const { quantity, unit } = receiptLineToInventoryAmount({
+			name: name.trim(),
+			quantity:
+				typeof quantityRaw === 'string' && quantityRaw.trim() ? quantityRaw.trim() : undefined,
+			unit: typeof unitRaw === 'string' && unitRaw.trim() ? unitRaw.trim() : undefined,
+			location
+		});
 
 		await event.locals.inventoryService.createItem(
 			event.locals.householdId!,
@@ -164,9 +159,10 @@ export const actions: Actions = {
 			event.locals.householdRole!
 		);
 
-		const returnTo = String(formData.get('returnTo') ?? '/');
-		const safeReturn =
-			returnTo.startsWith('/') && !returnTo.startsWith('//') ? returnTo : '/';
+		const returnToRaw = formData.get('returnTo');
+		const safeReturn = parseScanReturnTo(
+			typeof returnToRaw === 'string' ? returnToRaw : null
+		);
 		const productFound = formData.get('productFound') === '1';
 
 		const userId = event.locals.user!.id;
@@ -201,26 +197,15 @@ export const actions: Actions = {
 		}
 
 		const toastKind: ScanToastKind = productFound ? 'added' : 'unknown';
-		const target =
-			safeReturn === '/' || safeReturn.startsWith('/inventory/')
-				? buildScanReturnUrl(safeReturn, toastKind, parsed.data.name)
-				: `/inventory/${parsed.data.location}?scan=${toastKind}&scanName=${encodeURIComponent(parsed.data.name)}`;
-
-		redirect(302, target);
+		redirect(302, buildScanReturnUrl(safeReturn, toastKind, parsed.data.name));
 	},
 	bulkCreate: async (event) => {
 		const formData = await event.request.formData();
 		const bulkFlow = formData.get('bulkFlow');
 		if (bulkFlow === 'photo') {
-			await bulkCreateFromForm(
-				event,
-				formData,
-				'/inventory/cupboard',
-				'photo_round_parsed',
-				false
-			);
+			await bulkCreateFromForm(event, formData, 'photo_round_parsed', false);
 			return;
 		}
-		await bulkCreateFromForm(event, formData, '/', 'receipt_parsed', true);
+		await bulkCreateFromForm(event, formData, 'receipt_parsed', true);
 	}
 };

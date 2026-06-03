@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { portal } from '$lib/actions/portal';
 	import { t } from '$lib/i18n';
 
 	export type ToastVariant = 'default' | 'success' | 'error' | 'info';
@@ -63,6 +64,7 @@
 
 {#if show && message}
 	<div
+		use:portal={'body'}
 		class="toast motion-slide-up"
 		class:toast-celebrate={celebrate}
 		class:toast-success={variant === 'success'}
@@ -102,9 +104,9 @@
 	.toast {
 		position: fixed;
 		left: 50%;
-		bottom: calc(var(--space-lg) + env(safe-area-inset-bottom, 0px));
+		bottom: calc(var(--content-bottom-safe) + var(--space-sm));
 		transform: translateX(-50%);
-		z-index: 120;
+		z-index: var(--z-toast);
 		display: flex;
 		align-items: center;
 		gap: var(--space-sm);
@@ -118,7 +120,6 @@
 	}
 
 	.toast-action {
-		bottom: calc(var(--content-bottom-safe) + var(--space-sm));
 		width: min(28rem, calc(100vw - 2 * var(--space-md)));
 		max-width: min(28rem, calc(100vw - 2 * var(--space-md)));
 		padding: var(--space-md) var(--space-lg);

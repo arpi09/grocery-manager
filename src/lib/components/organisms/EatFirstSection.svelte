@@ -41,11 +41,28 @@
 	let feedbackBanner = $state<{ message: string; tone: AddMissingFeedbackTone } | null>(null);
 	let scheduleDates = $state<Record<string, string>>({});
 	let note = $state<string | null>(null);
+	let ideaCompletion = $state<Record<string, 'exiting' | 'done'>>({});
 
 	const todayIso = new Date().toISOString().slice(0, 10);
 	const previewItems = $derived(expiringItems.slice(0, 5));
 	const overflowCount = $derived(Math.max(0, expiringItems.length - previewItems.length));
 	const hasSuggestions = $derived(suggestions.length > 0);
+
+	const completionDelayMs = 420;
+	const completionHoldMs = 900;
+
+	function markIdeaScheduled(ideaId: string) {
+		ideaCompletion = { ...ideaCompletion, [ideaId]: 'exiting' };
+		window.setTimeout(() => {
+			ideaCompletion = { ...ideaCompletion, [ideaId]: 'done' };
+		}, completionDelayMs);
+		window.setTimeout(() => {
+			suggestions = suggestions.filter((entry) => entry.id !== ideaId);
+			const next = { ...ideaCompletion };
+			delete next[ideaId];
+			ideaCompletion = next;
+		}, completionDelayMs + completionHoldMs);
+	}
 
 	async function generateSuggestions() {
 		loading = true;
@@ -130,6 +147,7 @@
 			}
 
 			toastMessage = t('eatFirst.scheduleSuccess', { title: idea.title, date: plannedDate });
+			markIdeaScheduled(idea.id);
 
 			if (
 				data.celebration === 'eatFirstRitual' &&
@@ -274,56 +292,68 @@
 		<div class="suggestions">
 			<h3>{t('eatFirst.suggestionsTitle')}</h3>
 			{#each suggestions as idea (idea.id)}
-				<article class="suggestion-card">
-					<h4>{idea.title}</h4>
-					<p class="why">{idea.whyItFits}</p>
-					<p class="uses">
-						<strong>{t('recipe.fromStock')}</strong>
-						{idea.ingredientsToUse.join(', ')}
-					</p>
-					{#if idea.missingIngredients.length > 0}
-						<p class="missing">
-							<strong>{t('planer.missingLabel')}</strong>
-							{idea.missingIngredients.join(', ')}
+				{@const completion = ideaCompletion[idea.id]}
+				{#if completion === 'done'}
+					<div class="idea-complete" aria-live="polite">
+						<span class="idea-complete-icon" aria-hidden="true">
+							<FeatureIcon id="check" size={22} />
+						</span>
+						<span class="idea-complete-title">{idea.title}</span>
+						<span class="idea-complete-label">{t('eatFirst.scheduledLabel')}</span>
+					</div>
+				{:else}
+					<article class="suggestion-card" class:idea-exiting={completion === 'exiting'}>
+						<h4>{idea.title}</h4>
+						<p class="why">{idea.whyItFits}</p>
+						<p class="uses">
+							<strong>{t('recipe.fromStock')}</strong>
+							{idea.ingredientsToUse.join(', ')}
 						</p>
-					{/if}
+						{#if idea.missingIngredients.length > 0}
+							<p class="missing">
+								<strong>{t('planer.missingLabel')}</strong>
+								{idea.missingIngredients.join(', ')}
+							</p>
+						{/if}
 
-					{#if canEdit}
-						<div class="suggestion-actions">
-							<label class="date-label">
-								{t('planer.scheduleDate')}
-								<input
-									type="date"
-									min={todayIso}
-									value={scheduleDates[idea.id] ?? ''}
-									oninput={(event) => updateScheduleDate(idea.id, event)}
-								/>
-							</label>
-							<div class="btn-row">
-								<Button
-									type="button"
-									loading={schedulingKey === idea.id}
-									loadingLabel={t('common.loading')}
-									onclick={() => scheduleIdea(idea)}
-									disabled={!scheduleDates[idea.id]}
-								>
-									{t('eatFirst.addToPlan')}
-								</Button>
-								{#if idea.missingIngredients.length > 0}
+						{#if canEdit}
+							<div class="suggestion-actions">
+								<label class="date-label">
+									{t('planer.scheduleDate')}
+									<input
+										type="date"
+										min={todayIso}
+										value={scheduleDates[idea.id] ?? ''}
+										oninput={(event) => updateScheduleDate(idea.id, event)}
+									/>
+								</label>
+								<div class="btn-row">
 									<Button
 										type="button"
-										variant="ghost"
-										loading={addingMissingKey === idea.id}
+										loading={schedulingKey === idea.id}
 										loadingLabel={t('common.loading')}
-										onclick={() => addMissing(idea)}
+										onclick={() => scheduleIdea(idea)}
+										disabled={!scheduleDates[idea.id] || completion === 'exiting'}
 									>
-										{t('recipe.addMissingBtnShort', { count: idea.missingIngredients.length })}
+										{t('eatFirst.addToPlan')}
 									</Button>
-								{/if}
+									{#if idea.missingIngredients.length > 0}
+										<Button
+											type="button"
+											variant="ghost"
+											loading={addingMissingKey === idea.id}
+											loadingLabel={t('common.loading')}
+											onclick={() => addMissing(idea)}
+											disabled={completion === 'exiting'}
+										>
+											{t('recipe.addMissingBtnShort', { count: idea.missingIngredients.length })}
+										</Button>
+									{/if}
+								</div>
 							</div>
-						</div>
-					{/if}
-				</article>
+						{/if}
+					</article>
+				{/if}
 			{/each}
 		</div>
 	{/if}
@@ -519,6 +549,86 @@
 
 	.suggestion-card + .suggestion-card {
 		margin-top: var(--space-sm);
+	}
+
+	.suggestion-card.idea-exiting {
+		animation: idea-exit 0.42s ease forwards;
+	}
+
+	@keyframes idea-exit {
+		to {
+			opacity: 0;
+			transform: translateY(-0.35rem) scale(0.98);
+			max-height: 0;
+			margin: 0;
+			padding-block: 0;
+			border-width: 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.suggestion-card.idea-exiting {
+			animation: none;
+			opacity: 0;
+		}
+	}
+
+	.idea-complete {
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+		padding: var(--space-md);
+		border: 1px solid color-mix(in srgb, var(--color-success) 35%, var(--color-border));
+		border-radius: var(--radius-md);
+		background: color-mix(in srgb, var(--color-success) 8%, var(--color-surface-muted));
+		animation: idea-check-in 0.35s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+	}
+
+	.idea-complete + .idea-complete,
+	.idea-complete + .suggestion-card,
+	.suggestion-card + .idea-complete {
+		margin-top: var(--space-sm);
+	}
+
+	.idea-complete-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-success) 16%, transparent);
+		color: var(--color-success);
+		flex-shrink: 0;
+	}
+
+	.idea-complete-title {
+		font-weight: 700;
+		font-size: 0.9375rem;
+	}
+
+	.idea-complete-label {
+		margin-left: auto;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--color-success);
+	}
+
+	@keyframes idea-check-in {
+		from {
+			opacity: 0;
+			transform: scale(0.92);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.idea-complete {
+			animation: none;
+		}
 	}
 
 	.suggestion-card h4 {

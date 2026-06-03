@@ -22,10 +22,11 @@
 	interface Props {
 		item?: InventoryItem;
 		defaultLocation?: StorageLocation;
+		returnTo?: string;
 		errors?: Record<string, string[]>;
 	}
 
-	let { item, defaultLocation = 'fridge', errors = {} }: Props = $props();
+	let { item, defaultLocation = 'fridge', returnTo, errors = {} }: Props = $props();
 
 	const isEdit = !!item;
 
@@ -131,6 +132,9 @@
 </script>
 
 <form method="POST" action={isEdit ? '?/save' : '?/create'} class="form">
+	{#if !isEdit && returnTo}
+		<input type="hidden" name="returnTo" value={returnTo} />
+	{/if}
 	{#if !isEdit}
 		<div class="barcode-row">
 			<p class="scan-title">{t('item.howToFill')}</p>

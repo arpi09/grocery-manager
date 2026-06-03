@@ -1255,11 +1255,10 @@
 		"ctaBarcode": "Skanna 5 varor",
 		"barcodeProgress": "{count} av {goal} streckkoder",
 		"skipLater": "Jag gör det senare",
-		"celebrateTitle": "Wohooo!",
-		"celebrateBody": "Du underlättar vardagen. Fortsätt när du vill — eller stanna på startsidan ett ögonblick.",
+		"celebrateTitle": "Bra start!",
+		"celebrateBody": "Du har lagt till dina första varor. Fortsätt skanna när du vill.",
 		"celebrateCtaScan": "Skanna fler varor",
-		"celebrateCtaShopping": "Öppna inköpslistan",
-		"celebrateDismiss": "Stanna på startsidan",
+		"celebrateDismiss": "Gå till startsidan",
 		"scanTitle": "Lägg till din första vara",
 		"scanBody": "Skanna streckkod eller kvitto, eller lägg till manuellt. Fem varor räcker för att komma igång — du behöver inte fylla hela skafferiet på en gång.",
 		"locationsTitle": "Tre platser",
@@ -1340,6 +1339,7 @@
 		"suggestionsTitle": "Måltidsidéer",
 		"addToPlan": "Lägg i matplan",
 		"scheduleSuccess": "{title} inplanerad {date}",
+		"scheduledLabel": "Inplanerad",
 		"scheduleFailed": "Kunde inte lägga till i matplanen. Försök igen."
 	},
 	"demo": {

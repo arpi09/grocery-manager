@@ -50,6 +50,8 @@
 
 	const titleId = `modal-title-${Math.random().toString(36).slice(2, 9)}`;
 	let dialogEl = $state<HTMLDivElement | null>(null);
+	let sheetDragY = $state(0);
+	let sheetTouchStartY = $state<number | null>(null);
 
 	const ariaLabel = $derived(label ?? (title ? undefined : 'Dialog'));
 	const ariaLabelledby = $derived(title ? titleId : undefined);
@@ -76,8 +78,40 @@
 		event.stopPropagation();
 	}
 
+	function resetSheetDrag() {
+		sheetTouchStartY = null;
+		sheetDragY = 0;
+	}
+
+	function onSheetTouchStart(event: TouchEvent) {
+		if (variant !== 'sheet' || !dismissible) {
+			return;
+		}
+		sheetTouchStartY = event.touches[0]?.clientY ?? null;
+		sheetDragY = 0;
+	}
+
+	function onSheetTouchMove(event: TouchEvent) {
+		if (sheetTouchStartY === null) {
+			return;
+		}
+		const currentY = event.touches[0]?.clientY ?? sheetTouchStartY;
+		sheetDragY = Math.max(0, currentY - sheetTouchStartY);
+	}
+
+	function onSheetTouchEnd() {
+		if (sheetTouchStartY === null) {
+			return;
+		}
+		if (sheetDragY > 72) {
+			requestClose();
+		}
+		resetSheetDrag();
+	}
+
 	$effect(() => {
 		if (!open) {
+			resetSheetDrag();
 			return;
 		}
 		saveFocus();
@@ -124,14 +158,22 @@
 			class="modal-panel {panelClass}"
 			class:modal-panel--sheet={variant === 'sheet'}
 			class:modal-panel--center={variant === 'center'}
+			class:modal-panel--dragging={sheetDragY > 0}
 			role="dialog"
 			aria-modal="true"
 			aria-label={ariaLabel}
 			aria-labelledby={ariaLabelledby}
 			tabindex="-1"
+			style:transform={variant === 'sheet' && sheetDragY > 0
+				? `translateY(${sheetDragY}px)`
+				: undefined}
 			onclick={onPanelClick}
+			ontouchstart={onSheetTouchStart}
+			ontouchmove={onSheetTouchMove}
+			ontouchend={onSheetTouchEnd}
+			ontouchcancel={resetSheetDrag}
 		>
-			{#if variant === 'sheet' && showSheetHandle}
+			{#if variant === 'sheet' && showSheetHandle && dismissible}
 				<div class="modal-sheet-handle" aria-hidden="true"></div>
 			{/if}
 
@@ -162,6 +204,15 @@
 		pointer-events: none;
 	}
 
+	.modal-root--center {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: var(--space-md);
+		padding-top: max(var(--space-md), env(safe-area-inset-top, 0px));
+		padding-bottom: max(var(--space-md), env(safe-area-inset-bottom, 0px));
+	}
+
 	.modal-root--nested {
 		z-index: var(--z-modal-nested);
 	}
@@ -185,11 +236,12 @@
 	}
 
 	.modal-panel--center {
-		left: 50%;
-		top: 50%;
-		width: min(560px, calc(100vw - 2 * var(--space-md)));
+		position: relative;
+		left: auto;
+		top: auto;
+		width: min(560px, 100%);
 		max-height: min(85vh, 720px);
-		transform: translate(-50%, -50%);
+		transform: none;
 		border-radius: var(--radius-lg);
 		overflow: hidden;
 		animation: modal-center-in 0.2s ease-out;
@@ -207,19 +259,35 @@
 		animation: modal-sheet-in 0.24s ease-out;
 	}
 
+	.modal-root--sheet {
+		display: flex;
+		align-items: flex-end;
+		justify-content: center;
+	}
+
 	@media (min-width: 768px) {
+		.modal-root--sheet {
+			align-items: center;
+			padding: var(--space-md);
+		}
+
 		.modal-panel--sheet {
-			left: 50%;
+			position: relative;
+			left: auto;
 			right: auto;
 			bottom: auto;
-			top: 50%;
+			top: auto;
 			width: min(520px, calc(100vw - 2rem));
 			max-height: min(85vh, 680px);
-			transform: translate(-50%, -50%);
+			transform: none;
 			border-radius: var(--radius-lg);
 			border-bottom: 1px solid var(--color-border);
 			padding-bottom: var(--space-lg);
 			animation: modal-center-in 0.2s ease-out;
+		}
+
+		.modal-panel--sheet.modal-panel--dragging {
+			transform: translateY(var(--sheet-drag-y, 0));
 		}
 	}
 
@@ -284,14 +352,19 @@
 		padding-top: var(--space-md);
 	}
 
+	.modal-panel--center.modal-panel--dragging,
+	.modal-panel--sheet.modal-panel--dragging {
+		transition: transform 0.05s linear;
+	}
+
 	@keyframes modal-center-in {
 		from {
 			opacity: 0;
-			transform: translate(-50%, -46%) scale(0.98);
+			transform: translateY(0.75rem) scale(0.98);
 		}
 		to {
 			opacity: 1;
-			transform: translate(-50%, -50%) scale(1);
+			transform: translateY(0) scale(1);
 		}
 	}
 
@@ -312,10 +385,5 @@
 			animation: none;
 		}
 
-		@media (min-width: 768px) {
-			.modal-panel--sheet {
-				transform: translate(-50%, -50%);
-			}
-		}
 	}
 </style>

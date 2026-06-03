@@ -17,17 +17,18 @@
 
 	interface Props {
 		month: string;
+		initialIdeas?: RecipeIdea[];
 		onIdeasChange?: (ideas: RecipeIdea[]) => void;
 	}
 
-	let { month, onIdeasChange }: Props = $props();
+	let { month, initialIdeas = [], onIdeasChange }: Props = $props();
 
 	const canEdit = $derived(
 		page.data.householdRole ? canEditInventory(page.data.householdRole) : false
 	);
 
-	let ideas = $state<RecipeIdea[]>([]);
-	let loading = $state(true);
+	let ideas = $state<RecipeIdea[]>(initialIdeas);
+	let loading = $state(initialIdeas.length === 0);
 	let loadError = $state(false);
 	let addingMissingKey = $state<string | null>(null);
 	let toastMessage = $state<string | null>(null);
@@ -38,6 +39,11 @@
 	);
 
 	onMount(async () => {
+		if (initialIdeas.length > 0) {
+			onIdeasChange?.(ideas);
+			return;
+		}
+
 		try {
 			ideas = await fetchMealPlanIdeas();
 			onIdeasChange?.(ideas);
