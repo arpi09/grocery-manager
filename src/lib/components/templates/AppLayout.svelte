@@ -39,7 +39,10 @@
 	);
 
 	function openRecipeIdeas() {
-		recipeOpen = true;
+		// Defer so the opening click cannot hit the new backdrop in the same gesture.
+		queueMicrotask(() => {
+			recipeOpen = true;
+		});
 	}
 
 	setContext(OPEN_RECIPE_IDEAS, openRecipeIdeas);
@@ -87,10 +90,10 @@
 	<InventoryScanToast />
 	<ActionToast />
 	<GamificationToast />
-	<RecipeAssistant bind:open={recipeOpen} canEdit={canWrite} />
 	<OnboardingGuide />
 	<PostOnboardingSurvey />
 	<ActivationCelebration />
+	<RecipeAssistant bind:open={recipeOpen} canEdit={canWrite} />
 </div>
 
 <style>

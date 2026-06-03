@@ -52,6 +52,8 @@
 	let dialogEl = $state<HTMLDivElement | null>(null);
 	let sheetDragY = $state(0);
 	let sheetTouchStartY = $state<number | null>(null);
+	/** Ignore backdrop clicks in the same tick as open (avoids instant close from trigger click). */
+	let openedAt = $state(0);
 
 	const ariaLabel = $derived(label ?? (title ? undefined : 'Dialog'));
 	const ariaLabelledby = $derived(title ? titleId : undefined);
@@ -71,6 +73,9 @@
 	}
 
 	function onBackdropClick() {
+		if (performance.now() - openedAt < 400) {
+			return;
+		}
 		requestClose();
 	}
 
@@ -114,6 +119,7 @@
 			resetSheetDrag();
 			return;
 		}
+		openedAt = performance.now();
 		saveFocus();
 		lockBodyScroll();
 
@@ -236,12 +242,13 @@
 	}
 
 	.modal-panel--center {
-		position: relative;
-		left: auto;
-		top: auto;
-		width: min(560px, 100%);
+		position: fixed;
+		left: 50%;
+		top: 50%;
+		z-index: 1;
+		width: min(560px, calc(100vw - 2 * var(--space-md)));
 		max-height: min(85vh, 720px);
-		transform: none;
+		transform: translate(-50%, -50%);
 		border-radius: var(--radius-lg);
 		overflow: hidden;
 		animation: modal-center-in 0.2s ease-out;
@@ -360,11 +367,11 @@
 	@keyframes modal-center-in {
 		from {
 			opacity: 0;
-			transform: translateY(0.75rem) scale(0.98);
+			transform: translate(-50%, calc(-50% + 0.75rem)) scale(0.98);
 		}
 		to {
 			opacity: 1;
-			transform: translateY(0) scale(1);
+			transform: translate(-50%, -50%) scale(1);
 		}
 	}
 

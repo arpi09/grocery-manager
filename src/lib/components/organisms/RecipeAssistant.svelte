@@ -150,9 +150,10 @@
 </script>
 
 <Modal
-	{open}
+	open={open}
 	onClose={closeAssistant}
 	variant="center"
+	nested
 	title={t('recipe.title')}
 	panelClass="recipe-assistant-panel"
 >
