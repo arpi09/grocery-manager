@@ -127,6 +127,7 @@
 						<th>{t('admin.roleCol')}</th>
 						<th>{t('admin.petsCol')}</th>
 						<th>{t('admin.inventoryCol')}</th>
+						<th>{t('admin.planCol')}</th>
 						<th>{t('admin.utmSourceCol')}</th>
 						<th>{t('admin.createdCol')}</th>
 						<th>{t('admin.actionsCol')}</th>
@@ -158,6 +159,23 @@
 							</td>
 							<td>{account.petsEnabled ? t('admin.on') : t('admin.off')}</td>
 							<td>{account.inventoryCount}</td>
+							<td>
+								{#if account.householdPlanTier}
+									<span
+										class="plan-pill"
+										class:pro={account.householdPlanTier === 'pro'}
+									>
+										{account.householdPlanTier === 'pro'
+											? t('admin.planPro')
+											: t('admin.planFree')}
+									</span>
+									{#if account.hasStripeBilling}
+										<span class="stripe-tag">{t('admin.planStripe')}</span>
+									{/if}
+								{:else}
+									—
+								{/if}
+							</td>
 							<td>{account.signupUtmSource ?? '—'}</td>
 							<td>{formatDate(account.createdAt)}</td>
 							<td class="actions">
@@ -212,6 +230,25 @@
 										{account.petsEnabled ? t('admin.disablePets') : t('admin.enablePets')}
 									</Button>
 								</form>
+
+								{#if account.householdId}
+									<form method="POST" action="?/setHouseholdPlan">
+										<input type="hidden" name="householdId" value={account.householdId} />
+										<input type="hidden" name="planTier" value="pro" />
+										<input type="hidden" name="clearStripe" value="true" />
+										<Button type="submit" variant="secondary">
+											{t('admin.grantPro')}
+										</Button>
+									</form>
+									<form method="POST" action="?/setHouseholdPlan">
+										<input type="hidden" name="householdId" value={account.householdId} />
+										<input type="hidden" name="planTier" value="free" />
+										<input type="hidden" name="clearStripe" value="true" />
+										<Button type="submit" variant="secondary">
+											{t('admin.revokePro')}
+										</Button>
+									</form>
+								{/if}
 							</td>
 						</tr>
 					{/each}
@@ -344,6 +381,28 @@
 		color: #1b5e20;
 		font-weight: 600;
 		font-size: 0.8rem;
+	}
+
+	.plan-pill {
+		display: inline-block;
+		padding: 0.15rem 0.5rem;
+		border-radius: 999px;
+		background: #eceff1;
+		color: #455a64;
+		font-weight: 600;
+		font-size: 0.78rem;
+	}
+
+	.plan-pill.pro {
+		background: color-mix(in srgb, var(--color-primary) 18%, #fff);
+		color: var(--color-primary);
+	}
+
+	.stripe-tag {
+		display: block;
+		margin-top: 0.2rem;
+		font-size: 0.72rem;
+		color: var(--color-text-muted);
 	}
 
 	.actions {

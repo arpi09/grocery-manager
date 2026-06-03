@@ -74,10 +74,12 @@ export const authService = new AuthService(userRepository);
 export const passwordResetService = new PasswordResetService(userRepository, passwordResetRepository);
 export const oauthService = new OAuthService(userRepository);
 export const profileService = new ProfileService(userRepository);
+export const billingService = new BillingService(billingRepository);
 export const adminService = new AdminService(
 	adminRepository,
 	passwordResetService,
-	adminActionRepository
+	adminActionRepository,
+	billingService
 );
 export const householdService = new HouseholdService(householdRepository);
 export const inventoryService = new InventoryService(
@@ -89,7 +91,6 @@ export const purchasePatternService = new PurchasePatternService(
 	purchasePatternRepository,
 	inventoryService
 );
-export const billingService = new BillingService(billingRepository);
 export const statistikService = new StatistikService(
 	inventoryService,
 	inventoryRepository,

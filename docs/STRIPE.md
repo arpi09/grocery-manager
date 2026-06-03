@@ -57,7 +57,24 @@ Lyssna på dessa events (appen hanterar dem):
 
 ---
 
-## 4. Testa checkout
+## 4. Customer Portal (hantera prenumeration)
+
+Ägare med aktiv Stripe-prenumeration öppnar portalen via **Inställningar → Plan → Hantera prenumeration** (`POST /api/stripe/portal`).
+
+### Dashboard-konfiguration (test + live)
+
+1. [Stripe Dashboard → Settings → Billing → Customer portal](https://dashboard.stripe.com/settings/billing/portal)
+2. Aktivera portalen och tillåt minst:
+   - **Cancel subscriptions**
+   - **Switch plans** (koppla månads- och årspris till samma produkt)
+   - **Update payment methods**
+3. Ingen extra miljövariabel i appen — return URL är `{ORIGIN}/settings?checkout=portal#settings-plan`.
+
+Webhook `customer.subscription.updated` / `deleted` synkar `plan_tier` efter ändringar i portalen.
+
+---
+
+## 5. Testa checkout
 
 1. Starta appen (dev-runtime startar om automatiskt vid `.env`-ändringar).
 2. Kör `stripe listen` i ett separat terminalfönster.
@@ -78,11 +95,12 @@ Avbryt flödet testar du med **Tillbaka** i Checkout (`?checkout=cancel`).
 
 ---
 
-## 5. Teknisk översikt
+## 6. Teknisk översikt
 
 | Del | Plats |
 |-----|-------|
 | Checkout API | `POST /api/stripe/checkout` — skapar Stripe Checkout Session |
+| Customer Portal | `POST /api/stripe/portal` — Stripe Billing Portal (ägare) |
 | Webhook | `POST /api/stripe/webhook` — signaturverifiering + uppdaterar DB |
 | Plan per hushåll | Kolumner på `household`: `plan_tier`, `stripe_customer_id`, `stripe_subscription_id`, `stripe_subscription_status` |
 | Gränser | `PlanLimitsService` / `AiRateLimitService` läser `locals.planTier` |
@@ -91,7 +109,7 @@ Fakturering sker på **hushåll** (en betalande ägare). Endast **ägare** kan s
 
 ---
 
-## 6. Produktion (senare)
+## 7. Produktion (senare)
 
 1. Byt till **live**-nycklar i Stripe Dashboard.
 2. Skapa webhook-endpoint mot `https://skaffu.com/api/stripe/webhook` med samma events.
@@ -100,10 +118,12 @@ Fakturering sker på **hushåll** (en betalande ägare). Endast **ägare** kan s
 
 ---
 
-## 7. Felsökning
+## 8. Felsökning
 
 | Symptom | Åtgärd |
 |---------|--------|
+| Portal-knapp saknas | Hushållet behöver `stripe_customer_id` (efter checkout) |
+| Portal 409 | Kostnadsfri Pro utan Stripe-kund — förväntat |
 | Ingen uppgraderingsknapp | Kontrollera `STRIPE_SECRET_KEY` + price IDs i `.env` |
 | Betalning OK men fortfarande Gratis | Kör `stripe listen`, kontrollera `STRIPE_WEBHOOK_SECRET` |
 | 400 Invalid signature | Webhook secret matchar inte `stripe listen`-utskriften |

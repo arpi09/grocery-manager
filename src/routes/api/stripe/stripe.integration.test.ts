@@ -15,6 +15,7 @@ const { dbState, testEnv, stripeMocks } = vi.hoisted(() => ({
 	stripeMocks: {
 		customersCreate: vi.fn(),
 		checkoutSessionsCreate: vi.fn(),
+		billingPortalSessionsCreate: vi.fn(),
 		subscriptionsRetrieve: vi.fn(),
 		webhooksConstructEvent: vi.fn()
 	}
@@ -47,6 +48,7 @@ vi.mock('stripe', () => {
 	class StripeMock {
 		customers = { create: stripeMocks.customersCreate };
 		checkout = { sessions: { create: stripeMocks.checkoutSessionsCreate } };
+		billingPortal = { sessions: { create: stripeMocks.billingPortalSessionsCreate } };
 		subscriptions = { retrieve: stripeMocks.subscriptionsRetrieve };
 		webhooks = { constructEvent: stripeMocks.webhooksConstructEvent };
 	}
@@ -61,6 +63,7 @@ describe('Stripe API integration', () => {
 	let integrationDb: IntegrationDbContext;
 	let billingService: import('$lib/application/billing.service').BillingService;
 	let checkout: typeof import('./checkout/+server').POST;
+	let portal: typeof import('./portal/+server').POST;
 	let webhook: typeof import('./webhook/+server').POST;
 	let locals: App.Locals;
 
@@ -68,16 +71,18 @@ describe('Stripe API integration', () => {
 		integrationDb = await createIntegrationDb();
 		dbState.db = integrationDb.db;
 
-		const [{ BillingService }, { DrizzleBillingRepository }, checkoutMod, webhookMod] =
+		const [{ BillingService }, { DrizzleBillingRepository }, checkoutMod, portalMod, webhookMod] =
 			await Promise.all([
 				import('$lib/application/billing.service'),
 				import('$lib/infrastructure/repositories/billing.repository'),
 				import('./checkout/+server'),
+				import('./portal/+server'),
 				import('./webhook/+server')
 			]);
 
 		billingService = new BillingService(new DrizzleBillingRepository(integrationDb.db));
 		checkout = checkoutMod.POST;
+		portal = portalMod.POST;
 		webhook = webhookMod.POST;
 	}, 30_000);
 
@@ -95,6 +100,7 @@ describe('Stripe API integration', () => {
 		testEnv.STRIPE_PRICE_ID_YEARLY = undefined;
 		stripeMocks.customersCreate.mockReset();
 		stripeMocks.checkoutSessionsCreate.mockReset();
+		stripeMocks.billingPortalSessionsCreate.mockReset();
 		stripeMocks.subscriptionsRetrieve.mockReset();
 		stripeMocks.webhooksConstructEvent.mockReset();
 
@@ -210,5 +216,81 @@ describe('Stripe API integration', () => {
 
 		const tier = await billingService.getPlanTier(HOUSEHOLD_ID);
 		expect(tier).toBe('pro');
+	});
+
+	it('portal returns 409 without stripe customer', async () => {
+		testEnv.STRIPE_SECRET_KEY = 'sk_test_integration';
+		testEnv.STRIPE_PRICE_ID_MONTHLY = 'price_month_test';
+		testEnv.STRIPE_PRICE_ID_YEARLY = 'price_year_test';
+
+		const response = await portal({
+			locals,
+			url: new URL('http://localhost:5173/api/stripe/portal')
+		} as Parameters<typeof portal>[0]);
+
+		expect(response.status).toBe(409);
+	});
+
+	it('creates billing portal session for household with customer', async () => {
+		testEnv.STRIPE_SECRET_KEY = 'sk_test_integration';
+		testEnv.STRIPE_PRICE_ID_MONTHLY = 'price_month_test';
+		testEnv.STRIPE_PRICE_ID_YEARLY = 'price_year_test';
+
+		const { eq } = await import('drizzle-orm');
+		const { householdTable } = await import('$lib/infrastructure/db/schema');
+		await integrationDb.db
+			.update(householdTable)
+			.set({ stripeCustomerId: 'cus_portal_1' })
+			.where(eq(householdTable.id, HOUSEHOLD_ID));
+
+		stripeMocks.billingPortalSessionsCreate.mockResolvedValue({
+			url: 'https://billing.stripe.test/portal_1'
+		});
+
+		const response = await portal({
+			locals,
+			url: new URL('http://localhost:5173/api/stripe/portal')
+		} as Parameters<typeof portal>[0]);
+
+		expect(response.status).toBe(200);
+		await expect(response.json()).resolves.toEqual({
+			ok: true,
+			url: 'https://billing.stripe.test/portal_1'
+		});
+	});
+
+	it('admin can grant complimentary pro and clear stripe fields', async () => {
+		const { eq } = await import('drizzle-orm');
+		const { householdTable } = await import('$lib/infrastructure/db/schema');
+		await integrationDb.db
+			.update(householdTable)
+			.set({
+				stripeCustomerId: 'cus_old',
+				stripeSubscriptionId: 'sub_old',
+				stripeSubscriptionStatus: 'active'
+			})
+			.where(eq(householdTable.id, HOUSEHOLD_ID));
+
+		await billingService.adminSetHouseholdPlan({
+			householdId: HOUSEHOLD_ID,
+			planTier: 'pro',
+			clearStripe: true
+		});
+
+		const rows = await integrationDb.db
+			.select({
+				planTier: householdTable.planTier,
+				stripeCustomerId: householdTable.stripeCustomerId,
+				stripeSubscriptionId: householdTable.stripeSubscriptionId
+			})
+			.from(householdTable)
+			.where(eq(householdTable.id, HOUSEHOLD_ID));
+
+		expect(rows[0]).toMatchObject({
+			planTier: 'pro',
+			stripeCustomerId: null,
+			stripeSubscriptionId: null
+		});
+		expect(await billingService.getPlanTier(HOUSEHOLD_ID)).toBe('pro');
 	});
 });

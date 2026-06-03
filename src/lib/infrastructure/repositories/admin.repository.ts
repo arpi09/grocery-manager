@@ -1,4 +1,4 @@
-import { count, desc, eq, gt, gte, sql } from 'drizzle-orm';
+import { count, desc, eq, gt, gte, inArray, sql } from 'drizzle-orm';
 import { latestLastSeenAt } from '$lib/domain/admin-stats';
 import { ERROR_LOG_RETENTION_MS } from '$lib/domain/error-log';
 import type { AppErrorEntry, AppErrorSummary } from '$lib/domain/error-log';
@@ -26,6 +26,9 @@ export interface AdminUserSummary {
 	isActiveNow: boolean;
 	hasActiveSession: boolean;
 	inventoryCount: number;
+	householdId: string | null;
+	householdPlanTier: 'free' | 'pro' | null;
+	hasStripeBilling: boolean;
 }
 
 export interface AdminDashboardStats {
@@ -173,20 +176,57 @@ export class DrizzleAdminRepository implements IAdminRepository {
 			inventoryCounts.map((row) => [row.userId, Number(row.count)])
 		);
 
+		const userIds = users.map((user) => user.id);
+		const householdByUser = new Map<
+			string,
+			{ householdId: string; planTier: 'free' | 'pro'; hasStripeBilling: boolean }
+		>();
+
+		if (userIds.length > 0) {
+			const membershipRows = await db
+				.select({
+					userId: householdMemberTable.userId,
+					householdId: householdMemberTable.householdId,
+					planTier: householdTable.planTier,
+					stripeCustomerId: householdTable.stripeCustomerId,
+					stripeSubscriptionId: householdTable.stripeSubscriptionId
+				})
+				.from(householdMemberTable)
+				.innerJoin(householdTable, eq(householdMemberTable.householdId, householdTable.id))
+				.where(inArray(householdMemberTable.userId, userIds));
+
+			for (const row of membershipRows) {
+				if (householdByUser.has(row.userId)) {
+					continue;
+				}
+				householdByUser.set(row.userId, {
+					householdId: row.householdId,
+					planTier: row.planTier,
+					hasStripeBilling: Boolean(row.stripeCustomerId || row.stripeSubscriptionId)
+				});
+			}
+		}
+
 		return {
 			total: totalRow?.count ?? 0,
-			users: users.map((user) => ({
-				id: user.id,
-				email: user.email,
-				role: user.role as UserRole,
-				petsEnabled: user.petsEnabled,
-				signupUtmSource: user.signupUtmSource,
-				createdAt: user.createdAt,
-				lastSeenAt: user.lastSeenAt,
-				isActiveNow: isUserActiveNow(user.lastSeenAt),
-				hasActiveSession: activeSessionUserIds.has(user.id),
-				inventoryCount: countByUser.get(user.id) ?? 0
-			}))
+			users: users.map((user) => {
+				const household = householdByUser.get(user.id);
+				return {
+					id: user.id,
+					email: user.email,
+					role: user.role as UserRole,
+					petsEnabled: user.petsEnabled,
+					signupUtmSource: user.signupUtmSource,
+					createdAt: user.createdAt,
+					lastSeenAt: user.lastSeenAt,
+					isActiveNow: isUserActiveNow(user.lastSeenAt),
+					hasActiveSession: activeSessionUserIds.has(user.id),
+					inventoryCount: countByUser.get(user.id) ?? 0,
+					householdId: household?.householdId ?? null,
+					householdPlanTier: household?.planTier ?? null,
+					hasStripeBilling: household?.hasStripeBilling ?? false
+				};
+			})
 		};
 	}
 

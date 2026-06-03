@@ -3,11 +3,13 @@ import { AdminService } from './admin.service';
 import type { PasswordResetService } from './password-reset.service';
 import type { IAdminRepository } from '$lib/infrastructure/repositories/admin.repository';
 import type { IAdminActionRepository } from '$lib/infrastructure/repositories/admin-action.repository';
+import type { BillingService } from './billing.service';
 
 describe('AdminService', () => {
 	let admin: IAdminRepository;
 	let passwordReset: PasswordResetService;
 	let adminActions: IAdminActionRepository;
+	let billing: BillingService;
 	let service: AdminService;
 
 	beforeEach(() => {
@@ -28,7 +30,10 @@ describe('AdminService', () => {
 			adminTriggerReset: vi.fn().mockResolvedValue({ sent: true })
 		} as unknown as PasswordResetService;
 		adminActions = { logAction: vi.fn().mockResolvedValue(undefined) };
-		service = new AdminService(admin, passwordReset, adminActions);
+		billing = {
+			adminSetHouseholdPlan: vi.fn().mockResolvedValue(undefined)
+		} as unknown as BillingService;
+		service = new AdminService(admin, passwordReset, adminActions, billing);
 	});
 
 	it('returns dashboard stats', async () => {
@@ -64,7 +69,10 @@ describe('AdminService', () => {
 				lastSeenAt: new Date(),
 				isActiveNow: true,
 				hasActiveSession: true,
-				inventoryCount: 5
+				inventoryCount: 5,
+				householdId: 'hh-1',
+				householdPlanTier: 'free' as const,
+				hasStripeBilling: false
 			}
 		];
 		vi.mocked(admin.listUsers).mockResolvedValue({ users, total: 1 });

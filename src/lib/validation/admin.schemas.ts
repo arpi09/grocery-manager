@@ -24,3 +24,9 @@ export const adminLogoutAllSchema = z.object({
 export const adminPasswordResetSchema = adminUserIdSchema.extend({
 	forceReset: z.enum(['true', 'false']).optional()
 });
+
+export const adminSetHouseholdPlanSchema = z.object({
+	householdId: z.string().min(1),
+	planTier: z.enum(['free', 'pro']),
+	clearStripe: z.enum(['true', 'false']).optional()
+});

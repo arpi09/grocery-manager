@@ -1,6 +1,8 @@
 import type { AppErrorSummary } from '$lib/domain/error-log';
 import type { UserRole } from '$lib/domain/user';
+import type { BillingService } from '$lib/application/billing.service';
 import type { PasswordResetService } from '$lib/application/password-reset.service';
+import type { PlanTier } from '$lib/domain/plan';
 import type {
 	AdminDashboardStats,
 	IAdminRepository
@@ -18,7 +20,8 @@ export class AdminService {
 	constructor(
 		private readonly admin: IAdminRepository,
 		private readonly passwordReset: PasswordResetService,
-		private readonly adminActions: IAdminActionRepository
+		private readonly adminActions: IAdminActionRepository,
+		private readonly billing: BillingService
 	) {}
 
 	getDashboardStats(): Promise<AdminDashboardStats> {
@@ -51,6 +54,21 @@ export class AdminService {
 
 	setUserPetsEnabled(userId: string, enabled: boolean) {
 		return this.admin.setUserPetsEnabled(userId, enabled);
+	}
+
+	async setHouseholdPlan(
+		actorId: string,
+		householdId: string,
+		planTier: PlanTier,
+		clearStripe: boolean
+	) {
+		await this.billing.adminSetHouseholdPlan({ householdId, planTier, clearStripe });
+		await this.adminActions.logAction({
+			actorUserId: actorId,
+			action: 'household_plan',
+			targetUserId: null,
+			metadata: { householdId, planTier, clearStripe }
+		});
 	}
 
 	logoutAllUsers() {

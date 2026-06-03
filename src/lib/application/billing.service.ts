@@ -22,6 +22,10 @@ export class BillingHouseholdMissingError extends Error {
 	readonly name = 'BillingHouseholdMissingError';
 }
 
+export class BillingPortalUnavailableError extends Error {
+	readonly name = 'BillingPortalUnavailableError';
+}
+
 export interface CreateCheckoutSessionInput {
 	householdId: string;
 	userId: string;
@@ -148,6 +152,50 @@ export class BillingService {
 			stripeSubscriptionId: subscription.id,
 			stripeSubscriptionStatus: subscription.status
 		});
+	}
+
+	async createPortalSession(input: {
+		householdId: string;
+		origin?: string;
+	}): Promise<{ url: string }> {
+		if (!isStripeCheckoutConfigured()) {
+			throw new BillingNotConfiguredError();
+		}
+
+		const stripe = createStripeClient();
+		if (!stripe) {
+			throw new BillingNotConfiguredError();
+		}
+
+		const billing = await this.repository.getBillingState(input.householdId);
+		if (!billing?.stripeCustomerId) {
+			throw new BillingPortalUnavailableError();
+		}
+
+		const origin = getAppOrigin(input.origin);
+		const session = await stripe.billingPortal.sessions.create({
+			customer: billing.stripeCustomerId,
+			return_url: `${origin}/settings?checkout=portal#settings-plan`
+		});
+
+		if (!session.url) {
+			throw new Error('Stripe portal session missing url');
+		}
+
+		return { url: session.url };
+	}
+
+	async adminSetHouseholdPlan(input: {
+		householdId: string;
+		planTier: PlanTier;
+		clearStripe: boolean;
+	}): Promise<void> {
+		const billing = await this.repository.getBillingState(input.householdId);
+		if (!billing) {
+			throw new BillingHouseholdMissingError();
+		}
+
+		await this.repository.adminSetHouseholdPlan(input);
 	}
 
 	async applySubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {

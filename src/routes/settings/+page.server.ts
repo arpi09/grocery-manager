@@ -66,15 +66,24 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		: null;
 
 	const checkout = url.searchParams.get('checkout');
+	const billing =
+		householdId ? await locals.billingService.getBillingState(householdId) : null;
 
 	return {
 		user,
 		planTier,
 		planLimits,
+		billing,
 		stripeCheckoutEnabled: isStripeCheckoutConfigured(),
 		isPro: isProTier(planTier),
 		checkoutStatus:
-			checkout === 'success' ? ('success' as const) : checkout === 'cancel' ? ('cancel' as const) : null,
+			checkout === 'success'
+				? ('success' as const)
+				: checkout === 'cancel'
+					? ('cancel' as const)
+					: checkout === 'portal'
+						? ('portal' as const)
+						: null,
 		petsEnabled: Boolean(user?.petsEnabled),
 		expiryRemindersEnabled: expirySettings.enabled,
 		expiryReminderDays: expirySettings.days,

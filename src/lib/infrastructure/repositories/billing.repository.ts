@@ -13,6 +13,11 @@ export interface IBillingRepository {
 		stripeSubscriptionId: string | null;
 		stripeSubscriptionStatus: string | null;
 	}): Promise<void>;
+	adminSetHouseholdPlan(input: {
+		householdId: string;
+		planTier: PlanTier;
+		clearStripe: boolean;
+	}): Promise<void>;
 }
 
 export class DrizzleBillingRepository implements IBillingRepository {
@@ -63,6 +68,26 @@ export class DrizzleBillingRepository implements IBillingRepository {
 				stripeSubscriptionId: input.stripeSubscriptionId,
 				stripeSubscriptionStatus: input.stripeSubscriptionStatus
 			})
+			.where(eq(householdTable.id, input.householdId));
+	}
+
+	async adminSetHouseholdPlan(input: {
+		householdId: string;
+		planTier: PlanTier;
+		clearStripe: boolean;
+	}): Promise<void> {
+		const patch = input.clearStripe
+			? {
+					planTier: input.planTier,
+					stripeCustomerId: null,
+					stripeSubscriptionId: null,
+					stripeSubscriptionStatus: null
+				}
+			: { planTier: input.planTier };
+
+		await this.database
+			.update(householdTable)
+			.set(patch)
 			.where(eq(householdTable.id, input.householdId));
 	}
 }

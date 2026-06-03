@@ -45,9 +45,7 @@
 </script>
 
 <div class="pro-upgrade">
-	{#if checkoutStatus === 'success'}
-		<FeedbackBanner tone="success" message={t('settings.plan.checkoutSuccess')} />
-	{:else if checkoutStatus === 'cancel'}
+	{#if checkoutStatus === 'cancel'}
 		<FeedbackBanner tone="info" message={t('settings.plan.checkoutCancel')} />
 	{/if}
 

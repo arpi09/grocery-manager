@@ -25,6 +25,8 @@
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import PlanLimitBanner from '$lib/components/molecules/PlanLimitBanner.svelte';
 	import ProUpgradePanel from '$lib/components/molecules/ProUpgradePanel.svelte';
+	import ProActivePanel from '$lib/components/molecules/ProActivePanel.svelte';
+	import ProActivationCelebration from '$lib/components/organisms/ProActivationCelebration.svelte';
 	import {
 		isPushSupported,
 		pushErrorMessage,
@@ -256,8 +258,11 @@
 					bind:this={expiryRemindersForm}
 					use:enhance={bindSubmitting(
 						(v) => (expiryRemindersSubmitting = v),
-						(formData) =>
-							formData.set('enabled', expiryRemindersEnabled ? 'true' : 'false')
+						(formData) => {
+							formData.set('enabled', expiryRemindersEnabled ? 'true' : 'false');
+							// Select is disabled while off; disabled fields are omitted from FormData.
+							formData.set('days', expiryReminderDays);
+						}
 					)}
 				>
 					<input type="hidden" name="enabled" value={expiryRemindersEnabled ? 'true' : 'false'} />
@@ -487,14 +492,23 @@
 			title={t('settings.plan.title')}
 			description={data.isPro ? t('settings.plan.descriptionPro') : t('settings.plan.description')}
 		>
-			{#if data.planLimits}
+			{#if data.planLimits && !data.isPro}
 				<PlanLimitBanner snapshot={data.planLimits} stripeCheckoutEnabled={data.stripeCheckoutEnabled} />
 			{/if}
-			<SettingsRow
-				title={t('settings.plan.currentTier')}
-				note={data.isPro ? t('settings.plan.currentPro') : t('settings.plan.currentFree')}
-				last={false}
-			/>
+			{#if data.isPro}
+				<ProActivePanel
+					isOwner={data.isOwner}
+					billing={data.billing}
+					stripeCheckoutEnabled={data.stripeCheckoutEnabled}
+					checkoutStatus={data.checkoutStatus}
+				/>
+			{:else}
+				<SettingsRow
+					title={t('settings.plan.currentTier')}
+					note={t('settings.plan.currentFree')}
+					last={false}
+				/>
+			{/if}
 			{#if data.planLimits && !data.isPro}
 				<div class="plan-panel plan-usage-panel">
 					<h3 class="plan-heading">{t('settings.plan.usageTitle')}</h3>
@@ -543,11 +557,9 @@
 							yearly: PRICE_HYPOTHESIS_SEK.yearly
 						})}
 					</p>
-					{#if data.isPro}
-						<p class="plan-copy plan-muted">{t('settings.plan.proActive')}</p>
-					{:else if data.stripeCheckoutEnabled}
+					{#if !data.isPro && data.stripeCheckoutEnabled}
 						<ProUpgradePanel isOwner={data.isOwner} checkoutStatus={data.checkoutStatus} />
-					{:else}
+					{:else if !data.isPro}
 						<p class="plan-copy plan-muted">{t('settings.plan.comingSoon')}</p>
 						<ProWaitlistForm
 							action="?/joinProWaitlist"
@@ -656,6 +668,11 @@
 {#if pushToastMessage}
 	<Toast message={pushToastMessage} visible={true} onDismiss={dismissPushToast} />
 {/if}
+
+<ProActivationCelebration
+	show={data.checkoutStatus === 'success'}
+	isPro={data.isPro}
+/>
 </AppLayout>
 
 <style>

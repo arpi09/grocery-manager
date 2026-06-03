@@ -4,6 +4,7 @@ import {
 	adminLogoutAllSchema,
 	adminPasswordResetSchema,
 	adminSetEmailSendingSchema,
+	adminSetHouseholdPlanSchema,
 	adminSetPetsSchema,
 	adminSetRoleSchema,
 	adminUserIdSchema
@@ -69,6 +70,34 @@ export const actions: Actions = {
 		}
 
 		redirect(302, appendActionToast('/admin', 'adminSaved'));
+	},
+	setHouseholdPlan: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const parsed = adminSetHouseholdPlanSchema.safeParse({
+			householdId: formData.get('householdId'),
+			planTier: formData.get('planTier'),
+			clearStripe: formData.get('clearStripe')
+		});
+
+		if (!parsed.success) {
+			return fail(400, { message: translate(locals.locale, 'admin.invalidHouseholdPlan') });
+		}
+
+		try {
+			await locals.adminService.setHouseholdPlan(
+				locals.user!.id,
+				parsed.data.householdId,
+				parsed.data.planTier,
+				parsed.data.clearStripe === 'true'
+			);
+		} catch (error) {
+			if (error instanceof AdminError) {
+				return fail(400, { message: error.message });
+			}
+			throw error;
+		}
+
+		redirect(302, appendActionToast('/admin?tab=users', 'adminSaved'));
 	},
 	setPets: async ({ request, locals }) => {
 		const formData = await request.formData();

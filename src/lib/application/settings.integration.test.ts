@@ -13,8 +13,9 @@ vi.mock('$lib/infrastructure/db/init', () => ({
 	getDb: () => integrationDb.db
 }));
 
-function syncExpiryFormEnabled(formData: FormData, enabled: boolean) {
+function syncExpiryFormEnabled(formData: FormData, enabled: boolean, days = '7') {
 	formData.set('enabled', enabled ? 'true' : 'false');
+	formData.set('days', days);
 }
 
 async function applyUpdateExpiryReminders(userId: string, formData: FormData, repo: DrizzleExpiryReminderRepository) {
@@ -104,6 +105,20 @@ describe('Settings persistence integration', () => {
 		await applyUpdateExpiryReminders('user-1', formData, expiryRepo);
 
 		expect((await expiryRepo.getSettings('user-1')).enabled).toBe(true);
+	});
+
+	it('persists expiry on when days omitted from form (disabled select at submit)', async () => {
+		await integrationDb.seedUser({ id: 'user-1', email: 'user@example.com' });
+
+		const formData = new FormData();
+		formData.set('enabled', 'true');
+		syncExpiryFormEnabled(formData, true, '7');
+
+		await applyUpdateExpiryReminders('user-1', formData, expiryRepo);
+
+		const settings = await expiryRepo.getSettings('user-1');
+		expect(settings.enabled).toBe(true);
+		expect(settings.days).toBe(7);
 	});
 
 	it('persists expiry reminders off', async () => {
