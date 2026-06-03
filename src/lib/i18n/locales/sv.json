@@ -1089,11 +1089,11 @@
 		"networkError": "N?tverksfel vid generering av recept. Kontrollera anslutningen och f?rs?k igen.",
 		"intro": "Matid?er fr?n det du faktiskt kan laga ? inte hundmat, blommor eller st?d. V?lj stil nedan och l?gg till ?nskem?l om du vill.",
 		"mealIntentLabel": "Vad vill du laga?",
-		"mealIntentAria": "Typ av m?ltid",
+		"mealIntentAria": "Typ av måltid",
 		"mealIntentQuick": "Snabb vardag",
 		"mealIntentFriday": "Fredag",
-		"mealIntentMealPrep": "Matl�dor",
-		"noSuitableInventoryNote": "Vi hittade inget i lagret som passar matlagning (t.ex. bara st?d eller djurfoder). L?gg till matvaror och f?rs?k igen.",
+		"mealIntentMealPrep": "Matlådor",
+		"noSuitableInventoryNote": "Vi hittade inget i lagret som passar matlagning (t.ex. bara städ eller djurfoder). Lägg till matvaror och försök igen.",
 		"preferences": "?nskem?l (valfritt)",
 		"preferencesPlaceholder": "Exempel: under 30 minuter, utan mejeri",
 		"fromStock": "Fr?n lagret:",
@@ -1112,7 +1112,7 @@
 		"noMissingToAdd": "Inga saknade ingredienser att l?gga till.",
 		"newBadge": "Ny",
 		"label": "Receptid?er",
-		"firstWinToast": "Wohooo ? dina f?rsta receptid?er ?r h?r! Nu blir det l?ttare att laga gott."
+		"firstWinToast": "Wohooo — dina första receptidéer är här! Nu blir det lättare att laga gott."
 	},
 	"onboarding": {
 		"welcome": "V?lkommen till Skaffu",

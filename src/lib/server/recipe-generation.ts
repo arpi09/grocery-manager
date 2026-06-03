@@ -32,7 +32,7 @@ export interface GenerateRecipesInput {
 }
 
 export type GenerateRecipesResult =
-	| { ok: true; recipes: RecipeSuggestion[]; noteKey?: string }
+	| { ok: true; recipes: RecipeSuggestion[]; noteKey?: 'recipe.noSuitableInventoryNote' }
 	| { ok: false; result: Extract<StructuredJsonResult, { ok: false }> };
 
 export type RequestStructuredJsonFn = typeof requestStructuredJson;

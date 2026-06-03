@@ -8,7 +8,7 @@
 
 {#if active}
 	<div class="celebration-burst" aria-hidden="true">
-		{#each Array.from({ length: 12 }, (_, i) => i) as i (i)}
+		{#each Array.from({ length: 18 }, (_, i) => i) as i (i)}
 			<span class="particle" style="--i: {i}"></span>
 		{/each}
 	</div>

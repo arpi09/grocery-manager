@@ -78,7 +78,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				location: item.location
 			})),
 			portions,
-			note: translate(locale, generated.noteKey ?? 'recipe.noSuitableInventoryNote')
+			note: translate(locale, generated.noteKey ?? ('recipe.noSuitableInventoryNote' as const))
 		});
 	}
 

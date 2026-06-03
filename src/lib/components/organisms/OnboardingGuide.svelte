@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
+	import CelebrationBurst from '$lib/components/atoms/CelebrationBurst.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import { trackProductEvent } from '$lib/client/product-events';
@@ -216,6 +217,9 @@
 	{/snippet}
 
 	<div class="step-content" class:step-forward={stepDirection === 'forward'} class:step-back={stepDirection === 'back'}>
+		{#if open && currentStep.id === 'welcome'}
+			<CelebrationBurst active={true} />
+		{/if}
 		<div class="progress-track" aria-hidden="true">
 			<div
 				class="progress-fill"
@@ -358,6 +362,8 @@
 	}
 
 	.step-content {
+		position: relative;
+		overflow: hidden;
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-md);

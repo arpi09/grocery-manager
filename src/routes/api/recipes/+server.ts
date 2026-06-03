@@ -62,7 +62,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({
 			recipes: [],
 			portions,
-			note: translate(locale, generated.noteKey ?? 'recipe.noSuitableInventoryNote')
+			note: translate(locale, generated.noteKey ?? ('recipe.noSuitableInventoryNote' as const))
 		});
 	}
 

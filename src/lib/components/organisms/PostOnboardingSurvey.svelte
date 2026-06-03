@@ -8,7 +8,7 @@
 		POST_ONBOARDING_QUICK_OPTIONS,
 		type PostOnboardingQuickOption
 	} from '$lib/domain/product-feedback';
-	import { t } from '$lib/i18n';
+	import { t, type MessageKey } from '$lib/i18n';
 	import {
 		clearPostOnboardingSurveyPending,
 		dismissPostOnboardingSurvey,
@@ -24,6 +24,14 @@
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
+
+	const quickLabelKeys: Record<string, MessageKey> = {
+		going_well: 'feedback.postOnboarding.quick.going_well',
+		too_much_work: 'feedback.postOnboarding.quick.too_much_work',
+		missing_feature: 'feedback.postOnboarding.quick.missing_feature',
+		forgot_habit: 'feedback.postOnboarding.quick.forgot_habit',
+		other_app: 'feedback.postOnboarding.quick.other_app'
+	};
 
 	function tryOpenSurvey() {
 		if (
@@ -131,7 +139,7 @@
 					disabled={submitting}
 					onclick={() => submitFeedback(option)}
 				>
-					{t(`feedback.postOnboarding.quick.${option.id}`)}
+					{t(quickLabelKeys[option.id])}
 				</button>
 			{/each}
 		</div>

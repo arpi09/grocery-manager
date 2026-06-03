@@ -72,9 +72,10 @@
 	<div class="celebration-body">
 		<CelebrationBurst active={open} />
 		<div class="celebration-icon motion-fade-in" aria-hidden="true">
-			<FeatureIcon id="check" size={36} />
+			<FeatureIcon id="sparkle" size={36} />
 		</div>
-		<p>{t('onboarding.celebrateBody')}</p>
+		<p class="celebrate-woohoo">{t('onboarding.celebrateWoohoo')}</p>
+		<p class="celebrate-sub">{t('onboarding.celebrateBody')}</p>
 		<div class="celebration-actions">
 			<Button type="button" fullWidth onclick={goScan}>
 				{t('onboarding.celebrateCtaScan')}
@@ -136,12 +137,43 @@
 		}
 	}
 
-	.celebration-body p {
+	.celebrate-woohoo {
+		position: relative;
+		z-index: 1;
 		margin: 0;
-		font-size: 1rem;
+		font-size: 1.15rem;
+		font-weight: 700;
+		line-height: 1.35;
+		color: var(--color-text);
+		max-width: 28ch;
+		animation: celebrate-pop 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+	}
+
+	.celebrate-sub {
+		position: relative;
+		z-index: 1;
+		margin: 0;
+		font-size: 0.95rem;
 		line-height: 1.5;
 		color: var(--color-text-muted);
 		max-width: 32ch;
+	}
+
+	@keyframes celebrate-pop {
+		from {
+			opacity: 0;
+			transform: scale(0.92) translateY(0.35rem);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1) translateY(0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.celebrate-woohoo {
+			animation: none;
+		}
 	}
 
 	.celebration-actions {
