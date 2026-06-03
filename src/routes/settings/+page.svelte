@@ -591,11 +591,11 @@
 			>
 				<input type="hidden" name="source" value="settings" />
 				<label class="feedback-field">
-					<span>{t('feedback.churnQuestion')}</span>
+					<span>{t('settings.feedback.topicQuestion')}</span>
 					<select name="churnReason">
-						<option value="">{t('feedback.churnOptional')}</option>
+						<option value="">{t('settings.feedback.topicOptional')}</option>
 						{#each CHURN_REASONS as reason}
-							<option value={reason}>{t(`feedback.churnReasons.${reason}`)}</option>
+							<option value={reason}>{t(`settings.feedback.topicReasons.${reason}`)}</option>
 						{/each}
 					</select>
 				</label>
@@ -607,7 +607,7 @@
 						minlength="3"
 						maxlength="2000"
 						rows="4"
-						placeholder={t('feedback.messagePlaceholder')}
+						placeholder={t('settings.feedback.messagePlaceholder')}
 					></textarea>
 					{#if feedbackErrors.message?.[0]}
 						<p class="feedback-error" role="alert">{t('settings.feedback.messageTooShort')}</p>

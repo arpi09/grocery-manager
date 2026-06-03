@@ -416,22 +416,22 @@
 		},
 		"feedback": {
 			"title": "Ge feedback",
-			"description": "Ber?tta vad som funkar bra eller vad vi kan g?ra b?ttre ? kort r?cker.",
-			"topicQuestion": "Vad g?ller det? (valfritt)",
-			"topicOptional": "V?lj ?mne",
+			"description": "Berätta vad som funkar bra eller vad vi kan göra bättre — kort räcker.",
+			"topicQuestion": "Vad gäller det? (valfritt)",
+			"topicOptional": "Välj ämne",
 			"topicReasons": {
-				"forgot_habit": "Vana / att komma ih?g",
-				"too_much_work": "Arbetsfl?de / friktion",
+				"forgot_habit": "Vana / att komma ihåg",
+				"too_much_work": "Arbetsflöde / friktion",
 				"missing_feature": "Funktioner",
-				"privacy_trust": "Integritet / f?rtroende",
+				"privacy_trust": "Integritet / förtroende",
 				"other_app": "Andra appar",
-				"notifications": "Notiser / p?minnelser",
+				"notifications": "Notiser / påminnelser",
 				"other": "Annat"
 			},
 			"messageLabel": "Din kommentar",
-			"messagePlaceholder": "T.ex. scan k?ndes smidig, ?nskar filter i listan?",
-			"messageTooShort": "Skriv minst n?gra ord s? vi f?rst?r.",
-			"thanks": "Tack ? din feedback ?r sparad."
+			"messagePlaceholder": "T.ex. scan kändes smidig, önskar filter i listan…",
+			"messageTooShort": "Skriv minst några ord så vi förstår.",
+			"thanks": "Tack — din feedback är sparad."
 		},
 		"autoExpiredGrace": {
 			"title": "Automatiskt utg?ngna varor",
