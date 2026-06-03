@@ -49,14 +49,16 @@ export function bindSubmittingWithRedirect(
 	return () => {
 		setSubmitting(true);
 		return async ({ result, update }) => {
-			setSubmitting(false);
-			if (result.type === 'redirect') {
-				await update({ invalidateAll: true });
-				await onRedirect(result.location);
-				await goto(result.location);
-				return;
+			try {
+				if (result.type === 'redirect') {
+					await onRedirect(result.location);
+					await goto(result.location, { invalidateAll: true });
+					return;
+				}
+				await update();
+			} finally {
+				setSubmitting(false);
 			}
-			await update();
 		};
 	};
 }
