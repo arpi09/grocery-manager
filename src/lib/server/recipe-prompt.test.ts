@@ -12,10 +12,12 @@ import {
 	missingIngredientToListItem,
 	parseMissingIngredientsPayload,
 	RECIPE_CULINARY_REALISM_RULES,
+	mealIntentGuidance,
 	resolveIngredientToInventoryName,
 	sanitizeRecipeAgainstInventory,
 	sanitizeRecipesAgainstInventory
 } from './recipe-prompt';
+import { filterInventoryForRecipes } from '$lib/domain/recipe-inventory-filter';
 
 function makeItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
 	return {
@@ -102,6 +104,21 @@ describe('buildRecipe prompts', () => {
 		expect(user).toContain('Antal portioner: 2');
 		expect(user).toContain('Mjölk');
 		expect(user).toContain('vegetariskt');
+	});
+
+	it('includes meal intent guidance in user prompts', () => {
+		const quick = buildRecipeUserPrompt('- Mjölk: 1 l', 4, '', 'quick');
+		const friday = buildRecipeUserPrompt('- Mjölk: 1 l', 4, '', 'friday');
+		expect(quick).toContain(mealIntentGuidance('quick'));
+		expect(friday).toContain('fredagsmiddag');
+
+		const refine = buildRecipeRefinementUserPrompt('{}', '- Mjölk', 4, undefined, 'meal_prep');
+		expect(refine).toContain('matlådor');
+	});
+
+	it('includes human-food-only rules in culinary realism', () => {
+		expect(RECIPE_CULINARY_REALISM_RULES.some((rule) => rule.includes('hundmat'))).toBe(true);
+		expect(RECIPE_CULINARY_REALISM_RULES.some((rule) => rule.includes('ignorera'))).toBe(true);
 	});
 });
 
@@ -194,6 +211,44 @@ describe('sanitizeRecipeAgainstInventory', () => {
 				inventory
 			)
 		).toBeNull();
+	});
+
+	it('drops recipes that mention or use non-food inventory', () => {
+		const foodInventory = inventoryNameList([makeItem({ name: 'Pasta' }), makeItem({ name: 'Hundmat' })]);
+		expect(
+			sanitizeRecipeAgainstInventory(
+				{
+					title: 'Pasta med hundmat',
+					whyItFits: 'Nope',
+					ingredientsToUse: ['Pasta', 'Hundmat'],
+					missingIngredients: [],
+					steps: ['Blanda']
+				},
+				foodInventory
+			)
+		).toBeNull();
+
+		expect(
+			sanitizeRecipeAgainstInventory(
+				{
+					title: 'Pasta',
+					whyItFits: 'OK',
+					ingredientsToUse: ['Pasta'],
+					missingIngredients: [],
+					steps: ['Servera med rosor']
+				},
+				foodInventory
+			)
+		).toBeNull();
+	});
+
+	it('filterInventoryForRecipes removes non-food before prompts', () => {
+		const filtered = filterInventoryForRecipes([
+			makeItem({ name: 'Mjölk' }),
+			makeItem({ id: '2', name: 'Diskmedel' })
+		]);
+		expect(filtered).toHaveLength(1);
+		expect(filtered[0]?.name).toBe('Mjölk');
 	});
 
 	it('sanitizes a list and caps at four', () => {

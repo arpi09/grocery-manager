@@ -5,7 +5,7 @@
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
-	import { DEFAULT_RECIPE_PORTIONS } from '$lib/domain/recipe';
+	import { DEFAULT_RECIPE_PORTIONS, DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
 	import {
 		addMissingIngredientsToList,
 		dedupeMissingIngredients,
@@ -30,6 +30,7 @@
 	let loading = $state(false);
 	let preferences = $state('');
 	let portions = $state(DEFAULT_RECIPE_PORTIONS);
+	let mealIntent = $state<MealIntent>(DEFAULT_MEAL_INTENT);
 	let recipes = $state<RecipeSuggestion[]>([]);
 	let errorMessage = $state<string | null>(null);
 	let note = $state<string | null>(null);
@@ -75,7 +76,8 @@
 				},
 				body: JSON.stringify({
 					preferences,
-					portions
+					portions,
+					mealIntent
 				})
 			});
 
@@ -150,6 +152,24 @@
 	<p class="helper">
 		{t('recipe.intro')}
 	</p>
+
+	<fieldset class="intent-fieldset">
+		<legend class="label">{t('recipe.mealIntentLabel')}</legend>
+		<div class="intent-presets" role="group" aria-label={t('recipe.mealIntentAria')}>
+			<label class="intent-preset">
+				<input type="radio" name="meal-intent" value="quick" bind:group={mealIntent} />
+				<span>{t('recipe.mealIntentQuick')}</span>
+			</label>
+			<label class="intent-preset">
+				<input type="radio" name="meal-intent" value="friday" bind:group={mealIntent} />
+				<span>{t('recipe.mealIntentFriday')}</span>
+			</label>
+			<label class="intent-preset">
+				<input type="radio" name="meal-intent" value="meal_prep" bind:group={mealIntent} />
+				<span>{t('recipe.mealIntentMealPrep')}</span>
+			</label>
+		</div>
+	</fieldset>
 
 	<label class="label" for="recipe-portions">{t('recipe.portions')}</label>
 	<input
@@ -263,6 +283,48 @@
 		display: block;
 		margin-bottom: var(--space-xs);
 		font-weight: 600;
+	}
+
+	.intent-fieldset {
+		border: 0;
+		margin: 0 0 var(--space-md);
+		padding: 0;
+	}
+
+	.intent-fieldset .label {
+		margin-bottom: var(--space-sm);
+	}
+
+	.intent-presets {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--space-xs);
+	}
+
+	.intent-preset {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.2rem;
+		padding: 0.5rem 0.35rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		font-size: 0.78rem;
+		font-weight: 600;
+		cursor: pointer;
+		text-align: center;
+	}
+
+	.intent-preset:has(input:checked) {
+		border-color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+	}
+
+	.intent-preset input {
+		position: absolute;
+		opacity: 0;
+		pointer-events: none;
 	}
 
 	.number-input {

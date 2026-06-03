@@ -8,6 +8,7 @@
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
+	import { DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
 	import { getLocale, t } from '$lib/i18n';
 	import { celebrationMessage } from '$lib/utils/gamification-celebrate';
@@ -30,6 +31,7 @@
 	let { expiringItems, canEdit = false, householdId = null }: Props = $props();
 
 	let loading = $state(false);
+	let mealIntent = $state<MealIntent>(DEFAULT_MEAL_INTENT);
 	let suggestions = $state<RecipeIdea[]>([]);
 	let errorMessage = $state<string | null>(null);
 	let addingMissingKey = $state<string | null>(null);
@@ -37,6 +39,7 @@
 	let toastMessage = $state<string | null>(null);
 	let feedbackBanner = $state<{ message: string; tone: AddMissingFeedbackTone } | null>(null);
 	let scheduleDates = $state<Record<string, string>>({});
+	let note = $state<string | null>(null);
 
 	const todayIso = new Date().toISOString().slice(0, 10);
 	const previewItems = $derived(expiringItems.slice(0, 5));
@@ -46,17 +49,19 @@
 	async function generateSuggestions() {
 		loading = true;
 		errorMessage = null;
+		note = null;
 		feedbackBanner = null;
 
 		try {
 			const response = await fetch('/api/eat-first', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({})
+				body: JSON.stringify({ mealIntent })
 			});
 
 			const data = (await response.json()) as {
 				error?: string;
+				note?: string;
 				suggestions?: RecipeIdea[];
 			};
 
@@ -67,8 +72,9 @@
 			}
 
 			suggestions = data.suggestions ?? [];
+			note = data.note ?? null;
 
-			if (suggestions.length === 0) {
+			if (suggestions.length === 0 && !note) {
 				errorMessage = t('eatFirst.noneGenerated');
 			}
 		} catch {
@@ -183,6 +189,23 @@
 	{/if}
 
 	{#if canEdit}
+		<fieldset class="intent-fieldset">
+			<legend>{t('recipe.mealIntentLabel')}</legend>
+			<div class="intent-presets" role="group" aria-label={t('recipe.mealIntentAria')}>
+				<label class="intent-preset">
+					<input type="radio" name="eat-first-intent" value="quick" bind:group={mealIntent} />
+					<span>{t('recipe.mealIntentQuick')}</span>
+				</label>
+				<label class="intent-preset">
+					<input type="radio" name="eat-first-intent" value="friday" bind:group={mealIntent} />
+					<span>{t('recipe.mealIntentFriday')}</span>
+				</label>
+				<label class="intent-preset">
+					<input type="radio" name="eat-first-intent" value="meal_prep" bind:group={mealIntent} />
+					<span>{t('recipe.mealIntentMealPrep')}</span>
+				</label>
+			</div>
+		</fieldset>
 		<div class="actions">
 			<Button
 				type="button"
@@ -198,6 +221,10 @@
 
 	{#if errorMessage}
 		<FeedbackBanner tone="error" message={errorMessage} />
+	{/if}
+
+	{#if note}
+		<p class="note">{note}</p>
 	{/if}
 
 	{#if hasSuggestions}
@@ -347,6 +374,57 @@
 
 	.expiring-overflow,
 	.no-expiring {
+		margin: 0;
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+	}
+
+	.intent-fieldset {
+		border: 0;
+		margin: 0;
+		padding: 0;
+	}
+
+	.intent-fieldset legend {
+		font-weight: 600;
+		font-size: 0.875rem;
+		margin-bottom: var(--space-sm);
+	}
+
+	.intent-presets {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--space-xs);
+		margin-bottom: var(--space-sm);
+	}
+
+	.intent-preset {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.2rem;
+		padding: 0.5rem 0.35rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		font-size: 0.78rem;
+		font-weight: 600;
+		cursor: pointer;
+		text-align: center;
+	}
+
+	.intent-preset:has(input:checked) {
+		border-color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+	}
+
+	.intent-preset input {
+		position: absolute;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.note {
 		margin: 0;
 		font-size: 0.875rem;
 		color: var(--color-text-muted);

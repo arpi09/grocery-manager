@@ -1,7 +1,12 @@
 import {
+	isExcludedFromRecipes,
+	recipeTextMentionsExcludedTerms
+} from '$lib/domain/recipe-inventory-filter';
+import {
 	DEFAULT_RECIPE_PORTIONS,
 	MAX_RECIPE_PORTIONS,
-	MIN_RECIPE_PORTIONS
+	MIN_RECIPE_PORTIONS,
+	type MealIntent
 } from '$lib/domain/recipe';
 import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
 import type { InventoryItem } from '$lib/domain/inventory-item';
@@ -12,6 +17,8 @@ export { DEFAULT_RECIPE_PORTIONS, MAX_RECIPE_PORTIONS, MIN_RECIPE_PORTIONS };
 
 /** Shared culinary rules for draft + refinement LLM passes (exported for tests). */
 export const RECIPE_CULINARY_REALISM_RULES = [
+	'Föreslå endast mat för människor — aldrig hundmat, kattmat, djurfoder, blommor, växter, städ, diskmedel, hygien eller annat som inte är mat.',
+	'Om lagerlistan innehåller konstiga eller icke-matvaror: ignorera dem helt — använd dem inte i recept, titel eller steg.',
 	'Föreslå endast realistiska svenska vardagsmåltider, frukost, lunch eller fika — inga absurda kombinationer.',
 	'Varje recept ska vara en sammanhängande rätt: alla huvudingredienser ska naturligt passa i samma måltidstyp.',
 	'Kombinera inte söta pålägg (sylt, marmelad, choklad, godis) med bröd/baguette som middagsrätt — det är OK som frukost, macka eller fika.',
@@ -19,6 +26,17 @@ export const RECIPE_CULINARY_REALISM_RULES = [
 	'Bröd och baguette: macka, smörgås, croutons, brödpudding eller tillbehör — inte som huvudrätt med sylt om lagret räcker till vanlig matlagning.',
 	'Undvik att blanda efterrätt/konservering (sylt, dessert) med huvudrätter om inte ett etablerat svenskt recept stödjer det (pannkakor med sylt — inte "baguette med blåbärssylt" som middag).'
 ] as const;
+
+export function mealIntentGuidance(intent: MealIntent): string {
+	switch (intent) {
+		case 'friday':
+			return 'Måltidsintention: lite finare fredagsmiddag — fortfarande från lagret, men gärna mer smak och presentation än en snabb vardagsrätt.';
+		case 'meal_prep':
+			return 'Måltidsintention: matlådor / flera portioner / förberedel inför veckan — recept som håller i kyl och går att laga i större batch.';
+		default:
+			return 'Måltidsintention: snabb vardagsmat — lätt att laga, god vardag, rimlig tid i köket.';
+	}
+}
 
 export function clampRecipePortions(value: unknown): number {
 	if (typeof value !== 'number' || !Number.isFinite(value)) {
@@ -91,10 +109,12 @@ export function buildRecipeSystemPrompt(portions: number): string {
 export function buildRecipeUserPrompt(
 	inventoryLines: string,
 	portions: number,
-	preferences: string
+	preferences: string,
+	mealIntent: MealIntent = 'quick'
 ): string {
 	const parts = [
 		`Antal portioner: ${portions}`,
+		mealIntentGuidance(mealIntent),
 		'Lager (enda tillåtna källor för ingredientsToUse — kopiera varunamn exakt):',
 		inventoryLines
 	];
@@ -127,10 +147,12 @@ export function buildRecipeRefinementUserPrompt(
 	draftJson: string,
 	inventoryLines: string,
 	portions: number,
-	extraContext?: string
+	extraContext?: string,
+	mealIntent: MealIntent = 'quick'
 ): string {
 	const parts = [
 		`Antal portioner: ${portions}`,
+		mealIntentGuidance(mealIntent),
 		'Lager (enda tillåtna källor för ingredientsToUse):',
 		inventoryLines,
 		'Utkast att granska och förbättra:',
@@ -164,10 +186,31 @@ export function resolveIngredientToInventoryName(
 	return null;
 }
 
+function recipeContentIsExcluded(recipe: RecipeSuggestion): boolean {
+	if (recipeTextMentionsExcludedTerms(recipe.title)) {
+		return true;
+	}
+	for (const step of recipe.steps) {
+		if (recipeTextMentionsExcludedTerms(step)) {
+			return true;
+		}
+	}
+	for (const ing of recipe.ingredientsToUse) {
+		if (isExcludedFromRecipes(ing)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 export function sanitizeRecipeAgainstInventory(
 	recipe: RecipeSuggestion,
 	inventoryNames: string[]
 ): RecipeSuggestion | null {
+	if (recipeContentIsExcluded(recipe)) {
+		return null;
+	}
+
 	const ingredientsToUse: string[] = [];
 	const missingSet = new Set<string>();
 
@@ -183,8 +226,14 @@ export function sanitizeRecipeAgainstInventory(
 		if (!trimmed) {
 			continue;
 		}
+		if (isExcludedFromRecipes(trimmed)) {
+			return null;
+		}
 		const canonical = resolveIngredientToInventoryName(trimmed, inventoryNames);
 		if (canonical) {
+			if (isExcludedFromRecipes(canonical)) {
+				return null;
+			}
 			if (!ingredientsToUse.includes(canonical)) {
 				ingredientsToUse.push(canonical);
 			}

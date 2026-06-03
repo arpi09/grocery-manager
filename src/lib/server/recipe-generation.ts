@@ -1,4 +1,6 @@
+import { filterInventoryForRecipes } from '$lib/domain/recipe-inventory-filter';
 import type { InventoryItem } from '$lib/domain/inventory-item';
+import { DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
 import type { StructuredJsonResult } from '$lib/server/openai';
 import { requestStructuredJson } from '$lib/server/openai';
 import {
@@ -26,10 +28,11 @@ export interface GenerateRecipesInput {
 	mode?: RecipeGenerationMode;
 	expiringItemNames?: string[];
 	maxRecipes?: number;
+	mealIntent?: MealIntent;
 }
 
 export type GenerateRecipesResult =
-	| { ok: true; recipes: RecipeSuggestion[] }
+	| { ok: true; recipes: RecipeSuggestion[]; noteKey?: string }
 	| { ok: false; result: Extract<StructuredJsonResult, { ok: false }> };
 
 export type RequestStructuredJsonFn = typeof requestStructuredJson;
@@ -87,11 +90,17 @@ export async function generateRecipesWithRefinement(
 		preferences = '',
 		mode = 'standard',
 		expiringItemNames = [],
-		maxRecipes = mode === 'eat_first' ? 5 : 4
+		maxRecipes = mode === 'eat_first' ? 5 : 4,
+		mealIntent = DEFAULT_MEAL_INTENT
 	} = input;
 
-	const inventoryLines = formatRecipeInventoryLines(inventory);
-	const inventoryNames = inventoryNameList(inventory);
+	const recipeInventory = filterInventoryForRecipes(inventory);
+	if (recipeInventory.length === 0) {
+		return { ok: true, recipes: [], noteKey: 'recipe.noSuitableInventoryNote' };
+	}
+
+	const inventoryLines = formatRecipeInventoryLines(recipeInventory);
+	const inventoryNames = inventoryNameList(recipeInventory);
 	const effectivePreferences =
 		mode === 'eat_first' ? eatFirstPreferences(preferences, expiringItemNames) : preferences;
 
@@ -99,7 +108,7 @@ export async function generateRecipesWithRefinement(
 		requestJson,
 		apiKey,
 		buildRecipeSystemPrompt(portions),
-		buildRecipeUserPrompt(inventoryLines, portions, effectivePreferences)
+		buildRecipeUserPrompt(inventoryLines, portions, effectivePreferences, mealIntent)
 	);
 
 	if (!draftResult.ok) {
@@ -122,7 +131,8 @@ export async function generateRecipesWithRefinement(
 			JSON.stringify({ recipes: draftRecipes }),
 			inventoryLines,
 			portions,
-			refinementContext
+			refinementContext,
+			mealIntent
 		)
 	);
 
@@ -144,7 +154,7 @@ export async function generateRecipesWithRefinement(
 	).slice(0, maxRecipes);
 
 	if (recipes.length === 0) {
-		return { ok: false, result: { ok: false, status: 422, messageKey: 'errors.api.openAiInvalidJson' } };
+		return { ok: true, recipes: [], noteKey: 'recipe.noSuitableInventoryNote' };
 	}
 
 	return { ok: true, recipes };

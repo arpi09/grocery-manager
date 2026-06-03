@@ -134,6 +134,46 @@ describe('generateRecipesWithRefinement', () => {
 		expect(refineSystem).toContain('orealistiska kombinationer');
 	});
 
+	it('returns friendly empty when inventory is only non-food', async () => {
+		const requestJson = vi.fn();
+
+		const result = await generateRecipesWithRefinement(
+			{
+				apiKey: API_KEY,
+				inventory: [makeItem({ name: 'Hundmat' }), makeItem({ id: '2', name: 'Rosor' })],
+				portions: 4
+			},
+			requestJson
+		);
+
+		expect(result.ok).toBe(true);
+		if (!result.ok) {
+			return;
+		}
+		expect(result.recipes).toEqual([]);
+		expect(result.noteKey).toBe('recipe.noSuitableInventoryNote');
+		expect(requestJson).not.toHaveBeenCalled();
+	});
+
+	it('passes meal intent into draft user prompt', async () => {
+		const requestJson = vi
+			.fn()
+			.mockResolvedValueOnce({ ok: true, data: draftPayload } satisfies StructuredJsonResult)
+			.mockResolvedValueOnce({ ok: true, data: refinedPayload } satisfies StructuredJsonResult);
+
+		await generateRecipesWithRefinement(
+			{
+				apiKey: API_KEY,
+				inventory: [makeItem()],
+				portions: 4,
+				mealIntent: 'friday'
+			},
+			requestJson
+		);
+
+		expect(requestJson.mock.calls[0]?.[1]?.userPrompt).toContain('fredagsmiddag');
+	});
+
 	it('returns error when draft is empty and refinement fails', async () => {
 		const requestJson = vi
 			.fn()

@@ -3,6 +3,7 @@ import { json } from '@sveltejs/kit';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { translateOpenAiError } from '$lib/server/openai';
+import { parseMealIntent } from '$lib/domain/recipe';
 import { clampRecipePortions } from '$lib/server/recipe-prompt';
 import { generateRecipesWithRefinement } from '$lib/server/recipe-generation';
 import { translate } from '$lib/i18n/messages';
@@ -30,10 +31,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const body = (await request.json().catch(() => ({}))) as {
 		preferences?: unknown;
 		portions?: unknown;
+		mealIntent?: unknown;
 	};
 
 	const preferences = typeof body.preferences === 'string' ? body.preferences.trim().slice(0, 300) : '';
 	const portions = clampRecipePortions(body.portions);
+	const mealIntent = parseMealIntent(body.mealIntent);
 
 	const inventory = await locals.inventoryService.listAll(locals.householdId!);
 	if (inventory.length === 0) {
@@ -47,11 +50,20 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		apiKey,
 		inventory,
 		portions,
-		preferences
+		preferences,
+		mealIntent
 	});
 
 	if (!generated.ok) {
 		return json({ error: translateOpenAiError(locale, generated.result) }, { status: generated.result.status });
+	}
+
+	if (generated.recipes.length === 0) {
+		return json({
+			recipes: [],
+			portions,
+			note: translate(locale, generated.noteKey ?? 'recipe.noSuitableInventoryNote')
+		});
 	}
 
 	const savedIdeas = await locals.mealPlanService.storeGeneratedIdeas(auth.user.id, generated.recipes);
