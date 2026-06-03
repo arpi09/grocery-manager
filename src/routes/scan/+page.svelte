@@ -49,11 +49,11 @@
 <AppLayout user={data.user}>
 	<AppHeader {title} {subtitle} {backHref} {backLabel} />
 	<PageContainer>
-		{#if !isHub}
+		{#if data.canWrite}
 			<ScanModeTabs
 				active={activeTab}
 				returnTo={data.returnTo}
-				defaultLocation={data.defaultLocation}
+				defaultLocation={data.defaultLocation ?? undefined}
 			/>
 		{/if}
 		{#if !data.canWrite}
@@ -66,7 +66,7 @@
 			</p>
 		{:else if isBarcodeMode}
 			<ScanToAddFlow
-				defaultLocation={data.defaultLocation}
+				defaultLocation={data.defaultLocation ?? 'fridge'}
 				returnTo={data.returnTo}
 				cancelHref={data.returnTo}
 				errors={form?.errors}
@@ -76,9 +76,8 @@
 			<ReceiptBulkAddFlow returnTo={data.returnTo} />
 		{:else if isPhotoMode}
 			<PhotoRoundFlow returnTo={data.returnTo} />
-			<ScanFlowFooter cancelHref={data.returnTo} cancelLabel={t('scan.cancel')} />
 		{:else}
-			<ScanModeHub returnTo={data.returnTo} defaultLocation={data.defaultLocation} />
+			<ScanModeHub returnTo={data.returnTo} defaultLocation={data.defaultLocation ?? undefined} />
 			<ScanFlowFooter cancelHref={data.returnTo} {cancelLabel} />
 		{/if}
 	</PageContainer>

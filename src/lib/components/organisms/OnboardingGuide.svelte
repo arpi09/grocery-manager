@@ -4,19 +4,16 @@
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
-	import CelebrationBurst from '$lib/components/atoms/CelebrationBurst.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
-	import { isPostRegisterScanPath } from '$lib/navigation/post-register';
 	import { t, type MessageKey } from '$lib/i18n';
 	import {
 		ONBOARDING_REPLAY_EVENT,
 		ONBOARDING_STEP_COUNT,
 		dismissOnboarding,
 		getActivationProgress,
-		getSignupAt,
 		isOnboardingExcludedPath,
 		setActivationPath,
 		shouldShowOnboarding
@@ -86,11 +83,8 @@
 		if (page.url.searchParams.get('freshAccount') === '1') {
 			return;
 		}
-		// Fast-start scan path: guide is opt-in from settings, not a blocking modal on /scan.
-		if (
-			getSignupAt(userId) &&
-			isPostRegisterScanPath(pathname, page.url.searchParams)
-		) {
+		// Scan flows: guide is opt-in from settings, not a blocking modal on /scan.
+		if (pathname.startsWith('/scan')) {
 			return;
 		}
 		stepIndex = 0;
@@ -217,9 +211,6 @@
 	{/snippet}
 
 	<div class="step-content" class:step-forward={stepDirection === 'forward'} class:step-back={stepDirection === 'back'}>
-		{#if open && currentStep.id === 'welcome'}
-			<CelebrationBurst active={true} />
-		{/if}
 		<div class="progress-track" aria-hidden="true">
 			<div
 				class="progress-fill"
