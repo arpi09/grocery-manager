@@ -138,8 +138,11 @@ async function fillBoundInput(input: import('@playwright/test').Locator, value: 
 export async function dismissCookieConsentIfOpen(page: Page) {
 	const dialog = page.locator('[aria-labelledby="cookie-consent-title"]');
 	if (await dialog.isVisible().catch(() => false)) {
-		await page.getByRole("button", { name: /Endast n.dv.ndiga|Godk.nn/i }).first().click();
-		await dialog.waitFor({ state: "hidden", timeout: 10_000 }).catch(() => {});
+		await page
+			.getByRole('button', { name: /Endast n\u00f6dv\u00e4ndiga|Godk\u00e4nn/i })
+			.first()
+			.click();
+		await dialog.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
 	}
 }
 
@@ -147,18 +150,26 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 	await dismissCookieConsentIfOpen(page);
 
 	for (let attempt = 0; attempt < 5; attempt += 1) {
-		const skip = page.getByRole('button', {
-			name: /^(Hoppa över|Hoppa over|Jag gör det senare|Skip)$/i
-		});
-		if (!(await skip.first().isVisible().catch(() => false))) {
+		const modal = page.locator('.modal-root').first();
+		if (!(await modal.isVisible().catch(() => false))) {
 			break;
 		}
-		await skip.first().click({ force: true });
-		await page
-			.locator('[role="dialog"], .modal-root')
-			.first()
-			.waitFor({ state: 'hidden', timeout: 10_000 })
-			.catch(() => {});
+
+		const skipByTestId = page.getByTestId('onboarding-skip');
+		if (await skipByTestId.isVisible().catch(() => false)) {
+			await skipByTestId.click({ force: true });
+		} else {
+			const skip = page.getByRole('button', {
+				name: /^(Hoppa Ã¶ver|Hoppa over|Jag gÃ¶r det senare|Skip)$/i
+			});
+			if (await skip.first().isVisible().catch(() => false)) {
+				await skip.first().click({ force: true });
+			} else {
+				await page.keyboard.press('Escape');
+			}
+		}
+
+		await modal.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
 	}
 }
 
