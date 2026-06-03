@@ -20,7 +20,7 @@ test.describe('Photo round flow', () => {
 
 		await page.getByTestId('photo-round-zone-fridge').click();
 		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 15_000 });
-		await expect(page.getByTestId('photo-round-analyze').toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('photo-round-analyze')).toBeVisible({ timeout: 15_000 });
 
 		const fileInput = page.getByTestId('receipt-file-input');
 		await expect(fileInput).toBeAttached({ timeout: 15_000 });
