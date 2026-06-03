@@ -43,9 +43,11 @@ export function bindSubmittingWithToast(
 /** Like `bindSubmitting`, but handles redirect results without a full page reload. */
 export function bindSubmittingWithRedirect(
 	setSubmitting: (value: boolean) => void,
-	onRedirect: (location: string) => Promise<void>
+	onRedirect: (location: string) => Promise<void>,
+	syncFormData?: (formData: FormData) => void
 ): SubmitFunction {
-	return () => {
+	return ({ formData }) => {
+		syncFormData?.(formData);
 		setSubmitting(true);
 		return async ({ result, update }) => {
 			try {

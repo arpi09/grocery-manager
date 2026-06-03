@@ -22,6 +22,14 @@ test.describe('Scan and inventory', () => {
 		await expect(page).toHaveURL(/\/scan\?.*mode=receipt/);
 	});
 
+	test('legacy inventory foto redirects to unified scan photo mode', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/inventory/foto?from=/hem');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page).toHaveURL(/\/scan\?.*mode=photo/);
+	});
+
 	test('manual barcode lookup and add item to inventory', async ({ page }) => {
 		test.setTimeout(60_000);
 		const fixture = loadFixture<{

@@ -120,6 +120,10 @@ async function bulkCreateFromForm(
 		created++;
 	}
 
+	if (created === 0) {
+		error(400, 'Inga giltiga varor att spara');
+	}
+
 	if (recordPurchases && purchaseLines.length > 0) {
 		await event.locals.purchasePatternService.recordReceiptImport(purchaseLines);
 	}

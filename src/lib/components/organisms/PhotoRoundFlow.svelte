@@ -187,6 +187,23 @@
 
 	const selectedCount = $derived(lines.filter((line) => selected[line.id]).length);
 
+	function syncPhotoRoundFormData(formData: FormData) {
+		formData.delete('selected');
+		for (const line of lines) {
+			const key = String(line.id);
+			formData.delete(`name_${key}`);
+			formData.delete(`quantity_${key}`);
+			formData.delete(`unit_${key}`);
+			formData.delete(`location_${key}`);
+			if (!selected[line.id]) continue;
+			formData.append('selected', key);
+			formData.set(`name_${key}`, line.name);
+			formData.set(`quantity_${key}`, line.quantity);
+			formData.set(`unit_${key}`, line.unit ?? '');
+			formData.set(`location_${key}`, line.location);
+		}
+	}
+
 	onMount(() => {
 		return () => revokePreviews();
 	});
@@ -279,7 +296,8 @@
 			action="?/bulkCreate"
 			use:enhance={bindSubmittingWithRedirect(
 				(v) => (bulkSubmitting = v),
-				async () => {}
+				async () => {},
+				syncPhotoRoundFormData
 			)}
 		>
 			<input type="hidden" name="bulkFlow" value="photo" />

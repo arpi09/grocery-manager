@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { describe, expect, it, vi } from 'vitest';
-import { bindSubmitting } from './form-submit-feedback';
+import { bindSubmitting, bindSubmittingWithRedirect } from './form-submit-feedback';
 
 function submitArgs(formData: FormData) {
 	return {
@@ -43,5 +43,22 @@ describe('bindSubmitting', () => {
 		submit(submitArgs(formData));
 
 		expect(formData.get('enabled')).toBe('true');
+	});
+});
+
+describe('bindSubmittingWithRedirect', () => {
+	it('calls syncFormData before marking submitting', () => {
+		const setSubmitting = vi.fn();
+		const syncFormData = vi.fn((fd: FormData) => {
+			fd.set('bulkFlow', 'photo');
+		});
+		const submit = bindSubmittingWithRedirect(setSubmitting, async () => {}, syncFormData);
+		const formData = new FormData();
+
+		submit(submitArgs(formData));
+
+		expect(syncFormData).toHaveBeenCalledWith(formData);
+		expect(formData.get('bulkFlow')).toBe('photo');
+		expect(setSubmitting).toHaveBeenCalledWith(true);
 	});
 });
