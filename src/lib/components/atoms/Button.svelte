@@ -66,11 +66,12 @@
 
 	.btn-primary {
 		background: var(--color-primary);
-		color: #fff;
+		color: var(--color-on-primary);
 	}
 
 	.btn-primary:hover:not(:disabled) {
 		background: var(--color-primary-hover);
+		color: var(--color-on-primary);
 	}
 
 	.btn-secondary {
@@ -95,7 +96,7 @@
 
 	.btn-danger {
 		background: var(--color-danger);
-		color: #fff;
+		color: var(--color-on-primary);
 	}
 
 	.btn-full {

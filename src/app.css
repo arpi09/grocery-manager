@@ -7,6 +7,7 @@
 	--color-text-muted: #5c6b62;
 	--color-primary: #3d6b4f;
 	--color-primary-hover: #325a42;
+	--color-on-primary: #ffffff;
 	--color-accent: #c8a96e;
 	--color-danger: #b54a4a;
 	--color-fridge: #4a8fb8;
@@ -71,8 +72,9 @@ html[data-theme='dark'] {
 	--color-border: #3a4540;
 	--color-text: #e8eee9;
 	--color-text-muted: #a3b0a8;
-	--color-primary: #6aab82;
-	--color-primary-hover: #7fbe96;
+	--color-primary: #4d8f68;
+	--color-primary-hover: #5aa076;
+	--color-on-primary: #ffffff;
 	--color-accent: #d4b57a;
 	--color-danger: #e07a7a;
 	--color-fridge: #6eb0d4;

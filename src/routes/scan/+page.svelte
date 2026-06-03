@@ -74,7 +74,6 @@
 			<ScanFlowFooter cancelHref={data.returnTo} cancelLabel={t('scan.cancelBack')} />
 		{:else if isReceiptMode}
 			<ReceiptBulkAddFlow returnTo={data.returnTo} />
-			<ScanFlowFooter cancelHref={data.returnTo} cancelLabel={t('scan.cancel')} />
 		{:else if isPhotoMode}
 			<PhotoRoundFlow returnTo={data.returnTo} />
 			<ScanFlowFooter cancelHref={data.returnTo} cancelLabel={t('scan.cancel')} />

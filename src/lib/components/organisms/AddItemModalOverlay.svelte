@@ -27,4 +27,8 @@
 	:global(.add-item-panel) {
 		width: min(680px, calc(100vw - 2 * var(--space-md)));
 	}
+
+	:global(.add-item-panel .btn-primary) {
+		color: var(--color-on-primary);
+	}
 </style>

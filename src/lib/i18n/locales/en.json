@@ -87,6 +87,15 @@
 		"morePages": "More pages",
 		"language": "Language"
 	},
+	"email": {
+		"inviteWarning": {
+			"base": "Invitation created but the email could not be sent.",
+			"envDisabled": "Invitation created. Email sending is disabled — share the invitation link below.",
+			"missingApiKey": "RESEND_API_KEY is missing. Add it to your .env (see .env.example).",
+			"sandbox": "Invitation created but the email could not be sent. In test mode (onboarding@resend.dev) Resend can only send to the email on your Resend account. Try that address locally, or verify your own domain in Resend. More info: {docsUrl}",
+			"apiKey": "Invitation created but the email could not be sent. The Resend API key is invalid or not allowed. Check RESEND_API_KEY in .env."
+		}
+	},
 	"auth": {
 		"email": "Email",
 		"password": "Password",
@@ -214,7 +223,10 @@
 		"allModes": "All scan modes",
 		"readonly": "You have read-only access in this household and cannot add items.",
 		"cancelBack": "Cancel and go back",
+		"cancelBackToHome": "Cancel and back to home",
 		"cancel": "Cancel",
+		"otherModes": "Scan another way",
+		"otherModesHide": "Hide other ways",
 		"hubAria": "Scan modes",
 		"modes": {
 			"barcode": "Barcode",
@@ -427,8 +439,20 @@
 		},
 		"feedback": {
 			"title": "Give feedback",
-			"description": "Help us understand what works — and why you do not use the app more often.",
-			"messageLabel": "Why do you not use the app more often?",
+			"description": "Tell us what's working well or what we could do better — a few words is enough.",
+			"topicQuestion": "What is this about? (optional)",
+			"topicOptional": "Choose topic",
+			"topicReasons": {
+				"forgot_habit": "Habit / remembering",
+				"too_much_work": "Workflow / friction",
+				"missing_feature": "Features",
+				"privacy_trust": "Privacy / trust",
+				"other_app": "Other apps",
+				"notifications": "Notifications / reminders",
+				"other": "Other"
+			},
+			"messageLabel": "Your comment",
+			"messagePlaceholder": "e.g. scan felt smooth, wish there was a filter in the list…",
 			"messageTooShort": "Please write at least a few words.",
 			"thanks": "Thanks — your feedback was saved."
 		}
@@ -537,7 +561,8 @@
 		"listAria": "Items in this location",
 		"photoRound": "Photo round",
 		"itemActionsNamed": "Actions for {name}",
-		"editItem": "Edit"
+		"editItem": "Edit",
+		"quantityLeft": "{amount} left"
 	},
 	"consume": {
 		"logUsage": "Log usage",
@@ -566,6 +591,7 @@
 		"bestBefore": "Best before (optional)",
 		"notesOptional": "Notes (optional)",
 		"unitPlaceholder": "pcs, g, L…",
+		"unitNone": "No unit",
 		"invalidBarcode": "Invalid barcode. Enter at least 8 digits.",
 		"lookupFailed": "Could not look up the barcode. Try again or enter manually.",
 		"lookupNetwork": "Network error while looking up the product.",
@@ -1101,7 +1127,7 @@
 		"confidenceMedium": "medium",
 		"filledFromPhoto": "Filled in details from the photo (confidence: {confidence}). Check before saving.",
 		"continueReview": "Continue and review",
-		"pickHint": "Take a clear photo of the product label and we'll fill in name, quantity and unit for you."
+		"pickHint": "Take a clear photo of the product label and we'll fill in name, quantity, unit and best-before when visible."
 	},
 	"receipt": {
 		"pickFile": "📁 Choose receipt (PDF or image)",
@@ -1123,7 +1149,9 @@
 		"cameraPaper": "Photograph paper receipt",
 		"selectItems": "Select items ({selected} of {total})",
 		"locationForAll": "Set location for all selected:",
+		"locationBulkHint": "Applies to checked rows. Change a row below if it should go somewhere else.",
 		"locationPerItem": "Location:",
+		"locationOverride": "custom",
 		"addCount": "Add {count} {count, plural, one {item} other {items}}",
 		"apiKeyHint": "Requires OPENAI_API_KEY in server .env."
 	},
@@ -1509,6 +1537,7 @@
 		"itemFinished": "{label} marked as finished",
 		"itemFinishedGeneric": "Item marked as finished",
 		"itemPartiallyConsumed": "{label} updated — remainder still in pantry",
+		"itemPartiallyConsumedRemaining": "{label} logged — {remaining} left",
 		"itemPartiallyConsumedGeneric": "Usage logged — pantry quantity updated",
 		"settingsSaved": "Settings saved",
 		"autoExpiredCleared": "{label} expired items cleared",
@@ -1537,6 +1566,8 @@
 		"pantryLeft": "You left the pantry",
 		"householdRenamed": "Household renamed to {label}",
 		"householdRenamedGeneric": "Household name saved",
+		"profileSaved": "Profile saved",
+		"inviteSent": "Invitation sent — check the inbox",
 		"shoppingAdded": "Added to shopping list",
 		"shoppingCleared": "Shopping list cleared",
 		"adminSaved": "Admin settings saved",

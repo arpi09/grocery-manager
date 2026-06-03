@@ -38,6 +38,7 @@
 	let selected = $state<Record<number, boolean>>({});
 	let lineLocations = $state<Record<number, StorageLocation>>({});
 	let bulkLocation = $state<StorageLocation>('cupboard');
+	let locationOverrides = $state<Set<number>>(new Set());
 	let step = $state<'upload' | 'review'>('upload');
 	let bulkSubmitting = $state(false);
 	let discardReviewOpen = $state(false);
@@ -112,6 +113,8 @@
 			selected = Object.fromEntries(data.lines.map((_, i) => [i, true]));
 			lineLocations = Object.fromEntries(data.lines.map((line, i) => [i, line.location]));
 			bulkLocation = modeLocation(data.lines.map((l) => l.location)) ?? 'cupboard';
+			locationOverrides = new Set();
+			applyBulkLocationToSelected();
 			step = 'review';
 		} catch {
 			parseError = t('receipt.networkError');
@@ -141,9 +144,18 @@
 		lineLocations = {
 			...lineLocations,
 			...Object.fromEntries(
-				lines.map((_, i) => (selected[i] ? [i, bulkLocation] : [])).filter((entry) => entry.length === 2)
+				lines
+					.map((_, i) =>
+						selected[i] && !locationOverrides.has(i) ? ([i, bulkLocation] as const) : null
+					)
+					.filter((entry): entry is [number, StorageLocation] => entry !== null)
 			)
 		};
+	}
+
+	function setLineLocation(index: number, loc: StorageLocation) {
+		lineLocations[index] = loc;
+		locationOverrides = new Set(locationOverrides).add(index);
 	}
 
 	function toggleAll(checked: boolean) {
@@ -171,6 +183,7 @@
 		lines = [];
 		selected = {};
 		lineLocations = {};
+		locationOverrides = new Set();
 		step = 'upload';
 		parseError = null;
 	}
@@ -234,13 +247,16 @@
 		{/if}
 	</section>
 
-	<ScanFlowFooter cancelHref={cancelHref} cancelLabel={t('common.cancel')} />
+	<ScanFlowFooter cancelHref={cancelHref} cancelLabel={t('scan.allModes')} />
 {:else}
 	<section data-testid="receipt-review">
 		<h2 class="title">{t('receiptBulk.selectItems', { selected: selectedCount, total: lines.length })}</h2>
 
 		<div class="bulk-location">
-			<span>{t('receiptBulk.locationForAll')}</span>
+			<div class="bulk-location-copy">
+				<span>{t('receiptBulk.locationForAll')}</span>
+				<p class="bulk-location-hint">{t('receiptBulk.locationBulkHint')}</p>
+			</div>
 			<select
 				bind:value={bulkLocation}
 				onchange={() => {
@@ -284,21 +300,32 @@
 									value={index}
 									checked={selected[index]}
 									onchange={(e) => {
-									selected[index] = (e.currentTarget as HTMLInputElement).checked;
-								}} />
+										const checked = (e.currentTarget as HTMLInputElement).checked;
+										selected[index] = checked;
+										if (checked && !locationOverrides.has(index)) {
+											lineLocations[index] = bulkLocation;
+										}
+									}} />
 								<span class="line-name">{line.name}</span>
 								{#if formatLineAmount(line)}
 									<span class="line-qty">{formatLineAmount(line)}</span>
 								{/if}
 							</label>
 							<label class="line-location">
-								<span class="line-location-label">{t('receiptBulk.locationPerItem')}</span>
+								<span class="line-location-label">
+									{t('receiptBulk.locationPerItem')}
+									{#if locationOverrides.has(index)}
+										<span class="override-badge">{t('receiptBulk.locationOverride')}</span>
+									{/if}
+								</span>
 								<select
 									data-testid="receipt-line-location-{index}"
 									value={lineLocations[index] ?? line.location}
 									onchange={(e) => {
-										lineLocations[index] = (e.currentTarget as HTMLSelectElement)
-											.value as StorageLocation;
+										setLineLocation(
+											index,
+											(e.currentTarget as HTMLSelectElement).value as StorageLocation
+										);
 									}}
 								>
 									{#each LOCATIONS as loc (loc)}
@@ -336,7 +363,7 @@
 		</form>
 	</section>
 
-	<ScanFlowFooter cancelHref={cancelHref} cancelLabel={t('common.cancel')} />
+	<ScanFlowFooter cancelHref={returnTo} cancelLabel={t('scan.cancelBackToHome')} />
 
 	<DeleteSafetyModal
 		open={discardReviewOpen}
@@ -368,10 +395,22 @@
 	.bulk-location {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: center;
+		align-items: flex-start;
 		gap: var(--space-sm);
 		margin-bottom: var(--space-md);
 		font-size: 0.9rem;
+	}
+
+	.bulk-location-copy {
+		flex: 1;
+		min-width: 12rem;
+	}
+
+	.bulk-location-hint {
+		margin: var(--space-xs) 0 0;
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+		line-height: 1.35;
 	}
 
 	.bulk-location select {
@@ -439,6 +478,15 @@
 	.line-location-label {
 		color: var(--color-text-muted);
 		white-space: nowrap;
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-xs);
+	}
+
+	.override-badge {
+		font-size: 0.7rem;
+		font-weight: 600;
+		color: var(--color-primary);
 	}
 
 	.line-location select {

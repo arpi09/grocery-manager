@@ -3,15 +3,19 @@ import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
 import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
 
 test.describe('Scan and inventory', () => {
-	test('scan hub loads with mode tiles', async ({ page }) => {
+	test('scan hub loads with photo round primary', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/scan');
 		await dismissOnboardingModalIfOpen(page);
 
 		await expect(page).toHaveURL(/\/scan(?!\?.*mode=)/);
+		await expect(page.getByTestId('scan-hub-photo-round')).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Foto-runda' })).toBeVisible();
+
+		await page.getByTestId('scan-hub-other-modes').click();
+		await expect(page.getByTestId('scan-hub-other-modes-panel')).toBeVisible();
 		await expect(page.getByRole('heading', { name: 'Streckkod' })).toBeVisible();
 		await expect(page.getByRole('heading', { name: 'Kvitto' })).toBeVisible();
-		await expect(page.getByRole('heading', { name: 'Foto-runda' })).toBeVisible();
 	});
 
 	test('legacy receipt route redirects to unified scan', async ({ page }) => {
