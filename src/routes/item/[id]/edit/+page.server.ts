@@ -5,6 +5,7 @@ import {
 import { consumeItemSchema } from '$lib/validation/consumption.schemas';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { itemSchema } from '$lib/validation/inventory.schemas';
+import { formatNumericQuantity, parseNumericQuantity } from '$lib/domain/consumption-quantity';
 import { appendActionToast } from '$lib/utils/action-toast';
 import { appendCelebration } from '$lib/utils/gamification-celebrate';
 import { error, fail, redirect } from '@sveltejs/kit';
@@ -109,6 +110,7 @@ export const actions: Actions = {
 		let location = 'fridge';
 		let itemName = '';
 		let toastKind: 'itemFinished' | 'itemPartiallyConsumed' = 'itemFinished';
+		let remainingLabel: string | undefined;
 		try {
 			const result = await event.locals.inventoryService.consumeItem(
 				event.locals.householdId!,
@@ -119,7 +121,14 @@ export const actions: Actions = {
 			);
 			location = result.item.location;
 			itemName = result.item.name;
-			if (!result.finished) toastKind = 'itemPartiallyConsumed';
+			if (!result.finished) {
+				toastKind = 'itemPartiallyConsumed';
+				const unitSuffix = result.item.unit ? ` ${result.item.unit}` : '';
+				const remainingQty = parseNumericQuantity(result.item.quantity);
+				if (remainingQty !== null) {
+					remainingLabel = `${formatNumericQuantity(remainingQty)}${unitSuffix}`.trim();
+				}
+			}
 		} catch (e) {
 			if (e instanceof InventoryNotFoundError) error(404, 'Item not found');
 			if (e instanceof InvalidConsumptionAmountError) {
@@ -134,7 +143,12 @@ export const actions: Actions = {
 						event.locals.householdId!
 					)
 				: null;
-		let redirectPath = appendActionToast(`/inventory/${location}`, toastKind, itemName);
+		let redirectPath = appendActionToast(
+			`/inventory/${location}`,
+			toastKind,
+			itemName,
+			remainingLabel
+		);
 		if (celebration) redirectPath = appendCelebration(redirectPath, celebration);
 		redirect(302, redirectPath);
 	}

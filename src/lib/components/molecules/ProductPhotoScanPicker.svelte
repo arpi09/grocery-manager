@@ -6,6 +6,7 @@
 		name: string;
 		quantity: string;
 		unit: string | null;
+		expiresOn: string | null;
 		notes: string | null;
 		confidence: 'high' | 'medium' | 'low';
 	}
