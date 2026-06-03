@@ -13,6 +13,7 @@ test.describe('Scan and inventory', () => {
 		await expect(page.getByRole('heading', { name: 'Foto-runda' })).toBeVisible();
 
 		await page.getByTestId('scan-hub-other-modes').click();
+		await expect(page.getByTestId('scan-hub-other-modes')).toHaveAttribute('aria-expanded', 'true');
 		await expect(page.getByTestId('scan-hub-other-modes-panel')).toBeVisible();
 		await expect(page.getByRole('heading', { name: 'Streckkod' })).toBeVisible();
 		await expect(page.getByRole('heading', { name: 'Kvitto' })).toBeVisible();

@@ -148,7 +148,7 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 
 	for (let attempt = 0; attempt < 5; attempt += 1) {
 		const skip = page.getByRole('button', {
-			name: /Hoppa \u00f6ver|Jag g\u00f6r det senare|Inte nu|Skip/i
+			name: /^(Hoppa över|Hoppa over|Jag gör det senare|Skip)$/i
 		});
 		if (!(await skip.first().isVisible().catch(() => false))) {
 			break;

@@ -263,8 +263,8 @@
 			"kivraStep3": "Spara PDF:en och v?lj filen h?r ? du beh?ver inte g?ra om den till sk?rmdump."
 		},
 		"cancelBackToHome": "Avbryt och tillbaka till hem",
-		"otherModes": "Skanna p? annat s?tt",
-		"otherModesHide": "D?lj andra s?tt"
+		"otherModes": "Skanna på annat sätt",
+		"otherModesHide": "Dölj andra sätt"
 	},
 	"settings": {
 		"title": "Inställningar",
@@ -1215,7 +1215,7 @@
 		"ctaReceipt": "Skanna kvitto",
 		"ctaBarcode": "Skanna 5 varor",
 		"barcodeProgress": "{count} av {goal} streckkoder",
-		"skipLater": "Jag g?r det senare",
+		"skipLater": "Jag gör det senare",
 		"celebrateTitle": "Wohooo!",
 		"celebrateBody": "Du underlättar vardagen. Fortsätt när du vill — eller stanna på startsidan ett ögonblick.",
 		"celebrateCtaScan": "Skanna fler varor",
@@ -1250,7 +1250,7 @@
 		"encourageStep4": "Du f?r koll p? datumen ? smart!",
 		"encourageStep5": "N?stan f?rdig att f? en super bra matupplevelse!",
 		"getStarted": "Kom ig?ng",
-		"skip": "Hoppa ?ver",
+		"skip": "Hoppa över",
 		"dialogAria": "Introduktion till Skaffu",
 		"celebrateWoohoo": "Du har kommit igång med appen — woohoo!"
 	},

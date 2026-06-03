@@ -228,7 +228,7 @@
 	</section>
 	<ScanFlowFooter {cancelHref} cancelLabel={t('common.cancel')} />
 {:else if step === 'capture' && zone}
-	<section>
+	<section data-testid="photo-round-capture">
 		<p class="lead">
 			{t('photoRound.captureLead', { zone: locationLabel(getLocale(), zone), count: photos.length, max: PHOTO_ROUND_MAX_IMAGES })}
 		</p>
