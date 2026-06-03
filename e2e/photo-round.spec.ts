@@ -18,7 +18,7 @@ test.describe('Photo round flow', () => {
 		await page.goto('/scan?mode=photo&from=/hem');
 		await dismissOnboardingModalIfOpen(page);
 
-		await page.getByRole('button', { name: 'Kyl' }).click();
+		await page.getByRole('button', { name: 'Kylskåp' }).click();
 
 		const fileInput = page.getByTestId('receipt-file-input');
 		await expect(fileInput).toBeAttached({ timeout: 15_000 });
