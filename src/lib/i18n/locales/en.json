@@ -748,9 +748,9 @@
 		"eatFirstLead": "See expiring items and meal suggestions on the home screen.",
 		"scanCta": "Add more items",
 		"scanLead": "Keep inventory up to date with scan or photo.",
-		"proBadge": "Pro coming soon",
+		"proBadge": "Pro",
 		"proTitle": "Deeper insights with Pro",
-		"proLead": "AI insights, longer history, and smarter suggestions — no charges until payment is enabled.",
+		"proLead": "Unlimited AI, receipt PDF, and full statistics — upgrade under Settings → Plan when you are ready.",
 		"footnoteMissingExpiry": "{count} items have no expiry date — add dates for better expiry alerts."
 	},
 	"profile": {

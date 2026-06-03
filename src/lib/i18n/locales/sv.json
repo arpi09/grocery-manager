@@ -728,9 +728,9 @@
 		"eatFirstLead": "Se utgående varor och få måltidsförslag på startsidan.",
 		"scanCta": "Lägg till fler varor",
 		"scanLead": "Håll lagret uppdaterat med scan eller foto.",
-		"proBadge": "Pro kommer snart",
+		"proBadge": "Pro",
 		"proTitle": "Djupare insikter med Pro",
-		"proLead": "AI-insikter, längre historik och smartare förslag — utan att debiteras förrän betalning aktiveras.",
+		"proLead": "Obegränsad AI, kvitto-PDF och full statistik — uppgradera under Inställningar → Plan när du vill.",
 		"footnoteMissingExpiry": "{count} varor saknar utgångsdatum — lägg till datum för bättre utgångsvarningar."
 	},
 	"profile": {

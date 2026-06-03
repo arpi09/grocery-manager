@@ -372,6 +372,9 @@
 		padding: 0.55rem 0.7rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		color: var(--color-text);
+		font: inherit;
 	}
 
 	.list {

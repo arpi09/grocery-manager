@@ -6,6 +6,17 @@ async function navigateAfterRedirect(location: string): Promise<void> {
 	await invalidateAll();
 }
 
+async function updatePreservingScroll(
+	update: (options?: { reset?: boolean; invalidateAll?: boolean }) => Promise<void>,
+	options?: { reset?: boolean; invalidateAll?: boolean }
+): Promise<void> {
+	const scrollY = window.scrollY;
+	await update(options);
+	requestAnimationFrame(() => {
+		window.scrollTo(0, scrollY);
+	});
+}
+
 /** SvelteKit `use:enhance` helper — toggles submitting while the action runs. */
 export function bindSubmitting(
 	setSubmitting: (value: boolean) => void,
@@ -20,7 +31,7 @@ export function bindSubmitting(
 					await navigateAfterRedirect(result.location);
 					return;
 				}
-				await update();
+				await updatePreservingScroll(update);
 			} finally {
 				setSubmitting(false);
 			}
@@ -39,7 +50,7 @@ export function bindSubmittingWithToast(
 		setSubmitting(true);
 		return async ({ result, update }) => {
 			try {
-				await update();
+				await updatePreservingScroll(update);
 				if (result.type === 'success') {
 					onSuccess();
 				}
@@ -66,7 +77,7 @@ export function bindSubmittingWithRedirect(
 					await navigateAfterRedirect(result.location);
 					return;
 				}
-				await update({ invalidateAll: true });
+				await updatePreservingScroll(update, { invalidateAll: true });
 			} finally {
 				setSubmitting(false);
 			}

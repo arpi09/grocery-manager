@@ -153,7 +153,7 @@
 
 		<div class="actions">
 			<Card href="{APP_HOME_PATH}#eat-first" interactive class="action-card"><FeatureIcon id="home" size={22} /><div><h2>{t('stats.eatFirstCta')}</h2><p>{t('stats.eatFirstLead')}</p></div></Card>
-			<Card href="/scan?mode=barcode&from=/statistik" interactive class="action-card"><FeatureIcon id="barcode" size={22} /><div><h2>{t('stats.scanCta')}</h2><p>{t('stats.scanLead')}</p></div></Card>
+			<Card href="/scan?mode=photo&from=/statistik" interactive class="action-card"><FeatureIcon id="photo" size={22} /><div><h2>{t('stats.scanCta')}</h2><p>{t('stats.scanLead')}</p></div></Card>
 		</div>
 
 		{#if !isPro}
