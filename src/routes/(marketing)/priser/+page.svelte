@@ -1,14 +1,15 @@
 <script lang="ts">
+	import MarketingButtonLink from '$lib/components/marketing/MarketingButtonLink.svelte';
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
-	import ProWaitlistForm from '$lib/components/marketing/ProWaitlistForm.svelte';
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
 	import { getPricingContent } from '$lib/marketing/pricing-content';
 	import type { MarketingLocale } from '$lib/marketing/content';
 
-	let { data, form } = $props();
+	let { data } = $props();
 
 	const pricing = getPricingContent(data.marketingLocale as MarketingLocale);
 	const { marketing: content, loginUrl, registerUrl, canonicalUrl, marketingLocale } = data;
+	const upgradeUrl = '/settings#settings-plan';
 </script>
 
 <MarketingSeoHead
@@ -24,7 +25,7 @@
 	<div class="inner">
 		<h1>{pricing.title}</h1>
 		<p>{pricing.lead}</p>
-		<p class="note">{pricing.comingSoonNote}</p>
+		<p class="note pro-live">{pricing.proLiveNote}</p>
 	</div>
 </section>
 
@@ -50,11 +51,23 @@
 		</table>
 
 		<h2>{pricing.proTitle}</h2>
+		<p class="pro-price">{pricing.proPriceLabel}</p>
 		<ul class="pro-list">
 			{#each pricing.proBullets as bullet (bullet)}
 				<li>{bullet}</li>
 			{/each}
 		</ul>
+
+		<section class="pro-cta" aria-labelledby="pro-cta-title">
+			<h2 id="pro-cta-title">{pricing.proCtaTitle}</h2>
+			<p>{pricing.proCtaLead}</p>
+			<div class="pro-cta-actions">
+				<MarketingButtonLink href={upgradeUrl}>{pricing.proCtaUpgradeLabel}</MarketingButtonLink>
+				<MarketingButtonLink href={registerUrl} variant="secondary">
+					{pricing.proCtaRegisterLabel}
+				</MarketingButtonLink>
+			</div>
+		</section>
 
 		<h2>{pricing.priceHypothesisTitle}</h2>
 		<p>{pricing.priceHypothesisBody}</p>
@@ -64,18 +77,6 @@
 
 		<h2>{pricing.stripeNoteTitle}</h2>
 		<p>{pricing.stripeNoteBody}</p>
-
-		<ProWaitlistForm
-			action="?/joinProWaitlist"
-			source="priser"
-			title={pricing.waitlistTitle}
-			description={pricing.waitlistDescription}
-			emailLabel={pricing.waitlistEmailLabel}
-			submitLabel={pricing.waitlistSubmitLabel}
-			successMessage={pricing.waitlistSuccess}
-			existsMessage={pricing.waitlistExists}
-			{form}
-		/>
 
 		<p class="faq-crosslink">
 			<a href={pricing.faqHref}>{pricing.faqLinkLabel}</a>
@@ -121,6 +122,12 @@
 		border: 1px solid var(--color-border);
 	}
 
+	.note.pro-live {
+		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+		border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+		color: var(--color-text);
+	}
+
 	.section {
 		padding: 0 var(--space-lg) var(--space-xl);
 	}
@@ -134,6 +141,12 @@
 		margin: 0;
 		color: var(--color-text-muted);
 		line-height: var(--line-height-body);
+	}
+
+	.pro-price {
+		margin: 0 0 var(--space-sm);
+		font-weight: 600;
+		color: var(--color-text);
 	}
 
 	.compare {
@@ -168,6 +181,29 @@
 
 	.pro-list li + li {
 		margin-top: var(--space-xs);
+	}
+
+	.pro-cta {
+		margin-top: var(--space-xl);
+		padding: var(--space-lg);
+		border-radius: var(--radius-lg);
+		background: linear-gradient(
+			145deg,
+			color-mix(in srgb, var(--color-primary) 14%, var(--color-surface)),
+			var(--color-surface)
+		);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 28%, var(--color-border));
+	}
+
+	.pro-cta h2 {
+		margin: 0 0 var(--space-sm);
+	}
+
+	.pro-cta-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
+		margin-top: var(--space-md);
 	}
 
 	.faq-crosslink {

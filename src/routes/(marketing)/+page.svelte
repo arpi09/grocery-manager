@@ -14,6 +14,7 @@
 	import MarketingButtonLink from '$lib/components/marketing/MarketingButtonLink.svelte';
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
 	import MarketingFeatureCard from '$lib/components/marketing/MarketingFeatureCard.svelte';
+	import MarketingProLaunchBanner from '$lib/components/marketing/MarketingProLaunchBanner.svelte';
 	import MarketingScrollReveal from '$lib/components/marketing/MarketingScrollReveal.svelte';
 	import MarketingStepCard from '$lib/components/marketing/MarketingStepCard.svelte';
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
@@ -99,6 +100,12 @@
 		</div>
 	</div>
 </section>
+
+<MarketingProLaunchBanner
+	proLaunch={content.proLaunch}
+	{registerUrl}
+	onRegisterClick={trackRegisterClick}
+/>
 
 <section class="stats-strip" aria-label="Skaffu i siffror">
 	<ul class="stats-list">

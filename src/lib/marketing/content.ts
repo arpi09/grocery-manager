@@ -51,9 +51,20 @@ export interface MarketingComparison {
 	ctaLead: string;
 }
 
+export interface MarketingProLaunch {
+	badge: string;
+	title: string;
+	lead: string;
+	bullets: string[];
+	priceFrom: string;
+	ctaPricing: string;
+	ctaFree: string;
+}
+
 export interface MarketingContent {
 	siteName: string;
 	tagline: string;
+	proLaunch: MarketingProLaunch;
 	meta: {
 		title: string;
 		description: string;
@@ -150,6 +161,21 @@ const sv: MarketingContent = {
 		login: 'Logga in',
 		register: 'Skapa konto',
 		tryFree: 'Kom igång gratis'
+	},
+	proLaunch: {
+		badge: 'Pro är live',
+		title: 'Mer kraft när skafferiet växer',
+		lead:
+			'Pro är här — obegränsad AI, kvitto-PDF och plats för fler i hushållet. Gratisplanen finns kvar om du vill prova i lugn och ro.',
+		bullets: [
+			'Obegränsad AI-skannning, kvitto-PDF och smart inköpslista',
+			'AI-insikter och full statistik för hushållet',
+			'Upp till 6 hushållsmedlemmar',
+			'Från cirka 39 kr/mån — uppgradera när du är redo'
+		],
+		priceFrom: 'från 39 kr/mån',
+		ctaPricing: 'Se Pro & priser',
+		ctaFree: 'Kom igång gratis'
 	},
 	landing: {
 		heroTitle: 'Skaffu — skafferiet du faktiskt har koll på.',
@@ -341,7 +367,7 @@ const sv: MarketingContent = {
 			{
 				question: 'Kostar Skaffu något?',
 				answer:
-					'Du kan skapa konto och använda appen gratis med en generös kärnplan (lager, manuell lista, två hushållsmedlemmar). AI-tunga funktioner får begränsningar i gratisplanen; en Pro-plan med obegränsad AI och fler medlemmar kommer senare — vi meddelar i förväg innan något debiteras. Läs mer på /priser.'
+					'Du kan skapa konto och använda appen gratis med en generös kärnplan (lager, manuell lista, två hushållsmedlemmar). Pro (~39 kr/mån) ger obegränsad AI, kvitto-PDF och fler hushållsmedlemmar — uppgradera under Inställningar när du vill. Läs mer på /priser.'
 			},
 			{
 				question: 'Fungerar det utan streckkod?',
@@ -401,6 +427,21 @@ const en: MarketingContent = {
 		login: 'Log in',
 		register: 'Create account',
 		tryFree: 'Get started free'
+	},
+	proLaunch: {
+		badge: 'Pro is live',
+		title: 'More power as your pantry grows',
+		lead:
+			'Pro is here — unlimited AI, receipt PDF parsing and room for more household members. The free plan is still there if you want to try at your own pace.',
+		bullets: [
+			'Unlimited AI scans, receipt PDF and smart shopping list',
+			'AI insights and full household statistics',
+			'Up to 6 household members',
+			'From about 39 SEK/month — upgrade when you are ready'
+		],
+		priceFrom: 'from 39 SEK/month',
+		ctaPricing: 'See Pro & pricing',
+		ctaFree: 'Get started free'
 	},
 	comparison: {
 		title: 'Compared to apps you may already use',
@@ -579,7 +620,7 @@ const en: MarketingContent = {
 			{
 				question: 'Does Skaffu cost anything?',
 				answer:
-					'You can create an account and use the app free on a generous core plan (inventory, manual list, two household members). AI-heavy features will have limits on the free plan; a Pro plan with unlimited AI and more members is coming later — we will notify you before any charge. See /priser for more.'
+					'You can create an account and use the app free on a generous core plan (inventory, manual list, two household members). Pro (~39 SEK/month) adds unlimited AI, receipt PDF and more household members — upgrade in Settings when you want. See /priser for more.'
 			},
 			{
 				question: 'Does it work without a barcode?',

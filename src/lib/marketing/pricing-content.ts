@@ -16,21 +16,20 @@ export interface PricingTierRow {
 export interface PricingContent {
 	title: string;
 	lead: string;
-	comingSoonNote: string;
+	proLiveNote: string;
 	meta: {
 		title: string;
 		description: string;
 		ogTitle: string;
 		ogDescription: string;
 	};
-	waitlistTitle: string;
-	waitlistDescription: string;
-	waitlistEmailLabel: string;
-	waitlistSubmitLabel: string;
-	waitlistSuccess: string;
-	waitlistExists: string;
+	proCtaTitle: string;
+	proCtaLead: string;
+	proCtaUpgradeLabel: string;
+	proCtaRegisterLabel: string;
 	freeTitle: string;
 	proTitle: string;
+	proPriceLabel: string;
 	priceHypothesisTitle: string;
 	priceHypothesisBody: string;
 	comparisonRows: PricingTierRow[];
@@ -54,28 +53,27 @@ const proFeatureLabelsSv: Record<ProFeatureKey, string> = {
 
 const sv: PricingContent = {
 	title: 'Priser & planer',
-	lead: 'Skaffu är gratis att komma igång. Betalning kommer först när vi ser att produkten levererar värde — och du får veta i förväg.',
-	comingSoonNote:
-		'Ingen betalvägg är aktiv ännu. Alla konton kör Free-planen medan vi finslipar gränser och väntar på rätt tillfälle för prenumeration.',
+	lead: 'Skaffu är gratis att komma igång. När du vill ha mer kraft kan du uppgradera till Pro — utan att tappa gratisplanen.',
+	proLiveNote:
+		'Pro är live. Uppgradera i appen när du är redo; gratisplanen finns kvar för dig som vill prova i lugn och ro.',
 	meta: {
 		title: 'Priser — Skaffu skafferi-app (Gratis & Pro)',
 		description:
-			'Generös gratisplan med lager och inköpslista. Pro (~39 kr/mån) kommer senare — skafferi-app utan betalvägg än. Minska matsvinn gratis idag.',
-		ogTitle: 'Skaffu — Gratis skafferi-app, Pro kommer snart',
+			'Generös gratisplan med lager och inköpslista. Pro från cirka 39 kr/mån med obegränsad AI, kvitto-PDF och fler i hushållet.',
+		ogTitle: 'Skaffu — Gratis skafferi-app & Pro',
 		ogDescription:
-			'Jämför Free vs Pro: lager, AI-skannar och kvitto-PDF. Vi meddelar innan något debiteras — ingen Stripe än.'
+			'Jämför Free vs Pro: lager, AI-skannar och kvitto-PDF. Pro är tillgängligt — uppgradera i appen när du vill.'
 	},
-	waitlistTitle: 'Meddela mig när Pro lanseras',
-	waitlistDescription:
-		'Vi aktiverar inte betalning förrän produkten bevisat värde. Lämna e-post så hör vi av oss innan Pro går live — inget debiteras nu.',
-	waitlistEmailLabel: 'E-post',
-	waitlistSubmitLabel: 'Meddela mig',
-	waitlistSuccess: 'Tack! Vi hör av oss innan Pro lanseras.',
-	waitlistExists: 'Du står redan på listan — vi hör av oss innan Pro lanseras.',
+	proCtaTitle: 'Uppgradera till Pro',
+	proCtaLead:
+		'Logga in som ägare av hushållet och välj månads- eller årsplan under Inställningar → Plan. Avsluta eller byt plan när som helst.',
+	proCtaUpgradeLabel: 'Logga in och uppgradera',
+	proCtaRegisterLabel: 'Skapa konto gratis',
 	freeTitle: 'Gratis',
-	proTitle: 'Pro (kommer snart)',
-	priceHypothesisTitle: 'Prishypotes',
-	priceHypothesisBody: `Vi planerar cirka ${PRICE_HYPOTHESIS_SEK.monthly} kr/månad eller ${PRICE_HYPOTHESIS_SEK.yearly} kr/år — i linje med svenska konkurrenter (${PRICE_HYPOTHESIS_SEK.competitorMonthlyLow}–${PRICE_HYPOTHESIS_SEK.competitorMonthlyHigh} kr/mån).`,
+	proTitle: 'Pro',
+	proPriceLabel: `från ${PRICE_HYPOTHESIS_SEK.monthly} kr/mån eller ${PRICE_HYPOTHESIS_SEK.yearly} kr/år`,
+	priceHypothesisTitle: 'Pro-pris',
+	priceHypothesisBody: `${PRICE_HYPOTHESIS_SEK.monthly} kr/månad eller ${PRICE_HYPOTHESIS_SEK.yearly} kr/år — i linje med svenska konkurrenter (${PRICE_HYPOTHESIS_SEK.competitorMonthlyLow}–${PRICE_HYPOTHESIS_SEK.competitorMonthlyHigh} kr/mån).`,
 	comparisonRows: [
 		{
 			label: 'Lagerrader',
@@ -106,9 +104,9 @@ const sv: PricingContent = {
 	proBullets: Object.values(proFeatureLabelsSv),
 	aiNoteTitle: 'Varför gränser?',
 	aiNoteBody: `AI-funktioner kostar per anrop (modell ${AI_UNIT_ECONOMICS.model}). En typisk kvitto-PDF kostar ungefär ${AI_UNIT_ECONOMICS.receiptParseSekLow}–${AI_UNIT_ECONOMICS.receiptParseSekHigh} kr i API-avgift — därför begränsar vi AI i gratisplanen och finansierar obegränsat via Pro.`,
-	stripeNoteTitle: 'När kommer betalning?',
+	stripeNoteTitle: 'Betalning & villkor',
 	stripeNoteBody:
-		'Först när retention och efterfrågan motiverar det — vi meddelar i appen och på denna sida innan något debiteras.',
+		'Betalning sker via Stripe. Som hushållsägare kan du hantera prenumeration, byta mellan månad och år eller avsluta under Inställningar → Plan. Konsumentvillkor från Stripe gäller vid köp.',
 	faqHref: '/faq',
 	faqLinkLabel: 'Vanliga frågor',
 	fullDocHint: 'Intern produktdokumentation: docs/PRICING.md'
@@ -117,28 +115,27 @@ const sv: PricingContent = {
 const en: PricingContent = {
 	...sv,
 	title: 'Pricing & plans',
-	lead: 'Skaffu is free to get started. Paid plans come only when the product proves its value — and we will tell you in advance.',
-	comingSoonNote:
-		'No paywall is active yet. Every account runs the Free plan while we finalize limits and timing for subscriptions.',
+	lead: 'Skaffu is free to get started. Upgrade to Pro when you want more power — without losing the free tier.',
+	proLiveNote:
+		'Pro is live. Upgrade in the app when you are ready; the free plan stays available if you want to take it slow.',
 	meta: {
 		title: 'Pricing — Skaffu (Free & Pro)',
 		description:
-			'Generous free tier with pantry and shopping list. Pro (~39 SEK/month) coming later with unlimited AI and receipt PDF — store-neutral pantry, no paywall yet.',
-		ogTitle: 'Skaffu — Free pantry, Pro coming soon',
+			'Generous free tier with pantry and shopping list. Pro from about 39 SEK/month with unlimited AI, receipt PDF and more household members.',
+		ogTitle: 'Skaffu — Free pantry & Pro',
 		ogDescription:
-			'Compare Free vs Pro: inventory, AI scans and receipt PDF. We notify before any charge — no Stripe yet.'
+			'Compare Free vs Pro: inventory, AI scans and receipt PDF. Pro is available — upgrade in the app when you want.'
 	},
-	waitlistTitle: 'Notify me when Pro launches',
-	waitlistDescription:
-		'We will not enable billing until the product proves its value. Leave your email and we will reach out before Pro goes live — nothing is charged now.',
-	waitlistEmailLabel: 'Email',
-	waitlistSubmitLabel: 'Notify me',
-	waitlistSuccess: 'Thanks! We will reach out before Pro launches.',
-	waitlistExists: 'You are already on the list — we will reach out before Pro launches.',
+	proCtaTitle: 'Upgrade to Pro',
+	proCtaLead:
+		'Sign in as the household owner and pick monthly or yearly under Settings → Plan. Cancel or switch plans anytime.',
+	proCtaUpgradeLabel: 'Sign in and upgrade',
+	proCtaRegisterLabel: 'Create a free account',
 	freeTitle: 'Free',
-	proTitle: 'Pro (coming soon)',
-	priceHypothesisTitle: 'Planned pricing',
-	priceHypothesisBody: `We plan around ${PRICE_HYPOTHESIS_SEK.monthly} SEK/month or ${PRICE_HYPOTHESIS_SEK.yearly} SEK/year — in line with Swedish competitors.`,
+	proTitle: 'Pro',
+	proPriceLabel: `from ${PRICE_HYPOTHESIS_SEK.monthly} SEK/month or ${PRICE_HYPOTHESIS_SEK.yearly} SEK/year`,
+	priceHypothesisTitle: 'Pro pricing',
+	priceHypothesisBody: `${PRICE_HYPOTHESIS_SEK.monthly} SEK/month or ${PRICE_HYPOTHESIS_SEK.yearly} SEK/year — in line with Swedish competitors.`,
 	comparisonRows: sv.comparisonRows.map((row) => ({
 		...row,
 		label:
@@ -161,9 +158,9 @@ const en: PricingContent = {
 	],
 	aiNoteTitle: 'Why limits?',
 	aiNoteBody: `AI features cost per API call (${AI_UNIT_ECONOMICS.model}). A typical receipt PDF costs about ${AI_UNIT_ECONOMICS.receiptParseSekLow}–${AI_UNIT_ECONOMICS.receiptParseSekHigh} SEK — so Free tier caps AI usage and Pro funds unlimited use.`,
-	stripeNoteTitle: 'When will billing go live?',
+	stripeNoteTitle: 'Billing & terms',
 	stripeNoteBody:
-		'Only when retention and demand justify it — we will announce in the app and on this page before any charge.',
+		'Payments go through Stripe. As household owner you can manage your subscription, switch monthly/yearly or cancel under Settings → Plan. Stripe consumer terms apply at checkout.',
 	faqLinkLabel: 'FAQ',
 	fullDocHint: 'Internal product doc: docs/PRICING.md'
 };

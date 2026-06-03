@@ -6,7 +6,7 @@
 
 	interface Props {
 		isOwner: boolean;
-		checkoutStatus?: 'success' | 'cancel' | null;
+		checkoutStatus?: 'success' | 'cancel' | 'portal' | null;
 	}
 
 	let { isOwner, checkoutStatus = null }: Props = $props();

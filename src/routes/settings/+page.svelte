@@ -558,7 +558,10 @@
 						})}
 					</p>
 					{#if !data.isPro && data.stripeCheckoutEnabled}
-						<ProUpgradePanel isOwner={data.isOwner} checkoutStatus={data.checkoutStatus} />
+						<ProUpgradePanel
+							isOwner={data.isOwner}
+							checkoutStatus={data.checkoutStatus === 'portal' ? null : data.checkoutStatus}
+						/>
 					{:else if !data.isPro}
 						<p class="plan-copy plan-muted">{t('settings.plan.comingSoon')}</p>
 						<ProWaitlistForm
