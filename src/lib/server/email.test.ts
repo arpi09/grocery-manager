@@ -91,6 +91,20 @@ describe('buildHouseholdInviteEmailContent', () => {
 		expect(content.html).toContain('#3d6b4f');
 		expect(content.html).not.toContain('<script');
 	});
+
+	it('builds English invite copy when locale is en', () => {
+		const content = buildHouseholdInviteEmailContent({
+			inviterName: 'Alex',
+			householdName: 'Home',
+			inviteUrl: 'https://app.example/invite/abc',
+			role: 'viewer',
+			locale: 'en'
+		});
+
+		expect(content.subject).toContain('invited you');
+		expect(content.text).toContain('You are invited to Home');
+		expect(content.html).toContain('Accept invitation');
+	});
 });
 
 describe('sendEmail', () => {
@@ -184,22 +198,22 @@ describe('sendEmail', () => {
 });
 
 describe('householdInviteEmailWarning', () => {
-	it('returns undefined when email sending is globally disabled', () => {
-		expect(
-			householdInviteEmailWarning({
-				ok: false,
-				reason: EMAIL_SENDING_DISABLED_REASON
-			})
-		).toBeUndefined();
+	it('explains when email sending is globally disabled', () => {
+		const warning = householdInviteEmailWarning('sv', {
+			ok: false,
+			reason: EMAIL_SENDING_DISABLED_REASON
+		});
+
+		expect(warning).toContain('E-postutskick');
 	});
 
 	it('explains missing API key', () => {
-		const warning = householdInviteEmailWarning({
+		const warning = householdInviteEmailWarning('sv', {
 			ok: false,
 			reason: 'RESEND_API_KEY is not configured'
 		});
 
-		expect(warning).toContain(missingResendKeyMessage());
+		expect(warning).toContain(missingResendKeyMessage('sv'));
 	});
 
 	it('explains Resend sandbox recipient restriction', () => {
@@ -210,15 +224,15 @@ describe('householdInviteEmailWarning', () => {
 		};
 
 		expect(isResendSandboxRecipientError(failure)).toBe(true);
-		expect(householdInviteEmailWarning(failure)).toContain('testläge');
-		expect(householdInviteEmailWarning(failure)).toContain('Resend-konto');
+		expect(householdInviteEmailWarning('sv', failure)).toContain('testläge');
+		expect(householdInviteEmailWarning('sv', failure)).toContain('Resend-konto');
 	});
 
 	it('includes sanitized Resend detail in non-production', () => {
 		const previousNodeEnv = process.env.NODE_ENV;
 		process.env.NODE_ENV = 'development';
 
-		const warning = householdInviteEmailWarning({
+		const warning = householdInviteEmailWarning('en', {
 			ok: false,
 			reason: 'Domain not verified'
 		});

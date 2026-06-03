@@ -320,19 +320,23 @@ export const actions: Actions = {
 			const household = await locals.householdService.getHouseholdForUser(locals.user!.id);
 			const inviterName = locals.user!.displayName?.trim() || locals.user!.email;
 			const inviteUrl = `${getAppOrigin(url.origin)}/invite/${token}`;
+			const emailLocale = locals.locale === 'en' ? 'en' : 'sv';
 			const emailResult = await sendHouseholdInviteEmail({
 				to: invite.email,
 				inviterName,
 				householdName: household?.name ?? 'Pantry',
 				inviteUrl,
-				role: invite.role
+				role: invite.role,
+				locale: emailLocale
 			});
+
+			if (emailResult.ok) {
+				redirect(302, appendActionToast('/settings', 'inviteSent'));
+			}
 
 			return {
 				inviteLink: inviteUrl,
-				inviteEmailWarning: emailResult.ok
-					? undefined
-					: householdInviteEmailWarning(emailResult)
+				inviteEmailWarning: householdInviteEmailWarning(locals.locale, emailResult)
 			};
 		} catch (error) {
 			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);

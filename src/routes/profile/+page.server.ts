@@ -1,5 +1,6 @@
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { translate, type MessageKey } from '$lib/i18n/messages';
+import { appendActionToast } from '$lib/utils/action-toast';
 import { updateProfileSchema, updateThemeSchema, saveAvatarSchema } from '$lib/validation/profile.schemas';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -53,15 +54,12 @@ export const actions: Actions = {
 		const displayName = parsed.data.displayName?.trim() || null;
 		const avatarUrl = parsed.data.avatarUrl?.trim() || null;
 
-		const profile = await locals.profileService.updateProfile(locals.user!.id, {
+		await locals.profileService.updateProfile(locals.user!.id, {
 			displayName,
 			avatarUrl
 		});
 
-		return {
-			success: true as const,
-			profile
-		};
+		redirect(302, appendActionToast('/profile', 'profileSaved'));
 	},
 	saveAvatar: async ({ request, locals }) => {
 		const formData = await request.formData();

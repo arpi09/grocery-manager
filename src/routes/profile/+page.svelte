@@ -15,7 +15,7 @@
 
 	let { data, form } = $props();
 
-	const profile = $derived(form?.profile ?? data.profile);
+	const profile = $derived(data.profile);
 	const displayName = $derived(form?.values?.displayName ?? profile.displayName ?? '');
 	const initials = $derived(userInitials(profile.displayName, profile.email));
 	const selectedTheme = $derived(
@@ -35,16 +35,12 @@
 	);
 
 	const showAvatarSuccess = $derived(Boolean(form?.avatarSuccess));
-	const showProfileSuccess = $derived(Boolean(form?.success) && !form?.avatarSuccess);
 </script>
 
 <AppLayout user={data.user}>
 	<AppHeader title={t('profile.title')} subtitle={t('profile.subtitle')} />
 	<PageContainer>
 	<Card>
-		{#if showProfileSuccess}
-			<FeedbackBanner tone="success" message={t('profile.updated')} />
-		{/if}
 		{#if showAvatarSuccess}
 			<FeedbackBanner tone="success" message={t('profile.avatarUpdated')} />
 		{/if}

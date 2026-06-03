@@ -44,9 +44,11 @@ export const actions: Actions = {
 			});
 		}
 
+		const emailLocale = event.locals.locale === 'en' ? 'en' : 'sv';
 		await event.locals.passwordResetService.requestReset(
 			parsed.data.email,
-			event.getClientAddress()
+			event.getClientAddress(),
+			emailLocale
 		);
 
 		return {

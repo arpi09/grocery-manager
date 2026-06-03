@@ -19,7 +19,11 @@ export class PasswordResetService {
 		private readonly tokens: IPasswordResetRepository
 	) {}
 
-	async requestReset(email: string, clientIp: string): Promise<PasswordResetRequestResult> {
+	async requestReset(
+		email: string,
+		clientIp: string,
+		locale: 'sv' | 'en' = 'sv'
+	): Promise<PasswordResetRequestResult> {
 		const normalized = email.trim().toLowerCase();
 		const ipKey = `pw-reset:ip:${clientIp}`;
 		const emailKey = `pw-reset:email:${normalized}`;
@@ -54,7 +58,7 @@ export class PasswordResetService {
 		await sendPasswordResetEmail({
 			to: user.email,
 			resetUrl,
-			locale: 'sv'
+			locale
 		});
 
 		return { sent: true };
@@ -79,7 +83,7 @@ export class PasswordResetService {
 
 	async adminTriggerReset(
 		targetUserId: string,
-		options?: { forceReset?: boolean }
+		options?: { forceReset?: boolean; locale?: 'sv' | 'en' }
 	): Promise<PasswordResetRequestResult> {
 		const user = await this.users.findById(targetUserId);
 		if (!user) {
@@ -101,7 +105,7 @@ export class PasswordResetService {
 		await sendPasswordResetEmail({
 			to: user.email,
 			resetUrl,
-			locale: 'sv'
+			locale: options?.locale ?? 'sv'
 		});
 
 		return { sent: true };

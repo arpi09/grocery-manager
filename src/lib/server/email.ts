@@ -1,6 +1,8 @@
 import { env } from '$env/dynamic/private';
 import { Resend } from 'resend';
 import { inviteRoleLabel, type InviteRole } from '$lib/domain/household';
+import type { Locale } from '$lib/i18n/locale';
+import { translate } from '$lib/i18n/messages';
 import { getAppOrigin } from '$lib/server/origin';
 import {
 	EMAIL_SENDING_DISABLED_REASON,
@@ -33,8 +35,8 @@ export function getPmfDigestTo(): string | null {
 	return to ? to : null;
 }
 
-export function missingResendKeyMessage(): string {
-	return 'RESEND_API_KEY saknas. Lägg till den i din .env (se .env.example).';
+export function missingResendKeyMessage(locale: Locale = 'sv'): string {
+	return translate(locale, 'email.inviteWarning.missingApiKey');
 }
 
 export type SendEmailFailure = { ok: false; reason: string; statusCode?: number };
@@ -76,26 +78,26 @@ function sanitizeEmailErrorDetail(reason: string): string | null {
 	return trimmed.slice(0, 200);
 }
 
-export function householdInviteEmailWarning(result: SendEmailFailure): string | undefined {
+export function householdInviteEmailWarning(
+	locale: Locale,
+	result: SendEmailFailure
+): string | undefined {
 	if (result.reason === EMAIL_SENDING_DISABLED_REASON) {
-		return undefined;
+		return translate(locale, 'email.inviteWarning.envDisabled');
 	}
 
-	const base = 'Inbjudan skapad men e-post kunde inte skickas.';
+	const base = translate(locale, 'email.inviteWarning.base');
 
 	if (result.reason === 'RESEND_API_KEY is not configured') {
-		return `${base} ${missingResendKeyMessage()}`;
+		return `${base} ${missingResendKeyMessage(locale)}`;
 	}
 
 	if (isResendSandboxRecipientError(result)) {
-		return (
-			`${base} I testläge (onboarding@resend.dev) kan Resend bara skicka till e-postadressen kopplad till ditt Resend-konto. ` +
-			`Testa med den adressen lokalt, eller verifiera en egen domän i Resend. Mer info: ${RESEND_DOCS_URL}`
-		);
+		return translate(locale, 'email.inviteWarning.sandbox', { docsUrl: RESEND_DOCS_URL });
 	}
 
 	if (result.statusCode === 401 || result.statusCode === 403) {
-		return `${base} Resend API-nyckeln är ogiltig eller otillåten. Kontrollera RESEND_API_KEY i .env.`;
+		return translate(locale, 'email.inviteWarning.apiKey');
 	}
 
 	if (process.env.NODE_ENV !== 'production') {
@@ -181,31 +183,57 @@ export function buildHouseholdInviteEmailContent(options: {
 	householdName: string;
 	inviteUrl: string;
 	role: InviteRole;
-	locale?: 'sv';
+	locale?: 'sv' | 'en';
 }): HouseholdInviteEmailContent {
+	const locale = options.locale ?? 'sv';
 	const { inviterName, householdName, inviteUrl, role } = options;
-	const roleLabel = inviteRoleLabel(role);
-	const subject = `${inviterName} bjöd in dig till ${householdName} i Skaffu`;
-	const headline = `Du är inbjuden till ${householdName}`;
-	const preheader = `${inviterName} bjöd in dig till Skaffu — håll koll på skafferi, datum och inköp tillsammans.`;
+	const roleLabel = inviteRoleLabel(role, locale);
+	const isSv = locale === 'sv';
+	const subject = isSv
+		? `${inviterName} bjöd in dig till ${householdName} i Skaffu`
+		: `${inviterName} invited you to ${householdName} on Skaffu`;
+	const headline = isSv
+		? `Du är inbjuden till ${householdName}`
+		: `You are invited to ${householdName}`;
+	const preheader = isSv
+		? `${inviterName} bjöd in dig till Skaffu — håll koll på skafferi, datum och inköp tillsammans.`
+		: `${inviterName} invited you to Skaffu — track pantry, dates and shopping together.`;
 
-	const text = [
-		`Hej!`,
-		``,
-		headline,
-		``,
-		`${inviterName} har bjudit in dig till hushållet "${householdName}" i Skaffu.`,
-		`Skaffu hjälper er hålla koll på skafferi, utgångsdatum och inköpslistor — tillsammans i samma hushåll.`,
-		`Du får rollen ${roleLabel}.`,
-		``,
-		`Acceptera inbjudan:`,
-		inviteUrl,
-		``,
-		`Länken gäller i 7 dagar. Om du inte förväntade dig detta kan du ignorera mejlet.`,
-		``,
-		`Vänliga hälsningar,`,
-		`Skaffu`
-	].join('\n');
+	const text = isSv
+		? [
+				`Hej!`,
+				``,
+				headline,
+				``,
+				`${inviterName} har bjudit in dig till hushållet "${householdName}" i Skaffu.`,
+				`Skaffu hjälper er hålla koll på skafferi, utgångsdatum och inköpslistor — tillsammans i samma hushåll.`,
+				`Du får rollen ${roleLabel}.`,
+				``,
+				`Acceptera inbjudan:`,
+				inviteUrl,
+				``,
+				`Länken gäller i 7 dagar. Om du inte förväntade dig detta kan du ignorera mejlet.`,
+				``,
+				`Vänliga hälsningar,`,
+				`Skaffu`
+			].join('\n')
+		: [
+				`Hi!`,
+				``,
+				headline,
+				``,
+				`${inviterName} invited you to the household "${householdName}" on Skaffu.`,
+				`Skaffu helps you track pantry items, expiry dates and shopping lists together.`,
+				`Your role: ${roleLabel}.`,
+				``,
+				`Accept the invitation:`,
+				inviteUrl,
+				``,
+				`The link is valid for 7 days. If you did not expect this, you can ignore this email.`,
+				``,
+				`Best regards,`,
+				`Skaffu`
+			].join('\n');
 
 	const html = buildHouseholdInviteEmailHtml({
 		headline,
@@ -213,7 +241,8 @@ export function buildHouseholdInviteEmailContent(options: {
 		inviterName,
 		householdName,
 		inviteUrl,
-		roleLabel
+		roleLabel,
+		locale
 	});
 
 	return { subject, html, text };
@@ -226,8 +255,25 @@ function buildHouseholdInviteEmailHtml(options: {
 	householdName: string;
 	inviteUrl: string;
 	roleLabel: string;
+	locale: 'sv' | 'en';
 }): string {
-	const { headline, preheader, inviterName, householdName, inviteUrl, roleLabel } = options;
+	const { headline, preheader, inviterName, householdName, inviteUrl, roleLabel, locale } = options;
+	const isSv = locale === 'sv';
+	const invitedBody = isSv
+		? 'har bjudit in dig till hushållet'
+		: 'invited you to the household';
+	const productLead = isSv
+		? 'Skaffu hjälper er hålla koll på skafferi, utgångsdatum och inköpslistor — tillsammans i samma hushåll.'
+		: 'Skaffu helps you track pantry items, expiry dates and shopping lists — together in one household.';
+	const rolePrefix = isSv ? 'Din roll:' : 'Your role:';
+	const cta = isSv ? 'Acceptera inbjudan' : 'Accept invitation';
+	const linkHelp = isSv
+		? 'Fungerar inte knappen? Kopiera och klistra in länken i webbläsaren:'
+		: "Button not working? Copy and paste this link into your browser:";
+	const expiryNote = isSv
+		? 'Länken gäller i 7 dagar. Om du inte förväntade dig detta kan du ignorera mejlet.'
+		: 'The link is valid for 7 days. If you did not expect this, you can ignore this email.';
+	const signOff = isSv ? 'Vänliga hälsningar,' : 'Best regards,';
 	const safeHeadline = escapeHtml(headline);
 	const safeInviter = escapeHtml(inviterName);
 	const safeHousehold = escapeHtml(householdName);
@@ -236,7 +282,7 @@ function buildHouseholdInviteEmailHtml(options: {
 	const safePreheader = escapeHtml(preheader);
 
 	return `<!DOCTYPE html>
-<html lang="sv" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="${locale}" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -270,16 +316,16 @@ function buildHouseholdInviteEmailHtml(options: {
             <td style="padding:32px 32px 8px;">
               <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;line-height:1.25;letter-spacing:-0.02em;color:${EMAIL.text};">${safeHeadline}</h1>
               <p style="margin:0 0 20px;font-size:16px;line-height:1.6;color:${EMAIL.text};">
-                <strong style="color:${EMAIL.text};">${safeInviter}</strong> har bjudit in dig till hushållet
+                <strong style="color:${EMAIL.text};">${safeInviter}</strong> ${invitedBody}
                 <strong style="color:${EMAIL.text};">${safeHousehold}</strong>.
               </p>
               <p style="margin:0 0 24px;font-size:15px;line-height:1.55;color:${EMAIL.textMuted};">
-                Skaffu hjälper er hålla koll på skafferi, utgångsdatum och inköpslistor — tillsammans i samma hushåll.
+                ${escapeHtml(productLead)}
               </p>
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px;">
                 <tr>
                   <td style="background-color:${EMAIL.surfaceMuted};border:1px solid ${EMAIL.border};border-radius:999px;padding:8px 16px;">
-                    <span style="font-size:13px;color:${EMAIL.textMuted};">Din roll:&nbsp;</span>
+                    <span style="font-size:13px;color:${EMAIL.textMuted};">${escapeHtml(rolePrefix)}&nbsp;</span>
                     <strong style="font-size:13px;color:${EMAIL.primary};">${safeRole}</strong>
                   </td>
                 </tr>
@@ -291,7 +337,7 @@ function buildHouseholdInviteEmailHtml(options: {
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="center" style="border-radius:10px;background-color:${EMAIL.primary};">
-                    <a href="${safeUrl}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:16px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;background-color:${EMAIL.primary};border:1px solid ${EMAIL.primaryHover};">Acceptera inbjudan</a>
+                    <a href="${safeUrl}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:16px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;background-color:${EMAIL.primary};border:1px solid ${EMAIL.primaryHover};">${escapeHtml(cta)}</a>
                   </td>
                 </tr>
               </table>
@@ -300,20 +346,20 @@ function buildHouseholdInviteEmailHtml(options: {
           <tr>
             <td style="padding:0 32px 32px;border-top:1px solid ${EMAIL.border};">
               <p style="margin:24px 0 8px;font-size:13px;line-height:1.5;color:${EMAIL.textMuted};">
-                Fungerar inte knappen? Kopiera och klistra in länken i webbläsaren:
+                ${escapeHtml(linkHelp)}
               </p>
               <p style="margin:0 0 20px;font-size:13px;line-height:1.5;word-break:break-all;">
                 <a href="${safeUrl}" style="color:${EMAIL.primary};text-decoration:underline;">${safeUrl}</a>
               </p>
               <p style="margin:0;font-size:12px;line-height:1.5;color:${EMAIL.textMuted};">
-                Länken gäller i 7 dagar. Om du inte förväntade dig detta kan du ignorera mejlet.
+                ${escapeHtml(expiryNote)}
               </p>
             </td>
           </tr>
           <tr>
             <td style="padding:20px 32px 28px;background-color:${EMAIL.surfaceMuted};border-top:1px solid ${EMAIL.border};">
               <p style="margin:0;font-size:12px;line-height:1.5;color:${EMAIL.textMuted};text-align:center;">
-                Vänliga hälsningar,<br />
+                ${escapeHtml(signOff)}<br />
                 <strong style="color:${EMAIL.text};font-weight:600;">Skaffu</strong>
               </p>
             </td>
@@ -410,7 +456,7 @@ export async function sendHouseholdInviteEmail(options: {
 	householdName: string;
 	inviteUrl: string;
 	role: InviteRole;
-	locale?: 'sv';
+	locale?: 'sv' | 'en';
 }): Promise<SendEmailResult> {
 	const content = buildHouseholdInviteEmailContent(options);
 	return sendEmail({

@@ -120,8 +120,10 @@ export const actions: Actions = {
 			return fail(400, { message: translate(locals.locale, 'admin.invalidUser') });
 		}
 
+		const emailLocale = locals.locale === 'en' ? 'en' : 'sv';
 		await locals.adminService.sendPasswordResetEmail(locals.user!.id, parsed.data.userId, {
-			forceReset: parsed.data.forceReset === 'true'
+			forceReset: parsed.data.forceReset === 'true',
+			locale: emailLocale
 		});
 
 		redirect(302, appendActionToast('/admin?tab=users', 'adminPasswordResetSent'));

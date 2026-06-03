@@ -64,7 +64,7 @@ export class AdminService {
 	async sendPasswordResetEmail(
 		actorId: string,
 		targetUserId: string,
-		options?: { forceReset?: boolean }
+		options?: { forceReset?: boolean; locale?: 'sv' | 'en' }
 	) {
 		if (options?.forceReset) {
 			await this.admin.invalidateUserSessions(targetUserId);
