@@ -6,6 +6,9 @@
 	import BarcodeScanButton from '$lib/components/molecules/BarcodeScanButton.svelte';
 	import BarcodeScannerModal from '$lib/components/organisms/BarcodeScannerModal.svelte';
 	import ProductPhotoScanPicker from '$lib/components/molecules/ProductPhotoScanPicker.svelte';
+	import UnitSelect from '$lib/components/molecules/UnitSelect.svelte';
+	import { guessShelfLife } from '$lib/domain/shelf-life';
+	import { normalizeUnitInput, suggestUnitForName } from '$lib/domain/inventory-units';
 	import ConsumeItemPanel from '$lib/components/molecules/ConsumeItemPanel.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 
@@ -30,6 +33,7 @@
 	let quantity = $state(item?.quantity ?? '1');
 	let unit = $state(item?.unit ?? '');
 	let notes = $state(item?.notes ?? '');
+	let expiresOn = $state(item?.expiresOn ?? '');
 	let location = $state<StorageLocation>(item?.location ?? defaultLocation);
 
 	let scannerOpen = $state(false);
@@ -44,6 +48,7 @@
 		quantity = item?.quantity ?? '1';
 		unit = item?.unit ?? '';
 		notes = item?.notes ?? '';
+		expiresOn = item?.expiresOn ?? '';
 		location = item?.location ?? defaultLocation;
 	});
 
@@ -107,11 +112,18 @@
 		name: string;
 		quantity: string;
 		unit: string | null;
+		expiresOn: string | null;
 		notes: string | null;
 	}) {
 		name = product.name;
 		quantity = product.quantity || '1';
-		unit = product.unit ?? '';
+		unit = normalizeUnitInput(product.unit) || suggestUnitForName(product.name, product.unit);
+		if (product.expiresOn) {
+			expiresOn = product.expiresOn;
+		} else {
+			const inferred = guessShelfLife(product.name, location);
+			if (inferred) expiresOn = inferred.expiresOn;
+		}
 		if (product.notes) {
 			notes = notes ? `${notes}\n${product.notes}` : product.notes;
 		}
@@ -187,18 +199,17 @@
 			{/if}
 		</div>
 		<div class="field">
-			<Label for="unit">{t('common.unit')}</Label>
-			<Input id="unit" name="unit" placeholder={t('item.unitPlaceholder')} bind:value={unit} />
+			<UnitSelect id="unit" name="unit" bind:value={unit} productName={name} />
 		</div>
 	</div>
 
 	<div class="field">
 		<Label for="expiresOn">{t('item.bestBefore')}</Label>
-		<Input id="expiresOn" name="expiresOn" type="date" value={item?.expiresOn ?? ''} />
+		<Input id="expiresOn" name="expiresOn" type="date" bind:value={expiresOn} />
 	</div>
 
 	<div class="field">
-		<Label for="notes">Anteckningar (valfritt)</Label>
+		<Label for="notes">{t('item.notesOptional')}</Label>
 		<textarea id="notes" name="notes" class="textarea" rows="3" bind:value={notes}></textarea>
 	</div>
 

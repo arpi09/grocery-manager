@@ -6,6 +6,7 @@
 	import {
 		ACTION_TOAST_LABEL_PARAM,
 		ACTION_TOAST_PARAM,
+		ACTION_TOAST_REMAINING_PARAM,
 		actionToastMessage,
 		actionToastTone,
 		parseActionToastKind
@@ -17,8 +18,16 @@
 
 	const toastKind = $derived(parseActionToastKind(page.url.searchParams.get(ACTION_TOAST_PARAM)));
 	const label = $derived(page.url.searchParams.get(ACTION_TOAST_LABEL_PARAM) ?? undefined);
+	const remaining = $derived(page.url.searchParams.get(ACTION_TOAST_REMAINING_PARAM) ?? undefined);
+
+	$effect(() => {
+		toastKind;
+		label;
+		remaining;
+		dismissed = false;
+	});
 	const message = $derived(
-		toastKind ? actionToastMessage(getLocale(), toastKind, label) : ''
+		toastKind ? actionToastMessage(getLocale(), toastKind, label, remaining) : ''
 	);
 	const visible = $derived(Boolean(toastKind && message && !dismissed));
 
@@ -40,6 +49,7 @@
 		const url = new URL(page.url);
 		url.searchParams.delete(ACTION_TOAST_PARAM);
 		url.searchParams.delete(ACTION_TOAST_LABEL_PARAM);
+		url.searchParams.delete(ACTION_TOAST_REMAINING_PARAM);
 		const next = `${url.pathname}${url.search}${url.hash}`;
 		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
 	}

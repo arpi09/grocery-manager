@@ -93,6 +93,11 @@
 <style>
 	:global(.celebration-panel) {
 		width: min(400px, calc(100vw - 2 * var(--space-md)));
+		max-height: min(90dvh, 32rem);
+	}
+
+	:global(.celebration-panel .modal-body) {
+		overflow-y: auto;
 	}
 
 	.celebration-body {
@@ -101,9 +106,10 @@
 		flex-direction: column;
 		align-items: center;
 		gap: var(--space-md);
-		padding: var(--space-sm) var(--space-md) var(--space-md);
+		padding: var(--space-md) var(--space-lg) var(--space-lg);
 		text-align: center;
 		overflow: hidden;
+		box-sizing: border-box;
 	}
 
 	.celebration-icon {
@@ -145,7 +151,9 @@
 		font-weight: 700;
 		line-height: 1.35;
 		color: var(--color-text);
-		max-width: 28ch;
+		max-width: 100%;
+		padding: 0 var(--space-xs);
+		overflow-wrap: anywhere;
 		animation: celebrate-pop 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) both;
 	}
 
@@ -156,7 +164,9 @@
 		font-size: 0.95rem;
 		line-height: 1.5;
 		color: var(--color-text-muted);
-		max-width: 32ch;
+		max-width: 100%;
+		padding: 0 var(--space-xs);
+		overflow-wrap: anywhere;
 	}
 
 	@keyframes celebrate-pop {

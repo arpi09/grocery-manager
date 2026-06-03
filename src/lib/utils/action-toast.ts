@@ -3,6 +3,7 @@ import { translate, type MessageKey } from '$lib/i18n/messages';
 
 export const ACTION_TOAST_PARAM = 'actionToast';
 export const ACTION_TOAST_LABEL_PARAM = 'actionLabel';
+export const ACTION_TOAST_REMAINING_PARAM = 'actionRemaining';
 
 export type ActionToastKind =
 	| 'itemCreated'
@@ -27,6 +28,8 @@ export type ActionToastKind =
 	| 'pantryCreated'
 	| 'pantryLeft'
 	| 'householdRenamed'
+	| 'profileSaved'
+	| 'inviteSent'
 	| 'shoppingAdded'
 	| 'shoppingCleared'
 	| 'adminSaved'
@@ -124,6 +127,14 @@ const ACTION_TOAST_KEYS: Record<
 		withLabel: 'actionToast.householdRenamed',
 		generic: 'actionToast.householdRenamedGeneric'
 	},
+	profileSaved: {
+		withLabel: 'actionToast.profileSaved',
+		generic: 'actionToast.profileSaved'
+	},
+	inviteSent: {
+		withLabel: 'actionToast.inviteSent',
+		generic: 'actionToast.inviteSent'
+	},
 	shoppingAdded: {
 		withLabel: 'actionToast.shoppingAdded',
 		generic: 'actionToast.shoppingAdded'
@@ -151,13 +162,23 @@ export function parseActionToastKind(value: string | null): ActionToastKind | nu
 	return null;
 }
 
-export function appendActionToast(path: string, kind: ActionToastKind, label?: string): string {
+export function appendActionToast(
+	path: string,
+	kind: ActionToastKind,
+	label?: string,
+	remaining?: string
+): string {
 	const url = new URL(path, 'http://local');
 	url.searchParams.set(ACTION_TOAST_PARAM, kind);
 	if (label?.trim()) {
 		url.searchParams.set(ACTION_TOAST_LABEL_PARAM, label.trim());
 	} else {
 		url.searchParams.delete(ACTION_TOAST_LABEL_PARAM);
+	}
+	if (remaining?.trim()) {
+		url.searchParams.set(ACTION_TOAST_REMAINING_PARAM, remaining.trim());
+	} else {
+		url.searchParams.delete(ACTION_TOAST_REMAINING_PARAM);
 	}
 	return `${url.pathname}${url.search}${url.hash}`;
 }
@@ -184,10 +205,22 @@ export function actionToastTone(kind: ActionToastKind): ActionToastTone {
 export function actionToastMessage(
 	locale: Locale,
 	kind: ActionToastKind,
-	label?: string
+	label?: string,
+	remaining?: string
 ): string {
 	const keys = ACTION_TOAST_KEYS[kind];
 	const trimmed = label?.trim();
+	const remainingTrimmed = remaining?.trim();
+	if (
+		kind === 'itemPartiallyConsumed' &&
+		trimmed &&
+		remainingTrimmed
+	) {
+		return translate(locale, 'actionToast.itemPartiallyConsumedRemaining', {
+			label: trimmed,
+			remaining: remainingTrimmed
+		});
+	}
 	if (trimmed) {
 		return translate(locale, keys.withLabel, { label: trimmed });
 	}

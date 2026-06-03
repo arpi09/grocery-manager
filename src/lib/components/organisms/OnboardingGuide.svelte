@@ -331,8 +331,10 @@
 	}
 
 	:global(.onboarding-body) {
-		padding-top: var(--space-sm);
+		padding: var(--space-sm) var(--space-md) 0;
 		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
 	}
 
 	@keyframes onboarding-fullscreen-in {
@@ -487,6 +489,7 @@
 		color: var(--color-primary);
 		text-align: center;
 		line-height: 1.4;
+		overflow-wrap: anywhere;
 	}
 
 	.step-body {
@@ -494,6 +497,8 @@
 		font-size: 1rem;
 		line-height: 1.55;
 		color: var(--color-text);
+		overflow-wrap: anywhere;
+		word-break: break-word;
 	}
 
 	.quick-points {

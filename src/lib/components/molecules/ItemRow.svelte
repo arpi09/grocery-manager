@@ -2,6 +2,7 @@
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import ConsumeItemPanel from '$lib/components/molecules/ConsumeItemPanel.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
+	import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
 	import { daysUntilExpiry, formatExpiryDate, EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
 	import { getLocale, t } from '$lib/i18n';
 
@@ -17,10 +18,20 @@
 	let menuOpen = $state(false);
 	let consumeOpen = $state(false);
 
-	function formatQuantity(item: InventoryItem) {
-		const unit = item.unit ? ` ${item.unit}` : '';
-		return `${item.quantity}${unit}`;
+	function formatQuantityLine(item: InventoryItem, showRemaining: boolean) {
+		const unitSuffix = item.unit ? ` ${item.unit}` : '';
+		const amount = `${item.quantity}${unitSuffix}`.trim();
+		if (!showRemaining) return amount;
+		return t('inventory.quantityLeft', { amount });
 	}
+
+	const showRemainingLabel = $derived.by(() => {
+		if (finished) return false;
+		const stock = parseNumericQuantity(item.quantity);
+		return stock !== null && stock > 0;
+	});
+
+	const quantityLine = $derived(formatQuantityLine(item, showRemainingLabel));
 
 	function expiryTone(date: string) {
 		const days = daysUntilExpiry(date);
@@ -98,26 +109,26 @@
 		</div>
 
 		<div class="meta-line">
-			<span class="quantity">{formatQuantity(item)}</span>
-			{#if finished}
-				<Badge tone="default">{t('inventory.finishedBadge')}</Badge>
-			{:else if autoExpired}
-				<Badge tone="warning">{t('inventory.autoExpiredBadge')}</Badge>
-				{#if item.expiresOn}
-					<Badge tone="default">{formatExpiryDate(item.expiresOn, getLocale())}</Badge>
+			<span class="quantity">{quantityLine}</span>
+			<div class="badges">
+				{#if finished}
+					<Badge tone="default">{t('inventory.finishedBadge')}</Badge>
+				{:else if autoExpired}
+					<Badge tone="warning">{t('inventory.autoExpiredBadge')}</Badge>
 				{/if}
-			{:else if item.expiresOn}
-				<Badge tone={expiryTone(item.expiresOn)}>
-					{formatExpiryDate(item.expiresOn, getLocale())}
-				</Badge>
-				{#if item.expiresOnSource === 'ai_inferred'}
-					<Badge tone="default">{t('inventory.aiExpiryBadge')}</Badge>
+				{#if item.expiresOn && !finished}
+					<Badge tone={autoExpired ? 'default' : expiryTone(item.expiresOn)}>
+						{formatExpiryDate(item.expiresOn, getLocale())}
+					</Badge>
+					{#if item.expiresOnSource === 'ai_inferred' && !autoExpired}
+						<Badge tone="default">{t('inventory.aiExpiryBadge')}</Badge>
+					{/if}
 				{/if}
-			{/if}
+			</div>
 		</div>
 
 		{#if item.notes}
-			<p class="notes">{item.notes}</p>
+			<p class="notes" title={item.notes}>{item.notes}</p>
 		{/if}
 	</div>
 </article>
@@ -170,13 +181,25 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: var(--space-sm);
+		justify-content: space-between;
+		gap: var(--space-xs) var(--space-sm);
 		margin-top: var(--space-xs);
 	}
 
 	.quantity {
 		font-size: 0.875rem;
+		font-weight: 600;
 		color: var(--color-text-muted);
+		flex-shrink: 0;
+	}
+
+	.badges {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-xs);
+		justify-content: flex-end;
+		min-width: 0;
 	}
 
 	.notes {
@@ -184,6 +207,13 @@
 		font-size: 0.8125rem;
 		color: var(--color-text-muted);
 		line-height: 1.4;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		word-break: break-word;
 	}
 
 	.menu-wrap {

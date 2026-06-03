@@ -14,21 +14,23 @@ const IMAGE_PRODUCT_SCHEMA = {
 		name: { type: 'string' },
 		quantity: { type: 'string' },
 		unit: { type: 'string' },
+		expiresOn: { type: 'string' },
 		notes: { type: 'string' },
 		confidence: { type: 'string', enum: ['high', 'medium', 'low'] }
 	},
-	required: ['name', 'quantity', 'unit', 'notes', 'confidence'],
+	required: ['name', 'quantity', 'unit', 'expiresOn', 'notes', 'confidence'],
 	additionalProperties: false
 } as const;
 
 const SYSTEM_PROMPT = [
 	'You extract grocery product data from a photo label.',
 	'Output JSON only with:',
-	'{"name":"","quantity":"","unit":"","notes":"","confidence":"high|medium|low"}',
+	'{"name":"","quantity":"","unit":"","expiresOn":"","notes":"","confidence":"high|medium|low"}',
 	'Rules:',
 	'- name: short product name in English',
 	'- quantity: numeric-like string (fallback "1")',
-	'- unit: common short unit or empty string',
+	'- unit: common short unit (st, g, kg, l, ml, förp, pack) or empty string',
+	'- expiresOn: best-before / use-by date as YYYY-MM-DD when visible on the label, otherwise empty string',
 	'- notes: short useful details (brand/flavor/size) or empty string',
 	'- confidence is high when label is very clear, medium when mostly clear, low when uncertain',
 	'- never output markdown code fences'
@@ -38,8 +40,25 @@ interface ImageProduct {
 	name: string;
 	quantity: string;
 	unit: string | null;
+	expiresOn: string | null;
 	notes: string | null;
 	confidence: 'high' | 'medium' | 'low';
+}
+
+function parseExpiresOn(raw: unknown): string | null {
+	if (typeof raw !== 'string') return null;
+	const trimmed = raw.trim();
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return null;
+	const [year, month, day] = trimmed.split('-').map(Number);
+	const date = new Date(year, month - 1, day);
+	if (
+		date.getFullYear() !== year ||
+		date.getMonth() !== month - 1 ||
+		date.getDate() !== day
+	) {
+		return null;
+	}
+	return trimmed;
 }
 
 function parseProduct(raw: unknown): ImageProduct | null {
@@ -51,6 +70,7 @@ function parseProduct(raw: unknown): ImageProduct | null {
 	const name = typeof obj.name === 'string' ? obj.name.trim() : '';
 	const quantity = typeof obj.quantity === 'string' ? obj.quantity.trim() : '1';
 	const unit = typeof obj.unit === 'string' && obj.unit.trim() ? obj.unit.trim() : null;
+	const expiresOn = parseExpiresOn(obj.expiresOn);
 	const notes = typeof obj.notes === 'string' && obj.notes.trim() ? obj.notes.trim() : null;
 	const confidence =
 		obj.confidence === 'high' || obj.confidence === 'medium' || obj.confidence === 'low'
@@ -65,6 +85,7 @@ function parseProduct(raw: unknown): ImageProduct | null {
 		name,
 		quantity: quantity || '1',
 		unit,
+		expiresOn,
 		notes,
 		confidence
 	};
