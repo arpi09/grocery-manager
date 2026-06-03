@@ -23,6 +23,21 @@ export function isProductFeedbackSource(value: string): value is ProductFeedback
 	return (PRODUCT_FEEDBACK_SOURCES as readonly string[]).includes(value);
 }
 
+/** One-tap options for the post-activation survey (maps to churnReason and/or short message). */
+export type PostOnboardingQuickOption = {
+	id: string;
+	churnReason: ChurnReason | null;
+	message: string;
+};
+
+export const POST_ONBOARDING_QUICK_OPTIONS: PostOnboardingQuickOption[] = [
+	{ id: 'going_well', churnReason: null, message: 'Funkar bra hittills' },
+	{ id: 'too_much_work', churnReason: 'too_much_work', message: '' },
+	{ id: 'missing_feature', churnReason: 'missing_feature', message: '' },
+	{ id: 'forgot_habit', churnReason: 'forgot_habit', message: '' },
+	{ id: 'other_app', churnReason: 'other_app', message: '' }
+];
+
 export interface ProductFeedbackEntry {
 	id: string;
 	userId: string;

@@ -7,6 +7,7 @@ import {
 	getActivationProgress,
 	isActivationComplete,
 	isOnboardingExcludedPath,
+	isPostOnboardingSurveyPath,
 	markSignupAt,
 	recordBarcodeActivation,
 	recordReceiptActivation,
@@ -83,6 +84,13 @@ describe('onboarding helpers', () => {
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(true);
 		dismissPostOnboardingSurvey(TEST_USER_A);
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
+	});
+
+	it('limits post-onboarding survey to calm app surfaces', () => {
+		expect(isPostOnboardingSurveyPath('/hem')).toBe(true);
+		expect(isPostOnboardingSurveyPath('/inventory/fridge')).toBe(true);
+		expect(isPostOnboardingSurveyPath('/scan')).toBe(false);
+		expect(isPostOnboardingSurveyPath('/scan?mode=barcode')).toBe(false);
 	});
 
 	it('excludes admin and auth routes', () => {

@@ -428,10 +428,22 @@
 			"other": "Other"
 		},
 		"postOnboarding": {
-			"title": "Quick question",
-			"subtitle": "Optional — helps us improve",
-			"skip": "Skip",
-			"thanks": "Thanks for your feedback!"
+			"title": "How does it feel so far?",
+			"subtitle": "One tap is enough",
+			"lead": "Pick what fits best — we save it right away.",
+			"chipGroupAria": "Quick feedback",
+			"skip": "Not now",
+			"more": "Want to add your own words?",
+			"moreLabel": "Your comment",
+			"morePlaceholder": "e.g. scan felt smooth but …",
+			"thanks": "Thanks — we read everything.",
+			"quick": {
+				"going_well": "Works well",
+				"too_much_work": "Too much effort",
+				"missing_feature": "Missing something",
+				"forgot_habit": "Easy to forget",
+				"other_app": "Using another app"
+			}
 		}
 	},
 	"pwa": {

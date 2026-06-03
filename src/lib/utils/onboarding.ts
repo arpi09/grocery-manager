@@ -116,6 +116,14 @@ export function shouldShowPostOnboardingSurvey(userId?: string | null): boolean 
 	return localStorage.getItem(storageKey(POST_ONBOARDING_SURVEY_PENDING_SUFFIX, userId)) === '1';
 }
 
+/** Calm surfaces only — not during scan/login flows. */
+export function isPostOnboardingSurveyPath(pathname: string): boolean {
+	if (pathname === '/hem' || pathname === '/inkop') {
+		return true;
+	}
+	return pathname.startsWith('/inventory/');
+}
+
 export function dismissPostOnboardingSurvey(userId?: string | null): void {
 	if (typeof localStorage === 'undefined' || !userId) {
 		return;

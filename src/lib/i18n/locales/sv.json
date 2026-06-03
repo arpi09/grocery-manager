@@ -428,10 +428,22 @@
 			"other": "Annat"
 		},
 		"postOnboarding": {
-			"title": "En snabb frÃ¥ga",
-			"subtitle": "Valfritt â€” hjÃ¤lper oss fÃ¶rbÃ¤ttra appen",
-			"skip": "Hoppa Ã¶ver",
-			"thanks": "Tack fÃ¶r din feedback!"
+			"title": "Hur känns det hittills?",
+			"subtitle": "Ett tryck räcker",
+			"lead": "Välj det som stämmer bäst ? vi sparar direkt.",
+			"chipGroupAria": "Snabb feedback",
+			"skip": "Inte nu",
+			"more": "Vill du förtydliga med egna ord?",
+			"moreLabel": "Egen kommentar",
+			"morePlaceholder": "T.ex. scan kändes smidig men ?",
+			"thanks": "Tack ? vi läser allt.",
+			"quick": {
+				"going_well": "Funkar bra",
+				"too_much_work": "För mycket jobb",
+				"missing_feature": "Saknar något",
+				"forgot_habit": "Glömmer lätt",
+				"other_app": "Använder annat"
+			}
 		}
 	},
 	"pwa": {

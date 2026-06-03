@@ -1,29 +1,38 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
-	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
-	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
-	import { CHURN_REASONS } from '$lib/domain/product-feedback';
+	import {
+		POST_ONBOARDING_QUICK_OPTIONS,
+		type PostOnboardingQuickOption
+	} from '$lib/domain/product-feedback';
 	import { t } from '$lib/i18n';
 	import {
 		clearPostOnboardingSurveyPending,
 		dismissPostOnboardingSurvey,
 		isOnboardingExcludedPath,
+		isPostOnboardingSurveyPath,
 		shouldShowPostOnboardingSurvey
 	} from '$lib/utils/onboarding';
 
 	let open = $state(false);
 	let submitting = $state(false);
-	let submitted = $state(false);
+	let showMore = $state(false);
+	let moreMessage = $state('');
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
 
 	function tryOpenSurvey() {
-		if (!browser || !userId || isOnboardingExcludedPath(pathname) || !shouldShowPostOnboardingSurvey(userId)) {
+		if (
+			!browser ||
+			!userId ||
+			isOnboardingExcludedPath(pathname) ||
+			!isPostOnboardingSurveyPath(pathname) ||
+			!shouldShowPostOnboardingSurvey(userId)
+		) {
 			open = false;
 			return;
 		}
@@ -33,13 +42,54 @@
 	function skipSurvey() {
 		dismissPostOnboardingSurvey(userId);
 		open = false;
+		showMore = false;
+		moreMessage = '';
 	}
 
-	function onSubmitted() {
-		submitted = true;
+	function closeAfterSubmit() {
 		clearPostOnboardingSurveyPending(userId);
 		dismissPostOnboardingSurvey(userId);
 		open = false;
+		showMore = false;
+		moreMessage = '';
+	}
+
+	async function submitFeedback(option: PostOnboardingQuickOption | null, message = '') {
+		if (!browser || submitting) {
+			return;
+		}
+
+		const trimmedMessage = message.trim();
+		const churnReason = option?.churnReason ?? null;
+		const payloadMessage = trimmedMessage || option?.message?.trim() || '';
+
+		if (!churnReason && payloadMessage.length < 3) {
+			return;
+		}
+
+		submitting = true;
+		const formData = new FormData();
+		formData.set('source', 'post_onboarding');
+		if (churnReason) {
+			formData.set('churnReason', churnReason);
+		}
+		formData.set('message', payloadMessage);
+
+		try {
+			const response = await fetch('/settings?/submitProductFeedback', {
+				method: 'POST',
+				body: formData
+			});
+			if (response.ok) {
+				closeAfterSubmit();
+			}
+		} finally {
+			submitting = false;
+		}
+	}
+
+	function submitMore() {
+		void submitFeedback(null, moreMessage);
 	}
 
 	$effect(() => {
@@ -70,54 +120,49 @@
 		</ModalHeader>
 	{/snippet}
 
-	{#if submitted}
-		<FeedbackBanner tone="success" message={t('feedback.postOnboarding.thanks')} />
-	{:else}
-		<form
-			method="POST"
-			action="/settings?/submitProductFeedback"
-			class="survey-form"
-			use:enhance={() => {
-				submitting = true;
-				return async ({ result, update }) => {
-					submitting = false;
-					if (result.type === 'success') {
-						onSubmitted();
-						return;
-					}
-					await update();
-				};
-			}}
-		>
-			<input type="hidden" name="source" value="post_onboarding" />
-			<label class="survey-field">
-				<span>{t('feedback.churnQuestion')}</span>
-				<select name="churnReason">
-					<option value="">{t('feedback.churnOptional')}</option>
-					{#each CHURN_REASONS as reason}
-						<option value={reason}>{t(`feedback.churnReasons.${reason}`)}</option>
-					{/each}
-				</select>
-			</label>
-			<label class="survey-field">
-				<span>{t('feedback.messageOptional')}</span>
+	<div class="survey-body" aria-busy={submitting}>
+		<p class="lead">{t('feedback.postOnboarding.lead')}</p>
+
+		<div class="chip-grid" role="group" aria-label={t('feedback.postOnboarding.chipGroupAria')}>
+			{#each POST_ONBOARDING_QUICK_OPTIONS as option (option.id)}
+				<button
+					type="button"
+					class="chip"
+					disabled={submitting}
+					onclick={() => submitFeedback(option)}
+				>
+					{t(`feedback.postOnboarding.quick.${option.id}`)}
+				</button>
+			{/each}
+		</div>
+
+		{#if !showMore}
+			<button type="button" class="more-link" disabled={submitting} onclick={() => (showMore = true)}>
+				{t('feedback.postOnboarding.more')}
+			</button>
+		{:else}
+			<label class="more-field">
+				<span class="sr-only">{t('feedback.postOnboarding.moreLabel')}</span>
 				<textarea
-					name="message"
-					rows="3"
-					maxlength="2000"
-					placeholder={t('feedback.messagePlaceholder')}
+					bind:value={moreMessage}
+					rows="2"
+					maxlength="500"
+					placeholder={t('feedback.postOnboarding.morePlaceholder')}
+					disabled={submitting}
 				></textarea>
 			</label>
-			<div class="survey-actions">
-				<Button type="button" variant="secondary" onclick={skipSurvey}>
-					{t('feedback.postOnboarding.skip')}
-				</Button>
-				<Button type="submit" loading={submitting} loadingLabel={t('common.saving')}>
-					{t('feedback.submit')}
-				</Button>
-			</div>
-		</form>
-	{/if}
+			<Button
+				type="button"
+				fullWidth
+				disabled={moreMessage.trim().length < 3}
+				loading={submitting}
+				loadingLabel={t('common.saving')}
+				onclick={submitMore}
+			>
+				{t('feedback.submit')}
+			</Button>
+		{/if}
+	</div>
 </Modal>
 
 <style>
@@ -130,33 +175,72 @@
 		text-decoration: underline;
 	}
 
-	.survey-form {
+	.survey-body {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-md);
 	}
 
-	.survey-field {
-		display: flex;
-		flex-direction: column;
-		gap: 0.35rem;
-		font-size: 0.9rem;
+	.lead {
+		margin: 0;
+		font-size: 0.95rem;
+		color: var(--color-text-muted);
+		line-height: 1.45;
 	}
 
-	.survey-field select,
-	.survey-field textarea {
+	.chip-grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
+	}
+
+	.chip {
+		flex: 1 1 calc(50% - var(--space-sm));
+		min-width: 8.5rem;
+		padding: 0.65rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		color: var(--color-text);
+		font: inherit;
+		font-size: 0.9rem;
+		font-weight: 600;
+		text-align: center;
+		cursor: pointer;
+		transition:
+			border-color 0.15s ease,
+			background 0.15s ease;
+	}
+
+	.chip:hover:not(:disabled) {
+		border-color: var(--color-primary);
+		background: var(--color-primary-soft, rgba(61, 107, 79, 0.08));
+	}
+
+	.chip:disabled {
+		opacity: 0.6;
+		cursor: wait;
+	}
+
+	.more-link {
+		align-self: flex-start;
+		border: none;
+		background: none;
+		padding: 0;
+		color: var(--color-text-muted);
+		font-size: 0.85rem;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	.more-field textarea {
+		width: 100%;
 		padding: 0.6rem 0.75rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
 		background: var(--color-surface);
 		color: var(--color-text);
 		font: inherit;
-	}
-
-	.survey-actions {
-		display: flex;
-		justify-content: flex-end;
-		gap: var(--space-sm);
-		flex-wrap: wrap;
+		resize: vertical;
 	}
 </style>
