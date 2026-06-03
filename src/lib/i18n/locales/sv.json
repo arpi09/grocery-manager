@@ -208,14 +208,14 @@
 	},
 	"scan": {
 		"title": "Skanna",
-		"subtitle": "V?lj hur du vill l?gga till varor",
+		"subtitle": "Välj hur du vill lägga till varor",
 		"barcodeTitle": "Streckkod",
-		"barcodeSubtitle": "Rikta kameran mot streckkoden p? f?rpackningen",
-		"allModes": "Alla skanningsl?gen",
-		"readonly": "Du har endast l?sbeh?righet i detta hush?ll och kan inte l?gga till varor.",
-		"cancelBack": "Avbryt och g? tillbaka",
+		"barcodeSubtitle": "Rikta kameran mot streckkoden på förpackningen",
+		"allModes": "Alla skanningslägen",
+		"readonly": "Du har endast läsbehörighet i detta hushåll och kan inte lägga till varor.",
+		"cancelBack": "Avbryt och gå tillbaka",
 		"cancel": "Avbryt",
-		"hubAria": "Skanningsl?gen",
+		"hubAria": "Skanningslägen",
 		"modes": {
 			"barcode": "Streckkod",
 			"receipt": "Kvitto",
@@ -224,43 +224,43 @@
 		},
 		"modeTiles": {
 			"barcode": {
-				"description": "Skanna EAN och l?gg till direkt."
+				"description": "Skanna EAN och lägg till direkt."
 			},
 			"receipt": {
-				"description": "Digitalt kvitto eller pappersfoto ? flera varor p? en g?ng."
+				"description": "Digitalt kvitto eller pappersfoto — flera varor på en gång."
 			},
 			"photo": {
 				"description": "Fota etiketten och fyll i uppgifter automatiskt."
 			},
 			"photoRound": {
-				"description": "Fota kyl, frys eller skafferi ? inventera flera varor i en runda."
+				"description": "Fota kyl, frys eller skafferi — inventera flera varor i en runda."
 			}
 		},
 		"photoPage": {
 			"title": "Fota produkt",
-			"subtitle": "AI l?ser etiketten och fyller i uppgifter",
-			"readonly": "Du har endast l?sbeh?righet i detta hush?ll och kan inte l?gga till varor.",
-			"continue": "Forts?tt och granska"
+			"subtitle": "AI läser etiketten och fyller i uppgifter",
+			"readonly": "Du har endast läsbehörighet i detta hushåll och kan inte lägga till varor.",
+			"continue": "Fortsätt och granska"
 		},
 		"receiptPage": {
 			"title": "Skanna kvitto",
-			"subtitle": "L?gg till flera varor p? en g?ng",
-			"readonly": "Du har endast l?sbeh?righet och kan inte l?gga till varor fr?n kvitto."
+			"subtitle": "Lägg till flera varor på en gång",
+			"readonly": "Du har endast läsbehörighet och kan inte lägga till varor från kvitto."
 		},
 		"receiptGuide": {
 			"title": "Har du kvittot digitalt?",
-			"hide": "D?lj",
+			"hide": "Dölj",
 			"show": "Visa",
-			"intro": "M?nga appar sparar kvitton ? exportera som PDF eller bild och ladda upp h?r.",
-			"step1": "?ppna appen d?r kvittot finns (t.ex. Kivra, bank, e-post, Wallet)",
-			"step2": "?ppna kvittot ? Spara, Dela eller Ladda ner som PDF eller bild",
-			"step3": "Kom tillbaka hit och v?lj V?lj fr?n filer",
-			"examplesLabel": "Vanliga k?llor",
-			"examplesAria": "Exempel p? appar med digitala kvitton",
-			"kivraTitle": "Visa steg f?r Kivra",
-			"kivraStep1": "?ppna Kivra och hitta kvittot under ink?p eller dokument.",
-			"kivraStep2": "Tryck p? kvittot och v?lj dela eller spara ? ofta som PDF.",
-			"kivraStep3": "Spara PDF:en och v?lj filen h?r ? du beh?ver inte g?ra om den till sk?rmdump."
+			"intro": "Många appar sparar kvitton — exportera som PDF eller bild och ladda upp här.",
+			"step1": "Öppna appen där kvittot finns (t.ex. Kivra, bank, e-post, Wallet)",
+			"step2": "Öppna kvittot — Spara, Dela eller Ladda ner som PDF eller bild",
+			"step3": "Kom tillbaka hit och välj Välj från filer",
+			"examplesLabel": "Vanliga källor",
+			"examplesAria": "Exempel på appar med digitala kvitton",
+			"kivraTitle": "Visa steg för Kivra",
+			"kivraStep1": "Öppna Kivra och hitta kvittot under inköp eller dokument.",
+			"kivraStep2": "Tryck på kvittot och välj dela eller spara — ofta som PDF.",
+			"kivraStep3": "Spara PDF:en och välj filen här — du behöver inte göra om den till skärmdump."
 		},
 		"cancelBackToHome": "Avbryt och tillbaka till hem",
 		"otherModes": "Skanna på annat sätt",
@@ -495,21 +495,21 @@
 			"other": "Annat"
 		},
 		"postOnboarding": {
-			"title": "Hur k�nns det hittills?",
-			"subtitle": "Ett tryck r�cker",
-			"lead": "V�lj det som st�mmer b�st ? vi sparar direkt.",
+			"title": "Hur känns det hittills?",
+			"subtitle": "Ett tryck räcker",
+			"lead": "Välj det som stämmer bäst — vi sparar direkt.",
 			"chipGroupAria": "Snabb feedback",
 			"skip": "Inte nu",
-			"more": "Vill du f�rtydliga med egna ord?",
+			"more": "Vill du förtydliga med egna ord?",
 			"moreLabel": "Egen kommentar",
-			"morePlaceholder": "T.ex. scan k�ndes smidig men ?",
-			"thanks": "Tack ? vi l�ser allt.",
+			"morePlaceholder": "T.ex. scan kändes smidig men …",
+			"thanks": "Tack — vi läser allt.",
 			"quick": {
 				"going_well": "Funkar bra",
-				"too_much_work": "F�r mycket jobb",
-				"missing_feature": "Saknar n�got",
-				"forgot_habit": "Gl�mmer l�tt",
-				"other_app": "Anv�nder annat"
+				"too_much_work": "För mycket jobb",
+				"missing_feature": "Saknar något",
+				"forgot_habit": "Glömmer lätt",
+				"other_app": "Använder annat"
 			}
 		}
 	},
@@ -1163,14 +1163,14 @@
 		}
 	},
 	"receiptBulk": {
-		"lead": "Har du kvittot i en app? Ladda upp PDF eller bild direkt ? eller fota ett papperskvitto. Vi f?resl?r varor du kan l?gga till.",
+		"lead": "Har du kvittot i en appå Ladda upp PDF eller bild direkt — eller fota ett papperskvitto. Vi föreslår varor du kan lägga till.",
 		"cameraPaper": "Fota papperskvitto",
-		"selectItems": "V?lj varor ({selected} av {total})",
-		"locationForAll": "S?tt plats f?r alla valda:",
+		"selectItems": "Välj varor ({selected} av {total})",
+		"locationForAll": "Sätt plats för alla valda:",
 		"locationPerItem": "Plats:",
-		"addCount": "L?gg till {count} {count, plural, one {vara} other {varor}}",
-		"apiKeyHint": "Kr?ver OPENAI_API_KEY i serverns .env.",
-		"locationBulkHint": "G?ller markerade rader. ?ndra plats per vara nedan om en rad ska ligga n?gon annanstans.",
+		"addCount": "Lägg till {count} {count, plural, one {vara} other {varor}}",
+		"apiKeyHint": "Kräver OPENAI_API_KEY i serverns .env.",
+		"locationBulkHint": "Gäller markerade rader. Ändra plats per vara nedan om en rad ska ligga någon annanstans.",
 		"locationOverride": "egen plats"
 	},
 	"scanFlow": {
@@ -1249,7 +1249,7 @@
 		"quickPointExpiry": "Se vad som går ut snart på startsidan",
 		"quickPointMeals": "Planera middagar när du vill",
 		"ctaBarcodeFirst": "Skanna din första vara",
-		"welcomeBody": "Skaffu hj?lper dig h?lla koll p? mat hemma ? s? du handlar smartare, minskar svinn och lagar mat utifr?n det du redan har.",
+		"welcomeBody": "Skaffu hjälper dig hålla koll på mat hemma — så du handlar smartare, minskar svinn och lagar mat utifrån det du redan har.",
 		"ctaReceipt": "Skanna kvitto",
 		"ctaBarcode": "Skanna 5 varor",
 		"barcodeProgress": "{count} av {goal} streckkoder",
@@ -1259,12 +1259,12 @@
 		"celebrateCtaScan": "Skanna fler varor",
 		"celebrateCtaShopping": "Öppna inköpslistan",
 		"celebrateDismiss": "Stanna på startsidan",
-		"scanTitle": "L?gg till din f?rsta vara",
-		"scanBody": "Skanna streckkod eller kvitto, eller l?gg till manuellt. Fem varor r?cker f?r att komma ig?ng ? du beh?ver inte fylla hela skafferiet p? en g?ng.",
+		"scanTitle": "Lägg till din första vara",
+		"scanBody": "Skanna streckkod eller kvitto, eller lägg till manuellt. Fem varor räcker för att komma igång — du behöver inte fylla hela skafferiet på en gång.",
 		"locationsTitle": "Tre platser",
-		"locationsBody": "Dela upp lagret efter var varorna st?r. Tryck p? en plats p? startsidan f?r att se och redigera inneh?llet.",
-		"shareTitle": "Dela hush?ll",
-		"shareBody": "Bjud in familj eller sambo under Inst?llningar. Byt mellan hush?ll via menyn h?gst upp om du har flera skafferier.",
+		"locationsBody": "Dela upp lagret efter var varorna står. Tryck på en plats på startsidan för att se och redigera innehållet.",
+		"shareTitle": "Dela hushåll",
+		"shareBody": "Bjud in familj eller sambo under Inställningar. Byt mellan hushåll via menyn högst upp om du har flera skafferier.",
 		"readyTitle": "Nu är du redo!",
 		"readyBody": "Välj hur du vill börja fylla skafferiet, eller tryck Kom igång och utforska i din egen takt. Guiden finns under Inställningar om du vill se den igen.",
 		"locationsAria": "Lagringsplatser",
@@ -1273,21 +1273,21 @@
 		"cupboardShort": "Skafferi",
 		"tryScan": "Prova skanna",
 		"stepsAria": "Introduktionssteg",
-		"landingHousehold": "Hush?ll",
-		"landingShopping": "Ink?pslista",
-		"landingExpiring": "Utg?r snart",
+		"landingHousehold": "Hushåll",
+		"landingShopping": "Inköpslista",
+		"landingExpiring": "Utgår snart",
 		"landingHeadline": "Ditt skafferi, samlat",
 		"landingExpiringCount": "{count} snart",
-		"scanHint": "Tips: skanna-knappen sitter l?ngst ner i menyn p? mobilen.",
-		"expiryTitle": "Utg?ngsdatum och ?t det f?rst",
-		"expiryBody": "S?tt utg?ngsdatum n?r du l?gger till varor. P? startsidan visar vi vad som g?r ut snart och f?resl?r m?ltider s? du hinner anv?nda maten i tid.",
-		"mealsTitle": "Matplan och ink?pslista",
-		"mealsBody": "Planera veckans middagar och fyll ink?pslistan med det som saknas ? listan h?nger ihop med det du har hemma.",
+		"scanHint": "Tips: skanna-knappen sitter längst ner i menyn på mobilen.",
+		"expiryTitle": "Utgångsdatum och ät det först",
+		"expiryBody": "Sätt utgångsdatum när du lägger till varor. På startsidan visar vi vad som går ut snart och föreslår måltider så du hinner använda maten i tid.",
+		"mealsTitle": "Matplan och inköpslista",
+		"mealsBody": "Planera veckans middagar och fyll inköpslistan med det som saknas — listan hänger ihop med det du har hemma.",
 		"encourageStep2": "Bra start — nu kollar vi hur du fyller skafferiet.",
-		"encourageStep3": "Snart ?r du d?r?",
-		"encourageStep4": "Du f?r koll p? datumen ? smart!",
-		"encourageStep5": "N?stan f?rdig att f? en super bra matupplevelse!",
-		"getStarted": "Kom ig?ng",
+		"encourageStep3": "Snart är du där?",
+		"encourageStep4": "Du för koll på datumen — smart!",
+		"encourageStep5": "Nästan färdig att få en super bra matupplevelse!",
+		"getStarted": "Kom igång",
 		"skip": "Hoppa över",
 		"dialogAria": "Introduktion till Skaffu",
 		"celebrateWoohoo": "Du har kommit igång med appen — woohoo!"
@@ -1309,7 +1309,7 @@
 		"stripTitle": "Din vecka",
 		"zeroWasteWeeks": "Veckor utan svinn",
 		"streakBadge": "Streak",
-		"milestonesProgress": "{done} av {total} uppn�dda",
+		"milestonesProgress": "{done} av {total} uppnådda",
 		"consumedThisWeek": "Förbrukade denna vecka",
 		"eatFirstRitual": "Ät det först-ritual",
 		"eatFirstProgress": "{done} av {goal} inplanerade denna vecka",
@@ -1592,7 +1592,7 @@
 		"householdRenamedGeneric": "Hushållsnamn sparat",
 		"itemPartiallyConsumedRemaining": "{label} loggad — {remaining} kvar",
 		"profileSaved": "Profil sparad",
-		"inviteSent": "Inbjudan skickad ? kolla inkorgen"
+		"inviteSent": "Inbjudan skickad — kolla inkorgen"
 	},
 	"consume": {
 		"logUsage": "Logga förbrukning",

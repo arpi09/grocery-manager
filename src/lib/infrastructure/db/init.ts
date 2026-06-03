@@ -145,7 +145,7 @@ export function getDatabaseBackend(): DatabaseBackend {
 	return usePglite() ? 'pglite' : 'postgres';
 }
 
-/** Full schema â€” only on a new PGlite data directory. */
+/** Full schema — only on a new PGlite data directory. */
 const PGlite_BASELINE_MIGRATION = '0000_init.sql';
 /**
  * Safe to re-run on every startup (uses IF NOT EXISTS).

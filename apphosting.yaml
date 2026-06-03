@@ -1,4 +1,4 @@
-﻿# Firebase App Hosting â€” Cloud Run settings and environment.
+﻿# Firebase App Hosting — Cloud Run settings and environment.
 # Replace placeholder values and create secrets before first deploy.
 # Docs: docs/FIREBASE_DEPLOY.md
 
@@ -19,14 +19,14 @@ scripts:
   runCommand: node build
 
 env:
-  # Production only at runtime â€” NODE_ENV=production during BUILD makes npm ci
+  # Production only at runtime — NODE_ENV=production during BUILD makes npm ci
   # omit devDependencies (vite, SvelteKit, adapter-node) and breaks npm run build.
   - variable: NODE_ENV
     value: production
     availability:
       - RUNTIME
 
-  # Production must use real Postgres â€” never PGlite
+  # Production must use real Postgres — never PGlite
   - variable: USE_PGLITE
     value: "false"
     availability:
@@ -64,7 +64,7 @@ env:
     availability:
       - RUNTIME
 
-  # Build phase only â€” vite build does not connect; satisfies tools that read DATABASE_URL.
+  # Build phase only — vite build does not connect; satisfies tools that read DATABASE_URL.
   - variable: DATABASE_URL
     value: postgresql://build:build@127.0.0.1:5432/build
     availability:
@@ -139,7 +139,7 @@ env:
     availability:
       - RUNTIME
 
-  # Resend sender â€” use onboarding@resend.dev until a domain is verified (see docs/EMAIL.md)
+  # Resend sender — use onboarding@resend.dev until a domain is verified (see docs/EMAIL.md)
   - variable: RESEND_FROM
     value: Skaffu <hello@skaffu.com>
     availability:
