@@ -33,9 +33,10 @@ test.describe('Critical flows', () => {
 	test('onboarding quickstart from settings redirects to scan hub', async ({ page }) => {
 		test.setTimeout(60_000);
 		await registerNewUser(page);
-		await page.goto('/settings');
+		await page.goto('/settings#settings-app');
 		await dismissOnboardingModalIfOpen(page);
 		await expect(page).toHaveURL(/\/settings/);
+		await page.locator('#settings-app details.settings-disclosure summary').click();
 		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click();
 		await expectOnboardingGuideVisible(page);
 		await page.getByTestId('onboarding-quickstart').click();

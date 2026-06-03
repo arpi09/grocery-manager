@@ -78,6 +78,8 @@ test.describe('Receipt flow', () => {
 		await page.getByTestId('receipt-bulk-submit').click();
 
 		await expect(page).toHaveURL(/\/hem/, { timeout: 15_000 });
-		await expect(page.getByText(/E2E Testvara|1 varor/i)).toBeVisible({ timeout: 10_000 });
+		await expect(
+			page.locator('.toast-message').filter({ hasText: /E2E Testvara|1 varor/i })
+		).toBeVisible({ timeout: 10_000 });
 	});
 });
