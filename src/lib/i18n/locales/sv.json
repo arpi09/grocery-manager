@@ -1,4 +1,4 @@
-{
+﻿{
 	"common": {
 		"save": "Spara",
 		"cancel": "Avbryt",
@@ -225,8 +225,8 @@
 		"cancelBack": "Avbryt och g? tillbaka",
 		"cancelBackToHome": "Avbryt och tillbaka till hem",
 		"cancel": "Avbryt",
-		"otherModes": "Skanna p? annat s?tt",
-		"otherModesHide": "D?lj andra s?tt",
+		"otherModes": "Skanna p├Ñ annat s├ñtt",
+		"otherModesHide": "D├╢lj andra s├ñtt",
 		"hubAria": "Skanningsl?gen",
 		"modes": {
 			"barcode": "Streckkod",
@@ -416,22 +416,22 @@
 		},
 		"feedback": {
 			"title": "Ge feedback",
-			"description": "Berätta vad som funkar bra eller vad vi kan göra bättre — kort räcker.",
-			"topicQuestion": "Vad gäller det? (valfritt)",
-			"topicOptional": "Välj ämne",
+			"description": "Ber├ñtta vad som funkar bra eller vad vi kan g├╢ra b├ñttre ΓÇö kort r├ñcker.",
+			"topicQuestion": "Vad g├ñller det? (valfritt)",
+			"topicOptional": "V├ñlj ├ñmne",
 			"topicReasons": {
-				"forgot_habit": "Vana / att komma ihåg",
-				"too_much_work": "Arbetsflöde / friktion",
+				"forgot_habit": "Vana / att komma ih├Ñg",
+				"too_much_work": "Arbetsfl├╢de / friktion",
 				"missing_feature": "Funktioner",
-				"privacy_trust": "Integritet / förtroende",
+				"privacy_trust": "Integritet / f├╢rtroende",
 				"other_app": "Andra appar",
-				"notifications": "Notiser / påminnelser",
+				"notifications": "Notiser / p├Ñminnelser",
 				"other": "Annat"
 			},
 			"messageLabel": "Din kommentar",
-			"messagePlaceholder": "T.ex. scan kändes smidig, önskar filter i listan…",
-			"messageTooShort": "Skriv minst några ord så vi förstår.",
-			"thanks": "Tack — din feedback är sparad."
+			"messagePlaceholder": "T.ex. scan k├ñndes smidig, ├╢nskar filter i listanΓÇª",
+			"messageTooShort": "Skriv minst n├Ñgra ord s├Ñ vi f├╢rst├Ñr.",
+			"thanks": "Tack ΓÇö din feedback ├ñr sparad."
 		},
 		"autoExpiredGrace": {
 			"title": "Automatiskt utg?ngna varor",
@@ -1138,7 +1138,7 @@
 		"cameraPaper": "Fota papperskvitto",
 		"selectItems": "V?lj varor ({selected} av {total})",
 		"locationForAll": "S?tt plats f?r alla valda:",
-		"locationBulkHint": "G?ller markerade rader. ?ndra plats per vara nedan om en rad ska ligga n?gon annanstans.",
+		"locationBulkHint": "G├ñller markerade rader. ├ändra plats per vara nedan om en rad ska ligga n├Ñgon annanstans.",
 		"locationPerItem": "Plats:",
 		"locationOverride": "egen plats",
 		"addCount": "L?gg till {count} {count, plural, one {vara} other {varor}}",
@@ -1211,15 +1211,15 @@
 		"firstWinToast": "Wohooo ? dina f?rsta receptid?er ?r h?r! Nu blir det l?ttare att laga gott."
 	},
 	"onboarding": {
-		"welcome": "V�lkommen till Skaffu",
+		"welcome": "V∩┐╜lkommen till Skaffu",
 		"stepOf": "Steg {current} av {total}",
-		"welcomeBodyShort": "Tre saker p� 10 sekunder ? sedan f�r du v�rde direkt.",
-		"quickStart": "Snabbstart ? hoppa �ver guiden",
-		"quickPointsAria": "Det h�r kan du g�ra direkt",
+		"welcomeBodyShort": "Tre saker p∩┐╜ 10 sekunder ? sedan f∩┐╜r du v∩┐╜rde direkt.",
+		"quickStart": "Snabbstart ? hoppa ∩┐╜ver guiden",
+		"quickPointsAria": "Det h∩┐╜r kan du g∩┐╜ra direkt",
 		"quickPointScan": "Skanna streckkod eller kvitto",
-		"quickPointExpiry": "Se vad som g�r ut snart p� startsidan",
-		"quickPointMeals": "Planera middagar n�r du vill",
-		"ctaBarcodeFirst": "Skanna din f�rsta vara",
+		"quickPointExpiry": "Se vad som g∩┐╜r ut snart p∩┐╜ startsidan",
+		"quickPointMeals": "Planera middagar n∩┐╜r du vill",
+		"ctaBarcodeFirst": "Skanna din f∩┐╜rsta vara",
 		"welcomeBody": "Skaffu hj?lper dig h?lla koll p? mat hemma ? s? du handlar smartare, minskar svinn och lagar mat utifr?n det du redan har.",
 		"ctaReceipt": "Skanna kvitto",
 		"ctaBarcode": "Skanna 5 varor",
