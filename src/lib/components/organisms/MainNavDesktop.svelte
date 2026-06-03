@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
+	import ProNavBadge from '$lib/components/atoms/ProNavBadge.svelte';
 	import NavIcon from '$lib/components/atoms/NavIcon.svelte';
 	import PantrySwitcher from '$lib/components/molecules/PantrySwitcher.svelte';
 	import ProfileMenu from '$lib/components/molecules/ProfileMenu.svelte';
@@ -35,6 +36,7 @@
 	}: Props = $props();
 
 	const pathname = $derived(page.url.pathname);
+	const isPro = $derived(Boolean(page.data.isPro));
 
 	const moreActive = $derived(
 		secondary.some((item) => isNavActive(pathname, item)) || (moreOpen && secondary.length > 0)
@@ -58,6 +60,9 @@
 		<a href={APP_HOME_PATH} class="desktop-brand" aria-label={t('nav.brandHome')}>
 			<AppLogo size="sm" />
 			<span class="desktop-brand-text">{t('nav.brandName')}</span>
+			{#if isPro}
+				<ProNavBadge />
+			{/if}
 		</a>
 
 		<nav class="desktop-nav" aria-label={t('nav.primaryNav')}>
@@ -154,7 +159,7 @@
 		gap: 0.55rem;
 		min-height: 2.75rem;
 		min-width: 0;
-		max-width: 10rem;
+		max-width: 12rem;
 		color: var(--color-text);
 		text-decoration: none;
 		flex-shrink: 0;
@@ -324,6 +329,10 @@
 
 		.desktop-brand {
 			max-width: 2.75rem;
+		}
+
+		.desktop-brand:has(:global(.pro-nav-badge)) {
+			max-width: 4.75rem;
 		}
 
 		.desktop-brand-text {

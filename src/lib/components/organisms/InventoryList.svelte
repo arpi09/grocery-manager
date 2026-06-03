@@ -16,6 +16,7 @@
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import type { StorageLocation } from '$lib/domain/location';
+	import { scanModeHref } from '$lib/utils/scan-nav';
 
 	interface Props {
 		items: InventoryItem[];
@@ -40,9 +41,7 @@
 	}: Props = $props();
 
 	const inventoryPath = $derived(`/inventory/${location}`);
-	const scanHref = $derived(
-		`/scan?mode=barcode&location=${location}&from=${encodeURIComponent(inventoryPath)}`
-	);
+	const scanHref = $derived(scanModeHref('photo', inventoryPath, { location }));
 	const manualAddHref = $derived(
 		`/item/new?location=${location}&from=${encodeURIComponent(inventoryPath)}`
 	);
@@ -213,7 +212,7 @@
 			actionLabel={isSearchEmpty
 				? undefined
 				: canWrite
-					? t('inventory.scanFirstItem')
+					? t('photoRound.title')
 					: t('inventory.backHome')}
 			actionHref={isSearchEmpty ? undefined : canWrite ? scanHref : '/'}
 			secondaryActionLabel={!isSearchEmpty && canWrite && !hasInventory

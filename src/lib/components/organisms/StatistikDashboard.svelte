@@ -14,9 +14,10 @@
 	interface Props {
 		dashboard: StatistikDashboard;
 		milestones?: MilestoneState[];
+		isPro?: boolean;
 	}
 
-	let { dashboard, milestones = [] }: Props = $props();
+	let { dashboard, milestones = [], isPro = false }: Props = $props();
 	const { analytics, addedTrend, addedWeekOverWeek, impact } = $derived(dashboard);
 	const isEmpty = $derived(analytics.totalItems === 0);
 	const addedMax = $derived(maxWeeklyCount(addedTrend));
@@ -155,12 +156,14 @@
 			<Card href="/scan?mode=barcode&from=/statistik" interactive class="action-card"><FeatureIcon id="barcode" size={22} /><div><h2>{t('stats.scanCta')}</h2><p>{t('stats.scanLead')}</p></div></Card>
 		</div>
 
-		<Card class="pro-teaser">
-			<p class="pro-badge label-caps">{t('stats.proBadge')}</p>
-			<h2>{t('stats.proTitle')}</h2>
-			<p class="muted">{t('stats.proLead')}</p>
-			<a href="/priser">{t('settings.plan.learnMore')}</a>
-		</Card>
+		{#if !isPro}
+			<Card class="pro-teaser">
+				<p class="pro-badge label-caps">{t('stats.proBadge')}</p>
+				<h2>{t('stats.proTitle')}</h2>
+				<p class="muted">{t('stats.proLead')}</p>
+				<a href="/priser">{t('settings.plan.learnMore')}</a>
+			</Card>
+		{/if}
 	{/if}
 </section>
 

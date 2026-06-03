@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
+	import ProNavBadge from '$lib/components/atoms/ProNavBadge.svelte';
 	import NavIcon from '$lib/components/atoms/NavIcon.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import NavMoreSheet from '$lib/components/molecules/NavMoreSheet.svelte';
@@ -40,6 +41,7 @@
 	}: Props = $props();
 
 	const pathname = $derived(page.url.pathname);
+	const isPro = $derived(Boolean(page.data.isPro));
 
 	let isNarrowViewport = $state(false);
 
@@ -64,6 +66,9 @@
 			<a href={APP_HOME_PATH} class="mobile-brand" aria-label={t('nav.brandHome')}>
 				<AppLogo size="sm" />
 				<span class="mobile-brand-text">{t('nav.brandName')}</span>
+				{#if isPro}
+					<ProNavBadge />
+				{/if}
 			</a>
 			<div class="mobile-header-actions">
 				{#if onRecipeIdeas}

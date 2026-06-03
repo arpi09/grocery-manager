@@ -1,4 +1,10 @@
+import { goto, invalidateAll } from '$app/navigation';
 import type { SubmitFunction } from '@sveltejs/kit';
+
+async function navigateAfterRedirect(location: string): Promise<void> {
+	await goto(location, { replaceState: true, keepFocus: true, noScroll: true });
+	await invalidateAll();
+}
 
 /** SvelteKit `use:enhance` helper — toggles submitting while the action runs. */
 export function bindSubmitting(
@@ -8,8 +14,12 @@ export function bindSubmitting(
 	return ({ formData }) => {
 		syncFormData?.(formData);
 		setSubmitting(true);
-		return async ({ update }) => {
+		return async ({ result, update }) => {
 			try {
+				if (result.type === 'redirect') {
+					await navigateAfterRedirect(result.location);
+					return;
+				}
 				await update();
 			} finally {
 				setSubmitting(false);
@@ -53,6 +63,8 @@ export function bindSubmittingWithRedirect(
 			try {
 				if (result.type === 'redirect') {
 					await onRedirect(result.location);
+					await navigateAfterRedirect(result.location);
+					return;
 				}
 				await update({ invalidateAll: true });
 			} finally {

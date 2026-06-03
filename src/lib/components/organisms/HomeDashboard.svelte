@@ -45,6 +45,7 @@
 	}: Props = $props();
 
 	const returnTo = APP_HOME_PATH;
+	const scanPhotoHref = $derived(scanModeHref('photo', returnTo));
 	const scanBarcodeHref = $derived(scanModeHref('barcode', returnTo));
 	const scanHubLinkHref = $derived(scanHubHref(returnTo));
 	const userId = $derived(page.data.user?.id ?? null);
@@ -107,11 +108,13 @@
 	const emptyPrimaryHref = $derived(
 		activationProgress.path === 'receipt'
 			? scanModeHref('receipt', returnTo)
-			: scanBarcodeHref
+			: scanPhotoHref
 	);
 
 	const emptyPrimaryLabel = $derived(
-		activationProgress.path === 'receipt' ? t('home.emptyActionReceipt') : t('home.emptyActionBarcode')
+		activationProgress.path === 'receipt'
+			? t('home.emptyActionReceipt')
+			: t('home.chipPhotoRound')
 	);
 
 	const emptySecondaryHref = $derived(
@@ -169,7 +172,7 @@
 	{#if summary.totalItems === 0}
 		{#if canWrite}
 			<EmptyState
-				iconId="barcode"
+				iconId={activationProgress.path === 'receipt' ? 'receipt' : 'photo'}
 				title={t('home.emptyTitle')}
 				description={t('home.emptyDescription')}
 				actionLabel={emptyPrimaryLabel}
@@ -194,13 +197,13 @@
 		{#if canWrite}
 			<section class="scan-zone" aria-labelledby="home-scan-heading">
 				<h2 id="home-scan-heading" class="sr-only">{t('home.scanCardTitle')}</h2>
-				<a class="scan-card" href={scanBarcodeHref}>
+				<a class="scan-card" href={scanPhotoHref}>
 					<span class="scan-icon" aria-hidden="true">
-						<FeatureIcon id="barcode" size={22} />
+						<FeatureIcon id="photo" size={22} />
 					</span>
 					<div class="scan-copy">
-						<span class="scan-title">{t('scan.modes.barcode')}</span>
-						<span class="scan-subtitle">{t('home.scanCardSubtitle')}</span>
+						<span class="scan-title">{t('photoRound.title')}</span>
+						<span class="scan-subtitle">{t('scan.modeTiles.photoRound.description')}</span>
 					</div>
 					<span class="scan-arrow" aria-hidden="true">→</span>
 				</a>
@@ -342,12 +345,8 @@
 	.home-disclosure > :global(.eat-first),
 	.home-disclosure > .locations,
 	.home-disclosure > :global(.autopilot) {
-		padding: 0 var(--space-md) var(--space-md);
+		padding: var(--space-md) var(--space-lg) var(--space-lg);
 		border-top: 1px solid var(--color-border);
-	}
-
-	.home-disclosure > :global(.eat-first) {
-		padding-top: var(--space-md);
 	}
 
 	.activation-progress {

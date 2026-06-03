@@ -24,7 +24,7 @@
 
 	<PageContainer>
 
-		<StatistikDashboard dashboard={data.dashboard} milestones={data.milestones} />
+		<StatistikDashboard dashboard={data.dashboard} milestones={data.milestones} isPro={data.isPro} />
 
 	</PageContainer>
 

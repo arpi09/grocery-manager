@@ -1,4 +1,5 @@
 import { isThemePreference } from '$lib/domain/theme';
+import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { resolveThemeForRequest } from '$lib/server/theme-cookie';
 import type { LayoutServerLoad } from './$types';
@@ -16,6 +17,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			households: [],
 			activeHousehold: null,
 			householdRole: null,
+			isPro: false,
 			cookieConsent
 		};
 	}
@@ -38,9 +40,12 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		isActive: h.id === activeId
 	}));
 
+	const planTier = locals.planTier ?? DEFAULT_PLAN_TIER;
+
 	return {
 		locale,
 		cookieConsent,
+		isPro: isProTier(planTier),
 		user: {
 			id: locals.user.id,
 			email: locals.user.email,

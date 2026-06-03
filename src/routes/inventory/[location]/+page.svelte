@@ -7,14 +7,20 @@
 	import InventoryList from '$lib/components/organisms/InventoryList.svelte';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
+	import { scanModeHref } from '$lib/utils/scan-nav';
 
 	let { data } = $props();
 
 	const inventoryPath = $derived(`/inventory/${data.location}`);
-	const from = $derived(encodeURIComponent(inventoryPath));
-	const addItemHref = $derived(`/item/new?location=${data.location}&from=${from}`);
-	const scanHref = $derived(`/scan?mode=barcode&location=${data.location}&from=${from}`);
-	const photoRoundHref = $derived(`/scan?mode=photo&location=${data.location}&from=${from}`);
+	const addItemHref = $derived(
+		`/item/new?location=${data.location}&from=${encodeURIComponent(inventoryPath)}`
+	);
+	const photoScanHref = $derived(
+		scanModeHref('photo', inventoryPath, { location: data.location })
+	);
+	const barcodeScanHref = $derived(
+		scanModeHref('barcode', inventoryPath, { location: data.location })
+	);
 
 	const activeCount = $derived(data.activeTotal);
 	const totalCount = $derived(data.activeTotal + data.autoExpiredTotal + data.finishedTotal);
@@ -39,16 +45,16 @@
 
 			{#if data.canWrite && hasInventory}
 				<div class="action-row">
-					<a class="scan-primary" href={scanHref}>
-						<FeatureIcon id="barcode" size={18} />
-						{t('inventory.scanItem')}
+					<a class="scan-primary" href={photoScanHref}>
+						<FeatureIcon id="photo" size={18} />
+						{t('photoRound.title')}
 					</a>
 					<a class="manual-secondary" href={addItemHref} data-sveltekit-reload>
 						{t('inventory.addManual')}
 					</a>
 				</div>
-				<a class="photo-round-link" href={photoRoundHref}>
-					{t('inventory.photoRound')}
+				<a class="scan-alt-link" href={barcodeScanHref}>
+					{t('home.emptyActionBarcode')}
 				</a>
 			{/if}
 
@@ -125,7 +131,7 @@
 		text-decoration: none;
 	}
 
-	.photo-round-link {
+	.scan-alt-link {
 		align-self: flex-start;
 		min-height: 2.75rem;
 		padding: 0.35rem 0.15rem;
@@ -136,7 +142,7 @@
 		color: var(--color-primary);
 	}
 
-	.photo-round-link:hover {
+	.scan-alt-link:hover {
 		color: var(--color-primary-hover);
 		text-decoration: none;
 	}
