@@ -1000,6 +1000,34 @@
 			"label": "Smart fill / list",
 			"detail": "{count} WAU used smart fill",
 			"definition": "Share of weekly active users who added AI suggestions to the shopping list"
+		},
+		"funnel": {
+			"title": "Funnel / PMF",
+			"subtitle": "Top-of-funnel KPIs from product_event (visits, signup, first scan, D1).",
+			"periodToggle": "Select funnel period",
+			"periodOption": "{days} days",
+			"periodRange": "{start} – {end} ({days} days)",
+			"ratioUnavailable": "{numerator} / {denominator} — not enough visits",
+			"ratio": "{numerator} / {denominator} ({percent})",
+			"visits": {
+				"label": "Visits",
+				"definition": "landing_view events in period",
+				"proxyDefinition": "Unique active users (no landing views in period)",
+				"proxyNote": "Visits estimated from active users when landing_view is missing."
+			},
+			"signups": {
+				"label": "Registrations",
+				"definition": "signup_complete events"
+			},
+			"firstScan": {
+				"label": "First scan",
+				"definition": "Users with first barcode or receipt in period"
+			},
+			"d1": {
+				"label": "D1 retention",
+				"detail": "{retained} of {eligible} eligible signups",
+				"definition": "Share of eligible signups active the day after signup"
+			}
 		}
 	},
 	"invite": {
