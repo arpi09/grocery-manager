@@ -10,6 +10,7 @@ describe('PmfService', () => {
 		repository = {
 			recordEvent: vi.fn(),
 			getGlobalMetrics: vi.fn(),
+			getFunnelMetrics: vi.fn(),
 			hasHouseholdEvent: vi.fn(),
 			countUserScanEvents: vi.fn(),
 			getUserCreatedAt: vi.fn()
@@ -64,6 +65,34 @@ describe('PmfService', () => {
 		const result = await service.getGlobalMetrics();
 
 		expect(result).toEqual(metrics);
+	});
+
+	const funnelSnapshot = {
+		periodDays: 7 as const,
+		periodStart: new Date('2026-05-23T12:00:00Z'),
+		periodEnd: new Date('2026-05-30T12:00:00Z'),
+		visits: 120,
+		visitsSource: 'landing_view' as const,
+		signups: 12,
+		firstScans: 6,
+		d1Retention: 0.25,
+		d1EligibleUsers: 4,
+		d1RetainedUsers: 1
+	};
+
+	it('returns funnel metrics for the selected period', async () => {
+		vi.mocked(repository.getFunnelMetrics).mockResolvedValue(funnelSnapshot);
+
+		const result = await service.getFunnelMetrics(30);
+
+		expect(repository.getFunnelMetrics).toHaveBeenCalledWith(30, undefined);
+		expect(result).toEqual(funnelSnapshot);
+	});
+
+	it('parses funnel period days', () => {
+		expect(service.parseFunnelPeriodDays('30')).toBe(30);
+		expect(service.parseFunnelPeriodDays('7')).toBe(7);
+		expect(service.parseFunnelPeriodDays('invalid')).toBe(7);
 	});
 
 	it('returns weekly review with current and prior-week snapshots', async () => {

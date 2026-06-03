@@ -1,4 +1,11 @@
 import {
+	buildPmfFunnelSnapshot,
+	FUNNEL_ACTIVITY_EVENT_TYPES,
+	FUNNEL_FIRST_SCAN_EVENT_TYPES,
+	type PmfFunnelPeriodDays,
+	type PmfFunnelSnapshot
+} from '$lib/domain/pmf-funnel';
+import {
 	computeActivationRate,
 	computeMultiMemberHouseholdRate,
 	computeRetentionRate,
@@ -30,6 +37,7 @@ export interface RecordProductEventInput {
 export interface IPmfRepository {
 	recordEvent(input: RecordProductEventInput): Promise<void>;
 	getGlobalMetrics(now?: Date): Promise<PmfMetricSnapshot>;
+	getFunnelMetrics(periodDays: PmfFunnelPeriodDays, now?: Date): Promise<PmfFunnelSnapshot>;
 	hasHouseholdEvent(householdId: string, eventType: ProductEventType): Promise<boolean>;
 	countUserScanEvents(userId: string): Promise<number>;
 	getUserCreatedAt(userId: string): Promise<Date | null>;
@@ -201,6 +209,109 @@ export class DrizzlePmfRepository implements IPmfRepository {
 			weeklyFillUsers: smartFill.weeklyFillUsers,
 			eventCounts
 		};
+	}
+
+	async getFunnelMetrics(periodDays: PmfFunnelPeriodDays, now = new Date()): Promise<PmfFunnelSnapshot> {
+		const periodMs = periodDays * 24 * 60 * 60 * 1000;
+		const periodStart = new Date(now.getTime() - periodMs);
+
+		const [
+			landingRow,
+			signupRow,
+			firstScanUserRows,
+			proxyUsersRow,
+			cohortUsers,
+			activityRows
+		] = await Promise.all([
+			db
+				.select({ count: sql<number>`count(*)::int` })
+				.from(productEventTable)
+				.where(
+					and(
+						eq(productEventTable.eventType, 'landing_view'),
+						gte(productEventTable.createdAt, periodStart)
+					)
+				),
+			db
+				.select({ count: sql<number>`count(*)::int` })
+				.from(productEventTable)
+				.where(
+					and(
+						eq(productEventTable.eventType, 'signup_complete'),
+						gte(productEventTable.createdAt, periodStart)
+					)
+				),
+			db
+				.select({
+					userId: productEventTable.userId,
+					firstAt: sql<Date>`min(${productEventTable.createdAt})`
+				})
+				.from(productEventTable)
+				.where(
+					and(
+						sql`${productEventTable.userId} is not null`,
+						inArray(productEventTable.eventType, [...FUNNEL_FIRST_SCAN_EVENT_TYPES])
+					)
+				)
+				.groupBy(productEventTable.userId),
+			db
+				.select({
+					count: sql<number>`count(distinct ${productEventTable.userId})::int`
+				})
+				.from(productEventTable)
+				.where(
+					and(
+						sql`${productEventTable.userId} is not null`,
+						gte(productEventTable.createdAt, periodStart)
+					)
+				),
+			db
+				.select({
+					id: userTable.id,
+					createdAt: userTable.createdAt
+				})
+				.from(userTable)
+				.where(gte(userTable.createdAt, periodStart)),
+			db
+				.select({
+					userId: productEventTable.userId,
+					createdAt: productEventTable.createdAt
+				})
+				.from(productEventTable)
+				.innerJoin(userTable, eq(productEventTable.userId, userTable.id))
+				.where(
+					and(
+						gte(userTable.createdAt, periodStart),
+						inArray(productEventTable.eventType, [...FUNNEL_ACTIVITY_EVENT_TYPES])
+					)
+				)
+		]);
+
+		const activity = activityRows
+			.filter((row): row is { userId: string; createdAt: Date } => row.userId != null)
+			.map((row) => ({ userId: row.userId, createdAt: row.createdAt }));
+
+		const periodStartMs = periodStart.getTime();
+		const firstScans = firstScanUserRows.filter((row) => {
+			if (row.userId == null || !row.firstAt) {
+				return false;
+			}
+			const firstAtMs =
+				row.firstAt instanceof Date ? row.firstAt.getTime() : new Date(row.firstAt).getTime();
+			return firstAtMs >= periodStartMs;
+		}).length;
+
+		return buildPmfFunnelSnapshot({
+			periodDays,
+			periodStart,
+			periodEnd: now,
+			landingViews: landingRow[0]?.count ?? 0,
+			uniqueActiveUsersInPeriod: proxyUsersRow[0]?.count ?? 0,
+			signups: signupRow[0]?.count ?? 0,
+			firstScans,
+			users: cohortUsers.map((user) => ({ userId: user.id, registeredAt: user.createdAt })),
+			activityRows: activity
+		});
 	}
 
 	async hasHouseholdEvent(householdId: string, eventType: ProductEventType) {

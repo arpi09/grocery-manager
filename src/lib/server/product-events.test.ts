@@ -5,6 +5,7 @@ import { recordProductEvent } from './product-events';
 function mockPmfRepository(overrides: Partial<{
 	recordEvent: ReturnType<typeof vi.fn>;
 	getGlobalMetrics: ReturnType<typeof vi.fn>;
+	getFunnelMetrics: ReturnType<typeof vi.fn>;
 	hasHouseholdEvent: ReturnType<typeof vi.fn>;
 	countUserScanEvents: ReturnType<typeof vi.fn>;
 	getUserCreatedAt: ReturnType<typeof vi.fn>;
@@ -12,6 +13,7 @@ function mockPmfRepository(overrides: Partial<{
 	return {
 		recordEvent: vi.fn(),
 		getGlobalMetrics: vi.fn(),
+		getFunnelMetrics: vi.fn(),
 		hasHouseholdEvent: vi.fn(),
 		countUserScanEvents: vi.fn(),
 		getUserCreatedAt: vi.fn(),

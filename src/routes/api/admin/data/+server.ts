@@ -10,6 +10,7 @@ import {
 } from '$lib/domain/product-feedback';
 import { STRIPE_READINESS_GATES } from '$lib/domain/plan';
 import { parseAdminAiUsagePeriodDays } from '$lib/domain/ai-usage-admin';
+import { parsePmfFunnelPeriodDays } from '$lib/domain/pmf-funnel';
 import { WAITLIST_LIST_DEFAULT, WAITLIST_LIST_MAX } from '$lib/domain/waitlist';
 import { requireAdmin } from '$lib/server/api-guards';
 import type { RequestHandler } from './$types';
@@ -68,8 +69,12 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 
 	switch (sectionParam) {
 		case 'analytics': {
-			const pmfWeeklyReview = await locals.pmfService.getWeeklyReview();
-			return json({ pmfWeeklyReview });
+			const funnelDays = parsePmfFunnelPeriodDays(url.searchParams.get('funnelDays'));
+			const [pmfWeeklyReview, pmfFunnel] = await Promise.all([
+				locals.pmfService.getWeeklyReview(),
+				locals.pmfService.getFunnelMetrics(funnelDays)
+			]);
+			return json({ pmfWeeklyReview, pmfFunnel });
 		}
 		case 'ai-usage': {
 			const periodDays = parseAdminAiUsagePeriodDays(url.searchParams.get('days'));
