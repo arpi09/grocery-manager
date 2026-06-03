@@ -45,7 +45,6 @@
 	}: Props = $props();
 
 	const returnTo = APP_HOME_PATH;
-	const from = $derived(encodeURIComponent(returnTo));
 	const scanBarcodeHref = $derived(scanModeHref('barcode', returnTo));
 	const scanHubLinkHref = $derived(scanHubHref(returnTo));
 	const userId = $derived(page.data.user?.id ?? null);
