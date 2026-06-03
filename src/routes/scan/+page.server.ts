@@ -38,13 +38,12 @@ function parseItemForm(formData: FormData) {
 
 async function bulkCreateFromForm(
 	event: import('@sveltejs/kit').RequestEvent,
+	formData: FormData,
 	defaultReturnTo: string,
 	eventType: 'receipt_parsed' | 'photo_round_parsed',
 	recordPurchases: boolean
 ) {
 	requireInventoryWriteAccess(event.locals.householdRole);
-
-	const formData = await event.request.formData();
 	const returnToRaw = formData.get('returnTo');
 	const returnTo =
 		typeof returnToRaw === 'string' && returnToRaw.startsWith('/') && !returnToRaw.startsWith('//')
@@ -209,9 +208,15 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const bulkFlow = formData.get('bulkFlow');
 		if (bulkFlow === 'photo') {
-			await bulkCreateFromForm(event, '/inventory/cupboard', 'photo_round_parsed', false);
+			await bulkCreateFromForm(
+				event,
+				formData,
+				'/inventory/cupboard',
+				'photo_round_parsed',
+				false
+			);
 			return;
 		}
-		await bulkCreateFromForm(event, '/', 'receipt_parsed', true);
+		await bulkCreateFromForm(event, formData, '/', 'receipt_parsed', true);
 	}
 };

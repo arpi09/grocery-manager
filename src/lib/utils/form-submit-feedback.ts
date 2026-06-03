@@ -1,4 +1,3 @@
-import { goto } from '$app/navigation';
 import type { SubmitFunction } from '@sveltejs/kit';
 
 /** SvelteKit `use:enhance` helper — toggles submitting while the action runs. */
@@ -52,10 +51,8 @@ export function bindSubmittingWithRedirect(
 			try {
 				if (result.type === 'redirect') {
 					await onRedirect(result.location);
-					await goto(result.location, { invalidateAll: true });
-					return;
 				}
-				await update();
+				await update({ invalidateAll: true });
 			} finally {
 				setSubmitting(false);
 			}
