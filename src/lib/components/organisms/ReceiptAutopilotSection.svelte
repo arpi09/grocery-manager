@@ -104,7 +104,7 @@
 			title={t('receiptAutopilot.emptyTitle')}
 			description={t('receiptAutopilot.emptyDescription')}
 			actionLabel={t('receiptAutopilot.emptyAction')}
-			actionHref="/scan/kvitto?from=/hem"
+			actionHref="/scan?mode=receipt&from=/hem"
 		/>
 	{:else}
 		<ul class="suggestions">

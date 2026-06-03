@@ -282,6 +282,7 @@
 				async () => {}
 			)}
 		>
+			<input type="hidden" name="bulkFlow" value="photo" />
 			<input type="hidden" name="returnTo" value={returnTo} />
 			<ul class="line-list" data-testid="photo-round-line-list">
 				{#each lines as line, index (line.id)}

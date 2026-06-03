@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { enhance } from '$app/forms';
 	import { t } from '$lib/i18n';
@@ -28,24 +28,28 @@
 	let emailSendingSubmitEnabled: boolean | undefined = $state(undefined);
 	let emailSendingForm: HTMLFormElement | undefined = $state();
 
-	const activeTab = $derived(parseAdminTab($page.url.searchParams.get('tab') ?? data.tab));
+	let activeTab = $state<AdminTab>(parseAdminTab(data.tab));
+
+	$effect(() => {
+		activeTab = parseAdminTab($page.url.searchParams.get('tab') ?? data.tab);
+	});
 
 	$effect(() => {
 		emailSendingEnabled = data.emailSending.enabledInApp;
 	});
 
 	function selectTab(tab: AdminTab) {
-		const url = new URL($page.url);
+		activeTab = tab;
+		if (!browser) {
+			return;
+		}
+		const url = new URL(window.location.href);
 		if (tab === 'overview') {
 			url.searchParams.delete('tab');
 		} else {
 			url.searchParams.set('tab', tab);
 		}
-		void goto(`${url.pathname}${url.search}`, {
-			keepFocus: true,
-			noScroll: true,
-			replaceState: true
-		});
+		history.replaceState(history.state, '', `${url.pathname}${url.search}`);
 	}
 </script>
 

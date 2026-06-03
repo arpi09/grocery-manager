@@ -36,7 +36,8 @@
 
 	async function goScan() {
 		closeCelebration();
-		const path = getActivationProgress(userId).path === 'receipt' ? '/scan/kvitto' : '/scan';
+		const path =
+			getActivationProgress(userId).path === 'receipt' ? '/scan?mode=receipt' : '/scan';
 		const query =
 			getActivationProgress(userId).path === 'receipt'
 				? `?from=${fromHome}`

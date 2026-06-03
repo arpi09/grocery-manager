@@ -57,7 +57,7 @@
 			actionLabel={t('stats.emptyActionScan')}
 			actionHref="/scan?mode=barcode&from=/statistik"
 			secondaryActionLabel={t('stats.emptyActionPhoto')}
-			secondaryActionHref="/inventory/foto?from=/statistik"
+			secondaryActionHref="/scan?mode=photo&from=/statistik"
 		/>
 	{:else}
 		<div class="hero-grid" role="list" aria-label={t('stats.heroLabel')}>

@@ -4,12 +4,9 @@
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
-	import EngagementStrip from '$lib/components/molecules/EngagementStrip.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import EatFirstSection from '$lib/components/organisms/EatFirstSection.svelte';
-	import ExpiringSoonSection from '$lib/components/organisms/ExpiringSoonSection.svelte';
-	import MealTimeSuggestions from '$lib/components/organisms/MealTimeSuggestions.svelte';
-	import type { EngagementStrip as EngagementStripData } from '$lib/application/gamification.service';
+	import ReceiptAutopilotSection from '$lib/components/organisms/ReceiptAutopilotSection.svelte';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { ZERO_WASTE_STREAK_CELEBRATION, type GamificationCelebrationKind } from '$lib/domain/gamification';
@@ -27,11 +24,10 @@
 		type ActivationProgress
 	} from '$lib/utils/onboarding';
 	import type { ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
-	import ReceiptAutopilotSection from '$lib/components/organisms/ReceiptAutopilotSection.svelte';
+	import { scanHubHref, scanModeHref } from '$lib/utils/scan-nav';
 
 	interface Props {
 		summary: DashboardSummary;
-		engagement: EngagementStripData;
 		celebration?: GamificationCelebrationKind | null;
 		canWrite?: boolean;
 		displayName?: string | null;
@@ -41,7 +37,6 @@
 
 	let {
 		summary,
-		engagement,
 		celebration = null,
 		canWrite = false,
 		displayName = null,
@@ -51,6 +46,8 @@
 
 	const returnTo = APP_HOME_PATH;
 	const from = $derived(encodeURIComponent(returnTo));
+	const scanBarcodeHref = $derived(scanModeHref('barcode', returnTo));
+	const scanHubLinkHref = $derived(scanHubHref(returnTo));
 	const userId = $derived(page.data.user?.id ?? null);
 
 	let activationProgress = $state<ActivationProgress>(getActivationProgress(null));
@@ -89,8 +86,8 @@
 
 	const emptyPrimaryHref = $derived(
 		activationProgress.path === 'receipt'
-			? `/scan/kvitto?from=${encodeURIComponent(`/scan?from=${from}`)}`
-			: `/scan?mode=barcode&from=${encodeURIComponent(`/scan?from=${from}`)}`
+			? scanModeHref('receipt', returnTo)
+			: scanBarcodeHref
 	);
 
 	const emptyPrimaryLabel = $derived(
@@ -98,9 +95,7 @@
 	);
 
 	const emptySecondaryHref = $derived(
-		activationProgress.path === 'receipt'
-			? `/scan?mode=barcode&from=${encodeURIComponent(`/scan?from=${from}`)}`
-			: `/scan/kvitto?from=${encodeURIComponent(`/scan?from=${from}`)}`
+		activationProgress.path === 'receipt' ? scanBarcodeHref : scanModeHref('receipt', returnTo)
 	);
 
 	const emptySecondaryLabel = $derived(
@@ -176,42 +171,28 @@
 			</Card>
 		{/if}
 	{:else}
-		<EngagementStrip {engagement} />
-
 		<EatFirstSection
 			expiringItems={summary.expiringSoon}
 			canEdit={canWrite}
 			householdId={householdId}
 		/>
 
-		<MealTimeSuggestions hasInventory={summary.totalItems > 0} />
-
-		{#if canWrite}
-			<ReceiptAutopilotSection suggestions={receiptAutopilotSuggestions} canEdit={canWrite} />
-		{/if}
-
 		{#if canWrite}
 			<section class="scan-zone" aria-labelledby="home-scan-heading">
 				<h2 id="home-scan-heading" class="sr-only">{t('home.scanCardTitle')}</h2>
-				<a class="scan-card" href="/scan?from={from}">
+				<a class="scan-card" href={scanBarcodeHref}>
 					<span class="scan-icon" aria-hidden="true">
 						<FeatureIcon id="barcode" size={22} />
 					</span>
 					<div class="scan-copy">
-						<span class="scan-title">{t('scan.title')}</span>
+						<span class="scan-title">{t('scan.modes.barcode')}</span>
 						<span class="scan-subtitle">{t('home.scanCardSubtitle')}</span>
 					</div>
 					<span class="scan-arrow" aria-hidden="true">→</span>
 				</a>
-				<details class="more-ways">
-					<summary>{t('home.moreAddWays')}</summary>
-					<nav class="more-ways-links" aria-label={t('home.moreAddWays')}>
-						<a href="/scan?mode=barcode&from={encodeURIComponent(`/scan?from=${from}`)}">{t('home.chipBarcode')}</a>
-						<a href="/scan/kvitto?from={encodeURIComponent(`/scan?from=${from}`)}">{t('home.chipReceipt')}</a>
-						<a href="/inventory/foto?from={encodeURIComponent(`/scan?from=${from}`)}">{t('home.chipPhotoRound')}</a>
-						<a href="/item/new?from={from}">{t('home.chipManual')}</a>
-					</nav>
-				</details>
+				<p class="scan-alt">
+					<a href={scanHubLinkHref}>{t('home.moreAddWays')}</a>
+				</p>
 			</section>
 		{:else}
 			<p class="readonly-hint">{t('home.readonlyHint')}</p>
@@ -239,10 +220,8 @@
 			</div>
 		</section>
 
-		{#if summary.expiringSoon.length > 0}
-			<div class="expiring-block">
-				<ExpiringSoonSection items={summary.expiringSoon} showEmpty={false} />
-			</div>
+		{#if canWrite && receiptAutopilotSuggestions.length > 0}
+			<ReceiptAutopilotSection suggestions={receiptAutopilotSuggestions} canEdit={canWrite} />
 		{/if}
 	{/if}
 </section>
@@ -282,7 +261,7 @@
 	.scan-zone {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-md);
+		gap: var(--space-sm);
 	}
 
 	.scan-card {
@@ -357,50 +336,20 @@
 		font-weight: 600;
 	}
 
-	.more-ways {
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-md);
-		background: var(--color-surface);
-	}
-
-	.more-ways summary {
-		cursor: pointer;
-		padding: 0.65rem var(--space-md);
-		font-weight: 600;
+	.scan-alt {
+		margin: 0;
+		text-align: center;
 		font-size: 0.875rem;
-		color: var(--color-text-muted);
-		list-style: none;
 	}
 
-	.more-ways summary::-webkit-details-marker {
-		display: none;
-	}
-
-	.more-ways[open] summary {
-		color: var(--color-text);
-		border-bottom: 1px solid var(--color-border);
-	}
-
-	.more-ways-links {
-		display: flex;
-		flex-direction: column;
-		padding: var(--space-xs) 0;
-	}
-
-	.more-ways-links a {
-		display: flex;
-		align-items: center;
-		min-height: 2.75rem;
-		padding: 0 var(--space-md);
+	.scan-alt a {
 		font-weight: 600;
-		font-size: 0.875rem;
 		color: var(--color-primary);
 		text-decoration: none;
 	}
 
-	.more-ways-links a:hover {
-		background: var(--color-surface-muted);
-		text-decoration: none;
+	.scan-alt a:hover {
+		text-decoration: underline;
 	}
 
 	.readonly-hint,
@@ -461,12 +410,6 @@
 		font-weight: 700;
 		letter-spacing: -0.02em;
 		line-height: 1;
-	}
-
-	.expiring-block {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
 	}
 
 	@media (min-width: 560px) {

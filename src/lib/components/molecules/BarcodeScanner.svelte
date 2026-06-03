@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { t } from '$lib/i18n';
 	import { BrowserMultiFormatReader } from '@zxing/browser';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, tick } from 'svelte';
 	import { canAccessCamera, BARCODE_HTTPS_HINT } from '$lib/utils/device';
 
 	interface Props {
@@ -19,6 +20,7 @@
 	let reader: BrowserMultiFormatReader | null = null;
 	let stopScanner: (() => void) | null = null;
 	let mediaStream: MediaStream | null = null;
+	let startGeneration = 0;
 
 	function stopMediaStream() {
 		mediaStream?.getTracks().forEach((track) => track.stop());
@@ -28,24 +30,62 @@
 		}
 	}
 
-	function cleanup() {
-		stopScanner?.();
+	function stopDecode() {
+		if (!stopScanner) {
+			return;
+		}
+		try {
+			stopScanner();
+		} catch {
+			// ZXing may throw if the stream was already torn down.
+		}
 		stopScanner = null;
+	}
+
+	function cleanup() {
+		startGeneration += 1;
+		stopDecode();
 		reader = null;
 		stopMediaStream();
 		scanning = false;
 	}
 
-	async function startScanner() {
-		if (!videoEl || !active) {
+	async function waitForVideoReady(video: HTMLVideoElement): Promise<void> {
+		if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
 			return;
 		}
 
-		cleanup();
+		await new Promise<void>((resolve, reject) => {
+			const onReady = () => {
+				video.removeEventListener('loadedmetadata', onReady);
+				video.removeEventListener('error', onError);
+				resolve();
+			};
+			const onError = () => {
+				video.removeEventListener('loadedmetadata', onReady);
+				video.removeEventListener('error', onError);
+				reject(new Error('video-metadata-error'));
+			};
+			video.addEventListener('loadedmetadata', onReady, { once: true });
+			video.addEventListener('error', onError, { once: true });
+		});
+	}
+
+	async function startScanner() {
+		const generation = ++startGeneration;
+		const video = videoEl;
+
+		if (!video || !active) {
+			return;
+		}
+
+		stopDecode();
+		stopMediaStream();
 		scannerError = null;
 
 		if (!canAccessCamera()) {
 			scannerError = BARCODE_HTTPS_HINT;
+			scanning = false;
 			return;
 		}
 
@@ -57,11 +97,32 @@
 				video: { facingMode: { ideal: facingMode } },
 				audio: false
 			});
-			videoEl.srcObject = mediaStream;
-			await videoEl.play();
 
-			const controls = await reader.decodeFromVideoElement(videoEl, (result) => {
-				if (!result) {
+			if (generation !== startGeneration || !active || videoEl !== video) {
+				mediaStream.getTracks().forEach((track) => track.stop());
+				mediaStream = null;
+				return;
+			}
+
+			video.srcObject = mediaStream;
+			await waitForVideoReady(video);
+
+			if (generation !== startGeneration || !active || videoEl !== video) {
+				return;
+			}
+
+			try {
+				await video.play();
+			} catch {
+				// play() can reject when the element is detached during a fast restart.
+			}
+
+			if (generation !== startGeneration || !active || videoEl !== video) {
+				return;
+			}
+
+			const controls = await reader.decodeFromVideoElement(video, (result) => {
+				if (!result || generation !== startGeneration) {
 					return;
 				}
 				const code = result.getText().trim();
@@ -71,26 +132,68 @@
 				}
 			});
 
+			if (generation !== startGeneration) {
+				try {
+					controls.stop();
+				} catch {
+					// ignore stale decode session
+				}
+				return;
+			}
+
 			stopScanner = () => controls.stop();
 		} catch {
-			scannerError = t('scanFlow.cameraDenied');
-			cleanup();
+			if (generation === startGeneration) {
+				scannerError = t('scanFlow.cameraDenied');
+				scanning = false;
+			}
+			stopDecode();
+			stopMediaStream();
+			reader = null;
 		}
 	}
 
 	function flipCamera() {
 		facingMode = facingMode === 'environment' ? 'user' : 'environment';
+	}
+
+	async function restartForOrientation() {
+		if (!active || !videoEl || scannerError) {
+			return;
+		}
+		cleanup();
+		await tick();
 		if (active && videoEl) {
 			void startScanner();
 		}
 	}
 
 	$effect(() => {
-		if (active && videoEl) {
-			void startScanner();
-		} else {
+		void facingMode;
+		if (!active || !videoEl) {
 			cleanup();
+			return;
 		}
+
+		void startScanner();
+		return () => {
+			stopDecode();
+			stopMediaStream();
+			scanning = false;
+		};
+	});
+
+	$effect(() => {
+		if (!browser || !active) {
+			return;
+		}
+
+		const onOrientation = () => {
+			void restartForOrientation();
+		};
+
+		window.addEventListener('orientationchange', onOrientation);
+		return () => window.removeEventListener('orientationchange', onOrientation);
 	});
 
 	onDestroy(cleanup);

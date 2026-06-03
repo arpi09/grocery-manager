@@ -154,7 +154,7 @@
 		setActivationPath('receipt', userId);
 		dismissOnboarding(userId);
 		closeGuide();
-		await goto(`/scan/kvitto?from=${encodeURIComponent(`/scan?from=${encodeURIComponent(APP_HOME_PATH)}`)}`);
+		await goto(`/scan?mode=receipt&from=${encodeURIComponent(APP_HOME_PATH)}`);
 	}
 
 	async function chooseBarcode() {

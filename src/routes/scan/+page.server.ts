@@ -1,10 +1,14 @@
-import { isStorageLocation } from '$lib/domain/location';
+import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
+import { canEditInventory } from '$lib/domain/household';
+import { isStorageLocation, type StorageLocation } from '$lib/domain/location';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
+import { receiptLineToInventoryAmount } from '$lib/server/receipt-parse';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { buildScanReturnUrl, type ScanToastKind } from '$lib/utils/scan-toast';
+import { parseScanMode } from '$lib/utils/scan-nav';
 import { recordProductEvent } from '$lib/server/product-events';
-import { fail, redirect } from '@sveltejs/kit';
-import { canEditInventory } from '$lib/domain/household';
+import { generateId } from '$lib/infrastructure/auth/id';
+import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
@@ -17,7 +21,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		locationParam && isStorageLocation(locationParam) ? locationParam : 'fridge';
 	const returnTo =
 		fromParam && fromParam.startsWith('/') && !fromParam.startsWith('//') ? fromParam : '/';
-	const scanMode = modeParam === 'barcode' ? 'barcode' : 'hub';
+	const scanMode = parseScanMode(modeParam);
 
 	return { defaultLocation, returnTo, canWrite, scanMode };
 };
@@ -30,6 +34,106 @@ function parseItemForm(formData: FormData) {
 		expiresOn: raw.expiresOn || undefined,
 		notes: raw.notes || undefined
 	});
+}
+
+async function bulkCreateFromForm(
+	event: import('@sveltejs/kit').RequestEvent,
+	defaultReturnTo: string,
+	eventType: 'receipt_parsed' | 'photo_round_parsed',
+	recordPurchases: boolean
+) {
+	requireInventoryWriteAccess(event.locals.householdRole);
+
+	const formData = await event.request.formData();
+	const returnToRaw = formData.get('returnTo');
+	const returnTo =
+		typeof returnToRaw === 'string' && returnToRaw.startsWith('/') && !returnToRaw.startsWith('//')
+			? returnToRaw
+			: defaultReturnTo;
+
+	const selected = formData
+		.getAll('selected')
+		.map((v) => Number(v))
+		.filter((n) => !Number.isNaN(n));
+
+	if (selected.length === 0) {
+		error(400, 'Inga varor valda');
+	}
+
+	let created = 0;
+	const importBatchId = recordPurchases ? generateId() : null;
+	const purchaseLines: Array<{
+		householdId: string;
+		userId: string;
+		importBatchId: string;
+		productName: string;
+		location: StorageLocation;
+		quantity: string | null;
+		unit: string | null;
+	}> = [];
+
+	for (const index of selected) {
+		const name = formData.get(`name_${index}`);
+		if (typeof name !== 'string' || !name.trim()) {
+			continue;
+		}
+		const quantityRaw = formData.get(`quantity_${index}`);
+		const unitRaw = formData.get(`unit_${index}`);
+		const { quantity, unit } = receiptLineToInventoryAmount({
+			name: name.trim(),
+			quantity:
+				typeof quantityRaw === 'string' && quantityRaw.trim() ? quantityRaw.trim() : undefined,
+			unit: typeof unitRaw === 'string' && unitRaw.trim() ? unitRaw.trim() : undefined,
+			location: 'cupboard'
+		});
+
+		const locationRaw = formData.get(`location_${index}`);
+		const location: StorageLocation =
+			typeof locationRaw === 'string' && isStorageLocation(locationRaw)
+				? locationRaw
+				: resolveReceiptLineLocation(name.trim(), locationRaw);
+
+		await event.locals.inventoryService.createItem(
+			event.locals.householdId!,
+			event.locals.user!.id,
+			{
+				name: name.trim(),
+				location,
+				quantity,
+				unit,
+				expiresOn: null,
+				notes: null
+			},
+			event.locals.householdRole!
+		);
+
+		if (recordPurchases && importBatchId) {
+			purchaseLines.push({
+				householdId: event.locals.householdId!,
+				userId: event.locals.user!.id,
+				importBatchId,
+				productName: name.trim(),
+				location,
+				quantity,
+				unit: unit ?? null
+			});
+		}
+		created++;
+	}
+
+	if (recordPurchases && purchaseLines.length > 0) {
+		await event.locals.purchasePatternService.recordReceiptImport(purchaseLines);
+	}
+
+	const label = `${created} varor`;
+	recordProductEvent(event.locals.pmfService, {
+		userId: event.locals.user!.id,
+		householdId: event.locals.householdId,
+		eventType,
+		metadata: { itemsAdded: created, ...(eventType === 'photo_round_parsed' ? { stage: 'save' } : {}) }
+	});
+
+	redirect(302, buildScanReturnUrl(returnTo, 'added', label));
 }
 
 export const actions: Actions = {
@@ -100,5 +204,14 @@ export const actions: Actions = {
 				: `/inventory/${parsed.data.location}?scan=${toastKind}&scanName=${encodeURIComponent(parsed.data.name)}`;
 
 		redirect(302, target);
+	},
+	bulkCreate: async (event) => {
+		const formData = await event.request.formData();
+		const bulkFlow = formData.get('bulkFlow');
+		if (bulkFlow === 'photo') {
+			await bulkCreateFromForm(event, '/inventory/cupboard', 'photo_round_parsed', false);
+			return;
+		}
+		await bulkCreateFromForm(event, '/', 'receipt_parsed', true);
 	}
 };

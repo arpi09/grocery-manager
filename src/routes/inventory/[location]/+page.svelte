@@ -14,7 +14,7 @@
 	const from = $derived(encodeURIComponent(inventoryPath));
 	const addItemHref = $derived(`/item/new?location=${data.location}&from=${from}`);
 	const scanHref = $derived(`/scan?mode=barcode&location=${data.location}&from=${from}`);
-	const photoRoundHref = $derived(`/inventory/foto?from=${from}`);
+	const photoRoundHref = $derived(`/scan?mode=photo&location=${data.location}&from=${from}`);
 
 	const activeCount = $derived(data.activeTotal);
 	const totalCount = $derived(data.activeTotal + data.autoExpiredTotal + data.finishedTotal);

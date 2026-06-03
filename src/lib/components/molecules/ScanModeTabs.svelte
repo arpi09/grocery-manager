@@ -1,42 +1,38 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
-	import { scanHubHref, scanSubFlowFrom } from '$lib/utils/scan-nav';
+	import { scanHubHref, scanModeHref } from '$lib/utils/scan-nav';
+	import type { StorageLocation } from '$lib/domain/location';
 
 	export type ScanModeTab = 'hub' | 'barcode' | 'receipt' | 'photoRound' | 'manual';
 
 	interface Props {
 		active: ScanModeTab | null;
 		returnTo: string;
-		defaultLocation?: string;
+		defaultLocation?: StorageLocation | string;
 		showManual?: boolean;
 	}
 
 	let { active, returnTo, defaultLocation, showManual = true }: Props = $props();
 
-	const hubHref = $derived(scanHubHref(returnTo));
-	const subFlowFrom = $derived(scanSubFlowFrom(returnTo));
-	const locationQuery = $derived(defaultLocation ? `&location=${defaultLocation}` : '');
+	const locationOption = $derived(
+		defaultLocation ? { location: defaultLocation as StorageLocation | string } : undefined
+	);
 
 	const tabs = $derived.by(() => {
 		const items: { id: ScanModeTab; href: string; label: string }[] = [
 			{
-				id: 'hub',
-				href: hubHref,
-				label: t('scan.title')
-			},
-			{
 				id: 'barcode',
-				href: `${hubHref}&mode=barcode${locationQuery}`,
+				href: scanModeHref('barcode', returnTo, locationOption),
 				label: t('scan.modes.barcode')
 			},
 			{
 				id: 'receipt',
-				href: `/scan/kvitto?from=${subFlowFrom}`,
+				href: scanModeHref('receipt', returnTo),
 				label: t('scan.modes.receipt')
 			},
 			{
 				id: 'photoRound',
-				href: `/inventory/foto?from=${encodeURIComponent(subFlowFrom)}${locationQuery ? `&location=${defaultLocation}` : ''}`,
+				href: scanModeHref('photo', returnTo, locationOption),
 				label: t('photoRound.title')
 			}
 		];
@@ -44,7 +40,7 @@
 		if (showManual) {
 			items.push({
 				id: 'manual',
-				href: `/item/new?from=${encodeURIComponent(subFlowFrom)}${locationQuery}`,
+				href: `/item/new?from=${encodeURIComponent(scanHubHref(returnTo))}${defaultLocation ? `&location=${defaultLocation}` : ''}`,
 				label: t('scan.modes.manual')
 			});
 		}
@@ -55,6 +51,14 @@
 
 <nav class="mode-tabs" aria-label={t('scan.hubAria')}>
 	<div class="mode-tabs-scroll">
+		<a
+			href={scanHubHref(returnTo)}
+			class="tab"
+			class:active={active === 'hub'}
+			aria-current={active === 'hub' ? 'page' : undefined}
+		>
+			{t('scan.allModes')}
+		</a>
 		{#each tabs as tab (tab.id)}
 			<a
 				href={tab.href}

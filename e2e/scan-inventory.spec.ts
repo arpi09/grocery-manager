@@ -8,11 +8,18 @@ test.describe('Scan and inventory', () => {
 		await page.goto('/scan');
 		await dismissOnboardingModalIfOpen(page);
 
-		await expect(page).toHaveURL(/\/scan/);
-		await expect(page.locator('nav.mode-tabs')).toBeVisible();
+		await expect(page).toHaveURL(/\/scan(?!\?.*mode=)/);
 		await expect(page.getByRole('heading', { name: 'Streckkod' })).toBeVisible();
 		await expect(page.getByRole('heading', { name: 'Kvitto' })).toBeVisible();
 		await expect(page.getByRole('heading', { name: 'Foto-runda' })).toBeVisible();
+	});
+
+	test('legacy receipt route redirects to unified scan', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/scan/kvitto?from=/hem');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page).toHaveURL(/\/scan\?.*mode=receipt/);
 	});
 
 	test('manual barcode lookup and add item to inventory', async ({ page }) => {

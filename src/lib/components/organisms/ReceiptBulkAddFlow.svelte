@@ -270,6 +270,7 @@
 				}
 			)}
 		>
+			<input type="hidden" name="bulkFlow" value="receipt" />
 			<input type="hidden" name="returnTo" value={returnTo} />
 			<ul class="line-list" data-testid="receipt-line-list">
 				{#each lines as line, index (index)}
