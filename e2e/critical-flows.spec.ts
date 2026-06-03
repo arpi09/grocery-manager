@@ -1,4 +1,4 @@
-﻿import { test, expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import {
 	dismissOnboardingModalIfOpen,
 	expectOnboardingGuideVisible,
@@ -11,7 +11,7 @@ test.describe('Critical flows', () => {
 		page
 	}) => {
 		await registerNewUser(page);
-		await expect(page).toHaveURL(/\/scan(\?.*mode=barcode)?$/);
+		await expect(page).toHaveURL(/\/scan(\?.*mode=barcode).*$/);
 	});
 
 	test('login redirects to /hem', async ({ page }) => {
@@ -24,7 +24,7 @@ test.describe('Critical flows', () => {
 
 	test('fresh registration skips auto-open onboarding modal on scan hub', async ({ page }) => {
 		await registerNewUser(page);
-		await expect(page).toHaveURL(/\/scan(\?.*mode=barcode)?$/);
+		await expect(page).toHaveURL(/\/scan(\?.*mode=barcode).*$/);
 		await expect(
 			page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
 		).toHaveCount(0);
@@ -39,7 +39,7 @@ test.describe('Critical flows', () => {
 		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click();
 		await expectOnboardingGuideVisible(page);
 		await page.getByTestId('onboarding-quickstart').click();
-		await expect(page).toHaveURL(/\/scan(\?.*mode=barcode)?$/);
+		await expect(page).toHaveURL(/\/scan(\?.*mode=barcode).*$/);
 	});
 });
 
