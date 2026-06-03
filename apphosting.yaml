@@ -198,11 +198,11 @@ env:
 
   # Stripe Pro price IDs — from Stripe Dashboard (test or live); replace before deploy. See docs/STRIPE.md
   - variable: STRIPE_PRICE_ID_MONTHLY
-    value: price_REPLACE_MONTHLY
+    value: price_1TdyEW0xHxoOfEfBbbfRVfJp
     availability:
       - RUNTIME
 
   - variable: STRIPE_PRICE_ID_YEARLY
-    value: price_REPLACE_YEARLY
+    value: price_1TdyFt0xHxoOfEfBd160VXF3
     availability:
       - RUNTIME
