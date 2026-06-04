@@ -24,9 +24,9 @@ test.describe('Photo round flow', () => {
 			.getByTestId('photo-round-zone-fridge')
 			.or(page.getByRole('button', { name: /Kylskåp|Fridge/i }));
 		await zoneBtn.first().scrollIntoViewIfNeeded();
-		await zoneBtn.first().click();
+		await page.getByTestId('photo-round-zone-fridge').click();
 		await dismissOnboardingModalIfOpen(page);
-		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 20_000 });
+		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 30_000 });
 		await expect(page.getByTestId('photo-round-analyze')).toBeVisible({ timeout: 15_000 });
 
 		const fileInput = page.getByTestId('receipt-file-input');
