@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DrizzleExpiryReminderRepository } from '$lib/infrastructure/repositories/expiry-reminder.repository';
 import { DrizzleHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
+import { DrizzlePushSubscriptionRepository } from '$lib/infrastructure/repositories/push-subscription.repository';
 import { DrizzleShoppingPushRepository } from '$lib/infrastructure/repositories/shopping-push.repository';
 import { updateExpiryRemindersSchema } from '$lib/validation/expiry-reminder.schemas';
 import { updateAutoExpiredGraceSchema } from '$lib/validation/auto-expired.schemas';
@@ -170,5 +171,24 @@ describe('Settings persistence integration', () => {
 	it('rejects invalid auto-expired grace days in schema', () => {
 		const parsed = updateAutoExpiredGraceSchema.safeParse({ days: '99' });
 		expect(parsed.success).toBe(false);
+	});
+
+	it('clears push enabled flag when all subscriptions are removed', async () => {
+		const pushRepo = new DrizzlePushSubscriptionRepository(integrationDb.db);
+		await integrationDb.seedUser({ id: 'user-1', email: 'user@example.com' });
+		await pushRepo.upsert('user-1', {
+			endpoint: 'https://push.example.com/subscription/settings-1',
+			p256dh: 'p256dh-key',
+			auth: 'auth-key'
+		});
+		await pushRepo.setPushEnabled('user-1', true);
+
+		expect(await pushRepo.isPushEnabled('user-1')).toBe(true);
+
+		await pushRepo.removeAllForUser('user-1');
+		await pushRepo.setPushEnabled('user-1', false);
+
+		expect(await pushRepo.listByUserId('user-1')).toHaveLength(0);
+		expect(await pushRepo.isPushEnabled('user-1')).toBe(false);
 	});
 });
