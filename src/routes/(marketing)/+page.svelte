@@ -18,7 +18,9 @@
 	import MarketingScrollReveal from '$lib/components/marketing/MarketingScrollReveal.svelte';
 	import MarketingStepCard from '$lib/components/marketing/MarketingStepCard.svelte';
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
+	import { page } from '$app/state';
 	import { writeLandingVariantSession } from '$lib/client/landing-variant-session';
+	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import { buildLandingJsonLd } from '$lib/seo/seo';
 	import { onMount } from 'svelte';
@@ -26,6 +28,7 @@
 	let { data } = $props();
 
 	const { marketing: content, loginUrl, registerUrl, hero, canonicalUrl, marketingLocale } = data;
+	const isLoggedIn = $derived(Boolean(page.data.user?.id));
 	const landing = content.landing;
 	const previewFeatures = content.features.items.slice(0, 4);
 	const jsonLd = buildLandingJsonLd(canonicalUrl, content.meta.description);
@@ -69,14 +72,18 @@
 			<p class="hero-secondary">{hero.heroSecondary}</p>
 
 			<div class="hero-actions">
-				<MarketingButtonLink href={registerUrl} onclick={trackRegisterClick}>
-					{content.cta.tryFree}
-				</MarketingButtonLink>
-				<MarketingButtonLink href={loginUrl} variant="secondary">{content.cta.login}</MarketingButtonLink>
-				<a href={registerUrl} class="hero-register" onclick={trackRegisterClick}>
-					{content.cta.register}
-					<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
-				</a>
+				{#if isLoggedIn}
+					<MarketingButtonLink href={APP_HOME_PATH}>{content.cta.openApp}</MarketingButtonLink>
+				{:else}
+					<MarketingButtonLink href={registerUrl} onclick={trackRegisterClick}>
+						{content.cta.tryFree}
+					</MarketingButtonLink>
+					<MarketingButtonLink href={loginUrl} variant="secondary">{content.cta.login}</MarketingButtonLink>
+					<a href={registerUrl} class="hero-register" onclick={trackRegisterClick}>
+						{content.cta.register}
+						<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+					</a>
+				{/if}
 			</div>
 
 			<ul class="hero-highlights" aria-label="Snabbstart">

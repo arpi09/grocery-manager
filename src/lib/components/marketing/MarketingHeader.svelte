@@ -6,10 +6,13 @@
 	interface Props {
 		content: MarketingContent;
 		loginUrl: string;
+		appHomeUrl?: string;
+		isLoggedIn?: boolean;
 		currentPath?: string;
 	}
 
-	let { content, loginUrl, currentPath = '' }: Props = $props();
+	let { content, loginUrl, appHomeUrl = '/hem', isLoggedIn = false, currentPath = '' }: Props =
+		$props();
 
 	let menuOpen = $state(false);
 
@@ -35,8 +38,12 @@
 		</nav>
 
 		<div class="actions">
-			<a href={loginUrl} class="login-link">{content.cta.login}</a>
-			<MarketingButtonLink href={loginUrl}>{content.cta.openApp}</MarketingButtonLink>
+			{#if isLoggedIn}
+				<MarketingButtonLink href={appHomeUrl}>{content.cta.openApp}</MarketingButtonLink>
+			{:else}
+				<a href={loginUrl} class="login-link">{content.cta.login}</a>
+				<MarketingButtonLink href={loginUrl}>{content.cta.openApp}</MarketingButtonLink>
+			{/if}
 		</div>
 
 		<button
@@ -57,10 +64,20 @@
 			{#each content.nav as link (link.href)}
 				<a href={link.href} class={navLinkClass(link.href)} onclick={closeMenu}>{link.label}</a>
 			{/each}
-			<a href={loginUrl} class="mobile-login" onclick={closeMenu}>{content.cta.login}</a>
-			<div class="mobile-cta">
-				<MarketingButtonLink href={loginUrl} fullWidth>{content.cta.openApp}</MarketingButtonLink>
-			</div>
+			{#if isLoggedIn}
+				<div class="mobile-cta">
+					<MarketingButtonLink href={appHomeUrl} fullWidth onclick={closeMenu}>
+						{content.cta.openApp}
+					</MarketingButtonLink>
+				</div>
+			{:else}
+				<a href={loginUrl} class="mobile-login" onclick={closeMenu}>{content.cta.login}</a>
+				<div class="mobile-cta">
+					<MarketingButtonLink href={loginUrl} fullWidth onclick={closeMenu}>
+						{content.cta.openApp}
+					</MarketingButtonLink>
+				</div>
+			{/if}
 		</nav>
 	{/if}
 </header>
