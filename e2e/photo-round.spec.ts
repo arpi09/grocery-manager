@@ -29,10 +29,7 @@ test.describe('Photo round flow', () => {
 			{ timeout: 25_000 }
 		);
 		await fileInput.setInputFiles(FIXTURE_JPEG);
-		await fileInput.evaluate((el: HTMLInputElement) => {
-			el.dispatchEvent(new Event('change', { bubbles: true }));
-		});
-		await expect(page.getByTestId('photo-round-thumbnails')).toBeVisible({ timeout: 10_000 });
+		await expect(page.getByTestId('photo-round-thumbnails')).toBeVisible({ timeout: 25_000 });
 
 		await page.getByTestId('photo-round-analyze').click();
 

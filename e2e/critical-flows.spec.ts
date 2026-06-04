@@ -7,11 +7,10 @@ import {
 } from './helpers/auth';
 
 test.describe('Critical flows', () => {
-	test('register creates account with captcha bypass and lands on unified scan hub', async ({
-		page
-	}) => {
+	test('register creates account with captcha bypass and lands on home', async ({ page }) => {
 		await registerNewUser(page);
-		await expect(page).toHaveURL(/\/scan(\?.*mode=photo).*$/);
+		await expect(page).toHaveURL('/hem');
+		await page.goto('/scan?mode=photo');
 		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 15_000 });
 	});
 
@@ -23,9 +22,13 @@ test.describe('Critical flows', () => {
 		await expect(page).toHaveURL('/hem');
 	});
 
-	test('fresh registration skips auto-open onboarding modal on scan hub', async ({ page }) => {
+	test('fresh registration skips auto-open onboarding modal on home', async ({ page }) => {
 		await registerNewUser(page);
-		await expect(page).toHaveURL(/\/scan(\?.*mode=photo).*$/);
+		await expect(page).toHaveURL('/hem');
+		await expect(
+			page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
+		).toHaveCount(0);
+		await page.goto('/scan?mode=photo');
 		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 15_000 });
 		await expect(
 			page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
