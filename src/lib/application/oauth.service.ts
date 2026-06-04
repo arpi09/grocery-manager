@@ -37,12 +37,14 @@ export class OAuthService {
 
 		const linked = await this.oauth.findByProviderUserId(GOOGLE_PROVIDER_ID, sub);
 		if (linked) {
+			await this.users.markEmailVerified(linked.userId);
 			return { ok: true, userId: linked.userId, isNewUser: false };
 		}
 
 		const existing = await this.users.findByEmail(normalizedEmail);
 		if (existing) {
 			await this.oauth.linkAccount(GOOGLE_PROVIDER_ID, sub, existing.id);
+			await this.users.markEmailVerified(existing.id);
 			return { ok: true, userId: existing.id, isNewUser: false };
 		}
 

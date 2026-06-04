@@ -125,6 +125,7 @@ jobs:
           PLAYWRIGHT_PORT: '5190'
           TURNSTILE_SKIP: 'true'
           TURNSTILE_BYPASS: 'true'
+          EMAIL_VERIFICATION_SKIP: 'true'
           E2E_MOCK_AI: 'true'
           PUBLIC_E2E_DISABLE_POST_SURVEY: 'true'
           CI: 'true'

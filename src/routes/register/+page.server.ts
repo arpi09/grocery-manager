@@ -17,7 +17,8 @@ import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { getOrSetAnalyticsVisitorId } from '$lib/server/analytics-visitor';
 import { recordSignupCompleteEvent } from '$lib/server/marketing-analytics';
 import { registerSchema } from '$lib/validation/auth.schemas';
-import { POST_REGISTER_SCAN_PATH } from '$lib/navigation/post-register';
+import { POST_REGISTER_APP_HOME_PATH, POST_REGISTER_SCAN_PATH } from '$lib/navigation/post-register';
+import { isEmailVerificationSkipped } from '$lib/server/email-verification-enforcement';
 import { createSession } from '$lib/server/session';
 import { isGoogleOAuthConfigured } from '$lib/server/google-oauth';
 import { fail, redirect } from '@sveltejs/kit';
@@ -75,6 +76,8 @@ export const actions: Actions = {
 				analyticsAllowed ? getOrSetAnalyticsVisitorId(event.cookies) : null
 			);
 			await createSession(event, user.id);
+			const emailLocale = event.locals.locale === 'en' ? 'en' : 'sv';
+			await event.locals.emailVerificationService.sendSignupVerification(user.id, emailLocale);
 		} catch (error) {
 			if (isAuthError(error)) {
 				return fail(400, {
@@ -86,6 +89,9 @@ export const actions: Actions = {
 			throw error;
 		}
 
-		redirect(302, POST_REGISTER_SCAN_PATH);
+		redirect(
+			302,
+			isEmailVerificationSkipped() ? POST_REGISTER_APP_HOME_PATH : POST_REGISTER_SCAN_PATH
+		);
 	}
 };

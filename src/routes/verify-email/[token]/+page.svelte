@@ -1,0 +1,42 @@
+﻿<script lang="ts">
+	import AuthLandingShell from '$lib/components/templates/AuthLandingShell.svelte';
+	import AuthSeoHead from '$lib/components/seo/AuthSeoHead.svelte';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
+	import Button from '$lib/components/atoms/Button.svelte';
+	import { t } from '$lib/i18n';
+	import type { PageProps } from './$types';
+
+	let { data, form }: PageProps = $props();
+</script>
+
+<AuthSeoHead
+	title={t('auth.verifyEmail.pageTitle')}
+	description={t('auth.verifyEmail.metaDescription')}
+	canonicalUrl={data.canonicalUrl}
+	locale={data.locale}
+/>
+
+<AuthLandingShell
+	formTitle={data.tokenValid ? t('auth.verifyEmail.confirmedTitle') : t('auth.verifyEmail.title')}
+	formSubtitle={data.tokenValid ? t('auth.verifyEmail.confirmedBody') : t('auth.verifyEmail.subtitle')}
+>
+	{#if !data.tokenValid}
+		<FeedbackBanner tone="error" message={t('auth.verifyEmail.invalidToken')} />
+		<p class="footer"><a href="/verify-email">{t('auth.verifyEmail.requestNew')}</a></p>
+	{:else}
+		{#if form?.message}
+			<FeedbackBanner tone="error" message={form.message} />
+		{/if}
+		<form method="POST">
+			<Button type="submit" variant="primary">{t('auth.verifyEmail.confirmedTitle')}</Button>
+		</form>
+	{/if}
+</AuthLandingShell>
+
+<style>
+	.footer {
+		margin-top: var(--space-lg);
+		text-align: center;
+		font-size: 0.875rem;
+	}
+</style>

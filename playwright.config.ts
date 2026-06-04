@@ -70,6 +70,7 @@ export default defineConfig({
 			ADMIN_PASSWORD: e2eAdminPassword,
 			TURNSTILE_SKIP: turnstileBypass,
 			TURNSTILE_BYPASS: turnstileBypass,
+			EMAIL_VERIFICATION_SKIP: process.env.EMAIL_VERIFICATION_SKIP ?? 'true',
 			E2E_MOCK_AI: process.env.E2E_MOCK_AI ?? 'true',
 			PUBLIC_E2E_DISABLE_POST_SURVEY: 'true'
 		}

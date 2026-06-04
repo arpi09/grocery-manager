@@ -45,6 +45,11 @@ export class AuthService {
 			throw new AuthError('Invalid email or password');
 		}
 
-		return { id: user.id, email: user.email, mustResetPassword: user.mustResetPassword };
+		return {
+			id: user.id,
+			email: user.email,
+			mustResetPassword: user.mustResetPassword,
+			emailVerifiedAt: user.emailVerifiedAt
+		};
 	}
 }

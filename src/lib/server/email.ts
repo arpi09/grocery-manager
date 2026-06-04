@@ -433,6 +433,43 @@ export function buildPasswordResetEmailContent(options: {
 	return { subject, html, text };
 }
 
+export interface EmailVerificationEmailContent {
+	subject: string;
+	html: string;
+	text: string;
+}
+
+export function buildEmailVerificationEmailContent(options: {
+	verifyUrl: string;
+	locale?: 'sv' | 'en';
+}): EmailVerificationEmailContent {
+	const locale = options.locale ?? 'sv';
+	const isSv = locale === 'sv';
+	const subject = isSv ? 'Bekräfta din e-post · Skaffu' : 'Confirm your email · Skaffu';
+	const headline = isSv ? 'Bekräfta din e-postadress' : 'Confirm your email address';
+	const preheader = isSv ? 'Länken gäller i 24 timmar.' : 'This link is valid for 24 hours.';
+	const cta = isSv ? 'Bekräfta e-post' : 'Confirm email';
+	const body = isSv ? 'Välkommen till Skaffu! Klicka på länken nedan för att bekräfta din e-post och komma igång.' : 'Welcome to Skaffu! Click the link below to confirm your email and get started.';
+	const footer = isSv ? 'Länken gäller i 24 timmar. Om du inte skapade ett konto kan du ignorera mejlet.' : 'The link is valid for 24 hours. If you did not create an account, you can ignore this email.';
+	const text = [headline, '', body, '', `${cta}:`, options.verifyUrl, '', footer, '', 'Skaffu'].join('\n');
+	const safeHeadline = escapeHtml(headline);
+	const safePreheader = escapeHtml(preheader);
+	const safeUrl = escapeHtml(options.verifyUrl);
+	const safeBody = escapeHtml(body);
+	const safeFooter = escapeHtml(footer);
+	const html = `<!DOCTYPE html><html lang="${locale}"><head><meta charset="utf-8" /><title>${safeHeadline}</title></head><body style="margin:0;padding:24px;font-family:system-ui,sans-serif;background:${EMAIL.bg};color:${EMAIL.text};"><div style="display:none;max-height:0;overflow:hidden;">${safePreheader}</div><div style="max-width:560px;margin:0 auto;background:${EMAIL.surface};border:1px solid ${EMAIL.border};border-radius:16px;padding:32px;"><h1 style="margin:0 0 16px;font-size:22px;">${safeHeadline}</h1><p style="margin:0 0 24px;line-height:1.55;color:${EMAIL.textMuted};">${safeBody}</p><p style="margin:0 0 24px;"><a href="${safeUrl}" style="display:inline-block;padding:12px 24px;background:${EMAIL.primary};color:#fff;text-decoration:none;border-radius:10px;font-weight:600;">${escapeHtml(cta)}</a></p><p style="margin:0;font-size:13px;color:${EMAIL.textMuted};">${safeFooter}</p></div></body></html>`;
+	return { subject, html, text };
+}
+
+export async function sendEmailVerificationEmail(options: {
+	to: string;
+	verifyUrl: string;
+	locale?: 'sv' | 'en';
+}): Promise<SendEmailResult> {
+	const content = buildEmailVerificationEmailContent({ verifyUrl: options.verifyUrl, locale: options.locale });
+	return sendEmail({ to: options.to, subject: content.subject, html: content.html, text: content.text });
+}
+
 export async function sendPasswordResetEmail(options: {
 	to: string;
 	resetUrl: string;

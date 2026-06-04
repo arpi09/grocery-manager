@@ -45,7 +45,8 @@ export async function ensureDefaultAdminUser(): Promise<void> {
 			email,
 			passwordHash,
 			role: 'admin',
-			petsEnabled: true
+			petsEnabled: true,
+			emailVerifiedAt: new Date()
 		});
 		return;
 	}
@@ -59,6 +60,8 @@ export async function ensureDefaultAdminUser(): Promise<void> {
 	if (password) {
 		updates.passwordHash = await hashPassword(password);
 	}
+
+	updates.emailVerifiedAt = new Date();
 
 	if (Object.keys(updates).length > 0) {
 		await db.update(userTable).set(updates).where(eq(userTable.id, existing.id));

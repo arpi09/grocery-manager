@@ -1,6 +1,7 @@
 ﻿import { AdminService } from '$lib/application/admin.service';
 import { AuthService } from '$lib/application/auth.service';
 import { PasswordResetService } from '$lib/application/password-reset.service';
+import { EmailVerificationService } from '$lib/application/email-verification.service';
 import { OAuthService } from '$lib/application/oauth.service';
 import { ProfileService } from '$lib/application/profile.service';
 import { ShoppingListService } from '$lib/application/shopping-list.service';
@@ -22,6 +23,7 @@ import { DrizzleAdminRepository } from '$lib/infrastructure/repositories/admin.r
 import { DrizzleErrorLogRepository } from '$lib/infrastructure/repositories/error-log.repository';
 import { DrizzleUserRepository } from '$lib/infrastructure/repositories/user.repository';
 import { DrizzlePasswordResetRepository } from '$lib/infrastructure/repositories/password-reset.repository';
+import { DrizzleEmailVerificationRepository } from '$lib/infrastructure/repositories/email-verification.repository';
 import { DrizzleAdminActionRepository } from '$lib/infrastructure/repositories/admin-action.repository';
 import { DrizzlePmfRepository } from '$lib/infrastructure/repositories/pmf.repository';
 import { DrizzleExpiryReminderRepository } from '$lib/infrastructure/repositories/expiry-reminder.repository';
@@ -48,6 +50,7 @@ import { DrizzleBillingRepository } from '$lib/infrastructure/repositories/billi
 
 const userRepository = new DrizzleUserRepository();
 const passwordResetRepository = new DrizzlePasswordResetRepository();
+const emailVerificationRepository = new DrizzleEmailVerificationRepository();
 const adminActionRepository = new DrizzleAdminActionRepository();
 const errorLogRepository = new DrizzleErrorLogRepository();
 const adminRepository = new DrizzleAdminRepository(errorLogRepository);
@@ -72,6 +75,10 @@ const billingRepository = new DrizzleBillingRepository();
 
 export const authService = new AuthService(userRepository);
 export const passwordResetService = new PasswordResetService(userRepository, passwordResetRepository);
+export const emailVerificationService = new EmailVerificationService(
+	userRepository,
+	emailVerificationRepository
+);
 export const oauthService = new OAuthService(userRepository);
 export const profileService = new ProfileService(userRepository);
 export const billingService = new BillingService(billingRepository);

@@ -22,7 +22,8 @@ export const lucia = new Lucia(adapter, {
 		isDemo: Boolean(attributes.isDemo),
 		expiryRemindersEnabled: Boolean(attributes.expiryRemindersEnabled),
 		expiryReminderDays: attributes.expiryReminderDays,
-		themePreference: attributes.themePreference
+		themePreference: attributes.themePreference,
+		emailVerifiedAt: attributes.emailVerifiedAt ?? null
 	})
 });
 
@@ -39,6 +40,7 @@ declare module 'lucia' {
 			expiryRemindersEnabled: boolean;
 			expiryReminderDays: number;
 			themePreference: string;
+			emailVerifiedAt: Date | null;
 		};
 	}
 }
@@ -54,5 +56,6 @@ declare module 'lucia' {
 		expiryRemindersEnabled: boolean;
 		expiryReminderDays: number;
 		themePreference: string;
+		emailVerifiedAt: Date | null;
 	}
 }
