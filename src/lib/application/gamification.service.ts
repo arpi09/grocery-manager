@@ -90,8 +90,7 @@ export class GamificationService {
 			: null;
 	}
 
-	private async getImpactSummary(householdId: string): Promise<ImpactStats> {
-		const dashboard = await this.statistikService.getDashboard(householdId);
-		return dashboard.impact;
+	private getImpactSummary(householdId: string): Promise<ImpactStats> {
+		return this.statistikService.getImpact(householdId);
 	}
 }

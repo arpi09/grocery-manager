@@ -37,6 +37,7 @@ import { expiryReminderService } from '$lib/server/di';
 import { DEFAULT_PLAN_TIER } from '$lib/domain/plan';
 import { isMarketingPath } from '$lib/marketing/routes';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
+import { applySecurityHeaders } from '$lib/server/security-headers';
 import { redirect, json, type Handle, type HandleServerError } from '@sveltejs/kit';
 
 const publicPaths = new Set(['/login', '/register', '/forgot-password']);
@@ -159,7 +160,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		resolvedTheme = resolveTheme(preference, prefersDarkFromRequest(event.request));
 	}
 
-	return resolve(event, {
+	const response = await resolve(event, {
 		transformPageChunk: ({ html, done }) => {
 			if (!done) {
 				return html;
@@ -169,6 +170,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 				.replaceAll('%pantry.locale%', resolvedLocale);
 		}
 	});
+	applySecurityHeaders(response);
+	return response;
 };
 
 export const handleError: HandleServerError = async ({ error, event, status }) => {

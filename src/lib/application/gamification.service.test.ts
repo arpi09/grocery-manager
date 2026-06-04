@@ -14,7 +14,8 @@ describe('GamificationService', () => {
 
 	beforeEach(() => {
 		statistikService = {
-			getDashboard: vi.fn()
+			getDashboard: vi.fn(),
+			getImpact: vi.fn()
 		} as unknown as StatistikService;
 		consumptionRepository = {
 			countByEventTypes: vi.fn(),
@@ -39,18 +40,13 @@ describe('GamificationService', () => {
 	});
 
 	it('builds engagement strip from impact and weekly eat-first signals', async () => {
-		vi.mocked(statistikService.getDashboard).mockResolvedValue({
-			analytics: { totalItems: 5 } as never,
-			addedTrend: [],
-			addedWeekOverWeek: null,
-			impact: {
-				hasConsumptionData: true,
-				consumedThisWeek: 4,
-				consumedWeekOverWeek: null,
-				consumedTrend: [],
-				wasteTrend: [],
-				zeroWasteWeeks: 2
-			}
+		vi.mocked(statistikService.getImpact).mockResolvedValue({
+			hasConsumptionData: true,
+			consumedThisWeek: 4,
+			consumedWeekOverWeek: null,
+			consumedTrend: [],
+			wasteTrend: [],
+			zeroWasteWeeks: 2
 		});
 		vi.mocked(mealPlanRepository.countRecipeIdeasSince).mockResolvedValue(3);
 		vi.mocked(mealPlanRepository.countPlannedMealsSince).mockResolvedValue(1);

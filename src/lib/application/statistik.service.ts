@@ -34,6 +34,26 @@ export class StatistikService {
 		private readonly consumptionRepository: IConsumptionRepository
 	) {}
 
+	/** Lighter than getDashboard — used by /hem engagement strip. */
+	async getImpact(householdId: string): Promise<ImpactStats> {
+		const referenceDate = new Date();
+		const [consumedCounts, wasteCounts] = await Promise.all([
+			this.consumptionRepository.weeklyCountsByEventType(
+				householdId,
+				['consumed'],
+				TREND_WEEKS,
+				referenceDate
+			),
+			this.consumptionRepository.weeklyCountsByEventType(
+				householdId,
+				['discarded', 'expired'],
+				TREND_WEEKS,
+				referenceDate
+			)
+		]);
+		return this.buildImpactStats(householdId, consumedCounts, wasteCounts, referenceDate);
+	}
+
 	async getDashboard(householdId: string): Promise<StatistikDashboard> {
 		const referenceDate = new Date();
 		const [analytics, addedCounts, consumedCounts, wasteCounts] = await Promise.all([
@@ -54,6 +74,29 @@ export class StatistikService {
 		]);
 
 		const addedTrend = buildLastNWeekBars(addedCounts, TREND_WEEKS, referenceDate);
+		const impact = await this.buildImpactStats(
+			householdId,
+			consumedCounts,
+			wasteCounts,
+			referenceDate
+		);
+
+		return {
+			analytics,
+			addedTrend,
+			addedWeekOverWeek: computeWeekOverWeek(addedTrend),
+			impact
+		};
+	}
+
+	private async buildImpactStats(
+		householdId: string,
+		consumedCounts: Awaited<
+			ReturnType<IConsumptionRepository['weeklyCountsByEventType']>
+		>,
+		wasteCounts: Awaited<ReturnType<IConsumptionRepository['weeklyCountsByEventType']>>,
+		referenceDate: Date
+	): Promise<ImpactStats> {
 		const consumedTrend = buildLastNWeekBars(consumedCounts, TREND_WEEKS, referenceDate);
 		const wasteTrend = buildLastNWeekBars(wasteCounts, TREND_WEEKS, referenceDate);
 		const hasConsumptionData = consumedCounts.some((entry) => entry.count > 0);
@@ -68,17 +111,12 @@ export class StatistikService {
 			: null;
 
 		return {
-			analytics,
-			addedTrend,
-			addedWeekOverWeek: computeWeekOverWeek(addedTrend),
-			impact: {
-				hasConsumptionData,
-				consumedThisWeek,
-				consumedWeekOverWeek: hasConsumptionData ? computeWeekOverWeek(consumedTrend) : null,
-				consumedTrend,
-				wasteTrend,
-				zeroWasteWeeks: hasConsumptionData ? computeZeroWasteStreak(wasteTrend) : null
-			}
+			hasConsumptionData,
+			consumedThisWeek,
+			consumedWeekOverWeek: hasConsumptionData ? computeWeekOverWeek(consumedTrend) : null,
+			consumedTrend,
+			wasteTrend,
+			zeroWasteWeeks: hasConsumptionData ? computeZeroWasteStreak(wasteTrend) : null
 		};
 	}
 }
