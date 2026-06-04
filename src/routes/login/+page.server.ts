@@ -2,8 +2,6 @@ import { marketingCanonicalUrl } from '$lib/marketing/app-url';
 import { isAuthError } from '$lib/application/auth.service';
 import { loginSchema } from '$lib/validation/auth.schemas';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
-import { VERIFY_EMAIL_PATH } from '$lib/navigation/email-verification';
-import { isUserEmailVerified } from '$lib/server/email-verification-enforcement';
 import { consumeRateLimit } from '$lib/server/auth-rate-limit';
 import { isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 import { createSession } from '$lib/server/session';
@@ -61,13 +59,9 @@ export const actions: Actions = {
 			});
 		}
 
-		let destination = redirectTo ?? APP_HOME_PATH;
 		try {
 			const user = await event.locals.authService.login(parsed.data.email, parsed.data.password);
 			await createSession(event, user.id);
-			destination = !isUserEmailVerified({ emailVerifiedAt: user.emailVerifiedAt ?? null })
-				? VERIFY_EMAIL_PATH
-				: (redirectTo ?? APP_HOME_PATH);
 		} catch (error) {
 			if (isAuthError(error)) {
 				return fail(400, {
@@ -79,6 +73,7 @@ export const actions: Actions = {
 			}
 			throw error;
 		}
-		redirect(302, destination);
+
+		redirect(302, redirectTo ?? APP_HOME_PATH);
 	}
 };
