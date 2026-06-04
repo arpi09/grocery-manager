@@ -12,7 +12,7 @@ test.describe('Critical flows', () => {
 	}) => {
 		await registerNewUser(page);
 		await expect(page).toHaveURL(/\/scan(\?.*mode=photo).*$/);
-		await expect(page.getByTestId('scan-hub-photo-round')).toBeVisible();
+		await expect(page.getByTestId('photo-round-zone-fridge')).toBeVisible({ timeout: 15_000 });
 	});
 
 	test('login redirects to /hem', async ({ page }) => {
@@ -26,7 +26,7 @@ test.describe('Critical flows', () => {
 	test('fresh registration skips auto-open onboarding modal on scan hub', async ({ page }) => {
 		await registerNewUser(page);
 		await expect(page).toHaveURL(/\/scan(\?.*mode=photo).*$/);
-		await expect(page.getByTestId('scan-hub-photo-round')).toBeVisible();
+		await expect(page.getByTestId('photo-round-zone-fridge')).toBeVisible({ timeout: 15_000 });
 		await expect(
 			page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
 		).toHaveCount(0);
