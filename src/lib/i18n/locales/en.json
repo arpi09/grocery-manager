@@ -365,9 +365,10 @@
 			"title": "Browser notifications",
 			"note": "Weekly browser notification when items expire soon. Requires HTTPS and permission.",
 			"enable": "Enable browser notifications",
-			"unsupported": "This browser does not support push notifications.",
+			"unsupported": "Browser notifications need the installed app (PWA) or production — not plain dev server.",
 			"errors": {
 				"unsupported": "This browser does not support push notifications.",
+				"serviceWorkerUnavailable": "Install the app to your home screen or use production (service worker missing). Try /install-app or skaffu.com.",
 				"denied": "Notifications were blocked. Allow notifications in your browser settings.",
 				"notConfigured": "Push notifications are not configured on the server yet.",
 				"failed": "Could not enable notifications. Try again."

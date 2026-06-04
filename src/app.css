@@ -48,6 +48,12 @@
 	--z-modal: 100;
 	--z-modal-nested: 110;
 	--z-toast: 120;
+	/* Toast — inverted surface for readable contrast in light + dark */
+	--toast-bg: #1f2a24;
+	--toast-fg: #ffffff;
+	--toast-fg-muted: rgba(255, 255, 255, 0.88);
+	--toast-dismiss-hover: rgba(255, 255, 255, 0.14);
+	--toast-icon-bg: rgba(255, 255, 255, 0.2);
 	--modal-scrim: color-mix(in srgb, var(--color-text) 42%, transparent);
 	--modal-scrim-blur: 8px;
 	/* Nav flyouts: dim page only — no blur (dropdown ≠ modal) */
@@ -84,6 +90,11 @@ html[data-theme='dark'] {
 	--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
 	--shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
 	--nav-bottom-shadow: 0 -4px 24px rgba(0, 0, 0, 0.28);
+	--toast-bg: #e8eee9;
+	--toast-fg: #141a17;
+	--toast-fg-muted: color-mix(in srgb, var(--toast-fg) 82%, transparent);
+	--toast-dismiss-hover: color-mix(in srgb, var(--toast-fg) 10%, transparent);
+	--toast-icon-bg: color-mix(in srgb, var(--toast-fg) 14%, transparent);
 }
 
 *,
