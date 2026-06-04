@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { marketingOgImageUrl, SITE_NAME } from '$lib/seo/seo';
+	import {
+		marketingOgImageUrl,
+		OG_IMAGE_HEIGHT,
+		OG_IMAGE_WIDTH,
+		SITE_NAME
+	} from '$lib/seo/seo';
 
 	interface Props {
 		title: string;
@@ -50,6 +55,9 @@
 	<meta property="og:type" content="website" />
 	<meta property="og:locale" content={ogLocale} />
 	<meta property="og:image" content={imageUrl} />
+	<meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />
+	<meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />
+	<meta property="og:image:type" content="image/png" />
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content={ogTitle} />
 	<meta name="twitter:description" content={ogDescription} />

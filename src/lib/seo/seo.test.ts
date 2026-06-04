@@ -15,6 +15,8 @@ import {
 	buildLandingJsonLd,
 	buildRobotsTxt,
 	buildSitemapXml,
+	marketingOgImageUrl,
+	OG_IMAGE_PATH,
 	robotsDirectiveForPath,
 	shouldIndexPath,
 	SITEMAP_ENTRIES
@@ -58,6 +60,17 @@ describe('buildSitemapXml', () => {
 			expect(xml).toContain(`<loc>${loc}</loc>`);
 		}
 		expect(xml).not.toContain('/hem');
+	});
+});
+
+describe('marketingOgImageUrl', () => {
+	beforeEach(() => {
+		mockPublicEnv.PUBLIC_ORIGIN = 'https://skaffu.com';
+	});
+
+	it('returns absolute HTTPS PNG path for social crawlers', () => {
+		expect(OG_IMAGE_PATH).toBe('/og-skaffu.png');
+		expect(marketingOgImageUrl('https://skaffu.com')).toBe('https://skaffu.com/og-skaffu.png');
 	});
 });
 

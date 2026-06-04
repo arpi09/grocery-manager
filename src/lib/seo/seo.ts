@@ -3,8 +3,12 @@ import { isMarketingPath } from '$lib/marketing/routes';
 
 export const SITE_NAME = 'Skaffu';
 
-/** Default Open Graph / Twitter image (absolute URL built at render time). */
-export const OG_IMAGE_PATH = '/og-skaffu.svg';
+/** Default Open Graph / Twitter image (absolute URL built at render time). PNG for LinkedIn/social crawlers. */
+export const OG_IMAGE_PATH = '/og-skaffu.png';
+
+/** LinkedIn / OG recommended dimensions (matches static/og-skaffu.png). */
+export const OG_IMAGE_WIDTH = 1200;
+export const OG_IMAGE_HEIGHT = 630;
 
 export interface SitemapEntry {
 	path: string;
