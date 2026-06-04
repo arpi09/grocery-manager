@@ -69,21 +69,39 @@ Coordinator kan anropa begränsade typer, t.ex. `explore`, `shell`, `generalPurp
 
 ## WIP 3 och operativa regler
 
-**WIP 3 (aktiv disciplin):** max **3** implementation-agenter samtidigt. **dev-runtime** räknas inte in i implementation-taket.
+**WIP 3 (aktiv disciplin):** max **3 feature branches** (`feat/*`, `fix/*`) med en implementation-agent vardera. **dev-runtime** räknas inte in i implementation-taket.
 
 | Regel | Innebörd |
 |-------|----------|
+| **master = deploy** | Endast `master` pushar till prod via Release. Agenter kodar på `feat/*` / `fix/*`, mergar när CI är grön |
+| **Parallella branches** | Upp till 3 aktiva feature/fix-branches; en agent per branch, en hot zone per agent |
 | **Inga parallella bursts** | Inte flera `explore`/`shell`/`generalPurpose` samtidigt på samma uppgift eller hot zone |
 | **En hot zone = en agent** | t.ex. `src/lib/i18n/`, settings-UI/API, `di.ts`, `db/migrations/` + `init.ts`, `hooks.server.ts`, delad auth/layout |
 | **E2E efter freeze** | En avgränsad E2E-batch per vecka när feature-arbetet är fryst — inte XL E2E mitt i sprint |
 | **Finish before starting** | Stäng/merge öppet arbete innan ny P1-feature-spawn |
 | **Coordinator-only spawn** | Implementation-agenter spawnar inte peers |
-| **G0 före push** | `npm run check && npm test` (E2E om auth/UI berörts) — se [`CI_CD.md`](./CI_CD.md), [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) |
+| **G0 före push** | `npm run check:locales && npm run check && npm test` (E2E om auth/UI berörts) — se [`CI_CD.md`](./CI_CD.md), [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) |
 | **Security före deploy** | Security-agent → `private/SECURITY_REPORT.md` måste vara grön nog för G3 |
+| **Definition of done** | Ingen "deployed" utan **lyckad Release** för merge-SHA + [`PROD_SMOKE.md`](./PROD_SMOKE.md) (5 punkter) |
+
+**Parallell dev:** implementation på feature-branch i huvud-worktree; **dev-runtime** kör `dev:watch` i worktree `home-pantry-dev` (`npm run dev:start:ai`) så två agenter kan utveckla utan port-krock.
 
 Övriga WIP-slots (när coordinator använder dem): 1 planner (read-only explore), 1 integration (merge/konflikt), 1 governance-skannning — se koordinatorregler; detaljer och experimentlogg i `private/WIP1_TEST_LOG.md`.
 
-**Survival mode (WIP=1):** vid mycket tight budget — max 1 implementation + dev-runtime; inga parallella swarms. Aktiveras i coordinator-session, inte i denna fils detaljer.
+**Survival mode (WIP=1):** vid mycket tight budget — max 1 feature-branch + dev-runtime; inga parallella swarms. Aktiveras i coordinator-session, inte i denna fils detaljer.
+
+---
+
+## Merge queue (branch → master → Release)
+
+1. **Branch:** agent jobbar på `feat/*` eller `fix/*` från senaste `master`.
+2. **G0 lokalt:** `npm run check:locales && npm run check && npm test` (+ `test:integration`, `test:e2e` vid behov).
+3. **CI grön på branch** (valfritt push till branch för Actions, eller G0 räcker för små fix).
+4. **Merge till `master`:** coordinator rebasar/mergar, pushar `origin master`.
+5. **Release:** `gh run watch` tills **Release** workflow är grön för merge-SHA.
+6. **Rapportera:** merge-SHA (7 tecken) + [`PROD_SMOKE.md`](./PROD_SMOKE.md) checklista — **inte** "deployed" förrän steg 5 lyckats.
+
+Se [`private/MERGE_QUEUE.md`](../private/MERGE_QUEUE.md) för live-kö när den finns lokalt.
 
 ---
 
@@ -177,7 +195,7 @@ Läs och följ:
 1) docs/CURSOR_COORDINATOR.md (publik — coordinator, WIP, spawn)
 2) private/NEW_CURSOR_AGENT_START.md (lokal — miljö, private/, första uppgifter)
 
-Du är coordinator. Fråga innan commit, push eller spawn. WIP 3 aktiv: max 3 implementation-agenter, inga parallella explore/shell-bursts, E2E efter feature-freeze. Spawn-proposal före varje ny agent (utom dev-runtime / enstaka P0 vid röd CI-prod).
+Du är coordinator. Fråga innan commit, push eller spawn. WIP 3 aktiv: max 3 feature branches (feat/*, fix/*), master endast för deploy-merge, inga parallella explore/shell-bursts, E2E efter feature-freeze. Spawn-proposal före varje ny agent (utom dev-runtime / enstaka P0 vid röd CI-prod). Definition of done: grön Release för merge-SHA + PROD_SMOKE.md.
 ```
 
 ---
@@ -190,4 +208,4 @@ Du är coordinator. Fråga innan commit, push eller spawn. WIP 3 aktiv: max 3 im
 | [`CI_CD.md`](./CI_CD.md) | G0–G3, trunk på `master` |
 | [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) | Testing diamond, risk, DoD |
 | [`E2E.md`](./E2E.md) | Playwright-setup |
-| [`README.md`](./README.md) (docs/) | Hela doc-index |
+| [`PROD_SMOKE.md`](./PROD_SMOKE.md) | Post-deploy smoke (sv) efter grön Release |

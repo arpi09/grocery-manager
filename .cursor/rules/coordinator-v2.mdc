@@ -6,7 +6,10 @@ alwaysApply: false
 # Coordinator v2
 
 - **Delivery (default):** Trunk on `master` — no PRs. See [docs/CI_CD.md](../../docs/CI_CD.md).
+- **Parallel work:** Up to **3 feature branches** (`feat/*`, `fix/*`); one agent per branch. **`master` is deploy-only** — merge when G0 green, then push.
 - **Work order:** [private/MERGE_QUEUE.md](../../private/MERGE_QUEUE.md) when present — sequencing for parallel agents, not GitHub PRs.
+- **Dev worktree:** `home-pantry-dev` for `dev:watch` (`npm run dev:start:ai`) so a second agent can run dev without port clash.
+- **Definition of done:** No "deployed" without **successful Release** for the merge SHA + [docs/PROD_SMOKE.md](../../docs/PROD_SMOKE.md).
 - **Live status:** [private/AGENT_STATUS.md](../../private/AGENT_STATUS.md) — active slots, blockers, base SHA.
 - **Ownership:** [private/OWNERSHIP.md](../../private/OWNERSHIP.md) — shared areas; one agent per hot zone.
 - **Complexity:** [private/COMPLEXITY_REPORT.md](../../private/COMPLEXITY_REPORT.md) — structural hotspots; refresh via [complexity-agent.mdc](./complexity-agent.mdc) (read-only, no auto-refactors).
@@ -15,11 +18,12 @@ alwaysApply: false
 ## Rules
 
 1. **Only the coordinator** creates implementation agents or worktrees. Implementation agents do not spawn peers.
-2. **WIP limit:** Max **3** implementation agents (dev-runtime excluded).
-3. **Push to `master`:** After G0 (`npm run check && npm test`; E2E if auth/UI touched) — `git commit` + `git push origin master`. CI/CD runs automatically; **never** instruct the user to open a PR unless they ask.
+2. **WIP limit:** Max **3 feature branches** with one implementation agent each (dev-runtime excluded).
+3. **Push to `master`:** After G0 (`npm run check:locales && npm run check && npm test`; E2E if auth/UI touched) — merge branch, `git push origin master`. CI/CD runs automatically; **never** instruct the user to open a PR unless they ask.
 4. **Before push:** Pull/rebase on latest `master` if others may have pushed; run the G0 checklist above.
-5. **No manual dev restart** when `dev:watch` is running (see `dev-server-auto-restart.mdc`).
-6. **Before deploy (G3):** Invoke Security agent; do not push high-risk or dependency-sensitive changes if [private/SECURITY_REPORT.md](../../private/SECURITY_REPORT.md) status is **blocked** without human approval.
+5. **After push:** Watch Release (`gh run watch`) until green; report merge SHA + PROD_SMOKE checklist — not "deployed" until Release succeeds.
+6. **No manual dev restart** when `dev:watch` is running (see `dev-server-auto-restart.mdc`).
+7. **Before deploy (G3):** Invoke Security agent; do not push high-risk or dependency-sensitive changes if [private/SECURITY_REPORT.md](../../private/SECURITY_REPORT.md) status is **blocked** without human approval.
 
 ## Security agent lifecycle
 

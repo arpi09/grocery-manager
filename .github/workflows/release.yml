@@ -57,6 +57,7 @@ jobs:
       - run: npm ci
 
       - run: npm run lint
+      - run: npm run check:locales
       - run: npm run check
         env:
           PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA

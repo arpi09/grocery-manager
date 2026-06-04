@@ -6,6 +6,18 @@ Manuell checklista efter G3-deploy (Firebase App Hosting). E2E och CI använder 
 
 ---
 
+## Coordinator — snabbcheck (5 punkter)
+
+Kör **efter** grön **Release** för merge-SHA. Räkna inte deploy som klar utan lyckad Release-run.
+
+1. **SHA** — Prod kör samma commit som den gröna Release-run (kort SHA i Actions).
+2. **Inloggning** — Logga in på prod; landar på `/hem` utan fel.
+3. **Scan** — `/scan`; foto-runda syns som primärt val (photo-first hub).
+4. **Recept** — Receptknapp i headern; modal öppnas och kan generera.
+5. **Inställningar** — `/settings`; e-postpåminnelser sparar utan fel.
+
+---
+
 ## Checklista (5–8 min)
 
 - [ ] **Admin-login** — logga in med admin-konto; landar på `/hem` utan 500

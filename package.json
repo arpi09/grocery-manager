@@ -24,6 +24,7 @@
 		"prepare": "svelte-kit sync || echo '' && husky",
 		"lint:staged": "lint-staged",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:locales": "node scripts/check-locale-encoding.mjs",
 		"lint": "eslint .",
 		"format": "prettier --write .",
 		"test": "vitest run",
