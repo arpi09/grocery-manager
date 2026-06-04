@@ -43,7 +43,12 @@
 	async function goScan() {
 		closeCelebration();
 		const progress = getActivationProgress(userId);
-		const mode = progress.path === 'receipt' ? 'receipt' : 'barcode';
+		const mode =
+			progress.path === 'receipt'
+				? 'receipt'
+				: progress.path === 'barcode'
+					? 'barcode'
+					: 'photo';
 		await goto(scanModeHref(mode, APP_HOME_PATH));
 	}
 
