@@ -11,7 +11,7 @@ test.describe('Critical flows', () => {
 		page
 	}) => {
 		await registerNewUser(page);
-		await expect(page).toHaveURL(/\/scan(?!\?.*mode=)/);
+		await expect(page).toHaveURL(/\/scan(\?.*mode=photo).*$/);
 		await expect(page.getByTestId('scan-hub-photo-round')).toBeVisible();
 	});
 
@@ -25,7 +25,7 @@ test.describe('Critical flows', () => {
 
 	test('fresh registration skips auto-open onboarding modal on scan hub', async ({ page }) => {
 		await registerNewUser(page);
-		await expect(page).toHaveURL(/\/scan(?!\?.*mode=)/);
+		await expect(page).toHaveURL(/\/scan(\?.*mode=photo).*$/);
 		await expect(page.getByTestId('scan-hub-photo-round')).toBeVisible();
 		await expect(
 			page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
@@ -42,6 +42,6 @@ test.describe('Critical flows', () => {
 		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click();
 		await expectOnboardingGuideVisible(page);
 		await page.getByTestId('onboarding-quickstart').click();
-		await expect(page).toHaveURL(/\/scan(\?.*mode=barcode).*$/);
+		await expect(page).toHaveURL(/\/scan(\?.*mode=photo).*$/);
 	});
 });
