@@ -3,8 +3,12 @@
 	import { page } from '$app/state';
 	import MarketingFooter from '$lib/components/marketing/MarketingFooter.svelte';
 	import MarketingHeader from '$lib/components/marketing/MarketingHeader.svelte';
+	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 
 	let { children, data } = $props();
+
+	const isLoggedIn = $derived(Boolean(page.data.user?.id));
+	const appHomeUrl = APP_HOME_PATH;
 
 	$effect.pre(() => {
 		if (!browser) {
@@ -18,6 +22,8 @@
 	<MarketingHeader
 		content={data.marketing}
 		loginUrl={data.loginUrl}
+		{appHomeUrl}
+		{isLoggedIn}
 		currentPath={page.url.pathname}
 	/>
 	<main class="marketing-main">
