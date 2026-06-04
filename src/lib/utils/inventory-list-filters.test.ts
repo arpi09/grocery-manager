@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { InventoryItem } from '$lib/domain/inventory-item';
-import { filterAndSortInventoryItems } from './inventory-list-filters';
+import {
+	compareInventoryItems,
+	filterAndSortInventoryItems
+} from './inventory-list-filters';
 
 function item(overrides: Partial<InventoryItem> & Pick<InventoryItem, 'id' | 'name'>): InventoryItem {
 	return {
@@ -47,5 +50,25 @@ describe('filterAndSortInventoryItems', () => {
 		];
 		const sorted = filterAndSortInventoryItems(withQty, '', 'all', 'quantity');
 		expect(sorted.map((row) => row.name)).toEqual(['Butter', 'Milk', 'Eggs']);
+	});
+
+	it('sorts expiry descending (latest / no date last)', () => {
+		const sorted = filterAndSortInventoryItems(items, '', 'all', 'expiry', 'desc');
+		expect(sorted.map((row) => row.name)).toEqual(['Banana', 'Zucchini', 'Apple']);
+	});
+
+	it('reverses name order when direction is desc', () => {
+		const sorted = filterAndSortInventoryItems(items, '', 'all', 'name', 'desc');
+		expect(sorted.map((row) => row.name)).toEqual(['Zucchini', 'Banana', 'Apple']);
+	});
+});
+
+describe('compareInventoryItems', () => {
+	const a = item({ id: '1', name: 'Apple', expiresOn: '2026-01-01' });
+	const b = item({ id: '2', name: 'Banana', expiresOn: '2026-06-01' });
+
+	it('flips sign for descending', () => {
+		expect(compareInventoryItems(a, b, 'expiry', 'asc')).toBeLessThan(0);
+		expect(compareInventoryItems(a, b, 'expiry', 'desc')).toBeGreaterThan(0);
 	});
 });

@@ -151,11 +151,7 @@
 
 <style>
 	.data-row {
-		transition: background-color 0.15s ease;
-	}
-
-	.data-row:hover {
-		background: var(--color-surface-muted);
+		transition: background-color 0.12s ease;
 	}
 
 	.data-row.finished {
