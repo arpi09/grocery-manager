@@ -9,6 +9,7 @@
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import { TOAST_DEFAULT_DURATION_MS, TOAST_UNDO_DURATION_MS } from '$lib/utils/action-toast';
+import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { fetchCheckedShoppingItems } from '$lib/client/shopping-data';
 	import { t } from '$lib/i18n';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
@@ -71,7 +72,6 @@
 	} | null>(null);
 	let undoSubmitting = $state(false);
 	let exportCopied = $state(false);
-	let successToastMessage = $state<string | null>(null);
 	let addSubmitting = $state(false);
 
 	const undoCopy = $derived(getDeleteCopy(1, 'shoppingListItem'));
@@ -151,11 +151,7 @@
 	}
 
 	function showSuccessToast(message: string) {
-		successToastMessage = message;
-	}
-
-	function dismissSuccessToast() {
-		successToastMessage = null;
+		showClientToast(message, { variant: 'success' });
 	}
 
 	function createClearCheckedEnhance(): SubmitFunction {
@@ -342,6 +338,7 @@
 </section>
 
 {#if undoPayload}
+	<!-- Local undo toast: longer duration + inline undo action -->
 	<div class="undo-toast-wrap">
 		<Toast
 			message={undoMessage ?? ''}
@@ -359,14 +356,6 @@
 			{undoCopy.undoActionLabel ?? t('common.undo')}
 		</button>
 	</div>
-{:else if successToastMessage}
-	<Toast
-		message={successToastMessage}
-		visible={true}
-		variant="success"
-		durationMs={TOAST_DEFAULT_DURATION_MS}
-		onDismiss={dismissSuccessToast}
-	/>
 {/if}
 
 <style>

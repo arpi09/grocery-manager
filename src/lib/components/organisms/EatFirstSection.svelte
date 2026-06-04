@@ -5,9 +5,7 @@
 	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
-	import Toast from '$lib/components/molecules/Toast.svelte';
-	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
-	import type { InventoryItem } from '$lib/domain/inventory-item';
+			import type { InventoryItem } from '$lib/domain/inventory-item';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
 	import { DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
@@ -38,7 +36,6 @@
 	let errorMessage = $state<string | null>(null);
 	let addingMissingKey = $state<string | null>(null);
 	let schedulingKey = $state<string | null>(null);
-	let toastMessage = $state<string | null>(null);
 	let feedbackBanner = $state<{ message: string; tone: AddMissingFeedbackTone } | null>(null);
 	let scheduleDates = $state<Record<string, string>>({});
 	let note = $state<string | null>(null);
@@ -115,7 +112,7 @@
 			getLocale(),
 			await addMissingIngredientsToList(idea.missingIngredients)
 		);
-		toastMessage = presented.message;
+		showClientToast(presented.message, { variant: 'success' });
 		feedbackBanner = presented;
 		addingMissingKey = null;
 	}
@@ -147,17 +144,17 @@
 				return;
 			}
 
-			toastMessage = t('eatFirst.scheduleSuccess', { title: idea.title, date: plannedDate });
-			markIdeaScheduled(idea.id);
-
+			let scheduleToast = t('eatFirst.scheduleSuccess', { title: idea.title, date: plannedDate });
 			if (
 				data.celebration === 'eatFirstRitual' &&
 				householdId &&
 				shouldShowCelebration('eatFirstRitual', householdId)
 			) {
-				toastMessage = `${toastMessage} ${celebrationMessage(getLocale(), 'eatFirstRitual')}`;
+				scheduleToast = scheduleToast + ' ' + celebrationMessage(getLocale(), 'eatFirstRitual');
 				markCelebrationShown('eatFirstRitual', householdId);
 			}
+			showClientToast(scheduleToast, { variant: 'success' });
+			markIdeaScheduled(idea.id);
 		} catch {
 			errorMessage = t('eatFirst.scheduleFailed');
 		} finally {
@@ -170,9 +167,6 @@
 		scheduleDates = { ...scheduleDates, [ideaId]: target.value };
 	}
 
-	function dismissToast() {
-		toastMessage = null;
-	}
 </script>
 
 <section
@@ -360,15 +354,6 @@
 	{/if}
 </section>
 
-{#if toastMessage}
-	<Toast
-		message={toastMessage}
-		visible={true}
-		variant="success"
-		durationMs={TOAST_DEFAULT_DURATION_MS}
-		onDismiss={dismissToast}
-	/>
-{/if}
 
 <style>
 	.eat-first {

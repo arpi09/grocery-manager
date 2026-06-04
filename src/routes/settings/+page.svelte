@@ -12,6 +12,7 @@
 		actionToastMessage,
 		parseActionToastKind
 	} from '$lib/utils/action-toast';
+import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import SettingsRow from '$lib/components/molecules/SettingsRow.svelte';
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
 	import SettingsSectionNav, {
@@ -40,8 +41,7 @@
 		unsubscribeFromExpiryPush
 	} from '$lib/utils/push-notifications';
 	import ProWaitlistForm from '$lib/components/marketing/ProWaitlistForm.svelte';
-	import Toast from '$lib/components/molecules/Toast.svelte';
-
+	
 	let { data, form } = $props();
 	let petModalOpen = $state(false);
 	let copiedInviteLink = $state(false);
@@ -64,8 +64,6 @@
 	let feedbackSubmitting = $state(false);
 	let expiryRemindersForm: HTMLFormElement | undefined = $state();
 	let autoExpiredGraceForm: HTMLFormElement | undefined = $state();
-	let pushToastMessage = $state<string | null>(null);
-	let expirySettingsToast = $state<string | null>(null);
 
 	const feedbackErrors = $derived(form?.feedbackErrors ?? {});
 	const feedbackSuccess = $derived(form?.feedbackSuccess === true);
@@ -170,7 +168,7 @@
 					return;
 				}
 				pushNotificationsEnabled = true;
-				pushToastMessage = t('actionToast.pushEnabled');
+				showClientToast(t('actionToast.pushEnabled'), { variant: 'success' });
 				await invalidateAll();
 			} else {
 				const result = await unsubscribeFromExpiryPush();
@@ -180,7 +178,7 @@
 					return;
 				}
 				pushNotificationsEnabled = false;
-				pushToastMessage = t('actionToast.pushDisabled');
+				showClientToast(t('actionToast.pushDisabled'), { variant: 'success' });
 				await invalidateAll();
 			}
 		} catch {
@@ -191,13 +189,7 @@
 		}
 	}
 
-	function dismissPushToast() {
-		pushToastMessage = null;
-	}
 
-	function dismissExpirySettingsToast() {
-		expirySettingsToast = null;
-	}
 
 	const settingsNavItems = $derived.by((): SettingsNavItem[] => {
 		const items: SettingsNavItem[] = [
@@ -279,7 +271,7 @@
 							const url = new URL(location, 'http://local');
 							const kind = parseActionToastKind(url.searchParams.get(ACTION_TOAST_PARAM));
 							if (kind === 'settingsSaved') {
-								expirySettingsToast = actionToastMessage(getLocale(), kind);
+								showClientToast(actionToastMessage(getLocale(), kind), { variant: 'success' });
 							}
 						},
 						(formData) => {
@@ -692,18 +684,6 @@
 		</form>
 	</Modal>
 
-{#if pushToastMessage}
-	<Toast message={pushToastMessage} visible={true} onDismiss={dismissPushToast} />
-{/if}
-{#if expirySettingsToast}
-	<Toast
-		message={expirySettingsToast}
-		visible={true}
-		variant="success"
-		size="action"
-		onDismiss={dismissExpirySettingsToast}
-	/>
-{/if}
 
 <ProActivationCelebration
 	show={data.checkoutStatus === 'success'}

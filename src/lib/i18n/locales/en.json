@@ -279,6 +279,10 @@
 			"kivraStep1": "Open Kivra and find the receipt under purchases or documents.",
 			"kivraStep2": "Tap the receipt and choose share or save — often as PDF.",
 			"kivraStep3": "Save the PDF and choose the file here — no need to convert it to a screenshot."
+		},
+		"hubHero": {
+			"subtitle": "Photograph fridge, freezer, or pantry — many items at once.",
+			"cta": "Start photo round"
 		}
 	},
 	"settings": {

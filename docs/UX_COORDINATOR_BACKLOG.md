@@ -32,15 +32,17 @@
 
 ---
 
-## Toast-audit — kvar efter P2 (ej migrerat)
+## Toast-audit – efter ClientToast (feat/toast-unify-scan-hero)
 
-| Källa | Status efter P2 |
-|-------|-----------------|
-| `EatFirstSection`, `RecipeAssistant`, `MealPlanIdeasPanel`, `ReceiptAutopilot` | Lokala `Toast`, nu 5s + success-variant |
-| `ShoppingListPanel` undo | 8s via `TOAST_UNDO_DURATION_MS` |
-| `CalendarDaySheet` | Lokal variant — ej migrerad |
-| `GamificationToast`, `InventoryScanToast` | Egna wrappers — behåll |
-| `settings/+page.svelte` push/expiry | Lokala — överväg `ActionToast` i P3 |
+| Källa | Status |
+|-------|--------|
+| `ClientToast` + `showClientToast` | Global via `AppLayout` (action size, 5s default, paus hover) |
+| `EatFirstSection`, `RecipeAssistant`, `MealPlanIdeasPanel`, `ReceiptAutopilot`, `CalendarDaySheet` | Migrerade till `showClientToast` |
+| `ShoppingListPanel` success | `showClientToast` |
+| `ShoppingListPanel` undo | Lokal `Toast` + 8s `TOAST_UNDO_DURATION_MS` (inline undo) |
+| `settings/+page.svelte` push/expiry | `showClientToast` |
+| `ActionToast` (`?toast=`) | Oförändrad URL-driven toast |
+| `GamificationToast`, `InventoryScanToast` | Egna wrappers – behåll |
 
 ## Toast-audit (P1 — historik)
 

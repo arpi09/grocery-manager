@@ -3,8 +3,8 @@
 	import Card from '$lib/components/atoms/Card.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
-	import Toast from '$lib/components/molecules/Toast.svelte';
-	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
+		import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
+import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import type { ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
 	import { t } from '$lib/i18n';
 
@@ -20,7 +20,6 @@
 	let acceptingKey = $state<string | null>(null);
 	let dismissingKey = $state<string | null>(null);
 	let errorMessage = $state<string | null>(null);
-	let toastMessage = $state<string | null>(null);
 
 	$effect(() => {
 		items = suggestions;
@@ -52,7 +51,7 @@
 			}
 
 			items = items.filter((entry) => entry.normalizedKey !== normalizedKey);
-			toastMessage = t('receiptAutopilot.acceptSuccess', { name: data.name ?? '' });
+			showClientToast(t('receiptAutopilot.acceptSuccess', { name: data.name ?? '' }), { variant: 'success' });
 		} catch {
 			errorMessage = t('receiptAutopilot.acceptFailed');
 		} finally {
@@ -148,15 +147,6 @@
 	{/if}
 </section>
 
-{#if toastMessage}
-	<Toast
-		message={toastMessage}
-		visible={true}
-		variant="success"
-		durationMs={TOAST_DEFAULT_DURATION_MS}
-		onDismiss={() => (toastMessage = null)}
-	/>
-{/if}
 
 <style>
 	.autopilot {
