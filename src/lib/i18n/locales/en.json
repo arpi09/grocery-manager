@@ -227,8 +227,6 @@
 		"cancelBack": "Cancel and go back",
 		"cancelBackToHome": "Cancel and back to home",
 		"cancel": "Cancel",
-		"otherModes": "Scan another way",
-		"otherModesHide": "Hide other ways",
 		"hubAria": "Scan modes",
 		"modes": {
 			"barcode": "Barcode",
@@ -248,6 +246,9 @@
 			},
 			"photoRound": {
 				"description": "Photograph fridge, freezer or cupboard — many items at once. Recommended first step."
+			},
+			"manual": {
+				"description": "Enter name and details yourself without scanning."
 			}
 		},
 		"photoPage": {

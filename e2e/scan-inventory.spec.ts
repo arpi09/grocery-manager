@@ -18,13 +18,24 @@ test.describe('Scan and inventory', () => {
 		await expect(scanModes.getByRole('link', { name: 'Streckkod' })).toBeVisible();
 		await expect(scanModes.getByRole('link', { name: 'Kvitto' })).toBeVisible();
 
-		const otherModes = hub.getByTestId('scan-hub-other-modes');
-		await otherModes.scrollIntoViewIfNeeded();
-		await otherModes.click();
-		await expect(otherModes).toHaveAttribute('aria-expanded', 'true', { timeout: 10_000 });
-		await expect(hub.getByTestId('scan-hub-other-modes-panel')).toBeVisible({ timeout: 10_000 });
+		const modeGrid = hub.getByTestId('scan-hub-mode-grid');
+		await expect(modeGrid).toBeVisible();
+		await expect(hub.getByTestId('scan-hub-barcode')).toBeVisible();
+		await expect(hub.getByTestId('scan-hub-receipt')).toBeVisible();
+		await expect(hub.getByTestId('scan-hub-manual')).toBeVisible();
 		await expect(hub.getByRole('heading', { name: 'Streckkod' })).toBeVisible();
 		await expect(hub.getByRole('heading', { name: 'Kvitto' })).toBeVisible();
+		await expect(hub.getByRole('heading', { name: 'Manuellt' })).toBeVisible();
+	});
+
+	test('scan sub-modes hide mode tabs', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/scan?mode=photo&from=/hem');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page).toHaveURL(/mode=photo/);
+		await expect(page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i })).toHaveCount(0);
+		await expect(page.getByRole('link', { name: /Alla skanningslägen|All scan modes/i })).toBeVisible();
 	});
 
 	test('legacy receipt route redirects to unified scan', async ({ page }) => {

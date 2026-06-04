@@ -10,6 +10,7 @@
 	import { PHOTO_ROUND_MAX_IMAGES, PHOTO_ROUND_MAX_TOTAL_BYTES } from '$lib/domain/photo-round';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
+	import { scanHubHref } from '$lib/utils/scan-nav';
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { onMount } from 'svelte';
 
@@ -34,7 +35,7 @@
 	let discardReviewOpen = $state(false);
 	let nextLineId = $state(0);
 
-	const cancelHref = $derived(returnTo);
+	const cancelHref = $derived(scanHubHref(returnTo));
 	const canAddPhoto = $derived(photos.length < PHOTO_ROUND_MAX_IMAGES);
 
 	function confidenceLabel(confidence: PhotoRoundDetectedItem['confidence']): string {
@@ -226,7 +227,7 @@
 			{/each}
 		</div>
 	</section>
-	<ScanFlowFooter {cancelHref} cancelLabel={t('common.cancel')} />
+	<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} />
 {:else if step === 'capture' && zone}
 	<section data-testid="photo-round-capture">
 		<p class="lead">
@@ -284,7 +285,7 @@
 			</div>
 		{/if}
 	</section>
-	<ScanFlowFooter {cancelHref} cancelLabel={t('common.cancel')} />
+	<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} />
 {:else}
 	<section data-testid="photo-round-review">
 		<h2 class="title">
@@ -409,7 +410,7 @@
 			</div>
 		</form>
 	</section>
-	<ScanFlowFooter {cancelHref} cancelLabel={t('common.cancel')} />
+	<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} />
 
 	<DeleteSafetyModal
 		open={discardReviewOpen}
