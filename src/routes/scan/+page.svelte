@@ -75,7 +75,7 @@
 		{:else if isReceiptMode}
 			<ReceiptBulkAddFlow returnTo={data.returnTo} />
 		{:else if isPhotoMode}
-			<PhotoRoundFlow returnTo={data.returnTo} />
+			<PhotoRoundFlow returnTo={data.returnTo} initialLocation={data.defaultLocation} />
 		{:else}
 			<ScanModeHub returnTo={data.returnTo} defaultLocation={data.defaultLocation ?? undefined} />
 			<ScanFlowFooter cancelHref={data.returnTo} {cancelLabel} />
