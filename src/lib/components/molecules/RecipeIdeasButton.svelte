@@ -16,7 +16,7 @@
 	class:compact
 	class:icon-only={iconOnly}
 	data-testid="recipe-ideas-btn"
-	{onclick}
+	onclick={() => onclick?.()}
 	aria-label={t('planer.recipeIdeasAria')}
 >
 	{#if iconOnly}
