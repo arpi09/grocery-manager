@@ -7,12 +7,13 @@
 		ACTION_TOAST_LABEL_PARAM,
 		ACTION_TOAST_PARAM,
 		ACTION_TOAST_REMAINING_PARAM,
+		TOAST_DEFAULT_DURATION_MS,
 		actionToastMessage,
 		actionToastTone,
 		parseActionToastKind
 	} from '$lib/utils/action-toast';
 
-	const ACTION_TOAST_DURATION_MS = 5500;
+	const ACTION_TOAST_DURATION_MS = TOAST_DEFAULT_DURATION_MS;
 
 	let dismissed = $state(false);
 

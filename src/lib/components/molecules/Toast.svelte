@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { portal } from '$lib/actions/portal';
 	import { t } from '$lib/i18n';
+	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
 
 	export type ToastVariant = 'default' | 'success' | 'error' | 'info';
 	export type ToastSize = 'compact' | 'action';
@@ -21,7 +22,7 @@
 	let {
 		message,
 		visible = true,
-		durationMs = 4500,
+		durationMs = TOAST_DEFAULT_DURATION_MS,
 		variant = 'default',
 		size = 'compact',
 		celebrate = false,
@@ -30,13 +31,14 @@
 	}: Props = $props();
 
 	let show = $state(visible);
+	let paused = $state(false);
 
 	$effect(() => {
 		show = visible;
 	});
 
 	$effect(() => {
-		if (!visible || !message) {
+		if (!visible || !message || paused) {
 			return;
 		}
 
@@ -60,6 +62,13 @@
 		dismiss();
 	}
 
+	function handlePointerEnter() {
+		paused = true;
+	}
+
+	function handlePointerLeave() {
+		paused = false;
+	}
 </script>
 
 {#if show && message}
@@ -75,6 +84,8 @@
 		role="status"
 		aria-live="polite"
 		onclick={handleToastClick}
+		onpointerenter={handlePointerEnter}
+		onpointerleave={handlePointerLeave}
 	>
 		{#if variant === 'success'}
 			<span class="toast-icon" aria-hidden="true">✓</span>
@@ -112,11 +123,11 @@
 		gap: var(--space-sm);
 		max-width: min(420px, calc(100vw - 2 * var(--space-md)));
 		padding: var(--space-sm) var(--space-md);
-		background: var(--color-text);
-		color: #fff;
+		background: var(--toast-bg);
+		color: var(--toast-fg);
 		border-radius: var(--radius-md);
 		box-shadow: var(--shadow-md);
-		border: 1px solid transparent;
+		border: 1px solid color-mix(in srgb, var(--toast-fg) 12%, transparent);
 	}
 
 	.toast-action {
@@ -124,7 +135,7 @@
 		max-width: min(28rem, calc(100vw - 2 * var(--space-md)));
 		padding: var(--space-md) var(--space-lg);
 		border-radius: var(--radius-lg);
-		box-shadow: 0 8px 28px rgba(31, 42, 36, 0.18);
+		box-shadow: var(--shadow-md);
 		cursor: pointer;
 	}
 
@@ -134,13 +145,13 @@
 
 	.toast-success {
 		background: var(--color-primary);
-		color: #fff;
+		color: var(--color-on-primary);
 		border-color: color-mix(in srgb, var(--color-primary) 80%, #000);
 	}
 
 	.toast-error {
 		background: var(--color-danger);
-		color: #fff;
+		color: var(--color-on-primary);
 		border-color: color-mix(in srgb, var(--color-danger) 75%, #000);
 	}
 
@@ -156,12 +167,22 @@
 		color: var(--color-primary);
 	}
 
+	.toast-info .dismiss {
+		color: var(--color-text-muted);
+	}
+
+	.toast-info .dismiss:hover {
+		background: var(--color-surface-muted);
+		color: var(--color-text);
+	}
+
 	.toast-celebrate {
 		background: linear-gradient(
 			135deg,
-			color-mix(in srgb, var(--color-primary) 88%, #1a2420),
-			var(--color-text)
+			var(--color-primary),
+			color-mix(in srgb, var(--color-primary) 55%, var(--toast-bg))
 		);
+		color: var(--color-on-primary);
 		border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
 	}
 
@@ -173,7 +194,7 @@
 		width: 1.75rem;
 		height: 1.75rem;
 		border-radius: 999px;
-		background: rgba(255, 255, 255, 0.2);
+		background: var(--toast-icon-bg);
 		font-size: 1rem;
 		font-weight: 800;
 		line-height: 1;
@@ -186,6 +207,7 @@
 		font-size: 0.9rem;
 		line-height: 1.4;
 		font-weight: 600;
+		color: inherit;
 	}
 
 	.toast-action .toast-message {
@@ -213,11 +235,7 @@
 
 	.dismiss:hover {
 		opacity: 1;
-		background: rgba(255, 255, 255, 0.12);
-	}
-
-	.toast-info .dismiss:hover {
-		background: var(--color-surface-muted);
+		background: var(--toast-dismiss-hover);
 	}
 
 	@media (min-width: 560px) {

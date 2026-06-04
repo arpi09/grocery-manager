@@ -333,9 +333,10 @@
 			"title": "Webbläsarnotiser",
 			"note": "Veckovis notis i webbläsaren när varor går ut snart. Kräver HTTPS och tillåtelse.",
 			"enable": "Aktivera webbläsarnotiser",
-			"unsupported": "Webbläsaren stödjer inte push-notiser.",
+			"unsupported": "Webbläsarnotiser kräver installerad app (PWA) eller produktion — inte vanlig dev-server.",
 			"errors": {
 				"unsupported": "Webbläsaren stödjer inte push-notiser.",
+				"serviceWorkerUnavailable": "Appen måste vara installerad på hemskärmen eller köras i produktion (service worker saknas). Prova /install-app eller öppna skaffu.com.",
 				"denied": "Notiser blockerades. Tillåt notiser i webbläsarinställningarna.",
 				"notConfigured": "Push-notiser är inte konfigurerade på servern ännu.",
 				"failed": "Kunde inte aktivera notiser. Försök igen."

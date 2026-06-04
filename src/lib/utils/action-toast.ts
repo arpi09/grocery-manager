@@ -1,6 +1,9 @@
 import type { Locale } from '$lib/i18n/locale';
 import { translate, type MessageKey } from '$lib/i18n/messages';
 
+/** Default visible duration for toasts — long enough to read on mobile */
+export const TOAST_DEFAULT_DURATION_MS = 5000;
+
 export const ACTION_TOAST_PARAM = 'actionToast';
 export const ACTION_TOAST_LABEL_PARAM = 'actionLabel';
 export const ACTION_TOAST_REMAINING_PARAM = 'actionRemaining';

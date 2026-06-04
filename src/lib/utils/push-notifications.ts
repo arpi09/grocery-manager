@@ -1,6 +1,9 @@
 import { getLocale } from '$lib/i18n';
 import { translate } from '$lib/i18n/messages';
 
+const SERVICE_WORKER_REGISTER_WAIT_MS = 4_000;
+const SERVICE_WORKER_READY_TIMEOUT_MS = 8_000;
+
 export function isPushSupported(): boolean {
 	if (typeof window === 'undefined') {
 		return false;
@@ -10,6 +13,49 @@ export function isPushSupported(): boolean {
 		'PushManager' in window &&
 		'Notification' in window
 	);
+}
+
+async function waitForServiceWorkerRegistration(): Promise<boolean> {
+	const deadline = Date.now() + SERVICE_WORKER_REGISTER_WAIT_MS;
+	while (Date.now() < deadline) {
+		const existing = await navigator.serviceWorker.getRegistration();
+		if (existing || navigator.serviceWorker.controller) {
+			return true;
+		}
+		await new Promise((resolve) => window.setTimeout(resolve, 250));
+	}
+	const existing = await navigator.serviceWorker.getRegistration();
+	return Boolean(existing || navigator.serviceWorker.controller);
+}
+
+/** True when APIs exist and a push-capable service worker is active (or will activate soon). */
+export async function isPushServiceWorkerAvailable(): Promise<boolean> {
+	if (!isPushSupported()) {
+		return false;
+	}
+
+	if (!(await waitForServiceWorkerRegistration())) {
+		return false;
+	}
+
+	try {
+		await Promise.race([
+			navigator.serviceWorker.ready,
+			new Promise<never>((_, reject) => {
+				window.setTimeout(() => reject(new Error('sw_timeout')), SERVICE_WORKER_READY_TIMEOUT_MS);
+			})
+		]);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+async function getPushServiceWorkerRegistration(): Promise<ServiceWorkerRegistration | null> {
+	if (!(await isPushServiceWorkerAvailable())) {
+		return null;
+	}
+	return navigator.serviceWorker.ready;
 }
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
@@ -53,6 +99,7 @@ async function fetchVapidPublicKey(): Promise<string> {
 
 export type PushSubscribeFailureReason =
 	| 'unsupported'
+	| 'service_worker_unavailable'
 	| 'denied'
 	| 'not_configured'
 	| 'failed';
@@ -70,8 +117,12 @@ export async function subscribeToExpiryPush(): Promise<PushSubscribeResult> {
 	}
 
 	try {
+		const registration = await getPushServiceWorkerRegistration();
+		if (!registration) {
+			return { ok: false, reason: 'service_worker_unavailable' };
+		}
+
 		const publicKey = await fetchVapidPublicKey();
-		const registration = await navigator.serviceWorker.ready;
 		const subscription = await registration.pushManager.subscribe({
 			userVisibleOnly: true,
 			applicationServerKey: urlBase64ToUint8Array(publicKey) as BufferSource
@@ -108,7 +159,11 @@ export async function unsubscribeFromExpiryPush(): Promise<void> {
 		return;
 	}
 
-	const registration = await navigator.serviceWorker.ready;
+	const registration = await getPushServiceWorkerRegistration();
+	if (!registration) {
+		return;
+	}
+
 	const subscription = await registration.pushManager.getSubscription();
 	if (!subscription) {
 		return;
@@ -128,7 +183,11 @@ export async function resyncExistingPushSubscription(): Promise<PushSubscribeRes
 	}
 
 	try {
-		const registration = await navigator.serviceWorker.ready;
+		const registration = await getPushServiceWorkerRegistration();
+		if (!registration) {
+			return { ok: false, reason: 'service_worker_unavailable' };
+		}
+
 		const subscription = await registration.pushManager.getSubscription();
 		if (!subscription) {
 			return { ok: false, reason: 'failed' };
@@ -162,6 +221,8 @@ export function pushErrorMessage(reason: PushSubscribeFailureReason): string {
 	switch (reason) {
 		case 'unsupported':
 			return translate(locale, 'settings.pushNotifications.errors.unsupported');
+		case 'service_worker_unavailable':
+			return translate(locale, 'settings.pushNotifications.errors.serviceWorkerUnavailable');
 		case 'denied':
 			return translate(locale, 'settings.pushNotifications.errors.denied');
 		case 'not_configured':

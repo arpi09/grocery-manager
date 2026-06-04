@@ -95,11 +95,6 @@
 			if (Notification.permission !== 'granted') {
 				return;
 			}
-			const registration = await navigator.serviceWorker.ready;
-			const subscription = await registration.pushManager.getSubscription();
-			if (!subscription) {
-				return;
-			}
 
 			const result = await resyncExistingPushSubscription();
 			if (result.ok) {
