@@ -175,7 +175,8 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 
 		const skipByTestId = page.getByTestId('onboarding-skip');
 		if (await skipByTestId.isVisible().catch(() => false)) {
-			await skipByTestId.click({ force: true });
+			// Skip link can sit outside the viewport in CI; DOM click avoids Playwright viewport checks.
+			await skipByTestId.evaluate((button) => (button as HTMLButtonElement).click());
 		} else {
 			const postSurveySkip = page.getByRole('button', { name: /^(Inte nu|Not now)$/i });
 			if (await postSurveySkip.first().isVisible().catch(() => false)) {
