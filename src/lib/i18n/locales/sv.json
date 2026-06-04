@@ -1273,7 +1273,16 @@
 		"noSuitableInventoryNote": "Vi hittade inget i lagret som passar matlagning (t.ex. bara städ eller djurfoder). Lägg till matvaror och försök igen.",
 		"firstWinToast": "Wohooo — dina första receptidéer är här! Nu blir det lättare att laga gott.",
 		"stepsTitle": "Steg",
-		"stepsAria": "Tillagningssteg för {title}"
+		"stepsAria": "Tillagningssteg för {title}",
+		"stepLabel": "Steg {number}",
+		"stepCount": "{count, plural, one {# steg} other {# steg}}",
+		"portionsBadge": "{count, plural, one {# portion} other {# portioner}}",
+		"missingBadge": "{count, plural, one {# saknas} other {# saknas}}",
+		"settingsToggle": "Ändra inställningar",
+		"ingredientsToggle": "Visa ingredienser",
+		"ingredientsAria": "Ingredienser",
+		"metaAria": "Receptsammanfattning",
+		"suggestionPickerAria": "Välj recept"
 	},
 	"onboarding": {
 		"welcome": "Välkommen till Skaffu",
