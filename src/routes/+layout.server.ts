@@ -1,4 +1,5 @@
 import { isThemePreference } from '$lib/domain/theme';
+import { isUserEmailVerified } from '$lib/server/email-verification-enforcement';
 import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { resolveThemeForRequest } from '$lib/server/theme-cookie';
@@ -53,7 +54,8 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			avatarUrl: locals.user.avatarUrl,
 			role: locals.user.role,
 			petsEnabled: Boolean(locals.user.petsEnabled),
-			isDemo: Boolean(locals.user.isDemo)
+			isDemo: Boolean(locals.user.isDemo),
+			emailVerified: isUserEmailVerified(locals.user)
 		},
 		themePreference: preference,
 		resolvedTheme: resolved,

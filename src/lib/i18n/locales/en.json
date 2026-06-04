@@ -150,6 +150,22 @@
 			"requestNew": "Request a new link",
 			"pageTitle": "New password · Skaffu",
 			"metaDescription": "Set a new password for your Skaffu account."
+		},
+		"verifyEmail": {
+			"title": "Confirm your email",
+			"subtitle": "We sent a link to your inbox",
+			"lead": "Open the email and click the link to activate your account. Check spam if you do not see it.",
+			"resend": "Resend email",
+			"resendSubmitting": "Sending…",
+			"resendSuccess": "If your account is pending confirmation, we sent a new email.",
+			"confirmedTitle": "Email confirmed",
+			"confirmedBody": "You can now use Skaffu.",
+			"invalidToken": "This link is invalid or has expired.",
+			"requestNew": "Go to confirmation page",
+			"pageTitle": "Confirm email · Skaffu",
+			"metaDescription": "Confirm your email address to use Skaffu.",
+			"welcomeTitle": "Welcome to Skaffu",
+			"welcomeBody": "Confirm your email to start using your pantry."
 		}
 	},
 	"home": {

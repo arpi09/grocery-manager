@@ -7,8 +7,8 @@ import {
 } from './post-register';
 
 describe('post-register navigation', () => {
-	it('targets app home with fresh-account flag', () => {
-		expect(POST_REGISTER_SCAN_PATH).toBe('/hem?freshAccount=1');
+	it('targets verify-email after password signup', () => {
+		expect(POST_REGISTER_SCAN_PATH).toBe('/verify-email');
 		expect(POST_REGISTER_SCAN_OAUTH_REDIRECT).toBe(APP_HOME_PATH);
 	});
 

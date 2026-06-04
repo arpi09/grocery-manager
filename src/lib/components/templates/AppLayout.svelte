@@ -14,10 +14,15 @@
 	import InventoryScanToast from '$lib/components/molecules/InventoryScanToast.svelte';
 	import ActivationCelebration from '$lib/components/organisms/ActivationCelebration.svelte';
 	import OnboardingGuide from '$lib/components/organisms/OnboardingGuide.svelte';
+	import RegistrationWelcome from '$lib/components/organisms/RegistrationWelcome.svelte';
 	import PostOnboardingSurvey from '$lib/components/organisms/PostOnboardingSurvey.svelte';
 	import { canEditInventory } from '$lib/domain/household';
 	import DemoAccountBanner from '$lib/components/molecules/DemoAccountBanner.svelte';
-	import { completeOnboarding, markSignupAt } from '$lib/utils/onboarding';
+	import {
+		REGISTRATION_WELCOME_DONE_EVENT,
+		completeOnboarding,
+		markSignupAt
+	} from '$lib/utils/onboarding';
 	import type { NavUser } from '$lib/navigation/nav-config';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
 
@@ -47,6 +52,9 @@
 
 	const locale = $derived((page.data.locale === 'en' ? 'en' : 'sv') as 'sv' | 'en');
 	const showDemoBanner = $derived(Boolean(page.data.user?.isDemo));
+	const showRegistrationWelcome = $derived(
+		browser && page.url.searchParams.get('welcome') === '1' && Boolean(page.data.user?.emailVerified)
+	);
 
 	$effect(() => {
 		if (!browser) {
@@ -54,6 +62,10 @@
 		}
 
 		if (page.url.searchParams.get('freshAccount') !== '1') {
+			return;
+		}
+
+		if (!page.data.user?.emailVerified) {
 			return;
 		}
 
@@ -69,6 +81,25 @@
 		const next = `${url.pathname}${url.search}${url.hash}`;
 		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
 	});
+
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+
+		const stripWelcomeParam = () => {
+			if (page.url.searchParams.get('welcome') !== '1') {
+				return;
+			}
+			const url = new URL(page.url);
+			url.searchParams.delete('welcome');
+			const next = `${url.pathname}${url.search}${url.hash}`;
+			void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
+		};
+
+		window.addEventListener(REGISTRATION_WELCOME_DONE_EVENT, stripWelcomeParam);
+		return () => window.removeEventListener(REGISTRATION_WELCOME_DONE_EVENT, stripWelcomeParam);
+	});
 </script>
 
 <AppSeoHead {locale} />
@@ -78,6 +109,9 @@
 	<main>
 		{#if showDemoBanner}
 			<DemoAccountBanner />
+		{/if}
+		{#if showRegistrationWelcome}
+			<RegistrationWelcome />
 		{/if}
 		{#key page.url.pathname}
 			<div class="page-content motion-page-enter">

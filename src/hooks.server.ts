@@ -1,8 +1,10 @@
 import { initDatabase } from '$lib/infrastructure/db';
+import { shouldRedirectUnverifiedUser } from '$lib/server/email-verification-enforcement';
 import {
 	adminService,
 	authService,
 	passwordResetService,
+	emailVerificationService,
 	oauthService,
 	profileService,
 	householdService,
@@ -37,6 +39,7 @@ import { expiryReminderService } from '$lib/server/di';
 import { DEFAULT_PLAN_TIER } from '$lib/domain/plan';
 import { isMarketingPath } from '$lib/marketing/routes';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
+import { VERIFY_EMAIL_PATH } from '$lib/navigation/email-verification';
 import { applySecurityHeaders } from '$lib/server/security-headers';
 import { redirect, json, type Handle, type HandleServerError } from '@sveltejs/kit';
 
@@ -44,6 +47,10 @@ const publicPaths = new Set(['/login', '/register', '/forgot-password']);
 
 function isPasswordResetPath(pathname: string): boolean {
 	return pathname.startsWith('/reset-password/');
+}
+
+function isEmailVerificationPath(pathname: string): boolean {
+	return pathname === '/verify-email' || pathname.startsWith('/verify-email/');
 }
 
 function isGoogleAuthPath(pathname: string): boolean {
@@ -58,6 +65,7 @@ function isPublicPath(pathname: string): boolean {
 	return (
 		publicPaths.has(pathname) ||
 		isPasswordResetPath(pathname) ||
+		isEmailVerificationPath(pathname) ||
 		isGoogleAuthPath(pathname) ||
 		isInvitePath(pathname) ||
 		isMarketingPath(pathname) ||
@@ -77,6 +85,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	event.locals.authService = authService;
 	event.locals.passwordResetService = passwordResetService;
+	event.locals.emailVerificationService = emailVerificationService;
 	event.locals.oauthService = oauthService;
 	event.locals.profileService = profileService;
 	event.locals.adminService = adminService;
@@ -129,6 +138,14 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const isPublic = isPublicPath(pathname);
 	const isAuthenticated = !!event.locals.user;
 
+	if (
+			isAuthenticated &&
+			shouldRedirectUnverifiedUser(event.locals.user, pathname) &&
+			!pathname.startsWith('/api/')
+		) {
+		redirect(302, '/verify-email');
+	}
+
 	if (!isAuthenticated && !isPublic) {
 		if (pathname.startsWith('/api/')) {
 			return json({ ok: false, error: 'Unauthorized' }, { status: 401 });
@@ -140,8 +157,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 		isAuthenticated &&
 		publicPaths.has(pathname) &&
 		!isInvitePath(pathname) &&
-		!isPasswordResetPath(pathname)
+		!isPasswordResetPath(pathname) &&
+		!isEmailVerificationPath(pathname)
 	) {
+		if (shouldRedirectUnverifiedUser(event.locals.user, pathname)) {
+			redirect(302, VERIFY_EMAIL_PATH);
+		}
 		redirect(302, APP_HOME_PATH);
 	}
 

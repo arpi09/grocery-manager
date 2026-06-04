@@ -24,7 +24,8 @@ describe('AuthService', () => {
 			setMustResetPassword: vi.fn(),
 			findProfileById: vi.fn(),
 			updateProfile: vi.fn(),
-			updateThemePreference: vi.fn()
+			updateThemePreference: vi.fn(),
+			markEmailVerified: vi.fn()
 		};
 		service = new AuthService(users);
 	});
@@ -65,7 +66,8 @@ describe('AuthService', () => {
 			id: 'user-1',
 			email: 'test@example.com',
 			passwordHash: 'stored-hash',
-			mustResetPassword: false
+			mustResetPassword: false,
+			emailVerifiedAt: new Date()
 		});
 
 		const result = await service.login('test@example.com', 'secret123');
@@ -73,7 +75,8 @@ describe('AuthService', () => {
 		expect(result).toEqual({
 			id: 'user-1',
 			email: 'test@example.com',
-			mustResetPassword: false
+			mustResetPassword: false,
+			emailVerifiedAt: expect.any(Date)
 		});
 		expect(verifyPassword).toHaveBeenCalledWith('stored-hash', 'secret123');
 	});

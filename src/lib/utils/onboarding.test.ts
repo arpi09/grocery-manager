@@ -98,6 +98,7 @@ describe('onboarding helpers', () => {
 		expect(isOnboardingExcludedPath('/admin/users')).toBe(true);
 		expect(isOnboardingExcludedPath('/login')).toBe(true);
 		expect(isOnboardingExcludedPath('/register')).toBe(true);
+		expect(isOnboardingExcludedPath('/verify-email')).toBe(true);
 		expect(isOnboardingExcludedPath('/')).toBe(true);
 		expect(isOnboardingExcludedPath('/funktioner')).toBe(true);
 		expect(isOnboardingExcludedPath(APP_HOME_PATH)).toBe(false);
@@ -112,10 +113,8 @@ describe('onboarding helpers', () => {
 		expect(secondsSinceSignup(TEST_USER_A)).toBeGreaterThanOrEqual(0);
 	});
 
-	it('routes new registrations to app home', () => {
-		const url = new URL(`https://skaffu.com${POST_REGISTER_SCAN_PATH}`);
-		expect(url.pathname).toBe('/hem');
-		expect(url.searchParams.get('freshAccount')).toBe('1');
+	it('routes new registrations to verify-email', () => {
+		expect(POST_REGISTER_SCAN_PATH).toBe('/verify-email');
 	});
 });
 

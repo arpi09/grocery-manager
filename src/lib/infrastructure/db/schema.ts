@@ -42,6 +42,7 @@ export const userTable = pgTable('user', {
 	signupUtmCampaign: text('signup_utm_campaign'),
 	signupUtmContent: text('signup_utm_content'),
 	isDemo: boolean('is_demo').notNull().default(false),
+	emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true, mode: 'date' }),
 	createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 });
 
@@ -57,6 +58,24 @@ export const oauthAccountTable = pgTable(
 	(table) => [
 		primaryKey({ columns: [table.providerId, table.providerUserId] }),
 		index('oauth_account_user_idx').on(table.userId)
+	]
+);
+
+export const emailVerificationTokenTable = pgTable(
+	'email_verification_token',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		tokenHash: text('token_hash').notNull(),
+		expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+		usedAt: timestamp('used_at', { withTimezone: true, mode: 'date' }),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('email_verification_token_user_idx').on(table.userId),
+		index('email_verification_token_hash_idx').on(table.tokenHash)
 	]
 );
 

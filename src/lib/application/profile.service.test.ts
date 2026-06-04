@@ -16,7 +16,8 @@ describe('ProfileService', () => {
 			setMustResetPassword: vi.fn(),
 			findProfileById: vi.fn(),
 			updateProfile: vi.fn(),
-			updateThemePreference: vi.fn()
+			updateThemePreference: vi.fn(),
+			markEmailVerified: vi.fn()
 		};
 		service = new ProfileService(users);
 	});

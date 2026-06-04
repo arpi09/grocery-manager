@@ -141,6 +141,22 @@
 			"requestNew": "Begär ny länk",
 			"pageTitle": "Nytt lösenord · Skaffu",
 			"metaDescription": "Välj nytt lösenord för ditt Skaffu-konto."
+		},
+		"verifyEmail": {
+			"title": "Bekräfta din e-post",
+			"subtitle": "Vi har skickat en länk till din inkorg",
+			"lead": "Öppna mejlet och klicka på länken för att aktivera kontot. Kolla skräpposten om du inte ser det.",
+			"resend": "Skicka mejl igen",
+			"resendSubmitting": "Skickar…",
+			"resendSuccess": "Om kontot väntar på bekräftelse har vi skickat ett nytt mejl.",
+			"confirmedTitle": "E-post bekräftad",
+			"confirmedBody": "Du kan nu använda Skaffu.",
+			"invalidToken": "Länken är ogiltig eller har gått ut.",
+			"requestNew": "Gå till bekräftelsesidan",
+			"pageTitle": "Bekräfta e-post · Skaffu",
+			"metaDescription": "Bekräfta din e-postadress för att använda Skaffu.",
+			"welcomeTitle": "Välkommen till Skaffu",
+			"welcomeBody": "Bekräfta din e-post så är du igång med skafferiet."
 		}
 	},
 	"home": {

@@ -2,6 +2,7 @@
 import type { AdminService } from '$lib/application/admin.service';
 import type { AuthService } from '$lib/application/auth.service';
 import type { PasswordResetService } from '$lib/application/password-reset.service';
+import type { EmailVerificationService } from '$lib/application/email-verification.service';
 import type { OAuthService } from '$lib/application/oauth.service';
 import type { ProfileService } from '$lib/application/profile.service';
 import type { HouseholdService } from '$lib/application/household.service';
@@ -39,6 +40,7 @@ declare global {
 			planTier: PlanTier;
 			authService: AuthService;
 			passwordResetService: PasswordResetService;
+			emailVerificationService: EmailVerificationService;
 			oauthService: OAuthService;
 			profileService: ProfileService;
 			adminService: AdminService;

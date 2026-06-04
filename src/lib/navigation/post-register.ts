@@ -1,12 +1,20 @@
 import { APP_HOME_PATH } from './app-home';
+import { postSignupVerifyEmailPath } from './email-verification';
 
-/** Where new accounts land — app home with fresh-account flag (onboarding fast-start). */
+/** Where new password signups land before email is confirmed. */
 export function postRegisterPath(): string {
+	return postSignupVerifyEmailPath();
+}
+
+export const POST_REGISTER_SCAN_PATH = postRegisterPath();
+
+/** E2E / skip enforcement — land on home with fresh-account onboarding shortcut. */
+export function postRegisterAppHomePath(): string {
 	const params = new URLSearchParams({ freshAccount: '1' });
 	return `${APP_HOME_PATH}?${params.toString()}`;
 }
 
-export const POST_REGISTER_SCAN_PATH = postRegisterPath();
+export const POST_REGISTER_APP_HOME_PATH = postRegisterAppHomePath();
 
 /** OAuth redirect target (callback appends freshAccount for new users). */
 export const POST_REGISTER_SCAN_OAUTH_REDIRECT = APP_HOME_PATH;

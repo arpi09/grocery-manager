@@ -13,6 +13,7 @@
 	import {
 		ONBOARDING_REPLAY_EVENT,
 		ONBOARDING_STEP_COUNT,
+		REGISTRATION_WELCOME_DONE_EVENT,
 		dismissOnboarding,
 		getActivationProgress,
 		isOnboardingExcludedPath,
@@ -53,6 +54,7 @@
 	let open = $state(false);
 	let stepIndex = $state(0);
 	let stepDirection = $state<'forward' | 'back'>('forward');
+	let registrationWelcomeDone = $state(false);
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
@@ -78,6 +80,9 @@
 
 	function tryOpenGuide() {
 		if (!browser || !userId || isOnboardingExcludedPath(pathname) || !shouldShowOnboarding(userId)) {
+			return;
+		}
+		if (page.url.searchParams.get('welcome') === '1' && !registrationWelcomeDone) {
 			return;
 		}
 		if (page.url.searchParams.get('freshAccount') === '1') {
@@ -197,6 +202,32 @@
 
 		window.addEventListener(ONBOARDING_REPLAY_EVENT, onReplay);
 		return () => window.removeEventListener(ONBOARDING_REPLAY_EVENT, onReplay);
+	});
+
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+
+		const onWelcomeDone = () => {
+			registrationWelcomeDone = true;
+			tryOpenGuide();
+		};
+
+		window.addEventListener(REGISTRATION_WELCOME_DONE_EVENT, onWelcomeDone);
+		return () => window.removeEventListener(REGISTRATION_WELCOME_DONE_EVENT, onWelcomeDone);
+	});
+
+	$effect(() => {
+		if (!browser || !userId || page.url.searchParams.get('welcome') !== '1') {
+			return;
+		}
+
+		const shownKey = `home-pantry-registration-welcome-shown:${userId}`;
+		if (localStorage.getItem(shownKey) === '1') {
+			registrationWelcomeDone = true;
+			tryOpenGuide();
+		}
 	});
 </script>
 

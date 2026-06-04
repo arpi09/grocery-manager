@@ -5,11 +5,17 @@ import type { SignupUtm } from '$lib/domain/signup-utm';
 import type { ThemePreference } from '$lib/domain/theme';
 import type { UserProfile } from '$lib/domain/user';
 
+export interface UserAuthRow {
+	id: string;
+	email: string;
+	passwordHash: string | null;
+	mustResetPassword: boolean;
+	emailVerifiedAt: Date | null;
+}
+
 export interface IUserRepository {
-	findByEmail(
-		email: string
-	): Promise<{ id: string; email: string; passwordHash: string | null; mustResetPassword: boolean } | null>;
-	findById(id: string): Promise<{ id: string; email: string; passwordHash: string | null; mustResetPassword: boolean } | null>;
+	findByEmail(email: string): Promise<UserAuthRow | null>;
+	findById(id: string): Promise<UserAuthRow | null>;
 	create(
 		email: string,
 		passwordHash: string | null,
@@ -22,6 +28,7 @@ export interface IUserRepository {
 		profile?: { displayName?: string | null; avatarUrl?: string | null },
 		signupUtm?: SignupUtm | null
 	): Promise<{ id: string; email: string }>;
+	markEmailVerified(id: string): Promise<void>;
 	updatePasswordHash(id: string, passwordHash: string): Promise<void>;
 	setMustResetPassword(id: string, enabled: boolean): Promise<void>;
 	findProfileById(id: string): Promise<UserProfile | null>;
@@ -46,17 +53,20 @@ function mapProfile(row: {
 	};
 }
 
+const authSelect = {
+	id: userTable.id,
+	email: userTable.email,
+	passwordHash: userTable.passwordHash,
+	mustResetPassword: userTable.mustResetPassword,
+	emailVerifiedAt: userTable.emailVerifiedAt
+};
+
 export class DrizzleUserRepository implements IUserRepository {
 	constructor(private readonly db: AppDatabase = defaultDb) {}
 
 	async findByEmail(email: string) {
 		const [row] = await this.db
-			.select({
-				id: userTable.id,
-				email: userTable.email,
-				passwordHash: userTable.passwordHash,
-				mustResetPassword: userTable.mustResetPassword
-			})
+			.select(authSelect)
 			.from(userTable)
 			.where(eq(userTable.email, email.toLowerCase()))
 			.limit(1);
@@ -65,16 +75,7 @@ export class DrizzleUserRepository implements IUserRepository {
 	}
 
 	async findById(id: string) {
-		const [row] = await this.db
-			.select({
-				id: userTable.id,
-				email: userTable.email,
-				passwordHash: userTable.passwordHash,
-				mustResetPassword: userTable.mustResetPassword
-			})
-			.from(userTable)
-			.where(eq(userTable.id, id))
-			.limit(1);
+		const [row] = await this.db.select(authSelect).from(userTable).where(eq(userTable.id, id)).limit(1);
 
 		return row ?? null;
 	}
@@ -106,6 +107,7 @@ export class DrizzleUserRepository implements IUserRepository {
 			id,
 			email: normalizedEmail,
 			passwordHash: null,
+			emailVerifiedAt: new Date(),
 			displayName: profile?.displayName ?? null,
 			avatarUrl: profile?.avatarUrl ?? null,
 			themePreference: 'light',
@@ -116,6 +118,10 @@ export class DrizzleUserRepository implements IUserRepository {
 		});
 
 		return { id, email: normalizedEmail };
+	}
+
+	async markEmailVerified(id: string) {
+		await this.db.update(userTable).set({ emailVerifiedAt: new Date() }).where(eq(userTable.id, id));
 	}
 
 	async updatePasswordHash(id: string, passwordHash: string) {
@@ -144,10 +150,7 @@ export class DrizzleUserRepository implements IUserRepository {
 		return row ? mapProfile(row) : null;
 	}
 
-	async updateProfile(
-		id: string,
-		data: { displayName: string | null; avatarUrl: string | null }
-	) {
+	async updateProfile(id: string, data: { displayName: string | null; avatarUrl: string | null }) {
 		const [row] = await this.db
 			.update(userTable)
 			.set({

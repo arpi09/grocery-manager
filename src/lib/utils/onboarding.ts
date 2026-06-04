@@ -29,10 +29,11 @@ const LEGACY_KEYS = [
 
 export const ONBOARDING_REPLAY_EVENT = 'home-pantry-onboarding-replay';
 export const ONBOARDING_PROGRESS_EVENT = 'home-pantry-onboarding-progress';
+export const REGISTRATION_WELCOME_DONE_EVENT = 'home-pantry-registration-welcome-done';
 
 export const ACTIVATION_BARCODE_GOAL = 5;
 
-const EXCLUDED_PATH_PREFIXES = ['/admin', '/login', '/register'] as const;
+const EXCLUDED_PATH_PREFIXES = ['/admin', '/login', '/register', '/verify-email'] as const;
 
 export type ActivationPath = 'barcode' | 'receipt' | 'photo';
 
