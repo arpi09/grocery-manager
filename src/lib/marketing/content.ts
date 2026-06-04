@@ -154,6 +154,7 @@ const sv: MarketingContent = {
 		{ href: '/funktioner', label: 'Funktioner' },
 		{ href: '/sa-fungerar-det', label: 'Så fungerar det' },
 		{ href: '/faq', label: 'FAQ' },
+		{ href: '/nyheter', label: 'Nyheter' },
 		{ href: '/privacy', label: 'Integritet' }
 	],
 	cta: {
@@ -420,6 +421,7 @@ const en: MarketingContent = {
 		{ href: '/funktioner', label: 'Features' },
 		{ href: '/sa-fungerar-det', label: 'How it works' },
 		{ href: '/faq', label: 'FAQ' },
+		{ href: '/nyheter', label: 'News' },
 		{ href: '/privacy', label: 'Privacy' }
 	],
 	cta: {
