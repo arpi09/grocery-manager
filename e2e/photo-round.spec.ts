@@ -24,13 +24,13 @@ test.describe('Photo round flow', () => {
 
 		const fileInput = page.getByTestId('receipt-file-input');
 		await expect(fileInput).toBeAttached({ timeout: 15_000 });
+		await fileInput.setInputFiles(FIXTURE_JPEG);
+		await expect(page.getByTestId('photo-round-thumbnails')).toBeVisible({ timeout: 25_000 });
+
 		const parseDone = page.waitForResponse(
 			(res) => res.url().includes('/api/inventory/photo-scan') && res.request().method() === 'POST',
 			{ timeout: 25_000 }
 		);
-		await fileInput.setInputFiles(FIXTURE_JPEG);
-		await expect(page.getByTestId('photo-round-thumbnails')).toBeVisible({ timeout: 25_000 });
-
 		await page.getByTestId('photo-round-analyze').click();
 
 		const parseResponse = await parseDone;
