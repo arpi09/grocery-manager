@@ -1,115 +1,46 @@
-# Nästa steg — ägare (30 dagar)
+# Nästa steg — produkt & ägare (kort)
 
-*1 jun 2026. Full roadmap: [ROADMAP.md](./ROADMAP.md). PMF-kriterier: [COMPETITIVE_ANALYSIS.md §13](./COMPETITIVE_ANALYSIS.md#13-mätetal-för-product-market-fit).*
+*4 jun 2026. Senaste leverans: säkerhet/perf-städning + alla flöden gröna i test.*
 
-**Prod:** [https://skaffu.com](https://skaffu.com) (www pekar till apex).
-
-Produkten är **inte klar** och **PMF är inte bevisad**. Fas 0 är i stort sett levererad i kod; **Fas 1** handlar om retention, launch och mätning.
+**Prod:** [https://skaffu.com](https://skaffu.com)
 
 ---
 
-## Två spår (parallellt)
+## Vad som är klart nu
 
-| Spår | Vem | Blockerar? |
-|------|-----|------------|
-| **Ägare** | Intervjuer, veckovis PMF-rutin, launch, riktiga kvitto-PDF, metrics i `/admin` | **Nej** — körs parallellt med kod |
-| **Kod** | SEO, valfri push *handla idag*, hero A/B-beslut när data räcker | Stripe och Capacitor **väntar** |
-
-Veckovis PMF-e-post till ägare (cron) underlättar rutinen — ersätter inte granskning i `/admin`.
+- Kärnflöden (scan, inköp, recept, inställningar, onboarding) verifierade manuellt.
+- Säkerhetsluckor HIGH åtgärdade — se [SECURITY_AUDIT.md](./SECURITY_AUDIT.md).
 
 ---
 
-## 1. Fyll i preliminär dag-90-läsning
+## Produkt-roadmap (nästa 2–4 veckor, kod)
 
-Öppna [`DAY_90_DECISION.md`](./DAY_90_DECISION.md) → *Preliminär avläsning* och fyll metrics från `/admin`. Underlag för webb vs Capacitor — formellt beslut när kohort tillåter.
+Prioritet enligt [UX_COORDINATOR_BACKLOG.md](./UX_COORDINATOR_BACKLOG.md):
 
----
+| Prio | Epic | Kort beskrivning |
+|------|------|------------------|
+| **P1** | Toast-unify | En kanonisk toast (`ActionToast` + URL `?toast=`); migrera lokala `Toast` i paneler |
+| **P1** | Scan hub v2 / hero | Polish på `/scan` — intro och tydlig photo-first (ej full redesign än) |
+| **P1** | Foto AI-plats | `/scan?mode=photo` — inferera kyl/frys/skafferi, slipp tvingande platssteg |
+| **P1** | Inventory CTA | Primär «Lägg till varor» + sekundära metoder på lagerplats |
+| **P1** | Inköp-magi | Efter smart fill: loader, scroll, firande vid många varor |
+| **P2** | Inventory-tabell | Tätare lista, sortering, kolumner |
+| **P2** | Nav «Mer» | Bättre desktop-flyout |
 
-## 2. Etablera veckorutin (varje måndag, 30 min)
-
-1. `/admin` → veckosammanfattning och WoW-delta (ev. kompletterat av ägar-e-post).
-2. Notera **en** metric under mål och **en** åtgärd.
-3. Logga kort (datum + metric + åtgärd).
-
-**Checklista:** [ROADMAP.md § Veckovis PMF-rutin](./ROADMAP.md#veckovis-pmf-rutin-ägare).
-
----
-
-## 3. Genomför minst 3 av 10 intervjuer
-
-[USER_INTERVIEWS.md](./USER_INTERVIEWS.md). Prioritera churn efter vecka 1. Uppdatera syntes — **parallellt**, blockerar inte deploy.
+**Inte nu:** Stripe (väntar gates i [PRICING.md](./PRICING.md)), App Store/Capacitor, stor ny feature utan PMF-data.
 
 ---
 
-## 4. Launch i minst 1 community
+## Ägare (parallellt, blockerar inte deploy)
 
-[LAUNCH_PLAYBOOK.md](./LAUNCH_PLAYBOOK.md) med UTM mot `skaffu.com`.
+1. **Veckorutin** — `/admin` + PMF-cron → en metric under mål + en åtgärd ([ROADMAP.md](./ROADMAP.md)).
+2. **3+ användarintervjuer** — [USER_INTERVIEWS.md](./USER_INTERVIEWS.md).
+3. **Launch** i minst en community — [LAUNCH_PLAYBOOK.md](./LAUNCH_PLAYBOOK.md).
+4. **Kvitto-PDF-fixtures** — fler riktiga kvitton, `npm run test:receipt-fixtures`.
+5. **Dag-90-underlag** — fyll [DAY_90_DECISION.md](./DAY_90_DECISION.md) från `/admin`.
 
----
-
-## 5. Lägg till minst 5 riktiga kvitto-PDF lokalt
-
-[RECEIPT_TEST_PACK.md](./RECEIPT_TEST_PACK.md). `npm run test:receipt-fixtures`. Mål: ≥15/20 — **parallellt** med Fas 1.
-
----
-
-## 6. Domän — klar
-
-**skaffu.com** är live. Vid ändringar: [`DOMAIN_STRATEGY.md`](./DOMAIN_STRATEGY.md), [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md). `PUBLIC_ORIGIN` / Turnstile-hostnames ska peka på **skaffu.com** (inte `*.hosted.app` som kanonisk prod-URL).
+Mer ägarlista: [ROADMAP.md](./ROADMAP.md), [90_DAY_ROADMAP.md](./90_DAY_ROADMAP.md).
 
 ---
 
-## 7. Mät e-post utgångspåminnelser
-
-Resend: digest, bounces, opt-in. `EMAIL_SENDING_ENABLED` ska vara satt för prod om utskick ska gå.
-
----
-
-## 8. Utvärdera Stripe-readiness
-
-Jämför `/admin` D30 med [PRICING.md §6](./PRICING.md). Om gates **inte** uppfyllda: **inte** Stripe än (medvetet vänteläge).
-
----
-
-## 9. PWA-installation — en enkel mätning
-
-Fråga 5 aktiva användare: hemskärm? Justera banner-copy på `/hem` vid behov.
-
----
-
-## 10. Formellt dag-90-beslut
-
-När kohort tillåter: [DAY_90_DECISION.md](./DAY_90_DECISION.md) §7 — väg A/B/hybrid. Uppdatera [ROADMAP.md](./ROADMAP.md) Fas 2.
-
----
-
-## Vad du **inte** behöver göra nu
-
-- Ny stor feature utan PMF-data.
-- App Store / Capacitor utan D30 och kvalitativ motivering.
-- Stripe utan gates i PRICING.md.
-- Manuell omstart av dev-server (dev-runtime sköter det).
-- Byta tillbaka till `*.hosted.app` som primär marknads-URL.
-
----
-
-## P1 — Secrets readiness (ägare, Firebase App Hosting)
-
-*Uppdaterad 1 jun 2026. Inga hemligheter i git.*
-
-| Secret / env | Krävs för |
-|--------------|-----------|
-| `PUBLIC_ORIGIN` / `ORIGIN` | **skaffu.com** — CSRF, länkar i mejl |
-| `PUBLIC_TURNSTILE_SITE_KEY` + `TURNSTILE_SECRET_KEY` | Registrering — hostnames **skaffu.com** i Cloudflare |
-| `RESEND_*` + `EMAIL_SENDING_ENABLED` | Inbjudan, utgång, PMF-ägar-e-post |
-| `CRON_SECRET` | Utgång + PMF-cron |
-| `OPENAI_API_KEY` | AI-features |
-| VAPID-nycklar | Web push utgång |
-
-**Prioritet:** Turnstile och `PUBLIC_ORIGIN` ska matcha **skaffu.com** efter domänbyte.
-
-Se [EMAIL.md](./EMAIL.md), [CAPTCHA.md](./CAPTCHA.md), [PWA.md](./PWA.md), [VAPID_SETUP.md](./VAPID_SETUP.md).
-
----
-
-*Peeka här varje vecka; prioritering i [ROADMAP.md](./ROADMAP.md).*
+*Peek här varje vecka; teknisk säkerhet: [SECURITY_AUDIT.md](./SECURITY_AUDIT.md).*

@@ -6,11 +6,6 @@ export function postRegisterPath(): string {
 	return `${APP_HOME_PATH}?${params.toString()}`;
 }
 
-/** @deprecated Use {@link postRegisterPath} — kept for existing imports. */
-export function postRegisterScanPath(): string {
-	return postRegisterPath();
-}
-
 export const POST_REGISTER_SCAN_PATH = postRegisterPath();
 
 /** OAuth redirect target (callback appends freshAccount for new users). */
@@ -20,7 +15,3 @@ export function isPostRegisterPath(pathname: string, searchParams: URLSearchPara
 	return pathname === APP_HOME_PATH && searchParams.get('freshAccount') === '1';
 }
 
-/** @deprecated Use {@link isPostRegisterPath} */
-export function isPostRegisterScanPath(pathname: string, searchParams: URLSearchParams): boolean {
-	return isPostRegisterPath(pathname, searchParams);
-}

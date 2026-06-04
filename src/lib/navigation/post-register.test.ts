@@ -3,8 +3,7 @@ import { APP_HOME_PATH } from './app-home';
 import {
 	POST_REGISTER_SCAN_OAUTH_REDIRECT,
 	POST_REGISTER_SCAN_PATH,
-	isPostRegisterPath,
-	isPostRegisterScanPath
+	isPostRegisterPath
 } from './post-register';
 
 describe('post-register navigation', () => {
@@ -19,8 +18,5 @@ describe('post-register navigation', () => {
 		).toBe(true);
 		expect(isPostRegisterPath('/hem', new URLSearchParams('mode=barcode'))).toBe(false);
 		expect(isPostRegisterPath('/scan', new URLSearchParams('freshAccount=1'))).toBe(false);
-		expect(
-			isPostRegisterScanPath('/hem', new URLSearchParams('freshAccount=1'))
-		).toBe(true);
 	});
 });

@@ -9,11 +9,6 @@
 	import AdminSectionTabs, {
 		type AdminTab
 	} from '$lib/components/organisms/admin/AdminSectionTabs.svelte';
-	import AdminAnalyticsPanel from '$lib/components/organisms/admin/AdminAnalyticsPanel.svelte';
-	import AdminAiUsagePanel from '$lib/components/organisms/admin/AdminAiUsagePanel.svelte';
-	import AdminUsersPanel from '$lib/components/organisms/admin/AdminUsersPanel.svelte';
-	import AdminErrorLogsPanel from '$lib/components/organisms/admin/AdminErrorLogsPanel.svelte';
-	import AdminFeedbackPanel from '$lib/components/organisms/admin/AdminFeedbackPanel.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
@@ -128,15 +123,25 @@
 				</Card>
 			</section>
 		{:else if activeTab === 'analytics'}
-			<AdminAnalyticsPanel active={true} />
+			{#await import('$lib/components/organisms/admin/AdminAnalyticsPanel.svelte') then { default: AdminAnalyticsPanel }}
+				<AdminAnalyticsPanel active={true} />
+			{/await}
 		{:else if activeTab === 'aiUsage'}
-			<AdminAiUsagePanel active={true} />
+			{#await import('$lib/components/organisms/admin/AdminAiUsagePanel.svelte') then { default: AdminAiUsagePanel }}
+				<AdminAiUsagePanel active={true} />
+			{/await}
 		{:else if activeTab === 'users' && data.user}
-			<AdminUsersPanel active={true} currentUserId={data.user.id} />
+			{#await import('$lib/components/organisms/admin/AdminUsersPanel.svelte') then { default: AdminUsersPanel }}
+				<AdminUsersPanel active={true} currentUserId={data.user.id} />
+			{/await}
 		{:else if activeTab === 'logs'}
-			<AdminErrorLogsPanel active={true} />
+			{#await import('$lib/components/organisms/admin/AdminErrorLogsPanel.svelte') then { default: AdminErrorLogsPanel }}
+				<AdminErrorLogsPanel active={true} />
+			{/await}
 		{:else if activeTab === 'feedback'}
-			<AdminFeedbackPanel active={true} />
+			{#await import('$lib/components/organisms/admin/AdminFeedbackPanel.svelte') then { default: AdminFeedbackPanel }}
+				<AdminFeedbackPanel active={true} />
+			{/await}
 		{/if}
 	</PageContainer>
 </AppLayout>
