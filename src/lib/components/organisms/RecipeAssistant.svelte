@@ -7,7 +7,7 @@
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import RecipeSuggestionCard from '$lib/components/molecules/RecipeSuggestionCard.svelte';
-		import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { DEFAULT_RECIPE_PORTIONS, DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
 	import {
 		addMissingIngredientsToList,

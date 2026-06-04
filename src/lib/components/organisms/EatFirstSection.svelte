@@ -5,7 +5,8 @@
 	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
-			import type { InventoryItem } from '$lib/domain/inventory-item';
+	import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
 	import { DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
