@@ -39,10 +39,7 @@
 	);
 
 	function openRecipeIdeas() {
-		// Defer past the opening click so the new backdrop cannot swallow it (mobile Safari).
-		setTimeout(() => {
-			recipeOpen = true;
-		}, 0);
+		recipeOpen = true;
 	}
 
 	setContext(OPEN_RECIPE_IDEAS, openRecipeIdeas);

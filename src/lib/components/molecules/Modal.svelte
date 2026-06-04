@@ -73,7 +73,7 @@
 	}
 
 	function onBackdropClick() {
-		if (performance.now() - openedAt < 400) {
+		if (performance.now() - openedAt < 500) {
 			return;
 		}
 		requestClose();
