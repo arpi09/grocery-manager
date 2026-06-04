@@ -44,7 +44,8 @@ const SQL_MIGRATION_FILES = [
 	'0023_auth_password_reset_oauth.sql',
 	'0024_auto_expired_grace.sql',
 	'0025_receipt_purchase_pattern.sql',
-	'0026_household_stripe.sql'
+	'0026_household_stripe.sql',
+	'0027_email_verification.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
@@ -70,6 +71,7 @@ TRUNCATE TABLE
 	"app_settings",
 	"admin_action_log",
 	"password_reset_token",
+	"email_verification_token",
 	"oauth_account",
 	"user"
 RESTART IDENTITY CASCADE;
