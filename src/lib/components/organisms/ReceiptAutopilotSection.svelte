@@ -3,8 +3,7 @@
 	import Card from '$lib/components/atoms/Card.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
-		import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
-import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import type { ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
 	import { t } from '$lib/i18n';
 

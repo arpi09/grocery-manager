@@ -4,8 +4,7 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
 	import RecipeStepsPanel from '$lib/components/molecules/RecipeStepsPanel.svelte';
-		import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
-import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { fetchMealPlanIdeas } from '$lib/client/planer-data';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
 	import { normalizeRecipeIdeas, type RecipeIdeaLoad } from '$lib/utils/meal-plan-ideas';

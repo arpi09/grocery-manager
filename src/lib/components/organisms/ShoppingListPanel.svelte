@@ -8,7 +8,7 @@
 	import SearchInput from '$lib/components/molecules/SearchInput.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
-	import { TOAST_DEFAULT_DURATION_MS, TOAST_UNDO_DURATION_MS } from '$lib/utils/action-toast';
+	import { TOAST_UNDO_DURATION_MS } from '$lib/utils/action-toast';
 import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { fetchCheckedShoppingItems } from '$lib/client/shopping-data';
 	import { t } from '$lib/i18n';

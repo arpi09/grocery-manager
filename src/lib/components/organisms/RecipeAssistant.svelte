@@ -143,9 +143,6 @@
 		return addMissingToList(allMissingIngredients, '__all__');
 	}
 
-	function dismissToast() {
-	}
-
 	function closeAssistant() {
 		open = false;
 	}
@@ -512,4 +509,4 @@
 		min-height: 0;
 	}
 </style>
-
+
