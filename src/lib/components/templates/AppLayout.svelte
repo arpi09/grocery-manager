@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
@@ -9,6 +9,7 @@
 	import MainNav from '$lib/components/organisms/MainNav.svelte';
 	import RecipeAssistant from '$lib/components/organisms/RecipeAssistant.svelte';
 	import ActionToast from '$lib/components/molecules/ActionToast.svelte';
+	import ClientToast from '$lib/components/molecules/ClientToast.svelte';
 	import GamificationToast from '$lib/components/molecules/GamificationToast.svelte';
 	import InventoryScanToast from '$lib/components/molecules/InventoryScanToast.svelte';
 	import ActivationCelebration from '$lib/components/organisms/ActivationCelebration.svelte';
@@ -86,6 +87,7 @@
 	</main>
 	<InventoryScanToast />
 	<ActionToast />
+	<ClientToast />
 	<GamificationToast />
 	<OnboardingGuide />
 	<PostOnboardingSurvey />
@@ -121,3 +123,4 @@
 		}
 	}
 </style>
+

@@ -6,7 +6,7 @@
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import RecipeStepsPanel from '$lib/components/molecules/RecipeStepsPanel.svelte';
-	import Toast, { type ToastVariant } from '$lib/components/molecules/Toast.svelte';
+	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { formatCalendarDayLabel, mealSourceVariant } from '$lib/domain/calendar-display';
 	import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
 	import {
@@ -35,8 +35,6 @@
 	let { open, day, month, ideasById = {}, canEdit = false, onClose }: Props = $props();
 	let expandedMealId = $state<string | null>(null);
 	let addingMissingKey = $state<string | null>(null);
-	let toastMessage = $state<string | null>(null);
-	let toastVariant = $state<ToastVariant>('default');
 	let feedbackBanner = $state<{ message: string; tone: AddMissingFeedbackTone } | null>(null);
 
 	$effect(() => {
@@ -72,9 +70,9 @@
 
 	function showAddMissingResult(result: Awaited<ReturnType<typeof addMissingIngredientsToList>>) {
 		const presented = presentAddMissingFeedback(getLocale(), result);
-		toastMessage = presented.message;
-		toastVariant =
+		const variant =
 			presented.tone === 'error' ? 'error' : presented.tone === 'warning' ? 'info' : 'success';
+		showClientToast(presented.message, { variant });
 		feedbackBanner = presented;
 	}
 
@@ -103,9 +101,6 @@
 		addingMissingKey = null;
 	}
 
-	function dismissToast() {
-		toastMessage = null;
-	}
 </script>
 
 {#if day}
@@ -243,9 +238,6 @@
 	</Modal>
 {/if}
 
-{#if toastMessage}
-	<Toast message={toastMessage} visible={true} variant={toastVariant} onDismiss={dismissToast} />
-{/if}
 
 <style>
 	:global(.calendar-day-panel) {

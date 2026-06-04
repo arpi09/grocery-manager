@@ -4,8 +4,8 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
 	import RecipeStepsPanel from '$lib/components/molecules/RecipeStepsPanel.svelte';
-	import Toast from '$lib/components/molecules/Toast.svelte';
-	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
+		import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
+import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { fetchMealPlanIdeas } from '$lib/client/planer-data';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
 	import { normalizeRecipeIdeas, type RecipeIdeaLoad } from '$lib/utils/meal-plan-ideas';
@@ -34,7 +34,6 @@
 	let loading = $state(initialIdeas.length === 0);
 	let loadError = $state(false);
 	let addingMissingKey = $state<string | null>(null);
-	let toastMessage = $state<string | null>(null);
 	let feedbackBanner = $state<{ message: string; tone: AddMissingFeedbackTone } | null>(null);
 
 	const allMissingIngredients = $derived(
@@ -59,7 +58,7 @@
 
 	function showAddMissingResult(result: Awaited<ReturnType<typeof addMissingIngredientsToList>>) {
 		const presented = presentAddMissingFeedback(getLocale(), result);
-		toastMessage = presented.message;
+		showClientToast(presented.message, { variant: 'success' });
 		feedbackBanner = presented;
 	}
 
@@ -87,9 +86,6 @@
 		addingMissingKey = null;
 	}
 
-	function dismissToast() {
-		toastMessage = null;
-	}
 </script>
 
 <aside class="ideas-card" aria-label={t('planer.ideasAria')}>
@@ -162,15 +158,6 @@
 	{/if}
 </aside>
 
-{#if toastMessage}
-	<Toast
-		message={toastMessage}
-		visible={true}
-		variant="success"
-		durationMs={TOAST_DEFAULT_DURATION_MS}
-		onDismiss={dismissToast}
-	/>
-{/if}
 
 <style>
 	h3 {

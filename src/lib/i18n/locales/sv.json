@@ -270,7 +270,11 @@
 			"kivraStep2": "Tryck på kvittot och välj dela eller spara — ofta som PDF.",
 			"kivraStep3": "Spara PDF:en och välj filen här — du behöver inte göra om den till skärmdump."
 		},
-		"cancelBackToHome": "Avbryt och tillbaka till hem"
+		"cancelBackToHome": "Avbryt och tillbaka till hem",
+		"hubHero": {
+			"subtitle": "Fota kyl, frys eller skafferi – flera varor på en gång.",
+			"cta": "Starta fotorunda"
+		}
 	},
 	"settings": {
 		"title": "Inställningar",
