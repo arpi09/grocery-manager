@@ -74,12 +74,6 @@
 		}
 	}
 
-	function resetCapture() {
-		revokePreviews();
-		photos = [];
-		parseError = null;
-	}
-
 	async function handlePhotoFile(file: File) {
 		if (!canAddPhoto) return;
 		const previewUrl = URL.createObjectURL(file);
