@@ -37,13 +37,15 @@ describe('Auth integration', () => {
 			.select({
 				id: userTable.id,
 				email: userTable.email,
-				passwordHash: userTable.passwordHash
+				passwordHash: userTable.passwordHash,
+				themePreference: userTable.themePreference
 			})
 			.from(userTable)
 			.where(eq(userTable.email, 'new-user@example.com'))
 			.limit(1);
 
 		expect(row?.id).toBe(result.id);
+		expect(row?.themePreference).toBe('light');
 		expect(row?.passwordHash).not.toBe('secret123');
 		expect(row?.passwordHash).toBeTruthy();
 		expect(await verifyPassword(row!.passwordHash!, 'secret123')).toBe(true);

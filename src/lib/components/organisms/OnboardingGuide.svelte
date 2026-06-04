@@ -3,8 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
-	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
+	import OnboardingStepIllustration from '$lib/components/organisms/OnboardingStepIllustration.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
@@ -31,21 +31,18 @@
 		id: OnboardingStepId;
 		titleKey: MessageKey;
 		bodyKey: MessageKey;
-		iconId: FeatureIconId;
 	}
 
 	const stepDefinitions: Step[] = [
 		{
 			id: 'welcome',
 			titleKey: 'onboarding.welcome',
-			bodyKey: 'onboarding.welcomeBodyShort',
-			iconId: 'photo'
+			bodyKey: 'onboarding.welcomeBodyShort'
 		},
 		{
 			id: 'ready',
 			titleKey: 'onboarding.readyTitle',
-			bodyKey: 'onboarding.readyBody',
-			iconId: 'check'
+			bodyKey: 'onboarding.readyBody'
 		}
 	];
 
@@ -207,7 +204,7 @@
 	{open}
 	onClose={skipGuide}
 	variant="sheet"
-	dismissible={true}
+	dismissible={false}
 	panelClass="onboarding-panel"
 	bodyClass="onboarding-body"
 	label={t('onboarding.dialogAria')}
@@ -235,21 +232,10 @@
 			<p class="encourage" role="status">{encourageCopy}</p>
 		{/if}
 
-		<div class="step-visual" aria-hidden="true">
-			<div class="step-icon-ring">
-				<div class="step-icon">
-					<FeatureIcon id={currentStep.iconId} size={36} />
-				</div>
-			</div>
-		</div>
+		<OnboardingStepIllustration step={currentStep.id} />
 		<p class="step-body">{currentStep.body}</p>
 
 		{#if currentStep.id === 'welcome'}
-			<ul class="quick-points" aria-label={t('onboarding.quickPointsAria')}>
-				<li>{t('onboarding.quickPointScan')}</li>
-				<li>{t('onboarding.quickPointExpiry')}</li>
-				<li>{t('onboarding.quickPointMeals')}</li>
-			</ul>
 			<Button type="button" fullWidth onclick={quickStart} data-testid="onboarding-quickstart">
 				{t('onboarding.quickStart')}
 			</Button>
@@ -338,7 +324,7 @@
 	}
 
 	:global(.onboarding-body) {
-		padding: var(--space-sm) var(--space-md) 0;
+		padding: var(--space-md) var(--space-lg) 0;
 		flex: 1;
 		min-height: 0;
 		overflow-y: auto;
@@ -375,7 +361,7 @@
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-md);
+		gap: var(--space-lg);
 		flex: 1;
 		animation: step-enter 0.35s ease-out;
 	}
@@ -407,35 +393,6 @@
 		transition: width 0.35s ease;
 	}
 
-	.step-visual {
-		display: flex;
-		justify-content: center;
-		padding: var(--space-md) 0;
-	}
-
-	.step-icon-ring {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 5.5rem;
-		height: 5.5rem;
-		border-radius: 999px;
-		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface-muted));
-		animation: icon-pulse 2.4s ease-in-out infinite;
-	}
-
-	.step-icon {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 3.75rem;
-		height: 3.75rem;
-		border-radius: var(--radius-md);
-		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
-		color: var(--color-primary);
-		box-shadow: 0 8px 24px color-mix(in srgb, var(--color-primary) 18%, transparent);
-	}
-
 	@keyframes step-enter-forward {
 		from {
 			opacity: 0;
@@ -458,16 +415,6 @@
 		}
 	}
 
-	@keyframes icon-pulse {
-		0%,
-		100% {
-			transform: scale(1);
-		}
-		50% {
-			transform: scale(1.04);
-		}
-	}
-
 	@keyframes step-enter {
 		from {
 			opacity: 0;
@@ -479,7 +426,6 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.step-content,
-		.step-icon-ring,
 		:global(.onboarding-panel) {
 			animation: none;
 		}
@@ -501,22 +447,14 @@
 
 	.step-body {
 		margin: 0;
-		font-size: 1rem;
-		line-height: 1.55;
-		color: var(--color-text);
+		font-size: 1.0625rem;
+		line-height: 1.6;
+		color: var(--color-text-muted);
+		text-align: center;
+		max-width: 22rem;
+		margin-inline: auto;
 		overflow-wrap: anywhere;
 		word-break: break-word;
-	}
-
-	.quick-points {
-		margin: 0;
-		padding-left: 1.25rem;
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-xs);
-		font-size: 0.9375rem;
-		color: var(--color-text-muted);
-		line-height: 1.45;
 	}
 
 	.progress-note {
@@ -533,14 +471,14 @@
 	.path-actions {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-sm);
+		gap: var(--space-md);
 	}
 
 	.onboarding-footer {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-md);
-		padding: 0 var(--space-md) var(--space-md);
+		gap: var(--space-lg);
+		padding: 0 var(--space-lg) var(--space-lg);
 	}
 
 	.step-dots {

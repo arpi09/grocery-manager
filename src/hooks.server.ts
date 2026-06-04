@@ -35,7 +35,7 @@ import { writeLocaleCookie } from '$lib/infrastructure/locale-cookie';
 import { resolveLocaleForRequest } from '$lib/server/locale';
 import { expiryReminderService } from '$lib/server/di';
 import { DEFAULT_PLAN_TIER } from '$lib/domain/plan';
-import { isMarketingPath, redirectsAuthenticatedFromMarketing } from '$lib/marketing/routes';
+import { isMarketingPath } from '$lib/marketing/routes';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { redirect, json, type Handle, type HandleServerError } from '@sveltejs/kit';
 
@@ -133,10 +133,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 			return json({ ok: false, error: 'Unauthorized' }, { status: 401 });
 		}
 		redirect(302, '/login');
-	}
-
-	if (isAuthenticated && redirectsAuthenticatedFromMarketing(pathname)) {
-		redirect(302, APP_HOME_PATH);
 	}
 
 	if (
