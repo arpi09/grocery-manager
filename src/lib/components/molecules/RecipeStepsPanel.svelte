@@ -9,8 +9,14 @@
 	let { steps, recipeTitle }: Props = $props();
 
 	const hasSteps = $derived(steps.length > 0);
-	const useAccordion = $derived(steps.length > 4);
-	let expandedStep = $state<number | null>(null);
+	const useAccordion = $derived(steps.length > 3);
+	let expandedStep = $state<number | null>(0);
+
+	$effect(() => {
+		if (steps.length > 0) {
+			expandedStep = 0;
+		}
+	});
 </script>
 
 {#if hasSteps}
@@ -32,8 +38,8 @@
 						}}
 					>
 						<summary>
-							<span class="step-num">{index + 1}</span>
-							<span class="step-preview">{step}</span>
+							<span class="step-num" aria-hidden="true">{index + 1}</span>
+							<span class="step-label">{t('recipe.stepLabel', { number: index + 1 })}</span>
 						</summary>
 						<p class="step-body">{step}</p>
 					</details>
@@ -44,7 +50,7 @@
 				{#each steps as step, index (index)}
 					<li>
 						<span class="step-num" aria-hidden="true">{index + 1}</span>
-						<span>{step}</span>
+						<p class="step-text">{step}</p>
 					</li>
 				{/each}
 			</ol>
@@ -54,12 +60,12 @@
 
 <style>
 	.steps {
-		margin-top: var(--space-sm);
+		margin-top: 0;
 	}
 
 	.steps-heading {
-		margin: 0 0 var(--space-xs);
-		font-size: 0.8rem;
+		margin: 0 0 var(--space-sm);
+		font-size: 0.75rem;
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: var(--letter-spacing-label);
@@ -72,18 +78,19 @@
 		list-style: none;
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-xs);
+		gap: var(--space-sm);
+		max-height: min(18rem, 42vh);
+		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 
 	.steps-list li {
 		display: flex;
-		gap: var(--space-sm);
+		gap: var(--space-md);
 		align-items: flex-start;
-		font-size: 0.9rem;
-		line-height: 1.45;
-		padding: var(--space-xs) var(--space-sm);
-		border-radius: var(--radius-sm);
-		background: var(--color-surface);
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
 		border: 1px solid var(--color-border);
 	}
 
@@ -92,36 +99,44 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		min-width: 1.5rem;
-		height: 1.5rem;
+		min-width: 1.75rem;
+		height: 1.75rem;
 		border-radius: 999px;
-		background: var(--color-surface-muted);
+		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
 		color: var(--color-primary);
-		font-size: 0.75rem;
+		font-size: 0.8125rem;
 		font-weight: 700;
+	}
+
+	.step-text {
+		margin: 0;
+		flex: 1;
+		min-width: 0;
+		font-size: 0.9375rem;
+		line-height: 1.55;
 	}
 
 	.steps-accordion {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-xs);
-		max-height: min(16rem, 40vh);
+		gap: var(--space-sm);
+		max-height: min(18rem, 42vh);
 		overflow-y: auto;
 		overscroll-behavior: contain;
 	}
 
 	.step-panel {
 		border: 1px solid var(--color-border);
-		border-radius: var(--radius-sm);
-		background: var(--color-surface);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
 		overflow: hidden;
 	}
 
 	.step-panel summary {
 		display: flex;
-		align-items: flex-start;
+		align-items: center;
 		gap: var(--space-sm);
-		padding: var(--space-sm);
+		padding: var(--space-sm) var(--space-md);
 		cursor: pointer;
 		list-style: none;
 		font-weight: 600;
@@ -132,20 +147,16 @@
 		display: none;
 	}
 
-	.step-preview {
+	.step-label {
 		flex: 1;
 		min-width: 0;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 	}
 
 	.step-body {
 		margin: 0;
-		padding: 0 var(--space-sm) var(--space-sm);
-		padding-left: calc(var(--space-sm) + 1.5rem + var(--space-sm));
-		font-size: 0.875rem;
-		line-height: 1.45;
-		color: var(--color-text-muted);
+		padding: 0 var(--space-md) var(--space-md);
+		padding-left: calc(var(--space-md) + 1.75rem + var(--space-sm));
+		font-size: 0.9375rem;
+		line-height: 1.55;
 	}
 </style>

@@ -48,6 +48,8 @@ test.describe('Recipe assistant from header', () => {
 		await expect(dialog.getByRole('heading', { name: 'E2E Testpasta' })).toBeVisible({
 			timeout: 20_000
 		});
+		await expect(dialog.getByText('2 steg')).toBeVisible();
+		await expect(dialog.getByText('4 portioner')).toBeVisible();
 	});
 
 });

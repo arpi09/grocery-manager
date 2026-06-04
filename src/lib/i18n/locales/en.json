@@ -1293,7 +1293,16 @@
 		"label": "Recipe ideas",
 		"firstWinToast": "Woohoo — your first recipe ideas are here! Cooking just got easier.",
 		"stepsTitle": "Steps",
-		"stepsAria": "Cooking steps for {title}"
+		"stepsAria": "Cooking steps for {title}",
+		"stepLabel": "Step {number}",
+		"stepCount": "{count, plural, one {# step} other {# steps}}",
+		"portionsBadge": "{count, plural, one {# serving} other {# servings}}",
+		"missingBadge": "{count, plural, one {# missing} other {# missing}}",
+		"settingsToggle": "Change settings",
+		"ingredientsToggle": "Show ingredients",
+		"ingredientsAria": "Ingredients",
+		"metaAria": "Recipe summary",
+		"suggestionPickerAria": "Choose a recipe"
 	},
 	"onboarding": {
 		"welcome": "Welcome to Skaffu",
