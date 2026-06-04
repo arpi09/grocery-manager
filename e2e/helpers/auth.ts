@@ -141,7 +141,7 @@ export async function dismissCookieConsentIfOpen(page: Page) {
 		await page
 			.getByRole('button', { name: /Endast n\u00f6dv\u00e4ndiga|Godk\u00e4nn/i })
 			.first()
-			.click();
+			.click({ force: true });
 		await dialog.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
 	}
 }

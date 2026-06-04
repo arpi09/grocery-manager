@@ -29,11 +29,8 @@ export function lockBodyScroll(): void {
 	}
 	if (scrollLockCount === 0) {
 		lockedScrollY = window.scrollY;
+		document.documentElement.style.overflow = 'hidden';
 		document.body.style.overflow = 'hidden';
-		document.body.style.position = 'fixed';
-		document.body.style.top = `-${lockedScrollY}px`;
-		document.body.style.left = '0';
-		document.body.style.right = '0';
 	}
 	scrollLockCount += 1;
 }
@@ -44,11 +41,8 @@ export function unlockBodyScroll(): void {
 	}
 	scrollLockCount = Math.max(0, scrollLockCount - 1);
 	if (scrollLockCount === 0) {
+		document.documentElement.style.overflow = '';
 		document.body.style.overflow = '';
-		document.body.style.position = '';
-		document.body.style.top = '';
-		document.body.style.left = '';
-		document.body.style.right = '';
 		window.scrollTo(0, lockedScrollY);
 	}
 }
