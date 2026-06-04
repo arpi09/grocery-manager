@@ -4,6 +4,10 @@ import { daysUntilExpiry, EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
 
 export type InventoryExpiryFilter = 'all' | 'expiring' | 'dated';
 export type InventorySortKey = 'name' | 'expiry' | 'quantity';
+export type InventorySortDirection = 'asc' | 'desc';
+
+export const DEFAULT_INVENTORY_SORT: InventorySortKey = 'name';
+export const DEFAULT_INVENTORY_SORT_DIRECTION: InventorySortDirection = 'asc';
 
 export function matchesInventoryExpiryFilter(
 	item: InventoryItem,
@@ -31,32 +35,39 @@ function compareQuantity(a: InventoryItem, b: InventoryItem): number {
 	return a.quantity.localeCompare(b.quantity, undefined, { numeric: true, sensitivity: 'base' });
 }
 
-export function compareInventoryItems(a: InventoryItem, b: InventoryItem, sort: InventorySortKey): number {
+export function compareInventoryItems(
+	a: InventoryItem,
+	b: InventoryItem,
+	sort: InventorySortKey,
+	direction: InventorySortDirection = DEFAULT_INVENTORY_SORT_DIRECTION
+): number {
+	let cmp = 0;
+
 	if (sort === 'name') {
-		return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
-	}
-
-	if (sort === 'quantity') {
-		const byQty = compareQuantity(a, b);
-		if (byQty !== 0) {
-			return byQty;
+		cmp = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+	} else if (sort === 'quantity') {
+		cmp = compareQuantity(a, b);
+		if (cmp === 0) {
+			cmp = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
 		}
-		return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+	} else {
+		const aExpiry = a.expiresOn ?? '9999-12-31';
+		const bExpiry = b.expiresOn ?? '9999-12-31';
+		cmp = aExpiry.localeCompare(bExpiry);
+		if (cmp === 0) {
+			cmp = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+		}
 	}
 
-	const aExpiry = a.expiresOn ?? '9999-12-31';
-	const bExpiry = b.expiresOn ?? '9999-12-31';
-	if (aExpiry !== bExpiry) {
-		return aExpiry.localeCompare(bExpiry);
-	}
-	return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+	return direction === 'asc' ? cmp : -cmp;
 }
 
 export function filterAndSortInventoryItems(
 	items: InventoryItem[],
 	query: string,
 	expiryFilter: InventoryExpiryFilter,
-	sort: InventorySortKey
+	sort: InventorySortKey,
+	direction: InventorySortDirection = DEFAULT_INVENTORY_SORT_DIRECTION
 ): InventoryItem[] {
 	const normalized = query.trim().toLowerCase();
 	return items
@@ -66,5 +77,5 @@ export function filterAndSortInventoryItems(
 			}
 			return matchesInventoryExpiryFilter(item, expiryFilter);
 		})
-		.sort((a, b) => compareInventoryItems(a, b, sort));
+		.sort((a, b) => compareInventoryItems(a, b, sort, direction));
 }

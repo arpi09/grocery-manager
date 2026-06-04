@@ -17,8 +17,11 @@
 	import type { StorageLocation } from '$lib/domain/location';
 	import { scanModeHref } from '$lib/utils/scan-nav';
 	import {
+		DEFAULT_INVENTORY_SORT,
+		DEFAULT_INVENTORY_SORT_DIRECTION,
 		filterAndSortInventoryItems,
 		type InventoryExpiryFilter,
+		type InventorySortDirection,
 		type InventorySortKey
 	} from '$lib/utils/inventory-list-filters';
 
@@ -52,7 +55,8 @@
 
 	let query = $state('');
 	let expiryFilter = $state<InventoryExpiryFilter>('all');
-	let sortKey = $state<InventorySortKey>('name');
+	let sortKey = $state<InventorySortKey>(DEFAULT_INVENTORY_SORT);
+	let sortDirection = $state<InventorySortDirection>(DEFAULT_INVENTORY_SORT_DIRECTION);
 	let showAutoExpired = $state(false);
 	let showFinished = $state(false);
 	let loadedItems = $state<InventoryItem[]>([]);
@@ -75,17 +79,46 @@
 	});
 
 	const filtered = $derived(
-		filterAndSortInventoryItems(loadedItems, query, expiryFilter, sortKey)
+		filterAndSortInventoryItems(loadedItems, query, expiryFilter, sortKey, sortDirection)
 	);
 	const filteredAutoExpired = $derived(
 		showAutoExpired
-			? filterAndSortInventoryItems(autoExpiredItems, query, expiryFilter, sortKey)
+			? filterAndSortInventoryItems(
+					autoExpiredItems,
+					query,
+					expiryFilter,
+					sortKey,
+					sortDirection
+				)
 			: []
 	);
 	const filteredFinished = $derived(
 		showFinished
-			? filterAndSortInventoryItems(finishedItems, query, expiryFilter, sortKey)
+			? filterAndSortInventoryItems(
+					finishedItems,
+					query,
+					expiryFilter,
+					sortKey,
+					sortDirection
+				)
 			: []
+	);
+
+	function handleHeaderSort(key: InventorySortKey) {
+		if (sortKey === key) {
+			sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+			return;
+		}
+		sortKey = key;
+		sortDirection = 'asc';
+	}
+
+	function toggleSortDirection() {
+		sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+	}
+
+	const sortDirectionLabel = $derived(
+		sortDirection === 'asc' ? t('inventory.sortDirectionAsc') : t('inventory.sortDirectionDesc')
 	);
 	const hasMoreActive = $derived(loadedItems.length < activeTotal);
 	const hasVisibleItems = $derived(
@@ -164,22 +197,34 @@
 		<div class="filter-row">
 			<SearchInput bind:value={query} placeholder={t('inventory.searchPlaceholder')} />
 			<div class="filter-toolbar" role="group" aria-label={t('inventory.filterToolbarAria')}>
-				<label class="filter-select">
-					<span class="sr-only">{t('inventory.expiryFilterLabel')}</span>
-					<select bind:value={expiryFilter}>
+				<label class="filter-field">
+					<span class="field-label">{t('inventory.toolbarFilter')}</span>
+					<select bind:value={expiryFilter} aria-label={t('inventory.expiryFilterLabel')}>
 						<option value="all">{t('inventory.expiryFilterAll')}</option>
 						<option value="expiring">{t('inventory.expiryFilterSoon')}</option>
 						<option value="dated">{t('inventory.expiryFilterDated')}</option>
 					</select>
 				</label>
-				<label class="filter-select">
-					<span class="sr-only">{t('inventory.sortLabel')}</span>
-					<select bind:value={sortKey}>
-						<option value="name">{t('inventory.sortName')}</option>
-						<option value="quantity">{t('inventory.sortQuantity')}</option>
-						<option value="expiry">{t('inventory.sortExpiry')}</option>
-					</select>
-				</label>
+				<div class="sort-controls">
+					<label class="filter-field">
+						<span class="field-label">{t('inventory.toolbarSort')}</span>
+						<select bind:value={sortKey} aria-label={t('inventory.sortLabel')}>
+							<option value="name">{t('inventory.sortName')}</option>
+							<option value="quantity">{t('inventory.sortQuantity')}</option>
+							<option value="expiry">{t('inventory.sortExpiry')}</option>
+						</select>
+					</label>
+					<button
+						type="button"
+						class="sort-direction-btn"
+						aria-label={sortDirectionLabel}
+						title={sortDirectionLabel}
+						data-testid="inventory-sort-direction"
+						onclick={toggleSortDirection}
+					>
+						<span aria-hidden="true">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+					</button>
+				</div>
 			</div>
 			{#if autoExpiredTotal > 0 || finishedTotal > 0}
 				<div class="filter-meta">
@@ -240,7 +285,8 @@
 		<InventoryDataTable
 			items={filtered}
 			{sortKey}
-			onSortChange={(key) => (sortKey = key)}
+			{sortDirection}
+			onSortChange={handleHeaderSort}
 			{canWrite}
 			ariaLabel={t('inventory.listAria')}
 		/>
@@ -285,7 +331,8 @@
 			<InventoryDataTable
 				items={filteredAutoExpired}
 				{sortKey}
-				onSortChange={(key) => (sortKey = key)}
+				{sortDirection}
+				onSortChange={handleHeaderSort}
 				{canWrite}
 				autoExpired={true}
 				ariaLabel={t('inventory.autoExpiredSection')}
@@ -297,7 +344,8 @@
 			<InventoryDataTable
 				items={filteredFinished}
 				{sortKey}
-				onSortChange={(key) => (sortKey = key)}
+				{sortDirection}
+				onSortChange={handleHeaderSort}
 				{canWrite}
 				finished={true}
 				ariaLabel={t('inventory.finishedSection')}
@@ -325,7 +373,22 @@
 		gap: var(--space-sm);
 	}
 
-	.filter-select select {
+	.filter-field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		min-width: 0;
+	}
+
+	.field-label {
+		font-size: 0.6875rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--color-text-muted);
+	}
+
+	.filter-field select {
 		min-height: 2.5rem;
 		padding: 0.45rem 0.65rem;
 		border: 1px solid var(--color-border);
@@ -334,6 +397,33 @@
 		color: var(--color-text);
 		font-size: 0.875rem;
 		font-weight: 600;
+	}
+
+	.sort-controls {
+		display: flex;
+		align-items: flex-end;
+		gap: 0.35rem;
+	}
+
+	.sort-direction-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 2.5rem;
+		min-height: 2.5rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		color: var(--color-primary);
+		font-size: 1.125rem;
+		font-weight: 700;
+		line-height: 1;
+		cursor: pointer;
+	}
+
+	.sort-direction-btn:hover {
+		border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
 	}
 
 	.filter-meta {

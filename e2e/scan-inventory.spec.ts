@@ -118,6 +118,11 @@ test.describe('Scan and inventory', () => {
 		await expect(table.getByRole('columnheader', { name: /Namn|Name/i })).toBeVisible();
 		await expect(table.getByRole('columnheader', { name: /Antal|Qty/i })).toBeVisible();
 		await expect(table.getByRole('columnheader', { name: /Bäst före|Expiry/i })).toBeVisible();
+
+		const sortDirection = page.getByTestId('inventory-sort-direction');
+		await expect(sortDirection).toBeVisible();
+		await sortDirection.click();
+		await expect(table.locator('th[aria-sort="descending"]')).toHaveCount(1, { timeout: 5_000 });
 	});
 
 	test('inventory shows single add-goods CTA to photo scan', async ({ page }) => {
