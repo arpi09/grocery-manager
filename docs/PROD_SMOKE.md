@@ -1,20 +1,24 @@
 # Produktionssmoke efter deploy
 
-Manuell checklista efter G3-deploy (Firebase App Hosting). E2E och CI använder Turnstile-bypass — dessa steg verifierar **produktion** där captcha och push är skarpt konfigurerade.
+Checklista för **Cursor coordinator och agenter** efter grön **Release** (G3-deploy, Firebase App Hosting). E2E och CI använder Turnstile-bypass — dessa steg verifierar **produktion** där captcha och push är skarpt konfigurerade.
+
+**Användaren kör inte denna lista** i normal leverans; den är agents arbete. Mänsklig körning endast vid felsökning eller om coordinator ber om bekräftelse av en specifik avvikelse.
 
 **Relaterat:** [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) · [`CAPTCHA.md`](./CAPTCHA.md) · [`VAPID_SETUP.md`](./VAPID_SETUP.md) · [`CI_CD.md`](./CI_CD.md)
 
 ---
 
-## Coordinator — snabbcheck (5 punkter)
+## Agent post-deploy (mandatory for coordinator)
 
-Kör **efter** grön **Release** för merge-SHA. Räkna inte deploy som klar utan lyckad Release-run.
+Kör **efter** grön **Release** för merge-SHA. Räkna inte deploy som klar och säg inte "prod är live" till användaren utan lyckad Release-run **och** denna check (eller motsvarande täckning — se nedan).
 
 1. **SHA** — Prod kör samma commit som den gröna Release-run (kort SHA i Actions).
 2. **Inloggning** — Logga in på prod; landar på `/hem` utan fel.
 3. **Scan** — `/scan`; foto-runda syns som primärt val (photo-first hub).
 4. **Recept** — Receptknapp i headern; modal öppnas och kan generera.
 5. **Inställningar** — `/settings`; e-postpåminnelser sparar utan fel.
+
+**CI E2E:** För kod-deploy täcker grön Release-E2E samma kritiska resor lokalt (Turnstile-bypass). Coordinator kör ändå 5-punktslistan på prod när deploy faktiskt skett. Vid auth/push/captcha-ändringar: utökad checklista nedan. Valfritt: browser MCP mot `https://skaffu.com` vid P0 eller nyligen rapporterade prod-buggar.
 
 ---
 
@@ -50,13 +54,14 @@ Förväntat: HTTP 200 och JSON med `publicKey` när VAPID är konfigurerat.
 
 ---
 
-## När köra
+## När köra (coordinator / agenter)
 
-| Trigger | Kör smoke? |
-|---------|------------|
-| Vanlig feature-deploy | Minst admin-login + `/` |
+| Trigger | Agent smoke? |
+|---------|----------------|
+| Vanlig feature-deploy | Minst 5-punktslistan ovan |
 | Auth / Turnstile-ändring | Hela checklistan inkl. `/register` |
 | Push / VAPID-ändring | Settings push + `vapid-public-key` GET |
 | Kvitto / OpenAI-ändring | Valfri kvitto-rad ovan |
+| Endast docs/rules (ingen deploy) | Ingen prod-smoke — Release skippar deploy |
 
-Dokumentera avvikelser i deploy-chat eller incident-notering.
+Dokumentera avvikelser i deploy-chat eller incident-notering. **Tilldela inte** checklistan till användaren som läxa.

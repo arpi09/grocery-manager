@@ -21,9 +21,10 @@ alwaysApply: false
 2. **WIP limit:** Max **3 feature branches** with one implementation agent each (dev-runtime excluded).
 3. **Push to `master`:** After G0 (`npm run check:locales && npm run check && npm test`; E2E if auth/UI touched) — merge branch, `git push origin master`. CI/CD runs automatically; **never** instruct the user to open a PR unless they ask.
 4. **Before push:** Pull/rebase on latest `master` if others may have pushed; run the G0 checklist above.
-5. **After push:** Watch Release (`gh run watch`) until green; report merge SHA + PROD_SMOKE checklist — not "deployed" until Release succeeds.
-6. **No manual dev restart** when `dev:watch` is running (see `dev-server-auto-restart.mdc`).
-7. **Before deploy (G3):** Invoke Security agent; do not push high-risk or dependency-sensitive changes if [private/SECURITY_REPORT.md](../../private/SECURITY_REPORT.md) status is **blocked** without human approval.
+5. **After push:** Watch Release (`gh run watch`) until green for the merge SHA.
+6. **Before "deployed" / "prod is live":** Coordinator runs agent post-deploy smoke per [docs/PROD_SMOKE.md](../../docs/PROD_SMOKE.md) (5-point list) when Release actually deployed — not the user. Green Release E2E covers critical paths in CI (Turnstile bypass); prod smoke still required after real deploy. Optional: browser MCP on `https://skaffu.com` for P0 or user-reported prod bugs. **Never** assign prod testing to the user as homework ("test on prod", "verify in production yourself").
+7. **No manual dev restart** when `dev:watch` is running (see `dev-server-auto-restart.mdc`).
+8. **Before deploy (G3):** Invoke Security agent; do not push high-risk or dependency-sensitive changes if [private/SECURITY_REPORT.md](../../private/SECURITY_REPORT.md) status is **blocked** without human approval.
 
 ## Security agent lifecycle
 

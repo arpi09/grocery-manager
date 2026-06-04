@@ -1,0 +1,11 @@
+---
+description: Definition of done for agents — verification is not user homework
+alwaysApply: true
+---
+
+# Delivery — definition of done (agents)
+
+- **Deploy claim:** Say "deployed" / "prod is live" only after **successful Release** for the merge SHA **and** coordinator agent post-deploy smoke per [docs/PROD_SMOKE.md](../../docs/PROD_SMOKE.md) when that push actually deployed (docs-only pushes may skip deploy — no prod smoke then).
+- **Who verifies:** Coordinator or delegated e2e/browser agent. **Not** the human user unless they are debugging with you.
+- **CI E2E:** Green Release E2E is the automated agent smoke layer for code deploys; prod 5-point check still runs after real G3 deploy.
+- **Forbidden:** "Test on prod", "check production yourself", or handing [PROD_SMOKE.md](../../docs/PROD_SMOKE.md) to the user as a task list.

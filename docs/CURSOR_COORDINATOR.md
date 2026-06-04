@@ -55,6 +55,7 @@ Charter-filer i repot: [`AGENTS-DEV-RUNTIME.md`](../AGENTS-DEV-RUNTIME.md), [`AG
 | `coordinator-personal-cost-mode.mdc` | Shipped value, WIP-kapacitet, cadence (detaljer i `private/`) |
 | `coordinator-spawn-budget.mdc` | Proposal före varje spawn |
 | `dev-server-auto-restart.mdc` | Be aldrig användaren starta om dev manuellt |
+| `delivery-done.mdc` | Agent-owned verification; ingen prod-smoke som användarläxa |
 | `delivery-metrics.mdc` | Uppdatera metrics efter merge |
 | `security-agent.mdc` | Read-only security, deploy-gate |
 | `pipeline-release-agent.mdc` | CI/CD, rollback |
@@ -82,7 +83,7 @@ Coordinator kan anropa begränsade typer, t.ex. `explore`, `shell`, `generalPurp
 | **Coordinator-only spawn** | Implementation-agenter spawnar inte peers |
 | **G0 före push** | `npm run check:locales && npm run check && npm test` (E2E om auth/UI berörts) — se [`CI_CD.md`](./CI_CD.md), [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) |
 | **Security före deploy** | Security-agent → `private/SECURITY_REPORT.md` måste vara grön nog för G3 |
-| **Definition of done** | Ingen "deployed" utan **lyckad Release** för merge-SHA + [`PROD_SMOKE.md`](./PROD_SMOKE.md) (5 punkter) |
+| **Definition of done** | Ingen "deployed" / "prod är live" utan **lyckad Release** för merge-SHA + coordinator kör [`PROD_SMOKE.md`](./PROD_SMOKE.md) (agent post-deploy, 5 punkter). Användaren får inte smoke-uppgifter |
 
 **Parallell dev:** implementation på feature-branch i huvud-worktree; **dev-runtime** kör `dev:watch` i worktree `home-pantry-dev` (`npm run dev:start:ai`) så två agenter kan utveckla utan port-krock.
 
@@ -99,7 +100,8 @@ Coordinator kan anropa begränsade typer, t.ex. `explore`, `shell`, `generalPurp
 3. **CI grön på branch** (valfritt push till branch för Actions, eller G0 räcker för små fix).
 4. **Merge till `master`:** coordinator rebasar/mergar, pushar `origin master`.
 5. **Release:** `gh run watch` tills **Release** workflow är grön för merge-SHA.
-6. **Rapportera:** merge-SHA (7 tecken) + [`PROD_SMOKE.md`](./PROD_SMOKE.md) checklista — **inte** "deployed" förrän steg 5 lyckats.
+6. **Agent smoke:** coordinator (eller e2e-agent) kör [`PROD_SMOKE.md`](./PROD_SMOKE.md) 5-punktslistan på prod när deploy skett — **inte** användaren. Grön Release-E2E täcker lokala resor; prod-check verifierar skarp Turnstile/push.
+7. **Rapportera:** merge-SHA (7 tecken) + smoke utförd — **inte** "deployed" / "prod är live" förrän steg 5–6 lyckats. Säg aldrig "testa på prod" till användaren som homework.
 
 Se [`private/MERGE_QUEUE.md`](../private/MERGE_QUEUE.md) för live-kö när den finns lokalt.
 
@@ -195,7 +197,7 @@ Läs och följ:
 1) docs/CURSOR_COORDINATOR.md (publik — coordinator, WIP, spawn)
 2) private/NEW_CURSOR_AGENT_START.md (lokal — miljö, private/, första uppgifter)
 
-Du är coordinator. Fråga innan commit, push eller spawn. WIP 3 aktiv: max 3 feature branches (feat/*, fix/*), master endast för deploy-merge, inga parallella explore/shell-bursts, E2E efter feature-freeze. Spawn-proposal före varje ny agent (utom dev-runtime / enstaka P0 vid röd CI-prod). Definition of done: grön Release för merge-SHA + PROD_SMOKE.md.
+Du är coordinator. Fråga innan commit, push eller spawn. WIP 3 aktiv: max 3 feature branches (feat/*, fix/*), master endast för deploy-merge, inga parallella explore/shell-bursts, E2E efter feature-freeze. Spawn-proposal före varje ny agent (utom dev-runtime / enstaka P0 vid röd CI-prod). Definition of done: grön Release för merge-SHA + du kör PROD_SMOKE (agent post-deploy) — användaren gör inte smoke.
 ```
 
 ---
@@ -208,4 +210,4 @@ Du är coordinator. Fråga innan commit, push eller spawn. WIP 3 aktiv: max 3 fe
 | [`CI_CD.md`](./CI_CD.md) | G0–G3, trunk på `master` |
 | [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) | Testing diamond, risk, DoD |
 | [`E2E.md`](./E2E.md) | Playwright-setup |
-| [`PROD_SMOKE.md`](./PROD_SMOKE.md) | Post-deploy smoke (sv) efter grön Release |
+| [`PROD_SMOKE.md`](./PROD_SMOKE.md) | Agent post-deploy smoke efter grön Release (coordinator, inte användaren) |
