@@ -156,6 +156,7 @@
 	nested
 	title={t('recipe.title')}
 	panelClass="recipe-assistant-panel"
+	data-testid="recipe-assistant-dialog"
 >
 	<p class="helper">
 		{t('recipe.intro')}

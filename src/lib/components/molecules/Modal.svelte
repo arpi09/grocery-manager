@@ -25,6 +25,7 @@
 		nested?: boolean;
 		panelClass?: string;
 		bodyClass?: string;
+		'data-testid'?: string;
 		showSheetHandle?: boolean;
 		children: Snippet;
 		header?: Snippet;
@@ -42,6 +43,7 @@
 		nested = false,
 		panelClass = '',
 		bodyClass = '',
+		'data-testid': dataTestId,
 		showSheetHandle = true,
 		children,
 		header,
@@ -161,6 +163,7 @@
 
 		<div
 			bind:this={dialogEl}
+			data-testid={dataTestId}
 			class="modal-panel {panelClass}"
 			class:modal-panel--sheet={variant === 'sheet'}
 			class:modal-panel--center={variant === 'center'}

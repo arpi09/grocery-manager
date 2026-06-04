@@ -46,6 +46,8 @@ export async function prepareE2eBrowserState(page: Page) {
 				localStorage.setItem(`home-pantry-onboarding-dismissed:${userId}`, '1');
 				localStorage.setItem(`${activationReceiptKey}:${userId}`, '1');
 				localStorage.removeItem(`${celebrationKey}:${userId}`);
+				localStorage.setItem(`home-pantry-post-onboarding-survey-dismissed:${userId}`, '1');
+				localStorage.removeItem(`home-pantry-post-onboarding-survey-pending:${userId}`);
 			};
 
 			(window as Window & { __hpMarkOnboardingComplete?: (userId: string) => void }).__hpMarkOnboardingComplete =
@@ -146,8 +148,24 @@ export async function dismissCookieConsentIfOpen(page: Page) {
 	}
 }
 
+export async function dismissPostOnboardingSurveyIfOpen(page: Page) {
+	const skipByTestId = page.getByTestId('post-onboarding-survey-skip');
+	if (await skipByTestId.isVisible().catch(() => false)) {
+		await skipByTestId.click({ force: true });
+		await page.locator('.post-onboarding-survey-panel').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+		return;
+	}
+
+	const skip = page.getByRole('button', { name: /^(Inte nu|Not now)$/i });
+	if (await skip.first().isVisible().catch(() => false)) {
+		await skip.first().click({ force: true });
+		await page.locator('.post-onboarding-survey-panel').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+	}
+}
+
 export async function dismissOnboardingModalIfOpen(page: Page) {
 	await dismissCookieConsentIfOpen(page);
+	await dismissPostOnboardingSurveyIfOpen(page);
 
 	for (let attempt = 0; attempt < 5; attempt += 1) {
 		const modal = page.locator('.modal-root').first();
@@ -159,13 +177,18 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 		if (await skipByTestId.isVisible().catch(() => false)) {
 			await skipByTestId.click({ force: true });
 		} else {
-			const skip = page.getByRole('button', {
-				name: /^(Hoppa över|Hoppa over|Jag gör det senare|Skip)$/i
-			});
-			if (await skip.first().isVisible().catch(() => false)) {
-				await skip.first().click({ force: true });
+			const postSurveySkip = page.getByRole('button', { name: /^(Inte nu|Not now)$/i });
+			if (await postSurveySkip.first().isVisible().catch(() => false)) {
+				await postSurveySkip.first().click({ force: true });
 			} else {
-				await page.keyboard.press('Escape');
+				const skip = page.getByRole('button', {
+					name: /^(Hoppa över|Hoppa over|Jag gör det senare|Skip)$/i
+				});
+				if (await skip.first().isVisible().catch(() => false)) {
+					await skip.first().click({ force: true });
+				} else {
+					await page.keyboard.press('Escape');
+				}
 			}
 		}
 
@@ -297,11 +320,12 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 		throw new Error(`Login action failed with HTTP ${status}`);
 	}
 
+	await markE2eOnboardingComplete(page);
 	await dismissCookieConsentIfOpen(page);
 	await dismissOnboardingModalIfOpen(page);
+	await dismissPostOnboardingSurveyIfOpen(page);
 	await expect(page.locator('section.home')).toBeVisible({ timeout: E2E_AUTH_NAV_TIMEOUT_MS });
 	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-	await markE2eOnboardingComplete(page);
 }
 
 export async function loginAsAdmin(page: Page) {

@@ -1,5 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
+import {
+	dismissOnboardingModalIfOpen,
+	dismissPostOnboardingSurveyIfOpen,
+	loginAsAdmin
+} from './helpers/auth';
 import { mockRecipeSuggestionsApi } from './helpers/mock-api';
 
 test.describe('Recipe assistant from header', () => {
@@ -13,13 +17,19 @@ test.describe('Recipe assistant from header', () => {
 	});
 
 	async function openRecipeAssistant(page: import('@playwright/test').Page) {
+		await dismissOnboardingModalIfOpen(page);
+		await dismissPostOnboardingSurveyIfOpen(page);
+
 		const viewport = page.viewportSize();
 		const navScope =
 			viewport && viewport.width < 900
 				? page.locator('.main-nav-mobile')
 				: page.locator('.main-nav-desktop');
-		await navScope.getByTestId('recipe-ideas-btn').click();
-		const dialog = page.getByRole('dialog', { name: 'Receptförslag' });
+		const openBtn = navScope.getByTestId('recipe-ideas-btn');
+		await expect(openBtn).toBeVisible({ timeout: 15_000 });
+		await openBtn.click();
+
+		const dialog = page.getByTestId('recipe-assistant-dialog');
 		await expect(dialog).toBeVisible({ timeout: 15_000 });
 		await expect(dialog).toBeInViewport();
 		return dialog;

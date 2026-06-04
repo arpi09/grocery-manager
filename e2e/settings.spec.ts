@@ -24,7 +24,21 @@ test.describe('Settings', () => {
 		await page.goto('/settings#settings-notifications');
 		await dismissOnboardingModalIfOpen(page);
 
-		await page.getByRole('switch', { name: /Skicka e-postp\u00e5minnelser|Send email reminders/i }).click();
+		const expirySwitch = page.getByRole('switch', {
+			name: /Skicka e-postp\u00e5minnelser|Send email reminders/i
+		});
+		await expirySwitch.scrollIntoViewIfNeeded();
+		await expect(expirySwitch).toBeVisible({ timeout: 15_000 });
+
+		const expiryForm = page.locator('form.expiry-reminders-form').first();
+		await expirySwitch.click();
+		await expiryForm.evaluate((form: HTMLFormElement) => {
+			const enabled = form.querySelector('input[name="enabled"]') as HTMLInputElement | null;
+			if (enabled) {
+				enabled.value = enabled.value === 'true' ? 'false' : 'true';
+			}
+			form.requestSubmit();
+		});
 
 		await expect(
 			page.locator('.toast-message').filter({ hasText: /Inst\u00e4llningar sparade|Settings saved/i })

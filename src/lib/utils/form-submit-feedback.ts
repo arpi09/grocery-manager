@@ -2,8 +2,7 @@ import { goto, invalidateAll } from '$app/navigation';
 import type { SubmitFunction } from '@sveltejs/kit';
 
 async function navigateAfterRedirect(location: string): Promise<void> {
-	await goto(location, { replaceState: true, keepFocus: true, noScroll: true });
-	await invalidateAll();
+	await goto(location, { replaceState: true, keepFocus: true, noScroll: true, invalidateAll: true });
 }
 
 async function updatePreservingScroll(

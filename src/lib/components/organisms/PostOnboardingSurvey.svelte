@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { env as publicEnv } from '$env/dynamic/public';
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
@@ -36,6 +37,7 @@
 	function tryOpenSurvey() {
 		if (
 			!browser ||
+			publicEnv.PUBLIC_E2E_DISABLE_POST_SURVEY === 'true' ||
 			!userId ||
 			isOnboardingExcludedPath(pathname) ||
 			!isPostOnboardingSurveyPath(pathname) ||
@@ -121,7 +123,12 @@
 	{#snippet header()}
 		<ModalHeader title={t('feedback.postOnboarding.title')} subtitle={t('feedback.postOnboarding.subtitle')}>
 			{#snippet actions()}
-				<button type="button" class="skip-link" onclick={skipSurvey}>
+				<button
+					type="button"
+					class="skip-link"
+					data-testid="post-onboarding-survey-skip"
+					onclick={skipSurvey}
+				>
 					{t('feedback.postOnboarding.skip')}
 				</button>
 			{/snippet}

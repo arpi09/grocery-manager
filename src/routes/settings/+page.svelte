@@ -6,7 +6,12 @@
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
-	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
+	import { bindSubmitting, bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
+	import {
+		ACTION_TOAST_PARAM,
+		actionToastMessage,
+		parseActionToastKind
+	} from '$lib/utils/action-toast';
 	import SettingsRow from '$lib/components/molecules/SettingsRow.svelte';
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
 	import SettingsSectionNav, {
@@ -18,7 +23,7 @@
 	import { ONBOARDING_REPLAY_EVENT, resetOnboarding } from '$lib/utils/onboarding';
 	import LanguageSwitcher from '$lib/components/molecules/LanguageSwitcher.svelte';
 	import Toggle from '$lib/components/atoms/Toggle.svelte';
-	import { t } from '$lib/i18n';
+	import { getLocale, t } from '$lib/i18n';
 	import { FREE_LIMITS, PRICE_HYPOTHESIS_SEK, PRO_LIMITS } from '$lib/domain/plan';
 	import { planLimitUsageLabelKey } from '$lib/domain/plan-limits';
 	import { CHURN_REASONS } from '$lib/domain/product-feedback';
@@ -60,6 +65,7 @@
 	let expiryRemindersForm: HTMLFormElement | undefined = $state();
 	let autoExpiredGraceForm: HTMLFormElement | undefined = $state();
 	let pushToastMessage = $state<string | null>(null);
+	let expirySettingsToast = $state<string | null>(null);
 
 	const feedbackErrors = $derived(form?.feedbackErrors ?? {});
 	const feedbackSuccess = $derived(form?.feedbackSuccess === true);
@@ -182,6 +188,10 @@
 		pushToastMessage = null;
 	}
 
+	function dismissExpirySettingsToast() {
+		expirySettingsToast = null;
+	}
+
 	const settingsNavItems = $derived.by((): SettingsNavItem[] => {
 		const items: SettingsNavItem[] = [
 			{ id: 'settings-account', label: t('settings.nav.account') },
@@ -256,8 +266,15 @@
 					action="?/updateExpiryReminders"
 					class="expiry-reminders-form"
 					bind:this={expiryRemindersForm}
-					use:enhance={bindSubmitting(
+					use:enhance={bindSubmittingWithRedirect(
 						(v) => (expiryRemindersSubmitting = v),
+						async (location) => {
+							const url = new URL(location, 'http://local');
+							const kind = parseActionToastKind(url.searchParams.get(ACTION_TOAST_PARAM));
+							if (kind === 'settingsSaved') {
+								expirySettingsToast = actionToastMessage(getLocale(), kind);
+							}
+						},
 						(formData) => {
 							formData.set('enabled', expiryRemindersEnabled ? 'true' : 'false');
 							// Select is disabled while off; disabled fields are omitted from FormData.
@@ -670,6 +687,15 @@
 
 {#if pushToastMessage}
 	<Toast message={pushToastMessage} visible={true} onDismiss={dismissPushToast} />
+{/if}
+{#if expirySettingsToast}
+	<Toast
+		message={expirySettingsToast}
+		visible={true}
+		variant="success"
+		size="action"
+		onDismiss={dismissExpirySettingsToast}
+	/>
 {/if}
 
 <ProActivationCelebration

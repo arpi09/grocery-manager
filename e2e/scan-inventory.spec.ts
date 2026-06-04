@@ -9,14 +9,22 @@ test.describe('Scan and inventory', () => {
 		await dismissOnboardingModalIfOpen(page);
 
 		await expect(page).toHaveURL(/\/scan(?!\?.*mode=)/);
-		await expect(page.getByTestId('scan-hub-photo-round')).toBeVisible();
-		await expect(page.getByRole('heading', { name: 'Foto-runda' })).toBeVisible();
+		const hub = page.getByTestId('scan-mode-hub');
+		await expect(hub).toBeVisible({ timeout: 15_000 });
+		await expect(hub.getByTestId('scan-hub-photo-round')).toBeVisible();
+		await expect(hub.getByRole('heading', { name: 'Foto-runda' })).toBeVisible();
 
-		await dismissOnboardingModalIfOpen(page);
-		await page.getByTestId('scan-hub-other-modes').click({ force: true });
-		await expect(page.getByTestId('scan-hub-other-modes-panel')).toBeVisible({ timeout: 10_000 });
-		await expect(page.getByRole('heading', { name: 'Streckkod' })).toBeVisible();
-		await expect(page.getByRole('heading', { name: 'Kvitto' })).toBeVisible();
+		const scanModes = page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i });
+		await expect(scanModes.getByRole('link', { name: 'Streckkod' })).toBeVisible();
+		await expect(scanModes.getByRole('link', { name: 'Kvitto' })).toBeVisible();
+
+		const otherModes = hub.getByTestId('scan-hub-other-modes');
+		await otherModes.scrollIntoViewIfNeeded();
+		await otherModes.click();
+		await expect(otherModes).toHaveAttribute('aria-expanded', 'true', { timeout: 10_000 });
+		await expect(hub.getByTestId('scan-hub-other-modes-panel')).toBeVisible({ timeout: 10_000 });
+		await expect(hub.getByRole('heading', { name: 'Streckkod' })).toBeVisible();
+		await expect(hub.getByRole('heading', { name: 'Kvitto' })).toBeVisible();
 	});
 
 	test('legacy receipt route redirects to unified scan', async ({ page }) => {
