@@ -197,16 +197,16 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 	}
 }
 
-async function waitForPostRegisterScan(page: Page) {
+async function waitForPostRegisterHome(page: Page) {
 	await page.waitForURL(
-		(url) => url.pathname === '/scan' && url.searchParams.get('freshAccount') === '1',
+		(url) => url.pathname === '/hem' && url.searchParams.get('freshAccount') === '1',
 		{
 			timeout: E2E_AUTH_NAV_TIMEOUT_MS,
 			waitUntil: 'commit'
 		}
 	);
 	await page.waitForURL(
-		(url) => url.pathname === '/scan' && !url.searchParams.has('freshAccount'),
+		(url) => url.pathname === '/hem' && !url.searchParams.has('freshAccount'),
 		{ timeout: 20_000 }
 	);
 }
@@ -282,9 +282,9 @@ export async function registerNewUser(
 	await fillBoundInput(passwordInput, password);
 	await fillBoundInput(confirmInput, password);
 
-	const navigatedToScan = waitForPostRegisterScan(page);
+	const navigatedToHome = waitForPostRegisterHome(page);
 	await page.getByTestId('register-submit').click();
-	await navigatedToScan;
+	await navigatedToHome;
 
 	return { email, password };
 }
