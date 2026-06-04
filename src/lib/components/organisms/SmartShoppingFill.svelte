@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
@@ -14,12 +15,22 @@
 		};
 	}
 
-	let { canEdit, form }: { canEdit: boolean; form: FillFormResult | null | undefined } = $props();
+	let {
+		canEdit,
+		form,
+		onFillComplete
+	}: {
+		canEdit: boolean;
+		form: FillFormResult | null | undefined;
+		onFillComplete?: (result: { added: number; skipped: number }) => void;
+	} = $props();
 
 	let showAdvanced = $state(false);
 	let preferences = $state('');
 	let householdSize = $state(2);
 	let loading = $state(false);
+	let celebrate = $state(false);
+	let lastHandledFillKey = $state<string | null>(null);
 
 	const successMessage = $derived.by(() => {
 		const result = form?.fillSuccess;
@@ -34,6 +45,28 @@
 			});
 		}
 		return t('shopping.fillSuccess', { count: result.added });
+	});
+
+	const showStickySuccess = $derived(
+		!!successMessage && !loading && (form?.fillSuccess?.added ?? 0) > 0
+	);
+
+	$effect(() => {
+		const result = form?.fillSuccess;
+		if (!result || loading) return;
+		const key = `${result.added}:${result.skipped}:${result.note ?? ''}`;
+		if (key === lastHandledFillKey) return;
+		lastHandledFillKey = key;
+		if (result.added > 0) {
+			celebrate = true;
+			onFillComplete?.({ added: result.added, skipped: result.skipped });
+			if (browser) {
+				const timer = setTimeout(() => {
+					celebrate = false;
+				}, 1200);
+				return () => clearTimeout(timer);
+			}
+		}
 	});
 </script>
 
@@ -51,10 +84,16 @@
 				type="submit"
 				fullWidth
 				loading={loading}
-				loadingLabel={t('common.thinking')}
+				loadingLabel={t('shopping.fillLoading')}
 			>
 				{t('shopping.fillFromPantry')}
 			</Button>
+
+			{#if loading}
+				<p class="fill-status" role="status" aria-live="polite">
+					{t('shopping.fillLoading')}
+				</p>
+			{/if}
 
 			<details class="advanced" bind:open={showAdvanced}>
 				<summary>{t('shopping.advancedPreferences')}</summary>
@@ -87,7 +126,19 @@
 		{#if form?.fillError}
 			<FeedbackBanner tone="error" message={form.fillError} />
 		{:else if successMessage}
-			<FeedbackBanner tone="success" message={successMessage} />
+			{#if showStickySuccess}
+				<div
+					class="fill-success-banner"
+					class:celebrate
+					role="status"
+					aria-live="polite"
+					data-testid="shopping-fill-success"
+				>
+					{successMessage}
+				</div>
+			{:else}
+				<FeedbackBanner tone="success" message={successMessage} />
+			{/if}
 			{#if form?.fillSuccess?.note}
 				<p class="note">{form.fillSuccess.note}</p>
 			{/if}
@@ -107,16 +158,63 @@
 	}
 
 	.intro,
-	.note {
+	.note,
+	.fill-status {
 		margin: 0;
 		color: var(--color-text-muted);
 		font-size: 0.9375rem;
+	}
+
+	.fill-status {
+		text-align: center;
+		font-weight: 600;
+		color: var(--color-text);
 	}
 
 	.fill-form {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-md);
+	}
+
+	.fill-success-banner {
+		position: sticky;
+		top: var(--space-sm);
+		z-index: 2;
+		margin: 0;
+		padding: var(--space-md);
+		border-radius: var(--radius-md);
+		background: var(--color-success-muted, color-mix(in srgb, var(--color-success) 12%, var(--color-surface)));
+		border: 1px solid color-mix(in srgb, var(--color-success) 35%, var(--color-border));
+		color: var(--color-text);
+		font-weight: 700;
+		font-size: 1rem;
+		line-height: 1.4;
+		box-shadow: var(--shadow-sm);
+	}
+
+	.fill-success-banner.celebrate {
+		animation: fill-success-pop 0.55s cubic-bezier(0.34, 1.4, 0.64, 1);
+	}
+
+	@keyframes fill-success-pop {
+		0% {
+			transform: scale(0.96);
+			opacity: 0.85;
+		}
+		45% {
+			transform: scale(1.02);
+		}
+		100% {
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.fill-success-banner.celebrate {
+			animation: none;
+		}
 	}
 
 	.advanced {

@@ -14,18 +14,23 @@
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { onMount } from 'svelte';
 
+	const DEFAULT_ANALYZE_ZONE: StorageLocation = 'fridge';
+
 	interface Props {
 		returnTo: string;
+		/** Hint zone for AI parse (from inventory tab or URL). Skips forced zone picker. */
+		initialLocation?: StorageLocation | null;
 	}
 
-	let { returnTo }: Props = $props();
+	let { returnTo, initialLocation = null }: Props = $props();
 
-	type Step = 'zone' | 'capture' | 'review';
+	type Step = 'capture' | 'review';
 
 	type ReviewLine = PhotoRoundDetectedItem & { id: number };
 
-	let step = $state<Step>('zone');
-	let zone = $state<StorageLocation | null>(null);
+	let step = $state<Step>('capture');
+	let zone = $state<StorageLocation>(initialLocation ?? DEFAULT_ANALYZE_ZONE);
+	let zonePickerOpen = $state(false);
 	let photos = $state<{ file: File; previewUrl: string }[]>([]);
 	let parsing = $state(false);
 	let parseError = $state<string | null>(null);
@@ -44,10 +49,23 @@
 		return t('photoRound.confidenceLow');
 	}
 
+	const captureLead = $derived(
+		initialLocation
+			? t('photoRound.captureLead', {
+					zone: locationLabel(getLocale(), zone),
+					count: photos.length,
+					max: PHOTO_ROUND_MAX_IMAGES
+				})
+			: t('photoRound.captureLeadGeneric', {
+					count: photos.length,
+					max: PHOTO_ROUND_MAX_IMAGES
+				})
+	);
+
 	function selectZone(next: StorageLocation) {
 		zone = next;
-		step = 'capture';
 		parseError = null;
+		zonePickerOpen = false;
 	}
 
 	function revokePreviews() {
@@ -60,11 +78,6 @@
 		revokePreviews();
 		photos = [];
 		parseError = null;
-	}
-
-	function backToZone() {
-		resetCapture();
-		step = 'zone';
 	}
 
 	async function handlePhotoFile(file: File) {
@@ -108,7 +121,7 @@
 	}
 
 	async function analyzePhotos() {
-		if (!zone || photos.length === 0) return;
+		if (photos.length === 0) return;
 
 		const totalBytes = photos.reduce((sum, photo) => sum + photo.file.size, 0);
 		if (totalBytes > PHOTO_ROUND_MAX_TOTAL_BYTES) {
@@ -182,8 +195,8 @@
 		lines = [];
 		selected = {};
 		parseError = null;
-		step = 'zone';
-		zone = null;
+		step = 'capture';
+		zone = initialLocation ?? DEFAULT_ANALYZE_ZONE;
 	}
 
 	const selectedCount = $derived(lines.filter((line) => selected[line.id]).length);
@@ -210,29 +223,9 @@
 	});
 </script>
 
-{#if step === 'zone'}
-	<section>
-		<p class="lead">{t('photoRound.zoneLead')}</p>
-		<div class="zone-grid" role="group" aria-label={t('photoRound.zoneAria')}>
-			{#each LOCATIONS as loc (loc)}
-				<Button
-					type="button"
-					variant="secondary"
-					fullWidth
-					data-testid="photo-round-zone-{loc}"
-					onclick={() => selectZone(loc)}
-				>
-					{locationLabel(getLocale(), loc)}
-				</Button>
-			{/each}
-		</div>
-	</section>
-	<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} />
-{:else if step === 'capture' && zone}
+{#if step === 'capture'}
 	<section data-testid="photo-round-capture">
-		<p class="lead">
-			{t('photoRound.captureLead', { zone: locationLabel(getLocale(), zone), count: photos.length, max: PHOTO_ROUND_MAX_IMAGES })}
-		</p>
+		<p class="lead">{captureLead}</p>
 		<p class="privacy">{t('photoRound.privacyNote')}</p>
 
 		{#if photos.length > 0}
@@ -263,10 +256,27 @@
 			/>
 		{/if}
 
+		{#if !initialLocation}
+			<details class="zone-optional" bind:open={zonePickerOpen}>
+				<summary>{t('photoRound.zoneOptional')}</summary>
+				<div class="zone-grid" role="group" aria-label={t('photoRound.zoneAria')}>
+					{#each LOCATIONS as loc (loc)}
+						<Button
+							type="button"
+							variant="secondary"
+							fullWidth
+							data-testid="photo-round-zone-{loc}"
+							aria-pressed={zone === loc}
+							onclick={() => selectZone(loc)}
+						>
+							{locationLabel(getLocale(), loc)}
+						</Button>
+					{/each}
+				</div>
+			</details>
+		{/if}
+
 		<div class="capture-actions">
-			<Button type="button" variant="secondary" onclick={backToZone} disabled={parsing}>
-				{t('photoRound.changeZone')}
-			</Button>
 			<Button
 				type="button"
 				data-testid="photo-round-analyze"
@@ -438,6 +448,25 @@
 		margin: 0 0 var(--space-md);
 		font-size: 0.85rem;
 		color: var(--color-text-muted);
+	}
+
+	.zone-optional {
+		margin: 0 0 var(--space-md);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface-muted);
+	}
+
+	.zone-optional summary {
+		cursor: pointer;
+		padding: 0.55rem 0.75rem;
+		font-weight: 600;
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+	}
+
+	.zone-optional .zone-grid {
+		padding: 0 0.75rem 0.75rem;
 	}
 
 	.zone-grid {

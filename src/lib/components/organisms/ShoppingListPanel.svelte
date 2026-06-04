@@ -21,8 +21,16 @@
 	let {
 		items,
 		checkedCount = 0,
-		canEdit
-	}: { items: ShoppingListItem[]; checkedCount?: number; canEdit: boolean } = $props();
+		canEdit,
+		id: panelId,
+		tabindex: panelTabindex
+	}: {
+		items: ShoppingListItem[];
+		checkedCount?: number;
+		canEdit: boolean;
+		id?: string;
+		tabindex?: number;
+	} = $props();
 
 	let listQuery = $state('');
 
@@ -188,7 +196,12 @@
 	}
 </script>
 
-<section class="panel" aria-label={t('shopping.listAria')}>
+<section
+	class="panel"
+	id={panelId}
+	tabindex={panelTabindex}
+	aria-label={t('shopping.listAria')}
+>
 	{#if items.length > 0 || checkedCount > 0}
 		<p class="intro">{t('shopping.intro')}</p>
 	{/if}
