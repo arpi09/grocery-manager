@@ -49,7 +49,7 @@
 <AppLayout user={data.user}>
 	<AppHeader {title} {subtitle} {backHref} {backLabel} />
 	<PageContainer>
-		{#if data.canWrite}
+		{#if data.canWrite && isHub}
 			<ScanModeTabs
 				active={activeTab}
 				returnTo={data.returnTo}
