@@ -1,19 +1,26 @@
-/** Where new accounts land — unified scan hub (photo-first), ready to add first item. */
-export type PostRegisterScanMode = 'photo';
+import { APP_HOME_PATH } from './app-home';
 
-export function postRegisterScanPath(options?: { mode?: PostRegisterScanMode }): string {
+/** Where new accounts land — app home with fresh-account flag (onboarding fast-start). */
+export function postRegisterPath(): string {
 	const params = new URLSearchParams({ freshAccount: '1' });
-	if (options?.mode === 'photo') {
-		params.set('mode', 'photo');
-	}
-	return `/scan?${params.toString()}`;
+	return `${APP_HOME_PATH}?${params.toString()}`;
 }
 
-export const POST_REGISTER_SCAN_PATH = postRegisterScanPath({ mode: 'photo' });
+/** @deprecated Use {@link postRegisterPath} — kept for existing imports. */
+export function postRegisterScanPath(): string {
+	return postRegisterPath();
+}
+
+export const POST_REGISTER_SCAN_PATH = postRegisterPath();
 
 /** OAuth redirect target (callback appends freshAccount for new users). */
-export const POST_REGISTER_SCAN_OAUTH_REDIRECT = '/scan';
+export const POST_REGISTER_SCAN_OAUTH_REDIRECT = APP_HOME_PATH;
 
+export function isPostRegisterPath(pathname: string, searchParams: URLSearchParams): boolean {
+	return pathname === APP_HOME_PATH && searchParams.get('freshAccount') === '1';
+}
+
+/** @deprecated Use {@link isPostRegisterPath} */
 export function isPostRegisterScanPath(pathname: string, searchParams: URLSearchParams): boolean {
-	return pathname === '/scan' && searchParams.get('freshAccount') === '1';
+	return isPostRegisterPath(pathname, searchParams);
 }

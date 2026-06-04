@@ -112,10 +112,9 @@ describe('onboarding helpers', () => {
 		expect(secondsSinceSignup(TEST_USER_A)).toBeGreaterThanOrEqual(0);
 	});
 
-	it('routes new registrations to unified scan hub', () => {
+	it('routes new registrations to app home', () => {
 		const url = new URL(`https://skaffu.com${POST_REGISTER_SCAN_PATH}`);
-		expect(url.pathname).toBe('/scan');
-		expect(url.searchParams.get('mode')).toBe('photo');
+		expect(url.pathname).toBe('/hem');
 		expect(url.searchParams.get('freshAccount')).toBe('1');
 	});
 });
