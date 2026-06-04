@@ -13,7 +13,12 @@ test.describe('Recipe assistant from header', () => {
 	});
 
 	async function openRecipeAssistant(page: import('@playwright/test').Page) {
-		await page.getByTestId('recipe-ideas-btn').filter({ visible: true }).first().click();
+		const viewport = page.viewportSize();
+		const navScope =
+			viewport && viewport.width < 900
+				? page.locator('.main-nav-mobile')
+				: page.locator('.main-nav-desktop');
+		await navScope.getByTestId('recipe-ideas-btn').click();
 		const dialog = page.getByRole('dialog', { name: 'Receptförslag' });
 		await expect(dialog).toBeVisible({ timeout: 15_000 });
 		await expect(dialog).toBeInViewport();
