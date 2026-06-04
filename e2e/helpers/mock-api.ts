@@ -79,3 +79,25 @@ export async function mockShoppingSuggestionsApi(
 		});
 	});
 }
+
+export async function mockRecipeSuggestionsApi(
+	page: Page,
+	options: { body?: unknown; status?: number; error?: string } = {}
+) {
+	const body =
+		options.error !== undefined
+			? { error: options.error }
+			: (options.body ?? loadFixture('recipe-suggestions.json'));
+
+	await page.route('**/api/recipes', async (route: Route) => {
+		if (route.request().method() !== 'POST') {
+			await route.continue();
+			return;
+		}
+		await route.fulfill({
+			status: options.status ?? (options.error ? 503 : 200),
+			contentType: 'application/json',
+			body: JSON.stringify(body)
+		});
+	});
+}

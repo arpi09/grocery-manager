@@ -39,9 +39,11 @@
 	);
 
 	function openRecipeIdeas() {
-		// Defer so the opening click cannot hit the new backdrop in the same gesture.
-		queueMicrotask(() => {
-			recipeOpen = true;
+		// Defer past the opening click so the new backdrop cannot swallow it (mobile Safari).
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				recipeOpen = true;
+			});
 		});
 	}
 

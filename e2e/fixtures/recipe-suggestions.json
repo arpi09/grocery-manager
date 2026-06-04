@@ -1,0 +1,11 @@
+{
+	"recipes": [
+		{
+			"title": "E2E Testpasta",
+			"whyItFits": "Använder det som finns i lagret.",
+			"ingredientsToUse": ["Mjölk", "Pasta"],
+			"missingIngredients": ["Basilika"],
+			"steps": ["Koka pastan.", "Blanda och servera."]
+		}
+	]
+}

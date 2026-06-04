@@ -28,6 +28,14 @@ test.describe('Scan and inventory', () => {
 		await expect(page).toHaveURL(/\/scan\?.*mode=receipt/);
 	});
 
+	test('legacy scan foto route redirects to unified photo mode', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/scan/foto?from=/hem');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page).toHaveURL(/\/scan\?.*mode=photo/);
+	});
+
 	test('legacy inventory foto redirects to unified scan photo mode', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/inventory/foto?from=/hem');

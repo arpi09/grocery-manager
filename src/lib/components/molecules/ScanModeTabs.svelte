@@ -21,9 +21,9 @@
 	const tabs = $derived.by(() => {
 		const items: { id: ScanModeTab; href: string; label: string }[] = [
 			{
-				id: 'barcode',
-				href: scanModeHref('barcode', returnTo, locationOption),
-				label: t('scan.modes.barcode')
+				id: 'photoRound',
+				href: scanModeHref('photo', returnTo, locationOption),
+				label: t('photoRound.title')
 			},
 			{
 				id: 'receipt',
@@ -31,9 +31,9 @@
 				label: t('scan.modes.receipt')
 			},
 			{
-				id: 'photoRound',
-				href: scanModeHref('photo', returnTo, locationOption),
-				label: t('photoRound.title')
+				id: 'barcode',
+				href: scanModeHref('barcode', returnTo, locationOption),
+				label: t('scan.modes.barcode')
 			}
 		];
 

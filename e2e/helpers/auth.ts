@@ -175,7 +175,7 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 
 async function waitForPostRegisterScan(page: Page) {
 	await page.waitForURL(
-		(url) => url.pathname === '/scan' && url.searchParams.get('mode') === 'barcode',
+		(url) => url.pathname === '/scan' && url.searchParams.get('freshAccount') === '1',
 		{
 			timeout: E2E_AUTH_NAV_TIMEOUT_MS,
 			waitUntil: 'commit'

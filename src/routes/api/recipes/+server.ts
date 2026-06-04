@@ -7,6 +7,7 @@ import { parseMealIntent } from '$lib/domain/recipe';
 import { clampRecipePortions } from '$lib/server/recipe-prompt';
 import { generateRecipesWithRefinement } from '$lib/server/recipe-generation';
 import { translate } from '$lib/i18n/messages';
+import { e2eMockRecipeSuggestions, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 
 import type { RequestHandler } from './$types';
 
@@ -44,6 +45,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			recipes: [],
 			note: translate(locale, 'recipe.noInventoryNote')
 		});
+	}
+
+	if (isE2eMockAiEnabled()) {
+		const recipes = e2eMockRecipeSuggestions();
+		const savedIdeas = await locals.mealPlanService.storeGeneratedIdeas(auth.user.id, recipes);
+		return json({ recipes: savedIdeas, portions });
 	}
 
 	const generated = await generateRecipesWithRefinement({

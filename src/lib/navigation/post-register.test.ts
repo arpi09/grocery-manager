@@ -6,16 +6,16 @@ import {
 } from './post-register';
 
 describe('post-register navigation', () => {
-	it('targets barcode scan hub with fresh-account flag', () => {
-		expect(POST_REGISTER_SCAN_PATH).toBe('/scan?freshAccount=1&mode=barcode');
-		expect(POST_REGISTER_SCAN_OAUTH_REDIRECT).toBe('/scan?mode=barcode');
+	it('targets unified scan hub with fresh-account flag', () => {
+		expect(POST_REGISTER_SCAN_PATH).toBe('/scan?freshAccount=1');
+		expect(POST_REGISTER_SCAN_OAUTH_REDIRECT).toBe('/scan');
 	});
 
 	it('recognises post-register scan URLs', () => {
 		expect(
-			isPostRegisterScanPath('/scan', new URLSearchParams('mode=barcode&freshAccount=1'))
+			isPostRegisterScanPath('/scan', new URLSearchParams('freshAccount=1'))
 		).toBe(true);
-		expect(isPostRegisterScanPath('/scan', new URLSearchParams('mode=hub'))).toBe(false);
-		expect(isPostRegisterScanPath('/hem', new URLSearchParams('mode=barcode'))).toBe(false);
+		expect(isPostRegisterScanPath('/scan', new URLSearchParams('mode=barcode'))).toBe(false);
+		expect(isPostRegisterScanPath('/hem', new URLSearchParams('freshAccount=1'))).toBe(false);
 	});
 });

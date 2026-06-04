@@ -10,6 +10,7 @@ import { parsePhotoRoundItems } from '$lib/server/photo-round-parse';
 import type { ReceiptLine } from '$lib/domain/receipt-line';
 import type { StorageLocation } from '$lib/domain/location';
 import type { PhotoRoundDetectedItem } from '$lib/domain/photo-round';
+import { parseRecipeSuggestions, type RecipeSuggestion } from '$lib/server/recipe-suggestions';
 
 export function isE2eMockAiEnabled(): boolean {
 	return process.env.E2E_MOCK_AI === 'true';
@@ -67,4 +68,19 @@ function loadPhotoRoundParseFixture(zone: StorageLocation): PhotoRoundDetectedIt
 /** Deterministic photo-round parse for Playwright (no OPENAI_API_KEY). */
 export function e2eMockPhotoRoundParse(zone: StorageLocation): PhotoRoundDetectedItem[] {
 	return loadPhotoRoundParseFixture(zone);
+}
+
+function loadRecipeSuggestionsFixture(): RecipeSuggestion[] {
+	const path = join(process.cwd(), 'e2e/fixtures/recipe-suggestions.json');
+	const raw = JSON.parse(readFileSync(path, 'utf8')) as unknown;
+	const recipes = parseRecipeSuggestions(raw);
+	if (recipes.length === 0) {
+		throw new Error('e2e/fixtures/recipe-suggestions.json produced zero recipes');
+	}
+	return recipes;
+}
+
+/** Deterministic recipe suggestions for Playwright (no OPENAI_API_KEY). */
+export function e2eMockRecipeSuggestions(): RecipeSuggestion[] {
+	return loadRecipeSuggestionsFixture();
 }
