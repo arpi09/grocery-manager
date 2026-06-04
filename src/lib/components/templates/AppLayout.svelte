@@ -40,11 +40,9 @@
 
 	function openRecipeIdeas() {
 		// Defer past the opening click so the new backdrop cannot swallow it (mobile Safari).
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				recipeOpen = true;
-			});
-		});
+		setTimeout(() => {
+			recipeOpen = true;
+		}, 0);
 	}
 
 	setContext(OPEN_RECIPE_IDEAS, openRecipeIdeas);

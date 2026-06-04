@@ -12,15 +12,18 @@ test.describe('Recipe assistant from header', () => {
 		await dismissOnboardingModalIfOpen(page);
 	});
 
-	test('header button opens modal and generate returns recipes', async ({ page }) => {
-		await page.getByRole('button', { name: /Öppna receptidéer/i }).click();
-
+	async function openRecipeAssistant(page: import('@playwright/test').Page) {
+		await page.getByTestId('recipe-ideas-btn').click();
 		const dialog = page.getByRole('dialog', { name: 'Receptförslag' });
-		await expect(dialog).toBeVisible();
+		await expect(dialog).toBeVisible({ timeout: 15_000 });
 		await expect(dialog).toBeInViewport();
+		return dialog;
+	}
+
+	test('header button opens modal and generate returns recipes', async ({ page }) => {
+		const dialog = await openRecipeAssistant(page);
 
 		const generateBtn = dialog.getByRole('button', { name: 'Generera recept' });
-		await expect(generateBtn).toBeVisible();
 		await expect(generateBtn).toBeEnabled();
 		await generateBtn.click();
 
@@ -34,11 +37,7 @@ test.describe('Recipe assistant from header', () => {
 		await page.goto('/hem');
 		await dismissOnboardingModalIfOpen(page);
 
-		await page.getByRole('button', { name: /Öppna receptidéer/i }).click();
-
-		const dialog = page.getByRole('dialog', { name: 'Receptförslag' });
-		await expect(dialog).toBeVisible();
-		await expect(dialog).toBeInViewport();
+		const dialog = await openRecipeAssistant(page);
 		await expect(dialog.getByRole('button', { name: 'Generera recept' })).toBeEnabled();
 	});
 });

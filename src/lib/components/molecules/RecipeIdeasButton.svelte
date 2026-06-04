@@ -15,6 +15,7 @@
 	class="recipe-ideas-btn"
 	class:compact
 	class:icon-only={iconOnly}
+	data-testid="recipe-ideas-btn"
 	{onclick}
 	aria-label={t('planer.recipeIdeasAria')}
 >
