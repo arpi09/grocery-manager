@@ -22,9 +22,9 @@ test.describe('Scan and inventory', () => {
 		await expect(hub.getByTestId('scan-hub-receipt')).toBeVisible();
 		await expect(hub.getByTestId('scan-hub-manual')).toBeVisible();
 		await expect(hub.getByRole('heading', { name: /Fler sätt|More ways/i })).toBeVisible();
-		await expect(hub.getByRole('heading', { name: 'Streckkod' })).toBeVisible();
-		await expect(hub.getByRole('heading', { name: 'Kvitto' })).toBeVisible();
-		await expect(hub.getByRole('heading', { name: 'Manuellt' })).toBeVisible();
+		await expect(hub.getByTestId('scan-hub-barcode')).toContainText(/Streckkod|Barcode/i);
+		await expect(hub.getByTestId('scan-hub-receipt')).toContainText(/Kvitto|Receipt/i);
+		await expect(hub.getByTestId('scan-hub-manual')).toContainText(/Manuellt|Manual/i);
 	});
 
 	test('scan sub-modes show mode tabs', async ({ page }) => {

@@ -36,9 +36,11 @@ function formatPlural(text: string, params: Record<string, string | number>): st
 		const raw = params[key];
 		const count = typeof raw === 'number' ? raw : Number.parseInt(String(raw), 10);
 		const chosen = count === 1 ? one : other;
-		return chosen.replace(/\{(\w+)\}/g, (_match: string, paramKey: string) =>
-			String(params[paramKey] ?? '')
-		);
+		return chosen
+			.replace(/#/g, String(count))
+			.replace(/\{(\w+)\}/g, (_match: string, paramKey: string) =>
+				String(params[paramKey] ?? '')
+			);
 	});
 }
 

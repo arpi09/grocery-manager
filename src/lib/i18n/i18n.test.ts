@@ -27,5 +27,7 @@ describe('i18n translate', () => {
 		expect(translate('sv', 'dashboard.itemCount', { count: 1 })).toBe('1 vara');
 		expect(translate('sv', 'dashboard.itemCount', { count: 3 })).toBe('3 varor');
 		expect(translate('en', 'dashboard.totalTracked', { count: 5 })).toBe('5 items tracked');
+		expect(translate('sv', 'recipe.stepCount', { count: 2 })).toBe('2 steg');
+		expect(translate('sv', 'recipe.portionsBadge', { count: 4 })).toBe('4 portioner');
 	});
 });
