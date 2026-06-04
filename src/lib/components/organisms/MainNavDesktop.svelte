@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fade, fly } from 'svelte/transition';
 	import { page } from '$app/state';
 	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
 	import ProNavBadge from '$lib/components/atoms/ProNavBadge.svelte';
@@ -98,8 +99,14 @@
 								class="desktop-more-backdrop nav-dropdown-scrim"
 								aria-label={t('nav.closeMenu')}
 								onclick={onCloseMore}
+								transition:fade={{ duration: 140 }}
 							></button>
-							<div class="desktop-more-panel" id="nav-more-desktop" role="menu">
+							<div
+								class="desktop-more-panel"
+								id="nav-more-desktop"
+								role="menu"
+								transition:fly={{ y: -6, duration: 180 }}
+							>
 								<p class="more-section-title label-caps">{t('nav.morePages')}</p>
 								{#each secondary as item (item.href)}
 									{@const active = isNavActive(pathname, item)}
@@ -227,6 +234,7 @@
 		top: calc(100% + 0.4rem);
 		left: 50%;
 		transform: translateX(-50%);
+		transform-origin: top center;
 		z-index: var(--z-nav-flyout);
 		min-width: 13.5rem;
 		padding: var(--space-sm);
@@ -237,6 +245,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.1rem;
+		will-change: transform, opacity;
 	}
 
 	.more-section-title {
@@ -375,6 +384,11 @@
 	@media (prefers-reduced-motion: reduce) {
 		.nav-link {
 			transition: none;
+		}
+
+		.desktop-more-panel,
+		.desktop-more-backdrop {
+			animation: none;
 		}
 	}
 </style>

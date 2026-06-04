@@ -21,6 +21,7 @@ test.describe('Scan and inventory', () => {
 		await expect(hub.getByTestId('scan-hub-barcode')).toBeVisible();
 		await expect(hub.getByTestId('scan-hub-receipt')).toBeVisible();
 		await expect(hub.getByTestId('scan-hub-manual')).toBeVisible();
+		await expect(hub.getByRole('heading', { name: /Fler sätt|More ways/i })).toBeVisible();
 		await expect(hub.getByRole('heading', { name: 'Streckkod' })).toBeVisible();
 		await expect(hub.getByRole('heading', { name: 'Kvitto' })).toBeVisible();
 		await expect(hub.getByRole('heading', { name: 'Manuellt' })).toBeVisible();
@@ -90,7 +91,9 @@ test.describe('Scan and inventory', () => {
 		}
 
 		await expect(page).toHaveURL(/\/inventory\/fridge/, { timeout: 15_000 });
-		await expect(page.locator('.inventory-page').getByText(itemName)).toBeVisible({ timeout: 10_000 });
+		await expect(page.getByTestId('inventory-table').getByText(itemName)).toBeVisible({
+			timeout: 10_000
+		});
 	});
 
 	test('inventory fridge location list loads', async ({ page }) => {
@@ -101,6 +104,20 @@ test.describe('Scan and inventory', () => {
 		await expect(page).toHaveURL(/\/inventory\/fridge/);
 		await expect(page.getByRole('link', { name: 'Kyl' })).toBeVisible();
 		await expect(page.getByRole('link', { name: 'Frys' })).toBeVisible();
+	});
+
+	test('inventory list uses dense table with sortable columns', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/inventory/fridge');
+		await dismissOnboardingModalIfOpen(page);
+
+		const table = page.getByTestId('inventory-table');
+		if (!(await table.isVisible({ timeout: 15_000 }).catch(() => false))) {
+			test.skip(true, 'No inventory rows in fridge — table hidden behind empty state');
+		}
+		await expect(table.getByRole('columnheader', { name: /Namn|Name/i })).toBeVisible();
+		await expect(table.getByRole('columnheader', { name: /Antal|Qty/i })).toBeVisible();
+		await expect(table.getByRole('columnheader', { name: /Bäst före|Expiry/i })).toBeVisible();
 	});
 
 	test('inventory shows single add-goods CTA to photo scan', async ({ page }) => {

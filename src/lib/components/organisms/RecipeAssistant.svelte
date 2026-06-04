@@ -8,6 +8,7 @@
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import RecipeStepsPanel from '$lib/components/molecules/RecipeStepsPanel.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
+	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
 	import { DEFAULT_RECIPE_PORTIONS, DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
 	import {
 		addMissingIngredientsToList,
@@ -265,7 +266,13 @@
 </Modal>
 
 {#if toastMessage}
-	<Toast message={toastMessage} visible={true} onDismiss={dismissToast} />
+	<Toast
+		message={toastMessage}
+		visible={true}
+		variant="success"
+		durationMs={TOAST_DEFAULT_DURATION_MS}
+		onDismiss={dismissToast}
+	/>
 {/if}
 
 <style>

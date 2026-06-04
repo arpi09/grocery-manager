@@ -8,11 +8,9 @@
 |--------|--------|
 | Hel redesign scan-hub (beyond tabs bort) | Endast dubbel navigering borttagen på hub |
 | Foto-runda utan platsval + AI-plats | Kräver flödes- och prompt-ändring |
-| Inventory DataGrid / MUI-densitet | Ny tabellkomponent, sortering, kolumner |
-| En CTA «Lägg till varor» på inventory | Ny informationsarkitektur |
+| En CTA «Lägg till varor» på inventory | Levererat P1 — ej P2 |
 | /inkop fill celebration + auto-scroll | Animation + layout, egen epic |
-| Header «Mer»-meny animation | MainNavDesktop polish |
-| Enhetlig toast-arkitektur överallt | Audit + migrering av lokala toasts |
+| Enhetlig toast-arkitektur överallt | Delvis P2 — se toast-rader nedan |
 
 ---
 
@@ -27,13 +25,24 @@
 | **P1** | **F3-inventory-CTA** | Primär «Lägg till varor» + sekundära metoder (foto/streckkod/manuellt) | `inventory/[location]/+page.svelte`, i18n | Planerad |
 | **P1** | **Toast-unify** | En källa: `ActionToast` + `Toast`; 5s action / 8s undo; samma placering | `action-toast.ts`, `AppLayout.svelte`, paneler med lokal `Toast` | Audit i P1 |
 | **P1** | **F2-inkop-magi** | Efter smart fill: loader, scroll till lista, firande (15 varor) | `SmartShoppingFill.svelte`, `ShoppingListPanel.svelte`, `inkop/+page.svelte` | Planerad |
-| **P2** | **Inventory-tabell** | DataGrid-liknande: densitet, sortering, kolumner (namn, antal, utgång) | Inventory list-komponenter under `src/lib/components/` + `inventory/[location]/` | Planerad |
-| **P2** | **Nav-Mer** | Professionell öppning/stängning av desktop «Mer»-flyout | `MainNavDesktop.svelte` | Planerad |
-| **P2** | **F5-hub-v2** | Full sid-redesign hub (hero, en primär CTA, resten «Fler sätt») | `ScanModeHub.svelte`, BRAND/UX_GUIDELINES | Efter P0 |
+| **P2** | **Inventory-tabell** | DataGrid-liknande: densitet, sortering, kolumner (namn, antal, utgång) | `InventoryDataTable.svelte`, `InventoryTableRow.svelte` | **PR feat/ux-p2** |
+| **P2** | **Nav-Mer** | Professionell öppning/stängning av desktop «Mer»-flyout | `MainNavDesktop.svelte` | **PR feat/ux-p2** |
+| **P2** | **F5-hub-v2** | Hub-polish: intro, «Fler sätt»-sektion (ej full hero-redesign) | `ScanModeHub.svelte` | **PR feat/ux-p2** (partial) |
+| **P2** | **Toast-unify (partial)** | 5s + success på panel-toasts; `TOAST_UNDO_DURATION_MS` | `action-toast.ts`, EatFirst, Recipe, m.fl. | **PR feat/ux-p2** |
 
 ---
 
-## Toast-audit (P1 — förslag, ej implementerat)
+## Toast-audit — kvar efter P2 (ej migrerat)
+
+| Källa | Status efter P2 |
+|-------|-----------------|
+| `EatFirstSection`, `RecipeAssistant`, `MealPlanIdeasPanel`, `ReceiptAutopilot` | Lokala `Toast`, nu 5s + success-variant |
+| `ShoppingListPanel` undo | 8s via `TOAST_UNDO_DURATION_MS` |
+| `CalendarDaySheet` | Lokal variant — ej migrerad |
+| `GamificationToast`, `InventoryScanToast` | Egna wrappers — behåll |
+| `settings/+page.svelte` push/expiry | Lokala — överväg `ActionToast` i P3 |
+
+## Toast-audit (P1 — historik)
 
 | Källa | Placering | Duration idag | Rekommendation |
 |-------|-----------|---------------|----------------|

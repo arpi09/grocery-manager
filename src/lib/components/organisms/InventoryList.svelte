@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { fly } from 'svelte/transition';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
-	import ItemRow from '$lib/components/molecules/ItemRow.svelte';
+	import InventoryDataTable from '$lib/components/molecules/InventoryDataTable.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import SearchInput from '$lib/components/molecules/SearchInput.svelte';
 	import type { FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
@@ -64,14 +63,6 @@
 	let loadingFinished = $state(false);
 	let autoExpiredLoaded = $state(false);
 	let finishedLoaded = $state(false);
-	let reduceMotion = $state(true);
-
-	$effect(() => {
-		if (!browser) {
-			return;
-		}
-		reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-	});
 
 	$effect.pre(() => {
 		loadedItems = items;
@@ -185,6 +176,7 @@
 					<span class="sr-only">{t('inventory.sortLabel')}</span>
 					<select bind:value={sortKey}>
 						<option value="name">{t('inventory.sortName')}</option>
+						<option value="quantity">{t('inventory.sortQuantity')}</option>
 						<option value="expiry">{t('inventory.sortExpiry')}</option>
 					</select>
 				</label>
@@ -245,19 +237,13 @@
 			secondaryActionHref={!isSearchEmpty && canWrite && !hasInventory ? manualAddHref : undefined}
 		/>
 	{:else}
-		<ul class="item-list" aria-label={t('inventory.listAria')}>
-			{#each filtered as item, index (item.id)}
-				{#if reduceMotion}
-					<li><ItemRow {item} {canWrite} finished={false} autoExpired={false} /></li>
-				{:else}
-					<li
-						in:fly={{ y: 8, duration: 220, delay: Math.min(index, 8) * 35 }}
-					>
-						<ItemRow {item} {canWrite} finished={false} autoExpired={false} />
-					</li>
-				{/if}
-			{/each}
-		</ul>
+		<InventoryDataTable
+			items={filtered}
+			{sortKey}
+			onSortChange={(key) => (sortKey = key)}
+			{canWrite}
+			ariaLabel={t('inventory.listAria')}
+		/>
 
 		{#if hasMoreActive && query.length === 0}
 			<div class="load-more-row">
@@ -296,20 +282,26 @@
 					/>
 				{/if}
 			</div>
-			<ul class="item-list auto-expired-list" aria-label={t('inventory.autoExpiredSection')}>
-				{#each filteredAutoExpired as item (item.id)}
-					<li><ItemRow {item} {canWrite} finished={false} autoExpired={true} /></li>
-				{/each}
-			</ul>
+			<InventoryDataTable
+				items={filteredAutoExpired}
+				{sortKey}
+				onSortChange={(key) => (sortKey = key)}
+				{canWrite}
+				autoExpired={true}
+				ariaLabel={t('inventory.autoExpiredSection')}
+			/>
 		{/if}
 
 		{#if filteredFinished.length > 0}
 			<h2 class="secondary-heading">{t('inventory.finishedSection')}</h2>
-			<ul class="item-list finished-list" aria-label={t('inventory.finishedSection')}>
-				{#each filteredFinished as item (item.id)}
-					<li><ItemRow {item} {canWrite} finished={true} autoExpired={false} /></li>
-				{/each}
-			</ul>
+			<InventoryDataTable
+				items={filteredFinished}
+				{sortKey}
+				onSortChange={(key) => (sortKey = key)}
+				{canWrite}
+				finished={true}
+				ariaLabel={t('inventory.finishedSection')}
+			/>
 		{/if}
 	{/if}
 </div>
@@ -432,20 +424,6 @@
 		font-size: 0.8125rem;
 		color: var(--color-text-muted);
 		line-height: 1.4;
-	}
-
-	.item-list {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-	}
-
-	.finished-list :global(.row),
-	.auto-expired-list :global(.row) {
-		opacity: 0.78;
 	}
 
 	:global(.clear-auto-expired-action) {

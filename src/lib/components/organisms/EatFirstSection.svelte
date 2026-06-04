@@ -6,6 +6,7 @@
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
+	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
 	import { DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
@@ -360,7 +361,13 @@
 </section>
 
 {#if toastMessage}
-	<Toast message={toastMessage} visible={true} onDismiss={dismissToast} />
+	<Toast
+		message={toastMessage}
+		visible={true}
+		variant="success"
+		durationMs={TOAST_DEFAULT_DURATION_MS}
+		onDismiss={dismissToast}
+	/>
 {/if}
 
 <style>

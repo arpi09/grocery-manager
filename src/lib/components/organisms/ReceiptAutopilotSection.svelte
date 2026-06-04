@@ -4,6 +4,7 @@
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
+	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
 	import type { ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
 	import { t } from '$lib/i18n';
 
@@ -148,7 +149,13 @@
 </section>
 
 {#if toastMessage}
-	<Toast message={toastMessage} onDismiss={() => (toastMessage = null)} />
+	<Toast
+		message={toastMessage}
+		visible={true}
+		variant="success"
+		durationMs={TOAST_DEFAULT_DURATION_MS}
+		onDismiss={() => (toastMessage = null)}
+	/>
 {/if}
 
 <style>

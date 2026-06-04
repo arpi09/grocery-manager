@@ -1,8 +1,9 @@
 import type { InventoryItem } from '$lib/domain/inventory-item';
+import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
 import { daysUntilExpiry, EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
 
 export type InventoryExpiryFilter = 'all' | 'expiring' | 'dated';
-export type InventorySortKey = 'name' | 'expiry';
+export type InventorySortKey = 'name' | 'expiry' | 'quantity';
 
 export function matchesInventoryExpiryFilter(
 	item: InventoryItem,
@@ -21,8 +22,25 @@ export function matchesInventoryExpiryFilter(
 	return days >= 0 && days <= EXPIRING_SOON_DAYS;
 }
 
+function compareQuantity(a: InventoryItem, b: InventoryItem): number {
+	const aNum = parseNumericQuantity(a.quantity);
+	const bNum = parseNumericQuantity(b.quantity);
+	if (aNum !== null && bNum !== null && aNum !== bNum) {
+		return aNum - bNum;
+	}
+	return a.quantity.localeCompare(b.quantity, undefined, { numeric: true, sensitivity: 'base' });
+}
+
 export function compareInventoryItems(a: InventoryItem, b: InventoryItem, sort: InventorySortKey): number {
 	if (sort === 'name') {
+		return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+	}
+
+	if (sort === 'quantity') {
+		const byQty = compareQuantity(a, b);
+		if (byQty !== 0) {
+			return byQty;
+		}
 		return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
 	}
 

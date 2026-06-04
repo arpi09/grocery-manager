@@ -5,6 +5,7 @@
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
 	import RecipeStepsPanel from '$lib/components/molecules/RecipeStepsPanel.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
+	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
 	import { fetchMealPlanIdeas } from '$lib/client/planer-data';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
 	import { normalizeRecipeIdeas, type RecipeIdeaLoad } from '$lib/utils/meal-plan-ideas';
@@ -162,7 +163,13 @@
 </aside>
 
 {#if toastMessage}
-	<Toast message={toastMessage} visible={true} onDismiss={dismissToast} />
+	<Toast
+		message={toastMessage}
+		visible={true}
+		variant="success"
+		durationMs={TOAST_DEFAULT_DURATION_MS}
+		onDismiss={dismissToast}
+	/>
 {/if}
 
 <style>

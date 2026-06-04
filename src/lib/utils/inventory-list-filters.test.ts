@@ -38,4 +38,14 @@ describe('filterAndSortInventoryItems', () => {
 		const sorted = filterAndSortInventoryItems(items, '', 'all', 'expiry');
 		expect(sorted.map((row) => row.name)).toEqual(['Apple', 'Zucchini', 'Banana']);
 	});
+
+	it('sorts by quantity then name', () => {
+		const withQty = [
+			item({ id: '1', name: 'Milk', quantity: '2' }),
+			item({ id: '2', name: 'Eggs', quantity: '12' }),
+			item({ id: '3', name: 'Butter', quantity: '1' })
+		];
+		const sorted = filterAndSortInventoryItems(withQty, '', 'all', 'quantity');
+		expect(sorted.map((row) => row.name)).toEqual(['Butter', 'Milk', 'Eggs']);
+	});
 });
