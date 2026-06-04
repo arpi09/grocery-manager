@@ -143,6 +143,7 @@
 		}
 	},
 	"home": {
+		"title": "Ditt skafferi",
 		"ariaLabel": "Startsida",
 		"greeting": "Hej, {name}",
 		"greetingNeutral": "Ditt skafferi",
@@ -184,7 +185,7 @@
 		},
 		"moreAddWays": "Fler sätt att lägga till",
 		"chipBarcode": "Streckkod",
-		"chipPhotoRound": "Foto-runda",
+		"chipPhotoRound": "Fota in varor",
 		"eatFirstSummary": "Ät först ({count})",
 		"locationsSummary": "Platser · {count} varor",
 		"receiptAutopilotSummary": "Kvitto-förslag ({count})"
@@ -234,7 +235,7 @@
 				"description": "Fota etiketten och fyll i uppgifter automatiskt."
 			},
 			"photoRound": {
-				"description": "Fota kyl, frys eller skafferi — inventera flera varor i en runda."
+				"description": "Kyl, frys eller skafferi — flera varor på en gång."
 			}
 		},
 		"photoPage": {
@@ -582,7 +583,7 @@
 		"sortExpiry": "Bäst före",
 		"tabsAria": "Förvaringsplatser",
 		"listAria": "Varor i förvaringsplatsen",
-		"photoRound": "Foto-runda",
+		"photoRound": "Fota in varor",
 		"itemActionsNamed": "Åtgärder för {name}",
 		"editItem": "Redigera",
 		"showAutoExpired": "Utgångna (auto)",
@@ -1114,7 +1115,7 @@
 		"scanLink": "Skanna"
 	},
 	"photoRound": {
-		"title": "Foto-runda",
+		"title": "Fota in varor",
 		"subtitle": "Fota kyl, frys eller skafferi — granska och spara",
 		"zoneLead": "Välj var du ska inventera. Ta 1–3 foton per zon.",
 		"zoneAria": "Välj förvaringsplats",
@@ -1127,7 +1128,7 @@
 		"changeZone": "Byt zon",
 		"parseFailed": "Kunde inte läsa varorna från fotona. Prova tydligare bilder.",
 		"noItems": "Inga synliga varor hittades. Prova fler vinklar eller bättre ljus.",
-		"networkError": "Nätverksfel vid foto-rundan.",
+		"networkError": "Nätverksfel vid fotoskanning.",
 		"reviewTitle": "Granska ({selected} av {total})",
 		"reviewHint": "Ta bort felaktiga rader och justera namn, mängd och plats innan du sparar.",
 		"fieldName": "Namn",
@@ -1137,7 +1138,7 @@
 		"confidenceHigh": "hög säkerhet",
 		"confidenceMedium": "medel säkerhet",
 		"confidenceLow": "låg säkerhet",
-		"newRound": "Ny foto-runda",
+		"newRound": "Skanna igen",
 		"saving": "Sparar varor…",
 		"addCount": "Lägg till {count} {count, plural, one {vara} other {varor}}",
 		"uploadTooLarge": "Fotona är för stora tillsammans (max 18 MB). Ta bort ett foto eller använd mindre bilder.",
@@ -1460,7 +1461,7 @@
 			"confirm": "Kasta och välj ny bild"
 		},
 		"photoRoundReview": {
-			"title": "Avbryt foto-runda?",
+			"title": "Avbryt fotoskanning?",
 			"description": "{count} {count, plural, one {vara försvinner} other {varor försvinner}} från granskningen.",
 			"descriptionEmpty": "Granskningslistan rensas.",
 			"consequence": "Du måste fotografera zonen igen.",

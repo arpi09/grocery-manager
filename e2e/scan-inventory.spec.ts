@@ -12,7 +12,7 @@ test.describe('Scan and inventory', () => {
 		const hub = page.getByTestId('scan-mode-hub');
 		await expect(hub).toBeVisible({ timeout: 15_000 });
 		await expect(hub.getByTestId('scan-hub-photo-round')).toBeVisible();
-		await expect(hub.getByRole('heading', { name: 'Foto-runda' })).toBeVisible();
+		await expect(hub.getByRole('heading', { name: 'Fota in varor' })).toBeVisible();
 
 		const scanModes = page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i });
 		await expect(scanModes.getByRole('link', { name: 'Streckkod' })).toBeVisible();
