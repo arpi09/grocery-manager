@@ -34,7 +34,7 @@ export const ACTIVATION_BARCODE_GOAL = 5;
 
 const EXCLUDED_PATH_PREFIXES = ['/admin', '/login', '/register'] as const;
 
-export type ActivationPath = 'barcode' | 'receipt';
+export type ActivationPath = 'barcode' | 'receipt' | 'photo';
 
 export interface ActivationProgress {
 	path: ActivationPath | null;
@@ -239,7 +239,8 @@ export function getActivationProgress(userId?: string | null): ActivationProgres
 	}
 
 	const pathRaw = localStorage.getItem(storageKey(ACTIVATION_PATH_SUFFIX, userId));
-	const path = pathRaw === 'barcode' || pathRaw === 'receipt' ? pathRaw : null;
+	const path =
+		pathRaw === 'barcode' || pathRaw === 'receipt' || pathRaw === 'photo' ? pathRaw : null;
 	const receiptDone = localStorage.getItem(storageKey(ACTIVATION_RECEIPT_SUFFIX, userId)) === '1';
 	const storedBarcodeCount = Number(
 		localStorage.getItem(storageKey(ACTIVATION_BARCODE_COUNT_SUFFIX, userId)) ?? '0'

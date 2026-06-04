@@ -7,7 +7,7 @@ import {
 
 describe('post-register navigation', () => {
 	it('targets unified scan hub with fresh-account flag', () => {
-		expect(POST_REGISTER_SCAN_PATH).toBe('/scan?freshAccount=1');
+		expect(POST_REGISTER_SCAN_PATH).toBe('/scan?freshAccount=1&mode=photo');
 		expect(POST_REGISTER_SCAN_OAUTH_REDIRECT).toBe('/scan');
 	});
 

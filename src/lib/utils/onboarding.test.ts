@@ -115,7 +115,7 @@ describe('onboarding helpers', () => {
 	it('routes new registrations to unified scan hub', () => {
 		const url = new URL(`https://skaffu.com${POST_REGISTER_SCAN_PATH}`);
 		expect(url.pathname).toBe('/scan');
-		expect(url.searchParams.get('mode')).toBeNull();
+		expect(url.searchParams.get('mode')).toBe('photo');
 		expect(url.searchParams.get('freshAccount')).toBe('1');
 	});
 });

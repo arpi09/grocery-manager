@@ -9,6 +9,7 @@
 	import { trackProductEvent } from '$lib/client/product-events';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { t, type MessageKey } from '$lib/i18n';
+	import { scanModeHref } from '$lib/utils/scan-nav';
 	import {
 		ONBOARDING_REPLAY_EVENT,
 		ONBOARDING_STEP_COUNT,
@@ -38,7 +39,7 @@
 			id: 'welcome',
 			titleKey: 'onboarding.welcome',
 			bodyKey: 'onboarding.welcomeBodyShort',
-			iconId: 'barcode'
+			iconId: 'photo'
 		},
 		{
 			id: 'ready',
@@ -48,7 +49,9 @@
 		}
 	];
 
-	const scanQuickStartPath = `/scan?mode=barcode&from=${encodeURIComponent(APP_HOME_PATH)}`;
+	const scanPhotoQuickStartPath = $derived(
+		scanModeHref('photo', APP_HOME_PATH)
+	);
 
 	let open = $state(false);
 	let stepIndex = $state(0);
@@ -100,7 +103,7 @@
 			return;
 		}
 
-		setActivationPath('barcode', userId);
+		setActivationPath('photo', userId);
 		dismissOnboarding(userId);
 		closeGuide();
 		void trackProductEvent(
@@ -111,7 +114,7 @@
 			return;
 		}
 
-		await goto(scanQuickStartPath);
+		await goto(scanPhotoQuickStartPath);
 	}
 
 	function skipGuide() {
@@ -152,6 +155,16 @@
 		await goto(`/scan?mode=receipt&from=${encodeURIComponent(APP_HOME_PATH)}`);
 	}
 
+	async function choosePhoto() {
+		if (!userId) {
+			return;
+		}
+		setActivationPath('photo', userId);
+		dismissOnboarding(userId);
+		closeGuide();
+		await goto(scanPhotoQuickStartPath);
+	}
+
 	async function chooseBarcode() {
 		if (!userId) {
 			return;
@@ -159,7 +172,7 @@
 		setActivationPath('barcode', userId);
 		dismissOnboarding(userId);
 		closeGuide();
-		await goto(scanQuickStartPath);
+		await goto(scanModeHref('barcode', APP_HOME_PATH));
 	}
 
 	$effect(() => {
@@ -253,8 +266,11 @@
 			{/if}
 
 			<div class="path-actions">
-				<Button type="button" fullWidth onclick={chooseBarcode}>
-					{t('onboarding.ctaBarcodeFirst')}
+				<Button type="button" fullWidth onclick={choosePhoto}>
+					{t('onboarding.ctaPhotoFirst')}
+				</Button>
+				<Button type="button" variant="secondary" fullWidth onclick={chooseBarcode}>
+					{t('onboarding.ctaBarcode')}
 				</Button>
 				<Button type="button" variant="secondary" fullWidth onclick={chooseReceipt}>
 					{t('onboarding.ctaReceipt')}
