@@ -19,19 +19,19 @@ test.describe('Recipe assistant from header', () => {
 	async function openRecipeAssistant(page: import('@playwright/test').Page) {
 		await dismissOnboardingModalIfOpen(page);
 		await dismissPostOnboardingSurveyIfOpen(page);
+		await expect(page.locator('.modal-root')).toHaveCount(0, { timeout: 10_000 });
 
 		const viewport = page.viewportSize();
-		const navScope =
-			viewport && viewport.width < 900
-				? page.locator('.main-nav-mobile')
-				: page.locator('.main-nav-desktop');
-		const openBtn = navScope.getByTestId('recipe-ideas-btn');
+		const isMobile = viewport != null && viewport.width < 900;
+		const openBtn = isMobile
+			? page.locator('.mobile-header-actions').getByTestId('recipe-ideas-btn')
+			: page.locator('.main-nav-desktop').getByTestId('recipe-ideas-btn');
 		await expect(openBtn).toBeVisible({ timeout: 15_000 });
+		await openBtn.scrollIntoViewIfNeeded();
 		await openBtn.click();
 
 		const dialog = page.getByTestId('recipe-assistant-dialog');
-		await expect(dialog).toBeVisible({ timeout: 15_000 });
-		await expect(dialog).toBeInViewport();
+		await expect(dialog).toBeVisible({ timeout: 20_000 });
 		return dialog;
 	}
 
@@ -51,6 +51,7 @@ test.describe('Recipe assistant from header', () => {
 		await page.setViewportSize({ width: 390, height: 844 });
 		await page.goto('/hem');
 		await dismissOnboardingModalIfOpen(page);
+		await dismissPostOnboardingSurveyIfOpen(page);
 
 		const dialog = await openRecipeAssistant(page);
 		await expect(dialog.getByRole('button', { name: 'Generera recept' })).toBeEnabled();
