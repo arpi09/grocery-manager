@@ -1,5 +1,7 @@
 import { canEditInventory } from '$lib/domain/household';
 import type { GamificationCelebrationKind } from '$lib/domain/gamification';
+import { DEFAULT_LOCALE, isLocale, type Locale } from '$lib/i18n/locale';
+import { translate } from '$lib/i18n/messages';
 import {
 	createHouseholdAction,
 	leaveHouseholdAction,
@@ -17,7 +19,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 		locals.purchasePatternService.getSuggestions(householdId)
 	]);
 	const canWrite = locals.householdRole ? canEditInventory(locals.householdRole) : false;
+	const locale: Locale = isLocale(locals.locale) ? locals.locale : DEFAULT_LOCALE;
 	return {
+		locale,
+		pageTitle: translate(locale, 'home.title'),
 		summary,
 		engagement,
 		celebration: celebration as GamificationCelebrationKind | null,

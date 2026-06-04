@@ -152,6 +152,7 @@
 		}
 	},
 	"home": {
+		"title": "Your pantry",
 		"ariaLabel": "Home page",
 		"greeting": "Hi, {name}",
 		"greetingNeutral": "Your pantry",
@@ -162,7 +163,7 @@
 		"chipReceipt": "Receipt",
 		"chipBarcode": "Barcode",
 		"chipPhoto": "Photo",
-		"chipPhotoRound": "Photo round",
+		"chipPhotoRound": "Add with photos",
 		"chipManual": "Manual",
 		"moreAddWays": "More ways to add",
 		"locationsTitle": "Your locations",
@@ -246,7 +247,7 @@
 				"description": "Photograph the label and fill in details automatically."
 			},
 			"photoRound": {
-				"description": "Photograph fridge, freezer or cupboard — inventory many items in one round."
+				"description": "Fridge, freezer or cupboard — add many items at once."
 			}
 		},
 		"photoPage": {
@@ -599,7 +600,7 @@
 		"sortExpiry": "Expiry date",
 		"tabsAria": "Storage locations",
 		"listAria": "Items in this location",
-		"photoRound": "Photo round",
+		"photoRound": "Add with photos",
 		"itemActionsNamed": "Actions for {name}",
 		"editItem": "Edit",
 		"quantityLeft": "{amount} left"
@@ -1134,7 +1135,7 @@
 		"scanLink": "Scan"
 	},
 	"photoRound": {
-		"title": "Photo round",
+		"title": "Add with photos",
 		"subtitle": "Photograph fridge, freezer or cupboard — review and save",
 		"zoneLead": "Pick where to inventory. Take 1–3 photos per zone.",
 		"zoneAria": "Choose storage location",
@@ -1149,7 +1150,7 @@
 		"uploadTooLarge": "Photos are too large together (max 18 MB). Remove a photo or use smaller images.",
 		"serverError": "The server could not analyze the photos. Try again in a moment.",
 		"noItems": "No visible items found. Try more angles or better lighting.",
-		"networkError": "Network error during photo round.",
+		"networkError": "Network error during photo scan.",
 		"reviewTitle": "Review ({selected} of {total})",
 		"reviewHint": "Remove wrong rows and adjust name, quantity and location before saving.",
 		"fieldName": "Name",
@@ -1159,7 +1160,7 @@
 		"confidenceHigh": "high confidence",
 		"confidenceMedium": "medium confidence",
 		"confidenceLow": "low confidence",
-		"newRound": "New photo round",
+		"newRound": "Scan again",
 		"saving": "Saving items…",
 		"addCount": "Add {count} {count, plural, one {item} other {items}}"
 	},
@@ -1486,7 +1487,7 @@
 			"confirm": "Discard and choose new image"
 		},
 		"photoRoundReview": {
-			"title": "Cancel photo round?",
+			"title": "Cancel photo scan?",
 			"description": "{count} {count, plural, one {item will be lost} other {items will be lost}} from the review list.",
 			"descriptionEmpty": "The review list will be cleared.",
 			"consequence": "You will need to photograph the zone again.",

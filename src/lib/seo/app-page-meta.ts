@@ -18,7 +18,7 @@ function suffix(): string {
 /** Human-readable document title for authenticated app routes. */
 export function resolveAppPageTitle(pathname: string, locale: Locale): string {
 	if (pathname === APP_HOME_PATH) {
-		return translate(locale, 'dashboard.title') + suffix();
+		return translate(locale, 'home.title') + suffix();
 	}
 	if (pathname.startsWith('/inventory/')) {
 		const segment = pathname.split('/')[2];
