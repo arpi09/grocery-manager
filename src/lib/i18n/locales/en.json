@@ -373,7 +373,7 @@
 				"serviceWorkerUnavailable": "Install the app to your home screen or use production (service worker missing). Try /install-app or skaffu.com.",
 				"denied": "Notifications were blocked. Allow notifications in your browser settings.",
 				"notConfigured": "Push notifications are not configured on the server yet.",
-				"failed": "Could not enable notifications. Try again."
+				"failed": "Could not update notifications. Try again."
 			}
 		},
 		"shoppingPush": {

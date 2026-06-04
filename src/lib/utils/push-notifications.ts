@@ -1,8 +1,24 @@
 import { getLocale } from '$lib/i18n';
 import { translate } from '$lib/i18n/messages';
 
-const SERVICE_WORKER_REGISTER_WAIT_MS = 4_000;
-const SERVICE_WORKER_READY_TIMEOUT_MS = 8_000;
+const SERVICE_WORKER_REGISTER_WAIT_MS = 6_000;
+const SERVICE_WORKER_READY_TIMEOUT_MS = 12_000;
+
+let serviceWorkerRegistrationStarted = false;
+
+function startServiceWorkerRegistration(): void {
+	if (!isPushSupported() || serviceWorkerRegistrationStarted) {
+		return;
+	}
+	serviceWorkerRegistrationStarted = true;
+	void import('virtual:pwa-register')
+		.then(({ registerSW }) => {
+			registerSW({ immediate: true });
+		})
+		.catch(() => {
+			serviceWorkerRegistrationStarted = false;
+		});
+}
 
 export function isPushSupported(): boolean {
 	if (typeof window === 'undefined') {
@@ -16,6 +32,8 @@ export function isPushSupported(): boolean {
 }
 
 async function waitForServiceWorkerRegistration(): Promise<boolean> {
+	startServiceWorkerRegistration();
+
 	const deadline = Date.now() + SERVICE_WORKER_REGISTER_WAIT_MS;
 	while (Date.now() < deadline) {
 		const existing = await navigator.serviceWorker.getRegistration();
@@ -69,7 +87,10 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 	return output;
 }
 
-async function postPushJson<T>(url: string, body: unknown): Promise<{ ok: true; data: T } | { ok: false; status: number }> {
+async function postPushJson<T>(
+	url: string,
+	body: unknown = {}
+): Promise<{ ok: true; data: T } | { ok: false; status: number }> {
 	const response = await fetch(url, {
 		method: 'POST',
 		credentials: 'same-origin',
@@ -105,6 +126,36 @@ export type PushSubscribeFailureReason =
 	| 'failed';
 
 export type PushSubscribeResult = { ok: true } | { ok: false; reason: PushSubscribeFailureReason };
+
+async function disablePushOnServer(): Promise<PushSubscribeResult> {
+	const response = await postPushJson<{ ok?: boolean }>('/api/push/disable');
+	if (!response.ok) {
+		return { ok: false, reason: response.status === 503 ? 'not_configured' : 'failed' };
+	}
+	if (response.data.ok !== true) {
+		return { ok: false, reason: 'failed' };
+	}
+	return { ok: true };
+}
+
+/** Best-effort: drop browser push subscription without waiting for SW ready. */
+async function unsubscribeBrowserPush(): Promise<void> {
+	if (!isPushSupported()) {
+		return;
+	}
+
+	try {
+		const registration = await navigator.serviceWorker.getRegistration();
+		const subscription = registration
+			? await registration.pushManager.getSubscription()
+			: null;
+		if (subscription) {
+			await subscription.unsubscribe();
+		}
+	} catch {
+		// Browser cleanup is optional; server disable is authoritative.
+	}
+}
 
 export async function subscribeToExpiryPush(): Promise<PushSubscribeResult> {
 	if (!isPushSupported()) {
@@ -154,23 +205,13 @@ export async function subscribeToExpiryPush(): Promise<PushSubscribeResult> {
 	}
 }
 
-export async function unsubscribeFromExpiryPush(): Promise<void> {
+export async function unsubscribeFromExpiryPush(): Promise<PushSubscribeResult> {
 	if (!isPushSupported()) {
-		return;
+		return disablePushOnServer();
 	}
 
-	const registration = await getPushServiceWorkerRegistration();
-	if (!registration) {
-		return;
-	}
-
-	const subscription = await registration.pushManager.getSubscription();
-	if (!subscription) {
-		return;
-	}
-
-	await postPushJson('/api/push/unsubscribe', { endpoint: subscription.endpoint });
-	await subscription.unsubscribe();
+	await unsubscribeBrowserPush();
+	return disablePushOnServer();
 }
 
 /** Re-register an existing browser subscription with the server (e.g. after reload drift). */

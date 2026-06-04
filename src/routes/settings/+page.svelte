@@ -76,13 +76,20 @@
 		if (data.autoExpiredGraceDays !== null) {
 			autoExpiredGraceDays = String(data.autoExpiredGraceDays);
 		}
-		pushNotificationsEnabled = data.pushNotificationsEnabled;
+		if (!pushNotificationsSubmitting) {
+			pushNotificationsEnabled = data.pushNotificationsEnabled;
+		}
 		shoppingPushEnabled = data.shoppingPushEnabled;
 	});
 
 	$effect(() => {
 		if (browser) {
 			pushSupported = isPushSupported();
+			if (pushSupported) {
+				void import('virtual:pwa-register').then(({ registerSW }) => {
+					registerSW({ immediate: true });
+				});
+			}
 		}
 	});
 
@@ -166,7 +173,12 @@
 				pushToastMessage = t('actionToast.pushEnabled');
 				await invalidateAll();
 			} else {
-				await unsubscribeFromExpiryPush();
+				const result = await unsubscribeFromExpiryPush();
+				if (!result.ok) {
+					pushNotificationsError = pushErrorMessage(result.reason);
+					pushNotificationsEnabled = data.pushNotificationsEnabled;
+					return;
+				}
 				pushNotificationsEnabled = false;
 				pushToastMessage = t('actionToast.pushDisabled');
 				await invalidateAll();

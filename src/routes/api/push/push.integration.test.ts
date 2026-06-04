@@ -49,6 +49,7 @@ vi.mock('$env/dynamic/private', () => ({
 import { GET as getVapidPublicKey } from './vapid-public-key/+server';
 import { POST as subscribe } from './subscribe/+server';
 import { POST as unsubscribe } from './unsubscribe/+server';
+import { POST as disable } from './disable/+server';
 
 const TEST_PUBLIC_KEY =
 	'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjXuR2Y1Y2b0J5Q2Y1Y2b0J5Q2Y1Y2b0';
@@ -195,6 +196,42 @@ describe('Push API integration', () => {
 				}),
 				locals: { user: { id: 'user-1' } } as App.Locals
 			} as Parameters<typeof unsubscribe>[0]);
+
+			expect(response.status).toBe(200);
+			await expect(response.json()).resolves.toEqual({ ok: true });
+			expect(await repository.listByUserId('user-1')).toHaveLength(0);
+			expect(await repository.isPushEnabled('user-1')).toBe(false);
+		});
+	});
+
+	describe('POST /api/push/disable', () => {
+		it('returns 401 when unauthenticated', async () => {
+			await expect(
+				disable({
+					request: new Request('http://localhost/api/push/disable', { method: 'POST' }),
+					locals: { user: null } as App.Locals
+				} as Parameters<typeof disable>[0])
+			).rejects.toMatchObject({ status: 401 });
+		});
+
+		it('returns 200 and clears all subscriptions without endpoint', async () => {
+			await integrationDb.seedUser({ id: 'user-1' });
+			await repository.upsert('user-1', {
+				endpoint: TEST_ENDPOINT,
+				p256dh: 'p256dh-key',
+				auth: 'auth-key'
+			});
+			await repository.upsert('user-1', {
+				endpoint: 'https://push.example.com/subscription/integration-2',
+				p256dh: 'p256dh-key-2',
+				auth: 'auth-key-2'
+			});
+			await repository.setPushEnabled('user-1', true);
+
+			const response = await disable({
+				request: new Request('http://localhost/api/push/disable', { method: 'POST' }),
+				locals: { user: { id: 'user-1' } } as App.Locals
+			} as Parameters<typeof disable>[0]);
 
 			expect(response.status).toBe(200);
 			await expect(response.json()).resolves.toEqual({ ok: true });

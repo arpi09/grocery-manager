@@ -341,7 +341,7 @@
 				"serviceWorkerUnavailable": "Appen måste vara installerad på hemskärmen eller köras i produktion (service worker saknas). Prova /install-app eller öppna skaffu.com.",
 				"denied": "Notiser blockerades. Tillåt notiser i webbläsarinställningarna.",
 				"notConfigured": "Push-notiser är inte konfigurerade på servern ännu.",
-				"failed": "Kunde inte aktivera notiser. Försök igen."
+				"failed": "Kunde inte ändra notiser. Försök igen."
 			}
 		},
 		"shoppingPush": {
