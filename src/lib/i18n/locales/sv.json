@@ -68,6 +68,7 @@
 		"shopping": "Inköp",
 		"plans": "Planer",
 		"stats": "Statistik",
+		"news": "Nyheter",
 		"settings": "Inställningar",
 		"pets": "Husdjur",
 		"admin": "Admin",
@@ -1650,6 +1651,35 @@
 		"customLabel": "Egen mängd",
 		"customPlaceholder": "t.ex. 50",
 		"confirm": "Logga förbrukning"
+	},
+	"news": {
+		"title": "Nyheter",
+		"subtitle": "Det senaste i Skaffu — steg för steg framåt",
+		"lead": "Följ banan genom nya funktioner och förbättringar. Vi bygger vidare så skafferiet ska kännas enklare varje vecka.",
+		"metaDescription": "Senaste nytt och uppdateringar i Skaffu — nya funktioner för skannning, recept, onboarding och mer.",
+		"trailAria": "Tidslinje med produktnyheter",
+		"items": {
+			"inventoryTable": {
+				"title": "Tydligare översikt i skafferiet",
+				"body": "Sortera, filtrera och hantera varor i en kompakt tabell — perfekt när lagret växer och du vill se allt på en gång."
+			},
+			"scanUx": {
+				"title": "Snabbare in med foto och kvitto",
+				"body": "Förbättrad skanningshubb med tydligare flöde — fota, skanna streckkod eller kvitto utan att tappa tråden."
+			},
+			"recipeModal": {
+				"title": "Receptidéer som känns klara",
+				"body": "Ny receptvy med steg, portioner och ingredienser — välj rätt rätt direkt utifrån det du har hemma."
+			},
+			"onboarding": {
+				"title": "Kom igång med glädje",
+				"body": "Kortare guide som tar dig från välkommen till första varan — med animationer som firar din start."
+			},
+			"pushFix": {
+				"title": "Notiser som faktiskt fungerar",
+				"body": "Pålitlig aktivering av webbläsarnotiser i inställningarna — utgående varor och inköp når dig i rätt tid."
+			}
+		}
 	},
 	"email": {
 		"inviteWarning": {

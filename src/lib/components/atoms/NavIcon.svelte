@@ -37,6 +37,10 @@
 	{:else if id === 'chart'}
 		<path d="M4 19V5M4 19h16" />
 		<path d="M8 17V11M12 17V7M16 17v-4" />
+	{:else if id === 'news'}
+		<path d="M6 8h12v10a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V8Z" />
+		<path d="M8 4h8v4H8V4Z" />
+		<path d="M9 12h6M9 15h4" />
 	{:else if id === 'settings'}
 		<circle cx="12" cy="12" r="3" />
 		<path

@@ -44,6 +44,8 @@ export const ROBOTS_DISALLOW_PREFIXES = [
 	'/husdjur',
 	'/invite',
 	'/install-app',
+	'/nyheter',
+	'/news',
 	'/logout'
 ] as const;
 

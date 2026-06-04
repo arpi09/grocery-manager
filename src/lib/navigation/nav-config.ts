@@ -7,6 +7,7 @@ export type NavIconId =
 	| 'shopping'
 	| 'calendar'
 	| 'chart'
+	| 'news'
 	| 'settings'
 	| 'paw'
 	| 'shield'
@@ -23,6 +24,7 @@ export type NavLabelKey = Extract<
 	| 'nav.shopping'
 	| 'nav.plans'
 	| 'nav.stats'
+	| 'nav.news'
 	| 'nav.pets'
 	| 'nav.admin'
 	| 'nav.more'
@@ -62,6 +64,7 @@ export const NAV_ITEMS: NavItem[] = [
 	{ href: '/inkop', labelKey: 'nav.shopping', icon: 'shopping', primary: true, match: 'prefix' },
 	{ href: '/planer', labelKey: 'nav.plans', icon: 'calendar', match: 'prefix' },
 	{ href: '/statistik', labelKey: 'nav.stats', icon: 'chart', match: 'prefix' },
+	{ href: '/nyheter', labelKey: 'nav.news', icon: 'news', match: 'prefix' },
 	{ href: '/husdjur', labelKey: 'nav.pets', icon: 'paw', requiresPets: true, match: 'prefix' },
 	{ href: '/admin', labelKey: 'nav.admin', icon: 'shield', roles: ['admin'], match: 'prefix' }
 ];

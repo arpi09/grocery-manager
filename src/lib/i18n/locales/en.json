@@ -68,6 +68,7 @@
 		"shopping": "Shopping",
 		"plans": "Plans",
 		"stats": "Statistics",
+		"news": "News",
 		"settings": "Settings",
 		"pets": "Pets",
 		"admin": "Admin",
@@ -1659,5 +1660,34 @@
 		"adminPasswordResetSent": "Password reset email sent",
 		"pushEnabled": "Browser notifications enabled",
 		"pushDisabled": "Browser notifications disabled"
+	},
+	"news": {
+		"title": "News",
+		"subtitle": "What's new in Skaffu — step by step forward",
+		"lead": "Follow the trail of new features and improvements. We keep building so your pantry feels easier every week.",
+		"metaDescription": "Latest news and updates in Skaffu — new features for scanning, recipes, onboarding and more.",
+		"trailAria": "Timeline of product news",
+		"items": {
+			"inventoryTable": {
+				"title": "Clearer pantry overview",
+				"body": "Sort, filter and manage items in a compact table — perfect when your stock grows and you want everything at a glance."
+			},
+			"scanUx": {
+				"title": "Faster capture with photo and receipt",
+				"body": "Improved scan hub with a clearer flow — photo, barcode or receipt without losing your place."
+			},
+			"recipeModal": {
+				"title": "Recipe ideas that feel ready",
+				"body": "New recipe view with steps, portions and ingredients — pick the right dish from what you already have at home."
+			},
+			"onboarding": {
+				"title": "Get started with a smile",
+				"body": "A shorter guide from welcome to your first items — with animations that celebrate your start."
+			},
+			"pushFix": {
+				"title": "Notifications that actually work",
+				"body": "Reliable browser notification toggles in settings — expiring items and shopping reminders reach you on time."
+			}
+		}
 	}
 }

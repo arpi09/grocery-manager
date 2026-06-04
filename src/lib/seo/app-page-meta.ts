@@ -37,6 +37,9 @@ export function resolveAppPageTitle(pathname: string, locale: Locale): string {
 	if (pathname.startsWith('/statistik')) {
 		return translate(locale, 'stats.title') + suffix();
 	}
+	if (pathname.startsWith('/nyheter') || pathname.startsWith('/news')) {
+		return translate(locale, 'news.title') + suffix();
+	}
 	if (pathname.startsWith('/settings')) {
 		return translate(locale, 'settings.title') + suffix();
 	}
