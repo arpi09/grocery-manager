@@ -18,7 +18,9 @@ test.describe('Shopping list', () => {
 
 		await row.locator('form[action="?/toggle"] input[type=checkbox]').click();
 		await expect(
-			page.locator('.toast-message').filter({ hasText: new RegExp(itemName, 'i') })
+			page
+				.locator('.toast-message')
+				.filter({ hasText: new RegExp(`${itemName} avbockad`, 'i') })
 		).toBeVisible({ timeout: 15_000 });
 		await expect(row).toHaveCount(0, { timeout: 15_000 });
 	});
