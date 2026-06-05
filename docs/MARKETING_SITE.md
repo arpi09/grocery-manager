@@ -17,7 +17,7 @@ The authenticated app dashboard moved from `/` to **`/hem`**. All other app rout
 
 Why this approach:
 
-- **Zero extra deploy** — same Firebase App Hosting build and pipeline (`release.yml` → `npm run build` → `firebase deploy --only apphosting:home-pantry`).
+- **Zero extra deploy** — same Firebase App Hosting build and pipeline (`deploy.yml` → `npm run build` → `firebase deploy --only apphosting:home-pantry`).
 - **Shared brand tokens** — reuses `src/app.css` and `docs/BRAND.md` (kitchen green `#3d6b4f`, warm background).
 - **Clean separation** — marketing uses `(marketing)/+layout.svelte` (header/footer, light theme); app uses `AppLayout` with nav shell.
 

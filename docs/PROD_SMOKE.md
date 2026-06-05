@@ -1,6 +1,6 @@
 # Produktionssmoke efter deploy
 
-Checklista för **Cursor coordinator och agenter** efter grön **Release** (G3-deploy, Firebase App Hosting). E2E och CI använder Turnstile-bypass — dessa steg verifierar **produktion** där captcha och push är skarpt konfigurerade.
+Checklista för **Cursor coordinator och agenter** efter grön **Deploy to production** (G3-deploy, Firebase App Hosting). E2E och CI använder Turnstile-bypass — dessa steg verifierar **produktion** där captcha och push är skarpt konfigurerade.
 
 **Användaren kör inte denna lista** i normal leverans; den är agents arbete. Mänsklig körning endast vid felsökning eller om coordinator ber om bekräftelse av en specifik avvikelse.
 
@@ -10,15 +10,15 @@ Checklista för **Cursor coordinator och agenter** efter grön **Release** (G3-d
 
 ## Agent post-deploy (mandatory for coordinator)
 
-Kör **efter** grön **Release** för merge-SHA. Räkna inte deploy som klar och säg inte "prod är live" till användaren utan lyckad Release-run **och** denna check (eller motsvarande täckning — se nedan).
+Kör **efter** grön **Deploy to production** för target-SHA. Räkna inte deploy som klar och säg inte "prod är live" till användaren utan lyckad deploy-run **och** denna check (eller motsvarande täckning — se nedan).
 
-1. **SHA** — Prod kör samma commit som den gröna Release-run (kort SHA i Actions).
+1. **SHA** — Prod kör samma commit som den gröna deploy-run (kort SHA i Actions).
 2. **Inloggning** — Logga in på prod; landar på `/hem` utan fel.
 3. **Scan** — `/scan`; foto-runda syns som primärt val (photo-first hub).
 4. **Recept** — Receptknapp i headern; modal öppnas och kan generera.
 5. **Inställningar** — `/settings`; e-postpåminnelser sparar utan fel.
 
-**CI E2E:** För kod-deploy täcker grön Release-E2E samma kritiska resor lokalt (Turnstile-bypass). Coordinator kör ändå 5-punktslistan på prod när deploy faktiskt skett. Vid auth/push/captcha-ändringar: utökad checklista nedan. Valfritt: browser MCP mot `https://skaffu.com` vid P0 eller nyligen rapporterade prod-buggar.
+**CI E2E:** För kod-deploy täcker grön deploy-workflow E2E samma kritiska resor lokalt (Turnstile-bypass). Coordinator kör ändå 5-punktslistan på prod när deploy faktiskt skett. Vid auth/push/captcha-ändringar: utökad checklista nedan. Valfritt: browser MCP mot `https://skaffu.com` vid P0 eller nyligen rapporterade prod-buggar.
 
 ---
 
@@ -62,6 +62,6 @@ Förväntat: HTTP 200 och JSON med `publicKey` när VAPID är konfigurerat.
 | Auth / Turnstile-ändring | Hela checklistan inkl. `/register` |
 | Push / VAPID-ändring | Settings push + `vapid-public-key` GET |
 | Kvitto / OpenAI-ändring | Valfri kvitto-rad ovan |
-| Endast docs/rules (ingen deploy) | Ingen prod-smoke — Release skippar deploy |
+| Endast docs/rules (ingen deploy) | Ingen prod-smoke — ingen deploy triggad |
 
 Dokumentera avvikelser i deploy-chat eller incident-notering. **Tilldela inte** checklistan till användaren som läxa.

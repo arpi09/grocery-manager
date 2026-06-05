@@ -1,0 +1,51 @@
+---
+description: Nightly E2E guard — fix red E2E on master, never auto-deploy
+alwaysApply: false
+---
+
+# Nightly E2E guard (Cursor Automation)
+
+When this rule applies (nightly Cursor Automation or coordinator delegated nightly fix), the agent **only** triages and fixes **E2E** failures on `master`. It does **not** release to production.
+
+## Scope
+
+| In scope | Out of scope |
+|----------|--------------|
+| Read latest **E2E** workflow run on `master` via `gh` | **Deploy to production** (`deploy.yml`) |
+| Minimal fix + push to `master` when nightly/scheduled E2E is red | `firebase deploy`, App Hosting release |
+| Local `npm run test:e2e` (or targeted spec) when feasible | PROD_SMOKE, prod browser checks |
+| Report green = OK, no push | `skip_e2e` deploy hotfixes |
+
+## Flow
+
+1. **Discover:** `gh run list --workflow=e2e.yml --branch=master --limit=5 --json databaseId,status,conclusion,headSha,event,createdAt,url`
+   - Prefer the latest run with `event == schedule` (nightly). If none today, use the most recent completed run on `master`.
+2. **Green (`conclusion == success`):** Reply briefly: SHA, run URL, "E2E OK — no changes."
+3. **Red or cancelled:** `gh run view <id> --log-failed` (or job logs). Identify failing Playwright spec(s).
+4. **Fix:** Checkout `master`, pull, minimal diff (test flake, selector, timing — not feature scope). Run `USE_PGLITE=true npm run test:e2e` locally when possible; at least the failing spec file.
+5. **Push:** Commit on `master`, `git push origin master`. Do **not** open a PR unless branch protection requires it.
+6. **Verify:** `gh run list --workflow=e2e.yml --branch=master --limit=1` — optional `workflow_dispatch` only if user/coordinator asked; do not wait hours in automation.
+
+## Forbidden (hard)
+
+- `gh workflow run deploy.yml` or any production deploy trigger
+- `firebase deploy`, `npm run deploy:firebase`, or claiming "deployed" / "prod is live"
+- Instructing the human to deploy or test production as homework
+- Large refactors unrelated to the failing E2E
+
+## Commands (reference)
+
+```bash
+gh run list --workflow=e2e.yml --branch=master --limit=5 --json databaseId,status,conclusion,headSha,event,url
+gh run view <run-id> --log-failed
+git fetch origin master && git checkout master && git pull --ff-only origin master
+USE_PGLITE=true npm run test:e2e
+git push origin master
+```
+
+## Related
+
+- [docs/CI_CD.md](../../docs/CI_CD.md) — G2 nightly schedule (03:00 UTC)
+- [docs/DEPLOY.md](../../docs/DEPLOY.md) — deploy is manual / coordinator on request only
+- [delivery-done.mdc](./delivery-done.mdc) — no deploy claims without Deploy workflow + smoke
+- [deploy-on-request.mdc](./deploy-on-request.mdc) — separate path when user asks to deploy

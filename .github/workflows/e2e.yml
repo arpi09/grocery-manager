@@ -1,0 +1,165 @@
+# E2E on PRs, manual trigger, or nightly — not on every master push
+# Full deploy pipeline: Actions → "Deploy to production"
+
+name: E2E
+
+on:
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *'
+
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    outputs:
+      source: ${{ steps.filter.outputs.source }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            source:
+              - '**'
+              - '!docs/**'
+              - '!**/*.md'
+              - '!.cursor/**'
+
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+      - run: npm run check:locales
+      - run: npm run check
+        env:
+          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+      - run: npm test
+      - run: npm run test:receipt-fixtures
+      - run: npm run test:integration
+        env:
+          USE_PGLITE: 'true'
+      - run: npm run build
+        env:
+          DATABASE_URL: postgresql://pantry:pantry@localhost:5432/pantry
+          USE_PGLITE: 'true'
+          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sveltekit-build
+          path: build/
+          retention-days: 1
+
+  e2e:
+    name: e2e
+    needs: [quality, changes]
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'schedule' ||
+      needs.changes.outputs.source == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: sveltekit-build
+          path: build/
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - run: npm run test:e2e
+        env:
+          USE_PGLITE: 'true'
+          ADMIN_EMAIL: e2e-admin@example.com
+          ADMIN_PASSWORD: e2e-ci-password
+          PUBLIC_ORIGIN: http://localhost:5190
+          PLAYWRIGHT_PORT: '5190'
+          TURNSTILE_SKIP: 'true'
+          TURNSTILE_BYPASS: 'true'
+          EMAIL_VERIFICATION_SKIP: 'true'
+          E2E_MOCK_AI: 'true'
+          PUBLIC_E2E_DISABLE_POST_SURVEY: 'true'
+          CI: 'true'
+
+      - name: Notify E2E failure (optional)
+        if: failure() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+        continue-on-error: true
+        env:
+          WEBHOOK_URL: ${{ secrets.DEPLOY_NOTIFY_WEBHOOK_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.DEPLOY_TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.DEPLOY_TELEGRAM_CHAT_ID }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${WEBHOOK_URL:-}" ] && [ -z "${TELEGRAM_BOT_TOKEN:-}" ]; then
+            echo "No notify secrets configured — skipping."
+            exit 0
+          fi
+
+          short_sha="${GITHUB_SHA:0:7}"
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          msg="Skaffu E2E misslyckades (${short_sha})"
+          msg=$(printf '%s\n%s' "$msg" "$run_url")
+
+          if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
+            payload=$(jq -n --arg chat_id "$TELEGRAM_CHAT_ID" --arg text "$msg" \
+              '{chat_id: $chat_id, text: $text, disable_web_page_preview: true}')
+            curl --fail-with-body -sS -X POST \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "$payload"
+          elif [ -n "${WEBHOOK_URL:-}" ]; then
+            if [[ "$WEBHOOK_URL" == *"ntfy.sh"* ]]; then
+              curl --fail-with-body -sS -X POST "$WEBHOOK_URL" \
+                -H "Title: Skaffu E2E misslyckades" \
+                -H "Tags: rotating_light" \
+                -d "$msg"
+            else
+              payload=$(jq -n --arg text "$msg" '{text: $text}')
+              curl --fail-with-body -sS -X POST "$WEBHOOK_URL" \
+                -H "Content-Type: application/json" \
+                -d "$payload"
+            fi
+          fi
