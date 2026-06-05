@@ -155,7 +155,7 @@
 				<p class="pro-badge label-caps">{t('stats.proBadge')}</p>
 				<h2>{t('stats.proTitle')}</h2>
 				<p class="muted">{t('stats.proLead')}</p>
-				<a href="/priser">{t('settings.plan.learnMore')}</a>
+				<a href="/settings#plan-upgrade">{t('proUpgrade.cta')}</a>
 			</Card>
 		{/if}
 	{/if}

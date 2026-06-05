@@ -11,12 +11,12 @@
 </script>
 
 {#if variant === 'nav'}
-	<a href="/priser" class="pro-upgrade-nav {className}">
+	<a href="/settings#plan-upgrade" class="pro-upgrade-nav {className}">
 		<span class="nav-badge">{t('proUpgrade.navBadge')}</span>
 		<span class="nav-cta">{t('proUpgrade.cta')}</span>
 	</a>
 {:else if variant === 'banner'}
-	<a href="/priser" class="pro-upgrade-banner {className}">
+	<a href="/settings#plan-upgrade" class="pro-upgrade-banner {className}">
 		<span class="banner-badge label-caps">
 			<Sparkles size={14} strokeWidth={2} aria-hidden="true" />
 			{t('proUpgrade.navBadge')}
@@ -28,7 +28,7 @@
 		<span class="banner-cta">{t('proUpgrade.cta')}</span>
 	</a>
 {:else}
-	<a href="/priser" class="pro-upgrade-card {className}">
+	<a href="/settings#plan-upgrade" class="pro-upgrade-card {className}">
 		<span class="card-badge label-caps">
 			<Sparkles size={14} strokeWidth={2} aria-hidden="true" />
 			{t('proUpgrade.navBadge')}

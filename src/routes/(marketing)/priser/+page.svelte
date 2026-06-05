@@ -9,7 +9,7 @@
 
 	const pricing = getPricingContent(data.marketingLocale as MarketingLocale);
 	const { marketing: content, loginUrl, registerUrl, canonicalUrl, marketingLocale } = data;
-	const upgradeUrl = '/settings#settings-plan';
+	const upgradeUrl = '/settings#plan-upgrade';
 </script>
 
 <MarketingSeoHead
