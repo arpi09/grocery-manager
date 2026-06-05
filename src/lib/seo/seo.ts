@@ -6,6 +6,12 @@ export const SITE_NAME = 'Skaffu';
 /** Default Open Graph / Twitter image (absolute URL built at render time). PNG for LinkedIn/social crawlers. */
 export const OG_IMAGE_PATH = '/og-skaffu.png';
 
+/**
+ * Bump when replacing static/og-skaffu.png so LinkedIn/Twitter refetch cached previews.
+ * LinkedIn does not render SVG og:image — v2 switched from og-skaffu.svg to PNG (PR #7).
+ */
+export const OG_IMAGE_VERSION = '2';
+
 /** LinkedIn / OG recommended dimensions (matches static/og-skaffu.png). */
 export const OG_IMAGE_WIDTH = 1200;
 export const OG_IMAGE_HEIGHT = 630;
@@ -50,7 +56,8 @@ export const ROBOTS_DISALLOW_PREFIXES = [
 ] as const;
 
 export function marketingOgImageUrl(requestOrigin?: string): string {
-	return `${resolveAppOrigin(requestOrigin)}${OG_IMAGE_PATH}`;
+	const origin = resolveAppOrigin(requestOrigin);
+	return `${origin}${OG_IMAGE_PATH}?v=${OG_IMAGE_VERSION}`;
 }
 
 export function sitemapAbsoluteUrl(path: string, requestOrigin?: string): string {
@@ -132,7 +139,7 @@ export function buildLandingJsonLd(
 			'@type': 'Organization',
 			name: SITE_NAME,
 			url: origin,
-			logo: `${origin}${OG_IMAGE_PATH}`,
+			logo: marketingOgImageUrl(origin),
 			email: 'hello@skaffu.com',
 			description
 		}

@@ -5,6 +5,7 @@
 	import MarketingHeader from '$lib/components/marketing/MarketingHeader.svelte';
 	import { initLocale, type Locale } from '$lib/i18n';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
+	import { t } from '$lib/i18n';
 
 	let { children, data } = $props();
 
@@ -30,6 +31,7 @@
 </script>
 
 <div class="marketing-shell">
+	<a href="#main-content" class="skip-to-main">{t('a11y.skipToContent')}</a>
 	<MarketingHeader
 		content={data.marketing}
 		loginUrl={data.loginUrl}
@@ -37,7 +39,7 @@
 		{isLoggedIn}
 		currentPath={page.url.pathname}
 	/>
-	<main class="marketing-main">
+	<main id="main-content" class="marketing-main" tabindex="-1">
 		{@render children()}
 	</main>
 	<MarketingFooter content={data.marketing} loginUrl={data.loginUrl} />
@@ -45,6 +47,7 @@
 
 <style>
 	.marketing-shell {
+		position: relative;
 		min-height: 100dvh;
 		display: flex;
 		flex-direction: column;
@@ -55,5 +58,10 @@
 
 	.marketing-main {
 		flex: 1;
+		scroll-margin-top: var(--header-height-desktop);
+	}
+
+	.marketing-main:focus {
+		outline: none;
 	}
 </style>

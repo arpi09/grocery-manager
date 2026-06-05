@@ -71,9 +71,11 @@ describe('marketingOgImageUrl', () => {
 		mockPublicEnv.PUBLIC_ORIGIN = 'https://skaffu.com';
 	});
 
-	it('returns absolute HTTPS PNG path for social crawlers', () => {
+	it('returns absolute HTTPS PNG path with cache-bust version for social crawlers', () => {
 		expect(OG_IMAGE_PATH).toBe('/og-skaffu.png');
-		expect(marketingOgImageUrl('https://skaffu.com')).toBe('https://skaffu.com/og-skaffu.png');
+		expect(marketingOgImageUrl('https://skaffu.com')).toBe(
+			'https://skaffu.com/og-skaffu.png?v=2'
+		);
 	});
 });
 

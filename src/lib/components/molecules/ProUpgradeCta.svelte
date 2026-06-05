@@ -70,12 +70,8 @@
 		display: inline-flex;
 		padding: 0.1rem 0.4rem;
 		border-radius: 999px;
-		color: var(--color-on-primary, #fff);
-		background: linear-gradient(
-			120deg,
-			var(--color-primary),
-			color-mix(in srgb, var(--color-primary) 65%, #6d28d9)
-		);
+		color: var(--color-on-primary);
+		background: var(--color-primary-hover);
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
 	}
@@ -159,7 +155,7 @@
 
 	.card-lead {
 		font-size: 0.8125rem;
-		color: var(--color-text-muted);
+		color: var(--color-text);
 		line-height: 1.45;
 	}
 </style>

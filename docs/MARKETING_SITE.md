@@ -210,7 +210,7 @@ Keywords in Swedish copy include **skafferi-app** and **minska matsvinn**. Engli
 | `/sitemap.xml` | Dynamic sitemap — `/`, `/funktioner`, `/sa-fungerar-det`, `/faq`, `/priser`, `/privacy`, `/login`, `/register` (not `/hem`) |
 | `/robots.txt` | Allow `/`; disallow `/admin`, `/api/`, `/hem`, `/settings`, `/inventory`, `/inkop`, `/planer`, `/statistik`, `/scan`, `/profile`, `/item`, `/husdjur`, `/invite`, `/install-app`, `/logout`; `Sitemap:` points to canonical origin |
 
-OG image: `/og-skaffu.png` (1200×630; regenerate from SVG with `npm run generate:og-image`). Absolute URL via `PUBLIC_ORIGIN`. Use PNG — LinkedIn does not preview SVG `og:image`.
+OG image: `/og-skaffu.png` (1200×630; regenerate from SVG with `npm run generate:og-image`). Absolute URL via `PUBLIC_ORIGIN`, with `?v=` cache-bust (`OG_IMAGE_VERSION` in `src/lib/seo/seo.ts`). Use PNG — LinkedIn does not preview SVG `og:image`. After deploy, refresh LinkedIn cache via [Post Inspector](https://www.linkedin.com/post-inspector/) (see [LINKEDIN_LAUNCH.md](./LINKEDIN_LAUNCH.md)).
 
 PWA manifest (`static/manifest.webmanifest`): name/description aligned with Skaffu brand.
 

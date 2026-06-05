@@ -3,6 +3,7 @@
 	import LanguageSwitcher from '$lib/components/molecules/LanguageSwitcher.svelte';
 	import LoginLandingShowcase from '$lib/components/molecules/LoginLandingShowcase.svelte';
 	import type { Snippet } from 'svelte';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		formTitle: string;
@@ -17,7 +18,8 @@
 		$props();
 </script>
 
-<main class="landing">
+<main id="main-content" class="landing" tabindex="-1">
+	<a href="#main-content" class="skip-to-main">{t('a11y.skipToContent')}</a>
 	<div class="lang-bar">
 		<LanguageSwitcher compact />
 	</div>
@@ -50,10 +52,15 @@
 		display: flex;
 		flex-direction: column;
 		position: relative;
+		scroll-margin-top: var(--space-md);
 		background:
 			radial-gradient(ellipse 120% 80% at 10% -10%, color-mix(in srgb, var(--color-primary) 12%, transparent), transparent 55%),
 			radial-gradient(ellipse 90% 60% at 100% 0%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 50%),
 			linear-gradient(165deg, color-mix(in srgb, var(--color-surface-muted) 70%, var(--color-bg)) 0%, var(--color-bg) 45%, var(--color-bg) 100%);
+	}
+
+	.landing:focus {
+		outline: none;
 	}
 
 	@media (max-width: 899px) {

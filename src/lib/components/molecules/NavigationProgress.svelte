@@ -196,7 +196,7 @@
 
 {#if visible}
 
-	<div class="navigation-progress" aria-hidden="false">
+	<div class="navigation-progress" aria-hidden="true">
 
 		<div
 

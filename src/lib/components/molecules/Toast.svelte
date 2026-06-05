@@ -33,6 +33,9 @@
 	let show = $state(visible);
 	let paused = $state(false);
 
+	const toastRole = $derived(variant === 'error' ? 'alert' : 'status');
+	const toastLive = $derived(variant === 'error' ? 'assertive' : 'polite');
+
 	$effect(() => {
 		show = visible;
 	});
@@ -81,8 +84,8 @@
 		class:toast-info={variant === 'info'}
 		class:toast-action={size === 'action'}
 		class:toast-tappable={tapToDismiss && !!onDismiss}
-		role="status"
-		aria-live="polite"
+		role={toastRole}
+		aria-live={toastLive}
 		onclick={handleToastClick}
 		onpointerenter={handlePointerEnter}
 		onpointerleave={handlePointerLeave}

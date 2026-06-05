@@ -11,7 +11,11 @@
 
 	const activeLocale = $derived(getLocale());
 	const activeIndex = $derived(LOCALES.indexOf(activeLocale));
-	const ariaLabel = $derived(t('settings.language.label'));
+	const groupLabel = $derived(t('settings.language.label'));
+
+	function localeButtonLabel(locale: Locale): string {
+		return locale === 'sv' ? t('a11y.languageSv') : t('a11y.languageEn');
+	}
 
 	async function selectLocale(locale: Locale) {
 		if (locale === activeLocale) return;
@@ -24,7 +28,7 @@
 	class={['lang-switch', compact ? 'lang-switch--compact' : '', className].filter(Boolean).join(' ')}
 	style={`--active-index: ${activeIndex}`}
 	role="group"
-	aria-label={ariaLabel}
+	aria-label={groupLabel}
 	data-testid="language-switcher"
 >
 	<span class="lang-thumb" aria-hidden="true"></span>
@@ -32,7 +36,8 @@
 		<button
 			type="button"
 			class={['lang-btn', activeLocale === locale ? 'active' : ''].filter(Boolean).join(' ')}
-			aria-pressed={activeLocale === locale}
+			aria-label={localeButtonLabel(locale)}
+			aria-current={activeLocale === locale ? 'true' : undefined}
 			data-testid={`locale-${locale}`}
 			onclick={() => selectLocale(locale)}
 		>

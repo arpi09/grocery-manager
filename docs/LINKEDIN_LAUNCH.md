@@ -199,6 +199,21 @@ skaffu.com — skapa konto och testa EN grej (scan eller kvitto).
 
 ---
 
+## Förhandsbild (og:image) — projekt, inlägg och utvald länk
+
+Sajten serverar **PNG** (`/og-skaffu.png`, 1200×630) som absolut HTTPS-URL i `og:image` via `MarketingSeoHead` på `/` och övriga marketing-sidor. LinkedIn läser **inte** SVG — tidigare pekade meta på `og-skaffu.svg`, vilket gav tom/miniatyr.
+
+**Efter deploy:** LinkedIn cachar länkförhandsgranskning länge. Uppdatera inte bara projektet i UI — kör först:
+
+1. Öppna [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/)
+2. Klistra in `https://skaffu.com` och klicka **Inspect**
+3. Bekräfta att förhandsbilden visas (grön Skaffu-banner)
+4. Spara om LinkedIn-projektet / utvald länk om miniatyren fortfarande är gammal
+
+Om miniatyren saknas trots Inspector: kontrollera att `og:image` i HTML är `https://skaffu.com/og-skaffu.png?v=…` och att bilden svarar `200` utan inloggning.
+
+---
+
 ## Relaterat i repot
 
 - [BETA_TESTER_GUIDE.md](./BETA_TESTER_GUIDE.md) — vad testare ska göra  

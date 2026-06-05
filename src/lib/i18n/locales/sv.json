@@ -58,6 +58,11 @@
 		"date": "Datum",
 		"titleField": "Titel"
 	},
+	"a11y": {
+		"skipToContent": "Hoppa till innehåll",
+		"languageSv": "Svenska",
+		"languageEn": "Engelska"
+	},
 	"cookieConsent": {
 		"message": "Vi använder cookies för inloggning och för att förbättra sidan.",
 		"privacyLink": "Läs integritetspolicyn",

@@ -51,6 +51,7 @@
 		<button
 			type="button"
 			class="menu-toggle"
+			aria-label={content.header.menuToggle}
 			aria-expanded={menuOpen}
 			aria-controls="marketing-mobile-nav"
 			onclick={() => (menuOpen = !menuOpen)}

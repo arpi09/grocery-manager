@@ -27,6 +27,7 @@
 	} from '$lib/utils/onboarding';
 	import type { NavUser } from '$lib/navigation/nav-config';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		children: Snippet;
@@ -107,8 +108,9 @@
 <AppSeoHead {locale} />
 
 <div class="app">
+	<a href="#main-content" class="skip-to-main">{t('a11y.skipToContent')}</a>
 	<MainNav {user} {households} {activeHousehold} onRecipeIdeas={openRecipeIdeas} />
-	<main>
+	<main id="main-content" tabindex="-1">
 		{#if showDemoBanner}
 			<DemoAccountBanner />
 		{/if}
@@ -135,6 +137,7 @@
 
 <style>
 	.app {
+		position: relative;
 		min-height: 100vh;
 		width: 100%;
 		max-width: 100%;
@@ -158,6 +161,10 @@
 		main {
 			padding-bottom: var(--space-xl);
 			scroll-margin-top: var(--header-height-desktop);
+		}
+
+		main:focus {
+			outline: none;
 		}
 	}
 </style>

@@ -55,7 +55,7 @@
 			secondaryActionHref="/scan?mode=photo&from=/statistik"
 		/>
 	{:else}
-		<div class="hero-grid" role="list" aria-label={t('stats.heroLabel')}>
+		<div class="hero-grid" aria-label={t('stats.heroLabel')}>
 			<Card class="hero-card hero-primary">
 				<p class="hero-value">{analytics.totalItems}</p>
 				<p class="hero-label">{t('stats.itemsInPantry')}</p>

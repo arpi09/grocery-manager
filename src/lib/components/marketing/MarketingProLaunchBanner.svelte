@@ -141,7 +141,7 @@
 		font-weight: var(--font-weight-label);
 		letter-spacing: var(--letter-spacing-label);
 		text-transform: uppercase;
-		color: color-mix(in srgb, var(--color-primary) 75%, var(--color-text-muted));
+		color: var(--color-text-muted);
 	}
 
 	@media (max-width: 720px) {

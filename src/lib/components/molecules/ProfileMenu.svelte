@@ -228,8 +228,8 @@
 		width: 2.25rem;
 		height: 2.25rem;
 		border-radius: 999px;
-		background: color-mix(in srgb, var(--color-primary) 16%, var(--color-surface-muted));
-		color: var(--color-primary);
+		background: var(--color-surface-muted);
+		color: var(--color-primary-hover);
 		font-size: 0.9rem;
 		font-weight: 700;
 		letter-spacing: 0.02em;

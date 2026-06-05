@@ -115,13 +115,13 @@
 	}
 
 	.chip {
-		font-size: 0.65rem;
+		font-size: var(--font-size-label);
 		font-weight: 600;
 		padding: 0.2rem 0.55rem;
 		border-radius: 999px;
-		border: 1px solid color-mix(in srgb, var(--chip) 35%, var(--color-border));
-		color: var(--chip);
-		background: color-mix(in srgb, var(--chip) 10%, var(--color-surface));
+		border: 1px solid color-mix(in srgb, var(--chip) 40%, var(--color-border));
+		color: var(--color-text);
+		background: color-mix(in srgb, var(--chip) 18%, var(--color-surface));
 	}
 
 	.chip.fridge {
@@ -147,7 +147,7 @@
 		font-weight: var(--font-weight-label);
 		letter-spacing: var(--letter-spacing-label);
 		text-transform: uppercase;
-		color: color-mix(in srgb, var(--color-accent) 85%, var(--color-text));
+		color: var(--color-primary);
 	}
 
 	.eat-copy {
@@ -207,7 +207,7 @@
 	}
 
 	.date {
-		font-size: 0.65rem;
+		font-size: var(--font-size-label);
 		font-weight: 600;
 		color: var(--color-text-muted);
 		white-space: nowrap;

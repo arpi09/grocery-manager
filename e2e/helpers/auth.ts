@@ -332,13 +332,19 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 			message?: string;
 		} | null;
 		if (result?.type === 'redirect') {
-			await page.goto(result.location ?? '/hem');
+			await page.goto(result.location ?? '/hem', {
+				waitUntil: 'commit',
+				timeout: E2E_AUTH_NAV_TIMEOUT_MS
+			});
 		} else {
 			throw new Error(`Login failed: ${result?.message ?? JSON.stringify(result)}`);
 		}
 	} else if (status === 302 || status === 303) {
 		const location = loginResponse.headers()['location'] ?? '/hem';
-		await page.goto(location.startsWith('http') ? location : `${baseURL}${location}`);
+		await page.goto(location.startsWith('http') ? location : `${baseURL}${location}`, {
+			waitUntil: 'commit',
+			timeout: E2E_AUTH_NAV_TIMEOUT_MS
+		});
 	} else {
 		throw new Error(`Login action failed with HTTP ${status}`);
 	}

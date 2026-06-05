@@ -77,8 +77,8 @@
 		align-items: center;
 		padding: 0.1rem 0.4rem;
 		border-radius: 999px;
-		background: var(--color-accent);
-		color: #fff;
+		background: var(--color-primary-hover);
+		color: var(--color-on-primary);
 		font-size: 0.625rem;
 		font-weight: 800;
 		line-height: 1.2;

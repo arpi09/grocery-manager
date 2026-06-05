@@ -450,11 +450,12 @@
 	.scan-alt a {
 		font-weight: 600;
 		color: var(--color-primary);
-		text-decoration: none;
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
 	}
 
 	.scan-alt a:hover {
-		text-decoration: underline;
+		color: var(--color-primary-hover);
 	}
 
 	.readonly-hint,

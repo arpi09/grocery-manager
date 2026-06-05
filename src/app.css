@@ -4,12 +4,13 @@
 	--color-surface-muted: #eef2eb;
 	--color-border: #dde5d8;
 	--color-text: #1f2a24;
-	--color-text-muted: #5c6b62;
+	--color-text-muted: #4a5850;
 	--color-primary: #3d6b4f;
 	--color-primary-hover: #325a42;
 	--color-on-primary: #ffffff;
 	--color-accent: #c8a96e;
 	--color-danger: #b54a4a;
+	--color-warning: #9a6700;
 	--color-fridge: #4a8fb8;
 	--color-freezer: #6b7fd4;
 	--color-cupboard: #c17f4a;
@@ -84,6 +85,7 @@ html[data-theme='dark'] {
 	--color-on-primary: #ffffff;
 	--color-accent: #d4b57a;
 	--color-danger: #e07a7a;
+	--color-warning: #e8a317;
 	--color-fridge: #6eb0d4;
 	--color-freezer: #8b9de8;
 	--color-cupboard: #d99a62;
@@ -150,6 +152,29 @@ textarea {
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border: 0;
+}
+
+/* Skip link — visible on focus (WCAG 2.4.1) */
+.skip-to-main {
+	position: absolute;
+	left: var(--space-md);
+	top: calc(var(--space-sm) + env(safe-area-inset-top, 0));
+	z-index: 10001;
+	padding: var(--space-sm) var(--space-md);
+	background: var(--color-surface);
+	color: var(--color-primary);
+	border: 2px solid var(--color-primary);
+	border-radius: var(--radius-sm);
+	font-weight: 600;
+	font-size: var(--font-size-body-sm);
+	text-decoration: none;
+	transform: translateY(-250%);
+	transition: transform var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.skip-to-main:focus,
+.skip-to-main:focus-visible {
+	transform: translateY(0);
 }
 
 /* Shared modal/sheet scrim — use on Modal backdrop and aligned overlay dismiss layers */

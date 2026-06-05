@@ -140,6 +140,12 @@
 		color: var(--color-text-muted);
 	}
 
+	.footer a {
+		font-weight: 600;
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
+	}
+
 	@media (max-width: 899px) {
 		.footer {
 			margin-top: var(--space-md);

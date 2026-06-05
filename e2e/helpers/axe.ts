@@ -56,10 +56,25 @@ export async function analyzePageA11y(page: Page): Promise<AxeRouteResult> {
 }
 
 export async function expectNoCriticalOrSeriousViolations(page: Page, routeLabel: string) {
-	const summary = await analyzePageA11y(page);
+	await page.emulateMedia({ reducedMotion: 'reduce' });
+	const results = await new AxeBuilder({ page }).withTags([...AXE_WCAG_TAGS]).analyze();
+	const summary = summarizeViolations(results.violations);
 	const blocking = summary.violations.filter(
 		(v) => v.impact === 'critical' || v.impact === 'serious'
 	);
+
+	if (blocking.length > 0) {
+		const details = results.violations
+			.filter((v) => v.impact === 'critical' || v.impact === 'serious')
+			.flatMap((v) =>
+				v.nodes.map((node) => ({
+					rule: v.id,
+					html: node.html,
+					target: node.target
+				}))
+			);
+		console.log(`${routeLabel} axe blocking nodes:`, JSON.stringify(details, null, 2));
+	}
 
 	expect(
 		blocking,
