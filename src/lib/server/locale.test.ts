@@ -26,4 +26,13 @@ describe('resolveLocaleForRequest', () => {
 		const noHeader = new Request('https://example.com');
 		expect(resolveLocaleForRequest(mockCookies(undefined), noHeader)).toBe('sv');
 	});
+
+	it('defaults marketing paths to sv without cookie even when Accept-Language prefers en', () => {
+		const enRequest = new Request('https://example.com', {
+			headers: { 'accept-language': 'en-US,en;q=0.9' }
+		});
+		expect(
+			resolveLocaleForRequest(mockCookies(undefined), enRequest, { marketingPath: true })
+		).toBe('sv');
+	});
 });

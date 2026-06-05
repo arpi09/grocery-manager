@@ -1,6 +1,8 @@
 <script lang="ts">
 	import MarketingButtonLink from '$lib/components/marketing/MarketingButtonLink.svelte';
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
+	import MarketingPageHero from '$lib/components/marketing/MarketingPageHero.svelte';
+	import MarketingScrollReveal from '$lib/components/marketing/MarketingScrollReveal.svelte';
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
 	import { getPricingContent } from '$lib/marketing/pricing-content';
 	import type { MarketingLocale } from '$lib/marketing/content';
@@ -21,14 +23,13 @@
 	locale={marketingLocale}
 />
 
-<section class="page-hero">
-	<div class="inner">
-		<h1>{pricing.title}</h1>
-		<p>{pricing.lead}</p>
-		<p class="note pro-live">{pricing.proLiveNote}</p>
-	</div>
-</section>
+<MarketingPageHero>
+	<h1>{pricing.title}</h1>
+	<p>{pricing.lead}</p>
+	<p class="note pro-live">{pricing.proLiveNote}</p>
+</MarketingPageHero>
 
+<MarketingScrollReveal>
 <section class="section">
 	<div class="inner">
 		<table class="compare">
@@ -83,7 +84,9 @@
 		</p>
 	</div>
 </section>
+</MarketingScrollReveal>
 
+<MarketingScrollReveal delay={80}>
 <MarketingCta
 	title={content.landing.finalCtaTitle}
 	lead={content.landing.finalCtaLead}
@@ -92,29 +95,9 @@
 	secondaryLabel={content.cta.register}
 	secondaryHref={registerUrl}
 />
+</MarketingScrollReveal>
 
 <style>
-	.page-hero {
-		padding: var(--space-xl) var(--space-lg) var(--space-md);
-	}
-
-	.inner {
-		max-width: 42rem;
-		margin: 0 auto;
-	}
-
-	.page-hero h1 {
-		margin: 0;
-		font-size: var(--font-size-display);
-		font-weight: var(--font-weight-display);
-	}
-
-	.page-hero p {
-		margin: var(--space-md) 0 0;
-		color: var(--color-text-muted);
-		line-height: var(--line-height-body);
-	}
-
 	.note {
 		padding: var(--space-md);
 		border-radius: var(--radius-md);

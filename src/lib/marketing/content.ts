@@ -72,6 +72,11 @@ export interface MarketingContent {
 		ogDescription: string;
 	};
 	nav: MarketingNavLink[];
+	header: {
+		navAria: string;
+		navMobileAria: string;
+		menuToggle: string;
+	};
 	cta: {
 		openApp: string;
 		login: string;
@@ -79,9 +84,22 @@ export interface MarketingContent {
 		tryFree: string;
 	};
 	landing: {
+		heroDomainSuffix: string;
 		heroTitle: string;
 		heroLead: string;
 		heroSecondary: string;
+		heroHighlightsAria: string;
+		heroHighlights: {
+			barcode: string;
+			receipt: string;
+			storage: string;
+		};
+		statsAria: string;
+		seeAllFeatures: string;
+		wasteMeterLabel: string;
+		wasteMeterCaption: string;
+		comparisonKicker: string;
+		readHowItWorks: string;
 		stats: MarketingStat[];
 		differentiatorsTitle: string;
 		differentiatorsLead: string;
@@ -129,6 +147,7 @@ export interface MarketingContent {
 			ogDescription: string;
 		};
 		items: MarketingFaqItem[];
+		pricingLinkLabel: string;
 		contactLabel: string;
 		contactLead: string;
 		contactEmail: string;
@@ -157,6 +176,11 @@ const sv: MarketingContent = {
 		{ href: '/nyheter', label: 'Nyheter' },
 		{ href: '/privacy', label: 'Integritet' }
 	],
+	header: {
+		navAria: 'Webbplats',
+		navMobileAria: 'Webbplats mobil',
+		menuToggle: 'Meny'
+	},
 	cta: {
 		openApp: 'Öppna appen',
 		login: 'Logga in',
@@ -179,11 +203,24 @@ const sv: MarketingContent = {
 		ctaFree: 'Kom igång gratis'
 	},
 	landing: {
+		heroDomainSuffix: '· skaffu.com',
 		heroTitle: 'Skaffu — skafferiet du faktiskt har koll på.',
 		heroLead:
 			'Skanna in det du har hemma på sekunder. Se kyl, frys och skafferi på ett ställe — och ät det som går ut innan det blir matsvinn.',
 		heroSecondary:
 			'Lager som sanningskälla, kvitto-autopilot och inköpslista som fylls från det du faktiskt har — butiksneutralt, utan stammiskonto.',
+		heroHighlightsAria: 'Snabbstart',
+		heroHighlights: {
+			barcode: 'Streckkod',
+			receipt: 'Kvitto & foto',
+			storage: 'Kyl · frys · skafferi'
+		},
+		statsAria: 'Skaffu i siffror',
+		seeAllFeatures: 'Se alla funktioner',
+		wasteMeterLabel: 'Mindre matsvinn',
+		wasteMeterCaption: 'Ät det som går ut först — handla det som saknas.',
+		comparisonKicker: 'Jämfört med Bring & ICA',
+		readHowItWorks: 'Läs mer om hur det fungerar',
 		stats: [
 			{ value: '3', label: 'sätt att komma igång — streckkod, kvitto, foto' },
 			{ value: '1', label: 'gemensamt lager för hela hushållet' },
@@ -396,6 +433,7 @@ const sv: MarketingContent = {
 					'Ja. Öppna appen i Safari (iPhone) eller Chrome (Android) och välj Lägg till på hemskärmen / Installera app. I appen under Inställningar → Lägg till på hemskärmen finns steg-för-steg-guide. På dator fungerar appen i webbläsaren.'
 			}
 		],
+		pricingLinkLabel: 'Priser & planer',
 		contactLabel: 'Hittar du inte svaret?',
 		contactLead: 'Skriv till oss så återkommer vi så snart vi kan.',
 		contactEmail: 'hello@skaffu.com'
@@ -424,6 +462,11 @@ const en: MarketingContent = {
 		{ href: '/nyheter', label: 'News' },
 		{ href: '/privacy', label: 'Privacy' }
 	],
+	header: {
+		navAria: 'Site',
+		navMobileAria: 'Site mobile',
+		menuToggle: 'Menu'
+	},
 	cta: {
 		openApp: 'Open app',
 		login: 'Log in',
@@ -478,11 +521,24 @@ const en: MarketingContent = {
 		ctaLead: 'Open the app or log in — start with one receipt or a few barcodes.'
 	},
 	landing: {
+		heroDomainSuffix: '· skaffu.com',
 		heroTitle: 'Skaffu — the pantry you actually keep track of.',
 		heroLead:
 			'Scan what you have at home in seconds. See fridge, freezer and cupboard in one place — and eat what expires before it becomes waste.',
 		heroSecondary:
 			'Inventory as source of truth, receipt autopilot and a shopping list filled from what you actually have — store-neutral, no loyalty lock-in.',
+		heroHighlightsAria: 'Quick start',
+		heroHighlights: {
+			barcode: 'Barcode',
+			receipt: 'Receipt & photo',
+			storage: 'Fridge · freezer · cupboard'
+		},
+		statsAria: 'Skaffu in numbers',
+		seeAllFeatures: 'See all features',
+		wasteMeterLabel: 'Less food waste',
+		wasteMeterCaption: 'Eat what expires first — shop for what is missing.',
+		comparisonKicker: 'Compared to Bring & ICA',
+		readHowItWorks: 'Read more about how it works',
 		stats: [
 			{ value: '3', label: 'ways to get started — barcode, receipt, photo' },
 			{ value: '1', label: 'shared pantry for the whole household' },
@@ -648,6 +704,7 @@ const en: MarketingContent = {
 					'Yes. Open the app in Safari (iPhone) or Chrome (Android) and choose Add to Home Screen / Install app. In the app, go to Settings → Add to home screen for step-by-step instructions. On desktop, use the app in your browser.'
 			}
 		],
+		pricingLinkLabel: 'Pricing & plans',
 		contactLabel: 'Cannot find your answer?',
 		contactLead: 'Email us and we will get back to you as soon as we can.',
 		contactEmail: 'hello@skaffu.com'

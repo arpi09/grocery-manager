@@ -66,7 +66,7 @@
 	<div class="hero-bg" aria-hidden="true"></div>
 	<div class="hero-inner">
 		<div class="hero-copy">
-			<p class="eyebrow label-caps">{content.siteName} · skaffu.com</p>
+			<p class="eyebrow label-caps">{content.siteName} {landing.heroDomainSuffix}</p>
 			<h1 class="hero-title">{hero.heroTitle}</h1>
 			<p class="hero-lead">{hero.heroLead}</p>
 			<p class="hero-secondary">{hero.heroSecondary}</p>
@@ -86,18 +86,18 @@
 				{/if}
 			</div>
 
-			<ul class="hero-highlights" aria-label="Snabbstart">
+			<ul class="hero-highlights" aria-label={landing.heroHighlightsAria}>
 				<li>
 					<Barcode size={18} strokeWidth={2} aria-hidden="true" />
-					<span>Streckkod</span>
+					<span>{landing.heroHighlights.barcode}</span>
 				</li>
 				<li>
 					<Camera size={18} strokeWidth={2} aria-hidden="true" />
-					<span>Kvitto & foto</span>
+					<span>{landing.heroHighlights.receipt}</span>
 				</li>
 				<li>
 					<Refrigerator size={18} strokeWidth={2} aria-hidden="true" />
-					<span>Kyl · frys · skafferi</span>
+					<span>{landing.heroHighlights.storage}</span>
 				</li>
 			</ul>
 		</div>
@@ -114,7 +114,7 @@
 	onRegisterClick={trackRegisterClick}
 />
 
-<section class="stats-strip" aria-label="Skaffu i siffror">
+<section class="stats-strip" aria-label={landing.statsAria}>
 	<ul class="stats-list">
 		{#each landing.stats as stat, i (stat.label)}
 			<li class="stat" style:--stat-i={i}>
@@ -161,7 +161,7 @@
 			</div>
 			<p class="section-link">
 				<a href="/funktioner">
-					Se alla funktioner
+					{landing.seeAllFeatures}
 					<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
 				</a>
 			</p>
@@ -188,11 +188,11 @@
 			</div>
 			<div class="waste-aside" aria-hidden="true">
 				<div class="waste-meter">
-					<span class="meter-label">Mindre matsvinn</span>
+					<span class="meter-label">{landing.wasteMeterLabel}</span>
 					<div class="meter-bar">
 						<span class="meter-fill"></span>
 					</div>
-					<p class="meter-caption">Ät det som går ut först — handla det som saknas.</p>
+					<p class="meter-caption">{landing.wasteMeterCaption}</p>
 				</div>
 			</div>
 		</div>
@@ -205,7 +205,7 @@
 			<header class="section-header center">
 				<span class="section-kicker label-caps">
 					<Store size={14} strokeWidth={2} aria-hidden="true" />
-					Jämfört med Bring & ICA
+					{landing.comparisonKicker}
 				</span>
 				<h2>{content.comparison.title}</h2>
 				<p>{content.comparison.lead}</p>
@@ -245,7 +245,7 @@
 			</div>
 			<p class="section-link center-link">
 				<a href="/sa-fungerar-det">
-					Läs mer om hur det fungerar
+					{landing.readHowItWorks}
 					<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
 				</a>
 			</p>

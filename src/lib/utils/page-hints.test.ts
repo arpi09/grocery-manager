@@ -2,18 +2,22 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	PAGE_HINT_IDS,
 	dismissPageHint,
+	markPageHintShownInSession,
 	resolvePageHintId,
 	resetPageHints,
-	shouldShowPageHint
+	shouldShowPageHint,
+	wasPageHintShownInSession
 } from './page-hints';
 
 const TEST_USER = 'user-a';
 
 describe('page hints', () => {
 	let storage: Record<string, string>;
+	let session: Record<string, string>;
 
 	beforeEach(() => {
 		storage = {};
+		session = {};
 		vi.stubGlobal('localStorage', {
 			getItem: (key: string) => storage[key] ?? null,
 			setItem: (key: string, value: string) => {
@@ -21,6 +25,15 @@ describe('page hints', () => {
 			},
 			removeItem: (key: string) => {
 				delete storage[key];
+			}
+		});
+		vi.stubGlobal('sessionStorage', {
+			getItem: (key: string) => session[key] ?? null,
+			setItem: (key: string, value: string) => {
+				session[key] = value;
+			},
+			removeItem: (key: string) => {
+				delete session[key];
 			}
 		});
 	});
@@ -53,6 +66,13 @@ describe('page hints', () => {
 	it('keeps hint state scoped per surface', () => {
 		dismissPageHint('hem', TEST_USER);
 		expect(shouldShowPageHint('inkop', TEST_USER)).toBe(true);
+	});
+
+	it('hides hints for the rest of the session after first show', () => {
+		expect(shouldShowPageHint('hem', TEST_USER)).toBe(true);
+		markPageHintShownInSession('hem', TEST_USER);
+		expect(wasPageHintShownInSession('hem', TEST_USER)).toBe(true);
+		expect(shouldShowPageHint('hem', TEST_USER)).toBe(false);
 	});
 
 	it('resets all hints for one user', () => {
