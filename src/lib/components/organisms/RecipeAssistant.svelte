@@ -297,16 +297,18 @@
 			<AddMissingFeedback feedback={feedbackBanner} />
 		{/if}
 		{#if canEdit && allMissingIngredients.length > 0}
-			<div class="batch-action">
-				<Button
-					type="button"
-					loading={addingMissingKey === '__all__'}
-					loadingLabel={t('common.loading')}
-					onclick={addAllMissing}
-					fullWidth
-				>
-					{t('recipe.addAllMissingBtn', { count: allMissingIngredients.length })}
-				</Button>
+			<div class="results-actions">
+				<div class="batch-action">
+					<Button
+						type="button"
+						loading={addingMissingKey === '__all__'}
+						loadingLabel={t('common.loading')}
+						onclick={addAllMissing}
+						fullWidth
+					>
+						{t('recipe.addAllMissingBtn', { count: allMissingIngredients.length })}
+					</Button>
+				</div>
 			</div>
 		{/if}
 
@@ -355,6 +357,11 @@
 	:global(.recipe-assistant-panel) {
 		width: min(760px, calc(100vw - 2 * var(--space-md)));
 		max-height: min(92vh, 52rem);
+	}
+
+	:global(.recipe-assistant-panel.modal-panel--sheet) {
+		width: 100%;
+		max-height: min(94vh, 52rem);
 	}
 
 	:global(.recipe-assistant-body) {
@@ -488,6 +495,38 @@
 
 	.batch-action {
 		margin-bottom: var(--space-md);
+	}
+
+	.results-actions {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		margin-bottom: var(--space-md);
+	}
+
+	@media (max-width: 899px) {
+		:global(.recipe-assistant-panel .batch-action),
+		:global(.recipe-assistant-panel .results-actions) {
+			position: sticky;
+			bottom: 0;
+			z-index: 1;
+			margin-bottom: 0;
+			padding-top: var(--space-sm);
+			padding-bottom: env(safe-area-inset-bottom, 0);
+			background: linear-gradient(
+				to top,
+				var(--color-surface) 78%,
+				color-mix(in srgb, var(--color-surface) 0%, transparent)
+			);
+		}
+
+		.settings-disclosure {
+			margin-bottom: var(--space-sm);
+		}
+
+		.recipe-picker {
+			margin-bottom: var(--space-sm);
+		}
 	}
 
 	.note {

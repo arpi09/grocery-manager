@@ -71,6 +71,21 @@ test.describe('Recipe assistant mobile', () => {
 
 	test('header button opens modal on screen', async ({ page }) => {
 		const dialog = await openRecipeAssistant(page);
-		await expect(dialog.getByRole('button', { name: 'Generera recept' })).toBeEnabled();
+		const generateBtn = dialog.getByRole('button', { name: 'Generera recept' });
+		await expect(generateBtn).toBeEnabled();
+		await expect(generateBtn).toBeInViewport();
+	});
+
+	test('generate shows recipe with visible action buttons', async ({ page }) => {
+		const dialog = await openRecipeAssistant(page);
+		const generateBtn = dialog.getByRole('button', { name: 'Generera recept' });
+		await generateBtn.click();
+
+		await expect(dialog.getByRole('heading', { name: 'E2E Testpasta' })).toBeVisible({
+			timeout: 20_000
+		});
+		const addMissing = dialog.getByRole('button', { name: /Lägg på lista|Lägg alla saknade/i });
+		await expect(addMissing.first()).toBeVisible();
+		await expect(addMissing.first()).toBeInViewport();
 	});
 });

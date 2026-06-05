@@ -226,4 +226,29 @@
 		font-size: 0.875rem;
 		color: var(--color-text-muted);
 	}
+
+	@media (max-width: 899px) {
+		.recipe-card {
+			padding: var(--space-sm) var(--space-md);
+			gap: var(--space-sm);
+		}
+
+		.recipe-hero {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.recipe-hero :global(.recipe-add-btn) {
+			width: 100%;
+		}
+
+		.recipe-title {
+			font-size: 1.05rem;
+		}
+
+		.recipe-lead {
+			margin-bottom: var(--space-xs);
+			font-size: 0.875rem;
+		}
+	}
 </style>

@@ -104,23 +104,29 @@
 		<div class="trends">
 			<Card>
 				<h2 class="section-title label-caps">{t('stats.addedTrendTitle')}</h2>
+				<p class="section-lead">{t('stats.addedTrendLead')}</p>
 				<ul class="trend-stats" aria-label={t('stats.addedTrendTitle')}>
 					{#each addedTrend as bar (bar.weekStart)}
-						<li class="trend-stat">
-							<span>{weekLabel(bar.label)}</span>
-							<span class="trend-value">{bar.count}</span>
+						<li class="trend-stat" class:trend-stat-current={bar.label === 'current'}>
+							<span class="trend-week">{weekLabel(bar.label)}</span>
+							<span class="trend-value" aria-label={t('stats.trendCountAria', { count: bar.count })}>
+								{bar.count}
+							</span>
 						</li>
 					{/each}
 				</ul>
 			</Card>
 			<Card>
 				<h2 class="section-title label-caps">{t('stats.consumedTrendTitle')}</h2>
+				<p class="section-lead">{t('stats.consumedTrendLead')}</p>
 				{#if impact.hasConsumptionData}
 					<ul class="trend-stats" aria-label={t('stats.consumedTrendTitle')}>
 						{#each impact.consumedTrend as bar (bar.weekStart)}
-							<li class="trend-stat">
-								<span>{weekLabel(bar.label)}</span>
-								<span class="trend-value">{bar.count}</span>
+							<li class="trend-stat" class:trend-stat-current={bar.label === 'current'}>
+								<span class="trend-week">{weekLabel(bar.label)}</span>
+								<span class="trend-value" aria-label={t('stats.trendCountAria', { count: bar.count })}>
+									{bar.count}
+								</span>
 							</li>
 						{/each}
 					</ul>
@@ -184,9 +190,12 @@
 		border-radius: var(--radius-md);
 		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface-muted));
 	}
-	.trend-stats, .bars { list-style: none; margin: var(--space-md) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-xs); }
-	.trend-stat, .bar-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 0.2rem 0; }
-	.trend-value { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-primary); }
+	.trend-stats, .bars { list-style: none; margin: var(--space-sm) 0 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
+	.trend-stat, .bar-header { display: flex; justify-content: space-between; align-items: center; gap: var(--space-sm); font-size: 0.875rem; padding: 0.45rem 0.55rem; border-radius: var(--radius-sm); }
+	.trend-stat-current { background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface-muted)); }
+	.trend-week { color: var(--color-text-muted); }
+	.trend-stat-current .trend-week { color: var(--color-text); font-weight: 600; }
+	.trend-value { min-width: 2rem; text-align: right; font-weight: 800; font-size: 1rem; font-variant-numeric: tabular-nums; color: var(--color-primary); }
 	.track { height: 0.45rem; background: var(--color-border); border-radius: var(--radius-sm); overflow: hidden; }
 	.fill { height: 100%; border-radius: var(--radius-sm); }
 	:global(.action-card) { display: flex; gap: var(--space-md); align-items: flex-start; }
