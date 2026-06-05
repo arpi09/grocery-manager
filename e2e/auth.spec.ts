@@ -11,6 +11,7 @@ test.describe('Authentication', () => {
 		await expect(page.getByRole('banner').getByRole('link', { name: 'Skaffu' })).toBeVisible();
 		await expect(page.getByRole('heading', { level: 1 })).toContainText(/skafferi|butiksneutralt|koll på/i);
 		await expect(page.getByRole('banner').getByRole('link', { name: 'Logga in' })).toBeVisible();
+		await expect(page.getByTestId('language-switcher')).toBeVisible();
 	});
 
 	test('admin can sign in and reach home', async ({ page }) => {

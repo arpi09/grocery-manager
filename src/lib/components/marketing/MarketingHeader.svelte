@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
+	import LanguageSwitcher from '$lib/components/molecules/LanguageSwitcher.svelte';
 	import MarketingButtonLink from '$lib/components/marketing/MarketingButtonLink.svelte';
 	import type { MarketingContent } from '$lib/marketing/content';
 
@@ -31,13 +32,14 @@
 			<AppLogo size="sm" showWordmark wordmark={content.siteName} />
 		</a>
 
-		<nav class="nav-desktop" aria-label="Webbplats">
+		<nav class="nav-desktop" aria-label={content.header.navAria}>
 			{#each content.nav as link (link.href)}
 				<a href={link.href} class={navLinkClass(link.href)}>{link.label}</a>
 			{/each}
 		</nav>
 
 		<div class="actions">
+			<LanguageSwitcher compact class="lang-switch" />
 			{#if isLoggedIn}
 				<MarketingButtonLink href={appHomeUrl}>{content.cta.openApp}</MarketingButtonLink>
 			{:else}
@@ -53,14 +55,17 @@
 			aria-controls="marketing-mobile-nav"
 			onclick={() => (menuOpen = !menuOpen)}
 		>
-			<span class="sr-only">Meny</span>
+			<span class="sr-only">{content.header.menuToggle}</span>
 			<span class="bar" aria-hidden="true"></span>
 			<span class="bar" aria-hidden="true"></span>
 		</button>
 	</div>
 
 	{#if menuOpen}
-		<nav id="marketing-mobile-nav" class="nav-mobile" aria-label="Webbplats mobil">
+		<nav id="marketing-mobile-nav" class="nav-mobile" aria-label={content.header.navMobileAria}>
+			<div class="mobile-lang">
+				<LanguageSwitcher compact />
+			</div>
 			{#each content.nav as link (link.href)}
 				<a href={link.href} class={navLinkClass(link.href)} onclick={closeMenu}>{link.label}</a>
 			{/each}
@@ -133,6 +138,14 @@
 		align-items: center;
 		gap: var(--space-md);
 		margin-left: auto;
+	}
+
+	:global(.lang-switch) {
+		flex-shrink: 0;
+	}
+
+	.mobile-lang {
+		padding-top: var(--space-xs);
 	}
 
 	.login-link {

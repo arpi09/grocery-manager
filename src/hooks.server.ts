@@ -109,7 +109,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.billingService = billingService;
 	event.locals.purchasePatternService = purchasePatternService;
 
-	const locale = resolveLocaleForRequest(event.cookies, event.request);
+	const { pathname: requestPathname } = event.url;
+	const locale = resolveLocaleForRequest(event.cookies, event.request, {
+		marketingPath: isMarketingPath(requestPathname)
+	});
 	event.locals.locale = locale;
 	writeLocaleCookie(event.cookies, locale);
 

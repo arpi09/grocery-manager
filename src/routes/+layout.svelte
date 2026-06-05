@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
+	import { initScrollOnNavigate } from '$lib/navigation/scroll-on-navigate';
 	import '../app.css';
 	import CookieConsentBanner from '$lib/components/molecules/CookieConsentBanner.svelte';
 	import NavigationProgress from '$lib/components/molecules/NavigationProgress.svelte';
@@ -14,6 +15,7 @@
 	const webManifest = $derived(pwaInfo?.webManifest);
 
 	onMount(() => {
+		initScrollOnNavigate();
 		initPwaInstallListeners();
 
 		if (!pwaInfo) {
