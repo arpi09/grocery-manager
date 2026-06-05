@@ -1416,6 +1416,8 @@
 		"scanModalTitle": "Hur vill du lägga till?",
 		"scanModalBody": "Välj det sätt som passar dig bäst. Guiden stannar kvar medan du skannar.",
 		"scanModalAria": "Lägg till vara under introduktionen",
+		"backToGuide": "Tillbaka till guiden",
+		"backToPicker": "Tillbaka till val",
 		"encourageStep2": "Bra start!",
 		"encourageStep3": "Snart är du där?",
 		"encourageStep4": "Du för koll på datumen — smart!",

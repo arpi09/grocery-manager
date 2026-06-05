@@ -23,6 +23,7 @@
 		embedded?: boolean;
 		formAction?: string;
 		onItemSaved?: () => void;
+		onCancel?: () => void;
 	}
 
 	let {
@@ -30,7 +31,8 @@
 		initialLocation = null,
 		embedded = false,
 		formAction,
-		onItemSaved
+		onItemSaved,
+		onCancel
 	}: Props = $props();
 
 	const bulkFormAction = $derived(formAction ?? '?/bulkCreate');
@@ -468,7 +470,15 @@
 			</div>
 		</form>
 	</section>
-	<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} />
+	{#if !embedded}
+		<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} />
+	{:else if onCancel}
+		<ScanFlowFooter
+			onCancel={onCancel}
+			cancelLabel={t('onboarding.backToPicker')}
+			data-testid="onboarding-scan-flow-cancel"
+		/>
+	{/if}
 
 	<DeleteSafetyModal
 		open={discardReviewOpen}
