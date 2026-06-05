@@ -1421,6 +1421,8 @@
 		"scanModalTitle": "Hur vill du lägga till?",
 		"scanModalBody": "Välj det sätt som passar dig bäst. Guiden stannar kvar medan du skannar.",
 		"scanModalAria": "Lägg till vara under introduktionen",
+		"backToGuide": "Tillbaka till guiden",
+		"backToPicker": "Tillbaka till val",
 		"encourageStep2": "Bra start!",
 		"encourageStep3": "Snart är du där?",
 		"encourageStep4": "Du för koll på datumen — smart!",
@@ -1703,7 +1705,10 @@
 			"missingRowId": "Saknar rad-id",
 			"aiRateLimitAiScan": "Du har använt alla {limit} AI-skannar den här månaden på Gratis-planen. Uppgradera till Pro eller vänta till nästa månad.",
 			"aiRateLimitReceiptPdf": "Du har använt alla {limit} kvitto-PDF den här månaden på Gratis-planen. Uppgradera till Pro eller vänta till nästa månad.",
-			"aiRateLimitSmartFill": "Du har använt alla {limit} smart fill den här veckan på Gratis-planen. Uppgradera till Pro eller vänta till nästa vecka."
+			"aiRateLimitSmartFill": "Du har använt alla {limit} smart fill den här veckan på Gratis-planen. Uppgradera till Pro eller vänta till nästa vecka.",
+			"barcodeNotFound": "Ogiltig streckkod.",
+			"invalidSection": "Ogiltig inventariesektion.",
+			"invalidLocation": "Ogiltig förvaringsplats."
 		},
 		"shopping": {
 			"missingRowId": "Saknar rad-id"

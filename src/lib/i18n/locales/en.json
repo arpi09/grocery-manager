@@ -1416,6 +1416,8 @@
 		"scanModalTitle": "How do you want to add?",
 		"scanModalBody": "Pick what works best for you. The guide stays open while you scan.",
 		"scanModalAria": "Add item during introduction",
+		"backToGuide": "Back to guide",
+		"backToPicker": "Back to options",
 		"encourageStep2": "Great start!",
 		"encourageStep3": "Almost there…",
 		"encourageStep4": "You will stay on top of dates — smart!",
@@ -1723,7 +1725,10 @@
 			"missingRowId": "Missing row id",
 			"aiRateLimitAiScan": "You've used all {limit} AI scans this month on the Free plan. Upgrade to Pro or wait until next month.",
 			"aiRateLimitReceiptPdf": "You've used all {limit} receipt PDF parses this month on the Free plan. Upgrade to Pro or wait until next month.",
-			"aiRateLimitSmartFill": "You've used all {limit} smart fill runs this week on the Free plan. Upgrade to Pro or wait until next week."
+			"aiRateLimitSmartFill": "You've used all {limit} smart fill runs this week on the Free plan. Upgrade to Pro or wait until next week.",
+			"barcodeNotFound": "Invalid barcode.",
+			"invalidSection": "Invalid inventory section.",
+			"invalidLocation": "Invalid storage location."
 		},
 		"shopping": {
 			"missingRowId": "Missing row id"

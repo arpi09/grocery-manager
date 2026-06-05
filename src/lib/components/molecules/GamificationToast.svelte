@@ -14,6 +14,7 @@
 		markCelebrationShown,
 		shouldShowCelebration
 	} from '$lib/utils/gamification-celebrations';
+	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
 
 	const celebrateKind = $derived(parseCelebrationKind(page.url.searchParams.get(CELEBRATE_PARAM)));
 	const householdId = $derived(page.data.activeHousehold?.id ?? page.data.householdId ?? null);
@@ -61,5 +62,8 @@
 	{message}
 	{visible}
 	celebrate={celebrateKind === 'zeroWasteStreak' || celebrateKind === 'eatFirstRitual'}
+	size="action"
+	durationMs={TOAST_DEFAULT_DURATION_MS}
+	tapToDismiss={true}
 	onDismiss={handleDismiss}
 />

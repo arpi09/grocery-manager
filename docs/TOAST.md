@@ -1,4 +1,4 @@
-# Toast patterns — Skaffu
+﻿# Toast patterns — Skaffu
 
 Canonical reference for success, info, and error feedback via toasts. Tokens live in `src/app.css` (`--toast-*`).
 
@@ -10,15 +10,23 @@ Canonical reference for success, info, and error feedback via toasts. Tokens liv
 - **Contrast:** use `--toast-*` tokens; no hardcoded `#fff` on `var(--color-text)` backgrounds
 - **One toast per gesture** — do not stack multiple success toasts for the same action
 
-## Mechanisms
+## Primitive: `Toast.svelte`
 
-| Mechanism | When | Duration | File |
-|-----------|------|----------|------|
-| `showClientToast` / `ClientToast` | In-app success/info after client actions | 5s default | `client-toast.svelte.ts`, `ClientToast.svelte` |
-| `ActionToast` (`?actionToast=`) | Server redirect after form action | 5s | `action-toast.ts`, `ActionToast.svelte` |
-| Local `Toast` | Inline undo flows | 8s (`TOAST_UNDO_DURATION_MS`) | `Toast.svelte` |
-| `GamificationToast` | Gamification milestones | Custom | `GamificationToast.svelte` |
-| `InventoryScanToast` | Scan-specific feedback | Custom | `InventoryScanToast.svelte` |
+- **Placement:** fixed bottom center (`--content-bottom-safe`)
+- **Default duration:** `TOAST_DEFAULT_DURATION_MS` (5000 ms) via `action-toast.ts`
+- **Pause:** timer pauses on hover/pointerenter
+- **Theme:** `--toast-*`, `--color-primary`, `--color-danger` — no hardcoded contrast on toast surface
+- **Sizes:** `compact` (default) or `action` (primary action confirmations)
+- **Variants:** `default` | `success` | `error` | `info`
+
+## Global wrappers (mounted in `AppLayout.svelte`)
+
+| Component | Trigger | Duration | Size | Notes |
+|-----------|---------|----------|------|-------|
+| `ActionToast` | URL `?actionToast=` after server redirect | 5s | `action` | Canonical for forms/CRUD |
+| `ClientToast` | `showClientToast()` (client store) | 5s | `action` | Panels, push, expiry, recipes |
+| `InventoryScanToast` | URL `?scan=` after barcode/photo | 5s | `action` | `success` on match, `info` on unknown product |
+| `GamificationToast` | URL `?celebrate=` | 5s | `action` | `celebrate` gradient for milestones |
 
 ## When to use which
 
@@ -30,13 +38,7 @@ Canonical reference for success, info, and error feedback via toasts. Tokens liv
 
 **Do not add** a fourth global path without updating this doc.
 
-## Migration status
-
-Migrated to `showClientToast`: EatFirst, RecipeAssistant, MealPlanIdeasPanel, ReceiptAutopilot, CalendarDaySheet, ShoppingListPanel success, settings push/expiry.
-
-Intentionally local: ShoppingListPanel undo (8s), GamificationToast, InventoryScanToast, URL-driven ActionToast.
-
-## Adding a toast
+## Client-side API
 
 ```ts
 import { showClientToast } from '$lib/utils/client-toast.svelte';
@@ -44,7 +46,41 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 showClientToast(t('my.messageKey'), { variant: 'success' });
 ```
 
-For server actions, use `appendActionToast` / redirect helpers in `action-toast.ts`.
+Used by: `EatFirstSection`, `RecipeAssistant`, `MealPlanIdeasPanel`, `ReceiptAutopilotSection`, `CalendarDaySheet`, `ShoppingListPanel` (success), `settings/+page.svelte` (push + expiry).
+
+## Server-side API
+
+```ts
+import { appendActionToast } from '$lib/utils/action-toast';
+
+redirect(302, appendActionToast('/inventory/fridge', 'itemCreated', 'Mjölk'));
+```
+
+## Intentional exceptions
+
+| Location | Why | Duration |
+|----------|-----|----------|
+| `ShoppingListPanel` undo | Inline **Undo** next to toast; cannot use global store without losing the button | `TOAST_UNDO_DURATION_MS` (8000 ms) |
+
+Undo toast still uses `Toast.svelte` (same theme/tokens) but renders locally with companion button.
+
+## Migration status
+
+Migrated to `showClientToast`: EatFirst, RecipeAssistant, MealPlanIdeasPanel, ReceiptAutopilot, CalendarDaySheet, ShoppingListPanel success, settings push/expiry.
+
+Intentionally local: ShoppingListPanel undo (8s), GamificationToast, InventoryScanToast, URL-driven ActionToast.
+
+## E2E selectors
+
+Tests match `.toast-message` — do not rename without updating `e2e/*.spec.ts`.
+
+## Constants
+
+```ts
+// src/lib/utils/action-toast.ts
+export const TOAST_DEFAULT_DURATION_MS = 5000;
+export const TOAST_UNDO_DURATION_MS = 8000;
+```
 
 ## UX checklist
 

@@ -28,9 +28,25 @@
 | **P2** | **Inventory-tabell** | DataGrid-liknande: densitet, sortering, kolumner (namn, antal, utgång) | `InventoryDataTable.svelte`, `InventoryTableRow.svelte` | **PR feat/ux-p2** |
 | **P2** | **Nav-Mer** | Professionell öppning/stängning av desktop «Mer»-flyout | `MainNavDesktop.svelte` | **PR feat/ux-p2** |
 | **P2** | **F5-hub-v2** | Hub-polish: intro, «Fler sätt»-sektion (ej full hero-redesign) | `ScanModeHub.svelte` | **PR feat/ux-p2** (partial) |
-| **P2** | **Toast-unify (partial)** | 5s + success på panel-toasts; `TOAST_UNDO_DURATION_MS` | `action-toast.ts`, EatFirst, Recipe, m.fl. | **PR feat/ux-p2** |
+| **P2** | **Toast-unify (partial)** | 5s + success på panel-toasts; `TOAST_UNDO_DURATION_MS` | `action-toast.ts`, EatFirst, Recipe, m.fl. | **Klart (feat/ux-p2)** |
+| **P2** | **Track F — toast unify** | Full audit, wrappers enhetliga, `docs/TOAST.md` | `AppLayout`, `InventoryScanToast`, `GamificationToast`, `ClientToast` | **PR feat/track-f-toast-unify** |
 
 ---
+
+## Toast-audit – Track F (feat/track-f-toast-unify)
+
+Se **[docs/TOAST.md](./TOAST.md)** för canonical arkitektur.
+
+| Källa | Status |
+|-------|--------|
+| `ClientToast` + `showClientToast` | Global via `AppLayout` (action, 5s, tap dismiss, paus hover) |
+| `ActionToast` (`?actionToast=`) | URL-driven, action size, 5s |
+| `InventoryScanToast` | URL `?scan=`, action size, 5s, success/info |
+| `GamificationToast` | URL `?celebrate=`, action size, 5s, celebrate gradient |
+| `EatFirstSection`, `RecipeAssistant`, `MealPlanIdeasPanel`, `ReceiptAutopilot`, `CalendarDaySheet` | `showClientToast` |
+| `ShoppingListPanel` success | `showClientToast` |
+| `ShoppingListPanel` undo | **Undantag:** lokal `Toast` + 8s + inline Ångra-knapp |
+| `settings/+page.svelte` push/expiry | `showClientToast` |
 
 ## Toast-audit – efter ClientToast (feat/toast-unify-scan-hero)
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { t } from '$lib/i18n';
-	import { BrowserMultiFormatReader } from '@zxing/browser';
+	import type { BrowserMultiFormatReader } from '@zxing/browser';
 	import { onDestroy, tick } from 'svelte';
 	import { canAccessCamera, BARCODE_HTTPS_HINT } from '$lib/utils/device';
 
@@ -90,7 +90,8 @@
 		}
 
 		scanning = true;
-		reader = new BrowserMultiFormatReader();
+		const { BrowserMultiFormatReader: Reader } = await import('@zxing/browser');
+		reader = new Reader();
 
 		try {
 			mediaStream = await navigator.mediaDevices.getUserMedia({
