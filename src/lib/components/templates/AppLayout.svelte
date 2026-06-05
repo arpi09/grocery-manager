@@ -14,6 +14,7 @@
 	import InventoryScanToast from '$lib/components/molecules/InventoryScanToast.svelte';
 	import ActivationCelebration from '$lib/components/organisms/ActivationCelebration.svelte';
 	import OnboardingGuide from '$lib/components/organisms/OnboardingGuide.svelte';
+	import PageHintModal from '$lib/components/organisms/PageHintModal.svelte';
 	import RegistrationWelcome from '$lib/components/organisms/RegistrationWelcome.svelte';
 	import PostOnboardingSurvey from '$lib/components/organisms/PostOnboardingSurvey.svelte';
 	import { canEditInventory } from '$lib/domain/household';
@@ -124,6 +125,7 @@
 	<ClientToast />
 	<GamificationToast />
 	<OnboardingGuide />
+	<PageHintModal />
 	<PostOnboardingSurvey />
 	<ActivationCelebration />
 	<RecipeAssistant bind:open={recipeOpen} canEdit={canWrite} />

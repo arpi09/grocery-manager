@@ -5,6 +5,7 @@
 	import BarcodeScanner from '$lib/components/molecules/BarcodeScanner.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
+	import { bindEmbeddedScanSubmit } from '$lib/utils/scan-embedded-submit';
 	import { page } from '$app/state';
 	import { recordBarcodeActivation } from '$lib/utils/onboarding';
 	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
@@ -24,9 +25,22 @@
 		returnTo: string;
 		cancelHref?: string;
 		errors?: Record<string, string[]>;
+		embedded?: boolean;
+		formAction?: string;
+		onItemSaved?: () => void;
 	}
 
-	let { defaultLocation, returnTo, cancelHref, errors = {} }: Props = $props();
+	let {
+		defaultLocation,
+		returnTo,
+		cancelHref,
+		errors = {},
+		embedded = false,
+		formAction,
+		onItemSaved
+	}: Props = $props();
+
+	const saveFormAction = $derived(formAction ?? '?/create');
 
 	type Step = 'scan' | 'confirm';
 
@@ -269,14 +283,22 @@
 
 		<form
 			method="POST"
-			action="?/create"
-			use:enhance={bindSubmittingWithRedirect(
-				(v) => (saveSubmitting = v),
-				async () => {
-					persistFavoriteProduct();
-					recordBarcodeActivation(page.data.user?.id);
-				}
-			)}
+			action={saveFormAction}
+			use:enhance={embedded
+				? bindEmbeddedScanSubmit(
+						(v) => (saveSubmitting = v),
+						() => {
+							persistFavoriteProduct();
+							onItemSaved?.();
+						}
+					)
+				: bindSubmittingWithRedirect(
+						(v) => (saveSubmitting = v),
+						async () => {
+							persistFavoriteProduct();
+							recordBarcodeActivation(page.data.user?.id);
+						}
+					)}
 			class="save-form"
 		>
 			<input type="hidden" name="barcode" value={barcode} />
@@ -345,7 +367,7 @@
 			{/if}
 
 			<div class="actions">
-				{#if cancelHref}
+				{#if cancelHref && !embedded}
 					<a class="cancel-link" href={cancelHref}>{t('common.cancel')}</a>
 				{/if}
 				<Button type="button" variant="ghost" onclick={resetToScan}>{t('scanFlow.scanAgain')}</Button>

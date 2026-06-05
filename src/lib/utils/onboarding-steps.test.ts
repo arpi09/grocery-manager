@@ -4,25 +4,35 @@ import {
 	ONBOARDING_STEP_IDS,
 	canGoBackOnboarding,
 	getEncourageKeyForStepIndex,
+	getOnboardingStepId,
 	isLastOnboardingStep
 } from './onboarding-steps';
 
 describe('onboarding step flow', () => {
-	it('defines two quick-start steps in order', () => {
-		expect(ONBOARDING_STEP_COUNT).toBe(2);
-		expect(ONBOARDING_STEP_IDS).toEqual(['welcome', 'ready']);
+	it('defines three guided steps in order', () => {
+		expect(ONBOARDING_STEP_COUNT).toBe(3);
+		expect(ONBOARDING_STEP_IDS).toEqual(['welcome', 'addItems', 'celebrate']);
 	});
 
-	it('shows encourage micro-copy on the final step', () => {
+	it('maps step indices to step ids', () => {
+		expect(getOnboardingStepId(0)).toBe('welcome');
+		expect(getOnboardingStepId(1)).toBe('addItems');
+		expect(getOnboardingStepId(2)).toBe('celebrate');
+	});
+
+	it('shows encourage micro-copy after welcome', () => {
 		expect(getEncourageKeyForStepIndex(0)).toBeNull();
-		expect(getEncourageKeyForStepIndex(1)).toBe('encourageStep2');
-		expect(getEncourageKeyForStepIndex(2)).toBeNull();
+		expect(getEncourageKeyForStepIndex(1)).toBe('encourageAddItems');
+		expect(getEncourageKeyForStepIndex(2)).toBe('encourageCelebrate');
+		expect(getEncourageKeyForStepIndex(3)).toBeNull();
 	});
 
 	it('tracks navigation boundaries', () => {
 		expect(canGoBackOnboarding(0)).toBe(false);
 		expect(canGoBackOnboarding(1)).toBe(true);
+		expect(canGoBackOnboarding(2)).toBe(true);
 		expect(isLastOnboardingStep(0)).toBe(false);
-		expect(isLastOnboardingStep(1)).toBe(true);
+		expect(isLastOnboardingStep(1)).toBe(false);
+		expect(isLastOnboardingStep(2)).toBe(true);
 	});
 });

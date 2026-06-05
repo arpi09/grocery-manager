@@ -12,7 +12,8 @@
 		clearCelebrationPending,
 		getActivationProgress,
 		isOnboardingExcludedPath,
-		shouldShowCelebration
+		shouldShowCelebration,
+		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
 
 	let open = $state(false);
@@ -21,7 +22,13 @@
 	const userId = $derived(page.data.user?.id ?? null);
 
 	function tryOpenCelebration() {
-		if (!browser || !userId || isOnboardingExcludedPath(pathname) || !shouldShowCelebration(userId)) {
+		if (
+			!browser ||
+			!userId ||
+			isOnboardingExcludedPath(pathname) ||
+			shouldShowOnboarding(userId) ||
+			!shouldShowCelebration(userId)
+		) {
 			open = false;
 			return;
 		}

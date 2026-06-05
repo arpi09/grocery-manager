@@ -4,6 +4,7 @@ const CLIENT_EVENT_TYPES = [
 	'register_click',
 	'onboarding_skipped',
 	'onboarding_quickstart',
+	'onboarding_completed',
 	'pwa_banner_dismiss',
 	'pwa_banner_install_click'
 ] as const;

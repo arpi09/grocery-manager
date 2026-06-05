@@ -31,7 +31,8 @@ export const ONBOARDING_REPLAY_EVENT = 'home-pantry-onboarding-replay';
 export const ONBOARDING_PROGRESS_EVENT = 'home-pantry-onboarding-progress';
 export const REGISTRATION_WELCOME_DONE_EVENT = 'home-pantry-registration-welcome-done';
 
-export const ACTIVATION_BARCODE_GOAL = 5;
+/** First saved item completes onboarding activation (v3). */
+export const ACTIVATION_BARCODE_GOAL = 1;
 
 const EXCLUDED_PATH_PREFIXES = ['/admin', '/login', '/register', '/verify-email'] as const;
 
@@ -303,6 +304,14 @@ export function recordBarcodeActivation(userId?: string | null): boolean {
 
 	dispatchProgress();
 	return false;
+}
+
+/** Returns true when activation just completed on this call (any add path). */
+export function recordFirstItemActivation(userId?: string | null): boolean {
+	if (typeof localStorage === 'undefined' || !userId) return false;
+	if (isActivationComplete(userId)) return false;
+	markActivationComplete(userId);
+	return true;
 }
 
 /** Returns true when activation just completed on this call. */

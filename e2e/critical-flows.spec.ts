@@ -35,7 +35,7 @@ test.describe('Critical flows', () => {
 		).toHaveCount(0);
 	});
 
-	test('onboarding quickstart from settings redirects to scan hub', async ({ page }) => {
+	test('onboarding embedded scan opens picker without navigation', async ({ page }) => {
 		test.setTimeout(60_000);
 		await registerNewUser(page);
 		await page.goto('/settings#settings-app');
@@ -44,7 +44,12 @@ test.describe('Critical flows', () => {
 		await page.locator('#settings-app details.settings-disclosure summary').click();
 		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click();
 		await expectOnboardingGuideVisible(page);
-		await page.getByTestId('onboarding-quickstart').click();
-		await expect(page).toHaveURL(/\/scan(\?.*mode=photo).*$/);
+		await page.getByRole('button', { name: /Nästa|Next/i }).click();
+		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
+		await page.getByTestId('onboarding-add-first-item').click();
+		await expect(page.getByTestId('onboarding-scan-picker')).toBeVisible();
+		await page.getByTestId('onboarding-scan-barcode').click();
+		await expect(page).toHaveURL(/\/settings/);
+		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
 	});
 });

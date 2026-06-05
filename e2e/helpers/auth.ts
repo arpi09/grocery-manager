@@ -217,7 +217,7 @@ export async function expectOnboardingGuideVisible(page: Page) {
 		page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
 	).toBeVisible({ timeout: 20_000 });
 	await expect(page.getByTestId('onboarding-skip')).toBeVisible();
-	await expect(page.getByText(/Steg 1 av 2/i)).toBeVisible();
+	await expect(page.getByText(/Steg 1 av 3/i)).toBeVisible();
 }
 
 async function markE2eOnboardingComplete(page: Page) {

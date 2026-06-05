@@ -139,20 +139,29 @@ describe('activation progress', () => {
 	});
 
 	it('tracks barcode scans toward the goal', () => {
-		for (let i = 0; i < ACTIVATION_BARCODE_GOAL - 1; i++) {
-			expect(recordBarcodeActivation(TEST_USER_A)).toBe(false);
+		expect(ACTIVATION_BARCODE_GOAL).toBe(1);
+
+		if (ACTIVATION_BARCODE_GOAL > 1) {
+			for (let i = 0; i < ACTIVATION_BARCODE_GOAL - 1; i++) {
+				expect(recordBarcodeActivation(TEST_USER_A)).toBe(false);
+			}
+
+			const progress = getActivationProgress(TEST_USER_A);
+			expect(progress.barcodeCount).toBe(ACTIVATION_BARCODE_GOAL - 1);
+			expect(progress.inProgress).toBe(true);
+			expect(isActivationComplete(TEST_USER_A)).toBe(false);
+			return;
 		}
 
+		expect(recordBarcodeActivation(TEST_USER_A)).toBe(true);
 		const progress = getActivationProgress(TEST_USER_A);
-		expect(progress.barcodeCount).toBe(ACTIVATION_BARCODE_GOAL - 1);
-		expect(progress.inProgress).toBe(true);
-		expect(isActivationComplete(TEST_USER_A)).toBe(false);
+		expect(progress.barcodeCount).toBe(1);
+		expect(progress.inProgress).toBe(false);
+		expect(isActivationComplete(TEST_USER_A)).toBe(true);
 	});
 
-	it('completes activation after five barcodes', () => {
-		for (let i = 0; i < ACTIVATION_BARCODE_GOAL; i++) {
-			recordBarcodeActivation(TEST_USER_A);
-		}
+	it('completes activation after one barcode', () => {
+		expect(recordBarcodeActivation(TEST_USER_A)).toBe(true);
 
 		expect(isActivationComplete(TEST_USER_A)).toBe(true);
 		expect(getActivationProgress(TEST_USER_A).isComplete).toBe(true);
