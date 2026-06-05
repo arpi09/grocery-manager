@@ -131,7 +131,7 @@
 			await addMissingIngredientsToList(ingredients)
 		);
 		showClientToast(presented.message, {
-			variant: presented.tone === 'error' ? 'error' : presented.tone === 'warning' ? 'warning' : 'success'
+			variant: presented.tone === 'error' ? 'error' : presented.tone === 'warning' ? 'info' : 'success'
 		});
 		feedbackBanner = presented;
 		addingMissingKey = null;
