@@ -1,6 +1,11 @@
+import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
 import type { StorageLocation } from '$lib/domain/location';
 import { isStorageLocation } from '$lib/domain/location';
-import type { PhotoRoundConfidence, PhotoRoundDetectedItem } from '$lib/domain/photo-round';
+import type {
+	PhotoRoundConfidence,
+	PhotoRoundDetectedItem,
+	PhotoRoundParseResult
+} from '$lib/domain/photo-round';
 import {
 	openAiErrorLogDetail,
 	requestStructuredJson,
@@ -9,9 +14,13 @@ import {
 	type StructuredJsonResult
 } from '$lib/server/openai';
 
+const LOCATION_ENUM = ['fridge', 'freezer', 'cupboard'] as const;
+
 export const PHOTO_ROUND_ITEMS_SCHEMA = {
 	type: 'object',
 	properties: {
+		detectedZone: { type: 'string', enum: LOCATION_ENUM },
+		zoneConfidence: { type: 'string', enum: ['high', 'medium', 'low'] },
 		items: {
 			type: 'array',
 			items: {
@@ -20,14 +29,15 @@ export const PHOTO_ROUND_ITEMS_SCHEMA = {
 					name: { type: 'string' },
 					quantity: { type: 'string' },
 					unit: { type: 'string' },
-					confidence: { type: 'string', enum: ['high', 'medium', 'low'] }
+					confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
+					location: { type: 'string', enum: LOCATION_ENUM }
 				},
-				required: ['name', 'quantity', 'unit', 'confidence'],
+				required: ['name', 'quantity', 'unit', 'confidence', 'location'],
 				additionalProperties: false
 			}
 		}
 	},
-	required: ['items'],
+	required: ['detectedZone', 'zoneConfidence', 'items'],
 	additionalProperties: false
 } as const;
 
@@ -37,12 +47,28 @@ const ZONE_CONTEXT: Record<StorageLocation, string> = {
 	cupboard: 'skafferi/hyllor (torrförvaring)'
 };
 
-export function photoRoundSystemPrompt(zone: StorageLocation): string {
-	const zoneLabel = ZONE_CONTEXT[zone];
+const LOCATION_RULES = [
+	'- location per vara: fridge | freezer | cupboard (förvaring hemma)',
+	'  - fridge: mejeri, kött, fisk, chark, färdigrätter, färska grönsaker, ägg, mat som ska kylas',
+	'  - freezer: frysta varor, glass, djupfryst',
+	'  - cupboard: torrvaror (ris, pasta torr, mjöl), konserver, kryddor, kaffe, te'
+].join('\n');
+
+export function photoRoundSystemPrompt(zoneHint: StorageLocation | null): string {
+	const zoneLines = zoneHint
+		? [
+				`Förslag från användaren: ${ZONE_CONTEXT[zoneHint]}.`,
+				'Om fotot tydligt visar en annan zon, sätt detectedZone och location därefter.'
+			]
+		: [
+				'Identifiera zonen från fotot (kyl, frys eller skafferi) i detectedZone.',
+				'zoneConfidence: high = tydlig kyl/frys/hylla, medium = delvis synlig, low = osäker.'
+			];
+
 	return [
 		'Du inventerar ett svenskt hushålls skafferi från foton.',
-		`Zon: ${zoneLabel}. Alla varor ska förvaras i denna zon.`,
-		'Returnera JSON: {"items":[{"name":"","quantity":"","unit":"","confidence":"high|medium|low"}]}',
+		...zoneLines,
+		'Returnera JSON: {"detectedZone":"fridge|freezer|cupboard","zoneConfidence":"high|medium|low","items":[{"name":"","quantity":"","unit":"","confidence":"high|medium|low","location":"fridge|freezer|cupboard"}]}',
 		'Strikta regler (anti-hallucination):',
 		'- Lista ENDAST livsmedel och drycker som är tydligt synliga i bilderna',
 		'- Gissa INTE varor som kan finnas utanför bild eller bakom annat',
@@ -51,6 +77,7 @@ export function photoRoundSystemPrompt(zone: StorageLocation): string {
 		'- quantity: numerisk mängd som sträng (standard "1")',
 		'- unit: l, ml, kg, g, st, pack — tom sträng om okänd',
 		'- confidence: high = tydligt läsbar etikett/hel förpackning, medium = delvis synlig, low = osäker',
+		LOCATION_RULES,
 		'- Slå ihop dubbletter av samma vara till en rad med summerad quantity om möjligt',
 		'- max 30 rader'
 	].join('\n');
@@ -58,10 +85,11 @@ export function photoRoundSystemPrompt(zone: StorageLocation): string {
 
 export const PHOTO_ROUND_VALIDATION_PROMPT = [
 	'Du granskar en lista med varor som en AI hävdade såg i skafferifoton.',
-	'Returnera JSON: {"items":[{"name":"","quantity":"","unit":"","confidence":"high|medium|low"}]}',
+	'Returnera JSON: {"detectedZone":"fridge|freezer|cupboard","zoneConfidence":"high|medium|low","items":[{"name":"","quantity":"","unit":"","confidence":"high|medium|low","location":"fridge|freezer|cupboard"}]}',
 	'Behåll ENDAST rader som sannolikt är synliga på hyllan/kylen — ta bort uppenbara hallucinationer.',
-	'Behåll quantity/unit/confidence oförändrat om du behåller raden.',
-	'Om listan är tom, returnera {"items":[]}.'
+	'Behåll quantity/unit/confidence/location oförändrat om du behåller raden.',
+	'Behåll detectedZone och zoneConfidence om de fortfarande stämmer med bilden.',
+	'Om listan är tom, returnera {"detectedZone":"cupboard","zoneConfidence":"low","items":[]}.'
 ].join('\n');
 
 function coerceName(value: unknown): string {
@@ -100,15 +128,40 @@ function coerceConfidence(value: unknown): PhotoRoundConfidence | null {
 	return null;
 }
 
+function coerceLocation(value: unknown): StorageLocation | null {
+	if (typeof value === 'string' && isStorageLocation(value.trim().toLowerCase())) {
+		return value.trim().toLowerCase() as StorageLocation;
+	}
+	return null;
+}
+
 export function normalizePhotoRoundPayload(raw: unknown): unknown {
-	if (!raw || typeof raw !== 'object' || !('items' in raw)) {
+	if (!raw || typeof raw !== 'object') {
 		return raw;
 	}
-	const items = (raw as { items: unknown }).items;
+	const payload = raw as Record<string, unknown>;
+	const normalized: Record<string, unknown> = {};
+
+	const detectedZone = coerceLocation(payload.detectedZone);
+	if (detectedZone) {
+		normalized.detectedZone = detectedZone;
+	}
+	const zoneConfidence = coerceConfidence(payload.zoneConfidence);
+	if (zoneConfidence) {
+		normalized.zoneConfidence = zoneConfidence;
+	}
+
+	if (!('items' in payload)) {
+		return Object.keys(normalized).length > 0 ? normalized : raw;
+	}
+
+	const items = payload.items;
 	if (!Array.isArray(items)) {
-		return raw;
+		return { ...normalized, items };
 	}
+
 	return {
+		...normalized,
 		items: items.map((entry) => {
 			if (!entry || typeof entry !== 'object') {
 				return entry;
@@ -118,7 +171,8 @@ export function normalizePhotoRoundPayload(raw: unknown): unknown {
 				name: coerceName(row.name),
 				quantity: coerceQuantity(row.quantity),
 				unit: coerceUnit(row.unit) ?? '',
-				confidence: coerceConfidence(row.confidence) ?? 'low'
+				confidence: coerceConfidence(row.confidence) ?? 'low',
+				location: coerceLocation(row.location) ?? ''
 			};
 		})
 	};
@@ -126,7 +180,7 @@ export function normalizePhotoRoundPayload(raw: unknown): unknown {
 
 export function parsePhotoRoundItems(
 	raw: unknown,
-	zone: StorageLocation
+	zoneHint: StorageLocation | null
 ): PhotoRoundDetectedItem[] {
 	const normalized = normalizePhotoRoundPayload(raw);
 	if (!normalized || typeof normalized !== 'object' || !('items' in normalized)) {
@@ -136,6 +190,11 @@ export function parsePhotoRoundItems(
 	if (!Array.isArray(items)) {
 		return [];
 	}
+
+	const fallbackZone =
+		zoneHint ??
+		coerceLocation((normalized as { detectedZone?: unknown }).detectedZone) ??
+		'cupboard';
 
 	const result: PhotoRoundDetectedItem[] = [];
 	const seen = new Set<string>();
@@ -156,11 +215,36 @@ export function parsePhotoRoundItems(
 			quantity: coerceQuantity(row.quantity),
 			unit: coerceUnit(row.unit),
 			confidence,
-			location: zone
+			location: resolveReceiptLineLocation(name, row.location || fallbackZone)
 		});
 	}
 
 	return result;
+}
+
+export function parsePhotoRoundResponse(
+	raw: unknown,
+	zoneHint: StorageLocation | null
+): PhotoRoundParseResult {
+	const normalized = normalizePhotoRoundPayload(raw);
+	const detectedZone =
+		zoneHint ??
+		(normalized && typeof normalized === 'object' && 'detectedZone' in normalized
+			? coerceLocation((normalized as { detectedZone: unknown }).detectedZone)
+			: null) ??
+		'cupboard';
+	const zoneConfidence =
+		zoneHint !== null
+			? 'high'
+			: normalized && typeof normalized === 'object' && 'zoneConfidence' in normalized
+				? (coerceConfidence((normalized as { zoneConfidence: unknown }).zoneConfidence) ?? 'low')
+				: 'low';
+
+	return {
+		items: parsePhotoRoundItems(raw, zoneHint ?? detectedZone),
+		detectedZone,
+		zoneConfidence
+	};
 }
 
 function isOpenAiSchemaFailure(result: OpenAiFailureResult): boolean {
@@ -206,16 +290,19 @@ async function requestPhotoRoundStructured(
 
 export async function parsePhotoRoundFromImages(
 	apiKey: string,
-	zone: StorageLocation,
+	zoneHint: StorageLocation | null,
 	imageDataUrls: string[],
 	options?: { validate?: boolean }
 ): Promise<
-	| { ok: true; items: PhotoRoundDetectedItem[] }
+	| ({ ok: true } & PhotoRoundParseResult)
 	| ({ ok: false } & OpenAiFailureResult)
 > {
+	const zoneLabel = zoneHint ? ZONE_CONTEXT[zoneHint] : 'fotot';
 	const initial = await requestPhotoRoundStructured(apiKey, {
-		systemPrompt: photoRoundSystemPrompt(zone),
-		userPrompt: `Inventera varorna i ${ZONE_CONTEXT[zone]} från ${imageDataUrls.length} foto.`,
+		systemPrompt: photoRoundSystemPrompt(zoneHint),
+		userPrompt: zoneHint
+			? `Inventera varorna i ${ZONE_CONTEXT[zoneHint]} från ${imageDataUrls.length} foto.`
+			: `Inventera varorna och identifiera zonen från ${imageDataUrls.length} foto.`,
 		imageDataUrls
 	});
 
@@ -223,31 +310,41 @@ export async function parsePhotoRoundFromImages(
 		return initial;
 	}
 
-	let items = parsePhotoRoundItems(initial.data, zone);
-	if (items.length === 0) {
-		return { ok: true, items: [] };
+	let parsed = parsePhotoRoundResponse(initial.data, zoneHint);
+	if (parsed.items.length === 0) {
+		return { ok: true, ...parsed };
 	}
 
-	if (options?.validate !== false && items.length > 0) {
-		const summary = items
-			.map((item) => `- ${item.name} (${item.quantity}${item.unit ? ` ${item.unit}` : ''})`)
+	if (options?.validate !== false && parsed.items.length > 0) {
+		const summary = parsed.items
+			.map(
+				(item) =>
+					`- ${item.name} (${item.quantity}${item.unit ? ` ${item.unit}` : ''}, ${item.location})`
+			)
 			.join('\n');
 		const validation = await requestPhotoRoundStructured(apiKey, {
 			systemPrompt: PHOTO_ROUND_VALIDATION_PROMPT,
-			userPrompt: `Zon: ${ZONE_CONTEXT[zone]}.\nFöreslagna varor:\n${summary}`,
+			userPrompt: `Zon: ${ZONE_CONTEXT[parsed.detectedZone]}.\nFöreslagna varor:\n${summary}`,
 			imageDataUrls: []
 		});
 		if (validation.ok) {
-			const validated = parsePhotoRoundItems(validation.data, zone);
-			if (validated.length > 0) {
-				items = validated;
+			const validated = parsePhotoRoundResponse(validation.data, zoneHint);
+			if (validated.items.length > 0) {
+				parsed = validated;
 			}
 		}
 	}
 
-	return { ok: true, items };
+	return { ok: true, ...parsed };
 }
 
 export function isPhotoRoundZone(value: string): value is StorageLocation {
 	return isStorageLocation(value);
+}
+
+export function parsePhotoRoundZoneHint(value: unknown): StorageLocation | null {
+	if (typeof value !== 'string') return null;
+	const trimmed = value.trim().toLowerCase();
+	if (!trimmed || trimmed === 'auto') return null;
+	return isPhotoRoundZone(trimmed) ? trimmed : null;
 }

@@ -1,16 +1,20 @@
 {
+	"detectedZone": "fridge",
+	"zoneConfidence": "high",
 	"items": [
 		{
 			"name": "Mjölk",
 			"quantity": "1",
 			"unit": "l",
-			"confidence": "high"
+			"confidence": "high",
+			"location": "fridge"
 		},
 		{
 			"name": "Ägg",
 			"quantity": "12",
 			"unit": "st",
-			"confidence": "medium"
+			"confidence": "medium",
+			"location": "fridge"
 		}
 	]
 }

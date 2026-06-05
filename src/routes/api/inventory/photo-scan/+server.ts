@@ -1,13 +1,13 @@
 import { Buffer } from 'node:buffer';
 import { json } from '@sveltejs/kit';
-import type { PhotoRoundDetectedItem } from '$lib/domain/photo-round';
+import type { PhotoRoundParseResult } from '$lib/domain/photo-round';
 import { PHOTO_ROUND_MAX_IMAGE_BYTES, PHOTO_ROUND_MAX_IMAGES } from '$lib/domain/photo-round';
 import { translate } from '$lib/i18n/messages';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { e2eMockPhotoRoundParse, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 import { translateOpenAiError, missingOpenAiKeyMessage } from '$lib/server/openai';
-import { isPhotoRoundZone, parsePhotoRoundFromImages } from '$lib/server/photo-round-parse';
+import { parsePhotoRoundFromImages, parsePhotoRoundZoneHint } from '$lib/server/photo-round-parse';
 import { recordProductEvent } from '$lib/server/product-events';
 import type { RequestHandler } from './$types';
 
@@ -18,11 +18,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	const formData = await request.formData();
-	const zoneRaw = formData.get('zone');
-	if (typeof zoneRaw !== 'string' || !isPhotoRoundZone(zoneRaw)) {
-		return json({ error: translate(locals.locale, 'errors.api.photoRoundInvalidZone') }, { status: 400 });
+	const zoneHint = parsePhotoRoundZoneHint(formData.get('zone'));
+	if (formData.has('zone') && zoneHint === null && formData.get('zone') !== 'auto') {
+		const zoneRaw = formData.get('zone');
+		if (typeof zoneRaw === 'string' && zoneRaw.trim() && zoneRaw.trim().toLowerCase() !== 'auto') {
+			return json({ error: translate(locals.locale, 'errors.api.photoRoundInvalidZone') }, { status: 400 });
+		}
 	}
-	const zone = zoneRaw;
 
 	const uploads = formData
 		.getAll('images')
@@ -60,14 +62,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	if (isE2eMockAiEnabled()) {
-		const items = e2eMockPhotoRoundParse(zone);
+		const parsed = e2eMockPhotoRoundParse(zoneHint);
 		recordProductEvent(locals.pmfService, {
 			userId: auth.user.id,
 			householdId: locals.householdId,
 			eventType: 'photo_round_parsed',
-			metadata: { itemCount: items.length, zone, e2eMock: true }
+			metadata: {
+				itemCount: parsed.items.length,
+				zone: parsed.detectedZone,
+				zoneConfidence: parsed.zoneConfidence,
+				e2eMock: true
+			}
 		});
-		return json({ items } satisfies { items: PhotoRoundDetectedItem[] });
+		return json(parsed satisfies PhotoRoundParseResult);
 	}
 
 	const apiKeyOrResponse = requireOpenAiKey(locals.locale, 'photo inventory round', 503);
@@ -84,7 +91,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		imageDataUrls.push(`data:${file.type};base64,${base64}`);
 	}
 
-	const aiResult = await parsePhotoRoundFromImages(apiKey, zone, imageDataUrls);
+	const aiResult = await parsePhotoRoundFromImages(apiKey, zoneHint, imageDataUrls);
 	if (!aiResult.ok) {
 		return json({ error: translateOpenAiError(locals.locale, aiResult) }, { status: aiResult.status });
 	}
@@ -93,8 +100,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		userId: auth.user.id,
 		householdId: locals.householdId,
 		eventType: 'photo_round_parsed',
-		metadata: { itemCount: aiResult.items.length, zone, imageCount: uploads.length }
+		metadata: {
+			itemCount: aiResult.items.length,
+			zone: aiResult.detectedZone,
+			zoneConfidence: aiResult.zoneConfidence,
+			zoneHint: zoneHint ?? undefined,
+			imageCount: uploads.length
+		}
 	});
 
-	return json({ items: aiResult.items } satisfies { items: PhotoRoundDetectedItem[] });
+	return json({
+		items: aiResult.items,
+		detectedZone: aiResult.detectedZone,
+		zoneConfidence: aiResult.zoneConfidence
+	} satisfies PhotoRoundParseResult);
 };
