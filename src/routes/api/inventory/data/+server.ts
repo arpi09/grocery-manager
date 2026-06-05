@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { INVENTORY_LIST_DEFAULT, INVENTORY_LIST_MAX } from '$lib/domain/inventory-list';
 import { isStorageLocation } from '$lib/domain/location';
+import { translate } from '$lib/i18n/messages';
 import { requireHousehold } from '$lib/server/api-guards';
 import type { RequestHandler } from './$types';
 
@@ -45,12 +46,18 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 
 	const sectionParam = url.searchParams.get('section');
 	if (!isSection(sectionParam)) {
-		return json({ error: 'Invalid section' }, { status: 400 });
+		return json(
+			{ error: translate(locals.locale, 'errors.api.invalidSection') },
+			{ status: 400 }
+		);
 	}
 
 	const locationParam = url.searchParams.get('location');
 	if (!locationParam || !isStorageLocation(locationParam)) {
-		return json({ error: 'Invalid location' }, { status: 400 });
+		return json(
+			{ error: translate(locals.locale, 'errors.api.invalidLocation') },
+			{ status: 400 }
+		);
 	}
 
 	const householdId = auth.householdId;

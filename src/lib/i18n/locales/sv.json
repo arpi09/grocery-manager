@@ -1700,7 +1700,10 @@
 			"missingRowId": "Saknar rad-id",
 			"aiRateLimitAiScan": "Du har använt alla {limit} AI-skannar den här månaden på Gratis-planen. Uppgradera till Pro eller vänta till nästa månad.",
 			"aiRateLimitReceiptPdf": "Du har använt alla {limit} kvitto-PDF den här månaden på Gratis-planen. Uppgradera till Pro eller vänta till nästa månad.",
-			"aiRateLimitSmartFill": "Du har använt alla {limit} smart fill den här veckan på Gratis-planen. Uppgradera till Pro eller vänta till nästa vecka."
+			"aiRateLimitSmartFill": "Du har använt alla {limit} smart fill den här veckan på Gratis-planen. Uppgradera till Pro eller vänta till nästa vecka.",
+			"barcodeNotFound": "Ogiltig streckkod.",
+			"invalidSection": "Ogiltig inventariesektion.",
+			"invalidLocation": "Ogiltig förvaringsplats."
 		},
 		"shopping": {
 			"missingRowId": "Saknar rad-id"
