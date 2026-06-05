@@ -297,7 +297,6 @@ export async function parsePhotoRoundFromImages(
 	| ({ ok: true } & PhotoRoundParseResult)
 	| ({ ok: false } & OpenAiFailureResult)
 > {
-	const zoneLabel = zoneHint ? ZONE_CONTEXT[zoneHint] : 'fotot';
 	const initial = await requestPhotoRoundStructured(apiKey, {
 		systemPrompt: photoRoundSystemPrompt(zoneHint),
 		userPrompt: zoneHint
