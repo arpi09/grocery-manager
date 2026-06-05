@@ -37,6 +37,8 @@
 		onCloseMore
 	}: Props = $props();
 
+	let morePanelEl = $state<HTMLDivElement | null>(null);
+
 	const pathname = $derived(page.url.pathname);
 	const isPro = $derived(Boolean(page.data.isPro));
 
@@ -53,6 +55,14 @@
 			onCloseMore();
 		}
 	}
+
+	$effect(() => {
+		if (!moreOpen || !morePanelEl) {
+			return;
+		}
+		const firstItem = morePanelEl.querySelector<HTMLElement>('[role="menuitem"]');
+		firstItem?.focus();
+	});
 </script>
 
 <svelte:window onkeydown={onWindowKeydown} />
@@ -106,6 +116,7 @@
 								class="desktop-more-panel"
 								id="nav-more-desktop"
 								role="menu"
+								bind:this={morePanelEl}
 								transition:fly={{ y: -6, duration: 180 }}
 							>
 								<p class="more-section-title label-caps">{t('nav.morePages')}</p>

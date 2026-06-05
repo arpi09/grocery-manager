@@ -10,6 +10,7 @@
 		trapFocus,
 		unlockBodyScroll
 	} from '$lib/utils/modal-a11y';
+	import { t } from '$lib/i18n';
 	import type { Snippet } from 'svelte';
 
 	type Variant = 'center' | 'sheet';
@@ -57,7 +58,7 @@
 	/** Ignore backdrop clicks in the same tick as open (avoids instant close from trigger click). */
 	let openedAt = $state(0);
 
-	const ariaLabel = $derived(label ?? (title ? undefined : 'Dialog'));
+	const ariaLabel = $derived(label ?? (title ? undefined : t('common.dialog')));
 	const ariaLabelledby = $derived(title ? titleId : undefined);
 
 	function requestClose() {

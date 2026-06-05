@@ -8,6 +8,7 @@ import { consumeRateLimit } from '$lib/server/auth-rate-limit';
 import { isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 import { createSession } from '$lib/server/session';
 import { isGoogleOAuthConfigured } from '$lib/server/google-oauth';
+import { translate } from '$lib/i18n/messages';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -37,7 +38,7 @@ export const actions: Actions = {
 		if (!parsed.success) {
 			return fail(400, {
 				errors: parsed.error.flatten().fieldErrors,
-				message: 'Please fix the errors below.',
+				message: translate(event.locals.locale, 'auth.login.fixErrorsBelow'),
 				email: String(formData.email ?? ''),
 				redirectTo: safeRedirect(String(formData.redirectTo ?? ''))
 			});
@@ -55,7 +56,7 @@ export const actions: Actions = {
 		) {
 			return fail(429, {
 				errors: {},
-				message: 'Too many login attempts. Please try again later.',
+				message: translate(event.locals.locale, 'auth.login.rateLimit'),
 				email: parsed.data.email,
 				redirectTo
 			});

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Modal from '$lib/components/molecules/Modal.svelte';
-	import NewsPathIllustration from '$lib/components/organisms/NewsPathIllustration.svelte';
+	import NewsPathIllustration from '$lib/components/molecules/NewsPathIllustration.svelte';
 	import type { NewsIllustrationId } from '$lib/data/app-news';
 
 	interface Props {

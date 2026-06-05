@@ -23,6 +23,8 @@
 		"skip": "Skip",
 		"getStarted": "Get started",
 		"loading": "Loading…",
+		"processing": "Processing…",
+		"dialog": "Dialog",
 		"loadMore": "Load more",
 		"thinking": "Thinking…",
 		"lookup": "Looking up…",
@@ -111,7 +113,9 @@
 			"metaDescription": "Log in to Skaffu — pantry app for fridge, freezer and shopping. Reduce food waste with smart inventory and expiry tracking.",
 			"newHere": "New here?",
 			"createAccount": "Create account",
-			"forgotPassword": "Forgot password?"
+			"forgotPassword": "Forgot password?",
+			"fixErrorsBelow": "Please fix the errors below.",
+			"rateLimit": "Too many login attempts. Please try again later."
 		},
 		"register": {
 			"title": "Create account",
@@ -736,6 +740,7 @@
 		"preferencesPlaceholder": "E.g. vegetarian, budget, gluten-free, family with kids",
 		"householdSizeLabel": "People in household",
 		"fillSuccess": "{count} {count, plural, one {item added} other {items added}} to the list.",
+		"fillCelebrationBig": "Nice — {count} items on your list!",
 		"fillPartialSuccess": "{added} {added, plural, one {item added} other {items added}}. {skipped} already on the list.",
 		"fillAllDuplicates": "All {count} suggestions were already on the list.",
 		"exportList": "Copy list",

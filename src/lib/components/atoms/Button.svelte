@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Spinner from '$lib/components/atoms/Spinner.svelte';
+	import { t } from '$lib/i18n';
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 
@@ -33,7 +34,7 @@
 	{...rest}
 >
 	{#if loading}
-		<Spinner size="sm" label={loadingLabel ?? 'Bearbetar'} />
+		<Spinner size="sm" label={loadingLabel ?? t('common.processing')} />
 		{#if loadingLabel}
 			<span>{loadingLabel}</span>
 		{/if}

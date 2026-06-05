@@ -23,6 +23,8 @@
 		"skip": "Hoppa över",
 		"getStarted": "Kom igång",
 		"loading": "Laddar…",
+		"processing": "Bearbetar…",
+		"dialog": "Dialog",
 		"loadMore": "Visa fler",
 		"thinking": "Tänker…",
 		"lookup": "Slår upp…",
@@ -102,7 +104,9 @@
 			"metaDescription": "Logga in på Skaffu — skafferi-app för kyl, frys och inköp. Minska matsvinn med smart lagerhållning och utgångsdatum.",
 			"newHere": "Ny här?",
 			"createAccount": "Skapa konto",
-			"forgotPassword": "Glömt lösenord?"
+			"forgotPassword": "Glömt lösenord?",
+			"fixErrorsBelow": "Åtgärda felen nedan.",
+			"rateLimit": "För många inloggningsförsök. Försök igen om en stund."
 		},
 		"register": {
 			"title": "Skapa konto",
@@ -716,6 +720,7 @@
 		"preferencesPlaceholder": "T.ex. vegetariskt, budget, glutenfritt, barnfamilj",
 		"householdSizeLabel": "Antal personer i hushållet",
 		"fillSuccess": "{count} {count, plural, one {vara lades} other {varor lades}} till på listan.",
+		"fillCelebrationBig": "Bra jobbat — {count} varor på listan!",
 		"fillPartialSuccess": "{added} {added, plural, one {vara lades} other {varor lades}} till. {skipped} fanns redan på listan.",
 		"fillAllDuplicates": "Alla {count} förslag fanns redan på listan.",
 		"exportList": "Kopiera lista",

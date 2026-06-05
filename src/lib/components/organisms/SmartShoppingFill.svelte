@@ -32,6 +32,8 @@
 	let celebrate = $state(false);
 	let lastHandledFillKey = $state<string | null>(null);
 
+	const FILL_CELEBRATION_THRESHOLD = 15;
+
 	const successMessage = $derived.by(() => {
 		const result = form?.fillSuccess;
 		if (!result) return null;
@@ -43,6 +45,9 @@
 				added: result.added,
 				skipped: result.skipped
 			});
+		}
+		if (result.added >= FILL_CELEBRATION_THRESHOLD) {
+			return t('shopping.fillCelebrationBig', { count: result.added });
 		}
 		return t('shopping.fillSuccess', { count: result.added });
 	});

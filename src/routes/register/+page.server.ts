@@ -43,7 +43,7 @@ export const actions: Actions = {
 		if (!parsed.success) {
 			return fail(400, {
 				errors: parsed.error.flatten().fieldErrors,
-				message: 'Please fix the errors below.',
+				message: translate(event.locals.locale, 'auth.login.fixErrorsBelow'),
 				email: String(formData.email ?? '')
 			});
 		}
