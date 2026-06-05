@@ -1,26 +1,30 @@
-import { error, json } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
+import { translate } from '$lib/i18n/messages';
+import { requireUser } from '$lib/server/api-guards';
+import { pushSubscriptionRepository } from '$lib/server/di';
 import { pushUnsubscribeSchema } from '$lib/validation/push.schemas';
-import { DrizzlePushSubscriptionRepository } from '$lib/infrastructure/repositories/push-subscription.repository';
 import type { RequestHandler } from './$types';
 
-const pushRepository = new DrizzlePushSubscriptionRepository();
-
 export const POST: RequestHandler = async ({ request, locals }) => {
-	if (!locals.user) {
-		error(401, 'Unauthorized');
+	const auth = requireUser(locals);
+	if (!auth.authorized) {
+		return auth.response;
 	}
 
 	const body = await request.json().catch(() => null);
 	const parsed = pushUnsubscribeSchema.safeParse(body);
 	if (!parsed.success) {
-		return json({ ok: false, error: 'Invalid request' }, { status: 400 });
+		return json(
+			{ ok: false, error: translate(locals.locale, 'errors.api.invalidRequest') },
+			{ status: 400 }
+		);
 	}
 
-	await pushRepository.removeByEndpoint(locals.user.id, parsed.data.endpoint);
+	await pushSubscriptionRepository.removeByEndpoint(auth.user.id, parsed.data.endpoint);
 
-	const remaining = await pushRepository.listByUserId(locals.user.id);
+	const remaining = await pushSubscriptionRepository.listByUserId(auth.user.id);
 	if (remaining.length === 0) {
-		await pushRepository.setPushEnabled(locals.user.id, false);
+		await pushSubscriptionRepository.setPushEnabled(auth.user.id, false);
 	}
 
 	return json({ ok: true });

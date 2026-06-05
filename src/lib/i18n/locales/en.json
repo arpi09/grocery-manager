@@ -128,7 +128,8 @@
 			"loginLink": "Log in",
 			"captchaLabel": "Confirm you are not a robot",
 			"captchaLoadError": "Captcha could not load. Refresh the page and try again.",
-			"captchaDomainError": "Captcha could not load for this website address. Try opening the app via the official website URL or contact support."
+			"captchaDomainError": "Captcha could not load for this website address. Try opening the app via the official website URL or contact support.",
+			"rateLimited": "Too many registration attempts. Wait a moment and try again."
 		},
 		"google": {
 			"continue": "Continue with Google",
@@ -1690,6 +1691,18 @@
 		},
 		"api": {
 			"unauthorized": "You must be logged in.",
+			"emailNotVerified": "Verify your email address before using the API.",
+			"invalidJson": "Invalid JSON.",
+			"invalidSection": "Invalid section.",
+			"invalidPayload": "Invalid payload.",
+			"invalidChoice": "Invalid choice.",
+			"invalidInterval": "Invalid interval.",
+			"householdNotFound": "Household not found.",
+			"pushNotConfigured": "Push notifications are not configured.",
+			"invalidSubscription": "Invalid subscription.",
+			"invalidRequest": "Invalid request.",
+			"missingId": "Missing id.",
+			"invalidEventType": "Invalid event type.",
 			"openAiNotConfigured": "AI service is not available right now. Try again later.",
 			"openAiUnauthorized": "AI service is temporarily unavailable. Try again in a moment.",
 			"openAiRateLimit": "AI service is busy right now. Wait a moment and try again.",

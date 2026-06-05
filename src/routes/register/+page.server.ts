@@ -18,6 +18,7 @@ import { getOrSetAnalyticsVisitorId } from '$lib/server/analytics-visitor';
 import { recordSignupCompleteEvent } from '$lib/server/marketing-analytics';
 import { registerSchema } from '$lib/validation/auth.schemas';
 import { POST_REGISTER_APP_HOME_PATH, POST_REGISTER_SCAN_PATH } from '$lib/navigation/post-register';
+import { consumeRateLimit } from '$lib/server/auth-rate-limit';
 import { isEmailVerificationSkipped } from '$lib/server/email-verification-enforcement';
 import { createSession } from '$lib/server/session';
 import { isGoogleOAuthConfigured } from '$lib/server/google-oauth';
@@ -48,8 +49,17 @@ export const actions: Actions = {
 			});
 		}
 
+		const clientIp = event.getClientAddress();
+		if (!consumeRateLimit(`register:ip:${clientIp}`, 10, 15 * 60 * 1000)) {
+			return fail(429, {
+				errors: {},
+				message: translate(event.locals.locale, 'auth.register.rateLimited'),
+				email: parsed.data.email
+			});
+		}
+
 		const captchaToken = String(formData['cf-turnstile-response'] ?? '');
-		const captcha = await verifyTurnstileToken(captchaToken, event.getClientAddress());
+		const captcha = await verifyTurnstileToken(captchaToken, clientIp);
 		if (!captcha.ok) {
 			return fail(400, {
 				errors: {},

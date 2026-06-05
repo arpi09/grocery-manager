@@ -2,10 +2,10 @@
 import { generateSecureToken, hashSecureToken, verifySecureToken } from '$lib/infrastructure/auth/secure-token';
 import type { IEmailVerificationRepository } from '$lib/infrastructure/repositories/email-verification.repository';
 import type { IUserRepository } from '$lib/infrastructure/repositories/user.repository';
-import { consumeRateLimit } from '$lib/server/auth-rate-limit';
-import { sendEmailVerificationEmail } from '$lib/server/email';
-import { getAppOrigin } from '$lib/server/origin';
-import { isEmailVerificationSkipped } from '$lib/server/email-verification-enforcement';
+import type { AppOriginPort } from '$lib/application/ports/app-origin.port';
+import type { EmailPort } from '$lib/application/ports/email.port';
+import type { EmailVerificationPolicyPort } from '$lib/application/ports/email-verification-policy.port';
+import type { RateLimitPort } from '$lib/application/ports/rate-limit.port';
 
 const EMAIL_WINDOW_MS = 60 * 60 * 1000;
 const MAX_PER_EMAIL = 3;
@@ -16,7 +16,11 @@ export type EmailVerificationSendResult = { sent: boolean };
 export class EmailVerificationService {
 	constructor(
 		private readonly users: IUserRepository,
-		private readonly tokens: IEmailVerificationRepository
+		private readonly tokens: IEmailVerificationRepository,
+		private readonly rateLimit: RateLimitPort,
+		private readonly email: EmailPort,
+		private readonly appOrigin: AppOriginPort,
+		private readonly verificationPolicy: EmailVerificationPolicyPort
 	) {}
 
 	async sendSignupVerification(
@@ -28,7 +32,7 @@ export class EmailVerificationService {
 			return { sent: false };
 		}
 
-		if (isEmailVerificationSkipped()) {
+		if (this.verificationPolicy.isSkipped()) {
 			await this.users.markEmailVerified(userId);
 			return { sent: false };
 		}
@@ -42,7 +46,7 @@ export class EmailVerificationService {
 		locale: 'sv' | 'en' = 'sv'
 	): Promise<EmailVerificationSendResult> {
 		const ipKey = `email-verify:ip:${clientIp}`;
-		if (!consumeRateLimit(ipKey, 20, EMAIL_WINDOW_MS)) {
+		if (!this.rateLimit.consume(ipKey, 20, EMAIL_WINDOW_MS)) {
 			return { sent: true };
 		}
 
@@ -52,7 +56,7 @@ export class EmailVerificationService {
 		}
 
 		const emailKey = `email-verify:email:${user.email}`;
-		if (!consumeRateLimit(emailKey, MAX_PER_EMAIL, EMAIL_WINDOW_MS)) {
+		if (!this.rateLimit.consume(emailKey, MAX_PER_EMAIL, EMAIL_WINDOW_MS)) {
 			return { sent: true };
 		}
 
@@ -77,8 +81,8 @@ export class EmailVerificationService {
 		const tokenId = generateId();
 		await this.tokens.createToken(userId, tokenId, tokenHash);
 
-		const verifyUrl = `${getAppOrigin()}/verify-email/${rawToken}`;
-		await sendEmailVerificationEmail({ to: email, verifyUrl, locale });
+		const verifyUrl = `${this.appOrigin.getOrigin()}/verify-email/${rawToken}`;
+		await this.email.sendEmailVerificationEmail({ to: email, verifyUrl, locale });
 
 		return { sent: true };
 	}

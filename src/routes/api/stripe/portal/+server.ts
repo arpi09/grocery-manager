@@ -6,12 +6,13 @@ import {
 } from '$lib/application/billing.service';
 import { isHouseholdOwner } from '$lib/domain/household';
 import { translate } from '$lib/i18n/messages';
+import { requireUser } from '$lib/server/api-guards';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ locals, url }) => {
-	const user = locals.user;
-	if (!user) {
-		return json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+	const auth = requireUser(locals);
+	if (!auth.authorized) {
+		return auth.response;
 	}
 
 	if (!locals.householdId || !locals.householdRole || !isHouseholdOwner(locals.householdRole)) {
@@ -41,7 +42,10 @@ export const POST: RequestHandler = async ({ locals, url }) => {
 			);
 		}
 		if (error instanceof BillingHouseholdMissingError) {
-			return json({ ok: false, error: 'Household not found' }, { status: 404 });
+			return json(
+				{ ok: false, error: translate(locals.locale, 'errors.api.householdNotFound') },
+				{ status: 404 }
+			);
 		}
 		throw error;
 	}

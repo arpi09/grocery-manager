@@ -1,5 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { hasAnalyticsConsent } from '$lib/cookie-consent';
+import { translate } from '$lib/i18n/messages';
+import { requireUser } from '$lib/server/api-guards';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { PRODUCT_EVENT_TYPES, type ProductEventType } from '$lib/domain/pmf';
 import {
@@ -47,11 +49,17 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 	try {
 		body = (await request.json()) as { eventType?: unknown; metadata?: unknown };
 	} catch {
-		return json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
+		return json(
+			{ ok: false, error: translate(locals.locale, 'errors.api.invalidJson') },
+			{ status: 400 }
+		);
 	}
 
 	if (!isAllowedEventType(body.eventType)) {
-		return json({ ok: false, error: 'Invalid event type' }, { status: 400 });
+		return json(
+			{ ok: false, error: translate(locals.locale, 'errors.api.invalidEventType') },
+			{ status: 400 }
+		);
 	}
 
 	const eventType = body.eventType;
@@ -59,11 +67,17 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 	const isAuthEvent = AUTH_EVENT_TYPES.has(eventType);
 
 	if (!isPublic && !isAuthEvent) {
-		return json({ ok: false, error: 'Invalid event type' }, { status: 400 });
+		return json(
+			{ ok: false, error: translate(locals.locale, 'errors.api.invalidEventType') },
+			{ status: 400 }
+		);
 	}
 
-	if (isAuthEvent && !locals.user) {
-		return json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+	if (isAuthEvent) {
+		const auth = requireUser(locals);
+		if (!auth.authorized) {
+			return auth.response;
+		}
 	}
 
 	const consent = readCookieConsent(cookies);

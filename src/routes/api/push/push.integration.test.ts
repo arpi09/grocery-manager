@@ -79,12 +79,13 @@ describe('Push API integration', () => {
 
 	describe('GET /api/push/vapid-public-key', () => {
 		it('returns 503 when VAPID public key is missing', async () => {
-			const response = await getVapidPublicKey({} as Parameters<typeof getVapidPublicKey>[0]);
+			const response = await getVapidPublicKey({
+				locals: { locale: 'en' }
+			} as Parameters<typeof getVapidPublicKey>[0]);
 			expect(response.status).toBe(503);
-			await expect(response.json()).resolves.toEqual({
-				ok: false,
-				error: 'Push not configured'
-			});
+			const body = await response.json();
+			expect(body.ok).toBe(false);
+			expect(body.error).toBeTruthy();
 		});
 
 		it('returns 200 with public key when configured', async () => {
@@ -104,19 +105,19 @@ describe('Push API integration', () => {
 			pushEnv.publicKey = TEST_PUBLIC_KEY;
 			pushEnv.privateKey = TEST_PRIVATE_KEY;
 
-			await expect(
-				subscribe({
-					request: new Request('http://localhost/api/push/subscribe', {
-						method: 'POST',
-						headers: { 'content-type': 'application/json' },
-						body: JSON.stringify({
-							endpoint: TEST_ENDPOINT,
-							keys: { p256dh: 'p256dh-key', auth: 'auth-key' }
-						})
-					}),
-					locals: { user: null } as App.Locals
-				} as Parameters<typeof subscribe>[0])
-			).rejects.toMatchObject({ status: 401 });
+			const response = await subscribe({
+				request: new Request('http://localhost/api/push/subscribe', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({
+						endpoint: TEST_ENDPOINT,
+						keys: { p256dh: 'p256dh-key', auth: 'auth-key' }
+					})
+				}),
+				locals: { user: null, locale: 'en' } as App.Locals
+			} as Parameters<typeof subscribe>[0]);
+
+			expect(response.status).toBe(401);
 		});
 
 		it('returns 503 when push is not configured', async () => {
@@ -131,14 +132,13 @@ describe('Push API integration', () => {
 						keys: { p256dh: 'p256dh-key', auth: 'auth-key' }
 					})
 				}),
-				locals: { user: { id: 'user-1' } } as App.Locals
+				locals: { user: { id: 'user-1' }, locale: 'en' } as App.Locals
 			} as Parameters<typeof subscribe>[0]);
 
 			expect(response.status).toBe(503);
-			await expect(response.json()).resolves.toEqual({
-				ok: false,
-				error: 'Push not configured'
-			});
+			const body = await response.json();
+			expect(body.ok).toBe(false);
+			expect(body.error).toBeTruthy();
 		});
 
 		it('returns 200 and persists subscription when configured', async () => {
@@ -167,16 +167,16 @@ describe('Push API integration', () => {
 
 	describe('POST /api/push/unsubscribe', () => {
 		it('returns 401 when unauthenticated', async () => {
-			await expect(
-				unsubscribe({
-					request: new Request('http://localhost/api/push/unsubscribe', {
-						method: 'POST',
-						headers: { 'content-type': 'application/json' },
-						body: JSON.stringify({ endpoint: TEST_ENDPOINT })
-					}),
-					locals: { user: null } as App.Locals
-				} as Parameters<typeof unsubscribe>[0])
-			).rejects.toMatchObject({ status: 401 });
+			const response = await unsubscribe({
+				request: new Request('http://localhost/api/push/unsubscribe', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ endpoint: TEST_ENDPOINT })
+				}),
+				locals: { user: null, locale: 'en' } as App.Locals
+			} as Parameters<typeof unsubscribe>[0]);
+
+			expect(response.status).toBe(401);
 		});
 
 		it('returns 200 and clears subscription for authenticated user', async () => {
@@ -206,12 +206,12 @@ describe('Push API integration', () => {
 
 	describe('POST /api/push/disable', () => {
 		it('returns 401 when unauthenticated', async () => {
-			await expect(
-				disable({
-					request: new Request('http://localhost/api/push/disable', { method: 'POST' }),
-					locals: { user: null } as App.Locals
-				} as Parameters<typeof disable>[0])
-			).rejects.toMatchObject({ status: 401 });
+			const response = await disable({
+				request: new Request('http://localhost/api/push/disable', { method: 'POST' }),
+				locals: { user: null, locale: 'en' } as App.Locals
+			} as Parameters<typeof disable>[0]);
+
+			expect(response.status).toBe(401);
 		});
 
 		it('returns 200 and clears all subscriptions without endpoint', async () => {

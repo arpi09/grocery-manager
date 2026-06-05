@@ -1,17 +1,17 @@
 import { shouldSendShoppingPush } from '$lib/domain/shopping-push';
 import type { HouseholdService } from '$lib/application/household.service';
 import type { ShoppingListService } from '$lib/application/shopping-list.service';
+import type { AppOriginPort } from '$lib/application/ports/app-origin.port';
+import type { PushPort } from '$lib/application/ports/push.port';
 import {
 	deletePushSubscriptionById,
-	DrizzlePushSubscriptionRepository
+	type IPushSubscriptionRepository
 } from '$lib/infrastructure/repositories/push-subscription.repository';
 import type {
 	IShoppingPushRepository,
 	ShoppingPushUser
 } from '$lib/infrastructure/repositories/shopping-push.repository';
-import { sendPushNotification } from '$lib/server/push';
 import { translate } from '$lib/i18n/messages';
-import { getAppOrigin } from '$lib/server/origin';
 
 export type ShoppingPushRunResult =
 	| { status: 'skipped'; reason: 'disabled' | 'recent' | 'no_items' | 'no_subscriptions' }
@@ -26,12 +26,13 @@ export interface ShoppingPushBatchResult {
 }
 
 export class ShoppingPushService {
-	private readonly pushRepository = new DrizzlePushSubscriptionRepository();
-
 	constructor(
 		private readonly repository: IShoppingPushRepository,
 		private readonly householdService: HouseholdService,
-		private readonly shoppingListService: ShoppingListService
+		private readonly shoppingListService: ShoppingListService,
+		private readonly pushRepository: IPushSubscriptionRepository,
+		private readonly push: PushPort,
+		private readonly appOrigin: AppOriginPort
 	) {}
 
 	async getSettings(userId: string) {
@@ -117,13 +118,13 @@ export class ShoppingPushService {
 		const payload = {
 			title: translate(locale, 'pushNotifications.shoppingTitle'),
 			body: translate(locale, 'pushNotifications.shoppingBody', { count: itemCount }),
-			url: `${getAppOrigin() || ''}/inkop`,
+			url: `${this.appOrigin.getOrigin() || ''}/inkop`,
 			tag: 'home-pantry-shopping'
 		};
 
 		let delivered = 0;
 		for (const subscription of subscriptions) {
-			const result = await sendPushNotification(subscription, payload);
+			const result = await this.push.sendNotification(subscription, payload);
 			if (result.ok) {
 				delivered += 1;
 				continue;

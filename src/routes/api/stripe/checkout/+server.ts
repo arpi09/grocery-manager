@@ -6,14 +6,16 @@ import {
 import { isHouseholdOwner } from '$lib/domain/household';
 import { isProTier } from '$lib/domain/plan';
 import { translate } from '$lib/i18n/messages';
+import { requireUser } from '$lib/server/api-guards';
 import { createCheckoutSessionSchema } from '$lib/validation/billing.schemas';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals, url }) => {
-	const user = locals.user;
-	if (!user) {
-		return json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+	const auth = requireUser(locals);
+	if (!auth.authorized) {
+		return auth.response;
 	}
+	const user = auth.user;
 
 	if (!locals.householdId || !locals.householdRole || !isHouseholdOwner(locals.householdRole)) {
 		return json(
@@ -34,12 +36,18 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
 	try {
 		body = await request.json();
 	} catch {
-		return json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
+		return json(
+			{ ok: false, error: translate(locals.locale, 'errors.api.invalidJson') },
+			{ status: 400 }
+		);
 	}
 
 	const parsed = createCheckoutSessionSchema.safeParse(body);
 	if (!parsed.success) {
-		return json({ ok: false, error: 'Invalid interval' }, { status: 400 });
+		return json(
+			{ ok: false, error: translate(locals.locale, 'errors.api.invalidInterval') },
+			{ status: 400 }
+		);
 	}
 
 	try {
@@ -59,7 +67,10 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
 			);
 		}
 		if (error instanceof BillingHouseholdMissingError) {
-			return json({ ok: false, error: 'Household not found' }, { status: 404 });
+			return json(
+				{ ok: false, error: translate(locals.locale, 'errors.api.householdNotFound') },
+				{ status: 404 }
+			);
 		}
 		throw error;
 	}

@@ -11,5 +11,3 @@ export const POST: RequestHandler = async ({ request }) => {
 	const result = await pmfDigestService.runWeeklyDigest();
 	return json({ ok: true, ...result });
 };
-
-export const GET: RequestHandler = POST;

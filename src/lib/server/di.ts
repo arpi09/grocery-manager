@@ -49,9 +49,17 @@ import { DrizzlePurchasePatternRepository } from '$lib/infrastructure/repositori
 import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
 import { BillingService } from '$lib/application/billing.service';
 import { DrizzleBillingRepository } from '$lib/infrastructure/repositories/billing.repository';
+import { DrizzlePushSubscriptionRepository } from '$lib/infrastructure/repositories/push-subscription.repository';
+import { appOriginAdapter } from '$lib/infrastructure/adapters/app-origin.adapter';
+import { emailAdapter } from '$lib/infrastructure/adapters/email.adapter';
+import { emailVerificationPolicyAdapter } from '$lib/infrastructure/adapters/email-verification-policy.adapter';
+import { pushAdapter } from '$lib/infrastructure/adapters/push.adapter';
+import { rateLimitAdapter } from '$lib/infrastructure/adapters/rate-limit.adapter';
+import { shelfLifeInferenceAdapter } from '$lib/infrastructure/adapters/shelf-life-inference.adapter';
+import { stripeAdapter } from '$lib/infrastructure/adapters/stripe.adapter';
 
 const userRepository = new DrizzleUserRepository();
-const passwordResetRepository = new DrizzlePasswordResetRepository();
+export const passwordResetRepository = new DrizzlePasswordResetRepository();
 const emailVerificationRepository = new DrizzleEmailVerificationRepository();
 const adminActionRepository = new DrizzleAdminActionRepository();
 const errorLogRepository = new DrizzleErrorLogRepository();
@@ -75,16 +83,27 @@ const appSettingsRepository = new DrizzleAppSettingsRepository();
 
 const purchasePatternRepository = new DrizzlePurchasePatternRepository();
 const billingRepository = new DrizzleBillingRepository();
+export const pushSubscriptionRepository = new DrizzlePushSubscriptionRepository();
 
 export const authService = new AuthService(userRepository);
-export const passwordResetService = new PasswordResetService(userRepository, passwordResetRepository);
+export const passwordResetService = new PasswordResetService(
+	userRepository,
+	passwordResetRepository,
+	rateLimitAdapter,
+	emailAdapter,
+	appOriginAdapter
+);
 export const emailVerificationService = new EmailVerificationService(
 	userRepository,
-	emailVerificationRepository
+	emailVerificationRepository,
+	rateLimitAdapter,
+	emailAdapter,
+	appOriginAdapter,
+	emailVerificationPolicyAdapter
 );
 export const oauthService = new OAuthService(userRepository);
 export const profileService = new ProfileService(userRepository);
-export const billingService = new BillingService(billingRepository);
+export const billingService = new BillingService(billingRepository, stripeAdapter, appOriginAdapter);
 export const adminService = new AdminService(
 	adminRepository,
 	passwordResetService,
@@ -95,7 +114,8 @@ export const householdService = new HouseholdService(householdRepository);
 export const inventoryService = new InventoryService(
 	inventoryRepository,
 	consumptionRepository,
-	householdRepository
+	householdRepository,
+	shelfLifeInferenceAdapter
 );
 export const purchasePatternService = new PurchasePatternService(
 	purchasePatternRepository,
@@ -120,12 +140,19 @@ export const pmfService = new PmfService(pmfRepository);
 export const expiryReminderService = new ExpiryReminderService(
 	expiryReminderRepository,
 	householdService,
-	inventoryService
+	inventoryService,
+	pushSubscriptionRepository,
+	emailAdapter,
+	pushAdapter,
+	appOriginAdapter
 );
 export const shoppingPushService = new ShoppingPushService(
 	shoppingPushRepository,
 	householdService,
-	shoppingListService
+	shoppingListService,
+	pushSubscriptionRepository,
+	pushAdapter,
+	appOriginAdapter
 );
 export const productFeedbackService = new ProductFeedbackService(productFeedbackRepository);
 export const pmfSurveyService = new PmfSurveyService(pmfSurveyRepository);
@@ -137,5 +164,7 @@ export const appSettingsService = new AppSettingsService(appSettingsRepository);
 export const pmfDigestService = new PmfDigestService(
 	pmfService,
 	adminService,
-	waitlistService
+	waitlistService,
+	emailAdapter,
+	appOriginAdapter
 );

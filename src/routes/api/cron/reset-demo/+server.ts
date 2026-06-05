@@ -25,5 +25,3 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json({ ok: false, error: message }, { status: 500 });
 	}
 };
-
-export const GET: RequestHandler = POST;

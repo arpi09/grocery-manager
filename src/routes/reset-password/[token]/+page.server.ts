@@ -4,15 +4,13 @@ import { translate } from '$lib/i18n/messages';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { createSession } from '$lib/server/session';
 import { resetPasswordSchema } from '$lib/validation/auth.schemas';
-import { DrizzlePasswordResetRepository } from '$lib/infrastructure/repositories/password-reset.repository';
+import { passwordResetRepository } from '$lib/server/di';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-const tokenRepository = new DrizzlePasswordResetRepository();
-
 export const load: PageServerLoad = async ({ params, url }) => {
 	const tokenHash = hashSecureToken(params.token);
-	const row = await tokenRepository.findValidByTokenHash(tokenHash);
+	const row = await passwordResetRepository.findValidByTokenHash(tokenHash);
 	const tokenValid = Boolean(row && verifySecureToken(params.token, row.tokenHash));
 
 	return {

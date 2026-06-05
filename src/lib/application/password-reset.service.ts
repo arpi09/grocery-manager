@@ -3,9 +3,9 @@ import { hashPassword } from '$lib/infrastructure/auth/password';
 import { generateSecureToken, hashSecureToken, verifySecureToken } from '$lib/infrastructure/auth/secure-token';
 import type { IPasswordResetRepository } from '$lib/infrastructure/repositories/password-reset.repository';
 import type { IUserRepository } from '$lib/infrastructure/repositories/user.repository';
-import { consumeRateLimit } from '$lib/server/auth-rate-limit';
-import { sendPasswordResetEmail } from '$lib/server/email';
-import { getAppOrigin } from '$lib/server/origin';
+import type { AppOriginPort } from '$lib/application/ports/app-origin.port';
+import type { EmailPort } from '$lib/application/ports/email.port';
+import type { RateLimitPort } from '$lib/application/ports/rate-limit.port';
 
 const EMAIL_WINDOW_MS = 60 * 60 * 1000;
 const MAX_PER_EMAIL = 3;
@@ -16,7 +16,10 @@ export type PasswordResetRequestResult = { sent: boolean };
 export class PasswordResetService {
 	constructor(
 		private readonly users: IUserRepository,
-		private readonly tokens: IPasswordResetRepository
+		private readonly tokens: IPasswordResetRepository,
+		private readonly rateLimit: RateLimitPort,
+		private readonly email: EmailPort,
+		private readonly appOrigin: AppOriginPort
 	) {}
 
 	async requestReset(
@@ -28,11 +31,11 @@ export class PasswordResetService {
 		const ipKey = `pw-reset:ip:${clientIp}`;
 		const emailKey = `pw-reset:email:${normalized}`;
 
-		if (!consumeRateLimit(ipKey, MAX_PER_IP, EMAIL_WINDOW_MS)) {
+		if (!this.rateLimit.consume(ipKey, MAX_PER_IP, EMAIL_WINDOW_MS)) {
 			return { sent: true };
 		}
 
-		if (!consumeRateLimit(emailKey, MAX_PER_EMAIL, EMAIL_WINDOW_MS)) {
+		if (!this.rateLimit.consume(emailKey, MAX_PER_EMAIL, EMAIL_WINDOW_MS)) {
 			return { sent: true };
 		}
 
@@ -54,8 +57,8 @@ export class PasswordResetService {
 		const tokenId = generateId();
 		await this.tokens.createToken(user.id, tokenId, tokenHash);
 
-		const resetUrl = `${getAppOrigin()}/reset-password/${rawToken}`;
-		await sendPasswordResetEmail({
+		const resetUrl = `${this.appOrigin.getOrigin()}/reset-password/${rawToken}`;
+		await this.email.sendPasswordResetEmail({
 			to: user.email,
 			resetUrl,
 			locale
@@ -101,8 +104,8 @@ export class PasswordResetService {
 		const tokenId = generateId();
 		await this.tokens.createToken(targetUserId, tokenId, tokenHash);
 
-		const resetUrl = `${getAppOrigin()}/reset-password/${rawToken}`;
-		await sendPasswordResetEmail({
+		const resetUrl = `${this.appOrigin.getOrigin()}/reset-password/${rawToken}`;
+		await this.email.sendPasswordResetEmail({
 			to: user.email,
 			resetUrl,
 			locale: options?.locale ?? 'sv'

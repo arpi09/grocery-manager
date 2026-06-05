@@ -8,14 +8,14 @@ import { daysUntilExpiry, formatExpiryDate } from '$lib/domain/expiry';
 import { locationLabel } from '$lib/i18n/domain-labels';
 import type { HouseholdService } from '$lib/application/household.service';
 import type { InventoryService } from '$lib/application/inventory.service';
-import { sendExpiryReminderEmail, isEmailSendingDisabledFailure } from '$lib/server/email';
+import type { AppOriginPort } from '$lib/application/ports/app-origin.port';
+import type { EmailPort } from '$lib/application/ports/email.port';
+import type { PushPort } from '$lib/application/ports/push.port';
 import {
 	deletePushSubscriptionById,
-	DrizzlePushSubscriptionRepository
+	type IPushSubscriptionRepository
 } from '$lib/infrastructure/repositories/push-subscription.repository';
-import { sendPushNotification } from '$lib/server/push';
 import { translate } from '$lib/i18n/messages';
-import { getAppOrigin } from '$lib/server/origin';
 import type {
 	ExpiryReminderUser,
 	IExpiryReminderRepository
@@ -40,12 +40,14 @@ export interface ExpiryReminderBatchResult {
 }
 
 export class ExpiryReminderService {
-	private readonly pushRepository = new DrizzlePushSubscriptionRepository();
-
 	constructor(
 		private readonly repository: IExpiryReminderRepository,
 		private readonly householdService: HouseholdService,
-		private readonly inventoryService: InventoryService
+		private readonly inventoryService: InventoryService,
+		private readonly pushRepository: IPushSubscriptionRepository,
+		private readonly email: EmailPort,
+		private readonly push: PushPort,
+		private readonly appOrigin: AppOriginPort
 	) {}
 
 	async getSettings(userId: string) {
@@ -110,7 +112,7 @@ export class ExpiryReminderService {
 		const failures: string[] = [];
 
 		if (emailEnabled) {
-			const emailResult = await sendExpiryReminderEmail({
+			const emailResult = await this.email.sendExpiryReminderEmail({
 				to: user.email,
 				recipientName: user.displayName?.trim() || user.email,
 				days: user.settings.days,
@@ -129,7 +131,7 @@ export class ExpiryReminderService {
 
 			if (emailResult.ok) {
 				sentAny = true;
-			} else if (!isEmailSendingDisabledFailure(emailResult)) {
+			} else if (!this.email.isEmailSendingDisabledFailure(emailResult)) {
 				failures.push(emailResult.reason);
 			}
 		}
@@ -165,13 +167,13 @@ export class ExpiryReminderService {
 		const payload = {
 			title: translate(locale, 'pushNotifications.expiryTitle'),
 			body: translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days }),
-			url: `${getAppOrigin() || ''}/hem`,
+			url: `${this.appOrigin.getOrigin() || ''}/hem`,
 			tag: 'home-pantry-expiry'
 		};
 
 		let delivered = 0;
 		for (const subscription of subscriptions) {
-			const result = await sendPushNotification(subscription, payload);
+			const result = await this.push.sendNotification(subscription, payload);
 			if (result.ok) {
 				delivered += 1;
 				continue;

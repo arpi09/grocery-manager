@@ -44,3 +44,6 @@ jobs:
           DATABASE_URL: postgresql://pantry:pantry@localhost:5432/pantry
           USE_PGLITE: 'true'
           PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+
+      - name: npm audit (runtime critical/high)
+        run: npm audit --omit=dev --audit-level=high

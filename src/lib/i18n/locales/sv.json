@@ -119,7 +119,8 @@
 			"loginLink": "Logga in",
 			"captchaLabel": "Bekräfta att du inte är en robot",
 			"captchaLoadError": "Captcha kunde inte laddas. Uppdatera sidan och försök igen.",
-			"captchaDomainError": "Captcha kunde inte laddas för den här webbadressen. Prova att öppna appen via den officiella webbadressen eller kontakta support."
+			"captchaDomainError": "Captcha kunde inte laddas för den här webbadressen. Prova att öppna appen via den officiella webbadressen eller kontakta support.",
+			"rateLimited": "För många registreringsförsök. Vänta en stund och försök igen."
 		},
 		"google": {
 			"continue": "Fortsätt med Google",
@@ -1670,6 +1671,18 @@
 		},
 		"api": {
 			"unauthorized": "Du måste vara inloggad.",
+			"emailNotVerified": "Bekräfta din e-postadress innan du använder API:et.",
+			"invalidJson": "Ogiltig JSON.",
+			"invalidSection": "Ogiltig inventariesektion.",
+			"invalidPayload": "Ogiltig data.",
+			"invalidChoice": "Ogiltigt val.",
+			"invalidInterval": "Ogiltigt intervall.",
+			"householdNotFound": "Hushåll hittades inte.",
+			"pushNotConfigured": "Push-notiser är inte konfigurerade.",
+			"invalidSubscription": "Ogiltig prenumeration.",
+			"invalidRequest": "Ogiltig begäran.",
+			"missingId": "Saknar id.",
+			"invalidEventType": "Ogiltig händelsetyp.",
 			"openAiNotConfigured": "AI-tjänsten är inte tillgänglig just nu. Försök igen senare.",
 			"openAiUnauthorized": "AI-tjänsten är tillfälligt otillgänglig. Försök igen om en stund.",
 			"openAiRateLimit": "AI-tjänsten är upptagen just nu. Vänta en stund och försök igen.",
@@ -1707,7 +1720,6 @@
 			"aiRateLimitReceiptPdf": "Du har använt alla {limit} kvitto-PDF den här månaden på Gratis-planen. Uppgradera till Pro eller vänta till nästa månad.",
 			"aiRateLimitSmartFill": "Du har använt alla {limit} smart fill den här veckan på Gratis-planen. Uppgradera till Pro eller vänta till nästa vecka.",
 			"barcodeNotFound": "Ogiltig streckkod.",
-			"invalidSection": "Ogiltig inventariesektion.",
 			"invalidLocation": "Ogiltig förvaringsplats."
 		},
 		"shopping": {

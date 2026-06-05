@@ -6,13 +6,9 @@ import {
 	type HouseholdBillingState
 } from '$lib/domain/billing';
 import { DEFAULT_PLAN_TIER, type PlanTier } from '$lib/domain/plan';
+import type { AppOriginPort } from '$lib/application/ports/app-origin.port';
+import type { StripePort } from '$lib/application/ports/stripe.port';
 import type { IBillingRepository } from '$lib/infrastructure/repositories/billing.repository';
-import {
-	createStripeClient,
-	getStripePriceIdForInterval,
-	isStripeCheckoutConfigured
-} from '$lib/server/stripe';
-import { getAppOrigin } from '$lib/server/origin';
 
 export class BillingNotConfiguredError extends Error {
 	readonly name = 'BillingNotConfiguredError';
@@ -35,7 +31,11 @@ export interface CreateCheckoutSessionInput {
 }
 
 export class BillingService {
-	constructor(private readonly repository: IBillingRepository) {}
+	constructor(
+		private readonly repository: IBillingRepository,
+		private readonly stripe: StripePort,
+		private readonly appOrigin: AppOriginPort
+	) {}
 
 	async getPlanTier(householdId: string | null): Promise<PlanTier> {
 		if (!householdId) {
@@ -55,12 +55,12 @@ export class BillingService {
 	}
 
 	async createCheckoutSession(input: CreateCheckoutSessionInput): Promise<{ url: string }> {
-		if (!isStripeCheckoutConfigured()) {
+		if (!this.stripe.isCheckoutConfigured()) {
 			throw new BillingNotConfiguredError();
 		}
 
-		const stripe = createStripeClient();
-		const priceId = getStripePriceIdForInterval(input.interval);
+		const stripe = this.stripe.createClient();
+		const priceId = this.stripe.getPriceIdForInterval(input.interval);
 		if (!stripe || !priceId) {
 			throw new BillingNotConfiguredError();
 		}
@@ -70,7 +70,7 @@ export class BillingService {
 			throw new BillingHouseholdMissingError();
 		}
 
-		const origin = getAppOrigin(input.origin);
+		const origin = this.appOrigin.getOrigin(input.origin);
 		let customerId = billing.stripeCustomerId;
 
 		if (!customerId) {
@@ -124,7 +124,7 @@ export class BillingService {
 			return;
 		}
 
-		const stripe = createStripeClient();
+		const stripe = this.stripe.createClient();
 		let status: string | null = 'active';
 		if (stripe && subscriptionId) {
 			const subscription = await stripe.subscriptions.retrieve(subscriptionId);
@@ -158,11 +158,11 @@ export class BillingService {
 		householdId: string;
 		origin?: string;
 	}): Promise<{ url: string }> {
-		if (!isStripeCheckoutConfigured()) {
+		if (!this.stripe.isCheckoutConfigured()) {
 			throw new BillingNotConfiguredError();
 		}
 
-		const stripe = createStripeClient();
+		const stripe = this.stripe.createClient();
 		if (!stripe) {
 			throw new BillingNotConfiguredError();
 		}
@@ -172,7 +172,7 @@ export class BillingService {
 			throw new BillingPortalUnavailableError();
 		}
 
-		const origin = getAppOrigin(input.origin);
+		const origin = this.appOrigin.getOrigin(input.origin);
 		const session = await stripe.billingPortal.sessions.create({
 			customer: billing.stripeCustomerId,
 			return_url: `${origin}/settings?checkout=portal#settings-plan`

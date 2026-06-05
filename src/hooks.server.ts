@@ -62,6 +62,17 @@ function isInvitePath(pathname: string): boolean {
 	return pathname.startsWith('/invite/');
 }
 
+function isVerificationExemptApiPath(pathname: string): boolean {
+	return (
+		pathname.startsWith('/api/health') ||
+		pathname.startsWith('/api/cron/') ||
+		pathname === '/api/push/vapid-public-key' ||
+		pathname === '/api/product-events' ||
+		pathname === '/api/cookie-consent' ||
+		pathname === '/api/stripe/webhook'
+	);
+}
+
 function isPublicPath(pathname: string): boolean {
 	return (
 		publicPaths.has(pathname) ||
@@ -72,12 +83,7 @@ function isPublicPath(pathname: string): boolean {
 		isMarketingPath(pathname) ||
 		pathname === '/robots.txt' ||
 		pathname === '/sitemap.xml' ||
-		pathname.startsWith('/api/health') ||
-		pathname.startsWith('/api/cron/') ||
-		pathname === '/api/push/vapid-public-key' ||
-		pathname === '/api/product-events' ||
-		pathname === '/api/cookie-consent' ||
-		pathname === '/api/stripe/webhook'
+		isVerificationExemptApiPath(pathname)
 	);
 }
 
@@ -144,10 +150,16 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const isAuthenticated = !!event.locals.user;
 
 	if (
-			isAuthenticated &&
-			shouldRedirectUnverifiedUser(event.locals.user, pathname) &&
-			!pathname.startsWith('/api/')
-		) {
+		isAuthenticated &&
+		shouldRedirectUnverifiedUser(event.locals.user, pathname) &&
+		(!pathname.startsWith('/api/') || !isVerificationExemptApiPath(pathname))
+	) {
+		if (pathname.startsWith('/api/')) {
+			return json(
+				{ ok: false, error: translate(locale, 'errors.api.emailNotVerified') },
+				{ status: 403 }
+			);
+		}
 		redirect(302, '/verify-email');
 	}
 

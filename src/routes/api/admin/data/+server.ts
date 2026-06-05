@@ -13,6 +13,7 @@ import { STRIPE_READINESS_GATES } from '$lib/domain/plan';
 import { parseAdminAiUsagePeriodDays } from '$lib/domain/ai-usage-admin';
 import { parsePmfFunnelPeriodDays } from '$lib/domain/pmf-funnel';
 import { WAITLIST_LIST_DEFAULT, WAITLIST_LIST_MAX } from '$lib/domain/waitlist';
+import { translate } from '$lib/i18n/messages';
 import { requireAdmin } from '$lib/server/api-guards';
 import type { RequestHandler } from './$types';
 
@@ -74,7 +75,7 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 
 	const sectionParam = url.searchParams.get('section');
 	if (!isSection(sectionParam)) {
-		return json({ error: 'Invalid section' }, { status: 400 });
+		return json({ error: translate(locals.locale, 'errors.api.invalidSection') }, { status: 400 });
 	}
 
 	switch (sectionParam) {
@@ -121,7 +122,7 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 		case 'errorStack': {
 			const id = url.searchParams.get('id')?.trim();
 			if (!id) {
-				return json({ error: 'Missing id' }, { status: 400 });
+				return json({ error: translate(locals.locale, 'errors.api.missingId') }, { status: 400 });
 			}
 			const stack = await locals.adminService.getErrorStack(id);
 			return json({ stack });
@@ -172,6 +173,6 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 			});
 		}
 		default:
-			return json({ error: 'Invalid section' }, { status: 400 });
+			return json({ error: translate(locals.locale, 'errors.api.invalidSection') }, { status: 400 });
 	}
 };

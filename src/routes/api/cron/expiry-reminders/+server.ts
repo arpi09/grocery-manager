@@ -11,5 +11,3 @@ export const POST: RequestHandler = async ({ request }) => {
 	const result = await expiryReminderService.runWeeklyReminders();
 	return json({ ok: true, ...result });
 };
-
-export const GET: RequestHandler = POST;

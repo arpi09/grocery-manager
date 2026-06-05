@@ -1,9 +1,5 @@
 ﻿import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('$lib/server/email', () => ({
-	sendEmailVerificationEmail: vi.fn().mockResolvedValue({ ok: true })
-}));
-
 vi.mock('$lib/infrastructure/auth/secure-token', () => ({
 	generateSecureToken: vi.fn().mockReturnValue('raw-token'),
 	hashSecureToken: vi.fn().mockReturnValue('hash'),
@@ -14,23 +10,29 @@ vi.mock('$lib/infrastructure/auth/id', () => ({
 	generateId: vi.fn().mockReturnValue('token-id')
 }));
 
-vi.mock('$lib/server/auth-rate-limit', () => ({
-	consumeRateLimit: vi.fn().mockReturnValue(true)
-}));
-
-vi.mock('$lib/server/origin', () => ({
-	getAppOrigin: vi.fn().mockReturnValue('https://app.test')
-}));
-
-import { sendEmailVerificationEmail } from '$lib/server/email';
 import { EmailVerificationService } from './email-verification.service';
 import type { IUserRepository } from '$lib/infrastructure/repositories/user.repository';
 import type { IEmailVerificationRepository } from '$lib/infrastructure/repositories/email-verification.repository';
+import type { AppOriginPort } from '$lib/application/ports/app-origin.port';
+import type { EmailPort } from '$lib/application/ports/email.port';
+import type { EmailVerificationPolicyPort } from '$lib/application/ports/email-verification-policy.port';
+import type { RateLimitPort } from '$lib/application/ports/rate-limit.port';
 
 describe('EmailVerificationService', () => {
 	let users: IUserRepository;
 	let tokens: IEmailVerificationRepository;
 	let service: EmailVerificationService;
+	const rateLimit: RateLimitPort = { consume: vi.fn().mockReturnValue(true) };
+	const email: EmailPort = {
+		sendEmailVerificationEmail: vi.fn().mockResolvedValue({ ok: true }),
+		sendPasswordResetEmail: vi.fn(),
+		sendExpiryReminderEmail: vi.fn(),
+		isEmailSendingDisabledFailure: () => false,
+		getPmfDigestTo: () => null,
+		sendOwnerPmfDigest: vi.fn()
+	};
+	const appOrigin: AppOriginPort = { getOrigin: () => 'https://app.test' };
+	const verificationPolicy: EmailVerificationPolicyPort = { isSkipped: () => false };
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -53,7 +55,14 @@ describe('EmailVerificationService', () => {
 			invalidateAllForUser: vi.fn(),
 			countRecentForUser: vi.fn().mockResolvedValue(0)
 		};
-		service = new EmailVerificationService(users, tokens);
+		service = new EmailVerificationService(
+			users,
+			tokens,
+			rateLimit,
+			email,
+			appOrigin,
+			verificationPolicy
+		);
 	});
 
 	it('sends signup verification for unverified users', async () => {
@@ -68,7 +77,7 @@ describe('EmailVerificationService', () => {
 		const result = await service.sendSignupVerification('user-1', 'en');
 		expect(result).toEqual({ sent: true });
 		expect(tokens.invalidateAllForUser).toHaveBeenCalledWith('user-1');
-		expect(sendEmailVerificationEmail).toHaveBeenCalled();
+		expect(email.sendEmailVerificationEmail).toHaveBeenCalled();
 	});
 
 	it('completes signup verification with a valid token', async () => {

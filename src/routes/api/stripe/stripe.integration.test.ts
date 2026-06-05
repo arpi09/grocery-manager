@@ -80,7 +80,13 @@ describe('Stripe API integration', () => {
 				import('./webhook/+server')
 			]);
 
-		billingService = new BillingService(new DrizzleBillingRepository(integrationDb.db));
+		const { stripeAdapter } = await import('$lib/infrastructure/adapters/stripe.adapter');
+		const { appOriginAdapter } = await import('$lib/infrastructure/adapters/app-origin.adapter');
+		billingService = new BillingService(
+			new DrizzleBillingRepository(integrationDb.db),
+			stripeAdapter,
+			appOriginAdapter
+		);
 		checkout = checkoutMod.POST;
 		portal = portalMod.POST;
 		webhook = webhookMod.POST;

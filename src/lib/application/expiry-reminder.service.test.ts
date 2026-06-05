@@ -55,10 +55,32 @@ describe('ExpiryReminderService push delivery', () => {
 		])
 	};
 
+	const pushRepository = {
+		listByUserId: vi.fn().mockResolvedValue([
+			{
+				id: 'sub-1',
+				userId: 'user-1',
+				endpoint: 'https://push.example.com/1',
+				p256dh: 'key',
+				auth: 'auth'
+			}
+		])
+	};
+	const email = {
+		sendExpiryReminderEmail: vi.fn().mockResolvedValue({ ok: true }),
+		isEmailSendingDisabledFailure: vi.fn().mockReturnValue(false)
+	};
+	const push = { sendNotification: sendPushNotification };
+	const appOrigin = { getOrigin: () => 'https://skaffu.test' };
+
 	const service = new ExpiryReminderService(
 		repository as never,
 		householdService as never,
-		inventoryService as never
+		inventoryService as never,
+		pushRepository as never,
+		email as never,
+		push,
+		appOrigin
 	);
 
 	beforeEach(() => {

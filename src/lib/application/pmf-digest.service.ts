@@ -2,8 +2,8 @@ import { buildPmfDigestEmailContent } from '$lib/domain/pmf-digest';
 import type { PmfService } from '$lib/application/pmf.service';
 import type { AdminService } from '$lib/application/admin.service';
 import type { WaitlistService } from '$lib/application/waitlist.service';
-import { getPmfDigestTo, sendOwnerPmfDigest } from '$lib/server/email';
-import { getAppOrigin } from '$lib/server/origin';
+import type { AppOriginPort } from '$lib/application/ports/app-origin.port';
+import type { EmailPort } from '$lib/application/ports/email.port';
 
 export interface PmfDigestRunResult {
 	sent: boolean;
@@ -18,11 +18,13 @@ export class PmfDigestService {
 	constructor(
 		private readonly pmfService: PmfService,
 		private readonly adminService: AdminService,
-		private readonly waitlistService: WaitlistService
+		private readonly waitlistService: WaitlistService,
+		private readonly email: EmailPort,
+		private readonly appOrigin: AppOriginPort
 	) {}
 
 	async runWeeklyDigest(): Promise<PmfDigestRunResult> {
-		const to = getPmfDigestTo();
+		const to = this.email.getPmfDigestTo();
 		if (!to) {
 			console.warn('[pmf-digest] PMF_DIGEST_TO not configured; skipped');
 			return { sent: false, skipped: 'PMF_DIGEST_TO not configured' };
@@ -38,10 +40,10 @@ export class PmfDigestService {
 			review,
 			stats,
 			waitlistCount,
-			adminUrl: `${getAppOrigin()}/admin`
+			adminUrl: `${this.appOrigin.getOrigin()}/admin`
 		});
 
-		const result = await sendOwnerPmfDigest({
+		const result = await this.email.sendOwnerPmfDigest({
 			to,
 			subject: content.subject,
 			html: content.html,

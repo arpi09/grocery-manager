@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { hasAnalyticsConsent, type CookieConsentChoice } from '$lib/cookie-consent';
+import { translate } from '$lib/i18n/messages';
 import {
 	clearNonEssentialAnalyticsCookies,
 	writeCookieConsent
@@ -21,16 +22,22 @@ function parseLandingVariant(value: unknown): LandingHeroVariant | null {
 	return typeof value === 'string' && isLandingHeroVariant(value) ? value : null;
 }
 
-export const POST: RequestHandler = async ({ request, cookies }) => {
+export const POST: RequestHandler = async ({ request, cookies, locals }) => {
 	let body: { choice?: unknown; landingVariant?: unknown };
 	try {
 		body = (await request.json()) as { choice?: unknown; landingVariant?: unknown };
 	} catch {
-		return json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
+		return json(
+			{ ok: false, error: translate(locals.locale, 'errors.api.invalidJson') },
+			{ status: 400 }
+		);
 	}
 
 	if (!isConsentChoice(body.choice)) {
-		return json({ ok: false, error: 'Invalid choice' }, { status: 400 });
+		return json(
+			{ ok: false, error: translate(locals.locale, 'errors.api.invalidChoice') },
+			{ status: 400 }
+		);
 	}
 
 	writeCookieConsent(cookies, body.choice);

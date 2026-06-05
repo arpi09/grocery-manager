@@ -42,10 +42,27 @@ describe('ShoppingPushService', () => {
 		listUncheckedItems: vi.fn().mockResolvedValue([{ id: 'item-1', name: 'Mjölk' }])
 	};
 
+	const pushRepository = {
+		listByUserId: vi.fn().mockResolvedValue([
+			{
+				id: 'sub-1',
+				userId: 'user-1',
+				endpoint: 'https://push.example.com/1',
+				p256dh: 'key',
+				auth: 'auth'
+			}
+		])
+	};
+	const push = { sendNotification: sendPushNotification };
+	const appOrigin = { getOrigin: () => 'https://skaffu.test' };
+
 	const service = new ShoppingPushService(
 		repository as never,
 		householdService as never,
-		shoppingListService as never
+		shoppingListService as never,
+		pushRepository as never,
+		push,
+		appOrigin
 	);
 
 	beforeEach(() => {

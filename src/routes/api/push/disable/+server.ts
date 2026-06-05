@@ -1,17 +1,17 @@
-import { error, json } from '@sveltejs/kit';
-import { DrizzlePushSubscriptionRepository } from '$lib/infrastructure/repositories/push-subscription.repository';
+import { json } from '@sveltejs/kit';
+import { requireUser } from '$lib/server/api-guards';
+import { pushSubscriptionRepository } from '$lib/server/di';
 import type { RequestHandler } from './$types';
-
-const pushRepository = new DrizzlePushSubscriptionRepository();
 
 /** Turn off push for this user on the server (all devices). Browser cleanup is client-side. */
 export const POST: RequestHandler = async ({ locals }) => {
-	if (!locals.user) {
-		error(401, 'Unauthorized');
+	const auth = requireUser(locals);
+	if (!auth.authorized) {
+		return auth.response;
 	}
 
-	await pushRepository.removeAllForUser(locals.user.id);
-	await pushRepository.setPushEnabled(locals.user.id, false);
+	await pushSubscriptionRepository.removeAllForUser(auth.user.id);
+	await pushSubscriptionRepository.setPushEnabled(auth.user.id, false);
 
 	return json({ ok: true });
 };

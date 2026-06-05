@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { translate } from '$lib/i18n/messages';
 import { requireHousehold } from '$lib/server/api-guards';
 import type { RequestHandler } from './$types';
 
@@ -27,7 +28,7 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 
 	const sectionParam = url.searchParams.get('section');
 	if (!isSection(sectionParam)) {
-		return json({ error: 'Invalid section' }, { status: 400 });
+		return json({ error: translate(locals.locale, 'errors.api.invalidSection') }, { status: 400 });
 	}
 
 	const [items, total] = await Promise.all([

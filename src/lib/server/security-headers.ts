@@ -6,6 +6,7 @@ export function applySecurityHeaders(response: Response): void {
 	headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 	headers.set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
 	headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+	headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
 	if (!headers.has('Content-Security-Policy')) {
 		headers.set(
 			'Content-Security-Policy',

@@ -41,6 +41,7 @@
 		"seed:demo": "svelte-kit sync && node --env-file=.env --import tsx scripts/seed-demo-cli.ts"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "^4.11.3",
 		"@eslint/js": "^9.18.0",
 		"@playwright/test": "^1.52.0",
 		"@sveltejs/adapter-node": "^5.2.12",
