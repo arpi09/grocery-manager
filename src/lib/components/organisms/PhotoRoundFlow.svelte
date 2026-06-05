@@ -7,7 +7,7 @@
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
 	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
 	import { bindEmbeddedScanSubmit } from '$lib/utils/scan-embedded-submit';
-	import type { PhotoRoundDetectedItem } from '$lib/domain/photo-round';
+	import type { PhotoRoundConfidence, PhotoRoundDetectedItem } from '$lib/domain/photo-round';
 	import { PHOTO_ROUND_MAX_IMAGES, PHOTO_ROUND_MAX_TOTAL_BYTES } from '$lib/domain/photo-round';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
@@ -15,7 +15,6 @@
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { onMount } from 'svelte';
 
-	const DEFAULT_ANALYZE_ZONE: StorageLocation = 'fridge';
 
 	interface Props {
 		returnTo: string;
@@ -41,7 +40,8 @@
 	type ReviewLine = PhotoRoundDetectedItem & { id: number };
 
 	let step = $state<Step>('capture');
-	let zone = $state<StorageLocation>(initialLocation ?? DEFAULT_ANALYZE_ZONE);
+	let zone = $state<StorageLocation>(initialLocation ?? 'fridge');
+	let zoneConfidence = $state<PhotoRoundConfidence | null>(initialLocation ? 'high' : null);
 	let zonePickerOpen = $state(false);
 	let photos = $state<{ file: File; previewUrl: string }[]>([]);
 	let parsing = $state(false);
@@ -61,6 +61,10 @@
 		return t('photoRound.confidenceLow');
 	}
 
+	const showZonePicker = $derived(
+		!initialLocation && zoneConfidence !== 'high'
+	);
+
 	const captureLead = $derived(
 		initialLocation
 			? t('photoRound.captureLead', {
@@ -68,10 +72,16 @@
 					count: photos.length,
 					max: PHOTO_ROUND_MAX_IMAGES
 				})
-			: t('photoRound.captureLeadGeneric', {
-					count: photos.length,
-					max: PHOTO_ROUND_MAX_IMAGES
-				})
+			: zoneConfidence === 'high'
+				? t('photoRound.captureLeadDetected', {
+						zone: locationLabel(getLocale(), zone),
+						count: photos.length,
+						max: PHOTO_ROUND_MAX_IMAGES
+					})
+				: t('photoRound.captureLeadGeneric', {
+						count: photos.length,
+						max: PHOTO_ROUND_MAX_IMAGES
+					})
 	);
 
 	function selectZone(next: StorageLocation) {
@@ -113,6 +123,8 @@
 
 	async function readPhotoRoundParseResponse(response: Response): Promise<{
 		items?: PhotoRoundDetectedItem[];
+		detectedZone?: StorageLocation;
+		zoneConfidence?: PhotoRoundConfidence;
 		error?: string;
 	}> {
 		const contentType = response.headers.get('content-type') ?? '';
@@ -120,7 +132,12 @@
 			return {};
 		}
 		try {
-			return (await response.json()) as { items?: PhotoRoundDetectedItem[]; error?: string };
+			return (await response.json()) as {
+				items?: PhotoRoundDetectedItem[];
+				detectedZone?: StorageLocation;
+				zoneConfidence?: PhotoRoundConfidence;
+				error?: string;
+			};
 		} catch {
 			return {};
 		}
@@ -139,7 +156,13 @@
 		parseError = null;
 
 		const formData = new FormData();
-		formData.append('zone', zone);
+		if (initialLocation) {
+			formData.append('zone', initialLocation);
+		} else if (showZonePicker) {
+			formData.append('zone', zone);
+		} else {
+			formData.append('zone', 'auto');
+		}
 		for (const photo of photos) {
 			formData.append('images', photo.file);
 		}
@@ -156,6 +179,11 @@
 			if (data.items.length === 0) {
 				parseError = t('photoRound.noItems');
 				return;
+			}
+
+			if (!initialLocation && data.detectedZone) {
+				zone = data.detectedZone;
+				zoneConfidence = data.zoneConfidence ?? 'medium';
 			}
 
 			lines = data.items.map((item) => {
@@ -202,7 +230,8 @@
 		selected = {};
 		parseError = null;
 		step = 'capture';
-		zone = initialLocation ?? DEFAULT_ANALYZE_ZONE;
+		zone = initialLocation ?? 'fridge';
+		zoneConfidence = initialLocation ? 'high' : null;
 	}
 
 	const selectedCount = $derived(lines.filter((line) => selected[line.id]).length);
@@ -262,7 +291,7 @@
 			/>
 		{/if}
 
-		{#if !initialLocation}
+		{#if showZonePicker}
 			<details class="zone-optional" bind:open={zonePickerOpen}>
 				<summary>{t('photoRound.zoneOptional')}</summary>
 				<div class="zone-grid" role="group" aria-label={t('photoRound.zoneAria')}>
@@ -310,6 +339,9 @@
 			{t('photoRound.reviewTitle', { selected: selectedCount, total: lines.length })}
 		</h2>
 		<p class="hint">{t('photoRound.reviewHint')}</p>
+		{#if !initialLocation && zoneConfidence && zoneConfidence !== 'high'}
+			<FeedbackBanner tone="info" message={t('photoRound.zoneUncertain', { zone: locationLabel(getLocale(), zone) })} />
+		{/if}
 
 		<div class="select-actions">
 			<button type="button" class="link-btn" onclick={() => toggleAll(true)}>{t('common.selectAll')}</button>

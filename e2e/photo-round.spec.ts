@@ -13,6 +13,15 @@ const FIXTURE_JPEG = {
 test.describe('Photo round flow', () => {
 	test.setTimeout(90_000);
 
+	test('inventory location skips zone picker on capture', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/scan?mode=photo&location=fridge&from=/inventory/fridge');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 30_000 });
+		await expect(page.getByTestId('photo-round-zone-fridge')).toHaveCount(0);
+	});
+
 	test('bulk add selected items redirects with success feedback', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/scan?mode=photo&from=/hem');
