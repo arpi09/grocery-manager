@@ -124,6 +124,26 @@ test.describe('Scan and inventory', () => {
 		await expect(table.locator('th[aria-sort="descending"]')).toHaveCount(1, { timeout: 5_000 });
 	});
 
+	test.describe('inventory mobile', () => {
+		test.use({ viewport: { width: 390, height: 844 } });
+
+		test('table rows show log usage and labeled fields', async ({ page }) => {
+			await loginAsAdmin(page);
+			await page.goto('/inventory/fridge');
+			await dismissOnboardingModalIfOpen(page);
+
+			const table = page.getByTestId('inventory-table');
+			if (!(await table.isVisible({ timeout: 15_000 }).catch(() => false))) {
+				test.skip(true, 'No inventory rows in fridge — table hidden behind empty state');
+			}
+
+			await expect(table.getByRole('columnheader')).toHaveCount(0);
+			const logUsage = table.getByRole('button', { name: /Logga förbrukning|Log usage/i }).first();
+			await expect(logUsage).toBeVisible();
+			await expect(logUsage).toBeInViewport();
+		});
+	});
+
 	test('inventory shows single add-goods CTA to photo scan', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/inventory/fridge');

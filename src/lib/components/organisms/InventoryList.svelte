@@ -20,7 +20,6 @@
 		DEFAULT_INVENTORY_SORT,
 		DEFAULT_INVENTORY_SORT_DIRECTION,
 		filterAndSortInventoryItems,
-		type InventoryExpiryFilter,
 		type InventorySortDirection,
 		type InventorySortKey
 	} from '$lib/utils/inventory-list-filters';
@@ -54,7 +53,6 @@
 	);
 
 	let query = $state('');
-	const expiryFilter: InventoryExpiryFilter = 'all';
 	let sortKey = $state<InventorySortKey>(DEFAULT_INVENTORY_SORT);
 	let sortDirection = $state<InventorySortDirection>(DEFAULT_INVENTORY_SORT_DIRECTION);
 	let showAutoExpired = $state(false);
@@ -79,28 +77,16 @@
 	});
 
 	const filtered = $derived(
-		filterAndSortInventoryItems(loadedItems, query, expiryFilter, sortKey, sortDirection)
+		filterAndSortInventoryItems(loadedItems, query, 'all', sortKey, sortDirection)
 	);
 	const filteredAutoExpired = $derived(
 		showAutoExpired
-			? filterAndSortInventoryItems(
-					autoExpiredItems,
-					query,
-					expiryFilter,
-					sortKey,
-					sortDirection
-				)
+			? filterAndSortInventoryItems(autoExpiredItems, query, 'all', sortKey, sortDirection)
 			: []
 	);
 	const filteredFinished = $derived(
 		showFinished
-			? filterAndSortInventoryItems(
-					finishedItems,
-					query,
-					expiryFilter,
-					sortKey,
-					sortDirection
-				)
+			? filterAndSortInventoryItems(finishedItems, query, 'all', sortKey, sortDirection)
 			: []
 	);
 

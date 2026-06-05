@@ -805,6 +805,7 @@
 		"consumedTrendLead": "Items marked as finished",
 		"consumedTrendEmpty": "No history yet — mark items as finished when you use them.",
 		"trendCurrentWeek": "This week",
+		"trendCountAria": "{count} items",
 		"eatFirstCta": "Eat it first",
 		"eatFirstLead": "See expiring items and meal suggestions on the home screen.",
 		"scanCta": "Add more items",

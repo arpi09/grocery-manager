@@ -159,4 +159,11 @@
 		font-size: 0.9375rem;
 		line-height: 1.55;
 	}
+
+	@media (max-width: 899px) {
+		.steps-list,
+		.steps-accordion {
+			max-height: min(14rem, 34vh);
+		}
+	}
 </style>

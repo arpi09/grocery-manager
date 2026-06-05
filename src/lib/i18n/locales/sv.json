@@ -785,6 +785,7 @@
 		"consumedTrendLead": "Varor markerade som slut",
 		"consumedTrendEmpty": "Ingen historik än — markera varor som slut när ni använder dem.",
 		"trendCurrentWeek": "Denna vecka",
+		"trendCountAria": "{count} varor",
 		"eatFirstCta": "Ät det först",
 		"eatFirstLead": "Se utgående varor och få måltidsförslag på startsidan.",
 		"scanCta": "Lägg till fler varor",
