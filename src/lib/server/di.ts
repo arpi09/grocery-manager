@@ -33,6 +33,8 @@ import { ExpiryReminderService } from '$lib/application/expiry-reminder.service'
 import { ShoppingPushService } from '$lib/application/shopping-push.service';
 import { DrizzleProductFeedbackRepository } from '$lib/infrastructure/repositories/product-feedback.repository';
 import { ProductFeedbackService } from '$lib/application/product-feedback.service';
+import { PmfSurveyService } from '$lib/application/pmf-survey.service';
+import { DrizzlePmfSurveyRepository } from '$lib/infrastructure/repositories/pmf-survey.repository';
 import { DrizzleAiUsageRepository } from '$lib/infrastructure/repositories/ai-usage.repository';
 import { AiRateLimitService } from '$lib/application/ai-rate-limit.service';
 import { AiUsageAdminService } from '$lib/application/ai-usage-admin.service';
@@ -65,6 +67,7 @@ const pmfRepository = new DrizzlePmfRepository();
 const expiryReminderRepository = new DrizzleExpiryReminderRepository();
 const shoppingPushRepository = new DrizzleShoppingPushRepository();
 const productFeedbackRepository = new DrizzleProductFeedbackRepository();
+const pmfSurveyRepository = new DrizzlePmfSurveyRepository();
 const aiUsageRepository = new DrizzleAiUsageRepository();
 const planLimitsRepository = new DrizzlePlanLimitsRepository();
 const waitlistRepository = new DrizzleWaitlistRepository();
@@ -125,6 +128,7 @@ export const shoppingPushService = new ShoppingPushService(
 	shoppingListService
 );
 export const productFeedbackService = new ProductFeedbackService(productFeedbackRepository);
+export const pmfSurveyService = new PmfSurveyService(pmfSurveyRepository);
 export const aiRateLimitService = new AiRateLimitService(aiUsageRepository);
 export const aiUsageAdminService = new AiUsageAdminService(aiUsageRepository);
 export const planLimitsService = new PlanLimitsService(planLimitsRepository, aiRateLimitService);

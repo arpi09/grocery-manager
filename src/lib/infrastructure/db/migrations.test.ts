@@ -64,7 +64,8 @@ describe('drizzle migrations', () => {
 			'0025_receipt_purchase_pattern.sql',
 			'0026_household_stripe.sql',
 			'0027_email_verification.sql',
-			'0028_backfill_email_verified_at.sql'
+			'0028_backfill_email_verified_at.sql',
+			'0029_pmf_survey_response.sql'
 		];
 
 		expect(pgliteFiles).toEqual(sqlFiles);

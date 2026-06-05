@@ -8,6 +8,7 @@ import {
 	PRODUCT_FEEDBACK_LIST_DEFAULT,
 	PRODUCT_FEEDBACK_LIST_MAX
 } from '$lib/domain/product-feedback';
+import { PMF_SURVEY_LIST_DEFAULT, PMF_SURVEY_LIST_MAX } from '$lib/domain/pmf-survey';
 import { STRIPE_READINESS_GATES } from '$lib/domain/plan';
 import { parseAdminAiUsagePeriodDays } from '$lib/domain/ai-usage-admin';
 import { parsePmfFunnelPeriodDays } from '$lib/domain/pmf-funnel';
@@ -15,7 +16,16 @@ import { WAITLIST_LIST_DEFAULT, WAITLIST_LIST_MAX } from '$lib/domain/waitlist';
 import { requireAdmin } from '$lib/server/api-guards';
 import type { RequestHandler } from './$types';
 
-const SECTIONS = ['analytics', 'ai-usage', 'users', 'errors', 'errorStack', 'feedback', 'waitlist'] as const;
+const SECTIONS = [
+	'analytics',
+	'ai-usage',
+	'users',
+	'errors',
+	'errorStack',
+	'feedback',
+	'waitlist',
+	'pmf-survey'
+] as const;
 type AdminSection = (typeof SECTIONS)[number];
 
 function parseLimit(
@@ -142,6 +152,22 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 				waitlistCount,
 				waitlistTarget: STRIPE_READINESS_GATES.payingWaitlistMin,
 				waitlistEntries: serializeRows(waitlistEntries),
+				limit
+			});
+		}
+		case 'pmf-survey': {
+			const limit = parseLimit(
+				url.searchParams.get('limit'),
+				PMF_SURVEY_LIST_DEFAULT,
+				PMF_SURVEY_LIST_MAX
+			);
+			const [responses, summary] = await Promise.all([
+				locals.pmfSurveyService.listRecent(limit),
+				locals.pmfSurveyService.getSummary()
+			]);
+			return json({
+				responses: serializeRows(responses),
+				summary,
 				limit
 			});
 		}

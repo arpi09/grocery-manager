@@ -558,6 +558,26 @@
 			}
 		}
 	},
+	"pmfSurvey": {
+		"dialogAria": "Quick product survey",
+		"title": "Quick question about Skaffu",
+		"lead": "Three taps help us improve — dismiss anytime.",
+		"npsQuestion": "How likely are you to recommend Skaffu?",
+		"npsGroupAria": "Recommendation score 0–10",
+		"npsLow": "Not likely",
+		"npsHigh": "Very likely",
+		"missQuestion": "Would you miss Skaffu if it disappeared?",
+		"missGroupAria": "Would you miss Skaffu",
+		"wouldMiss": {
+			"yes": "Yes",
+			"somewhat": "Somewhat",
+			"no": "No"
+		},
+		"commentLabel": "Anything else? (optional)",
+		"commentPlaceholder": "e.g. what you love or what's missing…",
+		"dismiss": "Not now",
+		"submit": "Send"
+	},
 	"pwa": {
 		"page": {
 			"title": "Add to home screen",
@@ -947,7 +967,8 @@
 			"overview": "Overview",
 			"analytics": "Analytics",
 			"aiUsage": "AI usage",
-			"feedback": "Feedback & waitlist"
+			"feedback": "Feedback & waitlist",
+			"pmfSurvey": "PMF survey"
 		},
 		"sessionManagement": "Session management",
 		"logoutAllNote": "Log out everyone ends every active session, including your own. Users must log in again.",
@@ -1003,6 +1024,30 @@
 			"title": "User feedback",
 			"note": "Churn signals from settings and a short post-onboarding survey. Complements interviews — see docs/USER_INTERVIEWS.md.",
 			"empty": "No feedback yet."
+		},
+		"pmfSurvey": {
+			"summaryTitle": "PMF summary",
+			"tableTitle": "Survey responses",
+			"note": "NPS and “would you miss Skaffu” from the in-app banner. Export for interview prep.",
+			"empty": "No survey responses yet.",
+			"exportCsv": "Export CSV",
+			"totalResponses": "Responses",
+			"nps": "NPS",
+			"promoters": "Promoters (9–10)",
+			"passives": "Passives (7–8)",
+			"detractors": "Detractors (0–6)",
+			"wouldMissYes": "Would miss — yes",
+			"wouldMissSomewhat": "Would miss — somewhat",
+			"wouldMissNo": "Would miss — no",
+			"colDate": "Date",
+			"colTrigger": "Trigger",
+			"colNps": "NPS",
+			"colWouldMiss": "Would miss",
+			"colComment": "Comment",
+			"trigger": {
+				"post_onboarding": "Post-onboarding",
+				"periodic": "Periodic"
+			}
 		},
 		"waitlist": {
 			"title": "Pro interest (waitlist)",

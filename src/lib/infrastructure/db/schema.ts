@@ -327,6 +327,28 @@ export const productEventTable = pgTable(
 	]
 );
 
+export const pmfSurveyResponseTable = pgTable(
+	'pmf_survey_response',
+	{
+		id: text('id').primaryKey(),
+		userId: text('user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		householdId: text('household_id').references(() => householdTable.id, {
+			onDelete: 'set null'
+		}),
+		trigger: text('trigger', { enum: ['post_onboarding', 'periodic'] }).notNull(),
+		npsScore: integer('nps_score').notNull(),
+		wouldMiss: text('would_miss', { enum: ['yes', 'somewhat', 'no'] }).notNull(),
+		comment: text('comment'),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('pmf_survey_response_created_idx').on(table.createdAt),
+		index('pmf_survey_response_user_created_idx').on(table.userId, table.createdAt)
+	]
+);
+
 export const productFeedbackTable = pgTable(
 	'product_feedback',
 	{

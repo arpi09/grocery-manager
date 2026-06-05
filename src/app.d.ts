@@ -15,6 +15,7 @@ import type { PetFoodService } from '$lib/application/pet-food.service';
 import type { PetService } from '$lib/application/pet.service';
 import type { PmfService } from '$lib/application/pmf.service';
 import type { ProductFeedbackService } from '$lib/application/product-feedback.service';
+import type { PmfSurveyService } from '$lib/application/pmf-survey.service';
 import type { PlanLimitsService } from '$lib/application/plan-limits.service';
 import type { AiRateLimitService } from '$lib/application/ai-rate-limit.service';
 import type { AiUsageAdminService } from '$lib/application/ai-usage-admin.service';
@@ -54,6 +55,7 @@ declare global {
 			petFoodService: PetFoodService;
 			pmfService: PmfService;
 			productFeedbackService: ProductFeedbackService;
+			pmfSurveyService: PmfSurveyService;
 			planLimitsService: PlanLimitsService;
 			aiRateLimitService: AiRateLimitService;
 			aiUsageAdminService: AiUsageAdminService;

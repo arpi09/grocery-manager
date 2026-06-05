@@ -1,4 +1,5 @@
 import { isMarketingPath } from '$lib/marketing/routes';
+import { markPmfSurveyEligible } from '$lib/utils/pmf-survey-storage';
 
 /** Current onboarding tour version — bump to show the guide again for returning users. */
 export const ONBOARDING_VERSION = 3;
@@ -280,6 +281,7 @@ function markActivationComplete(userId?: string | null): void {
 	if (typeof localStorage !== 'undefined' && userId) {
 		localStorage.setItem(storageKey(CELEBRATION_PENDING_SUFFIX, userId), '1');
 	}
+	markPmfSurveyEligible(userId);
 	dispatchProgress();
 }
 

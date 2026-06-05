@@ -17,6 +17,7 @@ import {
 	petService,
 	pmfService,
 	productFeedbackService,
+	pmfSurveyService,
 	aiRateLimitService,
 	aiUsageAdminService,
 	planLimitsService,
@@ -102,6 +103,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.petFoodService = petFoodService;
 	event.locals.pmfService = pmfService;
 	event.locals.productFeedbackService = productFeedbackService;
+	event.locals.pmfSurveyService = pmfSurveyService;
 	event.locals.planLimitsService = planLimitsService;
 	event.locals.aiRateLimitService = aiRateLimitService;
 	event.locals.aiUsageAdminService = aiUsageAdminService;

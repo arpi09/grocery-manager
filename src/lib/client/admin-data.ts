@@ -1,6 +1,21 @@
-export type AdminTab = 'overview' | 'analytics' | 'aiUsage' | 'users' | 'logs' | 'feedback';
+export type AdminTab =
+	| 'overview'
+	| 'analytics'
+	| 'aiUsage'
+	| 'users'
+	| 'logs'
+	| 'feedback'
+	| 'pmfSurvey';
 
-export const ADMIN_TABS: AdminTab[] = ['overview', 'analytics', 'aiUsage', 'users', 'logs', 'feedback'];
+export const ADMIN_TABS: AdminTab[] = [
+	'overview',
+	'analytics',
+	'aiUsage',
+	'users',
+	'logs',
+	'feedback',
+	'pmfSurvey'
+];
 
 export function parseAdminTab(raw: string | null): AdminTab {
 	if (raw && ADMIN_TABS.includes(raw as AdminTab)) {
