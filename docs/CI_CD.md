@@ -1,8 +1,8 @@
 # CI/CD — trunk-baserad pipeline (home-pantry)
 
-**Ingen PR krävs.** Agenter och du pushar direkt till `master`. GitHub Actions kör kvalitet → E2E → deploy automatiskt.
+**Merge till `master` = snabb CI (~3–5 min).** Produktion deployas **manuellt** via Actions → **Deploy to production**. Se [DEPLOY.md](./DEPLOY.md).
 
-**Relaterat:** [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md)
+**Relaterat:** [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md) · [DEPLOY.md](./DEPLOY.md)
 
 ---
 
@@ -16,80 +16,82 @@ flowchart TB
     check --> commit
   end
 
-  subgraph G1["G1 — quality (~3–6 min)"]
+  subgraph G1["G1 — CI (~3–5 min, varje push/PR)"]
     push[git push origin master]
     q[lint · check · test · integration · build]
     push --> q
   end
 
-  subgraph G2["G2 — e2e (~8–15 min)"]
+  subgraph G2["G2 — e2e (~8–15 min, valfritt)"]
     e2e[Playwright chromium]
-    q --> e2e
+    pr[PR / manuellt / nattligt]
+    pr --> e2e
   end
 
-  subgraph G3["G3 — deploy (~5–20 min)"]
+  subgraph G3["G3 — deploy (~5–20 min, manuellt)"]
+    manual[Actions → Deploy to production]
     fb[Firebase App Hosting]
-    e2e --> fb
+    manual --> q2[quality + e2e]
+    q2 --> fb
   end
 
   commit --> push
+  q -.->|när du är redo| manual
 ```
 
 | Gate | När | Vad | Måltid | Blockerar |
 |------|-----|-----|--------|-----------|
 | **G0** | Före commit (agenter) | `npm run check && npm test` + husky `lint-staged` | ~1–2 min | Lokalt |
-| **G1** | Push till `master` | `lint`, `check`, `test`, `test:integration` (PGlite), `build` | ~3–6 min | G2 |
-| **G2** | Efter G1 | Playwright E2E (9 spec-filer, PGlite) | ~8–15 min | G3 |
-| **G3** | Efter G2 | `npm run deploy:firebase` | ~5–20 min | Produktion |
+| **G1** | Push/PR till `master` | `lint`, `check`, `test`, `test:integration` (PGlite), `build` | ~3–5 min | — (ingen auto-deploy) |
+| **G2** | PR, manuellt, nattligt, eller före deploy | Playwright E2E (PGlite) | ~8–15 min | G3 (vid deploy) |
+| **G3** | Manuell trigger | `firebase deploy --only apphosting:home-pantry` | ~5–20 min | Produktion |
 
-**Total tid (typiskt):** ~15–25 min från push till live — inget manuellt steg.
+**Efter merge:** ~3–5 min till grön CI. Deploy när du vill — typiskt ~15–25 min för full deploy-kedja.
 
 ---
 
 ## Agentens happy path
 
-När uppgiften är klar eller användaren säger *commit push deploy*:
+När uppgiften är klar:
 
 1. **G0 lokalt:** `npm run check && npm test` (plus `npm run test:e2e` om auth/UI rörts).
-2. **Commit + push:** `git commit` → `git push origin master`.
-3. **Vänta inte manuellt** — Actions kör automatiskt. Agent kan rapportera Actions-länk eller deploy-URL när klar.
-4. **Användaren gör inget** (förutsatt `FIREBASE_TOKEN` finns).
-
-**Öppna aldrig PR** om inte användaren uttryckligen ber om det.
+2. **Commit + push/merge till `master`.**
+3. **Vänta på grön CI** (~3–5 min) — inte full E2E/deploy.
+4. **Deploy (människa eller coordinator):** Actions → **Deploy to production** → Run workflow. Coordinator kan `gh workflow run deploy.yml` eller be användaren trigga.
+5. **Efter grön deploy:** coordinator kör [PROD_SMOKE.md](./PROD_SMOKE.md) — inte användaren.
 
 ---
 
-## Workflow (GitHub Actions)
+## Workflows (GitHub Actions)
 
 | Fil | Namn (UI) | Trigger |
 |-----|-----------|---------|
-| [`.github/workflows/release.yml`](../.github/workflows/release.yml) | **Release** | `push` → `master`/`main`; `workflow_dispatch` (nödläge) |
-| [`.github/workflows/expiry-reminders-cron.yml`](../.github/workflows/expiry-reminders-cron.yml) | **Expiry reminders cron** | `schedule` måndag 07:00 UTC; `workflow_dispatch` |
+| [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | **CI** | `push` / `pull_request` → `master`/`main` |
+| [`.github/workflows/e2e.yml`](../.github/workflows/e2e.yml) | **E2E** | PR → `master`/`main`; `workflow_dispatch`; schedule 03:00 UTC |
+| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | **Deploy to production** | `workflow_dispatch` only |
 
-Jobbkedja: `quality` → `e2e` → `deploy` (`needs:` — inga `workflow_run`-länkar).
+Deploy-kedja: `quality` → `e2e` → `deploy` (`needs:` i samma workflow).
 
-**Concurrency:** ny push till `master` avbryter pågående körning (`cancel-in-progress`).
+**Concurrency:**
+- **CI / E2E:** ny körning avbryter pågående på samma ref (`cancel-in-progress: true`).
+- **Deploy:** `deploy-production` — avbryter inte pågående deploy.
 
 **Node:** 20 (`.nvmrc`, `package.json` `engines`).
 
-### Nödläge
+### Nödläge (hotfix)
 
-Actions → **Release** → Run workflow → kryssa i *Skip E2E* endast vid akut deploy. Dokumentera i chat/commit-meddelande.
+Actions → **Deploy to production** → Run workflow → kryssa i *Skip E2E* endast vid akut deploy. Dokumentera i chat/commit-meddelande.
 
 ---
 
 ## Branch protection (valfritt)
 
-För solo trunk-flöde: **ingen** "Require pull request before merging".
-
 | Inställning | Rekommendation solo | Varför |
 |-------------|---------------------|--------|
-| Require PR | **Av** | Agenter pushar direkt till `master` |
-| Require status check `quality` | Valfritt | Blockerar röd push automatiskt — ingen människa |
-| Require status check `e2e` | Valfritt | Samma, men långsammare feedback vid direkt push |
+| Require PR | Valfritt | Trunk-flöde fungerar med direkt push |
+| Require status check `quality` | Rekommenderat | Snabb feedback vid merge |
+| Require status check `e2e` | Valfritt | Långsammare — kör E2E på PR eller före deploy |
 | Do not allow bypassing | Av för solo | Du behöver kunna pusha direkt |
-
-Om du aktiverar status checks på `master` körs de automatiskt vid push — fortfarande **ingen PR**.
 
 ---
 
@@ -104,36 +106,36 @@ Om du aktiverar status checks på `master` körs de automatiskt vid push — for
 | GitHub Actions (valfritt) | `DEPLOY_TELEGRAM_BOT_TOKEN` + `DEPLOY_TELEGRAM_CHAT_ID` | Telegram-push efter lyckad deploy (alternativ till webhook) |
 | Firebase Secret Manager | `DATABASE_URL`, `ADMIN_PASSWORD`, `OPENAI_API_KEY`, `CRON_SECRET`, … | Runtime i App Hosting |
 
-Utan `FIREBASE_TOKEN` körs G1+G2 ändå; G3 **skippar** med tydlig loggrad.
+Utan `FIREBASE_TOKEN` körs quality + E2E vid deploy ändå; deploy-jobbet **skippar** med tydlig loggrad.
 
-**Firebase Console → App Hosting → GitHub auto-deploy:** stäng av om du använder Actions-kedjan — undvik **dubbel deploy**. En källa: **Actions vid push till `master`**.
+**Firebase Console → App Hosting → GitHub auto-deploy:** stäng av om du använder Actions — undvik **dubbel deploy**. En källa: **Actions → Deploy to production**.
 
 ---
 
 ## Mobilnotis vid deploy
 
-Du kan få notis på mobilen när **deploy-jobbet lyckas** (efter Firebase deploy, inte bara när quality/e2e är klart).
+Du kan få notis på mobilen när **deploy-jobbet lyckas** (efter Firebase deploy, inte bara när CI är klart).
 
 ### Alternativ utan kod (rekommenderas att prova först)
 
 | Metod | Fördelar | Nackdelar |
 |-------|----------|-----------|
-| **[GitHub Mobile](https://github.com/mobile)** (iOS/Android) | Ingen konfiguration i repot | Notiser för *hela* workflow-körningen, inte bara deploy; kan bli mycket vid varje push |
-| **GitHub e-post** | Zero setup | Samma som ovan — alla Actions-events; kolla spam; ingen ren "deploy klar"-push |
-| **GitHub → Watch → Custom → Actions** | Finare filter i appen | Fortfarande workflow-nivå, inte deploy-specifik |
+| **[GitHub Mobile](https://github.com/mobile)** (iOS/Android) | Ingen konfiguration i repot | Notiser för *hela* workflow-körningen |
+| **GitHub e-post** | Zero setup | Samma som ovan |
+| **GitHub → Watch → Custom → Actions** | Finare filter i appen | Fortfarande workflow-nivå |
 
 **GitHub Mobile — snabbstart:**
 
 1. Installera appen och logga in.
 2. Gå till repot **home-pantry** → **Watch** → **Custom**.
-3. Kryssa i **Actions** (och ev. **Releases** om du använder det senare).
+3. Kryssa i **Actions**.
 4. Aktivera push-notiser för GitHub i telefonens systeminställningar.
 
-Du får då notis när **Release**-workflowen är klar (grön eller röd). Det är nära nog för många, men skiljer inte deploy från enbart testfel.
+Du får notis när **Deploy to production** är klar (grön eller röd).
 
 ### Push-notis bara vid lyckad deploy (rekommenderat)
 
-Workflow-steg **Notify deploy success** i [`release.yml`](../.github/workflows/release.yml) körs **endast** när Firebase-deploy faktiskt lyckades (`FIREBASE_TOKEN` satt och deploy OK). Ingen secret = steget hoppar tyst över.
+Workflow-steg **Notify deploy success** i [`deploy.yml`](../.github/workflows/deploy.yml) körs **endast** när Firebase-deploy faktiskt lyckades (`FIREBASE_TOKEN` satt och deploy OK). Ingen secret = steget hoppar tyst över.
 
 #### A) ntfy.sh (enklast för mobil-push)
 
@@ -145,8 +147,6 @@ Gratis app ([ntfy](https://ntfy.sh/app)) med riktiga push-notiser. Ett enda GitH
    - Namn: `DEPLOY_NOTIFY_WEBHOOK_URL`
    - Värde: `https://ntfy.sh/skaffu-deploy-dittnamn`
 4. Nästa lyckade deploy → push-notis: *"Skaffu deploy lyckades"* med commit och Actions-länk.
-
-Topic-namnet är offentligt om någon gissar det — använd ett svårgissat namn eller [ntfy access tokens](https://docs.ntfy.sh/publish/#access-tokens) om du vill låsa publicering.
 
 #### B) Telegram
 
@@ -177,7 +177,7 @@ npm test              # G0 + G1
 USE_PGLITE=true npm run test:integration
 npm run build
 
-# G2 (innan push om auth/UI rörts)
+# G2 (innan deploy om auth/UI rörts)
 USE_PGLITE=true npm run test:e2e
 
 # G3 (lokalt om FIREBASE_TOKEN saknas i Actions)
@@ -192,7 +192,7 @@ npm run deploy:firebase
 
 | Idé | Status |
 |-----|--------|
-| Path filters (skippa E2E på ren dokumentation) | **Implementerat** — `changes`-jobb i [`release.yml`](../.github/workflows/release.yml) (`dorny/paths-filter@v3`) |
+| Path filters (skippa E2E på ren dokumentation) | **Implementerat** i [`e2e.yml`](../.github/workflows/e2e.yml) (`dorny/paths-filter@v3`) |
 | Delade npm-cache artifacts mellan jobb | Ej implementerat |
 | Preview deploy per commit | Ej implementerat |
 | Post-deploy prod-smoke (curl) | Manuell checklista — [`PROD_SMOKE.md`](./PROD_SMOKE.md) |
@@ -203,8 +203,11 @@ npm run deploy:firebase
 
 | Fil | Roll |
 |-----|------|
-| `.github/workflows/release.yml` | G1 → G2 → G3 |
-| `.github/workflows/expiry-reminders-cron.yml` | Veckovis utgångspåminnelse i prod (oberoende av release) |
+| `.github/workflows/ci.yml` | G1 — snabb CI vid push/PR |
+| `.github/workflows/e2e.yml` | G2 — E2E på PR, manuellt, nattligt |
+| `.github/workflows/deploy.yml` | G1 → G2 → G3 — manuell prod-deploy |
+| `.github/workflows/expiry-reminders-cron.yml` | Veckovis utgångspåminnelse i prod |
 | `.husky/pre-commit` | lint-staged (G0) |
 | `apphosting.yaml` | Firebase build/run |
+| `docs/DEPLOY.md` | Så deployar du (svenska) |
 | `docs/FIREBASE_DEPLOY.md` | Infra, secrets, första deploy |

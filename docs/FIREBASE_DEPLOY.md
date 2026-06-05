@@ -328,12 +328,14 @@ Trunk-baserad CI/CD (ingen PR): **[`docs/CI_CD.md`](./CI_CD.md)**.
 
 | Workflow | Gate | Trigger |
 |----------|------|---------|
-| [`.github/workflows/release.yml`](../.github/workflows/release.yml) | G1 `quality` �  G2 `e2e` �  G3 `deploy` | Push till `master`/`main`; `workflow_dispatch` (nödläge) |
+| [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | G1 `quality` | Push/PR → `master`/`main` |
+| [`.github/workflows/e2e.yml`](../.github/workflows/e2e.yml) | G2 `e2e` | PR; `workflow_dispatch`; nattlig schedule |
+| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | G1 → G2 → G3 `deploy` �  G2 `e2e` �  G3 `deploy` | Push till `master`/`main`; `workflow_dispatch` (nödläge) |
 
 | Trigger | Behavior |
 |---------|----------|
 | Push to `master`/`main` | G1 �  G2 �  G3 automatiskt (deploy om `FIREBASE_TOKEN` finns) |
-| **workflow_dispatch** on **Release** | Samma kedja; *Skip E2E* endast vid nödläge |
+| **Deploy to production** | quality → e2e → deploy; *Skip E2E* endast vid nödläge |
 
 The deploy job uses the **`production`** GitHub Environment � optional required reviewers there (solo dev: lämna tomt för helt automatisk deploy).
 
@@ -355,13 +357,13 @@ Alternative (not wired in the default workflow): a Google Cloud **service accoun
 1. Merge this branch to `master`
 2. Add `FIREBASE_TOKEN` in GitHub repo secrets
 3. (Optional) Configure **Environments �  production** with required reviewers
-4. Push to `master` (Release workflow: quality �  e2e �  deploy) or run **Release** manually from Actions
+4. Push to `master` (Release workflow: quality �  e2e �  deploy) or run **Deploy to production** from Actions (see [`DEPLOY.md`](./DEPLOY.md))
 
 App Hosting runtime secrets (`DATABASE_URL`, `ADMIN_PASSWORD`, etc.) stay in **Firebase Secret Manager**, not GitHub.
 
 ### Alternative: Firebase Console GitHub integration
 
-Firebase Console �  App Hosting �  **home-pantry** �  Settings �  **GitHub** can connect the repo for rollouts. **Use either Console auto-deploy or the Actions `release.yml` workflow � not both.** Actions is recommended (tests before deploy).
+Firebase Console �  App Hosting �  **home-pantry** �  Settings �  **GitHub** can connect the repo for rollouts. **Use either Console auto-deploy or the Actions `deploy.yml` workflow � not both.** Actions is recommended (tests before deploy).
 
 ## Alternative: Cloud Run via Docker
 

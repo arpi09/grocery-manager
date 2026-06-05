@@ -34,7 +34,7 @@ Own CI/CD pipeline, release automation, deployment safety, and rollback strategy
 
 | Area | What to do |
 |------|------------|
-| **CI/CD workflow** | Align docs with `.github/workflows/release.yml`; note gaps vs desired gates |
+| **CI/CD workflow** | Align docs with `.github/workflows/ci.yml`, `e2e.yml`, `deploy.yml`; note gaps vs desired gates |
 | **Automated checks** | Map G0–G3 to npm scripts; verify blocking behavior |
 | **Deploy stages** | Document G3 Firebase App Hosting; single deploy source (Actions, not Console auto-deploy) |
 | **Test integration** | Map unit, integration (PGlite), E2E smoke specs into pipeline gates |
@@ -68,7 +68,7 @@ Own CI/CD pipeline, release automation, deployment safety, and rollback strategy
 
 ## Each run
 
-1. Read **`.github/workflows/release.yml`**, [`docs/CI_CD.md`](../../docs/CI_CD.md), [`docs/FIREBASE_DEPLOY.md`](../../docs/FIREBASE_DEPLOY.md).
+1. Read **`.github/workflows/ci.yml`**, **`e2e.yml`**, **`deploy.yml`**, [`docs/CI_CD.md`](../../docs/CI_CD.md), [`docs/DEPLOY.md`](../../docs/DEPLOY.md), [`docs/FIREBASE_DEPLOY.md`](../../docs/FIREBASE_DEPLOY.md).
 2. Verify gate table (G0–G3) matches workflow jobs: `quality` → `e2e` → `deploy`.
 3. Check secrets posture: `FIREBASE_TOKEN` in GitHub; runtime secrets in Firebase only.
 4. Update **`private/DEPLOYMENT_POLICY.md`**: authority, environments, risk tiers, rollback, incident deploy.
@@ -92,7 +92,7 @@ Process doc: **`private/docs/PIPELINE_AGENT.md`** (cadence and coordinator invoc
 | Area | Content |
 |------|---------|
 | Gates | G0 pre-commit → G1 quality → G2 e2e → G3 deploy |
-| Workflow | `.github/workflows/release.yml` (Release) |
+| Workflow | `.github/workflows/ci.yml`, `e2e.yml`, `deploy.yml` |
 | Risk | low / medium / high with examples |
 | Paths | Fast (low/medium) vs guarded (high) |
 | E2E specs | `e2e/smoke.spec.ts`, `auth.spec.ts`, `navigation.spec.ts`, `admin.spec.ts` |

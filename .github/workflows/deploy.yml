@@ -1,0 +1,220 @@
+# Manual production deploy — quality → e2e → Firebase App Hosting
+# Trigger: Actions → "Deploy to production"
+# Required secret: FIREBASE_TOKEN (npx firebase login:ci)
+
+name: Deploy to production
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref (branch or tag) to deploy
+        required: false
+        default: master
+        type: string
+      sha:
+        description: Commit SHA (overrides ref when set)
+        required: false
+        type: string
+      skip_e2e:
+        description: Skip E2E (hotfix only — use rarely)
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha || inputs.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+      - run: npm run check:locales
+      - run: npm run check
+        env:
+          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+      - run: npm test
+      - run: npm run test:receipt-fixtures
+      - run: npm run test:integration
+        env:
+          USE_PGLITE: 'true'
+      - run: npm run build
+        env:
+          DATABASE_URL: postgresql://pantry:pantry@localhost:5432/pantry
+          USE_PGLITE: 'true'
+          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sveltekit-build
+          path: build/
+          retention-days: 1
+
+  e2e:
+    name: e2e
+    needs: [quality]
+    if: inputs.skip_e2e != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha || inputs.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: sveltekit-build
+          path: build/
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - run: npm run test:e2e
+        env:
+          USE_PGLITE: 'true'
+          ADMIN_EMAIL: e2e-admin@example.com
+          ADMIN_PASSWORD: e2e-ci-password
+          PUBLIC_ORIGIN: http://localhost:5190
+          PLAYWRIGHT_PORT: '5190'
+          TURNSTILE_SKIP: 'true'
+          TURNSTILE_BYPASS: 'true'
+          EMAIL_VERIFICATION_SKIP: 'true'
+          E2E_MOCK_AI: 'true'
+          PUBLIC_E2E_DISABLE_POST_SURVEY: 'true'
+          CI: 'true'
+
+  deploy:
+    name: deploy
+    needs: [quality, e2e]
+    if: >
+      always() &&
+      needs.quality.result == 'success' &&
+      (needs.e2e.result == 'success' || needs.e2e.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.sha || inputs.ref }}
+
+      - name: Deploy App Hosting backend
+        id: deploy
+        run: |
+          if [ -z "$FIREBASE_TOKEN" ]; then
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::FIREBASE_TOKEN is not set — quality and E2E passed but deploy was skipped."
+            echo "Add FIREBASE_TOKEN under Settings → Secrets and variables → Actions,"
+            echo "or deploy locally: npm run deploy:firebase"
+            echo "See docs/DEPLOY.md and docs/FIREBASE_DEPLOY.md"
+            exit 0
+          fi
+          npx firebase-tools@latest deploy --only apphosting:home-pantry --non-interactive --project home-pantry-4bee5
+          echo "skipped=false" >> "$GITHUB_OUTPUT"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Notify deploy success
+        if: steps.deploy.outputs.skipped != 'true'
+        continue-on-error: true
+        env:
+          WEBHOOK_URL: ${{ secrets.DEPLOY_NOTIFY_WEBHOOK_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.DEPLOY_TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.DEPLOY_TELEGRAM_CHAT_ID }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${WEBHOOK_URL:-}" ] && [ -z "${TELEGRAM_BOT_TOKEN:-}" ]; then
+            echo "No deploy notify secrets configured — skipping."
+            exit 0
+          fi
+
+          short_sha="${GITHUB_SHA:0:7}"
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          prod_url="${PRODUCTION_URL:-}"
+          msg="Skaffu deploy lyckades (${short_sha})"
+          if [ -n "$prod_url" ]; then
+            msg="${msg} — ${prod_url%/}"
+          fi
+          msg=$(printf '%s\n%s' "$msg" "$run_url")
+
+          if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
+            payload=$(jq -n --arg chat_id "$TELEGRAM_CHAT_ID" --arg text "$msg" \
+              '{chat_id: $chat_id, text: $text, disable_web_page_preview: true}')
+            curl --fail-with-body -sS -X POST \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "$payload"
+            echo "Telegram notify sent."
+          elif [ -n "${TELEGRAM_BOT_TOKEN:-}" ] || [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
+            echo "::warning::Set both DEPLOY_TELEGRAM_BOT_TOKEN and DEPLOY_TELEGRAM_CHAT_ID for Telegram notify."
+          fi
+
+          if [ -z "${WEBHOOK_URL:-}" ]; then
+            exit 0
+          fi
+
+          if [[ "$WEBHOOK_URL" == *"discord.com/api/webhooks"* ]]; then
+            payload=$(jq -n --arg content "$msg" '{content: $content}')
+            curl --fail-with-body -sS -X POST "$WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "$payload"
+          elif [[ "$WEBHOOK_URL" == *"hooks.slack.com"* ]]; then
+            payload=$(jq -n --arg text "$msg" '{text: $text}')
+            curl --fail-with-body -sS -X POST "$WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "$payload"
+          elif [[ "$WEBHOOK_URL" == *"ntfy.sh"* ]]; then
+            curl --fail-with-body -sS -X POST "$WEBHOOK_URL" \
+              -H "Title: Skaffu deploy lyckades" \
+              -H "Tags: white_check_mark" \
+              -H "Priority: default" \
+              -d "$msg"
+          else
+            payload=$(jq -n \
+              --arg text "$msg" \
+              --arg url "$run_url" \
+              --arg commit "$GITHUB_SHA" \
+              '{text: $text, url: $url, commit: $commit}')
+            curl --fail-with-body -sS -X POST "$WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "$payload"
+          fi
+          echo "Webhook notify sent."
