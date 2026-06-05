@@ -86,6 +86,8 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 	let undoSubmitting = $state(false);
 	let exportCopied = $state(false);
 	let addSubmitting = $state(false);
+	let removingIds = $state(new Set<string>());
+	const REMOVE_ANIMATION_MS = 280;
 
 	const undoCopy = $derived(getDeleteCopy(1, 'shoppingListItem'));
 	const undoMessage = $derived(
@@ -150,10 +152,19 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 		};
 	}
 
-	function createToggleEnhance(): SubmitFunction {
+	function createToggleEnhance(item: ShoppingListItem): SubmitFunction {
 		return () => async ({ result, update }) => {
+			const isCheckingOff = !item.checked;
+			if (result.type === 'success' && isCheckingOff) {
+				removingIds = new Set([...removingIds, item.id]);
+				showSuccessToast(t('actionToast.shoppingChecked', { label: item.name }));
+				await new Promise((resolve) => window.setTimeout(resolve, REMOVE_ANIMATION_MS));
+			}
 			await update();
 			if (result.type === 'success') {
+				const next = new Set(removingIds);
+				next.delete(item.id);
+				removingIds = next;
 				await invalidateAll();
 			}
 		};
@@ -253,9 +264,9 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 		<SearchInput bind:value={listQuery} placeholder={t('shopping.searchPlaceholder')} />
 		<ul class="list">
 			{#each unchecked as item (item.id)}
-				<li>
+				<li class:removing={removingIds.has(item.id)}>
 					{#if canEdit}
-						<form method="POST" action="?/toggle" class="row-form" use:enhance={createToggleEnhance()}>
+						<form method="POST" action="?/toggle" class="row-form" use:enhance={createToggleEnhance(item)}>
 							<input type="hidden" name="id" value={item.id} />
 							<label class="check-row">
 								<input type="checkbox" onchange={(e) => e.currentTarget.form?.requestSubmit()} />
@@ -313,7 +324,7 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 						{#each visibleChecked as item (item.id)}
 							<li>
 								{#if canEdit}
-									<form method="POST" action="?/toggle" class="row-form" use:enhance={createToggleEnhance()}>
+									<form method="POST" action="?/toggle" class="row-form" use:enhance={createToggleEnhance(item)}>
 										<input type="hidden" name="id" value={item.id} />
 										<label class="check-row">
 											<input type="checkbox" checked onchange={(e) => e.currentTarget.form?.requestSubmit()} />
@@ -437,6 +448,24 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 		border-radius: var(--radius-sm);
 		padding: 0.45rem 0.65rem;
 		background: var(--color-surface-muted);
+		transition:
+			opacity 0.24s ease,
+			transform 0.24s ease,
+			max-height 0.24s ease,
+			margin 0.24s ease,
+			padding 0.24s ease;
+	}
+
+	.list li.removing {
+		opacity: 0;
+		transform: translateX(0.75rem);
+		max-height: 0;
+		margin: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+		border-width: 0;
+		overflow: hidden;
+		pointer-events: none;
 	}
 
 	.list.checked li {

@@ -21,7 +21,7 @@
 			<circle class="illus-dot dot-a" cx="48" cy="52" r="4" />
 			<circle class="illus-dot dot-b" cx="152" cy="46" r="3" />
 		</svg>
-	{:else if id === 'onboarding'}
+	{:else if id === 'launch' || id === 'onboarding'}
 		<svg class="illus" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
 			<circle class="illus-bg celebrate" cx="100" cy="80" r="72" />
 			<circle class="illus-ring" cx="100" cy="72" r="44" stroke-width="4" />

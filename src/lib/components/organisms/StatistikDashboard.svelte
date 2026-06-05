@@ -6,7 +6,7 @@
 	import type { StatistikDashboard } from '$lib/application/statistik.service';
 	import { ZERO_WASTE_STREAK_CELEBRATION, type MilestoneState } from '$lib/domain/gamification';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
-	import { maxWeeklyCount } from '$lib/domain/statistik';
+
 	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
@@ -20,8 +20,6 @@
 	let { dashboard, milestones = [], isPro = false }: Props = $props();
 	const { analytics, addedTrend, addedWeekOverWeek, impact } = $derived(dashboard);
 	const isEmpty = $derived(analytics.totalItems === 0);
-	const addedMax = $derived(maxWeeklyCount(addedTrend));
-	const consumedMax = $derived(maxWeeklyCount(impact.consumedTrend));
 
 	const locationIcons: Record<StorageLocation, FeatureIconId> = {
 		fridge: 'fridge',
@@ -40,10 +38,6 @@
 
 	function weekLabel(label: string): string {
 		return label === 'current' ? t('stats.trendCurrentWeek') : label;
-	}
-
-	function barWidth(count: number, max: number): number {
-		return max === 0 ? 0 : Math.max(8, Math.round((count / max) * 100));
 	}
 </script>
 
@@ -110,11 +104,11 @@
 		<div class="trends">
 			<Card>
 				<h2 class="section-title label-caps">{t('stats.addedTrendTitle')}</h2>
-				<ul class="trend-bars" aria-label={t('stats.addedTrendTitle')}>
+				<ul class="trend-stats" aria-label={t('stats.addedTrendTitle')}>
 					{#each addedTrend as bar (bar.weekStart)}
-						<li>
-							<div class="trend-row"><span>{weekLabel(bar.label)}</span><span>{bar.count}</span></div>
-							<div class="track" aria-hidden="true"><div class="fill added" style="width:{barWidth(bar.count, addedMax)}%"></div></div>
+						<li class="trend-stat">
+							<span>{weekLabel(bar.label)}</span>
+							<span class="trend-value">{bar.count}</span>
 						</li>
 					{/each}
 				</ul>
@@ -122,11 +116,11 @@
 			<Card>
 				<h2 class="section-title label-caps">{t('stats.consumedTrendTitle')}</h2>
 				{#if impact.hasConsumptionData}
-					<ul class="trend-bars" aria-label={t('stats.consumedTrendTitle')}>
+					<ul class="trend-stats" aria-label={t('stats.consumedTrendTitle')}>
 						{#each impact.consumedTrend as bar (bar.weekStart)}
-							<li>
-								<div class="trend-row"><span>{weekLabel(bar.label)}</span><span>{bar.count}</span></div>
-								<div class="track" aria-hidden="true"><div class="fill consumed" style="width:{barWidth(bar.count, consumedMax)}%"></div></div>
+							<li class="trend-stat">
+								<span>{weekLabel(bar.label)}</span>
+								<span class="trend-value">{bar.count}</span>
 							</li>
 						{/each}
 					</ul>
@@ -190,12 +184,11 @@
 		border-radius: var(--radius-md);
 		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface-muted));
 	}
-	.trend-bars, .bars { list-style: none; margin: var(--space-md) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-sm); }
-	.trend-row, .bar-header { display: flex; justify-content: space-between; font-size: 0.85rem; }
+	.trend-stats, .bars { list-style: none; margin: var(--space-md) 0 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-xs); }
+	.trend-stat, .bar-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 0.2rem 0; }
+	.trend-value { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--color-primary); }
 	.track { height: 0.45rem; background: var(--color-border); border-radius: var(--radius-sm); overflow: hidden; }
 	.fill { height: 100%; border-radius: var(--radius-sm); }
-	.fill.added { background: var(--color-primary); }
-	.fill.consumed { background: var(--color-success, #2d7a4f); }
 	:global(.action-card) { display: flex; gap: var(--space-md); align-items: flex-start; }
 	:global(.action-card) h2 { margin: 0; font-size: 1rem; }
 	:global(.action-card) p { margin: var(--space-xs) 0 0; color: var(--color-text-muted); font-size: 0.85rem; }

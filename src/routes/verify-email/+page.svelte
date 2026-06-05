@@ -16,7 +16,11 @@
 	locale={data.locale}
 />
 
-<AuthLandingShell formTitle={t('auth.verifyEmail.title')} formSubtitle={t('auth.verifyEmail.subtitle')}>
+<AuthLandingShell
+	formTitle={t('auth.verifyEmail.title')}
+	formSubtitle={t('auth.verifyEmail.subtitle')}
+	hideShowcaseOnMobile={true}
+>
 	<RegistrationWelcome />
 	<VerifyEmailPanel email={data.email} success={form?.success} />
 </AuthLandingShell>

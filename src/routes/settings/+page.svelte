@@ -30,6 +30,7 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { CHURN_REASONS } from '$lib/domain/product-feedback';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import PlanLimitBanner from '$lib/components/molecules/PlanLimitBanner.svelte';
+	import ProUpgradeCta from '$lib/components/molecules/ProUpgradeCta.svelte';
 	import ProUpgradePanel from '$lib/components/molecules/ProUpgradePanel.svelte';
 	import ProActivePanel from '$lib/components/molecules/ProActivePanel.svelte';
 	import ProActivationCelebration from '$lib/components/organisms/ProActivationCelebration.svelte';
@@ -214,6 +215,9 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 
 	<PageContainer>
 	<div class="settings-page">
+		{#if !data.isPro}
+			<ProUpgradeCta variant="banner" class="settings-pro-banner" />
+		{/if}
 		<SettingsSectionNav items={settingsNavItems} />
 
 		<SettingsSection
@@ -696,6 +700,10 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 		display: flex;
 		flex-direction: column;
 		gap: 0;
+	}
+
+	:global(.settings-pro-banner) {
+		margin-bottom: var(--space-md);
 	}
 
 	.settings-disclosure {

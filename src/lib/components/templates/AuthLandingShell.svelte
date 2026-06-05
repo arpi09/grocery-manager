@@ -8,10 +8,13 @@
 		formTitle: string;
 		formSubtitle?: string;
 		showShowcase?: boolean;
+		/** When true, the showcase hero is hidden on narrow viewports. */
+		hideShowcaseOnMobile?: boolean;
 		children: Snippet;
 	}
 
-	let { formTitle, formSubtitle, showShowcase = true, children }: Props = $props();
+	let { formTitle, formSubtitle, showShowcase = true, hideShowcaseOnMobile = false, children }: Props =
+		$props();
 </script>
 
 <main class="landing">
@@ -35,7 +38,7 @@
 	</section>
 
 	{#if showShowcase}
-		<div class="hero" aria-hidden="true">
+		<div class="hero" class:hide-on-mobile={hideShowcaseOnMobile} aria-hidden="true">
 			<LoginLandingShowcase />
 		</div>
 	{/if}
@@ -86,6 +89,10 @@
 			order: 2;
 			padding: var(--space-sm) var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom, 0));
 			max-width: none;
+		}
+
+		.hero.hide-on-mobile {
+			display: none;
 		}
 	}
 

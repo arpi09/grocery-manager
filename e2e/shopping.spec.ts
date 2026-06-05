@@ -17,7 +17,10 @@ test.describe('Shopping list', () => {
 		await expect(row).toBeVisible({ timeout: 15_000 });
 
 		await row.locator('form[action="?/toggle"] input[type=checkbox]').click();
-		await expect(row.locator('input[type=checkbox]')).toBeChecked({ timeout: 15_000 });
+		await expect(
+			page.locator('.toast-message').filter({ hasText: new RegExp(itemName, 'i') })
+		).toBeVisible({ timeout: 15_000 });
+		await expect(row).toHaveCount(0, { timeout: 15_000 });
 	});
 
 	test('smart fill adds fixture items when E2E_MOCK_AI is enabled', async ({ page }) => {

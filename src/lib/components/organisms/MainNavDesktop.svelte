@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
 	import ProNavBadge from '$lib/components/atoms/ProNavBadge.svelte';
+	import ProUpgradeCta from '$lib/components/molecules/ProUpgradeCta.svelte';
 	import NavIcon from '$lib/components/atoms/NavIcon.svelte';
 	import PantrySwitcher from '$lib/components/molecules/PantrySwitcher.svelte';
 	import ProfileMenu from '$lib/components/molecules/ProfileMenu.svelte';
@@ -129,6 +130,9 @@
 		</nav>
 
 		<div class="desktop-actions">
+			{#if !isPro}
+				<ProUpgradeCta variant="nav" />
+			{/if}
 			<PantrySwitcher {households} {activeHousehold} />
 			{#if onRecipeIdeas}
 				<RecipeIdeasButton onclick={onRecipeIdeas} />

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { t, getLocale } from '$lib/i18n';
+	import { subscribeNarrowViewport } from '$lib/utils/use-narrow-viewport';
 	import { markFirstRecipeWinIfNeeded } from '$lib/utils/first-recipe-celebration';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
@@ -30,6 +31,7 @@
 	}
 
 	let { open = $bindable(false), canEdit = false }: Props = $props();
+	let isNarrowViewport = $state(false);
 	let loading = $state(false);
 	let preferences = $state('');
 	let portions = $state(DEFAULT_RECIPE_PORTIONS);
@@ -47,6 +49,13 @@
 	const hasResults = $derived(recipes.length > 0);
 	const selectedRecipe = $derived(recipes[selectedRecipeIndex] ?? null);
 	const showRecipePicker = $derived(recipes.length > 1);
+	const modalVariant = $derived(isNarrowViewport ? 'sheet' : 'center');
+
+	$effect(() =>
+		subscribeNarrowViewport((matches) => {
+			isNarrowViewport = matches;
+		})
+	);
 
 	function recipeErrorMessage(status: number, serverError?: string): string {
 		if (serverError?.trim()) {
@@ -157,10 +166,11 @@
 <Modal
 	open={open}
 	onClose={closeAssistant}
-	variant="center"
+	variant={modalVariant}
 	nested
 	title={t('recipe.title')}
 	panelClass="recipe-assistant-panel"
+	bodyClass="recipe-assistant-body"
 	data-testid="recipe-assistant-dialog"
 >
 	{#if hasResults}
@@ -347,6 +357,27 @@
 		max-height: min(92vh, 52rem);
 	}
 
+	:global(.recipe-assistant-body) {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		overscroll-behavior: contain;
+	}
+
+	:global(.recipe-assistant-panel .actions) {
+		position: sticky;
+		bottom: 0;
+		z-index: 1;
+		padding-top: var(--space-sm);
+		background: linear-gradient(
+			to top,
+			var(--color-surface) 72%,
+			color-mix(in srgb, var(--color-surface) 0%, transparent)
+		);
+	}
+
 	.helper,
 	.hint {
 		margin: 0 0 var(--space-md);
@@ -471,7 +502,8 @@
 		-webkit-overflow-scrolling: touch;
 		scrollbar-width: none;
 		margin-bottom: var(--space-md);
-		padding-bottom: 2px;
+		padding: 0 1px 2px;
+		scroll-snap-type: x proximity;
 	}
 
 	.recipe-picker::-webkit-scrollbar {
@@ -484,8 +516,9 @@
 		background: var(--color-surface);
 		border-radius: 999px;
 		padding: 0.45rem 0.9rem;
-		min-height: 2.5rem;
+		min-height: 2.75rem;
 		max-width: 14rem;
+		scroll-snap-align: start;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -509,6 +542,18 @@
 
 	.result-panel {
 		min-height: 0;
+	}
+
+	@media (max-width: 899px) {
+		.intent-presets {
+			grid-template-columns: 1fr;
+		}
+
+		.intent-preset {
+			flex-direction: row;
+			justify-content: center;
+			min-height: 2.75rem;
+		}
 	}
 </style>
 
