@@ -549,6 +549,26 @@
 			}
 		}
 	},
+	"pmfSurvey": {
+		"dialogAria": "Snabb produktenkät",
+		"title": "Snabb fråga om Skaffu",
+		"lead": "Tre tryck hjälper oss förbättra — stäng när som helst.",
+		"npsQuestion": "Hur sannolikt är det att du rekommenderar Skaffu?",
+		"npsGroupAria": "Rekommendationspoäng 0–10",
+		"npsLow": "Inte sannolikt",
+		"npsHigh": "Mycket sannolikt",
+		"missQuestion": "Skulle du sakna Skaffu om den försvann?",
+		"missGroupAria": "Skulle du sakna Skaffu",
+		"wouldMiss": {
+			"yes": "Ja",
+			"somewhat": "Delvis",
+			"no": "Nej"
+		},
+		"commentLabel": "Något mer? (valfritt)",
+		"commentPlaceholder": "T.ex. vad du gillar eller saknar…",
+		"dismiss": "Inte nu",
+		"submit": "Skicka"
+	},
 	"pwa": {
 		"page": {
 			"title": "Lägg till på hemskärmen",
@@ -928,7 +948,8 @@
 			"overview": "Översikt",
 			"analytics": "Analys",
 			"aiUsage": "AI-användning",
-			"feedback": "Feedback & waitlist"
+			"feedback": "Feedback & waitlist",
+			"pmfSurvey": "PMF-enkät"
 		},
 		"sessionManagement": "Sessionshantering",
 		"logoutAllNote": "Logga ut alla avslutar varje aktiv session, inklusive din egen. Användare måste logga in igen.",
@@ -977,6 +998,30 @@
 			"title": "Användarfeedback",
 			"note": "Churn-röster från inställningar och kort enkät efter introduktion. Kompletterar intervjuer — se docs/USER_INTERVIEWS.md.",
 			"empty": "Ingen feedback ännu."
+		},
+		"pmfSurvey": {
+			"summaryTitle": "PMF-sammanfattning",
+			"tableTitle": "Enkätsvar",
+			"note": "NPS och «skulle du sakna Skaffu» från bannern i appen. Exportera inför intervjuer.",
+			"empty": "Inga enkätsvar ännu.",
+			"exportCsv": "Exportera CSV",
+			"totalResponses": "Svar",
+			"nps": "NPS",
+			"promoters": "Promoters (9–10)",
+			"passives": "Passives (7–8)",
+			"detractors": "Detractors (0–6)",
+			"wouldMissYes": "Skulle sakna — ja",
+			"wouldMissSomewhat": "Skulle sakna — delvis",
+			"wouldMissNo": "Skulle sakna — nej",
+			"colDate": "Datum",
+			"colTrigger": "Utlösare",
+			"colNps": "NPS",
+			"colWouldMiss": "Skulle sakna",
+			"colComment": "Kommentar",
+			"trigger": {
+				"post_onboarding": "Efter onboarding",
+				"periodic": "Återkommande"
+			}
 		},
 		"waitlist": {
 			"title": "Pro-intresse (waitlist)",

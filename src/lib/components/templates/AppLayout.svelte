@@ -17,6 +17,7 @@
 	import PageHintModal from '$lib/components/organisms/PageHintModal.svelte';
 	import RegistrationWelcome from '$lib/components/organisms/RegistrationWelcome.svelte';
 	import PostOnboardingSurvey from '$lib/components/organisms/PostOnboardingSurvey.svelte';
+	import PmfSurveyBanner from '$lib/components/organisms/PmfSurveyBanner.svelte';
 	import { canEditInventory } from '$lib/domain/household';
 	import DemoAccountBanner from '$lib/components/molecules/DemoAccountBanner.svelte';
 	import {
@@ -127,6 +128,7 @@
 	<OnboardingGuide />
 	<PageHintModal />
 	<PostOnboardingSurvey />
+	<PmfSurveyBanner />
 	<ActivationCelebration />
 	<RecipeAssistant bind:open={recipeOpen} canEdit={canWrite} />
 </div>

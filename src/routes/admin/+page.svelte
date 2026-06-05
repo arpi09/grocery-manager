@@ -142,6 +142,10 @@
 			{#await import('$lib/components/organisms/admin/AdminFeedbackPanel.svelte') then { default: AdminFeedbackPanel }}
 				<AdminFeedbackPanel active={true} />
 			{/await}
+		{:else if activeTab === 'pmfSurvey'}
+			{#await import('$lib/components/organisms/admin/AdminPmfSurveyPanel.svelte') then { default: AdminPmfSurveyPanel }}
+				<AdminPmfSurveyPanel active={true} />
+			{/await}
 		{/if}
 	</PageContainer>
 </AppLayout>
