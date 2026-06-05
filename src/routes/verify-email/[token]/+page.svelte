@@ -3,6 +3,7 @@
 	import AuthSeoHead from '$lib/components/seo/AuthSeoHead.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import VerifyEmailCelebrateIllustration from '$lib/components/organisms/VerifyEmailCelebrateIllustration.svelte';
 	import { t } from '$lib/i18n';
 	import type { PageProps } from './$types';
 
@@ -19,16 +20,18 @@
 <AuthLandingShell
 	formTitle={data.tokenValid ? t('auth.verifyEmail.confirmedTitle') : t('auth.verifyEmail.title')}
 	formSubtitle={data.tokenValid ? t('auth.verifyEmail.confirmedBody') : t('auth.verifyEmail.subtitle')}
+	hideShowcaseOnMobile={true}
 >
 	{#if !data.tokenValid}
 		<FeedbackBanner tone="error" message={t('auth.verifyEmail.invalidToken')} />
 		<p class="footer"><a href="/verify-email">{t('auth.verifyEmail.requestNew')}</a></p>
 	{:else}
+		<VerifyEmailCelebrateIllustration />
 		{#if form?.message}
 			<FeedbackBanner tone="error" message={form.message} />
 		{/if}
 		<form method="POST">
-			<Button type="submit" variant="primary">{t('auth.verifyEmail.confirmedTitle')}</Button>
+			<Button type="submit" variant="primary" fullWidth>{t('auth.verifyEmail.goToApp')}</Button>
 		</form>
 	{/if}
 </AuthLandingShell>

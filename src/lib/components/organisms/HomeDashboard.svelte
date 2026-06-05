@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import Card from '$lib/components/atoms/Card.svelte';
+	import ProUpgradeCta from '$lib/components/molecules/ProUpgradeCta.svelte';
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
@@ -49,6 +50,7 @@
 	const scanBarcodeHref = $derived(scanModeHref('barcode', returnTo));
 	const scanHubLinkHref = $derived(scanHubHref(returnTo));
 	const userId = $derived(page.data.user?.id ?? null);
+	const isPro = $derived(Boolean(page.data.isPro));
 
 	let activationProgress = $state<ActivationProgress>(getActivationProgress(null));
 
@@ -167,6 +169,10 @@
 
 	{#if showCelebrationBanner}
 		<FeedbackBanner tone="success" message={celebrationMessageText} />
+	{/if}
+
+	{#if !isPro && summary.totalItems > 0}
+		<ProUpgradeCta variant="card" />
 	{/if}
 
 	{#if summary.totalItems === 0}

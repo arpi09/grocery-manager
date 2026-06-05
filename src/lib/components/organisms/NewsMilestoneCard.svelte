@@ -3,16 +3,29 @@
 	import { onMount } from 'svelte';
 	import NewsPathIllustration from '$lib/components/organisms/NewsPathIllustration.svelte';
 	import type { AppNewsItem } from '$lib/data/app-news';
+	import { t } from '$lib/i18n';
 
 	interface Props {
 		item: AppNewsItem;
 		title: string;
 		body: string;
 		dateLabel: string;
+		versionLabel?: string | null;
+		hasDetail?: boolean;
 		index: number;
+		onReadMore?: () => void;
 	}
 
-	let { item, title, body, dateLabel, index }: Props = $props();
+	let {
+		item,
+		title,
+		body,
+		dateLabel,
+		versionLabel = null,
+		hasDetail = false,
+		index,
+		onReadMore
+	}: Props = $props();
 
 	let root: HTMLElement | undefined = $state();
 	let visible = $state(true);
@@ -57,16 +70,31 @@
 		<span class="path-dot"></span>
 	</div>
 
-	<div class="card">
+	<button
+		type="button"
+		class="card"
+		class:interactive={hasDetail}
+		disabled={!hasDetail}
+		aria-label={hasDetail ? t('news.openDetail', { title }) : undefined}
+		onclick={() => onReadMore?.()}
+	>
 		<div class="card-media">
 			<NewsPathIllustration id={item.illustration} active={visible} />
 		</div>
 		<div class="card-body">
-			<time class="date" datetime={item.date}>{dateLabel}</time>
+			<div class="meta">
+				<time class="date" datetime={item.date}>{dateLabel}</time>
+				{#if versionLabel}
+					<span class="version">{versionLabel}</span>
+				{/if}
+			</div>
 			<h2 class="title" id="news-{item.id}-title">{title}</h2>
 			<p class="copy">{body}</p>
+			{#if hasDetail}
+				<span class="read-more">{t('news.readMore')}</span>
+			{/if}
 		</div>
-	</div>
+	</button>
 </article>
 
 <style>
@@ -118,6 +146,29 @@
 		border-radius: var(--radius-lg);
 		background: var(--color-surface);
 		box-shadow: var(--shadow-sm);
+		width: 100%;
+		text-align: left;
+		font: inherit;
+		color: inherit;
+		cursor: default;
+	}
+
+	.card.interactive {
+		cursor: pointer;
+		transition:
+			border-color 0.15s ease,
+			box-shadow 0.15s ease,
+			transform 0.15s ease;
+	}
+
+	.card.interactive:hover {
+		border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+		box-shadow: var(--shadow-md);
+		transform: translateY(-1px);
+	}
+
+	.card:disabled {
+		opacity: 1;
 	}
 
 	@media (min-width: 640px) {
@@ -138,13 +189,30 @@
 		min-width: 0;
 	}
 
+	.meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-xs);
+		margin-bottom: var(--space-xs);
+	}
+
 	.date {
-		display: block;
-		margin: 0 0 var(--space-xs);
 		font-size: var(--font-size-body-sm);
 		font-weight: 600;
 		color: var(--color-primary);
 		font-variant-numeric: tabular-nums;
+	}
+
+	.version {
+		font-size: 0.6875rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--color-text-muted);
+		padding: 0.1rem 0.4rem;
+		border-radius: 999px;
+		background: var(--color-surface-muted);
 	}
 
 	.title {
@@ -162,11 +230,23 @@
 		color: var(--color-text-muted);
 	}
 
+	.read-more {
+		display: inline-block;
+		margin-top: var(--space-sm);
+		font-size: 0.8125rem;
+		font-weight: 700;
+		color: var(--color-primary);
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.milestone {
 			opacity: 1;
 			transform: none;
 			transition: none;
+		}
+
+		.card.interactive:hover {
+			transform: none;
 		}
 	}
 </style>

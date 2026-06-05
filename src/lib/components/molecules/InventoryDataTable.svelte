@@ -190,25 +190,4 @@
 	tbody :global(tr.data-row:hover) {
 		background: var(--color-surface-muted);
 	}
-
-	@media (max-width: 559px) {
-		thead {
-			display: none;
-		}
-
-		table {
-			min-width: 0;
-		}
-
-		.table-scroll {
-			border: none;
-			background: transparent;
-			box-shadow: none;
-		}
-
-		tbody :global(tr.data-row:nth-child(4n + 1)),
-		tbody :global(tr.data-row:nth-child(4n + 3)) {
-			background: transparent;
-		}
-	}
 </style>

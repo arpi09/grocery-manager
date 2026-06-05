@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
 	import ProNavBadge from '$lib/components/atoms/ProNavBadge.svelte';
+	import ProUpgradeCta from '$lib/components/molecules/ProUpgradeCta.svelte';
 	import NavIcon from '$lib/components/atoms/NavIcon.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import NavMoreSheet from '$lib/components/molecules/NavMoreSheet.svelte';
@@ -71,6 +72,9 @@
 				{/if}
 			</a>
 			<div class="mobile-header-actions">
+				{#if !isPro}
+					<ProUpgradeCta variant="nav" />
+				{/if}
 				{#if onRecipeIdeas}
 					<RecipeIdeasButton iconOnly onclick={onRecipeIdeas} />
 				{/if}
