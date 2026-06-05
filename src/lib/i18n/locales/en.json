@@ -166,6 +166,7 @@
 			"confirmedBody": "You can now use Skaffu.",
 			"invalidToken": "This link is invalid or has expired.",
 			"requestNew": "Go to confirmation page",
+			"goToApp": "Go to app",
 			"pageTitle": "Confirm email · Skaffu",
 			"metaDescription": "Confirm your email address to use Skaffu.",
 			"welcomeTitle": "Welcome to Skaffu",
@@ -1348,6 +1349,16 @@
 		"mealsBody": "Plan the week's dinners and fill the shopping list with what's missing — the list stays connected to what you have at home.",
 		"readyTitle": "You are ready!",
 		"readyBody": "Choose how you want to fill your pantry first.",
+		"addItemsTitle": "Add your first item",
+		"addItemsBody": "Photograph fridge, freezer or cupboard — or scan a barcode or receipt. One item is enough to get started!",
+		"addFirstItem": "Add item",
+		"startUsingApp": "Start using the app",
+		"celebrateStartedBody": "You've started — your pantry is taking shape!",
+		"encourageAddItems": "Almost there — just one item!",
+		"encourageCelebrate": "Hooray — you're up and running!",
+		"scanModalTitle": "How do you want to add?",
+		"scanModalBody": "Pick what works best for you. The guide stays open while you scan.",
+		"scanModalAria": "Add item during introduction",
 		"encourageStep2": "Great start!",
 		"encourageStep3": "Almost there…",
 		"encourageStep4": "You will stay on top of dates — smart!",
@@ -1381,6 +1392,30 @@
 		"landingExpiring": "Expiring soon",
 		"landingHeadline": "Your pantry, together",
 		"landingExpiringCount": "{count} soon"
+	},
+	"pageHints": {
+		"dialogAria": "Quick tip for this page",
+		"gotIt": "Got it",
+		"hem": {
+			"title": "Your home screen",
+			"body": "See expiring items, shortcuts to fridge, freezer and cupboard — plus smart suggestions for the week."
+		},
+		"inventory": {
+			"title": "Your inventory",
+			"body": "Everything you add lands here, sorted by location. Tap an item to edit or mark as used."
+		},
+		"inkop": {
+			"title": "Shopping list",
+			"body": "Add what's missing at home. The list stays connected to your pantry so you don't double-buy."
+		},
+		"planer": {
+			"title": "Meal plan",
+			"body": "Plan the week's dinners from what you have at home — and fill the list with what's missing."
+		},
+		"statistik": {
+			"title": "Your stats",
+			"body": "Track waste, streaks and how well you use food in time."
+		}
 	},
 	"pantry": {
 		"switchAria": "Switch pantry, current: {name}",
@@ -1679,6 +1714,7 @@
 		"profileSaved": "Profile saved",
 		"inviteSent": "Invitation sent — check the inbox",
 		"shoppingAdded": "Added to shopping list",
+		"shoppingChecked": "{label} checked off",
 		"shoppingCleared": "Shopping list cleared",
 		"adminSaved": "Admin settings saved",
 		"adminPasswordResetSent": "Password reset email sent",
@@ -1691,7 +1727,15 @@
 		"lead": "Follow the trail of new features and improvements. We keep building so your pantry feels easier every week.",
 		"metaDescription": "Latest news and updates in Skaffu — new features for scanning, recipes, onboarding and more.",
 		"trailAria": "Timeline of product news",
+		"readMore": "Read more",
+		"openDetail": "Read more about {title}",
 		"items": {
+			"launch": {
+				"version": "v1.0",
+				"title": "Skaffu is here",
+				"body": "The first version of Skaffu — pantry, shopping list and smart tools in one app.",
+				"detail": "With v1.0 you can track fridge, freezer and cupboard, plan shopping and get started quickly with photo, barcode or receipt. More news will appear here soon."
+			},
 			"inventoryTable": {
 				"title": "Clearer pantry overview",
 				"body": "Sort, filter and manage items in a compact table — perfect when your stock grows and you want everything at a glance."
@@ -1713,5 +1757,13 @@
 				"body": "Reliable browser notification toggles in settings — expiring items and shopping reminders reach you on time."
 			}
 		}
+	},
+	"proUpgrade": {
+		"navBadge": "Pro",
+		"cta": "See Pro & pricing",
+		"bannerTitle": "Upgrade to Pro",
+		"bannerLead": "Unlimited AI, receipt PDF and more household members.",
+		"cardTitle": "Pro unlocks more",
+		"cardLead": "Uncapped AI, receipt PDF and more people in your household."
 	}
 }

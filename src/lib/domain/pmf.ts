@@ -8,6 +8,7 @@ export const PRODUCT_EVENT_TYPES = [
 	'signup_complete',
 	'onboarding_skipped',
 	'onboarding_quickstart',
+	'onboarding_completed',
 	'first_scan',
 	'pwa_banner_dismiss',
 	'pwa_banner_install_click',

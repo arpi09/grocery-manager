@@ -157,6 +157,7 @@
 			"confirmedBody": "Du kan nu använda Skaffu.",
 			"invalidToken": "Länken är ogiltig eller har gått ut.",
 			"requestNew": "Gå till bekräftelsesidan",
+			"goToApp": "Gå till appen",
 			"pageTitle": "Bekräfta e-post · Skaffu",
 			"metaDescription": "Bekräfta din e-postadress för att använda Skaffu.",
 			"welcomeTitle": "Välkommen till Skaffu",
@@ -1353,6 +1354,16 @@
 		"expiryBody": "Sätt utgångsdatum när du lägger till varor. På startsidan visar vi vad som går ut snart och föreslår måltider så du hinner använda maten i tid.",
 		"mealsTitle": "Matplan och inköpslista",
 		"mealsBody": "Planera veckans middagar och fyll inköpslistan med det som saknas — listan hänger ihop med det du har hemma.",
+		"addItemsTitle": "Lägg till din första vara",
+		"addItemsBody": "Fota kyl, frys eller skafferi — eller skanna streckkod och kvitto. En vara räcker för att komma igång!",
+		"addFirstItem": "Lägg till vara",
+		"startUsingApp": "Börja använda appen",
+		"celebrateStartedBody": "Du har startat — ditt skafferi börjar ta form!",
+		"encourageAddItems": "Du är nästan där — bara en vara!",
+		"encourageCelebrate": "Hurra — du är igång!",
+		"scanModalTitle": "Hur vill du lägga till?",
+		"scanModalBody": "Välj det sätt som passar dig bäst. Guiden stannar kvar medan du skannar.",
+		"scanModalAria": "Lägg till vara under introduktionen",
 		"encourageStep2": "Bra start!",
 		"encourageStep3": "Snart är du där?",
 		"encourageStep4": "Du för koll på datumen — smart!",
@@ -1361,6 +1372,30 @@
 		"skip": "Hoppa över",
 		"dialogAria": "Introduktion till Skaffu",
 		"celebrateWoohoo": "Du har kommit igång med appen — woohoo!"
+	},
+	"pageHints": {
+		"dialogAria": "Snabbtips för sidan",
+		"gotIt": "Jag förstår",
+		"hem": {
+			"title": "Din startsida",
+			"body": "Här ser du utgående varor, genvägar till kyl, frys och skafferi — och smarta förslag för veckan."
+		},
+		"inventory": {
+			"title": "Ditt lager",
+			"body": "Allt du lagt in hamnar här, sorterat efter plats. Tryck på en vara för att redigera eller markera som förbrukad."
+		},
+		"inkop": {
+			"title": "Inköpslistan",
+			"body": "Lägg till det som saknas hemma. Listan hänger ihop med skafferiet så du slipper dubbelhandla."
+		},
+		"planer": {
+			"title": "Matplan",
+			"body": "Planera veckans middagar utifrån det du har hemma — och fyll listan med det som saknas."
+		},
+		"statistik": {
+			"title": "Din statistik",
+			"body": "Följ svinn, streaks och hur bra ni använder maten i tid."
+		}
 	},
 	"pantry": {
 		"switchAria": "Byt pantry, nuvarande: {name}",
@@ -1650,6 +1685,7 @@
 		"pantryCreatedGeneric": "Skafferi skapat",
 		"pantryLeft": "Du lämnade skafferiet",
 		"shoppingAdded": "Tillagd på inköpslistan",
+		"shoppingChecked": "{label} avbockad",
 		"shoppingCleared": "Inköpslistan rensad",
 		"adminSaved": "Admininställningar sparade",
 		"adminPasswordResetSent": "E-post för återställning skickad",
@@ -1682,7 +1718,15 @@
 		"lead": "Följ banan genom nya funktioner och förbättringar. Vi bygger vidare så skafferiet ska kännas enklare varje vecka.",
 		"metaDescription": "Senaste nytt och uppdateringar i Skaffu — nya funktioner för skannning, recept, onboarding och mer.",
 		"trailAria": "Tidslinje med produktnyheter",
+		"readMore": "Läs mer",
+		"openDetail": "Läs mer om {title}",
 		"items": {
+			"launch": {
+				"version": "v1.0",
+				"title": "Skaffu är här",
+				"body": "Första versionen av Skaffu — skafferi, inköpslista och smarta verktyg i en app.",
+				"detail": "Med v1.0 kan du hålla koll på kyl, frys och skafferi, planera inköp och komma igång snabbt med foto, streckkod eller kvitto. Mer nyheter dyker upp här framöver."
+			},
 			"inventoryTable": {
 				"title": "Tydligare översikt i skafferiet",
 				"body": "Sortera, filtrera och hantera varor i en kompakt tabell — perfekt när lagret växer och du vill se allt på en gång."
@@ -1704,6 +1748,14 @@
 				"body": "Pålitlig aktivering av webbläsarnotiser i inställningarna — utgående varor och inköp når dig i rätt tid."
 			}
 		}
+	},
+	"proUpgrade": {
+		"navBadge": "Pro",
+		"cta": "Se Pro & priser",
+		"bannerTitle": "Uppgradera till Pro",
+		"bannerLead": "Obegränsad AI, kvitto-PDF och fler hushållsmedlemmar.",
+		"cardTitle": "Pro låser upp mer",
+		"cardLead": "Obegränsad AI, kvitto-PDF och fler personer i hushållet."
 	},
 	"email": {
 		"inviteWarning": {

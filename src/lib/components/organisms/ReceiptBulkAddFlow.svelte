@@ -6,6 +6,7 @@
 	import DigitalReceiptGuide from '$lib/components/molecules/DigitalReceiptGuide.svelte';
 	import ImageSourcePicker from '$lib/components/molecules/ImageSourcePicker.svelte';
 	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
+	import { bindEmbeddedScanSubmit } from '$lib/utils/scan-embedded-submit';
 	import { page } from '$app/state';
 	import { recordReceiptActivation } from '$lib/utils/onboarding';
 	import {
@@ -28,9 +29,14 @@
 
 	interface Props {
 		returnTo: string;
+		embedded?: boolean;
+		formAction?: string;
+		onItemSaved?: () => void;
 	}
 
-	let { returnTo }: Props = $props();
+	let { returnTo, embedded = false, formAction, onItemSaved }: Props = $props();
+
+	const bulkFormAction = $derived(formAction ?? '?/bulkCreate');
 
 	let parsing = $state(false);
 	let parseError = $state<string | null>(null);
@@ -246,7 +252,9 @@
 		{/if}
 	</section>
 
-	<ScanFlowFooter cancelHref={cancelHref} cancelLabel={t('scan.allModes')} />
+	{#if !embedded}
+		<ScanFlowFooter cancelHref={cancelHref} cancelLabel={t('scan.allModes')} />
+	{/if}
 {:else}
 	<section data-testid="receipt-review">
 		<h2 class="title">{t('receiptBulk.selectItems', { selected: selectedCount, total: lines.length })}</h2>
@@ -277,13 +285,20 @@
 
 		<form
 			method="POST"
-			action="?/bulkCreate"
-			use:enhance={bindSubmittingWithRedirect(
-				(v) => (bulkSubmitting = v),
-				async () => {
-					recordReceiptActivation(page.data.user?.id);
-				}
-			)}
+			action={bulkFormAction}
+			use:enhance={embedded
+				? bindEmbeddedScanSubmit(
+						(v) => (bulkSubmitting = v),
+						() => {
+							onItemSaved?.();
+						}
+					)
+				: bindSubmittingWithRedirect(
+						(v) => (bulkSubmitting = v),
+						async () => {
+							recordReceiptActivation(page.data.user?.id);
+						}
+					)}
 		>
 			<input type="hidden" name="bulkFlow" value="receipt" />
 			<input type="hidden" name="returnTo" value={returnTo} />

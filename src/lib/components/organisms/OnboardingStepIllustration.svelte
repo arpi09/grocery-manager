@@ -24,6 +24,20 @@
 			<circle class="illus-dot dot-2" cx="132" cy="28" r="3" />
 			<path class="illus-camera" d="M72 108h56l8-14H64l8 14z" stroke-width="2.5" />
 			<circle class="illus-lens" cx="100" cy="108" r="10" stroke-width="2.5" />
+			<circle class="flash-ring camera-flash" cx="100" cy="108" r="16" />
+			<circle class="flash-burst camera-flash" cx="100" cy="108" r="9" />
+		</svg>
+	{:else if step === 'addItems'}
+		<svg class="illus" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<circle class="illus-bg" cx="100" cy="80" r="72" />
+			<rect class="scan-frame" x="52" y="36" width="96" height="88" rx="10" stroke-width="3" />
+			<path class="scan-corner tl" d="M52 52 V36 H68" stroke-width="4" stroke-linecap="round" />
+			<path class="scan-corner tr" d="M132 36 H148 V52" stroke-width="4" stroke-linecap="round" />
+			<path class="scan-corner bl" d="M52 108 V124 H68" stroke-width="4" stroke-linecap="round" />
+			<path class="scan-corner br" d="M148 108 V124 H132" stroke-width="4" stroke-linecap="round" />
+			<line class="scan-line" x1="60" y1="72" x2="140" y2="72" stroke-width="2.5" stroke-linecap="round" />
+			<circle class="add-plus ring" cx="100" cy="80" r="22" stroke-width="2.5" />
+			<path class="add-plus" d="M100 70 V90 M90 80 H110" stroke-width="3" stroke-linecap="round" />
 		</svg>
 	{:else}
 		<svg class="illus" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -49,12 +63,15 @@
 		display: flex;
 		justify-content: center;
 		width: 100%;
+		flex-shrink: 0;
 		padding: var(--space-lg) 0 var(--space-md);
 	}
 
 	.illus {
 		width: min(220px, 72vw);
+		max-height: 10rem;
 		height: auto;
+		flex-shrink: 0;
 		overflow: visible;
 	}
 
@@ -120,6 +137,78 @@
 		fill: none;
 		opacity: 0;
 		animation: illus-fade-up 0.5s 0.55s ease-out forwards;
+	}
+
+	.camera-flash {
+		fill: none;
+		stroke: color-mix(in srgb, var(--color-primary) 55%, #fff);
+		transform-origin: 100px 108px;
+		pointer-events: none;
+	}
+
+	.flash-ring {
+		opacity: 0;
+		animation: camera-flash 2.4s 0.9s ease-out infinite;
+	}
+
+	.flash-burst {
+		fill: color-mix(in srgb, var(--color-primary) 25%, #fff);
+		stroke: none;
+		opacity: 0;
+		animation: camera-flash 2.4s 0.9s ease-out infinite;
+		animation-delay: 0.05s;
+	}
+
+	.scan-frame {
+		fill: none;
+		stroke: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+		opacity: 0;
+		animation: scan-frame-in 0.55s 0.1s ease-out forwards;
+	}
+
+	.scan-corner {
+		stroke: var(--color-primary);
+		fill: none;
+		opacity: 0;
+		animation: scan-frame-in 0.45s ease-out forwards;
+	}
+
+	.scan-corner.tl {
+		animation-delay: 0.15s;
+	}
+
+	.scan-corner.tr {
+		animation-delay: 0.22s;
+	}
+
+	.scan-corner.bl {
+		animation-delay: 0.29s;
+	}
+
+	.scan-corner.br {
+		animation-delay: 0.36s;
+	}
+
+	.scan-line {
+		stroke: color-mix(in srgb, var(--color-primary) 70%, var(--color-success));
+		opacity: 0;
+		animation: scan-line 2.2s 0.5s ease-in-out infinite;
+	}
+
+	.add-plus {
+		stroke: var(--color-primary);
+		fill: none;
+		opacity: 0;
+		transform-origin: 100px 80px;
+	}
+
+	.add-plus.ring {
+		fill: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+		animation: add-plus-in 0.5s 0.35s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+	}
+
+	.add-plus:not(.ring) {
+		animation: add-plus-in 0.5s 0.42s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
 	}
 
 	.illus-ring {
@@ -219,6 +308,67 @@
 		}
 	}
 
+	@keyframes camera-flash {
+		0%,
+		78%,
+		100% {
+			opacity: 0;
+			transform: scale(0.75);
+		}
+		82% {
+			opacity: 0.85;
+			transform: scale(1.15);
+		}
+		86% {
+			opacity: 0.35;
+			transform: scale(1.45);
+		}
+		92% {
+			opacity: 0;
+			transform: scale(1.7);
+		}
+	}
+
+	@keyframes scan-frame-in {
+		from {
+			opacity: 0;
+			transform: scale(0.94);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	@keyframes scan-line {
+		0%,
+		100% {
+			opacity: 0.25;
+			transform: translateY(-18px);
+		}
+		15% {
+			opacity: 0.9;
+		}
+		50% {
+			opacity: 1;
+			transform: translateY(18px);
+		}
+		85% {
+			opacity: 0.9;
+		}
+	}
+
+	@keyframes add-plus-in {
+		from {
+			opacity: 0;
+			transform: scale(0.7);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
 	@keyframes illus-ring-pop {
 		from {
 			opacity: 0;
@@ -259,6 +409,11 @@
 		.illus-dot,
 		.illus-camera,
 		.illus-lens,
+		.camera-flash,
+		.scan-frame,
+		.scan-corner,
+		.scan-line,
+		.add-plus,
 		.illus-ring,
 		.illus-check,
 		.illus-confetti {

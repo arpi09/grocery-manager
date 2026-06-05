@@ -6,6 +6,7 @@
 	import ImageSourcePicker from '$lib/components/molecules/ImageSourcePicker.svelte';
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
 	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
+	import { bindEmbeddedScanSubmit } from '$lib/utils/scan-embedded-submit';
 	import type { PhotoRoundDetectedItem } from '$lib/domain/photo-round';
 	import { PHOTO_ROUND_MAX_IMAGES, PHOTO_ROUND_MAX_TOTAL_BYTES } from '$lib/domain/photo-round';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
@@ -20,9 +21,20 @@
 		returnTo: string;
 		/** Hint zone for AI parse (from inventory tab or URL). Skips forced zone picker. */
 		initialLocation?: StorageLocation | null;
+		embedded?: boolean;
+		formAction?: string;
+		onItemSaved?: () => void;
 	}
 
-	let { returnTo, initialLocation = null }: Props = $props();
+	let {
+		returnTo,
+		initialLocation = null,
+		embedded = false,
+		formAction,
+		onItemSaved
+	}: Props = $props();
+
+	const bulkFormAction = $derived(formAction ?? '?/bulkCreate');
 
 	type Step = 'capture' | 'review';
 
@@ -289,7 +301,9 @@
 			</div>
 		{/if}
 	</section>
-	<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} />
+	{#if !embedded}
+		<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} />
+	{/if}
 {:else}
 	<section data-testid="photo-round-review">
 		<h2 class="title">
@@ -304,12 +318,20 @@
 
 		<form
 			method="POST"
-			action="?/bulkCreate"
-			use:enhance={bindSubmittingWithRedirect(
-				(v) => (bulkSubmitting = v),
-				async () => {},
-				syncPhotoRoundFormData
-			)}
+			action={bulkFormAction}
+			use:enhance={embedded
+				? bindEmbeddedScanSubmit(
+						(v) => (bulkSubmitting = v),
+						() => {
+							onItemSaved?.();
+						},
+						syncPhotoRoundFormData
+					)
+				: bindSubmittingWithRedirect(
+						(v) => (bulkSubmitting = v),
+						async () => {},
+						syncPhotoRoundFormData
+					)}
 		>
 			<input type="hidden" name="bulkFlow" value="photo" />
 			<input type="hidden" name="returnTo" value={returnTo} />

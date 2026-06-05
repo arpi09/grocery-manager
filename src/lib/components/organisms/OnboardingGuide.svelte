@@ -1,23 +1,26 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import CelebrationBurst from '$lib/components/atoms/CelebrationBurst.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
-	import OnboardingStepIllustration from '$lib/components/organisms/OnboardingStepIllustration.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
+	import OnboardingCelebrateIllustration from '$lib/components/organisms/OnboardingCelebrateIllustration.svelte';
+	import OnboardingScanModal from '$lib/components/organisms/OnboardingScanModal.svelte';
+	import OnboardingStepIllustration from '$lib/components/organisms/OnboardingStepIllustration.svelte';
 	import { trackProductEvent } from '$lib/client/product-events';
-	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { t, type MessageKey } from '$lib/i18n';
-	import { scanModeHref } from '$lib/utils/scan-nav';
 	import {
+		ONBOARDING_PROGRESS_EVENT,
 		ONBOARDING_REPLAY_EVENT,
 		ONBOARDING_STEP_COUNT,
 		REGISTRATION_WELCOME_DONE_EVENT,
+		clearCelebrationPending,
+		completeOnboarding,
 		dismissOnboarding,
 		getActivationProgress,
+		isActivationComplete,
 		isOnboardingExcludedPath,
-		setActivationPath,
 		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
 	import {
@@ -41,20 +44,22 @@
 			bodyKey: 'onboarding.welcomeBodyShort'
 		},
 		{
-			id: 'ready',
-			titleKey: 'onboarding.readyTitle',
-			bodyKey: 'onboarding.readyBody'
+			id: 'addItems',
+			titleKey: 'onboarding.addItemsTitle',
+			bodyKey: 'onboarding.addItemsBody'
+		},
+		{
+			id: 'celebrate',
+			titleKey: 'onboarding.celebrateTitle',
+			bodyKey: 'onboarding.celebrateStartedBody'
 		}
 	];
-
-	const scanPhotoQuickStartPath = $derived(
-		scanModeHref('photo', APP_HOME_PATH)
-	);
 
 	let open = $state(false);
 	let stepIndex = $state(0);
 	let stepDirection = $state<'forward' | 'back'>('forward');
 	let registrationWelcomeDone = $state(false);
+	let scanModalOpen = $state(false);
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
@@ -88,7 +93,6 @@
 		if (page.url.searchParams.get('freshAccount') === '1') {
 			return;
 		}
-		// Scan flows: guide is opt-in from settings, not a blocking modal on /scan.
 		if (pathname.startsWith('/scan')) {
 			return;
 		}
@@ -98,33 +102,16 @@
 
 	function closeGuide() {
 		open = false;
-	}
-
-	async function goToScanQuickStart(source: 'skip' | 'quickstart') {
-		if (!userId) {
-			return;
-		}
-
-		setActivationPath('photo', userId);
-		dismissOnboarding(userId);
-		closeGuide();
-		void trackProductEvent(
-			source === 'quickstart' ? 'onboarding_quickstart' : 'onboarding_skipped'
-		);
-
-		if (pathname.startsWith('/scan') || source === 'skip') {
-			return;
-		}
-
-		await goto(scanPhotoQuickStartPath);
+		scanModalOpen = false;
 	}
 
 	function skipGuide() {
-		void goToScanQuickStart('skip');
-	}
-
-	function quickStart() {
-		void goToScanQuickStart('quickstart');
+		if (!userId) {
+			return;
+		}
+		dismissOnboarding(userId);
+		closeGuide();
+		void trackProductEvent('onboarding_skipped');
 	}
 
 	function goNext() {
@@ -144,37 +131,28 @@
 	}
 
 	function finishGuide() {
-		void goToScanQuickStart('skip');
-	}
-
-	async function chooseReceipt() {
 		if (!userId) {
 			return;
 		}
-		setActivationPath('receipt', userId);
-		dismissOnboarding(userId);
+		clearCelebrationPending(userId);
+		completeOnboarding(userId);
 		closeGuide();
-		await goto(`/scan?mode=receipt&from=${encodeURIComponent(APP_HOME_PATH)}`);
 	}
 
-	async function choosePhoto() {
-		if (!userId) {
-			return;
+	function handleItemSaved() {
+		scanModalOpen = false;
+		if (stepIndex < 2) {
+			stepDirection = 'forward';
+			stepIndex = 2;
 		}
-		setActivationPath('photo', userId);
-		dismissOnboarding(userId);
-		closeGuide();
-		await goto(scanPhotoQuickStartPath);
 	}
 
-	async function chooseBarcode() {
-		if (!userId) {
+	function syncCelebrateStep() {
+		if (!open || !userId || !isActivationComplete(userId) || stepIndex >= 2) {
 			return;
 		}
-		setActivationPath('barcode', userId);
-		dismissOnboarding(userId);
-		closeGuide();
-		await goto(scanModeHref('barcode', APP_HOME_PATH));
+		stepDirection = 'forward';
+		stepIndex = 2;
 	}
 
 	$effect(() => {
@@ -229,6 +207,18 @@
 			tryOpenGuide();
 		}
 	});
+
+	$effect(() => {
+		if (!browser || !open || !userId) {
+			return;
+		}
+
+		syncCelebrateStep();
+
+		const onProgress = () => syncCelebrateStep();
+		window.addEventListener(ONBOARDING_PROGRESS_EVENT, onProgress);
+		return () => window.removeEventListener(ONBOARDING_PROGRESS_EVENT, onProgress);
+	});
 </script>
 
 <Modal
@@ -251,7 +241,11 @@
 		</ModalHeader>
 	{/snippet}
 
-	<div class="step-content" class:step-forward={stepDirection === 'forward'} class:step-back={stepDirection === 'back'}>
+	<div
+		class="step-content"
+		class:step-forward={stepDirection === 'forward'}
+		class:step-back={stepDirection === 'back'}
+	>
 		<div class="progress-track" aria-hidden="true">
 			<div
 				class="progress-fill"
@@ -263,16 +257,18 @@
 			<p class="encourage" role="status">{encourageCopy}</p>
 		{/if}
 
-		<OnboardingStepIllustration step={currentStep.id} />
+		<div class="illustration-wrap">
+			<CelebrationBurst active={open && currentStep.id === 'celebrate'} />
+			{#if currentStep.id === 'celebrate'}
+				<OnboardingCelebrateIllustration heavy />
+			{:else}
+				<OnboardingStepIllustration step={currentStep.id} />
+			{/if}
+		</div>
+
 		<p class="step-body">{currentStep.body}</p>
 
-		{#if currentStep.id === 'welcome'}
-			<Button type="button" fullWidth onclick={quickStart} data-testid="onboarding-quickstart">
-				{t('onboarding.quickStart')}
-			</Button>
-		{/if}
-
-		{#if currentStep.id === 'ready'}
+		{#if currentStep.id === 'addItems'}
 			{#if activationProgress?.inProgress && activationProgress.path === 'barcode' && activationProgress.barcodeCount > 0}
 				<p class="progress-note" role="status">
 					{t('onboarding.barcodeProgress', {
@@ -282,17 +278,20 @@
 				</p>
 			{/if}
 
-			<div class="path-actions">
-				<Button type="button" fullWidth onclick={choosePhoto}>
-					{t('onboarding.ctaPhotoFirst')}
-				</Button>
-				<Button type="button" variant="secondary" fullWidth onclick={chooseBarcode}>
-					{t('onboarding.ctaBarcode')}
-				</Button>
-				<Button type="button" variant="secondary" fullWidth onclick={chooseReceipt}>
-					{t('onboarding.ctaReceipt')}
-				</Button>
-			</div>
+			<Button
+				type="button"
+				fullWidth
+				data-testid="onboarding-add-items"
+				onclick={() => (scanModalOpen = true)}
+			>
+				{t('onboarding.addFirstItem')}
+			</Button>
+		{/if}
+
+		{#if currentStep.id === 'celebrate'}
+			<Button type="button" fullWidth data-testid="onboarding-finish" onclick={finishGuide}>
+				{t('onboarding.startUsingApp')}
+			</Button>
 		{/if}
 	</div>
 
@@ -309,23 +308,25 @@
 				{/each}
 			</div>
 
-			<div class="footer-actions">
-				<Button type="button" variant="ghost" disabled={!canGoBack} onclick={goBack}>
-					{t('common.previous')}
-				</Button>
-				{#if isLastStep}
-					<Button type="button" onclick={finishGuide}>
-						{t('onboarding.getStarted')}
+			{#if !isLastStep}
+				<div class="footer-actions">
+					<Button type="button" variant="ghost" disabled={!canGoBack} onclick={goBack}>
+						{t('common.previous')}
 					</Button>
-				{:else}
 					<Button type="button" onclick={goNext}>
 						{t('common.next')}
 					</Button>
-				{/if}
-			</div>
+				</div>
+			{/if}
 		</div>
 	{/snippet}
 </Modal>
+
+<OnboardingScanModal
+	open={scanModalOpen}
+	onClose={() => (scanModalOpen = false)}
+	onItemSaved={handleItemSaved}
+/>
 
 <style>
 	:global(.onboarding-panel) {
@@ -424,6 +425,10 @@
 		transition: width 0.35s ease;
 	}
 
+	.illustration-wrap {
+		position: relative;
+	}
+
 	@keyframes step-enter-forward {
 		from {
 			opacity: 0;
@@ -497,12 +502,6 @@
 		font-weight: 600;
 		color: var(--color-primary);
 		text-align: center;
-	}
-
-	.path-actions {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-md);
 	}
 
 	.onboarding-footer {
