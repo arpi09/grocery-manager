@@ -130,7 +130,9 @@
 			getLocale(),
 			await addMissingIngredientsToList(ingredients)
 		);
-		showClientToast(presented.message, { variant: 'success' });
+		showClientToast(presented.message, {
+			variant: presented.tone === 'error' ? 'error' : presented.tone === 'warning' ? 'warning' : 'success'
+		});
 		feedbackBanner = presented;
 		addingMissingKey = null;
 	}

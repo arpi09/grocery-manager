@@ -44,12 +44,12 @@
 	}
 
 	$effect(() => {
-		if (!menuOpen) return;
+		if (!menuOpen && !consumeOpen) return;
 
 		function handlePointerDown(event: PointerEvent) {
 			const target = event.target;
 			if (!(target instanceof Element)) return;
-			if (target.closest('.menu-wrap')) return;
+			if (target.closest('.menu-wrap') || target.closest('.consume-panel')) return;
 			closeMenu();
 		}
 

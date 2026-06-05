@@ -15,4 +15,17 @@ describe('Household shopping list', () => {
     await service.addItem(DEFAULT_HOUSEHOLD_ID, 'owner', { name: 'Agg' });
     expect((await service.listItems(DEFAULT_HOUSEHOLD_ID))).toHaveLength(1);
   });
+
+  it('adds recipe missing ingredients with numeric quantity', async () => {
+    await integrationDb.seedUser({ id: 'user-1' });
+    await integrationDb.seedHousehold({ id: DEFAULT_HOUSEHOLD_ID, members: [{ userId: 'user-1', role: 'owner' }] });
+    const { missingIngredientToListItem } = await import('$lib/server/recipe-prompt');
+    const result = await service.addSuggestedItems(DEFAULT_HOUSEHOLD_ID, 'owner', [
+      missingIngredientToListItem('Basilika')
+    ]);
+    expect(result).toEqual({ added: 1, skipped: 0 });
+    const items = await service.listItems(DEFAULT_HOUSEHOLD_ID);
+    expect(items[0]).toMatchObject({ name: 'Basilika', unit: 'st' });
+    expect(Number(items[0]?.quantity)).toBe(1);
+  });
 });

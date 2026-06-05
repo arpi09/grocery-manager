@@ -36,13 +36,24 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 
 	let listQuery = $state('');
 
+	function formatLine(item: ShoppingListItem): string {
+		return formatShoppingListExportLine(item);
+	}
+
+	function matchesListQuery(item: ShoppingListItem, query: string): boolean {
+		if (!query) {
+			return true;
+		}
+		return formatLine(item).toLowerCase().includes(query);
+	}
+
 	const unchecked = $derived(
 		items.filter((item) => {
 			if (item.checked) {
 				return false;
 			}
 			const q = listQuery.trim().toLowerCase();
-			return !q || item.name.toLowerCase().includes(q);
+			return matchesListQuery(item, q);
 		})
 	);
 	let checked = $state<ShoppingListItem[]>([]);
@@ -51,6 +62,8 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 	let showChecked = $state(false);
 
 	$effect.pre(() => {
+		items;
+		checkedCount;
 		checked = [];
 		checkedLoaded = false;
 		showChecked = false;
@@ -60,7 +73,7 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 		showChecked
 			? checked.filter((item) => {
 					const q = listQuery.trim().toLowerCase();
-					return !q || item.name.toLowerCase().includes(q);
+					return matchesListQuery(item, q);
 				})
 			: []
 	);
@@ -81,10 +94,6 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 					t('delete.shoppingItem.undo')
 			: ''
 	);
-
-	function formatLine(item: ShoppingListItem): string {
-		return formatShoppingListExportLine(item);
-	}
 
 	async function ensureCheckedLoaded() {
 		if (checkedLoaded || checkedCount === 0 || !browser) {

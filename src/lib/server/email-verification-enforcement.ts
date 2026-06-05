@@ -1,4 +1,5 @@
 import { env } from '$env/dynamic/private';
+import { isMarketingPath } from '$lib/marketing/routes';
 
 export function isEmailVerificationSkipped(): boolean {
 	const raw = env.EMAIL_VERIFICATION_SKIP?.trim().toLowerCase();
@@ -23,7 +24,10 @@ export function isPathAllowedForUnverifiedUser(pathname: string): boolean {
 	if (isEmailVerificationPath(pathname)) {
 		return true;
 	}
-	if (pathname === '/logout') {
+	if (pathname === '/logout' || pathname === '/login') {
+		return true;
+	}
+	if (isMarketingPath(pathname)) {
 		return true;
 	}
 	return false;
