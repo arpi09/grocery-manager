@@ -65,7 +65,16 @@ export const actions: Actions = {
 		try {
 			const user = await event.locals.authService.login(parsed.data.email, parsed.data.password);
 			await createSession(event, user.id);
-			destination = !isUserEmailVerified({ emailVerifiedAt: user.emailVerifiedAt ?? null }) ? VERIFY_EMAIL_PATH : (redirectTo ?? APP_HOME_PATH);
+			if (!isUserEmailVerified({ emailVerifiedAt: user.emailVerifiedAt ?? null })) {
+				await event.locals.emailVerificationService.resendVerification(
+					user.id,
+					event.getClientAddress(),
+					event.locals.locale
+				);
+				destination = VERIFY_EMAIL_PATH;
+			} else {
+				destination = redirectTo ?? APP_HOME_PATH;
+			}
 		} catch (error) {
 			if (isAuthError(error)) {
 				return fail(400, {

@@ -48,12 +48,12 @@
 	);
 
 	$effect(() => {
-		if (!menuOpen) return;
+		if (!menuOpen && !consumeOpen) return;
 
 		function handlePointerDown(event: PointerEvent) {
 			const target = event.target;
 			if (!(target instanceof Element)) return;
-			if (target.closest('.menu-wrap')) return;
+			if (target.closest('.menu-wrap') || target.closest('.consume-panel')) return;
 			closeMenu();
 		}
 
@@ -71,6 +71,19 @@
 <tr class="data-row" class:finished class:autoExpired={autoExpired}>
 	<td class="col-name">
 		<a href="/item/{item.id}/edit" class="name">{item.name}</a>
+		{#if canWrite && !finished}
+			<button
+				type="button"
+				class="mobile-log-usage"
+				onclick={(event) => {
+					event.stopPropagation();
+					consumeOpen = true;
+					menuOpen = false;
+				}}
+			>
+				{t('consume.logUsage')}
+			</button>
+		{/if}
 		{#if item.notes}
 			<p class="notes" title={item.notes}>{item.notes}</p>
 		{/if}
@@ -189,6 +202,20 @@
 
 	.name:hover {
 		color: var(--color-primary);
+	}
+
+	.mobile-log-usage {
+		display: none;
+		margin-top: 0.35rem;
+		padding: 0.35rem 0.55rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		cursor: pointer;
+		font-family: inherit;
 	}
 
 	.notes {
@@ -358,6 +385,10 @@
 		.detail-row td {
 			display: block;
 			padding: 0 0.5rem 0.65rem;
+		}
+
+		.mobile-log-usage {
+			display: inline-flex;
 		}
 	}
 </style>

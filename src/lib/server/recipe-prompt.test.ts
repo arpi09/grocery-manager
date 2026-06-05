@@ -290,8 +290,8 @@ describe('missingIngredientToListItem', () => {
 	it('creates a shopping list row with default quantity', () => {
 		expect(missingIngredientToListItem('Basilika')).toEqual({
 			name: 'Basilika',
-			quantity: '1 st',
-			unit: null
+			quantity: '1',
+			unit: 'st'
 		});
 	});
 });

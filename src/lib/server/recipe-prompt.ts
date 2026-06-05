@@ -12,6 +12,7 @@ import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
 import type { InventoryItem } from '$lib/domain/inventory-item';
 import type { CreateShoppingListItemInput } from '$lib/domain/shopping-list-item';
 import type { RecipeSuggestion } from '$lib/server/recipe-suggestions';
+import { parseSuggestionQuantity } from '$lib/server/shopping-suggestions';
 
 export { DEFAULT_RECIPE_PORTIONS, MAX_RECIPE_PORTIONS, MIN_RECIPE_PORTIONS };
 
@@ -269,10 +270,11 @@ export function sanitizeRecipesAgainstInventory(
 
 export function missingIngredientToListItem(name: string): CreateShoppingListItemInput {
 	const trimmed = name.trim().slice(0, 200);
+	const { quantity, unit } = parseSuggestionQuantity('1 st');
 	return {
 		name: trimmed,
-		quantity: '1 st',
-		unit: null
+		quantity,
+		unit
 	};
 }
 
