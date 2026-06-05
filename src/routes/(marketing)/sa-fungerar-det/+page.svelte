@@ -4,10 +4,18 @@
 	import MarketingScrollReveal from '$lib/components/marketing/MarketingScrollReveal.svelte';
 	import MarketingStepCard from '$lib/components/marketing/MarketingStepCard.svelte';
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
+	import { buildMarketingWebPageJsonLd } from '$lib/seo/seo';
 
 	let { data } = $props();
 
 	const { marketing: content, loginUrl, registerUrl, canonicalUrl, marketingLocale } = data;
+	const siteOrigin = new URL(canonicalUrl).origin;
+	const jsonLd = buildMarketingWebPageJsonLd(
+		siteOrigin,
+		'/sa-fungerar-det',
+		content.howItWorks.meta.ogTitle,
+		content.howItWorks.meta.description
+	);
 </script>
 
 <MarketingSeoHead
@@ -17,6 +25,7 @@
 	ogDescription={content.howItWorks.meta.ogDescription}
 	{canonicalUrl}
 	locale={marketingLocale}
+	{jsonLd}
 />
 
 <MarketingPageHero>
@@ -36,7 +45,7 @@
 	</section>
 </MarketingScrollReveal>
 
-<MarketingScrollReveal delay={80}>
+<MarketingScrollReveal delay={80} variant="scale">
 	<MarketingCta
 		title={content.landing.finalCtaTitle}
 		lead={content.landing.finalCtaLead}

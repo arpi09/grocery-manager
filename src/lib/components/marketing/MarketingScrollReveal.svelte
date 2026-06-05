@@ -3,6 +3,8 @@
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
 
+	type RevealVariant = 'up' | 'fade' | 'scale';
+
 	interface Props {
 		children: Snippet;
 		class?: string;
@@ -10,9 +12,17 @@
 		delay?: number;
 		/** Hero and above-the-fold blocks should not wait for scroll */
 		immediate?: boolean;
+		/** Motion style — all respect prefers-reduced-motion */
+		variant?: RevealVariant;
 	}
 
-	let { children, class: className = '', delay = 0, immediate = false }: Props = $props();
+	let {
+		children,
+		class: className = '',
+		delay = 0,
+		immediate = false,
+		variant = 'up'
+	}: Props = $props();
 
 	let root: HTMLElement | undefined = $state();
 	/** SSR and no-JS: show content. With JS, below-fold blocks fade in on scroll. */
@@ -51,7 +61,7 @@
 
 <div
 	bind:this={root}
-	class="reveal {className}"
+	class="reveal reveal-{variant} {className}"
 	class:animate
 	class:is-visible={visible}
 	style:--reveal-delay="{delay}ms"
@@ -67,15 +77,26 @@
 
 	.reveal.animate:not(.is-visible) {
 		opacity: 0;
+	}
+
+	.reveal-up.animate:not(.is-visible) {
 		transform: translateY(1.25rem);
+	}
+
+	.reveal-fade.animate:not(.is-visible) {
+		transform: none;
+	}
+
+	.reveal-scale.animate:not(.is-visible) {
+		transform: translateY(0.85rem) scale(0.98);
 	}
 
 	.reveal.animate.is-visible {
 		opacity: 1;
-		transform: translateY(0);
+		transform: translateY(0) scale(1);
 		transition:
-			opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
-			transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+			opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+			transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 		transition-delay: var(--reveal-delay, 0ms);
 	}
 

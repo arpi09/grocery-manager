@@ -1,5 +1,11 @@
 <script lang="ts">
-	/** CSS-only product preview — no images, fast LCP */
+	import type { MarketingContent } from '$lib/marketing/content';
+
+	interface Props {
+		copy: MarketingContent['landing']['heroVisual'];
+	}
+
+	let { copy }: Props = $props();
 </script>
 
 <div class="visual" aria-hidden="true">
@@ -7,34 +13,34 @@
 	<div class="phone">
 		<div class="phone-notch"></div>
 		<header class="phone-top">
-			<span class="chip fridge">Kyl</span>
-			<span class="chip freezer">Frys</span>
-			<span class="chip cupboard">Skafferi</span>
+			<span class="chip fridge">{copy.fridge}</span>
+			<span class="chip freezer">{copy.freezer}</span>
+			<span class="chip cupboard">{copy.cupboard}</span>
 		</header>
 		<div class="eat-first">
-			<span class="eat-badge">Ät det först</span>
-			<p class="eat-copy">3 varor går ut denna vecka</p>
+			<span class="eat-badge">{copy.eatFirstBadge}</span>
+			<p class="eat-copy">{copy.eatFirstCaption}</p>
 		</div>
 		<ul class="items">
 			<li>
 				<span class="dot fridge"></span>
 				<span class="line wide"></span>
-				<span class="date warn">2 dagar</span>
+				<span class="date warn">{copy.expiryDays[0]}</span>
 			</li>
 			<li>
 				<span class="dot cupboard"></span>
 				<span class="line"></span>
-				<span class="date ok">12 dagar</span>
+				<span class="date ok">{copy.expiryDays[1]}</span>
 			</li>
 			<li>
 				<span class="dot freezer"></span>
 				<span class="line mid"></span>
-				<span class="date">5 dagar</span>
+				<span class="date">{copy.expiryDays[2]}</span>
 			</li>
 		</ul>
 		<div class="list-preview">
-			<span class="list-label">Inköpslista</span>
-			<span class="list-pill">+2 från lager</span>
+			<span class="list-label">{copy.shoppingList}</span>
+			<span class="list-pill">{copy.shoppingListPill}</span>
 		</div>
 	</div>
 	<div class="float-card scan">
@@ -44,7 +50,7 @@
 				<path d="M7 12h10" />
 			</svg>
 		</span>
-		<span>Kvitto · streckkod · foto</span>
+		<span>{copy.scanModes}</span>
 	</div>
 	<div class="float-card neutral">
 		<span class="float-icon" aria-hidden="true">
@@ -53,7 +59,7 @@
 				<path d="M3 9l2-4h14l2 4" />
 			</svg>
 		</span>
-		<span>Butiksneutral</span>
+		<span>{copy.storeNeutral}</span>
 	</div>
 </div>
 

@@ -12,7 +12,10 @@ vi.mock('$env/dynamic/public', () => ({
 }));
 
 import {
+	buildFaqPageJsonLd,
 	buildLandingJsonLd,
+	buildMarketingWebPageJsonLd,
+	buildPricingJsonLd,
 	buildRobotsTxt,
 	buildSitemapXml,
 	marketingOgImageUrl,
@@ -93,6 +96,45 @@ describe('buildLandingJsonLd', () => {
 		expect(schemas).toHaveLength(2);
 		expect(schemas[0]['@type']).toBe('WebApplication');
 		expect(schemas[1]['@type']).toBe('Organization');
+	});
+});
+
+describe('buildFaqPageJsonLd', () => {
+	it('maps FAQ items to FAQPage schema', () => {
+		const schema = buildFaqPageJsonLd('https://skaffu.com/faq', [
+			{ question: 'Kostar det?', answer: 'Gratis att börja.' }
+		]);
+		expect(schema['@type']).toBe('FAQPage');
+		expect(schema.mainEntity).toHaveLength(1);
+		expect((schema.mainEntity as { name: string }[])[0].name).toBe('Kostar det?');
+	});
+});
+
+describe('buildMarketingWebPageJsonLd', () => {
+	it('links page to site origin', () => {
+		const schema = buildMarketingWebPageJsonLd(
+			'https://skaffu.com',
+			'/funktioner',
+			'Funktioner',
+			'Beskrivning'
+		);
+		expect(schema['@type']).toBe('WebPage');
+		expect(schema.url).toBe('https://skaffu.com/funktioner');
+		expect((schema.isPartOf as { url: string }).url).toBe('https://skaffu.com');
+	});
+});
+
+describe('buildPricingJsonLd', () => {
+	it('returns WebPage and Product offers', () => {
+		const schemas = buildPricingJsonLd('https://skaffu.com', {
+			freeDescription: 'Gratisplan',
+			proDescription: 'Pro med AI',
+			proMonthlyPrice: 39,
+			proYearlyPrice: 390
+		});
+		expect(schemas).toHaveLength(2);
+		expect(schemas[1]['@type']).toBe('Product');
+		expect((schemas[1].offers as unknown[]).length).toBe(3);
 	});
 });
 

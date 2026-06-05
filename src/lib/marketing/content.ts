@@ -111,8 +111,21 @@ export interface MarketingContent {
 		wasteReductionPoints: string[];
 		stepsTitle: string;
 		stepsLead: string;
+		stepsKicker: string;
 		finalCtaTitle: string;
 		finalCtaLead: string;
+		heroVisual: {
+			fridge: string;
+			freezer: string;
+			cupboard: string;
+			eatFirstBadge: string;
+			eatFirstCaption: string;
+			expiryDays: [string, string, string];
+			shoppingList: string;
+			shoppingListPill: string;
+			scanModes: string;
+			storeNeutral: string;
+		};
 	};
 	features: {
 		title: string;
@@ -155,6 +168,7 @@ export interface MarketingContent {
 	footer: {
 		tagline: string;
 		rights: string;
+		navAria: string;
 	};
 }
 
@@ -172,7 +186,8 @@ const sv: MarketingContent = {
 	nav: [
 		{ href: '/funktioner', label: 'Funktioner' },
 		{ href: '/sa-fungerar-det', label: 'Så fungerar det' },
-		{ href: '/faq', label: 'FAQ' },
+		{ href: '/priser', label: 'Priser' },
+		{ href: '/faq', label: 'Vanliga frågor' },
 		{ href: '/nyheter', label: 'Nyheter' },
 		{ href: '/privacy', label: 'Integritet' }
 	],
@@ -267,8 +282,21 @@ const sv: MarketingContent = {
 		],
 		stepsTitle: 'Igång på tre steg',
 		stepsLead: 'Ingen krånglig setup. Skanna det du har hemma redan idag.',
+		stepsKicker: 'Så fungerar det',
 		finalCtaTitle: 'Redo att slippa gissa i skafferiet?',
-		finalCtaLead: 'Prova gratis på en minut — eller logga in om du redan har konto.'
+		finalCtaLead: 'Prova gratis på en minut — eller logga in om du redan har konto.',
+		heroVisual: {
+			fridge: 'Kyl',
+			freezer: 'Frys',
+			cupboard: 'Skafferi',
+			eatFirstBadge: 'Ät det först',
+			eatFirstCaption: '3 varor går ut denna vecka',
+			expiryDays: ['2 dagar', '12 dagar', '5 dagar'],
+			shoppingList: 'Inköpslista',
+			shoppingListPill: '+2 från lager',
+			scanModes: 'Kvitto · streckkod · foto',
+			storeNeutral: 'Butiksneutral'
+		}
 	},
 	features: {
 		title: 'Funktioner',
@@ -440,7 +468,8 @@ const sv: MarketingContent = {
 	},
 	footer: {
 		tagline: 'Skafferi, kyl och inköp på ett ställe.',
-		rights: '© Skaffu. Alla rättigheter förbehållna.'
+		rights: '© Skaffu. Alla rättigheter förbehållna.',
+		navAria: 'Sidfot'
 	}
 };
 
@@ -458,6 +487,7 @@ const en: MarketingContent = {
 	nav: [
 		{ href: '/funktioner', label: 'Features' },
 		{ href: '/sa-fungerar-det', label: 'How it works' },
+		{ href: '/priser', label: 'Pricing' },
 		{ href: '/faq', label: 'FAQ' },
 		{ href: '/nyheter', label: 'News' },
 		{ href: '/privacy', label: 'Privacy' }
@@ -582,8 +612,21 @@ const en: MarketingContent = {
 		],
 		stepsTitle: 'Up and running in three steps',
 		stepsLead: 'No complicated setup. Scan what you have at home today.',
+		stepsKicker: 'How it works',
 		finalCtaTitle: 'Ready to stop guessing what is in the pantry?',
-		finalCtaLead: 'Try free in a minute — or log in if you already have an account.'
+		finalCtaLead: 'Try free in a minute — or log in if you already have an account.',
+		heroVisual: {
+			fridge: 'Fridge',
+			freezer: 'Freezer',
+			cupboard: 'Cupboard',
+			eatFirstBadge: 'Eat first',
+			eatFirstCaption: '3 items expire this week',
+			expiryDays: ['2 days', '12 days', '5 days'],
+			shoppingList: 'Shopping list',
+			shoppingListPill: '+2 from inventory',
+			scanModes: 'Receipt · barcode · photo',
+			storeNeutral: 'Store-neutral'
+		}
 	},
 	features: {
 		title: 'Features',
@@ -711,7 +754,8 @@ const en: MarketingContent = {
 	},
 	footer: {
 		tagline: 'Pantry, fridge and shopping in one place.',
-		rights: '© Skaffu. All rights reserved.'
+		rights: '© Skaffu. All rights reserved.',
+		navAria: 'Footer'
 	}
 };
 

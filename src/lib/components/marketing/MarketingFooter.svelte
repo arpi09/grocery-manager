@@ -16,7 +16,7 @@
 			<p class="tagline">{content.footer.tagline}</p>
 		</div>
 
-		<nav class="links" aria-label="Sidfot">
+		<nav class="links" aria-label={content.footer.navAria}>
 			{#each content.nav as link (link.href)}
 				<a href={link.href}>{link.label}</a>
 			{/each}

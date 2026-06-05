@@ -5,11 +5,13 @@
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
 	import { getPrivacyContent } from '$lib/marketing/privacy-content';
 	import type { MarketingLocale } from '$lib/marketing/content';
+	import { buildFaqPageJsonLd } from '$lib/seo/seo';
 
 	let { data } = $props();
 
 	const { marketing: content, loginUrl, registerUrl, canonicalUrl, marketingLocale } = data;
 	const privacyLinkLabel = getPrivacyContent(data.marketingLocale as MarketingLocale).title;
+	const jsonLd = buildFaqPageJsonLd(canonicalUrl, content.faq.items);
 </script>
 
 <MarketingSeoHead
@@ -19,6 +21,7 @@
 	ogDescription={content.faq.meta.ogDescription}
 	{canonicalUrl}
 	locale={marketingLocale}
+	{jsonLd}
 />
 
 <MarketingPageHero>
