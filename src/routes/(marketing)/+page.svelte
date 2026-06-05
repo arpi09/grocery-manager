@@ -103,17 +103,20 @@
 		</div>
 
 		<div class="hero-visual-wrap">
-			<LandingHeroVisual />
+			<LandingHeroVisual copy={landing.heroVisual} />
 		</div>
 	</div>
 </section>
 
-<MarketingProLaunchBanner
-	proLaunch={content.proLaunch}
-	{registerUrl}
-	onRegisterClick={trackRegisterClick}
-/>
+<MarketingScrollReveal variant="scale" delay={40}>
+	<MarketingProLaunchBanner
+		proLaunch={content.proLaunch}
+		{registerUrl}
+		onRegisterClick={trackRegisterClick}
+	/>
+</MarketingScrollReveal>
 
+<MarketingScrollReveal immediate variant="fade">
 <section class="stats-strip" aria-label={landing.statsAria}>
 	<ul class="stats-list">
 		{#each landing.stats as stat, i (stat.label)}
@@ -124,6 +127,7 @@
 		{/each}
 	</ul>
 </section>
+</MarketingScrollReveal>
 
 <MarketingScrollReveal>
 	<section class="section" id="varfor-skaffu">
@@ -134,7 +138,7 @@
 			</header>
 			<div class="diff-grid">
 				{#each landing.differentiators as diff, i (diff.title)}
-					<article class="diff-card" style:--card-i={i}>
+					<article class="diff-card diff-reveal" style:--card-i={i}>
 						<span class="diff-tag label-caps">{diff.tag}</span>
 						<h3>{diff.title}</h3>
 						<p>{diff.description}</p>
@@ -145,7 +149,7 @@
 	</section>
 </MarketingScrollReveal>
 
-<MarketingScrollReveal delay={80}>
+<MarketingScrollReveal delay={80} variant="fade">
 	<section class="section muted">
 		<div class="section-inner">
 			<header class="section-header">
@@ -169,7 +173,7 @@
 	</section>
 </MarketingScrollReveal>
 
-<MarketingScrollReveal>
+<MarketingScrollReveal variant="scale">
 	<section class="section waste" id="minska-matsvinn">
 		<div class="section-inner waste-inner">
 			<div class="waste-copy">
@@ -231,7 +235,7 @@
 			<header class="section-header center">
 				<span class="section-kicker label-caps">
 					<Sparkles size={14} strokeWidth={2} aria-hidden="true" />
-					Så fungerar det
+					{landing.stepsKicker}
 				</span>
 				<h2>{landing.stepsTitle}</h2>
 				<p>{landing.stepsLead}</p>
@@ -253,6 +257,7 @@
 	</section>
 </MarketingScrollReveal>
 
+<MarketingScrollReveal delay={60} variant="fade">
 <div class="final-cta-wrap">
 	<MarketingCta
 		title={landing.finalCtaTitle}
@@ -264,6 +269,7 @@
 		onRegisterClick={trackRegisterClick}
 	/>
 </div>
+</MarketingScrollReveal>
 
 <style>
 	.hero {
@@ -625,13 +631,15 @@
 	}
 
 	:global(.is-visible) .feature-reveal,
-	:global(.is-visible) .step-reveal {
+	:global(.is-visible) .step-reveal,
+	:global(.is-visible) .diff-reveal {
 		animation: card-stagger 0.55s ease forwards;
 		animation-delay: calc(0.07s * var(--card-i, 0));
 	}
 
 	.feature-reveal,
-	.step-reveal {
+	.step-reveal,
+	.diff-reveal {
 		opacity: 0;
 	}
 
@@ -648,7 +656,8 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.feature-reveal,
-		.step-reveal {
+		.step-reveal,
+		.diff-reveal {
 			opacity: 1;
 			animation: none;
 		}

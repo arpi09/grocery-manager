@@ -54,6 +54,7 @@
 	<meta property="og:url" content={canonicalUrl} />
 	<meta property="og:type" content="website" />
 	<meta property="og:locale" content={ogLocale} />
+	<meta property="og:locale:alternate" content={locale === 'en' ? 'sv_SE' : 'en_US'} />
 	<meta property="og:image" content={imageUrl} />
 	<meta property="og:image:width" content={String(OG_IMAGE_WIDTH)} />
 	<meta property="og:image:height" content={String(OG_IMAGE_HEIGHT)} />

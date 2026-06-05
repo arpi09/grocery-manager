@@ -139,6 +139,99 @@ export function buildLandingJsonLd(
 	];
 }
 
+export interface FaqJsonLdItem {
+	question: string;
+	answer: string;
+}
+
+export function buildFaqPageJsonLd(
+	canonicalUrl: string,
+	items: FaqJsonLdItem[]
+): Record<string, unknown> {
+	return {
+		'@context': 'https://schema.org',
+		'@type': 'FAQPage',
+		mainEntity: items.map((item) => ({
+			'@type': 'Question',
+			name: item.question,
+			acceptedAnswer: {
+				'@type': 'Answer',
+				text: item.answer
+			}
+		}))
+	};
+}
+
+export function buildMarketingWebPageJsonLd(
+	siteOrigin: string,
+	path: string,
+	name: string,
+	description: string
+): Record<string, unknown> {
+	const pageUrl = marketingCanonicalUrl(path, siteOrigin);
+	return {
+		'@context': 'https://schema.org',
+		'@type': 'WebPage',
+		name,
+		description,
+		url: pageUrl,
+		isPartOf: {
+			'@type': 'WebSite',
+			name: SITE_NAME,
+			url: marketingCanonicalUrl('/', siteOrigin)
+		}
+	};
+}
+
+export function buildPricingJsonLd(
+	siteOrigin: string,
+	options: {
+		freeDescription: string;
+		proDescription: string;
+		proMonthlyPrice: number;
+		proYearlyPrice: number;
+	}
+): Record<string, unknown>[] {
+	const pricingUrl = marketingCanonicalUrl('/priser', siteOrigin);
+	return [
+		buildMarketingWebPageJsonLd(siteOrigin, '/priser', 'Priser & planer', options.freeDescription),
+		{
+			'@context': 'https://schema.org',
+			'@type': 'Product',
+			name: `${SITE_NAME} Pro`,
+			description: options.proDescription,
+			brand: { '@type': 'Brand', name: SITE_NAME },
+			url: pricingUrl,
+			offers: [
+				{
+					'@type': 'Offer',
+					name: 'Gratis',
+					price: '0',
+					priceCurrency: 'SEK',
+					url: pricingUrl,
+					availability: 'https://schema.org/InStock'
+				},
+				{
+					'@type': 'Offer',
+					name: 'Pro månadsvis',
+					price: String(options.proMonthlyPrice),
+					priceCurrency: 'SEK',
+					url: pricingUrl,
+					availability: 'https://schema.org/InStock'
+				},
+				{
+					'@type': 'Offer',
+					name: 'Pro årsvis',
+					price: String(options.proYearlyPrice),
+					priceCurrency: 'SEK',
+					url: pricingUrl,
+					availability: 'https://schema.org/InStock'
+				}
+			]
+		}
+	];
+}
+
 const AUTH_INDEX_PATHS = new Set(['/login', '/register']);
 
 /** Whether crawlers should index this pathname. */

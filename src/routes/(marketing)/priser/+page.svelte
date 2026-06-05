@@ -4,14 +4,23 @@
 	import MarketingPageHero from '$lib/components/marketing/MarketingPageHero.svelte';
 	import MarketingScrollReveal from '$lib/components/marketing/MarketingScrollReveal.svelte';
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
+	import { PRICE_HYPOTHESIS_SEK } from '$lib/domain/plan';
 	import { getPricingContent } from '$lib/marketing/pricing-content';
 	import type { MarketingLocale } from '$lib/marketing/content';
+	import { buildPricingJsonLd } from '$lib/seo/seo';
 
 	let { data } = $props();
 
 	const pricing = getPricingContent(data.marketingLocale as MarketingLocale);
 	const { marketing: content, loginUrl, registerUrl, canonicalUrl, marketingLocale } = data;
 	const upgradeUrl = '/settings#plan-upgrade';
+	const siteOrigin = new URL(canonicalUrl).origin;
+	const jsonLd = buildPricingJsonLd(siteOrigin, {
+		freeDescription: pricing.meta.description,
+		proDescription: pricing.proBullets.join(' '),
+		proMonthlyPrice: PRICE_HYPOTHESIS_SEK.monthly,
+		proYearlyPrice: PRICE_HYPOTHESIS_SEK.yearly
+	});
 </script>
 
 <MarketingSeoHead
@@ -21,6 +30,7 @@
 	ogDescription={pricing.meta.ogDescription}
 	{canonicalUrl}
 	locale={marketingLocale}
+	{jsonLd}
 />
 
 <MarketingPageHero>
@@ -29,72 +39,84 @@
 	<p class="note pro-live">{pricing.proLiveNote}</p>
 </MarketingPageHero>
 
-<MarketingScrollReveal>
-<section class="section">
-	<div class="inner">
-		<table class="compare">
-			<thead>
-				<tr>
-					<th scope="col"></th>
-					<th scope="col">{pricing.freeTitle}</th>
-					<th scope="col">{pricing.proTitle}</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each pricing.comparisonRows as row (row.label)}
+<MarketingScrollReveal variant="scale">
+	<section class="section">
+		<div class="inner">
+			<table class="compare">
+				<thead>
 					<tr>
-						<th scope="row">{row.label}</th>
-						<td>{row.free}</td>
-						<td>{row.pro}</td>
+						<th scope="col"></th>
+						<th scope="col">{pricing.freeTitle}</th>
+						<th scope="col">{pricing.proTitle}</th>
 					</tr>
-				{/each}
-			</tbody>
-		</table>
-
-		<h2>{pricing.proTitle}</h2>
-		<p class="pro-price">{pricing.proPriceLabel}</p>
-		<ul class="pro-list">
-			{#each pricing.proBullets as bullet (bullet)}
-				<li>{bullet}</li>
-			{/each}
-		</ul>
-
-		<section class="pro-cta" aria-labelledby="pro-cta-title">
-			<h2 id="pro-cta-title">{pricing.proCtaTitle}</h2>
-			<p>{pricing.proCtaLead}</p>
-			<div class="pro-cta-actions">
-				<MarketingButtonLink href={upgradeUrl}>{pricing.proCtaUpgradeLabel}</MarketingButtonLink>
-				<MarketingButtonLink href={registerUrl} variant="secondary">
-					{pricing.proCtaRegisterLabel}
-				</MarketingButtonLink>
-			</div>
-		</section>
-
-		<h2>{pricing.priceHypothesisTitle}</h2>
-		<p>{pricing.priceHypothesisBody}</p>
-
-		<h2>{pricing.aiNoteTitle}</h2>
-		<p>{pricing.aiNoteBody}</p>
-
-		<h2>{pricing.stripeNoteTitle}</h2>
-		<p>{pricing.stripeNoteBody}</p>
-
-		<p class="faq-crosslink">
-			<a href={pricing.faqHref}>{pricing.faqLinkLabel}</a>
-		</p>
-	</div>
-</section>
+				</thead>
+				<tbody>
+					{#each pricing.comparisonRows as row, i (row.label)}
+						<tr class="row-reveal" style:--row-i={i}>
+							<th scope="row">{row.label}</th>
+							<td>{row.free}</td>
+							<td>{row.pro}</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	</section>
 </MarketingScrollReveal>
 
-<MarketingScrollReveal delay={80}>
-<MarketingCta
-	title={content.landing.finalCtaTitle}
-	lead={content.landing.finalCtaLead}
-	primaryLabel={content.cta.openApp}
-	primaryHref={loginUrl}
-	secondaryLabel={content.cta.register}
-	secondaryHref={registerUrl}
-/>
+<MarketingScrollReveal delay={60}>
+	<section class="section">
+		<div class="inner">
+			<h2>{pricing.proTitle}</h2>
+			<p class="pro-price">{pricing.proPriceLabel}</p>
+			<ul class="pro-list">
+				{#each pricing.proBullets as bullet, i (bullet)}
+					<li class="bullet-reveal" style:--bullet-i={i}>{bullet}</li>
+				{/each}
+			</ul>
+
+			<section class="pro-cta" aria-labelledby="pro-cta-title">
+				<h2 id="pro-cta-title">{pricing.proCtaTitle}</h2>
+				<p>{pricing.proCtaLead}</p>
+				<div class="pro-cta-actions">
+					<MarketingButtonLink href={upgradeUrl}>{pricing.proCtaUpgradeLabel}</MarketingButtonLink>
+					<MarketingButtonLink href={registerUrl} variant="secondary">
+						{pricing.proCtaRegisterLabel}
+					</MarketingButtonLink>
+				</div>
+			</section>
+		</div>
+	</section>
+</MarketingScrollReveal>
+
+<MarketingScrollReveal delay={80} variant="fade">
+	<section class="section notes">
+		<div class="inner">
+			<h2>{pricing.priceHypothesisTitle}</h2>
+			<p>{pricing.priceHypothesisBody}</p>
+
+			<h2>{pricing.aiNoteTitle}</h2>
+			<p>{pricing.aiNoteBody}</p>
+
+			<h2>{pricing.stripeNoteTitle}</h2>
+			<p>{pricing.stripeNoteBody}</p>
+
+			<p class="faq-crosslink">
+				<a href={pricing.faqHref}>{pricing.faqLinkLabel}</a>
+			</p>
+		</div>
+	</section>
+</MarketingScrollReveal>
+
+<MarketingScrollReveal delay={100} variant="scale">
+	<MarketingCta
+		title={content.landing.finalCtaTitle}
+		lead={content.landing.finalCtaLead}
+		primaryLabel={content.cta.openApp}
+		primaryHref={loginUrl}
+		secondaryLabel={content.cta.register}
+		secondaryHref={registerUrl}
+	/>
 </MarketingScrollReveal>
 
 <style>
@@ -118,6 +140,10 @@
 	.section h2 {
 		margin: var(--space-xl) 0 var(--space-sm);
 		font-size: 1.15rem;
+	}
+
+	.section h2:first-child {
+		margin-top: 0;
 	}
 
 	.section p {
@@ -153,6 +179,43 @@
 	.compare tbody th {
 		font-weight: 500;
 		background: var(--color-surface-muted);
+	}
+
+	:global(.is-visible) .row-reveal {
+		animation: row-in 0.45s ease forwards;
+		animation-delay: calc(0.04s * var(--row-i, 0));
+	}
+
+	.row-reveal {
+		opacity: 0;
+	}
+
+	:global(.is-visible) .bullet-reveal {
+		animation: row-in 0.4s ease forwards;
+		animation-delay: calc(0.05s * var(--bullet-i, 0));
+	}
+
+	.bullet-reveal {
+		opacity: 0;
+	}
+
+	@keyframes row-in {
+		from {
+			opacity: 0;
+			transform: translateY(0.4rem);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.row-reveal,
+		.bullet-reveal {
+			opacity: 1;
+			animation: none;
+		}
 	}
 
 	.pro-list {
