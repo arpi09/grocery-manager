@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import {
 	dismissOnboardingModalIfOpen,
+	dismissPageHintIfOpen,
 	dismissPostOnboardingSurveyIfOpen,
 	loginAsAdmin
 } from './helpers/auth';
@@ -9,7 +10,8 @@ import { mockRecipeSuggestionsApi } from './helpers/mock-api';
 async function openRecipeAssistant(page: import('@playwright/test').Page) {
 	await dismissOnboardingModalIfOpen(page);
 	await dismissPostOnboardingSurveyIfOpen(page);
-	await expect(page.locator('.modal-root')).toHaveCount(0, { timeout: 10_000 });
+	await dismissPageHintIfOpen(page);
+	await expect(page.locator('.modal-backdrop')).toHaveCount(0, { timeout: 10_000 });
 
 	const viewport = page.viewportSize();
 	const isMobile = viewport != null && viewport.width < 900;
@@ -21,7 +23,7 @@ async function openRecipeAssistant(page: import('@playwright/test').Page) {
 
 	const dialog = page.getByTestId('recipe-assistant-dialog');
 	await expect(async () => {
-		await openBtn.click();
+		await openBtn.click({ force: true });
 		await expect(dialog).toBeVisible({ timeout: 3_000 });
 	}).toPass({ timeout: 20_000 });
 	await expect(dialog).toBeInViewport();

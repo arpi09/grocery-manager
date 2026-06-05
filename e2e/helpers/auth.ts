@@ -181,12 +181,15 @@ export async function dismissPostOnboardingSurveyIfOpen(page: Page) {
 export async function dismissOnboardingModalIfOpen(page: Page) {
 	await dismissCookieConsentIfOpen(page);
 	await dismissPostOnboardingSurveyIfOpen(page);
-	await dismissPageHintIfOpen(page);
 
-	for (let attempt = 0; attempt < 5; attempt += 1) {
+	const deadline = Date.now() + 8_000;
+	while (Date.now() < deadline) {
+		await dismissPageHintIfOpen(page);
+
 		const modal = page.locator('.modal-root').first();
 		if (!(await modal.isVisible().catch(() => false))) {
-			break;
+			await page.waitForTimeout(250);
+			continue;
 		}
 
 		if (await page.getByTestId('page-hint-dismiss').isVisible().catch(() => false)) {
@@ -194,7 +197,6 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 		} else {
 			const skipByTestId = page.getByTestId('onboarding-skip');
 			if (await skipByTestId.isVisible().catch(() => false)) {
-				// Skip link can sit outside the viewport in CI; DOM click avoids Playwright viewport checks.
 				await skipByTestId.evaluate((button) => (button as HTMLButtonElement).click());
 			} else {
 				const postSurveySkip = page.getByRole('button', { name: /^(Inte nu|Not now)$/i });

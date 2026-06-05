@@ -155,13 +155,13 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 	function createToggleEnhance(item: ShoppingListItem): SubmitFunction {
 		return () => async ({ result, update }) => {
 			const isCheckingOff = !item.checked;
-			if (result.type === 'success' && isCheckingOff) {
-				removingIds = new Set([...removingIds, item.id]);
-				showSuccessToast(t('actionToast.shoppingChecked', { label: item.name }));
-				await new Promise((resolve) => window.setTimeout(resolve, REMOVE_ANIMATION_MS));
-			}
 			await update();
 			if (result.type === 'success') {
+				if (isCheckingOff) {
+					removingIds = new Set([...removingIds, item.id]);
+					showSuccessToast(t('actionToast.shoppingChecked', { label: item.name }));
+					await new Promise((resolve) => window.setTimeout(resolve, REMOVE_ANIMATION_MS));
+				}
 				const next = new Set(removingIds);
 				next.delete(item.id);
 				removingIds = next;
