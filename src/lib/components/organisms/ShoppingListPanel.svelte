@@ -62,8 +62,8 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 	let showChecked = $state(false);
 
 	$effect.pre(() => {
-		items;
-		checkedCount;
+		void items.length;
+		void checkedCount;
 		checked = [];
 		checkedLoaded = false;
 		showChecked = false;
