@@ -9,7 +9,7 @@
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import { TOAST_UNDO_DURATION_MS } from '$lib/utils/action-toast';
-import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { fetchCheckedShoppingItems } from '$lib/client/shopping-data';
 	import { t } from '$lib/i18n';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
@@ -363,7 +363,10 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 		<Toast
 			message={undoMessage ?? ''}
 			visible={true}
+			variant="success"
+			size="action"
 			durationMs={TOAST_UNDO_DURATION_MS}
+			tapToDismiss={true}
 			onDismiss={dismissUndo}
 		/>
 		<button
@@ -537,7 +540,7 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 		padding: 0.45rem 0.75rem;
 		font-weight: 600;
 		font-size: 0.85rem;
-		background: #fff;
+		background: var(--color-surface);
 		color: var(--color-text);
 		cursor: pointer;
 		box-shadow: var(--shadow-md);
