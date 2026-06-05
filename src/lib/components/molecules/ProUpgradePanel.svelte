@@ -3,6 +3,7 @@
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import { t } from '$lib/i18n';
 	import { PRICE_HYPOTHESIS_SEK } from '$lib/domain/plan';
+	import { startStripeCheckout } from '$lib/utils/stripe-checkout';
 
 	interface Props {
 		isOwner: boolean;
@@ -22,29 +23,21 @@
 		loadingInterval = interval;
 		errorMessage = null;
 
-		try {
-			const response = await fetch('/api/stripe/checkout', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ interval })
-			});
-			const payload = (await response.json()) as { ok?: boolean; url?: string; error?: string };
-
-			if (!response.ok || !payload.ok || !payload.url) {
-				errorMessage = payload.error ?? t('settings.plan.upgradeError');
-				return;
-			}
-
-			window.location.href = payload.url;
-		} catch {
-			errorMessage = t('settings.plan.upgradeError');
-		} finally {
+		const result = await startStripeCheckout(interval);
+		if (!result.ok) {
+			errorMessage =
+				result.error === 'checkout_failed'
+					? t('settings.plan.upgradeError')
+					: (result.error ?? t('settings.plan.upgradeError'));
 			loadingInterval = null;
+			return;
 		}
+
+		window.location.href = result.url;
 	}
 </script>
 
-<div class="pro-upgrade">
+<div class="pro-upgrade" id="plan-upgrade">
 	{#if checkoutStatus === 'cancel'}
 		<FeedbackBanner tone="info" message={t('settings.plan.checkoutCancel')} />
 	{/if}
@@ -55,26 +48,29 @@
 
 	<p class="pro-upgrade-copy">{t('settings.plan.upgradeDescription')}</p>
 
-	<div class="pro-upgrade-actions">
-		<Button
+	<Button
+		type="button"
+		class="pro-upgrade-primary"
+		disabled={!isOwner || loadingInterval !== null}
+		onclick={() => startCheckout('month')}
+	>
+		{loadingInterval === 'month'
+			? t('settings.plan.upgradeLoading')
+			: t('settings.plan.upgradePrimary', { price: PRICE_HYPOTHESIS_SEK.monthly })}
+	</Button>
+
+	<div class="pro-upgrade-secondary">
+		<button
 			type="button"
-			disabled={!isOwner || loadingInterval !== null}
-			onclick={() => startCheckout('month')}
-		>
-			{loadingInterval === 'month'
-				? t('settings.plan.upgradeLoading')
-				: t('settings.plan.upgradeMonthly', { price: PRICE_HYPOTHESIS_SEK.monthly })}
-		</Button>
-		<Button
-			type="button"
-			variant="secondary"
+			class="pro-upgrade-yearly"
 			disabled={!isOwner || loadingInterval !== null}
 			onclick={() => startCheckout('year')}
 		>
 			{loadingInterval === 'year'
 				? t('settings.plan.upgradeLoading')
-				: t('settings.plan.upgradeYearly', { price: PRICE_HYPOTHESIS_SEK.yearly })}
-		</Button>
+				: t('settings.plan.upgradeYearlyLink', { price: PRICE_HYPOTHESIS_SEK.yearly })}
+		</button>
+		<a class="pro-upgrade-plans" href="/priser">{t('settings.plan.seeAllPlans')}</a>
 	</div>
 
 	{#if !isOwner}
@@ -98,10 +94,44 @@
 		color: var(--color-text);
 	}
 
-	.pro-upgrade-actions {
+	:global(.pro-upgrade-primary) {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.pro-upgrade-secondary {
 		display: flex;
 		flex-wrap: wrap;
-		gap: var(--space-sm);
+		align-items: center;
+		gap: var(--space-sm) var(--space-md);
+	}
+
+	.pro-upgrade-yearly {
+		padding: 0;
+		border: none;
+		background: none;
+		color: var(--color-primary);
+		font: inherit;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	.pro-upgrade-yearly:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.pro-upgrade-plans {
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+		text-decoration: none;
+	}
+
+	.pro-upgrade-plans:hover {
+		color: var(--color-primary);
+		text-decoration: underline;
 	}
 
 	.pro-upgrade-note {

@@ -528,6 +528,29 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 					note={t('settings.plan.currentFree')}
 					last={false}
 				/>
+				<div class="plan-panel plan-upgrade-panel">
+					{#if data.stripeCheckoutEnabled}
+						<ProUpgradePanel
+							isOwner={data.isOwner}
+							checkoutStatus={data.checkoutStatus === 'portal' ? null : data.checkoutStatus}
+						/>
+					{:else}
+						<p class="plan-copy plan-muted">{t('settings.plan.comingSoon')}</p>
+						<ProWaitlistForm
+							action="?/joinProWaitlist"
+							source="settings"
+							title={t('settings.plan.waitlistTitle')}
+							description={t('settings.plan.waitlistDescription')}
+							emailLabel={t('settings.plan.waitlistEmailLabel')}
+							submitLabel={t('settings.plan.waitlistSubmitLabel')}
+							successMessage={t('settings.plan.waitlistSuccess')}
+							existsMessage={t('settings.plan.waitlistExists')}
+							email={data.user?.email ?? ''}
+							emailReadonly
+							{form}
+						/>
+					{/if}
+				</div>
 			{/if}
 			{#if data.planLimits && !data.isPro}
 				<div class="plan-panel plan-usage-panel">
@@ -550,7 +573,7 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 			{/if}
 			<details class="settings-disclosure plan-compare">
 				<summary class="settings-disclosure-summary">{t('settings.plan.compareSummary')}</summary>
-				<div class="plan-panel" id="plan-upgrade">
+				<div class="plan-panel">
 					<h3 class="plan-heading">{t('settings.plan.freeLimitsTitle')}</h3>
 					<p class="plan-copy">
 						{t('settings.plan.freeLimitsItems', {
@@ -577,33 +600,12 @@ import { showClientToast } from '$lib/utils/client-toast.svelte';
 							yearly: PRICE_HYPOTHESIS_SEK.yearly
 						})}
 					</p>
-					{#if !data.isPro && data.stripeCheckoutEnabled}
-						<ProUpgradePanel
-							isOwner={data.isOwner}
-							checkoutStatus={data.checkoutStatus === 'portal' ? null : data.checkoutStatus}
-						/>
-					{:else if !data.isPro}
-						<p class="plan-copy plan-muted">{t('settings.plan.comingSoon')}</p>
-						<ProWaitlistForm
-							action="?/joinProWaitlist"
-							source="settings"
-							title={t('settings.plan.waitlistTitle')}
-							description={t('settings.plan.waitlistDescription')}
-							emailLabel={t('settings.plan.waitlistEmailLabel')}
-							submitLabel={t('settings.plan.waitlistSubmitLabel')}
-							successMessage={t('settings.plan.waitlistSuccess')}
-							existsMessage={t('settings.plan.waitlistExists')}
-							email={data.user?.email ?? ''}
-							emailReadonly
-							{form}
-						/>
-					{/if}
 				</div>
 			</details>
 			<SettingsRow
 				href="/priser"
-				title={t('settings.plan.learnMore')}
-				note={t('settings.plan.learnMoreNote')}
+				title={t('settings.plan.seeAllPlans')}
+				note={t('settings.plan.seeAllPlansNote')}
 				last
 			/>
 		</SettingsSection>
