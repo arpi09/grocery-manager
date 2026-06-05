@@ -46,7 +46,7 @@ test.describe('Critical flows', () => {
 		await expectOnboardingGuideVisible(page);
 		await page.getByRole('button', { name: /Nästa|Next/i }).click();
 		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
-		await page.getByTestId('onboarding-add-first-item').click();
+		await page.getByTestId('onboarding-add-items').click();
 		await expect(page.getByTestId('onboarding-scan-picker')).toBeVisible();
 		await page.getByTestId('onboarding-scan-barcode').click();
 		await expect(page).toHaveURL(/\/settings/);

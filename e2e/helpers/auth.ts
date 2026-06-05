@@ -1,7 +1,9 @@
 import { expect, type Page } from '@playwright/test';
 import { LOCALE_COOKIE_NAME, LOCALE_STORAGE_KEY } from '../../src/lib/i18n/locale';
+import { PAGE_HINT_IDS } from '../../src/lib/utils/page-hints';
 
 const ONBOARDING_VERSION = '3';
+const PAGE_HINT_STORAGE_PREFIX = 'home-pantry-page-hint-dismissed';
 const E2E_LOCALE = 'sv';
 /** Locale only — onboarding and activation state stay fresh (new-user flows). */
 export async function prepareFreshUserBrowserState(page: Page) {
@@ -25,7 +27,7 @@ export async function prepareE2eBrowserState(page: Page) {
 	await applyE2eLocale(page);
 
 	await page.addInitScript(
-		({ version, activationReceiptKey, celebrationKey }) => {
+		({ version, activationReceiptKey, celebrationKey, pageHintIds, pageHintPrefix }) => {
 			// Only clear legacy (non user-scoped) keys — wiping per-user keys re-opens the guide on every navigation.
 			const legacyPrefixes = [
 				'home-pantry-onboarding-version',
@@ -48,6 +50,9 @@ export async function prepareE2eBrowserState(page: Page) {
 				localStorage.removeItem(`${celebrationKey}:${userId}`);
 				localStorage.setItem(`home-pantry-post-onboarding-survey-dismissed:${userId}`, '1');
 				localStorage.removeItem(`home-pantry-post-onboarding-survey-pending:${userId}`);
+				for (const hintId of pageHintIds) {
+					localStorage.setItem(`${pageHintPrefix}:${hintId}:${userId}`, '1');
+				}
 			};
 
 			(window as Window & { __hpMarkOnboardingComplete?: (userId: string) => void }).__hpMarkOnboardingComplete =
@@ -56,7 +61,9 @@ export async function prepareE2eBrowserState(page: Page) {
 		{
 			version: ONBOARDING_VERSION,
 			activationReceiptKey: 'home-pantry-onboarding-activation-receipt-done',
-			celebrationKey: 'home-pantry-onboarding-celebration-pending'
+			celebrationKey: 'home-pantry-onboarding-celebration-pending',
+			pageHintIds: [...PAGE_HINT_IDS],
+			pageHintPrefix: PAGE_HINT_STORAGE_PREFIX
 		}
 	);
 }
@@ -148,6 +155,14 @@ export async function dismissCookieConsentIfOpen(page: Page) {
 	}
 }
 
+export async function dismissPageHintIfOpen(page: Page) {
+	const dismiss = page.getByTestId('page-hint-dismiss');
+	if (await dismiss.isVisible().catch(() => false)) {
+		await dismiss.click({ force: true });
+		await page.locator('.page-hint-panel').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+	}
+}
+
 export async function dismissPostOnboardingSurveyIfOpen(page: Page) {
 	const skipByTestId = page.getByTestId('post-onboarding-survey-skip');
 	if (await skipByTestId.isVisible().catch(() => false)) {
@@ -166,6 +181,7 @@ export async function dismissPostOnboardingSurveyIfOpen(page: Page) {
 export async function dismissOnboardingModalIfOpen(page: Page) {
 	await dismissCookieConsentIfOpen(page);
 	await dismissPostOnboardingSurveyIfOpen(page);
+	await dismissPageHintIfOpen(page);
 
 	for (let attempt = 0; attempt < 5; attempt += 1) {
 		const modal = page.locator('.modal-root').first();
@@ -173,22 +189,26 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 			break;
 		}
 
-		const skipByTestId = page.getByTestId('onboarding-skip');
-		if (await skipByTestId.isVisible().catch(() => false)) {
-			// Skip link can sit outside the viewport in CI; DOM click avoids Playwright viewport checks.
-			await skipByTestId.evaluate((button) => (button as HTMLButtonElement).click());
+		if (await page.getByTestId('page-hint-dismiss').isVisible().catch(() => false)) {
+			await dismissPageHintIfOpen(page);
 		} else {
-			const postSurveySkip = page.getByRole('button', { name: /^(Inte nu|Not now)$/i });
-			if (await postSurveySkip.first().isVisible().catch(() => false)) {
-				await postSurveySkip.first().click({ force: true });
+			const skipByTestId = page.getByTestId('onboarding-skip');
+			if (await skipByTestId.isVisible().catch(() => false)) {
+				// Skip link can sit outside the viewport in CI; DOM click avoids Playwright viewport checks.
+				await skipByTestId.evaluate((button) => (button as HTMLButtonElement).click());
 			} else {
-				const skip = page.getByRole('button', {
-					name: /^(Hoppa över|Hoppa over|Jag gör det senare|Skip)$/i
-				});
-				if (await skip.first().isVisible().catch(() => false)) {
-					await skip.first().click({ force: true });
+				const postSurveySkip = page.getByRole('button', { name: /^(Inte nu|Not now)$/i });
+				if (await postSurveySkip.first().isVisible().catch(() => false)) {
+					await postSurveySkip.first().click({ force: true });
 				} else {
-					await page.keyboard.press('Escape');
+					const skip = page.getByRole('button', {
+						name: /^(Hoppa över|Hoppa over|Jag gör det senare|Skip)$/i
+					});
+					if (await skip.first().isVisible().catch(() => false)) {
+						await skip.first().click({ force: true });
+					} else {
+						await page.keyboard.press('Escape');
+					}
 				}
 			}
 		}

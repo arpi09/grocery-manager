@@ -11,7 +11,8 @@ test.describe('Navigation', () => {
 	test('can open inventory, planer, and inkop pages', async ({ page }) => {
 		await clickNavHref(page, '/inkop');
 		await expect(page).toHaveURL(/\/inkop/);
-		await expect(page.getByRole('heading', { name: /Ink/i })).toBeVisible();
+		await dismissOnboardingModalIfOpen(page);
+		await expect(page.getByRole('heading', { level: 1, name: /^Inköp$/i })).toBeVisible();
 
 		await page.goto('/planer');
 		await expect(page).toHaveURL(/\/planer/);
