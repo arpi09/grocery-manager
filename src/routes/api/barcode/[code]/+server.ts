@@ -1,12 +1,15 @@
 import { BarcodeLookupService, BarcodeNotFoundError } from '$lib/application/barcode-lookup.service';
-import { error, json } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
+import { translate } from '$lib/i18n/messages';
+import { requireUser } from '$lib/server/api-guards';
 import type { RequestHandler } from './$types';
 
 const lookupService = new BarcodeLookupService();
 
 export const GET: RequestHandler = async ({ params, locals }) => {
-	if (!locals.user) {
-		error(401, 'Unauthorized');
+	const auth = requireUser(locals);
+	if (!auth.authorized) {
+		return auth.response;
 	}
 
 	try {
@@ -14,7 +17,10 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		return json(result);
 	} catch (e) {
 		if (e instanceof BarcodeNotFoundError) {
-			error(400, 'Invalid barcode');
+			return json(
+				{ error: translate(locals.locale, 'errors.api.barcodeNotFound') },
+				{ status: 400 }
+			);
 		}
 		throw e;
 	}
