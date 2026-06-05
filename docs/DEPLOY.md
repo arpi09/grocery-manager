@@ -4,19 +4,56 @@
 
 ---
 
-## Så deployar du
+## Be coordinator om deploy i chatten
+
+Det enklaste sättet att släppa till produktion: skriv till **coordinator** i Cursor-chatten. Du behöver **inte** öppna GitHub Actions själv.
+
+**Exempel på fraser:**
+
+| Säg till coordinator | |
+|----------------------|---|
+| `deploy` | Deploya senaste `master` |
+| `kör deploy` / `deploya till prod` | Samma — full quality → E2E → Firebase |
+| `release` / `släpp till prod` | Samma |
+
+**Vad coordinator gör:**
+
+1. Kontrollerar att CI på `master` är grön och security-gate OK.
+2. Startar workflowen [**Deploy to production**](https://github.com/arpi09/grocery-manager/actions/workflows/deploy.yml) via `gh workflow run deploy.yml`.
+3. Följer körningen tills den är klar (~15–25 min med E2E).
+4. Om E2E eller quality failar: fixar minimalt, pushar `master`, kör deploy igen.
+5. Rapporterar tillbaka på svenska: SHA, länk till workflow-körning, prod-URL.
+
+Valfri mobilnotis skickas fortfarande om `DEPLOY_NOTIFY_WEBHOOK_URL` eller Telegram-secrets är konfigurerade.
+
+**Manuellt i GitHub (fallback):** Actions → **Deploy to production** → Run workflow — se [Inputs](#inputs-deploy-to-production) nedan.
+
+---
+
+## Så deployar du (översikt)
 
 Merge till `master` kör **bara snabb CI** (lint, check, tester, build — ~3–5 min). Ingen E2E och ingen Firebase-deploy sker automatiskt.
 
-När du vill släppa till produktion:
-
-1. Se till att **CI** är grön på `master` (senaste merge).
-2. Gå till GitHub → **Actions** → **Deploy to production** → **Run workflow**.
-3. Lämna **ref** som `master` (standard) eller ange en **sha** om du vill deploya en specifik commit.
-4. Kryssa i **Skip E2E** endast vid akut hotfix — standard är att E2E körs före deploy (~15–25 min totalt).
-5. Vänta tills workflowen är grön. Du får mobilnotis om `DEPLOY_NOTIFY_WEBHOOK_URL` eller Telegram-secrets är konfigurerade.
+När du vill släppa till produktion: **be coordinator om deploy i chatten** (rekommenderat) eller kör workflowen manuellt i GitHub.
 
 **E2E utan deploy:** Actions → **E2E** (manuellt), på PR mot `master`, eller nattligt kl. 03:00 UTC.
+
+---
+
+## Nattlig E2E och Cursor Automation
+
+Produktion deployas **inte** automatiskt på natten. Två lager:
+
+1. **GitHub Actions — E2E** (03:00 UTC): [`e2e.yml`](../.github/workflows/e2e.yml) kör quality + Playwright mot senaste `master`. Vid fel kan samma mobilnotis-secrets som deploy användas (valfritt).
+2. **Cursor Automation** (04:00 UTC, ~1 h efter GitHub E2E): en schemalagd agent som:
+   - Hämtar senaste **E2E**-körning på `master` (`gh run list --workflow=e2e.yml`)
+   - Vid **grön:** rapporterar OK — ingen push, **ingen deploy**
+   - Vid **röd:** läser loggar, gör minimal fix på `master`, pushar, kör lokal E2E om möjligt
+   - **Aldrig** startar **Deploy to production**, `firebase deploy`, eller PROD_SMOKE
+
+Skapa/redigera automationen i Cursor → **Automations** (prefill från coordinator-session). Beteende styrs av [`.cursor/rules/nightly-e2e-guard.mdc`](../.cursor/rules/nightly-e2e-guard.mdc).
+
+Deploy till prod sker fortfarande bara när du ber coordinator om deploy i chatten eller kör **Deploy to production** manuellt.
 
 ---
 

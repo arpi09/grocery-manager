@@ -48,6 +48,20 @@ flowchart TB
 
 **Efter merge:** ~3–5 min till grön CI. Deploy när du vill — typiskt ~15–25 min för full deploy-kedja.
 
+### Nattlig E2E + Cursor Automation
+
+| Steg | Tid (UTC) | Vad |
+|------|-----------|-----|
+| **GitHub E2E** | 03:00 | Schedule i [`e2e.yml`](../.github/workflows/e2e.yml) kör Playwright mot `master`-tip. Ingen deploy. |
+| **Valfri notis** | Efter körning | Vid röd nattlig/manuell E2E: samma webhook/Telegram-secrets som deploy (`DEPLOY_NOTIFY_*`) om konfigurerade. |
+| **Cursor Automation** | 04:00 | Schemalagd agent (se [DEPLOY.md](./DEPLOY.md)) läser senaste E2E på `master` via `gh`. |
+
+**Cursor-agenten vid röd E2E:** minimal fix, push `master`, ev. lokal `test:e2e`. **Aldrig** `deploy.yml` eller Firebase.
+
+**Cursor-agenten vid grön E2E:** rapportera OK — ingen push, ingen deploy.
+
+Regel för coordinator: [`.cursor/rules/nightly-e2e-guard.mdc`](../.cursor/rules/nightly-e2e-guard.mdc).
+
 ---
 
 ## Agentens happy path

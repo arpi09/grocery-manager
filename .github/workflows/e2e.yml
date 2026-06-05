@@ -122,3 +122,44 @@ jobs:
           E2E_MOCK_AI: 'true'
           PUBLIC_E2E_DISABLE_POST_SURVEY: 'true'
           CI: 'true'
+
+      - name: Notify E2E failure (optional)
+        if: failure() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+        continue-on-error: true
+        env:
+          WEBHOOK_URL: ${{ secrets.DEPLOY_NOTIFY_WEBHOOK_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.DEPLOY_TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.DEPLOY_TELEGRAM_CHAT_ID }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${WEBHOOK_URL:-}" ] && [ -z "${TELEGRAM_BOT_TOKEN:-}" ]; then
+            echo "No notify secrets configured — skipping."
+            exit 0
+          fi
+
+          short_sha="${GITHUB_SHA:0:7}"
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          msg="Skaffu E2E misslyckades (${short_sha})"
+          msg=$(printf '%s\n%s' "$msg" "$run_url")
+
+          if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
+            payload=$(jq -n --arg chat_id "$TELEGRAM_CHAT_ID" --arg text "$msg" \
+              '{chat_id: $chat_id, text: $text, disable_web_page_preview: true}')
+            curl --fail-with-body -sS -X POST \
+              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+              -H "Content-Type: application/json" \
+              -d "$payload"
+          elif [ -n "${WEBHOOK_URL:-}" ]; then
+            if [[ "$WEBHOOK_URL" == *"ntfy.sh"* ]]; then
+              curl --fail-with-body -sS -X POST "$WEBHOOK_URL" \
+                -H "Title: Skaffu E2E misslyckades" \
+                -H "Tags: rotating_light" \
+                -d "$msg"
+            else
+              payload=$(jq -n --arg text "$msg" '{text: $text}')
+              curl --fail-with-body -sS -X POST "$WEBHOOK_URL" \
+                -H "Content-Type: application/json" \
+                -d "$payload"
+            fi
+          fi
