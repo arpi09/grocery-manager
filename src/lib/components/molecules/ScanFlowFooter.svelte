@@ -1,14 +1,31 @@
 <script lang="ts">
+	import { t } from '$lib/i18n';
+
 	interface Props {
-		cancelHref: string;
+		cancelHref?: string;
+		onCancel?: () => void;
 		cancelLabel?: string;
+		'data-testid'?: string;
 	}
 
-	let { cancelHref, cancelLabel = 'Avbryt' }: Props = $props();
+	let {
+		cancelHref,
+		onCancel,
+		cancelLabel,
+		'data-testid': dataTestId
+	}: Props = $props();
+
+	const label = $derived(cancelLabel ?? t('common.cancel'));
 </script>
 
 <footer class="flow-footer">
-	<a class="cancel-link" href={cancelHref}>{cancelLabel}</a>
+	{#if onCancel}
+		<button type="button" class="cancel-link" data-testid={dataTestId} onclick={onCancel}>
+			{label}
+		</button>
+	{:else if cancelHref}
+		<a class="cancel-link" href={cancelHref} data-testid={dataTestId}>{label}</a>
+	{/if}
 </footer>
 
 <style>
@@ -27,9 +44,14 @@
 		justify-content: center;
 		min-height: 2.75rem;
 		padding: 0.5rem 1.25rem;
+		border: none;
+		background: transparent;
 		color: var(--color-text-muted);
 		font-weight: 600;
+		font-size: inherit;
+		font-family: inherit;
 		text-decoration: none;
+		cursor: pointer;
 	}
 
 	.cancel-link:hover {

@@ -52,4 +52,21 @@ test.describe('Critical flows', () => {
 		await expect(page).toHaveURL(/\/settings/);
 		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
 	});
+
+	test('onboarding scan cancel returns to guide without leaving settings', async ({ page }) => {
+		test.setTimeout(60_000);
+		await registerNewUser(page);
+		await page.goto('/settings#settings-app');
+		await dismissOnboardingModalIfOpen(page);
+		await page.locator('#settings-app details.settings-disclosure summary').click();
+		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click();
+		await expectOnboardingGuideVisible(page);
+		await page.getByRole('button', { name: /Nästa|Next/i }).click();
+		await page.getByTestId('onboarding-add-items').click();
+		await expect(page.getByTestId('onboarding-scan-picker')).toBeVisible();
+		await page.getByTestId('onboarding-scan-cancel').click();
+		await expect(page.getByTestId('onboarding-scan-picker')).toHaveCount(0);
+		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
+		await expect(page).toHaveURL(/\/settings/);
+	});
 });

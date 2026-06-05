@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Button from '$lib/components/atoms/Button.svelte';
 	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import PhotoRoundFlow from '$lib/components/organisms/PhotoRoundFlow.svelte';
@@ -36,7 +35,7 @@
 		activeFlow = null;
 	}
 
-	function closeAll() {
+	function closePicker() {
 		activeFlow = null;
 		onClose();
 	}
@@ -69,7 +68,7 @@
 
 <Modal
 	open={open && activeFlow === null}
-	onClose={closeAll}
+	onClose={closePicker}
 	variant="sheet"
 	nested
 	dismissible={true}
@@ -118,7 +117,18 @@
 		</button>
 	</div>
 
-	<Button type="button" variant="ghost" fullWidth onclick={closeAll}>{t('common.cancel')}</Button>
+	{#snippet footer()}
+		<div class="picker-footer">
+			<button
+				type="button"
+				class="picker-dismiss"
+				data-testid="onboarding-scan-cancel"
+				onclick={closePicker}
+			>
+				{t('onboarding.backToGuide')}
+			</button>
+		</div>
+	{/snippet}
 </Modal>
 
 {#if activeFlow === 'barcode'}
@@ -159,6 +169,7 @@
 			embedded
 			formAction="/scan?/bulkCreate"
 			onItemSaved={handlePhotoSaved}
+			onCancel={closeFlow}
 		/>
 	</Modal>
 {/if}
@@ -174,7 +185,13 @@
 		title={t('scan.receiptPage.title')}
 		subtitle={t('scan.receiptPage.subtitle')}
 	>
-		<ReceiptBulkAddFlow {returnTo} embedded formAction="/scan?/bulkCreate" onItemSaved={handleReceiptSaved} />
+		<ReceiptBulkAddFlow
+			{returnTo}
+			embedded
+			formAction="/scan?/bulkCreate"
+			onItemSaved={handleReceiptSaved}
+			onCancel={closeFlow}
+		/>
 	</Modal>
 {/if}
 
@@ -199,11 +216,43 @@
 		color: var(--color-text-muted);
 	}
 
+	:global(.onboarding-scan-picker-panel .modal-footer) {
+		padding: var(--space-md) var(--space-md) 0;
+		border-top: 1px solid var(--color-border);
+	}
+
 	.picker-grid {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
-		margin-bottom: var(--space-md);
+	}
+
+	.picker-footer {
+		display: flex;
+		justify-content: center;
+		padding-bottom: env(safe-area-inset-bottom, 0px);
+	}
+
+	.picker-dismiss {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2.75rem;
+		padding: 0.5rem 1.25rem;
+		border: none;
+		border-radius: var(--radius-sm);
+		background: transparent;
+		color: var(--color-text-muted);
+		font: inherit;
+		font-weight: 600;
+		font-size: var(--font-size-body-sm);
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	.picker-dismiss:hover {
+		color: var(--color-text);
+		background: var(--color-surface-muted);
 	}
 
 	.picker-tile {
