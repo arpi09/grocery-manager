@@ -125,4 +125,15 @@
 		color: var(--color-text-muted);
 		font-size: 0.9rem;
 	}
+
+	@media (max-width: 480px) {
+		.pets-head {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		li {
+			flex-wrap: wrap;
+		}
+	}
 </style>

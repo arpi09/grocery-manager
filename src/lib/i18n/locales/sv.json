@@ -833,6 +833,8 @@
 		"pageTitle": "Er kylskåps-årstid",
 		"pageSubtitle": "Månadssammanfattning för ert hushåll",
 		"flowAria": "Månadssammanfattning",
+		"progressAria": "Bild {current} av {total}",
+		"progressDot": "Bild {current} av {total}",
 		"prev": "Tillbaka",
 		"next": "Nästa",
 		"backToStats": "Till statistik",

@@ -853,6 +853,8 @@
 		"pageTitle": "Your pantry wrapped",
 		"pageSubtitle": "Monthly summary for your household",
 		"flowAria": "Monthly summary",
+		"progressAria": "Slide {current} of {total}",
+		"progressDot": "Slide {current} of {total}",
 		"prev": "Back",
 		"next": "Next",
 		"backToStats": "Back to stats",

@@ -136,7 +136,8 @@
 
 <style>
 	.section {
-		padding: 0 var(--space-lg) var(--space-xl);
+		padding: 0 var(--page-padding-x) var(--space-xl);
+		overflow-x: clip;
 	}
 
 	.inner {
@@ -250,5 +251,27 @@
 		margin: 0;
 		font-size: var(--text-sm);
 		color: var(--color-text-muted);
+	}
+
+	@media (max-width: 480px) {
+		.chart-card {
+			padding: var(--space-md);
+		}
+
+		.weekday-chart {
+			gap: 0.2rem;
+			min-height: 10rem;
+		}
+
+		.weekday-label,
+		.weekday-count {
+			font-size: 0.65rem;
+			line-height: 1.2;
+			overflow-wrap: anywhere;
+		}
+
+		.weekday-fill {
+			max-width: 100%;
+		}
 	}
 </style>

@@ -42,10 +42,12 @@
 <style>
 	.share-card {
 		position: relative;
-		width: min(100%, 360px);
+		width: 100%;
+		max-width: 22.5rem;
 		aspect-ratio: 9 / 16;
 		margin: 0 auto;
-		padding: 1.75rem 1.5rem;
+		padding: clamp(1.25rem, 4vw, 1.75rem) clamp(1rem, 3.5vw, 1.5rem);
+		min-width: 0;
 		border-radius: 1.5rem;
 		overflow: hidden;
 		display: flex;
@@ -110,20 +112,22 @@
 	.headline {
 		position: relative;
 		margin: 0;
-		font-size: 1.35rem;
+		font-size: clamp(1.05rem, 4.5vw, 1.35rem);
 		font-weight: 800;
 		line-height: 1.2;
 		letter-spacing: -0.02em;
 		color: var(--color-text);
+		overflow-wrap: anywhere;
 	}
 
 	.stats {
 		position: relative;
 		margin: 0.85rem 0 0;
-		font-size: 1rem;
+		font-size: clamp(0.875rem, 3.5vw, 1rem);
 		font-weight: 700;
 		color: var(--color-primary);
 		line-height: 1.35;
+		overflow-wrap: anywhere;
 	}
 
 	.footer {
@@ -135,6 +139,16 @@
 		line-height: 1.45;
 		border-top: 1px solid color-mix(in srgb, var(--color-primary) 18%, var(--color-border));
 		width: 100%;
+	}
+
+	@media (max-width: 480px) {
+		.illus-wrap :global(.gamification-illus) {
+			--illus-size: 88px;
+		}
+
+		.footer {
+			font-size: 0.75rem;
+		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {

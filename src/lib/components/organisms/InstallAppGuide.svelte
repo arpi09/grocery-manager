@@ -149,6 +149,12 @@
 		gap: var(--space-sm);
 	}
 
+	@media (max-width: 480px) {
+		.install-cta :global(.btn) {
+			width: 100%;
+		}
+	}
+
 	.platform-block h3 {
 		margin: 0 0 var(--space-sm);
 		font-size: 1rem;

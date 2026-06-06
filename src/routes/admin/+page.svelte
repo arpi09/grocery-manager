@@ -155,8 +155,9 @@
 		margin: 0 0 var(--space-md);
 		padding: var(--space-sm) var(--space-md);
 		border-radius: var(--radius-sm);
-		background: #fde8e8;
-		color: #8a1f1f;
+		background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
+		color: var(--color-danger);
+		border: 1px solid color-mix(in srgb, var(--color-danger) 28%, var(--color-border));
 	}
 
 	.email-settings {
@@ -175,8 +176,9 @@
 	.email-settings-env {
 		padding: var(--space-sm) var(--space-md);
 		border-radius: var(--radius-sm);
-		background: #fff8e1;
-		color: #7a5c00;
+		background: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));
+		color: var(--color-warning);
+		border: 1px solid color-mix(in srgb, var(--color-warning) 30%, var(--color-border));
 	}
 
 	.email-settings-form {

@@ -166,7 +166,15 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
+		min-height: var(--touch-target-min);
+		padding: 0.25rem 0;
 		cursor: pointer;
+	}
+
+	.theme-option input {
+		width: 1.125rem;
+		height: 1.125rem;
+		flex-shrink: 0;
 	}
 
 	.theme-error {

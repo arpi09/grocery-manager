@@ -91,13 +91,15 @@
 	}
 
 	.message.error {
-		background: #fdeaea;
+		background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
 		color: var(--color-danger);
+		border: 1px solid color-mix(in srgb, var(--color-danger) 28%, var(--color-border));
 	}
 
 	.message.info {
-		background: #e8f5e9;
-		color: #1b5e20;
+		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+		color: var(--color-primary);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
 	}
 
 	.login-link {
@@ -105,6 +107,7 @@
 		align-items: center;
 		justify-content: center;
 		width: 100%;
+		min-height: var(--touch-target-min);
 		padding: 0.75rem 1rem;
 		border-radius: var(--radius-sm);
 		background: var(--color-primary);

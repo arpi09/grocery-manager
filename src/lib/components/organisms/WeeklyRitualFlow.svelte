@@ -406,6 +406,7 @@
 	}
 
 	.date-input {
+		min-height: var(--touch-target-min);
 		padding: 0.35rem 0.5rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
@@ -423,5 +424,20 @@
 		gap: var(--space-md);
 		font-weight: 600;
 		font-size: 0.9rem;
+	}
+
+	@media (max-width: 600px) {
+		.hero-card {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.approve-wrap {
+			align-self: stretch;
+		}
+
+		.approve-wrap :global(.btn) {
+			width: 100%;
+		}
 	}
 </style>

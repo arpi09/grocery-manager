@@ -77,8 +77,17 @@
 	}
 
 	@media (max-width: 480px) {
+		.cta-section {
+			padding: var(--space-lg) var(--page-padding-x);
+		}
+
+		.inner {
+			padding: var(--space-lg) var(--space-md);
+		}
+
 		.actions {
 			flex-direction: column;
+			align-items: stretch;
 		}
 	}
 </style>

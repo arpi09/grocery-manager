@@ -22,6 +22,7 @@
 	let activeIndex = $state(0);
 	let viewedTracked = $state(false);
 	let sharing = $state(false);
+	let slideTitleEl = $state<HTMLHeadingElement | undefined>(undefined);
 
 	const slides = $derived(report.slides);
 	const activeSlide = $derived(slides[activeIndex] as WrappedSlide | undefined);
@@ -134,6 +135,14 @@
 		});
 	});
 
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+		activeIndex;
+		slideTitleEl?.focus({ preventScroll: true });
+	});
+
 	function goNext() {
 		if (!isLastSlide) {
 			activeIndex += 1;
@@ -189,21 +198,42 @@
 	}
 </script>
 
-<section class="wrapped-flow" aria-label={t('wrapped.flowAria')}>
-	<div class="progress" aria-hidden="true">
+<section class="wrapped-flow" aria-label={t('wrapped.flowAria')} data-testid="wrapped-flow">
+	<div
+		class="progress"
+		role="tablist"
+		aria-label={t('wrapped.progressAria', { current: activeIndex + 1, total: slides.length })}
+	>
 		{#each slides as slide, index (slide.id)}
-			<span class="dot" class:active={index === activeIndex} class:done={index < activeIndex}></span>
+			<span
+				class="dot"
+				class:active={index === activeIndex}
+				class:done={index < activeIndex}
+				role="tab"
+				aria-selected={index === activeIndex}
+				aria-label={t('wrapped.progressDot', { current: index + 1, total: slides.length })}
+			></span>
 		{/each}
 	</div>
 
 	{#if activeSlide}
 		<article class="slide" class:share-slide={isShareSlide} aria-live="polite">
 			{#if !isShareSlide}
-				<div class="slide-visual">
+				<div class="slide-visual" aria-hidden="true">
 					<GamificationIllustration variant={activeSlide.illustration} size={130} />
 				</div>
-				<h2 class="slide-title">{slideTitle(activeSlide)}</h2>
-				<p class="slide-body">{slideBody(activeSlide)}</p>
+				<h2
+					class="slide-title"
+					class:first-month={report.isFirstMonth && activeSlide.id === 'intro'}
+					tabindex="-1"
+					bind:this={slideTitleEl}
+					data-testid="wrapped-slide-title"
+				>
+					{slideTitle(activeSlide)}
+				</h2>
+				<p class="slide-body" class:first-month={report.isFirstMonth && activeSlide.id === 'intro'}>
+					{slideBody(activeSlide)}
+				</p>
 			{:else}
 				<WrappedShareCard {report} {monthLabel} />
 				<p class="share-hint">{t('wrapped.slideShareBody')}</p>
@@ -245,7 +275,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-lg);
+		width: 100%;
 		max-width: 28rem;
+		min-width: 0;
 		margin: 0 auto;
 	}
 
@@ -313,6 +345,16 @@
 		max-width: 32ch;
 	}
 
+	.slide-title.first-month,
+	.slide-body.first-month {
+		max-width: 36ch;
+	}
+
+	.slide-body.first-month {
+		font-size: 1rem;
+		color: var(--color-text);
+	}
+
 	.share-hint {
 		margin: 0;
 		font-size: 0.85rem;
@@ -327,22 +369,56 @@
 		width: 100%;
 	}
 
+	.share-actions :global(.btn) {
+		min-width: 0;
+	}
+
 	.nav-row {
 		display: flex;
+		flex-wrap: wrap;
 		justify-content: space-between;
 		align-items: center;
 		gap: var(--space-sm);
 	}
 
 	.back-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		padding: 0.35rem 0.5rem;
 		font-size: 0.875rem;
 		font-weight: 600;
 		color: var(--color-primary);
-		text-decoration: none;
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
 	}
 
 	.back-link:hover {
-		text-decoration: underline;
+		color: var(--color-primary-hover);
+	}
+
+	@media (max-width: 480px) {
+		.slide {
+			padding: var(--space-sm);
+		}
+
+		.slide-title {
+			font-size: 1.25rem;
+		}
+
+		.share-actions {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.share-actions :global(.btn) {
+			width: 100%;
+		}
+
+		.nav-row :global(.btn) {
+			flex: 1 1 auto;
+			min-width: 0;
+		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {

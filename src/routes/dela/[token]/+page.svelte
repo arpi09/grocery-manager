@@ -61,14 +61,16 @@
 			{/each}
 		</ul>
 
-		<p class="gdpr-note">{t('expiringShare.publicGdprNote')}</p>
+		<p class="gdpr-note" role="note">{t('expiringShare.publicGdprNote')}</p>
 	</div>
 </main>
 
 <style>
 	.share-page {
 		min-height: 100dvh;
-		padding: var(--space-xl) var(--space-lg);
+		padding: calc(var(--space-xl) + env(safe-area-inset-top, 0)) var(--page-padding-x)
+			calc(var(--space-xl) + env(safe-area-inset-bottom, 0));
+		overflow-x: clip;
 		background:
 			radial-gradient(
 				ellipse 80% 50% at 50% -10%,
@@ -103,11 +105,20 @@
 		margin: 0;
 	}
 
-	.expires,
-	.gdpr-note {
+	.expires {
 		margin: 0;
 		color: var(--color-text-muted);
 		font-size: var(--text-sm);
+	}
+
+	.gdpr-note {
+		margin: 0;
+		padding: var(--space-md);
+		border-radius: var(--radius-md);
+		font-size: var(--text-sm);
+		color: var(--color-text-muted);
+		background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+		border: 1px solid color-mix(in srgb, var(--color-primary) 18%, var(--color-border));
 	}
 
 	.item-list {
@@ -132,6 +143,7 @@
 
 	.item-name {
 		font-weight: 600;
+		overflow-wrap: anywhere;
 	}
 
 	.item-location,
@@ -144,5 +156,24 @@
 		display: grid;
 		justify-items: end;
 		gap: var(--space-xs);
+		flex-shrink: 0;
+	}
+
+	@media (max-width: 480px) {
+		:global(.item-card) {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+
+		.item-meta {
+			width: 100%;
+			grid-template-columns: 1fr auto;
+			align-items: center;
+			justify-items: stretch;
+		}
+
+		.quantity {
+			justify-self: end;
+		}
 	}
 </style>

@@ -303,9 +303,12 @@
 	}
 
 	.users-header select {
+		min-height: var(--touch-target-min);
 		padding: 0.35rem 0.5rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		color: var(--color-text);
 	}
 
 	.panel-status {
@@ -314,7 +317,7 @@
 	}
 
 	.panel-error {
-		color: #8a1f1f;
+		color: var(--color-danger);
 	}
 
 	.users-count {
@@ -325,10 +328,14 @@
 
 	.table-wrap {
 		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		margin: 0 calc(-1 * var(--page-padding-x));
+		padding: 0 var(--page-padding-x);
 	}
 
 	table {
 		width: 100%;
+		min-width: 52rem;
 		border-collapse: collapse;
 		font-size: 0.9rem;
 	}
@@ -357,28 +364,28 @@
 		display: inline-block;
 		padding: 0.15rem 0.5rem;
 		border-radius: 999px;
-		background: #eceff1;
-		color: #546e7a;
+		background: var(--color-surface-muted);
+		color: var(--color-text-muted);
 		font-weight: 600;
 		font-size: 0.8rem;
 	}
 
 	.status-pill.active {
-		background: #e8f5e9;
-		color: #1b5e20;
+		background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface));
+		color: var(--color-primary);
 	}
 
 	.status-pill.logged-in {
-		background: #fff8e1;
-		color: #f57f17;
+		background: color-mix(in srgb, var(--color-warning) 16%, var(--color-surface));
+		color: var(--color-warning);
 	}
 
 	.admin-badge {
 		display: inline-block;
 		padding: 0.15rem 0.5rem;
 		border-radius: 999px;
-		background: #e8f5e9;
-		color: #1b5e20;
+		background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
+		color: var(--color-primary);
 		font-weight: 600;
 		font-size: 0.8rem;
 	}
@@ -387,14 +394,14 @@
 		display: inline-block;
 		padding: 0.15rem 0.5rem;
 		border-radius: 999px;
-		background: #eceff1;
-		color: #455a64;
+		background: var(--color-surface-muted);
+		color: var(--color-text-muted);
 		font-weight: 600;
 		font-size: 0.78rem;
 	}
 
 	.plan-pill.pro {
-		background: color-mix(in srgb, var(--color-primary) 18%, #fff);
+		background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface));
 		color: var(--color-primary);
 	}
 
@@ -420,8 +427,22 @@
 	}
 
 	@media (max-width: 900px) {
+		.users-header {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.users-header label {
+			justify-content: space-between;
+		}
+
 		.actions {
 			min-width: 8rem;
+		}
+
+		.pagination {
+			flex-wrap: wrap;
+			justify-content: center;
 		}
 	}
 </style>
