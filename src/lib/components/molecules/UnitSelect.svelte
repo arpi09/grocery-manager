@@ -56,6 +56,9 @@
 <style>
 	.select {
 		width: 100%;
+		box-sizing: border-box;
+		min-height: max(2.8125rem, var(--touch-target-min));
+		line-height: 1.4;
 		padding: 0.65rem 0.85rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
