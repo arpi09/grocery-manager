@@ -139,8 +139,9 @@
 		if (!browser) {
 			return;
 		}
-		void activeIndex;
-		slideTitleEl?.focus({ preventScroll: true });
+		if (activeIndex >= 0) {
+			slideTitleEl?.focus({ preventScroll: true });
+		}
 	});
 
 	function goNext() {
