@@ -25,7 +25,8 @@ describe('Household shopping list', () => {
     if (!parsed.success) return;
     await service.addItem(DEFAULT_HOUSEHOLD_ID, 'owner', parsed.data);
     const items = await service.listItems(DEFAULT_HOUSEHOLD_ID);
-    expect(items[0]).toMatchObject({ name: 'Basilika', quantity: '500', unit: 'g' });
+    expect(items[0]).toMatchObject({ name: 'Basilika', unit: 'g' });
+    expect(Number(items[0]?.quantity)).toBe(500);
   });
 
   it('adds recipe missing ingredients with numeric quantity', async () => {
