@@ -16,7 +16,12 @@ export const PRODUCT_EVENT_TYPES = [
 	'weekly_ritual_approved',
 	'milestone_achieved',
 	'celebration_shown',
-	'streak_milestone_reached'
+	'streak_milestone_reached',
+	'public_report_viewed',
+	'expiring_share_created',
+	'expiring_share_viewed',
+	'wrapped_viewed',
+	'wrapped_shared'
 ] as const;
 
 export const PMF_PRODUCT_EVENT_TYPES = [

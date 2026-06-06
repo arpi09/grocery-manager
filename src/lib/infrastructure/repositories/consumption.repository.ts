@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, sql } from 'drizzle-orm';
+import { and, eq, gte, inArray, lt, sql } from 'drizzle-orm';
 import type { InventoryItem } from '$lib/domain/inventory-item';
 import type { WeeklyCount } from '$lib/domain/statistik';
 import { startOfWeek } from '$lib/domain/statistik';
@@ -38,6 +38,16 @@ export interface IConsumptionRepository {
 	listEventsForSavings(householdId: string): Promise<
 		Array<{ productName: string; eventType: ConsumptionEventType }>
 	>;
+	listEventsForSavingsInPeriod(
+		householdId: string,
+		since: Date,
+		until: Date
+	): Promise<Array<{ productName: string; eventType: ConsumptionEventType }>>;
+	hasConsumptionBefore(householdId: string, before: Date): Promise<boolean>;
+	listWasteEventsBetween(
+		start: Date,
+		end: Date
+	): Promise<Array<{ productName: string; createdAt: Date; householdId: string }>>;
 }
 
 export class DrizzleConsumptionRepository implements IConsumptionRepository {
@@ -152,5 +162,59 @@ export class DrizzleConsumptionRepository implements IConsumptionRepository {
 			productName: row.productName,
 			eventType: row.eventType as ConsumptionEventType
 		}));
+	}
+
+	async listEventsForSavingsInPeriod(householdId: string, since: Date, until: Date) {
+		const rows = await this.database
+			.select({
+				productName: consumptionEventTable.productName,
+				eventType: consumptionEventTable.eventType
+			})
+			.from(consumptionEventTable)
+			.where(
+				and(
+					eq(consumptionEventTable.householdId, householdId),
+					gte(consumptionEventTable.createdAt, since),
+					lt(consumptionEventTable.createdAt, until)
+				)
+			);
+
+		return rows.map((row) => ({
+			productName: row.productName,
+			eventType: row.eventType as ConsumptionEventType
+		}));
+	}
+
+	async hasConsumptionBefore(householdId: string, before: Date): Promise<boolean> {
+		const [row] = await this.database
+			.select({ count: sql<number>`count(*)::int` })
+			.from(consumptionEventTable)
+			.where(
+				and(
+					eq(consumptionEventTable.householdId, householdId),
+					lt(consumptionEventTable.createdAt, before)
+				)
+			);
+
+		return (row?.count ?? 0) > 0;
+	}
+
+	async listWasteEventsBetween(start: Date, end: Date) {
+		const rows = await this.database
+			.select({
+				productName: consumptionEventTable.productName,
+				createdAt: consumptionEventTable.createdAt,
+				householdId: consumptionEventTable.householdId
+			})
+			.from(consumptionEventTable)
+			.where(
+				and(
+					inArray(consumptionEventTable.eventType, ['discarded', 'expired']),
+					gte(consumptionEventTable.createdAt, start),
+					lt(consumptionEventTable.createdAt, end)
+				)
+			);
+
+		return rows;
 	}
 }

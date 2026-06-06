@@ -285,6 +285,22 @@ Alla mål och definitioner finns i kod (`src/lib/domain/pmf.ts`) och på **`/adm
 
 ---
 
+## Skaffurapporten (public PR)
+
+När kohorten tillåter (≥10 hushåll anonymt per månad, mål ≥50 för “stor” launch):
+
+| Steg | Action |
+|------|--------|
+| **Cron** | `POST /api/cron/skaffurapport` (samma `CRON_SECRET` som övriga cron) — aggregerar föregående månad |
+| **Public URL** | `/rapport/YYYY-MM` (marketing layout) — tre insikter + veckodagsdiagram |
+| **Disclaimer** | Beta-kohort-text när <50 hushåll eller k-anonymitet precis uppfylld |
+| **Event** | `public_report_viewed` i product_event |
+| **PR-vinkel** | LinkedIn + matsvinn-poddar: *"Skaffu:s anonymiserade månadsdata visar …"* |
+
+Exempel-UTM för rapport-länkar: `utm_source=linkedin&utm_medium=pr&utm_campaign=skaffurapport-2026-06`.
+
+---
+
 ## Relaterade dokument
 
 | Dokument | Innehåll |

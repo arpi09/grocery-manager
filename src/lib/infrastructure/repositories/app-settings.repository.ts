@@ -6,6 +6,8 @@ import { eq } from 'drizzle-orm';
 export interface IAppSettingsRepository {
 	getBoolean(key: string): Promise<boolean | null>;
 	setBoolean(key: string, value: boolean): Promise<void>;
+	getJson<T>(key: string): Promise<T | null>;
+	setJson(key: string, value: unknown): Promise<void>;
 	getEmailSendingEnabled(): Promise<boolean>;
 	setEmailSendingEnabled(enabled: boolean): Promise<void>;
 }
@@ -39,6 +41,43 @@ export class DrizzleAppSettingsRepository implements IAppSettingsRepository {
 				target: appSettingsTable.key,
 				set: {
 					value: value ? 'true' : 'false',
+					updatedAt: now
+				}
+			});
+	}
+
+	async getJson<T>(key: string): Promise<T | null> {
+		const rows = await this.db
+			.select({ value: appSettingsTable.value })
+			.from(appSettingsTable)
+			.where(eq(appSettingsTable.key, key))
+			.limit(1);
+
+		const raw = rows[0]?.value;
+		if (!raw) {
+			return null;
+		}
+
+		try {
+			return JSON.parse(raw) as T;
+		} catch {
+			return null;
+		}
+	}
+
+	async setJson(key: string, value: unknown): Promise<void> {
+		const now = new Date();
+		await this.db
+			.insert(appSettingsTable)
+			.values({
+				key,
+				value: JSON.stringify(value),
+				updatedAt: now
+			})
+			.onConflictDoUpdate({
+				target: appSettingsTable.key,
+				set: {
+					value: JSON.stringify(value),
 					updatedAt: now
 				}
 			});

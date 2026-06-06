@@ -98,6 +98,13 @@
 			{#if !impact.hasConsumptionData}<p class="muted">{t('stats.impactPlaceholder')}</p>{/if}
 		</Card>
 
+		{#if impact.hasConsumptionData}
+			<Card href="/statistik/wrapped" interactive class="wrapped-entry">
+				<h2 class="section-title">{t('stats.wrappedCta')}</h2>
+				<p class="section-lead">{t('stats.wrappedLead')}</p>
+			</Card>
+		{/if}
+
 		{#if milestones.length > 0}
 			<Card class="progress-hub">
 				<h2 class="section-title">{t('gamification.progressHubTitle')}</h2>
@@ -174,6 +181,15 @@
 
 <style>
 	.statistik { display: flex; flex-direction: column; gap: var(--page-section-gap); }
+	:global(.wrapped-entry) {
+		background: linear-gradient(
+			155deg,
+			color-mix(in srgb, var(--color-primary) 10%, var(--color-surface)),
+			var(--color-surface)
+		);
+		border-color: color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+	}
+
 	:global(.progress-hub) {
 		background: linear-gradient(
 			160deg,

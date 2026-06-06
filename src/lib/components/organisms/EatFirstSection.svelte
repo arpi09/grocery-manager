@@ -28,6 +28,7 @@
 	let { expiringItems, canEdit = false, householdId = null, compact = false }: Props = $props();
 
 	let loading = $state(false);
+	let sharing = $state(false);
 	let mealIntent = $state<MealIntent>(DEFAULT_MEAL_INTENT);
 	let suggestions = $state<RecipeIdea[]>([]);
 	let errorMessage = $state<string | null>(null);
@@ -57,6 +58,35 @@
 			delete next[ideaId];
 			ideaCompletion = next;
 		}, completionDelayMs + completionHoldMs);
+	}
+
+	async function shareExpiringList() {
+		if (!canEdit || expiringItems.length === 0) {
+			return;
+		}
+
+		sharing = true;
+		errorMessage = null;
+
+		try {
+			const response = await fetch('/api/expiring-share', { method: 'POST' });
+			const data = (await response.json()) as { ok?: boolean; url?: string; error?: string };
+
+			if (!response.ok || !data.ok || !data.url) {
+				errorMessage = data.error ?? t('eatFirst.shareFailed');
+				return;
+			}
+
+			if (navigator.clipboard?.writeText) {
+				await navigator.clipboard.writeText(data.url);
+			}
+
+			showClientToast(t('eatFirst.shareSuccess'), { variant: 'success' });
+		} catch {
+			errorMessage = t('eatFirst.shareFailed');
+		} finally {
+			sharing = false;
+		}
 	}
 
 	async function generateSuggestions() {
@@ -256,6 +286,18 @@
 			</fieldset>
 		{/if}
 		<div class="actions">
+			{#if previewItems.length > 0}
+				<Button
+					type="button"
+					onclick={shareExpiringList}
+					loading={sharing}
+					loadingLabel={t('eatFirst.shareLoading')}
+					variant="secondary"
+					fullWidth
+				>
+					{t('eatFirst.shareBtn')}
+				</Button>
+			{/if}
 			<Button
 				type="button"
 				onclick={generateSuggestions}

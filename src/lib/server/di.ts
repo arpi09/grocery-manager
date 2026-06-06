@@ -20,6 +20,7 @@ import { DrizzleConsumptionRepository } from '$lib/infrastructure/repositories/c
 import { DrizzleInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
 import { GamificationService } from '$lib/application/gamification.service';
 import { StatistikService } from '$lib/application/statistik.service';
+import { WrappedService } from '$lib/application/wrapped.service';
 import { DrizzleAdminRepository } from '$lib/infrastructure/repositories/admin.repository';
 import { DrizzleErrorLogRepository } from '$lib/infrastructure/repositories/error-log.repository';
 import { DrizzleUserRepository } from '$lib/infrastructure/repositories/user.repository';
@@ -47,7 +48,10 @@ import { DrizzleAppSettingsRepository } from '$lib/infrastructure/repositories/a
 import { AppSettingsService } from '$lib/application/app-settings.service';
 import { PmfDigestService } from '$lib/application/pmf-digest.service';
 import { DrizzlePurchasePatternRepository } from '$lib/infrastructure/repositories/purchase-pattern.repository';
+import { DrizzleExpiringShareRepository } from '$lib/infrastructure/repositories/expiring-share.repository';
 import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
+import { SkaffurapportService } from '$lib/application/skaffurapport.service';
+import { ExpiringShareService } from '$lib/application/expiring-share.service';
 import { BillingService } from '$lib/application/billing.service';
 import { DrizzleBillingRepository } from '$lib/infrastructure/repositories/billing.repository';
 import { DrizzlePushSubscriptionRepository } from '$lib/infrastructure/repositories/push-subscription.repository';
@@ -83,6 +87,7 @@ const waitlistRepository = new DrizzleWaitlistRepository();
 const appSettingsRepository = new DrizzleAppSettingsRepository();
 
 const purchasePatternRepository = new DrizzlePurchasePatternRepository();
+const expiringShareRepository = new DrizzleExpiringShareRepository();
 const billingRepository = new DrizzleBillingRepository();
 export const pushSubscriptionRepository = new DrizzlePushSubscriptionRepository();
 
@@ -122,6 +127,11 @@ export const purchasePatternService = new PurchasePatternService(
 	purchasePatternRepository,
 	inventoryService
 );
+export const skaffurapportService = new SkaffurapportService(
+	consumptionRepository,
+	appSettingsRepository
+);
+export const expiringShareService = new ExpiringShareService(expiringShareRepository);
 export const statistikService = new StatistikService(
 	inventoryService,
 	inventoryRepository,
@@ -132,6 +142,11 @@ export const gamificationService = new GamificationService(
 	consumptionRepository,
 	mealPlanRepository,
 	pmfRepository
+);
+export const wrappedService = new WrappedService(
+	statistikService,
+	gamificationService,
+	consumptionRepository
 );
 export const shoppingListService = new ShoppingListService(shoppingListRepository);
 export const mealPlanService = new MealPlanService(mealPlanRepository);

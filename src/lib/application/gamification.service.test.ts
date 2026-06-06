@@ -55,7 +55,7 @@ describe('GamificationService', () => {
 			record: vi.fn(),
 			weeklyCountsByEventType: vi.fn(),
 			listEventsForSavings: vi.fn().mockResolvedValue([])
-		};
+		} as unknown as IConsumptionRepository;
 		mealPlanRepository = {
 			countRecipeIdeasSince: vi.fn(),
 			countPlannedMealsSince: vi.fn(),

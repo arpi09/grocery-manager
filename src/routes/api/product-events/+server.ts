@@ -15,7 +15,9 @@ import type { RequestHandler } from './$types';
 
 const PUBLIC_EVENT_TYPES = new Set<ProductEventType>([
 	'register_click',
-	'landing_view'
+	'landing_view',
+	'public_report_viewed',
+	'expiring_share_viewed'
 ]);
 
 const AUTH_EVENT_TYPES = new Set<ProductEventType>([
@@ -26,7 +28,10 @@ const AUTH_EVENT_TYPES = new Set<ProductEventType>([
 	'onboarding_completed',
 	'milestone_achieved',
 	'celebration_shown',
-	'streak_milestone_reached'
+	'streak_milestone_reached',
+	'wrapped_viewed',
+	'wrapped_shared',
+	'expiring_share_created'
 ]);
 
 function isAllowedEventType(value: unknown): value is ProductEventType {

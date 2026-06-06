@@ -318,7 +318,12 @@ export const productEventTable = pgTable(
 				'weekly_ritual_approved',
 				'milestone_achieved',
 				'celebration_shown',
-				'streak_milestone_reached'
+				'streak_milestone_reached',
+				'public_report_viewed',
+				'expiring_share_created',
+				'expiring_share_viewed',
+				'wrapped_viewed',
+				'wrapped_shared'
 			]
 		}).notNull(),
 		metadata: text('metadata'),
@@ -505,4 +510,25 @@ export const consumptionEventTable = pgTable(
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 	},
 	(table) => [index('consumption_event_household_created_idx').on(table.householdId, table.createdAt)]
+);
+
+export const expiringShareLinkTable = pgTable(
+	'expiring_share_link',
+	{
+		id: text('id').primaryKey(),
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
+		createdByUserId: text('created_by_user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		tokenHash: text('token_hash').notNull(),
+		snapshotJson: text('snapshot_json').notNull(),
+		expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('expiring_share_link_token_hash_idx').on(table.tokenHash),
+		index('expiring_share_link_household_idx').on(table.householdId)
+	]
 );

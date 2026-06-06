@@ -456,6 +456,11 @@ const sv: MarketingContent = {
 					'AI (OpenAI) hjälper till att tolka kvitto, föreslå varor och ge inköps- och receptidéer. Vi skickar bara det som behövs för funktionen och använder API på ett sätt som inte tränar OpenAI:s modeller. Se integritetspolicyn för detaljer.'
 			},
 			{
+				question: 'Kan jag dela utgående varor med grannar?',
+				answer:
+					'Ja, som beta kan du skapa en tidsbegränsad länk (48 timmar) med varor som går ut snart — utan adress eller geo. Mottagaren ser bara varunamn och utgångsdatum. Läs mer i docs/GRANNSKAFFERIET_V0.md.'
+			},
+			{
 				question: 'Kan jag lägga till Skaffu på hemskärmen?',
 				answer:
 					'Ja. Öppna appen i Safari (iPhone) eller Chrome (Android) och välj Lägg till på hemskärmen / Installera app. I appen under Inställningar → Lägg till på hemskärmen finns steg-för-steg-guide. På dator fungerar appen i webbläsaren.'
@@ -740,6 +745,11 @@ const en: MarketingContent = {
 				question: 'How is AI used in the app?',
 				answer:
 					'AI (OpenAI) helps parse receipts, suggest items and give shopping and recipe ideas. We only send what is needed for the feature and use the API in a way that does not train OpenAI models. See the privacy policy for details.'
+			},
+			{
+				question: 'Can I share expiring items with neighbours?',
+				answer:
+					'Yes — as a beta you can create a time-limited link (48 hours) with items expiring soon, with no address or geo. Recipients only see item names and expiry dates. See docs/GRANNSKAFFERIET_V0.md for details.'
 			},
 			{
 				question: 'Can I add Skaffu to my home screen?',

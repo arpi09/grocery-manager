@@ -825,7 +825,47 @@
 		"proBadge": "Pro",
 		"proTitle": "Djupare insikter med Pro",
 		"proLead": "Obegränsad AI, kvitto-PDF och full statistik — uppgradera under Inställningar → Plan när du vill.",
-		"footnoteMissingExpiry": "{count} varor saknar utgångsdatum — lägg till datum för bättre utgångsvarningar."
+		"footnoteMissingExpiry": "{count} varor saknar utgångsdatum — lägg till datum för bättre utgångsvarningar.",
+		"wrappedCta": "Er kylskåps-årstid",
+		"wrappedLead": "Månadssammanfattning att dela — sparade kronor, streak och milstolpar."
+	},
+	"wrapped": {
+		"pageTitle": "Er kylskåps-årstid",
+		"pageSubtitle": "Månadssammanfattning för ert hushåll",
+		"flowAria": "Månadssammanfattning",
+		"prev": "Tillbaka",
+		"next": "Nästa",
+		"backToStats": "Till statistik",
+		"shareCta": "Dela bild",
+		"downloadCta": "Ladda ner PNG",
+		"shareTitle": "Skaffu — kylskåps-årstid",
+		"shareText": "Vår månadssammanfattning från Skaffu",
+		"shareTextWithStats": "Vi räddade {sek} kr och {kg} kg mat den här månaden med Skaffu",
+		"bannerBadge": "Månadssammanfattning",
+		"bannerTitle": "Er månadssammanfattning är klar",
+		"bannerBody": "Se hur mycket ni sparat, er streak och milstolpar — dela gärna vidare.",
+		"bannerCta": "Öppna årstiden",
+		"bannerDismiss": "Inte nu",
+		"slideIntroTitle": "Er kylskåps-årstid",
+		"slideIntroFirstTitle": "Er första månad med Skaffu",
+		"slideIntroBody": "En snabb recap av {month} — vad ni åt upp, sparade och firade.",
+		"slideIntroFirstBody": "Välkommen — här växer er berättelse allt eftersom ni loggar förbrukning.",
+		"slideSavingsTitle": "Ni räddade {sek} kr och {kg} kg",
+		"slideSavingsBodyMonth": "Genom att använda maten innan den gick ut den här månaden.",
+		"slideSavingsBodyLifetime": "Så här mycket har ni sparat totalt genom att använda maten i tid.",
+		"slideTopProductTitle": "Er mest förbrukade vara",
+		"slideTopProductBody": "{product} — en trogen favorit i kylen.",
+		"slideStreakTitle": "{count} veckors zero-waste streak",
+		"slideStreakBody": "Veckor utan kastat eller utgånget — fortsätt i samma takt.",
+		"slideMilestonesTitle": "{count} milstolpar",
+		"slideMilestonesBody": "Små vinster längs vägen i ert skafferi.",
+		"slideShareTitle": "Dela er månad",
+		"slideShareBody": "Spara en bild till stories eller dela med familjen.",
+		"shareCardHeadline": "Ni räddade {sek} kr och {kg} kg",
+		"shareCardTopProduct": "Mest förbrukad: {product}",
+		"shareCardStreak": "{count} veckor utan svinn",
+		"shareCardConsumed": "{count} varor förbrukade",
+		"shareCardFooter": "Mindre matsvinn med Skaffu — skafferi som håller koll."
 	},
 	"profile": {
 		"title": "Profil",
@@ -1523,7 +1563,12 @@
 		"addToPlan": "Lägg i matplan",
 		"scheduleSuccess": "{title} inplanerad {date}",
 		"scheduledLabel": "Inplanerad",
-		"scheduleFailed": "Kunde inte lägga till i matplanen. Försök igen."
+		"scheduleFailed": "Kunde inte lägga till i matplanen. Försök igen.",
+		"shareBtn": "Dela utgående lista",
+		"shareLoading": "Skapar länk…",
+		"shareSuccess": "Länken är kopierad — giltig i 48 timmar.",
+		"shareFailed": "Kunde inte skapa delningslänk. Försök igen.",
+		"shareEmpty": "Inga utgående varor att dela just nu."
 	},
 	"weeklyRitual": {
 		"pageTitle": "Veckan fixad",
@@ -1892,5 +1937,55 @@
 			"sandbox": "Inbjudan skapad men e-post kunde inte skickas. I testläge (onboarding@resend.dev) kan Resend bara skicka till e-postadressen kopplad till ditt Resend-konto. Testa med den adressen lokalt, eller verifiera en egen domän i Resend. Mer info: {docsUrl}",
 			"apiKey": "Inbjudan skapad men e-post kunde inte skickas. Resend API-nyckeln är ogiltig eller otillåten. Kontrollera RESEND_API_KEY i .env."
 		}
+	},
+	"rapport": {
+		"metaTitle": "Skaffurapporten {month}",
+		"metaDescription": "Anonymiserad månadsrapport om matsvinn i svenska Skaffu-hushåll.",
+		"eyebrow": "Skaffurapporten",
+		"title": "Så kastar svenska hushåll mat — {month}",
+		"lead": "Aggregerad och anonymiserad data från Skaffu-hushåll som markerar utgångna och kasserade varor.",
+		"betaDisclaimer": "Beta-kohort: siffrorna bygger på en växande användarbas och ska tolkas som tidiga signaler, inte som officiell statistik.",
+		"insufficientCohort": "Vi publicerar detaljerade insikter när minst tio hushåll bidrar anonymt under månaden.",
+		"insightsLabel": "Månadens insikter",
+		"insightCategoryTitle": "Mest kastade kategori",
+		"insightWeekdayTitle": "Veckodag med flest utgångna varor",
+		"insightAverageTitle": "Snitt per hushåll",
+		"insightAverageValue": "{count} varor",
+		"chartTitle": "Utgång per veckodag",
+		"chartLead": "Antal markerade utgångna eller kasserade varor per veckodag.",
+		"chartBarAria": "{weekday}: {count} varor",
+		"metaStats": "Baserat på {households} hushåll och {events} händelser.",
+		"ctaTitle": "Vill du minska svinn hemma?",
+		"ctaLead": "Skaffu hjälper hushåll att se vad som går ut och planera veckan i tid.",
+		"categories": {
+			"meat": "Kött",
+			"fish": "Fisk & skaldjur",
+			"dairy": "Mejeri",
+			"eggs": "Ägg",
+			"bread": "Bröd & bakverk",
+			"pantry": "Skafferi",
+			"fruit": "Frukt",
+			"vegetables": "Grönsaker",
+			"fats": "Fett & olja",
+			"beverages": "Dryck",
+			"other": "Övrigt"
+		},
+		"weekdays": {
+			"1": "Måndag",
+			"2": "Tisdag",
+			"3": "Onsdag",
+			"4": "Torsdag",
+			"5": "Fredag",
+			"6": "Lördag",
+			"7": "Söndag"
+		}
+	},
+	"expiringShare": {
+		"noItems": "Inga utgående varor att dela.",
+		"publicEyebrow": "Grannskafferiet",
+		"publicTitle": "Utgående varor att hämta",
+		"publicLead": "En granne eller vän delade den här listan från sitt skafferi.",
+		"publicExpires": "Länken gäller till {date}.",
+		"publicGdprNote": "Listan visar bara varunamn och utgångsdatum — inga adresser eller kontaktuppgifter. Länken slutar gälla automatiskt."
 	}
 }

@@ -11,6 +11,7 @@ import {
 	inventoryService,
 	statistikService,
 	gamificationService,
+	wrappedService,
 	shoppingListService,
 	mealPlanService,
 	weeklyRitualService,
@@ -39,7 +40,7 @@ import { writeLocaleCookie } from '$lib/infrastructure/locale-cookie';
 import { resolveLocaleForRequest } from '$lib/server/locale';
 import { expiryReminderService } from '$lib/server/di';
 import { DEFAULT_PLAN_TIER } from '$lib/domain/plan';
-import { isMarketingPath } from '$lib/marketing/routes';
+import { isMarketingPath, isExpiringSharePath } from '$lib/marketing/routes';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { VERIFY_EMAIL_PATH } from '$lib/navigation/email-verification';
 import { applySecurityHeaders } from '$lib/server/security-headers';
@@ -63,6 +64,10 @@ function isInvitePath(pathname: string): boolean {
 	return pathname.startsWith('/invite/');
 }
 
+function isExpiringSharePublicPath(pathname: string): boolean {
+	return isExpiringSharePath(pathname);
+}
+
 function isVerificationExemptApiPath(pathname: string): boolean {
 	return (
 		pathname.startsWith('/api/health') ||
@@ -81,6 +86,7 @@ function isPublicPath(pathname: string): boolean {
 		isEmailVerificationPath(pathname) ||
 		isGoogleAuthPath(pathname) ||
 		isInvitePath(pathname) ||
+		isExpiringSharePublicPath(pathname) ||
 		isMarketingPath(pathname) ||
 		pathname === '/robots.txt' ||
 		pathname === '/sitemap.xml' ||
@@ -104,6 +110,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.inventoryService = inventoryService;
 	event.locals.statistikService = statistikService;
 	event.locals.gamificationService = gamificationService;
+	event.locals.wrappedService = wrappedService;
 	event.locals.shoppingListService = shoppingListService;
 	event.locals.mealPlanService = mealPlanService;
 	event.locals.weeklyRitualService = weeklyRitualService;

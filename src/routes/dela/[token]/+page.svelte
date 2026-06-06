@@ -1,0 +1,148 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import Badge from '$lib/components/atoms/Badge.svelte';
+	import Card from '$lib/components/atoms/Card.svelte';
+	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
+	import { getLocale, t } from '$lib/i18n';
+	import { locationLabel } from '$lib/i18n/domain-labels';
+
+	let { data } = $props();
+
+	const locale = getLocale();
+	const expiresAtLabel = $derived(
+		new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
+			data.preview.expiresAt
+		)
+	);
+
+	onMount(() => {
+		void fetch('/api/product-events', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				eventType: 'expiring_share_viewed',
+				metadata: { itemCount: data.preview.items.length }
+			})
+		});
+	});
+</script>
+
+<svelte:head>
+	<title>{t('expiringShare.publicTitle')}</title>
+	<meta name="robots" content="noindex,nofollow" />
+</svelte:head>
+
+<main class="share-page">
+	<div class="share-shell">
+		<header class="share-header">
+			<p class="eyebrow">{t('expiringShare.publicEyebrow')}</p>
+			<h1>{t('expiringShare.publicTitle')}</h1>
+			<p>{t('expiringShare.publicLead')}</p>
+			<p class="expires">{t('expiringShare.publicExpires', { date: expiresAtLabel })}</p>
+		</header>
+
+		<ul class="item-list">
+			{#each data.preview.items as item, index (index)}
+				<li>
+					<Card class="item-card">
+						<div class="item-main">
+							<span class="item-name">{item.name}</span>
+							<span class="item-location">{locationLabel(locale, item.location)}</span>
+						</div>
+						<div class="item-meta">
+							{#if item.expiresOn}
+								{@const daysLeft = daysUntilExpiry(item.expiresOn)}
+								<Badge tone="warning">{formatDaysLeft(daysLeft, locale)}</Badge>
+							{/if}
+							<span class="quantity">{item.quantity}{item.unit ? ` ${item.unit}` : ''}</span>
+						</div>
+					</Card>
+				</li>
+			{/each}
+		</ul>
+
+		<p class="gdpr-note">{t('expiringShare.publicGdprNote')}</p>
+	</div>
+</main>
+
+<style>
+	.share-page {
+		min-height: 100dvh;
+		padding: var(--space-xl) var(--space-lg);
+		background:
+			radial-gradient(
+				ellipse 80% 50% at 50% -10%,
+				color-mix(in srgb, var(--color-primary) 8%, transparent),
+				transparent
+			),
+			var(--color-bg);
+	}
+
+	.share-shell {
+		max-width: 36rem;
+		margin: 0 auto;
+		display: grid;
+		gap: var(--space-lg);
+	}
+
+	.share-header {
+		display: grid;
+		gap: var(--space-sm);
+	}
+
+	.eyebrow {
+		margin: 0;
+		font-size: var(--text-sm);
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--color-primary);
+	}
+
+	h1 {
+		margin: 0;
+	}
+
+	.expires,
+	.gdpr-note {
+		margin: 0;
+		color: var(--color-text-muted);
+		font-size: var(--text-sm);
+	}
+
+	.item-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		display: grid;
+		gap: var(--space-sm);
+	}
+
+	:global(.item-card) {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--space-md);
+		align-items: center;
+	}
+
+	.item-main {
+		display: grid;
+		gap: var(--space-2xs);
+	}
+
+	.item-name {
+		font-weight: 600;
+	}
+
+	.item-location,
+	.quantity {
+		font-size: var(--text-sm);
+		color: var(--color-text-muted);
+	}
+
+	.item-meta {
+		display: grid;
+		justify-items: end;
+		gap: var(--space-xs);
+	}
+</style>

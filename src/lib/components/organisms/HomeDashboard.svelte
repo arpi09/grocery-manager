@@ -10,6 +10,7 @@
 	import EngagementStrip from '$lib/components/molecules/EngagementStrip.svelte';
 	import WeeklyRitualHero from '$lib/components/molecules/WeeklyRitualHero.svelte';
 	import SkafferapportWidget from '$lib/components/molecules/SkafferapportWidget.svelte';
+	import WrappedBanner from '$lib/components/molecules/WrappedBanner.svelte';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import type { EngagementStrip as EngagementStripData } from '$lib/application/gamification.service';
 	import type { SavingsReport } from '$lib/domain/savings-estimate';
@@ -230,6 +231,8 @@
 		{#if showWeeklyRitual}
 			<WeeklyRitualHero expiringCount={expiringCount} />
 		{/if}
+
+		<WrappedBanner />
 
 		<EngagementStrip {engagement} />
 

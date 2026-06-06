@@ -20,7 +20,7 @@ All criteria live in **`docs/UX_GUIDELINES.md`**. Read it at the start of every 
 ## Allowed without explicit assignment
 
 - Read-only review of routes under `src/routes/**`, `src/lib/components/**`, `src/app.css`
-- Update **`docs/UX_GUIDELINES.md`** (guidelines, changelog, route audit table)
+- Update **`docs/UX_GUIDELINES.md`** and **`docs/ACCESSIBILITY.md`** (guidelines, axe baseline, route audit)
 - Summarize top UX risks in chat (severity, page, one-line fix)
 
 ## Forbidden unless explicitly assigned
@@ -39,6 +39,15 @@ All criteria live in **`docs/UX_GUIDELINES.md`**. Read it at the start of every 
    - **Pass** / **Pass with notes** / **Block** (release only if critical a11y or dead-end)
    - Bulleted findings: `severity | route/component | issue | suggested fix`
 5. If guidelines are outdated, patch `UX_GUIDELINES.md` in the same assignment.
+
+## WCAG 2.2 AA release gate
+
+- Read **`docs/ACCESSIBILITY.md`** for scope, exceptions, and component contracts.
+- **Block release** if:
+  - Any **P0 route** (`/`, `/login`, `/register`, `/hem`, `/inventory/fridge`, `/scan`, `/inkop`) has axe **critical** or **serious** violations (`wcag22aa` tags), or
+  - A new/changed P0 route ships **without** an entry in `e2e/accessibility.spec.ts`.
+- P1/P2 routes: fix serious/critical when touched; document known gaps in `ACCESSIBILITY.md` baseline table.
+- Verify skip link, one `h1`, and keyboard path on changed app routes.
 
 ## Severity
 

@@ -6,6 +6,14 @@ export const PUBLIC_MARKETING_PATHS = [...MARKETING_LANDING_PATHS, '/privacy', '
 
 export type MarketingPath = (typeof PUBLIC_MARKETING_PATHS)[number];
 
-export function isMarketingPath(pathname: string): pathname is MarketingPath {
-	return (PUBLIC_MARKETING_PATHS as readonly string[]).includes(pathname);
+export function isRapportPath(pathname: string): boolean {
+	return /^\/rapport\/\d{4}-\d{2}$/.test(pathname);
+}
+
+export function isExpiringSharePath(pathname: string): boolean {
+	return pathname.startsWith('/dela/');
+}
+
+export function isMarketingPath(pathname: string): boolean {
+	return (PUBLIC_MARKETING_PATHS as readonly string[]).includes(pathname) || isRapportPath(pathname);
 }
