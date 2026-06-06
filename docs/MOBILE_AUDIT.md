@@ -71,6 +71,10 @@ Checklist per route: no horizontal scroll, touch targets ≥44px (`--touch-targe
 | Medium | Inventory tables | Sort controls below 44px on card layout | `sort-btn` min-height on narrow |
 | Medium | Inventory tabs | Tab links short on 360px | `LocationTab` min-height 44px |
 | Medium | Item forms | Scan method tabs small tap area | `AddItemForm` tab + input min-height |
+| Medium | Scan mode tabs | Tab pills below 44px on mobile | `ScanModeTabs` uses `--touch-target-min` |
+| Medium | Empty state | Secondary CTA below 44px | `EmptyState` secondary action min-height |
+| Medium | Photo / receipt pickers | Camera file input unlabeled | `ImageSourcePicker` `aria-label` on camera input |
+| Medium | Error banners | Danger text fails contrast on tinted bg | `FeedbackBanner` error tone darkened |
 | Low | Photo round | Remove-photo control tiny | Expanded hit target |
 
 ## Regression
