@@ -1,4 +1,4 @@
-import { json } from '@sveltejs/kit';
+﻿import { json } from '@sveltejs/kit';
 
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
@@ -18,6 +18,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return auth.response;
 	}
 
+	const body = (await request.json().catch(() => ({}))) as {
+		preferences?: unknown;
+		portions?: unknown;
+		mealIntent?: unknown;
+	};
+
+	const preferences = typeof body.preferences === 'string' ? body.preferences.trim().slice(0, 300) : '';
+	const portions = clampRecipePortions(body.portions);
+	const mealIntent = parseMealIntent(body.mealIntent);
+
+	if (isE2eMockAiEnabled()) {
+		const recipes = e2eMockRecipeSuggestions();
+		const savedIdeas = await locals.mealPlanService.storeGeneratedIdeas(auth.user.id, recipes);
+		return json({ recipes: savedIdeas, portions });
+	}
+
 	const quotaResponse = await requireAiQuota(locals, 'ai_scan', auth.user.id);
 	if (quotaResponse) {
 		return quotaResponse;
@@ -29,28 +45,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 	const apiKey = apiKeyOrResponse;
 
-	const body = (await request.json().catch(() => ({}))) as {
-		preferences?: unknown;
-		portions?: unknown;
-		mealIntent?: unknown;
-	};
-
-	const preferences = typeof body.preferences === 'string' ? body.preferences.trim().slice(0, 300) : '';
-	const portions = clampRecipePortions(body.portions);
-	const mealIntent = parseMealIntent(body.mealIntent);
-
 	const inventory = await locals.inventoryService.listAll(locals.householdId!);
 	if (inventory.length === 0) {
 		return json({
 			recipes: [],
 			note: translate(locale, 'recipe.noInventoryNote')
 		});
-	}
-
-	if (isE2eMockAiEnabled()) {
-		const recipes = e2eMockRecipeSuggestions();
-		const savedIdeas = await locals.mealPlanService.storeGeneratedIdeas(auth.user.id, recipes);
-		return json({ recipes: savedIdeas, portions });
 	}
 
 	const generated = await generateRecipesWithRefinement({
