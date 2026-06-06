@@ -291,7 +291,7 @@ När kohorten tillåter (≥10 hushåll anonymt per månad, mål ≥50 för “s
 
 | Steg | Action |
 |------|--------|
-| **Cron** | `POST /api/cron/skaffurapport` (samma `CRON_SECRET` som övriga cron) — aggregerar föregående månad |
+| **Cron** | `POST /api/cron/skaffurapport` (samma `CRON_SECRET` som övriga cron) — aggregerar föregående månad. GitHub Actions: [`.github/workflows/skaffurapport-cron.yml`](../.github/workflows/skaffurapport-cron.yml) (**1:a i månaden 06:00 UTC**). Checklista: [`LAUNCH_CHECKLIST_GROWTH_WAVE.md`](./LAUNCH_CHECKLIST_GROWTH_WAVE.md). |
 | **Public URL** | `/rapport/YYYY-MM` (marketing layout) — tre insikter + veckodagsdiagram |
 | **Disclaimer** | Beta-kohort-text när <50 hushåll eller k-anonymitet precis uppfylld |
 | **Event** | `public_report_viewed` i product_event |

@@ -5,12 +5,11 @@
 	import MarketingScrollReveal from '$lib/components/marketing/MarketingScrollReveal.svelte';
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
 	import type { ProductCategoryId } from '$lib/domain/savings-estimate';
-	import { getLocale, t } from '$lib/i18n';
+	import { t } from '$lib/i18n';
 
 	let { data } = $props();
 
 	const { report, month, marketingLocale, loginUrl, registerUrl, canonicalUrl } = data;
-	const locale = getLocale();
 
 	const weekdayLabels: Record<number, string> = {
 		1: t('rapport.weekdays.1'),

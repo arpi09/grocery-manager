@@ -6,7 +6,6 @@ import {
 	buildWrappedReport,
 	parseWrappedMonthParam,
 	resolveTopConsumedProduct,
-	startOfMonth,
 	startOfNextMonth,
 	toMonthKey,
 	type WrappedReportData

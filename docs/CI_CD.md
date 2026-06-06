@@ -114,7 +114,7 @@ Actions → **Deploy to production** → Run workflow → kryssa i *Skip E2E* en
 | Plats | Namn | Syfte |
 |-------|------|--------|
 | GitHub Actions | `FIREBASE_TOKEN` | `firebase login:ci` — deploy från Actions |
-| GitHub Actions (secret) | `CRON_SECRET` | Bearer för veckocron `POST /api/cron/expiry-reminders` — måste matcha Firebase |
+| GitHub Actions (secret) | `CRON_SECRET` | Bearer för schemalagda cron (`/api/cron/expiry-reminders`, `pmf-weekly`, `shopping-push`, `skaffurapport`, …) — måste matcha Firebase |
 | GitHub Actions (variable) | `PRODUCTION_URL` | Prod-appens bas-URL (samma som `PUBLIC_ORIGIN`, utan `/` på slutet). **`https://skaffu.com`** — se [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md). |
 | GitHub Actions (valfritt) | `DEPLOY_NOTIFY_WEBHOOK_URL` | Push-notis efter lyckad deploy — ntfy, Discord, Slack m.m. (se [Mobilnotis vid deploy](#mobilnotis-vid-deploy)) |
 | GitHub Actions (valfritt) | `DEPLOY_TELEGRAM_BOT_TOKEN` + `DEPLOY_TELEGRAM_CHAT_ID` | Telegram-push efter lyckad deploy (alternativ till webhook) |
@@ -220,7 +220,10 @@ npm run deploy:firebase
 | `.github/workflows/ci.yml` | G1 — snabb CI vid push/PR |
 | `.github/workflows/e2e.yml` | G2 — E2E på PR, manuellt, nattligt |
 | `.github/workflows/deploy.yml` | G1 → G2 → G3 — manuell prod-deploy |
-| `.github/workflows/expiry-reminders-cron.yml` | Veckovis utgångspåminnelse i prod |
+| `.github/workflows/expiry-reminders-cron.yml` | Veckovis utgångspåminnelse i prod (måndag 07:00 UTC) |
+| `.github/workflows/pmf-weekly-cron.yml` | Veckovis PMF-digest till ägare (måndag 08:00 UTC) |
+| `.github/workflows/shopping-push-cron.yml` | Daglig handla-idag-push (06:00 UTC) |
+| `.github/workflows/skaffurapport-cron.yml` | Månatlig Skaffurapport-aggregering (1:a 06:00 UTC) |
 | `.husky/pre-commit` | lint-staged (G0) |
 | `apphosting.yaml` | Firebase build/run |
 | `docs/DEPLOY.md` | Så deployar du (svenska) |

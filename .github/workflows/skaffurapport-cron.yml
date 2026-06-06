@@ -1,0 +1,46 @@
+# Monthly Skaffurapport aggregation (production only).
+# Aggregates the previous calendar month into app_settings for /rapport/YYYY-MM.
+# Independent of release.yml — no quality/e2e/deploy.
+#
+# GitHub: secret CRON_SECRET, variable PRODUCTION_URL (https://skaffu.com)
+# Firebase: same CRON_SECRET via apphosting secrets — see docs/CI_CD.md
+
+name: Skaffurapport cron
+
+on:
+  schedule:
+    # 1st of each month 06:00 UTC (~08:00 CET) — after daily shopping-push at 06:00
+    - cron: '0 6 1 * *'
+  workflow_dispatch:
+
+jobs:
+  skaffurapport:
+    name: skaffurapport
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: POST /api/cron/skaffurapport
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "::error::GitHub secret CRON_SECRET is not set."
+            exit 1
+          fi
+          if [ -z "${PRODUCTION_URL:-}" ]; then
+            echo "::error::GitHub repository variable PRODUCTION_URL is not set (e.g. https://skaffu.com)."
+            exit 1
+          fi
+
+          base="${PRODUCTION_URL%/}"
+          url="${base}/api/cron/skaffurapport"
+          echo "POST ${url}"
+
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Accept: application/json" \
+            "${url}"
