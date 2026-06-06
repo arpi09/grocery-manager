@@ -161,6 +161,18 @@ describe('receiptLineToInventoryAmount', () => {
 			receiptLineToInventoryAmount({ name: 'Coca-Cola', quantity: '1.5', unit: 'l', location: 'cupboard' })
 		).toEqual({ quantity: '1.5', unit: 'l' });
 	});
+
+	it('splits combined quantity strings from AI receipt lines', () => {
+		expect(
+			receiptLineToInventoryAmount({ name: 'Mjölk', quantity: '1 st', location: 'fridge' })
+		).toEqual({ quantity: '1', unit: 'st' });
+		expect(
+			receiptLineToInventoryAmount({ name: 'Kött', quantity: '0.71 kg', location: 'fridge' })
+		).toEqual({ quantity: '0.71', unit: 'kg' });
+		expect(
+			receiptLineToInventoryAmount({ name: 'Ägg', quantity: '1 1', location: 'fridge' })
+		).toEqual({ quantity: '1', unit: '1' });
+	});
 });
 
 describe('normalizeReceiptAiPayload', () => {

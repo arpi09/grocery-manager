@@ -1,4 +1,5 @@
 ﻿import { z } from 'zod';
+import { parseSuggestionQuantity } from '$lib/server/shopping-suggestions';
 
 const nameSchema = z.string().trim().min(1, 'Ange en vara').max(200);
 
@@ -23,9 +24,16 @@ export function parseAddShoppingListItem(fields: Record<string, FormDataEntryVal
 		return { success: false as const, errors: parsed.error.flatten().fieldErrors };
 	}
 
-	const quantity =
+	let quantity: string | null =
 		parsed.data.quantity && parsed.data.quantity.length > 0 ? parsed.data.quantity : null;
-	const unit = parsed.data.unit && parsed.data.unit.length > 0 ? parsed.data.unit : null;
+	let unit: string | null =
+		parsed.data.unit && parsed.data.unit.length > 0 ? parsed.data.unit : null;
+
+	if (quantity) {
+		const split = parseSuggestionQuantity(quantity);
+		quantity = split.quantity;
+		unit = unit ?? split.unit;
+	}
 
 	return {
 		success: true as const,

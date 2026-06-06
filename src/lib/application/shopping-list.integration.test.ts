@@ -16,6 +16,18 @@ describe('Household shopping list', () => {
     expect((await service.listItems(DEFAULT_HOUSEHOLD_ID))).toHaveLength(1);
   });
 
+  it('stores manual items with combined quantity strings', async () => {
+    await integrationDb.seedUser({ id: 'user-1' });
+    await integrationDb.seedHousehold({ id: DEFAULT_HOUSEHOLD_ID, members: [{ userId: 'user-1', role: 'owner' }] });
+    const { parseAddShoppingListItem } = await import('$lib/validation/shopping-list.schemas');
+    const parsed = parseAddShoppingListItem({ name: 'Basilika', quantity: '500 g', unit: '' });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    await service.addItem(DEFAULT_HOUSEHOLD_ID, 'owner', parsed.data);
+    const items = await service.listItems(DEFAULT_HOUSEHOLD_ID);
+    expect(items[0]).toMatchObject({ name: 'Basilika', quantity: '500', unit: 'g' });
+  });
+
   it('adds recipe missing ingredients with numeric quantity', async () => {
     await integrationDb.seedUser({ id: 'user-1' });
     await integrationDb.seedHousehold({ id: DEFAULT_HOUSEHOLD_ID, members: [{ userId: 'user-1', role: 'owner' }] });

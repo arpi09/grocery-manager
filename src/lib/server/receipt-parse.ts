@@ -10,6 +10,7 @@ import {
 	type OpenAiFailureResult
 } from '$lib/server/openai';
 import type { MessageKey } from '$lib/i18n/messages';
+import { parseSuggestionQuantity } from '$lib/server/shopping-suggestions';
 
 export const RECEIPT_LINES_SCHEMA = {
 	type: 'object',
@@ -113,9 +114,13 @@ export function receiptLineToInventoryAmount(line: ReceiptLine): {
 	quantity: string;
 	unit: string | null;
 } {
-	const quantity = line.quantity?.trim() || '1';
-	const unit = line.unit?.trim() || null;
-	return { quantity, unit };
+	const quantityRaw = line.quantity?.trim() || '1';
+	const unitRaw = line.unit?.trim() || null;
+	const { quantity: parsedQuantity, unit: parsedUnit } = parseSuggestionQuantity(quantityRaw);
+	return {
+		quantity: parsedQuantity ?? '1',
+		unit: unitRaw ?? parsedUnit
+	};
 }
 
 /** Normalizes model output before line parsing (coerce types, ignore extra fields). */
