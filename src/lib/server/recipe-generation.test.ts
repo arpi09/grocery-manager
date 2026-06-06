@@ -30,7 +30,7 @@ const draftPayload = {
 			whyItFits: 'Använder mjölk',
 			ingredientsToUse: ['Mjölk', 'Basilika'],
 			missingIngredients: ['Mjöl'],
-			steps: ['Blanda och stek']
+			steps: [{ instruction: 'Blanda och stek', minutes: 8 }]
 		}
 	]
 };
@@ -42,7 +42,10 @@ const refinedPayload = {
 			whyItFits: 'Passar mjölken som går ut snart',
 			ingredientsToUse: ['Mjölk'],
 			missingIngredients: ['Basilika', 'Ägg'],
-			steps: ['Vispa 2 dl mjölk med mjöl', 'Stek tunna pannkakor']
+			steps: [
+				{ instruction: 'Vispa 2 dl mjölk med mjöl', minutes: 3 },
+				{ instruction: 'Stek tunna pannkakor', minutes: 10 }
+			]
 		}
 	]
 };

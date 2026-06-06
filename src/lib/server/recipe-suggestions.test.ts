@@ -10,13 +10,36 @@ describe('parseRecipeSuggestions', () => {
 					whyItFits: 'Använder pasta och tomater som snart går ut.',
 					ingredientsToUse: ['pasta', 'tomater'],
 					missingIngredients: ['basilika'],
-					steps: ['Koka pasta', 'Blanda sås']
+					steps: [
+						{ instruction: 'Koka pasta', minutes: 10 },
+						{ instruction: 'Blanda sås', minutes: 5 }
+					]
 				}
 			]
 		});
 
 		expect(recipes).toHaveLength(1);
 		expect(recipes[0]?.title).toBe('Pasta med tomatsås');
+		expect(recipes[0]?.steps[0]).toEqual({ instruction: 'Koka pasta', minutes: 10 });
+	});
+
+	it('accepts legacy string steps for backward compatibility', () => {
+		const recipes = parseRecipeSuggestions({
+			recipes: [
+				{
+					title: 'Soppa',
+					whyItFits: 'Tomater',
+					ingredientsToUse: ['tomater'],
+					missingIngredients: [],
+					steps: ['Koka', 'Servera']
+				}
+			]
+		});
+
+		expect(recipes[0]?.steps).toEqual([
+			{ instruction: 'Koka' },
+			{ instruction: 'Servera' }
+		]);
 	});
 
 	it('rejects recipes missing required content', () => {
@@ -28,7 +51,7 @@ describe('parseRecipeSuggestions', () => {
 						whyItFits: 'Tomater',
 						ingredientsToUse: [],
 						missingIngredients: [],
-						steps: ['Koka']
+						steps: [{ instruction: 'Koka' }]
 					}
 				]
 			})
@@ -49,7 +72,7 @@ describe('parseRecipeSuggestions', () => {
 						whyItFits: 'Tomater',
 						ingredientsToUse: ['pasta'],
 						missingIngredients: [],
-						steps: ['Koka'],
+						steps: [{ instruction: 'Koka' }],
 						hallucinatedPantryItem: 'Kycklingfilé'
 					}
 				]

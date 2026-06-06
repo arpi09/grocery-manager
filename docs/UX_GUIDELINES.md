@@ -134,7 +134,16 @@ Shared tokens: `--page-padding-x`, `--page-section-gap`, `--color-primary` — s
 | `/inkop` | Add item / smart fill | Export + add + clear as identical buttons |
 | `/statistik` | View insight (passive) | Extra CTAs when empty already guides scan |
 | `/settings` | Toggles + row navigation | Button per row instead of toggle + link |
+| `/recept/[id]` | Börja laga | Hiding steps in accordion/scrollbox; duplicate generator UI |
+| `/recept/[id]/laga` | Nästa steg | Bottom nav visible; tiny prev/next; step text below fold |
 | Scan flows | Camera / continue | Cancel vs submit same weight |
+
+### Recipe detail and cook mode
+
+- **Generator modal** — settings + compact result list with links; full recipe lives on `/recept/[id]`.
+- **Detail page** — all steps visible in a timeline (no `max-height` scroll trap); primary CTA **Börja laga**.
+- **Cook mode** — fullscreen, no bottom nav; one step at a time; prev/next ≥44px; safe-area on footer; `aria-live` on step change.
+- **Ingredient checklist** — cosmetic localStorage only (v1); do not imply inventory sync.
 
 ## Coordinator integration
 
@@ -150,3 +159,4 @@ Shared tokens: `--page-padding-x`, `--page-section-gap`, `--color-primary` — s
 | 2026-06-02 | Partial consumption (lite/halv/egen mängd); Planer banner tied to hem/expiry |
 | 2026-06-02 | Kvitto-autopilot v1: one primary "Lägg till i lager" per suggestion; dismiss as text link |
 | 2026-06-05 | WCAG 2.2 AA checklist + axe P0 gate; see ACCESSIBILITY.md |
+| 2026-06-06 | Recipe detail `/recept/[id]` + cook mode `/recept/[id]/laga` patterns |

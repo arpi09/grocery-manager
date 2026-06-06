@@ -3,13 +3,14 @@
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import RecipeStepsPanel from '$lib/components/molecules/RecipeStepsPanel.svelte';
+	import { totalMinutes, type RecipeStep } from '$lib/domain/recipe';
 
 	interface Props {
 		title: string;
 		whyItFits: string;
 		ingredientsToUse: string[];
 		missingIngredients: string[];
-		steps: string[];
+		steps: RecipeStep[];
 		portions: number;
 		canEdit?: boolean;
 		addingMissing?: boolean;
@@ -30,6 +31,7 @@
 
 	const stepCount = $derived(steps.length);
 	const missingCount = $derived(missingIngredients.length);
+	const estimatedMinutes = $derived(totalMinutes(steps));
 	const showIngredientsToggle = $derived(
 		ingredientsToUse.length + missingIngredients.length > 4
 	);
@@ -42,6 +44,9 @@
 			<p class="recipe-lead">{whyItFits}</p>
 			<div class="meta-row" aria-label={t('recipe.metaAria')}>
 				<Badge tone="default">{t('recipe.portionsBadge', { count: portions })}</Badge>
+				{#if estimatedMinutes}
+					<Badge tone="default">{t('recipe.totalMinutesBadge', { count: estimatedMinutes })}</Badge>
+				{/if}
 				{#if stepCount > 0}
 					<Badge tone="default">{t('recipe.stepCount', { count: stepCount })}</Badge>
 				{/if}

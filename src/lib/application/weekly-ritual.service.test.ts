@@ -11,7 +11,7 @@ const ideaFixture = (id: string, missing: string[] = []): RecipeIdea => ({
 	whyItFits: 'Uses expiring items',
 	ingredientsToUse: ['Mjölk'],
 	missingIngredients: missing,
-	steps: ['Cook'],
+	steps: [{ instruction: 'Cook' }],
 	createdAt: new Date('2026-06-01')
 });
 

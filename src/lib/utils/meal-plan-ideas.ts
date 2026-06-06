@@ -1,10 +1,15 @@
 import type { RecipeIdea } from '$lib/domain/meal-plan';
+import { normalizeRecipeSteps } from '$lib/domain/recipe';
 
-export type RecipeIdeaLoad = Omit<RecipeIdea, 'createdAt'> & { createdAt: string | Date };
+export type RecipeIdeaLoad = Omit<RecipeIdea, 'createdAt' | 'steps'> & {
+	createdAt: string | Date;
+	steps: unknown;
+};
 
 export function normalizeRecipeIdeas(ideas: RecipeIdeaLoad[]): RecipeIdea[] {
 	return ideas.map((idea) => ({
 		...idea,
+		steps: normalizeRecipeSteps(idea.steps),
 		createdAt: idea.createdAt instanceof Date ? idea.createdAt : new Date(idea.createdAt)
 	}));
 }

@@ -54,6 +54,14 @@ export class MealPlanService {
 		return this.repository.createRecipeIdeas(userId, ideas);
 	}
 
+	async getIdeaById(userId: string, ideaId: string) {
+		const idea = await this.repository.getRecipeIdeaById(userId, ideaId);
+		if (!idea) {
+			throw new RecipeIdeaNotFoundError();
+		}
+		return idea;
+	}
+
 	async createPlannedMealFromIdea(userId: string, ideaId: string, plannedDate: string) {
 		const idea = await this.repository.getRecipeIdeaById(userId, ideaId);
 		if (!idea) {

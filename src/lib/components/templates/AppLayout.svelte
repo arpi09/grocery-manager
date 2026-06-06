@@ -33,9 +33,10 @@
 	interface Props {
 		children: Snippet;
 		user?: (NavUser & { email: string }) | null;
+		hideNav?: boolean;
 	}
 
-	let { children, user = null }: Props = $props();
+	let { children, user = null, hideNav = false }: Props = $props();
 
 	let recipeOpen = $state(false);
 
@@ -108,9 +109,11 @@
 
 <AppSeoHead {locale} />
 
-<div class="app">
+<div class="app" class:app--hide-nav={hideNav}>
 	<a href="#main-content" class="skip-to-main">{t('a11y.skipToContent')}</a>
-	<MainNav {user} {households} {activeHousehold} onRecipeIdeas={openRecipeIdeas} />
+	{#if !hideNav}
+		<MainNav {user} {households} {activeHousehold} onRecipeIdeas={openRecipeIdeas} />
+	{/if}
 	<main id="main-content" tabindex="-1">
 		{#if showDemoBanner}
 			<DemoAccountBanner />
@@ -146,6 +149,14 @@
 		min-width: 0;
 		padding: 0;
 		padding-bottom: var(--content-bottom-safe);
+	}
+
+	.app--hide-nav {
+		padding-bottom: 0;
+	}
+
+	.app--hide-nav main {
+		padding: 0;
 	}
 
 	main {

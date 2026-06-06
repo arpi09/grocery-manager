@@ -100,9 +100,16 @@ export function buildRecipeSystemPrompt(portions: number): string {
 		'- whyItFits (en kort mening om varför receptet passar lagret)',
 		'- ingredientsToUse (array med exakta lagernamn)',
 		'- missingIngredients (array, tom om inget saknas)',
-		'- steps (korta steg som strängar, mängder anpassade till portionerna)',
+		'- steps (5–8 objekt med instruction + valfritt minutes)',
+		'Steg-regler:',
+		'- 5–8 steg, en tydlig handling per steg',
+		'- Imperativ svenska ("Hacka löken", inte "Man hackar...")',
+		'- Mängder i steget där det behövs ("Tillsätt 2 dl grädde")',
+		'- minutes (1–120) när rimligt (stek 8 min, vila 5 min)',
+		'- Max ~220 tecken per instruction — inga väggar av text',
+		'- Upprepa inte samma information mellan steg',
 		'Returnera endast giltig JSON i denna form:',
-		'{"recipes":[{"title":"","whyItFits":"","ingredientsToUse":[],"missingIngredients":[],"steps":[]}]}',
+		'{"recipes":[{"title":"","whyItFits":"","ingredientsToUse":[],"missingIngredients":[],"steps":[{"instruction":"","minutes":5}]}]}',
 		'Inga markdown-kodblock eller förklaringar utanför JSON.'
 	].join('\n');
 }
@@ -134,12 +141,13 @@ export function buildRecipeRefinementSystemPrompt(portions: number): string {
 		'Flytta varor som inte finns i lagret till missingIngredients (aldrig i ingredientsToUse).',
 		'Förbättra title till naturliga svenska rättnamn (ingen engelska, inga varumärken som inte finns i lagret).',
 		'Justera steps så mängder och instruktioner matchar portionerna linjärt.',
+		'Förbättra steps till 5–8 imperativa steg med tydliga mängder och minutes där det passar.',
 		'Behåll whyItFits kort och relevant — nämn utgående varor om de används.',
 		...RECIPE_CULINARY_REALISM_RULES,
 		'Ta bort eller skriv om recept med orealistiska kombinationer (t.ex. "baguette med blåbärssylt" som middagsrätt när lagret räcker till vanlig matlagning).',
 		'Se till att titel, steg och ingredienser hör ihop som frukost, fika, lunch eller middag.',
 		'Returnera samma JSON-struktur som utkastet, med samma antal recept (eller färre om ett utkast är omöjligt).',
-		'{"recipes":[{"title":"","whyItFits":"","ingredientsToUse":[],"missingIngredients":[],"steps":[]}]}',
+		'{"recipes":[{"title":"","whyItFits":"","ingredientsToUse":[],"missingIngredients":[],"steps":[{"instruction":"","minutes":5}]}]}',
 		'Inga markdown-kodblock eller förklaringar utanför JSON.'
 	].join('\n');
 }
@@ -192,7 +200,7 @@ function recipeContentIsExcluded(recipe: RecipeSuggestion): boolean {
 		return true;
 	}
 	for (const step of recipe.steps) {
-		if (recipeTextMentionsExcludedTerms(step)) {
+		if (recipeTextMentionsExcludedTerms(step.instruction)) {
 			return true;
 		}
 	}

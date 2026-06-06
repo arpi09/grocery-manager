@@ -10,7 +10,7 @@ function makeIdea(id: string, missing: string[] = []): RecipeIdea {
 		whyItFits: 'fits',
 		ingredientsToUse: ['pasta'],
 		missingIngredients: missing,
-		steps: ['Cook'],
+		steps: [{ instruction: 'Cook' }],
 		createdAt: new Date('2026-01-01')
 	};
 }

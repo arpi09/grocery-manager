@@ -1,60 +1,28 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
+	import type { RecipeStep } from '$lib/domain/recipe';
 
 	interface Props {
-		steps: string[];
+		steps: RecipeStep[];
 		recipeTitle?: string;
 	}
 
 	let { steps, recipeTitle }: Props = $props();
 
 	const hasSteps = $derived(steps.length > 0);
-	const useAccordion = $derived(steps.length > 3);
-	let expandedStep = $state<number | null>(0);
-
-	$effect(() => {
-		if (steps.length > 0) {
-			expandedStep = 0;
-		}
-	});
 </script>
 
 {#if hasSteps}
 	<section class="steps" aria-label={t('recipe.stepsAria', { title: recipeTitle ?? '' })}>
 		<h4 class="steps-heading">{t('recipe.stepsTitle')}</h4>
-		{#if useAccordion}
-			<div class="steps-accordion">
-				{#each steps as step, index (index)}
-					<details
-						class="step-panel"
-						open={expandedStep === index}
-						ontoggle={(event) => {
-							const el = event.currentTarget;
-							if (el.open) {
-								expandedStep = index;
-							} else if (expandedStep === index) {
-								expandedStep = null;
-							}
-						}}
-					>
-						<summary>
-							<span class="step-num" aria-hidden="true">{index + 1}</span>
-							<span class="step-label">{t('recipe.stepLabel', { number: index + 1 })}</span>
-						</summary>
-						<p class="step-body">{step}</p>
-					</details>
-				{/each}
-			</div>
-		{:else}
-			<ol class="steps-list">
-				{#each steps as step, index (index)}
-					<li>
-						<span class="step-num" aria-hidden="true">{index + 1}</span>
-						<p class="step-text">{step}</p>
-					</li>
-				{/each}
-			</ol>
-		{/if}
+		<ol class="steps-list">
+			{#each steps as step, index (index)}
+				<li>
+					<span class="step-num" aria-hidden="true">{index + 1}</span>
+					<p class="step-text">{step.instruction}</p>
+				</li>
+			{/each}
+		</ol>
 	</section>
 {/if}
 
@@ -79,9 +47,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
-		max-height: min(18rem, 42vh);
-		overflow-y: auto;
-		overscroll-behavior: contain;
 	}
 
 	.steps-list li {
@@ -114,56 +79,5 @@
 		min-width: 0;
 		font-size: 0.9375rem;
 		line-height: 1.55;
-	}
-
-	.steps-accordion {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-		max-height: min(18rem, 42vh);
-		overflow-y: auto;
-		overscroll-behavior: contain;
-	}
-
-	.step-panel {
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-md);
-		background: var(--color-surface-muted);
-		overflow: hidden;
-	}
-
-	.step-panel summary {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		padding: var(--space-sm) var(--space-md);
-		cursor: pointer;
-		list-style: none;
-		font-weight: 600;
-		font-size: 0.875rem;
-	}
-
-	.step-panel summary::-webkit-details-marker {
-		display: none;
-	}
-
-	.step-label {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.step-body {
-		margin: 0;
-		padding: 0 var(--space-md) var(--space-md);
-		padding-left: calc(var(--space-md) + 1.75rem + var(--space-sm));
-		font-size: 0.9375rem;
-		line-height: 1.55;
-	}
-
-	@media (max-width: 899px) {
-		.steps-list,
-		.steps-accordion {
-			max-height: min(14rem, 34vh);
-		}
 	}
 </style>

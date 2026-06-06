@@ -25,7 +25,7 @@ function makeRecipeIdea(overrides: Partial<RecipeIdea> = {}): RecipeIdea {
 		whyItFits: 'Uses fridge veg',
 		ingredientsToUse: ['carrots'],
 		missingIngredients: ['soy sauce'],
-		steps: ['Chop', 'Fry'],
+		steps: [{ instruction: 'Chop' }, { instruction: 'Fry' }],
 		createdAt: new Date(),
 		...overrides
 	};
@@ -119,7 +119,7 @@ describe('MealPlanService', () => {
 				whyItFits: 'Uses fridge veg',
 				ingredientsToUse: ['carrots'],
 				missingIngredients: ['soy sauce'],
-				steps: ['Chop', 'Fry']
+				steps: [{ instruction: 'Chop' }, { instruction: 'Fry' }]
 			}
 		];
 
@@ -127,6 +127,22 @@ describe('MealPlanService', () => {
 
 		expect(result).toEqual(ideas);
 		expect(repository.createRecipeIdeas).toHaveBeenCalledWith('user-1', input);
+	});
+
+	it('loads a recipe idea by id', async () => {
+		const idea = makeRecipeIdea();
+		vi.mocked(repository.getRecipeIdeaById).mockResolvedValue(idea);
+
+		const result = await service.getIdeaById('user-1', 'idea-1');
+
+		expect(result).toEqual(idea);
+		expect(repository.getRecipeIdeaById).toHaveBeenCalledWith('user-1', 'idea-1');
+	});
+
+	it('throws when recipe idea is missing', async () => {
+		vi.mocked(repository.getRecipeIdeaById).mockResolvedValue(null);
+
+		await expect(service.getIdeaById('user-1', 'missing')).rejects.toThrow('Recipe idea not found');
 	});
 
 	it('creates a planned meal from a recipe idea', async () => {

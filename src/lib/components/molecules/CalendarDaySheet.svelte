@@ -5,7 +5,6 @@
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
-	import RecipeStepsPanel from '$lib/components/molecules/RecipeStepsPanel.svelte';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { formatCalendarDayLabel, mealSourceVariant } from '$lib/domain/calendar-display';
 	import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
@@ -187,15 +186,9 @@
 							<div class="meal-detail">
 								{#if idea}
 									<div class="idea-ingredients">
-										<p>
-											<strong>{t('planer.usesLabel')}</strong>
-											{idea.ingredientsToUse.join(', ')}
-										</p>
-										<p class="missing-text">
-											<strong>{t('planer.missingLabel')}</strong>
-											{idea.missingIngredients.join(', ') || t('common.none')}
-										</p>
-										<RecipeStepsPanel steps={idea.steps} recipeTitle={idea.title} />
+										<a href="/recept/{idea.id}" class="view-recipe-link">
+											{t('recipe.detail.viewRecipe')}
+										</a>
 									</div>
 								{/if}
 								<form method="POST" action="?/update" class="edit-form">
@@ -374,14 +367,18 @@
 		gap: var(--space-xs);
 	}
 
-	.idea-ingredients p {
-		margin: 0;
-		font-size: 0.84rem;
+	.view-recipe-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+		font-size: 0.875rem;
+		font-weight: 700;
+		color: var(--color-primary);
+		text-decoration: none;
 	}
 
-	.missing-text {
-		margin: 0;
-		font-size: 0.84rem;
+	.view-recipe-link:hover {
+		text-decoration: underline;
 	}
 
 	.edit-form {

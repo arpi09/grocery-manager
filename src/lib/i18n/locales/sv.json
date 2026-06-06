@@ -1414,7 +1414,26 @@
 		"ingredientsToggle": "Visa ingredienser",
 		"ingredientsAria": "Ingredienser",
 		"metaAria": "Receptsammanfattning",
-		"suggestionPickerAria": "Välj recept"
+		"suggestionPickerAria": "Välj recept",
+		"minutesBadge": "{count} min",
+		"totalMinutesBadge": "~{count} min",
+		"ingredientsChecklistTitle": "Ingredienser",
+		"detail": {
+			"back": "← Tillbaka",
+			"open": "Öppna",
+			"startCooking": "Börja laga",
+			"scheduleTitle": "Lägg i kalender",
+			"scheduleDate": "Datum",
+			"scheduleAria": "Schemalägg recept",
+			"viewRecipe": "Visa recept"
+		},
+		"cook": {
+			"prev": "Föregående",
+			"next": "Nästa",
+			"done": "Klart",
+			"exit": "Avsluta",
+			"progress": "Steg {current} av {total}"
+		}
 	},
 	"onboarding": {
 		"welcome": "Välkommen till Skaffu",

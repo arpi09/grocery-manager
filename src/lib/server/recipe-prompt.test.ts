@@ -86,6 +86,14 @@ describe('buildRecipe prompts', () => {
 		expect(prompt).toContain('linjärt');
 	});
 
+	it('includes structured step rules in system prompt', () => {
+		const prompt = buildRecipeSystemPrompt(4);
+		expect(prompt).toContain('5–8 steg');
+		expect(prompt).toContain('Imperativ svenska');
+		expect(prompt).toContain('minutes');
+		expect(prompt).toContain('"instruction"');
+	});
+
 	it('includes culinary realism constraints in draft and refinement system prompts', () => {
 		const draft = buildRecipeSystemPrompt(4);
 		const refine = buildRecipeRefinementSystemPrompt(4);
@@ -168,7 +176,7 @@ describe('sanitizeRecipeAgainstInventory', () => {
 				whyItFits: 'Passar lagret',
 				ingredientsToUse: ['Pasta', 'Basilika'],
 				missingIngredients: ['Olivolja'],
-				steps: ['Koka pasta']
+				steps: [{ instruction: 'Koka pasta' }]
 			},
 			inventory
 		);
@@ -189,7 +197,7 @@ describe('sanitizeRecipeAgainstInventory', () => {
 				whyItFits: 'Passar lagret',
 				ingredientsToUse: ['falukorv', 'Matlagningsgrädde', 'Lök'],
 				missingIngredients: [],
-				steps: ['Stek korv']
+				steps: [{ instruction: 'Stek korv' }]
 			},
 			inventory
 		);
@@ -206,7 +214,7 @@ describe('sanitizeRecipeAgainstInventory', () => {
 					whyItFits: 'Y',
 					ingredientsToUse: ['Basilika'],
 					missingIngredients: [],
-					steps: ['Steg']
+					steps: [{ instruction: 'Steg' }]
 				},
 				inventory
 			)
@@ -222,7 +230,7 @@ describe('sanitizeRecipeAgainstInventory', () => {
 					whyItFits: 'Nope',
 					ingredientsToUse: ['Pasta', 'Hundmat'],
 					missingIngredients: [],
-					steps: ['Blanda']
+					steps: [{ instruction: 'Blanda' }]
 				},
 				foodInventory
 			)
@@ -235,7 +243,7 @@ describe('sanitizeRecipeAgainstInventory', () => {
 					whyItFits: 'OK',
 					ingredientsToUse: ['Pasta'],
 					missingIngredients: [],
-					steps: ['Servera med rosor']
+					steps: [{ instruction: 'Servera med rosor' }]
 				},
 				foodInventory
 			)
@@ -259,14 +267,14 @@ describe('sanitizeRecipeAgainstInventory', () => {
 					whyItFits: 'B',
 					ingredientsToUse: ['Pasta'],
 					missingIngredients: [],
-					steps: ['1']
+					steps: [{ instruction: '1' }]
 				},
 				{
 					title: 'B',
 					whyItFits: 'C',
 					ingredientsToUse: ['Lök'],
 					missingIngredients: [],
-					steps: ['2']
+					steps: [{ instruction: '2' }]
 				}
 			],
 			inventory

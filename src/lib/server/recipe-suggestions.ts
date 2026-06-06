@@ -1,9 +1,11 @@
+import { normalizeRecipeSteps, type RecipeStep } from '$lib/domain/recipe';
+
 export interface RecipeSuggestion {
 	title: string;
 	whyItFits: string;
 	ingredientsToUse: string[];
 	missingIngredients: string[];
-	steps: string[];
+	steps: RecipeStep[];
 }
 
 const RECIPE_OBJECT_KEYS = new Set([
@@ -34,7 +36,15 @@ export const RECIPE_SUGGESTIONS_SCHEMA = {
 					},
 					steps: {
 						type: 'array',
-						items: { type: 'string' }
+						items: {
+							type: 'object',
+							properties: {
+								instruction: { type: 'string' },
+								minutes: { type: 'number' }
+							},
+							required: ['instruction'],
+							additionalProperties: false
+						}
 					}
 				},
 				required: ['title', 'whyItFits', 'ingredientsToUse', 'missingIngredients', 'steps'],
@@ -75,9 +85,7 @@ export function parseRecipeSuggestions(input: unknown): RecipeSuggestion[] {
 			const missingIngredients = Array.isArray(candidate.missingIngredients)
 				? candidate.missingIngredients.filter((v): v is string => typeof v === 'string')
 				: [];
-			const steps = Array.isArray(candidate.steps)
-				? candidate.steps.filter((v): v is string => typeof v === 'string')
-				: [];
+			const steps = normalizeRecipeSteps(candidate.steps);
 
 			if (!title || !whyItFits || ingredientsToUse.length === 0 || steps.length === 0) {
 				return null;

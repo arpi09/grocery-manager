@@ -5,7 +5,10 @@
 			"whyItFits": "Använder det som finns i lagret.",
 			"ingredientsToUse": ["Mjölk", "Pasta"],
 			"missingIngredients": ["Basilika"],
-			"steps": ["Koka pastan.", "Blanda och servera."]
+			"steps": [
+				{ "instruction": "Koka pastan enligt förpackningen.", "minutes": 10 },
+				{ "instruction": "Blanda och servera med sås.", "minutes": 5 }
+			]
 		}
 	]
 }

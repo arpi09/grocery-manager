@@ -1,3 +1,5 @@
+import type { RecipeStep } from '$lib/domain/recipe';
+
 export interface RecipeIdea {
 	id: string;
 	userId: string;
@@ -5,7 +7,7 @@ export interface RecipeIdea {
 	whyItFits: string;
 	ingredientsToUse: string[];
 	missingIngredients: string[];
-	steps: string[];
+	steps: RecipeStep[];
 	createdAt: Date;
 }
 
@@ -38,5 +40,5 @@ export interface CreateRecipeIdeaInput {
 	whyItFits: string;
 	ingredientsToUse: string[];
 	missingIngredients: string[];
-	steps: string[];
+	steps: RecipeStep[];
 }

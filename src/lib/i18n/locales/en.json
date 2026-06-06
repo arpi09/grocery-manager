@@ -1434,7 +1434,26 @@
 		"ingredientsToggle": "Show ingredients",
 		"ingredientsAria": "Ingredients",
 		"metaAria": "Recipe summary",
-		"suggestionPickerAria": "Choose a recipe"
+		"suggestionPickerAria": "Choose a recipe",
+		"minutesBadge": "{count} min",
+		"totalMinutesBadge": "~{count} min",
+		"ingredientsChecklistTitle": "Ingredients",
+		"detail": {
+			"back": "← Back",
+			"open": "Open",
+			"startCooking": "Start cooking",
+			"scheduleTitle": "Add to calendar",
+			"scheduleDate": "Date",
+			"scheduleAria": "Schedule recipe",
+			"viewRecipe": "View recipe"
+		},
+		"cook": {
+			"prev": "Previous",
+			"next": "Next",
+			"done": "Done",
+			"exit": "Exit",
+			"progress": "Step {current} of {total}"
+		}
 	},
 	"onboarding": {
 		"welcome": "Welcome to Skaffu",

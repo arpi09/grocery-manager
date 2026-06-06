@@ -2,6 +2,7 @@ import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import { db } from '$lib/infrastructure/db';
 import { mealPlanTable, recipeIdeaTable } from '$lib/infrastructure/db/schema';
 import { generateId } from '$lib/infrastructure/auth/id';
+import { normalizeRecipeSteps } from '$lib/domain/recipe';
 import type {
 	CreatePlannedMealInput,
 	CreateRecipeIdeaInput,
@@ -35,6 +36,14 @@ function parseStringArray(raw: string): string[] {
 	}
 }
 
+function parseRecipeSteps(raw: string) {
+	try {
+		return normalizeRecipeSteps(JSON.parse(raw));
+	} catch {
+		return [];
+	}
+}
+
 function mapPlannedMeal(row: typeof mealPlanTable.$inferSelect): PlannedMeal {
 	return {
 		id: row.id,
@@ -56,7 +65,7 @@ function mapRecipeIdea(row: typeof recipeIdeaTable.$inferSelect): RecipeIdea {
 		whyItFits: row.whyItFits,
 		ingredientsToUse: parseStringArray(row.ingredientsToUse),
 		missingIngredients: parseStringArray(row.missingIngredients),
-		steps: parseStringArray(row.steps),
+		steps: parseRecipeSteps(row.steps),
 		createdAt: row.createdAt
 	};
 }
