@@ -224,7 +224,7 @@ async function waitForPostRegisterHome(page: Page) {
 		(url) => url.pathname === '/hem' && url.searchParams.get('freshAccount') === '1',
 		{
 			timeout: E2E_AUTH_NAV_TIMEOUT_MS,
-			waitUntil: 'commit'
+			waitUntil: 'domcontentloaded'
 		}
 	);
 	await page.waitForURL(
@@ -333,7 +333,7 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 		} | null;
 		if (result?.type === 'redirect') {
 			await page.goto(result.location ?? '/hem', {
-				waitUntil: 'commit',
+				waitUntil: 'domcontentloaded',
 				timeout: E2E_AUTH_NAV_TIMEOUT_MS
 			});
 		} else {
@@ -342,7 +342,7 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 	} else if (status === 302 || status === 303) {
 		const location = loginResponse.headers()['location'] ?? '/hem';
 		await page.goto(location.startsWith('http') ? location : `${baseURL}${location}`, {
-			waitUntil: 'commit',
+			waitUntil: 'domcontentloaded',
 			timeout: E2E_AUTH_NAV_TIMEOUT_MS
 		});
 	} else {
