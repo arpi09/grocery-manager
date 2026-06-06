@@ -124,6 +124,32 @@ Utan `FIREBASE_TOKEN` körs quality + E2E vid deploy ändå; deploy-jobbet **ski
 
 **Firebase Console → App Hosting → GitHub auto-deploy:** stäng av om du använder Actions — undvik **dubbel deploy**. En källa: **Actions → Deploy to production**.
 
+### CRON_SECRET — ägare (manuellt)
+
+Cron-jobb körs från **GitHub Actions** mot prod (`POST /api/cron/*`). Appen validerar `Authorization: Bearer <CRON_SECRET>` i `src/lib/server/cron-auth.ts` (inte i `hooks.server.ts`). **Samma sträng** måste finnas i GitHub (avsändare) och Firebase App Hosting (mottagare).
+
+| Status (repo) | Detalj |
+|---------------|--------|
+| Kod | Fyra workflows: `expiry-reminders-cron.yml` (mån 07:00 UTC), `pmf-weekly-cron.yml` (mån 08:00), `shopping-push-cron.yml` (dagligen 06:00), `skaffurapport-cron.yml` (1:a i månaden 06:00). Endpoints: `/api/cron/expiry-reminders`, `pmf-weekly`, `shopping-push`, `skaffurapport` (+ valfritt `reset-demo` utan egen workflow). |
+| `.env.example` | `CRON_SECRET=` med kommentar om Bearer och scheman. |
+| `apphosting.yaml` | `CRON_SECRET` mappad från Secret Manager (kräver redeploy efter att secret skapats). |
+
+**Du gör (engångs):**
+
+1. **Generera** stark hemlighet (rotera inte utan avsikt): t.ex. `openssl rand -hex 32`.
+2. **Firebase** (projekt `home-pantry-4bee5`, backend `home-pantry`):
+   ```bash
+   npx firebase apphosting:secrets:set CRON_SECRET --project home-pantry-4bee5
+   npx firebase apphosting:secrets:grantaccess CRON_SECRET --backend home-pantry --project home-pantry-4bee5
+   ```
+   Deploya om så runtime får värdet (Actions → **Deploy to production**).
+3. **GitHub** → *Settings* → *Secrets and variables* → *Actions*:
+   - **Secret** `CRON_SECRET` — exakt samma sträng som i Firebase.
+   - **Variable** `PRODUCTION_URL` — redan satt till `https://skaffu.com` om du följt domän-migreringen.
+4. **Verifiera:** Actions → t.ex. **Expiry reminders cron** → *Run workflow*. Förväntat: HTTP 200, JSON `{ "ok": true, ... }`. Om GitHub saknar secret failar workflow direkt med `CRON_SECRET is not set`. Om Firebase saknar/värdet skiljer sig: HTTP **401** `Unauthorized`.
+
+**Lokalt:** sätt `CRON_SECRET` i `.env` om du vill testa cron-rutter manuellt med `curl -H "Authorization: Bearer …"`.
+
 ---
 
 ## Mobilnotis vid deploy

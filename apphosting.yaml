@@ -96,6 +96,14 @@ env:
     availability:
       - RUNTIME
 
+  # Cron + health probes — Bearer for POST /api/cron/* and /api/health/* (see docs/CI_CD.md § CRON_SECRET)
+  # npx firebase apphosting:secrets:set CRON_SECRET --project home-pantry-4bee5
+  # npx firebase apphosting:secrets:grantaccess CRON_SECRET --backend home-pantry --project home-pantry-4bee5
+  - variable: CRON_SECRET
+    secret: CRON_SECRET
+    availability:
+      - RUNTIME
+
   # Stripe (Pro checkout) — see docs/STRIPE.md. Create secrets before first deploy with Stripe enabled:
   # npx firebase apphosting:secrets:set STRIPE_SECRET_KEY --project home-pantry-4bee5
   # npx firebase apphosting:secrets:grantaccess STRIPE_SECRET_KEY --backend home-pantry --project home-pantry-4bee5
