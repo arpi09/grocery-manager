@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	interface Props {
 		value: string;
 		placeholder?: string;
@@ -17,6 +17,7 @@
 		display: flex;
 		align-items: center;
 		gap: var(--space-sm);
+		min-height: var(--touch-target-min);
 		padding: 0.5rem 0.85rem;
 		background: var(--color-surface);
 		border: 1px solid var(--color-border);
@@ -29,8 +30,11 @@
 
 	.search-input {
 		flex: 1;
+		min-height: var(--touch-target-min);
 		border: none;
 		background: transparent;
 		outline: none;
+		font-size: 1rem;
+		line-height: 1.4;
 	}
 </style>
