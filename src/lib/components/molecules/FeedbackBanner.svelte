@@ -41,7 +41,7 @@
 
 	.feedback-error {
 		background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
-		color: var(--color-danger);
+		color: color-mix(in srgb, var(--color-danger) 65%, #3d1515);
 		border: 1px solid color-mix(in srgb, var(--color-danger) 25%, var(--color-border));
 	}
 

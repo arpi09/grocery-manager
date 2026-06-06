@@ -114,6 +114,6 @@
 	.tab.active {
 		background: var(--color-primary);
 		border-color: var(--color-primary);
-		color: #fff;
+		color: var(--color-on-primary);
 	}
 </style>
