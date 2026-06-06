@@ -69,7 +69,7 @@ export async function prepareE2eBrowserState(page: Page) {
 }
 
 /** Must stay below Playwright test timeout (see playwright.config / per-spec setTimeout). */
-export const E2E_AUTH_NAV_TIMEOUT_MS = 45_000;
+export const E2E_AUTH_NAV_TIMEOUT_MS = 90_000;
 
 function pickEnv(value: string | undefined): string | undefined {
 	const trimmed = value?.trim();

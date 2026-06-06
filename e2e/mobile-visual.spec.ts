@@ -54,10 +54,6 @@ async function gotoAuthedRoute(
 	options?: { expectUrl?: RegExp }
 ) {
 	await page.goto(path, { waitUntil: 'commit', timeout: 60_000 });
-	if (new URL(page.url()).pathname.startsWith('/login')) {
-		await loginAsAdmin(page);
-		await page.goto(path, { waitUntil: 'commit', timeout: 60_000 });
-	}
 	await expect(page).not.toHaveURL(/\/login/, { timeout: 15_000 });
 	await dismissOnboardingModalIfOpen(page);
 
@@ -81,9 +77,18 @@ async function resolveEditItemPath(page: Page): Promise<string> {
 }
 
 test.describe('Mobile visual — P0 routes (390×844)', () => {
+	let authReady = false;
+
 	for (const route of MOBILE_P0_ROUTES) {
 		test(`${route.path} — layout, touch targets, axe`, async ({ page }) => {
-			await loginAsAdmin(page);
+			if (!authReady) {
+				await loginAsAdmin(page);
+				authReady = true;
+			} else {
+				await page.goto('/hem', { waitUntil: 'commit', timeout: 60_000 });
+				await dismissOnboardingModalIfOpen(page);
+			}
+
 			await gotoAuthedRoute(page, route.path, 'expectUrl' in route ? { expectUrl: route.expectUrl } : undefined);
 
 			await expectNoHorizontalScroll(page, route.path);
@@ -93,7 +98,14 @@ test.describe('Mobile visual — P0 routes (390×844)', () => {
 	}
 
 	test('/item/[id]/edit — layout, touch targets, axe', async ({ page }) => {
-		await loginAsAdmin(page);
+		if (!authReady) {
+			await loginAsAdmin(page);
+			authReady = true;
+		} else {
+			await page.goto('/hem', { waitUntil: 'commit', timeout: 60_000 });
+			await dismissOnboardingModalIfOpen(page);
+		}
+
 		const editItemPath = await resolveEditItemPath(page);
 		await gotoAuthedRoute(page, editItemPath);
 

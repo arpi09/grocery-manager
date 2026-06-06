@@ -138,9 +138,11 @@
 	{#if !isEdit}
 		<div class="barcode-row">
 			<p class="scan-title">{t('item.howToFill')}</p>
-			<div class="scan-method-tabs" role="tablist" aria-label={t('item.scanModeAria')}>
+			<div class="scan-method-tabs" role="radiogroup" aria-label={t('item.scanModeAria')}>
 				<button
 					type="button"
+					role="radio"
+					aria-checked={scanMethod === 'barcode'}
 					class="scan-tab {scanMethod === 'barcode' ? 'active' : ''}"
 					onclick={() => (scanMethod = 'barcode')}
 				>
@@ -148,6 +150,8 @@
 				</button>
 				<button
 					type="button"
+					role="radio"
+					aria-checked={scanMethod === 'photo'}
 					class="scan-tab {scanMethod === 'photo' ? 'active' : ''}"
 					onclick={() => (scanMethod = 'photo')}
 				>
