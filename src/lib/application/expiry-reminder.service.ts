@@ -167,7 +167,7 @@ export class ExpiryReminderService {
 		const payload = {
 			title: translate(locale, 'pushNotifications.expiryTitle'),
 			body: translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days }),
-			url: `${this.appOrigin.getOrigin() || ''}/hem`,
+			url: `${this.appOrigin.getOrigin() || ''}/planer/vecka?from=push`,
 			tag: 'home-pantry-expiry'
 		};
 

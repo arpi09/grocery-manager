@@ -20,3 +20,16 @@ export const scheduleIdeaSchema = z.object({
 	ideaId: z.string().min(1, 'Recipe idea id is required'),
 	plannedDate: z.string().regex(isoDateRegex, 'Valid date is required')
 });
+
+const weeklyMealAssignmentSchema = z.object({
+	ideaId: z.string().min(1, 'Recipe idea id is required'),
+	plannedDate: z.string().regex(isoDateRegex, 'Valid date is required')
+});
+
+export const approveWeeklyRitualSchema = z.object({
+	assignments: z
+		.array(weeklyMealAssignmentSchema)
+		.min(1, 'At least one assignment is required')
+		.max(5),
+	addMissingToList: z.boolean().optional().default(true)
+});

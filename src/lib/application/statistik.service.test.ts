@@ -29,7 +29,11 @@ describe('StatistikService', () => {
 			countByEventTypeSince: vi.fn().mockResolvedValue(2),
 			weeklyCountsByEventType: vi.fn().mockImplementation((_h, types) => types.includes('consumed')
 				? Promise.resolve([{ weekStart: previousWeek, count: 1 }, { weekStart: currentWeek, count: 2 }])
-				: Promise.resolve([]))
+				: Promise.resolve([])),
+			listEventsForSavings: vi.fn().mockResolvedValue([
+				{ productName: 'Mjölk', eventType: 'consumed' },
+				{ productName: 'Bröd', eventType: 'expired' }
+			])
 		} as unknown as IConsumptionRepository;
 		service = new StatistikService(
 			{ getAnalytics: vi.fn().mockResolvedValue(analyticsFixture) } as unknown as InventoryService,
@@ -49,5 +53,13 @@ describe('StatistikService', () => {
 		vi.mocked(consumptionRepository.weeklyCountsByEventType).mockResolvedValue([]);
 		const dashboard = await service.getDashboard('household-1');
 		expect(dashboard.impact.consumedThisWeek).toBeNull();
+	});
+
+	it('builds savings report from consumption events', async () => {
+		const savings = await service.getSavingsReport('household-1');
+		expect(savings.hasData).toBe(true);
+		expect(savings.consumedCount).toBe(1);
+		expect(savings.wastedCount).toBe(1);
+		expect(consumptionRepository.listEventsForSavings).toHaveBeenCalledWith('household-1');
 	});
 });

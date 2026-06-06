@@ -314,7 +314,8 @@ export const productEventTable = pgTable(
 				'first_scan',
 				'pwa_banner_dismiss',
 				'pwa_banner_install_click',
-				'receipt_autopilot_accepted'
+				'receipt_autopilot_accepted',
+				'weekly_ritual_approved'
 			]
 		}).notNull(),
 		metadata: text('metadata'),

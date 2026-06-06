@@ -781,6 +781,7 @@
 		"contextExpiring": "{count} varor går ut inom {days} dagar",
 		"contextNoExpiring": "Inget brådskande som går ut inom {days} dagar.",
 		"contextPlanned": "{count} måltider i denna kalendervy",
+		"contextWeeklyLink": "Veckan fixad — planera hela veckan",
 		"contextHomeLink": "Gå till hem och Ät först"
 	},
 	"stats": {
@@ -1485,7 +1486,7 @@
 		"eatFirstProgress": "{done} av {goal} inplanerade denna vecka",
 		"eatFirstSuggestions": "{count} förslag denna vecka",
 		"viewStats": "Statistik",
-		"eatFirstLink": "Ät det först",
+		"eatFirstLink": "Veckan fixad",
 		"placeholder": "Markera varor som förbrukade när ni använder dem — då fylls siffrorna i här.",
 		"celebrateFirstConsumption": "Första varan markerad som förbrukad — bra start mot matsvinn.",
 		"celebrateZeroWasteStreak": "{count} veckor utan svinn i rad — fortsätt i samma takt.",
@@ -1512,6 +1513,41 @@
 		"scheduledLabel": "Inplanerad",
 		"scheduleFailed": "Kunde inte lägga till i matplanen. Försök igen."
 	},
+	"weeklyRitual": {
+		"pageTitle": "Veckan fixad",
+		"pageSubtitle": "Utgående varor → AI-måltider → ett klick till plan och inköpslista",
+		"heroTitle": "Veckan fixad",
+		"heroBadge": "Måndagsritual",
+		"heroSubtitleDefault": "Planera veckans middagar utifrån lagret — ett klick till matplan och inköpslista.",
+		"heroSubtitleExpiring": "{count} varor går ut snart — planera veckan innan de blir svinn.",
+		"heroCta": "Planera veckan →",
+		"flowLead": "Generera upp till fem middagsförslag, justera dagarna och godkänn hela veckan.",
+		"expiringLabel": "Varor som går ut",
+		"noExpiring": "Inget brådskande just nu — du kan ändå planera veckan utifrån lagret.",
+		"generateBtn": "Generera veckoförslag",
+		"generateFailed": "Kunde inte skapa förslag. Försök igen.",
+		"noneGenerated": "Inga förslag just nu — lägg till fler varor eller försök igen senare.",
+		"suggestionsTitle": "Dina veckoförslag",
+		"approveBtn": "Godkänn veckan",
+		"approveLoading": "Planerar veckan…",
+		"approveSuccess": "{count} måltider inplanerade. {listAdded} varor till inköpslistan.",
+		"approveFailed": "Kunde inte godkänna veckan. Försök igen.",
+		"successTitle": "Veckan är fixad",
+		"linkPlaner": "Se matplanen",
+		"linkInkop": "Gå till inköpslistan",
+		"plannedThisWeek": "{count} måltider redan planerade denna vecka",
+		"readonlyHint": "Du har läsbehörighet — be en administratör planera veckan.",
+		"savingsFootnote": "Hittills sparat ca {sek} kr · {kg} kg genom att använda maten i tid."
+	},
+	"skafferapport": {
+		"title": "Skafferapport",
+		"saved": "Sparat ca {sek} kr · {kg} kg",
+		"lead": "Uppskattning utifrån varor ni markerat som förbrukade — inte kastade.",
+		"consumed": "Förbrukade varor",
+		"net": "Netto (kr)",
+		"metricsAria": "Skafferapport i siffror",
+		"viewStats": "Se hela statistiken"
+	},
 	"demo": {
 		"banner": {
 			"aria": "Demokonto",
@@ -1531,7 +1567,7 @@
 	},
 	"pushNotifications": {
 		"expiryTitle": "Varor går ut snart",
-		"expiryBody": "{count} varor går ut inom {days} dagar",
+		"expiryBody": "{count} varor går ut inom {days} dagar — öppna veckoförslag",
 		"shoppingTitle": "Dags att handla?",
 		"shoppingBody": "{count} varor väntar på inköpslistan"
 	},

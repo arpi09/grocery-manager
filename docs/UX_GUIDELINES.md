@@ -42,6 +42,7 @@ Before merge / release:
 - [ ] **Empty** — explains why empty and offers one primary next step.
 - [ ] **Success** — toast or inline confirmation; destructive actions support undo when feasible.
 - [ ] **Accessibility** — interactive elements named; `focus-visible` visible; no icon-only without `aria-label`.
+- [ ] **WCAG 2.2 AA (axe)** — `npm run test:e2e -- e2e/accessibility.spec.ts` green for touched P0 routes; see [ACCESSIBILITY.md](./ACCESSIBILITY.md).
 - [ ] **Responsiveness** — tested at ~360px width; bottom nav safe area respected (`--content-bottom-safe`).
 
 ## UX rules
@@ -78,6 +79,21 @@ Before merge / release:
 - One `<h1>` per page (usually via `AppHeader`).
 - Section headings for screen readers when layout is card-based.
 - `details`/`summary` allowed for progressive disclosure if the summary text is clear.
+- Skip link to `#main-content` on app, marketing, and auth shells.
+- Page language matches content (`html lang` via layout load).
+
+### WCAG 2.2 AA checklist (per release)
+
+Reference: [ACCESSIBILITY.md](./ACCESSIBILITY.md). Block merge if P0 axe reports **critical** or **serious** violations.
+
+- [ ] One `h1` per route; landmarks (`header`, `nav`, `main`) consistent
+- [ ] Focus visible and not permanently hidden by fixed chrome (bottom nav, cookie bar, toasts)
+- [ ] Form errors tied to fields (`aria-describedby`, `aria-invalid`)
+- [ ] Links in body text distinguishable without color alone (underline or icon)
+- [ ] Icon-only buttons have `aria-label`
+- [ ] `prefers-reduced-motion` respected for marketing scroll reveals and motion utilities
+- [ ] New or changed **P0 route** includes or updates `e2e/accessibility.spec.ts` coverage
+- [ ] Contrast: muted text uses `--color-text-muted`; no opacity-only disabled labels
 
 ### Simplicity
 
@@ -133,3 +149,4 @@ Shared tokens: `--page-padding-x`, `--page-section-gap`, `--color-primary` — s
 | 2026-06-02 | Initial guidelines + button hierarchy; audit of hem, inventory, inköp, settings, statistik |
 | 2026-06-02 | Partial consumption (lite/halv/egen mängd); Planer banner tied to hem/expiry |
 | 2026-06-02 | Kvitto-autopilot v1: one primary "Lägg till i lager" per suggestion; dismiss as text link |
+| 2026-06-05 | WCAG 2.2 AA checklist + axe P0 gate; see ACCESSIBILITY.md |

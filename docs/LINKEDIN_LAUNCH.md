@@ -106,6 +106,30 @@ Prova gärna skaffu.com och säg vad som brister för en vanlig familj på mobil
 
 ---
 
+## Måndagsritual — demo-inlägg (Veckan fixad)
+
+```
+Måndag = planering i vår familj.
+
+I Skaffu har jag paketerat det som "Veckan fixad":
+→ utgående varor visas direkt
+→ AI föreslår upp till fem middagar
+→ ett klick — matplan + saknade varor på inköpslistan
+
+Inte ännu ett recept-flöde — samma lager som på hem, samma kvitto och scan.
+
+Vill du se flödet?
+1. skaffu.com → hem (mån–ons syns hero-kortet)
+2. eller gå direkt till /planer/vecka
+3. skriv vad som kändes smidigt / klumpigt
+
+Screenshot: hero "Veckan fixad" på /hem eller förslagslistan på /planer/vecka.
+
+#skaffu #matsvinn #matplanering #produktutveckling
+```
+
+---
+
 ## Uppföljningsinlägg (vecka 2–4)
 
 ### Efter första testare

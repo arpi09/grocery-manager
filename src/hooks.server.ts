@@ -13,6 +13,7 @@ import {
 	gamificationService,
 	shoppingListService,
 	mealPlanService,
+	weeklyRitualService,
 	petFoodService,
 	petService,
 	pmfService,
@@ -105,6 +106,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.gamificationService = gamificationService;
 	event.locals.shoppingListService = shoppingListService;
 	event.locals.mealPlanService = mealPlanService;
+	event.locals.weeklyRitualService = weeklyRitualService;
 	event.locals.petService = petService;
 	event.locals.petFoodService = petFoodService;
 	event.locals.pmfService = pmfService;

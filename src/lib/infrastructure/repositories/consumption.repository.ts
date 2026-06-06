@@ -35,6 +35,9 @@ export interface IConsumptionRepository {
 		weekCount: number,
 		referenceDate?: Date
 	): Promise<WeeklyCount[]>;
+	listEventsForSavings(householdId: string): Promise<
+		Array<{ productName: string; eventType: ConsumptionEventType }>
+	>;
 }
 
 export class DrizzleConsumptionRepository implements IConsumptionRepository {
@@ -134,5 +137,20 @@ export class DrizzleConsumptionRepository implements IConsumptionRepository {
 			.orderBy(sql`date_trunc('week', ${consumptionEventTable.createdAt})`);
 
 		return rows.map((row) => ({ weekStart: row.weekStart, count: row.count }));
+	}
+
+	async listEventsForSavings(householdId: string) {
+		const rows = await this.database
+			.select({
+				productName: consumptionEventTable.productName,
+				eventType: consumptionEventTable.eventType
+			})
+			.from(consumptionEventTable)
+			.where(eq(consumptionEventTable.householdId, householdId));
+
+		return rows.map((row) => ({
+			productName: row.productName,
+			eventType: row.eventType as ConsumptionEventType
+		}));
 	}
 }

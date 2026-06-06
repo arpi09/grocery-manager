@@ -6,10 +6,11 @@ import {
 } from './helpers/auth';
 import { expectNoCriticalOrSeriousViolations } from './helpers/axe';
 
+/** Public routes first (warm server); auth routes share one login session. */
 const P0_ROUTES = [
-	{ path: '/', auth: false, name: 'Landing' },
 	{ path: '/login', auth: false, name: 'Login' },
 	{ path: '/register', auth: false, name: 'Register' },
+	{ path: '/', auth: false, name: 'Landing' },
 	{ path: '/hem', auth: true, name: 'Home' },
 	{ path: '/inventory/fridge', auth: true, name: 'Inventory fridge' },
 	{ path: '/scan', auth: true, name: 'Scan hub' },
@@ -17,14 +18,24 @@ const P0_ROUTES = [
 ] as const;
 
 test.describe('Accessibility — P0 routes (WCAG 2.2 AA)', () => {
+	test.describe.configure({ mode: 'serial' });
 	test.setTimeout(120_000);
+
+	let authReady = false;
 
 	for (const route of P0_ROUTES) {
 		test(`${route.path} has no critical or serious axe violations`, async ({ page }) => {
-			const gotoOptions = { waitUntil: 'commit' as const, timeout: 60_000 };
+			const gotoTimeout = route.path === '/' ? 90_000 : 60_000;
+			const gotoOptions = { waitUntil: 'commit' as const, timeout: gotoTimeout };
 
 			if (route.auth) {
-				await loginAsAdmin(page);
+				if (!authReady) {
+					await loginAsAdmin(page);
+					authReady = true;
+				} else {
+					await page.goto('/hem', gotoOptions);
+					await dismissOnboardingModalIfOpen(page);
+				}
 				await page.goto(route.path, gotoOptions);
 				await dismissOnboardingModalIfOpen(page);
 			} else {
@@ -33,7 +44,6 @@ test.describe('Accessibility — P0 routes (WCAG 2.2 AA)', () => {
 			}
 
 			await page.locator('main, [role="main"]').first().waitFor({ state: 'visible', timeout: 30_000 });
-			await page.emulateMedia({ reducedMotion: 'reduce' });
 			await expectNoCriticalOrSeriousViolations(page, route.path);
 		});
 	}

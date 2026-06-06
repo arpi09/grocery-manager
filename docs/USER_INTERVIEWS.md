@@ -66,6 +66,19 @@ Be dem **tänka högt** medan de:
 - Var fastnar de?
 - Nämner de "för mycket jobb", "glömmer appen", "använder ICA/Bring istället"?
 
+### Måndagsritual / "Veckan fixad" (8 min) — *ny jun 2026*
+
+Syfte: validera killer feature innan/efter lansering av `/planer/vecka`.
+
+1. *"Vad gör du **måndag kväll** (eller dagen efter storhandel) med maten hemma?"*
+2. *"Planerar ni veckans middagar tillsammans — och hur?"*
+3. *"Om appen visade 3–5 middagsförslag från det som **går ut snart** — och ett klick la in dem i veckoplan + inköpslista — skulle du använda det?"* (1–5)
+4. *"Vad skulle få dig att **inte** lita på förslagen?"* (fel recept, för mycket AI, för lite kontroll)
+5. *"Vill du se **hur mycket pengar/matsvinn ni räddat** — eller känns det onödigt?"*
+6. *"Push: '3 saker går ut — här är veckans förslag' — hjälpsamt eller störande?"*
+
+**Observéra:** nämner de Matdags, meal prep, eller "vi improviserar"? Skriv citat under P1–P10 i syntes-tabellen.
+
 ### Churn & vanor (12 min)
 
 1. *"När öppnade du appen senast — och varför just då?"*

@@ -21,7 +21,8 @@ describe('GamificationService', () => {
 			countByEventTypes: vi.fn(),
 			countByEventTypeSince: vi.fn(),
 			record: vi.fn(),
-			weeklyCountsByEventType: vi.fn()
+			weeklyCountsByEventType: vi.fn(),
+			listEventsForSavings: vi.fn().mockResolvedValue([])
 		};
 		mealPlanRepository = {
 			countRecipeIdeasSince: vi.fn(),

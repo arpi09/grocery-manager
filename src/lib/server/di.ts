@@ -7,6 +7,7 @@ import { ProfileService } from '$lib/application/profile.service';
 import { ShoppingListService } from '$lib/application/shopping-list.service';
 import { InventoryService } from '$lib/application/inventory.service';
 import { MealPlanService } from '$lib/application/meal-plan.service';
+import { WeeklyRitualService } from '$lib/application/weekly-ritual.service';
 import { PetFoodService } from '$lib/application/pet-food.service';
 import { PetService } from '$lib/application/pet.service';
 import { DrizzleMealPlanRepository } from '$lib/infrastructure/repositories/meal-plan.repository';
@@ -134,6 +135,7 @@ export const gamificationService = new GamificationService(
 );
 export const shoppingListService = new ShoppingListService(shoppingListRepository);
 export const mealPlanService = new MealPlanService(mealPlanRepository);
+export const weeklyRitualService = new WeeklyRitualService(mealPlanService, shoppingListService);
 export const petService = new PetService(petRepository);
 export const petFoodService = new PetFoodService(petFoodRepository);
 export const pmfService = new PmfService(pmfRepository);

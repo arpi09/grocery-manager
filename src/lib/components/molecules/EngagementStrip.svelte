@@ -33,7 +33,7 @@
 			<h2 id="engagement-strip-heading">{t('gamification.stripTitle')}</h2>
 			<div class="strip-links">
 				<a href="/statistik">{t('gamification.viewStats')}</a>
-				<a href="/hem#eat-first">{t('gamification.eatFirstLink')}</a>
+				<a href="/planer/vecka">{t('gamification.eatFirstLink')}</a>
 			</div>
 		</div>
 

@@ -221,7 +221,7 @@ const sv: MarketingContent = {
 		heroDomainSuffix: '· skaffu.com',
 		heroTitle: 'Skaffu — skafferiet du faktiskt har koll på.',
 		heroLead:
-			'Skanna in det du har hemma på sekunder. Se kyl, frys och skafferi på ett ställe — och ät det som går ut innan det blir matsvinn.',
+			'Skanna in det du har hemma på sekunder. Se kyl, frys och skafferi på ett ställe — planera veckan med Veckan fixad och ät det som går ut innan det blir matsvinn.',
 		heroSecondary:
 			'Lager som sanningskälla, kvitto-autopilot och inköpslista som fylls från det du faktiskt har — butiksneutralt, utan stammiskonto.',
 		heroHighlightsAria: 'Snabbstart',
@@ -233,12 +233,12 @@ const sv: MarketingContent = {
 		statsAria: 'Skaffu i siffror',
 		seeAllFeatures: 'Se alla funktioner',
 		wasteMeterLabel: 'Mindre matsvinn',
-		wasteMeterCaption: 'Ät det som går ut först — handla det som saknas.',
+		wasteMeterCaption: 'Veckan fixad — utgående varor blir middag och inköpslista på ett klick.',
 		comparisonKicker: 'Jämfört med Bring & ICA',
 		readHowItWorks: 'Läs mer om hur det fungerar',
 		stats: [
+			{ value: '1', label: 'klick — Veckan fixad från utgående varor till matplan' },
 			{ value: '3', label: 'sätt att komma igång — streckkod, kvitto, foto' },
-			{ value: '1', label: 'gemensamt lager för hela hushållet' },
 			{ value: '0', label: 'krav på matkedja eller stammisapp' }
 		],
 		differentiatorsTitle: 'Byggt för att du ska äta upp — inte köpa dubbelt',
@@ -554,7 +554,7 @@ const en: MarketingContent = {
 		heroDomainSuffix: '· skaffu.com',
 		heroTitle: 'Skaffu — the pantry you actually keep track of.',
 		heroLead:
-			'Scan what you have at home in seconds. See fridge, freezer and cupboard in one place — and eat what expires before it becomes waste.',
+			'Scan what you have at home in seconds. See fridge, freezer and cupboard in one place — plan the week with Week sorted and eat what expires before it becomes waste.',
 		heroSecondary:
 			'Inventory as source of truth, receipt autopilot and a shopping list filled from what you actually have — store-neutral, no loyalty lock-in.',
 		heroHighlightsAria: 'Quick start',
@@ -566,12 +566,12 @@ const en: MarketingContent = {
 		statsAria: 'Skaffu in numbers',
 		seeAllFeatures: 'See all features',
 		wasteMeterLabel: 'Less food waste',
-		wasteMeterCaption: 'Eat what expires first — shop for what is missing.',
+		wasteMeterCaption: 'Week sorted — expiring items become dinners and a shopping list in one click.',
 		comparisonKicker: 'Compared to Bring & ICA',
 		readHowItWorks: 'Read more about how it works',
 		stats: [
+			{ value: '1', label: 'click — Week sorted from expiring items to meal plan' },
 			{ value: '3', label: 'ways to get started — barcode, receipt, photo' },
-			{ value: '1', label: 'shared pantry for the whole household' },
 			{ value: '0', label: 'retailer or loyalty app required' }
 		],
 		differentiatorsTitle: 'Built so you eat up — not buy twice',

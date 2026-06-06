@@ -11,6 +11,7 @@ import type { InventoryService } from '$lib/application/inventory.service';
 import type { StatistikService } from '$lib/application/statistik.service';
 import type { GamificationService } from '$lib/application/gamification.service';
 import type { MealPlanService } from '$lib/application/meal-plan.service';
+import type { WeeklyRitualService } from '$lib/application/weekly-ritual.service';
 import type { PetFoodService } from '$lib/application/pet-food.service';
 import type { PetService } from '$lib/application/pet.service';
 import type { PmfService } from '$lib/application/pmf.service';
@@ -51,6 +52,7 @@ declare global {
 			gamificationService: GamificationService;
 			shoppingListService: ShoppingListService;
 			mealPlanService: MealPlanService;
+			weeklyRitualService: WeeklyRitualService;
 			petService: PetService;
 			petFoodService: PetFoodService;
 			pmfService: PmfService;

@@ -50,7 +50,8 @@ describe('InventoryService', () => {
 			record: vi.fn(),
 			countByEventTypes: vi.fn(),
 			countByEventTypeSince: vi.fn(),
-			weeklyCountsByEventType: vi.fn()
+			weeklyCountsByEventType: vi.fn(),
+			listEventsForSavings: vi.fn().mockResolvedValue([])
 		};
 		service = new InventoryService(repository, consumptionRepository);
 	});

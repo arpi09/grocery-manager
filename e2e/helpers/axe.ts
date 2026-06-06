@@ -63,19 +63,6 @@ export async function expectNoCriticalOrSeriousViolations(page: Page, routeLabel
 		(v) => v.impact === 'critical' || v.impact === 'serious'
 	);
 
-	if (blocking.length > 0) {
-		const details = results.violations
-			.filter((v) => v.impact === 'critical' || v.impact === 'serious')
-			.flatMap((v) =>
-				v.nodes.map((node) => ({
-					rule: v.id,
-					html: node.html,
-					target: node.target
-				}))
-			);
-		console.log(`${routeLabel} axe blocking nodes:`, JSON.stringify(details, null, 2));
-	}
-
 	expect(
 		blocking,
 		`${routeLabel}: expected 0 critical/serious axe violations (wcag22aa), found ${blocking.length}:\n${JSON.stringify(blocking, null, 2)}`

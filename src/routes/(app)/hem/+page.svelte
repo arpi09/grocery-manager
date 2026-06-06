@@ -12,6 +12,9 @@
 		<InstallAppBanner />
 		<HomeDashboard
 			summary={data.summary}
+			engagement={data.engagement}
+			savings={data.savings}
+			showWeeklyRitual={data.showWeeklyRitual}
 			celebration={data.celebration}
 			canWrite={data.canWrite}
 			displayName={data.user?.displayName}

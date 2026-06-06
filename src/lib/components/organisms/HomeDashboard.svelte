@@ -8,7 +8,12 @@
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import EatFirstSection from '$lib/components/organisms/EatFirstSection.svelte';
 	import ReceiptAutopilotSection from '$lib/components/organisms/ReceiptAutopilotSection.svelte';
+	import EngagementStrip from '$lib/components/molecules/EngagementStrip.svelte';
+	import WeeklyRitualHero from '$lib/components/molecules/WeeklyRitualHero.svelte';
+	import SkafferapportWidget from '$lib/components/molecules/SkafferapportWidget.svelte';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
+	import type { EngagementStrip as EngagementStripData } from '$lib/application/gamification.service';
+	import type { SavingsReport } from '$lib/domain/savings-estimate';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { ZERO_WASTE_STREAK_CELEBRATION, type GamificationCelebrationKind } from '$lib/domain/gamification';
 	import { getTimeOfDay, timeOfDayGreetingKey } from '$lib/domain/meal-slot';
@@ -29,6 +34,9 @@
 
 	interface Props {
 		summary: DashboardSummary;
+		engagement: EngagementStripData;
+		savings: SavingsReport;
+		showWeeklyRitual?: boolean;
 		celebration?: GamificationCelebrationKind | null;
 		canWrite?: boolean;
 		displayName?: string | null;
@@ -38,6 +46,9 @@
 
 	let {
 		summary,
+		engagement,
+		savings,
+		showWeeklyRitual = false,
 		celebration = null,
 		canWrite = false,
 		displayName = null,
@@ -221,21 +232,33 @@
 			<p class="readonly-hint">{t('home.readonlyHint')}</p>
 		{/if}
 
-		<details class="home-disclosure" bind:open={eatFirstOpen}>
-			<summary>
-				{#if hasExpiring}
-					{t('home.eatFirstSummary', { count: expiringCount })}
-				{:else}
-					{t('eatFirst.title')}
-				{/if}
-			</summary>
-			<EatFirstSection
-				compact
-				expiringItems={summary.expiringSoon}
-				canEdit={canWrite}
-				householdId={householdId}
-			/>
-		</details>
+		{#if showWeeklyRitual}
+			<WeeklyRitualHero expiringCount={expiringCount} />
+		{/if}
+
+		<EngagementStrip {engagement} />
+
+		{#if savings.hasData}
+			<SkafferapportWidget {savings} />
+		{/if}
+
+		{#if !showWeeklyRitual}
+			<details class="home-disclosure" bind:open={eatFirstOpen}>
+				<summary>
+					{#if hasExpiring}
+						{t('home.eatFirstSummary', { count: expiringCount })}
+					{:else}
+						{t('eatFirst.title')}
+					{/if}
+				</summary>
+				<EatFirstSection
+					compact
+					expiringItems={summary.expiringSoon}
+					canEdit={canWrite}
+					householdId={householdId}
+				/>
+			</details>
+		{/if}
 
 		<details class="home-disclosure" bind:open={locationsOpen}>
 			<summary>

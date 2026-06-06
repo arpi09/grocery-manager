@@ -67,7 +67,14 @@
 
 	.toggle-disabled {
 		cursor: not-allowed;
-		opacity: 0.55;
+	}
+
+	.toggle-disabled .toggle-label {
+		color: var(--color-text-muted);
+	}
+
+	.toggle-disabled .toggle-track {
+		background: color-mix(in srgb, var(--color-border) 72%, var(--color-surface-muted));
 	}
 
 	.toggle-switch {

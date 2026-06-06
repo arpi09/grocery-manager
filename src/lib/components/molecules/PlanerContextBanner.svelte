@@ -42,6 +42,7 @@
 		{/if}
 
 		<p class="actions">
+			<a class="weekly-link" href="/planer/vecka">{t('planer.contextWeeklyLink')}</a>
 			<a class="home-link" href={APP_HOME_PATH}>{t('planer.contextHomeLink')}</a>
 		</p>
 	</Card>
@@ -81,9 +82,13 @@
 	}
 
 	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-md);
 		margin: var(--space-xs) 0 0;
 	}
 
+	.weekly-link,
 	.home-link {
 		font-size: 0.9rem;
 		font-weight: 600;
@@ -91,6 +96,7 @@
 		text-decoration: none;
 	}
 
+	.weekly-link:hover,
 	.home-link:hover {
 		text-decoration: underline;
 	}

@@ -12,7 +12,8 @@ export const PRODUCT_EVENT_TYPES = [
 	'first_scan',
 	'pwa_banner_dismiss',
 	'pwa_banner_install_click',
-	'receipt_autopilot_accepted'
+	'receipt_autopilot_accepted',
+	'weekly_ritual_approved'
 ] as const;
 
 export const PMF_PRODUCT_EVENT_TYPES = [

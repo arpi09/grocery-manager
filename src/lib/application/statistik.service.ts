@@ -6,6 +6,7 @@ import {
 	startOfWeek,
 	type WeeklyBar
 } from '$lib/domain/statistik';
+import { buildSavingsReport, type SavingsReport } from '$lib/domain/savings-estimate';
 import type { IConsumptionRepository } from '$lib/infrastructure/repositories/consumption.repository';
 import type { IInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
 
@@ -25,6 +26,7 @@ export interface StatistikDashboard {
 	addedTrend: WeeklyBar[];
 	addedWeekOverWeek: ReturnType<typeof computeWeekOverWeek>;
 	impact: ImpactStats;
+	savings: SavingsReport;
 }
 
 export class StatistikService {
@@ -35,6 +37,11 @@ export class StatistikService {
 	) {}
 
 	/** Lighter than getDashboard — used by /hem engagement strip. */
+	async getSavingsReport(householdId: string): Promise<SavingsReport> {
+		const events = await this.consumptionRepository.listEventsForSavings(householdId);
+		return buildSavingsReport(events);
+	}
+
 	async getImpact(householdId: string): Promise<ImpactStats> {
 		const referenceDate = new Date();
 		const [consumedCounts, wasteCounts] = await Promise.all([
@@ -74,18 +81,17 @@ export class StatistikService {
 		]);
 
 		const addedTrend = buildLastNWeekBars(addedCounts, TREND_WEEKS, referenceDate);
-		const impact = await this.buildImpactStats(
-			householdId,
-			consumedCounts,
-			wasteCounts,
-			referenceDate
-		);
+		const [impact, savings] = await Promise.all([
+			this.buildImpactStats(householdId, consumedCounts, wasteCounts, referenceDate),
+			this.getSavingsReport(householdId)
+		]);
 
 		return {
 			analytics,
 			addedTrend,
 			addedWeekOverWeek: computeWeekOverWeek(addedTrend),
-			impact
+			impact,
+			savings
 		};
 	}
 

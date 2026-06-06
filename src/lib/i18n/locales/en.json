@@ -777,6 +777,7 @@
 		"contextExpiring": "{count} items expiring within {days} days",
 		"contextNoExpiring": "Nothing urgent expiring within {days} days.",
 		"contextPlanned": "{count} meals in this calendar view",
+		"contextWeeklyLink": "Week sorted — plan the full week",
 		"contextHomeLink": "Go to home & Eat First",
 		"ideasAria": "Recipe ideas",
 		"ideasIntro": "Ideas from your stock, prioritising what expires. Pick a date and add to the calendar.",
@@ -1505,7 +1506,7 @@
 		"eatFirstProgress": "{done} of {goal} planned this week",
 		"eatFirstSuggestions": "{count} suggestions this week",
 		"viewStats": "Statistics",
-		"eatFirstLink": "Eat it first",
+		"eatFirstLink": "Week sorted",
 		"placeholder": "Mark items as finished when you use them — your impact shows up here.",
 		"celebrateFirstConsumption": "First item marked as used — a solid start against food waste.",
 		"celebrateZeroWasteStreak": "{count} zero-waste weeks in a row — keep the rhythm going.",
@@ -1532,6 +1533,41 @@
 		"scheduledLabel": "Planned",
 		"scheduleFailed": "Could not add to the meal plan. Try again."
 	},
+	"weeklyRitual": {
+		"pageTitle": "Week sorted",
+		"pageSubtitle": "Expiring items → AI meals → one click to plan and shopping list",
+		"heroTitle": "Week sorted",
+		"heroBadge": "Monday ritual",
+		"heroSubtitleDefault": "Plan the week's dinners from your pantry — one click to meal plan and shopping list.",
+		"heroSubtitleExpiring": "{count} items expiring soon — plan the week before they become waste.",
+		"heroCta": "Plan the week →",
+		"flowLead": "Generate up to five dinner ideas, adjust the days, and approve the whole week.",
+		"expiringLabel": "Expiring items",
+		"noExpiring": "Nothing urgent right now — you can still plan the week from your pantry.",
+		"generateBtn": "Generate week suggestions",
+		"generateFailed": "Could not create suggestions. Try again.",
+		"noneGenerated": "No suggestions right now — add more items or try again later.",
+		"suggestionsTitle": "Your week suggestions",
+		"approveBtn": "Approve the week",
+		"approveLoading": "Planning the week…",
+		"approveSuccess": "{count} meals scheduled. {listAdded} items added to the shopping list.",
+		"approveFailed": "Could not approve the week. Try again.",
+		"successTitle": "Week sorted",
+		"linkPlaner": "View meal plan",
+		"linkInkop": "Go to shopping list",
+		"plannedThisWeek": "{count} meals already planned this week",
+		"readonlyHint": "You have read-only access — ask an admin to plan the week.",
+		"savingsFootnote": "Estimated {sek} kr · {kg} kg saved so far by using food in time."
+	},
+	"skafferapport": {
+		"title": "Pantry report",
+		"saved": "Saved approx. {sek} kr · {kg} kg",
+		"lead": "Estimate based on items you marked as consumed — not wasted.",
+		"consumed": "Consumed items",
+		"net": "Net (kr)",
+		"metricsAria": "Pantry report figures",
+		"viewStats": "View full statistics"
+	},
 	"demo": {
 		"banner": {
 			"aria": "Demo account",
@@ -1551,7 +1587,7 @@
 	},
 	"pushNotifications": {
 		"expiryTitle": "Items expiring soon",
-		"expiryBody": "{count} items expire within {days} days",
+		"expiryBody": "{count} items expire within {days} days — see your weekly meal suggestions",
 		"shoppingTitle": "Time to shop?",
 		"shoppingBody": "{count} items on your shopping list"
 	},
