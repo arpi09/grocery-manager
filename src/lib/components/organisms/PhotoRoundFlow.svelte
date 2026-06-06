@@ -561,13 +561,15 @@
 
 	.remove-photo {
 		position: absolute;
-		top: 0.25rem;
-		right: 0.25rem;
+		top: 0.15rem;
+		right: 0.15rem;
 		border: none;
 		background: var(--color-surface);
 		border-radius: var(--radius-sm);
 		font-size: 0.7rem;
-		padding: 0.15rem 0.35rem;
+		min-width: var(--touch-target-min);
+		min-height: var(--touch-target-min);
+		padding: 0;
 		cursor: pointer;
 	}
 
@@ -670,5 +672,21 @@
 	.actions :global(.btn) {
 		flex: 1;
 		min-height: 2.75rem;
+	}
+
+	@media (max-width: 899px) {
+		.actions {
+			position: sticky;
+			bottom: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0));
+			z-index: 1;
+			margin-bottom: 0;
+			padding-top: var(--space-sm);
+			padding-bottom: var(--space-sm);
+			background: linear-gradient(
+				to top,
+				var(--color-bg) 78%,
+				color-mix(in srgb, var(--color-bg) 0%, transparent)
+			);
+		}
 	}
 </style>

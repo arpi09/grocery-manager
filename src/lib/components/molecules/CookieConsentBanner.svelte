@@ -120,6 +120,12 @@
 		flex-shrink: 0;
 	}
 
+	@media (max-width: 899px) {
+		:global(body:has(.app)) .consent-root {
+			bottom: var(--content-bottom-safe);
+		}
+	}
+
 	@media (max-width: 540px) {
 		.consent-bar {
 			flex-direction: column;

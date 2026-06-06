@@ -158,6 +158,8 @@
 
 		gap: var(--space-lg);
 
+		min-width: 0;
+
 	}
 
 

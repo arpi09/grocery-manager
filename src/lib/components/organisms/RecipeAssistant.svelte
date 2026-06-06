@@ -356,12 +356,12 @@
 <style>
 	:global(.recipe-assistant-panel) {
 		width: min(760px, calc(100vw - 2 * var(--space-md)));
-		max-height: min(92vh, 52rem);
+		max-height: min(92dvh, 52rem);
 	}
 
 	:global(.recipe-assistant-panel.modal-panel--sheet) {
 		width: 100%;
-		max-height: min(94vh, 52rem);
+		max-height: min(100dvh, 52rem);
 	}
 
 	:global(.recipe-assistant-body) {

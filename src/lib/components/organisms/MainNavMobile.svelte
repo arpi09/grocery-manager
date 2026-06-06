@@ -330,7 +330,7 @@
 	}
 
 	:global(.nav-more-panel) {
-		max-height: min(85vh, 640px);
+		max-height: min(85dvh, 640px);
 	}
 
 	:global(.nav-more-panel .modal-header) {
@@ -344,7 +344,8 @@
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
 		overscroll-behavior: contain;
-		padding: var(--space-sm) var(--space-md) var(--space-lg);
+		padding: var(--space-sm) var(--space-md)
+			calc(var(--space-lg) + env(safe-area-inset-bottom, 0));
 	}
 
 	@media (prefers-reduced-motion: reduce) {

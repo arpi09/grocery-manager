@@ -40,6 +40,10 @@
 
 	.tab {
 		flex: 1;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: var(--touch-target-min);
 		text-align: center;
 		padding: 0.45rem 0.5rem;
 		border-radius: calc(var(--radius-md) - 3px);

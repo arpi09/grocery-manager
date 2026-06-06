@@ -508,7 +508,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-lg);
-		padding: 0 var(--space-lg) var(--space-lg);
+		padding: 0 var(--space-lg) calc(var(--space-lg) + env(safe-area-inset-bottom, 0));
 	}
 
 	.step-dots {

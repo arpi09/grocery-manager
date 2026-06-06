@@ -274,6 +274,7 @@
 		background: var(--color-surface);
 		border-radius: var(--radius-sm);
 		padding: 0.5rem 0.75rem;
+		min-height: var(--touch-target-min);
 		font-weight: 600;
 		cursor: pointer;
 	}
@@ -315,6 +316,14 @@
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
 		background: var(--color-surface);
+	}
+
+	@media (max-width: 899px) {
+		.select,
+		.textarea,
+		.barcode-row :global(input) {
+			min-height: var(--touch-target-min);
+		}
 	}
 
 	.error {

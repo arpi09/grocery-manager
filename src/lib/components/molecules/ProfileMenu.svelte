@@ -416,7 +416,7 @@
 	}
 
 	:global(.profile-sheet-panel) {
-		max-height: min(85vh, 640px);
+		max-height: min(85dvh, 640px);
 	}
 
 	:global(.profile-sheet-body) {
@@ -427,5 +427,6 @@
 		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
 		overscroll-behavior: contain;
+		padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom, 0));
 	}
 </style>

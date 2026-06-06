@@ -38,6 +38,12 @@
 		text-align: center;
 	}
 
+	@media (max-width: 899px) {
+		.flow-footer {
+			bottom: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0));
+		}
+	}
+
 	.cancel-link {
 		display: inline-flex;
 		align-items: center;

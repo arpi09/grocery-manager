@@ -474,7 +474,8 @@
 	}
 
 	:global(.pantry-sheet-panel) {
-		padding-bottom: calc(var(--space-xl) + 4.5rem + env(safe-area-inset-bottom, 0));
+		max-height: min(85dvh, 640px);
+		padding-bottom: calc(var(--content-bottom-safe) + var(--space-sm));
 	}
 
 	:global(.pantry-sheet-body) {

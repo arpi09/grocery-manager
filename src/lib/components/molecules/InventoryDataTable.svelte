@@ -100,6 +100,7 @@
 	.table-scroll {
 		overflow-x: auto;
 		-webkit-overflow-scrolling: touch;
+		max-width: 100%;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
 		background: var(--color-surface);
@@ -150,6 +151,7 @@
 		border: none;
 		background: transparent;
 		padding: 0.1rem 0;
+		min-height: var(--touch-target-min);
 		font: inherit;
 		font-size: 0.6875rem;
 		font-weight: 700;

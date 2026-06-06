@@ -394,6 +394,7 @@
 		display: flex;
 		align-items: center;
 		gap: var(--space-md);
+		min-height: var(--touch-target-min);
 		padding: var(--space-lg);
 		background: linear-gradient(
 			135deg,
