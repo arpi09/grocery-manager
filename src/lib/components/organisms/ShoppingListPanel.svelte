@@ -520,9 +520,12 @@
 	}
 
 	.checked-toggle {
+		display: inline-flex;
+		align-items: center;
 		border: none;
 		background: transparent;
-		padding: 0;
+		min-height: var(--touch-target-min);
+		padding: 0.375rem 0;
 		cursor: pointer;
 		text-align: left;
 		color: inherit;
