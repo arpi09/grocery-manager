@@ -218,10 +218,13 @@
 	.error {
 		margin: 0;
 		padding: var(--space-sm) var(--space-md);
-		background: #fdeaea;
-		color: var(--color-danger);
+		background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
+		color: color-mix(in srgb, var(--color-danger) 65%, #3d1515);
+		border: 1px solid color-mix(in srgb, var(--color-danger) 25%, var(--color-border));
 		border-radius: var(--radius-sm);
 		font-size: 0.875rem;
+		font-weight: 500;
+		line-height: 1.45;
 	}
 
 	.viewport {
