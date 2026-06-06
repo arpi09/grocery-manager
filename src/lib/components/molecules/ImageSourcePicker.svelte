@@ -75,6 +75,7 @@
 	accept={cameraAccept}
 	capture="environment"
 	class="sr-input"
+	aria-label={cameraLabel}
 	{disabled}
 />
 

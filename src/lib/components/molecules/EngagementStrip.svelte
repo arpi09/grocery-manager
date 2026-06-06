@@ -185,6 +185,13 @@
 		font-weight: 600;
 	}
 
+	.strip-links a {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		padding: 0 var(--space-xs);
+	}
+
 	.metrics {
 		display: grid;
 		grid-template-columns: 1.2fr 1fr;

@@ -139,7 +139,7 @@
 		if (!browser) {
 			return;
 		}
-		activeIndex;
+		void activeIndex;
 		slideTitleEl?.focus({ preventScroll: true });
 	});
 

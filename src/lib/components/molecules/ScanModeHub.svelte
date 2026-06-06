@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
 	import { t } from '$lib/i18n';
@@ -143,6 +143,8 @@
 
 	.hero-cta {
 		display: inline-flex;
+		min-height: var(--touch-target-min);
+		box-sizing: border-box;
 		align-items: center;
 		justify-content: center;
 		align-self: flex-start;

@@ -16,8 +16,8 @@ Canonical reference for accessibility goals, scope, component contracts, and aut
 |------|-------------------|
 | Marketing | `(marketing)/*`, landing `/` |
 | Auth | `/login`, `/register`, `/verify-email`, password reset |
-| App (P0) | `/hem`, `/inventory/*`, `/scan`, `/inkop` |
-| App (P1) | `/settings`, `/planer`, `/statistik`, `/priser` |
+| App (P0) | `/hem`, `/inventory/*`, `/scan`, `/inkop`, `/item/new`, `/item/[id]/edit` |
+| App (P1) | `/settings`, `/planer`, `/statistik`, `/profile`, growth: `/statistik/wrapped`, `/rapport/[month]`, `/dela/[token]` |
 | Admin (P2) | `/admin` |
 
 ## Documented exceptions
@@ -55,8 +55,8 @@ Extends `docs/BRAND.md` and `docs/MODAL_CONTRACT.md`.
 
 ## Baseline axe audit (`@axe-core/playwright`)
 
-Tags: `wcag2a`, `wcag2aa`, `wcag22aa`. Viewport: 1400×900. Locale: `sv`.  
-**Before** = pre-fix snapshot (Mar 2026). **After** = post-fix; P0 enforced in `e2e/accessibility.spec.ts`.
+Tags: `wcag2a`, `wcag2aa`, `wcag22aa`. Viewports: **1400×900** (desktop baseline), **390×844** (iPhone 14 mobile gate in `e2e/mobile-visual.spec.ts`). Locale: `sv`.  
+**Before** = pre-fix snapshot (Mar 2026). **After** = post-fix; P0 enforced in `e2e/accessibility.spec.ts` (desktop) and `e2e/mobile-visual.spec.ts` (mobile).
 
 | Priority | Route | Critical (before) | Serious (before) | Critical (after) | Serious (after) | Notes |
 |----------|-------|-------------------|------------------|------------------|-----------------|-------|
@@ -70,6 +70,9 @@ Tags: `wcag2a`, `wcag2aa`, `wcag22aa`. Viewport: 1400×900. Locale: `sv`.
 | P1 | `/settings` | 0 | 1 | 0 | 0 | Disabled toggle label opacity |
 | P1 | `/planer` | 0 | 0 | 0 | 0 | — |
 | P1 | `/statistik` | 0 | 0 | 0 | 0 | Removed invalid `role="list"` |
+| P1 | `/statistik/wrapped` | — | — | 0 | 0 | Growth wave — mobile pass (Jun 2026) |
+| P1 | `/rapport/[month]` | — | — | 0 | 0 | Public Skaffurapport — growth wave |
+| P1 | `/dela/[token]` | — | — | 0 | 0 | Public expiring-share link |
 | P1 | `/priser` | 0 | 0 | 0 | 0 | — |
 | P1 | `/verify-email` | 0 | 0 | 0 | 0 | — |
 | P2 | `/admin` | 0 | 0 | 0 | 0 | — |
@@ -79,7 +82,7 @@ Moderate/minor findings (e.g. duplicate landmarks on complex pages) are tracked 
 ## Automated regression
 
 - **Package:** `@axe-core/playwright` (devDependency)
-- **CI / E2E:** `e2e/accessibility.spec.ts` — all P0 routes, serial auth, fail on critical/serious
+- **CI / E2E:** `e2e/accessibility.spec.ts` — P0 routes at desktop viewport; `e2e/mobile-visual.spec.ts` — P0 at 390×844 (`mobile-chrome` project); serial auth; fail on critical/serious
 - **Helper:** `e2e/helpers/axe.ts`
 - **Baseline script:** `scripts/a11y-baseline.mjs` (optional local audit)
 
@@ -94,4 +97,5 @@ Moderate/minor findings (e.g. duplicate landmarks on complex pages) are tracked 
 
 | Date | Change |
 |------|--------|
+| 2026-06 | Mobile viewport axe gate (`mobile-chrome`), growth routes P1 scope |
 | 2026-03 | Initial WCAG 2.2 AA baseline, skip links, axe P0 gate, token/contrast fixes |

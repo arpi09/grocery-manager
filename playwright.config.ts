@@ -21,6 +21,7 @@ loadDotEnv();
 /** Dedicated port so E2E does not collide with a running `npm run dev` on 5173. */
 const port = process.env.PLAYWRIGHT_PORT ?? '5190';
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${port}`;
+process.env.PLAYWRIGHT_BASE_URL = baseURL;
 const turnstileBypass = process.env.TURNSTILE_BYPASS ?? process.env.TURNSTILE_SKIP ?? 'true';
 
 function pickEnv(value: string | undefined): string | undefined {
@@ -32,6 +33,15 @@ const e2eAdminPassword = pickEnv(process.env.E2E_ADMIN_PASSWORD) ?? 'e2e-ci-pass
 
 process.env.ADMIN_EMAIL = e2eAdminEmail;
 process.env.ADMIN_PASSWORD = e2eAdminPassword;
+
+/** iPhone 14 viewport (390×844) in Chromium — avoids WebKit dependency in CI. */
+const mobileChrome = {
+	...devices['Desktop Chrome'],
+	viewport: { width: 390, height: 844 },
+	isMobile: true,
+	hasTouch: true,
+	deviceScaleFactor: 3
+};
 
 export default defineConfig({
 	globalSetup: './e2e/global-setup.ts',
@@ -54,7 +64,13 @@ export default defineConfig({
 	projects: [
 		{
 			name: 'chromium',
+			testIgnore: /mobile-visual\.spec\.ts/,
 			use: { ...devices['Desktop Chrome'] }
+		},
+		{
+			name: 'mobile-chrome',
+			testMatch: /mobile-visual\.spec\.ts/,
+			use: mobileChrome
 		}
 	],
 	webServer: {

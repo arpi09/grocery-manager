@@ -96,7 +96,7 @@
 		background: var(--color-surface);
 		border-radius: 999px;
 		padding: 0.45rem 0.9rem;
-		min-height: 2.5rem;
+		min-height: var(--touch-target-min);
 		display: inline-flex;
 		align-items: center;
 		font-weight: 600;

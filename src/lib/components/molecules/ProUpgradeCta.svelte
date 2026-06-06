@@ -49,6 +49,7 @@
 
 	.pro-upgrade-nav {
 		display: inline-flex;
+		min-height: var(--touch-target-min);
 		align-items: center;
 		gap: 0.35rem;
 		padding: 0.25rem 0.55rem;
@@ -82,6 +83,7 @@
 
 	.pro-upgrade-banner {
 		display: flex;
+		min-height: var(--touch-target-min);
 		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--space-sm) var(--space-md);
@@ -132,6 +134,7 @@
 
 	.pro-upgrade-card {
 		display: flex;
+		min-height: var(--touch-target-min);
 		flex-direction: column;
 		gap: var(--space-xs);
 		padding: var(--space-md) var(--space-lg);

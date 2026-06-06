@@ -10,7 +10,7 @@ Checklist per route: no horizontal scroll, touch targets ≥44px (`--touch-targe
 |-------|------|----------|-------|------|------------------|
 | `/hem` | App | P0 | Pass | Pass | Scan card touch OK; disclosure summary ≥44px |
 | `/inventory/fridge` | App | P0 | Pass | Pass | Location tabs + table scroll; sticky CTAs clear nav |
-| `/inventory/pantry` | App | P0 | Pass | Pass | Same shell as fridge |
+| `/inventory/cupboard` | App | P0 | Pass | Pass | Skafferi — same shell as fridge |
 | `/inventory/freezer` | App | P0 | Pass | Pass | Same shell as fridge |
 | `/inventory/foto` | App | P0 | Pass | Pass | Redirect → `/scan?mode=photo` |
 | `/scan` (hub) | App | P0 | Pass | Pass | ScanFlowFooter clears bottom nav |
@@ -20,31 +20,31 @@ Checklist per route: no horizontal scroll, touch targets ≥44px (`--touch-targe
 | `/inkop` | App | P0 | Pass | Pass | Sticky add row; undo toast above nav; export ≥44px |
 | `/item/new` | App | P0 | Pass | Pass | Full-page form; scan tabs ≥44px |
 | `/item/[id]/edit` | App | P0 | Pass | Pass | Same form patterns as new |
-| `/planer` | App | P1 | Pending | Pending | Agent 2 |
-| `/planer/vecka` | App | P1 | Pending | Pending | Agent 2 — WeeklyRitualFlow |
-| `/statistik` | App | P1 | Pending | Pending | Agent 2 |
-| `/statistik/wrapped` | App | P1 | Pending | Pending | Agent 2 — share card scaling |
-| `/settings` | App | P1 | Pending | Pending | Agent 2 |
-| `/profile` | App | P1 | Pending | Pending | Agent 2 |
-| `/nyheter` | App | P1 | Pending | Pending | Agent 2 |
-| `/husdjur` | App | P1 | Pending | Pending | Agent 2 |
-| `/install-app` | App | P1 | Pending | Pending | Agent 2 — PWA CTA |
-| `/login` | Public | P2 | Pending | Pending | Agent 2 |
-| `/register` | Public | P2 | Pending | Pending | Agent 2 |
-| `/verify-email` | Public | P2 | Pending | Pending | Agent 2 |
-| `/verify-email/[token]` | Public | P2 | Pending | Pending | Agent 2 |
-| `/forgot-password` | Public | P2 | Pending | Pending | Agent 2 |
-| `/reset-password/[token]` | Public | P2 | Pending | Pending | Agent 2 |
-| `/invite/[token]` | Public | P2 | Pending | Pending | Agent 2 |
-| `/` | Public | P2 | Pending | Pending | Agent 2 — marketing |
-| `/funktioner` | Public | P2 | Pending | Pending | Agent 2 |
-| `/priser` | Public | P2 | Pending | Pending | Agent 2 |
-| `/faq` | Public | P2 | Pending | Pending | Agent 2 |
-| `/sa-fungerar-det` | Public | P2 | Pending | Pending | Agent 2 |
-| `/privacy` | Public | P2 | Pending | Pending | Agent 2 |
-| `/rapport/[month]` | Public | P2 | Pending | Pending | Agent 2 — growth wave |
-| `/dela/[token]` | Public | P2 | Pending | Pending | Agent 2 — share link |
-| `/admin` | Admin | P2 | Pending | Pending | Agent 2 — table `@media 900px` |
+| `/planer` | App | P1 | Pass | Pass | Weekly ritual flow; sticky CTAs |
+| `/planer/vecka` | App | P1 | Pass | Pass | WeeklyRitualFlow touch targets |
+| `/statistik` | App | P1 | Pass | Pass | Dashboard cards scroll cleanly |
+| `/statistik/wrapped` | App | P1 | Pass | Pass | Share card scaling at 390px |
+| `/settings` | App | P1 | Pass | Pass | Form controls ≥44px |
+| `/profile` | App | P1 | Pass | Pass | Action links min-height |
+| `/nyheter` | App | P1 | Pass | Pass | Feed layout; no overflow |
+| `/husdjur` | App | P1 | Pass | Pass | Pet cards + CTA spacing |
+| `/install-app` | App | P1 | Pass | Pass | PWA CTA touch targets |
+| `/login` | Public | P2 | Pass | Pass | Auth form inputs ≥44px |
+| `/register` | Public | P2 | Pass | Pass | Same shell as login |
+| `/verify-email` | Public | P2 | Pass | Pass | Centered card layout |
+| `/verify-email/[token]` | Public | P2 | Pass | Pass | Token flow card |
+| `/forgot-password` | Public | P2 | Pass | Pass | Form controls |
+| `/reset-password/[token]` | Public | P2 | Pass | Pass | Form controls |
+| `/invite/[token]` | Public | P2 | Pass | Pass | Accept CTA min-height |
+| `/` | Public | P2 | Pass | Pass | Marketing header nav |
+| `/funktioner` | Public | P2 | Pass | Pass | Marketing layout |
+| `/priser` | Public | P2 | Pass | Pass | Pricing cards |
+| `/faq` | Public | P2 | Pass | Pass | Accordion touch targets |
+| `/sa-fungerar-det` | Public | P2 | Pass | Pass | Marketing layout |
+| `/privacy` | Public | P2 | Pass | Pass | Long-form readable |
+| `/rapport/[month]` | Public | P2 | Pass | Pass | Growth wave — rapport hero |
+| `/dela/[token]` | Public | P2 | Pass | Pass | Share link public page |
+| `/admin` | Admin | P2 | Pass | Pass | Table `@media 900px`; tab targets |
 
 ## Shared shell (mobile ≤899px)
 
@@ -77,4 +77,4 @@ Checklist per route: no horizontal scroll, touch targets ≥44px (`--touch-targe
 
 - `npm run check`
 - Existing E2E: `e2e/navigation.spec.ts`, `e2e/scan-inventory.spec.ts`, `e2e/recipe-assistant.spec.ts`
-- Planned: `e2e/mobile-visual.spec.ts` (Agent 2 / mobile-e2e todo)
+- `e2e/mobile-visual.spec.ts` — P0 at 390×844 (`mobile-chrome` project): horizontal scroll, touch-target sampling, axe

@@ -470,6 +470,11 @@
 	}
 
 	.scan-alt a {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: var(--touch-target-min);
+		padding: 0 var(--space-sm);
 		font-weight: 600;
 		color: var(--color-primary);
 		text-decoration: underline;
