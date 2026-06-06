@@ -11,6 +11,7 @@
 	import ActionToast from '$lib/components/molecules/ActionToast.svelte';
 	import ClientToast from '$lib/components/molecules/ClientToast.svelte';
 	import GamificationToast from '$lib/components/molecules/GamificationToast.svelte';
+	import CelebrationMoment from '$lib/components/molecules/CelebrationMoment.svelte';
 	import InventoryScanToast from '$lib/components/molecules/InventoryScanToast.svelte';
 	import ActivationCelebration from '$lib/components/organisms/ActivationCelebration.svelte';
 	import OnboardingGuide from '$lib/components/organisms/OnboardingGuide.svelte';
@@ -127,6 +128,7 @@
 	<ActionToast />
 	<ClientToast />
 	<GamificationToast />
+	<CelebrationMoment />
 	<OnboardingGuide />
 	<PageHintModal />
 	<PostOnboardingSurvey />

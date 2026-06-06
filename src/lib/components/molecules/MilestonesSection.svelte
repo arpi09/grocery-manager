@@ -1,40 +1,70 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
+	import GamificationIllustration from '$lib/components/atoms/GamificationIllustration.svelte';
 	import type { MilestoneState } from '$lib/domain/gamification';
-	import { t, type MessageKey } from '$lib/i18n';
+	import { getMilestoneRegistryEntry } from '$lib/domain/gamification.registry';
+	import { t } from '$lib/i18n';
+	import {
+		markMilestoneUnlockSeen,
+		shouldAnimateMilestoneUnlock
+	} from '$lib/utils/gamification-celebrations';
 
 	interface Props {
 		milestones: MilestoneState[];
+		householdId?: string | null;
 	}
 
-	let { milestones }: Props = $props();
-
-	const milestoneLabels: Record<MilestoneState['id'], MessageKey> = {
-		pantry10: 'gamification.milestonePantry10',
-		firstPlan: 'gamification.milestoneFirstPlan',
-		firstReceipt: 'gamification.milestoneFirstReceipt',
-		firstConsumption: 'gamification.milestoneFirstConsumption',
-		zeroWaste3: 'gamification.milestoneZeroWaste3'
-	};
+	let { milestones, householdId = null }: Props = $props();
 
 	const achievedCount = $derived(milestones.filter((m) => m.achieved).length);
+
+	function shouldUnlockAnimate(milestone: MilestoneState): boolean {
+		if (!browser || !householdId || !milestone.achieved) {
+			return false;
+		}
+		return shouldAnimateMilestoneUnlock(milestone.id, householdId);
+	}
+
+	function handleMilestoneUnlockSeen(milestone: MilestoneState) {
+		if (!householdId || !milestone.achieved) {
+			return;
+		}
+		markMilestoneUnlockSeen(milestone.id, householdId);
+	}
 </script>
 
 <Card class="milestones-card motion-fade-in">
 	<div class="section-head">
 		<h2 class="section-title">{t('gamification.milestonesTitle')}</h2>
-		<span class="progress-pill" aria-label={t('gamification.milestonesProgress', { done: achievedCount, total: milestones.length })}>
+		<span
+			class="progress-pill"
+			aria-label={t('gamification.milestonesProgress', {
+				done: achievedCount,
+				total: milestones.length
+			})}
+		>
 			{achievedCount}/{milestones.length}
 		</span>
 	</div>
 	<ul class="milestones motion-stagger-children" aria-label={t('gamification.milestonesTitle')}>
 		{#each milestones as milestone (milestone.id)}
-			<li class:achieved={milestone.achieved}>
+			{@const entry = getMilestoneRegistryEntry(milestone.id)}
+			{@const unlockAnimate = shouldUnlockAnimate(milestone)}
+			<li
+				class:achieved={milestone.achieved}
+				class:unlock-animate={unlockAnimate}
+				onanimationend={() => handleMilestoneUnlockSeen(milestone)}
+			>
 				<span class="icon" aria-hidden="true">
-					<FeatureIcon id={milestone.achieved ? 'check' : 'sparkle'} size={16} />
+					{#if milestone.achieved && unlockAnimate}
+						<GamificationIllustration variant={entry?.illustration ?? 'milestone'} size={28} />
+					{:else}
+						<FeatureIcon id={milestone.achieved ? 'check' : (entry?.icon ?? 'sparkle')} size={16} />
+					{/if}
 				</span>
-				<span class="label">{t(milestoneLabels[milestone.id])}</span>
+				<span class="label">{t(entry?.i18nKey ?? 'gamification.milestonesTitle')}</span>
 			</li>
 		{/each}
 	</ul>
@@ -98,6 +128,9 @@
 		color: var(--color-text);
 		border-color: color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
 		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+	}
+
+	.milestones li.unlock-animate {
 		animation: milestone-achieved 0.5s var(--motion-ease-out, ease-out);
 	}
 
@@ -108,11 +141,12 @@
 
 	.icon {
 		display: inline-flex;
+		flex-shrink: 0;
 		color: var(--color-primary);
 		opacity: 0.85;
 	}
 
-	.milestones li.achieved .icon {
+	.milestones li.unlock-animate .icon {
 		animation: milestone-check-pop 0.45s var(--motion-ease-out, ease-out);
 	}
 
@@ -143,8 +177,8 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.milestones li.achieved,
-		.milestones li.achieved .icon {
+		.milestones li.unlock-animate,
+		.milestones li.unlock-animate .icon {
 			animation: none;
 		}
 	}

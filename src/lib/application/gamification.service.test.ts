@@ -14,8 +14,40 @@ describe('GamificationService', () => {
 
 	beforeEach(() => {
 		statistikService = {
-			getDashboard: vi.fn(),
-			getImpact: vi.fn()
+			getDashboard: vi.fn().mockResolvedValue({
+				analytics: { totalItems: 8 },
+				addedTrend: [],
+				addedWeekOverWeek: null,
+				impact: {
+					hasConsumptionData: true,
+					consumedThisWeek: 4,
+					consumedWeekOverWeek: null,
+					consumedTrend: [],
+					wasteTrend: [],
+					zeroWasteWeeks: 2
+				},
+				savings: {
+					hasData: true,
+					consumedCount: 4,
+					wastedCount: 0,
+					savedSek: 220,
+					savedKg: 1,
+					wastedSek: 0,
+					wastedKg: 0,
+					netSek: 220
+				}
+			}),
+			getImpact: vi.fn(),
+			getSavingsReport: vi.fn().mockResolvedValue({
+				hasData: true,
+				consumedCount: 4,
+				wastedCount: 0,
+				savedSek: 220,
+				savedKg: 1,
+				wastedSek: 0,
+				wastedKg: 0,
+				netSek: 220
+			})
 		} as unknown as StatistikService;
 		consumptionRepository = {
 			countByEventTypes: vi.fn(),
@@ -51,6 +83,9 @@ describe('GamificationService', () => {
 		});
 		vi.mocked(mealPlanRepository.countRecipeIdeasSince).mockResolvedValue(3);
 		vi.mocked(mealPlanRepository.countPlannedMealsSince).mockResolvedValue(1);
+		vi.mocked(consumptionRepository.countByEventTypes).mockResolvedValue(2);
+		vi.mocked(mealPlanRepository.hasAnyPlannedMeal).mockResolvedValue(true);
+		vi.mocked(pmfRepository.hasHouseholdEvent).mockResolvedValue(false);
 
 		const strip = await service.getEngagementStrip('household-1', 'user-1');
 
@@ -58,6 +93,31 @@ describe('GamificationService', () => {
 		expect(strip.zeroWasteWeeks).toBe(2);
 		expect(strip.eatFirst.complete).toBe(true);
 		expect(strip.eatFirst.suggestionsThisWeek).toBe(3);
+		expect(strip.nextMilestone?.id).toBe('firstReceipt');
+	});
+
+	it('evaluates a unified gamification snapshot', async () => {
+		vi.mocked(statistikService.getImpact).mockResolvedValue({
+			hasConsumptionData: true,
+			consumedThisWeek: 2,
+			consumedWeekOverWeek: null,
+			consumedTrend: [],
+			wasteTrend: [],
+			zeroWasteWeeks: 5
+		});
+		vi.mocked(mealPlanRepository.countRecipeIdeasSince).mockResolvedValue(0);
+		vi.mocked(mealPlanRepository.countPlannedMealsSince).mockResolvedValue(0);
+		vi.mocked(consumptionRepository.countByEventTypes).mockResolvedValue(3);
+		vi.mocked(mealPlanRepository.hasAnyPlannedMeal).mockResolvedValue(true);
+		vi.mocked(pmfRepository.hasHouseholdEvent).mockImplementation(async (_id, type) => {
+			return type === 'weekly_ritual_approved';
+		});
+
+		const snapshot = await service.evaluateProgress('household-1', 'user-1');
+
+		expect(snapshot.savedSek).toBe(220);
+		expect(snapshot.milestones.find((m) => m.id === 'streak5')?.achieved).toBe(true);
+		expect(snapshot.engagement.nextMilestone).not.toBeNull();
 	});
 
 	it('detects first consumption celebration', async () => {
@@ -72,5 +132,41 @@ describe('GamificationService', () => {
 		vi.mocked(mealPlanRepository.countPlannedMealsSince).mockResolvedValue(1);
 
 		await expect(service.detectEatFirstRitualCelebration('user-1')).resolves.toBe('eatFirstRitual');
+	});
+
+	it('prefers streak5 celebration over zero-waste badge at 5 weeks', async () => {
+		vi.mocked(statistikService.getImpact).mockResolvedValue({
+			hasConsumptionData: true,
+			consumedThisWeek: 1,
+			consumedWeekOverWeek: null,
+			consumedTrend: [],
+			wasteTrend: [],
+			zeroWasteWeeks: 5
+		});
+
+		await expect(service.detectZeroWasteCelebration('household-1')).resolves.toBe('streak5');
+	});
+
+	it('detects weekly ritual first celebration', async () => {
+		vi.mocked(pmfRepository.hasHouseholdEvent).mockResolvedValue(true);
+
+		await expect(service.detectWeeklyRitualFirstCelebration('household-1')).resolves.toBe(
+			'weeklyRitualFirst'
+		);
+	});
+
+	it('detects savings milestone celebration', async () => {
+		vi.mocked(statistikService.getSavingsReport).mockResolvedValue({
+			hasData: true,
+			consumedCount: 10,
+			wastedCount: 0,
+			savedSek: 540,
+			savedKg: 2,
+			wastedSek: 0,
+			wastedKg: 0,
+			netSek: 540
+		});
+
+		await expect(service.detectSavingsCelebration('household-1')).resolves.toBe('savings500');
 	});
 });

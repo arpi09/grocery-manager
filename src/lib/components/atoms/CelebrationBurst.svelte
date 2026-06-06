@@ -1,14 +1,15 @@
 <script lang="ts">
 	interface Props {
 		active?: boolean;
+		particleCount?: number;
 	}
 
-	let { active = false }: Props = $props();
+	let { active = false, particleCount = 18 }: Props = $props();
 </script>
 
 {#if active}
 	<div class="celebration-burst" aria-hidden="true">
-		{#each Array.from({ length: 18 }, (_, i) => i) as i (i)}
+		{#each Array.from({ length: particleCount }, (_, i) => i) as i (i)}
 			<span class="particle" style="--i: {i}"></span>
 		{/each}
 	</div>

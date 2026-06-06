@@ -60,9 +60,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			});
 		}
 
-		const celebration = await locals.gamificationService.detectEatFirstRitualCelebration(
-			auth.user.id
-		);
+		const [weeklyRitualFirst, eatFirstRitual] = await Promise.all([
+			locals.gamificationService.detectWeeklyRitualFirstCelebration(auth.householdId),
+			locals.gamificationService.detectEatFirstRitualCelebration(auth.user.id)
+		]);
+		const celebration = weeklyRitualFirst ?? eatFirstRitual;
 
 		return json({
 			ok: true,

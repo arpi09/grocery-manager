@@ -2,45 +2,20 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import Toast from '$lib/components/molecules/Toast.svelte';
-	import { ZERO_WASTE_STREAK_CELEBRATION } from '$lib/domain/gamification';
-	import { getLocale } from '$lib/i18n';
+	import {
+		STREAK_MILESTONE_WEEKS,
+		ZERO_WASTE_STREAK_CELEBRATION
+	} from '$lib/domain/gamification';
+	import { getCelebrationRegistryEntry } from '$lib/domain/gamification.registry';
 	import {
 		CELEBRATE_PARAM,
-		celebrationMessage,
 		parseCelebrationKind
 	} from '$lib/utils/gamification-celebrate';
-	import {
-		markCelebrationShown,
-		shouldShowCelebration
-	} from '$lib/utils/gamification-celebrations';
-	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
+	import { shouldShowCelebration } from '$lib/utils/gamification-celebrations';
+	import { presentCelebration } from '$lib/utils/present-celebration.svelte';
 
 	const celebrateKind = $derived(parseCelebrationKind(page.url.searchParams.get(CELEBRATE_PARAM)));
 	const householdId = $derived(page.data.activeHousehold?.id ?? page.data.householdId ?? null);
-
-	let visible = $state(false);
-	let message = $state('');
-
-	$effect(() => {
-		if (!browser || !celebrateKind || !householdId) {
-			visible = false;
-			message = '';
-			return;
-		}
-
-		if (!shouldShowCelebration(celebrateKind, householdId)) {
-			clearCelebrateParam();
-			visible = false;
-			message = '';
-			return;
-		}
-
-		message = celebrationMessage(getLocale(), celebrateKind, {
-			count: ZERO_WASTE_STREAK_CELEBRATION
-		});
-		visible = true;
-	});
 
 	function clearCelebrateParam() {
 		const url = new URL(page.url);
@@ -49,21 +24,45 @@
 		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
 	}
 
-	function handleDismiss() {
-		if (celebrateKind && householdId) {
-			markCelebrationShown(celebrateKind, householdId);
+	function celebrationMetadata(kind: NonNullable<typeof celebrateKind>) {
+		if (kind === 'zeroWasteStreak') {
+			return { count: ZERO_WASTE_STREAK_CELEBRATION, weeks: ZERO_WASTE_STREAK_CELEBRATION };
 		}
-		visible = false;
-		clearCelebrateParam();
+		if (kind === 'streak5') {
+			return { count: STREAK_MILESTONE_WEEKS, weeks: STREAK_MILESTONE_WEEKS };
+		}
+		if (kind === 'savings500') {
+			return { sek: 500, milestoneId: 'savings500' as const };
+		}
+		if (kind === 'firstConsumption') {
+			return { milestoneId: 'firstConsumption' as const };
+		}
+		if (kind === 'weeklyRitualFirst') {
+			return { milestoneId: 'weeklyRitualFirst' as const };
+		}
+		return undefined;
 	}
-</script>
 
-<Toast
-	{message}
-	{visible}
-	celebrate={celebrateKind === 'zeroWasteStreak' || celebrateKind === 'eatFirstRitual'}
-	size="action"
-	durationMs={TOAST_DEFAULT_DURATION_MS}
-	tapToDismiss={true}
-	onDismiss={handleDismiss}
-/>
+	$effect(() => {
+		if (!browser || !celebrateKind || !householdId) {
+			return;
+		}
+
+		if (!shouldShowCelebration(celebrateKind, householdId)) {
+			clearCelebrateParam();
+			return;
+		}
+
+		const entry = getCelebrationRegistryEntry(celebrateKind);
+		const surface = entry?.defaultSurface ?? 'toast';
+
+		presentCelebration({
+			kind: celebrateKind,
+			surface,
+			householdId,
+			userId: page.data.user?.id ?? null,
+			metadata: celebrationMetadata(celebrateKind)
+		});
+		clearCelebrateParam();
+	});
+</script>

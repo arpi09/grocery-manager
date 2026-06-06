@@ -14,10 +14,11 @@
 	interface Props {
 		dashboard: StatistikDashboard;
 		milestones?: MilestoneState[];
+		householdId?: string | null;
 		isPro?: boolean;
 	}
 
-	let { dashboard, milestones = [], isPro = false }: Props = $props();
+	let { dashboard, milestones = [], householdId = null, isPro = false }: Props = $props();
 	const { analytics, addedTrend, addedWeekOverWeek, impact } = $derived(dashboard);
 	const isEmpty = $derived(analytics.totalItems === 0);
 
@@ -98,7 +99,11 @@
 		</Card>
 
 		{#if milestones.length > 0}
-			<MilestonesSection {milestones} />
+			<Card class="progress-hub">
+				<h2 class="section-title">{t('gamification.progressHubTitle')}</h2>
+				<p class="section-lead">{t('gamification.progressHubLead')}</p>
+			</Card>
+			<MilestonesSection {milestones} {householdId} />
 		{/if}
 
 		<div class="trends">
@@ -169,6 +174,14 @@
 
 <style>
 	.statistik { display: flex; flex-direction: column; gap: var(--page-section-gap); }
+	:global(.progress-hub) {
+		background: linear-gradient(
+			160deg,
+			color-mix(in srgb, var(--color-primary) 6%, var(--color-surface)),
+			var(--color-surface)
+		);
+		border-color: color-mix(in srgb, var(--color-primary) 18%, var(--color-border));
+	}
 	.hero-grid { display: grid; gap: var(--space-md); grid-template-columns: repeat(2, minmax(0, 1fr)); }
 	@media (min-width: 768px) { .hero-grid { grid-template-columns: repeat(4, 1fr); } .trends { grid-template-columns: 1fr 1fr; } .actions { grid-template-columns: 1fr 1fr; } }
 	@media (max-width: 479px) { .impact-grid { grid-template-columns: 1fr; gap: var(--space-sm); } }

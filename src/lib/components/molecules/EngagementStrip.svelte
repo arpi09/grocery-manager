@@ -4,7 +4,8 @@
 	import ProgressRing from '$lib/components/atoms/ProgressRing.svelte';
 	import type { EngagementStrip } from '$lib/application/gamification.service';
 	import { ZERO_WASTE_STREAK_CELEBRATION } from '$lib/domain/gamification';
-	import { t } from '$lib/i18n';
+	import { getMilestoneRegistryEntry } from '$lib/domain/gamification.registry';
+	import { t, type MessageKey } from '$lib/i18n';
 
 	interface Props {
 		engagement: EngagementStrip;
@@ -24,6 +25,24 @@
 	);
 	const ritualRatio = $derived(
 		Math.min(1, engagement.eatFirst.mealsScheduledThisWeek / engagement.eatFirst.goal)
+	);
+	const nextMilestone = $derived(engagement.nextMilestone);
+	const nextMilestoneEntry = $derived(
+		nextMilestone ? getMilestoneRegistryEntry(nextMilestone.id) : null
+	);
+	const nextMilestoneRatio = $derived(
+		nextMilestone && nextMilestone.target > 0
+			? Math.min(1, nextMilestone.current / nextMilestone.target)
+			: 0
+	);
+	const showStreakHint = $derived(
+		nextMilestone?.id === 'zeroWaste3' &&
+			(engagement.zeroWasteWeeks ?? 0) > 0 &&
+			(engagement.zeroWasteWeeks ?? 0) < ZERO_WASTE_STREAK_CELEBRATION
+	);
+
+	const nextMilestoneLabelKey = $derived(
+		nextMilestoneEntry?.i18nKey ?? ('gamification.nextMilestoneTitle' as MessageKey)
 	);
 </script>
 
@@ -51,6 +70,13 @@
 					<p class="metric-label">{t('gamification.zeroWasteWeeks')}</p>
 					{#if streakActive}
 						<span class="streak-badge">{t('gamification.streakBadge')}</span>
+					{:else if engagement.zeroWasteWeeks != null && engagement.zeroWasteWeeks > 0}
+						<span class="streak-count">
+							{t('gamification.nextMilestoneProgress', {
+								current: engagement.zeroWasteWeeks,
+								target: ZERO_WASTE_STREAK_CELEBRATION
+							})}
+						</span>
 					{/if}
 				</div>
 			</div>
@@ -64,6 +90,33 @@
 				<p class="metric-label">{t('gamification.consumedThisWeek')}</p>
 			</div>
 		</div>
+
+		{#if nextMilestone}
+			<div class="next-milestone">
+				<ProgressRing
+					ratio={nextMilestoneRatio}
+					size={44}
+					strokeWidth={5}
+					label="{nextMilestone.current}/{nextMilestone.target}"
+					ariaLabel={t(nextMilestoneLabelKey)}
+				/>
+				<div class="next-copy">
+					<p class="next-title">{t('gamification.nextMilestoneTitle')}</p>
+					<p class="next-label">{t(nextMilestoneLabelKey)}</p>
+					{#if nextMilestone.target > 1}
+						<p class="next-progress">
+							{t('gamification.nextMilestoneProgress', {
+								current: nextMilestone.current,
+								target: nextMilestone.target
+							})}
+						</p>
+					{/if}
+					{#if showStreakHint}
+						<p class="next-hint">{t('gamification.nextMilestoneStreakHint')}</p>
+					{/if}
+				</div>
+			</div>
+		{/if}
 
 		<div class="ritual" class:ritual-complete={engagement.eatFirst.complete}>
 			<ProgressRing
@@ -157,6 +210,7 @@
 	.metric-streak.streak-active {
 		border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
 		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface-muted));
+		animation: streak-ring-pulse 2.4s ease-in-out infinite;
 	}
 
 	.metric-copy {
@@ -204,14 +258,54 @@
 		animation: streak-badge-glow 2.4s ease-in-out infinite;
 	}
 
-	@keyframes streak-badge-glow {
-		0%,
-		100% {
-			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 0%, transparent);
-		}
-		50% {
-			box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 12%, transparent);
-		}
+	.streak-count {
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--color-primary);
+	}
+
+	.next-milestone {
+		display: flex;
+		align-items: center;
+		gap: var(--space-md);
+		padding: var(--space-sm) var(--space-md);
+		margin-bottom: var(--space-md);
+		border-radius: var(--radius-md);
+		border: 1px dashed color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+		background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+	}
+
+	.next-title {
+		margin: 0;
+		font-size: 0.6875rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--color-text-muted);
+	}
+
+	.next-label {
+		margin: 0.1rem 0 0;
+		font-size: 0.875rem;
+		font-weight: 700;
+	}
+
+	.next-progress,
+	.next-hint {
+		margin: 0.15rem 0 0;
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+		line-height: 1.4;
+	}
+
+	.next-hint {
+		color: var(--color-primary);
+		font-weight: 600;
+	}
+
+	.next-copy {
+		flex: 1;
+		min-width: 0;
 	}
 
 	.ritual {
@@ -256,8 +350,29 @@
 		margin-top: var(--space-md);
 	}
 
+	@keyframes streak-badge-glow {
+		0%,
+		100% {
+			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 0%, transparent);
+		}
+		50% {
+			box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 12%, transparent);
+		}
+	}
+
+	@keyframes streak-ring-pulse {
+		0%,
+		100% {
+			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 0%, transparent);
+		}
+		50% {
+			box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
+		}
+	}
+
 	@media (prefers-reduced-motion: reduce) {
-		.streak-badge {
+		.streak-badge,
+		.metric-streak.streak-active {
 			animation: none;
 		}
 	}

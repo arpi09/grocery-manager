@@ -3,19 +3,27 @@ import type { InventoryItem } from '$lib/domain/inventory-item';
 
 export const EAT_FIRST_RITUAL_GOAL = 1;
 export const ZERO_WASTE_STREAK_CELEBRATION = 3;
+export const STREAK_MILESTONE_WEEKS = 5;
+export const SAVINGS_MILESTONE_SEK = 500;
 export const PANTRY_MILESTONE_ITEMS = 10;
 
 export type GamificationCelebrationKind =
 	| 'firstConsumption'
 	| 'zeroWasteStreak'
-	| 'eatFirstRitual';
+	| 'eatFirstRitual'
+	| 'weeklyRitualFirst'
+	| 'savings500'
+	| 'streak5';
 
 export type MilestoneId =
 	| 'pantry10'
 	| 'firstPlan'
 	| 'firstReceipt'
 	| 'firstConsumption'
-	| 'zeroWaste3';
+	| 'zeroWaste3'
+	| 'weeklyRitualFirst'
+	| 'savings500'
+	| 'streak5';
 
 export interface EatFirstRitualProgress {
 	suggestionsThisWeek: number;
@@ -73,12 +81,26 @@ export function shouldCelebrateEatFirstRitual(
 	);
 }
 
+export function shouldCelebrateStreakMilestone(zeroWasteWeeks: number | null): boolean {
+	return zeroWasteWeeks != null && zeroWasteWeeks >= STREAK_MILESTONE_WEEKS;
+}
+
+export function shouldCelebrateSavingsMilestone(savedSek: number): boolean {
+	return savedSek >= SAVINGS_MILESTONE_SEK;
+}
+
+export function shouldCelebrateWeeklyRitualFirst(hasWeeklyRitual: boolean): boolean {
+	return hasWeeklyRitual;
+}
+
 export function buildMilestones(input: {
 	totalItems: number;
 	hasPlannedMeal: boolean;
 	hasReceipt: boolean;
 	consumedCount: number;
 	zeroWasteWeeks: number | null;
+	hasWeeklyRitual: boolean;
+	savedSek: number;
 }): MilestoneState[] {
 	return [
 		{ id: 'pantry10', achieved: input.totalItems >= PANTRY_MILESTONE_ITEMS },
@@ -88,6 +110,12 @@ export function buildMilestones(input: {
 		{
 			id: 'zeroWaste3',
 			achieved: (input.zeroWasteWeeks ?? 0) >= ZERO_WASTE_STREAK_CELEBRATION
+		},
+		{ id: 'weeklyRitualFirst', achieved: input.hasWeeklyRitual },
+		{ id: 'savings500', achieved: input.savedSek >= SAVINGS_MILESTONE_SEK },
+		{
+			id: 'streak5',
+			achieved: (input.zeroWasteWeeks ?? 0) >= STREAK_MILESTONE_WEEKS
 		}
 	];
 }

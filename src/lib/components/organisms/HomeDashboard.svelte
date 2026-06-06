@@ -5,7 +5,6 @@
 	import ProUpgradeCta from '$lib/components/molecules/ProUpgradeCta.svelte';
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
-	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import EatFirstSection from '$lib/components/organisms/EatFirstSection.svelte';
 	import ReceiptAutopilotSection from '$lib/components/organisms/ReceiptAutopilotSection.svelte';
 	import EngagementStrip from '$lib/components/molecules/EngagementStrip.svelte';
@@ -15,15 +14,16 @@
 	import type { EngagementStrip as EngagementStripData } from '$lib/application/gamification.service';
 	import type { SavingsReport } from '$lib/domain/savings-estimate';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
-	import { ZERO_WASTE_STREAK_CELEBRATION, type GamificationCelebrationKind } from '$lib/domain/gamification';
+	import {
+		STREAK_MILESTONE_WEEKS,
+		ZERO_WASTE_STREAK_CELEBRATION,
+		type GamificationCelebrationKind
+	} from '$lib/domain/gamification';
+	import { getCelebrationRegistryEntry } from '$lib/domain/gamification.registry';
 	import { getTimeOfDay, timeOfDayGreetingKey } from '$lib/domain/meal-slot';
 	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
-	import { getLocale, t, type MessageKey } from '$lib/i18n';
-	import { celebrationMessage } from '$lib/utils/gamification-celebrate';
-	import {
-		markCelebrationShown,
-		shouldShowCelebration
-	} from '$lib/utils/gamification-celebrations';
+	import { t, type MessageKey } from '$lib/i18n';
+	import { presentCelebration } from '$lib/utils/present-celebration.svelte';
 	import {
 		ONBOARDING_PROGRESS_EVENT,
 		getActivationProgress,
@@ -148,27 +148,26 @@
 		return t(`location.${location}Short` as MessageKey);
 	}
 
-	let showCelebrationBanner = $state(false);
-	let celebrationMessageText = $state('');
-
 	$effect(() => {
 		if (!browser || !celebration || !householdId) {
-			showCelebrationBanner = false;
-			celebrationMessageText = '';
 			return;
 		}
 
-		if (!shouldShowCelebration(celebration, householdId)) {
-			showCelebrationBanner = false;
-			celebrationMessageText = '';
-			return;
-		}
+		const entry = getCelebrationRegistryEntry(celebration);
+		const metadata =
+			celebration === 'zeroWasteStreak'
+				? { count: ZERO_WASTE_STREAK_CELEBRATION, weeks: ZERO_WASTE_STREAK_CELEBRATION }
+				: celebration === 'streak5'
+					? { count: STREAK_MILESTONE_WEEKS, weeks: STREAK_MILESTONE_WEEKS }
+					: undefined;
 
-		celebrationMessageText = celebrationMessage(getLocale(), celebration, {
-			count: ZERO_WASTE_STREAK_CELEBRATION
+		presentCelebration({
+			kind: celebration,
+			surface: entry?.defaultSurface ?? 'moment',
+			householdId,
+			userId,
+			metadata
 		});
-		showCelebrationBanner = true;
-		markCelebrationShown(celebration, householdId);
 	});
 </script>
 
@@ -177,10 +176,6 @@
 		<h1>{greeting}</h1>
 		<p class="tagline">{tagline}</p>
 	</header>
-
-	{#if showCelebrationBanner}
-		<FeedbackBanner tone="success" message={celebrationMessageText} />
-	{/if}
 
 	{#if !isPro && summary.totalItems > 0}
 		<ProUpgradeCta variant="card" />

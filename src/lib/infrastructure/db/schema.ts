@@ -315,7 +315,10 @@ export const productEventTable = pgTable(
 				'pwa_banner_dismiss',
 				'pwa_banner_install_click',
 				'receipt_autopilot_accepted',
-				'weekly_ritual_approved'
+				'weekly_ritual_approved',
+				'milestone_achieved',
+				'celebration_shown',
+				'streak_milestone_reached'
 			]
 		}).notNull(),
 		metadata: text('metadata'),

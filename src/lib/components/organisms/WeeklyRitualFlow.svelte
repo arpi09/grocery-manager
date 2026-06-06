@@ -15,11 +15,9 @@
 	import { DEFAULT_MEAL_INTENT, DEFAULT_RECIPE_PORTIONS, type MealIntent } from '$lib/domain/recipe';
 	import { distributeMealDates } from '$lib/domain/weekly-ritual';
 	import { getLocale, t } from '$lib/i18n';
-	import { celebrationMessage } from '$lib/utils/gamification-celebrate';
-	import {
-		markCelebrationShown,
-		shouldShowCelebration
-	} from '$lib/utils/gamification-celebrations';
+	import type { GamificationCelebrationKind } from '$lib/domain/gamification';
+	import { getCelebrationRegistryEntry } from '$lib/domain/gamification.registry';
+	import { presentCelebration } from '$lib/utils/present-celebration.svelte';
 
 	interface PlannedMealPreview {
 		id: string;
@@ -150,7 +148,7 @@
 				ok?: boolean;
 				mealsScheduled?: number;
 				listAdded?: number;
-				celebration?: 'eatFirstRitual';
+				celebration?: GamificationCelebrationKind;
 			};
 
 			if (!response.ok) {
@@ -158,21 +156,26 @@
 				return;
 			}
 
-			let toast = t('weeklyRitual.approveSuccess', {
-				count: data.mealsScheduled ?? assignments.length,
-				listAdded: data.listAdded ?? 0
-			});
+			showClientToast(
+				t('weeklyRitual.approveSuccess', {
+					count: data.mealsScheduled ?? assignments.length,
+					listAdded: data.listAdded ?? 0
+				}),
+				{ variant: 'success' }
+			);
 
-			if (
-				data.celebration === 'eatFirstRitual' &&
-				householdId &&
-				shouldShowCelebration('eatFirstRitual', householdId)
-			) {
-				toast = `${toast} ${celebrationMessage(getLocale(), 'eatFirstRitual')}`;
-				markCelebrationShown('eatFirstRitual', householdId);
+			if (data.celebration && householdId) {
+				const entry = getCelebrationRegistryEntry(data.celebration);
+				presentCelebration({
+					kind: data.celebration,
+					surface: entry?.defaultSurface ?? 'moment',
+					householdId,
+					metadata:
+						data.celebration === 'weeklyRitualFirst'
+							? { milestoneId: 'weeklyRitualFirst' }
+							: undefined
+				});
 			}
-
-			showClientToast(toast, { variant: 'success' });
 			approved = true;
 			suggestions = [];
 		} catch {

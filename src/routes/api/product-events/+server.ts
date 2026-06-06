@@ -23,7 +23,10 @@ const AUTH_EVENT_TYPES = new Set<ProductEventType>([
 	'pwa_banner_install_click',
 	'onboarding_skipped',
 	'onboarding_quickstart',
-	'onboarding_completed'
+	'onboarding_completed',
+	'milestone_achieved',
+	'celebration_shown',
+	'streak_milestone_reached'
 ]);
 
 function isAllowedEventType(value: unknown): value is ProductEventType {

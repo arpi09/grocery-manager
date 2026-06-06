@@ -11,11 +11,7 @@
 	import { DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
 	import { getLocale, t } from '$lib/i18n';
-	import { celebrationMessage } from '$lib/utils/gamification-celebrate';
-	import {
-		markCelebrationShown,
-		shouldShowCelebration
-	} from '$lib/utils/gamification-celebrations';
+	import { presentCelebration } from '$lib/utils/present-celebration.svelte';
 	import {
 		addMissingIngredientsToList,
 		presentAddMissingFeedback,
@@ -145,16 +141,16 @@
 				return;
 			}
 
-			let scheduleToast = t('eatFirst.scheduleSuccess', { title: idea.title, date: plannedDate });
-			if (
-				data.celebration === 'eatFirstRitual' &&
-				householdId &&
-				shouldShowCelebration('eatFirstRitual', householdId)
-			) {
-				scheduleToast = scheduleToast + ' ' + celebrationMessage(getLocale(), 'eatFirstRitual');
-				markCelebrationShown('eatFirstRitual', householdId);
+			showClientToast(t('eatFirst.scheduleSuccess', { title: idea.title, date: plannedDate }), {
+				variant: 'success'
+			});
+			if (data.celebration === 'eatFirstRitual' && householdId) {
+				presentCelebration({
+					kind: 'eatFirstRitual',
+					surface: 'toast',
+					householdId
+				});
 			}
-			showClientToast(scheduleToast, { variant: 'success' });
 			markIdeaScheduled(idea.id);
 		} catch {
 			errorMessage = t('eatFirst.scheduleFailed');

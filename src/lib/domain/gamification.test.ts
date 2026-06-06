@@ -56,11 +56,16 @@ describe('gamification domain', () => {
 			hasPlannedMeal: true,
 			hasReceipt: false,
 			consumedCount: 4,
-			zeroWasteWeeks: 3
+			zeroWasteWeeks: 3,
+			hasWeeklyRitual: true,
+			savedSek: 620
 		});
 
 		expect(milestones.find((m) => m.id === 'pantry10')?.achieved).toBe(true);
 		expect(milestones.find((m) => m.id === 'firstReceipt')?.achieved).toBe(false);
 		expect(milestones.find((m) => m.id === 'zeroWaste3')?.achieved).toBe(true);
+		expect(milestones.find((m) => m.id === 'weeklyRitualFirst')?.achieved).toBe(true);
+		expect(milestones.find((m) => m.id === 'savings500')?.achieved).toBe(true);
+		expect(milestones.find((m) => m.id === 'streak5')?.achieved).toBe(false);
 	});
 });

@@ -21,5 +21,12 @@ describe('gamification-celebrate', () => {
 	it('localizes celebration messages', () => {
 		expect(celebrationMessage('sv', 'zeroWasteStreak', { count: 3 })).toContain('3');
 		expect(celebrationMessage('en', 'firstConsumption')).toContain('First item');
+		expect(celebrationMessage('sv', 'streak5', { count: 5 })).toContain('5');
+		expect(celebrationMessage('en', 'savings500', { sek: 500 })).toContain('500');
+	});
+
+	it('parses new celebration kinds', () => {
+		expect(parseCelebrationKind('weeklyRitualFirst')).toBe('weeklyRitualFirst');
+		expect(parseCelebrationKind('streak5')).toBe('streak5');
 	});
 });

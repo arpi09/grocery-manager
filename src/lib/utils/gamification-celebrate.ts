@@ -7,7 +7,10 @@ export const CELEBRATE_PARAM = 'celebrate';
 const CELEBRATION_KEYS: Record<GamificationCelebrationKind, MessageKey> = {
 	firstConsumption: 'gamification.celebrateFirstConsumption',
 	zeroWasteStreak: 'gamification.celebrateZeroWasteStreak',
-	eatFirstRitual: 'gamification.celebrateEatFirstRitual'
+	eatFirstRitual: 'gamification.celebrateEatFirstRitual',
+	weeklyRitualFirst: 'gamification.celebrateWeeklyRitualFirst',
+	savings500: 'gamification.celebrateSavings500',
+	streak5: 'gamification.celebrateStreak5'
 };
 
 export function parseCelebrationKind(value: string | null): GamificationCelebrationKind | null {
@@ -27,11 +30,16 @@ export function appendCelebration(path: string, kind: GamificationCelebrationKin
 export function celebrationMessage(
 	locale: Locale,
 	kind: GamificationCelebrationKind,
-	options?: { count?: number }
+	options?: { count?: number; weeks?: number; sek?: number }
 ): string {
 	const key = CELEBRATION_KEYS[kind];
-	if (kind === 'zeroWasteStreak') {
-		return translate(locale, key, { count: options?.count ?? 3 });
+	if (kind === 'zeroWasteStreak' || kind === 'streak5') {
+		return translate(locale, key, {
+			count: options?.count ?? options?.weeks ?? (kind === 'streak5' ? 5 : 3)
+		});
+	}
+	if (kind === 'savings500') {
+		return translate(locale, key, { sek: options?.sek ?? 500 });
 	}
 	return translate(locale, key);
 }
