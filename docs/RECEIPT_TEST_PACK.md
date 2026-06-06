@@ -8,10 +8,25 @@ Checklista #10 i [90_DAY_ROADMAP.md](./90_DAY_ROADMAP.md): 20 riktiga ICA/Kivra/
 |-----------|-------|
 | `tests/fixtures/receipts/synthetic-*.pdf` | 5 minimala text-PDF:er — **körs i CI** |
 | `tests/fixtures/receipts/manifest.json` | 20 målplatser + metadata |
+| `private/receipts/` (valfritt, gitignored) | Råexport / arkiv **före** anonymisering — committas aldrig |
 | `scripts/validate-receipt-fixtures.mjs` | Räknar PDF:er, rapporterar saknade platser |
 | `src/lib/server/receipt-pdf-fixtures.test.ts` | Extraktionstest + valfri OpenAI-integration |
 
-Riktiga kvitton **committas inte** — de ligger lokalt i `tests/fixtures/receipts/` och ignoreras av git.
+Riktiga kvitton **committas inte** — de ligger lokalt i `tests/fixtures/receipts/` (manifest-platser) och ignoreras av git. Råmaterial kan ligga i `private/receipts/` tills det anonymiserats och kopierats till fixtures-mappen.
+
+### `private/receipts/` — staging (lokal)
+
+Hela `private/` är gitignored (koordinatorfiler, nycklar, m.m.). För kvittopack rekommenderas:
+
+```
+private/receipts/
+  inbox/          # rå PDF/e-postexport (PII — radera efter anonymisering)
+  archive/        # beskrivande filnamn, t.ex. ica-maxi-gunnesbo-2025-11-24.pdf
+```
+
+**Flöde:** spara rå export i `private/receipts/inbox/` → anonymisera PII → kopiera till `tests/fixtures/receipts/<manifest-slot>.pdf` eller `archive/` med beskrivande namn. Kör `node scripts/validate-receipt-fixtures.mjs` efteråt.
+
+Skapa mappen lokalt vid behov — den finns inte i git och behöver inte finnas på CI.
 
 ## Mål: 20 PDF:er
 
@@ -27,14 +42,26 @@ Blanda gärna: korta/långa kvitton, många/få rader, olika datumformat.
 
 ## Framdrift (lokal insamling)
 
-| Butik | Mål | Lokalt ifyllt | Saknas |
-|-------|-----|---------------|--------|
-| ICA | 7 | **7** | — |
+Kör `node scripts/validate-receipt-fixtures.mjs` för aktuella siffror på din maskin. **CI har endast syntetiska PDF:er** (5 st). Tabellen nedan speglar mål och typisk utvecklarmiljö — uppdatera siffrorna efter validering lokalt.
+
+| Butik | Mål | Typiskt ifyllt (dev) | Saknas (typiskt) |
+|-------|-----|----------------------|------------------|
+| ICA | 7 | **7** (manifest) + ev. arkiv i `private/receipts/archive/` | — |
 | Kivra | 7 | **4** | `kivra-05` … `kivra-07` |
 | Willys | 6 | **0** | `willys-01` … `willys-06` |
-| **Totalt riktiga** | **20** | **11/20** | **9 PDF:er** |
+| **Totalt riktiga** | **20** | **11/20** (manifest) | **9 PDF:er** |
 
 CI kör **5 syntetiska** (`synthetic-*.pdf`) — committade i repot. Riktiga PDF:er committas aldrig.
+
+### Denna workspace (senaste validering)
+
+| Mätetal | Antal |
+|---------|-------|
+| Manifest-platser ifyllda | **0 / 20** (inga riktiga PDF:er i `tests/fixtures/receipts/` just nu) |
+| Committed syntetiska (CI) | **5** |
+| `private/receipts/` | **saknas** — skapa lokalt vid insamling |
+
+Om du har kvitton i `private/receipts/` på en annan maskin: anonymisera och kopiera till manifest-platserna enligt avsnittet nedan, kör validering, uppdatera tabellen ovan.
 
 ### Ägare: samla in dessa 9 PDF:er
 
@@ -63,14 +90,30 @@ node scripts/validate-receipt-fixtures.mjs --strict
 
 | Mätetal | Antal |
 |---------|-------|
-| Manifest-platser ifyllda | **11 / 20** |
-| Extra ICA-arkiv (beskrivande filnamn) | **13** |
-| Riktiga PDF:er totalt lokalt | **24** |
-| Committed syntetiska (CI) | 5 |
+| Manifest-platser ifyllt (mål) | **11 / 20** på utvecklarmaskin med full insamling |
+| Extra ICA-arkiv (`private/receipts/archive/` eller beskrivande filnamn) | **13** (typisk dev) |
+| Riktiga PDF:er totalt lokalt (manifest + arkiv) | **24** (typisk dev) |
+| Committed syntetiska (CI) | **5** |
 
-Saknas fortfarande: `kivra-05` … `kivra-07`, alla `willys-*.pdf`.
+Saknas fortfarande på målmaskin: `kivra-05` … `kivra-07`, alla `willys-*.pdf`.
 
-## Inventering — ICA-arkiv (beskrivande filnamn)
+## Inventering — tillgängliga fixtures
+
+### Committed (CI, alla miljöer)
+
+| Fil | Butik | Syfte |
+|-----|-------|-------|
+| `synthetic-ica-01.pdf` | ICA | Minimal text-PDF |
+| `synthetic-ica-02.pdf` | ICA | Långt kvitto (~20 rader) |
+| `synthetic-kivra-01.pdf` | Kivra | Minimal text-PDF |
+| `synthetic-kivra-02.pdf` | Kivra | ICA Supermarket via Kivra |
+| `synthetic-willys-01.pdf` | Willys | Minimal text-PDF |
+
+### Manifest-platser (gitignored, lokalt)
+
+Se [`tests/fixtures/receipts/README.md`](../tests/fixtures/receipts/README.md) för ifyllda slot → butik/datum (ingen PII). Gaps: `kivra-05`–`07`, alla `willys-*`.
+
+### ICA-arkiv (beskrivande filnamn, `private/receipts/archive/` eller fixtures-mappen)
 
 Utöver manifest-platserna `ica-01.pdf` … `ica-07.pdf` finns ett lokalt ICA-arkiv med butik och datum i filnamnet. Dessa filer är gitignored och committas inte.
 
@@ -113,9 +156,15 @@ Om du bara har skannade bild-PDF:er utan textlager fungerar de fortfarande som m
 ## Lägg till filer lokalt
 
 ```bash
-# Kopiera anonymiserade PDF:er till fixtures-mappen
+# 1. (Valfritt) rå export till gitignored staging
+mkdir -p private/receipts/inbox private/receipts/archive
+
+# 2. Anonymisera och kopiera till manifest-platser
 cp ~/Downloads/anonymized-ica.pdf tests/fixtures/receipts/ica-01.pdf
 # … upprepa för alla 20 platser enligt manifest.json
+
+# 3. Validera
+node scripts/validate-receipt-fixtures.mjs
 ```
 
 ## Validera
