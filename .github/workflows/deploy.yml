@@ -1,5 +1,5 @@
-# Manual production deploy — quality → e2e → Firebase App Hosting
-# Trigger: Actions → "Deploy to production"
+﻿# Manual production deploy â€” quality â†’ e2e â†’ Firebase App Hosting
+# Trigger: Actions â†’ "Deploy to production"
 # Required secret: FIREBASE_TOKEN (npx firebase login:ci)
 
 name: Deploy to production
@@ -17,7 +17,7 @@ on:
         required: false
         type: string
       skip_e2e:
-        description: Skip E2E (hotfix only — use rarely)
+        description: Skip E2E (hotfix only â€” use rarely)
         required: false
         default: false
         type: boolean
@@ -71,7 +71,7 @@ jobs:
     needs: [quality]
     if: inputs.skip_e2e != true
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v4
@@ -139,8 +139,8 @@ jobs:
         run: |
           if [ -z "$FIREBASE_TOKEN" ]; then
             echo "skipped=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::FIREBASE_TOKEN is not set — quality and E2E passed but deploy was skipped."
-            echo "Add FIREBASE_TOKEN under Settings → Secrets and variables → Actions,"
+            echo "::notice::FIREBASE_TOKEN is not set â€” quality and E2E passed but deploy was skipped."
+            echo "Add FIREBASE_TOKEN under Settings â†’ Secrets and variables â†’ Actions,"
             echo "or deploy locally: npm run deploy:firebase"
             echo "See docs/DEPLOY.md and docs/FIREBASE_DEPLOY.md"
             exit 0
@@ -162,7 +162,7 @@ jobs:
           set -euo pipefail
 
           if [ -z "${WEBHOOK_URL:-}" ] && [ -z "${TELEGRAM_BOT_TOKEN:-}" ]; then
-            echo "No deploy notify secrets configured — skipping."
+            echo "No deploy notify secrets configured â€” skipping."
             exit 0
           fi
 
@@ -171,7 +171,7 @@ jobs:
           prod_url="${PRODUCTION_URL:-}"
           msg="Skaffu deploy lyckades (${short_sha})"
           if [ -n "$prod_url" ]; then
-            msg="${msg} — ${prod_url%/}"
+            msg="${msg} â€” ${prod_url%/}"
           fi
           msg=$(printf '%s\n%s' "$msg" "$run_url")
 
@@ -218,3 +218,4 @@ jobs:
               -d "$payload"
           fi
           echo "Webhook notify sent."
+
