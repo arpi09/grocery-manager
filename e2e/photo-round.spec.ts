@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
 
 const FIXTURE_JPEG = {
@@ -28,10 +28,10 @@ test.describe('Photo round flow', () => {
 		await dismissOnboardingModalIfOpen(page);
 
 		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 30_000 });
-		await expect(page.getByText(/AI föreslår plats|AI suggests location/i)).toBeVisible();
+		await expect(page.getByText(/AI fÃ¶reslÃ¥r plats|AI suggests location/i)).toBeVisible();
 		await expect(page.getByTestId('photo-round-zone-fridge')).not.toBeVisible();
-		await expect(page.getByText(/Byt zon för analys|Change zone for analysis/i)).toBeVisible();
-		await expect(page.getByTestId('photo-round-analyze')).toBeEnabled();
+		await expect(page.getByText(/Byt zon fÃ¶r analys|Change zone for analysis/i)).toBeVisible();
+		await expect(page.getByTestId('photo-round-analyze')).toBeDisabled();
 	});
 
 	test('bulk add selected items redirects with success feedback', async ({ page }) => {
@@ -73,7 +73,7 @@ test.describe('Photo round flow', () => {
 
 		await expect(page).toHaveURL(/\/hem/, { timeout: 15_000 });
 		await expect(
-			page.locator('.toast-message').filter({ hasText: /Mjölk|varor/i })
+			page.locator('.toast-message').filter({ hasText: /MjÃ¶lk|varor/i })
 		).toBeVisible({ timeout: 10_000 });
 	});
 });

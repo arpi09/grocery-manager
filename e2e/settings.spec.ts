@@ -1,15 +1,12 @@
 import { test, expect } from '@playwright/test';
 import {
 	dismissOnboardingModalIfOpen,
-	loginAsAdmin,
-	prepareE2eBrowserState,
-	registerNewUser
+	loginAsAdmin
 } from './helpers/auth';
 
 test.describe('Settings', () => {
 	test('settings page loads for authenticated user', async ({ page }) => {
-		await prepareE2eBrowserState(page);
-		await registerNewUser(page);
+		await loginAsAdmin(page);
 		await page.goto('/settings');
 		await dismissOnboardingModalIfOpen(page);
 
