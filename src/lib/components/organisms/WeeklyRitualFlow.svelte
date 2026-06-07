@@ -14,6 +14,8 @@
 	import { formatCalendarDayLabel } from '$lib/domain/calendar-display';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
 	import { DEFAULT_MEAL_INTENT, DEFAULT_RECIPE_PORTIONS, type MealIntent } from '$lib/domain/recipe';
+	import type { EatFirstWeekInboundSource } from '$lib/domain/eat-first-week';
+	import { shouldShowEatFirstWeekInboundBanner } from '$lib/domain/eat-first-week';
 	import { distributeMealDates, getPlanningWindowLabel } from '$lib/domain/weekly-ritual';
 	import { getLocale, t } from '$lib/i18n';
 	import type { GamificationCelebrationKind } from '$lib/domain/gamification';
@@ -35,6 +37,8 @@
 		savings: SavingsReport;
 		canEdit?: boolean;
 		householdId?: string | null;
+		inboundSource?: EatFirstWeekInboundSource | null;
+		expiringCount?: number;
 	}
 
 	let {
@@ -44,7 +48,9 @@
 		plannedMeals,
 		savings,
 		canEdit = false,
-		householdId = null
+		householdId = null,
+		inboundSource = null,
+		expiringCount = 0
 	}: Props = $props();
 
 	let loading = $state(false);
@@ -67,6 +73,12 @@
 			? `${formatCalendarDayLabel(planningWindow.from, getLocale())} – ${formatCalendarDayLabel(planningWindow.to, getLocale())}`
 			: ''
 	);
+	const showInboundBanner = $derived(shouldShowEatFirstWeekInboundBanner(inboundSource));
+	const inboundLead = $derived(
+		inboundSource === 'email'
+			? t('weeklyRitual.inboundEmailLead', { count: expiringCount })
+			: t('weeklyRitual.inboundPushLead', { count: expiringCount })
+	);
 
 	function assignDefaultDates(ideas: RecipeIdea[]) {
 		const dates = distributeMealDates(ideas.length);
@@ -88,7 +100,7 @@
 			const response = await fetch('/api/eat-first', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ mealIntent })
+				body: JSON.stringify({ mealIntent, scope: 'week' })
 			});
 
 			const data = (await response.json()) as {
@@ -216,6 +228,12 @@
 			<FeatureIcon id="sparkle" size={28} />
 		</span>
 	</div>
+
+	{#if showInboundBanner}
+		<p class="inbound-banner" role="status">
+			{inboundLead}
+		</p>
+	{/if}
 
 	{#if plannedMeals.length > 0}
 		<p class="planned-hint" role="status">
@@ -360,6 +378,7 @@
 
 	.hero-sub,
 	.week-range,
+	.inbound-banner,
 	.planned-hint,
 	.no-expiring,
 	.note,
@@ -375,6 +394,15 @@
 		margin-top: var(--space-xs);
 		font-size: 0.8125rem;
 		font-weight: 600;
+	}
+
+	.inbound-banner {
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-md);
+		border: 1px solid color-mix(in srgb, var(--color-warning) 35%, var(--color-border));
+		background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface));
+		font-weight: 600;
+		color: var(--color-text);
 	}
 
 	.expiring-chips {

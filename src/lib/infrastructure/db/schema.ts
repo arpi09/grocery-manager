@@ -316,6 +316,8 @@ export const productEventTable = pgTable(
 				'pwa_banner_install_click',
 				'receipt_autopilot_accepted',
 				'weekly_ritual_approved',
+				'eat_first_week_viewed',
+				'eat_first_plan_applied',
 				'milestone_achieved',
 				'celebration_shown',
 				'streak_milestone_reached',
@@ -324,7 +326,9 @@ export const productEventTable = pgTable(
 				'expiring_share_viewed',
 				'wrapped_viewed',
 				'wrapped_shared',
-				'kivra_forward_received'
+				'kivra_forward_received',
+				'shopping_list_export',
+				'barcode_override_used'
 			]
 		}).notNull(),
 		metadata: text('metadata'),

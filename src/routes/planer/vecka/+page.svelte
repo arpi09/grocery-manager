@@ -20,6 +20,8 @@
 			savings={data.savings}
 			canEdit={data.canWrite}
 			householdId={data.activeHousehold?.id ?? null}
+			inboundSource={data.inboundSource}
+			expiringCount={data.expiringCount}
 		/>
 	</PageContainer>
 </AppLayout>

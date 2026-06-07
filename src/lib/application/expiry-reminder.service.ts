@@ -1,3 +1,4 @@
+import { buildEatFirstWeekUrl } from '$lib/domain/eat-first-week';
 import {
 	expiryWindowEndDateIso,
 	shouldSendExpiryReminder,
@@ -112,7 +113,7 @@ export class ExpiryReminderService {
 		const failures: string[] = [];
 
 		if (emailEnabled) {
-			const weeklyRitualUrl = `${this.appOrigin.getOrigin() || ''}/planer/vecka?from=email`;
+			const weeklyRitualUrl = `${this.appOrigin.getOrigin() || ''}${buildEatFirstWeekUrl('email')}`;
 			const emailResult = await this.email.sendExpiryReminderEmail({
 				to: user.email,
 				recipientName: user.displayName?.trim() || user.email,
@@ -169,7 +170,7 @@ export class ExpiryReminderService {
 		const payload = {
 			title: translate(locale, 'pushNotifications.expiryTitle'),
 			body: translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days }),
-			url: `${this.appOrigin.getOrigin() || ''}/planer/vecka?from=push`,
+			url: `${this.appOrigin.getOrigin() || ''}${buildEatFirstWeekUrl('push')}`,
 			tag: 'home-pantry-expiry'
 		};
 

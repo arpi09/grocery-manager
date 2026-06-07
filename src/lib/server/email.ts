@@ -536,7 +536,7 @@ export function buildExpiryReminderEmailContent(options: {
 			: `${totalItems} varor går snart ut — Skaffu`;
 	const headline =
 		totalItems === 1 ? '1 vara går snart ut' : `${totalItems} varor går snart ut`;
-	const preheader = `Hej ${recipientName}! Här är varor som går ut inom ${days} dagar.`;
+	const preheader = `Hej ${recipientName}! ${headline} — här är veckans måltidsförslag.`;
 
 	const textSections = sections
 		.map((section) => {
@@ -557,7 +557,7 @@ export function buildExpiryReminderEmailContent(options: {
 		``,
 		textSections,
 		``,
-		`Fixa veckan:`,
+		`Se veckans förslag (Ät det först):`,
 		inventoryUrl,
 		``,
 		`Du får det här mejlet eftersom du aktiverat utgångspåminnelser i Skaffu. Stäng av dem under Inställningar.`,

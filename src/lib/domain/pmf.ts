@@ -14,6 +14,8 @@ export const PRODUCT_EVENT_TYPES = [
 	'pwa_banner_install_click',
 	'receipt_autopilot_accepted',
 	'weekly_ritual_approved',
+	'eat_first_week_viewed',
+	'eat_first_plan_applied',
 	'milestone_achieved',
 	'celebration_shown',
 	'streak_milestone_reached',
@@ -23,7 +25,8 @@ export const PRODUCT_EVENT_TYPES = [
 	'wrapped_viewed',
 	'wrapped_shared',
 	'kivra_forward_received',
-	'shopping_list_export'
+	'shopping_list_export',
+	'barcode_override_used'
 ] as const;
 
 export const PMF_PRODUCT_EVENT_TYPES = [

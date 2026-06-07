@@ -58,6 +58,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					listAdded: result.listAdded
 				}
 			});
+			recordProductEvent(locals.pmfService, {
+				userId: auth.user.id,
+				householdId: auth.householdId,
+				eventType: 'eat_first_plan_applied',
+				metadata: {
+					mealsScheduled: result.mealsScheduled,
+					listAdded: result.listAdded
+				}
+			});
 		}
 
 		const [weeklyRitualFirst, eatFirstRitual] = await Promise.all([

@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 
+import { resolveEatFirstWeekMealCount } from '$lib/domain/eat-first-week';
 import { EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
 import { filterItemsExpiringWithinDays } from '$lib/domain/expiry-reminder';
 import { isExcludedFromRecipes } from '$lib/domain/recipe-inventory-filter';
@@ -24,7 +25,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const body = (await request.json().catch(() => ({}))) as {
 		portions?: unknown;
 		mealIntent?: unknown;
+		scope?: unknown;
 	};
+
+	const scope = body.scope === 'week' ? 'week' : 'section';
 
 	const portions = clampRecipePortions(body.portions ?? DEFAULT_RECIPE_PORTIONS);
 	const mealIntent = parseMealIntent(body.mealIntent);
@@ -72,13 +76,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 	const apiKey = apiKeyOrResponse;
 
+	const maxRecipes =
+		scope === 'week' ? resolveEatFirstWeekMealCount(expiringItems.length) : 5;
+
 	const generated = await generateRecipesWithRefinement({
 		apiKey,
 		inventory,
 		portions,
 		mode: 'eat_first',
 		expiringItemNames,
-		maxRecipes: 5,
+		maxRecipes,
 		mealIntent
 	});
 
