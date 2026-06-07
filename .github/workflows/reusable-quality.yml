@@ -61,12 +61,13 @@ jobs:
         run: |
           set -euo pipefail
           echo "Checking CI quality check-run for commit ${DEPLOY_SHA}…"
+          # Reusable workflow check-runs are named "quality / quality"; pick latest successful CI run.
           conclusion=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${DEPLOY_SHA}/check-runs" \
             --paginate \
-            --jq '[.check_runs[] | select(.name == "quality")] | sort_by(.started_at) | last | .conclusion // "missing"')
+            --jq '[.check_runs[] | select(.name == "quality" or .name == "quality / quality") | select(.conclusion == "success")] | sort_by(.started_at) | last | .conclusion // "missing"')
           status=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${DEPLOY_SHA}/check-runs" \
             --paginate \
-            --jq '[.check_runs[] | select(.name == "quality")] | sort_by(.started_at) | last | .status // "missing"')
+            --jq '[.check_runs[] | select(.name == "quality" or .name == "quality / quality") | select(.conclusion == "success")] | sort_by(.started_at) | last | .status // "missing"')
           echo "quality check-run: status=${status} conclusion=${conclusion}"
           if [ "$status" != "completed" ] || [ "$conclusion" != "success" ]; then
             echo "::error::No successful CI quality check-run on ${DEPLOY_SHA}. Wait for CI on master or fix failures before deploy."
