@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import {
 	buildLastNWeekBars,
+	capZeroWasteStreak,
 	computeWeekOverWeek,
 	computeZeroWasteStreak,
 	maxWeeklyCount,
 	startOfWeek,
-	toIsoDate
+	toIsoDate,
+	weeksSinceHouseholdCreated
 } from './statistik';
 
 describe('statistik domain', () => {
@@ -84,5 +86,20 @@ describe('statistik domain', () => {
 				{ weekStart: '2026-06-01', count: 5, label: 'current' }
 			])
 		).toBe(5);
+	});
+
+	it('counts inclusive weeks since household creation', () => {
+		const referenceDate = new Date('2026-06-04T12:00:00Z');
+		const createdThisWeek = new Date('2026-06-03T09:00:00Z');
+		const createdThreeWeeksAgo = new Date('2026-05-14T09:00:00Z');
+
+		expect(weeksSinceHouseholdCreated(createdThisWeek, referenceDate)).toBe(1);
+		expect(weeksSinceHouseholdCreated(createdThreeWeeksAgo, referenceDate)).toBe(4);
+	});
+
+	it('caps streak to household age', () => {
+		expect(capZeroWasteStreak(4, 1)).toBe(1);
+		expect(capZeroWasteStreak(2, 4)).toBe(2);
+		expect(capZeroWasteStreak(3, 0)).toBe(0);
 	});
 });

@@ -1,13 +1,16 @@
 import type { InventoryAnalytics, InventoryService } from '$lib/application/inventory.service';
 import {
 	buildLastNWeekBars,
+	capZeroWasteStreak,
 	computeWeekOverWeek,
 	computeZeroWasteStreak,
 	startOfWeek,
+	weeksSinceHouseholdCreated,
 	type WeeklyBar
 } from '$lib/domain/statistik';
 import { buildSavingsReport, type SavingsReport } from '$lib/domain/savings-estimate';
 import type { IConsumptionRepository } from '$lib/infrastructure/repositories/consumption.repository';
+import type { IHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
 import type { IInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
 
 const TREND_WEEKS = 4;
@@ -33,7 +36,8 @@ export class StatistikService {
 	constructor(
 		private readonly inventoryService: InventoryService,
 		private readonly inventoryRepository: IInventoryRepository,
-		private readonly consumptionRepository: IConsumptionRepository
+		private readonly consumptionRepository: IConsumptionRepository,
+		private readonly householdRepository: IHouseholdRepository
 	) {}
 
 	/** Lighter than getDashboard — used by /hem engagement strip. */
@@ -116,15 +120,25 @@ export class StatistikService {
 				)
 			: null;
 
+		let zeroWasteWeeks: number | null = null;
+		if (hasConsumptionData) {
+			const rawStreak = computeZeroWasteStreak(wasteTrend, consumedTrend);
+			const household = await this.householdRepository.getHouseholdById(householdId);
+			if (household) {
+				const maxWeeks = weeksSinceHouseholdCreated(household.createdAt, referenceDate);
+				zeroWasteWeeks = capZeroWasteStreak(rawStreak, maxWeeks);
+			} else {
+				zeroWasteWeeks = rawStreak;
+			}
+		}
+
 		return {
 			hasConsumptionData,
 			consumedThisWeek,
 			consumedWeekOverWeek: hasConsumptionData ? computeWeekOverWeek(consumedTrend) : null,
 			consumedTrend,
 			wasteTrend,
-			zeroWasteWeeks: hasConsumptionData
-				? computeZeroWasteStreak(wasteTrend, consumedTrend)
-				: null
+			zeroWasteWeeks
 		};
 	}
 }

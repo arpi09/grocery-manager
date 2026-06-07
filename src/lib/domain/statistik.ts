@@ -105,6 +105,24 @@ export function computeZeroWasteStreak(
 	return streak;
 }
 
+/** Inclusive calendar weeks from household creation week through reference week. */
+export function weeksSinceHouseholdCreated(
+	householdCreatedAt: Date,
+	referenceDate: Date = new Date()
+): number {
+	const createdWeek = startOfWeek(householdCreatedAt);
+	const currentWeek = startOfWeek(referenceDate);
+	const diffDays = Math.floor((currentWeek.getTime() - createdWeek.getTime()) / (24 * 60 * 60 * 1000));
+	return Math.floor(diffDays / 7) + 1;
+}
+
+export function capZeroWasteStreak(streak: number, maxWeeks: number): number {
+	if (maxWeeks < 1) {
+		return 0;
+	}
+	return Math.min(Math.max(0, streak), maxWeeks);
+}
+
 export function maxWeeklyCount(bars: WeeklyBar[]): number {
 	return bars.reduce((max, bar) => Math.max(max, bar.count), 0);
 }

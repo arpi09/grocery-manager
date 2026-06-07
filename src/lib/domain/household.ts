@@ -20,6 +20,7 @@ export interface HouseholdMemberView {
 export interface HouseholdView {
 	id: string;
 	name: string;
+	createdAt: Date;
 	members: HouseholdMemberView[];
 }
 

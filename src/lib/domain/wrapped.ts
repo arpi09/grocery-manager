@@ -137,6 +137,10 @@ export function resolveTopConsumedProduct(events: WrappedConsumptionEvent[]): st
 	return top;
 }
 
+export function isEarlyZeroWasteStreak(zeroWasteWeeks: number | null): boolean {
+	return zeroWasteWeeks != null && zeroWasteWeeks > 0 && zeroWasteWeeks < 2;
+}
+
 export function buildWrappedSlides(input: BuildWrappedSlidesInput): WrappedSlide[] {
 	const slides: WrappedSlide[] = [{ id: 'intro', illustration: 'ritual' }];
 

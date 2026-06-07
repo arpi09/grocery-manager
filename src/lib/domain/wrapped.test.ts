@@ -3,6 +3,7 @@ import {
 	buildMonthlySavingsReport,
 	buildWrappedReport,
 	buildWrappedSlides,
+	isEarlyZeroWasteStreak,
 	isFirstMondayOfMonth,
 	parseWrappedMonthParam,
 	resolveTopConsumedProduct,
@@ -70,6 +71,14 @@ describe('buildMonthlySavingsReport', () => {
 
 		expect(report.consumedCount).toBe(1);
 		expect(report.savedSek).toBeGreaterThan(0);
+	});
+});
+
+describe('isEarlyZeroWasteStreak', () => {
+	it('flags a single zero-waste week as early streak', () => {
+		expect(isEarlyZeroWasteStreak(1)).toBe(true);
+		expect(isEarlyZeroWasteStreak(2)).toBe(false);
+		expect(isEarlyZeroWasteStreak(null)).toBe(false);
 	});
 });
 

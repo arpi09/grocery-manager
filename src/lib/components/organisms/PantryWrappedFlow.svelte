@@ -4,7 +4,11 @@
 	import GamificationIllustration from '$lib/components/atoms/GamificationIllustration.svelte';
 	import WrappedShareCard from '$lib/components/molecules/WrappedShareCard.svelte';
 	import { getMilestoneRegistryEntry } from '$lib/domain/gamification.registry';
-	import type { WrappedReportData, WrappedSlide } from '$lib/domain/wrapped';
+	import {
+		isEarlyZeroWasteStreak,
+		type WrappedReportData,
+		type WrappedSlide
+	} from '$lib/domain/wrapped';
 	import { t } from '$lib/i18n';
 	import {
 		downloadBlob,
@@ -47,7 +51,9 @@
 			case 'topProduct':
 				return t('wrapped.slideTopProductTitle');
 			case 'streak':
-				return t('wrapped.slideStreakTitle', { count: report.zeroWasteWeeks ?? 0 });
+				return isEarlyZeroWasteStreak(report.zeroWasteWeeks)
+					? t('wrapped.slideStreakFirstTitle')
+					: t('wrapped.slideStreakTitle', { count: report.zeroWasteWeeks ?? 0 });
 			case 'milestones':
 				return t('wrapped.slideMilestonesTitle', {
 					count: report.achievedMilestones.length
@@ -72,7 +78,9 @@
 			case 'topProduct':
 				return t('wrapped.slideTopProductBody', { product: report.topProduct ?? '' });
 			case 'streak':
-				return t('wrapped.slideStreakBody');
+				return isEarlyZeroWasteStreak(report.zeroWasteWeeks)
+					? t('wrapped.slideStreakFirstBody')
+					: t('wrapped.slideStreakBody');
 			case 'milestones': {
 				const labels = report.achievedMilestones
 					.slice(0, 3)
