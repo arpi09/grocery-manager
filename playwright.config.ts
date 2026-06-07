@@ -46,6 +46,8 @@ const mobileChrome = {
 export default defineConfig({
 	globalSetup: './e2e/global-setup.ts',
 	testDir: 'e2e',
+	/** Vitest unit tests under e2e/helpers must not be collected by Playwright. */
+	testMatch: '**/*.spec.ts',
 	fullyParallel: false,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,

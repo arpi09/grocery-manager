@@ -356,9 +356,14 @@ jobs:
             echo "::error::quality job did not succeed"
             exit 1
           fi
+          hotfix_skip="${{ github.event_name == 'workflow_dispatch' && (inputs.skip_e2e == true || inputs.skip_e2e == 'true') && inputs.hotfix_confirm == 'hotfix' }}"
           if [ "${{ needs.e2e.result }}" != "success" ]; then
-            echo "::error::E2E did not run or failed (result=${{ needs.e2e.result }}) — prod was NOT released"
-            exit 1
+            if [ "$hotfix_skip" = "true" ] && [ "${{ needs.deploy.result }}" = "success" ] && [ "${{ needs.smoke.result }}" = "success" ]; then
+              echo "::warning::HOTFIX deploy — E2E skipped but deploy and smoke passed."
+            else
+              echo "::error::E2E did not run or failed (result=${{ needs.e2e.result }}) — prod was NOT released"
+              exit 1
+            fi
           fi
           if [ "${{ needs.deploy.result }}" != "success" ]; then
             echo "::error::deploy job did not succeed"
