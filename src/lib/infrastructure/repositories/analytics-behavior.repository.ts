@@ -1,6 +1,5 @@
 import { createHash } from 'node:crypto';
 import {
-	ANALYTICS_RAW_RETENTION_DAYS,
 	ANALYTICS_SESSION_IDLE_MS,
 	normalizeAnalyticsRoute,
 	type AnalyticsBehaviorPeriodDays,
@@ -288,8 +287,7 @@ export class DrizzleAnalyticsBehaviorRepository implements IAnalyticsBehaviorRep
 
 	private async queryRouteOverview(
 		since: Date,
-		now: Date,
-		periodDays: AnalyticsBehaviorPeriodDays
+		now: Date
 	): Promise<BehaviorRouteOverviewRow[]> {
 		const fromDaily = await db
 			.select({
@@ -344,7 +342,7 @@ export class DrizzleAnalyticsBehaviorRepository implements IAnalyticsBehaviorRep
 		now = new Date()
 	): Promise<AdminBehaviorOverview> {
 		const start = periodStart(periodDays, now);
-		const routes = await this.queryRouteOverview(start, now, periodDays);
+		const routes = await this.queryRouteOverview(start, now);
 		return {
 			periodDays,
 			periodStart: start,
