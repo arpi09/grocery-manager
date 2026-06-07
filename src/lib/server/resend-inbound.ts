@@ -1,58 +1,14 @@
-import { Resend } from 'resend';
+import { Resend, type EmailReceivedEvent, type WebhookEventPayload } from 'resend';
 import { getResendApiKey } from '$lib/server/email';
 import { env } from '$env/dynamic/private';
 
-interface InboundAttachmentMeta {
-	id: string;
-	filename: string;
-	content_type: string;
-	download_url: string;
-}
-
-type ResendInboundClient = {
-	webhooks: {
-		verify: (input: {
-			payload: string;
-			headers: Record<string, string>;
-			secret: string;
-		}) => ResendEmailReceivedEvent;
-	};
-	emails: {
-		receiving: {
-			attachments: {
-				list: (input: { emailId: string }) => Promise<{
-					data: InboundAttachmentMeta[] | null;
-					error: { message: string } | null;
-				}>;
-			};
-		};
-	};
-};
-
-function createResendInboundClient(apiKey: string): ResendInboundClient {
-	return new Resend(apiKey) as unknown as ResendInboundClient;
-}
+export type ResendEmailReceivedEvent = EmailReceivedEvent;
 
 export interface ResendInboundAttachment {
 	id: string;
 	filename: string;
 	contentType: string;
 	downloadUrl: string;
-}
-
-export interface ResendEmailReceivedEvent {
-	type: 'email.received';
-	data: {
-		email_id: string;
-		from: string;
-		to: string[];
-		subject?: string;
-		attachments?: Array<{
-			id: string;
-			filename: string;
-			content_type: string;
-		}>;
-	};
 }
 
 export function getResendWebhookSecret(): string | null {
@@ -67,12 +23,12 @@ export function verifyResendWebhook(
 		svixTimestamp: string | null;
 		svixSignature: string | null;
 	}
-): ResendEmailReceivedEvent | { error: string } {
+): WebhookEventPayload | { error: string } {
 	const secret = getResendWebhookSecret();
 	if (!secret) {
 		console.warn('[kivra-forward] RESEND_WEBHOOK_SECRET missing — accepting webhook in stub mode');
 		try {
-			return JSON.parse(payload) as ResendEmailReceivedEvent;
+			return JSON.parse(payload) as WebhookEventPayload;
 		} catch {
 			return { error: 'Invalid webhook payload' };
 		}
@@ -83,18 +39,17 @@ export function verifyResendWebhook(
 		return { error: 'RESEND_API_KEY is not configured' };
 	}
 
-	const resend = createResendInboundClient(apiKey);
+	const resend = new Resend(apiKey);
 	try {
-		const event = resend.webhooks.verify({
+		return resend.webhooks.verify({
 			payload,
 			headers: {
-				'svix-id': headers.svixId ?? '',
-				'svix-timestamp': headers.svixTimestamp ?? '',
-				'svix-signature': headers.svixSignature ?? ''
+				id: headers.svixId ?? '',
+				timestamp: headers.svixTimestamp ?? '',
+				signature: headers.svixSignature ?? ''
 			},
-			secret
+			webhookSecret: secret
 		});
-		return event as ResendEmailReceivedEvent;
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'Webhook verification failed';
 		return { error: message };
@@ -109,21 +64,22 @@ export async function listInboundPdfAttachments(
 		throw new Error('RESEND_API_KEY is not configured');
 	}
 
-	const resend = createResendInboundClient(apiKey);
+	const resend = new Resend(apiKey);
 	const { data, error } = await resend.emails.receiving.attachments.list({ emailId });
 	if (error) {
 		throw new Error(error.message);
 	}
 
-	return (data ?? [])
-		.filter((attachment: InboundAttachmentMeta) => {
+	const attachments = data?.data ?? [];
+	return attachments
+		.filter((attachment) => {
 			const type = attachment.content_type?.toLowerCase() ?? '';
 			const name = attachment.filename?.toLowerCase() ?? '';
 			return type === 'application/pdf' || name.endsWith('.pdf');
 		})
-		.map((attachment: InboundAttachmentMeta) => ({
+		.map((attachment) => ({
 			id: attachment.id,
-			filename: attachment.filename,
+			filename: attachment.filename ?? 'attachment.pdf',
 			contentType: attachment.content_type,
 			downloadUrl: attachment.download_url
 		}));
