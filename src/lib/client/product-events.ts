@@ -6,7 +6,8 @@ const CLIENT_EVENT_TYPES = [
 	'onboarding_quickstart',
 	'onboarding_completed',
 	'pwa_banner_dismiss',
-	'pwa_banner_install_click'
+	'pwa_banner_install_click',
+	'shopping_list_export'
 ] as const;
 
 export type ClientProductEventType = (typeof CLIENT_EVENT_TYPES)[number];

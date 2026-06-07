@@ -742,7 +742,11 @@
 		"fillPartialSuccess": "{added} {added, plural, one {vara lades} other {varor lades}} till. {skipped} fanns redan på listan.",
 		"fillAllDuplicates": "Alla {count} förslag fanns redan på listan.",
 		"exportList": "Kopiera lista",
+		"exportBring": "Kopiera för Bring",
+		"exportAnyList": "Kopiera för AnyList",
 		"exportListAria": "Kopiera oavbockade varor till urklipp för Bring eller andra appar",
+		"exportBringAria": "Kopiera oavbockade varor i Bring-format",
+		"exportAnyListAria": "Kopiera oavbockade varor i AnyList-format",
 		"exportEmpty": "Inget att kopiera — alla varor är avbockade"
 	},
 	"receiptAutopilot": {
@@ -1753,6 +1757,8 @@
 		"nextStepTitle": "Inköpslistan är redo",
 		"nextStepLead": "{count, plural, =0 {Gå till inköpslistan och handla det som saknas.} one {En vara lades till på listan — handla när det passar.} other {{count} varor lades till på listan — handla när det passar.}}",
 		"nextStepCta": "Gå till inköpslistan →",
+		"inboundPushLead": "{count} varor går ut — här är veckans förslag. Generera och godkänn på ett klick.",
+		"inboundEmailLead": "{count} varor går ut snart — öppna veckoförslagen och lägg dem i plan och inköpslista.",
 		"plannedThisWeek": "{count} måltider redan planerade denna vecka",
 		"readonlyHint": "Du har läsbehörighet — be en administratör planera veckan.",
 		"savingsFootnote": "Hittills sparat ca {sek} kr · {kg} kg genom att använda maten i tid."
@@ -1785,7 +1791,7 @@
 	},
 	"pushNotifications": {
 		"expiryTitle": "Varor går ut snart",
-		"expiryBody": "{count} varor går ut — fixa veckan på 2 min",
+		"expiryBody": "{count} varor går ut — här är veckans förslag",
 		"shoppingTitle": "Dags att handla?",
 		"shoppingBody": "{count} varor väntar på inköpslistan"
 	},

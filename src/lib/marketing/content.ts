@@ -170,6 +170,25 @@ export interface MarketingContent {
 		rights: string;
 		navAria: string;
 	};
+	reduceWaste: MarketingSeoPage;
+	pantryApp: MarketingSeoPage;
+	receiptGuide: MarketingSeoPage;
+}
+
+export interface MarketingSeoPage {
+	title: string;
+	lead: string;
+	meta: {
+		title: string;
+		description: string;
+		ogTitle: string;
+		ogDescription: string;
+	};
+	points: string[];
+	steps?: MarketingStep[];
+	faq?: MarketingFaqItem[];
+	relatedHref?: string;
+	relatedLabel?: string;
 }
 
 const sv: MarketingContent = {
@@ -185,7 +204,9 @@ const sv: MarketingContent = {
 	},
 	nav: [
 		{ href: '/funktioner', label: 'Funktioner' },
+		{ href: '/minska-matsvinn', label: 'Matsvinn' },
 		{ href: '/sa-fungerar-det', label: 'Så fungerar det' },
+		{ href: '/kvitto-pdf-kivra', label: 'Kvitto & Kivra' },
 		{ href: '/priser', label: 'Priser' },
 		{ href: '/faq', label: 'Vanliga frågor' },
 		{ href: '/nyheter', label: 'Nyheter' },
@@ -475,6 +496,106 @@ const sv: MarketingContent = {
 		tagline: 'Skafferi, kyl och inköp på ett ställe.',
 		rights: '© Skaffu. Alla rättigheter förbehållna.',
 		navAria: 'Sidfot'
+	},
+	reduceWaste: {
+		title: 'Minska matsvinn med skafferi du har koll på',
+		lead:
+			'När du ser vad som finns i kyl, frys och skafferi — och vad som går ut snart — blir det lättare att handla rätt och äta upp innan maten kastas.',
+		meta: {
+			title: 'Minska matsvinn — skafferi-app med utgångsdatum & Ät det först',
+			description:
+				'Skaffu hjälper hushållet minska matsvinn: lager som sanningskälla, varningar innan varor går ut och veckoplan från det som redan finns hemma. Prova gratis.',
+			ogTitle: 'Minska matsvinn med Skaffu — lager, utgång & smart inköp',
+			ogDescription:
+				'Butiksneutral skafferi-app: se utgångsdatum, prioritera det som går ut och slipp dubbelköp som leder till svinn.'
+		},
+		points: [
+			'Utgångsdatum och påminnelser — du ser vad som behöver användas först.',
+			'Ät det först och Veckan fixad — middagsförslag från varor som snart går ut.',
+			'Inköpslista kopplad till lager — handla det som saknas, inte det du redan har.',
+			'Kvitto-PDF och streckkod — snabb start utan att fylla skafferiet manuellt.'
+		],
+		relatedHref: '/skafferi-app',
+		relatedLabel: 'Läs mer om skafferi-appen'
+	},
+	pantryApp: {
+		title: 'Skafferi-app för hela hushållet',
+		lead:
+			'Skaffu är en butiksneutral skafferi-app: ett lager för kyl, frys och skåp som hela familjen delar — oavsett om ni handlar på ICA, Willys eller Coop.',
+		meta: {
+			title: 'Skafferi-app — lager, kvitto-PDF & inköpslista | Skaffu',
+			description:
+				'Skafferi-app med streckkod, kvitto från Kivra, utgångsdatum och hushållssync. Webb först, gratis att börja — utan kedjelåsning.',
+			ogTitle: 'Skaffu — skafferi-app med lager som sanningskälla',
+			ogDescription:
+				'Från skanning till inköpslista: ett skafferi som speglar vad som faktiskt finns hemma. Jämför med Bring och Matdags.'
+		},
+		points: [
+			'Streckkod, kvitto-PDF och foto — tre sätt att fylla skafferiet snabbt.',
+			'Kyl, frys och skafferi på ett ställe med tydlig överblick per plats.',
+			'Butiksneutralt — samma lager oavsett kedja, utan stammisapp.',
+			'Hushållssync — familj eller rumskamrater ser samma lista och lager.'
+		],
+		relatedHref: '/minska-matsvinn',
+		relatedLabel: 'Så minskar du matsvinn med Skaffu'
+	},
+	receiptGuide: {
+		title: 'Kvitto-PDF från Kivra och butiksappar',
+		lead:
+			'Digitala kvitton i PDF är Skaffus nordiska wedge — ladda upp från Kivra, ICA eller Willys så hjälper AI till att fylla skafferiet utan manuell inmatning.',
+		meta: {
+			title: 'Kvitto-PDF & Kivra — guide till digitalt kvitto i Skaffu',
+			description:
+				'Så sparar du kvitto som PDF från Kivra, ICA-appen eller e-post och laddar upp i Skaffu. Butiksneutral skafferi-app med kvitto-autopilot.',
+			ogTitle: 'Kivra-kvitto som PDF — fyll skafferiet automatiskt',
+			ogDescription:
+				'Steg-för-steg: exportera digitalt kvitto, ladda upp PDF i Skaffu och granska varor innan de hamnar i lagret.'
+		},
+		points: [
+			'Fungerar med text-PDF från Kivra, ICA, Willys, Coop och fler.',
+			'Gratisplan: begränsat antal kvitto-PDF per månad — Pro ger obegränsat.',
+			'Du granskar alltid raderna innan de sparas i skafferiet.',
+			'Alternativ: fotografera kvittot om PDF saknar läsbart textlager.'
+		],
+		steps: [
+			{
+				step: 1,
+				title: 'Hitta kvittot i Kivra',
+				description:
+					'Öppna Kivra → Inköp eller Dokument. Välj kvittot från butiken (ICA, Willys, Coop m.fl.).'
+			},
+			{
+				step: 2,
+				title: 'Spara som PDF',
+				description:
+					'Tryck på kvittot och välj Dela eller Spara — välj PDF om appen frågar. Du behöver inte skriva ut eller skanna om.'
+			},
+			{
+				step: 3,
+				title: 'Ladda upp i Skaffu',
+				description:
+					'Öppna Skaffu → Skanna → Kvitto. Välj PDF-filen, granska raderna och spara valda varor till kyl, frys eller skafferi.'
+			}
+		],
+		faq: [
+			{
+				question: 'Fungerar alla Kivra-kvitton?',
+				answer:
+					'De flesta digitala kvitton med textlager fungerar. Bild-PDF utan text kan du fotografera i stället — samma granskningsflöde.'
+			},
+			{
+				question: 'Måste jag ha Kivra?',
+				answer:
+					'Nej. Spara PDF från ICA-appen, Willys, Coop eller butikens e-postkvitto — samma uppladdning i Skaffu.'
+			},
+			{
+				question: 'Lagras kvittot hos er?',
+				answer:
+					'Vi extraherar varor för ditt lager — inte hela kvittot som arkiv. Se integritetspolicyn för AI-hantering.'
+			}
+		],
+		relatedHref: '/sa-fungerar-det',
+		relatedLabel: 'Så fungerar Skaffu i tre steg'
 	}
 };
 
@@ -491,7 +612,9 @@ const en: MarketingContent = {
 	},
 	nav: [
 		{ href: '/funktioner', label: 'Features' },
+		{ href: '/minska-matsvinn', label: 'Food waste' },
 		{ href: '/sa-fungerar-det', label: 'How it works' },
+		{ href: '/kvitto-pdf-kivra', label: 'Receipt PDF' },
 		{ href: '/priser', label: 'Pricing' },
 		{ href: '/faq', label: 'FAQ' },
 		{ href: '/nyheter', label: 'News' },
@@ -527,29 +650,30 @@ const en: MarketingContent = {
 		title: 'Compared to apps you may already use',
 		lead: 'An honest view — we are not here to replace what already works for you. Here is when Skaffu complements or differs.',
 		disclaimer:
-			'Bring!, ICA and Matdags are strong in their niches. We focus on a store-neutral pantry with inventory as source of truth — not loyalty discounts or gamification.',
+			'Dedicated list apps and pantry trackers are strong in their niches. We focus on a store-neutral pantry with inventory as source of truth — not loyalty programs or gamification.',
 		themColumn: 'What they do well',
 		usColumn: 'What Skaffu adds',
 		rows: [
 			{
-				competitor: 'Bring!',
+				competitor: 'List apps (AnyList, OurGroceries)',
 				theirStrength:
-					'Market-leading shared shopping lists and family sync — simple and familiar in the Nordics.',
+					'Fast shared shopping lists and household sync — the default for many families who already live in a list app.',
 				homePantry:
-					'Pantry inventory by location, expiry dates and scanning so the list reflects what is actually in the fridge — not just what you plan to buy.'
+					'Pantry inventory by location, expiry dates and scanning so the list reflects what is actually at home — copy unchecked items back to your list app in one click.'
 			},
 			{
-				competitor: 'ICA app',
-				theirStrength: 'Free for loyalty members, offers, store maps and a shopping list tied to ICA.',
+				competitor: 'Pantry trackers (NoWaste, etc.)',
+				theirStrength:
+					'Large barcode databases, expiry tracking and native apps built around reducing food waste.',
 				homePantry:
-					'One household pantry, store-neutral — same inventory whether you shop ICA, Willys or Lidl, without list and pantry living in separate worlds.'
+					'Receipt PDF, meal plan tied to inventory, household sync and store-neutral shopping — web-first without switching apps on day one.'
 			},
 			{
-				competitor: 'Matdags',
+				competitor: 'Meal planners (Mealime, etc.)',
 				theirStrength:
-					'Similar promise in Sweden: photo, receipt, barcode, reminders and recipes from what you have at home.',
+					'Recipe ideas and weekly menus with polished native experiences and curated meal libraries.',
 				homePantry:
-					'Web-first, PDF receipts, meal plan tied to inventory and household sync — without gamification or switching to a native app on day one.'
+					'Plans built from your actual pantry and expiry dates — one click to shopping list, without a separate inventory world.'
 			}
 		],
 		ctaTitle: 'Try a store-neutral pantry',
@@ -572,7 +696,7 @@ const en: MarketingContent = {
 		seeAllFeatures: 'See all features',
 		wasteMeterLabel: 'Less food waste',
 		wasteMeterCaption: 'Week sorted — expiring items become dinners and a shopping list in one click.',
-		comparisonKicker: 'Compared to Bring & ICA',
+		comparisonKicker: 'Compared to list & pantry apps',
 		readHowItWorks: 'Read more about how it works',
 		stats: [
 			{ value: '1', label: 'click — Week sorted from expiring items to meal plan' },
@@ -581,7 +705,7 @@ const en: MarketingContent = {
 		],
 		differentiatorsTitle: 'Built so you eat up — not buy twice',
 		differentiatorsLead:
-			'Skaffu bridges shopping lists and what is actually in your cupboards. Here is what sets us apart from Bring and ICA.',
+			'Skaffu bridges shopping lists and what is actually in your cupboards. Here is what sets us apart from dedicated list apps.',
 		differentiators: [
 			{
 				tag: 'Source of truth',
@@ -639,7 +763,7 @@ const en: MarketingContent = {
 		meta: {
 			title: 'Features — scanning, receipt PDF & smart shopping list',
 			description:
-				'Barcode, receipt PDF, expiry dates, meal plan and household sync — store-neutral pantry that complements Bring and Matdags.',
+				'Barcode, receipt PDF, expiry dates, meal plan and household sync — store-neutral pantry that complements list apps and pantry trackers.',
 			ogTitle: 'Skaffu features — inventory as source of truth',
 			ogDescription:
 				'PDF receipts, AI scans and shopping list tied to inventory. Web-first, without gamification.'
@@ -766,6 +890,106 @@ const en: MarketingContent = {
 		tagline: 'Pantry, fridge and shopping in one place.',
 		rights: '© Skaffu. All rights reserved.',
 		navAria: 'Footer'
+	},
+	reduceWaste: {
+		title: 'Reduce food waste with a pantry you can trust',
+		lead:
+			'When you see what is in the fridge, freezer and cupboard — and what expires soon — it is easier to shop the right amount and eat up before food is thrown away.',
+		meta: {
+			title: 'Reduce food waste — pantry app with expiry dates',
+			description:
+				'Skaffu helps households cut food waste: inventory as source of truth, warnings before items go bad and weekly plans from what you already have. Free to start.',
+			ogTitle: 'Reduce food waste with Skaffu — expiry-aware pantry',
+			ogDescription:
+				'Store-neutral pantry app: see expiry dates, prioritise what goes out soon and avoid duplicate buys that lead to waste.'
+		},
+		points: [
+			'Expiry dates and reminders — see what to use first.',
+			'Eat-first suggestions and weekly ritual — meals from items expiring soon.',
+			'Shopping list tied to inventory — buy what is missing, not what you already have.',
+			'Receipt PDF and barcode — quick start without manual pantry admin.'
+		],
+		relatedHref: '/skafferi-app',
+		relatedLabel: 'Learn more about the pantry app'
+	},
+	pantryApp: {
+		title: 'Pantry app for the whole household',
+		lead:
+			'Skaffu is a store-neutral pantry app: one inventory for fridge, freezer and cupboards that the whole family shares — whether you shop at ICA, Willys or Coop.',
+		meta: {
+			title: 'Pantry app — inventory, receipt PDF & shopping list | Skaffu',
+			description:
+				'Pantry app with barcode scan, Kivra receipt PDF, expiry dates and household sync. Web-first, free to start — no chain lock-in.',
+			ogTitle: 'Skaffu — pantry app with inventory as source of truth',
+			ogDescription:
+				'From scanning to shopping list: a pantry that reflects what is actually at home. Compare with list-only apps.'
+		},
+		points: [
+			'Barcode, receipt PDF and photo — three ways to fill the pantry fast.',
+			'Fridge, freezer and cupboard in one place with clear location overview.',
+			'Store-neutral — same inventory regardless of chain, no loyalty app required.',
+			'Household sync — family or roommates share the same list and stock.'
+		],
+		relatedHref: '/minska-matsvinn',
+		relatedLabel: 'How Skaffu helps reduce food waste'
+	},
+	receiptGuide: {
+		title: 'Receipt PDF from Kivra and store apps',
+		lead:
+			'Digital receipts as PDF are Skaffu’s Nordic wedge — upload from Kivra, ICA or Willys and let AI help fill the pantry without manual entry.',
+		meta: {
+			title: 'Receipt PDF & Kivra — guide to digital receipts in Skaffu',
+			description:
+				'How to save receipts as PDF from Kivra, the ICA app or email and upload in Skaffu. Store-neutral pantry app with receipt autopilot.',
+			ogTitle: 'Kivra receipt as PDF — fill the pantry automatically',
+			ogDescription:
+				'Step by step: export a digital receipt, upload the PDF in Skaffu and review lines before they enter inventory.'
+		},
+		points: [
+			'Works with text PDFs from Kivra, ICA, Willys, Coop and more.',
+			'Free plan: limited receipt PDFs per month — Pro is unlimited.',
+			'You always review lines before they are saved to the pantry.',
+			'Alternative: photograph the receipt if the PDF has no readable text layer.'
+		],
+		steps: [
+			{
+				step: 1,
+				title: 'Find the receipt in Kivra',
+				description:
+					'Open Kivra → Purchases or Documents. Pick the receipt from the store (ICA, Willys, Coop, etc.).'
+			},
+			{
+				step: 2,
+				title: 'Save as PDF',
+				description:
+					'Tap the receipt and choose Share or Save — pick PDF if prompted. No need to print or rescan.'
+			},
+			{
+				step: 3,
+				title: 'Upload in Skaffu',
+				description:
+					'Open Skaffu → Scan → Receipt. Choose the PDF, review lines and save selected items to fridge, freezer or cupboard.'
+			}
+		],
+		faq: [
+			{
+				question: 'Do all Kivra receipts work?',
+				answer:
+					'Most digital receipts with a text layer work. Image-only PDFs can be photographed instead — same review flow.'
+			},
+			{
+				question: 'Do I need Kivra?',
+				answer:
+					'No. Save PDF from the ICA app, Willys, Coop or store email receipts — same upload in Skaffu.'
+			},
+			{
+				question: 'Do you store the full receipt?',
+				answer:
+					'We extract items for your inventory — not the full receipt as an archive. See the privacy policy for AI handling.'
+			}
+		],
+		relatedHref: '/sa-fungerar-det',
+		relatedLabel: 'How Skaffu works in three steps'
 	}
 };
 

@@ -22,7 +22,8 @@ export const PRODUCT_EVENT_TYPES = [
 	'expiring_share_viewed',
 	'wrapped_viewed',
 	'wrapped_shared',
-	'kivra_forward_received'
+	'kivra_forward_received',
+	'shopping_list_export'
 ] as const;
 
 export const PMF_PRODUCT_EVENT_TYPES = [

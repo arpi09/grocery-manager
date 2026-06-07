@@ -762,7 +762,11 @@
 		"fillPartialSuccess": "{added} {added, plural, one {item added} other {items added}}. {skipped} already on the list.",
 		"fillAllDuplicates": "All {count} suggestions were already on the list.",
 		"exportList": "Copy list",
+		"exportBring": "Copy for Bring",
+		"exportAnyList": "Copy for AnyList",
 		"exportListAria": "Copy unchecked items to clipboard for Bring or other apps",
+		"exportBringAria": "Copy unchecked items in Bring format",
+		"exportAnyListAria": "Copy unchecked items in AnyList format",
 		"exportEmpty": "Nothing to copy — all items are checked off"
 	},
 	"receiptAutopilot": {
@@ -1773,6 +1777,8 @@
 		"nextStepTitle": "Shopping list is ready",
 		"nextStepLead": "{count, plural, =0 {Open the shopping list for what you still need.} one {One item was added — shop when it suits you.} other {{count} items were added — shop when it suits you.}}",
 		"nextStepCta": "Go to shopping list →",
+		"inboundPushLead": "{count} items expiring — here are this week's suggestions. Generate and approve in one click.",
+		"inboundEmailLead": "{count} items expiring soon — open week suggestions and add them to your plan and shopping list.",
 		"plannedThisWeek": "{count} meals already planned this week",
 		"readonlyHint": "You have read-only access — ask an admin to plan the week.",
 		"savingsFootnote": "Estimated {sek} kr · {kg} kg saved so far by using food in time."
@@ -1805,7 +1811,7 @@
 	},
 	"pushNotifications": {
 		"expiryTitle": "Items expiring soon",
-		"expiryBody": "{count} items expiring — sort your week in 2 min",
+		"expiryBody": "{count} items expiring — here are this week's suggestions",
 		"shoppingTitle": "Time to shop?",
 		"shoppingBody": "{count} items on your shopping list"
 	},

@@ -31,7 +31,8 @@ const AUTH_EVENT_TYPES = new Set<ProductEventType>([
 	'streak_milestone_reached',
 	'wrapped_viewed',
 	'wrapped_shared',
-	'expiring_share_created'
+	'expiring_share_created',
+	'shopping_list_export'
 ]);
 
 function isAllowedEventType(value: unknown): value is ProductEventType {

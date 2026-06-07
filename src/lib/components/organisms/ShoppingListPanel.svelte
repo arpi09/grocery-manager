@@ -11,13 +11,15 @@
 	import { TOAST_UNDO_DURATION_MS } from '$lib/utils/action-toast';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { fetchCheckedShoppingItems } from '$lib/client/shopping-data';
+	import { trackProductEvent } from '$lib/client/product-events';
 	import { t } from '$lib/i18n';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { getDeleteCopy } from '$lib/utils/delete-safety';
 	import { bindSubmittingWithToast } from '$lib/utils/form-submit-feedback';
 	import {
-		formatShoppingListExport,
-		formatShoppingListExportLine
+		formatShoppingListExportByFormat,
+		formatShoppingListExportLine,
+		type ShoppingListExportFormat
 	} from '$lib/utils/shopping-list-export';
 
 	let {
@@ -84,7 +86,7 @@
 		unit: string | null;
 	} | null>(null);
 	let undoSubmitting = $state(false);
-	let exportCopied = $state(false);
+	let exportCopiedFormat = $state<ShoppingListExportFormat | null>(null);
 	let addSubmitting = $state(false);
 	let removingIds = $state(new Set<string>());
 	const REMOVE_ANIMATION_MS = 280;
@@ -125,16 +127,17 @@
 		return [...unchecked, ...checked];
 	}
 
-	async function copyExportList() {
+	async function copyExportList(format: ShoppingListExportFormat) {
 		const exportItems = await allItemsForExport();
-		const text = formatShoppingListExport(exportItems);
+		const text = formatShoppingListExportByFormat(exportItems, format);
 		if (!text) {
 			return;
 		}
 		await navigator.clipboard.writeText(text);
-		exportCopied = true;
+		exportCopiedFormat = format;
+		void trackProductEvent('shopping_list_export', { format });
 		setTimeout(() => {
-			exportCopied = false;
+			exportCopiedFormat = null;
 		}, 2000);
 	}
 
@@ -347,10 +350,19 @@
 					type="button"
 					class="text-action"
 					disabled={unchecked.length === 0 && checkedCount === 0}
-					aria-label={unchecked.length === 0 ? t('shopping.exportEmpty') : t('shopping.exportListAria')}
-					onclick={copyExportList}
+					aria-label={unchecked.length === 0 ? t('shopping.exportEmpty') : t('shopping.exportBringAria')}
+					onclick={() => copyExportList('bring')}
 				>
-					{exportCopied ? t('common.copied') : t('shopping.exportList')}
+					{exportCopiedFormat === 'bring' ? t('common.copied') : t('shopping.exportBring')}
+				</button>
+				<button
+					type="button"
+					class="text-action"
+					disabled={unchecked.length === 0 && checkedCount === 0}
+					aria-label={unchecked.length === 0 ? t('shopping.exportEmpty') : t('shopping.exportAnyListAria')}
+					onclick={() => copyExportList('anylist')}
+				>
+					{exportCopiedFormat === 'anylist' ? t('common.copied') : t('shopping.exportAnyList')}
 				</button>
 			</div>
 		{/if}
@@ -401,7 +413,9 @@
 
 	.panel-footer {
 		display: flex;
+		flex-wrap: wrap;
 		justify-content: flex-end;
+		gap: var(--space-sm);
 		padding-top: var(--space-xs);
 		border-top: 1px solid var(--color-border);
 	}
@@ -629,7 +643,8 @@
 		}
 
 		.panel-footer .text-action {
-			width: 100%;
+			flex: 1 1 auto;
+			min-width: min(100%, 10rem);
 		}
 
 		.list li {

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+	formatAnyListExportLine,
+	formatOurGroceriesExportLine,
 	formatShoppingListExport,
+	formatShoppingListExportByFormat,
 	formatShoppingListExportLine
 } from './shopping-list-export';
 
@@ -21,6 +24,28 @@ describe('formatShoppingListExportLine', () => {
 
 	it('ignores empty quantity string', () => {
 		expect(formatShoppingListExportLine({ name: 'Bröd', quantity: '' })).toBe('Bröd');
+	});
+});
+
+describe('formatAnyListExportLine', () => {
+	it('returns name only when no quantity', () => {
+		expect(formatAnyListExportLine({ name: 'Milk' })).toBe('Milk');
+	});
+
+	it('appends quantity and unit in parentheses', () => {
+		expect(formatAnyListExportLine({ name: 'Milk', quantity: '2', unit: 'L' })).toBe(
+			'Milk (2 L)'
+		);
+	});
+
+	it('appends quantity without unit in parentheses', () => {
+		expect(formatAnyListExportLine({ name: 'Eggs', quantity: '12' })).toBe('Eggs (12)');
+	});
+});
+
+describe('formatOurGroceriesExportLine', () => {
+	it('matches AnyList plain-text shape', () => {
+		expect(formatOurGroceriesExportLine({ name: 'Bread', quantity: '1' })).toBe('Bread (1)');
 	});
 });
 
@@ -50,5 +75,28 @@ describe('formatShoppingListExport', () => {
 			{ name: 'Yoghurt', quantity: '4' }
 		]);
 		expect(text).toBe('Banan\n4 Yoghurt');
+	});
+});
+
+describe('formatShoppingListExportByFormat', () => {
+	it('uses Bring format by default path', () => {
+		const text = formatShoppingListExportByFormat([{ name: 'Milk', quantity: '1', unit: 'L' }], 'bring');
+		expect(text).toBe('1 L Milk');
+	});
+
+	it('uses AnyList format', () => {
+		const text = formatShoppingListExportByFormat(
+			[
+				{ name: 'Milk', quantity: '1', unit: 'L' },
+				{ name: 'Bread', checked: true }
+			],
+			'anylist'
+		);
+		expect(text).toBe('Milk (1 L)');
+	});
+
+	it('uses OurGroceries format', () => {
+		const text = formatShoppingListExportByFormat([{ name: 'Eggs' }], 'ourgroceries');
+		expect(text).toBe('Eggs');
 	});
 });
