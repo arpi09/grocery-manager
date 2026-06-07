@@ -12,6 +12,7 @@
 
 	import Button from '$lib/components/atoms/Button.svelte';
 
+	import AiLoadingSkeleton from '$lib/components/molecules/AiLoadingSkeleton.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
@@ -494,6 +495,10 @@
 			</Button>
 
 		</div>
+
+		{#if loading}
+			<AiLoadingSkeleton messageKey="ai.loadingPantry" />
+		{/if}
 
 	{/if}
 

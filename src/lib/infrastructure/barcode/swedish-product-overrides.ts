@@ -37,6 +37,21 @@ export const SWEDISH_PRODUCT_OVERRIDES: Record<string, SwedishProductOverride> =
 		name: 'Pågen Lingongrova',
 		quantity: '1',
 		unit: null
+	},
+	'7311310123456': {
+		name: 'Kungsörnen Havregryn',
+		quantity: '1',
+		unit: 'kg'
+	},
+	'7310401101234': {
+		name: 'Barilla Spaghetti',
+		quantity: '500',
+		unit: 'g'
+	},
+	'7310865012345': {
+		name: 'Arla Ko Grädde 40%',
+		quantity: '2',
+		unit: 'dl'
 	}
 };
 
