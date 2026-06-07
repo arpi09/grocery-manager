@@ -195,10 +195,56 @@ Copy lives in `src/lib/marketing/content.ts` with Swedish (`sv`) as primary. Eng
 | Step | Command / file |
 |------|----------------|
 | Generate draft | `npm run guides:generate -- --keyword 0` (needs `OPENAI_API_KEY`) |
-| Quality checklist | `src/lib/marketing/guide-quality.ts` — min 800 words, internal links, no fake pricing |
-| Publish | Set `published: true` in frontmatter after manual review |
+| Next in queue | `npm run guides:publish-next` — picks first keyword without a `.md` file (`--next --publish`) |
+| SVT news gate | `src/lib/marketing/guide-news-context.ts` — fetches SVT Nyheter RSS, skips when no Skaffu-relevant headline |
+| Content rules | `src/lib/marketing/guide-generation-rules.ts` — documented editorial policy for prompts |
+| Quality checklist | `src/lib/marketing/guide-quality.ts` — min 800 words, internal links, forbidden phrases |
+| Publish | Set `published: true` in frontmatter after manual review, or pass checklist via `--publish` |
 
-Drafts default to `published: false`. Do not mass-publish without spot-checking kvitto/butik claims.
+Drafts default to `published: false`. `--publish` sets `published: true` only when the checklist passes. Do not mass-publish without spot-checking kvitto/butik claims.
+
+#### AI content policy
+
+| Rule | Detail |
+|------|--------|
+| Tone | Professional Swedish for practical households; butiksneutralt, not clickbait |
+| Topics | Food, pantry, shopping, food waste, prices, expiry dates, receipts, meal planning |
+| Forbidden | Fabricated facts/quotes/stats, medical/nutrition advice beyond basic food safety, politics, crime/celebrity news, conspiracy angles, competitor defamation |
+| News tie-in | Cron fetches [SVT Nyheter RSS](https://www.svt.se/nyheter/rss.xml) before generation. **No relevant headline → skip** (`news_not_relevant`, exit 0). Attribute cautiously ("enligt rapportering …") without invented quotes |
+| RSS failure | Log warning, fall back to keyword-matrix-only generation (no news hook) |
+| Local override | `--skip-news-check` bypasses the SVT gate for manual runs |
+
+Quality checks reject a small maintainable list of forbidden phrases (pricing guarantees, conspiracy-adjacent wording, unsupported medical claims). See `GUIDE_FORBIDDEN_PHRASES` in `guide-quality.ts`.
+
+Keyword queue helpers live in `src/lib/marketing/guides.ts`: `slugForGuideKeyword`, `resolveNextGuideKeywordIndex`, and `GUIDE_KEYWORD_MATRIX` (6 rows from COMPETITIVE_ANALYSIS §10). When all six guides exist, the cron exits quietly — expand the matrix (or add `GUIDE_KEYWORD_MATRIX_EXTRA`) before the queue runs dry.
+
+### Scheduled guide generation (GitHub Actions)
+
+Workflow: [`.github/workflows/guides-generate-cron.yml`](../.github/workflows/guides-generate-cron.yml)
+
+| Aspect | Detail |
+|--------|--------|
+| Schedule | Monday + Thursday 07:00 UTC (~09:00 CET) |
+| Manual run | Actions → **Guides generate cron** → `workflow_dispatch` |
+| Secret | `OPENAI_API_KEY` (repo → Settings → Secrets → Actions) |
+| PR label | `seo-guide` |
+| Branch | `guides/auto/{slug}` |
+
+**Flow:** `npm run guides:publish-next` → SVT news relevance check → `npm test` + `npm run check` → commit `content/guides/sv/{slug}.md` → open PR for review. Skips when the keyword queue is empty, no relevant SVT headline (`news_not_relevant`), or a branch/PR for that slug already exists.
+
+**Human review before merge:** spot-check kvitto/butik claims; the checklist does not catch factual errors.
+
+### Auto-deploy after guide merge
+
+[`deploy.yml`](../.github/workflows/deploy.yml) also triggers on `push` to `master` when paths under `content/guides/**` change.
+
+| Commit type | Deploy |
+|-------------|--------|
+| Guide-only merge (`content/guides/**` only) | Full pipeline auto-runs (quality → e2e → Firebase) |
+| Mixed commit (guides + code) | Auto-deploy **skipped** — run manual **Deploy to production** |
+| Feature release (no guide paths) | Manual **Deploy to production** as today |
+
+Requires existing `FIREBASE_TOKEN` secret. Sitemap picks up new slugs via `getPublishedGuideSitemapEntries` after deploy.
 
 ### Guide analytics
 

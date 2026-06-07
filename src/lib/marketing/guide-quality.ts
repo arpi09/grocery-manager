@@ -8,7 +8,7 @@ export const GUIDE_INTERNAL_LINK_PATTERNS = [
 	/\/guider\/[a-z0-9-]+/
 ] as const;
 
-/** Phrases that suggest hallucinated pricing or guarantees — reject in generated drafts. */
+/** Phrases that suggest hallucinated pricing, guarantees, or off-topic claims. */
 export const GUIDE_FORBIDDEN_PHRASES = [
 	'100% garanti',
 	'garanterat gratis för alltid',
@@ -16,7 +16,16 @@ export const GUIDE_FORBIDDEN_PHRASES = [
 	'ingen kostnad någonsin',
 	'0 kr för alltid',
 	'livstids gratis',
-	'gratis för alltid utan begränsning'
+	'gratis för alltid utan begränsning',
+	'konspiration',
+	'dold sanning',
+	'hemlig sanning',
+	'big pharma',
+	'chockande sanning',
+	'botar cancer',
+	'botar diabetes',
+	'garanterat hälsosam',
+	'regeringen vill att du'
 ] as const;
 
 export interface GuideQualityInput {

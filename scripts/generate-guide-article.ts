@@ -4,14 +4,26 @@
  * Usage:
  *   npm run guides:generate -- --keyword 0
  *   npm run guides:generate -- --topic "utgångsdatum kylskåp app"
+ *   npm run guides:publish-next   # --next --publish
+ *   npm run guides:generate -- --next --skip-news-check   # bypass SVT gate (local)
  *
- * Writes draft to content/guides/sv/{slug}.md with published: false.
- * Review checklist output before setting published: true.
+ * Before generation (unless --skip-news-check): fetches SVT Nyheter RSS and skips
+ * with exit 0 when no headline matches Skaffu themes (news_not_relevant).
+ * With --publish, sets published: true only when the quality checklist passes.
  */
 
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { GUIDE_KEYWORD_MATRIX } from '../src/lib/marketing/guides.ts';
+import {
+	GUIDE_KEYWORD_MATRIX,
+	resolveNextGuideKeywordIndex,
+	slugForGuideKeyword
+} from '../src/lib/marketing/guides.ts';
+import { GUIDE_AI_CONTENT_RULES } from '../src/lib/marketing/guide-generation-rules.ts';
+import {
+	formatNewsContextForPrompt,
+	resolveGuideNewsContext
+} from '../src/lib/marketing/guide-news-context.ts';
 import { validateGuideQuality } from '../src/lib/marketing/guide-quality.ts';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
@@ -22,6 +34,10 @@ interface CliOptions {
 	topic?: string;
 	keywordIndex?: number;
 	slug?: string;
+	next?: boolean;
+	publish?: boolean;
+	/** Bypass SVT relevance gate (local/manual runs only). */
+	skipNewsCheck?: boolean;
 }
 
 function parseArgs(argv: string[]): CliOptions {
@@ -34,22 +50,26 @@ function parseArgs(argv: string[]): CliOptions {
 			options.keywordIndex = Number(argv[++i]);
 		} else if (arg === '--slug' && argv[i + 1]) {
 			options.slug = argv[++i];
+		} else if (arg === '--next') {
+			options.next = true;
+		} else if (arg === '--publish') {
+			options.publish = true;
+		} else if (arg === '--skip-news-check') {
+			options.skipNewsCheck = true;
 		}
 	}
 	return options;
 }
 
-function slugify(value: string): string {
-	return value
-		.toLowerCase()
-		.normalize('NFD')
-		.replace(/[\u0300-\u036f]/g, '')
-		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/^-+|-+$/g, '')
-		.slice(0, 80);
-}
-
 function resolveKeywordBatch(options: CliOptions) {
+	if (options.next) {
+		const index = resolveNextGuideKeywordIndex();
+		if (index === null) {
+			return null;
+		}
+		return { batch: GUIDE_KEYWORD_MATRIX[index], index };
+	}
+
 	if (options.topic) {
 		const match = GUIDE_KEYWORD_MATRIX.find(
 			(row) =>
@@ -58,12 +78,15 @@ function resolveKeywordBatch(options: CliOptions) {
 				row.primaryKeyword.includes(options.topic ?? '')
 		);
 		if (match) {
-			return match;
+			return { batch: match, index: GUIDE_KEYWORD_MATRIX.indexOf(match) };
 		}
 		return {
-			topic: options.topic,
-			primaryKeyword: options.topic,
-			angle: 'Butiksneutralt skafferi med lager som sanningskälla'
+			batch: {
+				topic: options.topic,
+				primaryKeyword: options.topic,
+				angle: 'Butiksneutralt skafferi med lager som sanningskälla'
+			},
+			index: -1
 		};
 	}
 
@@ -72,7 +95,7 @@ function resolveKeywordBatch(options: CliOptions) {
 	if (!row) {
 		throw new Error(`Invalid --keyword index ${index}. Use 0-${GUIDE_KEYWORD_MATRIX.length - 1}.`);
 	}
-	return row;
+	return { batch: row, index };
 }
 
 function extractResponseText(payload: unknown): string {
@@ -143,6 +166,7 @@ function buildFrontmatterBlock(input: {
 	description: string;
 	date: string;
 	keywords: string[];
+	published: boolean;
 }): string {
 	const keywordLines = input.keywords.map((kw) => `  - ${kw}`).join('\n');
 	return `---
@@ -151,7 +175,7 @@ description: ${JSON.stringify(input.description)}
 date: ${input.date}
 keywords:
 ${keywordLines}
-published: false
+published: ${input.published}
 ---`;
 }
 
@@ -181,6 +205,37 @@ function parseGeneratedMarkdown(raw: string): {
 	return { title, description, keywords, body };
 }
 
+function buildGenerationPrompt(input: {
+	batch: { primaryKeyword: string; angle: string };
+	today: string;
+	newsContext?: string;
+}): string {
+	const rulesBlock = GUIDE_AI_CONTENT_RULES.map((rule) => `- ${rule}`).join('\n');
+	const newsBlock = input.newsContext
+		? `\n\nNyhetskontext (valfritt men relevant):\n${input.newsContext}`
+		: '';
+
+	return `Du skriver en SEO-guide på svenska för Skaffu (skafferi-app, skaffu.com).
+
+Primärt sökord: ${input.batch.primaryKeyword}
+Vinkel: ${input.batch.angle}
+
+Redaktionella regler (följ alla):
+${rulesBlock}
+
+Krav:
+- Minst 850 ord i brödtexten (markdown efter frontmatter).
+- Frontmatter med title, description (120-160 tecken), date (${input.today}), keywords (3-5), published: false.
+- Minst en intern länk till /register, /kvitto-pdf-kivra eller /guider/...
+- Länka naturligt till befintliga sidor: /minska-matsvinn, /skafferi-app, /kvitto-pdf-kivra där det passar.
+- Skriv ärligt om Skaffu: gratisplan finns, Pro från cirka 39 kr/mån — inga garantier eller "gratis för alltid".
+- Nämn att kvitto-AI kräver granskning; inga påhittade butiksintegrationer utöver PDF/Kivra.
+- Uppfinn inga fakta, citat, studier eller medicinska råd utanför skafferiområdet.
+- Svara ENDAST med komplett markdown-fil (frontmatter + artikel), inga kodblock runt hela svaret.
+
+Struktur: H1 i frontmatter title (inte i body), 5-7 H2-sektioner, punktlistor där det hjälper, avsluta med CTA-länk till /register.${newsBlock}`;
+}
+
 async function main(): Promise<void> {
 	const apiKey = process.env.OPENAI_API_KEY?.trim();
 	if (!apiKey) {
@@ -189,8 +244,14 @@ async function main(): Promise<void> {
 	}
 
 	const options = parseArgs(process.argv.slice(2));
-	const batch = resolveKeywordBatch(options);
-	const slug = options.slug ?? slugify(batch.primaryKeyword);
+	const resolved = resolveKeywordBatch(options);
+	if (!resolved) {
+		console.info('[guides:generate] queue_empty — all keyword-matrix guides already exist');
+		process.exit(0);
+	}
+
+	const { batch } = resolved;
+	const slug = options.slug ?? slugForGuideKeyword(batch.primaryKeyword);
 
 	if (!slug) {
 		throw new Error('Could not derive slug from keyword');
@@ -202,23 +263,29 @@ async function main(): Promise<void> {
 		throw new Error(`Refusing to overwrite existing guide: ${outPath}`);
 	}
 
+	let newsContext: string | undefined;
+	if (!options.skipNewsCheck) {
+		const news = await resolveGuideNewsContext();
+		if (news.mode === 'not_relevant') {
+			console.info(
+				'[guides:generate] news_not_relevant — no SVT headline matched Skaffu themes; skipping generation'
+			);
+			process.exit(0);
+		}
+		if (news.mode === 'rss_unavailable') {
+			console.warn(
+				'[guides:generate] SVT RSS unavailable — falling back to keyword-matrix-only generation'
+			);
+		} else if (news.relevance?.item) {
+			newsContext = formatNewsContextForPrompt(news.relevance.item, news.relevance.matchedTopics);
+			console.info(
+				`[guides:generate] news="${news.relevance.item.title.slice(0, 60)}..." topics=${news.relevance.matchedTopics.join(', ')}`
+			);
+		}
+	}
+
 	const today = new Date().toISOString().slice(0, 10);
-	const prompt = `Du skriver en SEO-guide på svenska för Skaffu (skafferi-app, skaffu.com).
-
-Primärt sökord: ${batch.primaryKeyword}
-Vinkel: ${batch.angle}
-
-Krav:
-- Minst 850 ord i brödtexten (markdown efter frontmatter).
-- Frontmatter med title, description (120-160 tecken), date (${today}), keywords (3-5), published: false.
-- Minst en intern länk till /register, /kvitto-pdf-kivra eller /guider/...
-- Länka naturligt till befintliga sidor: /minska-matsvinn, /skafferi-app, /kvitto-pdf-kivra där det passar.
-- Skriv ärligt om Skaffu: gratisplan finns, Pro från cirka 39 kr/mån — inga garantier eller "gratis för alltid".
-- Nämn att kvitto-AI kräver granskning; inga påhittade butiksintegrationer utöver PDF/Kivra.
-- Undvik generiska hälsotips utan koppling till skafferi/lager.
-- Svara ENDAST med komplett markdown-fil (frontmatter + artikel), inga kodblock runt hela svaret.
-
-Struktur: H1 i frontmatter title (inte i body), 5-7 H2-sektioner, punktlistor där det hjälper, avsluta med CTA-länk till /register.`;
+	const prompt = buildGenerationPrompt({ batch, today, newsContext });
 
 	console.info(`[guides:generate] keyword="${batch.primaryKeyword}" slug=${slug}`);
 	const generated = await callOpenAi(prompt, apiKey);
@@ -230,27 +297,40 @@ Struktur: H1 i frontmatter title (inte i body), 5-7 H2-sektioner, punktlistor d�
 		body: parsed.body
 	});
 
-	const fileContent = `${buildFrontmatterBlock({
-		title: parsed.title,
-		description: parsed.description,
-		date: today,
-		keywords: parsed.keywords.length > 0 ? parsed.keywords : [batch.primaryKeyword]
-	})}\n\n${parsed.body}\n`;
-
-	writeFileSync(outPath, fileContent, 'utf8');
-
-	console.info(`[guides:generate] wrote ${outPath}`);
-	console.info(`[guides:generate] wordCount=${quality.wordCount} published=false`);
 	if (!quality.ok) {
 		console.warn('[guides:generate] checklist FAILED:');
 		for (const err of quality.errors) {
 			console.warn(`  - ${err}`);
 		}
+		if (options.publish) {
+			console.error('[guides:generate] --publish refused: fix checklist failures first');
+			process.exit(2);
+		}
 		console.warn('[guides:generate] edit the draft manually before publishing.');
+	}
+
+	const published = options.publish && quality.ok;
+	const fileContent = `${buildFrontmatterBlock({
+		title: parsed.title,
+		description: parsed.description,
+		date: today,
+		keywords: parsed.keywords.length > 0 ? parsed.keywords : [batch.primaryKeyword],
+		published
+	})}\n\n${parsed.body}\n`;
+
+	writeFileSync(outPath, fileContent, 'utf8');
+
+	console.info(`[guides:generate] wrote ${outPath}`);
+	console.info(`[guides:generate] wordCount=${quality.wordCount} published=${published}`);
+	if (!quality.ok) {
 		process.exit(2);
 	}
 
-	console.info('[guides:generate] checklist passed — review content, then set published: true');
+	if (published) {
+		console.info('[guides:generate] checklist passed — guide is publish-ready');
+	} else {
+		console.info('[guides:generate] checklist passed — review content, then set published: true');
+	}
 }
 
 main().catch((error) => {

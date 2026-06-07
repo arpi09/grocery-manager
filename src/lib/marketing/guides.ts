@@ -64,6 +64,28 @@ export const GUIDE_KEYWORD_MATRIX = [
 	}
 ] as const;
 
+/** Slug for a guide file from its primary SEO keyword (matches generate-guide-article.ts). */
+export function slugForGuideKeyword(primaryKeyword: string): string {
+	return primaryKeyword
+		.toLowerCase()
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-+|-+$/g, '')
+		.slice(0, 80);
+}
+
+/** First keyword-matrix index without a guide file, or null when the queue is empty. */
+export function resolveNextGuideKeywordIndex(): number | null {
+	for (let index = 0; index < GUIDE_KEYWORD_MATRIX.length; index++) {
+		const slug = slugForGuideKeyword(GUIDE_KEYWORD_MATRIX[index].primaryKeyword);
+		if (!existsSync(join(GUIDES_CONTENT_DIR, `${slug}.md`))) {
+			return index;
+		}
+	}
+	return null;
+}
+
 function parseFrontmatter(raw: string): { frontmatter: Record<string, unknown>; body: string } {
 	const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
 	if (!match) {

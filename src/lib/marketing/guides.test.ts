@@ -1,11 +1,14 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { validateGuideQuality } from '$lib/marketing/guide-quality';
 import {
 	getLatestPublishedGuides,
+	GUIDE_KEYWORD_MATRIX,
 	guideCtaSearchParams,
 	guideRegisterUrl,
 	loadGuideBySlug,
-	loadPublishedGuides
+	loadPublishedGuides,
+	resolveNextGuideKeywordIndex,
+	slugForGuideKeyword
 } from '$lib/marketing/guides';
 
 describe('guides content', () => {
@@ -33,6 +36,46 @@ describe('guides content', () => {
 		expect(guideRegisterUrl('test-slug', '/register')).toBe(
 			'/register?utm_campaign=seo-guide&utm_content=test-slug'
 		);
+	});
+});
+
+describe('guide keyword queue', () => {
+	it('slugForGuideKeyword matches expected slugs', () => {
+		expect(slugForGuideKeyword('minska matsvinn hemma app')).toBe('minska-matsvinn-hemma-app');
+		expect(slugForGuideKeyword('kvitto pdf till inköpslista')).toBe('kvitto-pdf-till-inkopslista');
+	});
+
+	it('resolveNextGuideKeywordIndex skips existing guide files', () => {
+		const index = resolveNextGuideKeywordIndex();
+		expect(index).not.toBe(0);
+		if (index !== null) {
+			const slug = slugForGuideKeyword(GUIDE_KEYWORD_MATRIX[index].primaryKeyword);
+			expect(loadGuideBySlug(slug)).toBeNull();
+		}
+	});
+
+	it('resolveNextGuideKeywordIndex returns null when all matrix slugs exist', async () => {
+		const slugs = GUIDE_KEYWORD_MATRIX.map((row) => slugForGuideKeyword(row.primaryKeyword));
+
+		vi.doMock('node:fs', async (importOriginal) => {
+			const actual = await importOriginal<typeof import('node:fs')>();
+			return {
+				...actual,
+				existsSync: (path: Parameters<typeof actual.existsSync>[0]) => {
+					const normalized = String(path).replace(/\\/g, '/');
+					if (slugs.some((slug) => normalized.endsWith(`content/guides/sv/${slug}.md`))) {
+						return true;
+					}
+					return actual.existsSync(path);
+				}
+			};
+		});
+
+		vi.resetModules();
+		const { resolveNextGuideKeywordIndex: resolveEmptyQueue } = await import('$lib/marketing/guides');
+		expect(resolveEmptyQueue()).toBeNull();
+		vi.doUnmock('node:fs');
+		vi.resetModules();
 	});
 });
 

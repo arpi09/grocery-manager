@@ -21,21 +21,80 @@ on:
         required: false
         default: false
         type: boolean
+  push:
+    branches: [master]
+    paths:
+      - 'content/guides/**'
 
 concurrency:
   group: deploy-production
   cancel-in-progress: false
 
 jobs:
+  gate:
+    name: gate
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      guide_only: ${{ steps.check.outputs.guide_only }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Verify guide-only commit
+        id: check
+        run: |
+          set -euo pipefail
+
+          if git rev-parse -q --verify HEAD^2 >/dev/null 2>&1; then
+            changed=$(git diff --name-only HEAD^1 HEAD^2 HEAD)
+          else
+            changed=$(git diff-tree --no-commit-id --name-only -r HEAD)
+          fi
+
+          if [ -z "$changed" ]; then
+            echo "guide_only=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No changed files in commit — skipping deploy."
+            exit 0
+          fi
+
+          guide_only=true
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            case "$file" in
+              content/guides/*) ;;
+              *)
+                guide_only=false
+                break
+                ;;
+            esac
+          done <<< "$changed"
+
+          if [ "$guide_only" = "true" ]; then
+            echo "guide_only=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Guide-only commit — running full deploy pipeline."
+          else
+            echo "guide_only=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Mixed commit (not only content/guides/**) — skipping auto-deploy. Run manual deploy for releases."
+          fi
+
   quality:
     name: quality
+    needs: [gate]
+    if: >
+      always() &&
+      (github.event_name == 'workflow_dispatch' ||
+       (needs.gate.result == 'success' && needs.gate.outputs.guide_only == 'true'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.sha || inputs.ref }}
+          ref: ${{ github.event_name == 'push' && github.sha || (inputs.sha || inputs.ref) }}
 
       - uses: actions/setup-node@v6
         with:
@@ -69,7 +128,9 @@ jobs:
   e2e:
     name: e2e (${{ matrix.shard }}/3)
     needs: [quality]
-    if: inputs.skip_e2e != true
+    if: >
+      needs.quality.result == 'success' &&
+      (github.event_name != 'workflow_dispatch' || inputs.skip_e2e != true)
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -80,7 +141,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.sha || inputs.ref }}
+          ref: ${{ github.event_name == 'push' && github.sha || (inputs.sha || inputs.ref) }}
 
       - uses: actions/setup-node@v6
         with:
@@ -136,7 +197,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.sha || inputs.ref }}
+          ref: ${{ github.event_name == 'push' && github.sha || (inputs.sha || inputs.ref) }}
 
       - name: Deploy App Hosting backend
         id: deploy

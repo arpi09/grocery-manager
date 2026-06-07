@@ -1,0 +1,166 @@
+# Scheduled SEO guide generation — AI draft with published:true when checklist passes.
+# Opens a PR for human review before merge. Label: seo-guide
+#
+# GitHub secret: OPENAI_API_KEY
+
+name: Guides generate cron
+
+on:
+  schedule:
+    # Monday + Thursday 07:00 UTC (~09:00 CET)
+    - cron: '0 7 * * 1,4'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: guides-generate-cron
+  cancel-in-progress: false
+
+jobs:
+  generate-pr:
+    name: generate-guide-pr
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate next publish-ready guide
+        id: generate
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${OPENAI_API_KEY:-}" ]; then
+            echo "::error::GitHub secret OPENAI_API_KEY is not set."
+            exit 1
+          fi
+
+          set +e
+          output=$(npm run guides:publish-next 2>&1)
+          exit_code=$?
+          set -e
+          echo "$output"
+
+          if echo "$output" | grep -q 'queue_empty'; then
+            echo "queue_empty=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::Guide keyword queue is empty — nothing to generate."
+            exit 0
+          fi
+
+          if echo "$output" | grep -q 'news_not_relevant'; then
+            echo "queue_empty=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::No relevant SVT news for Skaffu themes — skipping generation."
+            exit 0
+          fi
+
+          if [ "$exit_code" -ne 0 ]; then
+            echo "::error::guides:publish-next failed (exit $exit_code)."
+            exit "$exit_code"
+          fi
+
+          slug=$(echo "$output" | grep -oE 'slug=[a-z0-9-]+' | head -1 | cut -d= -f2)
+          if [ -z "$slug" ]; then
+            echo "::error::Could not parse slug from generator output."
+            exit 1
+          fi
+
+          keyword=$(echo "$output" | sed -n 's/.*keyword="\([^"]*\)".*/\1/p' | head -1)
+          word_count=$(echo "$output" | grep -oE 'wordCount=[0-9]+' | head -1 | cut -d= -f2)
+          published=$(echo "$output" | grep -oE 'published=(true|false)' | head -1 | cut -d= -f2)
+
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+          echo "keyword=$keyword" >> "$GITHUB_OUTPUT"
+          echo "word_count=$word_count" >> "$GITHUB_OUTPUT"
+          echo "published=$published" >> "$GITHUB_OUTPUT"
+          echo "queue_empty=false" >> "$GITHUB_OUTPUT"
+
+      - name: Verify tests and types
+        if: steps.generate.outputs.queue_empty != 'true'
+        run: |
+          npm test
+          npm run check
+        env:
+          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+
+      - name: Create PR
+        if: steps.generate.outputs.queue_empty != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLUG: ${{ steps.generate.outputs.slug }}
+          KEYWORD: ${{ steps.generate.outputs.keyword }}
+          WORD_COUNT: ${{ steps.generate.outputs.word_count }}
+          PUBLISHED: ${{ steps.generate.outputs.published }}
+        run: |
+          set -euo pipefail
+
+          branch="guides/auto/${SLUG}"
+          guide_path="content/guides/sv/${SLUG}.md"
+
+          if [ ! -f "$guide_path" ]; then
+            echo "::error::Expected guide file missing: $guide_path"
+            exit 1
+          fi
+
+          if git ls-remote --heads origin "$branch" | grep -q .; then
+            echo "::notice::Branch $branch already exists — skipping PR."
+            exit 0
+          fi
+
+          existing_pr=$(gh pr list --head "$branch" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$existing_pr" ]; then
+            echo "::notice::Open PR #$existing_pr already exists for $branch — skipping."
+            exit 0
+          fi
+
+          title=$(grep -m1 '^title:' "$guide_path" | sed 's/^title: //' | tr -d '"')
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add "$guide_path"
+          git commit -m "feat(guides): ${title:-$SLUG}"
+
+          git push -u origin "$branch"
+
+          workflow_url="${{ github.server_url }}/${{ github.repository }}/actions/workflows/guides-generate-cron.yml"
+          pr_body=$(printf '%s\n' \
+            '## SEO guide (auto-generated)' \
+            '' \
+            '| Field | Value |' \
+            '|-------|-------|' \
+            "| Keyword | ${KEYWORD:-—} |" \
+            "| Slug | \`${SLUG}\` |" \
+            "| Title | ${title:-—} |" \
+            "| Word count | ${WORD_COUNT:-—} |" \
+            '| Checklist | passed |' \
+            "| Published | \`${PUBLISHED:-false}\` |" \
+            "| Preview (after deploy) | \`/guider/${SLUG}\` |" \
+            '' \
+            '### Review checklist' \
+            '' \
+            '- [ ] Spot-check kvitto / butik claims (ICA, Kivra, PDF)' \
+            '- [ ] Confirm internal links and CTA to `/register`' \
+            '- [ ] No fabricated pricing or integrations' \
+            '' \
+            "Generated by [\`guides-generate-cron\`](${workflow_url}).")
+
+          gh label create seo-guide --color 0E8A16 --description "Auto-generated SEO guide PR" 2>/dev/null || true
+
+          gh pr create \
+            --base master \
+            --head "$branch" \
+            --title "feat(guides): ${title:-$SLUG}" \
+            --body "$pr_body" \
+            --label seo-guide
