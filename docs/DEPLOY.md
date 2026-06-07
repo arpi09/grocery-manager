@@ -18,11 +18,13 @@ Det enklaste sättet att släppa till produktion: skriv till **coordinator** i C
 
 **Vad coordinator gör:**
 
-1. Kontrollerar att CI på `master` är grön och security-gate OK.
+1. Kontrollerar att CI `quality` på `master` är grön på **samma SHA** som ska deployas (deploy-workflowen verifierar detta automatiskt via G1b SHA-gate).
 2. Startar workflowen [**Deploy to production**](https://github.com/arpi09/grocery-manager/actions/workflows/deploy.yml) via `gh workflow run deploy.yml`.
-3. Följer körningen tills den är klar (~12–20 min med E2E — tre parallella shards).
-4. Om E2E eller quality failar: fixar minimalt, pushar `master`, kör deploy igen.
+3. Följer körningen tills **alla** jobb är gröna: `quality`, `e2e (1/3)(2/3)(3/3)`, `deploy`, `post-deploy smoke`, **`verify release completed`** (~12–20 min).
+4. Om E2E, smoke eller `verify-release` failar: fixar minimalt, pushar `master`, väntar på grön CI, kör deploy igen.
 5. Rapporterar tillbaka på svenska: SHA, länk till workflow-körning, prod-URL.
+
+**Ingen prod-release utan grön Deploy-workflow inkl. `verify-release`.** Säg aldrig "deployed" om bara CI eller bara `quality` är grön.
 
 Valfri mobilnotis skickas fortfarande om `DEPLOY_NOTIFY_WEBHOOK_URL` eller Telegram-secrets är konfigurerade.
 
@@ -61,9 +63,25 @@ Deploy till prod sker fortfarande bara när du ber coordinator om deploy i chatt
 
 | Fil | Namn (UI) | Trigger | Vad |
 |-----|-----------|---------|-----|
-| [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | **CI** | Push/PR → `master` | G1 quality — snabb feedback |
+| [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | **CI** | Push/PR → `master` | G1 quality (reusable) — snabb feedback |
 | [`.github/workflows/e2e.yml`](../.github/workflows/e2e.yml) | **E2E** | PR → `master`; `workflow_dispatch`; nattlig schedule | G2 Playwright (3 shards) |
-| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | **Deploy to production** | `workflow_dispatch` only | G1 → G2 (3 shards) → G3 Firebase |
+| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | **Deploy to production** | `workflow_dispatch`; guide-only `push` | G1b → G2 → G3 → G4 smoke → G5 verify-release |
+
+Guide-only auto-deploy: push till `master` som **endast** ändrar `content/guides/**` kör full deploy-pipeline (samma gates som manuell deploy).
+
+---
+
+## Ägare — checklista (GitHub + Firebase)
+
+Dessa steg kan inte aktiveras från kod men är **högsta ROI** mot dubbel deploy och trasiga releases:
+
+| Åtgärd | Var |
+|--------|-----|
+| Branch protection på `master` — kräv status check **`quality`** | GitHub → Settings → Branches |
+| Stäng av **Firebase App Hosting → GitHub auto-deploy** | Firebase Console |
+| Säkerställ `FIREBASE_TOKEN` och `PRODUCTION_URL` i GitHub | Settings → Secrets and variables |
+
+Se [CI_CD.md](./CI_CD.md) för G0–G5 gate-tabell och incident-lärdomar (2026-06-07).
 
 ---
 
@@ -92,14 +110,28 @@ Utan `FIREBASE_TOKEN` körs quality + E2E ändå; deploy-jobbet skippar med tydl
 
 ---
 
+## Release-gates (G0–G5)
+
+| Gate | Beskrivning |
+|------|-------------|
+| **G0** | Lokalt: `npm run check && npm test` |
+| **G1** | CI `quality` på varje push/PR (+ `check:server-imports`, `check:client-bundle`) |
+| **G1b** | Deploy kräver grön CI på samma SHA |
+| **G2** | E2E × 3 shards inkl. marketing hydration smoke |
+| **G3** | Firebase App Hosting deploy |
+| **G4** | `scripts/smoke-prod-urls.sh` — HTTP 200 + ingen `Internal Error` i HTML |
+| **G5** | `verify-release` — workflow failar om e2e/deploy/smoke inte kördes |
+
+---
+
 ## Efter deploy
 
-Coordinator eller e2e-agent kör [PROD_SMOKE.md](./PROD_SMOKE.md) (5 punkter) när deploy faktiskt skett — inte användaren som läxa.
+Coordinator eller e2e-agent kör [PROD_SMOKE.md](./PROD_SMOKE.md) (5 punkter) när deploy faktiskt skett — inte användaren som läxa. Verifiera `/` i browser med konsolen öppen (inte bara curl).
 
 ---
 
 ## English summary
 
 - **Merge to `master`** → fast CI only (~3–5 min).
-- **Production release** → GitHub Actions → **Deploy to production** → Run workflow.
+- **Production release** → GitHub Actions → **Deploy to production** → all jobs green including **verify release completed**.
 - **E2E before merge (optional)** → open a PR to `master` (E2E workflow) or run **E2E** manually.

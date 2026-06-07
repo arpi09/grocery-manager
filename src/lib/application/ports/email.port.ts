@@ -46,4 +46,13 @@ export interface EmailPort {
 		html: string;
 		text: string;
 	}): Promise<SendEmailResult>;
+
+	getErrorAlertTo(): string | null;
+
+	sendOwnerErrorAlert(input: {
+		to: string;
+		subject: string;
+		html: string;
+		text: string;
+	}): Promise<SendEmailResult>;
 }

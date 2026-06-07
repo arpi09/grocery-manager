@@ -35,6 +35,15 @@ export function getPmfDigestTo(): string | null {
 	return to ? to : null;
 }
 
+/** Owner prod error alert recipient — falls back to PMF_DIGEST_TO. */
+export function getErrorAlertTo(): string | null {
+	const to = env.ERROR_ALERT_TO?.trim();
+	if (to) {
+		return to;
+	}
+	return getPmfDigestTo();
+}
+
 export function missingResendKeyMessage(locale: Locale = 'sv'): string {
 	return translate(locale, 'email.inviteWarning.missingApiKey');
 }
@@ -756,6 +765,53 @@ export async function sendOwnerPmfDigest(input: SendEmailInput): Promise<SendEma
 	}
 
 	console.info(`[email] PMF digest sent to ${input.to}${data?.id ? ` (id: ${data.id})` : ''}`);
+	return { ok: true, id: data?.id };
+}
+
+/**
+ * Owner prod error alert — bypasses EMAIL_SENDING_DISABLED and admin email toggle.
+ * Only sends when ERROR_ALERT_TO (or PMF_DIGEST_TO) is configured and matches `input.to`.
+ */
+export async function sendOwnerErrorAlert(input: SendEmailInput): Promise<SendEmailResult> {
+	const allowedTo = getErrorAlertTo();
+	if (!allowedTo) {
+		const reason = 'ERROR_ALERT_TO / PMF_DIGEST_TO is not configured';
+		console.warn(`[email] ${reason}; skipped error alert`);
+		return { ok: false, reason };
+	}
+
+	if (input.to !== allowedTo) {
+		const reason = 'Error alert recipient does not match configured owner address';
+		console.warn(`[email] ${reason}; skipped send to ${input.to}`);
+		return { ok: false, reason };
+	}
+
+	const apiKey = getResendApiKey();
+	if (!apiKey) {
+		const reason = 'RESEND_API_KEY is not configured';
+		console.warn(`[email] ${reason}; skipped error alert to ${input.to}`);
+		return { ok: false, reason };
+	}
+
+	console.info(`[email] Sending error alert to ${input.to} via Resend`);
+	const resend = new Resend(apiKey);
+	const { data, error } = await resend.emails.send({
+		from: getEmailFrom(),
+		to: input.to,
+		subject: input.subject,
+		html: input.html,
+		text: input.text
+	});
+
+	if (error) {
+		const reason = resendErrorMessage(error);
+		const statusCode = resendErrorStatusCode(error);
+		const statusSuffix = statusCode ? ` (HTTP ${statusCode})` : '';
+		console.error(`[email] Failed to send error alert to ${input.to}: ${reason}${statusSuffix}`);
+		return { ok: false, reason, statusCode };
+	}
+
+	console.info(`[email] Error alert sent to ${input.to}${data?.id ? ` (id: ${data.id})` : ''}`);
 	return { ok: true, id: data?.id };
 }
 

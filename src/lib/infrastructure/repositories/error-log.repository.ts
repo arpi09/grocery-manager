@@ -1,4 +1,4 @@
-import { desc, eq, inArray, lt } from 'drizzle-orm';
+import { desc, eq, gte, inArray, lt } from 'drizzle-orm';
 import { db } from '$lib/infrastructure/db';
 import { appErrorTable } from '$lib/infrastructure/db/schema';
 import type { AppErrorEntry, AppErrorSummary, RecordAppErrorInput } from '$lib/domain/error-log';
@@ -11,6 +11,7 @@ export interface IErrorLogRepository {
 	insert(entry: RecordAppErrorInput & { id: string }): Promise<void>;
 	listRecent(limit: number): Promise<AppErrorEntry[]>;
 	listRecentSummaries(limit: number): Promise<AppErrorSummary[]>;
+	listSummariesSince(since: Date, limit: number): Promise<AppErrorSummary[]>;
 	getStack(id: string): Promise<string | null>;
 	enforceRetention(): Promise<void>;
 }
@@ -57,6 +58,28 @@ export class DrizzleErrorLogRepository implements IErrorLogRepository {
 				createdAt: appErrorTable.createdAt
 			})
 			.from(appErrorTable)
+			.orderBy(desc(appErrorTable.createdAt))
+			.limit(limit);
+
+		return rows.map(({ stack, ...row }) => ({
+			...row,
+			hasStack: stack !== null
+		}));
+	}
+
+	async listSummariesSince(since: Date, limit: number): Promise<AppErrorSummary[]> {
+		const rows = await db
+			.select({
+				id: appErrorTable.id,
+				message: appErrorTable.message,
+				stack: appErrorTable.stack,
+				path: appErrorTable.path,
+				userId: appErrorTable.userId,
+				statusCode: appErrorTable.statusCode,
+				createdAt: appErrorTable.createdAt
+			})
+			.from(appErrorTable)
+			.where(gte(appErrorTable.createdAt, since))
 			.orderBy(desc(appErrorTable.createdAt))
 			.limit(limit);
 

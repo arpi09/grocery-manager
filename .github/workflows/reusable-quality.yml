@@ -1,0 +1,114 @@
+# Shared quality gate — lint, check, test, integration, build, bundle guards.
+# Called from ci.yml and deploy.yml so steps never drift.
+
+name: Reusable quality
+
+on:
+  workflow_call:
+    inputs:
+      upload_build_artifact:
+        description: Upload sveltekit-build artifact for E2E shards
+        type: boolean
+        default: false
+      run_audit:
+        description: Run npm audit (runtime critical/high)
+        type: boolean
+        default: false
+      verify_ci_sha:
+        description: Require green CI quality check-run on this commit (deploy only)
+        type: boolean
+        default: false
+      deploy_ref:
+        description: Git ref to verify when verify_ci_sha is true (branch/tag)
+        required: false
+        type: string
+      deploy_sha:
+        description: Commit SHA to verify/build when set (overrides deploy_ref)
+        required: false
+        type: string
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Resolve deploy commit SHA
+        if: inputs.verify_ci_sha
+        id: deploy-sha
+        env:
+          DEPLOY_REF: ${{ inputs.deploy_ref }}
+          DEPLOY_SHA_INPUT: ${{ inputs.deploy_sha }}
+        run: |
+          set -euo pipefail
+          if [ -n "${DEPLOY_SHA_INPUT:-}" ]; then
+            sha="$DEPLOY_SHA_INPUT"
+          elif [ -n "${DEPLOY_REF:-}" ]; then
+            sha=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${DEPLOY_REF}" --jq .sha)
+          else
+            sha="${GITHUB_SHA}"
+          fi
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
+          echo "Deploy target SHA: ${sha}"
+
+      - name: Verify green CI quality on same SHA
+        if: inputs.verify_ci_sha
+        env:
+          DEPLOY_SHA: ${{ steps.deploy-sha.outputs.sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          echo "Checking CI quality check-run for commit ${DEPLOY_SHA}…"
+          conclusion=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${DEPLOY_SHA}/check-runs" \
+            --paginate \
+            --jq '[.check_runs[] | select(.name == "quality")] | sort_by(.started_at) | last | .conclusion // "missing"')
+          status=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${DEPLOY_SHA}/check-runs" \
+            --paginate \
+            --jq '[.check_runs[] | select(.name == "quality")] | sort_by(.started_at) | last | .status // "missing"')
+          echo "quality check-run: status=${status} conclusion=${conclusion}"
+          if [ "$status" != "completed" ] || [ "$conclusion" != "success" ]; then
+            echo "::error::No successful CI quality check-run on ${DEPLOY_SHA}. Wait for CI on master or fix failures before deploy."
+            exit 1
+          fi
+          echo "CI quality passed on ${DEPLOY_SHA}."
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.deploy_sha || inputs.deploy_ref || github.sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+      - run: npm run check:locales
+      - run: npm run check:server-imports
+      - run: npm run check
+        env:
+          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+      - run: npm test
+      - run: npm run test:receipt-fixtures
+      - run: npm run test:integration
+        env:
+          USE_PGLITE: 'true'
+      - run: npm run build
+        env:
+          DATABASE_URL: postgresql://pantry:pantry@localhost:5432/pantry
+          USE_PGLITE: 'true'
+          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+      - run: npm run check:client-bundle
+
+      - name: npm audit (runtime critical/high)
+        if: inputs.run_audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - uses: actions/upload-artifact@v7
+        if: inputs.upload_build_artifact
+        with:
+          name: sveltekit-build
+          path: build/
+          retention-days: 1

@@ -18,35 +18,49 @@ flowchart TB
 
   subgraph G1["G1 — CI (~3–5 min, varje push/PR)"]
     push[git push origin master]
-    q[lint · check · test · integration · build]
+    q[lint · server-imports · check · test · build · client-bundle]
     push --> q
   end
 
-  subgraph G2["G2 — e2e (~3–8 min, valfritt)"]
-    e2e[Playwright chromium × 3 shards]
-    pr[PR / manuellt / nattligt]
-    pr --> e2e
-  end
-
-  subgraph G3["G3 — deploy (~5–20 min, manuellt)"]
-    manual[Actions → Deploy to production]
-    fb[Firebase App Hosting]
-    manual --> q2[quality + e2e]
-    q2 --> fb
+  subgraph release["Deploy to production"]
+    G1b[G1b — CI SHA gate + quality]
+    G2[G2 — E2E × 3 shards + marketing hydration]
+    G2b[G2b — client-bundle check]
+    G3[G3 — Firebase App Hosting]
+    G4[G4 — prod smoke HTML]
+    G5[G5 — verify-release]
+    G1b --> G2 --> G2b --> G3 --> G4 --> G5
   end
 
   commit --> push
-  q -.->|när du är redo| manual
+  q -.->|när du är redo| G1b
 ```
 
 | Gate | När | Vad | Måltid | Blockerar |
 |------|-----|-----|--------|-----------|
 | **G0** | Före commit (agenter) | `npm run check && npm test` + husky `lint-staged` | ~1–2 min | Lokalt |
-| **G1** | Push/PR till `master` | `lint`, `check`, `test`, `test:integration` (PGlite), `build` | ~3–5 min | — (ingen auto-deploy) |
-| **G2** | PR, manuellt, nattligt, eller före deploy | Playwright E2E (PGlite), **3 parallella shards** | ~3–8 min (väggtid) | G3 (vid deploy) |
-| **G3** | Manuell trigger | `firebase deploy --only apphosting:home-pantry` | ~5–20 min | Produktion |
+| **G1** | Push/PR till `master` | Reusable `quality`: lint, `check:server-imports`, check, test, integration, build, `check:client-bundle`, audit | ~3–5 min | Deploy (via SHA-gate) |
+| **G1b** | Deploy `quality` | Kräver grön CI `quality` på **samma SHA** + samma steg som G1 | ~3–5 min | G2 |
+| **G2** | Deploy (alltid), PR, nattligt | Playwright E2E (PGlite), **3 shards**; marketing `pageerror`-check på `/` och guide-slug | ~3–8 min | G3 |
+| **G2b** | I G1/G1b efter build | `scripts/check-client-bundle.mjs` — fångar `process.cwd`, `node:fs` i klient | ~2 s | Deploy |
+| **G3** | Deploy | `firebase deploy --only apphosting:home-pantry` | ~5–20 min | Produktion |
+| **G4** | Efter G3 | `scripts/smoke-prod-urls.sh` — HTTP 200 + ingen `Internal Error`/500 i HTML; valfri 2× med 30 s paus | ~1 min | Release (workflow röd) |
+| **G5** | Deploy (sista jobbet) | `verify-release` — fail om E2E/deploy/smoke skippades eller misslyckades | ~5 s | Agent får inte säga "deployed" |
 
 **Efter merge:** ~3–5 min till grön CI. Deploy när du vill — typiskt ~15–25 min för full deploy-kedja.
+
+**Ingen prod-release utan grön Deploy-workflow inkl. `verify-release`.** Merge till `master` deployar inte automatiskt (utom guide-only push — se nedan).
+
+### Incident 2026-06-07 (lärdomar)
+
+| Gap | Konsekvens | Åtgärd i repo |
+|-----|------------|---------------|
+| CI körde inte E2E | `process is not defined` i klient nådde prod | Marketing E2E `pageerror`-check; client-bundle guard |
+| Deploy utan E2E tilläts | Firebase deploy utan Playwright | `verify-release` på `workflow_dispatch` **och** guide-only `push` |
+| Workflow **success** när bara `quality` kördes | Agent trodde prod var uppdaterad | `verify-release` failar om e2e/deploy/smoke inte `success` |
+| Post-deploy smoke = curl HTTP 200 | SSR 200 + JS-krasch passerade | Smoke läser HTML-body; dubbelkoll med paus |
+| Ingen guard mot server-kod i client bundle | Guides-regression | `check:client-bundle` + `check:server-imports` |
+| Playwright plockade vitest under `e2e/helpers/` | Hotfix deploy blockerades | `testMatch: **/*.spec.ts` + `tests/unit/receipt-fixtures.test.ts` |
 
 ### Nattlig E2E + Cursor Automation
 
@@ -80,25 +94,34 @@ När uppgiften är klar:
 
 | Fil | Namn (UI) | Trigger |
 |-----|-----------|---------|
+| [`.github/workflows/reusable-quality.yml`](../.github/workflows/reusable-quality.yml) | *(reusable)* | `workflow_call` från CI och deploy |
 | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | **CI** | `push` / `pull_request` → `master`/`main` |
 | [`.github/workflows/e2e.yml`](../.github/workflows/e2e.yml) | **E2E** | PR → `master`/`main`; `workflow_dispatch`; schedule 03:00 UTC |
-| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | **Deploy to production** | `workflow_dispatch` only |
+| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | **Deploy to production** | `workflow_dispatch`; `push` → `master` när **endast** `content/guides/**` ändrats |
 
-Deploy-kedja: `quality` → `e2e` (matrix 3 shards) → `deploy` → **`post-deploy smoke`** (`needs:` i samma workflow). Varje shard laddar ner samma `sveltekit-build`-artifact från `quality`, startar egen webServer + PGlite, och kör `playwright test --shard=N/3` (`workers: 1` per shard). Smoke curl:ar `https://skaffu.com/`, `/login`, `/guider` — workflow **failar** om någon svarar ≠ 200 (även om Firebase redan lyckades).
+Deploy-kedja: `gate` → `quality` (reusable + **CI SHA-gate**) → `e2e` (matrix 3 shards) → `deploy` → **`post-deploy smoke`** → **`verify-release`**. Varje shard laddar ner samma `sveltekit-build`-artifact från `quality`. Smoke curl:ar `/`, `/login`, `/guider` och failar på fel HTTP **eller** fel HTML (`Internal Error`, SvelteKit 500).
 
 ### Deploy gates (obligatoriska)
 
 | Gate | Var | Blockerar prod? | Varför |
 |------|-----|-----------------|--------|
-| **G1 quality** | `deploy.yml` job `quality` | Ja | Lint, check, unit/integration, build |
-| **G2 E2E** | `deploy.yml` job `e2e` (3 shards) | Ja — **alltid** vid normal deploy | Fångar SSR/load-fel som CI missar; Turnstile-bypass lokalt |
-| **G3 Firebase** | `deploy.yml` job `deploy` | Ja (utan `FIREBASE_TOKEN`: skip med logg) | Faktisk App Hosting-deploy |
-| **G4 prod smoke** | `deploy.yml` job `post-deploy smoke` | Ja | Curl mot live URL — fångar prod **500** som E2E inte ser (t.ex. Cloud SQL cold start, saknad runtime-fil) |
-| **CI på master** | `ci.yml` vid push | Rekommenderat (branch protection) | Snabb feedback före manuell deploy |
+| **G1 quality** | `ci.yml` + `deploy.yml` via reusable | Ja (deploy kräver grön CI på samma SHA) | En sanning för lint/test/build — inget drift |
+| **G1b CI SHA** | `reusable-quality.yml` när `verify_ci_sha: true` | Ja | Sparar tid; stoppar deploy av commit som inte passerat CI |
+| **G2 E2E** | `deploy.yml` job `e2e` (3 shards) | Ja — **alltid** vid normal deploy | SSR + marketing hydration (`pageerror`) |
+| **G2b client bundle** | Efter build i reusable | Ja | `process.cwd` / `node:fs` i klient |
+| **G3 Firebase** | `deploy.yml` job `deploy` | Ja (utan `FIREBASE_TOKEN`: skip → `verify-release` röd) | Faktisk App Hosting-deploy |
+| **G4 prod smoke** | `deploy.yml` job `post-deploy smoke` | Ja | HTML-body, inte bara HTTP 200 |
+| **G5 verify-release** | Sista jobbet i `deploy.yml` | Ja | Workflow **röd** om e2e/deploy/smoke skippades |
 
-**E2E hoppas aldrig över** utom explicit hotfix: `skip_e2e=true` **och** `hotfix_confirm=hotfix` (annars failar `quality`-steget). Deploy till prod utan grön E2E **och** grön smoke räknas som misslyckad release.
+**E2E hoppas aldrig över** utom explicit hotfix: `skip_e2e=true` **och** `hotfix_confirm=hotfix`. Deploy till prod utan grön E2E **och** grön smoke **och** grön `verify-release` räknas som misslyckad release.
 
-**Skript:** [`scripts/smoke-prod-urls.sh`](../scripts/smoke-prod-urls.sh) — samma kontroller som smoke-jobbet (lokal felsökning: `BASE_URL=https://skaffu.com bash scripts/smoke-prod-urls.sh`).
+**Skript:**
+
+| Skript | Roll |
+|--------|------|
+| [`scripts/smoke-prod-urls.sh`](../scripts/smoke-prod-urls.sh) | G4 — prod URL + HTML (lokal: `BASE_URL=https://skaffu.com bash scripts/smoke-prod-urls.sh`) |
+| [`scripts/check-client-bundle.mjs`](../scripts/check-client-bundle.mjs) | G2b — efter `npm run build` |
+| [`scripts/check-server-imports.mjs`](../scripts/check-server-imports.mjs) | G1 — förbjud `.server` i `.svelte`, `node:fs` utanför server paths |
 
 **Concurrency:**
 - **CI / E2E:** ny körning avbryter pågående på samma ref (`cancel-in-progress: true`).
@@ -112,12 +135,25 @@ Actions → **Deploy to production** → Run workflow → *Skip E2E* = `true` **
 
 ---
 
+## Ägare — GitHub och Firebase (kan inte kodas i repot)
+
+Dessa inställningar stoppar upprepning av incidenten. **Checklista för repo-ägare:**
+
+| Åtgärd | Var | Varför |
+|--------|-----|--------|
+| **Branch protection** på `master` | GitHub → Settings → Branches | Kräv status check **`quality`** (CI workflow) före merge |
+| **Stäng av Firebase Console auto-deploy** | Firebase → App Hosting → GitHub | En deploy-källa: Actions only |
+| **`FIREBASE_TOKEN` + `PRODUCTION_URL`** | GitHub Secrets/Variables | Deploy och smoke måste fungera |
+| **Required reviewers** (valfritt) | Branch protection | Mänskligt deploy-beslut för stora releases |
+
+Agentregel: [`.cursor/rules/deploy-safety.mdc`](../.cursor/rules/deploy-safety.mdc).
+
 ## Branch protection (valfritt)
 
 | Inställning | Rekommendation solo | Varför |
 |-------------|---------------------|--------|
 | Require PR | Valfritt | Trunk-flöde fungerar med direkt push |
-| Require status check `quality` (CI workflow) | **Rekommenderat** | Blockerar merge/deploy på trasig lint/test/build |
+| Require status check `quality` (CI workflow) | **Rekommenderat** | Blockerar merge/deploy på trasig lint/test/build; krävs för G1b SHA-gate |
 | Require status check `e2e` | Valfritt | Långsammare — deploy-workflow kör E2E ändå |
 | Require status check deploy `post-deploy smoke` | Ej möjligt solo | Smoke körs bara i deploy-workflow efter Firebase |
 | Do not allow bypassing | Av för solo | Du behöver kunna pusha direkt |
@@ -226,17 +262,22 @@ Workflowen känner igen ntfy, Discord och Slack automatiskt. Andra URL:er får g
 
 ```bash
 npm ci
-npm run lint          # G1
-npm run check         # G0 + G1
-npm test              # G0 + G1
+npm run lint                  # G1
+npm run check:server-imports  # G1
+npm run check                 # G0 + G1
+npm test                      # G0 + G1
 USE_PGLITE=true npm run test:integration
 npm run build
+npm run check:client-bundle   # G2b
 
 # G2 (innan deploy om auth/UI rörts)
 USE_PGLITE=true npm run test:e2e
 
 # G3 (lokalt om FIREBASE_TOKEN saknas i Actions)
 npm run deploy:firebase
+
+# G4 (efter deploy)
+BASE_URL=https://skaffu.com bash scripts/smoke-prod-urls.sh
 ```
 
 **G0:** husky pre-commit kör `lint-staged` vid commit. Agenter kör dessutom `npm run check && npm test` före commit.
@@ -258,9 +299,13 @@ npm run deploy:firebase
 
 | Fil | Roll |
 |-----|------|
+| `.github/workflows/reusable-quality.yml` | Delad G1 — lint, guards, test, build, artifact |
 | `.github/workflows/ci.yml` | G1 — snabb CI vid push/PR |
 | `.github/workflows/e2e.yml` | G2 — E2E på PR, manuellt, nattligt |
-| `.github/workflows/deploy.yml` | G1 → G2 → G3 — manuell prod-deploy |
+| `.github/workflows/deploy.yml` | G1b → G2 → G3 → G4 → G5 — prod-deploy |
+| `scripts/check-client-bundle.mjs` | G2b — klientbundle efter build |
+| `scripts/check-server-imports.mjs` | G1 — statisk server-import guard |
+| `.cursor/rules/deploy-safety.mdc` | Agent — aldrig falskt "deployed" |
 | `.github/workflows/expiry-reminders-cron.yml` | Veckovis utgångspåminnelse i prod (måndag 07:00 UTC) |
 | `.github/workflows/pmf-weekly-cron.yml` | Veckovis PMF-digest till ägare (måndag 08:00 UTC) |
 | `.github/workflows/shopping-push-cron.yml` | Daglig handla-idag-push (06:00 UTC) |

@@ -83,8 +83,23 @@ function isVerificationExemptApiPath(pathname: string): boolean {
 		pathname.startsWith('/api/cron/') ||
 		pathname === '/api/push/vapid-public-key' ||
 		pathname === '/api/product-events' ||
+		pathname === '/api/client-errors' ||
 		pathname === '/api/analytics/beacon' ||
 		pathname === '/api/cookie-consent' ||
+		pathname === '/api/stripe/webhook' ||
+		pathname === '/api/inbound/kivra'
+	);
+}
+
+function isAnonymousApiPath(pathname: string): boolean {
+	return (
+		pathname === '/api/client-errors' ||
+		pathname === '/api/product-events' ||
+		pathname === '/api/analytics/beacon' ||
+		pathname === '/api/cookie-consent' ||
+		pathname.startsWith('/api/health') ||
+		pathname.startsWith('/api/cron/') ||
+		pathname === '/api/push/vapid-public-key' ||
 		pathname === '/api/stripe/webhook' ||
 		pathname === '/api/inbound/kivra'
 	);
@@ -189,9 +204,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (!isAuthenticated && !isPublic) {
 		if (pathname.startsWith('/api/')) {
-			return json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+			if (!isAnonymousApiPath(pathname)) {
+				return json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+			}
+		} else {
+			redirect(302, '/login');
 		}
-		redirect(302, '/login');
 	}
 
 	if (

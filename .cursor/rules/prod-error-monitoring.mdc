@@ -1,0 +1,29 @@
+---
+description: Proactive prod error monitoring — agents check error logs before asking the user to report bugs
+globs:
+alwaysApply: false
+---
+
+# Prod error monitoring (agents)
+
+When the user reports a **production bug**, or you suspect prod regression after deploy:
+
+## Before asking the user for screenshots
+
+1. **Admin Error logs** — `/admin` → Error logs tab. Server 500s and client crashes (`CLIENT …` paths) land here automatically.
+2. **Docs** — [`docs/ERROR_MONITORING.md`](../../docs/ERROR_MONITORING.md) (capture → alert → CI gates).
+3. **Deploy SHA** — Compare error timestamps with last green **Deploy to production** run.
+
+## Do not
+
+- Ask the user to be the primary error reporter when logs or alert email already show the failure.
+- Say "check prod yourself" for routine verification — use admin logs, cron alert output, or coordinator browser smoke per [`docs/PROD_SMOKE.md`](../../docs/PROD_SMOKE.md).
+
+## After fixing prod issues
+
+- Confirm `npm run check:client-bundle` and `check:server-imports` pass (CI quality gate).
+- Ensure post-deploy smoke paths in `scripts/smoke-prod-urls.sh` cover affected routes.
+
+## Owner-only configuration (do not block on)
+
+`ERROR_ALERT_TO`, `PMF_DIGEST_TO`, `RESEND_*`, `CRON_SECRET`, GitHub cron workflows — see ERROR_MONITORING.md owner checklist.

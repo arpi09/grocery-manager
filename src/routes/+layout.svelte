@@ -9,6 +9,7 @@
 	import { initLocale } from '$lib/i18n';
 	import { pwaInfo } from 'virtual:pwa-info';
 	import { initPwaInstallListeners } from '$lib/utils/pwa';
+	import { initClientErrorReporting } from '$lib/client/error-reporting';
 
 	let { children, data } = $props();
 
@@ -17,6 +18,7 @@
 	onMount(() => {
 		initScrollOnNavigate();
 		initPwaInstallListeners();
+		initClientErrorReporting();
 
 		if (!pwaInfo) {
 			return;

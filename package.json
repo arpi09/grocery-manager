@@ -25,6 +25,8 @@
 		"lint:staged": "lint-staged",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:locales": "node scripts/check-locale-encoding.mjs",
+		"check:client-bundle": "node scripts/check-client-bundle.mjs",
+		"check:server-imports": "node scripts/check-server-imports.mjs",
 		"lint": "eslint .",
 		"format": "prettier --write .",
 		"test": "vitest run",

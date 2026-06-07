@@ -4,6 +4,7 @@ import type {
 	AdminBehaviorFunnel,
 	AdminEventExplorer
 } from '$lib/domain/analytics-behavior';
+import { ADMIN_INSIGHTS_SCHEMA } from '$lib/domain/admin-insights';
 import { ADMIN_INSIGHT_CHART_KEYS } from '$lib/domain/decisions-analytics';
 import type { PmfFunnelSnapshot } from '$lib/domain/pmf-funnel';
 import type { ProductFeedbackEntry } from '$lib/domain/product-feedback';
@@ -14,8 +15,9 @@ import type { ProductFeedbackService } from '$lib/application/product-feedback.s
 import {
 	extractResponseOutputText,
 	getOpenAiApiKey,
+	openAiErrorLogDetail,
 	OPENAI_MODEL,
-	safeParseModelJson
+	requestStructuredJson
 } from '$lib/server/openai';
 
 export interface AdminInsightsInput {
@@ -36,28 +38,6 @@ export interface AdminInsightsResult {
 }
 
 const INSIGHTS_CACHE_TTL_MS = 60 * 60 * 1000;
-
-const insightsSchema = {
-	type: 'object',
-	properties: {
-		summaryParagraphs: {
-			type: 'array',
-			items: { type: 'string' },
-			minItems: 3,
-			maxItems: 5
-		},
-		anomalyFlags: {
-			type: 'array',
-			items: { type: 'string' }
-		},
-		chartCaptions: {
-			type: 'object',
-			additionalProperties: { type: 'string' }
-		}
-	},
-	required: ['summaryParagraphs', 'anomalyFlags', 'chartCaptions'],
-	additionalProperties: false
-} as const;
 
 export class AdminInsightsService {
 	private cache: { expiresAt: number; result: AdminInsightsResult } | null = null;
@@ -196,75 +176,50 @@ export class AdminInsightsService {
 			feedbackSnippets: input.recentFeedback.map((row) => row.message?.slice(0, 200)).filter(Boolean)
 		};
 
-		try {
-			const response = await fetch('https://api.openai.com/v1/responses', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: `Bearer ${apiKey}`
-				},
-				body: JSON.stringify({
-					model: OPENAI_MODEL,
-					input: [
-						{
-							role: 'system',
-							content:
-								'Du är produktanalytiker för Skaffu (svensk skafferi-app). Svara på svenska med JSON enligt schema. Ingen rå användardata — bara aggregerade metrics. chartCaptions MÅSTE innehålla exakt dessa nycklar med en kort mening vardera: funnel, retention, events, heatmap (valfritt cohort om kohortdata finns).'
-						},
-						{
-							role: 'user',
-							content: JSON.stringify(sanitized)
-						}
-					],
-					text: {
-						format: {
-							type: 'json_schema',
-							name: 'admin_insights',
-							strict: true,
-							schema: insightsSchema
-						}
-					}
-				})
-			});
+		const generated = await requestStructuredJson(apiKey, {
+			systemPrompt:
+				'Du är produktanalytiker för Skaffu (svensk skafferi-app). Svara på svenska med JSON enligt schema. Ingen rå användardata — bara aggregerade metrics. chartCaptions MÅSTE innehålla en kort mening för varje nyckel (funnel, retention, events, heatmap, cohort — tom sträng för cohort om ingen kohortdata finns).',
+			userPrompt: JSON.stringify(sanitized),
+			schemaName: 'admin_insights',
+			schema: ADMIN_INSIGHTS_SCHEMA
+		});
 
-			if (!response.ok) {
-				return { error: 'openai_failed' };
-			}
-
-			const payload = (await response.json()) as unknown;
-			const raw = extractResponseOutputText(payload);
-			const parsed = safeParseModelJson(raw) as {
-				summaryParagraphs?: unknown;
-				anomalyFlags?: unknown;
-				chartCaptions?: unknown;
-			} | null;
-
-			if (!parsed || !Array.isArray(parsed.summaryParagraphs)) {
-				return { error: 'openai_invalid' };
-			}
-
-			const chartCaptions =
-				parsed.chartCaptions && typeof parsed.chartCaptions === 'object'
-					? (parsed.chartCaptions as Record<string, string>)
-					: {};
-
-			return {
-				summaryParagraphs: parsed.summaryParagraphs.filter(
-					(entry): entry is string => typeof entry === 'string'
-				),
-				anomalyFlags: Array.isArray(parsed.anomalyFlags)
-					? parsed.anomalyFlags.filter((entry): entry is string => typeof entry === 'string')
-					: [],
-				chartCaptions: {
-					[ADMIN_INSIGHT_CHART_KEYS.funnel]: chartCaptions.funnel ?? '',
-					[ADMIN_INSIGHT_CHART_KEYS.retention]: chartCaptions.retention ?? '',
-					[ADMIN_INSIGHT_CHART_KEYS.events]: chartCaptions.events ?? '',
-					[ADMIN_INSIGHT_CHART_KEYS.heatmap]: chartCaptions.heatmap ?? '',
-					[ADMIN_INSIGHT_CHART_KEYS.cohort]: chartCaptions.cohort ?? ''
-				}
-			};
-		} catch {
-			return { error: 'openai_network' };
+		if (!generated.ok) {
+			console.error(
+				`[admin-insights] OpenAI generation failed (${generated.status}): ${openAiErrorLogDetail(generated).slice(0, 500)}`
+			);
+			return { error: 'openai_failed' };
 		}
+
+		const parsed = generated.data as {
+			summaryParagraphs?: unknown;
+			anomalyFlags?: unknown;
+			chartCaptions?: unknown;
+		};
+
+		if (!Array.isArray(parsed.summaryParagraphs)) {
+			return { error: 'openai_invalid' };
+		}
+
+		const chartCaptions =
+			parsed.chartCaptions && typeof parsed.chartCaptions === 'object'
+				? (parsed.chartCaptions as Record<string, string>)
+				: {};
+
+		return {
+			summaryParagraphs: parsed.summaryParagraphs.filter(
+				(entry): entry is string => typeof entry === 'string'
+			),
+			anomalyFlags: Array.isArray(parsed.anomalyFlags)
+				? parsed.anomalyFlags.filter((entry): entry is string => typeof entry === 'string')
+				: [],
+			chartCaptions: {
+				[ADMIN_INSIGHT_CHART_KEYS.funnel]: chartCaptions.funnel ?? '',
+				[ADMIN_INSIGHT_CHART_KEYS.retention]: chartCaptions.retention ?? '',
+				[ADMIN_INSIGHT_CHART_KEYS.events]: chartCaptions.events ?? '',
+				[ADMIN_INSIGHT_CHART_KEYS.heatmap]: chartCaptions.heatmap ?? '',
+				[ADMIN_INSIGHT_CHART_KEYS.cohort]: chartCaptions.cohort ?? ''
+			}
+		};
 	}
 }

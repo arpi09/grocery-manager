@@ -47,6 +47,7 @@ import { WaitlistService } from '$lib/application/waitlist.service';
 import { DrizzleAppSettingsRepository } from '$lib/infrastructure/repositories/app-settings.repository';
 import { AppSettingsService } from '$lib/application/app-settings.service';
 import { PmfDigestService } from '$lib/application/pmf-digest.service';
+import { ErrorAlertService } from '$lib/application/error-alert.service';
 import { DrizzlePurchasePatternRepository } from '$lib/infrastructure/repositories/purchase-pattern.repository';
 import { DrizzleExpiringShareRepository } from '$lib/infrastructure/repositories/expiring-share.repository';
 import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
@@ -208,4 +209,10 @@ export const pmfDigestService = new PmfDigestService(
 	emailAdapter,
 	appOriginAdapter,
 	adminInsightsService
+);
+export const errorAlertService = new ErrorAlertService(
+	errorLogRepository,
+	appSettingsRepository,
+	emailAdapter,
+	appOriginAdapter
 );

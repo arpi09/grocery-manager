@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { listRealReceiptPdfs } from './receipt-fixtures';
+import { listRealReceiptPdfs } from '../../e2e/helpers/receipt-fixtures';
 
 describe('listRealReceiptPdfs', () => {
 	it('returns only manifest-style real PDFs, not synthetic CI fixtures', () => {

@@ -27,7 +27,9 @@ describe('Password reset integration', () => {
 		sendExpiryReminderEmail: vi.fn(),
 		isEmailSendingDisabledFailure: () => false,
 		getPmfDigestTo: () => null,
-		sendOwnerPmfDigest: vi.fn()
+		sendOwnerPmfDigest: vi.fn(),
+		getErrorAlertTo: () => null,
+		sendOwnerErrorAlert: vi.fn()
 	};
 	const appOrigin: AppOriginPort = { getOrigin: () => 'https://app.test' };
 

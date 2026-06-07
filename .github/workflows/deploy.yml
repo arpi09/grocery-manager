@@ -91,19 +91,14 @@ jobs:
             echo "::notice::Mixed commit (not only content/guides/**) — skipping auto-deploy. Run manual deploy for releases."
           fi
 
-  quality:
-    name: quality
-    needs: [gate]
-    if: >
-      always() &&
-      (github.event_name == 'workflow_dispatch' ||
-       (needs.gate.result == 'success' && needs.gate.outputs.guide_only == 'true'))
+  validate-inputs:
+    name: validate deploy inputs
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 2
 
     steps:
-      - name: Validate deploy inputs
-        if: github.event_name == 'workflow_dispatch'
+      - name: Validate hotfix skip_e2e inputs
         run: |
           set -euo pipefail
           skip_e2e="${{ inputs.skip_e2e }}"
@@ -116,38 +111,19 @@ jobs:
             echo "::warning::HOTFIX deploy — E2E will be skipped. Document reason in commit/chat."
           fi
 
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event_name == 'push' && github.sha || (inputs.sha || inputs.ref) }}
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-
-      - run: npm ci
-
-      - run: npm run lint
-      - run: npm run check:locales
-      - run: npm run check
-        env:
-          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
-      - run: npm test
-      - run: npm run test:receipt-fixtures
-      - run: npm run test:integration
-        env:
-          USE_PGLITE: 'true'
-      - run: npm run build
-        env:
-          DATABASE_URL: postgresql://pantry:pantry@localhost:5432/pantry
-          USE_PGLITE: 'true'
-          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: sveltekit-build
-          path: build/
-          retention-days: 1
+  quality:
+    needs: [gate, validate-inputs]
+    if: >
+      always() &&
+      (github.event_name == 'workflow_dispatch' ||
+       (needs.gate.result == 'success' && needs.gate.outputs.guide_only == 'true')) &&
+      (needs.validate-inputs.result == 'success' || needs.validate-inputs.result == 'skipped')
+    uses: ./.github/workflows/reusable-quality.yml
+    with:
+      upload_build_artifact: true
+      verify_ci_sha: true
+      deploy_ref: ${{ github.event_name == 'push' && github.ref_name || (inputs.sha == '' && inputs.ref || '') }}
+      deploy_sha: ${{ github.event_name == 'push' && github.sha || inputs.sha }}
 
   e2e:
     name: e2e (${{ matrix.shard }}/3)
@@ -342,8 +318,13 @@ jobs:
 
   verify-release:
     name: verify release completed
-    needs: [quality, e2e, deploy, smoke]
-    if: always() && github.event_name == 'workflow_dispatch'
+    needs: [gate, quality, e2e, deploy, smoke]
+    if: >
+      always() &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        needs.gate.outputs.guide_only == 'true'
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 2
 
@@ -351,7 +332,12 @@ jobs:
       - name: Fail if E2E or deploy did not run
         run: |
           set -euo pipefail
+          echo "gate=${{ needs.gate.result }} guide_only=${{ needs.gate.outputs.guide_only }}"
           echo "quality=${{ needs.quality.result }} e2e=${{ needs.e2e.result }} deploy=${{ needs.deploy.result }} smoke=${{ needs.smoke.result }}"
+          if [ "${{ needs.gate.result }}" != "success" ]; then
+            echo "::error::gate job did not succeed"
+            exit 1
+          fi
           if [ "${{ needs.quality.result }}" != "success" ]; then
             echo "::error::quality job did not succeed"
             exit 1

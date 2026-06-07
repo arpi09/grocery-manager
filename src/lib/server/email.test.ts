@@ -5,7 +5,8 @@ const { mockEnv, mockSend, mockIsEmailSendingEnabled } = vi.hoisted(() => ({
 		RESEND_API_KEY: undefined as string | undefined,
 		RESEND_FROM: undefined as string | undefined,
 		EMAIL_SENDING_DISABLED: undefined as string | undefined,
-		PMF_DIGEST_TO: undefined as string | undefined
+		PMF_DIGEST_TO: undefined as string | undefined,
+		ERROR_ALERT_TO: undefined as string | undefined
 	},
 	mockSend: vi.fn(),
 	mockIsEmailSendingEnabled: vi.fn().mockResolvedValue(true)
@@ -38,6 +39,8 @@ import {
 	sendHouseholdInviteEmail,
 	sendOwnerPmfDigest,
 	getPmfDigestTo,
+	getErrorAlertTo,
+	sendOwnerErrorAlert,
 	EMAIL_SENDING_DISABLED_REASON
 } from './email';
 
@@ -296,5 +299,46 @@ describe('sendOwnerPmfDigest', () => {
 
 		expect(result.ok).toBe(false);
 		expect(mockSend).not.toHaveBeenCalled();
+	});
+});
+
+describe('getErrorAlertTo', () => {
+	beforeEach(() => {
+		mockEnv.ERROR_ALERT_TO = undefined;
+		mockEnv.PMF_DIGEST_TO = undefined;
+	});
+
+	it('prefers ERROR_ALERT_TO over PMF_DIGEST_TO', () => {
+		mockEnv.ERROR_ALERT_TO = ' alerts@example.com ';
+		mockEnv.PMF_DIGEST_TO = 'pmf@example.com';
+		expect(getErrorAlertTo()).toBe('alerts@example.com');
+	});
+
+	it('falls back to PMF_DIGEST_TO', () => {
+		mockEnv.PMF_DIGEST_TO = 'pmf@example.com';
+		expect(getErrorAlertTo()).toBe('pmf@example.com');
+	});
+});
+
+describe('sendOwnerErrorAlert', () => {
+	beforeEach(() => {
+		mockSend.mockClear();
+		mockEnv.RESEND_API_KEY = 're_test';
+		mockEnv.ERROR_ALERT_TO = 'alerts@example.com';
+		mockEnv.EMAIL_SENDING_DISABLED = 'true';
+		mockIsEmailSendingEnabled.mockResolvedValue(false);
+		mockSend.mockResolvedValue({ data: { id: 'alert-id' }, error: null });
+	});
+
+	it('sends even when EMAIL_SENDING_DISABLED is set', async () => {
+		const result = await sendOwnerErrorAlert({
+			to: 'alerts@example.com',
+			subject: 'Prod errors',
+			html: '<p>errors</p>',
+			text: 'errors'
+		});
+
+		expect(result).toEqual({ ok: true, id: 'alert-id' });
+		expect(mockSend).toHaveBeenCalled();
 	});
 });
