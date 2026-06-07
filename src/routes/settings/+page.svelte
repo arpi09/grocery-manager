@@ -6,6 +6,7 @@
 	import AppSettingsPanel from '$lib/components/organisms/AppSettingsPanel.svelte';
 	import FeedbackSettingsPanel from '$lib/components/organisms/FeedbackSettingsPanel.svelte';
 	import HouseholdSettingsPanel from '$lib/components/organisms/HouseholdSettingsPanel.svelte';
+	import KivraForwardSettingsPanel from '$lib/components/organisms/KivraForwardSettingsPanel.svelte';
 	import NotificationSettingsPanel from '$lib/components/organisms/NotificationSettingsPanel.svelte';
 	import PlanSettingsPanel from '$lib/components/organisms/PlanSettingsPanel.svelte';
 	import ProActivationCelebration from '$lib/components/organisms/ProActivationCelebration.svelte';
@@ -66,6 +67,9 @@
 			...(data.household
 				? [{ id: 'settings-household', label: t('settings.nav.household') }]
 				: []),
+			...(data.kivraForwardAddress
+				? [{ id: 'settings-kivra-forward', label: t('settings.kivraForward.title') }]
+				: []),
 			{ id: 'settings-notifications', label: t('settings.nav.notifications') },
 			{ id: 'settings-app', label: t('settings.nav.app') },
 			{ id: 'settings-plan', label: t('settings.nav.plan') },
@@ -108,6 +112,16 @@
 						onCopyInviteLink={copyInviteLink}
 						onShareInviteLink={shareInviteLink}
 					/>
+				</SettingsSection>
+			{/if}
+
+			{#if data.kivraForwardAddress}
+				<SettingsSection
+					id="settings-kivra-forward"
+					title={t('settings.kivraForward.title')}
+					description={t('settings.kivraForward.description')}
+				>
+					<KivraForwardSettingsPanel forwardAddress={data.kivraForwardAddress} />
 				</SettingsSection>
 			{/if}
 

@@ -32,6 +32,7 @@ describe('HouseholdService', () => {
 			hasMember: vi.fn(),
 			getMemberRole: vi.fn(),
 			countOwners: vi.fn(),
+			findPrimaryOwnerUserId: vi.fn(),
 			findUserIdByEmail: vi.fn(),
 			isMemberByEmail: vi.fn(),
 			createInvite: vi.fn(),
@@ -244,6 +245,7 @@ describe('HouseholdService', () => {
 		vi.mocked(repository.getHouseholdById).mockResolvedValue({
 			id: 'household-1',
 			name: 'Hemmet',
+			createdAt: new Date('2026-01-01'),
 			members: []
 		});
 		vi.mocked(repository.getActiveHouseholdIdForUser).mockResolvedValue('household-1');
@@ -264,6 +266,7 @@ describe('HouseholdService', () => {
 		vi.mocked(repository.getHouseholdById).mockResolvedValue({
 			id: 'household-1',
 			name: 'Hemmet',
+			createdAt: new Date('2026-01-01'),
 			members: []
 		});
 		vi.mocked(repository.getActiveHouseholdIdForUser).mockResolvedValue(null);
@@ -288,6 +291,7 @@ describe('HouseholdService', () => {
 		vi.mocked(repository.getHouseholdById).mockResolvedValue({
 			id: 'household-1',
 			name: 'Hemmet',
+			createdAt: new Date('2026-01-01'),
 			members: []
 		});
 

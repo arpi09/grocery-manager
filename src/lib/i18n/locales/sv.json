@@ -332,6 +332,18 @@
 			"title": "Hushåll",
 			"description": "Delat hushåll, medlemmar och inbjudningar"
 		},
+		"kivraForward": {
+			"title": "Vidarebefordra Kivra-kvitto",
+			"description": "Få digitala kvitton direkt till lagret — beta",
+			"lead": "Vidarebefordra ditt Kivra-kvitto (PDF) till adressen nedan så fylls lagret automatiskt.",
+			"step1": "Öppna kvittot i Kivra och välj vidarebefordra eller dela via e-post.",
+			"step2": "Klistra in din personliga adress som mottagare.",
+			"step3": "Vi läser PDF:en och lägger varorna i lagret — du får en notis i appen.",
+			"copy": "Kopiera adress",
+			"copied": "Adress kopierad",
+			"hint": "Fungerar bäst med PDF från Kivra eller ICA. Kunde vi inte läsa kvittot? Ladda upp PDF manuellt under Skanna.",
+			"beta": "Beta — aktiveras för utvalda hushåll. Vi sparar inte hela e-postmeddelandet efter import."
+		},
 		"app": {
 			"title": "App",
 			"description": "Funktioner och preferenser"
@@ -859,6 +871,8 @@
 		"slideTopProductBody": "{product} — en trogen favorit i kylen.",
 		"slideStreakTitle": "{count} veckors zero-waste streak",
 		"slideStreakBody": "Veckor utan kastat eller utgånget — fortsätt i samma takt.",
+		"slideStreakFirstTitle": "Er första vecka",
+		"slideStreakFirstBody": "Inget kastat eller utgånget hittills — bra start.",
 		"slideMilestonesTitle": "{count} milstolpar",
 		"slideMilestonesBody": "Små vinster längs vägen i ert skafferi.",
 		"slideShareTitle": "Dela er månad",
@@ -1604,6 +1618,7 @@
 		"noExpiring": "Inget brådskande just nu — du kan ändå planera veckan utifrån lagret.",
 		"generateBtn": "Generera veckoförslag",
 		"generateFailed": "Kunde inte skapa förslag. Försök igen.",
+		"networkError": "Kunde inte nå AI-tjänsten. Kontrollera anslutningen och försök igen.",
 		"noneGenerated": "Inga förslag just nu — lägg till fler varor eller försök igen senare.",
 		"suggestionsTitle": "Dina veckoförslag",
 		"approveBtn": "Godkänn veckan",

@@ -52,6 +52,9 @@ import { DrizzleExpiringShareRepository } from '$lib/infrastructure/repositories
 import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
 import { SkaffurapportService } from '$lib/application/skaffurapport.service';
 import { ExpiringShareService } from '$lib/application/expiring-share.service';
+import { ReceiptForwardService } from '$lib/application/receipt-forward.service';
+import { DrizzleReceiptForwardRepository } from '$lib/infrastructure/repositories/receipt-forward.repository';
+import { getKivraForwardSecret } from '$lib/server/kivra-forward';
 import { BillingService } from '$lib/application/billing.service';
 import { DrizzleBillingRepository } from '$lib/infrastructure/repositories/billing.repository';
 import { DrizzlePushSubscriptionRepository } from '$lib/infrastructure/repositories/push-subscription.repository';
@@ -88,6 +91,7 @@ const appSettingsRepository = new DrizzleAppSettingsRepository();
 
 const purchasePatternRepository = new DrizzlePurchasePatternRepository();
 const expiringShareRepository = new DrizzleExpiringShareRepository();
+const receiptForwardRepository = new DrizzleReceiptForwardRepository();
 const billingRepository = new DrizzleBillingRepository();
 export const pushSubscriptionRepository = new DrizzlePushSubscriptionRepository();
 
@@ -132,10 +136,16 @@ export const skaffurapportService = new SkaffurapportService(
 	appSettingsRepository
 );
 export const expiringShareService = new ExpiringShareService(expiringShareRepository);
+const kivraForwardSecret = getKivraForwardSecret() ?? 'dev-kivra-forward-secret';
+export const receiptForwardService = new ReceiptForwardService(
+	receiptForwardRepository,
+	kivraForwardSecret
+);
 export const statistikService = new StatistikService(
 	inventoryService,
 	inventoryRepository,
-	consumptionRepository
+	consumptionRepository,
+	householdRepository
 );
 export const gamificationService = new GamificationService(
 	statistikService,

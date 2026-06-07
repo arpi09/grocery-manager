@@ -75,7 +75,8 @@ function isVerificationExemptApiPath(pathname: string): boolean {
 		pathname === '/api/push/vapid-public-key' ||
 		pathname === '/api/product-events' ||
 		pathname === '/api/cookie-consent' ||
-		pathname === '/api/stripe/webhook'
+		pathname === '/api/stripe/webhook' ||
+		pathname === '/api/inbound/kivra'
 	);
 }
 

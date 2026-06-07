@@ -211,6 +211,13 @@
 			"when": 1750857600000,
 			"tag": "0030_expiring_share_link",
 			"breakpoints": true
+		},
+		{
+			"idx": 30,
+			"version": "7",
+			"when": 1750944000000,
+			"tag": "0031_household_receipt_forward_token",
+			"breakpoints": true
 		}
 	]
 }

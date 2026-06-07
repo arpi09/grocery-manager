@@ -18,6 +18,7 @@
 	import type { GamificationCelebrationKind } from '$lib/domain/gamification';
 	import { getCelebrationRegistryEntry } from '$lib/domain/gamification.registry';
 	import { presentCelebration } from '$lib/utils/present-celebration.svelte';
+	import { aiServiceErrorMessage } from '$lib/utils/ai-service-error';
 
 	interface PlannedMealPreview {
 		id: string;
@@ -91,7 +92,7 @@
 			};
 
 			if (!response.ok) {
-				errorMessage = data.error ?? t('weeklyRitual.generateFailed');
+				errorMessage = aiServiceErrorMessage(response.status, data.error, 'weeklyRitual.generateFailed');
 				suggestions = [];
 				return;
 			}
@@ -104,7 +105,7 @@
 				errorMessage = t('weeklyRitual.noneGenerated');
 			}
 		} catch {
-			errorMessage = t('recipe.networkError');
+			errorMessage = t('weeklyRitual.networkError');
 			suggestions = [];
 		} finally {
 			loading = false;

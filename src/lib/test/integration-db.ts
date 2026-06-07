@@ -48,7 +48,8 @@ const SQL_MIGRATION_FILES = [
 	'0027_email_verification.sql',
 	'0028_backfill_email_verified_at.sql',
 	'0029_pmf_survey_response.sql',
-	'0030_expiring_share_link.sql'
+	'0030_expiring_share_link.sql',
+	'0031_household_receipt_forward_token.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
@@ -60,6 +61,7 @@ TRUNCATE TABLE
 	"product_feedback",
 	"product_event",
 	"expiring_share_link",
+	"household_receipt_forward_token",
 	"consumption_event",
 	"receipt_pattern_dismissal",
 	"receipt_purchase_line",

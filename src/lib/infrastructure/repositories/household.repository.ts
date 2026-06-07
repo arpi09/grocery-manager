@@ -54,6 +54,7 @@ export interface IHouseholdRepository {
 	hasMember(householdId: string, userId: string): Promise<boolean>;
 	getMemberRole(householdId: string, userId: string): Promise<HouseholdRole | null>;
 	countOwners(householdId: string): Promise<number>;
+	findPrimaryOwnerUserId(householdId: string): Promise<string | null>;
 	findUserIdByEmail(email: string): Promise<string | null>;
 	isMemberByEmail(householdId: string, email: string): Promise<boolean>;
 	createInvite(row: {
@@ -163,6 +164,7 @@ export class DrizzleHouseholdRepository implements IHouseholdRepository {
 		return {
 			id: household.id,
 			name: household.name,
+			createdAt: household.createdAt,
 			members: members.map(
 				(m): HouseholdMemberView => ({
 					userId: m.userId,
@@ -241,6 +243,21 @@ export class DrizzleHouseholdRepository implements IHouseholdRepository {
 			);
 
 		return rows.length;
+	}
+
+	async findPrimaryOwnerUserId(householdId: string) {
+		const [row] = await this.database
+			.select({ userId: householdMemberTable.userId })
+			.from(householdMemberTable)
+			.where(
+				and(
+					eq(householdMemberTable.householdId, householdId),
+					eq(householdMemberTable.role, 'owner')
+				)
+			)
+			.limit(1);
+
+		return row?.userId ?? null;
 	}
 
 	async findUserIdByEmail(email: string) {

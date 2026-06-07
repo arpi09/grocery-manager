@@ -358,6 +358,18 @@
 			"title": "Household",
 			"description": "Shared household, members and invitations"
 		},
+		"kivraForward": {
+			"title": "Forward Kivra receipts",
+			"description": "Get digital receipts straight into inventory — beta",
+			"lead": "Forward your Kivra receipt (PDF) to the address below and we'll fill your pantry automatically.",
+			"step1": "Open the receipt in Kivra and choose forward or share via email.",
+			"step2": "Paste your personal address as the recipient.",
+			"step3": "We parse the PDF and add items to inventory — you'll get a notification in the app.",
+			"copy": "Copy address",
+			"copied": "Address copied",
+			"hint": "Works best with PDF from Kivra or ICA. Couldn't read the receipt? Upload the PDF manually under Scan.",
+			"beta": "Beta — enabled for selected households. We don't keep the full email after import."
+		},
 		"app": {
 			"title": "App",
 			"description": "Features and preferences"
@@ -879,6 +891,8 @@
 		"slideTopProductBody": "{product} — a steady favourite in the fridge.",
 		"slideStreakTitle": "{count}-week zero-waste streak",
 		"slideStreakBody": "Weeks without waste or expiry — keep it up.",
+		"slideStreakFirstTitle": "Your first week",
+		"slideStreakFirstBody": "No waste or expiry so far — great start.",
 		"slideMilestonesTitle": "{count} milestones",
 		"slideMilestonesBody": "Small wins along the way in your pantry.",
 		"slideShareTitle": "Share your month",
@@ -1624,6 +1638,7 @@
 		"noExpiring": "Nothing urgent right now — you can still plan the week from your pantry.",
 		"generateBtn": "Generate week suggestions",
 		"generateFailed": "Could not create suggestions. Try again.",
+		"networkError": "Could not reach the AI service. Check your connection and try again.",
 		"noneGenerated": "No suggestions right now — add more items or try again later.",
 		"suggestionsTitle": "Your week suggestions",
 		"approveBtn": "Approve the week",

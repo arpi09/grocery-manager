@@ -323,7 +323,8 @@ export const productEventTable = pgTable(
 				'expiring_share_created',
 				'expiring_share_viewed',
 				'wrapped_viewed',
-				'wrapped_shared'
+				'wrapped_shared',
+				'kivra_forward_received'
 			]
 		}).notNull(),
 		metadata: text('metadata'),
@@ -510,6 +511,23 @@ export const consumptionEventTable = pgTable(
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 	},
 	(table) => [index('consumption_event_household_created_idx').on(table.householdId, table.createdAt)]
+);
+
+export const householdReceiptForwardTokenTable = pgTable(
+	'household_receipt_forward_token',
+	{
+		id: text('id').primaryKey(),
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
+		tokenHash: text('token_hash').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+		rotatedAt: timestamp('rotated_at', { withTimezone: true, mode: 'date' })
+	},
+	(table) => [
+		index('household_receipt_forward_token_household_idx').on(table.householdId),
+		index('household_receipt_forward_token_hash_idx').on(table.tokenHash)
+	]
 );
 
 export const expiringShareLinkTable = pgTable(

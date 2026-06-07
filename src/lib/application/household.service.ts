@@ -457,6 +457,10 @@ export class HouseholdService {
 		}
 	}
 
+	findPrimaryOwnerUserId(householdId: string): Promise<string | null> {
+		return this.repository.findPrimaryOwnerUserId(householdId);
+	}
+
 	private assertInviteAcceptable(status: string, expiresAt: Date) {
 		if (status !== 'pending') {
 			throw new InviteNotPendingError();

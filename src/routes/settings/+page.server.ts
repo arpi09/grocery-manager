@@ -1,7 +1,13 @@
 import { canEditInventory, isHouseholdOwner } from '$lib/domain/household';
 import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
 import { isStripeCheckoutConfigured } from '$lib/server/stripe';
-import { expiryReminderService, pushSubscriptionRepository, shoppingPushService } from '$lib/server/di';
+import {
+	expiryReminderService,
+	pushSubscriptionRepository,
+	receiptForwardService,
+	shoppingPushService
+} from '$lib/server/di';
+import { buildKivraForwardAddress, isKivraForwardEnabled } from '$lib/server/kivra-forward';
 import { billingActions } from './billing.actions';
 import { householdActions } from './household.actions';
 import { notificationsActions } from './notifications.actions';
@@ -52,6 +58,11 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 	]);
 
 	const checkout = url.searchParams.get('checkout');
+	const kivraForwardEnabled = isKivraForwardEnabled();
+	const kivraForwardAddress =
+		kivraForwardEnabled && householdId && householdRole && canEditInventory(householdRole)
+			? buildKivraForwardAddress(await receiptForwardService.getForwardToken(householdId))
+			: null;
 
 	return {
 		user,
@@ -78,7 +89,9 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		household,
 		householdRole,
 		isOwner,
-		pendingInvites
+		pendingInvites,
+		kivraForwardEnabled,
+		kivraForwardAddress
 	};
 };
 
