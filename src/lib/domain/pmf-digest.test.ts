@@ -30,6 +30,16 @@ function emptySnapshot(overrides: Partial<PmfMetricSnapshot> = {}): PmfMetricSna
 		multiMemberActiveHouseholds: 0,
 		smartFillWeeklyRate: 0,
 		weeklyFillUsers: 0,
+		weeklyRitualRate: 0,
+		weeklyRitualUsers: 0,
+		wrappedRate: 0,
+		mauCount: 0,
+		wrappedViewers: 0,
+		receiptRate: 0,
+		receiptUsers: 0,
+		inviteRate: 0,
+		newHouseholds: 0,
+		multiMemberNewHouseholds: 0,
 		eventCounts: {
 			scan_completed: 0,
 			receipt_parsed: 0,
@@ -78,7 +88,18 @@ describe('pickRecommendedMetric', () => {
 			activeHouseholds: 5,
 			multiMemberActiveHouseholds: 3,
 			smartFillWeeklyRate: 0.25,
-			weeklyFillUsers: 2
+			weeklyFillUsers: 2,
+			weeklyRitualRate: 0.2,
+			weeklyRitualUsers: 2,
+			wrappedRate: 0.25,
+			mauCount: 8,
+			wrappedViewers: 2,
+			receiptRate: 0.3,
+			receiptUsers: 3,
+			activatedUsers: 10,
+			inviteRate: 0.4,
+			newHouseholds: 5,
+			multiMemberNewHouseholds: 2
 		});
 		const review = buildWeeklyReview(
 			current,
@@ -155,7 +176,7 @@ describe('buildPmfDigestEmailContent', () => {
 		});
 
 		expect(content.subject).toContain('PMF');
-		expect(content.subject).toContain('0/7');
+		expect(content.subject).toContain('0/11');
 		expect(content.recommendedMetric).toBe('activationRate');
 		expect(content.text).toContain('Aktivering (24 h)');
 		expect(content.text).toContain('Pro-waitlist: 0 / 50');

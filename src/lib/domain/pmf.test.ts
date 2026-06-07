@@ -7,8 +7,12 @@ import {
 	computeMetricDelta,
 	computeMultiMemberHouseholdRate,
 	computeRetentionRate,
+	computeInviteRate,
+	computeReceiptRate,
 	computeSmartFillWeeklyRate,
+	computeWeeklyRitualRate,
 	computeWeeklyScanRate,
+	computeWrappedRate,
 	isTrackedMetricOnTarget,
 	isUserActivated,
 	medianMinutesToFirstScan,
@@ -34,6 +38,16 @@ function emptySnapshot(overrides: Partial<PmfMetricSnapshot> = {}): PmfMetricSna
 		multiMemberActiveHouseholds: 0,
 		smartFillWeeklyRate: 0,
 		weeklyFillUsers: 0,
+		weeklyRitualRate: 0,
+		weeklyRitualUsers: 0,
+		wrappedRate: 0,
+		mauCount: 0,
+		wrappedViewers: 0,
+		receiptRate: 0,
+		receiptUsers: 0,
+		inviteRate: 0,
+		newHouseholds: 0,
+		multiMemberNewHouseholds: 0,
 		eventCounts: {
 			scan_completed: 0,
 			receipt_parsed: 0,
@@ -214,6 +228,44 @@ describe('pmf retention and usage rates', () => {
 			weeklyFillUsers: 1
 		});
 	});
+
+	it('computes weekly ritual rate among WAU', () => {
+		const result = computeWeeklyRitualRate(new Set(['u1', 'u2']), new Set(['u2', 'u3']));
+
+		expect(result).toEqual({
+			rate: 0.5,
+			weeklyRitualUsers: 1
+		});
+	});
+
+	it('computes wrapped rate among MAU', () => {
+		const result = computeWrappedRate(new Set(['u1', 'u2', 'u3']), new Set(['u1', 'u4']));
+
+		expect(result).toEqual({
+			rate: 1 / 3,
+			mauCount: 3,
+			wrappedViewers: 1
+		});
+	});
+
+	it('computes receipt rate among activated users', () => {
+		const result = computeReceiptRate(new Set(['u1', 'u2']), new Set(['u1', 'u3']));
+
+		expect(result).toEqual({
+			rate: 0.5,
+			receiptUsers: 1
+		});
+	});
+
+	it('computes invite rate for new households', () => {
+		const result = computeInviteRate([1, 2, 1]);
+
+		expect(result).toEqual({
+			rate: 1 / 3,
+			newHouseholds: 3,
+			multiMemberNewHouseholds: 1
+		});
+	});
 });
 
 describe('pmf weekly review', () => {
@@ -279,8 +331,13 @@ describe('pmf weekly review', () => {
 			'weeklyScanRate',
 			'd7Retention',
 			'multiMemberHouseholdRate',
-			'smartFillWeeklyRate'
+			'smartFillWeeklyRate',
+			'weeklyRitualRate',
+			'wrappedRate',
+			'receiptRate',
+			'inviteRate'
 		]);
+		expect(review.totalTracked).toBe(11);
 		expect(buildMetricStatus('activationRate', current, previous).deltaDirection).toBe('up');
 	});
 });

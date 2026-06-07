@@ -6,21 +6,32 @@ import {
 	type PmfFunnelSnapshot
 } from '$lib/domain/pmf-funnel';
 import {
+	buildLaunchCohortSnapshot,
+	type LaunchCohortSnapshot
+} from '$lib/domain/launch-cohort';
+import {
 	computeActivationRate,
+	computeInviteRate,
 	computeMultiMemberHouseholdRate,
+	computeReceiptRate,
 	computeRetentionRate,
 	computeSmartFillWeeklyRate,
+	computeWeeklyRitualRate,
 	computeWeeklyScanRate,
+	computeWrappedRate,
+	isUserActivated,
 	medianMinutesToFirstScan,
 	type PmfMetricSnapshot,
 	type PmfProductEventType,
 	type ProductEventType,
+	MAU_WINDOW_MS,
 	WAU_WINDOW_MS
 } from '$lib/domain/pmf';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { db } from '$lib/infrastructure/db';
 import {
 	householdMemberTable,
+	householdTable,
 	inventoryItemTable,
 	productEventTable,
 	userTable
@@ -38,6 +49,7 @@ export interface IPmfRepository {
 	recordEvent(input: RecordProductEventInput): Promise<void>;
 	getGlobalMetrics(now?: Date): Promise<PmfMetricSnapshot>;
 	getFunnelMetrics(periodDays: PmfFunnelPeriodDays, now?: Date): Promise<PmfFunnelSnapshot>;
+	getLaunchCohortSignups(periodDays: PmfFunnelPeriodDays, now?: Date): Promise<LaunchCohortSnapshot>;
 	hasHouseholdEvent(householdId: string, eventType: ProductEventType): Promise<boolean>;
 	countUserScanEvents(userId: string): Promise<number>;
 	getUserCreatedAt(userId: string): Promise<Date | null>;
@@ -60,9 +72,23 @@ export class DrizzlePmfRepository implements IPmfRepository {
 
 	async getGlobalMetrics(now = new Date()): Promise<PmfMetricSnapshot> {
 		const wauSince = new Date(now.getTime() - WAU_WINDOW_MS);
+		const mauSince = new Date(now.getTime() - MAU_WINDOW_MS);
 
-		const [users, activationItemRows, receiptActivationRows, firstScanRows, weeklyScanRows, weeklyFillRows, householdMembers, eventCountRows] =
-			await Promise.all([
+		const [
+			users,
+			activationItemRows,
+			receiptActivationRows,
+			firstScanRows,
+			weeklyScanRows,
+			weeklyFillRows,
+			weeklyRitualRows,
+			wrappedViewerRows,
+			receiptUserRows,
+			newHouseholdRows,
+			householdMemberCounts,
+			householdMembers,
+			eventCountRows
+		] = await Promise.all([
 				db
 					.select({
 						id: userTable.id,
@@ -117,6 +143,42 @@ export class DrizzlePmfRepository implements IPmfRepository {
 							gte(productEventTable.createdAt, wauSince)
 						)
 					),
+				db
+					.selectDistinct({ userId: productEventTable.userId })
+					.from(productEventTable)
+					.where(
+						and(
+							eq(productEventTable.eventType, 'weekly_ritual_approved'),
+							gte(productEventTable.createdAt, wauSince)
+						)
+					),
+				db
+					.selectDistinct({ userId: productEventTable.userId })
+					.from(productEventTable)
+					.where(
+						and(
+							eq(productEventTable.eventType, 'wrapped_viewed'),
+							gte(productEventTable.createdAt, mauSince)
+						)
+					),
+				db
+					.selectDistinct({ userId: productEventTable.userId })
+					.from(productEventTable)
+					.where(eq(productEventTable.eventType, 'receipt_parsed')),
+				db
+					.select({
+						id: householdTable.id,
+						createdAt: householdTable.createdAt
+					})
+					.from(householdTable)
+					.where(gte(householdTable.createdAt, wauSince)),
+				db
+					.select({
+						householdId: householdMemberTable.householdId,
+						count: sql<number>`count(*)::int`
+					})
+					.from(householdMemberTable)
+					.groupBy(householdMemberTable.householdId),
 				db
 					.select({
 						householdId: householdMemberTable.householdId,
@@ -176,6 +238,29 @@ export class DrizzlePmfRepository implements IPmfRepository {
 
 		const multiMember = computeMultiMemberHouseholdRate(householdMembers, now);
 		const smartFill = computeSmartFillWeeklyRate(wauUserIds, userIdsFromEventRows(weeklyFillRows));
+		const weeklyRitual = computeWeeklyRitualRate(
+			wauUserIds,
+			userIdsFromEventRows(weeklyRitualRows)
+		);
+
+		const mauUserIds = new Set(
+			users
+				.filter((user) => user.lastSeenAt && user.lastSeenAt >= mauSince)
+				.map((user) => user.id)
+		);
+		const wrapped = computeWrappedRate(mauUserIds, userIdsFromEventRows(wrappedViewerRows));
+
+		const activatedUserIds = new Set(
+			activationFacts.filter(isUserActivated).map((facts) => facts.userId)
+		);
+		const receipt = computeReceiptRate(activatedUserIds, userIdsFromEventRows(receiptUserRows));
+
+		const memberCountByHousehold = new Map(
+			householdMemberCounts.map((row) => [row.householdId, row.count ?? 0])
+		);
+		const invite = computeInviteRate(
+			newHouseholdRows.map((household) => memberCountByHousehold.get(household.id) ?? 0)
+		);
 
 		const eventCounts: Record<PmfProductEventType, number> = {
 			scan_completed: 0,
@@ -207,6 +292,16 @@ export class DrizzlePmfRepository implements IPmfRepository {
 			multiMemberActiveHouseholds: multiMember.multiMemberActiveHouseholds,
 			smartFillWeeklyRate: smartFill.rate,
 			weeklyFillUsers: smartFill.weeklyFillUsers,
+			weeklyRitualRate: weeklyRitual.rate,
+			weeklyRitualUsers: weeklyRitual.weeklyRitualUsers,
+			wrappedRate: wrapped.rate,
+			mauCount: wrapped.mauCount,
+			wrappedViewers: wrapped.wrappedViewers,
+			receiptRate: receipt.rate,
+			receiptUsers: receipt.receiptUsers,
+			inviteRate: invite.rate,
+			newHouseholds: invite.newHouseholds,
+			multiMemberNewHouseholds: invite.multiMemberNewHouseholds,
 			eventCounts
 		};
 	}
@@ -311,6 +406,34 @@ export class DrizzlePmfRepository implements IPmfRepository {
 			firstScans,
 			users: cohortUsers.map((user) => ({ userId: user.id, registeredAt: user.createdAt })),
 			activityRows: activity
+		});
+	}
+
+	async getLaunchCohortSignups(
+		periodDays: PmfFunnelPeriodDays,
+		now = new Date()
+	): Promise<LaunchCohortSnapshot> {
+		const periodMs = periodDays * 24 * 60 * 60 * 1000;
+		const periodStart = new Date(now.getTime() - periodMs);
+
+		const events = await db
+			.select({
+				createdAt: productEventTable.createdAt,
+				metadata: productEventTable.metadata
+			})
+			.from(productEventTable)
+			.where(
+				and(
+					eq(productEventTable.eventType, 'signup_complete'),
+					gte(productEventTable.createdAt, periodStart)
+				)
+			);
+
+		return buildLaunchCohortSnapshot({
+			periodDays,
+			periodStart,
+			periodEnd: now,
+			events
 		});
 	}
 

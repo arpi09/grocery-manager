@@ -45,6 +45,7 @@ export const SCAN_EVENT_TYPES: ProductEventType[] = [
 export const ACTIVATION_WINDOW_MS = 24 * 60 * 60 * 1000;
 export const ACTIVATION_ITEM_THRESHOLD = 10;
 export const WAU_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+export const MAU_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
 export const PMF_TARGETS = {
 	activationRate: 0.4,
@@ -54,7 +55,11 @@ export const PMF_TARGETS = {
 	d30RetentionEarly: 0.15,
 	d30RetentionMature: 0.25,
 	multiMemberHouseholdRate: 0.5,
-	smartFillWeeklyRate: 0.2
+	smartFillWeeklyRate: 0.2,
+	weeklyRitualRate: 0.15,
+	wrappedRate: 0.2,
+	receiptRate: 0.25,
+	inviteRate: 0.3
 } as const;
 
 export interface UserRegistrationRow {
@@ -99,6 +104,16 @@ export interface PmfMetricSnapshot {
 	multiMemberActiveHouseholds: number;
 	smartFillWeeklyRate: number;
 	weeklyFillUsers: number;
+	weeklyRitualRate: number;
+	weeklyRitualUsers: number;
+	wrappedRate: number;
+	mauCount: number;
+	wrappedViewers: number;
+	receiptRate: number;
+	receiptUsers: number;
+	inviteRate: number;
+	newHouseholds: number;
+	multiMemberNewHouseholds: number;
 	eventCounts: Record<PmfProductEventType, number>;
 }
 
@@ -109,7 +124,11 @@ export const PMF_TRACKED_METRIC_KEYS = [
 	'd7Retention',
 	'd30Retention',
 	'multiMemberHouseholdRate',
-	'smartFillWeeklyRate'
+	'smartFillWeeklyRate',
+	'weeklyRitualRate',
+	'wrappedRate',
+	'receiptRate',
+	'inviteRate'
 ] as const;
 
 export type PmfTrackedMetricKey = (typeof PMF_TRACKED_METRIC_KEYS)[number];
@@ -154,7 +173,11 @@ const PMF_METRIC_CONFIG: Record<
 		target: PMF_TARGETS.multiMemberHouseholdRate,
 		higherIsBetter: true
 	},
-	smartFillWeeklyRate: { target: PMF_TARGETS.smartFillWeeklyRate, higherIsBetter: true }
+	smartFillWeeklyRate: { target: PMF_TARGETS.smartFillWeeklyRate, higherIsBetter: true },
+	weeklyRitualRate: { target: PMF_TARGETS.weeklyRitualRate, higherIsBetter: true },
+	wrappedRate: { target: PMF_TARGETS.wrappedRate, higherIsBetter: true },
+	receiptRate: { target: PMF_TARGETS.receiptRate, higherIsBetter: true },
+	inviteRate: { target: PMF_TARGETS.inviteRate, higherIsBetter: true }
 };
 
 const RATE_DELTA_EPSILON = 0.001;
@@ -414,5 +437,90 @@ export function computeSmartFillWeeklyRate(
 	return {
 		rate: weeklyFillUsers / wauUserIds.size,
 		weeklyFillUsers
+	};
+}
+
+export function isMonthlyActive(lastSeenAt: Date | null, now: Date, windowMs = MAU_WINDOW_MS): boolean {
+	return isWeeklyActive(lastSeenAt, now, windowMs);
+}
+
+export function computeWeeklyRitualRate(
+	wauUserIds: Set<string>,
+	weeklyRitualUserIds: Set<string>
+): { rate: number; weeklyRitualUsers: number } {
+	if (wauUserIds.size === 0) {
+		return { rate: 0, weeklyRitualUsers: 0 };
+	}
+
+	let weeklyRitualUsers = 0;
+	for (const userId of weeklyRitualUserIds) {
+		if (wauUserIds.has(userId)) {
+			weeklyRitualUsers++;
+		}
+	}
+
+	return {
+		rate: weeklyRitualUsers / wauUserIds.size,
+		weeklyRitualUsers
+	};
+}
+
+export function computeWrappedRate(
+	mauUserIds: Set<string>,
+	wrappedViewerUserIds: Set<string>
+): { rate: number; mauCount: number; wrappedViewers: number } {
+	const mauCount = mauUserIds.size;
+	if (mauCount === 0) {
+		return { rate: 0, mauCount: 0, wrappedViewers: 0 };
+	}
+
+	let wrappedViewers = 0;
+	for (const userId of wrappedViewerUserIds) {
+		if (mauUserIds.has(userId)) {
+			wrappedViewers++;
+		}
+	}
+
+	return {
+		rate: wrappedViewers / mauCount,
+		mauCount,
+		wrappedViewers
+	};
+}
+
+export function computeReceiptRate(
+	activatedUserIds: Set<string>,
+	receiptUserIds: Set<string>
+): { rate: number; receiptUsers: number } {
+	if (activatedUserIds.size === 0) {
+		return { rate: 0, receiptUsers: 0 };
+	}
+
+	let receiptUsers = 0;
+	for (const userId of receiptUserIds) {
+		if (activatedUserIds.has(userId)) {
+			receiptUsers++;
+		}
+	}
+
+	return {
+		rate: receiptUsers / activatedUserIds.size,
+		receiptUsers
+	};
+}
+
+export function computeInviteRate(
+	newHouseholdMemberCounts: number[]
+): { rate: number; newHouseholds: number; multiMemberNewHouseholds: number } {
+	const newHouseholds = newHouseholdMemberCounts.length;
+	if (newHouseholds === 0) {
+		return { rate: 0, newHouseholds: 0, multiMemberNewHouseholds: 0 };
+	}
+
+	const multiMemberNewHouseholds = newHouseholdMemberCounts.filter((count) => count >= 2).length;
+	return {
+		rate: multiMemberNewHouseholds / newHouseholds,
+		newHouseholds,
+		multiMemberNewHouseholds
 	};
 }

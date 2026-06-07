@@ -4,6 +4,8 @@ Veckovis logg för **Spår B3**: måndags-PMF enligt [`PMF_WEEKLY.md`](./PMF_WEE
 
 **Rutin:** ~30 min varje måndag · samma metrics som veckomejl (cron mån 08:00 UTC)
 
+**Auto-export:** På `/admin` → fliken **Analys** → *Exportera CSV (30 dagar)*, eller direkt `GET /api/admin/data?section=export&period=30` (admin-inloggad). CSV innehåller PMF-snapshot, event per dag och topp-routes — för Excel, case study och investerare.
+
 ---
 
 ## Baseline (före launch våg 1)
@@ -12,10 +14,11 @@ Veckovis logg för **Spår B3**: måndags-PMF enligt [`PMF_WEEKLY.md`](./PMF_WEE
 
 | | Värde | Datum |
 |---|-------|-------|
-| Användare | | |
-| Hushåll | | |
-| Aktivering (24 h) | | |
-| Pro-waitlist | / 50 | |
+| Användare | *(fyll från `/admin`)* | |
+| Hushåll | *(fyll från `/admin`)* | |
+| Aktivering (24 h) | *(fyll %)* | |
+| Sean Ellis ("Mycket besviken") | *(fyll % — mål >40 %)* | |
+| Pro-waitlist | *(fyll)* / 50 | |
 
 **Launch startdatum (vecka 1 post):** _______________
 

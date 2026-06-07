@@ -56,7 +56,11 @@
 			d7Retention: t('pmf.d7.label'),
 			d30Retention: t('pmf.d30.label'),
 			multiMemberHouseholdRate: t('pmf.multiMember.label'),
-			smartFillWeeklyRate: t('pmf.smartFill.label')
+			smartFillWeeklyRate: t('pmf.smartFill.label'),
+			weeklyRitualRate: t('pmf.weeklyRitual.label'),
+			wrappedRate: t('pmf.wrapped.label'),
+			receiptRate: t('pmf.receipt.label'),
+			inviteRate: t('pmf.invite.label')
 		};
 		return labels[key];
 	}
@@ -290,6 +294,90 @@
 			<p class="stat-definition">{t('pmf.smartFill.definition')}</p>
 			<p class="stat-target">
 				{t('pmf.target', { value: formatTarget(PMF_TARGETS.smartFillWeeklyRate) })}
+			</p>
+		</Card>
+
+		<Card class={cardClass(metricStatus('weeklyRitualRate'))}>
+			<p class="stat-label">{t('pmf.weeklyRitual.label')}</p>
+			<p class="stat-value">{formatPercent(metrics.weeklyRitualRate)}</p>
+			<p class="stat-delta {deltaClass(metricStatus('weeklyRitualRate'))}">
+				{formatDelta(metricStatus('weeklyRitualRate'))}
+			</p>
+			{#if !metricStatus('weeklyRitualRate').onTarget}
+				<p class="stat-alert">{t('pmf.belowTarget')}</p>
+			{/if}
+			<p class="stat-note">
+				{t('pmf.weeklyRitual.detail', {
+					approved: formatCount(metrics.weeklyRitualUsers),
+					wau: formatCount(metrics.wauCount)
+				})}
+			</p>
+			<p class="stat-definition">{t('pmf.weeklyRitual.definition')}</p>
+			<p class="stat-target">
+				{t('pmf.target', { value: formatTarget(PMF_TARGETS.weeklyRitualRate) })}
+			</p>
+		</Card>
+
+		<Card class={cardClass(metricStatus('wrappedRate'))}>
+			<p class="stat-label">{t('pmf.wrapped.label')}</p>
+			<p class="stat-value">{formatPercent(metrics.wrappedRate)}</p>
+			<p class="stat-delta {deltaClass(metricStatus('wrappedRate'))}">
+				{formatDelta(metricStatus('wrappedRate'))}
+			</p>
+			{#if !metricStatus('wrappedRate').onTarget}
+				<p class="stat-alert">{t('pmf.belowTarget')}</p>
+			{/if}
+			<p class="stat-note">
+				{t('pmf.wrapped.detail', {
+					viewers: formatCount(metrics.wrappedViewers),
+					mau: formatCount(metrics.mauCount)
+				})}
+			</p>
+			<p class="stat-definition">{t('pmf.wrapped.definition')}</p>
+			<p class="stat-target">
+				{t('pmf.target', { value: formatTarget(PMF_TARGETS.wrappedRate) })}
+			</p>
+		</Card>
+
+		<Card class={cardClass(metricStatus('receiptRate'))}>
+			<p class="stat-label">{t('pmf.receipt.label')}</p>
+			<p class="stat-value">{formatPercent(metrics.receiptRate)}</p>
+			<p class="stat-delta {deltaClass(metricStatus('receiptRate'))}">
+				{formatDelta(metricStatus('receiptRate'))}
+			</p>
+			{#if !metricStatus('receiptRate').onTarget}
+				<p class="stat-alert">{t('pmf.belowTarget')}</p>
+			{/if}
+			<p class="stat-note">
+				{t('pmf.receipt.detail', {
+					receiptUsers: formatCount(metrics.receiptUsers),
+					activated: formatCount(metrics.activatedUsers)
+				})}
+			</p>
+			<p class="stat-definition">{t('pmf.receipt.definition')}</p>
+			<p class="stat-target">
+				{t('pmf.target', { value: formatTarget(PMF_TARGETS.receiptRate) })}
+			</p>
+		</Card>
+
+		<Card class={cardClass(metricStatus('inviteRate'))}>
+			<p class="stat-label">{t('pmf.invite.label')}</p>
+			<p class="stat-value">{formatPercent(metrics.inviteRate)}</p>
+			<p class="stat-delta {deltaClass(metricStatus('inviteRate'))}">
+				{formatDelta(metricStatus('inviteRate'))}
+			</p>
+			{#if !metricStatus('inviteRate').onTarget}
+				<p class="stat-alert">{t('pmf.belowTarget')}</p>
+			{/if}
+			<p class="stat-note">
+				{t('pmf.invite.detail', {
+					multi: formatCount(metrics.multiMemberNewHouseholds),
+					total: formatCount(metrics.newHouseholds)
+				})}
+			</p>
+			<p class="stat-definition">{t('pmf.invite.definition')}</p>
+			<p class="stat-target">
+				{t('pmf.target', { value: formatTarget(PMF_TARGETS.inviteRate) })}
 			</p>
 		</Card>
 	</div>

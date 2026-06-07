@@ -1038,9 +1038,13 @@
 			"overview": "Overview",
 			"analytics": "Analytics",
 			"behavior": "Behavior",
+			"decisions": "Decisions",
 			"aiUsage": "AI usage",
 			"feedback": "Feedback & waitlist",
 			"pmfSurvey": "PMF survey"
+		},
+		"analytics": {
+			"exportCsv": "Export CSV ({days} days)"
 		},
 		"sessionManagement": "Session management",
 		"logoutAllNote": "Log out everyone ends every active session, including your own. Users must log in again.",
@@ -1158,6 +1162,20 @@
 				"admin_insights": "Admin insights"
 			}
 		},
+		"launchCohort": {
+			"title": "Launch cohort",
+			"subtitle": "Registrations per week and utm_campaign from signup_complete events.",
+			"periodToggle": "Select cohort period",
+			"periodOption": "{days} days",
+			"periodRange": "{start} – {end} ({days} days)",
+			"weekRange": "{start} – {end}",
+			"weekCol": "Week",
+			"campaignCol": "utm_campaign",
+			"signupsCol": "Registrations",
+			"totalSignups": "{count} registrations in period",
+			"unknownCampaign": "(none)",
+			"empty": "No signup_complete events in this period."
+		},
 		"sendPasswordReset": "Send password reset",
 		"forcePasswordReset": "Force password reset",
 		"funnel": {
@@ -1206,6 +1224,45 @@
 			"eventCol": "Event",
 			"countCol": "Count",
 			"empty": "No behavior data yet.",
+			"generateInsights": "Generate AI summary",
+			"refreshInsights": "Refresh AI summary",
+			"insightsTitle": "AI insights",
+			"insightsCached": "Cached summary (1 h).",
+			"insightsError": "Could not generate AI insights right now."
+		},
+		"decisions": {
+			"title": "Decisions",
+			"subtitle": "Three questions for Monday review: where we lose users, what they use, and where they get stuck.",
+			"periodToggle": "Select period",
+			"periodOption": "{days} days",
+			"dropoffTitle": "Where do we lose users?",
+			"dropoffNote": "Behavior funnel and retention from first-party analytics.",
+			"funnelTitle": "Activation funnel",
+			"funnel": {
+				"landing": "Landing",
+				"signup": "Signup",
+				"home": "Home (sessions)",
+				"first_scan": "First scan"
+			},
+			"stepConversion": "Step conversion: {rate}",
+			"retentionTitle": "Retention snapshot",
+			"retentionDetail": "{retained} of {eligible} eligible",
+			"cohortTitle": "Cohort retention curves",
+			"cohortNote": "Registration week × D1/D7/D30 (session activity). Shown when ≥30 D30-eligible users.",
+			"cohortGated": "Not enough data yet ({eligible}/{min} D30-eligible users). Check back after more signups.",
+			"cohortWeekCol": "Reg. week",
+			"signupsCol": "Signups",
+			"usageTitle": "What do people use?",
+			"usageNote": "Top product events and weekly totals from product_event.",
+			"topEventsTitle": "Top 5 events",
+			"weeklyEventsTitle": "Events per week",
+			"weekCol": "Week",
+			"eventCol": "Event",
+			"countCol": "Count",
+			"stuckTitle": "Where do they get stuck?",
+			"stuckNote": "Click heatmaps on key flows — inventory, weekly plan, and recipe.",
+			"heatmapEmpty": "No marked clicks for this route yet.",
+			"empty": "No data yet.",
 			"generateInsights": "Generate AI summary",
 			"refreshInsights": "Refresh AI summary",
 			"insightsTitle": "AI insights",
@@ -1277,6 +1334,26 @@
 			"label": "Smart fill / list",
 			"detail": "{count} WAU used smart fill",
 			"definition": "Share of weekly active users who added AI suggestions to the shopping list"
+		},
+		"weeklyRitual": {
+			"label": "Weekly ritual rate",
+			"detail": "{approved} of {wau} WAU",
+			"definition": "Share of weekly active users who approved their week plan (weekly_ritual_approved)"
+		},
+		"wrapped": {
+			"label": "Wrapped rate",
+			"detail": "{viewers} of {mau} MAU",
+			"definition": "Share of monthly active users who viewed Wrapped in the last 30 days"
+		},
+		"receipt": {
+			"label": "Receipt rate",
+			"detail": "{receiptUsers} of {activated} activated",
+			"definition": "Share of activated users who have parsed at least one receipt"
+		},
+		"invite": {
+			"label": "Invite rate",
+			"detail": "{multi} of {total} new households",
+			"definition": "Share of households created in the last 7 days with at least two members"
 		},
 		"funnel": {
 			"title": "Funnel / PMF",

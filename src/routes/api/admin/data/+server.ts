@@ -11,6 +11,11 @@ import {
 import { PMF_SURVEY_LIST_DEFAULT, PMF_SURVEY_LIST_MAX } from '$lib/domain/pmf-survey';
 import { STRIPE_READINESS_GATES } from '$lib/domain/plan';
 import { parseAdminAiUsagePeriodDays } from '$lib/domain/ai-usage-admin';
+import {
+	buildAdminDataExportCsv,
+	buildAdminExportFilename,
+	parseAdminExportPeriodDays
+} from '$lib/domain/admin-export';
 import { parsePmfFunnelPeriodDays } from '$lib/domain/pmf-funnel';
 import { WAITLIST_LIST_DEFAULT, WAITLIST_LIST_MAX } from '$lib/domain/waitlist';
 import { translate } from '$lib/i18n/messages';
@@ -24,14 +29,17 @@ const SECTIONS = [
 	'behavior-heatmap',
 	'behavior-funnel',
 	'behavior-retention',
+	'cohort-retention',
 	'event-explorer',
 	'ai-insights',
+	'launch-cohort',
 	'users',
 	'errors',
 	'errorStack',
 	'feedback',
 	'waitlist',
-	'pmf-survey'
+	'pmf-survey',
+	'export'
 ] as const;
 type AdminSection = (typeof SECTIONS)[number];
 
@@ -127,6 +135,10 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 			const retention = await locals.analyticsAdminService.getBehaviorRetention(periodDays);
 			return json({ retention });
 		}
+		case 'cohort-retention': {
+			const cohortRetention = await locals.analyticsAdminService.getCohortRetention();
+			return json({ cohortRetention });
+		}
 		case 'event-explorer': {
 			const periodDays = locals.analyticsAdminService.parsePeriodDays(
 				url.searchParams.get('periodDays')
@@ -157,6 +169,21 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 				return json({ error: translate(locals.locale, 'admin.behavior.insightsError') }, { status: 500 });
 			}
 			return json({ insights: serializeRow(insights) });
+		}
+		case 'launch-cohort': {
+			const periodDays = parsePmfFunnelPeriodDays(url.searchParams.get('periodDays'));
+			const launchCohort = await locals.pmfService.getLaunchCohortSignups(periodDays);
+			return json({
+				launchCohort: {
+					...launchCohort,
+					periodStart: launchCohort.periodStart.toISOString(),
+					periodEnd: launchCohort.periodEnd.toISOString(),
+					rows: launchCohort.rows.map((row) => ({
+						...row,
+						weekStart: row.weekStart.toISOString()
+					}))
+				}
+			});
 		}
 		case 'users': {
 			const limit = parseLimit(
@@ -236,6 +263,29 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 				responses: serializeRows(responses),
 				summary,
 				limit
+			});
+		}
+		case 'export': {
+			const periodDays = parseAdminExportPeriodDays(url.searchParams.get('period'));
+			const exportedAt = new Date();
+			const [pmfWeeklyReview, eventExplorer, behaviorOverview] = await Promise.all([
+				locals.pmfService.getWeeklyReview(exportedAt),
+				locals.analyticsAdminService.getEventExplorer(periodDays),
+				locals.analyticsAdminService.getBehaviorOverview(periodDays)
+			]);
+			const csv = buildAdminDataExportCsv({
+				exportedAt,
+				periodDays,
+				pmfWeeklyReview,
+				events: eventExplorer.events,
+				routes: behaviorOverview.routes
+			});
+			const filename = buildAdminExportFilename(periodDays, exportedAt);
+			return new Response(csv, {
+				headers: {
+					'Content-Type': 'text/csv; charset=utf-8',
+					'Content-Disposition': `attachment; filename="${filename}"`
+				}
 			});
 		}
 		default:

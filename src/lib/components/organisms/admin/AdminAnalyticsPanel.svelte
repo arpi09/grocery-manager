@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AdminLaunchCohortPanel from '$lib/components/organisms/admin/AdminLaunchCohortPanel.svelte';
 	import AdminPmfFunnelPanel from '$lib/components/organisms/admin/AdminPmfFunnelPanel.svelte';
 	import PmfDashboard from '$lib/components/organisms/PmfDashboard.svelte';
 	import { fetchAdminData, parseIsoDate } from '$lib/client/admin-data';
@@ -7,6 +8,7 @@
 		type PmfFunnelPeriodDays,
 		type PmfFunnelSnapshot
 	} from '$lib/domain/pmf-funnel';
+	import { ANALYTICS_BEHAVIOR_PERIOD_DAYS } from '$lib/domain/analytics-behavior';
 	import { t } from '$lib/i18n';
 	import type { PmfWeeklyReview } from '$lib/domain/pmf';
 
@@ -74,6 +76,10 @@
 		}
 		funnelDays = days;
 	}
+
+	function exportDataUrl(days: (typeof ANALYTICS_BEHAVIOR_PERIOD_DAYS)[number]) {
+		return `/api/admin/data?section=export&period=${days}`;
+	}
 </script>
 
 {#if loading && !pmfFunnel}
@@ -81,12 +87,20 @@
 {:else if error}
 	<p class="panel-status panel-error" role="alert">{error}</p>
 {:else if pmfFunnel && pmfWeeklyReview}
+	<div class="panel-actions">
+		{#each ANALYTICS_BEHAVIOR_PERIOD_DAYS as days}
+			<a class="export-link" href={exportDataUrl(days)} download>
+				{t('admin.analytics.exportCsv', { days })}
+			</a>
+		{/each}
+	</div>
 	<AdminPmfFunnelPanel
 		snapshot={pmfFunnel}
 		periodDays={funnelDays}
 		loading={loading}
 		onPeriodChange={selectFunnelPeriod}
 	/>
+	<AdminLaunchCohortPanel active={active} />
 	<PmfDashboard review={pmfWeeklyReview} />
 {/if}
 
@@ -98,5 +112,30 @@
 
 	.panel-error {
 		color: #8a1f1f;
+	}
+
+	.panel-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
+		margin: 0 0 var(--space-lg);
+	}
+
+	.export-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2.5rem;
+		padding: 0 var(--space-md);
+		border-radius: var(--radius-md);
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		color: var(--color-text);
+		font: inherit;
+		text-decoration: none;
+	}
+
+	.export-link:hover {
+		background: var(--color-surface-muted);
 	}
 </style>

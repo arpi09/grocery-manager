@@ -1018,9 +1018,13 @@
 			"overview": "Översikt",
 			"analytics": "Analys",
 			"behavior": "Beteende",
+			"decisions": "Beslut",
 			"aiUsage": "AI-användning",
 			"feedback": "Feedback & waitlist",
 			"pmfSurvey": "PMF-enkät"
+		},
+		"analytics": {
+			"exportCsv": "Exportera CSV ({days} dagar)"
 		},
 		"sessionManagement": "Sessionshantering",
 		"logoutAllNote": "Logga ut alla avslutar varje aktiv session, inklusive din egen. Användare måste logga in igen.",
@@ -1131,6 +1135,20 @@
 				"admin_insights": "Admin-insikter"
 			}
 		},
+		"launchCohort": {
+			"title": "Launch-kohort",
+			"subtitle": "Registreringar per vecka och utm_campaign från signup_complete.",
+			"periodToggle": "Välj kohortperiod",
+			"periodOption": "{days} dagar",
+			"periodRange": "{start} – {end} ({days} dagar)",
+			"weekRange": "{start} – {end}",
+			"weekCol": "Vecka",
+			"campaignCol": "utm_campaign",
+			"signupsCol": "Registreringar",
+			"totalSignups": "{count} registreringar i perioden",
+			"unknownCampaign": "(ingen)",
+			"empty": "Inga signup_complete-händelser i denna period."
+		},
 		"sendPasswordReset": "Skicka återställningslänk",
 		"forcePasswordReset": "Tvinga lösenordsbyte",
 		"funnel": {
@@ -1186,6 +1204,45 @@
 			"eventCol": "Event",
 			"countCol": "Antal",
 			"empty": "Ingen beteendedata ännu.",
+			"generateInsights": "Generera AI-sammanfattning",
+			"refreshInsights": "Uppdatera AI-sammanfattning",
+			"insightsTitle": "AI-insikter",
+			"insightsCached": "Cachad sammanfattning (1 h).",
+			"insightsError": "Kunde inte generera AI-insikter just nu."
+		},
+		"decisions": {
+			"title": "Beslut",
+			"subtitle": "Tre frågor för måndagsgenomgång: var tappar vi, vad använder folk, var fastnar de?",
+			"periodToggle": "Välj period",
+			"periodOption": "{days} dagar",
+			"dropoffTitle": "Var tappar vi?",
+			"dropoffNote": "Beteende-funnel och retention från first-party analytics.",
+			"funnelTitle": "Aktiverings-funnel",
+			"funnel": {
+				"landing": "Landning",
+				"signup": "Registrering",
+				"home": "Hem (sessioner)",
+				"first_scan": "Första scan"
+			},
+			"stepConversion": "Stegkonvertering: {rate}",
+			"retentionTitle": "Retention-översikt",
+			"retentionDetail": "{retained} av {eligible} eligible",
+			"cohortTitle": "Kohort-retention",
+			"cohortNote": "Registreringsvecka × D1/D7/D30 (sessionaktivitet). Visas när ≥30 D30-eligible användare.",
+			"cohortGated": "Inte tillräckligt data än ({eligible}/{min} D30-eligible). Återkom när fler registrerat sig.",
+			"cohortWeekCol": "Reg.-vecka",
+			"signupsCol": "Registreringar",
+			"usageTitle": "Vad använder folk?",
+			"usageNote": "Topp product events och veckosummor från product_event.",
+			"topEventsTitle": "Topp 5 events",
+			"weeklyEventsTitle": "Events per vecka",
+			"weekCol": "Vecka",
+			"eventCol": "Event",
+			"countCol": "Antal",
+			"stuckTitle": "Var fastnar de?",
+			"stuckNote": "Klick-heatmaps på nyckelflöden — inventarie, veckoplan och recept.",
+			"heatmapEmpty": "Inga märkta klick för denna route ännu.",
+			"empty": "Ingen data ännu.",
 			"generateInsights": "Generera AI-sammanfattning",
 			"refreshInsights": "Uppdatera AI-sammanfattning",
 			"insightsTitle": "AI-insikter",
@@ -1257,6 +1314,26 @@
 			"label": "Smart fill / lista",
 			"detail": "{count} WAU använde smart fill",
 			"definition": "Andel veckoaktiva som lagt till AI-förslag på inköpslistan"
+		},
+		"weeklyRitual": {
+			"label": "Veckoritual-rate",
+			"detail": "{approved} av {wau} WAU",
+			"definition": "Andel veckoaktiva som godkänt veckoplan (weekly_ritual_approved)"
+		},
+		"wrapped": {
+			"label": "Wrapped-rate",
+			"detail": "{viewers} av {mau} MAU",
+			"definition": "Andel månadsaktiva som sett Wrapped senaste 30 dagarna"
+		},
+		"receipt": {
+			"label": "Kvitto-rate",
+			"detail": "{receiptUsers} av {activated} aktiverade",
+			"definition": "Andel aktiverade användare som tolkat minst ett kvitto"
+		},
+		"invite": {
+			"label": "Inbjudan-rate",
+			"detail": "{multi} av {total} nya hushåll",
+			"definition": "Andel hushåll skapade senaste 7 dagarna med minst två medlemmar"
 		},
 		"funnel": {
 			"title": "Tratt / PMF",

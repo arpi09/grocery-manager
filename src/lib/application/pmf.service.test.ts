@@ -11,6 +11,7 @@ describe('PmfService', () => {
 			recordEvent: vi.fn(),
 			getGlobalMetrics: vi.fn(),
 			getFunnelMetrics: vi.fn(),
+			getLaunchCohortSignups: vi.fn(),
 			hasHouseholdEvent: vi.fn(),
 			countUserScanEvents: vi.fn(),
 			getUserCreatedAt: vi.fn()
@@ -35,6 +36,16 @@ describe('PmfService', () => {
 		multiMemberActiveHouseholds: 1,
 		smartFillWeeklyRate: 0.1,
 		weeklyFillUsers: 1,
+		weeklyRitualRate: 0.05,
+		weeklyRitualUsers: 1,
+		wrappedRate: 0.1,
+		mauCount: 10,
+		wrappedViewers: 1,
+		receiptRate: 0.2,
+		receiptUsers: 1,
+		inviteRate: 0.25,
+		newHouseholds: 4,
+		multiMemberNewHouseholds: 1,
 		eventCounts: {
 			scan_completed: 3,
 			receipt_parsed: 1,
@@ -112,6 +123,6 @@ describe('PmfService', () => {
 		);
 		expect(review.current).toEqual(metrics);
 		expect(review.previous).toEqual(previous);
-		expect(review.metrics).toHaveLength(7);
+		expect(review.metrics).toHaveLength(11);
 	});
 });

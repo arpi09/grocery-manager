@@ -16,7 +16,11 @@ const METRIC_LABELS_SV: Record<PmfTrackedMetricKey, string> = {
 	d7Retention: 'D7-retention',
 	d30Retention: 'D30-retention',
 	multiMemberHouseholdRate: 'Hushåll 2+ aktiva',
-	smartFillWeeklyRate: 'Smart fill / vecka'
+	smartFillWeeklyRate: 'Smart fill / vecka',
+	weeklyRitualRate: 'Veckoritual-rate',
+	wrappedRate: 'Wrapped-rate',
+	receiptRate: 'Kvitto-rate',
+	inviteRate: 'Inbjudan-rate'
 };
 
 const RECOMMENDED_ACTIONS_SV: Record<PmfTrackedMetricKey, string> = {
@@ -33,7 +37,15 @@ const RECOMMENDED_ACTIONS_SV: Record<PmfTrackedMetricKey, string> = {
 	multiMemberHouseholdRate:
 		'Öka flermedlemshushåll — förenkla inbjudningsflödet och uppmuntra ägare att bjuda in partner/familj.',
 	smartFillWeeklyRate:
-		'Öka smart fill — gör AI-fill mer synligt på inköpslistan och testa om fler WAU använder funktionen.'
+		'Öka smart fill — gör AI-fill mer synligt på inköpslistan och testa om fler WAU använder funktionen.',
+	weeklyRitualRate:
+		'Öka veckoritual — gör måndagsflödet (/planer/vecka) mer synligt på hem och testa copy för godkänn vecka.',
+	wrappedRate:
+		'Öka Wrapped-räckvidd — dela Wrapped i launch-copy och säkerställ CTA på /statistik och /hem.',
+	receiptRate:
+		'Öka kvitto-adoption — granska onboarding och kvitto-autopilot; intervjua aktiverade som bara scannat streckkod.',
+	inviteRate:
+		'Öka inbjudningar — förenkla hushållsinbjudan och påminn nya hushåll att bjuda in partner/familj.'
 };
 
 export interface PmfDigestInput {
@@ -149,6 +161,14 @@ function metricDetailSv(key: PmfTrackedMetricKey, review: PmfWeeklyReview): stri
 			return `${snapshot.multiMemberActiveHouseholds}/${snapshot.activeHouseholds} hushåll`;
 		case 'smartFillWeeklyRate':
 			return `${snapshot.weeklyFillUsers}/${snapshot.wauCount} WAU`;
+		case 'weeklyRitualRate':
+			return `${snapshot.weeklyRitualUsers}/${snapshot.wauCount} WAU`;
+		case 'wrappedRate':
+			return `${snapshot.wrappedViewers}/${snapshot.mauCount} MAU`;
+		case 'receiptRate':
+			return `${snapshot.receiptUsers}/${snapshot.activatedUsers} aktiverade`;
+		case 'inviteRate':
+			return `${snapshot.multiMemberNewHouseholds}/${snapshot.newHouseholds} nya hushåll`;
 		default:
 			return '';
 	}
