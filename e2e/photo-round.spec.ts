@@ -28,9 +28,13 @@ test.describe('Photo round flow', () => {
 		await dismissOnboardingModalIfOpen(page);
 
 		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 30_000 });
-		await expect(page.getByText(/AI fÃ¶reslÃ¥r plats|AI suggests location/i)).toBeVisible();
+		await expect(page.getByTestId('photo-round-lead')).toContainText(
+			/AI föreslår plats|AI suggests location/i
+		);
 		await expect(page.getByTestId('photo-round-zone-fridge')).not.toBeVisible();
-		await expect(page.getByText(/Byt zon fÃ¶r analys|Change zone for analysis/i)).toBeVisible();
+		await expect(page.getByTestId('photo-round-zone-toggle')).toContainText(
+			/Byt zon för analys|Change zone for analysis/i
+		);
 		await expect(page.getByTestId('photo-round-analyze')).toBeDisabled();
 	});
 

@@ -262,7 +262,7 @@
 
 {#if step === 'capture'}
 	<section data-testid="photo-round-capture">
-		<p class="lead">{captureLead}</p>
+		<p class="lead" data-testid="photo-round-lead">{captureLead}</p>
 		<p class="privacy">{t('photoRound.privacyNote')}</p>
 
 		{#if photos.length > 0}
@@ -295,7 +295,7 @@
 
 		{#if showZonePicker}
 			<details class="zone-optional" bind:open={zonePickerOpen}>
-				<summary>{t('photoRound.zoneOptional')}</summary>
+				<summary data-testid="photo-round-zone-toggle">{t('photoRound.zoneOptional')}</summary>
 				<div class="zone-grid" role="group" aria-label={t('photoRound.zoneAria')}>
 					{#each LOCATIONS as loc (loc)}
 						<Button
