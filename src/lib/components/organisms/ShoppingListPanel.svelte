@@ -596,11 +596,19 @@
 		}
 
 		.add-row {
-			grid-template-columns: 1fr 1fr auto;
+			grid-template-columns: auto minmax(4rem, 0.6fr) minmax(7rem, 1fr);
 		}
 
 		.add-row input:first-of-type {
 			grid-column: 1 / -1;
+		}
+
+		.add-row input[name='quantity'] {
+			grid-column: 2;
+		}
+
+		.add-row input[name='unit'] {
+			grid-column: 3;
 		}
 
 		.add-row input {
@@ -610,6 +618,7 @@
 		}
 
 		.add-row :global(.btn) {
+			grid-column: 1;
 			grid-row: 2;
 			min-width: 2.75rem;
 			padding-inline: 0.85rem;
