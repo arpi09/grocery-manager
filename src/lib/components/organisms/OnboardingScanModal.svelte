@@ -40,6 +40,10 @@
 	const returnTo = APP_HOME_PATH;
 
 	function closeFlow() {
+		if (visibleModes.length === 1) {
+			closePicker();
+			return;
+		}
 		activeFlow = null;
 	}
 
