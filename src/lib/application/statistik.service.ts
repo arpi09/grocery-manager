@@ -122,7 +122,9 @@ export class StatistikService {
 			consumedWeekOverWeek: hasConsumptionData ? computeWeekOverWeek(consumedTrend) : null,
 			consumedTrend,
 			wasteTrend,
-			zeroWasteWeeks: hasConsumptionData ? computeZeroWasteStreak(wasteTrend) : null
+			zeroWasteWeeks: hasConsumptionData
+				? computeZeroWasteStreak(wasteTrend, consumedTrend)
+				: null
 		};
 	}
 }

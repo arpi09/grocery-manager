@@ -45,14 +45,36 @@ describe('statistik domain', () => {
 	});
 
 	it('counts consecutive zero-waste weeks from the end', () => {
+		const consumedByWeek = [
+			{ weekStart: '2026-05-11', count: 2, label: 'w1' },
+			{ weekStart: '2026-05-18', count: 1, label: 'w2' },
+			{ weekStart: '2026-05-25', count: 3, label: 'w3' },
+			{ weekStart: '2026-06-01', count: 1, label: 'current' }
+		];
+
 		expect(
-			computeZeroWasteStreak([
-				{ weekStart: '2026-05-11', count: 1, label: 'w1' },
-				{ weekStart: '2026-05-18', count: 0, label: 'w2' },
-				{ weekStart: '2026-05-25', count: 0, label: 'w3' },
-				{ weekStart: '2026-06-01', count: 0, label: 'current' }
-			])
+			computeZeroWasteStreak(
+				[
+					{ weekStart: '2026-05-11', count: 1, label: 'w1' },
+					{ weekStart: '2026-05-18', count: 0, label: 'w2' },
+					{ weekStart: '2026-05-25', count: 0, label: 'w3' },
+					{ weekStart: '2026-06-01', count: 0, label: 'current' }
+				],
+				consumedByWeek
+			)
 		).toBe(3);
+	});
+
+	it('ignores zero-filled weeks before first consumption', () => {
+		const consumedByWeek = [
+			{ weekStart: '2026-05-11', count: 0, label: 'w1' },
+			{ weekStart: '2026-05-18', count: 0, label: 'w2' },
+			{ weekStart: '2026-05-25', count: 0, label: 'w3' },
+			{ weekStart: '2026-06-01', count: 4, label: 'current' }
+		];
+		const wasteByWeek = consumedByWeek.map((bar) => ({ ...bar, count: 0 }));
+
+		expect(computeZeroWasteStreak(wasteByWeek, consumedByWeek)).toBe(1);
 	});
 
 	it('finds max bar height for chart scaling', () => {

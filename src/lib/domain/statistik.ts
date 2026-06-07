@@ -86,9 +86,17 @@ export function computeWeekOverWeek(bars: WeeklyBar[]): WeekOverWeek | null {
 	return { thisWeek, lastWeek, delta, deltaPercent };
 }
 
-export function computeZeroWasteStreak(wasteByWeek: WeeklyBar[]): number {
+export function computeZeroWasteStreak(
+	wasteByWeek: WeeklyBar[],
+	consumedByWeek: WeeklyBar[]
+): number {
+	const firstConsumptionIndex = consumedByWeek.findIndex((bar) => bar.count > 0);
+	if (firstConsumptionIndex === -1) {
+		return 0;
+	}
+
 	let streak = 0;
-	for (let index = wasteByWeek.length - 1; index >= 0; index -= 1) {
+	for (let index = wasteByWeek.length - 1; index >= firstConsumptionIndex; index -= 1) {
 		if (wasteByWeek[index].count > 0) {
 			break;
 		}

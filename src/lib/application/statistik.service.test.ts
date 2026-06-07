@@ -62,4 +62,16 @@ describe('StatistikService', () => {
 		expect(savings.wastedCount).toBe(1);
 		expect(consumptionRepository.listEventsForSavings).toHaveBeenCalledWith('household-1');
 	});
+
+	it('caps zero-waste weeks at weeks since first consumption', async () => {
+		const currentWeek = toIsoDate(startOfWeek(referenceDate));
+		vi.mocked(consumptionRepository.weeklyCountsByEventType).mockImplementation((_h, types) =>
+			types.includes('consumed')
+				? Promise.resolve([{ weekStart: currentWeek, count: 3 }])
+				: Promise.resolve([])
+		);
+
+		const impact = await service.getImpact('household-new');
+		expect(impact.zeroWasteWeeks).toBe(1);
+	});
 });
