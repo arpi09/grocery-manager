@@ -7,6 +7,7 @@
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import OnboardingCelebrateIllustration from '$lib/components/organisms/OnboardingCelebrateIllustration.svelte';
 	import OnboardingScanModal from '$lib/components/organisms/OnboardingScanModal.svelte';
+	import { setActivationPath } from '$lib/utils/onboarding';
 	import OnboardingStepIllustration from '$lib/components/organisms/OnboardingStepIllustration.svelte';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import { t, type MessageKey } from '$lib/i18n';
@@ -46,7 +47,7 @@
 		{
 			id: 'addItems',
 			titleKey: 'onboarding.addItemsTitle',
-			bodyKey: 'onboarding.addItemsBody'
+			bodyKey: 'onboarding.addItemsBodyBinary'
 		},
 		{
 			id: 'celebrate',
@@ -60,6 +61,7 @@
 	let stepDirection = $state<'forward' | 'back'>('forward');
 	let registrationWelcomeDone = $state(false);
 	let scanModalOpen = $state(false);
+	let scanModalModes = $state<('barcode' | 'photo' | 'receipt')[] | undefined>(undefined);
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
@@ -141,10 +143,27 @@
 
 	function handleItemSaved() {
 		scanModalOpen = false;
+		scanModalModes = undefined;
 		if (stepIndex < 2) {
 			stepDirection = 'forward';
 			stepIndex = 2;
 		}
+	}
+
+	function chooseReceiptPath() {
+		if (userId) {
+			setActivationPath('receipt', userId);
+		}
+		scanModalModes = ['receipt'];
+		scanModalOpen = true;
+	}
+
+	function chooseBarcodePath() {
+		if (userId) {
+			setActivationPath('barcode', userId);
+		}
+		scanModalModes = ['barcode'];
+		scanModalOpen = true;
 	}
 
 	function syncCelebrateStep() {
@@ -278,15 +297,27 @@
 				</p>
 			{/if}
 
-			<Button
-				type="button"
-				fullWidth
-				data-testid="onboarding-add-items"
-				data-analytics-id="onboarding.add_first_item"
-				onclick={() => (scanModalOpen = true)}
-			>
-				{t('onboarding.addFirstItem')}
-			</Button>
+			<div class="activation-choices">
+				<Button
+					type="button"
+					fullWidth
+					data-testid="onboarding-choose-receipt"
+					data-analytics-id="onboarding.choose_receipt"
+					onclick={chooseReceiptPath}
+				>
+					{t('onboarding.chooseReceipt')}
+				</Button>
+				<Button
+					type="button"
+					variant="secondary"
+					fullWidth
+					data-testid="onboarding-choose-barcode"
+					data-analytics-id="onboarding.choose_barcode"
+					onclick={chooseBarcodePath}
+				>
+					{t('onboarding.chooseBarcode')}
+				</Button>
+			</div>
 		{/if}
 
 		{#if currentStep.id === 'celebrate'}
@@ -325,7 +356,11 @@
 
 <OnboardingScanModal
 	open={scanModalOpen}
-	onClose={() => (scanModalOpen = false)}
+	allowedModes={scanModalModes}
+	onClose={() => {
+		scanModalOpen = false;
+		scanModalModes = undefined;
+	}}
 	onItemSaved={handleItemSaved}
 />
 
@@ -492,6 +527,13 @@
 		margin-inline: auto;
 		overflow-wrap: anywhere;
 		word-break: break-word;
+	}
+
+	.activation-choices {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		width: 100%;
 	}
 
 	.progress-note {

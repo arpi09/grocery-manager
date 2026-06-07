@@ -139,7 +139,7 @@ describe('activation progress', () => {
 	});
 
 	it('tracks barcode scans toward the goal', () => {
-		expect(ACTIVATION_BARCODE_GOAL).toBe(1);
+		expect(ACTIVATION_BARCODE_GOAL).toBe(3);
 
 		if (ACTIVATION_BARCODE_GOAL > 1) {
 			for (let i = 0; i < ACTIVATION_BARCODE_GOAL - 1; i++) {
@@ -160,7 +160,9 @@ describe('activation progress', () => {
 		expect(isActivationComplete(TEST_USER_A)).toBe(true);
 	});
 
-	it('completes activation after one barcode', () => {
+	it('completes activation after three barcodes', () => {
+		expect(recordBarcodeActivation(TEST_USER_A)).toBe(false);
+		expect(recordBarcodeActivation(TEST_USER_A)).toBe(false);
 		expect(recordBarcodeActivation(TEST_USER_A)).toBe(true);
 
 		expect(isActivationComplete(TEST_USER_A)).toBe(true);

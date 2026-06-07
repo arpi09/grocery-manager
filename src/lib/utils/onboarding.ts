@@ -2,7 +2,7 @@ import { isMarketingPath } from '$lib/marketing/routes';
 import { markPmfSurveyEligible } from '$lib/utils/pmf-survey-storage';
 
 /** Current onboarding tour version — bump to show the guide again for returning users. */
-export const ONBOARDING_VERSION = 3;
+export const ONBOARDING_VERSION = 4;
 
 export { ONBOARDING_STEP_COUNT } from '$lib/utils/onboarding-steps';
 
@@ -32,8 +32,8 @@ export const ONBOARDING_REPLAY_EVENT = 'home-pantry-onboarding-replay';
 export const ONBOARDING_PROGRESS_EVENT = 'home-pantry-onboarding-progress';
 export const REGISTRATION_WELCOME_DONE_EVENT = 'home-pantry-registration-welcome-done';
 
-/** First saved item completes onboarding activation (v3). */
-export const ACTIVATION_BARCODE_GOAL = 1;
+/** Barcode path completes after three scans (v4 binary onboarding). */
+export const ACTIVATION_BARCODE_GOAL = 3;
 
 const EXCLUDED_PATH_PREFIXES = ['/admin', '/login', '/register', '/verify-email'] as const;
 

@@ -4,9 +4,11 @@
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
+	import InstallAppBanner from '$lib/components/molecules/InstallAppBanner.svelte';
 	import OnboardingCelebrateIllustration from '$lib/components/organisms/OnboardingCelebrateIllustration.svelte';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { t } from '$lib/i18n';
+	import { getPeakInventoryCount } from '$lib/utils/household-invite-prompt';
 	import { scanModeHref } from '$lib/utils/scan-nav';
 	import {
 		clearCelebrationPending,
@@ -20,6 +22,14 @@
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
+	const activationProgress = $derived(userId ? getActivationProgress(userId) : null);
+	const itemCount = $derived(userId ? getPeakInventoryCount(userId) : 0);
+	const celebrateBody = $derived(
+		activationProgress?.path === 'receipt' && itemCount > 0
+			? t('onboarding.celebrateReceiptBody', { count: itemCount })
+			: t('onboarding.celebrateBody')
+	);
+	const showPwaInstall = $derived(activationProgress?.path === 'receipt');
 
 	function tryOpenCelebration() {
 		if (
@@ -80,7 +90,10 @@
 >
 	<div class="celebration-body">
 		<OnboardingCelebrateIllustration />
-		<p class="celebrate-lead">{t('onboarding.celebrateBody')}</p>
+		<p class="celebrate-lead">{celebrateBody}</p>
+		{#if showPwaInstall}
+			<InstallAppBanner installHref="/install-app" />
+		{/if}
 		<div class="celebration-actions">
 			<Button type="button" fullWidth onclick={goScan}>
 				{t('onboarding.celebrateCtaScan')}

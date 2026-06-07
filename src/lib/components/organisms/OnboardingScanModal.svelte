@@ -22,9 +22,17 @@
 		onClose: () => void;
 		onItemSaved: () => void;
 		defaultLocation?: StorageLocation;
+		/** When set, limits picker and can auto-open a single flow (binary onboarding). */
+		allowedModes?: ScanPick[];
 	}
 
-	let { open, onClose, onItemSaved, defaultLocation = 'fridge' }: Props = $props();
+	let {
+		open,
+		onClose,
+		onItemSaved,
+		defaultLocation = 'fridge',
+		allowedModes
+	}: Props = $props();
 
 	let activeFlow = $state<ScanPick | null>(null);
 
@@ -39,6 +47,21 @@
 		activeFlow = null;
 		onClose();
 	}
+
+	const visibleModes = $derived(
+		allowedModes && allowedModes.length > 0
+			? allowedModes
+			: (['photo', 'barcode', 'receipt'] as ScanPick[])
+	);
+
+	const showPicker = $derived(open && activeFlow === null && visibleModes.length > 1);
+
+	$effect(() => {
+		if (!open || activeFlow !== null || visibleModes.length !== 1) {
+			return;
+		}
+		pickMode(visibleModes[0]!);
+	});
 
 	function pickMode(mode: ScanPick) {
 		if (userId) {
@@ -67,7 +90,7 @@
 </script>
 
 <Modal
-	open={open && activeFlow === null}
+	open={showPicker}
 	onClose={closePicker}
 	variant="sheet"
 	nested
@@ -80,6 +103,7 @@
 	<p class="picker-lead">{t('onboarding.scanModalBody')}</p>
 
 	<div class="picker-grid">
+		{#if visibleModes.includes('photo')}
 		<button
 			type="button"
 			class="picker-tile picker-tile-primary"
@@ -92,7 +116,9 @@
 			</span>
 			<span class="picker-label">{t('photoRound.title')}</span>
 		</button>
+		{/if}
 
+		{#if visibleModes.includes('barcode')}
 		<button
 			type="button"
 			class="picker-tile"
@@ -105,7 +131,9 @@
 			</span>
 			<span class="picker-label">{t('scan.modes.barcode')}</span>
 		</button>
+		{/if}
 
+		{#if visibleModes.includes('receipt')}
 		<button
 			type="button"
 			class="picker-tile"
@@ -118,6 +146,7 @@
 			</span>
 			<span class="picker-label">{t('scan.modes.receipt')}</span>
 		</button>
+		{/if}
 	</div>
 
 	{#snippet footer()}
