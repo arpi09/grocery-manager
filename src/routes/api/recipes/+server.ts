@@ -2,7 +2,7 @@
 
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
-import { translateOpenAiError } from '$lib/server/openai';
+import { openAiErrorLogDetail, translateOpenAiError } from '$lib/server/openai';
 import { parseMealIntent } from '$lib/domain/recipe';
 import { clampRecipePortions } from '$lib/server/recipe-prompt';
 import { generateRecipesWithRefinement } from '$lib/server/recipe-generation';
@@ -39,7 +39,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return quotaResponse;
 	}
 
-	const apiKeyOrResponse = requireOpenAiKey(locale, 'recipe suggestions');
+	const apiKeyOrResponse = requireOpenAiKey(locale, 'recipe suggestions', 503);
 	if (typeof apiKeyOrResponse !== 'string') {
 		return apiKeyOrResponse;
 	}
@@ -62,6 +62,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	});
 
 	if (!generated.ok) {
+		console.warn(
+			`[recipes] OpenAI generation failed (${generated.result.status}): ${openAiErrorLogDetail(generated.result).slice(0, 500)}`
+		);
 		return json({ error: translateOpenAiError(locale, generated.result) }, { status: generated.result.status });
 	}
 

@@ -42,7 +42,7 @@ export const RECIPE_SUGGESTIONS_SCHEMA = {
 								instruction: { type: 'string' },
 								minutes: { type: 'number' }
 							},
-							required: ['instruction'],
+							required: ['instruction', 'minutes'],
 							additionalProperties: false
 						}
 					}

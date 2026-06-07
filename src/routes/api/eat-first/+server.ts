@@ -6,10 +6,11 @@ import { isExcludedFromRecipes } from '$lib/domain/recipe-inventory-filter';
 import { DEFAULT_RECIPE_PORTIONS, parseMealIntent } from '$lib/domain/recipe';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
-import { translateOpenAiError } from '$lib/server/openai';
+import { openAiErrorLogDetail, translateOpenAiError } from '$lib/server/openai';
 import { clampRecipePortions } from '$lib/server/recipe-prompt';
 import { generateRecipesWithRefinement } from '$lib/server/recipe-generation';
 import { translate } from '$lib/i18n/messages';
+import { e2eMockRecipeSuggestions, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 
 import type { RequestHandler } from './$types';
 
@@ -19,17 +20,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!auth.authorized) {
 		return auth.response;
 	}
-
-	const quotaResponse = await requireAiQuota(locals, 'ai_scan', auth.user.id);
-	if (quotaResponse) {
-		return quotaResponse;
-	}
-
-	const apiKeyOrResponse = requireOpenAiKey(locale, 'eat-first suggestions');
-	if (typeof apiKeyOrResponse !== 'string') {
-		return apiKeyOrResponse;
-	}
-	const apiKey = apiKeyOrResponse;
 
 	const body = (await request.json().catch(() => ({}))) as {
 		portions?: unknown;
@@ -54,6 +44,34 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		.map((item) => item.name.trim())
 		.filter(Boolean);
 
+	const expiringItemsPayload = expiringItems.map((item) => ({
+		id: item.id,
+		name: item.name,
+		expiresOn: item.expiresOn,
+		location: item.location
+	}));
+
+	if (isE2eMockAiEnabled()) {
+		const recipes = e2eMockRecipeSuggestions();
+		const savedIdeas = await locals.mealPlanService.storeGeneratedIdeas(auth.user.id, recipes);
+		return json({
+			suggestions: savedIdeas,
+			expiringItems: expiringItemsPayload,
+			portions
+		});
+	}
+
+	const quotaResponse = await requireAiQuota(locals, 'ai_scan', auth.user.id);
+	if (quotaResponse) {
+		return quotaResponse;
+	}
+
+	const apiKeyOrResponse = requireOpenAiKey(locale, 'eat-first suggestions', 503);
+	if (typeof apiKeyOrResponse !== 'string') {
+		return apiKeyOrResponse;
+	}
+	const apiKey = apiKeyOrResponse;
+
 	const generated = await generateRecipesWithRefinement({
 		apiKey,
 		inventory,
@@ -65,18 +83,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	});
 
 	if (!generated.ok) {
+		console.warn(
+			`[eat-first] OpenAI generation failed (${generated.result.status}): ${openAiErrorLogDetail(generated.result).slice(0, 500)}`
+		);
 		return json({ error: translateOpenAiError(locale, generated.result) }, { status: generated.result.status });
 	}
 
 	if (generated.recipes.length === 0) {
 		return json({
 			suggestions: [],
-			expiringItems: expiringItems.map((item) => ({
-				id: item.id,
-				name: item.name,
-				expiresOn: item.expiresOn,
-				location: item.location
-			})),
+			expiringItems: expiringItemsPayload,
 			portions,
 			note: translate(locale, generated.noteKey ?? ('recipe.noSuitableInventoryNote' as const))
 		});
@@ -86,12 +102,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	return json({
 		suggestions: savedIdeas,
-		expiringItems: expiringItems.map((item) => ({
-			id: item.id,
-			name: item.name,
-			expiresOn: item.expiresOn,
-			location: item.location
-		})),
+		expiringItems: expiringItemsPayload,
 		portions
 	});
 };
