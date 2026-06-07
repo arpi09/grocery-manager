@@ -130,9 +130,9 @@
 		</ul>
 	</nav>
 
-	{#if secondary.length > 0 && (isNarrowViewport || moreOpen)}
+	{#if secondary.length > 0}
 		<Modal
-			open={moreOpen}
+			open={moreOpen && isNarrowViewport}
 			onClose={onCloseMore}
 			variant="sheet"
 			title={t('nav.more')}
