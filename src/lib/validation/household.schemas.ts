@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const createHouseholdInviteSchema = z.object({
-	email: z.string().email('Ange en giltig e-postadress'),
+	email: z.email({ message: 'Ange en giltig e-postadress' }),
 	role: z.enum(['editor', 'viewer'])
 });
 
