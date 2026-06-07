@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 
 	import { browser } from '$app/environment';
 
@@ -220,7 +220,7 @@
 
 		const q = debouncedQuery.trim();
 
-		location;
+		const loc = location;
 
 
 
@@ -242,7 +242,7 @@
 
 
 
-		void fetchInventorySearch(location, q)
+		void fetchInventorySearch(loc, q)
 
 			.then((page) => {
 
