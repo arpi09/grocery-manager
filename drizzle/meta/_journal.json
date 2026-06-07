@@ -218,6 +218,13 @@
 			"when": 1750944000000,
 			"tag": "0031_household_receipt_forward_token",
 			"breakpoints": true
+		},
+		{
+			"idx": 31,
+			"version": "7",
+			"when": 1751030400000,
+			"tag": "0032_analytics_behavior",
+			"breakpoints": true
 		}
 	]
 }

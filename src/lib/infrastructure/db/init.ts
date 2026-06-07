@@ -181,7 +181,8 @@ const INCREMENTAL_MIGRATIONS = [
 	'0028_backfill_email_verified_at.sql',
 	'0029_pmf_survey_response.sql',
 	'0030_expiring_share_link.sql',
-	'0031_household_receipt_forward_token.sql'
+	'0031_household_receipt_forward_token.sql',
+	'0032_analytics_behavior.sql'
 ];
 
 async function runPgliteBaseline(client: PGlite) {

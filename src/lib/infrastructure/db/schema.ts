@@ -398,7 +398,7 @@ export const aiUsageTable = pgTable(
 		userId: text('user_id')
 			.notNull()
 			.references(() => userTable.id, { onDelete: 'cascade' }),
-		kind: text('kind', { enum: ['ai_scan', 'receipt_pdf', 'smart_fill'] }).notNull(),
+		kind: text('kind', { enum: ['ai_scan', 'receipt_pdf', 'smart_fill', 'admin_insights'] }).notNull(),
 		periodKey: text('period_key').notNull(),
 		count: integer('count').notNull().default(1),
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' })
@@ -549,4 +549,88 @@ export const expiringShareLinkTable = pgTable(
 		index('expiring_share_link_token_hash_idx').on(table.tokenHash),
 		index('expiring_share_link_household_idx').on(table.householdId)
 	]
+);
+
+export const analyticsSessionTable = pgTable(
+	'analytics_session',
+	{
+		id: text('id').primaryKey(),
+		visitorId: text('visitor_id').notNull(),
+		userId: text('user_id').references(() => userTable.id, { onDelete: 'set null' }),
+		householdId: text('household_id').references(() => householdTable.id, {
+			onDelete: 'set null'
+		}),
+		startedAt: timestamp('started_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+		lastSeenAt: timestamp('last_seen_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+		userAgentHash: text('user_agent_hash')
+	},
+	(table) => [
+		index('analytics_session_visitor_last_seen_idx').on(table.visitorId, table.lastSeenAt),
+		index('analytics_session_started_idx').on(table.startedAt)
+	]
+);
+
+export const analyticsPageViewTable = pgTable(
+	'analytics_page_view',
+	{
+		id: text('id').primaryKey(),
+		sessionId: text('session_id')
+			.notNull()
+			.references(() => analyticsSessionTable.id, { onDelete: 'cascade' }),
+		route: text('route').notNull(),
+		enteredAt: timestamp('entered_at', { withTimezone: true, mode: 'date' }).notNull(),
+		exitedAt: timestamp('exited_at', { withTimezone: true, mode: 'date' }),
+		durationMs: integer('duration_ms'),
+		referrerRoute: text('referrer_route')
+	},
+	(table) => [
+		index('analytics_page_view_route_entered_idx').on(table.route, table.enteredAt),
+		index('analytics_page_view_session_idx').on(table.sessionId, table.enteredAt)
+	]
+);
+
+export const analyticsInteractionTable = pgTable(
+	'analytics_interaction',
+	{
+		id: text('id').primaryKey(),
+		sessionId: text('session_id')
+			.notNull()
+			.references(() => analyticsSessionTable.id, { onDelete: 'cascade' }),
+		route: text('route').notNull(),
+		elementKey: text('element_key').notNull(),
+		kind: text('kind', { enum: ['click', 'scroll_depth'] }).notNull(),
+		value: integer('value'),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('analytics_interaction_route_element_idx').on(
+			table.route,
+			table.elementKey,
+			table.createdAt
+		),
+		index('analytics_interaction_created_idx').on(table.createdAt)
+	]
+);
+
+export const analyticsRouteDailyTable = pgTable(
+	'analytics_route_daily',
+	{
+		day: date('day').notNull(),
+		route: text('route').notNull(),
+		viewCount: integer('view_count').notNull().default(0),
+		uniqueSessions: integer('unique_sessions').notNull().default(0),
+		avgDurationMs: integer('avg_duration_ms').notNull().default(0)
+	},
+	(table) => [primaryKey({ columns: [table.day, table.route] })]
+);
+
+export const analyticsElementDailyTable = pgTable(
+	'analytics_element_daily',
+	{
+		day: date('day').notNull(),
+		route: text('route').notNull(),
+		elementKey: text('element_key').notNull(),
+		clickCount: integer('click_count').notNull().default(0)
+	},
+	(table) => [primaryKey({ columns: [table.day, table.route, table.elementKey] })]
 );

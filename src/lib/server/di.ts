@@ -56,6 +56,10 @@ import { ReceiptForwardService } from '$lib/application/receipt-forward.service'
 import { DrizzleReceiptForwardRepository } from '$lib/infrastructure/repositories/receipt-forward.repository';
 import { getKivraForwardSecret } from '$lib/server/kivra-forward';
 import { BillingService } from '$lib/application/billing.service';
+import { AnalyticsBehaviorService } from '$lib/application/analytics-behavior.service';
+import { AnalyticsAdminService } from '$lib/application/analytics-admin.service';
+import { AdminInsightsService } from '$lib/application/admin-insights.service';
+import { DrizzleAnalyticsBehaviorRepository } from '$lib/infrastructure/repositories/analytics-behavior.repository';
 import { DrizzleBillingRepository } from '$lib/infrastructure/repositories/billing.repository';
 import { DrizzlePushSubscriptionRepository } from '$lib/infrastructure/repositories/push-subscription.repository';
 import { appOriginAdapter } from '$lib/infrastructure/adapters/app-origin.adapter';
@@ -94,6 +98,7 @@ const expiringShareRepository = new DrizzleExpiringShareRepository();
 const receiptForwardRepository = new DrizzleReceiptForwardRepository();
 const billingRepository = new DrizzleBillingRepository();
 export const pushSubscriptionRepository = new DrizzlePushSubscriptionRepository();
+const analyticsBehaviorRepository = new DrizzleAnalyticsBehaviorRepository();
 
 export const authService = new AuthService(userRepository);
 export const passwordResetService = new PasswordResetService(
@@ -188,10 +193,19 @@ export const aiUsageAdminService = new AiUsageAdminService(aiUsageRepository);
 export const planLimitsService = new PlanLimitsService(planLimitsRepository, aiRateLimitService);
 export const waitlistService = new WaitlistService(waitlistRepository);
 export const appSettingsService = new AppSettingsService(appSettingsRepository);
+export const analyticsBehaviorService = new AnalyticsBehaviorService(analyticsBehaviorRepository);
+export const analyticsAdminService = new AnalyticsAdminService(analyticsBehaviorRepository);
+export const adminInsightsService = new AdminInsightsService(
+	pmfService,
+	analyticsAdminService,
+	productFeedbackService,
+	aiRateLimitService
+);
 export const pmfDigestService = new PmfDigestService(
 	pmfService,
 	adminService,
 	waitlistService,
 	emailAdapter,
-	appOriginAdapter
+	appOriginAdapter,
+	adminInsightsService
 );

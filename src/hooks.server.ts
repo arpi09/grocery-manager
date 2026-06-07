@@ -25,7 +25,10 @@ import {
 	planLimitsService,
 	waitlistService,
 	billingService,
-	purchasePatternService
+	purchasePatternService,
+	analyticsBehaviorService,
+	analyticsAdminService,
+	adminInsightsService
 } from '$lib/server/di';
 import { recordUserActivity } from '$lib/server/activity';
 import { resolveHouseholdId } from '$lib/server/household-context';
@@ -74,6 +77,7 @@ function isVerificationExemptApiPath(pathname: string): boolean {
 		pathname.startsWith('/api/cron/') ||
 		pathname === '/api/push/vapid-public-key' ||
 		pathname === '/api/product-events' ||
+		pathname === '/api/analytics/beacon' ||
 		pathname === '/api/cookie-consent' ||
 		pathname === '/api/stripe/webhook' ||
 		pathname === '/api/inbound/kivra'
@@ -126,6 +130,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.waitlistService = waitlistService;
 	event.locals.billingService = billingService;
 	event.locals.purchasePatternService = purchasePatternService;
+	event.locals.analyticsBehaviorService = analyticsBehaviorService;
+	event.locals.analyticsAdminService = analyticsAdminService;
+	event.locals.adminInsightsService = adminInsightsService;
 
 	const { pathname: requestPathname } = event.url;
 	const locale = resolveLocaleForRequest(event.cookies, event.request, {

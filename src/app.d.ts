@@ -24,6 +24,9 @@ import type { AiUsageAdminService } from '$lib/application/ai-usage-admin.servic
 import type { WaitlistService } from '$lib/application/waitlist.service';
 import type { BillingService } from '$lib/application/billing.service';
 import type { PurchasePatternService } from '$lib/application/purchase-pattern.service';
+import type { AnalyticsBehaviorService } from '$lib/application/analytics-behavior.service';
+import type { AnalyticsAdminService } from '$lib/application/analytics-admin.service';
+import type { AdminInsightsService } from '$lib/application/admin-insights.service';
 import type { HouseholdRole } from '$lib/domain/household';
 import type { PlanTier } from '$lib/domain/plan';
 import type { Locale } from '$lib/i18n/locale';
@@ -66,6 +69,9 @@ declare global {
 			waitlistService: WaitlistService;
 			billingService: BillingService;
 			purchasePatternService: PurchasePatternService;
+			analyticsBehaviorService: AnalyticsBehaviorService;
+			analyticsAdminService: AnalyticsAdminService;
+			adminInsightsService: AdminInsightsService;
 		}
 	}
 }
