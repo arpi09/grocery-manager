@@ -1,4 +1,4 @@
-# Manual production deploy — quality ? e2e ? Firebase App Hosting ? prod smoke
+﻿# Manual production deploy â€” quality ? e2e ? Firebase App Hosting ? prod smoke
 # Trigger: Actions ? "Deploy to production"
 # Required secret: FIREBASE_TOKEN (npx firebase login:ci)
 
@@ -17,7 +17,7 @@ on:
         required: false
         type: string
       skip_e2e:
-        description: HOTFIX ONLY — skip E2E (requires hotfix_confirm=hotfix)
+        description: HOTFIX ONLY â€” skip E2E (requires hotfix_confirm=hotfix)
         required: false
         default: false
         type: boolean
@@ -43,7 +43,7 @@ jobs:
       guide_only: ${{ steps.manual.outputs.guide_only || steps.check.outputs.guide_only }}
 
     steps:
-      - name: Manual deploy — always run full pipeline
+      - name: Manual deploy â€” always run full pipeline
         if: github.event_name == 'workflow_dispatch'
         id: manual
         run: echo "guide_only=true" >> "$GITHUB_OUTPUT"
@@ -67,7 +67,7 @@ jobs:
 
           if [ -z "$changed" ]; then
             echo "guide_only=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No changed files in commit — skipping deploy."
+            echo "::notice::No changed files in commit â€” skipping deploy."
             exit 0
           fi
 
@@ -85,10 +85,10 @@ jobs:
 
           if [ "$guide_only" = "true" ]; then
             echo "guide_only=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::Guide-only commit — running full deploy pipeline."
+            echo "::notice::Guide-only commit â€” running full deploy pipeline."
           else
             echo "guide_only=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Mixed commit (not only content/guides/**) — skipping auto-deploy. Run manual deploy for releases."
+            echo "::notice::Mixed commit (not only content/guides/**) â€” skipping auto-deploy. Run manual deploy for releases."
           fi
 
   validate-inputs:
@@ -108,7 +108,7 @@ jobs:
               echo "::error::skip_e2e requires hotfix_confirm input set to exactly: hotfix"
               exit 1
             fi
-            echo "::warning::HOTFIX deploy — E2E will be skipped. Document reason in commit/chat."
+            echo "::warning::HOTFIX deploy â€” E2E will be skipped. Document reason in commit/chat."
           fi
 
   resolve-artifact:
@@ -152,7 +152,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          echo "Checking CI quality check-run for commit ${DEPLOY_SHA}…"
+          echo "Checking CI quality check-run for commit ${DEPLOY_SHA}â€¦"
           conclusion=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${DEPLOY_SHA}/check-runs" \
             --paginate \
             --jq '[.check_runs[] | select(.name == "quality" or .name == "quality / quality") | select(.conclusion == "success")] | sort_by(.started_at) | last | .conclusion // "missing"')
@@ -187,10 +187,10 @@ jobs:
               has=true
               echo "::notice::Reusing sveltekit-build from CI run ${run_id} (artifact ${artifact_id})."
             else
-              echo "::notice::CI run ${run_id} has no active sveltekit-build artifact — will run full quality."
+              echo "::notice::CI run ${run_id} has no active sveltekit-build artifact â€” will run full quality."
             fi
           else
-            echo "::notice::No successful CI run on ${DEPLOY_SHA} — will run full quality."
+            echo "::notice::No successful CI run on ${DEPLOY_SHA} â€” will run full quality."
           fi
 
           echo "has_ci_artifact=${has}" >> "$GITHUB_OUTPUT"
@@ -349,7 +349,7 @@ jobs:
           if [ -z "${FIREBASE_TOKEN:-}" ]; then
             echo "skipped=true" >> "$GITHUB_OUTPUT"
             echo "::notice::FIREBASE_TOKEN is not set - quality and E2E passed but deploy was skipped."
-            echo "Add FIREBASE_TOKEN under Settings → Secrets and variables → Actions,"
+            echo "Add FIREBASE_TOKEN under Settings â†’ Secrets and variables â†’ Actions,"
             echo "or deploy locally: npm run deploy:firebase"
             echo "See docs/DEPLOY.md and docs/FIREBASE_DEPLOY.md"
           else
@@ -362,21 +362,15 @@ jobs:
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
-  smoke:
-    name: post-deploy smoke
-    needs: [deploy]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - uses: actions/checkout@v6
 
       - name: Smoke test production URLs
+        if: steps.deploy-gate.outputs.skipped != 'true'
         run: bash scripts/smoke-prod-urls.sh
         env:
           BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
 
       - name: Check prod auth smoke credentials
+        if: steps.deploy-gate.outputs.skipped != 'true'
         id: smoke-auth-creds
         env:
           SMOKE_ADMIN_EMAIL: ${{ secrets.SMOKE_ADMIN_EMAIL }}
@@ -386,37 +380,43 @@ jobs:
             echo "configured=true" >> "$GITHUB_OUTPUT"
           else
             echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::SMOKE_ADMIN_EMAIL / SMOKE_ADMIN_PASSWORD not set — skipping authenticated prod smoke."
+            echo "::notice::SMOKE_ADMIN_EMAIL / SMOKE_ADMIN_PASSWORD not set â€” skipping authenticated prod smoke."
           fi
 
       - uses: actions/setup-node@v6
-        if: steps.smoke-auth-creds.outputs.configured == 'true'
+        if: steps.deploy-gate.outputs.skipped != 'true'
+        if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
         with:
           node-version-file: '.nvmrc'
           cache: npm
 
       - name: Install dependencies for prod auth smoke
-        if: steps.smoke-auth-creds.outputs.configured == 'true'
+        if: steps.deploy-gate.outputs.skipped != 'true'
+        if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
         run: npm ci
 
       - name: Get Playwright version
-        if: steps.smoke-auth-creds.outputs.configured == 'true'
+        if: steps.deploy-gate.outputs.skipped != 'true'
+        if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
         id: playwright-version
         run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache@v5
-        if: steps.smoke-auth-creds.outputs.configured == 'true'
+        if: steps.deploy-gate.outputs.skipped != 'true'
+        if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
 
       - name: Install Playwright Chromium
-        if: steps.smoke-auth-creds.outputs.configured == 'true' && steps.playwright-cache.outputs.cache-hit != 'true'
+        if: steps.deploy-gate.outputs.skipped != 'true'
+        if: (steps.smoke-auth-creds.outputs.configured == 'true' && steps.playwright-cache.outputs.cache-hit != 'true') && steps.deploy-gate.outputs.skipped != 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Authenticated prod smoke (Playwright /hem)
-        if: steps.smoke-auth-creds.outputs.configured == 'true'
+        if: steps.deploy-gate.outputs.skipped != 'true'
+        if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
         run: npm run smoke:prod-auth
         env:
           BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
@@ -426,7 +426,8 @@ jobs:
           CI: 'true'
 
       - name: Notify deploy success
-        if: success()
+        if: steps.deploy-gate.outputs.skipped != 'true'
+        if: success() && steps.deploy-gate.outputs.skipped != 'true'
         continue-on-error: true
         env:
           WEBHOOK_URL: ${{ secrets.DEPLOY_NOTIFY_WEBHOOK_URL }}
@@ -437,16 +438,16 @@ jobs:
           set -euo pipefail
 
           if [ -z "${WEBHOOK_URL:-}" ] && [ -z "${TELEGRAM_BOT_TOKEN:-}" ]; then
-            echo "No deploy notify secrets configured — skipping."
+            echo "No deploy notify secrets configured â€” skipping."
             exit 0
           fi
 
           short_sha="${GITHUB_SHA:0:7}"
           run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           prod_url="${PRODUCTION_URL:-https://skaffu.com}"
-          msg="Skaffu deploy lyckades (${short_sha}) — smoke OK"
+          msg="Skaffu deploy lyckades (${short_sha}) â€” smoke OK"
           if [ -n "$prod_url" ]; then
-            msg="${msg} — ${prod_url%/}"
+            msg="${msg} â€” ${prod_url%/}"
           fi
           msg=$(printf '%s\n%s' "$msg" "$run_url")
 
@@ -496,7 +497,7 @@ jobs:
 
   verify-release:
     name: verify release completed
-    needs: [gate, resolve-artifact, quality-full, quality-reuse, e2e, deploy, smoke]
+    needs: [gate, resolve-artifact, quality-full, quality-reuse, e2e, deploy]
     if: >
       always() &&
       (
@@ -512,7 +513,7 @@ jobs:
           set -euo pipefail
           echo "gate=${{ needs.gate.result }} guide_only=${{ needs.gate.outputs.guide_only }}"
           echo "resolve-artifact=${{ needs.resolve-artifact.result }} quality-full=${{ needs.quality-full.result }} quality-reuse=${{ needs.quality-reuse.result }}"
-          echo "e2e=${{ needs.e2e.result }} deploy=${{ needs.deploy.result }} smoke=${{ needs.smoke.result }}"
+          echo "e2e=${{ needs.e2e.result }} deploy=${{ needs.deploy.result }} (smoke inlined in deploy)"
           if [ "${{ needs.gate.result }}" != "success" ]; then
             echo "::error::gate job did not succeed"
             exit 1
@@ -530,10 +531,10 @@ jobs:
           fi
           hotfix_skip="${{ github.event_name == 'workflow_dispatch' && (inputs.skip_e2e == true || inputs.skip_e2e == 'true') && inputs.hotfix_confirm == 'hotfix' }}"
           if [ "${{ needs.e2e.result }}" != "success" ]; then
-            if [ "$hotfix_skip" = "true" ] && [ "${{ needs.deploy.result }}" = "success" ] && [ "${{ needs.smoke.result }}" = "success" ]; then
-              echo "::warning::HOTFIX deploy — E2E skipped but deploy and smoke passed."
+            if [ "$hotfix_skip" = "true" ] && [ "${{ needs.deploy.result }}" = "success" ]; then
+              echo "::warning::HOTFIX deploy â€” E2E skipped but deploy and smoke passed."
             else
-              echo "::error::E2E did not run or failed (result=${{ needs.e2e.result }}) — prod was NOT released"
+              echo "::error::E2E did not run or failed (result=${{ needs.e2e.result }}) â€” prod was NOT released"
               exit 1
             fi
           fi
@@ -541,9 +542,6 @@ jobs:
             echo "::error::deploy job did not succeed"
             exit 1
           fi
-          if [ "${{ needs.smoke.result }}" != "success" ]; then
-            echo "::error::post-deploy smoke did not pass"
-            exit 1
-          fi
           echo "Release pipeline completed: quality, E2E, deploy, and smoke all succeeded."
+
 
