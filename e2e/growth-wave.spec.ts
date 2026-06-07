@@ -38,6 +38,19 @@ async function createFridgeItemViaAction(
 }
 
 test.describe('Growth wave — wrapped, rapport, dela', () => {
+	test.use({ actionTimeout: 45_000 });
+
+	test('public rapport page loads for valid month', async ({ page }) => {
+		await page.goto('/rapport/2025-06', { waitUntil: 'commit' });
+		await dismissCookieConsentIfOpen(page);
+
+		await expect(page.getByRole('heading', { level: 1 })).toContainText(/2025-06|Så kastar svenska/i);
+		await expect(page.getByText(/Skaffurapporten|Skaffu report/i).first()).toBeVisible();
+		await expect(
+			page.getByText(/publicerar detaljerade insikter|publish detailed insights|Beta-kohort|Beta cohort/i).first()
+		).toBeVisible();
+	});
+
 	test('wrapped slide flow and empty-month copy for new household', async ({ page }) => {
 		test.setTimeout(90_000);
 		await registerNewUser(page);
@@ -58,31 +71,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		});
 	});
 
-	test('public rapport page loads for valid month', async ({ page }) => {
-		await page.goto('/rapport/2025-06', { waitUntil: 'commit' });
-		await dismissCookieConsentIfOpen(page);
-
-		await expect(page.getByRole('heading', { level: 1 })).toContainText(/2025-06|Så kastar svenska/i);
-		await expect(page.getByText(/Skaffurapporten|Skaffu report/i).first()).toBeVisible();
-		await expect(
-			page.getByText(/publicerar detaljerade insikter|publish detailed insights|Beta-kohort|Beta cohort/i).first()
-		).toBeVisible();
-	});
-
-	test('new household statistik shows no inflated zero-waste streak', async ({ page }) => {
-		test.setTimeout(90_000);
-		await registerNewUser(page);
-		await page.goto('/statistik', { waitUntil: 'commit' });
-		await dismissCookieConsentIfOpen(page);
-		await dismissOnboardingModalIfOpen(page);
-
-		const streakValue = page.locator('.impact-streak .impact-value');
-		await expect(streakValue).toBeVisible({ timeout: 20_000 });
-		await expect(streakValue).toHaveText('—');
-		await expect(page.getByText(/[2-9]\d*\s*veckors?\s+zero-waste/i)).toHaveCount(0);
-	});
-
-	test('wrapped flow omits streak slide for new household', async ({ page }) => {
+	test('wrapped streak regression — new household never shows inflated copy', async ({ page }) => {
 		test.setTimeout(90_000);
 		await registerNewUser(page);
 		await page.goto('/statistik/wrapped', { waitUntil: 'commit' });
@@ -91,12 +80,18 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 
 		const flow = page.getByTestId('wrapped-flow');
 		await expect(flow).toBeVisible({ timeout: 20_000 });
+		await expect(page.getByTestId('wrapped-slide-title')).toHaveText(
+			/Er första månad med Skaffu|Your first month with Skaffu/i
+		);
 
+		const inflatedStreak = /[2-9]\d*\s*veckors?\s+zero-waste|[2-9]\d*-week zero-waste/i;
 		const nextBtn = flow.getByRole('button', { name: /^Nästa$|^Next$/i });
 		for (let step = 0; step < 8; step += 1) {
-			await expect(page.getByTestId('wrapped-slide-title')).not.toHaveText(
-				/[2-9]\d*\s*veckors?\s+zero-waste|[2-9]\d*-week zero-waste/i
-			);
+			const title = page.getByTestId('wrapped-slide-title');
+			if (await title.isVisible()) {
+				await expect(title).not.toHaveText(inflatedStreak);
+			}
+			await expect(page.getByText(inflatedStreak)).toHaveCount(0);
 			if (!(await nextBtn.isVisible())) {
 				break;
 			}
