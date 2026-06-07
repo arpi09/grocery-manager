@@ -1,5 +1,5 @@
-﻿# Manual production deploy — quality → e2e → Firebase App Hosting → prod smoke
-# Trigger: Actions → "Deploy to production"
+﻿# Manual production deploy — quality ? e2e ? Firebase App Hosting ? prod smoke
+# Trigger: Actions ? "Deploy to production"
 # Required secret: FIREBASE_TOKEN (npx firebase login:ci)
 
 name: Deploy to production
@@ -334,26 +334,31 @@ jobs:
     timeout-minutes: 30
     environment: production
     outputs:
-      skipped: ${{ steps.deploy.outputs.skipped }}
+      skipped: ${{ steps.deploy-gate.outputs.skipped }}
 
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event_name == 'push' && github.sha || (inputs.sha || inputs.ref) }}
 
-      - name: Deploy App Hosting backend
-        id: deploy
+      - name: Resolve Firebase deploy skip
+        id: deploy-gate
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: |
-          if [ -z "$FIREBASE_TOKEN" ]; then
+          if [ -z "${FIREBASE_TOKEN:-}" ]; then
             echo "skipped=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::FIREBASE_TOKEN is not set — quality and E2E passed but deploy was skipped."
+            echo "::notice::FIREBASE_TOKEN is not set - quality and E2E passed but deploy was skipped."
             echo "Add FIREBASE_TOKEN under Settings → Secrets and variables → Actions,"
             echo "or deploy locally: npm run deploy:firebase"
             echo "See docs/DEPLOY.md and docs/FIREBASE_DEPLOY.md"
-            exit 0
+          else
+            echo "skipped=false" >> "$GITHUB_OUTPUT"
           fi
-          npx firebase-tools@latest deploy --only apphosting:home-pantry --non-interactive --project home-pantry-4bee5
-          echo "skipped=false" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy App Hosting backend
+        if: steps.deploy-gate.outputs.skipped != 'true'
+        run: npx firebase-tools@latest deploy --only apphosting:home-pantry --non-interactive --project home-pantry-4bee5
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
