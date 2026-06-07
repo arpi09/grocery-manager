@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
@@ -8,6 +9,11 @@
 	import { DEFAULT_RECIPE_PORTIONS, totalMinutes } from '$lib/domain/recipe';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
 	import { getLocale, t } from '$lib/i18n';
+	import { APP_HOME_PATH } from '$lib/navigation/app-home';
+	import {
+		isFromRecipeAssistant,
+		recipeAssistantReturnHref
+	} from '$lib/utils/recipe-assistant-nav';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import {
 		addMissingIngredientsToList,
@@ -37,6 +43,11 @@
 	const stepCount = $derived(idea.steps.length);
 	const missingCount = $derived(idea.missingIngredients.length);
 	const estimatedMinutes = $derived(totalMinutes(idea.steps));
+	const backHref = $derived(
+		isFromRecipeAssistant(page.url.searchParams.get('from'))
+			? recipeAssistantReturnHref()
+			: APP_HOME_PATH
+	);
 
 	function startCooking() {
 		void goto(`/recept/${idea.id}/laga`);
@@ -93,7 +104,7 @@
 
 <article class="recipe-detail" data-testid="recipe-detail">
 	{#if showBackLink}
-		<a href="/hem" class="back-link">{t('recipe.detail.back')}</a>
+		<a href={backHref} class="back-link" data-testid="recipe-detail-back">{t('recipe.detail.back')}</a>
 	{/if}
 
 	<header class="recipe-hero">

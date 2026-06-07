@@ -30,6 +30,7 @@
 	import type { UserHouseholdSummary } from '$lib/domain/household';
 	import { initAnalyticsBeacon } from '$lib/client/analytics-beacon';
 	import { t } from '$lib/i18n';
+	import { OPEN_RECIPE_ASSISTANT_PARAM } from '$lib/utils/recipe-assistant-nav';
 
 	interface Props {
 		children: Snippet;
@@ -61,6 +62,22 @@
 	const showRegistrationWelcome = $derived(
 		browser && page.url.searchParams.get('welcome') === '1' && Boolean(page.data.user?.emailVerified)
 	);
+
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+
+		if (page.url.searchParams.get(OPEN_RECIPE_ASSISTANT_PARAM) !== '1') {
+			return;
+		}
+
+		recipeOpen = true;
+		const url = new URL(page.url);
+		url.searchParams.delete(OPEN_RECIPE_ASSISTANT_PARAM);
+		const next = `${url.pathname}${url.search}${url.hash}`;
+		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
+	});
 
 	$effect(() => {
 		if (!browser) {

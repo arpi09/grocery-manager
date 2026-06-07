@@ -20,9 +20,14 @@
 
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 
-	import { DEFAULT_RECIPE_PORTIONS, DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
-
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
+
+	import { recipeDetailFromAssistantHref } from '$lib/utils/recipe-assistant-nav';
+	import {
+		hasRecipeAssistantResults,
+		recipeAssistantStore,
+		setRecipeAssistantResults
+	} from '$lib/utils/recipe-assistant-state.svelte';
 
 	import {
 
@@ -56,17 +61,7 @@
 
 	let loading = $state(false);
 
-	let preferences = $state('');
-
-	let portions = $state(DEFAULT_RECIPE_PORTIONS);
-
-	let mealIntent = $state<MealIntent>(DEFAULT_MEAL_INTENT);
-
-	let recipes = $state<RecipeIdea[]>([]);
-
 	let errorMessage = $state<string | null>(null);
-
-	let note = $state<string | null>(null);
 
 	let addingMissingKey = $state<string | null>(null);
 
@@ -76,11 +71,11 @@
 
 	const allMissingIngredients = $derived(
 
-		dedupeMissingIngredients(recipes.map((recipe) => recipe.missingIngredients))
+		dedupeMissingIngredients(recipeAssistantStore.recipes.map((recipe) => recipe.missingIngredients))
 
 	);
 
-	const hasResults = $derived(recipes.length > 0);
+	const hasResults = $derived(hasRecipeAssistantResults());
 
 	const modalVariant = $derived(isNarrowViewport ? 'sheet' : 'center');
 
@@ -104,8 +99,6 @@
 
 		errorMessage = null;
 
-		note = null;
-
 		feedbackBanner = null;
 
 
@@ -124,11 +117,11 @@
 
 				body: JSON.stringify({
 
-					preferences,
+					preferences: recipeAssistantStore.preferences,
 
-					portions,
+					portions: recipeAssistantStore.portions,
 
-					mealIntent
+					mealIntent: recipeAssistantStore.mealIntent
 
 				})
 
@@ -152,7 +145,7 @@
 
 				errorMessage = aiServiceErrorMessage(response.status, data.error);
 
-				recipes = [];
+				setRecipeAssistantResults([], null);
 
 				return;
 
@@ -160,13 +153,13 @@
 
 
 
-			recipes = data.recipes ?? [];
+			const nextRecipes = data.recipes ?? [];
 
-			note = data.note ?? null;
+			setRecipeAssistantResults(nextRecipes, data.note ?? null);
 
 
 
-			if (recipes.length > 0 && markFirstRecipeWinIfNeeded(page.data.user?.id)) {
+			if (nextRecipes.length > 0 && markFirstRecipeWinIfNeeded(page.data.user?.id)) {
 
 				showClientToast(t('recipe.firstWinToast'), { variant: 'success' });
 
@@ -174,7 +167,7 @@
 
 
 
-			if (recipes.length === 0 && !note) {
+			if (nextRecipes.length === 0 && !recipeAssistantStore.note) {
 
 				errorMessage = t('recipe.noneGenerated');
 
@@ -184,7 +177,7 @@
 
 			errorMessage = t('recipe.networkError');
 
-			recipes = [];
+			setRecipeAssistantResults([], null);
 
 		} finally {
 
@@ -256,7 +249,7 @@
 
 		closeAssistant();
 
-		void goto(`/recept/${idea.id}`);
+		void goto(recipeDetailFromAssistantHref(idea.id));
 
 	}
 
@@ -308,7 +301,7 @@
 
 						<label class="intent-preset">
 
-							<input type="radio" name="meal-intent" value="quick" bind:group={mealIntent} />
+							<input type="radio" name="meal-intent" value="quick" bind:group={recipeAssistantStore.mealIntent} />
 
 							<span>{t('recipe.mealIntentQuick')}</span>
 
@@ -316,7 +309,7 @@
 
 						<label class="intent-preset">
 
-							<input type="radio" name="meal-intent" value="friday" bind:group={mealIntent} />
+							<input type="radio" name="meal-intent" value="friday" bind:group={recipeAssistantStore.mealIntent} />
 
 							<span>{t('recipe.mealIntentFriday')}</span>
 
@@ -324,7 +317,7 @@
 
 						<label class="intent-preset">
 
-							<input type="radio" name="meal-intent" value="meal_prep" bind:group={mealIntent} />
+							<input type="radio" name="meal-intent" value="meal_prep" bind:group={recipeAssistantStore.mealIntent} />
 
 							<span>{t('recipe.mealIntentMealPrep')}</span>
 
@@ -350,7 +343,7 @@
 
 					max="8"
 
-					bind:value={portions}
+					bind:value={recipeAssistantStore.portions}
 
 				/>
 
@@ -370,7 +363,7 @@
 
 					maxlength="300"
 
-					bind:value={preferences}
+					bind:value={recipeAssistantStore.preferences}
 
 					placeholder={t('recipe.preferencesPlaceholder')}
 
@@ -422,7 +415,7 @@
 
 				<label class="intent-preset">
 
-					<input type="radio" name="meal-intent" value="quick" bind:group={mealIntent} />
+					<input type="radio" name="meal-intent" value="quick" bind:group={recipeAssistantStore.mealIntent} />
 
 					<span>{t('recipe.mealIntentQuick')}</span>
 
@@ -430,7 +423,7 @@
 
 				<label class="intent-preset">
 
-					<input type="radio" name="meal-intent" value="friday" bind:group={mealIntent} />
+					<input type="radio" name="meal-intent" value="friday" bind:group={recipeAssistantStore.mealIntent} />
 
 					<span>{t('recipe.mealIntentFriday')}</span>
 
@@ -438,7 +431,7 @@
 
 				<label class="intent-preset">
 
-					<input type="radio" name="meal-intent" value="meal_prep" bind:group={mealIntent} />
+					<input type="radio" name="meal-intent" value="meal_prep" bind:group={recipeAssistantStore.mealIntent} />
 
 					<span>{t('recipe.mealIntentMealPrep')}</span>
 
@@ -464,7 +457,7 @@
 
 			max="8"
 
-			bind:value={portions}
+			bind:value={recipeAssistantStore.portions}
 
 		/>
 
@@ -484,7 +477,7 @@
 
 			maxlength="300"
 
-			bind:value={preferences}
+			bind:value={recipeAssistantStore.preferences}
 
 			placeholder={t('recipe.preferencesPlaceholder')}
 
@@ -514,9 +507,9 @@
 
 
 
-	{#if note}
+	{#if recipeAssistantStore.note}
 
-		<p class="note">{note}</p>
+		<p class="note">{recipeAssistantStore.note}</p>
 
 	{/if}
 
@@ -564,7 +557,7 @@
 
 		<ul class="result-list" data-testid="recipe-result-list">
 
-			{#each recipes as recipe (recipe.id)}
+			{#each recipeAssistantStore.recipes as recipe (recipe.id)}
 
 				<li class="result-item">
 
