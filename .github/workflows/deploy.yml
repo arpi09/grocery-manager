@@ -1,5 +1,5 @@
-﻿# Manual production deploy â€” quality â†’ e2e â†’ Firebase App Hosting
-# Trigger: Actions â†’ "Deploy to production"
+﻿# Manual production deploy — quality → e2e → Firebase App Hosting → prod smoke
+# Trigger: Actions → "Deploy to production"
 # Required secret: FIREBASE_TOKEN (npx firebase login:ci)
 
 name: Deploy to production
@@ -17,10 +17,14 @@ on:
         required: false
         type: string
       skip_e2e:
-        description: Skip E2E (hotfix only â€” use rarely)
+        description: HOTFIX ONLY — skip E2E (requires hotfix_confirm=hotfix)
         required: false
         default: false
         type: boolean
+      hotfix_confirm:
+        description: 'When skip_e2e=true, type exactly: hotfix'
+        required: false
+        type: string
   push:
     branches: [master]
     paths:
@@ -92,6 +96,20 @@ jobs:
     timeout-minutes: 15
 
     steps:
+      - name: Validate deploy inputs
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          set -euo pipefail
+          skip_e2e="${{ inputs.skip_e2e }}"
+          hotfix_confirm="${{ inputs.hotfix_confirm }}"
+          if [ "$skip_e2e" = "true" ] || [ "$skip_e2e" = "True" ]; then
+            if [ "$hotfix_confirm" != "hotfix" ]; then
+              echo "::error::skip_e2e requires hotfix_confirm input set to exactly: hotfix"
+              exit 1
+            fi
+            echo "::warning::HOTFIX deploy — E2E will be skipped. Document reason in commit/chat."
+          fi
+
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.event_name == 'push' && github.sha || (inputs.sha || inputs.ref) }}
@@ -130,8 +148,11 @@ jobs:
     needs: [quality]
     if: >
       needs.quality.result == 'success' &&
-      (github.event_name != 'workflow_dispatch' ||
-       (inputs.skip_e2e != true && inputs.skip_e2e != 'true'))
+      !(
+        github.event_name == 'workflow_dispatch' &&
+        (inputs.skip_e2e == true || inputs.skip_e2e == 'true') &&
+        inputs.hotfix_confirm == 'hotfix'
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -190,10 +211,20 @@ jobs:
     if: >
       always() &&
       needs.quality.result == 'success' &&
-      (needs.e2e.result == 'success' || needs.e2e.result == 'skipped')
+      (
+        needs.e2e.result == 'success' ||
+        (
+          github.event_name == 'workflow_dispatch' &&
+          (inputs.skip_e2e == true || inputs.skip_e2e == 'true') &&
+          inputs.hotfix_confirm == 'hotfix' &&
+          needs.e2e.result == 'skipped'
+        )
+      )
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production
+    outputs:
+      skipped: ${{ steps.deploy.outputs.skipped }}
 
     steps:
       - uses: actions/checkout@v6
@@ -205,8 +236,8 @@ jobs:
         run: |
           if [ -z "$FIREBASE_TOKEN" ]; then
             echo "skipped=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::FIREBASE_TOKEN is not set â€” quality and E2E passed but deploy was skipped."
-            echo "Add FIREBASE_TOKEN under Settings â†’ Secrets and variables â†’ Actions,"
+            echo "::notice::FIREBASE_TOKEN is not set — quality and E2E passed but deploy was skipped."
+            echo "Add FIREBASE_TOKEN under Settings → Secrets and variables → Actions,"
             echo "or deploy locally: npm run deploy:firebase"
             echo "See docs/DEPLOY.md and docs/FIREBASE_DEPLOY.md"
             exit 0
@@ -216,8 +247,25 @@ jobs:
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
+  smoke:
+    name: post-deploy smoke
+    needs: [deploy]
+    if: >
+      needs.deploy.result == 'success' &&
+      needs.deploy.outputs.skipped != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Smoke test production URLs
+        run: bash scripts/smoke-prod-urls.sh
+        env:
+          BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
+
       - name: Notify deploy success
-        if: steps.deploy.outputs.skipped != 'true'
+        if: success()
         continue-on-error: true
         env:
           WEBHOOK_URL: ${{ secrets.DEPLOY_NOTIFY_WEBHOOK_URL }}
@@ -228,16 +276,16 @@ jobs:
           set -euo pipefail
 
           if [ -z "${WEBHOOK_URL:-}" ] && [ -z "${TELEGRAM_BOT_TOKEN:-}" ]; then
-            echo "No deploy notify secrets configured â€” skipping."
+            echo "No deploy notify secrets configured — skipping."
             exit 0
           fi
 
           short_sha="${GITHUB_SHA:0:7}"
           run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          prod_url="${PRODUCTION_URL:-}"
-          msg="Skaffu deploy lyckades (${short_sha})"
+          prod_url="${PRODUCTION_URL:-https://skaffu.com}"
+          msg="Skaffu deploy lyckades (${short_sha}) — smoke OK"
           if [ -n "$prod_url" ]; then
-            msg="${msg} â€” ${prod_url%/}"
+            msg="${msg} — ${prod_url%/}"
           fi
           msg=$(printf '%s\n%s' "$msg" "$run_url")
 
@@ -284,4 +332,3 @@ jobs:
               -d "$payload"
           fi
           echo "Webhook notify sent."
-

@@ -8,6 +8,25 @@ Checklista för **Cursor coordinator och agenter** efter grön **Deploy to produ
 
 ---
 
+## Deploy gates (automated)
+
+**Deploy to production** kör automatiskt efter Firebase:
+
+| Steg | Vad | Failar deploy? |
+|------|-----|----------------|
+| E2E (3 shards) | Playwright mot byggd app (PGlite) | Ja — obligatoriskt utom hotfix med `skip_e2e` + `hotfix_confirm=hotfix` |
+| **Post-deploy smoke** | `curl` `/`, `/login`, `/guider` → HTTP 200 | **Ja** — även om Firebase deploy lyckades |
+
+Skript (samma som CI): [`scripts/smoke-prod-urls.sh`](../scripts/smoke-prod-urls.sh)
+
+```bash
+BASE_URL=https://skaffu.com bash scripts/smoke-prod-urls.sh
+```
+
+Röd smoke = **rollback** eller fix-forward; säg inte "prod är live" förrän smoke **och** checklistan nedan är gröna.
+
+---
+
 ## Agent post-deploy (mandatory for coordinator)
 
 Kör **efter** grön **Deploy to production** för target-SHA. Räkna inte deploy som klar och säg inte "prod är live" till användaren utan lyckad deploy-run **och** denna check (eller motsvarande täckning — se nedan).

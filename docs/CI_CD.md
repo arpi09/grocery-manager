@@ -84,7 +84,21 @@ När uppgiften är klar:
 | [`.github/workflows/e2e.yml`](../.github/workflows/e2e.yml) | **E2E** | PR → `master`/`main`; `workflow_dispatch`; schedule 03:00 UTC |
 | [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | **Deploy to production** | `workflow_dispatch` only |
 
-Deploy-kedja: `quality` → `e2e` (matrix 3 shards) → `deploy` (`needs:` i samma workflow). Varje shard laddar ner samma `sveltekit-build`-artifact från `quality`, startar egen webServer + PGlite, och kör `playwright test --shard=N/3` (`workers: 1` per shard).
+Deploy-kedja: `quality` → `e2e` (matrix 3 shards) → `deploy` → **`post-deploy smoke`** (`needs:` i samma workflow). Varje shard laddar ner samma `sveltekit-build`-artifact från `quality`, startar egen webServer + PGlite, och kör `playwright test --shard=N/3` (`workers: 1` per shard). Smoke curl:ar `https://skaffu.com/`, `/login`, `/guider` — workflow **failar** om någon svarar ≠ 200 (även om Firebase redan lyckades).
+
+### Deploy gates (obligatoriska)
+
+| Gate | Var | Blockerar prod? | Varför |
+|------|-----|-----------------|--------|
+| **G1 quality** | `deploy.yml` job `quality` | Ja | Lint, check, unit/integration, build |
+| **G2 E2E** | `deploy.yml` job `e2e` (3 shards) | Ja — **alltid** vid normal deploy | Fångar SSR/load-fel som CI missar; Turnstile-bypass lokalt |
+| **G3 Firebase** | `deploy.yml` job `deploy` | Ja (utan `FIREBASE_TOKEN`: skip med logg) | Faktisk App Hosting-deploy |
+| **G4 prod smoke** | `deploy.yml` job `post-deploy smoke` | Ja | Curl mot live URL — fångar prod **500** som E2E inte ser (t.ex. Cloud SQL cold start, saknad runtime-fil) |
+| **CI på master** | `ci.yml` vid push | Rekommenderat (branch protection) | Snabb feedback före manuell deploy |
+
+**E2E hoppas aldrig över** utom explicit hotfix: `skip_e2e=true` **och** `hotfix_confirm=hotfix` (annars failar `quality`-steget). Deploy till prod utan grön E2E **och** grön smoke räknas som misslyckad release.
+
+**Skript:** [`scripts/smoke-prod-urls.sh`](../scripts/smoke-prod-urls.sh) — samma kontroller som smoke-jobbet (lokal felsökning: `BASE_URL=https://skaffu.com bash scripts/smoke-prod-urls.sh`).
 
 **Concurrency:**
 - **CI / E2E:** ny körning avbryter pågående på samma ref (`cancel-in-progress: true`).
@@ -94,7 +108,7 @@ Deploy-kedja: `quality` → `e2e` (matrix 3 shards) → `deploy` (`needs:` i sam
 
 ### Nödläge (hotfix)
 
-Actions → **Deploy to production** → Run workflow → kryssa i *Skip E2E* endast vid akut deploy. Dokumentera i chat/commit-meddelande.
+Actions → **Deploy to production** → Run workflow → *Skip E2E* = `true` **och** *hotfix_confirm* = `hotfix`. Annars körs E2E som vanligt. Dokumentera varför i chat/commit. **Prod smoke körs fortfarande** efter Firebase — rollback om smoke failar.
 
 ---
 
@@ -103,8 +117,9 @@ Actions → **Deploy to production** → Run workflow → kryssa i *Skip E2E* en
 | Inställning | Rekommendation solo | Varför |
 |-------------|---------------------|--------|
 | Require PR | Valfritt | Trunk-flöde fungerar med direkt push |
-| Require status check `quality` | Rekommenderat | Snabb feedback vid merge |
-| Require status check `e2e` | Valfritt | Långsammare — kör E2E på PR eller före deploy |
+| Require status check `quality` (CI workflow) | **Rekommenderat** | Blockerar merge/deploy på trasig lint/test/build |
+| Require status check `e2e` | Valfritt | Långsammare — deploy-workflow kör E2E ändå |
+| Require status check deploy `post-deploy smoke` | Ej möjligt solo | Smoke körs bara i deploy-workflow efter Firebase |
 | Do not allow bypassing | Av för solo | Du behöver kunna pusha direkt |
 
 ---
@@ -235,7 +250,7 @@ npm run deploy:firebase
 | Path filters (skippa E2E på ren dokumentation) | **Implementerat** i [`e2e.yml`](../.github/workflows/e2e.yml) (`dorny/paths-filter@v3`) |
 | Delade npm-cache artifacts mellan jobb | Ej implementerat |
 | Preview deploy per commit | Ej implementerat |
-| Post-deploy prod-smoke (curl) | Manuell checklista — [`PROD_SMOKE.md`](./PROD_SMOKE.md) |
+| Post-deploy prod-smoke (curl) | **Implementerat** — `deploy.yml` job `post-deploy smoke` + [`scripts/smoke-prod-urls.sh`](../scripts/smoke-prod-urls.sh); coordinator kör utökad checklista i [`PROD_SMOKE.md`](./PROD_SMOKE.md) |
 
 ---
 

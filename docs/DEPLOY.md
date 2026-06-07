@@ -73,7 +73,8 @@ Deploy till prod sker fortfarande bara när du ber coordinator om deploy i chatt
 |-------|----------|-------|
 | `ref` | `master` | Branch eller tag att bygga och deploya |
 | `sha` | *(tom)* | Specifik commit — överstyr `ref` om satt |
-| `skip_e2e` | `false` | Hoppa över E2E vid nödfall (dokumentera varför) |
+| `skip_e2e` | `false` | HOTFIX ONLY — hoppa över E2E (kräver `hotfix_confirm`) |
+| `hotfix_confirm` | *(tom)* | Skriv exakt `hotfix` när `skip_e2e=true` |
 
 ---
 
