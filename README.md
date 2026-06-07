@@ -1,8 +1,31 @@
-# Home Pantry
+# Skaffu
 
-A simple home grocery inventory app: track what you have in the **fridge**, **freezer**, and **cupboard**. Members of the same **household** share one inventory.
+**Skanna först. Håll koll på skafferiet. Handla smart.**
 
-Built with **SvelteKit**, **PostgreSQL**, **Lucia** auth, and **Docker**.
+[skaffu.com](https://skaffu.com) — live produkt för svenska hushåll: delat lager i kyl, frys och skafferi, kvitto-AI, smart inköpslista och veckoplan. Intern repo heter fortfarande `home-pantry`.
+
+> **Portfolio / intervju:** Case study med arkitektur, beslut och ärliga metrics — [`docs/CASE_STUDY_SKAFFU.md`](docs/CASE_STUDY_SKAFFU.md).  
+> Byggt som solo-produkt med PMF-disciplin (Head of Dev: prioritering, metrics, launch) och senior fullstack-leverans (hexagonal arkitektur, ~690 tester, deploy E2E-gate).
+
+## Highlights
+
+| Område | Detalj |
+|--------|--------|
+| **Prod** | [skaffu.com](https://skaffu.com) — SvelteKit SSR, Firebase App Hosting, PostgreSQL |
+| **Arkitektur** | Domain → application → infrastructure → routes; ports/adapters, `di.ts` composition root |
+| **AI** | Kvitto, foto, recept, smart fill — rate limits + månadstak per plan |
+| **Kvalitet** | Testing diamond (~620 unit, ~72 integration, ~23 E2E); axe mobile + desktop |
+| **Leverans** | CI G0→G3, deploy blockerad av E2E; agent coordinator (WIP 3) |
+| **PMF** | `/admin` dashboard, veckocron, medvetet väntande Stripe/Capacitor |
+
+## Tech stack
+
+- **Frontend:** SvelteKit 2, Svelte 5, PWA (install + web push)
+- **Backend:** SvelteKit server routes & actions, Lucia auth, Drizzle ORM
+- **Database:** PostgreSQL (Neon/Supabase/Cloud SQL; PGlite lokalt)
+- **AI:** OpenAI (vision + text), guardrailad via `AiRateLimitService`
+- **Infra:** Firebase App Hosting, Resend (e-post), GitHub Actions CI/CD
+- **Test:** Vitest, Playwright, `@axe-core/playwright`
 
 ## Prerequisites
 
@@ -158,7 +181,16 @@ Tests cover login redirect, admin sign-in, `/admin`, and navigation to Inköp / 
 
 ## Project structure
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for layers, SOLID boundaries, and Atomic Design conventions.
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for layers, SOLID boundaries, and Atomic Design conventions. Portfolio deep-dive: [docs/CASE_STUDY_SKAFFU.md](docs/CASE_STUDY_SKAFFU.md).
+
+## Documentation
+
+| Doc | Purpose |
+|-----|---------|
+| [CASE_STUDY_SKAFFU.md](docs/CASE_STUDY_SKAFFU.md) | Portfolio case study (strategy + architecture) |
+| [ROADMAP.md](docs/ROADMAP.md) | Product phases and PMF gates |
+| [CODE_QUALITY_AUDIT.md](docs/CODE_QUALITY_AUDIT.md) | Architecture and quality snapshot |
+| [FIREBASE_DEPLOY.md](docs/FIREBASE_DEPLOY.md) | Production deploy |
 
 ## Manual test checklist
 
@@ -179,7 +211,7 @@ Initialize git locally (if not already), create a repo on GitHub, and push:
 ```bash
 git init
 git add .
-git commit -m "Initial Home Pantry app"
+git commit -m "Initial Skaffu app"
 git remote add origin https://github.com/YOUR_USER/home-pantry.git
 git push -u origin main
 ```
@@ -189,3 +221,5 @@ CI runs lint, check, test, and build on push/PR (see `.github/workflows/ci.yml`)
 ## Production (Firebase)
 
 Deploy to **Firebase App Hosting** with PostgreSQL (Neon, Supabase, or Cloud SQL). See **[docs/FIREBASE_DEPLOY.md](./docs/FIREBASE_DEPLOY.md)** for first deploy, migrations, secrets, and the GitHub Actions pipeline (`deploy-firebase.yml`).
+
+**Live:** [https://skaffu.com](https://skaffu.com)
