@@ -32,6 +32,7 @@ describe('InventoryService', () => {
 			findById: vi.fn(),
 			findByHouseholdAndLocation: vi.fn(),
 			findByHouseholdAndLocationPaginated: vi.fn(),
+			searchActiveByLocation: vi.fn(),
 			countActiveByLocation: vi.fn(),
 			countAutoExpiredByLocation: vi.fn(),
 			findAutoExpiredByHouseholdAndLocation: vi.fn(),

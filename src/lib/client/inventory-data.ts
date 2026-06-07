@@ -61,3 +61,20 @@ export async function fetchInventoryAutoExpired(
 
 	return (await response.json()) as InventoryAutoExpiredPage;
 }
+
+export async function fetchInventorySearch(
+	location: StorageLocation,
+	query: string
+): Promise<InventoryActivePage> {
+	const search = new URLSearchParams({
+		section: 'active',
+		location,
+		q: query
+	});
+	const response = await fetch(`/api/inventory/data?${search}`);
+	if (!response.ok) {
+		throw new Error(`Inventory data request failed (${response.status})`);
+	}
+
+	return (await response.json()) as InventoryActivePage;
+}

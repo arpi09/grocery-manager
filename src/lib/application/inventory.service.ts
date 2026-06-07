@@ -22,7 +22,7 @@ import {
 
 import { EXPIRING_SOON_DAYS, buildLocationBars, type LocationBar } from '$lib/domain/inventory-analytics';
 
-import { INVENTORY_LIST_DEFAULT } from '$lib/domain/inventory-list';
+import { INVENTORY_LIST_DEFAULT, INVENTORY_LIST_MAX } from '$lib/domain/inventory-list';
 
 import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 
@@ -317,6 +317,38 @@ export class InventoryService {
 			offset,
 
 			context
+
+		);
+
+	}
+
+
+
+	async searchActiveByLocation(
+
+		householdId: string,
+
+		location: StorageLocation,
+
+		query: string,
+
+		limit = INVENTORY_LIST_MAX
+
+	) {
+
+		const context = await this.listContext(householdId);
+
+		return this.repository.searchActiveByLocation(
+
+			householdId,
+
+			location,
+
+			query,
+
+			context,
+
+			limit
 
 		);
 

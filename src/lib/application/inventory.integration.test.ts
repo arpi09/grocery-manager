@@ -105,4 +105,32 @@ describe('Inventory integration', () => {
 			])
 		);
 	});
+
+	it('searches active items by name case-insensitively', async () => {
+		await seedHouseholdForUser('user-search');
+
+		await service.createItem(
+			householdId,
+			'user-search',
+			{ name: 'Mjölk', location: 'fridge', quantity: '1' },
+			'owner'
+		);
+		await service.createItem(
+			householdId,
+			'user-search',
+			{ name: 'Ost', location: 'fridge', quantity: '1' },
+			'owner'
+		);
+		await service.createItem(
+			householdId,
+			'user-search',
+			{ name: 'Bröd', location: 'cupboard', quantity: '1' },
+			'owner'
+		);
+
+		const results = await service.searchActiveByLocation(householdId, 'fridge', 'mjö');
+
+		expect(results).toHaveLength(1);
+		expect(results[0].name).toBe('Mjölk');
+	});
 });

@@ -64,6 +64,27 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 	const location = locationParam;
 
 	if (sectionParam === 'active') {
+		const searchQuery = url.searchParams.get('q')?.trim() ?? '';
+
+		if (searchQuery.length >= 2) {
+			const limit = parseLimit(
+				url.searchParams.get('limit'),
+				INVENTORY_LIST_DEFAULT,
+				INVENTORY_LIST_MAX
+			);
+			const items = await locals.inventoryService.searchActiveByLocation(
+				householdId,
+				location,
+				searchQuery,
+				limit
+			);
+
+			return json({
+				items: items.map(serializeItem),
+				total: items.length
+			});
+		}
+
 		const limit = parseLimit(
 			url.searchParams.get('limit'),
 			INVENTORY_LIST_DEFAULT,

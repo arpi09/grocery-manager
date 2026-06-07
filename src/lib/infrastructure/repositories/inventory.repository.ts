@@ -88,6 +88,20 @@ export interface IInventoryRepository {
 
 	): Promise<InventoryItem[]>;
 
+	searchActiveByLocation(
+
+		householdId: string,
+
+		location: StorageLocation,
+
+		query: string,
+
+		context: InventoryListContext,
+
+		limit: number
+
+	): Promise<InventoryItem[]>;
+
 	countActiveByLocation(
 
 		householdId: string,
@@ -302,6 +316,56 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 			.limit(limit)
 
 			.offset(offset);
+
+
+
+		return rows.map(mapInventoryRow);
+
+	}
+
+
+
+	async searchActiveByLocation(
+
+		householdId: string,
+
+		location: StorageLocation,
+
+		query: string,
+
+		context: InventoryListContext,
+
+		limit: number
+
+	) {
+
+		const pattern = `%${query.trim().toLowerCase()}%`;
+
+		const rows = await this.database
+
+			.select()
+
+			.from(inventoryItemTable)
+
+			.where(
+
+				and(
+
+					eq(inventoryItemTable.householdId, householdId),
+
+					eq(inventoryItemTable.location, location),
+
+					activeNotAutoExpiredFilter(context),
+
+					sql`lower(${inventoryItemTable.name}) like ${pattern}`
+
+				)
+
+			)
+
+			.orderBy(inventoryItemTable.name)
+
+			.limit(limit);
 
 
 
