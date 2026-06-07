@@ -12,6 +12,8 @@ export interface BarcodeProduct {
 export interface BarcodeLookupResult {
 	found: boolean;
 	product: BarcodeProduct;
+	/** True when a curated Swedish override was applied (sv locale only). */
+	swedishOverrideUsed?: boolean;
 }
 
 export function unknownBarcodeProductName(

@@ -1,21 +1,14 @@
-import { existsSync, readdirSync } from 'node:fs';
+/**
+ * Optional regression for gitignored real receipt PDFs (ica-*, kivra-*, willys-*).
+ * Skipped in CI until fixtures are added locally — see docs/RECEIPT_TEST_PACK.md.
+ * Parse is mocked (no OPENAI_API_KEY); validates upload + review UI per PDF.
+ */
 import { join } from 'node:path';
 import { test, expect } from '@playwright/test';
 import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
 import { mockReceiptParse } from './helpers/mock-api';
+import { listRealReceiptPdfs, RECEIPT_FIXTURES_DIR } from './helpers/receipt-fixtures';
 import { uploadReceiptPdf } from './helpers/receipt';
-
-const FIXTURES_DIR = join(process.cwd(), 'tests/fixtures/receipts');
-
-function listRealReceiptPdfs(): string[] {
-	if (!existsSync(FIXTURES_DIR)) return [];
-
-	return readdirSync(FIXTURES_DIR)
-		.filter((name) => name.toLowerCase().endsWith('.pdf'))
-		.filter((name) => !name.startsWith('synthetic-'))
-		.filter((name) => /^(ica|kivra|willys)-\d+\.pdf$/i.test(name))
-		.sort();
-}
 
 const realPdfs = listRealReceiptPdfs();
 const describeReal = realPdfs.length > 0 ? test.describe : test.describe.skip;
@@ -23,7 +16,7 @@ const describeReal = realPdfs.length > 0 ? test.describe : test.describe.skip;
 describeReal('Receipt flow — local real PDF fixtures', () => {
 	for (const fileName of realPdfs) {
 		test(`${fileName} uploads with mocked parse`, async ({ page }) => {
-			const pdfPath = join(FIXTURES_DIR, fileName);
+			const pdfPath = join(RECEIPT_FIXTURES_DIR, fileName);
 
 			await mockReceiptParse(page);
 			await loginAsAdmin(page);

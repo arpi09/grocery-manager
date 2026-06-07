@@ -65,6 +65,7 @@ describe('BarcodeLookupService', () => {
 
 		expect(result.found).toBe(true);
 		expect(result.product.name).toBe('Felix Ketchup');
+		expect(result.swedishOverrideUsed).toBe(true);
 	});
 
 	it('lookupWithFallback applies Swedish override name on top of Open Food Facts', async () => {
@@ -81,6 +82,16 @@ describe('BarcodeLookupService', () => {
 		expect(result.found).toBe(true);
 		expect(result.product.name).toBe('Felix Ketchup');
 		expect(result.product.notes).toBe('Brand: Felix');
+		expect(result.swedishOverrideUsed).toBe(true);
+	});
+
+	it('lookupWithFallback does not flag override for non-sv locale', async () => {
+		vi.mocked(fetchProductByBarcode).mockResolvedValue(null);
+
+		const result = await service.lookupWithFallback('7310100683519', 'en');
+
+		expect(result.found).toBe(false);
+		expect(result.swedishOverrideUsed).toBeUndefined();
 	});
 
 	it('lookupWithFallback throws for short barcodes', async () => {

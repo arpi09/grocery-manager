@@ -2,7 +2,14 @@
 export const MARKETING_LANDING_PATHS = ['/', '/funktioner', '/sa-fungerar-det', '/faq'] as const;
 
 /** Public marketing routes (no login required; privacy stays reachable when logged in). */
-export const PUBLIC_MARKETING_PATHS = [...MARKETING_LANDING_PATHS, '/privacy', '/priser'] as const;
+export const PUBLIC_MARKETING_PATHS = [
+	...MARKETING_LANDING_PATHS,
+	'/minska-matsvinn',
+	'/skafferi-app',
+	'/kvitto-pdf-kivra',
+	'/privacy',
+	'/priser'
+] as const;
 
 export type MarketingPath = (typeof PUBLIC_MARKETING_PATHS)[number];
 

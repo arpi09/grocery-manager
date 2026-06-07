@@ -1,7 +1,9 @@
 import { BarcodeLookupService, BarcodeNotFoundError } from '$lib/application/barcode-lookup.service';
+import { getSwedishProductOverride } from '$lib/infrastructure/barcode/swedish-product-overrides';
 import { json } from '@sveltejs/kit';
 import { translate } from '$lib/i18n/messages';
 import { requireUser } from '$lib/server/api-guards';
+import { recordProductEvent } from '$lib/server/product-events';
 import type { RequestHandler } from './$types';
 
 const lookupService = new BarcodeLookupService();
@@ -14,6 +16,21 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 
 	try {
 		const result = await lookupService.lookupWithFallback(params.code, locals.locale);
+
+		if (result.swedishOverrideUsed && result.found) {
+			const normalized = params.code.replace(/\D/g, '');
+			const override = getSwedishProductOverride(normalized);
+			recordProductEvent(locals.pmfService, {
+				userId: locals.user!.id,
+				householdId: locals.householdId,
+				eventType: 'barcode_override_used',
+				metadata: {
+					barcode: normalized,
+					...(override?.store ? { store: override.store } : {})
+				}
+			});
+		}
+
 		return json(result);
 	} catch (e) {
 		if (e instanceof BarcodeNotFoundError) {

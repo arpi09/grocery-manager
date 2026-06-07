@@ -18,6 +18,10 @@ Regenerera syntetiska PDF:er:
 node scripts/generate-synthetic-receipt-pdfs.mjs
 ```
 
+## E2E i CI
+
+`e2e/receipt-real-fixtures.spec.ts` körs automatiskt när minst en riktig PDF finns här (`ica-*.pdf`, `kivra-*.pdf`, `willys-*.pdf`). **CI har inga riktiga PDF:er** — hela describe-blocket hoppas över tills ägare lagt till fixtures lokalt (parse mockas, ingen OpenAI-nyckel).
+
 ## Lokala riktiga PDF:er (gitignored)
 
 Lägg upp till **20 riktiga kvitton** enligt `manifest.json`:

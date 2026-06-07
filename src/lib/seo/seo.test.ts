@@ -15,6 +15,7 @@ import {
 	buildFaqPageJsonLd,
 	buildLandingJsonLd,
 	buildMarketingWebPageJsonLd,
+	buildSoftwareApplicationJsonLd,
 	buildPricingJsonLd,
 	buildRobotsTxt,
 	buildSitemapXml,
@@ -109,6 +110,18 @@ describe('buildFaqPageJsonLd', () => {
 		expect(schema['@type']).toBe('FAQPage');
 		expect(schema.mainEntity).toHaveLength(1);
 		expect((schema.mainEntity as { name: string }[])[0].name).toBe('Kostar det?');
+	});
+});
+
+describe('buildSoftwareApplicationJsonLd', () => {
+	it('returns SoftwareApplication schema for SEO landing pages', () => {
+		const schema = buildSoftwareApplicationJsonLd(
+			'https://skaffu.com',
+			'/skafferi-app',
+			'Skafferi-app med lager'
+		);
+		expect(schema['@type']).toBe('SoftwareApplication');
+		expect(schema.url).toBe('https://skaffu.com/skafferi-app');
 	});
 });
 

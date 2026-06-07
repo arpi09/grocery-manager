@@ -26,6 +26,9 @@ export interface SitemapEntry {
 export const SITEMAP_ENTRIES: SitemapEntry[] = [
 	{ path: '/', changefreq: 'weekly', priority: 1 },
 	{ path: '/funktioner', changefreq: 'monthly', priority: 0.9 },
+	{ path: '/minska-matsvinn', changefreq: 'monthly', priority: 0.85 },
+	{ path: '/skafferi-app', changefreq: 'monthly', priority: 0.85 },
+	{ path: '/kvitto-pdf-kivra', changefreq: 'monthly', priority: 0.8 },
 	{ path: '/sa-fungerar-det', changefreq: 'monthly', priority: 0.8 },
 	{ path: '/faq', changefreq: 'monthly', priority: 0.7 },
 	{ path: '/priser', changefreq: 'monthly', priority: 0.7 },
@@ -166,6 +169,27 @@ export function buildFaqPageJsonLd(
 				text: item.answer
 			}
 		}))
+	};
+}
+
+export function buildSoftwareApplicationJsonLd(
+	siteOrigin: string,
+	path: string,
+	description: string
+): Record<string, unknown> {
+	return {
+		'@context': 'https://schema.org',
+		'@type': 'SoftwareApplication',
+		name: SITE_NAME,
+		applicationCategory: 'LifestyleApplication',
+		operatingSystem: 'Web',
+		url: marketingCanonicalUrl(path, siteOrigin),
+		description,
+		offers: {
+			'@type': 'Offer',
+			price: '0',
+			priceCurrency: 'SEK'
+		}
 	};
 }
 

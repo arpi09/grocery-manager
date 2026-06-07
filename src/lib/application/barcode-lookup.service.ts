@@ -42,14 +42,16 @@ export class BarcodeLookupService {
 		if (offProduct) {
 			return {
 				found: true,
-				product: override ? applySwedishProductOverride(offProduct, override) : offProduct
+				product: override ? applySwedishProductOverride(offProduct, override) : offProduct,
+				...(override ? { swedishOverrideUsed: true } : {})
 			};
 		}
 
 		if (override) {
 			return {
 				found: true,
-				product: swedishOverrideToProduct(normalized, override)
+				product: swedishOverrideToProduct(normalized, override),
+				swedishOverrideUsed: true
 			};
 		}
 
