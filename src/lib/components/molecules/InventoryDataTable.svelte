@@ -13,6 +13,7 @@
 		finished?: boolean;
 		autoExpired?: boolean;
 		ariaLabel: string;
+		onLogUsage?: (item: InventoryItem) => void;
 	}
 
 	let {
@@ -23,7 +24,8 @@
 		canWrite = false,
 		finished = false,
 		autoExpired = false,
-		ariaLabel
+		ariaLabel,
+		onLogUsage
 	}: Props = $props();
 
 	function headerAriaSort(key: InventorySortKey): 'ascending' | 'descending' | 'none' {
@@ -90,7 +92,7 @@
 		</thead>
 		<tbody>
 			{#each items as item (item.id)}
-				<InventoryTableRow {item} {canWrite} {finished} {autoExpired} />
+				<InventoryTableRow {item} {canWrite} {finished} {autoExpired} {onLogUsage} />
 			{/each}
 		</tbody>
 	</table>
@@ -184,33 +186,11 @@
 		content: '▼';
 	}
 
-	tbody :global(tr.data-row:nth-child(4n + 1)),
-	tbody :global(tr.data-row:nth-child(4n + 3)) {
+	tbody :global(tr.data-row:nth-child(odd)) {
 		background: color-mix(in srgb, var(--color-surface-muted) 35%, var(--color-surface));
 	}
 
 	tbody :global(tr.data-row:hover) {
 		background: var(--color-surface-muted);
-	}
-
-	@media (max-width: 559px) {
-		thead {
-			display: none;
-		}
-
-		table {
-			min-width: 0;
-		}
-
-		.table-scroll {
-			border: none;
-			background: transparent;
-			box-shadow: none;
-		}
-
-		tbody :global(tr.data-row:nth-child(4n + 1)),
-		tbody :global(tr.data-row:nth-child(4n + 3)) {
-			background: transparent;
-		}
 	}
 </style>

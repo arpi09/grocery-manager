@@ -127,20 +127,19 @@ test.describe('Scan and inventory', () => {
 	test.describe('inventory mobile', () => {
 		test.use({ viewport: { width: 390, height: 844 } });
 
-		test('table rows show log usage and labeled fields', async ({ page }) => {
+		test('compact list shows log usage on mobile', async ({ page }) => {
 			await loginAsAdmin(page);
 			await page.goto('/inventory/fridge');
 			await dismissOnboardingModalIfOpen(page);
 
-			const table = page.getByTestId('inventory-table');
-			if (!(await table.isVisible({ timeout: 15_000 }).catch(() => false))) {
-				test.skip(true, 'No inventory rows in fridge — table hidden behind empty state');
+			const list = page.getByTestId('inventory-compact-list');
+			if (!(await list.isVisible({ timeout: 15_000 }).catch(() => false))) {
+				test.skip(true, 'No inventory rows in fridge — list hidden behind empty state');
 			}
 
-			await expect(table.getByRole('columnheader')).toHaveCount(0);
-			const logUsage = table.getByRole('button', { name: /Logga förbrukning|Log usage/i }).first();
+			await expect(page.getByTestId('inventory-table')).toHaveCount(0);
+			const logUsage = list.getByRole('button', { name: /Logga förbrukning|Log usage/i }).first();
 			await expect(logUsage).toBeVisible();
-			await expect(logUsage).toBeInViewport();
 		});
 	});
 

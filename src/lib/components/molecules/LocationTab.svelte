@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { t, type MessageKey } from '$lib/i18n';
 
@@ -13,6 +14,15 @@
 		freezer: 'location.freezerShort',
 		cupboard: 'location.cupboardShort'
 	};
+
+	function navigate(event: MouseEvent, location: StorageLocation) {
+		if (location === active) {
+			event.preventDefault();
+			return;
+		}
+		event.preventDefault();
+		void goto(`/inventory/${location}`, { replaceState: true });
+	}
 </script>
 
 <nav class="tabs" aria-label={t('inventory.tabsAria')}>
@@ -22,6 +32,7 @@
 			class="tab"
 			class:active={location === active}
 			aria-current={location === active ? 'page' : undefined}
+			onclick={(event) => navigate(event, location)}
 		>
 			{t(tabKeys[location])}
 		</a>

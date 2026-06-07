@@ -83,10 +83,9 @@
 	<PageContainer>
 
 		<div class="inventory-page">
-
-			<LocationTab active={data.location} />
-
-
+			<div class="inventory-sticky-tabs">
+				<LocationTab active={data.location} />
+			</div>
 
 			{#if data.canWrite}
 
@@ -160,6 +159,14 @@
 
 		min-width: 0;
 
+	}
+
+	.inventory-sticky-tabs {
+		position: sticky;
+		top: 0;
+		z-index: 6;
+		padding-bottom: var(--space-xs);
+		background: var(--color-bg);
 	}
 
 
