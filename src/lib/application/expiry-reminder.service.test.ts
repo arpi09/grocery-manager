@@ -111,7 +111,7 @@ describe('ExpiryReminderService push delivery', () => {
 			expect.objectContaining({ id: 'sub-1' }),
 			expect.objectContaining({
 				title: expect.any(String),
-				body: expect.stringContaining('veckoförslag'),
+				body: expect.stringMatching(/vecka|week/i),
 				url: 'https://skaffu.test/planer/vecka?from=push',
 				tag: 'home-pantry-expiry'
 			})

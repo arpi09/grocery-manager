@@ -557,7 +557,7 @@ export function buildExpiryReminderEmailContent(options: {
 		``,
 		textSections,
 		``,
-		`Öppna skafferiet:`,
+		`Fixa veckan:`,
 		inventoryUrl,
 		``,
 		`Du får det här mejlet eftersom du aktiverat utgångspåminnelser i Skaffu. Stäng av dem under Inställningar.`,
@@ -659,7 +659,7 @@ function buildExpiryReminderEmailHtml(options: {
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="center" style="border-radius:10px;background-color:${EMAIL.primary};">
-                    <a href="${safeUrl}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:16px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;background-color:${EMAIL.primary};">Öppna skafferiet</a>
+                    <a href="${safeUrl}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:16px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;background-color:${EMAIL.primary};">Fixa veckan</a>
                   </td>
                 </tr>
               </table>

@@ -32,6 +32,8 @@
 	} from '$lib/utils/onboarding';
 	import type { ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
 	import { scanHubHref, scanModeHref } from '$lib/utils/scan-nav';
+	import { recordPeakInventoryCount } from '$lib/utils/household-invite-prompt';
+	import { shouldNudgeReceiptAutopilot } from '$lib/utils/receipt-autopilot-nudge';
 
 	interface Props {
 		summary: DashboardSummary;
@@ -104,12 +106,25 @@
 	let locationsOpen = $state(false);
 	let eatFirstOpen = $state(true);
 	let receiptAutopilotOpen = $state(false);
+	const nudgeReceiptAutopilot = $derived(
+		browser && userId ? shouldNudgeReceiptAutopilot(userId) : false
+	);
+
+	$effect(() => {
+		if (!browser || !userId) {
+			return;
+		}
+		recordPeakInventoryCount(summary.totalItems, userId);
+	});
 
 	$effect(() => {
 		if (!browser) {
 			return;
 		}
 		eatFirstOpen = hasExpiring;
+		if (nudgeReceiptAutopilot && receiptAutopilotSuggestions.length > 0) {
+			receiptAutopilotOpen = true;
+		}
 		const mq = window.matchMedia('(min-width: 560px)');
 		const syncLocations = () => {
 			locationsOpen = mq.matches;
@@ -209,6 +224,10 @@
 			</Card>
 		{/if}
 	{:else}
+		{#if showWeeklyRitual}
+			<WeeklyRitualHero expiringCount={expiringCount} />
+		{/if}
+
 		{#if canWrite}
 			<section class="scan-zone" aria-labelledby="home-scan-heading">
 				<h2 id="home-scan-heading" class="sr-only">{t('home.scanCardTitle')}</h2>
@@ -228,10 +247,6 @@
 			</section>
 		{:else}
 			<p class="readonly-hint">{t('home.readonlyHint')}</p>
-		{/if}
-
-		{#if showWeeklyRitual}
-			<WeeklyRitualHero expiringCount={expiringCount} />
 		{/if}
 
 		<WrappedBanner />
@@ -282,16 +297,30 @@
 		</details>
 
 		{#if canWrite && receiptAutopilotSuggestions.length > 0}
-			<details class="home-disclosure" bind:open={receiptAutopilotOpen}>
-				<summary>
-					{t('home.receiptAutopilotSummary', { count: receiptAutopilotSuggestions.length })}
-				</summary>
-				<ReceiptAutopilotSection
-					suggestions={receiptAutopilotSuggestions}
-					canEdit={canWrite}
-					compact
-				/>
-			</details>
+			{#if nudgeReceiptAutopilot}
+				<section class="autopilot-nudge" aria-labelledby="home-autopilot-nudge-heading">
+					<h2 id="home-autopilot-nudge-heading" class="autopilot-nudge-title">
+						{t('receiptAutopilot.nudgeTitle')}
+					</h2>
+					<p class="autopilot-nudge-lead">{t('receiptAutopilot.nudgeLead')}</p>
+					<ReceiptAutopilotSection
+						suggestions={receiptAutopilotSuggestions}
+						canEdit={canWrite}
+						compact
+					/>
+				</section>
+			{:else}
+				<details class="home-disclosure" bind:open={receiptAutopilotOpen}>
+					<summary>
+						{t('home.receiptAutopilotSummary', { count: receiptAutopilotSuggestions.length })}
+					</summary>
+					<ReceiptAutopilotSection
+						suggestions={receiptAutopilotSuggestions}
+						canEdit={canWrite}
+						compact
+					/>
+				</details>
+			{/if}
 		{/if}
 	{/if}
 </section>
@@ -522,6 +551,27 @@
 		font-weight: 700;
 		letter-spacing: -0.02em;
 		line-height: 1;
+	}
+
+	.autopilot-nudge {
+		padding: var(--space-lg);
+		border-radius: var(--radius-lg);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+		background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+		box-shadow: var(--shadow-sm);
+	}
+
+	.autopilot-nudge-title {
+		margin: 0 0 var(--space-xs);
+		font-size: 1.05rem;
+		letter-spacing: -0.02em;
+	}
+
+	.autopilot-nudge-lead {
+		margin: 0 0 var(--space-md);
+		color: var(--color-text-muted);
+		font-size: 0.9375rem;
+		line-height: 1.45;
 	}
 
 	@media (min-width: 560px) {

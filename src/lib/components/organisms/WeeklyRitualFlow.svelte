@@ -3,6 +3,7 @@
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
+	import AiLoadingSkeleton from '$lib/components/molecules/AiLoadingSkeleton.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import RecipeSuggestionCard from '$lib/components/molecules/RecipeSuggestionCard.svelte';
 	import SkafferapportWidget from '$lib/components/molecules/SkafferapportWidget.svelte';
@@ -54,6 +55,7 @@
 	let errorMessage = $state<string | null>(null);
 	let note = $state<string | null>(null);
 	let approved = $state(false);
+	let listAddedCount = $state(0);
 
 	const previewItems = $derived(expiringItems.slice(0, 6));
 	const overflowCount = $derived(Math.max(0, expiringItems.length - previewItems.length));
@@ -190,6 +192,7 @@
 				});
 			}
 			approved = true;
+			listAddedCount = data.listAdded ?? 0;
 			suggestions = [];
 		} catch {
 			errorMessage = t('weeklyRitual.approveFailed');
@@ -246,17 +249,27 @@
 	{/if}
 
 	{#if approved}
-		<FeedbackBanner tone="success" message={t('weeklyRitual.successTitle')} />
-		<div class="post-approve-links">
-			<a href="/planer">{t('weeklyRitual.linkPlaner')}</a>
-			<a href="/inkop">{t('weeklyRitual.linkInkop')}</a>
-		</div>
+		<section class="next-step-card" aria-labelledby="weekly-ritual-next-step">
+			<span class="next-step-badge">{t('weeklyRitual.nextStepBadge')}</span>
+			<h3 id="weekly-ritual-next-step">{t('weeklyRitual.nextStepTitle')}</h3>
+			<p class="next-step-lead">
+				{t('weeklyRitual.nextStepLead', { count: listAddedCount })}
+			</p>
+			<a class="next-step-cta" href="/inkop" data-analytics-id="weekly_ritual.next_step_inkop">
+				{t('weeklyRitual.nextStepCta')}
+			</a>
+			<a class="next-step-secondary" href="/planer">{t('weeklyRitual.linkPlaner')}</a>
+		</section>
 	{:else if canEdit}
 		<div class="actions">
 			<Button type="button" loading={loading} disabled={approving} data-analytics-id="weekly_ritual.generate" onclick={generateSuggestions}>
 				{t('weeklyRitual.generateBtn')}
 			</Button>
 		</div>
+
+		{#if loading}
+			<AiLoadingSkeleton messageKey="ai.loadingWeekly" />
+		{/if}
 
 		{#if note}
 			<p class="note">{note}</p>
@@ -431,12 +444,72 @@
 		align-self: flex-start;
 	}
 
-	.post-approve-links {
+	.next-step-card {
 		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-md);
+		flex-direction: column;
+		gap: var(--space-sm);
+		padding: var(--space-lg);
+		border-radius: var(--radius-lg);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--color-primary) 10%, var(--color-surface)),
+			var(--color-surface)
+		);
+		box-shadow: var(--shadow-md);
+	}
+
+	.next-step-badge {
+		align-self: flex-start;
+		padding: 0.15rem 0.55rem;
+		font-size: 0.75rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+		border-radius: 999px;
+	}
+
+	.next-step-card h3 {
+		margin: 0;
+		font-size: 1.2rem;
+		letter-spacing: -0.02em;
+	}
+
+	.next-step-lead {
+		margin: 0;
+		color: var(--color-text-muted);
+		font-size: 0.9375rem;
+		line-height: 1.45;
+	}
+
+	.next-step-cta {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: var(--touch-target-min);
+		margin-top: var(--space-xs);
+		padding: 0.65rem 1.1rem;
+		border-radius: var(--radius-md);
+		background: var(--color-primary);
+		color: var(--color-on-primary);
+		font-weight: 700;
+		font-size: 0.9375rem;
+		text-decoration: none;
+	}
+
+	.next-step-cta:hover {
+		background: var(--color-primary-hover);
+		text-decoration: none;
+	}
+
+	.next-step-secondary {
+		font-size: 0.875rem;
 		font-weight: 600;
-		font-size: 0.9rem;
+		color: var(--color-primary);
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
 	}
 
 	@media (max-width: 600px) {

@@ -759,7 +759,9 @@
 		"acceptFailed": "Kunde inte lägga till varan. Försök igen.",
 		"dismissFailed": "Kunde inte dölja förslaget. Försök igen.",
 		"notFound": "Förslaget är inte längre tillgängligt.",
-		"invalidKey": "Ogiltigt förslag."
+		"invalidKey": "Ogiltigt förslag.",
+		"nudgeTitle": "Dags att fylla på?",
+		"nudgeLead": "Vi ser varor du ofta handlar — lägg till med ett tryck så slipper du skanna nästa gång."
 	},
 	"planer": {
 		"title": "Planer",
@@ -1467,6 +1469,9 @@
 		"minutesBadge": "{count} min",
 		"totalMinutesBadge": "~{count} min",
 		"ingredientsChecklistTitle": "Ingredienser",
+		"addToWeekBtn": "Lägg i veckan ({date})",
+		"addToWeekSuccess": "{title} planerad {date}",
+		"addToWeekFailed": "Kunde inte lägga i veckan. Försök igen.",
 		"detail": {
 			"back": "← Tillbaka",
 			"open": "Öppna",
@@ -1531,6 +1536,10 @@
 		"addItemsTitle": "Lägg till din första vara",
 		"addItemsBody": "Fota kyl, frys eller skafferi — eller skanna streckkod och kvitto. En vara räcker för att komma igång!",
 		"addFirstItem": "Lägg till vara",
+		"addItemsBodyBinary": "Välj ett sätt — kvitto eller tre streckkoder. Under tre minuter till ett fyllt skafferi.",
+		"chooseReceipt": "Ladda upp kvitto",
+		"chooseBarcode": "Skanna 3 varor",
+		"celebrateReceiptBody": "Du har {count} varor i lagret — bra start!",
 		"startUsingApp": "Börja använda appen",
 		"celebrateStartedBody": "Du har startat — ditt skafferi börjar ta form!",
 		"encourageAddItems": "Du är nästan där — bara en vara!",
@@ -1647,7 +1656,7 @@
 		"heroBadge": "Måndagsritual",
 		"heroSubtitleDefault": "Planera veckans middagar utifrån lagret — ett klick till matplan och inköpslista.",
 		"heroSubtitleExpiring": "{count} varor går ut snart — planera veckan innan de blir svinn.",
-		"heroCta": "Planera veckan →",
+		"heroCta": "Veckan fixad →",
 		"flowLead": "Generera upp till fem middagsförslag, justera dagarna och godkänn hela veckan.",
 		"expiringLabel": "Varor som går ut",
 		"noExpiring": "Inget brådskande just nu — du kan ändå planera veckan utifrån lagret.",
@@ -1663,6 +1672,10 @@
 		"successTitle": "Veckan är fixad",
 		"linkPlaner": "Se matplanen",
 		"linkInkop": "Gå till inköpslistan",
+		"nextStepBadge": "Nästa steg",
+		"nextStepTitle": "Inköpslistan är redo",
+		"nextStepLead": "{count, plural, =0 {Gå till inköpslistan och handla det som saknas.} one {En vara lades till på listan — handla när det passar.} other {{count} varor lades till på listan — handla när det passar.}}",
+		"nextStepCta": "Gå till inköpslistan →",
 		"plannedThisWeek": "{count} måltider redan planerade denna vecka",
 		"readonlyHint": "Du har läsbehörighet — be en administratör planera veckan.",
 		"savingsFootnote": "Hittills sparat ca {sek} kr · {kg} kg genom att använda maten i tid."
@@ -1695,9 +1708,20 @@
 	},
 	"pushNotifications": {
 		"expiryTitle": "Varor går ut snart",
-		"expiryBody": "{count} varor går ut inom {days} dagar — öppna veckoförslag",
+		"expiryBody": "{count} varor går ut — fixa veckan på 2 min",
 		"shoppingTitle": "Dags att handla?",
 		"shoppingBody": "{count} varor väntar på inköpslistan"
+	},
+	"ai": {
+		"loadingPantry": "Tänker utifrån ditt skafferi…",
+		"loadingWeekly": "Planerar veckan utifrån lagret…"
+	},
+	"householdInvite": {
+		"promptTitle": "Handla ihop?",
+		"promptAria": "Bjud in till hushållet",
+		"promptBody": "Delad lista och lager gör det enklare att hålla koll — bjud in partner eller familj.",
+		"promptCta": "Bjud in någon",
+		"promptDismiss": "Inte nu"
 	},
 	"calendar": {
 		"mon": "Mån",

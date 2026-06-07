@@ -112,10 +112,12 @@ export class ExpiryReminderService {
 		const failures: string[] = [];
 
 		if (emailEnabled) {
+			const weeklyRitualUrl = `${this.appOrigin.getOrigin() || ''}/planer/vecka?from=email`;
 			const emailResult = await this.email.sendExpiryReminderEmail({
 				to: user.email,
 				recipientName: user.displayName?.trim() || user.email,
 				days: user.settings.days,
+				inventoryUrl: weeklyRitualUrl,
 				sections: sections.map((section) => ({
 					householdName: section.householdName,
 					items: section.items.map((item) => ({

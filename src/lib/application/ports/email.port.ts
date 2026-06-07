@@ -33,6 +33,7 @@ export interface EmailPort {
 		recipientName: string;
 		days: ExpiryReminderDays;
 		sections: ExpiryReminderEmailSection[];
+		inventoryUrl?: string;
 	}): Promise<SendEmailResult>;
 
 	isEmailSendingDisabledFailure(result: SendEmailFailure): boolean;

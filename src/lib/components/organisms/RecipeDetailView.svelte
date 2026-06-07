@@ -7,6 +7,8 @@
 	import RecipeIngredientChecklist from '$lib/components/molecules/RecipeIngredientChecklist.svelte';
 	import RecipeStepTimeline from '$lib/components/molecules/RecipeStepTimeline.svelte';
 	import { DEFAULT_RECIPE_PORTIONS, totalMinutes } from '$lib/domain/recipe';
+	import { distributeMealDates } from '$lib/domain/weekly-ritual';
+	import { formatCalendarDayLabel } from '$lib/domain/calendar-display';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
 	import { getLocale, t } from '$lib/i18n';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
@@ -37,8 +39,14 @@
 
 	let addingMissing = $state(false);
 	let scheduling = $state(false);
+	let schedulingWeek = $state(false);
 	let scheduleDate = $state('');
 	let feedbackBanner = $state<{ message: string; tone: AddMissingFeedbackTone } | null>(null);
+
+	const defaultWeekDate = $derived(distributeMealDates(1)[0] ?? '');
+	const defaultWeekLabel = $derived(
+		defaultWeekDate ? formatCalendarDayLabel(defaultWeekDate, getLocale()) : ''
+	);
 
 	const stepCount = $derived(idea.steps.length);
 	const missingCount = $derived(idea.missingIngredients.length);
@@ -71,8 +79,8 @@
 		addingMissing = false;
 	}
 
-	async function scheduleToCalendar() {
-		if (!canEdit || !scheduleDate) {
+	async function scheduleToCalendar(date: string) {
+		if (!canEdit || !date) {
 			return;
 		}
 
@@ -81,7 +89,7 @@
 			const response = await fetch('/api/planer/schedule-idea', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ ideaId: idea.id, plannedDate: scheduleDate })
+				body: JSON.stringify({ ideaId: idea.id, plannedDate: date })
 			});
 
 			const data = (await response.json()) as { error?: string; ok?: boolean };
@@ -91,13 +99,44 @@
 				return;
 			}
 
-			showClientToast(t('eatFirst.scheduleSuccess', { title: idea.title, date: scheduleDate }), {
+			showClientToast(t('eatFirst.scheduleSuccess', { title: idea.title, date }), {
 				variant: 'success'
 			});
 		} catch {
 			showClientToast(t('eatFirst.scheduleFailed'), { variant: 'error' });
 		} finally {
 			scheduling = false;
+		}
+	}
+
+	async function addToWeek() {
+		if (!canEdit || !defaultWeekDate) {
+			return;
+		}
+
+		schedulingWeek = true;
+		try {
+			const response = await fetch('/api/planer/schedule-idea', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ ideaId: idea.id, plannedDate: defaultWeekDate })
+			});
+
+			const data = (await response.json()) as { error?: string; ok?: boolean };
+
+			if (!response.ok) {
+				showClientToast(data.error ?? t('recipe.addToWeekFailed'), { variant: 'error' });
+				return;
+			}
+
+			showClientToast(
+				t('recipe.addToWeekSuccess', { title: idea.title, date: defaultWeekLabel }),
+				{ variant: 'success' }
+			);
+		} catch {
+			showClientToast(t('recipe.addToWeekFailed'), { variant: 'error' });
+		} finally {
+			schedulingWeek = false;
 		}
 	}
 </script>
@@ -128,6 +167,20 @@
 		<Button type="button" fullWidth onclick={startCooking} data-testid="recipe-start-cooking">
 			{t('recipe.detail.startCooking')}
 		</Button>
+		{#if canEdit}
+			<Button
+				type="button"
+				variant="secondary"
+				fullWidth
+				loading={schedulingWeek}
+				loadingLabel={t('common.loading')}
+				disabled={!defaultWeekDate}
+				data-testid="recipe-add-to-week"
+				onclick={addToWeek}
+			>
+				{t('recipe.addToWeekBtn', { date: defaultWeekLabel })}
+			</Button>
+		{/if}
 		{#if canEdit && missingCount > 0}
 			<Button
 				type="button"
@@ -160,7 +213,7 @@
 					loading={scheduling}
 					loadingLabel={t('common.loading')}
 					disabled={!scheduleDate}
-					onclick={scheduleToCalendar}
+					onclick={() => scheduleToCalendar(scheduleDate)}
 				>
 					{t('planer.addToCalendar')}
 				</Button>
