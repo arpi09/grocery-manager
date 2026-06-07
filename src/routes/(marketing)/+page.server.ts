@@ -7,6 +7,7 @@ import {
 	LANDING_VARIANT_COOKIE,
 	resolveLandingVariant
 } from '$lib/marketing/landing-variants';
+import { getLatestPublishedGuides } from '$lib/marketing/guides';
 import { pmfService } from '$lib/server/di';
 import { recordMarketingEvent } from '$lib/server/marketing-analytics';
 import type { PageServerLoad } from './$types';
@@ -42,6 +43,7 @@ export const load: PageServerLoad = async ({ url, cookies, parent }) => {
 
 	return {
 		landingVariant: variant,
-		hero: getLandingHeroCopy(variant, locale)
+		hero: getLandingHeroCopy(variant, locale),
+		latestGuides: getLatestPublishedGuides(3)
 	};
 };

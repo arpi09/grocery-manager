@@ -10,8 +10,10 @@ import { getOrSetAnalyticsVisitorId } from '$lib/server/analytics-visitor';
 import { recordProductEvent } from '$lib/server/product-events';
 
 const LANDING_VIEW_SESSION_COOKIE = 'hp_landing_view_sent';
+const GUIDE_VIEW_SESSION_COOKIE_PREFIX = 'hp_guide_view_';
 
 const LANDING_VIEW_SESSION_MAX_AGE = 60 * 30;
+const GUIDE_VIEW_SESSION_MAX_AGE = 60 * 30;
 
 export interface RecordMarketingEventOptions {
 	pmfService: PmfService;
@@ -57,6 +59,46 @@ export function recordMarketingEvent(options: RecordMarketingEventOptions): void
 export interface RecordSignupCompleteEventOptions {
 	visitorId?: string | null;
 	signupUtm?: SignupUtm | null;
+}
+
+export interface RecordGuideViewEventOptions {
+	pmfService: PmfService;
+	cookies: Cookies;
+	slug: string;
+	userId?: string | null;
+}
+
+export function recordGuideViewEvent(options: RecordGuideViewEventOptions): void {
+	if (!hasAnalyticsConsent(readCookieConsent(options.cookies))) {
+		return;
+	}
+
+	const visitorId = getOrSetAnalyticsVisitorId(options.cookies);
+	if (!visitorId) {
+		return;
+	}
+
+	const sessionCookie = `${GUIDE_VIEW_SESSION_COOKIE_PREFIX}${options.slug}`;
+	if (options.cookies.get(sessionCookie) === '1') {
+		return;
+	}
+
+	options.cookies.set(sessionCookie, '1', {
+		path: '/',
+		maxAge: GUIDE_VIEW_SESSION_MAX_AGE,
+		httpOnly: true,
+		sameSite: 'lax'
+	});
+
+	recordProductEvent(options.pmfService, {
+		userId: options.userId ?? null,
+		householdId: null,
+		eventType: 'guide_view',
+		metadata: {
+			slug: options.slug,
+			visitorId
+		}
+	});
 }
 
 export function recordSignupCompleteEvent(

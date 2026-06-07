@@ -1,4 +1,5 @@
 import { marketingCanonicalUrl, resolveAppOrigin } from '$lib/marketing/app-url';
+import { getPublishedGuideSitemapEntries } from '$lib/marketing/guides';
 import { isMarketingPath } from '$lib/marketing/routes';
 
 export const SITE_NAME = 'Skaffu';
@@ -29,6 +30,7 @@ export const SITEMAP_ENTRIES: SitemapEntry[] = [
 	{ path: '/minska-matsvinn', changefreq: 'monthly', priority: 0.85 },
 	{ path: '/skafferi-app', changefreq: 'monthly', priority: 0.85 },
 	{ path: '/kvitto-pdf-kivra', changefreq: 'monthly', priority: 0.8 },
+	{ path: '/guider', changefreq: 'weekly', priority: 0.85 },
 	{ path: '/sa-fungerar-det', changefreq: 'monthly', priority: 0.8 },
 	{ path: '/faq', changefreq: 'monthly', priority: 0.7 },
 	{ path: '/priser', changefreq: 'monthly', priority: 0.7 },
@@ -67,10 +69,55 @@ export function sitemapAbsoluteUrl(path: string, requestOrigin?: string): string
 	return marketingCanonicalUrl(path, requestOrigin);
 }
 
+export interface ArticleJsonLdInput {
+	slug: string;
+	title: string;
+	description: string;
+	date: string;
+	keywords: string[];
+}
+
+export function buildArticleJsonLd(
+	siteOrigin: string,
+	article: ArticleJsonLdInput
+): Record<string, unknown> {
+	const articleUrl = marketingCanonicalUrl(`/guider/${article.slug}`, siteOrigin);
+	return {
+		'@context': 'https://schema.org',
+		'@type': 'Article',
+		headline: article.title,
+		description: article.description,
+		datePublished: article.date,
+		dateModified: article.date,
+		inLanguage: 'sv-SE',
+		keywords: article.keywords.join(', '),
+		author: {
+			'@type': 'Organization',
+			name: SITE_NAME,
+			url: marketingCanonicalUrl('/', siteOrigin)
+		},
+		publisher: {
+			'@type': 'Organization',
+			name: SITE_NAME,
+			logo: {
+				'@type': 'ImageObject',
+				url: marketingOgImageUrl(siteOrigin)
+			}
+		},
+		mainEntityOfPage: {
+			'@type': 'WebPage',
+			'@id': articleUrl
+		},
+		url: articleUrl
+	};
+}
+
 export function buildSitemapXml(requestOrigin?: string): string {
 	const origin = resolveAppOrigin(requestOrigin);
 	const lastmod = new Date().toISOString().slice(0, 10);
-	const urls = SITEMAP_ENTRIES.map(
+	const guideEntries = getPublishedGuideSitemapEntries();
+	const allEntries = [...SITEMAP_ENTRIES, ...guideEntries];
+	const urls = allEntries.map(
 		(entry) => `  <url>
     <loc>${sitemapAbsoluteUrl(entry.path, origin)}</loc>
     <lastmod>${lastmod}</lastmod>

@@ -12,6 +12,7 @@ vi.mock('$env/dynamic/public', () => ({
 }));
 
 import {
+	buildArticleJsonLd,
 	buildFaqPageJsonLd,
 	buildLandingJsonLd,
 	buildMarketingWebPageJsonLd,
@@ -63,7 +64,13 @@ describe('buildSitemapXml', () => {
 			const loc = entry.path === '/' ? 'https://skaffu.com' : `https://skaffu.com${entry.path}`;
 			expect(xml).toContain(`<loc>${loc}</loc>`);
 		}
+		expect(xml).toContain('<loc>https://skaffu.com/guider</loc>');
 		expect(xml).not.toContain('/hem');
+	});
+
+	it('includes published guide slugs in sitemap', () => {
+		const xml = buildSitemapXml('https://skaffu.com');
+		expect(xml).toContain('<loc>https://skaffu.com/guider/minska-matsvinn-hemma-app</loc>');
 	});
 });
 
@@ -122,6 +129,20 @@ describe('buildSoftwareApplicationJsonLd', () => {
 		);
 		expect(schema['@type']).toBe('SoftwareApplication');
 		expect(schema.url).toBe('https://skaffu.com/skafferi-app');
+	});
+});
+
+describe('buildArticleJsonLd', () => {
+	it('returns Article schema for guide pages', () => {
+		const schema = buildArticleJsonLd('https://skaffu.com', {
+			slug: 'test-guide',
+			title: 'Test guide',
+			description: 'Beskrivning',
+			date: '2026-06-01',
+			keywords: ['skafferi', 'matsvinn']
+		});
+		expect(schema['@type']).toBe('Article');
+		expect(schema.url).toBe('https://skaffu.com/guider/test-guide');
 	});
 });
 

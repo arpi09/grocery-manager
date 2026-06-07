@@ -38,7 +38,8 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
-		"seed:demo": "svelte-kit sync && node --env-file=.env --import tsx scripts/seed-demo-cli.ts"
+		"seed:demo": "svelte-kit sync && node --env-file=.env --import tsx scripts/seed-demo-cli.ts",
+		"guides:generate": "node --env-file=.env --import tsx scripts/generate-guide-article.ts"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.11.3",
@@ -84,6 +85,7 @@
 		"drizzle-orm": "^0.45.2",
 		"jose": "^6.2.3",
 		"lucia": "^3.2.2",
+		"marked": "^13.0.3",
 		"pdf-parse": "^2.4.5",
 		"postgres": "^3.4.5",
 		"resend": "^6.0.0",

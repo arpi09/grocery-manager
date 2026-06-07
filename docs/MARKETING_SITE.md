@@ -12,6 +12,8 @@ Public information pages for Home Pantry, served from the same SvelteKit app as 
 | `/funktioner` | Features |
 | `/sa-fungerar-det` | How it works (3 steps) |
 | `/faq` | FAQ stub + contact email |
+| `/guider` | SEO guides hub (public, indexable) |
+| `/guider/[slug]` | Individual guide articles from `content/guides/sv/*.md` |
 
 The authenticated app dashboard moved from `/` to **`/hem`**. All other app routes (`/scan`, `/inkop`, `/inventory/…`, etc.) are unchanged.
 
@@ -46,6 +48,7 @@ npm run dev
 | http://localhost:5173/funktioner | Features |
 | http://localhost:5173/sa-fungerar-det | How it works |
 | http://localhost:5173/faq | FAQ |
+| http://localhost:5173/guider | SEO guides hub |
 | http://localhost:5173/login | App login |
 | http://localhost:5173/hem | App dashboard (requires login) |
 
@@ -176,6 +179,44 @@ Pick the winner when one variant has materially higher signup rate with comparab
 
 Copy lives in `src/lib/marketing/content.ts` with Swedish (`sv`) as primary. English (`en`) mirrors comparison and shared sections. Hero A/B strings live in `landing-variants.ts`.
 
+## Guider vs Nyheter (two content tracks)
+
+| Track | URL | Audience | Indexed |
+|-------|-----|----------|---------|
+| **Guider (SEO)** | `/guider`, `/guider/[slug]` | All visitors | Yes — sitemap + Article JSON-LD |
+| **Nyheter (changelog)** | `/nyheter` | Logged-in product users | No — `robots.txt` disallow |
+
+- Marketing nav links to **Guider** (`/guider`), not `/nyheter`.
+- Landing `/` shows **Senaste guider** (up to 3 cards) — not a full blog feed in the hero.
+- Guide markdown lives in `content/guides/sv/*.md` with frontmatter (`title`, `description`, `date`, `keywords`, `published`).
+
+### AI-assisted guide pipeline
+
+| Step | Command / file |
+|------|----------------|
+| Generate draft | `npm run guides:generate -- --keyword 0` (needs `OPENAI_API_KEY`) |
+| Quality checklist | `src/lib/marketing/guide-quality.ts` — min 800 words, internal links, no fake pricing |
+| Publish | Set `published: true` in frontmatter after manual review |
+
+Drafts default to `published: false`. Do not mass-publish without spot-checking kvitto/butik claims.
+
+### Guide analytics
+
+| Event | When | Metadata |
+|-------|------|----------|
+| `guide_view` | Guide page load (server, consent-gated) | `slug` |
+| `register_click` | CTA from guide | `slug`, `source: guide` |
+
+Guide CTAs append `utm_campaign=seo-guide&utm_content={slug}` to `/register`.
+
+### Reviews and social proof on `/`
+
+**Policy (current):** No star ratings, `AggregateRating` JSON-LD, or fabricated testimonials on the landing page. PMF is not proven at low volume; fake reviews undermine the honest comparison positioning.
+
+**Later (after real interviews):** Optional “Vad beta-testare säger” with 2–3 quotes — written consent, first name + city only. Implement only when the owner has real interview transcripts; never AI-generated quotes.
+
+Keep the comparison table (Bring / ICA / Matdags) as positioning-based social proof until then.
+
 ## SEO
 
 Canonical URLs, Open Graph, Twitter cards, and JSON-LD use **`PUBLIC_ORIGIN`** via `src/lib/marketing/app-url.ts` (production: `https://skaffu.com`).
@@ -199,6 +240,8 @@ Canonical URLs, Open Graph, Twitter cards, and JSON-LD use **`PUBLIC_ORIGIN`** v
 | `/faq` | `content.faq.meta` |
 | `/priser` | `pricing-content.ts` meta |
 | `/privacy` | `privacy-content.ts` meta |
+| `/guider` | `content.guidesHub.meta` |
+| `/guider/[slug]` | Guide frontmatter + `Article` JSON-LD |
 | `/login`, `/register` | i18n `auth.*.metaDescription` |
 
 Keywords in Swedish copy include **skafferi-app** and **minska matsvinn**. English locale mirrors meta where pages are bilingual (cookie-based locale on same URL).
@@ -207,7 +250,7 @@ Keywords in Swedish copy include **skafferi-app** and **minska matsvinn**. Engli
 
 | URL | Purpose |
 |-----|---------|
-| `/sitemap.xml` | Dynamic sitemap — `/`, `/funktioner`, `/sa-fungerar-det`, `/faq`, `/priser`, `/privacy`, `/login`, `/register` (not `/hem`) |
+| `/sitemap.xml` | Dynamic sitemap — marketing paths + published `/guider/[slug]` (not `/hem`, not `/nyheter`) |
 | `/robots.txt` | Allow `/`; disallow `/admin`, `/api/`, `/hem`, `/settings`, `/inventory`, `/inkop`, `/planer`, `/statistik`, `/scan`, `/profile`, `/item`, `/husdjur`, `/invite`, `/install-app`, `/logout`; `Sitemap:` points to canonical origin |
 
 OG image: `/og-skaffu.png` (1200×630; regenerate from SVG with `npm run generate:og-image`). Absolute URL via `PUBLIC_ORIGIN`, with `?v=` cache-bust (`OG_IMAGE_VERSION` in `src/lib/seo/seo.ts`). Use PNG — LinkedIn does not preview SVG `og:image`. After deploy, refresh LinkedIn cache via [Post Inspector](https://www.linkedin.com/post-inspector/) (see [LINKEDIN_LAUNCH.md](./LINKEDIN_LAUNCH.md)).

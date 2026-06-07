@@ -12,4 +12,9 @@ describe('marketing routes', () => {
 	it('includes root landing for authenticated visitors', () => {
 		expect(MARKETING_LANDING_PATHS).toContain('/');
 	});
+
+	it('treats /guider and guide slugs as marketing', () => {
+		expect(isMarketingPath('/guider')).toBe(true);
+		expect(isMarketingPath('/guider/minska-matsvinn-hemma-app')).toBe(true);
+	});
 });

@@ -13,6 +13,10 @@ export const PUBLIC_MARKETING_PATHS = [
 
 export type MarketingPath = (typeof PUBLIC_MARKETING_PATHS)[number];
 
+export function isGuiderPath(pathname: string): boolean {
+	return pathname === '/guider' || pathname.startsWith('/guider/');
+}
+
 export function isRapportPath(pathname: string): boolean {
 	return /^\/rapport\/\d{4}-\d{2}$/.test(pathname);
 }
@@ -22,5 +26,9 @@ export function isExpiringSharePath(pathname: string): boolean {
 }
 
 export function isMarketingPath(pathname: string): boolean {
-	return (PUBLIC_MARKETING_PATHS as readonly string[]).includes(pathname) || isRapportPath(pathname);
+	return (
+		(PUBLIC_MARKETING_PATHS as readonly string[]).includes(pathname) ||
+		isRapportPath(pathname) ||
+		isGuiderPath(pathname)
+	);
 }

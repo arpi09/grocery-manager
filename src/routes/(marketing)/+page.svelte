@@ -2,6 +2,7 @@
 	import {
 		ArrowRight,
 		Barcode,
+		BookOpen,
 		Camera,
 		Leaf,
 		Refrigerator,
@@ -27,7 +28,8 @@
 
 	let { data } = $props();
 
-	const { marketing: content, loginUrl, registerUrl, hero, canonicalUrl, marketingLocale } = data;
+	const { marketing: content, loginUrl, registerUrl, hero, canonicalUrl, marketingLocale, latestGuides } =
+		data;
 	const isLoggedIn = $derived(Boolean(page.data.user?.id));
 	const landing = content.landing;
 	const previewFeatures = content.features.items.slice(0, 4);
@@ -172,6 +174,43 @@
 		</div>
 	</section>
 </MarketingScrollReveal>
+
+{#if latestGuides.length > 0}
+	<MarketingScrollReveal delay={40}>
+		<section class="section muted" id="senaste-guider">
+			<div class="section-inner">
+				<header class="section-header">
+					<span class="section-kicker label-caps">
+						<BookOpen size={14} strokeWidth={2} aria-hidden="true" />
+						{landing.guidesTeaserTitle}
+					</span>
+					<h2>{landing.guidesTeaserTitle}</h2>
+					<p>{landing.guidesTeaserLead}</p>
+				</header>
+				<div class="guide-teaser-grid">
+					{#each latestGuides as guide (guide.slug)}
+						<article class="guide-teaser-card">
+							<h3>
+								<a href="/guider/{guide.slug}">{guide.title}</a>
+							</h3>
+							<p>{guide.description}</p>
+							<a class="guide-teaser-link" href="/guider/{guide.slug}">
+								{landing.guidesTeaserReadMore}
+								<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+							</a>
+						</article>
+					{/each}
+				</div>
+				<p class="section-link">
+					<a href="/guider">
+						{landing.guidesTeaserSeeAll}
+						<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+					</a>
+				</p>
+			</div>
+		</section>
+	</MarketingScrollReveal>
+{/if}
 
 <MarketingScrollReveal variant="scale">
 	<section class="section waste" id="minska-matsvinn">
@@ -843,5 +882,62 @@
 			color-mix(in srgb, var(--color-surface-muted) 40%, var(--color-surface))
 		);
 		border-color: color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
+	}
+
+	.guide-teaser-grid {
+		display: grid;
+		gap: var(--space-md);
+		margin-top: var(--space-xl);
+	}
+
+	@media (min-width: 768px) {
+		.guide-teaser-grid {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+
+	.guide-teaser-card {
+		padding: var(--space-lg);
+		border-radius: var(--radius-lg);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.guide-teaser-card h3 {
+		margin: 0;
+		font-size: 1.05rem;
+		line-height: 1.3;
+	}
+
+	.guide-teaser-card h3 a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.guide-teaser-card h3 a:hover {
+		color: var(--color-primary);
+	}
+
+	.guide-teaser-card p {
+		margin: var(--space-sm) 0 0;
+		font-size: var(--font-size-body-sm);
+		color: var(--color-text-muted);
+		line-height: var(--line-height-body);
+	}
+
+	.guide-teaser-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		margin-top: var(--space-md);
+		color: var(--color-primary);
+		font-weight: 600;
+		text-decoration: none;
+		font-size: var(--font-size-body-sm);
+	}
+
+	.guide-teaser-link:hover {
+		text-decoration: underline;
 	}
 </style>

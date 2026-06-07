@@ -16,6 +16,7 @@ import type { RequestHandler } from './$types';
 const PUBLIC_EVENT_TYPES = new Set<ProductEventType>([
 	'register_click',
 	'landing_view',
+	'guide_view',
 	'public_report_viewed',
 	'expiring_share_viewed'
 ]);

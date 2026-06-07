@@ -114,6 +114,10 @@ export interface MarketingContent {
 		stepsKicker: string;
 		finalCtaTitle: string;
 		finalCtaLead: string;
+		guidesTeaserTitle: string;
+		guidesTeaserLead: string;
+		guidesTeaserSeeAll: string;
+		guidesTeaserReadMore: string;
 		heroVisual: {
 			fridge: string;
 			freezer: string;
@@ -173,6 +177,22 @@ export interface MarketingContent {
 	reduceWaste: MarketingSeoPage;
 	pantryApp: MarketingSeoPage;
 	receiptGuide: MarketingSeoPage;
+	guidesHub: {
+		kicker: string;
+		title: string;
+		lead: string;
+		empty: string;
+		readMore: string;
+		backToList: string;
+		ctaTitle: string;
+		ctaLead: string;
+		meta: {
+			title: string;
+			description: string;
+			ogTitle: string;
+			ogDescription: string;
+		};
+	};
 }
 
 export interface MarketingSeoPage {
@@ -209,7 +229,7 @@ const sv: MarketingContent = {
 		{ href: '/kvitto-pdf-kivra', label: 'Kvitto & Kivra' },
 		{ href: '/priser', label: 'Priser' },
 		{ href: '/faq', label: 'Vanliga frågor' },
-		{ href: '/nyheter', label: 'Nyheter' },
+		{ href: '/guider', label: 'Guider' },
 		{ href: '/privacy', label: 'Integritet' }
 	],
 	header: {
@@ -306,6 +326,11 @@ const sv: MarketingContent = {
 		stepsKicker: 'Så fungerar det',
 		finalCtaTitle: 'Redo att slippa gissa i skafferiet?',
 		finalCtaLead: 'Prova gratis på en minut — eller logga in om du redan har konto.',
+		guidesTeaserTitle: 'Senaste guider',
+		guidesTeaserLead:
+			'Praktiska artiklar om skafferi, matsvinn och kvitto-PDF — skrivna för svenska hushåll.',
+		guidesTeaserSeeAll: 'Alla guider',
+		guidesTeaserReadMore: 'Läs guiden',
 		heroVisual: {
 			fridge: 'Kyl',
 			freezer: 'Frys',
@@ -515,8 +540,8 @@ const sv: MarketingContent = {
 			'Inköpslista kopplad till lager — handla det som saknas, inte det du redan har.',
 			'Kvitto-PDF och streckkod — snabb start utan att fylla skafferiet manuellt.'
 		],
-		relatedHref: '/skafferi-app',
-		relatedLabel: 'Läs mer om skafferi-appen'
+		relatedHref: '/guider/minska-matsvinn-hemma-app',
+		relatedLabel: 'Läs guiden om att minska matsvinn hemma'
 	},
 	pantryApp: {
 		title: 'Skafferi-app för hela hushållet',
@@ -536,8 +561,8 @@ const sv: MarketingContent = {
 			'Butiksneutralt — samma lager oavsett kedja, utan stammisapp.',
 			'Hushållssync — familj eller rumskamrater ser samma lista och lager.'
 		],
-		relatedHref: '/minska-matsvinn',
-		relatedLabel: 'Så minskar du matsvinn med Skaffu'
+		relatedHref: '/guider',
+		relatedLabel: 'Fler guider om skafferi och inköp'
 	},
 	receiptGuide: {
 		title: 'Kvitto-PDF från Kivra och butiksappar',
@@ -594,8 +619,27 @@ const sv: MarketingContent = {
 					'Vi extraherar varor för ditt lager — inte hela kvittot som arkiv. Se integritetspolicyn för AI-hantering.'
 			}
 		],
-		relatedHref: '/sa-fungerar-det',
-		relatedLabel: 'Så fungerar Skaffu i tre steg'
+		relatedHref: '/guider',
+		relatedLabel: 'Guider om kvitto-PDF och skafferi'
+	},
+	guidesHub: {
+		kicker: 'Guider',
+		title: 'Guider för skafferi, matsvinn och smart inköp',
+		lead:
+			'Long-tail guider för svenska hushåll — lager som sanningskälla, utgångsdatum, kvitto-PDF och butiksneutral inköpslista.',
+		empty: 'Nya guider publiceras snart.',
+		readMore: 'Läs mer',
+		backToList: 'Alla guider',
+		ctaTitle: 'Prova Skaffu efter guiden',
+		ctaLead: 'Skapa konto gratis och testa med kvitto eller streckkod — webb först.',
+		meta: {
+			title: 'Guider — skafferi, matsvinn & kvitto-PDF',
+			description:
+				'Praktiska guider om skafferi-app, minska matsvinn, Kivra-kvitto och inköpslista kopplad till kyl och skafferi. Skaffu — butiksneutralt för hela hushållet.',
+			ogTitle: 'Skaffu guider — skafferi, matsvinn och smart inköp',
+			ogDescription:
+				'SEO-guider för svenska hushåll: utgångsdatum, kvitto-PDF, butiksneutral inköpslista och mindre matsvinn.'
+		}
 	}
 };
 
@@ -617,7 +661,7 @@ const en: MarketingContent = {
 		{ href: '/kvitto-pdf-kivra', label: 'Receipt PDF' },
 		{ href: '/priser', label: 'Pricing' },
 		{ href: '/faq', label: 'FAQ' },
-		{ href: '/nyheter', label: 'News' },
+		{ href: '/guider', label: 'Guides' },
 		{ href: '/privacy', label: 'Privacy' }
 	],
 	header: {
@@ -744,6 +788,11 @@ const en: MarketingContent = {
 		stepsKicker: 'How it works',
 		finalCtaTitle: 'Ready to stop guessing what is in the pantry?',
 		finalCtaLead: 'Try free in a minute — or log in if you already have an account.',
+		guidesTeaserTitle: 'Latest guides',
+		guidesTeaserLead:
+			'Practical articles on pantry management, food waste and receipt PDF — for everyday households.',
+		guidesTeaserSeeAll: 'All guides',
+		guidesTeaserReadMore: 'Read guide',
 		heroVisual: {
 			fridge: 'Fridge',
 			freezer: 'Freezer',
@@ -909,8 +958,8 @@ const en: MarketingContent = {
 			'Shopping list tied to inventory — buy what is missing, not what you already have.',
 			'Receipt PDF and barcode — quick start without manual pantry admin.'
 		],
-		relatedHref: '/skafferi-app',
-		relatedLabel: 'Learn more about the pantry app'
+		relatedHref: '/guider/minska-matsvinn-hemma-app',
+		relatedLabel: 'Read the guide on reducing food waste at home'
 	},
 	pantryApp: {
 		title: 'Pantry app for the whole household',
@@ -930,8 +979,8 @@ const en: MarketingContent = {
 			'Store-neutral — same inventory regardless of chain, no loyalty app required.',
 			'Household sync — family or roommates share the same list and stock.'
 		],
-		relatedHref: '/minska-matsvinn',
-		relatedLabel: 'How Skaffu helps reduce food waste'
+		relatedHref: '/guider',
+		relatedLabel: 'More guides on pantry and shopping'
 	},
 	receiptGuide: {
 		title: 'Receipt PDF from Kivra and store apps',
@@ -988,8 +1037,27 @@ const en: MarketingContent = {
 					'We extract items for your inventory — not the full receipt as an archive. See the privacy policy for AI handling.'
 			}
 		],
-		relatedHref: '/sa-fungerar-det',
-		relatedLabel: 'How Skaffu works in three steps'
+		relatedHref: '/guider',
+		relatedLabel: 'Guides on receipt PDF and pantry'
+	},
+	guidesHub: {
+		kicker: 'Guides',
+		title: 'Guides for pantry, food waste and smart shopping',
+		lead:
+			'Long-tail guides for households — inventory as source of truth, expiry dates, receipt PDF and store-neutral shopping lists.',
+		empty: 'New guides coming soon.',
+		readMore: 'Read more',
+		backToList: 'All guides',
+		ctaTitle: 'Try Skaffu after the guide',
+		ctaLead: 'Create a free account and test with a receipt or barcode — web-first.',
+		meta: {
+			title: 'Guides — pantry, food waste & receipt PDF',
+			description:
+				'Practical guides on pantry apps, reducing food waste, Kivra receipts and shopping lists tied to fridge and cupboard. Skaffu — store-neutral for the whole household.',
+			ogTitle: 'Skaffu guides — pantry, food waste and smart shopping',
+			ogDescription:
+				'SEO guides for households: expiry dates, receipt PDF, store-neutral shopping and less food waste.'
+		}
 	}
 };
 

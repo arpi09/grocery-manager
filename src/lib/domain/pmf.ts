@@ -4,6 +4,7 @@ export const PRODUCT_EVENT_TYPES = [
 	'photo_round_parsed',
 	'fill_suggestions_added',
 	'landing_view',
+	'guide_view',
 	'register_click',
 	'signup_complete',
 	'onboarding_skipped',
