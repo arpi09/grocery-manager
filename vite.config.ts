@@ -1,7 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import basicSsl from '@vitejs/plugin-basic-ssl';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 const useHttps = process.env.HTTPS === 'true';
 
@@ -60,9 +60,24 @@ export default defineConfig({
 		...(useHttps ? [basicSsl()] : [])
 	],
 	test: {
-		include: ['src/**/*.{test,spec}.{js,ts}'],
-		exclude: ['**/*.integration.test.ts'],
-		environmentMatchGlobs: [['src/lib/client/**', 'happy-dom']]
+		projects: [
+			{
+				extends: true,
+				test: {
+					name: 'client',
+					include: ['src/lib/client/**/*.{test,spec}.{js,ts}'],
+					environment: 'happy-dom'
+				}
+			},
+			{
+				extends: true,
+				test: {
+					name: 'unit',
+					include: ['src/**/*.{test,spec}.{js,ts}'],
+					exclude: ['**/*.integration.test.ts', 'src/lib/client/**/*.{test,spec}.{js,ts}']
+				}
+			}
+		]
 	},
 	server: {
 		host: true,

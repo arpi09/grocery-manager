@@ -22,9 +22,9 @@ vi.mock('$lib/server/di', () => ({
 }));
 
 vi.mock('resend', () => ({
-	Resend: vi.fn().mockImplementation(() => ({
-		emails: { send: mockSend }
-	}))
+	Resend: class {
+		emails = { send: mockSend };
+	}
 }));
 
 import {

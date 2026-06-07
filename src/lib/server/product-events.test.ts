@@ -1,15 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { PmfService } from '$lib/application/pmf.service';
+import type { IPmfRepository } from '$lib/infrastructure/repositories/pmf.repository';
 import { recordProductEvent } from './product-events';
 
-function mockPmfRepository(overrides: Partial<{
-	recordEvent: ReturnType<typeof vi.fn>;
-	getGlobalMetrics: ReturnType<typeof vi.fn>;
-	getFunnelMetrics: ReturnType<typeof vi.fn>;
-	hasHouseholdEvent: ReturnType<typeof vi.fn>;
-	countUserScanEvents: ReturnType<typeof vi.fn>;
-	getUserCreatedAt: ReturnType<typeof vi.fn>;
-}> = {}) {
+function mockPmfRepository(overrides: Partial<IPmfRepository> = {}): IPmfRepository {
 	return {
 		recordEvent: vi.fn(),
 		getGlobalMetrics: vi.fn(),
