@@ -124,9 +124,13 @@
 		}
 		openedAt = performance.now();
 		saveFocus();
-		lockBodyScroll();
+		// Defer scroll lock so the first paint can run the sheet transform without layout shift.
+		const scrollLockFrame = requestAnimationFrame(() => {
+			lockBodyScroll();
+		});
 
 		return () => {
+			cancelAnimationFrame(scrollLockFrame);
 			unlockBodyScroll();
 			restoreFocus();
 		};
@@ -175,7 +179,7 @@
 			aria-labelledby={ariaLabelledby}
 			tabindex="-1"
 			style:transform={variant === 'sheet' && sheetDragY > 0
-				? `translateY(${sheetDragY}px)`
+				? `translate3d(0, ${sheetDragY}px, 0)`
 				: undefined}
 			onclick={onPanelClick}
 			ontouchstart={onSheetTouchStart}
@@ -267,7 +271,8 @@
 		border-bottom: none;
 		border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 		padding-bottom: calc(var(--space-lg) + env(safe-area-inset-bottom, 0));
-		animation: modal-sheet-in 0.24s ease-out;
+		transform: translate3d(0, 0, 0);
+		animation: modal-sheet-in 0.3s cubic-bezier(0.32, 0.72, 0, 1) backwards;
 	}
 
 	.modal-root--sheet {
@@ -276,7 +281,8 @@
 		justify-content: center;
 	}
 
-	@media (min-width: 768px) {
+	/* Match nav narrow breakpoint (899px) — keep bottom sheet until desktop nav. */
+	@media (min-width: 900px) {
 		.modal-root--sheet {
 			align-items: center;
 			padding: var(--space-md);
@@ -294,7 +300,7 @@
 			border-radius: var(--radius-lg);
 			border-bottom: 1px solid var(--color-border);
 			padding-bottom: var(--space-lg);
-			animation: modal-center-in 0.2s ease-out;
+			animation: modal-center-in 0.2s ease-out backwards;
 		}
 
 		.modal-panel--sheet.modal-panel--dragging {
@@ -311,7 +317,7 @@
 		flex-shrink: 0;
 	}
 
-	@media (min-width: 768px) {
+	@media (min-width: 900px) {
 		.modal-sheet-handle {
 			display: none;
 		}
@@ -382,11 +388,11 @@
 	@keyframes modal-sheet-in {
 		from {
 			opacity: 0;
-			transform: translateY(100%);
+			transform: translate3d(0, 100%, 0);
 		}
 		to {
 			opacity: 1;
-			transform: translateY(0);
+			transform: translate3d(0, 0, 0);
 		}
 	}
 
@@ -394,7 +400,7 @@
 		.modal-panel--center,
 		.modal-panel--sheet {
 			animation: none;
+			transform: none;
 		}
-
 	}
 </style>
