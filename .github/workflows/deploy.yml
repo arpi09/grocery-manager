@@ -366,8 +366,7 @@ jobs:
     name: post-deploy smoke
     needs: [deploy]
     if: >
-      needs.deploy.result == 'success' &&
-      needs.deploy.outputs.skipped != 'true'
+      needs.deploy.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -549,3 +548,4 @@ jobs:
             exit 1
           fi
           echo "Release pipeline completed: quality, E2E, deploy, and smoke all succeeded."
+
