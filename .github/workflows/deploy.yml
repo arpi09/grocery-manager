@@ -384,25 +384,21 @@ jobs:
           fi
 
       - uses: actions/setup-node@v6
-        if: steps.deploy-gate.outputs.skipped != 'true'
         if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
         with:
           node-version-file: '.nvmrc'
           cache: npm
 
       - name: Install dependencies for prod auth smoke
-        if: steps.deploy-gate.outputs.skipped != 'true'
         if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
         run: npm ci
 
       - name: Get Playwright version
-        if: steps.deploy-gate.outputs.skipped != 'true'
         if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
         id: playwright-version
         run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
 
       - uses: actions/cache@v5
-        if: steps.deploy-gate.outputs.skipped != 'true'
         if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
         id: playwright-cache
         with:
@@ -410,12 +406,10 @@ jobs:
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
 
       - name: Install Playwright Chromium
-        if: steps.deploy-gate.outputs.skipped != 'true'
         if: (steps.smoke-auth-creds.outputs.configured == 'true' && steps.playwright-cache.outputs.cache-hit != 'true') && steps.deploy-gate.outputs.skipped != 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Authenticated prod smoke (Playwright /hem)
-        if: steps.deploy-gate.outputs.skipped != 'true'
         if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
         run: npm run smoke:prod-auth
         env:
@@ -426,7 +420,6 @@ jobs:
           CI: 'true'
 
       - name: Notify deploy success
-        if: steps.deploy-gate.outputs.skipped != 'true'
         if: success() && steps.deploy-gate.outputs.skipped != 'true'
         continue-on-error: true
         env:
