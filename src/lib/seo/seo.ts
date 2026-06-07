@@ -1,5 +1,4 @@
 import { marketingCanonicalUrl, resolveAppOrigin } from '$lib/marketing/app-url';
-import { getPublishedGuideSitemapEntries } from '$lib/marketing/guides';
 import { isMarketingPath } from '$lib/marketing/routes';
 
 export const SITE_NAME = 'Skaffu';
@@ -110,26 +109,6 @@ export function buildArticleJsonLd(
 		},
 		url: articleUrl
 	};
-}
-
-export function buildSitemapXml(requestOrigin?: string): string {
-	const origin = resolveAppOrigin(requestOrigin);
-	const lastmod = new Date().toISOString().slice(0, 10);
-	const guideEntries = getPublishedGuideSitemapEntries();
-	const allEntries = [...SITEMAP_ENTRIES, ...guideEntries];
-	const urls = allEntries.map(
-		(entry) => `  <url>
-    <loc>${sitemapAbsoluteUrl(entry.path, origin)}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>${entry.changefreq}</changefreq>
-    <priority>${entry.priority.toFixed(1)}</priority>
-  </url>`
-	).join('\n');
-
-	return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls}
-</urlset>`;
 }
 
 export function buildRobotsTxt(requestOrigin?: string): string {

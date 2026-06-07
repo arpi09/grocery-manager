@@ -1,4 +1,4 @@
-import { loadPublishedGuides, toGuideListItem } from '$lib/marketing/guides';
+import { loadPublishedGuides, toGuideListItem } from '$lib/marketing/guides.server';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ parent }) => {

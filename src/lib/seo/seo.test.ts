@@ -19,13 +19,13 @@ import {
 	buildSoftwareApplicationJsonLd,
 	buildPricingJsonLd,
 	buildRobotsTxt,
-	buildSitemapXml,
 	marketingOgImageUrl,
 	OG_IMAGE_PATH,
 	robotsDirectiveForPath,
 	shouldIndexPath,
 	SITEMAP_ENTRIES
 } from './seo';
+import { buildSitemapXml } from './seo.server';
 import { getMarketingContent } from '$lib/marketing/content';
 
 describe('shouldIndexPath', () => {

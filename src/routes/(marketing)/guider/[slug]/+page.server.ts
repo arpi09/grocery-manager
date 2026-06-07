@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { loadGuideBySlug } from '$lib/marketing/guides';
+import { loadGuideBySlug } from '$lib/marketing/guides.server';
 import { pmfService } from '$lib/server/di';
 import { recordGuideViewEvent } from '$lib/server/marketing-analytics';
 import type { PageServerLoad } from './$types';

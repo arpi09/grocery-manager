@@ -1,15 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
 import { validateGuideQuality } from '$lib/marketing/guide-quality';
 import {
-	getLatestPublishedGuides,
 	GUIDE_KEYWORD_MATRIX,
 	guideCtaSearchParams,
 	guideRegisterUrl,
-	loadGuideBySlug,
-	loadPublishedGuides,
-	resolveNextGuideKeywordIndex,
 	slugForGuideKeyword
 } from '$lib/marketing/guides';
+import {
+	getLatestPublishedGuides,
+	loadGuideBySlug,
+	loadPublishedGuides,
+	resolveNextGuideKeywordIndex
+} from '$lib/marketing/guides.server';
 
 describe('guides content', () => {
 	it('loads at least one published guide from content/guides/sv', () => {
@@ -72,7 +74,9 @@ describe('guide keyword queue', () => {
 		});
 
 		vi.resetModules();
-		const { resolveNextGuideKeywordIndex: resolveEmptyQueue } = await import('$lib/marketing/guides');
+		const { resolveNextGuideKeywordIndex: resolveEmptyQueue } = await import(
+			'$lib/marketing/guides.server'
+		);
 		expect(resolveEmptyQueue()).toBeNull();
 		vi.doUnmock('node:fs');
 		vi.resetModules();

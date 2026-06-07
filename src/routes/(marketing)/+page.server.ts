@@ -7,7 +7,7 @@ import {
 	LANDING_VARIANT_COOKIE,
 	resolveLandingVariant
 } from '$lib/marketing/landing-variants';
-import { getLatestPublishedGuides } from '$lib/marketing/guides';
+import { getLatestPublishedGuides } from '$lib/marketing/guides.server';
 import { pmfService } from '$lib/server/di';
 import { recordMarketingEvent } from '$lib/server/marketing-analytics';
 import type { PageServerLoad } from './$types';

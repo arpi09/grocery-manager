@@ -1,4 +1,4 @@
-import { buildSitemapXml } from '$lib/seo/seo';
+import { buildSitemapXml } from '$lib/seo/seo.server';
 import type { RequestHandler } from './$types';
 
 export const prerender = false;

@@ -14,11 +14,8 @@
 
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import {
-	GUIDE_KEYWORD_MATRIX,
-	resolveNextGuideKeywordIndex,
-	slugForGuideKeyword
-} from '../src/lib/marketing/guides.ts';
+import { GUIDE_KEYWORD_MATRIX, slugForGuideKeyword } from '../src/lib/marketing/guides.ts';
+import { resolveNextGuideKeywordIndex } from '../src/lib/marketing/guides.server.ts';
 import { GUIDE_AI_CONTENT_RULES } from '../src/lib/marketing/guide-generation-rules.ts';
 import {
 	formatNewsContextForPrompt,
