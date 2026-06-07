@@ -22,8 +22,8 @@ flowchart TB
     push --> q
   end
 
-  subgraph G2["G2 — e2e (~8–15 min, valfritt)"]
-    e2e[Playwright chromium]
+  subgraph G2["G2 — e2e (~3–8 min, valfritt)"]
+    e2e[Playwright chromium × 3 shards]
     pr[PR / manuellt / nattligt]
     pr --> e2e
   end
@@ -43,7 +43,7 @@ flowchart TB
 |------|-----|-----|--------|-----------|
 | **G0** | Före commit (agenter) | `npm run check && npm test` + husky `lint-staged` | ~1–2 min | Lokalt |
 | **G1** | Push/PR till `master` | `lint`, `check`, `test`, `test:integration` (PGlite), `build` | ~3–5 min | — (ingen auto-deploy) |
-| **G2** | PR, manuellt, nattligt, eller före deploy | Playwright E2E (PGlite) | ~8–15 min | G3 (vid deploy) |
+| **G2** | PR, manuellt, nattligt, eller före deploy | Playwright E2E (PGlite), **3 parallella shards** | ~3–8 min (väggtid) | G3 (vid deploy) |
 | **G3** | Manuell trigger | `firebase deploy --only apphosting:home-pantry` | ~5–20 min | Produktion |
 
 **Efter merge:** ~3–5 min till grön CI. Deploy när du vill — typiskt ~15–25 min för full deploy-kedja.
@@ -84,7 +84,7 @@ När uppgiften är klar:
 | [`.github/workflows/e2e.yml`](../.github/workflows/e2e.yml) | **E2E** | PR → `master`/`main`; `workflow_dispatch`; schedule 03:00 UTC |
 | [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | **Deploy to production** | `workflow_dispatch` only |
 
-Deploy-kedja: `quality` → `e2e` → `deploy` (`needs:` i samma workflow).
+Deploy-kedja: `quality` → `e2e` (matrix 3 shards) → `deploy` (`needs:` i samma workflow). Varje shard laddar ner samma `sveltekit-build`-artifact från `quality`, startar egen webServer + PGlite, och kör `playwright test --shard=N/3` (`workers: 1` per shard).
 
 **Concurrency:**
 - **CI / E2E:** ny körning avbryter pågående på samma ref (`cancel-in-progress: true`).

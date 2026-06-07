@@ -20,7 +20,7 @@ Det enklaste sättet att släppa till produktion: skriv till **coordinator** i C
 
 1. Kontrollerar att CI på `master` är grön och security-gate OK.
 2. Startar workflowen [**Deploy to production**](https://github.com/arpi09/grocery-manager/actions/workflows/deploy.yml) via `gh workflow run deploy.yml`.
-3. Följer körningen tills den är klar (~15–25 min med E2E).
+3. Följer körningen tills den är klar (~12–20 min med E2E — tre parallella shards).
 4. Om E2E eller quality failar: fixar minimalt, pushar `master`, kör deploy igen.
 5. Rapporterar tillbaka på svenska: SHA, länk till workflow-körning, prod-URL.
 
@@ -62,8 +62,8 @@ Deploy till prod sker fortfarande bara när du ber coordinator om deploy i chatt
 | Fil | Namn (UI) | Trigger | Vad |
 |-----|-----------|---------|-----|
 | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | **CI** | Push/PR → `master` | G1 quality — snabb feedback |
-| [`.github/workflows/e2e.yml`](../.github/workflows/e2e.yml) | **E2E** | PR → `master`; `workflow_dispatch`; nattlig schedule | G2 Playwright |
-| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | **Deploy to production** | `workflow_dispatch` only | G1 → G2 → G3 Firebase |
+| [`.github/workflows/e2e.yml`](../.github/workflows/e2e.yml) | **E2E** | PR → `master`; `workflow_dispatch`; nattlig schedule | G2 Playwright (3 shards) |
+| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | **Deploy to production** | `workflow_dispatch` only | G1 → G2 (3 shards) → G3 Firebase |
 
 ---
 
