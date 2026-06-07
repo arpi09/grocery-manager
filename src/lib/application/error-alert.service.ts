@@ -3,7 +3,6 @@ import {
 	buildErrorAlertEmailContent,
 	type ErrorAlertCursor
 } from '$lib/domain/error-alert';
-import type { AppErrorSummary } from '$lib/domain/error-log';
 import type { IErrorLogRepository } from '$lib/infrastructure/repositories/error-log.repository';
 import type { IAppSettingsRepository } from '$lib/infrastructure/repositories/app-settings.repository';
 import type { AppOriginPort } from '$lib/application/ports/app-origin.port';
