@@ -41,6 +41,7 @@ export interface PmfDigestInput {
 	stats: AdminDashboardStats;
 	waitlistCount: number;
 	adminUrl: string;
+	aiSummaryParagraph?: string | null;
 }
 
 export interface PmfDigestEmailContent {
@@ -169,7 +170,7 @@ function buildMetricsText(review: PmfWeeklyReview): string {
 }
 
 export function buildPmfDigestEmailContent(input: PmfDigestInput): PmfDigestEmailContent {
-	const { review, stats, waitlistCount, adminUrl } = input;
+	const { review, stats, waitlistCount, adminUrl, aiSummaryParagraph } = input;
 	const recommended = pickRecommendedMetric(review.belowTarget);
 	const recommendedMetric = recommended?.key ?? null;
 	const recommendedAction = getRecommendedActionText(recommended);
@@ -198,6 +199,9 @@ export function buildPmfDigestEmailContent(input: PmfDigestInput): PmfDigestEmai
 		metricsBlock,
 		``,
 		`Event counts (7 d): scan ${events.scan_completed} · kvitto ${events.receipt_parsed} · smart fill ${events.fill_suggestions_added}`,
+		...(aiSummaryParagraph
+			? ['', 'AI-sammanfattning:', aiSummaryParagraph]
+			: []),
 		``,
 		recommendedMetric
 			? `Föreslagen åtgärd (${METRIC_LABELS_SV[recommendedMetric]}):`
@@ -289,6 +293,11 @@ export function buildPmfDigestEmailContent(input: PmfDigestInput): PmfDigestEmai
         </tbody>
       </table>
       <p class="events">Event counts (7 d): scan ${events.scan_completed} · kvitto ${events.receipt_parsed} · smart fill ${events.fill_suggestions_added}</p>
+      ${
+				aiSummaryParagraph
+					? `<h2>AI-sammanfattning</h2><div class="action">${escapeHtml(aiSummaryParagraph)}</div>`
+					: ''
+			}
 
       <h2>Föreslagen åtgärd${recommendedMetric ? ` — ${escapeHtml(METRIC_LABELS_SV[recommendedMetric])}` : ''}</h2>
       <div class="action">${escapeHtml(recommendedAction)}</div>

@@ -55,7 +55,7 @@ describe('AiUsageAdminService', () => {
 		expect(summary.budgetUsd).toBe(1.5);
 		expect(summary.budgetExceeded).toBe(true);
 		expect(summary.budgetNearLimit).toBe(false);
-		expect(summary.freeTierLimits).toHaveLength(3);
+		expect(summary.freeTierLimits).toHaveLength(4);
 	});
 
 	it('uses a 7-day rolling window when requested', async () => {

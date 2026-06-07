@@ -25,7 +25,8 @@ describe('estimateOpenAiSpendUsd', () => {
 			estimateOpenAiSpendUsd({
 				ai_scan: 10,
 				receipt_pdf: 5,
-				smart_fill: 20
+				smart_fill: 20,
+				admin_insights: 0
 			})
 		).toBeCloseTo(10 * 0.015 + 5 * 0.02 + 20 * 0.008, 5);
 	});

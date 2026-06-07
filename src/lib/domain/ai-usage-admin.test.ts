@@ -20,7 +20,8 @@ describe('adminFreeTierRateLimits', () => {
 		expect(adminFreeTierRateLimits()).toEqual([
 			{ kind: 'ai_scan', limit: 15, period: 'month' },
 			{ kind: 'receipt_pdf', limit: 5, period: 'month' },
-			{ kind: 'smart_fill', limit: 2, period: 'week' }
+			{ kind: 'smart_fill', limit: 2, period: 'week' },
+			{ kind: 'admin_insights', limit: 20, period: 'week' }
 		]);
 	});
 });

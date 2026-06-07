@@ -2,6 +2,7 @@ import { buildPmfDigestEmailContent } from '$lib/domain/pmf-digest';
 import type { PmfService } from '$lib/application/pmf.service';
 import type { AdminService } from '$lib/application/admin.service';
 import type { WaitlistService } from '$lib/application/waitlist.service';
+import type { AdminInsightsService } from '$lib/application/admin-insights.service';
 import type { AppOriginPort } from '$lib/application/ports/app-origin.port';
 import type { EmailPort } from '$lib/application/ports/email.port';
 
@@ -20,7 +21,8 @@ export class PmfDigestService {
 		private readonly adminService: AdminService,
 		private readonly waitlistService: WaitlistService,
 		private readonly email: EmailPort,
-		private readonly appOrigin: AppOriginPort
+		private readonly appOrigin: AppOriginPort,
+		private readonly adminInsightsService: AdminInsightsService
 	) {}
 
 	async runWeeklyDigest(): Promise<PmfDigestRunResult> {
@@ -30,17 +32,19 @@ export class PmfDigestService {
 			return { sent: false, skipped: 'PMF_DIGEST_TO not configured' };
 		}
 
-		const [review, stats, waitlistCount] = await Promise.all([
+		const [review, stats, waitlistCount, aiSummary] = await Promise.all([
 			this.pmfService.getWeeklyReview(),
 			this.adminService.getDashboardStats(),
-			this.waitlistService.count()
+			this.waitlistService.count(),
+			this.adminInsightsService.getWeeklyDigestParagraph()
 		]);
 
 		const content = buildPmfDigestEmailContent({
 			review,
 			stats,
 			waitlistCount,
-			adminUrl: `${this.appOrigin.getOrigin()}/admin`
+			adminUrl: `${this.appOrigin.getOrigin()}/admin`,
+			aiSummaryParagraph: aiSummary
 		});
 
 		const result = await this.email.sendOwnerPmfDigest({

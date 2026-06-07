@@ -1,6 +1,6 @@
 import { getAiLimit, isProTier, type PlanTier } from '$lib/domain/plan';
 
-export const AI_USAGE_KINDS = ['ai_scan', 'receipt_pdf', 'smart_fill'] as const;
+export const AI_USAGE_KINDS = ['ai_scan', 'receipt_pdf', 'smart_fill', 'admin_insights'] as const;
 
 export type AiUsageKind = (typeof AI_USAGE_KINDS)[number];
 
@@ -15,7 +15,10 @@ export interface AiRateLimitSnapshot {
 }
 
 export function aiUsagePeriodForKind(kind: AiUsageKind): AiUsagePeriod {
-	return kind === 'smart_fill' ? 'week' : 'month';
+	if (kind === 'smart_fill' || kind === 'admin_insights') {
+		return 'week';
+	}
+	return 'month';
 }
 
 export function monthPeriodKey(date = new Date()): string {

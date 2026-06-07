@@ -71,7 +71,8 @@ export function planLimitKeyForAiUsageKind(kind: AiUsageKind): PlanLimitKey {
 	const map: Record<AiUsageKind, PlanLimitKey> = {
 		ai_scan: 'aiScansPerMonth',
 		receipt_pdf: 'receiptPdfParsesPerMonth',
-		smart_fill: 'smartFillPerWeek'
+		smart_fill: 'smartFillPerWeek',
+		admin_insights: 'smartFillPerWeek'
 	};
 	return map[kind];
 }
@@ -93,7 +94,8 @@ export function planLimitErrorKey(key: PlanLimitKey): MessageKey {
 		const map: Record<AiUsageKind, MessageKey> = {
 			ai_scan: 'errors.api.aiRateLimitAiScan',
 			receipt_pdf: 'errors.api.aiRateLimitReceiptPdf',
-			smart_fill: 'errors.api.aiRateLimitSmartFill'
+			smart_fill: 'errors.api.aiRateLimitSmartFill',
+			admin_insights: 'errors.api.openAiRateLimit'
 		};
 		return map[aiKind];
 	}

@@ -127,12 +127,14 @@ describe('DrizzleAiUsageRepository.getAdminSummary', () => {
 		expect(summary.byKind).toEqual({
 			ai_scan: 4,
 			receipt_pdf: 2,
-			smart_fill: 3
+			smart_fill: 3,
+			admin_insights: 0
 		});
 		expect(summary.monthlyByKind).toEqual({
 			ai_scan: 4,
 			receipt_pdf: 2,
-			smart_fill: 3
+			smart_fill: 3,
+			admin_insights: 0
 		});
 		expect(summary.monthlyTotal).toBe(9);
 	});

@@ -25,7 +25,8 @@ export function adminFreeTierRateLimits(): AdminFreeTierRateLimit[] {
 	return [
 		{ kind: 'ai_scan', limit: FREE_LIMITS.aiScansPerMonth, period: 'month' },
 		{ kind: 'receipt_pdf', limit: FREE_LIMITS.receiptPdfParsesPerMonth, period: 'month' },
-		{ kind: 'smart_fill', limit: FREE_LIMITS.smartFillPerWeek, period: 'week' }
+		{ kind: 'smart_fill', limit: FREE_LIMITS.smartFillPerWeek, period: 'week' },
+		{ kind: 'admin_insights', limit: FREE_LIMITS.adminInsightsPerWeek, period: 'week' }
 	];
 }
 

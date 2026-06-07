@@ -18,7 +18,8 @@ export const FREE_LIMITS = {
 	maxHouseholdMembers: 2,
 	aiScansPerMonth: 15,
 	receiptPdfParsesPerMonth: 5,
-	smartFillPerWeek: 2
+	smartFillPerWeek: 2,
+	adminInsightsPerWeek: 20
 } as const;
 
 /** Pro tier — null means unlimited. */
@@ -27,7 +28,8 @@ export const PRO_LIMITS = {
 	maxHouseholdMembers: 6,
 	aiScansPerMonth: null,
 	receiptPdfParsesPerMonth: null,
-	smartFillPerWeek: null
+	smartFillPerWeek: null,
+	adminInsightsPerWeek: null
 } as const;
 
 /** Rough AI unit economics (gpt-4.1-mini, May 2026 estimates). */
@@ -69,7 +71,7 @@ export function isProTier(tier: PlanTier): boolean {
 	return tier === 'pro';
 }
 
-export type AiUsageKind = 'ai_scan' | 'receipt_pdf' | 'smart_fill';
+export type AiUsageKind = 'ai_scan' | 'receipt_pdf' | 'smart_fill' | 'admin_insights';
 
 /** Returns null when the tier has no cap (Pro). */
 export function getAiLimit(tier: PlanTier, kind: AiUsageKind): number | null {
@@ -83,5 +85,7 @@ export function getAiLimit(tier: PlanTier, kind: AiUsageKind): number | null {
 			return FREE_LIMITS.receiptPdfParsesPerMonth;
 		case 'smart_fill':
 			return FREE_LIMITS.smartFillPerWeek;
+		case 'admin_insights':
+			return FREE_LIMITS.adminInsightsPerWeek;
 	}
 }
