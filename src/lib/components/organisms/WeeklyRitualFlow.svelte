@@ -13,7 +13,7 @@
 	import { formatCalendarDayLabel } from '$lib/domain/calendar-display';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
 	import { DEFAULT_MEAL_INTENT, DEFAULT_RECIPE_PORTIONS, type MealIntent } from '$lib/domain/recipe';
-	import { distributeMealDates } from '$lib/domain/weekly-ritual';
+	import { distributeMealDates, getPlanningWindowLabel } from '$lib/domain/weekly-ritual';
 	import { getLocale, t } from '$lib/i18n';
 	import type { GamificationCelebrationKind } from '$lib/domain/gamification';
 	import { getCelebrationRegistryEntry } from '$lib/domain/gamification.registry';
@@ -28,7 +28,8 @@
 
 	interface Props {
 		expiringItems: InventoryItem[];
-		weekDates: string[];
+		planningDates: string[];
+		todayIso: string;
 		plannedMeals: PlannedMealPreview[];
 		savings: SavingsReport;
 		canEdit?: boolean;
@@ -37,7 +38,8 @@
 
 	let {
 		expiringItems,
-		weekDates,
+		planningDates,
+		todayIso,
 		plannedMeals,
 		savings,
 		canEdit = false,
@@ -56,9 +58,11 @@
 	const previewItems = $derived(expiringItems.slice(0, 6));
 	const overflowCount = $derived(Math.max(0, expiringItems.length - previewItems.length));
 	const hasSuggestions = $derived(suggestions.length > 0);
+	const planningWindow = $derived(getPlanningWindowLabel(planningDates));
+	const maxPlanningDate = $derived(planningDates[planningDates.length - 1] ?? todayIso);
 	const weekLabel = $derived(
-		weekDates.length >= 2
-			? `${formatCalendarDayLabel(weekDates[0]!, getLocale())} – ${formatCalendarDayLabel(weekDates[weekDates.length - 1]!, getLocale())}`
+		planningWindow
+			? `${formatCalendarDayLabel(planningWindow.from, getLocale())} – ${formatCalendarDayLabel(planningWindow.to, getLocale())}`
 			: ''
 	);
 
@@ -67,7 +71,7 @@
 		const next: Record<string, string> = {};
 		for (let index = 0; index < ideas.length; index += 1) {
 			const idea = ideas[index]!;
-			next[idea.id] = dates[index] ?? weekDates[0] ?? new Date().toISOString().slice(0, 10);
+			next[idea.id] = dates[index] ?? planningDates[0] ?? todayIso;
 		}
 		scheduleDates = next;
 	}
@@ -130,6 +134,14 @@
 			.filter((entry) => Boolean(entry.plannedDate));
 
 		if (assignments.length === 0) {
+			errorMessage = t('weeklyRitual.approveFailed');
+			return;
+		}
+
+		const hasPastDate = assignments.some(
+			(entry) => entry.plannedDate != null && entry.plannedDate < todayIso
+		);
+		if (hasPastDate) {
 			errorMessage = t('weeklyRitual.approveFailed');
 			return;
 		}
@@ -260,8 +272,8 @@
 								type="date"
 								class="date-input"
 								value={scheduleDates[idea.id] ?? ''}
-								min={weekDates[0]}
-								max={weekDates[weekDates.length - 1]}
+								min={todayIso}
+								max={maxPlanningDate}
 								onchange={(event) => updateScheduleDate(idea.id, event)}
 							/>
 						</label>

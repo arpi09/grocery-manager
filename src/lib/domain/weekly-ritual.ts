@@ -16,9 +16,48 @@ export function getWeekDateRange(referenceDate = new Date()): { from: string; to
 	return { from: dates[0]!, to: dates[6]!, dates };
 }
 
+function isWeekday(date: Date): boolean {
+	const day = date.getUTCDay();
+	return day >= 1 && day <= 5;
+}
+
+/**
+ * Collect upcoming Mon–Fri dates from referenceDate forward (never before today).
+ * Spans up to ~2 calendar weeks so extra meals can spill into next week.
+ */
+export function getForwardMealDatePool(referenceDate = new Date(), maxWeekdays = 10): string[] {
+	const todayIso = toIsoDate(referenceDate);
+	const pool: string[] = [];
+	const cursor = new Date(
+		Date.UTC(referenceDate.getUTCFullYear(), referenceDate.getUTCMonth(), referenceDate.getUTCDate())
+	);
+	const maxCalendarDays = maxWeekdays * 2 + 7;
+
+	for (let offset = 0; offset < maxCalendarDays && pool.length < maxWeekdays; offset += 1) {
+		const day = new Date(cursor);
+		day.setUTCDate(cursor.getUTCDate() + offset);
+		const iso = toIsoDate(day);
+
+		if (isWeekday(day) && iso >= todayIso) {
+			pool.push(iso);
+		}
+	}
+
+	return pool;
+}
+
+/** First and last ISO dates in a planning pool (for hero labels). */
+export function getPlanningWindowLabel(dates: string[]): { from: string; to: string } | null {
+	if (dates.length === 0) {
+		return null;
+	}
+
+	return { from: dates[0]!, to: dates[dates.length - 1]! };
+}
+
 /**
  * Assign dinner slots across upcoming weekdays (Mon–Fri), starting today or next open slot.
- * Skips past dates within the current week.
+ * Never assigns dates before today; spills into the following week when needed.
  */
 export function distributeMealDates(
 	mealCount: number,
@@ -29,19 +68,9 @@ export function distributeMealDates(
 		return [];
 	}
 
-	const { dates } = getWeekDateRange(referenceDate);
-	const todayIso = toIsoDate(referenceDate);
-	const weekdayDates = dates.slice(0, 5);
-	const eligible = weekdayDates.filter((date) => date >= todayIso);
-	const pool = eligible.length > 0 ? eligible : weekdayDates;
+	const pool = getForwardMealDatePool(referenceDate);
 	const slots = Math.min(mealCount, maxSlots, pool.length);
-	const result: string[] = [];
-
-	for (let index = 0; index < slots; index += 1) {
-		result.push(pool[index]!);
-	}
-
-	return result;
+	return pool.slice(0, slots);
 }
 
 /** Promote weekly ritual hero Mon–Wed or whenever expiring inventory exists. */

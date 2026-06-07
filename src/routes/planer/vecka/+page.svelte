@@ -14,7 +14,8 @@
 	<PageContainer>
 		<WeeklyRitualFlow
 			expiringItems={data.expiringSoon}
-			weekDates={data.weekDates}
+			planningDates={data.planningDates}
+			todayIso={data.todayIso}
 			plannedMeals={data.plannedMealsThisWeek}
 			savings={data.savings}
 			canEdit={data.canWrite}
