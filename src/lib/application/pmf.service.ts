@@ -3,6 +3,7 @@ import type {
 	RecordProductEventInput
 } from '$lib/infrastructure/repositories/pmf.repository';
 import { buildWeeklyReview, type PmfMetricSnapshot, type PmfWeeklyReview } from '$lib/domain/pmf';
+import type { LaunchCohortSnapshot } from '$lib/domain/launch-cohort';
 import {
 	parsePmfFunnelPeriodDays,
 	type PmfFunnelPeriodDays,
@@ -35,6 +36,13 @@ export class PmfService {
 		now?: Date
 	): Promise<PmfFunnelSnapshot> {
 		return this.repository.getFunnelMetrics(periodDays, now);
+	}
+
+	getLaunchCohortSignups(
+		periodDays: PmfFunnelPeriodDays,
+		now?: Date
+	): Promise<LaunchCohortSnapshot> {
+		return this.repository.getLaunchCohortSignups(periodDays, now);
 	}
 
 	parseFunnelPeriodDays(raw: string | number | null | undefined): PmfFunnelPeriodDays {
