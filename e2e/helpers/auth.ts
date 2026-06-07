@@ -182,12 +182,28 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 	await dismissCookieConsentIfOpen(page);
 	await dismissPostOnboardingSurveyIfOpen(page);
 
+	const modal = page.locator('.modal-root').first();
+	const pageHintDismiss = page.getByTestId('page-hint-dismiss');
+	const hasBlockingOverlay = async () =>
+		(await modal.isVisible().catch(() => false)) ||
+		(await pageHintDismiss.isVisible().catch(() => false)) ||
+		(await page.getByTestId('post-onboarding-survey-skip').isVisible().catch(() => false));
+
+	if (!(await hasBlockingOverlay())) {
+		await page.waitForTimeout(250);
+		if (!(await hasBlockingOverlay())) {
+			return;
+		}
+	}
+
 	const deadline = Date.now() + 8_000;
 	while (Date.now() < deadline) {
 		await dismissPageHintIfOpen(page);
 
-		const modal = page.locator('.modal-root').first();
 		if (!(await modal.isVisible().catch(() => false))) {
+			if (!(await hasBlockingOverlay())) {
+				return;
+			}
 			await page.waitForTimeout(250);
 			continue;
 		}
