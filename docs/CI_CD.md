@@ -51,6 +51,16 @@ flowchart TB
 
 **Ingen prod-release utan grön Deploy-workflow inkl. `verify-release`.** Merge till `master` deployar inte automatiskt (utom guide-only push — se nedan).
 
+### Deploy SLO och definition of done (prod)
+
+| Mått | Mål / sanning |
+|------|----------------|
+| **När säga "prod är uppdaterad"** | Endast när [**Deploy to production**](https://github.com/arpi09/grocery-manager/actions/workflows/deploy.yml) är **grön** på rätt SHA **och** jobbet **`verify release completed`** är `success` — **inte** när bara CI eller E2E-workflow är grön |
+| **Obligatoriska jobb** | `quality` → `e2e (1/3)` + `(2/3)` + `(3/3)` → `deploy` → `post-deploy smoke` → `verify release completed` (alla `success`; E2E skip endast explicit hotfix) |
+| **Typisk tid (full deploy)** | `quality` ~3–5 min · E2E ×3 ~3–8 min · Firebase ~5–20 min · smoke ~1 min · verify ~5 s → **~12–25 min** totalt |
+| **Workflow drift** | Alla quality-vägar via [`reusable-quality.yml`](../.github/workflows/reusable-quality.yml) (CI, E2E, deploy) |
+| **False-green deploy** | 0 — `verify-release` failar om e2e/deploy/smoke skippades eller misslyckades |
+
 ### Incident 2026-06-07 (lärdomar)
 
 | Gap | Konsekvens | Åtgärd i repo |
@@ -94,7 +104,7 @@ När uppgiften är klar:
 
 | Fil | Namn (UI) | Trigger |
 |-----|-----------|---------|
-| [`.github/workflows/reusable-quality.yml`](../.github/workflows/reusable-quality.yml) | *(reusable)* | `workflow_call` från CI och deploy |
+| [`.github/workflows/reusable-quality.yml`](../.github/workflows/reusable-quality.yml) | *(reusable)* | `workflow_call` från CI, E2E och deploy |
 | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | **CI** | `push` / `pull_request` → `master`/`main` |
 | [`.github/workflows/e2e.yml`](../.github/workflows/e2e.yml) | **E2E** | PR → `master`/`main`; `workflow_dispatch`; schedule 03:00 UTC |
 | [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | **Deploy to production** | `workflow_dispatch`; `push` → `master` när **endast** `content/guides/**` ändrats |
@@ -105,7 +115,7 @@ Deploy-kedja: `gate` → `quality` (reusable + **CI SHA-gate**) → `e2e` (matri
 
 | Gate | Var | Blockerar prod? | Varför |
 |------|-----|-----------------|--------|
-| **G1 quality** | `ci.yml` + `deploy.yml` via reusable | Ja (deploy kräver grön CI på samma SHA) | En sanning för lint/test/build — inget drift |
+| **G1 quality** | `ci.yml`, `e2e.yml` + `deploy.yml` via reusable | Ja (deploy kräver grön CI på samma SHA) | En sanning för lint/test/build — inget drift |
 | **G1b CI SHA** | `reusable-quality.yml` när `verify_ci_sha: true` | Ja | Sparar tid; stoppar deploy av commit som inte passerat CI |
 | **G2 E2E** | `deploy.yml` job `e2e` (3 shards) | Ja — **alltid** vid normal deploy | SSR + marketing hydration (`pageerror`) |
 | **G2b client bundle** | Efter build i reusable | Ja | `process.cwd` / `node:fs` i klient |
@@ -141,7 +151,7 @@ Dessa inställningar stoppar upprepning av incidenten. **Checklista för repo-ä
 
 | Åtgärd | Var | Varför |
 |--------|-----|--------|
-| **Branch protection** på `master` | GitHub → Settings → Branches | Kräv status check **`quality`** (CI workflow) före merge |
+| **Branch protection** på `master` | GitHub → Settings → Branches | Kräv status check **`quality / quality`** (CI workflow via reusable-quality) före merge |
 | **Stäng av Firebase Console auto-deploy** | Firebase → App Hosting → GitHub | En deploy-källa: Actions only |
 | **`FIREBASE_TOKEN` + `PRODUCTION_URL`** | GitHub Secrets/Variables | Deploy och smoke måste fungera |
 | **Required reviewers** (valfritt) | Branch protection | Mänskligt deploy-beslut för stora releases |
@@ -153,7 +163,7 @@ Agentregel: [`.cursor/rules/deploy-safety.mdc`](../.cursor/rules/deploy-safety.m
 | Inställning | Rekommendation solo | Varför |
 |-------------|---------------------|--------|
 | Require PR | Valfritt | Trunk-flöde fungerar med direkt push |
-| Require status check `quality` (CI workflow) | **Rekommenderat** | Blockerar merge/deploy på trasig lint/test/build; krävs för G1b SHA-gate |
+| Require status check `quality / quality` (CI workflow) | **Rekommenderat** | Blockerar merge/deploy på trasig lint/test/build; krävs för G1b SHA-gate |
 | Require status check `e2e` | Valfritt | Långsammare — deploy-workflow kör E2E ändå |
 | Require status check deploy `post-deploy smoke` | Ej möjligt solo | Smoke körs bara i deploy-workflow efter Firebase |
 | Do not allow bypassing | Av för solo | Du behöver kunna pusha direkt |
@@ -288,7 +298,7 @@ BASE_URL=https://skaffu.com bash scripts/smoke-prod-urls.sh
 
 | Idé | Status |
 |-----|--------|
-| Path filters (skippa E2E på ren dokumentation) | **Implementerat** i [`e2e.yml`](../.github/workflows/e2e.yml) (`dorny/paths-filter@v3`) |
+| Path filters (skippa E2E på ren dokumentation) | **Implementerat** i [`e2e.yml`](../.github/workflows/e2e.yml) (`dorny/paths-filter@v4`) |
 | Delade npm-cache artifacts mellan jobb | Ej implementerat |
 | Preview deploy per commit | Ej implementerat |
 | Post-deploy prod-smoke (curl) | **Implementerat** — `deploy.yml` job `post-deploy smoke` + [`scripts/smoke-prod-urls.sh`](../scripts/smoke-prod-urls.sh); coordinator kör utökad checklista i [`PROD_SMOKE.md`](./PROD_SMOKE.md) |

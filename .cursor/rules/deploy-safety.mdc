@@ -9,7 +9,7 @@ alwaysApply: true
 
 ## Before triggering deploy
 
-1. Confirm **CI `quality`** is green on the **same SHA** you will deploy (`gh run list --workflow=ci.yml --branch=master`).
+1. Confirm **CI `quality / quality`** is green on the **same SHA** you will deploy (`gh run list --workflow=ci.yml --branch=master`).
 2. Never `gh workflow run deploy.yml` without monitoring the full run to completion.
 
 ## During and after deploy
@@ -26,5 +26,5 @@ alwaysApply: true
 
 ## Owner settings (not in code)
 
-- GitHub **branch protection** on `master`: require status check **`quality`** (CI workflow).
+- GitHub **branch protection** on `master`: require status check **`quality / quality`** (CI workflow via reusable-quality).
 - Firebase Console **App Hosting auto-deploy off** — Actions is the only deploy source ([docs/DEPLOY.md](../../docs/DEPLOY.md)).

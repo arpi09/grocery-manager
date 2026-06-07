@@ -18,3 +18,4 @@ jobs:
     uses: ./.github/workflows/reusable-quality.yml
     with:
       run_audit: true
+      upload_build_artifact: true

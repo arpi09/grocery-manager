@@ -34,41 +34,9 @@ jobs:
               - '!.cursor/**'
 
   quality:
-    name: quality
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-
-      - run: npm ci
-
-      - run: npm run lint
-      - run: npm run check:locales
-      - run: npm run check
-        env:
-          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
-      - run: npm test
-      - run: npm run test:receipt-fixtures
-      - run: npm run test:integration
-        env:
-          USE_PGLITE: 'true'
-      - run: npm run build
-        env:
-          DATABASE_URL: postgresql://pantry:pantry@localhost:5432/pantry
-          USE_PGLITE: 'true'
-          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
-
-      - uses: actions/upload-artifact@v7
-        with:
-          name: sveltekit-build
-          path: build/
-          retention-days: 1
+    uses: ./.github/workflows/reusable-quality.yml
+    with:
+      upload_build_artifact: true
 
   e2e:
     name: e2e (${{ matrix.shard }}/3)

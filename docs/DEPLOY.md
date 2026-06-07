@@ -18,7 +18,7 @@ Det enklaste sättet att släppa till produktion: skriv till **coordinator** i C
 
 **Vad coordinator gör:**
 
-1. Kontrollerar att CI `quality` på `master` är grön på **samma SHA** som ska deployas (deploy-workflowen verifierar detta automatiskt via G1b SHA-gate).
+1. Kontrollerar att CI `quality / quality` på `master` är grön på **samma SHA** som ska deployas (deploy-workflowen verifierar detta automatiskt via G1b SHA-gate).
 2. Startar workflowen [**Deploy to production**](https://github.com/arpi09/grocery-manager/actions/workflows/deploy.yml) via `gh workflow run deploy.yml`.
 3. Följer körningen tills **alla** jobb är gröna: `quality`, `e2e (1/3)(2/3)(3/3)`, `deploy`, `post-deploy smoke`, **`verify release completed`** (~12–20 min).
 4. Om E2E, smoke eller `verify-release` failar: fixar minimalt, pushar `master`, väntar på grön CI, kör deploy igen.
@@ -71,17 +71,18 @@ Guide-only auto-deploy: push till `master` som **endast** ändrar `content/guide
 
 ---
 
-## Ägare — checklista (GitHub + Firebase)
+## Ägare — audit-checklista (GitHub + Firebase)
 
-Dessa steg kan inte aktiveras från kod men är **högsta ROI** mot dubbel deploy och trasiga releases:
+Dessa steg kan inte aktiveras från kod men är **högsta ROI** mot dubbel deploy och trasiga releases. Bocka av manuellt (~15 min, engångs + vid rotation):
 
-| Åtgärd | Var |
-|--------|-----|
-| Branch protection på `master` — kräv status check **`quality`** | GitHub → Settings → Branches |
-| Stäng av **Firebase App Hosting → GitHub auto-deploy** | Firebase Console |
-| Säkerställ `FIREBASE_TOKEN` och `PRODUCTION_URL` i GitHub | Settings → Secrets and variables |
+- [ ] **Branch protection** på `master` — kräv status check **`quality / quality`** (inte bara `quality`; reusable workflow namnger check-runs så i GitHub UI) — GitHub → Settings → Branches
+- [ ] **Firebase App Hosting auto-deploy AV** — enda deploy-källa: Actions → Deploy to production — Firebase Console → App Hosting
+- [ ] **`FIREBASE_TOKEN`** satt i GitHub Secrets — `npx firebase login:ci`
+- [ ] **`PRODUCTION_URL`** satt i GitHub Variables (t.ex. `https://skaffu.com`)
+- [ ] **Watch → Custom → Actions** (eller GitHub Mobile) — notis vid röd workflow
+- [ ] *(Valfritt)* **GitHub Environment `production`** med required reviewers eller väntetid — Settings → Environments (bra vid team; solo kan hoppa över)
 
-Se [CI_CD.md](./CI_CD.md) för G0–G5 gate-tabell och incident-lärdomar (2026-06-07).
+Se [CI_CD.md](./CI_CD.md) för G0–G5 gate-tabell, deploy-SLO och incident-lärdomar (2026-06-07).
 
 ---
 
@@ -127,6 +128,17 @@ Utan `FIREBASE_TOKEN` körs quality + E2E ändå; deploy-jobbet skippar med tydl
 ## Efter deploy
 
 Coordinator eller e2e-agent kör [PROD_SMOKE.md](./PROD_SMOKE.md) (5 punkter) när deploy faktiskt skett — inte användaren som läxa. Verifiera `/` i browser med konsolen öppen (inte bara curl).
+
+---
+
+## Deploy SLO — definition of done (prod)
+
+| Mått | Mål |
+|------|-----|
+| **Säg "prod är uppdaterad"** | Endast när **Deploy to production** är grön på rätt SHA **och** **`verify release completed`** = `success` — inte när bara CI, E2E eller `quality` är grön |
+| **Obligatoriska jobb** | `quality` · `e2e (1/3)` · `e2e (2/3)` · `e2e (3/3)` · `deploy` · `post-deploy smoke` · `verify release completed` (alla `success`) |
+| **Typisk tid** | quality ~3–5 min + E2E ~3–8 min + Firebase ~5–20 min + smoke ~1 min → **~12–25 min** |
+| **Hotfix-undantag** | `skip_e2e=true` + `hotfix_confirm=hotfix` — smoke och `verify-release` körs fortfarande |
 
 ---
 
