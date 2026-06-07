@@ -11,6 +11,7 @@
 1. Logga in som admin → [`/admin`](https://skaffu.com/admin).
 2. **Hälsa:** användare, hushåll, lagerposter, fel senaste 7 dagar.
 3. **PMF-panel:** veckosammanfattning + WoW-delta (pil upp/ner/platt per metric).
+4. **Beslut-fliken** (`/admin?tab=decisions`): funnel + retention, topp-events, route-heatmaps och kohortkurvor (D1/D7/D30 per registreringsvecka när ≥30 D30-eligible).
 
 > **Prod-lösenord:** `ADMIN_PASSWORD` i Firebase Secret Manager kan skilja sig från lokal `.env`. Uppdatera secret eller logga in via webbläsare om curl misslyckas.
 
@@ -23,8 +24,10 @@
 | **Veckoscan-rate** | ≥30 % | PMF → Veckoscan | WAU som scannat/kvitto denna vecka |
 | **D7-retention** | ≥20 % | PMF → D7 | Kräver användare registrerade ≥7 dagar |
 | **D30-retention** | ≥15 % (tidigt) | PMF → D30 | **Primär PMF-gate** |
+| **Kohort D7/D30** | Jämför senaste launch | Beslut → Kohort-retention | Kräver ≥30 D30-eligible; annars gate-meddelande |
 | **Flera medlemmar (WAU)** | ≥50 % | PMF → Hushåll | Aktiva hushåll med ≥2 medlemmar |
 | **Smart fill / vecka** | ≥20 % | PMF → Smart fill | WAU som använt AI-fill |
+| **Sean Ellis** | >40 % "Mycket besviken" | PMF → Enkät | *"Hur besviken skulle du vara om Skaffu försvann?"* — ej i dashboard än; räkna manuellt från enkätsvar |
 
 Underliggande råtal (eligible, WAU, event counts) visas i samma panel.
 
@@ -45,6 +48,7 @@ Vecka slut ___________
 | D30                 |       |       |      |         |
 | Flera medlemmar     |       |       |      |         |
 | Smart fill          |       |       |      |         |
+| Sean Ellis          |       |       |      |         |
 
 Metric under mål (välj EN): _______________________
 En åtgärd denna vecka: ___________________________

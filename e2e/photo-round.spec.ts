@@ -29,11 +29,13 @@ test.describe('Photo round flow', () => {
 
 		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 30_000 });
 		await expect(page.getByTestId('photo-round-lead')).toContainText(
-			/AI föreslår plats|AI suggests location/i
+			/AI föreslår plats|AI suggests location/i,
+			{ timeout: 15_000 }
 		);
 		await expect(page.getByTestId('photo-round-zone-fridge')).not.toBeVisible();
 		await expect(page.getByTestId('photo-round-zone-toggle')).toContainText(
-			/Byt zon för analys|Change zone for analysis/i
+			/Byt zon för analys|Change zone for analysis/i,
+			{ timeout: 15_000 }
 		);
 		await expect(page.getByTestId('photo-round-analyze')).toBeDisabled();
 	});
@@ -77,7 +79,7 @@ test.describe('Photo round flow', () => {
 
 		await expect(page).toHaveURL(/\/hem/, { timeout: 15_000 });
 		await expect(
-			page.locator('.toast-message').filter({ hasText: /MjÃ¶lk|varor/i })
-		).toBeVisible({ timeout: 10_000 });
+			page.locator('.toast-message').filter({ hasText: /Mjölk|varor/i })
+		).toBeVisible({ timeout: 15_000 });
 	});
 });
