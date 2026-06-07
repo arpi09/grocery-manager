@@ -11,7 +11,8 @@ async function ensureEatFirstInventory(page: Page) {
 	await page.goto('/item/new?location=fridge&from=/planer/vecka');
 	await page.locator('input[name="name"]').fill(`E2E Vecka ${Date.now()}`);
 	await page.locator('form').getByRole('button', { name: /L.gg till vara/i }).click();
-	await expect(page).toHaveURL(/\/inventory\/fridge/, { timeout: 15_000 });
+	// `from=/planer/vecka` returns to vecka with ?scan=added; fridge redirect is also valid.
+	await expect(page).not.toHaveURL(/\/item\/new/, { timeout: 15_000 });
 }
 
 test.describe('Weekly ritual — vecka', () => {
