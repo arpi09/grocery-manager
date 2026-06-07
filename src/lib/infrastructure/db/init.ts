@@ -123,7 +123,7 @@ async function verifyPostgresConnection(
 			return;
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
-			const retryable = /ENOENT|ECONNREFUSED|connect/i.test(message);
+			const retryable = /ENOENT|ECONNREFUSED|ETIMEDOUT|timeout|connect/i.test(message);
 			if (!retryable || attempt === attempts) {
 				throw error;
 			}

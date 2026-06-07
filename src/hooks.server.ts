@@ -48,7 +48,12 @@ import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { VERIFY_EMAIL_PATH } from '$lib/navigation/email-verification';
 import { applySecurityHeaders } from '$lib/server/security-headers';
 import { persistSignupUtmCookie } from '$lib/server/signup-utm';
-import { redirect, json, type Handle, type HandleServerError } from '@sveltejs/kit';
+import { redirect, json, type Handle, type HandleServerError, type ServerInit } from '@sveltejs/kit';
+
+/** Warm Postgres/PGlite before first request — avoids Cloud Run cold-start 500s. */
+export const init: ServerInit = async () => {
+	await initDatabase();
+};
 
 const publicPaths = new Set(['/login', '/register', '/forgot-password']);
 
