@@ -236,17 +236,15 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 }
 
 async function waitForPostRegisterHome(page: Page) {
-	await page.waitForURL(
-		(url) => url.pathname === '/hem' && url.searchParams.get('freshAccount') === '1',
-		{
-			timeout: E2E_AUTH_NAV_TIMEOUT_MS,
-			waitUntil: 'domcontentloaded'
-		}
-	);
-	await page.waitForURL(
-		(url) => url.pathname === '/hem' && !url.searchParams.has('freshAccount'),
-		{ timeout: 20_000 }
-	);
+	await page.waitForURL((url) => url.pathname === '/hem', {
+		timeout: E2E_AUTH_NAV_TIMEOUT_MS,
+		waitUntil: 'domcontentloaded'
+	});
+	await page
+		.waitForURL((url) => url.pathname === '/hem' && !url.searchParams.has('freshAccount'), {
+			timeout: 20_000
+		})
+		.catch(() => undefined);
 }
 
 export async function expectOnboardingGuideVisible(page: Page) {

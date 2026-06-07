@@ -46,9 +46,8 @@ test.describe('Critical flows', () => {
 		await expectOnboardingGuideVisible(page);
 		await page.getByRole('button', { name: /Nästa|Next/i }).click();
 		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
-		await page.getByTestId('onboarding-add-items').click();
-		await expect(page.getByTestId('onboarding-scan-picker')).toBeVisible();
-		await page.getByTestId('onboarding-scan-barcode').click();
+		await page.getByTestId('onboarding-choose-barcode').click();
+		await expect(page.getByRole('heading', { name: /Streckkod|Barcode/i })).toBeVisible();
 		await expect(page).toHaveURL(/\/settings/);
 		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
 	});
@@ -62,10 +61,10 @@ test.describe('Critical flows', () => {
 		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click();
 		await expectOnboardingGuideVisible(page);
 		await page.getByRole('button', { name: /Nästa|Next/i }).click();
-		await page.getByTestId('onboarding-add-items').click();
-		await expect(page.getByTestId('onboarding-scan-picker')).toBeVisible();
-		await page.getByTestId('onboarding-scan-cancel').click();
-		await expect(page.getByTestId('onboarding-scan-picker')).toHaveCount(0);
+		await page.getByTestId('onboarding-choose-barcode').click();
+		await expect(page.getByRole('heading', { name: /Streckkod|Barcode/i })).toBeVisible();
+		await page.keyboard.press('Escape');
+		await expect(page.getByRole('heading', { name: /Streckkod|Barcode/i })).toHaveCount(0);
 		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
 		await expect(page).toHaveURL(/\/settings/);
 	});
