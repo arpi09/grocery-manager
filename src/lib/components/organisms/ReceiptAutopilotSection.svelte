@@ -5,7 +5,9 @@
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import type { ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
+	import { page } from '$app/state';
 	import { t } from '$lib/i18n';
+	import { recordReceiptAutopilotDismiss } from '$lib/utils/receipt-autopilot-nudge';
 
 	interface Props {
 		suggestions: ReceiptPatternSuggestion[];
@@ -77,6 +79,7 @@
 			}
 
 			items = items.filter((entry) => entry.normalizedKey !== normalizedKey);
+			recordReceiptAutopilotDismiss(page.data.user?.id ?? null);
 		} catch {
 			errorMessage = t('receiptAutopilot.dismissFailed');
 		} finally {

@@ -43,6 +43,12 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 
 	const planTier = locals.planTier ?? DEFAULT_PLAN_TIER;
 
+	let householdMemberCount = 0;
+	if (locals.householdId && locals.user) {
+		const household = await locals.householdService.getHouseholdForUser(locals.user.id);
+		householdMemberCount = household?.members.length ?? 0;
+	}
+
 	return {
 		locale,
 		cookieConsent,
@@ -63,6 +69,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		activeHousehold: activeHousehold
 			? { id: activeHousehold.id, name: activeHousehold.name }
 			: null,
-		householdRole: locals.householdRole
+		householdRole: locals.householdRole,
+		householdMemberCount
 	};
 };

@@ -14,6 +14,7 @@
 	import CelebrationMoment from '$lib/components/molecules/CelebrationMoment.svelte';
 	import InventoryScanToast from '$lib/components/molecules/InventoryScanToast.svelte';
 	import ActivationCelebration from '$lib/components/organisms/ActivationCelebration.svelte';
+	import HouseholdInvitePrompt from '$lib/components/organisms/HouseholdInvitePrompt.svelte';
 	import OnboardingGuide from '$lib/components/organisms/OnboardingGuide.svelte';
 	import PageHintModal from '$lib/components/organisms/PageHintModal.svelte';
 	import RegistrationWelcome from '$lib/components/organisms/RegistrationWelcome.svelte';
@@ -49,6 +50,9 @@
 
 	const canWrite = $derived(
 		page.data.householdRole ? canEditInventory(page.data.householdRole) : false
+	);
+	const householdMemberCount = $derived(
+		typeof page.data.householdMemberCount === 'number' ? page.data.householdMemberCount : 0
 	);
 
 	function openRecipeIdeas() {
@@ -161,6 +165,7 @@
 	<PostOnboardingSurvey />
 	<PmfSurveyBanner />
 	<ActivationCelebration />
+	<HouseholdInvitePrompt memberCount={householdMemberCount} />
 	<RecipeAssistant bind:open={recipeOpen} canEdit={canWrite} />
 </div>
 
