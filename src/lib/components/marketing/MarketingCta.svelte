@@ -6,6 +6,7 @@
 		lead?: string;
 		primaryLabel: string;
 		primaryHref: string;
+		primaryAnalyticsId?: string;
 		secondaryLabel?: string;
 		secondaryHref?: string;
 		onRegisterClick?: () => void;
@@ -16,6 +17,7 @@
 		lead,
 		primaryLabel,
 		primaryHref,
+		primaryAnalyticsId,
 		secondaryLabel,
 		secondaryHref,
 		onRegisterClick
@@ -29,7 +31,7 @@
 			<p class="lead">{lead}</p>
 		{/if}
 		<div class="actions">
-			<MarketingButtonLink href={primaryHref}>{primaryLabel}</MarketingButtonLink>
+			<MarketingButtonLink href={primaryHref} analyticsId={primaryAnalyticsId}>{primaryLabel}</MarketingButtonLink>
 			{#if secondaryLabel && secondaryHref}
 				<MarketingButtonLink href={secondaryHref} variant="secondary" onclick={onRegisterClick}>
 					{secondaryLabel}

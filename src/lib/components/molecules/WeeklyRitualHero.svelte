@@ -15,7 +15,7 @@
 	);
 </script>
 
-<a class="weekly-ritual-hero motion-fade-in" href="/planer/vecka" aria-labelledby="weekly-ritual-hero-heading">
+<a class="weekly-ritual-hero motion-fade-in" href="/planer/vecka" data-analytics-id="weekly_ritual.hero" aria-labelledby="weekly-ritual-hero-heading">
 	<div class="hero-copy">
 		<span class="hero-badge">{t('weeklyRitual.heroBadge')}</span>
 		<h2 id="weekly-ritual-hero-heading">{t('weeklyRitual.heroTitle')}</h2>

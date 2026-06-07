@@ -253,7 +253,7 @@
 		</div>
 	{:else if canEdit}
 		<div class="actions">
-			<Button type="button" loading={loading} disabled={approving} onclick={generateSuggestions}>
+			<Button type="button" loading={loading} disabled={approving} data-analytics-id="weekly_ritual.generate" onclick={generateSuggestions}>
 				{t('weeklyRitual.generateBtn')}
 			</Button>
 		</div>
@@ -290,7 +290,7 @@
 			</ul>
 
 			<div class="approve-wrap">
-			<Button type="button" loading={approving} disabled={loading} onclick={approveWeek}>
+			<Button type="button" loading={approving} disabled={loading} data-analytics-id="weekly_ritual.approve" onclick={approveWeek}>
 				{t('weeklyRitual.approveBtn')}
 			</Button>
 			</div>

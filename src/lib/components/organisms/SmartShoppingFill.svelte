@@ -90,6 +90,7 @@
 				fullWidth
 				loading={loading}
 				loadingLabel={t('shopping.fillLoading')}
+				data-analytics-id="shopping.smart_fill"
 			>
 				{t('shopping.fillFromPantry')}
 			</Button>

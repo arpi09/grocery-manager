@@ -75,11 +75,11 @@
 				{#if isLoggedIn}
 					<MarketingButtonLink href={APP_HOME_PATH}>{content.cta.openApp}</MarketingButtonLink>
 				{:else}
-					<MarketingButtonLink href={registerUrl} onclick={trackRegisterClick}>
+					<MarketingButtonLink href={registerUrl} analyticsId="marketing.register_hero" onclick={trackRegisterClick}>
 						{content.cta.tryFree}
 					</MarketingButtonLink>
 					<MarketingButtonLink href={loginUrl} variant="secondary">{content.cta.login}</MarketingButtonLink>
-					<a href={registerUrl} class="hero-register" onclick={trackRegisterClick}>
+					<a href={registerUrl} class="hero-register" data-analytics-id="marketing.register_link" onclick={trackRegisterClick}>
 						{content.cta.register}
 						<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
 					</a>
@@ -220,7 +220,7 @@
 				{content.comparison.disclaimer}
 			</p>
 			<div class="comparison-cta">
-				<MarketingButtonLink href={registerUrl} onclick={trackRegisterClick}>
+				<MarketingButtonLink href={registerUrl} analyticsId="marketing.register_comparison" onclick={trackRegisterClick}>
 					{content.cta.tryFree}
 				</MarketingButtonLink>
 				<MarketingButtonLink href={loginUrl} variant="secondary">{content.cta.login}</MarketingButtonLink>
@@ -264,6 +264,7 @@
 		lead={landing.finalCtaLead}
 		primaryLabel={content.cta.tryFree}
 		primaryHref={registerUrl}
+		primaryAnalyticsId="marketing.register_footer"
 		secondaryLabel={content.cta.login}
 		secondaryHref={loginUrl}
 		onRegisterClick={trackRegisterClick}

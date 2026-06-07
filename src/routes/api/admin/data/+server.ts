@@ -20,6 +20,12 @@ import type { RequestHandler } from './$types';
 const SECTIONS = [
 	'analytics',
 	'ai-usage',
+	'behavior-overview',
+	'behavior-heatmap',
+	'behavior-funnel',
+	'behavior-retention',
+	'event-explorer',
+	'ai-insights',
 	'users',
 	'errors',
 	'errorStack',
@@ -91,6 +97,66 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 			const periodDays = parseAdminAiUsagePeriodDays(url.searchParams.get('days'));
 			const aiUsage = await locals.aiUsageAdminService.getSummary(periodDays);
 			return json({ aiUsage });
+		}
+		case 'behavior-overview': {
+			const periodDays = locals.analyticsAdminService.parsePeriodDays(
+				url.searchParams.get('periodDays')
+			);
+			const overview = await locals.analyticsAdminService.getBehaviorOverview(periodDays);
+			return json({ overview: serializeRow(overview) });
+		}
+		case 'behavior-heatmap': {
+			const route = url.searchParams.get('route')?.trim() || '/hem';
+			const periodDays = locals.analyticsAdminService.parsePeriodDays(
+				url.searchParams.get('periodDays')
+			);
+			const heatmap = await locals.analyticsAdminService.getBehaviorHeatmap(route, periodDays);
+			return json({ heatmap });
+		}
+		case 'behavior-funnel': {
+			const periodDays = locals.analyticsAdminService.parsePeriodDays(
+				url.searchParams.get('periodDays')
+			);
+			const funnel = await locals.analyticsAdminService.getBehaviorFunnel(periodDays);
+			return json({ funnel });
+		}
+		case 'behavior-retention': {
+			const periodDays = locals.analyticsAdminService.parsePeriodDays(
+				url.searchParams.get('periodDays')
+			);
+			const retention = await locals.analyticsAdminService.getBehaviorRetention(periodDays);
+			return json({ retention });
+		}
+		case 'event-explorer': {
+			const periodDays = locals.analyticsAdminService.parsePeriodDays(
+				url.searchParams.get('periodDays')
+			);
+			const eventType = url.searchParams.get('eventType')?.trim() || undefined;
+			const explorer = await locals.analyticsAdminService.getEventExplorer(periodDays, eventType);
+			return json({ explorer });
+		}
+		case 'ai-insights': {
+			const forceRefresh = url.searchParams.get('refresh') === '1';
+			const insights = await locals.adminInsightsService.getInsights({
+				adminUserId: auth.user.id,
+				forceRefresh
+			});
+			if ('error' in insights) {
+				if (insights.error === 'rate_limited') {
+					return json(
+						{ error: translate(locals.locale, 'errors.api.rateLimited') },
+						{ status: 429 }
+					);
+				}
+				if (insights.error === 'openai_not_configured') {
+					return json(
+						{ error: translate(locals.locale, 'errors.api.openAiNotConfigured') },
+						{ status: 503 }
+					);
+				}
+				return json({ error: translate(locals.locale, 'admin.behavior.insightsError') }, { status: 500 });
+			}
+			return json({ insights: serializeRow(insights) });
 		}
 		case 'users': {
 			const limit = parseLimit(

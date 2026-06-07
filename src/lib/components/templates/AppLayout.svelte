@@ -28,6 +28,7 @@
 	} from '$lib/utils/onboarding';
 	import type { NavUser } from '$lib/navigation/nav-config';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
+	import { initAnalyticsBeacon } from '$lib/client/analytics-beacon';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -85,6 +86,12 @@
 		url.searchParams.delete('freshAccount');
 		const next = `${url.pathname}${url.search}${url.hash}`;
 		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
+	});
+
+	$effect(() => {
+		if (browser) {
+			initAnalyticsBeacon();
+		}
 	});
 
 	$effect(() => {

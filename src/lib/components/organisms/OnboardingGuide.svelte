@@ -282,6 +282,7 @@
 				type="button"
 				fullWidth
 				data-testid="onboarding-add-items"
+				data-analytics-id="onboarding.add_first_item"
 				onclick={() => (scanModalOpen = true)}
 			>
 				{t('onboarding.addFirstItem')}
@@ -289,7 +290,7 @@
 		{/if}
 
 		{#if currentStep.id === 'celebrate'}
-			<Button type="button" fullWidth data-testid="onboarding-finish" onclick={finishGuide}>
+			<Button type="button" fullWidth data-testid="onboarding-finish" data-analytics-id="onboarding.finish" onclick={finishGuide}>
 				{t('onboarding.startUsingApp')}
 			</Button>
 		{/if}

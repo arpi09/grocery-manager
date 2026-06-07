@@ -46,7 +46,7 @@
 			<h2 id="wrapped-banner-heading">{t('wrapped.bannerTitle')}</h2>
 			<p>{t('wrapped.bannerBody')}</p>
 			<div class="banner-actions">
-				<a class="banner-cta" href="/statistik/wrapped">{t('wrapped.bannerCta')}</a>
+				<a class="banner-cta" href="/statistik/wrapped" data-analytics-id="wrapped.banner_cta">{t('wrapped.bannerCta')}</a>
 				<button type="button" class="banner-dismiss" onclick={dismiss}>
 					{t('wrapped.bannerDismiss')}
 				</button>

@@ -40,7 +40,7 @@
 			<p>{t('pwa.banner.body')}</p>
 		</div>
 		<div class="banner-actions">
-			<MarketingButtonLink href={installHref} variant="primary" onclick={handleInstallClick}>
+			<MarketingButtonLink href={installHref} variant="primary" analyticsId="pwa.banner_install" onclick={handleInstallClick}>
 				{t('pwa.banner.cta')}
 			</MarketingButtonLink>
 			<Button type="button" variant="secondary" onclick={handleDismiss}>

@@ -248,13 +248,14 @@
 				<p class="share-hint">{t('wrapped.slideShareBody')}</p>
 				<div class="share-actions">
 					{#if browser && typeof navigator !== 'undefined' && 'share' in navigator}
-						<Button type="button" onclick={() => exportPng('share')} loading={sharing}>
+						<Button type="button" data-analytics-id="wrapped.share" onclick={() => exportPng('share')} loading={sharing}>
 							{t('wrapped.shareCta')}
 						</Button>
 					{/if}
 					<Button
 						type="button"
 						variant="secondary"
+						data-analytics-id="wrapped.download"
 						onclick={() => exportPng('download')}
 						loading={sharing}
 					>

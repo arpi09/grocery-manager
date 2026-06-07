@@ -69,6 +69,7 @@
 					<Button
 						type="button"
 						variant="primary"
+						data-analytics-id="pwa.install_cta"
 						loading={installBusy}
 						loadingLabel={t('common.loading')}
 						onclick={handleInstallClick}

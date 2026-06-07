@@ -112,6 +112,7 @@
 		loadingLabel={t('auth.register.submitting')}
 		disabled={captchaUi.disableSubmit || captchaLoadFailed}
 		data-testid="register-submit"
+		data-analytics-id="register.submit"
 	>
 		{t('auth.register.submit')}
 	</Button>

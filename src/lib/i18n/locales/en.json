@@ -1035,6 +1035,7 @@
 			"aria": "Admin sections",
 			"overview": "Overview",
 			"analytics": "Analytics",
+			"behavior": "Behavior",
 			"aiUsage": "AI usage",
 			"feedback": "Feedback & waitlist",
 			"pmfSurvey": "PMF survey"
@@ -1151,7 +1152,8 @@
 			"kinds": {
 				"ai_scan": "AI scans",
 				"receipt_pdf": "Receipt PDF",
-				"smart_fill": "Smart fill"
+				"smart_fill": "Smart fill",
+				"admin_insights": "Admin insights"
 			}
 		},
 		"sendPasswordReset": "Send password reset",
@@ -1174,6 +1176,39 @@
 			"conversionSignup": "Signup rate: {rate}",
 			"conversionFirstScan": "First-scan rate: {rate}",
 			"conversionD1": "D1 rate (eligible cohort): {rate}"
+		},
+		"behavior": {
+			"periodToggle": "Select behavior period",
+			"periodOption": "{days} days",
+			"routesTitle": "Top routes",
+			"routesNote": "Aggregated page views and average time on page (first-party, consent-gated).",
+			"routeCol": "Route",
+			"viewsCol": "Views",
+			"sessionsCol": "Sessions",
+			"durationCol": "Avg time",
+			"durationValue": "{ms} ms",
+			"heatmapTitle": "Element heatmap",
+			"heatmapNote": "Clicks on elements with data-analytics-id — not a pixel heatmap.",
+			"heatmapEmpty": "No marked clicks for the selected route yet.",
+			"funnelTitle": "Behavior funnel",
+			"funnel": {
+				"landing": "Landing",
+				"signup": "Signup",
+				"home": "Home (sessions)",
+				"first_scan": "First scan"
+			},
+			"retentionTitle": "Retention (behavior)",
+			"eventsTitle": "Event explorer",
+			"eventsNote": "product_event counts per day.",
+			"dayCol": "Day",
+			"eventCol": "Event",
+			"countCol": "Count",
+			"empty": "No behavior data yet.",
+			"generateInsights": "Generate AI summary",
+			"refreshInsights": "Refresh AI summary",
+			"insightsTitle": "AI insights",
+			"insightsCached": "Cached summary (1 h).",
+			"insightsError": "Could not generate AI insights right now."
 		}
 	},
 	"pmf": {
@@ -1829,6 +1864,7 @@
 			"invalidJson": "Invalid JSON.",
 			"invalidSection": "Invalid section.",
 			"invalidPayload": "Invalid payload.",
+			"rateLimited": "Too many requests. Try again in a moment.",
 			"invalidChoice": "Invalid choice.",
 			"invalidInterval": "Invalid interval.",
 			"householdNotFound": "Household not found.",

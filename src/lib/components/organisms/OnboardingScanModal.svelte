@@ -84,6 +84,7 @@
 			type="button"
 			class="picker-tile picker-tile-primary"
 			data-testid="onboarding-scan-photo"
+			data-analytics-id="onboarding.scan_photo"
 			onclick={() => pickMode('photo')}
 		>
 			<span class="picker-icon" aria-hidden="true">
@@ -96,6 +97,7 @@
 			type="button"
 			class="picker-tile"
 			data-testid="onboarding-scan-barcode"
+			data-analytics-id="onboarding.scan_barcode"
 			onclick={() => pickMode('barcode')}
 		>
 			<span class="picker-icon" aria-hidden="true">
@@ -108,6 +110,7 @@
 			type="button"
 			class="picker-tile"
 			data-testid="onboarding-scan-receipt"
+			data-analytics-id="onboarding.scan_receipt"
 			onclick={() => pickMode('receipt')}
 		>
 			<span class="picker-icon" aria-hidden="true">

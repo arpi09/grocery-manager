@@ -1,6 +1,7 @@
 export type AdminTab =
 	| 'overview'
 	| 'analytics'
+	| 'behavior'
 	| 'aiUsage'
 	| 'users'
 	| 'logs'
@@ -10,6 +11,7 @@ export type AdminTab =
 export const ADMIN_TABS: AdminTab[] = [
 	'overview',
 	'analytics',
+	'behavior',
 	'aiUsage',
 	'users',
 	'logs',

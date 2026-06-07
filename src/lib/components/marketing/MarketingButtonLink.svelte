@@ -7,14 +7,20 @@
 		href: string;
 		variant?: Variant;
 		fullWidth?: boolean;
+		analyticsId?: string;
 		onclick?: () => void;
 		children: Snippet;
 	}
 
-	let { href, variant = 'primary', fullWidth = false, onclick, children }: Props = $props();
+	let { href, variant = 'primary', fullWidth = false, analyticsId, onclick, children }: Props = $props();
 </script>
 
-<a class="btn-link btn-{variant} {fullWidth ? 'btn-full' : ''}" {href} {onclick}>
+<a
+	class="btn-link btn-{variant} {fullWidth ? 'btn-full' : ''}"
+	{href}
+	{onclick}
+	data-analytics-id={analyticsId}
+>
 	{@render children()}
 </a>
 

@@ -7,8 +7,10 @@
 		iconId?: FeatureIconId;
 		actionLabel?: string;
 		actionHref?: string;
+		primaryAnalyticsId?: string;
 		secondaryActionLabel?: string;
 		secondaryActionHref?: string;
+		secondaryAnalyticsId?: string;
 	}
 
 	let {
@@ -17,8 +19,10 @@
 		iconId,
 		actionLabel,
 		actionHref,
+		primaryAnalyticsId,
 		secondaryActionLabel,
-		secondaryActionHref
+		secondaryActionHref,
+		secondaryAnalyticsId
 	}: Props = $props();
 </script>
 
@@ -32,9 +36,17 @@
 	<p>{description}</p>
 	{#if actionLabel && actionHref}
 		<div class="actions">
-			<a class="action action-primary" href={actionHref}>{actionLabel}</a>
+			<a
+				class="action action-primary"
+				href={actionHref}
+				data-analytics-id={primaryAnalyticsId}
+			>{actionLabel}</a>
 			{#if secondaryActionLabel && secondaryActionHref}
-				<a class="action action-secondary" href={secondaryActionHref}>{secondaryActionLabel}</a>
+				<a
+					class="action action-secondary"
+					href={secondaryActionHref}
+					data-analytics-id={secondaryAnalyticsId}
+				>{secondaryActionLabel}</a>
 			{/if}
 		</div>
 	{/if}

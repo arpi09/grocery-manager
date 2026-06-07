@@ -88,6 +88,7 @@ const sv: PrivacyContent = {
 			paragraphs: [
 				'Vi använder nödvändiga cookies för inloggning (session), valt språk och — när du är inloggad — tema. Inga cookies för reklamspårning.',
 				'Vid första besök kan du välja i vår cookie-banner: godkänn alla (anonym besöksstatistik och A/B-test av landningssidan) eller endast nödvändiga.',
+				'Med samtycke samlar vi first-party sidvisningar, tid på sida och klick på märkta knappar — aggregerat i vår egen databas, utan tredjeparts analytics.',
 				'Språk på marknadsföringssidor följer ditt val eller webbläsarens språk där det stöds.'
 			]
 		},
@@ -187,6 +188,7 @@ const en: PrivacyContent = {
 			paragraphs: [
 				'We use essential cookies for login (session), language and — when logged in — theme. No advertising tracking cookies.',
 				'On your first visit you can choose in our cookie banner: accept all (anonymous visit analytics and landing-page A/B tests) or essential only.',
+				'With consent we collect first-party page views, time on page and clicks on marked buttons — aggregated in our own database, with no third-party analytics.',
 				'Marketing pages follow your language choice or browser locale where supported.'
 			]
 		},

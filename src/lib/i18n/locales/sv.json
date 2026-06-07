@@ -64,7 +64,7 @@
 		"languageEn": "Engelska"
 	},
 	"cookieConsent": {
-		"message": "Vi använder cookies för inloggning och för att förbättra sidan.",
+		"message": "Vi använder cookies för inloggning och för att förbättra sidan. Med ditt samtycke samlar vi first-party sidvisningar, tid på sida och klick på märkta knappar — aggregerat, utan tredjepart.",
 		"privacyLink": "Läs integritetspolicyn",
 		"accept": "Godkänn",
 		"essentialOnly": "Endast nödvändiga"
@@ -1015,6 +1015,7 @@
 			"aria": "Adminavsnitt",
 			"overview": "Översikt",
 			"analytics": "Analys",
+			"behavior": "Beteende",
 			"aiUsage": "AI-användning",
 			"feedback": "Feedback & waitlist",
 			"pmfSurvey": "PMF-enkät"
@@ -1124,7 +1125,8 @@
 			"kinds": {
 				"ai_scan": "AI-skannar",
 				"receipt_pdf": "Kvitto-PDF",
-				"smart_fill": "Smart fill"
+				"smart_fill": "Smart fill",
+				"admin_insights": "Admin-insikter"
 			}
 		},
 		"sendPasswordReset": "Skicka återställningslänk",
@@ -1154,7 +1156,40 @@
 		"planStripe": "Stripe",
 		"grantPro": "Ge Pro (gratis)",
 		"revokePro": "Ta bort Pro",
-		"invalidHouseholdPlan": "Ogiltig planuppdatering för hushåll."
+		"invalidHouseholdPlan": "Ogiltig planuppdatering för hushåll.",
+		"behavior": {
+			"periodToggle": "Välj beteendeperiod",
+			"periodOption": "{days} dagar",
+			"routesTitle": "Populära sidor",
+			"routesNote": "Aggregerade sidvisningar och snitt tid på sida (first-party, consent-gated).",
+			"routeCol": "Route",
+			"viewsCol": "Visningar",
+			"sessionsCol": "Sessioner",
+			"durationCol": "Snitt tid",
+			"durationValue": "{ms} ms",
+			"heatmapTitle": "Element-heatmap",
+			"heatmapNote": "Klick på element med data-analytics-id — ingen pixel-karta.",
+			"heatmapEmpty": "Inga märkta klick för vald route ännu.",
+			"funnelTitle": "Beteende-funnel",
+			"funnel": {
+				"landing": "Landning",
+				"signup": "Registrering",
+				"home": "Hem (sessioner)",
+				"first_scan": "Första scan"
+			},
+			"retentionTitle": "Retention (beteende)",
+			"eventsTitle": "Event explorer",
+			"eventsNote": "product_event per dag — filtrera i API vid behov.",
+			"dayCol": "Dag",
+			"eventCol": "Event",
+			"countCol": "Antal",
+			"empty": "Ingen beteendedata ännu.",
+			"generateInsights": "Generera AI-sammanfattning",
+			"refreshInsights": "Uppdatera AI-sammanfattning",
+			"insightsTitle": "AI-insikter",
+			"insightsCached": "Cachad sammanfattning (1 h).",
+			"insightsError": "Kunde inte generera AI-insikter just nu."
+		}
 	},
 	"pmf": {
 		"title": "PMF-mätetal",
@@ -1809,6 +1844,7 @@
 			"invalidJson": "Ogiltig JSON.",
 			"invalidSection": "Ogiltig inventariesektion.",
 			"invalidPayload": "Ogiltig data.",
+			"rateLimited": "För många förfrågningar. Försök igen om en stund.",
 			"invalidChoice": "Ogiltigt val.",
 			"invalidInterval": "Ogiltigt intervall.",
 			"householdNotFound": "Hushåll hittades inte.",

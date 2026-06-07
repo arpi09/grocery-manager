@@ -190,8 +190,10 @@
 				description={t('home.emptyDescription')}
 				actionLabel={emptyPrimaryLabel}
 				actionHref={emptyPrimaryHref}
+				primaryAnalyticsId="home.empty_primary"
 				secondaryActionLabel={emptySecondaryLabel}
 				secondaryActionHref={emptySecondaryHref}
+				secondaryAnalyticsId="home.empty_secondary"
 			/>
 			{#if activationProgress.inProgress && activationProgress.path === 'barcode' && activationProgress.barcodeCount > 0}
 				<p class="activation-progress" role="status">
@@ -210,7 +212,7 @@
 		{#if canWrite}
 			<section class="scan-zone" aria-labelledby="home-scan-heading">
 				<h2 id="home-scan-heading" class="sr-only">{t('home.scanCardTitle')}</h2>
-				<a class="scan-card" href={scanPhotoHref}>
+				<a class="scan-card" href={scanPhotoHref} data-analytics-id="home.scan_photo">
 					<span class="scan-icon" aria-hidden="true">
 						<FeatureIcon id="photo" size={22} />
 					</span>
@@ -221,7 +223,7 @@
 					<span class="scan-arrow" aria-hidden="true">→</span>
 				</a>
 				<p class="scan-alt">
-					<a href={scanHubLinkHref}>{t('home.moreAddWays')}</a>
+					<a href={scanHubLinkHref} data-analytics-id="home.scan_hub">{t('home.moreAddWays')}</a>
 				</p>
 			</section>
 		{:else}

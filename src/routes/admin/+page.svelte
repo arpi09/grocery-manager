@@ -126,6 +126,10 @@
 			{#await import('$lib/components/organisms/admin/AdminAnalyticsPanel.svelte') then { default: AdminAnalyticsPanel }}
 				<AdminAnalyticsPanel active={true} />
 			{/await}
+		{:else if activeTab === 'behavior'}
+			{#await import('$lib/components/organisms/admin/AdminBehaviorPanel.svelte') then { default: AdminBehaviorPanel }}
+				<AdminBehaviorPanel active={true} />
+			{/await}
 		{:else if activeTab === 'aiUsage'}
 			{#await import('$lib/components/organisms/admin/AdminAiUsagePanel.svelte') then { default: AdminAiUsagePanel }}
 				<AdminAiUsagePanel active={true} />
