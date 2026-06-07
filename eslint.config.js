@@ -20,8 +20,16 @@ export default ts.config(
 		},
 		rules: {
 			'no-undef': 'off',
+			// ESLint 10 recommended adds no-useless-assignment; keep prior behavior until refactored.
+			'no-useless-assignment': 'off',
 			// Svelte 5 $props() patterns trigger false-positive state_referenced_locally warnings.
-			'svelte/valid-compile': 'off'
+			'svelte/valid-compile': 'off',
+			// New in eslint-plugin-svelte v3 recommended — off until SvelteKit resolve() migration.
+			'svelte/no-navigation-without-resolve': 'off',
+			'svelte/require-each-key': 'off',
+			'svelte/prefer-writable-derived': 'off',
+			'svelte/prefer-svelte-reactivity': 'off',
+			'svelte/no-useless-mustaches': 'off'
 		}
 	},
 	{
