@@ -27,6 +27,11 @@ const MOBILE_P0_ROUTES = [
 	{ path: '/item/new?location=fridge&from=/inventory/fridge', name: 'New item' }
 ] as const;
 
+const MOBILE_P1_ROUTES = [
+	{ path: '/planer/vecka', name: 'Weekly ritual' },
+	{ path: '/statistik/wrapped', name: 'Pantry wrapped' }
+] as const;
+
 async function createFridgeItem(page: Page, name: string) {
 	const response = await page.request.post('/item/new?/create', {
 		form: {
@@ -80,9 +85,21 @@ async function resolveEditItemPath(page: Page): Promise<string> {
 	return href!;
 }
 
+async function resolveRecipeDetailPath(page: Page): Promise<string> {
+	const response = await page.request.post('/api/recipes', {
+		headers: { 'Content-Type': 'application/json' },
+		data: { portions: 2 }
+	});
+	expect(response.ok()).toBeTruthy();
+	const payload = (await response.json()) as { recipes?: Array<{ id: string }> };
+	const recipeId = payload.recipes?.[0]?.id;
+	expect(recipeId, 'Expected mocked recipe id from /api/recipes').toBeTruthy();
+	return `/recept/${recipeId}`;
+}
+
 test.describe('Mobile visual — P0 routes (390×844)', () => {
 	for (const route of MOBILE_P0_ROUTES) {
-		test(`${route.path} â€” layout, touch targets, axe`, async ({ page }) => {
+		test(`${route.path} — layout, touch targets, axe`, async ({ page }) => {
 			await loginAsAdmin(page);
 
 			await gotoAuthedRoute(page, route.path, 'expectUrl' in route ? { expectUrl: route.expectUrl } : undefined);
@@ -93,7 +110,7 @@ test.describe('Mobile visual — P0 routes (390×844)', () => {
 		});
 	}
 
-	test('/item/[id]/edit â€” layout, touch targets, axe', async ({ page }) => {
+	test('/item/[id]/edit — layout, touch targets, axe', async ({ page }) => {
 		await loginAsAdmin(page);
 
 		const editItemPath = await resolveEditItemPath(page);
@@ -102,5 +119,24 @@ test.describe('Mobile visual — P0 routes (390×844)', () => {
 		await expectNoHorizontalScroll(page, editItemPath);
 		await expectSampledTouchTargets(page, editItemPath);
 		await expectNoCriticalOrSeriousViolations(page, editItemPath);
+	});
+});
+
+test.describe('Mobile visual — P1 axe routes (390×844)', () => {
+	for (const route of MOBILE_P1_ROUTES) {
+		test(`${route.path} — axe`, async ({ page }) => {
+			await loginAsAdmin(page);
+
+			await gotoAuthedRoute(page, route.path);
+			await expectNoCriticalOrSeriousViolations(page, route.path);
+		});
+	}
+
+	test('/recept/[id] — axe', async ({ page }) => {
+		await loginAsAdmin(page);
+
+		const recipePath = await resolveRecipeDetailPath(page);
+		await gotoAuthedRoute(page, recipePath);
+		await expectNoCriticalOrSeriousViolations(page, recipePath);
 	});
 });

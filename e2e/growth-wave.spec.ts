@@ -2,10 +2,8 @@ import { test, expect, type Page } from '@playwright/test';
 import {
 	dismissCookieConsentIfOpen,
 	dismissOnboardingModalIfOpen,
-	e2eUserPassword,
 	loginAsAdmin,
-	prepareFreshUserBrowserState,
-	uniqueE2eEmail
+	registerNewUser
 } from './helpers/auth';
 
 function dateWithinExpiringSoonDays(daysFromNow = 2): string {
@@ -39,25 +37,10 @@ async function createFridgeItemViaAction(
 	expect([200, 302, 303]).toContain(status);
 }
 
-async function registerFreshHousehold(page: Page) {
-	const email = uniqueE2eEmail('wrapped-e2e');
-	const password = e2eUserPassword();
-
-	await prepareFreshUserBrowserState(page);
-	await page.goto('/register', { waitUntil: 'commit' });
-	await expect(page.getByTestId('register-submit')).toBeVisible({ timeout: 15_000 });
-
-	await page.locator('input[name="email"]').fill(email);
-	await page.locator('input[name="password"]').fill(password);
-	await page.locator('input[name="confirmPassword"]').fill(password);
-	await page.getByTestId('register-submit').click({ noWaitAfter: true });
-	await page.waitForURL(/\/hem/, { timeout: 45_000, waitUntil: 'commit' });
-}
-
 test.describe('Growth wave — wrapped, rapport, dela', () => {
 	test('wrapped slide flow and empty-month copy for new household', async ({ page }) => {
 		test.setTimeout(90_000);
-		await registerFreshHousehold(page);
+		await registerNewUser(page);
 		await page.goto('/statistik/wrapped', { waitUntil: 'commit' });
 		await dismissCookieConsentIfOpen(page);
 		await dismissOnboardingModalIfOpen(page);
@@ -84,6 +67,41 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		await expect(
 			page.getByText(/publicerar detaljerade insikter|publish detailed insights|Beta-kohort|Beta cohort/i).first()
 		).toBeVisible();
+	});
+
+	test('new household statistik shows no inflated zero-waste streak', async ({ page }) => {
+		test.setTimeout(90_000);
+		await registerNewUser(page);
+		await page.goto('/statistik', { waitUntil: 'commit' });
+		await dismissCookieConsentIfOpen(page);
+		await dismissOnboardingModalIfOpen(page);
+
+		const streakValue = page.locator('.impact-streak .impact-value');
+		await expect(streakValue).toBeVisible({ timeout: 20_000 });
+		await expect(streakValue).toHaveText('—');
+		await expect(page.getByText(/[2-9]\d*\s*veckors?\s+zero-waste/i)).toHaveCount(0);
+	});
+
+	test('wrapped flow omits streak slide for new household', async ({ page }) => {
+		test.setTimeout(90_000);
+		await registerNewUser(page);
+		await page.goto('/statistik/wrapped', { waitUntil: 'commit' });
+		await dismissCookieConsentIfOpen(page);
+		await dismissOnboardingModalIfOpen(page);
+
+		const flow = page.getByTestId('wrapped-flow');
+		await expect(flow).toBeVisible({ timeout: 20_000 });
+
+		const nextBtn = flow.getByRole('button', { name: /^Nästa$|^Next$/i });
+		for (let step = 0; step < 8; step += 1) {
+			await expect(page.getByTestId('wrapped-slide-title')).not.toHaveText(
+				/[2-9]\d*\s*veckors?\s+zero-waste|[2-9]\d*-week zero-waste/i
+			);
+			if (!(await nextBtn.isVisible())) {
+				break;
+			}
+			await nextBtn.click();
+		}
 	});
 
 	test('expiring share link opens public dela page', async ({ page }) => {

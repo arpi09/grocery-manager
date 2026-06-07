@@ -17,7 +17,7 @@ Canonical reference for accessibility goals, scope, component contracts, and aut
 | Marketing | `(marketing)/*`, landing `/` |
 | Auth | `/login`, `/register`, `/verify-email`, password reset |
 | App (P0) | `/hem`, `/inventory/*`, `/scan`, `/inkop`, `/item/new`, `/item/[id]/edit` |
-| App (P1) | `/settings`, `/planer`, `/statistik`, `/profile`, growth: `/statistik/wrapped`, `/rapport/[month]`, `/dela/[token]` |
+| App (P1) | `/settings`, `/planer`, `/planer/vecka`, `/recept/[id]`, `/statistik`, `/profile`, growth: `/statistik/wrapped`, `/rapport/[month]`, `/dela/[token]` |
 | Admin (P2) | `/admin` |
 
 ## Documented exceptions
@@ -69,8 +69,10 @@ Tags: `wcag2a`, `wcag2aa`, `wcag22aa`. Viewports: **1400×900** (desktop baselin
 | P0 | `/inkop` | 0 | 1* | 0 | 0 | *Animation |
 | P1 | `/settings` | 0 | 1 | 0 | 0 | Disabled toggle label opacity |
 | P1 | `/planer` | 0 | 0 | 0 | 0 | — |
+| P1 | `/planer/vecka` | — | — | 0 | 0 | Weekly ritual — mobile axe sampling (Jun 2026) |
+| P1 | `/recept/[id]` | — | — | 0 | 0 | Recipe detail — mobile axe sampling (Jun 2026) |
 | P1 | `/statistik` | 0 | 0 | 0 | 0 | Removed invalid `role="list"` |
-| P1 | `/statistik/wrapped` | — | — | 0 | 0 | Growth wave — mobile pass (Jun 2026) |
+| P1 | `/statistik/wrapped` | — | — | 0 | 0 | Growth wave — mobile axe sampling (Jun 2026) |
 | P1 | `/rapport/[month]` | — | — | 0 | 0 | Public Skaffurapport — growth wave |
 | P1 | `/dela/[token]` | — | — | 0 | 0 | Public expiring-share link |
 | P1 | `/priser` | 0 | 0 | 0 | 0 | — |
@@ -82,7 +84,7 @@ Moderate/minor findings (e.g. duplicate landmarks on complex pages) are tracked 
 ## Automated regression
 
 - **Package:** `@axe-core/playwright` (devDependency)
-- **CI / E2E:** `e2e/accessibility.spec.ts` — P0 routes at desktop viewport; `e2e/mobile-visual.spec.ts` — P0 at 390×844 (`mobile-chrome` project); serial auth; fail on critical/serious
+- **CI / E2E:** `e2e/accessibility.spec.ts` — P0 routes at desktop viewport; `e2e/mobile-visual.spec.ts` — P0 + P1 (`/recept/[id]`, `/planer/vecka`, `/statistik/wrapped`) at 390×844 (`mobile-chrome` project); serial auth; fail on critical/serious
 - **Helper:** `e2e/helpers/axe.ts`
 - **Baseline script:** `scripts/a11y-baseline.mjs` (optional local audit)
 
@@ -97,5 +99,5 @@ Moderate/minor findings (e.g. duplicate landmarks on complex pages) are tracked 
 
 | Date | Change |
 |------|--------|
-| 2026-06 | Mobile viewport axe gate (`mobile-chrome`), growth routes P1 scope |
+| 2026-06 | Mobile viewport axe gate (`mobile-chrome`); P1 sampling for `/recept/[id]`, `/planer/vecka`, `/statistik/wrapped` |
 | 2026-03 | Initial WCAG 2.2 AA baseline, skip links, axe P0 gate, token/contrast fixes |
