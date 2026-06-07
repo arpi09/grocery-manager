@@ -47,6 +47,7 @@ import { isMarketingPath, isExpiringSharePath } from '$lib/marketing/routes';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { VERIFY_EMAIL_PATH } from '$lib/navigation/email-verification';
 import { applySecurityHeaders } from '$lib/server/security-headers';
+import { persistSignupUtmCookie } from '$lib/server/signup-utm';
 import { redirect, json, type Handle, type HandleServerError } from '@sveltejs/kit';
 
 const publicPaths = new Set(['/login', '/register', '/forgot-password']);
@@ -140,6 +141,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	});
 	event.locals.locale = locale;
 	writeLocaleCookie(event.cookies, locale);
+	persistSignupUtmCookie(event.cookies, event.url.searchParams);
 
 	await validateSession(event);
 

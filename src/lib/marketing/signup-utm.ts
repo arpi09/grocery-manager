@@ -64,6 +64,30 @@ export function parseSignupUtmCookie(cookieValue: string | undefined | null): Si
 }
 
 /** Query wins per field; falls back to cookie when URL omits a key. */
+/** Maps resolved signup UTM to product_event metadata keys. */
+export function signupUtmToEventMetadata(
+	utm: SignupUtm | null | undefined
+): Record<string, string> {
+	if (!hasSignupUtm(utm)) {
+		return {};
+	}
+
+	const metadata: Record<string, string> = {};
+	if (utm.source) {
+		metadata.utm_source = utm.source;
+	}
+	if (utm.medium) {
+		metadata.utm_medium = utm.medium;
+	}
+	if (utm.campaign) {
+		metadata.utm_campaign = utm.campaign;
+	}
+	if (utm.content) {
+		metadata.utm_content = utm.content;
+	}
+	return metadata;
+}
+
 export function resolveSignupUtm(input: {
 	searchParams: URLSearchParams;
 	cookieValue?: string | null;

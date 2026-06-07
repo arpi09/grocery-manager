@@ -16,6 +16,10 @@ import { hasAnalyticsConsent } from '$lib/cookie-consent';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { getOrSetAnalyticsVisitorId } from '$lib/server/analytics-visitor';
 import { recordSignupCompleteEvent } from '$lib/server/marketing-analytics';
+import {
+	clearSignupUtmCookie,
+	resolveSignupUtmFromRequest
+} from '$lib/server/signup-utm';
 import { registerSchema } from '$lib/validation/auth.schemas';
 import { POST_REGISTER_APP_HOME_PATH, POST_REGISTER_SCAN_PATH } from '$lib/navigation/post-register';
 import { consumeRateLimit } from '$lib/server/auth-rate-limit';
@@ -69,9 +73,11 @@ export const actions: Actions = {
 		}
 
 		try {
+			const signupUtm = resolveSignupUtmFromRequest(event.cookies, event.url.searchParams);
 			const user = await event.locals.authService.register(
 				parsed.data.email,
-				parsed.data.password
+				parsed.data.password,
+				signupUtm
 			);
 			const analyticsAllowed = hasAnalyticsConsent(readCookieConsent(event.cookies));
 			const variant = resolveLandingVariant({
@@ -79,12 +85,11 @@ export const actions: Actions = {
 				envVariant: publicEnv.PUBLIC_LANDING_VARIANT,
 				allowVariantCookie: analyticsAllowed
 			});
-			recordSignupCompleteEvent(
-				event.locals.pmfService,
-				user.id,
-				variant,
-				analyticsAllowed ? getOrSetAnalyticsVisitorId(event.cookies) : null
-			);
+			recordSignupCompleteEvent(event.locals.pmfService, user.id, variant, {
+				visitorId: analyticsAllowed ? getOrSetAnalyticsVisitorId(event.cookies) : null,
+				signupUtm
+			});
+			clearSignupUtmCookie(event.cookies);
 			await createSession(event, user.id);
 			const emailLocale = event.locals.locale === 'en' ? 'en' : 'sv';
 			await event.locals.emailVerificationService.sendSignupVerification(user.id, emailLocale);

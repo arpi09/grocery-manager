@@ -14,6 +14,7 @@ function mockPmfRepository(overrides: Partial<{
 		recordEvent: vi.fn(),
 		getGlobalMetrics: vi.fn(),
 		getFunnelMetrics: vi.fn(),
+		getLaunchCohortSignups: vi.fn(),
 		hasHouseholdEvent: vi.fn(),
 		countUserScanEvents: vi.fn(),
 		getUserCreatedAt: vi.fn(),

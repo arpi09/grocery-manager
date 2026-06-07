@@ -4,6 +4,10 @@ import { POST_REGISTER_SCAN_OAUTH_REDIRECT } from '$lib/navigation/post-register
 import { createSession } from '$lib/server/session';
 import { recordSignupCompleteEvent } from '$lib/server/marketing-analytics';
 import {
+	clearSignupUtmCookie,
+	resolveSignupUtmFromRequest
+} from '$lib/server/signup-utm';
+import {
 	LANDING_VARIANT_COOKIE,
 	resolveLandingVariant
 } from '$lib/marketing/landing-variants';
@@ -49,7 +53,8 @@ export const GET: RequestHandler = async (event) => {
 	try {
 		const tokens = await google.validateAuthorizationCode(code, codeVerifier);
 		const idToken = tokens.idToken();
-		const result = await locals.oauthService.resolveGoogleUser(idToken, clientId);
+		const signupUtm = resolveSignupUtmFromRequest(cookies, url.searchParams);
+		const result = await locals.oauthService.resolveGoogleUser(idToken, clientId, signupUtm);
 
 		if (!result.ok) {
 			return loginError('Google sign-in failed. Please try again.');
@@ -64,12 +69,11 @@ export const GET: RequestHandler = async (event) => {
 				envVariant: publicEnv.PUBLIC_LANDING_VARIANT,
 				allowVariantCookie: analyticsAllowed
 			});
-			recordSignupCompleteEvent(
-				locals.pmfService,
-				result.userId,
-				variant,
-				analyticsAllowed ? getOrSetAnalyticsVisitorId(cookies) : null
-			);
+			recordSignupCompleteEvent(locals.pmfService, result.userId, variant, {
+				visitorId: analyticsAllowed ? getOrSetAnalyticsVisitorId(cookies) : null,
+				signupUtm
+			});
+			clearSignupUtmCookie(cookies);
 		}
 
 		await createSession(event, result.userId);

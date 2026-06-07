@@ -3,7 +3,8 @@ import {
 	parseSignupUtmCookie,
 	parseSignupUtmFromSearchParams,
 	resolveSignupUtm,
-	serializeSignupUtmCookie
+	serializeSignupUtmCookie,
+	signupUtmToEventMetadata
 } from './signup-utm';
 
 describe('parseSignupUtmFromSearchParams', () => {
@@ -41,6 +42,28 @@ describe('signup utm cookie', () => {
 		};
 		const cookie = serializeSignupUtmCookie(original);
 		expect(parseSignupUtmCookie(cookie)).toEqual(original);
+	});
+});
+
+describe('signupUtmToEventMetadata', () => {
+	it('maps signup fields to utm_* metadata keys', () => {
+		expect(
+			signupUtmToEventMetadata({
+				source: 'reddit',
+				medium: 'community',
+				campaign: 'matsvinn_w12',
+				content: 'post_a'
+			})
+		).toEqual({
+			utm_source: 'reddit',
+			utm_medium: 'community',
+			utm_campaign: 'matsvinn_w12',
+			utm_content: 'post_a'
+		});
+	});
+
+	it('returns empty object when attribution is missing', () => {
+		expect(signupUtmToEventMetadata(null)).toEqual({});
 	});
 });
 

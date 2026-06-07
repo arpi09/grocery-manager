@@ -3,7 +3,9 @@ import type { PmfService } from '$lib/application/pmf.service';
 import type { ProductEventType } from '$lib/domain/pmf';
 import { hasAnalyticsConsent } from '$lib/cookie-consent';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
+import type { SignupUtm } from '$lib/domain/signup-utm';
 import type { LandingHeroVariant } from '$lib/marketing/landing-variants';
+import { signupUtmToEventMetadata } from '$lib/marketing/signup-utm';
 import { getOrSetAnalyticsVisitorId } from '$lib/server/analytics-visitor';
 import { recordProductEvent } from '$lib/server/product-events';
 
@@ -52,11 +54,16 @@ export function recordMarketingEvent(options: RecordMarketingEventOptions): void
 	});
 }
 
+export interface RecordSignupCompleteEventOptions {
+	visitorId?: string | null;
+	signupUtm?: SignupUtm | null;
+}
+
 export function recordSignupCompleteEvent(
 	pmfService: PmfService,
 	userId: string,
 	variant: LandingHeroVariant,
-	visitorId?: string | null
+	options?: RecordSignupCompleteEventOptions
 ): void {
 	recordProductEvent(pmfService, {
 		userId,
@@ -64,7 +71,8 @@ export function recordSignupCompleteEvent(
 		eventType: 'signup_complete',
 		metadata: {
 			variant,
-			...(visitorId ? { visitorId } : {})
+			...(options?.visitorId ? { visitorId: options.visitorId } : {}),
+			...signupUtmToEventMetadata(options?.signupUtm)
 		}
 	});
 }
