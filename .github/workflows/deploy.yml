@@ -37,18 +37,24 @@ concurrency:
 jobs:
   gate:
     name: gate
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
-      guide_only: ${{ steps.check.outputs.guide_only }}
+      guide_only: ${{ steps.manual.outputs.guide_only || steps.check.outputs.guide_only }}
 
     steps:
+      - name: Manual deploy — always run full pipeline
+        if: github.event_name == 'workflow_dispatch'
+        id: manual
+        run: echo "guide_only=true" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v6
+        if: github.event_name == 'push'
         with:
           fetch-depth: 0
 
       - name: Verify guide-only commit
+        if: github.event_name == 'push'
         id: check
         run: |
           set -euo pipefail
@@ -147,6 +153,7 @@ jobs:
     name: e2e (${{ matrix.shard }}/3)
     needs: [quality]
     if: >
+      always() &&
       needs.quality.result == 'success' &&
       !(
         github.event_name == 'workflow_dispatch' &&
@@ -332,3 +339,33 @@ jobs:
               -d "$payload"
           fi
           echo "Webhook notify sent."
+
+  verify-release:
+    name: verify release completed
+    needs: [quality, e2e, deploy, smoke]
+    if: always() && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Fail if E2E or deploy did not run
+        run: |
+          set -euo pipefail
+          echo "quality=${{ needs.quality.result }} e2e=${{ needs.e2e.result }} deploy=${{ needs.deploy.result }} smoke=${{ needs.smoke.result }}"
+          if [ "${{ needs.quality.result }}" != "success" ]; then
+            echo "::error::quality job did not succeed"
+            exit 1
+          fi
+          if [ "${{ needs.e2e.result }}" != "success" ]; then
+            echo "::error::E2E did not run or failed (result=${{ needs.e2e.result }}) — prod was NOT released"
+            exit 1
+          fi
+          if [ "${{ needs.deploy.result }}" != "success" ]; then
+            echo "::error::deploy job did not succeed"
+            exit 1
+          fi
+          if [ "${{ needs.smoke.result }}" != "success" ]; then
+            echo "::error::post-deploy smoke did not pass"
+            exit 1
+          fi
+          echo "Release pipeline completed: quality, E2E, deploy, and smoke all succeeded."
