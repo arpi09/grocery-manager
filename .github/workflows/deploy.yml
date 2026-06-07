@@ -1,4 +1,4 @@
-﻿# Manual production deploy — quality ? e2e ? Firebase App Hosting ? prod smoke
+# Manual production deploy — quality ? e2e ? Firebase App Hosting ? prod smoke
 # Trigger: Actions ? "Deploy to production"
 # Required secret: FIREBASE_TOKEN (npx firebase login:ci)
 
@@ -365,8 +365,6 @@ jobs:
   smoke:
     name: post-deploy smoke
     needs: [deploy]
-    if: >
-      needs.deploy.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
