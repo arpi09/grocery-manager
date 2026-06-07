@@ -1,7 +1,7 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import basicSsl from '@vitejs/plugin-basic-ssl';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 const useHttps = process.env.HTTPS === 'true';
 
