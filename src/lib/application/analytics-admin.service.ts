@@ -7,6 +7,7 @@ import {
 	type AdminEventExplorer,
 	type AnalyticsBehaviorPeriodDays
 } from '$lib/domain/analytics-behavior';
+import type { AdminCohortRetention } from '$lib/domain/cohort-retention';
 import type { IAnalyticsBehaviorRepository } from '$lib/infrastructure/repositories/analytics-behavior.repository';
 
 export class AnalyticsAdminService {
@@ -36,6 +37,10 @@ export class AnalyticsAdminService {
 
 	getBehaviorRetention(periodDays: AnalyticsBehaviorPeriodDays): Promise<AdminBehaviorRetention> {
 		return this.repository.getBehaviorRetention(periodDays);
+	}
+
+	getCohortRetention(): Promise<AdminCohortRetention> {
+		return this.repository.getCohortRetention();
 	}
 
 	parsePeriodDays(raw: string | null): AnalyticsBehaviorPeriodDays {

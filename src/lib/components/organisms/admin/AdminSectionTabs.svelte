@@ -4,7 +4,7 @@
 	export type AdminTab =
 		| 'overview'
 		| 'analytics'
-		| 'behavior'
+		| 'decisions'
 		| 'aiUsage'
 		| 'users'
 		| 'logs'
@@ -21,7 +21,7 @@
 	const tabs: { id: AdminTab; label: string }[] = [
 		{ id: 'overview', label: t('admin.tabs.overview') },
 		{ id: 'analytics', label: t('admin.tabs.analytics') },
-		{ id: 'behavior', label: t('admin.tabs.behavior') },
+		{ id: 'decisions', label: t('admin.tabs.decisions') },
 		{ id: 'aiUsage', label: t('admin.tabs.aiUsage') },
 		{ id: 'users', label: t('admin.users') },
 		{ id: 'logs', label: t('admin.errorLogs') },

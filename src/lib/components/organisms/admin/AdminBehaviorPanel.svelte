@@ -4,25 +4,22 @@
 	import { fetchAdminData } from '$lib/client/admin-data';
 	import {
 		ANALYTICS_BEHAVIOR_PERIOD_DAYS,
-		type AdminBehaviorOverview,
-		type AdminBehaviorHeatmap,
 		type AdminBehaviorFunnel,
+		type AdminBehaviorHeatmap,
 		type AdminBehaviorRetention,
 		type AdminEventExplorer,
 		type AnalyticsBehaviorPeriodDays
 	} from '$lib/domain/analytics-behavior';
+	import type { AdminCohortRetention } from '$lib/domain/cohort-retention';
+	import {
+		ADMIN_INSIGHT_CHART_KEYS,
+		buildFunnelConversions,
+		buildTopEvents,
+		buildWeeklyEventTotals,
+		DECISIONS_HEATMAP_ROUTES,
+		formatRate
+	} from '$lib/domain/decisions-analytics';
 	import { t } from '$lib/i18n';
-
-	interface BehaviorOverviewPayload {
-		overview: AdminBehaviorOverview & {
-			periodStart: string;
-			periodEnd: string;
-		};
-	}
-
-	interface BehaviorHeatmapPayload {
-		heatmap: AdminBehaviorHeatmap;
-	}
 
 	interface BehaviorFunnelPayload {
 		funnel: AdminBehaviorFunnel;
@@ -34,6 +31,14 @@
 
 	interface EventExplorerPayload {
 		explorer: AdminEventExplorer;
+	}
+
+	interface BehaviorHeatmapPayload {
+		heatmap: AdminBehaviorHeatmap;
+	}
+
+	interface CohortRetentionPayload {
+		cohortRetention: AdminCohortRetention;
 	}
 
 	interface AiInsightsPayload {
@@ -58,24 +63,27 @@
 	let insightsError = $state<string | null>(null);
 	let periodDays = $state<AnalyticsBehaviorPeriodDays>(7);
 	let loadedPeriod: AnalyticsBehaviorPeriodDays | null = $state(null);
-	let overview = $state<BehaviorOverviewPayload['overview'] | null>(null);
-	let heatmapRoute = $state('/hem');
-	let heatmap = $state<AdminBehaviorHeatmap | null>(null);
 	let funnel = $state<AdminBehaviorFunnel | null>(null);
 	let retention = $state<AdminBehaviorRetention | null>(null);
 	let explorer = $state<AdminEventExplorer | null>(null);
+	let cohortRetention = $state<AdminCohortRetention | null>(null);
+	let heatmaps = $state<Record<string, AdminBehaviorHeatmap>>({});
 	let insights = $state<AiInsightsPayload['insights'] | null>(null);
+	let insightsRequested = $state(false);
 
 	const funnelStepLabels: Record<string, string> = {
-		landing: t('admin.behavior.funnel.landing'),
-		signup: t('admin.behavior.funnel.signup'),
-		home: t('admin.behavior.funnel.home'),
-		first_scan: t('admin.behavior.funnel.first_scan')
+		landing: t('admin.decisions.funnel.landing'),
+		signup: t('admin.decisions.funnel.signup'),
+		home: t('admin.decisions.funnel.home'),
+		first_scan: t('admin.decisions.funnel.first_scan')
 	};
 
-	const maxHeatmapClicks = $derived(
-		Math.max(1, ...(heatmap?.elements.map((row) => row.clickCount) ?? [1]))
-	);
+	const funnelRows = $derived(buildFunnelConversions(funnel?.steps ?? []));
+	const topEvents = $derived(buildTopEvents(explorer?.events ?? []));
+	const weeklyEvents = $derived(buildWeeklyEventTotals(explorer?.events ?? []).slice(0, 24));
+	const maxFunnelCount = $derived(Math.max(1, ...(funnel?.steps.map((step) => step.count) ?? [1])));
+
+	const caption = (key: string) => insights?.chartCaptions[key]?.trim() || null;
 
 	$effect(() => {
 		if (!active) {
@@ -84,55 +92,57 @@
 		if (loadedPeriod === periodDays || loading) {
 			return;
 		}
-		void loadBehavior(periodDays);
+		void loadDecisions(periodDays);
 	});
 
-	async function loadBehavior(days: AnalyticsBehaviorPeriodDays) {
+	async function loadDecisions(days: AnalyticsBehaviorPeriodDays) {
 		loading = true;
 		error = null;
 		try {
-			const [overviewPayload, heatmapPayload, funnelPayload, retentionPayload, explorerPayload] =
+			const [funnelPayload, retentionPayload, explorerPayload, cohortPayload, ...heatmapPayloads] =
 				await Promise.all([
-					fetchAdminData<BehaviorOverviewPayload>('behavior-overview', { periodDays: days }),
-					fetchAdminData<BehaviorHeatmapPayload>('behavior-heatmap', {
-						route: heatmapRoute,
-						periodDays: days
-					}),
 					fetchAdminData<BehaviorFunnelPayload>('behavior-funnel', { periodDays: days }),
 					fetchAdminData<BehaviorRetentionPayload>('behavior-retention', { periodDays: days }),
-					fetchAdminData<EventExplorerPayload>('event-explorer', { periodDays: days })
+					fetchAdminData<EventExplorerPayload>('event-explorer', { periodDays: days }),
+					fetchAdminData<CohortRetentionPayload>('cohort-retention'),
+					...DECISIONS_HEATMAP_ROUTES.map((route) =>
+						fetchAdminData<BehaviorHeatmapPayload>('behavior-heatmap', {
+							route,
+							periodDays: days
+						})
+					)
 				]);
-			overview = overviewPayload.overview;
-			heatmap = heatmapPayload.heatmap;
+
 			funnel = funnelPayload.funnel;
 			retention = retentionPayload.retention;
 			explorer = explorerPayload.explorer;
+			cohortRetention = cohortPayload.cohortRetention;
+
+			const nextHeatmaps: Record<string, AdminBehaviorHeatmap> = {};
+			for (const [index, route] of DECISIONS_HEATMAP_ROUTES.entries()) {
+				nextHeatmaps[route] = heatmapPayloads[index]?.heatmap ?? {
+					route,
+					periodDays: days,
+					elements: []
+				};
+			}
+			heatmaps = nextHeatmaps;
 			loadedPeriod = days;
+
+			if (!insightsRequested) {
+				insightsRequested = true;
+				void generateInsights(false);
+			}
 		} catch {
 			error = t('admin.loadError');
-			overview = null;
-			heatmap = null;
 			funnel = null;
 			retention = null;
 			explorer = null;
+			cohortRetention = null;
+			heatmaps = {};
 			loadedPeriod = null;
 		} finally {
 			loading = false;
-		}
-	}
-
-	async function reloadHeatmap() {
-		if (!active) {
-			return;
-		}
-		try {
-			const payload = await fetchAdminData<BehaviorHeatmapPayload>('behavior-heatmap', {
-				route: heatmapRoute,
-				periodDays
-			});
-			heatmap = payload.heatmap;
-		} catch {
-			// keep previous heatmap
 		}
 	}
 
@@ -146,7 +156,7 @@
 			);
 			insights = payload.insights;
 		} catch {
-			insightsError = t('admin.behavior.insightsError');
+			insightsError = t('admin.decisions.insightsError');
 		} finally {
 			insightsLoading = false;
 		}
@@ -158,39 +168,54 @@
 		}
 		periodDays = days;
 	}
+
+	function maxHeatmapClicks(heatmap: AdminBehaviorHeatmap | undefined): number {
+		return Math.max(1, ...(heatmap?.elements.map((row) => row.clickCount) ?? [1]));
+	}
 </script>
 
-{#if loading && !overview}
+{#if loading && !funnel}
 	<p class="panel-status">{t('admin.loading')}</p>
 {:else if error}
 	<p class="panel-status panel-error" role="alert">{error}</p>
-{:else if overview}
-	<section class="behavior-toolbar">
-		<div class="period-toggle" role="group" aria-label={t('admin.behavior.periodToggle')}>
-			{#each ANALYTICS_BEHAVIOR_PERIOD_DAYS as days (days)}
-				<button
-					type="button"
-					class="period-btn"
-					class:active={periodDays === days}
-					onclick={() => selectPeriod(days)}
-				>
-					{t('admin.behavior.periodOption', { days })}
-				</button>
-			{/each}
+{:else if funnel && retention && explorer && cohortRetention}
+	<section class="decisions-toolbar">
+		<div>
+			<h1 class="decisions-title">{t('admin.decisions.title')}</h1>
+			<p class="muted">{t('admin.decisions.subtitle')}</p>
 		</div>
-		<Button type="button" variant="secondary" loading={insightsLoading} onclick={() => generateInsights(false)}>
-			{t('admin.behavior.generateInsights')}
-		</Button>
+		<div class="toolbar-actions">
+			<div class="period-toggle" role="group" aria-label={t('admin.decisions.periodToggle')}>
+				{#each ANALYTICS_BEHAVIOR_PERIOD_DAYS as days (days)}
+					<button
+						type="button"
+						class="period-btn"
+						class:active={periodDays === days}
+						onclick={() => selectPeriod(days)}
+					>
+						{t('admin.decisions.periodOption', { days })}
+					</button>
+				{/each}
+			</div>
+			<Button
+				type="button"
+				variant="secondary"
+				loading={insightsLoading}
+				onclick={() => generateInsights(false)}
+			>
+				{t('admin.decisions.generateInsights')}
+			</Button>
+		</div>
 	</section>
 
 	{#if insights || insightsError}
 		<Card>
-			<h2>{t('admin.behavior.insightsTitle')}</h2>
+			<h2>{t('admin.decisions.insightsTitle')}</h2>
 			{#if insightsError}
 				<p class="panel-error" role="alert">{insightsError}</p>
 			{:else if insights}
 				{#if insights.cached}
-					<p class="muted">{t('admin.behavior.insightsCached')}</p>
+					<p class="muted">{t('admin.decisions.insightsCached')}</p>
 				{/if}
 				{#each insights.summaryParagraphs as paragraph, i (i)}
 					<p>{paragraph}</p>
@@ -202,133 +227,214 @@
 						{/each}
 					</ul>
 				{/if}
-				<Button type="button" variant="ghost" loading={insightsLoading} onclick={() => generateInsights(true)}>
-					{t('admin.behavior.refreshInsights')}
+				<Button
+					type="button"
+					variant="ghost"
+					loading={insightsLoading}
+					onclick={() => generateInsights(true)}
+				>
+					{t('admin.decisions.refreshInsights')}
 				</Button>
 			{/if}
 		</Card>
 	{/if}
 
-	<Card>
-		<h2>{t('admin.behavior.routesTitle')}</h2>
-		<p class="muted">{t('admin.behavior.routesNote')}</p>
-		{#if overview.routes.length === 0}
-			<p class="muted">{t('admin.behavior.empty')}</p>
-		{:else}
-			<table class="data-table">
-				<thead>
-					<tr>
-						<th>{t('admin.behavior.routeCol')}</th>
-						<th>{t('admin.behavior.viewsCol')}</th>
-						<th>{t('admin.behavior.sessionsCol')}</th>
-						<th>{t('admin.behavior.durationCol')}</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each overview.routes as row (row.route)}
-						<tr>
-							<td><code>{row.route}</code></td>
-							<td>{row.viewCount}</td>
-							<td>{row.uniqueSessions}</td>
-							<td>{t('admin.behavior.durationValue', { ms: row.avgDurationMs })}</td>
-						</tr>
+	<section class="decisions-section">
+		<h2>{t('admin.decisions.dropoffTitle')}</h2>
+		<p class="muted">{t('admin.decisions.dropoffNote')}</p>
+
+		<div class="decisions-grid">
+			<Card>
+				<h3>{t('admin.decisions.funnelTitle')}</h3>
+				<ul class="funnel-bars" aria-label={t('admin.decisions.funnelTitle')}>
+					{#each funnelRows as row (row.step)}
+						<li>
+							<div class="metric-head">
+								<span>{funnelStepLabels[row.step] ?? row.step}</span>
+								<strong>{row.count}</strong>
+							</div>
+							<div class="bar-track">
+								<div
+									class="bar-fill"
+									style={`width: ${Math.round((row.count / maxFunnelCount) * 100)}%`}
+								></div>
+							</div>
+							{#if row.conversionFromPrevious !== null}
+								<span class="muted small">
+									{t('admin.decisions.stepConversion', {
+										rate: formatRate(row.conversionFromPrevious)
+									})}
+								</span>
+							{/if}
+						</li>
 					{/each}
-				</tbody>
-			</table>
-		{/if}
-	</Card>
+				</ul>
+				{#if caption(ADMIN_INSIGHT_CHART_KEYS.funnel)}
+					<p class="ai-caption">{caption(ADMIN_INSIGHT_CHART_KEYS.funnel)}</p>
+				{/if}
+			</Card>
 
-	<Card>
-		<h2>{t('admin.behavior.heatmapTitle')}</h2>
-		<p class="muted">{t('admin.behavior.heatmapNote')}</p>
-		<label class="route-picker">
-			{t('admin.behavior.routeCol')}
-			<input
-				type="text"
-				bind:value={heatmapRoute}
-				onchange={() => reloadHeatmap()}
-				list="behavior-routes"
-			/>
-			<datalist id="behavior-routes">
-				{#each overview.routes as row (row.route)}
-					<option value={row.route}></option>
-				{/each}
-			</datalist>
-		</label>
-		{#if !heatmap || heatmap.elements.length === 0}
-			<p class="muted">{t('admin.behavior.heatmapEmpty')}</p>
-		{:else}
-			<ul class="heatmap-bars" aria-label={t('admin.behavior.heatmapTitle')}>
-				{#each heatmap.elements as row (row.elementKey)}
-					<li>
-						<span class="bar-label"><code>{row.elementKey}</code></span>
-						<div class="bar-track">
-							<div
-								class="bar-fill"
-								style={`width: ${Math.round((row.clickCount / maxHeatmapClicks) * 100)}%`}
-							></div>
-						</div>
-						<span class="bar-count">{row.clickCount}</span>
-					</li>
-				{/each}
-			</ul>
-		{/if}
-	</Card>
-
-	<Card>
-		<h2>{t('admin.behavior.funnelTitle')}</h2>
-		{#if funnel}
-			<ul class="funnel-steps">
-				{#each funnel.steps as step (step.step)}
-					<li>
-						<span>{funnelStepLabels[step.step] ?? step.step}</span>
-						<strong>{step.count}</strong>
-					</li>
-				{/each}
-			</ul>
-		{/if}
-	</Card>
-
-	<Card>
-		<h2>{t('admin.behavior.retentionTitle')}</h2>
-		{#if retention}
-			<ul class="retention-list">
-				{#each retention.points as point (point.dayOffset)}
-					<li>
-						D{point.dayOffset}: {Math.round(point.rate * 100)}%
-						<span class="muted">({point.retained}/{point.eligible})</span>
-					</li>
-				{/each}
-			</ul>
-		{/if}
-	</Card>
-
-	<Card>
-		<h2>{t('admin.behavior.eventsTitle')}</h2>
-		<p class="muted">{t('admin.behavior.eventsNote')}</p>
-		{#if explorer && explorer.events.length > 0}
-			<table class="data-table compact">
-				<thead>
-					<tr>
-						<th>{t('admin.behavior.dayCol')}</th>
-						<th>{t('admin.behavior.eventCol')}</th>
-						<th>{t('admin.behavior.countCol')}</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each explorer.events.slice(0, 40) as row (`${row.day}-${row.eventType}`)}
-						<tr>
-							<td>{row.day}</td>
-							<td><code>{row.eventType}</code></td>
-							<td>{row.count}</td>
-						</tr>
+			<Card>
+				<h3>{t('admin.decisions.retentionTitle')}</h3>
+				<ul class="retention-bars">
+					{#each retention.points as point (point.dayOffset)}
+						<li>
+							<div class="metric-head">
+								<span>D{point.dayOffset}</span>
+								<strong>{Math.round(point.rate * 100)}%</strong>
+							</div>
+							<div class="bar-track">
+								<div class="bar-fill" style={`width: ${Math.round(point.rate * 100)}%`}></div>
+							</div>
+							<span class="muted small">
+								{t('admin.decisions.retentionDetail', {
+									retained: point.retained,
+									eligible: point.eligible
+								})}
+							</span>
+						</li>
 					{/each}
-				</tbody>
-			</table>
-		{:else}
-			<p class="muted">{t('admin.behavior.empty')}</p>
+				</ul>
+				{#if caption(ADMIN_INSIGHT_CHART_KEYS.retention)}
+					<p class="ai-caption">{caption(ADMIN_INSIGHT_CHART_KEYS.retention)}</p>
+				{/if}
+			</Card>
+		</div>
+
+		<Card>
+			<h3>{t('admin.decisions.cohortTitle')}</h3>
+			<p class="muted">{t('admin.decisions.cohortNote')}</p>
+			{#if cohortRetention.gated}
+				<p class="cohort-gated" role="status">
+					{t('admin.decisions.cohortGated', {
+						eligible: cohortRetention.d30EligibleTotal,
+						min: cohortRetention.minEligible
+					})}
+				</p>
+			{:else if cohortRetention.weeks.length === 0}
+				<p class="muted">{t('admin.decisions.empty')}</p>
+			{:else}
+				<table class="data-table cohort-table">
+					<thead>
+						<tr>
+							<th>{t('admin.decisions.cohortWeekCol')}</th>
+							<th>{t('admin.decisions.signupsCol')}</th>
+							<th>D1</th>
+							<th>D7</th>
+							<th>D30</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each cohortRetention.weeks as week (week.weekStart)}
+							<tr>
+								<td>{week.weekStart}</td>
+								<td>{week.signups}</td>
+								<td>{formatRate(week.d1.eligible > 0 ? week.d1.rate : null)}</td>
+								<td>{formatRate(week.d7.eligible > 0 ? week.d7.rate : null)}</td>
+								<td>{formatRate(week.d30.eligible > 0 ? week.d30.rate : null)}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+				<div class="cohort-legend" aria-hidden="true">
+					<span class="legend-d1"></span> D1
+					<span class="legend-d7"></span> D7
+					<span class="legend-d30"></span> D30
+				</div>
+				{#if caption(ADMIN_INSIGHT_CHART_KEYS.cohort)}
+					<p class="ai-caption">{caption(ADMIN_INSIGHT_CHART_KEYS.cohort)}</p>
+				{/if}
+			{/if}
+		</Card>
+	</section>
+
+	<section class="decisions-section">
+		<h2>{t('admin.decisions.usageTitle')}</h2>
+		<p class="muted">{t('admin.decisions.usageNote')}</p>
+
+		<div class="decisions-grid">
+			<Card>
+				<h3>{t('admin.decisions.topEventsTitle')}</h3>
+				{#if topEvents.length === 0}
+					<p class="muted">{t('admin.decisions.empty')}</p>
+				{:else}
+					<ol class="top-events">
+						{#each topEvents as row, index (row.eventType)}
+							<li>
+								<span class="rank">#{index + 1}</span>
+								<code>{row.eventType}</code>
+								<strong>{row.count}</strong>
+							</li>
+						{/each}
+					</ol>
+				{/if}
+			</Card>
+
+			<Card>
+				<h3>{t('admin.decisions.weeklyEventsTitle')}</h3>
+				{#if weeklyEvents.length === 0}
+					<p class="muted">{t('admin.decisions.empty')}</p>
+				{:else}
+					<table class="data-table compact">
+						<thead>
+							<tr>
+								<th>{t('admin.decisions.weekCol')}</th>
+								<th>{t('admin.decisions.eventCol')}</th>
+								<th>{t('admin.decisions.countCol')}</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each weeklyEvents as row (`${row.weekStart}-${row.eventType}`)}
+								<tr>
+									<td>{row.weekStart}</td>
+									<td><code>{row.eventType}</code></td>
+									<td>{row.count}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				{/if}
+				{#if caption(ADMIN_INSIGHT_CHART_KEYS.events)}
+					<p class="ai-caption">{caption(ADMIN_INSIGHT_CHART_KEYS.events)}</p>
+				{/if}
+			</Card>
+		</div>
+	</section>
+
+	<section class="decisions-section">
+		<h2>{t('admin.decisions.stuckTitle')}</h2>
+		<p class="muted">{t('admin.decisions.stuckNote')}</p>
+
+		<div class="heatmap-grid">
+			{#each DECISIONS_HEATMAP_ROUTES as route (route)}
+				{@const heatmap = heatmaps[route]}
+				<Card>
+					<h3><code>{route}</code></h3>
+					{#if !heatmap || heatmap.elements.length === 0}
+						<p class="muted">{t('admin.decisions.heatmapEmpty')}</p>
+					{:else}
+						<ul class="heatmap-bars" aria-label={route}>
+							{#each heatmap.elements.slice(0, 8) as row (row.elementKey)}
+								<li>
+									<span class="bar-label"><code>{row.elementKey}</code></span>
+									<div class="bar-track">
+										<div
+											class="bar-fill"
+											style={`width: ${Math.round((row.clickCount / maxHeatmapClicks(heatmap)) * 100)}%`}
+										></div>
+									</div>
+									<span class="bar-count">{row.clickCount}</span>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</Card>
+			{/each}
+		</div>
+		{#if caption(ADMIN_INSIGHT_CHART_KEYS.heatmap)}
+			<p class="ai-caption section-caption">{caption(ADMIN_INSIGHT_CHART_KEYS.heatmap)}</p>
 		{/if}
-	</Card>
+	</section>
 {/if}
 
 <style>
@@ -341,13 +447,25 @@
 		color: #8a1f1f;
 	}
 
-	.behavior-toolbar {
+	.decisions-toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-md);
+		align-items: flex-start;
+		justify-content: space-between;
+		margin-bottom: var(--space-lg);
+	}
+
+	.decisions-title {
+		margin: 0 0 var(--space-xs);
+		font-size: 1.25rem;
+	}
+
+	.toolbar-actions {
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--space-md);
 		align-items: center;
-		justify-content: space-between;
-		margin-bottom: var(--space-lg);
 	}
 
 	.period-toggle {
@@ -370,7 +488,32 @@
 		color: #fff;
 	}
 
-	h2 {
+	.decisions-section {
+		margin-bottom: var(--space-xl);
+	}
+
+	.decisions-section > h2 {
+		margin: 0 0 var(--space-xs);
+		font-size: 1.1rem;
+	}
+
+	.decisions-grid,
+	.heatmap-grid {
+		display: grid;
+		gap: var(--space-md);
+	}
+
+	.decisions-grid {
+		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+		margin-bottom: var(--space-md);
+	}
+
+	.heatmap-grid {
+		grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+	}
+
+	h2,
+	h3 {
 		margin: 0 0 var(--space-sm);
 		font-size: 1.05rem;
 	}
@@ -379,6 +522,11 @@
 		margin: 0 0 var(--space-md);
 		color: var(--color-text-muted);
 		font-size: 0.9rem;
+	}
+
+	.muted.small {
+		margin: 0;
+		font-size: 0.82rem;
 	}
 
 	.data-table {
@@ -395,21 +543,11 @@
 		vertical-align: top;
 	}
 
-	.route-picker {
-		display: flex;
-		flex-direction: column;
-		gap: 0.35rem;
-		margin-bottom: var(--space-md);
-		font-size: 0.9rem;
-	}
-
-	.route-picker input {
-		padding: 0.55rem 0.7rem;
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-sm);
-	}
-
-	.heatmap-bars {
+	.funnel-bars,
+	.retention-bars,
+	.heatmap-bars,
+	.top-events,
+	.anomaly-list {
 		list-style: none;
 		margin: 0;
 		padding: 0;
@@ -418,11 +556,17 @@
 		gap: var(--space-sm);
 	}
 
-	.heatmap-bars li {
-		display: grid;
-		grid-template-columns: minmax(8rem, 30%) 1fr auto;
-		gap: var(--space-sm);
-		align-items: center;
+	.funnel-bars li,
+	.retention-bars li {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	.metric-head {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--space-md);
 	}
 
 	.bar-track {
@@ -438,23 +582,78 @@
 		border-radius: 999px;
 	}
 
+	.heatmap-bars li {
+		display: grid;
+		grid-template-columns: minmax(6rem, 34%) 1fr auto;
+		gap: var(--space-sm);
+		align-items: center;
+	}
+
 	.bar-count {
 		font-variant-numeric: tabular-nums;
 		font-size: 0.85rem;
 	}
 
-	.funnel-steps,
-	.retention-list,
-	.anomaly-list {
-		margin: 0;
-		padding-left: 1.1rem;
-		line-height: 1.7;
+	.top-events li {
+		display: grid;
+		grid-template-columns: auto 1fr auto;
+		gap: var(--space-sm);
+		align-items: center;
 	}
 
-	.funnel-steps li,
-	.retention-list li {
+	.rank {
+		font-weight: 700;
+		color: var(--color-text-muted);
+	}
+
+	.ai-caption {
+		margin: var(--space-md) 0 0;
+		padding: var(--space-sm) var(--space-md);
+		border-left: 3px solid var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+		font-size: 0.9rem;
+		color: var(--color-text);
+	}
+
+	.section-caption {
+		margin-top: var(--space-md);
+	}
+
+	.cohort-gated {
+		margin: 0;
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-sm);
+		background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+		color: var(--color-text);
+		font-size: 0.9rem;
+	}
+
+	.cohort-legend {
 		display: flex;
-		justify-content: space-between;
 		gap: var(--space-md);
+		margin-top: var(--space-sm);
+		font-size: 0.82rem;
+		color: var(--color-text-muted);
+	}
+
+	.cohort-legend span {
+		display: inline-block;
+		width: 0.75rem;
+		height: 0.75rem;
+		border-radius: 2px;
+		margin-right: 0.2rem;
+		vertical-align: middle;
+	}
+
+	.legend-d1 {
+		background: #4f8cff;
+	}
+
+	.legend-d7 {
+		background: #2fbf71;
+	}
+
+	.legend-d30 {
+		background: #f0a500;
 	}
 </style>

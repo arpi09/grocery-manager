@@ -14,6 +14,12 @@ import {
 	type BehaviorRetentionPoint,
 	type BehaviorRouteOverviewRow
 } from '$lib/domain/analytics-behavior';
+import {
+	buildAdminCohortRetention,
+	COHORT_RETENTION_WEEK_LOOKBACK,
+	type AdminCohortRetention,
+	type CohortSignupUser
+} from '$lib/domain/cohort-retention';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { db } from '$lib/infrastructure/db';
 import {
@@ -82,6 +88,7 @@ export interface IAnalyticsBehaviorRepository {
 		periodDays: AnalyticsBehaviorPeriodDays,
 		now?: Date
 	): Promise<AdminBehaviorRetention>;
+	getCohortRetention(now?: Date): Promise<AdminCohortRetention>;
 }
 
 function hashUserAgent(userAgent: string | null): string | null {
@@ -558,5 +565,61 @@ export class DrizzleAnalyticsBehaviorRepository implements IAnalyticsBehaviorRep
 		}
 
 		return { periodDays, points };
+	}
+
+	async getCohortRetention(now = new Date()): Promise<AdminCohortRetention> {
+		const lookbackStart = new Date(now);
+		lookbackStart.setUTCHours(0, 0, 0, 0);
+		lookbackStart.setUTCDate(lookbackStart.getUTCDate() - COHORT_RETENTION_WEEK_LOOKBACK * 7);
+
+		const signupRows = await db
+			.select({
+				userId: productEventTable.userId,
+				registeredAt: productEventTable.createdAt
+			})
+			.from(productEventTable)
+			.where(
+				and(
+					eq(productEventTable.eventType, 'signup_complete'),
+					gte(productEventTable.createdAt, lookbackStart)
+				)
+			);
+
+		const users: CohortSignupUser[] = [];
+		const seen = new Set<string>();
+		for (const row of signupRows) {
+			if (!row.userId || seen.has(row.userId)) {
+				continue;
+			}
+			seen.add(row.userId);
+			users.push({ userId: row.userId, registeredAt: row.registeredAt });
+		}
+
+		const userIds = users.map((user) => user.userId);
+		const sessionDaysByUser = new Map<string, Set<string>>();
+		if (userIds.length > 0) {
+			const sessionRows = await db
+				.select({
+					userId: analyticsSessionTable.userId,
+					day: sql<string>`to_char(date_trunc('day', ${analyticsSessionTable.lastSeenAt}), 'YYYY-MM-DD')`
+				})
+				.from(analyticsSessionTable)
+				.where(inArray(analyticsSessionTable.userId, userIds));
+
+			for (const row of sessionRows) {
+				if (!row.userId) {
+					continue;
+				}
+				const days = sessionDaysByUser.get(row.userId) ?? new Set<string>();
+				days.add(row.day);
+				sessionDaysByUser.set(row.userId, days);
+			}
+		}
+
+		return buildAdminCohortRetention({
+			users,
+			sessionDaysByUser,
+			now
+		});
 	}
 }

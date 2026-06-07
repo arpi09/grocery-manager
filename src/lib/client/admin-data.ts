@@ -1,7 +1,7 @@
 export type AdminTab =
 	| 'overview'
 	| 'analytics'
-	| 'behavior'
+	| 'decisions'
 	| 'aiUsage'
 	| 'users'
 	| 'logs'
@@ -11,7 +11,7 @@ export type AdminTab =
 export const ADMIN_TABS: AdminTab[] = [
 	'overview',
 	'analytics',
-	'behavior',
+	'decisions',
 	'aiUsage',
 	'users',
 	'logs',
@@ -19,9 +19,16 @@ export const ADMIN_TABS: AdminTab[] = [
 	'pmfSurvey'
 ];
 
+const ADMIN_TAB_ALIASES: Record<string, AdminTab> = {
+	behavior: 'decisions'
+};
+
 export function parseAdminTab(raw: string | null): AdminTab {
 	if (raw && ADMIN_TABS.includes(raw as AdminTab)) {
 		return raw as AdminTab;
+	}
+	if (raw && raw in ADMIN_TAB_ALIASES) {
+		return ADMIN_TAB_ALIASES[raw];
 	}
 	return 'overview';
 }

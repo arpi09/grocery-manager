@@ -4,6 +4,7 @@ import type {
 	AdminBehaviorFunnel,
 	AdminEventExplorer
 } from '$lib/domain/analytics-behavior';
+import { ADMIN_INSIGHT_CHART_KEYS } from '$lib/domain/decisions-analytics';
 import type { PmfFunnelSnapshot } from '$lib/domain/pmf-funnel';
 import type { ProductFeedbackEntry } from '$lib/domain/product-feedback';
 import type { AiRateLimitService } from '$lib/application/ai-rate-limit.service';
@@ -208,7 +209,7 @@ export class AdminInsightsService {
 						{
 							role: 'system',
 							content:
-								'Du är produktanalytiker för Skaffu (svensk skafferi-app). Svara på svenska med JSON enligt schema. Ingen rå användardata — bara aggregerade metrics.'
+								'Du är produktanalytiker för Skaffu (svensk skafferi-app). Svara på svenska med JSON enligt schema. Ingen rå användardata — bara aggregerade metrics. chartCaptions MÅSTE innehålla exakt dessa nycklar med en kort mening vardera: funnel, retention, events, heatmap (valfritt cohort om kohortdata finns).'
 						},
 						{
 							role: 'user',
@@ -242,6 +243,11 @@ export class AdminInsightsService {
 				return { error: 'openai_invalid' };
 			}
 
+			const chartCaptions =
+				parsed.chartCaptions && typeof parsed.chartCaptions === 'object'
+					? (parsed.chartCaptions as Record<string, string>)
+					: {};
+
 			return {
 				summaryParagraphs: parsed.summaryParagraphs.filter(
 					(entry): entry is string => typeof entry === 'string'
@@ -249,10 +255,13 @@ export class AdminInsightsService {
 				anomalyFlags: Array.isArray(parsed.anomalyFlags)
 					? parsed.anomalyFlags.filter((entry): entry is string => typeof entry === 'string')
 					: [],
-				chartCaptions:
-					parsed.chartCaptions && typeof parsed.chartCaptions === 'object'
-						? (parsed.chartCaptions as Record<string, string>)
-						: {}
+				chartCaptions: {
+					[ADMIN_INSIGHT_CHART_KEYS.funnel]: chartCaptions.funnel ?? '',
+					[ADMIN_INSIGHT_CHART_KEYS.retention]: chartCaptions.retention ?? '',
+					[ADMIN_INSIGHT_CHART_KEYS.events]: chartCaptions.events ?? '',
+					[ADMIN_INSIGHT_CHART_KEYS.heatmap]: chartCaptions.heatmap ?? '',
+					[ADMIN_INSIGHT_CHART_KEYS.cohort]: chartCaptions.cohort ?? ''
+				}
 			};
 		} catch {
 			return { error: 'openai_network' };
