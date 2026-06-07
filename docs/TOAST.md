@@ -24,9 +24,9 @@ Canonical reference for success, info, and error feedback via toasts. Tokens liv
 | Component | Trigger | Duration | Size | Notes |
 |-----------|---------|----------|------|-------|
 | `ActionToast` | URL `?actionToast=` after server redirect | 5s | `action` | Canonical for forms/CRUD |
-| `ClientToast` | `showClientToast()` (client store) | 5s | `action` | Panels, push, expiry, recipes |
+| `ClientToast` | `showClientToast()` (client store) | 5s | `action` | Panels, push, expiry, recipes; `celebrate` for gamification toast surface |
 | `InventoryScanToast` | URL `?scan=` after barcode/photo | 5s | `action` | `success` on match, `info` on unknown product |
-| `GamificationToast` | URL `?celebrate=` | 5s | `action` | `celebrate` gradient for milestones |
+| `GamificationToast` | URL `?celebrate=` | 5s | `action` | Routes toast-surface wins via `presentCelebration` → `showClientToast({ celebrate })` |
 
 ## When to use which
 

@@ -7,6 +7,10 @@ export type ClientToastPayload = {
 	variant: ToastVariant;
 	size: ToastSize;
 	durationMs: number;
+	/** Milestone / gamification gradient (see Toast.svelte) */
+	celebrate?: boolean;
+	/** Runs when the toast is dismissed (tap, timer, or manual dismiss). */
+	onDismiss?: () => void;
 };
 
 /** Global client toast — same placement and timing as ActionToast (see AppLayout). */
@@ -24,6 +28,8 @@ export function showClientToast(
 		variant?: ToastVariant;
 		size?: ToastSize;
 		durationMs?: number;
+		celebrate?: boolean;
+		onDismiss?: () => void;
 	}
 ): void {
 	const trimmed = message.trim();
@@ -37,10 +43,14 @@ export function showClientToast(
 		message: trimmed,
 		variant: options?.variant ?? 'success',
 		size: options?.size ?? 'action',
-		durationMs: options?.durationMs ?? TOAST_DEFAULT_DURATION_MS
+		durationMs: options?.durationMs ?? TOAST_DEFAULT_DURATION_MS,
+		celebrate: options?.celebrate,
+		onDismiss: options?.onDismiss
 	};
 }
 
 export function dismissClientToast(): void {
+	const onDismiss = clientToastStore.toast?.onDismiss;
 	clientToastStore.toast = null;
+	onDismiss?.();
 }

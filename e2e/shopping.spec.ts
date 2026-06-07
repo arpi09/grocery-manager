@@ -32,7 +32,11 @@ test.describe('Shopping list', () => {
 
 		await page.getByRole('button', { name: /Fyll p.+fr.n skafferiet/i }).click();
 
+		await expect(page.getByTestId('shopping-fill-success')).toBeVisible({ timeout: 20_000 });
 		await expect(page.getByText(/E2E Smartfill Mj/)).toBeVisible({ timeout: 20_000 });
 		await expect(page.getByText('E2E Smartfill Banan')).toBeVisible();
+
+		const panel = page.locator('#shopping-list-panel');
+		await expect(panel).toBeInViewport({ timeout: 10_000 });
 	});
 });

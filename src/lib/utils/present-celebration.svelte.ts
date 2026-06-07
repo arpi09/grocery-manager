@@ -161,9 +161,16 @@ export function presentCelebration(request: PresentCelebrationRequest): boolean 
 	}
 
 	if (request.surface === 'toast') {
+		const celebrate =
+			request.kind === 'zeroWasteStreak' ||
+			request.kind === 'eatFirstRitual' ||
+			request.kind === 'streak5' ||
+			request.kind === 'savings500';
 		showClientToast(message, {
 			variant: 'success',
-			size: 'action'
+			size: 'action',
+			celebrate,
+			onDismiss: () => dismissCelebrationToast(request.kind, request.householdId)
 		});
 		sessionCelebrationShown = true;
 		void recordGamificationEvent(request, 'shown');

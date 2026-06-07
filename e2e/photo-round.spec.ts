@@ -22,6 +22,18 @@ test.describe('Photo round flow', () => {
 		await expect(page.getByTestId('photo-round-zone-fridge')).toHaveCount(0);
 	});
 
+	test('photo mode without location skips forced zone step', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/scan?mode=photo&from=/hem');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 30_000 });
+		await expect(page.getByText(/AI föreslår plats|AI suggests location/i)).toBeVisible();
+		await expect(page.getByTestId('photo-round-zone-fridge')).not.toBeVisible();
+		await expect(page.getByText(/Byt zon för analys|Change zone for analysis/i)).toBeVisible();
+		await expect(page.getByTestId('photo-round-analyze')).toBeEnabled();
+	});
+
 	test('bulk add selected items redirects with success feedback', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/scan?mode=photo&from=/hem');

@@ -10,6 +10,7 @@
 		variant={clientToastStore.toast.variant}
 		size={clientToastStore.toast.size}
 		durationMs={clientToastStore.toast.durationMs}
+		celebrate={clientToastStore.toast.celebrate ?? false}
 		tapToDismiss={true}
 		onDismiss={dismissClientToast}
 	/>

@@ -6,6 +6,7 @@ import {
 	dismissCelebrationMoment
 } from './present-celebration.svelte';
 import * as celebrations from './gamification-celebrations';
+import { showClientToast } from './client-toast.svelte';
 
 vi.mock('./gamification-celebrations', () => ({
 	shouldShowCelebration: vi.fn(() => true),
@@ -81,5 +82,28 @@ describe('presentCelebration', () => {
 		});
 
 		expect(second).toBe(false);
+	});
+
+	it('shows a celebrate toast with dismiss bookkeeping', () => {
+		const shown = presentCelebration({
+			kind: 'eatFirstRitual',
+			surface: 'toast',
+			householdId: 'house-1'
+		});
+
+		expect(shown).toBe(true);
+		expect(showClientToast).toHaveBeenCalledWith(
+			expect.any(String),
+			expect.objectContaining({
+				variant: 'success',
+				size: 'action',
+				celebrate: true,
+				onDismiss: expect.any(Function)
+			})
+		);
+
+		const options = vi.mocked(showClientToast).mock.calls.at(-1)?.[1];
+		options?.onDismiss?.();
+		expect(celebrations.markCelebrationShown).toHaveBeenCalledWith('eatFirstRitual', 'house-1');
 	});
 });

@@ -34,4 +34,14 @@ describe('client-toast', () => {
 		expect(getClientToast()?.message).toBe('Second');
 		expect(getClientToast()?.id).toBeGreaterThan(1);
 	});
+
+	it('supports celebrate styling and onDismiss callback', () => {
+		let dismissed = false;
+		showClientToast('Milestone', { celebrate: true, onDismiss: () => (dismissed = true) });
+		expect(getClientToast()?.celebrate).toBe(true);
+
+		dismissClientToast();
+		expect(getClientToast()).toBeNull();
+		expect(dismissed).toBe(true);
+	});
 });
