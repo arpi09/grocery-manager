@@ -1,6 +1,6 @@
 # Veckovis PMF-rutin (ägare)
 
-*~30 min varje måndag. Kompletterar [ROADMAP.md § Veckovis PMF-rutin](./ROADMAP.md#veckovis-pmf-rutin-ägare) och [NEXT_STEPS.md §2](./NEXT_STEPS.md#2-etablera-veckorutin-varje-måndag-30-min).*
+*~30 min varje måndag. Kompletterar [ROADMAP.md § Veckovis PMF-rutin](./ROADMAP.md#veckovis-pmf-rutin-ägare) och [NEXT_STEPS.md § Ägare](./NEXT_STEPS.md#ägare-nu).*
 
 ---
 
