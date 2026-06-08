@@ -50,7 +50,9 @@ const SQL_MIGRATION_FILES = [
 	'0029_pmf_survey_response.sql',
 	'0030_expiring_share_link.sql',
 	'0031_household_receipt_forward_token.sql',
-	'0032_analytics_behavior.sql'
+	'0032_analytics_behavior.sql',
+	'0033_shopping_to_pantry_mode.sql',
+	'0034_inventory_last_confirmed_at.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE

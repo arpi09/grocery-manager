@@ -21,8 +21,15 @@ import {
 } from '$lib/domain/consumption-quantity';
 
 import { EXPIRING_SOON_DAYS, buildLocationBars, type LocationBar } from '$lib/domain/inventory-analytics';
+import {
+	addQuantities,
+	findDuplicateNameGroups,
+	findMergeCandidate
+} from '$lib/domain/inventory-merge';
+import { isMovingToAutoExpiredSoon } from '$lib/domain/auto-expired';
 
 import { INVENTORY_LIST_DEFAULT, INVENTORY_LIST_MAX } from '$lib/domain/inventory-list';
+import { STALENESS_BATCH_SIZE } from '$lib/domain/inventory-staleness';
 
 import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 
@@ -112,6 +119,26 @@ export interface ConsumeItemOptions {
 
 
 
+export interface PantryStatusSummary {
+
+	withoutExpiryCount: number;
+
+	autoExpiredCount: number;
+
+	staleCount: number;
+
+	lastUpdatedAt: Date | null;
+
+	lastUpdatedByUserId: string | null;
+
+}
+
+export interface DuplicateNameGroupSummary {
+	displayName: string;
+	count: number;
+	location: StorageLocation;
+}
+
 export interface DashboardSummary {
 
 	counts: LocationCount[];
@@ -119,6 +146,8 @@ export interface DashboardSummary {
 	expiringSoon: InventoryItem[];
 
 	totalItems: number;
+
+	pantryStatus: PantryStatusSummary;
 
 }
 
@@ -244,9 +273,25 @@ export class InventoryService {
 
 		const totalItems = countsByLocation.reduce((sum, c) => sum + c.count, 0);
 
+		const [analytics, autoExpiredCount, staleCount, lastUpdate] = await Promise.all([
+			this.repository.getAnalytics(householdId, context),
+			this.repository.countAutoExpiredHousehold(householdId, context),
+			this.repository.countStaleUndated(householdId),
+			this.repository.getLastInventoryUpdate(householdId)
+		]);
 
-
-		return { counts: countsByLocation, expiringSoon, totalItems };
+		return {
+			counts: countsByLocation,
+			expiringSoon,
+			totalItems,
+			pantryStatus: {
+				withoutExpiryCount: analytics.withoutExpiryCount,
+				autoExpiredCount,
+				staleCount,
+				lastUpdatedAt: lastUpdate?.updatedAt ?? null,
+				lastUpdatedByUserId: lastUpdate?.userId ?? null
+			}
+		};
 
 	}
 
@@ -474,6 +519,122 @@ export class InventoryService {
 
 
 
+	async findMergeCandidate(householdId: string, name: string, location: StorageLocation) {
+		const items = await this.listAll(householdId);
+		return findMergeCandidate(items, name, location);
+	}
+
+	async listRecentItemNames(householdId: string, limit = 12): Promise<string[]> {
+		return this.repository.listRecentActiveNames(householdId, limit);
+	}
+
+	async findDuplicateNameGroups(
+		householdId: string,
+		minCount = 3
+	): Promise<DuplicateNameGroupSummary[]> {
+		const items = await this.listAll(householdId);
+		return findDuplicateNameGroups(items, minCount).map((group) => ({
+			displayName: group.displayName,
+			count: group.count,
+			location: group.location
+		}));
+	}
+
+	async listMovingToAutoExpiredSoon(householdId: string): Promise<InventoryItem[]> {
+		const context = await this.listContext(householdId);
+		const items = await this.repository.findAllByHousehold(householdId, context);
+		const today = new Date();
+		return items
+			.filter((item) => isMovingToAutoExpiredSoon(item, context.graceDays, today))
+			.sort((a, b) => (a.expiresOn ?? '').localeCompare(b.expiresOn ?? ''));
+	}
+
+	async confirmStaleBatch(
+		householdId: string,
+		itemIds: string[],
+		actorRole: HouseholdRole
+	): Promise<number> {
+		assertInventoryWritable(actorRole);
+		let confirmed = 0;
+		for (const id of itemIds) {
+			try {
+				await this.confirmStillHave(householdId, id, actorRole);
+				confirmed += 1;
+			} catch {
+				// skip missing rows
+			}
+		}
+		return confirmed;
+	}
+
+	async findMergeCandidates(
+		householdId: string,
+		lines: Array<{ name: string; location: StorageLocation }>
+	) {
+		const items = await this.listAll(householdId);
+		return lines.map((line, index) => {
+			const candidate = findMergeCandidate(items, line.name, line.location);
+			return candidate
+				? {
+						index,
+						id: candidate.id,
+						name: candidate.name,
+						quantity: candidate.quantity,
+						unit: candidate.unit
+					}
+				: null;
+		});
+	}
+
+	async incrementQuantity(
+		householdId: string,
+		id: string,
+		addQuantity: string,
+		actorRole: HouseholdRole
+	) {
+		assertInventoryWritable(actorRole);
+		const item = await this.repository.findById(householdId, id);
+		if (!item) {
+			throw new InventoryNotFoundError();
+		}
+		const merged = addQuantities(item.quantity, addQuantity);
+		if (merged === null) {
+			throw new InvalidConsumptionAmountError();
+		}
+		const updated = await this.repository.update(householdId, id, {
+			quantity: merged,
+			lastConfirmedAt: new Date()
+		});
+		if (!updated) {
+			throw new InventoryNotFoundError();
+		}
+		return updated;
+	}
+
+	async countStaleUndated(householdId: string): Promise<number> {
+		return this.repository.countStaleUndated(householdId);
+	}
+
+	async listStaleUndatedBatch(
+		householdId: string,
+		limit = STALENESS_BATCH_SIZE
+	): Promise<InventoryItem[]> {
+		return this.repository.findStaleUndated(householdId, limit);
+	}
+
+	async confirmStillHave(
+		householdId: string,
+		id: string,
+		actorRole: HouseholdRole
+	): Promise<InventoryItem> {
+		assertInventoryWritable(actorRole);
+		const updated = await this.repository.update(householdId, id, { lastConfirmedAt: new Date() });
+		if (!updated) {
+			throw new InventoryNotFoundError();
+		}
+		return updated;
+	}
+
 	async createItem(
 
 		householdId: string,
@@ -487,6 +648,10 @@ export class InventoryService {
 	) {
 
 		assertInventoryWritable(actorRole);
+
+		if (input.mergeIntoId) {
+			return this.incrementQuantity(householdId, input.mergeIntoId, input.quantity, actorRole);
+		}
 
 		let expiresOn = input.expiresOn ?? null;
 
@@ -648,7 +813,10 @@ export class InventoryService {
 
 		const newQuantity = resolved.finished ? '0' : formatNumericQuantity(resolved.remaining);
 
-		const updated = await this.repository.update(householdId, id, { quantity: newQuantity });
+		const updated = await this.repository.update(householdId, id, {
+			quantity: newQuantity,
+			lastConfirmedAt: new Date()
+		});
 
 		if (!updated) throw new InventoryNotFoundError();
 

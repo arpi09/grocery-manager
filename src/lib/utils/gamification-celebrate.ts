@@ -10,7 +10,8 @@ const CELEBRATION_KEYS: Record<GamificationCelebrationKind, MessageKey> = {
 	eatFirstRitual: 'gamification.celebrateEatFirstRitual',
 	weeklyRitualFirst: 'gamification.celebrateWeeklyRitualFirst',
 	savings500: 'gamification.celebrateSavings500',
-	streak5: 'gamification.celebrateStreak5'
+	streak5: 'gamification.celebrateStreak5',
+	syncWeek: 'gamification.celebrateSyncWeek'
 };
 
 export function parseCelebrationKind(value: string | null): GamificationCelebrationKind | null {

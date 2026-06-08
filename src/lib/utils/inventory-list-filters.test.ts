@@ -15,6 +15,7 @@ function item(overrides: Partial<InventoryItem> & Pick<InventoryItem, 'id' | 'na
 		expiresOn: null,
 		expiresOnSource: null,
 		notes: null,
+		lastConfirmedAt: new Date(),
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		...overrides
@@ -35,6 +36,11 @@ describe('filterAndSortInventoryItems', () => {
 	it('filters by name and expiry', () => {
 		const soon = filterAndSortInventoryItems(items, '', 'expiring', 'name');
 		expect(soon.map((row) => row.name)).toEqual(['Apple']);
+	});
+
+	it('filters items without expiry date', () => {
+		const noExpiry = filterAndSortInventoryItems(items, '', 'noExpiry', 'name');
+		expect(noExpiry.map((row) => row.name)).toEqual(['Banana']);
 	});
 
 	it('sorts by expiry then name', () => {

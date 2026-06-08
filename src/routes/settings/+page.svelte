@@ -131,6 +131,7 @@
 				autoExpiredGraceDays={data.autoExpiredGraceDays}
 				pushNotificationsEnabled={data.pushNotificationsEnabled}
 				shoppingPushEnabled={data.shoppingPushEnabled}
+				shoppingToPantryMode={data.shoppingToPantryMode}
 			/>
 
 			<AppSettingsPanel

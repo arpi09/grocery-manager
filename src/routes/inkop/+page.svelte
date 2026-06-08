@@ -26,11 +26,9 @@
 
 	const receiptSuggestions = $derived(data.receiptAutopilotSuggestions ?? []);
 
-	const showReceiptSection = $derived(
+	const hasSuggestions = $derived(receiptSuggestions.length > 0);
 
-		data.canEdit && (!listHasItems || receiptSuggestions.length > 0)
-
-	);
+	const suggestionsOpen = $derived(hasSuggestions);
 
 
 
@@ -57,60 +55,7 @@
 
 
 	<PageContainer>
-
-		<SmartShoppingFill
-
-			canEdit={data.canEdit}
-
-			{form}
-
-			onFillComplete={({ added }) => {
-
-				if (added > 0) scrollToShoppingList();
-
-			}}
-
-		/>
-
-
-
-		{#if showReceiptSection}
-
-			{#if listHasItems && receiptSuggestions.length > 0}
-
-				<details class="receipt-fold" data-testid="receipt-autopilot-fold">
-
-					<summary>{t('receiptAutopilot.title')}</summary>
-
-					<ReceiptAutopilotSection
-
-						suggestions={receiptSuggestions}
-
-						canEdit={data.canEdit}
-
-						compact
-
-					/>
-
-				</details>
-
-			{:else}
-
-				<ReceiptAutopilotSection
-
-					suggestions={receiptSuggestions}
-
-					canEdit={data.canEdit}
-
-					compact
-
-				/>
-
-			{/if}
-
-		{/if}
-
-
+		<div class="shopping-page">
 
 		<ShoppingListPanel
 
@@ -124,8 +69,56 @@
 
 			canEdit={data.canEdit}
 
+			shoppingToPantryMode={data.shoppingToPantryMode}
+
 		/>
 
+
+
+		{#if data.canEdit && (hasSuggestions || !listHasItems)}
+
+			<details class="suggestions-fold" open={suggestionsOpen} data-testid="shopping-suggestions-fold">
+
+				<summary>{t('shopping.suggestionsTitle')}</summary>
+
+				<div class="suggestions-body">
+
+					<SmartShoppingFill
+
+						canEdit={data.canEdit}
+
+						{form}
+
+						onFillComplete={({ added }) => {
+
+							if (added > 0) scrollToShoppingList();
+
+						}}
+
+					/>
+
+
+
+					{#if hasSuggestions}
+
+						<ReceiptAutopilotSection
+
+							suggestions={receiptSuggestions}
+
+							canEdit={data.canEdit}
+
+							compact
+
+						/>
+
+					{/if}
+
+				</div>
+
+			</details>
+
+		{/if}
+		</div>
 	</PageContainer>
 
 </AppLayout>
@@ -134,7 +127,21 @@
 
 <style>
 
-	.receipt-fold {
+	.shopping-page {
+
+		display: flex;
+
+		flex-direction: column;
+
+		gap: var(--space-md);
+
+		padding-bottom: calc(var(--content-bottom-safe) + var(--space-md));
+
+	}
+
+
+
+	.suggestions-fold {
 
 		border: 1px solid var(--color-border);
 
@@ -146,7 +153,7 @@
 
 
 
-	.receipt-fold summary {
+	.suggestions-fold summary {
 
 		cursor: pointer;
 
@@ -164,7 +171,7 @@
 
 
 
-	.receipt-fold summary::-webkit-details-marker {
+	.suggestions-fold summary::-webkit-details-marker {
 
 		display: none;
 
@@ -172,11 +179,16 @@
 
 
 
-	.receipt-fold :global(.autopilot) {
+	.suggestions-body {
+
+		display: flex;
+
+		flex-direction: column;
+
+		gap: var(--space-md);
 
 		padding: 0 0.85rem 0.85rem;
 
 	}
 
 </style>
-

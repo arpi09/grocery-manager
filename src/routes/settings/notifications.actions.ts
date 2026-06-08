@@ -4,7 +4,13 @@ import { updateExpiryRemindersSchema } from '$lib/validation/expiry-reminder.sch
 import { updateAutoExpiredGraceSchema } from '$lib/validation/auto-expired.schemas';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { updateShoppingPushSchema } from '$lib/validation/shopping-push.schemas';
-import { expiryReminderService, pushSubscriptionRepository, shoppingPushService } from '$lib/server/di';
+import { normalizeShoppingToPantryMode } from '$lib/domain/shopping-to-pantry';
+import {
+	expiryReminderService,
+	pushSubscriptionRepository,
+	shoppingPushService,
+	shoppingToPantryService
+} from '$lib/server/di';
 import type { RequestEvent } from '@sveltejs/kit';
 
 export const notificationsActions = {
@@ -43,6 +49,12 @@ export const notificationsActions = {
 			Number(parsed.data.days),
 			locals.householdRole!
 		);
+		redirect(302, appendActionToast('/settings', 'settingsSaved'));
+	},
+	updateShoppingToPantryMode: async ({ request, locals }: RequestEvent) => {
+		const formData = await request.formData();
+		const mode = normalizeShoppingToPantryMode(formData.get('shoppingToPantryMode'));
+		await shoppingToPantryService.setMode(locals.user!.id, mode);
 		redirect(302, appendActionToast('/settings', 'settingsSaved'));
 	},
 	updateShoppingPush: async ({ request, locals }: RequestEvent) => {

@@ -1,11 +1,13 @@
-import { and, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
 
 import { InventoryAnalyticsRepository } from './inventory-analytics.repository';
 import { InventoryCrudRepository } from './inventory-crud.repository';
 import {
 	activeNotAutoExpiredFilter,
+	activeQuantityFilter,
 	autoExpiredFilter,
-	mapInventoryRow
+	mapInventoryRow,
+	staleUndatedFilter
 } from './inventory-repository.shared';
 
 import type { WeeklyCount } from '$lib/domain/statistik';
@@ -122,6 +124,16 @@ export interface IInventoryRepository {
 
 	): Promise<number>;
 
+	countAutoExpiredHousehold(householdId: string, context: InventoryListContext): Promise<number>;
+
+	getLastInventoryUpdatedAt(householdId: string): Promise<Date | null>;
+
+	getLastInventoryUpdate(
+		householdId: string
+	): Promise<{ updatedAt: Date; userId: string } | null>;
+
+	listRecentActiveNames(householdId: string, limit: number): Promise<string[]>;
+
 	findAutoExpiredByHouseholdAndLocation(
 
 		householdId: string,
@@ -133,6 +145,10 @@ export interface IInventoryRepository {
 	): Promise<InventoryItem[]>;
 
 	countFinishedByLocation(householdId: string, location: StorageLocation): Promise<number>;
+
+	countStaleUndated(householdId: string, referenceDate?: Date): Promise<number>;
+
+	findStaleUndated(householdId: string, limit: number, referenceDate?: Date): Promise<InventoryItem[]>;
 
 	findFinishedByHouseholdAndLocation(
 
@@ -449,7 +465,57 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 
 	}
 
+	async countAutoExpiredHousehold(householdId: string, context: InventoryListContext) {
+		const [row] = await this.database
+			.select({ count: sql<number>`count(*)::int` })
+			.from(inventoryItemTable)
+			.where(and(eq(inventoryItemTable.householdId, householdId), autoExpiredFilter(context)));
 
+		return row?.count ?? 0;
+	}
+
+	async getLastInventoryUpdatedAt(householdId: string) {
+		const update = await this.getLastInventoryUpdate(householdId);
+		return update?.updatedAt ?? null;
+	}
+
+	async getLastInventoryUpdate(householdId: string) {
+		const [row] = await this.database
+			.select({
+				updatedAt: inventoryItemTable.updatedAt,
+				userId: inventoryItemTable.userId
+			})
+			.from(inventoryItemTable)
+			.where(and(eq(inventoryItemTable.householdId, householdId), activeQuantityFilter()))
+			.orderBy(desc(inventoryItemTable.updatedAt))
+			.limit(1);
+
+		return row ?? null;
+	}
+
+	async listRecentActiveNames(householdId: string, limit: number) {
+		const rows = await this.database
+			.select({ name: inventoryItemTable.name })
+			.from(inventoryItemTable)
+			.where(and(eq(inventoryItemTable.householdId, householdId), activeQuantityFilter()))
+			.orderBy(desc(inventoryItemTable.updatedAt))
+			.limit(Math.max(limit * 4, limit));
+
+		const seen = new Set<string>();
+		const names: string[] = [];
+		for (const row of rows) {
+			const key = row.name.trim().toLowerCase();
+			if (!key || seen.has(key)) {
+				continue;
+			}
+			seen.add(key);
+			names.push(row.name);
+			if (names.length >= limit) {
+				break;
+			}
+		}
+		return names;
+	}
 
 	async findAutoExpiredByHouseholdAndLocation(
 
@@ -519,7 +585,25 @@ export class DrizzleInventoryRepository implements IInventoryRepository {
 
 	}
 
+	async countStaleUndated(householdId: string, referenceDate = new Date()) {
+		const [row] = await this.database
+			.select({ count: sql<number>`count(*)::int` })
+			.from(inventoryItemTable)
+			.where(and(eq(inventoryItemTable.householdId, householdId), staleUndatedFilter(referenceDate)));
 
+		return row?.count ?? 0;
+	}
+
+	async findStaleUndated(householdId: string, limit: number, referenceDate = new Date()) {
+		const rows = await this.database
+			.select()
+			.from(inventoryItemTable)
+			.where(and(eq(inventoryItemTable.householdId, householdId), staleUndatedFilter(referenceDate)))
+			.orderBy(inventoryItemTable.lastConfirmedAt, inventoryItemTable.quantity)
+			.limit(limit);
+
+		return rows.map(mapInventoryRow);
+	}
 
 	async findFinishedByHouseholdAndLocation(householdId: string, location: StorageLocation) {
 

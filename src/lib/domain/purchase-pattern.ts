@@ -12,6 +12,14 @@ export const RECEIPT_PATTERN_WINDOW_DAYS = 90;
 /** Max suggestions shown at once. */
 export const RECEIPT_PATTERN_MAX_SUGGESTIONS = 5;
 
+/** Days of recent purchases to check for still-in-stock conflicts. */
+export const RECEIPT_FINISH_LOOKBACK_DAYS = 14;
+
+/** Max "mark as finished?" suggestions. */
+export const RECEIPT_FINISH_MAX_SUGGESTIONS = 5;
+
+export const RECEIPT_FINISH_DISMISS_PREFIX = 'finish:';
+
 export interface ReceiptPurchaseLineRecord {
 	id: string;
 	householdId: string;
@@ -35,6 +43,30 @@ export interface ReceiptPatternSuggestion {
 	importCount: number;
 	lineCount: number;
 	lastPurchasedAt: Date;
+}
+
+export interface PantryInventoryMatch {
+	id: string;
+	name: string;
+	location: StorageLocation;
+	quantity: string;
+	unit: string | null;
+	normalizedKey: string;
+}
+
+export interface ReceiptFinishSuggestion {
+	inventoryItemId: string;
+	displayName: string;
+	normalizedKey: string;
+	location: StorageLocation;
+	quantity: string;
+	unit: string | null;
+	purchasedName: string;
+	purchasedAt: Date;
+}
+
+export function receiptFinishDismissKey(inventoryItemId: string): string {
+	return `${RECEIPT_FINISH_DISMISS_PREFIX}${inventoryItemId}`;
 }
 
 export interface RecordReceiptPurchaseLineInput {
@@ -141,4 +173,60 @@ export function detectReceiptPatternSuggestions(
 			return b.lastPurchasedAt.getTime() - a.lastPurchasedAt.getTime();
 		})
 		.slice(0, RECEIPT_PATTERN_MAX_SUGGESTIONS);
+}
+
+/** Bought again while still in pantry — suggest marking old stock finished. */
+export function detectReceiptFinishSuggestions(
+	lines: ReceiptPurchaseLineRecord[],
+	inventoryItems: PantryInventoryMatch[],
+	dismissedKeys: Set<string>,
+	now: Date = new Date()
+): ReceiptFinishSuggestion[] {
+	const cutoff = new Date(now);
+	cutoff.setDate(cutoff.getDate() - RECEIPT_FINISH_LOOKBACK_DAYS);
+
+	const inventoryByKey = new Map<string, PantryInventoryMatch[]>();
+	for (const item of inventoryItems) {
+		const quantity = Number(item.quantity);
+		if (!Number.isNaN(quantity) && quantity <= 0) continue;
+		const key = item.normalizedKey;
+		if (!key) continue;
+		const bucket = inventoryByKey.get(key) ?? [];
+		bucket.push(item);
+		inventoryByKey.set(key, bucket);
+	}
+
+	const bestByItemId = new Map<string, ReceiptFinishSuggestion>();
+
+	for (const line of lines) {
+		if (line.createdAt < cutoff) continue;
+		const key = line.normalizedKey;
+		if (!key) continue;
+
+		const matches = inventoryByKey.get(key);
+		if (!matches?.length) continue;
+
+		for (const match of matches) {
+			const dismissKey = receiptFinishDismissKey(match.id);
+			if (dismissedKeys.has(dismissKey)) continue;
+
+			const existing = bestByItemId.get(match.id);
+			if (existing && existing.purchasedAt >= line.createdAt) continue;
+
+			bestByItemId.set(match.id, {
+				inventoryItemId: match.id,
+				displayName: match.name,
+				normalizedKey: key,
+				location: match.location,
+				quantity: match.quantity,
+				unit: match.unit,
+				purchasedName: line.productName.trim(),
+				purchasedAt: line.createdAt
+			});
+		}
+	}
+
+	return [...bestByItemId.values()]
+		.sort((a, b) => b.purchasedAt.getTime() - a.purchasedAt.getTime())
+		.slice(0, RECEIPT_FINISH_MAX_SUGGESTIONS);
 }

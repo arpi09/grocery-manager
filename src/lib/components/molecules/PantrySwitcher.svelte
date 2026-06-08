@@ -218,20 +218,20 @@
 							type="text"
 							required
 							maxlength="80"
-							placeholder="t.ex. Sommarstuga"
+							placeholder={t('pantry.namePlaceholder')}
 							bind:value={newPantryName}
 						/>
 					</label>
 					<div class="create-actions">
 						<button type="button" class="text-btn" onclick={() => (createOpen = false)}>
-							Avbryt
+							{t('common.cancel')}
 						</button>
-						<button type="submit" class="primary-btn">Skapa pantry</button>
+						<button type="submit" class="primary-btn">{t('pantry.create')}</button>
 					</div>
 				</form>
 			{:else}
 				<button type="button" class="create-trigger sheet-create-trigger" onclick={() => (createOpen = true)}>
-					+ Skapa ny pantry
+					+ {t('pantry.createNew')}
 				</button>
 			{/if}
 		</Modal>

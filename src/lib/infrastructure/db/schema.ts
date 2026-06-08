@@ -33,6 +33,11 @@ export const userTable = pgTable('user', {
 		mode: 'date'
 	}),
 	themePreference: text('theme_preference', { enum: ['light', 'dark', 'system'] }).notNull().default('system'),
+	shoppingToPantryMode: text('shopping_to_pantry_mode', {
+		enum: ['always', 'ask', 'never']
+	})
+		.notNull()
+		.default('ask'),
 	activeHouseholdId: text('active_household_id').references(() => householdTable.id, {
 		onDelete: 'set null'
 	}),
@@ -194,12 +199,16 @@ export const inventoryItemTable = pgTable(
 			enum: ['user_set', 'ai_inferred', 'default_heuristic']
 		}),
 		notes: text('notes'),
+		lastConfirmedAt: timestamp('last_confirmed_at', { withTimezone: true, mode: 'date' })
+			.notNull()
+			.defaultNow(),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 	},
 	(table) => [
 		index('inventory_household_location_idx').on(table.householdId, table.location),
-		index('inventory_household_expires_idx').on(table.householdId, table.expiresOn)
+		index('inventory_household_expires_idx').on(table.householdId, table.expiresOn),
+		index('inventory_household_last_confirmed_idx').on(table.householdId, table.lastConfirmedAt)
 	]
 );
 
@@ -329,7 +338,13 @@ export const productEventTable = pgTable(
 				'wrapped_shared',
 				'kivra_forward_received',
 				'shopping_list_export',
-				'barcode_override_used'
+				'barcode_override_used',
+				'inventory_write',
+				'batch_review_completed',
+				'one_tap_consume',
+				'staleness_confirmed',
+				'shopping_checkoff_to_pantry',
+				'receipt_finish_accepted'
 			]
 		}).notNull(),
 		metadata: text('metadata'),

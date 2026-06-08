@@ -62,6 +62,7 @@ Before merge / release:
 
 - `FeedbackBanner` or field-level errors; never silent failure.
 - Copy: what happened + what to do next.
+- **Inventory actions** (consume, one-tap finish, staleness batch, bulk clear): failed POST/fetch must show a toast or banner — never fail silently.
 
 ### Success
 

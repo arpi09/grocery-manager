@@ -15,6 +15,7 @@ function makeItem(name: string, expiresOn: string): InventoryItem {
 		expiresOn,
 		expiresOnSource: null,
 		notes: null,
+		lastConfirmedAt: new Date(),
 		createdAt: new Date(),
 		updatedAt: new Date()
 	};

@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+	addDaysIso,
 	autoExpiredCutoffDate,
+	daysUntilAutoExpiredMove,
 	DEFAULT_AUTO_EXPIRED_GRACE_DAYS,
 	isAutoExpired,
+	isMovingToAutoExpiredSoon,
 	normalizeAutoExpiredGraceDays,
 	subtractDaysIso
 } from './auto-expired';
@@ -34,5 +37,29 @@ describe('auto-expired domain', () => {
 		expect(isAutoExpired({ expiresOn: '2026-05-20', quantity: '0' }, 7, today)).toBe(
 			false
 		);
+	});
+
+	it('adds days to iso date', () => {
+		expect(addDaysIso('2026-06-01', 7)).toBe('2026-06-08');
+	});
+
+	it('computes days until auto-expired move', () => {
+		expect(daysUntilAutoExpiredMove('2026-05-28', 7, today)).toBe(2);
+		expect(daysUntilAutoExpiredMove('2026-05-29', 7, today)).toBe(3);
+	});
+
+	it('flags items moving to auto-expired within 2–3 days', () => {
+		expect(
+			isMovingToAutoExpiredSoon({ expiresOn: '2026-05-28', quantity: '1' }, 7, today)
+		).toBe(true);
+		expect(
+			isMovingToAutoExpiredSoon({ expiresOn: '2026-05-29', quantity: '1' }, 7, today)
+		).toBe(true);
+		expect(
+			isMovingToAutoExpiredSoon({ expiresOn: '2026-06-01', quantity: '1' }, 7, today)
+		).toBe(false);
+		expect(
+			isMovingToAutoExpiredSoon({ expiresOn: '2026-05-20', quantity: '1' }, 7, today)
+		).toBe(false);
 	});
 });

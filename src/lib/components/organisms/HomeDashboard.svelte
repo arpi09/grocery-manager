@@ -9,6 +9,8 @@
 	import ReceiptAutopilotSection from '$lib/components/organisms/ReceiptAutopilotSection.svelte';
 	import EngagementStrip from '$lib/components/molecules/EngagementStrip.svelte';
 	import WeeklyRitualHero from '$lib/components/molecules/WeeklyRitualHero.svelte';
+	import HomeQuickAdd from '$lib/components/molecules/HomeQuickAdd.svelte';
+	import type { DuplicateNameGroupSummary } from '$lib/application/inventory.service';
 	import SkafferapportWidget from '$lib/components/molecules/SkafferapportWidget.svelte';
 	import WrappedBanner from '$lib/components/molecules/WrappedBanner.svelte';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
@@ -30,7 +32,7 @@
 		getActivationProgress,
 		type ActivationProgress
 	} from '$lib/utils/onboarding';
-	import type { ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
+	import type { ReceiptFinishSuggestion, ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
 	import { scanHubHref, scanModeHref } from '$lib/utils/scan-nav';
 	import { recordPeakInventoryCount } from '$lib/utils/household-invite-prompt';
 	import { shouldNudgeReceiptAutopilot } from '$lib/utils/receipt-autopilot-nudge';
@@ -45,6 +47,10 @@
 		displayName?: string | null;
 		householdId?: string | null;
 		receiptAutopilotSuggestions?: ReceiptPatternSuggestion[];
+		receiptFinishSuggestions?: ReceiptFinishSuggestion[];
+		recentItemNames?: string[];
+		duplicateGroups?: DuplicateNameGroupSummary[];
+		lastUpdatedByDisplayName?: string | null;
 	}
 
 	let {
@@ -56,7 +62,11 @@
 		canWrite = false,
 		displayName = null,
 		householdId = null,
-		receiptAutopilotSuggestions = []
+		receiptAutopilotSuggestions = [],
+		receiptFinishSuggestions = [],
+		recentItemNames = [],
+		duplicateGroups = [],
+		lastUpdatedByDisplayName = null
 	}: Props = $props();
 
 	const returnTo = APP_HOME_PATH;
@@ -102,6 +112,63 @@
 
 	const hasExpiring = $derived(summary.expiringSoon.length > 0);
 	const expiringCount = $derived(summary.expiringSoon.length);
+	const pantryStatus = $derived(summary.pantryStatus);
+
+	function daysSinceDate(date: Date | string): number {
+		const parsed = typeof date === 'string' ? new Date(date) : date;
+		const today = new Date();
+		const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+		const then = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+		return Math.round((start.getTime() - then.getTime()) / (1000 * 60 * 60 * 24));
+	}
+
+	const lastUpdatedLabel = $derived.by(() => {
+		const updatedAt = pantryStatus.lastUpdatedAt;
+		if (!updatedAt) return null;
+		const days = daysSinceDate(updatedAt);
+		if (days <= 0) return t('home.pantryStatusLastUpdatedToday');
+		if (days === 1) return t('home.pantryStatusLastUpdatedYesterday');
+		return t('home.pantryStatusLastUpdatedDays', { count: days });
+	});
+
+	type PantryStatusLine = { href: string; label: string };
+
+	const pantryStatusLines = $derived.by((): PantryStatusLine[] => {
+		const lines: PantryStatusLine[] = [];
+		if (pantryStatus.staleCount > 0) {
+			lines.push({
+				href: '/inventory/synk',
+				label: t('home.pantryStatusStale', { count: pantryStatus.staleCount })
+			});
+		}
+		if (pantryStatus.withoutExpiryCount > 0) {
+			lines.push({
+				href: '/inventory/fridge?filter=noExpiry',
+				label: t('home.pantryStatusWithoutExpiry', { count: pantryStatus.withoutExpiryCount })
+			});
+		}
+		if (pantryStatus.autoExpiredCount > 0) {
+			lines.push({
+				href: '/inventory/fridge?autoExpired=1',
+				label: t('home.pantryStatusAutoExpired', { count: pantryStatus.autoExpiredCount })
+			});
+		}
+		if (lastUpdatedLabel) {
+			const label = lastUpdatedByDisplayName
+				? t('home.pantryStatusLastUpdatedBy', {
+						label: lastUpdatedLabel,
+						name: lastUpdatedByDisplayName
+					})
+				: lastUpdatedLabel;
+			lines.push({
+				href: '/inventory/fridge',
+				label
+			});
+		}
+		return lines;
+	});
+
+	const showPantryStatusCard = $derived(summary.totalItems > 0);
 
 	let locationsOpen = $state(false);
 	let eatFirstOpen = $state(true);
@@ -122,7 +189,10 @@
 			return;
 		}
 		eatFirstOpen = hasExpiring;
-		if (nudgeReceiptAutopilot && receiptAutopilotSuggestions.length > 0) {
+		if (
+			nudgeReceiptAutopilot &&
+			(receiptAutopilotSuggestions.length > 0 || receiptFinishSuggestions.length > 0)
+		) {
 			receiptAutopilotOpen = true;
 		}
 		const mq = window.matchMedia('(min-width: 560px)');
@@ -225,10 +295,26 @@
 		{/if}
 	{:else}
 		{#if showWeeklyRitual}
-			<WeeklyRitualHero expiringCount={expiringCount} />
+			<WeeklyRitualHero expiringCount={expiringCount} staleCount={pantryStatus.staleCount} />
 		{/if}
 
 		{#if canWrite}
+			<HomeQuickAdd recentNames={recentItemNames} />
+
+			{#if duplicateGroups.length > 0}
+				<section class="duplicate-nudge" aria-labelledby="home-duplicate-heading">
+					<h2 id="home-duplicate-heading" class="sr-only">{t('home.duplicateWarningTitle')}</h2>
+					{#each duplicateGroups.slice(0, 2) as group (group.location + group.displayName)}
+						<p class="duplicate-copy">
+							{t('home.duplicateWarning', { count: group.count, name: group.displayName })}
+							<a href="/inventory/{group.location}">{t('home.duplicateWarningInventory')}</a>
+							·
+							<a href="/inventory/synk">{t('home.duplicateWarningMerge')}</a>
+						</p>
+					{/each}
+				</section>
+			{/if}
+
 			<section class="scan-zone" aria-labelledby="home-scan-heading">
 				<h2 id="home-scan-heading" class="sr-only">{t('home.scanCardTitle')}</h2>
 				<a class="scan-card" href={scanPhotoHref} data-analytics-id="home.scan_photo">
@@ -250,6 +336,28 @@
 		{/if}
 
 		<WrappedBanner />
+
+		{#if showPantryStatusCard}
+			<section class="pantry-status" aria-labelledby="home-pantry-status-heading">
+				<h2 id="home-pantry-status-heading" class="pantry-status-title">
+					{t('home.pantryStatusTitle')}
+				</h2>
+				{#if pantryStatus.staleCount === 0 && pantryStatus.withoutExpiryCount === 0 && pantryStatus.autoExpiredCount === 0 && pantryStatusLines.length === 1 && lastUpdatedLabel}
+					<p class="pantry-status-good">{t('home.pantryStatusAllGood')}</p>
+					<p class="pantry-status-meta">
+						<a href="/inventory/fridge">{lastUpdatedLabel}</a>
+					</p>
+				{:else if pantryStatusLines.length > 0}
+					<ul class="pantry-status-list">
+						{#each pantryStatusLines as line (line.href + line.label)}
+							<li>
+								<a href={line.href}>{line.label}</a>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+			</section>
+		{/if}
 
 		<EngagementStrip {engagement} />
 
@@ -296,7 +404,7 @@
 			</div>
 		</details>
 
-		{#if canWrite && receiptAutopilotSuggestions.length > 0}
+		{#if canWrite && (receiptAutopilotSuggestions.length > 0 || receiptFinishSuggestions.length > 0)}
 			{#if nudgeReceiptAutopilot}
 				<section class="autopilot-nudge" aria-labelledby="home-autopilot-nudge-heading">
 					<h2 id="home-autopilot-nudge-heading" class="autopilot-nudge-title">
@@ -305,6 +413,7 @@
 					<p class="autopilot-nudge-lead">{t('receiptAutopilot.nudgeLead')}</p>
 					<ReceiptAutopilotSection
 						suggestions={receiptAutopilotSuggestions}
+						finishSuggestions={receiptFinishSuggestions}
 						canEdit={canWrite}
 						compact
 					/>
@@ -312,10 +421,13 @@
 			{:else}
 				<details class="home-disclosure" bind:open={receiptAutopilotOpen}>
 					<summary>
-						{t('home.receiptAutopilotSummary', { count: receiptAutopilotSuggestions.length })}
+						{t('home.receiptAutopilotSummary', {
+							count: receiptAutopilotSuggestions.length + receiptFinishSuggestions.length
+						})}
 					</summary>
 					<ReceiptAutopilotSection
 						suggestions={receiptAutopilotSuggestions}
+						finishSuggestions={receiptFinishSuggestions}
 						canEdit={canWrite}
 						compact
 					/>
@@ -572,6 +684,84 @@
 		color: var(--color-text-muted);
 		font-size: 0.9375rem;
 		line-height: 1.45;
+	}
+
+	.pantry-status {
+		padding: var(--space-md) var(--space-lg);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.pantry-status-title {
+		margin: 0 0 var(--space-sm);
+		font-size: 0.9rem;
+		font-weight: 700;
+		letter-spacing: -0.01em;
+	}
+
+	.pantry-status-good {
+		margin: 0;
+		font-size: 0.875rem;
+		line-height: 1.45;
+		color: var(--color-text);
+	}
+
+	.pantry-status-meta {
+		margin: var(--space-xs) 0 0;
+		font-size: 0.8125rem;
+	}
+
+	.pantry-status-meta a {
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: underline;
+		text-underline-offset: 0.12em;
+	}
+
+	.pantry-status-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
+	}
+
+	.pantry-status-list a {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		font-size: 0.875rem;
+		font-weight: 600;
+		line-height: 1.4;
+		color: var(--color-primary);
+		text-decoration: underline;
+		text-underline-offset: 0.12em;
+	}
+
+	.pantry-status-list a:hover {
+		color: var(--color-primary-hover);
+	}
+
+	.duplicate-nudge {
+		padding: var(--space-md) var(--space-lg);
+		border-radius: var(--radius-md);
+		border: 1px solid color-mix(in srgb, var(--color-warning) 35%, var(--color-border));
+		background: color-mix(in srgb, var(--color-warning) 8%, var(--color-surface));
+	}
+
+	.duplicate-copy {
+		margin: 0;
+		font-size: 0.875rem;
+		line-height: 1.45;
+		color: var(--color-text-muted);
+	}
+
+	.duplicate-copy a {
+		font-weight: 700;
+		color: var(--color-primary);
 	}
 
 	@media (min-width: 560px) {

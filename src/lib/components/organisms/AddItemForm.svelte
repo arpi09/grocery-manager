@@ -1,5 +1,6 @@
 ﻿<script lang="ts">
 	import { onMount } from 'svelte';
+	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Label from '$lib/components/atoms/Label.svelte';
 	import Input from '$lib/components/atoms/Input.svelte';
@@ -35,6 +36,7 @@
 	let unit = $state(item?.unit ?? '');
 	let notes = $state(item?.notes ?? '');
 	let expiresOn = $state(item?.expiresOn ?? '');
+	let expiresOnAiInferred = $state(item?.expiresOnSource === 'ai_inferred');
 	let location = $state<StorageLocation>(item?.location ?? defaultLocation);
 
 	let scannerOpen = $state(false);
@@ -50,8 +52,23 @@
 		unit = item?.unit ?? '';
 		notes = item?.notes ?? '';
 		expiresOn = item?.expiresOn ?? '';
+		expiresOnAiInferred = item?.expiresOnSource === 'ai_inferred';
 		location = item?.location ?? defaultLocation;
 	});
+
+	function applyShelfLifeGuess() {
+		const inferred = guessShelfLife(name, location);
+		if (inferred) {
+			expiresOn = inferred.expiresOn;
+			expiresOnAiInferred = true;
+		}
+	}
+
+	function handleNameOrLocationChange() {
+		if (!isEdit && !expiresOn) {
+			applyShelfLifeGuess();
+		}
+	}
 
 	function openScanner() {
 		scanMessage = null;
@@ -123,7 +140,10 @@
 			expiresOn = product.expiresOn;
 		} else {
 			const inferred = guessShelfLife(product.name, location);
-			if (inferred) expiresOn = inferred.expiresOn;
+			if (inferred) {
+				expiresOn = inferred.expiresOn;
+				expiresOnAiInferred = true;
+			}
 		}
 		if (product.notes) {
 			notes = notes ? `${notes}\n${product.notes}` : product.notes;
@@ -131,7 +151,11 @@
 	}
 </script>
 
-<form method="POST" action={isEdit ? '?/save' : '?/create'} class="form">
+<form
+	method="POST"
+	action={isEdit ? '?/save' : '?/create'}
+	class="form"
+>
 	{#if !isEdit && returnTo}
 		<input type="hidden" name="returnTo" value={returnTo} />
 	{/if}
@@ -172,7 +196,14 @@
 
 	<div class="field name-field">
 		<Label for="name">{t('common.name')}</Label>
-		<Input id="name" name="name" bind:value={name} error={!!errors.name} required />
+		<Input
+			id="name"
+			name="name"
+			bind:value={name}
+			error={!!errors.name}
+			required
+			onchange={handleNameOrLocationChange}
+		/>
 		{#if errors.name}
 			<p class="error">{errors.name[0]}</p>
 		{/if}
@@ -180,7 +211,13 @@
 
 	<div class="field">
 		<Label for="location">{t('common.place')}</Label>
-		<select id="location" name="location" class="select" bind:value={location}>
+		<select
+			id="location"
+			name="location"
+			class="select"
+			bind:value={location}
+			onchange={handleNameOrLocationChange}
+		>
 			{#each LOCATIONS as loc}
 				<option value={loc}>{locationLabel(getLocale(), loc)}</option>
 			{/each}
@@ -212,8 +249,21 @@
 	</div>
 
 	<div class="field">
-		<Label for="expiresOn">{t('item.bestBefore')}</Label>
-		<Input id="expiresOn" name="expiresOn" type="date" bind:value={expiresOn} />
+		<div class="expiry-label-row">
+			<Label for="expiresOn">{t('item.bestBefore')}</Label>
+			{#if expiresOnAiInferred && expiresOn}
+				<Badge tone="default">{t('inventory.aiExpiryBadge')}</Badge>
+			{/if}
+		</div>
+		<Input
+			id="expiresOn"
+			name="expiresOn"
+			type="date"
+			bind:value={expiresOn}
+			onchange={() => {
+				expiresOnAiInferred = false;
+			}}
+		/>
 	</div>
 
 	<div class="field">
@@ -328,6 +378,32 @@
 		.barcode-row :global(input) {
 			min-height: var(--touch-target-min);
 		}
+	}
+
+	.expiry-label-row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+		flex-wrap: wrap;
+	}
+
+	.expiry-prompt {
+		margin-top: var(--space-sm);
+		padding: var(--space-sm);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface-muted);
+	}
+
+	.expiry-prompt p {
+		margin: 0 0 var(--space-sm);
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+	}
+
+	.expiry-prompt-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
 	}
 
 	.error {

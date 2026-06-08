@@ -225,6 +225,20 @@
 			"when": 1751030400000,
 			"tag": "0032_analytics_behavior",
 			"breakpoints": true
+		},
+		{
+			"idx": 32,
+			"version": "7",
+			"when": 1751116800000,
+			"tag": "0033_shopping_to_pantry_mode",
+			"breakpoints": true
+		},
+		{
+			"idx": 33,
+			"version": "7",
+			"when": 1751203200000,
+			"tag": "0034_inventory_last_confirmed_at",
+			"breakpoints": true
 		}
 	]
 }

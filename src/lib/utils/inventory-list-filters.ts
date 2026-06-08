@@ -2,7 +2,7 @@ import type { InventoryItem } from '$lib/domain/inventory-item';
 import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
 import { daysUntilExpiry, EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
 
-export type InventoryExpiryFilter = 'all' | 'expiring' | 'dated';
+export type InventoryExpiryFilter = 'all' | 'expiring' | 'dated' | 'noExpiry';
 export type InventorySortKey = 'name' | 'expiry' | 'quantity';
 export type InventorySortDirection = 'asc' | 'desc';
 
@@ -15,6 +15,9 @@ export function matchesInventoryExpiryFilter(
 ): boolean {
 	if (filter === 'all') {
 		return true;
+	}
+	if (filter === 'noExpiry') {
+		return !item.expiresOn;
 	}
 	if (!item.expiresOn) {
 		return false;

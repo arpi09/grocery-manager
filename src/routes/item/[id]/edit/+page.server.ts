@@ -6,6 +6,7 @@ import { consumeItemSchema } from '$lib/validation/consumption.schemas';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { formatNumericQuantity, parseNumericQuantity } from '$lib/domain/consumption-quantity';
+import { trackInventoryWrite } from '$lib/server/sync-analytics';
 import { appendActionToast } from '$lib/utils/action-toast';
 import { appendCelebration } from '$lib/utils/gamification-celebrate';
 import { error, fail, redirect } from '@sveltejs/kit';
@@ -129,6 +130,13 @@ export const actions: Actions = {
 					remainingLabel = `${formatNumericQuantity(remainingQty)}${unitSuffix}`.trim();
 				}
 			}
+
+			trackInventoryWrite(event.locals.pmfService, {
+				userId: event.locals.user!.id,
+				householdId: event.locals.householdId,
+				action: 'consume',
+				itemId: event.params.id
+			});
 		} catch (e) {
 			if (e instanceof InventoryNotFoundError) error(404, 'Item not found');
 			if (e instanceof InvalidConsumptionAmountError) {

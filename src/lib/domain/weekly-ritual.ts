@@ -73,12 +73,13 @@ export function distributeMealDates(
 	return pool.slice(0, slots);
 }
 
-/** Promote weekly ritual hero Mon–Wed or whenever expiring inventory exists. */
+/** Promote weekly ritual hero Mon–Wed or when pantry needs a quick sync. */
 export function shouldPromoteWeeklyRitual(
 	hasExpiringItems: boolean,
+	syncNudgeCount = 0,
 	referenceDate = new Date()
 ): boolean {
-	if (hasExpiringItems) {
+	if (hasExpiringItems || syncNudgeCount > 0) {
 		return true;
 	}
 

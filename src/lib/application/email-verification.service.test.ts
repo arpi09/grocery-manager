@@ -48,7 +48,9 @@ describe('EmailVerificationService', () => {
 			findProfileById: vi.fn(),
 			updateProfile: vi.fn(),
 			updateThemePreference: vi.fn(),
-			markEmailVerified: vi.fn()
+			markEmailVerified: vi.fn(),
+			getShoppingToPantryMode: vi.fn(),
+			updateShoppingToPantryMode: vi.fn()
 		};
 		tokens = {
 			createToken: vi.fn(),

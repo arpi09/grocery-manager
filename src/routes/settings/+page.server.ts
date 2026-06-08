@@ -30,7 +30,8 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		autoExpiredGraceDays,
 		planLimits,
 		billing,
-		pushNotificationsEnabled
+		pushNotificationsEnabled,
+		shoppingToPantryMode
 	] = await Promise.all([
 		user ? locals.petService.listPets(user.id) : Promise.resolve([]),
 		user ? locals.householdService.getHouseholdForUser(user.id) : Promise.resolve(null),
@@ -54,7 +55,10 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 				})
 			: Promise.resolve(null),
 		householdId ? locals.billingService.getBillingState(householdId) : Promise.resolve(null),
-		user ? pushSubscriptionRepository.isPushEnabled(user.id) : Promise.resolve(false)
+		user ? pushSubscriptionRepository.isPushEnabled(user.id) : Promise.resolve(false),
+		user
+			? locals.profileService.getShoppingToPantryMode(user.id)
+			: Promise.resolve('ask' as const)
 	]);
 
 	const checkout = url.searchParams.get('checkout');
@@ -91,7 +95,8 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		isOwner,
 		pendingInvites,
 		kivraForwardEnabled,
-		kivraForwardAddress
+		kivraForwardAddress,
+		shoppingToPantryMode
 	};
 };
 

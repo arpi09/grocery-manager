@@ -5,6 +5,7 @@ import { EmailVerificationService } from '$lib/application/email-verification.se
 import { OAuthService } from '$lib/application/oauth.service';
 import { ProfileService } from '$lib/application/profile.service';
 import { ShoppingListService } from '$lib/application/shopping-list.service';
+import { ShoppingToPantryService } from '$lib/application/shopping-to-pantry.service';
 import { InventoryService } from '$lib/application/inventory.service';
 import { MealPlanService } from '$lib/application/meal-plan.service';
 import { WeeklyRitualService } from '$lib/application/weekly-ritual.service';
@@ -71,7 +72,7 @@ import { rateLimitAdapter } from '$lib/infrastructure/adapters/rate-limit.adapte
 import { shelfLifeInferenceAdapter } from '$lib/infrastructure/adapters/shelf-life-inference.adapter';
 import { stripeAdapter } from '$lib/infrastructure/adapters/stripe.adapter';
 
-const userRepository = new DrizzleUserRepository();
+export const userRepository = new DrizzleUserRepository();
 export const passwordResetRepository = new DrizzlePasswordResetRepository();
 const emailVerificationRepository = new DrizzleEmailVerificationRepository();
 const adminActionRepository = new DrizzleAdminActionRepository();
@@ -165,6 +166,7 @@ export const wrappedService = new WrappedService(
 	consumptionRepository
 );
 export const shoppingListService = new ShoppingListService(shoppingListRepository);
+export const shoppingToPantryService = new ShoppingToPantryService(inventoryService, userRepository);
 export const mealPlanService = new MealPlanService(mealPlanRepository);
 export const weeklyRitualService = new WeeklyRitualService(mealPlanService, shoppingListService);
 export const petService = new PetService(petRepository);

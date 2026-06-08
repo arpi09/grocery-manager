@@ -5,6 +5,7 @@ import {
 	type ExpiryReminderDays
 } from '$lib/domain/expiry-reminder';
 import type { InventoryItem } from '$lib/domain/inventory-item';
+import { daysUntilAutoExpiredMove, type AutoExpiredGraceDays } from '$lib/domain/auto-expired';
 import { daysUntilExpiry, formatExpiryDate } from '$lib/domain/expiry';
 import { locationLabel } from '$lib/i18n/domain-labels';
 import type { HouseholdService } from '$lib/application/household.service';
@@ -26,6 +27,8 @@ export interface ExpiryReminderHouseholdSection {
 	householdId: string;
 	householdName: string;
 	items: InventoryItem[];
+	movingSoonIds?: Set<string>;
+	graceDays: AutoExpiredGraceDays;
 }
 
 export type ExpiryReminderRunResult =
@@ -121,14 +124,23 @@ export class ExpiryReminderService {
 				inventoryUrl: weeklyRitualUrl,
 				sections: sections.map((section) => ({
 					householdName: section.householdName,
-					items: section.items.map((item) => ({
-						name: item.name,
-						locationLabel: locationLabel('sv', item.location),
-						expiresOnLabel: item.expiresOn ? formatExpiryDate(item.expiresOn, 'sv') : '',
-						daysLeftLabel: item.expiresOn
-							? formatDaysLeftSv(daysUntilExpiry(item.expiresOn))
-							: ''
-					}))
+					items: section.items.map((item) => {
+						const isMovingSoon = section.movingSoonIds?.has(item.id) ?? false;
+						return {
+							name: item.name,
+							locationLabel: locationLabel('sv', item.location),
+							expiresOnLabel: item.expiresOn ? formatExpiryDate(item.expiresOn, 'sv') : '',
+							daysLeftLabel: isMovingSoon
+								? formatMovingToAutoExpiredSoonSv(
+										item.expiresOn
+											? daysUntilAutoExpiredMove(item.expiresOn, section.graceDays)
+											: 0
+									)
+								: item.expiresOn
+									? formatDaysLeftSv(daysUntilExpiry(item.expiresOn))
+									: ''
+						};
+					})
 				}))
 			});
 
@@ -201,14 +213,23 @@ export class ExpiryReminderService {
 		const sections: ExpiryReminderHouseholdSection[] = [];
 
 		for (const household of households) {
-			const items = await this.inventoryService.listExpiringBefore(household.id, beforeDate);
+			const graceDays = await this.inventoryService.getAutoExpiredGraceDays(household.id);
+			const [expiringItems, movingSoonItems] = await Promise.all([
+				this.inventoryService.listExpiringBefore(household.id, beforeDate),
+				this.inventoryService.listMovingToAutoExpiredSoon(household.id)
+			]);
+			const expiringIds = new Set(expiringItems.map((item) => item.id));
+			const uniqueMovingSoon = movingSoonItems.filter((item) => !expiringIds.has(item.id));
+			const items = [...expiringItems, ...uniqueMovingSoon];
 			if (items.length === 0) {
 				continue;
 			}
 			sections.push({
 				householdId: household.id,
 				householdName: household.name,
-				items
+				items,
+				movingSoonIds: new Set(uniqueMovingSoon.map((item) => item.id)),
+				graceDays
 			});
 		}
 
@@ -220,4 +241,14 @@ function formatDaysLeftSv(days: number): string {
 	if (days <= 0) return 'Går ut idag';
 	if (days === 1) return '1 dag kvar';
 	return `${days} dagar kvar`;
+}
+
+function formatMovingToAutoExpiredSoonSv(daysUntilMove: number): string {
+	if (daysUntilMove <= 0) {
+		return 'Hamnar i granskning snart — inget raderas automatiskt';
+	}
+	if (daysUntilMove === 1) {
+		return 'Hamnar i granskning om 1 dag — inget raderas automatiskt';
+	}
+	return `Hamnar i granskning om ${daysUntilMove} dagar — inget raderas automatiskt`;
 }

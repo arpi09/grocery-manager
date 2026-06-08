@@ -30,6 +30,11 @@ describe('action-toast', () => {
 		expect(actionToastMessage('sv', 'shoppingAdded')).toContain('inköpslistan');
 	});
 
+	it('formats auto-expired clear toast with remaining pantry count', () => {
+		expect(actionToastMessage('sv', 'autoExpiredCleared', undefined, '12')).toContain('12');
+		expect(actionToastMessage('en', 'autoExpiredCleared', undefined, '5')).toContain('5');
+	});
+
 	it('maps toast kinds to visual tones', () => {
 		expect(actionToastTone('itemCreated')).toBe('success');
 		expect(actionToastTone('itemDeleted')).toBe('info');

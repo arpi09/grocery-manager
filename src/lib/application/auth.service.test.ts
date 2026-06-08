@@ -25,7 +25,9 @@ describe('AuthService', () => {
 			findProfileById: vi.fn(),
 			updateProfile: vi.fn(),
 			updateThemePreference: vi.fn(),
-			markEmailVerified: vi.fn()
+			markEmailVerified: vi.fn(),
+			getShoppingToPantryMode: vi.fn(),
+			updateShoppingToPantryMode: vi.fn()
 		};
 		service = new AuthService(users);
 	});

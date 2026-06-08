@@ -18,6 +18,10 @@
 			displayName={data.user?.displayName}
 			householdId={data.activeHousehold?.id ?? null}
 			receiptAutopilotSuggestions={data.receiptAutopilotSuggestions}
+			receiptFinishSuggestions={data.receiptFinishSuggestions}
+			recentItemNames={data.recentItemNames}
+			duplicateGroups={data.duplicateGroups}
+			lastUpdatedByDisplayName={data.lastUpdatedByDisplayName}
 		/>
 	</PageContainer>
 </AppLayout>

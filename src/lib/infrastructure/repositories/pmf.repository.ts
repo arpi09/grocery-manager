@@ -51,6 +51,11 @@ export interface IPmfRepository {
 	getFunnelMetrics(periodDays: PmfFunnelPeriodDays, now?: Date): Promise<PmfFunnelSnapshot>;
 	getLaunchCohortSignups(periodDays: PmfFunnelPeriodDays, now?: Date): Promise<LaunchCohortSnapshot>;
 	hasHouseholdEvent(householdId: string, eventType: ProductEventType): Promise<boolean>;
+	countHouseholdEventsSince(
+		householdId: string,
+		eventType: ProductEventType,
+		since: Date
+	): Promise<number>;
 	countUserScanEvents(userId: string): Promise<number>;
 	getUserCreatedAt(userId: string): Promise<Date | null>;
 }
@@ -438,17 +443,31 @@ export class DrizzlePmfRepository implements IPmfRepository {
 	}
 
 	async hasHouseholdEvent(householdId: string, eventType: ProductEventType) {
+		const count = await this.countHouseholdEventsSince(
+			householdId,
+			eventType,
+			new Date(0)
+		);
+		return count > 0;
+	}
+
+	async countHouseholdEventsSince(
+		householdId: string,
+		eventType: ProductEventType,
+		since: Date
+	) {
 		const [row] = await db
 			.select({ count: sql<number>`count(*)::int` })
 			.from(productEventTable)
 			.where(
 				and(
 					eq(productEventTable.householdId, householdId),
-					eq(productEventTable.eventType, eventType)
+					eq(productEventTable.eventType, eventType),
+					gte(productEventTable.createdAt, since)
 				)
 			);
 
-		return (row?.count ?? 0) > 0;
+		return row?.count ?? 0;
 	}
 
 	async countUserScanEvents(userId: string): Promise<number> {

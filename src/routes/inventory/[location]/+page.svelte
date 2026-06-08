@@ -1,5 +1,6 @@
 <script lang="ts">
 
+	import { page } from '$app/state';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
@@ -51,6 +52,10 @@
 	const totalCount = $derived(data.activeTotal + data.autoExpiredTotal + data.finishedTotal);
 
 	const hasInventory = $derived(totalCount > 0);
+	const initialShowAutoExpired = $derived(page.url.searchParams.get('autoExpired') === '1');
+	const initialExpiryFilter = $derived(
+		page.url.searchParams.get('filter') === 'noExpiry' ? 'noExpiry' : 'all'
+	);
 
 
 
@@ -99,6 +104,8 @@
 
 					</a>
 
+					<a class="barcode-action" href={barcodeScanHref}>{t('inventory.otherWaysBarcode')}</a>
+
 					<details class="other-ways">
 
 						<summary>{t('inventory.otherWays')}</summary>
@@ -106,8 +113,6 @@
 						<nav class="other-ways-nav" aria-label={t('inventory.otherWays')}>
 
 							<a href={addItemHref} data-sveltekit-reload>{t('inventory.otherWaysManual')}</a>
-
-							<a href={barcodeScanHref}>{t('inventory.otherWaysBarcode')}</a>
 
 						</nav>
 
@@ -136,6 +141,8 @@
 				canWrite={data.canWrite}
 
 				{hasInventory}
+				{initialShowAutoExpired}
+				initialExpiryFilter={initialExpiryFilter}
 
 			/>
 
@@ -223,7 +230,20 @@
 
 	}
 
+	.barcode-action {
+		align-self: flex-start;
+		min-height: var(--touch-target-min);
+		padding: 0.25rem 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: underline;
+		text-underline-offset: 0.12em;
+	}
 
+	.barcode-action:hover {
+		color: var(--color-primary-hover);
+	}
 
 	.other-ways {
 

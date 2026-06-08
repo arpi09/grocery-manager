@@ -1,7 +1,10 @@
 import { canEditInventory, type HouseholdRole } from '$lib/domain/household';
 import {
+	detectReceiptFinishSuggestions,
 	detectReceiptPatternSuggestions,
 	normalizeReceiptProductName,
+	receiptFinishDismissKey,
+	type ReceiptFinishSuggestion,
 	type ReceiptPatternSuggestion,
 	type RecordReceiptPurchaseLineInput
 } from '$lib/domain/purchase-pattern';
@@ -44,6 +47,17 @@ export class PurchasePatternService {
 		]);
 
 		return detectReceiptPatternSuggestions(lines, inventoryKeys, dismissedKeys);
+	}
+
+	async getFinishSuggestions(householdId: string): Promise<ReceiptFinishSuggestion[]> {
+		const since = purchasePatternLookbackDate();
+		const [lines, dismissedKeys, inventoryItems] = await Promise.all([
+			this.repository.listRecentLines(householdId, since),
+			this.repository.listDismissedKeys(householdId),
+			this.repository.listActiveInventoryMatches(householdId)
+		]);
+
+		return detectReceiptFinishSuggestions(lines, inventoryItems, dismissedKeys);
 	}
 
 	async acceptSuggestion(
@@ -94,5 +108,42 @@ export class PurchasePatternService {
 		}
 
 		await this.repository.dismissPattern(householdId, key);
+	}
+
+	async acceptFinishSuggestion(
+		householdId: string,
+		userId: string,
+		role: HouseholdRole,
+		inventoryItemId: string
+	): Promise<{ name: string }> {
+		if (!canEditInventory(role)) {
+			throw new PurchasePatternReadOnlyError();
+		}
+
+		const suggestions = await this.getFinishSuggestions(householdId);
+		const suggestion = suggestions.find((entry) => entry.inventoryItemId === inventoryItemId);
+		if (!suggestion) {
+			throw new PurchasePatternNotFoundError();
+		}
+
+		await this.inventoryService.markAsFinished(householdId, inventoryItemId, userId, role);
+		return { name: suggestion.displayName };
+	}
+
+	async dismissFinishSuggestion(
+		householdId: string,
+		role: HouseholdRole,
+		inventoryItemId: string
+	): Promise<void> {
+		if (!canEditInventory(role)) {
+			throw new PurchasePatternReadOnlyError();
+		}
+
+		const suggestions = await this.getFinishSuggestions(householdId);
+		if (!suggestions.some((entry) => entry.inventoryItemId === inventoryItemId)) {
+			throw new PurchasePatternNotFoundError();
+		}
+
+		await this.repository.dismissPattern(householdId, receiptFinishDismissKey(inventoryItemId));
 	}
 }

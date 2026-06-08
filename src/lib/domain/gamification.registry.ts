@@ -129,6 +129,17 @@ export const GAMIFICATION_REGISTRY: GamificationRegistryEntry[] = [
 		illustration: 'streak',
 		celebrationKind: 'zeroWasteStreak',
 		defaultSurface: 'moment'
+	},
+	{
+		id: 'syncWeek',
+		kind: 'celebration',
+		threshold: 1,
+		icon: 'sparkle',
+		i18nKey: 'gamification.syncWeek',
+		celebrateKey: 'gamification.celebrateSyncWeek',
+		illustration: 'ritual',
+		celebrationKind: 'syncWeek',
+		defaultSurface: 'toast'
 	}
 ];
 

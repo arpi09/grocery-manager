@@ -12,6 +12,7 @@ export interface InventoryItem {
 	expiresOn: string | null;
 	expiresOnSource: ExpiresOnSource | null;
 	notes: string | null;
+	lastConfirmedAt: Date;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -25,6 +26,9 @@ export interface CreateInventoryItemInput {
 	expiresOnSource?: ExpiresOnSource | null;
 	inferExpiry?: boolean;
 	notes?: string | null;
+	/** When set, add quantity to this row instead of creating a new one. */
+	mergeIntoId?: string | null;
+	lastConfirmedAt?: Date;
 }
 
 export interface UpdateInventoryItemInput {
@@ -35,6 +39,7 @@ export interface UpdateInventoryItemInput {
 	expiresOn?: string | null;
 	expiresOnSource?: ExpiresOnSource | null;
 	notes?: string | null;
+	lastConfirmedAt?: Date;
 }
 
 export interface LocationCount {

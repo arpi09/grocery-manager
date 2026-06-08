@@ -1,8 +1,9 @@
-import { and, eq, gte } from 'drizzle-orm';
+import { and, eq, gt, gte } from 'drizzle-orm';
 import type { StorageLocation } from '$lib/domain/location';
 import {
 	normalizeReceiptProductName,
 	RECEIPT_PATTERN_WINDOW_DAYS,
+	type PantryInventoryMatch,
 	type RecordReceiptPurchaseLineInput,
 	type ReceiptPurchaseLineRecord
 } from '$lib/domain/purchase-pattern';
@@ -20,6 +21,7 @@ export interface IPurchasePatternRepository {
 	listDismissedKeys(householdId: string): Promise<Set<string>>;
 	dismissPattern(householdId: string, normalizedKey: string): Promise<void>;
 	listInventoryNormalizedKeys(householdId: string): Promise<Set<string>>;
+	listActiveInventoryMatches(householdId: string): Promise<PantryInventoryMatch[]>;
 }
 
 function mapLine(row: typeof receiptPurchaseLineTable.$inferSelect): ReceiptPurchaseLineRecord {
@@ -97,6 +99,28 @@ export class DrizzlePurchasePatternRepository implements IPurchasePatternReposit
 			.where(eq(inventoryItemTable.householdId, householdId));
 
 		return new Set(rows.map((row) => normalizeReceiptProductName(row.name)));
+	}
+
+	async listActiveInventoryMatches(householdId: string): Promise<PantryInventoryMatch[]> {
+		const rows = await this.database
+			.select({
+				id: inventoryItemTable.id,
+				name: inventoryItemTable.name,
+				location: inventoryItemTable.location,
+				quantity: inventoryItemTable.quantity,
+				unit: inventoryItemTable.unit
+			})
+			.from(inventoryItemTable)
+			.where(and(eq(inventoryItemTable.householdId, householdId), gt(inventoryItemTable.quantity, '0')));
+
+		return rows.map((row) => ({
+			id: row.id,
+			name: row.name,
+			location: row.location as PantryInventoryMatch['location'],
+			quantity: row.quantity,
+			unit: row.unit,
+			normalizedKey: normalizeReceiptProductName(row.name)
+		}));
 	}
 }
 

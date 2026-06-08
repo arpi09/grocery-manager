@@ -227,6 +227,11 @@ export function actionToastMessage(
 			remaining: remainingTrimmed
 		});
 	}
+	if (kind === 'autoExpiredCleared' && remainingTrimmed) {
+		return translate(locale, 'actionToast.autoExpiredClearedRemaining', {
+			remaining: remainingTrimmed
+		});
+	}
 	if (trimmed) {
 		return translate(locale, keys.withLabel, { label: trimmed });
 	}

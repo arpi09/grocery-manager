@@ -12,8 +12,11 @@
 		canWrite?: boolean;
 		finished?: boolean;
 		autoExpired?: boolean;
+		autoExpiredGraceDays?: number;
+		finishingIds?: Set<string>;
 		ariaLabel: string;
-		onLogUsage?: (item: InventoryItem) => void;
+		onFinishOneTap?: (item: InventoryItem) => void;
+		onPartialConsume?: (item: InventoryItem) => void;
 	}
 
 	let {
@@ -24,8 +27,11 @@
 		canWrite = false,
 		finished = false,
 		autoExpired = false,
+		autoExpiredGraceDays = 7,
+		finishingIds = new Set<string>(),
 		ariaLabel,
-		onLogUsage
+		onFinishOneTap,
+		onPartialConsume
 	}: Props = $props();
 
 	function headerAriaSort(key: InventorySortKey): 'ascending' | 'descending' | 'none' {
@@ -92,7 +98,16 @@
 		</thead>
 		<tbody>
 			{#each items as item (item.id)}
-				<InventoryTableRow {item} {canWrite} {finished} {autoExpired} {onLogUsage} />
+				<InventoryTableRow
+					{item}
+					{canWrite}
+					{finished}
+					{autoExpired}
+					{autoExpiredGraceDays}
+					finishing={finishingIds.has(item.id)}
+					{onFinishOneTap}
+					{onPartialConsume}
+				/>
 			{/each}
 		</tbody>
 	</table>

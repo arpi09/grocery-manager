@@ -13,7 +13,8 @@ export type GamificationCelebrationKind =
 	| 'eatFirstRitual'
 	| 'weeklyRitualFirst'
 	| 'savings500'
-	| 'streak5';
+	| 'streak5'
+	| 'syncWeek';
 
 export type MilestoneId =
 	| 'pantry10'
@@ -91,6 +92,10 @@ export function shouldCelebrateSavingsMilestone(savedSek: number): boolean {
 
 export function shouldCelebrateWeeklyRitualFirst(hasWeeklyRitual: boolean): boolean {
 	return hasWeeklyRitual;
+}
+
+export function shouldCelebrateSyncWeek(inventoryWritesThisWeek: number): boolean {
+	return inventoryWritesThisWeek >= 1;
 }
 
 export function buildMilestones(input: {

@@ -7,6 +7,7 @@ import { itemSchema } from '$lib/validation/inventory.schemas';
 import { buildScanReturnUrl, type ScanToastKind } from '$lib/utils/scan-toast';
 import { parseScanMode, parseScanReturnTo } from '$lib/utils/scan-nav';
 import { recordProductEvent } from '$lib/server/product-events';
+import { trackInventoryWrite } from '$lib/server/sync-analytics';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
@@ -87,6 +88,10 @@ async function bulkCreateFromForm(
 			location
 		});
 
+		const mergeIntoIdRaw = formData.get(`merge_${index}`);
+		const mergeIntoId =
+			typeof mergeIntoIdRaw === 'string' && mergeIntoIdRaw.trim() ? mergeIntoIdRaw.trim() : null;
+
 		await event.locals.inventoryService.createItem(
 			event.locals.householdId!,
 			event.locals.user!.id,
@@ -96,7 +101,8 @@ async function bulkCreateFromForm(
 				quantity,
 				unit,
 				expiresOn: null,
-				notes: null
+				notes: null,
+				mergeIntoId
 			},
 			event.locals.householdRole!
 		);
@@ -124,6 +130,11 @@ async function bulkCreateFromForm(
 	}
 
 	const label = `${created} varor`;
+	trackInventoryWrite(event.locals.pmfService, {
+		userId: event.locals.user!.id,
+		householdId: event.locals.householdId,
+		action: 'create'
+	});
 	recordProductEvent(event.locals.pmfService, {
 		userId: event.locals.user!.id,
 		householdId: event.locals.householdId,
@@ -145,7 +156,7 @@ export const actions: Actions = {
 			return fail(400, { errors: parsed.error.flatten().fieldErrors });
 		}
 
-		await event.locals.inventoryService.createItem(
+		const created = await event.locals.inventoryService.createItem(
 			event.locals.householdId!,
 			event.locals.user!.id,
 			{
@@ -158,6 +169,13 @@ export const actions: Actions = {
 			},
 			event.locals.householdRole!
 		);
+
+		trackInventoryWrite(event.locals.pmfService, {
+			userId: event.locals.user!.id,
+			householdId: event.locals.householdId,
+			action: 'create',
+			itemId: created.id
+		});
 
 		const returnToRaw = formData.get('returnTo');
 		const safeReturn = parseScanReturnTo(

@@ -8,11 +8,21 @@
 	import SearchInput from '$lib/components/molecules/SearchInput.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
+	import ShoppingToPantrySheet from '$lib/components/molecules/ShoppingToPantrySheet.svelte';
+	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
+	import type { StorageLocation } from '$lib/domain/location';
+	import {
+		clearPantryBridgeYesCount,
+		recordPantryBridgeYes
+	} from '$lib/utils/pantry-bridge-nudge';
+	import type { PantryBridgePreview } from '$lib/application/shopping-to-pantry.service';
+	import type { ShoppingToPantryMode } from '$lib/domain/shopping-to-pantry';
 	import { TOAST_UNDO_DURATION_MS } from '$lib/utils/action-toast';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { fetchCheckedShoppingItems } from '$lib/client/shopping-data';
 	import { trackProductEvent } from '$lib/client/product-events';
-	import { t } from '$lib/i18n';
+	import { getLocale, t } from '$lib/i18n';
+	import { locationLabel } from '$lib/i18n/domain-labels';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { getDeleteCopy } from '$lib/utils/delete-safety';
 	import { bindSubmittingWithToast } from '$lib/utils/form-submit-feedback';
@@ -26,12 +36,14 @@
 		items,
 		checkedCount = 0,
 		canEdit,
+		shoppingToPantryMode = 'ask',
 		id: panelId,
 		tabindex: panelTabindex
 	}: {
 		items: ShoppingListItem[];
 		checkedCount?: number;
 		canEdit: boolean;
+		shoppingToPantryMode?: ShoppingToPantryMode;
 		id?: string;
 		tabindex?: number;
 	} = $props();
@@ -89,7 +101,17 @@
 	let exportCopiedFormat = $state<ShoppingListExportFormat | null>(null);
 	let addSubmitting = $state(false);
 	let removingIds = $state(new Set<string>());
+	let pantrySheetOpen = $state(false);
+	let pantryBridgeItem = $state<ShoppingListItem | null>(null);
+	let pantryBridgePreview = $state<PantryBridgePreview | null>(null);
+	let pantryBridgeMode = $state<ShoppingToPantryMode>(shoppingToPantryMode);
+	let alwaysNudgeLocation = $state<StorageLocation | null>(null);
+	let alwaysNudgeDismissed = $state(false);
 	const REMOVE_ANIMATION_MS = 280;
+
+	$effect(() => {
+		pantryBridgeMode = shoppingToPantryMode;
+	});
 
 	const undoCopy = $derived(getDeleteCopy(1, 'shoppingListItem'));
 	const undoMessage = $derived(
@@ -160,11 +182,36 @@
 			const isCheckingOff = !item.checked;
 			await update();
 			if (result.type === 'success') {
+				const data = result.data as
+					| {
+							pantryBridge?: {
+								item: ShoppingListItem;
+								preview: PantryBridgePreview;
+								mode: ShoppingToPantryMode;
+							};
+							pantryAdded?: {
+								message?: string;
+								auto?: boolean;
+								location?: StorageLocation;
+							};
+					  }
+					| undefined;
+
 				if (isCheckingOff) {
 					removingIds = new Set([...removingIds, item.id]);
 					showSuccessToast(t('actionToast.shoppingChecked', { label: item.name }));
 					await new Promise((resolve) => window.setTimeout(resolve, REMOVE_ANIMATION_MS));
 				}
+
+				if (data?.pantryAdded?.message) {
+					handlePantryAdded(data.pantryAdded.message, data.pantryAdded.location);
+				} else if (data?.pantryBridge) {
+					pantryBridgeItem = data.pantryBridge.item;
+					pantryBridgePreview = data.pantryBridge.preview;
+					pantryBridgeMode = data.pantryBridge.mode;
+					pantrySheetOpen = true;
+				}
+
 				const next = new Set(removingIds);
 				next.delete(item.id);
 				removingIds = next;
@@ -173,9 +220,45 @@
 		};
 	}
 
+	function closePantrySheet() {
+		pantrySheetOpen = false;
+		pantryBridgeItem = null;
+		pantryBridgePreview = null;
+	}
+
+	function skipPantrySheet() {
+		closePantrySheet();
+		void invalidateAll();
+	}
+
 	function showSuccessToast(message: string) {
 		showClientToast(message, { variant: 'success' });
 	}
+
+	function handlePantryAdded(message: string, location?: StorageLocation) {
+		showSuccessToast(message);
+		if (!location || pantryBridgeMode === 'always' || alwaysNudgeDismissed) {
+			return;
+		}
+		const count = recordPantryBridgeYes(location);
+		if (count >= 3) {
+			alwaysNudgeLocation = location;
+		}
+	}
+
+	function dismissAlwaysNudge() {
+		alwaysNudgeDismissed = true;
+		if (alwaysNudgeLocation) {
+			clearPantryBridgeYesCount(alwaysNudgeLocation);
+		}
+		alwaysNudgeLocation = null;
+	}
+
+	$effect(() => {
+		if (shoppingToPantryMode === 'always') {
+			alwaysNudgeLocation = null;
+		}
+	});
 
 	function createClearCheckedEnhance(): SubmitFunction {
 		return () => async ({ result, update }) => {
@@ -306,6 +389,7 @@
 								: showChecked
 									? t('shopping.hideChecked')
 									: t('shopping.showChecked', { count: checkedCount })}
+							<span class="checked-badge">{checkedCount}</span>
 						</h2>
 					</button>
 					{#if canEdit && showChecked && visibleChecked.length > 0}
@@ -368,6 +452,38 @@
 		{/if}
 	{/if}
 </section>
+
+{#if alwaysNudgeLocation && shoppingToPantryMode !== 'always'}
+	<div class="always-nudge">
+		<FeedbackBanner
+			tone="info"
+			message={t('shopping.pantryBridge.alwaysNudge', {
+				location: locationLabel(getLocale(), alwaysNudgeLocation)
+			})}
+		/>
+		<form method="POST" action="?/savePantryMode" use:enhance={() => async ({ update }) => {
+			await update();
+			dismissAlwaysNudge();
+			await invalidateAll();
+		}}>
+			<input type="hidden" name="shoppingToPantryMode" value="always" />
+			<Button type="submit" variant="secondary">{t('shopping.pantryBridge.alwaysNudgeCta')}</Button>
+		</form>
+		<button type="button" class="text-action" onclick={dismissAlwaysNudge}>
+			{t('shopping.pantryBridge.alwaysNudgeDismiss')}
+		</button>
+	</div>
+{/if}
+
+<ShoppingToPantrySheet
+	open={pantrySheetOpen}
+	item={pantryBridgeItem}
+	preview={pantryBridgePreview}
+	mode={pantryBridgeMode}
+	onClose={closePantrySheet}
+	onSkip={skipPantrySheet}
+	onAdded={(message) => handlePantryAdded(message, pantryBridgePreview?.location ?? undefined)}
+/>
 
 {#if undoPayload}
 	<!-- Local undo toast: longer duration + inline undo action -->
@@ -547,6 +663,28 @@
 
 	.checked-toggle:hover h2 {
 		color: var(--color-primary);
+	}
+
+	.checked-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 1.35rem;
+		height: 1.35rem;
+		margin-left: var(--space-xs);
+		padding: 0 0.35rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-text-muted) 14%, transparent);
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: var(--color-text-muted);
+	}
+
+	.always-nudge {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		margin-bottom: var(--space-md);
 	}
 
 	.undo-toast-wrap {

@@ -13,11 +13,11 @@
 	import GamificationToast from '$lib/components/molecules/GamificationToast.svelte';
 	import CelebrationMoment from '$lib/components/molecules/CelebrationMoment.svelte';
 	import InventoryScanToast from '$lib/components/molecules/InventoryScanToast.svelte';
+	import ExpiryNudgeToast from '$lib/components/molecules/ExpiryNudgeToast.svelte';
 	import ActivationCelebration from '$lib/components/organisms/ActivationCelebration.svelte';
 	import HouseholdInvitePrompt from '$lib/components/organisms/HouseholdInvitePrompt.svelte';
 	import OnboardingGuide from '$lib/components/organisms/OnboardingGuide.svelte';
 	import PageHintModal from '$lib/components/organisms/PageHintModal.svelte';
-	import RegistrationWelcome from '$lib/components/organisms/RegistrationWelcome.svelte';
 	import PostOnboardingSurvey from '$lib/components/organisms/PostOnboardingSurvey.svelte';
 	import PmfSurveyBanner from '$lib/components/organisms/PmfSurveyBanner.svelte';
 	import { canEditInventory } from '$lib/domain/household';
@@ -63,9 +63,6 @@
 
 	const locale = $derived((page.data.locale === 'en' ? 'en' : 'sv') as 'sv' | 'en');
 	const showDemoBanner = $derived(Boolean(page.data.user?.isDemo));
-	const showRegistrationWelcome = $derived(
-		browser && page.url.searchParams.get('welcome') === '1' && Boolean(page.data.user?.emailVerified)
-	);
 
 	$effect(() => {
 		if (!browser) {
@@ -120,6 +117,21 @@
 			return;
 		}
 
+		if (page.url.searchParams.get('welcome') !== '1' || !page.data.user?.emailVerified) {
+			return;
+		}
+
+		const url = new URL(page.url);
+		url.searchParams.delete('welcome');
+		const next = `${url.pathname}${url.search}${url.hash}`;
+		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
+	});
+
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+
 		const stripWelcomeParam = () => {
 			if (page.url.searchParams.get('welcome') !== '1') {
 				return;
@@ -146,9 +158,6 @@
 		{#if showDemoBanner}
 			<DemoAccountBanner />
 		{/if}
-		{#if showRegistrationWelcome}
-			<RegistrationWelcome />
-		{/if}
 		{#key page.url.pathname}
 			<div class="page-content motion-page-enter">
 				{@render children()}
@@ -156,6 +165,7 @@
 		{/key}
 	</main>
 	<InventoryScanToast />
+	<ExpiryNudgeToast />
 	<ActionToast />
 	<ClientToast />
 	<GamificationToast />

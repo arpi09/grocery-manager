@@ -26,6 +26,7 @@
 		readReceiptBulkLocation,
 		writeReceiptBulkLocation
 	} from '$lib/utils/receipt-bulk-location';
+	import { fetchMergeCandidates, type MergeCandidateMatch } from '$lib/client/merge-candidates';
 
 	interface Props {
 		returnTo: string;
@@ -49,6 +50,8 @@
 	let step = $state<'upload' | 'review'>('upload');
 	let bulkSubmitting = $state(false);
 	let discardReviewOpen = $state(false);
+	let mergeCandidates = $state<Array<MergeCandidateMatch | null>>([]);
+	let mergeSelected = $state<Record<number, boolean>>({});
 
 	const hubHref = $derived(`/scan?from=${encodeURIComponent(returnTo)}`);
 	const cancelHref = $derived(hubHref);
@@ -122,6 +125,7 @@
 			bulkLocation = modeLocation(data.lines.map((l) => l.location)) ?? data.lines[0]?.location ?? 'cupboard';
 			locationOverrides = new Set();
 			step = 'review';
+			void loadMergeCandidates();
 		} catch {
 			parseError = t('receipt.networkError');
 		} finally {
@@ -162,6 +166,18 @@
 	function setLineLocation(index: number, loc: StorageLocation) {
 		lineLocations[index] = loc;
 		locationOverrides = new Set(locationOverrides).add(index);
+		void loadMergeCandidates();
+	}
+
+	async function loadMergeCandidates() {
+		const candidateLines = lines.map((line, index) => ({
+			name: line.name,
+			location: lineLocations[index] ?? line.location
+		}));
+		mergeCandidates = await fetchMergeCandidates(candidateLines);
+		mergeSelected = Object.fromEntries(
+			mergeCandidates.map((match, index) => [index, Boolean(match)])
+		);
 	}
 
 	function toggleAll(checked: boolean) {
@@ -190,6 +206,8 @@
 		selected = {};
 		lineLocations = {};
 		locationOverrides = new Set();
+		mergeCandidates = [];
+		mergeSelected = {};
 		step = 'upload';
 		parseError = null;
 	}
@@ -349,6 +367,24 @@
 								</select>
 							</label>
 						</div>
+						{#if mergeCandidates[index]}
+							<label class="merge-hint">
+								<input
+									type="checkbox"
+									checked={mergeSelected[index]}
+									onchange={(e) => {
+										mergeSelected[index] = (e.currentTarget as HTMLInputElement).checked;
+									}}
+								/>
+								<span>
+									{t('inventory.mergeExisting', {
+										name: mergeCandidates[index]!.name,
+										quantity: mergeCandidates[index]!.quantity,
+										unit: mergeCandidates[index]!.unit ?? ''
+									})}
+								</span>
+							</label>
+						{/if}
 						{#if selected[index]}
 							<input type="hidden" name={`name_${index}`} value={line.name} />
 							<input type="hidden" name={`quantity_${index}`} value={line.quantity ?? '1'} />
@@ -358,6 +394,9 @@
 								name={`location_${index}`}
 								value={lineLocations[index] ?? line.location}
 							/>
+							{#if mergeSelected[index] && mergeCandidates[index]}
+								<input type="hidden" name={`merge_${index}`} value={mergeCandidates[index]!.id} />
+							{/if}
 						{/if}
 					</li>
 				{/each}
@@ -413,6 +452,15 @@
 	.title {
 		margin: 0 0 var(--space-md);
 		font-size: 1.1rem;
+	}
+
+	.merge-hint {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--space-sm);
+		margin-top: var(--space-sm);
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
 	}
 
 	.bulk-location {

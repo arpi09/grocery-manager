@@ -1,3 +1,7 @@
+import {
+	normalizeShoppingToPantryMode,
+	type ShoppingToPantryMode
+} from '$lib/domain/shopping-to-pantry';
 import type { ThemePreference } from '$lib/domain/theme';
 import type { UserProfile } from '$lib/domain/user';
 import type { IUserRepository } from '$lib/infrastructure/repositories/user.repository';
@@ -37,5 +41,21 @@ export class ProfileService {
 			throw new ProfileNotFoundError();
 		}
 		return updated;
+	}
+
+	async setShoppingToPantryMode(
+		userId: string,
+		mode: ShoppingToPantryMode
+	): Promise<ShoppingToPantryMode> {
+		const updated = await this.users.updateShoppingToPantryMode(userId, mode);
+		if (!updated) {
+			throw new ProfileNotFoundError();
+		}
+		return normalizeShoppingToPantryMode(updated);
+	}
+
+	async getShoppingToPantryMode(userId: string): Promise<ShoppingToPantryMode> {
+		const mode = await this.users.getShoppingToPantryMode(userId);
+		return normalizeShoppingToPantryMode(mode);
 	}
 }

@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { db as defaultDb, type AppDatabase } from '$lib/infrastructure/db';
 import { userTable } from '$lib/infrastructure/db/schema';
 import type { SignupUtm } from '$lib/domain/signup-utm';
+import type { ShoppingToPantryMode } from '$lib/domain/shopping-to-pantry';
 import type { ThemePreference } from '$lib/domain/theme';
 import type { UserProfile } from '$lib/domain/user';
 
@@ -37,6 +38,11 @@ export interface IUserRepository {
 		data: { displayName: string | null; avatarUrl: string | null }
 	): Promise<UserProfile | null>;
 	updateThemePreference(id: string, themePreference: ThemePreference): Promise<ThemePreference | null>;
+	getShoppingToPantryMode(id: string): Promise<ShoppingToPantryMode | null>;
+	updateShoppingToPantryMode(
+		id: string,
+		mode: ShoppingToPantryMode
+	): Promise<ShoppingToPantryMode | null>;
 }
 
 function mapProfile(row: {
@@ -171,5 +177,25 @@ export class DrizzleUserRepository implements IUserRepository {
 			.returning();
 
 		return row?.themePreference ?? null;
+	}
+
+	async getShoppingToPantryMode(id: string) {
+		const [row] = await this.db
+			.select({ shoppingToPantryMode: userTable.shoppingToPantryMode })
+			.from(userTable)
+			.where(eq(userTable.id, id))
+			.limit(1);
+
+		return row?.shoppingToPantryMode ?? null;
+	}
+
+	async updateShoppingToPantryMode(id: string, mode: ShoppingToPantryMode) {
+		const [row] = await this.db
+			.update(userTable)
+			.set({ shoppingToPantryMode: mode })
+			.where(eq(userTable.id, id))
+			.returning();
+
+		return row?.shoppingToPantryMode ?? null;
 	}
 }

@@ -52,7 +52,9 @@ describe('ExpiryReminderService push delivery', () => {
 				location: 'fridge',
 				expiresOn: '2026-06-03'
 			}
-		])
+		]),
+		listMovingToAutoExpiredSoon: vi.fn().mockResolvedValue([]),
+		getAutoExpiredGraceDays: vi.fn().mockResolvedValue(7)
 	};
 
 	const pushRepository = {

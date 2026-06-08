@@ -1,12 +1,14 @@
 ﻿<script lang="ts">
 
 	import { browser } from '$app/environment';
+	import { invalidateAll } from '$app/navigation';
 
 	import Button from '$lib/components/atoms/Button.svelte';
 
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 
 	import ConsumeItemPanel from '$lib/components/molecules/ConsumeItemPanel.svelte';
+	import Toast from '$lib/components/molecules/Toast.svelte';
 
 	import InventoryCompactRow from '$lib/components/molecules/InventoryCompactRow.svelte';
 
@@ -52,32 +54,31 @@
 
 		filterAndSortInventoryItems,
 
+		type InventoryExpiryFilter,
+
 		type InventorySortDirection,
 
 		type InventorySortKey
 
 	} from '$lib/utils/inventory-list-filters';
-
-
+	import { TOAST_UNDO_DURATION_MS } from '$lib/utils/action-toast';
+	import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import {
+		dismissAutoExpiredIntro,
+		isAutoExpiredIntroDismissed
+	} from '$lib/utils/auto-expired-intro-dismiss';
 
 	interface Props {
-
 		items: InventoryItem[];
-
 		activeTotal: number;
-
 		autoExpiredTotal: number;
-
 		finishedTotal: number;
-
 		autoExpiredGraceDays: number;
-
 		location: StorageLocation;
-
 		canWrite?: boolean;
-
 		hasInventory?: boolean;
-
+		initialShowAutoExpired?: boolean;
+		initialExpiryFilter?: InventoryExpiryFilter;
 	}
 
 
@@ -97,9 +98,9 @@
 		location,
 
 		canWrite = false,
-
-		hasInventory = true
-
+		hasInventory = true,
+		initialShowAutoExpired = false,
+		initialExpiryFilter = 'all'
 	}: Props = $props();
 
 
@@ -151,6 +152,20 @@
 	let isCompact = $state(false);
 
 	let consumeItem = $state<InventoryItem | null>(null);
+	let finishingIds = $state(new Set<string>());
+	let undoPayload = $state<{
+		id: string;
+		name: string;
+		quantity: string;
+	} | null>(null);
+	let undoSubmitting = $state(false);
+	let showAutoExpiredIntro = $state(false);
+
+	const undoMessage = $derived(
+		undoPayload
+			? t('consume.undoToastNamed', { name: undoPayload.name })
+			: t('consume.undoToast')
+	);
 
 
 
@@ -179,7 +194,29 @@
 		showFinished = false;
 
 		consumeItem = null;
+		finishingIds = new Set();
+		undoPayload = null;
+	});
 
+	$effect(() => {
+		if (!browser || !initialShowAutoExpired || autoExpiredTotal === 0 || autoExpiredLoaded) {
+			return;
+		}
+
+		showAutoExpired = true;
+		loadingAutoExpired = true;
+
+		void fetchInventoryAutoExpired(location)
+			.then((page) => {
+				autoExpiredItems = page.items;
+				autoExpiredLoaded = true;
+				if (!isAutoExpiredIntroDismissed()) {
+					showAutoExpiredIntro = true;
+				}
+			})
+			.finally(() => {
+				loadingAutoExpired = false;
+			});
 	});
 
 
@@ -280,9 +317,9 @@
 
 		isServerSearch
 
-			? filterAndSortInventoryItems(searchResults, '', 'all', sortKey, sortDirection)
+			? filterAndSortInventoryItems(searchResults, '', initialExpiryFilter, sortKey, sortDirection)
 
-			: filterAndSortInventoryItems(loadedItems, query, 'all', sortKey, sortDirection)
+			: filterAndSortInventoryItems(loadedItems, query, initialExpiryFilter, sortKey, sortDirection)
 
 	);
 
@@ -358,18 +395,67 @@
 
 
 
-	function openConsumeSheet(item: InventoryItem) {
-
+	function openPartialConsumeSheet(item: InventoryItem) {
 		consumeItem = item;
-
 	}
 
-
-
 	function closeConsumeSheet() {
-
 		consumeItem = null;
+	}
 
+	async function finishOneTap(item: InventoryItem) {
+		if (!browser || finishingIds.has(item.id)) {
+			return;
+		}
+
+		const snapshot = { id: item.id, name: item.name, quantity: item.quantity };
+		finishingIds = new Set([...finishingIds, item.id]);
+
+		const formData = new FormData();
+		formData.set('itemId', item.id);
+		formData.set('consumptionPreset', 'all');
+		formData.set('oneTap', '1');
+
+		try {
+			const response = await fetch('?/consumeItem', { method: 'POST', body: formData });
+			if (response.ok) {
+				undoPayload = snapshot;
+				await invalidateAll();
+			} else {
+				showClientToast(t('consume.finishFailed'), { variant: 'error' });
+			}
+		} catch {
+			showClientToast(t('consume.finishFailed'), { variant: 'error' });
+		} finally {
+			const next = new Set(finishingIds);
+			next.delete(item.id);
+			finishingIds = next;
+		}
+	}
+
+	async function undoConsume() {
+		if (!browser || !undoPayload) {
+			return;
+		}
+
+		undoSubmitting = true;
+		const formData = new FormData();
+		formData.set('itemId', undoPayload.id);
+		formData.set('quantity', undoPayload.quantity);
+
+		try {
+			const response = await fetch('?/undoConsume', { method: 'POST', body: formData });
+			if (response.ok) {
+				undoPayload = null;
+				await invalidateAll();
+			}
+		} finally {
+			undoSubmitting = false;
+		}
+	}
+
+	function dismissUndo() {
+		undoPayload = null;
 	}
 
 
@@ -469,13 +555,17 @@
 			autoExpiredItems = (await fetchInventoryAutoExpired(location)).items;
 
 			autoExpiredLoaded = true;
-
+			if (!isAutoExpiredIntroDismissed()) {
+				showAutoExpiredIntro = true;
+			}
 		} finally {
-
 			loadingAutoExpired = false;
-
 		}
+	}
 
+	function dismissAutoExpiredIntroBanner() {
+		dismissAutoExpiredIntro();
+		showAutoExpiredIntro = false;
 	}
 
 
@@ -666,7 +756,14 @@
 
 				{#each activeItems as item (item.id)}
 
-					<InventoryCompactRow {item} {canWrite} onLogUsage={openConsumeSheet} />
+					<InventoryCompactRow
+						{item}
+						{canWrite}
+						autoExpiredGraceDays={autoExpiredGraceDays}
+						finishing={finishingIds.has(item.id)}
+						onFinishOneTap={finishOneTap}
+						onPartialConsume={openPartialConsumeSheet}
+					/>
 
 				{/each}
 
@@ -686,8 +783,10 @@
 
 				{canWrite}
 
-				onLogUsage={openConsumeSheet}
-
+				autoExpiredGraceDays={autoExpiredGraceDays}
+				finishingIds={finishingIds}
+				onFinishOneTap={finishOneTap}
+				onPartialConsume={openPartialConsumeSheet}
 				ariaLabel={t('inventory.listAria')}
 
 			/>
@@ -734,7 +833,9 @@
 
 				<h2 class="secondary-heading">{t('inventory.autoExpiredSection')}</h2>
 
-				<p class="secondary-note">
+				<p class="secondary-note">{t('inventory.autoExpiredSectionLead')}</p>
+
+				<p class="secondary-note subtle">
 
 					{t('inventory.autoExpiredNote', { days: autoExpiredGraceDays })}
 
@@ -772,6 +873,22 @@
 
 		</div>
 
+		{#if showAutoExpiredIntro}
+
+			<div class="auto-expired-intro" role="status">
+
+				<p>{t('inventory.autoExpiredIntro')}</p>
+
+				<button type="button" class="intro-dismiss" onclick={dismissAutoExpiredIntroBanner}>
+
+					{t('inventory.autoExpiredIntroDismiss')}
+
+				</button>
+
+			</div>
+
+		{/if}
+
 		{#if isCompact}
 
 			<div class="compact-list" aria-label={t('inventory.autoExpiredSection')}>
@@ -786,7 +903,13 @@
 
 						autoExpired={true}
 
-						onLogUsage={openConsumeSheet}
+						autoExpiredGraceDays={autoExpiredGraceDays}
+
+						finishing={finishingIds.has(item.id)}
+
+						onFinishOneTap={finishOneTap}
+
+						onPartialConsume={openPartialConsumeSheet}
 
 					/>
 
@@ -810,7 +933,13 @@
 
 				autoExpired={true}
 
-				onLogUsage={openConsumeSheet}
+				autoExpiredGraceDays={autoExpiredGraceDays}
+
+				finishingIds={finishingIds}
+
+				onFinishOneTap={finishOneTap}
+
+				onPartialConsume={openPartialConsumeSheet}
 
 				ariaLabel={t('inventory.autoExpiredSection')}
 
@@ -896,7 +1025,28 @@
 
 {/if}
 
-
+{#if undoPayload}
+	<div class="undo-toast-wrap">
+		<Toast
+			message={undoMessage}
+			visible={true}
+			variant="success"
+			size="action"
+			durationMs={TOAST_UNDO_DURATION_MS}
+			tapToDismiss={true}
+			onDismiss={dismissUndo}
+		/>
+		<button
+			type="button"
+			class="undo-btn"
+			disabled={undoSubmitting}
+			onclick={undoConsume}
+			aria-label={t('common.undo')}
+		>
+			{t('common.undo')}
+		</button>
+	</div>
+{/if}
 
 <style>
 
@@ -1208,7 +1358,73 @@
 
 	}
 
+	.secondary-note.subtle {
+		font-size: 0.75rem;
+	}
 
+	.auto-expired-intro {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		padding: var(--space-md);
+		border: 1px solid color-mix(in srgb, var(--color-warning) 28%, var(--color-border));
+		border-radius: var(--radius-md);
+		background: color-mix(in srgb, var(--color-warning) 6%, var(--color-surface));
+	}
+
+	.auto-expired-intro p {
+		margin: 0;
+		font-size: 0.8125rem;
+		line-height: 1.45;
+		color: var(--color-text);
+	}
+
+	.intro-dismiss {
+		align-self: flex-start;
+		min-height: var(--touch-target-min);
+		padding: 0.35rem 0.65rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		font-size: 0.8125rem;
+		font-weight: 600;
+		font-family: inherit;
+		color: var(--color-primary);
+		cursor: pointer;
+	}
+
+	.intro-dismiss:hover {
+		border-color: var(--color-primary);
+	}
+
+	.undo-toast-wrap {
+		position: fixed;
+		left: 50%;
+		bottom: calc(var(--content-bottom-safe) + var(--space-sm));
+		transform: translateX(-50%);
+		z-index: var(--z-toast);
+		display: flex;
+		align-items: center;
+		gap: var(--space-sm);
+		max-width: calc(100vw - 2 * var(--page-padding-x));
+	}
+
+	.undo-btn {
+		border: none;
+		border-radius: var(--radius-sm);
+		padding: 0.45rem 0.75rem;
+		font-weight: 600;
+		font-size: 0.85rem;
+		background: var(--color-surface);
+		color: var(--color-text);
+		cursor: pointer;
+		box-shadow: var(--shadow-md);
+	}
+
+	.undo-btn:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
 
 	:global(.clear-auto-expired-action) {
 

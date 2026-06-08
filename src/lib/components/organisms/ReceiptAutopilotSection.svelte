@@ -4,26 +4,36 @@
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
-	import type { ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
+	import type { ReceiptFinishSuggestion, ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
 	import { page } from '$app/state';
 	import { t } from '$lib/i18n';
 	import { recordReceiptAutopilotDismiss } from '$lib/utils/receipt-autopilot-nudge';
 
 	interface Props {
 		suggestions: ReceiptPatternSuggestion[];
+		finishSuggestions?: ReceiptFinishSuggestion[];
 		canEdit?: boolean;
 		compact?: boolean;
 	}
 
-	let { suggestions, canEdit = false, compact = false }: Props = $props();
+	let {
+		suggestions,
+		finishSuggestions = [],
+		canEdit = false,
+		compact = false
+	}: Props = $props();
 
 	let items = $state<ReceiptPatternSuggestion[]>([]);
+	let finishItems = $state<ReceiptFinishSuggestion[]>([]);
 	let acceptingKey = $state<string | null>(null);
 	let dismissingKey = $state<string | null>(null);
+	let finishActingId = $state<string | null>(null);
+	let finishDismissingId = $state<string | null>(null);
 	let errorMessage = $state<string | null>(null);
 
 	$effect(() => {
 		items = suggestions;
+		finishItems = finishSuggestions;
 	});
 
 	function formatQuantity(suggestion: ReceiptPatternSuggestion): string {
@@ -86,6 +96,61 @@
 			dismissingKey = null;
 		}
 	}
+
+	async function acceptFinish(inventoryItemId: string) {
+		if (!canEdit || finishActingId) return;
+		finishActingId = inventoryItemId;
+		errorMessage = null;
+
+		try {
+			const response = await fetch('/api/receipt-autopilot/finish', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ inventoryItemId })
+			});
+			const data = (await response.json()) as { error?: string; name?: string };
+
+			if (!response.ok) {
+				errorMessage = data.error ?? t('receiptAutopilot.finishFailed');
+				return;
+			}
+
+			finishItems = finishItems.filter((entry) => entry.inventoryItemId !== inventoryItemId);
+			showClientToast(t('receiptAutopilot.finishSuccess', { name: data.name ?? '' }), { variant: 'success' });
+		} catch {
+			errorMessage = t('receiptAutopilot.finishFailed');
+		} finally {
+			finishActingId = null;
+		}
+	}
+
+	async function dismissFinish(inventoryItemId: string) {
+		if (!canEdit || finishDismissingId) return;
+		finishDismissingId = inventoryItemId;
+		errorMessage = null;
+
+		try {
+			const response = await fetch('/api/receipt-autopilot/finish-dismiss', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ inventoryItemId })
+			});
+			const data = (await response.json()) as { error?: string };
+
+			if (!response.ok) {
+				errorMessage = data.error ?? t('receiptAutopilot.dismissFailed');
+				return;
+			}
+
+			finishItems = finishItems.filter((entry) => entry.inventoryItemId !== inventoryItemId);
+		} catch {
+			errorMessage = t('receiptAutopilot.dismissFailed');
+		} finally {
+			finishDismissingId = null;
+		}
+	}
+
+	const hasContent = $derived(items.length > 0 || finishItems.length > 0);
 </script>
 
 <section class="autopilot" class:compact aria-label={t('receiptAutopilot.ariaLabel')}>
@@ -100,7 +165,7 @@
 		<FeedbackBanner tone="error" message={errorMessage} />
 	{/if}
 
-	{#if items.length === 0}
+	{#if !hasContent}
 		<EmptyState
 			iconId="receipt"
 			title={t('receiptAutopilot.emptyTitle')}
@@ -109,46 +174,93 @@
 			actionHref="/scan?mode=receipt&from=/hem"
 		/>
 	{:else}
-		<ul class="suggestions">
-			{#each items as suggestion (suggestion.normalizedKey)}
-				<li>
-					<Card class="suggestion-card">
-						<div class="copy">
-							<span class="name">{suggestion.displayName}</span>
-							<span class="meta">
-								{t('receiptAutopilot.recurringMeta', {
-									count: suggestion.importCount,
-									quantity: formatQuantity(suggestion)
-								})}
-							</span>
-						</div>
-						{#if canEdit}
-							<div class="actions">
-								<Button
-									type="button"
-									loading={acceptingKey === suggestion.normalizedKey}
-									loadingLabel={t('common.saving')}
-									onclick={() => acceptSuggestion(suggestion.normalizedKey)}
-								>
-									{t('receiptAutopilot.addToPantry')}
-								</Button>
-								<button
-									type="button"
-									class="dismiss"
-									disabled={dismissingKey === suggestion.normalizedKey}
-									onclick={() => dismissSuggestion(suggestion.normalizedKey)}
-								>
-									{t('receiptAutopilot.dismiss')}
-								</button>
-							</div>
-						{/if}
-					</Card>
-				</li>
-			{/each}
-		</ul>
+		{#if finishItems.length > 0}
+			<div class="subsection">
+				<h3 class="subsection-title">{t('receiptAutopilot.finishTitle')}</h3>
+				<p class="subsection-intro">{t('receiptAutopilot.finishIntro')}</p>
+				<ul class="suggestions">
+					{#each finishItems as suggestion (suggestion.inventoryItemId)}
+						<li>
+							<Card class="suggestion-card">
+								<div class="copy">
+									<span class="name">{suggestion.displayName}</span>
+									<span class="meta">
+										{t('receiptAutopilot.finishMeta', { purchased: suggestion.purchasedName })}
+									</span>
+								</div>
+								{#if canEdit}
+									<div class="actions">
+										<Button
+											type="button"
+											loading={finishActingId === suggestion.inventoryItemId}
+											loadingLabel={t('common.saving')}
+											onclick={() => acceptFinish(suggestion.inventoryItemId)}
+										>
+											{t('receiptAutopilot.markFinished')}
+										</Button>
+										<button
+											type="button"
+											class="dismiss"
+											disabled={finishDismissingId === suggestion.inventoryItemId}
+											onclick={() => dismissFinish(suggestion.inventoryItemId)}
+										>
+											{t('receiptAutopilot.dismiss')}
+										</button>
+									</div>
+								{/if}
+							</Card>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
+
+		{#if items.length > 0}
+			<div class="subsection">
+				{#if finishItems.length > 0}
+					<h3 class="subsection-title">{t('receiptAutopilot.refillTitle')}</h3>
+				{/if}
+				<ul class="suggestions">
+					{#each items as suggestion (suggestion.normalizedKey)}
+						<li>
+							<Card class="suggestion-card">
+								<div class="copy">
+									<span class="name">{suggestion.displayName}</span>
+									<span class="meta">
+										{t('receiptAutopilot.recurringMeta', {
+											count: suggestion.importCount,
+											quantity: formatQuantity(suggestion)
+										})}
+									</span>
+								</div>
+								{#if canEdit}
+									<div class="actions">
+										<Button
+											type="button"
+											loading={acceptingKey === suggestion.normalizedKey}
+											loadingLabel={t('common.saving')}
+											onclick={() => acceptSuggestion(suggestion.normalizedKey)}
+										>
+											{t('receiptAutopilot.addToPantry')}
+										</Button>
+										<button
+											type="button"
+											class="dismiss"
+											disabled={dismissingKey === suggestion.normalizedKey}
+											onclick={() => dismissSuggestion(suggestion.normalizedKey)}
+										>
+											{t('receiptAutopilot.dismiss')}
+										</button>
+									</div>
+								{/if}
+							</Card>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
 	{/if}
 </section>
-
 
 <style>
 	.autopilot {
@@ -170,11 +282,24 @@
 		letter-spacing: var(--letter-spacing-label);
 	}
 
-	.intro {
+	.intro,
+	.subsection-intro {
 		margin: var(--space-xs) 0 0;
 		color: var(--color-text-muted);
 		font-size: 0.9375rem;
 		line-height: 1.45;
+	}
+
+	.subsection {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+	}
+
+	.subsection-title {
+		margin: 0;
+		font-size: 0.9375rem;
+		font-weight: 700;
 	}
 
 	.suggestions {

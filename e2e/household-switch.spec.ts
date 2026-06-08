@@ -14,6 +14,6 @@ test.describe('Household switcher smoke', () => {
 
 		await expect(
 			page.locator('.main-nav-desktop').getByTestId('pantry-switcher-trigger-desktop')
-		).toHaveAttribute('aria-label', /Byt pantry|Switch pantry/i);
+		).toHaveAttribute('aria-label', /Byt hushåll|Switch pantry/i);
 	});
 });

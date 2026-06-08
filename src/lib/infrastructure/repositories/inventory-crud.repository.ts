@@ -31,6 +31,7 @@ export class InventoryCrudRepository {
 				expiresOn: input.expiresOn ?? null,
 				expiresOnSource: input.expiresOnSource ?? null,
 				notes: input.notes ?? null,
+				lastConfirmedAt: input.lastConfirmedAt ?? now,
 				createdAt: now,
 				updatedAt: now
 			})
@@ -54,6 +55,7 @@ export class InventoryCrudRepository {
 				...(input.expiresOn !== undefined && { expiresOn: input.expiresOn }),
 				...(input.expiresOnSource !== undefined && { expiresOnSource: input.expiresOnSource }),
 				...(input.notes !== undefined && { notes: input.notes }),
+				...(input.lastConfirmedAt !== undefined && { lastConfirmedAt: input.lastConfirmedAt }),
 				updatedAt: new Date()
 			})
 			.where(and(eq(inventoryItemTable.id, id), eq(inventoryItemTable.householdId, householdId)))

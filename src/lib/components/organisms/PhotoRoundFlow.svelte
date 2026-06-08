@@ -13,6 +13,7 @@
 	import { getLocale, t } from '$lib/i18n';
 	import { scanHubHref } from '$lib/utils/scan-nav';
 	import { locationLabel } from '$lib/i18n/domain-labels';
+	import { fetchMergeCandidates, type MergeCandidateMatch } from '$lib/client/merge-candidates';
 	import { onMount } from 'svelte';
 
 
@@ -53,6 +54,8 @@
 	let bulkSubmitting = $state(false);
 	let discardReviewOpen = $state(false);
 	let nextLineId = $state(0);
+	let mergeCandidates = $state<Record<number, MergeCandidateMatch | null>>({});
+	let mergeSelected = $state<Record<number, boolean>>({});
 
 	const cancelHref = $derived(scanHubHref(returnTo));
 	const canAddPhoto = $derived(photos.length < PHOTO_ROUND_MAX_IMAGES);
@@ -196,11 +199,24 @@
 			revokePreviews();
 			photos = [];
 			step = 'review';
+			void loadMergeCandidates();
 		} catch {
 			parseError = t('photoRound.networkError');
 		} finally {
 			parsing = false;
 		}
+	}
+
+	async function loadMergeCandidates() {
+		const matches = await fetchMergeCandidates(
+			lines.map((line) => ({ name: line.name, location: line.location }))
+		);
+		mergeCandidates = Object.fromEntries(
+			lines.map((line, index) => [line.id, matches[index] ?? null])
+		);
+		mergeSelected = Object.fromEntries(
+			lines.map((line) => [line.id, Boolean(mergeCandidates[line.id])])
+		);
 	}
 
 	function removeLine(id: number) {
@@ -216,6 +232,9 @@
 
 	function updateLine(id: number, patch: Partial<ReviewLine>) {
 		lines = lines.map((line) => (line.id === id ? { ...line, ...patch } : line));
+		if (patch.location || patch.name) {
+			void loadMergeCandidates();
+		}
 	}
 
 	function requestNewRound() {
@@ -230,6 +249,8 @@
 		discardReviewOpen = false;
 		lines = [];
 		selected = {};
+		mergeCandidates = {};
+		mergeSelected = {};
 		parseError = null;
 		step = 'capture';
 		zone = initialLocation ?? 'fridge';
@@ -444,11 +465,32 @@
 								</select>
 							</label>
 						</div>
+						{#if mergeCandidates[line.id]}
+							<label class="merge-hint">
+								<input
+									type="checkbox"
+									checked={mergeSelected[line.id]}
+									onchange={(e) => {
+										mergeSelected[line.id] = (e.currentTarget as HTMLInputElement).checked;
+									}}
+								/>
+								<span>
+									{t('inventory.mergeExisting', {
+										name: mergeCandidates[line.id]!.name,
+										quantity: mergeCandidates[line.id]!.quantity,
+										unit: mergeCandidates[line.id]!.unit ?? ''
+									})}
+								</span>
+							</label>
+						{/if}
 						{#if selected[line.id]}
 							<input type="hidden" name={`name_${line.id}`} value={line.name} />
 							<input type="hidden" name={`quantity_${line.id}`} value={line.quantity} />
 							<input type="hidden" name={`unit_${line.id}`} value={line.unit ?? ''} />
 							<input type="hidden" name={`location_${line.id}`} value={line.location} />
+							{#if mergeSelected[line.id] && mergeCandidates[line.id]}
+								<input type="hidden" name={`merge_${line.id}`} value={mergeCandidates[line.id]!.id} />
+							{/if}
 						{/if}
 					</li>
 				{/each}
@@ -618,6 +660,15 @@
 		padding: var(--space-sm);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
+	}
+
+	.merge-hint {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--space-sm);
+		margin-top: var(--space-sm);
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
 	}
 
 	.line-top {

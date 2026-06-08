@@ -138,7 +138,7 @@ test.describe('Scan and inventory', () => {
 			}
 
 			await expect(page.getByTestId('inventory-table')).toHaveCount(0);
-			const logUsage = list.getByRole('button', { name: /Logga förbrukning|Log usage/i }).first();
+			const logUsage = list.getByRole('button', { name: /Delvis|Partial/i }).first();
 			await expect(logUsage).toBeVisible();
 		});
 	});

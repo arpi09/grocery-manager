@@ -7,6 +7,7 @@ import type { OAuthService } from '$lib/application/oauth.service';
 import type { ProfileService } from '$lib/application/profile.service';
 import type { HouseholdService } from '$lib/application/household.service';
 import type { ShoppingListService } from '$lib/application/shopping-list.service';
+import type { ShoppingToPantryService } from '$lib/application/shopping-to-pantry.service';
 import type { InventoryService } from '$lib/application/inventory.service';
 import type { StatistikService } from '$lib/application/statistik.service';
 import type { GamificationService } from '$lib/application/gamification.service';
@@ -56,6 +57,7 @@ declare global {
 			gamificationService: GamificationService;
 			wrappedService: WrappedService;
 			shoppingListService: ShoppingListService;
+			shoppingToPantryService: ShoppingToPantryService;
 			mealPlanService: MealPlanService;
 			weeklyRitualService: WeeklyRitualService;
 			petService: PetService;

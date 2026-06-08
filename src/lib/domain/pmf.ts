@@ -27,7 +27,13 @@ export const PRODUCT_EVENT_TYPES = [
 	'wrapped_shared',
 	'kivra_forward_received',
 	'shopping_list_export',
-	'barcode_override_used'
+	'barcode_override_used',
+	'inventory_write',
+	'batch_review_completed',
+	'one_tap_consume',
+	'staleness_confirmed',
+	'shopping_checkoff_to_pantry',
+	'receipt_finish_accepted'
 ] as const;
 
 export const PMF_PRODUCT_EVENT_TYPES = [

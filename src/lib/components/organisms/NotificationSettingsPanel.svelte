@@ -12,6 +12,10 @@
 		parseActionToastKind
 	} from '$lib/utils/action-toast';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import {
+		SHOPPING_TO_PANTRY_MODES,
+		type ShoppingToPantryMode
+	} from '$lib/domain/shopping-to-pantry';
 	import { bindSubmitting, bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
 	import {
 		isPushSupported,
@@ -27,6 +31,7 @@
 		autoExpiredGraceDays: number | null;
 		pushNotificationsEnabled: boolean;
 		shoppingPushEnabled: boolean;
+		shoppingToPantryMode?: ShoppingToPantryMode;
 	}
 
 	let {
@@ -34,7 +39,8 @@
 		expiryReminderDays: initialExpiryDays,
 		autoExpiredGraceDays,
 		pushNotificationsEnabled: initialPushEnabled,
-		shoppingPushEnabled: initialShoppingPushEnabled
+		shoppingPushEnabled: initialShoppingPushEnabled,
+		shoppingToPantryMode: initialShoppingToPantryMode = 'ask'
 	}: Props = $props();
 
 	let expiryRemindersEnabled = $state(initialExpiryEnabled);
@@ -53,6 +59,9 @@
 	let expiryRemindersForm: HTMLFormElement | undefined = $state();
 	let autoExpiredGraceForm: HTMLFormElement | undefined = $state();
 	let shoppingPushForm: HTMLFormElement | undefined = $state();
+	let shoppingToPantryMode = $state<ShoppingToPantryMode>(initialShoppingToPantryMode);
+	let shoppingToPantrySubmitting = $state(false);
+	let shoppingToPantryForm: HTMLFormElement | undefined = $state();
 
 	$effect(() => {
 		expiryRemindersEnabled = initialExpiryEnabled;
@@ -64,6 +73,7 @@
 			pushNotificationsEnabled = initialPushEnabled;
 		}
 		shoppingPushEnabled = initialShoppingPushEnabled;
+		shoppingToPantryMode = initialShoppingToPantryMode;
 	});
 
 	$effect(() => {
@@ -191,6 +201,9 @@
 			note={t('settings.autoExpiredGrace.note')}
 			last={false}
 		>
+			<p class="grace-timeline">
+				{t('settings.autoExpiredGrace.timeline', { days: autoExpiredGraceDaysLocal })}
+			</p>
 			<form
 				method="POST"
 				action="?/updateAutoExpiredGrace"
@@ -244,6 +257,35 @@
 	</SettingsRow>
 
 	<SettingsRow
+		title={t('settings.shoppingToPantry.title')}
+		note={t('settings.shoppingToPantry.note')}
+		last={false}
+	>
+		<form
+			method="POST"
+			action="?/updateShoppingToPantryMode"
+			bind:this={shoppingToPantryForm}
+			use:enhance={bindSubmitting((v) => (shoppingToPantrySubmitting = v))}
+		>
+			<label class="expiry-days">
+				<span>{t('settings.shoppingToPantry.modeLabel')}</span>
+				<select
+					name="shoppingToPantryMode"
+					bind:value={shoppingToPantryMode}
+					onchange={(event) => event.currentTarget.form?.requestSubmit()}
+				>
+					{#each SHOPPING_TO_PANTRY_MODES as mode (mode)}
+						<option value={mode}>{t(`shopping.pantryBridge.mode.${mode}`)}</option>
+					{/each}
+				</select>
+			</label>
+			{#if shoppingToPantrySubmitting}
+				<span class="expiry-saving">{t('common.saving')}</span>
+			{/if}
+		</form>
+	</SettingsRow>
+
+	<SettingsRow
 		title={t('settings.shoppingPush.title')}
 		note={t('settings.shoppingPush.note')}
 		last
@@ -285,6 +327,13 @@
 </SettingsSection>
 
 <style>
+	.grace-timeline {
+		margin: 0 0 var(--space-sm);
+		font-size: 0.8125rem;
+		line-height: 1.45;
+		color: var(--color-text-muted);
+	}
+
 	.expiry-reminders-form {
 		display: flex;
 		flex-direction: column;

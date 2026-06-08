@@ -1,6 +1,7 @@
 import { isStorageLocation } from '$lib/domain/location';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { itemSchema } from '$lib/validation/inventory.schemas';
+import { buildReturnUrlWithExpiryNudge } from '$lib/utils/expiry-nudge';
 import { buildScanReturnUrl } from '$lib/utils/scan-toast';
 import { parseScanReturnTo } from '$lib/utils/scan-nav';
 import { fail, redirect } from '@sveltejs/kit';
@@ -39,7 +40,7 @@ export const actions: Actions = {
 			return fail(400, { errors: parsed.error.flatten().fieldErrors });
 		}
 
-		await event.locals.inventoryService.createItem(
+		const created = await event.locals.inventoryService.createItem(
 			event.locals.householdId!,
 			event.locals.user!.id,
 			{
@@ -57,6 +58,17 @@ export const actions: Actions = {
 		const safeReturn = parseScanReturnTo(
 			typeof returnToRaw === 'string' ? returnToRaw : null
 		);
+
+		if (!created.expiresOn) {
+			redirect(
+				302,
+				buildReturnUrlWithExpiryNudge(
+					buildScanReturnUrl(safeReturn, 'added', parsed.data.name),
+					created.id,
+					created.name
+				)
+			);
+		}
 
 		redirect(302, buildScanReturnUrl(safeReturn, 'added', parsed.data.name));
 	}

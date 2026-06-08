@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+	detectReceiptFinishSuggestions,
 	detectReceiptPatternSuggestions,
 	normalizeReceiptProductName,
+	receiptFinishDismissKey,
 	type ReceiptPurchaseLineRecord
 } from './purchase-pattern';
 
@@ -89,5 +91,54 @@ describe('detectReceiptPatternSuggestions', () => {
 	it('requires minimum imports or line count', () => {
 		const lines = [line({ normalizedKey: 'solo', importBatchId: 'batch-1' })];
 		expect(detectReceiptPatternSuggestions(lines, new Set(), new Set(), now)).toHaveLength(0);
+	});
+});
+
+describe('detectReceiptFinishSuggestions', () => {
+	const now = new Date('2026-06-01T12:00:00Z');
+
+	it('suggests finishing pantry stock when the same product was bought again', () => {
+		const lines = [
+			line({
+				normalizedKey: 'mjolk',
+				productName: 'Mjölk 1L',
+				createdAt: new Date('2026-05-28T12:00:00Z')
+			})
+		];
+		const inventory = [
+			{
+				id: 'inv-1',
+				name: 'Mjölk',
+				location: 'fridge' as const,
+				quantity: '1',
+				unit: 'L',
+				normalizedKey: 'mjolk'
+			}
+		];
+
+		const suggestions = detectReceiptFinishSuggestions(lines, inventory, new Set(), now);
+		expect(suggestions).toHaveLength(1);
+		expect(suggestions[0]).toMatchObject({
+			inventoryItemId: 'inv-1',
+			displayName: 'Mjölk',
+			purchasedName: 'Mjölk 1L'
+		});
+	});
+
+	it('respects finish dismissals', () => {
+		const lines = [line({ normalizedKey: 'mjolk', createdAt: new Date('2026-05-28T12:00:00Z') })];
+		const inventory = [
+			{
+				id: 'inv-1',
+				name: 'Mjölk',
+				location: 'fridge' as const,
+				quantity: '1',
+				unit: null,
+				normalizedKey: 'mjolk'
+			}
+		];
+
+		const dismissed = new Set([receiptFinishDismissKey('inv-1')]);
+		expect(detectReceiptFinishSuggestions(lines, inventory, dismissed, now)).toHaveLength(0);
 	});
 });

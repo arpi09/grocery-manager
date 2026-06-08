@@ -16,6 +16,7 @@ function makeItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
 		expiresOn: '2026-06-01',
 		expiresOnSource: null,
 		notes: null,
+		lastConfirmedAt: new Date(),
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		...overrides
@@ -35,6 +36,12 @@ describe('InventoryService', () => {
 			searchActiveByLocation: vi.fn(),
 			countActiveByLocation: vi.fn(),
 			countAutoExpiredByLocation: vi.fn(),
+			countAutoExpiredHousehold: vi.fn().mockResolvedValue(0),
+			countStaleUndated: vi.fn().mockResolvedValue(0),
+			findStaleUndated: vi.fn().mockResolvedValue([]),
+			getLastInventoryUpdatedAt: vi.fn().mockResolvedValue(null),
+			getLastInventoryUpdate: vi.fn().mockResolvedValue(null),
+			listRecentActiveNames: vi.fn().mockResolvedValue([]),
 			findAutoExpiredByHouseholdAndLocation: vi.fn(),
 			countFinishedByLocation: vi.fn(),
 			findFinishedByHouseholdAndLocation: vi.fn(),
@@ -63,12 +70,32 @@ describe('InventoryService', () => {
 			{ location: 'cupboard', count: 1 }
 		]);
 		vi.mocked(repository.findExpiringBefore).mockResolvedValue([makeItem()]);
+		vi.mocked(repository.getAnalytics).mockResolvedValue({
+			totalItems: 3,
+			totalQuantity: '3',
+			distinctProducts: 3,
+			expiringSoonCount: 1,
+			withoutExpiryCount: 1,
+			lowStockCount: 0,
+			addedLast7Days: 0,
+			byLocation: []
+		});
+		vi.mocked(repository.countAutoExpiredHousehold).mockResolvedValue(2);
+		vi.mocked(repository.getLastInventoryUpdate).mockResolvedValue({
+			updatedAt: new Date('2026-06-01'),
+			userId: 'user-1'
+		});
 
 		const summary = await service.getDashboard('household-1');
 
 		expect(summary.totalItems).toBe(3);
 		expect(summary.counts.find((c) => c.location === 'freezer')?.count).toBe(0);
 		expect(summary.expiringSoon).toHaveLength(1);
+		expect(summary.pantryStatus.withoutExpiryCount).toBe(1);
+		expect(summary.pantryStatus.autoExpiredCount).toBe(2);
+		expect(summary.pantryStatus.staleCount).toBe(0);
+		expect(summary.pantryStatus.lastUpdatedAt).toEqual(new Date('2026-06-01'));
+		expect(summary.pantryStatus.lastUpdatedByUserId).toBe('user-1');
 	});
 
 	it('lists items by location', async () => {
@@ -216,7 +243,11 @@ describe('InventoryService', () => {
 		const result = await service.markAsFinished('household-1', 'item-1', 'user-1', 'editor');
 
 		expect(result.quantity).toBe('0');
-		expect(repository.update).toHaveBeenCalledWith('household-1', 'item-1', { quantity: '0' });
+		expect(repository.update).toHaveBeenCalledWith(
+			'household-1',
+			'item-1',
+			expect.objectContaining({ quantity: '0' })
+		);
 	});
 
 	it('records partial consumption without zeroing stock', async () => {
@@ -231,6 +262,44 @@ describe('InventoryService', () => {
 
 		expect(result.finished).toBe(false);
 		expect(result.item.quantity).toBe('450');
+	});
+
+	it('increments quantity on existing item', async () => {
+		const item = makeItem({ quantity: '2' });
+		const updated = makeItem({ quantity: '5' });
+		vi.mocked(repository.findById).mockResolvedValue(item);
+		vi.mocked(repository.update).mockResolvedValue(updated);
+
+		const result = await service.incrementQuantity('household-1', 'item-1', '3', 'editor');
+
+		expect(result.quantity).toBe('5');
+		expect(repository.update).toHaveBeenCalledWith(
+			'household-1',
+			'item-1',
+			expect.objectContaining({ quantity: '5', lastConfirmedAt: expect.any(Date) })
+		);
+	});
+
+	it('merges via createItem when mergeIntoId is provided', async () => {
+		const item = makeItem({ quantity: '1' });
+		const merged = makeItem({ quantity: '3' });
+		vi.mocked(repository.findById).mockResolvedValue(item);
+		vi.mocked(repository.update).mockResolvedValue(merged);
+
+		const result = await service.createItem(
+			'household-1',
+			'user-1',
+			{
+				name: 'Milk',
+				location: 'fridge',
+				quantity: '2',
+				mergeIntoId: 'item-1'
+			},
+			'editor'
+		);
+
+		expect(result.quantity).toBe('3');
+		expect(repository.create).not.toHaveBeenCalled();
 	});
 
 	it('rejects mark as finished for viewer role', async () => {

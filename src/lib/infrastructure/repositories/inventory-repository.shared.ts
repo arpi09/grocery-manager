@@ -1,5 +1,6 @@
 import { and, gt, lte, sql } from 'drizzle-orm';
 import { autoExpiredCutoffDate } from '$lib/domain/auto-expired';
+import { stalenessCutoffDate } from '$lib/domain/inventory-staleness';
 import type { StorageLocation } from '$lib/domain/location';
 import type { InventoryItem } from '$lib/domain/inventory-item';
 import { inventoryItemTable } from '$lib/infrastructure/db/schema';
@@ -26,6 +27,15 @@ export function activeNotAutoExpiredFilter(context: InventoryListContext) {
 	);
 }
 
+export function staleUndatedFilter(referenceDate = new Date()) {
+	const cutoff = stalenessCutoffDate(undefined, referenceDate);
+	return and(
+		activeQuantityFilter(),
+		sql`${inventoryItemTable.expiresOn} is null`,
+		sql`${inventoryItemTable.lastConfirmedAt} < ${cutoff}`
+	);
+}
+
 export function mapInventoryRow(row: typeof inventoryItemTable.$inferSelect): InventoryItem {
 	return {
 		id: row.id,
@@ -38,6 +48,7 @@ export function mapInventoryRow(row: typeof inventoryItemTable.$inferSelect): In
 		expiresOn: row.expiresOn,
 		expiresOnSource: row.expiresOnSource as InventoryItem['expiresOnSource'],
 		notes: row.notes,
+		lastConfirmedAt: row.lastConfirmedAt,
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt
 	};
