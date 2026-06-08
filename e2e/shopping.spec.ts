@@ -25,7 +25,7 @@ async function openShoppingSuggestionsFold(page: import('@playwright/test').Page
 	await expect(fold).toBeVisible({ timeout: 15_000 });
 	const isOpen = await fold.evaluate((el) => (el as HTMLDetailsElement).open);
 	if (!isOpen) {
-		await fold.locator('summary').click();
+		await fold.locator(':scope > summary').click();
 	}
 	await expect(page.getByTestId('shopping-smart-fill')).toBeVisible({ timeout: 15_000 });
 }

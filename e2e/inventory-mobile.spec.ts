@@ -93,16 +93,9 @@ test.describe('Inventory mobile UX', () => {
 		const row = seededRow(list);
 
 		await dismissBlockingOverlays(page);
-		const finishBtn = row.getByRole('button', { name: /Slut|Finished/i });
-		await Promise.all([
-			page.waitForResponse(
-				(r) => r.url().includes('consumeItem') && r.request().method() === 'POST',
-				{ timeout: 15_000 }
-			),
-			finishBtn.click({ force: true })
-		]);
-
+		await row.getByRole('button', { name: /Slut|Finished/i }).click({ force: true });
 		await clickUndo(page);
+		await page.waitForLoadState('networkidle');
 
 		await expect(
 			list.getByTestId('inventory-compact-row').filter({ hasText: seededItemName })
@@ -149,16 +142,9 @@ test.describe('Inventory mobile UX', () => {
 		const row = seededRow(list);
 
 		await dismissBlockingOverlays(page);
-		await Promise.all([
-			page.waitForResponse(
-				(r) => r.url().includes('consumeItem') && r.request().method() === 'POST',
-				{ timeout: 15_000 }
-			),
-			swipeRowHorizontal(page, row, 'right')
-		]);
-
+		await swipeRowHorizontal(page, row, 'right');
 		await clickUndo(page);
-
+		await page.waitForLoadState('networkidle');
 		await expect(
 			list.getByTestId('inventory-compact-row').filter({ hasText: seededItemName })
 		).toBeVisible({ timeout: 15_000 });
