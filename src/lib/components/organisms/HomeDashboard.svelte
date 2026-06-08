@@ -676,7 +676,9 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		justify-content: center;
 		gap: var(--space-xs);
+		min-height: var(--touch-target-min);
 		padding: var(--space-md) var(--space-sm) !important;
 		text-align: center;
 	}
@@ -762,6 +764,9 @@
 	}
 
 	.pantry-status-meta a {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
 		font-weight: 600;
 		color: var(--color-primary);
 		text-decoration: underline;

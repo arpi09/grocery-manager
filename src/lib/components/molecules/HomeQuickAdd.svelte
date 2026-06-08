@@ -95,10 +95,15 @@
 	}
 
 	.chip {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: var(--touch-target-min);
 		border: 1px solid var(--color-border);
 		background: var(--color-surface);
 		border-radius: 999px;
-		padding: 0.2rem 0.6rem;
+		padding: 0 var(--space-md);
+		font: inherit;
 	}
 
 	.chip.active {
