@@ -932,6 +932,8 @@
 		"ideasTitle": "ChatGPT recipe ideas",
 		"missingLabel": "Missing:",
 		"scheduleDate": "Schedule date",
+		"dismissNotInterested": "Not interested",
+		"dismissFailed": "Could not dismiss idea",
 		"prevMonthShort": "Prev",
 		"emptyDay": "No meals planned for this day."
 	},

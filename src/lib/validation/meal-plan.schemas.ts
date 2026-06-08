@@ -22,6 +22,10 @@ export const scheduleIdeaSchema = z.object({
 	plannedDate: z.string().regex(isoDateRegex, 'Valid date is required')
 });
 
+export const dismissIdeaSchema = z.object({
+	ideaId: z.string().min(1, 'Recipe idea id is required')
+});
+
 const weeklyMealAssignmentSchema = z.object({
 	ideaId: z.string().min(1, 'Recipe idea id is required'),
 	plannedDate: z.string().regex(isoDateRegex, 'Valid date is required')

@@ -44,6 +44,7 @@ describe('MealPlanService', () => {
 			listRecipeIdeas: vi.fn(),
 			createRecipeIdeas: vi.fn(),
 			getRecipeIdeaById: vi.fn(),
+			deleteRecipeIdea: vi.fn(),
 			countRecipeIdeasSince: vi.fn(),
 			countPlannedMealsSince: vi.fn(),
 			hasAnyPlannedMeal: vi.fn()
@@ -143,6 +144,22 @@ describe('MealPlanService', () => {
 		vi.mocked(repository.getRecipeIdeaById).mockResolvedValue(null);
 
 		await expect(service.getIdeaById('user-1', 'missing')).rejects.toThrow('Recipe idea not found');
+	});
+
+	it('dismisses a recipe idea', async () => {
+		vi.mocked(repository.deleteRecipeIdea).mockResolvedValue(true);
+
+		await service.dismissRecipeIdea('user-1', 'idea-1');
+
+		expect(repository.deleteRecipeIdea).toHaveBeenCalledWith('user-1', 'idea-1');
+	});
+
+	it('throws when dismissing a missing recipe idea', async () => {
+		vi.mocked(repository.deleteRecipeIdea).mockResolvedValue(false);
+
+		await expect(service.dismissRecipeIdea('user-1', 'missing')).rejects.toThrow(
+			'Recipe idea not found'
+		);
 	});
 
 	it('creates a planned meal from a recipe idea', async () => {

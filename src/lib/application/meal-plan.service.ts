@@ -62,6 +62,13 @@ export class MealPlanService {
 		return idea;
 	}
 
+	async dismissRecipeIdea(userId: string, ideaId: string) {
+		const deleted = await this.repository.deleteRecipeIdea(userId, ideaId);
+		if (!deleted) {
+			throw new RecipeIdeaNotFoundError();
+		}
+	}
+
 	async createPlannedMealFromIdea(userId: string, ideaId: string, plannedDate: string) {
 		const idea = await this.repository.getRecipeIdeaById(userId, ideaId);
 		if (!idea) {
