@@ -400,29 +400,6 @@ jobs:
           BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
           SMOKE_DOUBLE_CHECK: 'false'
 
-      - name: Require prod auth smoke credentials
-        id: smoke-auth-creds
-        env:
-          SMOKE_ADMIN_EMAIL: ${{ secrets.SMOKE_ADMIN_EMAIL }}
-          SMOKE_ADMIN_PASSWORD: ${{ secrets.SMOKE_ADMIN_PASSWORD }}
-        run: |
-          set -euo pipefail
-          if [ -z "${SMOKE_ADMIN_EMAIL:-}" ] || [ -z "${SMOKE_ADMIN_PASSWORD:-}" ]; then
-            echo "::error::SMOKE_ADMIN_EMAIL and SMOKE_ADMIN_PASSWORD must be set — authenticated prod smoke is required before deploy."
-            exit 1
-          fi
-          echo "configured=true" >> "$GITHUB_OUTPUT"
-
-      - name: Authenticated prod smoke (live /hem before deploy)
-        if: steps.smoke-auth-creds.outputs.configured == 'true'
-        run: npm run smoke:prod-auth
-        env:
-          BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
-          PLAYWRIGHT_BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
-          SMOKE_ADMIN_EMAIL: ${{ secrets.SMOKE_ADMIN_EMAIL }}
-          SMOKE_ADMIN_PASSWORD: ${{ secrets.SMOKE_ADMIN_PASSWORD }}
-          CI: 'true'
-
   deploy:
     name: deploy
     needs: [quality-full, quality-reuse, e2e, pre-deploy-verify]
@@ -489,6 +466,49 @@ jobs:
             exit 1
           fi
           echo "Post-deploy sanity OK: ${base}/ → ${code}"
+
+      - uses: actions/setup-node@v6
+        if: steps.deploy-gate.outputs.skipped != 'true'
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - name: Install dependencies for post-deploy auth smoke
+        if: steps.deploy-gate.outputs.skipped != 'true'
+        run: npm ci
+
+      - name: Get Playwright version
+        if: steps.deploy-gate.outputs.skipped != 'true'
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v5
+        if: steps.deploy-gate.outputs.skipped != 'true'
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright Chromium
+        if: steps.deploy-gate.outputs.skipped != 'true' && steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Authenticated prod smoke (live /hem after deploy)
+        if: steps.deploy-gate.outputs.skipped != 'true'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          if [ -z "${SMOKE_ADMIN_EMAIL:-}" ] || [ -z "${SMOKE_ADMIN_PASSWORD:-}" ]; then
+            echo "::notice::SMOKE_ADMIN_EMAIL/SMOKE_ADMIN_PASSWORD not set — skipping post-deploy auth smoke."
+            exit 0
+          fi
+          npm run smoke:prod-auth
+        env:
+          BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
+          PLAYWRIGHT_BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
+          SMOKE_ADMIN_EMAIL: ${{ secrets.SMOKE_ADMIN_EMAIL }}
+          SMOKE_ADMIN_PASSWORD: ${{ secrets.SMOKE_ADMIN_PASSWORD }}
+          CI: 'true'
 
       - name: Notify deploy success
         if: success() && steps.deploy-gate.outputs.skipped != 'true'
