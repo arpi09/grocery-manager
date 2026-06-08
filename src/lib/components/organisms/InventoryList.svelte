@@ -422,7 +422,14 @@
 		formData.set('oneTap', '1');
 
 		try {
-			const response = await fetch('?/consumeItem', { method: 'POST', body: formData });
+			const response = await fetch('?/consumeItem', {
+				method: 'POST',
+				body: formData,
+				headers: {
+					accept: 'application/json',
+					'x-sveltekit-action': 'true'
+				}
+			});
 			const result = deserialize(await response.text());
 			if (result.type === 'success') {
 				undoPayload = snapshot;
