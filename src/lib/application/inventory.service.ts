@@ -51,6 +51,7 @@ import type {
 } from '$lib/domain/inventory-item';
 
 import { generateId } from '$lib/infrastructure/auth/id';
+import { isMissingLastConfirmedColumn } from '$lib/infrastructure/repositories/inventory-repository.shared';
 
 import type {
 
@@ -266,43 +267,107 @@ export class InventoryService {
 
 		const beforeDate = addDays(new Date(), EXPIRING_SOON_DAYS);
 
-		const expiringSoon = await this.repository.findExpiringBefore(
+		let expiringSoon: InventoryItem[] = [];
 
-			householdId,
+		try {
 
-			beforeDate.toISOString().slice(0, 10),
+			expiringSoon = await this.repository.findExpiringBefore(
 
-			context
+				householdId,
 
-		);
+				beforeDate.toISOString().slice(0, 10),
+
+				context
+
+			);
+
+		} catch (error) {
+
+			if (!isMissingLastConfirmedColumn(error)) {
+
+				throw error;
+
+			}
+
+			console.warn('[inventory] findExpiringBefore degraded — last_confirmed_at missing');
+
+		}
 
 
 
 		const totalItems = countsByLocation.reduce((sum, c) => sum + c.count, 0);
 
-		const [analytics, autoExpiredCount, staleCount, lastUpdate] = await Promise.all([
-			this.repository.getAnalytics(householdId, context),
-			this.repository.countAutoExpiredHousehold(householdId, context),
-			this.repository.countStaleUndated(householdId),
-			this.repository.getLastInventoryUpdate(householdId)
-		]);
+		let pantryStatus: PantryStatusSummary = {
+
+			withoutExpiryCount: 0,
+
+			autoExpiredCount: 0,
+
+			staleCount: 0,
+
+			lastUpdatedAt: null,
+
+			lastUpdatedByUserId: null,
+
+			syncHealth: 'good'
+
+		};
+
+		try {
+
+			const [analytics, autoExpiredCount, staleCount, lastUpdate] = await Promise.all([
+
+				this.repository.getAnalytics(householdId, context),
+
+				this.repository.countAutoExpiredHousehold(householdId, context),
+
+				this.repository.countStaleUndated(householdId),
+
+				this.repository.getLastInventoryUpdate(householdId)
+
+			]);
+
+			pantryStatus = {
+
+				withoutExpiryCount: analytics.withoutExpiryCount,
+
+				autoExpiredCount,
+
+				staleCount,
+
+				lastUpdatedAt: lastUpdate?.updatedAt ?? null,
+
+				lastUpdatedByUserId: lastUpdate?.userId ?? null,
+
+				syncHealth: computeSyncHealthLevel({
+
+					totalItems,
+
+					withoutExpiryCount: analytics.withoutExpiryCount,
+
+					staleCount
+
+				})
+
+			};
+
+		} catch (error) {
+
+			if (!isMissingLastConfirmedColumn(error)) {
+
+				throw error;
+
+			}
+
+			console.warn('[inventory] pantry status degraded — last_confirmed_at missing');
+
+		}
 
 		return {
 			counts: countsByLocation,
 			expiringSoon,
 			totalItems,
-			pantryStatus: {
-				withoutExpiryCount: analytics.withoutExpiryCount,
-				autoExpiredCount,
-				staleCount,
-				lastUpdatedAt: lastUpdate?.updatedAt ?? null,
-				lastUpdatedByUserId: lastUpdate?.userId ?? null,
-				syncHealth: computeSyncHealthLevel({
-					totalItems,
-					withoutExpiryCount: analytics.withoutExpiryCount,
-					staleCount
-				})
-			}
+			pantryStatus
 		};
 
 	}
@@ -544,12 +609,20 @@ export class InventoryService {
 		householdId: string,
 		minCount = 3
 	): Promise<DuplicateNameGroupSummary[]> {
-		const items = await this.listAll(householdId);
-		return findDuplicateNameGroups(items, minCount).map((group) => ({
-			displayName: group.displayName,
-			count: group.count,
-			location: group.location
-		}));
+		try {
+			const items = await this.listAll(householdId);
+			return findDuplicateNameGroups(items, minCount).map((group) => ({
+				displayName: group.displayName,
+				count: group.count,
+				location: group.location
+			}));
+		} catch (error) {
+			if (isMissingLastConfirmedColumn(error)) {
+				console.warn('[inventory] findDuplicateNameGroups degraded — last_confirmed_at missing');
+				return [];
+			}
+			throw error;
+		}
 	}
 
 	async listMovingToAutoExpiredSoon(householdId: string): Promise<InventoryItem[]> {

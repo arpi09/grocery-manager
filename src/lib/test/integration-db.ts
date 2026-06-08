@@ -52,7 +52,8 @@ const SQL_MIGRATION_FILES = [
 	'0031_household_receipt_forward_token.sql',
 	'0032_analytics_behavior.sql',
 	'0033_shopping_to_pantry_mode.sql',
-	'0034_inventory_last_confirmed_at.sql'
+	'0034_inventory_last_confirmed_at.sql',
+	'0035_staleness_reminders.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE

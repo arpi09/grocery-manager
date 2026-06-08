@@ -239,6 +239,13 @@
 			"when": 1751203200000,
 			"tag": "0034_inventory_last_confirmed_at",
 			"breakpoints": true
+		},
+		{
+			"idx": 34,
+			"version": "7",
+			"when": 1751289600000,
+			"tag": "0035_staleness_reminders",
+			"breakpoints": true
 		}
 	]
 }

@@ -27,6 +27,11 @@ export function activeNotAutoExpiredFilter(context: InventoryListContext) {
 	);
 }
 
+export function isMissingLastConfirmedColumn(error: unknown): boolean {
+	const message = error instanceof Error ? error.message : String(error);
+	return /last_confirmed_at|column .* does not exist/i.test(message);
+}
+
 export function staleUndatedFilter(referenceDate = new Date()) {
 	const cutoff = stalenessCutoffDate(undefined, referenceDate);
 	return and(
@@ -48,7 +53,7 @@ export function mapInventoryRow(row: typeof inventoryItemTable.$inferSelect): In
 		expiresOn: row.expiresOn,
 		expiresOnSource: row.expiresOnSource as InventoryItem['expiresOnSource'],
 		notes: row.notes,
-		lastConfirmedAt: row.lastConfirmedAt,
+		lastConfirmedAt: row.lastConfirmedAt ?? row.createdAt,
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt
 	};

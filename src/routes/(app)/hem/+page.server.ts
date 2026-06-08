@@ -75,7 +75,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 		canWrite ? locals.inventoryService.listRecentItemNames(householdId) : Promise.resolve([]),
 
 		canWrite ? locals.inventoryService.findDuplicateNameGroups(householdId) : Promise.resolve([]),
-		locals.pmfService.listRecentHouseholdSyncEvents(householdId, 8)
+		locals.pmfService.listRecentHouseholdSyncEvents(householdId, 8).catch((error) => {
+			console.warn('[hem] activity feed degraded:', error);
+			return [];
+		})
 
 	]);
 
