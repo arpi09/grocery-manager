@@ -304,6 +304,8 @@
 
 		align-items: center;
 
+		min-height: var(--touch-target-min);
+
 		font-size: 0.875rem;
 
 		font-weight: 700;

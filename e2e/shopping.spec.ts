@@ -18,15 +18,16 @@ async function ensureSmartFillVisible(page: import('@playwright/test').Page) {
 	}
 
 	await openShoppingSuggestionsFold(page);
-	await expect(page.getByTestId('shopping-smart-fill')).toBeVisible({ timeout: 15_000 });
 }
 
 async function openShoppingSuggestionsFold(page: import('@playwright/test').Page) {
 	const fold = page.getByTestId('shopping-suggestions-fold');
 	await expect(fold).toBeVisible({ timeout: 15_000 });
-	await fold.evaluate((el) => {
-		(el as HTMLDetailsElement).open = true;
-	});
+	const isOpen = await fold.evaluate((el) => (el as HTMLDetailsElement).open);
+	if (!isOpen) {
+		await fold.locator('summary').click();
+	}
+	await expect(page.getByTestId('shopping-smart-fill')).toBeVisible({ timeout: 15_000 });
 }
 
 test.describe('Shopping list', () => {

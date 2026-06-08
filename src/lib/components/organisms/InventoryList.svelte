@@ -1,7 +1,9 @@
 ﻿<script lang="ts">
 
 	import { browser } from '$app/environment';
+	import { deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import { tick } from 'svelte';
 
 	import Button from '$lib/components/atoms/Button.svelte';
 
@@ -421,9 +423,11 @@
 
 		try {
 			const response = await fetch('?/consumeItem', { method: 'POST', body: formData });
-			if (response.ok) {
-				await invalidateAll();
+			const result = deserialize(await response.text());
+			if (result.type === 'success') {
 				undoPayload = snapshot;
+				await tick();
+				await invalidateAll();
 			} else {
 				showClientToast(t('consume.finishFailed'), { variant: 'error' });
 			}

@@ -93,7 +93,14 @@ test.describe('Inventory mobile UX', () => {
 		const row = seededRow(list);
 
 		await dismissBlockingOverlays(page);
-		await row.getByRole('button', { name: /Slut|Finished/i }).click({ force: true });
+		const finishBtn = row.getByRole('button', { name: /Slut|Finished/i });
+		await Promise.all([
+			page.waitForResponse(
+				(r) => r.url().includes('consumeItem') && r.request().method() === 'POST',
+				{ timeout: 15_000 }
+			),
+			finishBtn.click({ force: true })
+		]);
 
 		await clickUndo(page);
 
@@ -142,7 +149,13 @@ test.describe('Inventory mobile UX', () => {
 		const row = seededRow(list);
 
 		await dismissBlockingOverlays(page);
-		await swipeRowHorizontal(page, row, 'right');
+		await Promise.all([
+			page.waitForResponse(
+				(r) => r.url().includes('consumeItem') && r.request().method() === 'POST',
+				{ timeout: 15_000 }
+			),
+			swipeRowHorizontal(page, row, 'right')
+		]);
 
 		await clickUndo(page);
 
