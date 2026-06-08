@@ -19,8 +19,8 @@ export async function swipeRowHorizontal(
 	rowLocator: ReturnType<Page['locator']>,
 	direction: 'left' | 'right'
 ) {
-	const nameLink = rowLocator.locator('.name');
-	const target = (await nameLink.count()) > 0 ? nameLink.first() : rowLocator;
+	const handle = rowLocator.getByTestId('inventory-swipe-handle');
+	const target = (await handle.count()) > 0 ? handle.first() : rowLocator;
 	const box = await target.boundingBox();
 	if (!box) {
 		throw new Error('Swipe target has no bounding box');

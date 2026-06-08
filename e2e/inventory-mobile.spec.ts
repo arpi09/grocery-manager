@@ -30,6 +30,12 @@ test.describe('Inventory mobile UX', () => {
 		return list.getByTestId('inventory-compact-row').filter({ hasText: seededItemName });
 	}
 
+	async function clickUndo(page: import('@playwright/test').Page) {
+		const undoWrap = page.locator('.undo-toast-wrap');
+		await expect(undoWrap).toBeVisible({ timeout: 10_000 });
+		await undoWrap.getByRole('button', { name: /Ångra|Undo/i }).click();
+	}
+
 	test('compact list shows finish and partial actions', async ({ page }) => {
 		const list = await openFridgeList(page);
 		const row = seededRow(list);
@@ -41,12 +47,7 @@ test.describe('Inventory mobile UX', () => {
 		const list = await openFridgeList(page);
 		const row = seededRow(list);
 		await row.getByRole('button', { name: /Slut|Finished/i }).click();
-
-		const undoToast = page.getByRole('status').filter({ hasText: /markerad som slut|marked as finished/i });
-		await expect(undoToast).toBeVisible({ timeout: 10_000 });
-		await expect(page.getByRole('button', { name: /Ångra|Undo/i })).toBeVisible();
-
-		await page.getByRole('button', { name: /Ångra|Undo/i }).click();
+		await clickUndo(page);
 		await expect(row.getByRole('link', { name: seededItemName })).toBeVisible({ timeout: 10_000 });
 	});
 
@@ -69,11 +70,7 @@ test.describe('Inventory mobile UX', () => {
 		const list = await openFridgeList(page);
 		const row = seededRow(list);
 		await swipeRowHorizontal(page, row, 'right');
-
-		const undoToast = page.getByRole('status').filter({ hasText: /markerad som slut|marked as finished/i });
-		await expect(undoToast).toBeVisible({ timeout: 10_000 });
-
-		await page.getByRole('button', { name: /Ångra|Undo/i }).click();
+		await clickUndo(page);
 		await expect(row.getByRole('link', { name: seededItemName })).toBeVisible({ timeout: 10_000 });
 	});
 
