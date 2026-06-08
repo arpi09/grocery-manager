@@ -28,6 +28,7 @@ import {
 		/** Hint zone for AI parse (from inventory tab or URL). Skips forced zone picker. */
 		initialLocation?: StorageLocation | null;
 		embedded?: boolean;
+		showCancel?: boolean;
 		formAction?: string;
 		onItemSaved?: () => void;
 		onCancel?: () => void;
@@ -37,6 +38,7 @@ import {
 		returnTo,
 		initialLocation = null,
 		embedded = false,
+		showCancel = true,
 		formAction,
 		onItemSaved,
 		onCancel
@@ -385,7 +387,7 @@ import {
 			</div>
 		{/if}
 	</section>
-	{#if !embedded}
+	{#if !embedded && showCancel}
 		<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} />
 	{/if}
 {:else}
@@ -545,7 +547,7 @@ import {
 			</div>
 		</form>
 	</section>
-	{#if !embedded}
+	{#if !embedded && showCancel}
 		<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} sticky={false} />
 	{:else if onCancel}
 		<ScanFlowFooter

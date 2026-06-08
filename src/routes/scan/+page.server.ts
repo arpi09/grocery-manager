@@ -6,6 +6,7 @@ import { receiptLineToInventoryAmount } from '$lib/server/receipt-parse';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { buildScanReturnUrl, type ScanToastKind } from '$lib/utils/scan-toast';
 import { parseScanMode, parseScanReturnTo } from '$lib/utils/scan-nav';
+import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { recordProductEvent } from '$lib/server/product-events';
 import { trackInventoryWrite } from '$lib/server/sync-analytics';
 import { generateId } from '$lib/infrastructure/auth/id';
@@ -23,8 +24,9 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const defaultLocation =
 		locationParam && isStorageLocation(locationParam) ? locationParam : null;
 	const returnTo = parseScanReturnTo(fromParam);
+	const isTopLevelEntry = !defaultLocation && returnTo === APP_HOME_PATH;
 
-	return { defaultLocation, returnTo, canWrite, scanMode, needsSmartDefault };
+	return { defaultLocation, returnTo, canWrite, scanMode, needsSmartDefault, isTopLevelEntry };
 };
 
 function parseItemForm(formData: FormData) {

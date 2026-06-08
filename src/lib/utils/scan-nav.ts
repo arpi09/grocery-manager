@@ -27,9 +27,9 @@ export function scanHubHref(returnTo: string): string {
 	return `/scan?${params}`;
 }
 
-/** Preferred scan entry from nav (SSR-safe default photo; client may redirect to last-used). */
-export function preferredScanHref(returnTo: string): string {
-	return scanModeHref('photo', returnTo);
+/** Preferred scan entry from nav: a top-level page, not a return-to sub-flow. */
+export function preferredScanHref(): string {
+	return '/scan';
 }
 
 /** Scan URL for a specific mode (hub omits `mode` query). */
