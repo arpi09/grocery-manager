@@ -1,4 +1,4 @@
-﻿# Manual production deploy â€” quality ? e2e ? Firebase App Hosting ? prod smoke
+﻿# Manual production deploy — quality → e2e → pre-deploy verify → Firebase → post-deploy sanity
 # Trigger: Actions ? "Deploy to production"
 # Required secret: FIREBASE_TOKEN (npx firebase login:ci)
 
@@ -315,8 +315,8 @@ jobs:
           PUBLIC_E2E_DISABLE_POST_SURVEY: 'true'
           CI: 'true'
 
-  deploy:
-    name: deploy
+  pre-deploy-verify:
+    name: pre-deploy verify
     needs: [quality-full, quality-reuse, e2e]
     if: >
       always() &&
@@ -330,6 +330,114 @@ jobs:
           needs.e2e.result == 'skipped'
         )
       )
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'push' && github.sha || (inputs.sha || inputs.ref) }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: sveltekit-build
+          path: build/
+
+      - name: Apply database migrations (pre-deploy)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "::warning::DATABASE_URL not in GitHub secrets — skipping pre-deploy migrate."
+            echo "Apply migrations manually against prod before deploy (npm run db:migrate)."
+            exit 0
+          fi
+          npm run db:migrate
+          echo "Pre-deploy migrations applied."
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Auth smoke against production build (blocks deploy on /hem SSR failure)
+        run: npm run smoke:pre-deploy
+        env:
+          USE_PGLITE: 'true'
+          ADMIN_EMAIL: e2e-admin@example.com
+          ADMIN_PASSWORD: e2e-ci-password
+          PUBLIC_ORIGIN: http://localhost:5190
+          PLAYWRIGHT_PORT: '5190'
+          TURNSTILE_SKIP: 'true'
+          TURNSTILE_BYPASS: 'true'
+          EMAIL_VERIFICATION_SKIP: 'true'
+          E2E_MOCK_AI: 'true'
+          PUBLIC_E2E_DISABLE_POST_SURVEY: 'true'
+          CI: 'true'
+
+      - name: Production URL smoke (current prod baseline)
+        run: bash scripts/smoke-prod-urls.sh
+        env:
+          BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
+          SMOKE_DOUBLE_CHECK: 'false'
+
+      - name: Require prod auth smoke credentials
+        id: smoke-auth-creds
+        env:
+          SMOKE_ADMIN_EMAIL: ${{ secrets.SMOKE_ADMIN_EMAIL }}
+          SMOKE_ADMIN_PASSWORD: ${{ secrets.SMOKE_ADMIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SMOKE_ADMIN_EMAIL:-}" ] || [ -z "${SMOKE_ADMIN_PASSWORD:-}" ]; then
+            echo "::error::SMOKE_ADMIN_EMAIL and SMOKE_ADMIN_PASSWORD must be set — authenticated prod smoke is required before deploy."
+            exit 1
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticated prod smoke (live /hem before deploy)
+        if: steps.smoke-auth-creds.outputs.configured == 'true'
+        run: npm run smoke:prod-auth
+        env:
+          BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
+          PLAYWRIGHT_BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
+          SMOKE_ADMIN_EMAIL: ${{ secrets.SMOKE_ADMIN_EMAIL }}
+          SMOKE_ADMIN_PASSWORD: ${{ secrets.SMOKE_ADMIN_PASSWORD }}
+          CI: 'true'
+
+  deploy:
+    name: deploy
+    needs: [quality-full, quality-reuse, e2e, pre-deploy-verify]
+    if: >
+      always() &&
+      (needs.quality-full.result == 'success' || needs.quality-reuse.result == 'success') &&
+      (
+        needs.e2e.result == 'success' ||
+        (
+          github.event_name == 'workflow_dispatch' &&
+          (inputs.skip_e2e == true || inputs.skip_e2e == 'true') &&
+          inputs.hotfix_confirm == 'hotfix' &&
+          needs.e2e.result == 'skipped'
+        )
+      ) &&
+      needs.pre-deploy-verify.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production
@@ -362,62 +470,24 @@ jobs:
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
-
-      - name: Smoke test production URLs
+      - name: Post-deploy sanity check
         if: steps.deploy-gate.outputs.skipped != 'true'
-        run: bash scripts/smoke-prod-urls.sh
         env:
           BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
-
-      - name: Check prod auth smoke credentials
-        if: steps.deploy-gate.outputs.skipped != 'true'
-        id: smoke-auth-creds
-        env:
-          SMOKE_ADMIN_EMAIL: ${{ secrets.SMOKE_ADMIN_EMAIL }}
-          SMOKE_ADMIN_PASSWORD: ${{ secrets.SMOKE_ADMIN_PASSWORD }}
         run: |
-          if [ -n "${SMOKE_ADMIN_EMAIL:-}" ] && [ -n "${SMOKE_ADMIN_PASSWORD:-}" ]; then
-            echo "configured=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::SMOKE_ADMIN_EMAIL / SMOKE_ADMIN_PASSWORD not set â€” skipping authenticated prod smoke."
+          set -euo pipefail
+          base="${BASE_URL%/}"
+          body=$(mktemp)
+          code=$(curl -sS -o "$body" -w "%{http_code}" --max-time 30 -L "${base}/" || echo "000")
+          if [ "$code" != "200" ]; then
+            echo "::error::Post-deploy sanity failed: ${base}/ returned HTTP ${code}"
+            exit 1
           fi
-
-      - uses: actions/setup-node@v6
-        if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
-
-      - name: Install dependencies for prod auth smoke
-        if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
-        run: npm ci
-
-      - name: Get Playwright version
-        if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
-        id: playwright-version
-        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
-
-      - uses: actions/cache@v5
-        if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
-
-      - name: Install Playwright Chromium
-        if: (steps.smoke-auth-creds.outputs.configured == 'true' && steps.playwright-cache.outputs.cache-hit != 'true') && steps.deploy-gate.outputs.skipped != 'true'
-        run: npx playwright install --with-deps chromium
-
-      - name: Authenticated prod smoke (Playwright /hem)
-        if: (steps.smoke-auth-creds.outputs.configured == 'true') && steps.deploy-gate.outputs.skipped != 'true'
-        run: npm run smoke:prod-auth
-        env:
-          BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
-          PLAYWRIGHT_BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
-          SMOKE_ADMIN_EMAIL: ${{ secrets.SMOKE_ADMIN_EMAIL }}
-          SMOKE_ADMIN_PASSWORD: ${{ secrets.SMOKE_ADMIN_PASSWORD }}
-          CI: 'true'
+          if grep -qi 'Internal Error' "$body" || grep -qi 'process is not defined' "$body"; then
+            echo "::error::Post-deploy sanity failed: ${base}/ HTML contains error markers"
+            exit 1
+          fi
+          echo "Post-deploy sanity OK: ${base}/ → ${code}"
 
       - name: Notify deploy success
         if: success() && steps.deploy-gate.outputs.skipped != 'true'
@@ -490,7 +560,7 @@ jobs:
 
   verify-release:
     name: verify release completed
-    needs: [gate, resolve-artifact, quality-full, quality-reuse, e2e, deploy]
+    needs: [gate, resolve-artifact, quality-full, quality-reuse, e2e, pre-deploy-verify, deploy]
     if: >
       always() &&
       (
@@ -506,7 +576,7 @@ jobs:
           set -euo pipefail
           echo "gate=${{ needs.gate.result }} guide_only=${{ needs.gate.outputs.guide_only }}"
           echo "resolve-artifact=${{ needs.resolve-artifact.result }} quality-full=${{ needs.quality-full.result }} quality-reuse=${{ needs.quality-reuse.result }}"
-          echo "e2e=${{ needs.e2e.result }} deploy=${{ needs.deploy.result }} (smoke inlined in deploy)"
+          echo "e2e=${{ needs.e2e.result }} pre-deploy-verify=${{ needs.pre-deploy-verify.result }} deploy=${{ needs.deploy.result }}"
           if [ "${{ needs.gate.result }}" != "success" ]; then
             echo "::error::gate job did not succeed"
             exit 1
@@ -531,10 +601,14 @@ jobs:
               exit 1
             fi
           fi
+          if [ "${{ needs.pre-deploy-verify.result }}" != "success" ]; then
+            echo "::error::pre-deploy-verify did not succeed — Firebase deploy was blocked or skipped"
+            exit 1
+          fi
           if [ "${{ needs.deploy.result }}" != "success" ]; then
             echo "::error::deploy job did not succeed"
             exit 1
           fi
-          echo "Release pipeline completed: quality, E2E, deploy, and smoke all succeeded."
+          echo "Release pipeline completed: quality, E2E, pre-deploy verify, deploy, and post-deploy sanity all succeeded."
 
 

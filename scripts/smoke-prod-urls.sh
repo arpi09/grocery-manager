@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Post-deploy smoke: curl public routes and fail on non-200 or error HTML in body.
-# Used by .github/workflows/deploy.yml and documented in docs/PROD_SMOKE.md.
+# Production URL smoke: curl public routes and fail on non-200 or error HTML in body.
+# Used by .github/workflows/deploy.yml (pre-deploy verify) and docs/PROD_SMOKE.md.
 
 set -euo pipefail
 
