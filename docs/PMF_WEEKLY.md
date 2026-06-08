@@ -163,6 +163,21 @@ Alla sju metrics: **flat** (ingen föregående veckodata med förändring i `del
 
 ---
 
+## Beta vecka 1–4 (mjuk lansering)
+
+Under [mjuk beta](./BETA_LAUNCH_SOFT.md) (5–15 hushåll): kör **förenklad** måndagsrutin. Full checklista ovan gäller fortfarande — detta är fokus per vecka.
+
+| Vecka | `/admin` — läs | Ägare |
+|-------|----------------|-------|
+| **1** | Hälsa + fel (7 d); bekräfta prod SHA = master | Deploy + eget prod-röktest; **ingen** LinkedIn än |
+| **2** | Aktivering (24 h), tid till första scan; UTM source på nya användare | LinkedIn + DM; en P0-buggfix om feedback kräver det |
+| **3** | D7 (om eligible), veckoscan-rate, feedback-fliken | 2 korta intervjuer; notera i [USER_INTERVIEWS.md](./USER_INTERVIEWS.md) |
+| **4** | D7/D30-kohort, alla sju PMF-metrics vs mål | Beslut: Fas 5b / community-launch / pivot — se [BETA_LAUNCH_SOFT.md § Deferred](./BETA_LAUNCH_SOFT.md#deferred-until-post-beta) |
+
+**Beta-trösklar (indikativt):** ≥3 aktiverade hushåll; 2 intervjuer med tydlig friktion eller "skulle sakna det". Läs metrics i **PMF-panelen** och **Beslut-fliken** på [`/admin`](https://skaffu.com/admin).
+
+---
+
 ## Relaterat
 
 - [COMPETITIVE_ANALYSIS.md §13](./COMPETITIVE_ANALYSIS.md) — PMF-kriterier
