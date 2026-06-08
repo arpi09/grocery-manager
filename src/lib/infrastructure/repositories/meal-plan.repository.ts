@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, lte, notExists, sql } from 'drizzle-orm';
 import { db } from '$lib/infrastructure/db';
 import { mealPlanTable, recipeIdeaTable } from '$lib/infrastructure/db/schema';
 import { generateId } from '$lib/infrastructure/auth/id';
@@ -19,6 +19,7 @@ export interface IMealPlanRepository {
 	listRecipeIdeas(userId: string, limit: number): Promise<RecipeIdea[]>;
 	createRecipeIdeas(userId: string, ideas: CreateRecipeIdeaInput[]): Promise<RecipeIdea[]>;
 	getRecipeIdeaById(userId: string, ideaId: string): Promise<RecipeIdea | null>;
+	deleteRecipeIdea(userId: string, ideaId: string): Promise<boolean>;
 	countRecipeIdeasSince(userId: string, since: Date): Promise<number>;
 	countPlannedMealsSince(userId: string, since: Date): Promise<number>;
 	hasAnyPlannedMeal(userId: string): Promise<boolean>;
@@ -133,7 +134,22 @@ export class DrizzleMealPlanRepository implements IMealPlanRepository {
 		const rows = await db
 			.select()
 			.from(recipeIdeaTable)
-			.where(eq(recipeIdeaTable.userId, userId))
+			.where(
+				and(
+					eq(recipeIdeaTable.userId, userId),
+					notExists(
+						db
+							.select({ id: mealPlanTable.id })
+							.from(mealPlanTable)
+							.where(
+								and(
+									eq(mealPlanTable.userId, userId),
+									eq(mealPlanTable.ideaId, recipeIdeaTable.id)
+								)
+							)
+					)
+				)
+			)
 			.orderBy(desc(recipeIdeaTable.createdAt))
 			.limit(limit);
 
@@ -172,6 +188,15 @@ export class DrizzleMealPlanRepository implements IMealPlanRepository {
 			.limit(1);
 
 		return row ? mapRecipeIdea(row) : null;
+	}
+
+	async deleteRecipeIdea(userId: string, ideaId: string) {
+		const rows = await db
+			.delete(recipeIdeaTable)
+			.where(and(eq(recipeIdeaTable.id, ideaId), eq(recipeIdeaTable.userId, userId)))
+			.returning();
+
+		return rows.length > 0;
 	}
 
 	async countRecipeIdeasSince(userId: string, since: Date) {

@@ -875,6 +875,8 @@
 		"ideasTitle": "ChatGPT-receptidéer",
 		"missingLabel": "Saknas:",
 		"scheduleDate": "Planera datum",
+		"dismissNotInterested": "Inte intresserad",
+		"dismissFailed": "Kunde inte avfärda idén",
 		"prevMonthShort": "Förra",
 		"emptyDay": "Inga måltider planerade denna dag.",
 		"contextTitle": "Planera kring utgående varor",
