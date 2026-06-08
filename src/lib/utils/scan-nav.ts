@@ -28,7 +28,7 @@ export function scanHubHref(returnTo: string): string {
 }
 
 /** Preferred scan entry from nav: a top-level page, not a return-to sub-flow. */
-export function preferredScanHref(_returnTo?: string): string {
+export function preferredScanHref(): string {
 	return '/scan';
 }
 

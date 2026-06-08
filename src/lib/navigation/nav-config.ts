@@ -116,8 +116,8 @@ export function filterNavItems(items: NavItem[], user: NavUser | null | undefine
 }
 
 export function resolveNavHref(item: NavItem, pathname: string): string {
-	if (item.dynamicHref === 'scan') {
-		return preferredScanHref(pathname);
+	if (item.dynamicHref === 'scan' && pathname) {
+		return preferredScanHref();
 	}
 	return item.href;
 }
