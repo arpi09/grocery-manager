@@ -114,7 +114,7 @@ Receipt UI selectors: `data-testid` on `receipt-review`, `receipt-line-list`, `r
 
 ## CI
 
-GitHub Actions job **e2e** in [`.github/workflows/release.yml`](../.github/workflows/release.yml) runs after **quality**, with `TURNSTILE_BYPASS`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `USE_PGLITE`. Playwright config sets `E2E_MOCK_AI=true` on the web server — no `OPENAI_API_KEY` required.
+GitHub Actions job **e2e** in [`.github/workflows/e2e.yml`](../.github/workflows/e2e.yml) runs after **quality**, with `TURNSTILE_BYPASS`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `USE_PGLITE`. Playwright config sets `E2E_MOCK_AI=true` on the web server — no `OPENAI_API_KEY` required.
 
 Optional UI debugger: `npm run test:e2e:ui`.
 

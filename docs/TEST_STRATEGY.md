@@ -146,7 +146,7 @@ Prefer:
 - consolidated E2E batch before release
 - smoke tests as CI/CD deployment gates
 
-**Home Pantry:** E2E-agenten äger `e2e/**`, [`AGENTS-E2E.md`](../AGENTS-E2E.md) och [`.cursor/agents/e2e.md`](../.cursor/agents/e2e.md). Coordinator kör E2E **efter feature-freeze**, inte parallellt med flera hot zones — se [`CURSOR_COORDINATOR.md`](./CURSOR_COORDINATOR.md). G2 i [`release.yml`](../.github/workflows/release.yml) är release-blocker för källkodsändringar (docs-only push skippar E2E via paths-filter).
+**Home Pantry:** E2E-agenten äger `e2e/**`, [`AGENTS-E2E.md`](../AGENTS-E2E.md) och [`.cursor/agents/e2e.md`](../.cursor/agents/e2e.md). Coordinator kör E2E **efter feature-freeze**, inte parallellt med flera hot zones — se [`CURSOR_COORDINATOR.md`](./CURSOR_COORDINATOR.md). G2 i [`e2e.yml`](../.github/workflows/e2e.yml) är release-blocker för källkodsändringar (docs-only push skippar E2E via paths-filter).
 
 ---
 

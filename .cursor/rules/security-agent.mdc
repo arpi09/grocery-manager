@@ -52,7 +52,7 @@ Scan and report on:
 | **Admin seeding** | `seed-admin.ts`, `ADMIN_PASSWORD` rotation and startup behavior |
 | **Rate limiting** | Login, register, API abuse controls |
 | **Security headers** | CSP, HSTS, X-Frame-Options, Permissions-Policy |
-| **CI/CD security** | `.github/workflows/release.yml`: audit gate, `TURNSTILE_SKIP` in e2e, secrets in logs |
+| **CI/CD security** | `.github/workflows/ci.yml` (audit gate), `.github/workflows/e2e.yml` (`TURNSTILE_SKIP` in e2e), secrets in logs |
 | **Deploy config** | `apphosting.yaml` secret refs; Firebase Secret Manager posture |
 | **Permission changes** | Household roles, admin routes, shared-area auth edits in candidate diff |
 
@@ -97,7 +97,7 @@ For every merge/deploy candidate (typically `master` HEAD or coordinator-specifi
 
 ## Each run
 
-1. Read **`private/DEPENDENCY_HEALTH.md`**, **`.github/workflows/release.yml`**, **`private/DEPLOYMENT_POLICY.md`**, **`private/RELEASE_PIPELINE.md`**, **`hooks.server.ts`**, API routes under `src/routes/api/**`, auth/register/invite paths.
+1. Read **`private/DEPENDENCY_HEALTH.md`**, **`.github/workflows/ci.yml`**, **`.github/workflows/e2e.yml`**, **`.github/workflows/deploy.yml`**, **`private/DEPLOYMENT_POLICY.md`**, **`private/RELEASE_PIPELINE.md`**, **`hooks.server.ts`**, API routes under `src/routes/api/**`, auth/register/invite paths.
 2. Grep for secrets patterns (`.env` committed, `sk-`, `re_`, hardcoded passwords).
 3. Verify OpenAI routes use **`api-guards`** (`requireUser`, `requireOpenAiKey`).
 4. Check Turnstile, Resend, CSRF/origin, invite token flow, upload limits, admin seed.
