@@ -29,6 +29,17 @@
 	let visible = $state(true);
 	let animate = $state(immediate);
 
+	const observerOptions: IntersectionObserverInit = {
+		threshold: 0.08,
+		rootMargin: '0px 0px -6% 0px'
+	};
+
+	function isInRevealViewport(element: HTMLElement): boolean {
+		const rect = element.getBoundingClientRect();
+		const viewportBottom = window.innerHeight * 0.94;
+		return rect.top < viewportBottom && rect.bottom > 0;
+	}
+
 	onMount(() => {
 		if (immediate) {
 			visible = true;
@@ -44,18 +55,21 @@
 			return;
 		}
 
-		visible = false;
 		animate = true;
 
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				if (entry?.isIntersecting) {
-					visible = true;
-					observer.disconnect();
-				}
-			},
-			{ threshold: 0.08, rootMargin: '0px 0px -6% 0px' }
-		);
+		if (isInRevealViewport(root)) {
+			visible = true;
+			return;
+		}
+
+		visible = false;
+
+		const observer = new IntersectionObserver(([entry]) => {
+			if (entry?.isIntersecting) {
+				visible = true;
+				observer.disconnect();
+			}
+		}, observerOptions);
 		observer.observe(root);
 		return () => observer.disconnect();
 	});

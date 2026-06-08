@@ -28,12 +28,17 @@
 
 	let { data } = $props();
 
-	const { marketing: content, loginUrl, registerUrl, hero, canonicalUrl, marketingLocale, latestGuides } =
-		data;
+	const content = $derived(data.marketing);
+	const loginUrl = $derived(data.loginUrl);
+	const registerUrl = $derived(data.registerUrl);
+	const hero = $derived(data.hero);
+	const canonicalUrl = $derived(data.canonicalUrl);
+	const marketingLocale = $derived(data.marketingLocale);
+	const latestGuides = $derived(data.latestGuides);
 	const isLoggedIn = $derived(Boolean(page.data.user?.id));
-	const landing = content.landing;
-	const previewFeatures = content.features.items.slice(0, 4);
-	const jsonLd = buildLandingJsonLd(canonicalUrl, content.meta.description);
+	const landing = $derived(content.landing);
+	const previewFeatures = $derived(content.features.items.slice(0, 4));
+	const jsonLd = $derived(buildLandingJsonLd(canonicalUrl, content.meta.description));
 
 	let heroReady = $state(false);
 
@@ -348,66 +353,65 @@
 		}
 	}
 
-	.hero-copy > * {
-		opacity: 0;
-		transform: translateY(0.75rem);
-	}
-
-	.hero-ready .hero-copy > * {
-		opacity: 1;
-		transform: translateY(0);
-	}
-
-	.hero-ready .eyebrow {
-		transition:
-			opacity 0.5s ease,
-			transform 0.5s ease;
-	}
-	.hero-ready .hero-title {
-		transition:
-			opacity 0.55s ease 0.05s,
-			transform 0.55s ease 0.05s;
-	}
-	.hero-ready .hero-lead {
-		transition:
-			opacity 0.55s ease 0.1s,
-			transform 0.55s ease 0.1s;
-	}
-	.hero-ready .hero-secondary {
-		transition:
-			opacity 0.55s ease 0.14s,
-			transform 0.55s ease 0.14s;
-	}
-	.hero-ready .hero-actions {
-		transition:
-			opacity 0.55s ease 0.18s,
-			transform 0.55s ease 0.18s;
-	}
-	.hero-ready .hero-highlights {
-		transition:
-			opacity 0.55s ease 0.22s,
-			transform 0.55s ease 0.22s;
-	}
-
+	.hero-copy > *,
 	.hero-visual-wrap {
-		opacity: 0;
-		transform: translateY(1rem) scale(0.98);
-	}
-
-	.hero-ready .hero-visual-wrap {
 		opacity: 1;
-		transform: translateY(0) scale(1);
-		transition:
-			opacity 0.7s ease 0.12s,
-			transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s;
+		transform: none;
 	}
 
-	@media (prefers-reduced-motion: reduce) {
-		.hero-copy > *,
-		.hero-visual-wrap {
+	@media (prefers-reduced-motion: no-preference) {
+		.hero:not(.hero-ready) .hero-copy > * {
+			opacity: 0;
+			transform: translateY(0.75rem);
+		}
+
+		.hero-ready .hero-copy > * {
 			opacity: 1;
-			transform: none;
-			transition: none;
+			transform: translateY(0);
+		}
+
+		.hero-ready .eyebrow {
+			transition:
+				opacity 0.5s ease,
+				transform 0.5s ease;
+		}
+		.hero-ready .hero-title {
+			transition:
+				opacity 0.55s ease 0.05s,
+				transform 0.55s ease 0.05s;
+		}
+		.hero-ready .hero-lead {
+			transition:
+				opacity 0.55s ease 0.1s,
+				transform 0.55s ease 0.1s;
+		}
+		.hero-ready .hero-secondary {
+			transition:
+				opacity 0.55s ease 0.14s,
+				transform 0.55s ease 0.14s;
+		}
+		.hero-ready .hero-actions {
+			transition:
+				opacity 0.55s ease 0.18s,
+				transform 0.55s ease 0.18s;
+		}
+		.hero-ready .hero-highlights {
+			transition:
+				opacity 0.55s ease 0.22s,
+				transform 0.55s ease 0.22s;
+		}
+
+		.hero:not(.hero-ready) .hero-visual-wrap {
+			opacity: 0;
+			transform: translateY(1rem) scale(0.98);
+		}
+
+		.hero-ready .hero-visual-wrap {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+			transition:
+				opacity 0.7s ease 0.12s,
+				transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s;
 		}
 	}
 
@@ -670,17 +674,25 @@
 		}
 	}
 
-	:global(.is-visible) .feature-reveal,
-	:global(.is-visible) .step-reveal,
-	:global(.is-visible) .diff-reveal {
-		animation: card-stagger 0.55s ease forwards;
-		animation-delay: calc(0.07s * var(--card-i, 0));
-	}
-
 	.feature-reveal,
 	.step-reveal,
 	.diff-reveal {
-		opacity: 0;
+		opacity: 1;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		:global(.reveal.animate:not(.is-visible)) .feature-reveal,
+		:global(.reveal.animate:not(.is-visible)) .step-reveal,
+		:global(.reveal.animate:not(.is-visible)) .diff-reveal {
+			opacity: 0;
+		}
+
+		:global(.is-visible) .feature-reveal,
+		:global(.is-visible) .step-reveal,
+		:global(.is-visible) .diff-reveal {
+			animation: card-stagger 0.55s ease forwards;
+			animation-delay: calc(0.07s * var(--card-i, 0));
+		}
 	}
 
 	@keyframes card-stagger {
@@ -695,13 +707,6 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.feature-reveal,
-		.step-reveal,
-		.diff-reveal {
-			opacity: 1;
-			animation: none;
-		}
-
 		.diff-card:hover {
 			transform: none;
 		}

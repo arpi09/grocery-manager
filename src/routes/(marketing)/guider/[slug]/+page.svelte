@@ -59,7 +59,7 @@
 		<time class="date" datetime={guide.date}>{formatDate(guide.date)}</time>
 	</header>
 
-	<MarketingScrollReveal>
+	<MarketingScrollReveal immediate>
 		<div class="prose">
 			<!-- Guide HTML is authored in-repo markdown, not user-generated -->
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
