@@ -8,7 +8,11 @@ import {
 
 } from '$lib/domain/auto-expired';
 
-import { canEditInventory, type HouseholdRole } from '$lib/domain/household';
+import {
+	canConsumeInventory,
+	canEditInventory,
+	type HouseholdRole
+} from '$lib/domain/household';
 
 import {
 
@@ -27,6 +31,7 @@ import {
 	findMergeCandidate
 } from '$lib/domain/inventory-merge';
 import { isMovingToAutoExpiredSoon } from '$lib/domain/auto-expired';
+import { computeSyncHealthLevel, type SyncHealthLevel } from '$lib/domain/sync-health';
 
 import { INVENTORY_LIST_DEFAULT, INVENTORY_LIST_MAX } from '$lib/domain/inventory-list';
 import { STALENESS_BATCH_SIZE } from '$lib/domain/inventory-staleness';
@@ -130,6 +135,8 @@ export interface PantryStatusSummary {
 	lastUpdatedAt: Date | null;
 
 	lastUpdatedByUserId: string | null;
+
+	syncHealth: SyncHealthLevel;
 
 }
 
@@ -289,7 +296,12 @@ export class InventoryService {
 				autoExpiredCount,
 				staleCount,
 				lastUpdatedAt: lastUpdate?.updatedAt ?? null,
-				lastUpdatedByUserId: lastUpdate?.userId ?? null
+				lastUpdatedByUserId: lastUpdate?.userId ?? null,
+				syncHealth: computeSyncHealthLevel({
+					totalItems,
+					withoutExpiryCount: analytics.withoutExpiryCount,
+					staleCount
+				})
 			}
 		};
 
@@ -549,6 +561,31 @@ export class InventoryService {
 			.sort((a, b) => (a.expiresOn ?? '').localeCompare(b.expiresOn ?? ''));
 	}
 
+	async bulkInferExpiryForLocation(
+		householdId: string,
+		location: StorageLocation,
+		actorRole: HouseholdRole
+	): Promise<number> {
+		assertInventoryWritable(actorRole);
+		if (!this.shelfLifeInference) return 0;
+		const items = await this.listByLocation(householdId, location);
+		let inferredCount = 0;
+		for (const item of items) {
+			if (item.expiresOn) continue;
+			const inferred = await this.shelfLifeInference.inferShelfLife({
+				name: item.name,
+				location: item.location
+			});
+			if (!inferred?.expiresOn) continue;
+			const updated = await this.repository.update(householdId, item.id, {
+				expiresOn: inferred.expiresOn,
+				expiresOnSource: 'ai_inferred'
+			});
+			if (updated) inferredCount += 1;
+		}
+		return inferredCount;
+	}
+
 	async confirmStaleBatch(
 		householdId: string,
 		itemIds: string[],
@@ -793,7 +830,7 @@ export class InventoryService {
 
 	) {
 
-		assertInventoryWritable(actorRole);
+		assertInventoryConsumable(actorRole);
 
 		const item = await this.repository.findById(householdId, id);
 
@@ -886,6 +923,12 @@ function assertInventoryWritable(actorRole: HouseholdRole): void {
 
 	}
 
+}
+
+function assertInventoryConsumable(actorRole: HouseholdRole): void {
+	if (!canConsumeInventory(actorRole)) {
+		throw new InventoryReadOnlyError();
+	}
 }
 
 

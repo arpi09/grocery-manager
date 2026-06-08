@@ -228,6 +228,25 @@
 		"quickAddAria": "Quick add to pantry",
 		"quickAddPlaceholder": "Add…",
 		"quickAddSubmit": "Add",
+		"quickAddBarcode": "Scan barcode",
+		"mergeDuplicatesLink": "Merge duplicate rows",
+		"syncHealth": {
+			"good": "Healthy sync",
+			"needs_love": "Needs sync"
+		},
+		"activity": {
+			"title": "Recent household activity",
+			"empty": "No sync activity yet.",
+			"batchReview": "Completed sync review",
+			"stalenessConfirmed": "Confirmed still-have item",
+			"receiptFinishAccepted": "Marked old stock as finished",
+			"inventoryWrite": {
+				"create": "Added item",
+				"consume": "Consumed item",
+				"confirm": "Confirmed item",
+				"merge": "Merged duplicates"
+			}
+		},
 		"duplicateWarningTitle": "Duplicate pantry rows",
 		"duplicateWarning": "{count} rows named {name} —",
 		"duplicateWarningInventory": "view inventory",
@@ -694,6 +713,8 @@
 		"mergeExisting": "Already in pantry — merge with {name} ({quantity} {unit})?",
 		"clearAutoExpired": "Clear all expired",
 		"clearAutoExpiredAria": "Remove all {count} auto-expired items",
+		"bulkExpiryBanner": "Add best-before dates to undated items with AI in one tap.",
+		"bulkExpiryAction": "Infer dates",
 		"finishedBadge": "Finished",
 		"finishedSection": "Finished items",
 		"searchPlaceholder": "Search items…",
@@ -1139,6 +1160,12 @@
 		"analytics": {
 			"exportCsv": "Export CSV ({days} days)"
 		},
+		"syncFunnel": {
+			"title": "Sync funnel",
+			"write7d": "Households with writes (7d)",
+			"review7d": "Households with review (7d)",
+			"conversion": "Write→review conversion"
+		},
 		"sessionManagement": "Session management",
 		"logoutAllNote": "Log out everyone ends every active session, including your own. Users must log in again.",
 		"confirmYes": "Type {yes} to confirm",
@@ -1529,6 +1556,8 @@
 		"networkError": "Network error during photo scan.",
 		"reviewTitle": "Review ({selected} of {total})",
 		"reviewHint": "Remove wrong rows and adjust name, quantity and location before saving.",
+		"sameAsLastTime": "Use same location as last time",
+		"missingItemLink": "Missing something? Add item manually",
 		"fieldName": "Name",
 		"fieldQuantity": "Quantity",
 		"fieldUnit": "Unit",
@@ -1606,7 +1635,8 @@
 		"editNameHint": "Adjust the name if needed",
 		"moreOptions": "Expiry date and notes",
 		"manualBarcode": "Or enter barcode manually",
-		"scannerHint": "Point the camera at the product barcode."
+		"scannerHint": "Point the camera at the product barcode.",
+		"oneTapAdd": "One-tap add"
 	},
 	"recipe": {
 		"title": "Recipe suggestions",
@@ -1805,6 +1835,9 @@
 		"celebrateStreak5": "{count} zero-waste weeks — an impressive streak.",
 		"syncWeek": "Sync week",
 		"celebrateSyncWeek": "You kept the pantry alive this week — nice work.",
+		"syncWeekWrites": "Sync writes this week",
+		"bridgeCelebration": "Bridge x5",
+		"bridgeProgress": "{count} bridge checkoffs",
 		"celebrationDismiss": "Close",
 		"nextMilestoneTitle": "Next step",
 		"nextMilestoneProgress": "{current} of {target}",
@@ -1853,6 +1886,7 @@
 		"heroSubtitleSyncDefault": "Photo round or review a few uncertain items — good enough accuracy in no time.",
 		"heroSubtitleStale": "{count} items maybe gone — confirm or mark finished in 2 minutes.",
 		"heroCtaSync": "Quick sync →",
+		"heroCtaPhoto": "Photo round →",
 		"heroCtaPlan": "Plan the week →",
 		"heroTitleDual": "Sync and plan",
 		"heroBadgeDual": "This week",
@@ -2136,6 +2170,8 @@
 		"itemPartiallyConsumed": "{label} updated — remainder still in pantry",
 		"itemPartiallyConsumedRemaining": "{label} logged — {remaining} left",
 		"itemPartiallyConsumedGeneric": "Usage logged — pantry quantity updated",
+		"bulkExpiryInferred": "{label} expiry dates inferred",
+		"bulkExpiryInferredGeneric": "Expiry dates inferred",
 		"settingsSaved": "Settings saved",
 		"autoExpiredCleared": "{label} expired items cleared",
 		"autoExpiredClearedGeneric": "Expired items cleared",

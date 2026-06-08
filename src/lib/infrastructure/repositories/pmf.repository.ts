@@ -27,6 +27,9 @@ import {
 	MAU_WINDOW_MS,
 	WAU_WINDOW_MS
 } from '$lib/domain/pmf';
+import { SYNC_ANALYTICS_EVENTS } from '$lib/domain/sync-analytics';
+import { parseInventoryWriteMetadata, type HouseholdActivityEvent } from '$lib/domain/household-activity';
+import type { SyncFunnelCounts } from '$lib/domain/sync-funnel-admin';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { db } from '$lib/infrastructure/db';
 import {
@@ -36,7 +39,7 @@ import {
 	productEventTable,
 	userTable
 } from '$lib/infrastructure/db/schema';
-import { and, eq, gte, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
 
 export interface RecordProductEventInput {
 	userId: string | null;
@@ -58,6 +61,9 @@ export interface IPmfRepository {
 	): Promise<number>;
 	countUserScanEvents(userId: string): Promise<number>;
 	getUserCreatedAt(userId: string): Promise<Date | null>;
+	listRecentHouseholdSyncEvents(householdId: string, limit: number): Promise<HouseholdActivityEvent[]>;
+	getSyncFunnelCounts(now?: Date): Promise<SyncFunnelCounts>;
+	countDistinctHouseholdsWithEventSince(eventType: ProductEventType, since: Date): Promise<number>;
 }
 
 function userIdsFromEventRows(rows: Array<{ userId: string | null }>): Set<string> {
@@ -489,5 +495,83 @@ export class DrizzlePmfRepository implements IPmfRepository {
 			.limit(1);
 
 		return row?.createdAt ?? null;
+	}
+
+	async listRecentHouseholdSyncEvents(
+		householdId: string,
+		limit: number
+	): Promise<HouseholdActivityEvent[]> {
+		const rows = await db
+			.select({
+				id: productEventTable.id,
+				householdId: productEventTable.householdId,
+				userId: productEventTable.userId,
+				eventType: productEventTable.eventType,
+				metadata: productEventTable.metadata,
+				createdAt: productEventTable.createdAt
+			})
+			.from(productEventTable)
+			.where(
+				and(
+					eq(productEventTable.householdId, householdId),
+					inArray(productEventTable.eventType, [
+						SYNC_ANALYTICS_EVENTS.INVENTORY_WRITE,
+						SYNC_ANALYTICS_EVENTS.BATCH_REVIEW_COMPLETED,
+						SYNC_ANALYTICS_EVENTS.STALENESS_CONFIRMED,
+						SYNC_ANALYTICS_EVENTS.RECEIPT_FINISH_ACCEPTED
+					])
+				)
+			)
+			.orderBy(desc(productEventTable.createdAt))
+			.limit(limit);
+
+		return rows.map((row) => {
+			const parsed = parseInventoryWriteMetadata(row.metadata);
+			return {
+				id: row.id,
+				householdId: row.householdId ?? householdId,
+				userId: row.userId,
+				eventType: row.eventType,
+				createdAt: row.createdAt,
+				action: parsed.action,
+				itemId: parsed.itemId
+			};
+		});
+	}
+
+	async countDistinctHouseholdsWithEventSince(eventType: ProductEventType, since: Date): Promise<number> {
+		const [row] = await db
+			.select({
+				count: sql<number>`count(distinct ${productEventTable.householdId})::int`
+			})
+			.from(productEventTable)
+			.where(
+				and(
+					eq(productEventTable.eventType, eventType),
+					gte(productEventTable.createdAt, since),
+					sql`${productEventTable.householdId} is not null`
+				)
+			);
+		return row?.count ?? 0;
+	}
+
+	async getSyncFunnelCounts(now = new Date()): Promise<SyncFunnelCounts> {
+		const since7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+		const since30d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+		const [householdsWithWrite7d, householdsWithBatchReview7d, householdsWithWrite30d] =
+			await Promise.all([
+				this.countDistinctHouseholdsWithEventSince(SYNC_ANALYTICS_EVENTS.INVENTORY_WRITE, since7d),
+				this.countDistinctHouseholdsWithEventSince(
+					SYNC_ANALYTICS_EVENTS.BATCH_REVIEW_COMPLETED,
+					since7d
+				),
+				this.countDistinctHouseholdsWithEventSince(SYNC_ANALYTICS_EVENTS.INVENTORY_WRITE, since30d)
+			]);
+
+		return {
+			householdsWithWrite7d,
+			householdsWithBatchReview7d,
+			householdsWithWrite30d
+		};
 	}
 }

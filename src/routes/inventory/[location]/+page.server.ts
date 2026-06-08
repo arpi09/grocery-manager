@@ -2,10 +2,13 @@ import {
 	InvalidConsumptionAmountError,
 	InventoryNotFoundError
 } from '$lib/application/inventory.service';
-import { canEditInventory } from '$lib/domain/household';
+import { canConsumeInventory, canEditInventory } from '$lib/domain/household';
 import { INVENTORY_LIST_DEFAULT } from '$lib/domain/inventory-list';
 import { isStorageLocation } from '$lib/domain/location';
-import { requireInventoryWriteAccess } from '$lib/server/household-auth';
+import {
+	requireInventoryConsumeAccess,
+	requireInventoryWriteAccess
+} from '$lib/server/household-auth';
 import { trackOneTapConsume } from '$lib/server/sync-analytics';
 import { consumeItemSchema } from '$lib/validation/consumption.schemas';
 import { appendActionToast } from '$lib/utils/action-toast';
@@ -42,13 +45,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		autoExpiredTotal,
 		autoExpiredGraceDays,
 		location,
-		canWrite: locals.householdRole ? canEditInventory(locals.householdRole) : false
+		canWrite: locals.householdRole ? canEditInventory(locals.householdRole) : false,
+		canConsume: locals.householdRole ? canConsumeInventory(locals.householdRole) : false
 	};
 };
 
 export const actions: Actions = {
 	consumeItem: async ({ request, locals }) => {
-		requireInventoryWriteAccess(locals.householdRole);
+		requireInventoryConsumeAccess(locals.householdRole);
 
 		const formData = await request.formData();
 		const itemId = formData.get('itemId');
@@ -96,6 +100,21 @@ export const actions: Actions = {
 			}
 			throw e;
 		}
+	},
+	bulkInferExpiry: async ({ params, locals }) => {
+		requireInventoryWriteAccess(locals.householdRole);
+		if (!isStorageLocation(params.location)) {
+			error(404, 'Unknown storage location');
+		}
+		const inferred = await locals.inventoryService.bulkInferExpiryForLocation(
+			locals.householdId!,
+			params.location,
+			locals.householdRole!
+		);
+		redirect(
+			302,
+			appendActionToast(`/inventory/${params.location}?filter=noExpiry`, 'bulkExpiryInferred', String(inferred))
+		);
 	},
 	undoConsume: async ({ request, locals }) => {
 		requireInventoryWriteAccess(locals.householdRole);

@@ -45,6 +45,10 @@ export function canEditInventory(role: HouseholdRole): boolean {
 	return role === 'owner' || role === 'editor';
 }
 
+export function canConsumeInventory(role: HouseholdRole): boolean {
+	return role === 'owner' || role === 'editor' || role === 'viewer';
+}
+
 export function isHouseholdOwner(role: HouseholdRole): boolean {
 	return role === 'owner';
 }

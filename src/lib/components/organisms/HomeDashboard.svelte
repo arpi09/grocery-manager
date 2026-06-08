@@ -10,7 +10,9 @@
 	import EngagementStrip from '$lib/components/molecules/EngagementStrip.svelte';
 	import WeeklyRitualHero from '$lib/components/molecules/WeeklyRitualHero.svelte';
 	import HomeQuickAdd from '$lib/components/molecules/HomeQuickAdd.svelte';
+	import HouseholdActivityFeed from '$lib/components/molecules/HouseholdActivityFeed.svelte';
 	import type { DuplicateNameGroupSummary } from '$lib/application/inventory.service';
+	import type { HouseholdActivityEvent } from '$lib/domain/household-activity';
 	import SkafferapportWidget from '$lib/components/molecules/SkafferapportWidget.svelte';
 	import WrappedBanner from '$lib/components/molecules/WrappedBanner.svelte';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
@@ -50,6 +52,7 @@
 		receiptFinishSuggestions?: ReceiptFinishSuggestion[];
 		recentItemNames?: string[];
 		duplicateGroups?: DuplicateNameGroupSummary[];
+		activityEvents?: HouseholdActivityEvent[];
 		lastUpdatedByDisplayName?: string | null;
 	}
 
@@ -66,6 +69,7 @@
 		receiptFinishSuggestions = [],
 		recentItemNames = [],
 		duplicateGroups = [],
+		activityEvents = [],
 		lastUpdatedByDisplayName = null
 	}: Props = $props();
 
@@ -295,7 +299,11 @@
 		{/if}
 	{:else}
 		{#if showWeeklyRitual}
-			<WeeklyRitualHero expiringCount={expiringCount} staleCount={pantryStatus.staleCount} />
+			<WeeklyRitualHero
+				expiringCount={expiringCount}
+				staleCount={pantryStatus.staleCount}
+				photoHref={scanPhotoHref}
+			/>
 		{/if}
 
 		{#if canWrite}
@@ -314,6 +322,7 @@
 					{/each}
 				</section>
 			{/if}
+			<p class="merge-link"><a href="/inventory/merge">{t('home.mergeDuplicatesLink')}</a></p>
 
 			<section class="scan-zone" aria-labelledby="home-scan-heading">
 				<h2 id="home-scan-heading" class="sr-only">{t('home.scanCardTitle')}</h2>
@@ -341,6 +350,9 @@
 			<section class="pantry-status" aria-labelledby="home-pantry-status-heading">
 				<h2 id="home-pantry-status-heading" class="pantry-status-title">
 					{t('home.pantryStatusTitle')}
+					<span class="sync-health-badge" data-level={pantryStatus.syncHealth}>
+						{t(`home.syncHealth.${pantryStatus.syncHealth}` as MessageKey)}
+					</span>
 				</h2>
 				{#if pantryStatus.staleCount === 0 && pantryStatus.withoutExpiryCount === 0 && pantryStatus.autoExpiredCount === 0 && pantryStatusLines.length === 1 && lastUpdatedLabel}
 					<p class="pantry-status-good">{t('home.pantryStatusAllGood')}</p>
@@ -360,6 +372,7 @@
 		{/if}
 
 		<EngagementStrip {engagement} />
+		<HouseholdActivityFeed events={activityEvents} />
 
 		{#if savings.hasData}
 			<SkafferapportWidget {savings} />
@@ -699,6 +712,25 @@
 		font-size: 0.9rem;
 		font-weight: 700;
 		letter-spacing: -0.01em;
+		display: flex;
+		align-items: center;
+		gap: var(--space-xs);
+	}
+
+	.sync-health-badge {
+		font-size: 0.75rem;
+		padding: 0.1rem 0.45rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+	}
+
+	.sync-health-badge[data-level='needs_love'] {
+		background: color-mix(in srgb, var(--color-warning) 18%, transparent);
+	}
+
+	.merge-link {
+		margin: 0;
+		font-size: 0.875rem;
 	}
 
 	.pantry-status-good {

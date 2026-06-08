@@ -1,4 +1,5 @@
 import { canEditInventory } from '$lib/domain/household';
+import { isStorageLocation } from '$lib/domain/location';
 
 import type { GamificationCelebrationKind } from '$lib/domain/gamification';
 
@@ -54,7 +55,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 		recentItemNames,
 
-		duplicateGroups
+		duplicateGroups,
+		activityEvents
 
 	] = await Promise.all([
 
@@ -72,7 +74,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 		canWrite ? locals.inventoryService.listRecentItemNames(householdId) : Promise.resolve([]),
 
-		canWrite ? locals.inventoryService.findDuplicateNameGroups(householdId) : Promise.resolve([])
+		canWrite ? locals.inventoryService.findDuplicateNameGroups(householdId) : Promise.resolve([]),
+		locals.pmfService.listRecentHouseholdSyncEvents(householdId, 8)
 
 	]);
 
@@ -134,9 +137,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 		receiptFinishSuggestions,
 
-		recentItemNames,
+		recentItemNames: recentItemNames.slice(0, 5),
 
 		duplicateGroups,
+		activityEvents,
 
 		lastUpdatedByDisplayName
 
@@ -160,11 +164,13 @@ export const actions: Actions = {
 
 		const formData = await request.formData();
 
+		const locationRaw = formData.get('location');
+		const location = typeof locationRaw === 'string' && isStorageLocation(locationRaw) ? locationRaw : 'fridge';
 		const parsed = itemSchema.safeParse({
 
 			name: formData.get('name'),
 
-			location: 'fridge',
+			location,
 
 			quantity: '1',
 
@@ -194,7 +200,7 @@ export const actions: Actions = {
 
 				name: parsed.data.name,
 
-				location: 'fridge',
+				location,
 
 				quantity: '1',
 

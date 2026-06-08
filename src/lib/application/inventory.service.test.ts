@@ -94,6 +94,7 @@ describe('InventoryService', () => {
 		expect(summary.pantryStatus.withoutExpiryCount).toBe(1);
 		expect(summary.pantryStatus.autoExpiredCount).toBe(2);
 		expect(summary.pantryStatus.staleCount).toBe(0);
+		expect(summary.pantryStatus.syncHealth).toBe('good');
 		expect(summary.pantryStatus.lastUpdatedAt).toEqual(new Date('2026-06-01'));
 		expect(summary.pantryStatus.lastUpdatedByUserId).toBe('user-1');
 	});
@@ -264,6 +265,20 @@ describe('InventoryService', () => {
 		expect(result.item.quantity).toBe('450');
 	});
 
+	it('allows viewer to consume item', async () => {
+		const item = makeItem({ quantity: '2' });
+		const updated = makeItem({ quantity: '0' });
+		vi.mocked(repository.findById).mockResolvedValue(item);
+		vi.mocked(repository.update).mockResolvedValue(updated);
+
+		const result = await service.consumeItem('household-1', 'item-1', 'user-1', 'viewer', {
+			preset: 'all'
+		});
+
+		expect(result.finished).toBe(true);
+		expect(repository.update).toHaveBeenCalled();
+	});
+
 	it('increments quantity on existing item', async () => {
 		const item = makeItem({ quantity: '2' });
 		const updated = makeItem({ quantity: '5' });
@@ -302,11 +317,19 @@ describe('InventoryService', () => {
 		expect(repository.create).not.toHaveBeenCalled();
 	});
 
-	it('rejects mark as finished for viewer role', async () => {
-		await expect(
-			service.markAsFinished('household-1', 'item-1', 'user-1', 'viewer')
-		).rejects.toBeInstanceOf(InventoryReadOnlyError);
+	it('allows viewer to mark item as finished', async () => {
+		const item = makeItem({ quantity: '2' });
+		const updated = makeItem({ quantity: '0' });
+		vi.mocked(repository.findById).mockResolvedValue(item);
+		vi.mocked(repository.update).mockResolvedValue(updated);
 
-		expect(repository.findById).not.toHaveBeenCalled();
+		const result = await service.markAsFinished('household-1', 'item-1', 'user-1', 'viewer');
+
+		expect(result.quantity).toBe('0');
+		expect(repository.update).toHaveBeenCalledWith(
+			'household-1',
+			'item-1',
+			expect.objectContaining({ quantity: '0' })
+		);
 	});
 });

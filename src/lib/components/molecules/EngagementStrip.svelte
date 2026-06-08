@@ -89,6 +89,19 @@
 				</div>
 				<p class="metric-label">{t('gamification.consumedThisWeek')}</p>
 			</div>
+			<div class="metric">
+				<div class="metric-copy">
+					<p class="metric-value">{engagement.syncWeekWrites}</p>
+					<p class="metric-label">{t('gamification.syncWeekWrites')}</p>
+					{#if engagement.bridgeCheckoffsThisWeek >= 5}
+						<span class="streak-badge">{t('gamification.bridgeCelebration')}</span>
+					{:else if engagement.bridgeCheckoffsThisWeek > 0}
+						<span class="streak-count">
+							{t('gamification.bridgeProgress', { count: engagement.bridgeCheckoffsThisWeek })}
+						</span>
+					{/if}
+				</div>
+			</div>
 		</div>
 
 		{#if nextMilestone}

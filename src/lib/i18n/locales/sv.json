@@ -231,6 +231,25 @@
 		"quickAddAria": "Snabb in i skafferiet",
 		"quickAddPlaceholder": "Lägg till…",
 		"quickAddSubmit": "Lägg till",
+		"quickAddBarcode": "Skanna streckkod",
+		"mergeDuplicatesLink": "Slå ihop dubletter",
+		"syncHealth": {
+			"good": "Bra synk",
+			"needs_love": "Behöver synk"
+		},
+		"activity": {
+			"title": "Senaste hushållsaktivitet",
+			"empty": "Ingen synkaktivitet ännu.",
+			"batchReview": "Slutförde synkgranskning",
+			"stalenessConfirmed": "Bekräftade vara",
+			"receiptFinishAccepted": "Markerade äldre lager som slut",
+			"inventoryWrite": {
+				"create": "Lade till vara",
+				"consume": "Konsumerade vara",
+				"confirm": "Bekräftade vara",
+				"merge": "Slog ihop dubletter"
+			}
+		},
 		"duplicateWarningTitle": "Dubletter i skafferiet",
 		"duplicateWarning": "{count} rader heter {name} —",
 		"duplicateWarningInventory": "visa i lager",
@@ -713,6 +732,8 @@
 		"mergeExisting": "Finns redan — slå ihop med {name} ({quantity} {unit})?",
 		"clearAutoExpired": "Rensa utgångna",
 		"clearAutoExpiredAria": "Ta bort alla {count} automatiskt utgångna varor",
+		"bulkExpiryBanner": "Lägg bäst före-datum på odaterade varor med AI i ett tryck.",
+		"bulkExpiryAction": "Föreslå datum",
 		"quantityLeft": "{amount} kvar"
 	},
 	"item": {
@@ -1113,6 +1134,12 @@
 		"analytics": {
 			"exportCsv": "Exportera CSV ({days} dagar)"
 		},
+		"syncFunnel": {
+			"title": "Synk-tratt",
+			"write7d": "Hushåll med skrivningar (7d)",
+			"review7d": "Hushåll med granskning (7d)",
+			"conversion": "Skrivning→granskning"
+		},
 		"sessionManagement": "Sessionshantering",
 		"logoutAllNote": "Logga ut alla avslutar varje aktiv session, inklusive din egen. Användare måste logga in igen.",
 		"confirmYes": "Skriv {yes} för att bekräfta",
@@ -1501,6 +1528,8 @@
 		"networkError": "Nätverksfel vid fotoskanning.",
 		"reviewTitle": "Granska ({selected} av {total})",
 		"reviewHint": "Ta bort felaktiga rader och justera namn, mängd och plats innan du sparar.",
+		"sameAsLastTime": "Samma plats som senast",
+		"missingItemLink": "Saknas något? Lägg till manuellt",
 		"fieldName": "Namn",
 		"fieldQuantity": "Mängd",
 		"fieldUnit": "Enhet",
@@ -1580,7 +1609,8 @@
 		"moreOptions": "Utgångsdatum och anteckningar",
 		"manualBarcode": "Eller ange streckkod manuellt",
 		"scannerHint": "Rikta kameran mot produktens streckkod.",
-		"flipCamera": "Byt kamera"
+		"flipCamera": "Byt kamera",
+		"oneTapAdd": "Lägg till direkt"
 	},
 	"recipe": {
 		"title": "Receptförslag",
@@ -1779,6 +1809,9 @@
 		"celebrateStreak5": "{count} veckor utan svinn — imponerande streak.",
 		"syncWeek": "Synk-vecka",
 		"celebrateSyncWeek": "Du höll skafferiet levande denna vecka — bra jobbat.",
+		"syncWeekWrites": "Synkändringar denna vecka",
+		"bridgeCelebration": "Brygga x5",
+		"bridgeProgress": "{count} brygg-avbockningar",
 		"celebrationDismiss": "Stäng",
 		"nextMilestoneTitle": "Nästa steg",
 		"nextMilestoneProgress": "{current} av {target}",
@@ -1827,6 +1860,7 @@
 		"heroSubtitleSyncDefault": "Fotorunda eller granska några osäkra varor — lagom noggrann på nolltid.",
 		"heroSubtitleStale": "{count} varor kanske slut — bekräfta eller markera slut på 2 minuter.",
 		"heroCtaSync": "Snabb synk →",
+		"heroCtaPhoto": "Fotorunda →",
 		"heroCtaPlan": "Planera veckan →",
 		"heroTitleDual": "Synk och planera",
 		"heroBadgeDual": "Denna vecka",
@@ -2138,6 +2172,8 @@
 		"pushDisabled": "Webbläsarnotiser avaktiverade",
 		"itemPartiallyConsumed": "{label} uppdaterad — resten finns kvar i skafferiet",
 		"itemPartiallyConsumedGeneric": "Förbrukning loggad — lagersaldo uppdaterat",
+		"bulkExpiryInferred": "{label} utgångsdatum föreslagna",
+		"bulkExpiryInferredGeneric": "Utgångsdatum föreslagna",
 		"autoExpiredCleared": "{label} utgångna varor rensade",
 		"autoExpiredClearedGeneric": "Utgångna varor rensade",
 		"autoExpiredClearedRemaining": "{remaining} kvar i skafferiet — bra jobbat",

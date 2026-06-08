@@ -59,6 +59,9 @@ export interface EngagementStrip {
 
 	nextMilestone: NextMilestoneProgress | null;
 
+	syncWeekWrites: number;
+	bridgeCheckoffsThisWeek: number;
+
 }
 
 
@@ -143,6 +146,19 @@ export class GamificationService {
 
 			]);
 
+		const [syncWeekWrites, bridgeCheckoffsThisWeek] = await Promise.all([
+			this.pmfRepository.countHouseholdEventsSince(
+				householdId,
+				SYNC_ANALYTICS_EVENTS.INVENTORY_WRITE,
+				weekStart
+			),
+			this.pmfRepository.countHouseholdEventsSince(
+				householdId,
+				SYNC_ANALYTICS_EVENTS.SHOPPING_CHECKOFF_TO_PANTRY,
+				weekStart
+			)
+		]);
+
 
 
 		return {
@@ -154,6 +170,8 @@ export class GamificationService {
 			zeroWasteWeeks: impact.zeroWasteWeeks,
 
 			eatFirst: computeEatFirstRitualProgress(suggestionsThisWeek, mealsScheduledThisWeek),
+			syncWeekWrites,
+			bridgeCheckoffsThisWeek,
 
 			nextMilestone: resolveNextMilestone(milestones, {
 

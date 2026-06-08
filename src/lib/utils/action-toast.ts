@@ -17,6 +17,7 @@ export type ActionToastKind =
 	| 'itemDeleted'
 	| 'itemFinished'
 	| 'itemPartiallyConsumed'
+	| 'bulkExpiryInferred'
 	| 'autoExpiredCleared'
 	| 'settingsSaved'
 	| 'petAdded'
@@ -64,6 +65,10 @@ const ACTION_TOAST_KEYS: Record<
 	itemPartiallyConsumed: {
 		withLabel: 'actionToast.itemPartiallyConsumed',
 		generic: 'actionToast.itemPartiallyConsumedGeneric'
+	},
+	bulkExpiryInferred: {
+		withLabel: 'actionToast.bulkExpiryInferred',
+		generic: 'actionToast.bulkExpiryInferredGeneric'
 	},
 	autoExpiredCleared: {
 		withLabel: 'actionToast.autoExpiredCleared',

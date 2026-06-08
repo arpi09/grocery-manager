@@ -62,7 +62,8 @@ describe('GamificationService', () => {
 			hasAnyPlannedMeal: vi.fn()
 		} as unknown as IMealPlanRepository;
 		pmfRepository = {
-			hasHouseholdEvent: vi.fn()
+			hasHouseholdEvent: vi.fn(),
+			countHouseholdEventsSince: vi.fn().mockResolvedValue(0)
 		} as unknown as IPmfRepository;
 		service = new GamificationService(
 			statistikService,

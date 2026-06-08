@@ -152,7 +152,7 @@ export class ExpiryReminderService {
 		}
 
 		if (pushEnabled) {
-			const pushResult = await this.sendExpiryPush(user.id, itemCount, user.settings.days);
+			const pushResult = await this.sendExpiryPush(user.id, itemCount, user.settings.days, sections);
 			if (pushResult.ok) {
 				sentAny = true;
 			} else if (pushResult.reason !== 'no_subscriptions') {
@@ -171,7 +171,8 @@ export class ExpiryReminderService {
 	private async sendExpiryPush(
 		userId: string,
 		itemCount: number,
-		days: ExpiryReminderDays
+		days: ExpiryReminderDays,
+		sections: ExpiryReminderHouseholdSection[]
 	): Promise<{ ok: true } | { ok: false; reason: string }> {
 		const subscriptions = await this.pushRepository.listByUserId(userId);
 		if (subscriptions.length === 0) {
@@ -179,10 +180,17 @@ export class ExpiryReminderService {
 		}
 
 		const locale = 'sv';
+		const firstItem = sections.flatMap((section) => section.items.map((item) => ({ section, item })))[0];
+		const pushUrl = firstItem
+			? `${this.appOrigin.getOrigin() || ''}/item/${firstItem.item.id}/edit?from=/hem`
+			: `${this.appOrigin.getOrigin() || ''}${buildEatFirstWeekUrl('push')}`;
+		const pushBody = firstItem
+			? `${firstItem.item.name} ${translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days })}`
+			: translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days });
 		const payload = {
 			title: translate(locale, 'pushNotifications.expiryTitle'),
-			body: translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days }),
-			url: `${this.appOrigin.getOrigin() || ''}${buildEatFirstWeekUrl('push')}`,
+			body: pushBody,
+			url: pushUrl,
 			tag: 'home-pantry-expiry'
 		};
 

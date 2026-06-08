@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { t } from '$lib/i18n';
+	import { locationLabel } from '$lib/i18n/domain-labels';
+	import { getLocale } from '$lib/i18n';
 	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
+	import { getQuickAddDefaultLocation, saveQuickAddDefaultLocation } from '$lib/utils/quick-add-defaults';
 
 	interface Props {
 		recentNames: string[];
@@ -11,6 +15,7 @@
 	let { recentNames }: Props = $props();
 	let name = $state('');
 	let submitting = $state(false);
+	let location = $state<StorageLocation>(getQuickAddDefaultLocation());
 </script>
 
 <form
@@ -20,6 +25,7 @@
 	use:enhance={bindSubmitting((v) => (submitting = v))}
 	aria-label={t('home.quickAddAria')}
 >
+	<input type="hidden" name="location" value={location} />
 	<label class="sr-only" for="home-quick-add-input">{t('home.quickAddPlaceholder')}</label>
 	<input
 		id="home-quick-add-input"
@@ -41,6 +47,22 @@
 		{t('home.quickAddSubmit')}
 	</Button>
 </form>
+<div class="chips">
+	{#each LOCATIONS as loc}
+		<button
+			type="button"
+			class="chip"
+			class:active={location === loc}
+			onclick={() => {
+				location = loc;
+				saveQuickAddDefaultLocation(loc);
+			}}
+		>
+			{locationLabel(getLocale(), loc)}
+		</button>
+	{/each}
+	<a class="barcode-link" href="/scan?mode=barcode&from=/hem">{t('home.quickAddBarcode')}</a>
+</div>
 
 <style>
 	.quick-add {
@@ -63,5 +85,29 @@
 	.quick-add input:focus {
 		outline: 2px solid color-mix(in srgb, var(--color-primary) 40%, transparent);
 		outline-offset: 1px;
+	}
+
+	.chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-xs);
+		margin-top: var(--space-xs);
+	}
+
+	.chip {
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		border-radius: 999px;
+		padding: 0.2rem 0.6rem;
+	}
+
+	.chip.active {
+		border-color: var(--color-primary);
+	}
+
+	.barcode-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
 	}
 </style>

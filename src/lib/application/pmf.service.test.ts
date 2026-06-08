@@ -15,7 +15,10 @@ describe('PmfService', () => {
 			hasHouseholdEvent: vi.fn(),
 			countHouseholdEventsSince: vi.fn(),
 			countUserScanEvents: vi.fn(),
-			getUserCreatedAt: vi.fn()
+			getUserCreatedAt: vi.fn(),
+			listRecentHouseholdSyncEvents: vi.fn(),
+			getSyncFunnelCounts: vi.fn(),
+			countDistinctHouseholdsWithEventSince: vi.fn()
 		};
 		service = new PmfService(repository);
 	});

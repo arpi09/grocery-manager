@@ -76,6 +76,7 @@
 		autoExpiredGraceDays: number;
 		location: StorageLocation;
 		canWrite?: boolean;
+		canConsume?: boolean;
 		hasInventory?: boolean;
 		initialShowAutoExpired?: boolean;
 		initialExpiryFilter?: InventoryExpiryFilter;
@@ -98,10 +99,13 @@
 		location,
 
 		canWrite = false,
+		canConsume = false,
 		hasInventory = true,
 		initialShowAutoExpired = false,
 		initialExpiryFilter = 'all'
 	}: Props = $props();
+
+	const canConsumeItems = $derived(canWrite || canConsume);
 
 
 
@@ -758,7 +762,7 @@
 
 					<InventoryCompactRow
 						{item}
-						{canWrite}
+						canWrite={canConsumeItems}
 						autoExpiredGraceDays={autoExpiredGraceDays}
 						finishing={finishingIds.has(item.id)}
 						onFinishOneTap={finishOneTap}
@@ -781,7 +785,7 @@
 
 				onSortChange={handleHeaderSort}
 
-				{canWrite}
+				canWrite={canConsumeItems}
 
 				autoExpiredGraceDays={autoExpiredGraceDays}
 				finishingIds={finishingIds}
@@ -899,7 +903,7 @@
 
 						{item}
 
-						{canWrite}
+						canWrite={canConsumeItems}
 
 						autoExpired={true}
 
@@ -929,7 +933,7 @@
 
 				onSortChange={handleHeaderSort}
 
-				{canWrite}
+				canWrite={canConsumeItems}
 
 				autoExpired={true}
 
@@ -961,7 +965,7 @@
 
 				{#each filteredFinished as item (item.id)}
 
-					<InventoryCompactRow {item} {canWrite} finished={true} />
+					<InventoryCompactRow {item} canWrite={canConsumeItems} finished={true} />
 
 				{/each}
 
@@ -979,7 +983,7 @@
 
 				onSortChange={handleHeaderSort}
 
-				{canWrite}
+				canWrite={canConsumeItems}
 
 				finished={true}
 

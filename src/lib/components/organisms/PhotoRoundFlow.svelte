@@ -15,6 +15,11 @@
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { fetchMergeCandidates, type MergeCandidateMatch } from '$lib/client/merge-candidates';
 	import { onMount } from 'svelte';
+import {
+	getLastPhotoRoundLocation,
+	savePhotoRoundLocations,
+	savePhotoRoundLocation
+} from '$lib/utils/photo-round-locations';
 
 
 	interface Props {
@@ -43,7 +48,8 @@
 	type ReviewLine = PhotoRoundDetectedItem & { id: number };
 
 	let step = $state<Step>('capture');
-	let zone = $state<StorageLocation>(initialLocation ?? 'fridge');
+	const rememberedLocation = getLastPhotoRoundLocation();
+	let zone = $state<StorageLocation>(initialLocation ?? rememberedLocation ?? 'fridge');
 	let zoneConfidence = $state<PhotoRoundConfidence | null>(initialLocation ? 'high' : null);
 	let zonePickerOpen = $state(false);
 	let photos = $state<{ file: File; previewUrl: string }[]>([]);
@@ -56,6 +62,7 @@
 	let nextLineId = $state(0);
 	let mergeCandidates = $state<Record<number, MergeCandidateMatch | null>>({});
 	let mergeSelected = $state<Record<number, boolean>>({});
+	let sameAsLastTime = $state(Boolean(rememberedLocation && !initialLocation));
 
 	const cancelHref = $derived(scanHubHref(returnTo));
 	const canAddPhoto = $derived(photos.length < PHOTO_ROUND_MAX_IMAGES);
@@ -91,6 +98,7 @@
 
 	function selectZone(next: StorageLocation) {
 		zone = next;
+		savePhotoRoundLocation(next);
 		parseError = null;
 		zonePickerOpen = false;
 	}
@@ -188,6 +196,7 @@
 
 			if (!initialLocation && data.detectedZone) {
 				zone = data.detectedZone;
+				savePhotoRoundLocation(data.detectedZone);
 				zoneConfidence = data.zoneConfidence ?? 'medium';
 			}
 
@@ -254,6 +263,10 @@
 		parseError = null;
 		step = 'capture';
 		zone = initialLocation ?? 'fridge';
+		if (!initialLocation) {
+			const remembered = getLastPhotoRoundLocation();
+			if (remembered) zone = remembered;
+		}
 		zoneConfidence = initialLocation ? 'high' : null;
 	}
 
@@ -274,6 +287,9 @@
 			formData.set(`unit_${key}`, line.unit ?? '');
 			formData.set(`location_${key}`, line.location);
 		}
+		savePhotoRoundLocations(
+			lines.filter((line) => selected[line.id]).map((line) => ({ name: line.name, location: line.location }))
+		);
 	}
 
 	onMount(() => {
@@ -317,6 +333,20 @@
 		{#if showZonePicker}
 			<details class="zone-optional" bind:open={zonePickerOpen}>
 				<summary data-testid="photo-round-zone-toggle">{t('photoRound.zoneOptional')}</summary>
+				<label class="same-as-last">
+					<input
+						type="checkbox"
+						checked={sameAsLastTime}
+						onchange={(e) => {
+							sameAsLastTime = (e.currentTarget as HTMLInputElement).checked;
+							if (sameAsLastTime) {
+								const remembered = getLastPhotoRoundLocation();
+								if (remembered) selectZone(remembered);
+							}
+						}}
+					/>
+					<span>{t('photoRound.sameAsLastTime')}</span>
+				</label>
 				<div class="zone-grid" role="group" aria-label={t('photoRound.zoneAria')}>
 					{#each LOCATIONS as loc (loc)}
 						<Button
@@ -362,6 +392,7 @@
 			{t('photoRound.reviewTitle', { selected: selectedCount, total: lines.length })}
 		</h2>
 		<p class="hint">{t('photoRound.reviewHint')}</p>
+		<p class="hint"><a href="/item/new?from=/scan?mode=photo">{t('photoRound.missingItemLink')}</a></p>
 		{#if !initialLocation && zoneConfidence && zoneConfidence !== 'high'}
 			<FeedbackBanner tone="info" message={t('photoRound.zoneUncertain', { zone: locationLabel(getLocale(), zone) })} />
 		{/if}
@@ -573,6 +604,13 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
+	}
+
+	.same-as-last {
+		display: flex;
+		align-items: center;
+		gap: var(--space-xs);
+		padding: 0 var(--space-sm) var(--space-sm);
 	}
 
 	.zone-grid :global(.btn) {

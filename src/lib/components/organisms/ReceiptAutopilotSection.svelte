@@ -174,6 +174,7 @@
 			actionHref="/scan?mode=receipt&from=/hem"
 		/>
 	{:else}
+		<div class:dual-columns={finishItems.length > 0 && items.length > 0}>
 		{#if finishItems.length > 0}
 			<div class="subsection">
 				<h3 class="subsection-title">{t('receiptAutopilot.finishTitle')}</h3>
@@ -259,6 +260,7 @@
 				</ul>
 			</div>
 		{/if}
+		</div>
 	{/if}
 </section>
 
@@ -375,5 +377,11 @@
 			flex-shrink: 0;
 			align-items: flex-end;
 		}
+	}
+
+	.dual-columns {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-md);
 	}
 </style>

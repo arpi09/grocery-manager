@@ -19,6 +19,7 @@
 	import { addRecentScan } from '$lib/utils/recent-scans';
 	import { getScanQuickPicks, type ScanQuickPick } from '$lib/utils/scan-quick-picks';
 	import { isDesktopDevice } from '$lib/utils/device';
+import { getLastScanDefaults, saveLastScanDefaults } from '$lib/utils/last-scan-defaults';
 
 	interface Props {
 		defaultLocation: StorageLocation;
@@ -59,7 +60,7 @@
 	let quantity = $state('1');
 	let unit = $state('');
 	let notes = $state('');
-	let location = $state<StorageLocation>(defaultLocation);
+	let location = $state<StorageLocation>(getLastScanDefaults()?.location ?? defaultLocation);
 	let expiresOn = $state('');
 	let saveSubmitting = $state(false);
 
@@ -297,6 +298,7 @@
 						async () => {
 							persistFavoriteProduct();
 							recordBarcodeActivation(page.data.user?.id);
+							saveLastScanDefaults({ location });
 						}
 					)}
 			class="save-form"
@@ -377,6 +379,11 @@
 				<Button type="submit" fullWidth loading={saveSubmitting} loadingLabel={t('scanFlow.saving')}>
 					{t('common.save')}
 				</Button>
+				{#if !productFound}
+					<Button type="submit" variant="secondary" disabled={saveSubmitting}>
+						{t('scanFlow.oneTapAdd')}
+					</Button>
+				{/if}
 			</div>
 		</form>
 	</section>

@@ -21,6 +21,7 @@
 			receiptFinishSuggestions={data.receiptFinishSuggestions}
 			recentItemNames={data.recentItemNames}
 			duplicateGroups={data.duplicateGroups}
+			activityEvents={data.activityEvents}
 			lastUpdatedByDisplayName={data.lastUpdatedByDisplayName}
 		/>
 	</PageContainer>

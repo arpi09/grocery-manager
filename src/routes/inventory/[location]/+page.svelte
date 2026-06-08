@@ -122,6 +122,13 @@
 
 			{/if}
 
+			{#if data.canWrite && initialExpiryFilter === 'noExpiry'}
+				<form method="POST" action="?/bulkInferExpiry" class="bulk-expiry-banner">
+					<p>{t('inventory.bulkExpiryBanner')}</p>
+					<button type="submit">{t('inventory.bulkExpiryAction')}</button>
+				</form>
+			{/if}
+
 
 
 			<InventoryList
@@ -139,6 +146,7 @@
 				location={data.location}
 
 				canWrite={data.canWrite}
+				canConsume={data.canConsume}
 
 				{hasInventory}
 				{initialShowAutoExpired}
@@ -341,6 +349,22 @@
 
 		}
 
+	}
+
+	.bulk-expiry-banner {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-sm);
+		padding: var(--space-sm) var(--space-md);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+		border-radius: var(--radius-md);
+		background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+	}
+
+	.bulk-expiry-banner p {
+		margin: 0;
+		font-size: 0.875rem;
 	}
 
 </style>

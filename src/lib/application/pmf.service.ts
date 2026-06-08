@@ -9,6 +9,11 @@ import {
 	type PmfFunnelPeriodDays,
 	type PmfFunnelSnapshot
 } from '$lib/domain/pmf-funnel';
+import type { HouseholdActivityEvent } from '$lib/domain/household-activity';
+import {
+	buildSyncFunnelSnapshot,
+	type SyncFunnelSnapshot
+} from '$lib/domain/sync-funnel-admin';
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -57,5 +62,17 @@ export class PmfService {
 		]);
 
 		return buildWeeklyReview(current, previous, now, previousWeekEnd);
+	}
+
+	listRecentHouseholdSyncEvents(
+		householdId: string,
+		limit = 8
+	): Promise<HouseholdActivityEvent[]> {
+		return this.repository.listRecentHouseholdSyncEvents(householdId, limit);
+	}
+
+	async getSyncFunnelSnapshot(now = new Date()): Promise<SyncFunnelSnapshot> {
+		const counts = await this.repository.getSyncFunnelCounts(now);
+		return buildSyncFunnelSnapshot(counts);
 	}
 }
