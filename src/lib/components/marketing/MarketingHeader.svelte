@@ -38,35 +38,33 @@
 			{/each}
 		</nav>
 
-		<div class="actions">
+		<div class="header-end">
 			<LanguageSwitcher compact class="lang-switch" />
-			{#if isLoggedIn}
-				<MarketingButtonLink href={appHomeUrl}>{content.cta.openApp}</MarketingButtonLink>
-			{:else}
-				<a href={loginUrl} class="login-link">{content.cta.login}</a>
-				<MarketingButtonLink href={loginUrl}>{content.cta.openApp}</MarketingButtonLink>
-			{/if}
+			<div class="actions-desktop">
+				{#if isLoggedIn}
+					<MarketingButtonLink href={appHomeUrl}>{content.cta.openApp}</MarketingButtonLink>
+				{:else}
+					<a href={loginUrl} class="login-link">{content.cta.login}</a>
+					<MarketingButtonLink href={loginUrl}>{content.cta.openApp}</MarketingButtonLink>
+				{/if}
+			</div>
+			<button
+				type="button"
+				class="menu-toggle"
+				aria-label={content.header.menuToggle}
+				aria-expanded={menuOpen}
+				aria-controls="marketing-mobile-nav"
+				onclick={() => (menuOpen = !menuOpen)}
+			>
+				<span class="sr-only">{content.header.menuToggle}</span>
+				<span class="bar" aria-hidden="true"></span>
+				<span class="bar" aria-hidden="true"></span>
+			</button>
 		</div>
-
-		<button
-			type="button"
-			class="menu-toggle"
-			aria-label={content.header.menuToggle}
-			aria-expanded={menuOpen}
-			aria-controls="marketing-mobile-nav"
-			onclick={() => (menuOpen = !menuOpen)}
-		>
-			<span class="sr-only">{content.header.menuToggle}</span>
-			<span class="bar" aria-hidden="true"></span>
-			<span class="bar" aria-hidden="true"></span>
-		</button>
 	</div>
 
 	{#if menuOpen}
 		<nav id="marketing-mobile-nav" class="nav-mobile" aria-label={content.header.navMobileAria}>
-			<div class="mobile-lang">
-				<LanguageSwitcher compact />
-			</div>
 			{#each content.nav as link (link.href)}
 				<a href={link.href} class={navLinkClass(link.href)} onclick={closeMenu}>{link.label}</a>
 			{/each}
@@ -102,9 +100,12 @@
 		max-width: 72rem;
 		margin: 0 auto;
 		padding: var(--space-md) var(--space-lg);
+		padding-top: calc(var(--space-md) + env(safe-area-inset-top, 0));
 		display: flex;
+		flex-wrap: nowrap;
 		align-items: center;
 		gap: var(--space-lg);
+		min-width: 0;
 	}
 
 	.brand {
@@ -116,9 +117,11 @@
 
 	.nav-desktop {
 		display: none;
+		flex-wrap: nowrap;
 		align-items: center;
 		gap: var(--space-lg);
 		margin-right: auto;
+		min-width: 0;
 	}
 
 	.nav-link {
@@ -134,19 +137,23 @@
 		color: var(--color-primary);
 	}
 
-	.actions {
-		display: none;
+	.header-end {
+		display: flex;
+		flex-wrap: nowrap;
 		align-items: center;
 		gap: var(--space-md);
 		margin-left: auto;
+		flex-shrink: 0;
+	}
+
+	.actions-desktop {
+		display: none;
+		align-items: center;
+		gap: var(--space-md);
 	}
 
 	:global(.lang-switch) {
 		flex-shrink: 0;
-	}
-
-	.mobile-lang {
-		padding-top: var(--space-xs);
 	}
 
 	.login-link {
@@ -232,17 +239,17 @@
 		border: 0;
 	}
 
-	@media (max-width: 767px) {
+	@media (max-width: 899px) {
 		.inner {
 			padding: var(--space-sm) var(--page-padding-x);
+			padding-top: calc(var(--space-sm) + env(safe-area-inset-top, 0));
 			gap: var(--space-md);
-			min-width: 0;
 		}
 	}
 
-	@media (min-width: 768px) {
+	@media (min-width: 900px) {
 		.nav-desktop,
-		.actions {
+		.actions-desktop {
 			display: flex;
 		}
 
