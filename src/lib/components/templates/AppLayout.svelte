@@ -22,6 +22,7 @@
 	import PmfSurveyBanner from '$lib/components/organisms/PmfSurveyBanner.svelte';
 	import { canEditInventory } from '$lib/domain/household';
 	import DemoAccountBanner from '$lib/components/molecules/DemoAccountBanner.svelte';
+	import CoreActionBar from '$lib/components/molecules/CoreActionBar.svelte';
 	import {
 		REGISTRATION_WELCOME_DONE_EVENT,
 		completeOnboarding,
@@ -51,6 +52,10 @@
 	const canWrite = $derived(
 		page.data.householdRole ? canEditInventory(page.data.householdRole) : false
 	);
+	const staleCount = $derived(
+		typeof page.data.staleCount === 'number' ? page.data.staleCount : 0
+	);
+	const showCoreActionBar = $derived(Boolean(user) && !hideNav);
 	const householdMemberCount = $derived(
 		typeof page.data.householdMemberCount === 'number' ? page.data.householdMemberCount : 0
 	);
@@ -149,12 +154,15 @@
 
 <AppSeoHead {locale} />
 
-<div class="app" class:app--hide-nav={hideNav}>
+<div class="app" class:app--hide-nav={hideNav} class:app--core-actions={showCoreActionBar}>
 	<a href="#main-content" class="skip-to-main">{t('a11y.skipToContent')}</a>
 	{#if !hideNav}
 		<MainNav {user} {households} {activeHousehold} onRecipeIdeas={openRecipeIdeas} />
 	{/if}
 	<main id="main-content" tabindex="-1">
+		{#if showCoreActionBar}
+			<CoreActionBar {staleCount} {canWrite} />
+		{/if}
 		{#if showDemoBanner}
 			<DemoAccountBanner />
 		{/if}

@@ -19,7 +19,8 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			activeHousehold: null,
 			householdRole: null,
 			isPro: false,
-			cookieConsent
+			cookieConsent,
+			staleCount: 0
 		};
 	}
 
@@ -49,6 +50,15 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		householdMemberCount = household?.members.length ?? 0;
 	}
 
+	let staleCount = 0;
+	if (locals.householdId) {
+		try {
+			staleCount = await locals.inventoryService.countStaleUndated(locals.householdId);
+		} catch (error) {
+			console.warn('[layout] staleCount degraded:', error);
+		}
+	}
+
 	return {
 		locale,
 		cookieConsent,
@@ -70,6 +80,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			? { id: activeHousehold.id, name: activeHousehold.name }
 			: null,
 		householdRole: locals.householdRole,
-		householdMemberCount
+		householdMemberCount,
+		staleCount
 	};
 };

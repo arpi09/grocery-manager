@@ -79,6 +79,7 @@
 
 	const reviewedCount = $derived(Math.max(0, initialTotal - remaining));
 	const photoScanHref = '/scan?mode=photo&from=/inventory/synk';
+	const pantryHref = '/inventory/fridge';
 
 
 
@@ -335,17 +336,15 @@
 	{#if items.length === 0}
 
 		<EmptyState
-
 			iconId="sparkle"
-
 			title={t('staleness.emptyTitle')}
-
 			description={t('staleness.emptyDescription')}
-
-			actionLabel={t('staleness.emptyAction')}
-
-			actionHref={photoScanHref}
-
+			actionLabel={t('staleness.emptyActionPantry')}
+			actionHref={pantryHref}
+			primaryAnalyticsId="staleness.empty_pantry"
+			secondaryActionLabel={t('staleness.emptyActionScan')}
+			secondaryActionHref={photoScanHref}
+			secondaryAnalyticsId="staleness.empty_scan"
 		/>
 
 	{:else}

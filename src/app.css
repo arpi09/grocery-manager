@@ -41,6 +41,7 @@
 	--page-padding-x: var(--space-md);
 	--page-section-gap: var(--space-lg);
 	--touch-target-min: 2.75rem;
+	--core-action-bar-height: 3.5rem;
 	--content-bottom-safe: calc(
 		var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0) + var(--space-md)
 	);
@@ -119,12 +120,23 @@ body {
 	overflow-x: clip;
 }
 
+.app--core-actions {
+	--content-bottom-safe: calc(
+		var(--mobile-bottom-nav-height) + var(--core-action-bar-height) +
+			env(safe-area-inset-bottom, 0) + var(--space-md)
+	);
+}
+
 @media (min-width: 900px) {
 	:root {
 		--page-max-width: 68rem;
 		--nav-height: var(--header-height-desktop);
 		--page-padding-x: var(--space-lg);
 		--page-section-gap: var(--space-xl);
+		--content-bottom-safe: var(--space-xl);
+	}
+
+	.app--core-actions {
 		--content-bottom-safe: var(--space-xl);
 	}
 }

@@ -9,6 +9,7 @@
 	import ReceiptAutopilotSection from '$lib/components/organisms/ReceiptAutopilotSection.svelte';
 	import EngagementStrip from '$lib/components/molecules/EngagementStrip.svelte';
 	import WeeklyRitualHero from '$lib/components/molecules/WeeklyRitualHero.svelte';
+	import MealTimeSuggestions from '$lib/components/organisms/MealTimeSuggestions.svelte';
 	import HomeQuickAdd from '$lib/components/molecules/HomeQuickAdd.svelte';
 	import HouseholdActivityFeed from '$lib/components/molecules/HouseholdActivityFeed.svelte';
 	import type { DuplicateNameGroupSummary } from '$lib/application/inventory.service';
@@ -339,7 +340,7 @@
 							{t('home.duplicateWarning', { count: group.count, name: group.displayName })}
 							<a href="/inventory/{group.location}">{t('home.duplicateWarningInventory')}</a>
 							·
-							<a href="/inventory/synk">{t('home.duplicateWarningMerge')}</a>
+							<a href="/inventory/merge">{t('home.duplicateWarningMerge')}</a>
 						</p>
 					{/each}
 				</section>
@@ -355,9 +356,20 @@
 			<section class="pantry-status" aria-labelledby="home-pantry-status-heading">
 				<h2 id="home-pantry-status-heading" class="pantry-status-title">
 					{t('home.pantryStatusTitle')}
-					<span class="sync-health-badge" data-level={pantryStatus.syncHealth}>
-						{t(`home.syncHealth.${pantryStatus.syncHealth}` as MessageKey)}
-					</span>
+					{#if pantryStatus.staleCount > 0}
+						<a
+							class="sync-health-badge sync-health-badge--link"
+							data-level={pantryStatus.syncHealth}
+							href="/inventory/synk"
+							data-analytics-id="home.sync_health_badge"
+						>
+							{t(`home.syncHealth.${pantryStatus.syncHealth}` as MessageKey)}
+						</a>
+					{:else}
+						<span class="sync-health-badge" data-level={pantryStatus.syncHealth}>
+							{t(`home.syncHealth.${pantryStatus.syncHealth}` as MessageKey)}
+						</span>
+					{/if}
 				</h2>
 				{#if pantryStatus.staleCount === 0 && pantryStatus.withoutExpiryCount === 0 && pantryStatus.autoExpiredCount === 0 && pantryStatusLines.length === 1 && lastUpdatedLabel}
 					<p class="pantry-status-good">{t('home.pantryStatusAllGood')}</p>
@@ -375,6 +387,8 @@
 				{/if}
 			</section>
 		{/if}
+
+		<MealTimeSuggestions hasInventory={summary.totalItems > 0} />
 
 		<EngagementStrip {engagement} />
 		<HouseholdActivityFeed events={activityEvents} />
@@ -744,6 +758,17 @@
 
 	.sync-health-badge[data-level='needs_love'] {
 		background: color-mix(in srgb, var(--color-warning) 18%, transparent);
+	}
+
+	.sync-health-badge--link {
+		text-decoration: none;
+		color: inherit;
+		cursor: pointer;
+	}
+
+	.sync-health-badge--link:hover {
+		text-decoration: underline;
+		text-underline-offset: 0.12em;
 	}
 
 	.merge-link {

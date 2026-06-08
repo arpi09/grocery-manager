@@ -101,16 +101,30 @@
 		<div class="hero-copy">
 			<span class="hero-badge">{t('weeklyRitual.heroBadgeSyncHub')}</span>
 			<h2 id="weekly-ritual-hero-heading">{t('weeklyRitual.heroTitleSyncHub')}</h2>
-			<p class="hero-sub">{t('weeklyRitual.heroSubtitleSyncHub')}</p>
+			<p class="hero-sub">
+				{hasStale ? t('weeklyRitual.heroSubtitleSyncHub') : t('weeklyRitual.heroSubtitleSyncHubEmpty')}
+			</p>
 			<div class="hero-ctas">
 				<a class="hero-cta hero-cta--primary" href={photoHref} data-analytics-id="weekly_ritual.hero_photo">
 					{t('weeklyRitual.heroCtaPhoto')}
 				</a>
-				<a class="hero-cta hero-cta--secondary" href="/inventory/synk" data-analytics-id="weekly_ritual.hero_sync">
-					{t('weeklyRitual.heroCtaSync')}
-				</a>
-				<a class="hero-cta hero-cta--ghost" href="/planer/vecka" data-analytics-id="weekly_ritual.hero_plan">
-					{t('weeklyRitual.heroCtaPlanOptional')}
+				{#if hasStale}
+					<a
+						class="hero-cta hero-cta--secondary"
+						href="/inventory/synk"
+						data-analytics-id="weekly_ritual.hero_sync"
+					>
+						{t('weeklyRitual.heroCtaSync')}
+					</a>
+				{:else}
+					<p class="hero-nothing-to-confirm" role="status">{t('weeklyRitual.heroNothingToConfirm')}</p>
+				{/if}
+				<a
+					class="hero-cta {hasStale ? 'hero-cta--ghost' : 'hero-cta--secondary'}"
+					href="/planer/vecka"
+					data-analytics-id="weekly_ritual.hero_plan"
+				>
+					{hasStale ? t('weeklyRitual.heroCtaPlanOptional') : t('weeklyRitual.heroCtaPlan')}
 				</a>
 			</div>
 		</div>
@@ -368,6 +382,14 @@
 
 		font-weight: 600;
 
+	}
+
+	.hero-nothing-to-confirm {
+		margin: 0;
+		padding: 0.45rem 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
 	}
 
 	.hero--hub .hero-ctas {
