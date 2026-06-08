@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import {
 	dismissOnboardingModalIfOpen,
 	expectOnboardingGuideVisible,
+	loginAsAdmin,
 	loginWithCredentials,
 	registerNewUser
 } from './helpers/auth';
@@ -49,7 +50,27 @@ test.describe('Critical flows', () => {
 		await page.getByTestId('onboarding-choose-barcode').click();
 		await expect(page.getByRole('heading', { name: /Streckkod|Barcode/i })).toBeVisible();
 		await expect(page).toHaveURL(/\/settings/);
-		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
+		await expect(page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu|Welcome to Skaffu/i })).toHaveCount(0);
+	});
+
+	test('home has at most one primary CTA above the fold', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/hem');
+		await dismissOnboardingModalIfOpen(page);
+		const home = page.locator('section.home');
+		await expect(home).toBeVisible();
+		const primaryActions = home.locator('.cta-primary, .action-primary');
+		await expect(primaryActions).toHaveCount(1);
+	});
+
+	test('scan tab opens photo mode by default', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/hem');
+		await dismissOnboardingModalIfOpen(page);
+		const scanNav = page.getByTestId('nav-scan').filter({ visible: true }).first();
+		await scanNav.click();
+		await expect(page).toHaveURL(/\/scan\?.*mode=photo/);
+		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 15_000 });
 	});
 
 	test('onboarding scan cancel returns to guide without leaving settings', async ({ page }) => {
@@ -65,7 +86,7 @@ test.describe('Critical flows', () => {
 		await expect(page.getByRole('heading', { name: /Streckkod|Barcode/i })).toBeVisible();
 		await page.keyboard.press('Escape');
 		await expect(page.getByRole('heading', { name: /Streckkod|Barcode/i })).toHaveCount(0);
-		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
+		await expect(page.getByText(/Steg 2 av 3|Step 2 of 3/i)).toBeVisible();
 		await expect(page).toHaveURL(/\/settings/);
 	});
 });

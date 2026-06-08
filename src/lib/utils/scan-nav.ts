@@ -12,15 +12,24 @@ export function parseScanReturnTo(fromParam: string | null): string {
 }
 
 export function parseScanMode(value: string | null): ScanMode {
+	if (value === 'hub') {
+		return 'hub';
+	}
 	if (value === 'barcode' || value === 'receipt' || value === 'photo') {
 		return value;
 	}
-	return 'hub';
+	return 'photo';
 }
 
 /** Build the scan hub URL with a safe return path. */
 export function scanHubHref(returnTo: string): string {
-	return scanModeHref('hub', returnTo);
+	const params = new URLSearchParams({ from: returnTo, mode: 'hub' });
+	return `/scan?${params}`;
+}
+
+/** Preferred scan entry from nav (SSR-safe default photo; client may redirect to last-used). */
+export function preferredScanHref(returnTo: string): string {
+	return scanModeHref('photo', returnTo);
 }
 
 /** Scan URL for a specific mode (hub omits `mode` query). */

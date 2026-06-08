@@ -20,6 +20,7 @@
 	);
 
 	let ideasById = $state<Record<string, RecipeIdea>>(ideasByIdFromList(data.recipeIdeas));
+	let calendarOpen = $state(data.plannedMealCount > 0);
 
 	function handleIdeasChange(ideas: RecipeIdea[]) {
 		ideasById = ideasByIdFromList(ideas);
@@ -36,16 +37,25 @@
 			plannedMealCount={data.plannedMealCount}
 		/>
 		<section class="planner-grid">
-			<MealPlanCalendar
-				weeks={data.weeks}
-				month={data.month}
-				monthLabel={data.monthLabel}
-				previousMonth={data.previousMonth}
-				nextMonth={data.nextMonth}
-				{todayIso}
-				{ideasById}
-				{canEdit}
-			/>
+			<details class="calendar-fold" bind:open={calendarOpen}>
+				<summary>
+					{data.plannedMealCount > 0
+						? t('planer.calendarSummary', { count: data.plannedMealCount })
+						: t('planer.calendarExpand')}
+				</summary>
+				<div class="calendar-body">
+					<MealPlanCalendar
+						weeks={data.weeks}
+						month={data.month}
+						monthLabel={data.monthLabel}
+						previousMonth={data.previousMonth}
+						nextMonth={data.nextMonth}
+						{todayIso}
+						{ideasById}
+						{canEdit}
+					/>
+				</div>
+			</details>
 
 			<MealPlanIdeasPanel
 				month={data.month}
@@ -57,6 +67,46 @@
 </AppLayout>
 
 <style>
+	.calendar-fold {
+		min-width: 0;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		box-shadow: var(--shadow-sm);
+		overflow: hidden;
+	}
+
+	.calendar-fold > summary {
+		display: flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		padding: var(--space-md) var(--space-lg);
+		font-size: 0.9375rem;
+		font-weight: 600;
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.calendar-fold > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.calendar-fold > summary::after {
+		content: '▾';
+		margin-left: auto;
+		color: var(--color-text-muted);
+		transition: transform 0.15s;
+	}
+
+	.calendar-fold[open] > summary::after {
+		transform: rotate(180deg);
+	}
+
+	.calendar-body {
+		padding: 0 var(--space-md) var(--space-md);
+		min-width: 0;
+	}
+
 	.planner-grid {
 		display: grid;
 		grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);

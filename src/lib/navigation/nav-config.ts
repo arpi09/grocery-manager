@@ -1,5 +1,5 @@
 import type { MessageKey } from '$lib/i18n/messages';
-import { scanHubHref } from '$lib/utils/scan-nav';
+import { preferredScanHref } from '$lib/utils/scan-nav';
 import { APP_HOME_PATH } from './app-home';
 
 export type NavIconId =
@@ -117,7 +117,7 @@ export function filterNavItems(items: NavItem[], user: NavUser | null | undefine
 
 export function resolveNavHref(item: NavItem, pathname: string): string {
 	if (item.dynamicHref === 'scan') {
-		return scanHubHref(pathname);
+		return preferredScanHref(pathname);
 	}
 	return item.href;
 }

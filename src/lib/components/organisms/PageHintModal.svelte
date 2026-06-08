@@ -10,7 +10,11 @@
 		shouldShowPageHint,
 		type PageHintId
 	} from '$lib/utils/page-hints';
-	import { isOnboardingExcludedPath, shouldShowOnboarding } from '$lib/utils/onboarding';
+	import {
+		isOnboardingExcludedPath,
+		shouldShowCelebration,
+		shouldShowOnboarding
+	} from '$lib/utils/onboarding';
 
 	let open = $state(false);
 
@@ -33,6 +37,7 @@
 			!userId ||
 			isOnboardingExcludedPath(pathname) ||
 			shouldShowOnboarding(userId) ||
+			shouldShowCelebration(userId) ||
 			!shouldShowPageHint(currentHint, userId)
 		) {
 			open = false;

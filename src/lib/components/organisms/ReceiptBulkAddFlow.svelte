@@ -27,6 +27,7 @@
 		writeReceiptBulkLocation
 	} from '$lib/utils/receipt-bulk-location';
 	import { fetchMergeCandidates, type MergeCandidateMatch } from '$lib/client/merge-candidates';
+	import { saveLastScanMode } from '$lib/utils/last-scan-defaults';
 
 	interface Props {
 		returnTo: string;
@@ -218,6 +219,7 @@
 	});
 
 	onMount(() => {
+		saveLastScanMode('receipt');
 		if (!browser) return;
 		const stored = readReceiptBulkLocation();
 		if (stored) {

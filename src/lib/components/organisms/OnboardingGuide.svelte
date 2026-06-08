@@ -241,7 +241,7 @@
 </script>
 
 <Modal
-	{open}
+	open={open && !scanModalOpen}
 	onClose={skipGuide}
 	variant="sheet"
 	dismissible={false}
@@ -288,6 +288,7 @@
 		<p class="step-body">{currentStep.body}</p>
 
 		{#if currentStep.id === 'addItems'}
+			<p class="scan-tab-hint">{t('onboarding.scanTabHint')}</p>
 			{#if activationProgress?.inProgress && activationProgress.path === 'barcode' && activationProgress.barcodeCount > 0}
 				<p class="progress-note" role="status">
 					{t('onboarding.barcodeProgress', {
@@ -536,7 +537,8 @@
 		width: 100%;
 	}
 
-	.progress-note {
+	.progress-note,
+	.scan-tab-hint {
 		margin: 0;
 		padding: var(--space-sm) var(--space-md);
 		border-radius: var(--radius-sm);

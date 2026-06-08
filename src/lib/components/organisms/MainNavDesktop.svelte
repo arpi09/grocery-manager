@@ -160,6 +160,8 @@
 										role="menuitem"
 										class={navLinkClass(active)}
 										aria-current={active ? 'page' : undefined}
+										aria-label={t(item.labelKey)}
+										data-testid={`nav-more-${item.icon}`}
 										onclick={onCloseMore}
 									>
 										<NavIcon id={item.icon} />

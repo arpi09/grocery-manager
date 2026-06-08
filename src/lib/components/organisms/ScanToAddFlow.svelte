@@ -19,7 +19,7 @@
 	import { addRecentScan } from '$lib/utils/recent-scans';
 	import { getScanQuickPicks, type ScanQuickPick } from '$lib/utils/scan-quick-picks';
 	import { isDesktopDevice } from '$lib/utils/device';
-import { getLastScanDefaults, saveLastScanDefaults } from '$lib/utils/last-scan-defaults';
+import { getLastScanDefaults, saveLastScanDefaults, saveLastScanMode } from '$lib/utils/last-scan-defaults';
 
 	interface Props {
 		defaultLocation: StorageLocation;
@@ -86,6 +86,7 @@ import { getLastScanDefaults, saveLastScanDefaults } from '$lib/utils/last-scan-
 
 	$effect(() => {
 		refreshQuickPicks();
+		saveLastScanMode('barcode');
 	});
 
 	function resetToScan() {

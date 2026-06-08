@@ -155,10 +155,41 @@ Shared tokens: `--page-padding-x`, `--page-section-gap`, `--color-primary` — s
 - Findings go to the coordinator queue; implementation is a separate assigned task unless bundled in a UX audit ticket.
 - Update this file when new patterns are introduced (document the pattern, not every page).
 
+## Post-unified-nav rules (2026-06)
+
+After the four-tab bottom nav (Hem · Skanna · Lager · Äta) + header cart, **in-screen hierarchy** matters more than chrome.
+
+### `/hem` — situationsmedveten hub
+
+1. **Max 3 content blocks** above the fold on mobile (before scroll): status hero, one primary CTA, one compact shortcut row (e.g. inköp-teaser).
+2. **Max 1 primary green CTA** per viewport — implemented via `HomeNextAction.svelte` (tom → foto, stale → bekräfta, expiring → generera middag, all good → fotorunda).
+3. **Progressive disclosure** — `EngagementStrip`, `HouseholdActivityFeed`, `SkafferapportWidget`, `HomeQuickAdd`, and contextual `MealTimeSuggestions` live behind **“Mer på hem”** (`details`) unless a P0 data trigger requires prominence.
+4. **Maintenance is quiet** — merge link and duplicate nudge **only** when `duplicateGroups.length > 0`; pantry status merged into `WeeklyRitualHero` (one synk entry, not hero + status card).
+5. **Recipe entry dedup** — `MealTimeSuggestions` on hem only when expiring items **or** active meal slot; not when `WeeklyRitualHero` already surfaces the recipe/plan path.
+
+### Scan & inventory add
+
+6. **Default beats menu** — bottom **Skanna** → last-used scan mode (default photo), not the four-choice hub. Hub via **“Fler sätt”** / `?mode=hub` only.
+7. **Foto** — no forced location step; AI infers zone with optional override (`details`).
+8. **Inventory location** — one primary **Lägg till varor**; barcode and manual as text links / collapsed **Andra sätt**.
+
+### Planer & inköp
+
+9. **Äta-fliken** owns generera maträtt as primary; hem shows recipe CTA only in expiring/meal-slot context.
+10. **Planer calendar** — collapsed by default until `plannedMealCount ≥ 1` or user expands.
+11. **Smart fill** — after fill: scroll to list + success feedback (celebration when ≥15 items).
+
+### Overlays
+
+12. **Max one modal overlay** at a time — onboarding guide, page hints, and activation celebration are mutually exclusive; embedded onboarding scan replaces the guide sheet (not stacked).
+
+See [`UX_AUDIT_2026-05.md`](./UX_AUDIT_2026-05.md) for route-by-route findings.
+
 ## Changelog
 
 | Date | Change |
 |------|--------|
+| 2026-06-08 | Post-unified-nav hem/planer/scan rules; UX audit reference |
 | 2026-06-02 | Initial guidelines + button hierarchy; audit of hem, inventory, inköp, settings, statistik |
 | 2026-06-02 | Partial consumption (lite/halv/egen mängd); Planer banner tied to hem/expiry |
 | 2026-06-02 | Kvitto-autopilot v1: one primary "Lägg till i lager" per suggestion; dismiss as text link |

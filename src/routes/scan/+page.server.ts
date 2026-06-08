@@ -18,12 +18,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const locationParam = url.searchParams.get('location');
 	const fromParam = url.searchParams.get('from');
 	const modeParam = url.searchParams.get('mode');
+	const needsSmartDefault = !modeParam;
 	const scanMode = parseScanMode(modeParam);
 	const defaultLocation =
 		locationParam && isStorageLocation(locationParam) ? locationParam : null;
 	const returnTo = parseScanReturnTo(fromParam);
 
-	return { defaultLocation, returnTo, canWrite, scanMode };
+	return { defaultLocation, returnTo, canWrite, scanMode, needsSmartDefault };
 };
 
 function parseItemForm(formData: FormData) {

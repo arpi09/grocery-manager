@@ -10,6 +10,7 @@
 	import ReceiptAutopilotSection from '$lib/components/organisms/ReceiptAutopilotSection.svelte';
 	import EngagementStrip from '$lib/components/molecules/EngagementStrip.svelte';
 	import WeeklyRitualHero from '$lib/components/molecules/WeeklyRitualHero.svelte';
+	import HomeNextAction from '$lib/components/molecules/HomeNextAction.svelte';
 	import MealTimeSuggestions from '$lib/components/organisms/MealTimeSuggestions.svelte';
 	import HomeQuickAdd from '$lib/components/molecules/HomeQuickAdd.svelte';
 	import HouseholdActivityFeed from '$lib/components/molecules/HouseholdActivityFeed.svelte';
@@ -27,7 +28,7 @@
 		type GamificationCelebrationKind
 	} from '$lib/domain/gamification';
 	import { getCelebrationRegistryEntry } from '$lib/domain/gamification.registry';
-	import { getTimeOfDay, timeOfDayGreetingKey } from '$lib/domain/meal-slot';
+	import { getCurrentMealSlot, getTimeOfDay, timeOfDayGreetingKey } from '$lib/domain/meal-slot';
 	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
 	import { t, type MessageKey } from '$lib/i18n';
 	import { presentCelebration } from '$lib/utils/present-celebration.svelte';
@@ -175,8 +176,49 @@
 		return lines;
 	});
 
-	const showPantryStatusCard = $derived(summary.totalItems > 0);
+	const showPantryStatusCard = $derived(
+		summary.totalItems > 0 &&
+			(pantryStatus.staleCount > 0 ||
+				pantryStatus.withoutExpiryCount > 0 ||
+				pantryStatus.autoExpiredCount > 0)
+	);
 
+	const pantryStatusOnlyLines = $derived.by((): PantryStatusLine[] => {
+		return pantryStatusLines.filter((line) => {
+			if (lastUpdatedLabel && line.label === lastUpdatedLabel) return false;
+			if (
+				lastUpdatedLabel &&
+				lastUpdatedByDisplayName &&
+				line.label ===
+					t('home.pantryStatusLastUpdatedBy', {
+						label: lastUpdatedLabel,
+						name: lastUpdatedByDisplayName
+					})
+			) {
+				return false;
+			}
+			return true;
+		});
+	});
+
+	const pantryAllGood = $derived(
+		pantryStatus.staleCount === 0 &&
+			pantryStatus.withoutExpiryCount === 0 &&
+			pantryStatus.autoExpiredCount === 0
+	);
+
+	const showMealTimeSuggestions = $derived.by(() => {
+		if (summary.totalItems === 0 || showWeeklyRitual) {
+			return false;
+		}
+		if (hasExpiring) {
+			return true;
+		}
+		const slot = getCurrentMealSlot();
+		return slot === 'breakfast' || slot === 'lunch' || slot === 'dinner';
+	});
+
+	let moreOnHomeOpen = $state(false);
 	let locationsOpen = $state(false);
 	let eatFirstOpen = $state(true);
 	let receiptAutopilotOpen = $state(false);
@@ -270,10 +312,6 @@
 		<p class="tagline">{tagline}</p>
 	</header>
 
-	{#if !isPro && summary.totalItems > 0}
-		<ProUpgradeCta variant="card" />
-	{/if}
-
 	{#if summary.totalItems === 0}
 		{#if canWrite}
 			<EmptyState
@@ -301,14 +339,24 @@
 			</Card>
 		{/if}
 	{:else}
-		{#if showWeeklyRitual}
+		{#if showWeeklyRitual || showPantryStatusCard}
 			<WeeklyRitualHero
+				statusOnly
 				expiringCount={expiringCount}
 				staleCount={pantryStatus.staleCount}
-				photoHref={scanPhotoHref}
-				hub={true}
+				syncHealth={pantryStatus.syncHealth}
+				pantryStatusLines={pantryStatusOnlyLines}
+				allGood={pantryAllGood && !hasExpiring && pantryStatus.staleCount === 0}
 			/>
 		{/if}
+
+		<HomeNextAction
+			totalItems={summary.totalItems}
+			{expiringCount}
+			staleCount={pantryStatus.staleCount}
+			{canWrite}
+			{returnTo}
+		/>
 
 		<a class="shopping-teaser" href="/inkop" data-analytics-id="home.shopping_teaser">
 			<span class="shopping-teaser-icon" aria-hidden="true">
@@ -322,145 +370,120 @@
 			<span class="shopping-teaser-arrow" aria-hidden="true">→</span>
 		</a>
 
-		{#if canWrite}
-			<div class="quick-add-secondary">
-				<HomeQuickAdd recentNames={recentItemNames} />
-			</div>
-
-			{#if duplicateGroups.length > 0}
-				<section class="duplicate-nudge" aria-labelledby="home-duplicate-heading">
-					<h2 id="home-duplicate-heading" class="sr-only">{t('home.duplicateWarningTitle')}</h2>
-					{#each duplicateGroups.slice(0, 2) as group (group.location + group.displayName)}
-						<p class="duplicate-copy">
-							{t('home.duplicateWarning', { count: group.count, name: group.displayName })}
-							<a href="/inventory/{group.location}">{t('home.duplicateWarningInventory')}</a>
-							·
-							<a href="/inventory/merge">{t('home.duplicateWarningMerge')}</a>
-						</p>
-					{/each}
-				</section>
-			{/if}
-			<p class="merge-link"><a href="/inventory/merge">{t('home.mergeDuplicatesLink')}</a></p>
-		{:else}
+		{#if !canWrite}
 			<p class="readonly-hint">{t('home.readonlyHint')}</p>
 		{/if}
 
-		<WrappedBanner />
-
-		{#if showPantryStatusCard}
-			<section class="pantry-status" aria-labelledby="home-pantry-status-heading">
-				<h2 id="home-pantry-status-heading" class="pantry-status-title">
-					{t('home.pantryStatusTitle')}
-					{#if pantryStatus.staleCount > 0}
-						<a
-							class="sync-health-badge sync-health-badge--link"
-							data-level={pantryStatus.syncHealth}
-							href="/inventory/synk"
-							data-analytics-id="home.sync_health_badge"
-						>
-							{t(`home.syncHealth.${pantryStatus.syncHealth}` as MessageKey)}
-						</a>
-					{:else}
-						<span class="sync-health-badge" data-level={pantryStatus.syncHealth}>
-							{t(`home.syncHealth.${pantryStatus.syncHealth}` as MessageKey)}
-						</span>
-					{/if}
-				</h2>
-				{#if pantryStatus.staleCount === 0 && pantryStatus.withoutExpiryCount === 0 && pantryStatus.autoExpiredCount === 0 && pantryStatusLines.length === 1 && lastUpdatedLabel}
-					<p class="pantry-status-good">{t('home.pantryStatusAllGood')}</p>
-					<p class="pantry-status-meta">
-						<a href="/inventory/fridge">{lastUpdatedLabel}</a>
-					</p>
-				{:else if pantryStatusLines.length > 0}
-					<ul class="pantry-status-list">
-						{#each pantryStatusLines as line (line.href + line.label)}
-							<li>
-								<a href={line.href}>{line.label}</a>
-							</li>
-						{/each}
-					</ul>
+		<details class="home-disclosure more-on-home" bind:open={moreOnHomeOpen}>
+			<summary>{t('home.moreOnHome')}</summary>
+			<div class="more-on-home-body">
+				{#if !isPro}
+					<ProUpgradeCta variant="card" />
 				{/if}
-			</section>
-		{/if}
 
-		<MealTimeSuggestions hasInventory={summary.totalItems > 0} />
+				{#if canWrite}
+					<div class="quick-add-secondary">
+						<HomeQuickAdd recentNames={recentItemNames} />
+					</div>
+				{/if}
 
-		<EngagementStrip {engagement} />
-		<HouseholdActivityFeed events={activityEvents} />
+				{#if showMealTimeSuggestions}
+					<MealTimeSuggestions hasInventory={summary.totalItems > 0} />
+				{/if}
 
-		{#if savings.hasData}
-			<SkafferapportWidget {savings} />
-		{/if}
+				{#if canWrite && duplicateGroups.length > 0}
+					<section class="duplicate-nudge" aria-labelledby="home-duplicate-heading">
+						<h2 id="home-duplicate-heading" class="sr-only">{t('home.duplicateWarningTitle')}</h2>
+						{#each duplicateGroups.slice(0, 2) as group (group.location + group.displayName)}
+							<p class="duplicate-copy">
+								{t('home.duplicateWarning', { count: group.count, name: group.displayName })}
+								<a href="/inventory/{group.location}">{t('home.duplicateWarningInventory')}</a>
+								·
+								<a href="/inventory/merge">{t('home.duplicateWarningMerge')}</a>
+							</p>
+						{/each}
+					</section>
+				{/if}
 
-		{#if !showWeeklyRitual}
-			<details class="home-disclosure" bind:open={eatFirstOpen}>
-				<summary>
-					{#if hasExpiring}
-						{t('home.eatFirstSummary', { count: expiringCount })}
+				<WrappedBanner />
+				<EngagementStrip {engagement} />
+				<HouseholdActivityFeed events={activityEvents} />
+
+				{#if savings.hasData}
+					<SkafferapportWidget {savings} />
+				{/if}
+
+				{#if !showWeeklyRitual}
+					<details class="home-disclosure nested" bind:open={eatFirstOpen}>
+						<summary>
+							{#if hasExpiring}
+								{t('home.eatFirstSummary', { count: expiringCount })}
+							{:else}
+								{t('eatFirst.title')}
+							{/if}
+						</summary>
+						<EatFirstSection
+							compact
+							expiringItems={summary.expiringSoon}
+							canEdit={canWrite}
+							householdId={householdId}
+						/>
+					</details>
+				{/if}
+
+				<details class="home-disclosure nested" bind:open={locationsOpen}>
+					<summary>
+						{t('home.locationsSummary', { count: summary.totalItems })}
+					</summary>
+					<div class="locations">
+						{#each summary.counts as { location, count }}
+							<Card href="/inventory/{location}" interactive class="location-card">
+								<span
+									class="location-icon"
+									style="color: {LOCATION_COLORS[location]}"
+									aria-hidden="true"
+								>
+									<FeatureIcon id={locationIcons[location]} size={22} />
+								</span>
+								<span class="location-name">{locationShortLabel(location)}</span>
+								<span class="location-count">{count}</span>
+							</Card>
+						{/each}
+					</div>
+				</details>
+
+				{#if canWrite && (receiptAutopilotSuggestions.length > 0 || receiptFinishSuggestions.length > 0)}
+					{#if nudgeReceiptAutopilot}
+						<section class="autopilot-nudge" aria-labelledby="home-autopilot-nudge-heading">
+							<h2 id="home-autopilot-nudge-heading" class="autopilot-nudge-title">
+								{t('receiptAutopilot.nudgeTitle')}
+							</h2>
+							<p class="autopilot-nudge-lead">{t('receiptAutopilot.nudgeLead')}</p>
+							<ReceiptAutopilotSection
+								suggestions={receiptAutopilotSuggestions}
+								finishSuggestions={receiptFinishSuggestions}
+								canEdit={canWrite}
+								compact
+							/>
+						</section>
 					{:else}
-						{t('eatFirst.title')}
+						<details class="home-disclosure nested" bind:open={receiptAutopilotOpen}>
+							<summary>
+								{t('home.receiptAutopilotSummary', {
+									count: receiptAutopilotSuggestions.length + receiptFinishSuggestions.length
+								})}
+							</summary>
+							<ReceiptAutopilotSection
+								suggestions={receiptAutopilotSuggestions}
+								finishSuggestions={receiptFinishSuggestions}
+								canEdit={canWrite}
+								compact
+							/>
+						</details>
 					{/if}
-				</summary>
-				<EatFirstSection
-					compact
-					expiringItems={summary.expiringSoon}
-					canEdit={canWrite}
-					householdId={householdId}
-				/>
-			</details>
-		{/if}
-
-		<details class="home-disclosure" bind:open={locationsOpen}>
-			<summary>
-				{t('home.locationsSummary', { count: summary.totalItems })}
-			</summary>
-			<div class="locations">
-				{#each summary.counts as { location, count }}
-					<Card href="/inventory/{location}" interactive class="location-card">
-						<span
-							class="location-icon"
-							style="color: {LOCATION_COLORS[location]}"
-							aria-hidden="true"
-						>
-							<FeatureIcon id={locationIcons[location]} size={22} />
-						</span>
-						<span class="location-name">{locationShortLabel(location)}</span>
-						<span class="location-count">{count}</span>
-					</Card>
-				{/each}
+				{/if}
 			</div>
 		</details>
-
-		{#if canWrite && (receiptAutopilotSuggestions.length > 0 || receiptFinishSuggestions.length > 0)}
-			{#if nudgeReceiptAutopilot}
-				<section class="autopilot-nudge" aria-labelledby="home-autopilot-nudge-heading">
-					<h2 id="home-autopilot-nudge-heading" class="autopilot-nudge-title">
-						{t('receiptAutopilot.nudgeTitle')}
-					</h2>
-					<p class="autopilot-nudge-lead">{t('receiptAutopilot.nudgeLead')}</p>
-					<ReceiptAutopilotSection
-						suggestions={receiptAutopilotSuggestions}
-						finishSuggestions={receiptFinishSuggestions}
-						canEdit={canWrite}
-						compact
-					/>
-				</section>
-			{:else}
-				<details class="home-disclosure" bind:open={receiptAutopilotOpen}>
-					<summary>
-						{t('home.receiptAutopilotSummary', {
-							count: receiptAutopilotSuggestions.length + receiptFinishSuggestions.length
-						})}
-					</summary>
-					<ReceiptAutopilotSection
-						suggestions={receiptAutopilotSuggestions}
-						finishSuggestions={receiptFinishSuggestions}
-						canEdit={canWrite}
-						compact
-					/>
-				</details>
-			{/if}
-		{/if}
 	{/if}
 </section>
 
@@ -677,96 +700,17 @@
 		line-height: 1.45;
 	}
 
-	.pantry-status {
-		padding: var(--space-md) var(--space-lg);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-md);
-		background: var(--color-surface);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.pantry-status-title {
-		margin: 0 0 var(--space-sm);
-		font-size: 0.9rem;
-		font-weight: 700;
-		letter-spacing: -0.01em;
-		display: flex;
-		align-items: center;
-		gap: var(--space-xs);
-	}
-
-	.sync-health-badge {
-		font-size: 0.75rem;
-		padding: 0.1rem 0.45rem;
-		border-radius: 999px;
-		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
-	}
-
-	.sync-health-badge[data-level='needs_love'] {
-		background: color-mix(in srgb, var(--color-warning) 18%, transparent);
-	}
-
-	.sync-health-badge--link {
-		text-decoration: none;
-		color: inherit;
-		cursor: pointer;
-	}
-
-	.sync-health-badge--link:hover {
-		text-decoration: underline;
-		text-underline-offset: 0.12em;
-	}
-
-	.merge-link {
-		margin: 0;
-		font-size: 0.875rem;
-	}
-
-	.pantry-status-good {
-		margin: 0;
-		font-size: 0.875rem;
-		line-height: 1.45;
-		color: var(--color-text);
-	}
-
-	.pantry-status-meta {
-		margin: var(--space-xs) 0 0;
-		font-size: 0.8125rem;
-	}
-
-	.pantry-status-meta a {
-		display: inline-flex;
-		align-items: center;
-		min-height: var(--touch-target-min);
-		font-weight: 600;
-		color: var(--color-primary);
-		text-decoration: underline;
-		text-underline-offset: 0.12em;
-	}
-
-	.pantry-status-list {
-		margin: 0;
-		padding: 0;
-		list-style: none;
+	.more-on-home-body {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-xs);
+		gap: var(--space-md);
+		padding: var(--space-md) var(--space-lg) var(--space-lg);
+		border-top: 1px solid var(--color-border);
 	}
 
-	.pantry-status-list a {
-		display: inline-flex;
-		align-items: center;
-		min-height: var(--touch-target-min);
-		font-size: 0.875rem;
-		font-weight: 600;
-		line-height: 1.4;
-		color: var(--color-primary);
-		text-decoration: underline;
-		text-underline-offset: 0.12em;
-	}
-
-	.pantry-status-list a:hover {
-		color: var(--color-primary-hover);
+	.home-disclosure.nested {
+		box-shadow: none;
+		border-radius: var(--radius-sm);
 	}
 
 	.duplicate-nudge {

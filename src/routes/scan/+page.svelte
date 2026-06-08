@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
@@ -9,9 +11,22 @@
 	import PhotoRoundFlow from '$lib/components/organisms/PhotoRoundFlow.svelte';
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
 	import { t } from '$lib/i18n';
-	import { scanHubHref, type ScanMode } from '$lib/utils/scan-nav';
+	import { getLastScanMode } from '$lib/utils/last-scan-defaults';
+	import { scanHubHref, scanModeHref, type ScanMode } from '$lib/utils/scan-nav';
 
 	let { data, form } = $props();
+
+	$effect(() => {
+		if (!browser || !data.needsSmartDefault) {
+			return;
+		}
+		const mode = getLastScanMode();
+		if (mode !== 'photo') {
+			void goto(scanModeHref(mode, data.returnTo, data.defaultLocation ? { location: data.defaultLocation } : undefined), {
+				replaceState: true
+			});
+		}
+	});
 
 	const scanMode = $derived(data.scanMode as ScanMode);
 	const isHub = $derived(scanMode === 'hub');

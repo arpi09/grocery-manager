@@ -20,6 +20,7 @@ import {
 	savePhotoRoundLocations,
 	savePhotoRoundLocation
 } from '$lib/utils/photo-round-locations';
+	import { saveLastScanMode } from '$lib/utils/last-scan-defaults';
 
 
 	interface Props {
@@ -293,6 +294,7 @@ import {
 	}
 
 	onMount(() => {
+		saveLastScanMode('photo');
 		return () => revokePreviews();
 	});
 </script>
