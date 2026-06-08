@@ -61,7 +61,8 @@
 	/* Nav flyouts: dim page only — no blur (dropdown ≠ modal) */
 	--nav-dropdown-scrim: color-mix(in srgb, var(--color-text) 20%, transparent);
 	/* App navigation surfaces */
-	--nav-height: 3.25rem;
+	--nav-height: calc(3.25rem + env(safe-area-inset-top, 0));
+	--sticky-below-header: calc(var(--nav-height) + env(safe-area-inset-top, 0));
 	--header-height-desktop: 4rem;
 	--mobile-bottom-nav-height: 4.25rem;
 	--nav-surface: var(--color-surface);
@@ -69,6 +70,7 @@
 	--nav-active-bg: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface-muted));
 	--nav-header-shadow: var(--shadow-sm);
 	--nav-bottom-shadow: 0 -4px 24px rgba(31, 42, 36, 0.06);
+	--z-sticky-chrome: 50;
 	--z-nav-header: 60;
 	--z-nav-bottom: 70;
 	--z-nav-flyout: 86;

@@ -12,6 +12,7 @@ Checklist per route: no horizontal scroll, touch targets ≥44px (`--touch-targe
 | `/inventory/fridge` | App | P0 | Pass | Pass | Location tabs + table scroll; sticky CTAs clear nav |
 | `/inventory/cupboard` | App | P0 | Pass | Pass | Skafferi — same shell as fridge |
 | `/inventory/freezer` | App | P0 | Pass | Pass | Same shell as fridge |
+| `/inventory/synk` | App | P0 | Pass | Pass | Single h1 via AppHeader; undo toast above nav; batch review sticky |
 | `/inventory/foto` | App | P0 | Pass | Pass | Redirect → `/scan?mode=photo` |
 | `/scan` (hub) | App | P0 | Pass | Pass | ScanFlowFooter clears bottom nav |
 | `/scan?mode=barcode` | App | P0 | Pass | Pass | Footer + form inputs ≥44px |
@@ -50,13 +51,22 @@ Checklist per route: no horizontal scroll, touch targets ≥44px (`--touch-targe
 
 | Component | Light | Dark | Fixed in this pass |
 |-----------|-------|------|--------------------|
-| `MainNavMobile` + bottom nav | Pass | Pass | Nav-more sheet safe-area padding |
+| `MainNavMobile` + bottom nav | Pass | Pass | `safe-area-inset-top` on header; `--nav-height` includes inset |
 | `NavMoreSheet` | Pass | Pass | Touch targets already ≥44px |
 | `PantrySwitcher` sheet | Pass | Pass | Sheet padding uses `--content-bottom-safe` |
 | `ProfileMenu` sheet | Pass | Pass | `100dvh` cap + safe-area body padding |
 | `CookieConsentBanner` | Pass | Pass | Offset above app bottom nav via `:has(.app)` |
 | `OnboardingGuide` | Pass | Pass | Footer safe-area inset on fullscreen mobile |
 | `PageHintModal` / `PmfSurveyBanner` | Pass | Pass | Already use `--content-bottom-safe` |
+
+## P0 fixes applied (2026-06-08 — visual audit)
+
+| Severity | Route / area | Issue | Fix |
+|----------|--------------|-------|-----|
+| High | Undo toast (inventory, inköp, synk) | Toast portaled to body while Ångra stayed inline — flex broken | `Toast portal={false}` inside `.undo-toast-wrap` |
+| High | Inventory + settings sticky | Filter/tabs scrolled under mobile header (`top: 0`) | `--sticky-below-header` token on app-internal sticky chrome |
+| High | `/inventory/synk` | Duplicate h1; undo under nav (`z-index: 40`) | Inner title → h2; undo wrap uses `var(--z-toast)`; 8s undo |
+| High | `MainNavMobile` | Status bar overlap on notch devices | `padding-top: env(safe-area-inset-top)` on header |
 
 ## P0 fixes applied (2026-06-06)
 
@@ -81,4 +91,5 @@ Checklist per route: no horizontal scroll, touch targets ≥44px (`--touch-targe
 
 - `npm run check`
 - Existing E2E: `e2e/navigation.spec.ts`, `e2e/scan-inventory.spec.ts`, `e2e/recipe-assistant.spec.ts`
-- `e2e/mobile-visual.spec.ts` — P0 at 390×844 (`mobile-chrome` project): horizontal scroll, touch-target sampling, axe
+- `e2e/mobile-visual.spec.ts` — P0 at 390×844 (`mobile-chrome` project): horizontal scroll, touch-target sampling, axe (includes `/inventory/synk`)
+- `e2e/accessibility.spec.ts` — axe on P0 routes including `/inventory/synk`

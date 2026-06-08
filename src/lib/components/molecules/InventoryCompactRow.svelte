@@ -774,5 +774,43 @@
 
 	}
 
+
+
+	@media (max-width: 360px) {
+
+		.secondary {
+
+			flex-wrap: wrap;
+
+		}
+
+
+
+		.actions {
+
+			flex: 1 1 100%;
+
+			justify-content: flex-end;
+
+		}
+
+
+
+		.swipe-handle {
+
+			flex-wrap: wrap;
+
+		}
+
+
+
+		.swipe-handle .qty {
+
+			margin-left: auto;
+
+		}
+
+	}
+
 </style>
 

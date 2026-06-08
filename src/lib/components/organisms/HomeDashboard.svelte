@@ -308,7 +308,28 @@
 		{/if}
 
 		{#if canWrite}
-			<HomeQuickAdd recentNames={recentItemNames} />
+			{#if !showWeeklyRitual}
+				<section class="scan-zone" aria-labelledby="home-scan-heading">
+					<h2 id="home-scan-heading" class="sr-only">{t('home.scanCardTitle')}</h2>
+					<a class="scan-card" href={scanPhotoHref} data-analytics-id="home.scan_photo">
+						<span class="scan-icon" aria-hidden="true">
+							<FeatureIcon id="photo" size={22} />
+						</span>
+						<div class="scan-copy">
+							<span class="scan-title">{t('photoRound.title')}</span>
+							<span class="scan-subtitle">{t('scan.modeTiles.photoRound.description')}</span>
+						</div>
+						<span class="scan-arrow" aria-hidden="true">→</span>
+					</a>
+					<p class="scan-alt">
+						<a href={scanHubLinkHref} data-analytics-id="home.scan_hub">{t('home.moreAddWays')}</a>
+					</p>
+				</section>
+			{/if}
+
+			<div class="quick-add-secondary">
+				<HomeQuickAdd recentNames={recentItemNames} />
+			</div>
 
 			{#if duplicateGroups.length > 0}
 				<section class="duplicate-nudge" aria-labelledby="home-duplicate-heading">
@@ -324,23 +345,6 @@
 				</section>
 			{/if}
 			<p class="merge-link"><a href="/inventory/merge">{t('home.mergeDuplicatesLink')}</a></p>
-
-			<section class="scan-zone" aria-labelledby="home-scan-heading">
-				<h2 id="home-scan-heading" class="sr-only">{t('home.scanCardTitle')}</h2>
-				<a class="scan-card" href={scanPhotoHref} data-analytics-id="home.scan_photo">
-					<span class="scan-icon" aria-hidden="true">
-						<FeatureIcon id="photo" size={22} />
-					</span>
-					<div class="scan-copy">
-						<span class="scan-title">{t('photoRound.title')}</span>
-						<span class="scan-subtitle">{t('scan.modeTiles.photoRound.description')}</span>
-					</div>
-					<span class="scan-arrow" aria-hidden="true">→</span>
-				</a>
-				<p class="scan-alt">
-					<a href={scanHubLinkHref} data-analytics-id="home.scan_hub">{t('home.moreAddWays')}</a>
-				</p>
-			</section>
 		{:else}
 			<p class="readonly-hint">{t('home.readonlyHint')}</p>
 		{/if}
@@ -539,6 +543,17 @@
 		font-size: 0.9375rem;
 		font-weight: 600;
 		color: var(--color-primary);
+	}
+
+	.quick-add-secondary {
+		padding: var(--space-md);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+	}
+
+	.quick-add-secondary :global(.barcode-link) {
+		font-size: 0.8125rem;
 	}
 
 	.scan-zone {

@@ -16,6 +16,8 @@
 		celebrate?: boolean;
 		/** Tap anywhere on the toast to dismiss */
 		tapToDismiss?: boolean;
+		/** When false, render inline (e.g. undo row with companion button) instead of portaling to body */
+		portal?: boolean;
 		onDismiss?: () => void;
 	}
 
@@ -27,6 +29,7 @@
 		size = 'compact',
 		celebrate = false,
 		tapToDismiss = true,
+		portal: usePortal = true,
 		onDismiss
 	}: Props = $props();
 
@@ -76,8 +79,9 @@
 
 {#if show && message}
 	<div
-		use:portal={'body'}
+		use:portal={usePortal ? 'body' : undefined}
 		class="toast motion-slide-up"
+		class:toast-inline={!usePortal}
 		class:toast-celebrate={celebrate}
 		class:toast-success={variant === 'success'}
 		class:toast-error={variant === 'error'}
@@ -131,6 +135,16 @@
 		border-radius: var(--radius-md);
 		box-shadow: var(--shadow-md);
 		border: 1px solid color-mix(in srgb, var(--toast-fg) 12%, transparent);
+	}
+
+	.toast-inline {
+		position: static;
+		left: auto;
+		bottom: auto;
+		transform: none;
+		z-index: auto;
+		flex: 1;
+		min-width: 0;
 	}
 
 	.toast-action {

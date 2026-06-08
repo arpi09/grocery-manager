@@ -70,7 +70,7 @@ Do not pair a filled green button with an outlined green button on the same row 
 
 ## Intentional exceptions
 
-- **Dark theme** — primary lightens to `#6aab82` for contrast; same usage rules apply.
+- **Dark theme** — primary lightens to `#4d8f68` for contrast; same usage rules apply.
 - **Location colors** — fridge/freezer/cupboard keep distinct hues for at-a-glance scanning in inventory.
 - **Warning/expiry badges** — may use accent-tinted backgrounds (not full gold fills).
 - **Login landing showcase** — decorative mock UI may use accent strips; not a product surface.

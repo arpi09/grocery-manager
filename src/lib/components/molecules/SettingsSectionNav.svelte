@@ -26,8 +26,8 @@
 <style>
 	.settings-nav {
 		position: sticky;
-		top: 0;
-		z-index: 2;
+		top: var(--sticky-below-header);
+		z-index: var(--z-sticky-chrome);
 		margin: 0 calc(-1 * var(--page-padding-x)) var(--space-md);
 		padding: var(--space-sm) var(--page-padding-x);
 		background: color-mix(in srgb, var(--color-bg) 92%, transparent);

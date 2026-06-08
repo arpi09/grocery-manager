@@ -13,6 +13,7 @@ const P0_ROUTES = [
 	{ path: '/', auth: false, name: 'Landing' },
 	{ path: '/hem', auth: true, name: 'Home' },
 	{ path: '/inventory/fridge', auth: true, name: 'Inventory fridge' },
+	{ path: '/inventory/synk', auth: true, name: 'Inventory synk' },
 	{ path: '/scan', auth: true, name: 'Scan hub' },
 	{ path: '/inkop', auth: true, name: 'Shopping' }
 ] as const;

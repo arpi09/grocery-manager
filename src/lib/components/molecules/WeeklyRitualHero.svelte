@@ -236,7 +236,7 @@
 
 		transform: translateY(-2px);
 
-		box-shadow: 0 6px 20px rgba(31, 42, 36, 0.12);
+		box-shadow: var(--shadow-md);
 
 		text-decoration: none;
 
@@ -336,7 +336,7 @@
 
 		background: var(--color-primary);
 
-		color: #fff;
+		color: var(--color-on-primary);
 
 		text-decoration: none;
 

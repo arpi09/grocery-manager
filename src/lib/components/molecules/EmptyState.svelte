@@ -112,7 +112,7 @@
 
 	.action-primary {
 		background: var(--color-primary);
-		color: #fff;
+		color: var(--color-on-primary);
 		min-width: min(100%, 16rem);
 	}
 

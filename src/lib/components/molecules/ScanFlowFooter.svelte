@@ -5,6 +5,7 @@
 		cancelHref?: string;
 		onCancel?: () => void;
 		cancelLabel?: string;
+		sticky?: boolean;
 		'data-testid'?: string;
 	}
 
@@ -12,13 +13,14 @@
 		cancelHref,
 		onCancel,
 		cancelLabel,
+		sticky = true,
 		'data-testid': dataTestId
 	}: Props = $props();
 
 	const label = $derived(cancelLabel ?? t('common.cancel'));
 </script>
 
-<footer class="flow-footer">
+<footer class="flow-footer" class:flow-footer--static={!sticky}>
 	{#if onCancel}
 		<button type="button" class="cancel-link" data-testid={dataTestId} onclick={onCancel}>
 			{label}
@@ -36,6 +38,13 @@
 		padding: var(--space-md) 0 calc(var(--space-md) + env(safe-area-inset-bottom, 0px));
 		background: linear-gradient(transparent, var(--color-bg) 30%);
 		text-align: center;
+	}
+
+	.flow-footer--static {
+		position: static;
+		margin-top: var(--space-md);
+		padding-bottom: var(--space-md);
+		background: transparent;
 	}
 
 	@media (max-width: 899px) {

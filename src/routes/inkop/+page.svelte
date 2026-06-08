@@ -155,6 +155,12 @@
 
 	.suggestions-fold summary {
 
+		display: flex;
+
+		align-items: center;
+
+		min-height: var(--touch-target-min);
+
 		cursor: pointer;
 
 		padding: 0.65rem 0.85rem;

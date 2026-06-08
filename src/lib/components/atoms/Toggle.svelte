@@ -111,8 +111,8 @@
 	.toggle-thumb {
 		display: block;
 		border-radius: 50%;
-		background: #fff;
-		box-shadow: 0 1px 3px rgba(31, 42, 36, 0.22);
+		background: var(--color-on-primary);
+		box-shadow: var(--shadow-sm);
 		transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 

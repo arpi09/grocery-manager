@@ -74,6 +74,8 @@ Before merge / release:
 - Minimum touch target **2.75rem** (44px) for primary controls — see `Button` and `.text-action` in `app.css`.
 - Prefer full-width **primary** only when it is the main action for the section.
 - Bottom-fixed UI must clear `--content-bottom-safe`.
+- **Sticky below header** — app-internal sticky chrome (inventory tabs, filters, settings section nav) uses `top: var(--sticky-below-header)` and a z-index below the header (`--nav-height` + safe-area). Do not use `top: 0` on logged-in scroll surfaces.
+- **Undo toast** — when an inline **Ångra** button sits beside the toast (inventory consume, shopping clear, staleness batch), wrap both in `.undo-toast-wrap` and pass `portal={false}` on `Toast` so flex layout stays intact. See [TOAST.md](./TOAST.md).
 
 ### Accessibility
 
@@ -131,6 +133,7 @@ Shared tokens: `--page-padding-x`, `--page-section-gap`, `--color-primary` — s
 |-------|----------------|---------------------------|
 | `/hem` | Scan barcode | Too many equal chips; duplicate recipe CTAs |
 | `/inventory/[location]` | Scan item | Three competing full-width buttons |
+| `/inventory/synk` | Finish batch review | Duplicate page title; undo toast under nav |
 | `/inventory/foto` | Capture / review | Secondary buttons styled as primary |
 | `/inkop` | Add item / smart fill | Export + add + clear as identical buttons |
 | `/statistik` | View insight (passive) | Extra CTAs when empty already guides scan |
@@ -161,3 +164,4 @@ Shared tokens: `--page-padding-x`, `--page-section-gap`, `--color-primary` — s
 | 2026-06-02 | Kvitto-autopilot v1: one primary "Lägg till i lager" per suggestion; dismiss as text link |
 | 2026-06-05 | WCAG 2.2 AA checklist + axe P0 gate; see ACCESSIBILITY.md |
 | 2026-06-06 | Recipe detail `/recept/[id]` + cook mode `/recept/[id]/laga` patterns |
+| 2026-06-08 | Sticky-below-header token + undo-toast `portal={false}` pattern |

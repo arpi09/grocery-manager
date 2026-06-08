@@ -493,6 +493,7 @@
 			visible={true}
 			variant="success"
 			size="action"
+			portal={false}
 			durationMs={TOAST_UNDO_DURATION_MS}
 			tapToDismiss={true}
 			onDismiss={dismissUndo}
@@ -545,8 +546,8 @@
 	}
 
 	:global(.clear-checked-action .btn) {
-		min-height: auto;
-		padding: 0.25rem 0.5rem;
+		min-height: var(--touch-target-min);
+		padding: 0.35rem 0.65rem;
 		font-size: 0.8125rem;
 		font-weight: 600;
 	}
@@ -621,12 +622,16 @@
 	}
 
 	:global(.remove-trigger .btn) {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		border: none;
 		background: transparent;
 		font-size: 1.25rem;
 		line-height: 1;
-		padding: 0.15rem 0.35rem;
-		min-height: auto;
+		padding: 0.35rem 0.5rem;
+		min-width: var(--touch-target-min);
+		min-height: var(--touch-target-min);
 		color: var(--color-text-muted);
 	}
 
@@ -717,6 +722,11 @@
 	}
 
 	@media (max-width: 899px) {
+		.list,
+		.checked-block {
+			padding-bottom: calc(var(--touch-target-min) + var(--space-xl));
+		}
+
 		.add-form {
 			order: 99;
 			position: sticky;
@@ -794,8 +804,8 @@
 		}
 
 		:global(.remove-trigger .btn) {
-			min-width: 2.75rem;
-			min-height: 2.75rem;
+			min-width: var(--touch-target-min);
+			min-height: var(--touch-target-min);
 		}
 
 		.checked-head {

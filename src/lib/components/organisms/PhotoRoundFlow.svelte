@@ -544,7 +544,7 @@ import {
 		</form>
 	</section>
 	{#if !embedded}
-		<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} />
+		<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} sticky={false} />
 	{:else if onCancel}
 		<ScanFlowFooter
 			onCancel={onCancel}

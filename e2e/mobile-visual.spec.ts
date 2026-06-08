@@ -14,6 +14,7 @@ const MOBILE_P0_ROUTES = [
 	{ path: '/inventory/fridge', name: 'Inventory fridge' },
 	{ path: '/inventory/cupboard', name: 'Inventory cupboard' },
 	{ path: '/inventory/freezer', name: 'Inventory freezer' },
+	{ path: '/inventory/synk', name: 'Inventory synk' },
 	{
 		path: '/inventory/foto?from=/hem',
 		name: 'Inventory foto redirect',

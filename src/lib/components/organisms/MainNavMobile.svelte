@@ -149,7 +149,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0;
-		padding: var(--space-xs) var(--page-padding-x) 0;
+		padding: calc(var(--space-xs) + env(safe-area-inset-top, 0)) var(--page-padding-x) 0;
 	}
 
 	.mobile-header-top {

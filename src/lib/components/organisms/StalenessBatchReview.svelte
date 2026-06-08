@@ -21,7 +21,7 @@
 
 	import { getLocale, t } from '$lib/i18n';
 
-	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
+	import { TOAST_UNDO_DURATION_MS } from '$lib/utils/action-toast';
 
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 
@@ -304,7 +304,7 @@
 
 	<header class="header">
 
-		<h1>{t('staleness.title')}</h1>
+		<h2>{t('staleness.title')}</h2>
 
 		<p class="intro">{t('staleness.intro')}</p>
 
@@ -460,7 +460,9 @@
 
 			size="action"
 
-			durationMs={TOAST_DEFAULT_DURATION_MS}
+			portal={false}
+
+			durationMs={TOAST_UNDO_DURATION_MS}
 
 			tapToDismiss={true}
 
@@ -506,7 +508,7 @@
 
 
 
-	.header h1 {
+	.header h2 {
 
 		margin: 0;
 
@@ -614,23 +616,21 @@
 
 		position: fixed;
 
-		left: var(--page-padding-x);
-
-		right: var(--page-padding-x);
+		left: 50%;
 
 		bottom: calc(var(--content-bottom-safe) + var(--space-sm));
 
-		z-index: 40;
+		transform: translateX(-50%);
+
+		z-index: var(--z-toast);
 
 		display: flex;
 
-		align-items: stretch;
+		align-items: center;
 
-		gap: var(--space-xs);
+		gap: var(--space-sm);
 
-		max-width: 28rem;
-
-		margin-inline: auto;
+		max-width: calc(100vw - 2 * var(--page-padding-x));
 
 	}
 

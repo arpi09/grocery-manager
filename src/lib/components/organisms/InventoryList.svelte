@@ -733,7 +733,7 @@
 
 			description={emptyDescription}
 
-			actionLabel={isSearchEmpty
+			actionLabel={isSearchEmpty || (!hasInventory && canWrite)
 
 				? undefined
 
@@ -743,7 +743,15 @@
 
 					: t('inventory.backHome')}
 
-			actionHref={isSearchEmpty ? undefined : canWrite ? scanHref : '/'}
+			actionHref={isSearchEmpty || (!hasInventory && canWrite)
+
+				? undefined
+
+				: canWrite
+
+					? scanHref
+
+					: '/'}
 
 			secondaryActionLabel={!isSearchEmpty && canWrite && !hasInventory
 
@@ -1039,6 +1047,7 @@
 			visible={true}
 			variant="success"
 			size="action"
+			portal={false}
 			durationMs={TOAST_UNDO_DURATION_MS}
 			tapToDismiss={true}
 			onDismiss={dismissUndo}
@@ -1075,9 +1084,9 @@
 
 		position: sticky;
 
-		top: 0;
+		top: var(--sticky-below-header);
 
-		z-index: 5;
+		z-index: var(--z-sticky-chrome);
 
 		display: flex;
 
@@ -1209,13 +1218,15 @@
 
 		gap: 0.35rem;
 
+		min-height: var(--touch-target-min);
+
 		border: none;
 
 		background: transparent;
 
 		border-radius: var(--radius-sm);
 
-		padding: 0.15rem 0.35rem;
+		padding: 0.35rem 0.5rem;
 
 		font-size: 0.8125rem;
 

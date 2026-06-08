@@ -178,8 +178,8 @@
 
 	.inventory-sticky-tabs {
 		position: sticky;
-		top: 0;
-		z-index: 6;
+		top: var(--sticky-below-header);
+		z-index: var(--z-sticky-chrome);
 		padding-bottom: var(--space-xs);
 		background: var(--color-bg);
 	}
@@ -222,7 +222,7 @@
 
 		background: var(--color-primary);
 
-		color: #fff;
+		color: var(--color-on-primary);
 
 		box-shadow: var(--shadow-sm);
 
