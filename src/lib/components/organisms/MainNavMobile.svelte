@@ -197,8 +197,8 @@
 		align-items: center;
 		gap: 0.45rem;
 		min-height: 2.75rem;
-		min-width: 0;
-		flex: 1;
+		min-width: var(--touch-target-min);
+		flex: 1;flex: 1 1 auto;
 		color: var(--color-text);
 		text-decoration: none;
 	}
