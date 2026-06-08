@@ -102,7 +102,7 @@
 		border: 1px solid var(--color-border);
 		background: var(--color-surface);
 		border-radius: 999px;
-		padding: 0 var(--space-md);
+		padding: var(--space-xs) var(--space-md);
 		font: inherit;
 	}
 
@@ -114,5 +114,6 @@
 		display: inline-flex;
 		align-items: center;
 		min-height: var(--touch-target-min);
+		padding: var(--space-xs) 0;
 	}
 </style>
