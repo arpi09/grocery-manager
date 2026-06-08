@@ -10,6 +10,7 @@
 	import MealPlanCalendar from '$lib/components/organisms/MealPlanCalendar.svelte';
 	import MealPlanIdeasPanel from '$lib/components/organisms/MealPlanIdeasPanel.svelte';
 	import PlanerContextBanner from '$lib/components/molecules/PlanerContextBanner.svelte';
+	import EatHubHero from '$lib/components/molecules/EatHubHero.svelte';
 
 	let { data } = $props();
 
@@ -29,6 +30,7 @@
 	<AppHeader title={t('planer.title')} subtitle={t('planer.subtitle')} />
 
 	<PageContainer>
+		<EatHubHero />
 		<PlanerContextBanner
 			expiringSoon={data.expiringSoon}
 			plannedMealCount={data.plannedMealCount}

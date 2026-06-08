@@ -99,7 +99,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		recentItemNames,
 
 		duplicateGroups,
-		activityEvents
+		activityEvents,
+		shoppingListCount
 
 	] = await Promise.all([
 
@@ -132,7 +133,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 					.findDuplicateNameGroups(householdId)
 					.catch(degrade('duplicate groups', []))
 			: Promise.resolve([]),
-		locals.pmfService.listRecentHouseholdSyncEvents(householdId, 8).catch(degrade('activity feed', []))
+		locals.pmfService.listRecentHouseholdSyncEvents(householdId, 8).catch(degrade('activity feed', [])),
+		locals.shoppingListService
+			.listUncheckedItems(householdId)
+			.then((items) => items.length)
+			.catch(degrade('shopping list count', 0))
 
 	]);
 
@@ -199,7 +204,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		duplicateGroups,
 		activityEvents,
 
-		lastUpdatedByDisplayName
+		lastUpdatedByDisplayName,
+
+		shoppingListCount
 
 	};
 

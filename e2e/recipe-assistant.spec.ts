@@ -15,47 +15,26 @@ import {
 
 
 async function openRecipeAssistant(page: import('@playwright/test').Page) {
-
 	await dismissOnboardingModalIfOpen(page);
-
 	await dismissPostOnboardingSurveyIfOpen(page);
-
 	await dismissPageHintIfOpen(page);
-
 	await expect(page.locator('.modal-backdrop')).toHaveCount(0, { timeout: 10_000 });
 
+	await page.goto('/planer');
+	await dismissOnboardingModalIfOpen(page);
 
-
-	const viewport = page.viewportSize();
-
-	const isMobile = viewport != null && viewport.width < 900;
-
-	const openBtn = isMobile
-
-		? page.locator('.mobile-header-actions').getByTestId('recipe-ideas-btn')
-
-		: page.locator('.main-nav-desktop').getByTestId('recipe-ideas-btn');
-
+	const openBtn = page.getByTestId('eat-hub-generate');
 	await expect(openBtn).toBeVisible({ timeout: 15_000 });
-
 	await openBtn.scrollIntoViewIfNeeded();
 
-
-
 	const dialog = page.getByTestId('recipe-assistant-dialog');
-
 	await expect(async () => {
-
 		await openBtn.click({ force: true });
-
 		await expect(dialog).toBeVisible({ timeout: 3_000 });
-
 	}).toPass({ timeout: 20_000 });
-
 	await expect(dialog).toBeInViewport();
 
 	return dialog;
-
 }
 
 

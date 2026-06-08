@@ -1,4 +1,5 @@
 import type { MessageKey } from '$lib/i18n/messages';
+import { scanHubHref } from '$lib/utils/scan-nav';
 import { APP_HOME_PATH } from './app-home';
 
 export type NavIconId =
@@ -11,7 +12,9 @@ export type NavIconId =
 	| 'settings'
 	| 'paw'
 	| 'shield'
-	| 'more';
+	| 'more'
+	| 'scan'
+	| 'sparkle';
 
 export type NavRole = 'admin';
 
@@ -28,7 +31,13 @@ export type NavLabelKey = Extract<
 	| 'nav.pets'
 	| 'nav.admin'
 	| 'nav.more'
+	| 'nav.eat'
+	| 'nav.scan'
 >;
+
+export type NavDynamicHref = 'scan';
+
+export type NavBadge = 'stale';
 
 export interface NavUser {
 	email?: string;
@@ -44,6 +53,12 @@ export interface NavItem {
 	icon: NavIconId;
 	/** Shown in mobile tab bar and desktop primary row */
 	primary?: boolean;
+	/** Cart-style link in header (not bottom tab) */
+	headerUtility?: boolean;
+	/** Resolve href at runtime (e.g. scan hub with return path) */
+	dynamicHref?: NavDynamicHref;
+	/** Badge variant on this nav item */
+	badge?: NavBadge;
 	/** Only when `user.role` matches */
 	roles?: NavRole[];
 	/** Only when pets are enabled for the household */
@@ -55,14 +70,29 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
 	{ href: APP_HOME_PATH, labelKey: 'nav.home', icon: 'home', primary: true, match: 'exact' },
 	{
+		href: '/scan',
+		labelKey: 'nav.scan',
+		icon: 'scan',
+		primary: true,
+		dynamicHref: 'scan',
+		match: 'prefix'
+	},
+	{
 		href: '/inventory/fridge',
 		labelKey: 'nav.inventory',
 		icon: 'inventory',
 		primary: true,
+		badge: 'stale',
 		match: 'prefix'
 	},
-	{ href: '/inkop', labelKey: 'nav.shopping', icon: 'shopping', primary: true, match: 'prefix' },
-	{ href: '/planer', labelKey: 'nav.plans', icon: 'calendar', match: 'prefix' },
+	{ href: '/planer', labelKey: 'nav.eat', icon: 'sparkle', primary: true, match: 'prefix' },
+	{
+		href: '/inkop',
+		labelKey: 'nav.shopping',
+		icon: 'shopping',
+		headerUtility: true,
+		match: 'prefix'
+	},
 	{ href: '/statistik', labelKey: 'nav.stats', icon: 'chart', match: 'prefix' },
 	{ href: '/nyheter', labelKey: 'nav.news', icon: 'news', match: 'prefix' },
 	{ href: '/husdjur', labelKey: 'nav.pets', icon: 'paw', requiresPets: true, match: 'prefix' },
@@ -85,7 +115,33 @@ export function filterNavItems(items: NavItem[], user: NavUser | null | undefine
 	return items.filter((item) => isNavItemVisible(item, user));
 }
 
+export function resolveNavHref(item: NavItem, pathname: string): string {
+	if (item.dynamicHref === 'scan') {
+		return scanHubHref(pathname);
+	}
+	return item.href;
+}
+
+export function navItemTestId(item: NavItem): string | undefined {
+	if (item.dynamicHref === 'scan') {
+		return 'nav-scan';
+	}
+	if (item.badge === 'stale') {
+		return 'nav-pantry';
+	}
+	if (item.href === '/planer' && item.labelKey === 'nav.eat') {
+		return 'nav-eat';
+	}
+	if (item.headerUtility) {
+		return 'nav-shopping';
+	}
+	return undefined;
+}
+
 export function isNavActive(pathname: string, item: NavItem): boolean {
+	if (item.dynamicHref === 'scan') {
+		return pathname === '/scan' || pathname.startsWith('/scan/');
+	}
 	if (item.match === 'prefix') {
 		return pathname === item.href || pathname.startsWith(`${item.href}/`);
 	}
@@ -97,6 +153,7 @@ export function isNavActive(pathname: string, item: NavItem): boolean {
 
 export function splitNavItems(items: NavItem[]) {
 	const primary = items.filter((item) => item.primary);
-	const secondary = items.filter((item) => !item.primary);
-	return { primary, secondary };
+	const headerUtility = items.filter((item) => item.headerUtility);
+	const secondary = items.filter((item) => !item.primary && !item.headerUtility);
+	return { primary, headerUtility, secondary };
 }

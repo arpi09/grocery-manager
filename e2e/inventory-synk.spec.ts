@@ -52,17 +52,18 @@ test.describe('Inventory sync batch review', () => {
 		await expect(undoBtn).toHaveCount(0, { timeout: 10_000 });
 	});
 
-	test('core action bar visible on hem and fridge', async ({ page }) => {
+	test('primary nav visible on hem and fridge', async ({ page }) => {
 		test.setTimeout(60_000);
 		await loginAsAdmin(page);
 
 		for (const path of ['/hem', '/inventory/fridge']) {
 			await page.goto(path);
 			await dismissOnboardingModalIfOpen(page);
-			await expect(page.getByTestId('core-action-bar')).toBeVisible({ timeout: 15_000 });
-			await expect(page.getByTestId('core-action-scan')).toBeVisible();
-			await expect(page.getByTestId('core-action-pantry')).toBeVisible();
-			await expect(page.getByTestId('core-action-eat')).toBeVisible();
+			const desktopNav = page.locator('.main-nav-desktop');
+			await expect(desktopNav.getByTestId('nav-scan')).toBeVisible({ timeout: 15_000 });
+			await expect(desktopNav.getByTestId('nav-pantry')).toBeVisible();
+			await expect(desktopNav.getByTestId('nav-eat')).toBeVisible();
+			await expect(page.getByTestId('core-action-bar')).toHaveCount(0);
 		}
 	});
 
@@ -72,18 +73,21 @@ test.describe('Inventory sync batch review', () => {
 		await page.goto('/hem');
 		await dismissOnboardingModalIfOpen(page);
 
-		const coreConfirm = page.getByTestId('core-action-confirm');
-		const coreConfirmDisabled = page.getByTestId('core-action-confirm-disabled');
-		const hasActiveConfirm = await coreConfirm.isVisible({ timeout: 5_000 }).catch(() => false);
-		const hasDisabledConfirm = await coreConfirmDisabled
-			.isVisible({ timeout: 2_000 })
-			.catch(() => false);
+		const desktopNav = page.locator('.main-nav-desktop');
+		const pantryNav = desktopNav.getByTestId('nav-pantry');
+		await expect(pantryNav).toBeVisible({ timeout: 15_000 });
 
-		expect(hasActiveConfirm || hasDisabledConfirm).toBeTruthy();
+		const staleBadge = pantryNav.locator('.stale-badge');
+		const hasStaleBadge = await staleBadge.isVisible({ timeout: 5_000 }).catch(() => false);
 
-		if (hasActiveConfirm) {
-			await coreConfirm.click();
-			await expect(page).toHaveURL(/\/inventory\/synk/);
+		if (hasStaleBadge) {
+			await pantryNav.click();
+			await expect(page).toHaveURL(/\/inventory\/fridge/);
+			await page.goto('/inventory/synk');
+			await dismissOnboardingModalIfOpen(page);
+			await expect(page.getByText(/Fortfarande hemma|Still at home/i)).toBeVisible({
+				timeout: 10_000
+			});
 		} else {
 			await page.goto('/inventory/synk');
 			await dismissOnboardingModalIfOpen(page);

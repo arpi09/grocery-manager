@@ -53,6 +53,15 @@
 		<path d="M7 11.5c1.2 3 2.8 4.5 5 4.5s3.8-1.5 5-4.5" />
 	{:else if id === 'shield'}
 		<path d="M12 3 5 6v6c0 4.2 3 7.4 7 8 4-0.6 7-3.8 7-8V6l-7-3Z" />
+	{:else if id === 'scan'}
+		<path d="M4 8V6a2 2 0 0 1 2-2h2" />
+		<path d="M16 4h2a2 2 0 0 1 2 2v2" />
+		<path d="M20 16v2a2 2 0 0 1-2 2h-2" />
+		<path d="M8 20H6a2 2 0 0 1-2-2v-2" />
+		<circle cx="12" cy="12" r="3.25" />
+	{:else if id === 'sparkle'}
+		<path d="M12 3 13.2 7.2 17.5 8.5 13.2 9.8 12 14 10.8 9.8 6.5 8.5 10.8 7.2 12 3Z" />
+		<path d="M5 16.5 5.7 18.6 7.8 19.3 5.7 20 5 22.1 4.3 20 2.2 19.3 4.3 18.6 5 16.5Z" />
 	{:else if id === 'more'}
 		<circle cx="6" cy="12" r="1.25" fill="currentColor" stroke="none" />
 		<circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none" />

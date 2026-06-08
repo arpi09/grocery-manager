@@ -7,19 +7,26 @@
 	import NavIcon from '$lib/components/atoms/NavIcon.svelte';
 	import PantrySwitcher from '$lib/components/molecules/PantrySwitcher.svelte';
 	import ProfileMenu from '$lib/components/molecules/ProfileMenu.svelte';
-	import RecipeIdeasButton from '$lib/components/molecules/RecipeIdeasButton.svelte';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { t } from '$lib/i18n';
-	import { isNavActive, type NavItem, type NavUser } from '$lib/navigation/nav-config';
+	import {
+		isNavActive,
+		navItemTestId,
+		resolveNavHref,
+		type NavItem,
+		type NavUser
+	} from '$lib/navigation/nav-config';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
 
 	interface Props {
 		user: NavUser & { email: string };
 		households: UserHouseholdSummary[];
 		activeHousehold: { id: string; name: string } | null;
-		onRecipeIdeas?: () => void;
 		primary: NavItem[];
+		headerUtility: NavItem[];
 		secondary: NavItem[];
+		staleCount?: number;
+		canWrite?: boolean;
 		moreOpen: boolean;
 		onToggleMore: () => void;
 		onCloseMore: () => void;
@@ -29,9 +36,11 @@
 		user,
 		households,
 		activeHousehold,
-		onRecipeIdeas,
 		primary,
+		headerUtility,
 		secondary,
+		staleCount = 0,
+		canWrite = false,
 		moreOpen,
 		onToggleMore,
 		onCloseMore
@@ -41,6 +50,8 @@
 
 	const pathname = $derived(page.url.pathname);
 	const isPro = $derived(Boolean(page.data.isPro));
+	const showStaleBadge = $derived(staleCount > 0 && canWrite);
+	const desktopNavItems = $derived([...primary, ...headerUtility]);
 
 	const moreActive = $derived(
 		secondary.some((item) => isNavActive(pathname, item)) || (moreOpen && secondary.length > 0)
@@ -48,6 +59,10 @@
 
 	function navLinkClass(active: boolean): string {
 		return ['nav-link', active ? 'active' : ''].filter(Boolean).join(' ');
+	}
+
+	function showBadge(item: NavItem): boolean {
+		return item.badge === 'stale' && showStaleBadge;
 	}
 
 	function onWindowKeydown(event: KeyboardEvent) {
@@ -79,15 +94,33 @@
 
 		<nav class="desktop-nav" aria-label={t('nav.primaryNav')}>
 			<ul class="desktop-nav-list">
-				{#each primary as item (item.href)}
+				{#each desktopNavItems as item (item.href + item.labelKey)}
 					{@const active = isNavActive(pathname, item)}
+					{@const href = resolveNavHref(item, pathname)}
 					<li>
 						<a
-							href={item.href}
+							{href}
 							class={navLinkClass(active)}
 							aria-current={active ? 'page' : undefined}
+							data-testid={navItemTestId(item)}
+							data-analytics-id={item.dynamicHref === 'scan'
+								? 'core_action.scan'
+								: item.badge === 'stale'
+									? 'core_action.pantry'
+									: item.labelKey === 'nav.eat'
+										? 'core_action.eat'
+										: item.headerUtility
+											? 'nav.shopping'
+											: undefined}
 						>
-							<NavIcon id={item.icon} />
+							<span class="nav-link-icon" aria-hidden="true">
+								<NavIcon id={item.icon} />
+								{#if showBadge(item)}
+									<span class="stale-badge" aria-label={t('nav.staleBadge', { count: staleCount })}>
+										{staleCount}
+									</span>
+								{/if}
+							</span>
 							<span class="nav-link-label">{t(item.labelKey)}</span>
 						</a>
 					</li>
@@ -145,9 +178,6 @@
 				<ProUpgradeCta variant="nav" />
 			{/if}
 			<PantrySwitcher {households} {activeHousehold} />
-			{#if onRecipeIdeas}
-				<RecipeIdeasButton onclick={onRecipeIdeas} />
-			{/if}
 			<ProfileMenu {user} />
 		</div>
 	</div>
@@ -223,6 +253,30 @@
 		display: flex;
 		flex-shrink: 0;
 		min-width: 0;
+	}
+
+	.nav-link-icon {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.stale-badge {
+		position: absolute;
+		top: -0.35rem;
+		right: -0.45rem;
+		min-width: 1rem;
+		height: 1rem;
+		padding: 0 0.2rem;
+		border-radius: 999px;
+		background: var(--color-warning);
+		color: var(--color-on-primary);
+		font-size: 0.5625rem;
+		font-weight: 700;
+		line-height: 1rem;
+		text-align: center;
 	}
 
 	.nav-link-label {
@@ -366,15 +420,6 @@
 		.nav-link {
 			padding: 0.35rem 0.5rem;
 			font-size: 0.78rem;
-		}
-
-		.desktop-actions :global(.recipe-ideas-btn .label),
-		.desktop-actions :global(.recipe-ideas-btn .badge) {
-			display: none;
-		}
-
-		.desktop-actions :global(.recipe-ideas-btn .inner) {
-			padding: 0.35rem 0.55rem;
 		}
 	}
 

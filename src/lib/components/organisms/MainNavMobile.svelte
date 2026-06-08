@@ -8,10 +8,15 @@
 	import NavMoreSheet from '$lib/components/molecules/NavMoreSheet.svelte';
 	import PantrySwitcher from '$lib/components/molecules/PantrySwitcher.svelte';
 	import ProfileMenu from '$lib/components/molecules/ProfileMenu.svelte';
-	import RecipeIdeasButton from '$lib/components/molecules/RecipeIdeasButton.svelte';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { t } from '$lib/i18n';
-	import { isNavActive, type NavItem, type NavUser } from '$lib/navigation/nav-config';
+	import {
+		isNavActive,
+		navItemTestId,
+		resolveNavHref,
+		type NavItem,
+		type NavUser
+	} from '$lib/navigation/nav-config';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
 	import { subscribeNarrowViewport } from '$lib/utils/use-narrow-viewport';
 
@@ -20,9 +25,11 @@
 		user: NavUser & { email: string };
 		households: UserHouseholdSummary[];
 		activeHousehold: { id: string; name: string } | null;
-		onRecipeIdeas?: () => void;
 		primary: NavItem[];
+		headerUtility: NavItem[];
 		secondary: NavItem[];
+		staleCount?: number;
+		canWrite?: boolean;
 		moreOpen: boolean;
 		onToggleMore: () => void;
 		onCloseMore: () => void;
@@ -33,9 +40,11 @@
 		user,
 		households,
 		activeHousehold,
-		onRecipeIdeas,
 		primary,
+		headerUtility,
 		secondary,
+		staleCount = 0,
+		canWrite = false,
 		moreOpen,
 		onToggleMore,
 		onCloseMore
@@ -43,6 +52,7 @@
 
 	const pathname = $derived(page.url.pathname);
 	const isPro = $derived(Boolean(page.data.isPro));
+	const showStaleBadge = $derived(staleCount > 0 && canWrite);
 
 	let isNarrowViewport = $state(false);
 
@@ -58,6 +68,10 @@
 
 	function navLinkClass(active: boolean): string {
 		return ['nav-tab', active ? 'active' : ''].filter(Boolean).join(' ');
+	}
+
+	function showBadge(item: NavItem): boolean {
+		return item.badge === 'stale' && showStaleBadge;
 	}
 </script>
 
@@ -75,8 +89,32 @@
 				{#if !isPro}
 					<ProUpgradeCta variant="nav" />
 				{/if}
-				{#if onRecipeIdeas}
-					<RecipeIdeasButton iconOnly onclick={onRecipeIdeas} />
+				{#each headerUtility as item (item.href)}
+					{@const active = isNavActive(pathname, item)}
+					<a
+						href={resolveNavHref(item, pathname)}
+						class="header-utility"
+						class:active
+						aria-label={t(item.labelKey)}
+						aria-current={active ? 'page' : undefined}
+						data-testid={navItemTestId(item)}
+						data-analytics-id="nav.shopping"
+					>
+						<NavIcon id={item.icon} />
+					</a>
+				{/each}
+				{#if secondary.length > 0}
+					<button
+						type="button"
+						class={['header-utility', moreActive ? 'active' : ''].filter(Boolean).join(' ')}
+						aria-expanded={moreOpen}
+						aria-haspopup="dialog"
+						aria-label={t('nav.more')}
+						data-testid="mobile-nav-more"
+						onclick={onToggleMore}
+					>
+						<NavIcon id="more" />
+					</button>
 				{/if}
 				<ProfileMenu {user} />
 			</div>
@@ -85,50 +123,6 @@
 			<PantrySwitcher {households} {activeHousehold} />
 		</div>
 	</header>
-{:else}
-	<nav class="mobile-bottom" aria-label={t('nav.mobileNav')} aria-hidden={moreOpen ? 'true' : undefined}>
-		<ul class="mobile-bottom-list">
-			{#each primary as item (item.href)}
-				{@const active = isNavActive(pathname, item)}
-				<li>
-					<a
-						href={item.href}
-						class={navLinkClass(active)}
-						aria-current={active ? 'page' : undefined}
-						tabindex={moreOpen ? -1 : undefined}
-					>
-						<span class="tab-icon" aria-hidden="true">
-							<NavIcon id={item.icon} />
-						</span>
-						<span class="tab-label">{t(item.labelKey)}</span>
-						{#if active}
-							<span class="tab-indicator" aria-hidden="true"></span>
-						{/if}
-					</a>
-				</li>
-			{/each}
-			{#if secondary.length > 0}
-				<li>
-					<button
-						type="button"
-						class={navLinkClass(moreActive)}
-						aria-expanded={moreOpen}
-						aria-haspopup="dialog"
-						data-testid="mobile-nav-more"
-						onclick={onToggleMore}
-					>
-						<span class="tab-icon" aria-hidden="true">
-							<NavIcon id="more" />
-						</span>
-						<span class="tab-label">{t('nav.more')}</span>
-						{#if moreActive}
-							<span class="tab-indicator" aria-hidden="true"></span>
-						{/if}
-					</button>
-				</li>
-			{/if}
-		</ul>
-	</nav>
 
 	{#if secondary.length > 0}
 		<Modal
@@ -142,6 +136,44 @@
 			<NavMoreSheet {pathname} items={secondary} onNavigate={onCloseMore} />
 		</Modal>
 	{/if}
+{:else}
+	<nav class="mobile-bottom" aria-label={t('nav.mobileNav')} aria-hidden={moreOpen ? 'true' : undefined}>
+		<ul class="mobile-bottom-list">
+			{#each primary as item (item.href + item.labelKey)}
+				{@const active = isNavActive(pathname, item)}
+				{@const href = resolveNavHref(item, pathname)}
+				<li>
+					<a
+						{href}
+						class={navLinkClass(active)}
+						aria-current={active ? 'page' : undefined}
+						tabindex={moreOpen ? -1 : undefined}
+						data-testid={navItemTestId(item)}
+						data-analytics-id={item.dynamicHref === 'scan'
+							? 'core_action.scan'
+							: item.badge === 'stale'
+								? 'core_action.pantry'
+								: item.labelKey === 'nav.eat'
+									? 'core_action.eat'
+									: undefined}
+					>
+						<span class="tab-icon" aria-hidden="true">
+							<NavIcon id={item.icon} />
+							{#if showBadge(item)}
+								<span class="stale-badge" aria-label={t('nav.staleBadge', { count: staleCount })}>
+									{staleCount}
+								</span>
+							{/if}
+						</span>
+						<span class="tab-label">{t(item.labelKey)}</span>
+						{#if active}
+							<span class="tab-indicator" aria-hidden="true"></span>
+						{/if}
+					</a>
+				</li>
+			{/each}
+		</ul>
+	</nav>
 {/if}
 
 <style>
@@ -217,6 +249,36 @@
 		flex-shrink: 0;
 	}
 
+	.header-utility {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.75rem;
+		height: 2.75rem;
+		border: 0;
+		border-radius: var(--radius-md);
+		background: transparent;
+		color: var(--color-text-muted);
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	.header-utility :global(.nav-icon) {
+		width: 1.375rem;
+		height: 1.375rem;
+	}
+
+	.header-utility:hover,
+	.header-utility.active {
+		color: var(--color-primary);
+		text-decoration: none;
+	}
+
+	.header-utility:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+
 	.mobile-bottom {
 		position: fixed;
 		left: 0;
@@ -275,6 +337,7 @@
 	}
 
 	.tab-icon {
+		position: relative;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -287,6 +350,22 @@
 	.tab-icon :global(.nav-icon) {
 		width: 1.375rem;
 		height: 1.375rem;
+	}
+
+	.stale-badge {
+		position: absolute;
+		top: -0.2rem;
+		right: -0.45rem;
+		min-width: 1rem;
+		height: 1rem;
+		padding: 0 0.2rem;
+		border-radius: 999px;
+		background: var(--color-warning);
+		color: var(--color-on-primary);
+		font-size: 0.5625rem;
+		font-weight: 700;
+		line-height: 1rem;
+		text-align: center;
 	}
 
 	.tab-label {

@@ -12,7 +12,10 @@ async function openRecipeAssistant(page: import('@playwright/test').Page) {
 	await dismissPageHintIfOpen(page);
 	await expect(page.locator('.modal-backdrop')).toHaveCount(0, { timeout: 10_000 });
 
-	const openBtn = page.locator('.main-nav-desktop').getByTestId('recipe-ideas-btn');
+	await page.goto('/planer');
+	await dismissOnboardingModalIfOpen(page);
+
+	const openBtn = page.getByTestId('eat-hub-generate');
 	await expect(openBtn).toBeVisible({ timeout: 15_000 });
 	await openBtn.scrollIntoViewIfNeeded();
 

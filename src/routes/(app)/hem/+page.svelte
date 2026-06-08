@@ -23,6 +23,7 @@
 			duplicateGroups={data.duplicateGroups}
 			activityEvents={data.activityEvents}
 			lastUpdatedByDisplayName={data.lastUpdatedByDisplayName}
+			shoppingListCount={data.shoppingListCount}
 		/>
 	</PageContainer>
 </AppLayout>

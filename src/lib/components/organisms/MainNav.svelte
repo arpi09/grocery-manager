@@ -13,18 +13,20 @@
 		user: (NavUser & { email: string }) | null;
 		households?: UserHouseholdSummary[];
 		activeHousehold?: { id: string; name: string } | null;
-		onRecipeIdeas?: () => void;
+		staleCount?: number;
+		canWrite?: boolean;
 	}
 
 	let {
 		user,
 		households = [],
 		activeHousehold = null,
-		onRecipeIdeas
+		staleCount = 0,
+		canWrite = false
 	}: Props = $props();
 
 	const visibleItems = $derived(filterNavItems(NAV_ITEMS, user));
-	const { primary, secondary } = $derived(splitNavItems(visibleItems));
+	const { primary, headerUtility, secondary } = $derived(splitNavItems(visibleItems));
 
 	let moreOpen = $state(false);
 
@@ -45,9 +47,11 @@
 				{user}
 				{households}
 				{activeHousehold}
-				{onRecipeIdeas}
 				{primary}
+				{headerUtility}
 				{secondary}
+				{staleCount}
+				{canWrite}
 				{moreOpen}
 				onToggleMore={toggleMore}
 				onCloseMore={closeMore}
@@ -58,9 +62,11 @@
 			{user}
 			{households}
 			{activeHousehold}
-			{onRecipeIdeas}
 			{primary}
+			{headerUtility}
 			{secondary}
+			{staleCount}
+			{canWrite}
 			{moreOpen}
 			onToggleMore={toggleMore}
 			onCloseMore={closeMore}
@@ -72,9 +78,11 @@
 				{user}
 				{households}
 				{activeHousehold}
-				{onRecipeIdeas}
 				{primary}
+				{headerUtility}
 				{secondary}
+				{staleCount}
+				{canWrite}
 				{moreOpen}
 				onToggleMore={toggleMore}
 				onCloseMore={closeMore}

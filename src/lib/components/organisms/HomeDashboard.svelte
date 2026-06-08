@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import Card from '$lib/components/atoms/Card.svelte';
+	import NavIcon from '$lib/components/atoms/NavIcon.svelte';
 	import ProUpgradeCta from '$lib/components/molecules/ProUpgradeCta.svelte';
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
@@ -36,7 +37,7 @@
 		type ActivationProgress
 	} from '$lib/utils/onboarding';
 	import type { ReceiptFinishSuggestion, ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
-	import { scanHubHref, scanModeHref } from '$lib/utils/scan-nav';
+	import { scanModeHref } from '$lib/utils/scan-nav';
 	import { recordPeakInventoryCount } from '$lib/utils/household-invite-prompt';
 	import { shouldNudgeReceiptAutopilot } from '$lib/utils/receipt-autopilot-nudge';
 
@@ -55,6 +56,7 @@
 		duplicateGroups?: DuplicateNameGroupSummary[];
 		activityEvents?: HouseholdActivityEvent[];
 		lastUpdatedByDisplayName?: string | null;
+		shoppingListCount?: number;
 	}
 
 	let {
@@ -71,13 +73,13 @@
 		recentItemNames = [],
 		duplicateGroups = [],
 		activityEvents = [],
-		lastUpdatedByDisplayName = null
+		lastUpdatedByDisplayName = null,
+		shoppingListCount = 0
 	}: Props = $props();
 
 	const returnTo = APP_HOME_PATH;
 	const scanPhotoHref = $derived(scanModeHref('photo', returnTo));
 	const scanBarcodeHref = $derived(scanModeHref('barcode', returnTo));
-	const scanHubLinkHref = $derived(scanHubHref(returnTo));
 	const userId = $derived(page.data.user?.id ?? null);
 	const isPro = $derived(Boolean(page.data.isPro));
 
@@ -308,26 +310,19 @@
 			/>
 		{/if}
 
-		{#if canWrite}
-			{#if !showWeeklyRitual}
-				<section class="scan-zone" aria-labelledby="home-scan-heading">
-					<h2 id="home-scan-heading" class="sr-only">{t('home.scanCardTitle')}</h2>
-					<a class="scan-card" href={scanPhotoHref} data-analytics-id="home.scan_photo">
-						<span class="scan-icon" aria-hidden="true">
-							<FeatureIcon id="photo" size={22} />
-						</span>
-						<div class="scan-copy">
-							<span class="scan-title">{t('photoRound.title')}</span>
-							<span class="scan-subtitle">{t('scan.modeTiles.photoRound.description')}</span>
-						</div>
-						<span class="scan-arrow" aria-hidden="true">→</span>
-					</a>
-					<p class="scan-alt">
-						<a href={scanHubLinkHref} data-analytics-id="home.scan_hub">{t('home.moreAddWays')}</a>
-					</p>
-				</section>
-			{/if}
+		<a class="shopping-teaser" href="/inkop" data-analytics-id="home.shopping_teaser">
+			<span class="shopping-teaser-icon" aria-hidden="true">
+				<NavIcon id="shopping" />
+			</span>
+			<span class="shopping-teaser-copy">
+				{shoppingListCount > 0
+					? t('home.shoppingTeaser', { count: shoppingListCount })
+					: t('home.shoppingTeaserEmpty')}
+			</span>
+			<span class="shopping-teaser-arrow" aria-hidden="true">→</span>
+		</a>
 
+		{#if canWrite}
 			<div class="quick-add-secondary">
 				<HomeQuickAdd recentNames={recentItemNames} />
 			</div>
@@ -566,109 +561,53 @@
 		background: var(--color-surface);
 	}
 
-	.quick-add-secondary :global(.barcode-link) {
-		font-size: 0.8125rem;
-	}
-
-	.scan-zone {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-	}
-
-	.scan-card {
+	.shopping-teaser {
 		display: flex;
 		align-items: center;
 		gap: var(--space-md);
 		min-height: var(--touch-target-min);
-		padding: var(--space-lg);
-		background: linear-gradient(
-			135deg,
-			color-mix(in srgb, var(--color-primary) 14%, var(--color-surface)),
-			var(--color-surface)
-		);
-		border: 1px solid color-mix(in srgb, var(--color-primary) 28%, var(--color-border));
-		border-radius: var(--radius-lg);
-		box-shadow: var(--shadow-md);
+		padding: var(--space-md) var(--space-lg);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		box-shadow: var(--shadow-sm);
 		text-decoration: none;
 		color: inherit;
-		transition:
-			transform 0.15s,
-			box-shadow 0.15s;
 	}
 
-	.scan-card:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 6px 20px rgba(31, 42, 36, 0.12);
+	.shopping-teaser:hover {
 		text-decoration: none;
+		border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
 	}
 
-	.scan-icon {
+	.shopping-teaser-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		flex-shrink: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 3rem;
-		height: 3rem;
-		background: var(--color-primary);
-		color: #fff;
-		border-radius: var(--radius-md);
+		color: var(--color-primary);
 	}
 
-	.location-icon {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		line-height: 1;
-	}
-
-	.scan-copy {
+	.shopping-teaser-copy {
 		flex: 1;
 		min-width: 0;
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-xs);
+		font-size: 0.9375rem;
+		font-weight: 600;
 	}
 
-	.scan-title {
-		font-weight: 700;
-		font-size: 1.1rem;
-		letter-spacing: -0.02em;
-	}
-
-	.scan-subtitle {
-		font-size: 0.875rem;
-		color: var(--color-text-muted);
-		line-height: 1.4;
-	}
-
-	.scan-arrow {
+	.shopping-teaser-arrow {
 		flex-shrink: 0;
-		font-size: 1.25rem;
 		color: var(--color-primary);
 		font-weight: 600;
 	}
 
-	.scan-alt {
-		margin: 0;
-		text-align: center;
-		font-size: 0.875rem;
+	.quick-add-secondary :global(.barcode-link) {
+		font-size: 0.8125rem;
 	}
 
-	.scan-alt a {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-height: var(--touch-target-min);
-		padding: 0 var(--space-sm);
-		font-weight: 600;
-		color: var(--color-primary);
-		text-decoration: underline;
-		text-underline-offset: 0.15em;
-	}
-
-	.scan-alt a:hover {
-		color: var(--color-primary-hover);
+	.shopping-teaser-icon :global(.nav-icon) {
+		width: 1.375rem;
+		height: 1.375rem;
 	}
 
 	.readonly-hint,
@@ -678,6 +617,13 @@
 		color: var(--color-text-muted);
 		font-size: 0.9375rem;
 		line-height: 1.5;
+	}
+
+	.location-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		line-height: 1;
 	}
 
 	.locations {
