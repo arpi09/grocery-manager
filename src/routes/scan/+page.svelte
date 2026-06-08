@@ -34,6 +34,7 @@
 	const isReceiptMode = $derived(scanMode === 'receipt');
 	const isPhotoMode = $derived(scanMode === 'photo');
 	const hubHref = $derived(scanHubHref(data.returnTo));
+	const isTopLevelEntry = $derived(data.isTopLevelEntry);
 
 	const title = $derived(
 		isBarcodeMode
@@ -54,7 +55,7 @@
 					: t('scan.subtitle')
 	);
 	const cancelLabel = $derived(isHub ? t('scan.cancel') : t('scan.cancelBack'));
-	const backHref = $derived(isHub ? data.returnTo : hubHref);
+	const backHref = $derived(isTopLevelEntry ? undefined : isHub ? data.returnTo : hubHref);
 	const backLabel = $derived(isHub ? t('common.back') : t('scan.allModes'));
 	const activeTab = $derived(
 		isBarcodeMode ? 'barcode' : isReceiptMode ? 'receipt' : isPhotoMode ? 'photoRound' : 'hub'
@@ -83,17 +84,25 @@
 			<ScanToAddFlow
 				defaultLocation={data.defaultLocation ?? 'fridge'}
 				returnTo={data.returnTo}
-				cancelHref={data.returnTo}
+				cancelHref={isTopLevelEntry ? undefined : data.returnTo}
 				errors={form?.errors}
 			/>
-			<ScanFlowFooter cancelHref={data.returnTo} cancelLabel={t('scan.cancelBack')} />
+			{#if !isTopLevelEntry}
+				<ScanFlowFooter cancelHref={data.returnTo} cancelLabel={t('scan.cancelBack')} />
+			{/if}
 		{:else if isReceiptMode}
 			<ReceiptBulkAddFlow returnTo={data.returnTo} />
 		{:else if isPhotoMode}
-			<PhotoRoundFlow returnTo={data.returnTo} initialLocation={data.defaultLocation} />
+			<PhotoRoundFlow
+				returnTo={data.returnTo}
+				initialLocation={data.defaultLocation}
+				showCancel={!isTopLevelEntry}
+			/>
 		{:else}
 			<ScanModeHub returnTo={data.returnTo} defaultLocation={data.defaultLocation ?? undefined} />
-			<ScanFlowFooter cancelHref={data.returnTo} {cancelLabel} />
+			{#if !isTopLevelEntry}
+				<ScanFlowFooter cancelHref={data.returnTo} {cancelLabel} />
+			{/if}
 		{/if}
 	</PageContainer>
 </AppLayout>

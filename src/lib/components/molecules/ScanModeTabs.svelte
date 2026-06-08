@@ -57,7 +57,7 @@
 			class:active={active === 'hub'}
 			aria-current={active === 'hub' ? 'page' : undefined}
 		>
-			{t('scan.allModes')}
+			{t('scan.moreWays')}
 		</a>
 		{#each tabs as tab (tab.id)}
 			<a

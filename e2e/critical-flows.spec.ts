@@ -69,8 +69,10 @@ test.describe('Critical flows', () => {
 		await dismissOnboardingModalIfOpen(page);
 		const scanNav = page.getByTestId('nav-scan').filter({ visible: true }).first();
 		await scanNav.click();
-		await expect(page).toHaveURL(/\/scan\?.*mode=photo/);
+		await expect(page).toHaveURL(/\/scan(?:$|\?)/);
 		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 15_000 });
+		await expect(page.locator('.page-header .back-link')).toHaveCount(0);
+		await expect(page.getByText(/Avbryt och gå tillbaka|Cancel and go back/i)).toHaveCount(0);
 	});
 
 	test('onboarding scan cancel returns to guide without leaving settings', async ({ page }) => {

@@ -25,17 +25,19 @@ test.describe('Scan and inventory', () => {
 		await expect(hub.getByTestId('scan-hub-barcode')).toContainText(/Streckkod|Barcode/i);
 		await expect(hub.getByTestId('scan-hub-receipt')).toContainText(/Kvitto|Receipt/i);
 		await expect(hub.getByTestId('scan-hub-manual')).toContainText(/Manuellt|Manual/i);
+		await expect(page.locator('.page-header .back-link')).toHaveCount(0);
+		await expect(page.getByText(/Avbryt|Cancel/i)).toHaveCount(0);
 	});
 
 	test('scan sub-modes show mode tabs', async ({ page }) => {
 		await loginAsAdmin(page);
-		await page.goto('/scan?mode=photo&from=/hem');
+		await page.goto('/scan?mode=photo&from=/inventory/fridge&location=fridge');
 		await dismissOnboardingModalIfOpen(page);
 
 		await expect(page).toHaveURL(/mode=photo/);
 		const scanModes = page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i });
 		await expect(scanModes).toBeVisible();
-		await expect(scanModes.getByRole('link', { name: /Alla skanningslägen|All scan modes/i })).toBeVisible();
+		await expect(scanModes.getByRole('link', { name: /Fler sätt|More ways/i })).toBeVisible();
 		await expect(scanModes.getByRole('link', { name: 'Fota in varor' })).toBeVisible();
 	});
 
