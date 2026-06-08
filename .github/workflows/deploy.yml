@@ -384,6 +384,7 @@ jobs:
           USE_PGLITE: 'true'
           ADMIN_EMAIL: e2e-admin@example.com
           ADMIN_PASSWORD: e2e-ci-password
+          ORIGIN: http://localhost:5190
           PUBLIC_ORIGIN: http://localhost:5190
           PLAYWRIGHT_PORT: '5190'
           TURNSTILE_SKIP: 'true'

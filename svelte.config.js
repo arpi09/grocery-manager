@@ -11,6 +11,8 @@ const LEGACY_HOSTED_APP_ORIGIN =
 	process.env.LEGACY_APP_ORIGIN ??
 	'https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app';
 
+const PRODUCTION_ORIGIN = process.env.ORIGIN ?? 'https://skaffu.com';
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	preprocess: vitePreprocess(),
@@ -20,7 +22,7 @@ const config = {
 			register: false
 		},
 		csrf: {
-			trustedOrigins: [LEGACY_HOSTED_APP_ORIGIN]
+			trustedOrigins: [PRODUCTION_ORIGIN, LEGACY_HOSTED_APP_ORIGIN]
 		}
 	}
 };

@@ -333,7 +333,9 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 		form: { email, password },
 		headers: {
 			accept: 'application/json',
-			'x-sveltekit-action': 'true'
+			'x-sveltekit-action': 'true',
+			origin: baseURL,
+			referer: `${baseURL}/login`
 		},
 		maxRedirects: 0
 	});

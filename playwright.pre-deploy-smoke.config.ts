@@ -53,6 +53,7 @@ export default defineConfig({
 			PORT: port,
 			HOST: '127.0.0.1',
 			USE_PGLITE: process.env.USE_PGLITE ?? 'true',
+			ORIGIN: baseURL,
 			PUBLIC_ORIGIN: baseURL,
 			ADMIN_EMAIL: adminEmail,
 			ADMIN_PASSWORD: adminPassword,

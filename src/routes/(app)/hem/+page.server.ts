@@ -1,5 +1,8 @@
+import type { EngagementStrip } from '$lib/application/gamification.service';
+import type { DashboardSummary } from '$lib/application/inventory.service';
 import { canEditInventory } from '$lib/domain/household';
 import { isStorageLocation } from '$lib/domain/location';
+import type { SavingsReport } from '$lib/domain/savings-estimate';
 
 import type { GamificationCelebrationKind } from '$lib/domain/gamification';
 
@@ -39,6 +42,46 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const canWrite = locals.householdRole ? canEditInventory(locals.householdRole) : false;
 
+	const degrade = <T>(label: string, fallback: T) => (error: unknown) => {
+		console.warn(`[hem] ${label} degraded:`, error);
+		return fallback;
+	};
+
+	const emptyEngagement: EngagementStrip = {
+		hasConsumptionData: false,
+		consumedThisWeek: null,
+		zeroWasteWeeks: null,
+		eatFirst: { suggestionsThisWeek: 0, mealsScheduledThisWeek: 0, goal: 3, complete: false },
+		nextMilestone: null,
+		syncWeekWrites: 0,
+		bridgeCheckoffsThisWeek: 0
+	};
+
+	const emptySavings: SavingsReport = {
+		hasData: false,
+		consumedCount: 0,
+		wastedCount: 0,
+		savedSek: 0,
+		savedKg: 0,
+		wastedSek: 0,
+		wastedKg: 0,
+		netSek: 0
+	};
+
+	const emptySummary: DashboardSummary = {
+		counts: [],
+		expiringSoon: [],
+		totalItems: 0,
+		pantryStatus: {
+			withoutExpiryCount: 0,
+			autoExpiredCount: 0,
+			staleCount: 0,
+			lastUpdatedAt: null,
+			lastUpdatedByUserId: null,
+			syncHealth: 'good'
+		}
+	};
+
 	const [
 
 		summary,
@@ -60,25 +103,36 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	] = await Promise.all([
 
-		locals.inventoryService.getDashboard(householdId),
+		locals.inventoryService.getDashboard(householdId).catch(degrade('dashboard', emptySummary)),
 
-		locals.gamificationService.getEngagementStrip(householdId, userId),
+		locals.gamificationService
+			.getEngagementStrip(householdId, userId)
+			.catch(degrade('engagement strip', emptyEngagement)),
 
-		locals.gamificationService.detectHomeCelebration(householdId),
+		locals.gamificationService
+			.detectHomeCelebration(householdId)
+			.catch(degrade('celebration', null)),
 
-		locals.purchasePatternService.getSuggestions(householdId),
+		locals.purchasePatternService
+			.getSuggestions(householdId)
+			.catch(degrade('receipt autopilot', [])),
 
-		locals.purchasePatternService.getFinishSuggestions(householdId),
+		locals.purchasePatternService
+			.getFinishSuggestions(householdId)
+			.catch(degrade('receipt finish', [])),
 
-		locals.statistikService.getSavingsReport(householdId),
+		locals.statistikService.getSavingsReport(householdId).catch(degrade('savings', emptySavings)),
 
-		canWrite ? locals.inventoryService.listRecentItemNames(householdId) : Promise.resolve([]),
+		canWrite
+			? locals.inventoryService.listRecentItemNames(householdId).catch(degrade('recent names', []))
+			: Promise.resolve([]),
 
-		canWrite ? locals.inventoryService.findDuplicateNameGroups(householdId) : Promise.resolve([]),
-		locals.pmfService.listRecentHouseholdSyncEvents(householdId, 8).catch((error) => {
-			console.warn('[hem] activity feed degraded:', error);
-			return [];
-		})
+		canWrite
+			? locals.inventoryService
+					.findDuplicateNameGroups(householdId)
+					.catch(degrade('duplicate groups', []))
+			: Promise.resolve([]),
+		locals.pmfService.listRecentHouseholdSyncEvents(householdId, 8).catch(degrade('activity feed', []))
 
 	]);
 
