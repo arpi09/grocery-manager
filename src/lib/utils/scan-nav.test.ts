@@ -7,8 +7,8 @@ describe('scan-nav', () => {
 		expect(parseScanMode('barcode')).toBe('barcode');
 		expect(parseScanMode('receipt')).toBe('receipt');
 		expect(parseScanMode('photo')).toBe('photo');
-		expect(parseScanMode(null)).toBe('hub');
-		expect(parseScanMode('nope')).toBe('hub');
+		expect(parseScanMode(null)).toBe('photo');
+		expect(parseScanMode('nope')).toBe('photo');
 	});
 
 	it('parseScanReturnTo falls back to app home', () => {
