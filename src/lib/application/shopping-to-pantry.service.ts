@@ -1,6 +1,5 @@
 import { canEditInventory, type HouseholdRole } from '$lib/domain/household';
 import {
-	addQuantities,
 	findLastActiveByNormalizedName,
 	findMergeCandidate
 } from '$lib/domain/inventory-merge';

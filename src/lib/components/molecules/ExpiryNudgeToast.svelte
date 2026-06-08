@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import Toast from '$lib/components/molecules/Toast.svelte';
-	import { getLocale, t } from '$lib/i18n';
+	import { t } from '$lib/i18n';
 	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
 	import {
 		EXPIRY_NUDGE_ITEM_PARAM,

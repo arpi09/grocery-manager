@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
 
 /** Ensures at least one active fridge row for mobile inventory E2E (CI shards may start empty). */
 export async function ensureFridgeInventoryItem(page: Page, name?: string): Promise<string> {
