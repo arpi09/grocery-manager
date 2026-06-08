@@ -48,4 +48,4 @@ git push origin master
 - [docs/CI_CD.md](../../docs/CI_CD.md) — G2 nightly schedule (03:00 UTC)
 - [docs/DEPLOY.md](../../docs/DEPLOY.md) — deploy is manual / coordinator on request only
 - [delivery-done.mdc](./delivery-done.mdc) — no deploy claims without Deploy workflow + smoke
-- [deploy-on-request.mdc](./deploy-on-request.mdc) — separate path when user asks to deploy
+- [deploy-safety.mdc](./deploy-safety.mdc) — deploy gate and coordinator deploy rules
