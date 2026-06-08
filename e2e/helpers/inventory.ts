@@ -13,7 +13,7 @@ export async function ensureFridgeInventoryItem(page: Page, name?: string): Prom
 	return itemName;
 }
 
-/** Simulates a horizontal swipe on a row (works with pointer handlers in compact inventory rows). */
+/** Simulates a horizontal swipe on a row using PointerEvents (mouse API is unreliable in CI). */
 export async function swipeRowHorizontal(
 	page: Page,
 	rowLocator: ReturnType<Page['locator']>,
@@ -27,11 +27,33 @@ export async function swipeRowHorizontal(
 	}
 
 	const centerY = box.y + box.height / 2;
-	const startX = direction === 'right' ? box.x + 4 : box.x + box.width - 4;
-	const endX = direction === 'right' ? box.x + box.width - 4 : box.x + 4;
+	const startX = direction === 'right' ? box.x + 8 : box.x + box.width - 8;
+	const endX = direction === 'right' ? box.x + box.width - 8 : box.x + 8;
 
-	await page.mouse.move(startX, centerY);
-	await page.mouse.down();
-	await page.mouse.move(endX, centerY, { steps: 12 });
-	await page.mouse.up();
+	await target.evaluate(
+		(el, coords) => {
+			const pointerId = 42;
+			const mk = (type: string, clientX: number) =>
+				new PointerEvent(type, {
+					pointerId,
+					pointerType: 'touch',
+					clientX,
+					clientY: coords.centerY,
+					bubbles: true,
+					cancelable: true,
+					buttons: type === 'pointerup' ? 0 : 1
+				});
+
+			el.dispatchEvent(mk('pointerdown', coords.startX));
+			const steps = 12;
+			for (let i = 1; i <= steps; i++) {
+				const x = coords.startX + (coords.endX - coords.startX) * (i / steps);
+				el.dispatchEvent(mk('pointermove', x));
+			}
+			el.dispatchEvent(mk('pointerup', coords.endX));
+		},
+		{ startX, endX, centerY }
+	);
+
+	await page.waitForTimeout(150);
 }

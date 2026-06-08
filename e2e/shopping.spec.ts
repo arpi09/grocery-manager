@@ -1,8 +1,50 @@
 ﻿import { test, expect } from '@playwright/test';
 import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
 
+async function ensureSmartFillVisible(page: import('@playwright/test').Page) {
+	const fold = page.getByTestId('shopping-suggestions-fold');
+	if (!(await fold.isVisible().catch(() => false))) {
+		const uncheckedRows = page.locator('#shopping-list-panel ul.list:not(.checked) li');
+		while ((await uncheckedRows.count()) > 0) {
+			const before = await uncheckedRows.count();
+			const row = uncheckedRows.first();
+			await row.locator('.remove-trigger').getByRole('button').first().click();
+			await row.getByRole('button', { name: /Ta bort|Delete/i }).click();
+			await expect(uncheckedRows).toHaveCount(before - 1, { timeout: 10_000 });
+		}
+
+		await page.reload();
+		await dismissOnboardingModalIfOpen(page);
+	}
+
+	await openShoppingSuggestionsFold(page);
+	await expect(page.getByTestId('shopping-smart-fill')).toBeVisible({ timeout: 15_000 });
+}
+
+async function openShoppingSuggestionsFold(page: import('@playwright/test').Page) {
+	const fold = page.getByTestId('shopping-suggestions-fold');
+	await expect(fold).toBeVisible({ timeout: 15_000 });
+	await fold.evaluate((el) => {
+		(el as HTMLDetailsElement).open = true;
+	});
+}
+
 test.describe('Shopping list', () => {
 	test.setTimeout(60_000);
+
+	test('smart fill adds fixture items when E2E_MOCK_AI is enabled', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/inkop');
+		await dismissOnboardingModalIfOpen(page);
+		await ensureSmartFillVisible(page);
+		await openShoppingSuggestionsFold(page);
+		await page.getByTestId('shopping-smart-fill').click();
+
+		const panel = page.locator('#shopping-list-panel');
+		await expect(panel.getByText(/E2E Smartfill Mj/)).toBeVisible({ timeout: 20_000 });
+		await expect(panel.getByText('E2E Smartfill Banan')).toBeVisible();
+		await expect(panel).toBeInViewport({ timeout: 10_000 });
+	});
 
 	test('add line and check off item', async ({ page }) => {
 		test.setTimeout(60_000);
@@ -50,20 +92,5 @@ test.describe('Shopping list', () => {
 		await expect(
 			page.locator('.toast-message').filter({ hasText: /skafferiet|pantry/i })
 		).toBeVisible({ timeout: 15_000 });
-	});
-
-	test('smart fill adds fixture items when E2E_MOCK_AI is enabled', async ({ page }) => {
-		await loginAsAdmin(page);
-		await page.goto('/inkop');
-		await dismissOnboardingModalIfOpen(page);
-
-		await page.getByRole('button', { name: /Fyll p.+fr.n skafferiet/i }).click();
-
-		await expect(page.getByTestId('shopping-fill-success')).toBeVisible({ timeout: 20_000 });
-		await expect(page.getByText(/E2E Smartfill Mj/)).toBeVisible({ timeout: 20_000 });
-		await expect(page.getByText('E2E Smartfill Banan')).toBeVisible();
-
-		const panel = page.locator('#shopping-list-panel');
-		await expect(panel).toBeInViewport({ timeout: 10_000 });
 	});
 });

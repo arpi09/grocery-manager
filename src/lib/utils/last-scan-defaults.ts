@@ -13,8 +13,9 @@ export function getLastScanDefaults(): LastScanDefaults | null {
 		const raw = window.localStorage.getItem(KEY);
 		if (!raw) return null;
 		const parsed = JSON.parse(raw) as { location?: unknown };
-		if (!isStorageLocation(parsed.location)) return null;
-		return { location: parsed.location };
+		const location = parsed.location;
+		if (typeof location !== 'string' || !isStorageLocation(location)) return null;
+		return { location };
 	} catch {
 		return null;
 	}

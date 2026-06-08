@@ -29,6 +29,7 @@
 	let dismissingKey = $state<string | null>(null);
 	let finishActingId = $state<string | null>(null);
 	let finishDismissingId = $state<string | null>(null);
+	let reconcileSubmitting = $state(false);
 	let errorMessage = $state<string | null>(null);
 
 	$effect(() => {
@@ -151,6 +152,26 @@
 	}
 
 	const hasContent = $derived(items.length > 0 || finishItems.length > 0);
+	const showReconcile = $derived(items.length > 0 && finishItems.length > 0);
+
+	async function commitReconcileSession() {
+		if (!canEdit || reconcileSubmitting) return;
+		reconcileSubmitting = true;
+		errorMessage = null;
+		try {
+			for (const suggestion of [...items]) {
+				await acceptSuggestion(suggestion.normalizedKey);
+			}
+			for (const suggestion of [...finishItems]) {
+				await acceptFinish(suggestion.inventoryItemId);
+			}
+			showClientToast(t('receiptAutopilot.reconcileSuccess'), { variant: 'success' });
+		} catch {
+			errorMessage = t('receiptAutopilot.reconcileFailed');
+		} finally {
+			reconcileSubmitting = false;
+		}
+	}
 </script>
 
 <section class="autopilot" class:compact aria-label={t('receiptAutopilot.ariaLabel')}>
@@ -261,6 +282,18 @@
 			</div>
 		{/if}
 		</div>
+		{#if showReconcile && canEdit}
+			<div class="reconcile-commit">
+				<Button
+					type="button"
+					loading={reconcileSubmitting}
+					loadingLabel={t('common.saving')}
+					onclick={commitReconcileSession}
+				>
+					{t('receiptAutopilot.reconcileCommit')}
+				</Button>
+			</div>
+		{/if}
 	{/if}
 </section>
 
@@ -383,5 +416,9 @@
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: var(--space-md);
+	}
+
+	.reconcile-commit {
+		margin-top: var(--space-md);
 	}
 </style>

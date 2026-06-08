@@ -199,7 +199,6 @@
 
 		consumeItem = null;
 		finishingIds = new Set();
-		undoPayload = null;
 	});
 
 	$effect(() => {
@@ -423,8 +422,8 @@
 		try {
 			const response = await fetch('?/consumeItem', { method: 'POST', body: formData });
 			if (response.ok) {
-				undoPayload = snapshot;
 				await invalidateAll();
+				undoPayload = snapshot;
 			} else {
 				showClientToast(t('consume.finishFailed'), { variant: 'error' });
 			}
@@ -1030,7 +1029,7 @@
 {/if}
 
 {#if undoPayload}
-	<div class="undo-toast-wrap">
+	<div class="undo-toast-wrap" data-testid="undo-toast-wrap">
 		<Toast
 			message={undoMessage}
 			visible={true}

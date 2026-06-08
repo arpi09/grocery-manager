@@ -872,7 +872,10 @@
 		"markFinished": "Mark as finished",
 		"finishSuccess": "{name} marked as finished",
 		"finishFailed": "Could not mark as finished. Try again.",
-		"refillTitle": "Refill again"
+		"refillTitle": "Refill again",
+		"reconcileCommit": "Apply entire receipt",
+		"reconcileSuccess": "Receipt synced with pantry",
+		"reconcileFailed": "Could not sync receipt. Try again."
 	},
 	"staleness": {
 		"pageTitle": "Quick sync",
@@ -1892,6 +1895,10 @@
 		"heroBadgeDual": "This week",
 		"heroSubtitleDual": "{stale} maybe finished · {expiring} expiring soon",
 		"heroCta": "Week sorted →",
+		"heroTitleSyncHub": "2 min weekly sync",
+		"heroBadgeSyncHub": "Weekly sync",
+		"heroSubtitleSyncHub": "Photo round or quick sync — then optionally plan the week.",
+		"heroCtaPlanOptional": "Plan the week (optional)",
 		"flowLead": "Generate up to five dinner ideas, adjust the days, and approve the whole week.",
 		"expiringLabel": "Expiring items",
 		"noExpiring": "Nothing urgent right now — you can still plan the week from your pantry.",
@@ -1947,7 +1954,9 @@
 		"expiryTitle": "Items expiring soon",
 		"expiryBody": "{count} items expiring — here are this week's suggestions",
 		"shoppingTitle": "Time to shop?",
-		"shoppingBody": "{count} items on your shopping list"
+		"shoppingBody": "{count} items on your shopping list",
+		"movingSoonTitle": "{name} moving to review soon",
+		"movingSoonBody": "{name} — {days, plural, one {# day} other {# days}} left. Still good?"
 	},
 	"ai": {
 		"loadingPantry": "Thinking from your pantry…",

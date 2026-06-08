@@ -12,12 +12,15 @@
 
 		staleCount?: number;
 		photoHref?: string;
-
+		hub?: boolean;
 	}
 
-
-
-	let { expiringCount = 0, staleCount = 0, photoHref = '/scan?mode=photo&from=/hem' }: Props = $props();
+	let {
+		expiringCount = 0,
+		staleCount = 0,
+		photoHref = '/scan?mode=photo&from=/hem',
+		hub = false
+	}: Props = $props();
 
 
 
@@ -93,7 +96,29 @@
 
 
 
-{#if dualCta}
+{#if hub}
+	<section class="weekly-ritual-hero motion-fade-in" aria-labelledby="weekly-ritual-hero-heading">
+		<div class="hero-copy">
+			<span class="hero-badge">{t('weeklyRitual.heroBadgeSyncHub')}</span>
+			<h2 id="weekly-ritual-hero-heading">{t('weeklyRitual.heroTitleSyncHub')}</h2>
+			<p class="hero-sub">{t('weeklyRitual.heroSubtitleSyncHub')}</p>
+			<div class="hero-ctas">
+				<a class="hero-cta hero-cta--primary" href={photoHref} data-analytics-id="weekly_ritual.hero_photo">
+					{t('weeklyRitual.heroCtaPhoto')}
+				</a>
+				<a class="hero-cta hero-cta--secondary" href="/inventory/synk" data-analytics-id="weekly_ritual.hero_sync">
+					{t('weeklyRitual.heroCtaSync')}
+				</a>
+				<a class="hero-cta hero-cta--ghost" href="/planer/vecka" data-analytics-id="weekly_ritual.hero_plan">
+					{t('weeklyRitual.heroCtaPlanOptional')}
+				</a>
+			</div>
+		</div>
+		<span class="hero-icon" aria-hidden="true">
+			<FeatureIcon id="sparkle" size={28} />
+		</span>
+	</section>
+{:else if dualCta}
 
 	<section class="weekly-ritual-hero weekly-ritual-hero--dual motion-fade-in" aria-labelledby="weekly-ritual-hero-heading">
 
@@ -326,6 +351,38 @@
 		border: 1px solid color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
 
 		text-decoration: none;
+
+	}
+
+	.hero-cta--ghost {
+
+		padding: 0.45rem 0.85rem;
+
+		border-radius: 999px;
+
+		text-decoration: none;
+
+		color: var(--color-text-muted);
+
+		font-weight: 600;
+
+	}
+
+	.hero--hub .hero-ctas {
+
+		flex-direction: column;
+
+		align-items: stretch;
+
+	}
+
+	.hero--hub .hero-cta--primary,
+	.hero--hub .hero-cta--secondary,
+	.hero--hub .hero-cta--ghost {
+
+		justify-content: center;
+
+		text-align: center;
 
 	}
 

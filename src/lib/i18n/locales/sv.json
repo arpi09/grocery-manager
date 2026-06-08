@@ -846,7 +846,10 @@
 		"markFinished": "Markera som slut",
 		"finishSuccess": "{name} markerades som slut",
 		"finishFailed": "Kunde inte markera som slut. Försök igen.",
-		"refillTitle": "Fyll på igen"
+		"refillTitle": "Fyll på igen",
+		"reconcileCommit": "Tillämpa hela kvittot",
+		"reconcileSuccess": "Kvitto synkat med skafferiet",
+		"reconcileFailed": "Kunde inte synka kvittot. Försök igen."
 	},
 	"staleness": {
 		"pageTitle": "Snabb synk",
@@ -1866,6 +1869,10 @@
 		"heroBadgeDual": "Denna vecka",
 		"heroSubtitleDual": "{stale} kanske slut · {expiring} går ut snart",
 		"heroCta": "Veckan fixad →",
+		"heroTitleSyncHub": "2 min veckosynk",
+		"heroBadgeSyncHub": "Veckosynk",
+		"heroSubtitleSyncHub": "Fotorunda eller snabb synk — sedan valfritt planera veckan.",
+		"heroCtaPlanOptional": "Planera veckan (valfritt)",
 		"flowLead": "Generera upp till fem middagsförslag, justera dagarna och godkänn hela veckan.",
 		"expiringLabel": "Varor som går ut",
 		"noExpiring": "Inget brådskande just nu — du kan ändå planera veckan utifrån lagret.",
@@ -1921,7 +1928,9 @@
 		"expiryTitle": "Varor går ut snart",
 		"expiryBody": "{count} varor går ut — här är veckans förslag",
 		"shoppingTitle": "Dags att handla?",
-		"shoppingBody": "{count} varor väntar på inköpslistan"
+		"shoppingBody": "{count} varor väntar på inköpslistan",
+		"movingSoonTitle": "{name} hamnar i granskning snart",
+		"movingSoonBody": "{name} — {days, plural, one {# dag} other {# dagar}} kvar. Fortfarande bra?"
 	},
 	"ai": {
 		"loadingPantry": "Tänker utifrån ditt skafferi…",

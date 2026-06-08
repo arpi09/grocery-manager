@@ -303,6 +303,7 @@
 				expiringCount={expiringCount}
 				staleCount={pantryStatus.staleCount}
 				photoHref={scanPhotoHref}
+				hub={true}
 			/>
 		{/if}
 

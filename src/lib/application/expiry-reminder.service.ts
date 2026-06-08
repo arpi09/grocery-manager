@@ -180,18 +180,34 @@ export class ExpiryReminderService {
 		}
 
 		const locale = 'sv';
-		const firstItem = sections.flatMap((section) => section.items.map((item) => ({ section, item })))[0];
-		const pushUrl = firstItem
-			? `${this.appOrigin.getOrigin() || ''}/item/${firstItem.item.id}/edit?from=/hem`
+		const firstEntry = sections.flatMap((section) =>
+			section.items.map((item) => ({ section, item }))
+		)[0];
+		const isMovingSoon =
+			firstEntry?.section.movingSoonIds?.has(firstEntry.item.id) ?? false;
+		const pushUrl = firstEntry
+			? `${this.appOrigin.getOrigin() || ''}/item/${firstEntry.item.id}/edit?from=push-moving-soon`
 			: `${this.appOrigin.getOrigin() || ''}${buildEatFirstWeekUrl('push')}`;
-		const pushBody = firstItem
-			? `${firstItem.item.name} ${translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days })}`
+		const pushBody = firstEntry
+			? isMovingSoon
+				? translate(locale, 'pushNotifications.movingSoonBody', {
+						name: firstEntry.item.name,
+						days: firstEntry.item.expiresOn
+							? daysUntilAutoExpiredMove(
+									firstEntry.item.expiresOn,
+									firstEntry.section.graceDays
+								)
+							: 0
+					})
+				: `${firstEntry.item.name} ${translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days })}`
 			: translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days });
 		const payload = {
-			title: translate(locale, 'pushNotifications.expiryTitle'),
+			title: isMovingSoon
+				? translate(locale, 'pushNotifications.movingSoonTitle', { name: firstEntry!.item.name })
+				: translate(locale, 'pushNotifications.expiryTitle'),
 			body: pushBody,
 			url: pushUrl,
-			tag: 'home-pantry-expiry'
+			tag: isMovingSoon ? `home-pantry-moving-soon-${firstEntry!.item.id}` : 'home-pantry-expiry'
 		};
 
 		let delivered = 0;

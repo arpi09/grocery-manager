@@ -91,6 +91,7 @@
 				loading={loading}
 				loadingLabel={t('shopping.fillLoading')}
 				data-analytics-id="shopping.smart_fill"
+				data-testid="shopping-smart-fill"
 			>
 				{t('shopping.fillFromPantry')}
 			</Button>
