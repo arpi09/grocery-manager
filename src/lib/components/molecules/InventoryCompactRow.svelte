@@ -183,7 +183,6 @@
 
 	function onSwipePointerDown(event: PointerEvent) {
 		if (!swipeEnabled) return;
-		if (event.target instanceof Element && event.target.closest('button')) return;
 
 		swipeStartX = event.clientX;
 		swipeStartY = event.clientY;
@@ -262,67 +261,42 @@
 		</div>
 
 		<div
-
 			class="row swipe-content"
-
 			class:finished
-
 			class:autoExpired={autoExpired}
-
 			class:swipe-dragging={swipeDragging}
-
 			style:transform="translateX({swipeOffset}px)"
-
-			onpointerdown={onSwipePointerDown}
-
-			onpointermove={onSwipePointerMove}
-
-			onpointerup={onSwipePointerUp}
-
-			onpointercancel={onSwipePointerCancel}
-
 		>
-
-			<div class="primary">
-
-				<a href="/item/{item.id}/edit" class="name">{item.name}</a>
-
-				<div class="meta">
-
-					{#if finished}
-
-						<Badge tone="default">{t('inventory.finishedBadge')}</Badge>
-
-					{:else if autoExpired}
-
-						<Badge tone="warning">{t('inventory.autoExpiredBadge')}</Badge>
-
-					{/if}
-
-					{#if movingSoon}
-
-						<Badge tone="warning">{t('inventory.movingToAutoExpiredSoon')}</Badge>
-
-					{/if}
-
-					{#if expiryLabel}
-
-						<Badge tone={autoExpired ? 'default' : expiryTone(item.expiresOn!)}>
-
-							{expiryLabel}
-
-						</Badge>
-
-					{/if}
-
+			<div
+				class="swipe-handle"
+				data-testid="inventory-swipe-handle"
+				onpointerdown={onSwipePointerDown}
+				onpointermove={onSwipePointerMove}
+				onpointerup={onSwipePointerUp}
+				onpointercancel={onSwipePointerCancel}
+			>
+				<div class="primary">
+					<a href="/item/{item.id}/edit" class="name">{item.name}</a>
+					<div class="meta">
+						{#if finished}
+							<Badge tone="default">{t('inventory.finishedBadge')}</Badge>
+						{:else if autoExpired}
+							<Badge tone="warning">{t('inventory.autoExpiredBadge')}</Badge>
+						{/if}
+						{#if movingSoon}
+							<Badge tone="warning">{t('inventory.movingToAutoExpiredSoon')}</Badge>
+						{/if}
+						{#if expiryLabel}
+							<Badge tone={autoExpired ? 'default' : expiryTone(item.expiresOn!)}>
+								{expiryLabel}
+							</Badge>
+						{/if}
+					</div>
 				</div>
-
+				<span class="qty">{quantityLine}</span>
 			</div>
 
 			<div class="secondary">
-
-				<span class="qty">{quantityLine}</span>
-
 				<div class="actions">
 
 					{#if onFinishOneTap}
@@ -554,20 +528,21 @@
 
 
 	.swipe-content {
-
 		position: relative;
-
 		z-index: 1;
-
-		touch-action: pan-y;
-
 		transition: transform 0.18s ease;
-
 		will-change: transform;
-
 	}
 
-
+	.swipe-handle {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+		min-height: var(--touch-target-min);
+		touch-action: pan-y;
+		cursor: grab;
+	}
 
 	.swipe-content.swipe-dragging {
 
