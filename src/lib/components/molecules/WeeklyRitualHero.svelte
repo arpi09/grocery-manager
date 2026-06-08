@@ -346,6 +346,9 @@
 	}
 
 	.pantry-lines a {
+		display: flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
 		font-size: 0.8125rem;
 		font-weight: 600;
 		color: var(--color-primary);

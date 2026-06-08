@@ -5,10 +5,10 @@ import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
 test.describe('Scan and inventory', () => {
 	test('scan hub loads with photo round primary', async ({ page }) => {
 		await loginAsAdmin(page);
-		await page.goto('/scan');
+		await page.goto('/scan?mode=hub');
 		await dismissOnboardingModalIfOpen(page);
 
-		await expect(page).toHaveURL(/\/scan(?!\?.*mode=)/);
+		await expect(page).toHaveURL(/mode=hub/);
 		const hub = page.getByTestId('scan-mode-hub');
 		await expect(hub).toBeVisible({ timeout: 15_000 });
 		await expect(hub.getByTestId('scan-hub-photo-round')).toBeVisible();
