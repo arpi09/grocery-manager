@@ -371,6 +371,20 @@
 			<p class="readonly-hint">{t('home.readonlyHint')}</p>
 		{/if}
 
+		{#if hasExpiring}
+			<details class="home-disclosure eat-first-prominent" bind:open={eatFirstOpen}>
+				<summary>
+					{t('home.eatFirstSummary', { count: expiringCount })}
+				</summary>
+				<EatFirstSection
+					compact
+					expiringItems={summary.expiringSoon}
+					canEdit={canWrite}
+					householdId={householdId}
+				/>
+			</details>
+		{/if}
+
 		<details class="home-disclosure more-on-home" bind:open={moreOnHomeOpen}>
 			<summary>{t('home.moreOnHome')}</summary>
 			<div class="more-on-home-body">
@@ -410,14 +424,10 @@
 					<SkafferapportWidget {savings} />
 				{/if}
 
-				{#if !showWeeklyRitual}
+				{#if !hasExpiring && !showWeeklyRitual}
 					<details class="home-disclosure nested" bind:open={eatFirstOpen}>
 						<summary>
-							{#if hasExpiring}
-								{t('home.eatFirstSummary', { count: expiringCount })}
-							{:else}
-								{t('eatFirst.title')}
-							{/if}
+							{t('eatFirst.title')}
 						</summary>
 						<EatFirstSection
 							compact

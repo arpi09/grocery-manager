@@ -110,6 +110,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		await dismissCookieConsentIfOpen(page);
 		await dismissOnboardingModalIfOpen(page);
 
+		await expect(page.getByText(itemName)).toBeVisible({ timeout: 15_000 });
 		await expect(
 			page.getByRole('button', { name: /Dela som bild|Share as image/i })
 		).toBeVisible({ timeout: 15_000 });
