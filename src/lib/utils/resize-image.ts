@@ -58,7 +58,7 @@ export function computeTargetDimensions(
 	};
 }
 
-function loadImageFromFile(file: File): Promise<HTMLImageElement> {
+export function loadImageFromFile(file: File): Promise<HTMLImageElement> {
 	return new Promise((resolve, reject) => {
 		const url = URL.createObjectURL(file);
 		const img = new Image();
@@ -77,7 +77,7 @@ function loadImageFromFile(file: File): Promise<HTMLImageElement> {
 	});
 }
 
-function renderToJpegBlob(
+export function renderToJpegBlob(
 	source: CanvasImageSource,
 	width: number,
 	height: number,

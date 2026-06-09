@@ -20,6 +20,9 @@ function mockFetch(...responses: Array<{ ok: boolean; status?: number; body?: un
 				(part) => part && typeof part === 'object' && (part as { type?: string }).type === 'input_image'
 			);
 			expect(imageParts.length).toBeGreaterThan(0);
+			for (const part of imageParts) {
+				expect((part as { detail?: string }).detail).toBe('high');
+			}
 		}
 		return {
 			ok: next.ok,

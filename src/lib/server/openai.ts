@@ -119,8 +119,12 @@ interface StructuredImageResponseOptions extends StructuredResponseOptions {
 	imageDataUrl: string;
 }
 
+export type ImageDetailLevel = 'low' | 'high' | 'auto';
+
 interface StructuredImagesResponseOptions extends StructuredResponseOptions {
 	imageDataUrls: string[];
+	/** Vision detail for input_image parts (Responses API). Defaults to API auto when omitted. */
+	imageDetail?: ImageDetailLevel;
 }
 
 async function postOpenAiStructured(
@@ -241,7 +245,8 @@ export async function requestStructuredJsonFromImages(
 ): Promise<StructuredJsonResult> {
 	const imageParts = options.imageDataUrls.map((imageDataUrl) => ({
 		type: 'input_image' as const,
-		image_url: imageDataUrl
+		image_url: imageDataUrl,
+		...(options.imageDetail ? { detail: options.imageDetail } : {})
 	}));
 
 	return postOpenAiStructured(

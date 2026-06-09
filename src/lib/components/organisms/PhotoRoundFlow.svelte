@@ -23,6 +23,10 @@ import {
 	savePhotoRoundLocation
 } from '$lib/utils/photo-round-locations';
 	import { saveLastScanMode } from '$lib/utils/last-scan-defaults';
+	import {
+		PhotoRoundImageError,
+		resizeImageForPhotoRound
+	} from '$lib/utils/resize-photo-round-image';
 
 
 	interface Props {
@@ -185,17 +189,35 @@ import {
 		};
 	}
 
+	function imagePrepErrorMessage(err: unknown): string {
+		if (err instanceof PhotoRoundImageError) {
+			if (err.code === 'invalid_type') return t('photoRound.imageInvalidType');
+			if (err.code === 'too_large') return t('photoRound.uploadTooLarge');
+		}
+		return t('photoRound.imagePrepFailed');
+	}
+
 	async function analyzePhotos() {
 		if (photos.length === 0) return;
 
-		const totalBytes = photos.reduce((sum, photo) => sum + photo.file.size, 0);
-		if (totalBytes > PHOTO_ROUND_MAX_TOTAL_BYTES) {
-			parseError = t('photoRound.uploadTooLarge');
+		parsing = true;
+		parseError = null;
+
+		let preparedFiles: File[];
+		try {
+			preparedFiles = await Promise.all(photos.map((photo) => resizeImageForPhotoRound(photo.file)));
+		} catch (err) {
+			parseError = imagePrepErrorMessage(err);
+			parsing = false;
 			return;
 		}
 
-		parsing = true;
-		parseError = null;
+		const totalBytes = preparedFiles.reduce((sum, file) => sum + file.size, 0);
+		if (totalBytes > PHOTO_ROUND_MAX_TOTAL_BYTES) {
+			parseError = t('photoRound.uploadTooLarge');
+			parsing = false;
+			return;
+		}
 
 		const formData = new FormData();
 		if (initialLocation) {
@@ -205,8 +227,8 @@ import {
 		} else {
 			formData.append('zone', 'auto');
 		}
-		for (const photo of photos) {
-			formData.append('images', photo.file);
+		for (const file of preparedFiles) {
+			formData.append('images', file);
 		}
 
 		try {
@@ -334,8 +356,10 @@ import {
 {#if step === 'capture'}
 	<section data-testid="photo-round-capture">
 		<p class="lead" data-testid="photo-round-lead">{captureLead}</p>
-		{#if photos.length === 1 && zone === 'fridge'}
+		{#if zone === 'fridge' && canAddPhoto}
 			<p class="hint" data-testid="photo-round-multi-photo-hint">{t('photoRound.multiPhotoFridgeHint')}</p>
+		{:else if canAddPhoto && photos.length < PHOTO_ROUND_MAX_IMAGES}
+			<p class="hint" data-testid="photo-round-multi-photo-hint">{t('photoRound.multiPhotoHint')}</p>
 		{/if}
 		<p class="privacy">{t('photoRound.privacyNote')}</p>
 

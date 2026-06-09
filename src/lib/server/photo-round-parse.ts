@@ -347,7 +347,8 @@ async function requestPhotoRoundStructured(
 		options.imageDataUrls.length > 0
 			? await requestStructuredJsonFromImages(apiKey, {
 					...base,
-					imageDataUrls: options.imageDataUrls
+					imageDataUrls: options.imageDataUrls,
+					imageDetail: 'high'
 				})
 			: await requestStructuredJson(apiKey, base);
 
@@ -359,6 +360,7 @@ async function requestPhotoRoundStructured(
 		? await requestStructuredJsonFromImages(apiKey, {
 				...base,
 				imageDataUrls: options.imageDataUrls,
+				imageDetail: 'high',
 				strict: false
 			})
 		: await requestStructuredJson(apiKey, { ...base, strict: false });
