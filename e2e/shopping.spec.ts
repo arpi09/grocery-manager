@@ -64,9 +64,15 @@ test.describe('Shopping list', () => {
 		await row.locator('form[action="?/toggle"] input[type=checkbox]').click();
 		await expect(
 			page
-				.locator('.toast-message')
+				.getByRole('status')
 				.filter({ hasText: new RegExp(`${itemName} avbockad`, 'i') })
 		).toBeVisible({ timeout: 15_000 });
+
+		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
+		if (await pantrySheet.isVisible().catch(() => false)) {
+			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click();
+		}
+
 		await expect(row).toHaveCount(0, { timeout: 15_000 });
 	});
 

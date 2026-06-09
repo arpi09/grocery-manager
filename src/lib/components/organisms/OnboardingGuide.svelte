@@ -24,6 +24,7 @@
 		isOnboardingExcludedPath,
 		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
+	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
 	import {
 		canGoBackOnboarding,
 		getEncourageKeyForStepIndex,
@@ -237,6 +238,13 @@
 		const onProgress = () => syncCelebrateStep();
 		window.addEventListener(ONBOARDING_PROGRESS_EVENT, onProgress);
 		return () => window.removeEventListener(ONBOARDING_PROGRESS_EVENT, onProgress);
+	});
+
+	$effect(() => {
+		if (!open && !scanModalOpen) {
+			return;
+		}
+		return registerBlockingOverlay();
 	});
 </script>
 

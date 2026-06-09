@@ -17,6 +17,7 @@
 		isPostOnboardingSurveyPath,
 		shouldShowPostOnboardingSurvey
 	} from '$lib/utils/onboarding';
+	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
 
 	let open = $state(false);
 	let submitting = $state(false);
@@ -110,6 +111,13 @@
 		void pathname;
 		void userId;
 		tryOpenSurvey();
+	});
+
+	$effect(() => {
+		if (!open) {
+			return;
+		}
+		return registerBlockingOverlay();
 	});
 </script>
 

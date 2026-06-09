@@ -2,7 +2,7 @@ import { expect, type Page } from '@playwright/test';
 import { LOCALE_COOKIE_NAME, LOCALE_STORAGE_KEY } from '../../src/lib/i18n/locale';
 import { PAGE_HINT_IDS } from '../../src/lib/utils/page-hints';
 
-const ONBOARDING_VERSION = '3';
+const ONBOARDING_VERSION = '4';
 const PAGE_HINT_STORAGE_PREFIX = 'home-pantry-page-hint-dismissed';
 const E2E_LOCALE = 'sv';
 /** Locale only — onboarding and activation state stay fresh (new-user flows). */

@@ -208,7 +208,11 @@
 
 		if (!swipeDragging) {
 			swipeDragging = true;
-			(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+			try {
+				(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+			} catch {
+				// Pointer may already be released or captured elsewhere.
+			}
 		}
 
 		event.preventDefault();

@@ -33,9 +33,10 @@ Kör **efter** grön **Deploy to production** för target-SHA. Räkna inte deplo
 
 1. **SHA** — Prod kör samma commit som den gröna deploy-run (kort SHA i Actions).
 2. **Inloggning** — Logga in på prod; landar på `/hem` utan fel.
-3. **Scan** — `/scan`; foto-runda syns som primärt val (photo-first hub).
-4. **Recept** — Receptknapp i headern; modal öppnas och kan generera.
-5. **Inställningar** — `/settings`; e-postpåminnelser sparar utan fel.
+3. **Unified nav** — Bottom 4 flikar: Hem, Skanna, Lager, Äta; header kundvagn → `/inkop`; Mer-sheet öppnas.
+4. **Scan** — Skanna-flik eller `/scan`; foto-läge som standard (Take photo / `photo-round-capture`), inte hub med fyra likvärdiga val.
+5. **Äta / planer** — `/planer` (Äta-flik); ”Generera maträtt” / `eat-hub-generate` öppnar receptassistent och kan generera.
+6. **Inställningar** — `/settings`; e-postpåminnelser toggla och spara utan fel (toast eller sparad state).
 
 **CI E2E:** För kod-deploy täcker grön deploy-workflow E2E samma kritiska resor lokalt (Turnstile-bypass). Coordinator kör ändå 5-punktslistan på prod när deploy faktiskt skett. Vid auth/push/captcha-ändringar: utökad checklista nedan. Valfritt: browser MCP mot `https://skaffu.com` vid P0 eller nyligen rapporterade prod-buggar.
 
@@ -44,6 +45,8 @@ Kör **efter** grön **Deploy to production** för target-SHA. Räkna inte deplo
 ## Checklista (5–8 min)
 
 - [ ] **Admin-login** — logga in med admin-konto; landar på `/hem` utan 500
+- [ ] **Bottom nav** — Hem, Skanna, Lager, Äta går till rätt route; ingen dubbel header-rad på desktop (≥900px)
+- [ ] **Äta / planer** — `/planer` → generera maträtt öppnar assistant (inte header-recept — borttagen i unified nav)
 - [ ] **Marketing `/`** — landningssida laddar (200, inget serverfel)
 - [ ] **`/register` + Turnstile** — registreringssida visar widget; lyckad registrering landar på `/hem` (ingen bypass)
 - [ ] **`/login`** — inloggningssida svarar 200; befintlig användare kan logga in

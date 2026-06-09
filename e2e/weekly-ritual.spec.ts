@@ -10,9 +10,10 @@ import {
 async function ensureEatFirstInventory(page: Page) {
 	await page.goto('/item/new?location=fridge&from=/planer/vecka');
 	await page.locator('input[name="name"]').fill(`E2E Vecka ${Date.now()}`);
+	const expiresOn = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+	await page.locator('input[name="expiresOn"]').fill(expiresOn);
 	await page.locator('form').getByRole('button', { name: /L.gg till vara/i }).click();
-	// `from=/planer/vecka` returns to vecka with ?scan=added; fridge redirect is also valid.
-	await expect(page).not.toHaveURL(/\/item\/new/, { timeout: 15_000 });
+	await page.waitForURL((url) => !url.pathname.includes('/item/new'), { timeout: 20_000 });
 }
 
 test.describe('Weekly ritual — vecka', () => {
@@ -32,7 +33,8 @@ test.describe('Weekly ritual — vecka', () => {
 		await expect(generateBtn).toBeVisible({ timeout: 15_000 });
 
 		const eatFirstResponse = page.waitForResponse(
-			(res) => res.url().includes('/api/eat-first') && res.request().method() === 'POST'
+			(res) => res.url().includes('/api/eat-first') && res.request().method() === 'POST',
+			{ timeout: 30_000 }
 		);
 		await generateBtn.click();
 		const response = await eatFirstResponse;

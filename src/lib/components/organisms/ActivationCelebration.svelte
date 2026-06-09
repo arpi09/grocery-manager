@@ -17,6 +17,7 @@
 		shouldShowCelebration,
 		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
+	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
 
 	let open = $state(false);
 
@@ -77,6 +78,13 @@
 		void pathname;
 		void userId;
 		tryOpenCelebration();
+	});
+
+	$effect(() => {
+		if (!open) {
+			return;
+		}
+		return registerBlockingOverlay();
 	});
 </script>
 

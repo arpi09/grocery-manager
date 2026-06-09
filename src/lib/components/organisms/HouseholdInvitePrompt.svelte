@@ -5,6 +5,7 @@
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import { t } from '$lib/i18n';
 	import { getSignupAt, isOnboardingExcludedPath } from '$lib/utils/onboarding';
+	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
 	import {
 		dismissHouseholdInvitePrompt,
 		shouldShowHouseholdInvitePrompt
@@ -59,6 +60,13 @@
 		void userId;
 		void memberCount;
 		tryOpen();
+	});
+
+	$effect(() => {
+		if (!open) {
+			return;
+		}
+		return registerBlockingOverlay();
 	});
 </script>
 

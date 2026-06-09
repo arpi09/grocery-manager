@@ -274,24 +274,27 @@
 
 	<div class="actions">
 		<Button type="submit" fullWidth>{isEdit ? t('item.saveChanges') : t('item.addSubmit')}</Button>
-		{#if isEdit}
-			{#if item}
-				<ConsumeItemPanel {item} action="?/markAsFinished" variant="form" />
-			{/if}
-			<DeleteConfirmButton
-				tier={2}
-				context="inventoryItem"
-				copyOptions={{ itemName: name || item?.name }}
-				action="?/delete"
-				fullWidth
-				label={t('item.deleteItem')}
-				ariaLabel={t('item.deleteItemNamed', {
-					name: name || item?.name || t('common.unknownProduct')
-				})}
-			/>
-		{/if}
 	</div>
 </form>
+
+{#if isEdit}
+	<div class="secondary-actions">
+		{#if item}
+			<ConsumeItemPanel {item} action="?/markAsFinished" variant="form" />
+		{/if}
+		<DeleteConfirmButton
+			tier={2}
+			context="inventoryItem"
+			copyOptions={{ itemName: name || item?.name }}
+			action="?/delete"
+			fullWidth
+			label={t('item.deleteItem')}
+			ariaLabel={t('item.deleteItemNamed', {
+				name: name || item?.name || t('common.unknownProduct')
+			})}
+		/>
+	</div>
+{/if}
 
 {#if scannerOpen}
 	<BarcodeScannerModal open={scannerOpen} onScan={handleBarcodeScanned} onClose={closeScanner} />
@@ -412,7 +415,8 @@
 		color: var(--color-danger);
 	}
 
-	.actions {
+	.actions,
+	.secondary-actions {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);

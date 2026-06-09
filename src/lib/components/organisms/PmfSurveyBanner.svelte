@@ -6,6 +6,10 @@
 	import type { PmfWouldMiss } from '$lib/domain/pmf-survey';
 	import { t, type MessageKey } from '$lib/i18n';
 	import {
+		getBlockingOverlayCount,
+		OVERLAY_STACK_CHANGED_EVENT
+	} from '$lib/utils/overlay-stack';
+	import {
 		dismissPmfSurvey,
 		markPmfSurveySubmitted,
 		resolvePmfSurveyTrigger,
@@ -13,6 +17,7 @@
 	} from '$lib/utils/pmf-survey';
 
 	let open = $state(false);
+	let overlayRevision = $state(0);
 	let submitting = $state(false);
 	let npsScore = $state<number | null>(null);
 	let wouldMiss = $state<PmfWouldMiss | null>(null);
@@ -34,6 +39,7 @@
 			!browser ||
 			publicEnv.PUBLIC_E2E_DISABLE_PMF_SURVEY === 'true' ||
 			!userId ||
+			getBlockingOverlayCount() > 0 ||
 			!shouldShowPmfSurvey(userId, pathname)
 		) {
 			open = false;
@@ -87,8 +93,22 @@
 			return;
 		}
 
+		const onOverlayChange = () => {
+			overlayRevision += 1;
+		};
+
+		window.addEventListener(OVERLAY_STACK_CHANGED_EVENT, onOverlayChange);
+		return () => window.removeEventListener(OVERLAY_STACK_CHANGED_EVENT, onOverlayChange);
+	});
+
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+
 		void pathname;
 		void userId;
+		void overlayRevision;
 		tryOpenSurvey();
 	});
 </script>
