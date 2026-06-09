@@ -108,7 +108,6 @@ export const actions: Actions = {
 			return fail(400, { consumeErrors: parsed.error.flatten().fieldErrors });
 		}
 
-		let location = 'fridge';
 		let itemName = '';
 		let toastKind: 'itemFinished' | 'itemPartiallyConsumed' = 'itemFinished';
 		let remainingLabel: string | undefined;
@@ -120,7 +119,6 @@ export const actions: Actions = {
 				event.locals.householdRole!,
 				{ preset: parsed.data.preset, customAmount: parsed.data.customAmount }
 			);
-			location = result.item.location;
 			itemName = result.item.name;
 			if (!result.finished) {
 				toastKind = 'itemPartiallyConsumed';
@@ -152,7 +150,7 @@ export const actions: Actions = {
 					)
 				: null;
 		let redirectPath = appendActionToast(
-			`/inventory/${location}`,
+			`/item/${event.params.id}/edit`,
 			toastKind,
 			itemName,
 			remainingLabel

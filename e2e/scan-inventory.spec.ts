@@ -39,10 +39,9 @@ test.describe('Scan and inventory', () => {
 		await expect(scanModes).toBeVisible();
 		await expect(scanModes.getByRole('link', { name: /Fler sätt|More ways/i })).toHaveCount(0);
 		await expect(scanModes.getByRole('link', { name: 'Fota in varor' })).toBeVisible();
-		await expect(scanModes.getByRole('link', { name: /Manuellt|Manual/i })).toHaveAttribute(
-			'href',
-			/\/item\/new\?.*mode=photo/
-		);
+		const manualHref = await scanModes.getByRole('link', { name: /Manuellt|Manual/i }).getAttribute('href');
+		expect(manualHref).toMatch(/\/item\/new\?/);
+		expect(decodeURIComponent(manualHref!)).toMatch(/mode=photo/);
 	});
 
 	test('receipt mode has no duplicate all-modes footer', async ({ page }) => {

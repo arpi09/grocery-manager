@@ -129,7 +129,7 @@ test.describe('Inventory mobile UX', () => {
 
 		await expect(sheet).toBeVisible();
 
-		await expect(sheet.getByRole('button', { name: /Delvis|Partial/i })).toBeVisible();
+		await expect(sheet.getByRole('button', { name: /Logga förbrukning|Log usage/i })).toBeVisible();
 
 	});
 
@@ -167,7 +167,7 @@ test.describe('Inventory mobile UX', () => {
 
 		await expect(sheet).toBeVisible({ timeout: 5_000 });
 
-		await expect(sheet.getByRole('button', { name: /Delvis|Partial/i })).toBeVisible();
+		await expect(sheet.getByRole('button', { name: /Logga förbrukning|Log usage/i })).toBeVisible();
 
 	});
 

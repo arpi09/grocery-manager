@@ -2237,6 +2237,8 @@
 		"inviteSent": "Inbjudan skickad — kolla inkorgen"
 	},
 	"consume": {
+		"sectionTitle": "Logga förbrukning",
+		"sectionHelp": "Uppdaterar lagersaldo utan att ändra namn eller plats",
 		"finish": "Slut",
 		"partial": "Delvis…",
 		"finishNamed": "Markera {name} som slut",
@@ -2248,7 +2250,8 @@
 		"presetAll": "Allt",
 		"customLabel": "Egen mängd",
 		"customPlaceholder": "t.ex. 50",
-		"confirm": "Delvis",
+		"confirm": "Logga förbrukning",
+		"invalidAmount": "Ange en giltig mängd",
 		"finishFailed": "Kunde inte markera som slut — försök igen",
 		"undoToastNamed": "{name} markerad som slut",
 		"undoToast": "Vara markerad som slut"

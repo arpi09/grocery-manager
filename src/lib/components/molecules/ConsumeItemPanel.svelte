@@ -13,6 +13,7 @@
 		formId?: string;
 		variant?: 'menu' | 'form';
 		onClose?: () => void;
+		consumeErrors?: Record<string, string[]>;
 	}
 
 	let {
@@ -20,8 +21,18 @@
 		action,
 		formId: formIdProp,
 		variant = 'menu',
-		onClose
+		onClose,
+		consumeErrors = {}
 	}: Props = $props();
+
+	function consumeErrorMessage(field: string): string | null {
+		const code = consumeErrors[field]?.[0];
+		if (!code) return null;
+		if (field === 'consumptionAmount' && code === 'invalid') {
+			return t('consume.invalidAmount');
+		}
+		return code;
+	}
 
 	const formId = $derived(formIdProp ?? `consume-${item.id}`);
 	const stock = $derived(parseNumericQuantity(item.quantity));
@@ -77,6 +88,7 @@
 					inputmode="decimal"
 					placeholder={t('consume.customPlaceholder')}
 					bind:value={customAmount}
+					error={!!consumeErrors.consumptionAmount}
 					oninput={() => {
 						selectedPreset = '';
 					}}
@@ -85,6 +97,9 @@
 					<span class="unit">{item.unit}</span>
 				{/if}
 			</div>
+			{#if consumeErrorMessage('consumptionAmount')}
+				<p class="error">{consumeErrorMessage('consumptionAmount')}</p>
+			{/if}
 		</div>
 	{/if}
 
@@ -135,6 +150,7 @@
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
 		background: var(--color-surface);
+		color: var(--color-text);
 		font-size: 0.78rem;
 		font-weight: 600;
 		cursor: pointer;
@@ -143,7 +159,8 @@
 
 	.preset:has(input:checked) {
 		border-color: var(--color-primary);
-		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+		background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
+		color: var(--color-text);
 	}
 
 	.preset input {
@@ -179,7 +196,9 @@
 		flex-wrap: wrap;
 	}
 
-	.consume-panel--form .actions :global(button[type='submit']) {
-		flex: 1;
+	.error {
+		margin: var(--space-xs) 0 0;
+		font-size: 0.8rem;
+		color: var(--color-danger);
 	}
 </style>

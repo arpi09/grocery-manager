@@ -121,6 +121,37 @@ test.describe('Mobile visual — P0 routes (390×844)', () => {
 		await expectSampledTouchTargets(page, editItemPath);
 		await expectNoCriticalOrSeriousViolations(page, editItemPath);
 	});
+
+	test('/item/[id]/edit — save vs log consumption labels', async ({ page }) => {
+		await loginAsAdmin(page);
+
+		const editItemPath = await resolveEditItemPath(page);
+		await gotoAuthedRoute(page, editItemPath);
+
+		await expect(page.getByRole('button', { name: /Spara ändringar|Save changes/i })).toBeVisible();
+		await expect(
+			page.getByRole('button', { name: /^Delvis$|^Partial$/i })
+		).toHaveCount(0);
+		await expect(
+			page.getByRole('button', { name: /Logga förbrukning|Log usage/i })
+		).toBeVisible();
+	});
+
+	test('/item/[id]/edit — log consumption stays on edit page', async ({ page }) => {
+		await loginAsAdmin(page);
+
+		const editItemPath = await resolveEditItemPath(page);
+		await gotoAuthedRoute(page, editItemPath);
+
+		const consumeSection = page.locator('.consumption-section');
+		await consumeSection.scrollIntoViewIfNeeded();
+		await consumeSection.locator('input[name="consumptionPreset"][value="half"]').check({ force: true });
+		await consumeSection.getByRole('button', { name: /Logga förbrukning|Log usage/i }).click();
+
+		await expect(page).toHaveURL(new RegExp(`${editItemPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\?|$)`), {
+			timeout: 15_000
+		});
+	});
 });
 
 test.describe('Mobile visual — P1 axe routes (390×844)', () => {

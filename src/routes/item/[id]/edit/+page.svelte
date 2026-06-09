@@ -11,6 +11,6 @@
 <AppLayout user={data.user}>
 	<AppHeader title={t('item.editTitle')} />
 	<PageContainer>
-		<AddItemForm item={data.item} errors={form?.errors} />
+		<AddItemForm item={data.item} errors={form?.errors} consumeErrors={form?.consumeErrors} />
 	</PageContainer>
 </AppLayout>

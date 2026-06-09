@@ -25,9 +25,10 @@
 		defaultLocation?: StorageLocation;
 		returnTo?: string;
 		errors?: Record<string, string[]>;
+		consumeErrors?: Record<string, string[]>;
 	}
 
-	let { item, defaultLocation = 'fridge', returnTo, errors = {} }: Props = $props();
+	let { item, defaultLocation = 'fridge', returnTo, errors = {}, consumeErrors = {} }: Props = $props();
 
 	const isEdit = !!item;
 
@@ -280,7 +281,16 @@
 {#if isEdit}
 	<div class="secondary-actions">
 		{#if item}
-			<ConsumeItemPanel {item} action="?/markAsFinished" variant="form" />
+			<section class="consumption-section" aria-labelledby="consumption-section-title">
+				<h2 id="consumption-section-title" class="section-title">{t('consume.sectionTitle')}</h2>
+				<p class="section-help">{t('consume.sectionHelp')}</p>
+				<ConsumeItemPanel
+					{item}
+					action="?/markAsFinished"
+					variant="form"
+					{consumeErrors}
+				/>
+			</section>
 		{/if}
 		<DeleteConfirmButton
 			tier={2}
@@ -373,6 +383,7 @@
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
 		background: var(--color-surface);
+		color: var(--color-text);
 	}
 
 	@media (max-width: 899px) {

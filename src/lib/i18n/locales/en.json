@@ -755,6 +755,8 @@
 		"quantityLeft": "{amount} left"
 	},
 	"consume": {
+		"sectionTitle": "Log usage",
+		"sectionHelp": "Updates stock without changing name or location",
 		"finish": "Finished",
 		"partial": "Partial…",
 		"finishNamed": "Mark {name} as finished",
@@ -766,7 +768,8 @@
 		"presetAll": "All",
 		"customLabel": "Custom amount",
 		"customPlaceholder": "e.g. 50",
-		"confirm": "Partial",
+		"confirm": "Log usage",
+		"invalidAmount": "Enter a valid amount",
 		"finishFailed": "Could not mark as finished — try again",
 		"undoToastNamed": "{name} marked as finished",
 		"undoToast": "Item marked as finished"
