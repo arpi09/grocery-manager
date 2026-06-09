@@ -1,4 +1,3 @@
-import type { LinkedInOAuthTokens } from '$lib/domain/app-settings';
 import type { SocialPost } from '$lib/domain/social-post';
 import type { IAppSettingsRepository } from '$lib/infrastructure/repositories/app-settings.repository';
 import {
