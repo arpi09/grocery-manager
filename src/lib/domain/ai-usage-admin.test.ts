@@ -18,10 +18,10 @@ describe('parseAdminAiUsagePeriodDays', () => {
 describe('adminFreeTierRateLimits', () => {
 	it('maps free tier caps to AI usage kinds', () => {
 		expect(adminFreeTierRateLimits()).toEqual([
-			{ kind: 'ai_scan', limit: 15, period: 'month' },
-			{ kind: 'receipt_pdf', limit: 5, period: 'month' },
-			{ kind: 'smart_fill', limit: 2, period: 'week' },
-			{ kind: 'admin_insights', limit: 20, period: 'week' }
+			{ kind: 'ai_scan', limit: 75, period: 'month' },
+			{ kind: 'receipt_pdf', limit: 25, period: 'month' },
+			{ kind: 'smart_fill', limit: 8, period: 'week' },
+			{ kind: 'admin_insights', limit: 40, period: 'week' }
 		]);
 	});
 });
