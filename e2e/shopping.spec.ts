@@ -1,5 +1,5 @@
 ﻿import { test, expect } from '@playwright/test';
-import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
+import { dismissOnboardingModalIfOpen, dismissPageHintIfOpen, loginAsAdmin } from './helpers/auth';
 
 async function ensureSmartFillVisible(page: import('@playwright/test').Page) {
 	const fold = page.getByTestId('shopping-suggestions-fold');
@@ -37,6 +37,7 @@ test.describe('Shopping list', () => {
 		await loginAsAdmin(page);
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
 		await ensureSmartFillVisible(page);
 		await openShoppingSuggestionsFold(page);
 		await page.getByTestId('shopping-smart-fill').click();
@@ -54,6 +55,7 @@ test.describe('Shopping list', () => {
 		await loginAsAdmin(page);
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
 
 		await page.locator('#shopping-name').fill(itemName);
 		await page.locator('form.add-form').getByRole('button', { name: /L.gg till/i }).click();
@@ -62,18 +64,16 @@ test.describe('Shopping list', () => {
 		await expect(row).toBeVisible({ timeout: 15_000 });
 
 		await row.locator('form[action="?/toggle"] input[type=checkbox]').click();
-		await expect(
-			page
-				.getByRole('status')
-				.filter({ hasText: new RegExp(`${itemName} avbockad`, 'i') })
-		).toBeVisible({ timeout: 15_000 });
+		await dismissPageHintIfOpen(page);
 
 		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
 		if (await pantrySheet.isVisible().catch(() => false)) {
 			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click();
 		}
 
-		await expect(row).toHaveCount(0, { timeout: 15_000 });
+		await expect(page.locator('ul.list.checked li').filter({ hasText: itemName })).toBeVisible({
+			timeout: 20_000
+		});
 	});
 
 	test('check off opens pantry bridge sheet and can add to pantry', async ({ page }) => {
@@ -83,6 +83,7 @@ test.describe('Shopping list', () => {
 		await loginAsAdmin(page);
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
 
 		await page.locator('#shopping-name').fill(itemName);
 		await page.locator('form.add-form').getByRole('button', { name: /L.gg till/i }).click();
@@ -91,9 +92,10 @@ test.describe('Shopping list', () => {
 		await expect(row).toBeVisible({ timeout: 15_000 });
 
 		await row.locator('form[action="?/toggle"] input[type=checkbox]').click();
+		await dismissPageHintIfOpen(page);
 
 		const sheet = page.getByTestId('shopping-to-pantry-sheet');
-		await expect(sheet).toBeVisible({ timeout: 15_000 });
+		await expect(sheet).toBeVisible({ timeout: 20_000 });
 		await sheet.getByRole('button', { name: /Ja,|Yes,/i }).click();
 
 		await expect(

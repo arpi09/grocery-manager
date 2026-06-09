@@ -3,9 +3,14 @@ export const OVERLAY_STACK_CHANGED_EVENT = 'home-pantry-overlay-stack-changed';
 let blockingOverlayCount = 0;
 
 function notifyOverlayStackChanged(): void {
-	if (typeof window !== 'undefined') {
-		window.dispatchEvent(new Event(OVERLAY_STACK_CHANGED_EVENT));
+	if (typeof window === 'undefined') {
+		return;
 	}
+
+	// Defer so overlay registration effects can finish before PMF re-evaluates.
+	queueMicrotask(() => {
+		window.dispatchEvent(new Event(OVERLAY_STACK_CHANGED_EVENT));
+	});
 }
 
 export function getBlockingOverlayCount(): number {
