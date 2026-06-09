@@ -3,7 +3,7 @@
 Home Pantry sends transactional email via [Resend](https://resend.com):
 
 - **Household invites** when an owner invites someone by email
-- **Expiry reminders** (weekly cron) for users who opt in under Settings
+- **Expiry reminders** (weekly cron + session-scoped hook) for users who opt in under Settings
 - **PMF weekly digest** (Monday cron) to owner — see [PMF_WEEKLY.md](./PMF_WEEKLY.md#automation)
 
 ## Global kill switch (default: off)
@@ -18,6 +18,15 @@ Outbound email is **disabled by default**. Nothing is sent via Resend until an a
 Both must allow sending: admin toggle **on** and `EMAIL_SENDING_DISABLED` **not** set to `true`.
 
 When disabled, `sendEmail` returns early (warn log only). Invites still work — copy the invite link from Settings. Expiry reminder cron does not fail loudly; push notifications still deliver if enabled.
+
+### Expiry reminder dedup
+
+- **Interval:** At most one digest per user per 7 calendar days (`expiry_reminder_last_sent_at`).
+- **Cron:** `POST /api/cron/expiry-reminders` (Monday 07:00 UTC) — primary prod trigger.
+- **Hook:** On authenticated requests, at most **once per browser session** (cookie `hp_expiry_reminder_checked`, httpOnly). Same service path as cron.
+- **Atomic claim:** `tryClaimReminderSend` conditional UPDATE prevents parallel sends (race from multi-tab or cron + session). Reverts claim if all channels fail.
+
+See [EMAIL_DEDUP_AUDIT.md](./EMAIL_DEDUP_AUDIT.md) for the duplicate-email investigation.
 
 **Exception:** `sendOwnerPmfDigest()` (PMF weekly cron) bypasses the kill switch when `PMF_DIGEST_TO` is set — owner digest only, not user invites. Requires `RESEND_API_KEY` and verified `RESEND_FROM` (`hello@skaffu.com`).
 

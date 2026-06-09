@@ -1,9 +1,5 @@
 import { buildEatFirstWeekUrl } from '$lib/domain/eat-first-week';
-import {
-	expiryWindowEndDateIso,
-	shouldSendExpiryReminder,
-	type ExpiryReminderDays
-} from '$lib/domain/expiry-reminder';
+import { expiryWindowEndDateIso, type ExpiryReminderDays } from '$lib/domain/expiry-reminder';
 import type { InventoryItem } from '$lib/domain/inventory-item';
 import { daysUntilAutoExpiredMove, type AutoExpiredGraceDays } from '$lib/domain/auto-expired';
 import { daysUntilExpiry, formatExpiryDate } from '$lib/domain/expiry';
@@ -101,15 +97,16 @@ export class ExpiryReminderService {
 			return { status: 'skipped', reason: 'disabled' };
 		}
 
-		if (!shouldSendExpiryReminder(user.settings.lastSentAt)) {
-			return { status: 'skipped', reason: 'recent' };
-		}
-
 		const sections = await this.buildHouseholdSections(user.id, user.settings.days);
 		const itemCount = sections.reduce((sum, section) => sum + section.items.length, 0);
 		if (itemCount === 0) {
 			await this.repository.markReminderSent(user.id);
 			return { status: 'skipped', reason: 'no_items' };
+		}
+
+		const claim = await this.repository.tryClaimReminderSend(user.id);
+		if (!claim.claimed) {
+			return { status: 'skipped', reason: 'recent' };
 		}
 
 		let sentAny = false;
@@ -161,10 +158,10 @@ export class ExpiryReminderService {
 		}
 
 		if (sentAny) {
-			await this.repository.markReminderSent(user.id);
 			return { status: 'sent', itemCount };
 		}
 
+		await this.repository.revertReminderSendClaim(user.id, claim.previousLastSentAt);
 		return { status: 'failed', reason: failures.join('; ') || 'No delivery channel succeeded' };
 	}
 

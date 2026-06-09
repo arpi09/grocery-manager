@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { InventoryItem } from '$lib/domain/inventory-item';
 import {
 	filterItemsExpiringWithinDays,
+	expiryReminderClaimCutoff,
 	isWithinExpiryWindow,
 	normalizeExpiryReminderDays,
 	shouldSendExpiryReminder
@@ -60,6 +61,16 @@ describe('expiry-reminder domain', () => {
 		expect(shouldSendExpiryReminder(null, today)).toBe(true);
 		expect(shouldSendExpiryReminder(new Date(2026, 4, 29), today)).toBe(false);
 		expect(shouldSendExpiryReminder(new Date(2026, 4, 22), today)).toBe(true);
+	});
+
+	it('expiryReminderClaimCutoff aligns with shouldSendExpiryReminder', () => {
+		const eligible = new Date(2026, 4, 22);
+		expect(shouldSendExpiryReminder(eligible, today)).toBe(true);
+		expect(eligible.getTime()).toBeLessThanOrEqual(expiryReminderClaimCutoff(today).getTime());
+
+		const recent = new Date(2026, 4, 29);
+		expect(shouldSendExpiryReminder(recent, today)).toBe(false);
+		expect(recent.getTime()).toBeGreaterThan(expiryReminderClaimCutoff(today).getTime());
 	});
 
 	it('normalizeExpiryReminderDays falls back to default', () => {

@@ -43,6 +43,10 @@ import { writeThemeCookie } from '$lib/infrastructure/theme-cookie';
 import { writeLocaleCookie } from '$lib/infrastructure/locale-cookie';
 import { resolveLocaleForRequest } from '$lib/server/locale';
 import { expiryReminderService } from '$lib/server/di';
+import {
+	hasExpiryReminderChecked,
+	markExpiryReminderChecked
+} from '$lib/infrastructure/expiry-reminder-cookie';
 import { DEFAULT_PLAN_TIER } from '$lib/domain/plan';
 import { isMarketingPath, isExpiringSharePath } from '$lib/marketing/routes';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
@@ -169,10 +173,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (event.locals.user) {
 		await recordUserActivity(event.locals.user.id);
-		void expiryReminderService.maybeSendReminderForUser(event.locals.user.id).catch((error) => {
-			const message = error instanceof Error ? error.message : String(error);
-			console.warn(`[expiry-reminder] login check failed for ${event.locals.user!.id}: ${message}`);
-		});
+		if (!hasExpiryReminderChecked(event.cookies)) {
+			markExpiryReminderChecked(event.cookies);
+			void expiryReminderService.maybeSendReminderForUser(event.locals.user.id).catch((error) => {
+				const message = error instanceof Error ? error.message : String(error);
+				console.warn(
+					`[expiry-reminder] session expiry check failed for ${event.locals.user!.id}: ${message}`
+				);
+			});
+		}
 		event.locals.householdId = await resolveHouseholdId(
 			event.locals.householdService,
 			event.locals.user.id

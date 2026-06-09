@@ -1,8 +1,10 @@
-import { eq, or } from 'drizzle-orm';
+import { and, eq, isNull, or, sql } from 'drizzle-orm';
 import { db } from '$lib/infrastructure/db';
 import { userTable } from '$lib/infrastructure/db/schema';
 import {
 	DEFAULT_EXPIRY_REMINDER_DAYS,
+	EXPIRY_REMINDER_INTERVAL_DAYS,
+	expiryReminderClaimCutoff,
 	normalizeExpiryReminderDays,
 	type ExpiryReminderDays
 } from '$lib/domain/expiry-reminder';
@@ -21,12 +23,23 @@ export interface ExpiryReminderUser {
 	pushNotificationsEnabled: boolean;
 }
 
+export interface ReminderSendClaimResult {
+	claimed: boolean;
+	previousLastSentAt: Date | null;
+}
+
 export interface IExpiryReminderRepository {
 	getSettings(userId: string): Promise<ExpiryReminderSettings>;
 	updateSettings(userId: string, settings: { enabled: boolean; days: ExpiryReminderDays }): Promise<void>;
 	listOptedInUsers(): Promise<ExpiryReminderUser[]>;
 	findUserById(userId: string): Promise<ExpiryReminderUser | null>;
 	markReminderSent(userId: string, sentAt?: Date): Promise<void>;
+	tryClaimReminderSend(
+		userId: string,
+		sentAt?: Date,
+		intervalDays?: number
+	): Promise<ReminderSendClaimResult>;
+	revertReminderSendClaim(userId: string, previousLastSentAt: Date | null): Promise<void>;
 }
 
 function mapSettings(row: {
@@ -137,6 +150,47 @@ export class DrizzleExpiryReminderRepository implements IExpiryReminderRepositor
 		await db
 			.update(userTable)
 			.set({ expiryReminderLastSentAt: sentAt })
+			.where(eq(userTable.id, userId));
+	}
+
+	async tryClaimReminderSend(
+		userId: string,
+		sentAt = new Date(),
+		intervalDays = EXPIRY_REMINDER_INTERVAL_DAYS
+	): Promise<ReminderSendClaimResult> {
+		const [current] = await db
+			.select({ expiryReminderLastSentAt: userTable.expiryReminderLastSentAt })
+			.from(userTable)
+			.where(eq(userTable.id, userId))
+			.limit(1);
+
+		const previousLastSentAt = current?.expiryReminderLastSentAt ?? null;
+		const cutoff = expiryReminderClaimCutoff(sentAt, intervalDays);
+
+		const updated = await db
+			.update(userTable)
+			.set({ expiryReminderLastSentAt: sentAt })
+			.where(
+				and(
+					eq(userTable.id, userId),
+					or(
+						isNull(userTable.expiryReminderLastSentAt),
+						sql`date_trunc('day', ${userTable.expiryReminderLastSentAt}) <= ${cutoff}`
+					)
+				)
+			)
+			.returning();
+
+		return {
+			claimed: updated.length > 0,
+			previousLastSentAt
+		};
+	}
+
+	async revertReminderSendClaim(userId: string, previousLastSentAt: Date | null): Promise<void> {
+		await db
+			.update(userTable)
+			.set({ expiryReminderLastSentAt: previousLastSentAt })
 			.where(eq(userTable.id, userId));
 	}
 }

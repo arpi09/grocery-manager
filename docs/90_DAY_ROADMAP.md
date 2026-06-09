@@ -72,9 +72,9 @@ Levererat — se *Punkt 2 — levererat* ovan och [ROADMAP.md § Fas 0](./ROADMA
 - **Opt-in:** Inställningar → "Påminnelser om utgående varor" (e-post av som standard)
 - **Tröskel:** 3 eller 7 dagar innan utgång (standard 7)
 - **Innehåll:** Svensk HTML-e-post (Resend) med varor per hushåll användaren tillhör + CTA till `/hem`
-- **Intervall:** Max en digest per 7 dagar och användare (`expiry_reminder_last_sent_at`)
+- **Intervall:** Max en digest per 7 dagar och användare (`expiry_reminder_last_sent_at`), atomisk claim i DB
 - **Prod-trigger:** Schemalagd `POST /api/cron/expiry-reminders` med `Authorization: Bearer $CRON_SECRET` — workflow [`.github/workflows/expiry-reminders-cron.yml`](../.github/workflows/expiry-reminders-cron.yml) (måndag 07:00 UTC) eller t.ex. Cloud Scheduler
-- **Dev/fallback:** Vid inloggning körs samma veckovisa kontroll i bakgrunden (om ≥7 dagar sedan senaste)
+- **Dev/fallback:** Vid inloggning körs samma veckovisa kontroll **en gång per session** (cookie `hp_expiry_reminder_checked`) i bakgrunden (om ≥7 dagar sedan senaste och atomisk claim lyckas)
 - **Env (Firebase App Hosting):** `RESEND_API_KEY`, `RESEND_FROM`, `CRON_SECRET`, `PUBLIC_ORIGIN`/`ORIGIN` (länkar i mejl)
 - **Tester:** `expiry-reminder.test.ts` för urvalslogik
 

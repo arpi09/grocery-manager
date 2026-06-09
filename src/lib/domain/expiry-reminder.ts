@@ -56,6 +56,16 @@ export function shouldSendExpiryReminder(
 	return diffDays >= intervalDays;
 }
 
+/** Calendar-day cutoff for atomic send claims (matches shouldSendExpiryReminder). */
+export function expiryReminderClaimCutoff(
+	now = new Date(),
+	intervalDays = EXPIRY_REMINDER_INTERVAL_DAYS
+): Date {
+	const cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+	cutoff.setDate(cutoff.getDate() - intervalDays);
+	return cutoff;
+}
+
 export function expiryWindowEndDateIso(daysBefore: number, today = new Date()): string {
 	const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 	end.setDate(end.getDate() + daysBefore);
