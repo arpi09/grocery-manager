@@ -99,7 +99,7 @@ describe('Scan bulkCreate integration', () => {
 			bulkFlow: 'photo',
 			returnTo: '/hem',
 			selected: ['0'],
-			name_0: 'E2E Foto vara',
+			name_0: 'E2E Mjölk foto',
 			quantity_0: '2',
 			unit_0: 'st',
 			location_0: 'fridge'
@@ -112,7 +112,43 @@ describe('Scan bulkCreate integration', () => {
 		expect(redirect.location).toContain('scan=added');
 
 		const listed = await inventoryService.listByLocation(householdId, 'fridge');
-		expect(listed.some((item) => item.name === 'E2E Foto vara')).toBe(true);
+		const created = listed.find((item) => item.name === 'E2E Mjölk foto');
+		expect(created).toBeDefined();
+		expect(created!.expiresOn).not.toBeNull();
+		expect(created!.expiresOnSource).toBe('ai_inferred');
+	});
+
+	it('photo bulkCreate saves explicit expiresOn and notes', async () => {
+		await integrationDb.seedUser({ id: 'user-photo-expiry', email: 'photo-expiry@example.com' });
+		const householdId = await integrationDb.seedHousehold({
+			name: 'Photo expiry household',
+			members: [{ userId: 'user-photo-expiry', role: 'owner' }]
+		});
+
+		const request = bulkCreateRequest({
+			bulkFlow: 'photo',
+			returnTo: '/hem',
+			selected: ['0'],
+			name_0: 'E2E Mjölk',
+			quantity_0: '1',
+			unit_0: 'l',
+			location_0: 'fridge',
+			expiresOn_0: '2026-08-01',
+			notes_0: 'Arla 3%'
+		});
+
+		await expectRedirectTo(
+			invokeBulkCreate(scanEvent(request, { id: 'user-photo-expiry' }, householdId)),
+			'/hem'
+		);
+
+		const listed = await inventoryService.listByLocation(householdId, 'fridge');
+		const created = listed.find((item) => item.name === 'E2E Mjölk');
+		expect(created).toMatchObject({
+			expiresOn: '2026-08-01',
+			expiresOnSource: 'user_set',
+			notes: 'Arla 3%'
+		});
 	});
 
 	it('receipt bulkCreate records purchases and redirects', async () => {

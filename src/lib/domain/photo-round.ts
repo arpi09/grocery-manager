@@ -8,6 +8,8 @@ export interface PhotoRoundDetectedItem {
 	unit: string | null;
 	confidence: PhotoRoundConfidence;
 	location: StorageLocation;
+	expiresOn: string | null;
+	notes: string | null;
 }
 
 export interface PhotoRoundParseResult {

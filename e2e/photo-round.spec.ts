@@ -65,6 +65,9 @@ test.describe('Photo round flow', () => {
 
 		await expect(page.getByTestId('photo-round-review')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('photo-round-line-0')).toBeVisible();
+		await expect(page.getByTestId('photo-round-line-expires-0')).toBeVisible();
+		await expect(page.getByTestId('photo-round-line-expires-0')).toHaveValue('2026-06-15');
+		await expect(page.getByTestId('photo-round-line-notes-0')).toHaveValue('Arla 3%');
 
 		const bulkDone = page.waitForResponse(
 			(res) =>

@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+	coerceExpiresOn,
 	normalizePhotoRoundPayload,
 	parsePhotoRoundItems,
 	parsePhotoRoundResponse,
 	parsePhotoRoundZoneHint,
 	PHOTO_ROUND_ITEMS_SCHEMA,
+	PHOTO_ROUND_VALIDATION_PROMPT,
 	photoRoundSystemPrompt
 } from './photo-round-parse';
 
@@ -39,6 +41,14 @@ describe('PHOTO_ROUND_ITEMS_SCHEMA', () => {
 	it('lists every property as required for OpenAI strict json_schema', () => {
 		assertStrictOpenAiSchema(PHOTO_ROUND_ITEMS_SCHEMA);
 	});
+
+	it('includes expiresOn and notes on each item', () => {
+		const itemSchema = PHOTO_ROUND_ITEMS_SCHEMA.properties.items.items as unknown as {
+			required: readonly string[];
+		};
+		expect(itemSchema.required).toContain('expiresOn');
+		expect(itemSchema.required).toContain('notes');
+	});
 });
 
 describe('photoRoundSystemPrompt', () => {
@@ -54,6 +64,31 @@ describe('photoRoundSystemPrompt', () => {
 		expect(prompt).toContain('detectedZone');
 		expect(prompt).toContain('Identifiera zonen');
 	});
+
+	it('includes unit volume and expiry rules', () => {
+		const prompt = photoRoundSystemPrompt('fridge');
+		expect(prompt).toContain('netto');
+		expect(prompt).toContain('expiresOn');
+		expect(prompt).toContain('INTE st');
+	});
+});
+
+describe('PHOTO_ROUND_VALIDATION_PROMPT', () => {
+	it('tells model not to add new items', () => {
+		expect(PHOTO_ROUND_VALIDATION_PROMPT).toContain('Lägg INTE till');
+	});
+});
+
+describe('coerceExpiresOn', () => {
+	it('accepts valid YYYY-MM-DD dates', () => {
+		expect(coerceExpiresOn('2026-06-15')).toBe('2026-06-15');
+	});
+
+	it('rejects invalid dates and formats', () => {
+		expect(coerceExpiresOn('15/06/2026')).toBeNull();
+		expect(coerceExpiresOn('2026-02-30')).toBeNull();
+		expect(coerceExpiresOn('')).toBeNull();
+	});
 });
 
 describe('parsePhotoRoundZoneHint', () => {
@@ -66,7 +101,7 @@ describe('parsePhotoRoundZoneHint', () => {
 });
 
 describe('parsePhotoRoundItems', () => {
-	it('parses structured items with per-item location', () => {
+	it('parses structured items with per-item location, expiry and notes', () => {
 		expect(
 			parsePhotoRoundItems(
 				{
@@ -78,14 +113,18 @@ describe('parsePhotoRoundItems', () => {
 							quantity: '2',
 							unit: 'l',
 							confidence: 'high',
-							location: 'fridge'
+							location: 'fridge',
+							expiresOn: '2026-06-15',
+							notes: 'Arla 3%'
 						},
 						{
 							name: 'Pasta',
 							quantity: '1',
 							unit: '',
 							confidence: 'medium',
-							location: 'cupboard'
+							location: 'cupboard',
+							expiresOn: '',
+							notes: ''
 						}
 					]
 				},
@@ -97,15 +136,76 @@ describe('parsePhotoRoundItems', () => {
 				quantity: '2',
 				unit: 'l',
 				confidence: 'high',
-				location: 'fridge'
+				location: 'fridge',
+				expiresOn: '2026-06-15',
+				notes: 'Arla 3%'
 			},
 			{
 				name: 'Pasta',
 				quantity: '1',
-				unit: null,
+				unit: 'g',
 				confidence: 'medium',
-				location: 'cupboard'
+				location: 'cupboard',
+				expiresOn: null,
+				notes: null
 			}
+		]);
+	});
+
+	it('suggests unit from name when model returns st for liquids', () => {
+		expect(
+			parsePhotoRoundItems(
+				{
+					detectedZone: 'fridge',
+					zoneConfidence: 'high',
+					items: [
+						{
+							name: 'Mjölk',
+							quantity: '1',
+							unit: 'st',
+							confidence: 'high',
+							location: 'fridge',
+							expiresOn: '',
+							notes: ''
+						}
+					]
+				},
+				'fridge'
+			)
+		).toEqual([
+			expect.objectContaining({
+				name: 'Mjölk',
+				unit: 'l'
+			})
+		]);
+	});
+
+	it('parses gram from combined quantity hint in unit field', () => {
+		expect(
+			parsePhotoRoundItems(
+				{
+					detectedZone: 'cupboard',
+					zoneConfidence: 'high',
+					items: [
+						{
+							name: 'Pasta penne',
+							quantity: '500',
+							unit: 'g',
+							confidence: 'high',
+							location: 'cupboard',
+							expiresOn: '',
+							notes: ''
+						}
+					]
+				},
+				'cupboard'
+			)
+		).toEqual([
+			expect.objectContaining({
+				name: 'Pasta penne',
+				quantity: '500',
+				unit: 'g'
+			})
 		]);
 	});
 
@@ -115,7 +215,17 @@ describe('parsePhotoRoundItems', () => {
 				{
 					detectedZone: 'cupboard',
 					zoneConfidence: 'high',
-					items: [{ name: 'Bröd', quantity: '1', unit: '', confidence: 'medium', location: '' }]
+					items: [
+						{
+							name: 'Bröd',
+							quantity: '1',
+							unit: '',
+							confidence: 'medium',
+							location: '',
+							expiresOn: '',
+							notes: ''
+						}
+					]
 				},
 				'fridge'
 			)
@@ -123,9 +233,11 @@ describe('parsePhotoRoundItems', () => {
 			{
 				name: 'Bröd',
 				quantity: '1',
-				unit: null,
+				unit: 'st',
 				confidence: 'medium',
-				location: 'fridge'
+				location: 'fridge',
+				expiresOn: null,
+				notes: null
 			}
 		]);
 	});
@@ -142,14 +254,18 @@ describe('parsePhotoRoundItems', () => {
 							quantity: '1',
 							unit: '',
 							confidence: 'high',
-							location: 'fridge'
+							location: 'fridge',
+							expiresOn: '',
+							notes: ''
 						},
 						{
 							name: 'mjölk',
 							quantity: '2',
 							unit: '',
 							confidence: 'low',
-							location: 'fridge'
+							location: 'fridge',
+							expiresOn: '',
+							notes: ''
 						}
 					]
 				},
@@ -181,7 +297,9 @@ describe('parsePhotoRoundResponse', () => {
 							quantity: '1',
 							unit: 'l',
 							confidence: 'high',
-							location: 'fridge'
+							location: 'fridge',
+							expiresOn: '2026-06-01',
+							notes: ''
 						}
 					]
 				},
@@ -196,7 +314,9 @@ describe('parsePhotoRoundResponse', () => {
 					quantity: '1',
 					unit: 'l',
 					confidence: 'high',
-					location: 'fridge'
+					location: 'fridge',
+					expiresOn: '2026-06-01',
+					notes: null
 				}
 			]
 		});
@@ -209,7 +329,17 @@ describe('normalizePhotoRoundPayload', () => {
 			normalizePhotoRoundPayload({
 				detectedZone: 'fridge',
 				zoneConfidence: 'nope',
-				items: [{ name: 'Ägg', quantity: '', unit: null, confidence: 'nope', location: 'fridge' }]
+				items: [
+					{
+						name: 'Ägg',
+						quantity: '',
+						unit: null,
+						confidence: 'nope',
+						location: 'fridge',
+						expiresOn: 'bad',
+						notes: '  '
+					}
+				]
 			})
 		).toEqual({
 			detectedZone: 'fridge',
@@ -217,9 +347,11 @@ describe('normalizePhotoRoundPayload', () => {
 				{
 					name: 'Ägg',
 					quantity: '1',
-					unit: '',
+					unit: 'st',
 					confidence: 'low',
-					location: 'fridge'
+					location: 'fridge',
+					expiresOn: '',
+					notes: ''
 				}
 			]
 		});

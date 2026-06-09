@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteSafetyModal from '$lib/components/molecules/DeleteSafetyModal.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
@@ -10,6 +11,7 @@
 	import type { PhotoRoundConfidence, PhotoRoundDetectedItem } from '$lib/domain/photo-round';
 	import { PHOTO_ROUND_MAX_IMAGES, PHOTO_ROUND_MAX_TOTAL_BYTES } from '$lib/domain/photo-round';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
+	import { guessShelfLife } from '$lib/domain/shelf-life';
 	import { getLocale, t } from '$lib/i18n';
 	import { manualAddHref } from '$lib/utils/scan-nav';
 	import { locationLabel } from '$lib/i18n/domain-labels';
@@ -46,7 +48,10 @@ import {
 
 	type Step = 'capture' | 'review';
 
-	type ReviewLine = PhotoRoundDetectedItem & { id: number };
+	type ReviewLine = PhotoRoundDetectedItem & {
+		id: number;
+		expiresOnAiInferred: boolean;
+	};
 
 	let step = $state<Step>('capture');
 	const rememberedLocation = getLastPhotoRoundLocation();
@@ -64,6 +69,7 @@ import {
 	let mergeCandidates = $state<Record<number, MergeCandidateMatch | null>>({});
 	let mergeSelected = $state<Record<number, boolean>>({});
 	let sameAsLastTime = $state(Boolean(rememberedLocation && !initialLocation));
+	let showFewItemsHint = $state(false);
 
 	const manualAddLink = $derived(
 		manualAddHref(returnTo, initialLocation ? { location: initialLocation } : undefined)
@@ -159,6 +165,26 @@ import {
 		}
 	}
 
+	function reviewLineFromDetected(item: PhotoRoundDetectedItem): ReviewLine {
+		const id = nextLineId++;
+		let expiresOn = item.expiresOn ?? '';
+		let expiresOnAiInferred = false;
+		if (!expiresOn) {
+			const inferred = guessShelfLife(item.name, item.location);
+			if (inferred) {
+				expiresOn = inferred.expiresOn;
+				expiresOnAiInferred = true;
+			}
+		}
+		return {
+			...item,
+			id,
+			expiresOn: expiresOn || null,
+			notes: item.notes ?? null,
+			expiresOnAiInferred
+		};
+	}
+
 	async function analyzePhotos() {
 		if (photos.length === 0) return;
 
@@ -203,10 +229,9 @@ import {
 				zoneConfidence = data.zoneConfidence ?? 'medium';
 			}
 
-			lines = data.items.map((item) => {
-				const id = nextLineId++;
-				return { ...item, id };
-			});
+			const photoCount = photos.length;
+			showFewItemsHint = photoCount === 1 && data.items.length < 5;
+			lines = data.items.map((item) => reviewLineFromDetected(item));
 			selected = Object.fromEntries(lines.map((line) => [line.id, true]));
 			revokePreviews();
 			photos = [];
@@ -264,6 +289,7 @@ import {
 		mergeCandidates = {};
 		mergeSelected = {};
 		parseError = null;
+		showFewItemsHint = false;
 		step = 'capture';
 		zone = initialLocation ?? 'fridge';
 		if (!initialLocation) {
@@ -283,12 +309,16 @@ import {
 			formData.delete(`quantity_${key}`);
 			formData.delete(`unit_${key}`);
 			formData.delete(`location_${key}`);
+			formData.delete(`expiresOn_${key}`);
+			formData.delete(`notes_${key}`);
 			if (!selected[line.id]) continue;
 			formData.append('selected', key);
 			formData.set(`name_${key}`, line.name);
 			formData.set(`quantity_${key}`, line.quantity);
 			formData.set(`unit_${key}`, line.unit ?? '');
 			formData.set(`location_${key}`, line.location);
+			formData.set(`expiresOn_${key}`, line.expiresOn ?? '');
+			formData.set(`notes_${key}`, line.notes ?? '');
 		}
 		savePhotoRoundLocations(
 			lines.filter((line) => selected[line.id]).map((line) => ({ name: line.name, location: line.location }))
@@ -304,6 +334,9 @@ import {
 {#if step === 'capture'}
 	<section data-testid="photo-round-capture">
 		<p class="lead" data-testid="photo-round-lead">{captureLead}</p>
+		{#if photos.length === 1 && zone === 'fridge'}
+			<p class="hint" data-testid="photo-round-multi-photo-hint">{t('photoRound.multiPhotoFridgeHint')}</p>
+		{/if}
 		<p class="privacy">{t('photoRound.privacyNote')}</p>
 
 		{#if photos.length > 0}
@@ -394,6 +427,9 @@ import {
 		</h2>
 		<p class="hint">{t('photoRound.reviewHint')}</p>
 		<p class="hint"><a href={manualAddLink}>{t('photoRound.missingItemLink')}</a></p>
+		{#if showFewItemsHint}
+			<FeedbackBanner tone="info" message={t('photoRound.fewItemsHint')} />
+		{/if}
 		{#if !initialLocation && zoneConfidence && zoneConfidence !== 'high'}
 			<FeedbackBanner tone="info" message={t('photoRound.zoneUncertain', { zone: locationLabel(getLocale(), zone) })} />
 		{/if}
@@ -496,6 +532,54 @@ import {
 									{/each}
 								</select>
 							</label>
+							<label>
+								<div class="expiry-label-row">
+									<span>{t('photoRound.fieldExpiresOn')}</span>
+									{#if line.expiresOnAiInferred && line.expiresOn}
+										<Badge tone="default">{t('inventory.aiExpiryBadge')}</Badge>
+									{/if}
+								</div>
+								<input
+									type="date"
+									data-testid="photo-round-line-expires-{index}"
+									value={line.expiresOn ?? ''}
+									oninput={(e) =>
+										updateLine(line.id, {
+											expiresOn: (e.currentTarget as HTMLInputElement).value || null,
+											expiresOnAiInferred: false
+										})}
+								/>
+							</label>
+							{#if line.confidence === 'low'}
+								<details class="notes-details">
+									<summary>{t('photoRound.fieldNotes')}</summary>
+									<label>
+										<span class="sr-only">{t('photoRound.fieldNotes')}</span>
+										<input
+											type="text"
+											data-testid="photo-round-line-notes-{index}"
+											value={line.notes ?? ''}
+											oninput={(e) =>
+												updateLine(line.id, {
+													notes: (e.currentTarget as HTMLInputElement).value || null
+												})}
+										/>
+									</label>
+								</details>
+							{:else}
+								<label>
+									<span>{t('photoRound.fieldNotes')}</span>
+									<input
+										type="text"
+										data-testid="photo-round-line-notes-{index}"
+										value={line.notes ?? ''}
+										oninput={(e) =>
+											updateLine(line.id, {
+												notes: (e.currentTarget as HTMLInputElement).value || null
+											})}
+									/>
+								</label>
+							{/if}
 						</div>
 						{#if mergeCandidates[line.id]}
 							<label class="merge-hint">
@@ -520,6 +604,8 @@ import {
 							<input type="hidden" name={`quantity_${line.id}`} value={line.quantity} />
 							<input type="hidden" name={`unit_${line.id}`} value={line.unit ?? ''} />
 							<input type="hidden" name={`location_${line.id}`} value={line.location} />
+							<input type="hidden" name={`expiresOn_${line.id}`} value={line.expiresOn ?? ''} />
+							<input type="hidden" name={`notes_${line.id}`} value={line.notes ?? ''} />
 							{#if mergeSelected[line.id] && mergeCandidates[line.id]}
 								<input type="hidden" name={`merge_${line.id}`} value={mergeCandidates[line.id]!.id} />
 							{/if}
@@ -750,6 +836,35 @@ import {
 		padding: 0.45rem 0.55rem;
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-border);
+	}
+
+	.expiry-label-row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-xs);
+		flex-wrap: wrap;
+	}
+
+	.notes-details {
+		font-size: 0.85rem;
+	}
+
+	.notes-details summary {
+		cursor: pointer;
+		color: var(--color-text-muted);
+		margin-bottom: 0.2rem;
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 
 	.actions {

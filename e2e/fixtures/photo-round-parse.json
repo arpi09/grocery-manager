@@ -7,14 +7,18 @@
 			"quantity": "1",
 			"unit": "l",
 			"confidence": "high",
-			"location": "fridge"
+			"location": "fridge",
+			"expiresOn": "2026-06-15",
+			"notes": "Arla 3%"
 		},
 		{
 			"name": "Ägg",
 			"quantity": "12",
 			"unit": "st",
 			"confidence": "medium",
-			"location": "fridge"
+			"location": "fridge",
+			"expiresOn": "",
+			"notes": ""
 		}
 	]
 }

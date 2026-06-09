@@ -1,6 +1,9 @@
 import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
 import { canEditInventory } from '$lib/domain/household';
+import type { ExpiresOnSource } from '$lib/domain/auto-expired';
 import { isStorageLocation, type StorageLocation } from '$lib/domain/location';
+import { guessShelfLife } from '$lib/domain/shelf-life';
+import { coerceExpiresOn } from '$lib/server/photo-round-parse';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { receiptLineToInventoryAmount } from '$lib/server/receipt-parse';
 import { itemSchema } from '$lib/validation/inventory.schemas';
@@ -95,6 +98,25 @@ async function bulkCreateFromForm(
 		const mergeIntoId =
 			typeof mergeIntoIdRaw === 'string' && mergeIntoIdRaw.trim() ? mergeIntoIdRaw.trim() : null;
 
+		const expiresOnRaw = formData.get(`expiresOn_${index}`);
+		let expiresOn =
+			typeof expiresOnRaw === 'string' && expiresOnRaw.trim()
+				? coerceExpiresOn(expiresOnRaw.trim())
+				: null;
+		let expiresOnSource: ExpiresOnSource | null = expiresOn ? 'user_set' : null;
+
+		if (!expiresOn) {
+			const inferred = guessShelfLife(name.trim(), location);
+			if (inferred) {
+				expiresOn = inferred.expiresOn;
+				expiresOnSource = 'ai_inferred';
+			}
+		}
+
+		const notesRaw = formData.get(`notes_${index}`);
+		const notes =
+			typeof notesRaw === 'string' && notesRaw.trim() ? notesRaw.trim() : null;
+
 		await event.locals.inventoryService.createItem(
 			event.locals.householdId!,
 			event.locals.user!.id,
@@ -103,8 +125,10 @@ async function bulkCreateFromForm(
 				location,
 				quantity,
 				unit,
-				expiresOn: null,
-				notes: null,
+				expiresOn,
+				expiresOnSource,
+				notes,
+				inferExpiry: false,
 				mergeIntoId
 			},
 			event.locals.householdRole!

@@ -1,4 +1,5 @@
 import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
+import { suggestUnitForName } from '$lib/domain/inventory-units';
 import type { StorageLocation } from '$lib/domain/location';
 import { isStorageLocation } from '$lib/domain/location';
 import type {
@@ -16,6 +17,16 @@ import {
 
 const LOCATION_ENUM = ['fridge', 'freezer', 'cupboard'] as const;
 
+const ITEM_PROPERTIES = {
+	name: { type: 'string' },
+	quantity: { type: 'string' },
+	unit: { type: 'string' },
+	confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
+	location: { type: 'string', enum: LOCATION_ENUM },
+	expiresOn: { type: 'string' },
+	notes: { type: 'string' }
+} as const;
+
 export const PHOTO_ROUND_ITEMS_SCHEMA = {
 	type: 'object',
 	properties: {
@@ -25,14 +36,16 @@ export const PHOTO_ROUND_ITEMS_SCHEMA = {
 			type: 'array',
 			items: {
 				type: 'object',
-				properties: {
-					name: { type: 'string' },
-					quantity: { type: 'string' },
-					unit: { type: 'string' },
-					confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
-					location: { type: 'string', enum: LOCATION_ENUM }
-				},
-				required: ['name', 'quantity', 'unit', 'confidence', 'location'],
+				properties: ITEM_PROPERTIES,
+				required: [
+					'name',
+					'quantity',
+					'unit',
+					'confidence',
+					'location',
+					'expiresOn',
+					'notes'
+				],
 				additionalProperties: false
 			}
 		}
@@ -40,6 +53,9 @@ export const PHOTO_ROUND_ITEMS_SCHEMA = {
 	required: ['detectedZone', 'zoneConfidence', 'items'],
 	additionalProperties: false
 } as const;
+
+const ITEM_JSON_TEMPLATE =
+	'{"name":"","quantity":"","unit":"","confidence":"high|medium|low","location":"fridge|freezer|cupboard","expiresOn":"","notes":""}';
 
 const ZONE_CONTEXT: Record<StorageLocation, string> = {
 	fridge: 'kylskåp (kyl)',
@@ -52,6 +68,21 @@ const LOCATION_RULES = [
 	'  - fridge: mejeri, kött, fisk, chark, färdigrätter, färska grönsaker, ägg, mat som ska kylas',
 	'  - freezer: frysta varor, glass, djupfryst',
 	'  - cupboard: torrvaror (ris, pasta torr, mjöl), konserver, kryddor, kaffe, te'
+].join('\n');
+
+const UNIT_VOLUME_RULES = [
+	'- Enhet/volym: läs nettovikt/volym från förpackningen (500 g, 1,5 l, 6-pack). Sätt quantity + unit separat.',
+	'- Använd INTE st om gram eller liter syns på etiketten. st endast för ägg, enskilda frukter utan vikt, eller okänd förpackning.',
+	'- unit: l, ml, kg, g, st, pack — tom sträng om okänd'
+].join('\n');
+
+const EXPIRY_RULES = [
+	'- Bäst-före/förbruka-för: om datum syns på etiketten, sätt expiresOn som YYYY-MM-DD. Annars tom sträng.'
+].join('\n');
+
+const WHOLE_FRIDGE_RULES = [
+	'- För bred bild (hel kyl/skafferi): lista alla tydligt identifierbara produkter.',
+	'- medium confidence om etikett delvis dold; hoppa över oidentifierbara förpackningar.'
 ].join('\n');
 
 export function photoRoundSystemPrompt(zoneHint: StorageLocation | null): string {
@@ -68,16 +99,19 @@ export function photoRoundSystemPrompt(zoneHint: StorageLocation | null): string
 	return [
 		'Du inventerar ett svenskt hushålls skafferi från foton.',
 		...zoneLines,
-		'Returnera JSON: {"detectedZone":"fridge|freezer|cupboard","zoneConfidence":"high|medium|low","items":[{"name":"","quantity":"","unit":"","confidence":"high|medium|low","location":"fridge|freezer|cupboard"}]}',
+		`Returnera JSON: {"detectedZone":"fridge|freezer|cupboard","zoneConfidence":"high|medium|low","items":[${ITEM_JSON_TEMPLATE}]}`,
 		'Strikta regler (anti-hallucination):',
 		'- Lista ENDAST livsmedel och drycker som är tydligt synliga i bilderna',
 		'- Gissa INTE varor som kan finnas utanför bild eller bakom annat',
 		'- Hoppa över förpackningar där namnet inte går att läsa',
 		'- name: kort svenskt produktnamn (t.ex. "Mjölk", "Pasta penne")',
 		'- quantity: numerisk mängd som sträng (standard "1")',
-		'- unit: l, ml, kg, g, st, pack — tom sträng om okänd',
+		UNIT_VOLUME_RULES,
+		EXPIRY_RULES,
+		'- notes: varumärke, smak, storlek — tom sträng om inget extra syns',
 		'- confidence: high = tydligt läsbar etikett/hel förpackning, medium = delvis synlig, low = osäker',
 		LOCATION_RULES,
+		WHOLE_FRIDGE_RULES,
 		'- Slå ihop dubbletter av samma vara till en rad med summerad quantity om möjligt',
 		'- max 30 rader'
 	].join('\n');
@@ -85,12 +119,35 @@ export function photoRoundSystemPrompt(zoneHint: StorageLocation | null): string
 
 export const PHOTO_ROUND_VALIDATION_PROMPT = [
 	'Du granskar en lista med varor som en AI hävdade såg i skafferifoton.',
-	'Returnera JSON: {"detectedZone":"fridge|freezer|cupboard","zoneConfidence":"high|medium|low","items":[{"name":"","quantity":"","unit":"","confidence":"high|medium|low","location":"fridge|freezer|cupboard"}]}',
+	`Returnera JSON: {"detectedZone":"fridge|freezer|cupboard","zoneConfidence":"high|medium|low","items":[${ITEM_JSON_TEMPLATE}]}`,
 	'Behåll ENDAST rader som sannolikt är synliga på hyllan/kylen — ta bort uppenbara hallucinationer.',
-	'Behåll quantity/unit/confidence/location oförändrat om du behåller raden.',
+	'Lägg INTE till nya varor som inte fanns i den ursprungliga listan.',
+	'Behåll quantity/unit/confidence/location/expiresOn/notes oförändrat om du behåller raden.',
 	'Behåll detectedZone och zoneConfidence om de fortfarande stämmer med bilden.',
 	'Om listan är tom, returnera {"detectedZone":"cupboard","zoneConfidence":"low","items":[]}.'
 ].join('\n');
+
+export function coerceExpiresOn(value: unknown): string | null {
+	if (typeof value !== 'string') return null;
+	const trimmed = value.trim();
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return null;
+	const [year, month, day] = trimmed.split('-').map(Number);
+	const date = new Date(year, month - 1, day);
+	if (
+		date.getFullYear() !== year ||
+		date.getMonth() !== month - 1 ||
+		date.getDate() !== day
+	) {
+		return null;
+	}
+	return trimmed;
+}
+
+function coerceNotes(value: unknown): string | null {
+	if (typeof value !== 'string') return null;
+	const trimmed = value.trim();
+	return trimmed ? trimmed : null;
+}
 
 function coerceName(value: unknown): string {
 	if (typeof value === 'string') {
@@ -119,6 +176,20 @@ function coerceUnit(value: unknown): string | null {
 		return trimmed ? trimmed : null;
 	}
 	return null;
+}
+
+function resolveItemUnit(name: string, rawUnit: unknown): string | null {
+	const coerced = coerceUnit(rawUnit);
+	if (!coerced) {
+		return suggestUnitForName(name);
+	}
+	if (coerced === 'st') {
+		const suggested = suggestUnitForName(name);
+		if (suggested !== 'st') {
+			return suggested;
+		}
+	}
+	return coerced;
 }
 
 function coerceConfidence(value: unknown): PhotoRoundConfidence | null {
@@ -167,12 +238,15 @@ export function normalizePhotoRoundPayload(raw: unknown): unknown {
 				return entry;
 			}
 			const row = entry as Record<string, unknown>;
+			const name = coerceName(row.name);
 			return {
-				name: coerceName(row.name),
+				name,
 				quantity: coerceQuantity(row.quantity),
-				unit: coerceUnit(row.unit) ?? '',
+				unit: resolveItemUnit(name, row.unit) ?? '',
 				confidence: coerceConfidence(row.confidence) ?? 'low',
-				location: coerceLocation(row.location) ?? ''
+				location: coerceLocation(row.location) ?? '',
+				expiresOn: coerceExpiresOn(row.expiresOn) ?? '',
+				notes: coerceNotes(row.notes) ?? ''
 			};
 		})
 	};
@@ -213,9 +287,11 @@ export function parsePhotoRoundItems(
 		result.push({
 			name,
 			quantity: coerceQuantity(row.quantity),
-			unit: coerceUnit(row.unit),
+			unit: resolveItemUnit(name, row.unit),
 			confidence,
-			location: resolveReceiptLineLocation(name, row.location || fallbackZone)
+			location: resolveReceiptLineLocation(name, row.location || fallbackZone),
+			expiresOn: coerceExpiresOn(row.expiresOn),
+			notes: coerceNotes(row.notes)
 		});
 	}
 
@@ -314,17 +390,18 @@ export async function parsePhotoRoundFromImages(
 		return { ok: true, ...parsed };
 	}
 
-	if (options?.validate !== false && parsed.items.length > 0) {
+	if (options?.validate !== false && parsed.items.length > 0 && imageDataUrls.length > 0) {
 		const summary = parsed.items
-			.map(
-				(item) =>
-					`- ${item.name} (${item.quantity}${item.unit ? ` ${item.unit}` : ''}, ${item.location})`
-			)
+			.map((item) => {
+				const expiryPart = item.expiresOn ? `, bf ${item.expiresOn}` : '';
+				const notesPart = item.notes ? `, ${item.notes}` : '';
+				return `- ${item.name} (${item.quantity}${item.unit ? ` ${item.unit}` : ''}, ${item.location}${expiryPart}${notesPart})`;
+			})
 			.join('\n');
 		const validation = await requestPhotoRoundStructured(apiKey, {
 			systemPrompt: PHOTO_ROUND_VALIDATION_PROMPT,
 			userPrompt: `Zon: ${ZONE_CONTEXT[parsed.detectedZone]}.\nFöreslagna varor:\n${summary}`,
-			imageDataUrls: []
+			imageDataUrls
 		});
 		if (validation.ok) {
 			const validated = parsePhotoRoundResponse(validation.data, zoneHint);

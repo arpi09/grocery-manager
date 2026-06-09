@@ -9,8 +9,18 @@ function openAiPayload(items: unknown[], detectedZone = 'fridge', zoneConfidence
 
 function mockFetch(...responses: Array<{ ok: boolean; status?: number; body?: unknown; text?: string }>) {
 	let call = 0;
-	return vi.fn(async () => {
+	return vi.fn(async (_url: string, init?: RequestInit) => {
 		const next = responses[call++] ?? responses[responses.length - 1];
+		if (call === 2 && init?.body) {
+			const payload = JSON.parse(String(init.body)) as {
+				input?: Array<{ role: string; content?: unknown[] }>;
+			};
+			const userContent = payload.input?.find((entry) => entry.role === 'user')?.content ?? [];
+			const imageParts = userContent.filter(
+				(part) => part && typeof part === 'object' && (part as { type?: string }).type === 'input_image'
+			);
+			expect(imageParts.length).toBeGreaterThan(0);
+		}
 		return {
 			ok: next.ok,
 			status: next.status ?? (next.ok ? 200 : 502),
@@ -20,15 +30,23 @@ function mockFetch(...responses: Array<{ ok: boolean; status?: number; body?: un
 	});
 }
 
+const FULL_ITEM = {
+	name: 'Mjölk',
+	quantity: '1',
+	unit: 'l',
+	confidence: 'high',
+	location: 'fridge',
+	expiresOn: '2026-06-15',
+	notes: 'Arla 3%'
+};
+
 describe('parsePhotoRoundFromImages integration (mocked OpenAI)', () => {
 	afterEach(() => {
 		vi.unstubAllGlobals();
 	});
 
 	it('returns parsed fridge items with detected zone from vision + validation calls', async () => {
-		const items = [
-			{ name: 'Mjölk', quantity: '1', unit: 'l', confidence: 'high', location: 'fridge' }
-		];
+		const items = [FULL_ITEM];
 		vi.stubGlobal(
 			'fetch',
 			mockFetch({ ok: true, body: openAiPayload(items) }, { ok: true, body: openAiPayload(items) })
@@ -44,7 +62,9 @@ describe('parsePhotoRoundFromImages integration (mocked OpenAI)', () => {
 					quantity: '1',
 					unit: 'l',
 					confidence: 'high',
-					location: 'fridge'
+					location: 'fridge',
+					expiresOn: '2026-06-15',
+					notes: 'Arla 3%'
 				}
 			],
 			detectedZone: 'fridge',
@@ -54,9 +74,7 @@ describe('parsePhotoRoundFromImages integration (mocked OpenAI)', () => {
 	});
 
 	it('honours zone hint with forced high confidence', async () => {
-		const items = [
-			{ name: 'Mjölk', quantity: '1', unit: 'l', confidence: 'high', location: 'fridge' }
-		];
+		const items = [FULL_ITEM];
 		vi.stubGlobal('fetch', mockFetch({ ok: true, body: openAiPayload(items, 'cupboard', 'low') }));
 
 		const result = await parsePhotoRoundFromImages('sk-test', 'fridge', [
@@ -71,7 +89,9 @@ describe('parsePhotoRoundFromImages integration (mocked OpenAI)', () => {
 					quantity: '1',
 					unit: 'l',
 					confidence: 'high',
-					location: 'fridge'
+					location: 'fridge',
+					expiresOn: '2026-06-15',
+					notes: 'Arla 3%'
 				}
 			],
 			detectedZone: 'fridge',
@@ -106,6 +126,17 @@ describe('parsePhotoRoundFromImages integration (mocked OpenAI)', () => {
 			detectedZone: 'cupboard',
 			zoneConfidence: 'high'
 		});
+		expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
+	});
+
+	it('skips validation when validate is false', async () => {
+		const items = [FULL_ITEM];
+		vi.stubGlobal('fetch', mockFetch({ ok: true, body: openAiPayload(items) }));
+
+		await parsePhotoRoundFromImages('sk-test', 'fridge', ['data:image/jpeg;base64,/9j/4AAQ'], {
+			validate: false
+		});
+
 		expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
 	});
 });
