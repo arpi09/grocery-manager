@@ -205,6 +205,7 @@
 		"nextActionSync": "{count, plural, one {Confirm # item} other {Confirm # items}}",
 		"nextActionExpiring": "{count, plural, one {Generate dinner with # item} other {Generate dinner with # items}}",
 		"nextActionPhoto": "Photo the fridge",
+		"nextActionPlaner": "{count, plural, one {Plan meal on Eat} other {Plan meals on Eat}}",
 		"locationsTitle": "Your locations",
 		"totalTracked": "{count} items total",
 		"emptyTitle": "Get started",
@@ -461,6 +462,14 @@
 			"note": "Weekly browser notification when items expire soon. Requires HTTPS and permission.",
 			"enable": "Enable browser notifications",
 			"unsupported": "Browser notifications need the installed app (PWA) or production — not plain dev server.",
+			"status": {
+				"enabled": "Enabled",
+				"disabled": "Off",
+				"requiresInstall": "Requires app installation",
+				"permissionDenied": "Permission denied"
+			},
+			"driftWarning": "Skaffu shows notifications on, but your browser blocked permission.",
+			"driftDisable": "Turn off in Skaffu",
 			"errors": {
 				"unsupported": "This browser does not support push notifications.",
 				"serviceWorkerUnavailable": "Install the app to your home screen or use production (service worker missing). Try /install-app or skaffu.com.",
@@ -473,7 +482,10 @@
 			"title": "Shop today",
 			"note": "Daily morning notification when unchecked items remain on your shopping list. Requires browser notifications above.",
 			"enable": "Remind me to shop",
-			"requiresPush": "Enable browser notifications above first."
+			"requiresPush": "Enable browser notifications above first.",
+			"errors": {
+				"pushRequired": "Enable browser notifications above before turning on Shop today."
+			}
 		},
 		"shoppingToPantry": {
 			"title": "Check-off → pantry",

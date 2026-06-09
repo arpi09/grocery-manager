@@ -208,11 +208,8 @@
 	);
 
 	const showMealTimeSuggestions = $derived.by(() => {
-		if (summary.totalItems === 0 || showWeeklyRitual) {
+		if (summary.totalItems === 0 || showWeeklyRitual || hasExpiring) {
 			return false;
-		}
-		if (hasExpiring) {
-			return true;
 		}
 		const slot = getCurrentMealSlot();
 		return slot === 'breakfast' || slot === 'lunch' || slot === 'dinner';

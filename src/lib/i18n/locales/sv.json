@@ -225,6 +225,7 @@
 		"nextActionSync": "{count, plural, one {Bekräfta # vara} other {Bekräfta # varor}}",
 		"nextActionExpiring": "{count, plural, one {Generera middag med # vara} other {Generera middag med # varor}}",
 		"nextActionPhoto": "Fota kylen",
+		"nextActionPlaner": "{count, plural, one {Planera middag på Äta} other {Planera middag på Äta}}",
 		"chipBarcode": "Streckkod",
 		"chipPhotoRound": "Fota in varor",
 		"eatFirstSummary": "Ät först ({count})",
@@ -428,6 +429,14 @@
 			"note": "Veckovis notis i webbläsaren när varor går ut snart. Kräver HTTPS och tillåtelse.",
 			"enable": "Aktivera webbläsarnotiser",
 			"unsupported": "Webbläsarnotiser kräver installerad app (PWA) eller produktion — inte vanlig dev-server.",
+			"status": {
+				"enabled": "Aktiverad",
+				"disabled": "Av",
+				"requiresInstall": "Kräver app-installation",
+				"permissionDenied": "Behörighet nekad"
+			},
+			"driftWarning": "Skaffu visar notiser som på, men webbläsaren har nekat behörighet.",
+			"driftDisable": "Stäng av i Skaffu",
 			"errors": {
 				"unsupported": "Webbläsaren stödjer inte push-notiser.",
 				"serviceWorkerUnavailable": "Appen måste vara installerad på hemskärmen eller köras i produktion (service worker saknas). Prova /install-app eller öppna skaffu.com.",
@@ -440,7 +449,10 @@
 			"title": "Handla idag",
 			"note": "Daglig notis på morgonen när du har varor kvar på inköpslistan. Kräver webbläsarnotiser ovan.",
 			"enable": "Påminn mig att handla",
-			"requiresPush": "Aktivera webbläsarnotiser ovan först."
+			"requiresPush": "Aktivera webbläsarnotiser ovan först.",
+			"errors": {
+				"pushRequired": "Aktivera webbläsarnotiser ovan innan du slår på Handla idag."
+			}
 		},
 		"shoppingToPantry": {
 			"title": "Avbockning → skafferi",

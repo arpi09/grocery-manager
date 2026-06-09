@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
 	import { t } from '$lib/i18n';
 	import { scanModeHref } from '$lib/utils/scan-nav';
-	import { OPEN_RECIPE_IDEAS } from '$lib/navigation/app-layout-context';
 
 	interface Props {
 		totalItems: number;
@@ -20,9 +18,7 @@
 		returnTo
 	}: Props = $props();
 
-	const openRecipeIdeas = getContext<(() => void) | undefined>(OPEN_RECIPE_IDEAS);
-
-	type CtaKind = 'sync' | 'recipe' | 'photo';
+	type CtaKind = 'sync' | 'photo';
 
 	const ctaKind = $derived.by((): CtaKind | null => {
 		if (!canWrite || totalItems === 0) {
@@ -31,57 +27,43 @@
 		if (staleCount > 0) {
 			return 'sync';
 		}
-		if (expiringCount > 0) {
-			return 'recipe';
-		}
 		return 'photo';
 	});
 
 	const href = $derived(
-		ctaKind === 'sync'
-			? '/inventory/synk'
-			: ctaKind === 'photo'
-				? scanModeHref('photo', returnTo)
-				: null
+		ctaKind === 'sync' ? '/inventory/synk' : ctaKind === 'photo' ? scanModeHref('photo', returnTo) : null
 	);
 
 	const label = $derived(
 		ctaKind === 'sync'
 			? t('home.nextActionSync', { count: staleCount })
-			: ctaKind === 'recipe'
-				? t('home.nextActionExpiring', { count: expiringCount })
-				: ctaKind === 'photo'
-					? t('home.nextActionPhoto')
-					: ''
+			: ctaKind === 'photo'
+				? t('home.nextActionPhoto')
+				: ''
 	);
 
 	const analyticsId = $derived(
-		ctaKind === 'sync'
-			? 'home.next_action_sync'
-			: ctaKind === 'recipe'
-				? 'home.next_action_recipe'
-				: 'home.next_action_photo'
+		ctaKind === 'sync' ? 'home.next_action_sync' : 'home.next_action_photo'
 	);
 
-	function handleRecipeClick() {
-		openRecipeIdeas?.();
-	}
+	const showPlanerLink = $derived(canWrite && totalItems > 0 && expiringCount > 0);
 </script>
 
-{#if ctaKind}
-	<div class="next-action" data-testid="home-primary-cta">
-		{#if ctaKind === 'recipe'}
-			<button
-				type="button"
-				class="cta-primary"
-				data-analytics-id={analyticsId}
-				onclick={handleRecipeClick}
+{#if ctaKind || showPlanerLink}
+	<div class="next-action" class:next-action--stacked={showPlanerLink && ctaKind}>
+		{#if ctaKind && href}
+			<a class="cta-primary" {href} data-analytics-id={analyticsId} data-testid="home-primary-cta">
+				{label}
+			</a>
+		{/if}
+		{#if showPlanerLink}
+			<a
+				class="cta-secondary"
+				href="/planer"
+				data-analytics-id="home.next_action_planer"
+				data-testid="home-planer-link"
 			>
-				{label}
-			</button>
-		{:else if href}
-			<a class="cta-primary" {href} data-analytics-id={analyticsId}>
-				{label}
+				{t('home.nextActionPlaner', { count: expiringCount })}
 			</a>
 		{/if}
 	</div>
@@ -90,6 +72,11 @@
 <style>
 	.next-action {
 		display: flex;
+	}
+
+	.next-action--stacked {
+		flex-direction: column;
+		gap: var(--space-sm);
 	}
 
 	.cta-primary {
@@ -118,6 +105,37 @@
 	}
 
 	.cta-primary:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+
+	.cta-secondary {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		min-height: var(--touch-target-min);
+		padding: 0.65rem 1.25rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: transparent;
+		color: var(--color-primary);
+		font-size: 0.9375rem;
+		font-weight: 600;
+		text-decoration: none;
+		transition:
+			background 0.15s ease,
+			border-color 0.15s ease;
+	}
+
+	.cta-secondary:hover {
+		border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+		text-decoration: none;
+		color: var(--color-primary);
+	}
+
+	.cta-secondary:focus-visible {
 		outline: 2px solid var(--color-primary);
 		outline-offset: 2px;
 	}

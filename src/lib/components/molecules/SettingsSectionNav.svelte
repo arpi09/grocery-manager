@@ -8,12 +8,14 @@
 
 	interface Props {
 		items: SettingsNavItem[];
+		/** When true, nav is inside SettingsPageChrome sticky block (no own sticky). */
+		embedded?: boolean;
 	}
 
-	let { items }: Props = $props();
+	let { items, embedded = false }: Props = $props();
 </script>
 
-<nav class="settings-nav" aria-label={t('settings.nav.aria')}>
+<nav class="settings-nav" class:settings-nav--embedded={embedded} aria-label={t('settings.nav.aria')}>
 	<ul class="settings-nav-list">
 		{#each items as item (item.id)}
 			<li>
@@ -33,6 +35,16 @@
 		background: color-mix(in srgb, var(--color-bg) 92%, transparent);
 		backdrop-filter: blur(8px);
 		border-bottom: 1px solid var(--color-border);
+	}
+
+	.settings-nav--embedded {
+		position: static;
+		z-index: auto;
+		margin: 0;
+		padding: var(--space-sm) 0 var(--space-sm);
+		background: transparent;
+		backdrop-filter: none;
+		border-bottom: none;
 	}
 
 	.settings-nav-list {

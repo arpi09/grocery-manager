@@ -5,7 +5,7 @@
 	import Toggle from '$lib/components/atoms/Toggle.svelte';
 	import SettingsRow from '$lib/components/molecules/SettingsRow.svelte';
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
-	import { getLocale, t } from '$lib/i18n';
+	import { getLocale, t, type MessageKey } from '$lib/i18n';
 	import {
 		ACTION_TOAST_PARAM,
 		actionToastMessage,
@@ -19,6 +19,7 @@
 	import { bindSubmitting, bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
 	import {
 		isPushSupported,
+		isPushServiceWorkerAvailable,
 		pushErrorMessage,
 		resyncExistingPushSubscription,
 		subscribeToExpiryPush,
@@ -32,6 +33,7 @@
 		pushNotificationsEnabled: boolean;
 		shoppingPushEnabled: boolean;
 		shoppingToPantryMode?: ShoppingToPantryMode;
+		shoppingPushError?: string | null;
 	}
 
 	let {
@@ -40,7 +42,8 @@
 		autoExpiredGraceDays,
 		pushNotificationsEnabled: initialPushEnabled,
 		shoppingPushEnabled: initialShoppingPushEnabled,
-		shoppingToPantryMode: initialShoppingToPantryMode = 'ask'
+		shoppingToPantryMode: initialShoppingToPantryMode = 'ask',
+		shoppingPushError = null
 	}: Props = $props();
 
 	let expiryRemindersEnabled = $state(initialExpiryEnabled);
@@ -56,12 +59,47 @@
 	let pushNotificationsError = $state<string | null>(null);
 	let shoppingPushSubmitting = $state(false);
 	let pushSupported = $state(false);
+	let pushReady = $state(false);
+	let pushReadyChecked = $state(false);
+	let pushPermissionDenied = $state(false);
 	let expiryRemindersForm: HTMLFormElement | undefined = $state();
 	let autoExpiredGraceForm: HTMLFormElement | undefined = $state();
 	let shoppingPushForm: HTMLFormElement | undefined = $state();
 	let shoppingToPantryMode = $state<ShoppingToPantryMode>(initialShoppingToPantryMode);
 	let shoppingToPantrySubmitting = $state(false);
 	let shoppingToPantryForm: HTMLFormElement | undefined = $state();
+
+	const pushDrift = $derived(
+		browser && initialPushEnabled && pushPermissionDenied && !pushNotificationsSubmitting
+	);
+
+	const pushStatusKey = $derived.by((): MessageKey | null => {
+		if (!pushSupported) {
+			return 'settings.pushNotifications.status.requiresInstall';
+		}
+		if (!pushReadyChecked) {
+			return null;
+		}
+		if (!pushReady) {
+			return 'settings.pushNotifications.status.requiresInstall';
+		}
+		if (pushPermissionDenied) {
+			return 'settings.pushNotifications.status.permissionDenied';
+		}
+		if (pushNotificationsEnabled) {
+			return 'settings.pushNotifications.status.enabled';
+		}
+		return 'settings.pushNotifications.status.disabled';
+	});
+
+	const shoppingPushDisabled = $derived(
+		shoppingPushSubmitting ||
+			(!shoppingPushEnabled && (!pushReady || !pushNotificationsEnabled))
+	);
+
+	const shoppingPushErrorMessage = $derived(
+		shoppingPushError === 'push_required' ? t('settings.shoppingPush.errors.pushRequired') : null
+	);
 
 	$effect(() => {
 		expiryRemindersEnabled = initialExpiryEnabled;
@@ -77,14 +115,17 @@
 	});
 
 	$effect(() => {
-		if (browser) {
-			pushSupported = isPushSupported();
-			if (pushSupported) {
-				void import('virtual:pwa-register').then(({ registerSW }) => {
-					registerSW({ immediate: true });
-				});
-			}
+		if (!browser) {
+			return;
 		}
+
+		pushSupported = isPushSupported();
+		pushPermissionDenied = Notification.permission === 'denied';
+
+		void (async () => {
+			pushReady = await isPushServiceWorkerAvailable();
+			pushReadyChecked = true;
+		})();
 	});
 
 	$effect(() => {
@@ -113,9 +154,13 @@
 				if (!result.ok) {
 					pushNotificationsError = pushErrorMessage(result.reason);
 					pushNotificationsEnabled = false;
+					if (result.reason === 'denied') {
+						pushPermissionDenied = true;
+					}
 					return;
 				}
 				pushNotificationsEnabled = true;
+				pushPermissionDenied = false;
 				showClientToast(t('actionToast.pushEnabled'), { variant: 'success' });
 				await invalidateAll();
 			} else {
@@ -135,6 +180,10 @@
 		} finally {
 			pushNotificationsSubmitting = false;
 		}
+	}
+
+	async function resolvePushDrift() {
+		await togglePushNotifications(false);
 	}
 </script>
 
@@ -238,14 +287,22 @@
 		<div class="push-notifications-control">
 			<Toggle
 				checked={pushNotificationsEnabled}
-				disabled={!pushSupported || pushNotificationsSubmitting}
+				disabled={!pushReady || pushNotificationsSubmitting}
 				label={t('settings.pushNotifications.enable')}
 				onchange={(enabled) => {
 					void togglePushNotifications(enabled);
 				}}
 			/>
-			{#if !pushSupported}
-				<p class="push-hint">{t('settings.pushNotifications.unsupported')}</p>
+			{#if pushStatusKey}
+				<p class="push-status" role="status">{t(pushStatusKey)}</p>
+			{/if}
+			{#if pushDrift}
+				<div class="push-drift" role="alert">
+					<p class="push-drift-copy">{t('settings.pushNotifications.driftWarning')}</p>
+					<button type="button" class="text-action" onclick={() => void resolvePushDrift()}>
+						{t('settings.pushNotifications.driftDisable')}
+					</button>
+				</div>
 			{/if}
 			{#if pushNotificationsSubmitting}
 				<span class="expiry-saving">{t('common.saving')}</span>
@@ -294,19 +351,22 @@
 			method="POST"
 			action="?/updateShoppingPush"
 			bind:this={shoppingPushForm}
-			use:enhance={bindSubmitting(
+			use:enhance={bindSubmittingWithRedirect(
 				(v) => (shoppingPushSubmitting = v),
+				async (location) => {
+					const url = new URL(location, 'http://local');
+					const kind = parseActionToastKind(url.searchParams.get(ACTION_TOAST_PARAM));
+					if (kind === 'settingsSaved') {
+						showClientToast(actionToastMessage(getLocale(), kind), { variant: 'success' });
+					}
+				},
 				(formData) => formData.set('enabled', shoppingPushEnabled ? 'true' : 'false')
 			)}
 		>
 			<input type="hidden" name="enabled" value={shoppingPushEnabled ? 'true' : 'false'} />
 			<Toggle
 				checked={shoppingPushEnabled}
-				disabled={
-					shoppingPushSubmitting ||
-					!pushSupported ||
-					(!pushNotificationsEnabled && !shoppingPushEnabled)
-				}
+				disabled={shoppingPushDisabled}
 				label={t('settings.shoppingPush.enable')}
 				onchange={(enabled) => {
 					if (enabled && !pushNotificationsEnabled) {
@@ -316,8 +376,11 @@
 					shoppingPushForm?.requestSubmit();
 				}}
 			/>
-			{#if pushSupported && !pushNotificationsEnabled}
+			{#if !pushNotificationsEnabled && !shoppingPushEnabled}
 				<p class="push-hint">{t('settings.shoppingPush.requiresPush')}</p>
+			{/if}
+			{#if shoppingPushErrorMessage}
+				<p class="push-error" role="alert">{shoppingPushErrorMessage}</p>
 			{/if}
 			{#if shoppingPushSubmitting}
 				<span class="expiry-saving">{t('common.saving')}</span>
@@ -356,6 +419,7 @@
 		border-radius: var(--radius-sm);
 		background: var(--color-surface);
 		color: var(--color-text);
+		color-scheme: light dark;
 	}
 
 	.expiry-days select:disabled {
@@ -372,6 +436,31 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.5rem;
+	}
+
+	.push-status {
+		margin: 0;
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+	}
+
+	.push-drift {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.25rem;
+		padding: var(--space-sm);
+		border-radius: var(--radius-sm);
+		border: 1px solid color-mix(in srgb, var(--color-warning) 35%, var(--color-border));
+		background: color-mix(in srgb, var(--color-warning) 8%, var(--color-surface));
+	}
+
+	.push-drift-copy {
+		margin: 0;
+		font-size: 0.85rem;
+		line-height: 1.45;
+		color: var(--color-text-muted);
 	}
 
 	.push-hint,

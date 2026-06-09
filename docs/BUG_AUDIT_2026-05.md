@@ -11,7 +11,7 @@ Systematic product bug audit per [full product bug audit plan](https://github.co
 | Metric | Value |
 |--------|-------|
 | **P0 open (product)** | **0** |
-| P1 open | 2 (BUG-001, BUG-003 UX backlog) |
+| P1 open | 0 (BUG-001, BUG-003 **fixed**) |
 | P2 open | 3 |
 | Test / infra (not product) | 3 |
 | E2E baseline | 88 passed · 2 failed · 1 skipped (91 total) |
@@ -95,9 +95,9 @@ No reproducible P0 product bugs in this pass.
 
 | ID | Route | Variant | Repro | Expected / Actual | Miljö | Fix-förslag |
 |----|-------|---------|-------|-------------------|-------|-------------|
-| BUG-001 | `/hem` | Engagerat konto, mobil | Logga in → `/hem` | **Förväntat:** en tydlig nästa handling · **Faktiskt:** flera likvärdiga block (Vecka fixad, Din vecka, aktivitet, rapport, kvitto…) trots holistisk UX | prod | `HomeNextAction` / progressive disclosure — se UX audit; E2E `at most one primary CTA` passar PGlite-seed, prod-konto rikare |
+| BUG-001 | `/hem` | Engagerat konto, mobil | Logga in → `/hem` | **Förväntat:** en tydlig nästa handling · **Faktiskt:** flera likvärdiga block (Vecka fixad, Din vecka, aktivitet, rapport, kvitto…) trots holistisk UX | prod | **Fixed** — `HomeNextAction` primär = synka/fota; utgående → sekundär länk `/planer`; `MealTimeSuggestions` dold vid `hasExpiring` |
 | BUG-002 | `/item/[id]/edit` | Alla | Öppna redigera post → devtools console | **Förväntat:** ren hydration · **Faktiskt:** `node_invalid_placement_ssr`: `<form>` inuti `AddItemForm` (`ConsumeItemPanel`, `DeleteConfirmButton`) → `HierarchyRequestError` vid hydrate | local E2E | **Fixed** — consume/delete flyttade utanför save-`<form>` i `AddItemForm.svelte` |
-| BUG-003 | `/hem`, `/planer` | Engagerat | Jämför hero på hem vs Äta | **Förväntat:** ett recept-ingång · **Faktiskt:** "Generate dinner" på hem + EatHubHero på planer | prod | Konsolidera till Äta-fliken (UX backlog) |
+| BUG-003 | `/hem`, `/planer` | Engagerat | Jämför hero på hem vs Äta | **Förväntat:** ett recept-ingång · **Faktiskt:** "Generate dinner" på hem + EatHubHero på planer | prod | **Fixed** — generera middag endast primär på `/planer` (`EatHubHero`); hem länkar till Äta |
 | BUG-004 | Overlays | Returning user | Besök `/hem` efter deploy | **Förväntat:** max ett modal · **Faktiskt:** PMF-enkät + invite kan staplas med receipt-autopilot | prod | **Fixed** — `overlay-stack.ts` + `registerBlockingOverlay`; PMF deferrar tills högre prioritet stängs |
 
 ---
@@ -126,7 +126,7 @@ No reproducible P0 product bugs in this pass.
 ## Follow-up (out of scope for audit pass)
 
 1. **P0 fix PR** — none required from this audit.
-2. **P1 UX backlog:** BUG-001/BUG-003 (hem/planer CTA consolidation — coordinate with UX).
+2. ~~**P1 UX backlog:** BUG-001/BUG-003 (hem/planer CTA consolidation)~~ — **done** (settings/hem UX pass).
 3. **Test hygiene:** document `PLAYWRIGHT_PORT` when dev-runtime occupies 5190.
 4. **E2E coverage:** merge with duplicates, planer collapsed calendar, viewer role, `/profile` interactive.
 

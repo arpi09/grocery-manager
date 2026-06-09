@@ -157,6 +157,28 @@ test.describe('Scan and inventory', () => {
 		});
 	});
 
+	test.describe('scan mobile manual add', () => {
+		test.use({ viewport: { width: 390, height: 844 } });
+
+		test('manual add cancel returns to photo scan', async ({ page }) => {
+			await loginAsAdmin(page);
+			await page.goto('/scan?mode=photo&from=/inventory/fridge&location=fridge');
+			await dismissOnboardingModalIfOpen(page);
+
+			const manualHref = await page
+				.getByRole('navigation', { name: /Skanningslägen|Scan modes/i })
+				.getByRole('link', { name: /Manuellt|Manual/i })
+				.getAttribute('href');
+			expect(manualHref).toMatch(/\/item\/new\?/);
+
+			await page.getByRole('link', { name: /Manuellt|Manual/i }).click();
+			await expect(page).toHaveURL(/\/item\/new/, { timeout: 15_000 });
+
+			await page.getByRole('link', { name: /Avbryt|Cancel/i }).click();
+			await expect(page).toHaveURL(/\/scan\?.*mode=photo/, { timeout: 15_000 });
+		});
+	});
+
 	test('inventory shows single add-goods CTA to photo scan', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/inventory/fridge');

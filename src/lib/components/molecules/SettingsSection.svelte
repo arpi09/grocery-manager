@@ -13,7 +13,7 @@
 	const headingId = $derived(`${id}-heading`);
 </script>
 
-<section class="settings-section" {id} aria-labelledby={headingId} style="scroll-margin-top: 4.5rem;">
+<section class="settings-section" {id} aria-labelledby={headingId}>
 	<header class="section-header">
 		<h2 id={headingId} class="label-caps">{title}</h2>
 		{#if description}
@@ -28,6 +28,7 @@
 <style>
 	.settings-section {
 		margin-bottom: var(--page-section-gap);
+		scroll-margin-top: var(--settings-anchor-offset, 7rem);
 	}
 
 	.settings-section:last-child {

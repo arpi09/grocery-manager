@@ -63,6 +63,23 @@ test.describe('Critical flows', () => {
 		await expect(primaryActions).toHaveCount(1);
 	});
 
+	test('home expiring hint links to planer not recipe modal', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/hem');
+		await dismissOnboardingModalIfOpen(page);
+
+		const planerLink = page.getByTestId('home-planer-link');
+		if ((await planerLink.count()) === 0) {
+			test.skip(true, 'No expiring items in seed — planer link not shown');
+		}
+
+		await expect(planerLink).toHaveAttribute('href', '/planer');
+		await expect(planerLink).toBeVisible();
+		await expect(page.getByTestId('home-primary-cta')).not.toContainText(
+			/Generera middag|Generate dinner/i
+		);
+	});
+
 	test('scan tab opens photo mode by default', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/hem');

@@ -102,6 +102,21 @@
 		color: var(--color-text-muted);
 	}
 
+	.row-actions :global(select) {
+		padding: 0.55rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		color: var(--color-text);
+		color-scheme: light dark;
+		min-width: min(100%, 12rem);
+	}
+
+	.row-actions :global(select:disabled) {
+		opacity: 0.55;
+		cursor: not-allowed;
+	}
+
 	@media (max-width: 640px) {
 		.settings-row {
 			flex-direction: column;
@@ -110,6 +125,11 @@
 
 		.row-actions {
 			justify-content: flex-start;
+		}
+
+		.row-actions :global(select) {
+			width: 100%;
+			min-height: var(--touch-target-min);
 		}
 	}
 </style>

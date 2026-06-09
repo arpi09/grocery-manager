@@ -41,4 +41,75 @@ test.describe('Settings', () => {
 			page.locator('.toast-message').filter({ hasText: /Inst\u00e4llningar sparade|Settings saved/i })
 		).toBeVisible({ timeout: 15_000 });
 	});
+
+	test('push notifications row shows status and is not permanently disabled', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/settings#settings-notifications');
+		await dismissOnboardingModalIfOpen(page);
+
+		const pushSwitch = page.getByRole('switch', {
+			name: /Aktivera webbl\u00e4sarnotiser|Enable browser notifications/i
+		});
+		await pushSwitch.scrollIntoViewIfNeeded();
+		await expect(pushSwitch).toBeVisible({ timeout: 15_000 });
+
+		const status = page.locator('.push-status');
+		await expect(status).toBeVisible({ timeout: 15_000 });
+		await expect(status).toContainText(
+			/Aktiverad|Av|Kr\u00e4ver app-installation|Beh\u00f6righet nekad|Enabled|Off|Requires app installation|Permission denied/i
+		);
+
+		const ariaDisabled = await pushSwitch.getAttribute('aria-disabled');
+		const isDisabled = ariaDisabled === 'true' || (await pushSwitch.isDisabled());
+		if (isDisabled) {
+			await expect(status).toContainText(
+				/Kr\u00e4ver app-installation|Beh\u00f6righet nekad|Requires app installation|Permission denied/i
+			);
+		}
+	});
+
+	test('shop today shows requires-push hint when push is off', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/settings#settings-notifications');
+		await dismissOnboardingModalIfOpen(page);
+
+		const pushSwitch = page.getByRole('switch', {
+			name: /Aktivera webbl\u00e4sarnotiser|Enable browser notifications/i
+		});
+		const shopSwitch = page.getByRole('switch', {
+			name: /P\u00e5minn mig att handla|Remind me to shop/i
+		});
+		await shopSwitch.scrollIntoViewIfNeeded();
+		await expect(shopSwitch).toBeVisible({ timeout: 15_000 });
+
+		if (await pushSwitch.isChecked() || (await shopSwitch.isChecked())) {
+			test.skip(true, 'Push or shop today enabled — requires-push hint not shown');
+		}
+
+		await expect(
+			page.locator('.push-hint').filter({
+				hasText: /Aktivera webbl\u00e4sarnotiser|Enable browser notifications/i
+			})
+		).toBeVisible();
+	});
+
+	test('shop today can be turned off when enabled', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/settings#settings-notifications');
+		await dismissOnboardingModalIfOpen(page);
+
+		const shopSwitch = page.getByRole('switch', {
+			name: /P\u00e5minn mig att handla|Remind me to shop/i
+		});
+		await shopSwitch.scrollIntoViewIfNeeded();
+		await expect(shopSwitch).toBeVisible({ timeout: 15_000 });
+
+		if (!(await shopSwitch.isChecked())) {
+			test.skip(true, 'Shop today not enabled in seed — cannot test turn-off');
+		}
+
+		await expect(shopSwitch).toBeEnabled();
+		await shopSwitch.click();
+		await expect(shopSwitch).not.toBeChecked({ timeout: 10_000 });
+	});
 });
