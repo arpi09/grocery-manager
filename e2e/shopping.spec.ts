@@ -71,9 +71,7 @@ test.describe('Shopping list', () => {
 			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click();
 		}
 
-		await expect(page.locator('ul.list.checked li').filter({ hasText: itemName })).toBeVisible({
-			timeout: 20_000
-		});
+		await expect(row).toHaveCount(0, { timeout: 20_000 });
 	});
 
 	test('check off opens pantry bridge sheet and can add to pantry', async ({ page }) => {
