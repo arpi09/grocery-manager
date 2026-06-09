@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
-	import { scanHubHref, scanModeHref } from '$lib/utils/scan-nav';
+	import { manualAddHref, scanModeHref } from '$lib/utils/scan-nav';
 	import type { StorageLocation } from '$lib/domain/location';
 
-	export type ScanModeTab = 'hub' | 'barcode' | 'receipt' | 'photoRound' | 'manual';
+	export type ScanModeTab = 'barcode' | 'receipt' | 'photoRound' | 'manual';
 
 	interface Props {
 		active: ScanModeTab | null;
@@ -40,7 +40,7 @@
 		if (showManual) {
 			items.push({
 				id: 'manual',
-				href: `/item/new?from=${encodeURIComponent(scanHubHref(returnTo))}${defaultLocation ? `&location=${defaultLocation}` : ''}`,
+				href: manualAddHref(returnTo, locationOption),
 				label: t('scan.modes.manual')
 			});
 		}
@@ -51,14 +51,6 @@
 
 <nav class="mode-tabs" aria-label={t('scan.hubAria')}>
 	<div class="mode-tabs-scroll">
-		<a
-			href={scanHubHref(returnTo)}
-			class="tab"
-			class:active={active === 'hub'}
-			aria-current={active === 'hub' ? 'page' : undefined}
-		>
-			{t('scan.moreWays')}
-		</a>
 		{#each tabs as tab (tab.id)}
 			<a
 				href={tab.href}

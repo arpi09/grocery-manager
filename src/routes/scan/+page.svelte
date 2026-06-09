@@ -12,7 +12,7 @@
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
 	import { t } from '$lib/i18n';
 	import { getLastScanMode } from '$lib/utils/last-scan-defaults';
-	import { scanHubHref, scanModeHref, type ScanMode } from '$lib/utils/scan-nav';
+	import { scanModeHref, type ScanMode } from '$lib/utils/scan-nav';
 
 	let { data, form } = $props();
 
@@ -33,7 +33,6 @@
 	const isBarcodeMode = $derived(scanMode === 'barcode');
 	const isReceiptMode = $derived(scanMode === 'receipt');
 	const isPhotoMode = $derived(scanMode === 'photo');
-	const hubHref = $derived(scanHubHref(data.returnTo));
 	const isTopLevelEntry = $derived(data.isTopLevelEntry);
 
 	const title = $derived(
@@ -55,10 +54,10 @@
 					: t('scan.subtitle')
 	);
 	const cancelLabel = $derived(isHub ? t('scan.cancel') : t('scan.cancelBack'));
-	const backHref = $derived(isTopLevelEntry ? undefined : isHub ? data.returnTo : hubHref);
-	const backLabel = $derived(isHub ? t('common.back') : t('scan.allModes'));
+	const backHref = $derived(isTopLevelEntry ? undefined : data.returnTo);
+	const backLabel = $derived(t('common.back'));
 	const activeTab = $derived(
-		isBarcodeMode ? 'barcode' : isReceiptMode ? 'receipt' : isPhotoMode ? 'photoRound' : 'hub'
+		isBarcodeMode ? 'barcode' : isReceiptMode ? 'receipt' : isPhotoMode ? 'photoRound' : null
 	);
 </script>
 
@@ -87,17 +86,10 @@
 				cancelHref={isTopLevelEntry ? undefined : data.returnTo}
 				errors={form?.errors}
 			/>
-			{#if !isTopLevelEntry}
-				<ScanFlowFooter cancelHref={data.returnTo} cancelLabel={t('scan.cancelBack')} />
-			{/if}
 		{:else if isReceiptMode}
 			<ReceiptBulkAddFlow returnTo={data.returnTo} />
 		{:else if isPhotoMode}
-			<PhotoRoundFlow
-				returnTo={data.returnTo}
-				initialLocation={data.defaultLocation}
-				showCancel={!isTopLevelEntry}
-			/>
+			<PhotoRoundFlow returnTo={data.returnTo} initialLocation={data.defaultLocation} />
 		{:else}
 			<ScanModeHub returnTo={data.returnTo} defaultLocation={data.defaultLocation ?? undefined} />
 			{#if !isTopLevelEntry}

@@ -54,9 +54,6 @@
 	let mergeCandidates = $state<Array<MergeCandidateMatch | null>>([]);
 	let mergeSelected = $state<Record<number, boolean>>({});
 
-	const hubHref = $derived(`/scan?from=${encodeURIComponent(returnTo)}`);
-	const cancelHref = $derived(hubHref);
-
 	function receiptFileErrorMessage(error: ReceiptFileError): string {
 		if (error.code === 'too_large') {
 			return t('receipt.formats.tooLarge');
@@ -273,9 +270,6 @@
 		{/if}
 	</section>
 
-	{#if !embedded}
-		<ScanFlowFooter cancelHref={cancelHref} cancelLabel={t('scan.allModes')} />
-	{/if}
 {:else}
 	<section data-testid="receipt-review">
 		<h2 class="title">{t('receiptBulk.selectItems', { selected: selectedCount, total: lines.length })}</h2>
@@ -419,9 +413,7 @@
 		</form>
 	</section>
 
-	{#if !embedded}
-		<ScanFlowFooter cancelHref={returnTo} cancelLabel={t('scan.cancelBackToHome')} />
-	{:else if onCancel}
+	{#if onCancel}
 		<ScanFlowFooter
 			onCancel={onCancel}
 			cancelLabel={t('onboarding.backToPicker')}

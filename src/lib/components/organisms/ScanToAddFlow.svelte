@@ -19,7 +19,8 @@
 	import { addRecentScan } from '$lib/utils/recent-scans';
 	import { getScanQuickPicks, type ScanQuickPick } from '$lib/utils/scan-quick-picks';
 	import { isDesktopDevice } from '$lib/utils/device';
-import { getLastScanDefaults, saveLastScanDefaults, saveLastScanMode } from '$lib/utils/last-scan-defaults';
+	import { manualAddHref } from '$lib/utils/scan-nav';
+	import { getLastScanDefaults, saveLastScanDefaults, saveLastScanMode } from '$lib/utils/last-scan-defaults';
 
 	interface Props {
 		defaultLocation: StorageLocation;
@@ -47,6 +48,7 @@ import { getLastScanDefaults, saveLastScanDefaults, saveLastScanMode } from '$li
 
 	let step = $state<Step>('scan');
 	let scannerActive = $state(true);
+	let cameraBlocked = $state(false);
 	let lookupLoading = $state(false);
 	let lookupError = $state<string | null>(null);
 	let productFound = $state(true);
@@ -89,9 +91,23 @@ import { getLastScanDefaults, saveLastScanDefaults, saveLastScanMode } from '$li
 		saveLastScanMode('barcode');
 	});
 
+	const manualAddLink = $derived(
+		manualAddHref(returnTo, { location: defaultLocation })
+	);
+
+	function handleCameraError() {
+		cameraBlocked = true;
+		scannerActive = false;
+	}
+
+	function handleCameraReady() {
+		cameraBlocked = false;
+	}
+
 	function resetToScan() {
 		step = 'scan';
 		scannerActive = true;
+		cameraBlocked = false;
 		lookupLoading = false;
 		lookupError = null;
 		barcode = '';
@@ -235,7 +251,12 @@ import { getLastScanDefaults, saveLastScanDefaults, saveLastScanMode } from '$li
 		{/if}
 
 		<div class="scanner-wrap" aria-busy={lookupLoading}>
-			<BarcodeScanner active={scannerActive && !lookupLoading} onScan={handleScan} />
+			<BarcodeScanner
+				active={scannerActive && !lookupLoading && !cameraBlocked}
+				onScan={handleScan}
+				onCameraError={handleCameraError}
+				onCameraReady={handleCameraReady}
+			/>
 			{#if lookupLoading}
 				<div class="lookup-overlay" role="status" aria-live="polite">
 					<Spinner size="md" label={t('scanFlow.lookupProduct')} />
@@ -248,7 +269,7 @@ import { getLastScanDefaults, saveLastScanDefaults, saveLastScanMode } from '$li
 			<FeedbackBanner tone="error" message={lookupError} />
 		{/if}
 
-		{#if isDesktopDevice()}
+		{#if isDesktopDevice() || cameraBlocked}
 			<div class="manual">
 				<label for="manual-barcode">{t('scanFlow.manualBarcode')}</label>
 				<div class="manual-row">
@@ -270,6 +291,12 @@ import { getLastScanDefaults, saveLastScanDefaults, saveLastScanMode } from '$li
 					</Button>
 				</div>
 			</div>
+		{/if}
+
+		{#if cameraBlocked}
+			<p class="manual-add-fallback">
+				<a href={manualAddLink}>{t('scanFlow.manualAddFallback')}</a>
+			</p>
 		{/if}
 
 	</section>
@@ -439,6 +466,16 @@ import { getLastScanDefaults, saveLastScanDefaults, saveLastScanMode } from '$li
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
 		background: var(--color-surface);
+	}
+
+	.manual-add-fallback {
+		margin: var(--space-sm) 0 0;
+		font-size: 0.9rem;
+		text-align: center;
+	}
+
+	.manual-add-fallback a {
+		font-weight: 600;
 	}
 
 	.quick-picks {

@@ -29,7 +29,7 @@ test.describe('Scan and inventory', () => {
 		await expect(page.getByText(/Avbryt|Cancel/i)).toHaveCount(0);
 	});
 
-	test('scan sub-modes show mode tabs', async ({ page }) => {
+	test('scan sub-modes show mode tabs without hub link', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/scan?mode=photo&from=/inventory/fridge&location=fridge');
 		await dismissOnboardingModalIfOpen(page);
@@ -37,8 +37,21 @@ test.describe('Scan and inventory', () => {
 		await expect(page).toHaveURL(/mode=photo/);
 		const scanModes = page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i });
 		await expect(scanModes).toBeVisible();
-		await expect(scanModes.getByRole('link', { name: /Fler sätt|More ways/i })).toBeVisible();
+		await expect(scanModes.getByRole('link', { name: /Fler sätt|More ways/i })).toHaveCount(0);
 		await expect(scanModes.getByRole('link', { name: 'Fota in varor' })).toBeVisible();
+		await expect(scanModes.getByRole('link', { name: /Manuellt|Manual/i })).toHaveAttribute(
+			'href',
+			/\/item\/new\?.*mode=photo/
+		);
+	});
+
+	test('receipt mode has no duplicate all-modes footer', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/scan?mode=receipt&from=/inventory/fridge');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page).toHaveURL(/mode=receipt/);
+		await expect(page.getByText(/Alla skanningslägen|All scan modes/i)).toHaveCount(0);
 	});
 
 	test('legacy receipt route redirects to unified scan', async ({ page }) => {

@@ -2,7 +2,7 @@
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
 	import { t } from '$lib/i18n';
-	import { scanHubHref, scanModeHref } from '$lib/utils/scan-nav';
+	import { manualAddHref, scanModeHref } from '$lib/utils/scan-nav';
 	import type { StorageLocation } from '$lib/domain/location';
 
 	interface Props {
@@ -23,9 +23,7 @@
 	const barcodeHref = $derived(scanModeHref('barcode', returnTo, locationOption));
 	const receiptHref = $derived(scanModeHref('receipt', returnTo));
 	const photoHref = $derived(scanModeHref('photo', returnTo, locationOption));
-	const manualHref = $derived(
-		`/item/new?from=${encodeURIComponent(scanHubHref(returnTo))}${defaultLocation ? `&location=${defaultLocation}` : ''}`
-	);
+	const manualHref = $derived(manualAddHref(returnTo, locationOption));
 </script>
 
 <div class="hub" data-testid="scan-mode-hub">

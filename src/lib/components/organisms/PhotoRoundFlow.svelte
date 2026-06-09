@@ -11,7 +11,7 @@
 	import { PHOTO_ROUND_MAX_IMAGES, PHOTO_ROUND_MAX_TOTAL_BYTES } from '$lib/domain/photo-round';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
-	import { scanHubHref } from '$lib/utils/scan-nav';
+	import { manualAddHref } from '$lib/utils/scan-nav';
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { fetchMergeCandidates, type MergeCandidateMatch } from '$lib/client/merge-candidates';
 	import { onMount } from 'svelte';
@@ -28,7 +28,6 @@ import {
 		/** Hint zone for AI parse (from inventory tab or URL). Skips forced zone picker. */
 		initialLocation?: StorageLocation | null;
 		embedded?: boolean;
-		showCancel?: boolean;
 		formAction?: string;
 		onItemSaved?: () => void;
 		onCancel?: () => void;
@@ -38,7 +37,6 @@ import {
 		returnTo,
 		initialLocation = null,
 		embedded = false,
-		showCancel = true,
 		formAction,
 		onItemSaved,
 		onCancel
@@ -67,7 +65,9 @@ import {
 	let mergeSelected = $state<Record<number, boolean>>({});
 	let sameAsLastTime = $state(Boolean(rememberedLocation && !initialLocation));
 
-	const cancelHref = $derived(scanHubHref(returnTo));
+	const manualAddLink = $derived(
+		manualAddHref(returnTo, initialLocation ? { location: initialLocation } : undefined)
+	);
 	const canAddPhoto = $derived(photos.length < PHOTO_ROUND_MAX_IMAGES);
 
 	function confidenceLabel(confidence: PhotoRoundDetectedItem['confidence']): string {
@@ -387,16 +387,13 @@ import {
 			</div>
 		{/if}
 	</section>
-	{#if !embedded && showCancel}
-		<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} />
-	{/if}
 {:else}
 	<section data-testid="photo-round-review">
 		<h2 class="title">
 			{t('photoRound.reviewTitle', { selected: selectedCount, total: lines.length })}
 		</h2>
 		<p class="hint">{t('photoRound.reviewHint')}</p>
-		<p class="hint"><a href="/item/new?from=/scan?mode=photo">{t('photoRound.missingItemLink')}</a></p>
+		<p class="hint"><a href={manualAddLink}>{t('photoRound.missingItemLink')}</a></p>
 		{#if !initialLocation && zoneConfidence && zoneConfidence !== 'high'}
 			<FeedbackBanner tone="info" message={t('photoRound.zoneUncertain', { zone: locationLabel(getLocale(), zone) })} />
 		{/if}
@@ -547,9 +544,7 @@ import {
 			</div>
 		</form>
 	</section>
-	{#if !embedded && showCancel}
-		<ScanFlowFooter {cancelHref} cancelLabel={t('scan.cancelBack')} sticky={false} />
-	{:else if onCancel}
+	{#if onCancel}
 		<ScanFlowFooter
 			onCancel={onCancel}
 			cancelLabel={t('onboarding.backToPicker')}

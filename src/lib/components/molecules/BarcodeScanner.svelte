@@ -5,15 +5,20 @@
 	import { onDestroy, tick } from 'svelte';
 	import { canAccessCamera, BARCODE_HTTPS_HINT } from '$lib/utils/device';
 
+	export type CameraErrorKind = 'https' | 'denied' | 'not_found' | 'unavailable';
+
 	interface Props {
 		active?: boolean;
 		onScan: (barcode: string) => void;
+		onCameraError?: (kind: CameraErrorKind) => void;
+		onCameraReady?: () => void;
 	}
 
-	let { active = true, onScan }: Props = $props();
+	let { active = true, onScan, onCameraError, onCameraReady }: Props = $props();
 
 	let videoEl = $state<HTMLVideoElement | null>(null);
 	let scannerError = $state<string | null>(null);
+	let scannerErrorKind = $state<CameraErrorKind | null>(null);
 	let scanning = $state(false);
 	let facingMode = $state<'environment' | 'user'>('environment');
 
@@ -21,6 +26,39 @@
 	let stopScanner: (() => void) | null = null;
 	let mediaStream: MediaStream | null = null;
 	let startGeneration = 0;
+
+	function setCameraError(kind: CameraErrorKind, message: string) {
+		scannerErrorKind = kind;
+		scannerError = message;
+		onCameraError?.(kind);
+	}
+
+	function clearCameraError() {
+		scannerErrorKind = null;
+		scannerError = null;
+	}
+
+	function classifyCameraError(error: unknown): CameraErrorKind {
+		if (error instanceof DOMException) {
+			if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+				return 'denied';
+			}
+			if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+				return 'not_found';
+			}
+		}
+		return 'unavailable';
+	}
+
+	function cameraErrorMessage(kind: CameraErrorKind): string {
+		if (kind === 'denied') {
+			return t('scanFlow.cameraDenied');
+		}
+		if (kind === 'not_found') {
+			return t('scanFlow.noCamera');
+		}
+		return t('scanFlow.cameraUnavailable');
+	}
 
 	function stopMediaStream() {
 		mediaStream?.getTracks().forEach((track) => track.stop());
@@ -81,10 +119,10 @@
 
 		stopDecode();
 		stopMediaStream();
-		scannerError = null;
+		clearCameraError();
 
 		if (!canAccessCamera()) {
-			scannerError = BARCODE_HTTPS_HINT;
+			setCameraError('https', BARCODE_HTTPS_HINT);
 			scanning = false;
 			return;
 		}
@@ -143,9 +181,11 @@
 			}
 
 			stopScanner = () => controls.stop();
-		} catch {
+			onCameraReady?.();
+		} catch (error) {
 			if (generation === startGeneration) {
-				scannerError = t('scanFlow.cameraDenied');
+				const kind = classifyCameraError(error);
+				setCameraError(kind, cameraErrorMessage(kind));
 				scanning = false;
 			}
 			stopDecode();
@@ -156,6 +196,17 @@
 
 	function flipCamera() {
 		facingMode = facingMode === 'environment' ? 'user' : 'environment';
+	}
+
+	async function retryCamera() {
+		if (!active) {
+			return;
+		}
+		clearCameraError();
+		await tick();
+		if (active && videoEl) {
+			void startScanner();
+		}
 	}
 
 	async function restartForOrientation() {
@@ -201,7 +252,16 @@
 </script>
 
 {#if scannerError}
-	<p class="error" role="alert">{scannerError}</p>
+	<div class="camera-error" role="alert">
+		<p class="error-message">{scannerError}</p>
+		<div class="error-actions">
+			{#if scannerErrorKind !== 'not_found'}
+				<button type="button" class="retry-btn" onclick={retryCamera}>
+					{t('scanFlow.cameraRetry')}
+				</button>
+			{/if}
+		</div>
+	</div>
 {:else}
 	<div class="viewport">
 		<video bind:this={videoEl} class="video" playsinline muted></video>
@@ -215,16 +275,47 @@
 {/if}
 
 <style>
-	.error {
-		margin: 0;
-		padding: var(--space-sm) var(--space-md);
+	.camera-error {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		padding: var(--space-md);
 		background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
-		color: color-mix(in srgb, var(--color-danger) 65%, #3d1515);
 		border: 1px solid color-mix(in srgb, var(--color-danger) 25%, var(--color-border));
-		border-radius: var(--radius-sm);
+		border-radius: var(--radius-md);
+	}
+
+	.error-message {
+		margin: 0;
+		color: color-mix(in srgb, var(--color-danger) 65%, #3d1515);
 		font-size: 0.875rem;
 		font-weight: 500;
 		line-height: 1.45;
+	}
+
+	.error-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
+	}
+
+	.retry-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2.75rem;
+		padding: 0.5rem 1rem;
+		border: 1px solid color-mix(in srgb, var(--color-danger) 35%, var(--color-border));
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		color: var(--color-text);
+		font: inherit;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.retry-btn:hover {
+		background: var(--color-surface-muted);
 	}
 
 	.viewport {
