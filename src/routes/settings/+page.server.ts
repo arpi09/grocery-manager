@@ -1,7 +1,8 @@
 import { canEditInventory, isHouseholdOwner } from '$lib/domain/household';
 import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
-import { isStripeCheckoutConfigured } from '$lib/server/stripe';
+import { isAdminRole } from '$lib/domain/user';
 import {
+	appSettingsService,
 	expiryReminderService,
 	pushSubscriptionRepository,
 	receiptForwardService,
@@ -73,8 +74,9 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		planTier,
 		planLimits,
 		billing,
-		stripeCheckoutEnabled: isStripeCheckoutConfigured(),
+		stripeCheckoutEnabled: await appSettingsService.isStripeCheckoutEnabled(),
 		isPro: isProTier(planTier),
+		isAdmin: isAdminRole(user?.role),
 		checkoutStatus:
 			checkout === 'success'
 				? ('success' as const)

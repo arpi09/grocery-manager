@@ -437,6 +437,14 @@
 			},
 			"driftWarning": "Skaffu visar notiser som på, men webbläsaren har nekat behörighet.",
 			"driftDisable": "Stäng av i Skaffu",
+			"permissionDeniedHelp": {
+				"intro": "Webbläsaren blockerar notiser för Skaffu. Så här tillåter du dem igen:",
+				"chrome": "Chrome/Edge: klicka på lås-ikonen i adressfältet → Webbplatsinställningar → Notiser → Tillåt.",
+				"safari": "Safari/iOS: Inställningar → Safari → Webbplatser → Notiser, eller håll inne på sidan och välj Webbplatsinställningar."
+			},
+			"permissionRecovered": "Behörighet tillåten — aktivera notiser nu.",
+			"permissionRecoveredAction": "Aktivera nu",
+			"installAppLink": "Så installerar du appen",
 			"errors": {
 				"unsupported": "Webbläsaren stödjer inte push-notiser.",
 				"serviceWorkerUnavailable": "Appen måste vara installerad på hemskärmen eller köras i produktion (service worker saknas). Prova /install-app eller öppna skaffu.com.",
@@ -450,6 +458,7 @@
 			"note": "Daglig notis på morgonen när du har varor kvar på inköpslistan. Kräver webbläsarnotiser ovan.",
 			"enable": "Påminn mig att handla",
 			"requiresPush": "Aktivera webbläsarnotiser ovan först.",
+			"requiresPermission": "Tillåt webbläsarnotiser ovan (se hjälptexten om behörighet nekad).",
 			"errors": {
 				"pushRequired": "Aktivera webbläsarnotiser ovan innan du slår på Handla idag."
 			}
@@ -464,6 +473,7 @@
 			"description": "Prenumeration (Gratis)",
 			"currentTier": "Nuvarande plan",
 			"currentFree": "Gratis",
+			"adminUnlimited": "Admin — inga gränser gäller för ditt konto.",
 			"comingSoon": "Betalning är inte aktiverad ännu. Du får veta i förväg innan Pro debiteras.",
 			"freeLimitsTitle": "Gratis inkluderar",
 			"freeLimitsItems": "{items} lagerrader · {members} hushållsmedlemmar · {aiScans} AI-skannar/mån · {receipts} kvitto-PDF/mån · {smartFill} smart fill/vecka",
@@ -1182,7 +1192,8 @@
 			"decisions": "Beslut",
 			"aiUsage": "AI-användning",
 			"feedback": "Feedback & waitlist",
-			"pmfSurvey": "PMF-enkät"
+			"pmfSurvey": "PMF-enkät",
+			"social": "LinkedIn-kö"
 		},
 		"analytics": {
 			"exportCsv": "Exportera CSV ({days} dagar)"
@@ -1235,6 +1246,44 @@
 			"enable": "Aktivera e-postutskick",
 			"status": "Faktisk status: {state}",
 			"envDisabled": "EMAIL_SENDING_DISABLED är satt i miljövariabler — utskick blockeras tills variabeln tas bort, även om reglaget är på."
+		},
+		"socialPosts": {
+			"title": "LinkedIn-inläggskö",
+			"note": "Agenter lägger drafts via API. Granska, redigera, godkänn och publicera till Skaffu-företagssidan eller kopiera manuellt.",
+			"empty": "Inga inlägg i detta filter.",
+			"filter": "Filter",
+			"filterAll": "Alla statusar",
+			"bodyLabel": "Inläggstext",
+			"linkLabel": "Länk-URL (valfritt)",
+			"builtLink": "Länk med UTM",
+			"approve": "Godkänn",
+			"publish": "Publicera på LinkedIn",
+			"copyToLinkedIn": "Kopiera till LinkedIn",
+			"copied": "Kopierat till urklipp",
+			"copyFailed": "Kunde inte kopiera — markera texten manuellt",
+			"invalidPost": "Ogiltigt inlägg.",
+			"invalidUpdate": "Ogiltig uppdatering.",
+			"linkedInTitle": "LinkedIn-koppling",
+			"linkedInConfigured": "API konfigurerat: {state}",
+			"linkedInConnected": "OAuth kopplad: {state}",
+			"organizationId": "Organisations-ID: {id}",
+			"connectLinkedIn": "Koppla LinkedIn",
+			"status": {
+				"draft": "Utkast",
+				"approved": "Godkänt",
+				"published": "Publicerat",
+				"failed": "Misslyckades"
+			}
+		},
+		"stripeCheckout": {
+			"title": "Pro-checkout (Stripe)",
+			"note": "Styr om användare kan starta Stripe-checkout och hantera abonnemang. Av som standard tills du slår på betalning i produktion.",
+			"enable": "Aktivera Pro-checkout",
+			"status": "Faktisk status: {state}",
+			"keysConfigured": "Stripe-nycklar: {state}",
+			"keysOk": "konfigurerade",
+			"keysMissing": "saknas",
+			"envDisabled": "STRIPE_CHECKOUT_DISABLED är satt i miljövariabler — checkout blockeras tills variabeln tas bort, även om reglaget är på."
 		},
 		"feedback": {
 			"title": "Användarfeedback",
@@ -2250,6 +2299,11 @@
 		"shoppingCleared": "Inköpslistan rensad",
 		"adminSaved": "Admininställningar sparade",
 		"adminPasswordResetSent": "E-post för återställning skickad",
+		"adminLinkedInConnected": "LinkedIn kopplad",
+		"adminLinkedInConnectFailed": "LinkedIn-koppling misslyckades: {label}",
+		"adminSocialPostApproved": "Inlägg godkänt",
+		"adminSocialPostPublished": "Publicerat på LinkedIn",
+		"adminSocialPostPublishFailed": "Publicering misslyckades: {label}",
 		"pushEnabled": "Webbläsarnotiser aktiverade",
 		"pushDisabled": "Webbläsarnotiser avaktiverade",
 		"itemPartiallyConsumed": "{label} uppdaterad — resten finns kvar i skafferiet",

@@ -40,7 +40,12 @@ export type ActionToastKind =
 	| 'shoppingAdded'
 	| 'shoppingCleared'
 	| 'adminSaved'
-	| 'adminPasswordResetSent';
+	| 'adminPasswordResetSent'
+	| 'adminLinkedInConnected'
+	| 'adminLinkedInConnectFailed'
+	| 'adminSocialPostApproved'
+	| 'adminSocialPostPublished'
+	| 'adminSocialPostPublishFailed';
 
 const ACTION_TOAST_KEYS: Record<
 	ActionToastKind,
@@ -161,6 +166,26 @@ const ACTION_TOAST_KEYS: Record<
 	adminPasswordResetSent: {
 		withLabel: 'actionToast.adminPasswordResetSent',
 		generic: 'actionToast.adminPasswordResetSent'
+	},
+	adminLinkedInConnected: {
+		withLabel: 'actionToast.adminLinkedInConnected',
+		generic: 'actionToast.adminLinkedInConnected'
+	},
+	adminLinkedInConnectFailed: {
+		withLabel: 'actionToast.adminLinkedInConnectFailed',
+		generic: 'actionToast.adminLinkedInConnectFailed'
+	},
+	adminSocialPostApproved: {
+		withLabel: 'actionToast.adminSocialPostApproved',
+		generic: 'actionToast.adminSocialPostApproved'
+	},
+	adminSocialPostPublished: {
+		withLabel: 'actionToast.adminSocialPostPublished',
+		generic: 'actionToast.adminSocialPostPublished'
+	},
+	adminSocialPostPublishFailed: {
+		withLabel: 'actionToast.adminSocialPostPublishFailed',
+		generic: 'actionToast.adminSocialPostPublishFailed'
 	}
 };
 

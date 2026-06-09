@@ -3,8 +3,8 @@ import { buildPlanLimitsSnapshot, evaluatePlanLimit, getTierLimit } from './plan
 
 describe('plan-limits', () => {
 	it('evaluates free tier at limit when usage meets cap', () => {
-		expect(evaluatePlanLimit('maxInventoryItems', 150, 'free').atLimit).toBe(true);
-		expect(evaluatePlanLimit('maxInventoryItems', 149, 'free').atLimit).toBe(false);
+		expect(evaluatePlanLimit('maxInventoryItems', 400, 'free').atLimit).toBe(true);
+		expect(evaluatePlanLimit('maxInventoryItems', 399, 'free').atLimit).toBe(false);
 	});
 
 	it('never blocks Pro tier limits', () => {
@@ -14,9 +14,9 @@ describe('plan-limits', () => {
 
 	it('builds blocked keys from snapshot', () => {
 		const snapshot = buildPlanLimitsSnapshot('free', {
-			maxInventoryItems: 150,
+			maxInventoryItems: 400,
 			maxHouseholdMembers: 1,
-			aiScansPerMonth: 20,
+			aiScansPerMonth: 75,
 			receiptPdfParsesPerMonth: 0,
 			smartFillPerWeek: 0
 		});

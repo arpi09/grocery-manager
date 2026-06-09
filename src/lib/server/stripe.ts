@@ -51,3 +51,11 @@ export function createStripeClient(): Stripe | null {
 export function getStripePriceIdForInterval(interval: 'month' | 'year'): string | null {
 	return interval === 'year' ? getStripePriceIdYearly() : getStripePriceIdMonthly();
 }
+
+export function resolveStripeCheckoutEnabled(options: {
+	keysConfigured: boolean;
+	enabledInApp: boolean;
+	envDisabled: boolean;
+}): boolean {
+	return options.keysConfigured && options.enabledInApp && !options.envDisabled;
+}

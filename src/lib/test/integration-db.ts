@@ -53,7 +53,8 @@ const SQL_MIGRATION_FILES = [
 	'0032_analytics_behavior.sql',
 	'0033_shopping_to_pantry_mode.sql',
 	'0034_inventory_last_confirmed_at.sql',
-	'0035_staleness_reminders.sql'
+	'0035_staleness_reminders.sql',
+	'0036_social_post.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
@@ -84,6 +85,7 @@ TRUNCATE TABLE
 	"household_member",
 	"household",
 	"app_error",
+	"social_post",
 	"app_settings",
 	"admin_action_log",
 	"password_reset_token",

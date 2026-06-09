@@ -34,11 +34,12 @@ Vi lovar redan i FAQ att betalda planer meddelas i förväg. Denna fil är den i
 
 | Gräns | Värde | Motivering |
 |-------|-------|------------|
-| Aktiva lagerrader | **150** | Pantry Check ~200 gratis; vi vill inte kännas snålare än listappar men begränsa “arkiv-lager” |
-| Hushållsmedlemmar | **2** | Täcker par/sambo; uppmuntrar Pro för familj/studenter |
-| AI-skannar / månad | **15** | Streckkod+foto med AI-tolkning; räcker för ~1 skanning varannan dag |
-| Kvitto-PDF-tolkningar / månad | **5** | Wow-moment utan att AI-budget sprängs |
-| Smart fill (inköpslista) / vecka | **2** | Smak på differentiatorn; vardagsanvändare märker taket |
+| Aktiva lagerrader | **400** | Generös gratisplan; begränsar fortfarande “arkiv-lager” |
+| Hushållsmedlemmar | **4** | Täcker par och mindre familj; uppmuntrar Pro för större hushåll |
+| AI-skannar / månad | **75** | Streckkod+foto med AI-tolkning; räcker för daglig vardagsanvändning |
+| Kvitto-PDF-tolkningar / månad | **25** | Wow-moment utan att AI-budget sprängs |
+| Smart fill (inköpslista) / vecka | **8** | Smak på differentiatorn utan att vardagsanvändare träffar taket direkt |
+| Admin-insikter / vecka | **40** | Gäller endast icke-admin-användare i `/admin` |
 
 **Alltid gratis (ingen räknare):**
 

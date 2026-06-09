@@ -42,6 +42,35 @@ test.describe('Settings', () => {
 		).toBeVisible({ timeout: 15_000 });
 	});
 
+	test('push notifications denied state shows help and disables toggle', async ({ page }) => {
+		await page.addInitScript(() => {
+			Object.defineProperty(Notification, 'permission', {
+				get: () => 'denied',
+				configurable: true
+			});
+		});
+
+		await loginAsAdmin(page);
+		await page.goto('/settings#settings-notifications');
+		await dismissOnboardingModalIfOpen(page);
+
+		const pushSwitch = page.getByRole('switch', {
+			name: /Aktivera webbl\u00e4sarnotiser|Enable browser notifications/i
+		});
+		await pushSwitch.scrollIntoViewIfNeeded();
+		await expect(pushSwitch).toBeVisible({ timeout: 15_000 });
+		await expect(pushSwitch).toBeDisabled();
+
+		const status = page.locator('.push-status');
+		await expect(status).toBeVisible({ timeout: 15_000 });
+		await expect(status).toContainText(/Beh\u00f6righet nekad|Permission denied/i);
+
+		const help = page.getByTestId('push-permission-denied-help');
+		await expect(help).toBeVisible();
+		await expect(help).toContainText(/l\u00e5s-ikonen|lock icon/i);
+		await expect(help).toContainText(/Safari/i);
+	});
+
 	test('push notifications row shows status and is not permanently disabled', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/settings#settings-notifications');
@@ -86,9 +115,17 @@ test.describe('Settings', () => {
 			test.skip(true, 'Push or shop today enabled — requires-push hint not shown');
 		}
 
+		const status = page.locator('.push-status');
+		const permissionDenied = await status
+			.filter({ hasText: /Beh\u00f6righet nekad|Permission denied/i })
+			.isVisible()
+			.catch(() => false);
+
 		await expect(
 			page.locator('.push-hint').filter({
-				hasText: /Aktivera webbl\u00e4sarnotiser|Enable browser notifications/i
+				hasText: permissionDenied
+					? /Till\u00e5t webbl\u00e4sarnotiser|Allow browser notifications/i
+					: /Aktivera webbl\u00e4sarnotiser|Enable browser notifications/i
 			})
 		).toBeVisible();
 	});

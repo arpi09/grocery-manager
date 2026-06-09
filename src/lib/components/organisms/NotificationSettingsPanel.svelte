@@ -62,6 +62,7 @@
 	let pushReady = $state(false);
 	let pushReadyChecked = $state(false);
 	let pushPermissionDenied = $state(false);
+	let pushPermissionRecovered = $state(false);
 	let expiryRemindersForm: HTMLFormElement | undefined = $state();
 	let autoExpiredGraceForm: HTMLFormElement | undefined = $state();
 	let shoppingPushForm: HTMLFormElement | undefined = $state();
@@ -73,18 +74,22 @@
 		browser && initialPushEnabled && pushPermissionDenied && !pushNotificationsSubmitting
 	);
 
+	const pushRequiresInstall = $derived(
+		browser && pushReadyChecked && pushSupported && !pushReady && !pushPermissionDenied
+	);
+
 	const pushStatusKey = $derived.by((): MessageKey | null => {
 		if (!pushSupported) {
 			return 'settings.pushNotifications.status.requiresInstall';
+		}
+		if (pushPermissionDenied) {
+			return 'settings.pushNotifications.status.permissionDenied';
 		}
 		if (!pushReadyChecked) {
 			return null;
 		}
 		if (!pushReady) {
 			return 'settings.pushNotifications.status.requiresInstall';
-		}
-		if (pushPermissionDenied) {
-			return 'settings.pushNotifications.status.permissionDenied';
 		}
 		if (pushNotificationsEnabled) {
 			return 'settings.pushNotifications.status.enabled';
@@ -94,7 +99,8 @@
 
 	const shoppingPushDisabled = $derived(
 		shoppingPushSubmitting ||
-			(!shoppingPushEnabled && (!pushReady || !pushNotificationsEnabled))
+			(!shoppingPushEnabled &&
+				(!pushReady || !pushNotificationsEnabled || pushPermissionDenied))
 	);
 
 	const shoppingPushErrorMessage = $derived(
@@ -114,18 +120,54 @@
 		shoppingToPantryMode = initialShoppingToPantryMode;
 	});
 
+	function recheckPushPermission() {
+		if (!browser) {
+			return;
+		}
+
+		const permission = Notification.permission;
+		if (pushPermissionDenied && permission !== 'denied') {
+			pushPermissionDenied = false;
+			pushNotificationsError = null;
+			if (permission === 'granted') {
+				pushPermissionRecovered = true;
+			}
+			return;
+		}
+
+		pushPermissionDenied = permission === 'denied';
+		if (permission === 'denied') {
+			pushPermissionRecovered = false;
+		}
+	}
+
 	$effect(() => {
 		if (!browser) {
 			return;
 		}
 
 		pushSupported = isPushSupported();
-		pushPermissionDenied = Notification.permission === 'denied';
+		recheckPushPermission();
 
 		void (async () => {
 			pushReady = await isPushServiceWorkerAvailable();
 			pushReadyChecked = true;
 		})();
+	});
+
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+
+		const onRecheck = () => recheckPushPermission();
+		window.addEventListener('focus', onRecheck);
+		document.addEventListener('visibilitychange', onRecheck);
+
+		return () => {
+			window.removeEventListener('focus', onRecheck);
+			document.removeEventListener('visibilitychange', onRecheck);
+		};
 	});
 
 	$effect(() => {
@@ -152,15 +194,19 @@
 			if (enabled) {
 				const result = await subscribeToExpiryPush();
 				if (!result.ok) {
-					pushNotificationsError = pushErrorMessage(result.reason);
 					pushNotificationsEnabled = false;
 					if (result.reason === 'denied') {
 						pushPermissionDenied = true;
+						pushPermissionRecovered = false;
+						pushNotificationsError = null;
+					} else {
+						pushNotificationsError = pushErrorMessage(result.reason);
 					}
 					return;
 				}
 				pushNotificationsEnabled = true;
 				pushPermissionDenied = false;
+				pushPermissionRecovered = false;
 				showClientToast(t('actionToast.pushEnabled'), { variant: 'success' });
 				await invalidateAll();
 			} else {
@@ -287,7 +333,7 @@
 		<div class="push-notifications-control">
 			<Toggle
 				checked={pushNotificationsEnabled}
-				disabled={!pushReady || pushNotificationsSubmitting}
+				disabled={!pushReady || pushPermissionDenied || pushNotificationsSubmitting}
 				label={t('settings.pushNotifications.enable')}
 				onchange={(enabled) => {
 					void togglePushNotifications(enabled);
@@ -295,6 +341,33 @@
 			/>
 			{#if pushStatusKey}
 				<p class="push-status" role="status">{t(pushStatusKey)}</p>
+			{/if}
+			{#if pushPermissionDenied}
+				<div class="push-help" data-testid="push-permission-denied-help">
+					<p class="push-help-intro">{t('settings.pushNotifications.permissionDeniedHelp.intro')}</p>
+					<ul class="push-help-steps">
+						<li>{t('settings.pushNotifications.permissionDeniedHelp.chrome')}</li>
+						<li>{t('settings.pushNotifications.permissionDeniedHelp.safari')}</li>
+					</ul>
+				</div>
+			{/if}
+			{#if pushRequiresInstall}
+				<a class="text-action push-install-link" href="/install-app">
+					{t('settings.pushNotifications.installAppLink')}
+				</a>
+			{/if}
+			{#if pushPermissionRecovered && pushReady && !pushNotificationsEnabled}
+				<div class="push-recovered">
+					<p class="push-hint">{t('settings.pushNotifications.permissionRecovered')}</p>
+					<button
+						type="button"
+						class="text-action"
+						disabled={pushNotificationsSubmitting}
+						onclick={() => void togglePushNotifications(true)}
+					>
+						{t('settings.pushNotifications.permissionRecoveredAction')}
+					</button>
+				</div>
 			{/if}
 			{#if pushDrift}
 				<div class="push-drift" role="alert">
@@ -307,7 +380,7 @@
 			{#if pushNotificationsSubmitting}
 				<span class="expiry-saving">{t('common.saving')}</span>
 			{/if}
-			{#if pushNotificationsError}
+			{#if pushNotificationsError && !pushPermissionDenied}
 				<p class="push-error" role="alert">{pushNotificationsError}</p>
 			{/if}
 		</div>
@@ -377,7 +450,11 @@
 				}}
 			/>
 			{#if !pushNotificationsEnabled && !shoppingPushEnabled}
-				<p class="push-hint">{t('settings.shoppingPush.requiresPush')}</p>
+				<p class="push-hint">
+					{pushPermissionDenied
+						? t('settings.shoppingPush.requiresPermission')
+						: t('settings.shoppingPush.requiresPush')}
+				</p>
 			{/if}
 			{#if shoppingPushErrorMessage}
 				<p class="push-error" role="alert">{shoppingPushErrorMessage}</p>
@@ -461,6 +538,46 @@
 		font-size: 0.85rem;
 		line-height: 1.45;
 		color: var(--color-text-muted);
+	}
+
+	.push-help {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		padding: var(--space-sm);
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		background: var(--color-surface-muted);
+	}
+
+	.push-help-intro {
+		margin: 0;
+		font-size: 0.85rem;
+		line-height: 1.45;
+		color: var(--color-text-muted);
+	}
+
+	.push-help-steps {
+		margin: 0;
+		padding-left: 1.15rem;
+		font-size: 0.85rem;
+		line-height: 1.45;
+		color: var(--color-text-muted);
+	}
+
+	.push-help-steps li + li {
+		margin-top: 0.25rem;
+	}
+
+	.push-install-link {
+		font-size: 0.85rem;
+	}
+
+	.push-recovered {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.25rem;
 	}
 
 	.push-hint,

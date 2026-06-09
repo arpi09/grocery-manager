@@ -470,6 +470,14 @@
 			},
 			"driftWarning": "Skaffu shows notifications on, but your browser blocked permission.",
 			"driftDisable": "Turn off in Skaffu",
+			"permissionDeniedHelp": {
+				"intro": "Your browser blocked notifications for Skaffu. To allow them again:",
+				"chrome": "Chrome/Edge: click the lock icon in the address bar → Site settings → Notifications → Allow.",
+				"safari": "Safari/iOS: Settings → Safari → Websites → Notifications, or long-press the page and choose Website Settings."
+			},
+			"permissionRecovered": "Permission allowed — turn on notifications now.",
+			"permissionRecoveredAction": "Enable now",
+			"installAppLink": "How to install the app",
 			"errors": {
 				"unsupported": "This browser does not support push notifications.",
 				"serviceWorkerUnavailable": "Install the app to your home screen or use production (service worker missing). Try /install-app or skaffu.com.",
@@ -483,6 +491,7 @@
 			"note": "Daily morning notification when unchecked items remain on your shopping list. Requires browser notifications above.",
 			"enable": "Remind me to shop",
 			"requiresPush": "Enable browser notifications above first.",
+			"requiresPermission": "Allow browser notifications above (see the help text if permission was denied).",
 			"errors": {
 				"pushRequired": "Enable browser notifications above before turning on Shop today."
 			}
@@ -499,6 +508,7 @@
 			"descriptionPro": "Subscription (Pro)",
 			"currentTier": "Current plan",
 			"currentFree": "Free",
+			"adminUnlimited": "Admin — no limits apply to your account.",
 			"currentPro": "Pro",
 			"comingSoon": "Billing is not enabled yet. We will tell you before Pro is charged.",
 			"proActive": "Your household has Pro — unlimited AI, receipt PDF, smart fill, and more members.",
@@ -1211,7 +1221,8 @@
 			"decisions": "Decisions",
 			"aiUsage": "AI usage",
 			"feedback": "Feedback & waitlist",
-			"pmfSurvey": "PMF survey"
+			"pmfSurvey": "PMF survey",
+			"social": "LinkedIn queue"
 		},
 		"analytics": {
 			"exportCsv": "Export CSV ({days} days)"
@@ -1271,6 +1282,44 @@
 			"enable": "Enable email sending",
 			"status": "Effective status: {state}",
 			"envDisabled": "EMAIL_SENDING_DISABLED is set in environment variables — sending stays blocked until removed, even when the toggle is on."
+		},
+		"socialPosts": {
+			"title": "LinkedIn post queue",
+			"note": "Agents add drafts via API. Review, edit, approve, then publish to the Skaffu company page or copy manually.",
+			"empty": "No posts in this filter.",
+			"filter": "Filter",
+			"filterAll": "All statuses",
+			"bodyLabel": "Post text",
+			"linkLabel": "Link URL (optional)",
+			"builtLink": "Link with UTM",
+			"approve": "Approve",
+			"publish": "Publish to LinkedIn",
+			"copyToLinkedIn": "Copy to LinkedIn",
+			"copied": "Copied to clipboard",
+			"copyFailed": "Could not copy — select text manually",
+			"invalidPost": "Invalid post.",
+			"invalidUpdate": "Invalid post update.",
+			"linkedInTitle": "LinkedIn connection",
+			"linkedInConfigured": "API configured: {state}",
+			"linkedInConnected": "OAuth connected: {state}",
+			"organizationId": "Organization ID: {id}",
+			"connectLinkedIn": "Connect LinkedIn",
+			"status": {
+				"draft": "Draft",
+				"approved": "Approved",
+				"published": "Published",
+				"failed": "Failed"
+			}
+		},
+		"stripeCheckout": {
+			"title": "Pro checkout (Stripe)",
+			"note": "Controls whether users can start Stripe checkout and manage subscriptions. Off by default until you enable billing in production.",
+			"enable": "Enable Pro checkout",
+			"status": "Effective status: {state}",
+			"keysConfigured": "Stripe keys: {state}",
+			"keysOk": "configured",
+			"keysMissing": "missing",
+			"envDisabled": "STRIPE_CHECKOUT_DISABLED is set in environment variables — checkout stays blocked until removed, even when the toggle is on."
 		},
 		"feedback": {
 			"title": "User feedback",
@@ -2292,6 +2341,11 @@
 		"shoppingCleared": "Shopping list cleared",
 		"adminSaved": "Admin settings saved",
 		"adminPasswordResetSent": "Password reset email sent",
+		"adminLinkedInConnected": "LinkedIn connected",
+		"adminLinkedInConnectFailed": "LinkedIn connection failed: {label}",
+		"adminSocialPostApproved": "Post approved",
+		"adminSocialPostPublished": "Published to LinkedIn",
+		"adminSocialPostPublishFailed": "Publish failed: {label}",
 		"pushEnabled": "Browser notifications enabled",
 		"pushDisabled": "Browser notifications disabled"
 	},

@@ -1,18 +1,22 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
 	isEmailSendingDisabledByEnv,
-	type EmailSendingStatus
+	isStripeCheckoutDisabledByEnv,
+	type EmailSendingStatus,
+	type StripeCheckoutStatus
 } from '$lib/application/app-settings.service';
+import { resolveStripeCheckoutEnabled } from '$lib/server/stripe';
 
 vi.mock('$env/dynamic/private', () => ({
 	env: {
-		EMAIL_SENDING_DISABLED: undefined as string | undefined
+		EMAIL_SENDING_DISABLED: undefined as string | undefined,
+		STRIPE_CHECKOUT_DISABLED: undefined as string | undefined
 	}
 }));
 
 import { env } from '$env/dynamic/private';
 
-const testEnv = env as { EMAIL_SENDING_DISABLED?: string };
+const testEnv = env as { EMAIL_SENDING_DISABLED?: string; STRIPE_CHECKOUT_DISABLED?: string };
 
 describe('isEmailSendingDisabledByEnv', () => {
 	afterEach(() => {
@@ -50,6 +54,51 @@ describe('email sending effective status', () => {
 
 		for (const { enabledInApp, envDisabled, effective } of cases) {
 			expect(enabledInApp && !envDisabled).toBe(effective);
+		}
+	});
+});
+
+describe('isStripeCheckoutDisabledByEnv', () => {
+	afterEach(() => {
+		delete testEnv.STRIPE_CHECKOUT_DISABLED;
+	});
+
+	it('treats unset, false, and empty as not disabled', () => {
+		for (const value of [undefined, '', 'false', 'FALSE', '0', 'no'] as const) {
+			if (value === undefined) {
+				delete testEnv.STRIPE_CHECKOUT_DISABLED;
+			} else {
+				testEnv.STRIPE_CHECKOUT_DISABLED = value;
+			}
+			expect(isStripeCheckoutDisabledByEnv()).toBe(false);
+		}
+	});
+
+	it('treats true and 1 as disabled', () => {
+		for (const value of ['true', 'TRUE', '1'] as const) {
+			testEnv.STRIPE_CHECKOUT_DISABLED = value;
+			expect(isStripeCheckoutDisabledByEnv()).toBe(true);
+		}
+	});
+});
+
+describe('stripe checkout effective status', () => {
+	it('requires keys, app toggle, and env when computing effective', () => {
+		const cases: Array<
+			Pick<StripeCheckoutStatus, 'enabledInApp' | 'envDisabled' | 'keysConfigured'> & {
+				effective: boolean;
+			}
+		> = [
+			{ keysConfigured: false, enabledInApp: true, envDisabled: false, effective: false },
+			{ keysConfigured: true, enabledInApp: false, envDisabled: false, effective: false },
+			{ keysConfigured: true, enabledInApp: true, envDisabled: true, effective: false },
+			{ keysConfigured: true, enabledInApp: true, envDisabled: false, effective: true }
+		];
+
+		for (const { keysConfigured, enabledInApp, envDisabled, effective } of cases) {
+			expect(
+				resolveStripeCheckoutEnabled({ keysConfigured, enabledInApp, envDisabled })
+			).toBe(effective);
 		}
 	});
 });

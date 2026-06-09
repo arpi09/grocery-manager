@@ -152,7 +152,8 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 			const forceRefresh = url.searchParams.get('refresh') === '1';
 			const insights = await locals.adminInsightsService.getInsights({
 				adminUserId: auth.user.id,
-				forceRefresh
+				forceRefresh,
+				tier: locals.planTier
 			});
 			if ('error' in insights) {
 				if (insights.error === 'rate_limited') {

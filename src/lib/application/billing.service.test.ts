@@ -12,6 +12,7 @@ describe('BillingService', () => {
 	let repository: IBillingRepository;
 	let stripe: StripePort;
 	let appOrigin: AppOriginPort;
+	let checkoutGate: { isStripeCheckoutEnabled: ReturnType<typeof vi.fn> };
 	let service: BillingService;
 
 	beforeEach(() => {
@@ -27,11 +28,12 @@ describe('BillingService', () => {
 			getPriceIdForInterval: vi.fn().mockReturnValue('price_monthly')
 		};
 		appOrigin = { getOrigin: vi.fn().mockReturnValue('https://app.test') };
-		service = new BillingService(repository, stripe, appOrigin);
+		checkoutGate = { isStripeCheckoutEnabled: vi.fn().mockResolvedValue(true) };
+		service = new BillingService(repository, stripe, appOrigin, checkoutGate);
 	});
 
-	it('throws when checkout is not configured', async () => {
-		vi.mocked(stripe.isCheckoutConfigured).mockReturnValue(false);
+	it('throws when checkout is not enabled', async () => {
+		vi.mocked(checkoutGate.isStripeCheckoutEnabled).mockResolvedValue(false);
 
 		await expect(
 			service.createCheckoutSession({

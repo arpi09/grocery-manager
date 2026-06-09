@@ -9,7 +9,8 @@
 		| 'users'
 		| 'logs'
 		| 'feedback'
-		| 'pmfSurvey';
+		| 'pmfSurvey'
+		| 'social';
 
 	interface Props {
 		active: AdminTab;
@@ -26,7 +27,8 @@
 		{ id: 'users', label: t('admin.users') },
 		{ id: 'logs', label: t('admin.errorLogs') },
 		{ id: 'feedback', label: t('admin.tabs.feedback') },
-		{ id: 'pmfSurvey', label: t('admin.tabs.pmfSurvey') }
+		{ id: 'pmfSurvey', label: t('admin.tabs.pmfSurvey') },
+		{ id: 'social', label: t('admin.tabs.social') }
 	];
 </script>
 

@@ -9,6 +9,7 @@ import { ADMIN_INSIGHT_CHART_KEYS } from '$lib/domain/decisions-analytics';
 import type { PmfFunnelSnapshot } from '$lib/domain/pmf-funnel';
 import type { ProductFeedbackEntry } from '$lib/domain/product-feedback';
 import type { AiRateLimitService } from '$lib/application/ai-rate-limit.service';
+import type { PlanTier } from '$lib/domain/plan';
 import type { AnalyticsAdminService } from '$lib/application/analytics-admin.service';
 import type { PmfService } from '$lib/application/pmf.service';
 import type { ProductFeedbackService } from '$lib/application/product-feedback.service';
@@ -52,6 +53,7 @@ export class AdminInsightsService {
 	async getInsights(options: {
 		adminUserId: string;
 		forceRefresh?: boolean;
+		tier: PlanTier;
 	}): Promise<AdminInsightsResult | { error: string }> {
 		const now = Date.now();
 		if (!options.forceRefresh && this.cache && this.cache.expiresAt > now) {
@@ -62,7 +64,7 @@ export class AdminInsightsService {
 			householdId: null,
 			userId: options.adminUserId,
 			kind: 'admin_insights',
-			tier: 'free'
+			tier: options.tier
 		});
 		if (!quota.allowed) {
 			return { error: 'rate_limited' };

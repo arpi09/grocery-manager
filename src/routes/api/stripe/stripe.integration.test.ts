@@ -9,6 +9,7 @@ const { dbState, testEnv, stripeMocks } = vi.hoisted(() => ({
 		STRIPE_WEBHOOK_SECRET: undefined as string | undefined,
 		STRIPE_PRICE_ID_MONTHLY: undefined as string | undefined,
 		STRIPE_PRICE_ID_YEARLY: undefined as string | undefined,
+		STRIPE_CHECKOUT_DISABLED: undefined as string | undefined,
 		ORIGIN: 'http://localhost:5173',
 		PUBLIC_ORIGIN: 'http://localhost:5173'
 	},
@@ -62,6 +63,7 @@ const USER_ID = 'user-stripe-test';
 describe('Stripe API integration', () => {
 	let integrationDb: IntegrationDbContext;
 	let billingService: import('$lib/application/billing.service').BillingService;
+	let appSettingsService: import('$lib/application/app-settings.service').AppSettingsService;
 	let checkout: typeof import('./checkout/+server').POST;
 	let portal: typeof import('./portal/+server').POST;
 	let webhook: typeof import('./webhook/+server').POST;
@@ -71,10 +73,12 @@ describe('Stripe API integration', () => {
 		integrationDb = await createIntegrationDb();
 		dbState.db = integrationDb.db;
 
-		const [{ BillingService }, { DrizzleBillingRepository }, checkoutMod, portalMod, webhookMod] =
+		const [{ BillingService }, { DrizzleBillingRepository }, { AppSettingsService }, { DrizzleAppSettingsRepository }, checkoutMod, portalMod, webhookMod] =
 			await Promise.all([
 				import('$lib/application/billing.service'),
 				import('$lib/infrastructure/repositories/billing.repository'),
+				import('$lib/application/app-settings.service'),
+				import('$lib/infrastructure/repositories/app-settings.repository'),
 				import('./checkout/+server'),
 				import('./portal/+server'),
 				import('./webhook/+server')
@@ -82,10 +86,12 @@ describe('Stripe API integration', () => {
 
 		const { stripeAdapter } = await import('$lib/infrastructure/adapters/stripe.adapter');
 		const { appOriginAdapter } = await import('$lib/infrastructure/adapters/app-origin.adapter');
+		appSettingsService = new AppSettingsService(new DrizzleAppSettingsRepository(integrationDb.db));
 		billingService = new BillingService(
 			new DrizzleBillingRepository(integrationDb.db),
 			stripeAdapter,
-			appOriginAdapter
+			appOriginAdapter,
+			appSettingsService
 		);
 		checkout = checkoutMod.POST;
 		portal = portalMod.POST;
@@ -104,6 +110,7 @@ describe('Stripe API integration', () => {
 		testEnv.STRIPE_WEBHOOK_SECRET = undefined;
 		testEnv.STRIPE_PRICE_ID_MONTHLY = undefined;
 		testEnv.STRIPE_PRICE_ID_YEARLY = undefined;
+		testEnv.STRIPE_CHECKOUT_DISABLED = undefined;
 		stripeMocks.customersCreate.mockReset();
 		stripeMocks.checkoutSessionsCreate.mockReset();
 		stripeMocks.billingPortalSessionsCreate.mockReset();
@@ -139,10 +146,29 @@ describe('Stripe API integration', () => {
 		expect(response.status).toBe(503);
 	});
 
+	it('checkout returns 503 when keys are set but admin toggle is off', async () => {
+		testEnv.STRIPE_SECRET_KEY = 'sk_test_integration';
+		testEnv.STRIPE_PRICE_ID_MONTHLY = 'price_month_test';
+		testEnv.STRIPE_PRICE_ID_YEARLY = 'price_year_test';
+
+		const response = await checkout({
+			request: new Request('http://localhost/api/stripe/checkout', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ interval: 'month' })
+			}),
+			locals,
+			url: new URL('http://localhost:5173/api/stripe/checkout')
+		} as Parameters<typeof checkout>[0]);
+
+		expect(response.status).toBe(503);
+	});
+
 	it('creates checkout session and stores stripe customer id', async () => {
 		testEnv.STRIPE_SECRET_KEY = 'sk_test_integration';
 		testEnv.STRIPE_PRICE_ID_MONTHLY = 'price_month_test';
 		testEnv.STRIPE_PRICE_ID_YEARLY = 'price_year_test';
+		await appSettingsService.setStripeCheckoutEnabled(true);
 
 		stripeMocks.customersCreate.mockResolvedValue({ id: 'cus_test_1' });
 		stripeMocks.checkoutSessionsCreate.mockResolvedValue({
@@ -228,6 +254,7 @@ describe('Stripe API integration', () => {
 		testEnv.STRIPE_SECRET_KEY = 'sk_test_integration';
 		testEnv.STRIPE_PRICE_ID_MONTHLY = 'price_month_test';
 		testEnv.STRIPE_PRICE_ID_YEARLY = 'price_year_test';
+		await appSettingsService.setStripeCheckoutEnabled(true);
 
 		const response = await portal({
 			locals,
@@ -241,6 +268,7 @@ describe('Stripe API integration', () => {
 		testEnv.STRIPE_SECRET_KEY = 'sk_test_integration';
 		testEnv.STRIPE_PRICE_ID_MONTHLY = 'price_month_test';
 		testEnv.STRIPE_PRICE_ID_YEARLY = 'price_year_test';
+		await appSettingsService.setStripeCheckoutEnabled(true);
 
 		const { eq } = await import('drizzle-orm');
 		const { householdTable } = await import('$lib/infrastructure/db/schema');

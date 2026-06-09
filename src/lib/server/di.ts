@@ -46,7 +46,10 @@ import { DrizzlePlanLimitsRepository } from '$lib/infrastructure/repositories/pl
 import { DrizzleWaitlistRepository } from '$lib/infrastructure/repositories/waitlist.repository';
 import { WaitlistService } from '$lib/application/waitlist.service';
 import { DrizzleAppSettingsRepository } from '$lib/infrastructure/repositories/app-settings.repository';
+import { DrizzleSocialPostRepository } from '$lib/infrastructure/repositories/social-post.repository';
 import { AppSettingsService } from '$lib/application/app-settings.service';
+import { SocialPostService } from '$lib/application/social-post.service';
+import { LinkedInPublishService } from '$lib/application/linkedin-publish.service';
 import { PmfDigestService } from '$lib/application/pmf-digest.service';
 import { ErrorAlertService } from '$lib/application/error-alert.service';
 import { DrizzlePurchasePatternRepository } from '$lib/infrastructure/repositories/purchase-pattern.repository';
@@ -94,6 +97,13 @@ const aiUsageRepository = new DrizzleAiUsageRepository();
 const planLimitsRepository = new DrizzlePlanLimitsRepository();
 const waitlistRepository = new DrizzleWaitlistRepository();
 const appSettingsRepository = new DrizzleAppSettingsRepository();
+const socialPostRepository = new DrizzleSocialPostRepository();
+export const appSettingsService = new AppSettingsService(appSettingsRepository);
+export const socialPostService = new SocialPostService(socialPostRepository);
+export const linkedInPublishService = new LinkedInPublishService(
+	appSettingsRepository,
+	socialPostService
+);
 
 const purchasePatternRepository = new DrizzlePurchasePatternRepository();
 const expiringShareRepository = new DrizzleExpiringShareRepository();
@@ -120,7 +130,12 @@ export const emailVerificationService = new EmailVerificationService(
 );
 export const oauthService = new OAuthService(userRepository);
 export const profileService = new ProfileService(userRepository);
-export const billingService = new BillingService(billingRepository, stripeAdapter, appOriginAdapter);
+export const billingService = new BillingService(
+	billingRepository,
+	stripeAdapter,
+	appOriginAdapter,
+	appSettingsService
+);
 export const adminService = new AdminService(
 	adminRepository,
 	passwordResetService,
@@ -195,7 +210,6 @@ export const aiRateLimitService = new AiRateLimitService(aiUsageRepository);
 export const aiUsageAdminService = new AiUsageAdminService(aiUsageRepository);
 export const planLimitsService = new PlanLimitsService(planLimitsRepository, aiRateLimitService);
 export const waitlistService = new WaitlistService(waitlistRepository);
-export const appSettingsService = new AppSettingsService(appSettingsRepository);
 export const analyticsBehaviorService = new AnalyticsBehaviorService(analyticsBehaviorRepository);
 export const analyticsAdminService = new AnalyticsAdminService(analyticsBehaviorRepository);
 export const adminInsightsService = new AdminInsightsService(

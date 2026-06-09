@@ -654,3 +654,33 @@ export const analyticsElementDailyTable = pgTable(
 	},
 	(table) => [primaryKey({ columns: [table.day, table.route, table.elementKey] })]
 );
+
+export const socialPostTable = pgTable(
+	'social_post',
+	{
+		id: text('id').primaryKey(),
+		channel: text('channel', { enum: ['linkedin'] }).notNull().default('linkedin'),
+		status: text('status', { enum: ['draft', 'approved', 'published', 'failed'] })
+			.notNull()
+			.default('draft'),
+		title: text('title'),
+		body: text('body').notNull(),
+		linkUrl: text('link_url'),
+		utmSource: text('utm_source'),
+		utmMedium: text('utm_medium'),
+		utmCampaign: text('utm_campaign'),
+		utmContent: text('utm_content'),
+		imagePath: text('image_path'),
+		source: text('source', { enum: ['agent', 'manual', 'automation'] })
+			.notNull()
+			.default('manual'),
+		approvedBy: text('approved_by').references(() => userTable.id, { onDelete: 'set null' }),
+		approvedAt: timestamp('approved_at', { withTimezone: true, mode: 'date' }),
+		publishedAt: timestamp('published_at', { withTimezone: true, mode: 'date' }),
+		externalId: text('external_id'),
+		publishError: text('publish_error'),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [index('social_post_status_created_idx').on(table.status, table.createdAt)]
+);

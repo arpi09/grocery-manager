@@ -3,7 +3,7 @@ import { PlanLimitExceededError, PlanLimitsService } from './plan-limits.service
 import type { AiRateLimitService } from './ai-rate-limit.service';
 import type { IPlanLimitsRepository } from '$lib/infrastructure/repositories/plan-limits.repository';
 
-function aiSnapshot(used: number, limit: number | null = 15) {
+function aiSnapshot(used: number, limit: number | null = 75) {
 	return {
 		kind: 'ai_scan' as const,
 		limit,
@@ -31,10 +31,10 @@ describe('PlanLimitsService', () => {
 					return Promise.resolve(aiSnapshot(overrides.aiScanUsed ?? 0));
 				}
 				if (kind === 'receipt_pdf') {
-					return Promise.resolve({ ...aiSnapshot(0, 5), kind: 'receipt_pdf' as const });
+					return Promise.resolve({ ...aiSnapshot(0, 25), kind: 'receipt_pdf' as const });
 				}
 				return Promise.resolve({
-					...aiSnapshot(0, 2),
+					...aiSnapshot(0, 8),
 					kind: 'smart_fill' as const,
 					period: 'week' as const
 				});
@@ -45,7 +45,7 @@ describe('PlanLimitsService', () => {
 	}
 
 	it('returns blocked keys when inventory is at cap', async () => {
-		const service = createService({ nonAi: { maxInventoryItems: 150 } });
+		const service = createService({ nonAi: { maxInventoryItems: 400 } });
 		const snapshot = await service.getSnapshot({
 			userId: 'u1',
 			householdId: 'h1',
@@ -55,7 +55,7 @@ describe('PlanLimitsService', () => {
 	});
 
 	it('throws when AI scan quota is exhausted', async () => {
-		const service = createService({ aiScanUsed: 15 });
+		const service = createService({ aiScanUsed: 75 });
 		await expect(
 			service.requireWithinLimit({
 				userId: 'u1',

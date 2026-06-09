@@ -1,5 +1,8 @@
 import { env } from '$env/dynamic/private';
+import type { LinkedInOAuthTokens } from '$lib/domain/app-settings';
 import type { IAppSettingsRepository } from '$lib/infrastructure/repositories/app-settings.repository';
+import { isLinkedInApiConfigured } from '$lib/server/linkedin-oauth';
+import { isStripeCheckoutConfigured, resolveStripeCheckoutEnabled } from '$lib/server/stripe';
 
 export const EMAIL_SENDING_DISABLED_REASON = 'Email sending is disabled';
 
@@ -19,6 +22,22 @@ export function isEmailSendingDisabledByEnv(): boolean {
 
 export function isEmailSendingDisabledFailure(result: { ok: false; reason: string }): boolean {
 	return result.reason === EMAIL_SENDING_DISABLED_REASON;
+}
+
+export interface StripeCheckoutStatus {
+	/** Admin toggle in database (default false when unset). */
+	enabledInApp: boolean;
+	/** Hard kill switch from STRIPE_CHECKOUT_DISABLED env var. */
+	envDisabled: boolean;
+	/** Whether Stripe secret key and price IDs are configured. */
+	keysConfigured: boolean;
+	/** Whether checkout/portal sessions can be created. */
+	effective: boolean;
+}
+
+export function isStripeCheckoutDisabledByEnv(): boolean {
+	const value = env.STRIPE_CHECKOUT_DISABLED?.trim().toLowerCase();
+	return value === 'true' || value === '1';
 }
 
 export class AppSettingsService {
@@ -41,5 +60,43 @@ export class AppSettingsService {
 
 	setEmailSendingEnabled(enabled: boolean): Promise<void> {
 		return this.settings.setEmailSendingEnabled(enabled);
+	}
+
+	async getStripeCheckoutStatus(): Promise<StripeCheckoutStatus> {
+		const enabledInApp = await this.settings.getStripeCheckoutEnabled();
+		const envDisabled = isStripeCheckoutDisabledByEnv();
+		const keysConfigured = isStripeCheckoutConfigured();
+		return {
+			enabledInApp,
+			envDisabled,
+			keysConfigured,
+			effective: resolveStripeCheckoutEnabled({ keysConfigured, enabledInApp, envDisabled })
+		};
+	}
+
+	async isStripeCheckoutEnabled(): Promise<boolean> {
+		const status = await this.getStripeCheckoutStatus();
+		return status.effective;
+	}
+
+	setStripeCheckoutEnabled(enabled: boolean): Promise<void> {
+		return this.settings.setStripeCheckoutEnabled(enabled);
+	}
+
+	async getLinkedInOAuth(): Promise<LinkedInOAuthTokens | null> {
+		return this.settings.getLinkedInOAuth();
+	}
+
+	async setLinkedInOAuth(tokens: LinkedInOAuthTokens | null): Promise<void> {
+		return this.settings.setLinkedInOAuth(tokens);
+	}
+
+	async isLinkedInConnected(): Promise<boolean> {
+		const tokens = await this.settings.getLinkedInOAuth();
+		return Boolean(tokens?.refreshToken);
+	}
+
+	isLinkedInApiConfigured(): boolean {
+		return isLinkedInApiConfigured();
 	}
 }

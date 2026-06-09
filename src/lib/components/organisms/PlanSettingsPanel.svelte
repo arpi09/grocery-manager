@@ -12,6 +12,7 @@
 
 	interface Props {
 		isPro: boolean;
+		isAdmin?: boolean;
 		isOwner: boolean;
 		stripeCheckoutEnabled: boolean;
 		checkoutStatus: 'success' | 'cancel' | 'portal' | null;
@@ -23,6 +24,7 @@
 
 	let {
 		isPro,
+		isAdmin = false,
 		isOwner,
 		stripeCheckoutEnabled,
 		checkoutStatus,
@@ -40,6 +42,9 @@
 >
 	{#if planLimits && !isPro}
 		<PlanLimitBanner snapshot={planLimits} {stripeCheckoutEnabled} />
+	{/if}
+	{#if isAdmin}
+		<p class="plan-copy plan-admin-note">{t('settings.plan.adminUnlimited')}</p>
 	{/if}
 	{#if isPro}
 		<ProActivePanel
@@ -196,6 +201,10 @@
 
 	.plan-muted {
 		margin-top: var(--space-sm);
+	}
+
+	.plan-admin-note {
+		padding: var(--space-sm) var(--space-lg) 0;
 	}
 
 	.plan-pro-list {

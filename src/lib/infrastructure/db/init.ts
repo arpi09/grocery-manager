@@ -185,7 +185,8 @@ const INCREMENTAL_MIGRATIONS = [
 	'0032_analytics_behavior.sql',
 	'0033_shopping_to_pantry_mode.sql',
 	'0034_inventory_last_confirmed_at.sql',
-	'0035_staleness_reminders.sql'
+	'0035_staleness_reminders.sql',
+	'0036_social_post.sql'
 ];
 
 async function runPgliteBaseline(client: PGlite) {

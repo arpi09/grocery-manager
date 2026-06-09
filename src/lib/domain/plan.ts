@@ -1,3 +1,5 @@
+import { isAdminRole } from '$lib/domain/user';
+
 /** Subscription tier — enforcement and Stripe come later. */
 export type PlanTier = 'free' | 'pro';
 
@@ -14,12 +16,12 @@ export const PRICE_HYPOTHESIS_SEK = {
 
 /** Free tier limits — single source of truth for future rate limits. */
 export const FREE_LIMITS = {
-	maxInventoryItems: 150,
-	maxHouseholdMembers: 2,
-	aiScansPerMonth: 15,
-	receiptPdfParsesPerMonth: 5,
-	smartFillPerWeek: 2,
-	adminInsightsPerWeek: 20
+	maxInventoryItems: 400,
+	maxHouseholdMembers: 4,
+	aiScansPerMonth: 75,
+	receiptPdfParsesPerMonth: 25,
+	smartFillPerWeek: 8,
+	adminInsightsPerWeek: 40
 } as const;
 
 /** Pro tier — null means unlimited. */
@@ -69,6 +71,17 @@ export const DEFAULT_PLAN_TIER: PlanTier = 'free';
 
 export function isProTier(tier: PlanTier): boolean {
 	return tier === 'pro';
+}
+
+/** App admins bypass Free limits — enforcement treats them as Pro. */
+export function resolveEffectivePlanTier(
+	user: { role?: string | null } | null | undefined,
+	householdTier: PlanTier
+): PlanTier {
+	if (user && isAdminRole(user.role)) {
+		return 'pro';
+	}
+	return householdTier;
 }
 
 export type AiUsageKind = 'ai_scan' | 'receipt_pdf' | 'smart_fill' | 'admin_insights';

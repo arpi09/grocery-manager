@@ -5,6 +5,7 @@ import {
 	getAiLimit,
 	isProTier,
 	PRICE_HYPOTHESIS_SEK,
+	resolveEffectivePlanTier,
 	STRIPE_READINESS_GATES
 } from './plan';
 
@@ -16,11 +17,21 @@ describe('plan', () => {
 	});
 
 	it('keeps free limits concrete for future enforcement', () => {
-		expect(FREE_LIMITS.maxInventoryItems).toBeGreaterThan(0);
-		expect(FREE_LIMITS.maxHouseholdMembers).toBe(2);
-		expect(FREE_LIMITS.aiScansPerMonth).toBeGreaterThan(0);
+		expect(FREE_LIMITS.maxInventoryItems).toBe(400);
+		expect(FREE_LIMITS.maxHouseholdMembers).toBe(4);
+		expect(FREE_LIMITS.aiScansPerMonth).toBe(75);
+		expect(FREE_LIMITS.receiptPdfParsesPerMonth).toBe(25);
+		expect(FREE_LIMITS.smartFillPerWeek).toBe(8);
+		expect(FREE_LIMITS.adminInsightsPerWeek).toBe(40);
 		expect(getAiLimit('free', 'ai_scan')).toBe(FREE_LIMITS.aiScansPerMonth);
 		expect(getAiLimit('pro', 'ai_scan')).toBeNull();
+	});
+
+	it('treats app admins as Pro for enforcement', () => {
+		expect(resolveEffectivePlanTier({ role: 'admin' }, 'free')).toBe('pro');
+		expect(resolveEffectivePlanTier({ role: 'user' }, 'free')).toBe('free');
+		expect(resolveEffectivePlanTier({ role: 'user' }, 'pro')).toBe('pro');
+		expect(resolveEffectivePlanTier(null, 'free')).toBe('free');
 	});
 
 	it('anchors price hypothesis within competitor band', () => {

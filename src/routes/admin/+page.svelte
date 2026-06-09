@@ -22,6 +22,10 @@
 	/** Value from the latest toggle click — used at submit time before DOM/state flush. */
 	let emailSendingSubmitEnabled: boolean | undefined = $state(undefined);
 	let emailSendingForm: HTMLFormElement | undefined = $state();
+	let stripeCheckoutSubmitting = $state(false);
+	let stripeCheckoutEnabled = $state(data.stripeCheckout.enabledInApp);
+	let stripeCheckoutSubmitEnabled: boolean | undefined = $state(undefined);
+	let stripeCheckoutForm: HTMLFormElement | undefined = $state();
 
 	let activeTab = $state<AdminTab>(parseAdminTab(data.tab));
 
@@ -31,6 +35,10 @@
 
 	$effect(() => {
 		emailSendingEnabled = data.emailSending.enabledInApp;
+	});
+
+	$effect(() => {
+		stripeCheckoutEnabled = data.stripeCheckout.enabledInApp;
 	});
 
 	function selectTab(tab: AdminTab) {
@@ -109,6 +117,65 @@
 				</Card>
 			</section>
 
+			<section class="stripe-checkout-settings">
+				<Card>
+					<h2>{t('admin.stripeCheckout.title')}</h2>
+					<p class="stripe-checkout-note">{t('admin.stripeCheckout.note')}</p>
+					<p class="stripe-checkout-keys">
+						{t('admin.stripeCheckout.keysConfigured', {
+							state: data.stripeCheckout.keysConfigured
+								? t('admin.stripeCheckout.keysOk')
+								: t('admin.stripeCheckout.keysMissing')
+						})}
+					</p>
+					{#if data.stripeCheckout.envDisabled}
+						<p class="stripe-checkout-env" role="status">
+							{t('admin.stripeCheckout.envDisabled')}
+						</p>
+					{/if}
+					<form
+						method="POST"
+						action="?/setStripeCheckout"
+						class="stripe-checkout-form"
+						bind:this={stripeCheckoutForm}
+						use:enhance={bindSubmitting(
+							(v) => (stripeCheckoutSubmitting = v),
+							(formData) => {
+								const enabled = stripeCheckoutSubmitEnabled ?? stripeCheckoutEnabled;
+								formData.set('enabled', enabled ? 'true' : 'false');
+								stripeCheckoutSubmitEnabled = undefined;
+							}
+						)}
+					>
+						<input
+							type="hidden"
+							name="enabled"
+							value={stripeCheckoutEnabled ? 'true' : 'false'}
+						/>
+						<Toggle
+							checked={stripeCheckoutEnabled}
+							disabled={stripeCheckoutSubmitting || data.stripeCheckout.envDisabled}
+							label={t('admin.stripeCheckout.enable')}
+							onchange={(enabled) => {
+								stripeCheckoutSubmitEnabled = enabled;
+								stripeCheckoutEnabled = enabled;
+								stripeCheckoutForm?.requestSubmit();
+							}}
+						/>
+						<p class="stripe-checkout-status">
+							{t('admin.stripeCheckout.status', {
+								state: data.stripeCheckout.effective
+									? t('admin.on')
+									: t('admin.off')
+							})}
+						</p>
+						{#if stripeCheckoutSubmitting}
+							<span class="stripe-checkout-saving">{t('common.saving')}</span>
+						{/if}
+					</form>
+				</Card>
+			</section>
+
 			<section class="session-mgmt">
 				<Card>
 					<h2>{t('admin.sessionManagement')}</h2>
@@ -149,6 +216,10 @@
 		{:else if activeTab === 'pmfSurvey'}
 			{#await import('$lib/components/organisms/admin/AdminPmfSurveyPanel.svelte') then { default: AdminPmfSurveyPanel }}
 				<AdminPmfSurveyPanel active={true} />
+			{/await}
+		{:else if activeTab === 'social'}
+			{#await import('$lib/components/organisms/admin/AdminSocialPostsPanel.svelte') then { default: AdminSocialPostsPanel }}
+				<AdminSocialPostsPanel active={true} linkedIn={data.linkedIn} />
 			{/await}
 		{/if}
 	</PageContainer>
@@ -193,6 +264,41 @@
 	}
 
 	.email-settings-status {
+		margin-bottom: 0;
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	.stripe-checkout-settings {
+		margin-bottom: var(--space-lg);
+	}
+
+	.stripe-checkout-note,
+	.stripe-checkout-keys,
+	.stripe-checkout-env,
+	.stripe-checkout-status,
+	.stripe-checkout-saving {
+		margin: 0 0 var(--space-md);
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+
+	.stripe-checkout-env {
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-sm);
+		background: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));
+		color: var(--color-warning);
+		border: 1px solid color-mix(in srgb, var(--color-warning) 30%, var(--color-border));
+	}
+
+	.stripe-checkout-form {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--space-sm);
+	}
+
+	.stripe-checkout-status {
 		margin-bottom: 0;
 		font-weight: 600;
 		color: var(--color-text);

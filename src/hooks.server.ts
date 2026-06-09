@@ -29,7 +29,9 @@ import {
 	purchasePatternService,
 	analyticsBehaviorService,
 	analyticsAdminService,
-	adminInsightsService
+	adminInsightsService,
+	socialPostService,
+	linkedInPublishService
 } from '$lib/server/di';
 import { recordUserActivity } from '$lib/server/activity';
 import { resolveHouseholdId } from '$lib/server/household-context';
@@ -47,7 +49,7 @@ import {
 	hasExpiryReminderChecked,
 	markExpiryReminderChecked
 } from '$lib/infrastructure/expiry-reminder-cookie';
-import { DEFAULT_PLAN_TIER } from '$lib/domain/plan';
+import { DEFAULT_PLAN_TIER, resolveEffectivePlanTier } from '$lib/domain/plan';
 import { isMarketingPath, isExpiringSharePath } from '$lib/marketing/routes';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { VERIFY_EMAIL_PATH } from '$lib/navigation/email-verification';
@@ -160,6 +162,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.analyticsBehaviorService = analyticsBehaviorService;
 	event.locals.analyticsAdminService = analyticsAdminService;
 	event.locals.adminInsightsService = adminInsightsService;
+	event.locals.socialPostService = socialPostService;
+	event.locals.linkedInPublishService = linkedInPublishService;
 
 	const { pathname: requestPathname } = event.url;
 	const locale = resolveLocaleForRequest(event.cookies, event.request, {
@@ -191,7 +195,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 				event.locals.householdId,
 				event.locals.user.id
 			);
-			event.locals.planTier = await billingService.getPlanTier(event.locals.householdId);
+			const householdTier = await billingService.getPlanTier(event.locals.householdId);
+			event.locals.planTier = resolveEffectivePlanTier(event.locals.user, householdTier);
+		} else {
+			event.locals.planTier = resolveEffectivePlanTier(event.locals.user, DEFAULT_PLAN_TIER);
 		}
 	}
 

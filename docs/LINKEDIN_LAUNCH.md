@@ -3,6 +3,8 @@
 Kopiera, anpassa i **du-form**, publicera när du är redo för besökare på [skaffu.com](https://skaffu.com).  
 **Ärlig beta:** be om feedback, inte “tusentals användare” eller “folk betalar redan” om du inte har siffror från `/admin`.
 
+**Företagssida + godkännande-kö:** För varumärkesinlägg som **Skaffu** (inte personlig profil), skapa Company Page och använd admin-kön — se [LINKEDIN_COMPANY_PAGE.md](./LINKEDIN_COMPANY_PAGE.md). Uppföljningscopy finns i [LINKEDIN_REPOST.md](./LINKEDIN_REPOST.md); agenter kan fylla drafts via `POST /api/admin/social-posts`.
+
 ---
 
 ## Profil (engångs)

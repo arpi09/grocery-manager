@@ -30,11 +30,16 @@ export interface CreateCheckoutSessionInput {
 	origin?: string;
 }
 
+export interface StripeCheckoutGatePort {
+	isStripeCheckoutEnabled(): Promise<boolean>;
+}
+
 export class BillingService {
 	constructor(
 		private readonly repository: IBillingRepository,
 		private readonly stripe: StripePort,
-		private readonly appOrigin: AppOriginPort
+		private readonly appOrigin: AppOriginPort,
+		private readonly checkoutGate: StripeCheckoutGatePort
 	) {}
 
 	async getPlanTier(householdId: string | null): Promise<PlanTier> {
@@ -55,7 +60,7 @@ export class BillingService {
 	}
 
 	async createCheckoutSession(input: CreateCheckoutSessionInput): Promise<{ url: string }> {
-		if (!this.stripe.isCheckoutConfigured()) {
+		if (!(await this.checkoutGate.isStripeCheckoutEnabled())) {
 			throw new BillingNotConfiguredError();
 		}
 
@@ -158,7 +163,7 @@ export class BillingService {
 		householdId: string;
 		origin?: string;
 	}): Promise<{ url: string }> {
-		if (!this.stripe.isCheckoutConfigured()) {
+		if (!(await this.checkoutGate.isStripeCheckoutEnabled())) {
 			throw new BillingNotConfiguredError();
 		}
 
