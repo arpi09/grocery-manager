@@ -1939,7 +1939,17 @@
 		"shareLoading": "Creating link…",
 		"shareSuccess": "Link copied — valid for 48 hours.",
 		"shareFailed": "Could not create share link. Try again.",
-		"shareEmpty": "No expiring items to share right now."
+		"shareEmpty": "No expiring items to share right now.",
+		"shareCardBtn": "Share as image",
+		"shareCardLoading": "Creating image…",
+		"shareCardTitle": "Skaffu — eat it first",
+		"shareCardText": "{count} items expiring soon — eat them before they go to waste.",
+		"shareCardHeadline": "Eat these {count} items first",
+		"shareCardOverflow": "+ {count} more",
+		"shareCardFooter": "Less food waste with Skaffu — a pantry that keeps track.",
+		"shareCardSuccess": "Image shared.",
+		"shareCardDownloaded": "Image downloaded.",
+		"shareCardFailed": "Could not create share image. Try again."
 	},
 	"weeklyRitual": {
 		"pageTitle": "Week sorted",

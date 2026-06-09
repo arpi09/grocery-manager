@@ -99,6 +99,22 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		}
 	});
 
+	test('expiring share card button visible on home when items expiring', async ({ page }) => {
+		test.setTimeout(60_000);
+		const itemName = `E2E ShareCard ${Date.now()}`;
+		const expiresOn = dateWithinExpiringSoonDays(2);
+
+		await loginAsAdmin(page);
+		await createFridgeItemViaAction(page, { name: itemName, expiresOn });
+		await page.goto('/hem', { waitUntil: 'commit' });
+		await dismissCookieConsentIfOpen(page);
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(
+			page.getByRole('button', { name: /Dela som bild|Share as image/i })
+		).toBeVisible({ timeout: 15_000 });
+	});
+
 	test('expiring share link opens public dela page', async ({ page }) => {
 		test.setTimeout(60_000);
 		const itemName = `E2E Dela ${Date.now()}`;

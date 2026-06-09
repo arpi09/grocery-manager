@@ -1910,7 +1910,17 @@
 		"shareLoading": "Skapar länk…",
 		"shareSuccess": "Länken är kopierad — giltig i 48 timmar.",
 		"shareFailed": "Kunde inte skapa delningslänk. Försök igen.",
-		"shareEmpty": "Inga utgående varor att dela just nu."
+		"shareEmpty": "Inga utgående varor att dela just nu.",
+		"shareCardBtn": "Dela som bild",
+		"shareCardLoading": "Skapar bild…",
+		"shareCardTitle": "Skaffu — ät det först",
+		"shareCardText": "{count} varor går ut snart — ät dem innan de blir svinn.",
+		"shareCardHeadline": "Ät dessa {count} varor först",
+		"shareCardOverflow": "+ {count} till",
+		"shareCardFooter": "Mindre matsvinn med Skaffu — skafferi som håller koll.",
+		"shareCardSuccess": "Bilden delades.",
+		"shareCardDownloaded": "Bilden laddades ner.",
+		"shareCardFailed": "Kunde inte skapa delningsbild. Försök igen."
 	},
 	"weeklyRitual": {
 		"pageTitle": "Veckan fixad",

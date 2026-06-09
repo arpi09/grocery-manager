@@ -17,6 +17,11 @@
 		presentAddMissingFeedback,
 		type AddMissingFeedbackTone
 	} from '$lib/utils/recipe-add-missing';
+	import {
+		buildExpiringShareCardRows,
+		downloadBlob,
+		renderExpiringShareCardPng
+	} from '$lib/utils/expiring-share-export';
 
 	interface Props {
 		expiringItems: InventoryItem[];
@@ -29,6 +34,7 @@
 
 	let loading = $state(false);
 	let sharing = $state(false);
+	let sharingImage = $state(false);
 	let mealIntent = $state<MealIntent>(DEFAULT_MEAL_INTENT);
 	let suggestions = $state<RecipeIdea[]>([]);
 	let errorMessage = $state<string | null>(null);
@@ -86,6 +92,65 @@
 			errorMessage = t('eatFirst.shareFailed');
 		} finally {
 			sharing = false;
+		}
+	}
+
+	async function shareExpiringCard(method: 'share' | 'download') {
+		if (!canEdit || expiringItems.length === 0) {
+			return;
+		}
+
+		sharingImage = true;
+		errorMessage = null;
+
+		try {
+			const locale = getLocale();
+			const { rows, overflowCount } = buildExpiringShareCardRows(
+				expiringItems.map((item) => ({ name: item.name, expiresOn: item.expiresOn })),
+				locale
+			);
+			const labels = {
+				brand: t('nav.brandName'),
+				badge: t('eatFirst.badge'),
+				headline: t('eatFirst.shareCardHeadline', { count: expiringItems.length }),
+				items: rows,
+				overflowText:
+					overflowCount > 0 ? t('eatFirst.shareCardOverflow', { count: overflowCount }) : undefined,
+				footer: t('eatFirst.shareCardFooter')
+			};
+			const blob = await renderExpiringShareCardPng(labels);
+			const filename = `skaffu-eat-first-${new Date().toISOString().slice(0, 10)}.png`;
+			const file = new File([blob], filename, { type: 'image/png' });
+
+			if (
+				method === 'share' &&
+				navigator.share &&
+				navigator.canShare?.({ files: [file] })
+			) {
+				await navigator.share({
+					title: t('eatFirst.shareCardTitle'),
+					text: t('eatFirst.shareCardText', { count: expiringItems.length }),
+					files: [file]
+				});
+				showClientToast(t('eatFirst.shareCardSuccess'), { variant: 'success' });
+			} else if (method === 'share' && navigator.share) {
+				await navigator.share({
+					title: t('eatFirst.shareCardTitle'),
+					text: t('eatFirst.shareCardText', { count: expiringItems.length }),
+					url: window.location.origin
+				});
+				showClientToast(t('eatFirst.shareCardSuccess'), { variant: 'success' });
+			} else {
+				downloadBlob(blob, filename);
+				showClientToast(t('eatFirst.shareCardDownloaded'), { variant: 'success' });
+			}
+		} catch (error) {
+			if (error instanceof DOMException && error.name === 'AbortError') {
+				return;
+			}
+			errorMessage = t('eatFirst.shareCardFailed');
+		} finally {
+			sharingImage = false;
 		}
 	}
 
@@ -294,8 +359,21 @@
 					loadingLabel={t('eatFirst.shareLoading')}
 					variant="secondary"
 					fullWidth
+					disabled={sharingImage}
 				>
 					{t('eatFirst.shareBtn')}
+				</Button>
+				<Button
+					type="button"
+					data-analytics-id="eat-first.share-card"
+					onclick={() => shareExpiringCard('share')}
+					loading={sharingImage}
+					loadingLabel={t('eatFirst.shareCardLoading')}
+					variant="secondary"
+					fullWidth
+					disabled={sharing}
+				>
+					{t('eatFirst.shareCardBtn')}
 				</Button>
 			{/if}
 			<Button
@@ -564,6 +642,9 @@
 
 	.actions {
 		margin-top: var(--space-xs);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
 	}
 
 	.suggestions h3 {
