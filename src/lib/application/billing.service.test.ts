@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	BillingHouseholdMissingError,
 	BillingNotConfiguredError,
-	BillingService
+	BillingService,
+	type StripeCheckoutGatePort
 } from './billing.service';
 import type { IBillingRepository } from '$lib/infrastructure/repositories/billing.repository';
 import type { AppOriginPort } from '$lib/application/ports/app-origin.port';
@@ -12,7 +13,7 @@ describe('BillingService', () => {
 	let repository: IBillingRepository;
 	let stripe: StripePort;
 	let appOrigin: AppOriginPort;
-	let checkoutGate: { isStripeCheckoutEnabled: ReturnType<typeof vi.fn> };
+	let checkoutGate: StripeCheckoutGatePort;
 	let service: BillingService;
 
 	beforeEach(() => {
@@ -28,7 +29,7 @@ describe('BillingService', () => {
 			getPriceIdForInterval: vi.fn().mockReturnValue('price_monthly')
 		};
 		appOrigin = { getOrigin: vi.fn().mockReturnValue('https://app.test') };
-		checkoutGate = { isStripeCheckoutEnabled: vi.fn().mockResolvedValue(true) };
+		checkoutGate = { isStripeCheckoutEnabled: vi.fn(() => Promise.resolve(true)) };
 		service = new BillingService(repository, stripe, appOrigin, checkoutGate);
 	});
 
