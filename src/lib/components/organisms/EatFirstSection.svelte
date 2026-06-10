@@ -728,6 +728,7 @@
 		display: inline-flex !important;
 		align-items: center;
 		gap: var(--space-sm);
+		min-height: var(--touch-target-min);
 		padding: var(--space-sm) var(--space-md) !important;
 	}
 
@@ -959,6 +960,9 @@
 	}
 
 	.nearby-map-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
 		font-size: 0.8125rem;
 		font-weight: 600;
 		color: var(--color-primary);
@@ -977,7 +981,7 @@
 	.nearby-open-link {
 		display: inline-flex;
 		align-items: center;
-		min-height: 2.25rem;
+		min-height: var(--touch-target-min);
 		padding: 0.45rem 0.85rem;
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-border);
