@@ -55,7 +55,8 @@ const SQL_MIGRATION_FILES = [
 	'0034_inventory_last_confirmed_at.sql',
 	'0035_staleness_reminders.sql',
 	'0036_social_post.sql',
-	'0037_guide_article.sql'
+	'0037_guide_article.sql',
+	'0038_nearby_expiring_share.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE

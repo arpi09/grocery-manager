@@ -11,6 +11,7 @@ Operativ checklista för deploy av **gamification + Wrapped / Skaffurapport / Gr
 - [ ] **CI grön** — workflow **CI** på `master` (lint, check, test, integration, build). Senaste push: kontrollera [Actions → CI](https://github.com/arpi09/grocery-manager/actions/workflows/ci.yml).
 - [ ] **E2E** — valfritt före deploy; **obligatoriskt** i deploy-kedjan (G3). Nattlig schedule 03:00 UTC eller manuell körning.
 - [ ] **Migration 0030** — `drizzle/0030_expiring_share_link.sql` (`expiring_share_link`) appliceras vid prod-boot via befintlig migrationskedja; verifiera i deploy-logg att inget migrationsfel.
+- [ ] **Migration 0038** — `drizzle/0038_nearby_expiring_share.sql` (Grannskafferiet v1 geo) appliceras vid prod-boot; verifiera i deploy-logg.
 - [ ] **Cron schemalagd** — workflow [`.github/workflows/skaffurapport-cron.yml`](../.github/workflows/skaffurapport-cron.yml) mergad till `master`. Schema: **1:a i månaden 06:00 UTC** → `POST /api/cron/skaffurapport`. Secrets: `CRON_SECRET` (samma som övriga cron), variable `PRODUCTION_URL` (`https://skaffu.com`). Manuell test: Actions → **Skaffurapport cron** → Run workflow.
 - [ ] **Firebase secrets** — `CRON_SECRET` i Secret Manager matchar GitHub (se [`CI_CD.md`](./CI_CD.md) § Secrets).
 

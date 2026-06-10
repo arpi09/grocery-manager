@@ -9,6 +9,8 @@
 	let { data } = $props();
 
 	const locale = getLocale();
+	const signupUrl =
+		'https://skaffu.com/?utm_source=facebook&utm_medium=community&utm_campaign=matsvinn_w12&utm_content=grannskafferiet';
 	const expiresAtLabel = $derived(
 		new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
 			data.preview.expiresAt
@@ -62,6 +64,14 @@
 		</ul>
 
 		<p class="gdpr-note" role="note">{t('expiringShare.publicGdprNote')}</p>
+
+		<div class="signup-cta">
+			<h2>{t('expiringShare.publicSignupTitle')}</h2>
+			<p>{t('expiringShare.publicSignupLead')}</p>
+			<a class="signup-cta-btn" href={signupUrl}>
+				{t('expiringShare.publicSignupBtn')}
+			</a>
+		</div>
 	</div>
 </main>
 
@@ -109,6 +119,41 @@
 		margin: 0;
 		color: var(--color-text-muted);
 		font-size: var(--text-sm);
+	}
+
+	.signup-cta {
+		display: grid;
+		gap: var(--space-sm);
+		padding: var(--space-lg);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+	}
+
+	.signup-cta h2 {
+		margin: 0;
+		font-size: 1.125rem;
+	}
+
+	.signup-cta p {
+		margin: 0;
+		color: var(--color-text-muted);
+		font-size: var(--text-sm);
+	}
+
+	.signup-cta-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2.75rem;
+		padding: 0.65rem 1.1rem;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		background: var(--color-surface-muted);
+		color: var(--color-text);
+		font-weight: 600;
+		text-decoration: none;
+		text-align: center;
 	}
 
 	.gdpr-note {

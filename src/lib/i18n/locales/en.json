@@ -2023,6 +2023,7 @@
 		"shareBtn": "Share expiring list",
 		"shareLoading": "Creating link…",
 		"shareSuccess": "Link copied — valid for 48 hours.",
+		"shareSuccessNative": "Link shared — valid for 48 hours.",
 		"shareFailed": "Could not create share link. Try again.",
 		"shareEmpty": "No expiring items to share right now.",
 		"shareCardBtn": "Share as image",
@@ -2480,6 +2481,28 @@
 		"publicTitle": "Expiring items to pick up",
 		"publicLead": "A neighbour or friend shared this list from their pantry.",
 		"publicExpires": "Link valid until {date}.",
-		"publicGdprNote": "The list shows item names and expiry dates only — no addresses or contact details. The link expires automatically."
+		"publicGdprNote": "The list shows item names and expiry dates only — no addresses or contact details. The link expires automatically.",
+		"publicSignupTitle": "Want to track expiring food too?",
+		"publicSignupLead": "Skaffu helps households cut food waste — scan, get reminders, and share lists like this one.",
+		"publicSignupBtn": "Try Skaffu free"
+	},
+	"nearbySharing": {
+		"settingsTitle": "Neighbour pantry nearby",
+		"settingsDescription": "Find active shares within about 500 m — no address in the list.",
+		"enableTitle": "Show shares near me",
+		"enableNote": "Requires browser location. We store approximate position, not your address.",
+		"enableLabel": "Enable nearby shares",
+		"privacyNote": "Other opted-in users see approximate distance and item names — never address or contact.",
+		"specLink": "Read privacy and v1 spec",
+		"locationRequired": "Enable browser location to find nearby shares.",
+		"locationDenied": "Location denied — enable location in your browser settings.",
+		"saveFailed": "Could not save setting. Try again.",
+		"panelTitle": "Neighbour pantry nearby",
+		"panelLead": "Active shares within about 500 m — no address shown.",
+		"panelEmpty": "No active shares nearby right now.",
+		"panelOptInHint": "Want to see lists near you?",
+		"panelOptInLink": "Enable in Settings",
+		"approxDistance": "about {metres} m away",
+		"itemCount": "{count, plural, one {# item} other {# items}}"
 	}
 }

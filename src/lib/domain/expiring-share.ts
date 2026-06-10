@@ -18,3 +18,19 @@ export interface ExpiringSharePreview {
 	expiresAt: Date;
 	createdAt: Date;
 }
+
+export interface NearbySharingSettings {
+	enabled: boolean;
+	latitude: number | null;
+	longitude: number | null;
+	updatedAt: Date | null;
+}
+
+export interface NearbyExpiringShare {
+	id: string;
+	itemCount: number;
+	previewItems: Pick<ExpiringShareItemSnapshot, 'name' | 'expiresOn'>[];
+	approximateDistanceM: number;
+	expiresAt: Date;
+	createdAt: Date;
+}

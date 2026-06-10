@@ -1994,6 +1994,7 @@
 		"shareBtn": "Dela utgående lista",
 		"shareLoading": "Skapar länk…",
 		"shareSuccess": "Länken är kopierad — giltig i 48 timmar.",
+		"shareSuccessNative": "Länken delades — giltig i 48 timmar.",
 		"shareFailed": "Kunde inte skapa delningslänk. Försök igen.",
 		"shareEmpty": "Inga utgående varor att dela just nu.",
 		"shareCardBtn": "Dela som bild",
@@ -2479,6 +2480,28 @@
 		"publicTitle": "Utgående varor att hämta",
 		"publicLead": "En granne eller vän delade den här listan från sitt skafferi.",
 		"publicExpires": "Länken gäller till {date}.",
-		"publicGdprNote": "Listan visar bara varunamn och utgångsdatum — inga adresser eller kontaktuppgifter. Länken slutar gälla automatiskt."
+		"publicGdprNote": "Listan visar bara varunamn och utgångsdatum — inga adresser eller kontaktuppgifter. Länken slutar gälla automatiskt.",
+		"publicSignupTitle": "Vill du också hålla koll på utgående varor?",
+		"publicSignupLead": "Skaffu hjälper hushållet minska matsvinn — skanna, få påminnelser och dela listor som den här.",
+		"publicSignupBtn": "Prova Skaffu gratis"
+	},
+	"nearbySharing": {
+		"settingsTitle": "Grannskafferiet i närheten",
+		"settingsDescription": "Hitta aktiva delningar inom cirka 500 meter — utan adress i listan.",
+		"enableTitle": "Visa delningar nära mig",
+		"enableNote": "Kräver plats i webbläsaren. Vi sparar ungefärlig position, inte din adress.",
+		"enableLabel": "Aktivera närliggande delningar",
+		"privacyNote": "Andra opt-in-användare ser ungefärligt avstånd och varunamn — aldrig adress eller kontakt.",
+		"specLink": "Läs integritet och v1-spec",
+		"locationRequired": "Aktivera plats i webbläsaren för att hitta delningar i närheten.",
+		"locationDenied": "Plats nekad — aktivera plats i webbläsaren under Inställningar.",
+		"saveFailed": "Kunde inte spara inställningen. Försök igen.",
+		"panelTitle": "Grannskafferiet i närheten",
+		"panelLead": "Aktiva delningar inom cirka 500 m — utan adress.",
+		"panelEmpty": "Inga aktiva delningar i närheten just nu.",
+		"panelOptInHint": "Vill du se listor nära dig?",
+		"panelOptInLink": "Aktivera under Inställningar",
+		"approxDistance": "ca {metres} m bort",
+		"itemCount": "{count, plural, one {# vara} other {# varor}}"
 	}
 }

@@ -3,6 +3,7 @@ import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
 import { isAdminRole } from '$lib/domain/user';
 import {
 	appSettingsService,
+	expiringShareService,
 	expiryReminderService,
 	pushSubscriptionRepository,
 	receiptForwardService,
@@ -32,7 +33,8 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		planLimits,
 		billing,
 		pushNotificationsEnabled,
-		shoppingToPantryMode
+		shoppingToPantryMode,
+		nearbySharingSettings
 	] = await Promise.all([
 		user ? locals.petService.listPets(user.id) : Promise.resolve([]),
 		user ? locals.householdService.getHouseholdForUser(user.id) : Promise.resolve(null),
@@ -59,7 +61,10 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		user ? pushSubscriptionRepository.isPushEnabled(user.id) : Promise.resolve(false),
 		user
 			? locals.profileService.getShoppingToPantryMode(user.id)
-			: Promise.resolve('ask' as const)
+			: Promise.resolve('ask' as const),
+		user
+			? expiringShareService.getNearbySharingSettings(user.id)
+			: Promise.resolve({ enabled: false, latitude: null, longitude: null, updatedAt: null })
 	]);
 
 	const checkout = url.searchParams.get('checkout');
@@ -98,7 +103,8 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		pendingInvites,
 		kivraForwardEnabled,
 		kivraForwardAddress,
-		shoppingToPantryMode
+		shoppingToPantryMode,
+		nearbySharingEnabled: nearbySharingSettings.enabled
 	};
 };
 

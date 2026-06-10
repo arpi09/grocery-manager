@@ -141,5 +141,76 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		);
 		await expect(page.getByText(itemName)).toBeVisible();
 		await expect(page.getByRole('note')).toContainText(/inga adresser|no addresses/i);
+		await expect(
+			page.getByRole('link', { name: /Prova Skaffu|Try Skaffu/i })
+		).toHaveAttribute(
+			'href',
+			'https://skaffu.com/?utm_source=facebook&utm_medium=community&utm_campaign=matsvinn_w12&utm_content=grannskafferiet'
+		);
+	});
+
+	test('nearby sharing settings API accepts opt-out', async ({ page }) => {
+		await loginAsAdmin(page);
+
+		const settingsResponse = await page.request.post('/api/expiring-share/nearby-settings', {
+			data: { enabled: false }
+		});
+		expect(settingsResponse.ok()).toBeTruthy();
+		const settingsPayload = (await settingsResponse.json()) as { ok: boolean; enabled: boolean };
+		expect(settingsPayload.ok).toBe(true);
+		expect(settingsPayload.enabled).toBe(false);
+
+		const nearbyResponse = await page.request.get('/api/expiring-share/nearby');
+		expect(nearbyResponse.ok()).toBeTruthy();
+		const nearbyPayload = (await nearbyResponse.json()) as {
+			ok: boolean;
+			optedIn: boolean;
+			shares: unknown[];
+		};
+		expect(nearbyPayload.ok).toBe(true);
+		expect(nearbyPayload.optedIn).toBe(false);
+		expect(nearbyPayload.shares).toEqual([]);
+	});
+
+	test('nearby sharing settings API opt-in stores coarse location', async ({ page }) => {
+		await loginAsAdmin(page);
+
+		const optInResponse = await page.request.post('/api/expiring-share/nearby-settings', {
+			data: { enabled: true, latitude: 59.329323, longitude: 18.068581 }
+		});
+		expect(optInResponse.ok()).toBeTruthy();
+		const optInPayload = (await optInResponse.json()) as {
+			ok: boolean;
+			enabled: boolean;
+			latitude: number;
+			longitude: number;
+		};
+		expect(optInPayload.ok).toBe(true);
+		expect(optInPayload.enabled).toBe(true);
+		expect(optInPayload.latitude).toBe(59.329);
+		expect(optInPayload.longitude).toBe(18.069);
+
+		const getResponse = await page.request.get('/api/expiring-share/nearby-settings');
+		expect(getResponse.ok()).toBeTruthy();
+		const getPayload = (await getResponse.json()) as {
+			ok: boolean;
+			enabled: boolean;
+			latitude: number;
+			longitude: number;
+		};
+		expect(getPayload.enabled).toBe(true);
+		expect(getPayload.latitude).toBe(59.329);
+		expect(getPayload.longitude).toBe(18.069);
+
+		const nearbyResponse = await page.request.get('/api/expiring-share/nearby');
+		expect(nearbyResponse.ok()).toBeTruthy();
+		const nearbyPayload = (await nearbyResponse.json()) as {
+			ok: boolean;
+			optedIn: boolean;
+			shares: unknown[];
+		};
+		expect(nearbyPayload.ok).toBe(true);
+		expect(nearbyPayload.optedIn).toBe(true);
+		expect(Array.isArray(nearbyPayload.shares)).toBe(true);
 	});
 });

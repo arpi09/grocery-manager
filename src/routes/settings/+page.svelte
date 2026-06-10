@@ -14,6 +14,7 @@
 
 	import KivraForwardSettingsPanel from '$lib/components/organisms/KivraForwardSettingsPanel.svelte';
 
+	import NearbySharingSettingsPanel from '$lib/components/organisms/NearbySharingSettingsPanel.svelte';
 	import NotificationSettingsPanel from '$lib/components/organisms/NotificationSettingsPanel.svelte';
 
 	import PlanSettingsPanel from '$lib/components/organisms/PlanSettingsPanel.svelte';
@@ -259,6 +260,8 @@
 			{/if}
 
 
+
+			<NearbySharingSettingsPanel nearbySharingEnabled={data.nearbySharingEnabled} />
 
 			<NotificationSettingsPanel
 

@@ -1,0 +1,31 @@
+import { json } from '@sveltejs/kit';
+import { translate } from '$lib/i18n/messages';
+import { requireUser } from '$lib/server/api-guards';
+import { expiringShareService } from '$lib/server/di';
+import type { RequestHandler } from './$types';
+
+export const GET: RequestHandler = async ({ locals }) => {
+	const auth = requireUser(locals);
+	if (!auth.authorized) {
+		return auth.response;
+	}
+
+	if (!locals.householdId) {
+		return json({ ok: false, error: translate(locals.locale, 'errors.api.unauthorized') }, { status: 400 });
+	}
+
+	const result = await expiringShareService.listNearbyShares(auth.user.id, locals.householdId);
+
+	return json({
+		ok: true,
+		optedIn: result.optedIn,
+		shares: result.shares.map((share) => ({
+			id: share.id,
+			itemCount: share.itemCount,
+			previewItems: share.previewItems,
+			approximateDistanceM: share.approximateDistanceM,
+			expiresAt: share.expiresAt.toISOString(),
+			createdAt: share.createdAt.toISOString()
+		}))
+	});
+};

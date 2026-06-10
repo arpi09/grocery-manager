@@ -4,7 +4,7 @@ export function applySecurityHeaders(response: Response): void {
 	headers.set('X-Content-Type-Options', 'nosniff');
 	headers.set('X-Frame-Options', 'DENY');
 	headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-	headers.set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=()');
+	headers.set('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(self)');
 	headers.set('Cross-Origin-Opener-Policy', 'same-origin');
 	headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
 	if (!headers.has('Content-Security-Policy')) {

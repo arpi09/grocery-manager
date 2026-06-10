@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
@@ -44,6 +45,16 @@
 	let scheduleDates = $state<Record<string, string>>({});
 	let note = $state<string | null>(null);
 	let ideaCompletion = $state<Record<string, 'exiting' | 'done'>>({});
+	let nearbyOptedIn = $state(false);
+	let nearbyShares = $state<
+		Array<{
+			id: string;
+			itemCount: number;
+			previewItems: Array<{ name: string; expiresOn: string | null }>;
+			approximateDistanceM: number;
+		}>
+	>([]);
+	let nearbyLoading = $state(false);
 
 	const todayIso = new Date().toISOString().slice(0, 10);
 	const previewItems = $derived(expiringItems.slice(0, 5));
@@ -66,6 +77,70 @@
 		}, completionDelayMs + completionHoldMs);
 	}
 
+	async function readNearbySharingEnabled(): Promise<boolean> {
+		try {
+			const response = await fetch('/api/expiring-share/nearby-settings');
+			if (!response.ok) {
+				return false;
+			}
+			const data = (await response.json()) as { enabled?: boolean };
+			return Boolean(data.enabled);
+		} catch {
+			return false;
+		}
+	}
+
+	async function requestBrowserLocation(): Promise<{ latitude: number; longitude: number } | null> {
+		if (!navigator.geolocation) {
+			return null;
+		}
+		return new Promise((resolve) => {
+			navigator.geolocation.getCurrentPosition(
+				(position) =>
+					resolve({
+						latitude: position.coords.latitude,
+						longitude: position.coords.longitude
+					}),
+				() => resolve(null),
+				{ enableHighAccuracy: false, timeout: 10_000, maximumAge: 120_000 }
+			);
+		});
+	}
+
+	async function loadNearbyShares() {
+		nearbyLoading = true;
+		try {
+			const response = await fetch('/api/expiring-share/nearby');
+			const data = (await response.json()) as {
+				ok?: boolean;
+				optedIn?: boolean;
+				shares?: Array<{
+					id: string;
+					itemCount: number;
+					previewItems: Array<{ name: string; expiresOn: string | null }>;
+					approximateDistanceM: number;
+				}>;
+			};
+			if (!response.ok || !data.ok) {
+				return;
+			}
+			nearbyOptedIn = Boolean(data.optedIn);
+			nearbyShares = data.shares ?? [];
+		} catch {
+			nearbyShares = [];
+		} finally {
+			nearbyLoading = false;
+		}
+	}
+
+	onMount(() => {
+		void loadNearbyShares();
+	});
+
+	function formatNearbyDistance(metres: number): string {
+		return t('nearbySharing.approxDistance', { metres });
+	}
+
 	async function shareExpiringList() {
 		if (!canEdit || expiringItems.length === 0) {
 			return;
@@ -75,7 +150,17 @@
 		errorMessage = null;
 
 		try {
-			const response = await fetch('/api/expiring-share', { method: 'POST' });
+			const attachNearby = await readNearbySharingEnabled();
+			const coordinate = attachNearby ? await requestBrowserLocation() : null;
+			const response = await fetch('/api/expiring-share', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					attachNearby,
+					latitude: coordinate?.latitude,
+					longitude: coordinate?.longitude
+				})
+			});
 			const data = (await response.json()) as { ok?: boolean; url?: string; error?: string };
 
 			if (!response.ok || !data.ok || !data.url) {
@@ -83,11 +168,33 @@
 				return;
 			}
 
-			if (navigator.clipboard?.writeText) {
+			let sharedViaNative = false;
+			if (navigator.share && navigator.canShare?.({ url: data.url })) {
+				try {
+					await navigator.share({
+						title: t('eatFirst.shareCardTitle'),
+						text: t('eatFirst.shareCardText', { count: expiringItems.length }),
+						url: data.url
+					});
+					sharedViaNative = true;
+				} catch (error) {
+					if (error instanceof DOMException && error.name === 'AbortError') {
+						return;
+					}
+				}
+			}
+
+			if (!sharedViaNative && navigator.clipboard?.writeText) {
 				await navigator.clipboard.writeText(data.url);
 			}
 
-			showClientToast(t('eatFirst.shareSuccess'), { variant: 'success' });
+			showClientToast(
+				sharedViaNative ? t('eatFirst.shareSuccessNative') : t('eatFirst.shareSuccess'),
+				{ variant: 'success' }
+			);
+			if (attachNearby) {
+				void loadNearbyShares();
+			}
 		} catch {
 			errorMessage = t('eatFirst.shareFailed');
 		} finally {
@@ -303,6 +410,41 @@
 	{:else}
 		<p class="no-expiring">{t('eatFirst.noExpiring')}</p>
 	{/if}
+
+	<section class="nearby-panel" aria-labelledby="nearby-sharing-heading">
+			<h3 id="nearby-sharing-heading">{t('nearbySharing.panelTitle')}</h3>
+			<p class="nearby-lead">{t('nearbySharing.panelLead')}</p>
+			{#if nearbyLoading}
+				<p class="nearby-status">{t('common.loading')}</p>
+			{:else if !nearbyOptedIn}
+				<p class="nearby-hint">
+					{t('nearbySharing.panelOptInHint')}
+					<a href="/settings#settings-nearby-sharing">{t('nearbySharing.panelOptInLink')}</a>
+				</p>
+			{:else if nearbyShares.length === 0}
+				<p class="nearby-status">{t('nearbySharing.panelEmpty')}</p>
+			{:else}
+				<ul class="nearby-list">
+					{#each nearbyShares as share (share.id)}
+						<li>
+							<Card class="nearby-card">
+								<div class="nearby-card-main">
+									<span class="nearby-distance">{formatNearbyDistance(share.approximateDistanceM)}</span>
+									<span class="nearby-count">
+										{t('nearbySharing.itemCount', { count: share.itemCount })}
+									</span>
+									<ul class="nearby-preview">
+										{#each share.previewItems as item, index (index)}
+											<li>{item.name}</li>
+										{/each}
+									</ul>
+								</div>
+							</Card>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+	</section>
 
 	{#if canEdit}
 		{#if compact}
@@ -782,5 +924,63 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--space-sm);
+	}
+
+	.nearby-panel {
+		padding: var(--space-md);
+		border-radius: var(--radius-md);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
+		background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface-muted));
+	}
+
+	.nearby-panel h3 {
+		margin: 0 0 var(--space-xs);
+		font-size: 1rem;
+	}
+
+	.nearby-lead,
+	.nearby-status,
+	.nearby-hint {
+		margin: 0;
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+	}
+
+	.nearby-list {
+		margin: var(--space-sm) 0 0;
+		padding: 0;
+		list-style: none;
+		display: grid;
+		gap: var(--space-sm);
+	}
+
+	:global(.nearby-card) {
+		padding: var(--space-sm) var(--space-md) !important;
+	}
+
+	.nearby-card-main {
+		display: grid;
+		gap: var(--space-2xs);
+	}
+
+	.nearby-distance {
+		font-weight: 700;
+		font-size: 0.875rem;
+	}
+
+	.nearby-count {
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+	}
+
+	.nearby-preview {
+		margin: 0;
+		padding-left: 1.1rem;
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+	}
+
+	.nearby-hint {
+		margin-top: var(--space-sm);
 	}
 </style>

@@ -28,6 +28,13 @@ export const userTable = pgTable('user', {
 		mode: 'date'
 	}),
 	pushNotificationsEnabled: boolean('push_notifications_enabled').notNull().default(false),
+	nearbySharingEnabled: boolean('nearby_sharing_enabled').notNull().default(false),
+	nearbySharingLat: numeric('nearby_sharing_lat', { precision: 9, scale: 6 }),
+	nearbySharingLng: numeric('nearby_sharing_lng', { precision: 9, scale: 6 }),
+	nearbySharingUpdatedAt: timestamp('nearby_sharing_updated_at', {
+		withTimezone: true,
+		mode: 'date'
+	}),
 	shoppingPushEnabled: boolean('shopping_push_enabled').notNull().default(false),
 	shoppingPushLastSentAt: timestamp('shopping_push_last_sent_at', {
 		withTimezone: true,
@@ -564,11 +571,14 @@ export const expiringShareLinkTable = pgTable(
 		tokenHash: text('token_hash').notNull(),
 		snapshotJson: text('snapshot_json').notNull(),
 		expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+		latitude: numeric('latitude', { precision: 9, scale: 6 }),
+		longitude: numeric('longitude', { precision: 9, scale: 6 }),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 	},
 	(table) => [
 		index('expiring_share_link_token_hash_idx').on(table.tokenHash),
-		index('expiring_share_link_household_idx').on(table.householdId)
+		index('expiring_share_link_household_idx').on(table.householdId),
+		index('expiring_share_link_geo_idx').on(table.latitude, table.longitude)
 	]
 );
 
