@@ -13,7 +13,7 @@ import {
 	type ResolveDefaultSocialLinkDeps
 } from '$lib/marketing/linkedin-draft-defaults';
 
-export interface SeedSocialPostDeps extends ResolveDefaultSocialLinkDeps {}
+export type SeedSocialPostDeps = ResolveDefaultSocialLinkDeps;
 
 async function loadSeedDraft() {
 	const db = getDb();
