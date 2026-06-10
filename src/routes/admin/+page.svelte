@@ -225,6 +225,10 @@
 					openAiConfigured={data.openAiConfigured}
 				/>
 			{/await}
+		{:else if activeTab === 'grannskafferiet'}
+			{#await import('$lib/components/organisms/admin/AdminGrannskafferietReportsPanel.svelte') then { default: AdminGrannskafferietReportsPanel }}
+				<AdminGrannskafferietReportsPanel active={true} />
+			{/await}
 		{/if}
 	</PageContainer>
 </AppLayout>

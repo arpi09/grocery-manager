@@ -55,13 +55,17 @@ export const STRIPE_READINESS_GATES = {
 	payingWaitlistMin: 50
 } as const;
 
+/** Nearby discovery radius by tier (metres). */
+export const NEARBY_RADIUS_M = { free: 500, pro: 2000 } as const;
+
 /** Features included in Pro (marketing + settings copy keys). */
 export const PRO_FEATURE_KEYS = [
 	'unlimitedAi',
 	'unlimitedReceiptPdf',
 	'unlimitedSmartFill',
 	'insightsAndStats',
-	'moreHouseholdMembers'
+	'moreHouseholdMembers',
+	'nearbyRadius'
 ] as const;
 
 export type ProFeatureKey = (typeof PRO_FEATURE_KEYS)[number];
@@ -71,6 +75,10 @@ export const DEFAULT_PLAN_TIER: PlanTier = 'free';
 
 export function isProTier(tier: PlanTier): boolean {
 	return tier === 'pro';
+}
+
+export function getNearbyRadiusM(tier: PlanTier): number {
+	return isProTier(tier) ? NEARBY_RADIUS_M.pro : NEARBY_RADIUS_M.free;
 }
 
 /** App admins bypass Free limits — enforcement treats them as Pro. */

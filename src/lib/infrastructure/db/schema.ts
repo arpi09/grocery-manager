@@ -40,6 +40,11 @@ export const userTable = pgTable('user', {
 		withTimezone: true,
 		mode: 'date'
 	}),
+	nearbyPushEnabled: boolean('nearby_push_enabled').notNull().default(false),
+	nearbyPushLastSentAt: timestamp('nearby_push_last_sent_at', {
+		withTimezone: true,
+		mode: 'date'
+	}),
 	themePreference: text('theme_preference', { enum: ['light', 'dark', 'system'] }).notNull().default('system'),
 	shoppingToPantryMode: text('shopping_to_pantry_mode', {
 		enum: ['always', 'ask', 'never']

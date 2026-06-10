@@ -7,7 +7,8 @@ export type AdminTab =
 	| 'logs'
 	| 'feedback'
 	| 'pmfSurvey'
-	| 'social';
+	| 'social'
+	| 'grannskafferiet';
 
 export const ADMIN_TABS: AdminTab[] = [
 	'overview',
@@ -18,7 +19,8 @@ export const ADMIN_TABS: AdminTab[] = [
 	'logs',
 	'feedback',
 	'pmfSurvey',
-	'social'
+	'social',
+	'grannskafferiet'
 ];
 
 const ADMIN_TAB_ALIASES: Record<string, AdminTab> = {

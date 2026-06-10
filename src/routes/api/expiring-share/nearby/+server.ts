@@ -14,11 +14,15 @@ export const GET: RequestHandler = async ({ locals }) => {
 		return json({ ok: false, error: translate(locals.locale, 'errors.api.unauthorized') }, { status: 400 });
 	}
 
-	const result = await expiringShareService.listNearbyShares(auth.user.id, locals.householdId);
+	const result = await expiringShareService.listNearbyShares(auth.user.id, locals.householdId, {
+		viewerPlanTier: locals.planTier,
+		viewerRole: auth.user.role
+	});
 
 	return json({
 		ok: true,
 		optedIn: result.optedIn,
+		radiusM: result.radiusM,
 		shares: result.shares.map((share) => ({
 			id: share.id,
 			itemCount: share.itemCount,

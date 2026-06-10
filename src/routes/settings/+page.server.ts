@@ -5,6 +5,7 @@ import {
 	appSettingsService,
 	expiringShareService,
 	expiryReminderService,
+	nearbyPushService,
 	pushSubscriptionRepository,
 	receiptForwardService,
 	shoppingPushService
@@ -29,6 +30,7 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		pendingInvites,
 		expirySettings,
 		shoppingPushSettings,
+		nearbyPushSettings,
 		autoExpiredGraceDays,
 		planLimits,
 		billing,
@@ -46,6 +48,9 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 			: Promise.resolve({ enabled: false, days: 7 as const, lastSentAt: null }),
 		user
 			? shoppingPushService.getSettings(user.id)
+			: Promise.resolve({ enabled: false, lastSentAt: null }),
+		user
+			? nearbyPushService.getSettings(user.id)
 			: Promise.resolve({ enabled: false, lastSentAt: null }),
 		householdId && householdRole && canEditInventory(householdRole)
 			? locals.inventoryService.getAutoExpiredGraceDays(householdId)
@@ -95,6 +100,7 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		expiryReminderDays: expirySettings.days,
 		pushNotificationsEnabled,
 		shoppingPushEnabled: shoppingPushSettings.enabled,
+		nearbyPushEnabled: nearbyPushSettings.enabled,
 		autoExpiredGraceDays,
 		pets,
 		household,

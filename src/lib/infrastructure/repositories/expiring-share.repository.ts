@@ -1,4 +1,4 @@
-import { and, eq, gt, isNotNull, ne, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, isNotNull, ne, sql } from 'drizzle-orm';
 import type {
 	ExpiringSharePreview,
 	ExpiringShareSnapshot,
@@ -39,6 +39,24 @@ export interface ExpiringShareMeta {
 	expiresAt: Date;
 }
 
+export interface ExpiringShareForNearbyPush {
+	id: string;
+	householdId: string;
+	createdByUserId: string;
+	latitude: number | null;
+	longitude: number | null;
+	snapshot: ExpiringShareSnapshot;
+	expiresAt: Date;
+}
+
+export interface ExpiringShareReportRow {
+	id: string;
+	shareId: string;
+	reporterUserId: string;
+	reason: string | null;
+	createdAt: Date;
+}
+
 export interface IExpiringShareRepository {
 	create(input: CreateExpiringShareInput): Promise<void>;
 	findByTokenHash(tokenHash: string): Promise<ExpiringSharePreview | null>;
@@ -74,6 +92,8 @@ export interface IExpiringShareRepository {
 	getBlockedShareIds(reporterUserId: string): Promise<string[]>;
 	getBlockedHouseholdIds(reporterUserId: string): Promise<string[]>;
 	findPreviewById(shareId: string): Promise<ExpiringSharePreview | null>;
+	findShareForNearbyPush(shareId: string): Promise<ExpiringShareForNearbyPush | null>;
+	listReports(limit: number): Promise<ExpiringShareReportRow[]>;
 }
 
 function parseNumeric(value: string | null): number | null {
@@ -165,6 +185,58 @@ export class DrizzleExpiringShareRepository implements IExpiringShareRepository 
 			.limit(1);
 
 		return this.toPreview(rows[0]);
+	}
+
+	async findShareForNearbyPush(shareId: string): Promise<ExpiringShareForNearbyPush | null> {
+		const rows = await this.database
+			.select({
+				id: expiringShareLinkTable.id,
+				householdId: expiringShareLinkTable.householdId,
+				createdByUserId: expiringShareLinkTable.createdByUserId,
+				snapshotJson: expiringShareLinkTable.snapshotJson,
+				expiresAt: expiringShareLinkTable.expiresAt,
+				latitude: expiringShareLinkTable.latitude,
+				longitude: expiringShareLinkTable.longitude
+			})
+			.from(expiringShareLinkTable)
+			.where(eq(expiringShareLinkTable.id, shareId))
+			.limit(1);
+
+		const row = rows[0];
+		if (!row || row.expiresAt.getTime() <= Date.now()) {
+			return null;
+		}
+
+		let snapshot: ExpiringShareSnapshot;
+		try {
+			snapshot = JSON.parse(row.snapshotJson) as ExpiringShareSnapshot;
+		} catch {
+			return null;
+		}
+
+		return {
+			id: row.id,
+			householdId: row.householdId,
+			createdByUserId: row.createdByUserId,
+			latitude: parseNumeric(row.latitude),
+			longitude: parseNumeric(row.longitude),
+			snapshot,
+			expiresAt: row.expiresAt
+		};
+	}
+
+	async listReports(limit: number): Promise<ExpiringShareReportRow[]> {
+		return this.database
+			.select({
+				id: expiringShareReportTable.id,
+				shareId: expiringShareReportTable.shareId,
+				reporterUserId: expiringShareReportTable.reporterUserId,
+				reason: expiringShareReportTable.reason,
+				createdAt: expiringShareReportTable.createdAt
+			})
+			.from(expiringShareReportTable)
+			.orderBy(desc(expiringShareReportTable.createdAt))
+			.limit(limit);
 	}
 
 	async getNearbySharingSettings(userId: string): Promise<NearbySharingSettings> {

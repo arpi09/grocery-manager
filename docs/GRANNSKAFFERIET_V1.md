@@ -1,6 +1,6 @@
 # Grannskafferiet v1 — spec (geo, trust & karta)
 
-Status: **v1.2 shipped** (jun 2026). Push och Pro-radie kommer senare.
+Status: **v2a–v2c shipped** (jun 2026). Nearby-push gratis med opt-in; Pro-radie 2 km i kod (Stripe-gate); kart-polish + admin-rapporter.
 
 Se även: [`GRANNSKAFFERIET_V0.md`](./GRANNSKAFFERIET_V0.md) (token-länk + dela som bild).
 
@@ -10,66 +10,58 @@ Låt opt-in-användare **upptäcka** att någon i närheten delat utgående varo
 
 ## Scope per version
 
-| v1.0 | v1.1 | v1.2 |
-|------|------|------|
-| Opt-in + grov plats (~111 m) | Report + block | Dedikerad discovery-sida `/grannskafferiet` |
-| Feed inom ~500 m på `/hem` | E-post till ägare vid report (om `ERROR_ALERT_TO`) | MapLibre-karta med jitter-prickar |
-| Ungefärligt avstånd | Dölj token/hushåll för reporter | Lista + bottom sheet, `openPath` utan token i nearby API |
-| | | PMF: `nearby_map_opened`, `nearby_share_tapped` |
+| v1.0 | v1.1 | v1.2 | v2a | v2b | v2c |
+|------|------|------|-----|-----|-----|
+| Opt-in + grov plats (~111 m) | Report + block | `/grannskafferiet` + MapLibre | **Nearby push** (gratis, opt-in) | **Pro 2 km** radie | Karta clusters, du-markör, expiry badges, admin reports |
+| Feed inom ~500 m på `/hem` | E-post vid report | Bottom sheet + PMF events | Push med varunamn | Soft Pro CTA på karta | Pro TTL 72 h för sharers |
 
-**Ingår inte än:** push till närliggande, Pro-radie (2 km), chatt, bokning, exakta hem-prickar.
+**Ingår inte än:** chatt, bokning, exakta hem-prickar.
 
 ## Flöde
 
 1. Användare aktiverar **Grannskafferiet i närheten** under Inställningar → webbläsaren begär plats → server sparar **grov** lat/lng på `user`.
-2. Vid **Dela utgående lista** (om opt-in): klient skickar valfri färsk plats → server sparar grov lat/lng på `expiring_share_link`.
-3. Opt-in-användare ser panelen på `/hem` och kan öppna **`/grannskafferiet`** (karta + lista).
-4. `GET /api/expiring-share/nearby` returnerar jitterade `mapLat`/`mapLng` — **aldrig** raw lat/lng för andras hem.
-5. Mottagare öppnar lista via `openPath` (`/grannskafferiet/share/{id}`) efter nearby-validering — token läcker inte i feed.
+2. Valfritt: **Notis när någon nära delar** (kräver web push + nearby opt-in) — gratis för alla.
+3. Vid **Dela utgående lista** (om opt-in): klient skickar valfri färsk plats → server sparar grov lat/lng på `expiring_share_link` → **best-effort push** till opted-in viewers inom radie.
+4. Opt-in-användare ser panelen på `/hem` och **`/grannskafferiet`** (karta + lista). Free: 500 m; Pro: 2 km (`getNearbyRadiusM`).
+5. `GET /api/expiring-share/nearby` returnerar jitterade `mapLat`/`mapLng` — **aldrig** raw lat/lng för andras hem.
 
 ## Datamodell
 
-### `user` (v1.0)
+### `user` (v1.0 + v2a)
 
 - `nearby_sharing_enabled`, `nearby_sharing_lat` / `nearby_sharing_lng`, `nearby_sharing_updated_at`
+- `nearby_push_enabled`, `nearby_push_last_sent_at` (migration `0040`)
 
 ### `expiring_share_link` (v1.0)
 
 - `latitude` / `longitude` — nullable; grov plats vid delning
+- Pro sharers: TTL **72 h** (vs 48 h free) vid `createShareLink`
 
 ### `expiring_share_report` (v1.1)
 
-- `share_id`, `reporter_user_id`, `reason`, `created_at`
-
-### `expiring_share_block` (v1.1)
-
-- `reporter_user_id` + `share_id` och/eller `household_id` — döljer för reporter
+- Admin-tabell i `/admin` → Grannskafferiet (dismiss-only v1)
 
 ## API
 
 | Metod | Sökväg | Auth | Beskrivning |
 |-------|--------|------|-------------|
-| `POST` | `/api/expiring-share` | Ja | Skapa länk; valfritt `{ attachNearby, latitude?, longitude? }` |
-| `GET` | `/api/expiring-share/nearby` | Ja | Lista med `mapLat`, `mapLng`, `openPath` |
+| `POST` | `/api/expiring-share` | Ja | Skapa länk; valfritt `{ attachNearby, latitude?, longitude? }` → triggar nearby push |
+| `GET` | `/api/expiring-share/nearby` | Ja | Lista + `radiusM` |
 | `GET`/`POST` | `/api/expiring-share/nearby-settings` | Ja | Läs/spara opt-in + plats |
+| `GET`/`POST` | `/api/expiring-share/nearby-push-settings` | Ja | Läs/spara nearby push opt-in |
 | `POST` | `/api/expiring-share/report` | Ja | Rapportera; blockera share (+ valfritt hushåll) |
 
 ## Karta & integritet
 
-- **Jitter** — `jitterCoordinateForDisplay(id, coarseCoord)` i `geo.ts`; deterministisk per share-id.
-- **Gratis för alla** — ingen Pro-gate på karta eller nearby-lista i v1.2.
-- **Ingen adress** i snapshot, feed, karta eller publik `/dela/[token]`.
-
-## Planerat v2+ (ej implementerat)
-
-- Web push: "Någon nära dig delar utgående varor"
-- **Pro:** större radie (2 km vs 500 m), ev. längre TTL — se [`PRICING.md`](./PRICING.md)
+- **Jitter** — `jitterCoordinateForDisplay(id, coarseCoord)` i `geo.ts`
+- **Clusters** — MapLibre cluster layer när >5 prickar
+- **Du-markör** — coarse viewer center, inte exakt hem
+- **Gratis discovery + gratis nearby-push** — Pro = **räckvidd** (2 km), ev. längre TTL
 
 ## Kod
 
-- Geo: `src/lib/domain/geo.ts`
+- Geo / radie: `src/lib/domain/geo.ts`, `src/lib/domain/plan.ts` (`getNearbyRadiusM`)
+- Push: `src/lib/domain/nearby-push.ts`, `src/lib/application/nearby-push.service.ts`
 - Service: `src/lib/application/expiring-share.service.ts`
-- Repository: `src/lib/infrastructure/repositories/expiring-share.repository.ts`
-- API: `src/routes/api/expiring-share/`
-- UI: `EatFirstSection.svelte`, `NearbySharesMap.svelte`, `/grannskafferiet`
-- Migrationer: `0038_nearby_expiring_share.sql`, `0039_expiring_share_report_block.sql`
+- UI: `NearbySharesMap.svelte`, `NearbySharingSettingsPanel.svelte`, `/grannskafferiet`
+- Migrationer: `0038`–`0040`

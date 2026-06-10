@@ -3,6 +3,7 @@ import {
 	DEFAULT_PLAN_TIER,
 	FREE_LIMITS,
 	getAiLimit,
+	getNearbyRadiusM,
 	isProTier,
 	PRICE_HYPOTHESIS_SEK,
 	resolveEffectivePlanTier,
@@ -25,6 +26,11 @@ describe('plan', () => {
 		expect(FREE_LIMITS.adminInsightsPerWeek).toBe(40);
 		expect(getAiLimit('free', 'ai_scan')).toBe(FREE_LIMITS.aiScansPerMonth);
 		expect(getAiLimit('pro', 'ai_scan')).toBeNull();
+	});
+
+	it('returns nearby radius by tier', () => {
+		expect(getNearbyRadiusM('free')).toBe(500);
+		expect(getNearbyRadiusM('pro')).toBe(2000);
 	});
 
 	it('treats app admins as Pro for enforcement', () => {

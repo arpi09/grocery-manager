@@ -25,6 +25,8 @@
 		onSelectShare
 	}: Props = $props();
 
+	const CLUSTER_THRESHOLD = 5;
+
 	let mapContainer = $state<HTMLDivElement | null>(null);
 	let mapReady = $state(false);
 	let mapError = $state<string | null>(null);
@@ -33,6 +35,10 @@
 	let map: any = null;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let maplibregl: any = null;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let youMarker: any = null;
+
+	const useClusters = $derived(shares.length > CLUSTER_THRESHOLD);
 
 	function defaultCenter(): [number, number] {
 		if (centerLat != null && centerLng != null) {
@@ -42,6 +48,23 @@
 			return [shares[0]!.mapLng, shares[0]!.mapLat];
 		}
 		return [18.0686, 59.3293];
+	}
+
+	function sharesGeoJson() {
+		return {
+			type: 'FeatureCollection',
+			features: shares.map((share) => ({
+				type: 'Feature',
+				geometry: {
+					type: 'Point',
+					coordinates: [share.mapLng, share.mapLat]
+				},
+				properties: {
+					id: share.id,
+					selected: share.id === selectedShareId
+				}
+			}))
+		};
 	}
 
 	function fitShares() {
@@ -59,15 +82,44 @@
 		map.fitBounds(bounds, { padding: 48, maxZoom: 16, duration: 0 });
 	}
 
-	function renderMarkers() {
+	function renderYouMarker() {
 		if (!map || !maplibregl) {
 			return;
 		}
 
+		youMarker?.remove();
+		youMarker = null;
+
+		if (centerLat == null || centerLng == null) {
+			return;
+		}
+
+		const markerEl = document.createElement('div');
+		markerEl.className = 'nearby-map-you-marker';
+		markerEl.setAttribute('aria-label', t('nearbySharing.youMarkerLabel'));
+		markerEl.textContent = t('nearbySharing.youMarkerShort');
+
+		youMarker = new maplibregl.Marker({ element: markerEl, anchor: 'center' })
+			.setLngLat([centerLng, centerLat])
+			.addTo(map);
+	}
+
+	function clearDomMarkers() {
+		if (!map) {
+			return;
+		}
 		const existing = map.getContainer().querySelectorAll('[data-nearby-marker]');
 		for (const node of existing) {
 			node.remove();
 		}
+	}
+
+	function renderDomMarkers() {
+		if (!map || !maplibregl || useClusters) {
+			return;
+		}
+
+		clearDomMarkers();
 
 		for (const share of shares) {
 			const markerEl = document.createElement('button');
@@ -86,6 +138,151 @@
 			new maplibregl.Marker({ element: markerEl, anchor: 'center' })
 				.setLngLat([share.mapLng, share.mapLat])
 				.addTo(map);
+		}
+	}
+
+	function removeClusterLayers() {
+		if (!map) {
+			return;
+		}
+		for (const layerId of ['nearby-clusters', 'nearby-cluster-count', 'nearby-unclustered']) {
+			if (map.getLayer(layerId)) {
+				map.removeLayer(layerId);
+			}
+		}
+		if (map.getSource('nearby-shares')) {
+			map.removeSource('nearby-shares');
+		}
+	}
+
+	function mapColors() {
+		if (typeof document === 'undefined') {
+			return { primary: '#2563eb', warning: '#d97706', surface: '#ffffff', text: '#111827' };
+		}
+		const styles = getComputedStyle(document.documentElement);
+		return {
+			primary: styles.getPropertyValue('--color-primary').trim() || '#2563eb',
+			warning: styles.getPropertyValue('--color-warning').trim() || '#d97706',
+			surface: styles.getPropertyValue('--color-surface').trim() || '#ffffff',
+			text: styles.getPropertyValue('--color-text').trim() || '#111827'
+		};
+	}
+
+	function setupClusterLayers() {
+		if (!map || !useClusters) {
+			removeClusterLayers();
+			return;
+		}
+
+		clearDomMarkers();
+		removeClusterLayers();
+
+		const colors = mapColors();
+
+		map.addSource('nearby-shares', {
+			type: 'geojson',
+			data: sharesGeoJson(),
+			cluster: true,
+			clusterMaxZoom: 14,
+			clusterRadius: 50
+		});
+
+		map.addLayer({
+			id: 'nearby-clusters',
+			type: 'circle',
+			source: 'nearby-shares',
+			filter: ['has', 'point_count'],
+			paint: {
+				'circle-color': colors.primary,
+				'circle-radius': ['step', ['get', 'point_count'], 18, 5, 22, 10, 26],
+				'circle-stroke-width': 2,
+				'circle-stroke-color': colors.surface
+			}
+		});
+
+		map.addLayer({
+			id: 'nearby-cluster-count',
+			type: 'symbol',
+			source: 'nearby-shares',
+			filter: ['has', 'point_count'],
+			layout: {
+				'text-field': '{point_count_abbreviated}',
+				'text-size': 12
+			},
+			paint: {
+				'text-color': '#fff'
+			}
+		});
+
+		map.addLayer({
+			id: 'nearby-unclustered',
+			type: 'circle',
+			source: 'nearby-shares',
+			filter: ['!', ['has', 'point_count']],
+			paint: {
+				'circle-color': [
+					'case',
+					['==', ['get', 'selected'], true],
+					colors.warning,
+					colors.primary
+				],
+				'circle-radius': ['case', ['==', ['get', 'selected'], true], 10, 8],
+				'circle-stroke-width': 2,
+				'circle-stroke-color': colors.surface
+			}
+		});
+
+		map.on('click', 'nearby-clusters', (event: { features?: Array<{ geometry: { coordinates: number[] } }> }) => {
+			const feature = event.features?.[0];
+			if (!feature) {
+				return;
+			}
+			const coordinates = feature.geometry.coordinates.slice() as [number, number];
+			map.easeTo({ center: coordinates, zoom: map.getZoom() + 2 });
+		});
+
+		map.on('click', 'nearby-unclustered', (event: { features?: Array<{ properties?: { id?: string } }> }) => {
+			const shareId = event.features?.[0]?.properties?.id;
+			if (shareId) {
+				onSelectShare?.(shareId);
+			}
+		});
+
+		map.on('mouseenter', 'nearby-clusters', () => {
+			map.getCanvas().style.cursor = 'pointer';
+		});
+		map.on('mouseleave', 'nearby-clusters', () => {
+			map.getCanvas().style.cursor = '';
+		});
+		map.on('mouseenter', 'nearby-unclustered', () => {
+			map.getCanvas().style.cursor = 'pointer';
+		});
+		map.on('mouseleave', 'nearby-unclustered', () => {
+			map.getCanvas().style.cursor = '';
+		});
+	}
+
+	function refreshMapData() {
+		if (!mapReady || !map) {
+			return;
+		}
+
+		renderYouMarker();
+
+		if (useClusters) {
+			const source = map.getSource('nearby-shares');
+			if (source) {
+				source.setData(sharesGeoJson());
+			} else {
+				setupClusterLayers();
+			}
+		} else {
+			removeClusterLayers();
+			renderDomMarkers();
+		}
+
+		if (shares.length > 0) {
+			fitShares();
 		}
 	}
 
@@ -127,8 +324,7 @@
 			map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 			map.on('load', () => {
 				mapReady = true;
-				renderMarkers();
-				fitShares();
+				refreshMapData();
 			});
 		} catch {
 			mapError = t('nearbySharing.mapLoadFailed');
@@ -139,13 +335,11 @@
 		if (!mapReady) {
 			return;
 		}
-		renderMarkers();
-		if (shares.length > 0) {
-			fitShares();
-		}
+		refreshMapData();
 	});
 
 	onDestroy(() => {
+		youMarker?.remove();
 		map?.remove();
 		map = null;
 	});
@@ -190,8 +384,8 @@
 	}
 
 	:global(.nearby-map-marker) {
-		width: 1.1rem;
-		height: 1.1rem;
+		width: 2.75rem;
+		height: 2.75rem;
 		border-radius: 999px;
 		border: 2px solid var(--color-surface);
 		background: var(--color-primary);
@@ -201,9 +395,24 @@
 	}
 
 	:global(.nearby-map-marker.selected) {
-		width: 1.35rem;
-		height: 1.35rem;
 		background: var(--color-warning);
 		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-warning) 40%, transparent);
+	}
+
+	:global(.nearby-map-you-marker) {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 2.75rem;
+		min-height: 2.75rem;
+		padding: 0.25rem 0.55rem;
+		border-radius: 999px;
+		border: 2px solid var(--color-surface);
+		background: var(--color-text);
+		color: var(--color-surface);
+		font-size: 0.6875rem;
+		font-weight: 700;
+		letter-spacing: 0.02em;
+		box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-text) 25%, transparent);
 	}
 </style>

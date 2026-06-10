@@ -243,4 +243,28 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 			}
 		}
 	});
+
+	test('nearby push settings API toggles opt-in', async ({ page }) => {
+		await loginAsAdmin(page);
+
+		await page.request.post('/api/expiring-share/nearby-settings', {
+			data: { enabled: true, latitude: 59.329323, longitude: 18.068581 }
+		});
+
+		const enableResponse = await page.request.post('/api/expiring-share/nearby-push-settings', {
+			data: { enabled: 'true' }
+		});
+		expect(enableResponse.status()).toBe(400);
+		const enablePayload = (await enableResponse.json()) as { ok: boolean; error?: string };
+		expect(enablePayload.ok).toBe(false);
+		expect(enablePayload.error).toBe('push_required');
+
+		const disableResponse = await page.request.post('/api/expiring-share/nearby-push-settings', {
+			data: { enabled: 'false' }
+		});
+		expect(disableResponse.ok()).toBeTruthy();
+		const disablePayload = (await disableResponse.json()) as { ok: boolean; enabled: boolean };
+		expect(disablePayload.ok).toBe(true);
+		expect(disablePayload.enabled).toBe(false);
+	});
 });

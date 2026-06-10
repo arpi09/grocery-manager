@@ -261,7 +261,11 @@
 
 
 
-			<NearbySharingSettingsPanel nearbySharingEnabled={data.nearbySharingEnabled} />
+			<NearbySharingSettingsPanel
+				nearbySharingEnabled={data.nearbySharingEnabled}
+				nearbyPushEnabled={data.nearbyPushEnabled}
+				pushNotificationsEnabled={data.pushNotificationsEnabled}
+			/>
 
 			<NotificationSettingsPanel
 

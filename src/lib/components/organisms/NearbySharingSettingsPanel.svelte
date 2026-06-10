@@ -1,35 +1,63 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import Toggle from '$lib/components/atoms/Toggle.svelte';
 	import SettingsRow from '$lib/components/molecules/SettingsRow.svelte';
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
 	import { t } from '$lib/i18n';
+	import {
+		requestBrowserLocation,
+		type BrowserGeolocationErrorCode
+	} from '$lib/utils/browser-geolocation';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 
 	interface Props {
 		nearbySharingEnabled: boolean;
+		nearbyPushEnabled: boolean;
+		pushNotificationsEnabled: boolean;
 	}
 
-	let { nearbySharingEnabled: initialEnabled }: Props = $props();
+	let {
+		nearbySharingEnabled: initialEnabled,
+		nearbyPushEnabled: initialNearbyPushEnabled,
+		pushNotificationsEnabled: initialPushEnabled
+	}: Props = $props();
 
 	let nearbySharingEnabled = $state(initialEnabled);
+	let nearbyPushEnabled = $state(initialNearbyPushEnabled);
+	let pushNotificationsEnabled = $state(initialPushEnabled);
 	let submitting = $state(false);
+	let locating = $state(false);
+	let nearbyPushSubmitting = $state(false);
 	let errorMessage = $state<string | null>(null);
+	let nearbyPushError = $state<string | null>(null);
+
+	const nearbyBusy = $derived(submitting || locating);
+	const nearbyPushDisabled = $derived(
+		nearbyPushSubmitting ||
+			nearbyBusy ||
+			(!nearbyPushEnabled &&
+				(!nearbySharingEnabled || !pushNotificationsEnabled))
+	);
 
 	$effect(() => {
-		nearbySharingEnabled = initialEnabled;
+		if (!submitting && !locating && !nearbyPushSubmitting) {
+			nearbySharingEnabled = initialEnabled;
+			nearbyPushEnabled = initialNearbyPushEnabled;
+		}
+		pushNotificationsEnabled = initialPushEnabled;
 	});
 
-	async function requestBrowserLocation(): Promise<GeolocationPosition | null> {
-		if (!navigator.geolocation) {
-			return null;
+	function locationErrorMessage(code: BrowserGeolocationErrorCode): string {
+		switch (code) {
+			case 'denied':
+				return t('nearbySharing.locationDenied');
+			case 'timeout':
+				return t('nearbySharing.locationTimeout');
+			case 'unavailable':
+				return t('nearbySharing.locationUnavailable');
+			default:
+				return t('nearbySharing.locationRequired');
 		}
-		return new Promise((resolve) => {
-			navigator.geolocation.getCurrentPosition(
-				(position) => resolve(position),
-				() => resolve(null),
-				{ enableHighAccuracy: false, timeout: 12_000, maximumAge: 60_000 }
-			);
-		});
 	}
 
 	async function persistSettings(enabled: boolean, coords?: { latitude: number; longitude: number }) {
@@ -52,6 +80,10 @@
 				return;
 			}
 			nearbySharingEnabled = Boolean(data.enabled);
+			if (!nearbySharingEnabled && nearbyPushEnabled) {
+				await persistNearbyPush(false);
+			}
+			await invalidateAll();
 			showClientToast(t('actionToast.settingsSaved'), { variant: 'success' });
 		} catch {
 			errorMessage = t('nearbySharing.saveFailed');
@@ -61,27 +93,70 @@
 		}
 	}
 
+	async function persistNearbyPush(enabled: boolean) {
+		nearbyPushSubmitting = true;
+		nearbyPushError = null;
+		try {
+			const response = await fetch('/api/expiring-share/nearby-push-settings', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ enabled: enabled ? 'true' : 'false' })
+			});
+			const data = (await response.json()) as { ok?: boolean; error?: string; enabled?: boolean };
+			if (!response.ok || !data.ok) {
+				nearbyPushError =
+					data.error === 'push_required'
+						? t('nearbySharing.pushRequiresPush')
+						: t('nearbySharing.saveFailed');
+				nearbyPushEnabled = initialNearbyPushEnabled;
+				return;
+			}
+			nearbyPushEnabled = Boolean(data.enabled);
+			showClientToast(t('actionToast.settingsSaved'), { variant: 'success' });
+		} catch {
+			nearbyPushError = t('nearbySharing.saveFailed');
+			nearbyPushEnabled = initialNearbyPushEnabled;
+		} finally {
+			nearbyPushSubmitting = false;
+		}
+	}
+
 	async function toggleNearbySharing(enabled: boolean) {
-		if (submitting) {
+		if (nearbyBusy) {
 			return;
 		}
 
 		if (!enabled) {
+			nearbySharingEnabled = false;
 			await persistSettings(false);
 			return;
 		}
 
-		const position = await requestBrowserLocation();
-		if (!position) {
+		errorMessage = null;
+		locating = true;
+		const result = await requestBrowserLocation();
+		locating = false;
+
+		if (!result.ok) {
 			nearbySharingEnabled = false;
-			errorMessage = t('nearbySharing.locationDenied');
+			errorMessage = locationErrorMessage(result.code);
 			return;
 		}
 
 		await persistSettings(true, {
-			latitude: position.coords.latitude,
-			longitude: position.coords.longitude
+			latitude: result.latitude,
+			longitude: result.longitude
 		});
+	}
+
+	async function toggleNearbyPush(enabled: boolean) {
+		if (nearbyPushSubmitting) {
+			return;
+		}
+		if (enabled && (!nearbySharingEnabled || !pushNotificationsEnabled)) {
+			return;
+		}
+		await persistNearbyPush(enabled);
 	}
 </script>
 
@@ -90,17 +165,21 @@
 	title={t('nearbySharing.settingsTitle')}
 	description={t('nearbySharing.settingsDescription')}
 >
-	<SettingsRow title={t('nearbySharing.enableTitle')} note={t('nearbySharing.enableNote')} last={true}>
+	<SettingsRow title={t('nearbySharing.enableTitle')} note={t('nearbySharing.enableNote')} last={false}>
 		<Toggle
 			checked={nearbySharingEnabled}
 			label={t('nearbySharing.enableLabel')}
-			disabled={submitting}
+			disabled={nearbyBusy}
 			onchange={(enabled) => {
-				nearbySharingEnabled = enabled;
+				if (nearbyBusy) {
+					return;
+				}
 				void toggleNearbySharing(enabled);
 			}}
 		/>
-		{#if submitting}
+		{#if locating}
+			<span class="saving">{t('nearbySharing.locating')}</span>
+		{:else if submitting}
 			<span class="saving">{t('common.saving')}</span>
 		{/if}
 		{#if errorMessage}
@@ -112,6 +191,34 @@
 				{t('nearbySharing.specLink')}
 			</a>
 		</p>
+	</SettingsRow>
+
+	<SettingsRow
+		title={t('nearbySharing.pushTitle')}
+		note={t('nearbySharing.pushNote')}
+		last={true}
+	>
+		<Toggle
+			checked={nearbyPushEnabled}
+			label={t('nearbySharing.pushEnableLabel')}
+			disabled={nearbyPushDisabled}
+			onchange={(enabled) => {
+				nearbyPushEnabled = enabled;
+				void toggleNearbyPush(enabled);
+			}}
+		/>
+		{#if !nearbySharingEnabled && !nearbyPushEnabled}
+			<p class="hint">{t('nearbySharing.pushRequiresNearby')}</p>
+		{:else if !pushNotificationsEnabled && !nearbyPushEnabled}
+			<p class="hint">{t('nearbySharing.pushRequiresPush')}</p>
+		{/if}
+		{#if nearbyPushError}
+			<p class="error" role="alert">{nearbyPushError}</p>
+		{/if}
+		{#if nearbyPushSubmitting}
+			<span class="saving">{t('common.saving')}</span>
+		{/if}
+		<p class="privacy-note">{t('nearbySharing.pushPrivacyNote')}</p>
 	</SettingsRow>
 </SettingsSection>
 
@@ -129,6 +236,12 @@
 		color: var(--color-danger);
 	}
 
+	.hint {
+		margin: var(--space-xs) 0 0;
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+	}
+
 	.privacy-note {
 		margin: var(--space-sm) 0 0;
 		font-size: 0.8125rem;
@@ -139,5 +252,13 @@
 	.spec-link {
 		margin: var(--space-xs) 0 0;
 		font-size: 0.8125rem;
+	}
+
+	:global(#settings-nearby-sharing .toggle-switch) {
+		min-width: var(--touch-target-min);
+		min-height: var(--touch-target-min);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 	}
 </style>

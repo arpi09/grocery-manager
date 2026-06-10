@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import { isValidLatitude, isValidLongitude } from '$lib/domain/geo';
 import { translate } from '$lib/i18n/messages';
 import { requireUser } from '$lib/server/api-guards';
-import { expiringShareService } from '$lib/server/di';
+import { expiringShareService, nearbyPushService } from '$lib/server/di';
 import { recordProductEvent } from '$lib/server/product-events';
 import { createExpiringShareWithGeoSchema } from '$lib/validation/nearby-sharing.schemas';
 import type { RequestHandler } from './$types';
@@ -34,7 +34,12 @@ export const POST: RequestHandler = async ({ locals, url, request }) => {
 		locals.householdId,
 		locals.user!.id,
 		inventory,
-		{ attachNearby, coordinate }
+		{
+			attachNearby,
+			coordinate,
+			sharerPlanTier: locals.planTier,
+			sharerRole: locals.user!.role
+		}
 	);
 
 	if (!share) {
@@ -42,6 +47,12 @@ export const POST: RequestHandler = async ({ locals, url, request }) => {
 			{ ok: false, error: translate(locals.locale, 'expiringShare.noItems') },
 			{ status: 400 }
 		);
+	}
+
+	if (attachNearby) {
+		void nearbyPushService.notifyNearbyViewers(share.shareId).catch((error) => {
+			console.error('[nearby-push] notify failed', error);
+		});
 	}
 
 	recordProductEvent(locals.pmfService, {

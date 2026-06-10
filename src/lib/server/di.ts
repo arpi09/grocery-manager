@@ -31,9 +31,11 @@ import { DrizzleAdminActionRepository } from '$lib/infrastructure/repositories/a
 import { DrizzlePmfRepository } from '$lib/infrastructure/repositories/pmf.repository';
 import { DrizzleExpiryReminderRepository } from '$lib/infrastructure/repositories/expiry-reminder.repository';
 import { DrizzleShoppingPushRepository } from '$lib/infrastructure/repositories/shopping-push.repository';
+import { DrizzleNearbyPushRepository } from '$lib/infrastructure/repositories/nearby-push.repository';
 import { PmfService } from '$lib/application/pmf.service';
 import { ExpiryReminderService } from '$lib/application/expiry-reminder.service';
 import { ShoppingPushService } from '$lib/application/shopping-push.service';
+import { NearbyPushService } from '$lib/application/nearby-push.service';
 import { DrizzleProductFeedbackRepository } from '$lib/infrastructure/repositories/product-feedback.repository';
 import { ProductFeedbackService } from '$lib/application/product-feedback.service';
 import { PmfSurveyService } from '$lib/application/pmf-survey.service';
@@ -93,6 +95,7 @@ const petFoodRepository = new DrizzlePetFoodRepository();
 const pmfRepository = new DrizzlePmfRepository();
 const expiryReminderRepository = new DrizzleExpiryReminderRepository();
 const shoppingPushRepository = new DrizzleShoppingPushRepository();
+const nearbyPushRepository = new DrizzleNearbyPushRepository();
 const productFeedbackRepository = new DrizzleProductFeedbackRepository();
 const pmfSurveyRepository = new DrizzlePmfSurveyRepository();
 const aiUsageRepository = new DrizzleAiUsageRepository();
@@ -204,6 +207,13 @@ export const shoppingPushService = new ShoppingPushService(
 	shoppingPushRepository,
 	householdService,
 	shoppingListService,
+	pushSubscriptionRepository,
+	pushAdapter,
+	appOriginAdapter
+);
+export const nearbyPushService = new NearbyPushService(
+	nearbyPushRepository,
+	expiringShareRepository,
 	pushSubscriptionRepository,
 	pushAdapter,
 	appOriginAdapter

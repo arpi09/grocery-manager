@@ -15,7 +15,11 @@ export const load: PageServerLoad = async ({ parent, params, locals, url }) => {
 	const preview = await expiringShareService.getNearbySharePreviewForViewer(
 		user.id,
 		locals.householdId,
-		params.id
+		params.id,
+		{
+			viewerPlanTier: locals.planTier,
+			viewerRole: user.role
+		}
 	);
 
 	if (!preview) {

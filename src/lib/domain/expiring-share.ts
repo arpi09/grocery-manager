@@ -1,4 +1,5 @@
 export const EXPIRING_SHARE_TTL_MS = 48 * 60 * 60 * 1000;
+export const EXPIRING_SHARE_PRO_TTL_MS = 72 * 60 * 60 * 1000;
 
 export interface ExpiringShareItemSnapshot {
 	name: string;

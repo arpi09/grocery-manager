@@ -466,7 +466,7 @@ Kompakt översikt jun 2026. Skaffu-kolumn enligt §2.2 (shipped) — inga påhit
 | Pris (indikativt) | Gratis; Pro väntar | 29 kr/mån | ~60 kr/år | Premium från ~15 kr/mån | ~80 kr/år | Gratis | ~30 kr/mån | ~100 kr/år |
 | Grann-delning / karta | ✅ v1.2 jitter-karta, 500 m | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
-*Grann-delning:* OLIO har mogen P2P-karta (fuzz ~200 m) — se §3G. TGTG/FoodieFinder är butik-kartor (annat jobb). Skaffu: gratis karta + lista inom 500 m; Pro 2 km + push planeras ([`PRICING.md`](./PRICING.md)).
+*Grann-delning:* OLIO har mogen P2P-karta (fuzz ~200 m) — se §3G. TGTG/FoodieFinder är butik-kartor (annat jobb). Skaffu: gratis karta + lista inom 500 m, **gratis nearby-push med varupreview** (v2a); Pro 2 km + längre TTL ([`PRICING.md`](./PRICING.md)).
 
 ---
 

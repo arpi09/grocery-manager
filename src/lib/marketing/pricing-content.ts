@@ -2,6 +2,7 @@ import {
 	AI_UNIT_ECONOMICS,
 	FREE_LIMITS,
 	PRICE_HYPOTHESIS_SEK,
+	NEARBY_RADIUS_M,
 	PRO_LIMITS,
 	type ProFeatureKey
 } from '$lib/domain/plan';
@@ -48,7 +49,8 @@ const proFeatureLabelsSv: Record<ProFeatureKey, string> = {
 	unlimitedReceiptPdf: 'Obegränsad kvitto-PDF-tolkning',
 	unlimitedSmartFill: 'Obegränsad smart inköpslista',
 	insightsAndStats: 'AI-insikter och full statistik',
-	moreHouseholdMembers: `Upp till ${PRO_LIMITS.maxHouseholdMembers} hushållsmedlemmar`
+	moreHouseholdMembers: `Upp till ${PRO_LIMITS.maxHouseholdMembers} hushållsmedlemmar`,
+	nearbyRadius: `Grannskafferiet: sök inom ${NEARBY_RADIUS_M.pro / 1000} km (gratis ${NEARBY_RADIUS_M.free} m)`
 };
 
 const sv: PricingContent = {
@@ -99,6 +101,11 @@ const sv: PricingContent = {
 			label: 'Smart fill / vecka',
 			free: `${FREE_LIMITS.smartFillPerWeek}`,
 			pro: 'Obegränsat'
+		},
+		{
+			label: 'Grannskafferiet-radie',
+			free: `${NEARBY_RADIUS_M.free} m`,
+			pro: `${NEARBY_RADIUS_M.pro / 1000} km`
 		}
 	],
 	proBullets: Object.values(proFeatureLabelsSv),
@@ -147,6 +154,8 @@ const en: PricingContent = {
 						? 'AI scans / month'
 						: row.label === 'Kvitto-PDF / månad'
 							? 'Receipt PDF / month'
+							: row.label === 'Grannskafferiet-radie'
+							? 'Neighbour pantry radius'
 							: 'Smart fill / week'
 	})),
 	proBullets: [
@@ -154,7 +163,8 @@ const en: PricingContent = {
 		'Unlimited receipt PDF parsing',
 		'Unlimited smart shopping list fill',
 		'AI insights and full statistics',
-		`Up to ${PRO_LIMITS.maxHouseholdMembers} household members`
+		`Up to ${PRO_LIMITS.maxHouseholdMembers} household members`,
+		`Neighbour pantry: search within ${NEARBY_RADIUS_M.pro / 1000} km (free ${NEARBY_RADIUS_M.free} m)`
 	],
 	aiNoteTitle: 'Why limits?',
 	aiNoteBody: `AI features cost per API call (${AI_UNIT_ECONOMICS.model}). A typical receipt PDF costs about ${AI_UNIT_ECONOMICS.receiptParseSekLow}–${AI_UNIT_ECONOMICS.receiptParseSekHigh} SEK — so Free tier caps AI usage and Pro funds unlimited use.`,

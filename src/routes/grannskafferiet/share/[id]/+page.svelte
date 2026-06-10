@@ -29,6 +29,7 @@
 		<header class="preview-header">
 			<p class="eyebrow">{t('expiringShare.publicEyebrow')}</p>
 			<h1>{t('nearbySharing.sharePreviewTitle')}</h1>
+			<p class="pantry-note">{t('nearbySharing.sharePreviewPantryNote')}</p>
 			<p class="expires">{t('expiringShare.publicExpires', { date: expiresAtLabel })}</p>
 			<p class="gdpr-note">{t('expiringShare.publicGdprNote')}</p>
 		</header>
@@ -83,10 +84,16 @@
 	}
 
 	.expires,
-	.gdpr-note {
+	.gdpr-note,
+	.pantry-note {
 		margin: 0;
 		color: var(--color-text-muted);
 		font-size: var(--text-sm);
+	}
+
+	.pantry-note {
+		font-weight: 600;
+		color: var(--color-text);
 	}
 
 	.item-list {

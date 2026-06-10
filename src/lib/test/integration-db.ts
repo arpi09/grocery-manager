@@ -57,7 +57,8 @@ const SQL_MIGRATION_FILES = [
 	'0036_social_post.sql',
 	'0037_guide_article.sql',
 	'0038_nearby_expiring_share.sql',
-	'0039_expiring_share_report_block.sql'
+	'0039_expiring_share_report_block.sql',
+	'0040_nearby_push.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE

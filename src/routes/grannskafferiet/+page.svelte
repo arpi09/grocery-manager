@@ -4,13 +4,17 @@
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import NearbySharesMap from '$lib/components/organisms/NearbySharesMap.svelte';
 	import NearbyShareReportButton from '$lib/components/molecules/NearbyShareReportButton.svelte';
-	import { t } from '$lib/i18n';
+	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
+	import { getLocale, t } from '$lib/i18n';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 
 	let { data } = $props();
+
+	const locale = getLocale();
 
 	type NearbyShare = {
 		id: string;
@@ -24,12 +28,16 @@
 
 	let loading = $state(true);
 	let optedIn = $state(false);
+	let radiusM = $state(500);
 	let viewerLat = $state<number | null>(null);
 	let viewerLng = $state<number | null>(null);
 	let shares = $state<NearbyShare[]>([]);
 	let selectedShareId = $state<string | null>(null);
 
 	const selectedShare = $derived(shares.find((share) => share.id === selectedShareId) ?? null);
+	const radiusLabel = $derived(
+		data.isPro ? t('nearbySharing.radiusPro', { metres: radiusM }) : t('nearbySharing.radiusFree', { metres: radiusM })
+	);
 
 	function formatDistance(metres: number): string {
 		return t('nearbySharing.approxDistance', { metres });
@@ -56,6 +64,7 @@
 			const nearby = (await nearbyResponse.json()) as {
 				ok?: boolean;
 				optedIn?: boolean;
+				radiusM?: number;
 				shares?: NearbyShare[];
 			};
 
@@ -65,6 +74,7 @@
 			}
 
 			optedIn = Boolean(nearby.optedIn);
+			radiusM = nearby.radiusM ?? 500;
 			shares = nearby.shares ?? [];
 		} catch {
 			shares = [];
@@ -114,6 +124,13 @@
 		<header class="discovery-header">
 			<h1>{t('nearbySharing.discoveryTitle')}</h1>
 			<p>{t('nearbySharing.discoveryLead')}</p>
+			<p class="radius-note">{radiusLabel}</p>
+			{#if !data.isPro && data.stripeCheckoutEnabled}
+				<p class="pro-hint">
+					{t('nearbySharing.proRadiusHint')}
+					<a href="/priser">{t('nearbySharing.proRadiusLink')}</a>
+				</p>
+			{/if}
 			<p class="trust-note">{t('nearbySharing.trustNote')}</p>
 		</header>
 
@@ -162,7 +179,13 @@
 										<span class="count">{t('nearbySharing.itemCount', { count: share.itemCount })}</span>
 										<ul class="preview">
 											{#each share.previewItems as item, index (index)}
-												<li>{item.name}</li>
+												<li class="preview-item">
+													<span>{item.name}</span>
+													{#if item.expiresOn}
+														{@const daysLeft = daysUntilExpiry(item.expiresOn)}
+														<Badge tone="warning">{formatDaysLeft(daysLeft, locale)}</Badge>
+													{/if}
+												</li>
 											{/each}
 										</ul>
 									</div>
@@ -197,7 +220,13 @@
 		<p class="sheet-count">{t('nearbySharing.itemCount', { count: selectedShare.itemCount })}</p>
 		<ul class="sheet-preview">
 			{#each selectedShare.previewItems as item, index (index)}
-				<li>{item.name}</li>
+				<li class="sheet-preview-item">
+					<span>{item.name}</span>
+					{#if item.expiresOn}
+						{@const daysLeft = daysUntilExpiry(item.expiresOn)}
+						<Badge tone="warning">{formatDaysLeft(daysLeft, locale)}</Badge>
+					{/if}
+				</li>
 			{/each}
 		</ul>
 		<div class="sheet-actions">
@@ -233,6 +262,23 @@
 		border-radius: var(--radius-sm);
 		background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface-muted));
 		border: 1px solid color-mix(in srgb, var(--color-primary) 18%, var(--color-border));
+	}
+
+	.radius-note {
+		margin: 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	.pro-hint {
+		margin: 0;
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+	}
+
+	.pro-hint a {
+		font-weight: 600;
 	}
 
 	.status {
@@ -301,7 +347,18 @@
 
 	.preview {
 		margin: 0;
-		padding-left: 1.1rem;
+		padding-left: 0;
+		list-style: none;
+		display: grid;
+		gap: var(--space-2xs);
+	}
+
+	.preview-item,
+	.sheet-preview-item {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-xs);
 	}
 
 	.share-list-actions {
@@ -354,7 +411,10 @@
 
 	.sheet-preview {
 		margin: 0;
-		padding-left: 1.1rem;
+		padding-left: 0;
+		list-style: none;
+		display: grid;
+		gap: var(--space-xs);
 		color: var(--color-text-muted);
 		font-size: 0.875rem;
 	}

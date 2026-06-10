@@ -20,6 +20,7 @@ import { parsePmfFunnelPeriodDays } from '$lib/domain/pmf-funnel';
 import { WAITLIST_LIST_DEFAULT, WAITLIST_LIST_MAX } from '$lib/domain/waitlist';
 import { translate } from '$lib/i18n/messages';
 import { requireAdmin } from '$lib/server/api-guards';
+import { expiringShareService } from '$lib/server/di';
 import type { RequestHandler } from './$types';
 
 const SECTIONS = [
@@ -39,7 +40,8 @@ const SECTIONS = [
 	'feedback',
 	'waitlist',
 	'pmf-survey',
-	'export'
+	'export',
+	'grannskafferiet-reports'
 ] as const;
 type AdminSection = (typeof SECTIONS)[number];
 
@@ -264,6 +266,14 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 			return json({
 				responses: serializeRows(responses),
 				summary,
+				limit
+			});
+		}
+		case 'grannskafferiet-reports': {
+			const limit = parseLimit(url.searchParams.get('limit'), 50, 200);
+			const reports = await expiringShareService.listExpiringShareReports(limit);
+			return json({
+				reports: serializeRows(reports),
 				limit
 			});
 		}
