@@ -2,7 +2,7 @@
 
 *Version: jun 2026 (senast reviderad 7 jun 2026). Baserad på kodbas (`docs/BRAND.md`, `docs/MARKETING_SITE.md`, `src/lib/marketing/content.ts`) och öppna källor om marknaden.*
 
-*Changelog jun 2026:* Utökad med internationella profiler (§3F, §4B), funktionsmatris (§4C), expat-gap (§6B), internationella lärdomar (§7B) och uppdaterad positioneringskarta.
+*Changelog jun 2026:* Utökad med internationella profiler (§3F, §4B), funktionsmatris (§4C), expat-gap (§6B), internationella lärdomar (§7B) och uppdaterad positioneringskarta. **10 jun 2026:** §3G geo/grann-delning (OLIO, TGTG, FoodieFinder), matrisrad grann-delning/karta, OLIO hotnivå 🟠 för Grannskafferiet-spåret — se [`GRANNSKAFFERIET_V1.md`](./GRANNSKAFFERIET_V1.md).
 
 > **Produktroadmap:** [ROADMAP.md](./ROADMAP.md) · **Nästa 30 dagar (ägare):** [NEXT_STEPS.md](./NEXT_STEPS.md) · **Domän:** [skaffu.com](https://skaffu.com) — [DOMAIN_STRATEGY.md](./DOMAIN_STRATEGY.md)
 
@@ -30,6 +30,7 @@
 | **AI-kostnad** | Rate limits + **månadstak / guardrails** | Skyddar solo-ekonomi; Stripe fortfarande **väntar** |
 | **Marknad** | Hero A/B + analytics, cookie consent B, jämförelsetabell | Beslut på hero när data räcker |
 | **Smart inköpslista + export** | AI-fill, Bring-format clipboard | Differentiator vs ren lista |
+| **Grannskafferiet** | v0 länk+bild; **v1.2** geo, jitter-karta, report/block | Unikt: lager→auto-delning + lokal discovery; konkurrerar delvis med OLIO (§3G) |
 
 ### Fortfarande ej shipped eller ej bevisat (kritiska gap)
 
@@ -158,7 +159,8 @@ Marknadswebben betonar: streckkod, kvitto & foto, kyl/frys/skafferi, smart inkö
 
 | Aktör | Fokus |
 |-------|--------|
-| **Too Good To Go / Olio** | Köp/rädda mat utanför hemmet — **annat jobb** |
+| **Too Good To Go / FoodieFinder** | Butiks-/restaurangöverskott — **annat jobb** än hemmalager (§3G) |
+| **OLIO** | P2P grann-delning — **delvis overlap** med Grannskafferiet (§3G); 🟢 pantry-only, 🟠 geo-spår |
 | **NoWaste / Matdags / FreshKeeper / Skaffu** | Förebygga svinn via lager hemma |
 
 ### D. Recept + måltidsplan
@@ -189,7 +191,55 @@ Marknadswebben betonar: streckkod, kvitto & foto, kyl/frys/skafferi, smart inkö
 | **AnyList** | USA | iOS, Android, web, Mac | Gratis; Complete ~$10–15/år | Delad lista + recept + måltidskalender | 🟡 Expats i SE |
 | **OurGroceries** | USA | iOS, Android, web, Alexa | Gratis (annonser); ~$6/år eller $20 lifetime | Enkel delad lista | 🟡 Billigast lista |
 | **BigOven / Yummly** | USA | iOS, Android | Gratis + premium | Recept från ingredienser | 🟢 Adjacent |
-| **OLIO** | UK/global | iOS, Android | Gratis | Dela överskottsmat lokalt — **annat jobb** (bekräftar §3C) | 🟢 Ej pantry |
+| **OLIO** | UK/global | iOS, Android | Gratis | P2P grann-delning med karta — **🟠 hot** mot Grannskafferiet; **🟢** om pantry-only utan geo | 🟠 / 🟢 |
+
+### G. Geo / grann-delning (Grannskafferiet-spåret)
+
+Tre kategorier — **inte samma produkt.** Full spec: [`GRANNSKAFFERIET_V1.md`](./GRANNSKAFFERIET_V1.md). Hybrid-launch: [`GRANNSKAFFERIET_V0.md`](./GRANNSKAFFERIET_V0.md) (länk + bild tills density).
+
+#### P2P hemma (direkt konkurrent)
+
+| App | Geo/karta | Hur det fungerar | Hot mot Skaffu |
+|-----|-----------|------------------|----------------|
+| **OLIO** | Karta + radie-filter; platser **fuzzade ~200 m** ([Olio Help](https://help.olioapp.com/en/articles/12158422-location-and-privacy)) | Foto + beskrivning → begäran → in-app chat → upphämtning. Även butik via “Food Waste Heroes”. | **🟠** om density finns; **🟢** i många SV-förort (tomt nätverk) |
+
+**OLIO styrkor:** native app, push vid nya listningar, trust/moderation, fuzzed map, social proof (miljontals användare).
+
+**OLIO svagheter i Sverige:** tunt nätverk utanför storstad; **ingen koppling till vad du redan har i kylen**; manuell listing varje gång.
+
+**Skaffu-vinkel:** *“Utgång i skafferiet → dela i ett klick”* — listan är redan klar från lager; OLIO kräver foto + beskrivning från noll.
+
+#### Butik/restaurang — karta men annat jobb
+
+| App | Geo/karta | Jobb | Vs Grannskafferiet |
+|-----|-----------|------|---------------------|
+| **Too Good To Go** | Karta + Discover; filter distans/pris/betyg ([TGTG](https://www.toogoodtogo.com/en-us/how-does-the-app-work)) | Köp **överskotts-kassar** från café/restaurang/butik | **Kompletterar** — räddar mat *ute*; inte “min yoghurt går ut torsdag” |
+| **Foodie Finder** (SE) | App med **erbjudanden nära dig** ([foodiefinder.se](https://foodiefinder.se/)) | Surprise bags från restauranger — TGTG-lik | Samma — butik, inte hemmalager |
+
+**Positionering:** TGTG “vinner kartan” för **kommersiellt överskott**. Skaffu: *“det du redan köpt hemma”* — se §3C.
+
+#### Pantry / utgång — ingen grann-karta
+
+| App | Utgång | Geo-delning |
+|-----|--------|-------------|
+| **Matdags** | Native push, gamification | ❌ |
+| **NoWaste / Pantrist / FreshKeeper** | Utgång, streckkod | ❌ |
+| **Skaffu (kärnprodukt)** | Utgång, plan, kvitto | **Grannskafferiet** (v1.2) |
+
+**Slutsats:** Med Grannskafferiet **krockar du delvis med OLIO** på *dela mat lokalt*, men **inte** med Matdags på *lager* eller TGTG på *butik*.
+
+**Geo-funktionsmatris (jun 2026):**
+
+| Kapabilitet | OLIO | TGTG | FoodieFinder | Matdags | Skaffu idag |
+|-------------|------|------|--------------|---------|-------------|
+| Karta med prickar | ✅ fuzz 200 m | ✅ exakta butiker | ✅ butiker | ❌ | ✅ jitter-prickar (v1.2) |
+| Justerbar radie | ✅ | ✅ | ✅ | ❌ | 500 m free → Pro 2 km (senare) |
+| Auto-lista från utgång | ❌ | ❌ | ❌ | ⚠️ påminnelse | ✅ snapshot 7 d |
+| Chat / bokning | ✅ | ✅ order | ✅ order | ❌ | ❌ v1 (länk/WhatsApp) |
+| Report/block | ✅ | butik-support | ? | ❌ | ✅ v1.1 |
+| SV + kvitto/PDF | ❌ | ❌ | ❌ | ✅ | ✅ **moat** |
+
+**Skaffu unikt:** enda som kombinerar **butiksneutralt lager** + **automatisk utgångslista** + **lokal delning**.
 
 ---
 
@@ -394,7 +444,7 @@ Hotnivå mot Skaffu: 🔴 hög · 🟠 medel · 🟡 låg. **Vs Skaffu** följer
 **Kort — adjacent (ej kärnhot):**
 
 - **BigOven / Yummly** — Recept och "vad kan jag laga?" från ingredienser; svagt eller inget lager som sanningskälla. 🟢
-- **OLIO** — Dela överskottsmat i grannskapet; bekräftar §3C att matsvinn-appar kan ha helt annat jobb än heminventering. 🟢
+- **OLIO** — P2P grann-delning med karta; **🟠** mot Grannskafferiet (§3G), **🟢** om pantry-only utan geo-spår.
 
 ### 4C. Jämförelsematris (funktioner)
 
@@ -414,6 +464,9 @@ Kompakt översikt jun 2026. Skaffu-kolumn enligt §2.2 (shipped) — inga påhit
 | Native iOS/Android | ❌ väntar | ✅ | ✅ | ✅ | iOS only | ✅ | ✅ | ✅ |
 | SV språk / marknad | ✅ primär | ✅ | ❌ | ⚠️ DE/EN | ❌ | ❌ | ❌ | ❌ |
 | Pris (indikativt) | Gratis; Pro väntar | 29 kr/mån | ~60 kr/år | Premium från ~15 kr/mån | ~80 kr/år | Gratis | ~30 kr/mån | ~100 kr/år |
+| Grann-delning / karta | ✅ v1.2 jitter-karta, 500 m | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+*Grann-delning:* OLIO har mogen P2P-karta (fuzz ~200 m) — se §3G. TGTG/FoodieFinder är butik-kartor (annat jobb). Skaffu: gratis karta + lista inom 500 m; Pro 2 km + push planeras ([`PRICING.md`](./PRICING.md)).
 
 ---
 
@@ -533,6 +586,8 @@ quadrantChart
 - **Mot ICA:** "Ett skafferi för hela hushållet, inte bara ICA-handel."
 - **Mot Matdags:** PDF/Kivra, plan+lager, butiksneutral, ingen gamification-krav.
 - **Mot Skafferikoll:** Scan-first + kvitto + smart lista från **faktiskt** lager — inte bara "koll".
+- **Mot OLIO:** Listan redan klar från skafferiet; dela på ~10 sek — inte foto + beskrivning från noll. SV-kvitto-story kvar.
+- **Mot TGTG/FoodieFinder:** Inte värdekasse från café — yoghurt i kylen som går ut imorgon.
 
 ### Domän
 

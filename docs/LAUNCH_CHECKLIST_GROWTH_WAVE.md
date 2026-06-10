@@ -12,6 +12,7 @@ Operativ checklista för deploy av **gamification + Wrapped / Skaffurapport / Gr
 - [ ] **E2E** — valfritt före deploy; **obligatoriskt** i deploy-kedjan (G3). Nattlig schedule 03:00 UTC eller manuell körning.
 - [ ] **Migration 0030** — `drizzle/0030_expiring_share_link.sql` (`expiring_share_link`) appliceras vid prod-boot via befintlig migrationskedja; verifiera i deploy-logg att inget migrationsfel.
 - [ ] **Migration 0038** — `drizzle/0038_nearby_expiring_share.sql` (Grannskafferiet v1 geo) appliceras vid prod-boot; verifiera i deploy-logg.
+- [ ] **Migration 0039** — `drizzle/0039_expiring_share_report_block.sql` (report/block v1.1) appliceras vid prod-boot; verifiera i deploy-logg.
 - [ ] **Cron schemalagd** — workflow [`.github/workflows/skaffurapport-cron.yml`](../.github/workflows/skaffurapport-cron.yml) mergad till `master`. Schema: **1:a i månaden 06:00 UTC** → `POST /api/cron/skaffurapport`. Secrets: `CRON_SECRET` (samma som övriga cron), variable `PRODUCTION_URL` (`https://skaffu.com`). Manuell test: Actions → **Skaffurapport cron** → Run workflow.
 - [ ] **Firebase secrets** — `CRON_SECRET` i Secret Manager matchar GitHub (se [`CI_CD.md`](./CI_CD.md) § Secrets).
 
@@ -47,6 +48,7 @@ Bas-smoke enligt [`PROD_SMOKE.md`](./PROD_SMOKE.md) (login, `/hem`, scan) ska fo
 | **Wrapped** | Inget hushållsgolv — kan delas när som helst | LinkedIn / Stories: *privat* månadssammanfattning; UTM valfritt (`utm_campaign=wrapped-YYYY-MM`). Se [`WRAPPED.md`](./WRAPPED.md). |
 | **Skaffurapport (publik PR)** | ≥10 hushåll (k-anonymitet); **≥50** för “stor” launch utan beta-disclaimer | LinkedIn / poddar **efter** månadscron och när `householdCount ≥ 50`. Annars endast intern preview. Se [`LAUNCH_PLAYBOOK.md`](./LAUNCH_PLAYBOOK.md) § Skaffurapporten. |
 | **Grannskafferiet v0** | Ingen extra gate | Soft mention i community-poster om relevant; se [`GRANNSKAFFERIET_V0.md`](./GRANNSKAFFERIET_V0.md). |
+| **Grannskafferiet v1.2 karta** | **≥5–10 aktiva delningar** i målområde/stad | Marknadsför **inte** `/grannskafferiet` som huvudingång före density-gate. Tills dess: **Dela som bild + länk** i grupper ([`GRANNSKAFFERIET_V0.md`](./GRANNSKAFFERIET_V0.md) hybrid launch). Mät: `nearby_map_opened`, `expiring_share_created`. |
 
 **Timing:** Wrapped kan postas direkt efter deploy. Publik rapport-PR vänta till **dagen efter** första lyckade månadscron (eller manuell `workflow_dispatch`) **och** PMF-gate uppfylld.
 

@@ -56,7 +56,8 @@ const SQL_MIGRATION_FILES = [
 	'0035_staleness_reminders.sql',
 	'0036_social_post.sql',
 	'0037_guide_article.sql',
-	'0038_nearby_expiring_share.sql'
+	'0038_nearby_expiring_share.sql',
+	'0039_expiring_share_report_block.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
@@ -67,6 +68,8 @@ TRUNCATE TABLE
 	"pmf_survey_response",
 	"product_feedback",
 	"product_event",
+	"expiring_share_block",
+	"expiring_share_report",
 	"expiring_share_link",
 	"household_receipt_forward_token",
 	"analytics_interaction",

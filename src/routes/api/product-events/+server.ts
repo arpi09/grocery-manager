@@ -33,6 +33,9 @@ const AUTH_EVENT_TYPES = new Set<ProductEventType>([
 	'wrapped_viewed',
 	'wrapped_shared',
 	'expiring_share_created',
+	'expiring_share_reported',
+	'nearby_map_opened',
+	'nearby_share_tapped',
 	'shopping_list_export'
 ]);
 

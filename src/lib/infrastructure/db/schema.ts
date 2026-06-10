@@ -342,6 +342,9 @@ export const productEventTable = pgTable(
 				'public_report_viewed',
 				'expiring_share_created',
 				'expiring_share_viewed',
+				'nearby_map_opened',
+				'nearby_share_tapped',
+				'expiring_share_reported',
 				'wrapped_viewed',
 				'wrapped_shared',
 				'kivra_forward_received',
@@ -579,6 +582,41 @@ export const expiringShareLinkTable = pgTable(
 		index('expiring_share_link_token_hash_idx').on(table.tokenHash),
 		index('expiring_share_link_household_idx').on(table.householdId),
 		index('expiring_share_link_geo_idx').on(table.latitude, table.longitude)
+	]
+);
+
+export const expiringShareReportTable = pgTable(
+	'expiring_share_report',
+	{
+		id: text('id').primaryKey(),
+		shareId: text('share_id')
+			.notNull()
+			.references(() => expiringShareLinkTable.id, { onDelete: 'cascade' }),
+		reporterUserId: text('reporter_user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		reason: text('reason'),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('expiring_share_report_share_idx').on(table.shareId),
+		index('expiring_share_report_reporter_idx').on(table.reporterUserId)
+	]
+);
+
+export const expiringShareBlockTable = pgTable(
+	'expiring_share_block',
+	{
+		id: text('id').primaryKey(),
+		reporterUserId: text('reporter_user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		shareId: text('share_id').references(() => expiringShareLinkTable.id, { onDelete: 'cascade' }),
+		householdId: text('household_id').references(() => householdTable.id, { onDelete: 'cascade' }),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('expiring_share_block_reporter_idx').on(table.reporterUserId)
 	]
 );
 

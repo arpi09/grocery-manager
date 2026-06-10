@@ -267,6 +267,13 @@
 			"when": 1751548800000,
 			"tag": "0038_nearby_expiring_share",
 			"breakpoints": true
+		},
+		{
+			"idx": 38,
+			"version": "7",
+			"when": 1751635200000,
+			"tag": "0039_expiring_share_report_block",
+			"breakpoints": true
 		}
 	]
 }

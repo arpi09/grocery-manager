@@ -24,6 +24,9 @@ export const GET: RequestHandler = async ({ locals }) => {
 			itemCount: share.itemCount,
 			previewItems: share.previewItems,
 			approximateDistanceM: share.approximateDistanceM,
+			mapLat: share.mapLat,
+			mapLng: share.mapLng,
+			openPath: share.openPath,
 			expiresAt: share.expiresAt.toISOString(),
 			createdAt: share.createdAt.toISOString()
 		}))

@@ -62,6 +62,10 @@ Vi lovar redan i FAQ att betalda planer meddelas i förväg. Denna fil är den i
 | Lager-insights (AI) | Ja |
 | Statistik (`/statistik`) | Full dashboard |
 | Framtida: e-postutgångspåminnelser | Ingår i Pro när punkt 5 levererat |
+| Framtida: **Grannskafferiet** — större sökradie (t.ex. **2 km** vs 500 m free) | Ej live; karta + lista inom 500 m förblir **gratis** |
+| Framtida: **Grannskafferiet** — push när någon nära delar | Pro; strikt opt-in |
+
+**Grannskafferiet-monetisering (planerad, ej kod):** Free ser alltid delningar inom 500 m (lista + karta). Pro kan senare ge 2 km-radie och push — implementeras via `nearbyRadiusM` i `plan.ts`, inte `canViewNearby: false`. Se [`GRANNSKAFFERIET_V1.md`](./GRANNSKAFFERIET_V1.md).
 
 **Prishypotes (ej live):**
 
@@ -170,4 +174,4 @@ Konstanter: `STRIPE_READINESS_GATES` i `plan.ts`.
 
 ---
 
-*Senast uppdaterad: maj 2026. Ändra denna fil när gränser eller prishypotes justeras — håll `plan.ts` i synk.*
+*Senast uppdaterad: jun 2026 (Grannskafferiet Pro-radie + push dokumenterade). Ändra denna fil när gränser eller prishypotes justeras — håll `plan.ts` i synk.*

@@ -43,6 +43,7 @@ export const ROBOTS_DISALLOW_PREFIXES = [
 	'/admin',
 	'/api/',
 	'/hem',
+	'/grannskafferiet',
 	'/settings',
 	'/profile',
 	'/inventory',

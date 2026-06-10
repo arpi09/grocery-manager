@@ -1,6 +1,9 @@
 /** Approximate radius for Grannskafferiet v1 nearby discovery. */
 export const NEARBY_SHARING_RADIUS_M = 500;
 
+/** Max offset for map display pins (jitter within coarse cell). */
+export const DISPLAY_JITTER_RADIUS_M = 75;
+
 /** Decimal places for stored coordinates (~111 m per step at equator). */
 export const COARSE_GEO_DECIMALS = 3;
 
@@ -58,4 +61,34 @@ export function geoBoundingBox(
 /** Round to nearest 100 m for privacy-friendly distance labels. */
 export function approximateDistanceMetres(distanceM: number): number {
 	return Math.max(100, Math.round(distanceM / 100) * 100);
+}
+
+/** Deterministic unit float in [0, 1) from a stable id + salt. */
+export function hashIdToUnitFloat(id: string, salt: string): number {
+	let hash = 2_166_136_261;
+	const input = `${id}:${salt}`;
+	for (let i = 0; i < input.length; i += 1) {
+		hash ^= input.charCodeAt(i);
+		hash = Math.imul(hash, 16_777_619);
+	}
+	return (hash >>> 0) / 4_294_967_296;
+}
+
+/**
+ * Offset a coarse coordinate for map display — deterministic per share id,
+ * never exposes the sharer's exact stored position.
+ */
+export function jitterCoordinateForDisplay(
+	id: string,
+	coarseCoord: GeoCoordinate,
+	radiusM = DISPLAY_JITTER_RADIUS_M
+): GeoCoordinate {
+	const angle = hashIdToUnitFloat(id, 'angle') * 2 * Math.PI;
+	const distance = hashIdToUnitFloat(id, 'distance') * radiusM;
+	const latScale = 111_320;
+	const lngScale = 111_320 * Math.max(0.01, Math.abs(Math.cos((coarseCoord.latitude * Math.PI) / 180)));
+	return {
+		latitude: coarseCoord.latitude + (distance * Math.cos(angle)) / latScale,
+		longitude: coarseCoord.longitude + (distance * Math.sin(angle)) / lngScale
+	};
 }

@@ -31,6 +31,18 @@ export interface NearbyExpiringShare {
 	itemCount: number;
 	previewItems: Pick<ExpiringShareItemSnapshot, 'name' | 'expiresOn'>[];
 	approximateDistanceM: number;
+	mapLat: number;
+	mapLng: number;
+	openPath: string;
 	expiresAt: Date;
 	createdAt: Date;
+}
+
+export type ExpiringShareReportReason = 'inappropriate' | 'spam' | 'safety' | 'other';
+
+export interface ExpiringShareReportInput {
+	shareId?: string;
+	token?: string;
+	blockHousehold?: boolean;
+	reason?: ExpiringShareReportReason;
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
 	createExpiringShareWithGeoSchema,
+	expiringShareReportSchema,
 	updateNearbySharingSettingsSchema
 } from './nearby-sharing.schemas';
 
@@ -80,5 +81,19 @@ describe('createExpiringShareWithGeoSchema', () => {
 				longitude: 18.069
 			}).success
 		).toBe(false);
+	});
+});
+
+describe('expiringShareReportSchema', () => {
+	it('accepts shareId', () => {
+		expect(expiringShareReportSchema.safeParse({ shareId: 'share-1' }).success).toBe(true);
+	});
+
+	it('accepts token', () => {
+		expect(expiringShareReportSchema.safeParse({ token: 'abc123' }).success).toBe(true);
+	});
+
+	it('rejects empty body', () => {
+		expect(expiringShareReportSchema.safeParse({}).success).toBe(false);
 	});
 });

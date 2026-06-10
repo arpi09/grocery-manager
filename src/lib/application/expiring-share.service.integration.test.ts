@@ -208,6 +208,67 @@ describe('ExpiringShareService — nearby sharing', () => {
 		expect(result.shares).toHaveLength(0);
 	});
 
+	it('listNearbyShares returns jittered map coordinates and open path', async () => {
+		await seedHouseholdPair();
+
+		await service.updateNearbySharingSettings('viewer-user', {
+			enabled: true,
+			coordinate: STOCKHOLM
+		});
+		await service.updateNearbySharingSettings('sharer-user', {
+			enabled: true,
+			coordinate: NEARBY
+		});
+
+		const created = await service.createShareLink(
+			'sharer-household',
+			'sharer-user',
+			[expiringItem('Map test')],
+			{ attachNearby: true, coordinate: NEARBY }
+		);
+		expect(created).not.toBeNull();
+
+		const result = await service.listNearbyShares('viewer-user', 'viewer-household');
+		expect(result.shares).toHaveLength(1);
+		const share = result.shares[0]!;
+		expect(share.mapLat).not.toBe(NEARBY.latitude);
+		expect(share.mapLng).not.toBe(NEARBY.longitude);
+		expect(share.openPath).toBe(`/grannskafferiet/share/${share.id}`);
+	});
+
+	it('reportShare blocks share for reporter and hides it from nearby list', async () => {
+		await seedHouseholdPair();
+
+		await service.updateNearbySharingSettings('viewer-user', {
+			enabled: true,
+			coordinate: STOCKHOLM
+		});
+		await service.updateNearbySharingSettings('sharer-user', {
+			enabled: true,
+			coordinate: NEARBY
+		});
+
+		const created = await service.createShareLink(
+			'sharer-household',
+			'sharer-user',
+			[expiringItem('Report me')],
+			{ attachNearby: true, coordinate: NEARBY }
+		);
+		expect(created).not.toBeNull();
+
+		const before = await service.listNearbyShares('viewer-user', 'viewer-household');
+		expect(before.shares).toHaveLength(1);
+
+		const report = await service.reportShare('viewer-user', {
+			shareId: before.shares[0]!.id,
+			blockHousehold: true
+		});
+		expect(report.ok).toBe(true);
+
+		const after = await service.listNearbyShares('viewer-user', 'viewer-household');
+		expect(after.shares).toHaveLength(0);
+	});
+
 	it('listNearbyShares returns empty when viewer is not opted in', async () => {
 		await seedHouseholdPair();
 

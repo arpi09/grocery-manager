@@ -5,7 +5,12 @@ import type {
 	NearbySharingSettings
 } from '$lib/domain/expiring-share';
 import { db as defaultDb, type AppDatabase } from '$lib/infrastructure/db';
-import { expiringShareLinkTable, userTable } from '$lib/infrastructure/db/schema';
+import {
+	expiringShareBlockTable,
+	expiringShareLinkTable,
+	expiringShareReportTable,
+	userTable
+} from '$lib/infrastructure/db/schema';
 
 export interface CreateExpiringShareInput {
 	id: string;
@@ -20,6 +25,7 @@ export interface CreateExpiringShareInput {
 
 export interface NearbyShareRow {
 	id: string;
+	householdId: string;
 	snapshotJson: string;
 	expiresAt: Date;
 	createdAt: Date;
@@ -27,9 +33,17 @@ export interface NearbyShareRow {
 	longitude: string | null;
 }
 
+export interface ExpiringShareMeta {
+	id: string;
+	householdId: string;
+	expiresAt: Date;
+}
+
 export interface IExpiringShareRepository {
 	create(input: CreateExpiringShareInput): Promise<void>;
 	findByTokenHash(tokenHash: string): Promise<ExpiringSharePreview | null>;
+	findMetaByTokenHash(tokenHash: string): Promise<ExpiringShareMeta | null>;
+	findMetaById(shareId: string): Promise<ExpiringShareMeta | null>;
 	getNearbySharingSettings(userId: string): Promise<NearbySharingSettings>;
 	updateNearbySharingSettings(
 		userId: string,
@@ -41,8 +55,25 @@ export interface IExpiringShareRepository {
 	): Promise<void>;
 	findActiveSharesInBoundingBox(
 		bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number },
-		excludeHouseholdId: string
+		excludeHouseholdId: string,
+		excludeShareIds?: string[],
+		excludeHouseholdIds?: string[]
 	): Promise<NearbyShareRow[]>;
+	createReport(input: {
+		id: string;
+		shareId: string;
+		reporterUserId: string;
+		reason: string | null;
+	}): Promise<void>;
+	blockShareForReporter(input: { id: string; reporterUserId: string; shareId: string }): Promise<void>;
+	blockHouseholdForReporter(input: {
+		id: string;
+		reporterUserId: string;
+		householdId: string;
+	}): Promise<void>;
+	getBlockedShareIds(reporterUserId: string): Promise<string[]>;
+	getBlockedHouseholdIds(reporterUserId: string): Promise<string[]>;
+	findPreviewById(shareId: string): Promise<ExpiringSharePreview | null>;
 }
 
 function parseNumeric(value: string | null): number | null {
@@ -81,27 +112,59 @@ export class DrizzleExpiringShareRepository implements IExpiringShareRepository 
 			.where(eq(expiringShareLinkTable.tokenHash, tokenHash))
 			.limit(1);
 
+		return this.toPreview(rows[0]);
+	}
+
+	async findMetaByTokenHash(tokenHash: string): Promise<ExpiringShareMeta | null> {
+		const rows = await this.database
+			.select({
+				id: expiringShareLinkTable.id,
+				householdId: expiringShareLinkTable.householdId,
+				expiresAt: expiringShareLinkTable.expiresAt
+			})
+			.from(expiringShareLinkTable)
+			.where(eq(expiringShareLinkTable.tokenHash, tokenHash))
+			.limit(1);
+
 		const row = rows[0];
-		if (!row) {
+		if (!row || row.expiresAt.getTime() <= Date.now()) {
 			return null;
 		}
 
-		if (row.expiresAt.getTime() <= Date.now()) {
+		return row;
+	}
+
+	async findMetaById(shareId: string): Promise<ExpiringShareMeta | null> {
+		const rows = await this.database
+			.select({
+				id: expiringShareLinkTable.id,
+				householdId: expiringShareLinkTable.householdId,
+				expiresAt: expiringShareLinkTable.expiresAt
+			})
+			.from(expiringShareLinkTable)
+			.where(eq(expiringShareLinkTable.id, shareId))
+			.limit(1);
+
+		const row = rows[0];
+		if (!row || row.expiresAt.getTime() <= Date.now()) {
 			return null;
 		}
 
-		let snapshot: ExpiringShareSnapshot;
-		try {
-			snapshot = JSON.parse(row.snapshotJson) as ExpiringShareSnapshot;
-		} catch {
-			return null;
-		}
+		return row;
+	}
 
-		return {
-			items: snapshot.items,
-			expiresAt: row.expiresAt,
-			createdAt: row.createdAt
-		};
+	async findPreviewById(shareId: string): Promise<ExpiringSharePreview | null> {
+		const rows = await this.database
+			.select({
+				snapshotJson: expiringShareLinkTable.snapshotJson,
+				expiresAt: expiringShareLinkTable.expiresAt,
+				createdAt: expiringShareLinkTable.createdAt
+			})
+			.from(expiringShareLinkTable)
+			.where(eq(expiringShareLinkTable.id, shareId))
+			.limit(1);
+
+		return this.toPreview(rows[0]);
 	}
 
 	async getNearbySharingSettings(userId: string): Promise<NearbySharingSettings> {
@@ -150,11 +213,39 @@ export class DrizzleExpiringShareRepository implements IExpiringShareRepository 
 
 	async findActiveSharesInBoundingBox(
 		bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number },
-		excludeHouseholdId: string
+		excludeHouseholdId: string,
+		excludeShareIds: string[] = [],
+		excludeHouseholdIds: string[] = []
 	): Promise<NearbyShareRow[]> {
+		const filters = [
+			gt(expiringShareLinkTable.expiresAt, sql`now()`),
+			isNotNull(expiringShareLinkTable.latitude),
+			isNotNull(expiringShareLinkTable.longitude),
+			ne(expiringShareLinkTable.householdId, excludeHouseholdId),
+			sql`${expiringShareLinkTable.latitude}::float >= ${bounds.minLat}`,
+			sql`${expiringShareLinkTable.latitude}::float <= ${bounds.maxLat}`,
+			sql`${expiringShareLinkTable.longitude}::float >= ${bounds.minLng}`,
+			sql`${expiringShareLinkTable.longitude}::float <= ${bounds.maxLng}`
+		];
+
+		if (excludeShareIds.length > 0) {
+			filters.push(sql`${expiringShareLinkTable.id} NOT IN (${sql.join(
+				excludeShareIds.map((id) => sql`${id}`),
+				sql`, `
+			)})`);
+		}
+
+		if (excludeHouseholdIds.length > 0) {
+			filters.push(sql`${expiringShareLinkTable.householdId} NOT IN (${sql.join(
+				excludeHouseholdIds.map((id) => sql`${id}`),
+				sql`, `
+			)})`);
+		}
+
 		return this.database
 			.select({
 				id: expiringShareLinkTable.id,
+				householdId: expiringShareLinkTable.householdId,
 				snapshotJson: expiringShareLinkTable.snapshotJson,
 				expiresAt: expiringShareLinkTable.expiresAt,
 				createdAt: expiringShareLinkTable.createdAt,
@@ -162,17 +253,135 @@ export class DrizzleExpiringShareRepository implements IExpiringShareRepository 
 				longitude: expiringShareLinkTable.longitude
 			})
 			.from(expiringShareLinkTable)
+			.where(and(...filters));
+	}
+
+	async createReport(input: {
+		id: string;
+		shareId: string;
+		reporterUserId: string;
+		reason: string | null;
+	}): Promise<void> {
+		await this.database.insert(expiringShareReportTable).values({
+			id: input.id,
+			shareId: input.shareId,
+			reporterUserId: input.reporterUserId,
+			reason: input.reason
+		});
+	}
+
+	async blockShareForReporter(input: {
+		id: string;
+		reporterUserId: string;
+		shareId: string;
+	}): Promise<void> {
+		const existing = await this.database
+			.select({ id: expiringShareBlockTable.id })
+			.from(expiringShareBlockTable)
 			.where(
 				and(
-					gt(expiringShareLinkTable.expiresAt, sql`now()`),
-					isNotNull(expiringShareLinkTable.latitude),
-					isNotNull(expiringShareLinkTable.longitude),
-					ne(expiringShareLinkTable.householdId, excludeHouseholdId),
-					sql`${expiringShareLinkTable.latitude}::float >= ${bounds.minLat}`,
-					sql`${expiringShareLinkTable.latitude}::float <= ${bounds.maxLat}`,
-					sql`${expiringShareLinkTable.longitude}::float >= ${bounds.minLng}`,
-					sql`${expiringShareLinkTable.longitude}::float <= ${bounds.maxLng}`
+					eq(expiringShareBlockTable.reporterUserId, input.reporterUserId),
+					eq(expiringShareBlockTable.shareId, input.shareId)
+				)
+			)
+			.limit(1);
+
+		if (existing[0]) {
+			return;
+		}
+
+		await this.database.insert(expiringShareBlockTable).values({
+			id: input.id,
+			reporterUserId: input.reporterUserId,
+			shareId: input.shareId,
+			householdId: null
+		});
+	}
+
+	async blockHouseholdForReporter(input: {
+		id: string;
+		reporterUserId: string;
+		householdId: string;
+	}): Promise<void> {
+		const existing = await this.database
+			.select({ id: expiringShareBlockTable.id })
+			.from(expiringShareBlockTable)
+			.where(
+				and(
+					eq(expiringShareBlockTable.reporterUserId, input.reporterUserId),
+					eq(expiringShareBlockTable.householdId, input.householdId)
+				)
+			)
+			.limit(1);
+
+		if (existing[0]) {
+			return;
+		}
+
+		await this.database.insert(expiringShareBlockTable).values({
+			id: input.id,
+			reporterUserId: input.reporterUserId,
+			shareId: null,
+			householdId: input.householdId
+		});
+	}
+
+	async getBlockedShareIds(reporterUserId: string): Promise<string[]> {
+		const rows = await this.database
+			.select({ shareId: expiringShareBlockTable.shareId })
+			.from(expiringShareBlockTable)
+			.where(
+				and(
+					eq(expiringShareBlockTable.reporterUserId, reporterUserId),
+					isNotNull(expiringShareBlockTable.shareId)
 				)
 			);
+
+		return rows.map((row) => row.shareId!).filter(Boolean);
+	}
+
+	async getBlockedHouseholdIds(reporterUserId: string): Promise<string[]> {
+		const rows = await this.database
+			.select({ householdId: expiringShareBlockTable.householdId })
+			.from(expiringShareBlockTable)
+			.where(
+				and(
+					eq(expiringShareBlockTable.reporterUserId, reporterUserId),
+					isNotNull(expiringShareBlockTable.householdId)
+				)
+			);
+
+		return rows.map((row) => row.householdId!).filter(Boolean);
+	}
+
+	private toPreview(
+		row:
+			| {
+					snapshotJson: string;
+					expiresAt: Date;
+					createdAt: Date;
+			  }
+			| undefined
+	): ExpiringSharePreview | null {
+		if (!row) {
+			return null;
+		}
+
+		if (row.expiresAt.getTime() <= Date.now()) {
+			return null;
+		}
+
+		let snapshot: ExpiringShareSnapshot;
+		try {
+			snapshot = JSON.parse(row.snapshotJson) as ExpiringShareSnapshot;
+		} catch {
+			return null;
+		}
+
+		return {
+			items: snapshot.items,
+			expiresAt: row.expiresAt,
+			createdAt: row.createdAt
+		};
 	}
 }

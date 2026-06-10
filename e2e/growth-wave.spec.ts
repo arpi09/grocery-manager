@@ -172,6 +172,24 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		expect(nearbyPayload.shares).toEqual([]);
 	});
 
+	test('grannskafferiet discovery page loads for logged-in user', async ({ page }) => {
+		await loginAsAdmin(page);
+
+		const optInResponse = await page.request.post('/api/expiring-share/nearby-settings', {
+			data: { enabled: true, latitude: 59.329323, longitude: 18.068581 }
+		});
+		expect(optInResponse.ok()).toBeTruthy();
+
+		await page.goto('/grannskafferiet', { waitUntil: 'commit' });
+		await dismissCookieConsentIfOpen(page);
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page.getByRole('heading', { level: 1 })).toContainText(
+			/Grannskafferiet|Neighbour pantry/i
+		);
+		await expect(page.getByTestId('nearby-shares-map')).toBeVisible({ timeout: 15_000 });
+	});
+
 	test('nearby sharing settings API opt-in stores coarse location', async ({ page }) => {
 		await loginAsAdmin(page);
 
@@ -212,5 +230,17 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		expect(nearbyPayload.ok).toBe(true);
 		expect(nearbyPayload.optedIn).toBe(true);
 		expect(Array.isArray(nearbyPayload.shares)).toBe(true);
+
+		for (const share of nearbyPayload.shares as Array<Record<string, unknown>>) {
+			expect(share).not.toHaveProperty('latitude');
+			expect(share).not.toHaveProperty('longitude');
+			if (share.mapLat != null) {
+				expect(typeof share.mapLat).toBe('number');
+				expect(typeof share.mapLng).toBe('number');
+			}
+			if (share.openPath) {
+				expect(String(share.openPath)).toMatch(/^\/grannskafferiet\/share\//);
+			}
+		}
 	});
 });

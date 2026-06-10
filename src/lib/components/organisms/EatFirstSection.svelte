@@ -18,6 +18,7 @@
 		presentAddMissingFeedback,
 		type AddMissingFeedbackTone
 	} from '$lib/utils/recipe-add-missing';
+	import NearbyShareReportButton from '$lib/components/molecules/NearbyShareReportButton.svelte';
 	import {
 		buildExpiringShareCardRows,
 		downloadBlob,
@@ -52,6 +53,7 @@
 			itemCount: number;
 			previewItems: Array<{ name: string; expiresOn: string | null }>;
 			approximateDistanceM: number;
+			openPath: string;
 		}>
 	>([]);
 	let nearbyLoading = $state(false);
@@ -119,6 +121,7 @@
 					itemCount: number;
 					previewItems: Array<{ name: string; expiresOn: string | null }>;
 					approximateDistanceM: number;
+					openPath: string;
 				}>;
 			};
 			if (!response.ok || !data.ok) {
@@ -412,7 +415,10 @@
 	{/if}
 
 	<section class="nearby-panel" aria-labelledby="nearby-sharing-heading">
-			<h3 id="nearby-sharing-heading">{t('nearbySharing.panelTitle')}</h3>
+			<div class="nearby-panel-head">
+				<h3 id="nearby-sharing-heading">{t('nearbySharing.panelTitle')}</h3>
+				<a class="nearby-map-link" href="/grannskafferiet">{t('nearbySharing.openMapLink')}</a>
+			</div>
 			<p class="nearby-lead">{t('nearbySharing.panelLead')}</p>
 			{#if nearbyLoading}
 				<p class="nearby-status">{t('common.loading')}</p>
@@ -438,6 +444,12 @@
 											<li>{item.name}</li>
 										{/each}
 									</ul>
+									<div class="nearby-card-actions">
+										<a class="nearby-open-link" href={share.openPath}>
+											{t('nearbySharing.openShareBtn')}
+										</a>
+										<NearbyShareReportButton shareId={share.id} />
+									</div>
 								</div>
 							</Card>
 						</li>
@@ -933,9 +945,47 @@
 		background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface-muted));
 	}
 
+	.nearby-panel-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-sm);
+		margin-bottom: var(--space-xs);
+	}
+
 	.nearby-panel h3 {
-		margin: 0 0 var(--space-xs);
+		margin: 0;
 		font-size: 1rem;
+	}
+
+	.nearby-map-link {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: none;
+		white-space: nowrap;
+	}
+
+	.nearby-card-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
+		margin-top: var(--space-xs);
+		align-items: center;
+	}
+
+	.nearby-open-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.25rem;
+		padding: 0.45rem 0.85rem;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		color: var(--color-text);
+		font-size: 0.875rem;
+		font-weight: 600;
+		text-decoration: none;
 	}
 
 	.nearby-lead,

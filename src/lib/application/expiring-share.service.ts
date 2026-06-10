@@ -4,6 +4,7 @@ import {
 	EXPIRING_SHARE_TTL_MS,
 	type ExpiringShareItemSnapshot,
 	type ExpiringSharePreview,
+	type ExpiringShareReportInput,
 	type ExpiringShareSnapshot,
 	type NearbyExpiringShare,
 	type NearbySharingSettings
@@ -15,6 +16,7 @@ import {
 	geoBoundingBox,
 	isValidLatitude,
 	isValidLongitude,
+	jitterCoordinateForDisplay,
 	NEARBY_SHARING_RADIUS_M,
 	type GeoCoordinate
 } from '$lib/domain/geo';
@@ -140,9 +142,19 @@ export class ExpiringShareService {
 			return { optedIn: settings.enabled, shares: [] };
 		}
 
+		const [blockedShareIds, blockedHouseholdIds] = await Promise.all([
+			this.repository.getBlockedShareIds(userId),
+			this.repository.getBlockedHouseholdIds(userId)
+		]);
+
 		const center = { latitude: settings.latitude, longitude: settings.longitude };
 		const bounds = geoBoundingBox(center, NEARBY_SHARING_RADIUS_M);
-		const rows = await this.repository.findActiveSharesInBoundingBox(bounds, householdId);
+		const rows = await this.repository.findActiveSharesInBoundingBox(
+			bounds,
+			householdId,
+			blockedShareIds,
+			blockedHouseholdIds
+		);
 
 		const shares: NearbyExpiringShare[] = [];
 		for (const row of rows) {
@@ -168,6 +180,8 @@ export class ExpiringShareService {
 				continue;
 			}
 
+			const jittered = jitterCoordinateForDisplay(row.id, { latitude: lat, longitude: lng });
+
 			shares.push({
 				id: row.id,
 				itemCount: snapshot.items.length,
@@ -176,6 +190,9 @@ export class ExpiringShareService {
 					expiresOn: item.expiresOn
 				})),
 				approximateDistanceM: approximateDistanceMetres(distanceM),
+				mapLat: jittered.latitude,
+				mapLng: jittered.longitude,
+				openPath: `/grannskafferiet/share/${row.id}`,
 				expiresAt: row.expiresAt,
 				createdAt: row.createdAt
 			});
@@ -183,6 +200,56 @@ export class ExpiringShareService {
 
 		shares.sort((a, b) => a.approximateDistanceM - b.approximateDistanceM);
 		return { optedIn: true, shares };
+	}
+
+	async getNearbySharePreviewForViewer(
+		userId: string,
+		householdId: string,
+		shareId: string
+	): Promise<ExpiringSharePreview | null> {
+		const nearby = await this.listNearbyShares(userId, householdId);
+		if (!nearby.optedIn || !nearby.shares.some((share) => share.id === shareId)) {
+			return null;
+		}
+
+		return this.repository.findPreviewById(shareId);
+	}
+
+	async reportShare(
+		reporterUserId: string,
+		input: ExpiringShareReportInput
+	): Promise<{ ok: true; shareId: string; householdId: string } | { ok: false; error: string }> {
+		let meta = input.shareId ? await this.repository.findMetaById(input.shareId) : null;
+		if (!meta && input.token) {
+			meta = await this.repository.findMetaByTokenHash(hashSecureToken(input.token));
+		}
+
+		if (!meta) {
+			return { ok: false, error: 'not_found' };
+		}
+
+		await this.repository.createReport({
+			id: crypto.randomUUID(),
+			shareId: meta.id,
+			reporterUserId,
+			reason: input.reason ?? null
+		});
+
+		await this.repository.blockShareForReporter({
+			id: crypto.randomUUID(),
+			reporterUserId,
+			shareId: meta.id
+		});
+
+		if (input.blockHousehold) {
+			await this.repository.blockHouseholdForReporter({
+				id: crypto.randomUUID(),
+				reporterUserId,
+				householdId: meta.householdId
+			});
+		}
+
+		return { ok: true, shareId: meta.id, householdId: meta.householdId };
 	}
 }
 

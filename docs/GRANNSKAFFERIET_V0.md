@@ -94,6 +94,22 @@ Mer om Skaffu: https://skaffu.com/?utm_source=facebook&utm_medium=community&utm_
 
 **Tips:** Använd **Dela som bild** i grupper som inte vill ha externa länkar i flödet; lägg skaffu.com-UTM i kommentaren.
 
+## Hybrid launch — density-strategi
+
+Nätverksprodukter dör på **tom karta**. OLIO-recensioner och Facebook-grupper: *"inga användare i området"*. Grannskafferiet behöver en **fasad tillväxt** tills lokalt utbud finns.
+
+| Fas | Kanal | När det fungerar |
+|-----|-------|------------------|
+| **v0 länk + Dela som bild** | Facebook-grupp, WhatsApp, grannchat | **Alltid** — kräver ingen density |
+| **v1 lista nära** | Opt-in feed på `/hem`, 500 m | När **2+ hushåll** i samma område opt-in |
+| **v1.2 karta** | `/grannskafferiet` MapLibre | När **≥5–10 aktiva delningar** i en stad/område; annars tom karta skadar mer än den hjälper |
+
+**Density-gate för marknadsföring:** Marknadsför **inte** kartan som huvudingång förrän området har ≥5–10 aktiva delningar. Tills dess: community-poster med **Dela som bild + länk** (mallar ovan). Se [`LAUNCH_CHECKLIST_GROWTH_WAVE.md`](./LAUNCH_CHECKLIST_GROWTH_WAVE.md) PMF-gates.
+
+**Mätning:** `expiring_share_created`, `expiring_share_viewed`, `nearby_map_opened` — gate för "stor" geo-marknadsföring.
+
+**Konkurrentkontext:** [`COMPETITIVE_ANALYSIS.md`](./COMPETITIVE_ANALYSIS.md) §3G (OLIO vs TGTG vs Skaffu).
+
 ## v1 (planerat)
 
 - Browser geo + 500 m radie → [`GRANNSKAFFERIET_V1.md`](./GRANNSKAFFERIET_V1.md)

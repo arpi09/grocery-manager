@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
+	import NearbyShareReportButton from '$lib/components/molecules/NearbyShareReportButton.svelte';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
@@ -64,6 +66,13 @@
 		</ul>
 
 		<p class="gdpr-note" role="note">{t('expiringShare.publicGdprNote')}</p>
+
+		{#if $page.data.user}
+			<div class="report-row">
+				<p>{t('nearbySharing.trustNote')}</p>
+				<NearbyShareReportButton token={data.token} variant="secondary" />
+			</div>
+		{/if}
 
 		<div class="signup-cta">
 			<h2>{t('expiringShare.publicSignupTitle')}</h2>
@@ -154,6 +163,21 @@
 		font-weight: 600;
 		text-decoration: none;
 		text-align: center;
+	}
+
+	.report-row {
+		display: grid;
+		gap: var(--space-sm);
+		padding: var(--space-md);
+		border-radius: var(--radius-md);
+		border: 1px solid var(--color-border);
+		background: var(--color-surface-muted);
+	}
+
+	.report-row p {
+		margin: 0;
+		font-size: var(--text-sm);
+		color: var(--color-text-muted);
 	}
 
 	.gdpr-note {
