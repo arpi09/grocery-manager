@@ -528,6 +528,11 @@ const sv: MarketingContent = {
 				href: 'https://www.linkedin.com/company/skaffu',
 				label: 'LinkedIn',
 				external: true
+			},
+			{
+				href: 'https://www.facebook.com/profile.php?id=100066978903320',
+				label: 'Facebook',
+				external: true
 			}
 		]
 	},
@@ -952,6 +957,11 @@ const en: MarketingContent = {
 			{
 				href: 'https://www.linkedin.com/company/skaffu',
 				label: 'LinkedIn',
+				external: true
+			},
+			{
+				href: 'https://www.facebook.com/profile.php?id=100066978903320',
+				label: 'Facebook',
 				external: true
 			}
 		]

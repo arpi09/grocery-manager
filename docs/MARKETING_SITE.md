@@ -203,7 +203,7 @@ Copy lives in `src/lib/marketing/content.ts` with Swedish (`sv`) as primary. Eng
 
 Requires `OPENAI_API_KEY` in prod (same as cron). LinkedIn UTM: `utm_campaign=guide_link`, `utm_content={slug}`. Core generation: `src/lib/marketing/generate-guide-article.server.ts`.
 
-Marketing footer includes [Skaffu on LinkedIn](https://www.linkedin.com/company/skaffu) via `footer.socialLinks` in `content.ts`.
+Marketing footer includes [Skaffu on LinkedIn](https://www.linkedin.com/company/skaffu) and [Facebook Page](https://www.facebook.com/profile.php?id=100066978903320) via `footer.socialLinks` in `content.ts`. Facebook assets: [`docs/FACEBOOK_PAGE.md`](./FACEBOOK_PAGE.md); generate with `npm run generate:facebook`.
 
 ### AI-assisted guide pipeline
 
