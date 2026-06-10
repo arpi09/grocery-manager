@@ -1,6 +1,15 @@
 import { AdminError } from '$lib/application/admin.service';
+import { GuideArticleError } from '$lib/application/guide-article.service';
 import { SocialPostError } from '$lib/application/social-post.service';
-import { ensureLinkedInSeedDraft } from '$lib/infrastructure/db/seed-social-post';
+import {
+	ensureLinkedInSeedDraft,
+	repairStaleLinkedInSeedDraft
+} from '$lib/infrastructure/db/seed-social-post';
+import {
+	LINKEDIN_DEFAULT_UTM,
+	resolveDefaultSocialLink
+} from '$lib/marketing/linkedin-draft-defaults';
+import { skaffurapportService } from '$lib/server/di';
 import { lucia } from '$lib/infrastructure/auth/lucia';
 import {
 	adminLogoutAllSchema,
@@ -11,10 +20,13 @@ import {
 	adminSetPetsSchema,
 	adminSetRoleSchema,
 	adminSocialPostIdSchema,
+	adminGuideArticleIdSchema,
+	adminUpdateGuideArticleSchema,
 	adminUpdateSocialPostSchema,
 	adminUserIdSchema
 } from '$lib/validation/admin.schemas';
 import { appSettingsService, linkedInPublishService } from '$lib/server/di';
+import { getOpenAiApiKey } from '$lib/server/openai';
 import { fail, redirect } from '@sveltejs/kit';
 import { appendActionToast } from '$lib/utils/action-toast';
 import { translate } from '$lib/i18n/messages';
@@ -23,7 +35,11 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ parent, locals, url }) => {
 	const { user } = await parent();
 	const tab = url.searchParams.get('tab');
-	await ensureLinkedInSeedDraft();
+	const seedDeps = { skaffurapportService };
+	if (tab === 'social') {
+		await repairStaleLinkedInSeedDraft(seedDeps);
+	}
+	await ensureLinkedInSeedDraft(seedDeps);
 	const [stats, emailSending, stripeCheckout, linkedIn] = await Promise.all([
 		locals.adminService.getDashboardStats(),
 		appSettingsService.getEmailSendingStatus(),
@@ -37,6 +53,7 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		emailSending,
 		stripeCheckout,
 		linkedIn,
+		openAiConfigured: !!getOpenAiApiKey(),
 		tab
 	};
 };
@@ -217,6 +234,43 @@ export const actions: Actions = {
 
 		redirect(302, appendActionToast('/admin?tab=social', 'adminSaved'));
 	},
+	suggestBetterSocialPostLink: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const parsed = adminSocialPostIdSchema.safeParse({
+			postId: formData.get('postId')
+		});
+
+		if (!parsed.success) {
+			return fail(400, { message: translate(locals.locale, 'admin.socialPosts.invalidPost') });
+		}
+
+		const post = await locals.socialPostService.get(parsed.data.postId);
+		if (!post) {
+			return fail(400, { message: translate(locals.locale, 'admin.socialPosts.invalidPost') });
+		}
+
+		if (post.status !== 'draft' && post.status !== 'approved' && post.status !== 'failed') {
+			return fail(400, { message: translate(locals.locale, 'admin.socialPosts.invalidUpdate') });
+		}
+
+		const suggested = await resolveDefaultSocialLink({ skaffurapportService });
+		try {
+			await locals.socialPostService.update(parsed.data.postId, {
+				linkUrl: suggested.linkUrl,
+				utmSource: LINKEDIN_DEFAULT_UTM.utmSource,
+				utmMedium: LINKEDIN_DEFAULT_UTM.utmMedium,
+				utmCampaign: LINKEDIN_DEFAULT_UTM.utmCampaign,
+				utmContent: suggested.utmContent
+			});
+		} catch (error) {
+			if (error instanceof SocialPostError) {
+				return fail(400, { message: error.message });
+			}
+			throw error;
+		}
+
+		redirect(302, appendActionToast('/admin?tab=social', 'adminSaved'));
+	},
 	approveSocialPost: async ({ request, locals }) => {
 		const formData = await request.formData();
 		const parsed = adminSocialPostIdSchema.safeParse({
@@ -267,6 +321,76 @@ export const actions: Actions = {
 
 		await locals.socialPostService.markPublished(parsed.data.postId, result.externalId);
 		redirect(302, appendActionToast('/admin?tab=social', 'adminSocialPostPublished'));
+	},
+	updateGuide: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const parsed = adminUpdateGuideArticleSchema.safeParse({
+			guideId: formData.get('guideId'),
+			title: formData.get('title') || undefined,
+			description: formData.get('description') || undefined,
+			body: formData.get('body') || undefined
+		});
+
+		if (!parsed.success) {
+			return fail(400, { message: translate(locals.locale, 'admin.marketingCampaigns.invalidUpdate') });
+		}
+
+		try {
+			await locals.guideArticleService.update(parsed.data.guideId, {
+				title: parsed.data.title,
+				description: parsed.data.description,
+				body: parsed.data.body
+			});
+		} catch (error) {
+			if (error instanceof GuideArticleError) {
+				return fail(400, { message: error.message });
+			}
+			throw error;
+		}
+
+		redirect(302, appendActionToast('/admin?tab=social', 'adminSaved'));
+	},
+	approveGuide: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const parsed = adminGuideArticleIdSchema.safeParse({
+			guideId: formData.get('guideId')
+		});
+
+		if (!parsed.success) {
+			return fail(400, { message: translate(locals.locale, 'admin.marketingCampaigns.invalidGuide') });
+		}
+
+		try {
+			await locals.guideArticleService.approve(parsed.data.guideId, locals.user!.id);
+		} catch (error) {
+			if (error instanceof GuideArticleError) {
+				return fail(400, { message: error.message });
+			}
+			throw error;
+		}
+
+		redirect(302, appendActionToast('/admin?tab=social', 'adminGuideApproved'));
+	},
+	publishGuide: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const parsed = adminGuideArticleIdSchema.safeParse({
+			guideId: formData.get('guideId')
+		});
+
+		if (!parsed.success) {
+			return fail(400, { message: translate(locals.locale, 'admin.marketingCampaigns.invalidGuide') });
+		}
+
+		try {
+			await locals.guideArticleService.markPublished(parsed.data.guideId);
+		} catch (error) {
+			if (error instanceof GuideArticleError) {
+				return fail(400, { message: error.message });
+			}
+			throw error;
+		}
+
+		redirect(302, appendActionToast('/admin?tab=social', 'adminGuidePublished'));
 	},
 	logoutUser: async ({ request, locals, cookies }) => {
 		const formData = await request.formData();

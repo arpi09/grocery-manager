@@ -60,3 +60,14 @@ export const adminUpdateSocialPostSchema = z.object({
 export const adminSocialPostIdSchema = z.object({
 	postId: z.string().min(1)
 });
+
+export const adminGuideArticleIdSchema = z.object({
+	guideId: z.string().min(1)
+});
+
+export const adminUpdateGuideArticleSchema = z.object({
+	guideId: z.string().min(1),
+	title: z.string().min(1).max(200).optional(),
+	description: z.string().min(1).max(320).optional(),
+	body: z.string().min(1).optional()
+});

@@ -219,7 +219,11 @@
 			{/await}
 		{:else if activeTab === 'social'}
 			{#await import('$lib/components/organisms/admin/AdminSocialPostsPanel.svelte') then { default: AdminSocialPostsPanel }}
-				<AdminSocialPostsPanel active={true} linkedIn={data.linkedIn} />
+				<AdminSocialPostsPanel
+					active={true}
+					linkedIn={data.linkedIn}
+					openAiConfigured={data.openAiConfigured}
+				/>
 			{/await}
 		{/if}
 	</PageContainer>

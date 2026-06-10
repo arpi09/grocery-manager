@@ -116,6 +116,12 @@ describe('resolveGuideNewsContext', () => {
 		expect(result.mode).toBe('not_relevant');
 	});
 
+	it('not_relevant does not block guide cron — generation continues keyword-only', () => {
+		// guides-generate-cron.yml no longer treats news_not_relevant as queue_empty.
+		// generate-guide-article.ts logs and proceeds without newsContext.
+		expect('not_relevant').not.toBe('queue_empty');
+	});
+
 	it('returns relevant when RSS has matching headline', async () => {
 		const fetchFn = vi.fn().mockResolvedValue({
 			ok: true,

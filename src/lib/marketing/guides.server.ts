@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { marked } from 'marked';
+import type { GuideArticle } from '$lib/domain/guide-article';
 import type { SitemapEntry } from '$lib/seo/seo';
 import { countGuideWords } from '$lib/marketing/guide-quality';
 import {
@@ -13,15 +14,48 @@ import {
 
 const GUIDES_CONTENT_DIR = join(process.cwd(), 'content/guides/sv');
 
-/** First keyword-matrix index without a guide file, or null when the queue is empty. */
-export function resolveNextGuideKeywordIndex(): number | null {
+/** First keyword-matrix index without a guide file or DB slug, or null when the queue is empty. */
+export function resolveNextGuideKeywordIndex(extraSlugs: Iterable<string> = []): number | null {
+	const taken = new Set(extraSlugs);
 	for (let index = 0; index < GUIDE_KEYWORD_MATRIX.length; index++) {
 		const slug = slugForGuideKeyword(GUIDE_KEYWORD_MATRIX[index].primaryKeyword);
-		if (!existsSync(join(GUIDES_CONTENT_DIR, `${slug}.md`))) {
+		if (!existsSync(join(GUIDES_CONTENT_DIR, `${slug}.md`)) && !taken.has(slug)) {
 			return index;
 		}
 	}
 	return null;
+}
+
+export interface GuideLoaderDeps {
+	listPublishedFromDb?: () => Promise<GuideArticle[]>;
+	getPublishedBySlugFromDb?: (slug: string) => Promise<GuideArticle | null>;
+}
+
+export function guideArticleToGuide(article: GuideArticle): Guide {
+	const html = marked.parse(article.body) as string;
+	return {
+		slug: article.slug,
+		title: article.title,
+		description: article.description,
+		date: article.articleDate,
+		keywords: article.keywords,
+		published: article.status === 'published',
+		body: article.body,
+		html,
+		wordCount: countGuideWords(article.body)
+	};
+}
+
+/** Merge filesystem and DB guides; DB wins on slug conflict. */
+export function mergeGuides(fileGuides: Guide[], dbGuides: Guide[]): Guide[] {
+	const bySlug = new Map<string, Guide>();
+	for (const guide of fileGuides) {
+		bySlug.set(guide.slug, guide);
+	}
+	for (const guide of dbGuides) {
+		bySlug.set(guide.slug, guide);
+	}
+	return [...bySlug.values()].sort((a, b) => b.date.localeCompare(a.date));
 }
 
 function parseFrontmatter(raw: string): { frontmatter: Record<string, unknown>; body: string } {
@@ -154,24 +188,58 @@ export function listGuideSlugs(): string[] {
 	}
 }
 
-export function loadAllGuides(): Guide[] {
+export function loadAllGuidesFromFiles(): Guide[] {
 	return listGuideSlugs()
 		.map((slug) => readGuideFile(slug))
 		.filter((guide): guide is Guide => guide !== null);
 }
 
-export function loadPublishedGuides(): Guide[] {
-	return loadAllGuides()
+export function loadAllGuides(): Guide[] {
+	return loadAllGuidesFromFiles();
+}
+
+export async function loadAllGuidesMerged(deps?: GuideLoaderDeps): Promise<Guide[]> {
+	const fileGuides = loadAllGuidesFromFiles();
+	if (!deps?.listPublishedFromDb) {
+		return fileGuides;
+	}
+	const dbArticles = await deps.listPublishedFromDb();
+	const dbGuides = dbArticles.map(guideArticleToGuide);
+	return mergeGuides(fileGuides, dbGuides);
+}
+
+export function loadPublishedGuidesFromFiles(): Guide[] {
+	return loadAllGuidesFromFiles()
 		.filter((guide) => guide.published)
 		.sort((a, b) => b.date.localeCompare(a.date));
 }
 
-export function loadGuideBySlug(slug: string): Guide | null {
+export async function loadPublishedGuides(deps?: GuideLoaderDeps): Promise<Guide[]> {
+	const fileGuides = loadAllGuidesFromFiles();
+	if (!deps?.listPublishedFromDb) {
+		return fileGuides.filter((guide) => guide.published).sort((a, b) => b.date.localeCompare(a.date));
+	}
+	const dbArticles = await deps.listPublishedFromDb();
+	const dbGuides = dbArticles.map(guideArticleToGuide);
+	return mergeGuides(fileGuides, dbGuides).filter((guide) => guide.published);
+}
+
+function loadPublishedGuideFromFile(slug: string): Guide | null {
 	const guide = readGuideFile(slug);
 	if (!guide || !guide.published) {
 		return null;
 	}
 	return guide;
+}
+
+export async function loadGuideBySlug(slug: string, deps?: GuideLoaderDeps): Promise<Guide | null> {
+	if (deps?.getPublishedBySlugFromDb) {
+		const dbArticle = await deps.getPublishedBySlugFromDb(slug);
+		if (dbArticle) {
+			return guideArticleToGuide(dbArticle);
+		}
+	}
+	return loadPublishedGuideFromFile(slug);
 }
 
 export function toGuideListItem(guide: Guide): GuideListItem {
@@ -184,12 +252,14 @@ export function toGuideListItem(guide: Guide): GuideListItem {
 	};
 }
 
-export function getLatestPublishedGuides(limit = 3): GuideListItem[] {
-	return loadPublishedGuides().slice(0, limit).map(toGuideListItem);
+export async function getLatestPublishedGuides(limit = 3, deps?: GuideLoaderDeps): Promise<GuideListItem[]> {
+	const guides = await loadPublishedGuides(deps);
+	return guides.slice(0, limit).map(toGuideListItem);
 }
 
-export function getPublishedGuideSitemapEntries(): SitemapEntry[] {
-	return loadPublishedGuides().map((guide) => ({
+export async function getPublishedGuideSitemapEntries(deps?: GuideLoaderDeps): Promise<SitemapEntry[]> {
+	const guides = await loadPublishedGuides(deps);
+	return guides.map((guide) => ({
 		path: `/guider/${guide.slug}`,
 		changefreq: 'monthly' as const,
 		priority: 0.75

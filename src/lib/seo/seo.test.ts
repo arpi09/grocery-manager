@@ -58,8 +58,8 @@ describe('buildSitemapXml', () => {
 		mockPublicEnv.PUBLIC_ORIGIN = 'https://skaffu.com';
 	});
 
-	it('includes all public marketing and auth paths', () => {
-		const xml = buildSitemapXml('https://skaffu.com');
+	it('includes all public marketing and auth paths', async () => {
+		const xml = await buildSitemapXml('https://skaffu.com');
 		for (const entry of SITEMAP_ENTRIES) {
 			const loc = entry.path === '/' ? 'https://skaffu.com' : `https://skaffu.com${entry.path}`;
 			expect(xml).toContain(`<loc>${loc}</loc>`);
@@ -68,8 +68,8 @@ describe('buildSitemapXml', () => {
 		expect(xml).not.toContain('/hem');
 	});
 
-	it('includes published guide slugs in sitemap', () => {
-		const xml = buildSitemapXml('https://skaffu.com');
+	it('includes published guide slugs in sitemap', async () => {
+		const xml = await buildSitemapXml('https://skaffu.com');
 		expect(xml).toContain('<loc>https://skaffu.com/guider/minska-matsvinn-hemma-app</loc>');
 	});
 });

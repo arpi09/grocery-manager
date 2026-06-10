@@ -1,11 +1,15 @@
 import { getPublishedGuideSitemapEntries } from '$lib/marketing/guides.server';
+import type { GuideLoaderDeps } from '$lib/marketing/guides.server';
 import { resolveAppOrigin } from '$lib/marketing/app-url';
 import { SITEMAP_ENTRIES, sitemapAbsoluteUrl } from '$lib/seo/seo';
 
-export function buildSitemapXml(requestOrigin?: string): string {
+export async function buildSitemapXml(
+	requestOrigin?: string,
+	guideDeps?: GuideLoaderDeps
+): Promise<string> {
 	const origin = resolveAppOrigin(requestOrigin);
 	const lastmod = new Date().toISOString().slice(0, 10);
-	const guideEntries = getPublishedGuideSitemapEntries();
+	const guideEntries = await getPublishedGuideSitemapEntries(guideDeps);
 	const allEntries = [...SITEMAP_ENTRIES, ...guideEntries];
 	const urls = allEntries.map(
 		(entry) => `  <url>

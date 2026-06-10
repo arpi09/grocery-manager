@@ -1304,11 +1304,47 @@
 			"linkedInConnected": "OAuth connected: {state}",
 			"organizationId": "Organization ID: {id}",
 			"connectLinkedIn": "Connect LinkedIn",
+			"linkWarningRapportNotReady": "The link points to Skaffurapport {month}, but the cohort does not meet k-anonymity yet. Visitors only see a beta disclaimer.",
+			"linkWarningGeneric": "The link points to a report that is not ready for LinkedIn. Switch to the landing page or latest guide.",
+			"suggestBetterLink": "Suggest better link",
+			"suggestedLink": "Suggested link",
+			"suggestedLinkReason": {
+				"report_ready": "Skaffurapport with sufficient cohort",
+				"latest_guide": "Latest published SEO guide",
+				"landing": "Landing page (photo-round tip)"
+			},
 			"status": {
 				"draft": "Draft",
 				"approved": "Approved",
 				"published": "Published",
 				"failed": "Failed"
+			}
+		},
+		"marketingCampaigns": {
+			"title": "SEO campaigns (guide + LinkedIn)",
+			"note": "Generate a pair: AI guide draft and LinkedIn post linking to the article /guider/ URL. Approve both, publish the guide on the site, then publish LinkedIn.",
+			"generate": "Generate article + LinkedIn post",
+			"generateSuccess": "Campaign created as drafts",
+			"generateFailed": "Could not generate campaign",
+			"queueEmpty": "All keyword-matrix topics already have guides",
+			"openAiHint": "OPENAI_API_KEY is missing — add it to environment variables to generate.",
+			"empty": "No campaigns in this filter.",
+			"previewLink": "Preview article",
+			"previewTitle": "Preview guide",
+			"previewBanner": "Admin preview — status: {status}",
+			"backToAdmin": "Back to admin",
+			"titleLabel": "Title",
+			"descriptionLabel": "Description",
+			"bodyLabel": "Article (markdown)",
+			"approveGuide": "Approve article",
+			"publishGuide": "Publish article",
+			"linkedInDraft": "Linked LinkedIn post",
+			"invalidGuide": "Invalid article.",
+			"invalidUpdate": "Invalid article update.",
+			"status": {
+				"draft": "Draft",
+				"approved": "Approved",
+				"published": "Published"
 			}
 		},
 		"stripeCheckout": {
@@ -2346,6 +2382,8 @@
 		"adminSocialPostApproved": "Post approved",
 		"adminSocialPostPublished": "Published to LinkedIn",
 		"adminSocialPostPublishFailed": "Publish failed: {label}",
+		"adminGuideApproved": "Article approved",
+		"adminGuidePublished": "Article published on the site",
 		"pushEnabled": "Browser notifications enabled",
 		"pushDisabled": "Browser notifications disabled"
 	},

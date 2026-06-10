@@ -59,12 +59,6 @@ jobs:
             exit 0
           fi
 
-          if echo "$output" | grep -q 'news_not_relevant'; then
-            echo "queue_empty=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::No relevant SVT news for Skaffu themes — skipping generation."
-            exit 0
-          fi
-
           if [ "$exit_code" -ne 0 ]; then
             echo "::error::guides:publish-next failed (exit $exit_code)."
             exit "$exit_code"

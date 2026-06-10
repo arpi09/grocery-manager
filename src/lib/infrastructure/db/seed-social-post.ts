@@ -3,15 +3,30 @@ import { LINKEDIN_SEED_DRAFT_TITLE } from '$lib/domain/social-post';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { getDb } from '$lib/infrastructure/db';
 import { socialPostTable } from '$lib/infrastructure/db/schema';
+import {
+	isStaleSeedBody,
+	LINKEDIN_DEFAULT_UTM,
+	LINKEDIN_SEED_BODY,
+	parseRapportMonthFromUrl,
+	resolveDefaultSocialLink,
+	shouldRepairSeedDraftLink,
+	type ResolveDefaultSocialLinkDeps
+} from '$lib/marketing/linkedin-draft-defaults';
 
-const SEED_BODY = `Svenska hushåll kastar mat för miljarder varje år — ofta för att vi glömmer vad som redan finns i kylen.
+export interface SeedSocialPostDeps extends ResolveDefaultSocialLinkDeps {}
 
-Skaffurapporten för juni sammanfattar mönster från hushåll som faktiskt håller koll på lagret (ingen adress, ingen personlig data):
+async function loadSeedDraft() {
+	const db = getDb();
+	const rows = await db
+		.select()
+		.from(socialPostTable)
+		.where(eq(socialPostTable.title, LINKEDIN_SEED_DRAFT_TITLE))
+		.limit(1);
+	return rows[0] ?? null;
+}
 
-Vill du testa själv: skanna streckkod eller fota kylen — appen fyller lagret åt dig. Gratis att prova.`;
-
-/** Inserts the first LinkedIn draft from docs/LINKEDIN_REPOST.md when the queue is empty. */
-export async function ensureLinkedInSeedDraft(): Promise<string | null> {
+/** Inserts the first LinkedIn draft when the queue is empty. */
+export async function ensureLinkedInSeedDraft(deps: SeedSocialPostDeps): Promise<string | null> {
 	const db = getDb();
 	const existing = await db
 		.select({ id: socialPostTable.id })
@@ -28,6 +43,7 @@ export async function ensureLinkedInSeedDraft(): Promise<string | null> {
 		return null;
 	}
 
+	const resolved = await resolveDefaultSocialLink(deps);
 	const id = generateId();
 	const now = new Date();
 	await db.insert(socialPostTable).values({
@@ -35,16 +51,52 @@ export async function ensureLinkedInSeedDraft(): Promise<string | null> {
 		channel: 'linkedin',
 		status: 'draft',
 		title: LINKEDIN_SEED_DRAFT_TITLE,
-		body: SEED_BODY,
-		linkUrl: 'https://skaffu.com/rapport/2026-06',
-		utmSource: 'linkedin',
-		utmMedium: 'social',
-		utmCampaign: 'growth_repost',
-		utmContent: 'post_a',
+		body: LINKEDIN_SEED_BODY,
+		linkUrl: resolved.linkUrl,
+		utmSource: LINKEDIN_DEFAULT_UTM.utmSource,
+		utmMedium: LINKEDIN_DEFAULT_UTM.utmMedium,
+		utmCampaign: LINKEDIN_DEFAULT_UTM.utmCampaign,
+		utmContent: resolved.utmContent,
 		source: 'manual',
 		createdAt: now,
 		updatedAt: now
 	});
 
 	return id;
+}
+
+/** Repairs the seed draft when link or body is stale (e.g. hardcoded rapport/2026-06). */
+export async function repairStaleLinkedInSeedDraft(deps: SeedSocialPostDeps): Promise<boolean> {
+	const draft = await loadSeedDraft();
+	if (!draft || draft.status !== 'draft') {
+		return false;
+	}
+
+	const reportMonth = parseRapportMonthFromUrl(draft.linkUrl);
+	let meetsKAnonymity: boolean | null = null;
+	if (reportMonth) {
+		const report = await deps.skaffurapportService.getPublishedReport(reportMonth);
+		meetsKAnonymity = report?.meetsKAnonymity ?? false;
+	}
+
+	const needsLinkRepair = shouldRepairSeedDraftLink(draft.linkUrl, meetsKAnonymity);
+	const needsBodyRepair = isStaleSeedBody(draft.body);
+	if (!needsLinkRepair && !needsBodyRepair) {
+		return false;
+	}
+
+	const resolved = needsLinkRepair ? await resolveDefaultSocialLink(deps) : null;
+	const now = new Date();
+	const db = getDb();
+	await db
+		.update(socialPostTable)
+		.set({
+			body: needsBodyRepair ? LINKEDIN_SEED_BODY : draft.body,
+			linkUrl: resolved?.linkUrl ?? draft.linkUrl,
+			utmContent: resolved?.utmContent ?? draft.utmContent,
+			updatedAt: now
+		})
+		.where(eq(socialPostTable.id, draft.id));
+
+	return true;
 }

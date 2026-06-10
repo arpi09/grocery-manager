@@ -1268,11 +1268,47 @@
 			"linkedInConnected": "OAuth kopplad: {state}",
 			"organizationId": "Organisations-ID: {id}",
 			"connectLinkedIn": "Koppla LinkedIn",
+			"linkWarningRapportNotReady": "Länken går till Skaffurapport {month}, men kohorten har inte tillräckligt många hushåll (k-anonymitet). Besökare ser bara beta-disclaimer.",
+			"linkWarningGeneric": "Länken pekar på en rapport som inte är redo för LinkedIn. Byt till landning eller senaste guide.",
+			"suggestBetterLink": "Föreslå bättre länk",
+			"suggestedLink": "Föreslagen länk",
+			"suggestedLinkReason": {
+				"report_ready": "Skaffurapport med tillräcklig kohort",
+				"latest_guide": "Senaste publicerade SEO-guide",
+				"landing": "Landningssida (fotorunda-tip)"
+			},
 			"status": {
 				"draft": "Utkast",
 				"approved": "Godkänt",
 				"published": "Publicerat",
 				"failed": "Misslyckades"
+			}
+		},
+		"marketingCampaigns": {
+			"title": "SEO-kampanjer (guide + LinkedIn)",
+			"note": "Generera ett par: AI-guide (draft) och LinkedIn-inlägg med länk till artikelns /guider/-URL. Godkänn båda, publicera guiden på webben, publicera sedan LinkedIn.",
+			"generate": "Generera artikel + LinkedIn-inlägg",
+			"generateSuccess": "Kampanj skapad som utkast",
+			"generateFailed": "Kunde inte generera kampanj",
+			"queueEmpty": "Alla ämnen i keyword-matrisen är redan skrivna",
+			"openAiHint": "OPENAI_API_KEY saknas — lägg till i miljövariabler för att generera.",
+			"empty": "Inga kampanjer i detta filter.",
+			"previewLink": "Förhandsgranska artikel",
+			"previewTitle": "Förhandsgranska guide",
+			"previewBanner": "Admin-förhandsgranskning — status: {status}",
+			"backToAdmin": "Tillbaka till admin",
+			"titleLabel": "Titel",
+			"descriptionLabel": "Ingress",
+			"bodyLabel": "Artikel (markdown)",
+			"approveGuide": "Godkänn artikel",
+			"publishGuide": "Publicera artikel",
+			"linkedInDraft": "Kopplat LinkedIn-inlägg",
+			"invalidGuide": "Ogiltig artikel.",
+			"invalidUpdate": "Ogiltig uppdatering av artikel.",
+			"status": {
+				"draft": "Utkast",
+				"approved": "Godkänd",
+				"published": "Publicerad"
 			}
 		},
 		"stripeCheckout": {
@@ -2304,6 +2340,8 @@
 		"adminSocialPostApproved": "Inlägg godkänt",
 		"adminSocialPostPublished": "Publicerat på LinkedIn",
 		"adminSocialPostPublishFailed": "Publicering misslyckades: {label}",
+		"adminGuideApproved": "Artikel godkänd",
+		"adminGuidePublished": "Artikel publicerad på webben",
 		"pushEnabled": "Webbläsarnotiser aktiverade",
 		"pushDisabled": "Webbläsarnotiser avaktiverade",
 		"itemPartiallyConsumed": "{label} uppdaterad — resten finns kvar i skafferiet",

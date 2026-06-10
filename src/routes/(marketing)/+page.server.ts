@@ -8,11 +8,12 @@ import {
 	resolveLandingVariant
 } from '$lib/marketing/landing-variants';
 import { getLatestPublishedGuides } from '$lib/marketing/guides.server';
+import { guideLoaderDepsFromService } from '$lib/marketing/guide-loader-deps';
 import { pmfService } from '$lib/server/di';
 import { recordMarketingEvent } from '$lib/server/marketing-analytics';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url, cookies, parent }) => {
+export const load: PageServerLoad = async ({ url, cookies, parent, locals }) => {
 	const { marketingLocale } = await parent();
 	const locale = (marketingLocale === 'en' ? 'en' : 'sv') satisfies MarketingLocale;
 	const consent = readCookieConsent(cookies);
@@ -44,6 +45,6 @@ export const load: PageServerLoad = async ({ url, cookies, parent }) => {
 	return {
 		landingVariant: variant,
 		hero: getLandingHeroCopy(variant, locale),
-		latestGuides: getLatestPublishedGuides(3)
+		latestGuides: await getLatestPublishedGuides(3, guideLoaderDepsFromService(locals.guideArticleService))
 	};
 };

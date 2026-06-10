@@ -45,7 +45,9 @@ export type ActionToastKind =
 	| 'adminLinkedInConnectFailed'
 	| 'adminSocialPostApproved'
 	| 'adminSocialPostPublished'
-	| 'adminSocialPostPublishFailed';
+	| 'adminSocialPostPublishFailed'
+	| 'adminGuideApproved'
+	| 'adminGuidePublished';
 
 const ACTION_TOAST_KEYS: Record<
 	ActionToastKind,
@@ -186,6 +188,14 @@ const ACTION_TOAST_KEYS: Record<
 	adminSocialPostPublishFailed: {
 		withLabel: 'actionToast.adminSocialPostPublishFailed',
 		generic: 'actionToast.adminSocialPostPublishFailed'
+	},
+	adminGuideApproved: {
+		withLabel: 'actionToast.adminGuideApproved',
+		generic: 'actionToast.adminGuideApproved'
+	},
+	adminGuidePublished: {
+		withLabel: 'actionToast.adminGuidePublished',
+		generic: 'actionToast.adminGuidePublished'
 	}
 };
 

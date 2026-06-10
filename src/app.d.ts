@@ -29,6 +29,7 @@ import type { AnalyticsBehaviorService } from '$lib/application/analytics-behavi
 import type { AnalyticsAdminService } from '$lib/application/analytics-admin.service';
 import type { AdminInsightsService } from '$lib/application/admin-insights.service';
 import type { SocialPostService } from '$lib/application/social-post.service';
+import type { GuideArticleService } from '$lib/application/guide-article.service';
 import type { LinkedInPublishService } from '$lib/application/linkedin-publish.service';
 import type { HouseholdRole } from '$lib/domain/household';
 import type { PlanTier } from '$lib/domain/plan';
@@ -77,6 +78,7 @@ declare global {
 			analyticsAdminService: AnalyticsAdminService;
 			adminInsightsService: AdminInsightsService;
 			socialPostService: SocialPostService;
+			guideArticleService: GuideArticleService;
 			linkedInPublishService: LinkedInPublishService;
 		}
 	}

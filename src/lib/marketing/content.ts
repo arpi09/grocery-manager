@@ -4,6 +4,7 @@ export type MarketingLocale = 'sv' | 'en';
 export interface MarketingNavLink {
 	href: string;
 	label: string;
+	external?: boolean;
 }
 
 export interface MarketingFeature {
@@ -173,6 +174,7 @@ export interface MarketingContent {
 		tagline: string;
 		rights: string;
 		navAria: string;
+		socialLinks: MarketingNavLink[];
 	};
 	reduceWaste: MarketingSeoPage;
 	pantryApp: MarketingSeoPage;
@@ -520,7 +522,14 @@ const sv: MarketingContent = {
 	footer: {
 		tagline: 'Skafferi, kyl och inköp på ett ställe.',
 		rights: '© Skaffu. Alla rättigheter förbehållna.',
-		navAria: 'Sidfot'
+		navAria: 'Sidfot',
+		socialLinks: [
+			{
+				href: 'https://www.linkedin.com/company/skaffu',
+				label: 'LinkedIn',
+				external: true
+			}
+		]
 	},
 	reduceWaste: {
 		title: 'Minska matsvinn med skafferi du har koll på',
@@ -938,7 +947,14 @@ const en: MarketingContent = {
 	footer: {
 		tagline: 'Pantry, fridge and shopping in one place.',
 		rights: '© Skaffu. All rights reserved.',
-		navAria: 'Footer'
+		navAria: 'Footer',
+		socialLinks: [
+			{
+				href: 'https://www.linkedin.com/company/skaffu',
+				label: 'LinkedIn',
+				external: true
+			}
+		]
 	},
 	reduceWaste: {
 		title: 'Reduce food waste with a pantry you can trust',

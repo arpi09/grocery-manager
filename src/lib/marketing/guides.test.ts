@@ -9,22 +9,23 @@ import {
 import {
 	getLatestPublishedGuides,
 	loadGuideBySlug,
-	loadPublishedGuides,
+	loadPublishedGuidesFromFiles,
+	mergeGuides,
 	resolveNextGuideKeywordIndex
 } from '$lib/marketing/guides.server';
 
 describe('guides content', () => {
 	it('loads at least one published guide from content/guides/sv', () => {
-		const guides = loadPublishedGuides();
+		const guides = loadPublishedGuidesFromFiles();
 		expect(guides.length).toBeGreaterThanOrEqual(1);
 	});
 
-	it('returns null for unknown slug', () => {
-		expect(loadGuideBySlug('does-not-exist-xyz')).toBeNull();
+	it('returns null for unknown slug', async () => {
+		expect(await loadGuideBySlug('does-not-exist-xyz')).toBeNull();
 	});
 
-	it('lists latest published guides sorted by date desc', () => {
-		const latest = getLatestPublishedGuides(3);
+	it('lists latest published guides sorted by date desc', async () => {
+		const latest = await getLatestPublishedGuides(3);
 		expect(latest.length).toBeGreaterThanOrEqual(1);
 		for (let i = 1; i < latest.length; i++) {
 			expect(latest[i - 1].date >= latest[i].date).toBe(true);
@@ -52,7 +53,7 @@ describe('guide keyword queue', () => {
 		expect(index).not.toBe(0);
 		if (index !== null) {
 			const slug = slugForGuideKeyword(GUIDE_KEYWORD_MATRIX[index].primaryKeyword);
-			expect(loadGuideBySlug(slug)).toBeNull();
+			expect(loadPublishedGuidesFromFiles().some((g) => g.slug === slug)).toBe(false);
 		}
 	});
 
@@ -77,7 +78,7 @@ describe('guide keyword queue', () => {
 		const { resolveNextGuideKeywordIndex: resolveEmptyQueue } = await import(
 			'$lib/marketing/guides.server'
 		);
-		expect(resolveEmptyQueue()).toBeNull();
+		expect(resolveEmptyQueue(slugs)).toBeNull();
 		vi.doUnmock('node:fs');
 		vi.resetModules();
 	});
@@ -85,7 +86,7 @@ describe('guide keyword queue', () => {
 
 describe('published guide quality', () => {
 	it('passes checklist for each published guide', () => {
-		for (const guide of loadPublishedGuides()) {
+		for (const guide of loadPublishedGuidesFromFiles()) {
 			const result = validateGuideQuality({
 				title: guide.title,
 				description: guide.description,
@@ -93,5 +94,39 @@ describe('published guide quality', () => {
 			});
 			expect(result.ok, `${guide.slug}: ${result.errors.join('; ')}`).toBe(true);
 		}
+	});
+});
+
+describe('mergeGuides published filter usage', () => {
+	it('filters published guides after merge', () => {
+		const merged = mergeGuides(
+			[
+				{
+					slug: 'a',
+					title: 'A',
+					description: 'd',
+					date: '2026-06-01',
+					keywords: [],
+					published: true,
+					body: 'b',
+					html: '<p>b</p>',
+					wordCount: 1
+				},
+				{
+					slug: 'b',
+					title: 'B',
+					description: 'd',
+					date: '2026-06-02',
+					keywords: [],
+					published: false,
+					body: 'b',
+					html: '<p>b</p>',
+					wordCount: 1
+				}
+			],
+			[]
+		).filter((guide) => guide.published);
+		expect(merged).toHaveLength(1);
+		expect(merged[0].slug).toBe('a');
 	});
 });

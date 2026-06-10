@@ -2,10 +2,40 @@
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
+	import type { GuideArticleStatus } from '$lib/domain/guide-article';
 	import type { SocialPostStatus } from '$lib/domain/social-post';
 	import { t } from '$lib/i18n';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
+
+	interface SocialPostLinkStatus {
+		isRapportLink: boolean;
+		reportMonth: string | null;
+		meetsKAnonymity: boolean | null;
+		needsBetterLink: boolean;
+		suggestedLink: {
+			linkUrl: string;
+			utmContent: string;
+			reason: 'report_ready' | 'latest_guide' | 'landing';
+		} | null;
+	}
+
+	interface SerializedGuide {
+		id: string;
+		slug: string;
+		status: GuideArticleStatus;
+		title: string;
+		description: string;
+		body: string;
+		qualityWarnings: string[] | null;
+		socialPostId: string | null;
+		createdAt: string;
+	}
+
+	interface CampaignRow {
+		guide: SerializedGuide;
+		socialPost: SerializedPost | null;
+	}
 
 	interface SerializedPost {
 		id: string;
@@ -24,6 +54,7 @@
 		approvedAt: string | null;
 		publishedAt: string | null;
 		builtLinkUrl: string | null;
+		linkStatus?: SocialPostLinkStatus;
 	}
 
 	interface LinkedInStatus {
@@ -36,23 +67,79 @@
 	interface Props {
 		active: boolean;
 		linkedIn: LinkedInStatus;
+		openAiConfigured: boolean;
 	}
 
-	let { active, linkedIn }: Props = $props();
+	let { active, linkedIn, openAiConfigured }: Props = $props();
 
 	let loading = $state(false);
+	let campaignsLoading = $state(false);
+	let generating = $state(false);
 	let error = $state<string | null>(null);
+	let campaignError = $state<string | null>(null);
 	let posts = $state<SerializedPost[]>([]);
+	let campaigns = $state<CampaignRow[]>([]);
 	let statusFilter = $state<SocialPostStatus | 'all'>('draft');
+	let campaignStatusFilter = $state<GuideArticleStatus | 'all'>('draft');
 	let loaded = $state(false);
+	let campaignsLoaded = $state(false);
 	let submittingPostId = $state<string | null>(null);
+	let submittingGuideId = $state<string | null>(null);
+
+	const linkedCampaignPostIds = $derived(
+		new Set(campaigns.map((row) => row.socialPost?.id).filter(Boolean) as string[])
+	);
+
+	const standalonePosts = $derived(posts.filter((post) => !linkedCampaignPostIds.has(post.id)));
 
 	$effect(() => {
 		if (!active) {
 			return;
 		}
 		void loadPosts();
+		void loadCampaigns();
 	});
+
+	async function loadCampaigns() {
+		campaignsLoading = true;
+		campaignError = null;
+		try {
+			const params = new URLSearchParams();
+			if (campaignStatusFilter !== 'all') {
+				params.set('status', campaignStatusFilter);
+			}
+			const response = await fetch(`/api/admin/marketing-campaigns?${params}`);
+			if (!response.ok) {
+				throw new Error('fetch failed');
+			}
+			const payload = (await response.json()) as { campaigns: CampaignRow[] };
+			campaigns = payload.campaigns;
+			campaignsLoaded = true;
+		} catch {
+			campaignError = t('admin.loadError');
+		} finally {
+			campaignsLoading = false;
+		}
+	}
+
+	async function generateCampaign() {
+		generating = true;
+		campaignError = null;
+		try {
+			const response = await fetch('/api/admin/marketing-campaigns/generate', { method: 'POST' });
+			const payload = (await response.json()) as { error?: string };
+			if (!response.ok) {
+				campaignError = payload.error ?? t('admin.marketingCampaigns.generateFailed');
+				return;
+			}
+			showClientToast(t('admin.marketingCampaigns.generateSuccess'));
+			await Promise.all([loadCampaigns(), loadPosts()]);
+		} catch {
+			campaignError = t('admin.marketingCampaigns.generateFailed');
+		} finally {
+			generating = false;
+		}
+	}
 
 	async function loadPosts() {
 		loading = true;
@@ -97,6 +184,35 @@
 	function statusLabel(status: SocialPostStatus): string {
 		return t(`admin.socialPosts.status.${status}`);
 	}
+
+	function guideStatusLabel(status: GuideArticleStatus): string {
+		return t(`admin.marketingCampaigns.status.${status}`);
+	}
+
+	function canEditGuide(status: GuideArticleStatus): boolean {
+		return status === 'draft' || status === 'approved';
+	}
+
+	function linkWarning(post: SerializedPost): string | null {
+		const status = post.linkStatus;
+		if (!status?.needsBetterLink) {
+			return null;
+		}
+		if (status.isRapportLink && status.meetsKAnonymity === false) {
+			return t('admin.socialPosts.linkWarningRapportNotReady', {
+				month: status.reportMonth ?? ''
+			});
+		}
+		return t('admin.socialPosts.linkWarningGeneric');
+	}
+
+	function suggestedLinkLabel(post: SerializedPost): string | null {
+		const reason = post.linkStatus?.suggestedLink?.reason;
+		if (!reason) {
+			return null;
+		}
+		return t(`admin.socialPosts.suggestedLinkReason.${reason}`);
+	}
 </script>
 
 {#if loading && !loaded}
@@ -129,6 +245,201 @@
 		</Card>
 	</section>
 
+	<section class="campaigns">
+		<Card>
+			<div class="queue-header">
+				<h2>{t('admin.marketingCampaigns.title')}</h2>
+				<Button type="button" disabled={generating || !openAiConfigured} onclick={() => void generateCampaign()}>
+					{t('admin.marketingCampaigns.generate')}
+				</Button>
+			</div>
+			<p class="note">{t('admin.marketingCampaigns.note')}</p>
+			{#if !openAiConfigured}
+				<p class="openai-hint" role="status">{t('admin.marketingCampaigns.openAiHint')}</p>
+			{/if}
+			{#if campaignError}
+				<p class="panel-error" role="alert">{campaignError}</p>
+			{/if}
+			<label>
+				{t('admin.socialPosts.filter')}
+				<select
+					value={campaignStatusFilter}
+					onchange={(event) => {
+						const value = (event.currentTarget as HTMLSelectElement).value;
+						campaignStatusFilter = value === 'all' ? 'all' : (value as GuideArticleStatus);
+						void loadCampaigns();
+					}}
+				>
+					<option value="all">{t('admin.socialPosts.filterAll')}</option>
+					<option value="draft">{guideStatusLabel('draft')}</option>
+					<option value="approved">{guideStatusLabel('approved')}</option>
+					<option value="published">{guideStatusLabel('published')}</option>
+				</select>
+			</label>
+
+			{#if campaignsLoading && !campaignsLoaded}
+				<p class="panel-status">{t('admin.loading')}</p>
+			{:else if campaigns.length === 0}
+				<p class="empty">{t('admin.marketingCampaigns.empty')}</p>
+			{:else}
+				<ul class="post-list">
+					{#each campaigns as row (row.guide.id)}
+						<li class="post-card campaign-card">
+							<div class="post-meta">
+								<span class="badge">{guideStatusLabel(row.guide.status)}</span>
+								<strong>{row.guide.title}</strong>
+								<span class="source">/{row.guide.slug}</span>
+							</div>
+
+							{#if row.guide.qualityWarnings?.length}
+								<ul class="quality-warnings">
+									{#each row.guide.qualityWarnings as warning}
+										<li>{warning}</li>
+									{/each}
+								</ul>
+							{/if}
+
+							<p class="preview-link">
+								<a href="/admin/guide-preview/{row.guide.id}" target="_blank" rel="noopener noreferrer">
+									{t('admin.marketingCampaigns.previewLink')}
+								</a>
+							</p>
+
+							{#if canEditGuide(row.guide.status)}
+								<form
+									method="POST"
+									action="?/updateGuide"
+									class="edit-form"
+									use:enhance={bindSubmitting((v) => {
+										submittingGuideId = v ? row.guide.id : null;
+									})}
+								>
+									<input type="hidden" name="guideId" value={row.guide.id} />
+									<label>
+										{t('admin.marketingCampaigns.titleLabel')}
+										<input name="title" type="text" value={row.guide.title} required />
+									</label>
+									<label>
+										{t('admin.marketingCampaigns.descriptionLabel')}
+										<input name="description" type="text" value={row.guide.description} required />
+									</label>
+									<label>
+										{t('admin.marketingCampaigns.bodyLabel')}
+										<textarea name="body" rows="8" required>{row.guide.body}</textarea>
+									</label>
+									<Button type="submit" variant="secondary" disabled={submittingGuideId === row.guide.id}>
+										{t('common.save')}
+									</Button>
+								</form>
+							{/if}
+
+							<div class="actions">
+								{#if row.guide.status === 'draft'}
+									<form
+										method="POST"
+										action="?/approveGuide"
+										use:enhance={bindSubmitting((v) => {
+											submittingGuideId = v ? row.guide.id : null;
+										})}
+									>
+										<input type="hidden" name="guideId" value={row.guide.id} />
+										<Button type="submit" disabled={submittingGuideId === row.guide.id}>
+											{t('admin.marketingCampaigns.approveGuide')}
+										</Button>
+									</form>
+								{/if}
+								{#if row.guide.status === 'approved'}
+									<form
+										method="POST"
+										action="?/publishGuide"
+										use:enhance={bindSubmitting((v) => {
+											submittingGuideId = v ? row.guide.id : null;
+										})}
+									>
+										<input type="hidden" name="guideId" value={row.guide.id} />
+										<Button type="submit" disabled={submittingGuideId === row.guide.id}>
+											{t('admin.marketingCampaigns.publishGuide')}
+										</Button>
+									</form>
+								{/if}
+							</div>
+
+							{#if row.socialPost}
+								<div class="linked-post">
+									<h3>{t('admin.marketingCampaigns.linkedInDraft')}</h3>
+									<div class="post-meta">
+										<span class="badge">{statusLabel(row.socialPost.status)}</span>
+									</div>
+									{#if canEdit(row.socialPost.status)}
+										<form
+											method="POST"
+											action="?/updateSocialPost"
+											class="edit-form"
+											use:enhance={bindSubmitting((v) => {
+												submittingPostId = v ? row.socialPost!.id : null;
+											})}
+										>
+											<input type="hidden" name="postId" value={row.socialPost.id} />
+											<label>
+												{t('admin.socialPosts.bodyLabel')}
+												<textarea name="body" rows="5" required>{row.socialPost.body}</textarea>
+											</label>
+											{#if row.socialPost.builtLinkUrl}
+												<p class="built-link">
+													<a href={row.socialPost.builtLinkUrl} target="_blank" rel="noopener noreferrer">
+														{row.socialPost.builtLinkUrl}
+													</a>
+												</p>
+											{/if}
+											<Button type="submit" variant="secondary" disabled={submittingPostId === row.socialPost.id}>
+												{t('common.save')}
+											</Button>
+										</form>
+									{:else}
+										<pre class="preview">{row.socialPost.body}</pre>
+									{/if}
+									<div class="actions">
+										{#if row.socialPost.status === 'draft' || row.socialPost.status === 'failed'}
+											<form
+												method="POST"
+												action="?/approveSocialPost"
+												use:enhance={bindSubmitting((v) => {
+													submittingPostId = v ? row.socialPost!.id : null;
+												})}
+											>
+												<input type="hidden" name="postId" value={row.socialPost.id} />
+												<Button type="submit" disabled={submittingPostId === row.socialPost.id}>
+													{t('admin.socialPosts.approve')}
+												</Button>
+											</form>
+										{/if}
+										<Button type="button" variant="secondary" onclick={() => copyToClipboard(row.socialPost!)}>
+											{t('admin.socialPosts.copyToLinkedIn')}
+										</Button>
+										{#if row.socialPost.status === 'approved' && linkedIn.configured && linkedIn.connected}
+											<form
+												method="POST"
+												action="?/publishSocialPost"
+												use:enhance={bindSubmitting((v) => {
+													submittingPostId = v ? row.socialPost!.id : null;
+												})}
+											>
+												<input type="hidden" name="postId" value={row.socialPost.id} />
+												<Button type="submit" disabled={submittingPostId === row.socialPost.id}>
+													{t('admin.socialPosts.publish')}
+												</Button>
+											</form>
+										{/if}
+									</div>
+								</div>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</Card>
+	</section>
+
 	<section class="social-queue">
 		<Card>
 			<div class="queue-header">
@@ -153,11 +464,11 @@
 			</div>
 			<p class="note">{t('admin.socialPosts.note')}</p>
 
-			{#if posts.length === 0}
+			{#if standalonePosts.length === 0}
 				<p class="empty">{t('admin.socialPosts.empty')}</p>
 			{:else}
 				<ul class="post-list">
-					{#each posts as post (post.id)}
+					{#each standalonePosts as post (post.id)}
 						<li class="post-card">
 							<div class="post-meta">
 								<span class="badge">{statusLabel(post.status)}</span>
@@ -189,6 +500,33 @@
 										<p class="built-link">
 											{t('admin.socialPosts.builtLink')}: <a href={post.builtLinkUrl} target="_blank" rel="noopener noreferrer">{post.builtLinkUrl}</a>
 										</p>
+									{/if}
+									{#if linkWarning(post)}
+										<p class="link-warning" role="status">{linkWarning(post)}</p>
+										{#if post.linkStatus?.suggestedLink}
+											<p class="suggested-link-note">
+												{t('admin.socialPosts.suggestedLink')}: {suggestedLinkLabel(post)}
+												<a
+													href={post.linkStatus.suggestedLink.linkUrl}
+													target="_blank"
+													rel="noopener noreferrer"
+												>
+													{post.linkStatus.suggestedLink.linkUrl}
+												</a>
+											</p>
+											<form
+												method="POST"
+												action="?/suggestBetterSocialPostLink"
+												use:enhance={bindSubmitting((v) => {
+													submittingPostId = v ? post.id : null;
+												})}
+											>
+												<input type="hidden" name="postId" value={post.id} />
+												<Button type="submit" variant="secondary" disabled={submittingPostId === post.id}>
+													{t('admin.socialPosts.suggestBetterLink')}
+												</Button>
+											</form>
+										{/if}
 									{/if}
 									<Button type="submit" variant="secondary" disabled={submittingPostId === post.id}>
 										{t('common.save')}
@@ -260,6 +598,7 @@
 	}
 
 	.linkedin-connection,
+	.campaigns,
 	.social-queue {
 		margin-bottom: var(--space-lg);
 	}
@@ -388,6 +727,26 @@
 		font-size: 0.85rem;
 	}
 
+	.link-warning {
+		margin: 0 0 var(--space-sm);
+		padding: var(--space-sm);
+		border-radius: var(--radius-sm);
+		background: color-mix(in srgb, var(--color-warning, #b45309) 14%, var(--color-surface));
+		color: var(--color-warning, #b45309);
+		font-size: 0.85rem;
+	}
+
+	.suggested-link-note {
+		margin: 0 0 var(--space-sm);
+		font-size: 0.85rem;
+		color: var(--color-text-muted);
+		word-break: break-all;
+	}
+
+	.suggested-link-note a {
+		color: var(--color-primary);
+	}
+
 	.actions {
 		display: flex;
 		flex-wrap: wrap;
@@ -404,5 +763,43 @@
 		color: #fff;
 		font-weight: 600;
 		text-decoration: none;
+	}
+
+	.openai-hint {
+		margin: 0 0 var(--space-md);
+		padding: var(--space-sm);
+		border-radius: var(--radius-sm);
+		background: color-mix(in srgb, var(--color-warning, #b45309) 12%, var(--color-surface));
+		color: var(--color-warning, #b45309);
+		font-size: 0.85rem;
+	}
+
+	.campaign-card {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+	}
+
+	.quality-warnings {
+		margin: 0;
+		padding-left: 1.25rem;
+		color: var(--color-warning, #b45309);
+		font-size: 0.85rem;
+	}
+
+	.preview-link a {
+		color: var(--color-primary);
+		font-size: 0.9rem;
+	}
+
+	.linked-post {
+		margin-top: var(--space-md);
+		padding-top: var(--space-md);
+		border-top: 1px dashed var(--color-border);
+	}
+
+	.linked-post h3 {
+		margin: 0 0 var(--space-sm);
+		font-size: 1rem;
 	}
 </style>

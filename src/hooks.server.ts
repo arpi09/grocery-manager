@@ -31,6 +31,7 @@ import {
 	analyticsAdminService,
 	adminInsightsService,
 	socialPostService,
+	guideArticleService,
 	linkedInPublishService
 } from '$lib/server/di';
 import { recordUserActivity } from '$lib/server/activity';
@@ -163,6 +164,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.analyticsAdminService = analyticsAdminService;
 	event.locals.adminInsightsService = adminInsightsService;
 	event.locals.socialPostService = socialPostService;
+	event.locals.guideArticleService = guideArticleService;
 	event.locals.linkedInPublishService = linkedInPublishService;
 
 	const { pathname: requestPathname } = event.url;

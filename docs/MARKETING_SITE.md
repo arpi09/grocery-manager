@@ -13,7 +13,7 @@ Public information pages for Home Pantry, served from the same SvelteKit app as 
 | `/sa-fungerar-det` | How it works (3 steps) |
 | `/faq` | FAQ stub + contact email |
 | `/guider` | SEO guides hub (public, indexable) |
-| `/guider/[slug]` | Individual guide articles from `content/guides/sv/*.md` |
+| `/guider/[slug]` | Individual guide articles from `content/guides/sv/*.md` **and** published DB rows (`guide_article`) |
 
 The authenticated app dashboard moved from `/` to **`/hem`**. All other app routes (`/scan`, `/inkop`, `/inventory/…`, etc.) are unchanged.
 
@@ -189,14 +189,29 @@ Copy lives in `src/lib/marketing/content.ts` with Swedish (`sv`) as primary. Eng
 - Marketing nav links to **Guider** (`/guider`), not `/nyheter`.
 - Landing `/` shows **Senaste guider** (up to 3 cards) — not a full blog feed in the hero.
 - Guide markdown lives in `content/guides/sv/*.md` with frontmatter (`title`, `description`, `date`, `keywords`, `published`).
+- **Admin-published guides** live in Postgres (`guide_article`) and merge with filesystem guides in `src/lib/marketing/guides.server.ts` (DB wins on slug conflict). No deploy needed to publish from prod admin.
+
+### Admin campaign: guide + LinkedIn (prod)
+
+| Step | Where |
+|------|--------|
+| Generate pair | `/admin?tab=social` → **Generera artikel + LinkedIn-inlägg** → `POST /api/admin/marketing-campaigns/generate` |
+| Preview draft | `/admin/guide-preview/[id]` (admin-only) |
+| Approve | Form actions `approveGuide` + existing `approveSocialPost` |
+| Publish site | `publishGuide` → article appears on `/guider/{slug}` |
+| Publish LinkedIn | `publishSocialPost` (after guide is live) |
+
+Requires `OPENAI_API_KEY` in prod (same as cron). LinkedIn UTM: `utm_campaign=guide_link`, `utm_content={slug}`. Core generation: `src/lib/marketing/generate-guide-article.server.ts`.
+
+Marketing footer includes [Skaffu on LinkedIn](https://www.linkedin.com/company/skaffu) via `footer.socialLinks` in `content.ts`.
 
 ### AI-assisted guide pipeline
 
 | Step | Command / file |
 |------|----------------|
 | Generate draft | `npm run guides:generate -- --keyword 0` (needs `OPENAI_API_KEY`) |
-| Next in queue | `npm run guides:publish-next` — picks first keyword without a `.md` file (`--next --publish`) |
-| SVT news gate | `src/lib/marketing/guide-news-context.ts` — fetches SVT Nyheter RSS, skips when no Skaffu-relevant headline |
+| Next in queue | `npm run guides:publish-next` — picks first keyword without a `.md` file **or** DB slug (`--next --publish`) |
+| SVT news gate | `src/lib/marketing/guide-news-context.ts` — fetches SVT Nyheter RSS; when no Skaffu-relevant headline, continues keyword-only (no skip) |
 | Content rules | `src/lib/marketing/guide-generation-rules.ts` — documented editorial policy for prompts |
 | Quality checklist | `src/lib/marketing/guide-quality.ts` — min 800 words, internal links, forbidden phrases |
 | Publish | Set `published: true` in frontmatter after manual review, or pass checklist via `--publish` |
@@ -210,7 +225,7 @@ Drafts default to `published: false`. `--publish` sets `published: true` only wh
 | Tone | Professional Swedish for practical households; butiksneutralt, not clickbait |
 | Topics | Food, pantry, shopping, food waste, prices, expiry dates, receipts, meal planning |
 | Forbidden | Fabricated facts/quotes/stats, medical/nutrition advice beyond basic food safety, politics, crime/celebrity news, conspiracy angles, competitor defamation |
-| News tie-in | Cron fetches [SVT Nyheter RSS](https://www.svt.se/nyheter/rss.xml) before generation. **No relevant headline → skip** (`news_not_relevant`, exit 0). Attribute cautiously ("enligt rapportering …") without invented quotes |
+| News tie-in | Cron fetches [SVT Nyheter RSS](https://www.svt.se/nyheter/rss.xml) before generation. **No relevant headline → keyword-only** (`news_not_relevant`, generation continues). Attribute cautiously ("enligt rapportering …") without invented quotes |
 | RSS failure | Log warning, fall back to keyword-matrix-only generation (no news hook) |
 | Local override | `--skip-news-check` bypasses the SVT gate for manual runs |
 
@@ -230,7 +245,7 @@ Workflow: [`.github/workflows/guides-generate-cron.yml`](../.github/workflows/gu
 | PR label | `seo-guide` |
 | Branch | `guides/auto/{slug}` |
 
-**Flow:** `npm run guides:publish-next` → SVT news relevance check → `npm test` + `npm run check` → commit `content/guides/sv/{slug}.md` → open PR for review. Skips when the keyword queue is empty, no relevant SVT headline (`news_not_relevant`), or a branch/PR for that slug already exists.
+**Flow:** `npm run guides:publish-next` → SVT news relevance check (optional hook) → `npm test` + `npm run check` → commit `content/guides/sv/{slug}.md` → open PR for review. **Guider = PR — merga för att synas på `/`.** Skips only when the keyword queue is empty or a branch/PR for that slug already exists.
 
 **Human review before merge:** spot-check kvitto/butik claims; the checklist does not catch factual errors.
 

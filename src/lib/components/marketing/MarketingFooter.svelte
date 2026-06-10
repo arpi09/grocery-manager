@@ -20,6 +20,15 @@
 			{#each content.nav as link (link.href)}
 				<a href={link.href}>{link.label}</a>
 			{/each}
+			{#each content.footer.socialLinks as link (link.href)}
+				<a
+					href={link.href}
+					target={link.external ? '_blank' : undefined}
+					rel={link.external ? 'noopener noreferrer' : undefined}
+				>
+					{link.label}
+				</a>
+			{/each}
 			<a href={loginUrl}>{content.cta.login}</a>
 		</nav>
 	</div>

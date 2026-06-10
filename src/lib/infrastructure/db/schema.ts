@@ -8,7 +8,8 @@ import {
 	boolean,
 	integer,
 	primaryKey,
-	uniqueIndex
+	uniqueIndex,
+	jsonb
 } from 'drizzle-orm/pg-core';
 
 export const userTable = pgTable('user', {
@@ -683,4 +684,34 @@ export const socialPostTable = pgTable(
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 	},
 	(table) => [index('social_post_status_created_idx').on(table.status, table.createdAt)]
+);
+
+export const guideArticleTable = pgTable(
+	'guide_article',
+	{
+		id: text('id').primaryKey(),
+		slug: text('slug').notNull().unique(),
+		title: text('title').notNull(),
+		description: text('description').notNull(),
+		body: text('body').notNull(),
+		keywords: jsonb('keywords').$type<string[]>().notNull().default([]),
+		articleDate: text('article_date').notNull(),
+		status: text('status', { enum: ['draft', 'approved', 'published'] })
+			.notNull()
+			.default('draft'),
+		source: text('source', { enum: ['agent', 'manual'] }).notNull().default('manual'),
+		socialPostId: text('social_post_id').references(() => socialPostTable.id, {
+			onDelete: 'set null'
+		}),
+		qualityWarnings: jsonb('quality_warnings').$type<string[]>(),
+		approvedBy: text('approved_by').references(() => userTable.id, { onDelete: 'set null' }),
+		approvedAt: timestamp('approved_at', { withTimezone: true, mode: 'date' }),
+		publishedAt: timestamp('published_at', { withTimezone: true, mode: 'date' }),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('guide_article_status_created_idx').on(table.status, table.createdAt),
+		index('guide_article_slug_idx').on(table.slug)
+	]
 );

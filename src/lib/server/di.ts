@@ -47,8 +47,10 @@ import { DrizzleWaitlistRepository } from '$lib/infrastructure/repositories/wait
 import { WaitlistService } from '$lib/application/waitlist.service';
 import { DrizzleAppSettingsRepository } from '$lib/infrastructure/repositories/app-settings.repository';
 import { DrizzleSocialPostRepository } from '$lib/infrastructure/repositories/social-post.repository';
+import { DrizzleGuideArticleRepository } from '$lib/infrastructure/repositories/guide-article.repository';
 import { AppSettingsService } from '$lib/application/app-settings.service';
 import { SocialPostService } from '$lib/application/social-post.service';
+import { GuideArticleService } from '$lib/application/guide-article.service';
 import { LinkedInPublishService } from '$lib/application/linkedin-publish.service';
 import { PmfDigestService } from '$lib/application/pmf-digest.service';
 import { ErrorAlertService } from '$lib/application/error-alert.service';
@@ -98,8 +100,10 @@ const planLimitsRepository = new DrizzlePlanLimitsRepository();
 const waitlistRepository = new DrizzleWaitlistRepository();
 const appSettingsRepository = new DrizzleAppSettingsRepository();
 const socialPostRepository = new DrizzleSocialPostRepository();
+const guideArticleRepository = new DrizzleGuideArticleRepository();
 export const appSettingsService = new AppSettingsService(appSettingsRepository);
 export const socialPostService = new SocialPostService(socialPostRepository);
+export const guideArticleService = new GuideArticleService(guideArticleRepository);
 export const linkedInPublishService = new LinkedInPublishService(
 	appSettingsRepository,
 	socialPostService

@@ -1,7 +1,9 @@
 import { json } from '@sveltejs/kit';
 import { SocialPostError } from '$lib/application/social-post.service';
 import { SOCIAL_POST_LIST_DEFAULT, SOCIAL_POST_LIST_MAX } from '$lib/domain/social-post';
+import { resolveSocialPostLinkStatus } from '$lib/marketing/linkedin-draft-defaults';
 import { requireAdmin } from '$lib/server/api-guards';
+import { skaffurapportService } from '$lib/server/di';
 import { adminCreateSocialPostSchema } from '$lib/validation/admin.schemas';
 import type { RequestHandler } from './$types';
 
@@ -30,14 +32,21 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 	const limit = parseLimit(url.searchParams.get('limit'));
 
 	const posts = await locals.socialPostService.list({ status, limit });
-	const serialized = posts.map((post) => ({
-		...post,
-		createdAt: post.createdAt.toISOString(),
-		updatedAt: post.updatedAt.toISOString(),
-		approvedAt: post.approvedAt?.toISOString() ?? null,
-		publishedAt: post.publishedAt?.toISOString() ?? null,
-		builtLinkUrl: locals.socialPostService.buildFinalUrl(post)
-	}));
+	const linkDeps = { skaffurapportService };
+	const serialized = await Promise.all(
+		posts.map(async (post) => {
+			const linkStatus = await resolveSocialPostLinkStatus(post.linkUrl, linkDeps);
+			return {
+				...post,
+				createdAt: post.createdAt.toISOString(),
+				updatedAt: post.updatedAt.toISOString(),
+				approvedAt: post.approvedAt?.toISOString() ?? null,
+				publishedAt: post.publishedAt?.toISOString() ?? null,
+				builtLinkUrl: locals.socialPostService.buildFinalUrl(post),
+				linkStatus
+			};
+		})
+	);
 
 	return json({ posts: serialized, limit });
 };
