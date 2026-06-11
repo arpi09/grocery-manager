@@ -379,8 +379,15 @@ export const productEventTable = pgTable(
 				'receipt_finish_accepted',
 				'price_memory_viewed',
 				'replenishment_suggestion_shown',
+				'replenishment_suggestion_clicked',
+				'replenishment_suggestion_added',
 				'replenishment_suggestion_accepted',
-				'replenishment_suggestion_dismissed'
+				'replenishment_suggestion_dismissed',
+				'pantry_health_insight_shown',
+				'pantry_health_insight_clicked',
+				'waste_alert_shown',
+				'waste_alert_clicked',
+				'waste_alert_resolved'
 			]
 		}).notNull(),
 		metadata: text('metadata'),

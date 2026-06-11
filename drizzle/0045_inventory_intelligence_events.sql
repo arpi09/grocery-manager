@@ -1,0 +1,5 @@
+-- Inventory Intelligence V1 product_event types (application enum in schema.ts):
+-- replenishment_suggestion_clicked, replenishment_suggestion_added,
+-- pantry_health_insight_shown, pantry_health_insight_clicked,
+-- waste_alert_shown, waste_alert_clicked, waste_alert_resolved
+-- No DDL required: product_event.event_type is unconstrained text.

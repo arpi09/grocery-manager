@@ -861,6 +861,19 @@
 			}
 		}
 	},
+	"pantryHealth": {
+		"title": "Skafferihälsa",
+		"ariaLabel": "Skafferihälsoinsikter",
+		"stale": "{count, plural, one {# vara utan utgångsdatum verkar glömd} other {# varor utan utgångsdatum verkar glömda}}",
+		"duplicate": "{count} rader heter {name} — granska dubletter",
+		"overstock": "Du har {count} av {name} — kolla lagret"
+	},
+	"wastePrevention": {
+		"ariaLabel": "Använd innan utgång",
+		"copy": "{count, plural, one {# vara går snart ut} other {# varor går snart ut}}",
+		"slowMoverCopy": "{expiringCount, plural, one {# vara går snart ut} other {# varor går snart ut}} · {slowMoverCount} inte bekräftade på länge",
+		"action": "Se vad som ska användas först"
+	},
 	"replenishment": {
 		"title": "Dags att köpa igen?",
 		"ariaLabel": "Köp-igen-förslag",

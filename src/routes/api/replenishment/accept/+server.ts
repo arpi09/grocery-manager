@@ -44,6 +44,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		recordProductEvent(locals.pmfService, {
 			userId: auth.user.id,
 			householdId: auth.householdId,
+			eventType: 'replenishment_suggestion_added',
+			metadata: { normalizedKey, name: result.name }
+		});
+
+		recordProductEvent(locals.pmfService, {
+			userId: auth.user.id,
+			householdId: auth.householdId,
 			eventType: 'replenishment_suggestion_accepted',
 			metadata: { normalizedKey, name: result.name }
 		});

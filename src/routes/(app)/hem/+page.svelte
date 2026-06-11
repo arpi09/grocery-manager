@@ -20,6 +20,7 @@
 			receiptAutopilotSuggestions={data.receiptAutopilotSuggestions}
 			receiptFinishSuggestions={data.receiptFinishSuggestions}
 			recentItemNames={data.recentItemNames}
+			intelligence={data.intelligence}
 			duplicateGroups={data.duplicateGroups}
 			activityEvents={data.activityEvents}
 			lastUpdatedByDisplayName={data.lastUpdatedByDisplayName}

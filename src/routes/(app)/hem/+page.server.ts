@@ -6,6 +6,8 @@ import type { SavingsReport } from '$lib/domain/savings-estimate';
 
 import type { GamificationCelebrationKind } from '$lib/domain/gamification';
 
+import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
+
 import { shouldPromoteWeeklyRitual } from '$lib/domain/weekly-ritual';
 
 import { DEFAULT_LOCALE, isLocale, type Locale } from '$lib/i18n/locale';
@@ -82,52 +84,45 @@ export const load: PageServerLoad = async ({ locals }) => {
 		}
 	};
 
+	const emptyIntelligence: HomeIntelligenceSnapshot = {
+		replenishment: [],
+		pantryHealth: [],
+		waste: null
+	};
+
 	const [
-
 		summary,
-
+		intelligence,
 		engagement,
-
 		celebration,
-
 		receiptAutopilotSuggestions,
-
 		receiptFinishSuggestions,
-
 		savings,
-
 		recentItemNames,
-
 		duplicateGroups,
 		activityEvents,
 		shoppingListCount
-
 	] = await Promise.all([
-
 		locals.inventoryService.getDashboard(householdId).catch(degrade('dashboard', emptySummary)),
-
+		locals.inventoryIntelligenceService
+			.getHomeIntelligence(householdId)
+			.catch(degrade('inventory intelligence', emptyIntelligence)),
 		locals.gamificationService
 			.getEngagementStrip(householdId, userId)
 			.catch(degrade('engagement strip', emptyEngagement)),
-
 		locals.gamificationService
 			.detectHomeCelebration(householdId)
 			.catch(degrade('celebration', null)),
-
 		locals.purchasePatternService
 			.getSuggestions(householdId)
 			.catch(degrade('receipt autopilot', [])),
-
 		locals.purchasePatternService
 			.getFinishSuggestions(householdId)
 			.catch(degrade('receipt finish', [])),
-
 		locals.statistikService.getSavingsReport(householdId).catch(degrade('savings', emptySavings)),
-
 		canWrite
 			? locals.inventoryService.listRecentItemNames(householdId).catch(degrade('recent names', []))
 			: Promise.resolve([]),
-
 		canWrite
 			? locals.inventoryService
 					.findDuplicateNameGroups(householdId)
@@ -138,7 +133,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 			.listUncheckedItems(householdId)
 			.then((items) => items.length)
 			.catch(degrade('shopping list count', 0))
-
 	]);
 
 
@@ -184,6 +178,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		pageTitle: translate(locale, 'home.title'),
 
 		summary,
+
+		intelligence,
 
 		engagement,
 

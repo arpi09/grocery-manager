@@ -62,6 +62,7 @@ import { PriceMemoryService } from '$lib/application/price-memory.service';
 import { DrizzleExpiringShareRepository } from '$lib/infrastructure/repositories/expiring-share.repository';
 import { DrizzleShoppingListShareRepository } from '$lib/infrastructure/repositories/shopping-list-share.repository';
 import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
+import { InventoryIntelligenceService } from '$lib/application/inventory-intelligence.service';
 import { SkaffurapportService } from '$lib/application/skaffurapport.service';
 import { ExpiringShareService } from '$lib/application/expiring-share.service';
 import { ShoppingListShareService } from '$lib/application/shopping-list-share.service';
@@ -198,6 +199,10 @@ export const purchasePatternService = new PurchasePatternService(
 	purchasePatternRepository,
 	inventoryService,
 	shoppingListService
+);
+export const inventoryIntelligenceService = new InventoryIntelligenceService(
+	purchasePatternService,
+	inventoryService
 );
 export const shoppingToPantryService = new ShoppingToPantryService(inventoryService, userRepository);
 export const mealPlanService = new MealPlanService(mealPlanRepository);
