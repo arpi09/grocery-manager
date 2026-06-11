@@ -262,7 +262,7 @@
 		<ModalHeader title={currentStep.title} subtitle={currentStep.subtitle}>
 			{#snippet actions()}
 				<button type="button" class="skip-link" data-testid="onboarding-skip" onclick={skipGuide}>
-					{t('onboarding.skip')}
+					{t('onboarding.skipLater')}
 				</button>
 			{/snippet}
 		</ModalHeader>

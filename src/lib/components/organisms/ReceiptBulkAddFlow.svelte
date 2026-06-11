@@ -121,7 +121,11 @@
 			const data = await readReceiptParseResponse(response);
 
 			if (!response.ok || !data.lines?.length) {
-				parseError = receiptParseFailureMessage(response, data);
+				parseError =
+					data.error ??
+					(response.ok
+						? t('errors.api.receiptNoItems')
+						: receiptParseFailureMessage(response, data));
 				return;
 			}
 

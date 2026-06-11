@@ -13,6 +13,7 @@
 	const loginHref = $derived(
 		`/login?redirect=${encodeURIComponent(data.redirectTo)}&message=${encodeURIComponent(t('invite.loginRedirectMessage'))}`
 	);
+	const registerHref = '/register';
 </script>
 
 <AppLayout user={data.user}>
@@ -21,6 +22,7 @@
 	<Card>
 		{#if !data.preview}
 			<p class="message error">{t('invite.notFound')}</p>
+			<a class="login-link" href="/">{t('invite.goHome')}</a>
 		{:else}
 			<h2 class="title">{t('invite.invitedTo', { name: data.preview.householdName })}</h2>
 			<p class="detail">
@@ -36,6 +38,7 @@
 
 			{#if data.preview.status === 'accepted'}
 				<p class="message info">{t('invite.alreadyAccepted')}</p>
+				<a class="login-link" href="/hem">{t('invite.goHome')}</a>
 			{:else if data.preview.status === 'revoked'}
 				<p class="message error">{t('invite.revoked')}</p>
 			{:else if data.preview.expired}
@@ -43,10 +46,13 @@
 			{:else if !data.user}
 				<p class="message info">
 					{data.isShareInvite
-						? t('invite.shareLead')
+						? t('invite.shareLoginPrompt')
 						: t('invite.loginPrompt', { email: data.preview.email })}
 				</p>
 				<a class="login-link" href={loginHref}>{t('invite.loginLink')}</a>
+				{#if data.isShareInvite}
+					<a class="register-link" href={registerHref}>{t('invite.registerLink')}</a>
+				{/if}
 			{:else if !data.emailMatches}
 				<p class="message error">
 					{t('invite.wrongAccount', { current: data.user.email, expected: data.preview.email })}
@@ -112,6 +118,22 @@
 		border-radius: var(--radius-sm);
 		background: var(--color-primary);
 		color: #fff;
+		text-decoration: none;
+		font-weight: 600;
+	}
+
+	.register-link {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		min-height: var(--touch-target-min);
+		margin-top: var(--space-sm);
+		padding: 0.75rem 1rem;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		background: transparent;
+		color: var(--color-text);
 		text-decoration: none;
 		font-weight: 600;
 	}
