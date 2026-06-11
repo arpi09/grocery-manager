@@ -21,6 +21,11 @@ function line(
 		location: overrides.location ?? 'fridge',
 		quantity: overrides.quantity ?? '1',
 		unit: overrides.unit ?? 'L',
+		unitPrice: overrides.unitPrice ?? null,
+		currency: overrides.currency ?? null,
+		lineTotal: overrides.lineTotal ?? null,
+		storeLabel: overrides.storeLabel ?? null,
+		purchasedAt: overrides.purchasedAt ?? null,
 		createdAt: overrides.createdAt ?? new Date('2026-05-01T12:00:00Z')
 	};
 }
@@ -75,8 +80,8 @@ describe('detectReceiptPatternSuggestions', () => {
 		const lines = [
 			line({ normalizedKey: 'mjolk', importBatchId: 'batch-1' }),
 			line({ id: 'line-2', normalizedKey: 'mjolk', importBatchId: 'batch-2' }),
-			line({ id: 'line-3', normalizedKey: 'agg', importBatchId: 'batch-1', productName: 'Ã„gg 12st' }),
-			line({ id: 'line-4', normalizedKey: 'agg', importBatchId: 'batch-2', productName: 'Ã„gg 12st' })
+			line({ id: 'line-3', normalizedKey: 'agg', importBatchId: 'batch-1', productName: 'Ãÿgg 12st' }),
+			line({ id: 'line-4', normalizedKey: 'agg', importBatchId: 'batch-2', productName: 'Ãÿgg 12st' })
 		];
 
 		const suggestions = detectReceiptPatternSuggestions(
