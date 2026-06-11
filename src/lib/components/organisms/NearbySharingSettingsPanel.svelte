@@ -5,7 +5,9 @@
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
 	import { t } from '$lib/i18n';
 	import {
-		requestBrowserLocation,
+		queryGeolocationPermission,
+		refineGeolocationErrorCode,
+		startBrowserLocationRequest,
 		type BrowserGeolocationErrorCode
 	} from '$lib/utils/browser-geolocation';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
@@ -70,6 +72,8 @@
 		switch (code) {
 			case 'denied':
 				return t('nearbySharing.locationDenied');
+			case 'blocked':
+				return t('nearbySharing.locationBlocked');
 			case 'timeout':
 				return t('nearbySharing.locationTimeout');
 			case 'unavailable':
@@ -77,6 +81,13 @@
 			default:
 				return t('nearbySharing.locationRequired');
 		}
+	}
+
+	async function resolveLocationError(
+		code: BrowserGeolocationErrorCode
+	): Promise<string> {
+		const permission = await queryGeolocationPermission();
+		return locationErrorMessage(refineGeolocationErrorCode(code, permission));
 	}
 
 	async function persistSettings(enabled: boolean, coords?: { latitude: number; longitude: number }) {
@@ -142,24 +153,25 @@
 		}
 	}
 
-	async function toggleNearbySharing(enabled: boolean) {
-		if (nearbyBusy) {
-			return;
-		}
+	async function disableNearbySharing() {
+		await persistSettings(false);
+	}
 
-		if (!enabled) {
-			await persistSettings(false);
-			return;
-		}
-
+	/** locationPromise must be started synchronously in toggleNotify (iOS Safari user gesture). */
+	async function completeNearbySharingEnable(
+		locationPromise: Promise<
+			| { ok: true; latitude: number; longitude: number }
+			| { ok: false; code: BrowserGeolocationErrorCode }
+		>
+	) {
 		errorMessage = null;
 		locating = true;
-		const result = await requestBrowserLocation();
+		const result = await locationPromise;
 		locating = false;
 
 		if (!result.ok) {
 			nearbySharingEnabled = false;
-			errorMessage = locationErrorMessage(result.code);
+			errorMessage = await resolveLocationError(result.code);
 			return;
 		}
 
@@ -195,11 +207,18 @@
 				if (nearbyBusy) {
 					return;
 				}
-				void toggleNearbySharing(enabled);
+				if (!enabled) {
+					void disableNearbySharing();
+					return;
+				}
+				// Synchronous geolocation kickoff in the tap handler — required on iOS Safari.
+				const locationPromise = startBrowserLocationRequest();
+				void completeNearbySharingEnable(locationPromise);
 			}}
 		/>
 		{#if locating}
 			<span class="saving">{t('nearbySharing.locating')}</span>
+			<span class="hint">{t('nearbySharing.locationAllowPrompt')}</span>
 		{:else if submitting}
 			<span class="saving">{t('common.saving')}</span>
 		{/if}

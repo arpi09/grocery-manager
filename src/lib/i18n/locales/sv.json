@@ -378,17 +378,17 @@
 			"title": "Hushåll",
 			"description": "Delat hushåll, medlemmar och inbjudningar"
 		},
-		"kivraForward": {
-			"title": "Vidarebefordra Kivra-kvitto",
-			"description": "Få digitala kvitton direkt till lagret — beta",
-			"lead": "Vidarebefordra ditt Kivra-kvitto (PDF) till adressen nedan så fylls lagret automatiskt.",
-			"step1": "Öppna kvittot i Kivra och välj vidarebefordra eller dela via e-post.",
+		"receiptForward": {
+			"title": "Vidarebefordra digitalt kvitto",
+			"description": "Få kvitto-e-post direkt till lagret — beta",
+			"lead": "Vidarebefordra ditt digitala kvitto (PDF) till adressen nedan så fylls lagret automatiskt efter tolkning.",
+			"step1": "Öppna kvittot i e-post, Kivra eller butiksapp och välj vidarebefordra.",
 			"step2": "Klistra in din personliga adress som mottagare.",
 			"step3": "Vi läser PDF:en och lägger varorna i lagret — du får en notis i appen.",
 			"copy": "Kopiera adress",
 			"copied": "Adress kopierad",
-			"hint": "Fungerar bäst med PDF från Kivra eller ICA. Kunde vi inte läsa kvittot? Ladda upp PDF manuellt under Skanna.",
-			"beta": "Beta — aktiveras för utvalda hushåll. Vi sparar inte hela e-postmeddelandet efter import."
+			"hint": "Fungerar bäst med text-PDF från ICA, Willys eller Kivra. Kunde vi inte läsa kvittot? Ladda upp PDF manuellt under Skanna.",
+			"beta": "Beta — aktiveras för utvalda hushåll. Vi sparar inte hela e-postmeddelandet efter import. Ingen officiell Kivra-integration."
 		},
 		"app": {
 			"title": "App",
@@ -1541,6 +1541,9 @@
 		"events": {
 			"scanCompleted": "scan_completed",
 			"receiptParsed": "receipt_parsed",
+			"receiptImportStarted": "receipt_import_started",
+			"receiptUploaded": "receipt_uploaded",
+			"receiptReviewCompleted": "receipt_review_completed",
 			"fillSuggestionsAdded": "fill_suggestions_added"
 		},
 		"activation": {
@@ -1889,8 +1892,8 @@
 		"addItemsTitle": "Lägg till din första vara",
 		"addItemsBody": "Fota kyl, frys eller skafferi — eller skanna streckkod och kvitto. En vara räcker för att komma igång!",
 		"addFirstItem": "Lägg till vara",
-		"addItemsBodyBinary": "Välj ett sätt — kvitto eller tre streckkoder. Under tre minuter till ett fyllt skafferi.",
-		"chooseReceipt": "Ladda upp kvitto",
+		"addItemsBodyBinary": "Snabbast: ladda upp ett digitalt kvitto (PDF). Alternativ: skanna tre streckkoder. Under tre minuter till ett fyllt skafferi.",
+		"chooseReceipt": "Ladda upp digitalt kvitto",
 		"chooseBarcode": "Skanna 3 varor",
 		"celebrateReceiptBody": "Du har {count} varor i lagret — bra start!",
 		"startUsingApp": "Börja använda appen",
@@ -2512,9 +2515,11 @@
 		"privacyNote": "Andra opt-in-användare ser ungefärligt avstånd och varunamn — aldrig adress eller kontakt.",
 		"specLink": "Läs integritet och v1-spec",
 		"locationRequired": "Aktivera plats i webbläsaren för att hitta delningar i närheten.",
-		"locationDenied": "Plats nekad — aktivera plats i webbläsaren under Inställningar.",
+		"locationDenied": "Plats nekad för skaffu.com. På iPhone: Inställningar → Safari → Plats → skaffu.com → Tillåt, och försök igen.",
+		"locationBlocked": "Safari visade ingen platsruta. På iPhone: Inställningar → Safari → Plats → skaffu.com → Fråga eller Tillåt, och tryck på reglaget igen.",
 		"locationTimeout": "Platsbegäran tog för lång tid — kontrollera att platstjänster är på och försök igen.",
 		"locationUnavailable": "Plats är inte tillgänglig i den här webbläsaren.",
+		"locationAllowPrompt": "Tillåt plats när Safari frågar.",
 		"locating": "Begär plats…",
 		"saveFailed": "Kunde inte spara inställningen. Försök igen.",
 		"panelTitle": "Grannskafferiet i närheten",

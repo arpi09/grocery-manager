@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
 	mapGeolocationErrorCode,
-	requestBrowserLocation
+	queryGeolocationPermission,
+	refineGeolocationErrorCode,
+	requestBrowserLocation,
+	startBrowserLocationRequest
 } from './browser-geolocation';
 
 describe('mapGeolocationErrorCode', () => {
@@ -25,6 +28,40 @@ describe('mapGeolocationErrorCode', () => {
 
 	it('maps unknown codes', () => {
 		expect(mapGeolocationErrorCode({ code: 99 } as GeolocationPositionError)).toBe('unknown');
+	});
+});
+
+describe('refineGeolocationErrorCode', () => {
+	it('maps denied + prompt to blocked (no prompt shown)', () => {
+		expect(refineGeolocationErrorCode('denied', 'prompt')).toBe('blocked');
+	});
+
+	it('keeps denied when permission is denied', () => {
+		expect(refineGeolocationErrorCode('denied', 'denied')).toBe('denied');
+	});
+
+	it('passes through non-denied codes', () => {
+		expect(refineGeolocationErrorCode('timeout', 'prompt')).toBe('timeout');
+	});
+});
+
+describe('queryGeolocationPermission', () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it('returns unknown when Permissions API is missing', async () => {
+		vi.stubGlobal('navigator', {});
+		await expect(queryGeolocationPermission()).resolves.toBe('unknown');
+	});
+
+	it('returns permission state from Permissions API', async () => {
+		vi.stubGlobal('navigator', {
+			permissions: {
+				query: vi.fn().mockResolvedValue({ state: 'prompt' })
+			}
+		});
+		await expect(queryGeolocationPermission()).resolves.toBe('prompt');
 	});
 });
 
@@ -76,5 +113,15 @@ describe('requestBrowserLocation', () => {
 			longitude: 18.0
 		});
 		expect(getCurrentPosition).toHaveBeenCalledTimes(2);
+	});
+
+	it('startBrowserLocationRequest invokes geolocation synchronously', () => {
+		const getCurrentPosition = vi.fn();
+		vi.stubGlobal('navigator', { geolocation: { getCurrentPosition } });
+
+		void startBrowserLocationRequest();
+
+		expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+		expect(getCurrentPosition.mock.calls[0]?.[2]).toMatchObject({ enableHighAccuracy: true });
 	});
 });

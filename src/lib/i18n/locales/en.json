@@ -404,17 +404,17 @@
 			"title": "Household",
 			"description": "Shared household, members and invitations"
 		},
-		"kivraForward": {
-			"title": "Forward Kivra receipts",
-			"description": "Get digital receipts straight into inventory — beta",
-			"lead": "Forward your Kivra receipt (PDF) to the address below and we'll fill your pantry automatically.",
-			"step1": "Open the receipt in Kivra and choose forward or share via email.",
+		"receiptForward": {
+			"title": "Forward digital receipts",
+			"description": "Get receipt email straight into inventory — beta",
+			"lead": "Forward your digital receipt (PDF) to the address below and we'll fill your pantry after parsing.",
+			"step1": "Open the receipt in email, Kivra or a store app and choose forward.",
 			"step2": "Paste your personal address as the recipient.",
 			"step3": "We parse the PDF and add items to inventory — you'll get a notification in the app.",
 			"copy": "Copy address",
 			"copied": "Address copied",
-			"hint": "Works best with PDF from Kivra or ICA. Couldn't read the receipt? Upload the PDF manually under Scan.",
-			"beta": "Beta — enabled for selected households. We don't keep the full email after import."
+			"hint": "Works best with text PDFs from ICA, Willys or Kivra. Couldn't read the receipt? Upload the PDF manually under Scan.",
+			"beta": "Beta — enabled for selected households. We don't keep the full email after import. Not an official Kivra integration."
 		},
 		"app": {
 			"title": "App",
@@ -1570,6 +1570,9 @@
 		"events": {
 			"scanCompleted": "scan_completed",
 			"receiptParsed": "receipt_parsed",
+			"receiptImportStarted": "receipt_import_started",
+			"receiptUploaded": "receipt_uploaded",
+			"receiptReviewCompleted": "receipt_review_completed",
 			"fillSuggestionsAdded": "fill_suggestions_added"
 		},
 		"activation": {
@@ -1893,8 +1896,8 @@
 		"addItemsTitle": "Add your first item",
 		"addItemsBody": "Photograph fridge, freezer or cupboard — or scan a barcode or receipt. One item is enough to get started!",
 		"addFirstItem": "Add item",
-		"addItemsBodyBinary": "Pick one path — receipt or three barcodes. Under three minutes to a stocked pantry.",
-		"chooseReceipt": "Upload receipt",
+		"addItemsBodyBinary": "Fastest: upload a digital receipt (PDF). Or scan three barcodes. Under three minutes to a stocked pantry.",
+		"chooseReceipt": "Upload digital receipt",
 		"chooseBarcode": "Scan 3 items",
 		"celebrateReceiptBody": "You have {count} items in your pantry — great start!",
 		"startUsingApp": "Start using the app",
@@ -2513,9 +2516,11 @@
 		"privacyNote": "Other opted-in users see approximate distance and item names — never address or contact.",
 		"specLink": "Read privacy and v1 spec",
 		"locationRequired": "Enable browser location to find nearby shares.",
-		"locationDenied": "Location denied — enable location in your browser settings.",
+		"locationDenied": "Location denied for skaffu.com. On iPhone: Settings → Safari → Location → skaffu.com → Allow, then try again.",
+		"locationBlocked": "Safari did not show a location prompt. On iPhone: Settings → Safari → Location → skaffu.com → Ask or Allow, then tap the toggle again.",
 		"locationTimeout": "Location timed out — check that location services are on and try again.",
 		"locationUnavailable": "Location is not available in this browser.",
+		"locationAllowPrompt": "Allow location when Safari prompts you.",
 		"locating": "Requesting location…",
 		"saveFailed": "Could not save setting. Try again.",
 		"panelTitle": "Neighbour pantry nearby",
