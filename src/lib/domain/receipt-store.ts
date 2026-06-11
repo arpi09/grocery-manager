@@ -27,7 +27,7 @@ export function extractPurchasedAtFromReceiptText(receiptText: string): Date | u
 	for (const pattern of RECEIPT_DATE_PATTERNS) {
 		const match = pattern.exec(header);
 		if (!match) continue;
-		const [_, a, b, c] = match;
+		const [, a, b, c] = match;
 		const iso = match[0].startsWith('20') ? `${a}-${b}-${c}` : `${c}-${b}-${a}`;
 		const parsed = new Date(`${iso}T12:00:00.000Z`);
 		if (!Number.isNaN(parsed.getTime())) {

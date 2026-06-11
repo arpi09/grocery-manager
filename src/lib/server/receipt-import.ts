@@ -1,7 +1,6 @@
 import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
 import type { HouseholdRole } from '$lib/domain/household';
 import type { ReceiptLine } from '$lib/domain/receipt-line';
-import type { StorageLocation } from '$lib/domain/location';
 import type { InventoryService } from '$lib/application/inventory.service';
 import type { PurchasePatternService } from '$lib/application/purchase-pattern.service';
 import type { PmfService } from '$lib/application/pmf.service';
