@@ -310,6 +310,7 @@ Exempel-UTM för rapport-länkar: `utm_source=linkedin&utm_medium=pr&utm_campaig
 | [`USER_INTERVIEWS.md`](./USER_INTERVIEWS.md) | Djupintervjuer med community-leads |
 | [`MARKETING_SITE.md`](./MARKETING_SITE.md) | Landning, A/B hero, CTAs |
 | [`BRAND.md`](./BRAND.md) | Ton i poster |
+| [`GROWTH_STRATEGY.md`](./GROWTH_STRATEGY.md) | Growth-strategi — acquisition, density, experiment E1–E6 |
 
 ---
 

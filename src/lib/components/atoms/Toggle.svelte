@@ -24,57 +24,42 @@
 		id ??
 			(label ?? ariaLabel)?.replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '')
 	);
-	const labelId = $derived(switchId && label ? `${switchId}-label` : undefined);
 
-	function activateToggle(event: Event) {
-		event.preventDefault();
+	function activateToggle() {
 		if (disabled) return;
 		onCheckedChange?.(!checked);
 	}
 </script>
 
-<!-- Label click toggles — no nested button; checkbox is for a11y/CSS only. -->
-<label
+<!-- Label `for` + sibling button — label text taps work on iOS without nesting. -->
+<div
 	class={['toggle', size === 'sm' ? 'toggle-sm' : 'toggle-md', disabled ? 'toggle-disabled' : ''].filter(Boolean).join(' ')}
-	onclick={activateToggle}
-	onkeydown={(event) => {
-		if (event.key === ' ' || event.key === 'Enter') {
-			activateToggle(event);
-		}
-	}}
 >
-	<input
-		type="checkbox"
+	<button
+		type="button"
 		role="switch"
-		tabindex="-1"
 		id={switchId}
-		class="toggle-input"
-		checked={checked}
-		disabled={disabled}
+		class="toggle-switch"
 		aria-checked={checked}
+		aria-disabled={disabled}
 		aria-label={label ? undefined : ariaLabel}
-		aria-labelledby={labelId}
-		readonly
-	/>
-	<span class="toggle-switch" aria-hidden="true">
-		<span class="toggle-track">
+		disabled={disabled}
+		onclick={activateToggle}
+	>
+		<span class="toggle-track" aria-hidden="true">
 			<span class="toggle-thumb"></span>
 		</span>
-	</span>
+	</button>
 	{#if label}
-		<span class="toggle-label" id={labelId}>{label}</span>
+		<label class="toggle-label" for={switchId}>{label}</label>
 	{/if}
-</label>
+</div>
 
 <style>
 	.toggle {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-sm);
-		position: relative;
-		cursor: pointer;
-		user-select: none;
-		min-height: var(--touch-target-min, 2.75rem);
 	}
 
 	.toggle-disabled {
@@ -89,16 +74,6 @@
 		background: color-mix(in srgb, var(--color-border) 72%, var(--color-surface-muted));
 	}
 
-	.toggle-input {
-		position: absolute;
-		opacity: 0;
-		width: 0;
-		height: 0;
-		margin: 0;
-		padding: 0;
-		pointer-events: none;
-	}
-
 	.toggle-switch {
 		flex-shrink: 0;
 		display: inline-flex;
@@ -106,12 +81,21 @@
 		justify-content: center;
 		min-width: var(--touch-target-min, 2.75rem);
 		min-height: var(--touch-target-min, 2.75rem);
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		cursor: pointer;
+		border-radius: 999px;
 	}
 
-	.toggle:focus-visible {
+	.toggle-switch:focus-visible {
 		outline: 2px solid var(--color-primary);
 		outline-offset: 2px;
-		border-radius: var(--radius-sm);
+	}
+
+	.toggle-disabled .toggle-switch {
+		cursor: not-allowed;
 	}
 
 	.toggle-track {
@@ -122,7 +106,7 @@
 		transition: background-color 0.2s ease;
 	}
 
-	.toggle-input:checked + .toggle-switch .toggle-track {
+	.toggle-switch[aria-checked='true'] .toggle-track {
 		background: var(--color-primary);
 	}
 
@@ -146,7 +130,7 @@
 		transform: translateX(0);
 	}
 
-	.toggle-md .toggle-input:checked + .toggle-switch .toggle-thumb {
+	.toggle-md .toggle-switch[aria-checked='true'] .toggle-thumb {
 		transform: translateX(1.25rem);
 	}
 
@@ -162,7 +146,7 @@
 		transform: translateX(0);
 	}
 
-	.toggle-sm .toggle-input:checked + .toggle-switch .toggle-thumb {
+	.toggle-sm .toggle-switch[aria-checked='true'] .toggle-thumb {
 		transform: translateX(1rem);
 	}
 
@@ -170,5 +154,6 @@
 		font-size: 0.9rem;
 		line-height: 1.35;
 		color: var(--color-text);
+		cursor: pointer;
 	}
 </style>
