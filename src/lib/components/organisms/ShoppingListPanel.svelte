@@ -469,7 +469,13 @@
 	{/if}
 
 	{#if items.length === 0 && checkedCount === 0}
-		<EmptyState title={t('shopping.emptyList')} description={t('shopping.intro')} />
+		<EmptyState
+			iconId="box"
+			title={t('shopping.emptyList')}
+			description={t('shopping.emptyDescription')}
+			actionLabel={t('shopping.emptyAction')}
+			actionHref="#shopping-suggestions"
+		/>
 	{:else}
 		<SearchInput bind:value={listQuery} placeholder={t('shopping.searchPlaceholder')} />
 		<ul class="list">

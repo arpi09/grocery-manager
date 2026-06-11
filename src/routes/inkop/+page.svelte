@@ -92,7 +92,12 @@
 
 		{#if data.canEdit && (hasSuggestions || !listHasItems)}
 
-			<details class="suggestions-fold" open={suggestionsOpen} data-testid="shopping-suggestions-fold">
+			<details
+				id="shopping-suggestions"
+				class="suggestions-fold"
+				open={suggestionsOpen}
+				data-testid="shopping-suggestions-fold"
+			>
 
 				<summary>{t('shopping.suggestionsTitle')}</summary>
 
