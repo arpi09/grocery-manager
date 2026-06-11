@@ -11,7 +11,8 @@ import { db, type AppDatabase } from '$lib/infrastructure/db';
 import {
 	inventoryItemTable,
 	receiptPatternDismissalTable,
-	receiptPurchaseLineTable
+	receiptPurchaseLineTable,
+	shoppingListItemTable
 } from '$lib/infrastructure/db/schema';
 import { generateId } from '$lib/infrastructure/auth/id';
 
@@ -22,6 +23,7 @@ export interface IPurchasePatternRepository {
 	dismissPattern(householdId: string, normalizedKey: string): Promise<void>;
 	listInventoryNormalizedKeys(householdId: string): Promise<Set<string>>;
 	listActiveInventoryMatches(householdId: string): Promise<PantryInventoryMatch[]>;
+	listShoppingListNormalizedNames(householdId: string): Promise<Set<string>>;
 }
 
 function mapLine(row: typeof receiptPurchaseLineTable.$inferSelect): ReceiptPurchaseLineRecord {
@@ -107,6 +109,20 @@ export class DrizzlePurchasePatternRepository implements IPurchasePatternReposit
 			.select({ name: inventoryItemTable.name })
 			.from(inventoryItemTable)
 			.where(eq(inventoryItemTable.householdId, householdId));
+
+		return new Set(rows.map((row) => normalizeReceiptProductName(row.name)));
+	}
+
+	async listShoppingListNormalizedNames(householdId: string): Promise<Set<string>> {
+		const rows = await this.database
+			.select({ name: shoppingListItemTable.name })
+			.from(shoppingListItemTable)
+			.where(
+				and(
+					eq(shoppingListItemTable.householdId, householdId),
+					eq(shoppingListItemTable.checked, false)
+				)
+			);
 
 		return new Set(rows.map((row) => normalizeReceiptProductName(row.name)));
 	}

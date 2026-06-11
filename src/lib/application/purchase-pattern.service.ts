@@ -8,7 +8,12 @@ import {
 	type ReceiptPatternSuggestion,
 	type RecordReceiptPurchaseLineInput
 } from '$lib/domain/purchase-pattern';
+import {
+	detectReplenishmentSuggestions,
+	type ReplenishmentSuggestion
+} from '$lib/domain/replenishment';
 import type { InventoryService } from './inventory.service';
+import type { ShoppingListService } from './shopping-list.service';
 import {
 	type IPurchasePatternRepository,
 	purchasePatternLookbackDate
@@ -31,11 +36,48 @@ export class PurchasePatternNotFoundError extends Error {
 export class PurchasePatternService {
 	constructor(
 		private readonly repository: IPurchasePatternRepository,
-		private readonly inventoryService: InventoryService
+		private readonly inventoryService: InventoryService,
+		private readonly shoppingListService: ShoppingListService
 	) {}
 
 	async recordReceiptImport(lines: RecordReceiptPurchaseLineInput[]): Promise<void> {
 		await this.repository.insertLines(lines);
+	}
+
+	async getReplenishmentSuggestions(householdId: string): Promise<ReplenishmentSuggestion[]> {
+		const since = purchasePatternLookbackDate();
+		const [lines, dismissedKeys, inventoryKeys, listNames] = await Promise.all([
+			this.repository.listRecentLines(householdId, since),
+			this.repository.listDismissedKeys(householdId),
+			this.repository.listInventoryNormalizedKeys(householdId),
+			this.repository.listShoppingListNormalizedNames(householdId)
+		]);
+
+		return detectReplenishmentSuggestions(lines, inventoryKeys, listNames, dismissedKeys);
+	}
+
+	async acceptReplenishmentToList(
+		householdId: string,
+		role: HouseholdRole,
+		normalizedKey: string
+	): Promise<{ name: string }> {
+		if (!canEditInventory(role)) {
+			throw new PurchasePatternReadOnlyError();
+		}
+
+		const suggestions = await this.getReplenishmentSuggestions(householdId);
+		const suggestion = suggestions.find((entry) => entry.normalizedKey === normalizedKey);
+		if (!suggestion) {
+			throw new PurchasePatternNotFoundError();
+		}
+
+		await this.shoppingListService.addItem(householdId, role, {
+			name: suggestion.displayName,
+			quantity: suggestion.quantity,
+			unit: suggestion.unit
+		});
+
+		return { name: suggestion.displayName };
 	}
 
 	async getSuggestions(householdId: string): Promise<ReceiptPatternSuggestion[]> {

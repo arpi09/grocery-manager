@@ -2,7 +2,9 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { InventoryService } from '$lib/application/inventory.service';
 import { PmfService } from '$lib/application/pmf.service';
 import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
+import { ShoppingListService } from '$lib/application/shopping-list.service';
 import { DrizzleInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
+import { DrizzleShoppingListRepository } from '$lib/infrastructure/repositories/shopping-list.repository';
 import { DrizzlePmfRepository } from '$lib/infrastructure/repositories/pmf.repository';
 import { DrizzlePurchasePatternRepository } from '$lib/infrastructure/repositories/purchase-pattern.repository';
 import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integration-db';
@@ -76,7 +78,8 @@ describe('Scan bulkCreate integration', () => {
 		pmfService = new PmfService(new DrizzlePmfRepository());
 		purchasePatternService = new PurchasePatternService(
 			new DrizzlePurchasePatternRepository(),
-			inventoryService
+			inventoryService,
+			new ShoppingListService(new DrizzleShoppingListRepository(integrationDb.db))
 		);
 	}, 30_000);
 

@@ -12,7 +12,7 @@
 
 	import SmartShoppingFill from '$lib/components/organisms/SmartShoppingFill.svelte';
 
-	import ReceiptAutopilotSection from '$lib/components/organisms/ReceiptAutopilotSection.svelte';
+	import ReplenishmentSection from '$lib/components/organisms/ReplenishmentSection.svelte';
 
 	import ShoppingListPanel from '$lib/components/organisms/ShoppingListPanel.svelte';
 	import InkopHouseholdInviteBanner from '$lib/components/organisms/InkopHouseholdInviteBanner.svelte';
@@ -28,9 +28,9 @@
 		typeof data.householdMemberCount === 'number' ? data.householdMemberCount : 0
 	);
 
-	const receiptSuggestions = $derived(data.receiptAutopilotSuggestions ?? []);
+	const replenishmentSuggestions = $derived(data.replenishmentSuggestions ?? []);
 
-	const hasSuggestions = $derived(receiptSuggestions.length > 0);
+	const hasSuggestions = $derived(replenishmentSuggestions.length > 0);
 
 	const suggestionsOpen = $derived(hasSuggestions);
 
@@ -121,9 +121,9 @@
 
 					{#if hasSuggestions}
 
-						<ReceiptAutopilotSection
+						<ReplenishmentSection
 
-							suggestions={receiptSuggestions}
+							suggestions={replenishmentSuggestions}
 
 							canEdit={data.canEdit}
 

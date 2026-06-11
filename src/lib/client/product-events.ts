@@ -12,6 +12,7 @@ const CLIENT_EVENT_TYPES = [
 	'receipt_uploaded',
 	'receipt_review_completed',
 	'price_memory_viewed',
+	'replenishment_suggestion_shown',
 	'shopping_list_share_created',
 	'household_invite_prompt_shown',
 	'household_invite_prompt_clicked',
