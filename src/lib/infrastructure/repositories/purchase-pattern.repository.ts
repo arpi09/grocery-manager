@@ -36,6 +36,11 @@ function mapLine(row: typeof receiptPurchaseLineTable.$inferSelect): ReceiptPurc
 		location: row.location as StorageLocation,
 		quantity: row.quantity,
 		unit: row.unit,
+		unitPrice: row.unitPrice,
+		currency: row.currency,
+		lineTotal: row.lineTotal,
+		storeLabel: row.storeLabel,
+		purchasedAt: row.purchasedAt,
 		createdAt: row.createdAt
 	};
 }
@@ -57,7 +62,12 @@ export class DrizzlePurchasePatternRepository implements IPurchasePatternReposit
 				barcode: line.barcode ?? null,
 				location: line.location,
 				quantity: line.quantity ?? null,
-				unit: line.unit ?? null
+				unit: line.unit ?? null,
+				unitPrice: line.unitPrice ?? null,
+				currency: line.currency ?? 'SEK',
+				lineTotal: line.lineTotal ?? null,
+				storeLabel: line.storeLabel ?? null,
+				purchasedAt: line.purchasedAt ?? null
 			}))
 		);
 	}

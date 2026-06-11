@@ -376,7 +376,8 @@ export const productEventTable = pgTable(
 				'one_tap_consume',
 				'staleness_confirmed',
 				'shopping_checkoff_to_pantry',
-				'receipt_finish_accepted'
+				'receipt_finish_accepted',
+				'price_memory_viewed'
 			]
 		}).notNull(),
 		metadata: text('metadata'),
@@ -519,11 +520,21 @@ export const receiptPurchaseLineTable = pgTable(
 		location: text('location', { enum: ['fridge', 'freezer', 'cupboard'] }).notNull(),
 		quantity: numeric('quantity', { precision: 10, scale: 2 }),
 		unit: text('unit'),
+		unitPrice: numeric('unit_price', { precision: 10, scale: 2 }),
+		currency: text('currency').default('SEK'),
+		lineTotal: numeric('line_total', { precision: 10, scale: 2 }),
+		storeLabel: text('store_label'),
+		purchasedAt: timestamp('purchased_at', { withTimezone: true, mode: 'date' }),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 	},
 	(table) => [
 		index('receipt_purchase_line_household_key_idx').on(table.householdId, table.normalizedKey),
-		index('receipt_purchase_line_household_created_idx').on(table.householdId, table.createdAt)
+		index('receipt_purchase_line_household_created_idx').on(table.householdId, table.createdAt),
+		index('receipt_purchase_line_household_key_purchased_idx').on(
+			table.householdId,
+			table.normalizedKey,
+			table.purchasedAt
+		)
 	]
 );
 

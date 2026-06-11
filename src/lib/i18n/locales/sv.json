@@ -1751,8 +1751,8 @@
 		"locationOverride": "egen plats"
 	},
 	"priceMemory": {
-		"lastPaid": "Senast {price} ({date})",
-		"lastPaidWithStore": "Senast {price} ({date}, {store})"
+		"lastPaid": "Senast betalt {price} ({date})",
+		"lastPaidWithStore": "Senast betalt {price} ({date}, {store})"
 	},
 	"scanFlow": {
 		"lookupProduct": "Slår upp produkt",

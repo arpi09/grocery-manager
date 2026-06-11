@@ -182,7 +182,17 @@ describe('normalizeReceiptAiPayload', () => {
 				lines: [{ name: '  Ost ', quantity: 3, extra: true }]
 			})
 		).toEqual({
-			lines: [{ name: 'Ost', quantity: '3', unit: '', location: '' }]
+			lines: [
+				{
+					name: 'Ost',
+					quantity: '3',
+					unit: '',
+					location: '',
+					unitPrice: null,
+					lineTotal: null,
+					currency: null
+				}
+			]
 		});
 	});
 });

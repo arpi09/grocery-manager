@@ -23,9 +23,12 @@ export const RECEIPT_LINES_SCHEMA = {
 					name: { type: 'string' },
 					quantity: { type: 'string' },
 					unit: { type: 'string' },
-					location: { type: 'string', enum: ['fridge', 'freezer', 'cupboard'] }
+					location: { type: 'string', enum: ['fridge', 'freezer', 'cupboard'] },
+					unitPrice: { type: ['string', 'null'] },
+					lineTotal: { type: ['string', 'null'] },
+					currency: { type: ['string', 'null'] }
 				},
-				required: ['name', 'quantity', 'unit', 'location'],
+				required: ['name', 'quantity', 'unit', 'location', 'unitPrice', 'lineTotal', 'currency'],
 				additionalProperties: false
 			}
 		}
@@ -40,6 +43,8 @@ export const RECEIPT_SYSTEM_PROMPT = [
 	'Regler:',
 	'- name: kort produktnamn utan storlek/vikt (t.ex. "Coca-Cola", inte "Coca-Cola 1,5L")',
 	'- quantity: numerisk mängd som sträng med punkt som decimal (t.ex. "1", "1.5", "0.45")',
+	'- unitPrice/lineTotal: pris som sträng med punkt som decimal (Svenska kommatecken normaliseras), annars null',
+	'- currency: ISO-kod (oftast "SEK"), annars null',
 	'  - Synlig förpackning på raden (1,5L, 500 g, 1 kg): sätt quantity till storleken, unit till enheten',
 	'  - Flera stycken utan tydlig storlek: antal köpta (t.ex. "2") och unit "st" eller tom',
 	'  - Lösvikt: vikten i quantity, unit "kg"',
@@ -101,6 +106,25 @@ function coerceReceiptUnit(value: unknown): string | undefined {
 	return undefined;
 }
 
+export function coerceReceiptPrice(value: unknown): string | undefined {
+	if (typeof value === 'string') {
+		const trimmed = value.trim().replace(',', '.');
+		if (!trimmed) return undefined;
+		const parsed = Number(trimmed);
+		return Number.isFinite(parsed) ? parsed.toFixed(2) : undefined;
+	}
+	if (typeof value === 'number' && Number.isFinite(value)) {
+		return value.toFixed(2);
+	}
+	return undefined;
+}
+
+function coerceReceiptCurrency(value: unknown): string | undefined {
+	if (typeof value !== 'string') return undefined;
+	const trimmed = value.trim().toUpperCase();
+	return trimmed ? trimmed : undefined;
+}
+
 function coerceReceiptLocation(value: unknown): string | undefined {
 	if (typeof value === 'string') {
 		const trimmed = value.trim().toLowerCase();
@@ -149,6 +173,9 @@ export function normalizeReceiptAiPayload(raw: unknown): unknown {
 			normalized.unit = unit ?? '';
 			const location = coerceReceiptLocation(row.location);
 			normalized.location = location ?? '';
+			normalized.unitPrice = coerceReceiptPrice(row.unitPrice) ?? null;
+			normalized.lineTotal = coerceReceiptPrice(row.lineTotal) ?? null;
+			normalized.currency = coerceReceiptCurrency(row.currency) ?? null;
 			return normalized;
 		})
 	};
@@ -172,6 +199,9 @@ export function parseReceiptLines(raw: unknown): ReceiptLine[] {
 		const name = coerceReceiptName(row.name);
 		const quantity = coerceReceiptQuantity(row.quantity);
 		const unit = coerceReceiptUnit(row.unit);
+		const unitPrice = coerceReceiptPrice(row.unitPrice);
+		const lineTotal = coerceReceiptPrice(row.lineTotal);
+		const currency = coerceReceiptCurrency(row.currency);
 		if (!name) continue;
 		const line: ReceiptLine = {
 			name,
@@ -179,6 +209,9 @@ export function parseReceiptLines(raw: unknown): ReceiptLine[] {
 		};
 		if (quantity) line.quantity = quantity;
 		if (unit) line.unit = unit;
+		if (unitPrice) line.unitPrice = unitPrice;
+		if (lineTotal) line.lineTotal = lineTotal;
+		if (currency) line.currency = currency;
 		result.push(line);
 	}
 

@@ -56,6 +56,8 @@
 	let discardReviewOpen = $state(false);
 	let mergeCandidates = $state<Array<MergeCandidateMatch | null>>([]);
 	let mergeSelected = $state<Record<number, boolean>>({});
+	let parsedStoreLabel = $state<string | null>(null);
+	let parsedPurchasedAt = $state<string | null>(null);
 
 	function receiptFileErrorMessage(error: ReceiptFileError): string {
 		if (error.code === 'too_large') {
@@ -80,13 +82,20 @@
 	async function readReceiptParseResponse(response: Response): Promise<{
 		lines?: ReceiptLine[];
 		error?: string;
+		storeLabel?: string;
+		purchasedAt?: string;
 	}> {
 		const contentType = response.headers.get('content-type') ?? '';
 		if (!contentType.includes('application/json')) {
 			return {};
 		}
 		try {
-			return (await response.json()) as { lines?: ReceiptLine[]; error?: string };
+			return (await response.json()) as {
+				lines?: ReceiptLine[];
+				error?: string;
+				storeLabel?: string;
+				purchasedAt?: string;
+			};
 		} catch {
 			return {};
 		}
@@ -130,6 +139,8 @@
 			}
 
 			lines = data.lines;
+			parsedStoreLabel = data.storeLabel ?? null;
+			parsedPurchasedAt = data.purchasedAt ?? null;
 			selected = Object.fromEntries(data.lines.map((_, i) => [i, true]));
 			lineLocations = Object.fromEntries(data.lines.map((line, i) => [i, line.location]));
 			bulkLocation = modeLocation(data.lines.map((l) => l.location)) ?? data.lines[0]?.location ?? 'cupboard';
@@ -202,6 +213,16 @@
 		return line.quantity ?? line.unit ?? '';
 	}
 
+	function formatLinePrice(line: ReceiptLine): string {
+		if (!line.unitPrice && !line.lineTotal) return '';
+		const currency = line.currency ?? 'SEK';
+		if (line.unitPrice && line.lineTotal) {
+			return `${line.unitPrice} / ${line.lineTotal} ${currency}`;
+		}
+		if (line.unitPrice) return `${line.unitPrice} ${currency}`;
+		return `${line.lineTotal} ${currency}`;
+	}
+
 	function requestNewImage() {
 		if (lines.length > 0) {
 			discardReviewOpen = true;
@@ -218,6 +239,8 @@
 		locationOverrides = new Set();
 		mergeCandidates = [];
 		mergeSelected = {};
+		parsedStoreLabel = null;
+		parsedPurchasedAt = null;
 		step = 'upload';
 		parseError = null;
 	}
@@ -338,6 +361,8 @@
 		>
 			<input type="hidden" name="bulkFlow" value="receipt" />
 			<input type="hidden" name="returnTo" value={returnTo} />
+			<input type="hidden" name="storeLabel" value={parsedStoreLabel ?? ''} />
+			<input type="hidden" name="purchasedAt" value={parsedPurchasedAt ?? ''} />
 			<ul class="line-list" data-testid="receipt-line-list">
 				{#each lines as line, index (index)}
 					<li data-testid="receipt-line-{index}">
@@ -359,6 +384,9 @@
 								<span class="line-name">{line.name}</span>
 								{#if formatLineAmount(line)}
 									<span class="line-qty">{formatLineAmount(line)}</span>
+								{/if}
+								{#if formatLinePrice(line)}
+									<span class="line-price">{formatLinePrice(line)}</span>
 								{/if}
 							</label>
 							<label class="line-location">
@@ -406,6 +434,9 @@
 							<input type="hidden" name={`name_${index}`} value={line.name} />
 							<input type="hidden" name={`quantity_${index}`} value={line.quantity ?? '1'} />
 							<input type="hidden" name={`unit_${index}`} value={line.unit ?? ''} />
+							<input type="hidden" name={`unitPrice_${index}`} value={line.unitPrice ?? ''} />
+							<input type="hidden" name={`lineTotal_${index}`} value={line.lineTotal ?? ''} />
+							<input type="hidden" name={`currency_${index}`} value={line.currency ?? ''} />
 							<input
 								type="hidden"
 								name={`location_${index}`}
@@ -543,6 +574,11 @@
 
 	.line-qty {
 		font-size: 0.8rem;
+		color: var(--color-text-muted);
+	}
+
+	.line-price {
+		font-size: 0.78rem;
 		color: var(--color-text-muted);
 	}
 
