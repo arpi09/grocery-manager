@@ -50,7 +50,8 @@ export const PRODUCT_EVENT_TYPES = [
 	'one_tap_consume',
 	'staleness_confirmed',
 	'shopping_checkoff_to_pantry',
-	'receipt_finish_accepted'
+	'receipt_finish_accepted',
+	'price_memory_viewed'
 ] as const;
 
 export const PMF_PRODUCT_EVENT_TYPES = [

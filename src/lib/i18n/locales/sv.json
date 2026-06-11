@@ -1741,6 +1741,10 @@
 		"locationBulkHint": "Gäller markerade rader. Ändra plats per vara nedan om en rad ska ligga någon annanstans.",
 		"locationOverride": "egen plats"
 	},
+	"priceMemory": {
+		"lastPaid": "Senast betalt {price} ({date})",
+		"lastPaidWithStore": "Senast betalt {price} ({date}, {store})"
+	},
 	"scanFlow": {
 		"lookupProduct": "Slår upp produkt",
 		"saving": "Sparar till skafferiet…",

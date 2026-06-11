@@ -31,6 +31,11 @@ export interface ReceiptPurchaseLineRecord {
 	location: StorageLocation;
 	quantity: string | null;
 	unit: string | null;
+	unitPrice: string | null;
+	currency: string | null;
+	lineTotal: string | null;
+	storeLabel: string | null;
+	purchasedAt: Date | null;
 	createdAt: Date;
 }
 
@@ -78,6 +83,11 @@ export interface RecordReceiptPurchaseLineInput {
 	location: StorageLocation;
 	quantity?: string | null;
 	unit?: string | null;
+	unitPrice?: string | null;
+	currency?: string | null;
+	lineTotal?: string | null;
+	storeLabel?: string | null;
+	purchasedAt?: Date | null;
 }
 
 /** Normalize receipt product names for recurring-purchase matching. */

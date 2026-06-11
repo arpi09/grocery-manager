@@ -57,6 +57,8 @@ import { LinkedInPublishService } from '$lib/application/linkedin-publish.servic
 import { PmfDigestService } from '$lib/application/pmf-digest.service';
 import { ErrorAlertService } from '$lib/application/error-alert.service';
 import { DrizzlePurchasePatternRepository } from '$lib/infrastructure/repositories/purchase-pattern.repository';
+import { DrizzlePriceMemoryRepository } from '$lib/infrastructure/repositories/price-memory.repository';
+import { PriceMemoryService } from '$lib/application/price-memory.service';
 import { DrizzleExpiringShareRepository } from '$lib/infrastructure/repositories/expiring-share.repository';
 import { DrizzleShoppingListShareRepository } from '$lib/infrastructure/repositories/shopping-list-share.repository';
 import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
@@ -116,6 +118,7 @@ export const linkedInPublishService = new LinkedInPublishService(
 );
 
 const purchasePatternRepository = new DrizzlePurchasePatternRepository();
+const priceMemoryRepository = new DrizzlePriceMemoryRepository();
 const expiringShareRepository = new DrizzleExpiringShareRepository();
 const shoppingListShareRepository = new DrizzleShoppingListShareRepository();
 const receiptForwardRepository = new DrizzleReceiptForwardRepository();
@@ -164,6 +167,7 @@ export const purchasePatternService = new PurchasePatternService(
 	purchasePatternRepository,
 	inventoryService
 );
+export const priceMemoryService = new PriceMemoryService(priceMemoryRepository);
 export const skaffurapportService = new SkaffurapportService(
 	consumptionRepository,
 	appSettingsRepository

@@ -7,6 +7,7 @@ import type { PurchasePatternService } from '$lib/application/purchase-pattern.s
 import type { PmfService } from '$lib/application/pmf.service';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { receiptLineToInventoryAmount } from '$lib/server/receipt-parse';
+import { receiptLineToPurchaseRecord } from '$lib/server/receipt-import-purchase';
 import { recordProductEvent } from '$lib/server/product-events';
 
 export interface ImportReceiptLinesInput {
@@ -19,6 +20,8 @@ export interface ImportReceiptLinesInput {
 	pmfService: PmfService;
 	eventType: 'receipt_parsed' | 'kivra_forward_received';
 	source?: 'manual' | 'kivra_forward';
+	storeLabel?: string | null;
+	purchasedAt?: string | Date | null;
 }
 
 export interface ImportReceiptLinesResult {
@@ -30,15 +33,7 @@ export async function importReceiptLines(
 	input: ImportReceiptLinesInput
 ): Promise<ImportReceiptLinesResult> {
 	const importBatchId = generateId();
-	const purchaseLines: Array<{
-		householdId: string;
-		userId: string;
-		importBatchId: string;
-		productName: string;
-		location: StorageLocation;
-		quantity: string | null;
-		unit: string | null;
-	}> = [];
+	const purchaseLines: ReturnType<typeof receiptLineToPurchaseRecord>[] = [];
 
 	let itemsAdded = 0;
 
@@ -63,15 +58,19 @@ export async function importReceiptLines(
 			input.role
 		);
 
-		purchaseLines.push({
-			householdId: input.householdId,
-			userId: input.userId,
-			importBatchId,
-			productName: name,
-			location,
-			quantity,
-			unit: unit ?? null
-		});
+		purchaseLines.push(
+			receiptLineToPurchaseRecord({
+				householdId: input.householdId,
+				userId: input.userId,
+				importBatchId,
+				line,
+				location,
+				quantity,
+				unit: unit ?? null,
+				storeLabel: input.storeLabel,
+				purchasedAt: input.purchasedAt
+			})
+		);
 		itemsAdded++;
 	}
 

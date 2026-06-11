@@ -8,6 +8,12 @@ export interface ReceiptLine {
 	unit?: string | null;
 	/** Suggested storage (AI or heuristic). */
 	location: StorageLocation;
+	/** Unit price from receipt parse, normalized decimal string. */
+	unitPrice?: string | null;
+	/** Line total from receipt parse, normalized decimal string. */
+	lineTotal?: string | null;
+	/** ISO currency code, typically SEK. */
+	currency?: string | null;
 }
 
 export interface ReceiptParseResult {

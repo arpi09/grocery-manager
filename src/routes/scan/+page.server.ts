@@ -5,7 +5,9 @@ import { isStorageLocation, type StorageLocation } from '$lib/domain/location';
 import { guessShelfLife } from '$lib/domain/shelf-life';
 import { coerceExpiresOn } from '$lib/server/photo-round-parse';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
+import type { ReceiptLine } from '$lib/domain/receipt-line';
 import { receiptLineToInventoryAmount } from '$lib/server/receipt-parse';
+import { receiptLineToPurchaseRecord } from '$lib/server/receipt-import-purchase';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { buildScanReturnUrl, type ScanToastKind } from '$lib/utils/scan-toast';
 import { parseScanMode, parseScanReturnTo } from '$lib/utils/scan-nav';
@@ -63,15 +65,12 @@ async function bulkCreateFromForm(
 
 	let created = 0;
 	const importBatchId = recordPurchases ? generateId() : null;
-	const purchaseLines: Array<{
-		householdId: string;
-		userId: string;
-		importBatchId: string;
-		productName: string;
-		location: StorageLocation;
-		quantity: string | null;
-		unit: string | null;
-	}> = [];
+	const purchaseLines: ReturnType<typeof receiptLineToPurchaseRecord>[] = [];
+	const storeLabelRaw = formData.get('storeLabel');
+	const purchasedAtRaw = formData.get('purchasedAt');
+	const storeLabel =
+		typeof storeLabelRaw === 'string' && storeLabelRaw.trim() ? storeLabelRaw.trim() : null;
+	const purchasedAt = typeof purchasedAtRaw === 'string' ? purchasedAtRaw : null;
 
 	for (const index of selected) {
 		const name = formData.get(`name_${index}`);
@@ -135,15 +134,35 @@ async function bulkCreateFromForm(
 		);
 
 		if (recordPurchases && importBatchId) {
-			purchaseLines.push({
-				householdId: event.locals.householdId!,
-				userId: event.locals.user!.id,
-				importBatchId,
-				productName: name.trim(),
+			const unitPriceRaw = formData.get(`unitPrice_${index}`);
+			const lineTotalRaw = formData.get(`lineTotal_${index}`);
+			const currencyRaw = formData.get(`currency_${index}`);
+			const line: ReceiptLine = {
+				name: name.trim(),
 				location,
-				quantity,
-				unit: unit ?? null
-			});
+				quantity:
+					typeof quantityRaw === 'string' && quantityRaw.trim() ? quantityRaw.trim() : undefined,
+				unit: typeof unitRaw === 'string' && unitRaw.trim() ? unitRaw.trim() : undefined,
+				unitPrice:
+					typeof unitPriceRaw === 'string' && unitPriceRaw.trim() ? unitPriceRaw.trim() : undefined,
+				lineTotal:
+					typeof lineTotalRaw === 'string' && lineTotalRaw.trim() ? lineTotalRaw.trim() : undefined,
+				currency:
+					typeof currencyRaw === 'string' && currencyRaw.trim() ? currencyRaw.trim() : undefined
+			};
+			purchaseLines.push(
+				receiptLineToPurchaseRecord({
+					householdId: event.locals.householdId!,
+					userId: event.locals.user!.id,
+					importBatchId,
+					line,
+					location,
+					quantity,
+					unit: unit ?? null,
+					storeLabel,
+					purchasedAt
+				})
+			);
 		}
 		created++;
 	}

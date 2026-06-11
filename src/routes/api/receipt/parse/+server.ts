@@ -1,5 +1,9 @@
 import { Buffer } from 'node:buffer';
 import type { ReceiptParseResult } from '$lib/domain/receipt-line';
+import {
+	extractPurchasedAtFromReceiptText,
+	extractStoreFromReceiptText
+} from '$lib/domain/receipt-store';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { e2eMockReceiptParse, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
@@ -68,6 +72,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const apiKey = apiKeyOrResponse;
 
 	let aiResult;
+	let receiptTextForStoreHeuristic: string | undefined;
 
 	if (isReceiptPdf(mimeType)) {
 		const pdfText = await extractPdfText(bytes);
@@ -80,6 +85,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: translate(locals.locale, errorKey) }, { status: 422 });
 		}
 
+		receiptTextForStoreHeuristic = pdfText.text;
 		aiResult = await parseReceiptFromText(apiKey, pdfText.text);
 	} else {
 		const base64 = Buffer.from(bytes).toString('base64');
@@ -109,6 +115,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		);
 	}
 
+	const storeLabel = receiptTextForStoreHeuristic
+		? extractStoreFromReceiptText(receiptTextForStoreHeuristic)
+		: undefined;
+	const purchasedAt = receiptTextForStoreHeuristic
+		? extractPurchasedAtFromReceiptText(receiptTextForStoreHeuristic)
+		: undefined;
 	const result: ReceiptParseResult = { lines };
 	recordProductEvent(locals.pmfService, {
 		userId: auth.user.id,
@@ -116,5 +128,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		eventType: 'receipt_parsed',
 		metadata: { lineCount: lines.length, stage: 'parse' }
 	});
-	return json(result);
+	return json({
+		...result,
+		...(storeLabel ? { storeLabel } : {}),
+		...(purchasedAt ? { purchasedAt: purchasedAt.toISOString() } : {})
+	});
 };

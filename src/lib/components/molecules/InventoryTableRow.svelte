@@ -2,10 +2,12 @@
 
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import PriceMemoryChip from '$lib/components/molecules/PriceMemoryChip.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { isMovingToAutoExpiredSoon } from '$lib/domain/auto-expired';
 	import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
 	import { daysUntilExpiry, formatExpiryDate, EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
+	import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 	import { getLocale, t } from '$lib/i18n';
 
 
@@ -104,6 +106,8 @@
 		canWrite && !finished && (onFinishOneTap || onPartialConsume)
 	);
 
+	const priceMemoryKey = $derived(normalizeReceiptProductName(item.name));
+
 
 
 	$effect(() => {
@@ -176,6 +180,10 @@
 
 				<Badge tone="warning">{t('inventory.movingToAutoExpiredSoon')}</Badge>
 
+			{/if}
+
+			{#if !finished && !autoExpired && priceMemoryKey}
+				<PriceMemoryChip normalizedKey={priceMemoryKey} />
 			{/if}
 
 			{#if item.expiresOnSource === 'ai_inferred' && item.expiresOn && !finished && !autoExpired}
