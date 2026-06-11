@@ -139,7 +139,7 @@ describe('POST /api/household/share-invite', () => {
 			user: { id: 'owner-1', email: 'owner@example.com' } as App.Locals['user'],
 			householdId,
 			householdRole: 'owner',
-			pmfService: { recordEvent } as App.Locals['pmfService']
+			pmfService: { recordEvent } as unknown as App.Locals['pmfService']
 		});
 
 		const response = await POST({
@@ -165,7 +165,7 @@ describe('POST /api/household/share-invite', () => {
 			user: { id: 'owner-1', email: 'owner@example.com' } as App.Locals['user'],
 			householdId,
 			householdRole: 'owner',
-			pmfService: { recordEvent } as App.Locals['pmfService']
+			pmfService: { recordEvent } as unknown as App.Locals['pmfService']
 		});
 
 		const response = await POST({
