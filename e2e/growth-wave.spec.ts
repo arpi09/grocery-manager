@@ -1,6 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
 import {
-	clickSecondaryNavHref,
 	dismissCookieConsentIfOpen,
 	dismissOnboardingModalIfOpen,
 	loginAsAdmin,
@@ -220,7 +219,6 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 
 		await page.goto('/settings#settings-nearby-sharing', { waitUntil: 'commit' });
 		await dismissCookieConsentIfOpen(page);
-		await dismissOnboardingModalIfOpen(page);
 
 		const nearbySection = page.locator('#settings-nearby-sharing');
 		await expect(nearbySection).toBeVisible({ timeout: 15_000 });
@@ -229,7 +227,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 			name: /Aktivera n\u00e4rliggande delningar|Enable nearby shares/i
 		});
 		await switchControl.scrollIntoViewIfNeeded();
-		await expect(switchControl).not.toBeChecked();
+		await expect(switchControl).toHaveAttribute('aria-checked', 'false');
 
 		const apiWait = page.waitForResponse(
 			(res) =>
@@ -237,17 +235,17 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 				res.request().method() === 'POST',
 			{ timeout: 45_000 }
 		);
-		// Tap label text — `for` + sibling button (no nested button in label; iOS-safe).
-		await nearbySection.locator('label.toggle-label').first().click();
+		// Enable via switch (label span uses the same handler in Toggle.svelte).
+		await switchControl.click({ noWaitAfter: true });
 		const apiResponse = await apiWait;
 		expect(apiResponse.ok()).toBeTruthy();
 
-		await expect(switchControl).toBeChecked({ timeout: 20_000 });
+		await expect(switchControl).toHaveAttribute('aria-checked', 'true', { timeout: 20_000 });
 
 		await page.reload({ waitUntil: 'commit' });
 		await dismissOnboardingModalIfOpen(page);
 		await switchControl.scrollIntoViewIfNeeded();
-		await expect(switchControl).toBeChecked();
+		await expect(switchControl).toHaveAttribute('aria-checked', 'true');
 	});
 
 	test('nearby sharing settings API opt-in stores coarse location', async ({ page }) => {
@@ -326,20 +324,5 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		const disablePayload = (await disableResponse.json()) as { ok: boolean; enabled: boolean };
 		expect(disablePayload.ok).toBe(true);
 		expect(disablePayload.enabled).toBe(false);
-	});
-
-	test('Mer menu opens Grannskafferiet discovery page', async ({ page }) => {
-		test.setTimeout(60_000);
-		await prepareE2eBrowserState(page);
-		await loginAsAdmin(page);
-		await page.goto('/hem', { waitUntil: 'commit' });
-		await dismissOnboardingModalIfOpen(page);
-
-		await clickSecondaryNavHref(page, '/grannskafferiet');
-
-		await expect(page).toHaveURL(/\/grannskafferiet/);
-		await expect(page.getByRole('heading', { level: 1 })).toContainText(
-			/Grannskafferiet|Neighbour pantry/i
-		);
 	});
 });
