@@ -1,5 +1,9 @@
 import { json } from '@sveltejs/kit';
 import {
+	extractPurchasedAtFromReceiptText,
+	extractStoreFromReceiptText
+} from '$lib/domain/receipt-store';
+import {
 	isAllowedKivraForwardSender,
 	parseForwardTokenFromRecipients
 } from '$lib/domain/kivra-forward';
@@ -93,12 +97,16 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		let parsedLines: ReceiptLine[] = [];
+		let parsedStoreLabel: string | undefined;
+		let parsedPurchasedAt: Date | undefined;
 		for (const attachment of attachments) {
 			const bytes = await downloadAttachmentBytes(attachment.downloadUrl);
 			const pdfText = await extractPdfText(bytes);
 			if (!pdfText.ok) {
 				continue;
 			}
+			parsedStoreLabel = extractStoreFromReceiptText(pdfText.text);
+			parsedPurchasedAt = extractPurchasedAtFromReceiptText(pdfText.text);
 
 			const aiResult = await parseReceiptFromText(apiKey, pdfText.text);
 			if (!aiResult.ok) {
@@ -130,7 +138,9 @@ export const POST: RequestHandler = async ({ request }) => {
 			purchasePatternService,
 			pmfService,
 			eventType: 'kivra_forward_received',
-			source: 'kivra_forward'
+			source: 'kivra_forward',
+			storeLabel: parsedStoreLabel ?? null,
+			purchasedAt: parsedPurchasedAt ?? null
 		});
 
 		console.info(

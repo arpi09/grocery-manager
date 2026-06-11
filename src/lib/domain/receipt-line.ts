@@ -18,4 +18,6 @@ export interface ReceiptLine {
 
 export interface ReceiptParseResult {
 	lines: ReceiptLine[];
+	storeLabel?: string;
+	purchasedAt?: string;
 }
