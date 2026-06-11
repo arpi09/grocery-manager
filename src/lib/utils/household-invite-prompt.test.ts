@@ -1,14 +1,85 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+	dismissHouseholdInvitePrompt,
 	dismissInkopHouseholdInvitePrompt,
 	hasShoppingListEngagement,
 	recordInkopHouseholdInviteShown,
+	recordPeakInventoryCount,
 	recordShoppingListExport,
+	shouldShowHouseholdInvitePrompt,
 	shouldShowInkopHouseholdInvitePrompt
 } from './household-invite-prompt';
 
 const TEST_USER = 'user-inkop-invite';
+const TEST_GLOBAL_USER = 'user-global-invite';
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+
+describe('global household invite prompt', () => {
+	let storage: Record<string, string>;
+
+	beforeEach(() => {
+		storage = {};
+		vi.stubGlobal('localStorage', {
+			getItem: (key: string) => storage[key] ?? null,
+			setItem: (key: string, value: string) => {
+				storage[key] = value;
+			},
+			removeItem: (key: string) => {
+				delete storage[key];
+			}
+		});
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	const baseOptions = {
+		userId: TEST_GLOBAL_USER,
+		memberCount: 1,
+		signupAt: Date.UTC(2026, 5, 1)
+	};
+
+	it('shows after shopping list export even without inventory depth or signup age', () => {
+		const now = Date.UTC(2026, 5, 2);
+		recordShoppingListExport(TEST_GLOBAL_USER);
+
+		expect(
+			shouldShowHouseholdInvitePrompt({
+				...baseOptions,
+				now
+			})
+		).toBe(true);
+	});
+
+	it('shows when peak inventory reaches five items', () => {
+		recordPeakInventoryCount(5, TEST_GLOBAL_USER);
+
+		expect(
+			shouldShowHouseholdInvitePrompt({
+				...baseOptions,
+				now: baseOptions.signupAt + 1
+			})
+		).toBe(true);
+	});
+
+	it('shows when signup is at least three days ago', () => {
+		expect(
+			shouldShowHouseholdInvitePrompt({
+				...baseOptions,
+				now: baseOptions.signupAt + THREE_DAYS_MS
+			})
+		).toBe(true);
+	});
+
+	it('hides when dismissed permanently', () => {
+		recordShoppingListExport(TEST_GLOBAL_USER);
+		dismissHouseholdInvitePrompt(TEST_GLOBAL_USER);
+
+		expect(shouldShowHouseholdInvitePrompt(baseOptions)).toBe(false);
+	});
+});
 
 describe('inkop household invite prompt', () => {
 	let storage: Record<string, string>;

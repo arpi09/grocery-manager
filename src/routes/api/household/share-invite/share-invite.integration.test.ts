@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HouseholdService } from '$lib/application/household.service';
+import { SHARE_INVITE_EMAIL } from '$lib/domain/household';
 import { DrizzleHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
 import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integration-db';
 import { POST } from './+server';
@@ -44,10 +45,11 @@ describe('POST /api/household/share-invite', () => {
 		});
 	}
 
-	function makeRequest() {
+	function makeRequest(context = 'inkop') {
 		return new Request('http://localhost/api/household/share-invite', {
 			method: 'POST',
-			headers: { 'content-type': 'application/json' }
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ context })
 		});
 	}
 
@@ -123,5 +125,35 @@ describe('POST /api/household/share-invite', () => {
 		expect(secondBody.ok).toBe(true);
 		expect(firstBody.inviteUrl).toMatch(/\/invite\//);
 		expect(secondBody.inviteUrl).toBe(firstBody.inviteUrl);
+
+		const pending = await householdService.listPendingInvites(householdId, 'owner-1');
+		const shareInvite = pending.find((row) => row.email === SHARE_INVITE_EMAIL);
+		expect(shareInvite?.role).toBe('editor');
+	});
+
+	it('records household_invite_created with request context', async () => {
+		await seedOwner();
+
+		const recordEvent = vi.fn().mockResolvedValue(undefined);
+		const locals = makeLocals({
+			user: { id: 'owner-1', email: 'owner@example.com' } as App.Locals['user'],
+			householdId,
+			householdRole: 'owner',
+			pmfService: { recordEvent }
+		});
+
+		const response = await POST({
+			request: makeRequest('lista'),
+			locals,
+			url: new URL('http://localhost/api/household/share-invite')
+		} as Parameters<typeof POST>[0]);
+
+		expect(response.status).toBe(200);
+		expect(recordEvent).toHaveBeenCalledWith(
+			expect.objectContaining({
+				eventType: 'household_invite_created',
+				metadata: { context: 'lista' }
+			})
+		);
 	});
 });

@@ -62,7 +62,7 @@ export function shouldShowHouseholdInvitePrompt(options: {
 	const daysSinceSignup =
 		signupAt !== null ? Math.floor((now - signupAt) / dayMs) : 0;
 
-	return peakItems >= 5 || daysSinceSignup >= 3;
+	return peakItems >= 5 || daysSinceSignup >= 3 || hasShoppingListExported(userId);
 }
 
 export function recordShoppingListExport(userId?: string | null): void {

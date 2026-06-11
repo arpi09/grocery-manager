@@ -41,6 +41,7 @@
 		canEdit,
 		shareLinkEnabled = false,
 		shoppingToPantryMode = 'ask',
+		memberCount = 0,
 		id: panelId,
 		tabindex: panelTabindex
 	}: {
@@ -49,6 +50,7 @@
 		canEdit: boolean;
 		shareLinkEnabled?: boolean;
 		shoppingToPantryMode?: ShoppingToPantryMode;
+		memberCount?: number;
 		id?: string;
 		tabindex?: number;
 	} = $props();
@@ -106,6 +108,9 @@
 	let exportCopiedFormat = $state<ShoppingListExportFormat | null>(null);
 	let shareLinkCopied = $state(false);
 	let shareLinkSubmitting = $state(false);
+	let listaInviteVisible = $state(false);
+	let listaInviteSharing = $state(false);
+	let listaInviteCopied = $state(false);
 	let addSubmitting = $state(false);
 	let removingIds = $state(new Set<string>());
 	let pantrySheetOpen = $state(false);
@@ -198,6 +203,9 @@
 			}
 
 			await copyShareLink(body.url);
+			if (memberCount === 1) {
+				listaInviteVisible = true;
+			}
 
 			if (navigator.share && navigator.canShare?.({ url: body.url })) {
 				try {
@@ -353,6 +361,66 @@
 	function dismissUndo() {
 		undoPayload = null;
 	}
+
+	async function copyListaInviteLink(link: string) {
+		if (!browser) {
+			return;
+		}
+		await navigator.clipboard.writeText(link);
+		listaInviteCopied = true;
+		setTimeout(() => {
+			listaInviteCopied = false;
+		}, 2000);
+	}
+
+	async function shareListaInviteLink(link: string) {
+		if (!browser || !navigator.share) {
+			await copyListaInviteLink(link);
+			return;
+		}
+
+		try {
+			await navigator.share({
+				title: t('household.shareInvite'),
+				text: t('household.shareInviteNote'),
+				url: link
+			});
+		} catch (error) {
+			if (error instanceof DOMException && error.name === 'AbortError') {
+				return;
+			}
+			await copyListaInviteLink(link);
+		}
+	}
+
+	async function invitePartnerFromLista() {
+		if (!browser || listaInviteSharing) {
+			return;
+		}
+
+		listaInviteSharing = true;
+		try {
+			const response = await fetch('/api/household/share-invite', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ context: 'lista' })
+			});
+			const body = (await response.json().catch(() => ({}))) as {
+				ok?: boolean;
+				inviteUrl?: string;
+			};
+
+			if (response.ok && body.ok && body.inviteUrl) {
+				await shareListaInviteLink(body.inviteUrl);
+			}
+		} finally {
+			listaInviteSharing = false;
+		}
+	}
+
+	function dismissListaInvite() {
+		listaInviteVisible = false;
+	}
 </script>
 
 <section
@@ -484,6 +552,35 @@
 			</div>
 		{/if}
 
+		{#if listaInviteVisible && shareLinkEnabled}
+			<aside
+				class="lista-invite-banner"
+				role="region"
+				aria-label={t('householdInvite.listaBannerAria')}
+				data-testid="lista-household-invite-banner"
+			>
+				<p class="lista-invite-body">{t('householdInvite.listaBannerBody')}</p>
+				<div class="lista-invite-actions">
+					<Button
+						type="button"
+						variant="primary"
+						disabled={listaInviteSharing}
+						data-analytics-id="household_invite.lista_cta"
+						onclick={invitePartnerFromLista}
+					>
+						{listaInviteSharing
+							? t('common.loading')
+							: listaInviteCopied
+								? t('common.copied')
+								: t('householdInvite.listaBannerCta')}
+					</Button>
+					<Button type="button" variant="ghost" onclick={dismissListaInvite}>
+						{t('householdInvite.listaBannerDismiss')}
+					</Button>
+				</div>
+			</aside>
+		{/if}
+
 		{#if canEdit}
 			<div class="panel-footer">
 				{#if shareLinkEnabled}
@@ -593,6 +690,29 @@
 	.readonly {
 		margin: 0;
 		color: var(--color-text-muted);
+	}
+
+	.lista-invite-banner {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		padding: var(--space-md);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
+	}
+
+	.lista-invite-body {
+		margin: 0;
+		font-size: 0.9375rem;
+		line-height: 1.5;
+		color: var(--color-text-muted);
+	}
+
+	.lista-invite-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
 	}
 
 	.panel-footer {

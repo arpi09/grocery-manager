@@ -1673,7 +1673,7 @@
 		"switchAccount": "Switch account",
 		"accept": "Accept invitation",
 		"loginRedirectMessage": "Log in with the same email address the invitation was sent to.",
-		"shareLead": "Anyone with a Skaffu account can join with this link.",
+		"shareLead": "Join to share the same shopping list — updates as you shop.",
 		"shareAccept": "Join household"
 	},
 	"starter": {
@@ -2146,9 +2146,13 @@
 		"promptCta": "Invite someone",
 		"promptDismiss": "Not now",
 		"inkopBannerAria": "Invite to the shopping list",
-		"inkopBannerBody": "Shop together? Share the list so a partner or family member can check items off in real time.",
+		"inkopBannerBody": "Shop together? Invite a partner or family member — same list, updates as you shop.",
 		"inkopBannerCta": "Invite someone",
-		"inkopBannerDismiss": "Not now"
+		"inkopBannerDismiss": "Not now",
+		"listaBannerAria": "Invite to shared shopping list",
+		"listaBannerBody": "Want the list to update as you shop? Invite your partner — same list, updates as you shop.",
+		"listaBannerCta": "Sync live with partner",
+		"listaBannerDismiss": "Not now"
 	},
 	"calendar": {
 		"mon": "Mon",
@@ -2514,7 +2518,7 @@
 		"publicSnapshotAt": "Snapshot taken {date}.",
 		"publicGdprNote": "The list shows item names and quantities only — no household names, addresses, or contact details. The link expires automatically.",
 		"publicSignupTitle": "Want a shared shopping list too?",
-		"publicSignupLead": "Create your Skaffu pantry — share lists, get smart suggestions, and track food at home.",
+		"publicSignupLead": "Same list, updates as you shop — create your Skaffu pantry and invite your partner.",
 		"publicSignupBtn": "Try Skaffu free",
 		"emptyList": "The list was empty when the link was created.",
 		"checkedBadge": "Checked",

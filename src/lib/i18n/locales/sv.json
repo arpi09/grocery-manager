@@ -1644,7 +1644,7 @@
 		"switchAccount": "Byt konto",
 		"accept": "Acceptera inbjudan",
 		"loginRedirectMessage": "Logga in med samma e-post som inbjudan skickades till.",
-		"shareLead": "Vem som helst med Skaffu-konto kan gå med via den här länken.",
+		"shareLead": "Gå med för att dela samma inköpslista — uppdateras när ni handlar.",
 		"shareAccept": "Gå med i hushållet"
 	},
 	"starter": {
@@ -2117,9 +2117,13 @@
 		"promptCta": "Bjud in någon",
 		"promptDismiss": "Inte nu",
 		"inkopBannerAria": "Bjud in till inköpslistan",
-		"inkopBannerBody": "Handla ihop? Dela listan så partner eller familj kan bocka av i realtid.",
+		"inkopBannerBody": "Handla ihop? Bjud in partner eller familj — samma lista, uppdateras när ni handlar.",
 		"inkopBannerCta": "Bjud in någon",
-		"inkopBannerDismiss": "Inte nu"
+		"inkopBannerDismiss": "Inte nu",
+		"listaBannerAria": "Bjud in till gemensam inköpslista",
+		"listaBannerBody": "Vill du att listan uppdateras när ni handlar? Bjud in partner — samma lista, uppdateras när ni handlar.",
+		"listaBannerCta": "Synka live med partner",
+		"listaBannerDismiss": "Inte nu"
 	},
 	"calendar": {
 		"mon": "Mån",
@@ -2513,7 +2517,7 @@
 		"publicSnapshotAt": "Snapshot tagen {date}.",
 		"publicGdprNote": "Listan visar bara varunamn och mängd — inga hushållsnamn, adresser eller kontaktuppgifter. Länken slutar gälla automatiskt.",
 		"publicSignupTitle": "Vill du också ha en gemensam inköpslista?",
-		"publicSignupLead": "Skapa ditt Skaffu-skafferi — dela listor, få smarta förslag och håll koll på mat hemma.",
+		"publicSignupLead": "Samma lista, uppdateras när ni handlar — skapa ditt Skaffu-skafferi och bjud in partner.",
 		"publicSignupBtn": "Prova Skaffu gratis",
 		"emptyList": "Listan var tom när länken skapades.",
 		"checkedBadge": "Avbockad",

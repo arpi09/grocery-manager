@@ -2,7 +2,7 @@
 
 *Version: juni 2026. Kritisk strategidokument som svarar på breakthrough-frågan: vad får en främling att installera utan social proof?*
 
-**Relaterade dokument:** [`GROWTH_STRATEGY.md`](./GROWTH_STRATEGY.md) · [`PRODUCT_LED_GROWTH_ANALYSIS.md`](./PRODUCT_LED_GROWTH_ANALYSIS.md) · [`ACQUISITION_WEDGES.md`](./ACQUISITION_WEDGES.md) · [`JUNE_ENGINEERING_REPORT.md`](./JUNE_ENGINEERING_REPORT.md) · [`COMPETITIVE_ANALYSIS.md`](./COMPETITIVE_ANALYSIS.md) · [`GRANNSKAFFERIET_V0.md`](./GRANNSKAFFERIET_V0.md) · [`ROADMAP.md`](./ROADMAP.md) · [`PMF_METRICS_LOG.md`](./PMF_METRICS_LOG.md) · [`RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md`](./RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md) · [`KIVRA_PARTNERSHIP_TRACK.md`](./KIVRA_PARTNERSHIP_TRACK.md)
+**Relaterade dokument:** [`GROWTH_STRATEGY.md`](./GROWTH_STRATEGY.md) · [`PRODUCT_LED_GROWTH_ANALYSIS.md`](./PRODUCT_LED_GROWTH_ANALYSIS.md) · [`ACQUISITION_WEDGES.md`](./ACQUISITION_WEDGES.md) · [`JUNE_ENGINEERING_REPORT.md`](./JUNE_ENGINEERING_REPORT.md) · [`COMPETITIVE_ANALYSIS.md`](./COMPETITIVE_ANALYSIS.md) · [`GRANNSKAFFERIET_V0.md`](./GRANNSKAFFERIET_V0.md) · [`ROADMAP.md`](./ROADMAP.md) · [`PMF_METRICS_LOG.md`](./PMF_METRICS_LOG.md) · [`RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md`](./RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md) · [`KIVRA_PARTNERSHIP_TRACK.md`](./KIVRA_PARTNERSHIP_TRACK.md) · [`FOOD_ECOSYSTEM_EXPLORATION.md`](./FOOD_ECOSYSTEM_EXPLORATION.md) (C1–C7 kategori-horisont om B1–B12 compound lyckas)
 
 **Avgränsning:** Denna rapport upprepar inte distribution-kanaler (LinkedIn, Facebook-grupper, SEO, referrals, `/dela`, household invites, Wrapped-dela, community outreach, hero A/B, UTM) — de täcks i [`GROWTH_STRATEGY.md`](./GROWTH_STRATEGY.md) och [`PRODUCT_LED_GROWTH_ANALYSIS.md`](./PRODUCT_LED_GROWTH_ANALYSIS.md). Briefen antar att kanaler finns; fokus är *vad i produkten* skapar pull.
 
@@ -195,7 +195,7 @@ Obligatoriska fält per idé. ID används i rankning (§5). **O1–O15** i [`PRO
 | **Why users care** | Matpriskollen visar *butiks*priser idag; ingen app visar *din* historik kopplad till lager. Relevant vid inflation och budgetplanering. |
 | **Why hard to copy** | Kräver ackumulerad receipt history per hushåll, normalisering (`normalizeReceiptProductName`), tidslinje över butiker. ChatGPT har inte dina kvitton. |
 | **Why growth** | Differentierad intent (“mitt prisarkiv”); compound med B1 — varje forwardat kvitto förstärker minnet. |
-| **Complexity** | M — data finns i `receipt_purchase_line`; UI + query saknas som produkt-yta |
+| **Complexity** | M — köphistorik i `receipt_purchase_line` (namn, nyckel, frekvens); **pris/butik saknas**; parse + persist + UI väntar. Se [`PRICE_MEMORY_STRATEGY.md`](./PRICE_MEMORY_STRATEGY.md). |
 | **Confidence** | M — moat tydlig; stranger-pull medel (kräver förklaring) |
 | **Biggest risk** | Smalt use case; Matpriskollen kan lägga “historik” med lägre friktion |
 
@@ -550,6 +550,8 @@ Tonight push och pre-shopping gate efter PMF-aktivering. Stödjer ROADMAP P3-A m
 | [`COMPETITIVE_ANALYSIS.md`](./COMPETITIVE_ANALYSIS.md) | OLIO §3G, Matpriskollen §4.8 |
 | [`JUNE_ENGINEERING_REPORT.md`](./JUNE_ENGINEERING_REPORT.md) | Overbuilt analysis §9 |
 | [`PMF_METRICS_LOG.md`](./PMF_METRICS_LOG.md) | Datagap — fyll före beslut |
+| [`PRICE_MEMORY_STRATEGY.md`](./PRICE_MEMORY_STRATEGY.md) | B2 prisminne — datagap, V1–V3, implementationsuppgifter |
+| [`FOOD_ECOSYSTEM_EXPLORATION.md`](./FOOD_ECOSYSTEM_EXPLORATION.md) | Post-PMF kategori-karta — C1–C7, fyra ekosystem, H1–H3 |
 
 ### C. Datagap att fylla
 

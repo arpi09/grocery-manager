@@ -6,17 +6,20 @@ import { getAppOrigin } from '$lib/server/origin';
 import { recordProductEvent } from '$lib/server/product-events';
 import type { RequestHandler } from './$types';
 
-export const POST: RequestHandler = async ({ locals, url }) => {
+export const POST: RequestHandler = async ({ request, locals, url }) => {
 	const auth = requireHousehold(locals);
 	if (!auth.authorized) {
 		return auth.response;
 	}
 
+	const body = (await request.json().catch(() => ({}))) as { context?: string };
+	const context = typeof body.context === 'string' ? body.context : 'inkop';
+
 	try {
 		const { token } = await locals.householdService.createShareInvite(
 			auth.householdId,
 			auth.user.id,
-			'viewer'
+			'editor'
 		);
 		const inviteUrl = `${getAppOrigin(url.origin)}/invite/${token}`;
 
@@ -24,7 +27,7 @@ export const POST: RequestHandler = async ({ locals, url }) => {
 			userId: auth.user.id,
 			householdId: auth.householdId,
 			eventType: 'household_invite_created',
-			metadata: { context: 'inkop' }
+			metadata: { context }
 		});
 
 		return json({ ok: true, inviteUrl });

@@ -77,6 +77,8 @@
 
 			shoppingToPantryMode={data.shoppingToPantryMode}
 
+			memberCount={householdMemberCount}
+
 		/>
 
 		<InkopHouseholdInviteBanner

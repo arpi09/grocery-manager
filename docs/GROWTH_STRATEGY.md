@@ -15,6 +15,9 @@
 | [`BREAKTHROUGH_GROWTH_OPPORTUNITIES.md`](./BREAKTHROUGH_GROWTH_OPPORTUNITIES.md) | Breakthrough-frågan, stranger-pull, B1–B12-katalog, data compound-moat |
 | [`ACQUISITION_WEDGES.md`](./ACQUISITION_WEDGES.md) | Rankade acquisition-wedges W1–W10, capability scorecard, $0-ad mekanik, build-prioritet efter activation |
 | [`NEXT_STAGE_STRATEGY.md`](./NEXT_STAGE_STRATEGY.md) | PMF-risker, retention, moat, 10x-gafflar, CTO-granskning, beslutskalender efter W1–W4 |
+| [`PRICE_MEMORY_STRATEGY.md`](./PRICE_MEMORY_STRATEGY.md) | Price memory — compound/retention, V1–V3, schema-gap (inga priser i DB idag) |
+| [`HOUSEHOLD_GROWTH.md`](./HOUSEHOLD_GROWTH.md) | Hushållsexpansion solo→flermedlem, W1/W4-bryggor, friktion, V1–V3, naturlig invite |
+| [`FOOD_ECOSYSTEM_EXPLORATION.md`](./FOOD_ECOSYSTEM_EXPLORATION.md) | Horisont/kategori — fyra mat-ekosystem, C1–C7 bets, H1–H3 om Skaffu lyckas |
 
 ---
 

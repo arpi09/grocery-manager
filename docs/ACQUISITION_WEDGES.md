@@ -2,7 +2,7 @@
 
 *Version: juni 2026. Strategisk karta över vilka produkt-ytor som kan få främlingar och inbjudna att registrera sig utan betald distribution — efter att receipt-autopilot hanterats som activation, inte acquisition.*
 
-**Relaterade dokument:** [`GROWTH_STRATEGY.md`](./GROWTH_STRATEGY.md) · [`PRODUCT_LED_GROWTH_ANALYSIS.md`](./PRODUCT_LED_GROWTH_ANALYSIS.md) · [`BREAKTHROUGH_GROWTH_OPPORTUNITIES.md`](./BREAKTHROUGH_GROWTH_OPPORTUNITIES.md) · [`COMPETITIVE_ANALYSIS.md`](./COMPETITIVE_ANALYSIS.md) · [`RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md`](./RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md) · [`GRANNSKAFFERIET_V0.md`](./GRANNSKAFFERIET_V0.md) · [`PMF_METRICS_LOG.md`](./PMF_METRICS_LOG.md)
+**Relaterade dokument:** [`GROWTH_STRATEGY.md`](./GROWTH_STRATEGY.md) · [`HOUSEHOLD_GROWTH.md`](./HOUSEHOLD_GROWTH.md) · [`PRODUCT_LED_GROWTH_ANALYSIS.md`](./PRODUCT_LED_GROWTH_ANALYSIS.md) · [`BREAKTHROUGH_GROWTH_OPPORTUNITIES.md`](./BREAKTHROUGH_GROWTH_OPPORTUNITIES.md) · [`COMPETITIVE_ANALYSIS.md`](./COMPETITIVE_ANALYSIS.md) · [`RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md`](./RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md) · [`GRANNSKAFFERIET_V0.md`](./GRANNSKAFFERIET_V0.md) · [`PMF_METRICS_LOG.md`](./PMF_METRICS_LOG.md)
 
 **Avgränsning:** Detta dokument fokuserar på *acquisition wedges* — produktfeatures eller produkt-ytor som skapar pull utan betald reklam. **Uteslutet som fokus:** Kivra API, receipt autopilot, onboarding, activation, retention, mer parsing, generiska kanaler (LinkedIn, Facebook-grupper, SEO-kampanjer, hero A/B som kanal-strategi, UTM-playbooks). Receipt history och purchase patterns analyseras som *data-moat* och *compound* — **inte** som primär acquisition-wedge (align [`RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md`](./RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md) §8: validerar retention men inte stranger-install).
 
@@ -227,6 +227,8 @@ Varje wedge = produktfeature eller produkt-yta (inte kanal).
 | **Biggest risk** | Listan inaktuell → förtroende; måste spegla live sync |
 | **Verdict** | **Primary wedge** |
 
+W1 löser stranger-handoff men konverterar idag till **ny solo-registrering**, inte hushållsjoin — brygga till live sync och invite beskrivs i [`HOUSEHOLD_GROWTH.md`](./HOUSEHOLD_GROWTH.md) §7 V1 (post-lista-share CTA).
+
 ---
 
 ### W2 — Publik city-feed (aktiva `/dela` per stad, no login)
@@ -277,6 +279,8 @@ Varje wedge = produktfeature eller produkt-yta (inte kanal).
 | **Shipped vs build** | **Build** — `HouseholdInvitePrompt` pekar på settings |
 | **Biggest risk** | Audience för liten om acquisition redan failar |
 | **Verdict** | **Secondary wedge** (hög confidence, lägre stranger än W1/W2) |
+
+Friktionsanalys, roll-mismatch (viewer vs “realtid”-copy), kontextmatris och V1 implementation tasks: [`HOUSEHOLD_GROWTH.md`](./HOUSEHOLD_GROWTH.md).
 
 ---
 

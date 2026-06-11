@@ -81,7 +81,8 @@
 		try {
 			const response = await fetch('/api/household/share-invite', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' }
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ context: 'inkop' })
 			});
 			const body = (await response.json().catch(() => ({}))) as {
 				ok?: boolean;

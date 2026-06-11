@@ -21,6 +21,8 @@
 | [`KIVRA_PARTNERSHIP_TRACK.md`](./KIVRA_PARTNERSHIP_TRACK.md) | Partnerskapsspår, API-gate |
 | [`RECEIPT_TEST_PACK.md`](./RECEIPT_TEST_PACK.md) | Kvitto-PDF-korpus, CI-täckning |
 | [`RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md`](./RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md) | Activation, inte acquisition |
+| [`HOUSEHOLD_GROWTH.md`](./HOUSEHOLD_GROWTH.md) | Hushållsexpansion, invite-friktion, V1–V3, naturlig medlem-add |
+| [`FOOD_ECOSYSTEM_EXPLORATION.md`](./FOOD_ECOSYSTEM_EXPLORATION.md) | Post-PMF horisont — C1–C7 kategoribets, fyra ekosystem, H1–H3 |
 
 **Datagap (ärligt):** [`PMF_METRICS_LOG.md`](./PMF_METRICS_LOG.md) är i stort sett tom. Alla beslut i detta dokument förutsätter att ägaren fyller baseline *innan* wedge-verdict tolkas. Utan råtal är rankningar produktlogik — inte empiriska slutsatser.
 
@@ -230,7 +232,7 @@ Hushållsscoped inventory, valfria receipt-rader, expiry-tidsstämplar — **vä
 | Wedge-signal | Nätverkseffekt |
 |--------------|----------------|
 | W1 scale | Live lista-länkar tättar hushållsgrafen |
-| W4 scale | `inviteRate` och `multiMemberHouseholdRate` ökar |
+| W4 scale | `inviteRate` och `multiMemberHouseholdRate` ökar — se [`HOUSEHOLD_GROWTH.md`](./HOUSEHOLD_GROWTH.md) för friktionskatalog och V1-bryggor |
 | W2 scale | Stad-nivå supply-synlighet — svagt nätverk tills density |
 
 ### Moat-tes (om framgång)

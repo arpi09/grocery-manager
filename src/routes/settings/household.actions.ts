@@ -6,6 +6,7 @@ import { translate } from '$lib/i18n/messages';
 import { canEditInventory } from '$lib/domain/household';
 import { householdInviteEmailWarning, sendHouseholdInviteEmail } from '$lib/server/email';
 import { getAppOrigin } from '$lib/server/origin';
+import { recordProductEvent } from '$lib/server/product-events';
 import {
 	createHouseholdInviteSchema,
 	createShareInviteSchema,
@@ -69,6 +70,13 @@ export const householdActions = {
 				parsed.data.role
 			);
 			const inviteUrl = `${getAppOrigin(url.origin)}/invite/${token}`;
+
+			recordProductEvent(locals.pmfService, {
+				userId: locals.user!.id,
+				householdId: locals.householdId!,
+				eventType: 'household_invite_created',
+				metadata: { context: 'settings' }
+			});
 
 			return { inviteLink: inviteUrl };
 		} catch (error) {
