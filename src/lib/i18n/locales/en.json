@@ -890,6 +890,23 @@
 			}
 		}
 	},
+	"replenishment": {
+		"title": "Time to buy again?",
+		"ariaLabel": "Buy-again suggestions",
+		"intro": "Items you usually buy that are not in the pantry right now.",
+		"addToList": "Add to list",
+		"dismiss": "Not now",
+		"acceptSuccess": "{name} added to the list",
+		"acceptFailed": "Could not add to the list. Try again.",
+		"dismissFailed": "Could not hide the suggestion. Try again.",
+		"notFound": "Suggestion is no longer available.",
+		"invalidKey": "Invalid suggestion.",
+		"reason": {
+			"recurringNotInPantry": "Bought {count} times in the last 3 months",
+			"cadenceOverdue": "Last bought {days} days ago · usually buy about every {interval} days",
+			"recurringAndCadence": "Bought {count} times in the last 3 months · last {days} days ago · usually buy about every {interval} days"
+		}
+	},
 	"receiptAutopilot": {
 		"title": "From your receipts",
 		"ariaLabel": "Receipt autopilot suggestions",

@@ -41,15 +41,15 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 			checkedCount: 0,
 			canEdit: false,
 			shareLinkEnabled: false,
-			receiptAutopilotSuggestions: [],
+			replenishmentSuggestions: [],
 			shoppingToPantryMode: 'ask' as ShoppingToPantryMode
 		};
 	}
 
-	const [items, checkedCount, receiptAutopilotSuggestions, shoppingToPantryMode] = await Promise.all([
+	const [items, checkedCount, replenishmentSuggestions, shoppingToPantryMode] = await Promise.all([
 		locals.shoppingListService.listUncheckedItems(householdId),
 		locals.shoppingListService.countCheckedItems(householdId),
-		locals.purchasePatternService.getSuggestions(householdId),
+		locals.purchasePatternService.getReplenishmentSuggestions(householdId),
 		user ? locals.shoppingToPantryService.getMode(user.id) : Promise.resolve('ask' as ShoppingToPantryMode)
 	]);
 	return {
@@ -58,7 +58,7 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		checkedCount,
 		canEdit: !!locals.householdRole && canEditInventory(locals.householdRole),
 		shareLinkEnabled: isShoppingListShareEnabled(),
-		receiptAutopilotSuggestions,
+		replenishmentSuggestions,
 		shoppingToPantryMode
 	};
 };

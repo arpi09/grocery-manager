@@ -163,10 +163,6 @@ export const inventoryService = new InventoryService(
 	householdRepository,
 	shelfLifeInferenceAdapter
 );
-export const purchasePatternService = new PurchasePatternService(
-	purchasePatternRepository,
-	inventoryService
-);
 export const priceMemoryService = new PriceMemoryService(priceMemoryRepository);
 export const skaffurapportService = new SkaffurapportService(
 	consumptionRepository,
@@ -198,6 +194,11 @@ export const wrappedService = new WrappedService(
 	consumptionRepository
 );
 export const shoppingListService = new ShoppingListService(shoppingListRepository);
+export const purchasePatternService = new PurchasePatternService(
+	purchasePatternRepository,
+	inventoryService,
+	shoppingListService
+);
 export const shoppingToPantryService = new ShoppingToPantryService(inventoryService, userRepository);
 export const mealPlanService = new MealPlanService(mealPlanRepository);
 export const weeklyRitualService = new WeeklyRitualService(mealPlanService, shoppingListService);

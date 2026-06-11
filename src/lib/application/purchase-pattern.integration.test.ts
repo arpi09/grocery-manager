@@ -1,8 +1,10 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { InventoryService } from './inventory.service';
 import { PurchasePatternService } from './purchase-pattern.service';
+import { ShoppingListService } from './shopping-list.service';
 import { DrizzleInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
 import { DrizzlePurchasePatternRepository } from '$lib/infrastructure/repositories/purchase-pattern.repository';
+import { DrizzleShoppingListRepository } from '$lib/infrastructure/repositories/shopping-list.repository';
 import { DrizzleConsumptionRepository } from '$lib/infrastructure/repositories/consumption.repository';
 import { DrizzleHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
 import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integration-db';
@@ -22,9 +24,13 @@ describe('Purchase pattern integration', () => {
 			consumptionRepository,
 			householdRepository
 		);
+		const shoppingListService = new ShoppingListService(
+			new DrizzleShoppingListRepository(integrationDb.db)
+		);
 		service = new PurchasePatternService(
 			new DrizzlePurchasePatternRepository(integrationDb.db),
-			inventoryService
+			inventoryService,
+			shoppingListService
 		);
 	});
 
@@ -108,5 +114,58 @@ describe('Purchase pattern integration', () => {
 		const [suggestion] = await service.getSuggestions(householdId);
 		await service.dismissSuggestion(householdId, 'owner', suggestion.normalizedKey);
 		expect(await service.getSuggestions(householdId)).toHaveLength(0);
+	});
+
+	it('replenishment suggestions surface on shopping list page flow', async () => {
+		await seedRecurringMilk();
+		const suggestions = await service.getReplenishmentSuggestions(householdId);
+		expect(suggestions).toHaveLength(1);
+		expect(suggestions[0]!.displayName).toBe('Arla Mjölk 1L');
+	});
+
+	it('accepting replenishment adds shopping list row not inventory', async () => {
+		await seedRecurringMilk();
+		const [suggestion] = await service.getReplenishmentSuggestions(householdId);
+
+		const result = await service.acceptReplenishmentToList(
+			householdId,
+			'owner',
+			suggestion.normalizedKey
+		);
+
+		expect(result.name).toBe('Arla Mjölk 1L');
+
+		const shoppingListRepository = new DrizzleShoppingListRepository(integrationDb.db);
+		const listItems = await shoppingListRepository.listUncheckedByHousehold(householdId);
+		expect(listItems).toHaveLength(1);
+		expect(listItems[0]).toMatchObject({
+			name: 'Arla Mjölk 1L',
+			checked: false
+		});
+
+		const inventoryRepository = new DrizzleInventoryRepository(integrationDb.db);
+		const pantryItems = await inventoryRepository.findByHouseholdAndLocation(householdId, 'fridge', {
+			graceDays: 7
+		});
+		expect(pantryItems).toHaveLength(0);
+
+		expect(await service.getReplenishmentSuggestions(householdId)).toHaveLength(0);
+	});
+
+	it('replenishment does not leak across households', async () => {
+		await integrationDb.seedHousehold({
+			id: 'household-other',
+			name: 'Other',
+			members: [{ userId: 'user-pattern', role: 'owner' }]
+		});
+		await seedRecurringMilk();
+
+		const [suggestion] = await service.getReplenishmentSuggestions(householdId);
+		await expect(
+			service.acceptReplenishmentToList('household-other', 'owner', suggestion.normalizedKey)
+		).rejects.toThrow();
+
+		const shoppingListRepository = new DrizzleShoppingListRepository(integrationDb.db);
+		expect(await shoppingListRepository.listUncheckedByHousehold('household-other')).toHaveLength(0);
 	});
 });

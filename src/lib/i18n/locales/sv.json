@@ -861,6 +861,23 @@
 			}
 		}
 	},
+	"replenishment": {
+		"title": "Dags att köpa igen?",
+		"ariaLabel": "Köp-igen-förslag",
+		"intro": "Varor du brukar handla men som inte finns i skafferiet just nu.",
+		"addToList": "Lägg på listan",
+		"dismiss": "Inte nu",
+		"acceptSuccess": "{name} lades till på listan",
+		"acceptFailed": "Kunde inte lägga till på listan. Försök igen.",
+		"dismissFailed": "Kunde inte dölja förslaget. Försök igen.",
+		"notFound": "Förslaget är inte längre tillgängligt.",
+		"invalidKey": "Ogiltigt förslag.",
+		"reason": {
+			"recurringNotInPantry": "Köpt {count} gånger senaste 3 månaderna",
+			"cadenceOverdue": "Senast köpt {days} dagar sedan · brukar köpa ungefär var {interval} dagar",
+			"recurringAndCadence": "Köpt {count} gånger senaste 3 månaderna · senast {days} dagar sedan · brukar köpa ungefär var {interval} dagar"
+		}
+	},
 	"receiptAutopilot": {
 		"title": "Från dina kvitton",
 		"ariaLabel": "Kvitto-autopilot",
