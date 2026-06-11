@@ -229,7 +229,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 			name: /Aktivera n\u00e4rliggande delningar|Enable nearby shares/i
 		});
 		await switchControl.scrollIntoViewIfNeeded();
-		await expect(switchControl).toHaveAttribute('aria-checked', 'false');
+		await expect(switchControl).not.toBeChecked();
 
 		const apiWait = page.waitForResponse(
 			(res) =>
@@ -237,20 +237,17 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 				res.request().method() === 'POST',
 			{ timeout: 45_000 }
 		);
-		// Tap label text — sibling button via `for` (iOS-safe; no nested button in label).
-		await nearbySection
-			.locator('label.toggle-label')
-			.filter({ hasText: /Aktivera n\u00e4rliggande delningar|Enable nearby shares/i })
-			.click({ noWaitAfter: true });
+		// Tap label text — `for` + sibling button (no nested button in label; iOS-safe).
+		await nearbySection.locator('label.toggle-label').first().click();
 		const apiResponse = await apiWait;
 		expect(apiResponse.ok()).toBeTruthy();
 
-		await expect(switchControl).toHaveAttribute('aria-checked', 'true', { timeout: 20_000 });
+		await expect(switchControl).toBeChecked({ timeout: 20_000 });
 
 		await page.reload({ waitUntil: 'commit' });
-		await dismissCookieConsentIfOpen(page);
+		await dismissOnboardingModalIfOpen(page);
 		await switchControl.scrollIntoViewIfNeeded();
-		await expect(switchControl).toHaveAttribute('aria-checked', 'true');
+		await expect(switchControl).toBeChecked();
 	});
 
 	test('nearby sharing settings API opt-in stores coarse location', async ({ page }) => {
