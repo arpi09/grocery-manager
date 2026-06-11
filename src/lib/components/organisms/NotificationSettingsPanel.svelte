@@ -18,6 +18,7 @@
 	} from '$lib/domain/shopping-to-pantry';
 	import { bindSubmitting, bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
 	import {
+		getNotificationPermission,
 		isPushSupported,
 		isPushServiceWorkerAvailable,
 		pushErrorMessage,
@@ -125,7 +126,12 @@
 			return;
 		}
 
-		const permission = Notification.permission;
+		const permission = getNotificationPermission();
+		if (permission === null) {
+			pushPermissionDenied = false;
+			pushPermissionRecovered = false;
+			return;
+		}
 		if (pushPermissionDenied && permission !== 'denied') {
 			pushPermissionDenied = false;
 			pushNotificationsError = null;
@@ -176,7 +182,7 @@
 		}
 
 		void (async () => {
-			if (Notification.permission !== 'granted') {
+			if (getNotificationPermission() !== 'granted') {
 				return;
 			}
 

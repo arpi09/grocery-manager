@@ -20,6 +20,17 @@ function startServiceWorkerRegistration(): void {
 		});
 }
 
+export function isNotificationApiAvailable(): boolean {
+	return typeof window !== 'undefined' && 'Notification' in window;
+}
+
+export function getNotificationPermission(): NotificationPermission | null {
+	if (!isNotificationApiAvailable()) {
+		return null;
+	}
+	return window.Notification.permission;
+}
+
 export function isPushSupported(): boolean {
 	if (typeof window === 'undefined') {
 		return false;
@@ -27,7 +38,7 @@ export function isPushSupported(): boolean {
 	return (
 		'serviceWorker' in navigator &&
 		'PushManager' in window &&
-		'Notification' in window
+		isNotificationApiAvailable()
 	);
 }
 
@@ -162,7 +173,7 @@ export async function subscribeToExpiryPush(): Promise<PushSubscribeResult> {
 		return { ok: false, reason: 'unsupported' };
 	}
 
-	const permission = await Notification.requestPermission();
+	const permission = await window.Notification.requestPermission();
 	if (permission !== 'granted') {
 		return { ok: false, reason: 'denied' };
 	}
@@ -219,7 +230,7 @@ export async function resyncExistingPushSubscription(): Promise<PushSubscribeRes
 	if (!isPushSupported()) {
 		return { ok: false, reason: 'unsupported' };
 	}
-	if (Notification.permission !== 'granted') {
+	if (getNotificationPermission() !== 'granted') {
 		return { ok: false, reason: 'denied' };
 	}
 
