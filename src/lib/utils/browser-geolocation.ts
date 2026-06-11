@@ -17,18 +17,7 @@ export function mapGeolocationErrorCode(error: GeolocationPositionError): Browse
 	}
 }
 
-/** Call synchronously from a user gesture (required on iOS Safari). */
-export function requestBrowserLocation(
-	options: PositionOptions = {
-		enableHighAccuracy: true,
-		timeout: 15_000,
-		maximumAge: 0
-	}
-): Promise<BrowserGeolocationResult> {
-	if (typeof navigator === 'undefined' || !navigator.geolocation) {
-		return Promise.resolve({ ok: false, code: 'unavailable' });
-	}
-
+function getCurrentPosition(options: PositionOptions): Promise<BrowserGeolocationResult> {
 	return new Promise((resolve) => {
 		navigator.geolocation.getCurrentPosition(
 			(position) =>
@@ -41,4 +30,33 @@ export function requestBrowserLocation(
 			options
 		);
 	});
+}
+
+/** Call synchronously from a user gesture (required on iOS Safari). */
+export async function requestBrowserLocation(): Promise<BrowserGeolocationResult> {
+	if (typeof navigator === 'undefined' || !navigator.geolocation) {
+		return { ok: false, code: 'unavailable' };
+	}
+
+	const accurate = await getCurrentPosition({
+		enableHighAccuracy: true,
+		timeout: 12_000,
+		maximumAge: 0
+	});
+	if (accurate.ok) {
+		return accurate;
+	}
+
+	if (accurate.code === 'timeout' || accurate.code === 'unavailable') {
+		const fallback = await getCurrentPosition({
+			enableHighAccuracy: false,
+			timeout: 15_000,
+			maximumAge: 60_000
+		});
+		if (fallback.ok) {
+			return fallback;
+		}
+	}
+
+	return accurate;
 }

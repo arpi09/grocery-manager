@@ -267,7 +267,7 @@
 			<Toggle
 				checked={expiryRemindersEnabled}
 				label={t('settings.expiryReminders.enable')}
-				onchange={(enabled) => {
+				onCheckedChange={(enabled) => {
 					expiryRemindersEnabled = enabled;
 					expiryRemindersForm?.requestSubmit();
 				}}
@@ -335,7 +335,7 @@
 				checked={pushNotificationsEnabled}
 				disabled={!pushReady || pushPermissionDenied || pushNotificationsSubmitting}
 				label={t('settings.pushNotifications.enable')}
-				onchange={(enabled) => {
+				onCheckedChange={(enabled) => {
 					void togglePushNotifications(enabled);
 				}}
 			/>
@@ -441,7 +441,7 @@
 				checked={shoppingPushEnabled}
 				disabled={shoppingPushDisabled}
 				label={t('settings.shoppingPush.enable')}
-				onchange={(enabled) => {
+				onCheckedChange={(enabled) => {
 					if (enabled && !pushNotificationsEnabled) {
 						return;
 					}

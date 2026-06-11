@@ -393,11 +393,13 @@ export async function clickNavHref(page: Page, href: string) {
 }
 
 export async function clickSecondaryNavHref(page: Page, href: string) {
+	await dismissOnboardingModalIfOpen(page);
 	await openMoreNav(page);
-	await page
+	const link = page
 		.locator(`#nav-more-desktop a[href="${href}"], #nav-more-sheet a[href="${href}"]`)
-		.first()
-		.click();
+		.first();
+	await link.waitFor({ state: 'visible', timeout: 15_000 });
+	await link.click();
 }
 
 

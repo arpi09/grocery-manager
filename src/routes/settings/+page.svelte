@@ -147,6 +147,8 @@
 
 			{ id: 'settings-notifications', label: t('settings.nav.notifications') },
 
+			{ id: 'settings-nearby-sharing', label: t('nearbySharing.settingsTitle') },
+
 			{ id: 'settings-app', label: t('settings.nav.app') },
 
 			{ id: 'settings-plan', label: t('settings.nav.plan') },

@@ -14,7 +14,8 @@ export type NavIconId =
 	| 'shield'
 	| 'more'
 	| 'scan'
-	| 'sparkle';
+	| 'sparkle'
+	| 'mapPin';
 
 export type NavRole = 'admin';
 
@@ -28,6 +29,7 @@ export type NavLabelKey = Extract<
 	| 'nav.plans'
 	| 'nav.stats'
 	| 'nav.news'
+	| 'nav.grannskafferiet'
 	| 'nav.pets'
 	| 'nav.admin'
 	| 'nav.more'
@@ -95,6 +97,12 @@ export const NAV_ITEMS: NavItem[] = [
 	},
 	{ href: '/statistik', labelKey: 'nav.stats', icon: 'chart', match: 'prefix' },
 	{ href: '/nyheter', labelKey: 'nav.news', icon: 'news', match: 'prefix' },
+	{
+		href: '/grannskafferiet',
+		labelKey: 'nav.grannskafferiet',
+		icon: 'mapPin',
+		match: 'prefix'
+	},
 	{ href: '/husdjur', labelKey: 'nav.pets', icon: 'paw', requiresPets: true, match: 'prefix' },
 	{ href: '/admin', labelKey: 'nav.admin', icon: 'shield', roles: ['admin'], match: 'prefix' }
 ];

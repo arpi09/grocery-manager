@@ -30,8 +30,11 @@
 	let nearbyPushSubmitting = $state(false);
 	let errorMessage = $state<string | null>(null);
 	let nearbyPushError = $state<string | null>(null);
+	let prevInitialEnabled = $state(initialEnabled);
+	let prevInitialNearbyPushEnabled = $state(initialNearbyPushEnabled);
 
 	const nearbyBusy = $derived(submitting || locating);
+	const nearbyToggleChecked = $derived(locating ? true : nearbySharingEnabled);
 	const nearbyPushDisabled = $derived(
 		nearbyPushSubmitting ||
 			nearbyBusy ||
@@ -39,11 +42,27 @@
 				(!nearbySharingEnabled || !pushNotificationsEnabled))
 	);
 
+	// Sync from server only when load data changes — not when busy flags flip (avoids
+	// resetting the toggle after save before invalidateAll() updates props).
 	$effect(() => {
-		if (!submitting && !locating && !nearbyPushSubmitting) {
-			nearbySharingEnabled = initialEnabled;
-			nearbyPushEnabled = initialNearbyPushEnabled;
+		if (initialEnabled !== prevInitialEnabled) {
+			prevInitialEnabled = initialEnabled;
+			if (!locating) {
+				nearbySharingEnabled = initialEnabled;
+			}
 		}
+	});
+
+	$effect(() => {
+		if (initialNearbyPushEnabled !== prevInitialNearbyPushEnabled) {
+			prevInitialNearbyPushEnabled = initialNearbyPushEnabled;
+			if (!nearbyPushSubmitting) {
+				nearbyPushEnabled = initialNearbyPushEnabled;
+			}
+		}
+	});
+
+	$effect(() => {
 		pushNotificationsEnabled = initialPushEnabled;
 	});
 
@@ -80,6 +99,7 @@
 				return;
 			}
 			nearbySharingEnabled = Boolean(data.enabled);
+			prevInitialEnabled = nearbySharingEnabled;
 			if (!nearbySharingEnabled && nearbyPushEnabled) {
 				await persistNearbyPush(false);
 			}
@@ -112,6 +132,7 @@
 				return;
 			}
 			nearbyPushEnabled = Boolean(data.enabled);
+			prevInitialNearbyPushEnabled = nearbyPushEnabled;
 			showClientToast(t('actionToast.settingsSaved'), { variant: 'success' });
 		} catch {
 			nearbyPushError = t('nearbySharing.saveFailed');
@@ -127,7 +148,6 @@
 		}
 
 		if (!enabled) {
-			nearbySharingEnabled = false;
 			await persistSettings(false);
 			return;
 		}
@@ -143,6 +163,7 @@
 			return;
 		}
 
+		nearbySharingEnabled = true;
 		await persistSettings(true, {
 			latitude: result.latitude,
 			longitude: result.longitude
@@ -167,10 +188,10 @@
 >
 	<SettingsRow title={t('nearbySharing.enableTitle')} note={t('nearbySharing.enableNote')} last={false}>
 		<Toggle
-			checked={nearbySharingEnabled}
+			checked={nearbyToggleChecked}
 			label={t('nearbySharing.enableLabel')}
 			disabled={nearbyBusy}
-			onchange={(enabled) => {
+			onCheckedChange={(enabled) => {
 				if (nearbyBusy) {
 					return;
 				}
@@ -202,8 +223,7 @@
 			checked={nearbyPushEnabled}
 			label={t('nearbySharing.pushEnableLabel')}
 			disabled={nearbyPushDisabled}
-			onchange={(enabled) => {
-				nearbyPushEnabled = enabled;
+			onCheckedChange={(enabled) => {
 				void toggleNearbyPush(enabled);
 			}}
 		/>
@@ -254,11 +274,11 @@
 		font-size: 0.8125rem;
 	}
 
-	:global(#settings-nearby-sharing .toggle-switch) {
-		min-width: var(--touch-target-min);
+	:global(#settings-nearby-sharing) {
+		scroll-margin-top: var(--header-height-desktop);
+	}
+
+	:global(#settings-nearby-sharing .toggle) {
 		min-height: var(--touch-target-min);
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
 	}
 </style>

@@ -93,20 +93,9 @@
 	}
 
 	async function requestBrowserLocation(): Promise<{ latitude: number; longitude: number } | null> {
-		if (!navigator.geolocation) {
-			return null;
-		}
-		return new Promise((resolve) => {
-			navigator.geolocation.getCurrentPosition(
-				(position) =>
-					resolve({
-						latitude: position.coords.latitude,
-						longitude: position.coords.longitude
-					}),
-				() => resolve(null),
-				{ enableHighAccuracy: false, timeout: 10_000, maximumAge: 120_000 }
-			);
-		});
+		const { requestBrowserLocation: getLocation } = await import('$lib/utils/browser-geolocation');
+		const result = await getLocation();
+		return result.ok ? { latitude: result.latitude, longitude: result.longitude } : null;
 	}
 
 	async function loadNearbyShares() {

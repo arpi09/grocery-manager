@@ -78,7 +78,7 @@ export default defineConfig({
 	webServer: {
 		command: `npx svelte-kit sync && npm run dev -- --port ${port}`,
 		url: `${baseURL}/login`,
-		reuseExistingServer: false,
+		reuseExistingServer: !process.env.CI,
 		timeout: 180_000,
 		env: {
 			...process.env,

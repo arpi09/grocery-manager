@@ -3,6 +3,7 @@ import { isValidLatitude, isValidLongitude } from '$lib/domain/geo';
 import { translate } from '$lib/i18n/messages';
 import { requireUser } from '$lib/server/api-guards';
 import { expiringShareService, nearbyPushService } from '$lib/server/di';
+import { recordAppError } from '$lib/server/error-log/record';
 import { recordProductEvent } from '$lib/server/product-events';
 import { createExpiringShareWithGeoSchema } from '$lib/validation/nearby-sharing.schemas';
 import type { RequestHandler } from './$types';
@@ -51,7 +52,7 @@ export const POST: RequestHandler = async ({ locals, url, request }) => {
 
 	if (attachNearby) {
 		void nearbyPushService.notifyNearbyViewers(share.shareId).catch((error) => {
-			console.error('[nearby-push] notify failed', error);
+			void recordAppError({ error, path: '/api/expiring-share (nearby-push)', userId: locals.user?.id });
 		});
 	}
 

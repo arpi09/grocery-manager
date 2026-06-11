@@ -1,5 +1,8 @@
-import { describe, expect, it } from 'vitest';
-import { mapGeolocationErrorCode } from './browser-geolocation';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+	mapGeolocationErrorCode,
+	requestBrowserLocation
+} from './browser-geolocation';
 
 describe('mapGeolocationErrorCode', () => {
 	it('maps permission denied', () => {
@@ -22,5 +25,56 @@ describe('mapGeolocationErrorCode', () => {
 
 	it('maps unknown codes', () => {
 		expect(mapGeolocationErrorCode({ code: 99 } as GeolocationPositionError)).toBe('unknown');
+	});
+});
+
+describe('requestBrowserLocation', () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it('returns unavailable when geolocation is missing', async () => {
+		vi.stubGlobal('navigator', {});
+		await expect(requestBrowserLocation()).resolves.toEqual({ ok: false, code: 'unavailable' });
+	});
+
+	it('returns coordinates from high-accuracy attempt', async () => {
+		const getCurrentPosition = vi.fn((_success: PositionCallback, _error?: PositionErrorCallback, options?: PositionOptions) => {
+			if (options?.enableHighAccuracy) {
+				_success({
+					coords: { latitude: 59.33, longitude: 18.07, accuracy: 10 },
+					timestamp: Date.now()
+				} as GeolocationPosition);
+			}
+		});
+		vi.stubGlobal('navigator', { geolocation: { getCurrentPosition } });
+
+		await expect(requestBrowserLocation()).resolves.toEqual({
+			ok: true,
+			latitude: 59.33,
+			longitude: 18.07
+		});
+		expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+	});
+
+	it('falls back when high-accuracy times out', async () => {
+		const getCurrentPosition = vi.fn((success: PositionCallback, _error?: PositionErrorCallback, options?: PositionOptions) => {
+			if (options?.enableHighAccuracy) {
+				_error?.({ code: 3, PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3, message: 'timeout' } as GeolocationPositionError);
+				return;
+			}
+			success({
+				coords: { latitude: 59.1, longitude: 18.0, accuracy: 500 },
+				timestamp: Date.now()
+			} as GeolocationPosition);
+		});
+		vi.stubGlobal('navigator', { geolocation: { getCurrentPosition } });
+
+		await expect(requestBrowserLocation()).resolves.toEqual({
+			ok: true,
+			latitude: 59.1,
+			longitude: 18.0
+		});
+		expect(getCurrentPosition).toHaveBeenCalledTimes(2);
 	});
 });

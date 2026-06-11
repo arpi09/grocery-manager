@@ -62,6 +62,9 @@
 	{:else if id === 'sparkle'}
 		<path d="M12 3 13.2 7.2 17.5 8.5 13.2 9.8 12 14 10.8 9.8 6.5 8.5 10.8 7.2 12 3Z" />
 		<path d="M5 16.5 5.7 18.6 7.8 19.3 5.7 20 5 22.1 4.3 20 2.2 19.3 4.3 18.6 5 16.5Z" />
+	{:else if id === 'mapPin'}
+		<path d="M12 21s6-4.35 6-10a6 6 0 1 0-12 0c0 5.65 6 10 6 10Z" />
+		<circle cx="12" cy="11" r="2.25" />
 	{:else if id === 'more'}
 		<circle cx="6" cy="12" r="1.25" fill="currentColor" stroke="none" />
 		<circle cx="12" cy="12" r="1.25" fill="currentColor" stroke="none" />

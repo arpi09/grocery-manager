@@ -76,6 +76,30 @@ describe('ExpiringShareService — nearby sharing', () => {
 		expect(settings.longitude).toBe(coarseGeoCoordinate(STOCKHOLM).longitude);
 	});
 
+	it('persists nearby sharing toggle on and off across reads', async () => {
+		await integrationDb.seedUser({ id: 'user-1' });
+
+		expect((await service.getNearbySharingSettings('user-1')).enabled).toBe(false);
+
+		await service.updateNearbySharingSettings('user-1', {
+			enabled: true,
+			coordinate: STOCKHOLM
+		});
+		const afterOptIn = await service.getNearbySharingSettings('user-1');
+		expect(afterOptIn.enabled).toBe(true);
+		expect(afterOptIn.latitude).toBe(coarseGeoCoordinate(STOCKHOLM).latitude);
+		expect(afterOptIn.longitude).toBe(coarseGeoCoordinate(STOCKHOLM).longitude);
+
+		await service.updateNearbySharingSettings('user-1', {
+			enabled: false,
+			coordinate: null
+		});
+		const afterOptOut = await service.getNearbySharingSettings('user-1');
+		expect(afterOptOut.enabled).toBe(false);
+		expect(afterOptOut.latitude).toBeNull();
+		expect(afterOptOut.longitude).toBeNull();
+	});
+
 	it('createShareLink attaches geo when opted in and attachNearby is true', async () => {
 		await integrationDb.seedUser({ id: 'sharer-user' });
 		await integrationDb.seedHousehold({

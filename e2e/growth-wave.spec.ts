@@ -1,8 +1,10 @@
 import { test, expect, type Page } from '@playwright/test';
 import {
+	clickSecondaryNavHref,
 	dismissCookieConsentIfOpen,
 	dismissOnboardingModalIfOpen,
 	loginAsAdmin,
+	prepareE2eBrowserState,
 	registerNewUser
 } from './helpers/auth';
 
@@ -190,6 +192,68 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		await expect(page.getByTestId('nearby-shares-map')).toBeVisible({ timeout: 15_000 });
 	});
 
+	test('nearby sharing settings UI toggle enables and persists', async ({ page, context }) => {
+		test.setTimeout(90_000);
+		const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190';
+		await prepareE2eBrowserState(page);
+		await context.grantPermissions(['geolocation'], { origin: baseURL });
+		await context.setGeolocation({ latitude: 59.329323, longitude: 18.068581 });
+		await page.addInitScript(() => {
+			navigator.geolocation.getCurrentPosition = (success) => {
+				success({
+					coords: {
+						latitude: 59.329323,
+						longitude: 18.068581,
+						accuracy: 10,
+						altitude: null,
+						altitudeAccuracy: null,
+						heading: null,
+						speed: null
+					},
+					timestamp: Date.now()
+				} as GeolocationPosition);
+			};
+		});
+		await loginAsAdmin(page);
+
+		await page.request.post('/api/expiring-share/nearby-settings', { data: { enabled: false } });
+
+		await page.goto('/settings#settings-nearby-sharing', { waitUntil: 'commit' });
+		await dismissCookieConsentIfOpen(page);
+		await dismissOnboardingModalIfOpen(page);
+
+		const nearbySection = page.locator('#settings-nearby-sharing');
+		await expect(nearbySection).toBeVisible({ timeout: 15_000 });
+
+		const switchControl = nearbySection.getByRole('switch', {
+			name: /Aktivera n\u00e4rliggande delningar|Enable nearby shares/i
+		});
+		await switchControl.scrollIntoViewIfNeeded();
+		await expect(switchControl).not.toBeChecked();
+
+		const apiWait = page.waitForResponse(
+			(res) =>
+				res.url().includes('/api/expiring-share/nearby-settings') &&
+				res.request().method() === 'POST',
+			{ timeout: 45_000 }
+		);
+		// Tap label text — regression for iOS (nested button inside label broke this).
+		await nearbySection
+			.locator('label.toggle')
+			.filter({ has: switchControl })
+			.locator('.toggle-label')
+			.click();
+		const apiResponse = await apiWait;
+		expect(apiResponse.ok()).toBeTruthy();
+
+		await expect(switchControl).toBeChecked({ timeout: 20_000 });
+
+		await page.reload({ waitUntil: 'commit' });
+		await dismissCookieConsentIfOpen(page);
+		await switchControl.scrollIntoViewIfNeeded();
+		await expect(switchControl).toBeChecked();
+	});
+
 	test('nearby sharing settings API opt-in stores coarse location', async ({ page }) => {
 		await loginAsAdmin(page);
 
@@ -266,5 +330,20 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		const disablePayload = (await disableResponse.json()) as { ok: boolean; enabled: boolean };
 		expect(disablePayload.ok).toBe(true);
 		expect(disablePayload.enabled).toBe(false);
+	});
+
+	test('Mer menu opens Grannskafferiet discovery page', async ({ page }) => {
+		test.setTimeout(60_000);
+		await prepareE2eBrowserState(page);
+		await loginAsAdmin(page);
+		await page.goto('/hem', { waitUntil: 'commit' });
+		await dismissOnboardingModalIfOpen(page);
+
+		await clickSecondaryNavHref(page, '/grannskafferiet');
+
+		await expect(page).toHaveURL(/\/grannskafferiet/);
+		await expect(page.getByRole('heading', { level: 1 })).toContainText(
+			/Grannskafferiet|Neighbour pantry/i
+		);
 	});
 });

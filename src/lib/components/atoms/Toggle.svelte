@@ -7,7 +7,7 @@
 		id?: string;
 		/** Accessible name when no visible label is provided. */
 		'aria-label'?: string;
-		onchange?: (checked: boolean) => void;
+		onCheckedChange?: (checked: boolean) => void;
 	}
 
 	let {
@@ -17,42 +17,52 @@
 		size = 'md',
 		id,
 		'aria-label': ariaLabel,
-		onchange
+		onCheckedChange
 	}: Props = $props();
 
-	const switchId = $derived(id ?? (label ? undefined : ariaLabel?.replace(/\s+/g, '-').toLowerCase()));
+	const switchId = $derived(
+		id ??
+			(label ?? ariaLabel)?.replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '')
+	);
+	const labelId = $derived(switchId && label ? `${switchId}-label` : undefined);
 
-	function toggle() {
+	function activateToggle(event: Event) {
+		event.preventDefault();
 		if (disabled) return;
-		onchange?.(!checked);
-	}
-
-	function onKeydown(event: KeyboardEvent) {
-		if (event.key === ' ' || event.key === 'Enter') {
-			event.preventDefault();
-			toggle();
-		}
+		onCheckedChange?.(!checked);
 	}
 </script>
 
-<label class={['toggle', size === 'sm' ? 'toggle-sm' : 'toggle-md', disabled ? 'toggle-disabled' : ''].filter(Boolean).join(' ')}>
-	<button
-		type="button"
+<!-- Label click toggles — no nested button; checkbox is for a11y/CSS only. -->
+<label
+	class={['toggle', size === 'sm' ? 'toggle-sm' : 'toggle-md', disabled ? 'toggle-disabled' : ''].filter(Boolean).join(' ')}
+	onclick={activateToggle}
+	onkeydown={(event) => {
+		if (event.key === ' ' || event.key === 'Enter') {
+			activateToggle(event);
+		}
+	}}
+>
+	<input
+		type="checkbox"
 		role="switch"
+		tabindex="-1"
 		id={switchId}
-		class="toggle-switch"
+		class="toggle-input"
+		checked={checked}
+		disabled={disabled}
 		aria-checked={checked}
 		aria-label={label ? undefined : ariaLabel}
-		{disabled}
-		onclick={toggle}
-		onkeydown={onKeydown}
-	>
-		<span class="toggle-track" aria-hidden="true">
+		aria-labelledby={labelId}
+		readonly
+	/>
+	<span class="toggle-switch" aria-hidden="true">
+		<span class="toggle-track">
 			<span class="toggle-thumb"></span>
 		</span>
-	</button>
+	</span>
 	{#if label}
-		<span class="toggle-label">{label}</span>
+		<span class="toggle-label" id={labelId}>{label}</span>
 	{/if}
 </label>
 
@@ -61,8 +71,10 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-sm);
+		position: relative;
 		cursor: pointer;
 		user-select: none;
+		min-height: var(--touch-target-min, 2.75rem);
 	}
 
 	.toggle-disabled {
@@ -77,23 +89,29 @@
 		background: color-mix(in srgb, var(--color-border) 72%, var(--color-surface-muted));
 	}
 
-	.toggle-switch {
-		flex-shrink: 0;
+	.toggle-input {
+		position: absolute;
+		opacity: 0;
+		width: 0;
+		height: 0;
 		margin: 0;
 		padding: 0;
-		border: 0;
-		background: transparent;
-		cursor: inherit;
-		border-radius: 999px;
+		pointer-events: none;
 	}
 
-	.toggle-switch:focus-visible {
+	.toggle-switch {
+		flex-shrink: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: var(--touch-target-min, 2.75rem);
+		min-height: var(--touch-target-min, 2.75rem);
+	}
+
+	.toggle:focus-visible {
 		outline: 2px solid var(--color-primary);
 		outline-offset: 2px;
-	}
-
-	.toggle-switch:disabled {
-		cursor: not-allowed;
+		border-radius: var(--radius-sm);
 	}
 
 	.toggle-track {
@@ -104,7 +122,7 @@
 		transition: background-color 0.2s ease;
 	}
 
-	.toggle-switch[aria-checked='true'] .toggle-track {
+	.toggle-input:checked + .toggle-switch .toggle-track {
 		background: var(--color-primary);
 	}
 
@@ -128,7 +146,7 @@
 		transform: translateX(0);
 	}
 
-	.toggle-md .toggle-switch[aria-checked='true'] .toggle-thumb {
+	.toggle-md .toggle-input:checked + .toggle-switch .toggle-thumb {
 		transform: translateX(1.25rem);
 	}
 
@@ -144,7 +162,7 @@
 		transform: translateX(0);
 	}
 
-	.toggle-sm .toggle-switch[aria-checked='true'] .toggle-thumb {
+	.toggle-sm .toggle-input:checked + .toggle-switch .toggle-thumb {
 		transform: translateX(1rem);
 	}
 
