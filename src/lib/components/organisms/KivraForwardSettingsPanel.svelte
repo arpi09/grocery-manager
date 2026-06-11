@@ -23,26 +23,26 @@
 </script>
 
 <div class="kivra-forward">
-	<p class="lead">{t('settings.kivraForward.lead')}</p>
+	<p class="lead">{t('settings.receiptForward.lead')}</p>
 	<ol class="steps">
-		<li>{t('settings.kivraForward.step1')}</li>
-		<li>{t('settings.kivraForward.step2')}</li>
-		<li>{t('settings.kivraForward.step3')}</li>
+		<li>{t('settings.receiptForward.step1')}</li>
+		<li>{t('settings.receiptForward.step2')}</li>
+		<li>{t('settings.receiptForward.step3')}</li>
 	</ol>
 
 	<div class="address-row">
 		<code class="address" data-testid="kivra-forward-address">{forwardAddress}</code>
 		<Button type="button" variant="secondary" onclick={copyAddress}>
-			{copied ? t('settings.kivraForward.copied') : t('settings.kivraForward.copy')}
+			{copied ? t('settings.receiptForward.copied') : t('settings.receiptForward.copy')}
 		</Button>
 	</div>
 
 	{#if copied}
-		<FeedbackBanner tone="success" message={t('settings.kivraForward.copied')} />
+		<FeedbackBanner tone="success" message={t('settings.receiptForward.copied')} />
 	{/if}
 
-	<p class="hint">{t('settings.kivraForward.hint')}</p>
-	<p class="beta">{t('settings.kivraForward.beta')}</p>
+	<p class="hint">{t('settings.receiptForward.hint')}</p>
+	<p class="beta">{t('settings.receiptForward.beta')}</p>
 </div>
 
 <style>

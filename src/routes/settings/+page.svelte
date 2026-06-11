@@ -141,7 +141,7 @@
 
 			...(data.kivraForwardAddress
 
-				? [{ id: 'settings-kivra-forward', label: t('settings.kivraForward.title') }]
+				? [{ id: 'settings-kivra-forward', label: t('settings.receiptForward.title') }]
 
 				: []),
 
@@ -249,9 +249,9 @@
 
 					id="settings-kivra-forward"
 
-					title={t('settings.kivraForward.title')}
+					title={t('settings.receiptForward.title')}
 
-					description={t('settings.kivraForward.description')}
+					description={t('settings.receiptForward.description')}
 
 				>
 
