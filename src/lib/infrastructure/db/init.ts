@@ -190,7 +190,10 @@ const INCREMENTAL_MIGRATIONS = [
 	'0037_guide_article.sql',
 	'0038_nearby_expiring_share.sql',
 	'0039_expiring_share_report_block.sql',
-	'0040_nearby_push.sql'
+	'0040_nearby_push.sql',
+	'0041_receipt_import_funnel_events.sql',
+	'0042_acquisition_wedge_events.sql',
+	'0043_shopping_list_share_link.sql'
 ];
 
 async function runPgliteBaseline(client: PGlite) {

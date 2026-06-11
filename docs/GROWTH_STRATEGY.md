@@ -11,6 +11,10 @@
 | [`COMPETITIVE_ANALYSIS.md`](./COMPETITIVE_ANALYSIS.md) §3G | OLIO vs TGTG vs Skaffu — geo/grann-delning |
 | [`PRICING.md`](./PRICING.md) | Freemium, Pro-radie, betalvägg senare |
 | [`LINKEDIN_LAUNCH.md`](./LINKEDIN_LAUNCH.md) | Ärlig beta-copy, kall trafik |
+| [`PRODUCT_LED_GROWTH_ANALYSIS.md`](./PRODUCT_LED_GROWTH_ANALYSIS.md) | PLG-inventering, rankad opportunity-katalog, valideringsplan |
+| [`BREAKTHROUGH_GROWTH_OPPORTUNITIES.md`](./BREAKTHROUGH_GROWTH_OPPORTUNITIES.md) | Breakthrough-frågan, stranger-pull, B1–B12-katalog, data compound-moat |
+| [`ACQUISITION_WEDGES.md`](./ACQUISITION_WEDGES.md) | Rankade acquisition-wedges W1–W10, capability scorecard, $0-ad mekanik, build-prioritet efter activation |
+| [`NEXT_STAGE_STRATEGY.md`](./NEXT_STAGE_STRATEGY.md) | PMF-risker, retention, moat, 10x-gafflar, CTO-granskning, beslutskalender efter W1–W4 |
 
 ---
 

@@ -4,8 +4,12 @@ import { hasAnalyticsConsent } from '$lib/cookie-consent';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import {
 	getLandingHeroCopy,
+	isReceiptHeroVariant,
 	LANDING_VARIANT_COOKIE,
-	resolveLandingVariant
+	mergeReceiptHeroExperiment,
+	RECEIPT_HERO_VARIANT_COOKIE,
+	resolveLandingVariant,
+	resolveReceiptHeroVariant
 } from '$lib/marketing/landing-variants';
 import { getLatestPublishedGuides } from '$lib/marketing/guides.server';
 import { guideLoaderDepsFromService } from '$lib/marketing/guide-loader-deps';
@@ -19,6 +23,7 @@ export const load: PageServerLoad = async ({ url, cookies, parent, locals }) => 
 	const consent = readCookieConsent(cookies);
 	const analyticsAllowed = hasAnalyticsConsent(consent);
 	const queryHero = url.searchParams.get('hero');
+	const queryReceiptHero = url.searchParams.get('receipt_hero');
 	const variant = resolveLandingVariant({
 		queryHero,
 		cookieVariant: cookies.get(LANDING_VARIANT_COOKIE),
@@ -26,8 +31,30 @@ export const load: PageServerLoad = async ({ url, cookies, parent, locals }) => 
 		allowVariantCookie: analyticsAllowed
 	});
 
+	const receiptHeroVariant = resolveReceiptHeroVariant({
+		queryReceiptHero,
+		cookieVariant: cookies.get(RECEIPT_HERO_VARIANT_COOKIE),
+		allowVariantCookie: analyticsAllowed
+	});
+	const receiptHeroActive =
+		queryReceiptHero !== null ||
+		(analyticsAllowed && cookies.get(RECEIPT_HERO_VARIANT_COOKIE) != null);
+
 	if (queryHero && (queryHero === 'a' || queryHero === 'b') && analyticsAllowed) {
 		cookies.set(LANDING_VARIANT_COOKIE, variant, {
+			path: '/',
+			maxAge: 60 * 60 * 24 * 90,
+			httpOnly: false,
+			sameSite: 'lax'
+		});
+	}
+
+	if (
+		queryReceiptHero &&
+		isReceiptHeroVariant(queryReceiptHero.trim().toLowerCase()) &&
+		analyticsAllowed
+	) {
+		cookies.set(RECEIPT_HERO_VARIANT_COOKIE, receiptHeroVariant, {
 			path: '/',
 			maxAge: 60 * 60 * 24 * 90,
 			httpOnly: false,
@@ -39,12 +66,19 @@ export const load: PageServerLoad = async ({ url, cookies, parent, locals }) => 
 		pmfService,
 		cookies,
 		eventType: 'landing_view',
-		variant
+		variant,
+		receiptHeroVariant: receiptHeroActive ? receiptHeroVariant : null
 	});
+
+	const baseHero = getLandingHeroCopy(variant, locale);
+	const hero = receiptHeroActive
+		? mergeReceiptHeroExperiment(baseHero, receiptHeroVariant, locale)
+		: baseHero;
 
 	return {
 		landingVariant: variant,
-		hero: getLandingHeroCopy(variant, locale),
+		receiptHeroVariant: receiptHeroActive ? receiptHeroVariant : null,
+		hero,
 		latestGuides: await getLatestPublishedGuides(3, guideLoaderDepsFromService(locals.guideArticleService))
 	};
 };

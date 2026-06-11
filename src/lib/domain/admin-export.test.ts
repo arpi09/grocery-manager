@@ -41,7 +41,10 @@ function makeReview(): PmfWeeklyReview {
 			multiMemberNewHouseholds: 2,
 			eventCounts: {
 				scan_completed: 12,
+				receipt_import_started: 0,
+				receipt_uploaded: 0,
 				receipt_parsed: 3,
+				receipt_review_completed: 0,
 				photo_round_parsed: 1,
 				fill_suggestions_added: 2
 			}
@@ -75,7 +78,10 @@ function makeReview(): PmfWeeklyReview {
 			multiMemberNewHouseholds: 1,
 			eventCounts: {
 				scan_completed: 8,
+				receipt_import_started: 0,
+				receipt_uploaded: 0,
 				receipt_parsed: 1,
+				receipt_review_completed: 0,
 				photo_round_parsed: 0,
 				fill_suggestions_added: 0
 			}

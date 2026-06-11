@@ -58,7 +58,10 @@ const SQL_MIGRATION_FILES = [
 	'0037_guide_article.sql',
 	'0038_nearby_expiring_share.sql',
 	'0039_expiring_share_report_block.sql',
-	'0040_nearby_push.sql'
+	'0040_nearby_push.sql',
+	'0041_receipt_import_funnel_events.sql',
+	'0042_acquisition_wedge_events.sql',
+	'0043_shopping_list_share_link.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
@@ -72,6 +75,7 @@ TRUNCATE TABLE
 	"expiring_share_block",
 	"expiring_share_report",
 	"expiring_share_link",
+	"shopping_list_share_link",
 	"household_receipt_forward_token",
 	"analytics_interaction",
 	"analytics_page_view",

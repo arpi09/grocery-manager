@@ -165,7 +165,6 @@
 		>
 	) {
 		errorMessage = null;
-		locating = true;
 		const result = await locationPromise;
 		locating = false;
 
@@ -212,6 +211,7 @@
 					return;
 				}
 				// Synchronous geolocation kickoff in the tap handler — required on iOS Safari.
+				locating = true;
 				const locationPromise = startBrowserLocationRequest();
 				void completeNearbySharingEnable(locationPromise);
 			}}

@@ -4,15 +4,16 @@
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import NearbyShareReportButton from '$lib/components/molecules/NearbyShareReportButton.svelte';
+	import { trackProductEvent, trackPublicAcquisitionEvent } from '$lib/client/product-events';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
+	import { buildAcquisitionRegisterUrl } from '$lib/marketing/acquisition-attribution';
 
 	let { data } = $props();
 
 	const locale = getLocale();
-	const signupUrl =
-		'https://skaffu.com/?utm_source=facebook&utm_medium=community&utm_campaign=matsvinn_w12&utm_content=grannskafferiet';
+	const signupUrl = $derived(buildAcquisitionRegisterUrl('expiring_share', $page.url.origin));
 	const expiresAtLabel = $derived(
 		new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
 			data.preview.expiresAt
@@ -29,6 +30,15 @@
 			})
 		});
 	});
+
+	function handleSignupClick() {
+		void trackPublicAcquisitionEvent('expiring_share_cta_clicked', {
+			acquisition_source: 'expiring_share'
+		});
+		void trackProductEvent('register_click', {
+			acquisition_source: 'expiring_share'
+		});
+	}
 </script>
 
 <svelte:head>
@@ -77,7 +87,7 @@
 		<div class="signup-cta">
 			<h2>{t('expiringShare.publicSignupTitle')}</h2>
 			<p>{t('expiringShare.publicSignupLead')}</p>
-			<a class="signup-cta-btn" href={signupUrl}>
+			<a class="signup-cta-btn" href={signupUrl} onclick={handleSignupClick}>
 				{t('expiringShare.publicSignupBtn')}
 			</a>
 		</div>

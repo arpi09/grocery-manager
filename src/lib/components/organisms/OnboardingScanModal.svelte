@@ -224,6 +224,7 @@
 		<ReceiptBulkAddFlow
 			{returnTo}
 			embedded
+			prominentGuide
 			formAction="/scan?/bulkCreate"
 			onItemSaved={handleReceiptSaved}
 			onCancel={closeFlow}

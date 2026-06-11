@@ -324,7 +324,10 @@ export const productEventTable = pgTable(
 		eventType: text('event_type', {
 			enum: [
 				'scan_completed',
+				'receipt_import_started',
+				'receipt_uploaded',
 				'receipt_parsed',
+				'receipt_review_completed',
 				'photo_round_parsed',
 				'fill_suggestions_added',
 				'landing_view',
@@ -347,6 +350,17 @@ export const productEventTable = pgTable(
 				'public_report_viewed',
 				'expiring_share_created',
 				'expiring_share_viewed',
+				'expiring_share_cta_clicked',
+				'shopping_list_share_created',
+				'shopping_list_share_viewed',
+				'shopping_list_share_cta_clicked',
+				'public_city_feed_viewed',
+				'public_city_feed_item_clicked',
+				'public_city_feed_signup_clicked',
+				'household_invite_prompt_shown',
+				'household_invite_prompt_clicked',
+				'household_invite_prompt_dismissed',
+				'household_invite_created',
 				'nearby_map_opened',
 				'nearby_share_tapped',
 				'expiring_share_reported',
@@ -563,6 +577,28 @@ export const householdReceiptForwardTokenTable = pgTable(
 	(table) => [
 		index('household_receipt_forward_token_household_idx').on(table.householdId),
 		index('household_receipt_forward_token_hash_idx').on(table.tokenHash)
+	]
+);
+
+export const shoppingListShareLinkTable = pgTable(
+	'shopping_list_share_link',
+	{
+		id: text('id').primaryKey(),
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
+		createdByUserId: text('created_by_user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		tokenHash: text('token_hash').notNull(),
+		snapshotJson: text('snapshot_json').notNull(),
+		expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+		revokedAt: timestamp('revoked_at', { withTimezone: true, mode: 'date' })
+	},
+	(table) => [
+		index('shopping_list_share_link_token_hash_idx').on(table.tokenHash),
+		index('shopping_list_share_link_household_idx').on(table.householdId)
 	]
 );
 

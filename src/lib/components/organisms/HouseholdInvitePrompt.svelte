@@ -8,7 +8,8 @@
 	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
 	import {
 		dismissHouseholdInvitePrompt,
-		shouldShowHouseholdInvitePrompt
+		shouldShowHouseholdInvitePrompt,
+		shouldShowInkopHouseholdInvitePrompt
 	} from '$lib/utils/household-invite-prompt';
 
 	interface Props {
@@ -26,6 +27,26 @@
 		if (!browser || !userId || isOnboardingExcludedPath(pathname)) {
 			open = false;
 			return;
+		}
+
+		if (pathname === '/inkop') {
+			const uncheckedCount = Array.isArray(page.data.items) ? page.data.items.length : 0;
+			const checkedCount =
+				typeof page.data.checkedCount === 'number' ? page.data.checkedCount : 0;
+			const listHasItems = uncheckedCount > 0 || checkedCount > 0;
+
+			if (
+				shouldShowInkopHouseholdInvitePrompt({
+					userId,
+					memberCount,
+					listHasItems,
+					uncheckedCount,
+					checkedCount
+				})
+			) {
+				open = false;
+				return;
+			}
 		}
 
 		const calmPath =

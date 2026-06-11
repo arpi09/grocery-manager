@@ -579,14 +579,14 @@ const sv: MarketingContent = {
 		relatedLabel: 'Fler guider om skafferi och inköp'
 	},
 	receiptGuide: {
-		title: 'Kvitto-PDF från Kivra och butiksappar',
+		title: 'Digitalt kvitto (PDF) till skafferi',
 		lead:
-			'Digitala kvitton i PDF är Skaffus nordiska wedge — ladda upp från Kivra, ICA eller Willys så hjälper AI till att fylla skafferiet utan manuell inmatning.',
+			'Ladda upp digitalt kvitto från Kivra, ICA, Willys eller e-post — AI hjälper till att fylla skafferiet. Du granskar alltid raderna innan de sparas.',
 		meta: {
-			title: 'Kvitto-PDF & Kivra — guide till digitalt kvitto i Skaffu',
+			title: 'Digitalt kvitto (PDF) — guide till kvitto-autopilot i Skaffu',
 			description:
-				'Så sparar du kvitto som PDF från Kivra, ICA-appen eller e-post och laddar upp i Skaffu. Butiksneutral skafferi-app med kvitto-autopilot.',
-			ogTitle: 'Kivra-kvitto som PDF — fyll skafferiet automatiskt',
+				'Så sparar du kvitto som PDF från Kivra, ICA-appen eller e-post och laddar upp i Skaffu. Butiksneutral skafferi-app — ingen officiell Kivra-integration.',
+			ogTitle: 'Digitalt kvitto som PDF — fyll skafferiet med review',
 			ogDescription:
 				'Steg-för-steg: exportera digitalt kvitto, ladda upp PDF i Skaffu och granska varor innan de hamnar i lagret.'
 		},
@@ -599,9 +599,9 @@ const sv: MarketingContent = {
 		steps: [
 			{
 				step: 1,
-				title: 'Hitta kvittot i Kivra',
+				title: 'Hitta ditt digitala kvitto',
 				description:
-					'Öppna Kivra → Inköp eller Dokument. Välj kvittot från butiken (ICA, Willys, Coop m.fl.).'
+					'Öppna Kivra, butiksapp eller e-post. Välj kvittot från butiken (ICA, Willys, Coop m.fl.).'
 			},
 			{
 				step: 2,
@@ -618,14 +618,14 @@ const sv: MarketingContent = {
 		],
 		faq: [
 			{
-				question: 'Fungerar alla Kivra-kvitton?',
+				question: 'Fungerar alla digitala kvitton?',
 				answer:
-					'De flesta digitala kvitton med textlager fungerar. Bild-PDF utan text kan du fotografera i stället — samma granskningsflöde.'
+					'De flesta text-PDF:er fungerar — från Kivra, ICA, Willys m.fl. Bild-PDF utan text kan du fotografera i stället — samma granskningsflöde.'
 			},
 			{
 				question: 'Måste jag ha Kivra?',
 				answer:
-					'Nej. Spara PDF från ICA-appen, Willys, Coop eller butikens e-postkvitto — samma uppladdning i Skaffu.'
+					'Nej. Spara PDF från ICA-appen, Willys, Coop eller butikens e-postkvitto — samma uppladdning i Skaffu. Ingen Kivra-koppling krävs.'
 			},
 			{
 				question: 'Lagras kvittot hos er?',
@@ -1009,14 +1009,14 @@ const en: MarketingContent = {
 		relatedLabel: 'More guides on pantry and shopping'
 	},
 	receiptGuide: {
-		title: 'Receipt PDF from Kivra and store apps',
+		title: 'Digital receipt (PDF) to pantry',
 		lead:
-			'Digital receipts as PDF are Skaffu’s Nordic wedge — upload from Kivra, ICA or Willys and let AI help fill the pantry without manual entry.',
+			'Upload a digital receipt from Kivra, ICA, Willys or email — AI helps fill the pantry. You always review lines before they are saved.',
 		meta: {
-			title: 'Receipt PDF & Kivra — guide to digital receipts in Skaffu',
+			title: 'Digital receipt (PDF) — receipt autopilot guide in Skaffu',
 			description:
-				'How to save receipts as PDF from Kivra, the ICA app or email and upload in Skaffu. Store-neutral pantry app with receipt autopilot.',
-			ogTitle: 'Kivra receipt as PDF — fill the pantry automatically',
+				'How to save receipts as PDF from Kivra, the ICA app or email and upload in Skaffu. Store-neutral pantry app — not an official Kivra integration.',
+			ogTitle: 'Digital receipt as PDF — fill the pantry with review',
 			ogDescription:
 				'Step by step: export a digital receipt, upload the PDF in Skaffu and review lines before they enter inventory.'
 		},
@@ -1029,9 +1029,9 @@ const en: MarketingContent = {
 		steps: [
 			{
 				step: 1,
-				title: 'Find the receipt in Kivra',
+				title: 'Find your digital receipt',
 				description:
-					'Open Kivra → Purchases or Documents. Pick the receipt from the store (ICA, Willys, Coop, etc.).'
+					'Open Kivra, a store app or email. Pick the receipt from the store (ICA, Willys, Coop, etc.).'
 			},
 			{
 				step: 2,
@@ -1048,14 +1048,14 @@ const en: MarketingContent = {
 		],
 		faq: [
 			{
-				question: 'Do all Kivra receipts work?',
+				question: 'Do all digital receipts work?',
 				answer:
-					'Most digital receipts with a text layer work. Image-only PDFs can be photographed instead — same review flow.'
+					'Most text PDFs work — from Kivra, ICA, Willys and more. Image-only PDFs can be photographed instead — same review flow.'
 			},
 			{
 				question: 'Do I need Kivra?',
 				answer:
-					'No. Save PDF from the ICA app, Willys, Coop or store email receipts — same upload in Skaffu.'
+					'No. Save a PDF from the ICA app, Willys, Coop or store email — same upload in Skaffu. No Kivra connection required.'
 			},
 			{
 				question: 'Do you store the full receipt?',

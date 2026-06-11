@@ -395,6 +395,18 @@
 				<strong>{formatCount(metrics.eventCounts.receipt_parsed)}</strong>
 			</li>
 			<li>
+				<span>{t('pmf.events.receiptImportStarted')}</span>
+				<strong>{formatCount(metrics.eventCounts.receipt_import_started)}</strong>
+			</li>
+			<li>
+				<span>{t('pmf.events.receiptUploaded')}</span>
+				<strong>{formatCount(metrics.eventCounts.receipt_uploaded)}</strong>
+			</li>
+			<li>
+				<span>{t('pmf.events.receiptReviewCompleted')}</span>
+				<strong>{formatCount(metrics.eventCounts.receipt_review_completed)}</strong>
+			</li>
+			<li>
 				<span>{t('pmf.events.fillSuggestionsAdded')}</span>
 				<strong>{formatCount(metrics.eventCounts.fill_suggestions_added)}</strong>
 			</li>

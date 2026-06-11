@@ -51,7 +51,12 @@ import {
 	markExpiryReminderChecked
 } from '$lib/infrastructure/expiry-reminder-cookie';
 import { DEFAULT_PLAN_TIER, resolveEffectivePlanTier } from '$lib/domain/plan';
-import { isMarketingPath, isExpiringSharePath } from '$lib/marketing/routes';
+import {
+	isMarketingPath,
+	isExpiringSharePath,
+	isShoppingListSharePath,
+	isPublicCityFeedPath
+} from '$lib/marketing/routes';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { VERIFY_EMAIL_PATH } from '$lib/navigation/email-verification';
 import { applySecurityHeaders } from '$lib/server/security-headers';
@@ -83,6 +88,14 @@ function isInvitePath(pathname: string): boolean {
 
 function isExpiringSharePublicPath(pathname: string): boolean {
 	return isExpiringSharePath(pathname);
+}
+
+function isShoppingListSharePublicPath(pathname: string): boolean {
+	return isShoppingListSharePath(pathname);
+}
+
+function isPublicCityFeedPublicPath(pathname: string): boolean {
+	return isPublicCityFeedPath(pathname);
 }
 
 function isVerificationExemptApiPath(pathname: string): boolean {
@@ -121,6 +134,8 @@ function isPublicPath(pathname: string): boolean {
 		isGoogleAuthPath(pathname) ||
 		isInvitePath(pathname) ||
 		isExpiringSharePublicPath(pathname) ||
+		isShoppingListSharePublicPath(pathname) ||
+		isPublicCityFeedPublicPath(pathname) ||
 		isMarketingPath(pathname) ||
 		pathname === '/robots.txt' ||
 		pathname === '/sitemap.xml' ||

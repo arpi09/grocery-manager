@@ -1,4 +1,4 @@
-﻿import { json } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';

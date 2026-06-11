@@ -1,4 +1,5 @@
-﻿import { canEditInventory } from '$lib/domain/household';
+import { canEditInventory } from '$lib/domain/household';
+import { isShoppingListShareEnabled } from '$lib/server/shopping-list-share-flag';
 import { isStorageLocation, type StorageLocation } from '$lib/domain/location';
 import {
 	normalizeShoppingToPantryMode,
@@ -39,6 +40,7 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 			items: [],
 			checkedCount: 0,
 			canEdit: false,
+			shareLinkEnabled: false,
 			receiptAutopilotSuggestions: [],
 			shoppingToPantryMode: 'ask' as ShoppingToPantryMode
 		};
@@ -55,6 +57,7 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		items,
 		checkedCount,
 		canEdit: !!locals.householdRole && canEditInventory(locals.householdRole),
+		shareLinkEnabled: isShoppingListShareEnabled(),
 		receiptAutopilotSuggestions,
 		shoppingToPantryMode
 	};

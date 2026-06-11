@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import type { SubmitFunction } from '@sveltejs/kit';
@@ -21,11 +22,13 @@
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { fetchCheckedShoppingItems } from '$lib/client/shopping-data';
 	import { trackProductEvent } from '$lib/client/product-events';
+	import { recordShoppingListExport } from '$lib/utils/household-invite-prompt';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { getDeleteCopy } from '$lib/utils/delete-safety';
 	import { bindSubmittingWithToast } from '$lib/utils/form-submit-feedback';
+	import { get } from 'svelte/store';
 	import {
 		formatShoppingListExportByFormat,
 		formatShoppingListExportLine,
@@ -36,6 +39,7 @@
 		items,
 		checkedCount = 0,
 		canEdit,
+		shareLinkEnabled = false,
 		shoppingToPantryMode = 'ask',
 		id: panelId,
 		tabindex: panelTabindex
@@ -43,6 +47,7 @@
 		items: ShoppingListItem[];
 		checkedCount?: number;
 		canEdit: boolean;
+		shareLinkEnabled?: boolean;
 		shoppingToPantryMode?: ShoppingToPantryMode;
 		id?: string;
 		tabindex?: number;
@@ -99,6 +104,8 @@
 	} | null>(null);
 	let undoSubmitting = $state(false);
 	let exportCopiedFormat = $state<ShoppingListExportFormat | null>(null);
+	let shareLinkCopied = $state(false);
+	let shareLinkSubmitting = $state(false);
 	let addSubmitting = $state(false);
 	let removingIds = $state(new Set<string>());
 	let pantrySheetOpen = $state(false);
@@ -114,6 +121,7 @@
 	});
 
 	const undoCopy = $derived(getDeleteCopy(1, 'shoppingListItem'));
+	const hasShareableItems = $derived(unchecked.length > 0 || checkedCount > 0);
 	const undoMessage = $derived(
 		undoPayload
 			? getDeleteCopy(1, 'shoppingListItem', { itemName: undoPayload.name }).undoToastMessage ??
@@ -128,8 +136,8 @@
 
 		loadingChecked = true;
 		try {
-			const page = await fetchCheckedShoppingItems();
-			checked = page.items;
+			const checkedPage = await fetchCheckedShoppingItems();
+			checked = checkedPage.items;
 			checkedLoaded = true;
 		} finally {
 			loadingChecked = false;
@@ -158,9 +166,57 @@
 		await navigator.clipboard.writeText(text);
 		exportCopiedFormat = format;
 		void trackProductEvent('shopping_list_export', { format });
+		recordShoppingListExport(get(page).data.user?.id);
 		setTimeout(() => {
 			exportCopiedFormat = null;
 		}, 2000);
+	}
+
+	async function copyShareLink(link: string) {
+		if (!browser) {
+			return;
+		}
+		await navigator.clipboard.writeText(link);
+		shareLinkCopied = true;
+		setTimeout(() => {
+			shareLinkCopied = false;
+		}, 2000);
+	}
+
+	async function shareListLink() {
+		if (!browser || shareLinkSubmitting || !hasShareableItems) {
+			return;
+		}
+
+		shareLinkSubmitting = true;
+		try {
+			const response = await fetch('/api/shopping-list/share', { method: 'POST' });
+			const body = (await response.json()) as { ok?: boolean; url?: string; error?: string };
+			if (!response.ok || !body.ok || !body.url) {
+				showClientToast(body.error ?? t('shoppingListShare.shareLinkError'), { variant: 'error' });
+				return;
+			}
+
+			await copyShareLink(body.url);
+
+			if (navigator.share && navigator.canShare?.({ url: body.url })) {
+				try {
+					await navigator.share({
+						title: t('shoppingListShare.shareLinkTitle'),
+						text: t('shoppingListShare.shareLinkNote'),
+						url: body.url
+					});
+				} catch (error) {
+					if (error instanceof DOMException && error.name === 'AbortError') {
+						return;
+					}
+				}
+			}
+		} catch {
+			showClientToast(t('shoppingListShare.shareLinkError'), { variant: 'error' });
+		} finally {
+			shareLinkSubmitting = false;
+		}
 	}
 
 	function createRemoveEnhance(item: ShoppingListItem): SubmitFunction {
@@ -430,6 +486,17 @@
 
 		{#if canEdit}
 			<div class="panel-footer">
+				{#if shareLinkEnabled}
+					<button
+						type="button"
+						class="text-action"
+						disabled={!hasShareableItems || shareLinkSubmitting}
+						aria-label={hasShareableItems ? t('shoppingListShare.shareLinkAria') : t('shopping.exportEmpty')}
+						onclick={shareListLink}
+					>
+						{shareLinkCopied ? t('common.copied') : t('shoppingListShare.shareLink')}
+					</button>
+				{/if}
 				<button
 					type="button"
 					class="text-action"

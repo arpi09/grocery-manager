@@ -1,0 +1,133 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+	dismissInkopHouseholdInvitePrompt,
+	hasShoppingListEngagement,
+	recordInkopHouseholdInviteShown,
+	recordShoppingListExport,
+	shouldShowInkopHouseholdInvitePrompt
+} from './household-invite-prompt';
+
+const TEST_USER = 'user-inkop-invite';
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+describe('inkop household invite prompt', () => {
+	let storage: Record<string, string>;
+
+	beforeEach(() => {
+		storage = {};
+		vi.stubGlobal('localStorage', {
+			getItem: (key: string) => storage[key] ?? null,
+			setItem: (key: string, value: string) => {
+				storage[key] = value;
+			},
+			removeItem: (key: string) => {
+				delete storage[key];
+			}
+		});
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	const baseOptions = {
+		userId: TEST_USER,
+		memberCount: 1,
+		listHasItems: true,
+		uncheckedCount: 2,
+		checkedCount: 0
+	};
+
+	it('shows when solo household has items and shopping engagement', () => {
+		expect(shouldShowInkopHouseholdInvitePrompt(baseOptions)).toBe(true);
+	});
+
+	it('hides when member count is not one', () => {
+		expect(
+			shouldShowInkopHouseholdInvitePrompt({ ...baseOptions, memberCount: 2 })
+		).toBe(false);
+	});
+
+	it('hides when list has no items', () => {
+		expect(
+			shouldShowInkopHouseholdInvitePrompt({
+				...baseOptions,
+				listHasItems: false,
+				uncheckedCount: 0,
+				checkedCount: 0
+			})
+		).toBe(false);
+	});
+
+	it('hides when shopping engagement is missing', () => {
+		expect(
+			shouldShowInkopHouseholdInvitePrompt({
+				...baseOptions,
+				uncheckedCount: 1,
+				checkedCount: 0
+			})
+		).toBe(false);
+	});
+
+	it('shows with one unchecked item when user has checked items', () => {
+		expect(
+			shouldShowInkopHouseholdInvitePrompt({
+				...baseOptions,
+				uncheckedCount: 1,
+				checkedCount: 1
+			})
+		).toBe(true);
+	});
+
+	it('shows with one item after export', () => {
+		recordShoppingListExport(TEST_USER);
+		expect(
+			shouldShowInkopHouseholdInvitePrompt({
+				...baseOptions,
+				uncheckedCount: 1,
+				checkedCount: 0
+			})
+		).toBe(true);
+	});
+
+	it('hides when dismissed permanently', () => {
+		dismissInkopHouseholdInvitePrompt(TEST_USER);
+		expect(shouldShowInkopHouseholdInvitePrompt(baseOptions)).toBe(false);
+	});
+
+	it('rate limits to one show per seven days', () => {
+		const now = Date.UTC(2026, 5, 11);
+		recordInkopHouseholdInviteShown(TEST_USER, now);
+
+		expect(
+			shouldShowInkopHouseholdInvitePrompt({
+				...baseOptions,
+				now: now + SEVEN_DAYS_MS - 1
+			})
+		).toBe(false);
+
+		expect(
+			shouldShowInkopHouseholdInvitePrompt({
+				...baseOptions,
+				now: now + SEVEN_DAYS_MS
+			})
+		).toBe(true);
+	});
+
+	it('detects shopping list engagement signals', () => {
+		expect(
+			hasShoppingListEngagement(TEST_USER, { uncheckedCount: 2, checkedCount: 0 })
+		).toBe(true);
+		expect(
+			hasShoppingListEngagement(TEST_USER, { uncheckedCount: 1, checkedCount: 1 })
+		).toBe(true);
+		expect(
+			hasShoppingListEngagement(TEST_USER, { uncheckedCount: 1, checkedCount: 0 })
+		).toBe(false);
+
+		recordShoppingListExport(TEST_USER);
+		expect(
+			hasShoppingListEngagement(TEST_USER, { uncheckedCount: 1, checkedCount: 0 })
+		).toBe(true);
+	});
+});

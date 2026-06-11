@@ -1,6 +1,9 @@
 export const PRODUCT_EVENT_TYPES = [
 	'scan_completed',
+	'receipt_import_started',
+	'receipt_uploaded',
 	'receipt_parsed',
+	'receipt_review_completed',
 	'photo_round_parsed',
 	'fill_suggestions_added',
 	'landing_view',
@@ -23,6 +26,17 @@ export const PRODUCT_EVENT_TYPES = [
 	'public_report_viewed',
 	'expiring_share_created',
 	'expiring_share_viewed',
+	'expiring_share_cta_clicked',
+	'shopping_list_share_created',
+	'shopping_list_share_viewed',
+	'shopping_list_share_cta_clicked',
+	'public_city_feed_viewed',
+	'public_city_feed_item_clicked',
+	'public_city_feed_signup_clicked',
+	'household_invite_prompt_shown',
+	'household_invite_prompt_clicked',
+	'household_invite_prompt_dismissed',
+	'household_invite_created',
 	'nearby_map_opened',
 	'nearby_share_tapped',
 	'expiring_share_reported',
@@ -41,7 +55,10 @@ export const PRODUCT_EVENT_TYPES = [
 
 export const PMF_PRODUCT_EVENT_TYPES = [
 	'scan_completed',
+	'receipt_import_started',
+	'receipt_uploaded',
 	'receipt_parsed',
+	'receipt_review_completed',
 	'photo_round_parsed',
 	'fill_suggestions_added'
 ] as const;

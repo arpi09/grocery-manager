@@ -22,6 +22,7 @@
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import { trackProductEvent } from '$lib/client/product-events';
 	import {
 		readReceiptBulkLocation,
 		writeReceiptBulkLocation
@@ -35,9 +36,11 @@
 		formAction?: string;
 		onItemSaved?: () => void;
 		onCancel?: () => void;
+		/** Keep digital receipt guide expanded (e.g. onboarding first receipt path). */
+		prominentGuide?: boolean;
 	}
 
-	let { returnTo, embedded = false, formAction, onItemSaved, onCancel }: Props = $props();
+	let { returnTo, embedded = false, formAction, onItemSaved, onCancel, prominentGuide = false }: Props = $props();
 
 	const bulkFormAction = $derived(formAction ?? '?/bulkCreate');
 
@@ -104,6 +107,11 @@
 			parsing = false;
 			return;
 		}
+
+		void trackProductEvent('receipt_uploaded', {
+			fileType: uploadFile.type || 'unknown',
+			fileSize: uploadFile.size
+		});
 
 		try {
 			const formData = new FormData();
@@ -217,6 +225,7 @@
 
 	onMount(() => {
 		saveLastScanMode('receipt');
+		void trackProductEvent('receipt_import_started');
 		if (!browser) return;
 		const stored = readReceiptBulkLocation();
 		if (stored) {
@@ -239,7 +248,7 @@
 			{t('receiptBulk.lead')}
 		</p>
 
-		<DigitalReceiptGuide />
+		<DigitalReceiptGuide prominent={prominentGuide} />
 
 		{#if parsing}
 			<FeedbackBanner
@@ -305,12 +314,20 @@
 				? bindEmbeddedScanSubmit(
 						(v) => (bulkSubmitting = v),
 						() => {
+							void trackProductEvent('receipt_review_completed', {
+								selectedCount,
+								totalLines: lines.length
+							});
 							onItemSaved?.();
 						}
 					)
 				: bindSubmittingWithRedirect(
 						(v) => (bulkSubmitting = v),
 						async () => {
+							void trackProductEvent('receipt_review_completed', {
+								selectedCount,
+								totalLines: lines.length
+							});
 							recordReceiptActivation(page.data.user?.id);
 						}
 					)}

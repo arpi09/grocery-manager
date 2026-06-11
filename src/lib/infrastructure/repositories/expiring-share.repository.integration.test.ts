@@ -161,6 +161,41 @@ describe('DrizzleExpiringShareRepository — nearby sharing', () => {
 		expect(rows).toHaveLength(0);
 	});
 
+	it('findActiveGeoSharesInBoundingBox returns geo shares without household metadata', async () => {
+		await seedUsersAndHouseholds();
+
+		const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+		await repository.create({
+			id: 'share-nearby',
+			householdId: 'sharer-household',
+			createdByUserId: 'sharer-user',
+			tokenHash: 'hash-nearby',
+			snapshot: expiringSnapshot('Nearby yoghurt'),
+			expiresAt,
+			latitude: NEARBY.latitude,
+			longitude: NEARBY.longitude
+		});
+		await repository.create({
+			id: 'share-far',
+			householdId: 'sharer-household',
+			createdByUserId: 'sharer-user',
+			tokenHash: 'hash-far',
+			snapshot: expiringSnapshot('Far away cheese'),
+			expiresAt,
+			latitude: FAR_AWAY.latitude,
+			longitude: FAR_AWAY.longitude
+		});
+
+		const bounds = geoBoundingBox(STOCKHOLM, NEARBY_SHARING_RADIUS_M);
+		const rows = await repository.findActiveGeoSharesInBoundingBox(bounds);
+
+		expect(rows).toHaveLength(1);
+		expect(rows[0]?.id).toBe('share-nearby');
+		expect(rows[0]).not.toHaveProperty('householdId');
+		expect(rows[0]).not.toHaveProperty('latitude');
+		expect(rows[0]).not.toHaveProperty('longitude');
+	});
+
 	it('findActiveSharesInBoundingBox excludes expired shares', async () => {
 		await seedUsersAndHouseholds();
 

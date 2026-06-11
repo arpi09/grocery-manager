@@ -4,7 +4,7 @@ import type { ProductEventType } from '$lib/domain/pmf';
 import { hasAnalyticsConsent } from '$lib/cookie-consent';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import type { SignupUtm } from '$lib/domain/signup-utm';
-import type { LandingHeroVariant } from '$lib/marketing/landing-variants';
+import type { LandingHeroVariant, ReceiptHeroVariant } from '$lib/marketing/landing-variants';
 import { signupUtmToEventMetadata } from '$lib/marketing/signup-utm';
 import { getOrSetAnalyticsVisitorId } from '$lib/server/analytics-visitor';
 import { recordProductEvent } from '$lib/server/product-events';
@@ -20,6 +20,7 @@ export interface RecordMarketingEventOptions {
 	cookies: Cookies;
 	eventType: Extract<ProductEventType, 'landing_view' | 'register_click'>;
 	variant: LandingHeroVariant;
+	receiptHeroVariant?: ReceiptHeroVariant | null;
 	userId?: string | null;
 }
 
@@ -51,6 +52,7 @@ export function recordMarketingEvent(options: RecordMarketingEventOptions): void
 		eventType: options.eventType,
 		metadata: {
 			variant: options.variant,
+			...(options.receiptHeroVariant ? { receiptHero: options.receiptHeroVariant } : {}),
 			visitorId
 		}
 	});

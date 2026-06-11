@@ -281,6 +281,27 @@
 			"when": 1751721600000,
 			"tag": "0040_nearby_push",
 			"breakpoints": true
+		},
+		{
+			"idx": 40,
+			"version": "7",
+			"when": 1751808000000,
+			"tag": "0041_receipt_import_funnel_events",
+			"breakpoints": true
+		},
+		{
+			"idx": 41,
+			"version": "7",
+			"when": 1751894400000,
+			"tag": "0042_acquisition_wedge_events",
+			"breakpoints": true
+		},
+		{
+			"idx": 42,
+			"version": "7",
+			"when": 1751980800000,
+			"tag": "0043_shopping_list_share_link",
+			"breakpoints": true
 		}
 	]
 }

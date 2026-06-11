@@ -1,0 +1,3 @@
+-- Receipt import funnel product_event types (application enum in schema.ts):
+-- receipt_import_started, receipt_uploaded, receipt_review_completed
+-- No DDL required: product_event.event_type is unconstrained text.

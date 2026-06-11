@@ -2144,7 +2144,11 @@
 		"promptAria": "Invite to household",
 		"promptBody": "A shared list and pantry makes it easier to stay in sync — invite a partner or family member.",
 		"promptCta": "Invite someone",
-		"promptDismiss": "Not now"
+		"promptDismiss": "Not now",
+		"inkopBannerAria": "Invite to the shopping list",
+		"inkopBannerBody": "Shop together? Share the list so a partner or family member can check items off in real time.",
+		"inkopBannerCta": "Invite someone",
+		"inkopBannerDismiss": "Not now"
 	},
 	"calendar": {
 		"mon": "Mon",
@@ -2497,9 +2501,28 @@
 		"publicLead": "From someone's pantry — not a shop. Expiry list, no address.",
 		"publicExpires": "Link valid until {date}.",
 		"publicGdprNote": "The list shows item names and expiry dates only — no addresses or contact details. The link expires automatically.",
-		"publicSignupTitle": "Want to track expiring food too?",
-		"publicSignupLead": "Get your own pantry with expiry tracking — scan, get reminders, and share lists like this.",
-		"publicSignupBtn": "Try Skaffu free"
+		"publicSignupTitle": "Create your own expiring-items list",
+		"publicSignupLead": "Get reminders before food goes bad",
+		"publicSignupBtn": "Start your Skaffu pantry"
+	},
+	"shoppingListShare": {
+		"noItems": "Nothing to share — the list is empty.",
+		"publicEyebrow": "Shared shopping list",
+		"publicTitle": "Shopping list",
+		"publicLead": "A read-only snapshot — checked items are shown but cannot be changed here.",
+		"publicExpires": "Link valid until {date}.",
+		"publicSnapshotAt": "Snapshot taken {date}.",
+		"publicGdprNote": "The list shows item names and quantities only — no household names, addresses, or contact details. The link expires automatically.",
+		"publicSignupTitle": "Want a shared shopping list too?",
+		"publicSignupLead": "Create your Skaffu pantry — share lists, get smart suggestions, and track food at home.",
+		"publicSignupBtn": "Try Skaffu free",
+		"emptyList": "The list was empty when the link was created.",
+		"checkedBadge": "Checked",
+		"shareLink": "Share link",
+		"shareLinkAria": "Create and share a read-only link to the shopping list",
+		"shareLinkTitle": "Shopping list from Skaffu",
+		"shareLinkNote": "Shared shopping list — read-only via link.",
+		"shareLinkError": "Could not create share link. Try again."
 	},
 	"nearbySharing": {
 		"settingsTitle": "Neighbour pantry nearby",
@@ -2560,5 +2583,22 @@
 		"youMarkerShort": "You",
 		"mapAttribution": "Map © OpenStreetMap contributors",
 		"mapLoadFailed": "Could not load the map."
+	},
+	"publicCityFeed": {
+		"pageTitle": "Expiring food in {city}",
+		"eyebrow": "Neighbour pantry",
+		"title": "Expiring food in {city}",
+		"lead": "Active shares from real pantries — no address, no account needed to browse.",
+		"cityNavAria": "Choose city",
+		"softLandingTitle": "We're starting in {city} — create your list",
+		"softLandingLead": "As more neighbours share expiring food, the list will appear here. Set up your pantry and join from day one.",
+		"itemCount": "{count, plural, one {# item} other {# items}}",
+		"moreItems": "+{count} more",
+		"expand": "Show list",
+		"collapse": "Hide list",
+		"gdprNote": "Lists show item names and expiry only — no addresses or contact details.",
+		"signupTitle": "Want to share expiring food too?",
+		"signupLead": "Get your own pantry with expiry tracking — scan, get reminders, and share like neighbours here.",
+		"signupBtn": "Try Skaffu free"
 	}
 }

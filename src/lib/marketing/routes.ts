@@ -25,6 +25,14 @@ export function isExpiringSharePath(pathname: string): boolean {
 	return pathname.startsWith('/dela/');
 }
 
+export function isShoppingListSharePath(pathname: string): boolean {
+	return pathname.startsWith('/lista/');
+}
+
+export function isPublicCityFeedPath(pathname: string): boolean {
+	return pathname === '/delningar' || pathname.startsWith('/delningar/');
+}
+
 export function isMarketingPath(pathname: string): boolean {
 	return (
 		(PUBLIC_MARKETING_PATHS as readonly string[]).includes(pathname) ||

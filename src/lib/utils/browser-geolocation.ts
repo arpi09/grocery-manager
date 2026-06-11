@@ -39,6 +39,13 @@ export function refineGeolocationErrorCode(
 	return 'denied';
 }
 
+function isIosDevice(): boolean {
+	if (typeof navigator === 'undefined') {
+		return false;
+	}
+	return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
 export async function queryGeolocationPermission(): Promise<GeolocationPermissionState> {
 	if (typeof navigator === 'undefined' || !navigator.permissions?.query) {
 		return 'unknown';
@@ -76,19 +83,32 @@ export function startBrowserLocationRequest(): Promise<BrowserGeolocationResult>
 	}
 
 	// Invoke Geolocation API synchronously before any await in this function.
-	const accuratePromise = getCurrentPosition({
-		enableHighAccuracy: true,
-		timeout: 12_000,
-		maximumAge: 0
-	});
+	const ios = isIosDevice();
+	const primaryPromise = getCurrentPosition(
+		ios
+			? { enableHighAccuracy: false, timeout: 15_000, maximumAge: 60_000 }
+			: { enableHighAccuracy: true, timeout: 12_000, maximumAge: 0 }
+	);
 
 	return (async () => {
-		const accurate = await accuratePromise;
-		if (accurate.ok) {
-			return accurate;
+		const primary = await primaryPromise;
+		if (primary.ok) {
+			return primary;
 		}
 
-		if (accurate.code === 'timeout' || accurate.code === 'unavailable') {
+		// iOS Safari: high-accuracy indoors often times out; try it only after a fast coarse read.
+		if (ios && primary.code !== 'denied') {
+			const accurate = await getCurrentPosition({
+				enableHighAccuracy: true,
+				timeout: 12_000,
+				maximumAge: 0
+			});
+			if (accurate.ok) {
+				return accurate;
+			}
+		}
+
+		if (!ios && (primary.code === 'timeout' || primary.code === 'unavailable')) {
 			const fallback = await getCurrentPosition({
 				enableHighAccuracy: false,
 				timeout: 15_000,
@@ -99,7 +119,7 @@ export function startBrowserLocationRequest(): Promise<BrowserGeolocationResult>
 			}
 		}
 
-		return accurate;
+		return primary;
 	})();
 }
 

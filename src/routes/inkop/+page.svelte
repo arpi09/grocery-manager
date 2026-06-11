@@ -15,6 +15,7 @@
 	import ReceiptAutopilotSection from '$lib/components/organisms/ReceiptAutopilotSection.svelte';
 
 	import ShoppingListPanel from '$lib/components/organisms/ShoppingListPanel.svelte';
+	import InkopHouseholdInviteBanner from '$lib/components/organisms/InkopHouseholdInviteBanner.svelte';
 
 
 
@@ -22,7 +23,10 @@
 
 
 
-	const listHasItems = $derived(data.items.length > 0);
+	const listHasItems = $derived(data.items.length > 0 || data.checkedCount > 0);
+	const householdMemberCount = $derived(
+		typeof data.householdMemberCount === 'number' ? data.householdMemberCount : 0
+	);
 
 	const receiptSuggestions = $derived(data.receiptAutopilotSuggestions ?? []);
 
@@ -69,8 +73,17 @@
 
 			canEdit={data.canEdit}
 
+			shareLinkEnabled={data.shareLinkEnabled}
+
 			shoppingToPantryMode={data.shoppingToPantryMode}
 
+		/>
+
+		<InkopHouseholdInviteBanner
+			memberCount={householdMemberCount}
+			uncheckedCount={data.items.length}
+			checkedCount={data.checkedCount}
+			{listHasItems}
 		/>
 
 

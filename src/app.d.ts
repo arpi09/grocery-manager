@@ -1,4 +1,4 @@
-﻿import type { User, Session } from 'lucia';
+import type { User, Session } from 'lucia';
 import type { AdminService } from '$lib/application/admin.service';
 import type { AuthService } from '$lib/application/auth.service';
 import type { PasswordResetService } from '$lib/application/password-reset.service';

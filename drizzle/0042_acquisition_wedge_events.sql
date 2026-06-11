@@ -1,0 +1,7 @@
+-- Acquisition wedge product_event types (application enum in schema.ts):
+-- shopping_list_share_created, shopping_list_share_viewed, shopping_list_share_cta_clicked,
+-- public_city_feed_viewed, public_city_feed_item_clicked, public_city_feed_signup_clicked,
+-- expiring_share_cta_clicked,
+-- household_invite_prompt_shown, household_invite_prompt_clicked,
+-- household_invite_prompt_dismissed, household_invite_created
+-- No DDL required: product_event.event_type is unconstrained text.

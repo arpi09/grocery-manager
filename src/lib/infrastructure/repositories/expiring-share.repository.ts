@@ -33,6 +33,14 @@ export interface NearbyShareRow {
 	longitude: string | null;
 }
 
+/** Public city feed row — no household or exact coordinates. */
+export interface PublicGeoShareRow {
+	id: string;
+	snapshotJson: string;
+	expiresAt: Date;
+	createdAt: Date;
+}
+
 export interface ExpiringShareMeta {
 	id: string;
 	householdId: string;
@@ -77,6 +85,12 @@ export interface IExpiringShareRepository {
 		excludeShareIds?: string[],
 		excludeHouseholdIds?: string[]
 	): Promise<NearbyShareRow[]>;
+	findActiveGeoSharesInBoundingBox(bounds: {
+		minLat: number;
+		maxLat: number;
+		minLng: number;
+		maxLng: number;
+	}): Promise<PublicGeoShareRow[]>;
 	createReport(input: {
 		id: string;
 		shareId: string;
@@ -293,12 +307,15 @@ export class DrizzleExpiringShareRepository implements IExpiringShareRepository 
 			gt(expiringShareLinkTable.expiresAt, sql`now()`),
 			isNotNull(expiringShareLinkTable.latitude),
 			isNotNull(expiringShareLinkTable.longitude),
-			ne(expiringShareLinkTable.householdId, excludeHouseholdId),
 			sql`${expiringShareLinkTable.latitude}::float >= ${bounds.minLat}`,
 			sql`${expiringShareLinkTable.latitude}::float <= ${bounds.maxLat}`,
 			sql`${expiringShareLinkTable.longitude}::float >= ${bounds.minLng}`,
 			sql`${expiringShareLinkTable.longitude}::float <= ${bounds.maxLng}`
 		];
+
+		if (excludeHouseholdId) {
+			filters.push(ne(expiringShareLinkTable.householdId, excludeHouseholdId));
+		}
 
 		if (excludeShareIds.length > 0) {
 			filters.push(sql`${expiringShareLinkTable.id} NOT IN (${sql.join(
@@ -326,6 +343,33 @@ export class DrizzleExpiringShareRepository implements IExpiringShareRepository 
 			})
 			.from(expiringShareLinkTable)
 			.where(and(...filters));
+	}
+
+	async findActiveGeoSharesInBoundingBox(bounds: {
+		minLat: number;
+		maxLat: number;
+		minLng: number;
+		maxLng: number;
+	}): Promise<PublicGeoShareRow[]> {
+		return this.database
+			.select({
+				id: expiringShareLinkTable.id,
+				snapshotJson: expiringShareLinkTable.snapshotJson,
+				expiresAt: expiringShareLinkTable.expiresAt,
+				createdAt: expiringShareLinkTable.createdAt
+			})
+			.from(expiringShareLinkTable)
+			.where(
+				and(
+					gt(expiringShareLinkTable.expiresAt, sql`now()`),
+					isNotNull(expiringShareLinkTable.latitude),
+					isNotNull(expiringShareLinkTable.longitude),
+					sql`${expiringShareLinkTable.latitude}::float >= ${bounds.minLat}`,
+					sql`${expiringShareLinkTable.latitude}::float <= ${bounds.maxLat}`,
+					sql`${expiringShareLinkTable.longitude}::float >= ${bounds.minLng}`,
+					sql`${expiringShareLinkTable.longitude}::float <= ${bounds.maxLng}`
+				)
+			);
 	}
 
 	async createReport(input: {

@@ -143,10 +143,10 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		await expect(page.getByText(itemName)).toBeVisible();
 		await expect(page.getByRole('note')).toContainText(/inga adresser|no addresses/i);
 		await expect(
-			page.getByRole('link', { name: /Prova Skaffu|Try Skaffu/i })
+			page.getByRole('link', { name: /Starta ditt Skaffu-skafferi|Start your Skaffu pantry/i })
 		).toHaveAttribute(
 			'href',
-			'https://skaffu.com/?utm_source=facebook&utm_medium=community&utm_campaign=matsvinn_w12&utm_content=grannskafferiet'
+			'/register?utm_source=skaffu&utm_medium=product&utm_campaign=acquisition_wedge&utm_content=expiring_share'
 		);
 	});
 

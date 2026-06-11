@@ -1,4 +1,4 @@
-﻿import { AdminService } from '$lib/application/admin.service';
+import { AdminService } from '$lib/application/admin.service';
 import { AuthService } from '$lib/application/auth.service';
 import { PasswordResetService } from '$lib/application/password-reset.service';
 import { EmailVerificationService } from '$lib/application/email-verification.service';
@@ -58,9 +58,12 @@ import { PmfDigestService } from '$lib/application/pmf-digest.service';
 import { ErrorAlertService } from '$lib/application/error-alert.service';
 import { DrizzlePurchasePatternRepository } from '$lib/infrastructure/repositories/purchase-pattern.repository';
 import { DrizzleExpiringShareRepository } from '$lib/infrastructure/repositories/expiring-share.repository';
+import { DrizzleShoppingListShareRepository } from '$lib/infrastructure/repositories/shopping-list-share.repository';
 import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
 import { SkaffurapportService } from '$lib/application/skaffurapport.service';
 import { ExpiringShareService } from '$lib/application/expiring-share.service';
+import { ShoppingListShareService } from '$lib/application/shopping-list-share.service';
+import { PublicCityFeedService } from '$lib/application/public-city-feed.service';
 import { ReceiptForwardService } from '$lib/application/receipt-forward.service';
 import { DrizzleReceiptForwardRepository } from '$lib/infrastructure/repositories/receipt-forward.repository';
 import { getKivraForwardSecret } from '$lib/server/kivra-forward';
@@ -114,6 +117,7 @@ export const linkedInPublishService = new LinkedInPublishService(
 
 const purchasePatternRepository = new DrizzlePurchasePatternRepository();
 const expiringShareRepository = new DrizzleExpiringShareRepository();
+const shoppingListShareRepository = new DrizzleShoppingListShareRepository();
 const receiptForwardRepository = new DrizzleReceiptForwardRepository();
 const billingRepository = new DrizzleBillingRepository();
 export const pushSubscriptionRepository = new DrizzlePushSubscriptionRepository();
@@ -165,6 +169,8 @@ export const skaffurapportService = new SkaffurapportService(
 	appSettingsRepository
 );
 export const expiringShareService = new ExpiringShareService(expiringShareRepository);
+export const shoppingListShareService = new ShoppingListShareService(shoppingListShareRepository);
+export const publicCityFeedService = new PublicCityFeedService(expiringShareRepository);
 const kivraForwardSecret = getKivraForwardSecret() ?? 'dev-kivra-forward-secret';
 export const receiptForwardService = new ReceiptForwardService(
 	receiptForwardRepository,

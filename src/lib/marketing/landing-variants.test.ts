@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { getLandingHeroCopy, resolveLandingVariant } from '$lib/marketing/landing-variants';
+import {
+	getLandingHeroCopy,
+	getReceiptHeroCopy,
+	resolveLandingVariant,
+	resolveReceiptHeroVariant
+} from '$lib/marketing/landing-variants';
 
 describe('resolveLandingVariant', () => {
 	it('prefers query over cookie and env', () => {
@@ -28,11 +33,42 @@ describe('resolveLandingVariant', () => {
 	});
 });
 
+describe('resolveReceiptHeroVariant', () => {
+	it('prefers query over cookie', () => {
+		expect(
+			resolveReceiptHeroVariant({
+				queryReceiptHero: 'c',
+				cookieVariant: 'a'
+			})
+		).toBe('c');
+	});
+
+	it('defaults to a for unknown values', () => {
+		expect(resolveReceiptHeroVariant({ queryReceiptHero: 'x' })).toBe('a');
+	});
+});
+
 describe('getLandingHeroCopy', () => {
 	it('returns distinct copy for a and b', () => {
 		const a = getLandingHeroCopy('a', 'sv');
 		const b = getLandingHeroCopy('b', 'sv');
 		expect(a.heroTitle).not.toBe(b.heroTitle);
 		expect(b.heroTitle).toContain('Butiksneutralt');
+	});
+
+	it('does not promise Kivra integration in variant b secondary', () => {
+		const b = getLandingHeroCopy('b', 'sv');
+		expect(b.heroSecondary.toLowerCase()).not.toContain('från kivra');
+	});
+});
+
+describe('getReceiptHeroCopy', () => {
+	it('returns distinct copy for receipt hero variants', () => {
+		const a = getReceiptHeroCopy('a', 'sv');
+		const b = getReceiptHeroCopy('b', 'sv');
+		const c = getReceiptHeroCopy('c', 'sv');
+		expect(a.heroTitle).not.toBe(b.heroTitle);
+		expect(b.heroTitle).not.toBe(c.heroTitle);
+		expect(a.heroTitle).toContain('digitalt kvitto');
 	});
 });
