@@ -1741,6 +1741,10 @@
 		"locationBulkHint": "Gäller markerade rader. Ändra plats per vara nedan om en rad ska ligga någon annanstans.",
 		"locationOverride": "egen plats"
 	},
+	"priceMemory": {
+		"lastPaid": "Senast {price} ({date})",
+		"lastPaidWithStore": "Senast {price} ({date}, {store})"
+	},
 	"scanFlow": {
 		"lookupProduct": "Slår upp produkt",
 		"saving": "Sparar till skafferiet…",
@@ -2114,6 +2118,7 @@
 		"promptTitle": "Handla ihop?",
 		"promptAria": "Bjud in till hushållet",
 		"promptBody": "Delad lista och lager gör det enklare att hålla koll — bjud in partner eller familj.",
+		"promptExportBody": "Slipp klistra in listan nästa gång — bjud in partner till Skaffu.",
 		"promptCta": "Bjud in någon",
 		"promptDismiss": "Inte nu",
 		"inkopBannerAria": "Bjud in till inköpslistan",
@@ -2122,7 +2127,7 @@
 		"inkopBannerDismiss": "Inte nu",
 		"listaBannerAria": "Bjud in till gemensam inköpslista",
 		"listaBannerBody": "Vill du att listan uppdateras när ni handlar? Bjud in partner — samma lista, uppdateras när ni handlar.",
-		"listaBannerCta": "Synka live med partner",
+		"listaBannerCta": "Bjud in partner",
 		"listaBannerDismiss": "Inte nu"
 	},
 	"calendar": {

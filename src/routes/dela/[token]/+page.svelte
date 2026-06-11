@@ -21,13 +21,9 @@
 	);
 
 	onMount(() => {
-		void fetch('/api/product-events', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				eventType: 'expiring_share_viewed',
-				metadata: { itemCount: data.preview.items.length }
-			})
+		void trackPublicAcquisitionEvent('expiring_share_viewed', {
+			itemCount: data.preview.items.length,
+			acquisition_source: 'expiring_share'
 		});
 	});
 

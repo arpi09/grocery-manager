@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	dismissHouseholdInvitePrompt,
 	dismissInkopHouseholdInvitePrompt,
+	getGlobalHouseholdInvitePromptContext,
 	hasShoppingListEngagement,
 	recordInkopHouseholdInviteShown,
 	recordPeakInventoryCount,
@@ -78,6 +79,15 @@ describe('global household invite prompt', () => {
 		dismissHouseholdInvitePrompt(TEST_GLOBAL_USER);
 
 		expect(shouldShowHouseholdInvitePrompt(baseOptions)).toBe(false);
+	});
+
+	it('uses export_prompt context after shopping list export', () => {
+		recordShoppingListExport(TEST_GLOBAL_USER);
+		expect(getGlobalHouseholdInvitePromptContext(TEST_GLOBAL_USER)).toBe('export_prompt');
+	});
+
+	it('uses settings context without shopping list export', () => {
+		expect(getGlobalHouseholdInvitePromptContext(TEST_GLOBAL_USER)).toBe('settings');
 	});
 });
 

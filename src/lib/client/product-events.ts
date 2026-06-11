@@ -11,6 +11,7 @@ const CLIENT_EVENT_TYPES = [
 	'receipt_import_started',
 	'receipt_uploaded',
 	'receipt_review_completed',
+	'price_memory_viewed',
 	'shopping_list_share_created',
 	'household_invite_prompt_shown',
 	'household_invite_prompt_clicked',
@@ -24,6 +25,7 @@ export const PUBLIC_ACQUISITION_EVENT_TYPES = [
 	'public_city_feed_viewed',
 	'public_city_feed_item_clicked',
 	'public_city_feed_signup_clicked',
+	'expiring_share_viewed',
 	'expiring_share_cta_clicked'
 ] as const;
 

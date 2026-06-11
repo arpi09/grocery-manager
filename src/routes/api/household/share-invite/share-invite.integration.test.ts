@@ -131,6 +131,32 @@ describe('POST /api/household/share-invite', () => {
 		expect(shareInvite?.role).toBe('editor');
 	});
 
+	it('records household_invite_created with export_prompt context', async () => {
+		await seedOwner();
+
+		const recordEvent = vi.fn().mockResolvedValue(undefined);
+		const locals = makeLocals({
+			user: { id: 'owner-1', email: 'owner@example.com' } as App.Locals['user'],
+			householdId,
+			householdRole: 'owner',
+			pmfService: { recordEvent }
+		});
+
+		const response = await POST({
+			request: makeRequest('export_prompt'),
+			locals,
+			url: new URL('http://localhost/api/household/share-invite')
+		} as Parameters<typeof POST>[0]);
+
+		expect(response.status).toBe(200);
+		expect(recordEvent).toHaveBeenCalledWith(
+			expect.objectContaining({
+				eventType: 'household_invite_created',
+				metadata: { context: 'export_prompt' }
+			})
+		);
+	});
+
 	it('records household_invite_created with request context', async () => {
 		await seedOwner();
 

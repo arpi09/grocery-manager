@@ -10,6 +10,8 @@ export const PRODUCT_EVENT_TYPES = [
 	'guide_view',
 	'register_click',
 	'signup_complete',
+	'signup_from_shopping_share',
+	'signup_from_expiring_share',
 	'onboarding_skipped',
 	'onboarding_quickstart',
 	'onboarding_completed',
@@ -50,7 +52,8 @@ export const PRODUCT_EVENT_TYPES = [
 	'one_tap_consume',
 	'staleness_confirmed',
 	'shopping_checkoff_to_pantry',
-	'receipt_finish_accepted'
+	'receipt_finish_accepted',
+	'price_memory_viewed'
 ] as const;
 
 export const PMF_PRODUCT_EVENT_TYPES = [

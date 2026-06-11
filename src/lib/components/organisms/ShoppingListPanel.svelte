@@ -111,6 +111,7 @@
 	let listaInviteVisible = $state(false);
 	let listaInviteSharing = $state(false);
 	let listaInviteCopied = $state(false);
+	let listaInviteShownEventSent = $state(false);
 	let addSubmitting = $state(false);
 	let removingIds = $state(new Set<string>());
 	let pantrySheetOpen = $state(false);
@@ -398,6 +399,7 @@
 			return;
 		}
 
+		void trackProductEvent('household_invite_prompt_clicked', { context: 'lista' });
 		listaInviteSharing = true;
 		try {
 			const response = await fetch('/api/household/share-invite', {
@@ -419,8 +421,22 @@
 	}
 
 	function dismissListaInvite() {
+		void trackProductEvent('household_invite_prompt_dismissed', { context: 'lista' });
 		listaInviteVisible = false;
+		listaInviteShownEventSent = false;
 	}
+
+	$effect(() => {
+		if (!listaInviteVisible || listaInviteShownEventSent) {
+			if (!listaInviteVisible) {
+				listaInviteShownEventSent = false;
+			}
+			return;
+		}
+
+		void trackProductEvent('household_invite_prompt_shown', { context: 'lista' });
+		listaInviteShownEventSent = true;
+	});
 </script>
 
 <section

@@ -1,3 +1,5 @@
+export type HouseholdInvitePromptContext = 'settings' | 'export_prompt' | 'inkop' | 'lista';
+
 const DISMISSED_SUFFIX = 'household-invite-dismissed';
 const INKOP_DISMISSED_SUFFIX = 'household-invite-dismissed-inkop';
 const INKOP_LAST_SHOWN_SUFFIX = 'household-invite-last-shown-inkop';
@@ -79,6 +81,12 @@ export function hasShoppingListExported(userId?: string | null): boolean {
 	}
 
 	return localStorage.getItem(storageKey(SHOPPING_EXPORT_SUFFIX, userId)) === '1';
+}
+
+export function getGlobalHouseholdInvitePromptContext(
+	userId?: string | null
+): Extract<HouseholdInvitePromptContext, 'settings' | 'export_prompt'> {
+	return hasShoppingListExported(userId) ? 'export_prompt' : 'settings';
 }
 
 export function hasShoppingListEngagement(

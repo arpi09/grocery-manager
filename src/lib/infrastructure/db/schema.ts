@@ -334,6 +334,8 @@ export const productEventTable = pgTable(
 				'guide_view',
 				'register_click',
 				'signup_complete',
+				'signup_from_shopping_share',
+				'signup_from_expiring_share',
 				'onboarding_skipped',
 				'onboarding_quickstart',
 				'onboarding_completed',

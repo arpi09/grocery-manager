@@ -1770,6 +1770,10 @@
 		"addCount": "Add {count} {count, plural, one {item} other {items}}",
 		"apiKeyHint": "Requires OPENAI_API_KEY in server .env."
 	},
+	"priceMemory": {
+		"lastPaid": "Last paid {price} ({date})",
+		"lastPaidWithStore": "Last paid {price} ({date}, {store})"
+	},
 	"scanFlow": {
 		"lookupProduct": "Looking up product",
 		"saving": "Saving to pantry…",
@@ -2143,6 +2147,7 @@
 		"promptTitle": "Shop together?",
 		"promptAria": "Invite to household",
 		"promptBody": "A shared list and pantry makes it easier to stay in sync — invite a partner or family member.",
+		"promptExportBody": "Skip pasting the list next time — invite your partner to Skaffu.",
 		"promptCta": "Invite someone",
 		"promptDismiss": "Not now",
 		"inkopBannerAria": "Invite to the shopping list",
@@ -2151,7 +2156,7 @@
 		"inkopBannerDismiss": "Not now",
 		"listaBannerAria": "Invite to shared shopping list",
 		"listaBannerBody": "Want the list to update as you shop? Invite your partner — same list, updates as you shop.",
-		"listaBannerCta": "Sync live with partner",
+		"listaBannerCta": "Invite partner",
 		"listaBannerDismiss": "Not now"
 	},
 	"calendar": {

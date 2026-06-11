@@ -50,6 +50,60 @@ describe('recordSignupCompleteEvent', () => {
 		});
 	});
 
+	it('records signup_from_shopping_share when utm_content is shopping_share', async () => {
+		const repository = mockPmfRepository();
+		const service = new PmfService(repository);
+
+		recordSignupCompleteEvent(service, 'user-w1', 'a', {
+			signupUtm: {
+				source: 'skaffu',
+				medium: 'product',
+				campaign: 'acquisition_wedge',
+				content: 'shopping_share'
+			}
+		});
+
+		await Promise.resolve();
+
+		expect(repository.recordEvent).toHaveBeenCalledTimes(2);
+		expect(repository.recordEvent).toHaveBeenNthCalledWith(2, {
+			userId: 'user-w1',
+			householdId: null,
+			eventType: 'signup_from_shopping_share',
+			metadata: expect.objectContaining({
+				variant: 'a',
+				utm_content: 'shopping_share'
+			})
+		});
+	});
+
+	it('records signup_from_expiring_share when utm_content is expiring_share', async () => {
+		const repository = mockPmfRepository();
+		const service = new PmfService(repository);
+
+		recordSignupCompleteEvent(service, 'user-w3', 'b', {
+			signupUtm: {
+				source: 'skaffu',
+				medium: 'product',
+				campaign: 'acquisition_wedge',
+				content: 'expiring_share'
+			}
+		});
+
+		await Promise.resolve();
+
+		expect(repository.recordEvent).toHaveBeenCalledTimes(2);
+		expect(repository.recordEvent).toHaveBeenNthCalledWith(2, {
+			userId: 'user-w3',
+			householdId: null,
+			eventType: 'signup_from_expiring_share',
+			metadata: expect.objectContaining({
+				variant: 'b',
+				utm_content: 'expiring_share'
+			})
+		});
+	});
+
 	it('omits utm keys when attribution is missing', async () => {
 		const repository = mockPmfRepository();
 		const service = new PmfService(repository);

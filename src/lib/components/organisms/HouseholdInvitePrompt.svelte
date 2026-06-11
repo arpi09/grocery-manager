@@ -3,13 +3,16 @@
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
+	import { trackProductEvent } from '$lib/client/product-events';
 	import { t } from '$lib/i18n';
 	import { getSignupAt, isOnboardingExcludedPath } from '$lib/utils/onboarding';
 	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
 	import {
 		dismissHouseholdInvitePrompt,
+		getGlobalHouseholdInvitePromptContext,
 		shouldShowHouseholdInvitePrompt,
-		shouldShowInkopHouseholdInvitePrompt
+		shouldShowInkopHouseholdInvitePrompt,
+		type HouseholdInvitePromptContext
 	} from '$lib/utils/household-invite-prompt';
 
 	interface Props {
@@ -19,9 +22,18 @@
 	let { memberCount = 0 }: Props = $props();
 
 	let open = $state(false);
+	let shownEventSent = $state(false);
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
+	const promptContext = $derived(
+		userId ? getGlobalHouseholdInvitePromptContext(userId) : ('settings' as HouseholdInvitePromptContext)
+	);
+	const promptBody = $derived(
+		promptContext === 'export_prompt'
+			? t('householdInvite.promptExportBody')
+			: t('householdInvite.promptBody')
+	);
 
 	function tryOpen() {
 		if (!browser || !userId || isOnboardingExcludedPath(pathname)) {
@@ -68,8 +80,13 @@
 	}
 
 	function dismiss() {
+		void trackProductEvent('household_invite_prompt_dismissed', { context: promptContext });
 		dismissHouseholdInvitePrompt(userId);
 		open = false;
+	}
+
+	function handleCtaClick() {
+		void trackProductEvent('household_invite_prompt_clicked', { context: promptContext });
 	}
 
 	$effect(() => {
@@ -85,9 +102,19 @@
 
 	$effect(() => {
 		if (!open) {
+			shownEventSent = false;
 			return;
 		}
 		return registerBlockingOverlay();
+	});
+
+	$effect(() => {
+		if (!open || !userId || shownEventSent) {
+			return;
+		}
+
+		void trackProductEvent('household_invite_prompt_shown', { context: promptContext });
+		shownEventSent = true;
 	});
 </script>
 
@@ -101,9 +128,14 @@
 	panelClass="household-invite-panel"
 >
 	<div class="invite-body">
-		<p class="invite-lead">{t('householdInvite.promptBody')}</p>
+		<p class="invite-lead">{promptBody}</p>
 		<div class="invite-actions">
-			<a class="invite-cta" href="/settings#household" data-analytics-id="household_invite.prompt_cta">
+			<a
+				class="invite-cta"
+				href="/settings#household"
+				data-analytics-id="household_invite.prompt_cta"
+				onclick={handleCtaClick}
+			>
 				{t('householdInvite.promptCta')}
 			</a>
 			<Button type="button" variant="ghost" onclick={dismiss}>

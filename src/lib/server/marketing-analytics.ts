@@ -103,20 +103,49 @@ export function recordGuideViewEvent(options: RecordGuideViewEventOptions): void
 	});
 }
 
+const SIGNUP_FROM_WEDGE_EVENTS = {
+	shopping_share: 'signup_from_shopping_share',
+	expiring_share: 'signup_from_expiring_share'
+} as const satisfies Record<string, ProductEventType>;
+
+function resolveSignupFromWedgeEvent(
+	signupUtm: SignupUtm | null | undefined
+): ProductEventType | null {
+	const content = signupUtm?.content?.trim();
+	if (!content) {
+		return null;
+	}
+
+	return SIGNUP_FROM_WEDGE_EVENTS[content as keyof typeof SIGNUP_FROM_WEDGE_EVENTS] ?? null;
+}
+
 export function recordSignupCompleteEvent(
 	pmfService: PmfService,
 	userId: string,
 	variant: LandingHeroVariant,
 	options?: RecordSignupCompleteEventOptions
 ): void {
+	const utmMetadata = signupUtmToEventMetadata(options?.signupUtm);
+	const baseMetadata = {
+		variant,
+		...(options?.visitorId ? { visitorId: options.visitorId } : {}),
+		...utmMetadata
+	};
+
 	recordProductEvent(pmfService, {
 		userId,
 		householdId: null,
 		eventType: 'signup_complete',
-		metadata: {
-			variant,
-			...(options?.visitorId ? { visitorId: options.visitorId } : {}),
-			...signupUtmToEventMetadata(options?.signupUtm)
-		}
+		metadata: baseMetadata
 	});
+
+	const wedgeEvent = resolveSignupFromWedgeEvent(options?.signupUtm);
+	if (wedgeEvent) {
+		recordProductEvent(pmfService, {
+			userId,
+			householdId: null,
+			eventType: wedgeEvent,
+			metadata: baseMetadata
+		});
+	}
 }

@@ -3,5 +3,6 @@
 -- public_city_feed_viewed, public_city_feed_item_clicked, public_city_feed_signup_clicked,
 -- expiring_share_cta_clicked,
 -- household_invite_prompt_shown, household_invite_prompt_clicked,
--- household_invite_prompt_dismissed, household_invite_created
+-- household_invite_prompt_dismissed, household_invite_created,
+-- signup_from_shopping_share, signup_from_expiring_share
 -- No DDL required: product_event.event_type is unconstrained text.
