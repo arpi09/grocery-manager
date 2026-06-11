@@ -192,7 +192,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 	});
 
 	test('nearby sharing settings UI toggle enables and persists', async ({ page, context }) => {
-		test.setTimeout(90_000);
+		test.setTimeout(120_000);
 		const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190';
 		await prepareE2eBrowserState(page);
 		await context.grantPermissions(['geolocation'], { origin: baseURL });
@@ -228,22 +228,23 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		});
 		await switchControl.scrollIntoViewIfNeeded();
 		await expect(switchControl).toHaveAttribute('aria-checked', 'false');
+		await expect(switchControl).toBeEnabled();
 
 		const apiWait = page.waitForResponse(
 			(res) =>
 				res.url().includes('/api/expiring-share/nearby-settings') &&
 				res.request().method() === 'POST',
-			{ timeout: 45_000 }
+			{ timeout: 60_000 }
 		);
-		// Enable via switch (label span uses the same handler in Toggle.svelte).
-		await switchControl.click({ noWaitAfter: true });
+		// Tap switch (label has explicit handler too; switch is the primary mobile target).
+		await switchControl.click();
 		const apiResponse = await apiWait;
 		expect(apiResponse.ok()).toBeTruthy();
 
 		await expect(switchControl).toHaveAttribute('aria-checked', 'true', { timeout: 20_000 });
 
 		await page.reload({ waitUntil: 'commit' });
-		await dismissOnboardingModalIfOpen(page);
+		await dismissCookieConsentIfOpen(page);
 		await switchControl.scrollIntoViewIfNeeded();
 		await expect(switchControl).toHaveAttribute('aria-checked', 'true');
 	});

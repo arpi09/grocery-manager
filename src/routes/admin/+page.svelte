@@ -97,7 +97,7 @@
 							checked={emailSendingEnabled}
 							disabled={emailSendingSubmitting || data.emailSending.envDisabled}
 							label={t('admin.emailSending.enable')}
-							onCheckedChange={(enabled) => {
+							toggleNotify={(enabled) => {
 								emailSendingSubmitEnabled = enabled;
 								emailSendingEnabled = enabled;
 								emailSendingForm?.requestSubmit();
@@ -156,7 +156,7 @@
 							checked={stripeCheckoutEnabled}
 							disabled={stripeCheckoutSubmitting || data.stripeCheckout.envDisabled}
 							label={t('admin.stripeCheckout.enable')}
-							onCheckedChange={(enabled) => {
+							toggleNotify={(enabled) => {
 								stripeCheckoutSubmitEnabled = enabled;
 								stripeCheckoutEnabled = enabled;
 								stripeCheckoutForm?.requestSubmit();

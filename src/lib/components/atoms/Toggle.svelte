@@ -7,7 +7,8 @@
 		id?: string;
 		/** Accessible name when no visible label is provided. */
 		'aria-label'?: string;
-		onCheckedChange?: (checked: boolean) => void;
+		/** Called when the user requests a checked state change. */
+		toggleNotify?: (checked: boolean) => void;
 	}
 
 	let {
@@ -17,7 +18,7 @@
 		size = 'md',
 		id,
 		'aria-label': ariaLabel,
-		onCheckedChange
+		toggleNotify
 	}: Props = $props();
 
 	const switchId = $derived(
@@ -25,13 +26,13 @@
 			(label ?? ariaLabel)?.replace(/\s+/g, '-').toLowerCase().replace(/[^a-z0-9-]/g, '')
 	);
 
-	function activateToggle() {
+	function toggleFromUser() {
 		if (disabled) return;
-		onCheckedChange?.(!checked);
+		toggleNotify?.(!checked);
 	}
 </script>
 
-<!-- Label `for` + sibling button — label text taps work on iOS without nesting. -->
+<!-- Sibling button + label[for] — label text taps work on iOS (no nested button). -->
 <div
 	class={['toggle', size === 'sm' ? 'toggle-sm' : 'toggle-md', disabled ? 'toggle-disabled' : ''].filter(Boolean).join(' ')}
 >
@@ -44,14 +45,24 @@
 		aria-disabled={disabled}
 		aria-label={label ? undefined : ariaLabel}
 		disabled={disabled}
-		onclick={activateToggle}
+		onclick={toggleFromUser}
 	>
 		<span class="toggle-track" aria-hidden="true">
 			<span class="toggle-thumb"></span>
 		</span>
 	</button>
 	{#if label}
-		<label class="toggle-label" for={switchId}>{label}</label>
+		<!-- preventDefault: call handler directly — label[for] on iOS can focus without click. -->
+		<label
+			class="toggle-label"
+			for={switchId}
+			onclick={(e) => {
+				e.preventDefault();
+				toggleFromUser();
+			}}
+		>
+			{label}
+		</label>
 	{/if}
 </div>
 
@@ -60,6 +71,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-sm);
+		min-height: var(--touch-target-min, 2.75rem);
 	}
 
 	.toggle-disabled {

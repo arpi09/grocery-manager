@@ -191,7 +191,7 @@
 			checked={nearbyToggleChecked}
 			label={t('nearbySharing.enableLabel')}
 			disabled={nearbyBusy}
-			onCheckedChange={(enabled) => {
+			toggleNotify={(enabled) => {
 				if (nearbyBusy) {
 					return;
 				}
@@ -223,7 +223,7 @@
 			checked={nearbyPushEnabled}
 			label={t('nearbySharing.pushEnableLabel')}
 			disabled={nearbyPushDisabled}
-			onCheckedChange={(enabled) => {
+			toggleNotify={(enabled) => {
 				void toggleNearbyPush(enabled);
 			}}
 		/>
