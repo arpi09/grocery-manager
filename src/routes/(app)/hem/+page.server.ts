@@ -87,7 +87,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const emptyIntelligence: HomeIntelligenceSnapshot = {
 		replenishment: [],
 		pantryHealth: [],
-		waste: null
+		waste: null,
+		dedupeByKey: {}
 	};
 
 	const [

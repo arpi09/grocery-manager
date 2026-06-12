@@ -920,6 +920,20 @@
 			"recurringAndCadence": "Bought {count} times in the last 3 months · last {days} days ago · usually buy about every {interval} days"
 		}
 	},
+	"householdBriefing": {
+		"title": "What you can do now",
+		"ariaLabel": "Household briefing",
+		"replenishmentTitle": "Time to buy again?",
+		"finishLead": "You just imported a receipt — mark items as finished if that fits.",
+		"receiptLoopCopy": "{count, plural, one {# item added} other {# items added}}",
+		"receiptLoopCta": "See what you may need to buy",
+		"dedupe": {
+			"overstock": "You seem to have several packs of {name}",
+			"recentPurchase": "You bought this recently",
+			"onList": "Already on the shopping list",
+			"dismiss": "Dismiss warning"
+		}
+	},
 	"receiptAutopilot": {
 		"title": "From your receipts",
 		"ariaLabel": "Receipt autopilot suggestions",

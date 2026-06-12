@@ -9,12 +9,17 @@ import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { recordProductEvent } from '$lib/server/product-events';
 import type { RequestHandler } from './$types';
 
-function parseNormalizedKey(body: unknown): string | null {
+function parseAcceptBody(body: unknown): { normalizedKey: string; surface?: string } | null {
 	if (!body || typeof body !== 'object' || !('normalizedKey' in body)) {
 		return null;
 	}
 	const key = (body as { normalizedKey: unknown }).normalizedKey;
-	return typeof key === 'string' && key.trim() ? key.trim() : null;
+	if (typeof key !== 'string' || !key.trim()) {
+		return null;
+	}
+	const surfaceRaw = (body as { surface?: unknown }).surface;
+	const surface = typeof surfaceRaw === 'string' && surfaceRaw.trim() ? surfaceRaw.trim() : undefined;
+	return { normalizedKey: key.trim(), surface };
 }
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -29,10 +34,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: translate(locals.locale, 'errors.household.forbidden') }, { status: 403 });
 	}
 
-	const normalizedKey = parseNormalizedKey(await request.json().catch(() => null));
-	if (!normalizedKey) {
+	const parsed = parseAcceptBody(await request.json().catch(() => null));
+	if (!parsed) {
 		return json({ error: translate(locals.locale, 'replenishment.invalidKey') }, { status: 400 });
 	}
+	const { normalizedKey, surface } = parsed;
 
 	try {
 		const result = await locals.purchasePatternService.acceptReplenishmentToList(
@@ -45,14 +51,21 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			userId: auth.user.id,
 			householdId: auth.householdId,
 			eventType: 'replenishment_suggestion_added',
-			metadata: { normalizedKey, name: result.name }
+			metadata: { normalizedKey, name: result.name, ...(surface ? { surface } : {}) }
 		});
 
 		recordProductEvent(locals.pmfService, {
 			userId: auth.user.id,
 			householdId: auth.householdId,
 			eventType: 'replenishment_suggestion_accepted',
-			metadata: { normalizedKey, name: result.name }
+			metadata: { normalizedKey, name: result.name, ...(surface ? { surface } : {}) }
+		});
+
+		recordProductEvent(locals.pmfService, {
+			userId: auth.user.id,
+			householdId: auth.householdId,
+			eventType: 'replenishment_actioned',
+			metadata: { normalizedKey, name: result.name, ...(surface ? { surface } : {}) }
 		});
 
 		return json({ ok: true, name: result.name });

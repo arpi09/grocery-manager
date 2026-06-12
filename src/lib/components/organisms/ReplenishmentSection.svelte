@@ -1,26 +1,46 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
+	import Badge from '$lib/components/atoms/Badge.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
+	import PriceMemoryChip from '$lib/components/molecules/PriceMemoryChip.svelte';
+	import type { DedupeWarning } from '$lib/domain/dedupe-autopilot';
 	import type { ReplenishmentReasonCode, ReplenishmentSuggestion } from '$lib/domain/replenishment';
 	import { trackProductEvent } from '$lib/client/product-events';
+	import {
+		dismissDedupeWarning,
+		filterVisibleDedupeWarnings
+	} from '$lib/utils/dedupe-warning-dismiss';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { onMount } from 'svelte';
 	import { t } from '$lib/i18n';
 
+	export type ReplenishmentSurface = 'hem' | 'inkop';
+
 	interface Props {
 		suggestions: ReplenishmentSuggestion[];
+		dedupeByKey?: Record<string, DedupeWarning[]>;
 		canEdit?: boolean;
 		compact?: boolean;
+		surface?: ReplenishmentSurface;
+		householdId?: string | null;
 	}
 
-	let { suggestions, canEdit = false, compact = false }: Props = $props();
+	let {
+		suggestions,
+		dedupeByKey = {},
+		canEdit = false,
+		compact = false,
+		surface = 'inkop',
+		householdId = null
+	}: Props = $props();
 
 	let items = $state<ReplenishmentSuggestion[]>([]);
 	let acceptingKey = $state<string | null>(null);
 	let dismissingKey = $state<string | null>(null);
 	let errorMessage = $state<string | null>(null);
 	let shownTracked = $state(false);
+	let shownDedupeKeys = $state(new Set<string>());
 
 	$effect(() => {
 		items = suggestions;
@@ -29,9 +49,75 @@
 	onMount(() => {
 		if (suggestions.length > 0 && !shownTracked) {
 			shownTracked = true;
-			void trackProductEvent('replenishment_suggestion_shown', { count: suggestions.length });
+			void trackProductEvent('replenishment_suggestion_shown', {
+				count: suggestions.length,
+				surface
+			});
 		}
 	});
+
+	let dismissedDedupeKeys = $state(new Set<string>());
+
+	function dedupeTrackKey(warning: DedupeWarning): string {
+		return `${warning.normalizedKey}:${warning.kind}`;
+	}
+
+	function visibleDedupeWarnings(normalizedKey: string): DedupeWarning[] {
+		const warnings = dedupeByKey[normalizedKey] ?? [];
+		return filterVisibleDedupeWarnings(householdId, warnings).filter(
+			(entry) => !dismissedDedupeKeys.has(dedupeTrackKey(entry))
+		);
+	}
+
+	function dedupeMessage(warning: DedupeWarning): string {
+		if (warning.kind === 'overstock') {
+			return t('householdBriefing.dedupe.overstock', { name: warning.displayName });
+		}
+		if (warning.kind === 'recent_purchase') {
+			return t('householdBriefing.dedupe.recentPurchase');
+		}
+		return t('householdBriefing.dedupe.onList');
+	}
+
+	function trackDedupeShown(warning: DedupeWarning) {
+		const trackKey = `${warning.normalizedKey}:${warning.kind}`;
+		if (shownDedupeKeys.has(trackKey)) {
+			return;
+		}
+		shownDedupeKeys = new Set([...shownDedupeKeys, trackKey]);
+		void trackProductEvent('duplicate_warning_shown', {
+			kind: warning.kind,
+			normalizedKey: warning.normalizedKey,
+			surface
+		});
+	}
+
+	$effect(() => {
+		if (!householdId) {
+			return;
+		}
+		for (const suggestion of items) {
+			for (const warning of filterVisibleDedupeWarnings(
+				householdId,
+				dedupeByKey[suggestion.normalizedKey] ?? []
+			)) {
+				trackDedupeShown(warning);
+			}
+		}
+	});
+
+	function dismissDedupeChip(warning: DedupeWarning) {
+		if (!householdId) {
+			return;
+		}
+		dismissDedupeWarning(householdId, warning.normalizedKey, warning.kind);
+		dismissedDedupeKeys = new Set([...dismissedDedupeKeys, dedupeTrackKey(warning)]);
+		void trackProductEvent('duplicate_warning_dismissed', {
+			kind: warning.kind,
+			normalizedKey: warning.normalizedKey,
+			surface
+		});
+	}
 
 	function formatQuantity(suggestion: ReplenishmentSuggestion): string {
 		if (suggestion.unit) {
@@ -63,13 +149,13 @@
 		acceptingKey = normalizedKey;
 		errorMessage = null;
 
-		void trackProductEvent('replenishment_suggestion_clicked', { normalizedKey });
+		void trackProductEvent('replenishment_suggestion_clicked', { normalizedKey, surface });
 
 		try {
 			const response = await fetch('/api/replenishment/accept', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ normalizedKey })
+				body: JSON.stringify({ normalizedKey, surface })
 			});
 			const data = (await response.json()) as { error?: string; name?: string };
 
@@ -119,7 +205,7 @@
 {#if items.length > 0}
 	<section class="replenishment" class:compact aria-label={t('replenishment.ariaLabel')}>
 		<header class="header">
-			<h2>{t('replenishment.title')}</h2>
+			<h2>{compact ? t('householdBriefing.replenishmentTitle') : t('replenishment.title')}</h2>
 			{#if !compact}
 				<p class="intro">{t('replenishment.intro')}</p>
 			{/if}
@@ -131,12 +217,34 @@
 
 		<ul class="suggestions">
 			{#each items as suggestion (suggestion.normalizedKey)}
+				{@const dedupeWarnings = visibleDedupeWarnings(suggestion.normalizedKey)}
 				<li>
 					<Card class="suggestion-card">
 						<div class="copy">
 							<span class="name">{suggestion.displayName}</span>
 							<span class="meta">{reasonMessage(suggestion)}</span>
 							<span class="quantity-hint">{formatQuantity(suggestion)}</span>
+							<PriceMemoryChip
+								normalizedKey={suggestion.normalizedKey}
+								surface="replenishment"
+							/>
+							{#if dedupeWarnings.length > 0}
+								<div class="dedupe-chips">
+									{#each dedupeWarnings as warning (warning.kind)}
+										<span class="dedupe-chip">
+											<Badge tone="warning">{dedupeMessage(warning)}</Badge>
+											<button
+												type="button"
+												class="dedupe-dismiss"
+												aria-label={t('householdBriefing.dedupe.dismiss')}
+												onclick={() => dismissDedupeChip(warning)}
+											>
+												×
+											</button>
+										</span>
+									{/each}
+								</div>
+							{/if}
 						</div>
 						{#if canEdit}
 							<div class="actions">
@@ -228,6 +336,31 @@
 	.quantity-hint {
 		font-size: 0.8125rem;
 		color: var(--color-text-muted);
+	}
+
+	.dedupe-chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-xs);
+		margin-top: var(--space-xs);
+	}
+
+	.dedupe-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-xs);
+	}
+
+	.dedupe-dismiss {
+		border: none;
+		background: none;
+		padding: 0;
+		min-width: 1.5rem;
+		min-height: 1.5rem;
+		cursor: pointer;
+		color: inherit;
+		font-size: 1rem;
+		line-height: 1;
 	}
 
 	.actions {

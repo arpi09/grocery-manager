@@ -23,6 +23,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { trackProductEvent } from '$lib/client/product-events';
+	import { markReceiptImportCompleted } from '$lib/utils/receipt-import-session';
 	import {
 		readReceiptBulkLocation,
 		writeReceiptBulkLocation
@@ -355,6 +356,7 @@
 								selectedCount,
 								totalLines: lines.length
 							});
+							markReceiptImportCompleted(selectedCount);
 							recordReceiptActivation(page.data.user?.id);
 						}
 					)}

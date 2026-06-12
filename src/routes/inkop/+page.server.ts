@@ -42,14 +42,15 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 			canEdit: false,
 			shareLinkEnabled: false,
 			replenishmentSuggestions: [],
+			dedupeByKey: {},
 			shoppingToPantryMode: 'ask' as ShoppingToPantryMode
 		};
 	}
 
-	const [items, checkedCount, replenishmentSuggestions, shoppingToPantryMode] = await Promise.all([
+	const [items, checkedCount, intelligence, shoppingToPantryMode] = await Promise.all([
 		locals.shoppingListService.listUncheckedItems(householdId),
 		locals.shoppingListService.countCheckedItems(householdId),
-		locals.purchasePatternService.getReplenishmentSuggestions(householdId),
+		locals.inventoryIntelligenceService.getHomeIntelligence(householdId),
 		user ? locals.shoppingToPantryService.getMode(user.id) : Promise.resolve('ask' as ShoppingToPantryMode)
 	]);
 	return {
@@ -58,7 +59,9 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		checkedCount,
 		canEdit: !!locals.householdRole && canEditInventory(locals.householdRole),
 		shareLinkEnabled: isShoppingListShareEnabled(),
-		replenishmentSuggestions,
+		replenishmentSuggestions: intelligence.replenishment,
+		dedupeByKey: intelligence.dedupeByKey,
+		householdId,
 		shoppingToPantryMode
 	};
 };

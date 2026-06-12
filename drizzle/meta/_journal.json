@@ -316,6 +316,13 @@
 			"when": 1752153600000,
 			"tag": "0045_inventory_intelligence_events",
 			"breakpoints": true
+		},
+		{
+			"idx": 45,
+			"version": "7",
+			"when": 1752240000000,
+			"tag": "0046_household_os_events",
+			"breakpoints": true
 		}
 	]
 }

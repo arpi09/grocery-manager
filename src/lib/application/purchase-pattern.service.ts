@@ -56,6 +56,16 @@ export class PurchasePatternService {
 		return detectReplenishmentSuggestions(lines, inventoryKeys, listNames, dismissedKeys);
 	}
 
+	async getDedupeContext(householdId: string) {
+		const since = purchasePatternLookbackDate();
+		const [recentLines, listNormalizedNames] = await Promise.all([
+			this.repository.listRecentLines(householdId, since),
+			this.repository.listShoppingListNormalizedNames(householdId)
+		]);
+
+		return { recentLines, listNormalizedNames };
+	}
+
 	async acceptReplenishmentToList(
 		householdId: string,
 		role: HouseholdRole,

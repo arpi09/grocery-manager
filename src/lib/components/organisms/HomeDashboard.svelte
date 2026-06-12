@@ -16,6 +16,8 @@
 	import HouseholdActivityFeed from '$lib/components/molecules/HouseholdActivityFeed.svelte';
 	import PantryHealthInsights from '$lib/components/molecules/PantryHealthInsights.svelte';
 	import WastePreventionBanner from '$lib/components/molecules/WastePreventionBanner.svelte';
+	import HouseholdBriefing from '$lib/components/organisms/HouseholdBriefing.svelte';
+	import { composeHouseholdBriefing } from '$lib/domain/household-briefing';
 	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 	import type { DuplicateNameGroupSummary } from '$lib/application/inventory.service';
 	import type { HouseholdActivityEvent } from '$lib/domain/household-activity';
@@ -44,6 +46,7 @@
 	import { scanModeHref } from '$lib/utils/scan-nav';
 	import { recordPeakInventoryCount } from '$lib/utils/household-invite-prompt';
 	import { shouldNudgeReceiptAutopilot } from '$lib/utils/receipt-autopilot-nudge';
+	import { isReceiptImportRecentlyCompleted } from '$lib/utils/receipt-import-session';
 
 	interface Props {
 		summary: DashboardSummary;
@@ -77,7 +80,7 @@
 		receiptFinishSuggestions = [],
 		recentItemNames = [],
 		duplicateGroups = [],
-		intelligence = { replenishment: [], pantryHealth: [], waste: null },
+		intelligence = { replenishment: [], pantryHealth: [], waste: null, dedupeByKey: {} },
 		activityEvents = [],
 		lastUpdatedByDisplayName = null,
 		shoppingListCount = 0
@@ -212,6 +215,32 @@
 			pantryStatus.autoExpiredCount === 0
 	);
 
+	const householdBriefing = $derived(
+		composeHouseholdBriefing({
+			intelligence,
+			staleCount: pantryStatus.staleCount,
+			shoppingListCount
+		})
+	);
+
+	const showHouseholdBriefing = $derived(
+		summary.totalItems > 0 && householdBriefing.hasActionableContent
+	);
+
+	const replenishmentKeys = $derived(new Set(intelligence.replenishment.map((entry) => entry.normalizedKey)));
+
+	const filteredAutopilotSuggestions = $derived(
+		receiptAutopilotSuggestions.filter((entry) => !replenishmentKeys.has(entry.normalizedKey))
+	);
+
+	const finishSuggestionsForMore = $derived(
+		browser && isReceiptImportRecentlyCompleted() ? [] : receiptFinishSuggestions
+	);
+
+	const showWeeklyRitualHero = $derived(
+		showWeeklyRitual && !householdBriefing.hideWeeklyRitualSync
+	);
+
 	const showMealTimeSuggestions = $derived.by(() => {
 		if (summary.totalItems === 0 || showWeeklyRitual || hasExpiring) {
 			return false;
@@ -242,7 +271,7 @@
 		eatFirstOpen = hasExpiring;
 		if (
 			nudgeReceiptAutopilot &&
-			(receiptAutopilotSuggestions.length > 0 || receiptFinishSuggestions.length > 0)
+			(filteredAutopilotSuggestions.length > 0 || finishSuggestionsForMore.length > 0)
 		) {
 			receiptAutopilotOpen = true;
 		}
@@ -341,7 +370,16 @@
 			</Card>
 		{/if}
 	{:else}
-		{#if showWeeklyRitual || showPantryStatusCard}
+		<HouseholdBriefing
+			{intelligence}
+			staleCount={pantryStatus.staleCount}
+			{shoppingListCount}
+			{canWrite}
+			{householdId}
+			finishSuggestions={receiptFinishSuggestions}
+		/>
+
+		{#if showWeeklyRitualHero || showPantryStatusCard}
 			<WeeklyRitualHero
 				statusOnly
 				expiringCount={expiringCount}
@@ -352,36 +390,38 @@
 			/>
 		{/if}
 
-		<HomeNextAction
-			totalItems={summary.totalItems}
-			{expiringCount}
-			staleCount={pantryStatus.staleCount}
-			{canWrite}
-			{returnTo}
-		/>
+		{#if !showHouseholdBriefing}
+			<HomeNextAction
+				totalItems={summary.totalItems}
+				{expiringCount}
+				staleCount={pantryStatus.staleCount}
+				{canWrite}
+				{returnTo}
+			/>
 
-		<a class="shopping-teaser" href="/inkop" data-analytics-id="home.shopping_teaser">
-			<span class="shopping-teaser-icon" aria-hidden="true">
-				<NavIcon id="shopping" />
-			</span>
-			<span class="shopping-teaser-copy">
-				{shoppingListCount > 0
-					? t('home.shoppingTeaser', { count: shoppingListCount })
-					: t('home.shoppingTeaserEmpty')}
-			</span>
-			<span class="shopping-teaser-arrow" aria-hidden="true">→</span>
-		</a>
+			<a class="shopping-teaser" href="/inkop" data-analytics-id="home.shopping_teaser">
+				<span class="shopping-teaser-icon" aria-hidden="true">
+					<NavIcon id="shopping" />
+				</span>
+				<span class="shopping-teaser-copy">
+					{shoppingListCount > 0
+						? t('home.shoppingTeaser', { count: shoppingListCount })
+						: t('home.shoppingTeaserEmpty')}
+				</span>
+				<span class="shopping-teaser-arrow" aria-hidden="true">→</span>
+			</a>
+		{/if}
 
 		{#if !canWrite}
 			<p class="readonly-hint">{t('home.readonlyHint')}</p>
 		{/if}
 
-		{#if intelligence.pantryHealth.length > 0}
+		{#if !showHouseholdBriefing && intelligence.pantryHealth.length > 0}
 			<PantryHealthInsights insights={intelligence.pantryHealth} />
 		{/if}
 
 		{#if hasExpiring}
-			{#if intelligence.waste}
+			{#if !showHouseholdBriefing && intelligence.waste}
 				<WastePreventionBanner alert={intelligence.waste} />
 			{/if}
 			<details class="home-disclosure eat-first-prominent" bind:open={eatFirstOpen}>
@@ -414,7 +454,7 @@
 					<MealTimeSuggestions hasInventory={summary.totalItems > 0} />
 				{/if}
 
-				{#if canWrite && duplicateGroups.length > 0 && intelligence.pantryHealth.length === 0}
+				{#if canWrite && duplicateGroups.length > 0 && intelligence.pantryHealth.length === 0 && !showHouseholdBriefing}
 					<section class="duplicate-nudge" aria-labelledby="home-duplicate-heading">
 						<h2 id="home-duplicate-heading" class="sr-only">{t('home.duplicateWarningTitle')}</h2>
 						{#each duplicateGroups.slice(0, 2) as group (group.location + group.displayName)}
@@ -471,30 +511,42 @@
 					</div>
 				</details>
 
-				{#if canWrite && (receiptAutopilotSuggestions.length > 0 || receiptFinishSuggestions.length > 0)}
-					{#if nudgeReceiptAutopilot}
+				{#if canWrite && (filteredAutopilotSuggestions.length > 0 || finishSuggestionsForMore.length > 0)}
+					{#if nudgeReceiptAutopilot && filteredAutopilotSuggestions.length > 0}
 						<section class="autopilot-nudge" aria-labelledby="home-autopilot-nudge-heading">
 							<h2 id="home-autopilot-nudge-heading" class="autopilot-nudge-title">
 								{t('receiptAutopilot.nudgeTitle')}
 							</h2>
 							<p class="autopilot-nudge-lead">{t('receiptAutopilot.nudgeLead')}</p>
 							<ReceiptAutopilotSection
-								suggestions={receiptAutopilotSuggestions}
-								finishSuggestions={receiptFinishSuggestions}
+								suggestions={filteredAutopilotSuggestions}
+								finishSuggestions={finishSuggestionsForMore}
 								canEdit={canWrite}
 								compact
 							/>
 						</section>
-					{:else}
+					{:else if filteredAutopilotSuggestions.length > 0 || finishSuggestionsForMore.length > 0}
 						<details class="home-disclosure nested" bind:open={receiptAutopilotOpen}>
 							<summary>
 								{t('home.receiptAutopilotSummary', {
-									count: receiptAutopilotSuggestions.length + receiptFinishSuggestions.length
+									count: filteredAutopilotSuggestions.length + finishSuggestionsForMore.length
 								})}
 							</summary>
 							<ReceiptAutopilotSection
-								suggestions={receiptAutopilotSuggestions}
-								finishSuggestions={receiptFinishSuggestions}
+								suggestions={filteredAutopilotSuggestions}
+								finishSuggestions={finishSuggestionsForMore}
+								canEdit={canWrite}
+								compact
+							/>
+						</details>
+					{:else if finishSuggestionsForMore.length > 0}
+						<details class="home-disclosure nested" bind:open={receiptAutopilotOpen}>
+							<summary>
+								{t('home.receiptAutopilotSummary', { count: finishSuggestionsForMore.length })}
+							</summary>
+							<ReceiptAutopilotSection
+								suggestions={[]}
+								finishSuggestions={finishSuggestionsForMore}
 								canEdit={canWrite}
 								compact
 							/>

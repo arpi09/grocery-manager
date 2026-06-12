@@ -8,9 +8,10 @@
 
 	interface Props {
 		normalizedKey: string;
+		surface?: string;
 	}
 
-	let { normalizedKey }: Props = $props();
+	let { normalizedKey, surface }: Props = $props();
 	let label = $state<string | null>(null);
 
 	onMount(() => {
@@ -28,7 +29,7 @@
 						price: context.formattedUnitPrice,
 						date: context.monthYear
 					});
-			void trackProductEvent('price_memory_viewed', { normalizedKey });
+			void trackProductEvent('price_memory_viewed', { normalizedKey, ...(surface ? { surface } : {}) });
 		})();
 	});
 </script>

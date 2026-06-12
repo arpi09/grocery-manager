@@ -387,7 +387,14 @@ export const productEventTable = pgTable(
 				'pantry_health_insight_clicked',
 				'waste_alert_shown',
 				'waste_alert_clicked',
-				'waste_alert_resolved'
+				'waste_alert_resolved',
+				'home_briefing_viewed',
+				'replenishment_actioned',
+				'waste_alert_actioned',
+				'duplicate_warning_shown',
+				'duplicate_warning_dismissed',
+				'receipt_loop_cta_shown',
+				'receipt_loop_cta_clicked'
 			]
 		}).notNull(),
 		metadata: text('metadata'),

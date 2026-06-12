@@ -891,6 +891,20 @@
 			"recurringAndCadence": "Köpt {count} gånger senaste 3 månaderna · senast {days} dagar sedan · brukar köpa ungefär var {interval} dagar"
 		}
 	},
+	"householdBriefing": {
+		"title": "Det här kan du göra nu",
+		"ariaLabel": "Hushållsbriefing",
+		"replenishmentTitle": "Dags att köpa igen?",
+		"finishLead": "Du importerade nyss kvitto — markera det som tagit slut om det stämmer.",
+		"receiptLoopCopy": "{count, plural, one {# vara lades till} other {# varor lades till}}",
+		"receiptLoopCta": "Se vad du kan behöva köpa",
+		"dedupe": {
+			"overstock": "Du verkar ha flera paket {name}",
+			"recentPurchase": "Du köpte detta nyligen",
+			"onList": "Finns redan på inköpslistan",
+			"dismiss": "Dölj varning"
+		}
+	},
 	"receiptAutopilot": {
 		"title": "Från dina kvitton",
 		"ariaLabel": "Kvitto-autopilot",

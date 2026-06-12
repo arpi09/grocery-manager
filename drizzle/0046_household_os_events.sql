@@ -1,0 +1,5 @@
+-- Household OS V1 product_event types (application enum in schema.ts):
+-- home_briefing_viewed, replenishment_actioned, waste_alert_actioned,
+-- duplicate_warning_shown, duplicate_warning_dismissed,
+-- receipt_loop_cta_shown, receipt_loop_cta_clicked
+-- No DDL required: product_event.event_type is unconstrained text.

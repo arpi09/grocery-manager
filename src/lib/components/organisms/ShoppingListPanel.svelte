@@ -14,7 +14,9 @@
 	import type { StorageLocation } from '$lib/domain/location';
 	import {
 		clearPantryBridgeYesCount,
-		recordPantryBridgeYes
+		clearPantryBridgeYesHistory,
+		recordPantryBridgeYes,
+		shouldShowPantryBridgeAlwaysNudge
 	} from '$lib/utils/pantry-bridge-nudge';
 	import type { PantryBridgePreview } from '$lib/application/shopping-to-pantry.service';
 	import type { ShoppingToPantryMode } from '$lib/domain/shopping-to-pantry';
@@ -302,17 +304,22 @@
 
 	function handlePantryAdded(message: string, location?: StorageLocation) {
 		showSuccessToast(message);
-		if (!location || pantryBridgeMode === 'always' || alwaysNudgeDismissed) {
+		const userId = get(page).data.user?.id;
+		if (!location || pantryBridgeMode === 'always' || alwaysNudgeDismissed || !userId) {
 			return;
 		}
-		const count = recordPantryBridgeYes(location);
-		if (count >= 3) {
+		recordPantryBridgeYes(userId, location);
+		if (shouldShowPantryBridgeAlwaysNudge(userId)) {
 			alwaysNudgeLocation = location;
 		}
 	}
 
 	function dismissAlwaysNudge() {
 		alwaysNudgeDismissed = true;
+		const userId = get(page).data.user?.id;
+		if (userId) {
+			clearPantryBridgeYesHistory(userId);
+		}
 		if (alwaysNudgeLocation) {
 			clearPantryBridgeYesCount(alwaysNudgeLocation);
 		}

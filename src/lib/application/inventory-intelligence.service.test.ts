@@ -38,7 +38,11 @@ describe('InventoryIntelligenceService', () => {
 					daysSinceLast: 10,
 					reasonCode: 'recurring_not_in_pantry'
 				}
-			])
+			]),
+			getDedupeContext: vi.fn().mockResolvedValue({
+				recentLines: [],
+				listNormalizedNames: new Set<string>()
+			})
 		} as unknown as PurchasePatternService;
 
 		const inventoryService = {
@@ -70,11 +74,16 @@ describe('InventoryIntelligenceService', () => {
 		expect(snapshot.pantryHealth.some((entry) => entry.kind === 'stale')).toBe(true);
 		expect(snapshot.pantryHealth.some((entry) => entry.kind === 'duplicate')).toBe(true);
 		expect(snapshot.waste).toMatchObject({ expiringCount: 1, href: '#eat-first' });
+		expect(snapshot.dedupeByKey).toEqual({});
 	});
 
 	it('returns empty signals when pantry is clear', async () => {
 		const purchasePatternService = {
-			getReplenishmentSuggestions: vi.fn().mockResolvedValue([])
+			getReplenishmentSuggestions: vi.fn().mockResolvedValue([]),
+			getDedupeContext: vi.fn().mockResolvedValue({
+				recentLines: [],
+				listNormalizedNames: new Set<string>()
+			})
 		} as unknown as PurchasePatternService;
 		const inventoryService = {
 			listAll: vi.fn().mockResolvedValue([])
@@ -86,5 +95,40 @@ describe('InventoryIntelligenceService', () => {
 		expect(snapshot.replenishment).toEqual([]);
 		expect(snapshot.pantryHealth).toEqual([]);
 		expect(snapshot.waste).toBeNull();
+		expect(snapshot.dedupeByKey).toEqual({});
+	});
+
+	it('includes dedupe warnings for replenishment keys', async () => {
+		const purchasePatternService = {
+			getReplenishmentSuggestions: vi.fn().mockResolvedValue([
+				{
+					normalizedKey: 'beans',
+					displayName: 'Beans',
+					location: 'cupboard',
+					quantity: '1',
+					unit: null,
+					importCount: 2,
+					lineCount: 2,
+					lastPurchasedAt: new Date('2026-06-01T12:00:00Z'),
+					reasonCode: 'recurring_not_in_pantry',
+					daysSinceLast: 10,
+					avgIntervalDays: null,
+					purchaseCount: 2
+				}
+			]),
+			getDedupeContext: vi.fn().mockResolvedValue({
+				recentLines: [],
+				listNormalizedNames: new Set(['beans'])
+			})
+		} as unknown as PurchasePatternService;
+
+		const inventoryService = {
+			listAll: vi.fn().mockResolvedValue([])
+		} as unknown as InventoryService;
+
+		const service = new InventoryIntelligenceService(purchasePatternService, inventoryService);
+		const snapshot = await service.getHomeIntelligence('hh-1');
+
+		expect(snapshot.dedupeByKey.beans?.some((entry) => entry.kind === 'on_list')).toBe(true);
 	});
 });

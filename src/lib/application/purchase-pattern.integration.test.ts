@@ -168,4 +168,18 @@ describe('Purchase pattern integration', () => {
 		const shoppingListRepository = new DrizzleShoppingListRepository(integrationDb.db);
 		expect(await shoppingListRepository.listUncheckedByHousehold('household-other')).toHaveLength(0);
 	});
+
+	it('replenishment count stays available after receipt import for shopping loop', async () => {
+		await seedRecurringMilk();
+		const suggestions = await service.getReplenishmentSuggestions(householdId);
+		expect(suggestions).toHaveLength(1);
+
+		await service.acceptReplenishmentToList(
+			householdId,
+			'owner',
+			suggestions[0]!.normalizedKey
+		);
+
+		expect(await service.getReplenishmentSuggestions(householdId)).toHaveLength(0);
+	});
 });

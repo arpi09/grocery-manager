@@ -85,6 +85,7 @@ describe('Inventory intelligence integration', () => {
 		const snapshot = await intelligenceService.getHomeIntelligence(householdId);
 		expect(snapshot.replenishment).toHaveLength(1);
 		expect(snapshot.replenishment[0]!.displayName).toBe('Arla Mjölk 1L');
+		expect(snapshot.dedupeByKey).toEqual({});
 	});
 
 	it('surfaces pantry health and waste signals from inventory', async () => {

@@ -29,10 +29,11 @@
 	);
 
 	const replenishmentSuggestions = $derived(data.replenishmentSuggestions ?? []);
+	const dedupeByKey = $derived(data.dedupeByKey ?? {});
 
 	const hasSuggestions = $derived(replenishmentSuggestions.length > 0);
 
-	const suggestionsOpen = $derived(hasSuggestions);
+	const suggestionsOpen = $derived(hasSuggestions && !listHasItems);
 
 
 
@@ -125,9 +126,15 @@
 
 							suggestions={replenishmentSuggestions}
 
+							{dedupeByKey}
+
 							canEdit={data.canEdit}
 
+							householdId={data.householdId}
+
 							compact
+
+							surface="inkop"
 
 						/>
 
