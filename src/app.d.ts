@@ -25,6 +25,7 @@ import type { AiUsageAdminService } from '$lib/application/ai-usage-admin.servic
 import type { WaitlistService } from '$lib/application/waitlist.service';
 import type { BillingService } from '$lib/application/billing.service';
 import type { PurchasePatternService } from '$lib/application/purchase-pattern.service';
+import type { InventoryIntelligenceService } from '$lib/application/inventory-intelligence.service';
 import type { PriceMemoryService } from '$lib/application/price-memory.service';
 import type { AnalyticsBehaviorService } from '$lib/application/analytics-behavior.service';
 import type { AnalyticsAdminService } from '$lib/application/analytics-admin.service';
@@ -75,6 +76,7 @@ declare global {
 			waitlistService: WaitlistService;
 			billingService: BillingService;
 			purchasePatternService: PurchasePatternService;
+			inventoryIntelligenceService: InventoryIntelligenceService;
 			priceMemoryService: PriceMemoryService;
 			analyticsBehaviorService: AnalyticsBehaviorService;
 			analyticsAdminService: AnalyticsAdminService;

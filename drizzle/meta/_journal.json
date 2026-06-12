@@ -309,6 +309,13 @@
 			"when": 1752067200000,
 			"tag": "0044_receipt_price_memory",
 			"breakpoints": true
+		},
+		{
+			"idx": 44,
+			"version": "7",
+			"when": 1752153600000,
+			"tag": "0045_inventory_intelligence_events",
+			"breakpoints": true
 		}
 	]
 }

@@ -63,6 +63,8 @@
 		acceptingKey = normalizedKey;
 		errorMessage = null;
 
+		void trackProductEvent('replenishment_suggestion_clicked', { normalizedKey });
+
 		try {
 			const response = await fetch('/api/replenishment/accept', {
 				method: 'POST',

@@ -14,6 +14,9 @@
 	import MealTimeSuggestions from '$lib/components/organisms/MealTimeSuggestions.svelte';
 	import HomeQuickAdd from '$lib/components/molecules/HomeQuickAdd.svelte';
 	import HouseholdActivityFeed from '$lib/components/molecules/HouseholdActivityFeed.svelte';
+	import PantryHealthInsights from '$lib/components/molecules/PantryHealthInsights.svelte';
+	import WastePreventionBanner from '$lib/components/molecules/WastePreventionBanner.svelte';
+	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 	import type { DuplicateNameGroupSummary } from '$lib/application/inventory.service';
 	import type { HouseholdActivityEvent } from '$lib/domain/household-activity';
 	import SkafferapportWidget from '$lib/components/molecules/SkafferapportWidget.svelte';
@@ -55,6 +58,7 @@
 		receiptFinishSuggestions?: ReceiptFinishSuggestion[];
 		recentItemNames?: string[];
 		duplicateGroups?: DuplicateNameGroupSummary[];
+		intelligence?: HomeIntelligenceSnapshot;
 		activityEvents?: HouseholdActivityEvent[];
 		lastUpdatedByDisplayName?: string | null;
 		shoppingListCount?: number;
@@ -73,6 +77,7 @@
 		receiptFinishSuggestions = [],
 		recentItemNames = [],
 		duplicateGroups = [],
+		intelligence = { replenishment: [], pantryHealth: [], waste: null },
 		activityEvents = [],
 		lastUpdatedByDisplayName = null,
 		shoppingListCount = 0
@@ -371,7 +376,14 @@
 			<p class="readonly-hint">{t('home.readonlyHint')}</p>
 		{/if}
 
+		{#if intelligence.pantryHealth.length > 0}
+			<PantryHealthInsights insights={intelligence.pantryHealth} />
+		{/if}
+
 		{#if hasExpiring}
+			{#if intelligence.waste}
+				<WastePreventionBanner alert={intelligence.waste} />
+			{/if}
 			<details class="home-disclosure eat-first-prominent" bind:open={eatFirstOpen}>
 				<summary>
 					{t('home.eatFirstSummary', { count: expiringCount })}
@@ -402,7 +414,7 @@
 					<MealTimeSuggestions hasInventory={summary.totalItems > 0} />
 				{/if}
 
-				{#if canWrite && duplicateGroups.length > 0}
+				{#if canWrite && duplicateGroups.length > 0 && intelligence.pantryHealth.length === 0}
 					<section class="duplicate-nudge" aria-labelledby="home-duplicate-heading">
 						<h2 id="home-duplicate-heading" class="sr-only">{t('home.duplicateWarningTitle')}</h2>
 						{#each duplicateGroups.slice(0, 2) as group (group.location + group.displayName)}

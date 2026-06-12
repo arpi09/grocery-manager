@@ -194,7 +194,8 @@ const INCREMENTAL_MIGRATIONS = [
 	'0041_receipt_import_funnel_events.sql',
 	'0042_acquisition_wedge_events.sql',
 	'0043_shopping_list_share_link.sql',
-	'0044_receipt_price_memory.sql'
+	'0044_receipt_price_memory.sql',
+	'0045_inventory_intelligence_events.sql'
 ];
 
 async function runPgliteBaseline(client: PGlite) {

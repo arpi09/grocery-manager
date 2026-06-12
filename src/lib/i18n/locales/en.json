@@ -890,6 +890,19 @@
 			}
 		}
 	},
+	"pantryHealth": {
+		"title": "Pantry health",
+		"ariaLabel": "Pantry health insights",
+		"stale": "{count, plural, one {# item without expiry looks forgotten} other {# items without expiry look forgotten}}",
+		"duplicate": "{count} rows named {name} — review duplicates",
+		"overstock": "You have {count} of {name} — check stock levels"
+	},
+	"wastePrevention": {
+		"ariaLabel": "Use before expiry",
+		"copy": "{count, plural, one {# item expires soon} other {# items expire soon}}",
+		"slowMoverCopy": "{expiringCount, plural, one {# item expires soon} other {# items expire soon}} · {slowMoverCount} not checked in a while",
+		"action": "See what to use first"
+	},
 	"replenishment": {
 		"title": "Time to buy again?",
 		"ariaLabel": "Buy-again suggestions",
