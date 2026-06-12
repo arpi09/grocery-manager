@@ -23,8 +23,6 @@ function item(overrides: Partial<InventoryItem> & Pick<InventoryItem, 'name'>): 
 }
 
 describe('InventoryIntelligenceService', () => {
-	const now = new Date('2026-06-01T12:00:00Z');
-
 	it('aggregates replenishment, pantry health, and waste signals', async () => {
 		const purchasePatternService = {
 			getReplenishmentSuggestions: vi.fn().mockResolvedValue([
