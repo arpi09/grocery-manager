@@ -60,7 +60,8 @@ Läs docs/AGENT_DISPATCH_LOG.md och sammanfatta:
 
 | Tid | Agent | Branch | Task | Execution mode | Status | PR | Blockers | Coordinator follow-up |
 |-----|-------|--------|------|----------------|--------|----|----------|----------------------|
-| 2026-06-13 | cloud-pilot-reality | `feat/cloud-pilot-reality-sync` | CURRENT_REALITY master sync | MANUAL_CLOUD_AGENT | PLANNED | — | Deploy pågår lokalt | Start Cloud efter deploy stabil |
+| 2026-06-13 | cloud-handoff-protocol | `feat/cloud-handoff-protocol` | Cloud Handoff Protocol docs + PR template | MANUAL_CLOUD_AGENT | PR_OPEN | — | — | Review PR; merge when deploy track stable |
+| 2026-06-13 | cloud-pilot-reality | `feat/cloud-pilot-reality-sync` | CURRENT_REALITY master sync | MANUAL_CLOUD_AGENT | PR_OPEN | #39 | `cloud:bootstrap` script saknas på master | Review #39; prod SHA efter deploy |
 
 ---
 
@@ -94,11 +95,18 @@ Forbidden: deploy, Firebase, prod smoke, Cloud SQL, real API keys (OpenAI/Stripe
 
 ## PR description template
 
-Use when opening a PR from a Cloud agent:
+Use when opening a PR from a Cloud agent. Prefer the GitHub template:
+
+**[`.github/PULL_REQUEST_TEMPLATE/cloud_agent.md`](../.github/PULL_REQUEST_TEMPLATE/cloud_agent.md)** — select *cloud_agent* when opening the PR on GitHub.
+
+Inline fallback (same fields):
 
 ```markdown
 ## Task
 <!-- one-line from dispatch log -->
+
+## Execution mode
+MANUAL_CLOUD_AGENT
 
 ## Files touched
 - 
@@ -106,17 +114,12 @@ Use when opening a PR from a Cloud agent:
 ## Tests run
 - [ ] `npm run check:locales`
 - [ ] `npm run quick:dev` (or other: ___)
-- [ ] Other: ___
-
-## Risks
-- 
 
 ## Dispatch log updated
-- [ ] yes — row added/updated in docs/AGENT_DISPATCH_LOG.md
-- [ ] no — reason: ___
+- [ ] yes — row in docs/AGENT_DISPATCH_LOG.md
 
 ## Coordinator follow-up
-<!-- what coordinator must do after merge: prod SHA, deploy, review, etc. -->
+<!-- prod SHA, deploy, merge — coordinator only -->
 ```
 
 ---

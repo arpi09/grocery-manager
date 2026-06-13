@@ -151,3 +151,41 @@ Do **not** assign these without explicit user request:
 - Docs-only changes
 
 See also [INDEX.md](./INDEX.md) for coordinator skills and prod reality, and [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md#cloud-handoff-protocol) for execution modes and coordinator sync.
+
+---
+
+## Cloud Handoff Protocol (summary)
+
+Full protocol: [AGENT_DISPATCH_LOG.md](./AGENT_DISPATCH_LOG.md). GitHub PR template: [`.github/PULL_REQUEST_TEMPLATE/cloud_agent.md`](../.github/PULL_REQUEST_TEMPLATE/cloud_agent.md).
+
+| Role | Owns |
+|------|------|
+| **Cloud agent** | Branch work, tests in scope, PR, dispatch log row |
+| **Coordinator** | Prod SHA, deploy, merge, feature-flag rollout, prod smoke |
+
+**Lifecycle:** coordinator assigns prompt → Cloud agent implements on `feat/*` → opens PR → updates dispatch log → coordinator reviews, merges, deploys, updates prod SHA in `CURRENT_REALITY.md`.
+
+### Prod SHA policy
+
+- Cloud agents **never** update prod SHA in `docs/CURRENT_REALITY.md`.
+- Leave existing prod line or add: *Uppdateras av coordinator efter deploy — ej ändra i Cloud.*
+- Coordinator updates prod SHA only after **verified** Deploy to production (see `skaffu-deploy-verify` skill).
+- `refresh-current-reality.sh` may use `gh` for prod hints — optional on Cloud; master-only sync is enough for Cloud tasks.
+
+### Branch rule
+
+- Cloud agents work on `feat/cloud-*` or explicit feature branches from `master`.
+- **PR only** — never push to `master` directly.
+- Do not merge your own PR; coordinator merges when CI and deploy track allow.
+
+### Cloud Usage Policy
+
+| Tier | Scope | Approval |
+|------|-------|----------|
+| **Tier 1 — default Cloud** | Docs sync, i18n copy, unit tests, domain refactors, `quick:dev`, targeted vitest, `check:locales`, receipt fixtures, `private/DEPENDENCY_HEALTH.md` refresh | No extra approval |
+| **Tier 2 — Cloud + integration** | `quality:integration`, migration/repo tests, marketing copy + `quick:marketing` | Assign explicitly |
+| **Tier 3 — local / coordinator only** | Deploy, prod smoke, E2E, Firebase, Cloud SQL, real API keys, founder seed, mobile/camera manual tests | Never Cloud without explicit user request |
+
+### Bootstrap note
+
+`npm run cloud:bootstrap` expects `scripts/cloud-agent-bootstrap.sh`. If missing on branch, use manual bootstrap in [Bootstrap](#bootstrap-copy-paste) above — same minimum env vars.
