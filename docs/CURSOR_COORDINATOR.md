@@ -6,6 +6,20 @@ Denna fil finns i git. Operativ status, kostnadssiffror och spawn-logg ligger i 
 
 ---
 
+## Agent-ingång (INDEX + skills)
+
+Alla agenter (coordinator och implementation) börjar med [INDEX.md](./INDEX.md) och [CURRENT_REALITY.md](./CURRENT_REALITY.md) — prod SHA, nav, flags och tier.
+
+| Skill (`.cursor/skills/`) | När |
+|---------------------------|-----|
+| `skaffu-deploy-verify` | deploy, prod, release, rollback |
+| `skaffu-core-loop-change` | hem, inkop, onboarding, nav, household |
+| `skaffu-feature-flag-rollout` | `PUBLIC_*`, apphosting.yaml, W1/W2 flags |
+
+Kärnloop-regel (alwaysApply): `.cursor/rules/skaffu-core-loop.mdc`.
+
+---
+
 ## Vad är coordinator?
 
 **Coordinator** är den agent (chat) som äger leveransflödet: prioritering, WIP, spawn av andra agenter, merge/deploy-beslut och uppdatering av `private/`-statusfiler när de finns lokalt.

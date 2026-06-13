@@ -1,0 +1,23 @@
+---
+description: Skaffu kärnloopen — läs CURRENT_REALITY före produktarbete
+alwaysApply: true
+---
+
+# Skaffu kärnloopen (60 dagar)
+
+**Hypotes:** 10 hushåll × 2 medlemmar × 1 gemensam handling/vecka på delad inköpslista.
+
+**Loop:** Utgående mat → Delad inköpslista (`/inkop`) → Gemensam handling → Checkoff → Skafferi → Nästa veckas lista (replenishment).
+
+## Innan produktändring
+
+1. Läs [docs/CURRENT_REALITY.md](../../docs/CURRENT_REALITY.md) — prod SHA, flags, nav.
+2. Tier C (pausa utan explicit user request): grannskafferiet, Kivra forward, Stripe/Pro, meal-AI, wrapped/statistik som hero, PMF-dashboard som user-facing.
+
+## Tier A (prioritera)
+
+Inköpslista, household invite/share, checkoff→pantry, eat-first/expiry, basic skafferi, replenishment, onboarding→inkop.
+
+## Coordinator
+
+Implementation på `feat/*` / `fix/*`; merge `master` när G0 grön. Deploy = skill `skaffu-deploy-verify`.

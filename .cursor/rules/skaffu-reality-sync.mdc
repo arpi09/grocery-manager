@@ -1,0 +1,21 @@
+---
+description: Håll CURRENT_REALITY synkad med nav/home/onboarding
+globs:
+  - src/lib/navigation/**
+  - src/routes/(app)/hem/**
+  - src/routes/inkop/**
+  - src/lib/components/organisms/HomeDashboard.svelte
+  - src/lib/components/organisms/OnboardingGuide.svelte
+  - apphosting.yaml
+  - .env.example
+alwaysApply: false
+---
+
+# Reality sync
+
+När du ändrar default home, bottom nav, onboarding slutpunkt, eller `PUBLIC_*` flags:
+
+1. Uppdatera [docs/CURRENT_REALITY.md](../../docs/CURRENT_REALITY.md) (samma commit).
+2. Om prod-smoke-checklista berör nav: uppdatera [docs/PROD_SMOKE.md](../../docs/PROD_SMOKE.md).
+
+Kör lokalt: `.cursor/scripts/refresh-current-reality.sh` för SHA/nav/flag-hints.
