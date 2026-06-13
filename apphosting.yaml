@@ -179,6 +179,13 @@ env:
       - BUILD
       - RUNTIME
 
+  # W1 — public read-only shopping list share (/lista/[token]); see docs/HOUSEHOLD_GROWTH.md
+  - variable: PUBLIC_SHOPPING_LIST_SHARE_ENABLED
+    value: "true"
+    availability:
+      - BUILD
+      - RUNTIME
+
   # Optional demo household member (omit or override in console)
   # - variable: DEFAULT_MEMBER_EMAIL
   #   value: member@example.com

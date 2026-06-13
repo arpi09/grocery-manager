@@ -15,6 +15,7 @@
 		dismissPostOnboardingSurvey,
 		isOnboardingExcludedPath,
 		isPostOnboardingSurveyPath,
+		shouldShowPostOnboardingShare,
 		shouldShowPostOnboardingSurvey
 	} from '$lib/utils/onboarding';
 	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
@@ -42,6 +43,7 @@
 			!userId ||
 			isOnboardingExcludedPath(pathname) ||
 			!isPostOnboardingSurveyPath(pathname) ||
+			shouldShowPostOnboardingShare(userId) ||
 			!shouldShowPostOnboardingSurvey(userId)
 		) {
 			open = false;

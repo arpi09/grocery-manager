@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
 	formatAnyListExportLine,
 	formatOurGroceriesExportLine,
+	appendShoppingListExportFooter,
 	formatShoppingListExport,
 	formatShoppingListExportByFormat,
 	formatShoppingListExportLine
@@ -98,5 +99,21 @@ describe('formatShoppingListExportByFormat', () => {
 	it('uses OurGroceries format', () => {
 		const text = formatShoppingListExportByFormat([{ name: 'Eggs' }], 'ourgroceries');
 		expect(text).toBe('Eggs');
+	});
+});
+
+describe('appendShoppingListExportFooter', () => {
+	it('appends footer after items with blank line separator', () => {
+		expect(
+			appendShoppingListExportFooter('Mjölk\nBröd', 'Gemensam inköpslista med Skaffu: https://skaffu.com/register?utm_content=export')
+		).toBe('Mjölk\nBröd\n\nGemensam inköpslista med Skaffu: https://skaffu.com/register?utm_content=export');
+	});
+
+	it('returns items only when footer is empty', () => {
+		expect(appendShoppingListExportFooter('Mjölk', '')).toBe('Mjölk');
+	});
+
+	it('returns empty string when items are empty', () => {
+		expect(appendShoppingListExportFooter('', 'footer')).toBe('');
 	});
 });

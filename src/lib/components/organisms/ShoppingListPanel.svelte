@@ -25,6 +25,7 @@
 	import { fetchCheckedShoppingItems } from '$lib/client/shopping-data';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import { recordShoppingListExport } from '$lib/utils/household-invite-prompt';
+	import { recordShoppingListActivation } from '$lib/utils/onboarding';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
@@ -33,9 +34,11 @@
 	import { get } from 'svelte/store';
 	import {
 		formatShoppingListExportByFormat,
+		appendShoppingListExportFooter,
 		formatShoppingListExportLine,
 		type ShoppingListExportFormat
 	} from '$lib/utils/shopping-list-export';
+	import { buildAcquisitionRegisterUrl } from '$lib/marketing/acquisition-attribution';
 
 	let {
 		items,
@@ -167,10 +170,15 @@
 
 	async function copyExportList(format: ShoppingListExportFormat) {
 		const exportItems = await allItemsForExport();
-		const text = formatShoppingListExportByFormat(exportItems, format);
-		if (!text) {
+		const itemsText = formatShoppingListExportByFormat(exportItems, format);
+		if (!itemsText) {
 			return;
 		}
+		const registerUrl = buildAcquisitionRegisterUrl('export', get(page).url.origin);
+		const text = appendShoppingListExportFooter(
+			itemsText,
+			t('shopping.exportFooter', { url: registerUrl })
+		);
 		await navigator.clipboard.writeText(text);
 		exportCopiedFormat = format;
 		void trackProductEvent('shopping_list_export', { format });
@@ -467,7 +475,10 @@
 			action="?/add"
 			use:enhance={bindSubmittingWithToast(
 				(v) => (addSubmitting = v),
-				() => showSuccessToast(t('actionToast.shoppingAdded'))
+				() => {
+					showSuccessToast(t('actionToast.shoppingAdded'));
+					recordShoppingListActivation(get(page).data.user?.id);
+				}
 			)}
 			class="add-form"
 		>
