@@ -42,11 +42,11 @@ Cloud agents: [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md).
 |---|------|--------|
 | 1 | Add `quick:dev` npm script | **Done** (this branch) |
 | 2 | Create `private/DEPENDENCY_HEALTH.md` | Pending |
-| 3 | Integration test parallelism pilot | Pending |
+| 3 | Integration test parallelism pilot | **Done** (PGlite per-file; `fileParallelism: true`) |
 | 4 | `lista/[token]` guest join integration test | Pending |
 | 5 | `receipt-import.ts` focused integration test | Pending |
 | 6 | Duo wedge product-events test coverage | Pending |
-| 7 | Patch dependency bump PR | Pending |
+| 7 | Patch dependency bump PR | **Done** (this branch) |
 | 8 | CI: parallel fast + integration jobs | Pending |
 | 9 | Split `LearningEngineService` | Delay until Brain on prod |
 | 10 | Feature flags registry + CURRENT_REALITY sync | **Done** (this branch) |
