@@ -92,7 +92,6 @@
 		summary.totalItems === 0 ? t('home.taglineEmpty') : t('home.taglineEngaged')
 	);
 
-	const hasExpiring = $derived(summary.expiringSoon.length > 0);
 	const expiringCount = $derived(summary.expiringSoon.length);
 	const pantryStatus = $derived(summary.pantryStatus);
 

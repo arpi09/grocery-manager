@@ -2,8 +2,11 @@ import {
 	InvalidConsumptionAmountError,
 	InventoryNotFoundError
 } from '$lib/application/inventory.service';
+import { isEstimatedExpirySource } from '$lib/domain/learning/expiry-source';
+import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 import { consumeItemSchema } from '$lib/validation/consumption.schemas';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
+import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { formatNumericQuantity, parseNumericQuantity } from '$lib/domain/consumption-quantity';
 import { trackInventoryWrite } from '$lib/server/sync-analytics';
@@ -46,6 +49,25 @@ export const actions: Actions = {
 			return fail(400, { errors: parsed.error.flatten().fieldErrors });
 		}
 
+		let existing;
+		try {
+			existing = await event.locals.inventoryService.getItem(
+				event.locals.householdId!,
+				event.params.id
+			);
+		} catch (e) {
+			if (e instanceof InventoryNotFoundError) {
+				error(404, 'Item not found');
+			}
+			throw e;
+		}
+
+		const newExpiresOn = parsed.data.expiresOn || null;
+		const expiryCorrected =
+			isShelfLifeLearningEnabled() &&
+			isEstimatedExpirySource(existing.expiresOnSource) &&
+			newExpiresOn !== existing.expiresOn;
+
 		try {
 			await event.locals.inventoryService.updateItem(
 				event.locals.householdId!,
@@ -55,7 +77,8 @@ export const actions: Actions = {
 					location: parsed.data.location,
 					quantity: parsed.data.quantity,
 					unit: parsed.data.unit || null,
-					expiresOn: parsed.data.expiresOn || null,
+					expiresOn: newExpiresOn,
+					expiresOnSource: newExpiresOn ? 'user_set' : null,
 					notes: parsed.data.notes || null
 				},
 				event.locals.householdRole!
@@ -67,7 +90,32 @@ export const actions: Actions = {
 			throw e;
 		}
 
-		redirect(302, appendActionToast(`/inventory/${parsed.data.location}`, 'itemUpdated', parsed.data.name));
+		if (expiryCorrected && newExpiresOn) {
+			const normalizedKey = normalizeReceiptProductName(parsed.data.name);
+			if (normalizedKey) {
+				await event.locals.learningEngineService.recordFeedback({
+					householdId: event.locals.householdId!,
+					userId: event.locals.user!.id,
+					normalizedKey,
+					context: {
+						location: parsed.data.location,
+						productName: parsed.data.name,
+						source: 'inventory_edit'
+					},
+					predictedExpiresOn: existing.expiresOn,
+					predictedTypicalDays: null,
+					actualExpiresOn: newExpiresOn,
+					feedbackType: 'corrected',
+					modelVersion: 'inventory-edit'
+				});
+			}
+		}
+
+		const toastKind = expiryCorrected ? 'learningCorrected' : 'itemUpdated';
+		redirect(
+			302,
+			appendActionToast(`/inventory/${parsed.data.location}`, toastKind, parsed.data.name)
+		);
 	},
 	delete: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);

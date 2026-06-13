@@ -47,7 +47,9 @@ export type ActionToastKind =
 	| 'adminSocialPostPublished'
 	| 'adminSocialPostPublishFailed'
 	| 'adminGuideApproved'
-	| 'adminGuidePublished';
+	| 'adminGuidePublished'
+	| 'suggestionReset'
+	| 'learningCorrected';
 
 const ACTION_TOAST_KEYS: Record<
 	ActionToastKind,
@@ -196,6 +198,14 @@ const ACTION_TOAST_KEYS: Record<
 	adminGuidePublished: {
 		withLabel: 'actionToast.adminGuidePublished',
 		generic: 'actionToast.adminGuidePublished'
+	},
+	suggestionReset: {
+		withLabel: 'actionToast.suggestionReset',
+		generic: 'actionToast.suggestionReset'
+	},
+	learningCorrected: {
+		withLabel: 'actionToast.learningCorrected',
+		generic: 'actionToast.learningCorrected'
 	}
 };
 

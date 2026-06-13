@@ -1,6 +1,7 @@
 <script lang="ts">
 
 	import Badge from '$lib/components/atoms/Badge.svelte';
+	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import PriceMemoryChip from '$lib/components/molecules/PriceMemoryChip.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
@@ -8,6 +9,7 @@
 	import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
 	import { daysUntilExpiry, formatExpiryDate, EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
 	import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
+	import { isEstimatedExpirySource } from '$lib/domain/learning/expiry-source';
 	import { getLocale, t } from '$lib/i18n';
 
 
@@ -186,12 +188,6 @@
 				<PriceMemoryChip normalizedKey={priceMemoryKey} />
 			{/if}
 
-			{#if item.expiresOnSource === 'ai_inferred' && item.expiresOn && !finished && !autoExpired}
-
-				<Badge tone="default">{t('inventory.aiExpiryBadge')}</Badge>
-
-			{/if}
-
 		</div>
 
 	</td>
@@ -211,6 +207,9 @@
 				{expiryLabel}
 
 			</Badge>
+			{#if isEstimatedExpirySource(item.expiresOnSource) && !finished && !autoExpired}
+				<EstimatedBadge source={item.expiresOnSource} />
+			{/if}
 
 		{:else}
 

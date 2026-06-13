@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Badge from '$lib/components/atoms/Badge.svelte';
+	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
@@ -11,6 +12,7 @@
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
 	import { DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
+	import { isEstimatedExpirySource } from '$lib/domain/learning/expiry-source';
 	import { getLocale, t } from '$lib/i18n';
 	import { presentCelebration } from '$lib/utils/present-celebration.svelte';
 	import {
@@ -391,6 +393,9 @@
 						<span class="chip-name">{item.name}</span>
 						{#if daysLeft !== null}
 							<Badge tone="warning">{formatDaysLeft(daysLeft, getLocale())}</Badge>
+						{/if}
+						{#if isEstimatedExpirySource(item.expiresOnSource)}
+							<EstimatedBadge source={item.expiresOnSource} />
 						{/if}
 					</Card>
 				</li>
