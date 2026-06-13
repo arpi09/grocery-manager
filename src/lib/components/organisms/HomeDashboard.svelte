@@ -3,12 +3,10 @@
 	import { page } from '$app/state';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import NavIcon from '$lib/components/atoms/NavIcon.svelte';
-	import ProUpgradeCta from '$lib/components/molecules/ProUpgradeCta.svelte';
 	import FeatureIcon, { type FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import EatFirstSection from '$lib/components/organisms/EatFirstSection.svelte';
 	import ReceiptAutopilotSection from '$lib/components/organisms/ReceiptAutopilotSection.svelte';
-	import EngagementStrip from '$lib/components/molecules/EngagementStrip.svelte';
 	import WeeklyRitualHero from '$lib/components/molecules/WeeklyRitualHero.svelte';
 	import HomeNextAction from '$lib/components/molecules/HomeNextAction.svelte';
 	import MealTimeSuggestions from '$lib/components/organisms/MealTimeSuggestions.svelte';
@@ -21,8 +19,6 @@
 	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 	import type { DuplicateNameGroupSummary } from '$lib/application/inventory.service';
 	import type { HouseholdActivityEvent } from '$lib/domain/household-activity';
-	import SkafferapportWidget from '$lib/components/molecules/SkafferapportWidget.svelte';
-	import WrappedBanner from '$lib/components/molecules/WrappedBanner.svelte';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import type { EngagementStrip as EngagementStripData } from '$lib/application/gamification.service';
 	import type { SavingsReport } from '$lib/domain/savings-estimate';
@@ -88,9 +84,13 @@
 
 	const returnTo = APP_HOME_PATH;
 	const scanPhotoHref = $derived(scanModeHref('photo', returnTo));
-	const scanBarcodeHref = $derived(scanModeHref('barcode', returnTo));
 	const userId = $derived(page.data.user?.id ?? null);
-	const isPro = $derived(Boolean(page.data.isPro));
+
+	const weeklyShopStatus = $derived(
+		shoppingListCount > 0
+			? t('home.shoppingTeaser', { count: shoppingListCount })
+			: t('home.shoppingTeaserEmpty')
+	);
 
 	let activationProgress = $state<ActivationProgress>(getActivationProgress(null));
 
@@ -370,13 +370,16 @@
 			</details>
 		{/if}
 
-		<a class="shopping-teaser shopping-teaser-primary" href="/inkop" data-analytics-id="home.weekly_shop_cta">
-			<span class="shopping-teaser-icon" aria-hidden="true">
-				<NavIcon id="shopping" />
-			</span>
-			<span class="shopping-teaser-copy">{t('home.weeklyShopCta')}</span>
-			<span class="shopping-teaser-arrow" aria-hidden="true">→</span>
-		</a>
+		<div class="weekly-shop-block">
+			<a class="shopping-teaser shopping-teaser-primary" href="/inkop" data-analytics-id="home.weekly_shop_cta">
+				<span class="shopping-teaser-icon" aria-hidden="true">
+					<NavIcon id="shopping" />
+				</span>
+				<span class="shopping-teaser-copy">{t('home.weeklyShopCta')}</span>
+				<span class="shopping-teaser-arrow" aria-hidden="true">→</span>
+			</a>
+			<p class="weekly-shop-status" role="status">{weeklyShopStatus}</p>
+		</div>
 
 		{#if !canWrite}
 			<p class="readonly-hint">{t('home.readonlyHint')}</p>
@@ -422,9 +425,6 @@
 						<WastePreventionBanner alert={intelligence.waste} />
 					{/if}
 				{/if}
-				{#if !isPro}
-					<ProUpgradeCta variant="card" />
-				{/if}
 
 				{#if canWrite}
 					<div class="quick-add-secondary">
@@ -450,13 +450,7 @@
 					</section>
 				{/if}
 
-				<WrappedBanner />
-				<EngagementStrip {engagement} />
 				<HouseholdActivityFeed events={activityEvents} />
-
-				{#if savings.hasData}
-					<SkafferapportWidget {savings} />
-				{/if}
 
 				{#if !hasExpiring && !showWeeklyRitual}
 					<details class="home-disclosure nested" bind:open={eatFirstOpen}>
@@ -623,6 +617,19 @@
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
 		background: var(--color-surface);
+	}
+
+	.weekly-shop-block {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
+	}
+
+	.weekly-shop-status {
+		margin: 0;
+		padding: 0 var(--space-sm);
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
 	}
 
 	.shopping-teaser {
