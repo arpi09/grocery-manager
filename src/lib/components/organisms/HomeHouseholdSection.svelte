@@ -74,9 +74,9 @@
 	);
 </script>
 
-<div class="attention-stack">
+<div class="household-stack">
 	{#if hasExpiring}
-		<div class="attention-block attention-block--eat-first">
+		<div class="household-block household-block--eat-first">
 			<EatFirstSection
 				compact
 				expiringItems={expiringSoon}
@@ -87,42 +87,42 @@
 	{/if}
 
 	{#if showWaste && briefing.waste}
-		<div class="attention-block">
+		<div class="household-block">
 			<WastePreventionBanner alert={briefing.waste} />
 		</div>
 	{/if}
 
 	{#if showSync}
-		<a class="attention-row" href="/inventory/synk" data-analytics-id="home.attention_sync">
+		<a class="household-row" href="/inventory/synk" data-analytics-id="home.household_sync">
 			<span>{t('home.pantryStatusStale', { count: staleCount })}</span>
 			<span class="arrow" aria-hidden="true">→</span>
 		</a>
 	{/if}
 
 	{#each pantryHealthRows as insight (insight.id)}
-		<a class="attention-row" href={insight.href}>
+		<a class="household-row" href={insight.href}>
 			<span>{pantryHealthMessage(insight)}</span>
 			<span class="arrow" aria-hidden="true">→</span>
 		</a>
 	{/each}
 
 	{#if showCalm}
-		<p class="attention-calm" role="status">{t('home.pantryStatusAllGood')}</p>
+		<p class="household-calm" role="status">{t('home.pantryStatusAllGood')}</p>
 	{/if}
 </div>
 
 <style>
-	.attention-stack {
+	.household-stack {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
 	}
 
-	.attention-block--eat-first :global(.eat-first) {
+	.household-block--eat-first :global(.eat-first) {
 		margin: 0;
 	}
 
-	.attention-row {
+	.household-row {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -138,7 +138,7 @@
 		line-height: 1.45;
 	}
 
-	.attention-row:hover span:first-child {
+	.household-row:hover span:first-child {
 		text-decoration: underline;
 		text-underline-offset: 2px;
 	}
@@ -148,7 +148,7 @@
 		color: var(--color-text-muted);
 	}
 
-	.attention-calm {
+	.household-calm {
 		margin: 0;
 		padding: var(--space-sm) var(--space-md);
 		color: var(--color-text-muted);

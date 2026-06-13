@@ -144,6 +144,21 @@
 		});
 	}
 
+	function memoryChipLabels(suggestion: ReplenishmentSuggestion): string[] {
+		if (surface !== 'hem') {
+			return [];
+		}
+
+		const chips: string[] = [];
+		if (suggestion.avgIntervalDays !== null && suggestion.avgIntervalDays > 0) {
+			chips.push(t('replenishment.memoryChip.interval', { interval: suggestion.avgIntervalDays }));
+		}
+		if (suggestion.importCount >= 2) {
+			chips.push(t('replenishment.memoryChip.fromReceipts'));
+		}
+		return chips;
+	}
+
 	async function acceptSuggestion(normalizedKey: string) {
 		if (!canEdit || acceptingKey) return;
 		acceptingKey = normalizedKey;
@@ -218,11 +233,19 @@
 		<ul class="suggestions">
 			{#each items as suggestion (suggestion.normalizedKey)}
 				{@const dedupeWarnings = visibleDedupeWarnings(suggestion.normalizedKey)}
+				{@const memoryChips = memoryChipLabels(suggestion)}
 				<li>
 					<Card class="suggestion-card">
 						<div class="copy">
 							<span class="name">{suggestion.displayName}</span>
 							<span class="meta">{reasonMessage(suggestion)}</span>
+							{#if memoryChips.length > 0}
+								<div class="memory-chips">
+									{#each memoryChips as chip (chip)}
+										<Badge tone="default">{chip}</Badge>
+									{/each}
+								</div>
+							{/if}
 							<span class="quantity-hint">{formatQuantity(suggestion)}</span>
 							<PriceMemoryChip
 								normalizedKey={suggestion.normalizedKey}
@@ -331,6 +354,12 @@
 	.meta {
 		font-size: 0.875rem;
 		color: var(--color-text-muted);
+	}
+
+	.memory-chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-xs);
 	}
 
 	.quantity-hint {
