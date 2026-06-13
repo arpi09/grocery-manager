@@ -186,30 +186,34 @@ env:
       - BUILD
       - RUNTIME
 
-  # Brain V1 — default off until seed cohort smoke (see docs/LEARNING_ENGINE.md)
+  # Brain V1 — enabled post-merge smoke (see docs/LEARNING_ENGINE.md)
   - variable: SHELF_LIFE_LEARNING_ENABLED
-    value: "false"
+    value: "true"
     availability:
       - RUNTIME
   - variable: PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT
-    value: "false"
+    value: "true"
     availability:
       - BUILD
       - RUNTIME
   - variable: LOCATION_LEARNING_ENABLED
-    value: "false"
+    value: "true"
     availability:
       - RUNTIME
   - variable: REPLENISHMENT_LEARNING_ENABLED
-    value: "false"
+    value: "true"
     availability:
       - RUNTIME
   - variable: SHELF_LIFE_LLM_ENABLED
-    value: "false"
+    value: "true"
+    availability:
+      - RUNTIME
+  - variable: LOCATION_LLM_ENABLED
+    value: "true"
     availability:
       - RUNTIME
   - variable: HOUSEHOLD_FAVORITES_ENABLED
-    value: "false"
+    value: "true"
     availability:
       - RUNTIME
 
