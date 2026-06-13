@@ -3,6 +3,7 @@ import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { redirect } from '@sveltejs/kit';
 import { InviteNotFoundError } from '$lib/application/household.service';
 import { mapHouseholdErrorToFail } from '$lib/application/household-errors';
+import { recordProductEvent } from '$lib/server/product-events';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals, url }) => {
@@ -53,8 +54,19 @@ export const actions: Actions = {
 			redirect(302, `/login?redirect=${encodeURIComponent(`/invite/${params.token}`)}`);
 		}
 
+		let preview;
 		try {
-			await locals.householdService.acceptInvite(
+			preview = await locals.householdService.getInvitePreview(params.token);
+		} catch (error) {
+			if (error instanceof InviteNotFoundError) {
+				return mapHouseholdErrorToFail(error, 'acceptError', locals.locale);
+			}
+			throw error;
+		}
+
+		let householdId: string;
+		try {
+			householdId = await locals.householdService.acceptInvite(
 				params.token,
 				locals.user.id,
 				locals.user.email
@@ -62,6 +74,16 @@ export const actions: Actions = {
 		} catch (error) {
 			return mapHouseholdErrorToFail(error, 'acceptError', locals.locale);
 		}
+
+		recordProductEvent(locals.pmfService, {
+			userId: locals.user.id,
+			householdId,
+			eventType: 'household_invite_accepted',
+			metadata: {
+				context: isShareInviteEmail(preview.email) ? 'share' : 'settings',
+				role: preview.role
+			}
+		});
 
 		redirect(302, APP_HOME_PATH);
 	}
