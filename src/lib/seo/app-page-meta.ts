@@ -17,7 +17,10 @@ function suffix(): string {
 
 /** Human-readable document title for authenticated app routes. */
 export function resolveAppPageTitle(pathname: string, locale: Locale): string {
-	if (pathname === APP_HOME_PATH) {
+	if (pathname === APP_HOME_PATH || pathname.startsWith('/inkop')) {
+		return translate(locale, 'shopping.title') + suffix();
+	}
+	if (pathname === '/hem') {
 		return translate(locale, 'home.title') + suffix();
 	}
 	if (pathname.startsWith('/inventory/')) {
@@ -27,9 +30,6 @@ export function resolveAppPageTitle(pathname: string, locale: Locale): string {
 			return `${label}${suffix()}`;
 		}
 		return translate(locale, 'inventory.title') + suffix();
-	}
-	if (pathname.startsWith('/inkop')) {
-		return translate(locale, 'shopping.title') + suffix();
 	}
 	if (pathname.startsWith('/planer')) {
 		return translate(locale, 'planer.title') + suffix();

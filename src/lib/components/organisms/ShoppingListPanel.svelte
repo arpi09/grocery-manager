@@ -25,6 +25,7 @@
 	import { fetchCheckedShoppingItems } from '$lib/client/shopping-data';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import { recordShoppingListExport } from '$lib/utils/household-invite-prompt';
+	import { recordShoppingListItemActivation } from '$lib/utils/onboarding';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
@@ -467,7 +468,10 @@
 			action="?/add"
 			use:enhance={bindSubmittingWithToast(
 				(v) => (addSubmitting = v),
-				() => showSuccessToast(t('actionToast.shoppingAdded'))
+				() => {
+					showSuccessToast(t('actionToast.shoppingAdded'));
+					recordShoppingListItemActivation(get(page).data.user?.id);
+				}
 			)}
 			class="add-form"
 		>

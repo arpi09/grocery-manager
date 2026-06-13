@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import CelebrationBurst from '$lib/components/atoms/CelebrationBurst.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import OnboardingCelebrateIllustration from '$lib/components/organisms/OnboardingCelebrateIllustration.svelte';
-	import OnboardingScanModal from '$lib/components/organisms/OnboardingScanModal.svelte';
-	import { setActivationPath } from '$lib/utils/onboarding';
 	import OnboardingStepIllustration from '$lib/components/organisms/OnboardingStepIllustration.svelte';
 	import { trackProductEvent } from '$lib/client/product-events';
+	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { t, type MessageKey } from '$lib/i18n';
 	import {
 		ONBOARDING_PROGRESS_EVENT,
@@ -22,6 +22,7 @@
 		getActivationProgress,
 		isActivationComplete,
 		isOnboardingExcludedPath,
+		setActivationPath,
 		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
 	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
@@ -43,12 +44,12 @@
 		{
 			id: 'welcome',
 			titleKey: 'onboarding.welcome',
-			bodyKey: 'onboarding.welcomeBodyShort'
+			bodyKey: 'onboarding.welcomeBodyShoppingList'
 		},
 		{
 			id: 'addItems',
 			titleKey: 'onboarding.addItemsTitle',
-			bodyKey: 'onboarding.addItemsBodyBinary'
+			bodyKey: 'onboarding.addItemsBodyShoppingList'
 		},
 		{
 			id: 'celebrate',
@@ -61,8 +62,6 @@
 	let stepIndex = $state(0);
 	let stepDirection = $state<'forward' | 'back'>('forward');
 	let registrationWelcomeDone = $state(false);
-	let scanModalOpen = $state(false);
-	let scanModalModes = $state<('barcode' | 'photo' | 'receipt')[] | undefined>(undefined);
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
@@ -105,7 +104,6 @@
 
 	function closeGuide() {
 		open = false;
-		scanModalOpen = false;
 	}
 
 	function skipGuide() {
@@ -140,31 +138,15 @@
 		clearCelebrationPending(userId);
 		completeOnboarding(userId);
 		closeGuide();
+		void goto(APP_HOME_PATH);
 	}
 
-	function handleItemSaved() {
-		scanModalOpen = false;
-		scanModalModes = undefined;
-		if (stepIndex < 2) {
-			stepDirection = 'forward';
-			stepIndex = 2;
-		}
-	}
-
-	function chooseReceiptPath() {
+	async function beginAddingToList() {
 		if (userId) {
-			setActivationPath('receipt', userId);
+			setActivationPath('shopping', userId);
 		}
-		scanModalModes = ['receipt'];
-		scanModalOpen = true;
-	}
-
-	function chooseBarcodePath() {
-		if (userId) {
-			setActivationPath('barcode', userId);
-		}
-		scanModalModes = ['barcode'];
-		scanModalOpen = true;
+		closeGuide();
+		await goto('/inkop');
 	}
 
 	function syncCelebrateStep() {
@@ -241,7 +223,7 @@
 	});
 
 	$effect(() => {
-		if (!open && !scanModalOpen) {
+		if (!open) {
 			return;
 		}
 		return registerBlockingOverlay();
@@ -249,7 +231,7 @@
 </script>
 
 <Modal
-	open={open && !scanModalOpen}
+	open={open}
 	onClose={skipGuide}
 	variant="sheet"
 	dismissible={false}
@@ -296,12 +278,12 @@
 		<p class="step-body">{currentStep.body}</p>
 
 		{#if currentStep.id === 'addItems'}
-			<p class="scan-tab-hint">{t('onboarding.scanTabHint')}</p>
-			{#if activationProgress?.inProgress && activationProgress.path === 'barcode' && activationProgress.barcodeCount > 0}
+			<p class="scan-tab-hint">{t('onboarding.shoppingListInviteHint')}</p>
+			{#if activationProgress?.inProgress && activationProgress.path === 'shopping' && activationProgress.shoppingListCount > 0}
 				<p class="progress-note" role="status">
-					{t('onboarding.barcodeProgress', {
-						count: activationProgress.barcodeCount,
-						goal: activationProgress.barcodeGoal
+					{t('onboarding.shoppingListProgress', {
+						count: activationProgress.shoppingListCount,
+						goal: activationProgress.shoppingListGoal
 					})}
 				</p>
 			{/if}
@@ -310,21 +292,11 @@
 				<Button
 					type="button"
 					fullWidth
-					data-testid="onboarding-choose-receipt"
-					data-analytics-id="onboarding.choose_receipt"
-					onclick={chooseReceiptPath}
+					data-testid="onboarding-start-shopping-list"
+					data-analytics-id="onboarding.start_shopping_list"
+					onclick={beginAddingToList}
 				>
-					{t('onboarding.chooseReceipt')}
-				</Button>
-				<Button
-					type="button"
-					variant="secondary"
-					fullWidth
-					data-testid="onboarding-choose-barcode"
-					data-analytics-id="onboarding.choose_barcode"
-					onclick={chooseBarcodePath}
-				>
-					{t('onboarding.chooseBarcode')}
+					{t('onboarding.startShoppingList')}
 				</Button>
 			</div>
 		{/if}
@@ -362,16 +334,6 @@
 		</div>
 	{/snippet}
 </Modal>
-
-<OnboardingScanModal
-	open={scanModalOpen}
-	allowedModes={scanModalModes}
-	onClose={() => {
-		scanModalOpen = false;
-		scanModalModes = undefined;
-	}}
-	onItemSaved={handleItemSaved}
-/>
 
 <style>
 	:global(.onboarding-panel) {

@@ -226,6 +226,7 @@
 	const showHouseholdBriefing = $derived(
 		summary.totalItems > 0 && householdBriefing.hasActionableContent
 	);
+	const weeklyFocus = $derived(summary.totalItems > 0);
 
 	const replenishmentKeys = $derived(new Set(intelligence.replenishment.map((entry) => entry.normalizedKey)));
 
@@ -238,7 +239,7 @@
 	);
 
 	const showWeeklyRitualHero = $derived(
-		showWeeklyRitual && !householdBriefing.hideWeeklyRitualSync
+		!weeklyFocus && showWeeklyRitual && !householdBriefing.hideWeeklyRitualSync
 	);
 
 	const showMealTimeSuggestions = $derived.by(() => {
@@ -284,25 +285,10 @@
 		return () => mq.removeEventListener('change', syncLocations);
 	});
 
-	const emptyPrimaryHref = $derived(
-		activationProgress.path === 'receipt'
-			? scanModeHref('receipt', returnTo)
-			: scanPhotoHref
-	);
-
-	const emptyPrimaryLabel = $derived(
-		activationProgress.path === 'receipt'
-			? t('home.emptyActionReceipt')
-			: t('home.chipPhotoRound')
-	);
-
-	const emptySecondaryHref = $derived(
-		activationProgress.path === 'receipt' ? scanBarcodeHref : scanModeHref('receipt', returnTo)
-	);
-
-	const emptySecondaryLabel = $derived(
-		activationProgress.path === 'receipt' ? t('home.emptyActionBarcode') : t('home.emptyActionReceipt')
-	);
+	const emptyPrimaryHref = '/inkop';
+	const emptyPrimaryLabel = t('home.emptyActionShopping');
+	const emptySecondaryHref = $derived(scanPhotoHref);
+	const emptySecondaryLabel = t('home.chipPhotoRound');
 
 	const locationIcons: Record<StorageLocation, FeatureIconId> = {
 		fridge: 'fridge',
@@ -346,9 +332,9 @@
 	{#if summary.totalItems === 0}
 		{#if canWrite}
 			<EmptyState
-				iconId={activationProgress.path === 'receipt' ? 'receipt' : 'photo'}
+				iconId="box"
 				title={t('home.emptyTitle')}
-				description={t('home.emptyDescription')}
+				description={t('home.emptyDescriptionShopping')}
 				actionLabel={emptyPrimaryLabel}
 				actionHref={emptyPrimaryHref}
 				primaryAnalyticsId="home.empty_primary"
@@ -370,60 +356,7 @@
 			</Card>
 		{/if}
 	{:else}
-		<HouseholdBriefing
-			{intelligence}
-			staleCount={pantryStatus.staleCount}
-			{shoppingListCount}
-			{canWrite}
-			{householdId}
-			finishSuggestions={receiptFinishSuggestions}
-		/>
-
-		{#if showWeeklyRitualHero || showPantryStatusCard}
-			<WeeklyRitualHero
-				statusOnly
-				expiringCount={expiringCount}
-				staleCount={pantryStatus.staleCount}
-				syncHealth={pantryStatus.syncHealth}
-				pantryStatusLines={pantryStatusOnlyLines}
-				allGood={pantryAllGood && !hasExpiring && pantryStatus.staleCount === 0}
-			/>
-		{/if}
-
-		{#if !showHouseholdBriefing}
-			<HomeNextAction
-				totalItems={summary.totalItems}
-				{expiringCount}
-				staleCount={pantryStatus.staleCount}
-				{canWrite}
-				{returnTo}
-			/>
-
-			<a class="shopping-teaser" href="/inkop" data-analytics-id="home.shopping_teaser">
-				<span class="shopping-teaser-icon" aria-hidden="true">
-					<NavIcon id="shopping" />
-				</span>
-				<span class="shopping-teaser-copy">
-					{shoppingListCount > 0
-						? t('home.shoppingTeaser', { count: shoppingListCount })
-						: t('home.shoppingTeaserEmpty')}
-				</span>
-				<span class="shopping-teaser-arrow" aria-hidden="true">→</span>
-			</a>
-		{/if}
-
-		{#if !canWrite}
-			<p class="readonly-hint">{t('home.readonlyHint')}</p>
-		{/if}
-
-		{#if !showHouseholdBriefing && intelligence.pantryHealth.length > 0}
-			<PantryHealthInsights insights={intelligence.pantryHealth} />
-		{/if}
-
 		{#if hasExpiring}
-			{#if !showHouseholdBriefing && intelligence.waste}
-				<WastePreventionBanner alert={intelligence.waste} />
-			{/if}
 			<details class="home-disclosure eat-first-prominent" bind:open={eatFirstOpen}>
 				<summary>
 					{t('home.eatFirstSummary', { count: expiringCount })}
@@ -437,9 +370,58 @@
 			</details>
 		{/if}
 
+		<a class="shopping-teaser shopping-teaser-primary" href="/inkop" data-analytics-id="home.weekly_shop_cta">
+			<span class="shopping-teaser-icon" aria-hidden="true">
+				<NavIcon id="shopping" />
+			</span>
+			<span class="shopping-teaser-copy">{t('home.weeklyShopCta')}</span>
+			<span class="shopping-teaser-arrow" aria-hidden="true">→</span>
+		</a>
+
+		{#if !canWrite}
+			<p class="readonly-hint">{t('home.readonlyHint')}</p>
+		{/if}
+
 		<details class="home-disclosure more-on-home" bind:open={moreOnHomeOpen}>
 			<summary>{t('home.moreOnHome')}</summary>
 			<div class="more-on-home-body">
+				{#if !weeklyFocus}
+					<HouseholdBriefing
+						{intelligence}
+						staleCount={pantryStatus.staleCount}
+						{shoppingListCount}
+						{canWrite}
+						{householdId}
+						finishSuggestions={receiptFinishSuggestions}
+					/>
+
+					{#if showWeeklyRitualHero || showPantryStatusCard}
+						<WeeklyRitualHero
+							statusOnly
+							expiringCount={expiringCount}
+							staleCount={pantryStatus.staleCount}
+							syncHealth={pantryStatus.syncHealth}
+							pantryStatusLines={pantryStatusOnlyLines}
+							allGood={pantryAllGood && !hasExpiring && pantryStatus.staleCount === 0}
+						/>
+					{/if}
+
+					<HomeNextAction
+						totalItems={summary.totalItems}
+						{expiringCount}
+						staleCount={pantryStatus.staleCount}
+						{canWrite}
+						{returnTo}
+					/>
+
+					{#if intelligence.pantryHealth.length > 0}
+						<PantryHealthInsights insights={intelligence.pantryHealth} />
+					{/if}
+
+					{#if hasExpiring && intelligence.waste}
+						<WastePreventionBanner alert={intelligence.waste} />
+					{/if}
+				{/if}
 				{#if !isPro}
 					<ProUpgradeCta variant="card" />
 				{/if}
@@ -655,6 +637,11 @@
 		box-shadow: var(--shadow-sm);
 		text-decoration: none;
 		color: inherit;
+	}
+
+	.shopping-teaser-primary {
+		border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
 	}
 
 	.shopping-teaser:hover {

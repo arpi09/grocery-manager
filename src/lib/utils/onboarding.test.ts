@@ -1,16 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	ACTIVATION_BARCODE_GOAL,
+	ACTIVATION_SHOPPING_LIST_GOAL,
 	ONBOARDING_VERSION,
 	clearCelebrationPending,
 	completeOnboarding,
 	getActivationProgress,
 	isActivationComplete,
 	isOnboardingExcludedPath,
+	isOnboardingPrimaryPath,
 	isPostOnboardingSurveyPath,
 	markSignupAt,
 	recordBarcodeActivation,
 	recordReceiptActivation,
+	recordShoppingListItemActivation,
 	resetOnboarding,
 	secondsSinceSignup,
 	shouldShowCelebration,
@@ -88,9 +91,15 @@ describe('onboarding helpers', () => {
 
 	it('limits post-onboarding survey to calm app surfaces', () => {
 		expect(isPostOnboardingSurveyPath('/hem')).toBe(true);
+		expect(isPostOnboardingSurveyPath('/inkop')).toBe(true);
 		expect(isPostOnboardingSurveyPath('/inventory/fridge')).toBe(true);
 		expect(isPostOnboardingSurveyPath('/scan')).toBe(false);
 		expect(isPostOnboardingSurveyPath('/scan?mode=barcode')).toBe(false);
+	});
+
+	it('uses inkop as the primary onboarding surface', () => {
+		expect(isOnboardingPrimaryPath('/inkop')).toBe(true);
+		expect(isOnboardingPrimaryPath('/hem')).toBe(false);
 	});
 
 	it('excludes admin and auth routes', () => {
@@ -158,6 +167,18 @@ describe('activation progress', () => {
 		expect(progress.barcodeCount).toBe(1);
 		expect(progress.inProgress).toBe(false);
 		expect(isActivationComplete(TEST_USER_A)).toBe(true);
+	});
+
+	it('completes activation after three shopping list items', () => {
+		expect(ACTIVATION_SHOPPING_LIST_GOAL).toBe(3);
+		expect(recordShoppingListItemActivation(TEST_USER_A)).toBe(false);
+		expect(recordShoppingListItemActivation(TEST_USER_A)).toBe(false);
+		expect(recordShoppingListItemActivation(TEST_USER_A)).toBe(true);
+
+		expect(isActivationComplete(TEST_USER_A)).toBe(true);
+		expect(getActivationProgress(TEST_USER_A).shoppingListCount).toBe(3);
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
+		expect(shouldShowCelebration(TEST_USER_A)).toBe(true);
 	});
 
 	it('completes activation after three barcodes', () => {

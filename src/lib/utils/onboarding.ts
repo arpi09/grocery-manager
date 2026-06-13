@@ -1,55 +1,92 @@
 import { isMarketingPath } from '$lib/marketing/routes';
+
 import { markPmfSurveyEligible } from '$lib/utils/pmf-survey-storage';
 
 /** Current onboarding tour version — bump to show the guide again for returning users. */
-export const ONBOARDING_VERSION = 4;
+
+export const ONBOARDING_VERSION = 5;
 
 export { ONBOARDING_STEP_COUNT } from '$lib/utils/onboarding-steps';
 
 const VERSION_SUFFIX = 'version';
+
 const DISMISSED_SUFFIX = 'dismissed';
+
 const POST_ONBOARDING_SURVEY_PENDING_SUFFIX = 'post-onboarding-survey-pending';
+
 const POST_ONBOARDING_SURVEY_DISMISSED_SUFFIX = 'post-onboarding-survey-dismissed';
+
 const ACTIVATION_PATH_SUFFIX = 'activation-path';
+
 const ACTIVATION_BARCODE_COUNT_SUFFIX = 'activation-barcode-count';
+
 const ACTIVATION_RECEIPT_SUFFIX = 'activation-receipt-done';
+
+const ACTIVATION_SHOPPING_COUNT_SUFFIX = 'activation-shopping-count';
+
 const CELEBRATION_PENDING_SUFFIX = 'celebration-pending';
+
 const SIGNUP_AT_SUFFIX = 'signup-at';
 
 /** Legacy keys (pre user-scoped storage) — cleared on reset without userId. */
+
 const LEGACY_KEYS = [
 	'home-pantry-onboarding-version',
+
 	'home-pantry-onboarding-dismissed',
+
 	'home-pantry-activation-path',
+
 	'home-pantry-activation-barcode-count',
+
 	'home-pantry-activation-receipt-done',
+
 	'home-pantry-celebration-pending',
+
 	'home-pantry-post-onboarding-survey-pending',
+
 	'home-pantry-post-onboarding-survey-dismissed'
 ] as const;
 
 export const ONBOARDING_REPLAY_EVENT = 'home-pantry-onboarding-replay';
+
 export const ONBOARDING_PROGRESS_EVENT = 'home-pantry-onboarding-progress';
+
 export const REGISTRATION_WELCOME_DONE_EVENT = 'home-pantry-registration-welcome-done';
 
-/** Barcode path completes after three scans (v4 binary onboarding). */
+/** Barcode path completes after three scans (legacy activation). */
+
 export const ACTIVATION_BARCODE_GOAL = 3;
+
+/** Core mode: shopping list items to complete onboarding. */
+
+export const ACTIVATION_SHOPPING_LIST_GOAL = 3;
 
 const EXCLUDED_PATH_PREFIXES = ['/admin', '/login', '/register', '/verify-email'] as const;
 
-export type ActivationPath = 'barcode' | 'receipt' | 'photo';
+export type ActivationPath = 'barcode' | 'receipt' | 'photo' | 'shopping';
 
 export interface ActivationProgress {
 	path: ActivationPath | null;
+
 	barcodeCount: number;
+
 	barcodeGoal: number;
+
+	shoppingListCount: number;
+
+	shoppingListGoal: number;
+
 	receiptDone: boolean;
+
 	inProgress: boolean;
+
 	isComplete: boolean;
 }
 
 function storageKey(suffix: string, userId?: string | null): string {
 	const base = `home-pantry-onboarding-${suffix}`;
+
 	return userId ? `${base}:${userId}` : base;
 }
 
@@ -59,10 +96,15 @@ function dispatchProgress(): void {
 	}
 }
 
+export function isOnboardingPrimaryPath(pathname: string): boolean {
+	return pathname === '/inkop' || pathname.startsWith('/inkop/');
+}
+
 export function isOnboardingExcludedPath(pathname: string): boolean {
 	if (isMarketingPath(pathname)) {
 		return true;
 	}
+
 	return EXCLUDED_PATH_PREFIXES.some(
 		(prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
 	);
@@ -78,6 +120,7 @@ export function shouldShowOnboarding(userId?: string | null): boolean {
 	}
 
 	const storedVersion = localStorage.getItem(storageKey(VERSION_SUFFIX, userId));
+
 	if (storedVersion !== String(ONBOARDING_VERSION)) {
 		return true;
 	}
@@ -91,7 +134,9 @@ export function completeOnboarding(userId?: string | null): void {
 	}
 
 	localStorage.setItem(storageKey(VERSION_SUFFIX, userId), String(ONBOARDING_VERSION));
+
 	localStorage.setItem(storageKey(DISMISSED_SUFFIX, userId), '1');
+
 	markPostOnboardingSurveyPending(userId);
 }
 
@@ -120,10 +165,12 @@ export function shouldShowPostOnboardingSurvey(userId?: string | null): boolean 
 }
 
 /** Calm surfaces only — not during scan/login flows. */
+
 export function isPostOnboardingSurveyPath(pathname: string): boolean {
 	if (pathname === '/hem' || pathname === '/inkop') {
 		return true;
 	}
+
 	return pathname.startsWith('/inventory/');
 }
 
@@ -133,6 +180,7 @@ export function dismissPostOnboardingSurvey(userId?: string | null): void {
 	}
 
 	localStorage.removeItem(storageKey(POST_ONBOARDING_SURVEY_PENDING_SUFFIX, userId));
+
 	localStorage.setItem(storageKey(POST_ONBOARDING_SURVEY_DISMISSED_SUFFIX, userId), '1');
 }
 
@@ -145,6 +193,7 @@ export function clearPostOnboardingSurveyPending(userId?: string | null): void {
 }
 
 /** Skip or finish the tour — never show again for this version for this user on this device. */
+
 export function dismissOnboarding(userId?: string | null): void {
 	completeOnboarding(userId);
 }
@@ -156,13 +205,23 @@ function clearUserOnboardingKeys(userId: string): void {
 
 	for (const suffix of [
 		VERSION_SUFFIX,
+
 		DISMISSED_SUFFIX,
+
 		ACTIVATION_PATH_SUFFIX,
+
 		ACTIVATION_BARCODE_COUNT_SUFFIX,
+
 		ACTIVATION_RECEIPT_SUFFIX,
+
+		ACTIVATION_SHOPPING_COUNT_SUFFIX,
+
 		CELEBRATION_PENDING_SUFFIX,
+
 		POST_ONBOARDING_SURVEY_PENDING_SUFFIX,
+
 		POST_ONBOARDING_SURVEY_DISMISSED_SUFFIX,
+
 		SIGNUP_AT_SUFFIX
 	]) {
 		localStorage.removeItem(storageKey(suffix, userId));
@@ -187,16 +246,19 @@ export function getSignupAt(userId?: string | null): number | null {
 	}
 
 	const raw = localStorage.getItem(storageKey(SIGNUP_AT_SUFFIX, userId));
+
 	if (!raw) {
 		return null;
 	}
 
 	const parsed = Number(raw);
+
 	return Number.isFinite(parsed) ? parsed : null;
 }
 
 export function secondsSinceSignup(userId?: string | null): number | null {
 	const signupAt = getSignupAt(userId);
+
 	if (signupAt === null) {
 		return null;
 	}
@@ -222,6 +284,7 @@ export function resetOnboarding(userId?: string | null): void {
 
 export function requestOnboardingReplay(userId?: string | null): void {
 	resetOnboarding(userId);
+
 	if (typeof window !== 'undefined') {
 		window.dispatchEvent(new CustomEvent(ONBOARDING_REPLAY_EVENT));
 	}
@@ -230,35 +293,69 @@ export function requestOnboardingReplay(userId?: string | null): void {
 export function getActivationProgress(userId?: string | null): ActivationProgress {
 	const barcodeGoal = ACTIVATION_BARCODE_GOAL;
 
+	const shoppingListGoal = ACTIVATION_SHOPPING_LIST_GOAL;
+
 	if (typeof localStorage === 'undefined' || !userId) {
 		return {
 			path: null,
+
 			barcodeCount: 0,
+
 			barcodeGoal,
+
+			shoppingListCount: 0,
+
+			shoppingListGoal,
+
 			receiptDone: false,
+
 			inProgress: false,
+
 			isComplete: false
 		};
 	}
 
 	const pathRaw = localStorage.getItem(storageKey(ACTIVATION_PATH_SUFFIX, userId));
+
 	const path =
-		pathRaw === 'barcode' || pathRaw === 'receipt' || pathRaw === 'photo' ? pathRaw : null;
+		pathRaw === 'barcode' || pathRaw === 'receipt' || pathRaw === 'photo' || pathRaw === 'shopping'
+			? pathRaw
+			: null;
+
 	const receiptDone = localStorage.getItem(storageKey(ACTIVATION_RECEIPT_SUFFIX, userId)) === '1';
+
 	const storedBarcodeCount = Number(
 		localStorage.getItem(storageKey(ACTIVATION_BARCODE_COUNT_SUFFIX, userId)) ?? '0'
 	);
-	const isComplete = receiptDone || storedBarcodeCount >= barcodeGoal;
+
+	const storedShoppingCount = Number(
+		localStorage.getItem(storageKey(ACTIVATION_SHOPPING_COUNT_SUFFIX, userId)) ?? '0'
+	);
+
+	const isComplete =
+		receiptDone || storedBarcodeCount >= barcodeGoal || storedShoppingCount >= shoppingListGoal;
+
 	const barcodeCount = receiptDone && isComplete ? 0 : storedBarcodeCount;
+
 	const inProgress =
-		!isComplete && (path !== null || storedBarcodeCount > 0 || receiptDone);
+		!isComplete &&
+		(path !== null || storedBarcodeCount > 0 || storedShoppingCount > 0 || receiptDone);
 
 	return {
 		path,
+
 		barcodeCount,
+
 		barcodeGoal,
+
+		shoppingListCount: storedShoppingCount,
+
+		shoppingListGoal,
+
 		receiptDone,
+
 		inProgress,
+
 		isComplete
 	};
 }
@@ -273,19 +370,24 @@ export function setActivationPath(path: ActivationPath, userId?: string | null):
 	}
 
 	localStorage.setItem(storageKey(ACTIVATION_PATH_SUFFIX, userId), path);
+
 	dispatchProgress();
 }
 
 function markActivationComplete(userId?: string | null): void {
 	completeOnboarding(userId);
+
 	if (typeof localStorage !== 'undefined' && userId) {
 		localStorage.setItem(storageKey(CELEBRATION_PENDING_SUFFIX, userId), '1');
 	}
+
 	markPmfSurveyEligible(userId);
+
 	dispatchProgress();
 }
 
 /** Returns true when activation just completed on this call. */
+
 export function recordBarcodeActivation(userId?: string | null): boolean {
 	if (typeof localStorage === 'undefined' || !userId) {
 		return false;
@@ -297,26 +399,61 @@ export function recordBarcodeActivation(userId?: string | null): boolean {
 
 	const next =
 		Number(localStorage.getItem(storageKey(ACTIVATION_BARCODE_COUNT_SUFFIX, userId)) ?? '0') + 1;
+
 	localStorage.setItem(storageKey(ACTIVATION_BARCODE_COUNT_SUFFIX, userId), String(next));
 
 	if (next >= ACTIVATION_BARCODE_GOAL) {
 		markActivationComplete(userId);
+
 		return true;
 	}
 
 	dispatchProgress();
+
 	return false;
 }
 
 /** Returns true when activation just completed on this call (any add path). */
+
 export function recordFirstItemActivation(userId?: string | null): boolean {
 	if (typeof localStorage === 'undefined' || !userId) return false;
+
 	if (isActivationComplete(userId)) return false;
+
 	markActivationComplete(userId);
+
 	return true;
 }
 
 /** Returns true when activation just completed on this call. */
+
+export function recordShoppingListItemActivation(userId?: string | null): boolean {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return false;
+	}
+
+	if (isActivationComplete(userId)) {
+		return false;
+	}
+
+	const next =
+		Number(localStorage.getItem(storageKey(ACTIVATION_SHOPPING_COUNT_SUFFIX, userId)) ?? '0') + 1;
+
+	localStorage.setItem(storageKey(ACTIVATION_SHOPPING_COUNT_SUFFIX, userId), String(next));
+
+	if (next >= ACTIVATION_SHOPPING_LIST_GOAL) {
+		markActivationComplete(userId);
+
+		return true;
+	}
+
+	dispatchProgress();
+
+	return false;
+}
+
+/** Returns true when activation just completed on this call. */
+
 export function recordReceiptActivation(userId?: string | null): boolean {
 	if (typeof localStorage === 'undefined' || !userId) {
 		return false;
@@ -327,7 +464,9 @@ export function recordReceiptActivation(userId?: string | null): boolean {
 	}
 
 	localStorage.setItem(storageKey(ACTIVATION_RECEIPT_SUFFIX, userId), '1');
+
 	markActivationComplete(userId);
+
 	return true;
 }
 

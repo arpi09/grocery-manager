@@ -188,7 +188,15 @@ async function bulkCreateFromForm(
 		metadata: { itemsAdded: created, ...(eventType === 'photo_round_parsed' ? { stage: 'save' } : {}) }
 	});
 
-	redirect(302, buildScanReturnUrl(returnTo, 'added', label));
+	redirect(
+		302,
+		recordPurchases ? buildReceiptImportReturnUrl() : buildScanReturnUrl(returnTo, 'added', label)
+	);
+}
+
+function buildReceiptImportReturnUrl(): string {
+	const params = new URLSearchParams({ from: 'receipt' });
+	return `${APP_HOME_PATH}?${params}`;
 }
 
 export const actions: Actions = {

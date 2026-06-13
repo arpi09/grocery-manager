@@ -236,12 +236,12 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 }
 
 async function waitForPostRegisterHome(page: Page) {
-	await page.waitForURL((url) => url.pathname === '/hem', {
+	await page.waitForURL((url) => url.pathname === '/inkop', {
 		timeout: E2E_AUTH_NAV_TIMEOUT_MS,
 		waitUntil: 'domcontentloaded'
 	});
 	await page
-		.waitForURL((url) => url.pathname === '/hem' && !url.searchParams.has('freshAccount'), {
+		.waitForURL((url) => url.pathname === '/inkop' && !url.searchParams.has('freshAccount'), {
 			timeout: 20_000
 		})
 		.catch(() => undefined);
@@ -348,7 +348,7 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 			message?: string;
 		} | null;
 		if (result?.type === 'redirect') {
-			await page.goto(result.location ?? '/hem', {
+			await page.goto(result.location ?? '/inkop', {
 				waitUntil: 'domcontentloaded',
 				timeout: E2E_AUTH_NAV_TIMEOUT_MS
 			});
@@ -356,7 +356,7 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 			throw new Error(`Login failed: ${result?.message ?? JSON.stringify(result)}`);
 		}
 	} else if (status === 302 || status === 303) {
-		const location = loginResponse.headers()['location'] ?? '/hem';
+		const location = loginResponse.headers()['location'] ?? '/inkop';
 		await page.goto(location.startsWith('http') ? location : `${baseURL}${location}`, {
 			waitUntil: 'domcontentloaded',
 			timeout: E2E_AUTH_NAV_TIMEOUT_MS
@@ -369,7 +369,7 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 	await dismissCookieConsentIfOpen(page);
 	await dismissOnboardingModalIfOpen(page);
 	await dismissPostOnboardingSurveyIfOpen(page);
-	await expect(page.locator('section.home')).toBeVisible({ timeout: E2E_AUTH_NAV_TIMEOUT_MS });
+	await expect(page.locator('.shopping-page, section.home')).toBeVisible({ timeout: E2E_AUTH_NAV_TIMEOUT_MS });
 	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 }
 

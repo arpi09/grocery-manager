@@ -52,16 +52,18 @@ test.describe('Inventory sync batch review', () => {
 		await expect(undoBtn).toHaveCount(0, { timeout: 10_000 });
 	});
 
-	test('primary nav visible on hem and fridge', async ({ page }) => {
+	test('primary nav visible on inkop and fridge', async ({ page }) => {
 		test.setTimeout(60_000);
 		await loginAsAdmin(page);
 
-		for (const path of ['/hem', '/inventory/fridge']) {
+		for (const path of ['/inkop', '/inventory/fridge']) {
 			await page.goto(path);
 			await dismissOnboardingModalIfOpen(page);
 			const desktopNav = page.locator('.main-nav-desktop');
-			await expect(desktopNav.getByTestId('nav-scan')).toBeVisible({ timeout: 15_000 });
+			await expect(desktopNav.getByTestId('nav-shopping')).toBeVisible({ timeout: 15_000 });
 			await expect(desktopNav.getByTestId('nav-pantry')).toBeVisible();
+			await desktopNav.getByRole('button', { name: 'Mer' }).click();
+			await expect(desktopNav.getByTestId('nav-scan')).toBeVisible();
 			await expect(desktopNav.getByTestId('nav-eat')).toBeVisible();
 			await expect(page.getByTestId('core-action-bar')).toHaveCount(0);
 		}

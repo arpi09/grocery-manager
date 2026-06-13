@@ -1,6 +1,8 @@
 import type { MessageKey } from '$lib/i18n/messages';
+
 import { preferredScanHref } from '$lib/utils/scan-nav';
-import { APP_HOME_PATH } from './app-home';
+
+import { APP_HOME_PATH, HEM_PATH } from './app-home';
 
 export type NavIconId =
 	| 'home'
@@ -43,67 +45,111 @@ export type NavBadge = 'stale';
 
 export interface NavUser {
 	email?: string;
+
 	displayName?: string | null;
+
 	avatarUrl?: string | null;
+
 	role?: string;
+
 	petsEnabled?: boolean;
 }
 
 export interface NavItem {
 	href: string;
+
 	labelKey: NavLabelKey;
+
 	icon: NavIconId;
+
 	/** Shown in mobile tab bar and desktop primary row */
+
 	primary?: boolean;
+
 	/** Cart-style link in header (not bottom tab) */
+
 	headerUtility?: boolean;
+
 	/** Resolve href at runtime (e.g. scan hub with return path) */
+
 	dynamicHref?: NavDynamicHref;
+
 	/** Badge variant on this nav item */
+
 	badge?: NavBadge;
+
 	/** Only when `user.role` matches */
+
 	roles?: NavRole[];
+
 	/** Only when pets are enabled for the household */
+
 	requiresPets?: boolean;
+
 	match?: NavMatch;
 }
 
 /** Single source of truth for app navigation (account routes live in ProfileMenu only) */
+
 export const NAV_ITEMS: NavItem[] = [
-	{ href: APP_HOME_PATH, labelKey: 'nav.home', icon: 'home', primary: true, match: 'exact' },
 	{
-		href: '/scan',
-		labelKey: 'nav.scan',
-		icon: 'scan',
+		href: APP_HOME_PATH,
+
+		labelKey: 'nav.shopping',
+
+		icon: 'shopping',
+
 		primary: true,
-		dynamicHref: 'scan',
+
 		match: 'prefix'
 	},
+
 	{
 		href: '/inventory/fridge',
+
 		labelKey: 'nav.inventory',
+
 		icon: 'inventory',
+
 		primary: true,
+
 		badge: 'stale',
+
 		match: 'prefix'
 	},
-	{ href: '/planer', labelKey: 'nav.eat', icon: 'sparkle', primary: true, match: 'prefix' },
+
+	{ href: HEM_PATH, labelKey: 'nav.home', icon: 'home', primary: true, match: 'exact' },
+
 	{
-		href: '/inkop',
-		labelKey: 'nav.shopping',
-		icon: 'shopping',
-		headerUtility: true,
+		href: '/scan',
+
+		labelKey: 'nav.scan',
+
+		icon: 'scan',
+
+		dynamicHref: 'scan',
+
 		match: 'prefix'
 	},
+
+	{ href: '/planer', labelKey: 'nav.eat', icon: 'sparkle', match: 'prefix' },
+
 	{ href: '/statistik', labelKey: 'nav.stats', icon: 'chart', match: 'prefix' },
+
 	{ href: '/nyheter', labelKey: 'nav.news', icon: 'news', match: 'prefix' },
+
 	{
 		href: '/grannskafferiet',
+
 		labelKey: 'nav.grannskafferiet',
+
 		icon: 'mapPin',
+
 		match: 'prefix'
 	},
+
 	{ href: '/husdjur', labelKey: 'nav.pets', icon: 'paw', requiresPets: true, match: 'prefix' },
+
 	{ href: '/admin', labelKey: 'nav.admin', icon: 'shield', roles: ['admin'], match: 'prefix' }
 ];
 
@@ -113,9 +159,11 @@ export function isNavItemVisible(item: NavItem, user: NavUser | null | undefined
 			return false;
 		}
 	}
+
 	if (item.requiresPets && !user?.petsEnabled) {
 		return false;
 	}
+
 	return true;
 }
 
@@ -127,6 +175,7 @@ export function resolveNavHref(item: NavItem, pathname: string): string {
 	if (item.dynamicHref === 'scan' && pathname) {
 		return preferredScanHref();
 	}
+
 	return item.href;
 }
 
@@ -134,15 +183,19 @@ export function navItemTestId(item: NavItem): string | undefined {
 	if (item.dynamicHref === 'scan') {
 		return 'nav-scan';
 	}
+
 	if (item.badge === 'stale') {
 		return 'nav-pantry';
 	}
+
 	if (item.href === '/planer' && item.labelKey === 'nav.eat') {
 		return 'nav-eat';
 	}
-	if (item.headerUtility) {
+
+	if (item.href === APP_HOME_PATH && item.labelKey === 'nav.shopping') {
 		return 'nav-shopping';
 	}
+
 	return undefined;
 }
 
@@ -150,18 +203,24 @@ export function isNavActive(pathname: string, item: NavItem): boolean {
 	if (item.dynamicHref === 'scan') {
 		return pathname === '/scan' || pathname.startsWith('/scan/');
 	}
+
 	if (item.match === 'prefix') {
 		return pathname === item.href || pathname.startsWith(`${item.href}/`);
 	}
-	if (item.href === APP_HOME_PATH) {
-		return pathname === APP_HOME_PATH;
+
+	if (item.href === HEM_PATH) {
+		return pathname === HEM_PATH;
 	}
+
 	return pathname === item.href;
 }
 
 export function splitNavItems(items: NavItem[]) {
 	const primary = items.filter((item) => item.primary);
+
 	const headerUtility = items.filter((item) => item.headerUtility);
+
 	const secondary = items.filter((item) => !item.primary && !item.headerUtility);
+
 	return { primary, headerUtility, secondary };
 }

@@ -32,6 +32,7 @@
 	import { initAnalyticsBeacon } from '$lib/client/analytics-beacon';
 	import { t } from '$lib/i18n';
 	import { OPEN_RECIPE_ASSISTANT_PARAM } from '$lib/utils/recipe-assistant-nav';
+	import { POST_REGISTER_INKOP_PATH } from '$lib/navigation/post-register';
 
 	interface Props {
 		children: Snippet;
@@ -103,10 +104,7 @@
 
 		markSignupAt(userId);
 		completeOnboarding(userId);
-		const url = new URL(page.url);
-		url.searchParams.delete('freshAccount');
-		const next = `${url.pathname}${url.search}${url.hash}`;
-		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
+		void goto(POST_REGISTER_INKOP_PATH, { replaceState: true, keepFocus: true, noScroll: true });
 	});
 
 	$effect(() => {
