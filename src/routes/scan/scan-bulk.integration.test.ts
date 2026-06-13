@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+﻿import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { InventoryService } from '$lib/application/inventory.service';
 import { PmfService } from '$lib/application/pmf.service';
 import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
@@ -104,7 +104,7 @@ describe('Scan bulkCreate integration', () => {
 			bulkFlow: 'photo',
 			returnTo: '/hem',
 			selected: ['0'],
-			name_0: 'E2E Mjölk foto',
+			name_0: 'E2E MjÃ¶lk foto',
 			quantity_0: '2',
 			unit_0: 'st',
 			location_0: 'fridge'
@@ -117,7 +117,7 @@ describe('Scan bulkCreate integration', () => {
 		expect(redirect.location).toContain('scan=added');
 
 		const listed = await inventoryService.listByLocation(householdId, 'fridge');
-		const created = listed.find((item) => item.name === 'E2E Mjölk foto');
+		const created = listed.find((item) => item.name === 'E2E MjÃ¶lk foto');
 		expect(created).toBeDefined();
 		expect(created!.expiresOn).not.toBeNull();
 		expect(created!.expiresOnSource).toBe('ai_inferred');
@@ -134,7 +134,7 @@ describe('Scan bulkCreate integration', () => {
 			bulkFlow: 'photo',
 			returnTo: '/hem',
 			selected: ['0'],
-			name_0: 'E2E Mjölk',
+			name_0: 'E2E MjÃ¶lk',
 			quantity_0: '1',
 			unit_0: 'l',
 			location_0: 'fridge',
@@ -148,7 +148,7 @@ describe('Scan bulkCreate integration', () => {
 		);
 
 		const listed = await inventoryService.listByLocation(householdId, 'fridge');
-		const created = listed.find((item) => item.name === 'E2E Mjölk');
+		const created = listed.find((item) => item.name === 'E2E MjÃ¶lk');
 		expect(created).toMatchObject({
 			expiresOn: '2026-08-01',
 			expiresOnSource: 'user_set',
@@ -182,3 +182,4 @@ describe('Scan bulkCreate integration', () => {
 		expect(listed.some((item) => item.name === 'E2E Kvitto vara')).toBe(true);
 	});
 });
+
