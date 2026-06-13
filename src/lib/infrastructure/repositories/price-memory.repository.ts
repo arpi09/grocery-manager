@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, isNotNull, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, isNotNull, isNull, or, sql } from 'drizzle-orm';
 import type { LastPaidPrice } from '$lib/domain/price-memory';
 import { PRICE_MEMORY_WINDOW_DAYS } from '$lib/domain/price-memory';
 import { db, type AppDatabase } from '$lib/infrastructure/db';
@@ -31,7 +31,16 @@ export class DrizzlePriceMemoryRepository implements IPriceMemoryRepository {
 					eq(receiptPurchaseLineTable.householdId, householdId),
 					eq(receiptPurchaseLineTable.normalizedKey, normalizedKey),
 					isNotNull(receiptPurchaseLineTable.unitPrice),
-					gte(sql`COALESCE(${receiptPurchaseLineTable.purchasedAt}, ${receiptPurchaseLineTable.createdAt})`, since)
+					or(
+						and(
+							isNotNull(receiptPurchaseLineTable.purchasedAt),
+							gte(receiptPurchaseLineTable.purchasedAt, since)
+						),
+						and(
+							isNull(receiptPurchaseLineTable.purchasedAt),
+							gte(receiptPurchaseLineTable.createdAt, since)
+						)
+					)
 				)
 			)
 			.orderBy(desc(sql`COALESCE(${receiptPurchaseLineTable.purchasedAt}, ${receiptPurchaseLineTable.createdAt})`))
