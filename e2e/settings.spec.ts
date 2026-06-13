@@ -149,4 +149,17 @@ test.describe('Settings', () => {
 		await shopSwitch.click();
 		await expect(shopSwitch).not.toBeChecked({ timeout: 10_000 });
 	});
+
+	test('memory explorer shows empty state when learning is enabled', async ({ page }) => {
+		test.skip(
+			process.env.SHELF_LIFE_LEARNING_ENABLED !== 'true',
+			'Requires SHELF_LIFE_LEARNING_ENABLED=true'
+		);
+
+		await loginAsAdmin(page);
+		await page.goto('/settings/memory');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page.getByTestId('memory-explorer')).toBeVisible({ timeout: 15_000 });
+	});
 });

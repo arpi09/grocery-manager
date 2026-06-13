@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { HouseholdSuggestionsService } from '$lib/application/household-suggestions.service';
 import { DrizzleHouseholdLocationRuleRepository } from '$lib/infrastructure/repositories/household-location-rule.repository';
 import { DrizzleHouseholdShelfLifeRuleRepository } from '$lib/infrastructure/repositories/household-shelf-life-rule.repository';
+import { DrizzlePurchasePatternRepository } from '$lib/infrastructure/repositories/purchase-pattern.repository';
 import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integration-db';
 
 let integrationDb: IntegrationDbContext;
@@ -13,6 +14,7 @@ vi.mock('$lib/infrastructure/db/init', () => ({
 describe('Household suggestions integration', () => {
 	let shelfLifeRepository: DrizzleHouseholdShelfLifeRuleRepository;
 	let locationRepository: DrizzleHouseholdLocationRuleRepository;
+	let purchasePatternRepository: DrizzlePurchasePatternRepository;
 	let service: HouseholdSuggestionsService;
 	let householdId: string;
 
@@ -20,7 +22,12 @@ describe('Household suggestions integration', () => {
 		integrationDb = await createIntegrationDb();
 		shelfLifeRepository = new DrizzleHouseholdShelfLifeRuleRepository(integrationDb.db);
 		locationRepository = new DrizzleHouseholdLocationRuleRepository(integrationDb.db);
-		service = new HouseholdSuggestionsService(shelfLifeRepository, locationRepository);
+		purchasePatternRepository = new DrizzlePurchasePatternRepository(integrationDb.db);
+		service = new HouseholdSuggestionsService(
+			shelfLifeRepository,
+			locationRepository,
+			purchasePatternRepository
+		);
 	}, 30_000);
 
 	beforeEach(async () => {
@@ -72,5 +79,39 @@ describe('Household suggestions integration', () => {
 		const afterReset = await service.getSnapshot(householdId);
 		expect(afterReset.shelfLifeRules).toHaveLength(0);
 		expect(afterReset.locationRules).toHaveLength(1);
+	});
+
+	it('builds memory facets with minimum sample threshold and forget removes rules', async () => {
+		await shelfLifeRepository.upsert({
+			householdId,
+			normalizedKey: 'mjolk',
+			location: 'fridge',
+			typicalDays: 5,
+			sampleCount: 1,
+			lastPredictedDays: 5
+		});
+		await shelfLifeRepository.upsert({
+			householdId,
+			normalizedKey: 'brod',
+			location: 'cupboard',
+			typicalDays: 4,
+			sampleCount: 2,
+			lastPredictedDays: 4
+		});
+		await locationRepository.upsert({
+			householdId,
+			normalizedKey: 'yoghurt',
+			location: 'fridge',
+			sampleCount: 5
+		});
+
+		const memory = await service.getMemorySnapshot(householdId, 'sv');
+		expect(memory.memoryFacets).toHaveLength(2);
+		expect(memory.memoryFacets.map((facet) => facet.normalizedKey).sort()).toEqual(['brod', 'yoghurt']);
+
+		await service.resetLocationRule(householdId, 'yoghurt');
+		const afterForget = await service.getMemorySnapshot(householdId, 'sv');
+		expect(afterForget.memoryFacets).toHaveLength(1);
+		expect(afterForget.memoryFacets[0]?.normalizedKey).toBe('brod');
 	});
 });
