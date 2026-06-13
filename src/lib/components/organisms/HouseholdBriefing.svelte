@@ -177,7 +177,7 @@
 			<ReplenishmentSection
 				suggestions={briefing.replenishment}
 				dedupeByKey={intelligence.dedupeByKey}
-				{canWrite}
+				canEdit={canWrite}
 				{householdId}
 				compact
 				surface="hem"
