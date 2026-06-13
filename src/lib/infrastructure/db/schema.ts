@@ -209,7 +209,7 @@ export const inventoryItemTable = pgTable(
 		unit: text('unit'),
 		expiresOn: date('expires_on', { mode: 'string' }),
 		expiresOnSource: text('expires_on_source', {
-			enum: ['user_set', 'ai_inferred', 'default_heuristic']
+			enum: ['user_set', 'ai_inferred', 'default_heuristic', 'household_learned', 'heuristic']
 		}),
 		notes: text('notes'),
 		lastConfirmedAt: timestamp('last_confirmed_at', { withTimezone: true, mode: 'date' })
@@ -811,6 +811,67 @@ export const socialPostTable = pgTable(
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 	},
 	(table) => [index('social_post_status_created_idx').on(table.status, table.createdAt)]
+);
+
+export const householdShelfLifeRuleTable = pgTable(
+	'household_shelf_life_rule',
+	{
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
+		normalizedKey: text('normalized_key').notNull(),
+		location: text('location', { enum: ['fridge', 'freezer', 'cupboard'] }).notNull(),
+		typicalDays: integer('typical_days').notNull(),
+		sampleCount: integer('sample_count').notNull().default(0),
+		lastPredictedDays: integer('last_predicted_days'),
+		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		primaryKey({ columns: [table.householdId, table.normalizedKey, table.location] })
+	]
+);
+
+export const learningFeedbackTable = pgTable(
+	'learning_feedback',
+	{
+		id: text('id').primaryKey(),
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
+		userId: text('user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		predictorId: text('predictor_id').notNull(),
+		subjectKey: text('subject_key').notNull(),
+		contextJson: jsonb('context_json').$type<Record<string, unknown>>().notNull().default({}),
+		predictedValue: text('predicted_value').notNull(),
+		actualValue: text('actual_value'),
+		feedbackType: text('feedback_type').notNull(),
+		modelVersion: text('model_version').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('learning_feedback_household_predictor_created_idx').on(
+			table.householdId,
+			table.predictorId,
+			table.createdAt
+		),
+		index('learning_feedback_household_subject_key_idx').on(table.householdId, table.subjectKey)
+	]
+);
+
+export const householdLocationRuleTable = pgTable(
+	'household_location_rule',
+	{
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
+		normalizedKey: text('normalized_key').notNull(),
+		location: text('location', { enum: ['fridge', 'freezer', 'cupboard'] }).notNull(),
+		sampleCount: integer('sample_count').notNull().default(0),
+		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [primaryKey({ columns: [table.householdId, table.normalizedKey] })]
 );
 
 export const guideArticleTable = pgTable(

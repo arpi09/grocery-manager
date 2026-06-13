@@ -196,7 +196,9 @@ const INCREMENTAL_MIGRATIONS = [
 	'0043_shopping_list_share_link.sql',
 	'0044_receipt_price_memory.sql',
 	'0045_inventory_intelligence_events.sql',
-	'0046_household_os_events.sql'
+	'0046_household_os_events.sql',
+	'0047_learning_engine_v1.sql',
+	'0048_household_location_rule.sql'
 ];
 
 async function runPgliteBaseline(client: PGlite) {

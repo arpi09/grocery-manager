@@ -63,7 +63,10 @@ const SQL_MIGRATION_FILES = [
 	'0042_acquisition_wedge_events.sql',
 	'0043_shopping_list_share_link.sql',
 	'0044_receipt_price_memory.sql',
-	'0044_receipt_price_memory.sql'
+	'0045_inventory_intelligence_events.sql',
+	'0046_household_os_events.sql',
+	'0047_learning_engine_v1.sql',
+	'0048_household_location_rule.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
@@ -87,6 +90,9 @@ TRUNCATE TABLE
 	"consumption_event",
 	"receipt_pattern_dismissal",
 	"receipt_purchase_line",
+	"household_shelf_life_rule",
+	"household_location_rule",
+	"learning_feedback",
 	"shopping_list_item",
 	"inventory_items",
 	"meal_plans",
