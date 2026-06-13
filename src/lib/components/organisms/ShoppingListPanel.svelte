@@ -34,9 +34,11 @@
 	import { get } from 'svelte/store';
 	import {
 		formatShoppingListExportByFormat,
+		appendShoppingListExportFooter,
 		formatShoppingListExportLine,
 		type ShoppingListExportFormat
 	} from '$lib/utils/shopping-list-export';
+	import { buildAcquisitionRegisterUrl } from '$lib/marketing/acquisition-attribution';
 
 	let {
 		items,
@@ -168,10 +170,15 @@
 
 	async function copyExportList(format: ShoppingListExportFormat) {
 		const exportItems = await allItemsForExport();
-		const text = formatShoppingListExportByFormat(exportItems, format);
-		if (!text) {
+		const itemsText = formatShoppingListExportByFormat(exportItems, format);
+		if (!itemsText) {
 			return;
 		}
+		const registerUrl = buildAcquisitionRegisterUrl('export', get(page).url.origin);
+		const text = appendShoppingListExportFooter(
+			itemsText,
+			t('shopping.exportFooter', { url: registerUrl })
+		);
 		await navigator.clipboard.writeText(text);
 		exportCopiedFormat = format;
 		void trackProductEvent('shopping_list_export', { format });
