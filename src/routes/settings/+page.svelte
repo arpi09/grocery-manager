@@ -14,6 +14,7 @@
 
 	import KivraForwardSettingsPanel from '$lib/components/organisms/KivraForwardSettingsPanel.svelte';
 
+	import SuggestionsSettingsPanel from '$lib/components/organisms/SuggestionsSettingsPanel.svelte';
 	import NearbySharingSettingsPanel from '$lib/components/organisms/NearbySharingSettingsPanel.svelte';
 	import NotificationSettingsPanel from '$lib/components/organisms/NotificationSettingsPanel.svelte';
 
@@ -145,6 +146,9 @@
 
 				: []),
 
+			...(data.showSuggestions
+				? [{ id: 'settings-suggestions', label: t('settings.suggestions.title') }]
+				: []),
 			{ id: 'settings-notifications', label: t('settings.nav.notifications') },
 
 			{ id: 'settings-nearby-sharing', label: t('nearbySharing.settingsTitle') },
@@ -261,7 +265,14 @@
 
 			{/if}
 
-
+			{#if data.showSuggestions}
+				<SuggestionsSettingsPanel
+					shelfLifeRules={data.suggestionsSnapshot.shelfLifeRules}
+					locationRules={data.suggestionsSnapshot.locationRules}
+					canReset={data.canResetSuggestions}
+					showKivraHint={Boolean(data.kivraForwardAddress)}
+				/>
+			{/if}
 
 			<NearbySharingSettingsPanel
 				nearbySharingEnabled={data.nearbySharingEnabled}

@@ -11,10 +11,12 @@ import {
 	shoppingPushService
 } from '$lib/server/di';
 import { buildKivraForwardAddress, isKivraForwardEnabled } from '$lib/server/kivra-forward';
+import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { billingActions } from './billing.actions';
 import { householdActions } from './household.actions';
 import { notificationsActions } from './notifications.actions';
 import { petsActions } from './pets.actions';
+import { suggestionsActions, shouldShowSuggestionsSection } from './suggestions.actions';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ parent, locals, url }) => {
@@ -79,6 +81,15 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 			? buildKivraForwardAddress(await receiptForwardService.getForwardToken(householdId))
 			: null;
 
+	const suggestionsSnapshot =
+		householdId && householdRole && canEditInventory(householdRole)
+			? await locals.householdSuggestionsService.getSnapshot(householdId)
+			: { shelfLifeRules: [], locationRules: [], hasRules: false };
+	const showSuggestions = shouldShowSuggestionsSection(
+		suggestionsSnapshot,
+		isShelfLifeLearningEnabled()
+	);
+
 	return {
 		user,
 		planTier,
@@ -110,7 +121,10 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 		kivraForwardEnabled,
 		kivraForwardAddress,
 		shoppingToPantryMode,
-		nearbySharingEnabled: nearbySharingSettings.enabled
+		nearbySharingEnabled: nearbySharingSettings.enabled,
+		suggestionsSnapshot,
+		showSuggestions,
+		canResetSuggestions: Boolean(householdRole && canEditInventory(householdRole))
 	};
 };
 
@@ -118,5 +132,6 @@ export const actions: Actions = {
 	...billingActions,
 	...notificationsActions,
 	...petsActions,
-	...householdActions
+	...householdActions,
+	...suggestionsActions
 };
