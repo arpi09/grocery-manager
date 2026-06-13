@@ -196,6 +196,11 @@
 			return;
 		}
 
+		void trackProductEvent('shopping_list_share_clicked', {
+			itemCount: unchecked.length + checkedCount,
+			memberCount
+		});
+
 		shareLinkSubmitting = true;
 		try {
 			const response = await fetch('/api/shopping-list/share', { method: 'POST' });
