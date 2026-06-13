@@ -47,6 +47,8 @@
 
 	let briefingViewTracked = $state(false);
 	let receiptLoopCtaTracked = $state(false);
+	let wasteShownTracked = $state(false);
+	let pantryHealthShownTracked = $state(false);
 
 	onMount(() => {
 		if (!briefing.hasActionableContent || briefingViewTracked) {
@@ -73,6 +75,37 @@
 		void trackProductEvent('receipt_loop_cta_shown', {
 			itemsAdded: flag?.itemsAdded ?? 0,
 			replenishmentCount: intelligence.replenishment.length
+		});
+	});
+
+	$effect(() => {
+		const waste = briefing.waste;
+		if (!browser || wasteShownTracked || !briefing.hasActionableContent || !waste) {
+			return;
+		}
+		wasteShownTracked = true;
+		void trackProductEvent('waste_alert_shown', {
+			expiringCount: waste.expiringCount,
+			slowMoverCount: waste.slowMoverCount,
+			source: 'briefing'
+		});
+	});
+
+	$effect(() => {
+		const insights = visiblePantryHealth;
+		if (
+			!browser ||
+			pantryHealthShownTracked ||
+			!briefing.hasActionableContent ||
+			insights.length === 0
+		) {
+			return;
+		}
+		pantryHealthShownTracked = true;
+		void trackProductEvent('pantry_health_insight_shown', {
+			count: insights.length,
+			kinds: insights.map((entry) => entry.kind),
+			source: 'briefing'
 		});
 	});
 
