@@ -1010,6 +1010,44 @@
 		"confirmBadge": "{count} att bekräfta",
 		"eat": "Äta"
 	},
+	"memory": {
+		"navTitle": "Vad Skaffu vet",
+		"title": "Vad Skaffu vet",
+		"subtitle": "Om ditt hushåll — inte generella AI-tips",
+		"backToSettings": "Inställningar",
+		"countBanner": "{count} saker Skaffu lärt sig om ert hushåll",
+		"productsSection": "Produkter ({count})",
+		"openFullView": "Öppna full vy →",
+		"confidence": {
+			"high": "Säker",
+			"medium": "Vi börjar lära",
+			"hint": "Fler kvitton och rättningar gör uppskattningen säkrare."
+		},
+		"facet": {
+			"shelfLifeType": "Hållbarhet",
+			"locationType": "Plats",
+			"shelfLifePrimary": "Ca {days} dagars hållbarhet",
+			"locationPrimary": "Brukar i {location}",
+			"sampleMeta": "{count, plural, one {# observation} other {# observationer}}",
+			"detailCta": "Detalj"
+		},
+		"detail": {
+			"whatHeading": "Vad vi tror",
+			"whyHeading": "Varför",
+			"confidenceHeading": "Hur säkert"
+		},
+		"forget": "Glöm detta",
+		"forgetConfirm": "Skaffu glömmer detta för hushållet",
+		"correct": "Rätta i lager",
+		"correctDisabled": "Lägg in eller redigera varan i lager för att rätta",
+		"empty": {
+			"title": "Inga hushållsregler än",
+			"description": "Importera kvitton och bekräfta datum när du lägger in varor — då bygger Skaffu minne per produkt.",
+			"receiptHint": "Vi har kvittodata — regler visas när du rättat eller bekräftat datum.",
+			"scanCta": "Importera kvitto",
+			"inventoryCta": "Gå till lager"
+		}
+	},
 	"merge": {
 		"pageTitle": "Slå ihop dubletter",
 		"pageSubtitle": "Samma vara i flera rader — granska och slå ihop vid skanning",
@@ -2508,7 +2546,7 @@
 		"sourceDefault": "Standarduppskattning",
 		"explain": {
 			"title": "Varför detta förslag?",
-			"settingsLink": "Hantera inlärda regler",
+			"settingsLink": "Hantera vad Skaffu vet",
 			"productFallback": "varan",
 			"shelfLife": {
 				"householdFactPurchased": "Senast köpt {date}"

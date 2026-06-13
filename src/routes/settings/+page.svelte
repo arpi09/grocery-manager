@@ -147,7 +147,7 @@
 				: []),
 
 			...(data.showSuggestions
-				? [{ id: 'settings-suggestions', label: t('settings.suggestions.title') }]
+				? [{ id: 'settings-memory', label: t('memory.navTitle'), href: '/settings/memory' }]
 				: []),
 			{ id: 'settings-notifications', label: t('settings.nav.notifications') },
 

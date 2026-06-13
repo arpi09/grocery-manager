@@ -192,7 +192,8 @@ export const learningEngineService = new LearningEngineService(
 
 export const householdSuggestionsService = new HouseholdSuggestionsService(
 	householdShelfLifeRuleRepository,
-	householdLocationRuleRepository
+	householdLocationRuleRepository,
+	purchasePatternRepository
 );
 
 export const inventoryService = new InventoryService(

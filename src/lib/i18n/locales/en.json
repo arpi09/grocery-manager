@@ -1039,6 +1039,44 @@
 		"confirmBadge": "{count} to confirm",
 		"eat": "Cook"
 	},
+	"memory": {
+		"navTitle": "What Skaffu knows",
+		"title": "What Skaffu knows",
+		"subtitle": "About your household — not generic AI tips",
+		"backToSettings": "Settings",
+		"countBanner": "{count} things Skaffu has learned about your household",
+		"productsSection": "Products ({count})",
+		"openFullView": "Open full view →",
+		"confidence": {
+			"high": "Confident",
+			"medium": "Still learning",
+			"hint": "More receipts and corrections make the estimate more reliable."
+		},
+		"facet": {
+			"shelfLifeType": "Shelf life",
+			"locationType": "Location",
+			"shelfLifePrimary": "About {days} days shelf life",
+			"locationPrimary": "Usually in {location}",
+			"sampleMeta": "{count, plural, one {# observation} other {# observations}}",
+			"detailCta": "Details"
+		},
+		"detail": {
+			"whatHeading": "What we believe",
+			"whyHeading": "Why",
+			"confidenceHeading": "How confident"
+		},
+		"forget": "Forget this",
+		"forgetConfirm": "Skaffu will forget this for your household",
+		"correct": "Correct in pantry",
+		"correctDisabled": "Add or edit the item in your pantry to correct this",
+		"empty": {
+			"title": "No household rules yet",
+			"description": "Import receipts and confirm dates when adding items — then Skaffu builds memory per product.",
+			"receiptHint": "We see receipt data — rules appear when you correct or confirm dates.",
+			"scanCta": "Import receipt",
+			"inventoryCta": "Go to pantry"
+		}
+	},
 	"merge": {
 		"pageTitle": "Merge duplicates",
 		"pageSubtitle": "Same item in multiple rows — review and merge when scanning",
@@ -2538,7 +2576,7 @@
 		"sourceDefault": "Default estimate",
 		"explain": {
 			"title": "Why this suggestion?",
-			"settingsLink": "Manage learned rules",
+			"settingsLink": "Manage what Skaffu knows",
 			"productFallback": "the product",
 			"shelfLife": {
 				"householdFactPurchased": "Last purchased {date}"

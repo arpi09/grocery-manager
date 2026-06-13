@@ -4,6 +4,7 @@
 	export type SettingsNavItem = {
 		id: string;
 		label: string;
+		href?: string;
 	};
 
 	interface Props {
@@ -19,7 +20,7 @@
 	<ul class="settings-nav-list">
 		{#each items as item (item.id)}
 			<li>
-				<a class="settings-nav-link" href={`#${item.id}`}>{item.label}</a>
+				<a class="settings-nav-link" href={item.href ?? `#${item.id}`}>{item.label}</a>
 			</li>
 		{/each}
 	</ul>
