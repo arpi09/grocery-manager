@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import {
 	isFromRecipeAssistant,
 	recipeAssistantReturnHref,
@@ -8,7 +9,7 @@ import {
 describe('recipe-assistant-nav', () => {
 	it('builds detail and return URLs', () => {
 		expect(recipeDetailFromAssistantHref('abc-123')).toBe('/recept/abc-123?from=recipe-assistant');
-		expect(recipeAssistantReturnHref()).toBe('/hem?openRecipeAssistant=1');
+		expect(recipeAssistantReturnHref()).toBe(`${APP_HOME_PATH}?openRecipeAssistant=1`);
 	});
 
 	it('detects recipe-assistant origin', () => {
