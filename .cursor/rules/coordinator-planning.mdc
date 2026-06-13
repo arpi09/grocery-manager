@@ -1,0 +1,58 @@
+---
+description: Coordinator planning — execution modes, plan table, minimal PO coordination
+alwaysApply: false
+---
+
+# Coordinator planning
+
+Coordinator plans use a four-column task table and four execution modes. Minimize product-owner coordination — never assume the user starts a separate agent.
+
+## Planning rule
+
+Every coordinator plan (`CreatePlan` output) must include this **four-column** task table:
+
+| Task | Execution Mode | Owner | Dependency |
+|------|----------------|-------|------------|
+| … | `COORDINATOR_AGENT` | e2e | none |
+| … | `COORDINATOR_LOCAL` | coordinator | G0 on branch |
+| … | `USER_LOCAL` | user | none |
+| … | `BLOCKED` | — | deploy green |
+
+Per-todo tags may substitute the table only when a list is clearer; all four fields must still be present on every task.
+
+### Execution Mode
+
+| Mode | When |
+|------|------|
+| `COORDINATOR_AGENT` | **Default** for code, tests, docs, audits, refactors, release planning — coordinator spawns subagents |
+| `COORDINATOR_LOCAL` | Small orchestration in current chat (status, `gh run watch`, prod SHA after deploy) |
+| `USER_LOCAL` | Product owner must act physically/manually (Turnstile, mobile camera, App Store, physical device, manual payment, external accounts) |
+| `BLOCKED` | External dependency (deploy, secrets, decision) |
+
+**Default rule:** implementable work → `COORDINATOR_AGENT`.
+
+### Owner
+
+Who executes the task:
+
+- **coordinator** — current chat session (`COORDINATOR_LOCAL`)
+- **named agent** — subagent or branch label (e.g. `e2e`, `feat/nav-cleanup`)
+- **user** — product owner (`USER_LOCAL`)
+- **—** — unassigned when `BLOCKED`
+
+### Dependency
+
+What must complete first (or **none**):
+
+- **none** — no prerequisite; can start immediately
+- **task name** — another row in the same plan (e.g. "G0 on branch", "PR merged")
+- **external** — outside the plan (e.g. "deploy SHA abc1234", "user API key", "CI green on master")
+
+## Coordinator duties
+
+- Choose execution mode **per task** before execution
+- `BLOCKED` → state dependency explicitly in plan and `private/AGENT_STATUS.md`
+- Prod SHA updates → always `COORDINATOR_LOCAL` (post-deploy coordinator step)
+- Session start → read [docs/CURRENT_REALITY.md](../../docs/CURRENT_REALITY.md) + [private/AGENT_STATUS.md](../../private/AGENT_STATUS.md) — not a dispatch log
+
+See [docs/CURSOR_COORDINATOR.md](../../docs/CURSOR_COORDINATOR.md#coordinator-planning).

@@ -32,7 +32,7 @@ Branch strategy: work on `feat/engineering-health-*`; cherry-pick isolated commi
 | `quality:ci` / `release:gate` | Yes |
 | `nightly` | No (audit warn-only) |
 
-Cloud agents: [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md).
+Cloud agents (paused): [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md) — use coordinator + local agents instead.
 
 ---
 

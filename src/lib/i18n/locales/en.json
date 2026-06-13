@@ -203,6 +203,12 @@
 		"chipManual": "Manual",
 		"moreAddWays": "More ways to add",
 		"moreOnHome": "More on home",
+		"v3": {
+			"attentionTitle": "Attention",
+			"recommendsTitle": "Skaffu suggests",
+			"doNowTitle": "Do now",
+			"receiptFootnote": "{count, plural, one {# suggestion from receipts} other {# suggestions from receipts}} →"
+		},
 		"nextActionSync": "{count, plural, one {Confirm # item} other {Confirm # items}}",
 		"nextActionExpiring": "{count, plural, one {Generate dinner with # item} other {Generate dinner with # items}}",
 		"nextActionPhoto": "Photo the fridge",

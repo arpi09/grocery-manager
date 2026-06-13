@@ -226,6 +226,12 @@
 		},
 		"moreAddWays": "Fler sätt att lägga till",
 		"moreOnHome": "Mer på hem",
+		"v3": {
+			"attentionTitle": "Uppmärksamhet",
+			"recommendsTitle": "Skaffu föreslår",
+			"doNowTitle": "Gör nu",
+			"receiptFootnote": "{count, plural, one {# förslag från kvitton} other {# förslag från kvitton}} →"
+		},
 		"nextActionSync": "{count, plural, one {Bekräfta # vara} other {Bekräfta # varor}}",
 		"nextActionExpiring": "{count, plural, one {Generera middag med # vara} other {Generera middag med # varor}}",
 		"nextActionPhoto": "Fota kylen",

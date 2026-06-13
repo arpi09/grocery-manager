@@ -18,45 +18,57 @@ Alla agenter (coordinator och implementation) börjar med [INDEX.md](./INDEX.md)
 
 Kärnloop-regel (alwaysApply): `.cursor/rules/skaffu-core-loop.mdc`.
 
-Cloud Handoff-regel: `.cursor/rules/cloud-handoff.mdc` — execution modes, dispatch log, `MANUAL_CLOUD_AGENT`-prompter.
+Coordinator planning-regel: `.cursor/rules/coordinator-planning.mdc` — planning table (`Task | Execution Mode | Owner | Dependency`), fyra execution modes.
 
 ---
 
-## Cloud Handoff Protocol
+## Coordinator planning
 
-När coordinator-sessioner är för stora för Cloud-migrering: orchestrera via [AGENT_DISPATCH_LOG.md](./AGENT_DISPATCH_LOG.md) och copy-paste-prompter — anta inte session-kontinuitet i Cloud.
+Coordinator-planer använder fyrkolumnstabellen och fyra execution modes. Minimera PO-koordinering — anta aldrig att användaren startar en separat agent.
 
 ### Execution modes
 
 | Mode | Who runs | When to use |
 |------|----------|-------------|
-| `COORDINATOR_LOCAL` | Coordinator i nuvarande chat, lokala verktyg | Små docs, status, orchestration, ingen lång CI |
-| `COORDINATOR_AGENT` | Subagent/Task spawnad av coordinator (lokal/bakgrund) | Lokal agent med full repo; inte user-öppnad Cloud |
-| `MANUAL_CLOUD_AGENT` | Användaren öppnar ny Cursor Cloud-agent, klistrar prompt | Stor kontext, parallell kapacitet, Linux CI-subset |
-| `USER_LOCAL` | Product owner (captcha, telefon, prod-login, manuell smoke) | Kan inte automatiseras i Cloud |
-| `BLOCKED` | Ingen än | Deploy-lås, secrets, beslut, beroende |
+| `COORDINATOR_AGENT` | Subagent/Task spawnad av coordinator | **Default** — kod, tester, docs, audits, refactors, release-planering |
+| `COORDINATOR_LOCAL` | Coordinator i nuvarande chat, lokala verktyg | Små orchestration-steg (status, `gh run watch`, prod SHA efter deploy) |
+| `USER_LOCAL` | Product owner (fysisk/manuell handling) | Turnstile, mobilkamera, App Store, fysisk enhet, manuell betalning, externa konton |
+| `BLOCKED` | Ingen än | Deploy-lås, secrets, beslut, externt beroende |
 
 ### Planning rule
 
-**Från och med nu:** varje coordinator-plan (`CreatePlan`) måste ha kolumnen **Execution mode** i uppgiftstabellen (eller per-todo-tagg).
+**Från och med nu:** varje coordinator-plan (`CreatePlan`) måste ha denna **fyrkolumns** uppgiftstabell (eller per-todo med alla fyra fält):
+
+| Task | Execution Mode | Owner | Dependency |
+|------|----------------|-------|------------|
+| … | `COORDINATOR_AGENT` | e2e | none |
+| … | `COORDINATOR_LOCAL` | coordinator | G0 på branch |
+| … | `USER_LOCAL` | user | none |
+| … | `BLOCKED` | — | deploy grön |
+
+- **Owner:** `coordinator`, namngiven agent/branch-label, `user`, eller `—` vid `BLOCKED`
+- **Dependency:** `none`, annan uppgift i planen, eller externt beroende (deploy, secrets, beslut)
+- **Default:** implementerbar arbete → `COORDINATOR_AGENT`
+
+Se [`.cursor/rules/coordinator-planning.mdc`](../.cursor/rules/coordinator-planning.mdc).
 
 - Coordinator väljer mode **per uppgift** före körning
-- `MANUAL_CLOUD_AGENT` → coordinator måste leverera full copy-paste-prompt enligt [Manual Cloud Agent Task Template](./AGENT_DISPATCH_LOG.md#manual-cloud-agent-task-template) + [Prompt Footer](./AGENT_DISPATCH_LOG.md#standard-cloud-agent-prompt-footer); anta aldrig att Cloud startar automatiskt
-- `BLOCKED` → ange beroende uttryckligen i dispatch log
-- Prod SHA-uppdateringar → alltid `COORDINATOR_LOCAL` eller post-deploy coordinator-steg, **aldrig** Cloud
+- `BLOCKED` → ange beroende uttryckligen i planen och `private/AGENT_STATUS.md`
+- Prod SHA-uppdateringar → alltid `COORDINATOR_LOCAL` (post-deploy coordinator-steg)
+- Sessionstart → [CURRENT_REALITY.md](./CURRENT_REALITY.md) + `private/AGENT_STATUS.md`
 
-### Coordinator sync command
+---
 
-Kör vid sessionstart eller när användaren rapporterar att Cloud-agent är klar:
+## Prioritetsordning
 
-```text
-Läs docs/AGENT_DISPATCH_LOG.md och sammanfatta:
-- aktiva agents
-- öppna branches
-- öppna PRs
-- blockers
-- vad koordinatorn ska göra härnäst
-```
+1. MASTER == PROD
+2. Production Readiness
+3. Founder Acceptance Test
+4. Första riktiga hushåll
+5. Kodkvalitet / Engineering Health
+6. Positionering / Landing Page
+
+Inte Cloud-strategi, dispatch eller extra orchestration.
 
 ---
 
@@ -247,7 +259,7 @@ Starta alltid med [`private/NEW_CURSOR_AGENT_START.md`](../private/NEW_CURSOR_AG
 
 Aktivera eller referera vid behov:
 
-- `.cursor/rules/cloud-handoff.mdc`
+- `.cursor/rules/coordinator-planning.mdc`
 - `.cursor/rules/coordinator-v2.mdc`
 - `.cursor/rules/coordinator-personal-cost-mode.mdc`
 - `.cursor/rules/coordinator-spawn-budget.mdc`
@@ -276,8 +288,7 @@ Du är coordinator. Fråga innan commit, push eller spawn. WIP 3 aktiv: max 3 fe
 
 | Doc | När |
 |-----|-----|
-| [`AGENT_DISPATCH_LOG.md`](./AGENT_DISPATCH_LOG.md) | Cloud Handoff — dispatch table, footer, PR template |
-| [`CLOUD_AGENT_SETUP.md`](./CLOUD_AGENT_SETUP.md) | Cloud bootstrap, script matrix, forbidden tasks |
+| [`CLOUD_AGENT_SETUP.md`](./CLOUD_AGENT_SETUP.md) | **Pausad** — Cloud bootstrap arkiverat; använd coordinator + lokala agenter |
 | [`ONBOARDING_DEVELOPER.md`](./ONBOARDING_DEVELOPER.md) | Ny utvecklare (mänsklig) |
 | [`CI_CD.md`](./CI_CD.md) | G0–G3, trunk på `master` |
 | [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) | Testing diamond, risk, DoD |
