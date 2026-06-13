@@ -111,6 +111,10 @@ interface PatternAggregate {
 	lastPurchasedAt: Date;
 }
 
+function purchaseDate(line: ReceiptPurchaseLineRecord): Date {
+	return line.purchasedAt ?? line.createdAt;
+}
+
 /** Derive refill suggestions from stored receipt lines (pure/heuristic). */
 export function detectReceiptPatternSuggestions(
 	lines: ReceiptPurchaseLineRecord[],
@@ -124,7 +128,8 @@ export function detectReceiptPatternSuggestions(
 	const aggregates = new Map<string, PatternAggregate>();
 
 	for (const line of lines) {
-		if (line.createdAt < cutoff) continue;
+		const purchased = purchaseDate(line);
+		if (purchased < cutoff) continue;
 		const key = line.normalizedKey;
 		if (!key || dismissedKeys.has(key) || inventoryNormalizedKeys.has(key)) continue;
 
@@ -138,15 +143,15 @@ export function detectReceiptPatternSuggestions(
 				unit: line.unit,
 				importBatchIds: new Set(),
 				lineCount: 0,
-				lastPurchasedAt: line.createdAt
+				lastPurchasedAt: purchased
 			};
 			aggregates.set(key, aggregate);
 		}
 
 		aggregate.importBatchIds.add(line.importBatchId);
 		aggregate.lineCount += 1;
-		if (line.createdAt >= aggregate.lastPurchasedAt) {
-			aggregate.lastPurchasedAt = line.createdAt;
+		if (purchased >= aggregate.lastPurchasedAt) {
+			aggregate.lastPurchasedAt = purchased;
 			aggregate.displayName = line.productName.trim();
 			aggregate.location = line.location;
 			aggregate.quantity = line.quantity ?? aggregate.quantity;
