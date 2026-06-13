@@ -1,0 +1,35 @@
+---
+description: Cloud Handoff Protocol — execution modes, dispatch log, MANUAL_CLOUD_AGENT prompts
+alwaysApply: false
+---
+
+# Cloud Handoff Protocol
+
+When coordinator sessions exceed Cloud migration limits, orchestrate via [docs/AGENT_DISPATCH_LOG.md](../../docs/AGENT_DISPATCH_LOG.md) and copy-paste prompts — do not assume session continuity in Cloud.
+
+## Planning rule
+
+Every coordinator plan (`CreatePlan` output) must include an **Execution mode** column in the task table (or per-todo tag).
+
+| Mode | Who |
+|------|-----|
+| `COORDINATOR_LOCAL` | Coordinator in current chat |
+| `COORDINATOR_AGENT` | Subagent/Task spawned locally |
+| `MANUAL_CLOUD_AGENT` | User opens new Cursor Cloud agent |
+| `USER_LOCAL` | Product owner (manual prod/smoke) |
+| `BLOCKED` | Waiting on dependency |
+
+## Coordinator duties
+
+- Choose execution mode **per task** before execution
+- `MANUAL_CLOUD_AGENT` → output full copy-paste prompt using [Manual Cloud Agent Task Template](../../docs/AGENT_DISPATCH_LOG.md#manual-cloud-agent-task-template) + [Prompt Footer](../../docs/AGENT_DISPATCH_LOG.md#standard-cloud-agent-prompt-footer); never assume Cloud auto-starts
+- `BLOCKED` → state dependency explicitly in dispatch log
+- Prod SHA updates → always `COORDINATOR_LOCAL` or post-deploy coordinator step, **never** Cloud
+- Session start / after Cloud finish → run [coordinator sync command](../../docs/AGENT_DISPATCH_LOG.md#coordinator-sync-command)
+
+## Hard rules (Cloud agents)
+
+- Never deploy, secrets, or push to `master` — PR only
+- Coordinator owns prod state; prod SHA only after verified deploy
+
+See [docs/CLOUD_AGENT_SETUP.md](../../docs/CLOUD_AGENT_SETUP.md) and [docs/CURSOR_COORDINATOR.md](../../docs/CURSOR_COORDINATOR.md#cloud-handoff-protocol).

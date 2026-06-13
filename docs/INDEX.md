@@ -7,6 +7,7 @@
 | Prod vs master, flags, nav, tier | [CURRENT_REALITY.md](./CURRENT_REALITY.md) |
 | Kärnloopen | `.cursor/rules/skaffu-core-loop.mdc` |
 | Coordinator WIP/deploy | [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md) |
+| Cloud Handoff + dispatch log | [AGENT_DISPATCH_LOG.md](./AGENT_DISPATCH_LOG.md), [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md) |
 | Deploy + smoke | [DEPLOY.md](./DEPLOY.md), [PROD_SMOKE.md](./PROD_SMOKE.md) |
 | Retention playbook (human) | [FOUNDER_WEEKLY_HABIT.md](./FOUNDER_WEEKLY_HABIT.md) |
 

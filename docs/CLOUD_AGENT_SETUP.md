@@ -4,6 +4,8 @@
 
 Skaffu is cloud-ready for the same work CI proves on `ubuntu-latest`: lint, typecheck, unit tests, PGlite integration tests, and production build. Cloud agents should mirror the **quality** job in [`.github/workflows/reusable-quality.yml`](../.github/workflows/reusable-quality.yml), not local PowerShell dev-runtime, Firebase deploy, or production smoke.
 
+**Cloud Handoff Protocol:** Manual Cloud agents are orchestrated via [AGENT_DISPATCH_LOG.md](./AGENT_DISPATCH_LOG.md). Append the [Standard Cloud Agent Prompt Footer](./AGENT_DISPATCH_LOG.md#standard-cloud-agent-prompt-footer) to every `MANUAL_CLOUD_AGENT` prompt. Coordinator owns prod SHA and deploy — see [hard rules](./AGENT_DISPATCH_LOG.md#hard-rules).
+
 | Cloud safe | Cloud risky | Local only |
 |------------|-------------|------------|
 | Lint, check, unit/integration tests, build guards | Playwright E2E, `docker compose`, long-running dev | Firebase deploy, prod smoke, Cloud SQL migrate, real OpenAI |
@@ -148,4 +150,4 @@ Do **not** assign these without explicit user request:
 - Receipt fixture validation (`test:receipt-fixtures`)
 - Docs-only changes
 
-See also [INDEX.md](./INDEX.md) for coordinator skills and prod reality.
+See also [INDEX.md](./INDEX.md) for coordinator skills and prod reality, and [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md#cloud-handoff-protocol) for execution modes and coordinator sync.

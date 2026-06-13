@@ -18,6 +18,46 @@ Alla agenter (coordinator och implementation) börjar med [INDEX.md](./INDEX.md)
 
 Kärnloop-regel (alwaysApply): `.cursor/rules/skaffu-core-loop.mdc`.
 
+Cloud Handoff-regel: `.cursor/rules/cloud-handoff.mdc` — execution modes, dispatch log, `MANUAL_CLOUD_AGENT`-prompter.
+
+---
+
+## Cloud Handoff Protocol
+
+När coordinator-sessioner är för stora för Cloud-migrering: orchestrera via [AGENT_DISPATCH_LOG.md](./AGENT_DISPATCH_LOG.md) och copy-paste-prompter — anta inte session-kontinuitet i Cloud.
+
+### Execution modes
+
+| Mode | Who runs | When to use |
+|------|----------|-------------|
+| `COORDINATOR_LOCAL` | Coordinator i nuvarande chat, lokala verktyg | Små docs, status, orchestration, ingen lång CI |
+| `COORDINATOR_AGENT` | Subagent/Task spawnad av coordinator (lokal/bakgrund) | Lokal agent med full repo; inte user-öppnad Cloud |
+| `MANUAL_CLOUD_AGENT` | Användaren öppnar ny Cursor Cloud-agent, klistrar prompt | Stor kontext, parallell kapacitet, Linux CI-subset |
+| `USER_LOCAL` | Product owner (captcha, telefon, prod-login, manuell smoke) | Kan inte automatiseras i Cloud |
+| `BLOCKED` | Ingen än | Deploy-lås, secrets, beslut, beroende |
+
+### Planning rule
+
+**Från och med nu:** varje coordinator-plan (`CreatePlan`) måste ha kolumnen **Execution mode** i uppgiftstabellen (eller per-todo-tagg).
+
+- Coordinator väljer mode **per uppgift** före körning
+- `MANUAL_CLOUD_AGENT` → coordinator måste leverera full copy-paste-prompt enligt [Manual Cloud Agent Task Template](./AGENT_DISPATCH_LOG.md#manual-cloud-agent-task-template) + [Prompt Footer](./AGENT_DISPATCH_LOG.md#standard-cloud-agent-prompt-footer); anta aldrig att Cloud startar automatiskt
+- `BLOCKED` → ange beroende uttryckligen i dispatch log
+- Prod SHA-uppdateringar → alltid `COORDINATOR_LOCAL` eller post-deploy coordinator-steg, **aldrig** Cloud
+
+### Coordinator sync command
+
+Kör vid sessionstart eller när användaren rapporterar att Cloud-agent är klar:
+
+```text
+Läs docs/AGENT_DISPATCH_LOG.md och sammanfatta:
+- aktiva agents
+- öppna branches
+- öppna PRs
+- blockers
+- vad koordinatorn ska göra härnäst
+```
+
 ---
 
 ## Cursor hooks (minimal för hastighet)
@@ -207,6 +247,7 @@ Starta alltid med [`private/NEW_CURSOR_AGENT_START.md`](../private/NEW_CURSOR_AG
 
 Aktivera eller referera vid behov:
 
+- `.cursor/rules/cloud-handoff.mdc`
 - `.cursor/rules/coordinator-v2.mdc`
 - `.cursor/rules/coordinator-personal-cost-mode.mdc`
 - `.cursor/rules/coordinator-spawn-budget.mdc`
@@ -235,6 +276,8 @@ Du är coordinator. Fråga innan commit, push eller spawn. WIP 3 aktiv: max 3 fe
 
 | Doc | När |
 |-----|-----|
+| [`AGENT_DISPATCH_LOG.md`](./AGENT_DISPATCH_LOG.md) | Cloud Handoff — dispatch table, footer, PR template |
+| [`CLOUD_AGENT_SETUP.md`](./CLOUD_AGENT_SETUP.md) | Cloud bootstrap, script matrix, forbidden tasks |
 | [`ONBOARDING_DEVELOPER.md`](./ONBOARDING_DEVELOPER.md) | Ny utvecklare (mänsklig) |
 | [`CI_CD.md`](./CI_CD.md) | G0–G3, trunk på `master` |
 | [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) | Testing diamond, risk, DoD |
