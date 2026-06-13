@@ -2,6 +2,8 @@
 
 *Version: juni 2026. Strategisk analys och implementationsplan för personligt prisminne (breakthrough B2) — dokument först, kod i separat build.*
 
+**Shipped (jun 2026):** Migration [`0044_receipt_price_memory.sql`](../drizzle/0044_receipt_price_memory.sql) — `unit_price`, `currency`, `line_total`, `store_label`, `purchased_at` på `receipt_purchase_line`; utökad parse-pipeline och `GET /api/price-memory/last` shipped. Avsnitt 1–2 nedan beskriver **planeringsläget före build**; adoption se [`FEATURE_ADOPTION_INITIATIVE.md`](./FEATURE_ADOPTION_INITIATIVE.md) §1.
+
 **Relaterade dokument:** [`BREAKTHROUGH_GROWTH_OPPORTUNITIES.md`](./BREAKTHROUGH_GROWTH_OPPORTUNITIES.md) (B2) · [`RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md`](./RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md) · [`RECEIPT_TEST_PACK.md`](./RECEIPT_TEST_PACK.md) · [`PRICING.md`](./PRICING.md) · [`NEXT_STAGE_STRATEGY.md`](./NEXT_STAGE_STRATEGY.md) · [`GROWTH_STRATEGY.md`](./GROWTH_STRATEGY.md) · [`ACQUISITION_WEDGES.md`](./ACQUISITION_WEDGES.md) · Smart Replenishment V1 (`/inkop` — kvittobaserade köp-igen-förslag till inköpslistan, ingen AI)
 
 ---
@@ -312,7 +314,7 @@ sequenceDiagram
 
 ## 5. Sammanfattning
 
-Prisminne (B2) bygger på samma kvittokedja som receipt autopilot ([`RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md`](./RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md)) men kräver ett ärligt datagap: **pris och butik persistas inte idag** — varken i `receipt_purchase_line` eller i `receipt-parse.ts`. V1 är avgränsad, shipbar och compound — “senast betalt” — utan BI-scope creep. V2/V3 följer efter bevisad parsing-kvalitet och receipt-rate.
+Prisminne (B2) bygger på samma kvittokedja som receipt autopilot ([`RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md`](./RECEIPT_AUTOPILOT_NO_KIVRA_PLAN.md)). **V1 persistens och parse är shipped** (`0044_receipt_price_memory.sql`); kvarvarande arbete är adoption, parsing-kvalitet och V2/V3 — “senast betalt” utan BI-scope creep.
 
 **Nästa steg (ej denna build):** bekräfta V1-slice → implementera uppgifter 1–10 → utöka [`RECEIPT_TEST_PACK.md`](./RECEIPT_TEST_PACK.md) med prisförväntningar → mät success metrics utan admin-dashboard.
 

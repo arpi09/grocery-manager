@@ -29,15 +29,16 @@ flowchart TB
     Rapport["/rapport anonym"]
     Guides["SEO guider"]
   end
-  subgraph gated [Login eller supply gated]
+  subgraph gated [Login, flag eller supply gated]
     Map["/grannskafferiet"]
     Core["Lager lista plan"]
+    ShopLink["/lista/[token] W1"]
   end
   subgraph missing [Största PLG-gap]
-    ShopLink["Publik inköpslista"]
     CityFeed["Publik city-feed"]
   end
   cold -->|"varm trafik"| Register[Registrering]
+  gated -->|"varm trafik (flag)"| Register
   missing -->|"cold om supply"| Register
   gated -->|"retention"| Retain[Retention]
 ```
@@ -124,7 +125,7 @@ För varje kapabilitet: **Ja / Delvis / Nej** på fem PLG-frågor, med 1–2 men
 
 | Fråga | Svar | Evidens |
 |-------|------|---------|
-| Attraherar ny användare (cold)? | **Delvis** | Export till Bring/AnyList (`shopping_list_export`) — partner ser *extern* app, inte Skaffu. Publik länk **saknas** (W1-gap). |
+| Attraherar ny användare (cold)? | **Delvis** | Export till Bring/AnyList (`shopping_list_export`) — partner ser *extern* app, inte Skaffu. W1 `/lista/[token]` **shipped** bakom `PUBLIC_SHOPPING_LIST_SHARE_ENABLED` (av i prod tills enable). |
 | Orsakar invitations? | **Ja** | Naturlig familjekontext — O1/W4; idag CTA djupt i `/settings#household`. |
 | Genererar publikt innehåll? | **Nej** (idag) | W1 skulle vända detta. |
 | Genererar delning? | **Delvis** | Clipboard utåt — outbound only. |
@@ -200,7 +201,7 @@ Photo AI, recept-schema och generiska förslag har noll extern exponering ([`BRE
 
 ### “Household sync räcker”
 
-Invite sker i Inställningar, långt från `/inkop` där familjer faktiskt samordnar handel. [`PRODUCT_LED_GROWTH_ANALYSIS.md`](./PRODUCT_LED_GROWTH_ANALYSIS.md) O1–O2: kontext vid Inköp och publik lista saknas.
+Invite sker i Inställningar, långt från `/inkop` där familjer faktiskt samordnar handel. [`PRODUCT_LED_GROWTH_ANALYSIS.md`](./PRODUCT_LED_GROWTH_ANALYSIS.md) O1–O2: kontext vid Inköp shipped (W4); publik lista shipped bakom flag (W1).
 
 **Verdict:** W4 + W1 krävs för att synka ska bli acquisition.
 
@@ -223,7 +224,7 @@ Varje wedge = produktfeature eller produkt-yta (inte kanal).
 | **Effort** | 3 (M — återanvänd `expiring_share_link` + shopping snapshot) |
 | **Confidence** | 5 |
 | **Uniqueness** | 4 |
-| **Shipped vs build** | **Build** — export går idag utåt till Bring (`shopping_list_export`) |
+| **Shipped vs build** | **Shipped** (flag `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`) — `/lista/[token]` snapshot; export till Bring parallellt (`shopping_list_export`) |
 | **Biggest risk** | Listan inaktuell → förtroende; måste spegla live sync |
 | **Verdict** | **Primary wedge** |
 
@@ -507,6 +508,7 @@ Koppla till befintliga + nya events (post receipt-funnel work).
 | Route | Auth | Roll |
 |-------|------|------|
 | `/dela/[token]` | Nej | W3, W10 — publik utgående-lista |
+| `/lista/[token]` | Nej (flag) | W1 — publik read-only inköpslista (`PUBLIC_SHOPPING_LIST_SHARE_ENABLED`) |
 | `/invite/[token]` | Delvis | W4 — household expansion |
 | `/rapport/*` | Delvis | W7 — PR, k-anonymitet |
 | `/inkop` | Ja | W1, W4 — lista + saknad invite CTA |
@@ -547,7 +549,7 @@ Koppla till befintliga + nya events (post receipt-funnel work).
 
 | Bygg nu | Bygg inte nu |
 |---------|----------------|
-| W1 MVP (återanvänd `expiring_share_link`-mönster) | Grannskafferiet-karta som cold acquisition |
+| W1 flag enable + lista→household bridge (route shipped bakom `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`) | Grannskafferiet-karta som cold acquisition |
 | W3 conversion copy + intent-aware signup | W8 recall/allergy (liability) |
 | W4 banner/modal på `/inkop` | W9 demand board (pre-density) |
 | Events: `shopping_list_share_*`, `household_invite_prompt_*` | Generisk meal-plan landing |
@@ -583,7 +585,7 @@ Koppla till befintliga + nya events (post receipt-funnel work).
 
 ### Next 3 implementation tasks
 
-1. **W1 MVP:** Publik read-only inköpslista via token + snapshot; events `shopping_list_share_created` / `shopping_list_share_viewed`; CTA till registrering med hushålls-intent.
+1. **W1 enable + bridge:** `/lista/[token]` shipped bakom flag — enable med baseline; post-share household CTA + hushålls-intent (se [`HOUSEHOLD_GROWTH.md`](./HOUSEHOLD_GROWTH.md) V1).
 2. **W3 conversion pass:** Intent-copy på `/dela/[token]`; redirect till onboarding med “utgående-lista”-intent; mät view→signup 2–4 veckor.
 3. **W4 kontextuell invite:** Banner/modal på `/inkop` → `createShareInvite`; event `household_invite_prompt_shown` (context=`inkop`); jämför `inviteRate` mot Inställningar-baseline.
 
