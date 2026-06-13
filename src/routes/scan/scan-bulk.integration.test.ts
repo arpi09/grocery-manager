@@ -175,7 +175,7 @@ describe('Scan bulkCreate integration', () => {
 
 		await expectRedirectTo(
 			invokeBulkCreate(scanEvent(request, { id: 'user-receipt' }, householdId)),
-			'/inkop?from=receipt'
+			'/hem?from=receipt'
 		);
 
 		const listed = await inventoryService.listByLocation(householdId, 'cupboard');

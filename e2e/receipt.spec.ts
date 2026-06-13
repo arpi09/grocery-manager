@@ -77,7 +77,8 @@ test.describe('Receipt flow', () => {
 		await dismissOnboardingModalIfOpen(page);
 		await page.getByTestId('receipt-bulk-submit').click();
 
-		await expect(page).toHaveURL(/\/inkop/, { timeout: 15_000 });
-		await expect(page.locator('.shopping-page')).toBeVisible({ timeout: 10_000 });
+		await expect(page).toHaveURL(/\/hem(\?|$)/, { timeout: 15_000 });
+		await expect(page).toHaveURL(/from=receipt/);
+		await expect(page.locator('section.home')).toBeVisible({ timeout: 10_000 });
 	});
 });

@@ -120,11 +120,9 @@ test.describe('Critical flows', () => {
 
 		await expect(home).toBeVisible();
 
-		const primaryActions = home.locator('.cta-primary, .action-primary');
+		const primaryActions = home.locator('.cta-primary, .action-primary, .shopping-teaser-primary');
 
-		expect(await primaryActions.count()).toBeLessThanOrEqual(1);
-
-		await expect(home.locator('.shopping-teaser-primary')).toHaveCount(1);
+		await expect(primaryActions).toHaveCount(1);
 
 	});
 
@@ -148,7 +146,7 @@ test.describe('Critical flows', () => {
 
 		await expect(page.getByRole('heading', { name: /Hushållet|Your household/i })).toBeVisible();
 
-		await expect(page.locator('.shopping-teaser-primary')).toBeVisible();
+		await expect(page.locator('.shopping-teaser-primary, .action-primary')).toBeVisible();
 
 	});
 

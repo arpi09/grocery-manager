@@ -73,7 +73,7 @@ test.describe('Recipe assistant from header', () => {
 
 		await page.getByTestId('recipe-detail-back').click();
 
-		await expect(page).toHaveURL('/inkop');
+		await expect(page).toHaveURL(/\/hem\?openRecipeAssistant=1/);
 
 		const restoredDialog = page.getByTestId('recipe-assistant-dialog');
 
