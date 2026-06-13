@@ -176,7 +176,7 @@ describe('Lista guest join integration', () => {
 			params: { token },
 			locals: { user: null, householdService, pmfService },
 			cookies
-		} as Parameters<typeof loadListaPage>[0])) as {
+		} as unknown as Parameters<typeof loadListaPage>[0])) as {
 			preview: { items: Array<{ name: string }> };
 			token: string;
 		};
@@ -208,15 +208,17 @@ describe('Lista guest join integration', () => {
 
 		const cookies = createCookieJar();
 		await expectRedirectTo(
-			loadListaPage({
-				params: { token },
-				locals: {
-					user: { id: 'guest-b' },
-					householdService,
-					pmfService
-				},
-				cookies
-			} as Parameters<typeof loadListaPage>[0]),
+			Promise.resolve(
+				loadListaPage({
+					params: { token },
+					locals: {
+						user: { id: 'guest-b' },
+						householdService,
+						pmfService
+					},
+					cookies
+				} as unknown as Parameters<typeof loadListaPage>[0])
+			),
 			APP_HOME_PATH
 		);
 
@@ -234,15 +236,17 @@ describe('Lista guest join integration', () => {
 
 		const cookies = createCookieJar();
 		await expectRedirectTo(
-			loadListaPage({
-				params: { token },
-				locals: {
-					user: { id: 'guest-c' },
-					householdService,
-					pmfService
-				},
-				cookies
-			} as Parameters<typeof loadListaPage>[0]),
+			Promise.resolve(
+				loadListaPage({
+					params: { token },
+					locals: {
+						user: { id: 'guest-c' },
+						householdService,
+						pmfService
+					},
+					cookies
+				} as unknown as Parameters<typeof loadListaPage>[0])
+			),
 			APP_HOME_PATH
 		);
 
@@ -251,7 +255,7 @@ describe('Lista guest join integration', () => {
 				.select()
 				.from(productEventTable)
 				.where(eq(productEventTable.userId, 'guest-c'));
-			expect(events.some((event) => event.eventType === 'partner_joined')).toBe(true);
+			expect(events.some((event) => (event.eventType as string) === 'partner_joined')).toBe(true);
 		});
 	});
 
@@ -283,7 +287,7 @@ describe('Lista guest join integration', () => {
 				.select()
 				.from(productEventTable)
 				.where(eq(productEventTable.userId, 'guest-d'));
-			expect(events.some((event) => event.eventType === 'partner_joined')).toBe(true);
+			expect(events.some((event) => (event.eventType as string) === 'partner_joined')).toBe(true);
 		});
 	});
 });

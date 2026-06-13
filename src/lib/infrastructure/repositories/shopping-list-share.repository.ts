@@ -19,6 +19,7 @@ export interface IShoppingListShareRepository {
 	revokeActiveByHousehold(householdId: string): Promise<void>;
 	create(input: CreateShoppingListShareInput): Promise<void>;
 	findByTokenHash(tokenHash: string): Promise<ShoppingListSharePreview | null>;
+	findHouseholdIdByTokenHash(tokenHash: string): Promise<string | null>;
 }
 
 export class DrizzleShoppingListShareRepository implements IShoppingListShareRepository {
@@ -63,6 +64,25 @@ export class DrizzleShoppingListShareRepository implements IShoppingListShareRep
 			.limit(1);
 
 		return this.toPreview(rows[0]);
+	}
+
+	async findHouseholdIdByTokenHash(tokenHash: string): Promise<string | null> {
+		const rows = await this.database
+			.select({
+				householdId: shoppingListShareLinkTable.householdId,
+				expiresAt: shoppingListShareLinkTable.expiresAt,
+				revokedAt: shoppingListShareLinkTable.revokedAt
+			})
+			.from(shoppingListShareLinkTable)
+			.where(eq(shoppingListShareLinkTable.tokenHash, tokenHash))
+			.limit(1);
+
+		const row = rows[0];
+		if (!row || row.revokedAt != null || row.expiresAt.getTime() <= Date.now()) {
+			return null;
+		}
+
+		return row.householdId;
 	}
 
 	private toPreview(

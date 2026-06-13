@@ -182,7 +182,8 @@ describe('marketing SEO keywords (sv)', () => {
 			content.meta.description,
 			content.landing.wasteReductionTitle,
 			content.landing.wasteReductionLead,
-			content.faq.items[0]?.question ?? ''
+			content.faq.items[0]?.question ?? '',
+			content.faq.items[0]?.answer ?? ''
 		]
 			.join(' ')
 			.toLowerCase();

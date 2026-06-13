@@ -355,6 +355,20 @@ export class HouseholdService {
 		return invite.householdId;
 	}
 
+	async joinSharedListHousehold(
+		targetHouseholdId: string,
+		userId: string
+	): Promise<'joined' | 'already_member'> {
+		if (await this.repository.hasMember(targetHouseholdId, userId)) {
+			await this.repository.setActiveHouseholdId(userId, targetHouseholdId);
+			return 'already_member';
+		}
+
+		await this.repository.addMember(targetHouseholdId, userId, 'editor');
+		await this.repository.setActiveHouseholdId(userId, targetHouseholdId);
+		return 'joined';
+	}
+
 	async updateMemberRole(
 		householdId: string,
 		actorUserId: string,

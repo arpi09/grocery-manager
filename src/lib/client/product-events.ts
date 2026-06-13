@@ -32,7 +32,12 @@ const CLIENT_EVENT_TYPES = [
 	'household_invite_prompt_dismissed',
 	'household_invite_created',
 	'shopping_list_share_clicked',
-	'replenishment_fold_opened'
+	'replenishment_fold_opened',
+	'list_link_shared',
+	'list_link_opened',
+	'list_join_cta_clicked',
+	'partner_joined',
+	'shared_checkoff'
 ] as const;
 
 export const PUBLIC_ACQUISITION_EVENT_TYPES = [

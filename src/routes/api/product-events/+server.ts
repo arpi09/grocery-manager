@@ -24,7 +24,9 @@ const PUBLIC_EVENT_TYPES = new Set<ProductEventType>([
 	'public_city_feed_viewed',
 	'public_city_feed_item_clicked',
 	'public_city_feed_signup_clicked',
-	'expiring_share_cta_clicked'
+	'expiring_share_cta_clicked',
+	'list_link_opened',
+	'list_join_cta_clicked'
 ]);
 
 const AUTH_EVENT_TYPES = new Set<ProductEventType>([
@@ -68,7 +70,10 @@ const AUTH_EVENT_TYPES = new Set<ProductEventType>([
 	'household_invite_created',
 	'household_invite_accepted',
 	'shopping_list_share_clicked',
-	'replenishment_fold_opened'
+	'replenishment_fold_opened',
+	'list_link_shared',
+	'partner_joined',
+	'shared_checkoff'
 ]);
 
 function isAllowedEventType(value: unknown): value is ProductEventType {

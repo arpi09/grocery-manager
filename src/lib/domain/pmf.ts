@@ -73,7 +73,12 @@ export const PRODUCT_EVENT_TYPES = [
 	'duplicate_warning_shown',
 	'duplicate_warning_dismissed',
 	'receipt_loop_cta_shown',
-	'receipt_loop_cta_clicked'
+	'receipt_loop_cta_clicked',
+	'list_link_shared',
+	'list_link_opened',
+	'list_join_cta_clicked',
+	'partner_joined',
+	'shared_checkoff'
 ] as const;
 
 export const PMF_PRODUCT_EVENT_TYPES = [

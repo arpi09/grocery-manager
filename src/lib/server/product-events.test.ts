@@ -162,7 +162,7 @@ describe('POST /api/product-events duo wedge allowlist', () => {
 				request,
 				locals,
 				cookies
-			} as Parameters<typeof postProductEvent>[0]);
+			} as unknown as Parameters<typeof postProductEvent>[0]);
 
 			expect(response.status).toBe(200);
 			await expect(response.json()).resolves.toEqual({ ok: true });
@@ -187,7 +187,7 @@ describe('POST /api/product-events duo wedge allowlist', () => {
 				request,
 				locals,
 				cookies
-			} as Parameters<typeof postProductEvent>[0]);
+			} as unknown as Parameters<typeof postProductEvent>[0]);
 
 			expect(response.status).toBe(200);
 			await expect(response.json()).resolves.toEqual({ ok: true });
@@ -210,7 +210,7 @@ describe('POST /api/product-events duo wedge allowlist', () => {
 				request,
 				locals,
 				cookies
-			} as Parameters<typeof postProductEvent>[0]);
+			} as unknown as Parameters<typeof postProductEvent>[0]);
 
 			expect(response.status).toBe(401);
 			expect(repository.recordEvent).not.toHaveBeenCalled();
@@ -224,7 +224,7 @@ describe('POST /api/product-events duo wedge allowlist', () => {
 			request,
 			locals,
 			cookies
-		} as Parameters<typeof postProductEvent>[0]);
+		} as unknown as Parameters<typeof postProductEvent>[0]);
 
 		expect(response.status).toBe(200);
 		await expect(response.json()).resolves.toEqual({ ok: true, skipped: true });

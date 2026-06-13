@@ -1,5 +1,8 @@
+import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { resolveAppOrigin } from './app-url';
 import { appendSearchParamsToAppPath } from './utm-params';
+
+export const LISTA_JOIN_COOKIE = 'lista_join_token';
 
 export const ACQUISITION_SOURCES = [
 	'shopping_share',
@@ -63,4 +66,16 @@ export function buildAcquisitionLandingUrl(
 	}
 
 	return `${origin}${path}`;
+}
+
+/** Login URL that returns guest to the shared lista after auth. */
+export function buildListaLoginUrl(token: string): string {
+	return `/login?redirect=${encodeURIComponent(`/lista/${token}`)}`;
+}
+
+/** Signup URL for lista guest with shopping_share attribution and inkop redirect. */
+export function buildListaSignupUrl(requestOrigin?: string): string {
+	const base = buildAcquisitionRegisterUrl('shopping_share', requestOrigin);
+	const separator = base.includes('?') ? '&' : '?';
+	return `${base}${separator}redirect=${encodeURIComponent(APP_HOME_PATH)}`;
 }

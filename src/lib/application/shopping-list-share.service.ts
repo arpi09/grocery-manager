@@ -69,4 +69,8 @@ export class ShoppingListShareService {
 	getSharePreview(token: string): Promise<ShoppingListSharePreview | null> {
 		return this.repository.findByTokenHash(hashSecureToken(token));
 	}
+
+	resolveHouseholdIdForToken(token: string): Promise<string | null> {
+		return this.repository.findHouseholdIdByTokenHash(hashSecureToken(token));
+	}
 }

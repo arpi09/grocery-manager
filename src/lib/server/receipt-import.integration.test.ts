@@ -123,7 +123,7 @@ describe('importReceiptLines integration', () => {
 			householdId,
 			userId: 'user-import',
 			role: 'owner',
-			lines: [{ name: 'Bröd', location: 'pantry', quantity: '1', unit: 'st' }],
+			lines: [{ name: 'Bröd', location: 'cupboard', quantity: '1', unit: 'st' }],
 			inventoryService,
 			purchasePatternService,
 			pmfService,
