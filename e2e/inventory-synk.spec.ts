@@ -63,8 +63,8 @@ test.describe('Inventory sync batch review', () => {
 			await expect(desktopNav.getByTestId('nav-shopping')).toBeVisible({ timeout: 15_000 });
 			await expect(desktopNav.getByTestId('nav-pantry')).toBeVisible();
 			await desktopNav.getByRole('button', { name: 'Mer' }).click();
-			await expect(desktopNav.getByTestId('nav-scan')).toBeVisible();
-			await expect(desktopNav.getByTestId('nav-eat')).toBeVisible();
+			await expect(page.getByTestId('nav-scan')).toBeVisible();
+			await expect(page.getByTestId('nav-eat')).toBeVisible();
 			await expect(page.getByTestId('core-action-bar')).toHaveCount(0);
 		}
 	});

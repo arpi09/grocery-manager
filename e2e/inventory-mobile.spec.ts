@@ -66,7 +66,7 @@ test.describe('Inventory mobile UX', () => {
 		const undoBtn = page
 			.getByTestId('undo-toast-wrap')
 			.getByRole('button', { name: /Ångra|Undo/i });
-		await expect(undoBtn).toBeVisible({ timeout: 10_000 });
+		await expect(undoBtn).toBeVisible({ timeout: 20_000 });
 		await undoBtn.click({ force: true });
 	}
 

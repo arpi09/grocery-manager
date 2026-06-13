@@ -10,7 +10,7 @@ test.describe.configure({ mode: 'serial' });
 test.setTimeout(120_000);
 
 const MOBILE_P0_ROUTES = [
-	{ path: '/hem', name: 'Home' },
+	{ path: '/inkop', name: 'Shopping home' },
 	{ path: '/inventory/fridge', name: 'Inventory fridge' },
 	{ path: '/inventory/cupboard', name: 'Inventory cupboard' },
 	{ path: '/inventory/freezer', name: 'Inventory freezer' },
@@ -24,7 +24,6 @@ const MOBILE_P0_ROUTES = [
 	{ path: '/scan?mode=barcode&from=/hem', name: 'Scan barcode' },
 	{ path: '/scan?mode=receipt&from=/hem', name: 'Scan receipt' },
 	{ path: '/scan?mode=photo&from=/hem', name: 'Scan photo' },
-	{ path: '/inkop', name: 'Shopping' },
 	{ path: '/item/new?location=fridge&from=/inventory/fridge', name: 'New item' }
 ] as const;
 

@@ -9,13 +9,14 @@ test.describe('Authentication', () => {
 		await page.goto('/');
 		await expect(page).toHaveURL('/');
 		await expect(page.getByRole('banner').getByRole('link', { name: 'Skaffu' })).toBeVisible();
-		await expect(page.getByRole('heading', { level: 1 })).toContainText(/skafferi|butiksneutralt|koll på/i);
+		await expect(page.getByRole('heading', { level: 1 })).toContainText(/Handla ihop|hushåll|Skaffu/i);
 		await expect(page.getByRole('banner').getByRole('link', { name: 'Logga in' })).toBeVisible();
 		await expect(page.getByTestId('language-switcher')).toBeVisible();
 	});
 
-	test('admin can sign in and reach home', async ({ page }) => {
+	test('admin can sign in and reach inkop', async ({ page }) => {
 		await loginAsAdmin(page);
-		await expect(page.locator('section.home')).toBeVisible();
+		await expect(page).toHaveURL('/inkop');
+		await expect(page.locator('.shopping-page')).toBeVisible();
 	});
 });

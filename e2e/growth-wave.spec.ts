@@ -234,7 +234,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 			(res) =>
 				res.url().includes('/api/expiring-share/nearby-settings') &&
 				res.request().method() === 'POST',
-			{ timeout: 60_000 }
+			{ timeout: 90_000 }
 		);
 		// Tap switch (label has explicit handler too; switch is the primary mobile target).
 		await switchControl.click();

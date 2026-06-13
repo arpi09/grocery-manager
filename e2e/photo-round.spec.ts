@@ -80,7 +80,7 @@ test.describe('Photo round flow', () => {
 		const bulkResponse = await bulkDone;
 		expect(bulkResponse.status(), await bulkResponse.text()).toBeLessThan(400);
 
-		await expect(page).toHaveURL(/\/inkop/, { timeout: 15_000 });
+		await expect(page).toHaveURL(/\/hem/, { timeout: 15_000 });
 		await expect(
 			page.locator('.toast-message').filter({ hasText: /Mjölk|varor/i })
 		).toBeVisible({ timeout: 15_000 });
