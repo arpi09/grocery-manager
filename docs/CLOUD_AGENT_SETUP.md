@@ -1,10 +1,10 @@
 # Cloud agent setup — Skaffu
 
+> **PAUSED (2026-06-13):** Cursor Cloud is paused — use coordinator + local agents. See [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md#coordinator-planning).
+
 **Verdict: PARTIAL — usable for implementation agents, not for full-stack dev or deploy.**
 
 Skaffu is cloud-ready for the same work CI proves on `ubuntu-latest`: lint, typecheck, unit tests, PGlite integration tests, and production build. Cloud agents should mirror the **quality** job in [`.github/workflows/reusable-quality.yml`](../.github/workflows/reusable-quality.yml), not local PowerShell dev-runtime, Firebase deploy, or production smoke.
-
-**Cloud Handoff Protocol:** Manual Cloud agents are orchestrated via [AGENT_DISPATCH_LOG.md](./AGENT_DISPATCH_LOG.md). Append the [Standard Cloud Agent Prompt Footer](./AGENT_DISPATCH_LOG.md#standard-cloud-agent-prompt-footer) to every `MANUAL_CLOUD_AGENT` prompt. Coordinator owns prod SHA and deploy — see [hard rules](./AGENT_DISPATCH_LOG.md#hard-rules).
 
 | Cloud safe | Cloud risky | Local only |
 |------------|-------------|------------|
@@ -14,7 +14,9 @@ Skaffu is cloud-ready for the same work CI proves on `ubuntu-latest`: lint, type
 
 ---
 
-## Bootstrap (copy-paste)
+## Bootstrap (archived — not active workflow)
+
+`npm run cloud:bootstrap` and [`scripts/cloud-agent-bootstrap.sh`](../scripts/cloud-agent-bootstrap.sh) remain in the repo for possible reactivation. **Not** part of the active coordinator workflow while Cloud is paused.
 
 ```bash
 # Node 24 — match .nvmrc
@@ -150,4 +152,4 @@ Do **not** assign these without explicit user request:
 - Receipt fixture validation (`test:receipt-fixtures`)
 - Docs-only changes
 
-See also [INDEX.md](./INDEX.md) for coordinator skills and prod reality, and [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md#cloud-handoff-protocol) for execution modes and coordinator sync.
+See also [INDEX.md](./INDEX.md) for coordinator skills and prod reality, and [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md#coordinator-planning) for execution modes.

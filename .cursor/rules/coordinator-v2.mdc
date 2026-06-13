@@ -5,6 +5,8 @@ alwaysApply: false
 
 # Coordinator v2
 
+Plans: four-column table per `coordinator-planning.mdc`.
+
 - **Delivery (default):** Trunk on `master` — no PRs. See [docs/CI_CD.md](../../docs/CI_CD.md).
 - **Parallel work:** Up to **3 feature branches** (`feat/*`, `fix/*`); one agent per branch. **`master` is deploy-only** — merge when G0 green, then push.
 - **Work order:** [private/MERGE_QUEUE.md](../../private/MERGE_QUEUE.md) when present — sequencing for parallel agents, not GitHub PRs.

@@ -6,7 +6,7 @@
 |------|--------|
 | **Uppdaterad** | 2026-06-13 |
 | **Prod SHA** | `2779d141` — senaste lyckade Deploy to production (2026-06-13) |
-| **Master SHA** | `2779d141` — wedge deploy: lista join, duo events, inkop-first |
+| **Master SHA** | `1115b40d` — docs sync; prod wedge @ `2779d141` (lista join, duo events, inkop-first) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` — merged to master |
 | **Prod URL** | https://skaffu.com |
 
@@ -34,14 +34,15 @@ Utgående → `/inkop` (delad lista) → handla ihop → checkoff → skafferi �
 | `STRIPE_CHECKOUT_DISABLED` | true | true | .env | Pro checkout dold |
 | `KIVRA_FORWARD_ENABLED` | off | off | .env | Inbound Kivra |
 | `EMAIL_SENDING_DISABLED` | prod policy | prod policy | apphosting | E-post |
-| `SHELF_LIFE_LEARNING_ENABLED` | off | off | apphosting.yaml | Household shelf-life rules + feedback (Brain V1) |
-| `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT` | off | off | apphosting.yaml | Receipt review expiry UX ("Uppskattat") |
-| `SHELF_LIFE_LLM_ENABLED` | off | off | apphosting.yaml | Future LLM tier in predictor chain |
+| `SHELF_LIFE_LEARNING_ENABLED` | off | off | apphosting.yaml | Brain V1 shelf-life learning — **flags only on master**; UI/backend not deployed |
+| `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT` | off | off | apphosting.yaml | Receipt review expiry UX ("Uppskattat") — WIP on `feat/brain-v1` |
+| `SHELF_LIFE_LLM_ENABLED` | off | off | apphosting.yaml | Future LLM tier in predictor chain — not implemented |
 
 ## Tier snapshot
 
 - **A:** inkop, household, checkoff-bridge, eat-first, replenishment, onboarding→inkop
-- **B:** receipt import, barcode/photo add, price memory, export footer, **Learning Engine V1** (shelf-life predictor — codebase shipped, flags off)
+- **B:** receipt import, barcode/photo add, price memory, export footer
+- **B (WIP):** **Brain V1 / shelf-life learning** — env flags in `feature-flags.ts` only; predictor, EstimatedBadge implicit feedback, migrations 0047–0050 **not on master** (stash `wedge-brain-wip` → `feat/brain-v1`). No thumb up/down UI; learning uses implicit feedback in WIP branch.
 - **C:** grannskafferiet, meal plan AI, wrapped, PMF user dashboards, Stripe marketing
 
 ## Kända drift (fixa när du ser dem)
@@ -57,3 +58,4 @@ Utgående → `/inkop` (delad lista) → handla ihop → checkoff → skafferi �
 | `feat/weekly-habit-core` | Inkop-first landing + nav | Mergad till integrate |
 | `feat/seed-and-share` | W1 flag, export footer, PostOnboardingSharePrompt | Mergad till integrate |
 | `feat/lista-join-household-cta` | Lista → household CTA | Redan i weekly-habit (lista page) |
+| `feat/brain-v1` | Brain V1 shelf-life predictor + learning | WIP — apply stash `wedge-brain-wip` (stash@{1}); ~70 untracked files, integration incomplete |
