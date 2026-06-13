@@ -10,6 +10,7 @@ import {
 	isOnboardingExcludedPath,
 	isOnboardingPrimaryPath,
 	isPostOnboardingSurveyPath,
+	isPostOnboardingSharePath,
 	markSignupAt,
 	recordBarcodeActivation,
 	recordReceiptActivation,
@@ -19,7 +20,9 @@ import {
 	shouldShowCelebration,
 	shouldShowOnboarding,
 	shouldShowPostOnboardingSurvey,
-	dismissPostOnboardingSurvey
+	dismissPostOnboardingSurvey,
+	shouldShowPostOnboardingShare,
+	dismissPostOnboardingShare
 } from './onboarding';
 import { POST_REGISTER_SCAN_PATH } from '../navigation/post-register';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
@@ -89,6 +92,14 @@ describe('onboarding helpers', () => {
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
 	});
 
+	it('queues post-onboarding share prompt after completion', () => {
+		expect(shouldShowPostOnboardingShare(TEST_USER_A)).toBe(false);
+		completeOnboarding(TEST_USER_A);
+		expect(shouldShowPostOnboardingShare(TEST_USER_A)).toBe(true);
+		dismissPostOnboardingShare(TEST_USER_A);
+		expect(shouldShowPostOnboardingShare(TEST_USER_A)).toBe(false);
+	});
+
 	it('limits post-onboarding survey to calm app surfaces', () => {
 		expect(isPostOnboardingSurveyPath('/hem')).toBe(true);
 		expect(isPostOnboardingSurveyPath('/inkop')).toBe(true);
@@ -100,6 +111,12 @@ describe('onboarding helpers', () => {
 	it('uses inkop as the primary onboarding surface', () => {
 		expect(isOnboardingPrimaryPath('/inkop')).toBe(true);
 		expect(isOnboardingPrimaryPath('/hem')).toBe(false);
+	});
+
+	it('limits post-onboarding share prompt to inkop only', () => {
+		expect(isPostOnboardingSharePath('/inkop')).toBe(true);
+		expect(isPostOnboardingSharePath('/hem')).toBe(false);
+		expect(isPostOnboardingSharePath('/inventory/fridge')).toBe(false);
 	});
 
 	it('excludes admin and auth routes', () => {

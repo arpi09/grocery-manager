@@ -19,6 +19,7 @@
 	import OnboardingGuide from '$lib/components/organisms/OnboardingGuide.svelte';
 	import PageHintModal from '$lib/components/organisms/PageHintModal.svelte';
 	import PostOnboardingSurvey from '$lib/components/organisms/PostOnboardingSurvey.svelte';
+	import PostOnboardingSharePrompt from '$lib/components/organisms/PostOnboardingSharePrompt.svelte';
 	import PmfSurveyBanner from '$lib/components/organisms/PmfSurveyBanner.svelte';
 	import { canEditInventory } from '$lib/domain/household';
 	import DemoAccountBanner from '$lib/components/molecules/DemoAccountBanner.svelte';
@@ -58,6 +59,7 @@
 	const householdMemberCount = $derived(
 		typeof page.data.householdMemberCount === 'number' ? page.data.householdMemberCount : 0
 	);
+	const shareLinkEnabled = $derived(Boolean(page.data.shareLinkEnabled));
 
 	function openRecipeIdeas() {
 		recipeOpen = true;
@@ -104,7 +106,11 @@
 
 		markSignupAt(userId);
 		completeOnboarding(userId);
-		void goto(POST_REGISTER_INKOP_PATH, { replaceState: true, keepFocus: true, noScroll: true });
+		const url = new URL(page.url);
+		url.pathname = POST_REGISTER_INKOP_PATH;
+		url.searchParams.delete('freshAccount');
+		const next = `${url.pathname}${url.search}${url.hash}`;
+		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
 	});
 
 	$effect(() => {
@@ -173,6 +179,7 @@
 	<CelebrationMoment />
 	<OnboardingGuide />
 	<PageHintModal />
+	<PostOnboardingSharePrompt memberCount={householdMemberCount} {shareLinkEnabled} />
 	<PostOnboardingSurvey />
 	<PmfSurveyBanner />
 	<ActivationCelebration />

@@ -16,6 +16,10 @@ const POST_ONBOARDING_SURVEY_PENDING_SUFFIX = 'post-onboarding-survey-pending';
 
 const POST_ONBOARDING_SURVEY_DISMISSED_SUFFIX = 'post-onboarding-survey-dismissed';
 
+const POST_ONBOARDING_SHARE_PENDING_SUFFIX = 'post-onboarding-share-pending';
+
+const POST_ONBOARDING_SHARE_DISMISSED_SUFFIX = 'post-onboarding-share-dismissed';
+
 const ACTIVATION_PATH_SUFFIX = 'activation-path';
 
 const ACTIVATION_BARCODE_COUNT_SUFFIX = 'activation-barcode-count';
@@ -138,6 +142,7 @@ export function completeOnboarding(userId?: string | null): void {
 	localStorage.setItem(storageKey(DISMISSED_SUFFIX, userId), '1');
 
 	markPostOnboardingSurveyPending(userId);
+	markPostOnboardingSharePending(userId);
 }
 
 export function markPostOnboardingSurveyPending(userId?: string | null): void {
@@ -162,6 +167,44 @@ export function shouldShowPostOnboardingSurvey(userId?: string | null): boolean 
 	}
 
 	return localStorage.getItem(storageKey(POST_ONBOARDING_SURVEY_PENDING_SUFFIX, userId)) === '1';
+}
+
+export function markPostOnboardingSharePending(userId?: string | null): void {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	if (localStorage.getItem(storageKey(POST_ONBOARDING_SHARE_DISMISSED_SUFFIX, userId)) === '1') {
+		return;
+	}
+
+	localStorage.setItem(storageKey(POST_ONBOARDING_SHARE_PENDING_SUFFIX, userId), '1');
+}
+
+export function shouldShowPostOnboardingShare(userId?: string | null): boolean {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return false;
+	}
+
+	if (localStorage.getItem(storageKey(POST_ONBOARDING_SHARE_DISMISSED_SUFFIX, userId)) === '1') {
+		return false;
+	}
+
+	return localStorage.getItem(storageKey(POST_ONBOARDING_SHARE_PENDING_SUFFIX, userId)) === '1';
+}
+
+export function dismissPostOnboardingShare(userId?: string | null): void {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	localStorage.removeItem(storageKey(POST_ONBOARDING_SHARE_PENDING_SUFFIX, userId));
+	localStorage.setItem(storageKey(POST_ONBOARDING_SHARE_DISMISSED_SUFFIX, userId), '1');
+}
+
+/** Inkop-only — do not stack partner prompts on /hem with household briefing. */
+export function isPostOnboardingSharePath(pathname: string): boolean {
+	return pathname === '/inkop' || pathname.startsWith('/inkop/');
 }
 
 /** Calm surfaces only — not during scan/login flows. */
@@ -221,6 +264,10 @@ function clearUserOnboardingKeys(userId: string): void {
 		POST_ONBOARDING_SURVEY_PENDING_SUFFIX,
 
 		POST_ONBOARDING_SURVEY_DISMISSED_SUFFIX,
+
+		POST_ONBOARDING_SHARE_PENDING_SUFFIX,
+
+		POST_ONBOARDING_SHARE_DISMISSED_SUFFIX,
 
 		SIGNUP_AT_SUFFIX
 	]) {
