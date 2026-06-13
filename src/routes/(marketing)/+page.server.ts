@@ -7,9 +7,7 @@ import {
 	isReceiptHeroVariant,
 	LANDING_VARIANT_COOKIE,
 	mergeReceiptHeroExperiment,
-	RECEIPT_HERO_VARIANT_COOKIE,
-	resolveLandingVariant,
-	resolveReceiptHeroVariant
+	resolveLandingVariant
 } from '$lib/marketing/landing-variants';
 import { getLatestPublishedGuides } from '$lib/marketing/guides.server';
 import { guideLoaderDepsFromService } from '$lib/marketing/guide-loader-deps';
@@ -31,30 +29,13 @@ export const load: PageServerLoad = async ({ url, cookies, parent, locals }) => 
 		allowVariantCookie: analyticsAllowed
 	});
 
-	const receiptHeroVariant = resolveReceiptHeroVariant({
-		queryReceiptHero,
-		cookieVariant: cookies.get(RECEIPT_HERO_VARIANT_COOKIE),
-		allowVariantCookie: analyticsAllowed
-	});
+	const trimmedReceiptHero = queryReceiptHero?.trim().toLowerCase() ?? null;
 	const receiptHeroActive =
-		queryReceiptHero !== null ||
-		(analyticsAllowed && cookies.get(RECEIPT_HERO_VARIANT_COOKIE) != null);
+		trimmedReceiptHero != null && isReceiptHeroVariant(trimmedReceiptHero);
+	const receiptHeroVariant = receiptHeroActive ? trimmedReceiptHero : null;
 
 	if (queryHero && (queryHero === 'a' || queryHero === 'b') && analyticsAllowed) {
 		cookies.set(LANDING_VARIANT_COOKIE, variant, {
-			path: '/',
-			maxAge: 60 * 60 * 24 * 90,
-			httpOnly: false,
-			sameSite: 'lax'
-		});
-	}
-
-	if (
-		queryReceiptHero &&
-		isReceiptHeroVariant(queryReceiptHero.trim().toLowerCase()) &&
-		analyticsAllowed
-	) {
-		cookies.set(RECEIPT_HERO_VARIANT_COOKIE, receiptHeroVariant, {
 			path: '/',
 			maxAge: 60 * 60 * 24 * 90,
 			httpOnly: false,
@@ -71,9 +52,10 @@ export const load: PageServerLoad = async ({ url, cookies, parent, locals }) => 
 	});
 
 	const baseHero = getLandingHeroCopy(variant, locale);
-	const hero = receiptHeroActive
-		? mergeReceiptHeroExperiment(baseHero, receiptHeroVariant, locale)
-		: baseHero;
+	const hero =
+		receiptHeroActive && receiptHeroVariant
+			? mergeReceiptHeroExperiment(baseHero, receiptHeroVariant, locale)
+			: baseHero;
 
 	return {
 		landingVariant: variant,

@@ -1,14 +1,13 @@
 <script lang="ts">
 	import {
 		ArrowRight,
-		Barcode,
 		BookOpen,
-		Camera,
 		Leaf,
-		Refrigerator,
+		ListChecks,
 		Shield,
 		Sparkles,
-		Store
+		Store,
+		Users
 	} from '@lucide/svelte';
 	import ComparisonTable from '$lib/components/marketing/ComparisonTable.svelte';
 	import LandingHeroVisual from '$lib/components/marketing/LandingHeroVisual.svelte';
@@ -73,7 +72,7 @@
 	<div class="hero-bg" aria-hidden="true"></div>
 	<div class="hero-inner">
 		<div class="hero-copy">
-			<p class="eyebrow label-caps">{content.siteName} {landing.heroDomainSuffix}</p>
+			<p class="eyebrow label-caps">{landing.heroEyebrow}</p>
 			<h1 class="hero-title">{hero.heroTitle}</h1>
 			<p class="hero-lead">{hero.heroLead}</p>
 			<p class="hero-secondary">{hero.heroSecondary}</p>
@@ -83,7 +82,7 @@
 					<MarketingButtonLink href={APP_HOME_PATH}>{content.cta.openApp}</MarketingButtonLink>
 				{:else}
 					<MarketingButtonLink href={registerUrl} analyticsId="marketing.register_hero" onclick={trackRegisterClick}>
-						{content.cta.tryFree}
+						{content.cta.createWeeklyList}
 					</MarketingButtonLink>
 					<MarketingButtonLink href={loginUrl} variant="secondary">{content.cta.login}</MarketingButtonLink>
 					<a href={registerUrl} class="hero-register" data-analytics-id="marketing.register_link" onclick={trackRegisterClick}>
@@ -95,16 +94,16 @@
 
 			<ul class="hero-highlights" aria-label={landing.heroHighlightsAria}>
 				<li>
-					<Barcode size={18} strokeWidth={2} aria-hidden="true" />
-					<span>{landing.heroHighlights.barcode}</span>
+					<ListChecks size={18} strokeWidth={2} aria-hidden="true" />
+					<span>{landing.heroHighlights.list}</span>
 				</li>
 				<li>
-					<Camera size={18} strokeWidth={2} aria-hidden="true" />
-					<span>{landing.heroHighlights.receipt}</span>
+					<Users size={18} strokeWidth={2} aria-hidden="true" />
+					<span>{landing.heroHighlights.partner}</span>
 				</li>
 				<li>
-					<Refrigerator size={18} strokeWidth={2} aria-hidden="true" />
-					<span>{landing.heroHighlights.storage}</span>
+					<Sparkles size={18} strokeWidth={2} aria-hidden="true" />
+					<span>{landing.heroHighlights.eatFirst}</span>
 				</li>
 			</ul>
 		</div>
@@ -114,14 +113,6 @@
 		</div>
 	</div>
 </section>
-
-<MarketingScrollReveal variant="scale" delay={40}>
-	<MarketingProLaunchBanner
-		proLaunch={content.proLaunch}
-		{registerUrl}
-		onRegisterClick={trackRegisterClick}
-	/>
-</MarketingScrollReveal>
 
 <MarketingScrollReveal immediate variant="fade">
 <section class="stats-strip" aria-label={landing.statsAria}>
@@ -156,6 +147,34 @@
 	</section>
 </MarketingScrollReveal>
 
+<MarketingScrollReveal delay={60}>
+	<section class="section muted">
+		<div class="section-inner">
+			<header class="section-header center">
+				<span class="section-kicker label-caps">
+					<Sparkles size={14} strokeWidth={2} aria-hidden="true" />
+					{landing.stepsKicker}
+				</span>
+				<h2>{landing.stepsTitle}</h2>
+				<p>{landing.stepsLead}</p>
+			</header>
+			<div class="steps-grid">
+				{#each content.howItWorks.steps as step, i (step.step)}
+					<div class="step-reveal" style:--card-i={i}>
+						<MarketingStepCard {step} />
+					</div>
+				{/each}
+			</div>
+			<p class="section-link center-link">
+				<a href="/sa-fungerar-det">
+					{landing.readHowItWorks}
+					<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+				</a>
+			</p>
+		</div>
+	</section>
+</MarketingScrollReveal>
+
 <MarketingScrollReveal delay={80} variant="fade">
 	<section class="section muted">
 		<div class="section-inner">
@@ -179,43 +198,6 @@
 		</div>
 	</section>
 </MarketingScrollReveal>
-
-{#if latestGuides.length > 0}
-	<MarketingScrollReveal delay={40}>
-		<section class="section muted" id="senaste-guider">
-			<div class="section-inner">
-				<header class="section-header">
-					<span class="section-kicker label-caps">
-						<BookOpen size={14} strokeWidth={2} aria-hidden="true" />
-						{landing.guidesTeaserTitle}
-					</span>
-					<h2>{landing.guidesTeaserTitle}</h2>
-					<p>{landing.guidesTeaserLead}</p>
-				</header>
-				<div class="guide-teaser-grid">
-					{#each latestGuides as guide (guide.slug)}
-						<article class="guide-teaser-card">
-							<h3>
-								<a href="/guider/{guide.slug}">{guide.title}</a>
-							</h3>
-							<p>{guide.description}</p>
-							<a class="guide-teaser-link" href="/guider/{guide.slug}">
-								{landing.guidesTeaserReadMore}
-								<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
-							</a>
-						</article>
-					{/each}
-				</div>
-				<p class="section-link">
-					<a href="/guider">
-						{landing.guidesTeaserSeeAll}
-						<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
-					</a>
-				</p>
-			</div>
-		</section>
-	</MarketingScrollReveal>
-{/if}
 
 <MarketingScrollReveal variant="scale">
 	<section class="section waste" id="minska-matsvinn">
@@ -273,32 +255,49 @@
 	</section>
 </MarketingScrollReveal>
 
-<MarketingScrollReveal delay={60}>
-	<section class="section muted">
-		<div class="section-inner">
-			<header class="section-header center">
-				<span class="section-kicker label-caps">
-					<Sparkles size={14} strokeWidth={2} aria-hidden="true" />
-					{landing.stepsKicker}
-				</span>
-				<h2>{landing.stepsTitle}</h2>
-				<p>{landing.stepsLead}</p>
-			</header>
-			<div class="steps-grid">
-				{#each content.howItWorks.steps as step, i (step.step)}
-					<div class="step-reveal" style:--card-i={i}>
-						<MarketingStepCard {step} />
-					</div>
-				{/each}
+{#if latestGuides.length > 0}
+	<MarketingScrollReveal delay={40}>
+		<section class="section muted" id="senaste-guider">
+			<div class="section-inner">
+				<header class="section-header">
+					<span class="section-kicker label-caps">
+						<BookOpen size={14} strokeWidth={2} aria-hidden="true" />
+						{landing.guidesTeaserTitle}
+					</span>
+					<h2>{landing.guidesTeaserTitle}</h2>
+					<p>{landing.guidesTeaserLead}</p>
+				</header>
+				<div class="guide-teaser-grid">
+					{#each latestGuides as guide (guide.slug)}
+						<article class="guide-teaser-card">
+							<h3>
+								<a href="/guider/{guide.slug}">{guide.title}</a>
+							</h3>
+							<p>{guide.description}</p>
+							<a class="guide-teaser-link" href="/guider/{guide.slug}">
+								{landing.guidesTeaserReadMore}
+								<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+							</a>
+						</article>
+					{/each}
+				</div>
+				<p class="section-link">
+					<a href="/guider">
+						{landing.guidesTeaserSeeAll}
+						<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+					</a>
+				</p>
 			</div>
-			<p class="section-link center-link">
-				<a href="/sa-fungerar-det">
-					{landing.readHowItWorks}
-					<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
-				</a>
-			</p>
-		</div>
-	</section>
+		</section>
+	</MarketingScrollReveal>
+{/if}
+
+<MarketingScrollReveal variant="scale" delay={40}>
+	<MarketingProLaunchBanner
+		proLaunch={content.proLaunch}
+		{registerUrl}
+		onRegisterClick={trackRegisterClick}
+	/>
 </MarketingScrollReveal>
 
 <MarketingScrollReveal delay={60} variant="fade">
@@ -306,7 +305,7 @@
 	<MarketingCta
 		title={landing.finalCtaTitle}
 		lead={landing.finalCtaLead}
-		primaryLabel={content.cta.tryFree}
+		primaryLabel={content.cta.createWeeklyList}
 		primaryHref={registerUrl}
 		primaryAnalyticsId="marketing.register_footer"
 		secondaryLabel={content.cta.login}

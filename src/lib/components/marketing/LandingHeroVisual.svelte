@@ -12,54 +12,56 @@
 	<div class="glow"></div>
 	<div class="phone">
 		<div class="phone-notch"></div>
-		<header class="phone-top">
-			<span class="chip fridge">{copy.fridge}</span>
-			<span class="chip freezer">{copy.freezer}</span>
-			<span class="chip cupboard">{copy.cupboard}</span>
+		<header class="phone-header">
+			<span class="list-title">{copy.listTitle}</span>
+			<span class="member-avatars" title="Household members">{copy.memberAvatars}</span>
 		</header>
+		<ul class="list-items">
+			<li class="checked">
+				<span class="check" aria-hidden="true">✓</span>
+				<span class="item-name checked-name">{copy.listItemChecked}</span>
+			</li>
+			<li class="suggestion">
+				<span class="suggestion-icon" aria-hidden="true">✦</span>
+				<div class="suggestion-body">
+					<span class="item-name suggestion-text">{copy.suggestionText}</span>
+					<span class="suggestion-badge">{copy.suggestionBadge}</span>
+				</div>
+			</li>
+			<li>
+				<span class="check empty" aria-hidden="true"></span>
+				<span class="item-name">{copy.listItemPending}</span>
+			</li>
+			<li>
+				<span class="check empty" aria-hidden="true"></span>
+				<span class="item-name">{copy.listItemPending2}</span>
+			</li>
+		</ul>
 		<div class="eat-first">
 			<span class="eat-badge">{copy.eatFirstBadge}</span>
 			<p class="eat-copy">{copy.eatFirstCaption}</p>
 		</div>
-		<ul class="items">
-			<li>
-				<span class="dot fridge"></span>
-				<span class="line wide"></span>
-				<span class="date warn">{copy.expiryDays[0]}</span>
-			</li>
-			<li>
-				<span class="dot cupboard"></span>
-				<span class="line"></span>
-				<span class="date ok">{copy.expiryDays[1]}</span>
-			</li>
-			<li>
-				<span class="dot freezer"></span>
-				<span class="line mid"></span>
-				<span class="date">{copy.expiryDays[2]}</span>
-			</li>
-		</ul>
-		<div class="list-preview">
-			<span class="list-label">{copy.shoppingList}</span>
-			<span class="list-pill">{copy.shoppingListPill}</span>
-		</div>
 	</div>
-	<div class="float-card scan">
+	<div class="float-card share">
 		<span class="float-icon" aria-hidden="true">
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-				<path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3" />
-				<path d="M7 12h10" />
+				<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+				<polyline points="16 6 12 2 8 6" />
+				<line x1="12" y1="2" x2="12" y2="15" />
 			</svg>
 		</span>
-		<span>{copy.scanModes}</span>
+		<span>{copy.shareLink}</span>
 	</div>
-	<div class="float-card neutral">
+	<div class="float-card together">
 		<span class="float-icon" aria-hidden="true">
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-				<path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
-				<path d="M3 9l2-4h14l2 4" />
+				<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+				<circle cx="9" cy="7" r="4" />
+				<path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+				<path d="M16 3.13a4 4 0 0 1 0 7.75" />
 			</svg>
 		</span>
-		<span>{copy.storeNeutral}</span>
+		<span>{copy.shopTogether}</span>
 	</div>
 </div>
 
@@ -107,31 +109,126 @@
 		background: var(--color-surface-muted);
 	}
 
-	.phone-top {
+	.phone-header {
 		display: flex;
-		flex-wrap: wrap;
-		gap: 0.35rem;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-sm);
 		margin-top: var(--space-sm);
 	}
 
-	.chip {
-		font-size: var(--font-size-label);
-		font-weight: 600;
-		padding: 0.2rem 0.55rem;
-		border-radius: 999px;
-		border: 1px solid color-mix(in srgb, var(--chip) 40%, var(--color-border));
+	.list-title {
+		font-size: 1rem;
+		font-weight: 700;
 		color: var(--color-text);
-		background: color-mix(in srgb, var(--chip) 18%, var(--color-surface));
 	}
 
-	.chip.fridge {
-		--chip: var(--color-fridge);
+	.member-avatars {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 2.25rem;
+		padding: 0.2rem 0.5rem;
+		border-radius: 999px;
+		font-size: 0.65rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
+		color: var(--color-primary);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
 	}
-	.chip.freezer {
-		--chip: var(--color-freezer);
+
+	.list-items {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
 	}
-	.chip.cupboard {
-		--chip: var(--color-cupboard);
+
+	.list-items li {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		align-items: center;
+		gap: var(--space-sm);
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface-muted);
+	}
+
+	.list-items li.checked {
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface-muted));
+	}
+
+	.list-items li.suggestion {
+		grid-template-columns: auto 1fr;
+		background: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-muted));
+		border: 1px solid color-mix(in srgb, var(--color-accent) 30%, var(--color-border));
+	}
+
+	.suggestion-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.1rem;
+		height: 1.1rem;
+		font-size: 0.75rem;
+		color: var(--color-primary);
+	}
+
+	.suggestion-body {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-xs) var(--space-sm);
+	}
+
+	.suggestion-text {
+		font-weight: 600;
+	}
+
+	.suggestion-badge {
+		display: inline-block;
+		padding: 0.1rem 0.45rem;
+		border-radius: 999px;
+		font-size: 0.6rem;
+		font-weight: 700;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+		color: var(--color-primary);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+	}
+
+	.check {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.1rem;
+		height: 1.1rem;
+		border-radius: 999px;
+		font-size: 0.65rem;
+		font-weight: 700;
+		background: var(--color-primary);
+		color: var(--color-on-primary, #fff);
+	}
+
+	.check.empty {
+		background: transparent;
+		border: 2px solid var(--color-border);
+	}
+
+	.item-name {
+		font-size: var(--font-size-body-sm);
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	.checked-name {
+		color: var(--color-text-muted);
+		text-decoration: line-through;
+		font-weight: 500;
 	}
 
 	.eat-first {
@@ -157,92 +254,6 @@
 		color: var(--color-text);
 	}
 
-	.items {
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-	}
-
-	.items li {
-		display: grid;
-		grid-template-columns: auto 1fr auto;
-		align-items: center;
-		gap: var(--space-sm);
-		padding: var(--space-sm) var(--space-md);
-		border-radius: var(--radius-sm);
-		background: var(--color-surface-muted);
-	}
-
-	.dot {
-		width: 0.55rem;
-		height: 0.55rem;
-		border-radius: 999px;
-		background: var(--color-primary);
-	}
-
-	.dot.fridge {
-		background: var(--color-fridge);
-	}
-	.dot.freezer {
-		background: var(--color-freezer);
-	}
-	.dot.cupboard {
-		background: var(--color-cupboard);
-	}
-
-	.line {
-		height: 0.45rem;
-		border-radius: 999px;
-		background: color-mix(in srgb, var(--color-text) 12%, var(--color-border));
-	}
-
-	.line.wide {
-		width: 85%;
-	}
-	.line.mid {
-		width: 65%;
-	}
-
-	.date {
-		font-size: var(--font-size-label);
-		font-weight: 600;
-		color: var(--color-text-muted);
-		white-space: nowrap;
-	}
-
-	.date.warn {
-		color: var(--color-danger);
-	}
-	.date.ok {
-		color: var(--color-primary);
-	}
-
-	.list-preview {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-sm);
-		padding-top: var(--space-xs);
-		border-top: 1px dashed var(--color-border);
-	}
-
-	.list-label {
-		font-size: var(--font-size-body-sm);
-		font-weight: 600;
-	}
-
-	.list-pill {
-		font-size: 0.65rem;
-		font-weight: 600;
-		padding: 0.2rem 0.5rem;
-		border-radius: 999px;
-		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
-		color: var(--color-primary);
-	}
-
 	.float-card {
 		position: absolute;
 		display: inline-flex;
@@ -258,12 +269,12 @@
 		color: var(--color-text-muted);
 	}
 
-	.float-card.scan {
+	.float-card.share {
 		top: 8%;
 		right: -4%;
 	}
 
-	.float-card.neutral {
+	.float-card.together {
 		bottom: 6%;
 		left: -6%;
 	}
@@ -291,11 +302,11 @@
 			animation: float-phone 6s ease-in-out infinite;
 		}
 
-		.float-card.scan {
+		.float-card.share {
 			animation: float-card-a 5s ease-in-out infinite;
 		}
 
-		.float-card.neutral {
+		.float-card.together {
 			animation: float-card-b 5.5s ease-in-out infinite 0.4s;
 		}
 	}

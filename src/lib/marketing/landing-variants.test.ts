@@ -53,7 +53,15 @@ describe('getLandingHeroCopy', () => {
 		const a = getLandingHeroCopy('a', 'sv');
 		const b = getLandingHeroCopy('b', 'sv');
 		expect(a.heroTitle).not.toBe(b.heroTitle);
+		expect(a.heroTitle).toContain('Handla ihop');
+		expect(a.heroTitle).toContain('lär sig');
 		expect(b.heroTitle).toContain('Butiksneutralt');
+	});
+
+	it('uses household memory framing for variant a secondary', () => {
+		const a = getLandingHeroCopy('a', 'sv');
+		expect(a.heroSecondary).toContain('hushållets minne');
+		expect(a.heroSecondary.toLowerCase()).not.toContain('fyller skafferiet');
 	});
 
 	it('does not promise Kivra integration in variant b secondary', () => {
