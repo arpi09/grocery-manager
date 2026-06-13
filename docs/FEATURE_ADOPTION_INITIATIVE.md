@@ -117,7 +117,7 @@ Skaffu already ships a strong **Household OS** layer (`HouseholdBriefing`, `Inve
 | Question | Finding |
 |----------|---------|
 | **Discover** | Settings `#household`, global `HouseholdInvitePrompt` (solo + peak≥5 **or** day≥3 **or** export), `InkopHouseholdInviteBanner`, post-W1 `lista` banner (flag). Onboarding still points to settings, not invite. |
-| **Understand** | Shopping-first copy (`householdInvite.*`). Settings still "Hushåll" admin frame. W4 share-invite now creates **editor** role (`share-invite/+server.ts`) — `HOUSEHOLD_GROWTH.md` viewer note may be stale. |
+| **Understand** | Shopping-first copy (`householdInvite.*`). Settings still "Hushåll" admin frame. W4 share-invite creates **editor** role ([`share-invite/+server.ts`](../src/routes/api/household/share-invite/+server.ts) rad 22). |
 | **Value** | Multi-step: prompt → `/settings` or share-invite API → `/invite/[token]` accept. Export path triggers `export_prompt` copy but modal timing is inventory/time-based. |
 | **Measurable** | `household_invite_prompt_*`, `household_invite_created` (context: inkop/lista/settings). **Missing:** `household_invite_accepted`, settings-context on email invites. |
 | **Adoption risk** | **High** — wrong moment for global modal; lista path flag-gated; no post-accept celebration. |
