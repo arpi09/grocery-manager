@@ -186,6 +186,33 @@ env:
       - BUILD
       - RUNTIME
 
+  # Brain V1 — default off until seed cohort smoke (see docs/LEARNING_ENGINE.md)
+  - variable: SHELF_LIFE_LEARNING_ENABLED
+    value: "false"
+    availability:
+      - RUNTIME
+  - variable: PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT
+    value: "false"
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: LOCATION_LEARNING_ENABLED
+    value: "false"
+    availability:
+      - RUNTIME
+  - variable: REPLENISHMENT_LEARNING_ENABLED
+    value: "false"
+    availability:
+      - RUNTIME
+  - variable: SHELF_LIFE_LLM_ENABLED
+    value: "false"
+    availability:
+      - RUNTIME
+  - variable: HOUSEHOLD_FAVORITES_ENABLED
+    value: "false"
+    availability:
+      - RUNTIME
+
   # Optional demo household member (omit or override in console)
   # - variable: DEFAULT_MEMBER_EMAIL
   #   value: member@example.com
