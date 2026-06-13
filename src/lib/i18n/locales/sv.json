@@ -887,6 +887,9 @@
 		"dismissFailed": "Kunde inte dölja förslaget. Försök igen.",
 		"notFound": "Förslaget är inte längre tillgängligt.",
 		"invalidKey": "Ogiltigt förslag.",
+		"emptyTitle": "Inga köp-igen-förslag än",
+		"emptyDescription": "Importera kvitto för köp-igen-förslag baserat på vad du brukar handla.",
+		"emptyAction": "Skanna kvitto",
 		"reason": {
 			"recurringNotInPantry": "Köpt {count} gånger senaste 3 månaderna",
 			"cadenceOverdue": "Senast köpt {days} dagar sedan · brukar köpa ungefär var {interval} dagar",

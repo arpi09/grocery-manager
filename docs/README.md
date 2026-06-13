@@ -1,5 +1,7 @@
 # Dokumentation (publik)
 
+**Agent start:** [INDEX.md](./INDEX.md) · **Prod snapshot:** [CURRENT_REALITY.md](./CURRENT_REALITY.md)
+
 Filer i `docs/` är avsedda för produkt, deploy och utveckling i det publika repot.
 
 **Intern styrning ligger inte här.** Koordinatorinstruktioner, agentkartor, säkerhetsrapporter och engineering intelligence finns i gitignorerad mappen [`private/`](../private/) (lokal kopia — committas aldrig). Se [`ONBOARDING_DEVELOPER.md`](./ONBOARDING_DEVELOPER.md) för ny utvecklare; vid Cursor-kontobyte: `private/CURSOR_MIGRATION.md` lokalt.

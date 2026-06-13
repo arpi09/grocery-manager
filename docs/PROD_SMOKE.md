@@ -32,8 +32,8 @@ Röd smoke = **rollback** eller fix-forward; säg inte "prod är live" förrän 
 Kör **efter** grön **Deploy to production** för target-SHA. Räkna inte deploy som klar och säg inte "prod är live" till användaren utan lyckad deploy-run **och** denna check (eller motsvarande täckning — se nedan).
 
 1. **SHA** — Prod kör samma commit som den gröna deploy-run (kort SHA i Actions).
-2. **Inloggning** — Logga in på prod; landar på `/hem` utan fel.
-3. **Unified nav** — Bottom 4 flikar: Hem, Skanna, Lager, Äta; header kundvagn → `/inkop`; Mer-sheet öppnas.
+2. **Inloggning** — Logga in på prod; landar på `/inkop` utan fel (default home efter inkop-first merge).
+3. **Unified nav** — Bottom primary tabs: **Lista** (`/inkop`), **Lager**, **Hem**; Scan/Ät i secondary/Mer-sheet; Mer-sheet öppnas.
 4. **Scan** — Skanna-flik eller `/scan`; foto-läge som standard (Take photo / `photo-round-capture`), inte hub med fyra likvärdiga val.
 5. **Äta / planer** — `/planer` (Äta-flik); ”Generera maträtt” / `eat-hub-generate` öppnar receptassistent och kan generera.
 6. **Inställningar** — `/settings`; e-postpåminnelser toggla och spara utan fel (toast eller sparad state).
@@ -44,11 +44,11 @@ Kör **efter** grön **Deploy to production** för target-SHA. Räkna inte deplo
 
 ## Checklista (5–8 min)
 
-- [ ] **Admin-login** — logga in med admin-konto; landar på `/hem` utan 500
-- [ ] **Bottom nav** — Hem, Skanna, Lager, Äta går till rätt route; ingen dubbel header-rad på desktop (≥900px)
+- [ ] **Admin-login** — logga in med admin-konto; landar på `/inkop` utan 500
+- [ ] **Bottom nav** — Lista (`/inkop`), Lager, Hem går till rätt route; Scan/Ät nås via Mer; ingen dubbel header-rad på desktop (≥900px)
 - [ ] **Äta / planer** — `/planer` → generera maträtt öppnar assistant (inte header-recept — borttagen i unified nav)
 - [ ] **Marketing `/`** — landningssida laddar (200, inget serverfel)
-- [ ] **`/register` + Turnstile** — registreringssida visar widget; lyckad registrering landar på `/hem` (ingen bypass)
+- [ ] **`/register` + Turnstile** — registreringssida visar widget; lyckad registrering landar på `/inkop` (ingen bypass)
 - [ ] **`/login`** — inloggningssida svarar 200; befintlig användare kan logga in
 - [ ] **Settings → push** — `/settings` visar push-sektion; aktivering begär browser-tillstånd (eller tydligt fel om blockerat)
 - [ ] **`GET /api/push/vapid-public-key`** — returnerar `{ ok: true, publicKey: "..." }` (503 om VAPID saknas i Firebase secrets)

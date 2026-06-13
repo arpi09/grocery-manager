@@ -1,0 +1,21 @@
+---
+description: Tier C — ingen kod utan explicit user request
+globs:
+  - src/routes/grannskafferiet/**
+  - src/routes/api/inbound/kivra/**
+  - src/lib/server/kivra-forward.ts
+  - src/lib/infrastructure/adapters/stripe.adapter.ts
+  - src/routes/api/stripe/**
+  - docs/KIVRA*.md
+  - docs/STRIPE.md
+  - docs/GRANNSKAFFERIET*.md
+alwaysApply: false
+---
+
+# Frozen zones (Tier C)
+
+**Ändra inte** dessa filer/områden om användaren inte explicit nämner grannskafferiet, Kivra, eller Stripe/Pro i samma prompt.
+
+Om bug i frozen zone: fix minimalt, ingen feature expansion, ingen marketing/nav-promotion.
+
+Hooks i `.cursor/hooks/frozen-zone-guard.sh` ger extra varning vid Write.
