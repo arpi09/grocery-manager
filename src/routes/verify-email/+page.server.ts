@@ -1,5 +1,5 @@
 ﻿import { marketingCanonicalUrl } from '$lib/marketing/app-url';
-import { APP_HOME_PATH } from '$lib/navigation/app-home';
+import { resolvePostVerifyLanding, consumeSignupRedirect } from '$lib/navigation/signup-redirect';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -28,6 +28,7 @@ export const actions: Actions = {
 		if (!event.locals.user?.emailVerifiedAt) {
 			return fail(400, { message: 'Email not verified' });
 		}
-		redirect(302, `${APP_HOME_PATH}?welcome=1`);
+		const redirectTo = consumeSignupRedirect(event.cookies);
+		redirect(302, resolvePostVerifyLanding(redirectTo));
 	}
 };

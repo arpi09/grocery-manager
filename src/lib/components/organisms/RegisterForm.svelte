@@ -13,6 +13,7 @@
 		errors?: Record<string, string[]>;
 		message?: string;
 		email?: string;
+		redirectTo?: string;
 		turnstileSiteKey?: string;
 		/** True when Turnstile is required (not CI/local bypass). */
 		captchaRequired?: boolean;
@@ -23,6 +24,7 @@
 		errors = {},
 		message,
 		email = '',
+		redirectTo,
 		turnstileSiteKey = '',
 		captchaRequired = false,
 		googleOAuthEnabled = false
@@ -40,9 +42,10 @@
 	let submitting = $state(false);
 	let captchaLoadFailed = $state(false);
 
-	const googleHref = $derived(
-		`/auth/google?redirectTo=${encodeURIComponent(POST_REGISTER_SCAN_OAUTH_REDIRECT)}`
-	);
+	const googleHref = $derived.by(() => {
+		const target = redirectTo ?? POST_REGISTER_SCAN_OAUTH_REDIRECT;
+		return `/auth/google?redirectTo=${encodeURIComponent(target)}`;
+	});
 </script>
 
 {#if googleOAuthEnabled}
@@ -65,6 +68,10 @@
 		};
 	}}
 >
+	{#if redirectTo}
+		<input type="hidden" name="redirectTo" value={redirectTo} />
+	{/if}
+
 	{#if captchaUi.showMisconfiguredBanner}
 		<FeedbackBanner tone="error" message={t('captcha.notConfigured')} />
 	{:else if message}

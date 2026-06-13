@@ -25,6 +25,7 @@
 		errors={form?.errors}
 		message={form?.message}
 		email={form?.email}
+		redirectTo={form?.redirectTo ?? data.redirectTo ?? undefined}
 		turnstileSiteKey={data.turnstileSiteKey}
 		captchaRequired={data.captchaRequired}
 		googleOAuthEnabled={data.googleOAuthEnabled}
