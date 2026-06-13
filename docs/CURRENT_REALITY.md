@@ -5,8 +5,8 @@
 | Fält | Värde |
 |------|--------|
 | **Uppdaterad** | 2026-06-13 |
-| **Prod SHA** | *pending* — deploy in flight after push `937cd9a6` + flags redeploy |
-| **Master SHA** | `937cd9a6` — Brain activation + Home V3 + Memory Explorer + receipt pattern (flags commit pending push) |
+| **Prod SHA** | `2779d141` — live until deploy completes for `4a9b28ca`+ (CI redeploy pending) |
+| **Master SHA** | `4a9b28ca` — merge train @ `937cd9a6` + Brain flags enabled in apphosting.yaml |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` — merged to master |
 | **Prod URL** | https://skaffu.com |
 
