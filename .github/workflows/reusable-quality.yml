@@ -1,5 +1,8 @@
 # Shared quality gate — lint, check, test, integration, build, bundle guards.
 # Called from ci.yml and deploy.yml so steps never drift.
+#
+# quality-fast and quality-integration run in parallel; quality aggregates both
+# so branch protection / deploy gates still see "quality / quality".
 
 name: Reusable quality
 
@@ -28,14 +31,16 @@ on:
         type: string
 
 jobs:
-  quality:
-    name: quality
+  preflight:
+    name: preflight
+    if: inputs.verify_ci_sha
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
+    outputs:
+      checkout_ref: ${{ steps.deploy-sha.outputs.sha }}
 
     steps:
       - name: Resolve deploy commit SHA
-        if: inputs.verify_ci_sha
         id: deploy-sha
         env:
           DEPLOY_REF: ${{ inputs.deploy_ref }}
@@ -54,7 +59,6 @@ jobs:
           echo "Deploy target SHA: ${sha}"
 
       - name: Verify green CI quality on same SHA
-        if: inputs.verify_ci_sha
         env:
           DEPLOY_SHA: ${{ steps.deploy-sha.outputs.sha }}
           GH_TOKEN: ${{ github.token }}
@@ -75,6 +79,14 @@ jobs:
           fi
           echo "CI quality passed on ${DEPLOY_SHA}."
 
+  quality-fast:
+    name: quality-fast
+    needs: [preflight]
+    if: always() && !cancelled() && (needs.preflight.result == 'success' || needs.preflight.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.deploy_sha || inputs.deploy_ref || github.sha }}
@@ -93,6 +105,30 @@ jobs:
         env:
           PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
       - run: npm test
+
+      - name: npm audit (runtime critical/high)
+        if: inputs.run_audit
+        run: npm audit --omit=dev --audit-level=high
+
+  quality-integration:
+    name: quality-integration
+    needs: [preflight]
+    if: always() && !cancelled() && (needs.preflight.result == 'success' || needs.preflight.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.deploy_sha || inputs.deploy_ref || github.sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - run: npm ci
+
       - run: npm run test:receipt-fixtures
       - run: npm run test:integration
         env:
@@ -104,13 +140,29 @@ jobs:
           PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
       - run: npm run check:client-bundle
 
-      - name: npm audit (runtime critical/high)
-        if: inputs.run_audit
-        run: npm audit --omit=dev --audit-level=high
-
       - uses: actions/upload-artifact@v7
         if: inputs.upload_build_artifact
         with:
           name: sveltekit-build
           path: build/
           retention-days: 1
+
+  quality:
+    name: quality
+    needs: [quality-fast, quality-integration]
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Require quality-fast and quality-integration
+        run: |
+          set -euo pipefail
+          fast="${{ needs.quality-fast.result }}"
+          integration="${{ needs.quality-integration.result }}"
+          echo "quality-fast=${fast} quality-integration=${integration}"
+          if [ "$fast" != "success" ] || [ "$integration" != "success" ]; then
+            echo "::error::Quality gate failed (quality-fast=${fast}, quality-integration=${integration})"
+            exit 1
+          fi
+          echo "Quality gate passed."
