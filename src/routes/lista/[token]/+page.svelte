@@ -12,7 +12,15 @@
 	let { data } = $props();
 
 	const locale = getLocale();
-	const signupUrl = $derived(buildAcquisitionRegisterUrl('shopping_share', $page.url.origin));
+	const householdSettingsPath = '/settings#household';
+	const signupUrl = $derived.by(() => {
+		const base = buildAcquisitionRegisterUrl('shopping_share', $page.url.origin);
+		const separator = base.includes('?') ? '&' : '?';
+		return `${base}${separator}redirect=${encodeURIComponent(householdSettingsPath)}`;
+	});
+	const loginUrl = $derived(
+		`/login?redirect=${encodeURIComponent(householdSettingsPath)}`
+	);
 	const pageTitle = $derived(t(data.preview.title as Parameters<typeof t>[0]));
 	const expiresAtLabel = $derived(
 		new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
@@ -91,9 +99,11 @@
 		<div class="signup-cta">
 			<h2>{t('shoppingListShare.publicSignupTitle')}</h2>
 			<p>{t('shoppingListShare.publicSignupLead')}</p>
-			<a class="signup-cta-btn" href={signupUrl} onclick={handleSignupClick}>
+			<a class="signup-cta-btn signup-cta-btn--primary" href={signupUrl} onclick={handleSignupClick}>
 				{t('shoppingListShare.publicSignupBtn')}
 			</a>
+			<p class="signup-hint">{t('shoppingListShare.publicSignupHint')}</p>
+			<a class="signup-login-link" href={loginUrl}>{t('shoppingListShare.publicLoginLink')}</a>
 		</div>
 	</div>
 </main>
@@ -186,6 +196,30 @@
 		font-weight: 600;
 		text-decoration: none;
 		text-align: center;
+	}
+
+	.signup-cta-btn--primary {
+		background: var(--color-primary);
+		border-color: var(--color-primary);
+		color: var(--color-on-primary, #fff);
+	}
+
+	.signup-hint {
+		margin: 0;
+		font-size: var(--text-sm);
+		color: var(--color-text-muted);
+	}
+
+	.signup-login-link {
+		font-size: var(--text-sm);
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: none;
+		text-align: center;
+	}
+
+	.signup-login-link:hover {
+		text-decoration: underline;
 	}
 
 	.gdpr-note {
