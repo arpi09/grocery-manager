@@ -1,6 +1,7 @@
 ﻿<script lang="ts">
-
 	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	import { t } from '$lib/i18n';
 
@@ -21,11 +22,7 @@
 
 	import { trackProductEvent } from '$lib/client/product-events';
 
-
-
 	let { data, form } = $props();
-
-
 
 	const listHasItems = $derived(data.items.length > 0 || data.checkedCount > 0);
 	const householdMemberCount = $derived(
@@ -36,8 +33,40 @@
 	const dedupeByKey = $derived(data.dedupeByKey ?? {});
 
 	const hasSuggestions = $derived(replenishmentSuggestions.length > 0);
+	const RECEIPT_REPLENISHMENT_SESSION_KEY = 'home-pantry-inkop-replenishment-open';
 
-	const suggestionsOpen = $derived(hasSuggestions || !listHasItems);
+	const fromReceipt = $derived(page.url.searchParams.get('from') === 'receipt');
+	let receiptSessionOpen = $state(false);
+	let showReceiptImportLead = $state(false);
+
+	const suggestionsOpen = $derived(
+		fromReceipt || receiptSessionOpen || hasSuggestions || !listHasItems
+	);
+
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+		receiptSessionOpen = sessionStorage.getItem(RECEIPT_REPLENISHMENT_SESSION_KEY) === '1';
+		if (receiptSessionOpen) {
+			showReceiptImportLead = true;
+		}
+	});
+
+	$effect(() => {
+		if (!browser || !fromReceipt) {
+			return;
+		}
+
+		sessionStorage.setItem(RECEIPT_REPLENISHMENT_SESSION_KEY, '1');
+		receiptSessionOpen = true;
+		showReceiptImportLead = true;
+
+		const url = new URL(page.url);
+		url.searchParams.delete('from');
+		const next = `${url.pathname}${url.search}${url.hash}`;
+		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
+	});
 
 	function handleSuggestionsSummaryClick(event: MouseEvent) {
 		const summary = event.currentTarget as HTMLElement;
@@ -51,7 +80,6 @@
 	}
 
 	function scrollToShoppingList() {
-
 		if (!browser) return;
 
 		const panel = document.getElementById('shopping-list-panel');
@@ -59,121 +87,77 @@
 		panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
 		panel?.focus({ preventScroll: true });
-
 	}
-
 </script>
 
-
-
 <AppLayout user={data.user}>
-
 	<AppHeader title={t('shopping.title')} subtitle={t('shopping.subtitle')} />
-
-
 
 	<PageContainer>
 		<div class="shopping-page">
+			<ShoppingListPanel
+				id="shopping-list-panel"
+				tabindex={-1}
+				items={data.items}
+				checkedCount={data.checkedCount}
+				canEdit={data.canEdit}
+				shareLinkEnabled={data.shareLinkEnabled}
+				shoppingToPantryMode={data.shoppingToPantryMode}
+				memberCount={householdMemberCount}
+			/>
 
-		<ShoppingListPanel
+			<InkopHouseholdInviteBanner
+				memberCount={householdMemberCount}
+				uncheckedCount={data.items.length}
+				checkedCount={data.checkedCount}
+				{listHasItems}
+			/>
 
-			id="shopping-list-panel"
+			{#if data.canEdit && (hasSuggestions || !listHasItems)}
+				{#if showReceiptImportLead}
+					<p class="receipt-import-lead" role="status">{t('shopping.receiptImportLead')}</p>
+				{/if}
 
-			tabindex={-1}
+				<details
+					id="shopping-suggestions"
+					class="suggestions-fold"
+					open={suggestionsOpen}
+					data-testid="shopping-suggestions-fold"
+				>
+					<summary onclick={handleSuggestionsSummaryClick}>
+						<span class="summary-label">{t('shopping.suggestionsTitle')}</span>
+						{#if hasSuggestions}
+							<Badge tone="warning">{replenishmentSuggestions.length}</Badge>
+						{/if}
+					</summary>
 
-			items={data.items}
-
-			checkedCount={data.checkedCount}
-
-			canEdit={data.canEdit}
-
-			shareLinkEnabled={data.shareLinkEnabled}
-
-			shoppingToPantryMode={data.shoppingToPantryMode}
-
-			memberCount={householdMemberCount}
-
-		/>
-
-		<InkopHouseholdInviteBanner
-			memberCount={householdMemberCount}
-			uncheckedCount={data.items.length}
-			checkedCount={data.checkedCount}
-			{listHasItems}
-		/>
-
-
-
-		{#if data.canEdit && (hasSuggestions || !listHasItems)}
-
-			<details
-				id="shopping-suggestions"
-				class="suggestions-fold"
-				open={suggestionsOpen}
-				data-testid="shopping-suggestions-fold"
-			>
-
-				<summary onclick={handleSuggestionsSummaryClick}>
-					<span class="summary-label">{t('shopping.suggestionsTitle')}</span>
-					{#if hasSuggestions}
-						<Badge tone="warning">{replenishmentSuggestions.length}</Badge>
-					{/if}
-				</summary>
-
-				<div class="suggestions-body">
-
-					<SmartShoppingFill
-
-						canEdit={data.canEdit}
-
-						{form}
-
-						onFillComplete={({ added }) => {
-
-							if (added > 0) scrollToShoppingList();
-
-						}}
-
-					/>
-
-
-
-					{#if hasSuggestions}
-
-						<ReplenishmentSection
-
-							suggestions={replenishmentSuggestions}
-
-							{dedupeByKey}
-
+					<div class="suggestions-body">
+						<SmartShoppingFill
 							canEdit={data.canEdit}
-
-							householdId={data.householdId}
-
-							compact
-
-							surface="inkop"
-
+							{form}
+							onFillComplete={({ added }) => {
+								if (added > 0) scrollToShoppingList();
+							}}
 						/>
 
-					{/if}
-
-				</div>
-
-			</details>
-
-		{/if}
+						<ReplenishmentSection
+							suggestions={replenishmentSuggestions}
+							{dedupeByKey}
+							canEdit={data.canEdit}
+							householdId={data.householdId}
+							compact
+							surface="inkop"
+							showEmptyState={!listHasItems}
+						/>
+					</div>
+				</details>
+			{/if}
 		</div>
 	</PageContainer>
-
 </AppLayout>
 
-
-
 <style>
-
 	.shopping-page {
-
 		display: flex;
 
 		flex-direction: column;
@@ -181,25 +165,28 @@
 		gap: var(--space-md);
 
 		padding-bottom: calc(var(--content-bottom-safe) + var(--space-md));
-
 	}
 
-
+	.receipt-import-lead {
+		margin: 0;
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-sm);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
+		background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--color-primary);
+	}
 
 	.suggestions-fold {
-
 		border: 1px solid var(--color-border);
 
 		border-radius: var(--radius-md);
 
 		background: var(--color-surface-muted);
-
 	}
 
-
-
 	.suggestions-fold summary {
-
 		display: flex;
 
 		align-items: center;
@@ -219,27 +206,17 @@
 		color: var(--color-text-muted);
 
 		list-style: none;
-
 	}
 
-
-
 	.suggestions-fold summary::-webkit-details-marker {
-
 		display: none;
-
 	}
 
 	.summary-label {
-
 		flex: 1;
-
 	}
 
-
-
 	.suggestions-body {
-
 		display: flex;
 
 		flex-direction: column;
@@ -247,7 +224,5 @@
 		gap: var(--space-md);
 
 		padding: 0 0.85rem 0.85rem;
-
 	}
-
 </style>

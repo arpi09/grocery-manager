@@ -914,6 +914,9 @@
 		"dismissFailed": "Could not hide the suggestion. Try again.",
 		"notFound": "Suggestion is no longer available.",
 		"invalidKey": "Invalid suggestion.",
+		"emptyTitle": "No buy-again suggestions yet",
+		"emptyDescription": "Import a receipt to get buy-again suggestions based on what you usually shop for.",
+		"emptyAction": "Scan receipt",
 		"reason": {
 			"recurringNotInPantry": "Bought {count} times in the last 3 months",
 			"cadenceOverdue": "Last bought {days} days ago · usually buy about every {interval} days",
