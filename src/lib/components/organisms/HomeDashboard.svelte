@@ -539,18 +539,6 @@
 								compact
 							/>
 						</details>
-					{:else if finishSuggestionsForMore.length > 0}
-						<details class="home-disclosure nested" bind:open={receiptAutopilotOpen}>
-							<summary>
-								{t('home.receiptAutopilotSummary', { count: finishSuggestionsForMore.length })}
-							</summary>
-							<ReceiptAutopilotSection
-								suggestions={[]}
-								finishSuggestions={finishSuggestionsForMore}
-								canEdit={canWrite}
-								compact
-							/>
-						</details>
 					{/if}
 				{/if}
 			</div>
