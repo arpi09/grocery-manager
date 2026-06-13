@@ -17,11 +17,11 @@ export interface LandingHeroCopy {
 const heroByVariant: Record<MarketingLocale, Record<LandingHeroVariant, LandingHeroCopy>> = {
 	sv: {
 		a: {
-			heroTitle: 'Skafferiet du faktiskt har koll på.',
+			heroTitle: 'Er gemensamma veckolista — handla ihop.',
 			heroLead:
-				'Skanna in det du har hemma på sekunder — streckkod, kvitto eller foto — och se kyl, frys och skafferi på ett ställe.',
+				'Bygg veckans inköpslista tillsammans. Bjud in partner eller familj — samma lista, uppdateras när ni handlar.',
 			heroSecondary:
-				'Ät det som går ut först, planera måltider och låt inköpslistan fylla på sig från lager som sanningskälla.'
+				'Skafferi, utgångsdatum och smart påfyllning när ni vill — streckkod, kvitto eller foto som snabbstart.'
 		},
 		b: {
 			heroTitle: 'Butiksneutralt skafferi för hela hushållet.',
@@ -33,11 +33,11 @@ const heroByVariant: Record<MarketingLocale, Record<LandingHeroVariant, LandingH
 	},
 	en: {
 		a: {
-			heroTitle: 'The pantry you actually keep track of.',
+			heroTitle: 'Your shared weekly list — shop together.',
 			heroLead:
-				'Scan what you have at home in seconds — barcode, receipt or photo — and see fridge, freezer and cupboard in one place.',
+				'Build this week\'s shopping list together. Invite your partner or family — same list, updates as you shop.',
 			heroSecondary:
-				'Eat what expires first, plan meals and let the shopping list fill from inventory as source of truth.'
+				'Pantry, expiry dates and smart replenishment when you want — barcode, receipt or photo for a quick start.'
 		},
 		b: {
 			heroTitle: 'Store-neutral pantry for the whole household.',

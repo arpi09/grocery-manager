@@ -119,7 +119,7 @@
 		},
 		"register": {
 			"title": "Skapa konto",
-			"subtitle": "Ditt hushåll, en app",
+			"subtitle": "Skapa veckans lista — bjud in den du handlar med",
 			"submit": "Skapa konto",
 			"submitting": "Skapar konto…",
 			"pageTitle": "Skapa konto · Skaffu",
@@ -209,7 +209,7 @@
 		"greetingEvening": "God kväll, {name}",
 		"greetingNight": "Hej, {name}",
 		"taglineEngaged": "Här är dagens förslag utifrån lagret och klockan",
-		"weeklyShopCta": "Öppna veckans inköpslista",
+		"weeklyShopCta": "Handla denna vecka",
 		"mealSuggestionsTitle": "Vad blir det idag?",
 		"mealSuggestionsCta": "Visa receptförslag",
 		"shoppingTeaser": "{count} saker på listan",
@@ -771,9 +771,15 @@
 		"mergeExisting": "Finns redan — slå ihop med {name} ({quantity} {unit})?",
 		"clearAutoExpired": "Rensa utgångna",
 		"clearAutoExpiredAria": "Ta bort alla {count} automatiskt utgångna varor",
-		"bulkExpiryBanner": "Lägg bäst före-datum på odaterade varor med AI i ett tryck.",
+		"bulkExpiryBanner": "Lägg bäst före-datum på odaterade varor med ett tryck — vi föreslår utifrån varutyp.",
 		"bulkExpiryAction": "Föreslå datum",
 		"quantityLeft": "{amount} kvar"
+	},
+	"learning": {
+		"estimatedExpiry": "Uppskattat",
+		"correctedThanks": "Tack — vi kommer föreslå bättre datum nästa gång du köper samma vara.",
+		"sourceHousehold": "Baserat på dina tidigare köp",
+		"sourceDefault": "Standarduppskattning"
 	},
 	"item": {
 		"addTitle": "Lägg till vara",
@@ -806,7 +812,7 @@
 	},
 	"shopping": {
 		"title": "Inköp",
-		"subtitle": "Gemensam inköpslista med smarta förslag från skafferiet",
+		"subtitle": "Er gemensamma veckolista",
 		"listAria": "Inköpslista",
 		"quantityPlaceholder": "Antal",
 		"unitPlaceholder": "Enhet",
@@ -1800,7 +1806,9 @@
 		"addCount": "Lägg till {count} {count, plural, one {vara} other {varor}}",
 		"apiKeyHint": "Kräver OPENAI_API_KEY i serverns .env.",
 		"locationBulkHint": "Gäller markerade rader. Ändra plats per vara nedan om en rad ska ligga någon annanstans.",
-		"locationOverride": "egen plats"
+		"locationOverride": "egen plats",
+		"fieldExpiresOn": "Bäst före",
+		"expiryHint": "Skaffu föreslår datum utifrån vad du brukar köpa — ändra om det ser fel."
 	},
 	"priceMemory": {
 		"lastPaid": "Senast betalt {price} ({date})",
@@ -2197,7 +2205,7 @@
 		"promptCta": "Bjud in någon",
 		"promptDismiss": "Inte nu",
 		"inkopBannerAria": "Bjud in till inköpslistan",
-		"inkopBannerBody": "Handla ihop? Bjud in partner eller familj — samma lista, uppdateras när ni handlar.",
+		"inkopBannerBody": "Handla samma lista? Bjud in partner eller familj — uppdateras live när ni handlar.",
 		"inkopBannerCta": "Bjud in någon",
 		"inkopBannerDismiss": "Inte nu",
 		"listaBannerAria": "Bjud in till gemensam inköpslista",
@@ -2452,6 +2460,7 @@
 		"itemPartiallyConsumedGeneric": "Förbrukning loggad — lagersaldo uppdaterat",
 		"bulkExpiryInferred": "{label} utgångsdatum föreslagna",
 		"bulkExpiryInferredGeneric": "Utgångsdatum föreslagna",
+		"expiryCorrectedThanks": "Tack — vi kommer föreslå bättre datum nästa gång du köper samma vara.",
 		"autoExpiredCleared": "{label} utgångna varor rensade",
 		"autoExpiredClearedGeneric": "Utgångna varor rensade",
 		"autoExpiredClearedRemaining": "{remaining} kvar i skafferiet — bra jobbat",

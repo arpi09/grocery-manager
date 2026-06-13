@@ -11,8 +11,6 @@
 
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 
-	import SmartShoppingFill from '$lib/components/organisms/SmartShoppingFill.svelte';
-
 	import Badge from '$lib/components/atoms/Badge.svelte';
 
 	import ReplenishmentSection from '$lib/components/organisms/ReplenishmentSection.svelte';
@@ -22,7 +20,7 @@
 
 	import { trackProductEvent } from '$lib/client/product-events';
 
-	let { data, form } = $props();
+	let { data } = $props();
 
 	const listHasItems = $derived(data.items.length > 0 || data.checkedCount > 0);
 	const householdMemberCount = $derived(
@@ -78,16 +76,6 @@
 			suggestionCount: replenishmentSuggestions.length
 		});
 	}
-
-	function scrollToShoppingList() {
-		if (!browser) return;
-
-		const panel = document.getElementById('shopping-list-panel');
-
-		panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-		panel?.focus({ preventScroll: true });
-	}
 </script>
 
 <AppLayout user={data.user}>
@@ -132,14 +120,6 @@
 					</summary>
 
 					<div class="suggestions-body">
-						<SmartShoppingFill
-							canEdit={data.canEdit}
-							{form}
-							onFillComplete={({ added }) => {
-								if (added > 0) scrollToShoppingList();
-							}}
-						/>
-
 						{#if hasSuggestions}
 							<ReplenishmentSection
 								suggestions={replenishmentSuggestions}

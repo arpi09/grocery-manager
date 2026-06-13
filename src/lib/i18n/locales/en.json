@@ -128,7 +128,7 @@
 		},
 		"register": {
 			"title": "Create account",
-			"subtitle": "Your household, one app",
+			"subtitle": "Build this week's list — invite who you shop with",
 			"submit": "Create account",
 			"submitting": "Creating account…",
 			"pageTitle": "Create account · Skaffu",
@@ -226,7 +226,7 @@
 		"greetingEvening": "Good evening, {name}",
 		"greetingNight": "Hi, {name}",
 		"taglineEngaged": "Today's suggestions based on your pantry and the time of day",
-		"weeklyShopCta": "Open this week's shopping list",
+		"weeklyShopCta": "Shop this week",
 		"eatFirstSummary": "Eat first ({count})",
 		"pantryStatusTitle": "Pantry check-in",
 		"pantryStatusWithoutExpiry": "{count, plural, one {# item without expiry date — add dates for better tracking} other {# items without expiry dates — add dates for better tracking}}",
@@ -752,7 +752,7 @@
 		"mergeExisting": "Already in pantry — merge with {name} ({quantity} {unit})?",
 		"clearAutoExpired": "Clear all expired",
 		"clearAutoExpiredAria": "Remove all {count} auto-expired items",
-		"bulkExpiryBanner": "Add best-before dates to undated items with AI in one tap.",
+		"bulkExpiryBanner": "Add best-before dates to undated items in one tap — we suggest based on product type.",
 		"bulkExpiryAction": "Infer dates",
 		"finishedBadge": "Finished",
 		"finishedSection": "Finished items",
@@ -783,6 +783,12 @@
 		"itemActionsNamed": "Actions for {name}",
 		"editItem": "Edit",
 		"quantityLeft": "{amount} left"
+	},
+	"learning": {
+		"estimatedExpiry": "Estimated",
+		"correctedThanks": "Thanks — we'll suggest better dates next time you buy this.",
+		"sourceHousehold": "Based on your past purchases",
+		"sourceDefault": "Default estimate"
 	},
 	"consume": {
 		"sectionTitle": "Log usage",
@@ -835,7 +841,7 @@
 	},
 	"shopping": {
 		"title": "Shopping",
-		"subtitle": "Shared shopping list with smart suggestions from your pantry",
+		"subtitle": "Your shared weekly list",
 		"listAria": "Shopping list",
 		"quantityPlaceholder": "Qty",
 		"unitPlaceholder": "Unit",
@@ -1829,7 +1835,9 @@
 		"locationPerItem": "Location:",
 		"locationOverride": "custom",
 		"addCount": "Add {count} {count, plural, one {item} other {items}}",
-		"apiKeyHint": "Requires OPENAI_API_KEY in server .env."
+		"apiKeyHint": "Requires OPENAI_API_KEY in server .env.",
+		"fieldExpiresOn": "Best before",
+		"expiryHint": "Skaffu suggests dates based on what you usually buy — change if it looks wrong."
 	},
 	"priceMemory": {
 		"lastPaid": "Last paid {price} ({date})",
@@ -2226,7 +2234,7 @@
 		"promptCta": "Invite someone",
 		"promptDismiss": "Not now",
 		"inkopBannerAria": "Invite to the shopping list",
-		"inkopBannerBody": "Shop together? Invite a partner or family member — same list, updates as you shop.",
+		"inkopBannerBody": "Shop the same list? Invite your partner or family — updates live as you shop.",
 		"inkopBannerCta": "Invite someone",
 		"inkopBannerDismiss": "Not now",
 		"listaBannerAria": "Invite to shared shopping list",
@@ -2446,6 +2454,7 @@
 		"itemPartiallyConsumedGeneric": "Usage logged — pantry quantity updated",
 		"bulkExpiryInferred": "{label} expiry dates inferred",
 		"bulkExpiryInferredGeneric": "Expiry dates inferred",
+		"expiryCorrectedThanks": "Thanks — we'll suggest better dates next time you buy this.",
 		"settingsSaved": "Settings saved",
 		"autoExpiredCleared": "{label} expired items cleared",
 		"autoExpiredClearedGeneric": "Expired items cleared",

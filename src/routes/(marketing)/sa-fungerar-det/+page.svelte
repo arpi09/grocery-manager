@@ -49,10 +49,10 @@
 	<MarketingCta
 		title={content.landing.finalCtaTitle}
 		lead={content.landing.finalCtaLead}
-		primaryLabel={content.cta.openApp}
-		primaryHref={loginUrl}
-		secondaryLabel={content.cta.register}
-		secondaryHref={registerUrl}
+		primaryLabel={content.cta.register}
+		primaryHref={registerUrl}
+		secondaryLabel={content.cta.login}
+		secondaryHref={loginUrl}
 	/>
 </MarketingScrollReveal>
 
