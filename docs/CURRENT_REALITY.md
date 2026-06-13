@@ -5,8 +5,8 @@
 | Fält | Värde |
 |------|--------|
 | **Uppdaterad** | 2026-06-13 |
-| **Prod SHA** | `2779d141` — live until deploy completes for `4a9b28ca`+ (CI redeploy pending) |
-| **Master SHA** | `4a9b28ca` — merge train @ `937cd9a6` + Brain flags enabled in apphosting.yaml |
+| **Prod SHA** | `e26408a2` — deploy run 27482069247 (2026-06-13) |
+| **Master SHA** | `e26408a2` — merge train + E2E fixes + all Brain flags on |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` — merged to master |
 | **Prod URL** | https://skaffu.com |
 
@@ -51,8 +51,8 @@ Utgående → `/inkop` (delad lista) → handla ihop → checkoff → skafferi �
 
 ## Kända drift (fixa när du ser dem)
 
-- [ ] Prod DB migrations `0047`–`0048` — **blocked locally** (no `DATABASE_URL` in `.env`); run before/at deploy
-- [ ] Prod SHA — update after green Deploy to production workflow
+- [ ] Prod DB migrations `0047`–`0048` — **not run** (no `DATABASE_URL` in `.env`); required before Brain learning tables work in prod
+- [x] Prod SHA — `e26408a2` via deploy 27482069247
 - [x] Master merge train: docs, brain-activation, receipt-pattern, home-v3, memory-explorer @ `937cd9a6`
 
 ## Branches in flight (manuell)
