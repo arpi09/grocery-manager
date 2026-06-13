@@ -88,7 +88,6 @@
 
 	const returnTo = APP_HOME_PATH;
 	const scanPhotoHref = $derived(scanModeHref('photo', returnTo));
-	const scanBarcodeHref = $derived(scanModeHref('barcode', returnTo));
 	const userId = $derived(page.data.user?.id ?? null);
 	const isPro = $derived(Boolean(page.data.isPro));
 
