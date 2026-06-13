@@ -52,7 +52,14 @@
 		"db:studio": "drizzle-kit studio",
 		"seed:demo": "svelte-kit sync && node --env-file=.env --import tsx scripts/seed-demo-cli.ts",
 		"guides:generate": "node --env-file=.env --import tsx scripts/generate-guide-article.ts",
-		"guides:publish-next": "node --env-file=.env --import tsx scripts/generate-guide-article.ts --next --publish"
+		"guides:publish-next": "node --env-file=.env --import tsx scripts/generate-guide-article.ts --next --publish",
+		"cloud:bootstrap": "bash scripts/cloud-agent-bootstrap.sh",
+		"quick:dev": "npm run lint && npm run check:locales && npm run check:server-imports && npm test",
+		"quick:marketing": "npm run quick:dev && vitest run src/lib/marketing/landing-variants.test.ts",
+		"quality:integration": "npx cross-env USE_PGLITE=true vitest run --config vitest.integration.config.ts",
+		"release:gate": "npm run quality:ci",
+		"nightly": "npm run test:e2e && npm run test:receipt-fixtures && (npm audit --omit=dev || node -e process.exit(0))",
+		"quality:ci": "npm run lint && npm run check:locales && npm run check:server-imports && npx cross-env PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA npm run check && npm test && npm run test:receipt-fixtures && npx cross-env USE_PGLITE=true npm run test:integration && npx cross-env DATABASE_URL=postgresql://pantry:pantry@localhost:5432/pantry USE_PGLITE=true PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA npm run build && npm run check:client-bundle"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "^4.11.3",
