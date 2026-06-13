@@ -48,7 +48,7 @@ test.describe('Critical flows', () => {
 		await expectOnboardingGuideVisible(page);
 		await page.getByRole('button', { name: /Nästa|Next/i }).click();
 		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
-		await page.getByTestId('onboarding-open-shopping').click();
+		await page.getByTestId('onboarding-start-shopping-list').click();
 		await expect(page).toHaveURL('/inkop');
 		await expect(page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu|Welcome to Skaffu/i })).toHaveCount(0);
 	});
