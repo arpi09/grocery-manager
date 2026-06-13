@@ -12,10 +12,14 @@
 
 	import SmartShoppingFill from '$lib/components/organisms/SmartShoppingFill.svelte';
 
+	import Badge from '$lib/components/atoms/Badge.svelte';
+
 	import ReplenishmentSection from '$lib/components/organisms/ReplenishmentSection.svelte';
 
 	import ShoppingListPanel from '$lib/components/organisms/ShoppingListPanel.svelte';
 	import InkopHouseholdInviteBanner from '$lib/components/organisms/InkopHouseholdInviteBanner.svelte';
+
+	import { trackProductEvent } from '$lib/client/product-events';
 
 
 
@@ -33,9 +37,18 @@
 
 	const hasSuggestions = $derived(replenishmentSuggestions.length > 0);
 
-	const suggestionsOpen = $derived(hasSuggestions && !listHasItems);
+	const suggestionsOpen = $derived(hasSuggestions || !listHasItems);
 
+	function handleSuggestionsSummaryClick(event: MouseEvent) {
+		const summary = event.currentTarget as HTMLElement;
+		const details = summary.closest('details');
+		if (details?.open) return;
 
+		void trackProductEvent('replenishment_fold_opened', {
+			hadListItems: listHasItems,
+			suggestionCount: replenishmentSuggestions.length
+		});
+	}
 
 	function scrollToShoppingList() {
 
@@ -100,7 +113,12 @@
 				data-testid="shopping-suggestions-fold"
 			>
 
-				<summary>{t('shopping.suggestionsTitle')}</summary>
+				<summary onclick={handleSuggestionsSummaryClick}>
+					<span class="summary-label">{t('shopping.suggestionsTitle')}</span>
+					{#if hasSuggestions}
+						<Badge tone="warning">{replenishmentSuggestions.length}</Badge>
+					{/if}
+				</summary>
 
 				<div class="suggestions-body">
 
@@ -186,6 +204,8 @@
 
 		align-items: center;
 
+		gap: var(--space-sm);
+
 		min-height: var(--touch-target-min);
 
 		cursor: pointer;
@@ -207,6 +227,12 @@
 	.suggestions-fold summary::-webkit-details-marker {
 
 		display: none;
+
+	}
+
+	.summary-label {
+
+		flex: 1;
 
 	}
 
