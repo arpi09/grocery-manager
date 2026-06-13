@@ -7,6 +7,8 @@ export default defineConfig({
 		include: ['src/**/*.integration.test.ts'],
 		hookTimeout: 60_000,
 		testTimeout: 60_000,
-		fileParallelism: false
+		// PGlite per-file isolation (createIntegrationDb in beforeAll) — safe to parallelize.
+		fileParallelism: true,
+		pool: 'threads'
 	}
 });
