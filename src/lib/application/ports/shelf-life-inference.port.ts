@@ -5,5 +5,7 @@ export interface ShelfLifeInferencePort {
 	inferShelfLife(input: {
 		name: string;
 		location: StorageLocation;
+		householdId?: string;
+		purchasedAt?: string | null;
 	}): Promise<{ expiresOn: string; source: ExpiresOnSource } | null>;
 }

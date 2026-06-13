@@ -6,7 +6,12 @@ export const MOVING_TO_AUTO_EXPIRED_SOON_MIN_DAYS = 2;
 export const MOVING_TO_AUTO_EXPIRED_SOON_MAX_DAYS = 3;
 export type AutoExpiredGraceDays = (typeof AUTO_EXPIRED_GRACE_DAY_OPTIONS)[number];
 export const DEFAULT_AUTO_EXPIRED_GRACE_DAYS: AutoExpiredGraceDays = 7;
-export type ExpiresOnSource = 'user_set' | 'ai_inferred';
+export type ExpiresOnSource =
+	| 'user_set'
+	| 'ai_inferred'
+	| 'default_heuristic'
+	| 'household_learned'
+	| 'heuristic';
 
 export function normalizeAutoExpiredGraceDays(value: number): AutoExpiredGraceDays {
 	return AUTO_EXPIRED_GRACE_DAY_OPTIONS.includes(value as AutoExpiredGraceDays)

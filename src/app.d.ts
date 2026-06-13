@@ -27,6 +27,8 @@ import type { BillingService } from '$lib/application/billing.service';
 import type { PurchasePatternService } from '$lib/application/purchase-pattern.service';
 import type { InventoryIntelligenceService } from '$lib/application/inventory-intelligence.service';
 import type { PriceMemoryService } from '$lib/application/price-memory.service';
+import type { HouseholdSuggestionsService } from '$lib/application/household-suggestions.service';
+import type { LearningEngineService } from '$lib/application/learning/learning-engine.service';
 import type { AnalyticsBehaviorService } from '$lib/application/analytics-behavior.service';
 import type { AnalyticsAdminService } from '$lib/application/analytics-admin.service';
 import type { AdminInsightsService } from '$lib/application/admin-insights.service';
@@ -78,6 +80,8 @@ declare global {
 			purchasePatternService: PurchasePatternService;
 			inventoryIntelligenceService: InventoryIntelligenceService;
 			priceMemoryService: PriceMemoryService;
+			learningEngineService: LearningEngineService;
+			householdSuggestionsService: HouseholdSuggestionsService;
 			analyticsBehaviorService: AnalyticsBehaviorService;
 			analyticsAdminService: AnalyticsAdminService;
 			adminInsightsService: AdminInsightsService;

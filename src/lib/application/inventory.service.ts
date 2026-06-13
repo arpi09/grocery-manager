@@ -647,12 +647,13 @@ export class InventoryService {
 			if (item.expiresOn) continue;
 			const inferred = await this.shelfLifeInference.inferShelfLife({
 				name: item.name,
-				location: item.location
+				location: item.location,
+				householdId
 			});
 			if (!inferred?.expiresOn) continue;
 			const updated = await this.repository.update(householdId, item.id, {
 				expiresOn: inferred.expiresOn,
-				expiresOnSource: 'ai_inferred'
+				expiresOnSource: inferred.source
 			});
 			if (updated) inferredCount += 1;
 		}
@@ -770,14 +771,18 @@ export class InventoryService {
 		if (!expiresOn && input.inferExpiry !== false) {
 
 			const inferred = this.shelfLifeInference
-				? await this.shelfLifeInference.inferShelfLife({ name: input.name, location: input.location })
+				? await this.shelfLifeInference.inferShelfLife({
+						name: input.name,
+						location: input.location,
+						householdId
+					})
 				: null;
 
 			if (inferred) {
 
 				expiresOn = inferred.expiresOn;
 
-				expiresOnSource = 'ai_inferred';
+				expiresOnSource = inferred.source;
 
 			}
 
