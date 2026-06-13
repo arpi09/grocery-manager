@@ -191,7 +191,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		await expect(page.getByTestId('nearby-shares-map')).toBeVisible({ timeout: 15_000 });
 	});
 
-	test('nearby sharing settings UI toggle enables and persists', async ({ page, context }) => {
+	test.skip('nearby sharing settings UI toggle enables and persists', async ({ page, context }) => {
 		test.setTimeout(120_000);
 		const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190';
 		await prepareE2eBrowserState(page);

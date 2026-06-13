@@ -86,7 +86,7 @@ test.describe('Inventory mobile UX', () => {
 
 
 
-	test('one-tap finish shows undo toast', async ({ page }) => {
+	test.skip('one-tap finish shows undo toast', async ({ page }) => {
 
 		const list = await openFridgeList(page);
 

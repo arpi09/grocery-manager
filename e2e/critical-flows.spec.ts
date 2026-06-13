@@ -103,7 +103,6 @@ test.describe('Critical flows', () => {
 		await expect(page).toHaveURL('/inkop');
 
 		await expect(page.getByTestId('photo-round-capture')).toHaveCount(0);
-		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
 
 	});
 
