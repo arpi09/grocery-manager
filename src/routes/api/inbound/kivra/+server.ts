@@ -22,6 +22,7 @@ import {
 import {
 	householdService,
 	inventoryService,
+	learningEngineService,
 	pmfService,
 	purchasePatternService,
 	receiptForwardService
@@ -137,6 +138,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			inventoryService,
 			purchasePatternService,
 			pmfService,
+			learningEngineService,
 			eventType: 'kivra_forward_received',
 			source: 'kivra_forward',
 			storeLabel: parsedStoreLabel ?? null,

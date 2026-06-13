@@ -2,7 +2,6 @@ import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
 import { canEditInventory } from '$lib/domain/household';
 import type { ExpiresOnSource } from '$lib/domain/auto-expired';
 import { isStorageLocation, type StorageLocation } from '$lib/domain/location';
-import { guessShelfLife } from '$lib/domain/shelf-life';
 import { coerceExpiresOn } from '$lib/server/photo-round-parse';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import type { ReceiptLine } from '$lib/domain/receipt-line';
@@ -15,6 +14,14 @@ import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { recordProductEvent } from '$lib/server/product-events';
 import { trackInventoryWrite } from '$lib/server/sync-analytics';
 import { generateId } from '$lib/infrastructure/auth/id';
+import { isShelfLifeEstimatesInReceiptEnabled } from '$lib/server/shelf-life-learning-flag';
+import {
+	inferLineShelfLife
+} from '$lib/server/shelf-life-line-inference';
+import {
+	readLineShelfLifePrediction,
+	recordLineShelfLifeFeedback
+} from '$lib/server/shelf-life-feedback-recording';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -31,7 +38,15 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const returnTo = parseScanReturnTo(fromParam);
 	const isTopLevelEntry = !defaultLocation && returnTo === APP_HOME_PATH;
 
-	return { defaultLocation, returnTo, canWrite, scanMode, needsSmartDefault, isTopLevelEntry };
+	return {
+		defaultLocation,
+		returnTo,
+		canWrite,
+		scanMode,
+		needsSmartDefault,
+		isTopLevelEntry,
+		shelfLifeEstimatesInReceipt: isShelfLifeEstimatesInReceiptEnabled()
+	};
 };
 
 function parseItemForm(formData: FormData) {
@@ -42,6 +57,81 @@ function parseItemForm(formData: FormData) {
 		expiresOn: raw.expiresOn || undefined,
 		notes: raw.notes || undefined
 	});
+}
+
+async function resolveLineExpiry(
+	event: import('@sveltejs/kit').RequestEvent,
+	params: {
+		name: string;
+		location: StorageLocation;
+		index: number;
+		formData: FormData;
+		purchasedAt: string | null;
+	}
+): Promise<{
+	expiresOn: string | null;
+	expiresOnSource: ExpiresOnSource | null;
+	predictionForm: ReturnType<typeof readLineShelfLifePrediction>;
+	userProvidedExpiresOn: boolean;
+}> {
+	const expiresOnRaw = params.formData.get(`expiresOn_${params.index}`);
+	const userProvidedExpiresOn =
+		typeof expiresOnRaw === 'string' && expiresOnRaw.trim().length > 0;
+	const predictionForm = readLineShelfLifePrediction(params.formData, params.index);
+
+	if (userProvidedExpiresOn) {
+		return {
+			expiresOn: coerceExpiresOn(expiresOnRaw.trim()),
+			expiresOnSource: 'user_set',
+			predictionForm,
+			userProvidedExpiresOn: true
+		};
+	}
+
+	if (predictionForm.predictedExpiresOn) {
+		const sourceRaw = params.formData.get(`predictedExpiresOnSource_${params.index}`);
+		const expiresOnSource =
+			typeof sourceRaw === 'string' &&
+			(sourceRaw === 'heuristic' ||
+				sourceRaw === 'household_learned' ||
+				sourceRaw === 'ai_inferred' ||
+				sourceRaw === 'user_set')
+				? sourceRaw
+				: 'heuristic';
+		return {
+			expiresOn: predictionForm.predictedExpiresOn,
+			expiresOnSource,
+			predictionForm,
+			userProvidedExpiresOn: false
+		};
+	}
+
+	const inferred = await inferLineShelfLife(
+		event.locals.learningEngineService,
+		event.locals.householdId!,
+		params.name,
+		params.location,
+		params.purchasedAt
+	);
+	if (inferred) {
+		return {
+			expiresOn: inferred.expiresOn,
+			expiresOnSource: inferred.expiresOnSource,
+			predictionForm: {
+				predictedExpiresOn: inferred.expiresOn,
+				predictedTypicalDays: inferred.typicalDays,
+				modelVersion: inferred.modelVersion
+			},
+			userProvidedExpiresOn: false
+		};
+	}
+
+	return {
+		expiresOn: null,
+		expiresOnSource: null,
+		predictionForm,
+		userProvidedExpiresOn: false
+	};
 }
 
 async function bulkCreateFromForm(
@@ -97,20 +187,13 @@ async function bulkCreateFromForm(
 		const mergeIntoId =
 			typeof mergeIntoIdRaw === 'string' && mergeIntoIdRaw.trim() ? mergeIntoIdRaw.trim() : null;
 
-		const expiresOnRaw = formData.get(`expiresOn_${index}`);
-		let expiresOn =
-			typeof expiresOnRaw === 'string' && expiresOnRaw.trim()
-				? coerceExpiresOn(expiresOnRaw.trim())
-				: null;
-		let expiresOnSource: ExpiresOnSource | null = expiresOn ? 'user_set' : null;
-
-		if (!expiresOn) {
-			const inferred = guessShelfLife(name.trim(), location);
-			if (inferred) {
-				expiresOn = inferred.expiresOn;
-				expiresOnSource = 'ai_inferred';
-			}
-		}
+		const expiry = await resolveLineExpiry(event, {
+			name: name.trim(),
+			location,
+			index,
+			formData,
+			purchasedAt
+		});
 
 		const notesRaw = formData.get(`notes_${index}`);
 		const notes =
@@ -124,8 +207,8 @@ async function bulkCreateFromForm(
 				location,
 				quantity,
 				unit,
-				expiresOn,
-				expiresOnSource,
+				expiresOn: expiry.expiresOn,
+				expiresOnSource: expiry.expiresOnSource,
 				notes,
 				inferExpiry: false,
 				mergeIntoId
@@ -133,10 +216,29 @@ async function bulkCreateFromForm(
 			event.locals.householdRole!
 		);
 
+		const unitPriceRaw = formData.get(`unitPrice_${index}`);
+		const lineTotalRaw = formData.get(`lineTotal_${index}`);
+		const currencyRaw = formData.get(`currency_${index}`);
+
+		await recordLineShelfLifeFeedback({
+			learningEngine: event.locals.learningEngineService,
+			householdId: event.locals.householdId!,
+			userId: event.locals.user!.id,
+			productName: name.trim(),
+			location,
+			purchasedAt,
+			importBatchId,
+			storeLabel,
+			feedbackSource: 'receipt_scan',
+			prediction: expiry.predictionForm,
+			actualExpiresOn: expiry.expiresOn,
+			userProvidedExpiresOn: expiry.userProvidedExpiresOn,
+			quantity: typeof quantityRaw === 'string' ? quantityRaw : null,
+			unit: typeof unitRaw === 'string' ? unitRaw : null,
+			unitPrice: typeof unitPriceRaw === 'string' ? unitPriceRaw : null
+		});
+
 		if (recordPurchases && importBatchId) {
-			const unitPriceRaw = formData.get(`unitPrice_${index}`);
-			const lineTotalRaw = formData.get(`lineTotal_${index}`);
-			const currencyRaw = formData.get(`currency_${index}`);
 			const line: ReceiptLine = {
 				name: name.trim(),
 				location,

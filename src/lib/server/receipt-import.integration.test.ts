@@ -13,6 +13,7 @@ import { DrizzlePmfRepository } from '$lib/infrastructure/repositories/pmf.repos
 import { DrizzlePurchasePatternRepository } from '$lib/infrastructure/repositories/purchase-pattern.repository';
 import { DrizzleShoppingListRepository } from '$lib/infrastructure/repositories/shopping-list.repository';
 import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integration-db';
+import { learningEngineService } from '$lib/server/di';
 import { importReceiptLines } from './receipt-import';
 
 const { dbState } = vi.hoisted(() => ({
@@ -96,6 +97,7 @@ describe('importReceiptLines integration', () => {
 			inventoryService,
 			purchasePatternService,
 			pmfService,
+			learningEngineService,
 			eventType: 'receipt_parsed',
 			storeLabel: 'ICA',
 			purchasedAt: '2026-06-01'
@@ -127,6 +129,7 @@ describe('importReceiptLines integration', () => {
 			inventoryService,
 			purchasePatternService,
 			pmfService,
+			learningEngineService,
 			eventType: 'receipt_parsed',
 			source: 'manual'
 		});
@@ -159,6 +162,7 @@ describe('importReceiptLines integration', () => {
 			inventoryService,
 			purchasePatternService,
 			pmfService,
+			learningEngineService,
 			eventType: 'receipt_parsed'
 		});
 
@@ -178,6 +182,7 @@ describe('importReceiptLines integration', () => {
 				inventoryService,
 				purchasePatternService,
 				pmfService,
+				learningEngineService,
 				eventType: 'receipt_parsed'
 			})
 		).rejects.toThrow('No valid receipt lines to import');

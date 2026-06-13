@@ -8,6 +8,7 @@ import { DrizzleShoppingListRepository } from '$lib/infrastructure/repositories/
 import { DrizzlePmfRepository } from '$lib/infrastructure/repositories/pmf.repository';
 import { DrizzlePurchasePatternRepository } from '$lib/infrastructure/repositories/purchase-pattern.repository';
 import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integration-db';
+import { learningEngineService } from '$lib/server/di';
 import type { RequestEvent } from '@sveltejs/kit';
 import { actions } from './+page.server';
 
@@ -49,7 +50,8 @@ function scanEvent(request: Request, user: { id: string }, householdId: string):
 			householdRole: 'owner' as const,
 			inventoryService,
 			pmfService,
-			purchasePatternService
+			purchasePatternService,
+			learningEngineService
 		}
 	} as RequestEvent;
 }
