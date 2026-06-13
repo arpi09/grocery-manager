@@ -6,7 +6,7 @@
 |------|--------|
 | **Uppdaterad** | 2026-06-13 |
 | **Prod SHA** | `2779d141` — senaste lyckade Deploy to production (2026-06-13) |
-| **Master SHA** | `f67ad68b` — Brain V1 merge train (C1–C8); prod still @ `2779d141` |
+| **Master SHA** | `d8896e47` — Brain V1 merge train (C1–C8); prod still @ `2779d141` |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` — merged to master |
 | **Prod URL** | https://skaffu.com |
 
