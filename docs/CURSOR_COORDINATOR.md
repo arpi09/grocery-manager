@@ -20,6 +20,20 @@ Kärnloop-regel (alwaysApply): `.cursor/rules/skaffu-core-loop.mdc`.
 
 ---
 
+## Cursor hooks (minimal för hastighet)
+
+Projekt-hooks i [`.cursor/hooks.json`](../.cursor/hooks.json) är avsiktligt minimala — ingen `permission: ask`, inga hooks på varje filredigering.
+
+| Policy | Var den lever |
+|--------|----------------|
+| Tier C / frozen zones | `skaffu-core-loop.mdc`, `skaffu-frozen-zones.mdc` |
+| CURRENT_REALITY vid nav/flags | `skaffu-reality-sync.mdc` + skill `skaffu-core-loop-change` |
+| Deploy / G0 / rollback | `deploy-safety.mdc`, `delivery-done.mdc` + skill `skaffu-deploy-verify` |
+
+**Enda kvarvarande hook:** `beforeShellExecution` med matcher `gh workflow run deploy` — tyst `allow` + `agent_message` (ingen modal). Påminner agenten om G0/CI/rollback utan att blockera.
+
+---
+
 ## Vad är coordinator?
 
 **Coordinator** är den agent (chat) som äger leveransflödet: prioritering, WIP, spawn av andra agenter, merge/deploy-beslut och uppdatering av `private/`-statusfiler när de finns lokalt.

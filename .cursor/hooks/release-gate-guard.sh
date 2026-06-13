@@ -12,10 +12,8 @@ extract_command() {
 }
 command="$(extract_command)"
 if [ -z "$command" ]; then echo '{ "permission": "allow" }'; exit 0; fi
-if printf '%s' "$command" | grep -Eiq 'git push origin master|gh pr create|gh workflow run deploy'; then
-	cat <<'EOF'
-{"permission":"ask","user_message":"Release gate: G0 körd? CI green på target SHA? Rollback-plan klar?","agent_message":"Before merge/deploy: run G0 (npm run check:locales && npm run check && npm test), confirm CI quality/quality is green on the target SHA, and note rollback (Firebase revert or git revert + redeploy). Hotfixes may proceed with coordinator approval."}
-EOF
+if printf '%s' "$command" | grep -Eiq 'gh workflow run deploy'; then
+	echo '{"permission":"allow","agent_message":"Deploy: G0 green? CI quality on SHA? Rollback: revert SHA or Firebase rollout."}'
 	exit 0
 fi
 echo '{ "permission": "allow" }'

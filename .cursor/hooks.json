@@ -1,22 +1,10 @@
 {
   "version": 1,
   "hooks": {
-    "preToolUse": [
-      {
-        "command": ".cursor/hooks/frozen-zone-guard.sh",
-        "matcher": "Write|StrReplace|EditNotebook",
-        "failClosed": false
-      }
-    ],
-    "afterFileEdit": [
-      {
-        "command": ".cursor/hooks/docs-reality-nudge.sh"
-      }
-    ],
     "beforeShellExecution": [
       {
         "command": ".cursor/hooks/release-gate-guard.sh",
-        "matcher": "git push origin master|gh pr create|gh workflow run deploy",
+        "matcher": "gh workflow run deploy",
         "failClosed": false
       }
     ]

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# deprecated — policy in .mdc rules (skaffu-reality-sync.mdc, skaffu-core-loop.mdc)
 set -euo pipefail
 input="$(cat)"
 extract_path() {
