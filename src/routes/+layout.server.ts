@@ -1,5 +1,6 @@
 import { isThemePreference } from '$lib/domain/theme';
 import { isUserEmailVerified } from '$lib/server/email-verification-enforcement';
+import { isShoppingListShareEnabled } from '$lib/server/shopping-list-share-flag';
 import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { resolveThemeForRequest } from '$lib/server/theme-cookie';
@@ -20,7 +21,8 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			householdRole: null,
 			isPro: false,
 			cookieConsent,
-			staleCount: 0
+			staleCount: 0,
+			shareLinkEnabled: false
 		};
 	}
 
@@ -81,6 +83,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			: null,
 		householdRole: locals.householdRole,
 		householdMemberCount,
-		staleCount
+		staleCount,
+		shareLinkEnabled: isShoppingListShareEnabled()
 	};
 };

@@ -66,3 +66,16 @@ export function formatShoppingListExportByFormat(
 		.map(formatLine)
 		.join('\n');
 }
+
+/** Appends a localized footer line (e.g. Skaffu register link) after exported list items. */
+export function appendShoppingListExportFooter(itemsText: string, footerLine: string): string {
+	const body = itemsText.trim();
+	const footer = footerLine.trim();
+	if (!body) {
+		return body;
+	}
+	if (!footer) {
+		return body;
+	}
+	return `${body}\n\n${footer}`;
+}

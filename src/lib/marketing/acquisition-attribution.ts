@@ -5,7 +5,8 @@ export const ACQUISITION_SOURCES = [
 	'shopping_share',
 	'city_feed',
 	'expiring_share',
-	'household_invite_inkop'
+	'household_invite_inkop',
+	'export'
 ] as const;
 
 export type AcquisitionSource = (typeof ACQUISITION_SOURCES)[number];
