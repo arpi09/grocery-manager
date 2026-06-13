@@ -3,6 +3,27 @@ import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
+function safeRedirect(value: string | null): string | null {
+	if (value && value.startsWith('/') && !value.startsWith('//')) {
+		return value;
+	}
+	return null;
+}
+
+function resolvePostVerifyDestination(
+	url: URL,
+	cookies: import('@sveltejs/kit').Cookies
+): string {
+	const redirectTo = safeRedirect(
+		url.searchParams.get('redirect') ?? cookies.get('post_register_redirect') ?? null
+	);
+	if (redirectTo) {
+		cookies.delete('post_register_redirect', { path: '/' });
+		return redirectTo;
+	}
+	return `${APP_HOME_PATH}?welcome=1`;
+}
+
 export const load: PageServerLoad = async ({ locals, url }) => {
 	return {
 		email: locals.user?.email ?? null,
@@ -28,6 +49,6 @@ export const actions: Actions = {
 		if (!event.locals.user?.emailVerifiedAt) {
 			return fail(400, { message: 'Email not verified' });
 		}
-		redirect(302, `${APP_HOME_PATH}?welcome=1`);
+		redirect(302, resolvePostVerifyDestination(event.url, event.cookies));
 	}
 };

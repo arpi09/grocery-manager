@@ -29,6 +29,13 @@ import { isGoogleOAuthConfigured } from '$lib/server/google-oauth';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
+function safeRedirect(value: string | null): string | null {
+	if (value && value.startsWith('/') && !value.startsWith('//')) {
+		return value;
+	}
+	return null;
+}
+
 export const load: PageServerLoad = async ({ url }) => {
 	warnIfTurnstileMisconfigured('register load');
 
@@ -91,6 +98,15 @@ export const actions: Actions = {
 			});
 			clearSignupUtmCookie(event.cookies);
 			await createSession(event, user.id);
+			const redirectTo = safeRedirect(event.url.searchParams.get('redirect'));
+			if (redirectTo) {
+				event.cookies.set('post_register_redirect', redirectTo, {
+					path: '/',
+					httpOnly: true,
+					sameSite: 'lax',
+					maxAge: 60 * 60 * 24
+				});
+			}
 			const emailLocale = event.locals.locale === 'en' ? 'en' : 'sv';
 			await event.locals.emailVerificationService.sendSignupVerification(user.id, emailLocale);
 		} catch (error) {
@@ -104,9 +120,14 @@ export const actions: Actions = {
 			throw error;
 		}
 
+		const redirectTo = safeRedirect(event.url.searchParams.get('redirect'));
+		const verifyDestination = redirectTo
+			? `${POST_REGISTER_SCAN_PATH}?redirect=${encodeURIComponent(redirectTo)}`
+			: POST_REGISTER_SCAN_PATH;
+
 		redirect(
 			302,
-			isEmailVerificationSkipped() ? POST_REGISTER_APP_HOME_PATH : POST_REGISTER_SCAN_PATH
+			isEmailVerificationSkipped() ? POST_REGISTER_APP_HOME_PATH : verifyDestination
 		);
 	}
 };
