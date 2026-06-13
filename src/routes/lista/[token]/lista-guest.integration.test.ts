@@ -1,0 +1,289 @@
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { eq } from 'drizzle-orm';
+import type { AppDatabase } from '$lib/infrastructure/db';
+import { productEventTable } from '$lib/infrastructure/db/schema';
+import { HouseholdService } from '$lib/application/household.service';
+import { PmfService } from '$lib/application/pmf.service';
+import { ShoppingListService } from '$lib/application/shopping-list.service';
+import { ShoppingListShareService } from '$lib/application/shopping-list-share.service';
+import { DrizzleHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
+import { DrizzlePmfRepository } from '$lib/infrastructure/repositories/pmf.repository';
+import { DrizzleShoppingListRepository } from '$lib/infrastructure/repositories/shopping-list.repository';
+import { DrizzleShoppingListShareRepository } from '$lib/infrastructure/repositories/shopping-list-share.repository';
+import {
+	buildListaLoginUrl,
+	buildListaSignupUrl,
+	LISTA_JOIN_COOKIE
+} from '$lib/marketing/acquisition-attribution';
+import { APP_HOME_PATH } from '$lib/navigation/app-home';
+import { recordProductEvent } from '$lib/server/product-events';
+import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integration-db';
+
+const { dbState, shareFlag, diState } = vi.hoisted(() => ({
+	dbState: { db: null as AppDatabase | null },
+	shareFlag: { enabled: true },
+	diState: {
+		shareService: null as ShoppingListShareService | null
+	}
+}));
+
+vi.mock('$lib/infrastructure/db', () => ({
+	db: new Proxy({} as AppDatabase, {
+		get(_target, prop) {
+			if (!dbState.db) {
+				throw new Error('Integration db not initialized');
+			}
+			return Reflect.get(dbState.db, prop);
+		}
+	}),
+	getDb: () => {
+		if (!dbState.db) {
+			throw new Error('Integration db not initialized');
+		}
+		return dbState.db;
+	},
+	initDatabase: vi.fn(),
+	getDatabaseBackend: () => 'pglite' as const
+}));
+
+vi.mock('$lib/server/shopping-list-share-flag', () => ({
+	isShoppingListShareEnabled: () => shareFlag.enabled
+}));
+
+vi.mock('$lib/server/di', () => ({
+	get shoppingListShareService() {
+		if (!diState.shareService) {
+			throw new Error('Integration share service not initialized');
+		}
+		return diState.shareService;
+	}
+}));
+
+import { load as loadListaPage } from './+page.server';
+
+function createCookieJar() {
+	const jar = new Map<string, string>();
+	return {
+		jar,
+		get: (name: string) => jar.get(name),
+		set: (name: string, value: string) => {
+			jar.set(name, value);
+		},
+		delete: (name: string) => {
+			jar.delete(name);
+		}
+	};
+}
+
+async function expectRedirectTo(
+	promise: Promise<unknown>,
+	pathname: string
+): Promise<{ location: string }> {
+	await expect(promise).rejects.toMatchObject({
+		status: 302,
+		location: expect.stringContaining(pathname)
+	});
+	try {
+		await promise;
+	} catch (error) {
+		return error as { location: string };
+	}
+	throw new Error('Expected redirect');
+}
+
+/** Mirrors hooks.server.ts lista_join_token consumption for post-auth household join. */
+async function consumeListaJoinCookie(
+	userId: string,
+	cookies: ReturnType<typeof createCookieJar>,
+	services: {
+		shareService: ShoppingListShareService;
+		householdService: HouseholdService;
+		pmfService: PmfService;
+	}
+) {
+	const listaJoinToken = cookies.get(LISTA_JOIN_COOKIE);
+	if (!listaJoinToken) return null;
+
+	cookies.delete(LISTA_JOIN_COOKIE);
+	const targetHouseholdId = await services.shareService.resolveHouseholdIdForToken(listaJoinToken);
+	if (!targetHouseholdId) return null;
+
+	const outcome = await services.householdService.joinSharedListHousehold(
+		targetHouseholdId,
+		userId
+	);
+	if (outcome === 'joined') {
+		recordProductEvent(services.pmfService, {
+			userId,
+			householdId: targetHouseholdId,
+			eventType: 'partner_joined',
+			metadata: { context: 'lista' }
+		});
+	}
+
+	return { targetHouseholdId, outcome };
+}
+
+describe('Lista guest join integration', () => {
+	let integrationDb: IntegrationDbContext;
+	let shoppingListService: ShoppingListService;
+	let householdService: HouseholdService;
+	let pmfService: PmfService;
+
+	beforeAll(async () => {
+		integrationDb = await createIntegrationDb();
+		dbState.db = integrationDb.db;
+		diState.shareService = new ShoppingListShareService(
+			new DrizzleShoppingListShareRepository(integrationDb.db)
+		);
+		shoppingListService = new ShoppingListService(new DrizzleShoppingListRepository(integrationDb.db));
+		householdService = new HouseholdService(new DrizzleHouseholdRepository(integrationDb.db));
+		pmfService = new PmfService(new DrizzlePmfRepository());
+	}, 60_000);
+
+	beforeEach(async () => {
+		await integrationDb.reset();
+		shareFlag.enabled = true;
+		await integrationDb.seedUser({ id: 'owner-a', email: 'owner@example.com' });
+		await integrationDb.seedHousehold({
+			id: 'household-a',
+			members: [{ userId: 'owner-a', role: 'owner' }]
+		});
+	});
+
+	afterAll(async () => {
+		dbState.db = null;
+		diState.shareService = null;
+		await integrationDb.close();
+	});
+
+	async function createShareToken() {
+		await shoppingListService.addItem('household-a', 'owner', { name: 'Mjölk' });
+		const created = await diState.shareService!.createShareLink(
+			'household-a',
+			'owner-a',
+			await shoppingListService.listItems('household-a')
+		);
+		expect(created).not.toBeNull();
+		return created!.token;
+	}
+
+	it('sets lista_join_token cookie for unauthenticated guest visit', async () => {
+		const token = await createShareToken();
+		const cookies = createCookieJar();
+
+		const result = (await loadListaPage({
+			params: { token },
+			locals: { user: null, householdService, pmfService },
+			cookies
+		} as Parameters<typeof loadListaPage>[0])) as {
+			preview: { items: Array<{ name: string }> };
+			token: string;
+		};
+
+		expect(result.preview.items).toHaveLength(1);
+		expect(result.token).toBe(token);
+		expect(cookies.get(LISTA_JOIN_COOKIE)).toBe(token);
+	});
+
+	it('exposes guest CTA URLs with shopping_share attribution', async () => {
+		const token = await createShareToken();
+
+		expect(buildListaSignupUrl('https://skaffu.com')).toContain('utm_content=shopping_share');
+		expect(buildListaSignupUrl('https://skaffu.com')).toContain(
+			`redirect=${encodeURIComponent(APP_HOME_PATH)}`
+		);
+		expect(buildListaLoginUrl(token)).toBe(
+			`/login?redirect=${encodeURIComponent(`/lista/${token}`)}`
+		);
+	});
+
+	it('redirects authenticated visitor to inkop and joins shared household', async () => {
+		const token = await createShareToken();
+		await integrationDb.seedUser({ id: 'guest-b', email: 'guest@example.com' });
+		await integrationDb.seedHousehold({
+			id: 'household-b',
+			members: [{ userId: 'guest-b', role: 'owner' }]
+		});
+
+		const cookies = createCookieJar();
+		await expectRedirectTo(
+			loadListaPage({
+				params: { token },
+				locals: {
+					user: { id: 'guest-b' },
+					householdService,
+					pmfService
+				},
+				cookies
+			} as Parameters<typeof loadListaPage>[0]),
+			APP_HOME_PATH
+		);
+
+		const role = await householdService.getRoleForUser('household-a', 'guest-b');
+		expect(role).toBe('editor');
+	});
+
+	it('records partner_joined when guest joins via authenticated lista visit', async () => {
+		const token = await createShareToken();
+		await integrationDb.seedUser({ id: 'guest-c', email: 'guest-c@example.com' });
+		await integrationDb.seedHousehold({
+			id: 'household-c',
+			members: [{ userId: 'guest-c', role: 'owner' }]
+		});
+
+		const cookies = createCookieJar();
+		await expectRedirectTo(
+			loadListaPage({
+				params: { token },
+				locals: {
+					user: { id: 'guest-c' },
+					householdService,
+					pmfService
+				},
+				cookies
+			} as Parameters<typeof loadListaPage>[0]),
+			APP_HOME_PATH
+		);
+
+		await vi.waitFor(async () => {
+			const events = await integrationDb.db
+				.select()
+				.from(productEventTable)
+				.where(eq(productEventTable.userId, 'guest-c'));
+			expect(events.some((event) => event.eventType === 'partner_joined')).toBe(true);
+		});
+	});
+
+	it('consumes lista_join_token cookie after auth and joins target household', async () => {
+		const token = await createShareToken();
+		await integrationDb.seedUser({ id: 'guest-d', email: 'guest-d@example.com' });
+		await integrationDb.seedHousehold({
+			id: 'household-d',
+			members: [{ userId: 'guest-d', role: 'owner' }]
+		});
+
+		const cookies = createCookieJar();
+		cookies.set(LISTA_JOIN_COOKIE, token);
+
+		const result = await consumeListaJoinCookie('guest-d', cookies, {
+			shareService: diState.shareService!,
+			householdService,
+			pmfService
+		});
+
+		expect(result).toEqual({ targetHouseholdId: 'household-a', outcome: 'joined' });
+		expect(cookies.get(LISTA_JOIN_COOKIE)).toBeUndefined();
+
+		const role = await householdService.getRoleForUser('household-a', 'guest-d');
+		expect(role).toBe('editor');
+
+		await vi.waitFor(async () => {
+			const events = await integrationDb.db
+				.select()
+				.from(productEventTable)
+				.where(eq(productEventTable.userId, 'guest-d'));
+			expect(events.some((event) => event.eventType === 'partner_joined')).toBe(true);
+		});
+	});
+});
