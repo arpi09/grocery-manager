@@ -20,8 +20,9 @@ Utgående → `/inkop` (delad lista) → handla ihop → checkoff → skafferi �
 
 | Yta | Route | Notering |
 |-----|-------|----------|
-| Default home | `/inkop` | `APP_HOME_PATH` → inkop-first |
-| Primary tabs | Lista, Lager, Hem | Scan/Ät i secondary/Mer |
+| Default home | `/hem` | `APP_HOME_PATH` → dashboard default |
+| Primary tabs | Hem, Lager, Inköp | Scan/Ät i secondary/Mer |
+| Post-register wedge | `/inkop?freshAccount=1` | Ny registrering/OAuth — oförändrad inkop-first wedge |
 | Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie |
 | Duo wedge events | product_event | `list_link_*`, `partner_joined`, `shared_checkoff` |
 

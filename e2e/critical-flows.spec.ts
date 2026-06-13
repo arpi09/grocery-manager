@@ -34,7 +34,7 @@ test.describe('Critical flows', () => {
 
 
 
-	test('login redirects to /inkop', async ({ page }) => {
+	test('login redirects to /hem', async ({ page }) => {
 
 		const { email, password } = await registerNewUser(page);
 
@@ -44,7 +44,7 @@ test.describe('Critical flows', () => {
 
 		await loginWithCredentials(page, email, password);
 
-		await expect(page).toHaveURL('/inkop');
+		await expect(page).toHaveURL('/hem');
 
 	});
 
@@ -184,7 +184,7 @@ test.describe('Critical flows', () => {
 
 
 
-	test('onboarding finish returns to inkop shopping list', async ({ page }) => {
+	test('onboarding finish returns to hem dashboard', async ({ page }) => {
 
 		test.setTimeout(60_000);
 
@@ -206,9 +206,8 @@ test.describe('Critical flows', () => {
 
 		await page.getByTestId('onboarding-finish').click();
 
-		await expect(page).toHaveURL('/inkop');
+		await expect(page).toHaveURL('/hem');
 
 	});
 
 });
-

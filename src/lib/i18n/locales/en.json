@@ -226,7 +226,7 @@
 		"greetingEvening": "Good evening, {name}",
 		"greetingNight": "Hi, {name}",
 		"taglineEngaged": "Today's suggestions based on your pantry and the time of day",
-		"weeklyShopCta": "Open this week's shopping list",
+		"weeklyShopCta": "Shop this week",
 		"eatFirstSummary": "Eat first ({count})",
 		"pantryStatusTitle": "Pantry check-in",
 		"pantryStatusWithoutExpiry": "{count, plural, one {# item without expiry date — add dates for better tracking} other {# items without expiry dates — add dates for better tracking}}",

@@ -5,7 +5,7 @@
 	import PhotoRoundFlow from '$lib/components/organisms/PhotoRoundFlow.svelte';
 	import ReceiptBulkAddFlow from '$lib/components/organisms/ReceiptBulkAddFlow.svelte';
 	import ScanToAddFlow from '$lib/components/organisms/ScanToAddFlow.svelte';
-	import { APP_HOME_PATH } from '$lib/navigation/app-home';
+	import { INKOP_PATH } from '$lib/navigation/app-home';
 	import { t } from '$lib/i18n';
 	import type { StorageLocation } from '$lib/domain/location';
 	import {
@@ -37,7 +37,7 @@
 	let activeFlow = $state<ScanPick | null>(null);
 
 	const userId = $derived(page.data.user?.id ?? null);
-	const returnTo = APP_HOME_PATH;
+	const returnTo = INKOP_PATH;
 
 	function closeFlow() {
 		if (visibleModes.length === 1) {

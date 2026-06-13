@@ -348,7 +348,7 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 			message?: string;
 		} | null;
 		if (result?.type === 'redirect') {
-			await page.goto(result.location ?? '/inkop', {
+			await page.goto(result.location ?? '/hem', {
 				waitUntil: 'domcontentloaded',
 				timeout: E2E_AUTH_NAV_TIMEOUT_MS
 			});
@@ -356,7 +356,7 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 			throw new Error(`Login failed: ${result?.message ?? JSON.stringify(result)}`);
 		}
 	} else if (status === 302 || status === 303) {
-		const location = loginResponse.headers()['location'] ?? '/inkop';
+		const location = loginResponse.headers()['location'] ?? '/hem';
 		await page.goto(location.startsWith('http') ? location : `${baseURL}${location}`, {
 			waitUntil: 'domcontentloaded',
 			timeout: E2E_AUTH_NAV_TIMEOUT_MS
