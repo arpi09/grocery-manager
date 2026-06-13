@@ -140,6 +140,7 @@
 							}}
 						/>
 
+<<<<<<< HEAD
 						{#if hasSuggestions}
 							<ReplenishmentSection
 								suggestions={replenishmentSuggestions}
@@ -150,6 +151,17 @@
 								surface="inkop"
 							/>
 						{/if}
+=======
+						<ReplenishmentSection
+							suggestions={replenishmentSuggestions}
+							{dedupeByKey}
+							canEdit={data.canEdit}
+							householdId={data.householdId}
+							compact
+							surface="inkop"
+							showEmptyState={!listHasItems}
+						/>
+>>>>>>> c4f820d7 (feat(inkop): default-open replenishment suggestions with badge)
 					</div>
 				</details>
 			{/if}

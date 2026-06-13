@@ -3,6 +3,7 @@
 	import Card from '$lib/components/atoms/Card.svelte';
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
+	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import PriceMemoryChip from '$lib/components/molecules/PriceMemoryChip.svelte';
 	import type { DedupeWarning } from '$lib/domain/dedupe-autopilot';
 	import type { ReplenishmentReasonCode, ReplenishmentSuggestion } from '$lib/domain/replenishment';
@@ -12,6 +13,7 @@
 		filterVisibleDedupeWarnings
 	} from '$lib/utils/dedupe-warning-dismiss';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import { scanModeHref } from '$lib/utils/scan-nav';
 	import { onMount } from 'svelte';
 	import { t } from '$lib/i18n';
 
@@ -24,6 +26,7 @@
 		compact?: boolean;
 		surface?: ReplenishmentSurface;
 		householdId?: string | null;
+		showEmptyState?: boolean;
 	}
 
 	let {
@@ -32,7 +35,8 @@
 		canEdit = false,
 		compact = false,
 		surface = 'inkop',
-		householdId = null
+		householdId = null,
+		showEmptyState = false
 	}: Props = $props();
 
 	let items = $state<ReplenishmentSuggestion[]>([]);
@@ -202,7 +206,15 @@
 	}
 </script>
 
-{#if items.length > 0}
+{#if items.length === 0 && showEmptyState}
+	<EmptyState
+		iconId="receipt"
+		title={t('replenishment.emptyTitle')}
+		description={t('replenishment.emptyDescription')}
+		actionLabel={t('replenishment.emptyAction')}
+		actionHref={scanModeHref('receipt', surface === 'inkop' ? '/inkop' : '/hem')}
+	/>
+{:else if items.length > 0}
 	<section class="replenishment" class:compact aria-label={t('replenishment.ariaLabel')}>
 		<header class="header">
 			<h2>{compact ? t('householdBriefing.replenishmentTitle') : t('replenishment.title')}</h2>
