@@ -37,7 +37,7 @@
 				<p class="learn-more">{content.learnMore}</p>
 			{/if}
 			{#if showSettingsLink}
-				<a class="settings-link" href="/settings#settings-suggestions">
+				<a class="settings-link" href="/settings/memory">
 					{t('learning.explain.settingsLink')}
 				</a>
 			{/if}

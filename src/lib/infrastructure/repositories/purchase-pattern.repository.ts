@@ -24,6 +24,7 @@ export interface IPurchasePatternRepository {
 	listInventoryNormalizedKeys(householdId: string): Promise<Set<string>>;
 	listActiveInventoryMatches(householdId: string): Promise<PantryInventoryMatch[]>;
 	listShoppingListNormalizedNames(householdId: string): Promise<Set<string>>;
+	countReceiptLines(householdId: string): Promise<number>;
 }
 
 function mapLine(row: typeof receiptPurchaseLineTable.$inferSelect): ReceiptPurchaseLineRecord {
@@ -147,6 +148,16 @@ export class DrizzlePurchasePatternRepository implements IPurchasePatternReposit
 			unit: row.unit,
 			normalizedKey: normalizeReceiptProductName(row.name)
 		}));
+	}
+
+	async countReceiptLines(householdId: string): Promise<number> {
+		const rows = await this.database
+			.select({ id: receiptPurchaseLineTable.id })
+			.from(receiptPurchaseLineTable)
+			.where(eq(receiptPurchaseLineTable.householdId, householdId))
+			.limit(1);
+
+		return rows.length;
 	}
 }
 

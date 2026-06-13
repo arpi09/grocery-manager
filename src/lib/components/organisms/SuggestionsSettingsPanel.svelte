@@ -53,6 +53,10 @@
 		<p class="hint">{t('settings.suggestions.kivraHint')}</p>
 	{/if}
 
+	<p class="full-view-link">
+		<a href="/settings/memory">{t('memory.openFullView')}</a>
+	</p>
+
 	{#if !hasRules}
 		<p class="empty">{t('settings.suggestions.empty')}</p>
 	{:else}
@@ -117,10 +121,21 @@
 
 <style>
 	.hint,
-	.empty {
+	.empty,
+	.full-view-link {
 		margin: 0;
 		padding: var(--space-md) var(--space-lg);
 		color: var(--color-text-secondary);
+	}
+
+	.full-view-link a {
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: none;
+	}
+
+	.full-view-link a:hover {
+		text-decoration: underline;
 	}
 
 	.subsection {
