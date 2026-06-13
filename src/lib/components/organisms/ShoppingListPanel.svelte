@@ -32,7 +32,9 @@
 	import { getDeleteCopy } from '$lib/utils/delete-safety';
 	import { bindSubmittingWithToast } from '$lib/utils/form-submit-feedback';
 	import { get } from 'svelte/store';
+	import { buildAcquisitionRegisterUrl } from '$lib/marketing/acquisition-attribution';
 	import {
+		appendShoppingListExportFooter,
 		formatShoppingListExportByFormat,
 		formatShoppingListExportLine,
 		type ShoppingListExportFormat
@@ -166,11 +168,26 @@
 		return [...unchecked, ...checked];
 	}
 
+	function exportRegisterUrl(): string {
+		const origin = browser ? window.location.origin : undefined;
+		const url = buildAcquisitionRegisterUrl('export', origin);
+		if (browser && url.startsWith('/')) {
+			return `${window.location.origin}${url}`;
+		}
+		return url;
+	}
+
 	async function copyExportList(format: ShoppingListExportFormat) {
 		const exportItems = await allItemsForExport();
-		const text = formatShoppingListExportByFormat(exportItems, format);
+		let text = formatShoppingListExportByFormat(exportItems, format);
 		if (!text) {
 			return;
+		}
+		if (shareLinkEnabled) {
+			text = appendShoppingListExportFooter(
+				text,
+				t('shopping.exportFooter', { url: exportRegisterUrl() })
+			);
 		}
 		await navigator.clipboard.writeText(text);
 		exportCopiedFormat = format;
