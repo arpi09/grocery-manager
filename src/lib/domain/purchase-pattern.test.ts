@@ -7,6 +7,9 @@ import {
 	type ReceiptPurchaseLineRecord
 } from './purchase-pattern';
 
+const MJOLK = 'Mj\u00F6lk';
+const AGG = '\u00E4gg';
+
 function line(
 	overrides: Partial<ReceiptPurchaseLineRecord> & Pick<ReceiptPurchaseLineRecord, 'normalizedKey'>
 ): ReceiptPurchaseLineRecord {
@@ -15,7 +18,7 @@ function line(
 		householdId: overrides.householdId ?? 'hh-1',
 		userId: overrides.userId ?? 'user-1',
 		importBatchId: overrides.importBatchId ?? 'batch-1',
-		productName: overrides.productName ?? 'Mj?lk 1L',
+		productName: overrides.productName ?? `${MJOLK} 1L`,
 		normalizedKey: overrides.normalizedKey,
 		barcode: overrides.barcode ?? null,
 		location: overrides.location ?? 'fridge',
@@ -32,7 +35,7 @@ function line(
 
 describe('normalizeReceiptProductName', () => {
 	it('lowercases and strips punctuation', () => {
-		expect(normalizeReceiptProductName('  Arla Mj?lk!  ')).toBe('arla mj?lk');
+		expect(normalizeReceiptProductName(`  Arla ${MJOLK}!  `)).toBe(`arla ${MJOLK.toLowerCase()}`);
 	});
 
 	it('removes trailing pack size tokens', () => {
@@ -48,14 +51,14 @@ describe('detectReceiptPatternSuggestions', () => {
 			line({
 				normalizedKey: 'mjolk',
 				importBatchId: 'batch-1',
-				productName: 'Mj?lk 1L',
+				productName: `${MJOLK} 1L`,
 				createdAt: new Date('2026-05-10T12:00:00Z')
 			}),
 			line({
 				id: 'line-2',
 				normalizedKey: 'mjolk',
 				importBatchId: 'batch-2',
-				productName: 'Mj?lk 1L',
+				productName: `${MJOLK} 1L`,
 				createdAt: new Date('2026-05-20T12:00:00Z')
 			}),
 			line({
@@ -71,7 +74,7 @@ describe('detectReceiptPatternSuggestions', () => {
 		expect(suggestions).toHaveLength(1);
 		expect(suggestions[0]).toMatchObject({
 			normalizedKey: 'mjolk',
-			displayName: 'Mj?lk 1L',
+			displayName: `${MJOLK} 1L`,
 			importCount: 2
 		});
 	});
@@ -80,8 +83,8 @@ describe('detectReceiptPatternSuggestions', () => {
 		const lines = [
 			line({ normalizedKey: 'mjolk', importBatchId: 'batch-1' }),
 			line({ id: 'line-2', normalizedKey: 'mjolk', importBatchId: 'batch-2' }),
-			line({ id: 'line-3', normalizedKey: 'agg', importBatchId: 'batch-1', productName: 'ÿÿgg 12st' }),
-			line({ id: 'line-4', normalizedKey: 'agg', importBatchId: 'batch-2', productName: 'ÿÿgg 12st' })
+			line({ id: 'line-3', normalizedKey: 'agg', importBatchId: 'batch-1', productName: `${AGG} 12st` }),
+			line({ id: 'line-4', normalizedKey: 'agg', importBatchId: 'batch-2', productName: `${AGG} 12st` })
 		];
 
 		const suggestions = detectReceiptPatternSuggestions(
@@ -136,14 +139,14 @@ describe('detectReceiptFinishSuggestions', () => {
 		const lines = [
 			line({
 				normalizedKey: 'mjolk',
-				productName: 'Mj?lk 1L',
+				productName: `${MJOLK} 1L`,
 				createdAt: new Date('2026-05-28T12:00:00Z')
 			})
 		];
 		const inventory = [
 			{
 				id: 'inv-1',
-				name: 'Mj?lk',
+				name: MJOLK,
 				location: 'fridge' as const,
 				quantity: '1',
 				unit: 'L',
@@ -155,8 +158,8 @@ describe('detectReceiptFinishSuggestions', () => {
 		expect(suggestions).toHaveLength(1);
 		expect(suggestions[0]).toMatchObject({
 			inventoryItemId: 'inv-1',
-			displayName: 'Mj?lk',
-			purchasedName: 'Mj?lk 1L'
+			displayName: MJOLK,
+			purchasedName: `${MJOLK} 1L`
 		});
 	});
 
@@ -165,7 +168,7 @@ describe('detectReceiptFinishSuggestions', () => {
 		const inventory = [
 			{
 				id: 'inv-1',
-				name: 'Mj?lk',
+				name: MJOLK,
 				location: 'fridge' as const,
 				quantity: '1',
 				unit: null,
