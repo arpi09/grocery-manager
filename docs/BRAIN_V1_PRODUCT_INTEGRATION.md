@@ -34,8 +34,8 @@ flowchart LR
 |------|------------------|----------------|--------------|-----------------|------------------|
 | `SHELF_LIFE_LEARNING_ENABLED` | — | Server infer + feedback | Yes | Yes (saved source) | Yes |
 | `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT` | Review UX + parse predictions | Hidden prediction fields | — | Unchanged | — |
-| `LOCATION_LEARNING_ENABLED` | Location predictions in parse | — | — | — | Location rules panel |
-| `REPLENISHMENT_LEARNING_ENABLED` | — | — | — | — | Replenishment feedback only |
+| `LOCATION_LEARNING_ENABLED` | Location predictions in parse | Feedback on bulk save | Kivra import | — | Location rules panel |
+| `REPLENISHMENT_LEARNING_ENABLED` | — | — | — | — | Accept/dismiss → `learning_feedback` |
 
 ### Rollback
 
@@ -50,7 +50,10 @@ Flags `false` → heuristik-only / no receipt estimate UI; `household_*_rule` an
 | Parse API predictions | `isShelfLifeEstimatesInReceiptEnabled()` | `api/receipt/parse/+server.ts` |
 | Scan page prop | same | `scan/+page.server.ts` `load` → `ReceiptBulkAddFlow` |
 | Bulk create infer | `inferLineShelfLife` + `isShelfLifeLearningEnabled()` | `scan/+page.server.ts` `bulkCreate` |
+| Bulk create location feedback | `recordLineLocationFeedback` + `isLocationLearningEnabled()` | `scan/+page.server.ts` `bulkCreate`, `ReceiptBulkAddFlow` |
 | Email/Kivra import | `isShelfLifeLearningEnabled()` | `receipt-import.ts` |
+| Kivra/receipt location feedback | `recordLineLocationFeedback` + `isLocationLearningEnabled()` | `receipt-import.ts` |
+| Replenishment accept/dismiss | `recordPredictorFeedback` (gated in service) | `api/replenishment/accept`, `api/replenishment/dismiss` |
 | Inventory display | `isEstimatedExpirySource()` | `InventoryTableRow.svelte`, `EatFirstSection.svelte` |
 | Expiry correction | `isShelfLifeLearningEnabled()` | `item/[id]/edit/+page.server.ts` |
 | Settings → Förslag | `shouldShowSuggestionsSection()` | `settings/+page.server.ts` |

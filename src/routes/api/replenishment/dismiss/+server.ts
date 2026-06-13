@@ -35,11 +35,26 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	try {
+		const suggestions = await locals.purchasePatternService.getReplenishmentSuggestions(
+			auth.householdId
+		);
+		const suggestion = suggestions.find((entry) => entry.normalizedKey === normalizedKey);
+
 		await locals.purchasePatternService.dismissSuggestion(
 			auth.householdId,
 			locals.householdRole!,
 			normalizedKey
 		);
+
+		await locals.learningEngineService.recordPredictorFeedback({
+			householdId: auth.householdId,
+			userId: auth.user.id,
+			predictorId: 'replenishment',
+			normalizedKey,
+			feedbackType: 'ignored',
+			predictedValue: normalizedKey,
+			contextJson: suggestion ? { displayName: suggestion.displayName } : undefined
+		});
 
 		recordProductEvent(locals.pmfService, {
 			userId: auth.user.id,

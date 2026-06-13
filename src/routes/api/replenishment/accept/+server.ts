@@ -47,6 +47,20 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			normalizedKey
 		);
 
+		await locals.learningEngineService.recordPredictorFeedback({
+			householdId: auth.householdId,
+			userId: auth.user.id,
+			predictorId: 'replenishment',
+			normalizedKey,
+			feedbackType: 'accepted',
+			predictedValue: normalizedKey,
+			actualValue: result.name,
+			contextJson: {
+				displayName: result.name,
+				...(surface ? { surface } : {})
+			}
+		});
+
 		recordProductEvent(locals.pmfService, {
 			userId: auth.user.id,
 			householdId: auth.householdId,

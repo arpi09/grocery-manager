@@ -1,6 +1,7 @@
 import type { ExpiresOnSource } from '$lib/domain/auto-expired';
 import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
 import type { HouseholdRole } from '$lib/domain/household';
+import type { StorageLocation } from '$lib/domain/location';
 import type { ReceiptLine } from '$lib/domain/receipt-line';
 import type { InventoryService } from '$lib/application/inventory.service';
 import type { PurchasePatternService } from '$lib/application/purchase-pattern.service';
@@ -13,6 +14,9 @@ import { recordProductEvent } from '$lib/server/product-events';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { inferLineShelfLife } from '$lib/server/shelf-life-line-inference';
 import { recordLineShelfLifeFeedback } from '$lib/server/shelf-life-feedback-recording';
+import { inferLineLocation } from '$lib/server/location-line-inference';
+import { recordLineLocationFeedback } from '$lib/server/location-feedback-recording';
+import { isLocationLearningEnabled } from '$lib/server/location-learning-flag';
 
 export interface ImportReceiptLinesInput {
 	householdId: string;
@@ -53,7 +57,28 @@ export async function importReceiptLines(
 		const name = line.name.trim();
 		if (!name) continue;
 
-		const location = line.location ?? resolveReceiptLineLocation(name, line.location);
+		const heuristicLocation = line.location ?? resolveReceiptLineLocation(name, line.location);
+		let location = heuristicLocation;
+		let locationPredictionForm = {
+			predictedLocation: null as StorageLocation | null,
+			modelVersion: null as string | null
+		};
+
+		if (isLocationLearningEnabled()) {
+			const inferredLocation = await inferLineLocation(
+				input.learningEngineService,
+				input.householdId,
+				name
+			);
+			if (inferredLocation) {
+				location = inferredLocation.location;
+				locationPredictionForm = {
+					predictedLocation: inferredLocation.location,
+					modelVersion: inferredLocation.modelVersion
+				};
+			}
+		}
+
 		const { quantity, unit } = receiptLineToInventoryAmount(line);
 
 		let expiresOn: string | null = null;
@@ -115,6 +140,16 @@ export async function importReceiptLines(
 			quantity,
 			unit: unit ?? null,
 			unitPrice: line.unitPrice ?? null
+		});
+
+		await recordLineLocationFeedback({
+			learningEngine: input.learningEngineService,
+			householdId: input.householdId,
+			userId: input.userId,
+			productName: name,
+			storeLabel: input.storeLabel ?? null,
+			prediction: locationPredictionForm,
+			actualLocation: location
 		});
 
 		purchaseLines.push(

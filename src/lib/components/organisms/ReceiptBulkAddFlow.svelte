@@ -16,7 +16,7 @@
 		ReceiptFileError
 	} from '$lib/utils/receipt-file';
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
-	import type { ReceiptLine, ReceiptShelfLifePrediction } from '$lib/domain/receipt-line';
+	import type { ReceiptLine, ReceiptLocationPrediction, ReceiptShelfLifePrediction } from '$lib/domain/receipt-line';
 	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
@@ -70,6 +70,7 @@
 	let parsedStoreLabel = $state<string | null>(null);
 	let parsedPurchasedAt = $state<string | null>(null);
 	let shelfLifePredictions = $state<Array<ReceiptShelfLifePrediction | null>>([]);
+	let locationPredictions = $state<Array<ReceiptLocationPrediction | null>>([]);
 	let lineExpiresOn = $state<Record<number, string>>({});
 
 	function receiptFileErrorMessage(error: ReceiptFileError): string {
@@ -98,6 +99,7 @@
 		storeLabel?: string;
 		purchasedAt?: string;
 		shelfLifePredictions?: Array<ReceiptShelfLifePrediction | null>;
+		locationPredictions?: Array<ReceiptLocationPrediction | null>;
 	}> {
 		const contentType = response.headers.get('content-type') ?? '';
 		if (!contentType.includes('application/json')) {
@@ -110,6 +112,7 @@
 				storeLabel?: string;
 				purchasedAt?: string;
 				shelfLifePredictions?: Array<ReceiptShelfLifePrediction | null>;
+				locationPredictions?: Array<ReceiptLocationPrediction | null>;
 			};
 		} catch {
 			return {};
@@ -157,6 +160,7 @@
 			parsedStoreLabel = data.storeLabel ?? null;
 			parsedPurchasedAt = data.purchasedAt ?? null;
 			shelfLifePredictions = data.shelfLifePredictions ?? [];
+			locationPredictions = data.locationPredictions ?? [];
 			lineExpiresOn = Object.fromEntries(
 				data.lines.map((line, index) => [
 					index,
@@ -164,7 +168,12 @@
 				])
 			);
 			selected = Object.fromEntries(data.lines.map((_, i) => [i, true]));
-			lineLocations = Object.fromEntries(data.lines.map((line, i) => [i, line.location]));
+			lineLocations = Object.fromEntries(
+				data.lines.map((line, i) => [
+					i,
+					data.locationPredictions?.[i]?.location ?? line.location
+				])
+			);
 			bulkLocation = modeLocation(data.lines.map((l) => l.location)) ?? data.lines[0]?.location ?? 'cupboard';
 			locationOverrides = new Set();
 			step = 'review';
@@ -264,6 +273,7 @@
 		parsedStoreLabel = null;
 		parsedPurchasedAt = null;
 		shelfLifePredictions = [];
+		locationPredictions = [];
 		lineExpiresOn = {};
 		step = 'upload';
 		parseError = null;
@@ -516,6 +526,18 @@
 									type="hidden"
 									name={`predictedExpiresOnSource_${index}`}
 									value={shelfLifePredictions[index]!.expiresOnSource}
+								/>
+							{/if}
+							{#if locationPredictions[index]}
+								<input
+									type="hidden"
+									name={`predictedLocation_${index}`}
+									value={locationPredictions[index]!.location}
+								/>
+								<input
+									type="hidden"
+									name={`predictedLocationModelVersion_${index}`}
+									value={locationPredictions[index]!.modelVersion}
 								/>
 							{/if}
 							{#if mergeSelected[index] && mergeCandidates[index]}

@@ -22,6 +22,11 @@ import {
 	readLineShelfLifePrediction,
 	recordLineShelfLifeFeedback
 } from '$lib/server/shelf-life-feedback-recording';
+import { inferLineLocation } from '$lib/server/location-line-inference';
+import {
+	readLineLocationPrediction,
+	recordLineLocationFeedback
+} from '$lib/server/location-feedback-recording';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -134,6 +139,34 @@ async function resolveLineExpiry(
 	};
 }
 
+async function resolveLineLocationPrediction(
+	event: import('@sveltejs/kit').RequestEvent,
+	params: {
+		name: string;
+		index: number;
+		formData: FormData;
+	}
+): Promise<ReturnType<typeof readLineLocationPrediction>> {
+	const predictionForm = readLineLocationPrediction(params.formData, params.index);
+	if (predictionForm.predictedLocation) {
+		return predictionForm;
+	}
+
+	const inferred = await inferLineLocation(
+		event.locals.learningEngineService,
+		event.locals.householdId!,
+		params.name
+	);
+	if (inferred) {
+		return {
+			predictedLocation: inferred.location,
+			modelVersion: inferred.modelVersion
+		};
+	}
+
+	return predictionForm;
+}
+
 async function bulkCreateFromForm(
 	event: import('@sveltejs/kit').RequestEvent,
 	formData: FormData,
@@ -236,6 +269,21 @@ async function bulkCreateFromForm(
 			quantity: typeof quantityRaw === 'string' ? quantityRaw : null,
 			unit: typeof unitRaw === 'string' ? unitRaw : null,
 			unitPrice: typeof unitPriceRaw === 'string' ? unitPriceRaw : null
+		});
+
+		const locationPrediction = await resolveLineLocationPrediction(event, {
+			name: name.trim(),
+			index,
+			formData
+		});
+		await recordLineLocationFeedback({
+			learningEngine: event.locals.learningEngineService,
+			householdId: event.locals.householdId!,
+			userId: event.locals.user!.id,
+			productName: name.trim(),
+			storeLabel,
+			prediction: locationPrediction,
+			actualLocation: location
 		});
 
 		if (recordPurchases && importBatchId) {
