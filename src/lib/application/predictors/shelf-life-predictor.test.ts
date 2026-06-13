@@ -1,0 +1,105 @@
+import { describe, expect, it, vi } from 'vitest';
+import { ShelfLifePredictor } from '$lib/application/predictors/shelf-life-predictor';
+import type { HouseholdLearningPort } from '$lib/application/learning/ports/household-learning.port';
+
+function createHouseholdPort(
+	rules: Record<string, { typicalDays: number; sampleCount: number } | null> = {}
+): HouseholdLearningPort {
+	return {
+		findShelfLifeRule: vi.fn(async (_householdId, normalizedKey, location) => {
+			const key = `${normalizedKey}:${location}`;
+			return rules[key] ?? null;
+		}),
+		upsertShelfLifeRule: vi.fn(async () => {}),
+		findLocationRule: vi.fn(async () => null),
+		upsertLocationRule: vi.fn(async () => {})
+	};
+}
+
+describe('ShelfLifePredictor', () => {
+	const householdId = 'house-1';
+	const ctx = { householdId };
+
+	it('uses heuristic when learning is disabled', async () => {
+		const predictor = new ShelfLifePredictor(createHouseholdPort(), {
+			learningEnabled: () => false,
+			todayIso: () => '2026-06-01'
+		});
+
+		const result = await predictor.predict(ctx, {
+			productName: 'Mjölk 3%',
+			normalizedKey: 'mjolk 3',
+			location: 'fridge',
+			purchasedAt: '2026-06-01'
+		});
+
+		expect(result).not.toBeNull();
+		expect(result?.source).toBe('heuristic');
+		expect(result?.modelVersion).toBe('heuristic-v1');
+		expect(result?.value.expiresOn).toBe('2026-06-08');
+		expect(result?.value.typicalDays).toBe(7);
+		expect(result?.explain).toBe('Typisk hållbarhet för liknande varor');
+	});
+
+	it('skips household tier when sample count is below threshold', async () => {
+		const predictor = new ShelfLifePredictor(
+			createHouseholdPort({ 'mjolk:fridge': { typicalDays: 5, sampleCount: 1 } }),
+			{
+				learningEnabled: () => true,
+				todayIso: () => '2026-06-01'
+			}
+		);
+
+		const result = await predictor.predict(ctx, {
+			productName: 'Mjölk',
+			normalizedKey: 'mjolk',
+			location: 'fridge',
+			purchasedAt: '2026-06-01'
+		});
+
+		expect(result?.source).toBe('heuristic');
+	});
+
+	it('uses household rule when learning enabled and enough samples', async () => {
+		const predictor = new ShelfLifePredictor(
+			createHouseholdPort({ 'mjolk:fridge': { typicalDays: 9, sampleCount: 3 } }),
+			{
+				learningEnabled: () => true,
+				todayIso: () => '2026-06-01'
+			}
+		);
+
+		const result = await predictor.predict(ctx, {
+			productName: 'Mjölk',
+			normalizedKey: 'mjolk',
+			location: 'fridge',
+			purchasedAt: '2026-06-01'
+		});
+
+		expect(result).toMatchObject({
+			source: 'household_rule',
+			modelVersion: 'household-v1',
+			explain: 'Ca 9 dagars hållbarhet baserat på ert hushåll',
+			value: {
+				typicalDays: 9,
+				expiresOn: '2026-06-10'
+			}
+		});
+	});
+
+	it('returns null for unknown products without heuristic match', async () => {
+		const predictor = new ShelfLifePredictor(createHouseholdPort(), {
+			learningEnabled: () => false,
+			todayIso: () => '2026-06-01'
+		});
+
+		const result = await predictor.predict(ctx, {
+			productName: 'Mystery gadget',
+			normalizedKey: 'mystery gadget',
+			location: 'cupboard',
+			purchasedAt: null
+		});
+
+		expect(result).toBeNull();
+	});
+});

@@ -1,4 +1,22 @@
+import type { ExpiresOnSource } from './auto-expired';
+import type { PredictionSource } from './learning/predictor-types';
+import type { PredictionExplanation } from './learning/prediction-trust';
 import type { StorageLocation } from './location';
+
+export interface ReceiptShelfLifePrediction {
+	expiresOn: string;
+	typicalDays: number;
+	expiresOnSource: ExpiresOnSource;
+	modelVersion: string;
+	explanation?: PredictionExplanation;
+}
+
+export interface ReceiptLocationPrediction {
+	location: StorageLocation;
+	source: PredictionSource;
+	modelVersion: string;
+	explanation?: PredictionExplanation;
+}
 
 export interface ReceiptLine {
 	name: string;

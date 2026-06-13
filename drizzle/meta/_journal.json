@@ -323,6 +323,34 @@
 			"when": 1752240000000,
 			"tag": "0046_household_os_events",
 			"breakpoints": true
+		},
+		{
+			"idx": 46,
+			"version": "7",
+			"when": 1752326400000,
+			"tag": "0047_learning_engine_v1",
+			"breakpoints": true
+		},
+		{
+			"idx": 47,
+			"version": "7",
+			"when": 1752412800000,
+			"tag": "0048_household_location_rule",
+			"breakpoints": true
+		},
+		{
+			"idx": 48,
+			"version": "7",
+			"when": 1752499200000,
+			"tag": "0049_household_favorite_product",
+			"breakpoints": true
+		},
+		{
+			"idx": 49,
+			"version": "7",
+			"when": 1752585600000,
+			"tag": "0050_duo_wedge_events",
+			"breakpoints": true
 		}
 	]
 }

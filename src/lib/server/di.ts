@@ -84,6 +84,20 @@ import { pushAdapter } from '$lib/infrastructure/adapters/push.adapter';
 import { rateLimitAdapter } from '$lib/infrastructure/adapters/rate-limit.adapter';
 import { shelfLifeInferenceAdapter } from '$lib/infrastructure/adapters/shelf-life-inference.adapter';
 import { stripeAdapter } from '$lib/infrastructure/adapters/stripe.adapter';
+import { LearningEngineService } from '$lib/application/learning/learning-engine.service';
+import { HouseholdFavoritesService } from '$lib/application/household-favorites.service';
+import { HouseholdSuggestionsService } from '$lib/application/household-suggestions.service';
+import { DrizzleHouseholdShelfLifeRuleRepository } from '$lib/infrastructure/repositories/household-shelf-life-rule.repository';
+import { DrizzleHouseholdLocationRuleRepository } from '$lib/infrastructure/repositories/household-location-rule.repository';
+import { DrizzleLearningFeedbackRepository } from '$lib/infrastructure/repositories/learning-feedback.repository';
+import { DrizzleHouseholdFavoriteProductRepository } from '$lib/infrastructure/repositories/household-favorite-product.repository';
+import { HouseholdLearningAdapter } from '$lib/infrastructure/adapters/household-learning.adapter';
+import { LearningFeedbackAdapter } from '$lib/infrastructure/adapters/learning-feedback.adapter';
+import {
+	isLocationLearningEnabled,
+	isReplenishmentLearningEnabled,
+	isShelfLifeLearningEnabled
+} from '$lib/server/feature-flags';
 
 export const userRepository = new DrizzleUserRepository();
 export const passwordResetRepository = new DrizzlePasswordResetRepository();
@@ -262,3 +276,30 @@ export const errorAlertService = new ErrorAlertService(
 	emailAdapter,
 	appOriginAdapter
 );
+
+const householdShelfLifeRuleRepository = new DrizzleHouseholdShelfLifeRuleRepository();
+const householdLocationRuleRepository = new DrizzleHouseholdLocationRuleRepository();
+const learningFeedbackRepository = new DrizzleLearningFeedbackRepository();
+const householdFavoriteProductRepository = new DrizzleHouseholdFavoriteProductRepository();
+const householdLearningAdapter = new HouseholdLearningAdapter(
+	householdShelfLifeRuleRepository,
+	householdLocationRuleRepository
+);
+const learningFeedbackAdapter = new LearningFeedbackAdapter(learningFeedbackRepository);
+
+export const learningEngineService = new LearningEngineService(
+	householdLearningAdapter,
+	learningFeedbackAdapter,
+	{
+		learningEnabled: isShelfLifeLearningEnabled,
+		locationLearningEnabled: isLocationLearningEnabled,
+		replenishmentLearningEnabled: isReplenishmentLearningEnabled
+	}
+);
+
+export const householdSuggestionsService = new HouseholdSuggestionsService(
+	householdShelfLifeRuleRepository,
+	householdLocationRuleRepository
+);
+
+export const householdFavoritesService = new HouseholdFavoritesService(householdFavoriteProductRepository);

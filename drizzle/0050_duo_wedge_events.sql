@@ -1,0 +1,3 @@
+-- Duo wedge product_event types (application enum in schema.ts):
+-- list_link_shared, list_link_opened, list_join_cta_clicked, partner_joined, shared_checkoff
+-- No DDL required: product_event.event_type is unconstrained text.

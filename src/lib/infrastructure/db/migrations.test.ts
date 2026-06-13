@@ -82,7 +82,11 @@ describe('drizzle migrations', () => {
 			'0043_shopping_list_share_link.sql',
 	'0044_receipt_price_memory.sql',
 	'0045_inventory_intelligence_events.sql',
-	'0046_household_os_events.sql'
+	'0046_household_os_events.sql',
+	'0047_learning_engine_v1.sql',
+	'0048_household_location_rule.sql',
+	'0049_household_favorite_product.sql',
+	'0050_duo_wedge_events.sql'
 		];
 
 		expect(pgliteFiles).toEqual(sqlFiles);

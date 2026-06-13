@@ -226,7 +226,7 @@
 		"greetingEvening": "Good evening, {name}",
 		"greetingNight": "Hi, {name}",
 		"taglineEngaged": "Today's suggestions based on your pantry and the time of day",
-		"weeklyShopCta": "Open this week's shopping list",
+		"weeklyShopCta": "Shop this week",
 		"eatFirstSummary": "Eat first ({count})",
 		"pantryStatusTitle": "Pantry check-in",
 		"pantryStatusWithoutExpiry": "{count, plural, one {# item without expiry date — add dates for better tracking} other {# items without expiry dates — add dates for better tracking}}",
@@ -508,6 +508,20 @@
 			"title": "Check-off → pantry",
 			"note": "Choose whether checked shopping rows are added to inventory.",
 			"modeLabel": "When checking off the shopping list"
+		},
+		"suggestions": {
+			"title": "Skaffu learns",
+			"description": "Household-specific shelf-life and storage rules — built when you confirm or adjust suggestions.",
+			"kivraHint": "Receipt import and confirmed expiry dates improve suggestions over time.",
+			"empty": "No learned rules yet — they appear as you use the app.",
+			"shelfLifeSection": "Shelf life per product",
+			"locationSection": "Storage location per product",
+			"shelfLifeRule": "{name} — about {days} days in {location} ({source})",
+			"locationRule": "{name} — usually in {location} ({source})",
+			"sourceCorrections": "your adjustments",
+			"sampleCount": "{count, plural, one {# observation} other {# observations}}",
+			"reset": "Reset",
+			"resetNamed": "Reset rule for {name}"
 		},
 		"plan": {
 			"compareSummary": "Compare Free and Pro",
@@ -872,6 +886,13 @@
 		"exportAnyListAria": "Copy unchecked items in AnyList format",
 		"exportEmpty": "Nothing to copy — all items are checked off",
 		"exportFooter": "Shared shopping list with Skaffu: {url}",
+		"duoActionBar": {
+			"aria": "Share list and invite partner",
+			"shareList": "Share list",
+			"shareListAria": "Copy link to shared shopping list",
+			"invitePartner": "Invite partner",
+			"invitePartnerAria": "Copy household invite link"
+		},
 		"receiptImportLead": "Receipt imported. Review replenishment suggestions below.",
 		"suggestionsTitle": "Suggestions",
 		"pantryBridge": {
@@ -2488,8 +2509,50 @@
 		"adminSocialPostPublishFailed": "Publish failed: {label}",
 		"adminGuideApproved": "Article approved",
 		"adminGuidePublished": "Article published on the site",
+		"suggestionReset": "Suggestion rule reset",
 		"pushEnabled": "Browser notifications enabled",
 		"pushDisabled": "Browser notifications disabled"
+	},
+	"favorites": {
+		"invalidPayload": "Invalid barcode or product name"
+	},
+	"learning": {
+		"estimatedExpiry": "Estimated",
+		"sourceHousehold": "Learned by your household",
+		"sourceDefault": "Default estimate",
+		"explain": {
+			"title": "Why this suggestion?",
+			"settingsLink": "Manage learned rules",
+			"productFallback": "the product",
+			"shelfLife": {
+				"householdFactPurchased": "Last purchased {date}"
+			}
+		},
+		"shelfLife": {
+			"household": {
+				"primary": "About {days} days shelf life based on your household",
+				"factCount": "Based on {count, plural, one {# observation} other {# observations}} in {location}",
+				"factUpdated": "Last updated {date}"
+			},
+			"heuristic": {
+				"primary": "Typical shelf life for similar products",
+				"factLocation": "Usually stored in {location}"
+			},
+			"llm": {
+				"primary": "AI shelf-life estimate",
+				"factCheck": "Verify the date if needed"
+			}
+		},
+		"location": {
+			"household": {
+				"primary": "{product} is usually stored in {location}",
+				"factCount": "Based on {count, plural, one {# observation} other {# observations}}"
+			},
+			"heuristic": {
+				"primary": "Suggestion: {location}",
+				"fact": "Based on product type and common habits"
+			}
+		}
 	},
 	"news": {
 		"title": "News",

@@ -29,6 +29,7 @@ import {
 	purchasePatternService,
 	inventoryIntelligenceService,
 	priceMemoryService,
+	householdFavoritesService,
 	analyticsBehaviorService,
 	analyticsAdminService,
 	adminInsightsService,
@@ -179,6 +180,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.purchasePatternService = purchasePatternService;
 	event.locals.inventoryIntelligenceService = inventoryIntelligenceService;
 	event.locals.priceMemoryService = priceMemoryService;
+	event.locals.householdFavoritesService = householdFavoritesService;
 	event.locals.analyticsBehaviorService = analyticsBehaviorService;
 	event.locals.analyticsAdminService = analyticsAdminService;
 	event.locals.adminInsightsService = adminInsightsService;

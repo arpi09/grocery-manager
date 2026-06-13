@@ -71,17 +71,27 @@ function addDaysIso(from: Date, days: number): string {
 	return date.toISOString().slice(0, 10);
 }
 
-export function guessShelfLife(name: string, location: StorageLocation) {
+function heuristicTypicalDays(name: string, location: StorageLocation): number | null {
 	const normalized = name.toLowerCase();
 	const freezerBonus = location === 'freezer' ? 90 : 0;
 	const cupboardBonus = location === 'cupboard' ? 30 : 0;
 	for (const [keyword, days] of Object.entries(HEURISTIC_DAYS)) {
 		if (normalized.includes(keyword)) {
-			return {
-				expiresOn: addDaysIso(new Date(), days + freezerBonus + cupboardBonus),
-				source: 'ai_inferred' as ExpiresOnSource
-			};
+			return days + freezerBonus + cupboardBonus;
 		}
 	}
 	return null;
+}
+
+export function guessShelfLifeTypicalDays(name: string, location: StorageLocation): number | null {
+	return heuristicTypicalDays(name, location);
+}
+
+export function guessShelfLife(name: string, location: StorageLocation) {
+	const typicalDays = heuristicTypicalDays(name, location);
+	if (typicalDays == null) return null;
+	return {
+		expiresOn: addDaysIso(new Date(), typicalDays),
+		source: 'ai_inferred' as ExpiresOnSource
+	};
 }
