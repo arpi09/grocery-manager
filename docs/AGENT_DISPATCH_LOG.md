@@ -60,7 +60,7 @@ Läs docs/AGENT_DISPATCH_LOG.md och sammanfatta:
 
 | Tid | Agent | Branch | Task | Execution mode | Status | PR | Blockers | Coordinator follow-up |
 |-----|-------|--------|------|----------------|--------|----|----------|----------------------|
-| 2026-06-13 | cloud-handoff-protocol | `feat/cloud-handoff-protocol` | Cloud Handoff Protocol docs + PR template | MANUAL_CLOUD_AGENT | PR_OPEN | — | — | Review PR; merge when deploy track stable |
+| 2026-06-13 | cloud-handoff-protocol | `feat/cloud-handoff-protocol` | Cloud Handoff Protocol docs + PR template | MANUAL_CLOUD_AGENT | PR_OPEN | #40 | — | Review PR; merge when deploy track stable |
 | 2026-06-13 | cloud-pilot-reality | `feat/cloud-pilot-reality-sync` | CURRENT_REALITY master sync | MANUAL_CLOUD_AGENT | PR_OPEN | #39 | `cloud:bootstrap` script saknas på master | Review #39; prod SHA efter deploy |
 
 ---
