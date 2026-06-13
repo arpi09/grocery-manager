@@ -122,7 +122,31 @@ test.describe('Critical flows', () => {
 
 		const primaryActions = home.locator('.cta-primary, .action-primary');
 
-		await expect(primaryActions).toHaveCount(1);
+		expect(await primaryActions.count()).toBeLessThanOrEqual(1);
+
+		await expect(home.locator('.shopping-teaser-primary')).toHaveCount(1);
+
+	});
+
+
+
+	test('home V3 shows sections without Mer på hem', async ({ page }) => {
+
+		await loginAsAdmin(page);
+
+		await page.goto('/hem');
+
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page.locator('.more-on-home')).toHaveCount(0);
+
+		expect(await page.locator('.home-v3-section').count()).toBeGreaterThanOrEqual(2);
+
+		await expect(page.getByRole('heading', { name: /Uppmärksamhet|Attention/i })).toBeVisible();
+
+		await expect(page.getByRole('heading', { name: /Gör nu|Do now/i })).toBeVisible();
+
+		await expect(page.locator('.shopping-teaser-primary')).toBeVisible();
 
 	});
 

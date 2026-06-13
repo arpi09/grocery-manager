@@ -8,6 +8,8 @@
 		staleCount: number;
 		canWrite?: boolean;
 		returnTo: string;
+		/** When secondary, sync/photo use outline style (primary CTA lives elsewhere on home). */
+		variant?: 'primary' | 'secondary';
 	}
 
 	let {
@@ -15,7 +17,8 @@
 		expiringCount,
 		staleCount,
 		canWrite = false,
-		returnTo
+		returnTo,
+		variant = 'primary'
 	}: Props = $props();
 
 	type CtaKind = 'sync' | 'photo';
@@ -52,7 +55,12 @@
 {#if ctaKind || showPlanerLink}
 	<div class="next-action" class:next-action--stacked={showPlanerLink && ctaKind}>
 		{#if ctaKind && href}
-			<a class="cta-primary" {href} data-analytics-id={analyticsId} data-testid="home-primary-cta">
+			<a
+				class={variant === 'secondary' ? 'cta-secondary' : 'cta-primary'}
+				{href}
+				data-analytics-id={analyticsId}
+				data-testid="home-primary-cta"
+			>
 				{label}
 			</a>
 		{/if}

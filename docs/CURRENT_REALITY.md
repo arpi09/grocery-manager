@@ -21,6 +21,7 @@ Utgående → `/inkop` (delad lista) → handla ihop → checkoff → skafferi �
 | Yta | Route | Notering |
 |-----|-------|----------|
 | Default home | `/inkop` | `APP_HOME_PATH` → inkop-first |
+| Hem dashboard | `/hem` | **Home V3** — 3 sektioner: Uppmärksamhet, Skaffu föreslår, Gör nu ([HOME_V3.md](./HOME_V3.md)) |
 | Primary tabs | Lista, Lager, Hem | Scan/Ät i secondary/Mer |
 | Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie |
 | Duo wedge events | product_event | `list_link_*`, `partner_joined`, `shared_checkoff` |
@@ -59,3 +60,4 @@ Utgående → `/inkop` (delad lista) → handla ihop → checkoff → skafferi �
 | `feat/seed-and-share` | W1 flag, export footer, PostOnboardingSharePrompt | Mergad till integrate |
 | `feat/lista-join-household-cta` | Lista → household CTA | Redan i weekly-habit (lista page) |
 | `feat/brain-v1` | Brain V1 shelf-life predictor + learning | WIP — apply stash `wedge-brain-wip` (stash@{1}); ~70 untracked files, integration incomplete |
+| `feat/home-v3` | Home V3 — 3 sektioner på `/hem`, briefing synlig för engagerade | In flight |

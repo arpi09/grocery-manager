@@ -45,6 +45,12 @@ test.describe('Accessibility — P0 routes (WCAG 2.2 AA)', () => {
 			}
 
 			await page.locator('main, [role="main"]').first().waitFor({ state: 'visible', timeout: 30_000 });
+
+			if (route.path === '/hem') {
+				await expect(page.locator('.more-on-home')).toHaveCount(0);
+				expect(await page.locator('.home-v3-section').count()).toBeGreaterThanOrEqual(2);
+			}
+
 			await expectNoCriticalOrSeriousViolations(page, route.path);
 		});
 	}
