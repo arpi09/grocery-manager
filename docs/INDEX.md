@@ -1,10 +1,12 @@
 # Skaffu — agent index
 
-**Start här** för alla Cursor-agenter (coordinator + implementation).
+**Start här** för alla Cursor-agenter (coordinator + implementation). *(Historiskt "AGENT_INDEX" = denna fil, `docs/INDEX.md`.)*
 
 | Läs först | Fil |
 |-----------|-----|
 | Prod vs master, flags, nav, tier | [CURRENT_REALITY.md](./CURRENT_REALITY.md) |
+| Cloud agent bootstrap + script tiers | [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md) |
+| Engineering health snapshot + Top 10 | [ENGINEERING_HEALTH.md](./ENGINEERING_HEALTH.md) |
 | Kärnloopen | `.cursor/rules/skaffu-core-loop.mdc` |
 | Coordinator WIP/deploy | [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md) |
 | Deploy + smoke | [DEPLOY.md](./DEPLOY.md), [PROD_SMOKE.md](./PROD_SMOKE.md) |
@@ -18,10 +20,24 @@
 | `skaffu-core-loop-change` | hem, inkop, onboarding, nav, household |
 | `skaffu-feature-flag-rollout` | `PUBLIC_*`, apphosting.yaml, W1/W2 flags |
 
+## Cloud-safe first tasks
+
+Docs-only och låg risk — se [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md) för bootstrap och förbjudna uppgifter.
+
+1. **CURRENT_REALITY + INDEX sync** — master SHA, nav, flags från kod/yaml; prod SHA lämnas till coordinator
+2. **Dead-code / TODO audit** — grep-only → `docs/DEAD_CODE_AUDIT.md`
+3. **Dependency health refresh** — `private/DEPENDENCY_HEALTH.md` + `npm outdated` (ingen lockfile utan godkännande)
+4. **i18n / landing copy** — med `npm run check:locales` och `quick:marketing`
+5. **Unit/domain tests** — `npm run quick:dev` efter ändringar
+
+**Cloud default gate:** `npm run cloud:bootstrap` → `npm run check:locales` (docs) eller `npm run quick:dev` (kod).
+
 ## Rör inte (Tier C) utan explicit request
 
 Grannskafferiet · Kivra forward · Stripe/Pro checkout · meal-AI hero · wrapped/statistik som primär yta
 
 ## G0 före push till master
 
-`npm run check:locales && npm run check && npm test`
+**Snabb default (agenter):** `npm run quick:dev` (~2–3 min)
+
+**Full gate:** `npm run check:locales && npm run check && npm test` — eller `npm run quality:ci` / `release:gate` före merge till master
