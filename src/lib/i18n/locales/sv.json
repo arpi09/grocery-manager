@@ -208,7 +208,7 @@
 		"greetingDay": "Hej, {name}",
 		"greetingEvening": "God kväll, {name}",
 		"greetingNight": "Hej, {name}",
-		"taglineEngaged": "Här är dagens förslag utifrån lagret och klockan",
+		"taglineEngaged": "Gemensam veckohandel · hushållsminne",
 		"weeklyShopCta": "Handla denna vecka",
 		"mealSuggestionsTitle": "Vad blir det idag?",
 		"mealSuggestionsCta": "Visa receptförslag",
@@ -227,8 +227,12 @@
 		"moreAddWays": "Fler sätt att lägga till",
 		"moreOnHome": "Mer på hem",
 		"v3": {
+			"thisWeekTitle": "Denna vecka",
+			"recommendsTitle": "Skaffu rekommenderar",
+			"householdTitle": "Hushållet",
+			"recommendsEmpty": "Lägg till kvitton så vi kan föreslå det ni brukar köpa",
+			"householdEmpty": "Tomt skafferi — börja med listan",
 			"attentionTitle": "Uppmärksamhet",
-			"recommendsTitle": "Skaffu föreslår",
 			"doNowTitle": "Gör nu",
 			"receiptFootnote": "{count, plural, one {# förslag från kvitton} other {# förslag från kvitton}} →"
 		},
@@ -481,6 +485,20 @@
 			"title": "Avbockning → skafferi",
 			"note": "Välj om avbockade rader ska läggas till i lagret automatiskt.",
 			"modeLabel": "Vid avbockning på inköpslistan"
+		},
+		"suggestions": {
+			"title": "Skaffu-lär sig",
+			"description": "Hushållsspecifika regler för hållbarhet och förvaring — byggs upp när du bekräftar eller justerar förslag.",
+			"kivraHint": "Kvittoimport och bekräftade utgångsdatum förbättrar förslagen över tid.",
+			"empty": "Inga inlärda regler ännu — de skapas när du använder appen.",
+			"shelfLifeSection": "Hållbarhet per vara",
+			"locationSection": "Förvaringsplats per vara",
+			"shelfLifeRule": "{name} — ca {days} dagar i {location} ({source})",
+			"locationRule": "{name} — oftast i {location} ({source})",
+			"sourceCorrections": "dina justeringar",
+			"sampleCount": "{count, plural, one {# observation} other {# observationer}}",
+			"reset": "Återställ",
+			"resetNamed": "Återställ regel för {name}"
 		},
 		"plan": {
 			"title": "Plan",
@@ -849,6 +867,13 @@
 		"exportAnyListAria": "Kopiera oavbockade varor i AnyList-format",
 		"exportEmpty": "Inget att kopiera — alla varor är avbockade",
 		"exportFooter": "Delad inköpslista med Skaffu: {url}",
+		"duoActionBar": {
+			"aria": "Dela lista och bjud in partner",
+			"shareList": "Dela lista",
+			"shareListAria": "Kopiera länk till delad inköpslista",
+			"invitePartner": "Bjud in partner",
+			"invitePartnerAria": "Kopiera inbjudningslänk till hushållet"
+		},
 		"receiptImportLead": "Kvitto importerat. Granska påfyllnadsförslagen nedan.",
 		"suggestionsTitle": "Förslag",
 		"pantryBridge": {
@@ -903,6 +928,10 @@
 			"recurringNotInPantry": "Köpt {count} gånger senaste 3 månaderna",
 			"cadenceOverdue": "Senast köpt {days} dagar sedan · brukar köpa ungefär var {interval} dagar",
 			"recurringAndCadence": "Köpt {count} gånger senaste 3 månaderna · senast {days} dagar sedan · brukar köpa ungefär var {interval} dagar"
+		},
+		"memoryChip": {
+			"interval": "var {interval}:e dag",
+			"fromReceipts": "från kvitton"
 		}
 	},
 	"householdBriefing": {
@@ -1806,7 +1835,8 @@
 		"addCount": "Lägg till {count} {count, plural, one {vara} other {varor}}",
 		"apiKeyHint": "Kräver OPENAI_API_KEY i serverns .env.",
 		"locationBulkHint": "Gäller markerade rader. Ändra plats per vara nedan om en rad ska ligga någon annanstans.",
-		"locationOverride": "egen plats"
+		"locationOverride": "egen plats",
+		"estimatesHint": "Utgångsdatum är uppskattningar — justera vid behov innan du sparar."
 	},
 	"priceMemory": {
 		"lastPaid": "Senast betalt {price} ({date})",
@@ -2465,7 +2495,50 @@
 		"householdRenamedGeneric": "Hushållsnamn sparat",
 		"itemPartiallyConsumedRemaining": "{label} loggad — {remaining} kvar",
 		"profileSaved": "Profil sparad",
-		"inviteSent": "Inbjudan skickad — kolla inkorgen"
+		"inviteSent": "Inbjudan skickad — kolla inkorgen",
+		"suggestionReset": "Förslagsregel återställd",
+		"learningCorrected": "Tack — Skaffu justerar nästa gång"
+	},
+	"favorites": {
+		"invalidPayload": "Ogiltig streckkod eller varunamn"
+	},
+	"learning": {
+		"estimatedExpiry": "Uppskattat",
+		"sourceHousehold": "Inlärt av ert hushåll",
+		"sourceDefault": "Standarduppskattning",
+		"explain": {
+			"title": "Varför detta förslag?",
+			"settingsLink": "Hantera inlärda regler",
+			"productFallback": "varan",
+			"shelfLife": {
+				"householdFactPurchased": "Senast köpt {date}"
+			}
+		},
+		"shelfLife": {
+			"household": {
+				"primary": "Ca {days} dagars hållbarhet baserat på ert hushåll",
+				"factCount": "Baserat på {count, plural, one {# observation} other {# observationer}} i {location}",
+				"factUpdated": "Senast uppdaterad {date}"
+			},
+			"heuristic": {
+				"primary": "Typisk hållbarhet för liknande varor",
+				"factLocation": "Förvaras oftast i {location}"
+			},
+			"llm": {
+				"primary": "AI-uppskattning av hållbarhet",
+				"factCheck": "Kontrollera datumet vid behov"
+			}
+		},
+		"location": {
+			"household": {
+				"primary": "{product} förvaras oftast i {location}",
+				"factCount": "Baserat på {count, plural, one {# observation} other {# observationer}}"
+			},
+			"heuristic": {
+				"primary": "Förslag: {location}",
+				"fact": "Baserat på varutyp och vanliga vanor"
+			}
+		}
 	},
 	"consume": {
 		"sectionTitle": "Logga förbrukning",

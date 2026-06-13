@@ -87,7 +87,10 @@
 				errors={form?.errors}
 			/>
 		{:else if isReceiptMode}
-			<ReceiptBulkAddFlow returnTo={data.returnTo} />
+			<ReceiptBulkAddFlow
+				returnTo={data.returnTo}
+				shelfLifeEstimatesInReceipt={data.shelfLifeEstimatesInReceipt}
+			/>
 		{:else if isPhotoMode}
 			<PhotoRoundFlow returnTo={data.returnTo} initialLocation={data.defaultLocation} />
 		{:else}

@@ -9,6 +9,10 @@ import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { e2eMockReceiptParse, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 import { extractPdfText } from '$lib/server/receipt-pdf';
 import { parseReceiptFromImage, parseReceiptFromText, parseReceiptLines } from '$lib/server/receipt-parse';
+import { predictReceiptLinesLocation } from '$lib/server/receipt-location-predictions';
+import { predictReceiptLinesShelfLife } from '$lib/server/receipt-shelf-life-predictions';
+import { isLocationLearningEnabled } from '$lib/server/feature-flags';
+import { isShelfLifeEstimatesInReceiptEnabled } from '$lib/server/shelf-life-learning-flag';
 import {
 	isReceiptImage,
 	isReceiptPdf,
@@ -121,6 +125,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const purchasedAt = receiptTextForStoreHeuristic
 		? extractPurchasedAtFromReceiptText(receiptTextForStoreHeuristic)
 		: undefined;
+	const purchasedAtIso = purchasedAt?.toISOString() ?? null;
 	const result: ReceiptParseResult = { lines };
 	recordProductEvent(locals.pmfService, {
 		userId: auth.user.id,
@@ -128,9 +133,27 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		eventType: 'receipt_parsed',
 		metadata: { lineCount: lines.length, stage: 'parse' }
 	});
+
+	if (isShelfLifeEstimatesInReceiptEnabled() && locals.householdId) {
+		result.shelfLifePredictions = await predictReceiptLinesShelfLife(
+			locals.householdId,
+			lines,
+			purchasedAtIso,
+			locals.learningEngineService
+		);
+	}
+
+	if (isLocationLearningEnabled() && locals.householdId) {
+		result.locationPredictions = await predictReceiptLinesLocation(
+			locals.householdId,
+			lines,
+			locals.learningEngineService
+		);
+	}
+
 	return json({
 		...result,
 		...(storeLabel ? { storeLabel } : {}),
-		...(purchasedAt ? { purchasedAt: purchasedAt.toISOString() } : {})
+		...(purchasedAt ? { purchasedAt: purchasedAtIso } : {})
 	});
 };

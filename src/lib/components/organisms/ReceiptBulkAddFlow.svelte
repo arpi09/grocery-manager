@@ -16,7 +16,8 @@
 		ReceiptFileError
 	} from '$lib/utils/receipt-file';
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
-	import type { ReceiptLine } from '$lib/domain/receipt-line';
+	import type { ReceiptLine, ReceiptShelfLifePrediction } from '$lib/domain/receipt-line';
+	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
@@ -39,9 +40,18 @@
 		onCancel?: () => void;
 		/** Keep digital receipt guide expanded (e.g. onboarding first receipt path). */
 		prominentGuide?: boolean;
+		shelfLifeEstimatesInReceipt?: boolean;
 	}
 
-	let { returnTo, embedded = false, formAction, onItemSaved, onCancel, prominentGuide = false }: Props = $props();
+	let {
+		returnTo,
+		embedded = false,
+		formAction,
+		onItemSaved,
+		onCancel,
+		prominentGuide = false,
+		shelfLifeEstimatesInReceipt = false
+	}: Props = $props();
 
 	const bulkFormAction = $derived(formAction ?? '?/bulkCreate');
 
@@ -59,6 +69,8 @@
 	let mergeSelected = $state<Record<number, boolean>>({});
 	let parsedStoreLabel = $state<string | null>(null);
 	let parsedPurchasedAt = $state<string | null>(null);
+	let shelfLifePredictions = $state<Array<ReceiptShelfLifePrediction | null>>([]);
+	let lineExpiresOn = $state<Record<number, string>>({});
 
 	function receiptFileErrorMessage(error: ReceiptFileError): string {
 		if (error.code === 'too_large') {
@@ -85,6 +97,7 @@
 		error?: string;
 		storeLabel?: string;
 		purchasedAt?: string;
+		shelfLifePredictions?: Array<ReceiptShelfLifePrediction | null>;
 	}> {
 		const contentType = response.headers.get('content-type') ?? '';
 		if (!contentType.includes('application/json')) {
@@ -96,6 +109,7 @@
 				error?: string;
 				storeLabel?: string;
 				purchasedAt?: string;
+				shelfLifePredictions?: Array<ReceiptShelfLifePrediction | null>;
 			};
 		} catch {
 			return {};
@@ -142,6 +156,13 @@
 			lines = data.lines;
 			parsedStoreLabel = data.storeLabel ?? null;
 			parsedPurchasedAt = data.purchasedAt ?? null;
+			shelfLifePredictions = data.shelfLifePredictions ?? [];
+			lineExpiresOn = Object.fromEntries(
+				data.lines.map((line, index) => [
+					index,
+					data.shelfLifePredictions?.[index]?.expiresOn ?? ''
+				])
+			);
 			selected = Object.fromEntries(data.lines.map((_, i) => [i, true]));
 			lineLocations = Object.fromEntries(data.lines.map((line, i) => [i, line.location]));
 			bulkLocation = modeLocation(data.lines.map((l) => l.location)) ?? data.lines[0]?.location ?? 'cupboard';
@@ -242,6 +263,8 @@
 		mergeSelected = {};
 		parsedStoreLabel = null;
 		parsedPurchasedAt = null;
+		shelfLifePredictions = [];
+		lineExpiresOn = {};
 		step = 'upload';
 		parseError = null;
 	}
@@ -310,6 +333,9 @@
 {:else}
 	<section data-testid="receipt-review">
 		<h2 class="title">{t('receiptBulk.selectItems', { selected: selectedCount, total: lines.length })}</h2>
+		{#if shelfLifeEstimatesInReceipt}
+			<p class="hint">{t('receiptBulk.estimatesHint')}</p>
+		{/if}
 
 		<div class="bulk-location">
 			<div class="bulk-location-copy">
@@ -432,6 +458,29 @@
 								</span>
 							</label>
 						{/if}
+						{#if shelfLifeEstimatesInReceipt && selected[index]}
+							<div class="line-expiry">
+								<label class="line-expiry-label" for="expiresOn-{index}">
+									{t('scanFlow.expiresOptional')}
+									{#if shelfLifePredictions[index]}
+										<EstimatedBadge
+											source={shelfLifePredictions[index]!.expiresOnSource}
+											explanation={shelfLifePredictions[index]!.explanation}
+											showSettingsLink
+										/>
+									{/if}
+								</label>
+								<input
+									id="expiresOn-{index}"
+									type="date"
+									data-testid="receipt-line-expiry-{index}"
+									value={lineExpiresOn[index] ?? ''}
+									onchange={(e) => {
+										lineExpiresOn[index] = (e.currentTarget as HTMLInputElement).value;
+									}}
+								/>
+							</div>
+						{/if}
 						{#if selected[index]}
 							<input type="hidden" name={`name_${index}`} value={line.name} />
 							<input type="hidden" name={`quantity_${index}`} value={line.quantity ?? '1'} />
@@ -444,6 +493,31 @@
 								name={`location_${index}`}
 								value={lineLocations[index] ?? line.location}
 							/>
+							{#if lineExpiresOn[index]}
+								<input type="hidden" name={`expiresOn_${index}`} value={lineExpiresOn[index]} />
+							{/if}
+							{#if shelfLifePredictions[index]}
+								<input
+									type="hidden"
+									name={`predictedExpiresOn_${index}`}
+									value={shelfLifePredictions[index]!.expiresOn}
+								/>
+								<input
+									type="hidden"
+									name={`predictedTypicalDays_${index}`}
+									value={String(shelfLifePredictions[index]!.typicalDays)}
+								/>
+								<input
+									type="hidden"
+									name={`predictedModelVersion_${index}`}
+									value={shelfLifePredictions[index]!.modelVersion}
+								/>
+								<input
+									type="hidden"
+									name={`predictedExpiresOnSource_${index}`}
+									value={shelfLifePredictions[index]!.expiresOnSource}
+								/>
+							{/if}
 							{#if mergeSelected[index] && mergeCandidates[index]}
 								<input type="hidden" name={`merge_${index}`} value={mergeCandidates[index]!.id} />
 							{/if}
@@ -633,5 +707,20 @@
 	.actions :global(.btn) {
 		flex: 1;
 		min-height: 2.75rem;
+	}
+
+	.line-expiry {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
+		margin-top: var(--space-xs);
+	}
+
+	.line-expiry-label {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-xs);
+		flex-wrap: wrap;
+		font-size: 0.85rem;
 	}
 </style>
