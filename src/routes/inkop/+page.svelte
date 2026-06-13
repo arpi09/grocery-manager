@@ -138,25 +138,15 @@
 
 
 
-					{#if hasSuggestions}
-
-						<ReplenishmentSection
-
-							suggestions={replenishmentSuggestions}
-
-							{dedupeByKey}
-
-							canEdit={data.canEdit}
-
-							householdId={data.householdId}
-
-							compact
-
-							surface="inkop"
-
-						/>
-
-					{/if}
+					<ReplenishmentSection
+						suggestions={replenishmentSuggestions}
+						{dedupeByKey}
+						canEdit={data.canEdit}
+						householdId={data.householdId}
+						compact
+						surface="inkop"
+						showEmptyState
+					/>
 
 				</div>
 
