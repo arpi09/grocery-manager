@@ -1,6 +1,6 @@
 # Skaffu
 
-**Skanna först. Håll koll på skafferiet. Handla smart.**
+**Gemensam veckohandel med matkoll — hushållets minne lär sig vad ni behöver och håller veckans lista rätt.**
 
 [skaffu.com](https://skaffu.com) — live produkt för svenska hushåll: delat lager i kyl, frys och skafferi, kvitto-AI, smart inköpslista och veckoplan. Intern repo heter fortfarande `home-pantry`.
 
