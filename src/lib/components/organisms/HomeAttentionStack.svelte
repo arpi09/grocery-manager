@@ -32,7 +32,6 @@
 	}: Props = $props();
 
 	const hasExpiring = $derived(expiringSoon.length > 0);
-	const expiringCount = $derived(expiringSoon.length);
 
 	const briefing = $derived(
 		composeHouseholdBriefing({ intelligence, staleCount, shoppingListCount })
