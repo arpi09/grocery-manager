@@ -1,6 +1,6 @@
 import { createGoogleClient, getGoogleClientId } from '$lib/server/google-oauth';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
-import { POST_REGISTER_SCAN_OAUTH_REDIRECT } from '$lib/navigation/post-register';
+import { resolvePostSignupAppPath } from '$lib/navigation/signup-redirect';
 import { createSession } from '$lib/server/session';
 import { recordSignupCompleteEvent } from '$lib/server/marketing-analytics';
 import {
@@ -81,12 +81,13 @@ export const GET: RequestHandler = async (event) => {
 		return loginError('Google sign-in failed. Please try again.');
 	}
 
-	const destination =
+	const rawRedirect =
 		redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')
 			? redirectTo
-			: isNewUser
-				? POST_REGISTER_SCAN_OAUTH_REDIRECT
-				: APP_HOME_PATH;
+			: null;
+	const destination = isNewUser
+		? resolvePostSignupAppPath(rawRedirect)
+		: rawRedirect ?? APP_HOME_PATH;
 	const freshAccountSuffix = isNewUser
 		? `${destination.includes('?') ? '&' : '?'}freshAccount=1`
 		: '';

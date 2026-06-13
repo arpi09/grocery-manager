@@ -169,6 +169,8 @@
 			"switchAccount": "Logga in med annat konto",
 			"confirmedTitle": "E-post bekräftad",
 			"confirmedBody": "Du kan nu använda Skaffu.",
+			"confirmedHouseholdHint": "Du landar på inköpslistan först. Vill du bjuda in den som delade listan?",
+			"confirmedHouseholdLink": "Gå till Inställningar → Hushåll",
 			"invalidToken": "Länken är ogiltig eller har gått ut.",
 			"requestNew": "Gå till bekräftelsesidan",
 			"goToApp": "Gå till appen",

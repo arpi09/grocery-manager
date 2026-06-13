@@ -178,6 +178,8 @@
 			"switchAccount": "Sign in with another account",
 			"confirmedTitle": "Email confirmed",
 			"confirmedBody": "You can now use Skaffu.",
+			"confirmedHouseholdHint": "You'll land on the shopping list first. Want to invite the person who shared the list?",
+			"confirmedHouseholdLink": "Go to Settings → Household",
 			"invalidToken": "This link is invalid or has expired.",
 			"requestNew": "Go to confirmation page",
 			"goToApp": "Go to app",

@@ -22,6 +22,10 @@ import {
 } from '$lib/server/signup-utm';
 import { registerSchema } from '$lib/validation/auth.schemas';
 import { POST_REGISTER_APP_HOME_PATH, POST_REGISTER_SCAN_PATH } from '$lib/navigation/post-register';
+import {
+	persistSignupRedirect,
+	safeSignupRedirect
+} from '$lib/navigation/signup-redirect';
 import { consumeRateLimit } from '$lib/server/auth-rate-limit';
 import { isEmailVerificationSkipped } from '$lib/server/email-verification-enforcement';
 import { createSession } from '$lib/server/session';
@@ -29,13 +33,17 @@ import { isGoogleOAuthConfigured } from '$lib/server/google-oauth';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, cookies }) => {
 	warnIfTurnstileMisconfigured('register load');
+
+	const redirectTo = safeSignupRedirect(url.searchParams.get('redirect'));
+	persistSignupRedirect(cookies, redirectTo);
 
 	return {
 		turnstileSiteKey: getTurnstileSiteKeyForClient(),
 		captchaRequired: isTurnstileRequiredForRegistration(),
 		googleOAuthEnabled: isGoogleOAuthConfigured(),
+		redirectTo,
 		canonicalUrl: marketingCanonicalUrl('/register', url.origin)
 	};
 };
@@ -71,6 +79,11 @@ export const actions: Actions = {
 				email: parsed.data.email
 			});
 		}
+
+		const redirectTo =
+			safeSignupRedirect(String(formData.redirectTo ?? '')) ??
+			safeSignupRedirect(event.url.searchParams.get('redirect'));
+		persistSignupRedirect(event.cookies, redirectTo);
 
 		try {
 			const signupUtm = resolveSignupUtmFromRequest(event.cookies, event.url.searchParams);

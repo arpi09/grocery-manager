@@ -30,6 +30,12 @@
 		{#if form?.message}
 			<FeedbackBanner tone="error" message={form.message} />
 		{/if}
+		{#if data.householdInviteIntent}
+			<p class="household-hint">
+				{t('auth.verifyEmail.confirmedHouseholdHint')}
+				<a href="/settings#household">{t('auth.verifyEmail.confirmedHouseholdLink')}</a>
+			</p>
+		{/if}
 		<form method="POST">
 			<Button type="submit" variant="primary" fullWidth>{t('auth.verifyEmail.goToApp')}</Button>
 		</form>
@@ -41,5 +47,18 @@
 		margin-top: var(--space-lg);
 		text-align: center;
 		font-size: 0.875rem;
+	}
+
+	.household-hint {
+		margin: 0 0 var(--space-md);
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		text-align: center;
+	}
+
+	.household-hint a {
+		font-weight: 600;
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
 	}
 </style>
