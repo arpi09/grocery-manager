@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import {
 	dismissCookieConsentIfOpen,
 	dismissOnboardingModalIfOpen,
@@ -48,7 +48,7 @@ test.describe('Accessibility — P0 routes (WCAG 2.2 AA)', () => {
 
 			if (route.path === '/hem') {
 				await expect(page.locator('.more-on-home')).toHaveCount(0);
-				expect(await page.locator('.home-v3-section').count()).toBeGreaterThanOrEqual(2);
+				expect(await page.locator('.home-v3-section').count()).toBe(3);
 			}
 
 			await expectNoCriticalOrSeriousViolations(page, route.path);

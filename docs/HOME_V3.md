@@ -6,24 +6,25 @@
 
 | # | Fråga | Sektion | Komponent |
 |---|--------|---------|-----------|
-| 1 | Vad behöver min uppmärksamhet? | **Uppmärksamhet** | `HomeAttentionStack.svelte` |
-| 2 | Vad rekommenderar Skaffu? | **Skaffu föreslår** | `ReplenishmentSection` (max 3, `surface="hem"`) + kvitto-fotnot |
-| 3 | Vad ska jag göra nu? | **Gör nu** | Veckans inköpslista (primär) + `HomeNextAction` (sekundär) |
+| 1 | Vad ska vi handla denna vecka? | **Denna vecka** | Veckans inköpslista (primär) + `HomeNextAction` (sekundär) |
+| 2 | Vad rekommenderar Skaffu? | **Skaffu rekommenderar** | `ReplenishmentSection` (max 3, `surface="hem"`) + kvitto-fotnot |
+| 3 | Hur mår hushållet? | **Hushållet** | `HomeHouseholdSection.svelte` (eat-first, waste, sync, pantry health) |
 
-**Tomt skafferi:** sektion 1 kort text → sektion 3 = `EmptyState` (befintlig onboarding-väg).
+**Tomt skafferi:** sektion 1 = `EmptyState` (befintlig onboarding-väg); sektion 2+3 = tom-copy (alltid 3 rubriker).
 
 ## Komponentmatris (audit)
 
 | Komponent | Beslut |
 |-----------|--------|
-| Hero | Keep |
-| EmptyState | Keep → sektion 3 (tom) |
-| EatFirstSection | Move → sektion 1 (via `HomeAttentionStack`) |
+| Hero | Keep — uppdaterad `taglineEngaged` |
+| EmptyState | Keep → sektion 1 (tom) |
+| Shopping teaser + badge | Keep → sektion 1 (primär CTA) |
+| HomeNextAction | Keep → sektion 1 (secondary) |
 | ReplenishmentSection | Keep → sektion 2 |
-| WastePreventionBanner | Collapse → sektion 1 |
-| HomeNextAction | Move → sektion 3 (secondary) |
-| WeeklyRitualHero | Remove |
 | ReceiptAutopilotSection | Collapse → sektion 2 fotnot |
+| EatFirstSection | Move → sektion 3 (via `HomeHouseholdSection`) |
+| WastePreventionBanner | Move → sektion 3 |
+| WeeklyRitualHero | Remove |
 | MealTimeSuggestions | Remove (→ `/planer`) |
 | HomeQuickAdd | Remove |
 | ProUpgradeCta | Remove |
@@ -36,7 +37,7 @@
 
 ## Bugfix
 
-`weeklyFocus = totalItems > 0` gömde `HouseholdBriefing` för engagerade användare. V3 splittar briefing i sektion 1+2 utan gate.
+`showRecommendsSection` gömde sektion 2 när inga replenishment-rader fanns. V3 visar alltid 3 sektioner med tom-copy.
 
 ## Server load (`hem/+page.server.ts`)
 
@@ -46,12 +47,15 @@
 
 ## i18n
 
-- `home.v3.attentionTitle`
+- `home.v3.thisWeekTitle`
 - `home.v3.recommendsTitle`
-- `home.v3.doNowTitle`
+- `home.v3.householdTitle`
+- `home.v3.recommendsEmpty`
+- `home.v3.householdEmpty`
 - `home.v3.receiptFootnote`
+- `home.taglineEngaged` — produktlöfte (veckohandel + hushållsminne)
 
 ## Relaterat
 
-- Default app home förblir `/inkop` (`APP_HOME_PATH`) — Hem är dashboard/briefing, inte default route.
+- Default app home är `/hem` (`APP_HOME_PATH`) — Hem är dashboard/briefing; Inköp (`/inkop`) är djup-länk i kärnloopen.
 - [CURRENT_REALITY.md](./CURRENT_REALITY.md) — prod nav + flags.

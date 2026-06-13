@@ -140,11 +140,13 @@ test.describe('Critical flows', () => {
 
 		await expect(page.locator('.more-on-home')).toHaveCount(0);
 
-		expect(await page.locator('.home-v3-section').count()).toBeGreaterThanOrEqual(2);
+		expect(await page.locator('.home-v3-section').count()).toBe(3);
 
-		await expect(page.getByRole('heading', { name: /Uppmärksamhet|Attention/i })).toBeVisible();
+		await expect(page.getByRole('heading', { name: /Denna vecka|This week/i })).toBeVisible();
 
-		await expect(page.getByRole('heading', { name: /Gör nu|Do now/i })).toBeVisible();
+		await expect(page.getByRole('heading', { name: /Skaffu rekommenderar|Skaffu recommends/i })).toBeVisible();
+
+		await expect(page.getByRole('heading', { name: /Hushållet|Your household/i })).toBeVisible();
 
 		await expect(page.locator('.shopping-teaser-primary')).toBeVisible();
 
