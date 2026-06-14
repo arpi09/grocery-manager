@@ -5,6 +5,7 @@ import {
 	loginAsAdmin
 } from './helpers/auth';
 import { expectNoCriticalOrSeriousViolations } from './helpers/axe';
+import { ensureFridgeInventoryItem } from './helpers/inventory';
 
 /** Public routes first (warm server); auth routes share one login session. */
 const P0_ROUTES = [
@@ -36,6 +37,9 @@ test.describe('Accessibility — P0 routes (WCAG 2.2 AA)', () => {
 				} else {
 					await page.goto('/hem', gotoOptions);
 					await dismissOnboardingModalIfOpen(page);
+				}
+				if (route.path === '/hem') {
+					await ensureFridgeInventoryItem(page);
 				}
 				await page.goto(route.path, gotoOptions);
 				await dismissOnboardingModalIfOpen(page);

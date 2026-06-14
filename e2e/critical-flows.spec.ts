@@ -17,6 +17,8 @@ import {
 
 } from './helpers/auth';
 
+import { ensureFridgeInventoryItem } from './helpers/inventory';
+
 
 
 test.describe('Critical flows', () => {
@@ -150,6 +152,8 @@ test.describe('Critical flows', () => {
 	test('home V3 shows sections without Mer på hem', async ({ page }) => {
 
 		await loginAsAdmin(page);
+
+		await ensureFridgeInventoryItem(page);
 
 		await page.goto('/hem');
 
