@@ -1,6 +1,7 @@
 import { isThemePreference } from '$lib/domain/theme';
 import { isUserEmailVerified } from '$lib/server/email-verification-enforcement';
 import { isShoppingListShareEnabled } from '$lib/server/shopping-list-share-flag';
+import { isShelfLifeEstimatesInReceiptEnabled } from '$lib/server/shelf-life-learning-flag';
 import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { resolveThemeForRequest } from '$lib/server/theme-cookie';
@@ -9,6 +10,8 @@ import type { LayoutServerLoad } from './$types';
 export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 	const locale = locals.locale;
 	const cookieConsent = readCookieConsent(cookies);
+
+	const shelfLifeEstimatesInReceipt = isShelfLifeEstimatesInReceiptEnabled();
 
 	if (!locals.user) {
 		return {
@@ -22,7 +25,8 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			isPro: false,
 			cookieConsent,
 			staleCount: 0,
-			shareLinkEnabled: false
+			shareLinkEnabled: false,
+			shelfLifeEstimatesInReceipt
 		};
 	}
 
@@ -84,6 +88,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		householdRole: locals.householdRole,
 		householdMemberCount,
 		staleCount,
-		shareLinkEnabled: isShoppingListShareEnabled()
+		shareLinkEnabled: isShoppingListShareEnabled(),
+		shelfLifeEstimatesInReceipt
 	};
 };
