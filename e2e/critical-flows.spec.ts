@@ -19,11 +19,11 @@ import {
 
 test.describe('Critical flows', () => {
 
-	test('register creates account with captcha bypass and lands on inkop', async ({ page }) => {
+	test('register creates account with captcha bypass and lands on hem welcome', async ({ page }) => {
 
 		await registerNewUser(page);
 
-		await expect(page).toHaveURL('/inkop');
+		await expect(page).toHaveURL('/hem?welcome=1');
 
 		await page.goto('/scan?mode=photo');
 
@@ -53,7 +53,7 @@ test.describe('Critical flows', () => {
 
 		await registerNewUser(page);
 
-		await expect(page).toHaveURL('/inkop');
+		await expect(page).toHaveURL('/hem?welcome=1');
 
 		await expect(
 
@@ -193,7 +193,7 @@ test.describe('Critical flows', () => {
 
 		await dismissOnboardingModalIfOpen(page);
 
-		await page.getByTestId('nav-scan').click();
+		await page.locator('a.header-utility[data-testid="nav-scan"]').click();
 
 		await expect(page).toHaveURL(/\/scan(?:$|\?)/);
 
