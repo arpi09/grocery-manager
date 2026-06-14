@@ -234,7 +234,8 @@
 			"householdEmpty": "Tomt skafferi — börja via",
 			"attentionTitle": "Uppmärksamhet",
 			"doNowTitle": "Gör nu",
-			"receiptFootnote": "{count, plural, one {# förslag från kvitton} other {# förslag från kvitton}} →"
+			"receiptFootnote": "{count, plural, one {# förslag från kvitton} other {# förslag från kvitton}} →",
+			"memoryFootnote": "Se vad Skaffu lärde sig av kvittot →"
 		},
 		"nextActionSync": "{count, plural, one {Bekräfta # vara} other {Bekräfta # varor}}",
 		"nextActionExpiring": "{count, plural, one {Generera middag med # vara} other {Generera middag med # varor}}",
@@ -1041,9 +1042,10 @@
 		"correct": "Rätta i lager",
 		"correctDisabled": "Lägg in eller redigera varan i lager för att rätta",
 		"empty": {
-			"title": "Inga hushållsregler än",
-			"description": "Importera kvitton och bekräfta datum när du lägger in varor — då bygger Skaffu minne per produkt.",
-			"receiptHint": "Vi har kvittodata — regler visas när du rättat eller bekräftat datum.",
+			"title": "Inget inlärt än",
+			"description": "Inga hushållsregler än. Importera kvitton eller lägg in varor och bekräfta datum — Skaffu lär sig av ert hushåll, inte generella tips.",
+			"receiptHint": "Vi har redan kvittodata. Regler visas när du bekräftat datum eller rättat varor i lagret.",
+			"trustNote": "Allt här bygger på ert hushåll. Du kan rätta eller glömma vilken regel som helst.",
 			"scanCta": "Importera kvitto",
 			"inventoryCta": "Gå till lager"
 		}

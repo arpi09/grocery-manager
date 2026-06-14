@@ -211,7 +211,8 @@
 			"householdEmpty": "Empty pantry — get started via",
 			"attentionTitle": "Attention",
 			"doNowTitle": "Do now",
-			"receiptFootnote": "{count, plural, one {# suggestion from receipts} other {# suggestions from receipts}} →"
+			"receiptFootnote": "{count, plural, one {# suggestion from receipts} other {# suggestions from receipts}} →",
+			"memoryFootnote": "See what Skaffu learned from your receipt →"
 		},
 		"nextActionSync": "{count, plural, one {Confirm # item} other {Confirm # items}}",
 		"nextActionExpiring": "{count, plural, one {Generate dinner with # item} other {Generate dinner with # items}}",
@@ -1070,9 +1071,10 @@
 		"correct": "Correct in pantry",
 		"correctDisabled": "Add or edit the item in your pantry to correct this",
 		"empty": {
-			"title": "No household rules yet",
-			"description": "Import receipts and confirm dates when adding items — then Skaffu builds memory per product.",
-			"receiptHint": "We see receipt data — rules appear when you correct or confirm dates.",
+			"title": "Nothing learned yet",
+			"description": "No household rules yet. Import receipts or add items and confirm dates — Skaffu learns from your choices, not generic tips.",
+			"receiptHint": "We already have receipt data. Rules show up after you confirm dates or correct items in your pantry.",
+			"trustNote": "Everything here is based on your household. You can correct or forget any rule.",
 			"scanCta": "Import receipt",
 			"inventoryCta": "Go to pantry"
 		}
@@ -2465,7 +2467,7 @@
 			"unauthorized": "You must be logged in.",
 			"emailNotVerified": "Verify your email address before using the API.",
 			"invalidJson": "Invalid JSON.",
-			"invalidSection": "Invalid section.",
+			"invalidSection": "Invalid inventory section.",
 			"invalidPayload": "Invalid payload.",
 			"rateLimited": "Too many requests. Try again in a moment.",
 			"invalidChoice": "Invalid choice.",
@@ -2513,7 +2515,6 @@
 			"aiRateLimitReceiptPdf": "You've used all {limit} receipt PDF parses this month on the Free plan. Upgrade to Pro or wait until next month.",
 			"aiRateLimitSmartFill": "You've used all {limit} smart fill runs this week on the Free plan. Upgrade to Pro or wait until next week.",
 			"barcodeNotFound": "Invalid barcode.",
-			"invalidSection": "Invalid inventory section.",
 			"invalidLocation": "Invalid storage location."
 		},
 		"shopping": {
