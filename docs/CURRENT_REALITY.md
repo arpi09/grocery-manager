@@ -5,8 +5,8 @@
 | Fält | Värde |
 |------|--------|
 | **Uppdaterad** | 2026-06-14 |
-| **Prod SHA** | `8d3862dc` — deploy run [27496432530](https://github.com/arpi09/grocery-manager/actions/runs/27496432530) (2026-06-14) |
-| **Master SHA** | `aa736532` — #51 brain capability audit docs merged on `8d3862dc` prod |
+| **Prod SHA** | `51853d74` — deploy run [27499024958](https://github.com/arpi09/grocery-manager/actions/runs/27499024958) (2026-06-14) |
+| **Master SHA** | `05acb931` — #58 brain roadmap docs; prod at `51853d74` (#52 inventory CTAs, #53 memory trust) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` — merged to master |
 | **Prod URL** | https://skaffu.com |
 
@@ -57,9 +57,9 @@ What users **see** when core Brain flags are on (prod target / master), vs stubs
 ## Kända drift (fixa när du ser dem)
 
 - [x] Prod DB migrations `0047`–`0048` — applied 2026-06-14 (manual `npm run db:migrate` via Cloud SQL public IP; journal reconciled 0012–0048). `DATABASE_URL` secret set for future deploy pre-migrate.
-- [x] Prod SHA — `8d3862dc` via deploy [27496432530](https://github.com/arpi09/grocery-manager/actions/runs/27496432530)
+- [x] Prod SHA — `51853d74` via deploy [27499024958](https://github.com/arpi09/grocery-manager/actions/runs/27499024958)
 - [x] Master merge train: docs, brain-activation, receipt-pattern, home-v3, memory-explorer @ `937cd9a6`
-- [x] **Deploy** — `8d3862dc` (#54 E2E post-register fix) live in prod (run 27496432530)
+- [x] **Deploy** — `51853d74` (#52 inventory empty CTAs, #53 memory trust) live in prod (run 27499024958)
 
 ## Branches in flight (manuell)
 
