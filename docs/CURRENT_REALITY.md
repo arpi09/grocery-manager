@@ -46,7 +46,7 @@ What users **see** when core Brain flags are on (prod target / master), vs stubs
 | **Replenishment learning** â€” silent; accept/dismiss on `/hem` suggestions writes `learning_feedback` | â€” |
 | **Memory Explorer** â€” `/settings/memory` (â€œVad Skaffu vetâ€) when any learning flag on | â€” |
 
-**USER_LOCAL smoke** (physical device, real receipt): [Brain V1 smoke checklist](./BRAIN_V1_PRODUCT_INTEGRATION.md#smoke-checklist-post-deploy) in [BRAIN_V1_PRODUCT_INTEGRATION.md](./BRAIN_V1_PRODUCT_INTEGRATION.md).
+**USER_LOCAL smoke (pending — PO gate):** Physical device + real receipt @ prod SHA `73d3dfd0`; agents link only — **do not substitute or claim this pass.** Checklists: [Brain V1 smoke](./BRAIN_V1_PRODUCT_INTEGRATION.md#smoke-checklist-post-deploy) · [Weekly loop smoke](./HOUSEHOLD_LOOP_AUDIT.md#user_local--weekly-loop-smoke-checklist).
 
 ## Tier snapshot
 

@@ -86,6 +86,8 @@ Run after deploy when Brain flags are **on** on master `apphosting.yaml` ([RELEA
 
 **Owner:** `USER_LOCAL` — product owner on physical device (Turnstile, mobilkamera, real receipt). Agents link here from [CURRENT_REALITY.md](./CURRENT_REALITY.md); they do not substitute for this pass.
 
+**Required before Phase 2 un-flag** ([BRAIN_ROADMAP.md](./BRAIN_ROADMAP.md) — brain flags assumed always-on).
+
 1. Scan receipt → **Uppskattat** on line → save → lager badge
 2. Edit expiry → toast *Tack — Skaffu justerar nästa gång* → re-import → household rule
 3. `/hem` Eat First chips include item; estimated badge when source ≠ `user_set`

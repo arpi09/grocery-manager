@@ -199,6 +199,8 @@ Brain **accelererar** veckoloopen (cadence, expiry, trust) när kvitto + synligh
 
 **Owner:** `USER_LOCAL` — product owner on physical device (Turnstile, mobilkamera, real receipt). Agents link here; they do not substitute for this pass.
 
+**Status:** Pending — PO gate; agents document only, **do not claim smoke run**. Brain-specific steps: [Brain V1 smoke checklist](./BRAIN_V1_PRODUCT_INTEGRATION.md#smoke-checklist-post-deploy) (required before Phase 2 un-flag).
+
 **Target:** https://skaffu.com @ prod SHA **`73d3dfd0`** — deploy run [27501022135](https://github.com/arpi09/grocery-manager/actions/runs/27501022135) ([CURRENT_REALITY.md](./CURRENT_REALITY.md)).
 
 ### Setup
@@ -233,4 +235,4 @@ Brain **accelererar** veckoloopen (cadence, expiry, trust) när kvitto + synligh
 
 ### Pass criteria
 
-Weekly narrative holds: *"Lista → handla → checkoff → skafferi → hem visar vad som saknas / går ut."* Note friction points (modal fatigue, hidden Brain, empty replenishment) for coordinator backlog — do not block on bundle-2-only fixes pre-deploy.
+Weekly narrative holds: *"Lista → handla → checkoff → skafferi → hem visar vad som saknas / går ut."* Note friction points (modal fatigue, hidden Brain on mobile, empty replenishment on cold start) for coordinator backlog.
