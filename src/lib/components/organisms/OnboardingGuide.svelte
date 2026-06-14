@@ -23,7 +23,8 @@
 		isActivationComplete,
 		isOnboardingExcludedPath,
 		setActivationPath,
-		shouldShowOnboarding
+		shouldShowOnboarding,
+		type ActivationPath
 	} from '$lib/utils/onboarding';
 	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
 	import {
@@ -33,6 +34,7 @@
 		type OnboardingEncourageKey,
 		type OnboardingStepId
 	} from '$lib/utils/onboarding-steps';
+	import { manualAddHref, scanModeHref } from '$lib/utils/scan-nav';
 
 	interface Step {
 		id: OnboardingStepId;
@@ -40,38 +42,69 @@
 		bodyKey: MessageKey;
 	}
 
+	type PathChoice = 'photo' | 'barcode' | 'receipt' | 'manual' | 'shopping';
+
 	const stepDefinitions: Step[] = [
 		{
 			id: 'welcome',
 			titleKey: 'onboarding.welcome',
-			bodyKey: 'onboarding.welcomeBodyShoppingList'
+			bodyKey: 'onboarding.welcomeBodyInventory'
 		},
 		{
-			id: 'addItems',
-			titleKey: 'onboarding.addItemsTitle',
-			bodyKey: 'onboarding.addItemsBodyShoppingList'
+			id: 'pathGuide',
+			titleKey: 'onboarding.pathGuideTitle',
+			bodyKey: 'onboarding.pathGuidePhotoBody'
 		},
 		{
 			id: 'celebrate',
 			titleKey: 'onboarding.celebrateTitle',
-			bodyKey: 'onboarding.celebrateStartedBody'
+			bodyKey: 'onboarding.celebrateInventoryBody'
 		}
 	];
+
+	const pathChoices: { id: PathChoice; labelKey: MessageKey; activation: ActivationPath | 'manual' }[] = [
+		{ id: 'photo', labelKey: 'onboarding.pathChoosePhoto', activation: 'photo' },
+		{ id: 'barcode', labelKey: 'onboarding.pathChooseBarcode', activation: 'barcode' },
+		{ id: 'receipt', labelKey: 'onboarding.pathChooseReceipt', activation: 'receipt' },
+		{ id: 'manual', labelKey: 'onboarding.pathChooseManual', activation: 'manual' },
+		{ id: 'shopping', labelKey: 'onboarding.pathChooseShopping', activation: 'shopping' }
+	];
+
+	const pathGuideBodyKeys: Record<PathChoice, MessageKey> = {
+		photo: 'onboarding.pathGuidePhotoBody',
+		barcode: 'onboarding.pathGuideBarcodeBody',
+		receipt: 'onboarding.pathGuideReceiptBody',
+		manual: 'onboarding.pathGuideManualBody',
+		shopping: 'onboarding.pathGuideShoppingBody'
+	};
+
+	const pathGuideCtaKeys: Record<PathChoice, MessageKey> = {
+		photo: 'onboarding.ctaPhotoFirst',
+		barcode: 'onboarding.ctaBarcodeFirst',
+		receipt: 'onboarding.ctaReceipt',
+		manual: 'onboarding.ctaManual',
+		shopping: 'onboarding.startShoppingList'
+	};
 
 	let open = $state(false);
 	let stepIndex = $state(0);
 	let stepDirection = $state<'forward' | 'back'>('forward');
 	let registrationWelcomeDone = $state(false);
+	let selectedPath = $state<PathChoice | null>(null);
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
+	const returnTo = APP_HOME_PATH;
 
 	const steps = $derived(
 		stepDefinitions.map((step, index) => ({
 			...step,
 			title: t(step.titleKey),
 			subtitle: t('onboarding.stepOf', { current: index + 1, total: ONBOARDING_STEP_COUNT }),
-			body: t(step.bodyKey)
+			body:
+				step.id === 'pathGuide' && selectedPath
+					? t(pathGuideBodyKeys[selectedPath])
+					: t(step.bodyKey)
 		}))
 	);
 
@@ -84,6 +117,7 @@
 	);
 	const activationProgress = $derived(browser && userId ? getActivationProgress(userId) : null);
 	const canGoBack = $derived(canGoBackOnboarding(stepIndex));
+	const pathGuideCta = $derived(selectedPath ? t(pathGuideCtaKeys[selectedPath]) : null);
 
 	function tryOpenGuide() {
 		if (!browser || !userId || isOnboardingExcludedPath(pathname) || !shouldShowOnboarding(userId)) {
@@ -99,6 +133,7 @@
 			return;
 		}
 		stepIndex = 0;
+		selectedPath = null;
 		open = true;
 	}
 
@@ -116,7 +151,7 @@
 	}
 
 	function goNext() {
-		if (isLastStep) {
+		if (isLastStep || stepIndex === 0) {
 			return;
 		}
 		stepDirection = 'forward';
@@ -141,12 +176,37 @@
 		void goto(APP_HOME_PATH);
 	}
 
-	async function beginAddingToList() {
+	function choosePath(path: PathChoice) {
+		selectedPath = path;
 		if (userId) {
-			setActivationPath('shopping', userId);
+			if (path === 'shopping') {
+				setActivationPath('shopping', userId);
+			} else if (path === 'manual') {
+				setActivationPath('photo', userId);
+			} else {
+				setActivationPath(path, userId);
+			}
+		}
+		stepDirection = 'forward';
+		stepIndex = 1;
+	}
+
+	async function beginSelectedPath() {
+		if (!selectedPath) {
+			return;
 		}
 		closeGuide();
-		await goto('/inkop');
+		const href =
+			selectedPath === 'photo'
+				? scanModeHref('photo', returnTo)
+				: selectedPath === 'barcode'
+					? scanModeHref('barcode', returnTo)
+					: selectedPath === 'receipt'
+						? scanModeHref('receipt', returnTo)
+						: selectedPath === 'manual'
+							? manualAddHref(returnTo)
+							: '/inkop';
+		await goto(href);
 	}
 
 	function syncCelebrateStep() {
@@ -177,6 +237,7 @@
 				return;
 			}
 			stepIndex = 0;
+			selectedPath = null;
 			open = true;
 		};
 
@@ -277,9 +338,44 @@
 
 		<p class="step-body">{currentStep.body}</p>
 
-		{#if currentStep.id === 'addItems'}
-			<p class="scan-tab-hint">{t('onboarding.shoppingListInviteHint')}</p>
-			{#if activationProgress?.inProgress && activationProgress.path === 'shopping' && activationProgress.shoppingListCount > 0}
+		{#if currentStep.id === 'welcome'}
+			<div class="activation-choices">
+				{#each pathChoices.slice(0, 3) as choice (choice.id)}
+					<Button
+						type="button"
+						fullWidth
+						variant={choice.id === 'photo' ? 'primary' : 'secondary'}
+						data-testid="onboarding-path-{choice.id}"
+						data-analytics-id="onboarding.path_{choice.id}"
+						onclick={() => choosePath(choice.id)}
+					>
+						{t(choice.labelKey)}
+					</Button>
+				{/each}
+				<div class="path-secondary">
+					<button
+						type="button"
+						class="path-link"
+						data-testid="onboarding-path-manual"
+						onclick={() => choosePath('manual')}
+					>
+						{t('onboarding.pathChooseManual')}
+					</button>
+					<span class="path-sep" aria-hidden="true">·</span>
+					<button
+						type="button"
+						class="path-link"
+						data-testid="onboarding-path-shopping"
+						onclick={() => choosePath('shopping')}
+					>
+						{t('onboarding.pathChooseShopping')}
+					</button>
+				</div>
+			</div>
+		{/if}
+
+		{#if currentStep.id === 'pathGuide' && selectedPath}
+			{#if activationProgress?.inProgress && selectedPath === 'shopping' && activationProgress.shoppingListCount > 0}
 				<p class="progress-note" role="status">
 					{t('onboarding.shoppingListProgress', {
 						count: activationProgress.shoppingListCount,
@@ -287,18 +383,15 @@
 					})}
 				</p>
 			{/if}
-
-			<div class="activation-choices">
-				<Button
-					type="button"
-					fullWidth
-					data-testid="onboarding-start-shopping-list"
-					data-analytics-id="onboarding.start_shopping_list"
-					onclick={beginAddingToList}
-				>
-					{t('onboarding.startShoppingList')}
-				</Button>
-			</div>
+			<Button
+				type="button"
+				fullWidth
+				data-testid="onboarding-begin-path"
+				data-analytics-id="onboarding.begin_path"
+				onclick={beginSelectedPath}
+			>
+				{pathGuideCta}
+			</Button>
 		{/if}
 
 		{#if currentStep.id === 'celebrate'}
@@ -321,14 +414,16 @@
 				{/each}
 			</div>
 
-			{#if !isLastStep}
+			{#if !isLastStep && stepIndex !== 0}
 				<div class="footer-actions">
 					<Button type="button" variant="ghost" disabled={!canGoBack} onclick={goBack}>
 						{t('common.previous')}
 					</Button>
-					<Button type="button" onclick={goNext}>
-						{t('common.next')}
-					</Button>
+					{#if currentStep.id === 'pathGuide'}
+						<Button type="button" disabled={!selectedPath} onclick={goNext}>
+							{t('common.next')}
+						</Button>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -507,8 +602,31 @@
 		width: 100%;
 	}
 
-	.progress-note,
-	.scan-tab-hint {
+	.path-secondary {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+		gap: var(--space-xs);
+		margin-top: var(--space-xs);
+	}
+
+	.path-link {
+		border: none;
+		background: transparent;
+		color: var(--color-primary);
+		font-size: 0.9375rem;
+		font-weight: 600;
+		text-decoration: underline;
+		cursor: pointer;
+		padding: var(--space-xs);
+	}
+
+	.path-sep {
+		color: var(--color-text-muted);
+	}
+
+	.progress-note {
 		margin: 0;
 		padding: var(--space-sm) var(--space-md);
 		border-radius: var(--radius-sm);
