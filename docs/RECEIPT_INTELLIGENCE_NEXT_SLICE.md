@@ -2,55 +2,78 @@
 
 **Baseline:** `master` @ `de7f4b6b` (#46–#47 merged; Brain V1 wired, learning flags on in apphosting). **Prod:** `e26408a2` — pending deploy for #46–#47.
 
-**Purpose:** Coordinate the next receipt-signal work after Brain V1 prod smoke. Decision support only — no implementation in this wave.
+**Purpose:** Decision support for receipt-signal work — no new predictors, migrations, or AI models in this wave. Fold into [`chore/brain-capability-audit-v1`](https://github.com/arpi09/grocery-manager/pull/51) (Workstream C).
 
-**Sources:** [`receipt_intelligence_map`](../../.cursor/plans/receipt_intelligence_map_ce2e8094.plan.md), [`coordinator_six_workstreams`](../../.cursor/plans/coordinator_six_workstreams_a79496a6.plan.md), [`LEARNING_ENGINE.md`](./LEARNING_ENGINE.md), [`BRAIN_V1_PRODUCT_INTEGRATION.md`](./BRAIN_V1_PRODUCT_INTEGRATION.md).
+**Sources:** [`coordinator_six_workstreams`](../../.cursor/plans/coordinator_six_workstreams_a79496a6.plan.md), [`receipt_intelligence_map`](../../.cursor/plans/receipt_intelligence_map_ce2e8094.plan.md), [`LEARNING_ENGINE.md`](./LEARNING_ENGINE.md), [`BRAIN_V1_PRODUCT_INTEGRATION.md`](./BRAIN_V1_PRODUCT_INTEGRATION.md).
 
 ---
 
-## Receipt intelligence map
+## Workstream C — Receipt Intelligence Map
 
-Top 10 signals — data availability, model need, value, and UX surface ([Workstream C audit](../../.cursor/plans/coordinator_six_workstreams_a79496a6.plan.md)):
+**Decision support only — no implementation in this wave.** Codebase audit + prioritization for post-activation deploy.
+
+---
+
+## Top 10 Signals
 
 | Signal | Data today? | New model? | User value | Brain value | UX surface |
 |--------|-------------|------------|------------|-------------|------------|
-| Replenishment cadence | Yes — `receipt_purchase_line` | No | High | Medium (accept feedback) | Home §2, Inköp |
-| Recurring autopilot patterns | Yes — `detectReceiptPatternSuggestions` | No | High | Low | Inköp, Home footnote |
-| Finish suggestions (double-buy) | Yes — `detectReceiptFinishSuggestions` | No | Medium | Low | Home footnote |
-| Shelf-life at import | Yes — Brain predictors | No | High | **Core** | Receipt review, lager |
-| Location at import | Yes — location predictor | No | Medium | **Core** | Receipt review |
-| Last paid price | Yes — price memory | No | Medium | Low | Lager chip |
-| `purchasedAt` cadence accuracy | Yes (merged) | No | Medium | Medium | Replenishment timing |
-| Shopping day-of-week | Partial — lines exist, no aggregate UI | No (pure fn) | Medium | Medium | Home Hushållet one-liner |
-| Preferred store | Partial — `storeLabel` on lines | No | Low | Low | Hushållet hint |
-| Consumption velocity | **No** — needs consume events model | Yes | Medium | Medium | Deferred — not V1 |
-
-### Smallest valuable next feature
-
-**`feat/receipt-household-memory`** — pure functions `detectHouseholdShoppingDay` + `detectPreferredStore` → one line in Home Hushållet ([Slice 2](#slice-2--household-aggregates-pure-functions-no-migration)). **After** activation deploy + Brain smoke. No migration.
+| **Replenishment cadence** | Yes — `receipt_purchase_line` | No | High | Medium (accept feedback) | Home §2 Skaffu rekommenderar, Inköp |
+| **Recurring autopilot patterns** | Yes — `detectReceiptPatternSuggestions` | No | High | Low | Inköp, Home footnote |
+| **Finish suggestions** (double-buy) | Yes — `detectReceiptFinishSuggestions` | No | Medium | Low | Home footnote |
+| **Shelf-life at import** | Yes — Brain predictors | No | High | **Core** | Receipt review, lager |
+| **Location at import** | Yes — location predictor | No | Medium | **Core** | Receipt review |
+| **Last paid price** | Yes — price memory | No | Medium | Low | Lager `PriceMemoryChip` |
+| **`purchasedAt` cadence accuracy** | Yes (merged) | No | Medium | Medium | Replenishment timing |
+| **Shopping day-of-week** | Partial — lines exist, no aggregate UI | No (pure fn) | Medium | Medium | Home Hushållet one-liner |
+| **Preferred store** | Partial — `storeLabel` on lines | No | Low | Low | Hushållet hint |
+| **Consumption velocity** | **No** — needs consume events model | Yes | Medium | Medium | Deferred — not V1 |
 
 ---
 
-## Top 10 Highest-Value Receipt Signals
+## Signals We Ignore Today
 
-| # | Signal | Why it matters | Primary surface | Build phase |
-|---|--------|----------------|-----------------|-------------|
-| 1 | **Purchase cadence + replenishment** | Direct weekly shopping — "buy again now" | Home Skaffu rekommenderar, Inkop | **Shipped today** |
-| 2 | **Shelf-life from receipt + correction** | Core Brain V1 — reduces waste | Receipt review, eat-first | **After deploy** (flag on) |
-| 3 | **Recurring products / autopilot** | Onboarding to list without manual memory | Inkop, Home footnote | **Shipped today** |
-| 4 | **Purchase date for cadence** | Correct "overdue" vs import date | Cadence, price memory | **Shipped** — `purchase-pattern.ts` uses `purchasedAt ?? createdAt` |
-| 5 | **Last paid price** | Concrete household memory, not AI showcase | Lager `PriceMemoryChip` | **Shipped today** |
-| 6 | **Finish suggestion** (double-buy) | Household sync without nagging | Home receipt footnote | **Shipped today** |
-| 7 | **Shopping day-of-week** (household) | "You usually shop Sundays" — Brain feel | Home Hushållet | **Afternoon slice** |
-| 8 | **Preferred store** | Store ritual + price-memory context | Hushållet, price chip | **Afternoon slice** |
-| 9 | **Location rule** | Right storage for repurchase | Receipt import | **After deploy** (flag on) |
-| 10 | **Dedupe at replenishment** | Avoid list spam / double stock | Replenishment chips | **Shipped today** |
+Summary from coordinator audit — do not build in V1:
+
+| Signal | Reason |
+|--------|--------|
+| **Category habits** | No stable taxonomy |
+| **Cross-household benchmarking** | Out of scope; privacy + no product wedge |
+| **LLM receipt parsing tiers** | Stubs OFF — `SHELF_LIFE_LLM_ENABLED`, `LOCATION_LLM_ENABLED` |
+| **Household favorites** | Migration `0049` deferred — `HOUSEHOLD_FAVORITES_ENABLED` off |
+
+Detail (parse / privacy noise):
+
+| Signal | Reason |
+|--------|--------|
+| Payment method, VAT, total, deposit, rounding | Stripped in `preprocessReceiptText`; no food/household signal |
+| Org number, receipt number, card number | Privacy + zero product value |
+| Line order on receipt | No semantics |
+| Single-product purchases (under `RECEIPT_PATTERN_MIN_IMPORTS`) | Too low confidence for "you usually buy" |
+| `importBatchId` as visit proxy without `purchasedAt` | Wrong cadence if import days after purchase |
+| Specific store address (chain heuristic only) | Chain DQ sufficient; address parse = noise |
+| Discount/campaign rows without product link | Noise; hard to tie to `normalizedKey` |
+| Non-food (dish soap etc.) | Filtered in prompt/noise patterns |
+| `userId` per line for household prefs | Household scope sufficient |
+| Raw PDF text (not persisted) | Re-parse V2+; not a V1 signal |
+| Barcode from receipt when null | Wait for scan bridge |
+| Cross-store "cheapest here" | Multi-store price with current DQ = false precision |
 
 ---
 
-## Exact Next Slice (After Brain V1 Prod Smoke)
+## Smallest Valuable Next Feature
 
-Execute in this order. **Do not change `receipt-import.ts`, `apphosting.yaml`, or migrations before Brain V1 smoke completes.**
+**Branch:** `feat/receipt-household-memory`
+
+Pure functions `detectHouseholdShoppingDay` + `detectPreferredStore` → one line in Home Hushållet ([Slice 2](#slice-2--household-aggregates-featreceipt-household-memory)). **No migration.** **After** activation deploy (#48–#50) + Brain V1 prod smoke — not before.
+
+**Owner:** COORDINATOR_AGENT (implementation) · PO review of "från kvitton" copy → USER_LOCAL
+
+---
+
+## Exact Next Slice (Implementation Detail)
+
+Execute in this order after activation deploy + Brain smoke. **Do not change `receipt-import.ts`, `apphosting.yaml`, or migrations before Brain V1 smoke completes.**
 
 ### Slice 1 — Domain fix: `purchasedAt` in pattern detection
 
@@ -75,9 +98,9 @@ Execute in this order. **Do not change `receipt-import.ts`, `apphosting.yaml`, o
 
 ---
 
-### Slice 2 — Household aggregates (pure functions, no migration)
+### Slice 2 — Household aggregates (`feat/receipt-household-memory`)
 
-**Branch:** `feat/receipt-household-memory` (after Home V3 merged + Brain smoke).
+**Branch:** `feat/receipt-household-memory` (after activation deploy + Brain smoke + Home V3 on master).
 
 **Build:**
 
@@ -111,16 +134,9 @@ Execute in this order. **Do not change `receipt-import.ts`, `apphosting.yaml`, o
 1. Surface cadence/evidence on [`ReplenishmentSection.svelte`](../src/lib/components/organisms/ReplenishmentSection.svelte) when `surface=hem` — cosmetic on existing `reasonMessage` / reason codes from replenishment domain.
 2. Optional telemetry: replenishment accept on Home (product_event partial today).
 
-**Files:**
-
-| File | Change |
-|------|--------|
-| `src/lib/components/organisms/ReplenishmentSection.svelte` | Chips / evidence copy |
-| `src/lib/i18n/locales/sv.json`, `en.json` | Chip labels if needed |
-
 ---
 
-### Blocked until Brain V1 flags on prod
+### Blocked until Brain V1 flags verified on prod
 
 | Item | Why wait |
 |------|----------|
@@ -132,81 +148,46 @@ Execute in this order. **Do not change `receipt-import.ts`, `apphosting.yaml`, o
 
 ---
 
-## Signals We Should Ignore (V1)
-
-Summary from coordinator audit — do not build in V1:
-
-| Signal | Reason |
-|--------|--------|
-| Category habits | No stable taxonomy |
-| Cross-household benchmarking | Out of scope; privacy + no product wedge |
-| LLM receipt parsing tiers | Stubs OFF — `SHELF_LIFE_LLM_ENABLED`, `LOCATION_LLM_ENABLED` |
-| Household favorites | Migration `0049` deferred — `HOUSEHOLD_FAVORITES_ENABLED` off |
-
-Detail (parse / privacy noise):
-
-| Signal | Reason |
-|--------|--------|
-| Payment method, VAT, total, deposit, rounding | Stripped in `preprocessReceiptText`; no food/household signal |
-| Org number, receipt number, card number | Privacy + zero product value |
-| Line order on receipt | No semantics |
-| Single-product purchases (under `RECEIPT_PATTERN_MIN_IMPORTS`) | Too low confidence for "you usually buy" |
-| `importBatchId` as visit proxy without `purchasedAt` | Wrong cadence if import days after purchase |
-| Specific store address (chain heuristic only) | Chain DQ sufficient; address parse = noise |
-| Discount/campaign rows without product link | Noise; hard to tie to `normalizedKey` |
-| Non-food (dish soap etc.) | Filtered in prompt/noise patterns |
-| `userId` per line for household prefs | Household scope sufficient |
-| Raw PDF text (not persisted) | Re-parse V2+; not a V1 signal |
-| Barcode from receipt when null | Wait for scan bridge |
-| LLM shelf-life tier (`SHELF_LIFE_LLM_ENABLED`) | Stub — not implemented |
-| Category/macro-nutrition from name | Low DQ; needs product DB |
-| Cross-store "cheapest here" | Multi-store price with current DQ = false precision |
-
----
-
 ## Build Timeline
 
 ```mermaid
 flowchart TB
-  subgraph now [Can run now — draft PRs]
-    DOC[docs/receipt-intelligence-next-slice]
+  subgraph now [Docs only — PR 51]
+    DOC[chore/brain-capability-audit-v1]
     PAT[feat/receipt-pattern-purchasedAt merged]
   end
-  subgraph deploy [Deploy track — coordinator]
-    D1[Deploy de7f4b6b+]
-    D2[Migrations 0047-48]
-    D3[4-step Brain V1 smoke USER_LOCAL]
-    D4[Shelf-life flags on prod]
+  subgraph deploy [Deploy track — coordinator LAST]
+    D1[Merge #48-50 activation]
+    D2[quality:ci master]
+    D3[Prod deploy]
+    D4[Brain V1 + Memory smoke USER_LOCAL]
     D1 --> D2 --> D3 --> D4
   end
-  subgraph post [After smoke + Home V3 merge]
+  subgraph post [After smoke]
     MEM[feat/receipt-household-memory]
     CHP[Replenishment chips on Home]
     MEM --> CHP
   end
   deploy --> post
-  PAT --> post
 ```
 
 | Phase | When | Work | Merge gate |
 |-------|------|------|------------|
-| **Now** | Parallel with Home V3 / Memory Explorer | This doc; `pattern-purchasedAt` **merged** | Docs: low risk anytime |
-| **Deploy** | Coordinator | Migrations, smoke, enable shelf-life flags | Prod verified |
-| **Afternoon** | After Home V3 + smoke | `householdMemoryHint`, Hushållet one-liner | Home V3 merged, Brain smoke green |
-| **Same afternoon** | After aggregates | Replenishment evidence chips on `/hem` | ReplenishmentSection stable |
-| **Post-deploy** | Flags on | Location/shelf-life UX, replenishment learning wire | Extra prod smoke |
+| **Now** | Parallel with activation (#48–#50) | This doc update in PR #51; `pattern-purchasedAt` **merged** | Docs-only — low risk |
+| **Deploy** | Coordinator — **last** | Activation bundle + Brain flags | Prod verified |
+| **Post-deploy** | After smoke | `feat/receipt-household-memory` one-liner | Activation + Brain smoke green |
+| **Same wave** | After aggregates | Replenishment evidence chips on `/hem` | ReplenishmentSection stable |
 | **Later** | V2 design | Memory Explorer facets, price trend, consumption velocity | Blocked |
 
 ---
 
 ## Merge Order (Receipt Track)
 
-1. **`docs/receipt-intelligence-next-slice`** — can merge early (docs-only).
-2. **Brain V1 deploy + smoke** — no receipt code merges before this (except docs).
-3. **`feat/home-v3-reorder`** — unblocks Hushållet section.
-4. **`feat/receipt-pattern-purchasedAt`** — **merged** to master.
-5. **`feat/receipt-household-memory`** — hem load + one-liner (requires Home V3 + Brain smoke).
-6. **Replenishment chips** — cosmetic on shipped data.
+1. **`chore/brain-capability-audit-v1` (#51)** — docs-only; includes this map refresh.
+2. **Activation deploy + smoke** (#48–#50) — no receipt code merges before this.
+3. **`feat/receipt-pattern-purchasedAt`** — **merged** to master.
+4. **`feat/receipt-household-memory`** — hem load + one-liner (smallest next feature).
+5. **Replenishment chips** — cosmetic on shipped data.
 
 ---
 
@@ -214,7 +195,8 @@ flowchart TB
 
 | Work | Owner |
 |------|-------|
+| Receipt map doc (Workstream C) | **COORDINATOR_AGENT** |
 | `purchasedAt` fix, household aggregates, Home copy | **COORDINATOR_AGENT** |
 | PO review of "från kvitton" copy, mobile screenshots | **USER_LOCAL** |
-| Brain V1 prod flags + smoke | **COORDINATOR_AGENT** (deploy chain) |
-| Memory Explorer V2 facets | **BLOCKED** |
+| Brain V1 prod smoke + Memory Explorer with data | **USER_LOCAL** |
+| Consumption velocity, V2 facets, household favorites engine | **BLOCKED** |
