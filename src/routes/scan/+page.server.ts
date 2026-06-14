@@ -11,6 +11,7 @@ import { itemSchema } from '$lib/validation/inventory.schemas';
 import { buildScanReturnUrl, type ScanToastKind } from '$lib/utils/scan-toast';
 import { parseScanMode, parseScanReturnTo } from '$lib/utils/scan-nav';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
+import { RECEIPT_IMPORT_FROM_PARAM } from '$lib/utils/receipt-import-session';
 import { recordProductEvent } from '$lib/server/product-events';
 import { trackInventoryWrite } from '$lib/server/sync-analytics';
 import { generateId } from '$lib/infrastructure/auth/id';
@@ -345,7 +346,7 @@ async function bulkCreateFromForm(
 }
 
 function buildReceiptImportReturnUrl(): string {
-	const params = new URLSearchParams({ from: 'receipt' });
+	const params = new URLSearchParams({ from: RECEIPT_IMPORT_FROM_PARAM });
 	return `${APP_HOME_PATH}?${params}`;
 }
 

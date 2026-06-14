@@ -6,6 +6,8 @@
 	import DigitalReceiptGuide from '$lib/components/molecules/DigitalReceiptGuide.svelte';
 	import ImageSourcePicker from '$lib/components/molecules/ImageSourcePicker.svelte';
 	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
+	import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import { scanToastMessage } from '$lib/utils/scan-toast';
 	import { bindEmbeddedScanSubmit } from '$lib/utils/scan-embedded-submit';
 	import { page } from '$app/state';
 	import { recordReceiptActivation } from '$lib/utils/onboarding';
@@ -24,7 +26,10 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { trackProductEvent } from '$lib/client/product-events';
-	import { markReceiptImportCompleted } from '$lib/utils/receipt-import-session';
+	import {
+		aggregateReceiptImportSummary,
+		markReceiptImportCompleted
+	} from '$lib/utils/receipt-import-session';
 	import {
 		readReceiptBulkLocation,
 		writeReceiptBulkLocation
@@ -238,6 +243,22 @@
 
 	const selectedCount = $derived(lines.filter((_, i) => selected[i]).length);
 
+	function buildReceiptImportSummary() {
+		return aggregateReceiptImportSummary(
+			lines.map((line, index) => ({
+				line,
+				index,
+				selected: Boolean(selected[index]),
+				lineExpiresOn: lineExpiresOn[index] ?? '',
+				lineLocation: lineLocations[index] ?? line.location,
+				locationOverride: locationOverrides.has(index),
+				shelfLifePrediction: shelfLifePredictions[index] ?? null,
+				locationPrediction: locationPredictions[index] ?? null,
+				shelfLifeEstimatesInReceipt
+			}))
+		);
+	}
+
 	function formatLineAmount(line: ReceiptLine): string {
 		if (!line.quantity && !line.unit) return '';
 		if (line.quantity && line.unit) return `${line.quantity} ${line.unit}`;
@@ -392,7 +413,7 @@
 								selectedCount,
 								totalLines: lines.length
 							});
-							markReceiptImportCompleted(selectedCount);
+							markReceiptImportCompleted(selectedCount, buildReceiptImportSummary());
 							recordReceiptActivation(page.data.user?.id);
 						}
 					)}

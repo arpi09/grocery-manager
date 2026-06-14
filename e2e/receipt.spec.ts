@@ -79,6 +79,9 @@ test.describe('Receipt flow', () => {
 
 		await expect(page).toHaveURL(/\/hem(\?|$)/, { timeout: 15_000 });
 		await expect(page).toHaveURL(/from=receipt/);
+		await expect(page.locator('.toast-message')).toContainText(/Kvitto klart|Receipt done/i, {
+			timeout: 10_000
+		});
 		await expect(page.locator('section.home')).toBeVisible({ timeout: 10_000 });
 	});
 });
