@@ -20,6 +20,8 @@ import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 
 import { buildReturnUrlWithExpiryNudge } from '$lib/utils/expiry-nudge';
 
+import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
+
 import { itemSchema } from '$lib/validation/inventory.schemas';
 
 import { fail, redirect } from '@sveltejs/kit';
@@ -95,7 +97,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		receiptAutopilotSuggestions,
 		receiptFinishSuggestions,
 		shoppingListCount,
-		showMemoryExplorer: isShelfLifeLearningEnabled() || isLocationLearningEnabled()
+		showMemoryExplorer: isShelfLifeLearningEnabled()
 	};
 };
 

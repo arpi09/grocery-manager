@@ -22,6 +22,7 @@ import {
 	type ShoppingSuggestion
 } from '$lib/server/shopping-suggestions';
 import { recordProductEvent } from '$lib/server/product-events';
+import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { trackShoppingCheckoffToPantry } from '$lib/server/sync-analytics';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
@@ -43,7 +44,8 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 			shareLinkEnabled: false,
 			replenishmentSuggestions: [],
 			dedupeByKey: {},
-			shoppingToPantryMode: 'ask' as ShoppingToPantryMode
+			shoppingToPantryMode: 'ask' as ShoppingToPantryMode,
+			showMemoryExplorer: false
 		};
 	}
 
@@ -62,7 +64,8 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		replenishmentSuggestions: intelligence.replenishment,
 		dedupeByKey: intelligence.dedupeByKey,
 		householdId,
-		shoppingToPantryMode
+		shoppingToPantryMode,
+		showMemoryExplorer: isShelfLifeLearningEnabled()
 	};
 };
 

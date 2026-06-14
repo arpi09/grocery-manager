@@ -161,5 +161,6 @@ test.describe('Settings', () => {
 		await dismissOnboardingModalIfOpen(page);
 
 		await expect(page.getByTestId('memory-explorer')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('memory-empty-state')).toBeVisible();
 	});
 });
