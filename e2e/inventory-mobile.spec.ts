@@ -72,6 +72,12 @@ test.describe('Inventory mobile UX', () => {
 
 
 
+	async function openPartialFromOverflow(row: ReturnType<typeof seededRow>) {
+		const overflow = row.getByTestId('row-overflow-menu').getByRole('button');
+		await overflow.click({ force: true });
+		await row.getByRole('menuitem', { name: /Delvis|Partial/i }).click({ force: true });
+	}
+
 	test('compact list shows finish and partial actions', async ({ page }) => {
 
 		const list = await openFridgeList(page);
@@ -80,7 +86,9 @@ test.describe('Inventory mobile UX', () => {
 
 		await expect(row.getByRole('button', { name: /Slut|Finished/i })).toBeVisible();
 
-		await expect(row.getByRole('button', { name: /Delvis|Partial/i })).toBeVisible();
+		const overflow = row.getByTestId('row-overflow-menu').getByRole('button');
+		await overflow.click({ force: true });
+		await expect(row.getByRole('menuitem', { name: /Delvis|Partial/i })).toBeVisible();
 
 	});
 
@@ -111,7 +119,7 @@ test.describe('Inventory mobile UX', () => {
 
 		const row = seededRow(list);
 
-		await row.getByRole('button', { name: /Delvis|Partial/i }).click();
+		await openPartialFromOverflow(row);
 
 
 
