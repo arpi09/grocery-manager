@@ -88,6 +88,7 @@ export interface LocationPredictionValue {
 export interface LocationFeedbackContext {
 	productName?: string;
 	storeLabel?: string | null;
+	source?: ShelfLifeFeedbackSource | null;
 }
 
 export interface LocationFeedbackEvent {
