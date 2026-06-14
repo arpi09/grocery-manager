@@ -235,13 +235,37 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 	}
 }
 
+function isPostRegisterLanding(url: URL) {
+	if (url.pathname === '/inkop') {
+		return true;
+	}
+	if (url.pathname !== '/hem') {
+		return false;
+	}
+	return (
+		url.searchParams.get('welcome') === '1' ||
+		url.searchParams.get('freshAccount') === '1' ||
+		url.search === ''
+	);
+}
+
 async function waitForPostRegisterHome(page: Page) {
-	await page.waitForURL((url) => url.pathname === '/inkop', {
+	await page.waitForURL((url) => isPostRegisterLanding(url), {
 		timeout: E2E_AUTH_NAV_TIMEOUT_MS,
 		waitUntil: 'domcontentloaded'
 	});
 	await page
-		.waitForURL((url) => url.pathname === '/inkop' && !url.searchParams.has('freshAccount'), {
+		.waitForURL((url) => {
+			if (url.pathname === '/inkop') {
+				return !url.searchParams.has('freshAccount');
+			}
+			if (url.pathname === '/hem') {
+				return (
+					url.searchParams.get('welcome') !== '1' && !url.searchParams.has('freshAccount')
+				);
+			}
+			return true;
+		}, {
 			timeout: 20_000
 		})
 		.catch(() => undefined);
