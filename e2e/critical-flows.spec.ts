@@ -183,24 +183,18 @@ test.describe('Critical flows', () => {
 
 
 
-	test('scan opens photo mode from header nav', async ({ page }) => {
-
+	test('scan from header nav is kvitto-first not photo', async ({ page }) => {
 		await loginAsAdmin(page);
-
 		await page.goto('/inkop');
-
 		await dismissOnboardingModalIfOpen(page);
-
 		await page.locator('.main-nav-desktop').getByTestId('nav-scan').click();
-
 		await expect(page).toHaveURL(/\/scan(?:$|\?)/);
-
-		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 15_000 });
-
+		await expect(page.getByTestId('photo-round-capture')).toHaveCount(0);
+		const hub = page.getByTestId('scan-mode-hub');
+		const scanModes = page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i });
+		await expect(hub.or(scanModes)).toBeVisible({ timeout: 15_000 });
 		await expect(page.locator('.page-header .back-link')).toHaveCount(0);
-
 		await expect(page.getByText(/Avbryt och gå tillbaka|Cancel and go back/i)).toHaveCount(0);
-
 	});
 
 
