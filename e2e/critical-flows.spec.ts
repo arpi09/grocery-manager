@@ -137,11 +137,11 @@ test.describe('Critical flows', () => {
 
 		expect(await page.locator('.home-v3-section').count()).toBe(3);
 
-		await expect(page.getByRole('heading', { name: /Denna vecka|This week/i })).toBeVisible();
+		await expect(page.getByRole('heading', { name: /Vad ska vi handla|What should we shop/i })).toBeVisible();
 
-		await expect(page.getByRole('heading', { name: /Skaffu rekommenderar|Skaffu recommends/i })).toBeVisible();
+		await expect(page.getByRole('heading', { name: /Vad rekommenderar|What does Skaffu recommend/i })).toBeVisible();
 
-		await expect(page.getByRole('heading', { name: /Hushållet|Your household/i })).toBeVisible();
+		await expect(page.getByRole('heading', { name: /Hur mår hushållet|How's the household/i })).toBeVisible();
 
 		await expect(page.locator('.shopping-teaser-primary, .action-primary')).toBeVisible();
 

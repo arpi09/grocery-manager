@@ -281,8 +281,15 @@
 				compact
 				surface="hem"
 			/>
+		{:else if canWrite}
+			<p class="section-empty recommends-empty">
+				{t('home.v3.recommendsEmpty')}
+				<span class="household-empty-links">
+					<a href={scanHubLinkHref} data-analytics-id="home.recommends_empty_scan">{t('nav.scan')}</a>
+				</span>
+			</p>
 		{:else}
-			<p class="section-empty">{t('home.v3.recommendsEmpty')}</p>
+			<p class="section-empty">{t('home.v3.recommendsEmptyReadonly')}</p>
 		{/if}
 		{#if canWrite && receiptFootnoteCount > 0}
 			<p class="receipt-footnote">
@@ -386,11 +393,11 @@
 
 	.home-v3-heading {
 		margin: 0;
-		font-size: 0.8125rem;
+		font-size: 0.95rem;
 		font-weight: 700;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-		color: var(--color-text-muted);
+		letter-spacing: -0.01em;
+		line-height: 1.3;
+		color: var(--color-text);
 	}
 
 	.section-empty {
