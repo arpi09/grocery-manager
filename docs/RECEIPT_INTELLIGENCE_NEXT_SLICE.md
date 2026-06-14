@@ -1,10 +1,33 @@
 # Receipt Intelligence — Next Slice
 
-**Baseline:** `master` @ `e8a3e579` (Brain V1 wired, flags off). **Prod:** `@2779d141` (no Brain V1).
+**Baseline:** `master` @ `de7f4b6b` (#46–#47 merged; Brain V1 wired, learning flags on in apphosting). **Prod:** `e26408a2` — pending deploy for #46–#47.
 
-**Purpose:** Coordinate the next receipt-signal work after Brain V1 prod smoke. This doc is merge-safe before deploy verification.
+**Purpose:** Coordinate the next receipt-signal work after Brain V1 prod smoke. Decision support only — no implementation in this wave.
 
-**Sources:** [`receipt_intelligence_map`](../../.cursor/plans/receipt_intelligence_map_ce2e8094.plan.md), [`LEARNING_ENGINE.md`](./LEARNING_ENGINE.md), [`BRAIN_V1_PRODUCT_INTEGRATION.md`](./BRAIN_V1_PRODUCT_INTEGRATION.md).
+**Sources:** [`receipt_intelligence_map`](../../.cursor/plans/receipt_intelligence_map_ce2e8094.plan.md), [`coordinator_six_workstreams`](../../.cursor/plans/coordinator_six_workstreams_a79496a6.plan.md), [`LEARNING_ENGINE.md`](./LEARNING_ENGINE.md), [`BRAIN_V1_PRODUCT_INTEGRATION.md`](./BRAIN_V1_PRODUCT_INTEGRATION.md).
+
+---
+
+## Receipt intelligence map
+
+Top 10 signals — data availability, model need, value, and UX surface ([Workstream C audit](../../.cursor/plans/coordinator_six_workstreams_a79496a6.plan.md)):
+
+| Signal | Data today? | New model? | User value | Brain value | UX surface |
+|--------|-------------|------------|------------|-------------|------------|
+| Replenishment cadence | Yes — `receipt_purchase_line` | No | High | Medium (accept feedback) | Home §2, Inköp |
+| Recurring autopilot patterns | Yes — `detectReceiptPatternSuggestions` | No | High | Low | Inköp, Home footnote |
+| Finish suggestions (double-buy) | Yes — `detectReceiptFinishSuggestions` | No | Medium | Low | Home footnote |
+| Shelf-life at import | Yes — Brain predictors | No | High | **Core** | Receipt review, lager |
+| Location at import | Yes — location predictor | No | Medium | **Core** | Receipt review |
+| Last paid price | Yes — price memory | No | Medium | Low | Lager chip |
+| `purchasedAt` cadence accuracy | Yes (merged) | No | Medium | Medium | Replenishment timing |
+| Shopping day-of-week | Partial — lines exist, no aggregate UI | No (pure fn) | Medium | Medium | Home Hushållet one-liner |
+| Preferred store | Partial — `storeLabel` on lines | No | Low | Low | Hushållet hint |
+| Consumption velocity | **No** — needs consume events model | Yes | Medium | Medium | Deferred — not V1 |
+
+### Smallest valuable next feature
+
+**`feat/receipt-household-memory`** — pure functions `detectHouseholdShoppingDay` + `detectPreferredStore` → one line in Home Hushållet ([Slice 2](#slice-2--household-aggregates-pure-functions-no-migration)). **After** activation deploy + Brain smoke. No migration.
 
 ---
 
@@ -15,7 +38,7 @@
 | 1 | **Purchase cadence + replenishment** | Direct weekly shopping — "buy again now" | Home Skaffu rekommenderar, Inkop | **Shipped today** |
 | 2 | **Shelf-life from receipt + correction** | Core Brain V1 — reduces waste | Receipt review, eat-first | **After deploy** (flag on) |
 | 3 | **Recurring products / autopilot** | Onboarding to list without manual memory | Inkop, Home footnote | **Shipped today** |
-| 4 | **Purchase date for cadence** | Correct "overdue" vs import date | Cadence, price memory | **Today** — fix `purchase-pattern.ts` cutoff |
+| 4 | **Purchase date for cadence** | Correct "overdue" vs import date | Cadence, price memory | **Shipped** — `purchase-pattern.ts` uses `purchasedAt ?? createdAt` |
 | 5 | **Last paid price** | Concrete household memory, not AI showcase | Lager `PriceMemoryChip` | **Shipped today** |
 | 6 | **Finish suggestion** (double-buy) | Household sync without nagging | Home receipt footnote | **Shipped today** |
 | 7 | **Shopping day-of-week** (household) | "You usually shop Sundays" — Brain feel | Home Hushållet | **Afternoon slice** |
@@ -31,16 +54,15 @@ Execute in this order. **Do not change `receipt-import.ts`, `apphosting.yaml`, o
 
 ### Slice 1 — Domain fix: `purchasedAt` in pattern detection
 
-**Branch:** `feat/receipt-pattern-purchasedAt` (isolated, can draft PR in parallel with doc).
+**Status:** **Merged** (`feat/receipt-pattern-purchasedAt` → master).
 
-**Problem:** [`detectReceiptPatternSuggestions`](../src/lib/domain/purchase-pattern.ts) uses `createdAt` for cutoff, `lastPurchasedAt`, and sorting. [`replenishment.ts`](../src/lib/domain/replenishment.ts) already uses `purchasedAt ?? createdAt` via `purchaseDate()`.
+**Problem:** [`detectReceiptPatternSuggestions`](../src/lib/domain/purchase-pattern.ts) used `createdAt` for cutoff, `lastPurchasedAt`, and sorting. [`replenishment.ts`](../src/lib/domain/replenishment.ts) already uses `purchasedAt ?? createdAt` via `purchaseDate()`.
 
-**Build:**
+**Build (done):**
 
 1. Add `purchaseDate(line)` helper (or inline `line.purchasedAt ?? line.createdAt`) in `detectReceiptPatternSuggestions` only.
 2. Replace all cutoff / `lastPurchasedAt` / sort comparisons that use `createdAt`.
 3. Add unit test: line with `purchasedAt` older than `createdAt` stays in window when purchase date is within 90d.
-4. Run `npm run quality:ci`.
 
 **Files:**
 
@@ -112,6 +134,17 @@ Execute in this order. **Do not change `receipt-import.ts`, `apphosting.yaml`, o
 
 ## Signals We Should Ignore (V1)
 
+Summary from coordinator audit — do not build in V1:
+
+| Signal | Reason |
+|--------|--------|
+| Category habits | No stable taxonomy |
+| Cross-household benchmarking | Out of scope; privacy + no product wedge |
+| LLM receipt parsing tiers | Stubs OFF — `SHELF_LIFE_LLM_ENABLED`, `LOCATION_LLM_ENABLED` |
+| Household favorites | Migration `0049` deferred — `HOUSEHOLD_FAVORITES_ENABLED` off |
+
+Detail (parse / privacy noise):
+
 | Signal | Reason |
 |--------|--------|
 | Payment method, VAT, total, deposit, rounding | Stripped in `preprocessReceiptText`; no food/household signal |
@@ -137,12 +170,12 @@ Execute in this order. **Do not change `receipt-import.ts`, `apphosting.yaml`, o
 flowchart TB
   subgraph now [Can run now — draft PRs]
     DOC[docs/receipt-intelligence-next-slice]
-    PAT[feat/receipt-pattern-purchasedAt]
+    PAT[feat/receipt-pattern-purchasedAt merged]
   end
   subgraph deploy [Deploy track — coordinator]
-    D1[Deploy e8a3e579]
+    D1[Deploy de7f4b6b+]
     D2[Migrations 0047-48]
-    D3[4-step Brain V1 smoke]
+    D3[4-step Brain V1 smoke USER_LOCAL]
     D4[Shelf-life flags on prod]
     D1 --> D2 --> D3 --> D4
   end
@@ -157,7 +190,7 @@ flowchart TB
 
 | Phase | When | Work | Merge gate |
 |-------|------|------|------------|
-| **Now** | Parallel with Home V3 / Memory Explorer | This doc; optional `pattern-purchasedAt` branch | Docs: low risk anytime; code: draft only |
+| **Now** | Parallel with Home V3 / Memory Explorer | This doc; `pattern-purchasedAt` **merged** | Docs: low risk anytime |
 | **Deploy** | Coordinator | Migrations, smoke, enable shelf-life flags | Prod verified |
 | **Afternoon** | After Home V3 + smoke | `householdMemoryHint`, Hushållet one-liner | Home V3 merged, Brain smoke green |
 | **Same afternoon** | After aggregates | Replenishment evidence chips on `/hem` | ReplenishmentSection stable |
@@ -171,8 +204,8 @@ flowchart TB
 1. **`docs/receipt-intelligence-next-slice`** — can merge early (docs-only).
 2. **Brain V1 deploy + smoke** — no receipt code merges before this (except docs).
 3. **`feat/home-v3-reorder`** — unblocks Hushållet section.
-4. **`feat/receipt-pattern-purchasedAt`** — domain-only, low conflict risk.
-5. **`feat/receipt-household-memory`** — hem load + one-liner (requires Home V3).
+4. **`feat/receipt-pattern-purchasedAt`** — **merged** to master.
+5. **`feat/receipt-household-memory`** — hem load + one-liner (requires Home V3 + Brain smoke).
 6. **Replenishment chips** — cosmetic on shipped data.
 
 ---
