@@ -63,11 +63,8 @@ Central readers: [`src/lib/server/feature-flags.ts`](../src/lib/server/feature-f
 |--------------|---------|--------|------------------|
 | `SHELF_LIFE_LEARNING` | `SHELF_LIFE_LEARNING_ENABLED` | `isShelfLifeLearningEnabled` | `shelf-life-learning-flag.ts` |
 | `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT` | `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT` | `isShelfLifeEstimatesInReceiptEnabled` | `shelf-life-learning-flag.ts` |
-| `SHELF_LIFE_LLM` | `SHELF_LIFE_LLM_ENABLED` | `isShelfLifeLlmEnabled` | `shelf-life-learning-flag.ts` |
 | `LOCATION_LEARNING` | `LOCATION_LEARNING_ENABLED` | `isLocationLearningEnabled` | `location-learning-flag.ts` |
-| `LOCATION_LLM` | `LOCATION_LLM_ENABLED` | `isLocationLlmEnabled` | `location-learning-flag.ts` |
 | `REPLENISHMENT_LEARNING` | `REPLENISHMENT_LEARNING_ENABLED` | `isReplenishmentLearningEnabled` | `replenishment-learning-flag.ts` |
-| `HOUSEHOLD_FAVORITES` | `HOUSEHOLD_FAVORITES_ENABLED` | `isHouseholdFavoritesEnabled` | `household-favorites-flag.ts` |
 | `SHOPPING_LIST_SHARE` | `PUBLIC_SHOPPING_LIST_SHARE_ENABLED` | `isShoppingListShareEnabled` | `shopping-list-share-flag.ts` |
 
 Full audit rationale: Engineering Health plan (coordinator upload). Refresh quarterly or after major CI/architecture changes.

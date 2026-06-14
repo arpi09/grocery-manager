@@ -14,7 +14,7 @@ import type {
 	ShelfLifePredictionValue
 } from '$lib/domain/learning/predictor-types';
 import { predictHeuristicShelfLife } from '$lib/infrastructure/adapters/heuristic-shelf-life.adapter';
-import { isShelfLifeLearningEnabled, isShelfLifeLlmEnabled } from '$lib/server/shelf-life-learning-flag';
+import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 
 export class ShelfLifePredictor implements Predictor<ShelfLifePredictionInput, ShelfLifePredictionValue> {
 	readonly id = 'shelf_life' as const;
@@ -23,7 +23,6 @@ export class ShelfLifePredictor implements Predictor<ShelfLifePredictionInput, S
 		private readonly householdLearning: HouseholdLearningPort,
 		private readonly options: {
 			learningEnabled?: () => boolean;
-			llmEnabled?: () => boolean;
 			todayIso?: () => string;
 		} = {}
 	) {}
@@ -92,12 +91,6 @@ export class ShelfLifePredictor implements Predictor<ShelfLifePredictionInput, S
 				explain: explanation.primary,
 				explanation
 			};
-		}
-
-		const llmEnabled = this.options.llmEnabled?.() ?? isShelfLifeLlmEnabled();
-		if (llmEnabled) {
-			// V1 stub — no external model wired yet.
-			return null;
 		}
 
 		return null;

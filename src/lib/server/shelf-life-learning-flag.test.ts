@@ -1,14 +1,12 @@
 import { describe, expect, it, afterEach } from 'vitest';
 import {
 	isShelfLifeEstimatesInReceiptEnabled,
-	isShelfLifeLearningEnabled,
-	isShelfLifeLlmEnabled
+	isShelfLifeLearningEnabled
 } from './shelf-life-learning-flag';
 
 describe('shelf-life-learning-flag', () => {
 	const originalLearning = process.env.SHELF_LIFE_LEARNING_ENABLED;
 	const originalPublic = process.env.PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT;
-	const originalLlm = process.env.SHELF_LIFE_LLM_ENABLED;
 
 	afterEach(() => {
 		if (originalLearning === undefined) {
@@ -20,11 +18,6 @@ describe('shelf-life-learning-flag', () => {
 			delete process.env.PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT;
 		} else {
 			process.env.PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT = originalPublic;
-		}
-		if (originalLlm === undefined) {
-			delete process.env.SHELF_LIFE_LLM_ENABLED;
-		} else {
-			process.env.SHELF_LIFE_LLM_ENABLED = originalLlm;
 		}
 	});
 
@@ -54,10 +47,5 @@ describe('shelf-life-learning-flag', () => {
 
 		process.env.PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT = 'false';
 		expect(isShelfLifeEstimatesInReceiptEnabled()).toBe(false);
-	});
-
-	it('defaults LLM flag to false', () => {
-		delete process.env.SHELF_LIFE_LLM_ENABLED;
-		expect(isShelfLifeLlmEnabled()).toBe(false);
 	});
 });
