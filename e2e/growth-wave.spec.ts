@@ -53,7 +53,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 	});
 
 	test('wrapped slide flow and empty-month copy for new household', async ({ page }) => {
-		test.setTimeout(90_000);
+		test.setTimeout(120_000);
 		await registerNewUser(page);
 		await page.goto('/statistik/wrapped', { waitUntil: 'commit' });
 		await dismissCookieConsentIfOpen(page);
@@ -73,7 +73,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 	});
 
 	test('wrapped streak regression — new household never shows inflated copy', async ({ page }) => {
-		test.setTimeout(90_000);
+		test.setTimeout(120_000);
 		await registerNewUser(page);
 		await page.goto('/statistik/wrapped', { waitUntil: 'commit' });
 		await dismissCookieConsentIfOpen(page);

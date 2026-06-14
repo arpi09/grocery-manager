@@ -23,7 +23,7 @@ test.describe('Critical flows', () => {
 
 		await registerNewUser(page);
 
-		await expect(page).toHaveURL('/hem?welcome=1');
+		await expect(page).toHaveURL('/hem');
 
 		await page.goto('/scan?mode=photo');
 
@@ -53,7 +53,7 @@ test.describe('Critical flows', () => {
 
 		await registerNewUser(page);
 
-		await expect(page).toHaveURL('/hem?welcome=1');
+		await expect(page).toHaveURL('/hem');
 
 		await expect(
 
@@ -193,7 +193,7 @@ test.describe('Critical flows', () => {
 
 		await dismissOnboardingModalIfOpen(page);
 
-		await page.locator('a.header-utility[data-testid="nav-scan"]').click();
+		await page.locator('.main-nav-desktop').getByTestId('nav-scan').click();
 
 		await expect(page).toHaveURL(/\/scan(?:$|\?)/);
 

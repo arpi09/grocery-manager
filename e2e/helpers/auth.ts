@@ -264,7 +264,7 @@ async function waitForPostRegisterHome(page: Page) {
 					url.searchParams.get('welcome') !== '1' && !url.searchParams.has('freshAccount')
 				);
 			}
-			return true;
+			return false;
 		}, {
 			timeout: 20_000
 		})
