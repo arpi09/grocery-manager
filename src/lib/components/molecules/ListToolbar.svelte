@@ -89,6 +89,9 @@
 		flex-shrink: 0;
 		display: inline-flex;
 		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		min-width: var(--touch-target-min);
 		min-height: var(--touch-target-min);
 		padding: 0.35rem 0.65rem;
 		border: 1px solid var(--color-border);
@@ -117,6 +120,9 @@
 		flex-shrink: 0;
 		display: inline-flex;
 		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		min-width: var(--touch-target-min);
 		min-height: var(--touch-target-min);
 		padding: 0.35rem 0.65rem;
 		border: 1px solid var(--color-border);
