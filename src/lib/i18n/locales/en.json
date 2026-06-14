@@ -312,7 +312,7 @@
 	},
 	"scan": {
 		"title": "Scan",
-		"subtitle": "Start with a photo round — or pick another way",
+		"subtitle": "Receipt first — or another way",
 		"barcodeTitle": "Barcode",
 		"barcodeSubtitle": "Point the camera at the barcode on the package",
 		"allModes": "All scan modes",
@@ -321,7 +321,7 @@
 		"cancelBackToHome": "Cancel and back to home",
 		"cancel": "Cancel",
 		"hubAria": "Scan modes",
-		"hubLead": "Photo round is fastest when you want to add many items at once.",
+		"hubLead": "Receipt is fastest after shopping.",
 		"moreWays": "More ways",
 		"modes": {
 			"barcode": "Barcode",
@@ -377,8 +377,9 @@
 			"kivraStep3": "Save the PDF and choose the file here — no need to convert it to a screenshot."
 		},
 		"hubHero": {
-			"subtitle": "Photograph fridge, freezer, or pantry — many items at once.",
-			"cta": "Start photo round"
+			"title": "Receipt",
+			"subtitle": "Multiple items at once.",
+			"cta": "Scan receipt"
 		}
 	},
 	"settings": {
@@ -2034,7 +2035,9 @@
 		"stepOf": "Step {current} of {total}",
 		"welcomeBody": "Skaffu helps you keep track of food at home — so you shop smarter, waste less, and cook from what you already have.",
 		"welcomeBodyShort": "Build a weekly shopping list — three items is enough to get started.",
-		"welcomeBodyShoppingList": "Build a weekly shopping list — three items is enough to get started.",
+		"welcomeBodyShoppingList": "Skaffu is your shared weekly shopping list. Add three items you buy every week — shop together and keep the list updated.",
+		"brainLearnLine": "Skaffu learns as you use the app",
+		"fillPantrySecondary": "Fill pantry",
 		"quickStart": "Quick start",
 		"quickPointsAria": "What you can do right away",
 		"quickPointScan": "Add with photos — or scan barcodes and receipts",
@@ -2107,8 +2110,9 @@
 		"barcodeProgress": "{count} of {goal} barcodes",
 		"skipLater": "I'll do it later",
 		"celebrateTitle": "Nice start!",
-		"celebrateBody": "Your first items are in.",
+		"celebrateBody": "Your list is rolling — shop together and keep it updated.",
 		"celebrateCtaScan": "Photograph more items",
+		"celebrateCtaShopping": "Open shopping list",
 		"celebrateDismiss": "Go to home",
 		"celebrateWoohoo": "You're up and running with the app — woohoo!",
 		"locationsTitle": "Three locations",

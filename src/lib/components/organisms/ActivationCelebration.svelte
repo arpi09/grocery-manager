@@ -28,9 +28,14 @@
 	const celebrateBody = $derived(
 		activationProgress?.path === 'receipt' && itemCount > 0
 			? t('onboarding.celebrateReceiptBody', { count: itemCount })
-			: t('onboarding.celebrateBody')
+			: activationProgress?.path === 'shopping'
+				? t('onboarding.celebrateStartedBody')
+				: t('onboarding.celebrateBody')
 	);
 	const showPwaInstall = $derived(activationProgress?.path === 'receipt');
+	const showScanSecondary = $derived(
+		activationProgress?.path !== 'shopping' && activationProgress?.path !== 'receipt'
+	);
 
 	function tryOpenCelebration() {
 		if (
@@ -56,6 +61,11 @@
 		if (pathname !== APP_HOME_PATH) {
 			await goto(APP_HOME_PATH);
 		}
+	}
+
+	async function goShopping() {
+		closeCelebration();
+		await goto('/inkop');
 	}
 
 	async function goScan() {
@@ -103,9 +113,14 @@
 			<InstallAppBanner installHref="/install-app" />
 		{/if}
 		<div class="celebration-actions">
-			<Button type="button" fullWidth onclick={goScan}>
-				{t('onboarding.celebrateCtaScan')}
+			<Button type="button" fullWidth data-testid="celebration-primary-cta" onclick={goShopping}>
+				{t('onboarding.celebrateCtaShopping')}
 			</Button>
+			{#if showScanSecondary}
+				<Button type="button" fullWidth variant="secondary" data-testid="celebration-secondary-cta" onclick={goScan}>
+					{t('onboarding.celebrateCtaScan')}
+				</Button>
+			{/if}
 		</div>
 		<button type="button" class="dismiss-link" onclick={goHome}>
 			{t('onboarding.celebrateDismiss')}

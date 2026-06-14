@@ -97,7 +97,7 @@ test.describe('Critical flows', () => {
 
 		await page.getByTestId('onboarding-begin-path').click();
 
-		await expect(page).toHaveURL('/inkop');
+		await expect(page).toHaveURL(/\/inkop(?:\?quick=1)?$/);
 
 		await expect(page.getByTestId('photo-round-capture')).toHaveCount(0);
 
@@ -221,7 +221,7 @@ test.describe('Critical flows', () => {
 
 		await expectOnboardingGuideVisible(page);
 
-		await page.getByTestId('onboarding-path-photo').click();
+		await page.getByTestId('onboarding-path-shopping').click();
 
 		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
 
@@ -230,6 +230,36 @@ test.describe('Critical flows', () => {
 		await page.getByTestId('onboarding-finish').click();
 
 		await expect(page).toHaveURL('/hem');
+
+	});
+
+
+
+	test('welcome shows shopping list as primary CTA not photo', async ({ page }) => {
+
+		await registerNewUser(page);
+
+		await dismissOnboardingModalIfOpen(page);
+
+		await page.goto('/settings#settings-app');
+
+		await page.locator('#settings-app details.settings-disclosure summary').click();
+
+		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click();
+
+		await expectOnboardingGuideVisible(page);
+
+		const shoppingPrimary = page.getByTestId('onboarding-path-shopping');
+
+		await expect(shoppingPrimary).toBeVisible();
+
+		await expect(shoppingPrimary).toHaveClass(/btn-primary/);
+
+		await expect(page.getByTestId('onboarding-path-photo')).not.toBeVisible();
+
+		await page.locator('.pantry-secondary summary').click();
+
+		await expect(page.getByTestId('onboarding-path-photo')).toBeVisible();
 
 	});
 
