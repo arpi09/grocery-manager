@@ -64,6 +64,8 @@ Predictor chain: **household_rule** (LEARNING on + `sample_count >= 2`) → **he
 
 ## Smoke checklist (post flag enable)
 
+**Owner:** `USER_LOCAL` — product owner on physical device (Turnstile, mobilkamera, real receipt). Agents link here from [CURRENT_REALITY.md](./CURRENT_REALITY.md); they do not substitute for this pass.
+
 1. Scan receipt → **Uppskattat** on line → save → lager badge
 2. Edit expiry → toast *Tack — Skaffu justerar nästa gång* → re-import → household rule
 3. `/hem` Eat First chips include item; estimated badge when source ≠ `user_set`

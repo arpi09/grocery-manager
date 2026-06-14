@@ -5,8 +5,8 @@
 | Fält | Värde |
 |------|--------|
 | **Uppdaterad** | 2026-06-14 |
-| **Prod SHA** | `e26408a2` — deploy run 27482069247 (2026-06-13) |
-| **Master SHA** | `e26408a2` — merge train + E2E fixes + all Brain flags on |
+| **Prod SHA** | `e26408a2` — deploy run 27482069247 (2026-06-13); **pending deploy** for #46–#47 |
+| **Master SHA** | `de7f4b6b` — #46 post-register → `/hem?welcome=1`; #47 LLM + favorites off |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` — merged to master |
 | **Prod URL** | https://skaffu.com |
 
@@ -24,7 +24,7 @@ Utgående → `/inkop` (delad lista) → handla ihop → checkoff → skafferi �
 | Hem dashboard | `/hem` | **Home V3** — Denna vecka → Skaffu rekommenderar → Hushållet ([HOME_V3.md](./HOME_V3.md)) |
 | Primary tabs | Hem, Lager, Inköp | Scan/Ät i secondary/Mer |
 | Memory Explorer | `/settings/memory` | Vad Skaffu vet — household rules (learning gate) |
-| Post-register wedge | `/inkop?freshAccount=1` | Ny registrering/OAuth — inkop-first wedge |
+| Post-register wedge | `/hem?welcome=1` | Ny registrering/OAuth — guided start on hem ([#46](https://github.com/arpi09/grocery-manager/pull/46)) |
 | Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie |
 
 ## Feature flags (prod vs master)
@@ -43,6 +43,21 @@ Utgående → `/inkop` (delad lista) → handla ihop → checkoff → skafferi �
 | `STRIPE_CHECKOUT_DISABLED` | true | true | .env | Pro checkout dold |
 | `KIVRA_FORWARD_ENABLED` | off | off | .env | Inbound Kivra |
 
+> **Prod drift:** Live prod (`e26408a2`) may still land on `/inkop?freshAccount=1` and run LLM stub flags until next deploy. Master target above reflects #46–#47.
+
+## Brain capabilities today
+
+What users **see** when core Brain flags are on (prod target / master), vs stubs kept **off**:
+
+| Users see | Stubs off (no product surface) |
+|-----------|--------------------------------|
+| **Uppskattat** — receipt review dates + lager/eat-first badge when expiry ≠ user-set | `SHELF_LIFE_LLM_ENABLED`, `LOCATION_LLM_ENABLED` — predictor tier returns null ([#47](https://github.com/arpi09/grocery-manager/pull/47)) |
+| **Location hints** — suggested storage in receipt/scan parse; rules in Settings / Memory Explorer | `HOUSEHOLD_FAVORITES_ENABLED` — migration `0049` deferred ([#47](https://github.com/arpi09/grocery-manager/pull/47)) |
+| **Replenishment learning** — silent; accept/dismiss on `/hem` suggestions writes `learning_feedback` | — |
+| **Memory Explorer** — `/settings/memory` (“Vad Skaffu vet”) when any learning flag on | — |
+
+**USER_LOCAL smoke** (physical device, real receipt): [Brain V1 smoke checklist](./BRAIN_V1_PRODUCT_INTEGRATION.md#smoke-checklist-post-flag-enable) in [BRAIN_V1_PRODUCT_INTEGRATION.md](./BRAIN_V1_PRODUCT_INTEGRATION.md).
+
 ## Tier snapshot
 
 - **A:** inkop, household, checkoff-bridge, eat-first, replenishment, onboarding→inkop
@@ -54,6 +69,7 @@ Utgående → `/inkop` (delad lista) → handla ihop → checkoff → skafferi �
 - [x] Prod DB migrations `0047`–`0048` — applied 2026-06-14 (manual `npm run db:migrate` via Cloud SQL public IP; journal reconciled 0012–0048). `DATABASE_URL` secret set for future deploy pre-migrate.
 - [x] Prod SHA — `e26408a2` via deploy 27482069247
 - [x] Master merge train: docs, brain-activation, receipt-pattern, home-v3, memory-explorer @ `937cd9a6`
+- [ ] **Deploy pending** — master `de7f4b6b` (#46 onboarding wedge, #47 LLM/favorites off) ahead of prod
 
 ## Branches in flight (manuell)
 
