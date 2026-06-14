@@ -340,13 +340,8 @@ async function bulkCreateFromForm(
 
 	redirect(
 		302,
-		recordPurchases ? buildReceiptImportReturnUrl() : buildScanReturnUrl(returnTo, 'added', label)
+		buildScanReturnUrl(recordPurchases ? APP_HOME_PATH : returnTo, 'added', label)
 	);
-}
-
-function buildReceiptImportReturnUrl(): string {
-	const params = new URLSearchParams({ from: 'receipt' });
-	return `${APP_HOME_PATH}?${params}`;
 }
 
 export const actions: Actions = {

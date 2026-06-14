@@ -18,6 +18,7 @@
 	import { locationLabel } from '$lib/i18n/domain-labels';
 
 	import { scanModeHref } from '$lib/utils/scan-nav';
+	import { parseInventoryExpiryFilter } from '$lib/utils/inventory-list-filters';
 
 
 
@@ -59,9 +60,7 @@
 
 	const hasInventory = $derived(totalCount > 0);
 	const initialShowAutoExpired = $derived(page.url.searchParams.get('autoExpired') === '1');
-	const initialExpiryFilter = $derived(
-		page.url.searchParams.get('filter') === 'noExpiry' ? 'noExpiry' : 'all'
-	);
+	const initialExpiryFilter = $derived(parseInventoryExpiryFilter(page.url.searchParams.get('filter')));
 
 
 

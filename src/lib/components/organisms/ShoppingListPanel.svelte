@@ -293,7 +293,12 @@
 
 				if (isCheckingOff) {
 					removingIds = new Set([...removingIds, item.id]);
-					showSuccessToast(t('actionToast.shoppingChecked', { label: item.name }));
+					const pantryAutoAdded = Boolean(
+						data?.pantryAdded?.message && data.pantryAdded.auto
+					);
+					if (!pantryAutoAdded) {
+						showSuccessToast(t('actionToast.shoppingChecked', { label: item.name }));
+					}
 					await new Promise((resolve) => window.setTimeout(resolve, REMOVE_ANIMATION_MS));
 				}
 
@@ -310,6 +315,8 @@
 				next.delete(item.id);
 				removingIds = next;
 				await invalidateAll();
+			} else if (result.type === 'failure') {
+				showClientToast((result.data as { message?: string } | undefined)?.message ?? t('actionToast.shoppingCheckoffFailed'), { variant: 'error' });
 			}
 		};
 	}

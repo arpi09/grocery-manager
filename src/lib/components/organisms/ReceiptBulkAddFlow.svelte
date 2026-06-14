@@ -6,6 +6,8 @@
 	import DigitalReceiptGuide from '$lib/components/molecules/DigitalReceiptGuide.svelte';
 	import ImageSourcePicker from '$lib/components/molecules/ImageSourcePicker.svelte';
 	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
+	import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import { scanToastMessage } from '$lib/utils/scan-toast';
 	import { bindEmbeddedScanSubmit } from '$lib/utils/scan-embedded-submit';
 	import { page } from '$app/state';
 	import { recordReceiptActivation } from '$lib/utils/onboarding';
@@ -378,6 +380,10 @@
 				? bindEmbeddedScanSubmit(
 						(v) => (bulkSubmitting = v),
 						() => {
+							showClientToast(
+								scanToastMessage(getLocale(), 'added', t('receiptBulk.savedLabel', { count: selectedCount })),
+								{ variant: 'success' }
+							);
 							void trackProductEvent('receipt_review_completed', {
 								selectedCount,
 								totalLines: lines.length

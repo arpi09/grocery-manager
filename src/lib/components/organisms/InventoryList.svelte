@@ -2,7 +2,8 @@
 
 	import { browser } from '$app/environment';
 	import { deserialize } from '$app/forms';
-	import { invalidateAll } from '$app/navigation';
+	import { invalidateAll, goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { tick } from 'svelte';
 
 	import Button from '$lib/components/atoms/Button.svelte';
@@ -55,6 +56,8 @@
 		DEFAULT_INVENTORY_SORT_DIRECTION,
 
 		filterAndSortInventoryItems,
+
+		buildInventoryListUrl,
 
 		type InventoryExpiryFilter,
 
@@ -158,6 +161,7 @@
 	let isCompact = $state(false);
 
 	let consumeItem = $state<InventoryItem | null>(null);
+	let expiryFilter = $state<InventoryExpiryFilter>('all');
 	let finishingIds = $state(new Set<string>());
 	let undoPayload = $state<{
 		id: string;
@@ -180,6 +184,8 @@
 	const isServerSearch = $derived(trimmedQuery.length >= 2);
 
 
+
+	$effect(() => { expiryFilter = initialExpiryFilter; });
 
 	$effect.pre(() => {
 
@@ -322,9 +328,9 @@
 
 		isServerSearch
 
-			? filterAndSortInventoryItems(searchResults, '', initialExpiryFilter, sortKey, sortDirection)
+			? filterAndSortInventoryItems(searchResults, '', expiryFilter, sortKey, sortDirection)
 
-			: filterAndSortInventoryItems(loadedItems, query, initialExpiryFilter, sortKey, sortDirection)
+			: filterAndSortInventoryItems(loadedItems, query, expiryFilter, sortKey, sortDirection)
 
 	);
 
@@ -392,6 +398,15 @@
 
 
 
+	function setExpiryFilter(next: InventoryExpiryFilter) {
+		if (next === expiryFilter) return;
+		expiryFilter = next;
+		if (!browser) return;
+		void goto(buildInventoryListUrl(inventoryPath, next, page.url.searchParams), { replaceState: true, keepFocus: true, noScroll: true });
+	}
+	function handleExpiryFilterChange(event: Event) {
+		setExpiryFilter((event.currentTarget as HTMLSelectElement).value as InventoryExpiryFilter);
+	}
 	function mobileSortChipLabel(): string {
 
 		return sortKey === 'expiry' ? t('inventory.columnExpiry') : t('inventory.columnName');
@@ -483,6 +498,12 @@
 	);
 
 	const isSearchEmpty = $derived(trimmedQuery.length > 0 && !searching && !hasVisibleItems);
+	const isFilterEmpty = $derived(
+		expiryFilter !== 'all' && trimmedQuery.length === 0 && !searching && !hasVisibleItems
+	);
+	const clearFilterHref = $derived(
+		buildInventoryListUrl(inventoryPath, 'all', page.url.searchParams)
+	);
 
 
 
@@ -494,7 +515,7 @@
 
 			? t('inventory.noResults')
 
-			: t('inventory.emptyTitle', { location: locationName })
+			: isFilterEmpty ? t('inventory.filterEmptyTitle') : t('inventory.emptyTitle', { location: locationName })
 
 	);
 
@@ -503,6 +524,10 @@
 		isSearchEmpty
 
 			? t('inventory.tryOtherSearch')
+
+			: isFilterEmpty
+
+				? t('inventory.filterEmptyDescription')
 
 			: canWrite
 
@@ -631,6 +656,18 @@
 			<div class="filter-row">
 
 				<SearchInput bind:value={query} placeholder={t('inventory.searchPlaceholder')} />
+				<select
+					class="expiry-filter"
+					aria-label={t('inventory.expiryFilterLabel')}
+					value={expiryFilter}
+					onchange={handleExpiryFilterChange}
+					data-testid="inventory-expiry-filter"
+				>
+					<option value="all">{t('inventory.expiryFilterAll')}</option>
+					<option value="expiring">{t('inventory.expiryFilterSoon')}</option>
+					<option value="dated">{t('inventory.expiryFilterDated')}</option>
+					<option value="noExpiry">{t('inventory.expiryFilterNoExpiry')}</option>
+				</select>
 
 				{#if isCompact}
 
@@ -740,7 +777,7 @@
 
 			description={emptyDescription}
 
-			actionLabel={isSearchEmpty
+			actionLabel={isFilterEmpty ? t('inventory.filterClear') : isSearchEmpty
 
 				? undefined
 
@@ -750,7 +787,7 @@
 
 					: t('inventory.backHome')}
 
-			actionHref={isSearchEmpty
+			actionHref={isFilterEmpty ? clearFilterHref : isSearchEmpty
 
 				? undefined
 
@@ -1017,7 +1054,7 @@
 
 
 
-{#if consumeItem && canWrite}
+{#if consumeItem && canConsumeItems}
 
 	<Modal
 
@@ -1127,6 +1164,20 @@
 
 		min-width: 0;
 
+	}
+
+	.expiry-filter {
+		flex-shrink: 0;
+		max-width: 9.5rem;
+		min-height: var(--touch-target-min);
+		padding: 0.35rem 0.5rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		font-size: 0.75rem;
+		font-weight: 600;
+		font-family: inherit;
+		color: var(--color-text);
 	}
 
 
