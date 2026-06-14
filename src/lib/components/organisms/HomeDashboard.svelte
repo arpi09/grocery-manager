@@ -616,47 +616,27 @@
 
 		<h2 id="home-household-heading" class="home-v3-heading">{t('home.v3.householdTitle')}</h2>
 
-		{#if summary.totalItems === 0}
+		<HomeHouseholdSection
 
-			<p class="section-empty household-empty">
+			{intelligence}
 
-				{t('home.v3.householdEmpty')}
+			expiringSoon={summary.expiringSoon}
 
-				<span class="household-empty-links">
+			staleCount={pantryStatus.staleCount}
 
-					<a href={scanHubLinkHref} data-analytics-id="home.household_empty_scan">{t('nav.scan')}</a>
+			{shoppingListCount}
 
-					<span class="household-empty-sep" aria-hidden="true">·</span>
+			{canWrite}
 
-					<a href="/inventory/fridge" data-analytics-id="home.household_empty_inventory">{t('nav.inventory')}</a>
+			{householdId}
 
-				</span>
+			{pantryAllGood}
 
-			</p>
-
-		{:else}
-
-			<HomeHouseholdSection
-
-				{intelligence}
-
-				expiringSoon={summary.expiringSoon}
-
-				staleCount={pantryStatus.staleCount}
-
-				{shoppingListCount}
-
-				{canWrite}
-
-				{householdId}
-
-				{pantryAllGood}
-
-			/>
-
-		{/if}
+		/>
 
 	</section>
+
+	{/if}
 
 </section>
 
