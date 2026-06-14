@@ -1,4 +1,4 @@
-# Firebase App Hosting — Cloud Run settings and environment.
+# Firebase App Hosting - Cloud Run settings and environment.
 # Replace placeholder values and create secrets before first deploy.
 # Docs: docs/FIREBASE_DEPLOY.md
 
@@ -19,14 +19,14 @@ scripts:
   runCommand: node build
 
 env:
-  # Production only at runtime — NODE_ENV=production during BUILD makes npm ci
+  # Production only at runtime - NODE_ENV=production during BUILD makes npm ci
   # omit devDependencies (vite, SvelteKit, adapter-node) and breaks npm run build.
   - variable: NODE_ENV
     value: production
     availability:
       - RUNTIME
 
-  # Production must use real Postgres — never PGlite
+  # Production must use real Postgres - never PGlite
   - variable: USE_PGLITE
     value: "false"
     availability:
@@ -47,7 +47,7 @@ env:
     availability:
       - RUNTIME
 
-  # Legacy hosted.app — still used during skaffu.com transition; baked into kit.csrf.trustedOrigins at build
+  # Legacy hosted.app - still used during skaffu.com transition; baked into kit.csrf.trustedOrigins at build
   - variable: LEGACY_APP_ORIGIN
     value: https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app
     availability:
@@ -58,13 +58,13 @@ env:
     availability:
       - RUNTIME
 
-  # adapter-node default is 512K. Foto-runda accepts up to 3×6 MB images per request.
+  # adapter-node default is 512K. Foto-runda accepts up to 3-6 MB images per request.
   - variable: BODY_SIZE_LIMIT
     value: "20M"
     availability:
       - RUNTIME
 
-  # Build phase only — vite build does not connect; satisfies tools that read DATABASE_URL.
+  # Build phase only - vite build does not connect; satisfies tools that read DATABASE_URL.
   - variable: DATABASE_URL
     value: postgresql://build:build@127.0.0.1:5432/build
     availability:
@@ -96,7 +96,7 @@ env:
     availability:
       - RUNTIME
 
-  # Cron + health probes — Bearer for POST /api/cron/* and /api/health/* (see docs/CI_CD.md § CRON_SECRET)
+  # Cron + health probes - Bearer for POST /api/cron/* and /api/health/* (see docs/CI_CD.md CRON_SECRET)
   # npx firebase apphosting:secrets:set CRON_SECRET --project home-pantry-4bee5
   # npx firebase apphosting:secrets:grantaccess CRON_SECRET --backend home-pantry --project home-pantry-4bee5
   - variable: CRON_SECRET
@@ -104,10 +104,10 @@ env:
     availability:
       - RUNTIME
 
-  # Stripe (Pro checkout) — see docs/STRIPE.md. Create secrets before first deploy with Stripe enabled:
+  # Stripe (Pro checkout) - see docs/STRIPE.md. Create secrets before first deploy with Stripe enabled:
   # npx firebase apphosting:secrets:set STRIPE_SECRET_KEY --project home-pantry-4bee5
   # npx firebase apphosting:secrets:grantaccess STRIPE_SECRET_KEY --backend home-pantry --project home-pantry-4bee5
-  # (repeat for STRIPE_WEBHOOK_SECRET — prod signing secret from Dashboard webhook, not stripe listen)
+  # (repeat for STRIPE_WEBHOOK_SECRET - prod signing secret from Dashboard webhook, not stripe listen)
   - variable: STRIPE_SECRET_KEY
     secret: STRIPE_SECRET_KEY
     availability:
@@ -118,7 +118,7 @@ env:
     availability:
       - RUNTIME
 
-  # Google OAuth — app hides Google login when unset (isGoogleOAuthConfigured).
+  # Google OAuth - app hides Google login when unset (isGoogleOAuthConfigured).
   # Create secrets and grant backend access (see docs/FIREBASE_DEPLOY.md):
   # npx firebase apphosting:secrets:set GOOGLE_CLIENT_ID --project home-pantry-4bee5
   # npx firebase apphosting:secrets:grantaccess GOOGLE_CLIENT_ID --backend home-pantry --project home-pantry-4bee5
@@ -140,14 +140,14 @@ env:
       - RUNTIME
 
   # --- Non-secret config (override in Firebase console if needed) ---
-  # Replace with your admin login email before first deploy (or set in App Hosting â†’ Environment).
+  # Replace with your admin login email before first deploy (or set in App Hosting -> Environment).
   # Seeded/updated on startup together with the ADMIN_PASSWORD secret.
   - variable: ADMIN_EMAIL
     value: arvid.pilhall@me.com
     availability:
       - RUNTIME
 
-  # Resend sender — use onboarding@resend.dev until a domain is verified (see docs/EMAIL.md)
+  # Resend sender - use onboarding@resend.dev until a domain is verified (see docs/EMAIL.md)
   - variable: RESEND_FROM
     value: Skaffu <hello@skaffu.com>
     availability:
@@ -158,13 +158,13 @@ env:
     availability:
       - RUNTIME
 
-  # Owner PMF weekly digest — bypasses EMAIL_SENDING_DISABLED when cron calls sendOwnerPmfDigest
+  # Owner PMF weekly digest - bypasses EMAIL_SENDING_DISABLED when cron calls sendOwnerPmfDigest
   - variable: PMF_DIGEST_TO
     value: arvid.pilhall@me.com
     availability:
       - RUNTIME
 
-  # Cloudflare Turnstile site key (public) — must match a widget whose hostnames include
+  # Cloudflare Turnstile site key (public) - must match a widget whose hostnames include
   # Widget hostnames: localhost + hosted.app (+ skaffu.com after domain live); see docs/CAPTCHA.md
   - variable: PUBLIC_TURNSTILE_SITE_KEY
     value: 0x4AAAAAADZUXk7XZddZ9HBf
@@ -172,21 +172,21 @@ env:
       - BUILD
       - RUNTIME
 
-  # Web Push VAPID public key — pair with VAPID_PRIVATE_KEY secret; see docs/VAPID_SETUP.md
+  # Web Push VAPID public key - pair with VAPID_PRIVATE_KEY secret; see docs/VAPID_SETUP.md
   - variable: PUBLIC_VAPID_PUBLIC_KEY
     value: BPVXBW-3E3QzFlBeMJS-KYLr6bjleTmgqhyiTIzHzLnaQxQhuICXNeqKueFfGlGBJDgOHQK1z73CHf0xn-GJsdI
     availability:
       - BUILD
       - RUNTIME
 
-  # W1 — public read-only shopping list share (/lista/[token]); see docs/HOUSEHOLD_GROWTH.md
+  # W1 - public read-only shopping list share (/lista/[token]); see docs/HOUSEHOLD_GROWTH.md
   - variable: PUBLIC_SHOPPING_LIST_SHARE_ENABLED
     value: "true"
     availability:
       - BUILD
       - RUNTIME
 
-  # Brain V1 — enabled post-merge smoke (see docs/LEARNING_ENGINE.md)
+  # Brain V1 - enabled post-merge smoke (see docs/LEARNING_ENGINE.md)
   - variable: SHELF_LIFE_LEARNING_ENABLED
     value: "true"
     availability:
@@ -213,7 +213,7 @@ env:
   #   secret: DEFAULT_MEMBER_PASSWORD
 
 
-  # Sales demo account (see docs/DEMO_ACCOUNT.md) — password secret only needed for seed/cron reset-demo
+  # Sales demo account (see docs/DEMO_ACCOUNT.md) - password secret only needed for seed/cron reset-demo
   - variable: DEMO_ACCOUNT_EMAIL
     value: demo@skaffu.com
     availability:
@@ -229,7 +229,7 @@ env:
   #   availability:
   #     - RUNTIME
 
-  # Stripe Pro price IDs — from Stripe Dashboard (test or live); replace before deploy. See docs/STRIPE.md
+  # Stripe Pro price IDs - from Stripe Dashboard (test or live); replace before deploy. See docs/STRIPE.md
   - variable: STRIPE_PRICE_ID_MONTHLY
     value: price_1TdyEW0xHxoOfEfBbbfRVfJp
     availability:
@@ -240,7 +240,7 @@ env:
     availability:
       - RUNTIME
 
-  # Pro checkout kill switch â€” keep true until Stripe launch (see docs/STRIPE.md)
+  # Pro checkout kill switch - keep true until Stripe launch (see docs/STRIPE.md)
   - variable: STRIPE_CHECKOUT_DISABLED
     value: "true"
     availability:
