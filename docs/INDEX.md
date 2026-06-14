@@ -4,7 +4,8 @@
 
 | Läs först | Fil |
 |-----------|-----|
-| Prod vs master, flags, nav, tier | [CURRENT_REALITY.md](./CURRENT_REALITY.md) |
+| Prod SHA, nav, tier, kill switches | [CURRENT_REALITY.md](./CURRENT_REALITY.md) |
+| Release policy (master=truth, deploy=publish) | [RELEASE_MODEL.md](./RELEASE_MODEL.md) |
 | Kärnloopen | `.cursor/rules/skaffu-core-loop.mdc` |
 | Coordinator WIP/deploy | [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md) |
 | Coordinator planning | `coordinator-planning.mdc`, [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md) |
@@ -17,7 +18,7 @@
 |-------|-----|
 | `skaffu-deploy-verify` | deploy, prod, release, rollback |
 | `skaffu-core-loop-change` | hem, inkop, onboarding, nav, household |
-| `skaffu-feature-flag-rollout` | `PUBLIC_*`, apphosting.yaml, W1/W2 flags |
+| `skaffu-feature-flag-rollout` | Kill switches, Tier C, infra env — see [RELEASE_MODEL.md](./RELEASE_MODEL.md) |
 
 ## Rör inte (Tier C) utan explicit request
 

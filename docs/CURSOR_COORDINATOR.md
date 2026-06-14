@@ -8,13 +8,13 @@ Denna fil finns i git. Operativ status, kostnadssiffror och spawn-logg ligger i 
 
 ## Agent-ingång (INDEX + skills)
 
-Alla agenter (coordinator och implementation) börjar med [INDEX.md](./INDEX.md) och [CURRENT_REALITY.md](./CURRENT_REALITY.md) — prod SHA, nav, flags och tier.
+Alla agenter (coordinator och implementation) börjar med [INDEX.md](./INDEX.md), [CURRENT_REALITY.md](./CURRENT_REALITY.md) och [RELEASE_MODEL.md](./RELEASE_MODEL.md) — prod SHA, nav, release policy och tier.
 
 | Skill (`.cursor/skills/`) | När |
 |---------------------------|-----|
 | `skaffu-deploy-verify` | deploy, prod, release, rollback |
 | `skaffu-core-loop-change` | hem, inkop, onboarding, nav, household |
-| `skaffu-feature-flag-rollout` | `PUBLIC_*`, apphosting.yaml, W1/W2 flags |
+| `skaffu-feature-flag-rollout` | Kill switches, Tier C, infra env — **not** post-merge activation ([RELEASE_MODEL.md](./RELEASE_MODEL.md)) |
 
 Kärnloop-regel (alwaysApply): `.cursor/rules/skaffu-core-loop.mdc`.
 
@@ -79,7 +79,8 @@ Projekt-hooks i [`.cursor/hooks.json`](../.cursor/hooks.json) är avsiktligt min
 | Policy | Var den lever |
 |--------|----------------|
 | Tier C / frozen zones | `skaffu-core-loop.mdc`, `skaffu-frozen-zones.mdc` |
-| CURRENT_REALITY vid nav/flags | `skaffu-reality-sync.mdc` + skill `skaffu-core-loop-change` |
+| CURRENT_REALITY vid nav/deploy | `skaffu-reality-sync.mdc` + skill `skaffu-core-loop-change` |
+| Release policy (master=truth) | [RELEASE_MODEL.md](./RELEASE_MODEL.md) — flags merge with feature, deploy publishes |
 | Deploy / G0 / rollback | `deploy-safety.mdc`, `delivery-done.mdc` + skill `skaffu-deploy-verify` |
 
 **Enda kvarvarande hook:** `beforeShellExecution` med matcher `gh workflow run deploy` — tyst `allow` + `agent_message` (ingen modal). Påminner agenten om G0/CI/rollback utan att blockera.
@@ -294,3 +295,4 @@ Du är coordinator. Fråga innan commit, push eller spawn. WIP 3 aktiv: max 3 fe
 | [`TEST_STRATEGY.md`](./TEST_STRATEGY.md) | Testing diamond, risk, DoD |
 | [`E2E.md`](./E2E.md) | Playwright-setup |
 | [`PROD_SMOKE.md`](./PROD_SMOKE.md) | Agent post-deploy smoke efter grön Deploy to production (coordinator, inte användaren) |
+| [`RELEASE_MODEL.md`](./RELEASE_MODEL.md) | master=truth, deploy=publish, kill switches only, no post-merge flag flip |
