@@ -97,6 +97,6 @@ Run after deploy when Brain flags are **on** on master `apphosting.yaml` ([RELEA
 
 ## Deferred (not V1)
 
-- `HOUSEHOLD_FAVORITES_ENABLED` / migration `0049` — separate track
+- Migration `0049` (household favorites) — separate track
 - `InkopDuoActionBar` — wedge UI, not shelf-life loop
 - LLM tier, consumption-velocity sort, global learning

@@ -39,8 +39,8 @@ Summary from coordinator audit — do not build in V1:
 |--------|--------|
 | **Category habits** | No stable taxonomy |
 | **Cross-household benchmarking** | Out of scope; privacy + no product wedge |
-| **LLM receipt parsing tiers** | Stubs OFF — `SHELF_LIFE_LLM_ENABLED`, `LOCATION_LLM_ENABLED` |
-| **Household favorites** | Migration `0049` deferred — `HOUSEHOLD_FAVORITES_ENABLED` off |
+| **LLM receipt parsing tiers** | Not in V1 |
+| **Household favorites** | Migration `0049` deferred |
 
 Detail (parse / privacy noise):
 

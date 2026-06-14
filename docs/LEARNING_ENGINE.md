@@ -12,7 +12,8 @@ Skaffu Brain V1 replaces scattered `guessShelfLife` calls with a **modular predi
 
 1. **Household rule** — median `typical_days` per `(normalized_key, location)` when `sample_count >= 2`
 2. **Heuristic** — keyword table in `src/lib/domain/shelf-life.ts`
-3. **Optional LLM** — stub tier behind `SHELF_LIFE_LLM_ENABLED` (not implemented in V1)
+
+No LLM tier in V1.
 
 Every prediction is **observable and correctable**. User actions write to `learning_feedback` and update `household_shelf_life_rule`.
 
@@ -47,7 +48,6 @@ Every prediction is **observable and correctable**. User actions write to `learn
 | `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT` | BUILD+RUNTIME | `false` | `isShelfLifeEstimatesInReceiptEnabled()` |
 | `LOCATION_LEARNING_ENABLED` | server RUNTIME | `false` | `isLocationLearningEnabled()` |
 | `REPLENISHMENT_LEARNING_ENABLED` | server RUNTIME | `false` | `isReplenishmentLearningEnabled()` |
-| `SHELF_LIFE_LLM_ENABLED` | server RUNTIME | `false` | `isShelfLifeLlmEnabled()` |
 
 `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT` unset locally falls back to `SHELF_LIFE_LEARNING_ENABLED`.
 

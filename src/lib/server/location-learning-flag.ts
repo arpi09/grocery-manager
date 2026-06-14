@@ -1,8 +1,8 @@
-import { isLocationLearningEnabled } from './feature-flags';
-
-export { isLocationLearningEnabled, isLocationLlmEnabled } from './feature-flags';
-
-/** Client receipt UX — tied to server learning flag until PUBLIC_* env is wired. */
-export function isLocationPredictionsInReceiptEnabled(): boolean {
-	return isLocationLearningEnabled();
-}
+import { isLocationLearningEnabled } from './feature-flags';
+
+export { isLocationLearningEnabled } from './feature-flags';
+
+/** Client receipt UX — tied to server learning flag until PUBLIC_* env is wired. */
+export function isLocationPredictionsInReceiptEnabled(): boolean {
+	return isLocationLearningEnabled();
+}
