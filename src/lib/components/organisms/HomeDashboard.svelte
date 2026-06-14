@@ -40,6 +40,7 @@
 		receiptFinishSuggestions?: ReceiptFinishSuggestion[];
 		intelligence?: HomeIntelligenceSnapshot;
 		shoppingListCount?: number;
+		showMemoryExplorer?: boolean;
 	}
 
 	let {
@@ -51,7 +52,8 @@
 		receiptAutopilotSuggestions = [],
 		receiptFinishSuggestions = [],
 		intelligence = { replenishment: [], pantryHealth: [], waste: null, dedupeByKey: {} },
-		shoppingListCount = 0
+		shoppingListCount = 0,
+		showMemoryExplorer = false
 	}: Props = $props();
 
 	const returnTo = APP_HOME_PATH;
@@ -127,6 +129,10 @@
 
 	const receiptFootnoteCount = $derived(
 		filteredAutopilotSuggestions.length + finishSuggestionsForFootnote.length
+	);
+
+	const showMemoryFootnote = $derived(
+		browser && showMemoryExplorer && canWrite && isReceiptImportRecentlyCompleted()
 	);
 
 	$effect(() => {
@@ -282,6 +288,13 @@
 			<p class="receipt-footnote">
 				<a href="/inkop" data-analytics-id="home.receipt_footnote">
 					{t('home.v3.receiptFootnote', { count: receiptFootnoteCount })}
+				</a>
+			</p>
+		{/if}
+		{#if showMemoryFootnote}
+			<p class="receipt-footnote">
+				<a href="/settings/memory" data-analytics-id="home.memory_footnote">
+					{t('home.v3.memoryFootnote')}
 				</a>
 			</p>
 		{/if}

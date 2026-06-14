@@ -94,7 +94,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		canWrite,
 		receiptAutopilotSuggestions,
 		receiptFinishSuggestions,
-		shoppingListCount
+		shoppingListCount,
+		showMemoryExplorer: isShelfLifeLearningEnabled() || isLocationLearningEnabled()
 	};
 };
 
