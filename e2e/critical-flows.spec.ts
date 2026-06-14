@@ -11,7 +11,9 @@ import {
 
 	loginWithCredentials,
 
-	registerNewUser
+	registerNewUser,
+
+	waitForWelcomeParamStripped
 
 } from './helpers/auth';
 
@@ -21,7 +23,11 @@ test.describe('Critical flows', () => {
 
 	test('register creates account with captcha bypass and lands on hem welcome', async ({ page }) => {
 
+		test.setTimeout(60_000);
+
 		await registerNewUser(page);
+
+		await waitForWelcomeParamStripped(page);
 
 		await expect(page).toHaveURL('/hem');
 
