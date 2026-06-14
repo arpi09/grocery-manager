@@ -26,6 +26,8 @@ const ACTIVATION_BARCODE_COUNT_SUFFIX = 'activation-barcode-count';
 
 const ACTIVATION_RECEIPT_SUFFIX = 'activation-receipt-done';
 
+const ACTIVATION_FIRST_ITEM_DONE_SUFFIX = 'activation-first-item-done';
+
 const ACTIVATION_SHOPPING_COUNT_SUFFIX = 'activation-shopping-count';
 
 const CELEBRATION_PENDING_SUFFIX = 'celebration-pending';
@@ -257,6 +259,8 @@ function clearUserOnboardingKeys(userId: string): void {
 
 		ACTIVATION_RECEIPT_SUFFIX,
 
+		ACTIVATION_FIRST_ITEM_DONE_SUFFIX,
+
 		ACTIVATION_SHOPPING_COUNT_SUFFIX,
 
 		CELEBRATION_PENDING_SUFFIX,
@@ -371,6 +375,9 @@ export function getActivationProgress(userId?: string | null): ActivationProgres
 
 	const receiptDone = localStorage.getItem(storageKey(ACTIVATION_RECEIPT_SUFFIX, userId)) === '1';
 
+	const firstItemDone =
+		localStorage.getItem(storageKey(ACTIVATION_FIRST_ITEM_DONE_SUFFIX, userId)) === '1';
+
 	const storedBarcodeCount = Number(
 		localStorage.getItem(storageKey(ACTIVATION_BARCODE_COUNT_SUFFIX, userId)) ?? '0'
 	);
@@ -380,13 +387,20 @@ export function getActivationProgress(userId?: string | null): ActivationProgres
 	);
 
 	const isComplete =
-		receiptDone || storedBarcodeCount >= barcodeGoal || storedShoppingCount >= shoppingListGoal;
+		receiptDone ||
+		firstItemDone ||
+		storedBarcodeCount >= barcodeGoal ||
+		storedShoppingCount >= shoppingListGoal;
 
 	const barcodeCount = receiptDone && isComplete ? 0 : storedBarcodeCount;
 
 	const inProgress =
 		!isComplete &&
-		(path !== null || storedBarcodeCount > 0 || storedShoppingCount > 0 || receiptDone);
+		(path !== null ||
+			storedBarcodeCount > 0 ||
+			storedShoppingCount > 0 ||
+			receiptDone ||
+			firstItemDone);
 
 	return {
 		path,
@@ -466,6 +480,8 @@ export function recordFirstItemActivation(userId?: string | null): boolean {
 	if (typeof localStorage === 'undefined' || !userId) return false;
 
 	if (isActivationComplete(userId)) return false;
+
+	localStorage.setItem(storageKey(ACTIVATION_FIRST_ITEM_DONE_SUFFIX, userId), '1');
 
 	markActivationComplete(userId);
 

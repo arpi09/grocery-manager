@@ -13,6 +13,7 @@ import {
 	isPostOnboardingSharePath,
 	markSignupAt,
 	recordBarcodeActivation,
+	recordFirstItemActivation,
 	recordReceiptActivation,
 	recordShoppingListItemActivation,
 	resetOnboarding,
@@ -217,6 +218,13 @@ describe('activation progress', () => {
 		expect(getActivationProgress(TEST_USER_A).receiptDone).toBe(true);
 		expect(isActivationComplete(TEST_USER_A)).toBe(true);
 		expect(shouldShowCelebration(TEST_USER_A)).toBe(true);
+	});
+
+	it('completes activation after first photo item save', () => {
+		expect(recordFirstItemActivation(TEST_USER_A)).toBe(true);
+		expect(isActivationComplete(TEST_USER_A)).toBe(true);
+		expect(shouldShowCelebration(TEST_USER_A)).toBe(true);
+		expect(recordFirstItemActivation(TEST_USER_A)).toBe(false);
 	});
 
 	it('does not increment barcode progress after activation is complete', () => {

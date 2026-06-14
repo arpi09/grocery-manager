@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteSafetyModal from '$lib/components/molecules/DeleteSafetyModal.svelte';
@@ -23,6 +24,7 @@ import {
 	savePhotoRoundLocation
 } from '$lib/utils/photo-round-locations';
 	import { saveLastScanMode } from '$lib/utils/last-scan-defaults';
+	import { recordFirstItemActivation } from '$lib/utils/onboarding';
 	import {
 		PhotoRoundImageError,
 		resizeImageForPhotoRound
@@ -476,7 +478,9 @@ import {
 					)
 				: bindSubmittingWithRedirect(
 						(v) => (bulkSubmitting = v),
-						async () => {},
+						async () => {
+							recordFirstItemActivation(page.data.user?.id);
+						},
 						syncPhotoRoundFormData
 					)}
 		>
