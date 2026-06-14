@@ -6,11 +6,16 @@ const KEY = 'scan.last.defaults.v1';
 
 export type LastScanMode = Exclude<ScanMode, 'hub'>;
 
-export const DEFAULT_SCAN_MODE: LastScanMode = 'photo';
+/** New users without scan history — kvitto-first narrative. */
+export const DEFAULT_SCAN_MODE: LastScanMode = 'receipt';
 
 export interface LastScanDefaults {
 	mode?: LastScanMode;
 	location: StorageLocation;
+}
+
+function isLastScanMode(value: unknown): value is LastScanMode {
+	return value === 'barcode' || value === 'receipt' || value === 'photo';
 }
 
 export function getLastScanDefaults(): LastScanDefaults | null {
@@ -18,10 +23,11 @@ export function getLastScanDefaults(): LastScanDefaults | null {
 	try {
 		const raw = window.localStorage.getItem(KEY);
 		if (!raw) return null;
-		const parsed = JSON.parse(raw) as { location?: unknown };
+		const parsed = JSON.parse(raw) as { location?: unknown; mode?: unknown };
 		const location = parsed.location;
 		if (typeof location !== 'string' || !isStorageLocation(location)) return null;
-		return { location };
+		const mode = isLastScanMode(parsed.mode) ? parsed.mode : undefined;
+		return mode ? { location, mode } : { location };
 	} catch {
 		return null;
 	}

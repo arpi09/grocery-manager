@@ -43,9 +43,9 @@
 			</svg>
 		</div>
 		<div class="hero-copy">
-			<h2 class="hero-title">{t('photoRound.title')}</h2>
+			<h2 class="hero-title">{t('scan.hubHero.title')}</h2>
 			<p class="hero-subtitle">{t('scan.hubHero.subtitle')}</p>
-			<a class="hero-cta" href={photoHref} data-testid="scan-hub-photo-round">
+			<a class="hero-cta" href={receiptHref} data-testid="scan-hub-receipt-hero">
 				{t('scan.hubHero.cta')}
 			</a>
 		</div>
@@ -56,18 +56,18 @@
 			{t('scan.moreWays')}
 		</h2>
 		<div class="secondary-row" data-testid="scan-hub-mode-grid">
+			<Card href={photoHref} interactive class="compact-tile" data-testid="scan-hub-photo">
+				<span class="icon-wrap" aria-hidden="true">
+					<FeatureIcon id="photo" size={22} />
+				</span>
+				<span class="compact-label">{t('scan.modes.photo')}</span>
+			</Card>
+
 			<Card href={barcodeHref} interactive class="compact-tile" data-testid="scan-hub-barcode">
 				<span class="icon-wrap" aria-hidden="true">
 					<FeatureIcon id="barcode" size={22} />
 				</span>
 				<span class="compact-label">{t('scan.modes.barcode')}</span>
-			</Card>
-
-			<Card href={receiptHref} interactive class="compact-tile" data-testid="scan-hub-receipt">
-				<span class="icon-wrap" aria-hidden="true">
-					<FeatureIcon id="receipt" size={22} />
-				</span>
-				<span class="compact-label">{t('scan.modes.receipt')}</span>
 			</Card>
 
 			<Card href={manualHref} interactive class="compact-tile" data-testid="scan-hub-manual">

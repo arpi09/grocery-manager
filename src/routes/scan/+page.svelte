@@ -21,11 +21,9 @@
 			return;
 		}
 		const mode = getLastScanMode();
-		if (mode !== 'photo') {
-			void goto(scanModeHref(mode, data.returnTo, data.defaultLocation ? { location: data.defaultLocation } : undefined), {
-				replaceState: true
-			});
-		}
+		void goto(scanModeHref(mode, data.returnTo, data.defaultLocation ? { location: data.defaultLocation } : undefined), {
+			replaceState: true
+		});
 	});
 
 	const scanMode = $derived(data.scanMode as ScanMode);
