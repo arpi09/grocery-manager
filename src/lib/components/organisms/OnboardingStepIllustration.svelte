@@ -27,7 +27,7 @@
 			<circle class="flash-ring camera-flash" cx="100" cy="108" r="16" />
 			<circle class="flash-burst camera-flash" cx="100" cy="108" r="9" />
 		</svg>
-	{:else if step === 'pathGuide' || step === 'addItems'}
+	{:else if step === 'pathGuide'}
 		<svg class="illus" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
 			<circle class="illus-bg" cx="100" cy="80" r="72" />
 			<rect class="scan-frame" x="52" y="36" width="96" height="88" rx="10" stroke-width="3" />
