@@ -1,18 +1,18 @@
 # CURRENT_REALITY
 
-> **Uppdatera denna fil** nï¿½r prod deployas eller nav/flags ï¿½ndras. Kï¿½r: `.cursor/scripts/refresh-current-reality.sh`
+> **Uppdatera denna fil** n?r prod deployas eller nav/flags ?ndras. K?r: `.cursor/scripts/refresh-current-reality.sh`
 
-| Fï¿½lt | Vï¿½rde |
+| F?lt | V?rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-14 |
-| **Prod SHA** | `f70c2c9c` ï¿½ deploy run [27507835082](https://github.com/arpi09/grocery-manager/actions/runs/27507835082) (2026-06-14) |
-| **Master SHA** | `f70c2c9c` ï¿½ narrative sprint (#75ï¿½#79) + UX #73/#74 + apphosting.yaml deploy fix |
+| **Prod SHA** | `f70c2c9c` ? deploy run [27507835082](https://github.com/arpi09/grocery-manager/actions/runs/27507835082) (2026-06-14) |
+| **Master SHA** | `f70c2c9c` ? narrative sprint (#75?#79) + UX #73/#74 + apphosting.yaml deploy fix |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
 
-## Kï¿½rnloopen (produktfokus)
+## K?rnloopen (produktfokus)
 
-Utgï¿½ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenishment ? nï¿½sta lista.
+Utg?ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenishment ? n?sta lista.
 
 ## Navigation
 
@@ -21,9 +21,9 @@ Utgï¿½ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replen
 | Yta | Route | Notering |
 |-----|-------|----------|
 | Default home | `/hem` | `APP_HOME_PATH` ? dashboard default |
-| Hem dashboard | `/hem` | **Home V3** ? Denna vecka ? Skaffu rekommenderar ? Hushï¿½llet ([HOME_V3.md](./HOME_V3.md)) |
-| Primary tabs (desktop) | Hem, Lager, Inkï¿½p, Skanna, Mer | Lager + scan in top row |
-| Primary tabs (mobile) | Hem, Inkï¿½p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
+| Hem dashboard | `/hem` | **Home V3** ? Denna vecka ? Skaffu rekommenderar ? Hush?llet ([HOME_V3.md](./HOME_V3.md)) |
+| Primary tabs (desktop) | Hem, Lager, Ink?p, Skanna, Mer | Lager + scan in top row |
+| Primary tabs (mobile) | Hem, Ink?p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
 | Memory Explorer | `/settings/memory` | Vad Skaffu vet ? household rules (learning gate) |
 | Post-register wedge | `/hem?welcome=1` | Ny registrering/OAuth ? guided start on hem ([#46](https://github.com/arpi09/grocery-manager/pull/46)) |
 | Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie |
@@ -49,7 +49,7 @@ What users **see** when core Brain flags are on (prod target / master):
 
 Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 
-**USER_LOCAL smoke (pending ? PO gate):** Physical device + real receipt @ prod SHA `73d3dfd0`; agents link only ? **do not substitute or claim this pass.** Checklists: [Brain V1 smoke](./BRAIN_V1_PRODUCT_INTEGRATION.md#smoke-checklist-post-deploy) ï¿½ [Weekly loop smoke](./HOUSEHOLD_LOOP_AUDIT.md#user_local--weekly-loop-smoke-checklist).
+**USER_LOCAL smoke (pending ? PO gate):** Physical device + real receipt @ prod SHA `f70c2c9c`; agents link only ? **do not substitute or claim this pass.** Checklists: [Brain V1 smoke](./BRAIN_V1_PRODUCT_INTEGRATION.md#smoke-checklist-post-deploy) · [Weekly loop smoke](./HOUSEHOLD_LOOP_AUDIT.md#user_local--weekly-loop-smoke-checklist).
 
 ## Tier snapshot
 
@@ -57,12 +57,12 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 - **B:** receipt import, barcode/photo add, price memory, Brain V1 (flags on), Memory Explorer
 - **C:** grannskafferiet, meal plan AI, wrapped, PMF user dashboards, Stripe marketing
 
-## Kï¿½nda drift (fixa nï¿½r du ser dem)
+## K?nda drift (fixa n?r du ser dem)
 
 - [x] Prod DB migrations `0047`?`0048` ? applied 2026-06-14 (manual `npm run db:migrate` via Cloud SQL public IP; journal reconciled 0012?0048). `DATABASE_URL` secret set for future deploy pre-migrate.
-- [x] Prod SHA ? `73d3dfd0` via deploy [27501022135](https://github.com/arpi09/grocery-manager/actions/runs/27501022135)
-- [x] Master merge train: docs, brain-activation, receipt-pattern, home-v3, memory-explorer @ `937cd9a6`
-- [x] **Deploy** ? `73d3dfd0` bundle 2 brain visibility live in prod (run 27501022135)
+- [x] Prod SHA ? `f70c2c9c` via deploy [27507835082](https://github.com/arpi09/grocery-manager/actions/runs/27507835082) (narrative sprint + UX #73/#74)
+- [x] **Deploy fix** ? `apphosting.yaml` ASCII normalization (`fah/invalid-apphosting-yaml` mojibake)
+- [x] Prior prod `73d3dfd0` bundle 2 @ [27501022135](https://github.com/arpi09/grocery-manager/actions/runs/27501022135)
 
 ## Branches in flight (manuell)
 
@@ -73,5 +73,5 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 | `feat/memory-explorer-v1` | Memory Explorer V1 | **Mergad till master** |
 | `feat/receipt-pattern-purchasedAt` | purchasedAt cutoff fix | **Mergad till master** |
 | `docs/receipt-intelligence-next-slice` | Next slice plan | **Mergad till master** |
-| `feat/ux-inventory-list-v1` | UX Slice 1 ? Product Row + V1.1 inventory badge | **PLANNED** ? not started |
+| `feat/ux-inventory-list-v1` | UX Slice 1 ? Product Row + V1.1 inventory badge | **Merged** (#74 @ narrative deploy) |
 
