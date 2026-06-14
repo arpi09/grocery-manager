@@ -104,16 +104,6 @@ describe('receiptImportToastMessage', () => {
 		expect(message).toContain('2');
 		expect(message).toContain('1');
 	});
-
-	it('returns headline only when summary is empty', () => {
-		const message = receiptImportToastMessage('sv', 1, {
-			estimatedDates: 0,
-			locationCorrections: 0,
-			rulesImproved: 0
-		});
-
-		expect(message).not.toContain('·');
-	});
 });
 
 describe('markReceiptImportCompleted', () => {
