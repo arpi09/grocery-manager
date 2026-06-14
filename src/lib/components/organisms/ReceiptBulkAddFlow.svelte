@@ -242,6 +242,7 @@
 	}
 
 	const selectedCount = $derived(lines.filter((_, i) => selected[i]).length);
+	const hasLocationPredictions = $derived(locationPredictions.some((prediction) => prediction != null));
 
 	function buildReceiptImportSummary() {
 		return aggregateReceiptImportSummary(
@@ -367,6 +368,9 @@
 		{#if shelfLifeEstimatesInReceipt}
 			<p class="hint">{t('receiptBulk.estimatesHint')}</p>
 		{/if}
+		{#if hasLocationPredictions}
+			<p class="hint">{t('receiptBulk.locationSuggestionsHint')}</p>
+		{/if}
 
 		<div class="bulk-location">
 			<div class="bulk-location-copy">
@@ -455,6 +459,12 @@
 							<label class="line-location">
 								<span class="line-location-label">
 									{t('receiptBulk.locationPerItem')}
+									{#if locationPredictions[index] && !locationOverrides.has(index)}
+										<EstimatedBadge
+											source={locationPredictions[index]!.source}
+											label={t('receiptBulk.suggestedLocation')}
+										/>
+									{/if}
 									{#if locationOverrides.has(index)}
 										<span class="override-badge">{t('receiptBulk.locationOverride')}</span>
 									{/if}

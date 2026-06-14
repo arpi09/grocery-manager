@@ -1888,6 +1888,8 @@
 		"apiKeyHint": "Kräver OPENAI_API_KEY i serverns .env.",
 		"locationBulkHint": "Gäller markerade rader. Ändra plats per vara nedan om en rad ska ligga någon annanstans.",
 		"locationOverride": "egen plats",
+		"suggestedLocation": "Föreslagen plats",
+		"locationSuggestionsHint": "Platser är förslag från Skaffu — ändra vid behov innan du sparar.",
 		"estimatesHint": "Utgångsdatum är uppskattningar — justera vid behov innan du sparar.",
 		"savedLabel": "{count} {count, plural, one {vara} other {varor}}"
 	},
@@ -2834,3 +2836,4 @@
 		"signupBtn": "Prova Skaffu gratis"
 	}
 }
+

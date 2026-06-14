@@ -34,11 +34,19 @@
 
 		showSettingsLink?: boolean;
 
+		/** Defaults to expiry label; pass e.g. suggested-location copy for receipt rows. */
+
+		label?: string;
+
 	}
 
 
 
-	let { source = null, explanation = null, showSettingsLink = false }: Props = $props();
+	let { source = null, explanation = null, showSettingsLink = false, label }: Props = $props();
+
+
+
+	const badgeLabel = $derived(label ?? t('learning.estimatedExpiry'));
 
 
 
@@ -124,13 +132,13 @@
 
 			aria-expanded={hasExplanation ? sheetOpen : expanded}
 
-			aria-label="{t('learning.estimatedExpiry')}, {explanation?.primary ?? sourceHint ?? ''}"
+			aria-label="{badgeLabel}, {explanation?.primary ?? sourceHint ?? ''}"
 
 			onclick={onBadgeClick}
 
 		>
 
-			<Badge tone="default">{t('learning.estimatedExpiry')}</Badge>
+			<Badge tone="default">{badgeLabel}</Badge>
 
 		</button>
 
@@ -142,7 +150,7 @@
 
 	{:else}
 
-		<Badge tone="default">{t('learning.estimatedExpiry')}</Badge>
+		<Badge tone="default">{badgeLabel}</Badge>
 
 	{/if}
 
