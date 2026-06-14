@@ -38,11 +38,21 @@
 
 		label?: string;
 
+		/** When false, render a static badge (no tap / explain sheet). */
+
+		interactive?: boolean;
+
 	}
 
 
 
-	let { source = null, explanation = null, showSettingsLink = false, label }: Props = $props();
+	let {
+		source = null,
+		explanation = null,
+		showSettingsLink = false,
+		label,
+		interactive = true
+	}: Props = $props();
 
 
 
@@ -122,7 +132,11 @@
 
 <span class="estimated-badge-wrap">
 
-	{#if sourceHint || hasExplanation}
+	{#if !interactive}
+
+		<Badge tone="default">{badgeLabel}</Badge>
+
+	{:else if sourceHint || hasExplanation}
 
 		<button
 

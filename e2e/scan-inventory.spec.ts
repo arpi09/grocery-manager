@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
+import { dismissOnboardingModalIfOpen, dismissPageHintIfOpen, loginAsAdmin } from './helpers/auth';
 import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
 
 test.describe('Scan and inventory', () => {
@@ -148,6 +148,7 @@ test.describe('Scan and inventory', () => {
 			await loginAsAdmin(page);
 			await page.goto('/inventory/fridge');
 			await dismissOnboardingModalIfOpen(page);
+			await dismissPageHintIfOpen(page);
 
 			const list = page.getByTestId('inventory-compact-list');
 			if (!(await list.isVisible({ timeout: 15_000 }).catch(() => false))) {
@@ -155,7 +156,10 @@ test.describe('Scan and inventory', () => {
 			}
 
 			await expect(page.getByTestId('inventory-table')).toHaveCount(0);
-			const logUsage = list.getByRole('button', { name: /Delvis|Partial/i }).first();
+			const row = list.getByTestId('inventory-compact-row').first();
+			const overflow = row.getByTestId('row-overflow-menu').getByRole('button');
+			await overflow.click({ force: true });
+			const logUsage = row.getByRole('menuitem', { name: /Delvis|Partial/i });
 			await expect(logUsage).toBeVisible();
 		});
 	});

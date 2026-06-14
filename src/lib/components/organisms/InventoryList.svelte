@@ -17,11 +17,13 @@
 
 	import InventoryDataTable from '$lib/components/molecules/InventoryDataTable.svelte';
 
+	import ListToolbar from '$lib/components/molecules/ListToolbar.svelte';
+
+	import LocationTab from '$lib/components/molecules/LocationTab.svelte';
+
 	import Modal from '$lib/components/molecules/Modal.svelte';
 
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
-
-	import SearchInput from '$lib/components/molecules/SearchInput.svelte';
 
 	import type { FeatureIconId } from '$lib/components/atoms/FeatureIcon.svelte';
 
@@ -404,9 +406,7 @@
 		if (!browser) return;
 		void goto(buildInventoryListUrl(inventoryPath, next, page.url.searchParams), { replaceState: true, keepFocus: true, noScroll: true });
 	}
-	function handleExpiryFilterChange(event: Event) {
-		setExpiryFilter((event.currentTarget as HTMLSelectElement).value as InventoryExpiryFilter);
-	}
+
 	function mobileSortChipLabel(): string {
 
 		return sortKey === 'expiry' ? t('inventory.columnExpiry') : t('inventory.columnName');
@@ -651,35 +651,17 @@
 
 	{#if hasInventory}
 
-		<div class="sticky-chrome">
+		<div class="sticky-band">
 
-			<div class="filter-row">
+			<LocationTab active={location} />
 
-				<SearchInput bind:value={query} placeholder={t('inventory.searchPlaceholder')} />
-				<select
-					class="expiry-filter"
-					aria-label={t('inventory.expiryFilterLabel')}
-					value={expiryFilter}
-					onchange={handleExpiryFilterChange}
-					data-testid="inventory-expiry-filter"
-				>
-					<option value="all">{t('inventory.expiryFilterAll')}</option>
-					<option value="expiring">{t('inventory.expiryFilterSoon')}</option>
-					<option value="dated">{t('inventory.expiryFilterDated')}</option>
-					<option value="noExpiry">{t('inventory.expiryFilterNoExpiry')}</option>
-				</select>
-
-				{#if isCompact}
-
-					<button type="button" class="sort-chip" onclick={toggleMobileSortChip}>
-
-						{mobileSortChipLabel()}
-
-					</button>
-
-				{/if}
-
-			</div>
+			<ListToolbar
+				bind:query
+				expiryFilter={expiryFilter}
+				onExpiryFilterChange={setExpiryFilter}
+				sortChipLabel={isCompact ? mobileSortChipLabel() : undefined}
+				onSortChipClick={isCompact ? toggleMobileSortChip : undefined}
+			/>
 
 			{#if autoExpiredTotal > 0 || finishedTotal > 0}
 
@@ -1124,7 +1106,7 @@
 
 
 
-	.sticky-chrome {
+	.sticky-band {
 
 		position: sticky;
 
@@ -1141,86 +1123,6 @@
 		padding-bottom: var(--space-xs);
 
 		background: var(--color-bg);
-
-	}
-
-
-
-	.filter-row {
-
-		display: flex;
-
-		align-items: center;
-
-		gap: var(--space-sm);
-
-	}
-
-
-
-	.filter-row :global(.search) {
-
-		flex: 1;
-
-		min-width: 0;
-
-	}
-
-	.expiry-filter {
-		flex-shrink: 0;
-		max-width: 9.5rem;
-		min-height: var(--touch-target-min);
-		padding: 0.35rem 0.5rem;
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-sm);
-		background: var(--color-surface);
-		font-size: 0.75rem;
-		font-weight: 600;
-		font-family: inherit;
-		color: var(--color-text);
-	}
-
-
-
-	.sort-chip {
-
-		flex-shrink: 0;
-
-		display: inline-flex;
-
-		align-items: center;
-
-		min-height: var(--touch-target-min);
-
-		padding: 0.35rem 0.65rem;
-
-		border: 1px solid var(--color-border);
-
-		border-radius: var(--radius-sm);
-
-		background: var(--color-surface);
-
-		font-size: 0.75rem;
-
-		font-weight: 600;
-
-		font-family: inherit;
-
-		color: var(--color-text-muted);
-
-		cursor: pointer;
-
-		white-space: nowrap;
-
-	}
-
-
-
-	.sort-chip:hover {
-
-		border-color: var(--color-primary);
-
-		color: var(--color-primary);
 
 	}
 

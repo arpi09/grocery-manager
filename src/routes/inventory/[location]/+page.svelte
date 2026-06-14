@@ -9,8 +9,6 @@
 
 	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
 
-	import LocationTab from '$lib/components/molecules/LocationTab.svelte';
-
 	import InventoryList from '$lib/components/organisms/InventoryList.svelte';
 
 	import { getLocale, t } from '$lib/i18n';
@@ -93,10 +91,6 @@
 	<PageContainer>
 
 		<div class="inventory-page">
-			<div class="inventory-sticky-tabs">
-				<LocationTab active={data.location} />
-			</div>
-
 			{#if data.canWrite}
 
 				<div class="add-goods-block" data-testid="inventory-add-goods">
@@ -180,14 +174,6 @@
 
 		min-width: 0;
 
-	}
-
-	.inventory-sticky-tabs {
-		position: sticky;
-		top: var(--sticky-below-header);
-		z-index: var(--z-sticky-chrome);
-		padding-bottom: var(--space-xs);
-		background: var(--color-bg);
 	}
 
 
