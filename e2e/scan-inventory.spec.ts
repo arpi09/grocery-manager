@@ -184,10 +184,15 @@ test.describe('Scan and inventory', () => {
 		await page.goto('/inventory/fridge');
 		await dismissOnboardingModalIfOpen(page);
 
-		const primary = page.getByTestId('inventory-add-goods').getByRole('link', {
+		const addGoods = page.getByTestId('inventory-add-goods');
+		const primary = addGoods.getByRole('link', {
 			name: /Lägg till varor|Add items/i
 		});
 		await expect(primary).toBeVisible({ timeout: 15_000 });
 		await expect(primary).toHaveAttribute('href', /mode=photo.*location=fridge/);
+
+		const receiptLink = addGoods.getByRole('link', { name: /Kvitto|Receipt/i });
+		await expect(receiptLink).toBeVisible({ timeout: 15_000 });
+		await expect(receiptLink).toHaveAttribute('href', /mode=receipt.*location=fridge/);
 	});
 });
