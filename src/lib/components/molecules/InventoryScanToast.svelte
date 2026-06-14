@@ -5,6 +5,12 @@
 	import { getLocale } from '$lib/i18n';
 	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
 	import {
+		clearReceiptImportToastPending,
+		isReceiptImportToastPending,
+		readReceiptImportCompleted,
+		receiptImportToastMessage
+	} from '$lib/utils/receipt-import-session';
+	import {
 		SCAN_TOAST_NAME_PARAM,
 		SCAN_TOAST_PARAM,
 		parseScanToastKind,
@@ -22,9 +28,23 @@
 		dismissed = false;
 	});
 
-	const message = $derived(
-		toastKind ? scanToastMessage(getLocale(), toastKind, productName) : ''
+	const receiptSession = $derived(
+		toastKind === 'added' && isReceiptImportToastPending() ? readReceiptImportCompleted() : null
 	);
+
+	const message = $derived.by(() => {
+		if (!toastKind) {
+			return '';
+		}
+		if (receiptSession) {
+			return receiptImportToastMessage(getLocale(), receiptSession.itemsAdded, {
+				estimatedDates: receiptSession.estimatedDates,
+				locationCorrections: receiptSession.locationCorrections,
+				rulesImproved: receiptSession.rulesImproved
+			});
+		}
+		return scanToastMessage(getLocale(), toastKind, productName);
+	});
 	const visible = $derived(Boolean(toastKind && message && !dismissed));
 
 	const variant = $derived.by((): ToastVariant => {
@@ -44,6 +64,7 @@
 
 	function handleDismiss() {
 		dismissed = true;
+		clearReceiptImportToastPending();
 		clearToastParam();
 	}
 </script>
