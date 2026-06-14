@@ -78,7 +78,7 @@ test.describe('Receipt flow', () => {
 		await page.getByTestId('receipt-bulk-submit').click();
 
 		await expect(page).toHaveURL(/\/hem(\?|$)/, { timeout: 15_000 });
-		await expect(page).toHaveURL(/from=receipt/);
+		await expect(page).toHaveURL(/scan=added/);
 		await expect(page.locator('.toast-message')).toContainText(/Kvitto klart|Receipt done/i, {
 			timeout: 10_000
 		});
