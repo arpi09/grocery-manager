@@ -246,9 +246,13 @@
 	}
 
 	.barcode-action {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		align-self: flex-start;
 		min-height: var(--touch-target-min);
-		padding: 0.25rem 0;
+		min-width: var(--touch-target-min);
+		padding: 0.25rem 0.5rem;
 		font-size: 0.875rem;
 		font-weight: 600;
 		color: var(--color-primary);
