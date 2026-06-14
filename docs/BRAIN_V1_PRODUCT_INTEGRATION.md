@@ -1,8 +1,8 @@
 # Brain V1 — Product integration
 
-*How shelf-life learning connects to the weekly household loop — wired on `master`, flags off until deploy.*
+*How shelf-life learning connects to the weekly household loop — wired on `master`; release policy in [RELEASE_MODEL.md](./RELEASE_MODEL.md).*
 
-**Relaterat:** [LEARNING_ENGINE.md](./LEARNING_ENGINE.md) · [BRAIN_ROADMAP.md](./BRAIN_ROADMAP.md) · [CURRENT_REALITY.md](./CURRENT_REALITY.md)
+**Relaterat:** [LEARNING_ENGINE.md](./LEARNING_ENGINE.md) · [BRAIN_ROADMAP.md](./BRAIN_ROADMAP.md) · [CURRENT_REALITY.md](./CURRENT_REALITY.md) · [RELEASE_MODEL.md](./RELEASE_MODEL.md)
 
 ---
 
@@ -52,9 +52,11 @@ flowchart LR
 | `LOCATION_LEARNING_ENABLED` | Location predictions in parse | Feedback on bulk save | Kivra import | — | Location rules panel |
 | `REPLENISHMENT_LEARNING_ENABLED` | — | — | — | — | Accept/dismiss → `learning_feedback` |
 
-### Rollback
+### Rollback (kill switch)
 
-Flags `false` → heuristik-only / no receipt estimate UI; `household_*_rule` and `learning_feedback` data remain.
+Per [RELEASE_MODEL.md](./RELEASE_MODEL.md): set flags `false` on master and deploy. Heuristik-only / no receipt estimate UI; `household_*_rule` and `learning_feedback` data remain.
+
+> **Deprecated:** treating flags as a post-merge activation step separate from the feature merge.
 
 ---
 
@@ -78,7 +80,9 @@ Predictor chain: **household_rule** (LEARNING on + `sample_count >= 2`) → **he
 
 ---
 
-## Smoke checklist (post flag enable)
+## Smoke checklist (post-deploy)
+
+Run after deploy when Brain flags are **on** on master `apphosting.yaml` ([RELEASE_MODEL.md](./RELEASE_MODEL.md) — no separate flag-flip step).
 
 **Owner:** `USER_LOCAL` — product owner on physical device (Turnstile, mobilkamera, real receipt). Agents link here from [CURRENT_REALITY.md](./CURRENT_REALITY.md); they do not substitute for this pass.
 
