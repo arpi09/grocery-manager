@@ -1,18 +1,18 @@
 # CURRENT_REALITY
 
-> **Uppdatera denna fil** när prod deployas eller nav/flags ändras. Kör: `.cursor/scripts/refresh-current-reality.sh`
+> **Uppdatera denna fil** nï¿½r prod deployas eller nav/flags ï¿½ndras. Kï¿½r: `.cursor/scripts/refresh-current-reality.sh`
 
-| Fält | Värde |
+| Fï¿½lt | Vï¿½rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-14 |
-| **Prod SHA** | `73d3dfd0` ? deploy run [27501022135](https://github.com/arpi09/grocery-manager/actions/runs/27501022135) (2026-06-14) |
-| **Master SHA** | `6eb0d757` ? deploy bundle 2 brain visibility (#67 receipt summary, #70 wiring, #63 EstimatedBadge, #59 home tone, #65 receipt location badge); prod at `73d3dfd0` |
+| **Prod SHA** | `f70c2c9c` ï¿½ deploy run [27507835082](https://github.com/arpi09/grocery-manager/actions/runs/27507835082) (2026-06-14) |
+| **Master SHA** | `f70c2c9c` ï¿½ narrative sprint (#75ï¿½#79) + UX #73/#74 + apphosting.yaml deploy fix |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
 
-## Kärnloopen (produktfokus)
+## Kï¿½rnloopen (produktfokus)
 
-Utgående ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenishment ? nästa lista.
+Utgï¿½ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenishment ? nï¿½sta lista.
 
 ## Navigation
 
@@ -21,9 +21,9 @@ Utgående ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenis
 | Yta | Route | Notering |
 |-----|-------|----------|
 | Default home | `/hem` | `APP_HOME_PATH` ? dashboard default |
-| Hem dashboard | `/hem` | **Home V3** ? Denna vecka ? Skaffu rekommenderar ? Hushållet ([HOME_V3.md](./HOME_V3.md)) |
-| Primary tabs (desktop) | Hem, Lager, Inköp, Skanna, Mer | Lager + scan in top row |
-| Primary tabs (mobile) | Hem, Inköp, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
+| Hem dashboard | `/hem` | **Home V3** ? Denna vecka ? Skaffu rekommenderar ? Hushï¿½llet ([HOME_V3.md](./HOME_V3.md)) |
+| Primary tabs (desktop) | Hem, Lager, Inkï¿½p, Skanna, Mer | Lager + scan in top row |
+| Primary tabs (mobile) | Hem, Inkï¿½p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
 | Memory Explorer | `/settings/memory` | Vad Skaffu vet ? household rules (learning gate) |
 | Post-register wedge | `/hem?welcome=1` | Ny registrering/OAuth ? guided start on hem ([#46](https://github.com/arpi09/grocery-manager/pull/46)) |
 | Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie |
@@ -49,7 +49,7 @@ What users **see** when core Brain flags are on (prod target / master):
 
 Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 
-**USER_LOCAL smoke (pending ? PO gate):** Physical device + real receipt @ prod SHA `73d3dfd0`; agents link only ? **do not substitute or claim this pass.** Checklists: [Brain V1 smoke](./BRAIN_V1_PRODUCT_INTEGRATION.md#smoke-checklist-post-deploy) · [Weekly loop smoke](./HOUSEHOLD_LOOP_AUDIT.md#user_local--weekly-loop-smoke-checklist).
+**USER_LOCAL smoke (pending ? PO gate):** Physical device + real receipt @ prod SHA `73d3dfd0`; agents link only ? **do not substitute or claim this pass.** Checklists: [Brain V1 smoke](./BRAIN_V1_PRODUCT_INTEGRATION.md#smoke-checklist-post-deploy) ï¿½ [Weekly loop smoke](./HOUSEHOLD_LOOP_AUDIT.md#user_local--weekly-loop-smoke-checklist).
 
 ## Tier snapshot
 
@@ -57,7 +57,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 - **B:** receipt import, barcode/photo add, price memory, Brain V1 (flags on), Memory Explorer
 - **C:** grannskafferiet, meal plan AI, wrapped, PMF user dashboards, Stripe marketing
 
-## Kända drift (fixa när du ser dem)
+## Kï¿½nda drift (fixa nï¿½r du ser dem)
 
 - [x] Prod DB migrations `0047`?`0048` ? applied 2026-06-14 (manual `npm run db:migrate` via Cloud SQL public IP; journal reconciled 0012?0048). `DATABASE_URL` secret set for future deploy pre-migrate.
 - [x] Prod SHA ? `73d3dfd0` via deploy [27501022135](https://github.com/arpi09/grocery-manager/actions/runs/27501022135)
