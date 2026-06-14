@@ -2467,7 +2467,7 @@
 			"unauthorized": "You must be logged in.",
 			"emailNotVerified": "Verify your email address before using the API.",
 			"invalidJson": "Invalid JSON.",
-			"invalidSection": "Invalid inventory section.",
+			"invalidSection": "Invalid section.",
 			"invalidPayload": "Invalid payload.",
 			"rateLimited": "Too many requests. Try again in a moment.",
 			"invalidChoice": "Invalid choice.",
@@ -2515,6 +2515,7 @@
 			"aiRateLimitReceiptPdf": "You've used all {limit} receipt PDF parses this month on the Free plan. Upgrade to Pro or wait until next month.",
 			"aiRateLimitSmartFill": "You've used all {limit} smart fill runs this week on the Free plan. Upgrade to Pro or wait until next week.",
 			"barcodeNotFound": "Invalid barcode.",
+			"invalidSection": "Invalid inventory section.",
 			"invalidLocation": "Invalid storage location."
 		},
 		"shopping": {

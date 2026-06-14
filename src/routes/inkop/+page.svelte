@@ -118,6 +118,14 @@
 					<p class="receipt-import-lead" role="status">{t('shopping.receiptImportLead')}</p>
 				{/if}
 
+				{#if data.showMemoryExplorer && showReceiptImportLead}
+					<p class="memory-footnote">
+						<a href="/settings/memory" data-analytics-id="inkop.memory_footnote">
+							{t('home.v3.memoryFootnote')}
+						</a>
+					</p>
+				{/if}
+
 				<details
 					id="shopping-suggestions"
 					class="suggestions-fold"
@@ -166,6 +174,23 @@
 		gap: var(--space-md);
 
 		padding-bottom: calc(var(--content-bottom-safe) + var(--space-md));
+	}
+
+	.memory-footnote {
+		margin: 0;
+		font-size: 0.875rem;
+		line-height: 1.45;
+		color: var(--color-text-muted);
+	}
+
+	.memory-footnote a {
+		color: var(--color-primary);
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.memory-footnote a:hover {
+		text-decoration: underline;
 	}
 
 	.receipt-import-lead {
