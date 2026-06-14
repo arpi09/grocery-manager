@@ -47,17 +47,27 @@ test.describe('Mobile navigation', () => {
 		await expect(bottomNav.locator('a[href="/hem"]').first()).toBeVisible();
 	});
 
-	test('mobile bottom nav has exactly three primary tabs', async ({ page }) => {
+	test('mobile bottom nav has four tabs including scan', async ({ page }) => {
 		await page.goto('/hem');
 		await dismissOnboardingModalIfOpen(page);
 
 		const bottomNav = page.getByRole('navigation', { name: /Mobil/i });
-		await expect(bottomNav.locator('a.nav-tab')).toHaveCount(3);
+		await expect(bottomNav.locator('a.nav-tab, button.nav-tab')).toHaveCount(4);
 		await expect(bottomNav.getByTestId('nav-home')).toBeVisible();
-		await expect(bottomNav.getByTestId('nav-pantry')).toBeVisible();
 		await expect(bottomNav.getByTestId('nav-shopping')).toBeVisible();
-		await expect(bottomNav.getByTestId('nav-scan')).toHaveCount(0);
+		await expect(bottomNav.getByTestId('nav-scan')).toBeVisible();
+		await expect(bottomNav.getByTestId('mobile-nav-more')).toBeVisible();
+		await expect(bottomNav.getByTestId('nav-pantry')).toHaveCount(0);
 		await expect(bottomNav.getByTestId('nav-eat')).toHaveCount(0);
+	});
+
+	test('scan reachable from bottom tab without header icon', async ({ page }) => {
+		await page.goto('/hem');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page.locator('.mobile-header-actions [data-testid="nav-scan"]')).toHaveCount(0);
+		await page.getByRole('navigation', { name: /Mobil/i }).getByTestId('nav-scan').click();
+		await expect(page).toHaveURL(/\/scan/);
 	});
 
 	test('home page has no scan-zone card on mobile', async ({ page }) => {

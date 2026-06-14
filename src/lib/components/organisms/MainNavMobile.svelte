@@ -25,9 +25,8 @@
 		user: NavUser & { email: string };
 		households: UserHouseholdSummary[];
 		activeHousehold: { id: string; name: string } | null;
-		primary: NavItem[];
-		headerUtility: NavItem[];
-		secondary: NavItem[];
+		mobileTabs: NavItem[];
+		mobileSecondary: NavItem[];
 		staleCount?: number;
 		canWrite?: boolean;
 		moreOpen: boolean;
@@ -40,9 +39,8 @@
 		user,
 		households,
 		activeHousehold,
-		primary,
-		headerUtility,
-		secondary,
+		mobileTabs,
+		mobileSecondary,
 		staleCount = 0,
 		canWrite = false,
 		moreOpen,
@@ -52,7 +50,6 @@
 
 	const pathname = $derived(page.url.pathname);
 	const isPro = $derived(Boolean(page.data.isPro));
-	const showStaleBadge = $derived(staleCount > 0 && canWrite);
 
 	let isNarrowViewport = $state(false);
 
@@ -63,15 +60,12 @@
 	);
 
 	const moreActive = $derived(
-		secondary.some((item) => isNavActive(pathname, item)) || (moreOpen && secondary.length > 0)
+		mobileSecondary.some((item) => isNavActive(pathname, item)) ||
+			(moreOpen && mobileSecondary.length > 0)
 	);
 
 	function navLinkClass(active: boolean): string {
 		return ['nav-tab', active ? 'active' : ''].filter(Boolean).join(' ');
-	}
-
-	function showBadge(item: NavItem): boolean {
-		return item.badge === 'stale' && showStaleBadge;
 	}
 </script>
 
@@ -89,33 +83,6 @@
 				{#if !isPro}
 					<ProUpgradeCta variant="nav" />
 				{/if}
-				{#each headerUtility as item (item.href)}
-					{@const active = isNavActive(pathname, item)}
-					<a
-						href={resolveNavHref(item, pathname)}
-						class="header-utility"
-						class:active
-						aria-label={t(item.labelKey)}
-						aria-current={active ? 'page' : undefined}
-						data-testid={navItemTestId(item)}
-						data-analytics-id="nav.shopping"
-					>
-						<NavIcon id={item.icon} />
-					</a>
-				{/each}
-				{#if secondary.length > 0}
-					<button
-						type="button"
-						class={['header-utility', moreActive ? 'active' : ''].filter(Boolean).join(' ')}
-						aria-expanded={moreOpen}
-						aria-haspopup="dialog"
-						aria-label={t('nav.more')}
-						data-testid="mobile-nav-more"
-						onclick={onToggleMore}
-					>
-						<NavIcon id="more" />
-					</button>
-				{/if}
 				<ProfileMenu {user} />
 			</div>
 		</div>
@@ -124,7 +91,7 @@
 		</div>
 	</header>
 
-	{#if secondary.length > 0}
+	{#if mobileSecondary.length > 0}
 		<Modal
 			open={moreOpen && isNarrowViewport}
 			onClose={onCloseMore}
@@ -133,13 +100,19 @@
 			panelClass="nav-more-panel"
 			bodyClass="nav-more-sheet-body"
 		>
-			<NavMoreSheet {pathname} items={secondary} onNavigate={onCloseMore} />
+			<NavMoreSheet
+				{pathname}
+				items={mobileSecondary}
+				{staleCount}
+				{canWrite}
+				onNavigate={onCloseMore}
+			/>
 		</Modal>
 	{/if}
 {:else}
 	<nav class="mobile-bottom" aria-label={t('nav.mobileNav')} aria-hidden={moreOpen ? 'true' : undefined}>
 		<ul class="mobile-bottom-list">
-			{#each primary as item (item.href + item.labelKey)}
+			{#each mobileTabs as item (item.href + item.labelKey)}
 				{@const active = isNavActive(pathname, item)}
 				{@const href = resolveNavHref(item, pathname)}
 				<li>
@@ -159,11 +132,6 @@
 					>
 						<span class="tab-icon" aria-hidden="true">
 							<NavIcon id={item.icon} />
-							{#if showBadge(item)}
-								<span class="stale-badge" aria-label={t('nav.staleBadge', { count: staleCount })}>
-									{staleCount}
-								</span>
-							{/if}
 						</span>
 						<span class="tab-label">{t(item.labelKey)}</span>
 						{#if active}
@@ -172,6 +140,28 @@
 					</a>
 				</li>
 			{/each}
+			{#if mobileSecondary.length > 0}
+				<li>
+					<button
+						type="button"
+						class={navLinkClass(moreActive)}
+						aria-expanded={moreOpen}
+						aria-haspopup="dialog"
+						aria-label={t('nav.more')}
+						tabindex={moreOpen ? -1 : undefined}
+						data-testid="mobile-nav-more"
+						onclick={onToggleMore}
+					>
+						<span class="tab-icon" aria-hidden="true">
+							<NavIcon id="more" />
+						</span>
+						<span class="tab-label">{t('nav.more')}</span>
+						{#if moreActive}
+							<span class="tab-indicator" aria-hidden="true"></span>
+						{/if}
+					</button>
+				</li>
+			{/if}
 		</ul>
 	</nav>
 {/if}
@@ -198,7 +188,7 @@
 		gap: 0.45rem;
 		min-height: 2.75rem;
 		min-width: var(--touch-target-min);
-		flex: 1;flex: 1 1 auto;
+		flex: 1 1 auto;
 		color: var(--color-text);
 		text-decoration: none;
 	}
@@ -249,36 +239,6 @@
 		flex-shrink: 0;
 	}
 
-	.header-utility {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.75rem;
-		height: 2.75rem;
-		border: 0;
-		border-radius: var(--radius-md);
-		background: transparent;
-		color: var(--color-text-muted);
-		text-decoration: none;
-		cursor: pointer;
-	}
-
-	.header-utility :global(.nav-icon) {
-		width: 1.375rem;
-		height: 1.375rem;
-	}
-
-	.header-utility:hover,
-	.header-utility.active {
-		color: var(--color-primary);
-		text-decoration: none;
-	}
-
-	.header-utility:focus-visible {
-		outline: 2px solid var(--color-primary);
-		outline-offset: 2px;
-	}
-
 	.mobile-bottom {
 		position: fixed;
 		left: 0;
@@ -325,6 +285,7 @@
 		border-radius: var(--radius-md);
 		background: transparent;
 		color: var(--color-text-muted);
+		font: inherit;
 		font-size: 0.625rem;
 		font-weight: 600;
 		text-decoration: none;
@@ -350,22 +311,6 @@
 	.tab-icon :global(.nav-icon) {
 		width: 1.375rem;
 		height: 1.375rem;
-	}
-
-	.stale-badge {
-		position: absolute;
-		top: -0.2rem;
-		right: -0.45rem;
-		min-width: 1rem;
-		height: 1rem;
-		padding: 0 0.2rem;
-		border-radius: 999px;
-		background: var(--color-warning);
-		color: var(--color-on-primary);
-		font-size: 0.5625rem;
-		font-weight: 700;
-		line-height: 1rem;
-		text-align: center;
 	}
 
 	.tab-label {
