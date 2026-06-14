@@ -303,7 +303,7 @@
 	},
 	"scan": {
 		"title": "Skanna",
-		"subtitle": "Börja med fotorunda — eller välj ett annat sätt",
+		"subtitle": "Kvitto först — eller annat sätt",
 		"barcodeTitle": "Streckkod",
 		"barcodeSubtitle": "Rikta kameran mot streckkoden på förpackningen",
 		"allModes": "Alla skanningslägen",
@@ -311,7 +311,7 @@
 		"cancelBack": "Avbryt och gå tillbaka",
 		"cancel": "Avbryt",
 		"hubAria": "Skanningslägen",
-		"hubLead": "Fotorunda är snabbast när du vill fylla på många varor på en gång.",
+		"hubLead": "Kvitto är snabbast efter handeln.",
 		"moreWays": "Fler sätt",
 		"modes": {
 			"barcode": "Streckkod",
@@ -368,8 +368,9 @@
 		},
 		"cancelBackToHome": "Avbryt och tillbaka till hem",
 		"hubHero": {
-			"subtitle": "Fota kyl, frys eller skafferi – flera varor på en gång.",
-			"cta": "Starta fotorunda"
+			"title": "Kvitto",
+			"subtitle": "Flera varor på en gång.",
+			"cta": "Skanna kvitto"
 		}
 	},
 	"settings": {
@@ -2004,7 +2005,9 @@
 		"welcome": "Välkommen till Skaffu",
 		"stepOf": "Steg {current} av {total}",
 		"welcomeBodyShort": "Bygg en veckolista — tre varor räcker för att komma igång.",
-		"welcomeBodyShoppingList": "Bygg en veckolista — tre varor räcker för att komma igång.",
+		"welcomeBodyShoppingList": "Skaffu är er gemensamma veckolista. Lägg till tre varor ni brukar handla — handla tillsammans och håll listan uppdaterad.",
+		"brainLearnLine": "Skaffu lär sig när du använder appen",
+		"fillPantrySecondary": "Fyll skafferi",
 		"quickStart": "Snabbstart",
 		"quickPointsAria": "Det här kan du göra direkt",
 		"quickPointScan": "Fota in varor — eller skanna streckkod och kvitto",
@@ -2018,8 +2021,9 @@
 		"barcodeProgress": "{count} av {goal} streckkoder",
 		"skipLater": "Jag gör det senare",
 		"celebrateTitle": "Bra start!",
-		"celebrateBody": "Dina första varor är inne.",
+		"celebrateBody": "Listan är igång — handla tillsammans och håll den uppdaterad.",
 		"celebrateCtaScan": "Fota in fler varor",
+		"celebrateCtaShopping": "Öppna inköpslistan",
 		"celebrateDismiss": "Gå till startsidan",
 		"scanTitle": "Lägg till din första vara",
 		"scanBody": "Fota kyl, frys eller skafferi — eller skanna streckkod och kvitto. Fem varor räcker för att komma igång — du behöver inte fylla hela skafferiet på en gång.",
@@ -2836,4 +2840,3 @@
 		"signupBtn": "Prova Skaffu gratis"
 	}
 }
-

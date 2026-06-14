@@ -23,8 +23,7 @@
 		isActivationComplete,
 		isOnboardingExcludedPath,
 		setActivationPath,
-		shouldShowOnboarding,
-		type ActivationPath
+		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
 	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
 	import {
@@ -48,26 +47,29 @@
 		{
 			id: 'welcome',
 			titleKey: 'onboarding.welcome',
-			bodyKey: 'onboarding.welcomeBodyInventory'
+			bodyKey: 'onboarding.welcomeBodyShoppingList'
 		},
 		{
 			id: 'pathGuide',
 			titleKey: 'onboarding.pathGuideTitle',
-			bodyKey: 'onboarding.pathGuidePhotoBody'
+			bodyKey: 'onboarding.pathGuideShoppingBody'
 		},
 		{
 			id: 'celebrate',
 			titleKey: 'onboarding.celebrateTitle',
-			bodyKey: 'onboarding.celebrateInventoryBody'
+			bodyKey: 'onboarding.celebrateStartedBody'
 		}
 	];
 
-	const pathChoices: { id: PathChoice; labelKey: MessageKey; activation: ActivationPath | 'manual' }[] = [
-		{ id: 'photo', labelKey: 'onboarding.pathChoosePhoto', activation: 'photo' },
-		{ id: 'barcode', labelKey: 'onboarding.pathChooseBarcode', activation: 'barcode' },
-		{ id: 'receipt', labelKey: 'onboarding.pathChooseReceipt', activation: 'receipt' },
-		{ id: 'manual', labelKey: 'onboarding.pathChooseManual', activation: 'manual' },
-		{ id: 'shopping', labelKey: 'onboarding.pathChooseShopping', activation: 'shopping' }
+	const pantrySecondaryChoices: {
+		id: PathChoice;
+		labelKey: MessageKey;
+		testId: string;
+	}[] = [
+		{ id: 'receipt', labelKey: 'onboarding.pathChooseReceipt', testId: 'onboarding-path-receipt' },
+		{ id: 'photo', labelKey: 'onboarding.pathChoosePhoto', testId: 'onboarding-path-photo' },
+		{ id: 'barcode', labelKey: 'onboarding.pathChooseBarcode', testId: 'onboarding-path-barcode' },
+		{ id: 'manual', labelKey: 'onboarding.pathChooseManual', testId: 'onboarding-path-manual' }
 	];
 
 	const pathGuideBodyKeys: Record<PathChoice, MessageKey> = {
@@ -90,7 +92,7 @@
 	let stepIndex = $state(0);
 	let stepDirection = $state<'forward' | 'back'>('forward');
 	let registrationWelcomeDone = $state(false);
-	let selectedPath = $state<PathChoice | null>(null);
+	let selectedPath = $state<PathChoice | null>('shopping');
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
@@ -133,7 +135,7 @@
 			return;
 		}
 		stepIndex = 0;
-		selectedPath = null;
+		selectedPath = 'shopping';
 		open = true;
 	}
 
@@ -205,7 +207,7 @@
 						? scanModeHref('receipt', returnTo)
 						: selectedPath === 'manual'
 							? manualAddHref(returnTo)
-							: '/inkop';
+							: '/inkop?quick=1';
 		await goto(href);
 	}
 
@@ -339,38 +341,37 @@
 		<p class="step-body">{currentStep.body}</p>
 
 		{#if currentStep.id === 'welcome'}
+			<p class="brain-line">{t('onboarding.brainLearnLine')}</p>
 			<div class="activation-choices">
-				{#each pathChoices.slice(0, 3) as choice (choice.id)}
-					<Button
-						type="button"
-						fullWidth
-						variant={choice.id === 'photo' ? 'primary' : 'secondary'}
-						data-testid="onboarding-path-{choice.id}"
-						data-analytics-id="onboarding.path_{choice.id}"
-						onclick={() => choosePath(choice.id)}
-					>
-						{t(choice.labelKey)}
-					</Button>
-				{/each}
-				<div class="path-secondary">
-					<button
-						type="button"
-						class="path-link"
-						data-testid="onboarding-path-manual"
-						onclick={() => choosePath('manual')}
-					>
-						{t('onboarding.pathChooseManual')}
-					</button>
-					<span class="path-sep" aria-hidden="true">·</span>
-					<button
-						type="button"
-						class="path-link"
-						data-testid="onboarding-path-shopping"
-						onclick={() => choosePath('shopping')}
-					>
-						{t('onboarding.pathChooseShopping')}
-					</button>
-				</div>
+				<Button
+					type="button"
+					fullWidth
+					variant="primary"
+					data-testid="onboarding-path-shopping"
+					data-analytics-id="onboarding.path_shopping"
+					onclick={() => choosePath('shopping')}
+				>
+					{t('onboarding.startShoppingList')}
+				</Button>
+				<details class="pantry-secondary">
+					<summary>{t('onboarding.fillPantrySecondary')}</summary>
+					<div class="path-secondary">
+						{#each pantrySecondaryChoices as choice, index (choice.id)}
+							{#if index > 0}
+								<span class="path-sep" aria-hidden="true">·</span>
+							{/if}
+							<button
+								type="button"
+								class="path-link"
+								data-testid={choice.testId}
+								data-analytics-id="onboarding.path_{choice.id}"
+								onclick={() => choosePath(choice.id)}
+							>
+								{t(choice.labelKey)}
+							</button>
+						{/each}
+					</div>
+				</details>
 			</div>
 		{/if}
 
@@ -595,11 +596,43 @@
 		word-break: break-word;
 	}
 
+	.brain-line {
+		margin: calc(-1 * var(--space-sm)) 0 0;
+		font-size: 0.875rem;
+		line-height: 1.5;
+		color: var(--color-text-muted);
+		text-align: center;
+		max-width: 22rem;
+		margin-inline: auto;
+	}
+
 	.activation-choices {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
 		width: 100%;
+	}
+
+	.pantry-secondary {
+		margin-top: var(--space-xs);
+	}
+
+	.pantry-secondary summary {
+		cursor: pointer;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+		text-align: center;
+		list-style: none;
+		padding: var(--space-xs);
+	}
+
+	.pantry-secondary summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.pantry-secondary[open] summary {
+		margin-bottom: var(--space-xs);
 	}
 
 	.path-secondary {
