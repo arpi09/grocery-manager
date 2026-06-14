@@ -184,7 +184,7 @@
 		"greeting": "Hej, {name}",
 		"greetingNeutral": "Ditt skafferi",
 		"tagline": "Fota in varor för att hålla koll",
-		"taglineEmpty": "Fota in varor — en fotorunda i kyl, frys eller skafferi räcker för att komma igång",
+		"taglineEmpty": "Skapa veckans lista — tre varor räcker för att komma igång med gemensam veckohandel",
 		"scanCardTitle": "Lägg till varor",
 		"scanCardSubtitle": "Fotorunda — snabbast sättet att fylla skafferiet",
 		"chipReceipt": "Kvitto",
@@ -281,7 +281,12 @@
 		"duplicateWarningInventory": "visa i lager",
 		"duplicateWarningMerge": "slå ihop",
 		"locationsSummary": "Platser · {count} varor",
-		"receiptAutopilotSummary": "Kvitto-förslag ({count})"
+		"receiptAutopilotSummary": "Kvitto-förslag ({count})",
+		"v4": {
+			"coldTitle": "Veckans lista",
+			"coldAction": "Skapa veckans lista",
+			"coldSecondary": "Fyll skafferi"
+		}
 	},
 	"dashboard": {
 		"title": "Hem",
