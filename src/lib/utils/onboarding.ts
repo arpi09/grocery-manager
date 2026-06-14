@@ -4,7 +4,7 @@ import { markPmfSurveyEligible } from '$lib/utils/pmf-survey-storage';
 
 /** Current onboarding tour version — bump to show the guide again for returning users. */
 
-export const ONBOARDING_VERSION = 5;
+export const ONBOARDING_VERSION = 6;
 
 export { ONBOARDING_STEP_COUNT } from '$lib/utils/onboarding-steps';
 

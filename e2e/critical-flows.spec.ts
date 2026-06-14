@@ -94,11 +94,11 @@ test.describe('Critical flows', () => {
 
 		await expectOnboardingGuideVisible(page);
 
-		await page.getByRole('button', { name: /Nästa|Next/i }).click();
+		await page.getByTestId('onboarding-path-shopping').click();
 
 		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
 
-		await page.getByTestId('onboarding-start-shopping-list').click();
+		await page.getByTestId('onboarding-begin-path').click();
 
 		await expect(page).toHaveURL('/inkop');
 
@@ -224,7 +224,9 @@ test.describe('Critical flows', () => {
 
 		await expectOnboardingGuideVisible(page);
 
-		await page.getByRole('button', { name: /Nästa|Next/i }).click();
+		await page.getByTestId('onboarding-path-photo').click();
+
+		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
 
 		await page.getByRole('button', { name: /Nästa|Next/i }).click();
 
