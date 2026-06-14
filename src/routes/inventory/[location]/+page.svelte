@@ -111,12 +111,7 @@
 					</a>
 
 					<a class="barcode-action" href={barcodeScanHref}>{t('inventory.otherWaysBarcode')}</a>
-
-					{#if !hasInventory}
-
-						<a class="barcode-action" href={receiptScanHref}>{t('inventory.otherWaysReceipt')}</a>
-
-					{/if}
+				<a class="barcode-action" href={receiptScanHref}>{t('inventory.otherWaysReceipt')}</a>
 
 					<details class="other-ways">
 
@@ -125,12 +120,6 @@
 						<nav class="other-ways-nav" aria-label={t('inventory.otherWays')}>
 
 							<a href={addItemHref} data-sveltekit-reload>{t('inventory.otherWaysManual')}</a>
-
-							{#if hasInventory}
-
-								<a href={receiptScanHref}>{t('inventory.otherWaysReceipt')}</a>
-
-							{/if}
 
 						</nav>
 
