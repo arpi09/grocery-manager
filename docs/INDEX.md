@@ -11,6 +11,7 @@
 | Coordinator planning | `coordinator-planning.mdc`, [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md) |
 | Deploy + smoke | [DEPLOY.md](./DEPLOY.md), [PROD_SMOKE.md](./PROD_SMOKE.md) |
 | Retention playbook (human) | [FOUNDER_WEEKLY_HABIT.md](./FOUNDER_WEEKLY_HABIT.md) |
+| Household loop audit + weekly smoke | [HOUSEHOLD_LOOP_AUDIT.md](./HOUSEHOLD_LOOP_AUDIT.md) |
 
 ## Skills (namn i prompt)
 
