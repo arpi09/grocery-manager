@@ -36,9 +36,9 @@ Utgående → `/inkop` (delad lista) → handla ihop → checkoff → skafferi �
 | `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT` | **on** | **on** | apphosting.yaml | Receipt review Uppskattat UX |
 | `LOCATION_LEARNING_ENABLED` | **on** | **on** | apphosting.yaml | Location rules + feedback |
 | `REPLENISHMENT_LEARNING_ENABLED` | **on** | **on** | apphosting.yaml | Replenishment accept/dismiss feedback |
-| `SHELF_LIFE_LLM_ENABLED` | **on** | **on** | apphosting.yaml | LLM tier stub — returns null in V1 |
-| `LOCATION_LLM_ENABLED` | **on** | **on** | apphosting.yaml | LLM tier stub — returns null in V1 |
-| `HOUSEHOLD_FAVORITES_ENABLED` | **on** | **on** | apphosting.yaml | Deferred migration `0049` — UI gated |
+| `SHELF_LIFE_LLM_ENABLED` | **off** | **off** | apphosting.yaml | LLM tier stub — not implemented in V1 |
+| `LOCATION_LLM_ENABLED` | **off** | **off** | apphosting.yaml | LLM tier stub — not implemented in V1 |
+| `HOUSEHOLD_FAVORITES_ENABLED` | **off** | **off** | apphosting.yaml | Deferred migration `0049` — no product code |
 | `PUBLIC_CITY_FEED_ENABLED` | off | off | .env | Grannskafferiet supply |
 | `STRIPE_CHECKOUT_DISABLED` | true | true | .env | Pro checkout dold |
 | `KIVRA_FORWARD_ENABLED` | off | off | .env | Inbound Kivra |
