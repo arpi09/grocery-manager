@@ -70,4 +70,5 @@ What users **see** when core Brain flags are on (prod target / master), vs stubs
 | `feat/memory-explorer-v1` | Memory Explorer V1 | **Mergad till master** |
 | `feat/receipt-pattern-purchasedAt` | purchasedAt cutoff fix | **Mergad till master** |
 | `docs/receipt-intelligence-next-slice` | Next slice plan | **Mergad till master** |
+| `feat/ux-inventory-list-v1` | UX Slice 1 — Product Row + V1.1 inventory badge | **PLANNED** — not started |
 

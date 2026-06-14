@@ -1,6 +1,6 @@
 # Household Loop Audit — Skaffu
 
-**Prod-baseline:** `51853d74` (#52/#53 live). **Master ahead:** Slice 0 (#61), hooks (#66), brain roadmap docs — ej deployat.
+**Prod-baseline:** `73d3dfd0` — deploy bundle 2 brain visibility live ([CURRENT_REALITY.md](./CURRENT_REALITY.md)). **Master ahead:** UX Slice 1 (`feat/ux-inventory-list-v1`, PLANNED).
 
 **Hypotes i kod:** [skaffu-core-loop.mdc](../.cursor/rules/skaffu-core-loop.mdc) — 2 medlemmar × **1 gemensam handling/vecka** på delad lista.
 
@@ -77,7 +77,7 @@ flowchart LR
 | **Shopping path** | 3 rader på lista | Inköp utan skafferi känns "tomt" | Ingen tills kvitto | Delad lista tidigt |
 | Hem tom | Förstå vad appen gör | 3 sektioner tomma; Brain tom | Ingen data än | Scan CTA |
 
-**Dag-1 Brain:** Receipt review = starkast moment; onboarding embedded path saknar `shelfLifeEstimatesInReceipt` (PR #64 fixar). Memory Explorer ej i flödet.
+**Dag-1 Brain:** Receipt review = starkast moment; onboarding embedded receipt Brain wiring shipped via #70 (#64 closed superseded). Memory Explorer ej i flödet.
 
 ---
 
@@ -87,7 +87,7 @@ flowchart LR
 |------|-----|----------|-------------|-----------|
 | Veckans lista byggas | Handla tillsammans | Lista på `/inkop`, hem pekar dit | Replenishment tom utan kvittohistorik | Badge count på hem |
 | Handla + checkoff | Stäng shopping | Default `ask` på checkoff→pantry ([`shopping-to-pantry.ts`](../src/lib/domain/shopping-to-pantry.ts)) — modal per rad | Location från historik; **ingen expiry** på bridge-create | **Loop-breaker** om modal tröttar |
-| Efter kvitto | Förstå vad hände | Toast/summary (V1.2 #67) ej prod | Summary + memory footnote | "Skaffu gjorde något" |
+| Efter kvitto | Förstå vad hände | Summary synlig (#67 live @ `73d3dfd0`) | Summary + memory footnote | "Skaffu gjorde något" |
 | Eat-first syns | Undvik waste | Chips → edit, inte consume på hem | Ranking via `expires_on` learning | 7-dagars urgency |
 | Post-onboarding modals | Dela lista, feedback | Modal stack (survey, share, hints) | Ingen | Partner = retention multiplier |
 
@@ -101,7 +101,7 @@ flowchart LR
 |------|-----|----------|-------------|-----------|
 | Replenishment på hem | Slipp tänka på återköp | Max 3 rader; tom copy om kall start | **Cadence från kvitton**; chips "var N:e dag" | Veckovis "aha" om träff |
 | Andra kvitto | Förbättra minne | Review igen | Rules ≥2 samples → household_learned | Memory Explorer fotnot 30 min |
-| Inventory hygiene | Rätt datum/plats | Mobil saknar Uppskattat-badge (#63) | Data finns men **hidden** på mobile | Misstro om datum "fel" |
+| Inventory hygiene | Rätt datum/plats | Mobil saknar Uppskattat-badge (#63 = desktop fallback only; Slice 1 PLANNED) | Data finns men **hidden** på mobile | Misstro om datum "fel" |
 | Partner invite | Två använder samma loop | Ej på hem (design); inkop banner | Delad replenishment signal | **2× loop frequency** |
 | Planer | Veckomeny | Flyttat från hem | Meal AI separat | Veckoplan som adjunct |
 
@@ -157,8 +157,8 @@ Prioritet = **stärka befintlig vana**, inte fler features.
 
 | # | Improvement | Loop | Typ |
 |---|-------------|------|-----|
-| 1 | **Fix photo activation** på `/scan` (`recordFirstItemActivation`) | Activation | Wiring bug |
-| 2 | **Deploy bundle 2** (#67, #64, #63, #59, #65) — Brain synlig | Weekly + trust | Ship |
+| 1 | **Fix photo activation** på `/scan` (`recordFirstItemActivation`) — [#69](https://github.com/arpi09/grocery-manager/pull/69) pending | Activation | Wiring bug |
+| 2 | ~~**Deploy bundle 2**~~ **DONE @ `73d3dfd0`** (#67, #70, #63, #59, #65) — Brain synlig (mobil badge väntar Slice 1) | Weekly + trust | **Shipped** |
 | 3 | **Checkoff→pantry** — nudge till `always` eller smidigare default efter N yes | Weekly loop close | UX/policy |
 | 4 | **Hem §1 → `/inkop`** redan primär — säkerställ partner invite på inkop (inte hem) | Household | Redan design — verifiera |
 | 5 | **Eat-first → consume** one-tap från hem chip (befintlig `consumeItem`) | Daily loop | UX, ej Brain |
@@ -185,13 +185,13 @@ Brain **accelererar** veckoloopen (cadence, expiry, trust) när kvitto + synligh
 
 ## Relaterade artefakter
 
-- Merge train: #67 → #64 → #63/#59 → #65 → deploy bundle 2
+- Merge train (shipped): #67 → #70 (supersedes #64) → #63/#59 → #65 → deploy bundle 2 @ `73d3dfd0`
 - [BRAIN_ROADMAP.md](./BRAIN_ROADMAP.md) (master) — visibility buckets
 - [BRAIN_V1_PRODUCT_INTEGRATION.md](./BRAIN_V1_PRODUCT_INTEGRATION.md) — Brain smoke checklist
 - [HOME_V3.md](./HOME_V3.md) — 3 frågor på hem
 - [CURRENT_REALITY.md](./CURRENT_REALITY.md) — prod SHA, nav, flags
 
-**Nästa coordinator-beslut:** Prioritera **weekly loop close** (checkoff friction + deploy Brain visibility) över daily loop expansion.
+**Nästa coordinator-beslut:** Prioritera **weekly loop close** (checkoff friction + photo activation #69) och **UX Slice 1** (mobil badge) över daily loop expansion.
 
 ---
 
