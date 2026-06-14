@@ -205,15 +205,15 @@ env:
     availability:
       - RUNTIME
   - variable: SHELF_LIFE_LLM_ENABLED
-    value: "true"
+    value: "false"
     availability:
       - RUNTIME
   - variable: LOCATION_LLM_ENABLED
-    value: "true"
+    value: "false"
     availability:
       - RUNTIME
   - variable: HOUSEHOLD_FAVORITES_ENABLED
-    value: "true"
+    value: "false"
     availability:
       - RUNTIME
 
