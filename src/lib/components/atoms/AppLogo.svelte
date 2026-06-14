@@ -106,7 +106,7 @@
 	}
 
 	.mark-shelf {
-		stroke: color-mix(in srgb, var(--color-primary) 18%, #fff);
+		stroke: color-mix(in srgb, var(--color-primary) 33%, #fff);
 		fill: none;
 	}
 
