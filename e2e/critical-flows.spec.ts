@@ -2,7 +2,6 @@ import { test, expect } from '@playwright/test';
 
 import {
 
-	clickSecondaryNavHref,
 
 	dismissOnboardingModalIfOpen,
 
@@ -186,7 +185,7 @@ test.describe('Critical flows', () => {
 
 
 
-	test('scan opens photo mode from more menu', async ({ page }) => {
+	test('scan opens photo mode from header nav', async ({ page }) => {
 
 		await loginAsAdmin(page);
 
@@ -194,7 +193,7 @@ test.describe('Critical flows', () => {
 
 		await dismissOnboardingModalIfOpen(page);
 
-		await clickSecondaryNavHref(page, '/scan');
+		await page.getByTestId('nav-scan').click();
 
 		await expect(page).toHaveURL(/\/scan(?:$|\?)/);
 

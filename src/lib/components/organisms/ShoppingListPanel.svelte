@@ -33,12 +33,16 @@
 	import { bindSubmittingWithToast } from '$lib/utils/form-submit-feedback';
 	import { get } from 'svelte/store';
 	import { buildAcquisitionRegisterUrl } from '$lib/marketing/acquisition-attribution';
+	import { INKOP_PATH } from '$lib/navigation/app-home';
+	import { scanModeHref } from '$lib/utils/scan-nav';
 	import {
 		appendShoppingListExportFooter,
 		formatShoppingListExportByFormat,
 		formatShoppingListExportLine,
 		type ShoppingListExportFormat
 	} from '$lib/utils/shopping-list-export';
+
+	const shoppingEmptyScanHref = scanModeHref('receipt', INKOP_PATH);
 
 	let {
 		items,
@@ -523,7 +527,8 @@
 			title={t('shopping.emptyList')}
 			description={t('shopping.emptyDescription')}
 			actionLabel={t('shopping.emptyAction')}
-			actionHref="#shopping-suggestions"
+			actionHref={shoppingEmptyScanHref}
+			primaryAnalyticsId="shopping.empty_scan_receipt"
 		/>
 	{:else}
 		<SearchInput bind:value={listQuery} placeholder={t('shopping.searchPlaceholder')} />
