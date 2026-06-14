@@ -14,7 +14,7 @@ Alla agenter (coordinator och implementation) börjar med [INDEX.md](./INDEX.md)
 |---------------------------|-----|
 | `skaffu-deploy-verify` | deploy, prod, release, rollback |
 | `skaffu-core-loop-change` | hem, inkop, onboarding, nav, household |
-| `skaffu-feature-flag-rollout` | Kill switches, Tier C, infra env — **not** post-merge activation ([RELEASE_MODEL.md](./RELEASE_MODEL.md)) |
+| `skaffu-release-model` | Kill switches, Tier C, infra env - **not** post-merge activation ([RELEASE_MODEL.md](./RELEASE_MODEL.md)) |
 
 Kärnloop-regel (alwaysApply): `.cursor/rules/skaffu-core-loop.mdc`.
 
