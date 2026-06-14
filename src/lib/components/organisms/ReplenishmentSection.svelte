@@ -145,10 +145,6 @@
 	}
 
 	function memoryChipLabels(suggestion: ReplenishmentSuggestion): string[] {
-		if (surface !== 'hem') {
-			return [];
-		}
-
 		const chips: string[] = [];
 		if (suggestion.avgIntervalDays !== null && suggestion.avgIntervalDays > 0) {
 			chips.push(t('replenishment.memoryChip.interval', { interval: suggestion.avgIntervalDays }));

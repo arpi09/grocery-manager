@@ -24,6 +24,8 @@
 		defaultLocation?: StorageLocation;
 		/** When set, limits picker and can auto-open a single flow (binary onboarding). */
 		allowedModes?: ScanPick[];
+		/** Receipt review expiry estimates — defaults to app layout flag. */
+		shelfLifeEstimatesInReceipt?: boolean;
 	}
 
 	let {
@@ -31,8 +33,13 @@
 		onClose,
 		onItemSaved,
 		defaultLocation = 'fridge',
-		allowedModes
+		allowedModes,
+		shelfLifeEstimatesInReceipt: shelfLifeEstimatesInReceiptProp
 	}: Props = $props();
+
+	const shelfLifeEstimatesInReceipt = $derived(
+		shelfLifeEstimatesInReceiptProp ?? page.data.shelfLifeEstimatesInReceipt ?? false
+	);
 
 	let activeFlow = $state<ScanPick | null>(null);
 
@@ -226,6 +233,7 @@
 			embedded
 			prominentGuide
 			formAction="/scan?/bulkCreate"
+			shelfLifeEstimatesInReceipt={shelfLifeEstimatesInReceipt}
 			onItemSaved={handleReceiptSaved}
 			onCancel={closeFlow}
 		/>
