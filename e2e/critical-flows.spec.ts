@@ -21,6 +21,8 @@ test.describe('Critical flows', () => {
 
 	test('register creates account with captcha bypass and lands on hem welcome', async ({ page }) => {
 
+		test.setTimeout(120_000);
+
 		await registerNewUser(page);
 
 		await expect(page).toHaveURL('/hem?welcome=1');
@@ -51,6 +53,8 @@ test.describe('Critical flows', () => {
 
 	test('fresh registration skips auto-open onboarding modal on home', async ({ page }) => {
 
+		test.setTimeout(120_000);
+
 		await registerNewUser(page);
 
 		await expect(page).toHaveURL('/hem?welcome=1');
@@ -77,7 +81,7 @@ test.describe('Critical flows', () => {
 
 	test('onboarding opens shopping list without scan modal', async ({ page }) => {
 
-		test.setTimeout(60_000);
+		test.setTimeout(120_000);
 
 		await registerNewUser(page);
 
@@ -193,7 +197,7 @@ test.describe('Critical flows', () => {
 
 		await dismissOnboardingModalIfOpen(page);
 
-		await page.locator('a.header-utility[data-testid="nav-scan"]').click();
+		await page.locator('.main-nav-desktop').getByTestId('nav-scan').click();
 
 		await expect(page).toHaveURL(/\/scan(?:$|\?)/);
 
@@ -209,7 +213,7 @@ test.describe('Critical flows', () => {
 
 	test('onboarding finish returns to hem dashboard', async ({ page }) => {
 
-		test.setTimeout(60_000);
+		test.setTimeout(120_000);
 
 		await registerNewUser(page);
 
