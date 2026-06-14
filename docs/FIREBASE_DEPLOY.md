@@ -345,7 +345,8 @@ The deploy job uses the **`production`** GitHub Environment � optional requir
 
 | Secret | How to obtain |
 |--------|----------------|
-| `FIREBASE_TOKEN` | Run `npx firebase login:ci` locally and paste the token into **Settings �  Secrets and variables �  Actions** |
+| `FIREBASE_TOKEN` | Run `npx firebase login:ci` locally and paste the token into **Settings → Secrets and variables → Actions** |
+| `DATABASE_URL` | **Public IP** Postgres URL for pre-deploy `npm run db:migrate` in Actions — `postgresql://pantry_app:PASSWORD@PUBLIC_IP:5432/pantry`. **Not** the socket URL in Firebase Secret Manager. Password: parse from Firebase `DATABASE_URL` secret or Cloud SQL user `pantry_app`. Cloud SQL **Authorized networks** must allow [GitHub Actions IPs](https://api.github.com/meta) (`actions` ranges). Full steps: [CI_CD.md — DATABASE_URL](./CI_CD.md#database_url--ägare-manuellt) |
 
 | DEPLOY_NOTIFY_WEBHOOK_URL (optional) | ntfy topic URL, Discord webhook, or Slack incoming webhook  push on deploy success; see [docs/CI_CD.md � Mobilnotis](./CI_CD.md#mobilnotis-vid-deploy) |
 | DEPLOY_TELEGRAM_BOT_TOKEN + DEPLOY_TELEGRAM_CHAT_ID (optional) | Telegram bot push instead of or in addition to webhook |
@@ -359,7 +360,7 @@ Alternative (not wired in the default workflow): a Google Cloud **service accoun
 3. (Optional) Configure **Environments �  production** with required reviewers
 4. Push to `master` (Release workflow: quality �  e2e �  deploy) or run **Deploy to production** from Actions (see [`DEPLOY.md`](./DEPLOY.md))
 
-App Hosting runtime secrets (`DATABASE_URL`, `ADMIN_PASSWORD`, etc.) stay in **Firebase Secret Manager**, not GitHub.
+App Hosting runtime secrets (`DATABASE_URL` **socket URL**, `ADMIN_PASSWORD`, etc.) stay in **Firebase Secret Manager**. GitHub also needs a separate **`DATABASE_URL` secret (public IP format)** so deploy can run migrations — see [CI_CD.md — DATABASE_URL](./CI_CD.md#database_url--ägare-manuellt).
 
 ### Alternative: Firebase Console GitHub integration
 

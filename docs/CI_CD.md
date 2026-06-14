@@ -175,11 +175,12 @@ Agentregel: [`.cursor/rules/deploy-safety.mdc`](../.cursor/rules/deploy-safety.m
 | Plats | Namn | Syfte |
 |-------|------|--------|
 | GitHub Actions | `FIREBASE_TOKEN` | `firebase login:ci` — deploy från Actions |
+| GitHub Actions (secret) | `DATABASE_URL` | Pre-deploy `npm run db:migrate` i `deploy.yml` — **public IP**-URL, inte Firebase socket-URL (se [DATABASE_URL — ägare](#database_url--ägare-manuellt)) |
 | GitHub Actions (secret) | `CRON_SECRET` | Bearer för schemalagda cron (`/api/cron/expiry-reminders`, `pmf-weekly`, `shopping-push`, `skaffurapport`, …) — måste matcha Firebase |
 | GitHub Actions (variable) | `PRODUCTION_URL` | Prod-appens bas-URL (samma som `PUBLIC_ORIGIN`, utan `/` på slutet). **`https://skaffu.com`** — se [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md). |
 | GitHub Actions (valfritt) | `DEPLOY_NOTIFY_WEBHOOK_URL` | Push-notis efter lyckad deploy — ntfy, Discord, Slack m.m. (se [Mobilnotis vid deploy](#mobilnotis-vid-deploy)) |
 | GitHub Actions (valfritt) | `DEPLOY_TELEGRAM_BOT_TOKEN` + `DEPLOY_TELEGRAM_CHAT_ID` | Telegram-push efter lyckad deploy (alternativ till webhook) |
-| Firebase Secret Manager | `DATABASE_URL`, `ADMIN_PASSWORD`, `OPENAI_API_KEY`, `CRON_SECRET`, … | Runtime i App Hosting |
+| Firebase Secret Manager | `DATABASE_URL` (socket-URL), `ADMIN_PASSWORD`, `OPENAI_API_KEY`, `CRON_SECRET`, … | Runtime i App Hosting — **inte** samma format som GitHub `DATABASE_URL` |
 
 Utan `FIREBASE_TOKEN` körs quality + E2E vid deploy ändå; deploy-jobbet **skippar** med tydlig loggrad.
 
@@ -210,6 +211,45 @@ Cron-jobb körs från **GitHub Actions** mot prod (`POST /api/cron/*`). Appen va
 4. **Verifiera:** Actions → t.ex. **Expiry reminders cron** → *Run workflow*. Förväntat: HTTP 200, JSON `{ "ok": true, ... }`. Om GitHub saknar secret failar workflow direkt med `CRON_SECRET is not set`. Om Firebase saknar/värdet skiljer sig: HTTP **401** `Unauthorized`.
 
 **Lokalt:** sätt `CRON_SECRET` i `.env` om du vill testa cron-rutter manuellt med `curl -H "Authorization: Bearer …"`.
+
+### DATABASE_URL — ägare (manuellt)
+
+Deploy-workflow kör `npm run db:migrate` mot prod **innan** Firebase deploy. Det kräver GitHub secret `DATABASE_URL` med **public IP**-format — **inte** socket-URL:en som App Hosting använder i runtime.
+
+| Status (repo) | Detalj |
+|---------------|--------|
+| Kod | `.github/workflows/deploy.yml` — steget *Apply database migrations (pre-deploy)* failar om secret saknas |
+| Firebase Secret Manager | Socket-URL för runtime (`postgresql://pantry_app:…@/pantry?host=/cloudsql/…`) — se [`FIREBASE_DEPLOY.md`](./FIREBASE_DEPLOY.md#database) |
+| GitHub Actions | Public IP-URL enbart för migrate från Actions |
+
+**Format (GitHub secret):**
+
+```
+postgresql://pantry_app:PASSWORD@PUBLIC_IP:5432/pantry
+```
+
+Exempel (public IP kan ändras — se GCP Console → Cloud SQL → Connections):
+
+```
+postgresql://pantry_app:YOUR_PASSWORD@34.158.71.215:5432/pantry
+```
+
+**Lösenord:** parsa `PASSWORD` från Firebase Secret Manager `DATABASE_URL` (socket-URL), eller hämta från Cloud SQL-användaren `pantry_app` i GCP Console.
+
+**Cloud SQL — authorized networks:** GitHub Actions kör från dynamiska IP-adresser. Antingen:
+
+1. Tillåt [GitHub Actions IP-ranges](https://api.github.com/meta) (`actions` i JSON) under Cloud SQL → **Connections** → **Authorized networks**, eller
+2. Tillfälligt öppna `0.0.0.0/0` (eller din egen IP) endast under migrate, sedan ta bort.
+
+Utan auktoriserat nätverk failar migrate med connection timeout — deploy stoppar innan Firebase.
+
+**Du gör (engångs):**
+
+1. Bygg public IP-URL enligt format ovan (samma lösenord som prod, annan host).
+2. **GitHub** → *Settings* → *Secrets and variables* → *Actions* → **Secret** `DATABASE_URL`.
+3. Verifiera: kör **Deploy to production** (eller push till `master`) — steget *Apply database migrations* ska logga `Pre-deploy migrations applied.`
+
+**Lokalt:** `.env` med samma public IP-URL fungerar fortfarande för manuell `npm run db:migrate`; CI behöver inte din `.env`.
 
 ---
 

@@ -357,9 +357,10 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${DATABASE_URL:-}" ]; then
-            echo "::warning::DATABASE_URL not in GitHub secrets — skipping pre-deploy migrate."
-            echo "Apply migrations manually against prod before deploy (npm run db:migrate)."
-            exit 0
+            echo "::error::DATABASE_URL is not set in GitHub Actions secrets."
+            echo "Pre-deploy migrations require GitHub secret DATABASE_URL (public IP format, not Firebase socket URL)."
+            echo "See docs/CI_CD.md#database_url--ägare-manuellt"
+            exit 1
           fi
           npm run db:migrate
           echo "Pre-deploy migrations applied."
