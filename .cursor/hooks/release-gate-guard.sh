@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# deprecated — policy in deploy-safety.mdc, delivery-done.mdc, skill skaffu-deploy-verify
 set -euo pipefail
 input="$(cat)"
 extract_command() {
@@ -12,8 +13,4 @@ extract_command() {
 }
 command="$(extract_command)"
 if [ -z "$command" ]; then echo '{ "permission": "allow" }'; exit 0; fi
-if printf '%s' "$command" | grep -Eiq 'gh workflow run deploy'; then
-	echo '{"permission":"allow","agent_message":"Deploy: G0 green? CI quality on SHA? Rollback: revert SHA or Firebase rollout."}'
-	exit 0
-fi
 echo '{ "permission": "allow" }'

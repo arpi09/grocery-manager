@@ -1,12 +1,4 @@
 {
   "version": 1,
-  "hooks": {
-    "beforeShellExecution": [
-      {
-        "command": ".cursor/hooks/release-gate-guard.sh",
-        "matcher": "gh workflow run deploy",
-        "failClosed": false
-      }
-    ]
-  }
+  "hooks": {}
 }

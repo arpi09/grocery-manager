@@ -72,9 +72,15 @@ Inte Cloud-strategi, dispatch eller extra orchestration.
 
 ---
 
-## Cursor hooks (minimal för hastighet)
+## Cursor hooks (inga aktiva hooks)
 
-Projekt-hooks i [`.cursor/hooks.json`](../.cursor/hooks.json) är avsiktligt minimala — ingen `permission: ask`, inga hooks på varje filredigering.
+Projekt-hooks i [`.cursor/hooks.json`](../.cursor/hooks.json) är avsiktligt tomma (`"hooks": {}`) — ingen hook-process, ingen hook-UI, ingen latency på Shell eller filredigering.
+
+**Hooks-policy:**
+
+- Inga hooks på `preToolUse`, `afterFileEdit`, `beforeSubmitPrompt`, eller `beforeShellExecution`
+- Inga `permission: ask`, `user_message`, eller `agent_message` i hooks
+- Deploy/release styrs endast via rules och skills (inte shell-hooks)
 
 | Policy | Var den lever |
 |--------|----------------|
@@ -83,7 +89,7 @@ Projekt-hooks i [`.cursor/hooks.json`](../.cursor/hooks.json) är avsiktligt min
 | Release policy (master=truth) | [RELEASE_MODEL.md](./RELEASE_MODEL.md) — flags merge with feature, deploy publishes |
 | Deploy / G0 / rollback | `deploy-safety.mdc`, `delivery-done.mdc` + skill `skaffu-deploy-verify` |
 
-**Enda kvarvarande hook:** `beforeShellExecution` med matcher `gh workflow run deploy` — tyst `allow` + `agent_message` (ingen modal). Påminner agenten om G0/CI/rollback utan att blockera.
+Deprecated referensscript (ej wired): `.cursor/hooks/release-gate-guard.sh`, `.cursor/hooks/frozen-zone-guard.sh`.
 
 ---
 

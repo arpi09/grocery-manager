@@ -4,6 +4,8 @@
 
 **Verdict: PARTIAL — usable for implementation agents, not for full-stack dev or deploy.**
 
+Project Cursor hooks in [`.cursor/hooks.json`](../.cursor/hooks.json) are intentionally empty for agent speed — release safety lives in rules/skills only.
+
 Skaffu is cloud-ready for the same work CI proves on `ubuntu-latest`: lint, typecheck, unit tests, PGlite integration tests, and production build. Cloud agents should mirror the **quality** job in [`.github/workflows/reusable-quality.yml`](../.github/workflows/reusable-quality.yml), not local PowerShell dev-runtime, Firebase deploy, or production smoke.
 
 | Cloud safe | Cloud risky | Local only |
