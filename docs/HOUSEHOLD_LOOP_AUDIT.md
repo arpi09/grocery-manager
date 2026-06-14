@@ -199,13 +199,13 @@ Brain **accelererar** veckoloopen (cadence, expiry, trust) när kvitto + synligh
 
 **Owner:** `USER_LOCAL` — product owner on physical device (Turnstile, mobilkamera, real receipt). Agents link here; they do not substitute for this pass.
 
-**Target:** https://skaffu.com @ prod SHA **`51853d74`** ([CURRENT_REALITY.md](./CURRENT_REALITY.md)). Re-run after deploy bundle 2 lands.
+**Target:** https://skaffu.com @ prod SHA **`73d3dfd0`** — deploy run [27501022135](https://github.com/arpi09/grocery-manager/actions/runs/27501022135) ([CURRENT_REALITY.md](./CURRENT_REALITY.md)).
 
 ### Setup
 
 - [ ] Physical phone (not desktop-only) — primary weekly loop is mobile shopping
 - [ ] Fresh or test household with at least one prior receipt import (for replenishment signal)
-- [ ] Confirm prod SHA in browser devtools / deploy run matches `51853d74`
+- [ ] Confirm prod SHA in browser devtools / deploy run matches `73d3dfd0` ([27501022135](https://github.com/arpi09/grocery-manager/actions/runs/27501022135))
 
 ### Receipt path (activation + Brain seed)
 
