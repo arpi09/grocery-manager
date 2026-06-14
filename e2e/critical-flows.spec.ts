@@ -125,6 +125,28 @@ test.describe('Critical flows', () => {
 
 
 
+	test('cold home shows lista CTA without empty section headings', async ({ page }) => {
+
+		await registerNewUser(page);
+
+		await dismissOnboardingModalIfOpen(page);
+
+		await page.goto('/hem');
+
+		await expect(page.locator('[data-home-state="cold"]')).toBeVisible();
+
+		await expect(page.locator('.home-v3-section')).toHaveCount(1);
+
+		await expect(page.getByRole('link', { name: /Skapa veckans lista|Create this week's list/i })).toBeVisible();
+
+		await expect(page.getByRole('heading', { name: /Vad rekommenderar|What does Skaffu recommend/i })).toHaveCount(0);
+
+		await expect(page.getByRole('heading', { name: /Hur mår hushållet|How's the household/i })).toHaveCount(0);
+
+	});
+
+
+
 	test('home V3 shows sections without Mer på hem', async ({ page }) => {
 
 		await loginAsAdmin(page);

@@ -193,7 +193,7 @@
 		"greeting": "Hi, {name}",
 		"greetingNeutral": "Your pantry",
 		"tagline": "Photograph your pantry to stay on top of things",
-		"taglineEmpty": "Photograph items — one photo round in fridge, freezer or cupboard is enough to get started",
+		"taglineEmpty": "Create this week's list — three items is enough to start shared weekly shopping",
 		"scanCardTitle": "Add items",
 		"scanCardSubtitle": "Photo round — the fastest way to fill your pantry",
 		"chipReceipt": "Receipt",
@@ -290,6 +290,11 @@
 			"lunch": "Lunch",
 			"dinner": "Dinner",
 			"evening": "Evening"
+		},
+		"v4": {
+			"coldTitle": "This week's list",
+			"coldAction": "Create this week's list",
+			"coldSecondary": "Fill pantry"
 		}
 	},
 	"dashboard": {
