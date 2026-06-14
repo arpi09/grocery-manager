@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { enhance } from '$app/forms';
+	import { deserialize, enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import SearchInput from '$lib/components/molecules/SearchInput.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
+	import ShoppingListRow from '$lib/components/molecules/ShoppingListRow.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import ShoppingToPantrySheet from '$lib/components/molecules/ShoppingToPantrySheet.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
@@ -15,6 +16,8 @@
 	import {
 		clearPantryBridgeYesCount,
 		clearPantryBridgeYesHistory,
+		getPantryBridgeYesCountForUser,
+		PANTRY_BRIDGE_ALWAYS_THRESHOLD,
 		recordPantryBridgeYes,
 		shouldShowPantryBridgeAlwaysNudge
 	} from '$lib/utils/pantry-bridge-nudge';
@@ -117,6 +120,7 @@
 	let exportCopiedFormat = $state<ShoppingListExportFormat | null>(null);
 	let shareLinkCopied = $state(false);
 	let shareLinkSubmitting = $state(false);
+	let shareMenuOpen = $state(false);
 	let listaInviteVisible = $state(false);
 	let listaInviteSharing = $state(false);
 	let listaInviteCopied = $state(false);
@@ -181,6 +185,10 @@
 		return url;
 	}
 
+	function closeShareMenu() {
+		shareMenuOpen = false;
+	}
+
 	async function copyExportList(format: ShoppingListExportFormat) {
 		const exportItems = await allItemsForExport();
 		let text = formatShoppingListExportByFormat(exportItems, format);
@@ -197,6 +205,7 @@
 		exportCopiedFormat = format;
 		void trackProductEvent('shopping_list_export', { format });
 		recordShoppingListExport(get(page).data.user?.id);
+		closeShareMenu();
 		setTimeout(() => {
 			exportCopiedFormat = null;
 		}, 2000);
@@ -254,6 +263,7 @@
 			showClientToast(t('shoppingListShare.shareLinkError'), { variant: 'error' });
 		} finally {
 			shareLinkSubmitting = false;
+			closeShareMenu();
 		}
 	}
 
@@ -269,6 +279,53 @@
 				undoPayload = snapshot;
 			};
 		};
+	}
+
+	async function autoAddPantryBridge(bridge: {
+		item: ShoppingListItem;
+		preview: PantryBridgePreview;
+		mode: ShoppingToPantryMode;
+	}): Promise<boolean> {
+		const formData = new FormData();
+		formData.set('shoppingItemId', bridge.item.id);
+		formData.set('location', bridge.preview.location);
+		formData.set('quantity', bridge.preview.quantity);
+		formData.set('unit', bridge.preview.unit ?? '');
+		formData.set('merge', bridge.preview.mergeCandidate ? '1' : '0');
+		formData.set('shoppingToPantryMode', bridge.mode);
+
+		try {
+			const response = await fetch('?/addToPantry', {
+				method: 'POST',
+				body: formData,
+				headers: {
+					accept: 'application/json',
+					'x-sveltekit-action': 'true'
+				}
+			});
+			const result = deserialize(await response.text()) as {
+				type: string;
+				data?: { pantryAdded?: { message?: string; location?: StorageLocation } };
+			};
+
+			if (result.type === 'success' && result.data?.pantryAdded?.message) {
+				handlePantryAdded(result.data.pantryAdded.message, result.data.pantryAdded.location);
+				return true;
+			}
+		} catch {
+			// Fall back to the sheet when auto-add fails.
+		}
+
+		return false;
+	}
+
+	function shouldAutoAddPantryBridge(userId: string | undefined): boolean {
+		if (!userId || pantryBridgeMode !== 'ask') {
+			return false;
+		}
+		return (
+			getPantryBridgeYesCountForUser(userId) >= PANTRY_BRIDGE_ALWAYS_THRESHOLD - 1
+		);
 	}
 
 	function createToggleEnhance(item: ShoppingListItem): SubmitFunction {
@@ -305,6 +362,18 @@
 				if (data?.pantryAdded?.message) {
 					handlePantryAdded(data.pantryAdded.message, data.pantryAdded.location);
 				} else if (data?.pantryBridge) {
+					const userId = get(page).data.user?.id;
+					if (shouldAutoAddPantryBridge(userId)) {
+						const autoAdded = await autoAddPantryBridge(data.pantryBridge);
+						if (autoAdded) {
+							const next = new Set(removingIds);
+							next.delete(item.id);
+							removingIds = next;
+							await invalidateAll();
+							return;
+						}
+					}
+
 					pantryBridgeItem = data.pantryBridge.item;
 					pantryBridgePreview = data.pantryBridge.preview;
 					pantryBridgeMode = data.pantryBridge.mode;
@@ -478,6 +547,32 @@
 		void trackProductEvent('household_invite_prompt_shown', { context: 'lista' });
 		listaInviteShownEventSent = true;
 	});
+
+	$effect(() => {
+		if (!shareMenuOpen) {
+			return;
+		}
+
+		function handlePointerDown(event: PointerEvent) {
+			const target = event.target;
+			if (!(target instanceof Element)) {
+				return;
+			}
+			if (target.closest('.share-menu-wrap')) {
+				return;
+			}
+			closeShareMenu();
+		}
+
+		const id = window.setTimeout(() => {
+			window.addEventListener('pointerdown', handlePointerDown);
+		}, 0);
+
+		return () => {
+			window.clearTimeout(id);
+			window.removeEventListener('pointerdown', handlePointerDown);
+		};
+	});
 </script>
 
 <section
@@ -503,7 +598,7 @@
 			)}
 			class="add-form"
 		>
-			<div class="add-row">
+			<div class="add-primary">
 				<input
 					id="shopping-name"
 					name="name"
@@ -512,8 +607,6 @@
 					placeholder={t('shopping.itemPlaceholder')}
 					aria-label={t('shopping.itemPlaceholder')}
 				/>
-				<input name="quantity" inputmode="decimal" placeholder={t('shopping.quantityPlaceholder')} aria-label={t('shopping.quantityPlaceholder')} />
-				<input name="unit" maxlength="40" placeholder={t('shopping.unitPlaceholder')} aria-label={t('shopping.unitPlaceholder')} />
 				<Button
 					type="submit"
 					loading={addSubmitting}
@@ -523,6 +616,25 @@
 					+
 				</Button>
 			</div>
+			<details class="qty-optional">
+				<summary>
+					{t('shopping.quantityPlaceholder')} ({t('common.optional')})
+				</summary>
+				<div class="qty-row">
+					<input
+						name="quantity"
+						inputmode="decimal"
+						placeholder={t('shopping.quantityPlaceholder')}
+						aria-label={t('shopping.quantityPlaceholder')}
+					/>
+					<input
+						name="unit"
+						maxlength="40"
+						placeholder={t('shopping.unitPlaceholder')}
+						aria-label={t('shopping.unitPlaceholder')}
+					/>
+				</div>
+			</details>
 		</form>
 	{:else}
 		<p class="readonly">{t('inventory.readonly')}</p>
@@ -541,32 +653,14 @@
 		<SearchInput bind:value={listQuery} placeholder={t('shopping.searchPlaceholder')} />
 		<ul class="list">
 			{#each unchecked as item (item.id)}
-				<li class:removing={removingIds.has(item.id)}>
-					{#if canEdit}
-						<form method="POST" action="?/toggle" class="row-form" use:enhance={createToggleEnhance(item)}>
-							<input type="hidden" name="id" value={item.id} />
-							<label class="check-row">
-								<input type="checkbox" onchange={(e) => e.currentTarget.form?.requestSubmit()} />
-								<span>{formatLine(item)}</span>
-							</label>
-						</form>
-						<DeleteConfirmButton
-							tier={1}
-							context="shoppingListItem"
-							copyOptions={{ itemName: item.name }}
-							action="?/remove"
-							variant="ghost"
-							submitEnhance={createRemoveEnhance(item)}
-							label="×"
-							ariaLabel={t('shopping.removeLine', { line: formatLine(item) })}
-							class="remove-trigger"
-						>
-							<input type="hidden" name="id" value={item.id} />
-						</DeleteConfirmButton>
-					{:else}
-						<span>{formatLine(item)}</span>
-					{/if}
-				</li>
+				<ShoppingListRow
+					{item}
+					{canEdit}
+					lineLabel={formatLine(item)}
+					removing={removingIds.has(item.id)}
+					toggleEnhance={createToggleEnhance(item)}
+					removeEnhance={createRemoveEnhance(item)}
+				/>
 			{/each}
 		</ul>
 
@@ -600,19 +694,13 @@
 				{#if showChecked}
 					<ul class="list checked">
 						{#each visibleChecked as item (item.id)}
-							<li>
-								{#if canEdit}
-									<form method="POST" action="?/toggle" class="row-form" use:enhance={createToggleEnhance(item)}>
-										<input type="hidden" name="id" value={item.id} />
-										<label class="check-row">
-											<input type="checkbox" checked onchange={(e) => e.currentTarget.form?.requestSubmit()} />
-											<span>{formatLine(item)}</span>
-										</label>
-									</form>
-								{:else}
-									<span class="done">{formatLine(item)}</span>
-								{/if}
-							</li>
+							<ShoppingListRow
+								{item}
+								{canEdit}
+								checked
+								lineLabel={formatLine(item)}
+								toggleEnhance={createToggleEnhance(item)}
+							/>
 						{/each}
 					</ul>
 				{/if}
@@ -650,35 +738,52 @@
 
 		{#if canEdit}
 			<div class="panel-footer">
-				{#if shareLinkEnabled}
+				<div class="share-menu-wrap">
 					<button
 						type="button"
-						class="text-action"
-						disabled={!hasShareableItems || shareLinkSubmitting}
-						aria-label={hasShareableItems ? t('shoppingListShare.shareLinkAria') : t('shopping.exportEmpty')}
-						onclick={shareListLink}
+						class="text-action share-menu-trigger"
+						disabled={!hasShareableItems && unchecked.length === 0 && checkedCount === 0}
+						aria-expanded={shareMenuOpen}
+						aria-haspopup="menu"
+						aria-label={t('shopping.duoActionBar.aria')}
+						onclick={() => (shareMenuOpen = !shareMenuOpen)}
 					>
-						{shareLinkCopied ? t('common.copied') : t('shoppingListShare.shareLink')}
+						{t('shopping.duoActionBar.shareList')}
 					</button>
-				{/if}
-				<button
-					type="button"
-					class="text-action"
-					disabled={unchecked.length === 0 && checkedCount === 0}
-					aria-label={unchecked.length === 0 ? t('shopping.exportEmpty') : t('shopping.exportBringAria')}
-					onclick={() => copyExportList('bring')}
-				>
-					{exportCopiedFormat === 'bring' ? t('common.copied') : t('shopping.exportBring')}
-				</button>
-				<button
-					type="button"
-					class="text-action"
-					disabled={unchecked.length === 0 && checkedCount === 0}
-					aria-label={unchecked.length === 0 ? t('shopping.exportEmpty') : t('shopping.exportAnyListAria')}
-					onclick={() => copyExportList('anylist')}
-				>
-					{exportCopiedFormat === 'anylist' ? t('common.copied') : t('shopping.exportAnyList')}
-				</button>
+					{#if shareMenuOpen}
+						<div class="share-menu-panel" role="menu">
+							{#if shareLinkEnabled}
+								<button
+									type="button"
+									class="share-menu-item"
+									role="menuitem"
+									disabled={!hasShareableItems || shareLinkSubmitting}
+									onclick={shareListLink}
+								>
+									{shareLinkCopied ? t('common.copied') : t('shoppingListShare.shareLink')}
+								</button>
+							{/if}
+							<button
+								type="button"
+								class="share-menu-item"
+								role="menuitem"
+								disabled={unchecked.length === 0 && checkedCount === 0}
+								onclick={() => copyExportList('bring')}
+							>
+								{exportCopiedFormat === 'bring' ? t('common.copied') : t('shopping.exportBring')}
+							</button>
+							<button
+								type="button"
+								class="share-menu-item"
+								role="menuitem"
+								disabled={unchecked.length === 0 && checkedCount === 0}
+								onclick={() => copyExportList('anylist')}
+							>
+								{exportCopiedFormat === 'anylist' ? t('common.copied') : t('shopping.exportAnyList')}
+							</button>
+						</div>
+					{/if}
+				</div>
 			</div>
 		{/if}
 	{/if}
@@ -791,12 +896,55 @@
 		border-top: 1px solid var(--color-border);
 	}
 
-	.panel-footer .text-action {
+	.share-menu-wrap {
+		position: relative;
+	}
+
+	.share-menu-trigger {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		min-height: var(--touch-target-min);
-		padding: 0.35rem 0.5rem;
+		padding: 0.35rem 0.75rem;
+		font-weight: 600;
+	}
+
+	.share-menu-panel {
+		position: absolute;
+		right: 0;
+		bottom: calc(100% + 0.35rem);
+		z-index: 20;
+		min-width: 12rem;
+		padding: var(--space-xs);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		box-shadow: var(--shadow-md);
+	}
+
+	.share-menu-item {
+		display: block;
+		width: 100%;
+		padding: 0.55rem 0.65rem;
+		border: none;
+		border-radius: var(--radius-sm);
+		background: transparent;
+		font: inherit;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-text);
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.share-menu-item:hover:not(:disabled) {
+		background: var(--color-surface-muted);
+		color: var(--color-primary);
+	}
+
+	.share-menu-item:disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
 	}
 
 	:global(.clear-checked-action .btn) {
@@ -812,19 +960,38 @@
 		gap: var(--space-sm);
 	}
 
-	.add-row {
+	.add-primary {
 		display: grid;
-		grid-template-columns: 1fr 5rem 5rem auto;
+		grid-template-columns: 1fr auto;
 		gap: var(--space-sm);
 	}
 
-	.add-row input {
+	.add-primary input,
+	.qty-row input {
 		padding: 0.55rem 0.7rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
 		background: var(--color-surface);
 		color: var(--color-text);
 		font: inherit;
+		min-height: var(--touch-target-min);
+	}
+
+	.qty-optional summary {
+		cursor: pointer;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+		min-height: var(--touch-target-min);
+		display: inline-flex;
+		align-items: center;
+	}
+
+	.qty-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-sm);
+		margin-top: var(--space-xs);
 	}
 
 	.list {
@@ -834,66 +1001,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-xs);
-	}
-
-	.list li {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-sm);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-sm);
-		padding: 0.45rem 0.65rem;
-		background: var(--color-surface-muted);
-		transition:
-			opacity 0.24s ease,
-			transform 0.24s ease,
-			max-height 0.24s ease,
-			margin 0.24s ease,
-			padding 0.24s ease;
-	}
-
-	.list li.removing {
-		opacity: 0;
-		transform: translateX(0.75rem);
-		max-height: 0;
-		margin: 0;
-		padding-top: 0;
-		padding-bottom: 0;
-		border-width: 0;
-		overflow: hidden;
-		pointer-events: none;
-	}
-
-	.list.checked li {
-		opacity: 0.65;
-		text-decoration: line-through;
-	}
-
-	.row-form {
-		flex: 1;
-		margin: 0;
-	}
-
-	:global(.remove-trigger .btn) {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		border: none;
-		background: transparent;
-		font-size: 1.25rem;
-		line-height: 1;
-		padding: 0.35rem 0.5rem;
-		min-width: var(--touch-target-min);
-		min-height: var(--touch-target-min);
-		color: var(--color-text-muted);
-	}
-
-	.check-row {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		cursor: pointer;
 	}
 
 	.checked-head {
@@ -1011,55 +1118,27 @@
 			padding-inline: var(--space-sm);
 		}
 
-		.add-row {
-			grid-template-columns: auto minmax(4rem, 0.6fr) minmax(7rem, 1fr);
-		}
-
-		.add-row input:first-of-type {
-			grid-column: 1 / -1;
-		}
-
-		.add-row input[name='quantity'] {
-			grid-column: 2;
-		}
-
-		.add-row input[name='unit'] {
-			grid-column: 3;
-		}
-
-		.add-row input {
+		.add-primary input,
+		.qty-row input {
 			min-width: 0;
-			min-height: 2.75rem;
 			width: 100%;
-		}
-
-		.add-row :global(.btn) {
-			grid-column: 1;
-			grid-row: 2;
-			min-width: 2.75rem;
-			padding-inline: 0.85rem;
 		}
 
 		.panel-footer {
 			justify-content: stretch;
 		}
 
-		.panel-footer .text-action {
-			flex: 1 1 auto;
-			min-width: min(100%, 10rem);
+		.share-menu-wrap {
+			width: 100%;
 		}
 
-		.list li {
-			min-height: 2.75rem;
+		.share-menu-trigger {
+			width: 100%;
 		}
 
-		.check-row {
-			min-height: 2.75rem;
-		}
-
-		:global(.remove-trigger .btn) {
-			min-width: var(--touch-target-min);
-			min-height: var(--touch-target-min);
+		.share-menu-panel {
+			left: 0;
+			right: 0;
 		}
 
 		.checked-head {
