@@ -244,8 +244,7 @@ function isPostRegisterLanding(url: URL) {
 	}
 	return (
 		url.searchParams.get('welcome') === '1' ||
-		url.searchParams.get('freshAccount') === '1' ||
-		url.search === ''
+		url.searchParams.get('freshAccount') === '1'
 	);
 }
 
@@ -254,20 +253,17 @@ async function waitForPostRegisterHome(page: Page) {
 		timeout: E2E_AUTH_NAV_TIMEOUT_MS,
 		waitUntil: 'domcontentloaded'
 	});
+}
+
+export async function waitForWelcomeParamStripped(page: Page) {
 	await page
-		.waitForURL((url) => {
-			if (url.pathname === '/inkop') {
-				return !url.searchParams.has('freshAccount');
-			}
-			if (url.pathname === '/hem') {
-				return (
-					url.searchParams.get('welcome') !== '1' && !url.searchParams.has('freshAccount')
-				);
-			}
-			return false;
-		}, {
-			timeout: 20_000
-		})
+		.waitForURL(
+			(url) =>
+				url.pathname === '/hem' &&
+				url.searchParams.get('welcome') !== '1' &&
+				!url.searchParams.has('freshAccount'),
+			{ timeout: 20_000 }
+		)
 		.catch(() => undefined);
 }
 
@@ -331,6 +327,7 @@ export async function registerNewUser(
 	await prepareFreshUserBrowserState(page);
 
 	await page.goto('/register');
+	await dismissCookieConsentIfOpen(page);
 	await expect(page.getByTestId('register-submit')).toBeVisible({ timeout: 15_000 });
 	await expect(page.getByTestId('register-turnstile')).toHaveCount(0);
 
@@ -343,7 +340,7 @@ export async function registerNewUser(
 	await fillBoundInput(confirmInput, password);
 
 	const navigatedToHome = waitForPostRegisterHome(page);
-	await page.getByTestId('register-submit').click();
+	await page.getByTestId('register-submit').click({ noWaitAfter: true });
 	await navigatedToHome;
 
 	return { email, password };

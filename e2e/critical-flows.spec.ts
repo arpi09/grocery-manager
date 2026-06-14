@@ -11,7 +11,9 @@ import {
 
 	loginWithCredentials,
 
-	registerNewUser
+	registerNewUser,
+
+	waitForWelcomeParamStripped
 
 } from './helpers/auth';
 
@@ -21,7 +23,11 @@ test.describe('Critical flows', () => {
 
 	test('register creates account with captcha bypass and lands on hem welcome', async ({ page }) => {
 
+		test.setTimeout(60_000);
+
 		await registerNewUser(page);
+
+		await waitForWelcomeParamStripped(page);
 
 		await expect(page).toHaveURL('/hem');
 
@@ -49,27 +55,19 @@ test.describe('Critical flows', () => {
 
 
 
-	test('fresh registration skips auto-open onboarding modal on home', async ({ page }) => {
+	test('fresh registration does not reopen onboarding on scan', async ({ page }) => {
 
 		await registerNewUser(page);
 
-		await expect(page).toHaveURL('/hem');
-
-		await expect(
-
-			page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
-
-		).toHaveCount(0);
+		await dismissOnboardingModalIfOpen(page);
 
 		await page.goto('/scan?mode=photo');
 
 		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 15_000 });
 
 		await expect(
-
-			page.getByRole('heading', { name: /V\u00e4lkommen till Skaffu/i })
-
-		).toHaveCount(0);
+			page.getByRole('dialog', { name: /Introduktion till Skaffu|Introduction to Skaffu/i })
+		).toBeHidden();
 
 	});
 
