@@ -2,6 +2,8 @@
 
 	import Badge from '$lib/components/atoms/Badge.svelte';
 
+	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
+
 	import Button from '$lib/components/atoms/Button.svelte';
 
 	import type { InventoryItem } from '$lib/domain/inventory-item';
@@ -21,6 +23,8 @@
 		EXPIRING_SOON_DAYS
 
 	} from '$lib/domain/expiry';
+
+	import { isEstimatedExpirySource } from '$lib/domain/learning/expiry-source';
 
 	import { getLocale, t } from '$lib/i18n';
 
@@ -295,6 +299,9 @@
 								{expiryLabel}
 							</Badge>
 						{/if}
+						{#if isEstimatedExpirySource(item.expiresOnSource) && !finished && !autoExpired}
+							<EstimatedBadge source={item.expiresOnSource} />
+						{/if}
 					</div>
 				</div>
 				<span class="qty">{quantityLine}</span>
@@ -388,6 +395,12 @@
 						{expiryLabel}
 
 					</Badge>
+
+				{/if}
+
+				{#if isEstimatedExpirySource(item.expiresOnSource) && !finished && !autoExpired}
+
+					<EstimatedBadge source={item.expiresOnSource} />
 
 				{/if}
 
