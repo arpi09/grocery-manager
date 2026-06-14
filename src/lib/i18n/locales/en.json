@@ -128,11 +128,11 @@
 		},
 		"register": {
 			"title": "Create account",
-			"subtitle": "Your household, one app",
+			"subtitle": "Create this week's list — invite your partner when you're ready",
 			"submit": "Create account",
 			"submitting": "Creating account…",
 			"pageTitle": "Create account · Skaffu",
-			"metaDescription": "Create a free Skaffu account. Pantry app with scanning and receipt PDF — track your household inventory and reduce food waste.",
+			"metaDescription": "Free shared weekly list for your household. Skaffu learns what you usually buy — store-neutral.",
 			"hasAccount": "Already have an account?",
 			"loginLink": "Log in",
 			"captchaLabel": "Confirm you are not a robot",
