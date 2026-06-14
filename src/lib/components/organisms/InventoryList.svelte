@@ -740,7 +740,7 @@
 
 			description={emptyDescription}
 
-			actionLabel={isSearchEmpty || (!hasInventory && canWrite)
+			actionLabel={isSearchEmpty
 
 				? undefined
 
@@ -750,7 +750,7 @@
 
 					: t('inventory.backHome')}
 
-			actionHref={isSearchEmpty || (!hasInventory && canWrite)
+			actionHref={isSearchEmpty
 
 				? undefined
 
