@@ -18,6 +18,9 @@ export function parseScanMode(value: string | null): ScanMode {
 	if (value === 'barcode' || value === 'receipt' || value === 'photo') {
 		return value;
 	}
+	if (value === null) {
+		return 'hub';
+	}
 	return 'photo';
 }
 

@@ -3,7 +3,7 @@ import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
 import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
 
 test.describe('Scan and inventory', () => {
-	test('scan hub loads with photo round primary', async ({ page }) => {
+	test('scan hub loads with receipt primary', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/scan?mode=hub');
 		await dismissOnboardingModalIfOpen(page);
@@ -11,25 +11,25 @@ test.describe('Scan and inventory', () => {
 		await expect(page).toHaveURL(/mode=hub/);
 		const hub = page.getByTestId('scan-mode-hub');
 		await expect(hub).toBeVisible({ timeout: 15_000 });
-		await expect(hub.getByTestId('scan-hub-photo-round')).toBeVisible();
-		await expect(hub.getByRole('heading', { name: 'Fota in varor' })).toBeVisible();
+		await expect(hub.getByTestId('scan-hub-receipt-hero')).toBeVisible();
+		await expect(hub.getByRole('heading', { name: /^Kvitto$|^Receipt$/i })).toBeVisible();
 
 		await expect(page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i })).toHaveCount(0);
 
 		const modeGrid = hub.getByTestId('scan-hub-mode-grid');
 		await expect(modeGrid).toBeVisible();
+		await expect(hub.getByTestId('scan-hub-photo')).toBeVisible();
 		await expect(hub.getByTestId('scan-hub-barcode')).toBeVisible();
-		await expect(hub.getByTestId('scan-hub-receipt')).toBeVisible();
 		await expect(hub.getByTestId('scan-hub-manual')).toBeVisible();
 		await expect(hub.getByRole('heading', { name: /Fler sätt|More ways/i })).toBeVisible();
+		await expect(hub.getByTestId('scan-hub-photo')).toContainText(/Foto|Photo/i);
 		await expect(hub.getByTestId('scan-hub-barcode')).toContainText(/Streckkod|Barcode/i);
-		await expect(hub.getByTestId('scan-hub-receipt')).toContainText(/Kvitto|Receipt/i);
 		await expect(hub.getByTestId('scan-hub-manual')).toContainText(/Manuellt|Manual/i);
 		await expect(page.locator('.page-header .back-link')).toHaveCount(0);
 		await expect(page.getByText(/Avbryt|Cancel/i)).toHaveCount(0);
 	});
 
-	test('scan sub-modes show mode tabs without hub link', async ({ page }) => {
+	test('scan sub-modes show mode tabs with receipt first', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/scan?mode=photo&from=/inventory/fridge&location=fridge');
 		await dismissOnboardingModalIfOpen(page);
@@ -38,7 +38,10 @@ test.describe('Scan and inventory', () => {
 		const scanModes = page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i });
 		await expect(scanModes).toBeVisible();
 		await expect(scanModes.getByRole('link', { name: /Fler sätt|More ways/i })).toHaveCount(0);
+		await expect(scanModes.getByRole('link', { name: /Kvitto|Receipt/i })).toBeVisible();
 		await expect(scanModes.getByRole('link', { name: 'Fota in varor' })).toBeVisible();
+		const tabLinks = scanModes.getByRole('link');
+		await expect(tabLinks.first()).toContainText(/Kvitto|Receipt/i);
 		const manualHref = await scanModes.getByRole('link', { name: /Manuellt|Manual/i }).getAttribute('href');
 		expect(manualHref).toMatch(/\/item\/new\?/);
 		expect(decodeURIComponent(manualHref!)).toMatch(/mode=photo/);
