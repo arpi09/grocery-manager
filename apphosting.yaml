@@ -239,3 +239,9 @@ env:
     value: price_1TdyFt0xHxoOfEfBd160VXF3
     availability:
       - RUNTIME
+
+  # Pro checkout kill switch — keep true until Stripe launch (see docs/STRIPE.md)
+  - variable: STRIPE_CHECKOUT_DISABLED
+    value: "true"
+    availability:
+      - RUNTIME
