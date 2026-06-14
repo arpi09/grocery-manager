@@ -2,7 +2,22 @@
 
 *How shelf-life learning connects to the weekly household loop — wired on `master`; release policy in [RELEASE_MODEL.md](./RELEASE_MODEL.md).*
 
-**Relaterat:** [LEARNING_ENGINE.md](./LEARNING_ENGINE.md) · [CURRENT_REALITY.md](./CURRENT_REALITY.md) · [RELEASE_MODEL.md](./RELEASE_MODEL.md)
+**Relaterat:** [LEARNING_ENGINE.md](./LEARNING_ENGINE.md) · [BRAIN_ROADMAP.md](./BRAIN_ROADMAP.md) · [CURRENT_REALITY.md](./CURRENT_REALITY.md) · [RELEASE_MODEL.md](./RELEASE_MODEL.md)
+
+---
+
+## V1.1 — Product Row integration (not separate PR)
+
+**V1.1 Visibility** (Uppskattat på mobil inventory) ships as **acceptance criteria** on UX Slice 1 / Product Row (`feat/ux-inventory-list-v1`, #52) — **not** `feat/brain-v1.1-inventory-estimated-badge`.
+
+| What | Where |
+|------|-------|
+| AC owner | UX Slice 1 — `InventoryCompactRow` Product Row redesign |
+| Requirement | `EstimatedBadge` when `isEstimatedExpirySource(expiresOnSource)` — diskret bredvid expiry |
+| Desktop | `InventoryTableRow` already shows badge; adjust only if Product Row unify |
+| Fallback | Minimal Brain-only patch only if Slice 1 blocked >1 week |
+
+Full AC: [UX_COORDINATOR_BACKLOG.md](./UX_COORDINATOR_BACKLOG.md) § Slice 1 · roadmap: [BRAIN_ROADMAP.md](./BRAIN_ROADMAP.md).
 
 ---
 
@@ -56,7 +71,8 @@ Per [RELEASE_MODEL.md](./RELEASE_MODEL.md): set flags `false` on master and depl
 | Email/Kivra import | `isShelfLifeLearningEnabled()` | `receipt-import.ts` |
 | Kivra/receipt location feedback | `recordLineLocationFeedback` + `isLocationLearningEnabled()` | `receipt-import.ts` |
 | Replenishment accept/dismiss | `recordPredictorFeedback` (gated in service) | `api/replenishment/accept`, `api/replenishment/dismiss` |
-| Inventory display | `isEstimatedExpirySource()` | `InventoryTableRow.svelte`, `EatFirstSection.svelte` |
+| Inventory display (desktop + eat-first) | `isEstimatedExpirySource()` | `InventoryTableRow.svelte`, `EatFirstSection.svelte` |
+| Inventory display (mobil — V1.1) | same — **Slice 1 AC** | `InventoryCompactRow.svelte` via UX Product Row PR |
 | Expiry correction | `isShelfLifeLearningEnabled()` | `item/[id]/edit/+page.server.ts` |
 | Settings → Förslag | `shouldShowSuggestionsSection()` | `settings/+page.server.ts` |
 

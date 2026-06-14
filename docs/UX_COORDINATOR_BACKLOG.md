@@ -73,6 +73,26 @@ Se **[docs/TOAST.md](./TOAST.md)** för canonical arkitektur.
 
 ---
 
+## UX Slice 1 — Brain V1.1 integration (Product Row)
+
+**Branch:** `feat/ux-inventory-list-v1` · **Ingen separat Brain-PR** på `InventoryCompactRow`.
+
+Product Row layout: `Name · qty · [expiry] [EstimatedBadge diskret]`
+
+### Acceptance criteria
+
+| # | Krav | Detalj |
+|---|------|--------|
+| AC-1 | Estimated badge på mobil | När `expiresOn` finns och `isEstimatedExpirySource(expiresOnSource)` → visa `EstimatedBadge` i `InventoryCompactRow` |
+| AC-2 | Diskret placering | Badge bredvid expiry (samma rad), inte ny rad — align Product Row overflow spec |
+| AC-3 | Source only på lista | `EstimatedBadge` med `source` only; ingen explain-sheet på list — tap name → edit för explain |
+| AC-4 | Desktop table | `InventoryTableRow` redan OK; justera endast om Product Row unify |
+| AC-5 | V1.4 senare | Confidence tier i samma pill — inte separat rad (`feat/brain-v1.4-confidence-pill` efter Slice 1) |
+
+**Referens:** [BRAIN_ROADMAP.md](./BRAIN_ROADMAP.md) · [BRAIN_V1_PRODUCT_INTEGRATION.md](./BRAIN_V1_PRODUCT_INTEGRATION.md)
+
+---
+
 ## Nästa agent — filreferenser
 
 1. **Foto AI-plats:** `src/lib/components/organisms/PhotoRoundFlow.svelte`, `src/routes/scan/+page.svelte` (`mode=photo`)
