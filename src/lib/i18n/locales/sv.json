@@ -799,7 +799,11 @@
 		"clearAutoExpiredAria": "Ta bort alla {count} automatiskt utgångna varor",
 		"bulkExpiryBanner": "Lägg bäst före-datum på odaterade varor med AI i ett tryck.",
 		"bulkExpiryAction": "Föreslå datum",
-		"quantityLeft": "{amount} kvar"
+		"quantityLeft": "{amount} kvar",
+		"expiryFilterNoExpiry": "Utan datum",
+		"filterEmptyTitle": "Inga varor matchar filtret",
+		"filterEmptyDescription": "Prova ett annat filter eller visa alla varor.",
+		"filterClear": "Visa alla varor"
 	},
 	"item": {
 		"addTitle": "Lägg till vara",
@@ -1867,6 +1871,12 @@
 			"processingFailed": "Kunde inte förbereda bilden. Prova en annan fil eller fota kvittot."
 		}
 	},
+	"receiptImport": {
+		"toastAdded": "Kvitto klart! {count, plural, one {# vara tillagd} other {# varor tillagda}}.",
+		"toastEstimatedDates": "{count, plural, one {# datum uppskattat} other {# datum uppskattade}}",
+		"toastLocationCorrections": "{count, plural, one {# plats justerad} other {# platser justerade}}",
+		"toastRulesImproved": "{count, plural, one {# minnesregel förbättrad} other {# minnesregler förbättrade}}"
+	},
 	"receiptBulk": {
 		"lead": "Har du kvittot i en appå Ladda upp PDF eller bild direkt — eller fota ett papperskvitto. Vi föreslår varor du kan lägga till.",
 		"cameraPaper": "Fota papperskvitto",
@@ -1877,7 +1887,8 @@
 		"apiKeyHint": "Kräver OPENAI_API_KEY i serverns .env.",
 		"locationBulkHint": "Gäller markerade rader. Ändra plats per vara nedan om en rad ska ligga någon annanstans.",
 		"locationOverride": "egen plats",
-		"estimatesHint": "Utgångsdatum är uppskattningar — justera vid behov innan du sparar."
+		"estimatesHint": "Utgångsdatum är uppskattningar — justera vid behov innan du sparar.",
+		"savedLabel": "{count} {count, plural, one {vara} other {varor}}"
 	},
 	"priceMemory": {
 		"lastPaid": "Senast betalt {price} ({date})",
@@ -2552,7 +2563,8 @@
 		"profileSaved": "Profil sparad",
 		"inviteSent": "Inbjudan skickad — kolla inkorgen",
 		"suggestionReset": "Förslagsregel återställd",
-		"learningCorrected": "Tack — Skaffu justerar nästa gång"
+		"learningCorrected": "Tack — Skaffu justerar nästa gång",
+		"shoppingCheckoffFailed": "Kunde inte bocka av varan. Försök igen."
 	},
 	"favorites": {
 		"invalidPayload": "Ogiltig streckkod eller varunamn"

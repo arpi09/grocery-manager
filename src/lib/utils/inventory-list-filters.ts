@@ -8,6 +8,19 @@ export type InventorySortDirection = 'asc' | 'desc';
 
 export const DEFAULT_INVENTORY_SORT: InventorySortKey = 'name';
 export const DEFAULT_INVENTORY_SORT_DIRECTION: InventorySortDirection = 'asc';
+export const INVENTORY_EXPIRY_FILTER_PARAM = 'filter';
+const INVENTORY_EXPIRY_FILTERS = new Set<InventoryExpiryFilter>(['all', 'expiring', 'dated', 'noExpiry']);
+export function parseInventoryExpiryFilter(value: string | null): InventoryExpiryFilter {
+	if (value && INVENTORY_EXPIRY_FILTERS.has(value as InventoryExpiryFilter)) return value as InventoryExpiryFilter;
+	return 'all';
+}
+export function buildInventoryListUrl(pathname: string, filter: InventoryExpiryFilter, searchParams?: URLSearchParams): string {
+	const url = new URL(pathname, 'http://local');
+	if (searchParams) for (const [key, value] of searchParams) if (key !== INVENTORY_EXPIRY_FILTER_PARAM) url.searchParams.append(key, value);
+	const param = filter === 'all' ? null : filter;
+	if (param) url.searchParams.set(INVENTORY_EXPIRY_FILTER_PARAM, param); else url.searchParams.delete(INVENTORY_EXPIRY_FILTER_PARAM);
+	return `${url.pathname}${url.search}`;
+}
 
 export function matchesInventoryExpiryFilter(
 	item: InventoryItem,

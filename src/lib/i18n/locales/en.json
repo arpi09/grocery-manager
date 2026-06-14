@@ -808,7 +808,11 @@
 		"photoRound": "Add with photos",
 		"itemActionsNamed": "Actions for {name}",
 		"editItem": "Edit",
-		"quantityLeft": "{amount} left"
+		"quantityLeft": "{amount} left",
+		"expiryFilterNoExpiry": "No date",
+		"filterEmptyTitle": "No items match this filter",
+		"filterEmptyDescription": "Try another filter or show all items.",
+		"filterClear": "Show all items"
 	},
 	"consume": {
 		"sectionTitle": "Log usage",
@@ -1896,6 +1900,12 @@
 			"processingFailed": "Could not prepare the image. Try another file or photograph the receipt."
 		}
 	},
+	"receiptImport": {
+		"toastAdded": "Receipt done! {count, plural, one {# item added} other {# items added}}.",
+		"toastEstimatedDates": "{count, plural, one {# date estimated} other {# dates estimated}}",
+		"toastLocationCorrections": "{count, plural, one {# location adjusted} other {# locations adjusted}}",
+		"toastRulesImproved": "{count, plural, one {# memory rule improved} other {# memory rules improved}}"
+	},
 	"receiptBulk": {
 		"lead": "Have the receipt in an app? Upload the PDF or image directly — or photograph a paper receipt. We suggest items you can add.",
 		"cameraPaper": "Photograph paper receipt",
@@ -1906,7 +1916,8 @@
 		"locationOverride": "custom",
 		"estimatesHint": "Expiry dates are estimates — adjust if needed before saving.",
 		"addCount": "Add {count} {count, plural, one {item} other {items}}",
-		"apiKeyHint": "Requires OPENAI_API_KEY in server .env."
+		"apiKeyHint": "Requires OPENAI_API_KEY in server .env.",
+		"savedLabel": "{count} {count, plural, one {item} other {items}}"
 	},
 	"priceMemory": {
 		"lastPaid": "Last paid {price} ({date})",
@@ -2468,7 +2479,7 @@
 			"unauthorized": "You must be logged in.",
 			"emailNotVerified": "Verify your email address before using the API.",
 			"invalidJson": "Invalid JSON.",
-			"invalidSection": "Invalid section.",
+			"invalidSection": "Invalid inventory section.",
 			"invalidPayload": "Invalid payload.",
 			"rateLimited": "Too many requests. Try again in a moment.",
 			"invalidChoice": "Invalid choice.",
@@ -2516,7 +2527,6 @@
 			"aiRateLimitReceiptPdf": "You've used all {limit} receipt PDF parses this month on the Free plan. Upgrade to Pro or wait until next month.",
 			"aiRateLimitSmartFill": "You've used all {limit} smart fill runs this week on the Free plan. Upgrade to Pro or wait until next week.",
 			"barcodeNotFound": "Invalid barcode.",
-			"invalidSection": "Invalid inventory section.",
 			"invalidLocation": "Invalid storage location."
 		},
 		"shopping": {
@@ -2582,7 +2592,8 @@
 		"suggestionReset": "Suggestion rule reset",
 		"learningCorrected": "Thanks — Skaffu will adjust next time",
 		"pushEnabled": "Browser notifications enabled",
-		"pushDisabled": "Browser notifications disabled"
+		"pushDisabled": "Browser notifications disabled",
+		"shoppingCheckoffFailed": "Could not check off the item. Try again."
 	},
 	"favorites": {
 		"invalidPayload": "Invalid barcode or product name"
