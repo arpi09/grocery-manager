@@ -87,7 +87,6 @@ export async function recordInventoryEditLocationFeedback(params: {
 		context: {
 			productName: params.productName,
 			storeLabel: null,
-			source: 'inventory_edit'
 		},
 		predictedLocation: params.previousLocation,
 		actualLocation: params.newLocation,

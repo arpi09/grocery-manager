@@ -109,7 +109,7 @@ describe('location-feedback-recording', () => {
 			householdId: 'house-1',
 			userId: 'user-1',
 			normalizedKey: 'pasta spaghetti',
-			context: { productName: 'Pasta Spaghetti', storeLabel: null, source: 'inventory_edit' },
+			context: { productName: 'Pasta Spaghetti', storeLabel: null },
 			predictedLocation: 'cupboard',
 			actualLocation: 'fridge',
 			feedbackType: 'corrected',
