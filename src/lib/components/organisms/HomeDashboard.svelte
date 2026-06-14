@@ -26,7 +26,7 @@
 		type ActivationProgress
 	} from '$lib/utils/onboarding';
 	import type { ReceiptFinishSuggestion, ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
-	import { scanModeHref } from '$lib/utils/scan-nav';
+	import { scanHubHref, scanModeHref } from '$lib/utils/scan-nav';
 	import { recordPeakInventoryCount } from '$lib/utils/household-invite-prompt';
 	import { isReceiptImportRecentlyCompleted } from '$lib/utils/receipt-import-session';
 
@@ -55,7 +55,13 @@
 	}: Props = $props();
 
 	const returnTo = APP_HOME_PATH;
-	const scanPhotoHref = $derived(scanModeHref('photo', returnTo));
+	const scanPhotoHref = $derived(scanModeHref('photo', returnTo));
+
+	const scanReceiptHref = $derived(scanModeHref('receipt', returnTo));
+
+	const scanBarcodeHref = $derived(scanModeHref('barcode', returnTo));
+
+	const scanHubLinkHref = $derived(scanHubHref(returnTo));
 	const userId = $derived(page.data.user?.id ?? null);
 
 	let activationProgress = $state<ActivationProgress>(getActivationProgress(null));
@@ -130,11 +136,6 @@
 		recordPeakInventoryCount(summary.totalItems, userId);
 	});
 
-	const emptyPrimaryHref = '/inkop';
-	const emptyPrimaryLabel = t('home.emptyActionShopping');
-	const emptySecondaryHref = $derived(scanPhotoHref);
-	const emptySecondaryLabel = t('home.chipPhotoRound');
-
 	$effect(() => {
 		if (!browser || !celebration || !householdId) {
 			return;
@@ -168,17 +169,59 @@
 		<h2 id="home-this-week-heading" class="home-v3-heading">{t('home.v3.thisWeekTitle')}</h2>
 		{#if summary.totalItems === 0}
 			{#if canWrite}
-				<EmptyState
-					iconId="box"
-					title={t('home.emptyTitle')}
-					description={t('home.emptyDescriptionShopping')}
-					actionLabel={emptyPrimaryLabel}
-					actionHref={emptyPrimaryHref}
-					primaryAnalyticsId="home.empty_primary"
-					secondaryActionLabel={emptySecondaryLabel}
-					secondaryActionHref={emptySecondaryHref}
-					secondaryAnalyticsId="home.empty_secondary"
-				/>
+				<EmptyState
+
+					iconId="box"
+
+					title={t('home.emptyTitle')}
+
+					description={t('home.emptyDescription')}
+
+					actionLabel={t('home.emptyAction')}
+
+					actionHref={scanPhotoHref}
+
+					primaryAnalyticsId="home.empty_primary"
+
+				/>
+
+				<div class="empty-scan-chips">
+
+					<a
+
+						class="empty-chip"
+
+						href={scanReceiptHref}
+
+						data-analytics-id="home.empty_chip_receipt"
+
+					>
+
+						{t('home.chipReceipt')}
+
+					</a>
+
+					<a
+
+						class="empty-chip"
+
+						href={scanBarcodeHref}
+
+						data-analytics-id="home.empty_chip_barcode"
+
+					>
+
+						{t('home.chipBarcode')}
+
+					</a>
+
+				</div>
+
+				<a class="empty-tertiary" href="/inkop" data-analytics-id="home.empty_tertiary">
+
+					{t('home.emptyActionShopping')}
+
+				</a>
 				{#if activationProgress.inProgress && activationProgress.path === 'barcode' && activationProgress.barcodeCount > 0}
 					<p class="activation-progress" role="status">
 						{t('onboarding.barcodeProgress', {
@@ -246,8 +289,23 @@
 
 	<section class="home-v3-section" aria-labelledby="home-household-heading">
 		<h2 id="home-household-heading" class="home-v3-heading">{t('home.v3.householdTitle')}</h2>
-		{#if summary.totalItems === 0}
-			<p class="section-empty">{t('home.v3.householdEmpty')}</p>
+		{#if summary.totalItems === 0}
+
+			<p class="section-empty household-empty">
+
+				{t('home.v3.householdEmpty')}
+
+				<span class="household-empty-links">
+
+					<a href={scanHubLinkHref} data-analytics-id="home.household_empty_scan">{t('nav.scan')}</a>
+
+					<span class="household-empty-sep" aria-hidden="true">·</span>
+
+					<a href="/inventory/fridge" data-analytics-id="home.household_empty_inventory">{t('nav.inventory')}</a>
+
+				</span>
+
+			</p>
 		{:else}
 			<HomeHouseholdSection
 				{intelligence}
@@ -327,6 +385,108 @@
 		color: var(--color-text-muted);
 		font-size: 0.9375rem;
 		line-height: 1.45;
+	}
+
+	.empty-scan-chips {
+
+		display: flex;
+
+		flex-wrap: wrap;
+
+		justify-content: center;
+
+		gap: var(--space-xs);
+
+		margin-top: calc(-1 * var(--space-md));
+
+	}
+
+	.empty-chip {
+
+		display: inline-flex;
+
+		align-items: center;
+
+		justify-content: center;
+
+		min-height: var(--touch-target-min);
+
+		padding: var(--space-xs) var(--space-md);
+
+		border: 1px solid var(--color-border);
+
+		border-radius: 999px;
+
+		background: var(--color-surface);
+
+		color: var(--color-text);
+
+		font-size: var(--font-size-body-sm);
+
+		font-weight: 600;
+
+		text-decoration: none;
+
+	}
+
+	.empty-chip:hover {
+
+		border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+
+		text-decoration: none;
+
+	}
+
+	.empty-tertiary {
+
+		display: block;
+
+		margin-top: var(--space-xs);
+
+		text-align: center;
+
+		font-size: var(--font-size-body-sm);
+
+		font-weight: 600;
+
+		color: var(--color-text-muted);
+
+		text-decoration: none;
+
+	}
+
+	.empty-tertiary:hover {
+
+		color: var(--color-text);
+
+		text-decoration: underline;
+
+		text-underline-offset: 2px;
+
+	}
+
+	.household-empty-links {
+
+		display: inline;
+
+	}
+
+	.household-empty-links a {
+
+		font-weight: 600;
+
+		color: var(--color-primary);
+
+		text-decoration: underline;
+
+		text-underline-offset: 2px;
+
+	}
+
+	.household-empty-sep {
+
+		margin: 0 0.25rem;
+
 	}
 
 	.receipt-footnote {

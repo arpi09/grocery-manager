@@ -126,7 +126,8 @@ export const NAV_ITEMS: NavItem[] = [
 		labelKey: 'nav.scan',
 
 		icon: 'scan',
-
+
+		headerUtility: true,
 		dynamicHref: 'scan',
 
 		match: 'prefix'
