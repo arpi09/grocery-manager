@@ -1915,6 +1915,8 @@
 		"locationBulkHint": "Applies to checked rows. Change a row below if it should go somewhere else.",
 		"locationPerItem": "Location:",
 		"locationOverride": "custom",
+		"suggestedLocation": "Suggested location",
+		"locationSuggestionsHint": "Locations are suggestions from Skaffu — change if needed before saving.",
 		"estimatesHint": "Expiry dates are estimates — adjust if needed before saving.",
 		"addCount": "Add {count} {count, plural, one {item} other {items}}",
 		"apiKeyHint": "Requires OPENAI_API_KEY in server .env.",
