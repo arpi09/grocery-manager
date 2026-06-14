@@ -4,7 +4,7 @@
 
 | Fält | Värde |
 |------|--------|
-| **Uppdaterad** | 2026-06-13 |
+| **Uppdaterad** | 2026-06-14 |
 | **Prod SHA** | `e26408a2` — deploy run 27482069247 (2026-06-13) |
 | **Master SHA** | `e26408a2` — merge train + E2E fixes + all Brain flags on |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` — merged to master |
@@ -51,7 +51,7 @@ Utgående → `/inkop` (delad lista) → handla ihop → checkoff → skafferi �
 
 ## Kända drift (fixa när du ser dem)
 
-- [ ] Prod DB migrations `0047`–`0048` — **blocked** until GitHub Actions secret `DATABASE_URL` is set (pre-deploy migrate in `deploy.yml`); see [CI_CD.md — DATABASE_URL](./CI_CD.md#database_url--ägare-manuellt). Required before Brain learning tables work in prod.
+- [x] Prod DB migrations `0047`–`0048` — applied 2026-06-14 (manual `npm run db:migrate` via Cloud SQL public IP; journal reconciled 0012–0048). `DATABASE_URL` secret set for future deploy pre-migrate.
 - [x] Prod SHA — `e26408a2` via deploy 27482069247
 - [x] Master merge train: docs, brain-activation, receipt-pattern, home-v3, memory-explorer @ `937cd9a6`
 
