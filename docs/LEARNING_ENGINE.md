@@ -1,8 +1,8 @@
 # Learning Engine — Skaffu Brain V1
 
-*Shelf-life prediction at receipt import and inventory. Code on `master`; prod flags default **off** until deploy + seed smoke.*
+*Shelf-life prediction at receipt import and inventory. Code on `master`; flags in `apphosting.yaml` on master per [RELEASE_MODEL.md](./RELEASE_MODEL.md).*
 
-**Relaterat:** [BRAIN_V1_PRODUCT_INTEGRATION.md](./BRAIN_V1_PRODUCT_INTEGRATION.md) · [CURRENT_REALITY.md](./CURRENT_REALITY.md)
+**Relaterat:** [BRAIN_V1_PRODUCT_INTEGRATION.md](./BRAIN_V1_PRODUCT_INTEGRATION.md) · [CURRENT_REALITY.md](./CURRENT_REALITY.md) · [RELEASE_MODEL.md](./RELEASE_MODEL.md)
 
 ---
 
@@ -51,9 +51,9 @@ Every prediction is **observable and correctable**. User actions write to `learn
 
 `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT` unset locally falls back to `SHELF_LIFE_LEARNING_ENABLED`.
 
-### Rollback
+### Rollback (kill switch)
 
-Flip flags to `false` → predictor chain skips household tier; receipt UX hides estimates. **No data loss:** rules and feedback remain; re-enable to resume.
+Per [RELEASE_MODEL.md](./RELEASE_MODEL.md), flags are kill switches — not a post-merge activation lever. Flip flags to `false` on master and deploy to disable surface area. **No data loss:** rules and feedback remain; re-enable with explicit deploy.
 
 | Action | Effect |
 |--------|--------|
@@ -80,10 +80,14 @@ Flip flags to `false` → predictor chain skips household tier; receipt UX hides
 
 ## Deploy checklist
 
-1. Merge Brain V1 to `master` (code only — flags off in `apphosting.yaml`)
-2. Run migrations `0047_learning_engine_v1.sql`, `0048_household_location_rule.sql` on prod DB
-3. Enable flags for seed cohort per [FOUNDER_SEED_PLAYBOOK.md](./FOUNDER_SEED_PLAYBOOK.md)
+Per [RELEASE_MODEL.md](./RELEASE_MODEL.md): **master = truth**, **deploy = publish**. Merge feature + final flag values; deploy once.
+
+1. Migrations `0047_learning_engine_v1.sql`, `0048_household_location_rule.sql` on prod DB (before or with deploy)
+2. Merge Brain V1 to `master` with intended `apphosting.yaml` flag values (not “code only, flags off”)
+3. Deploy to production
 4. Smoke: scan → Uppskattat → save → edit expiry → Settings Förslag
+
+> **Deprecated:** merge code with flags off, then flip `apphosting.yaml` in a follow-up merge/deploy. Do not use for new work.
 
 ---
 
