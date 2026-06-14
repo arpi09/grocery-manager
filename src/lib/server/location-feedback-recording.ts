@@ -65,3 +65,33 @@ export async function recordLineLocationFeedback(params: {
 		modelVersion: params.prediction.modelVersion ?? 'none'
 	});
 }
+
+export async function recordInventoryEditLocationFeedback(params: {
+	learningEngine: LearningEngineService;
+	householdId: string;
+	userId: string;
+	productName: string;
+	previousLocation: StorageLocation;
+	newLocation: StorageLocation;
+}): Promise<void> {
+	if (!isLocationLearningEnabled()) return;
+	if (params.previousLocation === params.newLocation) return;
+
+	const normalizedKey = normalizeReceiptProductName(params.productName);
+	if (!normalizedKey) return;
+
+	await params.learningEngine.recordLocationFeedback({
+		householdId: params.householdId,
+		userId: params.userId,
+		normalizedKey,
+		context: {
+			productName: params.productName,
+			storeLabel: null,
+			source: 'inventory_edit'
+		},
+		predictedLocation: params.previousLocation,
+		actualLocation: params.newLocation,
+		feedbackType: 'corrected',
+		modelVersion: 'inventory-edit'
+	});
+}
