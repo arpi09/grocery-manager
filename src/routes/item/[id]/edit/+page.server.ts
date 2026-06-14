@@ -6,6 +6,8 @@ import { isEstimatedExpirySource } from '$lib/domain/learning/expiry-source';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 import { consumeItemSchema } from '$lib/validation/consumption.schemas';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
+import { recordInventoryEditLocationFeedback } from '$lib/server/location-feedback-recording';
+import { isLocationLearningEnabled } from '$lib/server/location-learning-flag';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { formatNumericQuantity, parseNumericQuantity } from '$lib/domain/consumption-quantity';
@@ -63,6 +65,8 @@ export const actions: Actions = {
 		}
 
 		const newExpiresOn = parsed.data.expiresOn || null;
+		const locationChanged =
+			isLocationLearningEnabled() && parsed.data.location !== existing.location;
 		const expiryCorrected =
 			isShelfLifeLearningEnabled() &&
 			isEstimatedExpirySource(existing.expiresOnSource) &&
@@ -109,6 +113,17 @@ export const actions: Actions = {
 					modelVersion: 'inventory-edit'
 				});
 			}
+		}
+
+		if (locationChanged) {
+			await recordInventoryEditLocationFeedback({
+				learningEngine: event.locals.learningEngineService,
+				householdId: event.locals.householdId!,
+				userId: event.locals.user!.id,
+				productName: parsed.data.name,
+				previousLocation: existing.location,
+				newLocation: parsed.data.location
+			});
 		}
 
 		const toastKind = expiryCorrected ? 'learningCorrected' : 'itemUpdated';
