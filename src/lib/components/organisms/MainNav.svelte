@@ -26,7 +26,9 @@
 	}: Props = $props();
 
 	const visibleItems = $derived(filterNavItems(NAV_ITEMS, user));
-	const { primary, headerUtility, secondary } = $derived(splitNavItems(visibleItems));
+	const { primary, mobileTabs, headerUtility, secondary, mobileSecondary } = $derived(
+		splitNavItems(visibleItems)
+	);
 
 	let moreOpen = $state(false);
 
@@ -47,9 +49,8 @@
 				{user}
 				{households}
 				{activeHousehold}
-				{primary}
-				{headerUtility}
-				{secondary}
+				{mobileTabs}
+				{mobileSecondary}
 				{staleCount}
 				{canWrite}
 				{moreOpen}
@@ -62,9 +63,8 @@
 			{user}
 			{households}
 			{activeHousehold}
-			{primary}
-			{headerUtility}
-			{secondary}
+			{mobileTabs}
+			{mobileSecondary}
 			{staleCount}
 			{canWrite}
 			{moreOpen}

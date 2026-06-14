@@ -1,30 +1,50 @@
 <script lang="ts">
 	import NavIcon from '$lib/components/atoms/NavIcon.svelte';
 	import { t } from '$lib/i18n';
-	import { isNavActive, type NavItem } from '$lib/navigation/nav-config';
+	import {
+		isNavActive,
+		navItemTestId,
+		resolveNavHref,
+		type NavItem
+	} from '$lib/navigation/nav-config';
 
 	interface Props {
 		pathname: string;
 		items: NavItem[];
+		staleCount?: number;
+		canWrite?: boolean;
 		onNavigate?: () => void;
 	}
 
-	let { pathname, items, onNavigate }: Props = $props();
+	let { pathname, items, staleCount = 0, canWrite = false, onNavigate }: Props = $props();
+
+	const showStaleBadge = $derived(staleCount > 0 && canWrite);
+
+	function showBadge(item: NavItem): boolean {
+		return item.badge === 'stale' && showStaleBadge;
+	}
 </script>
 
 <p class="section-title label-caps">{t('nav.morePages')}</p>
 <ul class="sheet-list" id="nav-more-sheet">
 	{#each items as item (item.href)}
 		{@const active = isNavActive(pathname, item)}
+		{@const href = resolveNavHref(item, pathname)}
 		<li>
 			<a
-				href={item.href}
+				{href}
 				class={['sheet-link', active ? 'active' : ''].filter(Boolean).join(' ')}
 				aria-current={active ? 'page' : undefined}
+				data-testid={navItemTestId(item)}
 				onclick={onNavigate}
 			>
 				<span class="sheet-icon-wrap">
 					<NavIcon id={item.icon} />
+					{#if showBadge(item)}
+						<span class="stale-badge" aria-label={t('nav.staleBadge', { count: staleCount })}>
+							{staleCount}
+						</span>
+					{/if}
 				</span>
 				<span class="sheet-label">{t(item.labelKey)}</span>
 			</a>
@@ -73,6 +93,7 @@
 	}
 
 	.sheet-icon-wrap {
+		position: relative;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -82,6 +103,22 @@
 		background: var(--color-surface-muted);
 		color: var(--color-text-muted);
 		flex-shrink: 0;
+	}
+
+	.stale-badge {
+		position: absolute;
+		top: -0.2rem;
+		right: -0.35rem;
+		min-width: 1rem;
+		height: 1rem;
+		padding: 0 0.2rem;
+		border-radius: 999px;
+		background: var(--color-warning);
+		color: var(--color-on-primary);
+		font-size: 0.5625rem;
+		font-weight: 700;
+		line-height: 1rem;
+		text-align: center;
 	}
 
 	.sheet-link.active .sheet-icon-wrap {
