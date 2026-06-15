@@ -298,7 +298,9 @@
 		},
 		"taglineListaReady": "Items on your list — shop together this week",
 		"taglineExpiry": "Something expires soon — eat first or plan dinner",
-		"nextActionLista": "Continue weekly shop"
+		"nextActionLista": "Continue weekly shop",
+		"cadenceLine": "You usually shop on {weekday}",
+		"cadenceLineStore": "You usually shop on {weekday} · often at {store}"
 	},
 	"dashboard": {
 		"title": "Home",

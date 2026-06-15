@@ -1,5 +1,9 @@
 import { canEditInventory, type HouseholdRole } from '$lib/domain/household';
 import {
+	deriveHouseholdShoppingCadence,
+	type HouseholdShoppingCadence
+} from '$lib/domain/household-shopping-cadence';
+import {
 	detectReceiptFinishSuggestions,
 	detectReceiptPatternSuggestions,
 	normalizeReceiptProductName,
@@ -54,6 +58,12 @@ export class PurchasePatternService {
 		]);
 
 		return detectReplenishmentSuggestions(lines, inventoryKeys, listNames, dismissedKeys);
+	}
+
+	async getHouseholdShoppingCadence(householdId: string): Promise<HouseholdShoppingCadence | null> {
+		const since = purchasePatternLookbackDate();
+		const lines = await this.repository.listRecentLines(householdId, since);
+		return deriveHouseholdShoppingCadence(lines);
 	}
 
 	async getDedupeContext(householdId: string) {
