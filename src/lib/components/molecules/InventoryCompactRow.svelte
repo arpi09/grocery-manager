@@ -76,7 +76,7 @@
 	const expiryExplanation = $derived.by(() => {
 		if (!isEstimatedExpirySource(item.expiresOnSource)) return null;
 		return buildInventoryShelfLifeExplanation(
-			{ productName: item.name, source: item.expiresOnSource, location: item.location },
+			{ productName: item.name, source: item.expiresOnSource!, location: item.location },
 			getLocale()
 		);
 	});

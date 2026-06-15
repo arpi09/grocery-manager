@@ -161,7 +161,7 @@
 		<input type="hidden" name="returnTo" value={returnTo} />
 	{/if}
 	{#if !isEdit}
-		<details class="scan-instead" bind:open={scanInsteadOpen}>
+		<details class="scan-instead">
 			<summary>{t('item.scanInstead')}</summary>
 			<div class="barcode-row">
 				<p class="scan-title">{t('item.howToFill')}</p>
