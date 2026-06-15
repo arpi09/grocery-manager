@@ -6,6 +6,7 @@
 		totalItems: number;
 		expiringCount: number;
 		staleCount: number;
+		shoppingListCount?: number;
 		canWrite?: boolean;
 		returnTo: string;
 		/** When secondary, sync/photo use outline style (primary CTA lives elsewhere on home). */
@@ -16,12 +17,13 @@
 		totalItems,
 		expiringCount,
 		staleCount,
+		shoppingListCount = 0,
 		canWrite = false,
 		returnTo,
 		variant = 'primary'
 	}: Props = $props();
 
-	type CtaKind = 'sync' | 'photo';
+	type CtaKind = 'lista' | 'sync' | 'photo';
 
 	const ctaKind = $derived.by((): CtaKind | null => {
 		if (!canWrite || totalItems === 0) {
@@ -30,23 +32,38 @@
 		if (staleCount > 0) {
 			return 'sync';
 		}
+		if (shoppingListCount > 0) {
+			return 'lista';
+		}
 		return 'photo';
 	});
 
 	const href = $derived(
-		ctaKind === 'sync' ? '/inventory/synk' : ctaKind === 'photo' ? scanModeHref('photo', returnTo) : null
+		ctaKind === 'sync'
+			? '/inventory/synk'
+			: ctaKind === 'lista'
+				? '/inkop'
+				: ctaKind === 'photo'
+					? scanModeHref('photo', returnTo)
+					: null
 	);
 
 	const label = $derived(
 		ctaKind === 'sync'
 			? t('home.nextActionSync', { count: staleCount })
-			: ctaKind === 'photo'
-				? t('home.nextActionPhoto')
+			: ctaKind === 'lista'
+				? t('home.nextActionLista')
+				: ctaKind === 'photo'
+					? t('home.nextActionPhoto')
 				: ''
 	);
 
 	const analyticsId = $derived(
-		ctaKind === 'sync' ? 'home.next_action_sync' : 'home.next_action_photo'
+		ctaKind === 'sync'
+			? 'home.next_action_sync'
+			: ctaKind === 'lista'
+				? 'home.next_action_lista'
+				: 'home.next_action_photo'
 	);
 
 	const showPlanerLink = $derived(canWrite && totalItems > 0 && expiringCount > 0);
