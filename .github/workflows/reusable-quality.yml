@@ -1,8 +1,7 @@
 # Shared quality gate — lint, check, test, integration, build, bundle guards.
 # Called from ci.yml and deploy.yml so steps never drift.
 #
-# quality-fast and quality-integration run in parallel; quality aggregates both
-# so branch protection / deploy gates still see "quality / quality".
+# pr-gate aggregates quality-fast + quality-integration for branch protection.
 
 name: Reusable quality
 
@@ -64,20 +63,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          echo "Checking CI quality check-run for commit ${DEPLOY_SHA}…"
-          # Reusable workflow check-runs are named "quality / quality"; pick latest successful CI run.
+          echo "Checking CI pr-gate check-run for commit ${DEPLOY_SHA}…"
           conclusion=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${DEPLOY_SHA}/check-runs" \
             --paginate \
-            --jq '[.check_runs[] | select(.name == "quality" or .name == "quality / quality") | select(.conclusion == "success")] | sort_by(.started_at) | last | .conclusion // "missing"')
+            --jq '[.check_runs[] | select(.name == "pr-gate" or .name == "pr-gate / pr-gate") | select(.conclusion == "success")] | sort_by(.started_at) | last | .conclusion // "missing"')
           status=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${DEPLOY_SHA}/check-runs" \
             --paginate \
-            --jq '[.check_runs[] | select(.name == "quality" or .name == "quality / quality") | select(.conclusion == "success")] | sort_by(.started_at) | last | .status // "missing"')
-          echo "quality check-run: status=${status} conclusion=${conclusion}"
+            --jq '[.check_runs[] | select(.name == "pr-gate" or .name == "pr-gate / pr-gate") | select(.conclusion == "success")] | sort_by(.started_at) | last | .status // "missing"')
+          echo "pr-gate check-run: status=${status} conclusion=${conclusion}"
           if [ "$status" != "completed" ] || [ "$conclusion" != "success" ]; then
-            echo "::error::No successful CI quality check-run on ${DEPLOY_SHA}. Wait for CI on master or fix failures before deploy."
+            echo "::error::No successful CI pr-gate check-run on ${DEPLOY_SHA}. Wait for CI on master or fix failures before deploy."
             exit 1
           fi
-          echo "CI quality passed on ${DEPLOY_SHA}."
+          echo "CI pr-gate passed on ${DEPLOY_SHA}."
 
   quality-fast:
     name: quality-fast
@@ -147,8 +145,8 @@ jobs:
           path: build/
           retention-days: 1
 
-  quality:
-    name: quality
+  pr-gate:
+    name: pr-gate
     needs: [quality-fast, quality-integration]
     if: always() && !cancelled()
     runs-on: ubuntu-latest
@@ -162,7 +160,7 @@ jobs:
           integration="${{ needs.quality-integration.result }}"
           echo "quality-fast=${fast} quality-integration=${integration}"
           if [ "$fast" != "success" ] || [ "$integration" != "success" ]; then
-            echo "::error::Quality gate failed (quality-fast=${fast}, quality-integration=${integration})"
+            echo "::error::PR gate failed (quality-fast=${fast}, quality-integration=${integration})"
             exit 1
           fi
-          echo "Quality gate passed."
+          echo "PR gate passed."

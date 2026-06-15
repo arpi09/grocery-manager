@@ -122,7 +122,7 @@ test.describe('Scan and inventory', () => {
 		});
 	});
 
-	test('inventory fridge location list loads', async ({ page }) => {
+	test('inventory fridge location list loads @deploy-critical', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/inventory/fridge');
 		await dismissOnboardingModalIfOpen(page);

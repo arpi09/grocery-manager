@@ -48,7 +48,7 @@ test.describe('Shopping list', () => {
 		await expect(panel).toBeInViewport({ timeout: 10_000 });
 	});
 
-	test('add line and check off item', async ({ page }) => {
+	test('add line and check off item @deploy-critical', async ({ page }) => {
 		test.setTimeout(60_000);
 		const itemName = `E2E Inkop ${Date.now()}`;
 

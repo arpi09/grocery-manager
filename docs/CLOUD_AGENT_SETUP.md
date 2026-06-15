@@ -48,56 +48,37 @@ PGlite applies migrations at runtime via `initDatabase()` — `npm run db:migrat
 
 | Script | Scope | Target time | When to run |
 |--------|-------|-------------|-------------|
-| `quick:dev` | lint + locales + server-imports + **unit tests only** | ~2–3 min | **Default** during implementation |
-| `quick:marketing` | `quick:dev` + `landing-variants.test.ts` | ~3 min | Marketing / landing copy changes |
-| `quality:integration` | PGlite integration suite (`USE_PGLITE=true`) | ~5–8 min | DB, routes, or migration work |
-| `quality:ci` | Full CI parity (lint → check → unit → fixtures → integration → build → bundle guard) | ~8–15 min | **Before claiming done** / pre-merge |
-| `release:gate` | Alias for `quality:ci` — same bar as deploy G1b | ~8–15 min | Coordinator sign-off, deploy prep |
-| `nightly` | E2E + receipt fixtures + `npm audit` (audit warn-only) | ~45+ min | Scheduled / explicit assignment only |
+| `quick:dev` | lint + locales + server-imports + unit tests | ~2–3 min | **Default** during implementation |
+| `quick:marketing` | `quick:dev` + `landing-variants.test.ts` | ~3 min | Marketing / landing copy |
+| `pr:gate` | CI parity without audit | ~8–12 min | **Before claiming done** |
+| `deploy:fast` | `pr:gate` + critical E2E + pre-deploy smoke | ~15–25 min | Low-risk pre-prod |
+| `test:e2e:critical` | `@deploy-critical` tests only | ~5–8 min | Deploy-fast lane |
+| `test:e2e:full` | Full Playwright suite | ~15–25 min | Core-loop / release:full |
+| `ci:path-tier` | Path classification script | ~1 s | Debugging gating |
+| `quality:ci` | Full CI + audit | ~8–15 min | With audit |
+| `release:gate` | Alias for `quality:ci` | ~8–15 min | Coordinator sign-off |
+| `nightly` | E2E + fixtures + audit | ~45+ min | Scheduled only |
 
-**Agent defaults:** run `npm run quick:dev` after substantive edits. Run `npm run quality:ci` (or `release:gate`) only when the task is complete. Do **not** run `test:e2e` or `nightly` unless explicitly assigned — slow and flaky on cloud.
+**Agent defaults:** `npm run quick:dev` during edits; `npm run pr:gate` when done. Do not run full E2E unless assigned.
 
-See [ENGINEERING_HEALTH.md](./ENGINEERING_HEALTH.md) for audit snapshot and Top 10 tracker.
-
----
-
-## CI parity gate (run before claiming done)
-
-Same steps as the CI **quality** job (skips optional `npm audit`):
-
-```bash
-npm run quality:ci
-```
-
-Equivalent manual sequence:
-
-```bash
-export PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
-export USE_PGLITE=true
-npm run lint
-npm run check:locales
-npm run check:server-imports
-npm run check
-npm test
-npm run test:receipt-fixtures
-npm run test:integration
-DATABASE_URL=postgresql://pantry:pantry@localhost:5432/pantry npm run build
-npm run check:client-bundle
-```
-
-**Success criterion:** all commands exit 0 — same bar as CI `quality / quality`.
+See [RELEASE_MODEL.md](./RELEASE_MODEL.md) and [CI_CD.md](./CI_CD.md).
 
 ---
 
-## Optional E2E (risky — slow, flaky)
-
-Only when explicitly assigned. Needs Chromium install and ~15–20 min runtime.
+## CI parity gate
 
 ```bash
-export USE_PGLITE=true ADMIN_EMAIL=e2e-admin@example.com ADMIN_PASSWORD=e2e-ci-password
-export TURNSTILE_SKIP=true TURNSTILE_BYPASS=true E2E_MOCK_AI=true EMAIL_VERIFICATION_SKIP=true
-npx playwright install chromium
-npm run test:e2e
+npm run pr:gate
+```
+
+**Success criterion:** same bar as **`pr-gate / pr-gate`**.
+
+---
+
+## Optional E2E
+
+```bash
+npm run test:e2e:critical   # deploy:fast lane
 ```
 
 ---

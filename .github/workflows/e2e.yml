@@ -1,5 +1,4 @@
-# E2E on PRs, manual trigger, or nightly — not on every master push
-# Full deploy pipeline: Actions → "Deploy to production"
+# E2E on PRs, manual trigger, or nightly — tier-aware critical vs full suite
 
 name: E2E
 
@@ -15,73 +14,84 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  changes:
-    name: changes
+  path-tier:
+    name: path-tier
     runs-on: ubuntu-latest
     outputs:
-      source: ${{ steps.filter.outputs.source }}
+      tier: ${{ steps.tier.outputs.tier }}
     steps:
       - uses: actions/checkout@v6
-
-      - uses: dorny/paths-filter@v4
-        id: filter
         with:
-          filters: |
-            source:
-              - '**'
-              - '!docs/**'
-              - '!**/*.md'
-              - '!.cursor/**'
+          fetch-depth: 0
 
-  quality:
+      - name: Classify changed paths
+        id: tier
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "tier=nightly" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tier=core-loop" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.pull_request.number }}/files" \
+              --paginate --jq '.[].filename' > changed-files.txt
+          else
+            before="${{ github.event.before }}"
+            if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ]; then
+              git diff-tree --no-commit-id --name-only -r HEAD > changed-files.txt
+            else
+              git diff --name-only "$before" "${{ github.sha }}" > changed-files.txt
+            fi
+          fi
+          tier=$(node scripts/ci-path-tier.mjs < changed-files.txt | tail -n1)
+          echo "tier=${tier}" >> "$GITHUB_OUTPUT"
+          echo "Path tier: ${tier}"
+
+  pr-gate:
     uses: ./.github/workflows/reusable-quality.yml
+    needs: path-tier
+    if: needs.path-tier.outputs.tier != 'docs-only'
     with:
       upload_build_artifact: true
 
-  e2e:
-    name: e2e (${{ matrix.shard }}/3)
-    needs: [quality, changes]
+  e2e-critical:
+    name: e2e critical
+    needs: [path-tier, pr-gate]
     if: >
-      github.event_name == 'workflow_dispatch' ||
-      github.event_name == 'schedule' ||
-      needs.changes.outputs.source == 'true'
+      always() &&
+      needs.path-tier.outputs.tier == 'low-risk' &&
+      needs.pr-gate.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3]
-
     steps:
       - uses: actions/checkout@v6
-
       - uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           cache: npm
-
       - run: npm ci
-
       - uses: actions/download-artifact@v8
         with:
           name: sveltekit-build
           path: build/
-
       - name: Get Playwright version
         id: playwright-version
         run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
-
       - uses: actions/cache@v5
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
-
       - name: Install Playwright Chromium
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
-
-      - run: npm run test:e2e -- --shard=${{ matrix.shard }}/3
+      - run: npm run test:e2e:critical
         env:
           USE_PGLITE: 'true'
           ADMIN_EMAIL: e2e-admin@example.com
@@ -95,43 +105,96 @@ jobs:
           PUBLIC_E2E_DISABLE_POST_SURVEY: 'true'
           CI: 'true'
 
-      - name: Notify E2E failure (optional)
-        if: failure() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-        continue-on-error: true
+  e2e-full:
+    name: e2e (${{ matrix.shard }}/3)
+    needs: [path-tier, pr-gate]
+    if: >
+      always() &&
+      (needs.path-tier.outputs.tier == 'core-loop' || needs.path-tier.outputs.tier == 'nightly') &&
+      needs.pr-gate.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v8
+        with:
+          name: sveltekit-build
+          path: build/
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e:full -- --shard=${{ matrix.shard }}/3
         env:
-          WEBHOOK_URL: ${{ secrets.DEPLOY_NOTIFY_WEBHOOK_URL }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.DEPLOY_TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.DEPLOY_TELEGRAM_CHAT_ID }}
-        run: |
-          set -euo pipefail
+          USE_PGLITE: 'true'
+          ADMIN_EMAIL: e2e-admin@example.com
+          ADMIN_PASSWORD: e2e-ci-password
+          PUBLIC_ORIGIN: http://localhost:5190
+          PLAYWRIGHT_PORT: '5190'
+          TURNSTILE_SKIP: 'true'
+          TURNSTILE_BYPASS: 'true'
+          EMAIL_VERIFICATION_SKIP: 'true'
+          E2E_MOCK_AI: 'true'
+          PUBLIC_E2E_DISABLE_POST_SURVEY: 'true'
+          CI: 'true'
 
-          if [ -z "${WEBHOOK_URL:-}" ] && [ -z "${TELEGRAM_BOT_TOKEN:-}" ]; then
-            echo "No notify secrets configured — skipping."
-            exit 0
-          fi
-
-          short_sha="${GITHUB_SHA:0:7}"
-          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          msg="Skaffu E2E misslyckades (${short_sha})"
-          msg=$(printf '%s\n%s' "$msg" "$run_url")
-
-          if [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && [ -n "${TELEGRAM_CHAT_ID:-}" ]; then
-            payload=$(jq -n --arg chat_id "$TELEGRAM_CHAT_ID" --arg text "$msg" \
-              '{chat_id: $chat_id, text: $text, disable_web_page_preview: true}')
-            curl --fail-with-body -sS -X POST \
-              "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-              -H "Content-Type: application/json" \
-              -d "$payload"
-          elif [ -n "${WEBHOOK_URL:-}" ]; then
-            if [[ "$WEBHOOK_URL" == *"ntfy.sh"* ]]; then
-              curl --fail-with-body -sS -X POST "$WEBHOOK_URL" \
-                -H "Title: Skaffu E2E misslyckades" \
-                -H "Tags: rotating_light" \
-                -d "$msg"
-            else
-              payload=$(jq -n --arg text "$msg" '{text: $text}')
-              curl --fail-with-body -sS -X POST "$WEBHOOK_URL" \
-                -H "Content-Type: application/json" \
-                -d "$payload"
-            fi
-          fi
+  e2e-nightly-extra:
+    name: e2e nightly extras
+    needs: [path-tier, pr-gate, e2e-full]
+    if: >
+      always() &&
+      needs.path-tier.outputs.tier == 'nightly' &&
+      needs.e2e-full.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v8
+        with:
+          name: sveltekit-build
+          path: build/
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - run: npx playwright test e2e/receipt-real-fixtures.spec.ts e2e/accessibility.spec.ts e2e/mobile-visual.spec.ts
+        env:
+          USE_PGLITE: 'true'
+          ADMIN_EMAIL: e2e-admin@example.com
+          ADMIN_PASSWORD: e2e-ci-password
+          PUBLIC_ORIGIN: http://localhost:5190
+          PLAYWRIGHT_PORT: '5190'
+          TURNSTILE_SKIP: 'true'
+          TURNSTILE_BYPASS: 'true'
+          EMAIL_VERIFICATION_SKIP: 'true'
+          E2E_MOCK_AI: 'true'
+          PUBLIC_E2E_DISABLE_POST_SURVEY: 'true'
+          CI: 'true'

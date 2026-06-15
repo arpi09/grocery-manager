@@ -1,5 +1,5 @@
-﻿# Manual production deploy — quality → e2e → pre-deploy verify → Firebase → post-deploy sanity
-# Trigger: Actions ? "Deploy to production"
+﻿# Manual production deploy - pr-gate -> tiered e2e -> pre-deploy verify -> Firebase -> post-deploy sanity
+# Trigger: Actions -> "Deploy to production"
 # Required secret: FIREBASE_TOKEN (npx firebase login:ci)
 
 name: Deploy to production
@@ -16,13 +16,18 @@ on:
         description: Commit SHA (overrides ref when set)
         required: false
         type: string
-      skip_e2e:
-        description: HOTFIX ONLY â€” skip E2E (requires hotfix_confirm=hotfix)
+      deploy_tier:
+        description: 'auto | fast | full | hotfix - E2E depth (auto uses path-tier on SHA)'
         required: false
-        default: false
-        type: boolean
-      hotfix_confirm:
-        description: 'When skip_e2e=true, type exactly: hotfix'
+        default: auto
+        type: choice
+        options:
+          - auto
+          - fast
+          - full
+          - hotfix
+      hotfix_reason:
+        description: 'Required when deploy_tier=hotfix - logged in workflow summary for audit'
         required: false
         type: string
   push:
@@ -43,7 +48,7 @@ jobs:
       guide_only: ${{ steps.manual.outputs.guide_only || steps.check.outputs.guide_only }}
 
     steps:
-      - name: Manual deploy â€” always run full pipeline
+      - name: Manual deploy - always run full pipeline
         if: github.event_name == 'workflow_dispatch'
         id: manual
         run: echo "guide_only=true" >> "$GITHUB_OUTPUT"
@@ -67,7 +72,7 @@ jobs:
 
           if [ -z "$changed" ]; then
             echo "guide_only=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No changed files in commit â€” skipping deploy."
+            echo "::notice::No changed files in commit - skipping deploy."
             exit 0
           fi
 
@@ -85,10 +90,10 @@ jobs:
 
           if [ "$guide_only" = "true" ]; then
             echo "guide_only=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::Guide-only commit â€” running full deploy pipeline."
+            echo "::notice::Guide-only commit - running full deploy pipeline."
           else
             echo "guide_only=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Mixed commit (not only content/guides/**) â€” skipping auto-deploy. Run manual deploy for releases."
+            echo "::notice::Mixed commit (not only content/guides/**) - skipping auto-deploy. Run manual deploy for releases."
           fi
 
   validate-inputs:
@@ -98,17 +103,20 @@ jobs:
     timeout-minutes: 2
 
     steps:
-      - name: Validate hotfix skip_e2e inputs
+      - name: Validate deploy tier and hotfix inputs
         run: |
           set -euo pipefail
-          skip_e2e="${{ inputs.skip_e2e }}"
-          hotfix_confirm="${{ inputs.hotfix_confirm }}"
-          if [ "$skip_e2e" = "true" ] || [ "$skip_e2e" = "True" ]; then
-            if [ "$hotfix_confirm" != "hotfix" ]; then
-              echo "::error::skip_e2e requires hotfix_confirm input set to exactly: hotfix"
+          deploy_tier="${{ inputs.deploy_tier }}"
+          hotfix_reason="${{ inputs.hotfix_reason }}"
+
+          if [ "$deploy_tier" = "hotfix" ]; then
+            if [ -z "${hotfix_reason// /}" ]; then
+              echo "::error::deploy_tier=hotfix requires hotfix_reason (audit trail)."
               exit 1
             fi
-            echo "::warning::HOTFIX deploy â€” E2E will be skipped. Document reason in commit/chat."
+            echo "## Hotfix deploy" >> "$GITHUB_STEP_SUMMARY"
+            echo "Reason: ${hotfix_reason}" >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::Hotfix lane - critical E2E + enhanced post-deploy smoke."
           fi
 
   resolve-artifact:
@@ -146,25 +154,25 @@ jobs:
           echo "sha=${sha}" >> "$GITHUB_OUTPUT"
           echo "Deploy target SHA: ${sha}"
 
-      - name: Verify green CI quality on same SHA (G1b)
+      - name: Verify green CI pr-gate on same SHA (G1b)
         env:
           DEPLOY_SHA: ${{ steps.deploy-sha.outputs.sha }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          echo "Checking CI quality check-run for commit ${DEPLOY_SHA}â€¦"
+          echo "Checking CI pr-gate check-run for commit ${DEPLOY_SHA}..."
           conclusion=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${DEPLOY_SHA}/check-runs" \
             --paginate \
-            --jq '[.check_runs[] | select(.name == "quality" or .name == "quality / quality") | select(.conclusion == "success")] | sort_by(.started_at) | last | .conclusion // "missing"')
+            --jq '[.check_runs[] | select(.name == "pr-gate / pr-gate") | select(.conclusion == "success")] | sort_by(.started_at) | last | .conclusion // "missing"')
           status=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${DEPLOY_SHA}/check-runs" \
             --paginate \
-            --jq '[.check_runs[] | select(.name == "quality" or .name == "quality / quality") | select(.conclusion == "success")] | sort_by(.started_at) | last | .status // "missing"')
-          echo "quality check-run: status=${status} conclusion=${conclusion}"
+            --jq '[.check_runs[] | select(.name == "pr-gate / pr-gate") | select(.conclusion == "success")] | sort_by(.started_at) | last | .status // "missing"')
+          echo "pr-gate check-run: status=${status} conclusion=${conclusion}"
           if [ "$status" != "completed" ] || [ "$conclusion" != "success" ]; then
-            echo "::error::No successful CI quality check-run on ${DEPLOY_SHA}. Wait for CI on master or fix failures before deploy."
+            echo "::error::No successful CI pr-gate check-run on ${DEPLOY_SHA}. Wait for CI on master or fix failures before deploy."
             exit 1
           fi
-          echo "CI quality passed on ${DEPLOY_SHA}."
+          echo "CI pr-gate passed on ${DEPLOY_SHA}."
 
       - name: Try resolve CI sveltekit-build artifact
         id: try-artifact
@@ -187,15 +195,65 @@ jobs:
               has=true
               echo "::notice::Reusing sveltekit-build from CI run ${run_id} (artifact ${artifact_id})."
             else
-              echo "::notice::CI run ${run_id} has no active sveltekit-build artifact â€” will run full quality."
+              echo "::notice::CI run ${run_id} has no active sveltekit-build artifact - will run full quality."
             fi
           else
-            echo "::notice::No successful CI run on ${DEPLOY_SHA} â€” will run full quality."
+            echo "::notice::No successful CI run on ${DEPLOY_SHA} - will run full quality."
           fi
 
           echo "has_ci_artifact=${has}" >> "$GITHUB_OUTPUT"
           echo "ci_run_id=${run_id}" >> "$GITHUB_OUTPUT"
           echo "artifact_id=${artifact_id}" >> "$GITHUB_OUTPUT"
+
+  resolve-deploy-tier:
+    name: resolve deploy tier
+    needs: [resolve-artifact]
+    if: >
+      always() &&
+      needs.resolve-artifact.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      e2e_tier: ${{ steps.resolve.outputs.e2e_tier }}
+      deploy_tier: ${{ steps.resolve.outputs.deploy_tier }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.resolve-artifact.outputs.deploy_sha }}
+
+      - name: Resolve deploy tier and E2E depth
+        id: resolve
+        env:
+          DEPLOY_SHA: ${{ needs.resolve-artifact.outputs.deploy_sha }}
+        run: |
+          set -euo pipefail
+          input_tier="${{ github.event_name == 'workflow_dispatch' && inputs.deploy_tier || 'auto' }}"
+          deploy_tier="$input_tier"
+
+          if [ "$input_tier" = "fast" ] || [ "$input_tier" = "hotfix" ]; then
+            e2e_tier="fast"
+          elif [ "$input_tier" = "full" ]; then
+            e2e_tier="full"
+          else
+            if git rev-parse -q --verify "${DEPLOY_SHA}^" >/dev/null 2>&1; then
+              git diff --name-only "${DEPLOY_SHA}^" "$DEPLOY_SHA" > changed-files.txt
+            else
+              git diff-tree --no-commit-id --name-only -r "$DEPLOY_SHA" > changed-files.txt
+            fi
+            path_tier=$(node scripts/ci-path-tier.mjs < changed-files.txt | tail -n1)
+            if [ "$path_tier" = "core-loop" ]; then
+              e2e_tier="full"
+            else
+              e2e_tier="fast"
+            fi
+            echo "auto path-tier=${path_tier} -> e2e_tier=${e2e_tier}"
+          fi
+
+          echo "e2e_tier=${e2e_tier}" >> "$GITHUB_OUTPUT"
+          echo "deploy_tier=${deploy_tier}" >> "$GITHUB_OUTPUT"
+          echo "Deploy tier: ${deploy_tier}, E2E tier: ${e2e_tier}"
 
   quality-full:
     name: quality (full build)
@@ -252,17 +310,70 @@ jobs:
           path: build/
           retention-days: 1
 
-  e2e:
-    name: e2e (${{ matrix.shard }}/3)
-    needs: [quality-full, quality-reuse]
+  e2e-critical:
+    name: e2e critical
+    needs: [resolve-artifact, resolve-deploy-tier, quality-full, quality-reuse]
     if: >
       always() &&
+      needs.resolve-deploy-tier.result == 'success' &&
       (needs.quality-full.result == 'success' || needs.quality-reuse.result == 'success') &&
-      !(
-        github.event_name == 'workflow_dispatch' &&
-        (inputs.skip_e2e == true || inputs.skip_e2e == 'true') &&
-        inputs.hotfix_confirm == 'hotfix'
-      )
+      needs.resolve-deploy-tier.outputs.e2e_tier == 'fast'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.resolve-artifact.outputs.deploy_sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: sveltekit-build
+          path: build/
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - run: npm run test:e2e:critical
+        env:
+          USE_PGLITE: 'true'
+          ADMIN_EMAIL: e2e-admin@example.com
+          ADMIN_PASSWORD: e2e-ci-password
+          PUBLIC_ORIGIN: http://localhost:5190
+          PLAYWRIGHT_PORT: '5190'
+          TURNSTILE_SKIP: 'true'
+          TURNSTILE_BYPASS: 'true'
+          EMAIL_VERIFICATION_SKIP: 'true'
+          E2E_MOCK_AI: 'true'
+          PUBLIC_E2E_DISABLE_POST_SURVEY: 'true'
+          CI: 'true'
+
+  e2e-full:
+    name: e2e (${{ matrix.shard }}/3)
+    needs: [resolve-artifact, resolve-deploy-tier, quality-full, quality-reuse]
+    if: >
+      always() &&
+      needs.resolve-deploy-tier.result == 'success' &&
+      (needs.quality-full.result == 'success' || needs.quality-reuse.result == 'success') &&
+      needs.resolve-deploy-tier.outputs.e2e_tier == 'full'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
@@ -273,7 +384,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event_name == 'push' && github.sha || (inputs.sha || inputs.ref) }}
+          ref: ${{ needs.resolve-artifact.outputs.deploy_sha }}
 
       - uses: actions/setup-node@v6
         with:
@@ -317,18 +428,15 @@ jobs:
 
   pre-deploy-verify:
     name: pre-deploy verify
-    needs: [quality-full, quality-reuse, e2e]
+    needs: [resolve-deploy-tier, resolve-artifact, quality-full, quality-reuse, e2e-critical, e2e-full]
     if: >
       always() &&
+      needs.resolve-deploy-tier.result == 'success' &&
+      needs.resolve-artifact.result == 'success' &&
       (needs.quality-full.result == 'success' || needs.quality-reuse.result == 'success') &&
       (
-        needs.e2e.result == 'success' ||
-        (
-          github.event_name == 'workflow_dispatch' &&
-          (inputs.skip_e2e == true || inputs.skip_e2e == 'true') &&
-          inputs.hotfix_confirm == 'hotfix' &&
-          needs.e2e.result == 'skipped'
-        )
+        needs.e2e-critical.result == 'success' ||
+        needs.e2e-full.result == 'success'
       )
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -337,7 +445,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event_name == 'push' && github.sha || (inputs.sha || inputs.ref) }}
+          ref: ${{ needs.resolve-artifact.outputs.deploy_sha }}
 
       - uses: actions/setup-node@v6
         with:
@@ -359,7 +467,7 @@ jobs:
           if [ -z "${DATABASE_URL:-}" ]; then
             echo "::error::DATABASE_URL is not set in GitHub Actions secrets."
             echo "Pre-deploy migrations require GitHub secret DATABASE_URL (public IP format, not Firebase socket URL)."
-            echo "See docs/CI_CD.md#database_url--ägare-manuellt"
+            echo "See docs/CI_CD.md#database_url--agare-manuellt"
             exit 1
           fi
           npm run db:migrate
@@ -399,22 +507,19 @@ jobs:
         run: bash scripts/smoke-prod-urls.sh
         env:
           BASE_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
-          SMOKE_DOUBLE_CHECK: 'false'
+          SMOKE_DOUBLE_CHECK: ${{ needs.resolve-deploy-tier.outputs.deploy_tier == 'hotfix' && 'true' || 'false' }}
 
   deploy:
     name: deploy
-    needs: [quality-full, quality-reuse, e2e, pre-deploy-verify]
+    needs: [resolve-deploy-tier, resolve-artifact, quality-full, quality-reuse, e2e-critical, e2e-full, pre-deploy-verify]
     if: >
       always() &&
+      needs.resolve-deploy-tier.result == 'success' &&
+      needs.resolve-artifact.result == 'success' &&
       (needs.quality-full.result == 'success' || needs.quality-reuse.result == 'success') &&
       (
-        needs.e2e.result == 'success' ||
-        (
-          github.event_name == 'workflow_dispatch' &&
-          (inputs.skip_e2e == true || inputs.skip_e2e == 'true') &&
-          inputs.hotfix_confirm == 'hotfix' &&
-          needs.e2e.result == 'skipped'
-        )
+        needs.e2e-critical.result == 'success' ||
+        needs.e2e-full.result == 'success'
       ) &&
       needs.pre-deploy-verify.result == 'success'
     runs-on: ubuntu-latest
@@ -426,7 +531,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.event_name == 'push' && github.sha || (inputs.sha || inputs.ref) }}
+          ref: ${{ needs.resolve-artifact.outputs.deploy_sha }}
 
       - name: Resolve Firebase deploy skip
         id: deploy-gate
@@ -436,7 +541,7 @@ jobs:
           if [ -z "${FIREBASE_TOKEN:-}" ]; then
             echo "skipped=true" >> "$GITHUB_OUTPUT"
             echo "::notice::FIREBASE_TOKEN is not set - quality and E2E passed but deploy was skipped."
-            echo "Add FIREBASE_TOKEN under Settings â†’ Secrets and variables â†’ Actions,"
+            echo "Add FIREBASE_TOKEN under Settings -> Secrets and variables -> Actions,"
             echo "or deploy locally: npm run deploy:firebase"
             echo "See docs/DEPLOY.md and docs/FIREBASE_DEPLOY.md"
           else
@@ -466,7 +571,7 @@ jobs:
             echo "::error::Post-deploy sanity failed: ${base}/ HTML contains error markers"
             exit 1
           fi
-          echo "Post-deploy sanity OK: ${base}/ → ${code}"
+          echo "Post-deploy sanity OK: ${base}/ -> ${code}"
 
       - uses: actions/setup-node@v6
         if: steps.deploy-gate.outputs.skipped != 'true'
@@ -500,7 +605,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${SMOKE_ADMIN_EMAIL:-}" ] || [ -z "${SMOKE_ADMIN_PASSWORD:-}" ]; then
-            echo "::notice::SMOKE_ADMIN_EMAIL/SMOKE_ADMIN_PASSWORD not set — skipping post-deploy auth smoke."
+            echo "::notice::SMOKE_ADMIN_EMAIL/SMOKE_ADMIN_PASSWORD not set - skipping post-deploy auth smoke."
             exit 0
           fi
           npm run smoke:prod-auth
@@ -523,16 +628,16 @@ jobs:
           set -euo pipefail
 
           if [ -z "${WEBHOOK_URL:-}" ] && [ -z "${TELEGRAM_BOT_TOKEN:-}" ]; then
-            echo "No deploy notify secrets configured â€” skipping."
+            echo "No deploy notify secrets configured - skipping."
             exit 0
           fi
 
           short_sha="${GITHUB_SHA:0:7}"
           run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           prod_url="${PRODUCTION_URL:-https://skaffu.com}"
-          msg="Skaffu deploy lyckades (${short_sha}) â€” smoke OK"
+          msg="Skaffu deploy lyckades (${short_sha}) - smoke OK"
           if [ -n "$prod_url" ]; then
-            msg="${msg} â€” ${prod_url%/}"
+            msg="${msg} - ${prod_url%/}"
           fi
           msg=$(printf '%s\n%s' "$msg" "$run_url")
 
@@ -582,7 +687,7 @@ jobs:
 
   verify-release:
     name: verify release completed
-    needs: [gate, resolve-artifact, quality-full, quality-reuse, e2e, pre-deploy-verify, deploy]
+    needs: [gate, resolve-artifact, resolve-deploy-tier, quality-full, quality-reuse, e2e-critical, e2e-full, pre-deploy-verify, deploy]
     if: >
       always() &&
       (
@@ -597,14 +702,21 @@ jobs:
         run: |
           set -euo pipefail
           echo "gate=${{ needs.gate.result }} guide_only=${{ needs.gate.outputs.guide_only }}"
-          echo "resolve-artifact=${{ needs.resolve-artifact.result }} quality-full=${{ needs.quality-full.result }} quality-reuse=${{ needs.quality-reuse.result }}"
-          echo "e2e=${{ needs.e2e.result }} pre-deploy-verify=${{ needs.pre-deploy-verify.result }} deploy=${{ needs.deploy.result }}"
+          echo "resolve-artifact=${{ needs.resolve-artifact.result }} resolve-deploy-tier=${{ needs.resolve-deploy-tier.result }}"
+          echo "deploy_tier=${{ needs.resolve-deploy-tier.outputs.deploy_tier }} e2e_tier=${{ needs.resolve-deploy-tier.outputs.e2e_tier }}"
+          echo "quality-full=${{ needs.quality-full.result }} quality-reuse=${{ needs.quality-reuse.result }}"
+          echo "e2e-critical=${{ needs.e2e-critical.result }} e2e-full=${{ needs.e2e-full.result }}"
+          echo "pre-deploy-verify=${{ needs.pre-deploy-verify.result }} deploy=${{ needs.deploy.result }}"
           if [ "${{ needs.gate.result }}" != "success" ]; then
             echo "::error::gate job did not succeed"
             exit 1
           fi
           if [ "${{ needs.resolve-artifact.result }}" != "success" ]; then
             echo "::error::resolve-artifact job did not succeed"
+            exit 1
+          fi
+          if [ "${{ needs.resolve-deploy-tier.result }}" != "success" ]; then
+            echo "::error::resolve-deploy-tier job did not succeed"
             exit 1
           fi
           quality_ok=false
@@ -614,23 +726,19 @@ jobs:
             echo "::error::quality did not succeed (full=${{ needs.quality-full.result }} reuse=${{ needs.quality-reuse.result }})"
             exit 1
           fi
-          hotfix_skip="${{ github.event_name == 'workflow_dispatch' && (inputs.skip_e2e == true || inputs.skip_e2e == 'true') && inputs.hotfix_confirm == 'hotfix' }}"
-          if [ "${{ needs.e2e.result }}" != "success" ]; then
-            if [ "$hotfix_skip" = "true" ] && [ "${{ needs.deploy.result }}" = "success" ]; then
-              echo "::warning::HOTFIX deploy â€” E2E skipped but deploy and smoke passed."
-            else
-              echo "::error::E2E did not run or failed (result=${{ needs.e2e.result }}) â€” prod was NOT released"
-              exit 1
-            fi
+          e2e_ok=false
+          if [ "${{ needs.e2e-critical.result }}" = "success" ]; then e2e_ok=true; fi
+          if [ "${{ needs.e2e-full.result }}" = "success" ]; then e2e_ok=true; fi
+          if [ "$e2e_ok" != "true" ]; then
+            echo "::error::E2E did not run or failed (e2e_tier=${{ needs.resolve-deploy-tier.outputs.e2e_tier }} critical=${{ needs.e2e-critical.result }} full=${{ needs.e2e-full.result }}) - prod was NOT released"
+            exit 1
           fi
           if [ "${{ needs.pre-deploy-verify.result }}" != "success" ]; then
-            echo "::error::pre-deploy-verify did not succeed — Firebase deploy was blocked or skipped"
+            echo "::error::pre-deploy-verify did not succeed - Firebase deploy was blocked or skipped"
             exit 1
           fi
           if [ "${{ needs.deploy.result }}" != "success" ]; then
             echo "::error::deploy job did not succeed"
             exit 1
           fi
-          echo "Release pipeline completed: quality, E2E, pre-deploy verify, deploy, and post-deploy sanity all succeeded."
-
-
+          echo "Release pipeline completed (deploy_tier=${{ needs.resolve-deploy-tier.outputs.deploy_tier }} e2e_tier=${{ needs.resolve-deploy-tier.outputs.e2e_tier }}): pr-gate, E2E, pre-deploy verify, deploy, and post-deploy sanity all succeeded."

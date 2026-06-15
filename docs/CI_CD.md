@@ -6,60 +6,55 @@
 
 ---
 
-## Översikt
+## Översikt (CI/CD model v2)
 
 ```mermaid
 flowchart TB
-  subgraph G0["G0 — Lokalt (agenter, före commit)"]
-    check[npm run check && npm test]
-    commit[git commit]
-    check --> commit
+  subgraph tier0 [quick:dev]
+    QD[lint + locales + unit]
   end
-
-  subgraph G1["G1 — CI (~3–5 min, varje push/PR)"]
-    push[git push origin master]
-    q[lint · server-imports · check · test · build · client-bundle]
-    push --> q
+  subgraph tier1 [pr:gate]
+    PG[lint + check + integration + build]
   end
-
-  subgraph release["Deploy to production"]
-    G1b[G1b — CI SHA gate + quality]
-    G2[G2 — E2E × 3 shards + marketing hydration]
-    G2b[G2b — client-bundle check]
-    G3[G3 — Firebase App Hosting]
-    G4[G4 — prod smoke HTML]
-    G5[G5 — verify-release]
-    G1b --> G2 --> G2b --> G3 --> G4 --> G5
+  subgraph tier2 [deploy:fast]
+    DF[critical E2E + Firebase + smoke + verify-release]
   end
-
-  commit --> push
-  q -.->|när du är redo| G1b
+  subgraph tier3 [release:full]
+    RF[full E2E 3 shards + deploy chain]
+  end
+  QD --> PG
+  PG --> DF
+  PG --> RF
 ```
 
-| Gate | När | Vad | Måltid | Blockerar |
-|------|-----|-----|--------|-----------|
-| **G0** | Före commit (agenter) | `npm run check && npm test` + husky `lint-staged` | ~1–2 min | Lokalt |
-| **G1** | Push/PR till `master` | Reusable `quality`: lint, `check:server-imports`, check, test, integration, build, `check:client-bundle`, audit | ~3–5 min | Deploy (via SHA-gate) |
-| **G1b** | Deploy `quality` | Kräver grön CI `quality` på **samma SHA** + samma steg som G1 | ~3–5 min | G2 |
-| **G2** | Deploy (alltid), PR, nattligt | Playwright E2E (PGlite), **3 shards**; marketing `pageerror`-check på `/` och guide-slug | ~3–8 min | G3 |
-| **G2b** | I G1/G1b efter build | `scripts/check-client-bundle.mjs` — fångar `process.cwd`, `node:fs` i klient | ~2 s | Deploy |
-| **G3** | Deploy | `firebase deploy --only apphosting:home-pantry` | ~5–20 min | Produktion |
-| **G4** | Efter G3 | `scripts/smoke-prod-urls.sh` — HTTP 200 + ingen `Internal Error`/500 i HTML; valfri 2× med 30 s paus | ~1 min | Release (workflow röd) |
-| **G5** | Deploy (sista jobbet) | `verify-release` — fail om E2E/deploy/smoke skippades eller misslyckades | ~5 s | Agent får inte säga "deployed" |
+| Tier | Trigger | E2E | Måltid | Blockerar prod? |
+|------|---------|-----|--------|-----------------|
+| **quick:dev** | Agent före commit | Ingen | 2–3 min | Lokalt |
+| **pr:gate** | PR + push master | Ingen (E2E separat) | 3–5 min | Merge |
+| **deploy:fast** | Deploy tier fast/auto low-risk | Critical `@deploy-critical` | ~8–15 min | Prod |
+| **release:full** | Deploy tier full / core paths | Full 3 shards | ~20–35 min | Prod |
+| **nightly** | 03:00 UTC | Full + heavy specs | ~25–45 min | Signal only |
 
-**Efter merge:** ~3–5 min till grön CI. Deploy när du vill — typiskt ~15–25 min för full deploy-kedja.
+| Gate | När | Vad | Blockerar |
+|------|-----|-----|-----------|
+| **G0** | Före commit | `npm run quick:dev` | Lokalt |
+| **G1** | Push/PR | `pr-gate / pr-gate` | Deploy SHA-gate |
+| **G2a** | Deploy fast/hotfix | Critical E2E | G3 |
+| **G2b** | Deploy full / core PR | Full E2E × 3 | G3 |
+| **G3–G5** | Deploy | Firebase + smoke + verify-release | Prod claim |
 
-**Ingen prod-release utan grön Deploy-workflow inkl. `verify-release`.** Merge till `master` deployar inte automatiskt (utom guide-only push — se nedan).
+Path-tier: `scripts/ci-path-tier.mjs` — `docs-only` skippar E2E; `low-risk` → critical; `core-loop` → full.
 
-### Deploy SLO och definition of done (prod)
+**Efter merge:** ~3–5 min `pr-gate`. Deploy fast ~8–15 min, full ~20–35 min.
 
-| Mått | Mål / sanning |
-|------|----------------|
-| **När säga "prod är uppdaterad"** | Endast när [**Deploy to production**](https://github.com/arpi09/grocery-manager/actions/workflows/deploy.yml) är **grön** på rätt SHA **och** jobbet **`verify release completed`** är `success` — **inte** när bara CI eller E2E-workflow är grön |
-| **Obligatoriska jobb** | `quality` → `e2e (1/3)` + `(2/3)` + `(3/3)` → `deploy` → `post-deploy smoke` → `verify release completed` (alla `success`; E2E skip endast explicit hotfix) |
-| **Typisk tid (full deploy)** | `quality` ~3–5 min · E2E ×3 ~3–8 min · Firebase ~5–20 min · smoke ~1 min · verify ~5 s → **~12–25 min** totalt |
-| **Workflow drift** | Alla quality-vägar via [`reusable-quality.yml`](../.github/workflows/reusable-quality.yml) (CI, E2E, deploy) |
-| **False-green deploy** | 0 — `verify-release` failar om e2e/deploy/smoke skippades eller misslyckades |
+### Deploy SLO
+
+| Mått | Sanning |
+|------|---------|
+| **Prod uppdaterad** | Grön Deploy + `verify release completed` på rätt SHA |
+| **Fast lane jobb** | `pr-gate` → `e2e critical` → `deploy` → smoke → verify |
+| **Full lane jobb** | `pr-gate` → `e2e (1/3–3/3)` → `deploy` → smoke → verify |
+| **Branch protection** | Kräv `pr-gate / pr-gate` (uppdatera från `quality / quality`) |
 
 ### Incident 2026-06-07 (lärdomar)
 
