@@ -649,11 +649,11 @@
 
 <div class="list">
 
-	{#if hasInventory}
+	<div class="sticky-band" class:sticky-band--compact={isCompact} class:sticky-band--locations-only={!hasInventory}>
 
-		<div class="sticky-band" class:sticky-band--compact={isCompact}>
+		<LocationTab active={location} />
 
-			<LocationTab active={location} />
+		{#if hasInventory}
 
 			<ListToolbar
 				bind:query
@@ -770,9 +770,9 @@
 
 			{/if}
 
-		</div>
+		{/if}
 
-	{/if}
+	</div>
 
 
 

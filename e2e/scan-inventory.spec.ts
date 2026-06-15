@@ -119,8 +119,9 @@ test.describe('Scan and inventory', () => {
 		await dismissOnboardingModalIfOpen(page);
 
 		await expect(page).toHaveURL(/\/inventory\/fridge/);
-		await expect(page.getByRole('link', { name: /Kyl|Fridge/i })).toBeVisible();
-		await expect(page.getByRole('link', { name: /Frys|Freezer/i })).toBeVisible();
+		const locationTabs = page.getByRole('navigation', { name: /Förvaringsplatser|Storage locations/i });
+		await expect(locationTabs.getByRole('link', { name: /Kyl|Fridge/i })).toBeVisible();
+		await expect(locationTabs.getByRole('link', { name: /Frys|Freezer/i })).toBeVisible();
 	});
 
 	test('inventory list uses card stack with sort chips', async ({ page }) => {
