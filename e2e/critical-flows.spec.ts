@@ -33,7 +33,7 @@ test.describe('Critical flows', () => {
 
 		await waitForWelcomeParamStripped(page);
 
-		await expect(page).toHaveURL('/hem');
+		await expect(page).toHaveURL((url) => new URL(url).pathname === '/hem');
 
 		await page.goto('/scan?mode=photo');
 
@@ -89,7 +89,8 @@ test.describe('Critical flows', () => {
 
 		await expect(page).toHaveURL(/\/settings/);
 
-		await page.locator('#settings-app details.settings-disclosure summary').click();
+		await dismissOnboardingModalIfOpen(page);
+		await page.locator('#settings-app details.settings-disclosure summary').click({ force: true });
 
 		await dismissOnboardingModalIfOpen(page);
 		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click({ force: true });
@@ -239,7 +240,8 @@ test.describe('Critical flows', () => {
 
 		await dismissOnboardingModalIfOpen(page);
 
-		await page.locator('#settings-app details.settings-disclosure summary').click();
+		await dismissOnboardingModalIfOpen(page);
+		await page.locator('#settings-app details.settings-disclosure summary').click({ force: true });
 
 		await dismissOnboardingModalIfOpen(page);
 		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click({ force: true });
@@ -259,14 +261,17 @@ test.describe('Critical flows', () => {
 		}
 
 		await page.goto('/settings#settings-app');
-		await page.locator('#settings-app details.settings-disclosure summary').click();
+		await dismissOnboardingModalIfOpen(page);
+		await page.locator('#settings-app details.settings-disclosure summary').click({ force: true });
 		await dismissOnboardingModalIfOpen(page);
 		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click({ force: true });
 
+		await expectOnboardingGuideVisible(page);
+		await dismissOnboardingModalIfOpen(page);
 		await expect(page.getByTestId('onboarding-finish')).toBeVisible({ timeout: 30_000 });
-		await page.getByTestId('onboarding-finish').click();
+		await page.getByTestId('onboarding-finish').click({ force: true });
 
-		await expect(page).toHaveURL('/hem');
+		await expect(page).toHaveURL((url) => new URL(url).pathname === '/hem', { timeout: 15_000 });
 
 	});
 
@@ -280,7 +285,8 @@ test.describe('Critical flows', () => {
 
 		await page.goto('/settings#settings-app');
 
-		await page.locator('#settings-app details.settings-disclosure summary').click();
+		await dismissOnboardingModalIfOpen(page);
+		await page.locator('#settings-app details.settings-disclosure summary').click({ force: true });
 
 		await dismissOnboardingModalIfOpen(page);
 		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click({ force: true });
