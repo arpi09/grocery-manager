@@ -179,10 +179,10 @@
 		}
 	},
 	"home": {
-		"title": "Ditt skafferi",
+		"title": "Veckohandel",
 		"ariaLabel": "Startsida",
 		"greeting": "Hej, {name}",
-		"greetingNeutral": "Ditt skafferi",
+		"greetingNeutral": "Veckohandel",
 		"tagline": "Fota in varor för att hålla koll",
 		"taglineEmpty": "Skapa veckans lista — tre varor räcker för att komma igång med gemensam veckohandel",
 		"scanCardTitle": "Lägg till varor",
@@ -286,7 +286,10 @@
 			"coldTitle": "Veckans lista",
 			"coldAction": "Skapa veckans lista",
 			"coldSecondary": "Fyll skafferi"
-		}
+		},
+		"taglineListaReady": "Ni har varor på listan — handla ihop denna vecka",
+		"taglineExpiry": "Något går ut snart — ät först eller planera middag",
+		"nextActionLista": "Fortsätt veckohandel"
 	},
 	"dashboard": {
 		"title": "Hem",
@@ -2673,6 +2676,25 @@
 			"pushFix": {
 				"title": "Notiser som faktiskt fungerar",
 				"body": "Pålitlig aktivering av webbläsarnotiser i inställningarna — utgående varor och inköp når dig i rätt tid."
+			},
+			"brainV1": {
+				"version": "Brain V1",
+				"title": "Hushållsminne i vardagen",
+				"body": "Uppskattade utgångsdatum och kvittolärande — tryck Uppskattat för att se varför.",
+				"detail": "Skaffu lär sig från kvitton och dina rättningar. I lager och vid kvittoreview ser du Uppskattat och kan öppna förklaringen. Fler observationer gör minnet säkrare."
+			},
+			"narrativeSprint": {
+				"title": "Lista först i hela appen",
+				"body": "Hem, onboarding och inköp berättar samma veckoloop — lista, handla, checkoff, skafferi.",
+				"detail": "Vi har skalat om copy och tomma tillstånd så nya hushåll möter veckolistan först, inte skannern."
+			},
+			"navV2": {
+				"title": "Tydligare mobilnavigering",
+				"body": "Hem · Inköp · Skanna · Mer — lager och fler verktyg samlas under Mer."
+			},
+			"inventoryProductRow": {
+				"title": "Renare rader i lager (mobil)",
+				"body": "Product Row-layout: namn, mängd och utgång på en rad — mindre brus, lättare att skanna listan."
 			}
 		}
 	},
