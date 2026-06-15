@@ -176,7 +176,7 @@
 			}
 
 			items = items.filter((entry) => entry.normalizedKey !== normalizedKey);
-			showClientToast(t('replenishment.acceptSuccess', { name: data.name ?? '' }), {
+			showClientToast(t('replenishment.acceptLearning', { name: data.name ?? '' }), {
 				variant: 'success'
 			});
 		} catch {
@@ -205,6 +205,7 @@
 			}
 
 			items = items.filter((entry) => entry.normalizedKey !== normalizedKey);
+			showClientToast(t('replenishment.dismissAck'), { variant: 'default' });
 		} catch {
 			errorMessage = t('replenishment.dismissFailed');
 		} finally {
