@@ -5,8 +5,8 @@
 | F?lt | V?rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-15 |
-| **Prod SHA** | `e8b44e9d` — deploy run [27531246759](https://github.com/arpi09/grocery-manager/actions/runs/27531246759) (2026-06-15) — Bundle B (#82, #85, #88)
-| **Master SHA** | `e8b44e9d` — Bundle B home/inventory (#82, #85, #88) + audit slices #83–#84 on master
+| **Prod SHA** | `94c95b4d` - deploy run [27532741179](https://github.com/arpi09/grocery-manager/actions/runs/27532741179) (2026-06-15) - Bundle A (#81, #83, #84, #86, #89)
+| **Master SHA** | `94c95b4d` - Bundle A (#81, #83, #84, #86, #89) + Bundle B (#82, #85, #88) on master
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
 
