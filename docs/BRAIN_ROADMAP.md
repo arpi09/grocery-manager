@@ -4,7 +4,7 @@
 
 **Relaterat:** [BRAIN_V1_PRODUCT_INTEGRATION.md](./BRAIN_V1_PRODUCT_INTEGRATION.md) · [LEARNING_ENGINE.md](./LEARNING_ENGINE.md) · [UX_COORDINATOR_BACKLOG.md](./UX_COORDINATOR_BACKLOG.md)
 
-**Baseline:** Prod `73d3dfd0` ([CURRENT_REALITY.md](./CURRENT_REALITY.md)), Brain V1 live (shelf/location/replenishment learning, Memory Explorer, Uppskattat i kvittoreview + receipt summary #67). **Deploy bundle 2 SHIPPED** (2026-06-14). **Release princip:** merge+deploy = aktiv, ingen flag-flip.
+**Baseline:** Prod `f70c2c9c` ([CURRENT_REALITY.md](./CURRENT_REALITY.md)), Brain V1 live (shelf/location/replenishment learning, Memory Explorer, Uppskattat i kvittoreview + receipt summary #67). **Narrative sprint + UX #73/#74 SHIPPED** (2026-06-14). **Release princip:** merge+deploy = aktiv, ingen flag-flip.
 
 **Hard rules:** Inga nya predictors utan tydlig loop, inga LLM-tier, inga migrations utan explicit V2-gate, deploy sist, max 1 aktiv branch per filfamilj.
 
@@ -17,8 +17,8 @@
 | 1 | Var finns estimated expiry? | `InventoryItem.expiresOn` + `expiresOnSource` |
 | 2 | Source/confidence på item? | `expiresOnSource`: `heuristic`, `household_learned`, `ai_inferred`, user-set, etc. |
 | 3 | Var visas `EstimatedBadge` idag? | Desktop table (`InventoryTableRow`); receipt review (`ReceiptBulkAddFlow`) |
-| 4 | Mobil compact row? | `InventoryCompactRow` — **ingen** badge; relative days only |
-| 5 | UX-konflikt? | **Hög** — UX Slice 1 ändrar samma rad |
+| 4 | Mobil compact row? | `InventoryCompactRow` — badge shipped (#74); **ej interactive** / explain (R1) |
+| 5 | UX-konflikt? | **Låg** — Slice 1 merged; R1 explain wiring kvar |
 
 **Rekommendation:** Integrera V1.1 i UX Slice 1 (Product Row) — **inte** separat Brain-PR på `InventoryCompactRow`. Fallback: minimal patch om Slice 1 blockeras >1 vecka.
 
@@ -128,7 +128,9 @@ Scoring: User Value × Strategic Alignment × Learning Potential ÷ Conflict Ris
 
 **Deploy bundle 1:** UX Slice 0 (+ V1.2), release Phase 0–1 → activation + receipt feedback. **Ej** inventory badge (väntar Slice 1).
 
-**Deploy bundle 2 — SHIPPED @ `73d3dfd0`:** #67 receipt summary, #70 onboarding receipt wiring, #63 EstimatedBadge (desktop fallback), #59 home tone, #65 receipt location badge. **Mobil inventory badge + Product Row unify** väntar UX Slice 1 (`feat/ux-inventory-list-v1`, PLANNED). Slice 2–3 + optional V1.4 → next wave.
+**Deploy bundle 2 — SHIPPED @ `73d3dfd0`:** #67 receipt summary, #70 onboarding receipt wiring, #63 EstimatedBadge (desktop fallback), #59 home tone, #65 receipt location badge.
+
+**Narrative deploy — SHIPPED @ `f70c2c9c`:** #73/#74 narrative sprint + UX Slice 1 Product Row (mobil badge partial). **R1** tap→explain + Brain visibility fixes → Bundle A ([PRODUCT_AUDIT_2026-06.md](./PRODUCT_AUDIT_2026-06.md)). Slice 2–3 + optional V1.4 → next wave.
 
 ---
 
