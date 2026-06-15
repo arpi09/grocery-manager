@@ -3,6 +3,15 @@ import { dismissOnboardingModalIfOpen, dismissPageHintIfOpen, loginAsAdmin } fro
 import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
 
 test.describe('Scan and inventory', () => {
+	test('bare /scan stays on hub without auto redirect', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/scan');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page.getByTestId('scan-mode-hub')).toBeVisible({ timeout: 15_000 });
+		await expect(page).not.toHaveURL(/mode=receipt/);
+	});
+
 	test('scan hub loads with receipt primary', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/scan?mode=hub');

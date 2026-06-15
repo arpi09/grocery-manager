@@ -940,7 +940,8 @@
 				"ask": "Ask every time",
 				"always": "Always add",
 				"never": "Never"
-			}
+			},
+			"loopHint": "Close the week — update your pantry so next week's list stays accurate."
 		}
 	},
 	"pantryHealth": {

@@ -911,7 +911,8 @@
 				"ask": "Fråga varje gång",
 				"always": "Lägg alltid till",
 				"never": "Aldrig"
-			}
+			},
+			"loopHint": "Stäng veckan — uppdatera skafferiet så nästa lista träffar rätt."
 		}
 	},
 	"pantryHealth": {
