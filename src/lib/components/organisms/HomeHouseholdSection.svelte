@@ -8,7 +8,11 @@
 		composeHouseholdBriefing,
 		BRIEFING_MAX_VISIBLE_LINES
 	} from '$lib/domain/household-briefing';
+	import { page } from '$app/state';
+	import type { HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
+	import { formatCadenceWeekday } from '$lib/domain/household-shopping-cadence';
 	import type { PantryHealthInsight } from '$lib/domain/pantry-health';
+	import { isLocale, type Locale } from '$lib/i18n/locale';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -30,6 +34,17 @@
 		householdId = null,
 		pantryAllGood = false
 	}: Props = $props();
+
+	const locale = $derived((isLocale(page.data.locale) ? page.data.locale : 'sv') as Locale);
+
+	const cadenceLine = $derived.by(() => {
+		if (!shoppingCadence) return null;
+		const weekday = formatCadenceWeekday(shoppingCadence.weekday, locale);
+		if (shoppingCadence.storeLabel) {
+			return t('home.cadenceLineStore', { weekday, store: shoppingCadence.storeLabel });
+		}
+		return t('home.cadenceLine', { weekday });
+	});
 
 	const hasExpiring = $derived(expiringSoon.length > 0);
 
@@ -75,6 +90,9 @@
 </script>
 
 <div class="household-stack">
+	{#if cadenceLine}
+		<p class="household-cadence" role="status">{cadenceLine}</p>
+	{/if}
 	{#if hasExpiring}
 		<div class="household-block household-block--eat-first">
 			<EatFirstSection
@@ -112,6 +130,13 @@
 </div>
 
 <style>
+	.household-cadence {
+		margin: 0;
+		font-size: 0.9375rem;
+		line-height: 1.45;
+		color: var(--color-text-muted);
+	}
+
 	.household-stack {
 		display: flex;
 		flex-direction: column;

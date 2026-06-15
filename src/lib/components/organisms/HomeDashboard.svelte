@@ -54,6 +54,7 @@
 
 	} from '$lib/utils/onboarding';
 
+	import type { HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
 	import type { ReceiptFinishSuggestion, ReceiptPatternSuggestion } from '$lib/domain/purchase-pattern';
 
 	import { scanHubHref, scanModeHref } from '$lib/utils/scan-nav';
@@ -86,6 +87,8 @@
 
 		showMemoryExplorer?: boolean;
 
+		shoppingCadence?: HouseholdShoppingCadence | null;
+
 	}
 
 
@@ -110,7 +113,9 @@
 
 		shoppingListCount = 0,
 
-		showMemoryExplorer = false
+		showMemoryExplorer = false,
+
+		shoppingCadence = null
 
 	}: Props = $props();
 

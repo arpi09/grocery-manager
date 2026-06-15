@@ -64,7 +64,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		celebration,
 		receiptAutopilotSuggestions,
 		receiptFinishSuggestions,
-		shoppingListCount
+		shoppingListCount,
+		shoppingCadence
 	] = await Promise.all([
 		locals.inventoryService.getDashboard(householdId).catch(degrade('dashboard', emptySummary)),
 		locals.inventoryIntelligenceService
@@ -82,7 +83,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 		locals.shoppingListService
 			.listUncheckedItems(householdId)
 			.then((items) => items.length)
-			.catch(degrade('shopping list count', 0))
+			.catch(degrade('shopping list count', 0)),
+		locals.purchasePatternService
+			.getHouseholdShoppingCadence(householdId)
+			.catch(degrade('shopping cadence', null))
 	]);
 
 	const locale: Locale = isLocale(locals.locale) ? locals.locale : DEFAULT_LOCALE;
@@ -97,6 +101,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		receiptAutopilotSuggestions,
 		receiptFinishSuggestions,
 		shoppingListCount,
+		shoppingCadence,
 		showMemoryExplorer: isShelfLifeLearningEnabled()
 	};
 };

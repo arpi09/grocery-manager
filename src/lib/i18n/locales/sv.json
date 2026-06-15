@@ -289,7 +289,9 @@
 		},
 		"taglineListaReady": "Ni har varor på listan — handla ihop denna vecka",
 		"taglineExpiry": "Något går ut snart — ät först eller planera middag",
-		"nextActionLista": "Fortsätt veckohandel"
+		"nextActionLista": "Fortsätt veckohandel",
+		"cadenceLine": "Ni brukar handla på {weekday}",
+		"cadenceLineStore": "Ni brukar handla på {weekday} · oftast {store}"
 	},
 	"dashboard": {
 		"title": "Hem",

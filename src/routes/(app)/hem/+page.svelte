@@ -18,7 +18,8 @@
 			receiptFinishSuggestions={data.receiptFinishSuggestions}
 			intelligence={data.intelligence}
 			shoppingListCount={data.shoppingListCount}
-			showMemoryExplorer={data.showMemoryExplorer}
+			showMemoryExplorer={data.showMemoryExplorer}
+			shoppingCadence={data.shoppingCadence}
 		/>
 	</PageContainer>
 </AppLayout>
