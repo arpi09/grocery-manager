@@ -25,6 +25,7 @@
 		border-radius: 999px;
 		font-size: 0.75rem;
 		font-weight: 600;
+		line-height: 1.2;
 		border: 1px solid var(--color-border);
 		background: var(--color-surface-muted);
 		color: var(--color-text-muted);
