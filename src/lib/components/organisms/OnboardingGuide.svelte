@@ -159,10 +159,6 @@
 		void trackProductEvent('onboarding_skipped');
 	}
 
-	function goNext() {
-		if (isLastStep || stepIndex === 0) {
-			return;
-		}
 		stepDirection = 'forward';
 		stepIndex += 1;
 	}
