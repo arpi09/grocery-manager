@@ -53,7 +53,7 @@ test.describe('Scan and inventory', () => {
 		await expect(tabLinks.first()).toContainText(/Kvitto|Receipt/i);
 		const manualHref = await scanModes.getByRole('link', { name: /Manuellt|Manual/i }).getAttribute('href');
 		expect(manualHref).toMatch(/\/item\/new\?/);
-		expect(decodeURIComponent(manualHref!)).toMatch(/mode=photo/);
+		expect(decodeURIComponent(manualHref!)).toMatch(/mode=hub/);
 	});
 
 	test('receipt mode has no duplicate all-modes footer', async ({ page }) => {
@@ -191,7 +191,7 @@ test.describe('Scan and inventory', () => {
 			await expect(page).toHaveURL(/\/item\/new/, { timeout: 15_000 });
 
 			await page.getByRole('link', { name: /Avbryt|Cancel/i }).click();
-			await expect(page).toHaveURL(/\/scan\?.*mode=photo/, { timeout: 15_000 });
+			await expect(page).toHaveURL(/\/scan\?.*mode=hub/, { timeout: 15_000 });
 		});
 	});
 
