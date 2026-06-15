@@ -2,6 +2,7 @@ import type { MessageKey } from '$lib/i18n/messages';
 
 import { preferredScanHref } from '$lib/utils/scan-nav';
 
+import { isPublicCityFeedEnabled } from '$lib/utils/public-city-feed-flag';
 import { HEM_PATH, INKOP_PATH } from './app-home';
 
 export type NavIconId =
@@ -142,6 +143,10 @@ export function isNavItemVisible(item: NavItem, user: NavUser | null | undefined
 	}
 
 	if (item.requiresPets && !user?.petsEnabled) {
+		return false;
+	}
+
+	if (item.href === '/grannskafferiet' && !isPublicCityFeedEnabled()) {
 		return false;
 	}
 
