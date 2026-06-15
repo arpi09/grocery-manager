@@ -217,12 +217,6 @@
 		white-space: nowrap;
 	}
 
-	.action-group {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-		justify-content: flex-end;
-	}
 
 	.action-group :global(.finish-btn) {
 		min-height: var(--touch-target-min);
