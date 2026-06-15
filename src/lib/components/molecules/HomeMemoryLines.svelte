@@ -26,8 +26,8 @@
 		}
 
 		const topReplenishment = intelligence.replenishment[0];
-		if (topReplenishment?.name) {
-			result.push(t('home.memory.replenishmentHint', { name: topReplenishment.name }));
+		if (topReplenishment?.displayName) {
+			result.push(t('home.memory.replenishmentHint', { name: topReplenishment.displayName }));
 		}
 
 		return result.slice(0, 3);

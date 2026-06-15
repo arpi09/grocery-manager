@@ -30,7 +30,7 @@
 	{#if homeState === 'cold'}
 		{#if canWrite}
 			<EmptyState
-				iconId="shopping"
+				iconId="box"
 				title={t('home.v4.coldTitle')}
 				description={t('home.emptyDescriptionShopping')}
 				actionLabel={t('home.v4.coldAction')}
