@@ -2,7 +2,7 @@ import type { MessageKey } from '$lib/i18n/messages';
 
 import { preferredScanHref } from '$lib/utils/scan-nav';
 
-import { isPublicCityFeedEnabled } from '/application/public-city-feed.service';
+import { isPublicCityFeedEnabled } from '$lib/utils/public-city-feed-flag';
 import { HEM_PATH, INKOP_PATH } from './app-home';
 
 export type NavIconId =
