@@ -159,8 +159,6 @@
 		void trackProductEvent('onboarding_skipped');
 	}
 
-		stepDirection = 'forward';
-		stepIndex += 1;
 	}
 
 	function goBack() {
@@ -192,7 +190,6 @@
 				setActivationPath(path, userId);
 			}
 		}
-		stepDirection = 'forward';
 		stepIndex = 1;
 	}
 
@@ -218,7 +215,6 @@
 		if (!open || !userId || !isActivationComplete(userId) || stepIndex >= 2) {
 			return;
 		}
-		stepDirection = 'forward';
 		stepIndex = 2;
 	}
 
@@ -378,7 +374,6 @@
 			</div>
 		{/if}
 
-		{#if currentStep.id === 'pathGuide' && selectedPath}
 			{#if activationProgress?.inProgress && selectedPath === 'shopping' && activationProgress.shoppingListCount > 0}
 				<p class="progress-note" role="status">
 					{t('onboarding.shoppingListProgress', {
