@@ -5,6 +5,8 @@ test.describe('Navigation', () => {
 	test.setTimeout(60_000);
 
 	test('can open inventory, planer, and inkop pages', async ({ page }) => {
+		await page.goto('/hem');
+		await dismissOnboardingModalIfOpen(page);
 		await clickNavHref(page, '/inkop');
 		await expect(page).toHaveURL(/\/inkop/);
 		await dismissOnboardingModalIfOpen(page);
@@ -18,6 +20,8 @@ test.describe('Navigation', () => {
 	});
 
 	test('planer shows generate meal CTA', async ({ page }) => {
+		await page.goto('/hem');
+		await dismissOnboardingModalIfOpen(page);
 		await clickSecondaryNavHref(page, '/planer');
 		await dismissOnboardingModalIfOpen(page);
 		await expect(page.getByTestId('eat-hub-generate')).toBeVisible({ timeout: 15_000 });

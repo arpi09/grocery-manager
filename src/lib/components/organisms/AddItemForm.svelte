@@ -254,18 +254,25 @@
 	.select,
 	.textarea {
 		width: 100%;
+		box-sizing: border-box;
+		min-height: max(2.8125rem, var(--touch-target-min));
+		line-height: 1.4;
 		padding: 0.65rem 0.85rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
 		background: var(--color-surface);
 		color: var(--color-text);
+		font: inherit;
+	}
+
+	.select {
+		height: max(2.8125rem, var(--touch-target-min));
 	}
 
 	@media (max-width: 899px) {
-		.select,
 		.textarea,
 		.barcode-row :global(input) {
-			min-height: var(--touch-target-min);
+			min-height: max(2.8125rem, var(--touch-target-min));
 		}
 	}
 

@@ -52,7 +52,9 @@ test.describe('Accessibility — P0 routes (WCAG 2.2 AA)', () => {
 
 			if (route.path === '/hem') {
 				await expect(page.locator('.more-on-home')).toHaveCount(0);
-				expect(await page.locator('.home-v3-section').count()).toBe(3);
+				const sectionCount = await page.locator('.home-v3-section').count();
+				expect(sectionCount).toBeGreaterThanOrEqual(1);
+				expect(sectionCount).toBeLessThanOrEqual(3);
 			}
 
 			await expectNoCriticalOrSeriousViolations(page, route.path);

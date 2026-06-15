@@ -45,7 +45,7 @@ test.describe('Scan and inventory', () => {
 		await expect(scanModes).toBeVisible();
 		await expect(scanModes.getByRole('link', { name: /Fler sätt|More ways/i })).toHaveCount(0);
 		await expect(scanModes.getByRole('link', { name: /Kvitto|Receipt/i })).toBeVisible();
-		await expect(scanModes.getByRole('link', { name: 'Fota in varor' })).toBeVisible();
+		await expect(scanModes.getByRole('link', { name: /^Foto$|^Photo$/i })).toBeVisible();
 		const tabLinks = scanModes.getByRole('link');
 		await expect(tabLinks.first()).toContainText(/Kvitto|Receipt/i);
 		const manualHref = await scanModes.getByRole('link', { name: /Manuellt|Manual/i }).getAttribute('href');

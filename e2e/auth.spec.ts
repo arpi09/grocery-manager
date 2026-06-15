@@ -2,6 +2,7 @@
 import { prepareE2eBrowserState } from './helpers/auth';
 
 test.describe('Authentication', () => {
+	test.use({ storageState: { cookies: [], origins: [] } });
 	test.setTimeout(60_000);
 
 	test('shows marketing landing for unauthenticated visitors', async ({ page }) => {

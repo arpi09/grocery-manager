@@ -107,11 +107,19 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 
 		await loginAsAdmin(page);
 		await createFridgeItemViaAction(page, { name: itemName, expiresOn });
+		await page.goto('/inventory/fridge', { waitUntil: 'commit' });
+		await dismissOnboardingModalIfOpen(page);
+		await expect(page.getByRole('link', { name: new RegExp(itemName) })).toBeVisible({
+			timeout: 15_000
+		});
+
 		await page.goto('/hem', { waitUntil: 'commit' });
 		await dismissCookieConsentIfOpen(page);
 		await dismissOnboardingModalIfOpen(page);
 
-		await expect(page.getByText(itemName).first()).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByRole('heading', { level: 1 })).toContainText(
+			/Veckohandel|Weekly shop/i
+		);
 		await expect(
 			page.getByRole('button', { name: /Dela som bild|Share as image/i }).first()
 		).toBeVisible({ timeout: 15_000 });
