@@ -8,17 +8,18 @@
 		onClose?: () => void;
 		closeLabel?: string;
 		subtitle?: string;
+		subtitleTestId?: string;
 		actions?: Snippet;
 	}
 
-	let { title, titleId, onClose, closeLabel, subtitle, actions }: Props = $props();
+	let { title, titleId, onClose, closeLabel, subtitle, subtitleTestId, actions }: Props = $props();
 </script>
 
 <header class="modal-header">
 	<div class="modal-header-text">
 		<h2 id={titleId}>{title}</h2>
 		{#if subtitle}
-			<p class="modal-header-sub">{subtitle}</p>
+			<p class="modal-header-sub" data-testid={subtitleTestId}>{subtitle}</p>
 		{/if}
 	</div>
 	{#if actions}

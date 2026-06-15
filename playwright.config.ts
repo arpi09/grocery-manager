@@ -34,6 +34,9 @@ const e2eAdminPassword = pickEnv(process.env.E2E_ADMIN_PASSWORD) ?? 'e2e-ci-pass
 process.env.ADMIN_EMAIL = e2eAdminEmail;
 process.env.ADMIN_PASSWORD = e2eAdminPassword;
 
+const adminStorageState = 'e2e/.auth/admin.json';
+const freshUserSpecs = [/critical-flows\.spec\.ts/, /growth-wave\.spec\.ts/];
+
 /** iPhone 14 viewport (390×844) in Chromium — avoids WebKit dependency in CI. */
 const mobileChrome = {
 	...devices['Desktop Chrome'],
@@ -48,31 +51,43 @@ export default defineConfig({
 	testDir: 'e2e',
 	/** Vitest unit tests under e2e/helpers must not be collected by Playwright. */
 	testMatch: '**/*.spec.ts',
-	fullyParallel: false,
+	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
-	workers: 1,
+	workers: process.env.CI ? 2 : 1,
 	reporter: process.env.CI ? 'github' : 'list',
 	timeout: process.env.CI ? 60_000 : 30_000,
 	use: {
 		baseURL,
 		locale: 'sv-SE',
 		viewport: { width: 1400, height: 900 },
-		trace: 'on-first-retry',
+		trace: 'retain-on-failure',
+		video: 'off',
 		screenshot: 'only-on-failure',
 		actionTimeout: 15_000,
 		navigationTimeout: process.env.CI ? 60_000 : 30_000
 	},
 	projects: [
 		{
+			name: 'setup',
+			testMatch: /auth\.setup\.ts/
+		},
+		{
 			name: 'chromium',
-			testIgnore: /mobile-visual\.spec\.ts/,
+			testIgnore: [/mobile-visual\.spec\.ts/, /auth\.setup\.ts/, ...freshUserSpecs],
+			use: { ...devices['Desktop Chrome'], storageState: adminStorageState },
+			dependencies: ['setup']
+		},
+		{
+			name: 'chromium-fresh',
+			testMatch: freshUserSpecs,
 			use: { ...devices['Desktop Chrome'] }
 		},
 		{
 			name: 'mobile-chrome',
 			testMatch: /mobile-visual\.spec\.ts/,
-			use: mobileChrome
+			use: { ...mobileChrome, storageState: adminStorageState },
+			dependencies: ['setup']
 		}
 	],
 	webServer: {
@@ -94,8 +109,3 @@ export default defineConfig({
 		}
 	}
 });
-
-
-
-
-

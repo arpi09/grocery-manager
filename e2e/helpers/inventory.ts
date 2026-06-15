@@ -1,15 +1,31 @@
-import { type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
+
+/** Creates a fridge item via SvelteKit action (faster than full form navigation). */
+export async function createFridgeItemViaApi(page: Page, name: string): Promise<void> {
+	const response = await page.request.post('/item/new?/create', {
+		form: {
+			name,
+			location: 'fridge',
+			quantity: '1',
+			unit: '',
+			expiresOn: '',
+			notes: '',
+			returnTo: '/inventory/fridge'
+		},
+		headers: {
+			accept: 'application/json',
+			'x-sveltekit-action': 'true'
+		},
+		maxRedirects: 0
+	});
+
+	expect([200, 302, 303]).toContain(response.status());
+}
 
 /** Ensures at least one active fridge row for mobile inventory E2E (CI shards may start empty). */
 export async function ensureFridgeInventoryItem(page: Page, name?: string): Promise<string> {
 	const itemName = name ?? `E2E Fridge ${Date.now()}`;
-	await page.goto('/item/new?location=fridge&from=/inventory/fridge');
-	await page.locator('input[name="name"]').fill(itemName);
-	const submit = page.locator('form').getByRole('button', { name: /L.gg till vara|Add item/i });
-	await Promise.all([
-		page.waitForURL(/\/inventory\/fridge/, { timeout: 15_000 }),
-		submit.click()
-	]);
+	await createFridgeItemViaApi(page, itemName);
 	return itemName;
 }
 
@@ -55,5 +71,10 @@ export async function swipeRowHorizontal(
 		{ startX, endX, centerY }
 	);
 
-	await page.waitForTimeout(150);
+	await expect
+		.poll(async () => (await rowLocator.locator('.swipe-dragging').count()) === 0, {
+			timeout: 2_000,
+			intervals: [50, 100, 150]
+		})
+		.toBe(true);
 }

@@ -32,7 +32,8 @@ export default defineConfig({
 		baseURL,
 		locale: 'sv-SE',
 		viewport: { width: 1400, height: 900 },
-		trace: 'on-first-retry',
+		trace: 'retain-on-failure',
+		video: 'off',
 		screenshot: 'only-on-failure',
 		actionTimeout: 15_000,
 		navigationTimeout: 60_000

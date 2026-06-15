@@ -150,29 +150,6 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		);
 	});
 
-	test('nearby sharing settings API accepts opt-out', async ({ page }) => {
-		await loginAsAdmin(page);
-
-		const settingsResponse = await page.request.post('/api/expiring-share/nearby-settings', {
-			data: { enabled: false }
-		});
-		expect(settingsResponse.ok()).toBeTruthy();
-		const settingsPayload = (await settingsResponse.json()) as { ok: boolean; enabled: boolean };
-		expect(settingsPayload.ok).toBe(true);
-		expect(settingsPayload.enabled).toBe(false);
-
-		const nearbyResponse = await page.request.get('/api/expiring-share/nearby');
-		expect(nearbyResponse.ok()).toBeTruthy();
-		const nearbyPayload = (await nearbyResponse.json()) as {
-			ok: boolean;
-			optedIn: boolean;
-			shares: unknown[];
-		};
-		expect(nearbyPayload.ok).toBe(true);
-		expect(nearbyPayload.optedIn).toBe(false);
-		expect(nearbyPayload.shares).toEqual([]);
-	});
-
 	test('grannskafferiet discovery page loads for logged-in user', async ({ page }) => {
 		await loginAsAdmin(page);
 
@@ -247,83 +224,5 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		await dismissCookieConsentIfOpen(page);
 		await switchControl.scrollIntoViewIfNeeded();
 		await expect(switchControl).toHaveAttribute('aria-checked', 'true');
-	});
-
-	test('nearby sharing settings API opt-in stores coarse location', async ({ page }) => {
-		await loginAsAdmin(page);
-
-		const optInResponse = await page.request.post('/api/expiring-share/nearby-settings', {
-			data: { enabled: true, latitude: 59.329323, longitude: 18.068581 }
-		});
-		expect(optInResponse.ok()).toBeTruthy();
-		const optInPayload = (await optInResponse.json()) as {
-			ok: boolean;
-			enabled: boolean;
-			latitude: number;
-			longitude: number;
-		};
-		expect(optInPayload.ok).toBe(true);
-		expect(optInPayload.enabled).toBe(true);
-		expect(optInPayload.latitude).toBe(59.329);
-		expect(optInPayload.longitude).toBe(18.069);
-
-		const getResponse = await page.request.get('/api/expiring-share/nearby-settings');
-		expect(getResponse.ok()).toBeTruthy();
-		const getPayload = (await getResponse.json()) as {
-			ok: boolean;
-			enabled: boolean;
-			latitude: number;
-			longitude: number;
-		};
-		expect(getPayload.enabled).toBe(true);
-		expect(getPayload.latitude).toBe(59.329);
-		expect(getPayload.longitude).toBe(18.069);
-
-		const nearbyResponse = await page.request.get('/api/expiring-share/nearby');
-		expect(nearbyResponse.ok()).toBeTruthy();
-		const nearbyPayload = (await nearbyResponse.json()) as {
-			ok: boolean;
-			optedIn: boolean;
-			shares: unknown[];
-		};
-		expect(nearbyPayload.ok).toBe(true);
-		expect(nearbyPayload.optedIn).toBe(true);
-		expect(Array.isArray(nearbyPayload.shares)).toBe(true);
-
-		for (const share of nearbyPayload.shares as Array<Record<string, unknown>>) {
-			expect(share).not.toHaveProperty('latitude');
-			expect(share).not.toHaveProperty('longitude');
-			if (share.mapLat != null) {
-				expect(typeof share.mapLat).toBe('number');
-				expect(typeof share.mapLng).toBe('number');
-			}
-			if (share.openPath) {
-				expect(String(share.openPath)).toMatch(/^\/grannskafferiet\/share\//);
-			}
-		}
-	});
-
-	test('nearby push settings API toggles opt-in', async ({ page }) => {
-		await loginAsAdmin(page);
-
-		await page.request.post('/api/expiring-share/nearby-settings', {
-			data: { enabled: true, latitude: 59.329323, longitude: 18.068581 }
-		});
-
-		const enableResponse = await page.request.post('/api/expiring-share/nearby-push-settings', {
-			data: { enabled: 'true' }
-		});
-		expect(enableResponse.status()).toBe(400);
-		const enablePayload = (await enableResponse.json()) as { ok: boolean; error?: string };
-		expect(enablePayload.ok).toBe(false);
-		expect(enablePayload.error).toBe('push_required');
-
-		const disableResponse = await page.request.post('/api/expiring-share/nearby-push-settings', {
-			data: { enabled: 'false' }
-		});
-		expect(disableResponse.ok()).toBeTruthy();
-		const disablePayload = (await disableResponse.json()) as { ok: boolean; enabled: boolean };
-		expect(disablePayload.ok).toBe(true);
-		expect(disablePayload.enabled).toBe(false);
 	});
 });

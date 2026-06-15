@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { dismissOnboardingModalIfOpen, dismissPageHintIfOpen, loginAsAdmin } from './helpers/auth';
+import { dismissOnboardingModalIfOpen } from './helpers/auth';
 import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
 
 test.describe('Scan and inventory', () => {
 	test('bare /scan stays on hub without auto redirect', async ({ page }) => {
-		await loginAsAdmin(page);
 		await page.goto('/scan');
 		await dismissOnboardingModalIfOpen(page);
 
@@ -13,7 +12,6 @@ test.describe('Scan and inventory', () => {
 	});
 
 	test('scan hub loads with receipt primary', async ({ page }) => {
-		await loginAsAdmin(page);
 		await page.goto('/scan?mode=hub');
 		await dismissOnboardingModalIfOpen(page);
 
@@ -39,7 +37,6 @@ test.describe('Scan and inventory', () => {
 	});
 
 	test('scan sub-modes show mode tabs with receipt first', async ({ page }) => {
-		await loginAsAdmin(page);
 		await page.goto('/scan?mode=photo&from=/inventory/fridge&location=fridge');
 		await dismissOnboardingModalIfOpen(page);
 
@@ -57,7 +54,6 @@ test.describe('Scan and inventory', () => {
 	});
 
 	test('receipt mode has no duplicate all-modes footer', async ({ page }) => {
-		await loginAsAdmin(page);
 		await page.goto('/scan?mode=receipt&from=/inventory/fridge');
 		await dismissOnboardingModalIfOpen(page);
 
@@ -66,7 +62,6 @@ test.describe('Scan and inventory', () => {
 	});
 
 	test('legacy receipt route redirects to unified scan', async ({ page }) => {
-		await loginAsAdmin(page);
 		await page.goto('/scan/kvitto?from=/hem');
 		await dismissOnboardingModalIfOpen(page);
 
@@ -74,7 +69,6 @@ test.describe('Scan and inventory', () => {
 	});
 
 	test('legacy scan foto route redirects to unified photo mode', async ({ page }) => {
-		await loginAsAdmin(page);
 		await page.goto('/scan/foto?from=/hem');
 		await dismissOnboardingModalIfOpen(page);
 
@@ -82,7 +76,6 @@ test.describe('Scan and inventory', () => {
 	});
 
 	test('legacy inventory foto redirects to unified scan photo mode', async ({ page }) => {
-		await loginAsAdmin(page);
 		await page.goto('/inventory/foto?from=/hem');
 		await dismissOnboardingModalIfOpen(page);
 
@@ -99,7 +92,6 @@ test.describe('Scan and inventory', () => {
 
 		await page.setViewportSize({ width: 1400, height: 900 });
 		await mockBarcodeLookup(page, { barcode, body: fixture });
-		await loginAsAdmin(page);
 		await page.goto(`/scan?mode=barcode&location=fridge&from=/inventory/fridge`);
 		await dismissOnboardingModalIfOpen(page);
 
@@ -123,7 +115,6 @@ test.describe('Scan and inventory', () => {
 	});
 
 	test('inventory fridge location list loads @deploy-critical', async ({ page }) => {
-		await loginAsAdmin(page);
 		await page.goto('/inventory/fridge');
 		await dismissOnboardingModalIfOpen(page);
 
@@ -133,7 +124,6 @@ test.describe('Scan and inventory', () => {
 	});
 
 	test('inventory list uses dense table with sortable columns', async ({ page }) => {
-		await loginAsAdmin(page);
 		await page.goto('/inventory/fridge');
 		await dismissOnboardingModalIfOpen(page);
 
@@ -150,34 +140,10 @@ test.describe('Scan and inventory', () => {
 		await expect(table.locator('th[aria-sort="descending"]')).toHaveCount(1, { timeout: 5_000 });
 	});
 
-	test.describe('inventory mobile', () => {
-		test.use({ viewport: { width: 390, height: 844 } });
-
-		test('compact list shows log usage on mobile', async ({ page }) => {
-			await loginAsAdmin(page);
-			await page.goto('/inventory/fridge');
-			await dismissOnboardingModalIfOpen(page);
-			await dismissPageHintIfOpen(page);
-
-			const list = page.getByTestId('inventory-compact-list');
-			if (!(await list.isVisible({ timeout: 15_000 }).catch(() => false))) {
-				test.skip(true, 'No inventory rows in fridge — list hidden behind empty state');
-			}
-
-			await expect(page.getByTestId('inventory-table')).toHaveCount(0);
-			const row = list.getByTestId('inventory-compact-row').first();
-			const overflow = row.getByTestId('row-overflow-menu').getByRole('button');
-			await overflow.click({ force: true });
-			const logUsage = row.getByRole('menuitem', { name: /Delvis|Partial/i });
-			await expect(logUsage).toBeVisible();
-		});
-	});
-
 	test.describe('scan mobile manual add', () => {
 		test.use({ viewport: { width: 390, height: 844 } });
 
 		test('manual add cancel returns to photo scan', async ({ page }) => {
-			await loginAsAdmin(page);
 			await page.goto('/scan?mode=photo&from=/inventory/fridge&location=fridge');
 			await dismissOnboardingModalIfOpen(page);
 
@@ -196,7 +162,6 @@ test.describe('Scan and inventory', () => {
 	});
 
 	test('inventory shows single add-goods CTA to photo scan', async ({ page }) => {
-		await loginAsAdmin(page);
 		await page.goto('/inventory/fridge');
 		await dismissOnboardingModalIfOpen(page);
 

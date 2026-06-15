@@ -1,40 +1,20 @@
 import { test, expect } from '@playwright/test';
 
 import {
-
 	dismissOnboardingModalIfOpen,
-
-	dismissPageHintIfOpen,
-
-	loginAsAdmin
-
+	dismissPageHintIfOpen
 } from './helpers/auth';
-
 import { ensureFridgeInventoryItem, swipeRowHorizontal } from './helpers/inventory';
 
-
-
 test.describe('Inventory mobile UX', () => {
-
 	test.use({ viewport: { width: 390, height: 844 } });
-
 	test.setTimeout(60_000);
-
-
 
 	let seededItemName = '';
 
-
-
 	test.beforeEach(async ({ page }) => {
-
-		await loginAsAdmin(page);
-
 		seededItemName = await ensureFridgeInventoryItem(page);
-
 	});
-
-
 
 	async function dismissBlockingOverlays(page: import('@playwright/test').Page) {
 		await dismissOnboardingModalIfOpen(page);
@@ -52,15 +32,9 @@ test.describe('Inventory mobile UX', () => {
 		return list;
 	}
 
-
-
 	function seededRow(list: ReturnType<import('@playwright/test').Page['getByTestId']>) {
-
 		return list.getByTestId('inventory-compact-row').filter({ hasText: seededItemName });
-
 	}
-
-
 
 	async function clickUndo(page: import('@playwright/test').Page) {
 		const undoBtn = page
@@ -70,8 +44,6 @@ test.describe('Inventory mobile UX', () => {
 		await undoBtn.click({ force: true });
 	}
 
-
-
 	async function openPartialFromOverflow(row: ReturnType<typeof seededRow>) {
 		const overflow = row.getByTestId('row-overflow-menu').getByRole('button');
 		await overflow.click({ force: true });
@@ -79,105 +51,50 @@ test.describe('Inventory mobile UX', () => {
 	}
 
 	test('compact list shows finish and partial actions', async ({ page }) => {
-
 		const list = await openFridgeList(page);
-
 		const row = seededRow(list);
 
 		await expect(row.getByRole('button', { name: /Slut|Finished/i })).toBeVisible();
 
 		const overflow = row.getByTestId('row-overflow-menu').getByRole('button');
 		await overflow.click({ force: true });
-		await expect(row.getByRole('menuitem', { name: /Delvis|Partial/i })).toBeVisible();
-
+		await expect(page.getByRole('menuitem', { name: /Delvis|Partial/i })).toBeVisible({
+			timeout: 15_000
+		});
 	});
-
-
-
-	test.skip('one-tap finish shows undo toast', async ({ page }) => {
-
-		const list = await openFridgeList(page);
-
-		const row = seededRow(list);
-
-		await dismissBlockingOverlays(page);
-		await row.getByRole('button', { name: /Slut|Finished/i }).click({ force: true });
-		await clickUndo(page);
-		await page.waitForLoadState('networkidle');
-
-		await expect(
-			list.getByTestId('inventory-compact-row').filter({ hasText: seededItemName })
-		).toBeVisible({ timeout: 15_000 });
-
-	});
-
-
 
 	test('partial sheet stays open while scrolling the list', async ({ page }) => {
-
 		const list = await openFridgeList(page);
-
 		const row = seededRow(list);
 
 		await openPartialFromOverflow(row);
 
-
-
 		const sheet = page.getByTestId('inventory-consume-sheet');
-
 		await expect(sheet).toBeVisible({ timeout: 5_000 });
 
-
-
 		await page.evaluate(() => window.scrollBy(0, 500));
-
-		await page.waitForTimeout(300);
-
-
-
 		await expect(sheet).toBeVisible();
-
 		await expect(sheet.getByRole('button', { name: /Logga förbrukning|Log usage/i })).toBeVisible();
-
 	});
 
-
-
 	test('swipe right finishes item with undo toast', async ({ page }) => {
-
 		const list = await openFridgeList(page);
-
 		const row = seededRow(list);
 
 		await dismissBlockingOverlays(page);
 		await swipeRowHorizontal(page, row, 'right');
 		await clickUndo(page);
-		await page.waitForLoadState('networkidle');
-		await expect(
-			list.getByTestId('inventory-compact-row').filter({ hasText: seededItemName })
-		).toBeVisible({ timeout: 15_000 });
-
+		await expect(seededRow(list)).toBeVisible({ timeout: 15_000 });
 	});
 
-
-
 	test('swipe left opens partial consume sheet', async ({ page }) => {
-
 		const list = await openFridgeList(page);
-
 		const row = seededRow(list);
 
 		await swipeRowHorizontal(page, row, 'left');
 
-
-
 		const sheet = page.getByTestId('inventory-consume-sheet');
-
 		await expect(sheet).toBeVisible({ timeout: 5_000 });
-
 		await expect(sheet.getByRole('button', { name: /Logga förbrukning|Log usage/i })).toBeVisible();
-
 	});
-
 });
-

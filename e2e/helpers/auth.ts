@@ -190,7 +190,10 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 		(await page.getByTestId('post-onboarding-survey-skip').isVisible().catch(() => false));
 
 	if (!(await hasBlockingOverlay())) {
-		await page.waitForTimeout(250);
+		await expect
+			.poll(hasBlockingOverlay, { timeout: 500, intervals: [50, 100, 150] })
+			.toBe(true)
+			.catch(() => undefined);
 		if (!(await hasBlockingOverlay())) {
 			return;
 		}
@@ -204,7 +207,7 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 			if (!(await hasBlockingOverlay())) {
 				return;
 			}
-			await page.waitForTimeout(250);
+			await modal.waitFor({ state: 'visible', timeout: 500 }).catch(() => {});
 			continue;
 		}
 
@@ -273,7 +276,15 @@ export async function expectOnboardingGuideVisible(page: Page) {
 		page.getByRole('heading', { name: /Vad \u00e4r Skaffu|What is Skaffu|V\u00e4lkommen till Skaffu|Welcome to Skaffu/i })
 	).toBeVisible({ timeout: 20_000 });
 	await expect(page.getByTestId('onboarding-skip')).toBeVisible();
-	await expect(page.getByText(/Steg 1 av 3/i)).toBeVisible();
+	await expectOnboardingStepVisible(page, 1);
+}
+
+export async function expectOnboardingStepVisible(page: Page, step: number, total = 3) {
+	const indicator = page.getByTestId('onboarding-step-indicator');
+	await expect(indicator).toBeVisible({ timeout: 20_000 });
+	await expect(indicator).toContainText(
+		new RegExp(`Steg ${step} av ${total}|Step ${step} of ${total}`, 'i')
+	);
 }
 
 async function markE2eOnboardingComplete(page: Page) {

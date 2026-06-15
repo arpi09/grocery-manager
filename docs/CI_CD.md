@@ -11,10 +11,13 @@
 ```mermaid
 flowchart TB
   subgraph tier0 [quick:dev]
-    QD[lint + locales + unit]
+    QD[quick:lint + locales + server-imports + quick:unit]
+  end
+  subgraph tier0b [gate:fast]
+    GF[lint + check + unit]
   end
   subgraph tier1 [pr:gate]
-    PG[lint + check + integration + build]
+    PG[gate:fast + integration + build]
   end
   subgraph tier2 [deploy:fast]
     DF[critical E2E + Firebase + smoke + verify-release]
@@ -30,22 +33,29 @@ flowchart TB
 | Tier | Trigger | E2E | Måltid | Blockerar prod? |
 |------|---------|-----|--------|-----------------|
 | **quick:dev** | Agent före commit | Ingen | 2–3 min | Lokalt |
-| **pr:gate** | PR + push master | Ingen (E2E separat) | 3–5 min | Merge |
+| **gate:fast** | Valfritt pre-merge lokalt | Ingen | ~5–7 min | Lokalt |
+| **pr:gate** | CI full path / pre-deploy lokalt | Ingen (E2E separat) | 3–5 min CI; ~12–18 min lokalt | Merge |
 | **deploy:fast** | Deploy tier fast/auto low-risk | Critical `@deploy-critical` | ~8–15 min | Prod |
 | **release:full** | Deploy tier full / core paths | Full 3 shards | ~20–35 min | Prod |
 | **nightly** | 03:00 UTC | Full + heavy specs | ~25–45 min | Signal only |
 
 | Gate | När | Vad | Blockerar |
 |------|-----|-----|-----------|
-| **G0** | Före commit | `npm run quick:dev` | Lokalt |
-| **G1** | Push/PR | `pr-gate / pr-gate` | Deploy SHA-gate |
+| **G0** | Före commit | `npm run quick:dev` only — **aldrig** `pr:gate` pre-push | Lokalt |
+| **G1** | Push/PR | `pr-gate / pr-gate` (tiered via path-tier) | Deploy SHA-gate |
 | **G2a** | Deploy fast/hotfix | Critical E2E | G3 |
 | **G2b** | Deploy full / core PR | Full E2E × 3 | G3 |
 | **G3–G5** | Deploy | Firebase + smoke + verify-release | Prod claim |
 
-Path-tier: `scripts/ci-path-tier.mjs` — `docs-only` skippar E2E; `low-risk` → critical; `core-loop` → full.
+Path-tier: `scripts/ci-path-tier.mjs` — **`ci.yml`** och E2E/deploy återanvänder samma klassificering:
 
-**Efter merge:** ~3–5 min `pr-gate`. Deploy fast ~8–15 min, full ~20–35 min.
+| Tier | CI (`ci.yml`) | E2E / deploy |
+|------|---------------|--------------|
+| **docs-only** | lint + `check:locales` (~2 min) | E2E skip |
+| **low-risk** | lint + check + unit (skip build + integration) | critical E2E |
+| **core-loop** | full pr-gate + build artifact | full E2E |
+
+**Efter merge:** ~2 min (docs) till ~5 min (full) `pr-gate`. Deploy fast ~8–15 min, full ~20–35 min.
 
 ### Deploy SLO
 
@@ -66,6 +76,7 @@ Path-tier: `scripts/ci-path-tier.mjs` — `docs-only` skippar E2E; `low-risk` �
 | Post-deploy smoke = curl HTTP 200 | SSR 200 + JS-krasch passerade | Smoke läser HTML-body; dubbelkoll med paus |
 | Ingen guard mot server-kod i client bundle | Guides-regression | `check:client-bundle` + `check:server-imports` |
 | Playwright plockade vitest under `e2e/helpers/` | Hotfix deploy blockerades | `testMatch: **/*.spec.ts` + `tests/unit/receipt-fixtures.test.ts` |
+| Playwright-artifacts (trace/video) | Stora CI-uppladdningar | `video: 'off'`, `trace: 'retain-on-failure'` i `playwright.config.ts` (+ critical/pre-deploy configs) |
 
 ### Nattlig E2E + Cursor Automation
 
@@ -85,13 +96,26 @@ Regel för coordinator: [`.cursor/rules/nightly-e2e-guard.mdc`](../.cursor/rules
 
 ## Agentens happy path
 
+| Steg | Kommando / åtgärd | Väntetid |
+|------|-------------------|----------|
+| **G0 lokalt** | `npm run quick:dev` — **aldrig** `pr:gate` före push | ~2–3 min |
+| **Svelte/typning only** | `npm run quick:check` eller `quick:types` | ~1–2 min |
+| **TS/JS only** | `npm run quick:lint` | ~30–60 s |
+| **Server/DB touched** | `npm run quality:integration` (eller valfritt `gate:fast` + integration) | ~5–10 min |
+| **Commit + push** | Merge till `master` | — |
+| **CI** | Vänta grön `pr-gate / pr-gate` (tiered) | ~2–5 min |
+| **Deploy** | Coordinator: `gh workflow run deploy.yml` eller Actions UI | ~8–35 min |
+| **Prod claim** | Coordinator kör [PROD_SMOKE.md](./PROD_SMOKE.md) — inte användaren | — |
+
+**Valfritt pre-merge lokalt:** `npm run gate:fast` (~5–7 min) när du vill köra check+unit utan integration/build. **`pr:gate`** = CI-paritet; kör bara före deploy-lokal eller debugging CI-fail.
+
 När uppgiften är klar:
 
-1. **G0 lokalt:** `npm run check && npm test` (plus `npm run test:e2e` om auth/UI rörts).
+1. **G0 lokalt:** `npm run quick:dev` (plus `npm run quality:integration` om server actions/DB rörts; E2E endast om tilldelad).
 2. **Commit + push/merge till `master`.**
-3. **Vänta på grön CI** (~3–5 min) — inte full E2E/deploy.
-4. **Deploy (människa eller coordinator):** Actions → **Deploy to production** → Run workflow. Coordinator kan `gh workflow run deploy.yml` eller be användaren trigga.
-5. **Efter grön deploy:** coordinator kör [PROD_SMOKE.md](./PROD_SMOKE.md) — inte användaren.
+3. **Vänta på grön CI** (~2–5 min tiered) — inte full E2E/deploy.
+4. **Deploy (coordinator):** Actions → **Deploy to production** (eller `gh workflow run deploy.yml`).
+5. **Efter grön deploy:** coordinator kör [PROD_SMOKE.md](./PROD_SMOKE.md) och uppdaterar CURRENT_REALITY från deploy summary — inte användaren.
 
 ---
 
@@ -307,13 +331,19 @@ Workflowen känner igen ntfy, Discord och Slack automatiskt. Andra URL:er får g
 
 ```bash
 npm ci
-npm run lint                  # G1
-npm run check:server-imports  # G1
-npm run check                 # G0 + G1
-npm test                      # G0 + G1
+npm run quick:lint             # G0 subset
+npm run quick:check            # sync + svelte-check
+npm run quick:unit             # vitest
+npm run quick:dev              # G0 — agent default
+npm run gate:fast              # optional pre-merge (~5–7 min)
+npm run lint                   # G1
+npm run check:server-imports   # G1
+npm run check                  # G0 + G1 (includes sync)
+npm test                       # G0 + G1
 USE_PGLITE=true npm run test:integration
 npm run build
 npm run check:client-bundle   # G2b
+npm run pr:gate                # CI parity — not pre-push default
 
 # G2 (innan deploy om auth/UI rörts)
 USE_PGLITE=true npm run test:e2e
@@ -325,7 +355,7 @@ npm run deploy:firebase
 BASE_URL=https://skaffu.com bash scripts/smoke-prod-urls.sh
 ```
 
-**G0:** husky pre-commit kör `lint-staged` vid commit. Agenter kör dessutom `npm run check && npm test` före commit.
+**G0:** husky pre-commit kör `lint-staged` vid commit. Agenter kör `npm run quick:dev` före commit — **aldrig** `pr:gate` pre-push.
 
 ---
 

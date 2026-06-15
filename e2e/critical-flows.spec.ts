@@ -7,6 +7,8 @@ import {
 
 	expectOnboardingGuideVisible,
 
+	expectOnboardingStepVisible,
+
 	loginAsAdmin,
 
 	loginWithCredentials,
@@ -75,7 +77,7 @@ test.describe('Critical flows', () => {
 
 
 
-	test('onboarding opens shopping list without scan modal', async ({ page }) => {
+	test('onboarding opens shopping list without scan modal @deploy-critical', async ({ page }) => {
 
 		test.setTimeout(60_000);
 
@@ -89,13 +91,14 @@ test.describe('Critical flows', () => {
 
 		await page.locator('#settings-app details.settings-disclosure summary').click();
 
-		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click();
+		await dismissOnboardingModalIfOpen(page);
+		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click({ force: true });
 
 		await expectOnboardingGuideVisible(page);
 
 		await page.getByTestId('onboarding-path-shopping').click();
 
-		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
+		await expectOnboardingStepVisible(page, 2);
 
 		await page.getByTestId('onboarding-begin-path').click();
 
@@ -238,13 +241,14 @@ test.describe('Critical flows', () => {
 
 		await page.locator('#settings-app details.settings-disclosure summary').click();
 
-		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click();
+		await dismissOnboardingModalIfOpen(page);
+		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click({ force: true });
 
 		await expectOnboardingGuideVisible(page);
 
 		await page.getByTestId('onboarding-path-shopping').click();
 
-		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
+		await expectOnboardingStepVisible(page, 2);
 
 		await page.getByTestId('onboarding-begin-path').click();
 		await dismissOnboardingModalIfOpen(page);
@@ -256,7 +260,8 @@ test.describe('Critical flows', () => {
 
 		await page.goto('/settings#settings-app');
 		await page.locator('#settings-app details.settings-disclosure summary').click();
-		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click();
+		await dismissOnboardingModalIfOpen(page);
+		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click({ force: true });
 
 		await expect(page.getByTestId('onboarding-finish')).toBeVisible({ timeout: 30_000 });
 		await page.getByTestId('onboarding-finish').click();
@@ -277,7 +282,8 @@ test.describe('Critical flows', () => {
 
 		await page.locator('#settings-app details.settings-disclosure summary').click();
 
-		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click();
+		await dismissOnboardingModalIfOpen(page);
+		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click({ force: true });
 
 		await expectOnboardingGuideVisible(page);
 

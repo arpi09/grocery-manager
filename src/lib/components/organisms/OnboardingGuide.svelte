@@ -3,7 +3,6 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
-	import CelebrationBurst from '$lib/components/atoms/CelebrationBurst.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import OnboardingCelebrateIllustration from '$lib/components/organisms/OnboardingCelebrateIllustration.svelte';
@@ -303,7 +302,11 @@
 	showSheetHandle={false}
 >
 	{#snippet header()}
-		<ModalHeader title={currentStep.title} subtitle={currentStep.subtitle}>
+		<ModalHeader
+			title={currentStep.title}
+			subtitle={currentStep.subtitle}
+			subtitleTestId="onboarding-step-indicator"
+		>
 			{#snippet actions()}
 				<button type="button" class="skip-link" data-testid="onboarding-skip" onclick={skipGuide}>
 					{t('onboarding.skipLater')}
@@ -329,9 +332,8 @@
 		{/if}
 
 		<div class="illustration-wrap">
-			<CelebrationBurst active={open && currentStep.id === 'celebrate'} />
 			{#if currentStep.id === 'celebrate'}
-				<OnboardingCelebrateIllustration heavy />
+				<OnboardingCelebrateIllustration />
 			{:else}
 				<OnboardingStepIllustration step={currentStep.id} path={selectedPath} />
 			{/if}
@@ -443,7 +445,7 @@
 			transform: none !important;
 			border-radius: 0 !important;
 			border: 0;
-			animation: onboarding-fullscreen-in 0.32s ease-out;
+			animation: onboarding-fullscreen-in 0.2s ease-out;
 		}
 
 		:global(.onboarding-panel .modal-body) {
