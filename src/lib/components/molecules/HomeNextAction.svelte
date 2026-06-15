@@ -32,6 +32,9 @@
 		if (staleCount > 0) {
 			return 'sync';
 		}
+		if (shoppingListCount > 0) {
+			return 'lista';
+		}
 		return 'photo';
 	});
 
@@ -48,8 +51,10 @@
 	const label = $derived(
 		ctaKind === 'sync'
 			? t('home.nextActionSync', { count: staleCount })
-			: ctaKind === 'photo'
-				? t('home.nextActionPhoto')
+			: ctaKind === 'lista'
+				? t('home.nextActionLista')
+				: ctaKind === 'photo'
+					? t('home.nextActionPhoto')
 				: ''
 	);
 
