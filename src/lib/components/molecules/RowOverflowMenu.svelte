@@ -130,9 +130,10 @@
 		position: absolute;
 		top: calc(100% + 0.25rem);
 		right: 0;
-		z-index: 20;
+		z-index: calc(var(--z-nav-bottom) + 2);
 		min-width: 11rem;
 		padding: var(--space-xs);
+		padding-bottom: calc(var(--space-xs) + env(safe-area-inset-bottom, 0));
 		background: var(--color-surface);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);

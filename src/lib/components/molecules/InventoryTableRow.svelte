@@ -137,7 +137,7 @@
 				{expiryLabel}
 			</Badge>
 		{:else if showNoExpiryHint}
-			<span class="no-expiry-hint">{t('inventory.noExpiryHint')}</span>
+			<span class="no-expiry-hint">{t('inventory.missingExpiryDate')}</span>
 		{/if}
 	</Cell>
 	<Cell class="actions-col">

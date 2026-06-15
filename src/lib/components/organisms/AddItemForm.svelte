@@ -26,6 +26,7 @@
 	let { item, defaultLocation = 'fridge', returnTo, errors = {}, consumeErrors = {} }: Props = $props();
 
 	const isEdit = !!item;
+	const scanInsteadHref = $derived(returnTo ? scanHubHref(returnTo) : '/scan');
 
 	let name = $state(item?.name ?? '');
 	let quantity = $state(item?.quantity ?? '1');
@@ -70,7 +71,7 @@
 	{/if}
 	{#if !isEdit && returnTo}
 		<p class="scan-link-row">
-			<a href={scanHubHref(returnTo)} class="scan-instead-link">{t('item.scanInsteadLink')}</a>
+			<a href={scanInsteadHref} class="scan-instead-link" data-analytics-id="item.scan_instead_link">{t('item.scanInsteadLink')}</a>
 		</p>
 	{/if}
 
@@ -192,53 +193,21 @@
 		gap: var(--space-sm);
 	}
 
-	.barcode-row {
-		margin-bottom: var(--space-sm);
-		display: grid;
-		gap: var(--space-sm);
+	.scan-instead-link {
+		margin: 0 0 var(--space-sm);
+		text-align: right;
+		font-size: var(--font-size-body-sm);
 	}
 
-	.scan-method-tabs {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: var(--space-sm);
-	}
-
-	.scan-title {
-		margin: 0;
-		font-size: 0.85rem;
-		font-weight: 700;
-		color: var(--color-text-muted);
-	}
-
-	.scan-tab {
-		border: 1px solid var(--color-border);
-		background: var(--color-surface);
-		border-radius: var(--radius-sm);
-		padding: 0.5rem 0.75rem;
-		min-height: var(--touch-target-min);
+	.scan-instead-link a {
 		font-weight: 600;
-		cursor: pointer;
-	}
-
-	.scan-tab.active {
-		background: var(--color-surface-muted);
-		border-color: var(--color-primary);
 		color: var(--color-primary);
+		text-decoration: none;
 	}
 
-	.barcode-row :global(.tooltip-wrap),
-	.barcode-row :global(.scan-btn) {
-		width: 100%;
-	}
-
-	.barcode-msg {
-		margin: 0 0 var(--space-md);
-		padding: var(--space-sm) var(--space-md);
-		background: var(--color-surface-muted);
-		border-radius: var(--radius-sm);
-		font-size: 0.875rem;
-		color: var(--color-text-muted);
+	.scan-instead-link a:hover {
+		text-decoration: underline;
+		text-underline-offset: 2px;
 	}
 
 	.field {
