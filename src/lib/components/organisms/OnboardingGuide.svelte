@@ -159,7 +159,6 @@
 		void trackProductEvent('onboarding_skipped');
 	}
 
-
 	function goBack() {
 		if (isFirstStep) {
 			return;
@@ -189,6 +188,7 @@
 				setActivationPath(path, userId);
 			}
 		}
+		stepDirection = 'forward';
 		stepIndex = 1;
 	}
 
@@ -214,6 +214,7 @@
 		if (!open || !userId || !isActivationComplete(userId) || stepIndex >= 2) {
 			return;
 		}
+		stepDirection = 'forward';
 		stepIndex = 2;
 	}
 
@@ -356,7 +357,7 @@
 					<div class="path-secondary">
 						{#each pantrySecondaryChoices as choice, index (choice.id)}
 							{#if index > 0}
-								<span class="path-sep" aria-hidden="true">·</span>
+								<span class="path-sep" aria-hidden="true">-+</span>
 							{/if}
 							<button
 								type="button"
@@ -373,6 +374,7 @@
 			</div>
 		{/if}
 
+		{#if currentStep.id === 'pathGuide' && selectedPath}
 			{#if activationProgress?.inProgress && selectedPath === 'shopping' && activationProgress.shoppingListCount > 0}
 				<p class="progress-note" role="status">
 					{t('onboarding.shoppingListProgress', {
