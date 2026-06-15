@@ -23,6 +23,7 @@
 		canWrite?: boolean;
 		householdId?: string | null;
 		pantryAllGood?: boolean;
+		shoppingCadence?: HouseholdShoppingCadence | null;
 	}
 
 	let {
