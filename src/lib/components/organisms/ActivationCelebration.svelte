@@ -14,6 +14,7 @@
 		clearCelebrationPending,
 		getActivationProgress,
 		isOnboardingExcludedPath,
+		ONBOARDING_PROGRESS_EVENT,
 		shouldShowCelebration,
 		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
@@ -88,6 +89,10 @@
 		void pathname;
 		void userId;
 		tryOpenCelebration();
+
+		const onProgress = () => tryOpenCelebration();
+		window.addEventListener(ONBOARDING_PROGRESS_EVENT, onProgress);
+		return () => window.removeEventListener(ONBOARDING_PROGRESS_EVENT, onProgress);
 	});
 
 	$effect(() => {
@@ -122,7 +127,7 @@
 				</Button>
 			{/if}
 		</div>
-		<button type="button" class="dismiss-link" onclick={goHome}>
+		<button type="button" class="dismiss-link" data-testid="celebration-dismiss-home" onclick={goHome}>
 			{t('onboarding.celebrateDismiss')}
 		</button>
 	</div>
