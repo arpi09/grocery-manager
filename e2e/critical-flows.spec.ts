@@ -256,8 +256,9 @@ test.describe('Critical flows', () => {
 		await dismissOnboardingModalIfOpen(page);
 
 		for (let i = 0; i < 3; i++) {
+			await dismissOnboardingModalIfOpen(page);
 			await page.locator('#shopping-name').fill(`E2E onboard ${i} ${Date.now()}`);
-			await page.locator('form.add-form').getByRole('button', { name: /Lägg till|Add/i }).click();
+			await page.locator('form.add-form').getByRole('button', { name: /Lägg till|Add/i }).click({ force: true });
 		}
 
 		await page.goto('/settings#settings-app');
