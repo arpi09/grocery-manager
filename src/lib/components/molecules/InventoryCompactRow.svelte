@@ -91,7 +91,7 @@
 	});
 
 	const showEstimatedBadge = $derived(
-		isEstimatedExpirySource(item.expiresOnSource) && !finished && !autoExpired
+		Boolean(expiryExplanation) && !finished && !autoExpired
 	);
 
 	const showNoExpiryHint = $derived(
