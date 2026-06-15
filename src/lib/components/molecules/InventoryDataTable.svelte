@@ -121,7 +121,7 @@
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
 		background: var(--color-surface);
-		box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text) 4%, transparent);
+		box-shadow: var(--shadow-sm);
 	}
 
 	table {
@@ -138,7 +138,7 @@
 		z-index: 2;
 		padding: 0.45rem 0.55rem;
 		border-bottom: 1px solid var(--color-border);
-		background: var(--color-surface-muted);
+		background: var(--color-surface);
 		text-align: left;
 		vertical-align: middle;
 		white-space: nowrap;
