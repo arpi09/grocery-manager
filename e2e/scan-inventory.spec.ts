@@ -176,7 +176,7 @@ test.describe('Scan and inventory', () => {
 	test.describe('scan mobile manual add', () => {
 		test.use({ viewport: { width: 390, height: 844 } });
 
-		test('manual add cancel returns to photo scan', async ({ page }) => {
+		test('manual add cancel returns to scan hub', async ({ page }) => {
 			await loginAsAdmin(page);
 			await page.goto('/scan?mode=photo&from=/inventory/fridge&location=fridge');
 			await dismissOnboardingModalIfOpen(page);
@@ -191,7 +191,9 @@ test.describe('Scan and inventory', () => {
 			await expect(page).toHaveURL(/\/item\/new/, { timeout: 15_000 });
 
 			await page.getByRole('link', { name: /Avbryt|Cancel/i }).click();
-			await expect(page).toHaveURL(/\/scan\?.*mode=hub/, { timeout: 15_000 });
+			await expect(page).toHaveURL(/\/scan\?/, { timeout: 15_000 });
+			await expect(page).not.toHaveURL(/mode=photo/);
+			await expect(page.getByTestId('scan-mode-hub')).toBeVisible();
 		});
 	});
 
