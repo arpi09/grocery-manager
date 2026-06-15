@@ -216,11 +216,19 @@
 
 			? t('home.taglineEmpty')
 
-			: homeState === 'steady'
+			: homeState === 'lista_ready'
 
-				? t('home.taglineEngaged')
+				? t('home.taglineListaReady')
 
-				: null
+				: homeState === 'expiry'
+
+					? t('home.taglineExpiry')
+
+					: homeState === 'steady'
+
+						? t('home.taglineEngaged')
+
+						: null
 
 	);
 
