@@ -75,9 +75,9 @@ Se **[docs/TOAST.md](./TOAST.md)** för canonical arkitektur.
 
 ## UX Slice 1 — Brain V1.1 integration (Product Row)
 
-**Branch:** `feat/ux-inventory-list-v1` · **Status: PLANNED — not started** · **Ingen separat Brain-PR** på `InventoryCompactRow`.
+**Branch:** `feat/ux-inventory-list-v1` · **Status: MERGED ([#74](https://github.com/arpi09/grocery-manager/pull/74) @ narrative deploy `f70c2c9c`)** · **Ingen separat Brain-PR** på `InventoryCompactRow`.
 
-**Supersession (deploy bundle 2 @ `73d3dfd0`):** [#63](https://github.com/arpi09/grocery-manager/pull/63) shipped **badge-only fallback** on desktop table (`InventoryTableRow`); mobil compact row **ej** badge. [#64](https://github.com/arpi09/grocery-manager/pull/64) **closed** — superseded by [#70](https://github.com/arpi09/grocery-manager/pull/70) (onboarding embedded receipt Brain wiring). Full Slice 1 Product Row visual (mobil badge + layout unify) **väntar** denna branch.
+**Supersession (deploy bundle 2 @ `73d3dfd0`):** [#63](https://github.com/arpi09/grocery-manager/pull/63) shipped **badge-only fallback** on desktop table (`InventoryTableRow`); mobil compact row **ej** badge. [#64](https://github.com/arpi09/grocery-manager/pull/64) **closed** — superseded by [#70](https://github.com/arpi09/grocery-manager/pull/70) (onboarding embedded receipt Brain wiring). **#74 partial:** mobil badge + Product Row layout shipped; tap→explain och full AC-3 **väntar** R1 ([PRODUCT_AUDIT_2026-06.md](./PRODUCT_AUDIT_2026-06.md)).
 
 Product Row layout: `Name · qty · [expiry] [EstimatedBadge diskret]`
 
