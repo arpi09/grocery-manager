@@ -188,10 +188,10 @@
 		}
 	},
 	"home": {
-		"title": "Your pantry",
+		"title": "Weekly shop",
 		"ariaLabel": "Home page",
 		"greeting": "Hi, {name}",
-		"greetingNeutral": "Your pantry",
+		"greetingNeutral": "Weekly shop",
 		"tagline": "Photograph your pantry to stay on top of things",
 		"taglineEmpty": "Create this week's list — three items is enough to start shared weekly shopping",
 		"scanCardTitle": "Add items",
@@ -295,7 +295,10 @@
 			"coldTitle": "This week's list",
 			"coldAction": "Create this week's list",
 			"coldSecondary": "Fill pantry"
-		}
+		},
+		"taglineListaReady": "Items on your list — shop together this week",
+		"taglineExpiry": "Something expires soon — eat first or plan dinner",
+		"nextActionLista": "Continue weekly shop"
 	},
 	"dashboard": {
 		"title": "Home",
@@ -2682,6 +2685,25 @@
 			"pushFix": {
 				"title": "Notifications that actually work",
 				"body": "Reliable browser notification toggles in settings — expiring items and shopping reminders reach you on time."
+			},
+			"brainV1": {
+				"version": "Brain V1",
+				"title": "Household memory in daily use",
+				"body": "Estimated expiry and receipt learning — tap Estimated to see why.",
+				"detail": "Skaffu learns from receipts and your corrections. In pantry and receipt review you see Estimated and can open the explanation. More observations make memory more reliable."
+			},
+			"narrativeSprint": {
+				"title": "List-first across the app",
+				"body": "Home, onboarding and shopping tell the same weekly loop — list, shop, check off, pantry.",
+				"detail": "We reshaped copy and empty states so new households meet the weekly list first, not the scanner."
+			},
+			"navV2": {
+				"title": "Clearer mobile navigation",
+				"body": "Home · Shopping · Scan · More — pantry and extra tools live under More."
+			},
+			"inventoryProductRow": {
+				"title": "Cleaner pantry rows (mobile)",
+				"body": "Product Row layout: name, amount and expiry on one line — less noise, easier to scan."
 			}
 		}
 	},
