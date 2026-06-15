@@ -1,20 +1,20 @@
 # CURRENT_REALITY
 
-> **Uppdatera denna fil** nï¿½r prod deployas eller nav/flags ï¿½ndras. Kï¿½r: `.cursor/scripts/refresh-current-reality.sh`
+> **Uppdatera denna fil** när prod deployas eller nav/flags ändras. Kör: `.cursor/scripts/refresh-current-reality.sh`
 
-| Fï¿½lt | Vï¿½rde |
+| Fält | Värde |
 |------|--------|
 | **Uppdaterad** | 2026-06-15 |
-| **Prod SHA** | `4cf6a0d8` ? [27550904031](https://github.com/arpi09/grocery-manager/actions/runs/27550904031) (Premium UX R30?R45 + full E2E suite). Prior `e9ff39c5` @ [27549097650](https://github.com/arpi09/grocery-manager/actions/runs/27549097650) |
-| **Master SHA** | `4cf6a0d8` ? Premium UX R30?R45 + full-suite E2E alignment |
-| **CI/CD model** | **v2 on master** ? tiered gates #95; prod validated @ `4cf6a0d8` (full E2E deploy tier) |
+| **Prod SHA** | `d585cbd5` ? [27570192623](https://github.com/arpi09/grocery-manager/actions/runs/27570192623) (Mobile UX Recovery R46?R58, fast E2E). Prior `4cf6a0d8` @ [27550904031](https://github.com/arpi09/grocery-manager/actions/runs/27550904031) |
+| **Master SHA** | `d585cbd5` ? Mobile UX Recovery R46?R58 |
+| **CI/CD model** | **v2 on master** ? tiered gates #95; prod validated @ `d585cbd5` (fast deploy tier) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
 | **Reality audit** | [REALITY_AUDIT_2026-06.md](./REALITY_AUDIT_2026-06.md) |
 
-## Kï¿½rnloopen (produktfokus)
+## Kärnloopen (produktfokus)
 
-Utgï¿½ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenishment ? nï¿½sta lista.
+Utgående ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenishment ? nästa lista.
 
 ## Navigation
 
@@ -23,13 +23,15 @@ Utgï¿½ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replen
 | Yta | Route | Notering |
 |-----|-------|----------|
 | Default home | `/hem` | `APP_HOME_PATH` ? dashboard default |
-| Hem dashboard | `/hem` | **Home V3** ? Denna vecka ? Skaffu rekommenderar ? Hushï¿½llet ([HOME_V3.md](./HOME_V3.md)) |
-| Primary tabs (desktop) | Hem, Lager, Inkï¿½p, Skanna, Mer | Lager + scan in top row |
-| Primary tabs (mobile) | Hem, Inkï¿½p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
+| Hem dashboard | `/hem` | **Minimal 3-nivå** ? EN hero (`home-hero`) + max 3 minnesrader + max 3 utgående ([MICRO_UX_SWEEP_2026-06.md](./MICRO_UX_SWEEP_2026-06.md)) |
+| Primary tabs (desktop) | Hem, Lager, Inköp, Skanna, Mer | Lager + scan in top row |
+| Primary tabs (mobile) | Hem, Inköp, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
+| Inventory add | `/inventory/[location]` | EN **Lägg till** ? sheet (kvitto/foto/streckkod/manuellt) |
+| Scan hub | `/scan` | 3-card choice hub; **ScanModeTabs desktop only** |
 | Memory Explorer | `/settings/memory` | Vad Skaffu vet ? household rules (learning gate) |
 | Post-register wedge | `/hem?welcome=1` | Ny registrering/OAuth ? guided start on hem ([#46](https://github.com/arpi09/grocery-manager/pull/46)) |
 | Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie |
-| Onboarding v2 (Bundle C) | modal | 3 beats vad/loop/hur ? **live** |
+| Onboarding | modal | **3 steg / ~15s** ? lista ? minne ? kvitto; finish ? `/inkop?quick=1` |
 | Grannskafferiet (R16) | hidden | Ej i Mer unless `PUBLIC_CITY_FEED_ENABLED` |
 
 ## Kill switches & experiments
@@ -46,14 +48,14 @@ What users **see** when core Brain flags are on (prod target / master):
 
 | Users see |
 |-----------|
-| **Uppskattat** ? receipt review dates + lager/eat-first badge when expiry ? user-set |
+| **Uppskattat** ? receipt review dates + lager badge **only when expiry explanation exists** |
 | **Location hints** ? suggested storage in receipt/scan parse; rules in Settings / Memory Explorer |
-| **Replenishment learning** ? silent; accept/dismiss on `/hem` suggestions writes `learning_feedback` |
+| **Replenishment learning** ? silent; home memory line (max 1) when replenishment data exists |
 | **Memory Explorer** ? `/settings/memory` (Vad Skaffu vet?) when any learning flag on |
 
 Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 
-**USER_LOCAL Gate 0 (PO pending â€” doc only):** Run on prod **`4cf6a0d8`** (post-Premium UX full E2E deploy). Checklist: [REALITY_AUDIT_2026-06.md](./REALITY_AUDIT_2026-06.md#user_local-verification). Agents must not substitute or claim this pass.
+**USER_LOCAL Gate (PO):** Run on prod **`d585cbd5`** ? checklist: [MICRO_UX_SWEEP_2026-06.md](./MICRO_UX_SWEEP_2026-06.md#user_local-gates-post-deploy). Agents must not substitute or claim this pass.
 
 ## Tier snapshot
 
@@ -61,17 +63,16 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 - **B:** receipt import, barcode/photo add, price memory, Brain V1 (flags on), Memory Explorer
 - **C:** grannskafferiet gate, onboarding v2, landing copy, design system doc (R12?R16 on master)
 
-## Kï¿½nda drift (fixa nï¿½r du ser dem)
+## Kända drift (fixa när du ser dem)
 
 - [x] Prod DB migrations `0047`?`0048` ? applied 2026-06-14
-- [x] **Deploy 0** â€” superseded; prod now **`4cf6a0d8`** @ [27550904031](https://github.com/arpi09/grocery-manager/actions/runs/27550904031) (full E2E). Prior **`e9ff39c5`** @ [27549097650](https://github.com/arpi09/grocery-manager/actions/runs/27549097650) (critical E2E). Failed full-tier attempt: [27541222554](https://github.com/arpi09/grocery-manager/actions/runs/27541222554).
-- [x] Prior prod `94c95b4d` @ [27533104716](https://github.com/arpi09/grocery-manager/actions/runs/27533104716) (Bundle A+B)
+- [x] **Mobile UX Recovery** ? prod **`d585cbd5`** @ [27570192623](https://github.com/arpi09/grocery-manager/actions/runs/27570192623) (fast E2E). Prior **`4cf6a0d8`** @ [27550904031](https://github.com/arpi09/grocery-manager/actions/runs/27550904031).
 - [x] **PR #95** CI/CD v2 merged 2026-06-15
 
 ## Branches in flight (manuell)
 
 | Branch | Syfte | Status |
 |--------|-------|--------|
-| `feat/premium-ux-r30-r45` | Premium UX audit R30?R45 | **Merged to master** (`b23034f7` + fixes) |
+| `feat/mobile-ux-recovery` | Mobile UX Recovery R46?R58 | **Merged to master** (`d585cbd5`) |
+| `feat/premium-ux-r30-r45` | Premium UX audit R30?R45 | **Merged** (prior prod baseline) |
 | `chore/ci-test-tiers` | CI/CD v2 tiered gates | **Merged** (#95) |
-| Bundle C (#90â€“#94) | onboarding, landing, design doc, grannskafferiet gate | **On master, live @ 4cf6a0d8** |
