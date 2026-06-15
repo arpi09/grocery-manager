@@ -2059,7 +2059,7 @@
 		"landingHousehold": "Hushåll",
 		"landingShopping": "Inköpslista",
 		"landingExpiring": "Utgår snart",
-		"landingHeadline": "Ditt skafferi, samlat",
+		"landingHeadline": "Er gemensamma veckolista",
 		"landingExpiringCount": "{count} snart",
 		"scanHint": "Tips: tryck på Skanna-fliken längst ner när du vill lägga till fler varor.",
 		"scanTabHint": "Du hittar alltid Skanna-fliken längst ner — foto, streckkod och kvitto.",
@@ -2117,7 +2117,12 @@
 		"getStarted": "Kom igång",
 		"skip": "Hoppa över",
 		"dialogAria": "Introduktion till Skaffu",
-		"celebrateWoohoo": "Du har kommit igång med appen — woohoo!"
+		"celebrateWoohoo": "Du har kommit igång med appen — woohoo!",
+		"beatWhatTitle": "Vad är Skaffu?",
+		"beatLoopTitle": "Veckoloopen",
+		"beatHowTitle": "Så kommer ni igång",
+		"beatLoopBody": "Delad lista → handla ihop → checka av → skafferi uppdateras. Kvitton och checkoffs bygger hushållets minne för nästa vecka.",
+		"beatHowBody": "Öppna inköpslistan och lägg till tre varor ni brukar handla. Bjud in partner när listan känns användbar."
 	},
 	"pageHints": {
 		"dialogAria": "Snabbtips för sidan",

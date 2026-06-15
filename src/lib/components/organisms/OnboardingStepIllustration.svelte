@@ -1,44 +1,46 @@
 <script lang="ts">
 	import type { OnboardingStepId } from '$lib/utils/onboarding-steps';
 
+	type PathChoice = 'photo' | 'barcode' | 'receipt' | 'manual' | 'shopping';
+
 	interface Props {
 		step: OnboardingStepId;
+		path?: PathChoice | null;
 	}
 
-	let { step }: Props = $props();
+	let { step, path = null }: Props = $props();
 </script>
 
 <div class="illus-wrap" data-step={step} aria-hidden="true">
 	{#if step === 'welcome'}
 		<svg class="illus" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
 			<circle class="illus-bg" cx="100" cy="80" r="72" />
-			<rect class="illus-shelf" x="44" y="88" width="112" height="8" rx="4" />
-			<rect class="illus-jar jar-a" x="52" y="52" width="36" height="44" rx="8" />
-			<rect class="illus-jar jar-b" x="96" y="44" width="36" height="52" rx="8" />
-			<rect class="illus-jar jar-c" x="140" y="58" width="28" height="38" rx="7" />
-			<path
-				class="illus-spark"
-				d="M100 24 L102 32 L110 30 L104 36 L112 40 L100 38 L88 40 L96 36 L90 30 L98 32 Z"
-			/>
-			<circle class="illus-dot dot-1" cx="68" cy="36" r="4" />
-			<circle class="illus-dot dot-2" cx="132" cy="28" r="3" />
-			<path class="illus-camera" d="M72 108h56l8-14H64l8 14z" stroke-width="2.5" />
-			<circle class="illus-lens" cx="100" cy="108" r="10" stroke-width="2.5" />
-			<circle class="flash-ring camera-flash" cx="100" cy="108" r="16" />
-			<circle class="flash-burst camera-flash" cx="100" cy="108" r="9" />
+			<rect class="list-card" x="48" y="40" width="104" height="88" rx="12" />
+			<rect class="list-line done" x="60" y="58" width="56" height="8" rx="4" />
+			<path class="list-check" d="M60 62 L66 68 L78 54" stroke-width="3" stroke-linecap="round" />
+			<rect class="list-line" x="60" y="76" width="72" height="8" rx="4" />
+			<rect class="list-line" x="60" y="94" width="64" height="8" rx="4" />
+			<rect class="list-chip" x="60" y="110" width="80" height="10" rx="5" />
 		</svg>
 	{:else if step === 'pathGuide'}
-		<svg class="illus" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-			<circle class="illus-bg" cx="100" cy="80" r="72" />
-			<rect class="scan-frame" x="52" y="36" width="96" height="88" rx="10" stroke-width="3" />
-			<path class="scan-corner tl" d="M52 52 V36 H68" stroke-width="4" stroke-linecap="round" />
-			<path class="scan-corner tr" d="M132 36 H148 V52" stroke-width="4" stroke-linecap="round" />
-			<path class="scan-corner bl" d="M52 108 V124 H68" stroke-width="4" stroke-linecap="round" />
-			<path class="scan-corner br" d="M148 108 V124 H132" stroke-width="4" stroke-linecap="round" />
-			<line class="scan-line" x1="60" y1="72" x2="140" y2="72" stroke-width="2.5" stroke-linecap="round" />
-			<circle class="add-plus ring" cx="100" cy="80" r="22" stroke-width="2.5" />
-			<path class="add-plus" d="M100 70 V90 M90 80 H110" stroke-width="3" stroke-linecap="round" />
-		</svg>
+		{#if path === 'shopping'}
+			<svg class="illus" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<circle class="illus-bg" cx="100" cy="80" r="72" />
+				<path class="loop-arrow" d="M100 44 A36 36 0 1 1 99 44" stroke-width="3" />
+				<path class="loop-head" d="M92 38 L100 44 L108 38" stroke-width="3" stroke-linecap="round" />
+				<text class="loop-label" x="100" y="58" text-anchor="middle">Lista</text>
+				<text class="loop-label" x="138" y="92" text-anchor="middle">Handla</text>
+				<text class="loop-label" x="62" y="92" text-anchor="middle">Skafferi</text>
+			</svg>
+		{:else}
+			<svg class="illus" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<circle class="illus-bg" cx="100" cy="80" r="72" />
+				<rect class="scan-frame" x="52" y="36" width="96" height="88" rx="10" stroke-width="3" />
+				<line class="scan-line" x1="60" y1="72" x2="140" y2="72" stroke-width="2.5" stroke-linecap="round" />
+				<circle class="add-plus ring" cx="100" cy="80" r="22" stroke-width="2.5" />
+				<path class="add-plus" d="M100 70 V90 M90 80 H110" stroke-width="3" stroke-linecap="round" />
+			</svg>
+		{/if}
 	{:else}
 		<svg class="illus" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
 			<circle class="illus-bg celebrate" cx="100" cy="80" r="72" />
@@ -74,6 +76,14 @@
 		flex-shrink: 0;
 		overflow: visible;
 	}
+
+	.list-card { fill: var(--color-surface); stroke: color-mix(in srgb, var(--color-primary) 35%, var(--color-border)); stroke-width: 2; }
+	.list-line { fill: color-mix(in srgb, var(--color-text-muted) 25%, var(--color-surface-muted)); }
+	.list-line.done { fill: color-mix(in srgb, var(--color-primary) 20%, var(--color-surface-muted)); }
+	.list-check { stroke: var(--color-primary); fill: none; }
+	.list-chip { fill: color-mix(in srgb, var(--color-primary) 15%, var(--color-surface-muted)); }
+	.loop-arrow, .loop-head { stroke: var(--color-primary); fill: none; }
+	.loop-label { fill: var(--color-text-muted); font-size: 11px; font-weight: 600; }
 
 	.illus-bg {
 		fill: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-muted));

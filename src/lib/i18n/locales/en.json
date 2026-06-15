@@ -2145,8 +2145,13 @@
 		"landingHousehold": "Household",
 		"landingShopping": "Shopping list",
 		"landingExpiring": "Expiring soon",
-		"landingHeadline": "Your pantry, together",
-		"landingExpiringCount": "{count} soon"
+		"landingHeadline": "Your shared weekly list",
+		"landingExpiringCount": "{count} soon",
+		"beatWhatTitle": "What is Skaffu?",
+		"beatLoopTitle": "The weekly loop",
+		"beatHowTitle": "How to get started",
+		"beatLoopBody": "Shared list → shop together → check off → pantry updates. Receipts and checkoffs build household memory for next week.",
+		"beatHowBody": "Open the shopping list and add three items you buy every week. Invite your partner when the list feels useful."
 	},
 	"pageHints": {
 		"dialogAria": "Quick tip for this page",

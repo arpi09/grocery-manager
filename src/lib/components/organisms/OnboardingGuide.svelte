@@ -46,18 +46,18 @@
 	const stepDefinitions: Step[] = [
 		{
 			id: 'welcome',
-			titleKey: 'onboarding.welcome',
+			titleKey: 'onboarding.beatWhatTitle',
 			bodyKey: 'onboarding.welcomeBodyShoppingList'
 		},
 		{
 			id: 'pathGuide',
-			titleKey: 'onboarding.pathGuideTitle',
-			bodyKey: 'onboarding.pathGuideShoppingBody'
+			titleKey: 'onboarding.beatLoopTitle',
+			bodyKey: 'onboarding.beatLoopBody'
 		},
 		{
 			id: 'celebrate',
-			titleKey: 'onboarding.celebrateTitle',
-			bodyKey: 'onboarding.celebrateStartedBody'
+			titleKey: 'onboarding.beatHowTitle',
+			bodyKey: 'onboarding.beatHowBody'
 		}
 	];
 
@@ -98,10 +98,17 @@
 	const userId = $derived(page.data.user?.id ?? null);
 	const returnTo = APP_HOME_PATH;
 
+	const pathGuideTitleKey = $derived(
+		selectedPath && selectedPath !== 'shopping' ? 'onboarding.pathGuideTitle' : 'onboarding.beatLoopTitle'
+	);
+
 	const steps = $derived(
 		stepDefinitions.map((step, index) => ({
 			...step,
-			title: t(step.titleKey),
+			title:
+				step.id === 'pathGuide' && selectedPath
+					? t(pathGuideTitleKey as MessageKey)
+					: t(step.titleKey),
 			subtitle: t('onboarding.stepOf', { current: index + 1, total: ONBOARDING_STEP_COUNT }),
 			body:
 				step.id === 'pathGuide' && selectedPath
@@ -334,7 +341,7 @@
 			{#if currentStep.id === 'celebrate'}
 				<OnboardingCelebrateIllustration heavy />
 			{:else}
-				<OnboardingStepIllustration step={currentStep.id} />
+				<OnboardingStepIllustration step={currentStep.id} path={selectedPath} />
 			{/if}
 		</div>
 
@@ -420,11 +427,7 @@
 					<Button type="button" variant="ghost" disabled={!canGoBack} onclick={goBack}>
 						{t('common.previous')}
 					</Button>
-					{#if currentStep.id === 'pathGuide'}
-						<Button type="button" disabled={!selectedPath} onclick={goNext}>
-							{t('common.next')}
-						</Button>
-					{/if}
+	
 				</div>
 			{/if}
 		</div>
