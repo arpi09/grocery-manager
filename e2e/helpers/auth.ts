@@ -335,6 +335,7 @@ export async function registerNewUser(
 	const email = options.email ?? uniqueE2eEmail();
 	const password = options.password ?? e2eUserPassword();
 
+	await page.context().clearCookies();
 	await prepareFreshUserBrowserState(page);
 
 	await page.goto('/register');
@@ -352,6 +353,16 @@ export async function registerNewUser(
 
 	const navigatedToHome = waitForPostRegisterHome(page);
 	await page.getByTestId('register-submit').click({ noWaitAfter: true });
+
+	const rateLimited = page.getByRole('alert').filter({
+		hasText: /För många registreringsförsök|Too many registration attempts/i
+	});
+	if (await rateLimited.isVisible().catch(() => false)) {
+		throw new Error(
+			'Registration rate-limited — restart the E2E dev server (port 5190) or wait 15 minutes.'
+		);
+	}
+
 	await navigatedToHome;
 
 	return { email, password };
