@@ -13,6 +13,7 @@
 		EXPIRING_SOON_DAYS
 	} from '$lib/domain/expiry';
 	import { isEstimatedExpirySource } from '$lib/domain/learning/expiry-source';
+	import { buildInventoryShelfLifeExplanation } from '$lib/domain/learning/prediction-explain';
 	import { getLocale, t } from '$lib/i18n';
 	import {
 		clampSwipeOffset,
