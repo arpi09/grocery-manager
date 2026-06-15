@@ -106,11 +106,11 @@
 		"confirmPassword": "Bekräfta lösenord",
 		"login": {
 			"title": "Logga in",
-			"subtitle": "Skafferi · datum · inköp",
+			"subtitle": "Gemensam veckolista — handla och fyll skafferiet",
 			"submit": "Logga in",
 			"submitting": "Loggar in…",
 			"pageTitle": "Logga in · Skaffu",
-			"metaDescription": "Logga in på Skaffu — skafferi-app för kyl, frys och inköp. Minska matsvinn med smart lagerhållning och utgångsdatum.",
+			"metaDescription": "Logga in på Skaffu — delad veckolista, kvittolärande och skafferi efter handeln. Minska matsvinn utan butiksbindning.",
 			"newHere": "Ny här?",
 			"createAccount": "Skapa konto",
 			"forgotPassword": "Glömt lösenord?",

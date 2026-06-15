@@ -115,11 +115,11 @@
 		"confirmPassword": "Confirm password",
 		"login": {
 			"title": "Log in",
-			"subtitle": "Pantry · dates · shopping",
+			"subtitle": "Shared weekly list — shop and update your pantry",
 			"submit": "Log in",
 			"submitting": "Logging in…",
 			"pageTitle": "Log in · Skaffu",
-			"metaDescription": "Log in to Skaffu — pantry app for fridge, freezer and shopping. Reduce food waste with smart inventory and expiry tracking.",
+			"metaDescription": "Sign in to Skaffu — shared weekly list, receipt learning, and pantry after you shop. Cut waste without tying to one store.",
 			"newHere": "New here?",
 			"createAccount": "Create account",
 			"forgotPassword": "Forgot password?",
