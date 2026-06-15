@@ -630,6 +630,7 @@
 		<h2 id="home-household-heading" class="home-v3-heading">{t('home.v3.householdTitle')}</h2>
 
 		<HomeHouseholdSection
+			shoppingCadence={shoppingCadence}
 
 			{intelligence}
 
