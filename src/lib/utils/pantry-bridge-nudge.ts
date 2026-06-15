@@ -4,6 +4,7 @@ const SESSION_PREFIX = 'pantry-bridge-yes-';
 const HISTORY_PREFIX = 'pantry-bridge-yes-history:';
 const WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 export const PANTRY_BRIDGE_ALWAYS_THRESHOLD = 3;
+const FIRST_COACH_PREFIX = 'pantry-bridge-first-coach:';
 
 function readHistory(userId: string): number[] {
 	if (typeof localStorage === 'undefined') {
@@ -79,4 +80,18 @@ export function clearPantryBridgeYesHistory(userId: string): void {
 		return;
 	}
 	localStorage.removeItem(`${HISTORY_PREFIX}${userId}`);
+}
+
+export function shouldShowFirstCheckoffCoach(userId: string): boolean {
+	if (typeof localStorage === 'undefined') {
+		return false;
+	}
+	return localStorage.getItem(`${FIRST_COACH_PREFIX}${userId}`) !== '1';
+}
+
+export function markFirstCheckoffCoachSeen(userId: string): void {
+	if (typeof localStorage === 'undefined') {
+		return;
+	}
+	localStorage.setItem(`${FIRST_COACH_PREFIX}${userId}`, '1');
 }

@@ -4,21 +4,16 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Label from '$lib/components/atoms/Label.svelte';
 	import Input from '$lib/components/atoms/Input.svelte';
-	import BarcodeScanButton from '$lib/components/molecules/BarcodeScanButton.svelte';
-	import BarcodeScannerModal from '$lib/components/organisms/BarcodeScannerModal.svelte';
-	import ProductPhotoScanPicker from '$lib/components/molecules/ProductPhotoScanPicker.svelte';
 	import UnitSelect from '$lib/components/molecules/UnitSelect.svelte';
 	import { guessShelfLife } from '$lib/domain/shelf-life';
-	import { normalizeUnitInput, suggestUnitForName } from '$lib/domain/inventory-units';
 	import ConsumeItemPanel from '$lib/components/molecules/ConsumeItemPanel.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 
 	import { getLocale, t } from '$lib/i18n';
+	import { scanHubHref } from '$lib/utils/scan-nav';
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
-	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
-	import { getFavoriteProduct } from '$lib/utils/favorite-products';
 
 	interface Props {
 		item?: InventoryItem;
@@ -39,13 +34,6 @@
 	let expiresOn = $state(item?.expiresOn ?? '');
 	let expiresOnAiInferred = $state(item?.expiresOnSource === 'ai_inferred');
 	let location = $state<StorageLocation>(item?.location ?? defaultLocation);
-
-	let scannerOpen = $state(false);
-	let lookupLoading = $state(false);
-
-	let scanMessage = $state<string | null>(null);
-	let scanMethod = $state<'barcode' | 'photo'>('barcode');
-
 
 	onMount(() => {
 		name = item?.name ?? '';
@@ -70,86 +58,6 @@
 			applyShelfLifeGuess();
 		}
 	}
-
-	function openScanner() {
-		scanMessage = null;
-		scannerOpen = true;
-	}
-
-	function closeScanner() {
-		scannerOpen = false;
-	}
-
-	async function handleBarcodeScanned(code: string) {
-		scannerOpen = false;
-		scanMessage = null;
-
-		const cached = getFavoriteProduct(code);
-		if (cached) {
-			name = cached.name;
-			quantity = cached.quantity;
-			unit = cached.unit ?? '';
-			if (cached.notes) {
-				notes = notes ? `${notes}\n${cached.notes}` : cached.notes;
-			}
-			scanMessage = t('item.foundProduct', { name: cached.name, barcode: cached.barcode });
-			return;
-		}
-
-		lookupLoading = true;
-
-		try {
-			const response = await fetch(`/api/barcode/${encodeURIComponent(code)}`);
-			const data = (await response.json()) as BarcodeLookupResult | { message?: string };
-
-			if (!response.ok) {
-				scanMessage =
-					response.status === 400
-						? t('item.invalidBarcode')
-						: t('item.lookupFailed');
-				return;
-			}
-
-			const { found, product } = data as BarcodeLookupResult;
-			name = product.name;
-			quantity = product.quantity;
-			unit = product.unit ?? '';
-			if (product.notes) {
-				notes = notes ? `${notes}\n${product.notes}` : product.notes;
-			}
-			scanMessage = found
-				? t('item.foundProduct', { name: product.name, barcode: product.barcode })
-				: t('item.unknownBarcodeFilled', { name: product.name });
-		} catch {
-			scanMessage = t('item.lookupNetwork');
-		} finally {
-			lookupLoading = false;
-		}
-	}
-
-	function handlePhotoProduct(product: {
-		name: string;
-		quantity: string;
-		unit: string | null;
-		expiresOn: string | null;
-		notes: string | null;
-	}) {
-		name = product.name;
-		quantity = product.quantity || '1';
-		unit = normalizeUnitInput(product.unit) || suggestUnitForName(product.name, product.unit);
-		if (product.expiresOn) {
-			expiresOn = product.expiresOn;
-		} else {
-			const inferred = guessShelfLife(product.name, location);
-			if (inferred) {
-				expiresOn = inferred.expiresOn;
-				expiresOnAiInferred = true;
-			}
-		}
-		if (product.notes) {
-			notes = notes ? `${notes}\n${product.notes}` : product.notes;
-		}
-	}
 </script>
 
 <form
@@ -160,25 +68,10 @@
 	{#if !isEdit && returnTo}
 		<input type="hidden" name="returnTo" value={returnTo} />
 	{/if}
-	{#if !isEdit}
-		<details class="scan-instead">
-			<summary>{t('item.scanInstead')}</summary>
-			<div class="barcode-row">
-				<p class="scan-title">{t('item.howToFill')}</p>
-				<div class="scan-method-tabs" role="radiogroup" aria-label={t('item.scanModeAria')}>
-					<button type="button" role="radio" aria-checked={scanMethod === 'barcode'} class="scan-tab {scanMethod === 'barcode' ? 'active' : ''}" onclick={() => (scanMethod = 'barcode')}>{t('item.barcodeTab')}</button>
-					<button type="button" role="radio" aria-checked={scanMethod === 'photo'} class="scan-tab {scanMethod === 'photo' ? 'active' : ''}" onclick={() => (scanMethod = 'photo')}>{t('item.photoTab')}</button>
-				</div>
-				{#if scanMethod === 'barcode'}
-					<BarcodeScanButton onclick={openScanner} loading={lookupLoading} />
-				{:else}
-					<ProductPhotoScanPicker onProduct={handlePhotoProduct} />
-				{/if}
-			</div>
-			{#if scanMessage}
-				<p class="barcode-msg" role="status">{scanMessage}</p>
-			{/if}
-		</details>
+	{#if !isEdit && returnTo}
+		<p class="scan-link-row">
+			<a href={scanHubHref(returnTo)} class="scan-instead-link">{t('item.scanInsteadLink')}</a>
+		</p>
 	{/if}
 
 	<div class="field name-field">
@@ -239,7 +132,7 @@
 		<div class="expiry-label-row">
 			<Label for="expiresOn">{t('item.bestBefore')}</Label>
 			{#if expiresOnAiInferred && expiresOn}
-				<Badge tone="default">{t('inventory.aiExpiryBadge')}</Badge>
+				<Badge tone="default">{t('learning.estimatedExpiry')}</Badge>
 			{/if}
 		</div>
 		<Input
@@ -290,10 +183,6 @@
 			})}
 		/>
 	</div>
-{/if}
-
-{#if scannerOpen}
-	<BarcodeScannerModal open={scannerOpen} onScan={handleBarcodeScanned} onClose={closeScanner} />
 {/if}
 
 <style>

@@ -71,10 +71,9 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--space-sm);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-sm);
-		padding: 0.45rem 0.65rem;
-		background: var(--color-surface-muted);
+		border-bottom: 1px solid var(--color-border);
+		padding: var(--space-sm) var(--space-md);
+		background: var(--color-surface);
 		transition:
 			opacity 0.24s ease,
 			transform 0.24s ease,

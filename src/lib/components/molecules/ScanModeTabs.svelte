@@ -28,7 +28,7 @@
 			{
 				id: 'photoRound',
 				href: scanModeHref('photo', returnTo, locationOption),
-				label: t('photoRound.title')
+				label: t('scan.modes.photo')
 			},
 			{
 				id: 'barcode',

@@ -17,8 +17,10 @@
 		clearPantryBridgeYesCount,
 		clearPantryBridgeYesHistory,
 		getPantryBridgeYesCountForUser,
+		markFirstCheckoffCoachSeen,
 		PANTRY_BRIDGE_ALWAYS_THRESHOLD,
 		recordPantryBridgeYes,
+		shouldShowFirstCheckoffCoach,
 		shouldShowPantryBridgeAlwaysNudge
 	} from '$lib/utils/pantry-bridge-nudge';
 	import type { PantryBridgePreview } from '$lib/application/shopping-to-pantry.service';
@@ -133,6 +135,7 @@
 	let pantryBridgeMode = $state<ShoppingToPantryMode>(shoppingToPantryMode);
 	let alwaysNudgeLocation = $state<StorageLocation | null>(null);
 	let alwaysNudgeDismissed = $state(false);
+	let showFirstPantryCoach = $state(false);
 	const REMOVE_ANIMATION_MS = 280;
 
 	$effect(() => {
@@ -377,6 +380,7 @@
 					pantryBridgeItem = data.pantryBridge.item;
 					pantryBridgePreview = data.pantryBridge.preview;
 					pantryBridgeMode = data.pantryBridge.mode;
+					showFirstPantryCoach = Boolean(userId && shouldShowFirstCheckoffCoach(userId));
 					pantrySheetOpen = true;
 				}
 
@@ -394,6 +398,15 @@
 		pantrySheetOpen = false;
 		pantryBridgeItem = null;
 		pantryBridgePreview = null;
+		showFirstPantryCoach = false;
+	}
+
+	function dismissFirstPantryCoach() {
+		const userId = get(page).data.user?.id;
+		if (userId) {
+			markFirstCheckoffCoachSeen(userId);
+		}
+		showFirstPantryCoach = false;
 	}
 
 	function skipPantrySheet() {
@@ -816,6 +829,8 @@
 	item={pantryBridgeItem}
 	preview={pantryBridgePreview}
 	mode={pantryBridgeMode}
+	showFirstCoach={showFirstPantryCoach}
+	onFirstCoachDismiss={dismissFirstPantryCoach}
 	onClose={closePantrySheet}
 	onSkip={skipPantrySheet}
 	onAdded={(message) => handlePantryAdded(message, pantryBridgePreview?.location ?? undefined)}

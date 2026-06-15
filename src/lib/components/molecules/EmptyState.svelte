@@ -37,13 +37,13 @@
 	{#if actionLabel && actionHref}
 		<div class="actions">
 			<a
-				class="action action-primary"
+				class="btn btn-primary btn-full action-link"
 				href={actionHref}
 				data-analytics-id={primaryAnalyticsId}
 			>{actionLabel}</a>
 			{#if secondaryActionLabel && secondaryActionHref}
 				<a
-					class="action action-secondary"
+					class="btn btn-ghost action-link action-link-secondary"
 					href={secondaryActionHref}
 					data-analytics-id={secondaryAnalyticsId}
 				>{secondaryActionLabel}</a>
@@ -97,40 +97,22 @@
 		gap: var(--space-sm);
 	}
 
-	.action {
+	.action-link {
 		display: inline-flex;
 		box-sizing: border-box;
 		min-height: var(--touch-target-min);
-		min-height: max(44px, var(--touch-target-min));
 		align-items: center;
 		justify-content: center;
-		padding: 0.65rem 1.25rem;
+		padding: var(--space-sm) var(--space-lg);
 		font-weight: 600;
 		border-radius: var(--radius-md);
 		text-decoration: none;
-	}
-
-	.action-primary {
-		background: var(--color-primary);
-		color: var(--color-on-primary);
 		min-width: min(100%, 16rem);
 	}
 
-	.action-primary:hover {
-		background: var(--color-primary-hover);
-		text-decoration: none;
-	}
-
-	.action-secondary {
-		background: transparent;
-		color: var(--color-text-muted);
+	.action-link-secondary {
 		font-size: var(--font-size-body-sm);
 		min-height: var(--touch-target-min);
 		padding: 0 var(--space-md);
-	}
-
-	.action-secondary:hover {
-		color: var(--color-text);
-		text-decoration: none;
 	}
 </style>

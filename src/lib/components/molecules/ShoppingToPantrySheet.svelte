@@ -175,9 +175,40 @@
 
 	.loop-hint {
 		margin: 0 0 var(--space-md);
-		color: var(--color-text-secondary);
-		font-size: var(--text-sm);
+		color: var(--color-text-muted);
+		font-size: 0.875rem;
 		line-height: 1.45;
+	}
+
+	.first-coach {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		margin-bottom: var(--space-md);
+		padding: var(--space-md);
+		border-radius: var(--radius-md);
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+		border: 1px solid color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
+	}
+
+	.first-coach p {
+		margin: 0;
+		font-size: 0.875rem;
+		line-height: 1.45;
+	}
+
+	.coach-dismiss {
+		align-self: flex-start;
+		min-height: var(--touch-target-min);
+		padding: var(--space-xs) var(--space-md);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		font: inherit;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		cursor: pointer;
 	}
 
 	.actions {

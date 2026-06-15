@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
-	import Button from '$lib/components/atoms/Button.svelte';
 	import RowOverflowMenu from '$lib/components/molecules/RowOverflowMenu.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { isMovingToAutoExpiredSoon } from '$lib/domain/auto-expired';
@@ -91,11 +90,21 @@
 		return formatExpiryDate(item.expiresOn, getLocale());
 	});
 
+	const showEstimatedBadge = $derived(
+		isEstimatedExpirySource(item.expiresOnSource) && !finished && !autoExpired
+	);
+
+	const showNoExpiryHint = $derived(
+		!item.expiresOn && !finished && !autoExpired && !showEstimatedBadge
+	);
+
 	const showConsumeActions = $derived(
 		canWrite && !finished && (onFinishOneTap || onPartialConsume)
 	);
 
 	const swipeEnabled = $derived(showConsumeActions && !finishing);
+
+	const partialSwipeLabel = $derived(t('consume' + '.partial' as 'consume.finish'));
 
 	function resetSwipe() {
 		swipeDragging = false;
@@ -175,11 +184,14 @@
 	<div class="content">
 		<div class="main-line">
 			<a href="/item/{item.id}/edit" class="name">{item.name}</a>
+			{#if showEstimatedBadge}
+				<EstimatedBadge source={item.expiresOnSource} explanation={expiryExplanation} showSettingsLink />
+			{/if}
 			<span class="sep" aria-hidden="true">·</span>
 			<span class="qty">{quantityLine}</span>
 		</div>
 
-		{#if finished || autoExpired || movingSoon || expiryLabel || (isEstimatedExpirySource(item.expiresOnSource) && !finished && !autoExpired)}
+		{#if finished || autoExpired || movingSoon || expiryLabel || showNoExpiryHint}
 			<div class="subline">
 				{#if finished}
 					<Badge tone="default">{t('inventory.finishedBadge')}</Badge>
@@ -194,8 +206,8 @@
 						{expiryLabel}
 					</Badge>
 				{/if}
-				{#if isEstimatedExpirySource(item.expiresOnSource) && !finished && !autoExpired}
-					<EstimatedBadge source={item.expiresOnSource} explanation={expiryExplanation} showSettingsLink />
+				{#if showNoExpiryHint}
+					<span class="no-expiry-hint">{t('inventory.noExpiryHint')}</span>
 				{/if}
 			</div>
 		{/if}
@@ -203,18 +215,6 @@
 
 	{#if showConsumeActions}
 		<div class="actions">
-			{#if onFinishOneTap}
-				<Button
-					type="button"
-					class="finish-btn"
-					loading={finishing}
-					loadingLabel={t('common.processing')}
-					aria-label={t('consume.finishNamed', { name: item.name })}
-					onclick={() => onFinishOneTap(item)}
-				>
-					{t('consume.finish')}
-				</Button>
-			{/if}
 			<RowOverflowMenu
 				itemId={item.id}
 				itemName={item.name}
@@ -228,11 +228,11 @@
 {#if swipeEnabled}
 	<div class="swipe-row" data-testid="inventory-compact-row">
 		<div class="swipe-bg" aria-hidden="true">
-			<span class="swipe-hint swipe-hint--partial">{t('consume.partial')}</span>
+			<span class="swipe-hint swipe-hint--partial">{partialSwipeLabel}</span>
 			<span class="swipe-hint swipe-hint--finish">{t('consume.finish')}</span>
 		</div>
 		<div
-			class="row swipe-content"
+			class="row swipe-content product-row"
 			class:finished
 			class:autoExpired={autoExpired}
 			class:swipe-dragging={swipeDragging}
@@ -254,7 +254,7 @@
 	</div>
 {:else}
 	<article
-		class="row"
+		class="row product-row"
 		class:finished
 		class:autoExpired={autoExpired}
 		data-testid="inventory-compact-row"
@@ -285,7 +285,7 @@
 		justify-content: center;
 		min-width: 5.5rem;
 		min-height: var(--touch-target-min);
-		padding: 0 0.75rem;
+		padding: 0 var(--space-sm);
 		font-size: 0.75rem;
 		font-weight: 700;
 		color: var(--color-on-primary);
@@ -310,7 +310,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 0.5rem;
+		gap: var(--space-sm);
 		min-height: var(--touch-target-min);
 		touch-action: pan-y;
 		cursor: grab;
@@ -324,9 +324,9 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: 0.5rem;
+		gap: var(--space-sm);
 		min-height: var(--touch-target-min);
-		padding: 0.5rem 0.65rem;
+		padding: var(--space-sm) var(--space-md);
 		border-bottom: 1px solid var(--color-border);
 		background: var(--color-surface);
 	}
@@ -348,13 +348,14 @@
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.15rem;
+		gap: var(--space-xs);
 	}
 
 	.main-line {
 		display: flex;
-		align-items: baseline;
-		gap: 0.35rem;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: var(--space-xs);
 		min-width: 0;
 	}
 
@@ -392,20 +393,18 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.2rem;
+		gap: var(--space-xs);
+	}
+
+	.no-expiry-hint {
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
 	}
 
 	.actions {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.15rem;
 		flex-shrink: 0;
-	}
-
-	.actions :global(.finish-btn) {
-		min-height: var(--touch-target-min);
-		padding: 0.35rem 0.75rem;
-		font-size: 0.75rem;
 	}
 
 	@media (prefers-reduced-motion: reduce) {

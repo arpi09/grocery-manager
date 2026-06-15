@@ -357,6 +357,10 @@ a:focus:not(:focus-visible) {
 	}
 }
 
+.product-row {
+	min-height: var(--touch-target-min);
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.motion-fade-in,
 	.motion-slide-up,

@@ -753,13 +753,13 @@
 	},
 	"inventory": {
 		"title": "Your pantry",
-		"subtitle": "Scan items when you shop — keep track of what you have.",
+		"subtitle": "Track what you have at home — update after shopping.",
 		"itemCountSubtitle": "{count} {count, plural, one {active item} other {active items}}",
 		"emptyTitle": "Empty in {location}",
 		"noResults": "No matches",
 		"tryOtherSearch": "Try a different search term.",
 		"emptyCanWrite": "Scan an item or add manually in {location}.",
-		"emptyCanWriteShort": "Scan your first item to get started.",
+		"emptyCanWriteShort": "Add your first item to get started.",
 		"emptyReadonly": "There are no items in {location} yet.",
 		"scan": "Scan",
 		"scanItem": "Scan item",
@@ -775,10 +775,10 @@
 		"readonly": "You have read-only access in this household.",
 		"rowSingular": "row in the pantry",
 		"rowPlural": "rows in the pantry",
-		"showFinished": "Show finished",
-		"hideFinished": "Hide finished",
-		"showAutoExpired": "Expired (auto)",
-		"hideAutoExpired": "Hide expired (auto)",
+		"showFinished": "Show done",
+		"hideFinished": "Hide done",
+		"showAutoExpired": "Review expired",
+		"hideAutoExpired": "Hide expired",
 		"autoExpiredSection": "Expired items (automatic)",
 		"autoExpiredSectionLead": "Nothing is deleted — review here and mark as used or clear when you're sure.",
 		"autoExpiredNote": "{days} days after best-before, items move here until you review them.",
@@ -786,14 +786,14 @@
 		"autoExpiredIntroDismiss": "Got it",
 		"movingToAutoExpiredSoon": "Moving to expired soon",
 		"autoExpiredBadge": "Expired",
-		"aiExpiryBadge": "AI guess",
+		"aiExpiryBadge": "Estimated",
 		"mergeExisting": "Already in pantry — merge with {name} ({quantity} {unit})?",
 		"clearAutoExpired": "Clear all expired",
 		"clearAutoExpiredAria": "Remove all {count} auto-expired items",
-		"bulkExpiryBanner": "Add best-before dates to undated items with AI in one tap.",
+		"bulkExpiryBanner": "Several items lack best-before dates — we can suggest dates from product type.",
 		"bulkExpiryAction": "Infer dates",
-		"finishedBadge": "Finished",
-		"finishedSection": "Finished items",
+		"finishedBadge": "Done",
+		"finishedSection": "Done items",
 		"searchPlaceholder": "Search items…",
 		"filterToolbarAria": "Filter and sort inventory",
 		"toolbarFilter": "Filter",
@@ -824,12 +824,13 @@
 		"expiryFilterNoExpiry": "No date",
 		"filterEmptyTitle": "No items match this filter",
 		"filterEmptyDescription": "Try another filter or show all items.",
-		"filterClear": "Show all items"
+		"filterClear": "Show all items",
+		"noExpiryHint": "No date"
 	},
 	"consume": {
 		"sectionTitle": "Log usage",
 		"sectionHelp": "Updates stock without changing name or location",
-		"finish": "Finished",
+		"finish": "Done",
 		"partial": "Partial…",
 		"finishNamed": "Mark {name} as finished",
 		"logUsage": "Partial",
@@ -874,7 +875,8 @@
 		"lookupNetwork": "Network error while looking up the product.",
 		"foundProduct": "Found {name} ({barcode}).",
 		"unknownBarcodeFilled": "Unknown barcode — filled in \"{name}\". Adjust if needed.",
-		"unknownProductName": "Unknown item ({barcode})"
+		"unknownProductName": "Unknown item ({barcode})",
+		"scanInsteadLink": "Scan instead →"
 	},
 	"shopping": {
 		"title": "Shopping",
@@ -943,7 +945,8 @@
 				"always": "Always add",
 				"never": "Never"
 			},
-			"loopHint": "Close the week — update your pantry so next week's list stays accurate."
+			"loopHint": "Close the week — update your pantry so next week's list stays accurate.",
+			"firstCoach": "First time you check off: add items to inventory so your weekly list and pantry stay in sync."
 		}
 	},
 	"pantryHealth": {
@@ -2053,7 +2056,7 @@
 		"welcomeBody": "Skaffu helps you keep track of food at home — so you shop smarter, waste less, and cook from what you already have.",
 		"welcomeBodyShort": "Build a weekly shopping list — three items is enough to get started.",
 		"welcomeBodyShoppingList": "Skaffu is your shared weekly shopping list. Add three items you buy every week — shop together and keep the list updated.",
-		"brainLearnLine": "Skaffu learns as you use the app",
+		"brainLearnLine": "The weekly list drives shopping — Skaffu estimates best-before when you fill the pantry.",
 		"fillPantrySecondary": "Fill pantry",
 		"quickStart": "Quick start",
 		"quickPointsAria": "What you can do right away",

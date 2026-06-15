@@ -14,9 +14,11 @@
 
 	import HomeHouseholdSection from '$lib/components/organisms/HomeHouseholdSection.svelte';
 
+	import EatFirstSection from '$lib/components/organisms/EatFirstSection.svelte';
+
 	import ReplenishmentSection from '$lib/components/organisms/ReplenishmentSection.svelte';
 
-	import { composeHouseholdBriefing } from '$lib/domain/household-briefing';
+	import { composeHouseholdBriefing, briefingVisiblePantryHealth } from '$lib/domain/household-briefing';
 
 	import { deriveHomeState, HOME_RECOMMENDS_MAX_ROWS } from '$lib/domain/home-state';
 
@@ -313,6 +315,29 @@
 
 	);
 
+	const showRecommendsSection = $derived(
+		recommendsRows.length > 0 ||
+			(canWrite && receiptFootnoteCount > 0) ||
+			showMemoryFootnote
+	);
+
+	const householdBriefingForVisibility = $derived(
+		composeHouseholdBriefing({
+			intelligence,
+			staleCount: pantryStatus.staleCount,
+			shoppingListCount
+		})
+	);
+
+	const showHouseholdSection = $derived.by(() => {
+		if (shoppingCadence) return true;
+		if (summary.expiringSoon.length > 0) return true;
+		if (pantryStatus.staleCount > 0) return true;
+		if (householdBriefingForVisibility.waste && expiringCount === 0) return true;
+		if (briefingVisiblePantryHealth(householdBriefingForVisibility).length > 0) return true;
+		return false;
+	});
+
 
 
 	$effect(() => {
@@ -380,6 +405,12 @@
 	<header class="hero" class:hero--engaged={homeState !== 'cold'}>
 
 		<h1>{greeting}</h1>
+
+		{#if tagline && homeState !== 'cold'}
+
+			<p class="state-pill" data-testid="home-state-pill">{tagline}</p>
+
+		{/if}
 
 		{#if tagline}
 
@@ -493,7 +524,39 @@
 
 		{:else}
 
-			<a class="shopping-teaser shopping-teaser-primary" href="/inkop" data-analytics-id="home.weekly_shop_cta">
+			{#if homeState === 'expiry' && summary.expiringSoon.length > 0 && canWrite}
+
+				<div class="hero-eat-first" data-testid="home-expiry-hero">
+
+					<EatFirstSection
+
+						compact
+
+						expiringItems={summary.expiringSoon}
+
+						canEdit={canWrite}
+
+						householdId={householdId}
+
+					/>
+
+				</div>
+
+			{/if}
+
+			<a
+
+				class="shopping-teaser"
+
+				class:shopping-teaser-primary={homeState === 'lista_ready' || homeState === 'steady'}
+
+				class:shopping-teaser-hero={homeState === 'lista_ready'}
+
+				href="/inkop"
+
+				data-analytics-id="home.weekly_shop_cta"
+
+			>
 
 				<span class="shopping-teaser-icon" aria-hidden="true">
 
@@ -527,6 +590,8 @@
 
 				staleCount={pantryStatus.staleCount}
 
+				shoppingListCount={shoppingListCount}
+
 				{canWrite}
 
 				{returnTo}
@@ -549,7 +614,7 @@
 
 
 
-	{#if showEngagedSections}
+	{#if showEngagedSections && showRecommendsSection}
 
 	<section class="home-v3-section" aria-labelledby="home-recommends-heading">
 
@@ -623,7 +688,11 @@
 
 	</section>
 
+	{/if}
 
+
+
+	{#if showEngagedSections && showHouseholdSection}
 
 	<section class="home-v3-section" aria-labelledby="home-household-heading">
 
@@ -724,16 +793,6 @@
 
 		}
 
-
-
-		.hero--engaged .tagline {
-
-			display: none;
-
-		}
-
-
-
 		.hero--engaged h1 {
 
 			font-size: 1.35rem;
@@ -742,6 +801,61 @@
 
 		}
 
+		.tagline {
+
+			display: none;
+
+		}
+
+		.state-pill {
+
+			display: inline-flex;
+
+			margin: var(--space-xs) 0 0;
+
+		}
+
+	}
+
+	.state-pill {
+
+		display: none;
+
+		align-items: center;
+
+		max-width: fit-content;
+
+		padding: var(--space-xs) var(--space-md);
+
+		border-radius: 999px;
+
+		background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+
+		border: 1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+
+		color: var(--color-primary);
+
+		font-size: 0.8125rem;
+
+		font-weight: 600;
+
+		line-height: 1.35;
+
+	}
+
+	.hero-eat-first {
+		margin-bottom: var(--space-xs);
+	}
+
+	.shopping-teaser-hero {
+		min-height: 3.25rem;
+		padding: var(--space-lg);
+		font-size: 1rem;
+		box-shadow: var(--shadow-md);
+	}
+
+	.shopping-teaser-hero .shopping-teaser-copy {
+		font-size: 1.0625rem;
 	}
 
 

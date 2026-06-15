@@ -11,7 +11,7 @@
 
 	let { prominent = false }: Props = $props();
 
-	let open = $state(true);
+	let open = $state(prominent);
 
 	$effect(() => {
 		if (!browser || prominent) return;

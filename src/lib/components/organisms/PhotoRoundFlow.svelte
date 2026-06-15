@@ -564,7 +564,7 @@ import {
 								<div class="expiry-label-row">
 									<span>{t('photoRound.fieldExpiresOn')}</span>
 									{#if line.expiresOnAiInferred && line.expiresOn}
-										<Badge tone="default">{t('inventory.aiExpiryBadge')}</Badge>
+										<Badge tone="default">{t('learning.estimatedExpiry')}</Badge>
 									{/if}
 								</div>
 								<input

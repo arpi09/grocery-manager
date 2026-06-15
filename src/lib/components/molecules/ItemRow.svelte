@@ -120,7 +120,7 @@
 						{formatExpiryDate(item.expiresOn, getLocale())}
 					</Badge>
 					{#if item.expiresOnSource === 'ai_inferred' && !autoExpired}
-						<Badge tone="default">{t('inventory.aiExpiryBadge')}</Badge>
+						<Badge tone="default">{t('learning.estimatedExpiry')}</Badge>
 					{/if}
 				{/if}
 			</div>

@@ -47,7 +47,7 @@
 
 	import type { StorageLocation } from '$lib/domain/location';
 
-	import { scanModeHref } from '$lib/utils/scan-nav';
+	import { scanHubHref } from '$lib/utils/scan-nav';
 
 	import { subscribeCompactInventoryViewport } from '$lib/utils/inventory-viewport';
 
@@ -118,7 +118,7 @@
 
 	const inventoryPath = $derived(`/inventory/${location}`);
 
-	const scanHref = $derived(scanModeHref('photo', inventoryPath, { location }));
+	const scanHubLinkHref = $derived(scanHubHref(inventoryPath));
 
 	const manualAddHref = $derived(
 
@@ -659,11 +659,46 @@
 				bind:query
 				expiryFilter={expiryFilter}
 				onExpiryFilterChange={setExpiryFilter}
+				compact={isCompact}
 				sortChipLabel={isCompact ? mobileSortChipLabel() : undefined}
 				onSortChipClick={isCompact ? toggleMobileSortChip : undefined}
+				sectionChips={isCompact
+					? [
+							...(autoExpiredTotal > 0
+								? [
+										{
+											label: loadingAutoExpired
+												? t('common.loading')
+												: showAutoExpired
+													? t('inventory.hideAutoExpired')
+													: t('inventory.showAutoExpired'),
+											pressed: showAutoExpired,
+											loading: loadingAutoExpired,
+											count: autoExpiredTotal,
+											onClick: toggleAutoExpired
+										}
+									]
+								: []),
+							...(finishedTotal > 0
+								? [
+										{
+											label: loadingFinished
+												? t('common.loading')
+												: showFinished
+													? t('inventory.hideFinished')
+													: t('inventory.showFinished'),
+											pressed: showFinished,
+											loading: loadingFinished,
+											count: finishedTotal,
+											onClick: toggleFinished
+										}
+									]
+								: [])
+						]
+					: undefined}
 			/>
 
-			{#if autoExpiredTotal > 0 || finishedTotal > 0}
+			{#if !isCompact && (autoExpiredTotal > 0 || finishedTotal > 0)}
 
 				<div class="filter-meta">
 
@@ -765,7 +800,7 @@
 
 				: canWrite
 
-					? t('photoRound.title')
+					? t('inventory.addGoods')
 
 					: t('inventory.backHome')}
 
@@ -775,7 +810,7 @@
 
 				: canWrite
 
-					? scanHref
+					? scanHubLinkHref
 
 					: '/'}
 

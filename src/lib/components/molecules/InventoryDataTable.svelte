@@ -34,12 +34,7 @@
 		onPartialConsume
 	}: Props = $props();
 
-	function headerAriaSort(key: InventorySortKey): 'ascending' | 'descending' | 'none' {
-		if (sortKey !== key) {
-			return 'none';
-		}
-		return sortDirection === 'asc' ? 'ascending' : 'descending';
-	}
+	const sortKeys: InventorySortKey[] = ['name', 'quantity', 'expiry'];
 
 	function sortHint(key: InventorySortKey): string {
 		if (sortKey !== key) {
@@ -57,155 +52,88 @@
 	}
 </script>
 
-<div class="table-scroll" data-testid="inventory-table">
-	<table aria-label={ariaLabel}>
-		<thead>
-			<tr>
-				<th scope="col" class="col-name" aria-sort={headerAriaSort('name')}>
-					<button
-						type="button"
-						class="sort-btn"
-						aria-label={sortHint('name')}
-						onclick={() => onSortChange('name')}
-					>
-						{t('inventory.columnName')}
-					</button>
-				</th>
-				<th scope="col" class="col-qty" aria-sort={headerAriaSort('quantity')}>
-					<button
-						type="button"
-						class="sort-btn"
-						aria-label={sortHint('quantity')}
-						onclick={() => onSortChange('quantity')}
-					>
-						{t('inventory.columnQuantity')}
-					</button>
-				</th>
-				<th scope="col" class="col-expiry" aria-sort={headerAriaSort('expiry')}>
-					<button
-						type="button"
-						class="sort-btn"
-						aria-label={sortHint('expiry')}
-						onclick={() => onSortChange('expiry')}
-					>
-						{t('inventory.columnExpiry')}
-					</button>
-				</th>
-				<th scope="col" class="col-actions">
-					<span class="sr-only">{t('inventory.columnActions')}</span>
-				</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each items as item (item.id)}
-				<InventoryTableRow
-					{item}
-					{canWrite}
-					{finished}
-					{autoExpired}
-					{autoExpiredGraceDays}
-					finishing={finishingIds.has(item.id)}
-					{onFinishOneTap}
-					{onPartialConsume}
-				/>
-			{/each}
-		</tbody>
-	</table>
+<div class="card-stack" data-testid="inventory-table" aria-label={ariaLabel}>
+	<div class="sort-bar" role="group" aria-label={t('inventory.sortLabel')}>
+		{#each sortKeys as key (key)}
+			<button
+				type="button"
+				class="sort-chip"
+				class:sort-chip--active={sortKey === key}
+				aria-pressed={sortKey === key}
+				aria-label={sortHint(key)}
+				onclick={() => onSortChange(key)}
+			>
+				{columnLabel(key)}
+				{#if sortKey === key}
+					<span class="sort-dir" aria-hidden="true">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+				{/if}
+			</button>
+		{/each}
+	</div>
+
+	<div class="card-list">
+		{#each items as item (item.id)}
+			<InventoryTableRow
+				{item}
+				{canWrite}
+				{finished}
+				{autoExpired}
+				{autoExpiredGraceDays}
+				finishing={finishingIds.has(item.id)}
+				{onFinishOneTap}
+				{onPartialConsume}
+			/>
+		{/each}
+	</div>
 </div>
 
 <style>
-	.table-scroll {
-		overflow-x: auto;
-		-webkit-overflow-scrolling: touch;
-		max-width: 100%;
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-md);
-		background: var(--color-surface);
-		box-shadow: var(--shadow-sm);
+	.card-stack {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		min-width: 0;
 	}
 
-	table {
-		width: 100%;
-		min-width: 20rem;
-		border-collapse: collapse;
-		font-size: 0.875rem;
-		line-height: 1.4;
+	.sort-bar {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-xs);
 	}
 
-	thead th {
-		position: sticky;
-		top: 0;
-		z-index: 2;
-		padding: 0.45rem 0.55rem;
-		border-bottom: 1px solid var(--color-border);
-		background: var(--color-surface);
-		text-align: left;
-		vertical-align: middle;
-		white-space: nowrap;
-		box-shadow: 0 1px 0 var(--color-border);
-	}
-
-	.col-name {
-		width: 42%;
-	}
-
-	.col-qty {
-		width: 18%;
-	}
-
-	.col-expiry {
-		width: 22%;
-	}
-
-	.col-actions {
-		width: 2.75rem;
-	}
-
-	.sort-btn {
+	.sort-chip {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
-		border: none;
-		background: transparent;
-		padding: 0.1rem 0;
+		gap: var(--space-xs);
 		min-height: var(--touch-target-min);
+		padding: var(--space-xs) var(--space-sm);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
 		font: inherit;
-		font-size: 0.6875rem;
-		font-weight: 700;
-		letter-spacing: 0.05em;
-		text-transform: uppercase;
+		font-size: 0.75rem;
+		font-weight: 600;
 		color: var(--color-text-muted);
 		cursor: pointer;
 	}
 
-	.sort-btn:hover {
+	.sort-chip:hover,
+	.sort-chip--active {
+		border-color: var(--color-primary);
 		color: var(--color-primary);
 	}
 
-	th[aria-sort='ascending'] .sort-btn,
-	th[aria-sort='descending'] .sort-btn {
-		color: var(--color-primary);
+	.sort-chip--active {
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
 	}
 
-	th[aria-sort='ascending'] .sort-btn::after,
-	th[aria-sort='descending'] .sort-btn::after {
-		font-size: 0.6rem;
-		line-height: 1;
+	.sort-dir {
+		font-size: 0.6875rem;
 	}
 
-	th[aria-sort='ascending'] .sort-btn::after {
-		content: '▲';
-	}
-
-	th[aria-sort='descending'] .sort-btn::after {
-		content: '▼';
-	}
-
-	tbody :global(tr.data-row:nth-child(odd)) {
-		background: color-mix(in srgb, var(--color-surface-muted) 35%, var(--color-surface));
-	}
-
-	tbody :global(tr.data-row:hover) {
-		background: var(--color-surface-muted);
+	.card-list {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
 	}
 </style>

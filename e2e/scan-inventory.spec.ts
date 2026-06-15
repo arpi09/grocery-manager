@@ -161,7 +161,7 @@ test.describe('Scan and inventory', () => {
 		});
 	});
 
-	test('inventory shows single add-goods CTA to photo scan', async ({ page }) => {
+	test('inventory add block links to scan hub with manual secondary', async ({ page }) => {
 		await page.goto('/inventory/fridge');
 		await dismissOnboardingModalIfOpen(page);
 
@@ -170,10 +170,10 @@ test.describe('Scan and inventory', () => {
 			name: /Lägg till varor|Add items/i
 		});
 		await expect(primary).toBeVisible({ timeout: 15_000 });
-		await expect(primary).toHaveAttribute('href', /mode=photo.*location=fridge/);
+		await expect(primary).toHaveAttribute('href', /\/scan\?.*mode=hub/);
 
-		const receiptLink = addGoods.getByRole('link', { name: /Kvitto|Receipt/i });
-		await expect(receiptLink).toBeVisible({ timeout: 15_000 });
-		await expect(receiptLink).toHaveAttribute('href', /mode=receipt.*location=fridge/);
+		const manualLink = addGoods.getByRole('link', { name: /Manuellt|Manual/i });
+		await expect(manualLink).toBeVisible({ timeout: 15_000 });
+		await expect(manualLink).toHaveAttribute('href', /\/item\/new/);
 	});
 });

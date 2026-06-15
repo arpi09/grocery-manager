@@ -8,6 +8,14 @@
 		label: string;
 	}
 
+	interface SectionChip {
+		label: string;
+		pressed: boolean;
+		loading?: boolean;
+		count?: number;
+		onClick: () => void;
+	}
+
 	interface Props {
 		query?: string;
 		expiryFilter: InventoryExpiryFilter;
@@ -16,6 +24,8 @@
 		onSortChipClick?: () => void;
 		/** Mobile inventory: collapse expiry chips into one row. */
 		compact?: boolean;
+		/** Auto-expired / finished toggles merged into compact chip row. */
+		sectionChips?: SectionChip[];
 	}
 
 	let {
@@ -24,7 +34,8 @@
 		onExpiryFilterChange,
 		sortChipLabel,
 		onSortChipClick,
-		compact = false
+		compact = false,
+		sectionChips = []
 	}: Props = $props();
 
 	const filterOptions: FilterOption[] = [
@@ -61,19 +72,40 @@
 		</div>
 
 		{#if compact}
-			<button
-				type="button"
-				class="filter-chip filter-chip--toggle"
-				aria-expanded={filtersOpen}
-				aria-controls="inventory-expiry-filter-panel"
-				data-testid="inventory-filter-toggle"
-				onclick={toggleFilters}
-			>
-				{filterChipLabel}
-			</button>
-		{/if}
+			<div class="chip-row">
+				<button
+					type="button"
+					class="filter-chip filter-chip--toggle"
+					aria-expanded={filtersOpen}
+					aria-controls="inventory-expiry-filter-panel"
+					data-testid="inventory-filter-toggle"
+					onclick={toggleFilters}
+				>
+					{filterChipLabel}
+				</button>
 
-		{#if sortChipLabel && onSortChipClick}
+				{#if sortChipLabel && onSortChipClick}
+					<button type="button" class="sort-chip" onclick={onSortChipClick}>
+						{sortChipLabel}
+					</button>
+				{/if}
+
+				{#each sectionChips as chip, index (index)}
+					<button
+						type="button"
+						class="section-chip"
+						aria-pressed={chip.pressed}
+						disabled={chip.loading}
+						onclick={chip.onClick}
+					>
+						{chip.label}
+						{#if chip.count !== undefined}
+							<span class="section-count">{chip.count}</span>
+						{/if}
+					</button>
+				{/each}
+			</div>
+		{:else if sortChipLabel && onSortChipClick}
 			<button type="button" class="sort-chip" onclick={onSortChipClick}>
 				{sortChipLabel}
 			</button>
@@ -148,11 +180,20 @@
 	}
 
 	.toolbar-row--primary {
-		flex-wrap: nowrap;
+		flex-wrap: wrap;
 	}
 
 	.search-wrap {
-		flex: 1;
+		flex: 1 1 8rem;
+		min-width: 0;
+	}
+
+	.chip-row {
+		display: flex;
+		flex: 1 1 auto;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-xs);
 		min-width: 0;
 	}
 
@@ -177,7 +218,7 @@
 		box-sizing: border-box;
 		min-width: var(--touch-target-min);
 		min-height: var(--touch-target-min);
-		padding: 0.35rem 0.65rem;
+		padding: var(--space-xs) var(--space-sm);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
 		background: var(--color-surface);
@@ -214,7 +255,7 @@
 		box-sizing: border-box;
 		min-width: var(--touch-target-min);
 		min-height: var(--touch-target-min);
-		padding: 0.35rem 0.65rem;
+		padding: var(--space-xs) var(--space-sm);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
 		background: var(--color-surface);
@@ -229,5 +270,56 @@
 	.sort-chip:hover {
 		border-color: var(--color-primary);
 		color: var(--color-primary);
+	}
+
+	.section-chip {
+		flex-shrink: 0;
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-xs);
+		min-height: var(--touch-target-min);
+		padding: var(--space-xs) var(--space-sm);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		font-size: 0.75rem;
+		font-weight: 600;
+		font-family: inherit;
+		color: var(--color-text-muted);
+		cursor: pointer;
+		white-space: nowrap;
+	}
+
+	.section-chip:hover:not(:disabled) {
+		border-color: var(--color-primary);
+		color: var(--color-primary);
+	}
+
+	.section-chip:disabled {
+		opacity: 0.7;
+		cursor: wait;
+	}
+
+	.section-chip[aria-pressed='true'] {
+		border-color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+		color: var(--color-primary);
+	}
+
+	.section-count {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 1.25rem;
+		padding: 0 var(--space-xs);
+		font-size: 0.6875rem;
+		font-weight: 700;
+		border-radius: 999px;
+		background: var(--color-surface-muted);
+		color: inherit;
+	}
+
+	.section-chip[aria-pressed='true'] .section-count {
+		background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface));
 	}
 </style>

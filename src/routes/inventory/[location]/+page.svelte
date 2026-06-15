@@ -7,15 +7,13 @@
 
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 
-	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
-
 	import InventoryList from '$lib/components/organisms/InventoryList.svelte';
 
 	import { getLocale, t } from '$lib/i18n';
 
 	import { locationLabel } from '$lib/i18n/domain-labels';
 
-	import { scanModeHref } from '$lib/utils/scan-nav';
+	import { scanHubHref } from '$lib/utils/scan-nav';
 	import { parseInventoryExpiryFilter } from '$lib/utils/inventory-list-filters';
 
 
@@ -32,23 +30,7 @@
 
 	);
 
-	const photoScanHref = $derived(
-
-		scanModeHref('photo', inventoryPath, { location: data.location })
-
-	);
-
-	const barcodeScanHref = $derived(
-
-		scanModeHref('barcode', inventoryPath, { location: data.location })
-
-	);
-
-	const receiptScanHref = $derived(
-
-		scanModeHref('receipt', inventoryPath, { location: data.location })
-
-	);
+	const scanHubLinkHref = $derived(scanHubHref(inventoryPath));
 
 
 
@@ -95,28 +77,13 @@
 
 				<div class="add-goods-block" data-testid="inventory-add-goods">
 
-					<a class="add-primary" href={photoScanHref}>
-
-						<FeatureIcon id="photo" size={18} />
+					<a class="add-primary" href={scanHubLinkHref}>
 
 						{t('inventory.addGoods')}
 
 					</a>
 
-					<a class="barcode-action" href={barcodeScanHref}>{t('inventory.otherWaysBarcode')}</a>
-				<a class="barcode-action" href={receiptScanHref}>{t('inventory.otherWaysReceipt')}</a>
-
-					<details class="other-ways">
-
-						<summary>{t('inventory.otherWays')}</summary>
-
-						<nav class="other-ways-nav" aria-label={t('inventory.otherWays')}>
-
-							<a href={addItemHref} data-sveltekit-reload>{t('inventory.otherWaysManual')}</a>
-
-						</nav>
-
-					</details>
+					<a class="add-manual" href={addItemHref} data-sveltekit-reload>{t('inventory.addManual')}</a>
 
 				</div>
 
@@ -182,10 +149,30 @@
 
 		display: flex;
 
-		flex-direction: column;
+		flex-wrap: wrap;
+
+		align-items: center;
 
 		gap: var(--space-sm);
 
+	}
+
+	.add-manual {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: var(--touch-target-min);
+		padding: var(--space-xs) var(--space-md);
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+		text-decoration: none;
+	}
+
+	.add-manual:hover {
+		color: var(--color-primary);
+		text-decoration: underline;
+		text-underline-offset: 0.12em;
 	}
 
 
@@ -200,13 +187,13 @@
 
 		gap: var(--space-sm);
 
-		min-height: 2.75rem;
+		min-height: var(--touch-target-min);
 
-		padding: 0.75rem 1rem;
+		padding: var(--space-sm) var(--space-lg);
 
 		font-weight: 700;
 
-		font-size: 1rem;
+		font-size: 0.9375rem;
 
 		border-radius: var(--radius-md);
 
@@ -229,113 +216,6 @@
 		text-decoration: none;
 
 	}
-
-	.barcode-action {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		align-self: flex-start;
-		min-height: var(--touch-target-min);
-		min-width: var(--touch-target-min);
-		padding: 0.25rem 0.5rem;
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: var(--color-primary);
-		text-decoration: underline;
-		text-underline-offset: 0.12em;
-	}
-
-	.barcode-action:hover {
-		color: var(--color-primary-hover);
-	}
-
-	.other-ways {
-
-		align-self: flex-start;
-
-	}
-
-
-
-	.other-ways summary {
-
-		cursor: pointer;
-
-		min-height: 2.75rem;
-
-		padding: 0.35rem 0.15rem;
-
-		font-weight: 600;
-
-		font-size: 0.875rem;
-
-		color: var(--color-text-muted);
-
-		list-style: none;
-
-	}
-
-
-
-	.other-ways summary::-webkit-details-marker {
-
-		display: none;
-
-	}
-
-
-
-	.other-ways summary:hover {
-
-		color: var(--color-primary);
-
-	}
-
-
-
-	.other-ways-nav {
-
-		display: flex;
-
-		flex-direction: column;
-
-		gap: 0.35rem;
-
-		padding: 0.25rem 0 0.5rem;
-
-	}
-
-
-
-	.other-ways-nav a {
-
-		min-height: 2.75rem;
-
-		padding: 0.35rem 0.15rem;
-
-		font-weight: 600;
-
-		font-size: 0.875rem;
-
-		color: var(--color-primary);
-
-		text-decoration: underline;
-
-		text-underline-offset: 0.15em;
-
-	}
-
-
-
-	.other-ways-nav a:hover {
-
-		color: var(--color-primary-hover);
-
-		text-decoration: none;
-
-	}
-
-
 
 	@media (min-width: 560px) {
 

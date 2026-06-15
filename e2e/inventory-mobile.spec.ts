@@ -50,11 +50,11 @@ test.describe('Inventory mobile UX', () => {
 		await row.getByRole('menuitem', { name: /Delvis|Partial/i }).click({ force: true });
 	}
 
-	test('compact list shows finish and partial actions', async ({ page }) => {
+	test('compact list shows partial via overflow and swipe', async ({ page }) => {
 		const list = await openFridgeList(page);
 		const row = seededRow(list);
 
-		await expect(row.getByRole('button', { name: /Slut|Finished/i })).toBeVisible();
+		await expect(row.getByRole('button', { name: /Slut|Finished|Klart|Done/i })).toHaveCount(0);
 
 		const overflow = row.getByTestId('row-overflow-menu').getByRole('button');
 		await overflow.click({ force: true });
