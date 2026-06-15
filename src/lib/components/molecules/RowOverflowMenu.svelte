@@ -6,6 +6,8 @@
 		itemName: string;
 		disabled?: boolean;
 		onPartialConsume?: () => void;
+		onFinishOneTap?: () => void;
+		finishing?: boolean;
 	}
 
 	let { itemId, itemName, disabled = false, onPartialConsume, onFinishOneTap, finishing = false }: Props = $props();
