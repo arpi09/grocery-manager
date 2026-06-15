@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
@@ -11,20 +9,9 @@
 	import PhotoRoundFlow from '$lib/components/organisms/PhotoRoundFlow.svelte';
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
 	import { t } from '$lib/i18n';
-	import { getLastScanMode } from '$lib/utils/last-scan-defaults';
-	import { scanModeHref, type ScanMode } from '$lib/utils/scan-nav';
+	import { type ScanMode } from '$lib/utils/scan-nav';
 
 	let { data, form } = $props();
-
-	$effect(() => {
-		if (!browser || !data.needsSmartDefault) {
-			return;
-		}
-		const mode = getLastScanMode();
-		void goto(scanModeHref(mode, data.returnTo, data.defaultLocation ? { location: data.defaultLocation } : undefined), {
-			replaceState: true
-		});
-	});
 
 	const scanMode = $derived(data.scanMode as ScanMode);
 	const isHub = $derived(scanMode === 'hub');
@@ -62,7 +49,7 @@
 <AppLayout user={data.user}>
 	<AppHeader {title} {subtitle} {backHref} {backLabel} />
 	<PageContainer>
-		{#if data.canWrite && !isHub}
+		{#if data.canWrite}
 			<ScanModeTabs
 				active={activeTab}
 				returnTo={data.returnTo}

@@ -36,7 +36,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const locationParam = url.searchParams.get('location');
 	const fromParam = url.searchParams.get('from');
 	const modeParam = url.searchParams.get('mode');
-	const needsSmartDefault = !modeParam;
 	const scanMode = parseScanMode(modeParam);
 	const defaultLocation =
 		locationParam && isStorageLocation(locationParam) ? locationParam : null;
@@ -48,7 +47,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		returnTo,
 		canWrite,
 		scanMode,
-		needsSmartDefault,
 		isTopLevelEntry,
 		shelfLifeEstimatesInReceipt: isShelfLifeEstimatesInReceiptEnabled()
 	};

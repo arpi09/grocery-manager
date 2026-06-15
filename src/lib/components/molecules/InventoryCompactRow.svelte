@@ -73,6 +73,14 @@
 		return days >= 0 && days <= EXPIRING_SOON_DAYS ? 'warning' : 'default';
 	}
 
+	const expiryExplanation = $derived.by(() => {
+		if (!isEstimatedExpirySource(item.expiresOnSource)) return null;
+		return buildInventoryShelfLifeExplanation(
+			{ productName: item.name, source: item.expiresOnSource, location: item.location },
+			getLocale()
+		);
+	});
+
 	const expiryLabel = $derived.by(() => {
 		if (!item.expiresOn || finished) return null;
 		const days = daysUntilExpiry(item.expiresOn);
@@ -186,7 +194,7 @@
 					</Badge>
 				{/if}
 				{#if isEstimatedExpirySource(item.expiresOnSource) && !finished && !autoExpired}
-					<EstimatedBadge source={item.expiresOnSource} interactive={false} />
+					<EstimatedBadge source={item.expiresOnSource} explanation={expiryExplanation} showSettingsLink />
 				{/if}
 			</div>
 		{/if}

@@ -161,38 +161,24 @@
 		<input type="hidden" name="returnTo" value={returnTo} />
 	{/if}
 	{#if !isEdit}
-		<div class="barcode-row">
-			<p class="scan-title">{t('item.howToFill')}</p>
-			<div class="scan-method-tabs" role="radiogroup" aria-label={t('item.scanModeAria')}>
-				<button
-					type="button"
-					role="radio"
-					aria-checked={scanMethod === 'barcode'}
-					class="scan-tab {scanMethod === 'barcode' ? 'active' : ''}"
-					onclick={() => (scanMethod = 'barcode')}
-				>
-					{t('item.barcodeTab')}
-				</button>
-				<button
-					type="button"
-					role="radio"
-					aria-checked={scanMethod === 'photo'}
-					class="scan-tab {scanMethod === 'photo' ? 'active' : ''}"
-					onclick={() => (scanMethod = 'photo')}
-				>
-					{t('item.photoTab')}
-				</button>
+		<details class="scan-instead" bind:open={scanInsteadOpen}>
+			<summary>{t('item.scanInstead')}</summary>
+			<div class="barcode-row">
+				<p class="scan-title">{t('item.howToFill')}</p>
+				<div class="scan-method-tabs" role="radiogroup" aria-label={t('item.scanModeAria')}>
+					<button type="button" role="radio" aria-checked={scanMethod === 'barcode'} class="scan-tab {scanMethod === 'barcode' ? 'active' : ''}" onclick={() => (scanMethod = 'barcode')}>{t('item.barcodeTab')}</button>
+					<button type="button" role="radio" aria-checked={scanMethod === 'photo'} class="scan-tab {scanMethod === 'photo' ? 'active' : ''}" onclick={() => (scanMethod = 'photo')}>{t('item.photoTab')}</button>
+				</div>
+				{#if scanMethod === 'barcode'}
+					<BarcodeScanButton onclick={openScanner} loading={lookupLoading} />
+				{:else}
+					<ProductPhotoScanPicker onProduct={handlePhotoProduct} />
+				{/if}
 			</div>
-
-			{#if scanMethod === 'barcode'}
-				<BarcodeScanButton onclick={openScanner} loading={lookupLoading} />
-			{:else}
-				<ProductPhotoScanPicker onProduct={handlePhotoProduct} />
+			{#if scanMessage}
+				<p class="barcode-msg" role="status">{scanMessage}</p>
 			{/if}
-		</div>
-		{#if scanMessage}
-			<p class="barcode-msg" role="status">{scanMessage}</p>
-		{/if}
+		</details>
 	{/if}
 
 	<div class="field name-field">
