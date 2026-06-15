@@ -13,7 +13,7 @@ function attachPageErrorGuard(page: import('@playwright/test').Page) {
 
 test.describe('Marketing hydration', () => {
 	for (const path of MARKETING_PATHS) {
-		test(`no client crash on ${path}`, async ({ page }) => {
+		test(`no client crash on ${path} @deploy-critical`, async ({ page }) => {
 			const collectErrors = attachPageErrorGuard(page);
 			const response = await page.goto(path, { waitUntil: 'domcontentloaded' });
 			expect(response?.status() ?? 0).toBeLessThan(500);

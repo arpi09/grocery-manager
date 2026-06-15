@@ -1,8 +1,54 @@
 # Release model — Skaffu
 
-*Phase 0 (docs). Canonical policy for how features reach production.*
+*CI/CD test tiers, deploy lanes, and rollback policy.*
 
-**Relaterat:** [DEPLOY.md](./DEPLOY.md) · [CURRENT_REALITY.md](./CURRENT_REALITY.md) · [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md)
+**Relaterat:** [DEPLOY.md](./DEPLOY.md) · [CI_CD.md](./CI_CD.md) · [CURRENT_REALITY.md](./CURRENT_REALITY.md)
+
+---
+
+## Test tiers
+
+| Tier | Trigger | E2E | Target time | Blocks prod? |
+|------|---------|-----|-------------|--------------|
+| **quick:dev** | Agent before commit | None | ~2–3 min | Local |
+| **pr:gate** | PR + push `master` | None (E2E in `e2e.yml`) | ~3–5 min | Merge |
+| **deploy:fast** | Deploy `tier=fast` or `auto` + low-risk | Critical `@deploy-critical` | ~8–15 min | Prod |
+| **release:full** | Deploy `tier=full`, core paths | Full 3 shards | ~20–35 min | Prod |
+| **nightly** | Schedule 03:00 UTC | Full + heavy specs | ~25–45 min | Signal only |
+
+**Branch protection:** require **`pr-gate / pr-gate`** (update from `quality / quality` after merge).
+
+---
+
+## Deploy tiers
+
+| `deploy_tier` | E2E | When |
+|---------------|-----|------|
+| **auto** | path-tier → fast or full | Normal releases |
+| **fast** | Critical E2E | CSS, copy, low-risk |
+| **full** | Full E2E × 3 | Core-loop paths |
+| **hotfix** | Critical + double prod smoke | Urgent fix + `hotfix_reason` |
+
+`skip_e2e` is **deprecated** — use `hotfix` (runs critical E2E, not zero E2E).
+
+`verify-release` always requires successful E2E, deploy, and smoke.
+
+---
+
+## How to ship a small bugfix fast
+
+1. `fix/*` branch, low-risk paths only.
+2. `npm run quick:dev` locally.
+3. Merge when `pr-gate` + PR critical E2E are green.
+4. Deploy with `deploy_tier: auto` or `fast`.
+5. Coordinator updates CURRENT_REALITY after smoke.
+
+---
+
+## Rollback
+
+1. Deploy previous good SHA from CURRENT_REALITY with `deploy_tier=fast`.
+2. If smoke fails → Firebase rollback / redeploy previous.
 
 ---
 
@@ -10,52 +56,18 @@
 
 | Principle | Meaning |
 |-----------|---------|
-| **master = truth** | `apphosting.yaml` on `master` is the intended production config. Feature code merges with its final flag values already set on master. |
-| **deploy = publish** | **Deploy to production** publishes the current `master` SHA. Deploy is not a separate “activation” step after merge. |
-| **Kill switches only** | Env flags are for emergency off, Tier C experiments, and infra toggles — not gradual rollout of Tier A/B product. |
-| **No post-merge flag flip** | Do **not** merge code with flags off and plan to flip `apphosting.yaml` after merge. Merge the final flag state; deploy once. |
+| **master = truth** | `apphosting.yaml` on master is intended prod config. |
+| **deploy = publish** | Deploy workflow publishes the SHA — not a separate activation. |
+| **Kill switches only** | Flags for emergency off, Tier C, infra — not gradual Tier A/B rollout. |
 
 ---
 
-## Workflow
+## Local scripts
 
-1. **Branch** — implement on `feat/*` or `fix/*` with final flag values in `apphosting.yaml` (or `.env` for local-only flags).
-2. **Merge** — merge to `master` when G0 / CI is green. Master now describes what prod should be.
-3. **Deploy** — coordinator runs **Deploy to production** when ready (~12–20 min, full gates). See [DEPLOY.md](./DEPLOY.md).
-4. **Kill switch (emergency)** — set flag `false` on `master`, deploy. Data and code remain; feature surface hides. Re-enable only with explicit decision + deploy.
-
----
-
-## Flag categories
-
-| Category | Examples | When to change |
-|----------|----------|----------------|
-| **Product (Tier A/B)** | `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `SHELF_LIFE_LEARNING_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT` | Same PR / merge as the feature — final value on master before deploy |
-| **Kill switch / infra** | `EMAIL_SENDING_DISABLED`, `STRIPE_CHECKOUT_DISABLED` | Off by default; flip on master + deploy when ready |
-| **Tier C / experiment** | `PUBLIC_CITY_FEED_ENABLED`, `KIVRA_FORWARD_ENABLED` | Stay off until explicit product request; not part of core loop release train |
-| **Stub / deferred** | Migration `0049` favorites, LLM tiers | Off until implementation exists |
-
-Local dev: `.env` overrides; prod truth is `apphosting.yaml` on master.
-
----
-
-## What this replaces
-
-- **Prod vs master flag tables** in [CURRENT_REALITY.md](./CURRENT_REALITY.md) — replaced by kill-switch summary + this doc.
-- **“Merge code only, flags off, enable post-deploy”** — deprecated in [LEARNING_ENGINE.md](./LEARNING_ENGINE.md) and [BRAIN_V1_PRODUCT_INTEGRATION.md](./BRAIN_V1_PRODUCT_INTEGRATION.md).
-- **Gradual flag rollout** as a release step — use branch + merge + deploy instead.
-
-Skill `skaffu-feature-flag-rollout` remains for kill switches, Tier C, and infra env — not for activating Tier A/B after merge.
-
----
-
-## Coordinator checklist
-
-| Step | Owner | Gate |
-|------|-------|------|
-| Flag values match feature intent on branch | Implementation agent | G0 |
-| `apphosting.yaml` on master = intended prod | Coordinator at merge | CI green |
-| Deploy when releasing | Coordinator | Deploy workflow all green |
-| Update [CURRENT_REALITY.md](./CURRENT_REALITY.md) prod SHA after deploy | Coordinator | [PROD_SMOKE.md](./PROD_SMOKE.md) |
-
-**Forbidden:** merge → separate PR that only flips flags → deploy, unless the flip is a documented emergency kill-switch reversal.
+| Script | Purpose |
+|--------|---------|
+| `npm run quick:dev` | Agent default |
+| `npm run pr:gate` | Pre-merge CI parity (no audit) |
+| `npm run deploy:fast` | pr:gate + critical E2E + pre-deploy smoke |
+| `npm run test:e2e:critical` | `@deploy-critical` tests only |
+| `npm run ci:path-tier` | Classify changed files |

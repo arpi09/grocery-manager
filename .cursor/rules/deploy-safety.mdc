@@ -5,26 +5,31 @@ alwaysApply: true
 
 # Deploy safety (agents)
 
-**A release failed** if E2E, Firebase deploy, post-deploy smoke, or `verify-release` did not all succeed — regardless of whether Firebase partially updated.
+**A release failed** if E2E, Firebase deploy, post-deploy smoke, or `verify-release` did not all succeed.
 
 ## Before triggering deploy
 
-1. Confirm **CI `quality / quality`** is green on the **same SHA** you will deploy (`gh run list --workflow=ci.yml --branch=master`).
+1. Confirm **CI `pr-gate / pr-gate`** is green on the **same SHA** (`gh run list --workflow=ci.yml --branch=master`).
 2. Never `gh workflow run deploy.yml` without monitoring the full run to completion.
+
+## Deploy tiers
+
+| Tier | E2E |
+|------|-----|
+| **auto** | path-tier → fast or full |
+| **fast** | Critical `@deploy-critical` |
+| **full** | Full E2E × 3 shards |
+| **hotfix** | Critical + double prod URL smoke + `hotfix_reason` |
+
+**Deprecated:** `skip_e2e` — use `deploy_tier=hotfix` (critical E2E, not skip).
 
 ## During and after deploy
 
-1. **Never** treat workflow success as prod-ready unless these jobs are all **`success`**:
-   - `quality`
-   - `e2e (1/3)`, `e2e (2/3)`, `e2e (3/3)` — unless explicit user-requested hotfix
-   - `deploy`
-   - `post-deploy smoke`
-   - `verify release completed`
-2. **Never** use `skip_e2e` except explicit user request with documented incident reason; requires `hotfix_confirm=hotfix`.
-3. **Never** say "deployed" / "prod is live" without green **Deploy to production** for the target SHA **and** coordinator post-deploy checks per [docs/PROD_SMOKE.md](../../docs/PROD_SMOKE.md) ([delivery-done.mdc](./delivery-done.mdc)).
-4. After deploy: verify `/` and a guide page in **browser** with console open — not curl alone. Fail on `process is not defined`, `Internal Error`, or SvelteKit 500 page.
+1. Never claim prod-ready unless **`e2e critical`** or **`e2e (1/3–3/3)`**, `deploy`, smoke, and **`verify release completed`** are all `success` for the chosen tier.
+2. Never say "deployed" without green Deploy workflow + coordinator [PROD_SMOKE.md](../../docs/PROD_SMOKE.md).
+3. After deploy: browser check on `/` and a guide page — fail on `process is not defined`, `Internal Error`, or 500.
 
-## Owner settings (not in code)
+## Owner settings
 
-- GitHub **branch protection** on `master`: require status check **`quality / quality`** (CI workflow via reusable-quality).
-- Firebase Console **App Hosting auto-deploy off** — Actions is the only deploy source ([docs/DEPLOY.md](../../docs/DEPLOY.md)).
+- Branch protection: require **`pr-gate / pr-gate`** (update from `quality / quality` after CI/CD v2 merge).
+- Firebase App Hosting auto-deploy off — Actions only ([docs/DEPLOY.md](../../docs/DEPLOY.md)).

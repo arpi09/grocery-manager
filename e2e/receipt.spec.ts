@@ -17,7 +17,7 @@ const FIXTURE_JPEG = {
 
 test.describe('Receipt flow', () => {
 	test.setTimeout(60_000);
-	test('PDF upload shows parsed lines from mocked API', async ({ page }) => {
+	test('PDF upload shows parsed lines from mocked API @deploy-critical', async ({ page }) => {
 		await mockReceiptParse(page);
 		await loginAsAdmin(page);
 		await page.goto('/scan/kvitto');

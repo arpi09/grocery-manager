@@ -1,6 +1,8 @@
 # Fast CI on every push/PR to master — no E2E, no deploy (~3–5 min)
 # Deploy: Actions → "Deploy to production" (see docs/DEPLOY.md)
 
+# Branch protection status check: pr-gate / pr-gate
+
 name: CI
 
 on:
@@ -14,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
+  pr-gate:
     uses: ./.github/workflows/reusable-quality.yml
     with:
       run_audit: true

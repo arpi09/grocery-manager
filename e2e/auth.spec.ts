@@ -14,7 +14,7 @@ test.describe('Authentication', () => {
 		await expect(page.getByTestId('language-switcher')).toBeVisible();
 	});
 
-	test('admin can sign in and reach hem', async ({ page }) => {
+	test('admin can sign in and reach hem @deploy-critical', async ({ page }) => {
 		await loginAsAdmin(page);
 		await expect(page).toHaveURL('/hem');
 		await expect(page.locator('section.home')).toBeVisible();

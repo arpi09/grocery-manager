@@ -1,0 +1,112 @@
+name: Release full
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Commit SHA (default: master tip)'
+        required: false
+        type: string
+      ref:
+        description: 'Git ref when sha is empty (default: master)'
+        required: false
+        default: master
+        type: string
+      deploy_after:
+        description: 'Trigger Deploy to production with tier=full after E2E passes'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: release-full
+  cancel-in-progress: false
+
+jobs:
+  resolve-sha:
+    name: resolve SHA
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_sha: ${{ steps.sha.outputs.sha }}
+    steps:
+      - name: Resolve target SHA
+        id: sha
+        env:
+          INPUT_SHA: ${{ inputs.sha }}
+          INPUT_REF: ${{ inputs.ref }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_SHA:-}" ]; then
+            sha="$INPUT_SHA"
+          else
+            sha=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${INPUT_REF:-master}" --jq .sha)
+          fi
+          echo "sha=${sha}" >> "$GITHUB_OUTPUT"
+
+  pr-gate:
+    needs: resolve-sha
+    uses: ./.github/workflows/reusable-quality.yml
+    with:
+      upload_build_artifact: true
+      deploy_sha: ${{ needs.resolve-sha.outputs.deploy_sha }}
+
+  e2e-full:
+    name: e2e (${{ matrix.shard }}/3)
+    needs: [resolve-sha, pr-gate]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.resolve-sha.outputs.deploy_sha }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v8
+        with:
+          name: sveltekit-build
+          path: build/
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v5
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+      - name: Install Playwright Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e:full -- --shard=${{ matrix.shard }}/3
+        env:
+          USE_PGLITE: 'true'
+          ADMIN_EMAIL: e2e-admin@example.com
+          ADMIN_PASSWORD: e2e-ci-password
+          PUBLIC_ORIGIN: http://localhost:5190
+          PLAYWRIGHT_PORT: '5190'
+          TURNSTILE_SKIP: 'true'
+          TURNSTILE_BYPASS: 'true'
+          EMAIL_VERIFICATION_SKIP: 'true'
+          E2E_MOCK_AI: 'true'
+          PUBLIC_E2E_DISABLE_POST_SURVEY: 'true'
+          CI: 'true'
+
+  trigger-deploy:
+    name: trigger deploy (tier=full)
+    needs: [resolve-sha, pr-gate, e2e-full]
+    if: inputs.deploy_after == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Start Deploy to production workflow
+        env:
+          DEPLOY_SHA: ${{ needs.resolve-sha.outputs.deploy_sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run deploy.yml -f sha="${DEPLOY_SHA}" -f deploy_tier=full
