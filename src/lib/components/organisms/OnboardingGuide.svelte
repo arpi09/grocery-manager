@@ -159,7 +159,6 @@
 		void trackProductEvent('onboarding_skipped');
 	}
 
-	}
 
 	function goBack() {
 		if (isFirstStep) {
