@@ -651,7 +651,7 @@
 
 	{#if hasInventory}
 
-		<div class="sticky-band">
+		<div class="sticky-band" class:sticky-band--compact={isCompact}>
 
 			<LocationTab active={location} />
 

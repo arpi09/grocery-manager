@@ -14,6 +14,8 @@
 		onExpiryFilterChange: (filter: InventoryExpiryFilter) => void;
 		sortChipLabel?: string;
 		onSortChipClick?: () => void;
+		/** Mobile inventory: collapse expiry chips into one row. */
+		compact?: boolean;
 	}
 
 	let {
@@ -21,7 +23,8 @@
 		expiryFilter,
 		onExpiryFilterChange,
 		sortChipLabel,
-		onSortChipClick
+		onSortChipClick,
+		compact = false
 	}: Props = $props();
 
 	const filterOptions: FilterOption[] = [
@@ -30,14 +33,57 @@
 		{ value: 'dated', label: t('inventory.expiryFilterDated') },
 		{ value: 'noExpiry', label: t('inventory.expiryFilterNoExpiry') }
 	];
+
+	let filtersOpen = $state(false);
+
+	const activeFilterLabel = $derived(
+		filterOptions.find((option) => option.value === expiryFilter)?.label ?? t('inventory.toolbarFilter')
+	);
+
+	const filterChipLabel = $derived(
+		expiryFilter === 'all' ? t('inventory.toolbarFilter') : activeFilterLabel
+	);
+
+	function selectFilter(value: InventoryExpiryFilter) {
+		onExpiryFilterChange(value);
+		filtersOpen = false;
+	}
+
+	function toggleFilters() {
+		filtersOpen = !filtersOpen;
+	}
 </script>
 
-<div class="list-toolbar" data-testid="inventory-list-toolbar">
-	<SearchInput bind:value={query} placeholder={t('inventory.searchPlaceholder')} />
+<div class="list-toolbar" class:list-toolbar--compact={compact} data-testid="inventory-list-toolbar">
+	<div class="toolbar-row" class:toolbar-row--primary={compact}>
+		<div class="search-wrap">
+			<SearchInput bind:value={query} placeholder={t('inventory.searchPlaceholder')} />
+		</div>
 
-	<div class="toolbar-row">
+		{#if compact}
+			<button
+				type="button"
+				class="filter-chip filter-chip--toggle"
+				aria-expanded={filtersOpen}
+				aria-controls="inventory-expiry-filter-panel"
+				data-testid="inventory-filter-toggle"
+				onclick={toggleFilters}
+			>
+				{filterChipLabel}
+			</button>
+		{/if}
+
+		{#if sortChipLabel && onSortChipClick}
+			<button type="button" class="sort-chip" onclick={onSortChipClick}>
+				{sortChipLabel}
+			</button>
+		{/if}
+	</div>
+
+	{#if compact && filtersOpen}
 		<div
-			class="filter-chips"
+			id="inventory-expiry-filter-panel"
+			class="filter-chips filter-chips--panel"
 			role="group"
 			aria-label={t('inventory.expiryFilterLabel')}
 			data-testid="inventory-expiry-filter"
@@ -47,19 +93,39 @@
 					type="button"
 					class="filter-chip"
 					aria-pressed={expiryFilter === option.value}
-					onclick={() => onExpiryFilterChange(option.value)}
+					onclick={() => selectFilter(option.value)}
 				>
 					{option.label}
 				</button>
 			{/each}
 		</div>
+	{:else if !compact}
+		<div class="toolbar-row">
+			<div
+				class="filter-chips"
+				role="group"
+				aria-label={t('inventory.expiryFilterLabel')}
+				data-testid="inventory-expiry-filter"
+			>
+				{#each filterOptions as option (option.value)}
+					<button
+						type="button"
+						class="filter-chip"
+						aria-pressed={expiryFilter === option.value}
+						onclick={() => onExpiryFilterChange(option.value)}
+					>
+						{option.label}
+					</button>
+				{/each}
+			</div>
 
-		{#if sortChipLabel && onSortChipClick}
-			<button type="button" class="sort-chip" onclick={onSortChipClick}>
-				{sortChipLabel}
-			</button>
-		{/if}
-	</div>
+			{#if sortChipLabel && onSortChipClick}
+				<button type="button" class="sort-chip" onclick={onSortChipClick}>
+					{sortChipLabel}
+				</button>
+			{/if}
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -70,10 +136,23 @@
 		min-width: 0;
 	}
 
+	.list-toolbar--compact {
+		gap: var(--space-xs);
+	}
+
 	.toolbar-row {
 		display: flex;
 		align-items: center;
 		gap: var(--space-sm);
+		min-width: 0;
+	}
+
+	.toolbar-row--primary {
+		flex-wrap: nowrap;
+	}
+
+	.search-wrap {
+		flex: 1;
 		min-width: 0;
 	}
 
@@ -83,6 +162,11 @@
 		min-width: 0;
 		flex-wrap: wrap;
 		gap: var(--space-xs);
+	}
+
+	.filter-chips--panel {
+		flex-wrap: wrap;
+		padding-top: var(--space-xs);
 	}
 
 	.filter-chip {
@@ -103,6 +187,12 @@
 		color: var(--color-text-muted);
 		cursor: pointer;
 		white-space: nowrap;
+	}
+
+	.filter-chip--toggle[aria-expanded='true'] {
+		border-color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+		color: var(--color-primary);
 	}
 
 	.filter-chip:hover {
