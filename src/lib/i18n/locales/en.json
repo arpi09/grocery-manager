@@ -1066,7 +1066,8 @@
 		"confidence": {
 			"high": "Confident",
 			"medium": "Still learning",
-			"hint": "More receipts and corrections make the estimate more reliable."
+			"hint": "More receipts and corrections make the estimate more reliable.",
+			"building": "Building memory (1/2)"
 		},
 		"facet": {
 			"shelfLifeType": "Shelf life",

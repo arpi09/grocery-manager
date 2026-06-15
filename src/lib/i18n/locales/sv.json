@@ -1037,7 +1037,8 @@
 		"confidence": {
 			"high": "Säker",
 			"medium": "Vi börjar lära",
-			"hint": "Fler kvitton och rättningar gör uppskattningen säkrare."
+			"hint": "Fler kvitton och rättningar gör uppskattningen säkrare.",
+			"building": "Bygger minne (1/2)"
 		},
 		"facet": {
 			"shelfLifeType": "Hållbarhet",

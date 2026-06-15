@@ -8,7 +8,8 @@ export function meetsMemoryExplorerMinSamples(sampleCount: number): boolean {
 }
 
 export function sampleCountToConfidenceTier(sampleCount: number): ConfidenceTier | null {
-	if (!meetsMemoryExplorerMinSamples(sampleCount)) return null;
+	if (sampleCount < 1) return null;
+	if (sampleCount < HOUSEHOLD_SHELF_LIFE_MIN_SAMPLES) return 'low';
 	if (sampleCount >= HIGH_SAMPLE_MIN) return 'high';
 	return 'medium';
 }

@@ -2,7 +2,6 @@ import { formatNormalizedKeyForDisplay } from '$lib/domain/learning/display-key'
 import { buildLocationExplanation } from '$lib/domain/learning/location-explanation';
 import { sampleCountToConfidenceTier } from '$lib/domain/learning/memory-confidence';
 import { buildShelfLifeExplanation } from '$lib/domain/learning/shelf-life-explanation';
-import { HOUSEHOLD_SHELF_LIFE_MIN_SAMPLES } from '$lib/domain/learning/shelf-life-learning';
 import type { ConfidenceTier, PredictionExplanation } from '$lib/domain/learning/prediction-trust';
 import type { StorageLocation } from '$lib/domain/location';
 import { DEFAULT_LOCALE, type Locale } from '$lib/i18n/locale';
@@ -103,7 +102,7 @@ export class HouseholdSuggestionsService {
 		householdId: string,
 		locale: Locale = DEFAULT_LOCALE
 	): Promise<HouseholdMemorySnapshot> {
-		const minSamples = HOUSEHOLD_SHELF_LIFE_MIN_SAMPLES;
+		const minSamples = 1;
 		const [shelfLifeRows, locationRows, inventoryMatches, receiptLineCount] = await Promise.all([
 			this.shelfLifeRepository.listByHousehold(householdId, minSamples),
 			this.locationRepository.listByHousehold(householdId, minSamples),
@@ -205,3 +204,4 @@ export class HouseholdSuggestionsService {
 		return this.locationRepository.delete(householdId, normalizedKey);
 	}
 }
+
