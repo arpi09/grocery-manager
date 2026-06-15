@@ -4,9 +4,9 @@
 
 | F?lt | V?rde |
 |------|--------|
-| **Uppdaterad** | 2026-06-14 |
-| **Prod SHA** | `f70c2c9c` ? deploy run [27507835082](https://github.com/arpi09/grocery-manager/actions/runs/27507835082) (2026-06-14) |
-| **Master SHA** | `f70c2c9c` ? narrative sprint (#75?#79) + UX #73/#74 + apphosting.yaml deploy fix |
+| **Uppdaterad** | 2026-06-15 |
+| **Prod SHA** | `e8b44e9d` — deploy run [27531246759](https://github.com/arpi09/grocery-manager/actions/runs/27531246759) (2026-06-15) — Bundle B (#82, #85, #88)
+| **Master SHA** | `e8b44e9d` — Bundle B home/inventory (#82, #85, #88) + audit slices #83–#84 on master
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
 
@@ -49,7 +49,7 @@ What users **see** when core Brain flags are on (prod target / master):
 
 Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 
-**USER_LOCAL smoke (pending ? PO gate):** Physical device + real receipt @ prod SHA `f70c2c9c`; agents link only ? **do not substitute or claim this pass.** Checklists: [Brain V1 smoke](./BRAIN_V1_PRODUCT_INTEGRATION.md#smoke-checklist-post-deploy) � [Weekly loop smoke](./HOUSEHOLD_LOOP_AUDIT.md#user_local--weekly-loop-smoke-checklist).
+**USER_LOCAL smoke (pending ? PO gate):** Physical device + real receipt @ prod SHA `f70c2c9c`; agents link only ? **do not substitute or claim this pass.** Checklists: [Brain V1 smoke](./BRAIN_V1_PRODUCT_INTEGRATION.md#smoke-checklist-post-deploy) � [Weekly loop smoke](./HOUSEHOLD_LOOP_AUDIT.md#user_local--weekly-loop-smoke-checklist).
 
 ## Tier snapshot
 
