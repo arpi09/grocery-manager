@@ -253,7 +253,7 @@ const sv: MarketingContent = {
 		badge: 'Pro är live',
 		title: 'Mer plats när hela hushållet är med',
 		lead:
-			'Pro ger plats för fler i hushållet, obegränsade kvitto-PDF och smartare listfyllning. Gratisplanen finns kvar om du vill prova i lugn och ro.',
+			'Pro ger plats för fler i hushållet och smartare listförslag från hushållets minne. Gratisplanen finns kvar om du vill prova i lugn och ro.',
 		bullets: [
 			'Smarta listförslag från hushållets minne',
 			'Full statistik och insikter för hushållet',
@@ -319,14 +319,14 @@ const sv: MarketingContent = {
 			}
 		],
 		featuresTitle: 'Allt du behöver i köket',
-		featuresLead: 'Från skanning till inköp — snabbt, tydligt och utan onödig friktion.',
+		featuresLead: 'Från gemensam lista till matkoll — snabbt, tydligt och utan onödig friktion.',
 		wasteReductionTitle: 'Mindre svinn när listan vet vad som finns',
 		wasteReductionLead:
 			'När hushållets minne känner era vanor blir det lättare att handla rätt mängd, använda det som går ut snart och slippa dubbelköp.',
 		wasteReductionPoints: [
 			'Utgångsdatum och varningar innan varor hinner bli dåliga.',
 			'Recept och inköpslista utifrån det som faktiskt finns hemma.',
-			'Kvitto-PDF och skanning — snabb start utan att fylla hela skafferiet manuellt.'
+			'Checkoffs och kvitton bygger minnet — så nästa veckas lista träffar rätt.'
 		],
 		stepsTitle: 'Veckohandel på tre steg',
 		stepsLead: 'Från gemensam lista till mindre svinn — utan krånglig setup.',
@@ -412,7 +412,7 @@ const sv: MarketingContent = {
 		title: 'Jämfört med andra appar du redan känner',
 		lead: 'Ärlig bild — vi vill inte sälja in något du redan har löst bra. Här är när Skaffu kompletterar eller skiljer sig.',
 		disclaimer:
-			'Bring!, ICA och Matdags är starka produkter i sina nischer. Vi fokuserar på butiksneutralt skafferi med lager som sanningskälla — inte på stammisrabatter eller gamification.',
+			'Bring!, ICA och Matdags är starka produkter i sina nischer. Vi fokuserar på gemensam veckolista och hushållets minne — butiksneutralt — inte på stammisrabatter eller gamification.',
 		themColumn: 'Det de gör bra',
 		usColumn: 'Det Skaffu lägger till',
 		rows: [
