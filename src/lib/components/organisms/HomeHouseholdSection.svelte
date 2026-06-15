@@ -33,7 +33,8 @@
 		shoppingListCount,
 		canWrite = false,
 		householdId = null,
-		pantryAllGood = false
+		pantryAllGood = false,
+		shoppingCadence = null
 	}: Props = $props();
 
 	const locale = $derived((isLocale(page.data.locale) ? page.data.locale : 'sv') as Locale);
