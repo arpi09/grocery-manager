@@ -88,7 +88,7 @@
 			<div class="first-coach" role="status" data-testid="pantry-bridge-first-coach">
 				<p>{t('shopping.pantryBridge.firstCoach')}</p>
 				<button type="button" class="coach-dismiss" onclick={onFirstCoachDismiss}>
-					{t('onboarding.gotIt')}
+					{t('pageHints.gotIt')}
 				</button>
 			</div>
 		{/if}
