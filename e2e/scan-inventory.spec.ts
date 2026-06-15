@@ -119,25 +119,25 @@ test.describe('Scan and inventory', () => {
 		await dismissOnboardingModalIfOpen(page);
 
 		await expect(page).toHaveURL(/\/inventory\/fridge/);
-		await expect(page.getByRole('link', { name: 'Kyl' })).toBeVisible();
-		await expect(page.getByRole('link', { name: 'Frys' })).toBeVisible();
+		await expect(page.getByRole('link', { name: /Kyl|Fridge/i })).toBeVisible();
+		await expect(page.getByRole('link', { name: /Frys|Freezer/i })).toBeVisible();
 	});
 
-	test('inventory list uses dense table with sortable columns', async ({ page }) => {
+	test('inventory list uses card stack with sort chips', async ({ page }) => {
 		await page.goto('/inventory/fridge');
 		await dismissOnboardingModalIfOpen(page);
 
 		const table = page.getByTestId('inventory-table');
 		if (!(await table.isVisible({ timeout: 15_000 }).catch(() => false))) {
-			test.skip(true, 'No inventory rows in fridge — table hidden behind empty state');
+			test.skip(true, 'No inventory rows in fridge — list hidden behind empty state');
 		}
-		await expect(table.getByRole('columnheader', { name: /Namn|Name/i })).toBeVisible();
-		await expect(table.getByRole('columnheader', { name: /Antal|Qty/i })).toBeVisible();
-		await expect(table.getByRole('columnheader', { name: /Bäst före|Expiry/i })).toBeVisible();
+		await expect(table.getByRole('button', { name: /Namn|Name/i })).toBeVisible();
+		await expect(table.getByRole('button', { name: /Antal|Qty|Quantity/i })).toBeVisible();
+		await expect(table.getByRole('button', { name: /Bäst före|Expiry/i })).toBeVisible();
 
-		const nameHeader = table.getByRole('columnheader', { name: /Namn|Name/i });
-		await nameHeader.getByRole('button').click();
-		await expect(table.locator('th[aria-sort="descending"]')).toHaveCount(1, { timeout: 5_000 });
+		const nameSort = table.getByRole('button', { name: /Namn|Name/i });
+		await nameSort.click();
+		await expect(nameSort).toHaveAttribute('aria-pressed', 'true');
 	});
 
 	test.describe('scan mobile manual add', () => {
