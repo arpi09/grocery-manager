@@ -106,12 +106,22 @@ describe('Household suggestions integration', () => {
 		});
 
 		const memory = await service.getMemorySnapshot(householdId, 'sv');
-		expect(memory.memoryFacets).toHaveLength(2);
-		expect(memory.memoryFacets.map((facet) => facet.normalizedKey).sort()).toEqual(['brod', 'yoghurt']);
+		expect(memory.memoryFacets).toHaveLength(3);
+		expect(memory.memoryFacets.map((facet) => facet.normalizedKey).sort()).toEqual([
+			'brod',
+			'mjolk',
+			'yoghurt'
+		]);
+		const mjolkFacet = memory.memoryFacets.find((facet) => facet.normalizedKey === 'mjolk');
+		expect(mjolkFacet?.confidenceTier).toBe('low');
+		expect(mjolkFacet?.sampleCount).toBe(1);
 
 		await service.resetLocationRule(householdId, 'yoghurt');
 		const afterForget = await service.getMemorySnapshot(householdId, 'sv');
-		expect(afterForget.memoryFacets).toHaveLength(1);
-		expect(afterForget.memoryFacets[0]?.normalizedKey).toBe('brod');
+		expect(afterForget.memoryFacets).toHaveLength(2);
+		expect(afterForget.memoryFacets.map((facet) => facet.normalizedKey).sort()).toEqual([
+			'brod',
+			'mjolk'
+		]);
 	});
 });
