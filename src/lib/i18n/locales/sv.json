@@ -948,7 +948,9 @@
 		"memoryChip": {
 			"interval": "var {interval}:e dag",
 			"fromReceipts": "från kvitton"
-		}
+		},
+		"learningToastAccept": "Skaffu kommer ihåg — tack för att du lade till det.",
+		"learningToastDismiss": "Okej — vi föreslår inte det igen på ett tag."
 	},
 	"householdBriefing": {
 		"title": "Det här kan du göra nu",
