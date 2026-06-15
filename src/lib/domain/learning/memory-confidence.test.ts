@@ -6,7 +6,7 @@ import {
 
 describe('memory-confidence', () => {
 	it('maps sample counts to confidence tiers', () => {
-		expect(sampleCountToConfidenceTier(1)).toBeNull();
+		expect(sampleCountToConfidenceTier(1)).toBe('low');
 		expect(sampleCountToConfidenceTier(2)).toBe('medium');
 		expect(sampleCountToConfidenceTier(4)).toBe('medium');
 		expect(sampleCountToConfidenceTier(5)).toBe('high');

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
+	import MemoryConfidenceBadge from '$lib/components/molecules/MemoryConfidenceBadge.svelte';
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
 	import type { StorageLocation } from '$lib/domain/location';
 	import { locationLabel } from '$lib/i18n/domain-labels';

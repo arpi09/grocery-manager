@@ -103,7 +103,7 @@ export class HouseholdSuggestionsService {
 		householdId: string,
 		locale: Locale = DEFAULT_LOCALE
 	): Promise<HouseholdMemorySnapshot> {
-		const minSamples = HOUSEHOLD_SHELF_LIFE_MIN_SAMPLES;
+		const minSamples = 1;
 		const [shelfLifeRows, locationRows, inventoryMatches, receiptLineCount] = await Promise.all([
 			this.shelfLifeRepository.listByHousehold(householdId, minSamples),
 			this.locationRepository.listByHousehold(householdId, minSamples),

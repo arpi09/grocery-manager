@@ -9,7 +9,11 @@
 	let { tier }: Props = $props();
 
 	const label = $derived(
-		tier === 'high' ? t('memory.confidence.high') : t('memory.confidence.medium')
+		tier === 'high'
+			? t('memory.confidence.high')
+			: tier === 'medium'
+				? t('memory.confidence.medium')
+				: t('memory.confidence.building')
 	);
 </script>
 
