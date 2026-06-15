@@ -1,8 +1,7 @@
 <script lang="ts">
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
-	import Button from '$lib/components/atoms/Button.svelte';
-	import PriceMemoryChip from '$lib/components/molecules/PriceMemoryChip.svelte';
+		import PriceMemoryChip from '$lib/components/molecules/PriceMemoryChip.svelte';
 	import RowOverflowMenu from '$lib/components/molecules/RowOverflowMenu.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { isMovingToAutoExpiredSoon } from '$lib/domain/auto-expired';
@@ -104,28 +103,16 @@
 			<span class="muted">—</span>
 		{/if}
 	</td>
-	<td class="col-actions">
+		<td class="col-actions">
 		{#if showConsumeActions}
-			<div class="action-group">
-				{#if onFinishOneTap}
-					<Button
-						type="button"
-						class="finish-btn"
-						loading={finishing}
-						loadingLabel={t('common.processing')}
-						aria-label={t('consume.finishNamed', { name: item.name })}
-						onclick={() => onFinishOneTap(item)}
-					>
-						{t('consume.finish')}
-					</Button>
-				{/if}
-				<RowOverflowMenu
-					itemId={item.id}
-					itemName={item.name}
-					disabled={finishing}
-					onPartialConsume={onPartialConsume ? () => onPartialConsume(item) : undefined}
-				/>
-			</div>
+			<RowOverflowMenu
+				itemId={item.id}
+				itemName={item.name}
+				disabled={finishing}
+				finishing={finishing}
+				onFinishOneTap={onFinishOneTap ? () => onFinishOneTap(item) : undefined}
+				onPartialConsume={onPartialConsume ? () => onPartialConsume(item) : undefined}
+			/>
 		{/if}
 	</td>
 </tr>
@@ -217,16 +204,6 @@
 		white-space: nowrap;
 	}
 
-	.action-group {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-		justify-content: flex-end;
-	}
 
-	.action-group :global(.finish-btn) {
-		min-height: var(--touch-target-min);
-		padding: 0.35rem 0.65rem;
-		font-size: 0.75rem;
-	}
+
 </style>

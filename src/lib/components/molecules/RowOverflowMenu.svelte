@@ -6,9 +6,11 @@
 		itemName: string;
 		disabled?: boolean;
 		onPartialConsume?: () => void;
+		onFinishOneTap?: () => void;
+		finishing?: boolean;
 	}
 
-	let { itemId, itemName, disabled = false, onPartialConsume }: Props = $props();
+	let { itemId, itemName, disabled = false, onPartialConsume, onFinishOneTap, finishing = false }: Props = $props();
 
 	let menuOpen = $state(false);
 
@@ -60,6 +62,20 @@
 			<a class="menu-item" role="menuitem" href="/item/{itemId}/edit" onclick={closeMenu}>
 				{t('inventory.editItem')}
 			</a>
+			{#if onFinishOneTap}
+				<button
+					type="button"
+					class="menu-item menu-action"
+					role="menuitem"
+					disabled={disabled || finishing}
+					onclick={() => {
+						closeMenu();
+						onFinishOneTap();
+					}}
+				>
+					{t('consume.finish')}
+				</button>
+			{/if}
 			{#if onPartialConsume}
 				<button
 					type="button"
