@@ -246,8 +246,14 @@ test.describe('Critical flows', () => {
 
 		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
 
-		await page.getByRole('button', { name: /Nästa|Next/i }).click();
+		await page.getByTestId('onboarding-begin-path').click();
 
+		for (let i = 0; i < 3; i++) {
+			await page.locator('#shopping-name').fill(`E2E onboard ${i} ${Date.now()}`);
+			await page.locator('form.add-form').getByRole('button', { name: /Lägg till|Add/i }).click();
+		}
+
+		await expect(page.getByTestId('onboarding-finish')).toBeVisible({ timeout: 30_000 });
 		await page.getByTestId('onboarding-finish').click();
 
 		await expect(page).toHaveURL('/hem');
