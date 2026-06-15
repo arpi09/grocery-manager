@@ -123,10 +123,6 @@
 	let shareLinkCopied = $state(false);
 	let shareLinkSubmitting = $state(false);
 	let shareMenuOpen = $state(false);
-	let listaInviteVisible = $state(false);
-	let listaInviteSharing = $state(false);
-	let listaInviteCopied = $state(false);
-	let listaInviteShownEventSent = $state(false);
 	let addSubmitting = $state(false);
 	let removingIds = $state(new Set<string>());
 	let pantrySheetOpen = $state(false);
@@ -245,9 +241,6 @@
 			}
 
 			await copyShareLink(body.url);
-			if (memberCount === 1) {
-				listaInviteVisible = true;
-			}
 
 			if (navigator.share && navigator.canShare?.({ url: body.url })) {
 				try {
@@ -486,81 +479,6 @@
 		undoPayload = null;
 	}
 
-	async function copyListaInviteLink(link: string) {
-		if (!browser) {
-			return;
-		}
-		await navigator.clipboard.writeText(link);
-		listaInviteCopied = true;
-		setTimeout(() => {
-			listaInviteCopied = false;
-		}, 2000);
-	}
-
-	async function shareListaInviteLink(link: string) {
-		if (!browser || !navigator.share) {
-			await copyListaInviteLink(link);
-			return;
-		}
-
-		try {
-			await navigator.share({
-				title: t('household.shareInvite'),
-				text: t('household.shareInviteNote'),
-				url: link
-			});
-		} catch (error) {
-			if (error instanceof DOMException && error.name === 'AbortError') {
-				return;
-			}
-			await copyListaInviteLink(link);
-		}
-	}
-
-	async function invitePartnerFromLista() {
-		if (!browser || listaInviteSharing) {
-			return;
-		}
-
-		void trackProductEvent('household_invite_prompt_clicked', { context: 'lista' });
-		listaInviteSharing = true;
-		try {
-			const response = await fetch('/api/household/share-invite', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ context: 'lista' })
-			});
-			const body = (await response.json().catch(() => ({}))) as {
-				ok?: boolean;
-				inviteUrl?: string;
-			};
-
-			if (response.ok && body.ok && body.inviteUrl) {
-				await shareListaInviteLink(body.inviteUrl);
-			}
-		} finally {
-			listaInviteSharing = false;
-		}
-	}
-
-	function dismissListaInvite() {
-		void trackProductEvent('household_invite_prompt_dismissed', { context: 'lista' });
-		listaInviteVisible = false;
-		listaInviteShownEventSent = false;
-	}
-
-	$effect(() => {
-		if (!listaInviteVisible || listaInviteShownEventSent) {
-			if (!listaInviteVisible) {
-				listaInviteShownEventSent = false;
-			}
-			return;
-		}
-
-		void trackProductEvent('household_invite_prompt_shown', { context: 'lista' });
-		listaInviteShownEventSent = true;
-	});
-
 	$effect(() => {
 		if (!shareMenuOpen) {
 			return;
@@ -594,63 +512,54 @@
 	tabindex={panelTabindex}
 	aria-label={t('shopping.listAria')}
 >
-	{#if items.length > 0 || checkedCount > 0}
-		<p class="intro">{t('shopping.intro')}</p>
-	{/if}
-
-	{#if canEdit}
-		<form
-			method="POST"
-			action="?/add"
-			use:enhance={bindSubmittingWithToast(
-				(v) => (addSubmitting = v),
-				() => {
-					showSuccessToast(t('actionToast.shoppingAdded'));
-					recordShoppingListItemActivation(get(page).data.user?.id);
-				}
-			)}
-			class="add-form"
-		>
-			<div class="add-primary">
-				<input
-					id="shopping-name"
-					name="name"
-					required
-					maxlength="200"
-					placeholder={t('shopping.itemPlaceholder')}
-					aria-label={t('shopping.itemPlaceholder')}
-				/>
-				<Button
-					type="submit"
-					loading={addSubmitting}
-					loadingLabel={t('common.saving')}
-					aria-label={t('shopping.addLabel')}
+	{#if canEdit && (items.length > 0 || checkedCount > 0)}
+		<div class="panel-toolbar">
+			<div class="share-menu-wrap">
+				<button
+					type="button"
+					class="overflow-trigger"
+					aria-expanded={shareMenuOpen}
+					aria-haspopup="menu"
+					aria-label={t('shopping.duoActionBar.aria')}
+					onclick={() => (shareMenuOpen = !shareMenuOpen)}
 				>
-					+
-				</Button>
+					⋯
+				</button>
+				{#if shareMenuOpen}
+					<div class="share-menu-panel" role="menu">
+						{#if shareLinkEnabled}
+							<button
+								type="button"
+								class="share-menu-item"
+								role="menuitem"
+								disabled={!hasShareableItems || shareLinkSubmitting}
+								onclick={shareListLink}
+							>
+								{shareLinkCopied ? t('common.copied') : t('shoppingListShare.shareLink')}
+							</button>
+						{/if}
+						<button
+							type="button"
+							class="share-menu-item"
+							role="menuitem"
+							disabled={unchecked.length === 0 && checkedCount === 0}
+							onclick={() => copyExportList('bring')}
+						>
+							{exportCopiedFormat === 'bring' ? t('common.copied') : t('shopping.exportBring')}
+						</button>
+						<button
+							type="button"
+							class="share-menu-item"
+							role="menuitem"
+							disabled={unchecked.length === 0 && checkedCount === 0}
+							onclick={() => copyExportList('anylist')}
+						>
+							{exportCopiedFormat === 'anylist' ? t('common.copied') : t('shopping.exportAnyList')}
+						</button>
+					</div>
+				{/if}
 			</div>
-			<details class="qty-optional">
-				<summary>
-					{t('shopping.quantityPlaceholder')} ({t('common.optional')})
-				</summary>
-				<div class="qty-row">
-					<input
-						name="quantity"
-						inputmode="decimal"
-						placeholder={t('shopping.quantityPlaceholder')}
-						aria-label={t('shopping.quantityPlaceholder')}
-					/>
-					<input
-						name="unit"
-						maxlength="40"
-						placeholder={t('shopping.unitPlaceholder')}
-						aria-label={t('shopping.unitPlaceholder')}
-					/>
-				</div>
-			</details>
-		</form>
-	{:else}
-		<p class="readonly">{t('inventory.readonly')}</p>
+		</div>
 	{/if}
 
 	{#if items.length === 0 && checkedCount === 0}
@@ -662,8 +571,40 @@
 			actionHref={shoppingEmptyScanHref}
 			primaryAnalyticsId="shopping.empty_scan_receipt"
 		/>
+		{#if canEdit}
+			<form
+				method="POST"
+				action="?/add"
+				use:enhance={bindSubmittingWithToast(
+					(v) => (addSubmitting = v),
+					() => {
+						showSuccessToast(t('actionToast.shoppingAdded'));
+						recordShoppingListItemActivation(get(page).data.user?.id);
+					}
+				)}
+				class="add-form"
+			>
+				<div class="add-primary">
+					<input
+						id="shopping-name"
+						name="name"
+						required
+						maxlength="200"
+						placeholder={t('shopping.itemPlaceholder')}
+						aria-label={t('shopping.itemPlaceholder')}
+					/>
+					<Button
+						type="submit"
+						loading={addSubmitting}
+						loadingLabel={t('common.saving')}
+						aria-label={t('shopping.addLabel')}
+					>
+						+
+					</Button>
+				</div>
+			</form>
+		{/if}
 	{:else}
-		<SearchInput bind:value={listQuery} placeholder={t('shopping.searchPlaceholder')} />
 		<ul class="list">
 			{#each unchecked as item (item.id)}
 				<ShoppingListRow
@@ -720,87 +661,65 @@
 			</div>
 		{/if}
 
-		{#if listaInviteVisible && shareLinkEnabled}
-			<aside
-				class="lista-invite-banner"
-				role="region"
-				aria-label={t('householdInvite.listaBannerAria')}
-				data-testid="lista-household-invite-banner"
-			>
-				<p class="lista-invite-body">{t('householdInvite.listaBannerBody')}</p>
-				<div class="lista-invite-actions">
-					<Button
-						type="button"
-						variant="primary"
-						disabled={listaInviteSharing}
-						data-analytics-id="household_invite.lista_cta"
-						onclick={invitePartnerFromLista}
-					>
-						{listaInviteSharing
-							? t('common.loading')
-							: listaInviteCopied
-								? t('common.copied')
-								: t('householdInvite.listaBannerCta')}
-					</Button>
-					<Button type="button" variant="ghost" onclick={dismissListaInvite}>
-						{t('householdInvite.listaBannerDismiss')}
-					</Button>
-				</div>
-			</aside>
-		{/if}
+		<SearchInput bind:value={listQuery} placeholder={t('shopping.searchPlaceholder')} />
 
 		{#if canEdit}
-			<div class="panel-footer">
-				<div class="share-menu-wrap">
-					<button
-						type="button"
-						class="text-action share-menu-trigger"
-						disabled={!hasShareableItems && unchecked.length === 0 && checkedCount === 0}
-						aria-expanded={shareMenuOpen}
-						aria-haspopup="menu"
-						aria-label={t('shopping.duoActionBar.aria')}
-						onclick={() => (shareMenuOpen = !shareMenuOpen)}
+			<form
+				method="POST"
+				action="?/add"
+				use:enhance={bindSubmittingWithToast(
+					(v) => (addSubmitting = v),
+					() => {
+						showSuccessToast(t('actionToast.shoppingAdded'));
+						recordShoppingListItemActivation(get(page).data.user?.id);
+					}
+				)}
+				class="add-form"
+			>
+				<div class="add-primary">
+					<input
+						id="shopping-name"
+						name="name"
+						required
+						maxlength="200"
+						placeholder={t('shopping.itemPlaceholder')}
+						aria-label={t('shopping.itemPlaceholder')}
+					/>
+					<Button
+						type="submit"
+						loading={addSubmitting}
+						loadingLabel={t('common.saving')}
+						aria-label={t('shopping.addLabel')}
 					>
-						{t('shopping.duoActionBar.shareList')}
-					</button>
-					{#if shareMenuOpen}
-						<div class="share-menu-panel" role="menu">
-							{#if shareLinkEnabled}
-								<button
-									type="button"
-									class="share-menu-item"
-									role="menuitem"
-									disabled={!hasShareableItems || shareLinkSubmitting}
-									onclick={shareListLink}
-								>
-									{shareLinkCopied ? t('common.copied') : t('shoppingListShare.shareLink')}
-								</button>
-							{/if}
-							<button
-								type="button"
-								class="share-menu-item"
-								role="menuitem"
-								disabled={unchecked.length === 0 && checkedCount === 0}
-								onclick={() => copyExportList('bring')}
-							>
-								{exportCopiedFormat === 'bring' ? t('common.copied') : t('shopping.exportBring')}
-							</button>
-							<button
-								type="button"
-								class="share-menu-item"
-								role="menuitem"
-								disabled={unchecked.length === 0 && checkedCount === 0}
-								onclick={() => copyExportList('anylist')}
-							>
-								{exportCopiedFormat === 'anylist' ? t('common.copied') : t('shopping.exportAnyList')}
-							</button>
-						</div>
-					{/if}
+						+
+					</Button>
 				</div>
-			</div>
+				<details class="qty-optional">
+					<summary>
+						{t('shopping.quantityPlaceholder')} ({t('common.optional')})
+					</summary>
+					<div class="qty-row">
+						<input
+							name="quantity"
+							inputmode="decimal"
+							placeholder={t('shopping.quantityPlaceholder')}
+							aria-label={t('shopping.quantityPlaceholder')}
+						/>
+						<input
+							name="unit"
+							maxlength="40"
+							placeholder={t('shopping.unitPlaceholder')}
+							aria-label={t('shopping.unitPlaceholder')}
+						/>
+					</div>
+				</details>
+			</form>
+		{:else}
+			<p class="readonly">{t('inventory.readonly')}</p>
 		{/if}
 	{/if}
 </section>
+
 
 {#if alwaysNudgeLocation && shoppingToPantryMode !== 'always'}
 	<div class="always-nudge">

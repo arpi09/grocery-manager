@@ -104,7 +104,7 @@
 
 	const swipeEnabled = $derived(showConsumeActions && !finishing);
 
-	const partialSwipeLabel = $derived(t('consume' + '.partial' as 'consume.finish'));
+	const partialSwipeLabel = $derived(t('consume.swipePartial'));
 
 	function resetSwipe() {
 		swipeDragging = false;
@@ -229,7 +229,7 @@
 	<div class="swipe-row" data-testid="inventory-compact-row">
 		<div class="swipe-bg" aria-hidden="true">
 			<span class="swipe-hint swipe-hint--partial">{partialSwipeLabel}</span>
-			<span class="swipe-hint swipe-hint--finish">{t('consume.finish')}</span>
+			<span class="swipe-hint swipe-hint--finish">{t('consume.swipeFinish')}</span>
 		</div>
 		<div
 			class="row swipe-content product-row"

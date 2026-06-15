@@ -162,19 +162,16 @@ test.describe('Scan and inventory', () => {
 		});
 	});
 
-	test('inventory add block links to scan hub with manual secondary', async ({ page }) => {
+	test('inventory add button opens add sheet with four choices', async ({ page }) => {
 		await page.goto('/inventory/fridge');
 		await dismissOnboardingModalIfOpen(page);
 
-		const addGoods = page.getByTestId('inventory-add-goods');
-		const primary = addGoods.getByRole('link', {
-			name: /Lägg till varor|Add items/i
-		});
-		await expect(primary).toBeVisible({ timeout: 15_000 });
-		await expect(primary).toHaveAttribute('href', /\/scan\?.*mode=hub/);
-
-		const manualLink = addGoods.getByRole('link', { name: /Manuellt|Manual/i });
-		await expect(manualLink).toBeVisible({ timeout: 15_000 });
-		await expect(manualLink).toHaveAttribute('href', /\/item\/new/);
+		await page.getByTestId('inventory-add-goods').click();
+		const sheet = page.getByTestId('inventory-add-sheet');
+		await expect(sheet).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('inventory-add-receipt')).toBeVisible();
+		await expect(page.getByTestId('inventory-add-photo')).toBeVisible();
+		await expect(page.getByTestId('inventory-add-barcode')).toBeVisible();
+		await expect(page.getByTestId('inventory-add-manual')).toBeVisible();
 	});
 });

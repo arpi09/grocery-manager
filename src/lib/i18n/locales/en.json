@@ -300,7 +300,24 @@
 		"taglineExpiry": "Something expires soon — eat first or plan dinner",
 		"nextActionLista": "Continue weekly shop",
 		"cadenceLine": "You usually shop on {weekday}",
-		"cadenceLineStore": "You usually shop on {weekday} · often at {store}"
+		"cadenceLineStore": "You usually shop on {weekday} · often at {store}",
+		"hero": {
+			"listaTitle": "{count, plural, one {# item to shop} other {# items to shop}}",
+			"listaCta": "Open shopping list",
+			"coldReceipt": "Scan receipt",
+			"coldPhoto": "Photo fridge/pantry",
+			"expiryTitle": "Something expires soon",
+			"expiryCta": "See expiring items"
+		},
+		"memory": {
+			"ariaLabel": "Household memory",
+			"replenishmentHint": "You usually buy {name}"
+		},
+		"expiring": {
+			"ariaLabel": "Expiring soon",
+			"daysLeft": "{days, plural, one {# day left} other {# days left}}",
+			"moreLink": "View all"
+		}
 	},
 	"dashboard": {
 		"title": "Home",
@@ -390,6 +407,13 @@
 			"title": "Receipt",
 			"subtitle": "Multiple items at once.",
 			"cta": "Scan receipt"
+		},
+		"choiceHub": {
+			"title": "What do you want to add?",
+			"receipt": "Receipt — full shop",
+			"photo": "Photo fridge/pantry — multiple items",
+			"barcode": "Barcode — one item",
+			"manualLink": "Manual"
 		}
 	},
 	"settings": {
@@ -753,7 +777,7 @@
 	},
 	"inventory": {
 		"title": "Your pantry",
-		"subtitle": "Track what you have at home — update after shopping.",
+		"subtitle": "What you have at home — updated after weekly shopping.",
 		"itemCountSubtitle": "{count} {count, plural, one {active item} other {active items}}",
 		"emptyTitle": "Empty in {location}",
 		"noResults": "No matches",
@@ -790,8 +814,8 @@
 		"mergeExisting": "Already in pantry — merge with {name} ({quantity} {unit})?",
 		"clearAutoExpired": "Clear all expired",
 		"clearAutoExpiredAria": "Remove all {count} auto-expired items",
-		"bulkExpiryBanner": "Several items lack best-before dates — we can suggest dates from product type.",
-		"bulkExpiryAction": "Infer dates",
+		"bulkExpiryBanner": "Some items lack dates — we can guess from product type.",
+		"bulkExpiryAction": "Guess dates",
 		"finishedBadge": "Done",
 		"finishedSection": "Done items",
 		"searchPlaceholder": "Search items…",
@@ -825,12 +849,26 @@
 		"filterEmptyTitle": "No items match this filter",
 		"filterEmptyDescription": "Try another filter or show all items.",
 		"filterClear": "Show all items",
-		"noExpiryHint": "No date"
+		"noExpiryHint": "No date",
+		"addSheet": {
+			"title": "Add",
+			"receipt": "Receipt — full shop",
+			"photo": "Photo fridge/pantry",
+			"barcode": "Barcode — one item",
+			"manual": "Manual"
+		},
+		"filterSheet": {
+			"title": "Filter and sort",
+			"apply": "Done",
+			"sections": "Show sections"
+		}
 	},
 	"consume": {
 		"sectionTitle": "Log usage",
 		"sectionHelp": "Updates stock without changing name or location",
 		"finish": "Done",
+		"swipeFinish": "Done",
+		"swipePartial": "Partial",
 		"partial": "Partial…",
 		"finishNamed": "Mark {name} as finished",
 		"logUsage": "Partial",
@@ -2055,7 +2093,7 @@
 		"stepOf": "Step {current} of {total}",
 		"welcomeBody": "Skaffu helps you keep track of food at home — so you shop smarter, waste less, and cook from what you already have.",
 		"welcomeBodyShort": "Build a weekly shopping list — three items is enough to get started.",
-		"welcomeBodyShoppingList": "Skaffu is your shared weekly shopping list. Add three items you buy every week — shop together and keep the list updated.",
+		"welcomeBodyShoppingList": "This is your shared shopping list. Add what you usually buy — invite your partner when ready.",
 		"brainLearnLine": "The weekly list drives shopping — Skaffu estimates best-before when you fill the pantry.",
 		"fillPantrySecondary": "Fill pantry",
 		"quickStart": "Quick start",
@@ -2150,11 +2188,11 @@
 		"landingExpiring": "Expiring soon",
 		"landingHeadline": "Your shared weekly list",
 		"landingExpiringCount": "{count} soon",
-		"beatWhatTitle": "What is Skaffu?",
-		"beatLoopTitle": "The weekly loop",
-		"beatHowTitle": "How to get started",
-		"beatLoopBody": "Shared list → shop together → check off → pantry updates. Receipts and checkoffs build household memory for next week.",
-		"beatHowBody": "Open the shopping list and add three items you buy every week. Invite your partner when the list feels useful."
+		"beatWhatTitle": "This is your shared shopping list",
+		"beatLoopTitle": "Check off as you shop",
+		"beatHowTitle": "Receipts build memory",
+		"beatLoopBody": "Check off rows as you shop — the list stays updated for the whole household.",
+		"beatHowBody": "Receipts and checkoffs build household memory — better suggestions next week."
 	},
 	"pageHints": {
 		"dialogAria": "Quick tip for this page",

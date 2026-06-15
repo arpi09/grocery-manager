@@ -17,6 +17,7 @@
 
 	import InventoryDataTable from '$lib/components/molecules/InventoryDataTable.svelte';
 
+	import InventoryFilterSheet from '$lib/components/molecules/InventoryFilterSheet.svelte';
 	import ListToolbar from '$lib/components/molecules/ListToolbar.svelte';
 
 	import LocationTab from '$lib/components/molecules/LocationTab.svelte';
@@ -161,6 +162,8 @@
 	let finishedLoaded = $state(false);
 
 	let isCompact = $state(false);
+	let stickyCollapsed = $state(false);
+	let filterSheetOpen = $state(false);
 
 	let consumeItem = $state<InventoryItem | null>(null);
 	let expiryFilter = $state<InventoryExpiryFilter>('all');
@@ -257,11 +260,18 @@
 		if (!browser) return;
 
 		return subscribeCompactInventoryViewport((compact) => {
-
 			isCompact = compact;
-
 		});
+	});
 
+	$effect(() => {
+		if (!browser) return;
+		const onScroll = () => {
+			stickyCollapsed = window.scrollY > 56;
+		};
+		onScroll();
+		window.addEventListener('scroll', onScroll, { passive: true });
+		return () => window.removeEventListener('scroll', onScroll);
 	});
 
 
@@ -380,40 +390,12 @@
 
 
 
-	function toggleMobileSortChip() {
-
-		if (sortKey === 'name') {
-
-			sortKey = 'expiry';
-
-			sortDirection = 'asc';
-
-			return;
-
-		}
-
-		sortKey = 'name';
-
-		sortDirection = 'asc';
-
-	}
-
-
-
 	function setExpiryFilter(next: InventoryExpiryFilter) {
 		if (next === expiryFilter) return;
 		expiryFilter = next;
 		if (!browser) return;
 		void goto(buildInventoryListUrl(inventoryPath, next, page.url.searchParams), { replaceState: true, keepFocus: true, noScroll: true });
 	}
-
-	function mobileSortChipLabel(): string {
-
-		return sortKey === 'expiry' ? t('inventory.columnExpiry') : t('inventory.columnName');
-
-	}
-
-
 
 	function openPartialConsumeSheet(item: InventoryItem) {
 		consumeItem = item;
@@ -649,7 +631,12 @@
 
 <div class="list">
 
-	<div class="sticky-band" class:sticky-band--compact={isCompact} class:sticky-band--locations-only={!hasInventory}>
+	<div
+		class="sticky-band"
+		class:sticky-band--compact={isCompact}
+		class:sticky-band--collapsed={stickyCollapsed}
+		class:sticky-band--locations-only={!hasInventory}
+	>
 
 		<LocationTab active={location} />
 
@@ -660,9 +647,9 @@
 				expiryFilter={expiryFilter}
 				onExpiryFilterChange={setExpiryFilter}
 				compact={isCompact}
-				sortChipLabel={isCompact ? mobileSortChipLabel() : undefined}
-				onSortChipClick={isCompact ? toggleMobileSortChip : undefined}
-				sectionChips={isCompact
+				sortChipLabel={undefined}
+				onSortChipClick={undefined}
+				sectionChips={isCompact && !stickyCollapsed
 					? [
 							...(autoExpiredTotal > 0
 								? [
@@ -697,6 +684,12 @@
 						]
 					: undefined}
 			/>
+
+			{#if isCompact}
+				<button type="button" class="filter-sheet-trigger" onclick={() => (filterSheetOpen = true)}>
+					{t('inventory.toolbarFilter')}
+				</button>
+			{/if}
 
 			{#if !isCompact && (autoExpiredTotal > 0 || finishedTotal > 0)}
 
@@ -774,6 +767,22 @@
 
 	</div>
 
+
+
+	
+	<InventoryFilterSheet
+		open={filterSheetOpen}
+		expiryFilter={expiryFilter}
+		sortKey={sortKey}
+		sortDirection={sortDirection}
+		sectionChips={isCompact ? [
+			...(autoExpiredTotal > 0 ? [{ label: showAutoExpired ? t('inventory.hideAutoExpired') : t('inventory.showAutoExpired'), pressed: showAutoExpired, loading: loadingAutoExpired, count: autoExpiredTotal, onClick: toggleAutoExpired }] : []),
+			...(finishedTotal > 0 ? [{ label: showFinished ? t('inventory.hideFinished') : t('inventory.showFinished'), pressed: showFinished, loading: loadingFinished, count: finishedTotal, onClick: toggleFinished }] : [])
+		] : []}
+		onExpiryFilterChange={setExpiryFilter}
+		onSortChange={(key, direction) => { sortKey = key; sortDirection = direction; }}
+		onClose={() => (filterSheetOpen = false)}
+	/>
 
 
 	{#if searching}
@@ -1142,23 +1151,36 @@
 
 
 	.sticky-band {
-
 		position: sticky;
-
 		top: var(--sticky-below-header);
-
 		z-index: var(--z-sticky-chrome);
-
 		display: flex;
-
 		flex-direction: column;
-
 		gap: var(--space-sm);
-
 		padding-bottom: var(--space-xs);
-
 		background: var(--color-bg);
+	}
 
+	.sticky-band--collapsed :global(.chip-row),
+	.sticky-band--collapsed :global(.filter-chips--panel) {
+		display: none;
+	}
+
+	.filter-sheet-trigger {
+		align-self: flex-start;
+		min-height: var(--touch-target-min);
+		padding: var(--space-xs) var(--space-sm);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		font-size: 0.8125rem;
+		font-weight: 600;
+		font-family: inherit;
+		cursor: pointer;
+	}
+
+	.sticky-band--collapsed .filter-sheet-trigger {
+		display: none;
 	}
 
 

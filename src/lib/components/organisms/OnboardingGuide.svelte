@@ -5,10 +5,7 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
-	import OnboardingCelebrateIllustration from '$lib/components/organisms/OnboardingCelebrateIllustration.svelte';
-	import OnboardingStepIllustration from '$lib/components/organisms/OnboardingStepIllustration.svelte';
 	import { trackProductEvent } from '$lib/client/product-events';
-	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { t, type MessageKey } from '$lib/i18n';
 	import {
 		ONBOARDING_PROGRESS_EVENT,
@@ -18,29 +15,19 @@
 		clearCelebrationPending,
 		completeOnboarding,
 		dismissOnboarding,
-		getActivationProgress,
 		isActivationComplete,
 		isOnboardingExcludedPath,
 		setActivationPath,
 		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
 	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
-	import {
-		canGoBackOnboarding,
-		getEncourageKeyForStepIndex,
-		isLastOnboardingStep,
-		type OnboardingEncourageKey,
-		type OnboardingStepId
-	} from '$lib/utils/onboarding-steps';
-	import { manualAddHref, scanModeHref } from '$lib/utils/scan-nav';
+	import { canGoBackOnboarding, isLastOnboardingStep, type OnboardingStepId } from '$lib/utils/onboarding-steps';
 
 	interface Step {
 		id: OnboardingStepId;
 		titleKey: MessageKey;
 		bodyKey: MessageKey;
 	}
-
-	type PathChoice = 'photo' | 'barcode' | 'receipt' | 'manual' | 'shopping';
 
 	const stepDefinitions: Step[] = [
 		{
@@ -60,72 +47,27 @@
 		}
 	];
 
-	const pantrySecondaryChoices: {
-		id: PathChoice;
-		labelKey: MessageKey;
-		testId: string;
-	}[] = [
-		{ id: 'receipt', labelKey: 'onboarding.pathChooseReceipt', testId: 'onboarding-path-receipt' },
-		{ id: 'photo', labelKey: 'onboarding.pathChoosePhoto', testId: 'onboarding-path-photo' },
-		{ id: 'barcode', labelKey: 'onboarding.pathChooseBarcode', testId: 'onboarding-path-barcode' },
-		{ id: 'manual', labelKey: 'onboarding.pathChooseManual', testId: 'onboarding-path-manual' }
-	];
-
-	const pathGuideBodyKeys: Record<PathChoice, MessageKey> = {
-		photo: 'onboarding.pathGuidePhotoBody',
-		barcode: 'onboarding.pathGuideBarcodeBody',
-		receipt: 'onboarding.pathGuideReceiptBody',
-		manual: 'onboarding.pathGuideManualBody',
-		shopping: 'onboarding.pathGuideShoppingBody'
-	};
-
-	const pathGuideCtaKeys: Record<PathChoice, MessageKey> = {
-		photo: 'onboarding.ctaPhotoFirst',
-		barcode: 'onboarding.ctaBarcodeFirst',
-		receipt: 'onboarding.ctaReceipt',
-		manual: 'onboarding.ctaManual',
-		shopping: 'onboarding.startShoppingList'
-	};
-
 	let open = $state(false);
 	let stepIndex = $state(0);
 	let stepDirection = $state<'forward' | 'back'>('forward');
 	let registrationWelcomeDone = $state(false);
-	let selectedPath = $state<PathChoice | null>('shopping');
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
-	const returnTo = APP_HOME_PATH;
-
-	const pathGuideTitleKey = $derived(
-		selectedPath && selectedPath !== 'shopping' ? 'onboarding.pathGuideTitle' : 'onboarding.beatLoopTitle'
-	);
 
 	const steps = $derived(
 		stepDefinitions.map((step, index) => ({
 			...step,
-			title:
-				step.id === 'pathGuide' && selectedPath
-					? t(pathGuideTitleKey as MessageKey)
-					: t(step.titleKey),
+			title: t(step.titleKey),
 			subtitle: t('onboarding.stepOf', { current: index + 1, total: ONBOARDING_STEP_COUNT }),
-			body:
-				step.id === 'pathGuide' && selectedPath
-					? t(pathGuideBodyKeys[selectedPath])
-					: t(step.bodyKey)
+			body: t(step.bodyKey)
 		}))
 	);
 
 	const currentStep = $derived(steps[stepIndex]);
 	const isFirstStep = $derived(stepIndex === 0);
 	const isLastStep = $derived(isLastOnboardingStep(stepIndex));
-	const encourageKey = $derived(getEncourageKeyForStepIndex(stepIndex));
-	const encourageCopy = $derived(
-		encourageKey ? t(`onboarding.${encourageKey}` as `onboarding.${OnboardingEncourageKey}`) : null
-	);
-	const activationProgress = $derived(browser && userId ? getActivationProgress(userId) : null);
 	const canGoBack = $derived(canGoBackOnboarding(stepIndex));
-	const pathGuideCta = $derived(selectedPath ? t(pathGuideCtaKeys[selectedPath]) : null);
 
 	function tryOpenGuide() {
 		if (!browser || !userId || isOnboardingExcludedPath(pathname) || !shouldShowOnboarding(userId)) {
@@ -141,7 +83,6 @@
 			return;
 		}
 		stepIndex = 0;
-		selectedPath = 'shopping';
 		open = true;
 	}
 
@@ -150,63 +91,36 @@
 	}
 
 	function skipGuide() {
-		if (!userId) {
-			return;
-		}
+		if (!userId) return;
 		dismissOnboarding(userId);
 		closeGuide();
 		void trackProductEvent('onboarding_skipped');
 	}
 
 	function goBack() {
-		if (isFirstStep) {
-			return;
-		}
+		if (isFirstStep) return;
 		stepDirection = 'back';
 		stepIndex -= 1;
 	}
 
-	function finishGuide() {
-		if (!userId) {
+	function advanceStep() {
+		if (userId && stepIndex === 0) {
+			setActivationPath('shopping', userId);
+		}
+		if (isLastStep) {
+			void finishGuideToList();
 			return;
 		}
+		stepDirection = 'forward';
+		stepIndex += 1;
+	}
+
+	async function finishGuideToList() {
+		if (!userId) return;
 		clearCelebrationPending(userId);
 		completeOnboarding(userId);
 		closeGuide();
-		void goto(APP_HOME_PATH);
-	}
-
-	function choosePath(path: PathChoice) {
-		selectedPath = path;
-		if (userId) {
-			if (path === 'shopping') {
-				setActivationPath('shopping', userId);
-			} else if (path === 'manual') {
-				setActivationPath('photo', userId);
-			} else {
-				setActivationPath(path, userId);
-			}
-		}
-		stepDirection = 'forward';
-		stepIndex = 1;
-	}
-
-	async function beginSelectedPath() {
-		if (!selectedPath) {
-			return;
-		}
-		closeGuide();
-		const href =
-			selectedPath === 'photo'
-				? scanModeHref('photo', returnTo)
-				: selectedPath === 'barcode'
-					? scanModeHref('barcode', returnTo)
-					: selectedPath === 'receipt'
-						? scanModeHref('receipt', returnTo)
-						: selectedPath === 'manual'
-							? manualAddHref(returnTo)
-							: '/inkop?quick=1';
-		await goto(href);
+		await goto('/inkop?quick=1');
 	}
 
 	function syncCelebrateStep() {
@@ -218,52 +132,35 @@
 	}
 
 	$effect(() => {
-		if (!browser) {
-			return;
-		}
-
+		if (!browser) return;
 		void pathname;
 		void userId;
 		tryOpenGuide();
 	});
 
 	$effect(() => {
-		if (!browser) {
-			return;
-		}
-
+		if (!browser) return;
 		const onReplay = () => {
-			if (!userId || isOnboardingExcludedPath(pathname)) {
-				return;
-			}
+			if (!userId || isOnboardingExcludedPath(pathname)) return;
 			stepIndex = 0;
-			selectedPath = null;
 			open = true;
 		};
-
 		window.addEventListener(ONBOARDING_REPLAY_EVENT, onReplay);
 		return () => window.removeEventListener(ONBOARDING_REPLAY_EVENT, onReplay);
 	});
 
 	$effect(() => {
-		if (!browser) {
-			return;
-		}
-
+		if (!browser) return;
 		const onWelcomeDone = () => {
 			registrationWelcomeDone = true;
 			tryOpenGuide();
 		};
-
 		window.addEventListener(REGISTRATION_WELCOME_DONE_EVENT, onWelcomeDone);
 		return () => window.removeEventListener(REGISTRATION_WELCOME_DONE_EVENT, onWelcomeDone);
 	});
 
 	$effect(() => {
-		if (!browser || !userId || page.url.searchParams.get('welcome') !== '1') {
-			return;
-		}
-
+		if (!browser || !userId || page.url.searchParams.get('welcome') !== '1') return;
 		const shownKey = `home-pantry-registration-welcome-shown:${userId}`;
 		if (localStorage.getItem(shownKey) === '1') {
 			registrationWelcomeDone = true;
@@ -272,21 +169,15 @@
 	});
 
 	$effect(() => {
-		if (!browser || !open || !userId) {
-			return;
-		}
-
+		if (!browser || !open || !userId) return;
 		syncCelebrateStep();
-
 		const onProgress = () => syncCelebrateStep();
 		window.addEventListener(ONBOARDING_PROGRESS_EVENT, onProgress);
 		return () => window.removeEventListener(ONBOARDING_PROGRESS_EVENT, onProgress);
 	});
 
 	$effect(() => {
-		if (!open) {
-			return;
-		}
+		if (!open) return;
 		return registerBlockingOverlay();
 	});
 </script>
@@ -327,80 +218,18 @@
 			></div>
 		</div>
 
-		{#if encourageCopy}
-			<p class="encourage" role="status">{encourageCopy}</p>
-		{/if}
-
-		<div class="illustration-wrap">
-			{#if currentStep.id === 'celebrate'}
-				<OnboardingCelebrateIllustration />
-			{:else}
-				<OnboardingStepIllustration step={currentStep.id} path={selectedPath} />
-			{/if}
-		</div>
-
 		<p class="step-body">{currentStep.body}</p>
 
-		{#if currentStep.id === 'welcome'}
-			<p class="brain-line">{t('onboarding.brainLearnLine')}</p>
-			<div class="activation-choices">
-				<Button
-					type="button"
-					fullWidth
-					variant="primary"
-					data-testid="onboarding-path-shopping"
-					data-analytics-id="onboarding.path_shopping"
-					onclick={() => choosePath('shopping')}
-				>
-					{t('onboarding.startShoppingList')}
-				</Button>
-				<details class="pantry-secondary">
-					<summary>{t('onboarding.fillPantrySecondary')}</summary>
-					<div class="path-secondary">
-						{#each pantrySecondaryChoices as choice, index (choice.id)}
-							{#if index > 0}
-								<span class="path-sep" aria-hidden="true">-+</span>
-							{/if}
-							<button
-								type="button"
-								class="path-link"
-								data-testid={choice.testId}
-								data-analytics-id="onboarding.path_{choice.id}"
-								onclick={() => choosePath(choice.id)}
-							>
-								{t(choice.labelKey)}
-							</button>
-						{/each}
-					</div>
-				</details>
-			</div>
-		{/if}
-
-		{#if currentStep.id === 'pathGuide' && selectedPath}
-			{#if activationProgress?.inProgress && selectedPath === 'shopping' && activationProgress.shoppingListCount > 0}
-				<p class="progress-note" role="status">
-					{t('onboarding.shoppingListProgress', {
-						count: activationProgress.shoppingListCount,
-						goal: activationProgress.shoppingListGoal
-					})}
-				</p>
-			{/if}
-			<Button
-				type="button"
-				fullWidth
-				data-testid="onboarding-begin-path"
-				data-analytics-id="onboarding.begin_path"
-				onclick={beginSelectedPath}
-			>
-				{pathGuideCta}
-			</Button>
-		{/if}
-
-		{#if currentStep.id === 'celebrate'}
-			<Button type="button" fullWidth data-testid="onboarding-finish" data-analytics-id="onboarding.finish" onclick={finishGuide}>
-				{t('onboarding.startUsingApp')}
-			</Button>
-		{/if}
+		<Button
+			type="button"
+			fullWidth
+			variant="primary"
+			data-testid={isLastStep ? 'onboarding-finish' : 'onboarding-next'}
+			data-analytics-id={isLastStep ? 'onboarding.finish' : 'onboarding.next'}
+			onclick={advanceStep}
+		>
+			{isLastStep ? t('onboarding.openShoppingList') : t('common.next')}
+		</Button>
 	</div>
 
 	{#snippet footer()}
@@ -416,12 +245,11 @@
 				{/each}
 			</div>
 
-			{#if !isLastStep && stepIndex !== 0}
+			{#if !isFirstStep}
 				<div class="footer-actions">
 					<Button type="button" variant="ghost" disabled={!canGoBack} onclick={goBack}>
 						{t('common.previous')}
 					</Button>
-	
 				</div>
 			{/if}
 		</div>
@@ -445,7 +273,6 @@
 			transform: none !important;
 			border-radius: 0 !important;
 			border: 0;
-			animation: onboarding-fullscreen-in 0.2s ease-out;
 		}
 
 		:global(.onboarding-panel .modal-body) {
@@ -462,17 +289,6 @@
 		overflow-y: auto;
 	}
 
-	@keyframes onboarding-fullscreen-in {
-		from {
-			opacity: 0;
-			transform: translateY(12px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
 	.skip-link {
 		border: none;
 		background: transparent;
@@ -484,26 +300,11 @@
 		cursor: pointer;
 	}
 
-	.skip-link:hover {
-		color: var(--color-text);
-	}
-
 	.step-content {
-		position: relative;
-		overflow: hidden;
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-lg);
 		flex: 1;
-		animation: step-enter 0.35s ease-out;
-	}
-
-	.step-content.step-forward {
-		animation-name: step-enter-forward;
-	}
-
-	.step-content.step-back {
-		animation-name: step-enter-back;
 	}
 
 	.progress-track {
@@ -517,68 +318,8 @@
 	.progress-fill {
 		height: 100%;
 		border-radius: inherit;
-		background: linear-gradient(
-			90deg,
-			var(--color-primary),
-			color-mix(in srgb, var(--color-primary) 70%, #7dd3fc)
-		);
+		background: var(--color-primary);
 		transition: width 0.35s ease;
-	}
-
-	.illustration-wrap {
-		position: relative;
-	}
-
-	@keyframes step-enter-forward {
-		from {
-			opacity: 0;
-			transform: translateX(1.25rem);
-		}
-		to {
-			opacity: 1;
-			transform: translateX(0);
-		}
-	}
-
-	@keyframes step-enter-back {
-		from {
-			opacity: 0;
-			transform: translateX(-1.25rem);
-		}
-		to {
-			opacity: 1;
-			transform: translateX(0);
-		}
-	}
-
-	@keyframes step-enter {
-		from {
-			opacity: 0;
-		}
-		to {
-			opacity: 1;
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.step-content,
-		:global(.onboarding-panel) {
-			animation: none;
-		}
-
-		.progress-fill {
-			transition: none;
-		}
-	}
-
-	.encourage {
-		margin: 0;
-		font-size: 0.9375rem;
-		font-weight: 600;
-		color: var(--color-primary);
-		text-align: center;
-		line-height: 1.4;
-		overflow-wrap: anywhere;
 	}
 
 	.step-body {
@@ -589,82 +330,6 @@
 		text-align: center;
 		max-width: 22rem;
 		margin-inline: auto;
-		overflow-wrap: anywhere;
-		word-break: break-word;
-	}
-
-	.brain-line {
-		margin: calc(-1 * var(--space-sm)) 0 0;
-		font-size: 0.875rem;
-		line-height: 1.5;
-		color: var(--color-text-muted);
-		text-align: center;
-		max-width: 22rem;
-		margin-inline: auto;
-	}
-
-	.activation-choices {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-		width: 100%;
-	}
-
-	.pantry-secondary {
-		margin-top: var(--space-xs);
-	}
-
-	.pantry-secondary summary {
-		cursor: pointer;
-		font-size: 0.9375rem;
-		font-weight: 600;
-		color: var(--color-text-muted);
-		text-align: center;
-		list-style: none;
-		padding: var(--space-xs);
-	}
-
-	.pantry-secondary summary::-webkit-details-marker {
-		display: none;
-	}
-
-	.pantry-secondary[open] summary {
-		margin-bottom: var(--space-xs);
-	}
-
-	.path-secondary {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: center;
-		align-items: center;
-		gap: var(--space-xs);
-		margin-top: var(--space-xs);
-	}
-
-	.path-link {
-		border: none;
-		background: transparent;
-		color: var(--color-primary);
-		font-size: 0.9375rem;
-		font-weight: 600;
-		text-decoration: underline;
-		cursor: pointer;
-		padding: var(--space-xs);
-	}
-
-	.path-sep {
-		color: var(--color-text-muted);
-	}
-
-	.progress-note {
-		margin: 0;
-		padding: var(--space-sm) var(--space-md);
-		border-radius: var(--radius-sm);
-		background: var(--color-surface-muted);
-		font-size: 0.9375rem;
-		font-weight: 600;
-		color: var(--color-primary);
-		text-align: center;
 	}
 
 	.onboarding-footer {
@@ -693,19 +358,7 @@
 	}
 
 	.footer-actions {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: var(--space-sm);
-	}
-
-	@media (min-width: 480px) {
-		.footer-actions {
-			display: flex;
-			justify-content: space-between;
-		}
-
-		.footer-actions :global(.btn) {
-			min-width: 7.5rem;
-		}
+		display: flex;
+		justify-content: flex-start;
 	}
 </style>

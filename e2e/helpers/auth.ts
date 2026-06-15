@@ -273,7 +273,7 @@ export async function waitForWelcomeParamStripped(page: Page) {
 export async function expectOnboardingGuideVisible(page: Page) {
 	await dismissCookieConsentIfOpen(page);
 	await expect(
-		page.getByRole('heading', { name: /Vad \u00e4r Skaffu|What is Skaffu|V\u00e4lkommen till Skaffu|Welcome to Skaffu/i })
+		page.getByRole('heading', { name: /gemensamma inköpslista|shared shopping list|Det här är er/i })
 	).toBeVisible({ timeout: 20_000 });
 	await expect(page.getByTestId('onboarding-skip')).toBeVisible();
 	await expectOnboardingStepVisible(page, 1);
@@ -413,7 +413,7 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 	await dismissOnboardingModalIfOpen(page);
 	await dismissPostOnboardingSurveyIfOpen(page);
 	await expect(page.locator('.shopping-page, section.home')).toBeVisible({ timeout: E2E_AUTH_NAV_TIMEOUT_MS });
-	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+	await expect(page.getByTestId('home-hero')).toBeVisible();
 }
 
 export async function loginAsAdmin(page: Page) {

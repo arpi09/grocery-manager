@@ -110,9 +110,14 @@
 		min-width: min(100%, 16rem);
 	}
 
-	.action-link-secondary {
+	.action-link.btn-primary {
+		background: var(--color-primary);
+		color: var(--color-on-primary);
+	}
+
+	.action-link.btn-ghost {
 		font-size: var(--font-size-body-sm);
-		min-height: var(--touch-target-min);
-		padding: 0 var(--space-md);
+		color: var(--color-text-muted);
+		background: transparent;
 	}
 </style>

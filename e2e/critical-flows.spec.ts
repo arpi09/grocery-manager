@@ -94,11 +94,11 @@ test.describe('Critical flows', () => {
 
 		await expectOnboardingGuideVisible(page);
 
-		await page.getByTestId('onboarding-path-shopping').click();
-
+		await page.getByTestId('onboarding-next').click();
 		await expectOnboardingStepVisible(page, 2);
-
-		await page.getByTestId('onboarding-begin-path').click();
+		await page.getByTestId('onboarding-next').click();
+		await expectOnboardingStepVisible(page, 3);
+		await page.getByTestId('onboarding-finish').click();
 
 		await expect(page).toHaveURL(/\/inkop(?:\?quick=1)?$/);
 
@@ -120,9 +120,7 @@ test.describe('Critical flows', () => {
 
 		await expect(home).toBeVisible();
 
-		const primaryActions = home.locator(
-			'.cta-primary, .action-primary, .shopping-teaser-primary, .shopping-teaser-hero'
-		);
+		const primaryActions = home.locator('.hero-cta, .btn-primary.action-link');
 
 		expect(await primaryActions.count()).toBeLessThanOrEqual(1);
 
@@ -140,7 +138,7 @@ test.describe('Critical flows', () => {
 
 		await expect(page.locator('[data-home-state="cold"]')).toBeVisible();
 
-		await expect(page.locator('.home-v3-section')).toHaveCount(1);
+		await expect(page.getByTestId('home-hero')).toBeVisible();
 
 		await expect(page.getByRole('link', { name: /Skapa veckans lista|Create this week's list/i })).toBeVisible();
 
@@ -152,7 +150,7 @@ test.describe('Critical flows', () => {
 
 
 
-	test('home V3 shows sections without Mer på hem', async ({ page }) => {
+	test('home minimal shows hero without legacy sections', async ({ page }) => {
 
 		await loginAsAdmin(page);
 
@@ -162,42 +160,9 @@ test.describe('Critical flows', () => {
 
 		await dismissOnboardingModalIfOpen(page);
 
-		await expect(page.locator('.more-on-home')).toHaveCount(0);
-
-		const sectionCount = await page.locator('.home-v3-section').count();
-		expect(sectionCount).toBeGreaterThanOrEqual(1);
-		expect(sectionCount).toBeLessThanOrEqual(3);
-
-		await expect(page.getByRole('heading', { name: /Vad ska vi handla|What should we shop/i })).toBeVisible();
-
-		const recommendsHeading = page.getByRole('heading', {
-			name: /Vad rekommenderar|What does Skaffu recommend/i
-		});
-		if (sectionCount >= 2 && (await recommendsHeading.count()) > 0) {
-			await expect(recommendsHeading).toBeVisible();
-		}
-
-		const householdHeading = page.getByRole('heading', {
-			name: /Hur mår hushållet|How's the household/i
-		});
-		if ((await householdHeading.count()) > 0) {
-			await expect(householdHeading).toBeVisible();
-		}
-
-		const homeState = await page.locator('[data-home-state]').getAttribute('data-home-state');
-		if (homeState === 'expiry') {
-			await expect(page.getByTestId('home-expiry-hero')).toBeVisible();
-		} else if (homeState === 'lista_ready') {
-			await expect(page.locator('.shopping-teaser-hero, .shopping-teaser-primary')).toBeVisible();
-		} else {
-			await expect(
-				page.locator('.shopping-teaser-primary, .shopping-teaser-hero, .action-primary, .btn-primary.action-link')
-			).toBeVisible();
-		}
-
-		await expect(
-			page.getByRole('link', { name: /Handla denna vecka|Shop this week|Skapa veckans lista/i }).first()
-		).toBeVisible();
+		await expect(page.getByTestId('home-hero')).toBeVisible();
+		await expect(page.locator('.home-v3-section')).toHaveCount(0);
+		await expect(page.getByRole('heading', { name: /Vad rekommenderar|What does Skaffu recommend/i })).toHaveCount(0);
 
 	});
 
@@ -246,7 +211,7 @@ test.describe('Critical flows', () => {
 		await expect(page.getByTestId('photo-round-capture')).toHaveCount(0);
 		const hub = page.getByTestId('scan-mode-hub');
 		await expect(hub).toBeVisible({ timeout: 15_000 });
-		await expect(hub.getByTestId('scan-hub-receipt-hero')).toBeVisible();
+		await expect(hub.getByTestId('scan-hub-receipt')).toBeVisible();
 		await expect(page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i })).toHaveCount(0);
 		await expect(page.locator('.page-header .back-link')).toHaveCount(0);
 		await expect(page.getByText(/Avbryt och gå tillbaka|Cancel and go back/i)).toHaveCount(0);
@@ -267,11 +232,9 @@ test.describe('Critical flows', () => {
 
 		await expectOnboardingGuideVisible(page);
 
-		await page.getByTestId('onboarding-path-shopping').click();
-
-		await expectOnboardingStepVisible(page, 2);
-
-		await page.getByTestId('onboarding-begin-path').click();
+		await page.getByTestId('onboarding-next').click();
+		await page.getByTestId('onboarding-next').click();
+		await page.getByTestId('onboarding-finish').click();
 		await dismissOnboardingModalIfOpen(page);
 
 		for (let i = 0; i < 3; i++) {
@@ -288,23 +251,13 @@ test.describe('Critical flows', () => {
 			await expect(page.getByText(itemName)).toBeVisible();
 		}
 
-		const finishGuide = page.getByTestId('onboarding-finish');
-		const celebrationDismiss = page.getByTestId('celebration-dismiss-home');
-		await expect(finishGuide.or(celebrationDismiss)).toBeVisible({ timeout: 30_000 });
-
-		if (await finishGuide.isVisible()) {
-			await finishGuide.click({ force: true });
-		} else {
-			await celebrationDismiss.click();
-		}
-
-		await expect(page).toHaveURL((url) => new URL(url).pathname === '/hem', { timeout: 15_000 });
+		await expect(page).toHaveURL(/\/inkop/, { timeout: 15_000 });
 
 	});
 
 
 
-	test('welcome shows shopping list as primary CTA not photo', async ({ page }) => {
+	test('onboarding 15s has no pantry path picker', async ({ page }) => {
 
 		await registerNewUser(page);
 
@@ -320,17 +273,8 @@ test.describe('Critical flows', () => {
 
 		await expectOnboardingGuideVisible(page);
 
-		const shoppingPrimary = page.getByTestId('onboarding-path-shopping');
-
-		await expect(shoppingPrimary).toBeVisible();
-
-		await expect(shoppingPrimary).toHaveClass(/btn-primary/);
-
-		await expect(page.getByTestId('onboarding-path-photo')).not.toBeVisible();
-
-		await page.locator('.pantry-secondary summary').click();
-
-		await expect(page.getByTestId('onboarding-path-photo')).toBeVisible();
+		await expect(page.getByTestId('onboarding-next')).toBeVisible();
+		await expect(page.getByTestId('onboarding-path-photo')).toHaveCount(0);
 
 	});
 

@@ -358,7 +358,11 @@ a:focus:not(:focus-visible) {
 }
 
 .product-row {
+	display: flex;
+	align-items: center;
+	gap: var(--space-sm);
 	min-height: var(--touch-target-min);
+	padding: var(--space-sm) var(--space-md);
 }
 
 @media (prefers-reduced-motion: reduce) {

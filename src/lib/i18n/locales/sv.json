@@ -291,7 +291,24 @@
 		"taglineExpiry": "Något går ut snart — ät först eller planera middag",
 		"nextActionLista": "Fortsätt veckohandel",
 		"cadenceLine": "Ni brukar handla på {weekday}",
-		"cadenceLineStore": "Ni brukar handla på {weekday} · oftast {store}"
+		"cadenceLineStore": "Ni brukar handla på {weekday} · oftast {store}",
+		"hero": {
+			"listaTitle": "{count, plural, one {# sak att handla} other {# saker att handla}}",
+			"listaCta": "Öppna inköpslistan",
+			"coldReceipt": "Skanna kvitto",
+			"coldPhoto": "Fota kyl/skafferi",
+			"expiryTitle": "Något går ut snart",
+			"expiryCta": "Se vad som går ut"
+		},
+		"memory": {
+			"ariaLabel": "Hushållsminne",
+			"replenishmentHint": "Ni brukar handla {name}"
+		},
+		"expiring": {
+			"ariaLabel": "Går ut snart",
+			"daysLeft": "{days, plural, one {# dag kvar} other {# dagar kvar}}",
+			"moreLink": "Visa alla"
+		}
 	},
 	"dashboard": {
 		"title": "Hem",
@@ -381,6 +398,13 @@
 			"title": "Kvitto",
 			"subtitle": "Flera varor på en gång.",
 			"cta": "Skanna kvitto"
+		},
+		"choiceHub": {
+			"title": "Vad vill du lägga till?",
+			"receipt": "Kvitto — hel handling",
+			"photo": "Fota kyl/skafferi — flera varor",
+			"barcode": "Streckkod — en vara",
+			"manualLink": "Manuellt"
 		}
 	},
 	"settings": {
@@ -744,7 +768,7 @@
 	},
 	"inventory": {
 		"title": "Ditt skafferi",
-		"subtitle": "Håll koll på vad ni har hemma — uppdatera efter handeln.",
+		"subtitle": "Vad ni har hemma — uppdaterat efter veckohandeln.",
 		"itemCountSubtitle": "{count} {count, plural, one {aktiv vara} other {aktiva varor}}",
 		"emptyTitle": "Tomt i {location}",
 		"noResults": "Inga träffar",
@@ -810,13 +834,25 @@
 		"mergeExisting": "Finns redan — slå ihop med {name} ({quantity} {unit})?",
 		"clearAutoExpired": "Rensa utgångna",
 		"clearAutoExpiredAria": "Ta bort alla {count} automatiskt utgångna varor",
-		"bulkExpiryBanner": "Flera varor saknar bäst-före-datum — vi kan föreslå datum utifrån varutyp.",
-		"bulkExpiryAction": "Föreslå datum",
+		"bulkExpiryBanner": "Några varor saknar datum — vi kan gissa utifrån varutyp.",
+		"bulkExpiryAction": "Gissa datum",
 		"quantityLeft": "{amount} kvar",
 		"expiryFilterNoExpiry": "Utan datum",
 		"filterEmptyTitle": "Inga varor matchar filtret",
 		"filterEmptyDescription": "Prova ett annat filter eller visa alla varor.",
-		"filterClear": "Visa alla varor"
+		"filterClear": "Visa alla varor",
+		"addSheet": {
+			"title": "Lägg till",
+			"receipt": "Kvitto — hel handling",
+			"photo": "Fota kyl/skafferi",
+			"barcode": "Streckkod — en vara",
+			"manual": "Manuellt"
+		},
+		"filterSheet": {
+			"title": "Filter och sortering",
+			"apply": "Klar",
+			"sections": "Visa sektioner"
+		}
 	},
 	"item": {
 		"addTitle": "Lägg till vara",
@@ -2025,7 +2061,7 @@
 		"welcome": "Välkommen till Skaffu",
 		"stepOf": "Steg {current} av {total}",
 		"welcomeBodyShort": "Bygg en veckolista — tre varor räcker för att komma igång.",
-		"welcomeBodyShoppingList": "Skaffu är er gemensamma veckolista. Lägg till tre varor ni brukar handla — handla tillsammans och håll listan uppdaterad.",
+		"welcomeBodyShoppingList": "Det här är er gemensamma inköpslista. Lägg till det ni brukar handla — bjud in partner när du vill.",
 		"brainLearnLine": "Veckolistan styr handeln — Skaffu uppskattar bäst-före när ni fyller lagret.",
 		"fillPantrySecondary": "Fyll skafferi",
 		"quickStart": "Snabbstart",
@@ -2121,11 +2157,11 @@
 		"skip": "Hoppa över",
 		"dialogAria": "Introduktion till Skaffu",
 		"celebrateWoohoo": "Du har kommit igång med appen — woohoo!",
-		"beatWhatTitle": "Vad är Skaffu?",
-		"beatLoopTitle": "Veckoloopen",
-		"beatHowTitle": "Så kommer ni igång",
-		"beatLoopBody": "Delad lista → handla ihop → checka av → skafferi uppdateras. Kvitton och checkoffs bygger hushållets minne för nästa vecka.",
-		"beatHowBody": "Öppna inköpslistan och lägg till tre varor ni brukar handla. Bjud in partner när listan känns användbar."
+		"beatWhatTitle": "Det här är er gemensamma inköpslista",
+		"beatLoopTitle": "Checka av när ni handlar",
+		"beatHowTitle": "Kvitton bygger minnet",
+		"beatLoopBody": "Bocka av rader när ni handlar — listan håller sig uppdaterad för hela hushållet.",
+		"beatHowBody": "Kvitton och avbockade rader bygger hushållets minne — bättre förslag nästa vecka."
 	},
 	"pageHints": {
 		"dialogAria": "Snabbtips för sidan",
@@ -2657,7 +2693,9 @@
 		"invalidAmount": "Ange en giltig mängd",
 		"finishFailed": "Kunde inte markera som slut — försök igen",
 		"undoToastNamed": "{name} markerad som slut",
-		"undoToast": "Vara markerad som slut"
+		"undoToast": "Vara markerad som slut",
+		"swipeFinish": "Klart",
+		"swipePartial": "Delvis"
 	},
 	"news": {
 		"title": "Nyheter",

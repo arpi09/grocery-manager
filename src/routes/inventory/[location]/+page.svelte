@@ -7,13 +7,15 @@
 
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 
+	import Button from '$lib/components/atoms/Button.svelte';
+	import InventoryAddSheet from '$lib/components/molecules/InventoryAddSheet.svelte';
 	import InventoryList from '$lib/components/organisms/InventoryList.svelte';
 
 	import { getLocale, t } from '$lib/i18n';
 
 	import { locationLabel } from '$lib/i18n/domain-labels';
 
-	import { scanHubHref } from '$lib/utils/scan-nav';
+	import { manualAddHref, scanModeHref } from '$lib/utils/scan-nav';
 	import { parseInventoryExpiryFilter } from '$lib/utils/inventory-list-filters';
 
 
@@ -24,13 +26,12 @@
 
 	const inventoryPath = $derived(`/inventory/${data.location}`);
 
-	const addItemHref = $derived(
+	const scanReceiptHref = $derived(scanModeHref('receipt', inventoryPath));
+	const scanPhotoHref = $derived(scanModeHref('photo', inventoryPath, { location: data.location }));
+	const scanBarcodeHref = $derived(scanModeHref('barcode', inventoryPath, { location: data.location }));
+	const manualHref = $derived(manualAddHref(inventoryPath, { location: data.location }));
 
-		`/item/new?location=${data.location}&from=${encodeURIComponent(inventoryPath)}`
-
-	);
-
-	const scanHubLinkHref = $derived(scanHubHref(inventoryPath));
+	let addSheetOpen = $state(false);
 
 
 
@@ -75,17 +76,17 @@
 		<div class="inventory-page">
 			{#if data.canWrite}
 
-				<div class="add-goods-block" data-testid="inventory-add-goods">
-
-					<a class="add-primary" href={scanHubLinkHref}>
-
-						{t('inventory.addGoods')}
-
-					</a>
-
-					<a class="add-manual" href={addItemHref} data-sveltekit-reload>{t('inventory.addManual')}</a>
-
-				</div>
+				<Button type="button" variant="primary" data-testid="inventory-add-goods" onclick={() => (addSheetOpen = true)}>
+				{t('inventory.add')}
+			</Button>
+			<InventoryAddSheet
+				open={addSheetOpen}
+				receiptHref={scanReceiptHref}
+				photoHref={scanPhotoHref}
+				barcodeHref={scanBarcodeHref}
+				manualHref={manualHref}
+				onClose={() => (addSheetOpen = false)}
+			/>
 
 			{/if}
 
@@ -144,88 +145,6 @@
 	}
 
 
-
-	.add-goods-block {
-
-		display: flex;
-
-		flex-wrap: wrap;
-
-		align-items: center;
-
-		gap: var(--space-sm);
-
-	}
-
-	.add-manual {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-height: var(--touch-target-min);
-		padding: var(--space-xs) var(--space-md);
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: var(--color-text-muted);
-		text-decoration: none;
-	}
-
-	.add-manual:hover {
-		color: var(--color-primary);
-		text-decoration: underline;
-		text-underline-offset: 0.12em;
-	}
-
-
-
-	.add-primary {
-
-		display: inline-flex;
-
-		align-items: center;
-
-		justify-content: center;
-
-		gap: var(--space-sm);
-
-		min-height: var(--touch-target-min);
-
-		padding: var(--space-sm) var(--space-lg);
-
-		font-weight: 700;
-
-		font-size: 0.9375rem;
-
-		border-radius: var(--radius-md);
-
-		text-decoration: none;
-
-		background: var(--color-primary);
-
-		color: var(--color-on-primary);
-
-		box-shadow: var(--shadow-sm);
-
-	}
-
-
-
-	.add-primary:hover {
-
-		background: var(--color-primary-hover);
-
-		text-decoration: none;
-
-	}
-
-	@media (min-width: 560px) {
-
-		.add-goods-block {
-
-			max-width: 28rem;
-
-		}
-
-	}
 
 	.bulk-expiry-banner {
 		display: flex;

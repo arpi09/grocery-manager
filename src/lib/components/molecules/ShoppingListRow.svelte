@@ -26,7 +26,7 @@
 	}: Props = $props();
 </script>
 
-<li class="shopping-row" class:removing class:checked-row={checked}>
+<li class="shopping-row product-row" class:removing class:checked-row={checked}>
 	{#if canEdit}
 		<form
 			method="POST"
@@ -138,6 +138,11 @@
 	.line-readonly.done {
 		opacity: 0.65;
 		text-decoration: line-through;
+	}
+
+	:global(.remove-trigger) {
+		grid-column: 2;
+		flex-shrink: 0;
 	}
 
 	:global(.remove-trigger .btn) {
