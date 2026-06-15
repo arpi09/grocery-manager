@@ -247,6 +247,7 @@ test.describe('Critical flows', () => {
 		await expect(page.getByText(/Steg 2 av 3/i)).toBeVisible();
 
 		await page.getByTestId('onboarding-begin-path').click();
+		await dismissOnboardingModalIfOpen(page);
 
 		for (let i = 0; i < 3; i++) {
 			await page.locator('#shopping-name').fill(`E2E onboard ${i} ${Date.now()}`);
