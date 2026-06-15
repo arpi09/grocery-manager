@@ -270,7 +270,7 @@ export async function waitForWelcomeParamStripped(page: Page) {
 export async function expectOnboardingGuideVisible(page: Page) {
 	await dismissCookieConsentIfOpen(page);
 	await expect(
-		page.getByRole('heading', { name: /Vad är Skaffu|What is Skaffu|Välkommen till Skaffu|Welcome to Skaffu/i })
+		page.getByRole('heading', { name: /Vad \u00e4r Skaffu|What is Skaffu|V\u00e4lkommen till Skaffu|Welcome to Skaffu/i })
 	).toBeVisible({ timeout: 20_000 });
 	await expect(page.getByTestId('onboarding-skip')).toBeVisible();
 	await expect(page.getByText(/Steg 1 av 3/i)).toBeVisible();

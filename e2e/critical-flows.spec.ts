@@ -253,6 +253,10 @@ test.describe('Critical flows', () => {
 			await page.locator('form.add-form').getByRole('button', { name: /Lägg till|Add/i }).click();
 		}
 
+		await page.goto('/settings#settings-app');
+		await page.locator('#settings-app details.settings-disclosure summary').click();
+		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click();
+
 		await expect(page.getByTestId('onboarding-finish')).toBeVisible({ timeout: 30_000 });
 		await page.getByTestId('onboarding-finish').click();
 
