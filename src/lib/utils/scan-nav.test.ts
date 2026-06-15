@@ -22,12 +22,12 @@ describe('scan-nav', () => {
 		expect(scanModeHref('receipt', '/hem')).toBe('/scan?from=%2Fhem&mode=receipt');
 	});
 
-	it('manualAddHref returns to photo scan on cancel', () => {
+	it('manualAddHref returns to scan hub on cancel', () => {
 		expect(manualAddHref('/hem')).toBe(
-			'/item/new?from=%2Fscan%3Ffrom%3D%252Fhem%26mode%3Dphoto'
+			'/item/new?from=%2Fscan%3Ffrom%3D%252Fhem%26mode%3Dhub'
 		);
 		expect(manualAddHref('/inventory/fridge', { location: 'fridge' })).toBe(
-			'/item/new?from=%2Fscan%3Ffrom%3D%252Finventory%252Ffridge%26mode%3Dphoto%26location%3Dfridge&location=fridge'
+			'/item/new?from=%2Fscan%3Ffrom%3D%252Finventory%252Ffridge%26mode%3Dhub&location=fridge'
 		);
 	});
 });

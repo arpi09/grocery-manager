@@ -173,6 +173,13 @@
 		color: var(--color-text-muted);
 	}
 
+	.loop-hint {
+		margin: 0 0 var(--space-md);
+		color: var(--color-text-secondary);
+		font-size: var(--text-sm);
+		line-height: 1.45;
+	}
+
 	.actions {
 		display: flex;
 		flex-direction: column;

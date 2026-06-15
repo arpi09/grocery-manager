@@ -56,15 +56,15 @@ export function scanSubFlowFrom(returnTo: string): string {
 	return scanHubHref(returnTo);
 }
 
-/** Manual add from scan — cancel returns to photo scan, not the legacy hub. */
+/** Manual add from scan — back returns to scan hub. */
 export function manualAddHref(
 	returnTo: string,
 	options?: { location?: StorageLocation | string }
 ): string {
-	const from = scanModeHref('photo', returnTo, options?.location ? { location: options.location } : undefined);
+	const from = scanHubHref(returnTo);
 	const params = new URLSearchParams({ from });
 	if (options?.location) {
 		params.set('location', String(options.location));
 	}
-	return `/item/new?${params}`;
+	return '/item/new?' + params.toString();
 }

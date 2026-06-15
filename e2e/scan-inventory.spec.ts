@@ -3,6 +3,15 @@ import { dismissOnboardingModalIfOpen, dismissPageHintIfOpen, loginAsAdmin } fro
 import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
 
 test.describe('Scan and inventory', () => {
+	test('bare /scan stays on hub without auto redirect', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/scan');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page.getByTestId('scan-mode-hub')).toBeVisible({ timeout: 15_000 });
+		await expect(page).not.toHaveURL(/mode=receipt/);
+	});
+
 	test('scan hub loads with receipt primary', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/scan?mode=hub');
@@ -44,7 +53,7 @@ test.describe('Scan and inventory', () => {
 		await expect(tabLinks.first()).toContainText(/Kvitto|Receipt/i);
 		const manualHref = await scanModes.getByRole('link', { name: /Manuellt|Manual/i }).getAttribute('href');
 		expect(manualHref).toMatch(/\/item\/new\?/);
-		expect(decodeURIComponent(manualHref!)).toMatch(/mode=photo/);
+		expect(decodeURIComponent(manualHref!)).toMatch(/mode=hub/);
 	});
 
 	test('receipt mode has no duplicate all-modes footer', async ({ page }) => {
@@ -182,7 +191,7 @@ test.describe('Scan and inventory', () => {
 			await expect(page).toHaveURL(/\/item\/new/, { timeout: 15_000 });
 
 			await page.getByRole('link', { name: /Avbryt|Cancel/i }).click();
-			await expect(page).toHaveURL(/\/scan\?.*mode=photo/, { timeout: 15_000 });
+			await expect(page).toHaveURL(/\/scan\?.*mode=hub/, { timeout: 15_000 });
 		});
 	});
 

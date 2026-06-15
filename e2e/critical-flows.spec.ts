@@ -217,8 +217,9 @@ test.describe('Critical flows', () => {
 		await expect(page).toHaveURL(/\/scan(?:$|\?)/);
 		await expect(page.getByTestId('photo-round-capture')).toHaveCount(0);
 		const hub = page.getByTestId('scan-mode-hub');
-		const scanModes = page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i });
-		await expect(hub.or(scanModes)).toBeVisible({ timeout: 15_000 });
+		await expect(hub).toBeVisible({ timeout: 15_000 });
+		await expect(hub.getByTestId('scan-hub-receipt-hero')).toBeVisible();
+		await expect(page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i })).toHaveCount(0);
 		await expect(page.locator('.page-header .back-link')).toHaveCount(0);
 		await expect(page.getByText(/Avbryt och gå tillbaka|Cancel and go back/i)).toHaveCount(0);
 	});

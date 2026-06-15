@@ -827,6 +827,7 @@
 		"howToFill": "Hur vill du fylla i varan?",
 		"scanModeAria": "Skanningsläge",
 		"barcodeTab": "Streckkod",
+		"scanInstead": "Skanna istället",
 		"photoTab": "Foto",
 		"bestBefore": "Bäst före (valfritt)",
 		"expiryPrompt": "Vill du gissa bäst-före-datum? Det hjälper oss påminna dig — inget krav.",
@@ -893,8 +894,8 @@
 		"receiptImportLead": "Kvitto importerat. Granska påfyllnadsförslagen nedan.",
 		"suggestionsTitle": "Förslag",
 		"pantryBridge": {
-			"title": "Lägg till i skafferi?",
-			"subtitle": "{name} är avbockad",
+			"title": "Stäng veckan — uppdatera skafferi",
+			"subtitle": "{name} är avbockad — lägg till i lagret så nästa vecka stämmer",
 			"lead": "Lägg till i {location} med {amount}?",
 			"yes": "Ja, {amount}",
 			"yesLocation": "Ja, i {location} ({amount})",
@@ -910,7 +911,8 @@
 				"ask": "Fråga varje gång",
 				"always": "Lägg alltid till",
 				"never": "Aldrig"
-			}
+			},
+			"loopHint": "Stäng veckan — uppdatera skafferiet så nästa lista träffar rätt."
 		}
 	},
 	"pantryHealth": {
@@ -933,6 +935,8 @@
 		"addToList": "Lägg på listan",
 		"dismiss": "Inte nu",
 		"acceptSuccess": "{name} lades till på listan",
+		"acceptLearning": "{name} på listan — Skaffu kommer ihåg",
+		"dismissAck": "Okej — vi visar inte förslaget igen",
 		"acceptFailed": "Kunde inte lägga till på listan. Försök igen.",
 		"dismissFailed": "Kunde inte dölja förslaget. Försök igen.",
 		"notFound": "Förslaget är inte längre tillgängligt.",
@@ -948,7 +952,9 @@
 		"memoryChip": {
 			"interval": "var {interval}:e dag",
 			"fromReceipts": "från kvitton"
-		}
+		},
+		"learningToastAccept": "Skaffu kommer ihåg — tack för att du lade till det.",
+		"learningToastDismiss": "Okej — vi föreslår inte det igen på ett tag."
 	},
 	"householdBriefing": {
 		"title": "Det här kan du göra nu",

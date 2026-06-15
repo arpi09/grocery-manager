@@ -9,7 +9,16 @@
 	import { daysUntilExpiry, formatExpiryDate, EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
 	import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 	import { isEstimatedExpirySource } from '$lib/domain/learning/expiry-source';
+	import { buildInventoryShelfLifeExplanation } from '$lib/domain/learning/prediction-explain';
 	import { getLocale, t } from '$lib/i18n';
+
+	const expiryExplanation = $derived.by(() => {
+		if (!isEstimatedExpirySource(item.expiresOnSource)) return null;
+		return buildInventoryShelfLifeExplanation(
+			{ productName: item.name, source: item.expiresOnSource!, location: item.location },
+			getLocale()
+		);
+	});
 
 	interface Props {
 		item: InventoryItem;
@@ -97,7 +106,7 @@
 				{expiryLabel}
 			</Badge>
 			{#if isEstimatedExpirySource(item.expiresOnSource) && !finished && !autoExpired}
-				<EstimatedBadge source={item.expiresOnSource} />
+				<EstimatedBadge source={item.expiresOnSource} explanation={expiryExplanation} showSettingsLink />
 			{/if}
 		{:else}
 			<span class="muted">—</span>
