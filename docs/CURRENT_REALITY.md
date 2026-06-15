@@ -1,33 +1,36 @@
 # CURRENT_REALITY
 
-> **Uppdatera denna fil** n?r prod deployas eller nav/flags ?ndras. K?r: `.cursor/scripts/refresh-current-reality.sh`
+> **Uppdatera denna fil** när prod deployas eller nav/flags ändras. Kör: `.cursor/scripts/refresh-current-reality.sh`
 
-| F?lt | V?rde |
+| Fält | Värde |
 |------|--------|
 | **Uppdaterad** | 2026-06-15 |
-| **Prod SHA** | `94c95b4d` - deploy run [27533104716](https://github.com/arpi09/grocery-manager/actions/runs/27533104716) (2026-06-15) - Bundle A (#81, #83, #84, #86, #89)
-| **Master SHA** | `94c95b4d` - Bundle A (#81, #83, #84, #86, #89) + Bundle B (#82, #85, #88) on master
-| **CI/CD model** | **v2 pending deploy** ? tiered gates on `chore/ci-test-tiers`; update after first `deploy_tier=fast` prod validation |
+| **Prod SHA** | `94c95b4d` ? prior deploy [27533104716](https://github.com/arpi09/grocery-manager/actions/runs/27533104716) (Bundle A+B). **Deploy 0 FAILED** — [27541222554](https://github.com/arpi09/grocery-manager/actions/runs/27541222554) (`deploy_tier=full`, target `eb8bd485`) — E2E shard 1/3 onboarding failures; prod **not** updated|
+| **Master SHA** | `eb8bd485` ? Bundle A+B + Bundle C (#90?#94) + CI/CD v2 (#95) |
+| **CI/CD model** | **v2 on master** ? tiered gates merged #95; first full-tier prod validation via Deploy 0 |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
+| **Reality audit** | [REALITY_AUDIT_2026-06.md](./REALITY_AUDIT_2026-06.md) |
 
-## K?rnloopen (produktfokus)
+## Kärnloopen (produktfokus)
 
-Utg?ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenishment ? n?sta lista.
+Utgående ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenishment ? nästa lista.
 
 ## Navigation
 
-### Prod (target after deploy)
+### Prod (target after Deploy 0)
 
 | Yta | Route | Notering |
 |-----|-------|----------|
 | Default home | `/hem` | `APP_HOME_PATH` ? dashboard default |
-| Hem dashboard | `/hem` | **Home V3** ? Denna vecka ? Skaffu rekommenderar ? Hush?llet ([HOME_V3.md](./HOME_V3.md)) |
-| Primary tabs (desktop) | Hem, Lager, Ink?p, Skanna, Mer | Lager + scan in top row |
-| Primary tabs (mobile) | Hem, Ink?p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
+| Hem dashboard | `/hem` | **Home V3** ? Denna vecka ? Skaffu rekommenderar ? Hushållet ([HOME_V3.md](./HOME_V3.md)) |
+| Primary tabs (desktop) | Hem, Lager, Inköp, Skanna, Mer | Lager + scan in top row |
+| Primary tabs (mobile) | Hem, Inköp, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
 | Memory Explorer | `/settings/memory` | Vad Skaffu vet ? household rules (learning gate) |
 | Post-register wedge | `/hem?welcome=1` | Ny registrering/OAuth ? guided start on hem ([#46](https://github.com/arpi09/grocery-manager/pull/46)) |
 | Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie |
+| Onboarding v2 (Bundle C) | modal | 3 beats vad/loop/hur ? **after Deploy 0** |
+| Grannskafferiet (R16) | hidden | Ej i Mer unless `PUBLIC_CITY_FEED_ENABLED` |
 
 ## Kill switches & experiments
 
@@ -46,33 +49,28 @@ What users **see** when core Brain flags are on (prod target / master):
 | **Uppskattat** ? receipt review dates + lager/eat-first badge when expiry ? user-set |
 | **Location hints** ? suggested storage in receipt/scan parse; rules in Settings / Memory Explorer |
 | **Replenishment learning** ? silent; accept/dismiss on `/hem` suggestions writes `learning_feedback` |
-| **Memory Explorer** ? `/settings/memory` (?Vad Skaffu vet?) when any learning flag on |
+| **Memory Explorer** ? `/settings/memory` (Vad Skaffu vet?) when any learning flag on |
 
 Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 
-**USER_LOCAL smoke (pending ? PO gate):** Physical device + real receipt @ prod SHA `f70c2c9c`; agents link only ? **do not substitute or claim this pass.** Checklists: [Brain V1 smoke](./BRAIN_V1_PRODUCT_INTEGRATION.md#smoke-checklist-post-deploy) ? [Weekly loop smoke](./HOUSEHOLD_LOOP_AUDIT.md#user_local--weekly-loop-smoke-checklist).
+**USER_LOCAL Gate 0 (PO pending ? doc only):** Run on **new prod SHA** after Deploy 0 ? not `94c95b4d`. Checklist: [REALITY_AUDIT_2026-06.md](./REALITY_AUDIT_2026-06.md#user_local-verification). Agents must not substitute or claim this pass.
 
 ## Tier snapshot
 
 - **A:** inkop, household, checkoff-bridge, eat-first, replenishment, onboarding?inkop
 - **B:** receipt import, barcode/photo add, price memory, Brain V1 (flags on), Memory Explorer
-- **C:** grannskafferiet, meal plan AI, wrapped, PMF user dashboards, Stripe marketing
+- **C:** grannskafferiet gate, onboarding v2, landing copy, design system doc (R12?R16 on master)
 
-## K?nda drift (fixa n?r du ser dem)
+## Kända drift (fixa när du ser dem)
 
-- [x] Prod DB migrations `0047`?`0048` ? applied 2026-06-14 (manual `npm run db:migrate` via Cloud SQL public IP; journal reconciled 0012?0048). `DATABASE_URL` secret set for future deploy pre-migrate.
-- [x] Prod SHA ? `f70c2c9c` via deploy [27507835082](https://github.com/arpi09/grocery-manager/actions/runs/27507835082) (narrative sprint + UX #73/#74)
-- [x] **Deploy fix** ? `apphosting.yaml` ASCII normalization (`fah/invalid-apphosting-yaml` mojibake)
-- [x] Prior prod `73d3dfd0` bundle 2 @ [27501022135](https://github.com/arpi09/grocery-manager/actions/runs/27501022135)
+- [x] Prod DB migrations `0047`?`0048` ? applied 2026-06-14
+- [ ] **Deploy 0** — **FAILED** [27541222554](https://github.com/arpi09/grocery-manager/actions/runs/27541222554) — e2e (1/3): onboarding/welcome tests. Prior [27540761228](https://github.com/arpi09/grocery-manager/actions/runs/27540761228) @ `01cb7bdb` also failed.
+- [x] Prior prod `94c95b4d` @ [27533104716](https://github.com/arpi09/grocery-manager/actions/runs/27533104716) (Bundle A+B)
+- [x] **PR #95** CI/CD v2 merged 2026-06-15
 
 ## Branches in flight (manuell)
 
 | Branch | Syfte | Status |
 |--------|-------|--------|
-| `feat/brain-activation-wiring` | Location + replenishment feedback | **Mergad till master** |
-| `feat/home-v3-reorder` | Home V3 layout | **Mergad till master** |
-| `feat/memory-explorer-v1` | Memory Explorer V1 | **Mergad till master** |
-| `feat/receipt-pattern-purchasedAt` | purchasedAt cutoff fix | **Mergad till master** |
-| `docs/receipt-intelligence-next-slice` | Next slice plan | **Mergad till master** |
-| `feat/ux-inventory-list-v1` | UX Slice 1 ? Product Row + V1.1 inventory badge | **Merged** (#74 @ narrative deploy) |
-
+| `chore/ci-test-tiers` | CI/CD v2 tiered gates | **Merged** (#95) |
+| Bundle C (#90?#94) | onboarding, landing, design doc, grannskafferiet gate | **On master, Deploy 0 pending** |
