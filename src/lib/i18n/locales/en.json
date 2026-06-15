@@ -977,7 +977,9 @@
 		"memoryChip": {
 			"interval": "every {interval} days",
 			"fromReceipts": "from receipts"
-		}
+		},
+		"learningToastAccept": "Skaffu will remember — thanks for adding that.",
+		"learningToastDismiss": "Got it — we will not suggest that again for a while."
 	},
 	"householdBriefing": {
 		"title": "What you can do now",
