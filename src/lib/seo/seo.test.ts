@@ -101,11 +101,12 @@ describe('buildRobotsTxt', () => {
 });
 
 describe('buildLandingJsonLd', () => {
-	it('returns WebApplication and Organization schemas', () => {
+	it('returns WebApplication, Organization and WebSite schemas', () => {
 		const schemas = buildLandingJsonLd('https://skaffu.com', 'Skafferi-app');
-		expect(schemas).toHaveLength(2);
+		expect(schemas).toHaveLength(3);
 		expect(schemas[0]['@type']).toBe('WebApplication');
 		expect(schemas[1]['@type']).toBe('Organization');
+		expect(schemas[2]['@type']).toBe('WebSite');
 	});
 });
 

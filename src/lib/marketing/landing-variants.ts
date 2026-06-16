@@ -17,11 +17,11 @@ export interface LandingHeroCopy {
 const heroByVariant: Record<MarketingLocale, Record<LandingHeroVariant, LandingHeroCopy>> = {
 	sv: {
 		a: {
-			heroTitle: 'Handla ihop — Skaffu lär sig ert hushåll.',
+			heroTitle: 'Handla ihop med koll på skafferiet.',
 			heroLead:
-				'En delad veckolista för hela hushållet. Bjud in partner, checka av i butiken och få förslag på vad ni brukar behöva — så ni köper rätt och slänger mindre.',
+				'Delad inköpslista och skafferi för hela hushållet — bjud in partner, checka av i butiken och se vad som finns hemma innan ni handlar.',
 			heroSecondary:
-				'Kvitton och checkoffs bygger hushållets minne i bakgrunden. Butiksneutralt — ICA, Willys eller Coop.'
+				'Kvitton och checkoffs bygger hushållets minne. Butiksneutralt — ICA, Willys eller Coop.'
 		},
 		b: {
 			heroTitle: 'Butiksneutralt skafferi för hela hushållet.',
@@ -33,11 +33,11 @@ const heroByVariant: Record<MarketingLocale, Record<LandingHeroVariant, LandingH
 	},
 	en: {
 		a: {
-			heroTitle: 'Shop together — Skaffu learns your household.',
+			heroTitle: 'Shop together with pantry awareness.',
 			heroLead:
-				'One shared weekly list for the whole household. Invite your partner, check off in the store and get suggestions for what you usually need — so you buy right and waste less.',
+				'Shared shopping list and pantry for the whole household — invite your partner, check off in the store and see what is at home before you shop.',
 			heroSecondary:
-				'Receipts and checkoffs build household memory in the background. Store-neutral — ICA, Willys or Coop.'
+				'Receipts and checkoffs build household memory. Store-neutral — ICA, Willys or Coop.'
 		},
 		b: {
 			heroTitle: 'Store-neutral pantry for the whole household.',

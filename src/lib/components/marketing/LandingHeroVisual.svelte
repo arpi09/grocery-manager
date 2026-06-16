@@ -86,6 +86,24 @@
 		pointer-events: none;
 	}
 
+	@media (prefers-reduced-motion: no-preference) {
+		.glow {
+			animation: glow-pulse 2.4s ease-in-out infinite;
+		}
+	}
+
+	@keyframes glow-pulse {
+		0%,
+		100% {
+			opacity: 0.65;
+			transform: scale(1);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.04);
+		}
+	}
+
 	.phone {
 		position: relative;
 		border-radius: calc(var(--radius-lg) + 4px);
@@ -344,6 +362,10 @@
 	@media (prefers-reduced-motion: reduce) {
 		.phone,
 		.float-card {
+			animation: none;
+		}
+
+		.glow {
 			animation: none;
 		}
 	}
