@@ -5,7 +5,7 @@
 | Fùlt | Vùrde |
 |------|--------|
 | **Uppdaterad** | 2026-06-16 |
-| **Prod SHA** | `9603fdca3` @ [27613736910](https://github.com/arpi09/grocery-manager/actions/runs/27613736910) (fix #102 mobile inventory SkaffuList parity, fast E2E). Prior `72b02f49b` @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) |
+| **Prod SHA** | `9603fdca3` @ [27613967796](https://github.com/arpi09/grocery-manager/actions/runs/27613967796) (fix #102 mobile inventory SkaffuList + panel parity, fast E2E). Prior `72b02f49b` @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) |
 | **Master SHA** | `9603fdca3` - PR #102 inventory mobile list fix |
 | **CI/CD model** | **v2 on master** - tiered gates #95; prod validated @ `9603fdca3` (fast deploy tier) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ù merged to master |
