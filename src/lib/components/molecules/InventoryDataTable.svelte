@@ -127,10 +127,6 @@
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
-		padding: var(--space-md);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-md);
-		background: var(--color-surface);
 	}
 
 	.sort-header-btn {

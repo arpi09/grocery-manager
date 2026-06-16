@@ -234,7 +234,7 @@
 			<span class="swipe-hint swipe-hint--finish">{t('consume.swipeFinish')}</span>
 		</div>
 		<div
-			class="row swipe-content product-row"
+			class="row swipe-content"
 			class:finished
 			class:autoExpired={autoExpired}
 			class:swipe-dragging={swipeDragging}
@@ -256,7 +256,7 @@
 	</div>
 {:else}
 	<article
-		class="row product-row"
+		class="row"
 		class:finished
 		class:autoExpired={autoExpired}
 		data-testid="inventory-compact-row"
@@ -304,6 +304,8 @@
 	.swipe-content {
 		position: relative;
 		z-index: 1;
+		width: 100%;
+		background: var(--color-surface);
 		transition: transform 0.18s ease;
 		will-change: transform;
 	}
@@ -313,7 +315,9 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--space-sm);
+		width: 100%;
 		min-height: var(--touch-target-min);
+		padding: var(--space-sm) var(--space-md);
 		touch-action: pan-y;
 		cursor: grab;
 	}
@@ -335,6 +339,8 @@
 
 	.swipe-row .row {
 		border-bottom: none;
+		padding: 0;
+		min-height: 0;
 	}
 
 	.row.finished {
