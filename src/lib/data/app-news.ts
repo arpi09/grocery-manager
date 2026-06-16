@@ -13,30 +13,8 @@ export interface AppNewsItem {
 	detailBodyKey?: MessageKey;
 }
 
-/** Changelog milestones — add new entries at the top. Copy lives in i18n (`news.items.*`). */
+/** Product milestones — add new entries at the top. Copy lives in i18n (`news.items.*`). */
 export const APP_NEWS_ITEMS: AppNewsItem[] = [
-	{
-		id: 'inventory-product-row',
-		date: '2026-06-14',
-		illustration: 'inventory-table',
-		titleKey: 'news.items.inventoryProductRow.title',
-		bodyKey: 'news.items.inventoryProductRow.body'
-	},
-	{
-		id: 'nav-v2',
-		date: '2026-06-12',
-		illustration: 'scan',
-		titleKey: 'news.items.navV2.title',
-		bodyKey: 'news.items.navV2.body'
-	},
-	{
-		id: 'narrative-sprint',
-		date: '2026-06-10',
-		illustration: 'onboarding',
-		titleKey: 'news.items.narrativeSprint.title',
-		bodyKey: 'news.items.narrativeSprint.body',
-		detailBodyKey: 'news.items.narrativeSprint.detail'
-	},
 	{
 		id: 'brain-v1',
 		date: '2026-06-08',

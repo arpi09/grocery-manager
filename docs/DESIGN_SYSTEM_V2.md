@@ -47,3 +47,7 @@ Home (`/hem`) uses `SkaffuCard.svelte` (`@smui/card` + `skaffu-card` overrides) 
 ## Sheets
 
 Filter/add sheets use `Modal variant="sheet"` and `--z-sheet` stacking above bottom nav.
+
+## News page
+
+`/nyheter` lists **major product milestones** only (launch, Brain, Pro, etc.) — not every UI sprint. Add a new entry only when PO approves.

@@ -2731,9 +2731,9 @@
 	},
 	"news": {
 		"title": "News",
-		"subtitle": "What's new in Skaffu — step by step forward",
-		"lead": "Follow the trail of new features and improvements. We keep building so your pantry feels easier every week.",
-		"metaDescription": "Latest news and updates in Skaffu — new features for scanning, recipes, onboarding and more.",
+		"subtitle": "Major Skaffu milestones — when the product takes a clear step forward",
+		"lead": "The moments that change everyday life: from launch to household memory that learns from receipts.",
+		"metaDescription": "Skaffu product milestones — launch and household memory for shared weekly shopping.",
 		"trailAria": "Timeline of product news",
 		"readMore": "Read more",
 		"openDetail": "Read more about {title}",
@@ -2744,44 +2744,11 @@
 				"body": "The first version of Skaffu — pantry, shopping list and smart tools in one app.",
 				"detail": "With v1.0 you can track fridge, freezer and cupboard, plan shopping and get started quickly with photo, barcode or receipt. More news will appear here soon."
 			},
-			"inventoryTable": {
-				"title": "Clearer pantry overview",
-				"body": "Sort, filter and manage items in a compact table — perfect when your stock grows and you want everything at a glance."
-			},
-			"scanUx": {
-				"title": "Faster capture with photo and receipt",
-				"body": "Improved scan hub with a clearer flow — photo, barcode or receipt without losing your place."
-			},
-			"recipeModal": {
-				"title": "Recipe ideas that feel ready",
-				"body": "New recipe view with steps, portions and ingredients — pick the right dish from what you already have at home."
-			},
-			"onboarding": {
-				"title": "Get started with a smile",
-				"body": "A shorter guide from welcome to your first items — with animations that celebrate your start."
-			},
-			"pushFix": {
-				"title": "Notifications that actually work",
-				"body": "Reliable browser notification toggles in settings — expiring items and shopping reminders reach you on time."
-			},
 			"brainV1": {
 				"version": "Brain V1",
 				"title": "Household memory in daily use",
 				"body": "Estimated expiry and receipt learning — tap Estimated to see why.",
 				"detail": "Skaffu learns from receipts and your corrections. In pantry and receipt review you see Estimated and can open the explanation. More observations make memory more reliable."
-			},
-			"narrativeSprint": {
-				"title": "List-first across the app",
-				"body": "Home, onboarding and shopping tell the same weekly loop — list, shop, check off, pantry.",
-				"detail": "We reshaped copy and empty states so new households meet the weekly list first, not the scanner."
-			},
-			"navV2": {
-				"title": "Clearer mobile navigation",
-				"body": "Home · Shopping · Scan · More — pantry and extra tools live under More."
-			},
-			"inventoryProductRow": {
-				"title": "Cleaner pantry rows (mobile)",
-				"body": "Product Row layout: name, amount and expiry on one line — less noise, easier to scan."
 			}
 		}
 	},
