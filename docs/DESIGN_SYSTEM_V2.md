@@ -32,6 +32,8 @@ Shared `.product-row` rhythm:
 - Meta: 0.75rem muted
 - Padding: `var(--space-sm) var(--space-md)`
 
+**Lists and tables:** use `SkaffuList` / `SkaffuListItem` for row lists and `SkaffuDataTable` for tabular inventory — not raw `<ul>` stacks or hand-rolled card tables. SMUI theme tokens live in `src/theme/` and `src/lib/design/skaffu-smui-theme.ts`.
+
 ## Sheets
 
 Filter/add sheets use `Modal variant="sheet"` and `--z-sheet` stacking above bottom nav.

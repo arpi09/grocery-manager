@@ -1,8 +1,10 @@
 <script lang="ts">
 	import InventoryTableRow from '$lib/components/molecules/InventoryTableRow.svelte';
+	import SkaffuDataTable from '$lib/components/molecules/SkaffuDataTable.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { t } from '$lib/i18n';
 	import type { InventorySortDirection, InventorySortKey } from '$lib/utils/inventory-list-filters';
+	import { Body, Cell, Head, Row } from '@smui/data-table';
 
 	interface Props {
 		items: InventoryItem[];
@@ -52,7 +54,7 @@
 	}
 </script>
 
-<div class="card-stack" data-testid="inventory-table" aria-label={ariaLabel}>
+<div class="inventory-table-wrap">
 	<div class="sort-bar" role="group" aria-label={t('inventory.sortLabel')}>
 		{#each sortKeys as key (key)}
 			<button
@@ -71,24 +73,38 @@
 		{/each}
 	</div>
 
-	<div class="card-list">
-		{#each items as item (item.id)}
-			<InventoryTableRow
-				{item}
-				{canWrite}
-				{finished}
-				{autoExpired}
-				{autoExpiredGraceDays}
-				finishing={finishingIds.has(item.id)}
-				{onFinishOneTap}
-				{onPartialConsume}
-			/>
-		{/each}
-	</div>
+	<SkaffuDataTable {ariaLabel} data-testid="inventory-table">
+		{#snippet head()}
+			<Head>
+				<Row>
+					<Cell>{t('inventory.columnName')}</Cell>
+					<Cell>{t('inventory.columnQuantity')}</Cell>
+					<Cell>{t('inventory.columnExpiry')}</Cell>
+					<Cell class="actions-col"></Cell>
+				</Row>
+			</Head>
+		{/snippet}
+		{#snippet body()}
+			<Body>
+				{#each items as item (item.id)}
+					<InventoryTableRow
+						{item}
+						{canWrite}
+						{finished}
+						{autoExpired}
+						{autoExpiredGraceDays}
+						finishing={finishingIds.has(item.id)}
+						{onFinishOneTap}
+						{onPartialConsume}
+					/>
+				{/each}
+			</Body>
+		{/snippet}
+	</SkaffuDataTable>
 </div>
 
 <style>
-	.card-stack {
+	.inventory-table-wrap {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
@@ -131,9 +147,7 @@
 		font-size: 0.6875rem;
 	}
 
-	.card-list {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-xs);
+	:global(.actions-col) {
+		width: 3rem;
 	}
 </style>

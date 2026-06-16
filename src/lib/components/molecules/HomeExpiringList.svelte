@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { DashboardSummary } from '$lib/application/inventory.service';
+	import SkaffuList from '$lib/components/molecules/SkaffuList.svelte';
+	import SkaffuListItem from '$lib/components/molecules/SkaffuListItem.svelte';
 	import { daysUntilExpiry } from '$lib/domain/expiry';
 	import { t } from '$lib/i18n';
 
@@ -14,9 +16,9 @@
 
 {#if visible.length > 0}
 	<section class="expiring-list" aria-label={t('home.expiring.ariaLabel')} data-testid="home-expiring-list">
-		<ul class="rows">
+		<SkaffuList>
 			{#each visible as item (item.id)}
-				<li class="row product-row">
+				<SkaffuListItem data-testid="home-expiring-row-{item.id}">
 					<span class="name">{item.name}</span>
 					<span class="meta" aria-hidden="true">·</span>
 					<span class="days">
@@ -24,9 +26,9 @@
 							{t('home.expiring.daysLeft', { days: daysUntilExpiry(item.expiresOn) })}
 						{/if}
 					</span>
-				</li>
+				</SkaffuListItem>
 			{/each}
-		</ul>
+		</SkaffuList>
 		{#if expiringSoon.length > 3}
 			<a class="more-link" href="/inventory/fridge?filter=expiring">{t('home.expiring.moreLink')}</a>
 		{/if}
@@ -40,27 +42,10 @@
 		gap: var(--space-xs);
 	}
 
-	.rows {
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-md);
-		overflow: hidden;
-	}
-
-	.row {
+	:global(.expiring-list .skaffu-list-item .mdc-deprecated-list-item__wrapper) {
 		display: flex;
 		align-items: center;
 		gap: var(--space-xs);
-		padding: var(--space-sm) var(--space-md);
-		border-bottom: 1px solid var(--color-border);
-		background: var(--color-surface);
-		min-height: var(--touch-target-min);
-	}
-
-	.row:last-child {
-		border-bottom: none;
 	}
 
 	.name {
@@ -79,7 +64,7 @@
 
 	.days {
 		flex-shrink: 0;
-		font-size: 0.8125rem;
+		font-size: 0.75rem;
 		color: var(--color-text-muted);
 	}
 

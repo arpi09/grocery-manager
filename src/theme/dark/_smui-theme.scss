@@ -1,0 +1,21 @@
+@use 'variables' as skaffu;
+
+@use '@smui/common/theme/index' as theme with (
+	$primary: skaffu.$skaffu-primary,
+	$secondary: skaffu.$skaffu-on-surface-muted,
+	$surface: skaffu.$skaffu-surface,
+	$background: skaffu.$skaffu-background,
+	$error: skaffu.$skaffu-error,
+	$on-surface: skaffu.$skaffu-on-surface,
+	$on-primary: #ffffff
+);
+
+@use '@smui/common/shape/index' as shape with (
+	$small-component-radius: skaffu.$skaffu-radius-sm,
+	$medium-component-radius: skaffu.$skaffu-radius-md,
+	$large-component-radius: skaffu.$skaffu-radius-lg
+);
+
+@use '@smui/common/typography/index' as typography with (
+	$font-family: skaffu.$skaffu-font-family
+);

@@ -300,7 +300,7 @@
 			border-radius: var(--radius-lg);
 			border-bottom: 1px solid var(--color-border);
 			padding-bottom: var(--space-lg);
-			animation: modal-center-in 0.2s ease-out backwards;
+			animation: modal-sheet-desktop-in 0.2s ease-out backwards;
 		}
 
 		.modal-panel--sheet.modal-panel--dragging {
@@ -372,6 +372,17 @@
 	.modal-panel--center.modal-panel--dragging,
 	.modal-panel--sheet.modal-panel--dragging {
 		transition: transform 0.05s linear;
+	}
+
+	@keyframes modal-sheet-desktop-in {
+		from {
+			opacity: 0;
+			transform: translateY(0.75rem) scale(0.98);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
 	}
 
 	@keyframes modal-center-in {
