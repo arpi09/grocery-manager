@@ -5,7 +5,7 @@
 | Fùlt | Vùrde |
 |------|--------|
 | **Uppdaterad** | 2026-06-16 |
-| **Prod SHA** | `72b02f49b` @ [27610739388](https://github.com/arpi09/grocery-manager/actions/runs/27610739388) (UI living polish #101 ù home priority cards, news/scan SVGs, inventory table, fast E2E). Prior `c267c172c` @ [27608398776](https://github.com/arpi09/grocery-manager/actions/runs/27608398776) |
+| **Prod SHA** | `72b02f49b` @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) (UI living polish #101 ù home priority cards, news/scan SVGs, inventory table, fast E2E). Prior `c267c172c` @ [27608398776](https://github.com/arpi09/grocery-manager/actions/runs/27608398776) |
 | **Master SHA** | `72b02f49b` ù PR #101 on #96ù#100 baseline |
 | **CI/CD model** | **v2 on master** ù tiered gates #95; prod validated @ `72b02f49b` (fast deploy tier) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ù merged to master |
@@ -67,7 +67,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 ## Kùnda drift (fixa nùr du ser dem)
 
 - [x] Prod DB migrations `0047`ù`0048` ù applied 2026-06-14
-- [x] **UI living polish** ù prod **`72b02f49b`** @ [27610739388](https://github.com/arpi09/grocery-manager/actions/runs/27610739388) (fast E2E). PR #101 merged 2026-06-16.
+- [x] **UI living polish** ó prod **`72b02f49b`** @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) (fast E2E). PR #101 merged 2026-06-16.
 - [x] **SMUI + Reality Audit + Settings hub** ù prod **`c267c172c`** @ [27608398776](https://github.com/arpi09/grocery-manager/actions/runs/27608398776) (fast E2E). PRs #96ù#100 merged 2026-06-16.
 - [x] **Mobile UX Recovery** ù prior prod **`d585cbd5`** @ [27570192623](https://github.com/arpi09/grocery-manager/actions/runs/27570192623)
 - [x] **PR #95** CI/CD v2 merged 2026-06-15
@@ -79,5 +79,5 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 | `fix/reality-audit-d1-d5` | Reality Audit polish R17ùR29 | **Merged** (#96 ? `c267c172c`) |
 | `feat/settings-ios-hub` | iOS settings hub drill-down | **Merged** (#100 ? `c267c172c`) |
 | `feat/ui-living-polish` | Home priority cards, news/scan SVGs, inventory table | **Merged** (#101 ? `72b02f49b`) |
-| `feat/smui-*` / `feat/marketing-*` | SMUI tables + home + marketing | **Merged** (#97ñ#99) |
+| `feat/smui-*` / `feat/marketing-*` | SMUI tables + home + marketing | **Merged** (#97ù#99) |
 | `feat/mobile-ux-recovery` | Mobile UX Recovery R46ùR58 | **Merged** (`d585cbd5`) |
