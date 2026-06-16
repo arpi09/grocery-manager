@@ -1,5 +1,8 @@
 <script lang="ts">
-	import HomeDashboardCard from '$lib/components/molecules/HomeDashboardCard.svelte';
+	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
+	import HomeDashboardCard, {
+		type HomeDashboardCardSize
+	} from '$lib/components/molecules/HomeDashboardCard.svelte';
 	import type { PantryStatusSummary } from '$lib/application/inventory.service';
 	import type { LocationCount } from '$lib/domain/inventory-item';
 	import { LOCATIONS } from '$lib/domain/location';
@@ -11,9 +14,10 @@
 		counts: LocationCount[];
 		pantryStatus: PantryStatusSummary;
 		cold?: boolean;
+		size?: HomeDashboardCardSize;
 	}
 
-	let { totalItems, counts, pantryStatus, cold = false }: Props = $props();
+	let { totalItems, counts, pantryStatus, cold = false, size = 'default' }: Props = $props();
 
 	const locale = $derived(getLocale());
 	const countByLocation = $derived(
@@ -45,7 +49,11 @@
 	href="/inventory/fridge"
 	testId="home-card-pantry"
 	footerLabel={t('home.dashboard.pantryFooter')}
+	{size}
 >
+	{#snippet icon()}
+		<FeatureIcon id="fridge" size={18} />
+	{/snippet}
 	{#snippet meta()}
 		{#if cold}
 			<p class="meta-line">{t('home.dashboard.pantryColdMeta')}</p>

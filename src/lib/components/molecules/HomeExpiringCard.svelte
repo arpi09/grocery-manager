@@ -1,5 +1,8 @@
 <script lang="ts">
-	import HomeDashboardCard from '$lib/components/molecules/HomeDashboardCard.svelte';
+	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
+	import HomeDashboardCard, {
+		type HomeDashboardCardSize
+	} from '$lib/components/molecules/HomeDashboardCard.svelte';
 	import HomeExpiringList from '$lib/components/molecules/HomeExpiringList.svelte';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import type { HomeState } from '$lib/domain/home-state';
@@ -8,9 +11,10 @@
 	interface Props {
 		expiringSoon: DashboardSummary['expiringSoon'];
 		homeState: HomeState;
+		size?: HomeDashboardCardSize;
 	}
 
-	let { expiringSoon, homeState }: Props = $props();
+	let { expiringSoon, homeState, size = 'default' }: Props = $props();
 
 	const tone = $derived(homeState === 'expiry' ? 'attention' : 'default');
 </script>
@@ -20,8 +24,12 @@
 	href="/inventory/fridge?filter=expiring"
 	testId="home-card-expiring"
 	{tone}
+	{size}
 	footerLabel={t('home.dashboard.expiringFooter')}
 >
+	{#snippet icon()}
+		<FeatureIcon id="clock" size={18} />
+	{/snippet}
 	{#snippet body()}
 		{#if expiringSoon.length > 0}
 			<HomeExpiringList {expiringSoon} />

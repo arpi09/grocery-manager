@@ -60,6 +60,19 @@
 			summary.pantryStatus.autoExpiredCount > 0
 	);
 
+	const pantrySize = $derived.by(() => {
+		if (homeState === 'expiry' || homeState === 'cold') return 'compact' as const;
+		return 'default' as const;
+	});
+
+	const shoppingSize = $derived.by(() => {
+		if (homeState === 'lista_ready') return 'hero' as const;
+		if (homeState === 'expiry') return 'compact' as const;
+		return 'default' as const;
+	});
+
+	const expiringSize = $derived(homeState === 'expiry' ? ('hero' as const) : ('default' as const));
+
 	$effect(() => {
 		if (!browser || !userId) return;
 		recordPeakInventoryCount(summary.totalItems, userId);
@@ -112,14 +125,37 @@
 	{/if}
 
 	<div class="card-grid">
-		<HomePantryCard
-			totalItems={summary.totalItems}
-			counts={summary.counts}
-			pantryStatus={summary.pantryStatus}
-			cold={isCold}
-		/>
-		<HomeShoppingCard {shoppingListCount} {shoppingCadence} />
-		<HomeExpiringCard expiringSoon={summary.expiringSoon} {homeState} />
+		{#if homeState === 'expiry'}
+			<HomeExpiringCard expiringSoon={summary.expiringSoon} {homeState} size={expiringSize} />
+			<HomePantryCard
+				totalItems={summary.totalItems}
+				counts={summary.counts}
+				pantryStatus={summary.pantryStatus}
+				cold={isCold}
+				size={pantrySize}
+			/>
+			<HomeShoppingCard {shoppingListCount} {shoppingCadence} size={shoppingSize} />
+		{:else if homeState === 'lista_ready'}
+			<HomeShoppingCard {shoppingListCount} {shoppingCadence} size={shoppingSize} />
+			<HomePantryCard
+				totalItems={summary.totalItems}
+				counts={summary.counts}
+				pantryStatus={summary.pantryStatus}
+				cold={isCold}
+				size={pantrySize}
+			/>
+			<HomeExpiringCard expiringSoon={summary.expiringSoon} {homeState} size={expiringSize} />
+		{:else}
+			<HomePantryCard
+				totalItems={summary.totalItems}
+				counts={summary.counts}
+				pantryStatus={summary.pantryStatus}
+				cold={isCold}
+				size={pantrySize}
+			/>
+			<HomeShoppingCard {shoppingListCount} {shoppingCadence} size={shoppingSize} />
+			<HomeExpiringCard expiringSoon={summary.expiringSoon} {homeState} size={expiringSize} />
+		{/if}
 		{#if showAttentionCard}
 			<HomeAttentionCard pantryStatus={summary.pantryStatus} />
 		{/if}
@@ -179,9 +215,17 @@
 		gap: var(--page-section-gap);
 	}
 
+	.card-grid :global(.dashboard-card[data-card-size='hero']) {
+		grid-column: 1 / -1;
+	}
+
 	@media (min-width: 720px) {
 		.card-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.card-grid :global(.dashboard-card[data-card-size='hero']) {
+			grid-column: span 2;
 		}
 	}
 
