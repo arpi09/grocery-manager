@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
 	import Toggle from '$lib/components/atoms/Toggle.svelte';
-	import SettingsRow from '$lib/components/molecules/SettingsRow.svelte';
+	import SkaffuSettingsToggleRow from '$lib/components/molecules/SkaffuSettingsToggleRow.svelte';
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
 	import { t } from '$lib/i18n';
 	import {
@@ -197,68 +197,75 @@
 	title={t('nearbySharing.settingsTitle')}
 	description={t('nearbySharing.settingsDescription')}
 >
-	<SettingsRow title={t('nearbySharing.enableTitle')} note={t('nearbySharing.enableNote')} last={false}>
-		<Toggle
-			checked={nearbyToggleChecked}
-			label={t('nearbySharing.enableLabel')}
-			disabled={nearbyBusy}
-			toggleNotify={(enabled) => {
-				if (nearbyBusy) {
-					return;
-				}
-				if (!enabled) {
-					void disableNearbySharing();
-					return;
-				}
-				// Synchronous geolocation kickoff in the tap handler — required on iOS Safari.
-				locating = true;
-				const locationPromise = startBrowserLocationRequest();
-				void completeNearbySharingEnable(locationPromise);
-			}}
-		/>
-		{#if locating}
-			<span class="saving">{t('nearbySharing.locating')}</span>
-			<span class="hint">{t('nearbySharing.locationAllowPrompt')}</span>
-		{:else if submitting}
-			<span class="saving">{t('common.saving')}</span>
-		{/if}
-		{#if errorMessage}
-			<p class="error" role="alert">{errorMessage}</p>
-		{/if}
-		<p class="privacy-note">{t('nearbySharing.privacyNote')}</p>
-		<p class="spec-link">
-			<a href="https://github.com/arpi09/grocery-manager/blob/master/docs/GRANNSKAFFERIET_V1.md">
-				{t('nearbySharing.specLink')}
-			</a>
-		</p>
-	</SettingsRow>
+	<SkaffuSettingsToggleRow title={t('nearbySharing.enableTitle')} note={t('nearbySharing.enableNote')} last={false}>
+		{#snippet control()}
+			<Toggle
+				checked={nearbyToggleChecked}
+				label={t('nearbySharing.enableLabel')}
+				disabled={nearbyBusy}
+				toggleNotify={(enabled) => {
+					if (nearbyBusy) {
+						return;
+					}
+					if (!enabled) {
+						void disableNearbySharing();
+						return;
+					}
+					locating = true;
+					const locationPromise = startBrowserLocationRequest();
+					void completeNearbySharingEnable(locationPromise);
+				}}
+			/>
+		{/snippet}
+		{#snippet below()}
+			{#if locating}
+				<span class="saving">{t('nearbySharing.locating')}</span>
+				<span class="hint">{t('nearbySharing.locationAllowPrompt')}</span>
+			{:else if submitting}
+				<span class="saving">{t('common.saving')}</span>
+			{/if}
+			{#if errorMessage}
+				<p class="error" role="alert">{errorMessage}</p>
+			{/if}
+			<p class="privacy-note">{t('nearbySharing.privacyNote')}</p>
+			<p class="spec-link">
+				<a href="https://github.com/arpi09/grocery-manager/blob/master/docs/GRANNSKAFFERIET_V1.md">
+					{t('nearbySharing.specLink')}
+				</a>
+			</p>
+		{/snippet}
+	</SkaffuSettingsToggleRow>
 
-	<SettingsRow
+	<SkaffuSettingsToggleRow
 		title={t('nearbySharing.pushTitle')}
 		note={t('nearbySharing.pushNote')}
 		last={true}
 	>
-		<Toggle
-			checked={nearbyPushEnabled}
-			label={t('nearbySharing.pushEnableLabel')}
-			disabled={nearbyPushDisabled}
-			toggleNotify={(enabled) => {
-				void toggleNearbyPush(enabled);
-			}}
-		/>
-		{#if !nearbySharingEnabled && !nearbyPushEnabled}
-			<p class="hint">{t('nearbySharing.pushRequiresNearby')}</p>
-		{:else if !pushNotificationsEnabled && !nearbyPushEnabled}
-			<p class="hint">{t('nearbySharing.pushRequiresPush')}</p>
-		{/if}
-		{#if nearbyPushError}
-			<p class="error" role="alert">{nearbyPushError}</p>
-		{/if}
-		{#if nearbyPushSubmitting}
-			<span class="saving">{t('common.saving')}</span>
-		{/if}
-		<p class="privacy-note">{t('nearbySharing.pushPrivacyNote')}</p>
-	</SettingsRow>
+		{#snippet control()}
+			<Toggle
+				checked={nearbyPushEnabled}
+				label={t('nearbySharing.pushEnableLabel')}
+				disabled={nearbyPushDisabled}
+				toggleNotify={(enabled) => {
+					void toggleNearbyPush(enabled);
+				}}
+			/>
+		{/snippet}
+		{#snippet below()}
+			{#if !nearbySharingEnabled && !nearbyPushEnabled}
+				<p class="hint">{t('nearbySharing.pushRequiresNearby')}</p>
+			{:else if !pushNotificationsEnabled && !nearbyPushEnabled}
+				<p class="hint">{t('nearbySharing.pushRequiresPush')}</p>
+			{/if}
+			{#if nearbyPushError}
+				<p class="error" role="alert">{nearbyPushError}</p>
+			{/if}
+			{#if nearbyPushSubmitting}
+				<span class="saving">{t('common.saving')}</span>
+			{/if}
+			<p class="privacy-note">{t('nearbySharing.pushPrivacyNote')}</p>
+		{/snippet}
+	</SkaffuSettingsToggleRow>
 </SettingsSection>
 
 <style>

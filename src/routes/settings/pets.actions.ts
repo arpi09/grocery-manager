@@ -19,7 +19,7 @@ export const petsActions = {
 		}
 
 		await locals.petService.setPetsEnabled(locals.user!.id, parsed.data.enabled === 'true');
-		redirect(302, appendActionToast('/settings', 'settingsSaved'));
+		redirect(302, appendActionToast('/settings/app', 'settingsSaved'));
 	},
 	addPet: async ({ request, locals }: RequestEvent) => {
 		const formData = await request.formData();
@@ -37,7 +37,7 @@ export const petsActions = {
 			parsed.data.name,
 			parsed.data.species || null
 		);
-		redirect(302, appendActionToast('/settings', 'petAdded', parsed.data.name));
+		redirect(302, appendActionToast('/settings/app', 'petAdded', parsed.data.name));
 	},
 	deletePet: async ({ request, locals }: RequestEvent) => {
 		const formData = await request.formData();
@@ -53,6 +53,6 @@ export const petsActions = {
 		const pet = pets.find((entry) => entry.id === parsed.data.id);
 
 		await locals.petService.deletePet(locals.user!.id, parsed.data.id);
-		redirect(302, appendActionToast('/settings', 'petRemoved', pet?.name));
+		redirect(302, appendActionToast('/settings/app', 'petRemoved', pet?.name));
 	}
 };

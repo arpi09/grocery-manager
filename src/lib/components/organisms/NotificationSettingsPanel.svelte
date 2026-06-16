@@ -3,6 +3,7 @@
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import Toggle from '$lib/components/atoms/Toggle.svelte';
+	import SkaffuSettingsToggleRow from '$lib/components/molecules/SkaffuSettingsToggleRow.svelte';
 	import SettingsRow from '$lib/components/molecules/SettingsRow.svelte';
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
 	import { getLocale, t, type MessageKey } from '$lib/i18n';
@@ -244,32 +245,12 @@
 	title={t('settings.notifications.title')}
 	description={t('settings.notifications.description')}
 >
-	<SettingsRow
+	<SkaffuSettingsToggleRow
 		title={t('settings.expiryReminders.title')}
 		note={t('settings.expiryReminders.note')}
 		last={false}
 	>
-		<form
-			method="POST"
-			action="?/updateExpiryReminders"
-			class="expiry-reminders-form"
-			bind:this={expiryRemindersForm}
-			use:enhance={bindSubmittingWithRedirect(
-				(v) => (expiryRemindersSubmitting = v),
-				async (location) => {
-					const url = new URL(location, 'http://local');
-					const kind = parseActionToastKind(url.searchParams.get(ACTION_TOAST_PARAM));
-					if (kind === 'settingsSaved') {
-						showClientToast(actionToastMessage(getLocale(), kind), { variant: 'success' });
-					}
-				},
-				(formData) => {
-					formData.set('enabled', expiryRemindersEnabled ? 'true' : 'false');
-					formData.set('days', expiryReminderDays);
-				}
-			)}
-		>
-			<input type="hidden" name="enabled" value={expiryRemindersEnabled ? 'true' : 'false'} />
+		{#snippet control()}
 			<Toggle
 				checked={expiryRemindersEnabled}
 				label={t('settings.expiryReminders.enable')}
@@ -278,23 +259,47 @@
 					expiryRemindersForm?.requestSubmit();
 				}}
 			/>
-			<label class="expiry-days">
-				<span>{t('settings.expiryReminders.daysLabel')}</span>
-				<select
-					name="days"
-					disabled={!expiryRemindersEnabled}
-					bind:value={expiryReminderDays}
-					onchange={(event) => event.currentTarget.form?.requestSubmit()}
-				>
-					<option value="3">{t('settings.expiryReminders.daysOption', { days: 3 })}</option>
-					<option value="7">{t('settings.expiryReminders.daysOption', { days: 7 })}</option>
-				</select>
-			</label>
-			{#if expiryRemindersSubmitting}
-				<span class="expiry-saving">{t('common.saving')}</span>
-			{/if}
-		</form>
-	</SettingsRow>
+		{/snippet}
+		{#snippet below()}
+			<form
+				method="POST"
+				action="?/updateExpiryReminders"
+				class="expiry-reminders-form"
+				bind:this={expiryRemindersForm}
+				use:enhance={bindSubmittingWithRedirect(
+					(v) => (expiryRemindersSubmitting = v),
+					async (location) => {
+						const url = new URL(location, 'http://local');
+						const kind = parseActionToastKind(url.searchParams.get(ACTION_TOAST_PARAM));
+						if (kind === 'settingsSaved') {
+							showClientToast(actionToastMessage(getLocale(), kind), { variant: 'success' });
+						}
+					},
+					(formData) => {
+						formData.set('enabled', expiryRemindersEnabled ? 'true' : 'false');
+						formData.set('days', expiryReminderDays);
+					}
+				)}
+			>
+				<input type="hidden" name="enabled" value={expiryRemindersEnabled ? 'true' : 'false'} />
+				<label class="expiry-days">
+					<span>{t('settings.expiryReminders.daysLabel')}</span>
+					<select
+						name="days"
+						disabled={!expiryRemindersEnabled}
+						bind:value={expiryReminderDays}
+						onchange={(event) => event.currentTarget.form?.requestSubmit()}
+					>
+						<option value="3">{t('settings.expiryReminders.daysOption', { days: 3 })}</option>
+						<option value="7">{t('settings.expiryReminders.daysOption', { days: 7 })}</option>
+					</select>
+				</label>
+				{#if expiryRemindersSubmitting}
+					<span class="expiry-saving">{t('common.saving')}</span>
+				{/if}
+			</form>
+		{/snippet}
+	</SkaffuSettingsToggleRow>
 
 	{#if autoExpiredGraceDays != null}
 		<SettingsRow
@@ -331,12 +336,12 @@
 		</SettingsRow>
 	{/if}
 
-	<SettingsRow
+	<SkaffuSettingsToggleRow
 		title={t('settings.pushNotifications.title')}
 		note={t('settings.pushNotifications.note')}
 		last={false}
 	>
-		<div class="push-notifications-control">
+		{#snippet control()}
 			<Toggle
 				checked={pushNotificationsEnabled}
 				disabled={!pushReady || pushPermissionDenied || pushNotificationsSubmitting}
@@ -345,52 +350,56 @@
 					void togglePushNotifications(enabled);
 				}}
 			/>
-			{#if pushStatusKey}
-				<p class="push-status" role="status">{t(pushStatusKey)}</p>
-			{/if}
-			{#if pushPermissionDenied}
-				<div class="push-help" data-testid="push-permission-denied-help">
-					<p class="push-help-intro">{t('settings.pushNotifications.permissionDeniedHelp.intro')}</p>
-					<ul class="push-help-steps">
-						<li>{t('settings.pushNotifications.permissionDeniedHelp.chrome')}</li>
-						<li>{t('settings.pushNotifications.permissionDeniedHelp.safari')}</li>
-					</ul>
-				</div>
-			{/if}
-			{#if pushRequiresInstall}
-				<a class="text-action push-install-link" href="/install-app">
-					{t('settings.pushNotifications.installAppLink')}
-				</a>
-			{/if}
-			{#if pushPermissionRecovered && pushReady && !pushNotificationsEnabled}
-				<div class="push-recovered">
-					<p class="push-hint">{t('settings.pushNotifications.permissionRecovered')}</p>
-					<button
-						type="button"
-						class="text-action"
-						disabled={pushNotificationsSubmitting}
-						onclick={() => void togglePushNotifications(true)}
-					>
-						{t('settings.pushNotifications.permissionRecoveredAction')}
-					</button>
-				</div>
-			{/if}
-			{#if pushDrift}
-				<div class="push-drift" role="alert">
-					<p class="push-drift-copy">{t('settings.pushNotifications.driftWarning')}</p>
-					<button type="button" class="text-action" onclick={() => void resolvePushDrift()}>
-						{t('settings.pushNotifications.driftDisable')}
-					</button>
-				</div>
-			{/if}
-			{#if pushNotificationsSubmitting}
-				<span class="expiry-saving">{t('common.saving')}</span>
-			{/if}
-			{#if pushNotificationsError && !pushPermissionDenied}
-				<p class="push-error" role="alert">{pushNotificationsError}</p>
-			{/if}
-		</div>
-	</SettingsRow>
+		{/snippet}
+		{#snippet below()}
+			<div class="push-notifications-control">
+				{#if pushStatusKey}
+					<p class="push-status" role="status">{t(pushStatusKey)}</p>
+				{/if}
+				{#if pushPermissionDenied}
+					<div class="push-help" data-testid="push-permission-denied-help">
+						<p class="push-help-intro">{t('settings.pushNotifications.permissionDeniedHelp.intro')}</p>
+						<ul class="push-help-steps">
+							<li>{t('settings.pushNotifications.permissionDeniedHelp.chrome')}</li>
+							<li>{t('settings.pushNotifications.permissionDeniedHelp.safari')}</li>
+						</ul>
+					</div>
+				{/if}
+				{#if pushRequiresInstall}
+					<a class="text-action push-install-link" href="/install-app">
+						{t('settings.pushNotifications.installAppLink')}
+					</a>
+				{/if}
+				{#if pushPermissionRecovered && pushReady && !pushNotificationsEnabled}
+					<div class="push-recovered">
+						<p class="push-hint">{t('settings.pushNotifications.permissionRecovered')}</p>
+						<button
+							type="button"
+							class="text-action"
+							disabled={pushNotificationsSubmitting}
+							onclick={() => void togglePushNotifications(true)}
+						>
+							{t('settings.pushNotifications.permissionRecoveredAction')}
+						</button>
+					</div>
+				{/if}
+				{#if pushDrift}
+					<div class="push-drift" role="alert">
+						<p class="push-drift-copy">{t('settings.pushNotifications.driftWarning')}</p>
+						<button type="button" class="text-action" onclick={() => void resolvePushDrift()}>
+							{t('settings.pushNotifications.driftDisable')}
+						</button>
+					</div>
+				{/if}
+				{#if pushNotificationsSubmitting}
+					<span class="expiry-saving">{t('common.saving')}</span>
+				{/if}
+				{#if pushNotificationsError && !pushPermissionDenied}
+					<p class="push-error" role="alert">{pushNotificationsError}</p>
+				{/if}
+			</div>
+		{/snippet}
+	</SkaffuSettingsToggleRow>
 
 	<SettingsRow
 		title={t('settings.shoppingToPantry.title')}
@@ -421,28 +430,12 @@
 		</form>
 	</SettingsRow>
 
-	<SettingsRow
+	<SkaffuSettingsToggleRow
 		title={t('settings.shoppingPush.title')}
 		note={t('settings.shoppingPush.note')}
 		last
 	>
-		<form
-			method="POST"
-			action="?/updateShoppingPush"
-			bind:this={shoppingPushForm}
-			use:enhance={bindSubmittingWithRedirect(
-				(v) => (shoppingPushSubmitting = v),
-				async (location) => {
-					const url = new URL(location, 'http://local');
-					const kind = parseActionToastKind(url.searchParams.get(ACTION_TOAST_PARAM));
-					if (kind === 'settingsSaved') {
-						showClientToast(actionToastMessage(getLocale(), kind), { variant: 'success' });
-					}
-				},
-				(formData) => formData.set('enabled', shoppingPushEnabled ? 'true' : 'false')
-			)}
-		>
-			<input type="hidden" name="enabled" value={shoppingPushEnabled ? 'true' : 'false'} />
+		{#snippet control()}
 			<Toggle
 				checked={shoppingPushEnabled}
 				disabled={shoppingPushDisabled}
@@ -455,21 +448,41 @@
 					shoppingPushForm?.requestSubmit();
 				}}
 			/>
-			{#if !pushNotificationsEnabled && !shoppingPushEnabled}
-				<p class="push-hint">
-					{pushPermissionDenied
-						? t('settings.shoppingPush.requiresPermission')
-						: t('settings.shoppingPush.requiresPush')}
-				</p>
-			{/if}
-			{#if shoppingPushErrorMessage}
-				<p class="push-error" role="alert">{shoppingPushErrorMessage}</p>
-			{/if}
-			{#if shoppingPushSubmitting}
-				<span class="expiry-saving">{t('common.saving')}</span>
-			{/if}
-		</form>
-	</SettingsRow>
+		{/snippet}
+		{#snippet below()}
+			<form
+				method="POST"
+				action="?/updateShoppingPush"
+				bind:this={shoppingPushForm}
+				use:enhance={bindSubmittingWithRedirect(
+					(v) => (shoppingPushSubmitting = v),
+					async (location) => {
+						const url = new URL(location, 'http://local');
+						const kind = parseActionToastKind(url.searchParams.get(ACTION_TOAST_PARAM));
+						if (kind === 'settingsSaved') {
+							showClientToast(actionToastMessage(getLocale(), kind), { variant: 'success' });
+						}
+					},
+					(formData) => formData.set('enabled', shoppingPushEnabled ? 'true' : 'false')
+				)}
+			>
+				<input type="hidden" name="enabled" value={shoppingPushEnabled ? 'true' : 'false'} />
+				{#if !pushNotificationsEnabled && !shoppingPushEnabled}
+					<p class="push-hint">
+						{pushPermissionDenied
+							? t('settings.shoppingPush.requiresPermission')
+							: t('settings.shoppingPush.requiresPush')}
+					</p>
+				{/if}
+				{#if shoppingPushErrorMessage}
+					<p class="push-error" role="alert">{shoppingPushErrorMessage}</p>
+				{/if}
+				{#if shoppingPushSubmitting}
+					<span class="expiry-saving">{t('common.saving')}</span>
+				{/if}
+			</form>
+		{/snippet}
+	</SkaffuSettingsToggleRow>
 </SettingsSection>
 
 <style>

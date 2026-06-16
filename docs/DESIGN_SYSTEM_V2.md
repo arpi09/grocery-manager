@@ -34,6 +34,8 @@ Shared `.product-row` rhythm:
 
 **Lists and tables:** use `SkaffuList` / `SkaffuListItem` for row lists and `SkaffuDataTable` for tabular inventory — not raw `<ul>` stacks or hand-rolled card tables. SMUI theme tokens live in `src/theme/` and `src/lib/design/skaffu-smui-theme.ts`.
 
+**Settings (iOS hub):** `/settings` hub uses `SkaffuSettingsGroup`, `SkaffuSettingsLinkRow`, and drill-down pages via `SettingsDrilldownLayout`. Toggle rows inside panels use `SkaffuSettingsToggleRow` (title left, switch right on all breakpoints). Prefer route paths over `#hash` anchors.
+
 ## Dashboard cards
 
 Home (`/hem`) uses `SkaffuCard.svelte` (`@smui/card` + `skaffu-card` overrides) composed via `HomeDashboardCard` and domain cards (`HomePantryCard`, `HomeShoppingCard`, `HomeExpiringCard`, `HomeAttentionCard`):

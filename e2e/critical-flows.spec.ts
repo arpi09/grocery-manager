@@ -80,7 +80,7 @@ test.describe('Critical flows', () => {
 
 		await registerNewUser(page);
 
-		await page.goto('/settings#settings-app');
+		await page.goto('/settings/app');
 
 		await dismissOnboardingModalIfOpen(page);
 
@@ -223,7 +223,7 @@ test.describe('Critical flows', () => {
 
 		await registerNewUser(page);
 
-		await page.goto('/settings#settings-app');
+		await page.goto('/settings/app');
 
 		await dismissOnboardingModalIfOpen(page);
 		await page.locator('#settings-app details.settings-disclosure summary').click({ force: true });
@@ -263,7 +263,7 @@ test.describe('Critical flows', () => {
 
 		await dismissOnboardingModalIfOpen(page);
 
-		await page.goto('/settings#settings-app');
+		await page.goto('/settings/app');
 
 		await dismissOnboardingModalIfOpen(page);
 		await page.locator('#settings-app details.settings-disclosure summary').click({ force: true });

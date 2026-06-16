@@ -36,7 +36,7 @@ export const suggestionsActions = {
 			parsed.data.normalizedKey,
 			parsed.data.location
 		);
-		redirect(302, appendActionToast('/settings#settings-suggestions', 'suggestionReset'));
+		redirect(302, appendActionToast('/settings/suggestions', 'suggestionReset'));
 	},
 	resetLocationSuggestion: async ({ request, locals }: RequestEvent) => {
 		const householdId = requireHouseholdEditor(locals);
@@ -50,7 +50,7 @@ export const suggestionsActions = {
 		}
 
 		await householdSuggestionsService.resetLocationRule(householdId, parsed.data.normalizedKey);
-		redirect(302, appendActionToast('/settings#settings-suggestions', 'suggestionReset'));
+		redirect(302, appendActionToast('/settings/suggestions', 'suggestionReset'));
 	}
 };
 

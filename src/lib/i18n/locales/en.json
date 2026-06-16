@@ -455,6 +455,15 @@
 			"plan": "Plan",
 			"feedback": "Feedback"
 		},
+		"hub": {
+			"account": "Account",
+			"household": "Household",
+			"receipts": "Shopping & receipts",
+			"notificationsSharing": "Notifications & sharing",
+			"app": "App",
+			"plan": "Plan",
+			"support": "Support"
+		},
 		"notifications": {
 			"title": "Notifications",
 			"description": "Email, browser and shopping reminders"

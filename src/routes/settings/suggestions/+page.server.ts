@@ -1,19 +1,13 @@
 import { canEditInventory } from '$lib/domain/household';
+import { redirect } from '@sveltejs/kit';
 import { buildKivraForwardAddress, isKivraForwardEnabled } from '$lib/server/kivra-forward';
 import { receiptForwardService } from '$lib/server/di';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
-import { shouldShowSuggestionsSection } from './suggestions.actions';
+import { shouldShowSuggestionsSection } from '../suggestions.actions';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ parent, locals }) => {
-	const { household, householdRole, isPro } = await parent();
-	const householdId = locals.householdId;
-
-	const kivraForwardEnabled = isKivraForwardEnabled();
-	const kivraForwardAddress =
-		kivraForwardEnabled && householdId && householdRole && canEditInventory(householdRole)
-			? buildKivraForwardAddress(await receiptForwardService.getForwardToken(householdId))
-			: null;
+	const { householdId, householdRole } = await parent();
 
 	const suggestionsSnapshot =
 		householdId && householdRole && canEditInventory(householdRole)
@@ -25,10 +19,19 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		isShelfLifeLearningEnabled()
 	);
 
+	if (!showSuggestions) {
+		throw redirect(302, '/settings');
+	}
+
+	const kivraForwardEnabled = isKivraForwardEnabled();
+	const kivraForwardAddress =
+		kivraForwardEnabled && householdId && householdRole && canEditInventory(householdRole)
+			? buildKivraForwardAddress(await receiptForwardService.getForwardToken(householdId))
+			: null;
+
 	return {
-		isPro,
-		household,
-		kivraForwardAddress,
-		showSuggestions
+		suggestionsSnapshot,
+		canResetSuggestions: Boolean(householdRole && canEditInventory(householdRole)),
+		kivraForwardAddress
 	};
 };

@@ -13,12 +13,12 @@ test.describe('Settings', () => {
 		await expect(page.getByRole('heading', { name: /Inst\u00e4llningar|Settings/i })).toBeVisible({
 			timeout: 15_000
 		});
-		await expect(page.getByRole('switch', { name: /Skicka e-postp\u00e5minnelser|Send email reminders/i })).toBeVisible();
+		await expect(page.getByRole('link', { name: /^Konto$|^Account$/i })).toBeVisible();
 	});
 
 	test('expiry reminders toggle saves and shows toast', async ({ page }) => {
 		await loginAsAdmin(page);
-		await page.goto('/settings#settings-notifications');
+		await page.goto('/settings/notifications');
 		await dismissOnboardingModalIfOpen(page);
 
 		const expirySwitch = page.getByRole('switch', {
@@ -51,7 +51,7 @@ test.describe('Settings', () => {
 		});
 
 		await loginAsAdmin(page);
-		await page.goto('/settings#settings-notifications');
+		await page.goto('/settings/notifications');
 		await dismissOnboardingModalIfOpen(page);
 
 		const pushSwitch = page.getByRole('switch', {
@@ -73,7 +73,7 @@ test.describe('Settings', () => {
 
 	test('push notifications row shows status and is not permanently disabled', async ({ page }) => {
 		await loginAsAdmin(page);
-		await page.goto('/settings#settings-notifications');
+		await page.goto('/settings/notifications');
 		await dismissOnboardingModalIfOpen(page);
 
 		const pushSwitch = page.getByRole('switch', {
@@ -99,7 +99,7 @@ test.describe('Settings', () => {
 
 	test('shop today shows requires-push hint when push is off', async ({ page }) => {
 		await loginAsAdmin(page);
-		await page.goto('/settings#settings-notifications');
+		await page.goto('/settings/notifications');
 		await dismissOnboardingModalIfOpen(page);
 
 		const pushSwitch = page.getByRole('switch', {
@@ -132,7 +132,7 @@ test.describe('Settings', () => {
 
 	test('shop today can be turned off when enabled', async ({ page }) => {
 		await loginAsAdmin(page);
-		await page.goto('/settings#settings-notifications');
+		await page.goto('/settings/notifications');
 		await dismissOnboardingModalIfOpen(page);
 
 		const shopSwitch = page.getByRole('switch', {

@@ -49,7 +49,7 @@ export const householdActions = {
 			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
 		}
 
-		redirect(302, appendActionToast('/settings', 'householdRenamed', parsed.data.name));
+		redirect(302, appendActionToast('/settings/household', 'householdRenamed', parsed.data.name));
 	},
 	createShareInvite: async ({ request, locals, url }: RequestEvent) => {
 		const formData = await request.formData();
@@ -115,7 +115,7 @@ export const householdActions = {
 			});
 
 			if (emailResult.ok) {
-				redirect(302, appendActionToast('/settings', 'inviteSent'));
+				redirect(302, appendActionToast('/settings/household', 'inviteSent'));
 			}
 
 			return {
@@ -148,7 +148,7 @@ export const householdActions = {
 			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
 		}
 
-		redirect(302, appendActionToast('/settings', 'inviteRevoked'));
+		redirect(302, appendActionToast('/settings/household', 'inviteRevoked'));
 	},
 	updateMemberRole: async ({ request, locals }: RequestEvent) => {
 		const formData = await request.formData();
@@ -174,7 +174,7 @@ export const householdActions = {
 			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
 		}
 
-		redirect(302, appendActionToast('/settings', 'memberUpdated'));
+		redirect(302, appendActionToast('/settings/household', 'memberUpdated'));
 	},
 	removeMember: async ({ request, locals }: RequestEvent) => {
 		const formData = await request.formData();
@@ -198,7 +198,7 @@ export const householdActions = {
 			return mapHouseholdErrorToFail(error, 'householdError', locals.locale);
 		}
 
-		redirect(302, appendActionToast('/settings', 'memberRemoved'));
+		redirect(302, appendActionToast('/settings/household', 'memberRemoved'));
 	},
 	deleteHousehold: async ({ request, locals }: RequestEvent) => {
 		const formData = await request.formData();

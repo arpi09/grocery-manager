@@ -419,7 +419,7 @@
 			{:else if !nearbyOptedIn}
 				<p class="nearby-hint">
 					{t('nearbySharing.panelOptInHint')}
-					<a href="/settings#settings-nearby-sharing">{t('nearbySharing.panelOptInLink')}</a>
+					<a href="/settings/nearby">{t('nearbySharing.panelOptInLink')}</a>
 				</p>
 			{:else if nearbyShares.length === 0}
 				<p class="nearby-status">{t('nearbySharing.panelEmpty')}</p>

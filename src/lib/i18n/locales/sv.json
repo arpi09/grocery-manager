@@ -696,6 +696,15 @@
 			"plan": "Plan",
 			"feedback": "Feedback"
 		},
+		"hub": {
+			"account": "Konto",
+			"household": "Hushåll",
+			"receipts": "Inköp & kvitton",
+			"notificationsSharing": "Notiser & delning",
+			"app": "App",
+			"plan": "Plan",
+			"support": "Support"
+		},
 		"notifications": {
 			"title": "Notiser",
 			"description": "E-post, webbläsare och handla-påminnelser"
