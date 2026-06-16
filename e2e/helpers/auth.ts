@@ -1,11 +1,11 @@
-import { expect, type Page } from '@playwright/test';
+﻿import { expect, type Page } from '@playwright/test';
 import { LOCALE_COOKIE_NAME, LOCALE_STORAGE_KEY } from '../../src/lib/i18n/locale';
 import { PAGE_HINT_IDS } from '../../src/lib/utils/page-hints';
 
 const ONBOARDING_VERSION = '4';
 const PAGE_HINT_STORAGE_PREFIX = 'home-pantry-page-hint-dismissed';
 const E2E_LOCALE = 'sv';
-/** Locale only — onboarding and activation state stay fresh (new-user flows). */
+/** Locale only â€” onboarding and activation state stay fresh (new-user flows). */
 export async function prepareFreshUserBrowserState(page: Page) {
 	await applyE2eLocale(page);
 
@@ -28,7 +28,7 @@ export async function prepareE2eBrowserState(page: Page) {
 
 	await page.addInitScript(
 		({ version, activationReceiptKey, celebrationKey, pageHintIds, pageHintPrefix }) => {
-			// Only clear legacy (non user-scoped) keys — wiping per-user keys re-opens the guide on every navigation.
+			// Only clear legacy (non user-scoped) keys â€” wiping per-user keys re-opens the guide on every navigation.
 			const legacyPrefixes = [
 				'home-pantry-onboarding-version',
 				'home-pantry-onboarding-dismissed',
@@ -223,7 +223,7 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 					await postSurveySkip.first().click({ force: true });
 				} else {
 					const skip = page.getByRole('button', {
-						name: /^(Hoppa över|Hoppa over|Jag gör det senare|Skip)$/i
+						name: /^(Hoppa Ã¶ver|Hoppa over|Jag gÃ¶r det senare|Skip)$/i
 					});
 					if (await skip.first().isVisible().catch(() => false)) {
 						await skip.first().click({ force: true });
@@ -273,7 +273,7 @@ export async function waitForWelcomeParamStripped(page: Page) {
 export async function expectOnboardingGuideVisible(page: Page) {
 	await dismissCookieConsentIfOpen(page);
 	await expect(
-		page.getByRole('heading', { name: /gemensamma inköpslista|shared shopping list|Det här är er/i })
+		page.getByRole('heading', { name: /gemensamma inköpslista|shared shopping list|Det här är er|Vad är Skaffu|What is Skaffu|Välkommen till Skaffu|Welcome to Skaffu/i })
 	).toBeVisible({ timeout: 20_000 });
 	await expect(page.getByTestId('onboarding-skip')).toBeVisible();
 	await expectOnboardingStepVisible(page, 1);

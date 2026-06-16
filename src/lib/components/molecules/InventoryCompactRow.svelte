@@ -91,11 +91,11 @@
 	});
 
 	const showEstimatedBadge = $derived(
-		Boolean(expiryExplanation) && !finished && !autoExpired
+		isEstimatedExpirySource(item.expiresOnSource) && !finished && !autoExpired
 	);
 
-	const showNoExpiryHint = $derived(
-		!item.expiresOn && !finished && !autoExpired && !showEstimatedBadge
+	const showMissingDateHint = $derived(
+		!finished && !autoExpired && !item.expiresOn && !showEstimatedBadge
 	);
 
 	const showConsumeActions = $derived(
@@ -187,11 +187,14 @@
 			{#if showEstimatedBadge}
 				<EstimatedBadge source={item.expiresOnSource} explanation={expiryExplanation} showSettingsLink />
 			{/if}
+			{#if showMissingDateHint}
+				<span class="missing-date">{t('inventory.missingExpiryDate')}</span>
+			{/if}
 			<span class="sep" aria-hidden="true">·</span>
 			<span class="qty">{quantityLine}</span>
 		</div>
 
-		{#if finished || autoExpired || movingSoon || expiryLabel || showNoExpiryHint}
+		{#if finished || autoExpired || movingSoon || expiryLabel}
 			<div class="subline">
 				{#if finished}
 					<Badge tone="default">{t('inventory.finishedBadge')}</Badge>
@@ -206,9 +209,6 @@
 						{expiryLabel}
 					</Badge>
 				{/if}
-				{#if showNoExpiryHint}
-					<span class="no-expiry-hint">{t('inventory.noExpiryHint')}</span>
-				{/if}
 			</div>
 		{/if}
 	</div>
@@ -219,6 +219,8 @@
 				itemId={item.id}
 				itemName={item.name}
 				disabled={finishing}
+				finishing={finishing}
+				onFinishOneTap={onFinishOneTap ? () => onFinishOneTap(item) : undefined}
 				onPartialConsume={onPartialConsume ? () => onPartialConsume(item) : undefined}
 			/>
 		</div>
@@ -362,8 +364,8 @@
 	.name {
 		min-width: 0;
 		font-weight: 600;
-		font-size: 0.875rem;
-		line-height: 1.3;
+		font-size: var(--font-size-body-sm);
+		line-height: var(--line-height-body);
 		color: var(--color-text);
 		text-decoration: none;
 		overflow: hidden;
@@ -373,6 +375,13 @@
 
 	.name:hover {
 		color: var(--color-primary);
+	}
+
+	.missing-date {
+		flex-shrink: 0;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
 	}
 
 	.sep {
@@ -396,7 +405,7 @@
 		gap: var(--space-xs);
 	}
 
-	.no-expiry-hint {
+	.missing-date {
 		font-size: 0.75rem;
 		color: var(--color-text-muted);
 	}

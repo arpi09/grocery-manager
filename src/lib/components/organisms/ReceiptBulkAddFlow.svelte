@@ -331,15 +331,6 @@
 			{t('receiptBulk.lead')}
 		</p>
 
-		<DigitalReceiptGuide prominent={prominentGuide} />
-
-		{#if parsing}
-			<FeedbackBanner
-				tone="info"
-				message={t('receipt.readingStatus')}
-			/>
-		{/if}
-
 		<ImageSourcePicker
 			cameraLabel={parsing ? t('receipt.reading') : t('receiptBulk.cameraPaper')}
 			fileLabel={parsing ? t('receipt.reading') : t('receipt.pickFile')}
@@ -348,6 +339,15 @@
 			disabled={parsing}
 			onSelect={handleReceiptFile}
 		/>
+
+		<DigitalReceiptGuide prominent={prominentGuide} />
+
+		{#if parsing}
+			<FeedbackBanner
+				tone="info"
+				message={t('receipt.readingStatus')}
+			/>
+		{/if}
 
 		<p class="hint">{t('receipt.formats.hint')}</p>
 

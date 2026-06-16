@@ -28,7 +28,7 @@
 		background: var(--color-surface);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
-		padding: var(--space-lg);
+		padding: var(--space-md) var(--space-lg);
 		box-shadow: var(--shadow-sm);
 		text-decoration: none;
 		color: inherit;

@@ -294,7 +294,11 @@
 		"v4": {
 			"coldTitle": "This week's list",
 			"coldAction": "Create this week's list",
-			"coldSecondary": "Fill pantry"
+			"coldSecondary": "Fill pantry",
+			"listaReadyTitle": "Time to shop",
+			"listaReadyDescription": "{count, plural, one {# item on your list — shop together this week} other {# items on your list — shop together this week}}",
+			"listaReadyAction": "Open shopping list",
+			"expiryHeroLink": "Plan dinner on Eat"
 		},
 		"taglineListaReady": "Items on your list — shop together this week",
 		"taglineExpiry": "Something expires soon — eat first or plan dinner",
@@ -837,10 +841,10 @@
 		"mergeExisting": "Already in pantry — merge with {name} ({quantity} {unit})?",
 		"clearAutoExpired": "Clear all expired",
 		"clearAutoExpiredAria": "Remove all {count} auto-expired items",
-		"bulkExpiryBanner": "Some items lack dates — we can guess from product type.",
-		"bulkExpiryAction": "Guess dates",
+		"bulkExpiryBanner": "Add best-before dates to undated items with AI in one tap.",
+		"bulkExpiryAction": "Infer dates",
 		"finishedBadge": "Done",
-		"finishedSection": "Done items",
+		"finishedSection": "Finished items",
 		"searchPlaceholder": "Search items…",
 		"filterToolbarAria": "Filter and sort inventory",
 		"toolbarFilter": "Filter",
@@ -872,7 +876,7 @@
 		"filterEmptyTitle": "No items match this filter",
 		"filterEmptyDescription": "Try another filter or show all items.",
 		"filterClear": "Show all items",
-		"noExpiryHint": "No date",
+		"missingExpiryDate": "No date",
 		"addSheet": {
 			"title": "Add",
 			"receipt": "Receipt — full shop",
@@ -893,7 +897,7 @@
 		"swipeFinish": "Done",
 		"swipePartial": "Partial",
 		"partial": "Partial…",
-		"finishNamed": "Mark {name} as finished",
+		"finishNamed": "Mark {name} as done",
 		"logUsage": "Partial",
 		"intro": "How much of {name} did you use? ({stock} left)",
 		"presetsAria": "Quick amount",
@@ -904,9 +908,9 @@
 		"customPlaceholder": "e.g. 50",
 		"confirm": "Log usage",
 		"invalidAmount": "Enter a valid amount",
-		"finishFailed": "Could not mark as finished — try again",
-		"undoToastNamed": "{name} marked as finished",
-		"undoToast": "Item marked as finished"
+		"finishFailed": "Could not mark as done — try again",
+		"undoToastNamed": "{name} marked as done",
+		"undoToast": "Item marked as done"
 	},
 	"item": {
 		"addTitle": "Add item",
@@ -1007,7 +1011,7 @@
 				"never": "Never"
 			},
 			"loopHint": "Close the week — update your pantry so next week's list stays accurate.",
-			"firstCoach": "First time you check off: add items to inventory so your weekly list and pantry stay in sync."
+			"firstCoach": "First checkoff? Add to pantry so next week's list gets smarter."
 		}
 	},
 	"pantryHealth": {

@@ -121,11 +121,15 @@
 		animation: illus-jar-in 0.55s 0.4s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
 	}
 
-	.illus-spark {
-		fill: var(--color-primary);
+	.illus-spark,
+	.dot-1,
+	.dot-2,
+	.scan-line,
+	.camera-flash,
+	.flash-ring,
+	.flash-burst {
+		animation: none;
 		opacity: 0;
-		transform-origin: 100px 32px;
-		animation: illus-spark 1.8s 0.5s ease-in-out infinite;
 	}
 
 	.illus-dot {
@@ -133,12 +137,10 @@
 		opacity: 0;
 	}
 
-	.dot-1 {
-		animation: illus-dot 2s 0.6s ease-in-out infinite;
-	}
-
+	.dot-1,
 	.dot-2 {
-		animation: illus-dot 2.2s 0.9s ease-in-out infinite;
+		animation: none;
+		opacity: 0;
 	}
 
 	.illus-camera,
@@ -239,26 +241,16 @@
 
 	.illus-confetti {
 		fill: var(--color-primary);
-		opacity: 0;
+		opacity: 0.5;
+		animation: none;
 	}
 
-	.c1 {
-		animation: illus-confetti 1.6s 0.45s ease-out infinite;
-	}
-
-	.c2 {
-		fill: color-mix(in srgb, var(--color-success) 80%, var(--color-primary));
-		animation: illus-confetti 1.8s 0.6s ease-out infinite;
-	}
-
-	.c3 {
-		fill: color-mix(in srgb, var(--color-warning, #f59e0b) 70%, var(--color-primary));
-		animation: illus-confetti 1.7s 0.75s ease-out infinite;
-	}
-
+	.c1,
+	.c2,
+	.c3,
 	.c4 {
-		fill: var(--color-success);
-		animation: illus-confetti 1.5s 0.5s ease-out infinite;
+		animation: none;
+		opacity: 0.5;
 	}
 
 	@keyframes illus-bg-in {

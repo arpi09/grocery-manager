@@ -10,6 +10,7 @@
 		Package,
 		Receipt,
 		Refrigerator,
+		ShoppingCart,
 		Snowflake,
 		Sparkles,
 		Users
@@ -26,7 +27,8 @@
 		| 'cupboard'
 		| 'home'
 		| 'users'
-		| 'check';
+		| 'check'
+		| 'shopping';
 
 	interface Props {
 		id: FeatureIconId;
@@ -46,7 +48,8 @@
 		cupboard: Boxes,
 		home: House,
 		users: Users,
-		check: Check
+		check: Check,
+		shopping: ShoppingCart
 	};
 
 	const Icon = $derived(iconComponents[id]);

@@ -55,10 +55,13 @@
 <style>
 	.empty {
 		text-align: center;
-		padding: var(--space-xl) var(--space-md);
+		padding: var(--space-lg) var(--space-md);
 		background: var(--color-surface-muted);
 		border-radius: var(--radius-lg);
 		border: 1px dashed var(--color-border);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
 	}
 
 	.icon-wrap {

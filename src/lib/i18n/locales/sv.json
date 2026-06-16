@@ -285,7 +285,11 @@
 		"v4": {
 			"coldTitle": "Veckans lista",
 			"coldAction": "Skapa veckans lista",
-			"coldSecondary": "Fyll skafferi"
+			"coldSecondary": "Fyll skafferi",
+			"listaReadyTitle": "Dags att handla",
+			"listaReadyDescription": "{count, plural, one {# vara på listan — handla ihop denna vecka} other {# varor på listan — handla ihop denna vecka}}",
+			"listaReadyAction": "Öppna inköpslistan",
+			"expiryHeroLink": "Planera middag på Äta"
 		},
 		"taglineListaReady": "Ni har varor på listan — handla ihop denna vecka",
 		"taglineExpiry": "Något går ut snart — ät först eller planera middag",
@@ -813,10 +817,10 @@
 		"readonly": "Du har endast läsbehörighet i detta hushåll.",
 		"rowSingular": "rad i skafferiet",
 		"rowPlural": "rader i skafferiet",
-		"showFinished": "Visa klara",
-		"hideFinished": "Dölj klara",
+		"showFinished": "Visa slut",
+		"hideFinished": "Dölj slut",
 		"finishedBadge": "Klart",
-		"finishedSection": "Klara varor",
+		"finishedSection": "Färdiga varor",
 		"searchPlaceholder": "Sök varor…",
 		"filterToolbarAria": "Filtrera och sortera varor",
 		"toolbarFilter": "Visa",
@@ -853,7 +857,7 @@
 		"movingToAutoExpiredSoon": "Flyttas snart till utgångna",
 		"autoExpiredBadge": "Utgången",
 		"aiExpiryBadge": "Uppskattat",
-		"noExpiryHint": "Saknar datum",
+		"missingExpiryDate": "Saknar datum",
 		"mergeExisting": "Finns redan — slå ihop med {name} ({quantity} {unit})?",
 		"clearAutoExpired": "Rensa utgångna",
 		"clearAutoExpiredAria": "Ta bort alla {count} automatiskt utgångna varor",
@@ -976,7 +980,7 @@
 				"never": "Aldrig"
 			},
 			"loopHint": "Stäng veckan — uppdatera skafferiet så nästa lista träffar rätt.",
-			"firstCoach": "Första gången du bockar av: lägg varor i lagret så veckolistan och skafferiet hänger ihop."
+			"firstCoach": "Första avbockningen? Lägg till i skafferiet så nästa veckas lista blir smartare."
 		}
 	},
 	"pantryHealth": {
@@ -2701,9 +2705,9 @@
 	"consume": {
 		"sectionTitle": "Logga förbrukning",
 		"sectionHelp": "Uppdaterar lagersaldo utan att ändra namn eller plats",
-		"finish": "Klart",
+		"finish": "Ätit upp",
 		"partial": "Delvis…",
-		"finishNamed": "Markera {name} som slut",
+		"finishNamed": "Markera {name} som ätit upp",
 		"logUsage": "Delvis",
 		"intro": "Hur mycket av {name} använde du? ({stock} kvar)",
 		"presetsAria": "Snabb mängd",
@@ -2714,9 +2718,9 @@
 		"customPlaceholder": "t.ex. 50",
 		"confirm": "Logga förbrukning",
 		"invalidAmount": "Ange en giltig mängd",
-		"finishFailed": "Kunde inte markera som slut — försök igen",
-		"undoToastNamed": "{name} markerad som slut",
-		"undoToast": "Vara markerad som slut",
+		"finishFailed": "Kunde inte markera som ätit upp — försök igen",
+		"undoToastNamed": "{name} markerad som ätit upp",
+		"undoToast": "Vara markerad som ätit upp",
 		"swipeFinish": "Klart",
 		"swipePartial": "Delvis"
 	},

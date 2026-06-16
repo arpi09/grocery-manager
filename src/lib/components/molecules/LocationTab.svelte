@@ -49,6 +49,24 @@
 		border: 1px solid var(--color-border);
 	}
 
+	@media (max-width: 559px) {
+		.tabs {
+			overflow-x: auto;
+			flex-wrap: nowrap;
+			-webkit-overflow-scrolling: touch;
+			scrollbar-width: none;
+		}
+
+		.tabs::-webkit-scrollbar {
+			display: none;
+		}
+
+		.tab {
+			flex: 0 0 auto;
+			min-width: 5.5rem;
+		}
+	}
+
 	.tab {
 		flex: 1;
 		display: inline-flex;

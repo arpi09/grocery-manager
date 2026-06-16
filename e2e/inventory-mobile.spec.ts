@@ -50,7 +50,7 @@ test.describe('Inventory mobile UX', () => {
 		await row.getByRole('menuitem', { name: /Delvis|Partial/i }).click({ force: true });
 	}
 
-	test('compact list shows partial via overflow and swipe', async ({ page }) => {
+	test('compact list shows finish in overflow and partial actions', async ({ page }) => {
 		const list = await openFridgeList(page);
 		const row = seededRow(list);
 
@@ -58,11 +58,11 @@ test.describe('Inventory mobile UX', () => {
 
 		const overflow = row.getByTestId('row-overflow-menu').getByRole('button');
 		await overflow.click({ force: true });
-		await expect(page.getByRole('menuitem', { name: /Delvis|Partial/i })).toBeVisible({
+		await expect(row.getByRole('menuitem', { name: /Ätit upp|Done/i })).toBeVisible();
+		await expect(row.getByRole('menuitem', { name: /Delvis|Partial/i })).toBeVisible({
 			timeout: 15_000
 		});
 	});
-
 	test('partial sheet stays open while scrolling the list', async ({ page }) => {
 		const list = await openFridgeList(page);
 		const row = seededRow(list);

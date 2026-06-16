@@ -156,6 +156,9 @@
 							<NavIcon id="more" />
 						</span>
 						<span class="tab-label">{t('nav.more')}</span>
+						{#if staleCount > 0 && canWrite}
+							<span class="stale-dot" aria-label={t('nav.staleBadge', { count: staleCount })}></span>
+						{/if}
 						{#if moreActive}
 							<span class="tab-indicator" aria-hidden="true"></span>
 						{/if}
@@ -331,6 +334,18 @@
 		border-radius: 999px;
 		background: var(--color-primary);
 		transform: translateX(-50%);
+		pointer-events: none;
+	}
+
+	.stale-dot {
+		position: absolute;
+		top: 0.1rem;
+		right: calc(50% - 0.95rem);
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 999px;
+		background: var(--color-warning, #d97706);
+		border: 2px solid var(--nav-surface);
 		pointer-events: none;
 	}
 
