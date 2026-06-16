@@ -3,8 +3,14 @@
 	import PlanSettingsPanel from '$lib/components/organisms/PlanSettingsPanel.svelte';
 	import ProActivationCelebration from '$lib/components/organisms/ProActivationCelebration.svelte';
 	import { t } from '$lib/i18n';
+	import type { PageData } from './$types';
 
-	let { data, form } = $props();
+	interface Props {
+		data: PageData;
+		form: Record<string, unknown> | null;
+	}
+
+	let { data, form }: Props = $props();
 </script>
 
 <SettingsDrilldownLayout

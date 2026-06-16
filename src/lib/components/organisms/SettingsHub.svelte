@@ -1,11 +1,11 @@
 <script lang="ts">
 	import SkaffuSettingsGroup from '$lib/components/molecules/SkaffuSettingsGroup.svelte';
 	import SkaffuSettingsLinkRow from '$lib/components/molecules/SkaffuSettingsLinkRow.svelte';
-	import type { Household } from '$lib/domain/household';
+	import type { HouseholdView } from '$lib/domain/household';
 	import { t } from '$lib/i18n';
 
 	interface Props {
-		household: Household | null;
+		household: HouseholdView | null;
 		kivraForwardAddress: string | null;
 		showSuggestions: boolean;
 	}

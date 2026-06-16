@@ -4,8 +4,22 @@
 	import HouseholdSettingsPanel from '$lib/components/organisms/HouseholdSettingsPanel.svelte';
 	import SettingsSection from '$lib/components/molecules/SettingsSection.svelte';
 	import { t } from '$lib/i18n';
+	import type { PageData } from './$types';
 
-	let { data, form } = $props();
+	interface HouseholdForm {
+		inviteLink?: string | null;
+		inviteEmailWarning?: string | null;
+		householdError?: string | null;
+		inviteErrors?: Record<string, string[] | undefined>;
+		householdNameErrors?: Record<string, string[] | undefined>;
+	}
+
+	interface Props {
+		data: PageData;
+		form: HouseholdForm | null;
+	}
+
+	let { data, form }: Props = $props();
 
 	let copiedInviteLink = $state(false);
 
@@ -13,10 +27,7 @@
 	const inviteEmailWarning = $derived(form?.inviteEmailWarning ?? null);
 	const householdError = $derived(form?.householdError ?? null);
 	const inviteFieldErrors = $derived(form?.inviteErrors ?? {});
-	const householdNameErrors = $derived(
-		(form as { householdNameErrors?: Record<string, string[] | undefined> } | null)
-			?.householdNameErrors ?? {}
-	);
+	const householdNameErrors = $derived(form?.householdNameErrors ?? {});
 
 	async function copyInviteLink(link: string) {
 		if (!browser) return;

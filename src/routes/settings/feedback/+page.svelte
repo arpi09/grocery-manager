@@ -2,8 +2,19 @@
 	import SettingsDrilldownLayout from '$lib/components/templates/SettingsDrilldownLayout.svelte';
 	import FeedbackSettingsPanel from '$lib/components/organisms/FeedbackSettingsPanel.svelte';
 	import { t } from '$lib/i18n';
+	import type { PageData } from './$types';
 
-	let { data, form } = $props();
+	interface FeedbackForm {
+		feedbackErrors?: Record<string, string[] | undefined>;
+		feedbackSuccess?: boolean;
+	}
+
+	interface Props {
+		data: PageData;
+		form: FeedbackForm | null;
+	}
+
+	let { data, form }: Props = $props();
 
 	const feedbackErrors = $derived(form?.feedbackErrors ?? {});
 	const feedbackSuccess = $derived(form?.feedbackSuccess === true);
