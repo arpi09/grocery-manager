@@ -202,7 +202,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 
 		await page.request.post('/api/expiring-share/nearby-settings', { data: { enabled: false } });
 
-		await page.goto('/settings#settings-nearby-sharing', { waitUntil: 'commit' });
+		await page.goto('/settings/nearby', { waitUntil: 'commit' });
 		await dismissCookieConsentIfOpen(page);
 
 		const nearbySection = page.locator('#settings-nearby-sharing');

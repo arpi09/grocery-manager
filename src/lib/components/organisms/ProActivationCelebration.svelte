@@ -29,7 +29,7 @@
 		clearPoll();
 		open = false;
 		if (browser) {
-			void goto('/settings#settings-plan', { replaceState: true, keepFocus: true });
+			void goto('/settings/plan', { replaceState: true, keepFocus: true });
 		}
 	}
 

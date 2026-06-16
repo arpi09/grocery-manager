@@ -30,7 +30,7 @@ export const notificationsActions = {
 			parsed.data.enabled === 'true',
 			Number(parsed.data.days) as 3 | 7
 		);
-		redirect(302, appendActionToast('/settings', 'settingsSaved'));
+		redirect(302, appendActionToast('/settings/notifications', 'settingsSaved'));
 	},
 	updateAutoExpiredGrace: async ({ request, locals }: RequestEvent) => {
 		requireInventoryWriteAccess(locals.householdRole);
@@ -49,13 +49,13 @@ export const notificationsActions = {
 			Number(parsed.data.days),
 			locals.householdRole!
 		);
-		redirect(302, appendActionToast('/settings', 'settingsSaved'));
+		redirect(302, appendActionToast('/settings/notifications', 'settingsSaved'));
 	},
 	updateShoppingToPantryMode: async ({ request, locals }: RequestEvent) => {
 		const formData = await request.formData();
 		const mode = normalizeShoppingToPantryMode(formData.get('shoppingToPantryMode'));
 		await shoppingToPantryService.setMode(locals.user!.id, mode);
-		redirect(302, appendActionToast('/settings', 'settingsSaved'));
+		redirect(302, appendActionToast('/settings/notifications', 'settingsSaved'));
 	},
 	updateShoppingPush: async ({ request, locals }: RequestEvent) => {
 		const formData = await request.formData();
@@ -76,6 +76,6 @@ export const notificationsActions = {
 		}
 
 		await shoppingPushService.updateSettings(locals.user!.id, enabled);
-		redirect(302, appendActionToast('/settings', 'settingsSaved'));
+		redirect(302, appendActionToast('/settings/notifications', 'settingsSaved'));
 	}
 };

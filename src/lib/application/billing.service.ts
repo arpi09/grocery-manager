@@ -95,8 +95,8 @@ export class BillingService {
 			customer: customerId,
 			client_reference_id: input.householdId,
 			line_items: [{ price: priceId, quantity: 1 }],
-			success_url: `${origin}/settings?checkout=success`,
-			cancel_url: `${origin}/settings?checkout=cancel`,
+			success_url: `${origin}/settings/plan?checkout=success`,
+			cancel_url: `${origin}/settings/plan?checkout=cancel`,
 			metadata: {
 				householdId: input.householdId,
 				userId: input.userId,
@@ -180,7 +180,7 @@ export class BillingService {
 		const origin = this.appOrigin.getOrigin(input.origin);
 		const session = await stripe.billingPortal.sessions.create({
 			customer: billing.stripeCustomerId,
-			return_url: `${origin}/settings?checkout=portal#settings-plan`
+			return_url: `${origin}/settings/plan?checkout=portal`,
 		});
 
 		if (!session.url) {

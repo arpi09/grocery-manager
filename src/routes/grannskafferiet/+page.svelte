@@ -139,7 +139,7 @@
 		{:else if !optedIn}
 			<section class="empty-panel">
 				<p>{t('nearbySharing.discoveryOptInHint')}</p>
-				<a class="cta-link secondary" href="/settings#settings-nearby-sharing">
+				<a class="cta-link secondary" href="/settings/nearby">
 					{t('nearbySharing.panelOptInLink')}
 				</a>
 			</section>
@@ -158,7 +158,7 @@
 					<p>{t('nearbySharing.discoveryEmptyLead')}</p>
 					<div class="empty-actions">
 						<a class="cta-link" href="/hem#eat-first">{t('nearbySharing.discoveryEmptyShareCta')}</a>
-						<a class="cta-link secondary" href="/settings#settings-nearby-sharing">
+						<a class="cta-link secondary" href="/settings/nearby">
 							{t('nearbySharing.discoveryEmptySettingsCta')}
 						</a>
 					</div>
