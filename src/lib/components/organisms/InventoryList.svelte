@@ -20,6 +20,8 @@
 
 	import InventoryFilterSheet from '$lib/components/molecules/InventoryFilterSheet.svelte';
 	import ListToolbar from '$lib/components/molecules/ListToolbar.svelte';
+	import SkaffuFilterBar from '$lib/components/molecules/SkaffuFilterBar.svelte';
+	import SkaffuListPanel from '$lib/components/molecules/SkaffuListPanel.svelte';
 
 	import LocationTab from '$lib/components/molecules/LocationTab.svelte';
 
@@ -522,14 +524,47 @@
 
 
 
+	const compactSectionChips = $derived(
+		isCompact && !stickyCollapsed
+			? [
+					...(autoExpiredTotal > 0
+						? [
+								{
+									label: loadingAutoExpired
+										? t('common.loading')
+										: showAutoExpired
+											? t('inventory.hideAutoExpired')
+											: t('inventory.showAutoExpired'),
+									pressed: showAutoExpired,
+									loading: loadingAutoExpired,
+									count: autoExpiredTotal,
+									onClick: toggleAutoExpired
+								}
+							]
+						: []),
+					...(finishedTotal > 0
+						? [
+								{
+									label: loadingFinished
+										? t('common.loading')
+										: showFinished
+											? t('inventory.hideFinished')
+											: t('inventory.showFinished'),
+									pressed: showFinished,
+									loading: loadingFinished,
+									count: finishedTotal,
+									onClick: toggleFinished
+								}
+							]
+						: [])
+				]
+			: undefined
+	);
+
 	const locationIcons: Record<StorageLocation, FeatureIconId> = {
-
 		fridge: 'fridge',
-
 		freezer: 'freezer',
-
 		cupboard: 'cupboard'
-
 	};
 
 
@@ -641,58 +676,17 @@
 
 		<LocationTab active={location} />
 
-		{#if hasInventory}
+		{#if hasInventory && !isCompact}
 
 			<ListToolbar
 				bind:query
 				expiryFilter={expiryFilter}
 				onExpiryFilterChange={setExpiryFilter}
-				compact={isCompact}
 				sortChipLabel={undefined}
 				onSortChipClick={undefined}
-				sectionChips={isCompact && !stickyCollapsed
-					? [
-							...(autoExpiredTotal > 0
-								? [
-										{
-											label: loadingAutoExpired
-												? t('common.loading')
-												: showAutoExpired
-													? t('inventory.hideAutoExpired')
-													: t('inventory.showAutoExpired'),
-											pressed: showAutoExpired,
-											loading: loadingAutoExpired,
-											count: autoExpiredTotal,
-											onClick: toggleAutoExpired
-										}
-									]
-								: []),
-							...(finishedTotal > 0
-								? [
-										{
-											label: loadingFinished
-												? t('common.loading')
-												: showFinished
-													? t('inventory.hideFinished')
-													: t('inventory.showFinished'),
-											pressed: showFinished,
-											loading: loadingFinished,
-											count: finishedTotal,
-											onClick: toggleFinished
-										}
-									]
-								: [])
-						]
-					: undefined}
 			/>
 
-			{#if isCompact}
-				<button type="button" class="filter-sheet-trigger" onclick={() => (filterSheetOpen = true)}>
-					{t('inventory.toolbarFilter')}
-				</button>
-			{/if}
-
-			{#if !isCompact && (autoExpiredTotal > 0 || finishedTotal > 0)}
+			{#if autoExpiredTotal > 0 || finishedTotal > 0}
 
 				<div class="filter-meta">
 
@@ -794,6 +788,57 @@
 
 
 
+	{#if isCompact && hasInventory}
+		<SkaffuListPanel data-testid={activeItems.length > 0 ? undefined : 'inventory-filter-panel'}>
+			{#snippet header()}
+				<SkaffuFilterBar collapsed={stickyCollapsed}>
+					<ListToolbar
+						bind:query
+						expiryFilter={expiryFilter}
+						onExpiryFilterChange={setExpiryFilter}
+						compact={true}
+						sortChipLabel={undefined}
+						onSortChipClick={undefined}
+						sectionChips={compactSectionChips}
+					/>
+				</SkaffuFilterBar>
+			{/snippet}
+
+			{#if activeItems.length > 0}
+				<SkaffuList
+					class="inventory-list"
+					data-testid="inventory-compact-list"
+					aria-label={t('inventory.listAria')}
+				>
+					{#each activeItems as item (item.id)}
+						<InventoryCompactRow
+							{item}
+							canWrite={canConsumeItems}
+							autoExpiredGraceDays={autoExpiredGraceDays}
+							finishing={finishingIds.has(item.id)}
+							onFinishOneTap={finishOneTap}
+							onPartialConsume={openPartialConsumeSheet}
+						/>
+					{/each}
+				</SkaffuList>
+
+				{#if hasMoreActive && trimmedQuery.length === 0}
+					<div class="load-more-row">
+						<Button
+							type="button"
+							variant="secondary"
+							loading={loadingMore}
+							loadingLabel={t('common.loading')}
+							onclick={loadMoreActive}
+						>
+							{t('common.loadMore')}
+						</Button>
+					</div>
+				{/if}
+			{/if}
+		</SkaffuListPanel>
+	{/if}
+
 	{#if !hasVisibleItems && !searching}
 
 		<EmptyState
@@ -834,50 +879,7 @@
 
 		/>
 
-	{:else if activeItems.length > 0}
-
-		{#if isCompact}
-
-			<div class="panel">
-
-				<SkaffuList class="inventory-list" data-testid="inventory-compact-list" aria-label={t('inventory.listAria')}>
-
-					{#each activeItems as item (item.id)}
-
-						<InventoryCompactRow
-							{item}
-							canWrite={canConsumeItems}
-							autoExpiredGraceDays={autoExpiredGraceDays}
-							finishing={finishingIds.has(item.id)}
-							onFinishOneTap={finishOneTap}
-							onPartialConsume={openPartialConsumeSheet}
-						/>
-
-					{/each}
-
-				</SkaffuList>
-
-				{#if hasMoreActive && trimmedQuery.length === 0}
-
-					<div class="load-more-row">
-
-						<Button
-							type="button"
-							variant="secondary"
-							loading={loadingMore}
-							loadingLabel={t('common.loading')}
-							onclick={loadMoreActive}
-						>
-							{t('common.loadMore')}
-						</Button>
-
-					</div>
-
-				{/if}
-
-			</div>
-
-		{:else}
+	{:else if activeItems.length > 0 && !isCompact}
 
 			<InventoryDataTable
 
@@ -899,11 +901,7 @@
 
 			/>
 
-		{/if}
-
-
-
-		{#if !isCompact && hasMoreActive && trimmedQuery.length === 0}
+		{#if hasMoreActive && trimmedQuery.length === 0}
 
 			<div class="load-more-row">
 
@@ -999,8 +997,7 @@
 
 		{#if isCompact}
 
-			<div class="panel">
-
+			<SkaffuListPanel>
 				<SkaffuList class="inventory-list" aria-label={t('inventory.autoExpiredSection')}>
 
 					{#each filteredAutoExpired as item (item.id)}
@@ -1026,8 +1023,7 @@
 					{/each}
 
 				</SkaffuList>
-
-			</div>
+			</SkaffuListPanel>
 
 		{:else}
 
@@ -1069,8 +1065,7 @@
 
 		{#if isCompact}
 
-			<div class="panel">
-
+			<SkaffuListPanel>
 				<SkaffuList class="inventory-list" aria-label={t('inventory.finishedSection')}>
 
 					{#each filteredFinished as item (item.id)}
@@ -1080,8 +1075,7 @@
 					{/each}
 
 				</SkaffuList>
-
-			</div>
+			</SkaffuListPanel>
 
 		{:else}
 
@@ -1188,29 +1182,30 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
+		padding-top: var(--space-xs);
 		padding-bottom: var(--space-xs);
 		background: var(--color-bg);
+		box-shadow: 0 1px 0 var(--color-border);
+		isolation: isolate;
+	}
+
+	.sticky-band::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: calc(-1 * var(--sticky-below-header));
+		height: var(--sticky-below-header);
+		background: var(--color-bg);
+		pointer-events: none;
+	}
+
+	.sticky-band--compact {
+		padding-top: var(--space-sm);
 	}
 
 	.sticky-band--collapsed :global(.chip-row),
 	.sticky-band--collapsed :global(.filter-chips--panel) {
-		display: none;
-	}
-
-	.filter-sheet-trigger {
-		align-self: flex-start;
-		min-height: var(--touch-target-min);
-		padding: var(--space-xs) var(--space-sm);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-sm);
-		background: var(--color-surface);
-		font-size: 0.8125rem;
-		font-weight: 600;
-		font-family: inherit;
-		cursor: pointer;
-	}
-
-	.sticky-band--collapsed .filter-sheet-trigger {
 		display: none;
 	}
 
@@ -1238,38 +1233,6 @@
 
 		color: var(--color-text-muted);
 
-	}
-
-	.panel {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-md);
-		padding: var(--space-md);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-md);
-		background: var(--color-surface);
-		min-width: 0;
-	}
-
-	.panel :global(.inventory-list.skaffu-list) {
-		border: none;
-		border-radius: 0;
-		background: transparent;
-	}
-
-	.panel :global(.inventory-list.skaffu-list .mdc-deprecated-list),
-	.panel :global(.inventory-list.skaffu-list .mdc-deprecated-list-item) {
-		overflow: visible;
-	}
-
-	.panel :global(.inventory-list.skaffu-list) :global(.mdc-deprecated-list) {
-		overflow: visible;
-	}
-
-	@media (max-width: 640px) {
-		.panel {
-			padding: var(--space-sm);
-		}
 	}
 
 	.section-chip {

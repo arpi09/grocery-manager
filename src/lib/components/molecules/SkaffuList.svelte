@@ -21,8 +21,7 @@
 <div
 	class="{skaffuSmuiClassNames.list} {className}"
 	data-testid={dataTestId}
-	aria-label={ariaLabel}
-	role={ariaLabel ? 'list' : undefined}
+	{...(ariaLabel ? { role: 'region', 'aria-label': ariaLabel } : {})}
 >
 	<List nonInteractive>
 		{@render children()}

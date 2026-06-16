@@ -34,6 +34,10 @@ Shared `.product-row` rhythm:
 
 **Lists and tables:** use `SkaffuList` / `SkaffuListItem` for row lists and `SkaffuDataTable` for tabular inventory — not raw `<ul>` stacks or hand-rolled card tables. SMUI theme tokens live in `src/theme/` and `src/lib/design/skaffu-smui-theme.ts`.
 
+**List panel shell:** mobile/desktop list surfaces use `SkaffuListPanel` (shared border, radius, padding). Inventory and shopping compose rows inside the panel; inventory keeps `LocationTab` in sticky chrome above the panel.
+
+**Filter header:** `SkaffuFilterBar` wraps search + expiry/section chips inside the panel header (inventory mobile); desktop inventory may keep toolbar in sticky chrome.
+
 **Settings (iOS hub):** `/settings` hub uses `SkaffuSettingsGroup`, `SkaffuSettingsLinkRow`, and drill-down pages via `SettingsDrilldownLayout`. Toggle rows inside panels use `SkaffuSettingsToggleRow` (title left, switch right on all breakpoints). Prefer route paths over `#hash` anchors.
 
 ## Dashboard cards
