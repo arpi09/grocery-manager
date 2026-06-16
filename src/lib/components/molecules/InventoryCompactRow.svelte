@@ -2,6 +2,7 @@
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
 	import RowOverflowMenu from '$lib/components/molecules/RowOverflowMenu.svelte';
+	import SkaffuListItem from '$lib/components/molecules/SkaffuListItem.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { isMovingToAutoExpiredSoon } from '$lib/domain/auto-expired';
 	import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
@@ -105,6 +106,17 @@
 	const swipeEnabled = $derived(showConsumeActions && !finishing);
 
 	const partialSwipeLabel = $derived(t('consume.swipePartial'));
+
+	const rowClass = $derived(
+		[
+			'inventory-row',
+			finished ? 'finished' : '',
+			autoExpired ? 'autoExpired' : '',
+			swipeEnabled ? 'inventory-row--swipe' : ''
+		]
+			.filter(Boolean)
+			.join(' ')
+	);
 
 	function resetSwipe() {
 		swipeDragging = false;
@@ -219,7 +231,7 @@
 				itemId={item.id}
 				itemName={item.name}
 				disabled={finishing}
-				finishing={finishing}
+				{finishing}
 				onFinishOneTap={onFinishOneTap ? () => onFinishOneTap(item) : undefined}
 				onPartialConsume={onPartialConsume ? () => onPartialConsume(item) : undefined}
 			/>
@@ -227,49 +239,58 @@
 	{/if}
 {/snippet}
 
-{#if swipeEnabled}
-	<div class="swipe-row" data-testid="inventory-compact-row">
-		<div class="swipe-bg" aria-hidden="true">
-			<span class="swipe-hint swipe-hint--partial">{partialSwipeLabel}</span>
-			<span class="swipe-hint swipe-hint--finish">{t('consume.swipeFinish')}</span>
-		</div>
-		<div
-			class="row swipe-content product-row"
-			class:finished
-			class:autoExpired={autoExpired}
-			class:swipe-dragging={swipeDragging}
-			style:transform="translateX({swipeOffset}px)"
-		>
+<SkaffuListItem class={rowClass} data-testid="inventory-compact-row">
+	{#if swipeEnabled}
+		<div class="swipe-row">
+			<div class="swipe-bg" aria-hidden="true">
+				<span class="swipe-hint swipe-hint--partial">{partialSwipeLabel}</span>
+				<span class="swipe-hint swipe-hint--finish">{t('consume.swipeFinish')}</span>
+			</div>
 			<div
-				class="swipe-handle"
-				role="group"
-				aria-label={item.name}
-				data-testid="inventory-swipe-handle"
-				onpointerdown={onSwipePointerDown}
-				onpointermove={onSwipePointerMove}
-				onpointerup={onSwipePointerUp}
-				onpointercancel={onSwipePointerCancel}
+				class="swipe-content"
+				class:swipe-dragging={swipeDragging}
+				style:transform="translateX({swipeOffset}px)"
 			>
-				{@render rowContent()}
+				<div
+					class="swipe-handle"
+					role="group"
+					aria-label={item.name}
+					data-testid="inventory-swipe-handle"
+					onpointerdown={onSwipePointerDown}
+					onpointermove={onSwipePointerMove}
+					onpointerup={onSwipePointerUp}
+					onpointercancel={onSwipePointerCancel}
+				>
+					{@render rowContent()}
+				</div>
 			</div>
 		</div>
-	</div>
-{:else}
-	<article
-		class="row product-row"
-		class:finished
-		class:autoExpired={autoExpired}
-		data-testid="inventory-compact-row"
-	>
-		{@render rowContent()}
-	</article>
-{/if}
+	{:else}
+		<div class="row-body">
+			{@render rowContent()}
+		</div>
+	{/if}
+</SkaffuListItem>
 
 <style>
+	:global(.inventory-row.finished) :global(.mdc-deprecated-list-item__wrapper) {
+		opacity: 0.78;
+	}
+
+	:global(.inventory-row.autoExpired) :global(.mdc-deprecated-list-item__wrapper) {
+		background: color-mix(in srgb, var(--color-warning) 5%, var(--color-surface));
+	}
+
+	:global(.inventory-row--swipe) :global(.mdc-deprecated-list-item__wrapper) {
+		padding: 0;
+		overflow-x: hidden;
+		overflow-y: visible;
+	}
+
 	.swipe-row {
 		position: relative;
+		width: 100%;
 		overflow: hidden;
-		border-bottom: 1px solid var(--color-border);
 	}
 
 	.swipe-bg {
@@ -304,6 +325,8 @@
 	.swipe-content {
 		position: relative;
 		z-index: 1;
+		width: 100%;
+		background: var(--color-surface);
 		transition: transform 0.18s ease;
 		will-change: transform;
 	}
@@ -313,36 +336,23 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--space-sm);
+		width: 100%;
 		min-height: var(--touch-target-min);
+		padding: var(--space-sm) var(--space-md);
 		touch-action: pan-y;
 		cursor: grab;
 	}
 
-	.swipe-content.swipe-dragging {
-		transition: none;
-	}
-
-	.row {
+	.row-body {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--space-sm);
-		min-height: var(--touch-target-min);
-		padding: var(--space-sm) var(--space-md);
-		border-bottom: 1px solid var(--color-border);
-		background: var(--color-surface);
+		width: 100%;
 	}
 
-	.swipe-row .row {
-		border-bottom: none;
-	}
-
-	.row.finished {
-		opacity: 0.78;
-	}
-
-	.row.autoExpired {
-		background: color-mix(in srgb, var(--color-warning) 5%, var(--color-surface));
+	.swipe-content.swipe-dragging {
+		transition: none;
 	}
 
 	.content {
@@ -355,22 +365,20 @@
 
 	.main-line {
 		display: flex;
-		align-items: center;
+		align-items: baseline;
 		flex-wrap: wrap;
 		gap: var(--space-xs);
 		min-width: 0;
 	}
 
 	.name {
+		flex: 1 1 auto;
 		min-width: 0;
 		font-weight: 600;
-		font-size: var(--font-size-body-sm);
-		line-height: var(--line-height-body);
+		font-size: 0.875rem;
+		line-height: 1.35;
 		color: var(--color-text);
 		text-decoration: none;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 	}
 
 	.name:hover {
@@ -403,11 +411,6 @@
 		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--space-xs);
-	}
-
-	.missing-date {
-		font-size: 0.75rem;
-		color: var(--color-text-muted);
 	}
 
 	.actions {
