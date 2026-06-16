@@ -6,13 +6,24 @@
 	interface Props {
 		class?: string;
 		'data-testid'?: string;
+		'aria-label'?: string;
 		children: Snippet;
 	}
 
-	let { class: className = '', 'data-testid': dataTestId, children }: Props = $props();
+	let {
+		class: className = '',
+		'data-testid': dataTestId,
+		'aria-label': ariaLabel,
+		children
+	}: Props = $props();
 </script>
 
-<div class="{skaffuSmuiClassNames.list} {className}" data-testid={dataTestId}>
+<div
+	class="{skaffuSmuiClassNames.list} {className}"
+	data-testid={dataTestId}
+	aria-label={ariaLabel}
+	role={ariaLabel ? 'list' : undefined}
+>
 	<List nonInteractive>
 		{@render children()}
 	</List>

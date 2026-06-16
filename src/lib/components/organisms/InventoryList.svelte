@@ -16,6 +16,7 @@
 	import InventoryCompactRow from '$lib/components/molecules/InventoryCompactRow.svelte';
 
 	import InventoryDataTable from '$lib/components/molecules/InventoryDataTable.svelte';
+	import SkaffuList from '$lib/components/molecules/SkaffuList.svelte';
 
 	import InventoryFilterSheet from '$lib/components/molecules/InventoryFilterSheet.svelte';
 	import ListToolbar from '$lib/components/molecules/ListToolbar.svelte';
@@ -837,20 +838,42 @@
 
 		{#if isCompact}
 
-			<div class="compact-list" data-testid="inventory-compact-list" aria-label={t('inventory.listAria')}>
+			<div class="panel">
 
-				{#each activeItems as item (item.id)}
+				<SkaffuList class="inventory-list" data-testid="inventory-compact-list" aria-label={t('inventory.listAria')}>
 
-					<InventoryCompactRow
-						{item}
-						canWrite={canConsumeItems}
-						autoExpiredGraceDays={autoExpiredGraceDays}
-						finishing={finishingIds.has(item.id)}
-						onFinishOneTap={finishOneTap}
-						onPartialConsume={openPartialConsumeSheet}
-					/>
+					{#each activeItems as item (item.id)}
 
-				{/each}
+						<InventoryCompactRow
+							{item}
+							canWrite={canConsumeItems}
+							autoExpiredGraceDays={autoExpiredGraceDays}
+							finishing={finishingIds.has(item.id)}
+							onFinishOneTap={finishOneTap}
+							onPartialConsume={openPartialConsumeSheet}
+						/>
+
+					{/each}
+
+				</SkaffuList>
+
+				{#if hasMoreActive && trimmedQuery.length === 0}
+
+					<div class="load-more-row">
+
+						<Button
+							type="button"
+							variant="secondary"
+							loading={loadingMore}
+							loadingLabel={t('common.loading')}
+							onclick={loadMoreActive}
+						>
+							{t('common.loadMore')}
+						</Button>
+
+					</div>
+
+				{/if}
 
 			</div>
 
@@ -880,7 +903,7 @@
 
 
 
-		{#if hasMoreActive && trimmedQuery.length === 0}
+		{#if !isCompact && hasMoreActive && trimmedQuery.length === 0}
 
 			<div class="load-more-row">
 
@@ -976,29 +999,33 @@
 
 		{#if isCompact}
 
-			<div class="compact-list" aria-label={t('inventory.autoExpiredSection')}>
+			<div class="panel">
 
-				{#each filteredAutoExpired as item (item.id)}
+				<SkaffuList class="inventory-list" aria-label={t('inventory.autoExpiredSection')}>
 
-					<InventoryCompactRow
+					{#each filteredAutoExpired as item (item.id)}
 
-						{item}
+						<InventoryCompactRow
 
-						canWrite={canConsumeItems}
+							{item}
 
-						autoExpired={true}
+							canWrite={canConsumeItems}
 
-						autoExpiredGraceDays={autoExpiredGraceDays}
+							autoExpired={true}
 
-						finishing={finishingIds.has(item.id)}
+							autoExpiredGraceDays={autoExpiredGraceDays}
 
-						onFinishOneTap={finishOneTap}
+							finishing={finishingIds.has(item.id)}
 
-						onPartialConsume={openPartialConsumeSheet}
+							onFinishOneTap={finishOneTap}
 
-					/>
+							onPartialConsume={openPartialConsumeSheet}
 
-				{/each}
+						/>
+
+					{/each}
+
+				</SkaffuList>
 
 			</div>
 
@@ -1042,13 +1069,17 @@
 
 		{#if isCompact}
 
-			<div class="compact-list" aria-label={t('inventory.finishedSection')}>
+			<div class="panel">
 
-				{#each filteredFinished as item (item.id)}
+				<SkaffuList class="inventory-list" aria-label={t('inventory.finishedSection')}>
 
-					<InventoryCompactRow {item} canWrite={canConsumeItems} finished={true} />
+					{#each filteredFinished as item (item.id)}
 
-				{/each}
+						<InventoryCompactRow {item} canWrite={canConsumeItems} finished={true} />
+
+					{/each}
+
+				</SkaffuList>
 
 			</div>
 
@@ -1209,23 +1240,28 @@
 
 	}
 
-
-
-	.compact-list {
-
+	.panel {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-md);
+		padding: var(--space-md);
 		border: 1px solid var(--color-border);
-
 		border-radius: var(--radius-md);
-
-		overflow: hidden;
-
 		background: var(--color-surface);
-
-		box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text) 4%, transparent);
-
+		min-width: 0;
 	}
 
+	.panel :global(.inventory-list.skaffu-list) {
+		border: none;
+		border-radius: 0;
+		background: transparent;
+	}
 
+	@media (max-width: 640px) {
+		.panel {
+			padding: var(--space-sm);
+		}
+	}
 
 	.section-chip {
 
