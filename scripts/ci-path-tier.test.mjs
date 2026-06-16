@@ -21,6 +21,13 @@ describe('ci-path-tier', () => {
 	it('classifies low-risk css', () => {
 		expect(runTier(['src/app.css'])).toBe('low-risk');
 	});
+	it('classifies low-risk i18n and ui primitives', () => {
+		expect(runTier(['messages/sv.json'])).toBe('low-risk');
+		expect(runTier(['src/lib/components/ui/Button.svelte'])).toBe('low-risk');
+	});
+	it('mixed docs + css without core paths is low-risk', () => {
+		expect(runTier(['docs/CI_CD.md', 'src/app.css'])).toBe('low-risk');
+	});
 	it('classifies core-loop', () => {
 		expect(runTier(['src/hooks.server.ts'])).toBe('core-loop');
 		expect(runTier(['e2e/auth.spec.ts'])).toBe('core-loop');

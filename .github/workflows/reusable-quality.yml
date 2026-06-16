@@ -1,13 +1,18 @@
 # Shared quality gate — lint, check, test, integration, build, bundle guards.
 # Called from ci.yml and deploy.yml so steps never drift.
 #
-# pr-gate aggregates quality-fast + quality-integration for branch protection.
+# pr-gate aggregates tier-appropriate jobs for branch protection.
+# tier: full (default) | low-risk | docs-only
 
 name: Reusable quality
 
 on:
   workflow_call:
     inputs:
+      tier:
+        description: 'full | low-risk | docs-only — path-tier from ci.yml'
+        type: string
+        default: full
       upload_build_artifact:
         description: Upload sveltekit-build artifact for E2E shards
         type: boolean
@@ -77,12 +82,16 @@ jobs:
           fi
           echo "CI pr-gate passed on ${DEPLOY_SHA}."
 
-  quality-fast:
-    name: quality-fast
+  quality-docs:
+    name: quality-docs
     needs: [preflight]
-    if: always() && !cancelled() && (needs.preflight.result == 'success' || needs.preflight.result == 'skipped')
+    if: >
+      always() &&
+      !cancelled() &&
+      inputs.tier == 'docs-only' &&
+      (needs.preflight.result == 'success' || needs.preflight.result == 'skipped')
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v6
@@ -98,8 +107,37 @@ jobs:
 
       - run: npm run lint
       - run: npm run check:locales
+
+  quality-fast:
+    name: quality-fast
+    needs: [preflight]
+    if: >
+      always() &&
+      !cancelled() &&
+      inputs.tier != 'docs-only' &&
+      (needs.preflight.result == 'success' || needs.preflight.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.deploy_sha || inputs.deploy_ref || github.sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - run: npm ci
+
+      - name: svelte-kit sync (once per job)
+        run: npm run sync
+
+      - run: npm run lint
+      - run: npm run check:locales
       - run: npm run check:server-imports
-      - run: npm run check
+      - run: npm run check:fast
         env:
           PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
       - run: npm test
@@ -111,7 +149,11 @@ jobs:
   quality-integration:
     name: quality-integration
     needs: [preflight]
-    if: always() && !cancelled() && (needs.preflight.result == 'success' || needs.preflight.result == 'skipped')
+    if: >
+      always() &&
+      !cancelled() &&
+      inputs.tier == 'full' &&
+      (needs.preflight.result == 'success' || needs.preflight.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
@@ -147,20 +189,35 @@ jobs:
 
   pr-gate:
     name: pr-gate
-    needs: [quality-fast, quality-integration]
+    needs: [quality-docs, quality-fast, quality-integration]
     if: always() && !cancelled()
     runs-on: ubuntu-latest
     timeout-minutes: 2
 
     steps:
-      - name: Require quality-fast and quality-integration
+      - name: Require tier-appropriate quality jobs
+        env:
+          TIER: ${{ inputs.tier }}
         run: |
           set -euo pipefail
+          docs="${{ needs.quality-docs.result }}"
           fast="${{ needs.quality-fast.result }}"
           integration="${{ needs.quality-integration.result }}"
-          echo "quality-fast=${fast} quality-integration=${integration}"
-          if [ "$fast" != "success" ] || [ "$integration" != "success" ]; then
-            echo "::error::PR gate failed (quality-fast=${fast}, quality-integration=${integration})"
-            exit 1
+          echo "tier=${TIER} quality-docs=${docs} quality-fast=${fast} quality-integration=${integration}"
+          if [ "$TIER" = "docs-only" ]; then
+            if [ "$docs" != "success" ]; then
+              echo "::error::PR gate failed (docs-only tier, quality-docs=${docs})"
+              exit 1
+            fi
+          elif [ "$TIER" = "low-risk" ]; then
+            if [ "$fast" != "success" ]; then
+              echo "::error::PR gate failed (low-risk tier, quality-fast=${fast})"
+              exit 1
+            fi
+          else
+            if [ "$fast" != "success" ] || [ "$integration" != "success" ]; then
+              echo "::error::PR gate failed (quality-fast=${fast}, quality-integration=${integration})"
+              exit 1
+            fi
           fi
-          echo "PR gate passed."
+          echo "PR gate passed (tier=${TIER})."

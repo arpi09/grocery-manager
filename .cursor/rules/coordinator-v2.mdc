@@ -21,12 +21,13 @@ Plans: four-column table per `coordinator-planning.mdc`.
 
 1. **Only the coordinator** creates implementation agents or worktrees. Implementation agents do not spawn peers.
 2. **WIP limit:** Max **3 feature branches** with one implementation agent each (dev-runtime excluded).
-3. **Push to `master`:** After G0 (`npm run check:locales && npm run check && npm test`; E2E if auth/UI touched) — merge branch, `git push origin master`. Fast **CI** runs automatically (~3–5 min); **never** instruct the user to open a PR unless they ask.
-4. **Before push:** Pull/rebase on latest `master` if others may have pushed; run the G0 checklist above.
-5. **After push:** Watch **CI** (`gh run watch`) until green for the merge SHA. Deploy is **manual**: Actions → **Deploy to production** (or `gh workflow run deploy.yml`).
-6. **Before "deployed" / "prod is live":** Coordinator runs agent post-deploy smoke per [docs/PROD_SMOKE.md](../../docs/PROD_SMOKE.md) (5-point list) after **Deploy to production** succeeds — not the user. Green deploy-workflow E2E covers critical paths in CI (Turnstile bypass); prod smoke still required after real deploy. Optional: browser MCP on `https://skaffu.com` for P0 or user-reported prod bugs. **Never** assign prod testing to the user as homework ("test on prod", "verify in production yourself").
-7. **No manual dev restart** when `dev:watch` is running (see `dev-server-auto-restart.mdc`).
-8. **Before deploy (G3):** Invoke Security agent; do not push high-risk or dependency-sensitive changes if [private/SECURITY_REPORT.md](../../private/SECURITY_REPORT.md) status is **blocked** without human approval.
+3. **Push to `master`:** After G0 (`npm run quick:dev` only — **never** `pr:gate` pre-push; add `npm run quality:integration` when server/DB touched) — merge branch, `git push origin master`. Fast **CI** runs automatically (~2–5 min tiered); **never** instruct the user to open a PR unless they ask.
+4. **Before push:** Pull/rebase on latest `master` if others may have pushed; run G0 (`npm run quick:dev`).
+5. **Before spawn (hot zones):** Check [private/AGENT_STATUS.md](../../private/AGENT_STATUS.md) serial stream slots and [private/OWNERSHIP.md](../../private/OWNERSHIP.md) — **one agent per hot zone** (HomeDashboard, InventoryCompactRow, ShoppingListPanel, ReceiptBulkAddFlow). Do not spawn a second agent on a taken slot.
+6. **After push:** Watch **CI** (`gh run watch`) until green for the merge SHA. Deploy is **manual**: Actions → **Deploy to production** (or `gh workflow run deploy.yml`).
+7. **Before "deployed" / "prod is live":** Coordinator runs agent post-deploy smoke per [docs/PROD_SMOKE.md](../../docs/PROD_SMOKE.md) (5-point list) after **Deploy to production** succeeds — not the user. Green deploy-workflow E2E covers critical paths in CI (Turnstile bypass); prod smoke still required after real deploy. Optional: browser MCP on `https://skaffu.com` for P0 or user-reported prod bugs. **Never** assign prod testing to the user as homework ("test on prod", "verify in production yourself").
+8. **No manual dev restart** when `dev:watch` is running (see `dev-server-auto-restart.mdc`).
+9. **Before deploy (G3):** Invoke Security agent; do not push high-risk or dependency-sensitive changes if [private/SECURITY_REPORT.md](../../private/SECURITY_REPORT.md) status is **blocked** without human approval.
 
 ## Security agent lifecycle
 

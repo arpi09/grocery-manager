@@ -277,17 +277,12 @@ jobs:
       needs.resolve-artifact.result == 'success' &&
       needs.resolve-artifact.outputs.has_ci_artifact == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v6
         with:
           ref: ${{ needs.resolve-artifact.outputs.deploy_sha }}
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: '.nvmrc'
-          cache: npm
 
       - name: Download sveltekit-build from CI workflow run
         env:
@@ -302,7 +297,7 @@ jobs:
           echo "Downloaded CI artifact into build/ ($(find build -type f | wc -l) files)."
 
       - name: Client bundle guard on reused build
-        run: npm run check:client-bundle
+        run: node scripts/check-client-bundle.mjs
 
       - uses: actions/upload-artifact@v7
         with:
@@ -572,6 +567,27 @@ jobs:
             exit 1
           fi
           echo "Post-deploy sanity OK: ${base}/ -> ${code}"
+
+      - name: CURRENT_REALITY prod SHA hint
+        if: success() && steps.deploy-gate.outputs.skipped != 'true'
+        env:
+          DEPLOY_SHA: ${{ needs.resolve-artifact.outputs.deploy_sha }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL || 'https://skaffu.com' }}
+        run: |
+          set -euo pipefail
+          short_sha="${DEPLOY_SHA:0:8}"
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "## CURRENT_REALITY refresh" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Prod deploy succeeded. Update \`docs/CURRENT_REALITY.md\` **Prod SHA** row:" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Prod SHA** | \`${short_sha}\` — [run ${{ github.run_id }}](${run_url}) |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Prod URL** | ${PRODUCTION_URL%/} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Updated** | $(date -u +%Y-%m-%d) |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Coordinator: run \`.cursor/scripts/refresh-current-reality.sh\` or paste the row above. Do **not** hand-edit SHA on every nav-only touch." >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/setup-node@v6
         if: steps.deploy-gate.outputs.skipped != 'true'
