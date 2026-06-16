@@ -194,20 +194,20 @@
 
 {#snippet rowContent()}
 	<div class="content">
-		<div class="main-line">
+		<div class="line-text" data-testid="inventory-row-line">
 			<a href="/item/{item.id}/edit" class="name">{item.name}</a>
-			{#if showEstimatedBadge}
-				<EstimatedBadge source={item.expiresOnSource} explanation={expiryExplanation} showSettingsLink />
-			{/if}
-			{#if showMissingDateHint}
-				<span class="missing-date">{t('inventory.missingExpiryDate')}</span>
-			{/if}
 			<span class="sep" aria-hidden="true">·</span>
 			<span class="qty">{quantityLine}</span>
 		</div>
 
-		{#if finished || autoExpired || movingSoon || expiryLabel}
+		{#if showEstimatedBadge || showMissingDateHint || finished || autoExpired || movingSoon || expiryLabel}
 			<div class="subline">
+				{#if showEstimatedBadge}
+					<EstimatedBadge source={item.expiresOnSource} explanation={expiryExplanation} showSettingsLink />
+				{/if}
+				{#if showMissingDateHint}
+					<span class="missing-date">{t('inventory.missingExpiryDate')}</span>
+				{/if}
 				{#if finished}
 					<Badge tone="default">{t('inventory.finishedBadge')}</Badge>
 				{:else if autoExpired}
@@ -241,7 +241,7 @@
 
 <SkaffuListItem class={rowClass} data-testid="inventory-compact-row">
 	{#if swipeEnabled}
-		<div class="swipe-row">
+		<div class="swipe-row" class:swipe-row--dragging={swipeDragging}>
 			<div class="swipe-bg" aria-hidden="true">
 				<span class="swipe-hint swipe-hint--partial">{partialSwipeLabel}</span>
 				<span class="swipe-hint swipe-hint--finish">{t('consume.swipeFinish')}</span>
@@ -300,6 +300,12 @@
 		align-items: stretch;
 		justify-content: space-between;
 		pointer-events: none;
+		opacity: 0;
+		transition: opacity 0.12s ease;
+	}
+
+	.swipe-row--dragging .swipe-bg {
+		opacity: 1;
 	}
 
 	.swipe-hint {
@@ -363,22 +369,25 @@
 		gap: var(--space-xs);
 	}
 
-	.main-line {
+	.line-text {
 		display: flex;
-		align-items: baseline;
-		flex-wrap: wrap;
+		align-items: center;
 		gap: var(--space-xs);
+		flex: 1;
 		min-width: 0;
+		line-height: 1.35;
+		font-size: 0.875rem;
+		font-weight: 600;
 	}
 
 	.name {
 		flex: 1 1 auto;
 		min-width: 0;
-		font-weight: 600;
-		font-size: 0.875rem;
-		line-height: 1.35;
 		color: var(--color-text);
 		text-decoration: none;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.name:hover {
@@ -400,8 +409,6 @@
 
 	.qty {
 		flex-shrink: 0;
-		font-size: 0.8125rem;
-		font-weight: 600;
 		color: var(--color-text-muted);
 		white-space: nowrap;
 	}
@@ -421,6 +428,10 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.swipe-content {
+			transition: none;
+		}
+
+		.swipe-bg {
 			transition: none;
 		}
 	}

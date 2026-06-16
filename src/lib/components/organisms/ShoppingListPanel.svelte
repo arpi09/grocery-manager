@@ -10,6 +10,7 @@
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import ShoppingListRow from '$lib/components/molecules/ShoppingListRow.svelte';
 	import SkaffuList from '$lib/components/molecules/SkaffuList.svelte';
+	import SkaffuListPanel from '$lib/components/molecules/SkaffuListPanel.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import ShoppingToPantrySheet from '$lib/components/molecules/ShoppingToPantrySheet.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
@@ -507,7 +508,7 @@
 	});
 </script>
 
-<section
+<SkaffuListPanel
 	class="panel"
 	id={panelId}
 	tabindex={panelTabindex}
@@ -719,7 +720,7 @@
 			<p class="readonly">{t('inventory.readonly')}</p>
 		{/if}
 	{/if}
-</section>
+</SkaffuListPanel>
 
 
 {#if alwaysNudgeLocation && shoppingToPantryMode !== 'always'}
@@ -782,17 +783,6 @@
 {/if}
 
 <style>
-	.panel {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-md);
-		padding: var(--space-md);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-md);
-		background: var(--color-surface);
-		min-width: 0;
-	}
-
 	.intro,
 	.readonly {
 		margin: 0;
@@ -833,6 +823,28 @@
 
 	.share-menu-wrap {
 		position: relative;
+	}
+
+	.overflow-trigger {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: var(--touch-target-min);
+		min-height: var(--touch-target-min);
+		border: none;
+		border-radius: var(--radius-sm);
+		background: transparent;
+		color: var(--color-text-muted);
+		cursor: pointer;
+		font-size: 1.25rem;
+		line-height: 1;
+		font-family: inherit;
+	}
+
+	.overflow-trigger:hover,
+	.overflow-trigger[aria-expanded='true'] {
+		background: var(--color-surface-muted);
+		color: var(--color-text);
 	}
 
 	.share-menu-trigger {

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { tick } from 'svelte';
+	import { portal } from '$lib/actions/portal';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -13,6 +15,25 @@
 	let { itemId, itemName, disabled = false, onPartialConsume, onFinishOneTap, finishing = false }: Props = $props();
 
 	let menuOpen = $state(false);
+	let triggerEl = $state<HTMLButtonElement | null>(null);
+	let panelStyle = $state('');
+
+	async function positionPanel() {
+		await tick();
+		if (!triggerEl) return;
+
+		const rect = triggerEl.getBoundingClientRect();
+		const panelWidth = 11 * 16;
+		let left = rect.right - panelWidth;
+		const margin = 8;
+		if (left < margin) left = margin;
+		if (left + panelWidth > window.innerWidth - margin) {
+			left = window.innerWidth - panelWidth - margin;
+		}
+
+		const top = rect.bottom + 4;
+		panelStyle = `top: ${top}px; left: ${left}px;`;
+	}
 
 	function closeMenu() {
 		menuOpen = false;
@@ -21,6 +42,9 @@
 	function toggleMenu(event: MouseEvent) {
 		event.stopPropagation();
 		menuOpen = !menuOpen;
+		if (menuOpen) {
+			void positionPanel();
+		}
 	}
 
 	$effect(() => {
@@ -29,7 +53,7 @@
 		function handlePointerDown(event: PointerEvent) {
 			const target = event.target;
 			if (!(target instanceof Element)) return;
-			if (target.closest('.menu-wrap')) return;
+			if (target.closest('[data-row-overflow-root]')) return;
 			closeMenu();
 		}
 
@@ -44,10 +68,11 @@
 	});
 </script>
 
-<div class="menu-wrap" data-testid="row-overflow-menu">
+<div class="menu-wrap" data-row-overflow-root data-testid="row-overflow-menu">
 	<button
 		type="button"
 		class="menu-trigger"
+		bind:this={triggerEl}
 		aria-label={t('inventory.itemActionsNamed', { name: itemName })}
 		aria-expanded={menuOpen}
 		aria-haspopup="menu"
@@ -58,7 +83,13 @@
 	</button>
 
 	{#if menuOpen}
-		<div class="menu-panel" role="menu">
+		<div
+			class="menu-panel"
+			role="menu"
+			style={panelStyle}
+			data-row-overflow-root
+			use:portal={'body'}
+		>
 			<a class="menu-item" role="menuitem" href="/item/{itemId}/edit" onclick={closeMenu}>
 				{t('inventory.editItem')}
 			</a>
@@ -127,10 +158,8 @@
 	}
 
 	.menu-panel {
-		position: absolute;
-		top: calc(100% + 0.25rem);
-		right: 0;
-		z-index: calc(var(--z-nav-bottom) + 2);
+		position: fixed;
+		z-index: calc(var(--z-nav-bottom) + 12);
 		min-width: 11rem;
 		padding: var(--space-xs);
 		padding-bottom: calc(var(--space-xs) + env(safe-area-inset-bottom, 0));
