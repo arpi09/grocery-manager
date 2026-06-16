@@ -120,7 +120,7 @@ test.describe('Critical flows', () => {
 
 		await expect(home).toBeVisible();
 
-		const primaryActions = home.locator('.hero-cta, .btn-primary.action-link');
+		const primaryActions = home.locator('.scan-cta, .btn-primary.action-link');
 
 		expect(await primaryActions.count()).toBeLessThanOrEqual(1);
 

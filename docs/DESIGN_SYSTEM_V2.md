@@ -32,6 +32,22 @@ Shared `.product-row` rhythm:
 - Meta: 0.75rem muted
 - Padding: `var(--space-sm) var(--space-md)`
 
+**Lists and tables:** use `SkaffuList` / `SkaffuListItem` for row lists and `SkaffuDataTable` for tabular inventory — not raw `<ul>` stacks or hand-rolled card tables. SMUI theme tokens live in `src/theme/` and `src/lib/design/skaffu-smui-theme.ts`.
+
+## Dashboard cards
+
+Home (`/hem`) uses `SkaffuCard.svelte` (`@smui/card` + `skaffu-card` overrides) composed via `HomeDashboardCard` and domain cards (`HomePantryCard`, `HomeShoppingCard`, `HomeExpiringCard`, `HomeAttentionCard`):
+
+- Padding: `var(--space-md)`
+- Border-radius: `var(--radius-lg)`
+- Border: `1px solid var(--color-border)` — no heavy shadow
+- Tones: `default` | `attention`
+- Clickable cards: hover/focus ring via `--focus-ring-color`
+
 ## Sheets
 
 Filter/add sheets use `Modal variant="sheet"` and `--z-sheet` stacking above bottom nav.
+
+## News page
+
+`/nyheter` lists **major product milestones** only (launch, Brain, Pro, etc.) — not every UI sprint. Add a new entry only when PO approves.

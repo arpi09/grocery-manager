@@ -1,11 +1,16 @@
 <!doctype html>
 <html lang="%pantry.locale%" data-theme="light">
 	<head>
+		<link id="smui-theme-css" rel="stylesheet" href="/smui.css" />
 		<script>
 			(function () {
 				var theme = '%pantry.resolvedTheme%';
 				if (theme.indexOf('%pantry.') !== 0) {
 					document.documentElement.dataset.theme = theme;
+					var smuiLink = document.getElementById('smui-theme-css');
+					if (smuiLink) {
+						smuiLink.href = theme === 'dark' ? '/smui-dark.css' : '/smui.css';
+					}
 				}
 				var locale = '%pantry.locale%';
 				if (locale === 'en' || locale === 'sv') {

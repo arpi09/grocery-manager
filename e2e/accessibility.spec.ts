@@ -52,7 +52,11 @@ test.describe('Accessibility — P0 routes (WCAG 2.2 AA)', () => {
 
 			if (route.path === '/hem') {
 				await expect(page.locator('.more-on-home')).toHaveCount(0);
-				await expect(page.getByTestId('home-hero')).toBeVisible();
+				await expect(page.getByTestId('home-welcome')).toBeVisible();
+				await expect(page.getByTestId('home-scan-cta')).toBeVisible();
+				await expect(page.getByTestId('home-card-pantry')).toBeVisible();
+				await expect(page.getByTestId('home-card-shopping')).toBeVisible();
+				await expect(page.getByTestId('home-card-expiring')).toBeVisible();
 			}
 
 			await expectNoCriticalOrSeriousViolations(page, route.path);

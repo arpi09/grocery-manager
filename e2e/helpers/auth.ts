@@ -413,7 +413,7 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 	await dismissOnboardingModalIfOpen(page);
 	await dismissPostOnboardingSurveyIfOpen(page);
 	await expect(page.locator('.shopping-page, section.home')).toBeVisible({ timeout: E2E_AUTH_NAV_TIMEOUT_MS });
-	await expect(page.getByTestId('home-hero')).toBeVisible();
+	await expect(page.getByTestId('home-welcome')).toBeVisible();
 }
 
 export async function loginAsAdmin(page: Page) {
