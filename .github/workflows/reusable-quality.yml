@@ -118,9 +118,6 @@ jobs:
       (needs.preflight.result == 'success' || needs.preflight.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
-
     steps:
       - uses: actions/checkout@v6
         with:
@@ -135,11 +132,15 @@ jobs:
 
       - name: svelte-kit sync (once per job)
         run: npm run sync
+        env:
+          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
 
       - run: npm run lint
       - run: npm run check:locales
       - run: npm run check:server-imports
       - run: npm run check:fast
+        env:
+          PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
       - run: npm test
 
       - name: npm audit (runtime critical/high)
