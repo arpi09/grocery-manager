@@ -1,5 +1,6 @@
 import { appSettingsService } from '$lib/server/di';
-import type { PageServerLoad } from './$types';
+import { billingActions } from '../billing.actions';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ parent, locals, url }) => {
 	const { user, householdId, planTier } = await parent();
@@ -31,4 +32,8 @@ export const load: PageServerLoad = async ({ parent, locals, url }) => {
 						? ('portal' as const)
 						: null
 	};
+};
+
+export const actions: Actions = {
+	joinProWaitlist: billingActions.joinProWaitlist
 };

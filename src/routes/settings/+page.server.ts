@@ -2,8 +2,9 @@ import { canEditInventory } from '$lib/domain/household';
 import { buildKivraForwardAddress, isKivraForwardEnabled } from '$lib/server/kivra-forward';
 import { receiptForwardService } from '$lib/server/di';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
+import { billingActions } from './billing.actions';
 import { shouldShowSuggestionsSection } from './suggestions.actions';
-import type { PageServerLoad } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ parent, locals }) => {
 	const { household, householdRole, isPro } = await parent();
@@ -31,4 +32,9 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		kivraForwardAddress,
 		showSuggestions
 	};
+};
+
+/** Legacy entry for PostOnboardingSurvey (`/settings?/submitProductFeedback`). */
+export const actions: Actions = {
+	submitProductFeedback: billingActions.submitProductFeedback
 };

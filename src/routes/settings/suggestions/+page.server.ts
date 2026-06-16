@@ -3,8 +3,8 @@ import { redirect } from '@sveltejs/kit';
 import { buildKivraForwardAddress, isKivraForwardEnabled } from '$lib/server/kivra-forward';
 import { receiptForwardService } from '$lib/server/di';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
-import { shouldShowSuggestionsSection } from '../suggestions.actions';
-import type { PageServerLoad } from './$types';
+import { shouldShowSuggestionsSection, suggestionsActions } from '../suggestions.actions';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ parent, locals }) => {
 	const { householdId, householdRole } = await parent();
@@ -35,3 +35,5 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		kivraForwardAddress
 	};
 };
+
+export const actions: Actions = suggestionsActions;

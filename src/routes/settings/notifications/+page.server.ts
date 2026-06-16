@@ -4,7 +4,8 @@ import {
 	pushSubscriptionRepository,
 	shoppingPushService
 } from '$lib/server/di';
-import type { PageServerLoad } from './$types';
+import { notificationsActions } from '../notifications.actions';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ parent, locals }) => {
 	const { user, householdId, householdRole } = await parent();
@@ -35,3 +36,5 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		shoppingToPantryMode
 	};
 };
+
+export const actions: Actions = notificationsActions;

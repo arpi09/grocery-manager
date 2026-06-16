@@ -1,5 +1,6 @@
 import { redirect } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { householdActions } from '../household.actions';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ parent, locals }) => {
 	const { user, household, householdId, isOwner } = await parent();
@@ -15,3 +16,5 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 
 	return { pendingInvites };
 };
+
+export const actions: Actions = householdActions;

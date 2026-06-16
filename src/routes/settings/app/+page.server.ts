@@ -1,4 +1,5 @@
-import type { PageServerLoad } from './$types';
+import { petsActions } from '../pets.actions';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ parent, locals }) => {
 	const { user } = await parent();
@@ -10,3 +11,5 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		pets
 	};
 };
+
+export const actions: Actions = petsActions;
