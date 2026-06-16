@@ -16,7 +16,7 @@ Branch strategy: work on `feat/engineering-health-*`; cherry-pick isolated commi
 | Test efficiency | Needs work | Integration serial; monolithic `quality:ci` |
 | CI/CD | Good design | Reusable quality + artifact reuse; G1b SHA-gate blocks deploy |
 | Architecture | Good V1 | Learning engine ports/adapters; flag sprawl |
-| Agent efficiency | Partial | `quick:dev` added; `private/DEPENDENCY_HEALTH.md` still missing |
+| Agent efficiency | Good | `quick:*` + `gate:fast`; G0 = `quick:dev` only |
 
 **Current deploy blocker:** no green `quality / quality` on target SHA (G1b) — not a flake. Fix: green `quality:ci` on commit, then manual deploy.
 
@@ -24,13 +24,18 @@ Branch strategy: work on `feat/engineering-health-*`; cherry-pick isolated commi
 
 ## Script tiers (implemented)
 
-| Script | Blocks deploy? |
-|--------|----------------|
-| `quick:dev` | No — agent default |
-| `quick:marketing` | No |
-| `quality:integration` | Yes (subset) |
-| `quality:ci` / `release:gate` | Yes |
-| `nightly` | No (audit warn-only) |
+| Script | Blocks deploy? | Notes |
+|--------|----------------|-------|
+| `quick:lint` | No | TS/JS-only edits (~30–60 s) |
+| `quick:check` | No | sync + svelte-check (~1–2 min) |
+| `quick:unit` | No | vitest only |
+| `quick:types` | No | svelte-check without sync |
+| `quick:dev` | No — **agent default G0** | lint + locales + server-imports + unit |
+| `quick:marketing` | No | quick:dev + landing variants |
+| `gate:fast` | No | optional pre-merge (~5–7 min) |
+| `quality:integration` | Yes (subset) | server/DB touches |
+| `pr:gate` / `quality:ci` | Yes | CI mirror — not pre-push |
+| `nightly` | No (audit warn-only) | |
 
 Cloud agents (paused): [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md) — use coordinator + local agents instead.
 
@@ -40,14 +45,15 @@ Cloud agents (paused): [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md) — use co
 
 | # | Task | Status |
 |---|------|--------|
-| 1 | Add `quick:dev` npm script | **Done** (this branch) |
+| 1 | Add `quick:dev` npm script | **Done** |
+| 1b | Split `quick:lint/check/unit` + `gate:fast` | **Done** |
 | 2 | Create `private/DEPENDENCY_HEALTH.md` | Pending |
 | 3 | Integration test parallelism pilot | **Done** (PGlite per-file; `fileParallelism: true`) |
 | 4 | `lista/[token]` guest join integration test | Pending |
 | 5 | `receipt-import.ts` focused integration test | Pending |
 | 6 | Duo wedge product-events test coverage | Pending |
 | 7 | Patch dependency bump PR | **Done** (this branch) |
-| 8 | CI: parallel fast + integration jobs | Pending |
+| 8 | CI: parallel fast + integration jobs + path-tier | **Done** |
 | 9 | Split `LearningEngineService` | Delay until Brain on prod |
 | 10 | Feature flags registry + CURRENT_REALITY sync | **Done** (this branch) |
 

@@ -1,4 +1,4 @@
-# Fast CI on every push/PR to master — no E2E, no deploy (~3–5 min)
+# Fast CI on every push/PR to master — no E2E, no deploy (~2–5 min tiered)
 # Deploy: Actions → "Deploy to production" (see docs/DEPLOY.md)
 
 # Branch protection status check: pr-gate / pr-gate
@@ -16,8 +16,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  path-tier:
+    name: path-tier
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      tier: ${{ steps.tier.outputs.tier }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Classify changed paths
+        id: tier
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.pull_request.number }}/files" \
+              --paginate --jq '.[].filename' > changed-files.txt
+          else
+            before="${{ github.event.before }}"
+            if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ]; then
+              git diff-tree --no-commit-id --name-only -r HEAD > changed-files.txt
+            else
+              git diff --name-only "$before" "${{ github.sha }}" > changed-files.txt
+            fi
+          fi
+          tier=$(node scripts/ci-path-tier.mjs < changed-files.txt | tail -n1)
+          echo "tier=${tier}" >> "$GITHUB_OUTPUT"
+          echo "Path tier: ${tier}" >> "$GITHUB_STEP_SUMMARY"
+
   pr-gate:
+    needs: path-tier
     uses: ./.github/workflows/reusable-quality.yml
     with:
-      run_audit: true
-      upload_build_artifact: true
+      tier: ${{ needs.path-tier.outputs.tier == 'core-loop' && 'full' || needs.path-tier.outputs.tier }}
+      run_audit: ${{ needs.path-tier.outputs.tier != 'docs-only' }}
+      upload_build_artifact: ${{ needs.path-tier.outputs.tier == 'core-loop' }}

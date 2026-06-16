@@ -15,7 +15,13 @@ alwaysApply: false
 
 När du ändrar default home, bottom nav, onboarding slutpunkt, eller `PUBLIC_*` flags:
 
-1. Uppdatera [docs/CURRENT_REALITY.md](../../docs/CURRENT_REALITY.md) (samma commit).
+1. Uppdatera nav/flag-rader i [docs/CURRENT_REALITY.md](../../docs/CURRENT_REALITY.md) (samma commit) — **inte** Prod SHA på varje nav-touch.
 2. Om prod-smoke-checklista berör nav: uppdatera [docs/PROD_SMOKE.md](../../docs/PROD_SMOKE.md).
 
-Kör lokalt: `.cursor/scripts/refresh-current-reality.sh` för SHA/nav/flag-hints.
+**Prod SHA:** uppdateras **efter lyckad deploy**, inte vid varje produktcommit. Källor (prioritet):
+
+1. Deploy workflow summary — steget *CURRENT_REALITY prod SHA hint* i [`deploy.yml`](../../.github/workflows/deploy.yml)
+2. `gh run view` på senaste gröna **Deploy to production**
+3. `.cursor/scripts/refresh-current-reality.sh` (coordinator handoff)
+
+**Coordinator:** klistra in Prod SHA-raden från deploy summary till CURRENT_REALITY — hand-redigera inte SHA-tabellen vid rutin-nav-ändringar.
