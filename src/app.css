@@ -357,7 +357,8 @@ a:focus:not(:focus-visible) {
 	}
 }
 
-.product-row {
+.skaffu-list-item.product-row,
+.row.product-row {
 	display: flex;
 	align-items: center;
 	gap: var(--space-sm);
