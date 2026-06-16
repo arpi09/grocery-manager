@@ -45,6 +45,10 @@
 			window.matchMedia('(prefers-color-scheme: dark)').matches
 		);
 		document.documentElement.dataset.theme = resolved;
+		const smuiLink = document.getElementById('smui-theme-css') as HTMLLinkElement | null;
+		if (smuiLink) {
+			smuiLink.href = resolved === 'dark' ? '/smui-dark.css' : '/smui.css';
+		}
 	}
 
 	$effect(() => {
