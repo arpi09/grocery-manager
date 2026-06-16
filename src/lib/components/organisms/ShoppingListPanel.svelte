@@ -9,6 +9,7 @@
 	import SearchInput from '$lib/components/molecules/SearchInput.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import ShoppingListRow from '$lib/components/molecules/ShoppingListRow.svelte';
+	import SkaffuList from '$lib/components/molecules/SkaffuList.svelte';
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import ShoppingToPantrySheet from '$lib/components/molecules/ShoppingToPantrySheet.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
@@ -605,7 +606,7 @@
 			</form>
 		{/if}
 	{:else}
-		<ul class="list">
+		<SkaffuList class="list">
 			{#each unchecked as item (item.id)}
 				<ShoppingListRow
 					{item}
@@ -616,7 +617,7 @@
 					removeEnhance={createRemoveEnhance(item)}
 				/>
 			{/each}
-		</ul>
+		</SkaffuList>
 
 		{#if checkedCount > 0}
 			<div class="checked-block">
@@ -646,7 +647,7 @@
 					{/if}
 				</div>
 				{#if showChecked}
-					<ul class="list checked">
+					<SkaffuList class="list checked">
 						{#each visibleChecked as item (item.id)}
 							<ShoppingListRow
 								{item}
@@ -656,7 +657,7 @@
 								toggleEnhance={createToggleEnhance(item)}
 							/>
 						{/each}
-					</ul>
+					</SkaffuList>
 				{/if}
 			</div>
 		{/if}
@@ -929,12 +930,15 @@
 	}
 
 	.list {
-		list-style: none;
-		margin: 0;
-		padding: 0;
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-xs);
+	}
+
+	.list :global(.skaffu-list) {
+		border: none;
+		border-radius: 0;
+		background: transparent;
 	}
 
 	.checked-head {

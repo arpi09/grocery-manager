@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
+	import SkaffuListItem from '$lib/components/molecules/SkaffuListItem.svelte';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { t } from '$lib/i18n';
 
@@ -26,7 +27,12 @@
 	}: Props = $props();
 </script>
 
-<li class="shopping-row product-row" class:removing class:checked-row={checked}>
+<SkaffuListItem
+	class="shopping-row"
+	{removing}
+	checkedRow={checked}
+	data-testid="shopping-row-{item.id}"
+>
 	{#if canEdit}
 		<form
 			method="POST"
@@ -63,26 +69,10 @@
 	{:else}
 		<span class="line-readonly" class:done={checked}>{lineLabel}</span>
 	{/if}
-</li>
+</SkaffuListItem>
 
 <style>
-	.shopping-row {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-sm);
-		border-bottom: 1px solid var(--color-border);
-		padding: var(--space-sm) var(--space-md);
-		background: var(--color-surface);
-		transition:
-			opacity 0.24s ease,
-			transform 0.24s ease,
-			max-height 0.24s ease,
-			margin 0.24s ease,
-			padding 0.24s ease;
-	}
-
-	.shopping-row.removing {
+	:global(.shopping-row.removing .mdc-deprecated-list-item__wrapper) {
 		opacity: 0;
 		transform: translateX(0.75rem);
 		max-height: 0;
@@ -92,9 +82,15 @@
 		border-width: 0;
 		overflow: hidden;
 		pointer-events: none;
+		transition:
+			opacity 0.24s ease,
+			transform 0.24s ease,
+			max-height 0.24s ease,
+			margin 0.24s ease,
+			padding 0.24s ease;
 	}
 
-	.shopping-row.checked-row {
+	:global(.shopping-row.checked-row .mdc-deprecated-list-item__wrapper) {
 		opacity: 0.65;
 		text-decoration: line-through;
 	}
@@ -127,12 +123,15 @@
 		flex: 1;
 		min-width: 0;
 		line-height: 1.35;
+		font-size: 0.875rem;
+		font-weight: 600;
 	}
 
 	.line-readonly {
 		flex: 1;
 		min-width: 0;
 		line-height: 1.35;
+		font-size: 0.875rem;
 	}
 
 	.line-readonly.done {
@@ -141,7 +140,6 @@
 	}
 
 	:global(.remove-trigger) {
-		grid-column: 2;
 		flex-shrink: 0;
 	}
 

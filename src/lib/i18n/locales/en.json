@@ -188,10 +188,10 @@
 		}
 	},
 	"home": {
-		"title": "Weekly shop",
+		"title": "Home",
 		"ariaLabel": "Home page",
 		"greeting": "Hi, {name}",
-		"greetingNeutral": "Weekly shop",
+		"greetingNeutral": "Home",
 		"tagline": "Photograph your pantry to stay on top of things",
 		"taglineEmpty": "Create this week's list — three items is enough to start shared weekly shopping",
 		"scanCardTitle": "Add items",
@@ -317,6 +317,29 @@
 			"ariaLabel": "Expiring soon",
 			"daysLeft": "{days, plural, one {# day left} other {# days left}}",
 			"moreLink": "View all"
+		},
+		"dashboard": {
+			"greetingMorningOnly": "Good morning",
+			"greetingDayOnly": "Hi",
+			"greetingEveningOnly": "Good evening",
+			"greetingNightOnly": "Hi",
+			"sublineCold": "Fresh start — fill your pantry when it suits you",
+			"sublineSteady": "{count, plural, one {# item · calm start} other {# items · calm start}}",
+			"sublineLista": "{count, plural, one {# item on the list} other {# items on the list}}",
+			"sublineExpiry": "Something expires soon",
+			"pantryTitle": "Pantry",
+			"pantryCount": "{count, plural, one {# item} other {# items}}",
+			"pantryEmpty": "Empty pantry — start with a photo round or this week's list",
+			"pantryColdMeta": "Three items is enough to get started",
+			"pantryFooter": "Open pantry",
+			"shoppingTitle": "Shopping",
+			"shoppingCount": "{count, plural, one {# item on the list} other {# items on the list}}",
+			"shoppingFooter": "Open shopping list",
+			"expiringTitle": "Expiring soon",
+			"expiringEmpty": "Nothing expires in the next few days",
+			"expiringFooter": "View expiring",
+			"attentionTitle": "Needs a quick check",
+			"attentionFooter": "Go to sync"
 		}
 	},
 	"dashboard": {
@@ -2708,9 +2731,9 @@
 	},
 	"news": {
 		"title": "News",
-		"subtitle": "What's new in Skaffu — step by step forward",
-		"lead": "Follow the trail of new features and improvements. We keep building so your pantry feels easier every week.",
-		"metaDescription": "Latest news and updates in Skaffu — new features for scanning, recipes, onboarding and more.",
+		"subtitle": "Major Skaffu milestones — when the product takes a clear step forward",
+		"lead": "The moments that change everyday life: from launch to household memory that learns from receipts.",
+		"metaDescription": "Skaffu product milestones — launch and household memory for shared weekly shopping.",
 		"trailAria": "Timeline of product news",
 		"readMore": "Read more",
 		"openDetail": "Read more about {title}",
@@ -2721,44 +2744,11 @@
 				"body": "The first version of Skaffu — pantry, shopping list and smart tools in one app.",
 				"detail": "With v1.0 you can track fridge, freezer and cupboard, plan shopping and get started quickly with photo, barcode or receipt. More news will appear here soon."
 			},
-			"inventoryTable": {
-				"title": "Clearer pantry overview",
-				"body": "Sort, filter and manage items in a compact table — perfect when your stock grows and you want everything at a glance."
-			},
-			"scanUx": {
-				"title": "Faster capture with photo and receipt",
-				"body": "Improved scan hub with a clearer flow — photo, barcode or receipt without losing your place."
-			},
-			"recipeModal": {
-				"title": "Recipe ideas that feel ready",
-				"body": "New recipe view with steps, portions and ingredients — pick the right dish from what you already have at home."
-			},
-			"onboarding": {
-				"title": "Get started with a smile",
-				"body": "A shorter guide from welcome to your first items — with animations that celebrate your start."
-			},
-			"pushFix": {
-				"title": "Notifications that actually work",
-				"body": "Reliable browser notification toggles in settings — expiring items and shopping reminders reach you on time."
-			},
 			"brainV1": {
 				"version": "Brain V1",
 				"title": "Household memory in daily use",
 				"body": "Estimated expiry and receipt learning — tap Estimated to see why.",
 				"detail": "Skaffu learns from receipts and your corrections. In pantry and receipt review you see Estimated and can open the explanation. More observations make memory more reliable."
-			},
-			"narrativeSprint": {
-				"title": "List-first across the app",
-				"body": "Home, onboarding and shopping tell the same weekly loop — list, shop, check off, pantry.",
-				"detail": "We reshaped copy and empty states so new households meet the weekly list first, not the scanner."
-			},
-			"navV2": {
-				"title": "Clearer mobile navigation",
-				"body": "Home · Shopping · Scan · More — pantry and extra tools live under More."
-			},
-			"inventoryProductRow": {
-				"title": "Cleaner pantry rows (mobile)",
-				"body": "Product Row layout: name, amount and expiry on one line — less noise, easier to scan."
 			}
 		}
 	},
