@@ -44,7 +44,18 @@
 
 	.skaffu-table :global(.mdc-data-table__table) {
 		width: 100%;
+		table-layout: fixed;
 		border-collapse: collapse;
+	}
+
+	.skaffu-table :global(.col-name) {
+		width: auto;
+	}
+
+	.skaffu-table :global(.col-qty),
+	.skaffu-table :global(.col-expiry) {
+		width: 1%;
+		white-space: nowrap;
 	}
 
 	.skaffu-table :global(.mdc-data-table__header-cell) {

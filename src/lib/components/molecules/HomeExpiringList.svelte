@@ -53,6 +53,7 @@
 		min-width: 0;
 		font-size: 0.875rem;
 		font-weight: 600;
+		color: var(--color-text);
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;

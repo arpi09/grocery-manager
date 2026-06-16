@@ -40,9 +40,6 @@
 		if (homeState === 'lista_ready') {
 			return t('home.dashboard.sublineLista', { count: shoppingListCount });
 		}
-		if (homeState === 'expiry') {
-			return t('home.dashboard.sublineExpiry');
-		}
 		return t('home.dashboard.sublineSteady', { count: totalItems });
 	});
 </script>
@@ -65,6 +62,7 @@
 		font-size: var(--font-size-display);
 		font-weight: var(--font-weight-display);
 		line-height: 1.2;
+		color: var(--color-text);
 	}
 
 	.subline {

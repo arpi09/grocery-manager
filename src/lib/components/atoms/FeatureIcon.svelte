@@ -2,10 +2,12 @@
 	import type { Component } from 'svelte';
 	import type { IconProps } from '@lucide/svelte';
 	import {
+		AlertTriangle,
 		Barcode,
 		Boxes,
 		Camera,
 		Check,
+		Clock,
 		House,
 		Package,
 		Receipt,
@@ -17,7 +19,9 @@
 	} from '@lucide/svelte';
 
 	export type FeatureIconId =
+		| 'alert'
 		| 'barcode'
+		| 'clock'
 		| 'receipt'
 		| 'photo'
 		| 'box'
@@ -38,7 +42,9 @@
 	let { id, size = 24 }: Props = $props();
 
 	const iconComponents: Record<FeatureIconId, Component<IconProps>> = {
+		alert: AlertTriangle,
 		barcode: Barcode,
+		clock: Clock,
 		receipt: Receipt,
 		photo: Camera,
 		box: Package,

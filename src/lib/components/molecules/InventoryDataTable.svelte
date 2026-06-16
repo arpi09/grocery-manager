@@ -36,8 +36,6 @@
 		onPartialConsume
 	}: Props = $props();
 
-	const sortKeys: InventorySortKey[] = ['name', 'quantity', 'expiry'];
-
 	function sortHint(key: InventorySortKey): string {
 		if (sortKey !== key) {
 			return t('inventory.sortColumnInactive', { column: columnLabel(key) });
@@ -55,31 +53,52 @@
 </script>
 
 <div class="inventory-table-wrap">
-	<div class="sort-bar" role="group" aria-label={t('inventory.sortLabel')}>
-		{#each sortKeys as key (key)}
-			<button
-				type="button"
-				class="sort-chip"
-				class:sort-chip--active={sortKey === key}
-				aria-pressed={sortKey === key}
-				aria-label={sortHint(key)}
-				onclick={() => onSortChange(key)}
-			>
-				{columnLabel(key)}
-				{#if sortKey === key}
-					<span class="sort-dir" aria-hidden="true">{sortDirection === 'asc' ? '↑' : '↓'}</span>
-				{/if}
-			</button>
-		{/each}
-	</div>
-
 	<SkaffuDataTable {ariaLabel} data-testid="inventory-table">
 		{#snippet head()}
 			<Head>
 				<Row>
-					<Cell>{t('inventory.columnName')}</Cell>
-					<Cell>{t('inventory.columnQuantity')}</Cell>
-					<Cell>{t('inventory.columnExpiry')}</Cell>
+					<Cell class="col-name">
+						<button
+							type="button"
+							class="sort-header-btn"
+							class:sort-header-btn--active={sortKey === 'name'}
+							aria-label={sortHint('name')}
+							onclick={() => onSortChange('name')}
+						>
+							{t('inventory.columnName')}
+							{#if sortKey === 'name'}
+								<span class="sort-dir" aria-hidden="true">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+							{/if}
+						</button>
+					</Cell>
+					<Cell class="col-qty">
+						<button
+							type="button"
+							class="sort-header-btn"
+							class:sort-header-btn--active={sortKey === 'quantity'}
+							aria-label={sortHint('quantity')}
+							onclick={() => onSortChange('quantity')}
+						>
+							{t('inventory.columnQuantity')}
+							{#if sortKey === 'quantity'}
+								<span class="sort-dir" aria-hidden="true">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+							{/if}
+						</button>
+					</Cell>
+					<Cell class="col-expiry">
+						<button
+							type="button"
+							class="sort-header-btn"
+							class:sort-header-btn--active={sortKey === 'expiry'}
+							aria-label={sortHint('expiry')}
+							onclick={() => onSortChange('expiry')}
+						>
+							{t('inventory.columnExpiry')}
+							{#if sortKey === 'expiry'}
+								<span class="sort-dir" aria-hidden="true">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+							{/if}
+						</button>
+					</Cell>
 					<Cell class="actions-col"></Cell>
 				</Row>
 			</Head>
@@ -107,25 +126,21 @@
 	.inventory-table-wrap {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-sm);
 		min-width: 0;
+		padding: var(--space-md);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
 	}
 
-	.sort-bar {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-xs);
-	}
-
-	.sort-chip {
+	.sort-header-btn {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-xs);
 		min-height: var(--touch-target-min);
-		padding: var(--space-xs) var(--space-sm);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-sm);
-		background: var(--color-surface);
+		padding: 0;
+		border: none;
+		background: transparent;
 		font: inherit;
 		font-size: 0.75rem;
 		font-weight: 600;
@@ -133,14 +148,9 @@
 		cursor: pointer;
 	}
 
-	.sort-chip:hover,
-	.sort-chip--active {
-		border-color: var(--color-primary);
+	.sort-header-btn:hover,
+	.sort-header-btn--active {
 		color: var(--color-primary);
-	}
-
-	.sort-chip--active {
-		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
 	}
 
 	.sort-dir {

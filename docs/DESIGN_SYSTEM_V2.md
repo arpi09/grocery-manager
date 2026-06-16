@@ -46,6 +46,8 @@ Home (`/hem`) uses `SkaffuCard.svelte` (`@smui/card` + `skaffu-card` overrides) 
 - Tones: `default` | `attention`
 - Clickable cards: hover/focus ring via `--focus-ring-color`
 
+**Priority layout:** `HomeDashboardCard` accepts `size: 'hero' | 'default' | 'compact'` plus optional icon snippet. `HomeDashboard` drives card order and size from `homeState` — expiring hero spans full width when `homeState === 'expiry'`; shopping hero when `lista_ready`; pantry/shopping compact when expiry or cold.
+
 ## Sheets
 
 Filter/add sheets use `Modal variant="sheet"` and `--z-sheet` stacking above bottom nav.
@@ -53,3 +55,9 @@ Filter/add sheets use `Modal variant="sheet"` and `--z-sheet` stacking above bot
 ## News page
 
 `/nyheter` lists **major product milestones** only (launch, Brain, Pro, etc.) — not every UI sprint. Add a new entry only when PO approves.
+
+**Illustration ids:** set `illustration` in `app-news.ts` (`NewsIllustrationId`: `launch`, `brain`, `scan`, `onboarding`, `recipe`, `push`, `inventory-table`). Each id maps to a distinct SVG in `NewsPathIllustration.svelte`. Scroll reveal stagger uses illustration id, not list index (`NewsMilestoneCard`).
+
+## Scan hub
+
+Scan mode choice (`ScanModeHub`) uses compact animated SVGs via `ScanHubIllustration.svelte` (`receipt` | `photo` | `barcode`) inside the icon wrap. Motion respects `prefers-reduced-motion: reduce` (static SVG fallback).

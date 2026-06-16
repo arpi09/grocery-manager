@@ -86,19 +86,14 @@
 	const priceMemoryKey = $derived(normalizeReceiptProductName(item.name));
 
 	const rowClass = $derived(
-		[
-			'inventory-row',
-			'product-row',
-			finished ? 'finished' : '',
-			autoExpired ? 'autoExpired' : ''
-		]
+		['inventory-row', finished ? 'finished' : '', autoExpired ? 'autoExpired' : '']
 			.filter(Boolean)
 			.join(' ')
 	);
 </script>
 
 <Row class={rowClass} data-testid="inventory-row-{item.id}">
-	<Cell>
+	<Cell class="col-name">
 		<div class="name-cell">
 			<div class="name-row">
 				<a href="/item/{item.id}/edit" class="name">{item.name}</a>
@@ -128,10 +123,10 @@
 			</div>
 		</div>
 	</Cell>
-	<Cell>
+	<Cell class="col-qty">
 		<span class="qty">{quantityCell}</span>
 	</Cell>
-	<Cell>
+	<Cell class="col-expiry">
 		{#if expiryLabel}
 			<Badge tone={autoExpired ? 'default' : expiryTone(item.expiresOn!)}>
 				{expiryLabel}
@@ -183,6 +178,10 @@
 		line-height: 1.35;
 		color: var(--color-text);
 		text-decoration: none;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.name:hover {
@@ -203,11 +202,13 @@
 		font-size: 0.8125rem;
 		font-weight: 600;
 		color: var(--color-text-muted);
+		white-space: nowrap;
 	}
 
 	.no-expiry-hint {
 		font-size: 0.75rem;
 		color: var(--color-text-muted);
+		white-space: nowrap;
 	}
 
 	.row-badges {

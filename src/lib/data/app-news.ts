@@ -1,6 +1,13 @@
 import type { MessageKey } from '$lib/i18n/messages';
 
-export type NewsIllustrationId = 'launch' | 'scan' | 'onboarding' | 'recipe' | 'push' | 'inventory-table';
+export type NewsIllustrationId =
+	| 'launch'
+	| 'brain'
+	| 'scan'
+	| 'onboarding'
+	| 'recipe'
+	| 'push'
+	| 'inventory-table';
 
 export interface AppNewsItem {
 	id: string;
@@ -18,7 +25,7 @@ export const APP_NEWS_ITEMS: AppNewsItem[] = [
 	{
 		id: 'brain-v1',
 		date: '2026-06-08',
-		illustration: 'launch',
+		illustration: 'brain',
 		versionLabelKey: 'news.items.brainV1.version',
 		titleKey: 'news.items.brainV1.title',
 		bodyKey: 'news.items.brainV1.body',

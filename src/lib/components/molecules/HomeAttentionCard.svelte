@@ -1,13 +1,17 @@
 <script lang="ts">
-	import HomeDashboardCard from '$lib/components/molecules/HomeDashboardCard.svelte';
+	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
+	import HomeDashboardCard, {
+		type HomeDashboardCardSize
+	} from '$lib/components/molecules/HomeDashboardCard.svelte';
 	import type { PantryStatusSummary } from '$lib/application/inventory.service';
 	import { t } from '$lib/i18n';
 
 	interface Props {
 		pantryStatus: PantryStatusSummary;
+		size?: HomeDashboardCardSize;
 	}
 
-	let { pantryStatus }: Props = $props();
+	let { pantryStatus, size = 'default' }: Props = $props();
 
 	const issueLine = $derived.by(() => {
 		if (pantryStatus.staleCount > 0) {
@@ -35,8 +39,12 @@
 	{href}
 	testId="home-card-attention"
 	tone="attention"
+	{size}
 	footerLabel={t('home.dashboard.attentionFooter')}
 >
+	{#snippet icon()}
+		<FeatureIcon id="alert" size={18} />
+	{/snippet}
 	{#snippet meta()}
 		<p class="meta-line">{issueLine}</p>
 	{/snippet}

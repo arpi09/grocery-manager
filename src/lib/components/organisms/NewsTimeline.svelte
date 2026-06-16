@@ -54,7 +54,7 @@
 <div class="timeline">
 	<div class="path-line" aria-hidden="true"></div>
 	<ol class="milestones" aria-label={t('news.trailAria')}>
-		{#each resolvedItems as item, index (item.id)}
+		{#each resolvedItems as item (item.id)}
 			<li class="milestone-item">
 				<NewsMilestoneCard
 					{item}
@@ -63,7 +63,6 @@
 					dateLabel={item.dateLabel}
 					versionLabel={item.versionLabel}
 					hasDetail={Boolean(item.detailBody)}
-					{index}
 					onReadMore={() => openDetail(item)}
 				/>
 			</li>
