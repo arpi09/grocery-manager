@@ -79,6 +79,7 @@
 		"@axe-core/playwright": "^4.11.3",
 		"@eslint/js": "^10.0.0",
 		"@playwright/test": "^1.52.0",
+		"@smui/card": "^9.0.1",
 		"@smui/common": "^9.0.1",
 		"@smui/data-table": "^9.0.1",
 		"@smui/list": "^9.0.1",

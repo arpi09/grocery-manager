@@ -36,7 +36,8 @@ export const skaffuSmuiTokens = {
 export const skaffuSmuiClassNames = {
 	table: 'skaffu-table',
 	list: 'skaffu-list',
-	listItem: 'skaffu-list-item'
+	listItem: 'skaffu-list-item',
+	card: 'skaffu-card'
 } as const;
 
 export type SkaffuSmuiThemeMode = keyof typeof skaffuSmuiTokens;

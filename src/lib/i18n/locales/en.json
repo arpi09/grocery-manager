@@ -188,10 +188,10 @@
 		}
 	},
 	"home": {
-		"title": "Weekly shop",
+		"title": "Home",
 		"ariaLabel": "Home page",
 		"greeting": "Hi, {name}",
-		"greetingNeutral": "Weekly shop",
+		"greetingNeutral": "Home",
 		"tagline": "Photograph your pantry to stay on top of things",
 		"taglineEmpty": "Create this week's list — three items is enough to start shared weekly shopping",
 		"scanCardTitle": "Add items",
@@ -317,6 +317,29 @@
 			"ariaLabel": "Expiring soon",
 			"daysLeft": "{days, plural, one {# day left} other {# days left}}",
 			"moreLink": "View all"
+		},
+		"dashboard": {
+			"greetingMorningOnly": "Good morning",
+			"greetingDayOnly": "Hi",
+			"greetingEveningOnly": "Good evening",
+			"greetingNightOnly": "Hi",
+			"sublineCold": "Fresh start — fill your pantry when it suits you",
+			"sublineSteady": "{count, plural, one {# item · calm start} other {# items · calm start}}",
+			"sublineLista": "{count, plural, one {# item on the list} other {# items on the list}}",
+			"sublineExpiry": "Something expires soon",
+			"pantryTitle": "Pantry",
+			"pantryCount": "{count, plural, one {# item} other {# items}}",
+			"pantryEmpty": "Empty pantry — start with a photo round or this week's list",
+			"pantryColdMeta": "Three items is enough to get started",
+			"pantryFooter": "Open pantry",
+			"shoppingTitle": "Shopping",
+			"shoppingCount": "{count, plural, one {# item on the list} other {# items on the list}}",
+			"shoppingFooter": "Open shopping list",
+			"expiringTitle": "Expiring soon",
+			"expiringEmpty": "Nothing expires in the next few days",
+			"expiringFooter": "View expiring",
+			"attentionTitle": "Needs a quick check",
+			"attentionFooter": "Go to sync"
 		}
 	},
 	"dashboard": {

@@ -34,6 +34,16 @@ Shared `.product-row` rhythm:
 
 **Lists and tables:** use `SkaffuList` / `SkaffuListItem` for row lists and `SkaffuDataTable` for tabular inventory — not raw `<ul>` stacks or hand-rolled card tables. SMUI theme tokens live in `src/theme/` and `src/lib/design/skaffu-smui-theme.ts`.
 
+## Dashboard cards
+
+Home (`/hem`) uses `SkaffuCard.svelte` (`@smui/card` + `skaffu-card` overrides) composed via `HomeDashboardCard` and domain cards (`HomePantryCard`, `HomeShoppingCard`, `HomeExpiringCard`, `HomeAttentionCard`):
+
+- Padding: `var(--space-md)`
+- Border-radius: `var(--radius-lg)`
+- Border: `1px solid var(--color-border)` — no heavy shadow
+- Tones: `default` | `attention`
+- Clickable cards: hover/focus ring via `--focus-ring-color`
+
 ## Sheets
 
 Filter/add sheets use `Modal variant="sheet"` and `--z-sheet` stacking above bottom nav.

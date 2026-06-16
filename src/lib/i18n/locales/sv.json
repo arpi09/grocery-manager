@@ -179,10 +179,10 @@
 		}
 	},
 	"home": {
-		"title": "Veckohandel",
+		"title": "Hem",
 		"ariaLabel": "Startsida",
 		"greeting": "Hej, {name}",
-		"greetingNeutral": "Veckohandel",
+		"greetingNeutral": "Hem",
 		"tagline": "Fota in varor för att hålla koll",
 		"taglineEmpty": "Skapa veckans lista — tre varor räcker för att komma igång med gemensam veckohandel",
 		"scanCardTitle": "Lägg till varor",
@@ -308,6 +308,29 @@
 			"ariaLabel": "Går ut snart",
 			"daysLeft": "{days, plural, one {# dag kvar} other {# dagar kvar}}",
 			"moreLink": "Visa alla"
+		},
+		"dashboard": {
+			"greetingMorningOnly": "God morgon",
+			"greetingDayOnly": "Hej",
+			"greetingEveningOnly": "God kväll",
+			"greetingNightOnly": "Hej",
+			"sublineCold": "Tom start — fyll skafferiet när det passar",
+			"sublineSteady": "{count, plural, one {# vara · lugn start} other {# varor · lugn start}}",
+			"sublineLista": "{count, plural, one {# sak på listan} other {# saker på listan}}",
+			"sublineExpiry": "Något går ut snart",
+			"pantryTitle": "Skafferi",
+			"pantryCount": "{count, plural, one {# vara} other {# varor}}",
+			"pantryEmpty": "Tomt skafferi — börja med en fotorunda eller veckans lista",
+			"pantryColdMeta": "Tre varor räcker för att komma igång",
+			"pantryFooter": "Öppna skafferiet",
+			"shoppingTitle": "Inköp",
+			"shoppingCount": "{count, plural, one {# sak på listan} other {# saker på listan}}",
+			"shoppingFooter": "Öppna inköpslistan",
+			"expiringTitle": "Går ut snart",
+			"expiringEmpty": "Inget går ut de närmaste dagarna",
+			"expiringFooter": "Visa utgående",
+			"attentionTitle": "Behöver en snabb koll",
+			"attentionFooter": "Gå till synk"
 		}
 	},
 	"dashboard": {
