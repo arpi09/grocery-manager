@@ -1,10 +1,21 @@
-﻿import { test, expect } from '@playwright/test';
+﻿import { test, expect, type Page } from '@playwright/test';
 import { dismissOnboardingModalIfOpen, dismissPageHintIfOpen, loginAsAdmin } from './helpers/auth';
 
-async function ensureSmartFillVisible(page: import('@playwright/test').Page) {
+/** SMUI SkaffuList wraps rows in div.list (not ul.list). */
+function uncheckedShoppingRow(page: Page, itemName: string) {
+	return page
+		.locator('#shopping-list-panel div.list:not(.checked) [data-testid^="shopping-row-"]')
+		.filter({ hasText: itemName });
+}
+
+function uncheckedShoppingRows(page: Page) {
+	return page.locator('#shopping-list-panel div.list:not(.checked) [data-testid^="shopping-row-"]');
+}
+
+async function ensureSmartFillVisible(page: Page) {
 	const fold = page.getByTestId('shopping-suggestions-fold');
 	if (!(await fold.isVisible().catch(() => false))) {
-		const uncheckedRows = page.locator('#shopping-list-panel ul.list:not(.checked) li');
+		const uncheckedRows = uncheckedShoppingRows(page);
 		while ((await uncheckedRows.count()) > 0) {
 			const before = await uncheckedRows.count();
 			const row = uncheckedRows.first();
@@ -20,7 +31,7 @@ async function ensureSmartFillVisible(page: import('@playwright/test').Page) {
 	await openShoppingSuggestionsFold(page);
 }
 
-async function openShoppingSuggestionsFold(page: import('@playwright/test').Page) {
+async function openShoppingSuggestionsFold(page: Page) {
 	const fold = page.getByTestId('shopping-suggestions-fold');
 	await expect(fold).toBeVisible({ timeout: 15_000 });
 	const isOpen = await fold.evaluate((el) => (el as HTMLDetailsElement).open);
@@ -60,7 +71,7 @@ test.describe('Shopping list', () => {
 		await page.locator('#shopping-name').fill(itemName);
 		await page.locator('form.add-form').getByRole('button', { name: /L.gg till/i }).click();
 
-		const row = page.locator('ul.list:not(.checked) li').filter({ hasText: itemName });
+		const row = uncheckedShoppingRow(page, itemName);
 		await expect(row).toBeVisible({ timeout: 15_000 });
 
 		await row.locator('form[action="?/toggle"] input[type=checkbox]').click();
@@ -86,7 +97,7 @@ test.describe('Shopping list', () => {
 		await page.locator('#shopping-name').fill(itemName);
 		await page.locator('form.add-form').getByRole('button', { name: /L.gg till/i }).click();
 
-		const row = page.locator('ul.list:not(.checked) li').filter({ hasText: itemName });
+		const row = uncheckedShoppingRow(page, itemName);
 		await expect(row).toBeVisible({ timeout: 15_000 });
 
 		await row.locator('form[action="?/toggle"] input[type=checkbox]').click();
