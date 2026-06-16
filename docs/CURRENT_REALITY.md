@@ -5,9 +5,9 @@
 | Fùlt | Vùrde |
 |------|--------|
 | **Uppdaterad** | 2026-06-16 |
-| **Prod SHA** | `9603fdca3` @ [27613967796](https://github.com/arpi09/grocery-manager/actions/runs/27613967796) (fix #102 mobile inventory SkaffuList + panel parity, fast E2E). Prior `72b02f49b` @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) |
-| **Master SHA** | `9603fdca3` - PR #102 inventory mobile list fix |
-| **CI/CD model** | **v2 on master** - tiered gates #95; prod validated @ `9603fdca3` (fast deploy tier) |
+| **Prod SHA** | `2be75b3ca` @ [27621532066](https://github.com/arpi09/grocery-manager/actions/runs/27621532066) (fix #103 inventory?shopping list parity, fast E2E critical). Prior `9603fdca3` @ [27613967796](https://github.com/arpi09/grocery-manager/actions/runs/27613967796) |
+| **Master SHA** | `2be75b3ca` ó PR #103 inventory list parity (SkaffuListPanel, filter in panel) |
+| **CI/CD model** | **v2 on master** ó tiered gates #95; prod validated @ `2be75b3ca` (fast deploy tier) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ù merged to master |
 | **Prod URL** | https://skaffu.com |
 | **Reality audit** | [REALITY_AUDIT_2026-06.md](./REALITY_AUDIT_2026-06.md) |
