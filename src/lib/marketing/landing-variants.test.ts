@@ -53,8 +53,7 @@ describe('getLandingHeroCopy', () => {
 		const a = getLandingHeroCopy('a', 'sv');
 		const b = getLandingHeroCopy('b', 'sv');
 		expect(a.heroTitle).not.toBe(b.heroTitle);
-		expect(a.heroTitle).toContain('Handla ihop');
-		expect(a.heroTitle).toContain('lär sig');
+		expect(a.heroTitle.toLowerCase()).toContain('skafferiet');
 		expect(b.heroTitle).toContain('Butiksneutralt');
 	});
 

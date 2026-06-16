@@ -61,6 +61,6 @@ export const load: PageServerLoad = async ({ url, cookies, parent, locals }) => 
 		landingVariant: variant,
 		receiptHeroVariant: receiptHeroActive ? receiptHeroVariant : null,
 		hero,
-		latestGuides: await getLatestPublishedGuides(3, guideLoaderDepsFromService(locals.guideArticleService))
+		latestGuides: await getLatestPublishedGuides(2, guideLoaderDepsFromService(locals.guideArticleService))
 	};
 };

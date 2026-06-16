@@ -7,6 +7,17 @@ export interface MarketingNavLink {
 	external?: boolean;
 }
 
+export interface MarketingDashboardCard {
+	title: string;
+	href: string;
+	previewLines: string[];
+}
+
+export interface MarketingFooterSection {
+	title: string;
+	links: MarketingNavLink[];
+}
+
 export interface MarketingFeature {
 	icon: 'barcode' | 'receipt' | 'sparkle' | 'box' | 'home' | 'users';
 	title: string;
@@ -121,6 +132,11 @@ export interface MarketingContent {
 		guidesTeaserLead: string;
 		guidesTeaserSeeAll: string;
 		guidesTeaserReadMore: string;
+		scanCtaLabel: string;
+		dashboardCardsTitle: string;
+		dashboardCardsLead: string;
+		dashboardCardsSeeMore: string;
+		dashboardCards: MarketingDashboardCard[];
 		heroVisual: {
 			listTitle: string;
 			listItemChecked: string;
@@ -177,6 +193,8 @@ export interface MarketingContent {
 		tagline: string;
 		rights: string;
 		navAria: string;
+		socialLabel: string;
+		sections: MarketingFooterSection[];
 		socialLinks: MarketingNavLink[];
 	};
 	reduceWaste: MarketingSeoPage;
@@ -220,22 +238,18 @@ const sv: MarketingContent = {
 	siteName: 'Skaffu',
 	tagline: 'Gemensam veckohandel med matkoll — handla ihop, släng mindre.',
 	meta: {
-		title: 'Skaffu — gemensam veckohandel & hushållets minne | handla ihop',
+		title: 'Skaffu — skafferi-app & inköpslista för hela hushållet | handla ihop',
 		description:
-			'Delad veckolista för hela hushållet. Skaffu lär sig vad ni brukar köpa från kvitton och checkoffs — butiksneutralt, gratis att börja.',
-		ogTitle: 'Skaffu — gemensam veckohandel med smart hushållsminne',
+			'Skafferi-app och delad inköpslista för hela hushållet. Handla ihop med koll på kyl, frys och skafferi — butiksneutralt, gratis att börja på skaffu.com.',
+		ogTitle: 'Skaffu — skafferi-app med gemensam inköpslista',
 		ogDescription:
-			'Handla ihop på en lista som lär sig ert hushåll. Förslag, partner-sync och mindre matsvinn — webb först på skaffu.com.'
+			'Handla ihop med koll på skafferiet. Delad lista, utgångsdatum och smarta förslag — webb först, butiksneutralt.'
 	},
 	nav: [
-		{ href: '/funktioner', label: 'Funktioner' },
-		{ href: '/minska-matsvinn', label: 'Matsvinn' },
-		{ href: '/sa-fungerar-det', label: 'Så fungerar det' },
-		{ href: '/kvitto-pdf-kivra', label: 'Kvitto & Kivra' },
+		{ href: '/funktioner', label: 'Produkt' },
 		{ href: '/priser', label: 'Priser' },
-		{ href: '/faq', label: 'Vanliga frågor' },
 		{ href: '/guider', label: 'Guider' },
-		{ href: '/privacy', label: 'Integritet' }
+		{ href: '/faq', label: 'FAQ' }
 	],
 	header: {
 		navAria: 'Webbplats',
@@ -266,12 +280,12 @@ const sv: MarketingContent = {
 	},
 	landing: {
 		heroDomainSuffix: '· skaffu.com',
-		heroEyebrow: 'Gemensam veckohandel · skaffu.com',
-		heroTitle: 'Handla ihop — Skaffu lär sig ert hushåll.',
+		heroEyebrow: 'Skafferi-app · handla ihop · skaffu.com',
+		heroTitle: 'Handla ihop med koll på skafferiet.',
 		heroLead:
-			'En delad veckolista för hela hushållet. Bjud in partner, checka av i butiken och få förslag på vad ni brukar behöva — så ni köper rätt och slänger mindre.',
+			'Delad inköpslista och skafferi för hela hushållet — bjud in partner, checka av i butiken och se vad som finns hemma innan ni handlar.',
 		heroSecondary:
-			'Kvitton och checkoffs bygger hushållets minne i bakgrunden. Butiksneutralt — ICA, Willys eller Coop.',
+			'Kvitton och checkoffs bygger hushållets minne. Butiksneutralt — ICA, Willys eller Coop.',
 		heroHighlightsAria: 'Det viktigaste',
 		heroHighlights: {
 			list: 'Delad lista i realtid',
@@ -283,7 +297,7 @@ const sv: MarketingContent = {
 		wasteMeterLabel: 'Mindre matsvinn',
 		wasteMeterCaption: 'Veckan fixad — utgående varor blir middag och inköpslista på ett klick.',
 		comparisonKicker: 'Jämfört med Bring & ICA',
-		readHowItWorks: 'Läs mer om hur det fungerar',
+		readHowItWorks: 'Se hur det fungerar',
 		stats: [
 			{ value: '1', label: 'gemensam lista — synkad i realtid för hela hushållet' },
 			{ value: '2+', label: 'i hushållet — bjud in partner och handla ihop' },
@@ -338,6 +352,28 @@ const sv: MarketingContent = {
 			'Praktiska artiklar om skafferi, matsvinn och kvitto-PDF — skrivna för svenska hushåll.',
 		guidesTeaserSeeAll: 'Alla guider',
 		guidesTeaserReadMore: 'Läs guiden',
+		scanCtaLabel: 'Kom igång — skanna kvitto eller bygg lista',
+		dashboardCardsTitle: 'Koll på skafferiet och veckans handel',
+		dashboardCardsLead:
+			'Tre vardagsytor i appen — klicka för att läsa mer om skafferi, inköpslista och det som går ut snart.',
+		dashboardCardsSeeMore: 'Visa mer',
+		dashboardCards: [
+			{
+				title: 'Skafferi',
+				href: '/skafferi-app',
+				previewLines: ['24 varor i hushållet', 'Kyl 12 · Frys 3 · Skafferi 9']
+			},
+			{
+				title: 'Inköp',
+				href: '/funktioner',
+				previewLines: ['5 saker på listan', 'Ni brukar handla på lördag']
+			},
+			{
+				title: 'Går ut snart',
+				href: '/minska-matsvinn',
+				previewLines: ['Mjölk — imorgon', 'Yoghurt — om 2 dagar', 'Tomater — om 3 dagar']
+			}
+		],
 		heroVisual: {
 			listTitle: 'Veckans lista',
 			listItemChecked: 'Anna checkade mjölk',
@@ -532,9 +568,31 @@ const sv: MarketingContent = {
 		contactEmail: 'hello@skaffu.com'
 	},
 	footer: {
-		tagline: 'Veckans lista och matkoll för hela hushållet.',
+		tagline: 'Skafferi-app och inköpslista för hela hushållet.',
 		rights: '© Skaffu. Alla rättigheter förbehållna.',
 		navAria: 'Sidfot',
+		socialLabel: 'Följ oss',
+		sections: [
+			{
+				title: 'Produkt',
+				links: [
+					{ href: '/funktioner', label: 'Funktioner' },
+					{ href: '/sa-fungerar-det', label: 'Så fungerar det' }
+				]
+			},
+			{
+				title: 'Användning',
+				links: [
+					{ href: '/minska-matsvinn', label: 'Minska matsvinn' },
+					{ href: '/skafferi-app', label: 'Skafferi-app' },
+					{ href: '/kvitto-pdf-kivra', label: 'Kvitto & Kivra' }
+				]
+			},
+			{
+				title: 'Juridik',
+				links: [{ href: '/privacy', label: 'Integritet' }]
+			}
+		],
 		socialLinks: [
 			{
 				href: 'https://www.linkedin.com/company/skaffu',
@@ -673,22 +731,18 @@ const en: MarketingContent = {
 	...sv,
 	tagline: 'Shared weekly shopping with food awareness — shop together, waste less.',
 	meta: {
-		title: 'Skaffu — shared weekly shopping & household memory | shop together',
+		title: 'Skaffu — pantry app & shopping list for the whole household | shop together',
 		description:
-			'Shared weekly list for the whole household. Skaffu learns what you usually buy from receipts and checkoffs — store-neutral, free to start.',
-		ogTitle: 'Skaffu — shared weekly shopping with smart household memory',
+			'Pantry app and shared shopping list for the whole household. Shop together with fridge, freezer and cupboard in sync — store-neutral, free to start at skaffu.com.',
+		ogTitle: 'Skaffu — pantry app with shared shopping list',
 		ogDescription:
-			'Shop together on a list that learns your household. Suggestions, partner sync and less food waste — web-first at skaffu.com.'
+			'Shop together with pantry awareness. Shared list, expiry dates and smart suggestions — web-first, store-neutral.'
 	},
 	nav: [
-		{ href: '/funktioner', label: 'Features' },
-		{ href: '/minska-matsvinn', label: 'Food waste' },
-		{ href: '/sa-fungerar-det', label: 'How it works' },
-		{ href: '/kvitto-pdf-kivra', label: 'Receipt PDF' },
+		{ href: '/funktioner', label: 'Product' },
 		{ href: '/priser', label: 'Pricing' },
-		{ href: '/faq', label: 'FAQ' },
 		{ href: '/guider', label: 'Guides' },
-		{ href: '/privacy', label: 'Privacy' }
+		{ href: '/faq', label: 'FAQ' }
 	],
 	header: {
 		navAria: 'Site',
@@ -752,12 +806,12 @@ const en: MarketingContent = {
 	},
 	landing: {
 		heroDomainSuffix: '· skaffu.com',
-		heroEyebrow: 'Shared weekly shopping · skaffu.com',
-		heroTitle: 'Shop together — Skaffu learns your household.',
+		heroEyebrow: 'Pantry app · shop together · skaffu.com',
+		heroTitle: 'Shop together with pantry awareness.',
 		heroLead:
-			'One shared weekly list for the whole household. Invite your partner, check off in the store and get suggestions for what you usually need — so you buy right and waste less.',
+			'Shared shopping list and pantry for the whole household — invite your partner, check off in the store and see what is at home before you shop.',
 		heroSecondary:
-			'Receipts and checkoffs build household memory in the background. Store-neutral — ICA, Willys or Coop.',
+			'Receipts and checkoffs build household memory. Store-neutral — ICA, Willys or Coop.',
 		heroHighlightsAria: 'Highlights',
 		heroHighlights: {
 			list: 'Shared list in real time',
@@ -769,7 +823,7 @@ const en: MarketingContent = {
 		wasteMeterLabel: 'Less food waste',
 		wasteMeterCaption: 'Week sorted — expiring items become dinners and a shopping list in one click.',
 		comparisonKicker: 'Compared to list & pantry apps',
-		readHowItWorks: 'Read more about how it works',
+		readHowItWorks: 'See how it works',
 		stats: [
 			{ value: '1', label: 'shared list — synced in real time for the whole household' },
 			{ value: '2+', label: 'in the household — invite your partner and shop together' },
@@ -822,6 +876,28 @@ const en: MarketingContent = {
 			'Practical articles on pantry management, food waste and receipt PDF — for everyday households.',
 		guidesTeaserSeeAll: 'All guides',
 		guidesTeaserReadMore: 'Read guide',
+		scanCtaLabel: 'Get started — scan a receipt or build your list',
+		dashboardCardsTitle: 'Pantry and weekly shopping at a glance',
+		dashboardCardsLead:
+			'Three everyday surfaces in the app — tap to learn more about pantry, shopping list and expiring items.',
+		dashboardCardsSeeMore: 'See more',
+		dashboardCards: [
+			{
+				title: 'Pantry',
+				href: '/skafferi-app',
+				previewLines: ['24 items in the household', 'Fridge 12 · Freezer 3 · Cupboard 9']
+			},
+			{
+				title: 'Shopping',
+				href: '/funktioner',
+				previewLines: ['5 items on the list', 'You usually shop on Saturdays']
+			},
+			{
+				title: 'Expiring soon',
+				href: '/minska-matsvinn',
+				previewLines: ['Milk — tomorrow', 'Yoghurt — in 2 days', 'Tomatoes — in 3 days']
+			}
+		],
 		heroVisual: {
 			listTitle: "This week's list",
 			listItemChecked: 'Anna checked off milk',
@@ -978,9 +1054,31 @@ const en: MarketingContent = {
 		contactEmail: 'hello@skaffu.com'
 	},
 	footer: {
-		tagline: "This week's list and food awareness for the whole household.",
+		tagline: "Pantry app and shopping list for the whole household.",
 		rights: '© Skaffu. All rights reserved.',
 		navAria: 'Footer',
+		socialLabel: 'Follow us',
+		sections: [
+			{
+				title: 'Product',
+				links: [
+					{ href: '/funktioner', label: 'Features' },
+					{ href: '/sa-fungerar-det', label: 'How it works' }
+				]
+			},
+			{
+				title: 'Use cases',
+				links: [
+					{ href: '/minska-matsvinn', label: 'Reduce food waste' },
+					{ href: '/skafferi-app', label: 'Pantry app' },
+					{ href: '/kvitto-pdf-kivra', label: 'Receipt PDF' }
+				]
+			},
+			{
+				title: 'Legal',
+				links: [{ href: '/privacy', label: 'Privacy' }]
+			}
+		],
 		socialLinks: [
 			{
 				href: 'https://www.linkedin.com/company/skaffu',

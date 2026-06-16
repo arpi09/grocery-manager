@@ -16,20 +16,41 @@
 			<p class="tagline">{content.footer.tagline}</p>
 		</div>
 
-		<nav class="links" aria-label={content.footer.navAria}>
-			{#each content.nav as link (link.href)}
-				<a href={link.href}>{link.label}</a>
-			{/each}
-			{#each content.footer.socialLinks as link (link.href)}
-				<a
-					href={link.href}
-					target={link.external ? '_blank' : undefined}
-					rel={link.external ? 'noopener noreferrer' : undefined}
-				>
-					{link.label}
-				</a>
-			{/each}
-			<a href={loginUrl}>{content.cta.login}</a>
+		<nav class="footer-nav" aria-label={content.footer.navAria}>
+			<div class="footer-columns">
+				{#each content.footer.sections as section (section.title)}
+					<div class="footer-column">
+						<p class="column-title">{section.title}</p>
+						<ul class="column-links">
+							{#each section.links as link (link.href)}
+								<li>
+									<a href={link.href}>{link.label}</a>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/each}
+
+				<div class="footer-column">
+					<p class="column-title">{content.footer.socialLabel}</p>
+					<ul class="column-links">
+						{#each content.footer.socialLinks as link (link.href)}
+							<li>
+								<a
+									href={link.href}
+									target={link.external ? '_blank' : undefined}
+									rel={link.external ? 'noopener noreferrer' : undefined}
+								>
+									{link.label}
+								</a>
+							</li>
+						{/each}
+						<li>
+							<a href={loginUrl}>{content.cta.login}</a>
+						</li>
+					</ul>
+				</div>
+			</div>
 		</nav>
 	</div>
 
@@ -49,7 +70,7 @@
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-lg);
+		gap: var(--space-xl);
 	}
 
 	.site-name {
@@ -63,21 +84,51 @@
 		margin: var(--space-xs) 0 0;
 		color: var(--color-text-muted);
 		font-size: var(--font-size-body-sm);
+		max-width: 36ch;
 	}
 
-	.links {
+	.footer-columns {
+		display: grid;
+		gap: var(--space-lg);
+	}
+
+	@media (min-width: 640px) {
+		.footer-columns {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	@media (min-width: 900px) {
+		.footer-columns {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+	}
+
+	.column-title {
+		margin: 0 0 var(--space-sm);
+		font-size: var(--font-size-label);
+		font-weight: var(--font-weight-label);
+		letter-spacing: var(--letter-spacing-label);
+		text-transform: uppercase;
+		color: var(--color-text);
+	}
+
+	.column-links {
+		margin: 0;
+		padding: 0;
+		list-style: none;
 		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-md) var(--space-lg);
+		flex-direction: column;
+		gap: var(--space-sm);
 	}
 
-	.links a {
+	.column-links a {
 		color: var(--color-text-muted);
 		text-decoration: none;
 		font-size: var(--font-size-body-sm);
 	}
 
-	.links a:hover {
+	.column-links a:hover {
 		color: var(--color-primary);
 	}
 

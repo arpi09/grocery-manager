@@ -172,6 +172,18 @@ export function buildLandingJsonLd(
 			logo: marketingOgImageUrl(origin),
 			email: 'hello@skaffu.com',
 			description
+		},
+		{
+			'@context': 'https://schema.org',
+			'@type': 'WebSite',
+			name: SITE_NAME,
+			url: origin,
+			description,
+			publisher: {
+				'@type': 'Organization',
+				name: SITE_NAME,
+				url: origin
+			}
 		}
 	];
 }

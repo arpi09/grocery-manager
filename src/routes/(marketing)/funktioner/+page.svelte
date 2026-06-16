@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { Shield, Store } from '@lucide/svelte';
+	import ComparisonTable from '$lib/components/marketing/ComparisonTable.svelte';
+	import MarketingButtonLink from '$lib/components/marketing/MarketingButtonLink.svelte';
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
 	import MarketingFeatureCard from '$lib/components/marketing/MarketingFeatureCard.svelte';
 	import MarketingPageHero from '$lib/components/marketing/MarketingPageHero.svelte';
@@ -45,6 +48,30 @@
 	</section>
 </MarketingScrollReveal>
 
+<MarketingScrollReveal delay={60}>
+	<section id="jamforelse" class="section comparison-section">
+		<div class="inner">
+			<header class="section-header center">
+				<span class="section-kicker label-caps">
+					<Store size={14} strokeWidth={2} aria-hidden="true" />
+					{content.landing.comparisonKicker}
+				</span>
+				<h2>{content.comparison.title}</h2>
+				<p>{content.comparison.lead}</p>
+			</header>
+			<ComparisonTable comparison={content.comparison} />
+			<p class="comparison-disclaimer">
+				<Shield size={14} strokeWidth={2} aria-hidden="true" />
+				{content.comparison.disclaimer}
+			</p>
+			<div class="comparison-cta">
+				<MarketingButtonLink href={registerUrl}>{content.cta.tryFree}</MarketingButtonLink>
+				<MarketingButtonLink href={loginUrl} variant="secondary">{content.cta.login}</MarketingButtonLink>
+			</div>
+		</div>
+	</section>
+</MarketingScrollReveal>
+
 <MarketingScrollReveal delay={80} variant="fade">
 	<MarketingCta
 		title={content.landing.finalCtaTitle}
@@ -61,9 +88,12 @@
 		padding: 0 var(--space-lg) var(--space-xl);
 	}
 
-	.feature-grid {
+	.inner {
 		max-width: 72rem;
 		margin: 0 auto;
+	}
+
+	.feature-grid {
 		display: grid;
 		gap: var(--space-md);
 	}
@@ -105,5 +135,59 @@
 			opacity: 1;
 			animation: none;
 		}
+	}
+
+	.comparison-section {
+		padding-top: var(--space-xl);
+	}
+
+	.section-header h2 {
+		margin: 0;
+		font-size: clamp(1.5rem, 3.5vw, 2rem);
+		font-weight: var(--font-weight-display);
+		line-height: 1.15;
+		letter-spacing: -0.02em;
+	}
+
+	.section-header p {
+		margin: var(--space-sm) 0 0;
+		color: var(--color-text-muted);
+		max-width: 50ch;
+		line-height: 1.55;
+	}
+
+	.section-header.center {
+		text-align: center;
+	}
+
+	.section-header.center p {
+		margin-inline: auto;
+	}
+
+	.section-kicker {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		margin-bottom: var(--space-sm);
+		color: var(--color-primary);
+	}
+
+	.comparison-disclaimer {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--space-sm);
+		margin: var(--space-lg) 0 0;
+		font-size: var(--font-size-body-sm);
+		color: var(--color-text-muted);
+		max-width: 58ch;
+		line-height: var(--line-height-body);
+	}
+
+	.comparison-cta {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: var(--space-md);
+		margin-top: var(--space-xl);
 	}
 </style>
