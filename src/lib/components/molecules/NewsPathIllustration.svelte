@@ -59,6 +59,24 @@
 			<circle class="illus-pulse p1" cx="100" cy="52" r="22" stroke-width="2" />
 			<circle class="illus-pulse p2" cx="100" cy="52" r="32" stroke-width="1.5" />
 		</svg>
+	{:else if id === 'brain'}
+		<svg class="illus" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<circle class="illus-bg brain-bg" cx="100" cy="80" r="72" />
+			<path
+				class="brain-outline"
+				d="M100 38c-18 0-32 12-34 28-2 10 2 18 8 24-6 4-10 12-8 22 2 12 14 20 28 20 6 0 12-2 16-6 4 4 10 6 16 6 14 0 26-8 28-20 2-10-2-18-8-22 6-6 10-14 8-24-2-16-16-28-34-28Z"
+				stroke-width="2.5"
+			/>
+			<path class="brain-fold" d="M100 52v56" stroke-width="2" stroke-linecap="round" />
+			<path class="brain-link bl1" d="M72 68c8 6 16 6 28 0" stroke-width="2" stroke-linecap="round" />
+			<path class="brain-link bl2" d="M128 68c-8 6-16 6-28 0" stroke-width="2" stroke-linecap="round" />
+			<path class="brain-link bl3" d="M78 96c10 4 18 4 22 0" stroke-width="2" stroke-linecap="round" />
+			<circle class="brain-node n1" cx="72" cy="68" r="5" />
+			<circle class="brain-node n2" cx="128" cy="68" r="5" />
+			<circle class="brain-node n3" cx="100" cy="96" r="4.5" />
+			<circle class="brain-glow g1" cx="100" cy="80" r="28" stroke-width="1.5" />
+			<circle class="brain-glow g2" cx="100" cy="80" r="38" stroke-width="1" />
+		</svg>
 	{:else}
 		<svg class="illus" viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
 			<circle class="illus-bg" cx="100" cy="80" r="72" />
@@ -95,7 +113,78 @@
 	}
 
 	.illus-wrap.active .illus-bg {
-		animation: illus-bg-in 0.7s ease-out both;
+		animation: illus-bg-in 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+
+	.illus-bg.brain-bg {
+		fill: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface-muted));
+	}
+
+	.brain-outline {
+		stroke: color-mix(in srgb, var(--color-primary) 65%, var(--color-text));
+		fill: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+		opacity: 0;
+		transform-origin: 100px 80px;
+	}
+
+	.brain-fold,
+	.brain-link {
+		stroke: color-mix(in srgb, var(--color-primary) 45%, transparent);
+		fill: none;
+		opacity: 0;
+	}
+
+	.brain-node {
+		fill: var(--color-primary);
+		opacity: 0;
+		transform-origin: center;
+	}
+
+	.brain-glow {
+		stroke: color-mix(in srgb, var(--color-primary) 30%, transparent);
+		fill: none;
+		opacity: 0;
+		transform-origin: 100px 80px;
+	}
+
+	.illus-wrap.active .brain-outline {
+		animation: illus-fade-up 0.75s 0.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+	}
+
+	.illus-wrap.active .brain-fold {
+		animation: illus-fade-up 0.7s 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+	}
+
+	.illus-wrap.active .bl1 {
+		animation: illus-fade-up 0.65s 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+	}
+
+	.illus-wrap.active .bl2 {
+		animation: illus-fade-up 0.65s 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+	}
+
+	.illus-wrap.active .bl3 {
+		animation: illus-fade-up 0.65s 0.48s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+	}
+
+	.illus-wrap.active .n1 {
+		animation: brain-node-pulse 2.4s 0.55s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+	}
+
+	.illus-wrap.active .n2 {
+		animation: brain-node-pulse 2.4s 0.85s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+	}
+
+	.illus-wrap.active .n3 {
+		animation: brain-node-pulse 2.6s 1.05s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+	}
+
+	.illus-wrap.active .g1 {
+		animation: brain-glow 2.8s 0.35s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+	}
+
+	.illus-wrap.active .g2 {
+		animation: brain-glow 2.8s 0.65s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 	}
 
 	.illus-frame,
@@ -110,7 +199,7 @@
 	.illus-wrap.active .illus-frame,
 	.illus-wrap.active .illus-card,
 	.illus-wrap.active .illus-table {
-		animation: illus-fade-up 0.55s 0.12s ease-out forwards;
+		animation: illus-fade-up 0.7s 0.14s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 	}
 
 	.illus-camera,
@@ -124,7 +213,7 @@
 
 	.illus-wrap.active .illus-camera,
 	.illus-wrap.active .illus-lens {
-		animation: illus-fade-up 0.5s 0.35s ease-out forwards;
+		animation: illus-fade-up 0.65s 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 	}
 
 	.illus-scan-line {
@@ -133,7 +222,7 @@
 	}
 
 	.illus-wrap.active .illus-scan-line {
-		animation: illus-scan-sweep 1.6s 0.5s ease-in-out infinite;
+		animation: illus-scan-sweep 2s 0.55s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 	}
 
 	.illus-dot {
@@ -142,11 +231,11 @@
 	}
 
 	.illus-wrap.active .dot-a {
-		animation: illus-dot 2s 0.55s ease-in-out infinite;
+		animation: illus-dot 2.4s 0.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 	}
 
 	.illus-wrap.active .dot-b {
-		animation: illus-dot 2.2s 0.85s ease-in-out infinite;
+		animation: illus-dot 2.6s 0.9s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 	}
 
 	.illus-ring {
@@ -168,7 +257,7 @@
 	}
 
 	.illus-wrap.active .illus-check {
-		animation: illus-check-draw 0.55s 0.35s ease-out forwards;
+		animation: illus-check-draw 0.7s 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 	}
 
 	.illus-confetti {
@@ -177,22 +266,22 @@
 	}
 
 	.illus-wrap.active .c1 {
-		animation: illus-confetti 1.6s 0.45s ease-out infinite;
+		animation: illus-confetti 2s 0.5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 	}
 
 	.illus-wrap.active .c2 {
 		fill: color-mix(in srgb, var(--color-success) 80%, var(--color-primary));
-		animation: illus-confetti 1.8s 0.6s ease-out infinite;
+		animation: illus-confetti 2.2s 0.65s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 	}
 
 	.illus-wrap.active .c3 {
 		fill: color-mix(in srgb, var(--color-warning, #f59e0b) 70%, var(--color-primary));
-		animation: illus-confetti 1.7s 0.75s ease-out infinite;
+		animation: illus-confetti 2.1s 0.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 	}
 
 	.illus-wrap.active .c4 {
 		fill: var(--color-success);
-		animation: illus-confetti 1.5s 0.5s ease-out infinite;
+		animation: illus-confetti 1.9s 0.55s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 	}
 
 	.illus-line,
@@ -352,6 +441,33 @@
 		}
 	}
 
+	@keyframes brain-node-pulse {
+		0%,
+		100% {
+			opacity: 0.45;
+			transform: scale(0.88);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.08);
+		}
+	}
+
+	@keyframes brain-glow {
+		0% {
+			opacity: 0.35;
+			transform: scale(0.92);
+		}
+		70% {
+			opacity: 0;
+			transform: scale(1.12);
+		}
+		100% {
+			opacity: 0;
+			transform: scale(1.12);
+		}
+	}
+
 	@keyframes illus-pulse {
 		0% {
 			opacity: 0.55;
@@ -386,7 +502,12 @@
 		.illus-wrap.active .illus-chip,
 		.illus-wrap.active .illus-bell,
 		.illus-wrap.active .illus-clapper,
-		.illus-wrap.active .illus-pulse {
+		.illus-wrap.active .illus-pulse,
+		.illus-wrap.active .brain-outline,
+		.illus-wrap.active .brain-fold,
+		.illus-wrap.active .brain-link,
+		.illus-wrap.active .brain-node,
+		.illus-wrap.active .brain-glow {
 			animation: none;
 			opacity: 1;
 			stroke-dashoffset: 0;

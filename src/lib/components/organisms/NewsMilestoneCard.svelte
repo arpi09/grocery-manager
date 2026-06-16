@@ -2,8 +2,18 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import NewsPathIllustration from '$lib/components/molecules/NewsPathIllustration.svelte';
-	import type { AppNewsItem } from '$lib/data/app-news';
+	import type { AppNewsItem, NewsIllustrationId } from '$lib/data/app-news';
 	import { t } from '$lib/i18n';
+
+	const ILLUSTRATION_STAGGER_MS: Record<NewsIllustrationId, number> = {
+		brain: 0,
+		launch: 100,
+		scan: 70,
+		onboarding: 70,
+		recipe: 85,
+		push: 55,
+		'inventory-table': 40
+	};
 
 	interface Props {
 		item: AppNewsItem;
@@ -12,7 +22,6 @@
 		dateLabel: string;
 		versionLabel?: string | null;
 		hasDetail?: boolean;
-		index: number;
 		onReadMore?: () => void;
 	}
 
@@ -23,9 +32,10 @@
 		dateLabel,
 		versionLabel = null,
 		hasDetail = false,
-		index,
 		onReadMore
 	}: Props = $props();
+
+	const revealDelay = $derived(ILLUSTRATION_STAGGER_MS[item.illustration]);
 
 	let root: HTMLElement | undefined = $state();
 	let visible = $state(true);
@@ -63,7 +73,7 @@
 	class="milestone"
 	class:animate
 	class:is-visible={visible}
-	style:--milestone-delay="{Math.min(index * 90, 360)}ms"
+	style:--milestone-delay="{revealDelay}ms"
 	aria-labelledby="news-{item.id}-title"
 >
 	<div class="path-node" aria-hidden="true">
@@ -110,15 +120,15 @@
 
 	.milestone.animate:not(.is-visible) {
 		opacity: 0;
-		transform: translateY(1.25rem);
+		transform: translateY(0.5rem) scale(0.98);
 	}
 
 	.milestone.animate.is-visible {
 		opacity: 1;
-		transform: translateY(0);
+		transform: translateY(0) scale(1);
 		transition:
-			opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
-			transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+			opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+			transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 		transition-delay: var(--milestone-delay, 0ms);
 	}
 
@@ -183,6 +193,20 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+	}
+
+	.card-media :global(.illus-wrap) {
+		padding: var(--space-xs) 0;
+	}
+
+	.card-media :global(.illus) {
+		width: min(140px, 44vw);
+	}
+
+	@media (min-width: 640px) {
+		.card-media :global(.illus) {
+			width: min(160px, 100%);
+		}
 	}
 
 	.card-body {
