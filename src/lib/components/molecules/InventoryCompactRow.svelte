@@ -283,7 +283,8 @@
 
 	:global(.inventory-row--swipe) :global(.mdc-deprecated-list-item__wrapper) {
 		padding: 0;
-		overflow: hidden;
+		overflow-x: hidden;
+		overflow-y: visible;
 	}
 
 	.swipe-row {

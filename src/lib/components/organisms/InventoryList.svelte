@@ -1257,6 +1257,15 @@
 		background: transparent;
 	}
 
+	.panel :global(.inventory-list.skaffu-list .mdc-deprecated-list),
+	.panel :global(.inventory-list.skaffu-list .mdc-deprecated-list-item) {
+		overflow: visible;
+	}
+
+	.panel :global(.inventory-list.skaffu-list) :global(.mdc-deprecated-list) {
+		overflow: visible;
+	}
+
 	@media (max-width: 640px) {
 		.panel {
 			padding: var(--space-sm);
