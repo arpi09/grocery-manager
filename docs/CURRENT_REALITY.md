@@ -5,9 +5,9 @@
 | Fùlt | Vùrde |
 |------|--------|
 | **Uppdaterad** | 2026-06-16 |
-| **Prod SHA** | `72b02f49b` @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) (UI living polish #101 ù home priority cards, news/scan SVGs, inventory table, fast E2E). Prior `c267c172c` @ [27608398776](https://github.com/arpi09/grocery-manager/actions/runs/27608398776) |
-| **Master SHA** | `72b02f49b` ù PR #101 on #96ù#100 baseline |
-| **CI/CD model** | **v2 on master** ù tiered gates #95; prod validated @ `72b02f49b` (fast deploy tier) |
+| **Prod SHA** | `9603fdca3` @ [27613736910](https://github.com/arpi09/grocery-manager/actions/runs/27613736910) (fix #102 mobile inventory SkaffuList parity, fast E2E). Prior `72b02f49b` @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) |
+| **Master SHA** | `9603fdca3` - PR #102 inventory mobile list fix |
+| **CI/CD model** | **v2 on master** - tiered gates #95; prod validated @ `9603fdca3` (fast deploy tier) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ù merged to master |
 | **Prod URL** | https://skaffu.com |
 | **Reality audit** | [REALITY_AUDIT_2026-06.md](./REALITY_AUDIT_2026-06.md) |
@@ -67,7 +67,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 ## Kùnda drift (fixa nùr du ser dem)
 
 - [x] Prod DB migrations `0047`ù`0048` ù applied 2026-06-14
-- [x] **UI living polish** ó prod **`72b02f49b`** @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) (fast E2E). PR #101 merged 2026-06-16.
+- [x] **UI living polish** ù prod **`72b02f49b`** @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) (fast E2E). PR #101 merged 2026-06-16.
 - [x] **SMUI + Reality Audit + Settings hub** ù prod **`c267c172c`** @ [27608398776](https://github.com/arpi09/grocery-manager/actions/runs/27608398776) (fast E2E). PRs #96ù#100 merged 2026-06-16.
 - [x] **Mobile UX Recovery** ù prior prod **`d585cbd5`** @ [27570192623](https://github.com/arpi09/grocery-manager/actions/runs/27570192623)
 - [x] **PR #95** CI/CD v2 merged 2026-06-15
