@@ -344,6 +344,65 @@
 			"expiringFooter": "View expiring",
 			"attentionTitle": "Needs a quick check",
 			"attentionFooter": "Go to sync"
+		},
+		"v5": {
+			"hero": {
+				"defaultBody": "Here's what deserves your attention today.",
+				"cta": "See what's next",
+				"scanLink": "Add items",
+				"morning": {
+					"title": "Good morning 👋"
+				},
+				"midday": {
+					"title": "Good day 👋"
+				},
+				"evening": {
+					"title": "Good evening 👋"
+				},
+				"night": {
+					"title": "Welcome back 👋"
+				},
+				"status": {
+					"healthy": "Everything looks good today.",
+					"expiring": "Something is worth using soon.",
+					"shopping": "A few things are starting to run low.",
+					"empty": "Let's start building your pantry."
+				}
+			},
+			"forYou": {
+				"title": "For you",
+				"replenishment": {
+					"body": "You usually buy {name}.",
+					"cta": "Add to shopping list"
+				},
+				"expiring": {
+					"body": "{name} is worth using soon.",
+					"cta": "View item"
+				}
+			},
+			"expiring": {
+				"title": "Use soon",
+				"body": "{count, plural, one {# item worth using soon} other {# items worth using soon}}",
+				"link": "View items"
+			},
+			"shopping": {
+				"title": "Shopping",
+				"body": "{count, plural, one {# item ready} other {# items ready}}",
+				"cadence": "Next trip: {weekday}",
+				"link": "Open shopping list"
+			},
+			"pantry": {
+				"title": "At home",
+				"body": "{count, plural, one {# item} other {# items}}",
+				"allGood": "All good",
+				"needsAttention": "Some items need attention",
+				"link": "Open pantry"
+			},
+			"household": {
+				"title": "Household",
+				"body": "Shared pantry and settings for your home.",
+				"link": "Household settings"
+			}
 		}
 	},
 	"dashboard": {

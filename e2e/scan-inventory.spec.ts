@@ -18,18 +18,16 @@ test.describe('Scan and inventory', () => {
 		await expect(page).toHaveURL(/mode=hub/);
 		const hub = page.getByTestId('scan-mode-hub');
 		await expect(hub).toBeVisible({ timeout: 15_000 });
-		await expect(hub.getByTestId('scan-hub-receipt-hero')).toBeVisible();
-		await expect(hub.getByRole('heading', { name: /^Kvitto$|^Receipt$/i })).toBeVisible();
+		await expect(hub.getByTestId('scan-hub-receipt')).toBeVisible();
+		await expect(hub.getByRole('heading', { name: /Vad vill du|What do you want/i })).toBeVisible();
 
 		await expect(page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i })).toHaveCount(0);
 
-		const modeGrid = hub.getByTestId('scan-hub-mode-grid');
-		await expect(modeGrid).toBeVisible();
 		await expect(hub.getByTestId('scan-hub-photo')).toBeVisible();
 		await expect(hub.getByTestId('scan-hub-barcode')).toBeVisible();
 		await expect(hub.getByTestId('scan-hub-manual')).toBeVisible();
-		await expect(hub.getByRole('heading', { name: /Fler sätt|More ways/i })).toBeVisible();
-		await expect(hub.getByTestId('scan-hub-photo')).toContainText(/Foto|Photo/i);
+		await expect(hub.getByTestId('scan-hub-receipt')).toContainText(/Kvitto|Receipt/i);
+		await expect(hub.getByTestId('scan-hub-photo')).toContainText(/Fota|Photo/i);
 		await expect(hub.getByTestId('scan-hub-barcode')).toContainText(/Streckkod|Barcode/i);
 		await expect(hub.getByTestId('scan-hub-manual')).toContainText(/Manuellt|Manual/i);
 		await expect(page.locator('.page-header .back-link')).toHaveCount(0);
@@ -37,6 +35,7 @@ test.describe('Scan and inventory', () => {
 	});
 
 	test('scan sub-modes show mode tabs with receipt first', async ({ page }) => {
+		await page.setViewportSize({ width: 1280, height: 900 });
 		await page.goto('/scan?mode=photo&from=/inventory/fridge&location=fridge');
 		await dismissOnboardingModalIfOpen(page);
 
@@ -138,23 +137,17 @@ test.describe('Scan and inventory', () => {
 
 		const nameSort = table.getByRole('button', { name: /Namn|Name/i });
 		await nameSort.click();
-		await expect(nameSort).toHaveAttribute('aria-pressed', 'true');
+		await expect(nameSort).toHaveClass(/sort-header-btn--active/);
 	});
 
 	test.describe('scan mobile manual add', () => {
 		test.use({ viewport: { width: 390, height: 844 } });
 
-		test('manual add cancel returns to photo scan', async ({ page }) => {
-			await page.goto('/scan?mode=photo&from=/inventory/fridge&location=fridge');
+		test('manual add cancel returns to scan hub', async ({ page }) => {
+			await page.goto('/scan?mode=hub');
 			await dismissOnboardingModalIfOpen(page);
 
-			const manualHref = await page
-				.getByRole('navigation', { name: /Skanningslägen|Scan modes/i })
-				.getByRole('link', { name: /Manuellt|Manual/i })
-				.getAttribute('href');
-			expect(manualHref).toMatch(/\/item\/new\?/);
-
-			await page.getByRole('link', { name: /Manuellt|Manual/i }).click();
+			await page.getByTestId('scan-hub-manual').click();
 			await expect(page).toHaveURL(/\/item\/new/, { timeout: 15_000 });
 
 			await page.getByRole('link', { name: /Avbryt|Cancel/i }).click();

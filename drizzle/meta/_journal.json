@@ -358,6 +358,13 @@
 			"when": 1752681600000,
 			"tag": "0051_price_memory_phase1",
 			"breakpoints": true
+		},
+		{
+			"idx": 51,
+			"version": "7",
+			"when": 1752768000000,
+			"tag": "0052_home_redesign_telemetry",
+			"breakpoints": true
 		}
 	]
 }
