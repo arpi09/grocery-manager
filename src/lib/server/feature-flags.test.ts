@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
 	FEATURE_FLAG_ENV,
 	isLocationLearningEnabled,
+	isPriceMemoryV1Enabled,
 	isReplenishmentLearningEnabled,
 	isShelfLifeLearningEnabled,
 	isShoppingListShareEnabled
@@ -32,6 +33,7 @@ describe('feature-flags registry', () => {
 		expect(FEATURE_FLAG_ENV.SHELF_LIFE_LEARNING).toBe('SHELF_LIFE_LEARNING_ENABLED');
 		expect(FEATURE_FLAG_ENV.LOCATION_LEARNING).toBe('LOCATION_LEARNING_ENABLED');
 		expect(FEATURE_FLAG_ENV.REPLENISHMENT_LEARNING).toBe('REPLENISHMENT_LEARNING_ENABLED');
+		expect(FEATURE_FLAG_ENV.PRICE_MEMORY_V1).toBe('PRICE_MEMORY_V1_ENABLED');
 		expect(FEATURE_FLAG_ENV.SHOPPING_LIST_SHARE).toBe('PUBLIC_SHOPPING_LIST_SHARE_ENABLED');
 	});
 
@@ -39,6 +41,7 @@ describe('feature-flags registry', () => {
 		expect(isShelfLifeLearningEnabled()).toBe(false);
 		expect(isLocationLearningEnabled()).toBe(false);
 		expect(isReplenishmentLearningEnabled()).toBe(false);
+		expect(isPriceMemoryV1Enabled()).toBe(false);
 		expect(isShoppingListShareEnabled()).toBe(false);
 	});
 
@@ -46,14 +49,16 @@ describe('feature-flags registry', () => {
 		process.env[FEATURE_FLAG_ENV.SHELF_LIFE_LEARNING] = 'true';
 		process.env[FEATURE_FLAG_ENV.LOCATION_LEARNING] = 'true';
 		process.env[FEATURE_FLAG_ENV.REPLENISHMENT_LEARNING] = 'true';
+		process.env[FEATURE_FLAG_ENV.PRICE_MEMORY_V1] = 'true';
 		process.env[FEATURE_FLAG_ENV.SHOPPING_LIST_SHARE] = 'true';
 
 		expect(isShelfLifeLearningEnabled()).toBe(true);
 		expect(isLocationLearningEnabled()).toBe(true);
 		expect(isReplenishmentLearningEnabled()).toBe(true);
+		expect(isPriceMemoryV1Enabled()).toBe(true);
 		expect(isShoppingListShareEnabled()).toBe(true);
 
-		process.env[FEATURE_FLAG_ENV.SHELF_LIFE_LEARNING] = 'false';
-		expect(isShelfLifeLearningEnabled()).toBe(false);
+		process.env[FEATURE_FLAG_ENV.PRICE_MEMORY_V1] = 'false';
+		expect(isPriceMemoryV1Enabled()).toBe(false);
 	});
 });

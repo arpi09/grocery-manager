@@ -193,6 +193,7 @@ async function bulkCreateFromForm(
 	const storeLabel =
 		typeof storeLabelRaw === 'string' && storeLabelRaw.trim() ? storeLabelRaw.trim() : null;
 	const purchasedAt = typeof purchasedAtRaw === 'string' ? purchasedAtRaw : null;
+	let purchaseLineIndex = 0;
 
 	for (const index of selected) {
 		const name = formData.get(`name_${index}`);
@@ -231,7 +232,7 @@ async function bulkCreateFromForm(
 		const notes =
 			typeof notesRaw === 'string' && notesRaw.trim() ? notesRaw.trim() : null;
 
-		await event.locals.inventoryService.createItem(
+		const createdItem = await event.locals.inventoryService.createItem(
 			event.locals.householdId!,
 			event.locals.user!.id,
 			{
@@ -309,9 +310,14 @@ async function bulkCreateFromForm(
 					quantity,
 					unit: unit ?? null,
 					storeLabel,
-					purchasedAt
+					purchasedAt,
+					lineIndex: purchaseLineIndex,
+					importSource: eventType === 'photo_round_parsed' ? 'photo_round' : 'receipt_scan',
+					inventoryItemId: createdItem.id,
+					matchSource: 'inventory_item'
 				})
 			);
+			purchaseLineIndex++;
 		}
 		created++;
 	}

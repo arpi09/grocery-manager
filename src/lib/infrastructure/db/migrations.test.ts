@@ -21,7 +21,6 @@ describe('drizzle migrations', () => {
 	it('lists every SQL file in the journal in order', () => {
 		const sqlFiles = listSqlMigrationFiles();
 		const tags = journalTags();
-
 		expect(tags).toEqual(sqlFiles.map((file) => file.replace(/\.sql$/, '')));
 	});
 
@@ -30,7 +29,6 @@ describe('drizzle migrations', () => {
 			entries: Array<{ idx: number }>;
 		};
 		const indices = journal.entries.map((entry) => entry.idx).sort((a, b) => a - b);
-
 		expect(indices).toEqual(Array.from({ length: indices.length }, (_, i) => i));
 	});
 
@@ -80,13 +78,13 @@ describe('drizzle migrations', () => {
 			'0041_receipt_import_funnel_events.sql',
 			'0042_acquisition_wedge_events.sql',
 			'0043_shopping_list_share_link.sql',
-	'0044_receipt_price_memory.sql',
-	'0045_inventory_intelligence_events.sql',
-	'0046_household_os_events.sql',
-	'0047_learning_engine_v1.sql',
-	'0048_household_location_rule.sql'
+			'0044_receipt_price_memory.sql',
+			'0045_inventory_intelligence_events.sql',
+			'0046_household_os_events.sql',
+			'0047_learning_engine_v1.sql',
+			'0048_household_location_rule.sql',
+			'0050_price_memory_phase1.sql'
 		];
-
 		expect(pgliteFiles).toEqual(sqlFiles);
 	});
 });

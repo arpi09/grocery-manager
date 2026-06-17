@@ -1,7 +1,8 @@
 import { canEditInventory } from '$lib/domain/household';
 import { buildKivraForwardAddress, isKivraForwardEnabled } from '$lib/server/kivra-forward';
 import { receiptForwardService } from '$lib/server/di';
-import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
+	import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
+	import { isPriceMemoryV1Enabled } from '$lib/server/price-memory-flag';
 import { billingActions } from './billing.actions';
 import { shouldShowSuggestionsSection } from './suggestions.actions';
 import type { Actions, PageServerLoad } from './$types';
@@ -25,12 +26,14 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		suggestionsSnapshot,
 		isShelfLifeLearningEnabled()
 	);
+	const showPriceMemory = isPriceMemoryV1Enabled();
 
 	return {
 		isPro,
 		household,
 		kivraForwardAddress,
-		showSuggestions
+		showSuggestions,
+		showPriceMemory
 	};
 };
 

@@ -9,6 +9,7 @@ import {
 } from '$lib/domain/purchase-pattern';
 import { db, type AppDatabase } from '$lib/infrastructure/db';
 import {
+	householdPurchaseConceptTable,
 	inventoryItemTable,
 	receiptPatternDismissalTable,
 	receiptPurchaseLineTable,
@@ -21,6 +22,7 @@ export interface IPurchasePatternRepository {
 	listRecentLines(householdId: string, since: Date): Promise<ReceiptPurchaseLineRecord[]>;
 	listDismissedKeys(householdId: string): Promise<Set<string>>;
 	dismissPattern(householdId: string, normalizedKey: string): Promise<void>;
+	restoreDismissal(householdId: string, normalizedKey: string): Promise<boolean>;
 	listInventoryNormalizedKeys(householdId: string): Promise<Set<string>>;
 	listActiveInventoryMatches(householdId: string): Promise<PantryInventoryMatch[]>;
 	listShoppingListNormalizedNames(householdId: string): Promise<Set<string>>;
@@ -44,6 +46,11 @@ function mapLine(row: typeof receiptPurchaseLineTable.$inferSelect): ReceiptPurc
 		lineTotal: row.lineTotal,
 		storeLabel: row.storeLabel,
 		purchasedAt: row.purchasedAt,
+		inventoryItemId: row.inventoryItemId,
+		conceptKey: row.conceptKey ?? row.normalizedKey,
+		matchSource: (row.matchSource as ReceiptPurchaseLineRecord['matchSource']) ?? null,
+		importSource: (row.importSource as ReceiptPurchaseLineRecord['importSource']) ?? 'unknown',
+		lineIndex: row.lineIndex,
 		createdAt: row.createdAt
 	};
 }
@@ -54,25 +61,58 @@ export class DrizzlePurchasePatternRepository implements IPurchasePatternReposit
 	async insertLines(lines: RecordReceiptPurchaseLineInput[]): Promise<void> {
 		if (lines.length === 0) return;
 
-		await this.database.insert(receiptPurchaseLineTable).values(
-			lines.map((line) => ({
-				id: generateId(),
-				householdId: line.householdId,
-				userId: line.userId,
-				importBatchId: line.importBatchId,
-				productName: line.productName.trim(),
-				normalizedKey: normalizeReceiptProductName(line.productName),
-				barcode: line.barcode ?? null,
-				location: line.location,
-				quantity: line.quantity ?? null,
-				unit: line.unit ?? null,
-				unitPrice: line.unitPrice ?? null,
-				currency: line.currency ?? 'SEK',
-				lineTotal: line.lineTotal ?? null,
-				storeLabel: line.storeLabel ?? null,
-				purchasedAt: line.purchasedAt ?? null
-			}))
-		);
+		await this.database
+			.insert(receiptPurchaseLineTable)
+			.values(
+				lines.map((line) => {
+					const normalizedKey = normalizeReceiptProductName(line.productName);
+					const conceptKey = line.conceptKey ?? normalizedKey;
+					return {
+						id: generateId(),
+						householdId: line.householdId,
+						userId: line.userId,
+						importBatchId: line.importBatchId,
+						productName: line.productName.trim(),
+						normalizedKey,
+						barcode: line.barcode ?? null,
+						location: line.location,
+						quantity: line.quantity ?? null,
+						unit: line.unit ?? null,
+						unitPrice: line.unitPrice ?? null,
+						currency: line.currency ?? 'SEK',
+						lineTotal: line.lineTotal ?? null,
+						storeLabel: line.storeLabel ?? null,
+						purchasedAt: line.purchasedAt ?? null,
+						inventoryItemId: line.inventoryItemId ?? null,
+						conceptKey,
+						matchSource: line.matchSource ?? null,
+						importSource: line.importSource ?? 'unknown',
+						lineIndex: line.lineIndex ?? 0
+					};
+				})
+			)
+			.onConflictDoNothing({
+				target: [receiptPurchaseLineTable.importBatchId, receiptPurchaseLineTable.lineIndex]
+			});
+
+		for (const line of lines) {
+			const conceptKey = line.conceptKey ?? normalizeReceiptProductName(line.productName);
+			if (!conceptKey) continue;
+			await this.database
+				.insert(householdPurchaseConceptTable)
+				.values({
+					householdId: line.householdId,
+					conceptKey,
+					displayName: line.productName.trim()
+				})
+				.onConflictDoUpdate({
+					target: [
+						householdPurchaseConceptTable.householdId,
+						householdPurchaseConceptTable.conceptKey
+					],
+					set: { displayName: line.productName.trim() }
+				});
+		}
 	}
 
 	async listRecentLines(householdId: string, since: Date): Promise<ReceiptPurchaseLineRecord[]> {
@@ -103,6 +143,20 @@ export class DrizzlePurchasePatternRepository implements IPurchasePatternReposit
 			.insert(receiptPatternDismissalTable)
 			.values({ householdId, normalizedKey })
 			.onConflictDoNothing();
+	}
+
+	async restoreDismissal(householdId: string, normalizedKey: string): Promise<boolean> {
+		const deleted = await this.database
+			.delete(receiptPatternDismissalTable)
+			.where(
+				and(
+					eq(receiptPatternDismissalTable.householdId, householdId),
+					eq(receiptPatternDismissalTable.normalizedKey, normalizedKey)
+				)
+			)
+			.returning({ normalizedKey: receiptPatternDismissalTable.normalizedKey });
+
+		return deleted.length > 0;
 	}
 
 	async listInventoryNormalizedKeys(householdId: string): Promise<Set<string>> {

@@ -2,6 +2,7 @@ import { isThemePreference } from '$lib/domain/theme';
 import { isUserEmailVerified } from '$lib/server/email-verification-enforcement';
 import { isShoppingListShareEnabled } from '$lib/server/shopping-list-share-flag';
 import { isShelfLifeEstimatesInReceiptEnabled } from '$lib/server/shelf-life-learning-flag';
+import { isPriceMemoryV1Enabled } from '$lib/server/price-memory-flag';
 import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { resolveThemeForRequest } from '$lib/server/theme-cookie';
@@ -12,6 +13,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 	const cookieConsent = readCookieConsent(cookies);
 
 	const shelfLifeEstimatesInReceipt = isShelfLifeEstimatesInReceiptEnabled();
+	const priceMemoryV1Enabled = isPriceMemoryV1Enabled();
 
 	if (!locals.user) {
 		return {
@@ -27,7 +29,8 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			staleCount: 0,
 			activeInventoryCount: 0,
 			shareLinkEnabled: false,
-			shelfLifeEstimatesInReceipt
+			shelfLifeEstimatesInReceipt,
+			priceMemoryV1Enabled
 		};
 	}
 
@@ -97,6 +100,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		staleCount,
 		activeInventoryCount,
 		shareLinkEnabled: isShoppingListShareEnabled(),
-		shelfLifeEstimatesInReceipt
+		shelfLifeEstimatesInReceipt,
+		priceMemoryV1Enabled
 	};
 };

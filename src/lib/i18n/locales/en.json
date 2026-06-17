@@ -2031,7 +2031,35 @@
 	},
 	"priceMemory": {
 		"lastPaid": "Last paid {price} ({date})",
-		"lastPaidWithStore": "Last paid {price} ({date}, {store})"
+		"lastPaidWithStore": "Last paid {price} ({date}, {store})",
+		"navTitle": "Price history",
+		"page": {
+			"title": "Price history",
+			"subtitle": "What you've paid for groceries from receipts",
+			"backToSettings": "Settings",
+			"searchLabel": "Search products",
+			"searchPlaceholder": "milk, coffee, eggs, pasta…",
+			"searchAction": "Search",
+			"searching": "Searching…",
+			"intro": "Search for products you've bought to see prices and stores from imported receipts.",
+			"emptyTitle": "No price history yet",
+			"emptyDescription": "Price history will appear as you import receipts and shop with Skaffu.",
+			"emptyScanCta": "Import receipt"
+		},
+		"card": {
+			"title": "Last purchased",
+			"lastPurchased": "{price} · {date}",
+			"lastPurchasedWithStore": "{store} · {price} · {date}",
+			"purchaseCount": "Purchased {count, plural, one {# time} other {# times}}",
+			"fromReceipts": "From receipts",
+			"showTimeline": "Show price history",
+			"hideTimeline": "Hide price history",
+			"timelineLabel": "Price history",
+			"timelineRow": "{date} — {price}",
+			"timelineRowWithStore": "{date} — {price} — {store}",
+			"timelineNoPrice": "{date}",
+			"timelineNoPriceWithStore": "{date} — {store}"
+		}
 	},
 	"scanFlow": {
 		"lookupProduct": "Looking up product",

@@ -8,11 +8,14 @@
 		household: HouseholdView | null;
 		kivraForwardAddress: string | null;
 		showSuggestions: boolean;
+		showPriceMemory?: boolean;
 	}
 
-	let { household, kivraForwardAddress, showSuggestions }: Props = $props();
+	let { household, kivraForwardAddress, showSuggestions, showPriceMemory = false }: Props = $props();
 
-	const showReceiptsGroup = $derived(Boolean(kivraForwardAddress) || showSuggestions);
+	const showReceiptsGroup = $derived(
+		Boolean(kivraForwardAddress) || showSuggestions || showPriceMemory
+	);
 </script>
 
 <div class="settings-hub">
@@ -48,6 +51,12 @@
 				<SkaffuSettingsLinkRow
 					href="/settings/suggestions"
 					title={t('settings.suggestions.title')}
+				/>
+			{/if}
+			{#if showPriceMemory}
+				<SkaffuSettingsLinkRow
+					href="/settings/price-memory"
+					title={t('priceMemory.navTitle')}
 				/>
 			{/if}
 		</SkaffuSettingsGroup>

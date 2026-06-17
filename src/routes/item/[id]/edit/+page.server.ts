@@ -9,6 +9,8 @@ import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { recordInventoryEditLocationFeedback } from '$lib/server/location-feedback-recording';
 import { isLocationLearningEnabled } from '$lib/server/location-learning-flag';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
+import { isPriceMemoryV1Enabled } from '$lib/server/price-memory-flag';
+import { emitPriceMemorySummaryViewed } from '$lib/server/price-memory-telemetry';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { formatNumericQuantity, parseNumericQuantity } from '$lib/domain/consumption-quantity';
 import { trackInventoryWrite } from '$lib/server/sync-analytics';
@@ -22,7 +24,28 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	try {
 		const item = await locals.inventoryService.getItem(locals.householdId!, params.id);
-		return { item };
+		const purchaseMemorySummary =
+			isPriceMemoryV1Enabled() && locals.householdId
+				? await locals.priceMemoryService.getSummaryByInventoryItemId(
+						locals.householdId,
+						params.id
+					)
+				: null;
+		if (locals.user && locals.householdId) {
+			emitPriceMemorySummaryViewed(locals.pmfService, {
+				userId: locals.user.id,
+				householdId: locals.householdId,
+				summary: purchaseMemorySummary,
+				entryPoint: 'product_detail'
+			});
+		}
+		return {
+			item,
+			purchaseMemorySummary:
+				purchaseMemorySummary && purchaseMemorySummary.purchaseCount > 0
+					? purchaseMemorySummary
+					: null
+		};
 	} catch (e) {
 		if (e instanceof InventoryNotFoundError) {
 			error(404, 'Item not found');

@@ -49,6 +49,7 @@ const AUTH_EVENT_TYPES = new Set<ProductEventType>([
 	'receipt_uploaded',
 	'receipt_review_completed',
 	'price_memory_viewed',
+	'price_memory_empty_state_seen',
 	'replenishment_suggestion_shown',
 	'replenishment_suggestion_clicked',
 	'pantry_health_insight_shown',

@@ -20,6 +20,19 @@ export const RECEIPT_FINISH_MAX_SUGGESTIONS = 5;
 
 export const RECEIPT_FINISH_DISMISS_PREFIX = 'finish:';
 
+export type PurchaseLineMatchSource =
+	| 'inventory_item'
+	| 'normalized_key'
+	| 'concept_key'
+	| 'raw';
+
+export type PurchaseLineImportSource =
+	| 'receipt_scan'
+	| 'photo_round'
+	| 'kivra_forward'
+	| 'manual'
+	| 'unknown';
+
 export interface ReceiptPurchaseLineRecord {
 	id: string;
 	householdId: string;
@@ -36,6 +49,11 @@ export interface ReceiptPurchaseLineRecord {
 	lineTotal: string | null;
 	storeLabel: string | null;
 	purchasedAt: Date | null;
+	inventoryItemId: string | null;
+	conceptKey: string;
+	matchSource: PurchaseLineMatchSource | null;
+	importSource: PurchaseLineImportSource;
+	lineIndex: number;
 	createdAt: Date;
 }
 
@@ -88,6 +106,11 @@ export interface RecordReceiptPurchaseLineInput {
 	lineTotal?: string | null;
 	storeLabel?: string | null;
 	purchasedAt?: Date | null;
+	inventoryItemId?: string | null;
+	conceptKey?: string;
+	matchSource?: PurchaseLineMatchSource | null;
+	importSource?: PurchaseLineImportSource;
+	lineIndex?: number;
 }
 
 /** Normalize receipt product names for recurring-purchase matching. */
