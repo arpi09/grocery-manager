@@ -66,7 +66,7 @@ test.describe('Critical flows', () => {
 		await loginAsAdmin(page);
 		await page.goto('/hem');
 		await dismissOnboardingModalIfOpen(page);
-		const home = page.locator('section.home');
+		const home = page.locator('section.home-v5, section.home');
 		await expect(home).toBeVisible();
 		const redesign = home.locator('.home-v5');
 		if ((await redesign.count()) > 0) {
