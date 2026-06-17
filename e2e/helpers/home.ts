@@ -1,4 +1,13 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
+
+/** Legacy `.home` or redesign `.home-v5` — matches whichever dashboard is active. */
+export function homeSectionLocator(page: Page): Locator {
+	return page.locator('section.home-v5, section.home');
+}
+
+export async function expectHomeSectionVisible(page: Page) {
+	await expect(homeSectionLocator(page)).toBeVisible();
+}
 
 export async function expectHomeRedesignVisible(page: Page) {
 	await expect(page.locator('.home-v5')).toBeVisible();
