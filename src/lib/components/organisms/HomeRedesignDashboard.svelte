@@ -13,7 +13,7 @@
 	import { formatCadenceWeekday, type HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
 	import { getLocale, t } from '$lib/i18n';
 	import { scanHubHref } from '$lib/utils/scan-nav';
-	import { trackProductEvent } from '$lib/client/product-events';
+	import { trackProductEvent, type ClientProductEventType } from '$lib/client/product-events';
 	import { onMount } from 'svelte';
 
 	interface Props {
@@ -64,7 +64,10 @@
 		});
 	});
 
-	function trackCard(event: string) {
+	function trackCard(event: Extract<
+		ClientProductEventType,
+		'expiring_clicked' | 'shopping_clicked' | 'pantry_clicked' | 'household_clicked'
+	>) {
 		void trackProductEvent(event, { homeState });
 	}
 </script>
