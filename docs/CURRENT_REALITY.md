@@ -5,9 +5,9 @@
 | F�lt | V�rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-17 |
-| **Prod SHA** | `92d4915` @ [27701442233](https://github.com/arpi09/grocery-manager/actions/runs/27701442233) (PR #113 prod feature flags, full E2E ×3). Prior `9f09fd2` @ [27673134941](https://github.com/arpi09/grocery-manager/actions/runs/27673134941) |
-| **Master SHA** | `92d4915` — enable prod feature flags ([#113](https://github.com/arpi09/grocery-manager/pull/113)) |
-| **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `92d4915` (full deploy tier) |
+| **Prod SHA** | `92d4915` @ [27701442233](https://github.com/arpi09/grocery-manager/actions/runs/27701442233) (PR #113). **Deploy pågår** för `0a26e8e59` @ [27711030539](https://github.com/arpi09/grocery-manager/actions/runs/27711030539) (full E2E ×3). |
+| **Master SHA** | `0a26e8e59` — Home redesign remaining ([#114](https://github.com/arpi09/grocery-manager/pull/114)) + Brain feedback gaps ([#115](https://github.com/arpi09/grocery-manager/pull/115)) |
+| **CI/CD model** | **v2 on master** — tiered gates #95; master CI green @ `0a26e8e59` |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` � merged to master |
 | **Prod URL** | https://skaffu.com |
 | **Reality audit** | [REALITY_AUDIT_2026-06.md](./REALITY_AUDIT_2026-06.md) |
@@ -43,7 +43,7 @@ Kill switches / Tier C (expect **off** unless noted): `EMAIL_SENDING_DISABLED`, 
 
 Product flags (Brain, W1 share, receipt estimates) follow master `apphosting.yaml`; merge ships the final value.
 
-**Prod product flags (on @ `92d4915`):** `HOME_REDESIGN_V1_ENABLED`, `PRICE_MEMORY_V1_ENABLED`, `BRAIN_FEEDBACK_V1_ENABLED`, `SHELF_LIFE_LEARNING_ENABLED`, `LOCATION_LEARNING_ENABLED`, `REPLENISHMENT_LEARNING_ENABLED`, `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT`.
+**Prod product flags (on @ `0a26e8e59` / apphosting.yaml):** `HOME_REDESIGN_V1_ENABLED`, `PRICE_MEMORY_V1_ENABLED`, `BRAIN_FEEDBACK_V1_ENABLED`, `SHELF_LIFE_LEARNING_ENABLED`, `LOCATION_LEARNING_ENABLED`, `REPLENISHMENT_LEARNING_ENABLED`, `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT`. **Off:** `STRIPE_CHECKOUT_DISABLED`, Tier C (`PUBLIC_CITY_FEED`, `KIVRA_FORWARD`).
 
 
 ## Brain capabilities today
@@ -72,6 +72,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 - [x] Prod DB migrations `0047`�`0048` � applied 2026-06-14
 - [x] **UI living polish** � prod **`72b02f49b`** @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) (fast E2E). PR #101 merged 2026-06-16.
 - [x] **Prod feature flags + hem redesign** — prod **`92d4915`** @ [27701442233](https://github.com/arpi09/grocery-manager/actions/runs/27701442233) (full E2E). PR #113 merged 2026-06-17.
+- [x] **Home redesign remaining + Brain feedback gaps** — master **`0a26e8e59`** (PRs #114, #115). Deploy [27711030539](https://github.com/arpi09/grocery-manager/actions/runs/27711030539) (full tier, in flight).
 - [x] **SMUI + Reality Audit + Settings hub** � prod **`c267c172c`** @ [27608398776](https://github.com/arpi09/grocery-manager/actions/runs/27608398776) (fast E2E). PRs #96�#100 merged 2026-06-16.
 - [x] **Mobile UX Recovery** � prior prod **`d585cbd5`** @ [27570192623](https://github.com/arpi09/grocery-manager/actions/runs/27570192623)
 - [x] **PR #95** CI/CD v2 merged 2026-06-15

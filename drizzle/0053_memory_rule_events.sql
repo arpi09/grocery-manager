@@ -1,2 +1,2 @@
 -- memory_rule_created, memory_rule_updated, memory_rule_rejected (server-only telemetry)
--- Enum kept in sync in schema.ts; no DDL when product_event.event_type is unconstrained text.
+-- Enum kept in sync in schema.ts — no DDL when product_event.event_type is unconstrained text
