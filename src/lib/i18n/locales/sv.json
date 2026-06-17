@@ -1031,7 +1031,37 @@
 			"fromReceipts": "från kvitton"
 		},
 		"learningToastAccept": "Skaffu kommer ihåg — tack för att du lade till det.",
-		"learningToastDismiss": "Okej — vi föreslår inte det igen på ett tag."
+		"learningToastDismiss": "Okej — vi föreslår inte det igen på ett tag.",
+		"feedback": {
+			"whyExpand": "Varför ser jag detta?",
+			"belief": {
+				"recurringNotInPantry": "Du brukar köpa {name}.",
+				"cadenceOverdue": "Det verkar börja ta slut på {name}.",
+				"recurringAndCadence": "Du brukar köpa {name} — och det var ett tag sedan."
+			},
+			"why": {
+				"recentPurchases": "Eftersom du köpt {name} {count, plural, one {# gång} other {# gånger}} nyligen.",
+				"cadenceInterval": "Eftersom du brukar köpa ungefär var {interval}:e dag.",
+				"daysSinceLast": "Senast köpt {days, plural, one {# dag} other {# dagar}} sedan.",
+				"recurringAndInterval": "Köpt {count, plural, one {# gång} other {# gånger}} nyligen · brukar var {interval}:e dag",
+				"recurringAndDays": "Köpt {count, plural, one {# gång} other {# gånger}} nyligen · senast {days} dagar sedan"
+			},
+			"positive": {
+				"thatsRight": "Stämmer",
+				"helpful": "Hjälpsamt"
+			},
+			"negative": {
+				"notReally": "Inte riktigt",
+				"notHelpful": "Inte hjälpsamt"
+			},
+			"ack": {
+				"positive": "Noterat.",
+				"negative": "Tack.",
+				"dismiss": "OK."
+			},
+			"ackPositive": "Noterat.",
+			"ackNegative": "Tack."
+		}
 	},
 	"householdBriefing": {
 		"title": "Det här kan du göra nu",
@@ -1117,6 +1147,16 @@
 		"countBanner": "{count} saker Skaffu lärt sig om ert hushåll",
 		"productsSection": "Produkter ({count})",
 		"openFullView": "Öppna full vy →",
+		"settingsProminentLink": "Se allt Skaffu vet om ert hushåll →",
+		"sections": {
+			"buyAgain": "Köp igen ({count})",
+			"shelfLife": "Hållbarhet ({count})",
+			"location": "Förvaring ({count})"
+		},
+		"buyAgain": {
+			"restore": "Visa förslag igen",
+			"restoreFailed": "Kunde inte återställa förslag. Försök igen."
+		},
 		"confidence": {
 			"high": "Säker",
 			"medium": "Vi börjar lära",
@@ -1126,10 +1166,19 @@
 		"facet": {
 			"shelfLifeType": "Hållbarhet",
 			"locationType": "Plats",
+			"buyAgainType": "Köp igen",
 			"shelfLifePrimary": "Ca {days} dagars hållbarhet",
 			"locationPrimary": "Brukar i {location}",
+			"buyAgainPrimary": "Brukar köpa ungefär var {interval}:e dag",
+			"buyAgainPrimaryNoCadence": "Köpt {count, plural, one {# gång} other {# gånger}} på kvitton",
 			"sampleMeta": "{count, plural, one {# observation} other {# observationer}}",
-			"detailCta": "Detalj"
+			"detailCta": "Detalj",
+			"feedbackStatus": {
+				"confirmed": "Du bekräftade detta",
+				"rejected": "Du sa inte riktigt",
+				"hidden": "Föreslås inte just nu",
+				"learning": "Vi observerar fortfarande"
+			}
 		},
 		"detail": {
 			"whatHeading": "Vad vi tror",

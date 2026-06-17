@@ -3,6 +3,7 @@ import { isUserEmailVerified } from '$lib/server/email-verification-enforcement'
 import { isShoppingListShareEnabled } from '$lib/server/shopping-list-share-flag';
 import { isShelfLifeEstimatesInReceiptEnabled } from '$lib/server/shelf-life-learning-flag';
 import { isPriceMemoryV1Enabled } from '$lib/server/price-memory-flag';
+import { isBrainFeedbackV1Enabled } from '$lib/server/brain-feedback-flag';
 import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { resolveThemeForRequest } from '$lib/server/theme-cookie';
@@ -14,6 +15,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 
 	const shelfLifeEstimatesInReceipt = isShelfLifeEstimatesInReceiptEnabled();
 	const priceMemoryV1Enabled = isPriceMemoryV1Enabled();
+	const brainFeedbackV1Enabled = isBrainFeedbackV1Enabled();
 
 	if (!locals.user) {
 		return {
@@ -30,7 +32,8 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			activeInventoryCount: 0,
 			shareLinkEnabled: false,
 			shelfLifeEstimatesInReceipt,
-			priceMemoryV1Enabled
+			priceMemoryV1Enabled,
+			brainFeedbackV1Enabled
 		};
 	}
 
@@ -101,6 +104,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		activeInventoryCount,
 		shareLinkEnabled: isShoppingListShareEnabled(),
 		shelfLifeEstimatesInReceipt,
-		priceMemoryV1Enabled
+		priceMemoryV1Enabled,
+		brainFeedbackV1Enabled
 	};
 };

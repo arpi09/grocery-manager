@@ -4,6 +4,10 @@ export const PRODUCT_EVENT_TYPES = [
 	'receipt_uploaded',
 	'receipt_parsed',
 	'receipt_review_completed',
+	'receipt_import_success_viewed',
+	'receipt_import_success_dismissed',
+	'receipt_import_success_primary_cta',
+	'receipt_import_success_secondary_cta',
 	'photo_round_parsed',
 	'fill_suggestions_added',
 	'landing_view',
@@ -14,6 +18,13 @@ export const PRODUCT_EVENT_TYPES = [
 	'signup_from_expiring_share',
 	'onboarding_skipped',
 	'onboarding_quickstart',
+	'onboarding_started',
+	'onboarding_step_viewed',
+	'onboarding_scan_started',
+	'onboarding_scan_completed',
+	'onboarding_inventory_created',
+	'onboarding_brain_viewed',
+	'onboarding_shopping_viewed',
 	'onboarding_completed',
 	'first_scan',
 	'pwa_banner_dismiss',
@@ -82,7 +93,11 @@ export const PRODUCT_EVENT_TYPES = [
 	'list_link_opened',
 	'list_join_cta_clicked',
 	'partner_joined',
-	'shared_checkoff'
+	'shared_checkoff',
+	'brain_feedback_positive',
+	'brain_feedback_negative',
+	'brain_feedback_dismissed',
+	'brain_explanation_viewed'
 ] as const;
 
 export const PMF_PRODUCT_EVENT_TYPES = [
