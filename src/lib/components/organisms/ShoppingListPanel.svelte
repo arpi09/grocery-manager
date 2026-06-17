@@ -764,28 +764,28 @@
 />
 
 {#if undoPayload}
-	<!-- Local undo toast: longer duration + inline undo action -->
-	<div class="undo-toast-wrap">
-		<Toast
-			message={undoMessage ?? ''}
-			visible={true}
-			variant="success"
-			size="action"
-			portal={false}
-			durationMs={TOAST_UNDO_DURATION_MS}
-			tapToDismiss={true}
-			onDismiss={dismissUndo}
-		/>
-		<button
-			type="button"
-			class="undo-btn"
-			disabled={undoSubmitting}
-			onclick={undoRemove}
-			aria-label={undoCopy.undoActionLabel ?? t('common.undo')}
-		>
-			{undoCopy.undoActionLabel ?? t('common.undo')}
-		</button>
-	</div>
+	<Toast
+		message={undoMessage ?? ''}
+		visible={true}
+		variant="success"
+		size="action"
+		durationMs={TOAST_UNDO_DURATION_MS}
+		tapToDismiss={true}
+		onDismiss={dismissUndo}
+		data-testid="shopping-undo-toast"
+	>
+		{#snippet actions()}
+			<button
+				type="button"
+				class="toast-action-btn"
+				disabled={undoSubmitting}
+				onclick={undoRemove}
+				aria-label={undoCopy.undoActionLabel ?? t('common.undo')}
+			>
+				{undoCopy.undoActionLabel ?? t('common.undo')}
+			</button>
+		{/snippet}
+	</Toast>
 {/if}
 
 <style>
@@ -1013,35 +1013,6 @@
 		flex-direction: column;
 		gap: var(--space-sm);
 		margin-bottom: var(--space-md);
-	}
-
-	.undo-toast-wrap {
-		position: fixed;
-		left: 50%;
-		bottom: calc(var(--content-bottom-safe) + var(--space-sm));
-		transform: translateX(-50%);
-		z-index: var(--z-toast);
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		max-width: calc(100vw - 2 * var(--page-padding-x));
-	}
-
-	.undo-btn {
-		border: none;
-		border-radius: var(--radius-sm);
-		padding: 0.45rem 0.75rem;
-		font-weight: 600;
-		font-size: 0.85rem;
-		background: var(--color-surface);
-		color: var(--color-text);
-		cursor: pointer;
-		box-shadow: var(--shadow-md);
-	}
-
-	.undo-btn:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
 	}
 
 	@media (max-width: 899px) {
