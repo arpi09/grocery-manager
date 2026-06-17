@@ -5,7 +5,9 @@
 	export type HomeOverviewTone = 'default' | 'attention' | 'dominant';
 
 	interface Props {
+		id?: string;
 		title: string;
+		titleId?: string;
 		href?: string;
 		tone?: HomeOverviewTone;
 		testId?: string;
@@ -17,7 +19,9 @@
 	}
 
 	let {
+		id,
 		title,
+		titleId,
 		href,
 		tone = 'default',
 		testId,
@@ -30,11 +34,17 @@
 </script>
 
 {#if href}
-	<a class="overview-card tone-{tone}" href={href} data-testid={testId} onclick={onclick}>
+	<a
+		{id}
+		class="overview-card tone-{tone}"
+		href={href}
+		data-testid={testId}
+		onclick={onclick}
+	>
 		{@render cardInner()}
 	</a>
 {:else}
-	<Card class="overview-card tone-{tone}" data-testid={testId}>
+	<Card class="overview-card tone-{tone}" {id} data-testid={testId}>
 		{@render cardInner()}
 	</Card>
 {/if}
@@ -45,7 +55,7 @@
 			<div class="illus" aria-hidden="true">{@render illustration()}</div>
 		{/if}
 		<div class="copy">
-			<h2 class="title">{title}</h2>
+			<h2 class="title" id={titleId}>{title}</h2>
 			{#if body}
 				<div class="body">{@render body()}</div>
 			{/if}
@@ -69,6 +79,7 @@
 		border: 1px solid var(--color-border);
 		background: var(--color-surface);
 		padding: var(--space-md);
+		transition: transform 160ms ease, box-shadow 160ms ease;
 	}
 
 	.overview-card.tone-dominant {
@@ -78,6 +89,14 @@
 
 	.overview-card.tone-attention {
 		border-color: color-mix(in srgb, var(--color-warning, #c9870a) 35%, var(--color-border));
+	}
+
+	@media (min-width: 720px) and (prefers-reduced-motion: no-preference) {
+		:global(a.overview-card:hover),
+		:global(a.overview-card:focus-visible) {
+			transform: translateY(-1px);
+			box-shadow: 0 4px 12px color-mix(in srgb, var(--color-text) 8%, transparent);
+		}
 	}
 
 	.inner {

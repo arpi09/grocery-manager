@@ -372,7 +372,7 @@
 			"forYou": {
 				"title": "For you",
 				"replenishment": {
-					"body": "You usually buy {name}.",
+					"body": "You usually buy {name} around this time.",
 					"cta": "Add to shopping list"
 				},
 				"expiring": {

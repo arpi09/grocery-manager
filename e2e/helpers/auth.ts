@@ -1,6 +1,7 @@
 ﻿import { expect, type Page } from '@playwright/test';
 import { LOCALE_COOKIE_NAME, LOCALE_STORAGE_KEY } from '../../src/lib/i18n/locale';
 import { PAGE_HINT_IDS } from '../../src/lib/utils/page-hints';
+import { expectHomeDashboardVisible } from './home';
 
 const ONBOARDING_VERSION = '4';
 const PAGE_HINT_STORAGE_PREFIX = 'home-pantry-page-hint-dismissed';
@@ -407,7 +408,7 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 	await dismissOnboardingModalIfOpen(page);
 	await dismissPostOnboardingSurveyIfOpen(page);
 	await expect(page.locator('.shopping-page, section.home')).toBeVisible({ timeout: E2E_AUTH_NAV_TIMEOUT_MS });
-	await expect(page.getByTestId('home-welcome')).toBeVisible();
+	await expectHomeDashboardVisible(page);
 }
 
 export async function loginAsAdmin(page: Page) {
