@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Toast from '$lib/components/molecules/Toast.svelte';
 	import { clientToastStore, dismissClientToast } from '$lib/utils/client-toast.svelte';
+	import { isReceiptImportToastPending } from '$lib/utils/receipt-import-session';
 </script>
 
-{#if clientToastStore.toast}
+{#if clientToastStore.toast && !isReceiptImportToastPending()}
 	<Toast
 		message={clientToastStore.toast.message}
 		visible={true}

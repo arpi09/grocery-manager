@@ -1,5 +1,6 @@
 import type { Locale } from '$lib/i18n/locale';
 import { translate } from '$lib/i18n/messages';
+import { dismissClientToast } from '$lib/utils/client-toast.svelte';
 import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 import type { ReceiptLine, ReceiptLocationPrediction, ReceiptShelfLifePrediction } from '$lib/domain/receipt-line';
 
@@ -155,6 +156,7 @@ export function markReceiptImportCompleted(
 	};
 	sessionStorage.setItem(RECEIPT_IMPORT_JUST_COMPLETED_KEY, JSON.stringify(payload));
 	sessionStorage.setItem(RECEIPT_IMPORT_TOAST_PENDING_KEY, '1');
+	dismissClientToast();
 }
 
 export function isReceiptImportToastPending(): boolean {

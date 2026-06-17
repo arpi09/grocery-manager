@@ -12,6 +12,7 @@
 		actionToastTone,
 		parseActionToastKind
 	} from '$lib/utils/action-toast';
+	import { isReceiptImportToastPending } from '$lib/utils/receipt-import-session';
 
 	const ACTION_TOAST_DURATION_MS = TOAST_DEFAULT_DURATION_MS;
 
@@ -27,9 +28,10 @@
 		void remaining;
 		dismissed = false;
 	});
-	const message = $derived(
-		toastKind ? actionToastMessage(getLocale(), toastKind, label, remaining) : ''
-	);
+	const message = $derived.by(() => {
+		if (!toastKind || isReceiptImportToastPending()) return '';
+		return actionToastMessage(getLocale(), toastKind, label, remaining);
+	});
 	const visible = $derived(Boolean(toastKind && message && !dismissed));
 
 	const variant = $derived.by((): ToastVariant => {

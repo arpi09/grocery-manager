@@ -1,5 +1,6 @@
 import type { ToastSize, ToastVariant } from '$lib/components/molecules/Toast.svelte';
 import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
+import { isReceiptImportToastPending } from '$lib/utils/receipt-import-session';
 
 export type ClientToastPayload = {
 	id: number;
@@ -32,6 +33,10 @@ export function showClientToast(
 		onDismiss?: () => void;
 	}
 ): void {
+	if (isReceiptImportToastPending()) {
+		return;
+	}
+
 	const trimmed = message.trim();
 	if (!trimmed) {
 		return;
