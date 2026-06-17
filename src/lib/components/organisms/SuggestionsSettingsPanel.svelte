@@ -54,7 +54,7 @@
 	{/if}
 
 	<p class="full-view-link">
-		<a href="/settings/memory">{t('memory.openFullView')}</a>
+		<a href="/settings/memory">{t('memory.settingsProminentLink')}</a>
 	</p>
 
 	{#if !hasRules}

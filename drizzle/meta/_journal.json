@@ -365,6 +365,13 @@
 			"when": 1752768000000,
 			"tag": "0052_home_redesign_telemetry",
 			"breakpoints": true
+		},
+		{
+			"idx": 52,
+			"version": "7",
+			"when": 1752854400000,
+			"tag": "0053_memory_rule_events",
+			"breakpoints": true
 		}
 	]
 }

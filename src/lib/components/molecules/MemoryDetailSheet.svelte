@@ -4,6 +4,7 @@
 	import MemoryCorrectLink from '$lib/components/molecules/MemoryCorrectLink.svelte';
 	import MemoryExplainBlock from '$lib/components/molecules/MemoryExplainBlock.svelte';
 	import MemoryForgetButton from '$lib/components/molecules/MemoryForgetButton.svelte';
+	import MemoryRestoreButton from '$lib/components/molecules/MemoryRestoreButton.svelte';
 	import type { MemoryFacetView } from '$lib/application/household-suggestions.service';
 	import type { StorageLocation } from '$lib/domain/location';
 	import { t } from '$lib/i18n';
@@ -40,18 +41,22 @@
 			<section class="confidence-block">
 				<h3>{t('memory.detail.confidenceHeading')}</h3>
 				<MemoryConfidenceBadge tier={facet.confidenceTier} />
-				<p>{t('memory.confidence.hint')}</p>
+				<p>{t('memory.detail.receiptBased')}</p>
 			</section>
 
 			{#if canEdit}
 				<div class="actions">
-					<MemoryCorrectLink itemId={facet.correctItemId} />
-					<MemoryForgetButton
-						type={facet.type}
-						normalizedKey={facet.normalizedKey}
-						location={facet.location}
-						displayName={facet.displayName}
-					/>
+					{#if facet.type === 'buy_again' && facet.feedbackStatus === 'hidden'}
+						<MemoryRestoreButton normalizedKey={facet.normalizedKey} onRestored={onClose} />
+					{:else if facet.type !== 'buy_again'}
+						<MemoryCorrectLink itemId={facet.correctItemId} />
+						<MemoryForgetButton
+							type={facet.type}
+							normalizedKey={facet.normalizedKey}
+							location={facet.location}
+							displayName={facet.displayName}
+						/>
+					{/if}
 				</div>
 			{/if}
 		</div>

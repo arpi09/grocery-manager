@@ -105,7 +105,10 @@ export const PRODUCT_EVENT_TYPES = [
 	'brain_feedback_positive',
 	'brain_feedback_negative',
 	'brain_feedback_dismissed',
-	'brain_explanation_viewed'
+	'brain_explanation_viewed',
+	'memory_rule_created',
+	'memory_rule_updated',
+	'memory_rule_rejected'
 ] as const;
 
 export const PMF_PRODUCT_EVENT_TYPES = [

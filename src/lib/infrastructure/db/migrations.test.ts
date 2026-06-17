@@ -86,7 +86,8 @@ describe('drizzle migrations', () => {
 			'0049_receipt_import_success_events.sql',
 			'0050_brain_feedback_v1.sql',
 			'0051_price_memory_phase1.sql',
-			'0052_home_redesign_telemetry.sql'
+			'0052_home_redesign_telemetry.sql',
+	'0053_memory_rule_events.sql'
 		];
 		expect(pgliteFiles).toEqual(sqlFiles);
 	});

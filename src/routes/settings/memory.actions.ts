@@ -1,6 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { canEditInventory } from '$lib/domain/household';
-import { householdSuggestionsService } from '$lib/server/di';
+import { householdSuggestionsService, pmfService } from '$lib/server/di';
+import { emitMemoryRuleEvent } from '$lib/server/memory-rule-telemetry';
 import { appendActionToast } from '$lib/utils/action-toast';
 import {
 	resetLocationSuggestionSchema,
@@ -35,6 +36,16 @@ export const memoryActions = {
 			parsed.data.normalizedKey,
 			parsed.data.location
 		);
+		if (locals.user?.id) {
+			emitMemoryRuleEvent(pmfService, {
+				householdId,
+				userId: locals.user.id,
+				eventType: 'memory_rule_rejected',
+				facetType: 'shelf_life',
+				normalizedKey: parsed.data.normalizedKey,
+				field: 'typicalDays'
+			});
+		}
 		redirect(302, appendActionToast('/settings/memory', 'suggestionReset'));
 	},
 	resetLocationSuggestion: async ({ request, locals }: RequestEvent) => {
@@ -49,6 +60,16 @@ export const memoryActions = {
 		}
 
 		await householdSuggestionsService.resetLocationRule(householdId, parsed.data.normalizedKey);
+		if (locals.user?.id) {
+			emitMemoryRuleEvent(pmfService, {
+				householdId,
+				userId: locals.user.id,
+				eventType: 'memory_rule_rejected',
+				facetType: 'location',
+				normalizedKey: parsed.data.normalizedKey,
+				field: 'location'
+			});
+		}
 		redirect(302, appendActionToast('/settings/memory', 'suggestionReset'));
 	}
 };
