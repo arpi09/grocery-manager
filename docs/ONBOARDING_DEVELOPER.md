@@ -71,3 +71,18 @@ Trunk-flöde: push till `master` triggar GitHub Actions ([CI_CD.md](./CI_CD.md))
 
 - [README.md](../README.md) — funktioner, hushåll, streckkod, AI
 - [ARCHITECTURE.md](../ARCHITECTURE.md) — lager och struktur
+
+## 7. Activation onboarding (v7)
+
+State-driven scan-first flow — not a step carousel.
+
+| Layer | Location |
+|-------|----------|
+| State machine | `src/lib/utils/activation-onboarding-state.ts` |
+| Storage + flags | `src/lib/utils/onboarding.ts` (`ONBOARDING_VERSION = 7`) |
+| UI shell | `ActivationOnboardingFlow.svelte`, progress checklist, five illustration components |
+| Copy | `onboarding.activation.*` in `en.json` / `sv.json` (locked) |
+| Server inventory truth | `activeInventoryCount` in `+layout.server.ts` |
+| Telemetry | `onboarding_started`, `onboarding_step_viewed`, `onboarding_scan_started`, `onboarding_scan_completed`, `onboarding_inventory_created`, `onboarding_brain_viewed`, `onboarding_shopping_viewed`, `onboarding_completed`, `onboarding_skipped` |
+
+Resume: localStorage flags per user; flow closes on `/scan/*` and reopens at `deriveActivationScreen()` when returning to calm surfaces.

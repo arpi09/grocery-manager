@@ -1969,7 +1969,19 @@
 		"toastAdded": "Kvitto klart! {count, plural, one {# vara tillagd} other {# varor tillagda}}.",
 		"toastEstimatedDates": "{count, plural, one {# datum uppskattat} other {# datum uppskattade}}",
 		"toastLocationCorrections": "{count, plural, one {# plats justerad} other {# platser justerade}}",
-		"toastRulesImproved": "{count, plural, one {# minnesregel förbättrad} other {# minnesregler förbättrade}}"
+		"toastRulesImproved": "{count, plural, one {# minnesregel förbättrad} other {# minnesregler förbättrade}}",
+		"success": {
+			"title": "Välkommen till ditt skafferi",
+			"body": "Vi hittade {count} produkter och ordnade dem automatiskt.",
+			"statCupboard": "{count} skafferi",
+			"statFridge": "{count} kyl",
+			"statFreezer": "{count} frys",
+			"estimatedExpiry": "{count} varor med uppskattat utgångsdatum",
+			"ctaPrimary": "Visa mitt skafferi",
+			"ctaSecondary": "Lägg till fler varor",
+			"ctaContinueSetup": "Fortsätt uppstarten",
+			"ariaLabel": "Kvittoimport klar"
+		}
 	},
 	"receiptBulk": {
 		"lead": "Har du kvittot i en appå Ladda upp PDF eller bild direkt — eller fota ett papperskvitto. Vi föreslår varor du kan lägga till.",
@@ -2197,7 +2209,45 @@
 		"beatLoopTitle": "Checka av när ni handlar",
 		"beatHowTitle": "Kvitton bygger minnet",
 		"beatLoopBody": "Bocka av rader när ni handlar — listan håller sig uppdaterad för hela hushållet.",
-		"beatHowBody": "Kvitton och avbockade rader bygger hushållets minne — bättre förslag nästa vecka."
+		"beatHowBody": "Kvitton och avbockade rader bygger hushållets minne — bättre förslag nästa vecka.",
+		"activation": {
+			"dialogAria": "Introduktion till Skaffu",
+			"progressAria": "Framsteg i introduktionen",
+			"welcome": {
+				"title": "Välkommen till Skaffu",
+				"body": "Vi börjar enkelt.\n\nSkanna några saker från ditt kök så hjälper Skaffu dig att hålla koll på det du redan har hemma.\n\nMindre gissande. Mindre svinn. Färre dubbelköp.",
+				"cta": "Kom igång"
+			},
+			"scan": {
+				"title": "Börja med en sak",
+				"body": "Titta dig omkring.\n\nEtt mjölkpaket. Ett paket pasta. Kaffet på hyllan.\n\nEn enda skanning räcker för att komma igång.",
+				"ctaPrimary": "Öppna skannern",
+				"ctaSecondary": "Kanske senare"
+			},
+			"success": {
+				"title": "Det här ser bra ut",
+				"body": "Ditt skafferi börjar redan ta form.\n\nJu mer du lägger till, desto bättre kan Skaffu hjälpa dig och ditt hushåll.",
+				"cta": "Visa mitt skafferi",
+				"itemsAria": "Varor du lagt till"
+			},
+			"brain": {
+				"title": "Skaffu kommer ihåg de små sakerna",
+				"body": "Skanningar, kvitton och inköpsvanor hjälper Skaffu att förstå ditt hushåll över tid.\n\nDet betyder smartare inköpsförslag, bättre påminnelser och mindre manuellt arbete.",
+				"cta": "Låter bra"
+			},
+			"shopping": {
+				"title": "Inköp fungerar bättre tillsammans",
+				"body": "När något börjar ta slut kan du lägga till det i inköpslistan och bocka av det medan du handlar.\n\nDu kan bjuda in din partner när du vill.",
+				"cta": "Öppna inköpslistan"
+			},
+			"progress": {
+				"welcome": "Välkommen",
+				"firstScan": "Första skanningen",
+				"pantryCreated": "Skafferi skapat",
+				"brain": "Lär dig hur Skaffu hjälper",
+				"shopping": "Inköpslista"
+			}
+		}
 	},
 	"pageHints": {
 		"dialogAria": "Snabbtips för sidan",
