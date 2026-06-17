@@ -18,6 +18,7 @@
 		shouldShowCelebration,
 		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
+	import { isReceiptImportToastPending } from '$lib/utils/receipt-import-session';
 	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
 
 	let open = $state(false);
@@ -44,6 +45,7 @@
 			!userId ||
 			isOnboardingExcludedPath(pathname) ||
 			shouldShowOnboarding(userId) ||
+			isReceiptImportToastPending() ||
 			!shouldShowCelebration(userId)
 		) {
 			open = false;

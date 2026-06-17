@@ -47,14 +47,21 @@
 	let startedTracked = $state(false);
 	let lastViewedStep = $state<string | null>(null);
 	let registrationWelcomeDone = $state(false);
+	let onboardingProgressTick = $state(0);
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
 	const inventoryCount = $derived(
 		typeof page.data.activeInventoryCount === 'number' ? page.data.activeInventoryCount : 0
 	);
-	const flags = $derived(userId ? getActivationOnboardingFlags(userId) : null);
-	const flowComplete = $derived(userId ? isActivationOnboardingFlowComplete(userId) : false);
+	const flags = $derived.by(() => {
+		void onboardingProgressTick;
+		return userId ? getActivationOnboardingFlags(userId) : null;
+	});
+	const flowComplete = $derived.by(() => {
+		void onboardingProgressTick;
+		return userId ? isActivationOnboardingFlowComplete(userId) : false;
+	});
 	const skipActivationSuccess = $derived(isReceiptImportRecentlyCompleted());
 	const screen = $derived.by((): ActivationScreen | 'complete' => {
 		if (!flags) {
@@ -255,7 +262,10 @@
 		if (!browser || !open || !userId) {
 			return;
 		}
-		const onProgress = () => tryOpenFlow();
+		const onProgress = () => {
+			onboardingProgressTick += 1;
+			tryOpenFlow();
+		};
 		window.addEventListener(ONBOARDING_PROGRESS_EVENT, onProgress);
 		return () => window.removeEventListener(ONBOARDING_PROGRESS_EVENT, onProgress);
 	});
