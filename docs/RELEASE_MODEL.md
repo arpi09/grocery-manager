@@ -37,6 +37,8 @@
 
 ## How to ship a small bugfix fast
 
+See **[HOTFIX_FAST_PATH.md](./HOTFIX_FAST_PATH.md)** for the full incident runbook (merge → deploy → smoke checklist).
+
 1. `fix/*` branch, low-risk paths only.
 2. `npm run quick:dev` locally.
 3. Merge when `pr-gate` + PR critical E2E are green.
