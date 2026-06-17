@@ -6,6 +6,7 @@
 		HouseholdMemorySnapshot,
 		MemoryFacetView
 	} from '$lib/application/household-suggestions.service';
+	import { invalidateAll } from '$app/navigation';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -88,7 +89,13 @@
 	{/if}
 </div>
 
-<MemoryDetailSheet open={sheetOpen} facet={selectedFacet} {canEdit} onClose={closeSheet} />
+<MemoryDetailSheet
+	open={sheetOpen}
+	facet={selectedFacet}
+	{canEdit}
+	onClose={closeSheet}
+	afterRestore={() => void invalidateAll()}
+/>
 
 <style>
 	.memory-explorer {

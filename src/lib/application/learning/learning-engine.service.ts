@@ -48,6 +48,16 @@ import type { PredictionExplanation } from '$lib/domain/learning/prediction-trus
 
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 
+import type { MemoryRuleTelemetryEvent } from '$lib/domain/memory-rule-telemetry';
+
+import {
+
+	resolveLocationMemoryRuleEvent,
+
+	resolveShelfLifeMemoryRuleEvent
+
+} from '$lib/domain/memory-rule-telemetry';
+
 
 
 export interface ShelfLifePrediction extends ShelfLifePredictionValue {
@@ -108,6 +118,8 @@ export class LearningEngineService {
 
 			replenishmentLearningEnabled?: () => boolean;
 
+			recordMemoryRuleEvent?: (event: MemoryRuleTelemetryEvent) => void;
+
 		} = {}
 
 	) {
@@ -132,6 +144,8 @@ export class LearningEngineService {
 
 		this.replenishmentLearningEnabled = options.replenishmentLearningEnabled ?? (() => false);
 
+		this.recordMemoryRuleEvent = options.recordMemoryRuleEvent ?? (() => {});
+
 	}
 
 
@@ -147,6 +161,84 @@ export class LearningEngineService {
 	private readonly locationLearningEnabled: () => boolean;
 
 	private readonly replenishmentLearningEnabled: () => boolean;
+
+	private readonly recordMemoryRuleEvent: (event: MemoryRuleTelemetryEvent) => void;
+
+	private emitShelfLifeRuleMemoryEvent(
+
+		householdId: string,
+
+		userId: string,
+
+		normalizedKey: string,
+
+		existing: { typicalDays: number; sampleCount: number } | null,
+
+		typicalDays: number,
+
+		sampleCount: number
+
+	): void {
+
+		const eventType = resolveShelfLifeMemoryRuleEvent({ existing, sampleCount, typicalDays });
+
+		if (!eventType) return;
+
+		this.recordMemoryRuleEvent({
+
+			householdId,
+
+			userId,
+
+			eventType,
+
+			facetType: 'shelf_life',
+
+			normalizedKey,
+
+			field: 'typicalDays'
+
+		});
+
+	}
+
+	private emitLocationRuleMemoryEvent(
+
+		householdId: string,
+
+		userId: string,
+
+		normalizedKey: string,
+
+		existing: { location: string; sampleCount: number } | null,
+
+		location: string,
+
+		sampleCount: number
+
+	): void {
+
+		const eventType = resolveLocationMemoryRuleEvent({ existing, sampleCount, location });
+
+		if (!eventType) return;
+
+		this.recordMemoryRuleEvent({
+
+			householdId,
+
+			userId,
+
+			eventType,
+
+			facetType: 'location',
+
+			normalizedKey,
+
+			field: 'location'
+
+		});
+
+	}
 
 
 
@@ -374,6 +466,22 @@ export class LearningEngineService {
 
 		});
 
+		this.emitShelfLifeRuleMemoryEvent(
+
+			event.householdId,
+
+			event.userId,
+
+			normalizedKey,
+
+			existing,
+
+			typicalDays,
+
+			sampleCount
+
+		);
+
 	}
 
 
@@ -492,6 +600,22 @@ export class LearningEngineService {
 
 		});
 
+		this.emitShelfLifeRuleMemoryEvent(
+
+			event.householdId,
+
+			event.userId,
+
+			normalizedKey,
+
+			existing,
+
+			typicalDays,
+
+			sampleCount
+
+		);
+
 	}
 
 
@@ -581,6 +705,22 @@ export class LearningEngineService {
 			sampleCount
 
 		});
+
+		this.emitLocationRuleMemoryEvent(
+
+			event.householdId,
+
+			event.userId,
+
+			normalizedKey,
+
+			existing,
+
+			learnedLocation,
+
+			sampleCount
+
+		);
 
 	}
 

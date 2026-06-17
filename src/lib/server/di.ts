@@ -33,6 +33,7 @@ import { DrizzleExpiryReminderRepository } from '$lib/infrastructure/repositorie
 import { DrizzleShoppingPushRepository } from '$lib/infrastructure/repositories/shopping-push.repository';
 import { DrizzleNearbyPushRepository } from '$lib/infrastructure/repositories/nearby-push.repository';
 import { PmfService } from '$lib/application/pmf.service';
+import { emitMemoryRuleEvent } from '$lib/server/memory-rule-telemetry';
 import { ExpiryReminderService } from '$lib/application/expiry-reminder.service';
 import { ShoppingPushService } from '$lib/application/shopping-push.service';
 import { NearbyPushService } from '$lib/application/nearby-push.service';
@@ -181,6 +182,8 @@ const householdLearningAdapter = new HouseholdLearningAdapter(
 	householdLocationRuleRepository
 );
 const learningFeedbackAdapter = new LearningFeedbackAdapter(learningFeedbackRepository);
+const pmfService = new PmfService(pmfRepository);
+export { pmfService };
 
 export const learningEngineService = new LearningEngineService(
 	householdLearningAdapter,
@@ -188,7 +191,8 @@ export const learningEngineService = new LearningEngineService(
 	{
 		learningEnabled: isShelfLifeLearningEnabled,
 		locationLearningEnabled: isLocationLearningEnabled,
-		replenishmentLearningEnabled: isReplenishmentLearningEnabled
+		replenishmentLearningEnabled: isReplenishmentLearningEnabled,
+		recordMemoryRuleEvent: (event) => emitMemoryRuleEvent(pmfService, event)
 	}
 );
 
@@ -250,7 +254,6 @@ export const mealPlanService = new MealPlanService(mealPlanRepository);
 export const weeklyRitualService = new WeeklyRitualService(mealPlanService, shoppingListService);
 export const petService = new PetService(petRepository);
 export const petFoodService = new PetFoodService(petFoodRepository);
-export const pmfService = new PmfService(pmfRepository);
 export const expiryReminderService = new ExpiryReminderService(
 	expiryReminderRepository,
 	householdService,
