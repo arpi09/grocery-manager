@@ -94,7 +94,7 @@
 	facet={selectedFacet}
 	{canEdit}
 	onClose={closeSheet}
-	onRestored={() => void invalidateAll()}
+	afterRestore={() => void invalidateAll()}
 />
 
 <style>

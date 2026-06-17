@@ -5,10 +5,10 @@
 
 	interface Props {
 		normalizedKey: string;
-		onRestored?: () => void;
+		afterRestore?: () => void;
 	}
 
-	let { normalizedKey, onRestored }: Props = $props();
+	let { normalizedKey, afterRestore }: Props = $props();
 
 	let restoring = $state(false);
 
@@ -25,9 +25,9 @@
 				throw new Error('restore_failed');
 			}
 			showClientToast(t('memory.buyAgain.restoreSuccess'));
-			onRestored?.();
+			afterRestore?.();
 		} catch {
-			showClientToast(t('memory.buyAgain.restoreFailed'), 'error');
+			showClientToast(t('memory.buyAgain.restoreFailed'), { variant: 'error' });
 		} finally {
 			restoring = false;
 		}

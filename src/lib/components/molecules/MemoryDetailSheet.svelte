@@ -14,9 +14,10 @@
 		facet: MemoryFacetView | null;
 		canEdit: boolean;
 		onClose: () => void;
+		afterRestore?: () => void;
 	}
 
-	let { open, facet, canEdit, onClose }: Props = $props();
+	let { open, facet, canEdit, onClose, afterRestore }: Props = $props();
 
 	function locationShortLabel(location: StorageLocation): string {
 		return t(`location.${location}Short` as 'location.fridgeShort');
@@ -47,7 +48,13 @@
 			{#if canEdit}
 				<div class="actions">
 					{#if facet.type === 'buy_again' && facet.feedbackStatus === 'hidden'}
-						<MemoryRestoreButton normalizedKey={facet.normalizedKey} onRestored={onClose} />
+						<MemoryRestoreButton
+							normalizedKey={facet.normalizedKey}
+							afterRestore={() => {
+								afterRestore?.();
+								onClose();
+							}}
+						/>
 					{:else if facet.type !== 'buy_again'}
 						<MemoryCorrectLink itemId={facet.correctItemId} />
 						<MemoryForgetButton
