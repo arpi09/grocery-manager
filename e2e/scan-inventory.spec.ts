@@ -27,7 +27,7 @@ test.describe('Scan and inventory', () => {
 		await expect(hub.getByTestId('scan-hub-barcode')).toBeVisible();
 		await expect(hub.getByTestId('scan-hub-manual')).toBeVisible();
 		await expect(hub.getByTestId('scan-hub-receipt')).toContainText(/Kvitto|Receipt/i);
-		await expect(hub.getByTestId('scan-hub-photo')).toContainText(/Foto|Photo/i);
+		await expect(hub.getByTestId('scan-hub-photo')).toContainText(/Fota|Photo/i);
 		await expect(hub.getByTestId('scan-hub-barcode')).toContainText(/Streckkod|Barcode/i);
 		await expect(hub.getByTestId('scan-hub-manual')).toContainText(/Manuellt|Manual/i);
 		await expect(page.locator('.page-header .back-link')).toHaveCount(0);
@@ -143,17 +143,11 @@ test.describe('Scan and inventory', () => {
 	test.describe('scan mobile manual add', () => {
 		test.use({ viewport: { width: 390, height: 844 } });
 
-		test('manual add cancel returns to photo scan', async ({ page }) => {
-			await page.goto('/scan?mode=photo&from=/inventory/fridge&location=fridge');
+		test('manual add cancel returns to scan hub', async ({ page }) => {
+			await page.goto('/scan?mode=hub');
 			await dismissOnboardingModalIfOpen(page);
 
-			const manualLink = page.getByRole('link', {
-				name: /Saknas något|Missing something|manuellt|manually/i
-			});
-			const manualHref = await manualLink.getAttribute('href');
-			expect(manualHref).toMatch(/\/item\/new\?/);
-
-			await manualLink.click();
+			await page.getByTestId('scan-hub-manual').click();
 			await expect(page).toHaveURL(/\/item\/new/, { timeout: 15_000 });
 
 			await page.getByRole('link', { name: /Avbryt|Cancel/i }).click();

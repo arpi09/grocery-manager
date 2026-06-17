@@ -45,24 +45,29 @@ test.describe('Inventory mobile UX', () => {
 	}
 
 	async function openOverflowMenu(page: import('@playwright/test').Page) {
-		await expect(page.getByRole('menu')).toBeVisible({ timeout: 5_000 });
+		await expect(page.getByRole('menuitem', { name: /Redigera|Edit/i })).toBeVisible({
+			timeout: 10_000
+		});
 	}
 
 	async function openPartialFromOverflow(page: import('@playwright/test').Page, row: ReturnType<typeof seededRow>) {
 		const overflow = row.getByTestId('row-overflow-menu').getByRole('button');
-		await overflow.click({ force: true });
+		await row.scrollIntoViewIfNeeded();
+		await overflow.click();
 		await openOverflowMenu(page);
-		await page.getByRole('menuitem', { name: /Delvis|Partial/i }).click({ force: true });
+		await page.getByRole('menuitem', { name: /Delvis|Partial/i }).click();
 	}
 
 	test('compact list shows finish in overflow and partial actions', async ({ page }) => {
 		const list = await openFridgeList(page);
 		const row = seededRow(list);
+		await expect(row).toBeVisible({ timeout: 15_000 });
 
 		await expect(row.getByRole('button', { name: /Slut|Finished|Klart|Done/i })).toHaveCount(0);
 
 		const overflow = row.getByTestId('row-overflow-menu').getByRole('button');
-		await overflow.click({ force: true });
+		await row.scrollIntoViewIfNeeded();
+		await overflow.click();
 		await openOverflowMenu(page);
 		await expect(page.getByRole('menuitem', { name: /Ätit upp|Done/i })).toBeVisible();
 		await expect(page.getByRole('menuitem', { name: /Delvis|Partial/i })).toBeVisible({
@@ -72,6 +77,7 @@ test.describe('Inventory mobile UX', () => {
 	test('partial sheet stays open while scrolling the list', async ({ page }) => {
 		const list = await openFridgeList(page);
 		const row = seededRow(list);
+		await expect(row).toBeVisible({ timeout: 15_000 });
 
 		await openPartialFromOverflow(page, row);
 
