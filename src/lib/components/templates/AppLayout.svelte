@@ -16,7 +16,8 @@
 	import ExpiryNudgeToast from '$lib/components/molecules/ExpiryNudgeToast.svelte';
 	import ActivationCelebration from '$lib/components/organisms/ActivationCelebration.svelte';
 	import HouseholdInvitePrompt from '$lib/components/organisms/HouseholdInvitePrompt.svelte';
-	import OnboardingGuide from '$lib/components/organisms/OnboardingGuide.svelte';
+	import ActivationOnboardingFlow from '$lib/components/organisms/ActivationOnboardingFlow.svelte';
+	import ReceiptImportSuccessMoment from '$lib/components/organisms/ReceiptImportSuccessMoment.svelte';
 	import PageHintModal from '$lib/components/organisms/PageHintModal.svelte';
 	import PostOnboardingSurvey from '$lib/components/organisms/PostOnboardingSurvey.svelte';
 	import PostOnboardingSharePrompt from '$lib/components/organisms/PostOnboardingSharePrompt.svelte';
@@ -166,12 +167,13 @@
 		{/key}
 	</main>
 	<InventoryScanToast />
+	<ReceiptImportSuccessMoment />
 	<ExpiryNudgeToast />
 	<ActionToast />
 	<ClientToast />
 	<GamificationToast />
 	<CelebrationMoment />
-	<OnboardingGuide />
+	<ActivationOnboardingFlow />
 	<PageHintModal />
 	<PostOnboardingSharePrompt memberCount={householdMemberCount} {shareLinkEnabled} />
 	<PostOnboardingSurvey />

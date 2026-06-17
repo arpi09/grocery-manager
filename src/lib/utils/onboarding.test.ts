@@ -12,6 +12,9 @@ import {
 	isPostOnboardingSurveyPath,
 	isPostOnboardingSharePath,
 	markSignupAt,
+	markActivationWelcomeSeen,
+	markActivationShoppingSeen,
+	recordActivationScanSave,
 	recordBarcodeActivation,
 	recordFirstItemActivation,
 	recordReceiptActivation,
@@ -65,10 +68,15 @@ describe('onboarding helpers', () => {
 		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
 	});
 
-	it('shows onboarding again when version changes', () => {
-		completeOnboarding(TEST_USER_A);
+	it('shows onboarding again when version changes for non-dismissed users', () => {
 		storage[`home-pantry-onboarding-version:${TEST_USER_A}`] = String(ONBOARDING_VERSION - 1);
 		expect(shouldShowOnboarding(TEST_USER_A)).toBe(true);
+	});
+
+	it('keeps v6 dismissed users dismissed when onboarding version bumps', () => {
+		storage[`home-pantry-onboarding-version:${TEST_USER_A}`] = '6';
+		storage[`home-pantry-onboarding-dismissed:${TEST_USER_A}`] = '1';
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
 	});
 
 	it('keeps onboarding state scoped per user on the same device', () => {
@@ -220,11 +228,22 @@ describe('activation progress', () => {
 		expect(shouldShowCelebration(TEST_USER_A)).toBe(true);
 	});
 
-	it('completes activation after first photo item save', () => {
+	it('completes activation after first photo item save (legacy path)', () => {
+		storage[`home-pantry-onboarding-version:${TEST_USER_A}`] = '6';
+		storage[`home-pantry-onboarding-dismissed:${TEST_USER_A}`] = '1';
 		expect(recordFirstItemActivation(TEST_USER_A)).toBe(true);
 		expect(isActivationComplete(TEST_USER_A)).toBe(true);
-		expect(shouldShowCelebration(TEST_USER_A)).toBe(true);
 		expect(recordFirstItemActivation(TEST_USER_A)).toBe(false);
+	});
+
+	it('v7 activation completes only after shopping step', () => {
+		markActivationWelcomeSeen(TEST_USER_A);
+		expect(recordActivationScanSave(TEST_USER_A, [{ name: 'Milk', locationLabel: 'Fridge' }])).toBe(true);
+		expect(isActivationComplete(TEST_USER_A)).toBe(false);
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(true);
+		markActivationShoppingSeen(TEST_USER_A);
+		expect(isActivationComplete(TEST_USER_A)).toBe(true);
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
 	});
 
 	it('does not increment barcode progress after activation is complete', () => {

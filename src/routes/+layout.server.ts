@@ -25,6 +25,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			isPro: false,
 			cookieConsent,
 			staleCount: 0,
+			activeInventoryCount: 0,
 			shareLinkEnabled: false,
 			shelfLifeEstimatesInReceipt
 		};
@@ -57,11 +58,17 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 	}
 
 	let staleCount = 0;
+	let activeInventoryCount = 0;
 	if (locals.householdId) {
 		try {
 			staleCount = await locals.inventoryService.countStaleUndated(locals.householdId);
 		} catch (error) {
 			console.warn('[layout] staleCount degraded:', error);
+		}
+		try {
+			activeInventoryCount = await locals.inventoryService.countActiveInventory(locals.householdId);
+		} catch (error) {
+			console.warn('[layout] activeInventoryCount degraded:', error);
 		}
 	}
 
@@ -88,6 +95,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		householdRole: locals.householdRole,
 		householdMemberCount,
 		staleCount,
+		activeInventoryCount,
 		shareLinkEnabled: isShoppingListShareEnabled(),
 		shelfLifeEstimatesInReceipt
 	};

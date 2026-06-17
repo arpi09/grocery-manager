@@ -2,12 +2,13 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ReceiptLine } from '$lib/domain/receipt-line';
 import {
 	aggregateReceiptImportSummary,
-	clearReceiptImportToastPending,
+	aggregateReceiptLocationCounts,
+	clearReceiptImportSuccessPending,
+	dominantStorageLocation,
 	isReceiptImportToastPending,
 	markReceiptImportCompleted,
-	receiptImportToastMessage,
+	readReceiptImportCompleted,
 	RECEIPT_IMPORT_JUST_COMPLETED_KEY,
-	RECEIPT_IMPORT_TOAST_PENDING_KEY,
 	type ReceiptImportLineContext
 } from './receipt-import-session';
 
@@ -31,103 +32,67 @@ function lineContext(
 	};
 }
 
-describe('aggregateReceiptImportSummary', () => {
-	it('counts estimated dates when prediction is kept', () => {
-		const summary = aggregateReceiptImportSummary([
-			lineContext({
-				index: 0,
-				lineExpiresOn: '2026-07-01',
-				shelfLifePrediction: {
-					expiresOn: '2026-07-01',
-					typicalDays: 7,
-					modelVersion: 'v1',
-					expiresOnSource: 'heuristic'
-				}
-			})
-		]);
-
-		expect(summary.estimatedDates).toBe(1);
-		expect(summary.locationCorrections).toBe(0);
-		expect(summary.rulesImproved).toBe(1);
-	});
-
-	it('counts location corrections when user overrides prediction', () => {
-		const summary = aggregateReceiptImportSummary([
-			lineContext({
-				index: 0,
-				lineLocation: 'fridge',
-				locationOverride: true,
-				locationPrediction: {
-					location: 'cupboard',
-					source: 'heuristic',
-					modelVersion: 'v1'
-				}
-			})
-		]);
-
-		expect(summary.estimatedDates).toBe(0);
-		expect(summary.locationCorrections).toBe(1);
-		expect(summary.rulesImproved).toBe(1);
-	});
-
-	it('skips deselected lines', () => {
-		const summary = aggregateReceiptImportSummary([
-			lineContext({
-				index: 0,
-				selected: false,
-				shelfLifePrediction: {
-					expiresOn: '2026-07-01',
-					typicalDays: 7,
-					modelVersion: 'v1',
-					expiresOnSource: 'heuristic'
-				}
-			})
-		]);
-
-		expect(summary).toEqual({
-			estimatedDates: 0,
-			locationCorrections: 0,
-			rulesImproved: 0
-		});
+describe('aggregateReceiptLocationCounts', () => {
+	it('counts selected lines per storage location', () => {
+		expect(
+			aggregateReceiptLocationCounts([
+				lineContext({ index: 0, lineLocation: 'cupboard' }),
+				lineContext({ index: 1, lineLocation: 'fridge' }),
+				lineContext({ index: 2, lineLocation: 'fridge' })
+			])
+		).toEqual({ cupboard: 1, fridge: 2, freezer: 0 });
 	});
 });
 
-describe('receiptImportToastMessage', () => {
-	it('includes summary details when present', () => {
-		const message = receiptImportToastMessage('sv', 3, {
-			estimatedDates: 2,
-			locationCorrections: 1,
-			rulesImproved: 2
-		});
-
-		expect(message).toContain('3');
-		expect(message).toContain('2');
-		expect(message).toContain('1');
+describe('dominantStorageLocation', () => {
+	it('picks the location with the highest count', () => {
+		expect(dominantStorageLocation({ cupboard: 2, fridge: 5, freezer: 1 })).toBe('fridge');
 	});
 });
 
 describe('markReceiptImportCompleted', () => {
-	it('stores summary and toast pending flag in sessionStorage', () => {
+	it('stores location counts and toast pending flag', () => {
 		const storage = new Map<string, string>();
 		vi.stubGlobal('sessionStorage', {
 			setItem: (key: string, value: string) => storage.set(key, value),
 			getItem: (key: string) => storage.get(key) ?? null,
-			removeItem: (key: string) => {
-				storage.delete(key);
-			}
+			removeItem: (key: string) => storage.delete(key)
 		});
 
-		markReceiptImportCompleted(2, {
-			estimatedDates: 1,
-			locationCorrections: 1,
-			rulesImproved: 2
-		});
+		markReceiptImportCompleted(
+			2,
+			{ estimatedDates: 1, locationCorrections: 0, rulesImproved: 0 },
+			{ cupboard: 1, fridge: 1, freezer: 0 }
+		);
 
-		expect(storage.get(RECEIPT_IMPORT_JUST_COMPLETED_KEY)).toContain('"itemsAdded":2');
-		expect(storage.get(RECEIPT_IMPORT_TOAST_PENDING_KEY)).toBe('1');
+		expect(storage.get(RECEIPT_IMPORT_JUST_COMPLETED_KEY)).toContain('"dominantLocation":"fridge"');
 		expect(isReceiptImportToastPending()).toBe(true);
+		expect(readReceiptImportCompleted()?.locationCounts).toEqual({
+			cupboard: 1,
+			fridge: 1,
+			freezer: 0
+		});
 
-		clearReceiptImportToastPending();
+		clearReceiptImportSuccessPending();
 		expect(isReceiptImportToastPending()).toBe(false);
+	});
+});
+
+describe('aggregateReceiptImportSummary', () => {
+	it('counts estimated dates when prediction is kept', () => {
+		expect(
+			aggregateReceiptImportSummary([
+				lineContext({
+					index: 0,
+					lineExpiresOn: '2026-07-01',
+					shelfLifePrediction: {
+						expiresOn: '2026-07-01',
+						typicalDays: 7,
+						modelVersion: 'v1',
+						expiresOnSource: 'heuristic'
+					}
+				})
+			]).estimatedDates
+		).toBe(1);
 	});
 });

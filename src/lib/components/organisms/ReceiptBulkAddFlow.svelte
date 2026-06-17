@@ -28,6 +28,7 @@
 	import { trackProductEvent } from '$lib/client/product-events';
 	import {
 		aggregateReceiptImportSummary,
+		aggregateReceiptLocationCounts,
 		markReceiptImportCompleted
 	} from '$lib/utils/receipt-import-session';
 	import {
@@ -245,19 +246,21 @@
 	const hasLocationPredictions = $derived(locationPredictions.some((prediction) => prediction != null));
 
 	function buildReceiptImportSummary() {
-		return aggregateReceiptImportSummary(
-			lines.map((line, index) => ({
-				line,
-				index,
-				selected: Boolean(selected[index]),
-				lineExpiresOn: lineExpiresOn[index] ?? '',
-				lineLocation: lineLocations[index] ?? line.location,
-				locationOverride: locationOverrides.has(index),
-				shelfLifePrediction: shelfLifePredictions[index] ?? null,
-				locationPrediction: locationPredictions[index] ?? null,
-				shelfLifeEstimatesInReceipt
-			}))
-		);
+		return aggregateReceiptImportSummary(buildReceiptLineContexts());
+	}
+
+	function buildReceiptLineContexts() {
+		return lines.map((line, index) => ({
+			line,
+			index,
+			selected: Boolean(selected[index]),
+			lineExpiresOn: lineExpiresOn[index] ?? '',
+			lineLocation: lineLocations[index] ?? line.location,
+			locationOverride: locationOverrides.has(index),
+			shelfLifePrediction: shelfLifePredictions[index] ?? null,
+			locationPrediction: locationPredictions[index] ?? null,
+			shelfLifeEstimatesInReceipt
+		}));
 	}
 
 	function formatLineAmount(line: ReceiptLine): string {
@@ -421,7 +424,11 @@
 								selectedCount,
 								totalLines: lines.length
 							});
-							markReceiptImportCompleted(selectedCount, buildReceiptImportSummary());
+							markReceiptImportCompleted(
+								selectedCount,
+								buildReceiptImportSummary(),
+								aggregateReceiptLocationCounts(buildReceiptLineContexts())
+							);
 							recordReceiptActivation(page.data.user?.id);
 						}
 					)}

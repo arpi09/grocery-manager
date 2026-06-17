@@ -2,9 +2,27 @@ import { isMarketingPath } from '$lib/marketing/routes';
 
 import { markPmfSurveyEligible } from '$lib/utils/pmf-survey-storage';
 
+import type {
+	ActivationOnboardingFlags,
+	ActivationSuccessItemSnapshot
+} from '$lib/utils/activation-onboarding-state';
+
+export type {
+	ActivationOnboardingFlags,
+	ActivationProgressMilestone,
+	ActivationScreen,
+	ActivationSuccessItemSnapshot,
+	ActivationTelemetryStep
+} from '$lib/utils/activation-onboarding-state';
+
+export {
+	deriveActivationScreen,
+	getActivationProgressChecklist
+} from '$lib/utils/activation-onboarding-state';
+
 /** Current onboarding tour version — bump to show the guide again for returning users. */
 
-export const ONBOARDING_VERSION = 6;
+export const ONBOARDING_VERSION = 7;
 
 export { ONBOARDING_STEP_COUNT } from '$lib/utils/onboarding-steps';
 
@@ -27,6 +45,24 @@ const ACTIVATION_BARCODE_COUNT_SUFFIX = 'activation-barcode-count';
 const ACTIVATION_RECEIPT_SUFFIX = 'activation-receipt-done';
 
 const ACTIVATION_FIRST_ITEM_DONE_SUFFIX = 'activation-first-item-done';
+
+const ACTIVATION_WELCOME_SEEN_SUFFIX = 'activation-welcome-seen';
+
+const ACTIVATION_SCAN_STARTED_SUFFIX = 'activation-scan-started';
+
+const ACTIVATION_SCAN_DEFERRED_SUFFIX = 'activation-scan-deferred';
+
+const ACTIVATION_FIRST_SCAN_DONE_SUFFIX = 'activation-first-scan-done';
+
+const ACTIVATION_INVENTORY_CREATED_SUFFIX = 'activation-inventory-created';
+
+const ACTIVATION_SUCCESS_SEEN_SUFFIX = 'activation-success-seen';
+
+const ACTIVATION_BRAIN_SEEN_SUFFIX = 'activation-brain-seen';
+
+const ACTIVATION_SHOPPING_SEEN_SUFFIX = 'activation-shopping-seen';
+
+const ACTIVATION_SUCCESS_SNAPSHOT_SUFFIX = 'activation-success-snapshot';
 
 const ACTIVATION_SHOPPING_COUNT_SUFFIX = 'activation-shopping-count';
 
@@ -121,17 +157,23 @@ export function shouldShowOnboarding(userId?: string | null): boolean {
 		return false;
 	}
 
-	if (isActivationComplete(userId)) {
+	const storedVersion = localStorage.getItem(storageKey(VERSION_SUFFIX, userId));
+	const dismissed = localStorage.getItem(storageKey(DISMISSED_SUFFIX, userId)) === '1';
+
+	// Users who dismissed v6+ stay dismissed when onboarding version bumps.
+	if (dismissed && storedVersion && Number(storedVersion) >= 6) {
 		return false;
 	}
 
-	const storedVersion = localStorage.getItem(storageKey(VERSION_SUFFIX, userId));
+	if (isActivationOnboardingFlowComplete(userId)) {
+		return false;
+	}
 
 	if (storedVersion !== String(ONBOARDING_VERSION)) {
 		return true;
 	}
 
-	return localStorage.getItem(storageKey(DISMISSED_SUFFIX, userId)) !== '1';
+	return !dismissed;
 }
 
 export function completeOnboarding(userId?: string | null): void {
@@ -261,6 +303,24 @@ function clearUserOnboardingKeys(userId: string): void {
 
 		ACTIVATION_FIRST_ITEM_DONE_SUFFIX,
 
+		ACTIVATION_WELCOME_SEEN_SUFFIX,
+
+		ACTIVATION_SCAN_STARTED_SUFFIX,
+
+		ACTIVATION_SCAN_DEFERRED_SUFFIX,
+
+		ACTIVATION_FIRST_SCAN_DONE_SUFFIX,
+
+		ACTIVATION_INVENTORY_CREATED_SUFFIX,
+
+		ACTIVATION_SUCCESS_SEEN_SUFFIX,
+
+		ACTIVATION_BRAIN_SEEN_SUFFIX,
+
+		ACTIVATION_SHOPPING_SEEN_SUFFIX,
+
+		ACTIVATION_SUCCESS_SNAPSHOT_SUFFIX,
+
 		ACTIVATION_SHOPPING_COUNT_SUFFIX,
 
 		CELEBRATION_PENDING_SUFFIX,
@@ -386,11 +446,21 @@ export function getActivationProgress(userId?: string | null): ActivationProgres
 		localStorage.getItem(storageKey(ACTIVATION_SHOPPING_COUNT_SUFFIX, userId)) ?? '0'
 	);
 
-	const isComplete =
-		receiptDone ||
-		firstItemDone ||
-		storedBarcodeCount >= barcodeGoal ||
-		storedShoppingCount >= shoppingListGoal;
+	const flags = getActivationOnboardingFlags(userId);
+	const usingV7Flow =
+		flags.welcomeSeen ||
+		flags.scanStarted ||
+		flags.firstScanDone ||
+		flags.successSeen ||
+		flags.brainSeen ||
+		flags.shoppingSeen;
+
+	const isComplete = usingV7Flow
+		? isActivationOnboardingFlowComplete(userId)
+		: receiptDone ||
+			firstItemDone ||
+			storedBarcodeCount >= barcodeGoal ||
+			storedShoppingCount >= shoppingListGoal;
 
 	const barcodeCount = receiptDone && isComplete ? 0 : storedBarcodeCount;
 
@@ -421,7 +491,156 @@ export function getActivationProgress(userId?: string | null): ActivationProgres
 	};
 }
 
+export function getActivationOnboardingFlags(userId?: string | null): ActivationOnboardingFlags {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return emptyActivationFlags();
+	}
+
+	return {
+		welcomeSeen: localStorage.getItem(storageKey(ACTIVATION_WELCOME_SEEN_SUFFIX, userId)) === '1',
+		scanStarted: localStorage.getItem(storageKey(ACTIVATION_SCAN_STARTED_SUFFIX, userId)) === '1',
+		scanDeferred: localStorage.getItem(storageKey(ACTIVATION_SCAN_DEFERRED_SUFFIX, userId)) === '1',
+		firstScanDone:
+			localStorage.getItem(storageKey(ACTIVATION_FIRST_SCAN_DONE_SUFFIX, userId)) === '1',
+		inventoryCreated:
+			localStorage.getItem(storageKey(ACTIVATION_INVENTORY_CREATED_SUFFIX, userId)) === '1',
+		successSeen: localStorage.getItem(storageKey(ACTIVATION_SUCCESS_SEEN_SUFFIX, userId)) === '1',
+		brainSeen: localStorage.getItem(storageKey(ACTIVATION_BRAIN_SEEN_SUFFIX, userId)) === '1',
+		shoppingSeen:
+			localStorage.getItem(storageKey(ACTIVATION_SHOPPING_SEEN_SUFFIX, userId)) === '1'
+	};
+}
+
+function emptyActivationFlags(): ActivationOnboardingFlags {
+	return {
+		welcomeSeen: false,
+		scanStarted: false,
+		scanDeferred: false,
+		firstScanDone: false,
+		inventoryCreated: false,
+		successSeen: false,
+		brainSeen: false,
+		shoppingSeen: false
+	};
+}
+
+export function isActivationOnboardingFlowComplete(userId?: string | null): boolean {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return false;
+	}
+
+	return localStorage.getItem(storageKey(ACTIVATION_SHOPPING_SEEN_SUFFIX, userId)) === '1';
+}
+
+export function getActivationSuccessSnapshot(
+	userId?: string | null
+): ActivationSuccessItemSnapshot[] {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return [];
+	}
+
+	const raw = localStorage.getItem(storageKey(ACTIVATION_SUCCESS_SNAPSHOT_SUFFIX, userId));
+	if (!raw) {
+		return [];
+	}
+
+	try {
+		const parsed = JSON.parse(raw) as unknown;
+		if (!Array.isArray(parsed)) {
+			return [];
+		}
+
+		return parsed
+			.filter(
+				(entry): entry is ActivationSuccessItemSnapshot =>
+					!!entry &&
+					typeof entry === 'object' &&
+					'name' in entry &&
+					typeof entry.name === 'string' &&
+					'locationLabel' in entry &&
+					typeof entry.locationLabel === 'string'
+			)
+			.slice(0, 3);
+	} catch {
+		return [];
+	}
+}
+
+function saveActivationSuccessSnapshot(
+	userId: string,
+	items: ActivationSuccessItemSnapshot[]
+): void {
+	if (items.length === 0) {
+		return;
+	}
+
+	localStorage.setItem(
+		storageKey(ACTIVATION_SUCCESS_SNAPSHOT_SUFFIX, userId),
+		JSON.stringify(items.slice(0, 3))
+	);
+}
+
+export function markActivationWelcomeSeen(userId?: string | null): void {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	localStorage.setItem(storageKey(ACTIVATION_WELCOME_SEEN_SUFFIX, userId), '1');
+	dispatchProgress();
+}
+
+export function markActivationScanStarted(userId?: string | null): void {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	localStorage.setItem(storageKey(ACTIVATION_SCAN_STARTED_SUFFIX, userId), '1');
+	localStorage.removeItem(storageKey(ACTIVATION_SCAN_DEFERRED_SUFFIX, userId));
+	dispatchProgress();
+}
+
+export function markActivationScanDeferred(userId?: string | null): void {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	localStorage.setItem(storageKey(ACTIVATION_SCAN_DEFERRED_SUFFIX, userId), '1');
+	dispatchProgress();
+}
+
+export function markActivationSuccessSeen(userId?: string | null): void {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	localStorage.setItem(storageKey(ACTIVATION_SUCCESS_SEEN_SUFFIX, userId), '1');
+	dispatchProgress();
+}
+
+export function markActivationBrainSeen(userId?: string | null): void {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	localStorage.setItem(storageKey(ACTIVATION_BRAIN_SEEN_SUFFIX, userId), '1');
+	dispatchProgress();
+}
+
+export function markActivationShoppingSeen(userId?: string | null): void {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	localStorage.setItem(storageKey(ACTIVATION_SHOPPING_SEEN_SUFFIX, userId), '1');
+	completeOnboarding(userId);
+	dispatchProgress();
+}
+
 export function isActivationComplete(userId?: string | null): boolean {
+	if (isActivationOnboardingFlowComplete(userId)) {
+		return true;
+	}
+
 	return getActivationProgress(userId).isComplete;
 }
 
@@ -474,17 +693,52 @@ export function recordBarcodeActivation(userId?: string | null): boolean {
 	return false;
 }
 
-/** Returns true when activation just completed on this call (any add path). */
+/** Returns true when the first scan save was recorded on this call. */
 
-export function recordFirstItemActivation(userId?: string | null): boolean {
-	if (typeof localStorage === 'undefined' || !userId) return false;
+export function recordActivationScanSave(
+	userId?: string | null,
+	items?: ActivationSuccessItemSnapshot[]
+): boolean {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return false;
+	}
 
-	if (isActivationComplete(userId)) return false;
+	if (getActivationOnboardingFlags(userId).firstScanDone) {
+		return false;
+	}
 
+	localStorage.setItem(storageKey(ACTIVATION_FIRST_SCAN_DONE_SUFFIX, userId), '1');
+	localStorage.setItem(storageKey(ACTIVATION_INVENTORY_CREATED_SUFFIX, userId), '1');
 	localStorage.setItem(storageKey(ACTIVATION_FIRST_ITEM_DONE_SUFFIX, userId), '1');
 
-	markActivationComplete(userId);
+	if (items?.length) {
+		saveActivationSuccessSnapshot(userId, items);
+	}
 
+	dispatchProgress();
+	return true;
+}
+
+/** Returns true when the first scan save was recorded on this call (any add path). */
+
+export function recordFirstItemActivation(
+	userId?: string | null,
+	items?: ActivationSuccessItemSnapshot[]
+): boolean {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return false;
+	}
+
+	if (shouldShowOnboarding(userId)) {
+		return recordActivationScanSave(userId, items);
+	}
+
+	if (isActivationComplete(userId)) {
+		return false;
+	}
+
+	localStorage.setItem(storageKey(ACTIVATION_FIRST_ITEM_DONE_SUFFIX, userId), '1');
+	markActivationComplete(userId);
 	return true;
 }
 

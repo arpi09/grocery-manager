@@ -2000,7 +2000,19 @@
 		"toastAdded": "Receipt done! {count, plural, one {# item added} other {# items added}}.",
 		"toastEstimatedDates": "{count, plural, one {# date estimated} other {# dates estimated}}",
 		"toastLocationCorrections": "{count, plural, one {# location adjusted} other {# locations adjusted}}",
-		"toastRulesImproved": "{count, plural, one {# memory rule improved} other {# memory rules improved}}"
+		"toastRulesImproved": "{count, plural, one {# memory rule improved} other {# memory rules improved}}",
+		"success": {
+			"title": "Welcome to your pantry",
+			"body": "We found {count} products and organized them automatically.",
+			"statCupboard": "{count} pantry items",
+			"statFridge": "{count} fridge items",
+			"statFreezer": "{count} freezer items",
+			"estimatedExpiry": "{count} items with estimated expiry dates",
+			"ctaPrimary": "View my pantry",
+			"ctaSecondary": "Add more items",
+			"ctaContinueSetup": "Continue setup",
+			"ariaLabel": "Receipt import complete"
+		}
 	},
 	"receiptBulk": {
 		"lead": "Have the receipt in an app? Upload the PDF or image directly — or photograph a paper receipt. We suggest items you can add.",
@@ -2228,7 +2240,45 @@
 		"beatLoopTitle": "Check off as you shop",
 		"beatHowTitle": "Receipts build memory",
 		"beatLoopBody": "Check off rows as you shop — the list stays updated for the whole household.",
-		"beatHowBody": "Receipts and checkoffs build household memory — better suggestions next week."
+		"beatHowBody": "Receipts and checkoffs build household memory — better suggestions next week.",
+		"activation": {
+			"dialogAria": "Introduction to Skaffu",
+			"progressAria": "Onboarding progress",
+			"welcome": {
+				"title": "Welcome to Skaffu",
+				"body": "Let's start with something simple.\n\nScan a few things from your kitchen and we'll help you keep track of what you already have at home.\n\nLess guessing. Less waste. Fewer duplicate purchases.",
+				"cta": "Let's get started"
+			},
+			"scan": {
+				"title": "Start with one thing",
+				"body": "Look around.\n\nA carton of milk. A bag of pasta. Your coffee.\n\nOne scan is all it takes to begin building your pantry.",
+				"ctaPrimary": "Open scanner",
+				"ctaSecondary": "Maybe later"
+			},
+			"success": {
+				"title": "Looking good",
+				"body": "Your pantry is already coming together.\n\nEverything you add helps Skaffu give better suggestions and keep your household in sync.",
+				"cta": "Show my pantry",
+				"itemsAria": "Items you added"
+			},
+			"brain": {
+				"title": "Skaffu remembers the small things",
+				"body": "Scans, receipts and shopping activity help Skaffu understand your household over time.\n\nThat means smarter shopping suggestions, better reminders and less manual work.",
+				"cta": "Sounds good"
+			},
+			"shopping": {
+				"title": "Shopping works better together",
+				"body": "When something runs low, add it to your shopping list and check it off as you shop.\n\nYou can invite your partner whenever you're ready.",
+				"cta": "Open shopping list"
+			},
+			"progress": {
+				"welcome": "Welcome",
+				"firstScan": "First scan",
+				"pantryCreated": "Pantry created",
+				"brain": "Learn how Skaffu helps",
+				"shopping": "Shopping list"
+			}
+		}
 	},
 	"pageHints": {
 		"dialogAria": "Quick tip for this page",

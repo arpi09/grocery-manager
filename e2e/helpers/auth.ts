@@ -214,7 +214,7 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 		if (await page.getByTestId('page-hint-dismiss').isVisible().catch(() => false)) {
 			await dismissPageHintIfOpen(page);
 		} else {
-			const skipByTestId = page.getByTestId('onboarding-skip');
+			const skipByTestId = page.getByTestId('activation-skip').or(page.getByTestId('onboarding-skip'));
 			if (await skipByTestId.isVisible().catch(() => false)) {
 				await skipByTestId.evaluate((button) => (button as HTMLButtonElement).click());
 			} else {
@@ -272,19 +272,13 @@ export async function waitForWelcomeParamStripped(page: Page) {
 
 export async function expectOnboardingGuideVisible(page: Page) {
 	await dismissCookieConsentIfOpen(page);
-	await expect(
-		page.getByRole('heading', { name: /gemensamma inköpslista|shared shopping list|Det här är er|Vad är Skaffu|What is Skaffu|Välkommen till Skaffu|Welcome to Skaffu/i })
-	).toBeVisible({ timeout: 20_000 });
-	await expect(page.getByTestId('onboarding-skip')).toBeVisible();
-	await expectOnboardingStepVisible(page, 1);
+	await expect(page.getByTestId('activation-onboarding')).toBeVisible({ timeout: 20_000 });
+	await expect(page.getByTestId('activation-skip')).toBeVisible();
+	await expect(page.getByTestId('activation-progress-welcome')).toBeVisible();
 }
 
-export async function expectOnboardingStepVisible(page: Page, step: number, total = 3) {
-	const indicator = page.getByTestId('onboarding-step-indicator');
-	await expect(indicator).toBeVisible({ timeout: 20_000 });
-	await expect(indicator).toContainText(
-		new RegExp(`Steg ${step} av ${total}|Step ${step} of ${total}`, 'i')
-	);
+export async function expectActivationScreenHeading(page: Page, pattern: RegExp) {
+	await expect(page.getByRole('heading', { name: pattern })).toBeVisible({ timeout: 20_000 });
 }
 
 async function markE2eOnboardingComplete(page: Page) {

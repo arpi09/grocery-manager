@@ -486,6 +486,12 @@ export class InventoryService {
 
 	}
 
+	async countActiveInventory(householdId: string): Promise<number> {
+		const context = await this.listContext(householdId);
+		const counts = await this.repository.countByLocation(householdId, context);
+		return counts.reduce((sum, entry) => sum + entry.count, 0);
+	}
+
 
 
 	async countAutoExpiredByLocation(householdId: string, location: StorageLocation) {

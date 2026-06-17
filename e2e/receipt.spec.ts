@@ -62,7 +62,7 @@ test.describe('Receipt flow', () => {
 		);
 	});
 
-	test('bulk add selected items redirects with success feedback', async ({ page }) => {
+	test('bulk add selected items shows receipt success moment @deploy-critical', async ({ page }) => {
 		await mockReceiptParse(page, {
 			body: { lines: [{ name: 'E2E Testvara', quantity: '1', unit: '', location: 'fridge' }] }
 		});
@@ -78,10 +78,11 @@ test.describe('Receipt flow', () => {
 		await page.getByTestId('receipt-bulk-submit').click();
 
 		await expect(page).toHaveURL(/\/hem(\?|$)/, { timeout: 15_000 });
-		await expect(page).toHaveURL(/scan=added/);
-		await expect(page.locator('.toast-message')).toContainText(/Kvitto klart|Receipt done/i, {
-			timeout: 10_000
-		});
-		await expect(page.locator('section.home')).toBeVisible({ timeout: 10_000 });
+		await expect(page.getByTestId('receipt-import-success')).toBeVisible({ timeout: 10_000 });
+		await expect(page.getByTestId('receipt-success-stat-fridge')).toBeVisible();
+		await expect(page.locator('.toast-message')).toHaveCount(0);
+
+		await page.getByTestId('receipt-success-cta-primary').click();
+		await expect(page).toHaveURL(/\/inventory\/fridge/, { timeout: 10_000 });
 	});
 });
