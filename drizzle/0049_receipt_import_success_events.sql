@@ -1,0 +1,4 @@
+-- Receipt import success moment product_event types (application enum in schema.ts):
+-- receipt_import_success_viewed, receipt_import_success_dismissed,
+-- receipt_import_success_primary_cta, receipt_import_success_secondary_cta
+-- No DDL required: product_event.event_type is unconstrained text.

@@ -80,12 +80,13 @@ describe('drizzle migrations', () => {
 			'0041_receipt_import_funnel_events.sql',
 			'0042_acquisition_wedge_events.sql',
 			'0043_shopping_list_share_link.sql',
-	'0044_receipt_price_memory.sql',
-	'0045_inventory_intelligence_events.sql',
-	'0046_household_os_events.sql',
+			'0044_receipt_price_memory.sql',
+			'0045_inventory_intelligence_events.sql',
+			'0046_household_os_events.sql',
 			'0047_learning_engine_v1.sql',
 			'0048_household_location_rule.sql',
-			'0049_brain_feedback_v1.sql'
+			'0049_receipt_import_success_events.sql',
+			'0050_brain_feedback_v1.sql'
 		];
 
 		expect(pgliteFiles).toEqual(sqlFiles);
