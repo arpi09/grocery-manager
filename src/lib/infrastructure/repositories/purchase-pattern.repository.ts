@@ -146,17 +146,16 @@ export class DrizzlePurchasePatternRepository implements IPurchasePatternReposit
 	}
 
 	async restoreDismissal(householdId: string, normalizedKey: string): Promise<boolean> {
-		const deleted = await this.database
+		await this.database
 			.delete(receiptPatternDismissalTable)
 			.where(
 				and(
 					eq(receiptPatternDismissalTable.householdId, householdId),
 					eq(receiptPatternDismissalTable.normalizedKey, normalizedKey)
 				)
-			)
-			.returning({ normalizedKey: receiptPatternDismissalTable.normalizedKey });
+			);
 
-		return deleted.length > 0;
+		return true;
 	}
 
 	async listInventoryNormalizedKeys(householdId: string): Promise<Set<string>> {
