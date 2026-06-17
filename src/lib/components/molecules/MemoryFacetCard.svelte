@@ -20,18 +20,30 @@
 
 	const title = $derived(`${facet.displayName} · ${locationShortLabel(facet.location)}`);
 
-	const primary = $derived(
-		facet.type === 'shelf_life' && facet.typicalDays != null
-			? t('memory.facet.shelfLifePrimary', { days: facet.typicalDays })
-			: t('memory.facet.locationPrimary', {
-					location: locationLabel(locale, facet.location)
-				})
-	);
-
 	const typeLabel = $derived(
 		facet.type === 'shelf_life'
 			? t('memory.facet.shelfLifeType')
-			: t('memory.facet.locationType')
+			: facet.type === 'buy_again'
+				? t('memory.facet.buyAgainType')
+				: t('memory.facet.locationType')
+	);
+
+	const primary = $derived(
+		facet.type === 'shelf_life' && facet.typicalDays != null
+			? t('memory.facet.shelfLifePrimary', { days: facet.typicalDays })
+			: facet.type === 'buy_again' && facet.avgIntervalDays
+				? t('memory.facet.buyAgainPrimary', { interval: facet.avgIntervalDays })
+				: facet.type === 'buy_again'
+					? t('memory.facet.buyAgainPrimaryNoCadence', { count: facet.lineCount ?? facet.sampleCount })
+					: t('memory.facet.locationPrimary', {
+							location: locationLabel(locale, facet.location)
+						})
+	);
+
+	const statusLabel = $derived(
+		facet.feedbackStatus
+			? t(`memory.facet.feedbackStatus.${facet.feedbackStatus}` as 'memory.facet.feedbackStatus.confirmed')
+			: null
 	);
 </script>
 
@@ -44,8 +56,13 @@
 		<p class="primary">{primary}</p>
 		<p class="meta">
 			{t('memory.facet.sampleMeta', { count: facet.sampleCount })}
-			<span aria-hidden="true"> · </span>
-			<MemoryConfidenceBadge tier={facet.confidenceTier} />
+			{#if statusLabel}
+				<span aria-hidden="true"> · </span>
+				<span class="status-pill">{statusLabel}</span>
+			{:else}
+				<span aria-hidden="true"> · </span>
+				<MemoryConfidenceBadge tier={facet.confidenceTier} />
+			{/if}
 		</p>
 	</div>
 	<span class="detail-cta">{t('memory.facet.detailCta')} →</span>
@@ -109,6 +126,11 @@
 		margin: var(--space-xs) 0 0;
 		font-size: 0.8125rem;
 		color: var(--color-text-secondary);
+	}
+
+	.status-pill {
+		color: var(--color-text-muted);
+		font-weight: 600;
 	}
 
 	.detail-cta {

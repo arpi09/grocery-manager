@@ -1064,18 +1064,18 @@
 		"learningToastAccept": "Skaffu will remember — thanks for adding that.",
 		"learningToastDismiss": "Got it — we will not suggest that again for a while.",
 		"feedback": {
-			"whyExpand": "Why this suggestion?",
+			"whyExpand": "Why am I seeing this?",
 			"belief": {
-				"recurringNotInPantry": "You often buy {name, select, other {{name}}}",
-				"cadenceOverdue": "Usually time to buy again — last bought {days} days ago",
-				"recurringAndCadence": "You often buy this — about every {interval} days"
+				"recurringNotInPantry": "You usually buy {name}.",
+				"cadenceOverdue": "Looks like you're running low on {name}.",
+				"recurringAndCadence": "You usually buy {name} — and it's been a while."
 			},
 			"why": {
-				"recentPurchases": "Bought {count, plural, one {# time} other {# times}} on recent receipts",
-				"cadenceInterval": "Usually about every {interval} days",
-				"daysSinceLast": "Last bought {days, plural, one {# day} other {# days}} ago",
-				"recurringAndInterval": "Bought {count, plural, one {# time} other {# times}} · usually every {interval} days",
-				"recurringAndDays": "Bought {count, plural, one {# time} other {# times}} · last {days} days ago"
+				"recentPurchases": "Because you've bought {name} {count, plural, one {# time} other {# times}} recently.",
+				"cadenceInterval": "Because you usually buy about every {interval} days.",
+				"daysSinceLast": "Last bought {days, plural, one {# day} other {# days}} ago.",
+				"recurringAndInterval": "Bought {count, plural, one {# time} other {# times}} recently · usually every {interval} days",
+				"recurringAndDays": "Bought {count, plural, one {# time} other {# times}} recently · last {days} days ago"
 			},
 			"positive": {
 				"thatsRight": "That's right",
@@ -1086,9 +1086,12 @@
 				"notHelpful": "Not helpful"
 			},
 			"ack": {
-				"positive": "Thanks — we'll keep suggesting this",
-				"negative": "Got it — we'll suggest less often"
-			}
+				"positive": "Got it.",
+				"negative": "Thanks.",
+				"dismiss": "OK."
+			},
+			"ackPositive": "Got it.",
+			"ackNegative": "Thanks."
 		}
 	},
 	"householdBriefing": {
@@ -1194,10 +1197,19 @@
 		"facet": {
 			"shelfLifeType": "Shelf life",
 			"locationType": "Location",
+			"buyAgainType": "Buy again",
 			"shelfLifePrimary": "About {days} days shelf life",
 			"locationPrimary": "Usually in {location}",
+			"buyAgainPrimary": "Usually buy about every {interval} days",
+			"buyAgainPrimaryNoCadence": "Bought {count, plural, one {# time} other {# times}} on receipts",
 			"sampleMeta": "{count, plural, one {# observation} other {# observations}}",
-			"detailCta": "Details"
+			"detailCta": "Details",
+			"feedbackStatus": {
+				"confirmed": "You confirmed this",
+				"rejected": "You said not really",
+				"hidden": "Not suggesting right now",
+				"learning": "Still observing"
+			}
 		},
 		"detail": {
 			"whatHeading": "What we believe",

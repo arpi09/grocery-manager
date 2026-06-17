@@ -156,6 +156,7 @@
 								householdId={data.householdId}
 								compact
 								surface="inkop"
+								brainFeedbackV1={Boolean(data.brainFeedbackV1Enabled)}
 							/>
 						{/if}
 					</div>

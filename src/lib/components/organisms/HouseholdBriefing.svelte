@@ -27,6 +27,7 @@
 		canWrite?: boolean;
 		householdId?: string | null;
 		finishSuggestions?: ReceiptFinishSuggestion[];
+		brainFeedbackV1?: boolean;
 	}
 
 	let {
@@ -35,7 +36,8 @@
 		shoppingListCount,
 		canWrite = false,
 		householdId = null,
-		finishSuggestions = []
+		finishSuggestions = [],
+		brainFeedbackV1 = false
 	}: Props = $props();
 
 	const briefing = $derived(
@@ -214,6 +216,7 @@
 				{householdId}
 				compact
 				surface="hem"
+				{brainFeedbackV1}
 			/>
 		{/if}
 

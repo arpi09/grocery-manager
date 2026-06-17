@@ -4,10 +4,13 @@ import { sampleCountToConfidenceTier } from '$lib/domain/learning/memory-confide
 import { buildShelfLifeExplanation } from '$lib/domain/learning/shelf-life-explanation';
 import type { ConfidenceTier, PredictionExplanation } from '$lib/domain/learning/prediction-trust';
 import type { StorageLocation } from '$lib/domain/location';
+import { detectBuyAgainMemoryCandidates } from '$lib/domain/buy-again-memory';
 import { DEFAULT_LOCALE, type Locale } from '$lib/i18n/locale';
 import type { IHouseholdLocationRuleRepository } from '$lib/infrastructure/repositories/household-location-rule.repository';
 import type { IHouseholdShelfLifeRuleRepository } from '$lib/infrastructure/repositories/household-shelf-life-rule.repository';
+import type { ILearningFeedbackRepository } from '$lib/infrastructure/repositories/learning-feedback.repository';
 import type { IPurchasePatternRepository } from '$lib/infrastructure/repositories/purchase-pattern.repository';
+import { purchasePatternLookbackDate } from '$lib/infrastructure/repositories/purchase-pattern.repository';
 
 export interface ShelfLifeSuggestionView {
 	normalizedKey: string;
@@ -30,7 +33,9 @@ export interface HouseholdSuggestionsSnapshot {
 	hasRules: boolean;
 }
 
-export type MemoryFacetType = 'shelf_life' | 'location';
+export type MemoryFacetType = 'shelf_life' | 'location' | 'buy_again';
+
+export type MemoryFeedbackStatus = 'confirmed' | 'rejected' | 'hidden' | 'learning';
 
 export interface MemoryFacetView {
 	facetKey: string;
@@ -44,6 +49,11 @@ export interface MemoryFacetView {
 	explanation: PredictionExplanation;
 	lastUpdatedAt: string;
 	correctItemId: string | null;
+	feedbackStatus?: MemoryFeedbackStatus;
+	feedbackAt?: string;
+	suggestionKind?: 'buy_again' | 'shelf_life' | 'location';
+	avgIntervalDays?: number | null;
+	lineCount?: number;
 }
 
 export interface HouseholdMemorySnapshot {
@@ -59,11 +69,34 @@ function formatMemoryDate(date: Date, locale: Locale): string {
 	});
 }
 
+function feedbackStatusFor(
+	normalizedKey: string,
+	dismissedKeys: Set<string>,
+	replenishmentFeedback: Map<string, { feedbackType: string; createdAt: Date }>,
+	sampleCount: number
+): { status: MemoryFeedbackStatus; at?: string } {
+	if (dismissedKeys.has(normalizedKey)) {
+		return { status: 'hidden' };
+	}
+	const latest = replenishmentFeedback.get(normalizedKey);
+	if (latest?.feedbackType === 'accepted') {
+		return { status: 'confirmed', at: formatMemoryDate(latest.createdAt, 'sv') };
+	}
+	if (latest?.feedbackType === 'rejected') {
+		return { status: 'rejected', at: formatMemoryDate(latest.createdAt, 'sv') };
+	}
+	if (sampleCount <= 1) {
+		return { status: 'learning' };
+	}
+	return { status: 'learning' };
+}
+
 export class HouseholdSuggestionsService {
 	constructor(
 		private readonly shelfLifeRepository: IHouseholdShelfLifeRuleRepository,
 		private readonly locationRepository: IHouseholdLocationRuleRepository,
-		private readonly purchasePatternRepository: IPurchasePatternRepository
+		private readonly purchasePatternRepository: IPurchasePatternRepository,
+		private readonly learningFeedbackRepository?: ILearningFeedbackRepository
 	) {}
 
 	async getSnapshot(householdId: string): Promise<HouseholdSuggestionsSnapshot> {
@@ -103,12 +136,38 @@ export class HouseholdSuggestionsService {
 		locale: Locale = DEFAULT_LOCALE
 	): Promise<HouseholdMemorySnapshot> {
 		const minSamples = 1;
-		const [shelfLifeRows, locationRows, inventoryMatches, receiptLineCount] = await Promise.all([
-			this.shelfLifeRepository.listByHousehold(householdId, minSamples),
-			this.locationRepository.listByHousehold(householdId, minSamples),
-			this.purchasePatternRepository.listActiveInventoryMatches(householdId),
-			this.purchasePatternRepository.countReceiptLines(householdId)
-		]);
+		const since = purchasePatternLookbackDate();
+		const [shelfLifeRows, locationRows, inventoryMatches, receiptLineCount, recentLines, dismissedKeys] =
+			await Promise.all([
+				this.shelfLifeRepository.listByHousehold(householdId, minSamples),
+				this.locationRepository.listByHousehold(householdId, minSamples),
+				this.purchasePatternRepository.listActiveInventoryMatches(householdId),
+				this.purchasePatternRepository.countReceiptLines(householdId),
+				this.purchasePatternRepository.listRecentLines(householdId, since),
+				this.purchasePatternRepository.listDismissedKeys(householdId)
+			]);
+
+		const buyAgainCandidates = detectBuyAgainMemoryCandidates(recentLines);
+		const feedbackKeys = [
+			...shelfLifeRows.map((row) => row.normalizedKey),
+			...locationRows.map((row) => row.normalizedKey),
+			...buyAgainCandidates.map((candidate) => candidate.normalizedKey)
+		];
+
+		const replenishmentFeedbackMap = new Map<string, { feedbackType: string; createdAt: Date }>();
+		if (this.learningFeedbackRepository && feedbackKeys.length > 0) {
+			const latestReplenishment = await this.learningFeedbackRepository.latestBySubjectKeys(
+				householdId,
+				'replenishment',
+				feedbackKeys
+			);
+			for (const [key, record] of latestReplenishment) {
+				replenishmentFeedbackMap.set(key, {
+					feedbackType: record.feedbackType,
+					createdAt: record.createdAt
+				});
+			}
+		}
 
 		const itemIdByKey = new Map<string, string>();
 		for (const match of inventoryMatches) {
@@ -126,6 +185,12 @@ export class HouseholdSuggestionsService {
 
 			const displayName = formatNormalizedKeyForDisplay(row.normalizedKey);
 			const lastUpdatedAt = formatMemoryDate(row.updatedAt, locale);
+			const feedback = feedbackStatusFor(
+				row.normalizedKey,
+				dismissedKeys,
+				replenishmentFeedbackMap,
+				row.sampleCount
+			);
 
 			memoryFacets.push({
 				facetKey: `${row.normalizedKey}:${row.location}:shelf_life`,
@@ -149,7 +214,10 @@ export class HouseholdSuggestionsService {
 					locale
 				),
 				lastUpdatedAt,
-				correctItemId: itemIdByKey.get(row.normalizedKey) ?? null
+				correctItemId: itemIdByKey.get(row.normalizedKey) ?? null,
+				feedbackStatus: feedback.status,
+				feedbackAt: feedback.at,
+				suggestionKind: 'shelf_life'
 			});
 		}
 
@@ -159,6 +227,12 @@ export class HouseholdSuggestionsService {
 
 			const displayName = formatNormalizedKeyForDisplay(row.normalizedKey);
 			const lastUpdatedAt = formatMemoryDate(row.updatedAt, locale);
+			const feedback = feedbackStatusFor(
+				row.normalizedKey,
+				dismissedKeys,
+				replenishmentFeedbackMap,
+				row.sampleCount
+			);
 
 			memoryFacets.push({
 				facetKey: `${row.normalizedKey}:location`,
@@ -179,7 +253,44 @@ export class HouseholdSuggestionsService {
 					locale
 				),
 				lastUpdatedAt,
-				correctItemId: itemIdByKey.get(row.normalizedKey) ?? null
+				correctItemId: itemIdByKey.get(row.normalizedKey) ?? null,
+				feedbackStatus: feedback.status,
+				feedbackAt: feedback.at,
+				suggestionKind: 'location'
+			});
+		}
+
+		for (const candidate of buyAgainCandidates) {
+			const confidenceTier = sampleCountToConfidenceTier(candidate.purchaseCount) ?? 'medium';
+			const displayName = candidate.displayName;
+			const lastUpdatedAt = formatMemoryDate(new Date(), locale);
+			const feedback = feedbackStatusFor(
+				candidate.normalizedKey,
+				dismissedKeys,
+				replenishmentFeedbackMap,
+				candidate.lineCount
+			);
+
+			memoryFacets.push({
+				facetKey: `${candidate.normalizedKey}:buy_again`,
+				type: 'buy_again',
+				normalizedKey: candidate.normalizedKey,
+				displayName,
+				location: candidate.location,
+				sampleCount: candidate.lineCount,
+				confidenceTier,
+				explanation: {
+					templateId: 'buy_again.household',
+					primary: displayName,
+					facts: []
+				},
+				lastUpdatedAt,
+				correctItemId: itemIdByKey.get(candidate.normalizedKey) ?? null,
+				feedbackStatus: feedback.status,
+				feedbackAt: feedback.at,
+				suggestionKind: 'buy_again',
+				avgIntervalDays: candidate.avgIntervalDays,
+				lineCount: candidate.lineCount
 			});
 		}
 

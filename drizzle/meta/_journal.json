@@ -337,6 +337,13 @@
 			"when": 1752412800000,
 			"tag": "0048_household_location_rule",
 			"breakpoints": true
+		},
+		{
+			"idx": 48,
+			"version": "7",
+			"when": 1752499200000,
+			"tag": "0049_brain_feedback_v1",
+			"breakpoints": true
 		}
 	]
 }
