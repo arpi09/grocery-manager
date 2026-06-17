@@ -1245,6 +1245,7 @@
 		},
 		"buyAgain": {
 			"restore": "Show suggestions again",
+			"restoreSuccess": "Suggestions restored.",
 			"restoreFailed": "Could not restore suggestions. Try again."
 		},
 		"confidence": {
@@ -1273,7 +1274,8 @@
 		"detail": {
 			"whatHeading": "What we believe",
 			"whyHeading": "Why",
-			"confidenceHeading": "How confident"
+			"confidenceHeading": "How confident",
+			"receiptBased": "Based on your receipts and corrections."
 		},
 		"forget": "Forget this",
 		"forgetConfirm": "Skaffu will forget this for your household",

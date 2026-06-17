@@ -1214,6 +1214,7 @@
 		},
 		"buyAgain": {
 			"restore": "Visa förslag igen",
+			"restoreSuccess": "Förslagen är tillbaka.",
 			"restoreFailed": "Kunde inte återställa förslag. Försök igen."
 		},
 		"confidence": {
@@ -1242,7 +1243,8 @@
 		"detail": {
 			"whatHeading": "Vad vi tror",
 			"whyHeading": "Varför",
-			"confidenceHeading": "Hur säkert"
+			"confidenceHeading": "Hur säkert",
+			"receiptBased": "Baserat på dina kvitton och rättningar."
 		},
 		"forget": "Glöm detta",
 		"forgetConfirm": "Skaffu glömmer detta för hushållet",
