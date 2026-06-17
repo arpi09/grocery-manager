@@ -66,5 +66,15 @@ export function manualAddHref(
 	if (options?.location) {
 		params.set('location', String(options.location));
 	}
-	return '/item/new?' + params.toString();
+	return `/item/new?` + params.toString();
+}
+
+/** Scan hub entry during activation onboarding — preserves return path and context. */
+export function activationScanHref(returnTo: string = APP_HOME_PATH): string {
+	const params = new URLSearchParams({ from: returnTo, onboarding: 'activation' });
+	return `/scan?${params}`;
+}
+
+export function isActivationOnboardingContext(searchParams: URLSearchParams): boolean {
+	return searchParams.get('onboarding') === 'activation';
 }

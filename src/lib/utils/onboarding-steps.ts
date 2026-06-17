@@ -1,31 +1,42 @@
-/** Pedagogical intro steps — welcome → path guide → celebration. */
+/** Activation onboarding screens — state-driven, not a step carousel. */
 
-export type OnboardingStepId = 'welcome' | 'pathGuide' | 'celebrate';
+export type ActivationScreenId = 'welcome' | 'scan' | 'success' | 'brain' | 'shopping';
 
-export const ONBOARDING_STEP_IDS = ['welcome', 'pathGuide', 'celebrate'] as const satisfies readonly OnboardingStepId[];
+export const ACTIVATION_SCREEN_IDS = [
+	'welcome',
+	'scan',
+	'success',
+	'brain',
+	'shopping'
+] as const satisfies readonly ActivationScreenId[];
 
-export const ONBOARDING_STEP_COUNT = ONBOARDING_STEP_IDS.length;
+export const ACTIVATION_SCREEN_COUNT = ACTIVATION_SCREEN_IDS.length;
 
-/** i18n key under `onboarding.*` shown when entering a step index > 0. */
-export type OnboardingEncourageKey = 'encouragePathGuide' | 'encourageCelebrate';
+/** @deprecated Legacy export — activation flow uses ACTIVATION_SCREEN_COUNT. */
+export const ONBOARDING_STEP_COUNT = ACTIVATION_SCREEN_COUNT;
 
-const ENCOURAGE_BY_STEP_INDEX: Record<number, OnboardingEncourageKey> = {
-	1: 'encouragePathGuide',
-	2: 'encourageCelebrate'
-};
+export type ActivationProgressKey =
+	| 'welcome'
+	| 'firstScan'
+	| 'pantryCreated'
+	| 'brain'
+	| 'shopping';
 
-export function getEncourageKeyForStepIndex(stepIndex: number): OnboardingEncourageKey | null {
-	return ENCOURAGE_BY_STEP_INDEX[stepIndex] ?? null;
-}
+export const ACTIVATION_PROGRESS_KEYS = [
+	'welcome',
+	'firstScan',
+	'pantryCreated',
+	'brain',
+	'shopping'
+] as const satisfies readonly ActivationProgressKey[];
 
-export function isLastOnboardingStep(stepIndex: number): boolean {
-	return stepIndex >= ONBOARDING_STEP_COUNT - 1;
-}
-
-export function canGoBackOnboarding(stepIndex: number): boolean {
-	return stepIndex > 0;
-}
-
-export function getOnboardingStepId(stepIndex: number): OnboardingStepId {
-	return ONBOARDING_STEP_IDS[stepIndex] ?? 'welcome';
+export function progressKeyForScreen(screen: ActivationScreenId): ActivationProgressKey | null {
+	const map: Partial<Record<ActivationScreenId, ActivationProgressKey>> = {
+		welcome: 'welcome',
+		scan: 'firstScan',
+		success: 'pantryCreated',
+		brain: 'brain',
+		shopping: 'shopping'
+	};
+	return map[screen] ?? null;
 }

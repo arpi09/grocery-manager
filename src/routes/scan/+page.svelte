@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
@@ -9,9 +10,22 @@
 	import PhotoRoundFlow from '$lib/components/organisms/PhotoRoundFlow.svelte';
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
 	import { t } from '$lib/i18n';
+	import { trackProductEvent } from '$lib/client/product-events';
+	import { markActivationScanStarted, shouldShowOnboarding } from '$lib/utils/onboarding';
 	import { type ScanMode } from '$lib/utils/scan-nav';
 
 	let { data, form } = $props();
+
+	$effect(() => {
+		if (!browser || !data.user?.id || !data.isActivationOnboarding) {
+			return;
+		}
+		if (!shouldShowOnboarding(data.user.id)) {
+			return;
+		}
+		markActivationScanStarted(data.user.id);
+		void trackProductEvent('onboarding_scan_started');
+	});
 
 	const scanMode = $derived(data.scanMode as ScanMode);
 	const isHub = $derived(scanMode === 'hub');
