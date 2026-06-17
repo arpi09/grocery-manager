@@ -30,7 +30,7 @@
 			{/each}
 		</SkaffuList>
 		{#if expiringSoon.length > 3}
-			<a class="more-link" href="/inventory/fridge?filter=expiring">{t('home.expiring.moreLink')}</a>
+			<span class="more-link">{t('home.expiring.moreLink')}</span>
 		{/if}
 	</section>
 {/if}
