@@ -110,16 +110,16 @@
 	});
 </script>
 
+{#if homeRedesignV1}
+	<HomeRedesignDashboard
+		{summary}
+		{intelligence}
+		{canWrite}
+		{shoppingListCount}
+		{shoppingCadence}
+	/>
+{:else}
 <section class="home" aria-label={t('home.ariaLabel')} data-home-state={homeState}>
-	{#if homeRedesignV1}
-		<HomeRedesignDashboard
-			{summary}
-			{intelligence}
-			{canWrite}
-			{shoppingListCount}
-			{shoppingCadence}
-		/>
-	{:else}
 	<HomeWelcome {displayName} totalItems={summary.totalItems} {homeState} {shoppingListCount} />
 
 	{#if canWrite}
@@ -184,8 +184,8 @@
 	{#if !canWrite}
 		<p class="readonly-hint">{t('home.readonlyHint')}</p>
 	{/if}
-	{/if}
 </section>
+{/if}
 
 <style>
 	.home {

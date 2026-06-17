@@ -82,7 +82,7 @@ test.describe('Critical flows', () => {
 		await registerNewUser(page);
 		await dismissOnboardingModalIfOpen(page);
 		await page.goto('/hem');
-		await expect(page.locator('[data-home-state="cold"]')).toBeVisible();
+		await expect(page.locator('.home-v5[data-home-state="cold"]')).toBeVisible();
 		await expectHomeDashboardVisible(page);
 		await expect(page.getByTestId('home-shopping-card')).toBeVisible();
 		await expect(
