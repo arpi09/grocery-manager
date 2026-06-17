@@ -43,7 +43,7 @@ describe('HouseholdSuggestionsService', () => {
 		listRecentLines: vi.fn(async () => []),
 		listDismissedKeys: vi.fn(async (): Promise<Set<string>> => new Set()),
 		dismissPattern: vi.fn(),
-		restoreDismissal: vi.fn(async (): Promise<boolean> => false),
+		restorePattern: vi.fn(async (): Promise<void> => {}),
 		listInventoryNormalizedKeys: vi.fn(),
 		listActiveInventoryMatches: vi.fn(async () => [
 			{
