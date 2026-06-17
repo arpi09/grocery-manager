@@ -1,5 +1,6 @@
 <script lang="ts">
 	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
+	import ProgressRing from '$lib/components/atoms/ProgressRing.svelte';
 	import HomeDashboardCard, {
 		type HomeDashboardCardSize
 	} from '$lib/components/molecules/HomeDashboardCard.svelte';
@@ -29,6 +30,10 @@
 			? t('home.cadenceLineStore', { weekday, store: shoppingCadence.storeLabel })
 			: t('home.cadenceLine', { weekday });
 	});
+
+	const listFillRatio = $derived(
+		shoppingListCount <= 0 ? 0 : Math.min(1, Math.max(0.12, shoppingListCount / 8))
+	);
 </script>
 
 <HomeDashboardCard
@@ -43,11 +48,17 @@
 	{/snippet}
 	{#snippet meta()}
 		<p class="meta-line">{primaryLine}</p>
-	{/snippet}
-	{#snippet body()}
 		{#if cadenceLine}
 			<p class="cadence-line">{cadenceLine}</p>
 		{/if}
+	{/snippet}
+	{#snippet viz()}
+		<ProgressRing
+			ratio={listFillRatio}
+			size={size === 'hero' ? 64 : size === 'compact' ? 48 : 56}
+			label={String(shoppingListCount)}
+			ariaLabel={primaryLine}
+		/>
 	{/snippet}
 </HomeDashboardCard>
 
@@ -58,6 +69,7 @@
 	}
 
 	.cadence-line {
+		margin-top: var(--space-xs);
 		color: var(--color-text-muted);
 	}
 </style>

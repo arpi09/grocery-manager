@@ -2,6 +2,7 @@
 	import { portal } from '$lib/actions/portal';
 	import { t } from '$lib/i18n';
 	import { TOAST_DEFAULT_DURATION_MS } from '$lib/utils/action-toast';
+	import type { Snippet } from 'svelte';
 
 	export type ToastVariant = 'default' | 'success' | 'error' | 'info';
 	export type ToastSize = 'compact' | 'action';
@@ -18,6 +19,9 @@
 		tapToDismiss?: boolean;
 		/** When false, render inline (e.g. undo row with companion button) instead of portaling to body */
 		portal?: boolean;
+		/** Inline action buttons (e.g. undo) rendered inside the toast bar */
+		actions?: Snippet;
+		'data-testid'?: string;
 		onDismiss?: () => void;
 	}
 
@@ -30,6 +34,8 @@
 		celebrate = false,
 		tapToDismiss = true,
 		portal: usePortal = true,
+		actions,
+		'data-testid': dataTestId,
 		onDismiss
 	}: Props = $props();
 
@@ -88,6 +94,8 @@
 		class:toast-info={variant === 'info'}
 		class:toast-action={size === 'action'}
 		class:toast-tappable={tapToDismiss && !!onDismiss}
+		class:toast-with-actions={!!actions}
+		data-testid={dataTestId}
 		role={toastRole}
 		aria-live={toastLive}
 		onclick={handleToastClick}
@@ -102,6 +110,11 @@
 			<span class="toast-icon" aria-hidden="true">i</span>
 		{/if}
 		<p class="toast-message">{message}</p>
+		{#if actions}
+			<div class="toast-actions" onclick={(event) => event.stopPropagation()}>
+				{@render actions()}
+			</div>
+		{/if}
 		{#if onDismiss}
 			<button
 				type="button"
@@ -230,6 +243,42 @@
 	.toast-action .toast-message {
 		font-size: 1rem;
 		line-height: 1.45;
+	}
+
+	.toast-with-actions {
+		padding-right: var(--space-sm);
+	}
+
+	.toast-actions {
+		display: inline-flex;
+		align-items: center;
+		flex-shrink: 0;
+	}
+
+	.toast-actions :global(.toast-action-btn) {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: var(--touch-target-min);
+		min-height: var(--touch-target-min);
+		padding: 0 var(--space-sm);
+		border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+		border-radius: var(--radius-sm);
+		background: color-mix(in srgb, var(--color-surface) 18%, transparent);
+		color: inherit;
+		font-size: 0.875rem;
+		font-weight: 700;
+		font-family: inherit;
+		cursor: pointer;
+	}
+
+	.toast-actions :global(.toast-action-btn:hover:not(:disabled)) {
+		background: color-mix(in srgb, var(--color-surface) 32%, transparent);
+	}
+
+	.toast-actions :global(.toast-action-btn:disabled) {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 
 	.dismiss {

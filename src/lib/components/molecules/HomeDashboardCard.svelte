@@ -12,6 +12,7 @@
 		size?: HomeDashboardCardSize;
 		icon?: Snippet;
 		meta?: Snippet;
+		viz?: Snippet;
 		body?: Snippet;
 		footerLabel: string;
 	}
@@ -24,12 +25,13 @@
 		size = 'default',
 		icon,
 		meta,
+		viz,
 		body,
 		footerLabel
 	}: Props = $props();
 </script>
 
-<div class="dashboard-card" data-card-size={size}>
+<div class="dashboard-card" data-card-size={size} class:has-viz={!!viz}>
 	<SkaffuCard {href} clickable {tone} data-testid={testId}>
 		<div class="card-inner">
 			<div class="card-header">
@@ -40,9 +42,18 @@
 				{/if}
 				<h2 class="card-title">{title}</h2>
 			</div>
-			{#if meta}
-				<div class="card-meta">
-					{@render meta()}
+			{#if meta || viz}
+				<div class="card-content-row">
+					{#if meta}
+						<div class="card-meta">
+							{@render meta()}
+						</div>
+					{/if}
+					{#if viz}
+						<div class="card-viz">
+							{@render viz()}
+						</div>
+					{/if}
 				</div>
 			{/if}
 			{#if body}
@@ -143,10 +154,33 @@
 		padding: 0 var(--space-md) var(--space-sm) !important;
 	}
 
+	.card-content-row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-md);
+		min-width: 0;
+	}
+
+	.has-viz .card-content-row {
+		justify-content: space-between;
+	}
+
 	.card-meta {
+		flex: 1;
+		min-width: 0;
 		font-size: var(--font-size-label);
 		color: var(--color-text-muted);
 		line-height: 1.4;
+	}
+
+	.card-viz {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: var(--space-xs);
+		flex-shrink: 0;
+		min-width: 0;
+		max-width: 8.5rem;
 	}
 
 	.card-body {
@@ -159,5 +193,16 @@
 		font-size: var(--font-size-body-sm);
 		font-weight: 600;
 		color: var(--color-primary);
+	}
+
+	@media (max-width: 420px) {
+		.card-content-row {
+			flex-wrap: wrap;
+		}
+
+		.card-viz {
+			align-items: flex-start;
+			max-width: 100%;
+		}
 	}
 </style>

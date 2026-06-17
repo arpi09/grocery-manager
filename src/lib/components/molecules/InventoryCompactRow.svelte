@@ -16,9 +16,9 @@
 	import { buildInventoryShelfLifeExplanation } from '$lib/domain/learning/prediction-explain';
 	import { getLocale, t } from '$lib/i18n';
 	import {
-		clampSwipeOffset,
 		resolveSwipeAction,
-		resolveSwipeAxis
+		resolveSwipeAxis,
+		swipeDisplayOffset
 	} from '$lib/utils/row-swipe';
 
 	interface Props {
@@ -159,7 +159,7 @@
 		}
 
 		event.preventDefault();
-		swipeOffset = clampSwipeOffset(deltaX);
+		swipeOffset = swipeDisplayOffset(deltaX);
 	}
 
 	function onSwipePointerUp(event: PointerEvent) {

@@ -168,11 +168,9 @@
 <style>
 	.shopping-page {
 		display: flex;
-
 		flex-direction: column;
-
-		gap: var(--space-md);
-
+		gap: var(--space-lg);
+		min-width: 0;
 		padding-bottom: calc(var(--content-bottom-safe) + var(--space-md));
 	}
 

@@ -19,8 +19,11 @@ async function ensureSmartFillVisible(page: Page) {
 		while ((await uncheckedRows.count()) > 0) {
 			const before = await uncheckedRows.count();
 			const row = uncheckedRows.first();
-			await row.locator('.remove-trigger').getByRole('button').first().click();
-			await row.getByRole('button', { name: /Ta bort|Delete/i }).click();
+			await row.getByTestId('shopping-delete-trigger').click();
+			await page
+				.getByTestId('shopping-delete-confirm-strip')
+				.getByRole('button', { name: /Ta bort|Delete/i })
+				.click();
 			await expect(uncheckedRows).toHaveCount(before - 1, { timeout: 10_000 });
 		}
 
@@ -83,6 +86,40 @@ test.describe('Shopping list', () => {
 		}
 
 		await expect(row).toHaveCount(0, { timeout: 20_000 });
+	});
+
+	test('delete confirm strip replaces row without overlap @deploy-critical', async ({ page }) => {
+		test.setTimeout(60_000);
+		const itemName = `E2E Delete Strip ${Date.now()}`;
+
+		await loginAsAdmin(page);
+		await page.goto('/inkop');
+		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
+
+		await page.locator('#shopping-name').fill(itemName);
+		await page.locator('form.add-form').getByRole('button', { name: /L.gg till/i }).click();
+
+		const row = uncheckedShoppingRow(page, itemName);
+		await expect(row).toBeVisible({ timeout: 15_000 });
+		await expect(row.getByText(itemName)).toBeVisible();
+
+		await row.getByTestId('shopping-delete-trigger').click();
+
+		const strip = page.getByTestId('shopping-delete-confirm-strip');
+		await expect(strip).toBeVisible();
+		await expect(strip.getByText(/Ta bort rad/i)).toBeVisible();
+		await expect(page.getByText(itemName)).not.toBeVisible();
+
+		await strip.getByRole('button', { name: /Avbryt|Cancel/i }).click();
+		await expect(strip).not.toBeVisible();
+		await expect(uncheckedShoppingRow(page, itemName)).toBeVisible();
+
+		const rowAfterCancel = uncheckedShoppingRow(page, itemName);
+		await rowAfterCancel.getByTestId('shopping-delete-trigger').click();
+		await expect(strip).toBeVisible();
+		await strip.getByRole('button', { name: /Ta bort|Delete/i }).click();
+		await expect(uncheckedShoppingRow(page, itemName)).toHaveCount(0, { timeout: 15_000 });
 	});
 
 	test('check off opens pantry bridge sheet and can add to pantry', async ({ page }) => {

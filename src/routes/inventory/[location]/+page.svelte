@@ -7,7 +7,6 @@
 
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 
-	import Button from '$lib/components/atoms/Button.svelte';
 	import InventoryAddSheet from '$lib/components/molecules/InventoryAddSheet.svelte';
 	import InventoryList from '$lib/components/organisms/InventoryList.svelte';
 
@@ -75,10 +74,6 @@
 
 		<div class="inventory-page">
 			{#if data.canWrite}
-
-				<Button type="button" variant="primary" data-testid="inventory-add-goods" onclick={() => (addSheetOpen = true)}>
-				{t('inventory.add')}
-			</Button>
 			<InventoryAddSheet
 				open={addSheetOpen}
 				receiptHref={scanReceiptHref}
@@ -87,7 +82,6 @@
 				manualHref={manualHref}
 				onClose={() => (addSheetOpen = false)}
 			/>
-
 			{/if}
 
 			{#if data.canWrite && initialExpiryFilter === 'noExpiry'}
@@ -119,6 +113,7 @@
 				{hasInventory}
 				{initialShowAutoExpired}
 				initialExpiryFilter={initialExpiryFilter}
+				onAddClick={data.canWrite ? () => (addSheetOpen = true) : undefined}
 
 			/>
 

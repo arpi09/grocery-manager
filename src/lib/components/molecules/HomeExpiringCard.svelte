@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
 	import FeatureIcon from '$lib/components/atoms/FeatureIcon.svelte';
+	import ProgressRing from '$lib/components/atoms/ProgressRing.svelte';
 	import HomeDashboardCard, {
 		type HomeDashboardCardSize
 	} from '$lib/components/molecules/HomeDashboardCard.svelte';
@@ -25,6 +26,10 @@
 	let { expiringSoon, homeState, size = 'default', canWrite = false }: Props = $props();
 
 	const tone = $derived(homeState === 'expiry' ? 'attention' : 'default');
+	const expiringCount = $derived(expiringSoon.length);
+	const expiringRatio = $derived(
+		expiringCount <= 0 ? 0 : Math.min(1, Math.max(0.15, expiringCount / 6))
+	);
 	let sharingImage = $state(false);
 
 	async function shareExpiringCard() {
@@ -91,11 +96,27 @@
 	{#snippet icon()}
 		<FeatureIcon id="clock" size={18} />
 	{/snippet}
-	{#snippet body()}
-		{#if expiringSoon.length > 0}
-			<HomeExpiringList {expiringSoon} />
+	{#snippet meta()}
+		{#if expiringCount > 0}
+			<p class="meta-line">{t('eatFirst.shareCardHeadline', { count: expiringCount })}</p>
 		{:else}
-			<p class="empty-line">{t('home.dashboard.expiringEmpty')}</p>
+			<p class="meta-line">{t('home.dashboard.expiringEmpty')}</p>
+		{/if}
+	{/snippet}
+	{#snippet viz()}
+		<div class="expiring-viz">
+			<ProgressRing
+				ratio={expiringRatio}
+				size={size === 'hero' ? 64 : size === 'compact' ? 48 : 56}
+				label={String(expiringCount)}
+				active={expiringCount > 0 && homeState === 'expiry'}
+				ariaLabel={t('eatFirst.shareCardHeadline', { count: expiringCount })}
+			/>
+		</div>
+	{/snippet}
+	{#snippet body()}
+		{#if size === 'hero' && expiringCount > 0}
+			<HomeExpiringList {expiringSoon} />
 		{/if}
 	{/snippet}
 </HomeDashboardCard>
@@ -117,10 +138,19 @@
 {/if}
 
 <style>
-	.empty-line {
+	.meta-line {
 		margin: 0;
 		font-size: var(--font-size-body-sm);
 		color: var(--color-text-muted);
+	}
+
+	.expiring-viz :global(.ring-fill) {
+		stroke: var(--color-warning);
+	}
+
+	.expiring-viz :global(.progress-ring.active .ring-fill) {
+		stroke: var(--color-warning);
+		filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-warning) 35%, transparent));
 	}
 
 	.share-action {

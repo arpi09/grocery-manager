@@ -16,6 +16,14 @@ export function clampSwipeOffset(
 	return Math.max(-max, Math.min(max, offsetPx));
 }
 
+/** Negated drag delta so row motion reveals the hint that matches resolveSwipeAction. */
+export function swipeDisplayOffset(
+	deltaX: number,
+	max: number = SWIPE_MAX_OFFSET_PX
+): number {
+	return clampSwipeOffset(-deltaX, max);
+}
+
 export function resolveSwipeAction(
 	offsetPx: number,
 	threshold: number = SWIPE_COMMIT_THRESHOLD_PX
