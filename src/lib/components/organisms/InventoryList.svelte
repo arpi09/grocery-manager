@@ -91,6 +91,7 @@
 		hasInventory?: boolean;
 		initialShowAutoExpired?: boolean;
 		initialExpiryFilter?: InventoryExpiryFilter;
+		onAddClick?: () => void;
 	}
 
 
@@ -113,7 +114,8 @@
 		canConsume = false,
 		hasInventory = true,
 		initialShowAutoExpired = false,
-		initialExpiryFilter = 'all'
+		initialExpiryFilter = 'all',
+		onAddClick
 	}: Props = $props();
 
 	const canConsumeItems = $derived(canWrite || canConsume);
@@ -676,6 +678,19 @@
 
 		<LocationTab active={location} />
 
+		{#if canWrite && onAddClick}
+			<div class="sticky-add-row">
+				<Button
+					type="button"
+					variant="primary"
+					data-testid="inventory-add-goods"
+					onclick={onAddClick}
+				>
+					{t('inventory.add')}
+				</Button>
+			</div>
+		{/if}
+
 		{#if hasInventory && !isCompact}
 
 			<ListToolbar
@@ -1136,27 +1151,28 @@
 {/if}
 
 {#if undoPayload}
-	<div class="undo-toast-wrap" data-testid="undo-toast-wrap">
-		<Toast
-			message={undoMessage}
-			visible={true}
-			variant="success"
-			size="action"
-			portal={false}
-			durationMs={TOAST_UNDO_DURATION_MS}
-			tapToDismiss={true}
-			onDismiss={dismissUndo}
-		/>
-		<button
-			type="button"
-			class="undo-btn"
-			disabled={undoSubmitting}
-			onclick={undoConsume}
-			aria-label={t('common.undo')}
-		>
-			{t('common.undo')}
-		</button>
-	</div>
+	<Toast
+		message={undoMessage}
+		visible={true}
+		variant="success"
+		size="action"
+		durationMs={TOAST_UNDO_DURATION_MS}
+		tapToDismiss={true}
+		onDismiss={dismissUndo}
+		data-testid="undo-toast-wrap"
+	>
+		{#snippet actions()}
+			<button
+				type="button"
+				class="toast-action-btn"
+				disabled={undoSubmitting}
+				onclick={undoConsume}
+				aria-label={t('common.undo')}
+			>
+				{t('common.undo')}
+			</button>
+		{/snippet}
+	</Toast>
 {/if}
 
 <style>
@@ -1202,6 +1218,11 @@
 
 	.sticky-band--compact {
 		padding-top: var(--space-sm);
+	}
+
+	.sticky-add-row {
+		display: flex;
+		justify-content: flex-end;
 	}
 
 	.sticky-band--collapsed :global(.chip-row),
@@ -1438,35 +1459,6 @@
 
 	.intro-dismiss:hover {
 		border-color: var(--color-primary);
-	}
-
-	.undo-toast-wrap {
-		position: fixed;
-		left: 50%;
-		bottom: calc(var(--content-bottom-safe) + var(--space-sm));
-		transform: translateX(-50%);
-		z-index: var(--z-toast);
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
-		max-width: calc(100vw - 2 * var(--page-padding-x));
-	}
-
-	.undo-btn {
-		border: none;
-		border-radius: var(--radius-sm);
-		padding: 0.45rem 0.75rem;
-		font-weight: 600;
-		font-size: 0.85rem;
-		background: var(--color-surface);
-		color: var(--color-text);
-		cursor: pointer;
-		box-shadow: var(--shadow-md);
-	}
-
-	.undo-btn:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
 	}
 
 	:global(.clear-auto-expired-action) {

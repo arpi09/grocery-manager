@@ -57,9 +57,18 @@
 		width: 100%;
 		min-height: var(--touch-target-min);
 		padding: var(--space-sm) var(--space-md);
-		border-bottom: 1px solid var(--color-border);
+		border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, var(--color-text-muted));
 		background: var(--color-surface);
 		font-family: var(--font);
+	}
+
+	.skaffu-list-item:nth-child(even) :global(.mdc-deprecated-list-item__wrapper) {
+		background: color-mix(in srgb, var(--color-surface-muted) 40%, var(--color-surface));
+	}
+
+	.skaffu-list-item:focus-within :global(.mdc-deprecated-list-item__wrapper) {
+		outline: 2px solid var(--color-primary);
+		outline-offset: -2px;
 	}
 
 	.skaffu-list-item:last-child :global(.mdc-deprecated-list-item__wrapper) {

@@ -3,6 +3,7 @@ import {
 	clampSwipeOffset,
 	resolveSwipeAction,
 	resolveSwipeAxis,
+	swipeDisplayOffset,
 	SWIPE_COMMIT_THRESHOLD_PX,
 	SWIPE_MAX_OFFSET_PX
 } from './row-swipe';
@@ -29,5 +30,20 @@ describe('row-swipe helpers', () => {
 		expect(resolveSwipeAxis(0, 0)).toBeNull();
 		expect(resolveSwipeAxis(20, 2)).toBe('x');
 		expect(resolveSwipeAxis(2, 20)).toBe('y');
+	});
+
+	it('pairs display offset with action hints (right → finish, left → partial)', () => {
+		const swipeRight = SWIPE_COMMIT_THRESHOLD_PX;
+		expect(resolveSwipeAction(swipeRight)).toBe('finish');
+		expect(swipeDisplayOffset(swipeRight)).toBe(-swipeRight);
+
+		const swipeLeft = -SWIPE_COMMIT_THRESHOLD_PX;
+		expect(resolveSwipeAction(swipeLeft)).toBe('partial');
+		expect(swipeDisplayOffset(swipeLeft)).toBe(-swipeLeft);
+	});
+
+	it('negates drag delta for display while clamping to max offset', () => {
+		expect(swipeDisplayOffset(120)).toBe(-SWIPE_MAX_OFFSET_PX);
+		expect(swipeDisplayOffset(-120)).toBe(SWIPE_MAX_OFFSET_PX);
 	});
 });
