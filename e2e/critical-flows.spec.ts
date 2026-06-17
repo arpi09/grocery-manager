@@ -138,7 +138,8 @@ test.describe('Critical flows', () => {
 
 		await expect(page.locator('[data-home-state="cold"]')).toBeVisible();
 
-		await expect(page.getByTestId('home-hero')).toBeVisible();
+		await expect(page.getByTestId('home-welcome')).toBeVisible();
+		await expect(page.getByTestId('home-card-shopping')).toBeVisible();
 
 		await expect(page.getByRole('link', { name: /Skapa veckans lista|Create this week's list/i })).toBeVisible();
 
@@ -160,7 +161,8 @@ test.describe('Critical flows', () => {
 
 		await dismissOnboardingModalIfOpen(page);
 
-		await expect(page.getByTestId('home-hero')).toBeVisible();
+		await expect(page.getByTestId('home-welcome')).toBeVisible();
+		await expect(page.getByTestId('home-card-pantry')).toBeVisible();
 		await expect(page.locator('.home-v3-section')).toHaveCount(0);
 		await expect(page.getByRole('heading', { name: /Vad rekommenderar|What does Skaffu recommend/i })).toHaveCount(0);
 

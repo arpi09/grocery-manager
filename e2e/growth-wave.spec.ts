@@ -117,9 +117,8 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		await dismissCookieConsentIfOpen(page);
 		await dismissOnboardingModalIfOpen(page);
 
-		await expect(page.getByRole('heading', { level: 1 })).toContainText(
-			/Veckohandel|Weekly shop/i
-		);
+		await expect(page.getByTestId('home-welcome')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('home-card-expiring')).toBeVisible();
 		await expect(
 			page.getByRole('button', { name: /Dela som bild|Share as image/i }).first()
 		).toBeVisible({ timeout: 15_000 });

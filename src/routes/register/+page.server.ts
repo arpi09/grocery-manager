@@ -26,6 +26,7 @@ import { consumeRateLimit } from '$lib/server/auth-rate-limit';
 import { isEmailVerificationSkipped } from '$lib/server/email-verification-enforcement';
 import { createSession } from '$lib/server/session';
 import { isGoogleOAuthConfigured } from '$lib/server/google-oauth';
+import { isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -54,7 +55,10 @@ export const actions: Actions = {
 		}
 
 		const clientIp = event.getClientAddress();
-		if (!consumeRateLimit(`register:ip:${clientIp}`, 10, 15 * 60 * 1000)) {
+		if (
+			!isE2eMockAiEnabled() &&
+			!consumeRateLimit(`register:ip:${clientIp}`, 10, 15 * 60 * 1000)
+		) {
 			return fail(429, {
 				errors: {},
 				message: translate(event.locals.locale, 'auth.register.rateLimited'),
