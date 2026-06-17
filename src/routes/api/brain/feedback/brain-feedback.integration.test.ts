@@ -26,7 +26,13 @@ vi.mock('$lib/server/brain-feedback-flag', () => ({
 }));
 
 vi.mock('$lib/server/feature-flags', () => ({
-	isReplenishmentLearningEnabled: () => replenishmentLearningEnabled.value
+	isShelfLifeLearningEnabled: () => true,
+	isLocationLearningEnabled: () => true,
+	isReplenishmentLearningEnabled: () => replenishmentLearningEnabled.value,
+	isHomeRedesignV1Enabled: () => true,
+	isBrainFeedbackV1Enabled: () => brainFeedbackEnabled.value,
+	isShoppingListShareEnabled: () => false,
+	isPriceMemoryV1Enabled: () => true
 }));
 
 vi.mock('$lib/infrastructure/db', () => ({
