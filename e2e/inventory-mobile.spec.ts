@@ -44,9 +44,14 @@ test.describe('Inventory mobile UX', () => {
 		await undoBtn.click({ force: true });
 	}
 
+	async function openOverflowMenu(page: import('@playwright/test').Page) {
+		await expect(page.getByRole('menu')).toBeVisible({ timeout: 5_000 });
+	}
+
 	async function openPartialFromOverflow(page: import('@playwright/test').Page, row: ReturnType<typeof seededRow>) {
 		const overflow = row.getByTestId('row-overflow-menu').getByRole('button');
 		await overflow.click({ force: true });
+		await openOverflowMenu(page);
 		await page.getByRole('menuitem', { name: /Delvis|Partial/i }).click({ force: true });
 	}
 
@@ -58,6 +63,7 @@ test.describe('Inventory mobile UX', () => {
 
 		const overflow = row.getByTestId('row-overflow-menu').getByRole('button');
 		await overflow.click({ force: true });
+		await openOverflowMenu(page);
 		await expect(page.getByRole('menuitem', { name: /Ätit upp|Done/i })).toBeVisible();
 		await expect(page.getByRole('menuitem', { name: /Delvis|Partial/i })).toBeVisible({
 			timeout: 15_000
