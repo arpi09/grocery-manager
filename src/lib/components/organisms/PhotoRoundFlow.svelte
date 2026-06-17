@@ -24,7 +24,8 @@ import {
 	savePhotoRoundLocation
 } from '$lib/utils/photo-round-locations';
 	import { saveLastScanMode } from '$lib/utils/last-scan-defaults';
-	import { recordFirstItemActivation } from '$lib/utils/onboarding';
+	import { recordFirstItemActivation, shouldShowOnboarding } from '$lib/utils/onboarding';
+	import { recordOnboardingScanSaveSync } from '$lib/utils/activation-scan-save';
 	import {
 		PhotoRoundImageError,
 		resizeImageForPhotoRound
@@ -479,7 +480,20 @@ import {
 				: bindSubmittingWithRedirect(
 						(v) => (bulkSubmitting = v),
 						async () => {
-							recordFirstItemActivation(page.data.user?.id);
+							const uid = page.data.user?.id;
+							if (shouldShowOnboarding(uid)) {
+								const selectedLines = lines.filter((line) => selected[line.id]);
+								recordOnboardingScanSaveSync(
+									uid,
+									selectedLines.map((line) => ({
+										name: line.name,
+										location: line.location,
+										expiresOn: line.expiresOn
+									}))
+								);
+							} else {
+								recordFirstItemActivation(uid);
+							}
 						},
 						syncPhotoRoundFormData
 					)}

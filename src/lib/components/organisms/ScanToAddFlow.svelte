@@ -7,7 +7,8 @@
 	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
 	import { bindEmbeddedScanSubmit } from '$lib/utils/scan-embedded-submit';
 	import { page } from '$app/state';
-	import { recordBarcodeActivation } from '$lib/utils/onboarding';
+	import { recordBarcodeActivation, shouldShowOnboarding } from '$lib/utils/onboarding';
+	import { recordOnboardingScanSaveSync } from '$lib/utils/activation-scan-save';
 	import type { BarcodeLookupResult } from '$lib/domain/barcode-product';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
@@ -325,7 +326,18 @@
 						(v) => (saveSubmitting = v),
 						async () => {
 							persistFavoriteProduct();
-							recordBarcodeActivation(page.data.user?.id);
+							const uid = page.data.user?.id;
+							if (shouldShowOnboarding(uid)) {
+								recordOnboardingScanSaveSync(uid, [
+									{
+										name,
+										location,
+										expiresOn: expiresOn || null
+									}
+								]);
+							} else {
+								recordBarcodeActivation(uid);
+							}
 							saveLastScanDefaults({ location });
 						}
 					)}

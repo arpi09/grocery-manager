@@ -3,7 +3,7 @@
 	import type { Snippet } from 'svelte';
 
 	interface Props {
-		title: string;
+		title?: string;
 		titleId?: string;
 		onClose?: () => void;
 		closeLabel?: string;
@@ -17,7 +17,9 @@
 
 <header class="modal-header">
 	<div class="modal-header-text">
-		<h2 id={titleId}>{title}</h2>
+		{#if title}
+			<h2 id={titleId}>{title}</h2>
+		{/if}
 		{#if subtitle}
 			<p class="modal-header-sub" data-testid={subtitleTestId}>{subtitle}</p>
 		{/if}
