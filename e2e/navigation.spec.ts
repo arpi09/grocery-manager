@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { clickNavHref, clickSecondaryNavHref, dismissOnboardingModalIfOpen } from './helpers/auth';
+import { expectHomeSectionVisible } from './helpers/home';
 
 test.describe('Navigation', () => {
 	test.setTimeout(60_000);
@@ -37,7 +38,7 @@ test.describe('Mobile navigation', () => {
 		await page.goto('/hem');
 		await dismissOnboardingModalIfOpen(page);
 
-		await expect(page.locator('section.home')).toBeVisible();
+		await expectHomeSectionVisible(page);
 		await expect(page.locator('.scan-zone')).toHaveCount(0);
 	});
 
@@ -45,7 +46,7 @@ test.describe('Mobile navigation', () => {
 		await page.goto('/hem');
 		await dismissOnboardingModalIfOpen(page);
 
-		await expect(page.locator('section.home')).toBeVisible();
+		await expectHomeSectionVisible(page);
 		await expect(page.locator('.app')).not.toContainText('`n');
 		await expect(page.locator('.app')).not.toContainText('`t');
 	});

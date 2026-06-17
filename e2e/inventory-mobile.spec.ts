@@ -51,6 +51,7 @@ test.describe('Inventory mobile UX', () => {
 	}
 
 	async function openPartialFromOverflow(page: import('@playwright/test').Page, row: ReturnType<typeof seededRow>) {
+		await dismissBlockingOverlays(page);
 		const overflow = row.getByTestId('row-overflow-menu').getByRole('button');
 		await row.scrollIntoViewIfNeeded();
 		await overflow.click();
