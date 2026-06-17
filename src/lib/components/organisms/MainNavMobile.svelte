@@ -264,6 +264,13 @@
 		isolation: isolate;
 	}
 
+	/* Portaled to body — parent .main-nav-mobile display:none at 900px+ does not apply */
+	@media (min-width: 900px) {
+		.mobile-bottom {
+			display: none;
+		}
+	}
+
 	.mobile-bottom-list {
 		display: flex;
 		align-items: stretch;
