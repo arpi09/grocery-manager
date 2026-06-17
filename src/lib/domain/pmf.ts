@@ -98,10 +98,6 @@ export const PMF_PRODUCT_EVENT_TYPES = [
 	'receipt_uploaded',
 	'receipt_parsed',
 	'receipt_review_completed',
-	'receipt_import_success_viewed',
-	'receipt_import_success_dismissed',
-	'receipt_import_success_primary_cta',
-	'receipt_import_success_secondary_cta',
 	'photo_round_parsed',
 	'fill_suggestions_added'
 ] as const;
