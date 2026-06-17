@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { portal } from '$lib/actions/portal';
 	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
 	import ProNavBadge from '$lib/components/atoms/ProNavBadge.svelte';
 	import ProUpgradeCta from '$lib/components/molecules/ProUpgradeCta.svelte';
@@ -110,7 +111,13 @@
 		</Modal>
 	{/if}
 {:else}
-	<nav class="mobile-bottom" aria-label={t('nav.mobileNav')} aria-hidden={moreOpen ? 'true' : undefined}>
+	<nav
+		class="mobile-bottom"
+		use:portal={'body'}
+		aria-label={t('nav.mobileNav')}
+		aria-hidden={moreOpen ? 'true' : undefined}
+		data-testid="mobile-bottom-nav"
+	>
 		<ul class="mobile-bottom-list">
 			{#each mobileTabs as item (item.href + item.labelKey)}
 				{@const active = isNavActive(pathname, item)}
