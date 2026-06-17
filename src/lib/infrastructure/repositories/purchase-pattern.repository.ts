@@ -21,6 +21,7 @@ export interface IPurchasePatternRepository {
 	listRecentLines(householdId: string, since: Date): Promise<ReceiptPurchaseLineRecord[]>;
 	listDismissedKeys(householdId: string): Promise<Set<string>>;
 	dismissPattern(householdId: string, normalizedKey: string): Promise<void>;
+	restorePattern(householdId: string, normalizedKey: string): Promise<void>;
 	listInventoryNormalizedKeys(householdId: string): Promise<Set<string>>;
 	listActiveInventoryMatches(householdId: string): Promise<PantryInventoryMatch[]>;
 	listShoppingListNormalizedNames(householdId: string): Promise<Set<string>>;
@@ -103,6 +104,17 @@ export class DrizzlePurchasePatternRepository implements IPurchasePatternReposit
 			.insert(receiptPatternDismissalTable)
 			.values({ householdId, normalizedKey })
 			.onConflictDoNothing();
+	}
+
+	async restorePattern(householdId: string, normalizedKey: string): Promise<void> {
+		await this.database
+			.delete(receiptPatternDismissalTable)
+			.where(
+				and(
+					eq(receiptPatternDismissalTable.householdId, householdId),
+					eq(receiptPatternDismissalTable.normalizedKey, normalizedKey)
+				)
+			);
 	}
 
 	async listInventoryNormalizedKeys(householdId: string): Promise<Set<string>> {

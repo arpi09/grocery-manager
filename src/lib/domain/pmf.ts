@@ -89,7 +89,11 @@ export const PRODUCT_EVENT_TYPES = [
 	'list_link_opened',
 	'list_join_cta_clicked',
 	'partner_joined',
-	'shared_checkoff'
+	'shared_checkoff',
+	'brain_feedback_positive',
+	'brain_feedback_negative',
+	'brain_feedback_dismissed',
+	'brain_explanation_viewed'
 ] as const;
 
 export const PMF_PRODUCT_EVENT_TYPES = [

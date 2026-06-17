@@ -18,6 +18,16 @@
 	let selectedFacet = $state<MemoryFacetView | null>(null);
 	let sheetOpen = $state(false);
 
+	const buyAgainFacets = $derived(
+		memorySnapshot.memoryFacets.filter((facet) => facet.type === 'buy_again')
+	);
+	const shelfLifeFacets = $derived(
+		memorySnapshot.memoryFacets.filter((facet) => facet.type === 'shelf_life')
+	);
+	const locationFacets = $derived(
+		memorySnapshot.memoryFacets.filter((facet) => facet.type === 'location')
+	);
+
 	function openFacet(facet: MemoryFacetView) {
 		selectedFacet = facet;
 		sheetOpen = true;
@@ -35,16 +45,44 @@
 			{t('memory.countBanner', { count: memorySnapshot.memoryFacets.length })}
 		</p>
 
-		<section aria-labelledby="memory-products-heading">
-			<h2 id="memory-products-heading" class="section-heading">
-				{t('memory.productsSection', { count: memorySnapshot.memoryFacets.length })}
-			</h2>
-			<div class="facet-list">
-				{#each memorySnapshot.memoryFacets as facet (facet.facetKey)}
-					<MemoryFacetCard {facet} onSelect={openFacet} />
-				{/each}
-			</div>
-		</section>
+		{#if buyAgainFacets.length > 0}
+			<section aria-labelledby="memory-buy-again-heading">
+				<h2 id="memory-buy-again-heading" class="section-heading">
+					{t('memory.sections.buyAgain', { count: buyAgainFacets.length })}
+				</h2>
+				<div class="facet-list">
+					{#each buyAgainFacets as facet (facet.facetKey)}
+						<MemoryFacetCard {facet} onSelect={openFacet} />
+					{/each}
+				</div>
+			</section>
+		{/if}
+
+		{#if shelfLifeFacets.length > 0}
+			<section aria-labelledby="memory-shelf-life-heading">
+				<h2 id="memory-shelf-life-heading" class="section-heading">
+					{t('memory.sections.shelfLife', { count: shelfLifeFacets.length })}
+				</h2>
+				<div class="facet-list">
+					{#each shelfLifeFacets as facet (facet.facetKey)}
+						<MemoryFacetCard {facet} onSelect={openFacet} />
+					{/each}
+				</div>
+			</section>
+		{/if}
+
+		{#if locationFacets.length > 0}
+			<section aria-labelledby="memory-location-heading">
+				<h2 id="memory-location-heading" class="section-heading">
+					{t('memory.sections.location', { count: locationFacets.length })}
+				</h2>
+				<div class="facet-list">
+					{#each locationFacets as facet (facet.facetKey)}
+						<MemoryFacetCard {facet} onSelect={openFacet} />
+					{/each}
+				</div>
+			</section>
+		{/if}
 	{:else}
 		<MemoryEmptyState hasReceiptData={memorySnapshot.receiptLineCount > 0} />
 	{/if}

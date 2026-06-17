@@ -1,0 +1,3 @@
+-- Brain Feedback V1 product_event types (application enum in schema.ts):
+-- brain_feedback_positive, brain_feedback_negative, brain_feedback_dismissed, brain_explanation_viewed
+-- No DDL required when product_event.event_type is unconstrained text; enum kept in sync in schema.ts.

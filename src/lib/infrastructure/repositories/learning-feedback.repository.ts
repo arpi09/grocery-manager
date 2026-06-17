@@ -1,4 +1,4 @@
-import { and, desc, eq, gte } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray } from 'drizzle-orm';
 import { db, type AppDatabase } from '$lib/infrastructure/db';
 import { learningFeedbackTable } from '$lib/infrastructure/db/schema';
 import { generateId } from '$lib/infrastructure/auth/id';
@@ -36,6 +36,12 @@ export interface ListLearningFeedbackOptions {
 	limit?: number;
 }
 
+export interface RecentFeedbackLookup {
+	predictorId: string;
+	subjectKey: string;
+	feedbackType: LearningFeedbackType;
+}
+
 export interface ILearningFeedbackRepository {
 	insert(input: InsertLearningFeedbackInput): Promise<LearningFeedbackRecord>;
 	listByHouseholdAndPredictor(
@@ -43,6 +49,16 @@ export interface ILearningFeedbackRepository {
 		predictorId: string,
 		options?: ListLearningFeedbackOptions
 	): Promise<LearningFeedbackRecord[]>;
+	hasRecentFeedback(
+		householdId: string,
+		lookup: RecentFeedbackLookup,
+		withinMs: number
+	): Promise<boolean>;
+	latestBySubjectKeys(
+		householdId: string,
+		predictorId: string,
+		subjectKeys: string[]
+	): Promise<Map<string, LearningFeedbackRecord>>;
 }
 
 function mapFeedback(row: typeof learningFeedbackTable.$inferSelect): LearningFeedbackRecord {
@@ -110,5 +126,55 @@ export class DrizzleLearningFeedbackRepository implements ILearningFeedbackRepos
 
 		const rows = await query;
 		return rows.map(mapFeedback);
+	}
+
+	async hasRecentFeedback(
+		householdId: string,
+		lookup: RecentFeedbackLookup,
+		withinMs: number
+	): Promise<boolean> {
+		const since = new Date(Date.now() - withinMs);
+		const [row] = await this.database
+			.select({ id: learningFeedbackTable.id })
+			.from(learningFeedbackTable)
+			.where(
+				and(
+					eq(learningFeedbackTable.householdId, householdId),
+					eq(learningFeedbackTable.predictorId, lookup.predictorId),
+					eq(learningFeedbackTable.subjectKey, lookup.subjectKey),
+					eq(learningFeedbackTable.feedbackType, lookup.feedbackType),
+					gte(learningFeedbackTable.createdAt, since)
+				)
+			)
+			.limit(1);
+		return Boolean(row);
+	}
+
+	async latestBySubjectKeys(
+		householdId: string,
+		predictorId: string,
+		subjectKeys: string[]
+	): Promise<Map<string, LearningFeedbackRecord>> {
+		if (subjectKeys.length === 0) return new Map();
+
+		const rows = await this.database
+			.select()
+			.from(learningFeedbackTable)
+			.where(
+				and(
+					eq(learningFeedbackTable.householdId, householdId),
+					eq(learningFeedbackTable.predictorId, predictorId),
+					inArray(learningFeedbackTable.subjectKey, subjectKeys)
+				)
+			)
+			.orderBy(desc(learningFeedbackTable.createdAt));
+
+		const latest = new Map<string, LearningFeedbackRecord>();
+		for (const row of rows) {
+			if (!latest.has(row.subjectKey)) {
+				latest.set(row.subjectKey, mapFeedback(row));
+			}
+		}
+		return latest;
 	}
 }

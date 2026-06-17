@@ -24,6 +24,7 @@
 		compact?: boolean;
 		surface?: ReplenishmentSurface;
 		householdId?: string | null;
+		brainFeedbackV1?: boolean;
 	}
 
 	let {
@@ -32,12 +33,16 @@
 		canEdit = false,
 		compact = false,
 		surface = 'inkop',
-		householdId = null
+		householdId = null,
+		brainFeedbackV1 = false
 	}: Props = $props();
 
 	let items = $state<ReplenishmentSuggestion[]>([]);
 	let acceptingKey = $state<string | null>(null);
 	let dismissingKey = $state<string | null>(null);
+	let feedbackKey = $state<string | null>(null);
+	let inlineAckByKey = $state<Record<string, string>>({});
+	let whyExpandedKey = $state<string | null>(null);
 	let errorMessage = $state<string | null>(null);
 	let shownTracked = $state(false);
 	let shownDedupeKeys = $state(new Set<string>());
@@ -144,6 +149,139 @@
 		});
 	}
 
+	function beliefLine(suggestion: ReplenishmentSuggestion): string {
+		const code: ReplenishmentReasonCode = suggestion.reasonCode;
+		const name = suggestion.displayName;
+		if (code === 'recurring_not_in_pantry') {
+			return t('replenishment.feedback.belief.recurringNotInPantry', { name });
+		}
+		if (code === 'cadence_overdue') {
+			return t('replenishment.feedback.belief.cadenceOverdue', { name });
+		}
+		return t('replenishment.feedback.belief.recurringAndCadence', { name });
+	}
+
+	function whyLine(suggestion: ReplenishmentSuggestion): string {
+		const code: ReplenishmentReasonCode = suggestion.reasonCode;
+		const name = suggestion.displayName;
+		if (code === 'recurring_not_in_pantry') {
+			return t('replenishment.feedback.why.recentPurchases', {
+				name,
+				count: suggestion.lineCount
+			});
+		}
+		if (code === 'cadence_overdue' && suggestion.avgIntervalDays) {
+			return t('replenishment.feedback.why.cadenceInterval', {
+				interval: suggestion.avgIntervalDays
+			});
+		}
+		if (code === 'cadence_overdue') {
+			return t('replenishment.feedback.why.daysSinceLast', { days: suggestion.daysSinceLast });
+		}
+		if (suggestion.avgIntervalDays) {
+			return t('replenishment.feedback.why.recurringAndInterval', {
+				count: suggestion.lineCount,
+				interval: suggestion.avgIntervalDays
+			});
+		}
+		return t('replenishment.feedback.why.recurringAndDays', {
+			count: suggestion.lineCount,
+			days: suggestion.daysSinceLast
+		});
+	}
+
+	function feedbackLabels(suggestion: ReplenishmentSuggestion): { positive: string; negative: string } {
+		if (suggestion.reasonCode === 'cadence_overdue') {
+			return {
+				positive: t('replenishment.feedback.positive.helpful'),
+				negative: t('replenishment.feedback.negative.notHelpful')
+			};
+		}
+		return {
+			positive: t('replenishment.feedback.positive.thatsRight'),
+			negative: t('replenishment.feedback.negative.notReally')
+		};
+	}
+
+	function setInlineAck(key: string, message: string) {
+		inlineAckByKey = { ...inlineAckByKey, [key]: message };
+		setTimeout(() => {
+			const next = { ...inlineAckByKey };
+			delete next[key];
+			inlineAckByKey = next;
+		}, 2000);
+	}
+
+	async function sendFeedback(
+		suggestion: ReplenishmentSuggestion,
+		polarity: 'positive' | 'negative'
+	) {
+		if (!canEdit || feedbackKey) return;
+		feedbackKey = suggestion.normalizedKey;
+		errorMessage = null;
+
+		try {
+			const response = await fetch('/api/brain/feedback', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					predictorId: 'replenishment',
+					subjectKey: suggestion.normalizedKey,
+					polarity,
+					surface,
+					reasonCode: suggestion.reasonCode,
+					suggestionContext: {
+						displayName: suggestion.displayName,
+						lineCount: suggestion.lineCount,
+						avgIntervalDays: suggestion.avgIntervalDays,
+						daysSinceLast: suggestion.daysSinceLast
+					}
+				})
+			});
+			const data = (await response.json()) as { ackKey?: string; error?: string };
+			if (!response.ok) {
+				errorMessage = data.error ?? t('replenishment.acceptFailed');
+				return;
+			}
+			setInlineAck(
+				suggestion.normalizedKey,
+				t(
+					polarity === 'positive'
+						? 'replenishment.feedback.ack.positive'
+						: 'replenishment.feedback.ack.negative'
+				)
+			);
+			if (polarity === 'positive') {
+				void trackProductEvent('brain_feedback_positive', {
+					normalizedKey: suggestion.normalizedKey,
+					surface,
+					reasonCode: suggestion.reasonCode
+				});
+			} else {
+				void trackProductEvent('brain_feedback_negative', {
+					normalizedKey: suggestion.normalizedKey,
+					surface,
+					reasonCode: suggestion.reasonCode
+				});
+			}
+		} catch {
+			errorMessage = t('replenishment.acceptFailed');
+		} finally {
+			feedbackKey = null;
+		}
+	}
+
+	function toggleWhy(key: string) {
+		const next = whyExpandedKey === key ? null : key;
+		if (next) {
+			void trackProductEvent('brain_explanation_viewed', {
+				normalizedKey: key,
+				surface
+			});
+		}
+		whyExpandedKey = next;
+	}
+
 	function memoryChipLabels(suggestion: ReplenishmentSuggestion): string[] {
 		const chips: string[] = [];
 		if (suggestion.avgIntervalDays !== null && suggestion.avgIntervalDays > 0) {
@@ -176,7 +314,9 @@
 			}
 
 			items = items.filter((entry) => entry.normalizedKey !== normalizedKey);
-			showClientToast(t('replenishment.learningToastAccept'), { variant: 'success' });
+			if (!brainFeedbackV1) {
+				showClientToast(t('replenishment.learningToastAccept'), { variant: 'success' });
+			}
 			showClientToast(t('replenishment.acceptSuccess', { name: data.name ?? '' }), {
 				variant: 'success'
 			});
@@ -206,7 +346,12 @@
 			}
 
 			items = items.filter((entry) => entry.normalizedKey !== normalizedKey);
-			showClientToast(t('replenishment.learningToastDismiss'), { variant: 'default' });
+			if (brainFeedbackV1) {
+				setInlineAck(normalizedKey, t('replenishment.feedback.ack.dismiss'));
+				void trackProductEvent('brain_feedback_dismissed', { normalizedKey, surface });
+			} else {
+				showClientToast(t('replenishment.learningToastDismiss'), { variant: 'default' });
+			}
 		} catch {
 			errorMessage = t('replenishment.dismissFailed');
 		} finally {
@@ -235,9 +380,37 @@
 				<li>
 					<Card class="suggestion-card">
 						<div class="copy">
-							<span class="name">{suggestion.displayName}</span>
-							<span class="meta">{reasonMessage(suggestion)}</span>
-							{#if memoryChips.length > 0}
+							{#if brainFeedbackV1}
+								<span class="belief">{beliefLine(suggestion)}</span>
+								<span class="meta">{whyLine(suggestion)}</span>
+								<button
+									type="button"
+									class="why-toggle"
+									aria-expanded={whyExpandedKey === suggestion.normalizedKey}
+									onclick={() => toggleWhy(suggestion.normalizedKey)}
+								>
+									{t('replenishment.feedback.whyExpand')}
+								</button>
+								{#if whyExpandedKey === suggestion.normalizedKey}
+									<ul class="why-facts">
+										<li>{reasonMessage(suggestion)}</li>
+										{#each memoryChips as chip (chip)}
+											<li>{chip}</li>
+										{/each}
+									</ul>
+								{/if}
+							{:else}
+								<span class="name">{suggestion.displayName}</span>
+								<span class="meta">{reasonMessage(suggestion)}</span>
+							{/if}
+							{#if !brainFeedbackV1 && memoryChips.length > 0}
+								<div class="memory-chips">
+									{#each memoryChips as chip (chip)}
+										<Badge tone="default">{chip}</Badge>
+									{/each}
+								</div>
+							{/if}
+							{#if brainFeedbackV1}
 								<div class="memory-chips">
 									{#each memoryChips as chip (chip)}
 										<Badge tone="default">{chip}</Badge>
@@ -249,6 +422,11 @@
 								normalizedKey={suggestion.normalizedKey}
 								surface="replenishment"
 							/>
+							{#if inlineAckByKey[suggestion.normalizedKey]}
+								<p class="inline-ack" role="status">
+									{inlineAckByKey[suggestion.normalizedKey]}
+								</p>
+							{/if}
 							{#if dedupeWarnings.length > 0}
 								<div class="dedupe-chips">
 									{#each dedupeWarnings as warning (warning.kind)}
@@ -277,6 +455,27 @@
 								>
 									{t('replenishment.addToList')}
 								</Button>
+								{#if brainFeedbackV1}
+									{@const labels = feedbackLabels(suggestion)}
+									<div class="feedback-pair">
+										<button
+											type="button"
+											class="feedback-btn"
+											disabled={feedbackKey === suggestion.normalizedKey}
+											onclick={() => sendFeedback(suggestion, 'positive')}
+										>
+											{labels.positive}
+										</button>
+										<button
+											type="button"
+											class="feedback-btn"
+											disabled={feedbackKey === suggestion.normalizedKey}
+											onclick={() => sendFeedback(suggestion, 'negative')}
+										>
+											{labels.negative}
+										</button>
+									</div>
+								{/if}
 								<button
 									type="button"
 									class="dismiss"
@@ -347,6 +546,53 @@
 		font-weight: 700;
 		font-size: 1rem;
 		line-height: 1.3;
+	}
+
+	.belief {
+		font-weight: 700;
+		font-size: 1rem;
+		line-height: 1.35;
+	}
+
+	.why-toggle {
+		align-self: flex-start;
+		border: none;
+		background: none;
+		padding: 0;
+		font-size: 0.8125rem;
+		color: var(--color-primary);
+		cursor: pointer;
+		min-height: var(--touch-target-min);
+	}
+
+	.why-facts {
+		margin: 0;
+		padding-left: 1.1rem;
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+	}
+
+	.inline-ack {
+		margin: 0;
+		font-size: 0.8125rem;
+		color: var(--color-text-secondary);
+	}
+
+	.feedback-pair {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
+	}
+
+	.feedback-btn {
+		border: 1px solid var(--color-border);
+		background: var(--color-surface-muted);
+		border-radius: var(--radius-md);
+		padding: var(--space-xs) var(--space-sm);
+		min-height: var(--touch-target-min);
+		font-size: 0.8125rem;
+		font-weight: 600;
+		cursor: pointer;
 	}
 
 	.meta {

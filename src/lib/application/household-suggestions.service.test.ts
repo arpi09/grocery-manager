@@ -40,9 +40,10 @@ describe('HouseholdSuggestionsService', () => {
 
 	const purchasePatternRepository: IPurchasePatternRepository = {
 		insertLines: vi.fn(),
-		listRecentLines: vi.fn(),
-		listDismissedKeys: vi.fn(),
+		listRecentLines: vi.fn(async () => []),
+		listDismissedKeys: vi.fn(async (): Promise<Set<string>> => new Set()),
 		dismissPattern: vi.fn(),
+		restorePattern: vi.fn(async (): Promise<void> => {}),
 		listInventoryNormalizedKeys: vi.fn(),
 		listActiveInventoryMatches: vi.fn(async () => [
 			{

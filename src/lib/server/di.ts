@@ -131,6 +131,7 @@ export const linkedInPublishService = new LinkedInPublishService(
 );
 
 const purchasePatternRepository = new DrizzlePurchasePatternRepository();
+export { purchasePatternRepository };
 const priceMemoryRepository = new DrizzlePriceMemoryRepository();
 const expiringShareRepository = new DrizzleExpiringShareRepository();
 const shoppingListShareRepository = new DrizzleShoppingListShareRepository();
@@ -174,6 +175,7 @@ export const householdService = new HouseholdService(householdRepository);
 const householdShelfLifeRuleRepository = new DrizzleHouseholdShelfLifeRuleRepository();
 const householdLocationRuleRepository = new DrizzleHouseholdLocationRuleRepository();
 const learningFeedbackRepository = new DrizzleLearningFeedbackRepository();
+export { learningFeedbackRepository };
 const householdLearningAdapter = new HouseholdLearningAdapter(
 	householdShelfLifeRuleRepository,
 	householdLocationRuleRepository
@@ -193,7 +195,8 @@ export const learningEngineService = new LearningEngineService(
 export const householdSuggestionsService = new HouseholdSuggestionsService(
 	householdShelfLifeRuleRepository,
 	householdLocationRuleRepository,
-	purchasePatternRepository
+	purchasePatternRepository,
+	learningFeedbackRepository
 );
 
 export const inventoryService = new InventoryService(

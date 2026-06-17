@@ -7,6 +7,7 @@ export const FEATURE_FLAG_ENV = {
 	PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT: 'PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT',
 	LOCATION_LEARNING: 'LOCATION_LEARNING_ENABLED',
 	REPLENISHMENT_LEARNING: 'REPLENISHMENT_LEARNING_ENABLED',
+	BRAIN_FEEDBACK_V1: 'BRAIN_FEEDBACK_V1_ENABLED',
 	SHOPPING_LIST_SHARE: 'PUBLIC_SHOPPING_LIST_SHARE_ENABLED'
 } as const;
 
@@ -27,6 +28,11 @@ export function isLocationLearningEnabled(): boolean {
 /** Server flag: replenishment accept/dismiss feedback log (default off). */
 export function isReplenishmentLearningEnabled(): boolean {
 	return isEnvTrue(FEATURE_FLAG_ENV.REPLENISHMENT_LEARNING);
+}
+
+/** Server flag: Brain Feedback V1 UI (belief line, teaching chips, inline ack). */
+export function isBrainFeedbackV1Enabled(): boolean {
+	return isEnvTrue(FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1);
 }
 
 /** Kill switch for W1 public shopping list share (create UI + API). */

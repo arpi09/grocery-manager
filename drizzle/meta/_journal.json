@@ -344,6 +344,13 @@
 			"when": 1752508800000,
 			"tag": "0049_receipt_import_success_events",
 			"breakpoints": true
+		},
+		{
+			"idx": 49,
+			"version": "7",
+			"when": 1752595200000,
+			"tag": "0050_brain_feedback_v1",
+			"breakpoints": true
 		}
 	]
 }
