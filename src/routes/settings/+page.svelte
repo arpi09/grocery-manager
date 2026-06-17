@@ -21,6 +21,7 @@
 				household={data.household}
 				kivraForwardAddress={data.kivraForwardAddress}
 				showSuggestions={data.showSuggestions}
+				showPriceMemory={data.showPriceMemory}
 			/>
 		</div>
 	</PageContainer>

@@ -2049,7 +2049,35 @@
 	},
 	"priceMemory": {
 		"lastPaid": "Senast betalt {price} ({date})",
-		"lastPaidWithStore": "Senast betalt {price} ({date}, {store})"
+		"lastPaidWithStore": "Senast betalt {price} ({date}, {store})",
+		"navTitle": "Prishistorik",
+		"page": {
+			"title": "Prishistorik",
+			"subtitle": "Vad du betalat för matvaror från kvitton",
+			"backToSettings": "Inställningar",
+			"searchLabel": "Sök produkter",
+			"searchPlaceholder": "mjölk, kaffe, ägg, pasta…",
+			"searchAction": "Sök",
+			"searching": "Söker…",
+			"intro": "Sök efter produkter du köpt för att se priser och butiker från importerade kvitton.",
+			"emptyTitle": "Ingen prishistorik än",
+			"emptyDescription": "Prishistorik visas automatiskt när du importerar kvitton och handlar med Skaffu.",
+			"emptyScanCta": "Importera kvitto"
+		},
+		"card": {
+			"title": "Senast köpt",
+			"lastPurchased": "{price} · {date}",
+			"lastPurchasedWithStore": "{store} · {price} · {date}",
+			"purchaseCount": "Köpt {count, plural, one {# gång} other {# gånger}}",
+			"fromReceipts": "Från kvitton",
+			"showTimeline": "Visa prishistorik",
+			"hideTimeline": "Dölj prishistorik",
+			"timelineLabel": "Prishistorik",
+			"timelineRow": "{date} — {price}",
+			"timelineRowWithStore": "{date} — {price} — {store}",
+			"timelineNoPrice": "{date}",
+			"timelineNoPriceWithStore": "{date} — {store}"
+		}
 	},
 	"scanFlow": {
 		"lookupProduct": "Slår upp produkt",

@@ -25,6 +25,11 @@ function line(
 		lineTotal: overrides.lineTotal ?? null,
 		storeLabel: overrides.storeLabel ?? null,
 		purchasedAt: overrides.purchasedAt ?? null,
+		inventoryItemId: overrides.inventoryItemId ?? null,
+		conceptKey: overrides.conceptKey ?? overrides.normalizedKey,
+		matchSource: overrides.matchSource ?? null,
+		importSource: overrides.importSource ?? 'unknown',
+		lineIndex: overrides.lineIndex ?? 0,
 		createdAt: overrides.createdAt ?? new Date('2026-05-01T12:00:00Z')
 	};
 }

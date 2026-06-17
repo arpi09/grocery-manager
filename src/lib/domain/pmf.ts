@@ -68,6 +68,10 @@ export const PRODUCT_EVENT_TYPES = [
 	'shopping_checkoff_to_pantry',
 	'receipt_finish_accepted',
 	'price_memory_viewed',
+	'price_memory_search',
+	'price_memory_product_opened',
+	'price_memory_timeline_viewed',
+	'price_memory_empty_state_seen',
 	'replenishment_suggestion_shown',
 	'replenishment_suggestion_clicked',
 	'replenishment_suggestion_added',
@@ -597,4 +601,30 @@ export function computeInviteRate(
 		newHouseholds,
 		multiMemberNewHouseholds
 	};
+}
+
+export type PriceMemoryEntryPoint =
+	| 'inventory'
+	| 'replenishment'
+	| 'search'
+	| 'product_detail'
+	| 'settings';
+
+export function bucketPriceMemoryCount(count: number): string {
+	if (count <= 0) return '0';
+	if (count === 1) return '1';
+	if (count <= 4) return '2-4';
+	return '5+';
+}
+
+export function bucketPriceMemoryQueryLength(length: number): string {
+	if (length <= 2) return '1-2';
+	if (length <= 5) return '3-5';
+	return '6+';
+}
+
+export function bucketPriceMemoryResultCount(count: number): string {
+	if (count <= 0) return '0';
+	if (count <= 3) return '1-3';
+	return '4+';
 }

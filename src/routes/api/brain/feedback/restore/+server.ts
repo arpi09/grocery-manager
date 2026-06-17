@@ -28,6 +28,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Missing normalizedKey' }, { status: 400 });
 	}
 
-	await purchasePatternRepository.restorePattern(auth.householdId, normalizedKey);
+	await purchasePatternRepository.restoreDismissal(auth.householdId, normalizedKey);
 	return json({ ok: true });
 };

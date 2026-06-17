@@ -21,7 +21,6 @@ describe('drizzle migrations', () => {
 	it('lists every SQL file in the journal in order', () => {
 		const sqlFiles = listSqlMigrationFiles();
 		const tags = journalTags();
-
 		expect(tags).toEqual(sqlFiles.map((file) => file.replace(/\.sql$/, '')));
 	});
 
@@ -30,7 +29,6 @@ describe('drizzle migrations', () => {
 			entries: Array<{ idx: number }>;
 		};
 		const indices = journal.entries.map((entry) => entry.idx).sort((a, b) => a - b);
-
 		expect(indices).toEqual(Array.from({ length: indices.length }, (_, i) => i));
 	});
 
@@ -86,9 +84,9 @@ describe('drizzle migrations', () => {
 			'0047_learning_engine_v1.sql',
 			'0048_household_location_rule.sql',
 			'0049_receipt_import_success_events.sql',
-			'0050_brain_feedback_v1.sql'
+			'0050_brain_feedback_v1.sql',
+			'0051_price_memory_phase1.sql'
 		];
-
 		expect(pgliteFiles).toEqual(sqlFiles);
 	});
 });

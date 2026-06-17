@@ -392,6 +392,10 @@ export const productEventTable = pgTable(
 				'shopping_checkoff_to_pantry',
 				'receipt_finish_accepted',
 				'price_memory_viewed',
+				'price_memory_search',
+				'price_memory_product_opened',
+				'price_memory_timeline_viewed',
+				'price_memory_empty_state_seen',
 				'brain_feedback_positive',
 				'brain_feedback_negative',
 				'brain_feedback_dismissed',
@@ -565,6 +569,13 @@ export const receiptPurchaseLineTable = pgTable(
 		lineTotal: numeric('line_total', { precision: 10, scale: 2 }),
 		storeLabel: text('store_label'),
 		purchasedAt: timestamp('purchased_at', { withTimezone: true, mode: 'date' }),
+		inventoryItemId: text('inventory_item_id').references(() => inventoryItemTable.id, {
+			onDelete: 'set null'
+		}),
+		conceptKey: text('concept_key'),
+		matchSource: text('match_source'),
+		importSource: text('import_source'),
+		lineIndex: integer('line_index').notNull().default(0),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 	},
 	(table) => [
@@ -574,8 +585,32 @@ export const receiptPurchaseLineTable = pgTable(
 			table.householdId,
 			table.normalizedKey,
 			table.purchasedAt
-		)
+		),
+		index('receipt_purchase_line_household_concept_purchased_idx').on(
+			table.householdId,
+			table.conceptKey,
+			table.purchasedAt
+		),
+		index('receipt_purchase_line_household_inventory_purchased_idx').on(
+			table.householdId,
+			table.inventoryItemId,
+			table.purchasedAt
+		),
+		uniqueIndex('receipt_purchase_line_batch_line_idx').on(table.importBatchId, table.lineIndex)
 	]
+);
+
+export const householdPurchaseConceptTable = pgTable(
+	'household_purchase_concept',
+	{
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
+		conceptKey: text('concept_key').notNull(),
+		displayName: text('display_name').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [primaryKey({ columns: [table.householdId, table.conceptKey] })]
 );
 
 export const receiptPatternDismissalTable = pgTable(

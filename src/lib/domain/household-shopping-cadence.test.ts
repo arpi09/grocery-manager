@@ -23,6 +23,11 @@ function line(partial: Partial<ReceiptPurchaseLineRecord> & Pick<ReceiptPurchase
 		lineTotal: null,
 		storeLabel: partial.storeLabel ?? null,
 		purchasedAt: partial.purchasedAt ?? null,
+		inventoryItemId: partial.inventoryItemId ?? null,
+		conceptKey: partial.conceptKey ?? partial.normalizedKey ?? 'mjolk',
+		matchSource: partial.matchSource ?? null,
+		importSource: partial.importSource ?? 'unknown',
+		lineIndex: partial.lineIndex ?? 0,
 		createdAt: partial.createdAt ?? new Date('2026-01-05T12:00:00Z')
 	};
 }

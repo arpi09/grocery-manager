@@ -351,6 +351,13 @@
 			"when": 1752595200000,
 			"tag": "0050_brain_feedback_v1",
 			"breakpoints": true
+		},
+		{
+			"idx": 50,
+			"version": "7",
+			"when": 1752681600000,
+			"tag": "0051_price_memory_phase1",
+			"breakpoints": true
 		}
 	]
 }

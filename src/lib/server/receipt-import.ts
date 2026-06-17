@@ -3,6 +3,7 @@ import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
 import type { HouseholdRole } from '$lib/domain/household';
 import type { StorageLocation } from '$lib/domain/location';
 import type { ReceiptLine } from '$lib/domain/receipt-line';
+import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 import type { InventoryService } from '$lib/application/inventory.service';
 import type { PurchasePatternService } from '$lib/application/purchase-pattern.service';
 import type { PmfService } from '$lib/application/pmf.service';
@@ -52,6 +53,7 @@ export async function importReceiptLines(
 	const purchasedAt = normalizePurchasedAt(input.purchasedAt);
 
 	let itemsAdded = 0;
+	let purchaseLineIndex = 0;
 
 	for (const line of input.lines) {
 		const name = line.name.trim();
@@ -108,7 +110,7 @@ export async function importReceiptLines(
 			}
 		}
 
-		await input.inventoryService.createItem(
+		const createdItem = await input.inventoryService.createItem(
 			input.householdId,
 			input.userId,
 			{
@@ -162,9 +164,15 @@ export async function importReceiptLines(
 				quantity,
 				unit: unit ?? null,
 				storeLabel: input.storeLabel,
-				purchasedAt: input.purchasedAt
+				purchasedAt: input.purchasedAt,
+				lineIndex: purchaseLineIndex,
+				importSource: input.source === 'kivra_forward' ? 'kivra_forward' : 'receipt_scan',
+				inventoryItemId: createdItem.id,
+				matchSource: 'inventory_item',
+				conceptKey: normalizeReceiptProductName(name)
 			})
 		);
+		purchaseLineIndex++;
 		itemsAdded++;
 	}
 

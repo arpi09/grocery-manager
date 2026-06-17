@@ -68,7 +68,8 @@ const SQL_MIGRATION_FILES = [
 	'0047_learning_engine_v1.sql',
 	'0048_household_location_rule.sql',
 	'0049_receipt_import_success_events.sql',
-	'0050_brain_feedback_v1.sql'
+	'0050_brain_feedback_v1.sql',
+	'0051_price_memory_phase1.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
