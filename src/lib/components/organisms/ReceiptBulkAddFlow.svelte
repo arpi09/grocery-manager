@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteSafetyModal from '$lib/components/molecules/DeleteSafetyModal.svelte';
@@ -10,7 +10,8 @@
 	import { scanToastMessage } from '$lib/utils/scan-toast';
 	import { bindEmbeddedScanSubmit } from '$lib/utils/scan-embedded-submit';
 	import { page } from '$app/state';
-	import { recordReceiptActivation } from '$lib/utils/onboarding';
+	import { recordReceiptActivation, shouldShowOnboarding } from '$lib/utils/onboarding';
+	import { recordOnboardingScanSaveSync } from '$lib/utils/activation-scan-save';
 	import {
 		prepareReceiptFileForUpload,
 		RECEIPT_CAMERA_ACCEPT,
@@ -28,7 +29,6 @@
 	import { trackProductEvent } from '$lib/client/product-events';
 	import {
 		aggregateReceiptImportSummary,
-		aggregateReceiptLocationCounts,
 		markReceiptImportCompleted
 	} from '$lib/utils/receipt-import-session';
 	import {
@@ -246,21 +246,19 @@
 	const hasLocationPredictions = $derived(locationPredictions.some((prediction) => prediction != null));
 
 	function buildReceiptImportSummary() {
-		return aggregateReceiptImportSummary(buildReceiptLineContexts());
-	}
-
-	function buildReceiptLineContexts() {
-		return lines.map((line, index) => ({
-			line,
-			index,
-			selected: Boolean(selected[index]),
-			lineExpiresOn: lineExpiresOn[index] ?? '',
-			lineLocation: lineLocations[index] ?? line.location,
-			locationOverride: locationOverrides.has(index),
-			shelfLifePrediction: shelfLifePredictions[index] ?? null,
-			locationPrediction: locationPredictions[index] ?? null,
-			shelfLifeEstimatesInReceipt
-		}));
+		return aggregateReceiptImportSummary(
+			lines.map((line, index) => ({
+				line,
+				index,
+				selected: Boolean(selected[index]),
+				lineExpiresOn: lineExpiresOn[index] ?? '',
+				lineLocation: lineLocations[index] ?? line.location,
+				locationOverride: locationOverrides.has(index),
+				shelfLifePrediction: shelfLifePredictions[index] ?? null,
+				locationPrediction: locationPredictions[index] ?? null,
+				shelfLifeEstimatesInReceipt
+			}))
+		);
 	}
 
 	function formatLineAmount(line: ReceiptLine): string {
@@ -424,12 +422,26 @@
 								selectedCount,
 								totalLines: lines.length
 							});
-							markReceiptImportCompleted(
-								selectedCount,
-								buildReceiptImportSummary(),
-								aggregateReceiptLocationCounts(buildReceiptLineContexts())
-							);
-							recordReceiptActivation(page.data.user?.id);
+							markReceiptImportCompleted(selectedCount, buildReceiptImportSummary());
+							const uid = page.data.user?.id;
+							if (shouldShowOnboarding(uid)) {
+								recordOnboardingScanSaveSync(
+									uid,
+									lines.flatMap((line, index) =>
+										selected[index]
+											? [
+													{
+														name: line.name,
+														location: line.location,
+														expiresOn: lineExpiresOn[index] || null
+													}
+												]
+											: []
+									)
+								);
+							} else {
+								recordReceiptActivation(uid);
+							}
 						}
 					)}
 		>
