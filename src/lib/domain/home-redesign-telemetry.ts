@@ -31,7 +31,7 @@ export function buildHomeViewedMetadata(input: {
 	expiringCount: number;
 	shoppingCount: number;
 	pantryCount: number;
-}): HomeViewedMetadata {
+}): Record<string, unknown> {
 	return {
 		homeState: input.homeState,
 		hasRecommendation: input.hasRecommendation,
@@ -41,7 +41,7 @@ export function buildHomeViewedMetadata(input: {
 		expiringCount: bucketHomeCount(input.expiringCount),
 		shoppingCount: bucketHomeCount(input.shoppingCount),
 		pantryCount: bucketHomeCount(input.pantryCount)
-	};
+	} satisfies HomeViewedMetadata;
 }
 
 export function resolveHeroScrollTargetId(input: {
