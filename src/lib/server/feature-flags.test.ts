@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
 	FEATURE_FLAG_ENV,
 	isBrainFeedbackV1Enabled,
+	isHomeRedesignV1Enabled,
 	isLocationLearningEnabled,
 	isPriceMemoryV1Enabled,
 	isReplenishmentLearningEnabled,
@@ -37,6 +38,7 @@ describe('feature-flags registry', () => {
 		expect(FEATURE_FLAG_ENV.PRICE_MEMORY_V1).toBe('PRICE_MEMORY_V1_ENABLED');
 		expect(FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1).toBe('BRAIN_FEEDBACK_V1_ENABLED');
 		expect(FEATURE_FLAG_ENV.SHOPPING_LIST_SHARE).toBe('PUBLIC_SHOPPING_LIST_SHARE_ENABLED');
+		expect(FEATURE_FLAG_ENV.HOME_REDESIGN_V1).toBe('HOME_REDESIGN_V1_ENABLED');
 	});
 
 	it('defaults all flags to false when unset', () => {
@@ -46,6 +48,7 @@ describe('feature-flags registry', () => {
 		expect(isPriceMemoryV1Enabled()).toBe(false);
 		expect(isBrainFeedbackV1Enabled()).toBe(false);
 		expect(isShoppingListShareEnabled()).toBe(false);
+		expect(isHomeRedesignV1Enabled()).toBe(false);
 	});
 
 	it('enables flags only when env is exactly true', () => {
@@ -55,6 +58,7 @@ describe('feature-flags registry', () => {
 		process.env[FEATURE_FLAG_ENV.PRICE_MEMORY_V1] = 'true';
 		process.env[FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1] = 'true';
 		process.env[FEATURE_FLAG_ENV.SHOPPING_LIST_SHARE] = 'true';
+		process.env[FEATURE_FLAG_ENV.HOME_REDESIGN_V1] = 'true';
 
 		expect(isShelfLifeLearningEnabled()).toBe(true);
 		expect(isLocationLearningEnabled()).toBe(true);
@@ -62,6 +66,7 @@ describe('feature-flags registry', () => {
 		expect(isPriceMemoryV1Enabled()).toBe(true);
 		expect(isBrainFeedbackV1Enabled()).toBe(true);
 		expect(isShoppingListShareEnabled()).toBe(true);
+		expect(isHomeRedesignV1Enabled()).toBe(true);
 
 		process.env[FEATURE_FLAG_ENV.PRICE_MEMORY_V1] = 'false';
 		expect(isPriceMemoryV1Enabled()).toBe(false);

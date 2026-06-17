@@ -1,0 +1,3 @@
+-- Home redesign v1 product_event types (application enum in schema.ts):
+-- home_viewed, recommendation_viewed, recommendation_clicked,
+-- expiring_clicked, shopping_clicked, pantry_clicked, household_clicked, primary_action_clicked

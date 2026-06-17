@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
+	import HomeRedesignDashboard from '$lib/components/organisms/HomeRedesignDashboard.svelte';
 	import HomeWelcome from '$lib/components/molecules/HomeWelcome.svelte';
 	import HomePantryCard from '$lib/components/molecules/HomePantryCard.svelte';
 	import HomeShoppingCard from '$lib/components/molecules/HomeShoppingCard.svelte';
@@ -8,6 +9,7 @@
 	import HomeAttentionCard from '$lib/components/molecules/HomeAttentionCard.svelte';
 	import { deriveHomeState } from '$lib/domain/home-state';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
+	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import {
 		STREAK_MILESTONE_WEEKS,
@@ -23,22 +25,31 @@
 
 	interface Props {
 		summary: DashboardSummary;
+		intelligence?: HomeIntelligenceSnapshot;
 		celebration?: GamificationCelebrationKind | null;
 		canWrite?: boolean;
 		displayName?: string | null;
 		householdId?: string | null;
 		shoppingListCount?: number;
 		shoppingCadence?: HouseholdShoppingCadence | null;
+		homeRedesignV1?: boolean;
 	}
 
 	let {
 		summary,
+		intelligence = {
+			replenishment: [],
+			pantryHealth: [],
+			waste: null,
+			dedupeByKey: {}
+		},
 		celebration = null,
 		canWrite = false,
 		displayName = null,
 		householdId = null,
 		shoppingListCount = 0,
-		shoppingCadence = null
+		shoppingCadence = null,
+		homeRedesignV1 = false
 	}: Props = $props();
 
 	const returnTo = APP_HOME_PATH;
@@ -100,6 +111,15 @@
 </script>
 
 <section class="home" aria-label={t('home.ariaLabel')} data-home-state={homeState}>
+	{#if homeRedesignV1}
+		<HomeRedesignDashboard
+			{summary}
+			{intelligence}
+			{canWrite}
+			{shoppingListCount}
+			{shoppingCadence}
+		/>
+	{:else}
 	<HomeWelcome {displayName} totalItems={summary.totalItems} {homeState} {shoppingListCount} />
 
 	{#if canWrite}
@@ -163,6 +183,7 @@
 
 	{#if !canWrite}
 		<p class="readonly-hint">{t('home.readonlyHint')}</p>
+	{/if}
 	{/if}
 </section>
 

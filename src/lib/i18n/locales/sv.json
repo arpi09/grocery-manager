@@ -335,6 +335,65 @@
 			"expiringFooter": "Visa utgående",
 			"attentionTitle": "Behöver en snabb koll",
 			"attentionFooter": "Gå till synk"
+		},
+		"v5": {
+			"hero": {
+				"defaultBody": "Här är det som förtjänar din uppmärksamhet idag.",
+				"cta": "Se vad som är näst",
+				"scanLink": "Lägg till varor",
+				"morning": {
+					"title": "God morgon 👋"
+				},
+				"midday": {
+					"title": "God dag 👋"
+				},
+				"evening": {
+					"title": "God kväll 👋"
+				},
+				"night": {
+					"title": "Välkommen tillbaka 👋"
+				},
+				"status": {
+					"healthy": "Allt ser bra ut idag.",
+					"expiring": "Något är värt att använda snart.",
+					"shopping": "En del börjar ta slut.",
+					"empty": "Låt oss börja bygga ert skafferi."
+				}
+			},
+			"forYou": {
+				"title": "För dig",
+				"replenishment": {
+					"body": "Du brukar köpa {name}.",
+					"cta": "Lägg på inköpslistan"
+				},
+				"expiring": {
+					"body": "{name} är värt att använda snart.",
+					"cta": "Visa vara"
+				}
+			},
+			"expiring": {
+				"title": "Använd snart",
+				"body": "{count, plural, one {# vara värd att använda snart} other {# varor värda att använda snart}}",
+				"link": "Visa varor"
+			},
+			"shopping": {
+				"title": "Inköp",
+				"body": "{count, plural, one {# vara redo} other {# varor redo}}",
+				"cadence": "Nästa tur: {weekday}",
+				"link": "Öppna inköpslistan"
+			},
+			"pantry": {
+				"title": "Hemma",
+				"body": "{count, plural, one {# vara} other {# varor}}",
+				"allGood": "Allt bra",
+				"needsAttention": "En del varor behöver uppmärksamhet",
+				"link": "Öppna skafferi"
+			},
+			"household": {
+				"title": "Hushåll",
+				"body": "Delat skafferi och inställningar för ert hem.",
+				"link": "Hushållsinställningar"
+			}
 		}
 	},
 	"dashboard": {
