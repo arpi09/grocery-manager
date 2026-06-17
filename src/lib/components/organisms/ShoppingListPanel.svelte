@@ -514,55 +514,64 @@
 	tabindex={panelTabindex}
 	aria-label={t('shopping.listAria')}
 >
-	{#if canEdit && (items.length > 0 || checkedCount > 0)}
-		<div class="panel-toolbar">
-			<div class="share-menu-wrap">
-				<button
-					type="button"
-					class="overflow-trigger"
-					aria-expanded={shareMenuOpen}
-					aria-haspopup="menu"
-					aria-label={t('shopping.duoActionBar.aria')}
-					onclick={() => (shareMenuOpen = !shareMenuOpen)}
-				>
-					⋯
-				</button>
-				{#if shareMenuOpen}
-					<div class="share-menu-panel" role="menu">
-						{#if shareLinkEnabled}
-							<button
-								type="button"
-								class="share-menu-item"
-								role="menuitem"
-								disabled={!hasShareableItems || shareLinkSubmitting}
-								onclick={shareListLink}
-							>
-								{shareLinkCopied ? t('common.copied') : t('shoppingListShare.shareLink')}
-							</button>
+	{#snippet header()}
+		{#if (canEdit && (items.length > 0 || checkedCount > 0)) || items.length > 0 || checkedCount > 0}
+			<div class="panel-header-row">
+				{#if items.length > 0 || checkedCount > 0}
+					<div class="panel-search">
+						<SearchInput bind:value={listQuery} placeholder={t('shopping.searchPlaceholder')} />
+					</div>
+				{/if}
+				{#if canEdit && (items.length > 0 || checkedCount > 0)}
+					<div class="share-menu-wrap">
+						<button
+							type="button"
+							class="overflow-trigger"
+							aria-expanded={shareMenuOpen}
+							aria-haspopup="menu"
+							aria-label={t('shopping.duoActionBar.aria')}
+							onclick={() => (shareMenuOpen = !shareMenuOpen)}
+						>
+							⋯
+						</button>
+						{#if shareMenuOpen}
+							<div class="share-menu-panel" role="menu">
+								{#if shareLinkEnabled}
+									<button
+										type="button"
+										class="share-menu-item"
+										role="menuitem"
+										disabled={!hasShareableItems || shareLinkSubmitting}
+										onclick={shareListLink}
+									>
+										{shareLinkCopied ? t('common.copied') : t('shoppingListShare.shareLink')}
+									</button>
+								{/if}
+								<button
+									type="button"
+									class="share-menu-item"
+									role="menuitem"
+									disabled={unchecked.length === 0 && checkedCount === 0}
+									onclick={() => copyExportList('bring')}
+								>
+									{exportCopiedFormat === 'bring' ? t('common.copied') : t('shopping.exportBring')}
+								</button>
+								<button
+									type="button"
+									class="share-menu-item"
+									role="menuitem"
+									disabled={unchecked.length === 0 && checkedCount === 0}
+									onclick={() => copyExportList('anylist')}
+								>
+									{exportCopiedFormat === 'anylist' ? t('common.copied') : t('shopping.exportAnyList')}
+								</button>
+							</div>
 						{/if}
-						<button
-							type="button"
-							class="share-menu-item"
-							role="menuitem"
-							disabled={unchecked.length === 0 && checkedCount === 0}
-							onclick={() => copyExportList('bring')}
-						>
-							{exportCopiedFormat === 'bring' ? t('common.copied') : t('shopping.exportBring')}
-						</button>
-						<button
-							type="button"
-							class="share-menu-item"
-							role="menuitem"
-							disabled={unchecked.length === 0 && checkedCount === 0}
-							onclick={() => copyExportList('anylist')}
-						>
-							{exportCopiedFormat === 'anylist' ? t('common.copied') : t('shopping.exportAnyList')}
-						</button>
 					</div>
 				{/if}
 			</div>
-		</div>
-	{/if}
+		{/if}
+	{/snippet}
 
 	{#if items.length === 0 && checkedCount === 0}
 		<EmptyState
@@ -584,25 +593,27 @@
 						recordShoppingListItemActivation(get(page).data.user?.id);
 					}
 				)}
-				class="add-form"
+				class="add-form add-form--empty"
 			>
-				<div class="add-primary">
-					<input
-						id="shopping-name"
-						name="name"
-						required
-						maxlength="200"
-						placeholder={t('shopping.itemPlaceholder')}
-						aria-label={t('shopping.itemPlaceholder')}
-					/>
-					<Button
-						type="submit"
-						loading={addSubmitting}
-						loadingLabel={t('common.saving')}
-						aria-label={t('shopping.addLabel')}
-					>
-						+
-					</Button>
+				<div class="add-card">
+					<div class="add-primary">
+						<input
+							id="shopping-name"
+							name="name"
+							required
+							maxlength="200"
+							placeholder={t('shopping.itemPlaceholder')}
+							aria-label={t('shopping.itemPlaceholder')}
+						/>
+						<Button
+							type="submit"
+							loading={addSubmitting}
+							loadingLabel={t('common.saving')}
+							aria-label={t('shopping.addLabel')}
+						>
+							+
+						</Button>
+					</div>
 				</div>
 			</form>
 		{/if}
@@ -663,8 +674,6 @@
 			</div>
 		{/if}
 
-		<SearchInput bind:value={listQuery} placeholder={t('shopping.searchPlaceholder')} />
-
 		{#if canEdit}
 			<form
 				method="POST"
@@ -678,28 +687,25 @@
 				)}
 				class="add-form"
 			>
-				<div class="add-primary">
-					<input
-						id="shopping-name"
-						name="name"
-						required
-						maxlength="200"
-						placeholder={t('shopping.itemPlaceholder')}
-						aria-label={t('shopping.itemPlaceholder')}
-					/>
-					<Button
-						type="submit"
-						loading={addSubmitting}
-						loadingLabel={t('common.saving')}
-						aria-label={t('shopping.addLabel')}
-					>
-						+
-					</Button>
-				</div>
-				<details class="qty-optional">
-					<summary>
-						{t('shopping.quantityPlaceholder')} ({t('common.optional')})
-					</summary>
+				<div class="add-card">
+					<div class="add-primary">
+						<input
+							id="shopping-name"
+							name="name"
+							required
+							maxlength="200"
+							placeholder={t('shopping.itemPlaceholder')}
+							aria-label={t('shopping.itemPlaceholder')}
+						/>
+						<Button
+							type="submit"
+							loading={addSubmitting}
+							loadingLabel={t('common.saving')}
+							aria-label={t('shopping.addLabel')}
+						>
+							+
+						</Button>
+					</div>
 					<div class="qty-row">
 						<input
 							name="quantity"
@@ -714,7 +720,7 @@
 							aria-label={t('shopping.unitPlaceholder')}
 						/>
 					</div>
-				</details>
+				</div>
 			</form>
 		{:else}
 			<p class="readonly">{t('inventory.readonly')}</p>
@@ -812,16 +818,24 @@
 		gap: var(--space-sm);
 	}
 
-	.panel-footer {
+	.panel-header-row {
 		display: flex;
-		flex-wrap: wrap;
-		justify-content: flex-end;
+		align-items: center;
 		gap: var(--space-sm);
-		padding-top: var(--space-xs);
-		border-top: 1px solid var(--color-border);
+		min-width: 0;
+	}
+
+	.panel-search {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.panel-search :global(.search) {
+		width: 100%;
 	}
 
 	.share-menu-wrap {
+		flex-shrink: 0;
 		position: relative;
 	}
 
@@ -907,6 +921,20 @@
 		gap: var(--space-sm);
 	}
 
+	.add-card {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		padding: var(--space-sm);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
+	}
+
+	.add-form--empty .add-card {
+		background: var(--color-surface);
+	}
+
 	.add-primary {
 		display: grid;
 		grid-template-columns: 1fr auto;
@@ -924,33 +952,17 @@
 		min-height: var(--touch-target-min);
 	}
 
-	.qty-optional summary {
-		cursor: pointer;
-		font-size: 0.8125rem;
-		font-weight: 600;
-		color: var(--color-text-muted);
-		min-height: var(--touch-target-min);
-		display: inline-flex;
-		align-items: center;
-	}
-
 	.qty-row {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: var(--space-sm);
-		margin-top: var(--space-xs);
 	}
 
 	.list {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-xs);
-	}
-
-	.list :global(.skaffu-list) {
-		border: none;
-		border-radius: 0;
-		background: transparent;
+		gap: 0;
+		min-width: 0;
 	}
 
 	.checked-head {

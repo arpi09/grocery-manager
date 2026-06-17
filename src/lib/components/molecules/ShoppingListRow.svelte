@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { SubmitFunction } from '@sveltejs/kit';
-	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
+	import Button from '$lib/components/atoms/Button.svelte';
 	import SkaffuListItem from '$lib/components/molecules/SkaffuListItem.svelte';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { t } from '$lib/i18n';
+	import { getDeleteCopy } from '$lib/utils/delete-safety';
 
 	interface Props {
 		item: ShoppingListItem;
@@ -25,15 +26,55 @@
 		toggleEnhance,
 		removeEnhance
 	}: Props = $props();
+
+	let confirmingDelete = $state(false);
+
+	const deleteCopy = $derived(getDeleteCopy(1, 'shoppingListItem', { itemName: item.name }));
+
+	function openDeleteConfirm() {
+		confirmingDelete = true;
+	}
+
+	function cancelDeleteConfirm() {
+		confirmingDelete = false;
+	}
 </script>
 
 <SkaffuListItem
-	class="shopping-row"
+	class="shopping-row{confirmingDelete ? ' confirming-delete' : ''}"
 	{removing}
 	checkedRow={checked}
 	data-testid="shopping-row-{item.id}"
 >
-	{#if canEdit}
+	{#if confirmingDelete && removeEnhance}
+		<div
+			class="delete-confirm-strip"
+			role="group"
+			aria-label={t('common.confirmDelete')}
+			data-testid="shopping-delete-confirm-strip"
+		>
+			<p class="confirm-text">{deleteCopy.title}</p>
+			<div class="confirm-actions">
+				<Button type="button" variant="secondary" onclick={cancelDeleteConfirm}>
+					{deleteCopy.cancelLabel}
+				</Button>
+				<form
+					method="POST"
+					action="?/remove"
+					class="remove-form"
+					use:enhance={(input) => {
+						confirmingDelete = false;
+						return removeEnhance(input);
+					}}
+				>
+					<input type="hidden" name="id" value={item.id} />
+					<Button type="submit" variant="danger" aria-label={t('common.confirmDelete')}>
+						{deleteCopy.confirmLabel}
+					</Button>
+				</form>
+			</div>
+		</div>
+	{:else if canEdit}
 		<form
 			method="POST"
 			action="?/toggle"
@@ -52,19 +93,15 @@
 			</label>
 		</form>
 		{#if !checked && removeEnhance}
-			<DeleteConfirmButton
-				tier={1}
-				context="shoppingListItem"
-				copyOptions={{ itemName: item.name }}
-				action="?/remove"
-				variant="ghost"
-				submitEnhance={removeEnhance}
-				label="×"
-				ariaLabel={t('shopping.removeLine', { line: lineLabel })}
+			<button
+				type="button"
 				class="remove-trigger"
+				data-testid="shopping-delete-trigger"
+				onclick={openDeleteConfirm}
+				aria-label={t('shopping.removeLine', { line: lineLabel })}
 			>
-				<input type="hidden" name="id" value={item.id} />
-			</DeleteConfirmButton>
+				×
+			</button>
 		{/if}
 	{:else}
 		<span class="line-readonly" class:done={checked}>{lineLabel}</span>
@@ -93,6 +130,40 @@
 	:global(.shopping-row.checked-row .mdc-deprecated-list-item__wrapper) {
 		opacity: 0.65;
 		text-decoration: line-through;
+	}
+
+	:global(.shopping-row.confirming-delete .mdc-deprecated-list-item__wrapper) {
+		flex-wrap: wrap;
+		align-items: stretch;
+	}
+
+	.delete-confirm-strip {
+		display: flex;
+		flex: 1 1 100%;
+		flex-direction: column;
+		gap: var(--space-sm);
+		width: 100%;
+		min-width: 0;
+		padding: var(--space-xs) 0;
+	}
+
+	.confirm-text {
+		margin: 0;
+		font-size: 0.875rem;
+		font-weight: 650;
+		line-height: 1.35;
+		color: var(--color-text);
+	}
+
+	.confirm-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
+		align-items: center;
+	}
+
+	.remove-form {
+		margin: 0;
 	}
 
 	.row-form {
@@ -139,11 +210,8 @@
 		text-decoration: line-through;
 	}
 
-	:global(.remove-trigger) {
+	.remove-trigger {
 		flex-shrink: 0;
-	}
-
-	:global(.remove-trigger .btn) {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -155,5 +223,13 @@
 		min-width: var(--touch-target-min);
 		min-height: var(--touch-target-min);
 		color: var(--color-text-muted);
+		cursor: pointer;
+		font-family: inherit;
+		border-radius: var(--radius-sm);
+	}
+
+	.remove-trigger:hover {
+		background: var(--color-surface-muted);
+		color: var(--color-text);
 	}
 </style>
