@@ -126,7 +126,7 @@
 
 	<div class="card-grid">
 		{#if homeState === 'expiry'}
-			<HomeExpiringCard expiringSoon={summary.expiringSoon} {homeState} size={expiringSize} />
+			<HomeExpiringCard expiringSoon={summary.expiringSoon} {homeState} size={expiringSize} {canWrite} />
 			<HomePantryCard
 				totalItems={summary.totalItems}
 				counts={summary.counts}
@@ -144,7 +144,7 @@
 				cold={isCold}
 				size={pantrySize}
 			/>
-			<HomeExpiringCard expiringSoon={summary.expiringSoon} {homeState} size={expiringSize} />
+			<HomeExpiringCard expiringSoon={summary.expiringSoon} {homeState} size={expiringSize} {canWrite} />
 		{:else}
 			<HomePantryCard
 				totalItems={summary.totalItems}
@@ -154,7 +154,7 @@
 				size={pantrySize}
 			/>
 			<HomeShoppingCard {shoppingListCount} {shoppingCadence} size={shoppingSize} />
-			<HomeExpiringCard expiringSoon={summary.expiringSoon} {homeState} size={expiringSize} />
+			<HomeExpiringCard expiringSoon={summary.expiringSoon} {homeState} size={expiringSize} {canWrite} />
 		{/if}
 		{#if showAttentionCard}
 			<HomeAttentionCard pantryStatus={summary.pantryStatus} />
