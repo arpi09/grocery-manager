@@ -5,9 +5,9 @@
 | F�lt | V�rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-17 |
-| **Prod SHA** | `024a3ff0b` @ [27670285350](https://github.com/arpi09/grocery-manager/actions/runs/27670285350) (home expiring card share + nested link fixes, fast E2E critical). Prior `2be75b3ca` @ [27621532066](https://github.com/arpi09/grocery-manager/actions/runs/27621532066) |
-| **Master SHA** | `024a3ff0b` — home expiring share action + nested link fix; nightly E2E home dashboard |
-| **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `024a3ff0b` (fast deploy tier) |
+| **Prod SHA** | `9f09fd242` @ [27673134941](https://github.com/arpi09/grocery-manager/actions/runs/27673134941) (list UX + mobile bottom nav portal, fast E2E critical). Prior `024a3ff0b` @ [27670285350](https://github.com/arpi09/grocery-manager/actions/runs/27670285350) |
+| **Master SHA** | `9f09fd242` � list UX + bottom nav portal ([#104](https://github.com/arpi09/grocery-manager/pull/104)) |
+| **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `9f09fd242` (fast deploy tier) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` � merged to master |
 | **Prod URL** | https://skaffu.com |
 | **Reality audit** | [REALITY_AUDIT_2026-06.md](./REALITY_AUDIT_2026-06.md) |
