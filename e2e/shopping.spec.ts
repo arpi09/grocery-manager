@@ -20,7 +20,7 @@ async function ensureSmartFillVisible(page: Page) {
 			const before = await uncheckedRows.count();
 			const row = uncheckedRows.first();
 			await row.getByTestId('shopping-delete-trigger').click();
-			await row
+			await page
 				.getByTestId('shopping-delete-confirm-strip')
 				.getByRole('button', { name: /Ta bort|Delete/i })
 				.click();
@@ -106,19 +106,20 @@ test.describe('Shopping list', () => {
 
 		await row.getByTestId('shopping-delete-trigger').click();
 
-		const strip = row.getByTestId('shopping-delete-confirm-strip');
+		const strip = page.getByTestId('shopping-delete-confirm-strip');
 		await expect(strip).toBeVisible();
 		await expect(strip.getByText(/Ta bort rad/i)).toBeVisible();
-		await expect(row.getByText(itemName)).not.toBeVisible();
+		await expect(page.getByText(itemName)).not.toBeVisible();
 
 		await strip.getByRole('button', { name: /Avbryt|Cancel/i }).click();
 		await expect(strip).not.toBeVisible();
-		await expect(row.getByText(itemName)).toBeVisible();
+		await expect(uncheckedShoppingRow(page, itemName)).toBeVisible();
 
-		await row.getByTestId('shopping-delete-trigger').click();
+		const rowAfterCancel = uncheckedShoppingRow(page, itemName);
+		await rowAfterCancel.getByTestId('shopping-delete-trigger').click();
 		await expect(strip).toBeVisible();
 		await strip.getByRole('button', { name: /Ta bort|Delete/i }).click();
-		await expect(row).toHaveCount(0, { timeout: 15_000 });
+		await expect(uncheckedShoppingRow(page, itemName)).toHaveCount(0, { timeout: 15_000 });
 	});
 
 	test('check off opens pantry bridge sheet and can add to pantry', async ({ page }) => {
