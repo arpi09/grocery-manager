@@ -9,7 +9,9 @@
 	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import { deriveHomeForYou } from '$lib/domain/home-for-you';
+	import { deriveHeroStatus, getHomeHeroTimeBand } from '$lib/domain/home-hero';
 	import { deriveHomeState } from '$lib/domain/home-state';
+	import { buildHomeViewedMetadata, resolveHeroScrollTargetId } from '$lib/domain/home-redesign-telemetry';
 	import { formatCadenceWeekday, type HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
 	import { getLocale, t } from '$lib/i18n';
 	import { scanHubHref } from '$lib/utils/scan-nav';
@@ -41,6 +43,11 @@
 		})
 	);
 	const forYou = $derived(deriveHomeForYou(intelligence, summary.expiringSoon));
+	const heroBand = $derived(getHomeHeroTimeBand());
+	const heroStatus = $derived(deriveHeroStatus(homeState));
+	const heroScrollTargetId = $derived(
+		resolveHeroScrollTargetId({ hasForYou: forYou != null, expiringCount })
+	);
 	const scanHref = $derived(canWrite ? scanHubHref('/hem') : '/scan');
 
 	const locale = $derived(getLocale());
@@ -57,11 +64,19 @@
 	);
 
 	onMount(() => {
-		void trackProductEvent('home_viewed', {
-			homeState,
-			hasRecommendation: forYou != null,
-			recommendationKind: forYou?.kind ?? null
-		});
+		void trackProductEvent(
+			'home_viewed',
+			buildHomeViewedMetadata({
+				homeState,
+				hasRecommendation: forYou != null,
+				recommendationKind: forYou?.kind ?? null,
+				heroBand,
+				heroStatus,
+				expiringCount,
+				shoppingCount: shoppingListCount,
+				pantryCount: summary.totalItems
+			})
+		);
 	});
 
 	function trackCard(event: Extract<
@@ -73,7 +88,7 @@
 </script>
 
 <section class="home-v5" aria-label={t('home.ariaLabel')} data-home-state={homeState}>
-	<HomeHero {homeState} {scanHref} />
+	<HomeHero {homeState} {scanHref} scrollTargetId={heroScrollTargetId} />
 
 	{#if forYou}
 		<HomeForYouCard recommendation={forYou} {canWrite} />
@@ -81,6 +96,7 @@
 
 	<div class="compact-row">
 		<HomeOverviewCard
+			id="home-expiring-card"
 			title={t('home.v5.expiring.title')}
 			href={expiringCount > 0 ? '/inventory/fridge?filter=expiring' : '/inventory/fridge'}
 			tone={expiringCount > 0 ? 'attention' : 'default'}
@@ -97,6 +113,7 @@
 		</HomeOverviewCard>
 
 		<HomeOverviewCard
+			id="home-shopping-card"
 			title={t('home.v5.shopping.title')}
 			href="/inkop"
 			testId="home-shopping-card"

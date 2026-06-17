@@ -6,7 +6,46 @@
 	<rect class="item i3" x="48" y="16" width="18" height="18" rx="4" />
 </svg>
 <style>
-	.illus { width: 5rem; height: auto; color: var(--color-primary); }
-	.shelf { fill: var(--color-surface-muted); }
-	.item { fill: color-mix(in srgb, var(--color-primary) 16%, var(--color-surface)); stroke: var(--color-primary); stroke-width: 1.5; }
+	.illus {
+		width: 5rem;
+		height: auto;
+		color: var(--color-primary);
+	}
+
+	.shelf {
+		fill: var(--color-surface-muted);
+	}
+
+	.item {
+		fill: color-mix(in srgb, var(--color-primary) 16%, var(--color-surface));
+		stroke: var(--color-primary);
+		stroke-width: 1.5;
+		transform-origin: center bottom;
+		animation: shelf-pulse 3.6s ease-in-out infinite;
+	}
+
+	.i2 {
+		animation-delay: 0.4s;
+	}
+
+	.i3 {
+		animation-delay: 0.8s;
+	}
+
+	@keyframes shelf-pulse {
+		0%,
+		100% {
+			opacity: 0.72;
+		}
+		50% {
+			opacity: 1;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.item {
+			animation: none;
+			opacity: 1;
+		}
+	}
 </style>

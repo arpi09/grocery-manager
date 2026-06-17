@@ -117,6 +117,13 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		await dismissCookieConsentIfOpen(page);
 		await dismissOnboardingModalIfOpen(page);
 
+		const redesign = page.locator('.home-v5');
+		if ((await redesign.count()) > 0) {
+			await expect(page.getByTestId('home-hero')).toBeVisible({ timeout: 15_000 });
+			await expect(page.getByTestId('home-expiring-card')).toBeVisible();
+			test.skip(true, 'Home redesign v1 — share button moved off Home');
+		}
+
 		await expect(page.getByTestId('home-welcome')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('home-card-expiring')).toBeVisible();
 		await expect(

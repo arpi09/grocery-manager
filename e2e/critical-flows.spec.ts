@@ -11,6 +11,7 @@ import {
 } from './helpers/auth';
 
 import { createFridgeItemViaApi, ensureFridgeInventoryItem } from './helpers/inventory';
+import { expectHomeDashboardVisible, expectHomeRedesignVisible } from './helpers/home';
 
 test.describe('Critical flows', () => {
 	test.describe.configure({ mode: 'serial', timeout: 120_000 });
@@ -67,19 +68,25 @@ test.describe('Critical flows', () => {
 		await dismissOnboardingModalIfOpen(page);
 		const home = page.locator('section.home');
 		await expect(home).toBeVisible();
+		const redesign = home.locator('.home-v5');
+		if ((await redesign.count()) > 0) {
+			const heroPrimary = home.getByTestId('home-hero').locator('.btn-primary');
+			expect(await heroPrimary.count()).toBeLessThanOrEqual(1);
+			return;
+		}
 		const primaryActions = home.locator('.scan-cta, .btn-primary.action-link');
 		expect(await primaryActions.count()).toBeLessThanOrEqual(1);
 	});
 
-	test('cold home shows lista CTA without empty section headings', async ({ page }) => {
+	test('cold home shows shopping entry without empty section headings', async ({ page }) => {
 		await registerNewUser(page);
 		await dismissOnboardingModalIfOpen(page);
 		await page.goto('/hem');
 		await expect(page.locator('[data-home-state="cold"]')).toBeVisible();
-		await expect(page.getByTestId('home-welcome')).toBeVisible();
-		await expect(page.getByTestId('home-card-shopping')).toBeVisible();
+		await expectHomeDashboardVisible(page);
+		await expect(page.getByTestId('home-shopping-card')).toBeVisible();
 		await expect(
-			page.getByRole('link', { name: /Skapa veckans lista|Create this week's list/i })
+			page.getByRole('link', { name: /Öppna inköpslistan|Open shopping list/i })
 		).toBeVisible();
 		await expect(
 			page.getByRole('heading', { name: /Vad rekommenderar|What does Skaffu recommend/i })
@@ -94,8 +101,7 @@ test.describe('Critical flows', () => {
 		await ensureFridgeInventoryItem(page);
 		await page.goto('/hem');
 		await dismissOnboardingModalIfOpen(page);
-		await expect(page.getByTestId('home-welcome')).toBeVisible();
-		await expect(page.getByTestId('home-card-pantry')).toBeVisible();
+		await expectHomeRedesignVisible(page);
 		await expect(page.locator('.home-v3-section')).toHaveCount(0);
 		await expect(
 			page.getByRole('heading', { name: /Vad rekommenderar|What does Skaffu recommend/i })
@@ -106,6 +112,10 @@ test.describe('Critical flows', () => {
 		await loginAsAdmin(page);
 		await page.goto('/hem');
 		await dismissOnboardingModalIfOpen(page);
+		const redesign = page.locator('.home-v5');
+		if ((await redesign.count()) > 0) {
+			test.skip(true, 'Home redesign v1 — planer link lives on inventory surfaces');
+		}
 		const planerLink = page.getByTestId('home-planer-link');
 		if ((await planerLink.count()) === 0) {
 			test.skip(true, 'No expiring items in seed — planer link not shown');

@@ -50,12 +50,12 @@
 </script>
 
 <section id="home-for-you" class="home-for-you" aria-labelledby="home-for-you-title">
-	<HomeOverviewCard tone="dominant" {title} testId="home-for-you-card">
+	<HomeOverviewCard tone="dominant" {title} titleId="home-for-you-title" testId="home-for-you-card">
 		{#snippet illustration()}
 			<HomeForYouIllustration />
 		{/snippet}
 		{#snippet body()}
-			<p id="home-for-you-title">{forYouBody}</p>
+			<p>{forYouBody}</p>
 		{/snippet}
 		{#snippet cta()}
 			{#if recommendation.kind === 'replenishment' && canWrite}
@@ -74,3 +74,26 @@
 		{/snippet}
 	</HomeOverviewCard>
 </section>
+
+<style>
+	.home-for-you {
+		animation: for-you-in 200ms ease both;
+	}
+
+	@keyframes for-you-in {
+		from {
+			opacity: 0;
+			transform: scale(0.98);
+		}
+		to {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.home-for-you {
+			animation: none;
+		}
+	}
+</style>

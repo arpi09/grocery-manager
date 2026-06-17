@@ -8,9 +8,10 @@
 	interface Props {
 		homeState: HomeState;
 		scanHref?: string;
+		scrollTargetId?: string;
 	}
 
-	let { homeState, scanHref = '/scan' }: Props = $props();
+	let { homeState, scanHref = '/scan', scrollTargetId = 'home-for-you' }: Props = $props();
 
 	const band = $derived(getHomeHeroTimeBand());
 	const heroStatus = $derived(deriveHeroStatus(homeState));
@@ -22,15 +23,15 @@
 			: t(`home.v5.hero.status.${heroStatus}` as 'home.v5.hero.status.healthy')
 	);
 
-	function scrollToForYou() {
-		document.getElementById('home-for-you')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	function scrollToTarget() {
+		document.getElementById(scrollTargetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 		void import('$lib/client/product-events').then(({ trackProductEvent }) =>
 			trackProductEvent('primary_action_clicked', { entryPoint: 'hero' })
 		);
 	}
 </script>
 
-<section class="home-hero" aria-labelledby="home-hero-title">
+<section class="home-hero" aria-labelledby="home-hero-title" data-testid="home-hero">
 	<div class="hero-illus" aria-hidden="true">
 		<HomeHeroIllustration />
 	</div>
@@ -38,7 +39,7 @@
 		<h1 id="home-hero-title">{title}</h1>
 		<p class="hero-body">{body}</p>
 		<div class="hero-actions">
-			<Button type="button" onclick={scrollToForYou}>{t('home.v5.hero.cta')}</Button>
+			<Button type="button" onclick={scrollToTarget}>{t('home.v5.hero.cta')}</Button>
 			<a class="scan-link" href={scanHref}>{t('home.v5.hero.scanLink')}</a>
 		</div>
 	</div>
@@ -47,6 +48,7 @@
 <style>
 	.home-hero {
 		display: flex;
+		flex-direction: column;
 		gap: var(--space-md);
 		align-items: center;
 		padding: var(--space-md);
@@ -55,11 +57,16 @@
 		border: 1px solid var(--color-border);
 	}
 
+	.hero-illus {
+		flex-shrink: 0;
+	}
+
 	.hero-copy {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
 		min-width: 0;
+		width: 100%;
 	}
 
 	h1 {
@@ -86,5 +93,16 @@
 	.scan-link {
 		font-size: var(--font-size-body-sm);
 		color: var(--color-text-muted);
+	}
+
+	@media (min-width: 720px) {
+		.home-hero {
+			flex-direction: row;
+			align-items: center;
+		}
+
+		.hero-illus {
+			order: -1;
+		}
 	}
 </style>
