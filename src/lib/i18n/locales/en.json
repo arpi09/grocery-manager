@@ -2576,7 +2576,9 @@
 				"freezer": "Freezer",
 				"cupboard": "Cupboard",
 				"count": "{count}",
-				"empty": "Empty here for now"
+				"empty": "Empty here for now",
+				"viewAll": "View all",
+				"viewAllAria": "View all items in {zone}"
 			},
 			"tile": {
 				"expiresDays": "{days, plural, one {# day} other {# days}}",

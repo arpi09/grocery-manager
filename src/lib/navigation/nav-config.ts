@@ -87,6 +87,13 @@ export interface NavItem {
 	match?: NavMatch;
 }
 
+/** Shelf-first pantry entry when `PANTRY_UX_V2_ENABLED` is on. */
+export const PANTRY_SHELF_PATH = '/inventory';
+
+export interface NavFeatureFlags {
+	pantryUxV2Enabled?: boolean;
+}
+
 /** Single source of truth for app navigation (account routes live in ProfileMenu only) */
 export const NAV_ITEMS: NavItem[] = [
 	{
@@ -157,6 +164,22 @@ export function filterNavItems(items: NavItem[], user: NavUser | null | undefine
 	return items.filter((item) => isNavItemVisible(item, user));
 }
 
+export function applyNavFeatureFlags(
+	items: NavItem[],
+	flags: NavFeatureFlags = {}
+): NavItem[] {
+	if (!flags.pantryUxV2Enabled) {
+		return items;
+	}
+
+	return items.map((item) => {
+		if (item.badge === 'stale') {
+			return { ...item, href: PANTRY_SHELF_PATH };
+		}
+		return item;
+	});
+}
+
 export function resolveNavHref(item: NavItem, pathname: string): string {
 	if (item.dynamicHref === 'scan' && pathname) {
 		return preferredScanHref();
@@ -189,9 +212,17 @@ export function navItemTestId(item: NavItem): string | undefined {
 	return undefined;
 }
 
+export function isPantryNavItem(item: NavItem): boolean {
+	return item.badge === 'stale' && item.labelKey === 'nav.inventory';
+}
+
 export function isNavActive(pathname: string, item: NavItem): boolean {
 	if (item.dynamicHref === 'scan') {
 		return pathname === '/scan' || pathname.startsWith('/scan/');
+	}
+
+	if (isPantryNavItem(item) && item.href === PANTRY_SHELF_PATH) {
+		return pathname === PANTRY_SHELF_PATH || pathname.startsWith(`${PANTRY_SHELF_PATH}/`);
 	}
 
 	if (item.match === 'prefix') {

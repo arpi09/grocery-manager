@@ -43,6 +43,17 @@ export function getActiveInventoryItems(items: InventoryItem[]): InventoryItem[]
 	return items.filter((item) => !isItemFinished(item));
 }
 
+export function filterInventoryBySearch(items: InventoryItem[], query: string): InventoryItem[] {
+	const normalized = query.trim().toLocaleLowerCase('sv');
+	if (!normalized) {
+		return items;
+	}
+
+	return getActiveInventoryItems(items).filter((item) =>
+		item.name.toLocaleLowerCase('sv').includes(normalized)
+	);
+}
+
 export function groupItemsByZone(
 	items: InventoryItem[]
 ): Record<StorageLocation, InventoryItem[]> {

@@ -22,14 +22,18 @@
 >
 	<div class="zone-title-row">
 		<h3 id="pantry-zone-{location}">{t(pantryZoneTitleKey(location))}</h3>
-		{#if count > 0}
-			<a class="zone-count" href={tableHref} aria-label={t(pantryZoneTitleKey(location))}>
-				{t('pantry.v2.zone.count', { count })}
-			</a>
-		{:else}
-			<span class="zone-count">{t('pantry.v2.zone.count', { count })}</span>
-		{/if}
+		<span class="zone-count">{t('pantry.v2.zone.count', { count })}</span>
 	</div>
+	{#if count > 0}
+		<a
+			class="zone-view-all"
+			href={tableHref}
+			aria-label={t('pantry.v2.zone.viewAllAria', { zone: t(pantryZoneTitleKey(location)) })}
+			data-testid="pantry-v2-zone-view-all-{location}"
+		>
+			{t('pantry.v2.zone.viewAll')}
+		</a>
+	{/if}
 </header>
 
 <style>
@@ -59,13 +63,20 @@
 		font-size: var(--font-size-label, 0.75rem);
 		font-weight: 600;
 		color: var(--color-text-muted);
-		text-decoration: none;
-		min-height: var(--touch-target-min);
-		display: inline-flex;
-		align-items: center;
 	}
 
-	a.zone-count:focus-visible {
+	.zone-view-all {
+		align-self: flex-start;
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: underline;
+	}
+
+	.zone-view-all:focus-visible {
 		outline: 2px solid var(--color-primary);
 		outline-offset: 2px;
 	}

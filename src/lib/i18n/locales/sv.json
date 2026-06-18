@@ -2545,7 +2545,9 @@
 				"freezer": "Frys",
 				"cupboard": "Skafferi",
 				"count": "{count}",
-				"empty": "Tomt här just nu"
+				"empty": "Tomt här just nu",
+				"viewAll": "Visa alla",
+				"viewAllAria": "Visa alla varor i {zone}"
 			},
 			"tile": {
 				"expiresDays": "{days, plural, one {# dag} other {# dagar}}",

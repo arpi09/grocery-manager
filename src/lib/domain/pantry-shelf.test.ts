@@ -3,6 +3,7 @@ import type { InventoryItem } from './inventory-item';
 import {
 	buildPantryShelfView,
 	buildZoneShelf,
+	filterInventoryBySearch,
 	getActiveInventoryItems,
 	groupItemsByZone,
 	isUseSoonItem,
@@ -32,6 +33,16 @@ function item(
 }
 
 describe('pantry-shelf', () => {
+	it('filters inventory by search query', () => {
+		const items = [
+			item({ id: '1', name: 'Mjölk', location: 'fridge' }),
+			item({ id: '2', name: 'Pasta', location: 'cupboard' })
+		];
+		expect(filterInventoryBySearch(items, 'mjölk')).toHaveLength(1);
+		expect(filterInventoryBySearch(items, '  ')).toHaveLength(2);
+		expect(filterInventoryBySearch(items, 'missing')).toHaveLength(0);
+	});
+
 	it('filters finished items and groups by zone', () => {
 		const items = [
 			item({ id: '1', name: 'Milk', location: 'fridge' }),

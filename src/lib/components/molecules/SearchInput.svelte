@@ -2,14 +2,15 @@
 	interface Props {
 		value: string;
 		placeholder?: string;
+		id?: string;
 	}
 
-	let { value = $bindable(''), placeholder = 'Search items…' }: Props = $props();
+	let { value = $bindable(''), placeholder = 'Search items…', id }: Props = $props();
 </script>
 
 <div class="search">
 	<span class="icon" aria-hidden="true">⌕</span>
-	<input type="search" {placeholder} bind:value class="search-input" />
+	<input type="search" {id} {placeholder} bind:value class="search-input" />
 </div>
 
 <style>

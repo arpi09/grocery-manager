@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import MainNavDesktop from '$lib/components/organisms/MainNavDesktop.svelte';
 	import MainNavMobile from '$lib/components/organisms/MainNavMobile.svelte';
 	import {
 		NAV_ITEMS,
+		applyNavFeatureFlags,
 		filterNavItems,
 		splitNavItems,
 		type NavUser
@@ -25,7 +27,10 @@
 		canWrite = false
 	}: Props = $props();
 
-	const visibleItems = $derived(filterNavItems(NAV_ITEMS, user));
+	const navFlags = $derived({
+		pantryUxV2Enabled: Boolean(page.data.pantryUxV2Enabled)
+	});
+	const visibleItems = $derived(applyNavFeatureFlags(filterNavItems(NAV_ITEMS, user), navFlags));
 	const { primary, mobileTabs, headerUtility, secondary, mobileSecondary } = $derived(
 		splitNavItems(visibleItems)
 	);
