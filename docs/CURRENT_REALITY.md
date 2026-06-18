@@ -1,13 +1,13 @@
-﻿# CURRENT_REALITY
+# CURRENT_REALITY
 
 > **Uppdatera denna fil** n�r prod deployas eller nav/flags �ndras. K�r: `.cursor/scripts/refresh-current-reality.sh`
 
 | F�lt | V�rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-18 |
-| **Prod SHA** | `73c7c5493` @ [27713747492](https://github.com/arpi09/grocery-manager/actions/runs/27713747492) (full E2E ×3, deploy_tier=full). Prior `92d4915` @ [27701442233](https://github.com/arpi09/grocery-manager/actions/runs/27701442233). |
-| **Master SHA** | `73c7c5493` — Home redesign remaining ([#114](https://github.com/arpi09/grocery-manager/pull/114)), Brain feedback gaps ([#115](https://github.com/arpi09/grocery-manager/pull/115)), E2E/migration hotfixes ([#117](https://github.com/arpi09/grocery-manager/pull/117)) |
-| **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `73c7c5493` (full deploy tier) |
+| **Prod SHA** | `0b999e153` @ [27790521211](https://github.com/arpi09/grocery-manager/actions/runs/27790521211) (deploy_tier=auto). Prior `73c7c5493` @ [27713747492](https://github.com/arpi09/grocery-manager/actions/runs/27713747492) (full E2E). |
+| **Master SHA** | `0b999e153` - PANTRY_UX_V2 canary enabled (`SHOPPING_UX_V2` + `PANTRY_UX_V2` canary live) |
+| **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `0b999e153` (auto deploy tier) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` � merged to master |
 | **Prod URL** | https://skaffu.com |
 | **Reality audit** | [REALITY_AUDIT_2026-06.md](./REALITY_AUDIT_2026-06.md) |
@@ -45,9 +45,7 @@ Kill switches / Tier C (expect **off** unless noted): `EMAIL_SENDING_DISABLED`, 
 
 Product flags (Brain, W1 share, receipt estimates) follow master `apphosting.yaml`; merge ships the final value.
 
-**Prod product flags (on @ `73c7c5493` / apphosting.yaml):** `HOME_REDESIGN_V1_ENABLED`, `PRICE_MEMORY_V1_ENABLED`, `BRAIN_FEEDBACK_V1_ENABLED`, `SHOPPING_UX_V2_ENABLED` (canary), `SHELF_LIFE_LEARNING_ENABLED`, `LOCATION_LEARNING_ENABLED`, `REPLENISHMENT_LEARNING_ENABLED`, `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT`. **Off:** `PANTRY_UX_V2_ENABLED` (code shipped on `feature/pantry-ux-v2`; enable via apphosting.yaml after canary), `STRIPE_CHECKOUT_DISABLED`, Tier C (`PUBLIC_CITY_FEED`, `KIVRA_FORWARD`).
-
-**Pantry V2 canary enable:** merge `feature/pantry-ux-v2` → set `PANTRY_UX_V2_ENABLED: "true"` in `apphosting.yaml` → deploy → nav Lager href becomes `/inventory` (shelf primary). Local: `.env` `PANTRY_UX_V2_ENABLED=true`. Kill: revert flag to `false`.
+**Prod product flags (on @ `0b999e153` / apphosting.yaml):** `HOME_REDESIGN_V1_ENABLED`, `PRICE_MEMORY_V1_ENABLED`, `BRAIN_FEEDBACK_V1_ENABLED`, `SHOPPING_UX_V2_ENABLED` (canary), `PANTRY_UX_V2_ENABLED` (canary), `SHELF_LIFE_LEARNING_ENABLED`, `LOCATION_LEARNING_ENABLED`, `REPLENISHMENT_LEARNING_ENABLED`, `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT`. **Off:** `STRIPE_CHECKOUT_DISABLED`, Tier C (`PUBLIC_CITY_FEED`, `KIVRA_FORWARD`).
 
 
 ## Brain capabilities today
@@ -77,6 +75,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 - [x] **UI living polish** � prod **`72b02f49b`** @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) (fast E2E). PR #101 merged 2026-06-16.
 - [x] **Prod feature flags + hem redesign** — prod **`92d4915`** @ [27701442233](https://github.com/arpi09/grocery-manager/actions/runs/27701442233) (full E2E). PR #113 merged 2026-06-17.
 - [x] **Home redesign remaining + Brain feedback gaps** — prod **`73c7c5493`** @ [27713747492](https://github.com/arpi09/grocery-manager/actions/runs/27713747492) (full E2E). PRs #114, #115, #117 merged 2026-06-17.
+- [x] **Shopping V2 + Pantry V2 canary** - prod **`0b999e153`** @ [27790521211](https://github.com/arpi09/grocery-manager/actions/runs/27790521211). `SHOPPING_UX_V2_ENABLED` + `PANTRY_UX_V2_ENABLED` live.
 - [x] **SMUI + Reality Audit + Settings hub** � prod **`c267c172c`** @ [27608398776](https://github.com/arpi09/grocery-manager/actions/runs/27608398776) (fast E2E). PRs #96�#100 merged 2026-06-16.
 - [x] **Mobile UX Recovery** � prior prod **`d585cbd5`** @ [27570192623](https://github.com/arpi09/grocery-manager/actions/runs/27570192623)
 - [x] **PR #95** CI/CD v2 merged 2026-06-15
@@ -89,4 +88,4 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 | `feat/settings-ios-hub` | iOS settings hub drill-down | **Merged** (#100 ? `c267c172c`) |
 | `feat/ui-living-polish` | Home priority cards, news/scan SVGs, inventory table | **Merged** (#101 ? `72b02f49b`) |
 | `feat/smui-*` / `feat/marketing-*` | SMUI tables + home + marketing | **Merged** (#97�#99) |
-| `feat/pantry-ux-v2` | Pantry shelf UX V2 (flag off until canary) | **PR5 ready** — E2E + WCAG on `feature/pantry-ux-v2` |
+| `feat/pantry-ux-v2` | Pantry shelf UX V2 | **Merged + canary live** @ `0b999e153` |
