@@ -5,9 +5,9 @@
 | F�lt | V�rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-18 |
-| **Prod SHA** | `0b999e153` @ [27790521211](https://github.com/arpi09/grocery-manager/actions/runs/27790521211) (deploy_tier=auto). Prior `73c7c5493` @ [27713747492](https://github.com/arpi09/grocery-manager/actions/runs/27713747492) (full E2E). |
-| **Master SHA** | `0b999e153` - PANTRY_UX_V2 canary enabled (`SHOPPING_UX_V2` + `PANTRY_UX_V2` canary live) |
-| **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `0b999e153` (auto deploy tier) |
+| **Prod SHA** | `0b999e153` @ [27790521211](https://github.com/arpi09/grocery-manager/actions/runs/27790521211) (full E2E x3, Pantry V2 canary). Prior `73c7c5493` @ [27713747492](https://github.com/arpi09/grocery-manager/actions/runs/27713747492). |
+| **Master SHA** | `0b999e153` — Pantry V2 canary (`PANTRY_UX_V2_ENABLED` + `SHOPPING_UX_V2_ENABLED` live) |
+| **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` � merged to master |
 | **Prod URL** | https://skaffu.com |
 | **Reality audit** | [REALITY_AUDIT_2026-06.md](./REALITY_AUDIT_2026-06.md) |
@@ -28,9 +28,9 @@ Utg�ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replen
 | Primary tabs (desktop) | Hem, Lager, Ink�p, Skanna, Mer | Lager + scan in top row |
 | Primary tabs (mobile) | Hem, Ink�p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
 | Inventory add | `/inventory/[location]` | EN **Lägg till** → sheet (kvitto/foto/streckkod/manuellt) |
-| Skafferi (Pantry V2) | `/inventory` | Shelf view (zones + use-soon) when `PANTRY_UX_V2_ENABLED`; table fallback at `/inventory/[location]` |
+| Skafferi (Pantry V2) | `/inventory` | Shelf view (zones + use-soon) live (`PANTRY_UX_V2_ENABLED` canary); table fallback at `/inventory/[location]` |
 | Scan hub | `/scan` | 3-card choice hub; **ScanModeTabs desktop only** |
-| Inköp (Shopping V2) | `/inkop` | Plan + Shop modes when `SHOPPING_UX_V2_ENABLED`; legacy checklist in overflow drawer |
+| Inköp (Shopping V2) | `/inkop` | Plan + Shop modes live (`SHOPPING_UX_V2_ENABLED` canary); legacy checklist in overflow drawer |
 | Memory Explorer | `/settings/memory` | Vad Skaffu vet � household rules (learning gate) |
 | Post-register wedge | `/hem?welcome=1` | Ny registrering/OAuth ? guided start on hem ([#46](https://github.com/arpi09/grocery-manager/pull/46)) |
 | Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie |
@@ -45,7 +45,7 @@ Kill switches / Tier C (expect **off** unless noted): `EMAIL_SENDING_DISABLED`, 
 
 Product flags (Brain, W1 share, receipt estimates) follow master `apphosting.yaml`; merge ships the final value.
 
-**Prod product flags (on @ `0b999e153` / apphosting.yaml):** `HOME_REDESIGN_V1_ENABLED`, `PRICE_MEMORY_V1_ENABLED`, `BRAIN_FEEDBACK_V1_ENABLED`, `SHOPPING_UX_V2_ENABLED` (canary), `PANTRY_UX_V2_ENABLED` (canary), `SHELF_LIFE_LEARNING_ENABLED`, `LOCATION_LEARNING_ENABLED`, `REPLENISHMENT_LEARNING_ENABLED`, `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT`. **Off:** `STRIPE_CHECKOUT_DISABLED`, Tier C (`PUBLIC_CITY_FEED`, `KIVRA_FORWARD`).
+**Prod product flags (on @ `0b999e153` / apphosting.yaml):** `HOME_REDESIGN_V1_ENABLED`, `PRICE_MEMORY_V1_ENABLED`, `BRAIN_FEEDBACK_V1_ENABLED`, `SHOPPING_UX_V2_ENABLED` (canary live), `PANTRY_UX_V2_ENABLED` (canary live), `SHELF_LIFE_LEARNING_ENABLED`, `LOCATION_LEARNING_ENABLED`, `REPLENISHMENT_LEARNING_ENABLED`, `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT`. **Off:** `STRIPE_CHECKOUT_DISABLED`, Tier C (`PUBLIC_CITY_FEED`, `KIVRA_FORWARD`).
 
 
 ## Brain capabilities today
