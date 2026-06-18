@@ -5,6 +5,7 @@ import { isShelfLifeEstimatesInReceiptEnabled } from '$lib/server/shelf-life-lea
 import { isHomeRedesignV1Enabled } from '$lib/server/home-redesign-flag';
 import { isPriceMemoryV1Enabled } from '$lib/server/price-memory-flag';
 import { isBrainFeedbackV1Enabled } from '$lib/server/brain-feedback-flag';
+import { isPantryUxV2Enabled } from '$lib/server/pantry-ux-v2-flag';
 import { isShoppingUxV2Enabled } from '$lib/server/shopping-ux-v2-flag';
 import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
@@ -20,6 +21,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 	const priceMemoryV1Enabled = isPriceMemoryV1Enabled();
 	const brainFeedbackV1Enabled = isBrainFeedbackV1Enabled();
 	const shoppingUxV2Enabled = isShoppingUxV2Enabled();
+	const pantryUxV2Enabled = isPantryUxV2Enabled();
 
 	if (!locals.user) {
 		return {
@@ -39,7 +41,8 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			homeRedesignV1Enabled,
 			priceMemoryV1Enabled,
 			brainFeedbackV1Enabled,
-			shoppingUxV2Enabled
+			shoppingUxV2Enabled,
+			pantryUxV2Enabled
 		};
 	}
 
@@ -113,6 +116,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		homeRedesignV1Enabled,
 		priceMemoryV1Enabled,
 		brainFeedbackV1Enabled,
-		shoppingUxV2Enabled
+		shoppingUxV2Enabled,
+		pantryUxV2Enabled
 	};
 };

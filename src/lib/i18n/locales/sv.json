@@ -2528,7 +2528,47 @@
 		"join": "Gå med",
 		"activeSuffix": "aktiv",
 		"createNew": "Skapa nytt hushåll",
-		"namePlaceholder": "t.ex. Sommarstuga"
+		"namePlaceholder": "t.ex. Sommarstuga",
+		"v2": {
+			"pageTitle": "Skafferi · Skaffu",
+			"metaDescription": "Se vad finns hemma — kyl, frys och skafferi i en överblick.",
+			"title": "Skafferi",
+			"heroAria": "Skafferi — hyllsystem",
+			"useSoon": {
+				"title": "Använd snart — {count, plural, one {# vara} other {# varor}}",
+				"list": "{items}",
+				"aria": "Varor att använda snart",
+				"cta": "Visa alla"
+			},
+			"zone": {
+				"fridge": "Kylskåp",
+				"freezer": "Frys",
+				"cupboard": "Skafferi",
+				"count": "{count}",
+				"empty": "Tomt här just nu"
+			},
+			"tile": {
+				"expiresDays": "{days, plural, one {# dag} other {# dagar}}",
+				"expiresToday": "Idag",
+				"frozen": "fryst",
+				"opened": "nyöppnad",
+				"half": "halv",
+				"moreInZone": "{count} till",
+				"aria": "{name}, {quantity}",
+				"warnAria": "{name} — använd snart"
+			},
+			"addCta": "Lägg till vara",
+			"scanCta": "Skanna",
+			"searchPlaceholder": "Sök i skafferiet…",
+			"empty": {
+				"title": "Tomt skafferi",
+				"body": "Skanna ett kvitto eller lägg till en vara — då fylls hyllorna här.",
+				"cta": "Skanna kvitto"
+			},
+			"error": {
+				"loadFailed": "Skafferiet kunde inte laddas. Försök igen."
+			}
+		}
 	},
 	"gamification": {
 		"stripTitle": "Din vecka",

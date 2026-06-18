@@ -2559,7 +2559,47 @@
 		"join": "Join",
 		"activeSuffix": "active",
 		"createNew": "Create new pantry",
-		"namePlaceholder": "e.g. Summer house"
+		"namePlaceholder": "e.g. Summer house",
+		"v2": {
+			"pageTitle": "Pantry · Skaffu",
+			"metaDescription": "See what's at home — fridge, freezer, and cupboard in one view.",
+			"title": "Pantry",
+			"heroAria": "Pantry — shelf system",
+			"useSoon": {
+				"title": "Use soon — {count, plural, one {# item} other {# items}}",
+				"list": "{items}",
+				"aria": "Items to use soon",
+				"cta": "View all"
+			},
+			"zone": {
+				"fridge": "Fridge",
+				"freezer": "Freezer",
+				"cupboard": "Cupboard",
+				"count": "{count}",
+				"empty": "Empty here for now"
+			},
+			"tile": {
+				"expiresDays": "{days, plural, one {# day} other {# days}}",
+				"expiresToday": "Today",
+				"frozen": "frozen",
+				"opened": "newly opened",
+				"half": "half",
+				"moreInZone": "{count} more",
+				"aria": "{name}, {quantity}",
+				"warnAria": "{name} — use soon"
+			},
+			"addCta": "Add item",
+			"scanCta": "Scan",
+			"searchPlaceholder": "Search pantry…",
+			"empty": {
+				"title": "Empty pantry",
+				"body": "Scan a receipt or add an item — the shelves will fill in here.",
+				"cta": "Scan receipt"
+			},
+			"error": {
+				"loadFailed": "Pantry couldn't load. Try again."
+			}
+		}
 	},
 	"gamification": {
 		"stripTitle": "Your week",
