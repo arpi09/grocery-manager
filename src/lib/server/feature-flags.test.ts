@@ -7,7 +7,8 @@ import {
 	isPriceMemoryV1Enabled,
 	isReplenishmentLearningEnabled,
 	isShelfLifeLearningEnabled,
-	isShoppingListShareEnabled
+	isShoppingListShareEnabled,
+	isShoppingUxV2Enabled
 } from './feature-flags';
 
 describe('feature-flags registry', () => {
@@ -39,6 +40,7 @@ describe('feature-flags registry', () => {
 		expect(FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1).toBe('BRAIN_FEEDBACK_V1_ENABLED');
 		expect(FEATURE_FLAG_ENV.SHOPPING_LIST_SHARE).toBe('PUBLIC_SHOPPING_LIST_SHARE_ENABLED');
 		expect(FEATURE_FLAG_ENV.HOME_REDESIGN_V1).toBe('HOME_REDESIGN_V1_ENABLED');
+		expect(FEATURE_FLAG_ENV.SHOPPING_UX_V2).toBe('SHOPPING_UX_V2_ENABLED');
 	});
 
 	it('defaults all flags to false when unset', () => {
@@ -49,6 +51,7 @@ describe('feature-flags registry', () => {
 		expect(isBrainFeedbackV1Enabled()).toBe(false);
 		expect(isShoppingListShareEnabled()).toBe(false);
 		expect(isHomeRedesignV1Enabled()).toBe(false);
+		expect(isShoppingUxV2Enabled()).toBe(false);
 	});
 
 	it('enables flags only when env is exactly true', () => {
@@ -59,6 +62,7 @@ describe('feature-flags registry', () => {
 		process.env[FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1] = 'true';
 		process.env[FEATURE_FLAG_ENV.SHOPPING_LIST_SHARE] = 'true';
 		process.env[FEATURE_FLAG_ENV.HOME_REDESIGN_V1] = 'true';
+		process.env[FEATURE_FLAG_ENV.SHOPPING_UX_V2] = 'true';
 
 		expect(isShelfLifeLearningEnabled()).toBe(true);
 		expect(isLocationLearningEnabled()).toBe(true);
@@ -67,6 +71,7 @@ describe('feature-flags registry', () => {
 		expect(isBrainFeedbackV1Enabled()).toBe(true);
 		expect(isShoppingListShareEnabled()).toBe(true);
 		expect(isHomeRedesignV1Enabled()).toBe(true);
+		expect(isShoppingUxV2Enabled()).toBe(true);
 
 		process.env[FEATURE_FLAG_ENV.PRICE_MEMORY_V1] = 'false';
 		expect(isPriceMemoryV1Enabled()).toBe(false);

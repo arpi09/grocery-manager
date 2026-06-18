@@ -432,7 +432,13 @@ export const productEventTable = pgTable(
 				'list_link_opened',
 				'list_join_cta_clicked',
 				'partner_joined',
-				'shared_checkoff'
+				'shared_checkoff',
+				'trip_started',
+				'trip_item_checked',
+				'trip_completed',
+				'shopping_mode_switched',
+				'memory_suggestion_added',
+				'memory_suggestion_ignored'
 			]
 		}).notNull(),
 		metadata: text('metadata'),

@@ -372,6 +372,13 @@
 			"when": 1752854400000,
 			"tag": "0053_memory_rule_events",
 			"breakpoints": true
+		},
+		{
+			"idx": 53,
+			"version": "7",
+			"when": 1752940800000,
+			"tag": "0054_shopping_ux_v2_telemetry",
+			"breakpoints": true
 		}
 	]
 }

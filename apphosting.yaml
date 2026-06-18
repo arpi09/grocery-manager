@@ -216,6 +216,10 @@ env:
     value: "true"
     availability:
       - RUNTIME
+  - variable: SHOPPING_UX_V2_ENABLED
+    value: "false"
+    availability:
+      - RUNTIME
   # Optional demo household member (omit or override in console)
   # - variable: DEFAULT_MEMBER_EMAIL
   #   value: member@example.com

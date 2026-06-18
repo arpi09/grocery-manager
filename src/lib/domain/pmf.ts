@@ -108,7 +108,13 @@ export const PRODUCT_EVENT_TYPES = [
 	'brain_explanation_viewed',
 	'memory_rule_created',
 	'memory_rule_updated',
-	'memory_rule_rejected'
+	'memory_rule_rejected',
+	'trip_started',
+	'trip_item_checked',
+	'trip_completed',
+	'shopping_mode_switched',
+	'memory_suggestion_added',
+	'memory_suggestion_ignored'
 ] as const;
 
 export const PMF_PRODUCT_EVENT_TYPES = [

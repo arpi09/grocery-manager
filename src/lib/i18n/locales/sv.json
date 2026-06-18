@@ -1026,8 +1026,114 @@
 			"invitePartner": "Bjud in partner",
 			"invitePartnerAria": "Kopiera inbjudningslänk till hushållet"
 		},
-		"receiptImportLead": "Kvitto importerat. Granska påfyllnadsförslagen nedan.",
+		"receiptImportLead": "Kvitto importerat.\n\nSkaffu har uppdaterat skafferiet.\n\nSaknas något inför nästa handling?",
 		"suggestionsTitle": "Förslag",
+		"v2": {
+			"pageTitle": "Inköp · Skaffu",
+			"metaDescription": "Planera veckans inköp och handla med fokus — en vara i taget. Delad lista för hushållet.",
+			"plan": {
+				"titleDefault": "Inköpslistan",
+				"titleTrip": "{name}",
+				"subtitle": "{count, plural, one {# vara} other {# varor}} · {store}",
+				"subtitleMemory": "minns vad ni brukar köpa",
+				"subtitleEmpty": "Tom lista — lägg till det som saknas",
+				"illustrationAria": "Inköpsplan — översikt"
+			},
+			"mode": {
+				"plan": "Planera",
+				"shop": "Handla",
+				"aria": "Inköpsläge",
+				"planAria": "Planera inköp",
+				"shopAria": "Handla i butik"
+			},
+			"memory": {
+				"sectionLabel": "Skaffu minns",
+				"empty": "Inga förslag just nu. När ni handlar och skannar kvitton bygger Skaffu på vanorna.",
+				"add": "Lägg till",
+				"addAria": "Lägg {name} på listan",
+				"dismiss": "Inte nu",
+				"dismissAria": "Visa inte {name} som förslag nu",
+				"onList": "På listan",
+				"onListAria": "{name} finns redan på listan",
+				"cadenceEvery": "Var {days} dagar",
+				"cadenceEveryDays": "Var {interval} dagar",
+				"lastPurchase": "senast {weekday}",
+				"lastPurchaseDate": "senast {date}",
+				"fromRecipe": "Redan på listan via För dig",
+				"fromMeal": "Från {mealName}",
+				"usualAmount": "{amount} brukar räcka",
+				"acceptSuccess": "{name} lades till",
+				"acceptFailed": "Kunde inte lägga till — försök igen"
+			},
+			"summary": {
+				"title": "Din lista just nu",
+				"countPill": "{count, plural, one {# vara} other {# varor}}",
+				"morePill": "+{count} till",
+				"empty": "Inga varor ännu",
+				"startShopCta": "Börja handla",
+				"startShopCtaAria": "Börja handla {count, plural, one {# vara} other {# varor}}",
+				"addItemCta": "Lägg till vara",
+				"viewAllAria": "Visa hela listan"
+			},
+			"add": {
+				"toggle": "Lägg till vara",
+				"placeholder": "Varu namn",
+				"quantityPlaceholder": "Antal",
+				"unitPlaceholder": "Enhet",
+				"submit": "Lägg till",
+				"scanLink": "Skanna istället"
+			},
+			"overflow": {
+				"export": "Kopiera lista",
+				"smartFill": "Fyll på från skafferiet",
+				"share": "Dela lista",
+				"legacyList": "Visa som checklista",
+				"title": "Mer för inköp"
+			},
+			"shop": {
+				"backToPlan": "Planera",
+				"backToPlanAria": "Tillbaka till planering",
+				"progress": "{picked} av {total} plockade",
+				"progressAria": "{picked} av {total} varor plockade",
+				"progressComplete": "Allt plockat",
+				"progressEmpty": "Inget att handla — lägg till varor i Planera",
+				"illustrationAria": "Handla — en vara i fokus",
+				"focusQuantity": "{quantity} {unit}",
+				"focusLocation": "{location}",
+				"focusDetail": "{quantity} · {location}",
+				"pickCta": "Jag har plockat",
+				"pickCtaAria": "Markera {name} som plockad",
+				"undoCta": "Ångra",
+				"undoAria": "Ångra senaste plock",
+				"peekLabel": "Nästa",
+				"peekMore": "+{count} till",
+				"peekAria": "Kommande varor på listan",
+				"completeTitle": "Klart för den här turen",
+				"completeBody": "{count, plural, one {# vara} other {# varor}} plockade. Uppdatera skafferiet när du packat hemma.",
+				"completePantryCta": "Uppdatera skafferiet",
+				"completePlanCta": "Tillbaka till planering",
+				"completeHomeCta": "Till hem",
+				"pickedLive": "{name} plockad"
+			},
+			"pantryBridge": {
+				"title": "Lägg till i skafferiet?",
+				"lead": "{name} — lägg till i {location} med {amount}?",
+				"yes": "Ja, lägg till",
+				"no": "Nej, bara lista",
+				"addedToast": "{name} lades till i skafferiet"
+			},
+			"invite": {
+				"title": "Handla tillsammans",
+				"body": "Bjud in partner så ni ser samma lista i butiken.",
+				"cta": "Bjud in"
+			},
+			"error": {
+				"loadFailed": "Inköpslistan kunde inte laddas. Försök igen.",
+				"toggleFailed": "Kunde inte uppdatera varan. Försök igen."
+			},
+			"readonly": "Du har endast läsbehörighet i detta hushåll.",
+			"receiptLead": "Kvitto importerat.\n\nSkaffu har uppdaterat skafferiet.\n\nSaknas något inför nästa handling?"
+		},
 		"pantryBridge": {
 			"title": "Stäng veckan — uppdatera skafferi",
 			"subtitle": "{name} är avbockad — lägg till i lagret så nästa vecka stämmer",

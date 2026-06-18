@@ -1057,8 +1057,114 @@
 			"invitePartner": "Invite partner",
 			"invitePartnerAria": "Copy household invite link"
 		},
-		"receiptImportLead": "Receipt imported. Review replenishment suggestions below.",
+		"receiptImportLead": "Receipt imported.\n\nSkaffu updated your pantry.\n\nAnything missing for the next shop?",
 		"suggestionsTitle": "Suggestions",
+		"v2": {
+			"pageTitle": "Shopping · Skaffu",
+			"metaDescription": "Plan the week's shop and pick items one at a time. Shared list for your household.",
+			"plan": {
+				"titleDefault": "Shopping list",
+				"titleTrip": "{name}",
+				"subtitle": "{count, plural, one {# item} other {# items}} · {store}",
+				"subtitleMemory": "remembers your usual picks",
+				"subtitleEmpty": "Empty list — add what's missing",
+				"illustrationAria": "Shopping plan overview"
+			},
+			"mode": {
+				"plan": "Plan",
+				"shop": "Shop",
+				"aria": "Shopping mode",
+				"planAria": "Plan shopping",
+				"shopAria": "Shop in store"
+			},
+			"memory": {
+				"sectionLabel": "Skaffu remembers",
+				"empty": "No suggestions yet. As you shop and scan receipts, Skaffu learns your habits.",
+				"add": "Add",
+				"addAria": "Add {name} to the list",
+				"dismiss": "Not now",
+				"dismissAria": "Hide {name} suggestion for now",
+				"onList": "On list",
+				"onListAria": "{name} is already on the list",
+				"cadenceEvery": "Every {days} days",
+				"cadenceEveryDays": "Every {interval} days",
+				"lastPurchase": "last {weekday}",
+				"lastPurchaseDate": "last {date}",
+				"fromRecipe": "Already on list from For you",
+				"fromMeal": "From {mealName}",
+				"usualAmount": "{amount} usually lasts",
+				"acceptSuccess": "{name} added",
+				"acceptFailed": "Couldn't add — try again"
+			},
+			"summary": {
+				"title": "Your list right now",
+				"countPill": "{count, plural, one {# item} other {# items}}",
+				"morePill": "+{count} more",
+				"empty": "No items yet",
+				"startShopCta": "Start shopping",
+				"startShopCtaAria": "Start shopping {count, plural, one {# item} other {# items}}",
+				"addItemCta": "Add item",
+				"viewAllAria": "View full list"
+			},
+			"add": {
+				"toggle": "Add item",
+				"placeholder": "Item name",
+				"quantityPlaceholder": "Qty",
+				"unitPlaceholder": "Unit",
+				"submit": "Add",
+				"scanLink": "Scan instead"
+			},
+			"overflow": {
+				"export": "Copy list",
+				"smartFill": "Fill from pantry",
+				"share": "Share list",
+				"legacyList": "Show as checklist",
+				"title": "More for shopping"
+			},
+			"shop": {
+				"backToPlan": "Plan",
+				"backToPlanAria": "Back to planning",
+				"progress": "{picked} of {total} picked",
+				"progressAria": "{picked} of {total} items picked",
+				"progressComplete": "All picked",
+				"progressEmpty": "Nothing to shop — add items in Plan",
+				"illustrationAria": "Shopping — one item in focus",
+				"focusQuantity": "{quantity} {unit}",
+				"focusLocation": "{location}",
+				"focusDetail": "{quantity} · {location}",
+				"pickCta": "I've picked this",
+				"pickCtaAria": "Mark {name} as picked",
+				"undoCta": "Undo",
+				"undoAria": "Undo last pick",
+				"peekLabel": "Up next",
+				"peekMore": "+{count} more",
+				"peekAria": "Upcoming items on the list",
+				"completeTitle": "Done for this trip",
+				"completeBody": "{count, plural, one {# item} other {# items}} picked. Update the pantry when you're home.",
+				"completePantryCta": "Update pantry",
+				"completePlanCta": "Back to planning",
+				"completeHomeCta": "Go to home",
+				"pickedLive": "{name} picked"
+			},
+			"pantryBridge": {
+				"title": "Add to pantry?",
+				"lead": "{name} — add to {location} as {amount}?",
+				"yes": "Yes, add",
+				"no": "No, list only",
+				"addedToast": "{name} added to pantry"
+			},
+			"invite": {
+				"title": "Shop together",
+				"body": "Invite your partner to see the same list in the store.",
+				"cta": "Invite"
+			},
+			"error": {
+				"loadFailed": "Couldn't load the shopping list. Try again.",
+				"toggleFailed": "Couldn't update the item. Try again."
+			},
+			"readonly": "You have read-only access in this household.",
+			"receiptLead": "Receipt imported.\n\nSkaffu updated your pantry.\n\nAnything missing for the next shop?"
+		},
 		"pantryBridge": {
 			"title": "Close the week — update pantry",
 			"subtitle": "{name} is checked off — add to inventory so next week stays in sync",

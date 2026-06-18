@@ -1,0 +1,3 @@
+-- Shopping UX v2 product_event types (application enum in schema.ts):
+-- trip_started, trip_item_checked, trip_completed, shopping_mode_switched,
+-- memory_suggestion_added, memory_suggestion_ignored
