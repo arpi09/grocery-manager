@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { afterRestore, invalidateAll } from '$app/navigation';
+	import { invalidateAll } from '$app/navigation';
 	import PantryShelfActions from '$lib/components/molecules/PantryShelfActions.svelte';
 	import PantryV2EmptyState from '$lib/components/organisms/PantryV2EmptyState.svelte';
 	import PantryV2ShelfView from '$lib/components/organisms/PantryV2ShelfView.svelte';
@@ -29,8 +29,19 @@
 		!loadFailed && !showSearchEmpty && unfilteredShelf.isEmpty && searchQuery.trim().length === 0
 	);
 
-	afterRestore(() => {
-		void invalidateAll();
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+
+		const onPageShow = (event: PageTransitionEvent) => {
+			if (event.persisted) {
+				void invalidateAll();
+			}
+		};
+
+		window.addEventListener('pageshow', onPageShow);
+		return () => window.removeEventListener('pageshow', onPageShow);
 	});
 
 	$effect(() => {
