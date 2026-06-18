@@ -106,7 +106,8 @@ export default defineConfig({
 			EMAIL_VERIFICATION_SKIP: process.env.EMAIL_VERIFICATION_SKIP ?? 'true',
 			E2E_MOCK_AI: process.env.E2E_MOCK_AI ?? 'true',
 			PUBLIC_E2E_DISABLE_POST_SURVEY: 'true',
-			HOME_REDESIGN_V1_ENABLED: process.env.HOME_REDESIGN_V1_ENABLED ?? 'true'
+			HOME_REDESIGN_V1_ENABLED: process.env.HOME_REDESIGN_V1_ENABLED ?? 'true',
+			SHOPPING_UX_V2_ENABLED: process.env.SHOPPING_UX_V2_ENABLED ?? 'false'
 		}
 	}
 });
