@@ -221,7 +221,7 @@ env:
     availability:
       - RUNTIME
   - variable: PANTRY_UX_V2_ENABLED
-    value: "false"
+    value: "true"
     availability:
       - RUNTIME
   # Optional demo household member (omit or override in console)
