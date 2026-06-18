@@ -1163,7 +1163,7 @@
 				"toggleFailed": "Couldn't update the item. Try again."
 			},
 			"readonly": "You have read-only access in this household.",
-			"receiptLead": "Receipt imported.\n\nSkaffu updated your pantry.\n\nAnything missing for the next shop?"
+			"receiptLead": "Receipt imported. Check if anything's missing from the list."
 		},
 		"pantryBridge": {
 			"title": "Close the week — update pantry",

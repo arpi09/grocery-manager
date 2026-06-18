@@ -1132,7 +1132,7 @@
 				"toggleFailed": "Kunde inte uppdatera varan. Försök igen."
 			},
 			"readonly": "Du har endast läsbehörighet i detta hushåll.",
-			"receiptLead": "Kvitto importerat.\n\nSkaffu har uppdaterat skafferiet.\n\nSaknas något inför nästa handling?"
+			"receiptLead": "Kvitto importerat. Kolla om något saknas på listan."
 		},
 		"pantryBridge": {
 			"title": "Stäng veckan — uppdatera skafferi",

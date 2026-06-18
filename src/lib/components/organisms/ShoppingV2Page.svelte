@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { deserialize, enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
+	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import ModeToggle from '$lib/components/molecules/ModeToggle.svelte';
 	import ShoppingToPantrySheet from '$lib/components/molecules/ShoppingToPantrySheet.svelte';
@@ -10,6 +11,7 @@
 	import ShoppingV2PlanView from '$lib/components/organisms/ShoppingV2PlanView.svelte';
 	import ShoppingV2ShopView from '$lib/components/organisms/ShoppingV2ShopView.svelte';
 	import {
+		clearShoppingTripSession,
 		defaultShoppingTripSession,
 		readShoppingTripSession,
 		writeShoppingTripSession,
@@ -55,6 +57,8 @@
 	}: Props = $props();
 
 	let session = $state<ShoppingTripSession>(defaultShoppingTripSession());
+	let initializedHouseholdId = $state<string | null>(null);
+	let shopDeeplinkHandled = $state(false);
 	let legacyOpen = $state(false);
 	let showQuickAdd = $state(false);
 	let acceptingKey = $state<string | null>(null);
@@ -75,8 +79,30 @@
 		if (!browser || !householdId) {
 			return;
 		}
-		const stored = readShoppingTripSession(householdId);
-		session = stored ?? defaultShoppingTripSession();
+
+		if (initializedHouseholdId && initializedHouseholdId !== householdId) {
+			clearShoppingTripSession(initializedHouseholdId);
+		}
+
+		if (initializedHouseholdId !== householdId) {
+			initializedHouseholdId = householdId;
+			const stored = readShoppingTripSession(householdId);
+			session = stored ?? defaultShoppingTripSession();
+		}
+	});
+
+	$effect(() => {
+		if (!browser || shopDeeplinkHandled || page.url.searchParams.get('mode') !== 'shop') {
+			return;
+		}
+
+		shopDeeplinkHandled = true;
+		switchMode('shop', 'deeplink');
+
+		const url = new URL(page.url);
+		url.searchParams.delete('mode');
+		const next = `${url.pathname}${url.search}${url.hash}`;
+		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
 	});
 
 	$effect(() => {

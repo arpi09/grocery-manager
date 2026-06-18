@@ -1,4 +1,4 @@
-# CURRENT_REALITY
+﻿# CURRENT_REALITY
 
 > **Uppdatera denna fil** n�r prod deployas eller nav/flags �ndras. K�r: `.cursor/scripts/refresh-current-reality.sh`
 
@@ -29,6 +29,7 @@ Utg�ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replen
 | Primary tabs (mobile) | Hem, Ink�p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
 | Inventory add | `/inventory/[location]` | EN **L�gg till** ? sheet (kvitto/foto/streckkod/manuellt) |
 | Scan hub | `/scan` | 3-card choice hub; **ScanModeTabs desktop only** |
+| Inköp (Shopping V2) | `/inkop` | Plan + Shop modes when `SHOPPING_UX_V2_ENABLED`; legacy checklist in overflow drawer |
 | Memory Explorer | `/settings/memory` | Vad Skaffu vet � household rules (learning gate) |
 | Post-register wedge | `/hem?welcome=1` | Ny registrering/OAuth ? guided start on hem ([#46](https://github.com/arpi09/grocery-manager/pull/46)) |
 | Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie |
@@ -43,7 +44,7 @@ Kill switches / Tier C (expect **off** unless noted): `EMAIL_SENDING_DISABLED`, 
 
 Product flags (Brain, W1 share, receipt estimates) follow master `apphosting.yaml`; merge ships the final value.
 
-**Prod product flags (on @ `73c7c5493` / apphosting.yaml):** `HOME_REDESIGN_V1_ENABLED`, `PRICE_MEMORY_V1_ENABLED`, `BRAIN_FEEDBACK_V1_ENABLED`, `SHELF_LIFE_LEARNING_ENABLED`, `LOCATION_LEARNING_ENABLED`, `REPLENISHMENT_LEARNING_ENABLED`, `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT`. **Off:** `STRIPE_CHECKOUT_DISABLED`, Tier C (`PUBLIC_CITY_FEED`, `KIVRA_FORWARD`).
+**Prod product flags (on @ `73c7c5493` / apphosting.yaml):** `HOME_REDESIGN_V1_ENABLED`, `PRICE_MEMORY_V1_ENABLED`, `BRAIN_FEEDBACK_V1_ENABLED`, `SHOPPING_UX_V2_ENABLED` (canary), `SHELF_LIFE_LEARNING_ENABLED`, `LOCATION_LEARNING_ENABLED`, `REPLENISHMENT_LEARNING_ENABLED`, `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT`. **Off:** `STRIPE_CHECKOUT_DISABLED`, Tier C (`PUBLIC_CITY_FEED`, `KIVRA_FORWARD`).
 
 
 ## Brain capabilities today
