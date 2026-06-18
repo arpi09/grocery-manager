@@ -60,3 +60,21 @@ test.describe('Accessibility — P0 routes (WCAG 2.2 AA)', () => {
 		});
 	}
 });
+
+test.describe('Accessibility — Pantry V2 shelf (WCAG 2.2 AA)', () => {
+	test.setTimeout(120_000);
+
+	test('/inventory shelf has no critical or serious axe violations', async ({ page }) => {
+		test.skip(process.env.PANTRY_UX_V2_ENABLED !== 'true', 'Requires PANTRY_UX_V2_ENABLED=true');
+
+		await loginAsAdmin(page);
+		await ensureFridgeInventoryItem(page);
+		await page.goto('/inventory', { waitUntil: 'commit', timeout: 60_000 });
+		await dismissOnboardingModalIfOpen(page);
+
+		await page.locator('main, [role="main"]').first().waitFor({ state: 'visible', timeout: 30_000 });
+		await expect(page.getByTestId('pantry-v2-shelf')).toBeVisible({ timeout: 15_000 });
+
+		await expectNoCriticalOrSeriousViolations(page, '/inventory (pantry v2 shelf)');
+	});
+});

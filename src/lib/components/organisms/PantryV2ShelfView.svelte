@@ -8,7 +8,6 @@
 		trackPantryZoneOpened
 	} from '$lib/client/pantry-v2-telemetry';
 	import type { PantryShelfViewModel } from '$lib/domain/pantry-shelf';
-	import { t } from '$lib/i18n';
 
 	interface Props {
 		shelf: PantryShelfViewModel;
@@ -32,10 +31,7 @@
 </script>
 
 <div class="pantry-shelf-view" data-testid="pantry-v2-shelf">
-	<SceneIllustration
-		src="/illustrations/v2/pantry-shelf.svg"
-		ariaLabel={t('pantry.v2.heroAria')}
-	/>
+	<SceneIllustration src="/illustrations/v2/pantry-shelf.svg" decorative />
 
 	<UseSoonBand count={shelf.useSoon.length} names={shelf.useSoonNames} href={useSoonHref} onTap={handleUseSoonTap} />
 

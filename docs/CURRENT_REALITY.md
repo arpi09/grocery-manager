@@ -4,7 +4,7 @@
 
 | F�lt | V�rde |
 |------|--------|
-| **Uppdaterad** | 2026-06-17 |
+| **Uppdaterad** | 2026-06-18 |
 | **Prod SHA** | `73c7c5493` @ [27713747492](https://github.com/arpi09/grocery-manager/actions/runs/27713747492) (full E2E ×3, deploy_tier=full). Prior `92d4915` @ [27701442233](https://github.com/arpi09/grocery-manager/actions/runs/27701442233). |
 | **Master SHA** | `73c7c5493` — Home redesign remaining ([#114](https://github.com/arpi09/grocery-manager/pull/114)), Brain feedback gaps ([#115](https://github.com/arpi09/grocery-manager/pull/115)), E2E/migration hotfixes ([#117](https://github.com/arpi09/grocery-manager/pull/117)) |
 | **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `73c7c5493` (full deploy tier) |
@@ -27,7 +27,8 @@ Utg�ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replen
 | Settings | `/settings` | **iOS hub** � grouped rows + drill-down (`/settings/account`, `/notifications`, `/household`, `/plan`, `/app`, `/feedback`, `/suggestions`) ([#100](https://github.com/arpi09/grocery-manager/pull/100)) |
 | Primary tabs (desktop) | Hem, Lager, Ink�p, Skanna, Mer | Lager + scan in top row |
 | Primary tabs (mobile) | Hem, Ink�p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
-| Inventory add | `/inventory/[location]` | EN **L�gg till** ? sheet (kvitto/foto/streckkod/manuellt) |
+| Inventory add | `/inventory/[location]` | EN **Lägg till** → sheet (kvitto/foto/streckkod/manuellt) |
+| Skafferi (Pantry V2) | `/inventory` | Shelf view (zones + use-soon) when `PANTRY_UX_V2_ENABLED`; table fallback at `/inventory/[location]` |
 | Scan hub | `/scan` | 3-card choice hub; **ScanModeTabs desktop only** |
 | Inköp (Shopping V2) | `/inkop` | Plan + Shop modes when `SHOPPING_UX_V2_ENABLED`; legacy checklist in overflow drawer |
 | Memory Explorer | `/settings/memory` | Vad Skaffu vet � household rules (learning gate) |
@@ -44,7 +45,9 @@ Kill switches / Tier C (expect **off** unless noted): `EMAIL_SENDING_DISABLED`, 
 
 Product flags (Brain, W1 share, receipt estimates) follow master `apphosting.yaml`; merge ships the final value.
 
-**Prod product flags (on @ `73c7c5493` / apphosting.yaml):** `HOME_REDESIGN_V1_ENABLED`, `PRICE_MEMORY_V1_ENABLED`, `BRAIN_FEEDBACK_V1_ENABLED`, `SHOPPING_UX_V2_ENABLED` (canary), `SHELF_LIFE_LEARNING_ENABLED`, `LOCATION_LEARNING_ENABLED`, `REPLENISHMENT_LEARNING_ENABLED`, `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT`. **Off:** `STRIPE_CHECKOUT_DISABLED`, Tier C (`PUBLIC_CITY_FEED`, `KIVRA_FORWARD`).
+**Prod product flags (on @ `73c7c5493` / apphosting.yaml):** `HOME_REDESIGN_V1_ENABLED`, `PRICE_MEMORY_V1_ENABLED`, `BRAIN_FEEDBACK_V1_ENABLED`, `SHOPPING_UX_V2_ENABLED` (canary), `SHELF_LIFE_LEARNING_ENABLED`, `LOCATION_LEARNING_ENABLED`, `REPLENISHMENT_LEARNING_ENABLED`, `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT`. **Off:** `PANTRY_UX_V2_ENABLED` (code shipped on `feature/pantry-ux-v2`; enable via apphosting.yaml after canary), `STRIPE_CHECKOUT_DISABLED`, Tier C (`PUBLIC_CITY_FEED`, `KIVRA_FORWARD`).
+
+**Pantry V2 canary enable:** merge `feature/pantry-ux-v2` → set `PANTRY_UX_V2_ENABLED: "true"` in `apphosting.yaml` → deploy → nav Lager href becomes `/inventory` (shelf primary). Local: `.env` `PANTRY_UX_V2_ENABLED=true`. Kill: revert flag to `false`.
 
 
 ## Brain capabilities today
@@ -86,4 +89,4 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 | `feat/settings-ios-hub` | iOS settings hub drill-down | **Merged** (#100 ? `c267c172c`) |
 | `feat/ui-living-polish` | Home priority cards, news/scan SVGs, inventory table | **Merged** (#101 ? `72b02f49b`) |
 | `feat/smui-*` / `feat/marketing-*` | SMUI tables + home + marketing | **Merged** (#97�#99) |
-| `feat/mobile-ux-recovery` | Mobile UX Recovery R46�R58 | **Merged** (`d585cbd5`) |
+| `feat/pantry-ux-v2` | Pantry shelf UX V2 (flag off until canary) | **PR5 ready** — E2E + WCAG on `feature/pantry-ux-v2` |

@@ -2,14 +2,19 @@
 	interface Props {
 		src: string;
 		ariaLabel?: string;
+		decorative?: boolean;
 		width?: number;
 		height?: number;
 	}
 
-	let { src, ariaLabel, width = 280, height = 210 }: Props = $props();
+	let { src, ariaLabel, decorative = false, width = 280, height = 210 }: Props = $props();
 </script>
 
-<div class="scene-illus" aria-label={ariaLabel}>
+<div
+	class="scene-illus"
+	aria-hidden={decorative ? 'true' : undefined}
+	aria-label={decorative ? undefined : ariaLabel}
+>
 	<img {src} alt="" {width} {height} aria-hidden="true" />
 </div>
 

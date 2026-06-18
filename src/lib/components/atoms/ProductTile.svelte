@@ -72,7 +72,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.25rem;
-		min-height: var(--touch-target-min);
+		min-height: max(3rem, var(--touch-target-min));
 		aspect-ratio: 1;
 		padding: var(--space-sm);
 		border: 1px solid var(--color-border);
@@ -136,5 +136,10 @@
 		font-size: 0.625rem;
 		color: var(--color-text-muted);
 		line-height: 1.2;
+	}
+
+	.product-tile.warn .tile-detail {
+		color: color-mix(in srgb, var(--color-warning) 35%, var(--color-text));
+		font-weight: 600;
 	}
 </style>

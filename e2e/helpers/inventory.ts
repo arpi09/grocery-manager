@@ -1,16 +1,29 @@
 import { expect, type Page } from '@playwright/test';
 
+export interface CreateFridgeItemOptions {
+	expiresOn?: string;
+	location?: 'fridge' | 'freezer' | 'cupboard';
+	returnTo?: string;
+}
+
 /** Creates a fridge item via SvelteKit action (faster than full form navigation). */
-export async function createFridgeItemViaApi(page: Page, name: string): Promise<void> {
+export async function createFridgeItemViaApi(
+	page: Page,
+	name: string,
+	options: CreateFridgeItemOptions = {}
+): Promise<void> {
+	const location = options.location ?? 'fridge';
+	const returnTo = options.returnTo ?? `/inventory/${location}`;
+
 	const response = await page.request.post('/item/new?/create', {
 		form: {
 			name,
-			location: 'fridge',
+			location,
 			quantity: '1',
 			unit: '',
-			expiresOn: '',
+			expiresOn: options.expiresOn ?? '',
 			notes: '',
-			returnTo: '/inventory/fridge'
+			returnTo
 		},
 		headers: {
 			accept: 'application/json',
