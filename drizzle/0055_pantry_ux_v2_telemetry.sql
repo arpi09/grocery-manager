@@ -1,0 +1,2 @@
+-- Pantry UX v2 product_event types (application enum in schema.ts):
+-- pantry_shelf_opened, pantry_zone_opened, pantry_item_opened, pantry_use_soon_tapped

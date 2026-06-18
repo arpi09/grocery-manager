@@ -9,6 +9,7 @@
 
 	import InventoryAddSheet from '$lib/components/molecules/InventoryAddSheet.svelte';
 	import InventoryList from '$lib/components/organisms/InventoryList.svelte';
+	import { trackPantryItemOpened } from '$lib/client/pantry-v2-telemetry';
 
 	import { getLocale, t } from '$lib/i18n';
 
@@ -41,6 +42,14 @@
 	const hasInventory = $derived(totalCount > 0);
 	const initialShowAutoExpired = $derived(page.url.searchParams.get('autoExpired') === '1');
 	const initialExpiryFilter = $derived(parseInventoryExpiryFilter(page.url.searchParams.get('filter')));
+
+	function handlePantryItemNavigate(itemId: string) {
+		if (!page.data.pantryUxV2Enabled) {
+			return;
+		}
+
+		trackPantryItemOpened(itemId, data.location, 'table');
+	}
 
 
 
@@ -114,6 +123,7 @@
 				{initialShowAutoExpired}
 				initialExpiryFilter={initialExpiryFilter}
 				onAddClick={data.canWrite ? () => (addSheetOpen = true) : undefined}
+				onItemNavigate={handlePantryItemNavigate}
 
 			/>
 

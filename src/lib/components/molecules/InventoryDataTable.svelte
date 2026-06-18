@@ -19,6 +19,7 @@
 		ariaLabel: string;
 		onFinishOneTap?: (item: InventoryItem) => void;
 		onPartialConsume?: (item: InventoryItem) => void;
+		onItemNavigate?: (itemId: string) => void;
 	}
 
 	let {
@@ -33,7 +34,8 @@
 		finishingIds = new Set<string>(),
 		ariaLabel,
 		onFinishOneTap,
-		onPartialConsume
+		onPartialConsume,
+		onItemNavigate
 	}: Props = $props();
 
 	function sortHint(key: InventorySortKey): string {
@@ -115,6 +117,7 @@
 						finishing={finishingIds.has(item.id)}
 						{onFinishOneTap}
 						{onPartialConsume}
+						{onItemNavigate}
 					/>
 				{/each}
 			</Body>

@@ -7,9 +7,10 @@
 	interface Props {
 		location: StorageLocation;
 		count: number;
+		onViewAll?: () => void;
 	}
 
-	let { location, count }: Props = $props();
+	let { location, count, onViewAll }: Props = $props();
 
 	const zoneColor = $derived(LOCATION_COLORS[location]);
 	const tableHref = $derived(`/inventory/${location}`);
@@ -30,6 +31,7 @@
 			href={tableHref}
 			aria-label={t('pantry.v2.zone.viewAllAria', { zone: t(pantryZoneTitleKey(location)) })}
 			data-testid="pantry-v2-zone-view-all-{location}"
+			onclick={onViewAll}
 		>
 			{t('pantry.v2.zone.viewAll')}
 		</a>

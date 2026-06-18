@@ -15,16 +15,28 @@ export const load: PageServerLoad = async ({ locals }) => {
 			pantryUxV2Enabled: true,
 			items: [],
 			canWrite: false,
-			canConsume: false
+			canConsume: false,
+			loadFailed: false
 		};
 	}
 
-	const items = await locals.inventoryService.listAll(locals.householdId);
+	try {
+		const items = await locals.inventoryService.listAll(locals.householdId);
 
-	return {
-		pantryUxV2Enabled: true,
-		items,
-		canWrite: locals.householdRole ? canEditInventory(locals.householdRole) : false,
-		canConsume: locals.householdRole ? canConsumeInventory(locals.householdRole) : false
-	};
+		return {
+			pantryUxV2Enabled: true,
+			items,
+			canWrite: locals.householdRole ? canEditInventory(locals.householdRole) : false,
+			canConsume: locals.householdRole ? canConsumeInventory(locals.householdRole) : false,
+			loadFailed: false
+		};
+	} catch {
+		return {
+			pantryUxV2Enabled: true,
+			items: [],
+			canWrite: locals.householdRole ? canEditInventory(locals.householdRole) : false,
+			canConsume: locals.householdRole ? canConsumeInventory(locals.householdRole) : false,
+			loadFailed: true
+		};
+	}
 };

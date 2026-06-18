@@ -5,9 +5,10 @@
 		count: number;
 		names: string[];
 		href: string;
+		onTap?: () => void;
 	}
 
-	let { count, names, href }: Props = $props();
+	let { count, names, href, onTap }: Props = $props();
 
 	const listText = $derived(names.join(', '));
 </script>
@@ -20,7 +21,7 @@
 			{#if listText}
 				<p>{t('pantry.v2.useSoon.list', { items: listText })}</p>
 			{/if}
-			<a class="cta" {href}>{t('pantry.v2.useSoon.cta')}</a>
+			<a class="cta" {href} onclick={onTap}>{t('pantry.v2.useSoon.cta')}</a>
 		</div>
 	</aside>
 {/if}

@@ -438,7 +438,11 @@ export const productEventTable = pgTable(
 				'trip_completed',
 				'shopping_mode_switched',
 				'memory_suggestion_added',
-				'memory_suggestion_ignored'
+				'memory_suggestion_ignored',
+				'pantry_shelf_opened',
+				'pantry_zone_opened',
+				'pantry_item_opened',
+				'pantry_use_soon_tapped'
 			]
 		}).notNull(),
 		metadata: text('metadata'),

@@ -22,6 +22,7 @@
 		finishing?: boolean;
 		onFinishOneTap?: (item: InventoryItem) => void;
 		onPartialConsume?: (item: InventoryItem) => void;
+		onItemNavigate?: (itemId: string) => void;
 	}
 
 	let {
@@ -32,7 +33,8 @@
 		autoExpiredGraceDays = 7,
 		finishing = false,
 		onFinishOneTap,
-		onPartialConsume
+		onPartialConsume,
+		onItemNavigate
 	}: Props = $props();
 
 	const expiryExplanation = $derived.by(() => {
@@ -96,7 +98,7 @@
 	<Cell class="col-name">
 		<div class="name-cell">
 			<div class="name-row">
-				<a href="/item/{item.id}/edit" class="name">{item.name}</a>
+				<a href="/item/{item.id}/edit" class="name" onclick={() => onItemNavigate?.(item.id)}>{item.name}</a>
 				{#if showEstimatedBadge}
 					<EstimatedBadge
 						source={item.expiresOnSource}

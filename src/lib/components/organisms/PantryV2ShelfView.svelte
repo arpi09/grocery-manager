@@ -3,6 +3,10 @@
 	import PantryZoneGrid from '$lib/components/molecules/PantryZoneGrid.svelte';
 	import PantryZoneHeader from '$lib/components/molecules/PantryZoneHeader.svelte';
 	import UseSoonBand from '$lib/components/molecules/UseSoonBand.svelte';
+	import {
+		trackPantryUseSoonTapped,
+		trackPantryZoneOpened
+	} from '$lib/client/pantry-v2-telemetry';
 	import type { PantryShelfViewModel } from '$lib/domain/pantry-shelf';
 	import { t } from '$lib/i18n';
 
@@ -17,6 +21,14 @@
 			shelf.zones.find((zone) => zone.tiles.some((tile) => tile.warn))?.location ?? 'fridge';
 		return `/inventory/${primaryZone}?filter=expiring`;
 	});
+
+	function handleUseSoonTap() {
+		trackPantryUseSoonTapped(shelf.useSoon.length);
+	}
+
+	function handleZoneOpen(location: PantryShelfViewModel['zones'][number]['location'], itemCount: number) {
+		trackPantryZoneOpened(location, itemCount);
+	}
 </script>
 
 <div class="pantry-shelf-view" data-testid="pantry-v2-shelf">
@@ -25,12 +37,16 @@
 		ariaLabel={t('pantry.v2.heroAria')}
 	/>
 
-	<UseSoonBand count={shelf.useSoon.length} names={shelf.useSoonNames} href={useSoonHref} />
+	<UseSoonBand count={shelf.useSoon.length} names={shelf.useSoonNames} href={useSoonHref} onTap={handleUseSoonTap} />
 
 	{#each shelf.zones as zone (zone.location)}
 		<section class="zone" aria-labelledby="pantry-zone-{zone.location}">
-			<PantryZoneHeader location={zone.location} count={zone.totalCount} />
-			<PantryZoneGrid {zone} />
+			<PantryZoneHeader
+				location={zone.location}
+				count={zone.totalCount}
+				onViewAll={() => handleZoneOpen(zone.location, zone.totalCount)}
+			/>
+			<PantryZoneGrid {zone} onZoneOpen={() => handleZoneOpen(zone.location, zone.totalCount)} />
 		</section>
 	{/each}
 </div>

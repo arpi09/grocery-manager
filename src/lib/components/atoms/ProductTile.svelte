@@ -11,9 +11,10 @@
 		href: string;
 		variant?: 'item' | 'overflow';
 		overflowLabel?: string;
+		onNavigate?: () => void;
 	}
 
-	let { tile, href, variant = 'item', overflowLabel }: Props = $props();
+	let { tile, href, variant = 'item', overflowLabel, onNavigate }: Props = $props();
 
 	const detailPresentation = $derived(buildPantryTileDetailPresentation(tile));
 	const quantityLine = $derived(formatPantryTileQuantityLine(tile));
@@ -49,6 +50,7 @@
 	class:overflow={variant === 'overflow'}
 	{href}
 	aria-label={ariaLabel}
+	onclick={onNavigate}
 	data-testid={variant === 'overflow' ? 'pantry-v2-overflow-tile' : 'pantry-v2-product-tile'}
 >
 	{#if variant === 'overflow'}

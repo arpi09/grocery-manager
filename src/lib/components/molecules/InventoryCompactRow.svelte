@@ -30,6 +30,7 @@
 		finishing?: boolean;
 		onFinishOneTap?: (item: InventoryItem) => void;
 		onPartialConsume?: (item: InventoryItem) => void;
+		onItemNavigate?: (itemId: string) => void;
 	}
 
 	let {
@@ -40,7 +41,8 @@
 		autoExpiredGraceDays = 7,
 		finishing = false,
 		onFinishOneTap,
-		onPartialConsume
+		onPartialConsume,
+		onItemNavigate
 	}: Props = $props();
 
 	let swipeOffset = $state(0);
@@ -195,7 +197,7 @@
 {#snippet rowContent()}
 	<div class="content">
 		<div class="line-text" data-testid="inventory-row-line">
-			<a href="/item/{item.id}/edit" class="name">{item.name}</a>
+			<a href="/item/{item.id}/edit" class="name" onclick={() => onItemNavigate?.(item.id)}>{item.name}</a>
 			<span class="sep" aria-hidden="true">·</span>
 			<span class="qty">{quantityLine}</span>
 		</div>

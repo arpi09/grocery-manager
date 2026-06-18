@@ -71,7 +71,9 @@ const SQL_MIGRATION_FILES = [
 	'0050_brain_feedback_v1.sql',
 	'0051_price_memory_phase1.sql',
 	'0052_home_redesign_telemetry.sql',
-	'0053_memory_rule_events.sql'
+	'0053_memory_rule_events.sql',
+	'0054_shopping_ux_v2_telemetry.sql',
+	'0055_pantry_ux_v2_telemetry.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE

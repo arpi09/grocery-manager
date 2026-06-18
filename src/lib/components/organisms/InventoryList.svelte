@@ -92,6 +92,7 @@
 		initialShowAutoExpired?: boolean;
 		initialExpiryFilter?: InventoryExpiryFilter;
 		onAddClick?: () => void;
+		onItemNavigate?: (itemId: string) => void;
 	}
 
 
@@ -115,7 +116,8 @@
 		hasInventory = true,
 		initialShowAutoExpired = false,
 		initialExpiryFilter = 'all',
-		onAddClick
+		onAddClick,
+		onItemNavigate
 	}: Props = $props();
 
 	const canConsumeItems = $derived(canWrite || canConsume);
@@ -833,6 +835,7 @@
 							finishing={finishingIds.has(item.id)}
 							onFinishOneTap={finishOneTap}
 							onPartialConsume={openPartialConsumeSheet}
+							{onItemNavigate}
 						/>
 					{/each}
 				</SkaffuList>
@@ -912,6 +915,7 @@
 				finishingIds={finishingIds}
 				onFinishOneTap={finishOneTap}
 				onPartialConsume={openPartialConsumeSheet}
+				{onItemNavigate}
 				ariaLabel={t('inventory.listAria')}
 
 			/>
@@ -1033,6 +1037,8 @@
 
 							onPartialConsume={openPartialConsumeSheet}
 
+							{onItemNavigate}
+
 						/>
 
 					{/each}
@@ -1063,6 +1069,8 @@
 				onFinishOneTap={finishOneTap}
 
 				onPartialConsume={openPartialConsumeSheet}
+
+				{onItemNavigate}
 
 				ariaLabel={t('inventory.autoExpiredSection')}
 
@@ -1107,6 +1115,8 @@
 				canWrite={canConsumeItems}
 
 				finished={true}
+
+				{onItemNavigate}
 
 				ariaLabel={t('inventory.finishedSection')}
 
