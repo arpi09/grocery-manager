@@ -18,12 +18,14 @@
 	import ReplenishmentSection from '$lib/components/organisms/ReplenishmentSection.svelte';
 
 	import ShoppingListPanel from '$lib/components/organisms/ShoppingListPanel.svelte';
+	import ShoppingV2Page from '$lib/components/organisms/ShoppingV2Page.svelte';
 	import InkopHouseholdInviteBanner from '$lib/components/organisms/InkopHouseholdInviteBanner.svelte';
 
 	import { trackProductEvent } from '$lib/client/product-events';
 
 	let { data, form } = $props();
 
+	const shoppingUxV2Enabled = $derived(Boolean(data.shoppingUxV2Enabled));
 	const listHasItems = $derived(data.items.length > 0 || data.checkedCount > 0);
 	const householdMemberCount = $derived(
 		typeof data.householdMemberCount === 'number' ? data.householdMemberCount : 0
@@ -91,76 +93,93 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title={t('shopping.title')} subtitle={t('shopping.subtitle')} />
+	<AppHeader
+		title={shoppingUxV2Enabled ? t('shopping.v2.plan.titleDefault') : t('shopping.title')}
+		subtitle={shoppingUxV2Enabled ? undefined : t('shopping.subtitle')}
+	/>
 
 	<PageContainer>
 		<div class="shopping-page">
-			<ShoppingListPanel
-				id="shopping-list-panel"
-				tabindex={-1}
-				items={data.items}
-				checkedCount={data.checkedCount}
-				canEdit={data.canEdit}
-				shareLinkEnabled={data.shareLinkEnabled}
-				shoppingToPantryMode={data.shoppingToPantryMode}
-				memberCount={householdMemberCount}
-			/>
+			{#if shoppingUxV2Enabled && data.householdId}
+				<ShoppingV2Page
+					items={data.items}
+					checkedCount={data.checkedCount}
+					canEdit={data.canEdit}
+					householdId={data.householdId}
+					replenishmentSuggestions={replenishmentSuggestions}
+					shoppingToPantryMode={data.shoppingToPantryMode}
+					shareLinkEnabled={data.shareLinkEnabled}
+					memberCount={householdMemberCount}
+					showReceiptImportLead={showReceiptImportLead}
+				/>
+			{:else}
+				<ShoppingListPanel
+					id="shopping-list-panel"
+					tabindex={-1}
+					items={data.items}
+					checkedCount={data.checkedCount}
+					canEdit={data.canEdit}
+					shareLinkEnabled={data.shareLinkEnabled}
+					shoppingToPantryMode={data.shoppingToPantryMode}
+					memberCount={householdMemberCount}
+				/>
 
-			<InkopHouseholdInviteBanner
-				memberCount={householdMemberCount}
-				uncheckedCount={data.items.length}
-				checkedCount={data.checkedCount}
-				{listHasItems}
-			/>
+				<InkopHouseholdInviteBanner
+					memberCount={householdMemberCount}
+					uncheckedCount={data.items.length}
+					checkedCount={data.checkedCount}
+					{listHasItems}
+				/>
 
-			{#if data.canEdit && (hasSuggestions || !listHasItems)}
-				{#if showReceiptImportLead}
-					<p class="receipt-import-lead" role="status">{t('shopping.receiptImportLead')}</p>
-				{/if}
+				{#if data.canEdit && (hasSuggestions || !listHasItems)}
+					{#if showReceiptImportLead}
+						<p class="receipt-import-lead" role="status">{t('shopping.receiptImportLead')}</p>
+					{/if}
 
-				{#if data.showMemoryExplorer && showReceiptImportLead}
-					<p class="memory-footnote">
-						<a href="/settings/memory" data-analytics-id="inkop.memory_footnote">
-							{t('home.v3.memoryFootnote')}
-						</a>
-					</p>
-				{/if}
+					{#if data.showMemoryExplorer && showReceiptImportLead}
+						<p class="memory-footnote">
+							<a href="/settings/memory" data-analytics-id="inkop.memory_footnote">
+								{t('home.v3.memoryFootnote')}
+							</a>
+						</p>
+					{/if}
 
-				<details
-					id="shopping-suggestions"
-					class="suggestions-fold"
-					open={suggestionsOpen}
-					data-testid="shopping-suggestions-fold"
-				>
-					<summary onclick={handleSuggestionsSummaryClick}>
-						<span class="summary-label">{t('shopping.suggestionsTitle')}</span>
-						{#if hasSuggestions}
-							<Badge tone="warning">{replenishmentSuggestions.length}</Badge>
-						{/if}
-					</summary>
+					<details
+						id="shopping-suggestions"
+						class="suggestions-fold"
+						open={suggestionsOpen}
+						data-testid="shopping-suggestions-fold"
+					>
+						<summary onclick={handleSuggestionsSummaryClick}>
+							<span class="summary-label">{t('shopping.suggestionsTitle')}</span>
+							{#if hasSuggestions}
+								<Badge tone="warning">{replenishmentSuggestions.length}</Badge>
+							{/if}
+						</summary>
 
-					<div class="suggestions-body">
-						<SmartShoppingFill
-							canEdit={data.canEdit}
-							{form}
-							onFillComplete={({ added }) => {
-								if (added > 0) scrollToShoppingList();
-							}}
-						/>
-
-						{#if hasSuggestions}
-							<ReplenishmentSection
-								suggestions={replenishmentSuggestions}
-								{dedupeByKey}
+						<div class="suggestions-body">
+							<SmartShoppingFill
 								canEdit={data.canEdit}
-								householdId={data.householdId}
-								compact
-								surface="inkop"
-								brainFeedbackV1={Boolean(data.brainFeedbackV1Enabled)}
+								{form}
+								onFillComplete={({ added }) => {
+									if (added > 0) scrollToShoppingList();
+								}}
 							/>
-						{/if}
-					</div>
-				</details>
+
+							{#if hasSuggestions}
+								<ReplenishmentSection
+									suggestions={replenishmentSuggestions}
+									{dedupeByKey}
+									canEdit={data.canEdit}
+									householdId={data.householdId}
+									compact
+									surface="inkop"
+									brainFeedbackV1={Boolean(data.brainFeedbackV1Enabled)}
+								/>
+							{/if}
+						</div>
+					</details>
+				{/if}
 			{/if}
 		</div>
 	</PageContainer>
@@ -201,6 +220,7 @@
 		font-size: 0.9375rem;
 		font-weight: 600;
 		color: var(--color-primary);
+		white-space: pre-line;
 	}
 
 	.suggestions-fold {

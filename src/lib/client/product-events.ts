@@ -64,7 +64,13 @@ const CLIENT_EVENT_TYPES = [
 	'list_link_opened',
 	'list_join_cta_clicked',
 	'partner_joined',
-	'shared_checkoff'
+	'shared_checkoff',
+	'trip_started',
+	'trip_item_checked',
+	'trip_completed',
+	'shopping_mode_switched',
+	'memory_suggestion_added',
+	'memory_suggestion_ignored'
 ] as const;
 
 export const PUBLIC_ACQUISITION_EVENT_TYPES = [
