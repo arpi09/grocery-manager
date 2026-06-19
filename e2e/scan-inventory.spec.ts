@@ -159,7 +159,9 @@ test.describe('Scan and inventory', () => {
 		await page.goto('/inventory/fridge');
 		await dismissOnboardingModalIfOpen(page);
 
-		await page.getByTestId('inventory-add-goods').click();
+		const addButton = page.getByTestId('inventory-add-goods');
+		await expect(addButton).toBeVisible({ timeout: 15_000 });
+		await addButton.click();
 		const sheet = page.getByTestId('inventory-add-sheet');
 		await expect(sheet).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('inventory-add-receipt')).toBeVisible();

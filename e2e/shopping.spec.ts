@@ -20,22 +20,24 @@ async function openLegacyShoppingGrid(page: Page) {
 		'Legacy checklist grid lives in Shopping V2 drawer when SHOPPING_UX_V2_ENABLED=true'
 	);
 
-	await page.goto(legacyShoppingGridPath);
+	await page.goto(legacyShoppingGridPath, { waitUntil: 'domcontentloaded' });
 	await dismissOnboardingModalIfOpen(page);
 	await dismissPageHintIfOpen(page);
 	await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 15_000 });
 }
 
+async function filterLegacyShoppingGrid(page: Page, itemName: string) {
+	await page.getByTestId('data-grid-filter-button').click();
+	const filterSheet = page.getByTestId('data-grid-filter-sheet');
+	await expect(filterSheet).toBeVisible();
+	await filterSheet.getByRole('textbox').fill(itemName);
+	await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
+}
+
 async function addLegacyShoppingItem(page: Page, itemName: string) {
 	await page.locator('#shopping-name').fill(itemName);
 	await page.locator('form.add-form').getByRole('button', { name: /L.gg till|Add/i }).click();
-	await page.goto(
-		`/inkop?sort=added&dir=desc&q=${encodeURIComponent(itemName)}`,
-		{ waitUntil: 'commit' }
-	);
-	await dismissOnboardingModalIfOpen(page);
-	await dismissPageHintIfOpen(page);
-	await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 15_000 });
+	await filterLegacyShoppingGrid(page, itemName);
 	await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 15_000 });
 }
 
@@ -185,20 +187,7 @@ test.describe('Shopping list', () => {
 		await openLegacyShoppingGrid(page);
 		await addLegacyShoppingItem(page, itemName);
 
-		await page.getByTestId('data-grid-filter-button').click();
-
-		const filterSheet = page.getByTestId('data-grid-filter-sheet');
-
-		await expect(filterSheet).toBeVisible();
-
-		await filterSheet.getByRole('textbox').fill(itemName);
-
-		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
-
-
-
 		await expect(uncheckedShoppingRow(page, itemName)).toBeVisible();
-
 		await expect(page.getByTestId('shopping-checklist-grid-table')).toBeVisible();
 
 	});
