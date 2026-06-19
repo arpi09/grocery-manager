@@ -24,11 +24,13 @@ export type HomeBriefingForYouKind = 'recipe' | 'replenishment' | 'expiring' | '
 
 export interface HomeBriefingRecipeCard {
 	kind: 'recipe';
+	ideaId: string;
 	mealName: string;
 	expiringItemNames: string[];
 	expiresWhenLabel: string;
 	servings: number;
 	missingCount: number;
+	missingIngredients: string[];
 	shopWeekday: number | null;
 }
 

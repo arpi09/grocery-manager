@@ -3,6 +3,7 @@
 	import HomeBriefingChips from '$lib/components/molecules/HomeBriefingChips.svelte';
 	import HomeBriefingForYouCard from '$lib/components/molecules/HomeBriefingForYouCard.svelte';
 	import HomeBriefingGreeting from '$lib/components/molecules/HomeBriefingGreeting.svelte';
+	import { trackForYouCtaTapped, trackHomeChipTapped } from '$lib/client/home-v2-telemetry';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 	import {
@@ -12,9 +13,11 @@
 		buildHomeBriefingStatusPresentation
 	} from '$lib/domain/home-briefing-presenter';
 	import {
+		isShoppingListReady,
 		selectHomeBriefingForYouCard,
 		selectHomeBriefingStatus,
-		type HomeBriefingForYouCard
+		type HomeBriefingForYouCard,
+		type HomeBriefingRecipeCard
 	} from '$lib/domain/home-briefing';
 	import type { HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
 	import { locationLabel } from '$lib/i18n/domain-labels';
@@ -28,12 +31,15 @@
 		displayName?: string | null;
 		shoppingListCount?: number;
 		shoppingCadence?: HouseholdShoppingCadence | null;
+		recipeSuggestion?: HomeBriefingRecipeCard | null;
 		canWrite?: boolean;
 		pantryUxV2Enabled?: boolean;
+		shoppingUxV2Enabled?: boolean;
 		acceptingReplenishment?: boolean;
 		onAcceptReplenishment?: (card: Extract<HomeBriefingForYouCard, { kind: 'replenishment' }>) =>
 			| void
 			| Promise<void>;
+		onRecipeCta?: (card: HomeBriefingRecipeCard) => void | Promise<void>;
 	}
 
 	let {
@@ -42,10 +48,13 @@
 		displayName = null,
 		shoppingListCount = 0,
 		shoppingCadence = null,
+		recipeSuggestion = null,
 		canWrite = false,
 		pantryUxV2Enabled = false,
+		shoppingUxV2Enabled = false,
 		acceptingReplenishment = false,
-		onAcceptReplenishment
+		onAcceptReplenishment,
+		onRecipeCta
 	}: Props = $props();
 
 	const locale = $derived(getLocale());
@@ -58,7 +67,7 @@
 		shoppingCadence,
 		intelligence,
 		expiringSoon: summary.expiringSoon,
-		recipeSuggestion: null
+		recipeSuggestion
 	});
 
 	const status = $derived(selectHomeBriefingStatus(briefingInput));
@@ -94,6 +103,12 @@
 
 	const pantryHref = $derived(pantryUxV2Enabled ? PANTRY_SHELF_PATH : '/inventory/fridge');
 
+	const shoppingHref = $derived(
+		shoppingUxV2Enabled && isShoppingListReady(shoppingListCount, shoppingCadence)
+			? '/inkop?mode=shop'
+			: '/inkop'
+	);
+
 	const forYouCtaHref = $derived.by(() => {
 		if (!forYou) return null;
 		switch (forYou.kind) {
@@ -104,11 +119,15 @@
 			case 'shopReady':
 				return '/inkop?mode=shop';
 			case 'recipe':
-				return '/inkop';
+				return forYou.missingCount > 0 ? null : '/inkop?mode=shop';
 			default:
 				return null;
 		}
 	});
+
+	function trackForYouLinkTap(kind: HomeBriefingForYouCard['kind'], destination: string) {
+		trackForYouCtaTapped(kind, destination);
+	}
 </script>
 
 <div class="home-v2-briefing" data-testid="home-v2-briefing">
@@ -136,7 +155,11 @@
 			onCta={
 				forYou.kind === 'replenishment' && onAcceptReplenishment
 					? () => onAcceptReplenishment(forYou)
-					: undefined
+					: forYou.kind === 'recipe' && onRecipeCta
+						? () => onRecipeCta(forYou)
+						: forYouCtaHref
+							? () => trackForYouLinkTap(forYou.kind, forYouCtaHref!)
+							: undefined
 			}
 		/>
 	{/if}
@@ -145,10 +168,11 @@
 		useSoon={chipsPresentation.useSoon}
 		shopping={chipsPresentation.shopping}
 		{useSoonHref}
-		shoppingHref="/inkop"
+		{shoppingHref}
 		householdHref="/settings/household"
 		{pantryHref}
 		showUseSoon={useSoonCount > 0}
+		onChipTap={trackHomeChipTapped}
 	/>
 </div>
 

@@ -1,12 +1,30 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
+	import { onMount } from 'svelte';
 	import HomeV2BriefingView from '$lib/components/organisms/HomeV2BriefingView.svelte';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
-	import type { HomeBriefingForYouCard } from '$lib/domain/home-briefing';
+	import {
+		trackForYouCtaTapped,
+		trackHomeBriefingOpened
+	} from '$lib/client/home-v2-telemetry';
+	import type { HomeBriefingForYouCard, HomeBriefingRecipeCard } from '$lib/domain/home-briefing';
+	import { homeBriefingRecipeCtaDestination } from '$lib/domain/home-briefing-recipe';
+	import {
+		selectHomeBriefingForYouCard,
+		selectHomeBriefingStatus,
+		type HomeBriefingInput
+	} from '$lib/domain/home-briefing';
 	import type { HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
 	import { t } from '$lib/i18n';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import {
+		addMissingIngredientsToList,
+		presentAddMissingFeedback
+	} from '$lib/utils/recipe-add-missing';
+	import { getLocale } from '$lib/i18n';
 
 	interface Props {
 		summary: DashboardSummary;
@@ -14,8 +32,10 @@
 		displayName?: string | null;
 		shoppingListCount?: number;
 		shoppingCadence?: HouseholdShoppingCadence | null;
+		recipeSuggestion?: HomeBriefingRecipeCard | null;
 		canWrite?: boolean;
 		pantryUxV2Enabled?: boolean;
+		shoppingUxV2Enabled?: boolean;
 		loadFailed?: boolean;
 	}
 
@@ -25,17 +45,43 @@
 		displayName = null,
 		shoppingListCount = 0,
 		shoppingCadence = null,
+		recipeSuggestion = null,
 		canWrite = false,
 		pantryUxV2Enabled = false,
+		shoppingUxV2Enabled = false,
 		loadFailed = false
 	}: Props = $props();
 
 	let acceptingReplenishment = $state(false);
+	let briefingTracked = $state(false);
+
+	const briefingInput = $derived<HomeBriefingInput>({
+		totalItems: summary.totalItems,
+		useSoonCount: summary.expiringSoon.length,
+		shoppingListCount,
+		shoppingCadence,
+		intelligence,
+		expiringSoon: summary.expiringSoon,
+		recipeSuggestion
+	});
+
+	const status = $derived(selectHomeBriefingStatus(briefingInput));
+	const forYouCard = $derived(selectHomeBriefingForYouCard(briefingInput));
+
+	onMount(() => {
+		if (!browser || briefingTracked || loadFailed) {
+			return;
+		}
+		briefingTracked = true;
+		trackHomeBriefingOpened(status.key, forYouCard?.kind ?? null);
+	});
 
 	async function acceptReplenishment(
 		card: Extract<HomeBriefingForYouCard, { kind: 'replenishment' }>
 	) {
 		if (!canWrite || acceptingReplenishment) return;
+
+		trackForYouCtaTapped('replenishment', 'accept');
 
 		acceptingReplenishment = true;
 		try {
@@ -65,6 +111,30 @@
 			acceptingReplenishment = false;
 		}
 	}
+
+	async function handleRecipeCta(card: HomeBriefingRecipeCard) {
+		if (!canWrite) {
+			await goto(homeBriefingRecipeCtaDestination(card));
+			return;
+		}
+
+		const destination = homeBriefingRecipeCtaDestination(card);
+		trackForYouCtaTapped('recipe', destination);
+
+		if (card.missingCount > 0) {
+			const result = await addMissingIngredientsToList(card.missingIngredients);
+			const feedback = presentAddMissingFeedback(getLocale(), result);
+			if (!result.ok) {
+				showClientToast(feedback.message, { variant: 'error' });
+				return;
+			}
+			if (feedback.tone !== 'success') {
+				showClientToast(feedback.message, { variant: feedback.tone });
+			}
+		}
+
+		await goto(destination);
+	}
 </script>
 
 <div class="home-v2-page" data-testid="home-v2-page">
@@ -85,10 +155,13 @@
 			{displayName}
 			{shoppingListCount}
 			{shoppingCadence}
+			{recipeSuggestion}
 			{canWrite}
 			{pantryUxV2Enabled}
+			{shoppingUxV2Enabled}
 			{acceptingReplenishment}
 			onAcceptReplenishment={acceptReplenishment}
+			onRecipeCta={handleRecipeCta}
 		/>
 	{/if}
 </div>

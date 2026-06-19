@@ -28,8 +28,12 @@
 	}: Props = $props();
 
 	const ctaLabel = $derived(t(cta.key, cta.params));
-	const showButton = $derived(card.kind === 'replenishment' && canWrite && onCta);
-	const showLink = $derived(Boolean(ctaHref));
+	const showButton = $derived(
+		canWrite &&
+			onCta &&
+			(card.kind === 'replenishment' || (card.kind === 'recipe' && card.missingCount > 0))
+	);
+	const showLink = $derived(Boolean(ctaHref) && !showButton);
 </script>
 
 <article class="for-you-card" data-testid="home-v2-for-you" data-for-you-kind={card.kind}>

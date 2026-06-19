@@ -8,13 +8,9 @@
 
 	import HomeV2Page from '$lib/components/organisms/HomeV2Page.svelte';
 
-
-
 	let { data } = $props();
 
 </script>
-
-
 
 <AppLayout user={data.user}>
 
@@ -34,9 +30,15 @@
 
 				shoppingCadence={data.shoppingCadence}
 
+				recipeSuggestion={data.recipeSuggestion}
+
 				canWrite={data.canWrite}
 
 				pantryUxV2Enabled={Boolean(data.pantryUxV2Enabled)}
+
+				shoppingUxV2Enabled={Boolean(data.shoppingUxV2Enabled)}
+
+				loadFailed={Boolean(data.loadFailed)}
 
 			/>
 
@@ -69,4 +71,3 @@
 	</PageContainer>
 
 </AppLayout>
-

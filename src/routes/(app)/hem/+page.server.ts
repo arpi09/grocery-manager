@@ -22,6 +22,11 @@ import { buildReturnUrlWithExpiryNudge } from '$lib/utils/expiry-nudge';
 
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { isHomeUxV2Enabled } from '$lib/server/home-ux-v2-flag';
+import {
+	buildHomeBriefingRecipeCard,
+	pickBriefingRecipeIdea
+} from '$lib/domain/home-briefing-recipe';
+import type { HomeBriefingRecipeCard } from '$lib/domain/home-briefing';
 
 import { itemSchema } from '$lib/validation/inventory.schemas';
 
@@ -32,6 +37,7 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ locals }) => {
 	const householdId = locals.householdId!;
 	const canWrite = locals.householdRole ? canEditInventory(locals.householdRole) : false;
+	const homeUxV2Enabled = isHomeUxV2Enabled();
 
 	const degrade = <T>(label: string, fallback: T) => (error: unknown) => {
 		console.warn(`[hem] ${label} degraded:`, error);
@@ -59,6 +65,24 @@ export const load: PageServerLoad = async ({ locals }) => {
 		dedupeByKey: {}
 	};
 
+	let loadFailed = false;
+
+	const summaryPromise = locals.inventoryService.getDashboard(householdId).catch((error) => {
+		if (homeUxV2Enabled) {
+			loadFailed = true;
+		}
+		return degrade('dashboard', emptySummary)(error);
+	});
+
+	const intelligencePromise = locals.inventoryIntelligenceService
+		.getHomeIntelligence(householdId)
+		.catch((error) => {
+			if (homeUxV2Enabled) {
+				loadFailed = true;
+			}
+			return degrade('inventory intelligence', emptyIntelligence)(error);
+		});
+
 	const [
 		summary,
 		intelligence,
@@ -68,10 +92,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		shoppingListCount,
 		shoppingCadence
 	] = await Promise.all([
-		locals.inventoryService.getDashboard(householdId).catch(degrade('dashboard', emptySummary)),
-		locals.inventoryIntelligenceService
-			.getHomeIntelligence(householdId)
-			.catch(degrade('inventory intelligence', emptyIntelligence)),
+		summaryPromise,
+		intelligencePromise,
 		locals.gamificationService
 			.detectHomeCelebration(householdId)
 			.catch(degrade('celebration', null)),
@@ -91,12 +113,30 @@ export const load: PageServerLoad = async ({ locals }) => {
 	]);
 
 	const locale: Locale = isLocale(locals.locale) ? locals.locale : DEFAULT_LOCALE;
-	const homeUxV2Enabled = isHomeUxV2Enabled();
+
+	let recipeSuggestion: HomeBriefingRecipeCard | null = null;
+	if (homeUxV2Enabled && locals.user && !loadFailed) {
+		try {
+			const ideas = await locals.mealPlanService.listRecipeIdeas(locals.user.id, 6);
+			const idea = pickBriefingRecipeIdea(ideas, summary.expiringSoon);
+			if (idea) {
+				recipeSuggestion = buildHomeBriefingRecipeCard(
+					idea,
+					summary.expiringSoon,
+					shoppingCadence,
+					locale
+				);
+			}
+		} catch (error) {
+			console.warn('[hem] recipe briefing degraded:', error);
+		}
+	}
 
 	return {
 		locale,
 		pageTitle: translate(locale, homeUxV2Enabled ? 'home.v6.pageTitle' : 'home.title'),
 		homeUxV2Enabled,
+		loadFailed: homeUxV2Enabled ? loadFailed : false,
 		summary,
 		intelligence,
 		celebration: celebration as GamificationCelebrationKind | null,
@@ -105,6 +145,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		receiptFinishSuggestions,
 		shoppingListCount,
 		shoppingCadence,
+		recipeSuggestion,
 		showMemoryExplorer: isShelfLifeLearningEnabled()
 	};
 };

@@ -43,11 +43,13 @@ const expiringItem: InventoryItem = {
 
 const recipeCard: HomeBriefingRecipeCard = {
 	kind: 'recipe',
+	ideaId: 'idea-1',
 	mealName: 'Pasta salad',
 	expiringItemNames: ['Pasta', 'Feta'],
 	expiresWhenLabel: 'this weekend',
 	servings: 2,
 	missingCount: 2,
+	missingIngredients: ['Basilika', 'Olivolja'],
 	shopWeekday: 5
 };
 
