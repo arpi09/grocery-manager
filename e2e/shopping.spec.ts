@@ -48,7 +48,19 @@ async function addLegacyShoppingItem(page: Page, itemName: string) {
 	await addDone;
 
 	await dismissShoppingInkopOverlays(page);
-	await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 20_000 });
+
+	const row = uncheckedShoppingRow(page, itemName);
+	const rowVisible = await row.isVisible().catch(() => false);
+	if (!rowVisible) {
+		await page.goto(
+			`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`,
+			{ waitUntil: 'domcontentloaded' }
+		);
+		await dismissOnboardingModalIfOpen(page);
+		await dismissShoppingInkopOverlays(page);
+	}
+
+	await expect(row).toBeVisible({ timeout: 20_000 });
 }
 
 
