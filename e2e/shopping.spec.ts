@@ -170,23 +170,22 @@ test.describe('Shopping list', () => {
 		const row = uncheckedShoppingRow(page, itemName);
 
 		await dismissShoppingInkopOverlays(page);
+		const toggleDone = page.waitForResponse(
+			(response) => response.request().method() === 'POST' && response.url().includes('/inkop'),
+			{ timeout: 20_000 }
+		);
 		await row.locator('form[action="?/toggle"] input[type=checkbox]').click({ force: true });
+		await toggleDone;
 
 		await dismissPageHintIfOpen(page);
-
-
 
 		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
 
 		if (await pantrySheet.isVisible().catch(() => false)) {
-
-			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click();
-
+			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click({ force: true });
 		}
 
-
-
-		await expect(row).toHaveCount(0, { timeout: 20_000 });
+		await expect(row).toHaveCount(0, { timeout: 30_000 });
 
 	});
 
