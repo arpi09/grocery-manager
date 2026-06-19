@@ -1,4 +1,5 @@
 <script lang="ts">
+	import SceneIllustration from '$lib/components/atoms/SceneIllustration.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import { t } from '$lib/i18n';
 	import { manualAddHref, scanModeHref } from '$lib/utils/scan-nav';
@@ -14,7 +15,9 @@
 	const addHref = $derived(manualAddHref(returnTo));
 </script>
 
-<div data-testid="pantry-v2-empty">
+<div class="pantry-empty" data-testid="pantry-v2-empty">
+	<SceneIllustration src="/illustrations/v2/pantry-shelf.svg" decorative />
+
 	<EmptyState
 		iconId="receipt"
 		title={t('pantry.v2.empty.title')}
@@ -25,3 +28,11 @@
 		secondaryActionHref={canWrite ? addHref : undefined}
 	/>
 </div>
+
+<style>
+	.pantry-empty {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-lg);
+	}
+</style>

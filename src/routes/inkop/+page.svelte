@@ -94,7 +94,7 @@
 
 <AppLayout user={data.user}>
 	<AppHeader
-		title={shoppingUxV2Enabled ? t('shopping.v2.plan.titleDefault') : t('shopping.title')}
+		title={shoppingUxV2Enabled ? t('nav.shopping') : t('shopping.title')}
 		subtitle={shoppingUxV2Enabled ? undefined : t('shopping.subtitle')}
 	/>
 

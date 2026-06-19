@@ -55,17 +55,25 @@
 
 <div class="plan-view" data-testid="shopping-v2-plan">
 	<header class="plan-header">
-		<h1 class="plan-title">
-			{header.useTripLabel
-				? t('shopping.v2.plan.titleTrip', { name: header.tripLabel })
-				: t('shopping.v2.plan.titleDefault')}
-		</h1>
+		{#if header.useTripLabel}
+			<h2 class="plan-trip">
+				{t('shopping.v2.plan.titleTrip', { name: header.tripLabel })}
+			</h2>
+		{/if}
 		<p class="plan-subtitle">{subtitle}</p>
 	</header>
 
-	<div class="plan-illus" aria-label={t('shopping.v2.plan.illustrationAria')}>
-		<img src="/illustrations/v2/shopping-plan.svg" alt="" width="280" height="140" aria-hidden="true" />
-	</div>
+	{#if uncheckedCount === 0}
+		<div class="plan-illus" aria-label={t('shopping.v2.plan.illustrationAria')}>
+			<img
+				src="/illustrations/v2/shopping-plan.svg"
+				alt=""
+				width="280"
+				height="140"
+				aria-hidden="true"
+			/>
+		</div>
+	{/if}
 
 	{#if showReceiptLead}
 		<p class="receipt-lead" role="status">{t('shopping.v2.receiptLead')}</p>
@@ -103,7 +111,7 @@
 		gap: var(--space-xs);
 	}
 
-	.plan-title {
+	.plan-trip {
 		margin: 0;
 		font-size: var(--font-size-display, 1.75rem);
 		font-weight: var(--font-weight-display, 700);

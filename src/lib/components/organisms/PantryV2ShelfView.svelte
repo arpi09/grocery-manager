@@ -1,5 +1,4 @@
 <script lang="ts">
-	import SceneIllustration from '$lib/components/atoms/SceneIllustration.svelte';
 	import PantryZoneGrid from '$lib/components/molecules/PantryZoneGrid.svelte';
 	import PantryZoneHeader from '$lib/components/molecules/PantryZoneHeader.svelte';
 	import UseSoonBand from '$lib/components/molecules/UseSoonBand.svelte';
@@ -31,8 +30,6 @@
 </script>
 
 <div class="pantry-shelf-view" data-testid="pantry-v2-shelf">
-	<SceneIllustration src="/illustrations/v2/pantry-shelf.svg" decorative />
-
 	<UseSoonBand count={shelf.useSoon.length} names={shelf.useSoonNames} href={useSoonHref} onTap={handleUseSoonTap} />
 
 	{#each shelf.zones as zone (zone.location)}
