@@ -1,5 +1,6 @@
 import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 import { daysUntilExpiry } from '$lib/domain/expiry';
+import type { MessageKey } from '$lib/i18n/messages';
 import type { HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
 import type { InventoryItem } from '$lib/domain/inventory-item';
 import type { ReplenishmentSuggestion } from '$lib/domain/replenishment';
@@ -151,10 +152,10 @@ export function selectHomeBriefingForYouCard(
 	return null;
 }
 
-export function homeBriefingStatusMessageKey(status: HomeBriefingStatus): string {
-	return `home.v6.status.${status.key}`;
+export function homeBriefingStatusMessageKey(status: HomeBriefingStatus): MessageKey {
+	return `home.v6.status.${status.key}` as MessageKey;
 }
 
-export function homeBriefingForYouMessagePrefix(kind: HomeBriefingForYouKind): string {
+export function homeBriefingForYouMessagePrefix(kind: HomeBriefingForYouKind): `home.v6.forYou.${HomeBriefingForYouKind}` {
 	return `home.v6.forYou.${kind}`;
 }
