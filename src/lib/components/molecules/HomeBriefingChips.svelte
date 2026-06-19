@@ -1,4 +1,5 @@
 <script lang="ts">
+	import MarqueeText from '$lib/components/atoms/MarqueeText.svelte';
 	import type {
 		HomeBriefingChipId,
 		HomeBriefingChipPresentation,
@@ -50,6 +51,14 @@
 		const messageHint = chip.hint as HomeBriefingMessagePresentation;
 		return t(messageHint.key, messageHint.params);
 	}
+
+	function chipAriaLabel(chip: HomeBriefingChipPresentation): string {
+		const action = t(chipAriaKey(chip.id));
+		const title = t(chip.titleKey);
+		const hint = hintText(chip);
+		if (hint) return `${action}: ${title}. ${hint}`;
+		return `${action}: ${title}`;
+	}
 </script>
 
 <section class="home-briefing-chips" aria-labelledby="home-briefing-chips-label" data-testid="home-v2-chips">
@@ -60,10 +69,10 @@
 				class="chip-card"
 				href={chipHref(chip.id)}
 				data-testid="home-v2-chip-{chip.id}"
-				aria-label={t(chipAriaKey(chip.id))}
+				aria-label={chipAriaLabel(chip)}
 				onclick={() => onChipTap?.(chip.id)}
 			>
-				<span class="chip-title">{t(chip.titleKey)}</span>
+				<MarqueeText class="chip-title" text={t(chip.titleKey)} />
 				{#if chip.id === 'storage' && chip.zoneCounts}
 					<span class="zone-hints" aria-hidden="true">
 						{#each LOCATIONS as location (location)}
@@ -73,8 +82,8 @@
 							</span>
 						{/each}
 					</span>
-				{:else}
-					<span class="chip-hint">{hintText(chip)}</span>
+				{:else if hintText(chip)}
+					<MarqueeText class="chip-hint" text={hintText(chip)} />
 				{/if}
 			</a>
 		{/each}
@@ -101,6 +110,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
+		min-width: 0;
 		min-height: var(--touch-target-min, 3rem);
 		padding: 12px 14px;
 		border: 1px solid var(--color-border);
@@ -111,7 +121,7 @@
 		box-shadow: var(--shadow-sm);
 	}
 
-	.chip-title {
+	.chip-card :global(.chip-title) {
 		font-size: var(--font-size-label, 0.75rem);
 		font-weight: var(--font-weight-label, 700);
 		letter-spacing: var(--letter-spacing-label, 0.04em);
@@ -119,13 +129,15 @@
 		color: var(--color-text-muted);
 	}
 
-	.chip-hint {
+	.chip-card :global(.chip-hint) {
 		font-size: var(--font-size-body-sm, 0.875rem);
 		font-weight: 600;
 		line-height: 1.3;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+	}
+
+	.chip-card:hover :global(.marquee-track.animate),
+	.chip-card:focus-visible :global(.marquee-track.animate) {
+		animation-play-state: paused;
 	}
 
 	.zone-hints {
