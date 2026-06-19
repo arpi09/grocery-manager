@@ -225,7 +225,7 @@ env:
     availability:
       - RUNTIME
   - variable: HOME_UX_V2_ENABLED
-    value: "true"
+    value: "false"
     availability:
       - RUNTIME
   # Optional demo household member (omit or override in console)
