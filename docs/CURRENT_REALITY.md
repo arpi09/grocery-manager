@@ -1,10 +1,10 @@
-# CURRENT_REALITY
+﻿# CURRENT_REALITY
 
 > **Uppdatera denna fil** n�r prod deployas eller nav/flags �ndras. K�r: `.cursor/scripts/refresh-current-reality.sh`
 
 | F�lt | V�rde |
 |------|--------|
-| **Uppdaterad** | 2026-06-18 |
+| **Uppdaterad** | 2026-06-19 |
 | **Prod SHA** | `0b999e153` @ [27790521211](https://github.com/arpi09/grocery-manager/actions/runs/27790521211) (full E2E x3, Pantry V2 canary). Prior `73c7c5493` @ [27713747492](https://github.com/arpi09/grocery-manager/actions/runs/27713747492). |
 | **Master SHA** | `0b999e153` — Pantry V2 canary (`PANTRY_UX_V2_ENABLED` + `SHOPPING_UX_V2_ENABLED` live) |
 | **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
@@ -23,7 +23,7 @@ Utg�ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replen
 | Yta | Route | Notering |
 |-----|-------|----------|
 | Default home | `/hem` | `APP_HOME_PATH` � dashboard default |
-| Hem dashboard | `/hem` | **Home redesign v1** (`HOME_REDESIGN_V1_ENABLED`) — hero + För dig + overview cards when flag on |
+| Hem dashboard | `/hem` | **Home redesign v1** (`HOME_REDESIGN_V1_ENABLED`) when v2 off; **Home UX v2 briefing** (`HOME_UX_V2_ENABLED`) ships on `feature/home-ux-v2` — flag **off** in prod until canary |
 | Settings | `/settings` | **iOS hub** � grouped rows + drill-down (`/settings/account`, `/notifications`, `/household`, `/plan`, `/app`, `/feedback`, `/suggestions`) ([#100](https://github.com/arpi09/grocery-manager/pull/100)) |
 | Primary tabs (desktop) | Hem, Lager, Ink�p, Skanna, Mer | Lager + scan in top row |
 | Primary tabs (mobile) | Hem, Ink�p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
@@ -45,7 +45,7 @@ Kill switches / Tier C (expect **off** unless noted): `EMAIL_SENDING_DISABLED`, 
 
 Product flags (Brain, W1 share, receipt estimates) follow master `apphosting.yaml`; merge ships the final value.
 
-**Prod product flags (on @ `0b999e153` / apphosting.yaml):** `HOME_REDESIGN_V1_ENABLED`, `PRICE_MEMORY_V1_ENABLED`, `BRAIN_FEEDBACK_V1_ENABLED`, `SHOPPING_UX_V2_ENABLED` (canary live), `PANTRY_UX_V2_ENABLED` (canary live), `SHELF_LIFE_LEARNING_ENABLED`, `LOCATION_LEARNING_ENABLED`, `REPLENISHMENT_LEARNING_ENABLED`, `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT`. **Off:** `STRIPE_CHECKOUT_DISABLED`, Tier C (`PUBLIC_CITY_FEED`, `KIVRA_FORWARD`).
+**Prod product flags (on @ `0b999e153` / apphosting.yaml):** `HOME_REDESIGN_V1_ENABLED`, `PRICE_MEMORY_V1_ENABLED`, `BRAIN_FEEDBACK_V1_ENABLED`, `SHOPPING_UX_V2_ENABLED` (canary live), `PANTRY_UX_V2_ENABLED` (canary live), `SHELF_LIFE_LEARNING_ENABLED`, `LOCATION_LEARNING_ENABLED`, `REPLENISHMENT_LEARNING_ENABLED`, `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT`. **Off:** `HOME_UX_V2_ENABLED` (code on `feature/home-ux-v2`, pre-canary), `STRIPE_CHECKOUT_DISABLED`, Tier C (`PUBLIC_CITY_FEED`, `KIVRA_FORWARD`).
 
 
 ## Brain capabilities today
@@ -89,3 +89,4 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 | `feat/ui-living-polish` | Home priority cards, news/scan SVGs, inventory table | **Merged** (#101 ? `72b02f49b`) |
 | `feat/smui-*` / `feat/marketing-*` | SMUI tables + home + marketing | **Merged** (#97�#99) |
 | `feat/pantry-ux-v2` | Pantry shelf UX V2 | **Merged + canary live** @ `0b999e153` |
+| `feature/home-ux-v2` | Home briefing UX V2 (PR1–PR5) | **In flight** — flag off until canary |
