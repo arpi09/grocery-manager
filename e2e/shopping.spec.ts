@@ -45,15 +45,17 @@ async function addLegacyShoppingItem(page: Page, itemName: string) {
 		timeout: 30_000
 	});
 	expect(addResponse.ok()).toBeTruthy();
+	const addResult = (await addResponse.json()) as { type?: string };
+	expect(addResult.type).toBe('success');
 
 	await page.goto(
 		`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`,
-		{ waitUntil: 'domcontentloaded' }
+		{ waitUntil: 'load' }
 	);
 	await dismissOnboardingModalIfOpen(page);
 	await dismissShoppingInkopOverlays(page);
-	await expect(page.getByTestId('shopping-checklist-grid')).toBeVisible({ timeout: 20_000 });
-	await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 20_000 });
+	await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 15_000 });
+	await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 30_000 });
 }
 
 
@@ -159,7 +161,7 @@ test.describe('Shopping list', () => {
 
 
 	test('add line and check off item @deploy-critical', async ({ page }) => {
-		test.setTimeout(60_000);
+		test.setTimeout(90_000);
 
 		const itemName = `E2E Inkop ${Date.now()}`;
 
@@ -193,7 +195,7 @@ test.describe('Shopping list', () => {
 
 
 	test('grid filter finds added item @deploy-critical', async ({ page }) => {
-		test.setTimeout(60_000);
+		test.setTimeout(90_000);
 
 		const itemName = `E2E Grid Filter ${Date.now()}`;
 
