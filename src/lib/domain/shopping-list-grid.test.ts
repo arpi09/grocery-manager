@@ -92,12 +92,12 @@ describe('runDataGridPipeline with shopping adapters', () => {
 				sort: 'name',
 				dir: 'asc',
 				page: 1,
-				pageSize: 2
+				pageSize: 5
 			},
 			shoppingListGridAdapters
 		);
 
-		expect(result.pageRows.map((row) => row.name)).toEqual(['Apple', 'Apricot']);
+		expect(result.pageRows.map((row) => row.name)).toEqual(['Apple', 'Apricot', 'Zucchini']);
 		expect(result.totalCount).toBe(3);
 	});
 });

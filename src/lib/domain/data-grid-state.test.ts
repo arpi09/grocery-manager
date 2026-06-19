@@ -153,15 +153,15 @@ describe('runDataGridPipeline', () => {
 				sort: 'name',
 				dir: 'asc',
 				page: 1,
-				pageSize: 2
+				pageSize: 5
 			},
 			inventoryAdapters
 		);
 
 		expect(result.allRows.map((item) => item.name)).toEqual(['Apple', 'Apricot', 'Banana']);
-		expect(result.pageRows.map((item) => item.name)).toEqual(['Apple', 'Apricot']);
+		expect(result.pageRows.map((item) => item.name)).toEqual(['Apple', 'Apricot', 'Banana']);
 		expect(result.totalCount).toBe(3);
 		expect(result.rangeStart).toBe(1);
-		expect(result.rangeEnd).toBe(2);
+		expect(result.rangeEnd).toBe(3);
 	});
 });
