@@ -78,3 +78,42 @@ test.describe('Accessibility — Pantry V2 shelf (WCAG 2.2 AA)', () => {
 		await expectNoCriticalOrSeriousViolations(page, '/inventory (pantry v2 shelf)');
 	});
 });
+
+test.describe('Accessibility — Pantry location data grid (WCAG 2.2 AA)', () => {
+	test.setTimeout(120_000);
+
+	test('/inventory/fridge grid has no critical or serious axe violations', async ({ page }) => {
+		await loginAsAdmin(page);
+		await ensureFridgeInventoryItem(page);
+		await page.goto('/inventory/fridge', { waitUntil: 'commit', timeout: 60_000 });
+		await dismissOnboardingModalIfOpen(page);
+
+		await page.locator('main, [role="main"]').first().waitFor({ state: 'visible', timeout: 30_000 });
+		await expect(page.getByTestId('pantry-location-grid')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('inventory-table')).toBeVisible();
+
+		await expectNoCriticalOrSeriousViolations(page, '/inventory/fridge (data grid)');
+	});
+});
+
+test.describe('Accessibility — Shopping checklist drawer (WCAG 2.2 AA)', () => {
+	test.setTimeout(120_000);
+
+	test('checklist drawer grid has no critical or serious axe violations', async ({ page }) => {
+		test.skip(process.env.SHOPPING_UX_V2_ENABLED !== 'true', 'Requires SHOPPING_UX_V2_ENABLED=true');
+
+		await loginAsAdmin(page);
+		await page.goto('/inkop', { waitUntil: 'commit', timeout: 60_000 });
+		await dismissOnboardingModalIfOpen(page);
+
+		await page.locator('main, [role="main"]').first().waitFor({ state: 'visible', timeout: 30_000 });
+		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
+		await page.getByRole('button', { name: /Visa som checklista|Show as checklist/i }).click();
+
+		const drawer = page.getByTestId('shopping-v2-legacy-drawer');
+		await expect(drawer).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('shopping-checklist-grid-table')).toBeVisible();
+
+		await expectNoCriticalOrSeriousViolations(page, '/inkop (shopping checklist drawer)');
+	});
+});

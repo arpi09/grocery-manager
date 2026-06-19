@@ -17,7 +17,9 @@
 
 	import ReplenishmentSection from '$lib/components/organisms/ReplenishmentSection.svelte';
 
-	import ShoppingListPanel from '$lib/components/organisms/ShoppingListPanel.svelte';
+	import ShoppingChecklistDataGrid from '$lib/components/organisms/ShoppingChecklistDataGrid.svelte';
+	import ShoppingListAddForm from '$lib/components/molecules/ShoppingListAddForm.svelte';
+	import ShoppingListShareMenu from '$lib/components/molecules/ShoppingListShareMenu.svelte';
 	import ShoppingV2Page from '$lib/components/organisms/ShoppingV2Page.svelte';
 	import InkopHouseholdInviteBanner from '$lib/components/organisms/InkopHouseholdInviteBanner.svelte';
 
@@ -113,16 +115,32 @@
 					showReceiptImportLead={showReceiptImportLead}
 				/>
 			{:else}
-				<ShoppingListPanel
+				<section
 					id="shopping-list-panel"
+					class="shopping-list-panel"
 					tabindex={-1}
-					items={data.items}
-					checkedCount={data.checkedCount}
-					canEdit={data.canEdit}
-					shareLinkEnabled={data.shareLinkEnabled}
-					shoppingToPantryMode={data.shoppingToPantryMode}
-					memberCount={householdMemberCount}
-				/>
+					aria-label={t('shopping.listAria')}
+				>
+					<ShoppingListShareMenu
+						uncheckedItems={data.items}
+						checkedCount={data.checkedCount}
+						canEdit={data.canEdit}
+						shareLinkEnabled={data.shareLinkEnabled}
+						memberCount={householdMemberCount}
+					/>
+					<ShoppingChecklistDataGrid
+						uncheckedItems={data.items}
+						checkedCount={data.checkedCount}
+						canEdit={data.canEdit}
+						shoppingToPantryMode={data.shoppingToPantryMode}
+					/>
+
+					{#if data.canEdit}
+						<ShoppingListAddForm variant={listHasItems ? 'default' : 'empty'} />
+					{:else}
+						<p class="readonly">{t('inventory.readonly')}</p>
+					{/if}
+				</section>
 
 				<InkopHouseholdInviteBanner
 					memberCount={householdMemberCount}
@@ -192,6 +210,13 @@
 		gap: var(--space-lg);
 		min-width: 0;
 		padding-bottom: calc(var(--content-bottom-safe) + var(--space-md));
+	}
+
+	.shopping-list-panel {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-md);
+		min-width: 0;
 	}
 
 	.memory-footnote {
@@ -269,5 +294,11 @@
 		gap: var(--space-md);
 
 		padding: 0 0.85rem 0.85rem;
+	}
+
+	.readonly {
+		margin: 0;
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
 	}
 </style>

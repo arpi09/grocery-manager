@@ -28,9 +28,9 @@ Utg?ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenis
 | Primary tabs (desktop) | Hem, Lager, Ink?p, Skanna, Mer | Lager + scan in top row |
 | Primary tabs (mobile) | Hem, Ink?p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
 | Inventory add | `/inventory/[location]` | EN **Lägg till** ? sheet (kvitto/foto/streckkod/manuellt) |
-| Skafferi (Pantry V2) | `/inventory` | Shelf view (zones + use-soon) live (`PANTRY_UX_V2_ENABLED` canary); table fallback at `/inventory/[location]` |
+| Skafferi (Pantry V2) | `/inventory` | Shelf view (zones + use-soon) live (`PANTRY_UX_V2_ENABLED` canary); unified data grid at `/inventory/[location]` |
 | Scan hub | `/scan` | 3-card choice hub; **ScanModeTabs desktop only** |
-| Inköp (Shopping V2) | `/inkop` | Plan + Shop modes live (`SHOPPING_UX_V2_ENABLED` canary); legacy checklist in overflow drawer |
+| Inköp (Shopping V2) | `/inkop` | Plan + Shop modes live (`SHOPPING_UX_V2_ENABLED` canary); checklist data grid in overflow drawer (flag-off: inline grid) |
 | Memory Explorer | `/settings/memory` | Vad Skaffu vet ? household rules (learning gate) |
 | Post-register wedge | `/hem?welcome=1` | Ny registrering/OAuth ? guided start on hem ([#46](https://github.com/arpi09/grocery-manager/pull/46)) |
 | Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie |
@@ -90,3 +90,4 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 | `feat/smui-*` / `feat/marketing-*` | SMUI tables + home + marketing | **Merged** (#97?#99) |
 | `feat/pantry-ux-v2` | Pantry shelf UX V2 | **Merged + canary live** @ `0b999e153` |
 | `feature/home-ux-v2` | Home briefing UX V2 (PR1-PR5) | **Merged + canary live** @ `ab46f3c49` |
+| `feature/unified-data-grid` | Unified MUI-style data grid (pantry location + shopping checklist) | **In flight** — PR4 cleanup |
