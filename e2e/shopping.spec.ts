@@ -201,7 +201,8 @@ test.describe('Shopping list', () => {
 		await openLegacyShoppingGrid(page);
 		await addLegacyShoppingItem(page, itemName);
 
-		await page.getByTestId('data-grid-filter-button').click();
+		await dismissShoppingInkopOverlays(page);
+		await page.getByTestId('data-grid-filter-button').click({ force: true });
 		const filterSheet = page.getByTestId('data-grid-filter-sheet');
 		await expect(filterSheet).toBeVisible();
 		await filterSheet.getByRole('textbox').fill(itemName);
