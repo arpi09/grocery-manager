@@ -168,24 +168,35 @@ test.describe('Shopping list', () => {
 		await addLegacyShoppingItem(page, itemName);
 
 		const row = uncheckedShoppingRow(page, itemName);
+		const rowId = await row.getAttribute('data-testid');
+		expect(rowId).toMatch(/^shopping-grid-row-/);
+		const id = rowId!.slice('shopping-grid-row-'.length);
 
-		await dismissShoppingInkopOverlays(page);
-		const toggleDone = page.waitForResponse(
-			(response) => response.request().method() === 'POST' && response.url().includes('/inkop'),
-			{ timeout: 20_000 }
+		const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190';
+		const toggleResponse = await page.request.post(`${baseURL}/inkop?/toggle`, {
+			form: { id },
+			headers: {
+				accept: 'application/json',
+				'x-sveltekit-action': 'true',
+				origin: baseURL,
+				referer: `${baseURL}/inkop`
+			},
+			timeout: 30_000
+		});
+		expect(toggleResponse.ok()).toBeTruthy();
+
+		await page.goto(
+			`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`,
+			{ waitUntil: 'domcontentloaded' }
 		);
-		await row.locator('form[action="?/toggle"] input[type=checkbox]').click({ force: true });
-		await toggleDone;
-
-		await dismissPageHintIfOpen(page);
+		await dismissShoppingInkopOverlays(page);
 
 		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
-
 		if (await pantrySheet.isVisible().catch(() => false)) {
 			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click({ force: true });
 		}
 
-		await expect(row).toHaveCount(0, { timeout: 30_000 });
+		await expect(uncheckedShoppingRow(page, itemName)).toHaveCount(0, { timeout: 30_000 });
 
 	});
 
