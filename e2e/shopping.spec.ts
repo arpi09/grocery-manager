@@ -169,9 +169,8 @@ test.describe('Shopping list', () => {
 
 		const row = uncheckedShoppingRow(page, itemName);
 
-
-
-		await row.locator('form[action="?/toggle"] input[type=checkbox]').click();
+		await dismissShoppingInkopOverlays(page);
+		await row.locator('form[action="?/toggle"] input[type=checkbox]').click({ force: true });
 
 		await dismissPageHintIfOpen(page);
 
