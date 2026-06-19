@@ -32,6 +32,10 @@
 
 				recipeSuggestion={data.recipeSuggestion}
 
+				briefingRecipeChip={data.briefingRecipeChip}
+
+				briefingFunFact={data.briefingFunFact}
+
 				canWrite={data.canWrite}
 
 				pantryUxV2Enabled={Boolean(data.pantryUxV2Enabled)}

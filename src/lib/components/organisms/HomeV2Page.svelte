@@ -10,7 +10,7 @@
 		trackForYouCtaTapped,
 		trackHomeBriefingOpened
 	} from '$lib/client/home-v2-telemetry';
-	import type { HomeBriefingForYouCard, HomeBriefingRecipeCard } from '$lib/domain/home-briefing';
+	import type { HomeBriefingForYouCard, HomeBriefingFunFact } from '$lib/domain/home-briefing';
 	import { homeBriefingRecipeCtaDestination } from '$lib/domain/home-briefing-recipe';
 	import {
 		selectHomeBriefingForYouCard,
@@ -33,6 +33,8 @@
 		shoppingListCount?: number;
 		shoppingCadence?: HouseholdShoppingCadence | null;
 		recipeSuggestion?: HomeBriefingRecipeCard | null;
+		briefingRecipeChip?: { id: string; title: string } | null;
+		briefingFunFact?: HomeBriefingFunFact | null;
 		canWrite?: boolean;
 		pantryUxV2Enabled?: boolean;
 		shoppingUxV2Enabled?: boolean;
@@ -46,6 +48,8 @@
 		shoppingListCount = 0,
 		shoppingCadence = null,
 		recipeSuggestion = null,
+		briefingRecipeChip = null,
+		briefingFunFact = null,
 		canWrite = false,
 		pantryUxV2Enabled = false,
 		shoppingUxV2Enabled = false,
@@ -159,6 +163,8 @@
 			{shoppingListCount}
 			{shoppingCadence}
 			{recipeSuggestion}
+			{briefingRecipeChip}
+			{briefingFunFact}
 			{canWrite}
 			{pantryUxV2Enabled}
 			{shoppingUxV2Enabled}

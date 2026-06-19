@@ -1,10 +1,13 @@
 import { formatCadenceWeekday, type HouseholdShoppingCadence } from './household-shopping-cadence';
+import { getTimeOfDay, timeOfDayGreetingKey, type TimeOfDay } from './meal-slot';
 import type { MessageKey } from '$lib/i18n/messages';
 import type { Locale } from '$lib/i18n/locale';
+import type { StorageLocation } from './location';
 import {
 	homeBriefingForYouMessagePrefix,
 	homeBriefingStatusMessageKey,
 	type HomeBriefingForYouCard,
+	type HomeBriefingFunFact,
 	type HomeBriefingStatus
 } from './home-briefing';
 
@@ -17,14 +20,23 @@ export interface HomeBriefingMessagePresentation {
 	params: Record<string, string | number>;
 }
 
+const GREETING_NEUTRAL_KEYS: Record<TimeOfDay, MessageKey> = {
+	morning: 'home.dashboard.greetingMorningOnly',
+	day: 'home.dashboard.greetingDayOnly',
+	evening: 'home.dashboard.greetingEveningOnly',
+	night: 'home.dashboard.greetingNightOnly'
+};
+
 export function buildHomeBriefingGreetingPresentation(
-	displayName: string | null | undefined
+	displayName: string | null | undefined,
+	date = new Date()
 ): HomeBriefingMessagePresentation {
+	const time = getTimeOfDay(date);
 	const trimmed = displayName?.trim();
 	if (trimmed) {
-		return { key: 'home.v6.greeting', params: { name: trimmed } };
+		return { key: timeOfDayGreetingKey(time), params: { name: trimmed } };
 	}
-	return { key: 'home.v6.greetingFallback', params: {} };
+	return { key: GREETING_NEUTRAL_KEYS[time], params: {} };
 }
 
 export function buildHomeBriefingStatusPresentation(
@@ -132,42 +144,88 @@ export function buildHomeBriefingForYouPresentation(
 	}
 }
 
-export function buildShoppingChipTripName(
-	shoppingCadence: HouseholdShoppingCadence | null | undefined
-): string | null {
-	if (!shoppingCadence) return null;
-	return shoppingCadence.storeLabel?.trim() || null;
+export type HomeBriefingChipId = 'shopping' | 'storage' | 'eat' | 'funFact';
+
+export interface HomeBriefingChipPresentation {
+	id: HomeBriefingChipId;
+	titleKey: MessageKey;
+	hint?: HomeBriefingMessagePresentation | { kind: 'recipeTitle'; title: string };
+	zoneCounts?: Record<StorageLocation, number>;
 }
 
-export function buildHomeBriefingChipsPresentation(input: {
-	useSoonCount: number;
-	shoppingCadence: HouseholdShoppingCadence | null | undefined;
-	locale: Locale;
-}): {
-	useSoon: HomeBriefingMessagePresentation;
-	shopping: { useTripName: boolean; tripName: string };
-} {
-	const tripName = buildShoppingChipTripName(input.shoppingCadence);
-	if (tripName) {
-		return {
-			useSoon: { key: 'home.v6.chips.useSoon', params: { count: input.useSoonCount } },
-			shopping: { useTripName: true, tripName }
-		};
-	}
-
-	const weekday = input.shoppingCadence?.weekday;
+export function buildShoppingChipHint(
+	shoppingListCount: number,
+	shoppingCadence: HouseholdShoppingCadence | null | undefined,
+	locale: Locale
+): HomeBriefingMessagePresentation {
+	const weekday = shoppingCadence?.weekday;
 	if (weekday != null) {
 		return {
-			useSoon: { key: 'home.v6.chips.useSoon', params: { count: input.useSoonCount } },
-			shopping: {
-				useTripName: true,
-				tripName: formatCadenceWeekday(weekday, input.locale)
+			key: 'home.v6.chips.shoppingHint',
+			params: {
+				count: shoppingListCount,
+				weekday: formatCadenceWeekday(weekday, locale)
 			}
 		};
 	}
-
 	return {
-		useSoon: { key: 'home.v6.chips.useSoon', params: { count: input.useSoonCount } },
-		shopping: { useTripName: false, tripName: '' }
+		key: 'home.v6.chips.shoppingHintNoCadence',
+		params: { count: shoppingListCount }
 	};
+}
+
+export function buildFunFactChipHint(
+	funFact: HomeBriefingFunFact | null
+): HomeBriefingMessagePresentation {
+	if (funFact?.kind === 'zeroWaste') {
+		return {
+			key: 'home.v6.chips.funFactZeroWaste',
+			params: { count: funFact.value }
+		};
+	}
+	if (funFact?.kind === 'consumedThisWeek') {
+		return {
+			key: 'home.v6.chips.funFactConsumed',
+			params: { count: funFact.value }
+		};
+	}
+	return { key: 'home.v6.chips.funFactPlaceholder', params: {} };
+}
+
+export function buildHomeBriefingChipsPresentation(input: {
+	shoppingListCount: number;
+	shoppingCadence: HouseholdShoppingCadence | null | undefined;
+	locale: Locale;
+	zoneCounts: Record<StorageLocation, number>;
+	recipeChip: { id: string; title: string } | null;
+	funFact: HomeBriefingFunFact | null;
+}): HomeBriefingChipPresentation[] {
+	const chips: HomeBriefingChipPresentation[] = [
+		{
+			id: 'shopping',
+			titleKey: 'nav.shopping',
+			hint: buildShoppingChipHint(input.shoppingListCount, input.shoppingCadence, input.locale)
+		},
+		{
+			id: 'storage',
+			titleKey: 'nav.inventory',
+			zoneCounts: input.zoneCounts
+		}
+	];
+
+	if (input.recipeChip) {
+		chips.push({
+			id: 'eat',
+			titleKey: 'nav.eat',
+			hint: { kind: 'recipeTitle', title: input.recipeChip.title }
+		});
+	}
+
+	chips.push({
+		id: 'funFact',
+		titleKey: 'home.v6.chips.funFactTitle',
+		hint: buildFunFactChipHint(input.funFact)
+	});
+
+	return chips;
 }

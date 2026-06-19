@@ -1,5 +1,4 @@
 <script lang="ts">
-	import SceneIllustration from '$lib/components/atoms/SceneIllustration.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import type { HomeBriefingForYouCard } from '$lib/domain/home-briefing';
 	import type { HomeBriefingMessagePresentation } from '$lib/domain/home-briefing-presenter';
@@ -37,12 +36,11 @@
 </script>
 
 <article class="for-you-card" data-testid="home-v2-for-you" data-for-you-kind={card.kind}>
-	<SceneIllustration
-		src="/illustrations/v2/for-you.svg"
-		ariaLabel={t('home.v6.forYou.illustrationAria')}
-		width={280}
-		height={72}
-	/>
+	<div class="for-you-accent" aria-hidden="true">
+		<span class="accent-bar"></span>
+		<span class="accent-shape shape-a"></span>
+		<span class="accent-shape shape-b"></span>
+	</div>
 	<h2 class="for-you-title">{t(title.key, title.params)}</h2>
 	<p class="for-you-body">{t(body.key, body.params)}</p>
 
@@ -67,20 +65,76 @@
 		border-radius: var(--radius-lg);
 		background: var(--color-surface);
 		box-shadow: var(--shadow-sm);
+		overflow: hidden;
 	}
 
-	.for-you-card :global(.scene-illus) {
-		justify-content: stretch;
-		opacity: 1;
+	.for-you-accent {
+		position: relative;
+		height: 40px;
+		margin: calc(-1 * var(--space-sm)) calc(-1 * var(--space-md)) 0;
+		overflow: hidden;
+		background: color-mix(in srgb, var(--color-accent, #8a9a7b) 8%, var(--color-surface));
 	}
 
-	.for-you-card :global(.scene-illus img) {
-		width: 100%;
-		max-height: 72px;
-		aspect-ratio: auto;
-		object-fit: cover;
-		border-radius: var(--radius-sm);
-		background: var(--color-surface-muted);
+	.accent-bar {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			90deg,
+			color-mix(in srgb, var(--color-accent, #8a9a7b) 0%, transparent) 0%,
+			color-mix(in srgb, var(--color-accent, #8a9a7b) 35%, transparent) 35%,
+			color-mix(in srgb, var(--color-taupe, #c4b8a8) 30%, transparent) 65%,
+			color-mix(in srgb, var(--color-accent, #8a9a7b) 0%, transparent) 100%
+		);
+		background-size: 200% 100%;
+		animation: accent-shift 8s ease-in-out infinite;
+	}
+
+	.accent-shape {
+		position: absolute;
+		border-radius: 50%;
+		opacity: 0.35;
+		animation: accent-pulse 6s ease-in-out infinite;
+	}
+
+	.shape-a {
+		top: 8px;
+		right: 24%;
+		width: 28px;
+		height: 28px;
+		background: color-mix(in srgb, var(--color-accent, #8a9a7b) 40%, transparent);
+		animation-delay: -2s;
+	}
+
+	.shape-b {
+		bottom: 4px;
+		left: 18%;
+		width: 18px;
+		height: 18px;
+		background: color-mix(in srgb, var(--color-taupe, #c4b8a8) 50%, transparent);
+		animation-delay: -4s;
+	}
+
+	@keyframes accent-shift {
+		0%,
+		100% {
+			background-position: 0% 50%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
+	}
+
+	@keyframes accent-pulse {
+		0%,
+		100% {
+			transform: scale(1);
+			opacity: 0.25;
+		}
+		50% {
+			transform: scale(1.15);
+			opacity: 0.45;
+		}
 	}
 
 	.for-you-title {

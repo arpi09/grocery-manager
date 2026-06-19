@@ -26,7 +26,8 @@ import {
 	buildHomeBriefingRecipeCard,
 	pickBriefingRecipeIdea
 } from '$lib/domain/home-briefing-recipe';
-import type { HomeBriefingRecipeCard } from '$lib/domain/home-briefing';
+import type { HomeBriefingRecipeCard, HomeBriefingFunFact } from '$lib/domain/home-briefing';
+import { selectHomeBriefingFunFact } from '$lib/domain/home-briefing';
 
 import { itemSchema } from '$lib/validation/inventory.schemas';
 
@@ -115,21 +116,39 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const locale: Locale = isLocale(locals.locale) ? locals.locale : DEFAULT_LOCALE;
 
 	let recipeSuggestion: HomeBriefingRecipeCard | null = null;
-	if (homeUxV2Enabled && locals.user && !loadFailed) {
-		try {
-			const ideas = await locals.mealPlanService.listRecipeIdeas(locals.user.id, 6);
-			const idea = pickBriefingRecipeIdea(ideas, summary.expiringSoon);
-			if (idea) {
-				recipeSuggestion = buildHomeBriefingRecipeCard(
-					idea,
-					summary.expiringSoon,
-					shoppingCadence,
-					locale
-				);
+	let briefingRecipeChip: { id: string; title: string } | null = null;
+	let briefingFunFact: HomeBriefingFunFact | null = null;
+
+	if (homeUxV2Enabled && !loadFailed) {
+		const impactPromise = locals.statistikService
+			.getImpact(householdId)
+			.then((impact) => selectHomeBriefingFunFact(impact))
+			.catch((error) => {
+				console.warn('[hem] fun fact degraded:', error);
+				return null;
+			});
+
+		if (locals.user) {
+			try {
+				const ideas = await locals.mealPlanService.listRecipeIdeas(locals.user.id, 6);
+				if (ideas.length > 0) {
+					briefingRecipeChip = { id: ideas[0].id, title: ideas[0].title };
+				}
+				const idea = pickBriefingRecipeIdea(ideas, summary.expiringSoon);
+				if (idea) {
+					recipeSuggestion = buildHomeBriefingRecipeCard(
+						idea,
+						summary.expiringSoon,
+						shoppingCadence,
+						locale
+					);
+				}
+			} catch (error) {
+				console.warn('[hem] recipe briefing degraded:', error);
 			}
-		} catch (error) {
-			console.warn('[hem] recipe briefing degraded:', error);
 		}
+
+		briefingFunFact = await impactPromise;
 	}
 
 	return {
@@ -146,6 +165,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		shoppingListCount,
 		shoppingCadence,
 		recipeSuggestion,
+		briefingRecipeChip,
+		briefingFunFact,
 		showMemoryExplorer: isShelfLifeLearningEnabled()
 	};
 };

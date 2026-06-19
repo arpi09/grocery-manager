@@ -417,10 +417,10 @@
 			"greeting": "Hi {name}",
 			"greetingFallback": "Hi",
 			"status": {
-				"useSoonAndList": "{useSoonCount, plural, one {# thing to use soon} other {# things to use soon}} · list ready for {weekday}",
+				"useSoonAndList": "{useSoonCount, plural, one {# thing to use soon} other {# things to use soon}} · shopping list ready to shop on {weekday}",
 				"useSoonOnly": "{count, plural, one {# thing to use soon} other {# things to use soon}}",
-				"listReady": "List ready for {weekday}",
-				"listItems": "{count, plural, one {# item} other {# items}} on the shopping list",
+				"listReady": "Shopping list ready to shop on {weekday}",
+				"listItems": "Shopping list has {count, plural, one {# item} other {# items}}",
 				"allGood": "Pantry looks good. Nothing urgent.",
 				"emptyPantry": "Let's start building your pantry."
 			},
@@ -452,15 +452,16 @@
 			},
 			"chips": {
 				"sectionLabel": "Quick glance",
-				"useSoon": "{count} to use soon",
-				"useSoonAria": "View items to use soon",
-				"shopping": "{tripName}",
-				"shoppingDefault": "Shopping list",
+				"shoppingHint": "{count, plural, one {# item} other {# items}} · {weekday}",
+				"shoppingHintNoCadence": "{count, plural, one {# item} other {# items}}",
 				"shoppingAria": "Open shopping list",
-				"householdSynced": "Household synced",
-				"householdAria": "Household settings",
-				"pantry": "Pantry",
-				"pantryAria": "Open pantry"
+				"storageAria": "Open storage",
+				"eatAria": "Cook recipe",
+				"funFactTitle": "Fun fact",
+				"funFactZeroWaste": "{count, plural, one {# zero-waste week} other {# zero-waste weeks}}",
+				"funFactConsumed": "{count, plural, one {# item used this week} other {# items used this week}}",
+				"funFactPlaceholder": "See how you're doing",
+				"funFactAria": "Open statistics"
 			},
 			"error": {
 				"loadFailed": "Home couldn't load. Try again."

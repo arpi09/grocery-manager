@@ -161,3 +161,24 @@ export function homeBriefingStatusMessageKey(status: HomeBriefingStatus): Messag
 export function homeBriefingForYouMessagePrefix(kind: HomeBriefingForYouKind): `home.v6.forYou.${HomeBriefingForYouKind}` {
 	return `home.v6.forYou.${kind}`;
 }
+
+export type HomeBriefingFunFactKind = 'zeroWaste' | 'consumedThisWeek';
+
+export interface HomeBriefingFunFact {
+	kind: HomeBriefingFunFactKind;
+	value: number;
+}
+
+/** Pick the simplest rotating fun stat for the Snabbkoll chip. */
+export function selectHomeBriefingFunFact(impact: {
+	zeroWasteWeeks: number | null;
+	consumedThisWeek: number | null;
+}): HomeBriefingFunFact | null {
+	if (impact.zeroWasteWeeks != null && impact.zeroWasteWeeks > 0) {
+		return { kind: 'zeroWaste', value: impact.zeroWasteWeeks };
+	}
+	if (impact.consumedThisWeek != null && impact.consumedThisWeek > 0) {
+		return { kind: 'consumedThisWeek', value: impact.consumedThisWeek };
+	}
+	return null;
+}

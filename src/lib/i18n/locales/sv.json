@@ -408,11 +408,11 @@
 			"greeting": "Hej {name}",
 			"greetingFallback": "Hej",
 			"status": {
-				"useSoonAndList": "{useSoonCount, plural, one {# sak att använda snart} other {# saker att använda snart}} · listan är klar till {weekday}",
+				"useSoonAndList": "{useSoonCount, plural, one {# sak att använda snart} other {# saker att använda snart}} · inköpslistan redo att handlas på {weekday}",
 				"useSoonOnly": "{count, plural, one {# sak att använda snart} other {# saker att använda snart}}",
-				"listReady": "Listan är klar till {weekday}",
-				"listItems": "{count, plural, one {# vara på inköpslistan} other {# varor på inköpslistan}}",
-				"allGood": "Skafferiet ser bra. Inget bråttom.",
+				"listReady": "Inköpslistan är redo att handlas på {weekday}",
+				"listItems": "Inköpslistan har {count, plural, one {# vara} other {# varor}}",
+				"allGood": "Skafferiet ser bra ut. Inget bråttom.",
 				"emptyPantry": "Låt oss börja bygga ert skafferi."
 			},
 			"forYou": {
@@ -443,15 +443,16 @@
 			},
 			"chips": {
 				"sectionLabel": "Snabbkoll",
-				"useSoon": "{count} att använda snart",
-				"useSoonAria": "Visa varor att använda snart",
-				"shopping": "{tripName}",
-				"shoppingDefault": "Inköpslistan",
+				"shoppingHint": "{count, plural, one {# vara} other {# varor}} · {weekday}",
+				"shoppingHintNoCadence": "{count, plural, one {# vara} other {# varor}}",
 				"shoppingAria": "Öppna inköpslistan",
-				"householdSynced": "Hushållet synkat",
-				"householdAria": "Hushållsinställningar",
-				"pantry": "Skafferi",
-				"pantryAria": "Öppna skafferiet"
+				"storageAria": "Öppna lagret",
+				"eatAria": "Laga recept",
+				"funFactTitle": "Rolig info",
+				"funFactZeroWaste": "{count, plural, one {# vecka utan svinn} other {# veckor utan svinn}}",
+				"funFactConsumed": "{count, plural, one {# vara använd denna vecka} other {# varor använda denna vecka}}",
+				"funFactPlaceholder": "Se hur det går",
+				"funFactAria": "Öppna statistik"
 			},
 			"error": {
 				"loadFailed": "Hem kunde inte laddas. Försök igen."

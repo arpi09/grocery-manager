@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest';
 import type { InventoryItem } from './inventory-item';
 import type { ReplenishmentSuggestion } from './replenishment';
 import {
+	buildFunFactChipHint,
 	buildHomeBriefingChipsPresentation,
 	buildHomeBriefingForYouPresentation,
 	buildHomeBriefingGreetingPresentation,
 	buildHomeBriefingStatusPresentation,
-	buildShoppingChipTripName
+	buildShoppingChipHint
 } from './home-briefing-presenter';
-
-const cadence = { weekday: 5, storeLabel: 'ICA', tripCount: 4 };
+import { selectHomeBriefingFunFact } from './home-briefing';
 
 const suggestion: ReplenishmentSuggestion = {
 	normalizedKey: 'mjolk',
@@ -42,13 +42,18 @@ const expiringItem: InventoryItem = {
 	updatedAt: new Date('2026-06-01')
 };
 
+const morning = new Date('2026-06-19T08:00:00');
+const evening = new Date('2026-06-19T20:00:00');
+
 describe('home-briefing-presenter', () => {
-	it('builds greeting with and without display name', () => {
-		expect(buildHomeBriefingGreetingPresentation('Anna')).toEqual({
-			key: 'home.v6.greeting',
+	it('builds time-of-day greeting with and without display name', () => {
+		expect(buildHomeBriefingGreetingPresentation('Anna', morning)).toEqual({
+			key: 'home.greetingMorning',
 			params: { name: 'Anna' }
 		});
-		expect(buildHomeBriefingGreetingPresentation('  ').key).toBe('home.v6.greetingFallback');
+		expect(buildHomeBriefingGreetingPresentation('  ', evening).key).toBe(
+			'home.dashboard.greetingEveningOnly'
+		);
 	});
 
 	it('builds status params for combined use-soon and list ready', () => {
@@ -83,25 +88,50 @@ describe('home-briefing-presenter', () => {
 		expect(copy.body.params.weekday).toBeTruthy();
 	});
 
-	it('prefers store label for shopping chip trip name', () => {
-		expect(buildShoppingChipTripName(cadence)).toBe('ICA');
-		expect(
-			buildHomeBriefingChipsPresentation({
-				useSoonCount: 2,
-				shoppingCadence: cadence,
-				locale: 'sv'
-			}).shopping
-		).toEqual({ useTripName: true, tripName: 'ICA' });
+	it('builds shopping chip hint with weekday, never store name', () => {
+		const hint = buildShoppingChipHint(
+			3,
+			{ weekday: 5, storeLabel: 'ICA', tripCount: 4 },
+			'sv'
+		);
+		expect(hint.key).toBe('home.v6.chips.shoppingHint');
+		expect(hint.params.count).toBe(3);
+		expect(hint.params.weekday).toBeTruthy();
+		expect(JSON.stringify(hint.params)).not.toContain('ICA');
 	});
 
-	it('falls back to weekday chip label without store label', () => {
+	it('builds four briefing chips in order, skipping eat without recipe', () => {
 		const chips = buildHomeBriefingChipsPresentation({
-			useSoonCount: 1,
-			shoppingCadence: { weekday: 5, storeLabel: null, tripCount: 2 },
-			locale: 'sv'
+			shoppingListCount: 2,
+			shoppingCadence: { weekday: 5, storeLabel: 'ICA', tripCount: 2 },
+			locale: 'sv',
+			zoneCounts: { fridge: 12, freezer: 3, cupboard: 8 },
+			recipeChip: null,
+			funFact: { kind: 'zeroWaste', value: 2 }
 		});
-		expect(chips.shopping.useTripName).toBe(true);
-		expect(chips.shopping.tripName.length).toBeGreaterThan(3);
+		expect(chips.map((chip) => chip.id)).toEqual(['shopping', 'storage', 'funFact']);
+		expect(chips[1].zoneCounts).toEqual({ fridge: 12, freezer: 3, cupboard: 8 });
+	});
+
+	it('includes eat chip when recipe is available', () => {
+		const chips = buildHomeBriefingChipsPresentation({
+			shoppingListCount: 1,
+			shoppingCadence: null,
+			locale: 'en',
+			zoneCounts: { fridge: 0, freezer: 0, cupboard: 0 },
+			recipeChip: { id: 'idea-1', title: 'Pasta primavera' },
+			funFact: null
+		});
+		expect(chips.map((chip) => chip.id)).toEqual(['shopping', 'storage', 'eat', 'funFact']);
+	});
+
+	it('selects fun fact from impact stats', () => {
+		expect(
+			selectHomeBriefingFunFact({ zeroWasteWeeks: 3, consumedThisWeek: 5 })
+		).toEqual({ kind: 'zeroWaste', value: 3 });
+		expect(buildFunFactChipHint({ kind: 'consumedThisWeek', value: 4 }).key).toBe(
+			'home.v6.chips.funFactConsumed'
+		);
 	});
 
 	it('builds expiring card copy', () => {

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import SceneIllustration from '$lib/components/atoms/SceneIllustration.svelte';
 	import HomeBriefingChips from '$lib/components/molecules/HomeBriefingChips.svelte';
 	import HomeBriefingForYouCardView from '$lib/components/molecules/HomeBriefingForYouCard.svelte';
 	import HomeBriefingGreeting from '$lib/components/molecules/HomeBriefingGreeting.svelte';
@@ -15,15 +14,15 @@
 	import {
 		isShoppingListReady,
 		selectHomeBriefingForYouCard,
-		selectHomeBriefingStatus,
 		type HomeBriefingForYouCard,
+		type HomeBriefingFunFact,
 		type HomeBriefingRecipeCard
 	} from '$lib/domain/home-briefing';
 	import type { HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { getLocale, t } from '$lib/i18n';
 	import { PANTRY_SHELF_PATH } from '$lib/navigation/nav-config';
-	import type { StorageLocation } from '$lib/domain/location';
+	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 
 	interface Props {
 		summary: DashboardSummary;
@@ -32,6 +31,8 @@
 		shoppingListCount?: number;
 		shoppingCadence?: HouseholdShoppingCadence | null;
 		recipeSuggestion?: HomeBriefingRecipeCard | null;
+		briefingRecipeChip?: { id: string; title: string } | null;
+		briefingFunFact?: HomeBriefingFunFact | null;
 		canWrite?: boolean;
 		pantryUxV2Enabled?: boolean;
 		shoppingUxV2Enabled?: boolean;
@@ -49,6 +50,8 @@
 		shoppingListCount = 0,
 		shoppingCadence = null,
 		recipeSuggestion = null,
+		briefingRecipeChip = null,
+		briefingFunFact = null,
 		canWrite = false,
 		pantryUxV2Enabled = false,
 		shoppingUxV2Enabled = false,
@@ -83,30 +86,43 @@
 		return card;
 	});
 
+	const zoneCounts = $derived.by(() => {
+		const counts = Object.fromEntries(LOCATIONS.map((location) => [location, 0])) as Record<
+			StorageLocation,
+			number
+		>;
+		for (const entry of summary.counts) {
+			counts[entry.location] = entry.count;
+		}
+		return counts;
+	});
+
 	const greeting = $derived(buildHomeBriefingGreetingPresentation(displayName));
 	const statusPresentation = $derived(buildHomeBriefingStatusPresentation(status, locale));
 	const forYouPresentation = $derived(
 		forYou ? buildHomeBriefingForYouPresentation(forYou, locale) : null
 	);
 	const chipsPresentation = $derived(
-		buildHomeBriefingChipsPresentation({ useSoonCount, shoppingCadence, locale })
+		buildHomeBriefingChipsPresentation({
+			shoppingListCount,
+			shoppingCadence,
+			locale,
+			zoneCounts,
+			recipeChip: briefingRecipeChip,
+			funFact: briefingFunFact
+		})
 	);
 
-	const useSoonHref = $derived.by(() => {
-		const primaryZone =
-			(summary.expiringSoon.find((item) => item.location)?.location as StorageLocation | undefined) ??
-			'fridge';
-		return pantryUxV2Enabled
-			? `${PANTRY_SHELF_PATH}?filter=expiring`
-			: `/inventory/${primaryZone}?filter=expiring`;
-	});
-
-	const pantryHref = $derived(pantryUxV2Enabled ? PANTRY_SHELF_PATH : '/inventory/fridge');
+	const storageHref = $derived(pantryUxV2Enabled ? PANTRY_SHELF_PATH : '/inventory');
 
 	const shoppingHref = $derived(
 		shoppingUxV2Enabled && isShoppingListReady(shoppingListCount, shoppingCadence)
 			? '/inkop?mode=shop'
 			: '/inkop'
+	);
+
+	const recipeChipHref = $derived(
+		briefingRecipeChip ? `/recept/${briefingRecipeChip.id}/laga` : null
 	);
 
 	const forYouCtaHref = $derived.by(() => {
@@ -131,15 +147,6 @@
 </script>
 
 <div class="home-v2-briefing" data-testid="home-v2-briefing">
-	<div class="hero-wrap">
-		<SceneIllustration
-			src="/illustrations/v2/home-hero.svg"
-			ariaLabel={t('home.v6.hero.illustrationAria')}
-			width={390}
-			height={120}
-		/>
-	</div>
-
 	<HomeBriefingGreeting greeting={greeting} status={statusPresentation} />
 
 	{#if forYou && forYouPresentation}
@@ -165,13 +172,10 @@
 	{/if}
 
 	<HomeBriefingChips
-		useSoon={chipsPresentation.useSoon}
-		shopping={chipsPresentation.shopping}
-		{useSoonHref}
+		chips={chipsPresentation}
 		{shoppingHref}
-		householdHref="/settings/household"
-		{pantryHref}
-		showUseSoon={useSoonCount > 0}
+		storageHref={storageHref}
+		recipeHref={recipeChipHref}
 		onChipTap={trackHomeChipTapped}
 	/>
 </div>
@@ -182,24 +186,6 @@
 		flex-direction: column;
 		gap: var(--space-sm);
 		min-width: 0;
-	}
-
-	.hero-wrap {
-		margin: var(--space-sm) 0;
-	}
-
-	.hero-wrap :global(.scene-illus) {
-		justify-content: stretch;
-		opacity: 1;
-		background: var(--color-surface);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.hero-wrap :global(.scene-illus img) {
-		width: 100%;
-		max-height: 120px;
-		aspect-ratio: 16 / 9;
-		object-fit: cover;
 	}
 
 	.section-label {

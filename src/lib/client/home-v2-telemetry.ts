@@ -13,6 +13,6 @@ export function trackForYouCtaTapped(kind: HomeBriefingForYouKind, destination: 
 	void trackProductEvent('for_you_cta_tapped', { kind, destination });
 }
 
-export function trackHomeChipTapped(chip: 'useSoon' | 'shopping' | 'household' | 'pantry'): void {
+export function trackHomeChipTapped(chip: 'shopping' | 'storage' | 'eat' | 'funFact'): void {
 	void trackProductEvent('home_chip_tapped', { chip });
 }
