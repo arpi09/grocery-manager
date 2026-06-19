@@ -12,7 +12,8 @@ export const FEATURE_FLAG_ENV = {
 	BRAIN_FEEDBACK_V1: 'BRAIN_FEEDBACK_V1_ENABLED',
 	SHOPPING_LIST_SHARE: 'PUBLIC_SHOPPING_LIST_SHARE_ENABLED',
 	SHOPPING_UX_V2: 'SHOPPING_UX_V2_ENABLED',
-	PANTRY_UX_V2: 'PANTRY_UX_V2_ENABLED'
+	PANTRY_UX_V2: 'PANTRY_UX_V2_ENABLED',
+	HOME_UX_V2: 'HOME_UX_V2_ENABLED'
 } as const;
 
 function isEnvTrue(key: string): boolean {
@@ -62,4 +63,9 @@ export function isShoppingUxV2Enabled(): boolean {
 /** Server flag: Pantry UX v2 — shelf view on `/inventory` (default off). */
 export function isPantryUxV2Enabled(): boolean {
 	return isEnvTrue(FEATURE_FLAG_ENV.PANTRY_UX_V2);
+}
+
+/** Server flag: Home UX v2 — Household Briefing on `/hem` (default off). */
+export function isHomeUxV2Enabled(): boolean {
+	return isEnvTrue(FEATURE_FLAG_ENV.HOME_UX_V2);
 }

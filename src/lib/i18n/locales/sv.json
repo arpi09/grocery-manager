@@ -394,6 +394,68 @@
 				"body": "Delat skafferi och inställningar för ert hem.",
 				"link": "Hushållsinställningar"
 			}
+		},
+		"v6": {
+			"pageTitle": "Hem · Skaffu",
+			"metaDescription": "Översikt för hushållet — vad att använda snart, inköp och skafferi.",
+			"brandAria": "Skaffu – Hem",
+			"accountAria": "Konto",
+			"householdSwitcher": "{name} · {count, plural, one {# medlem} other {# medlemmar}}",
+			"householdSwitcherAria": "Byt hushåll, nuvarande: {name}",
+			"hero": {
+				"illustrationAria": "Hem — översikt av skafferi och inköp"
+			},
+			"greeting": "Hej {name}",
+			"greetingFallback": "Hej",
+			"status": {
+				"useSoonAndList": "{useSoonCount, plural, one {# sak att använda snart} other {# saker att använda snart}} · listan är klar till {weekday}",
+				"useSoonOnly": "{count, plural, one {# sak att använda snart} other {# saker att använda snart}}",
+				"listReady": "Listan är klar till {weekday}",
+				"listItems": "{count, plural, one {# vara på inköpslistan} other {# varor på inköpslistan}}",
+				"allGood": "Skafferiet ser bra. Inget bråttom.",
+				"emptyPantry": "Låt oss börja bygga ert skafferi."
+			},
+			"forYou": {
+				"sectionLabel": "För dig",
+				"illustrationAria": "För dig — nästa naturliga steg",
+				"recipe": {
+					"title": "{mealName} med det du har hemma",
+					"body": "Du har {items} som går ut {when}. Ett snabbt mål för {servings}.",
+					"ctaAddAndShop": "Lägg till {missingCount} saknade · Handla {weekday}",
+					"ctaAdd": "Lägg till {missingCount} på listan",
+					"ctaShop": "Öppna inköpslistan"
+				},
+				"replenishment": {
+					"title": "Dags för {name}?",
+					"body": "Du brukar köpa det ungefär var {interval} dagar.",
+					"cta": "Lägg på inköpslistan"
+				},
+				"expiring": {
+					"title": "Använd {name} snart",
+					"body": "{days, plural, one {Går ut om # dag} other {Går ut om # dagar}} — bra till {suggestion}.",
+					"cta": "Visa i skafferiet"
+				},
+				"shopReady": {
+					"title": "Redo att handla",
+					"body": "{count, plural, one {# vara} other {# varor}} väntar. Perfekt till {weekday}.",
+					"cta": "Börja handla"
+				}
+			},
+			"chips": {
+				"sectionLabel": "Snabbkoll",
+				"useSoon": "{count} att använda snart",
+				"useSoonAria": "Visa varor att använda snart",
+				"shopping": "{tripName}",
+				"shoppingDefault": "Inköpslistan",
+				"shoppingAria": "Öppna inköpslistan",
+				"householdSynced": "Hushållet synkat",
+				"householdAria": "Hushållsinställningar",
+				"pantry": "Skafferi",
+				"pantryAria": "Öppna skafferiet"
+			},
+			"error": {
+				"loadFailed": "Hem kunde inte laddas. Försök igen."
+			}
 		}
 	},
 	"dashboard": {

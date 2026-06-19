@@ -403,6 +403,68 @@
 				"body": "Shared pantry and settings for your home.",
 				"link": "Household settings"
 			}
+		},
+		"v6": {
+			"pageTitle": "Home · Skaffu",
+			"metaDescription": "Household overview — what to use soon, shopping, and pantry.",
+			"brandAria": "Skaffu – Home",
+			"accountAria": "Account",
+			"householdSwitcher": "{name} · {count, plural, one {# member} other {# members}}",
+			"householdSwitcherAria": "Switch household, current: {name}",
+			"hero": {
+				"illustrationAria": "Home — pantry and shopping overview"
+			},
+			"greeting": "Hi {name}",
+			"greetingFallback": "Hi",
+			"status": {
+				"useSoonAndList": "{useSoonCount, plural, one {# thing to use soon} other {# things to use soon}} · list ready for {weekday}",
+				"useSoonOnly": "{count, plural, one {# thing to use soon} other {# things to use soon}}",
+				"listReady": "List ready for {weekday}",
+				"listItems": "{count, plural, one {# item} other {# items}} on the shopping list",
+				"allGood": "Pantry looks good. Nothing urgent.",
+				"emptyPantry": "Let's start building your pantry."
+			},
+			"forYou": {
+				"sectionLabel": "For you",
+				"illustrationAria": "For you — next natural step",
+				"recipe": {
+					"title": "{mealName} with what you have at home",
+					"body": "You have {items} expiring {when}. A quick meal for {servings}.",
+					"ctaAddAndShop": "Add {missingCount} missing · Shop {weekday}",
+					"ctaAdd": "Add {missingCount} to the list",
+					"ctaShop": "Open shopping list"
+				},
+				"replenishment": {
+					"title": "Time for {name}?",
+					"body": "You usually buy it about every {interval} days.",
+					"cta": "Add to shopping list"
+				},
+				"expiring": {
+					"title": "Use {name} soon",
+					"body": "{days, plural, one {Expires in # day} other {Expires in # days}} — good for {suggestion}.",
+					"cta": "View in pantry"
+				},
+				"shopReady": {
+					"title": "Ready to shop",
+					"body": "{count, plural, one {# item} other {# items}} waiting. Perfect for {weekday}.",
+					"cta": "Start shopping"
+				}
+			},
+			"chips": {
+				"sectionLabel": "Quick glance",
+				"useSoon": "{count} to use soon",
+				"useSoonAria": "View items to use soon",
+				"shopping": "{tripName}",
+				"shoppingDefault": "Shopping list",
+				"shoppingAria": "Open shopping list",
+				"householdSynced": "Household synced",
+				"householdAria": "Household settings",
+				"pantry": "Pantry",
+				"pantryAria": "Open pantry"
+			},
+			"error": {
+				"loadFailed": "Home couldn't load. Try again."
+			}
 		}
 	},
 	"dashboard": {

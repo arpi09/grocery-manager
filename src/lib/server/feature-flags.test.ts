@@ -9,7 +9,8 @@ import {
 	isShelfLifeLearningEnabled,
 	isShoppingListShareEnabled,
 	isShoppingUxV2Enabled,
-	isPantryUxV2Enabled
+	isPantryUxV2Enabled,
+	isHomeUxV2Enabled
 } from './feature-flags';
 
 describe('feature-flags registry', () => {
@@ -43,6 +44,7 @@ describe('feature-flags registry', () => {
 		expect(FEATURE_FLAG_ENV.HOME_REDESIGN_V1).toBe('HOME_REDESIGN_V1_ENABLED');
 		expect(FEATURE_FLAG_ENV.SHOPPING_UX_V2).toBe('SHOPPING_UX_V2_ENABLED');
 		expect(FEATURE_FLAG_ENV.PANTRY_UX_V2).toBe('PANTRY_UX_V2_ENABLED');
+		expect(FEATURE_FLAG_ENV.HOME_UX_V2).toBe('HOME_UX_V2_ENABLED');
 	});
 
 	it('defaults all flags to false when unset', () => {
@@ -55,6 +57,7 @@ describe('feature-flags registry', () => {
 		expect(isHomeRedesignV1Enabled()).toBe(false);
 		expect(isShoppingUxV2Enabled()).toBe(false);
 		expect(isPantryUxV2Enabled()).toBe(false);
+		expect(isHomeUxV2Enabled()).toBe(false);
 	});
 
 	it('enables flags only when env is exactly true', () => {
@@ -67,6 +70,7 @@ describe('feature-flags registry', () => {
 		process.env[FEATURE_FLAG_ENV.HOME_REDESIGN_V1] = 'true';
 		process.env[FEATURE_FLAG_ENV.SHOPPING_UX_V2] = 'true';
 		process.env[FEATURE_FLAG_ENV.PANTRY_UX_V2] = 'true';
+		process.env[FEATURE_FLAG_ENV.HOME_UX_V2] = 'true';
 
 		expect(isShelfLifeLearningEnabled()).toBe(true);
 		expect(isLocationLearningEnabled()).toBe(true);
@@ -77,6 +81,7 @@ describe('feature-flags registry', () => {
 		expect(isHomeRedesignV1Enabled()).toBe(true);
 		expect(isShoppingUxV2Enabled()).toBe(true);
 		expect(isPantryUxV2Enabled()).toBe(true);
+		expect(isHomeUxV2Enabled()).toBe(true);
 
 		process.env[FEATURE_FLAG_ENV.PRICE_MEMORY_V1] = 'false';
 		expect(isPriceMemoryV1Enabled()).toBe(false);

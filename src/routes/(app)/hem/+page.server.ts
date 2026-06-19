@@ -21,6 +21,7 @@ import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { buildReturnUrlWithExpiryNudge } from '$lib/utils/expiry-nudge';
 
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
+import { isHomeUxV2Enabled } from '$lib/server/home-ux-v2-flag';
 
 import { itemSchema } from '$lib/validation/inventory.schemas';
 
@@ -90,10 +91,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 	]);
 
 	const locale: Locale = isLocale(locals.locale) ? locals.locale : DEFAULT_LOCALE;
+	const homeUxV2Enabled = isHomeUxV2Enabled();
 
 	return {
 		locale,
-		pageTitle: translate(locale, 'home.title'),
+		pageTitle: translate(locale, homeUxV2Enabled ? 'home.v6.pageTitle' : 'home.title'),
+		homeUxV2Enabled,
 		summary,
 		intelligence,
 		celebration: celebration as GamificationCelebrationKind | null,
