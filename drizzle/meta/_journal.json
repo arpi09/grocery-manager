@@ -386,6 +386,13 @@
 			"when": 1753027200000,
 			"tag": "0055_pantry_ux_v2_telemetry",
 			"breakpoints": true
+		},
+		{
+			"idx": 55,
+			"version": "7",
+			"when": 1753113600000,
+			"tag": "0056_home_ux_v2_telemetry",
+			"breakpoints": true
 		}
 	]
 }

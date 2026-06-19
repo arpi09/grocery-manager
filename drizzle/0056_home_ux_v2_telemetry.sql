@@ -1,0 +1,2 @@
+-- Home UX v2 product_event types (application enum in schema.ts):
+-- home_briefing_opened, for_you_cta_tapped, home_chip_tapped
