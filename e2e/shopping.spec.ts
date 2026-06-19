@@ -33,35 +33,27 @@ async function openLegacyShoppingGrid(page: Page) {
 }
 
 async function addLegacyShoppingItem(page: Page, itemName: string) {
+	const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190';
+	const addResponse = await page.request.post(`${baseURL}/inkop?/add`, {
+		form: { name: itemName },
+		headers: {
+			accept: 'application/json',
+			'x-sveltekit-action': 'true',
+			origin: baseURL,
+			referer: `${baseURL}${legacyShoppingGridPath}`
+		},
+		timeout: 30_000
+	});
+	expect(addResponse.ok()).toBeTruthy();
+
+	await page.goto(
+		`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`,
+		{ waitUntil: 'domcontentloaded' }
+	);
 	await dismissOnboardingModalIfOpen(page);
 	await dismissShoppingInkopOverlays(page);
-	const addForm = page.getByTestId('shopping-list-add-form');
-	await addForm.locator('#shopping-name').fill(itemName);
-
-	const addDone = page.waitForResponse(
-		(response) => response.request().method() === 'POST' && response.url().includes('/inkop'),
-		{ timeout: 30_000 }
-	);
-	await addForm
-		.getByRole('button', { name: /Lägg till|Add/i })
-		.evaluate((button) => (button as HTMLButtonElement).click());
-	await addDone;
-
-	// Let SvelteKit enhance finish before asserting or opening the filter sheet.
-	await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => undefined);
-	await dismissShoppingInkopOverlays(page);
-
-	const row = uncheckedShoppingRow(page, itemName);
-	if (!(await row.isVisible().catch(() => false))) {
-		await page.getByTestId('data-grid-filter-button').click({ force: true });
-		const filterSheet = page.getByTestId('data-grid-filter-sheet');
-		await expect(filterSheet).toBeVisible({ timeout: 10_000 });
-		await filterSheet.getByRole('textbox').fill(itemName);
-		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click({ force: true });
-		await dismissShoppingInkopOverlays(page);
-	}
-
-	await expect(row).toBeVisible({ timeout: 20_000 });
+	await expect(page.getByTestId('shopping-checklist-grid')).toBeVisible({ timeout: 20_000 });
+	await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 20_000 });
 }
 
 
