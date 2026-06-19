@@ -42,14 +42,15 @@ export function bindSubmitting(
 export function bindSubmittingWithToast(
 	setSubmitting: (value: boolean) => void,
 	onSuccess: () => void,
-	syncFormData?: (formData: FormData) => void
+	syncFormData?: (formData: FormData) => void,
+	options?: { invalidateAll?: boolean }
 ): SubmitFunction {
 	return ({ formData }) => {
 		syncFormData?.(formData);
 		setSubmitting(true);
 		return async ({ result, update }) => {
 			try {
-				await updatePreservingScroll(update);
+				await updatePreservingScroll(update, options);
 				if (result.type === 'success') {
 					onSuccess();
 				}

@@ -14,6 +14,11 @@ function uncheckedShoppingRows(page: Page) {
 	return page.locator('#shopping-list-panel [data-testid^="shopping-grid-row-"]');
 }
 
+async function dismissShoppingInkopOverlays(page: Page) {
+	await dismissPostOnboardingShareIfOpen(page);
+	await dismissPageHintIfOpen(page);
+}
+
 async function openLegacyShoppingGrid(page: Page) {
 	test.skip(
 		process.env.SHOPPING_UX_V2_ENABLED === 'true',
@@ -22,25 +27,27 @@ async function openLegacyShoppingGrid(page: Page) {
 
 	await page.goto(legacyShoppingGridPath, { waitUntil: 'domcontentloaded' });
 	await dismissOnboardingModalIfOpen(page);
-	await dismissPageHintIfOpen(page);
-	await dismissPostOnboardingShareIfOpen(page);
+	await dismissShoppingInkopOverlays(page);
 	await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 15_000 });
+	await expect(page.getByTestId('shopping-list-add-form')).toBeVisible({ timeout: 15_000 });
 }
 
 async function addLegacyShoppingItem(page: Page, itemName: string) {
-	await dismissPostOnboardingShareIfOpen(page);
-	await page.locator('#shopping-name').fill(itemName);
-	await page.locator('form.add-form').getByRole('button', { name: /L.gg till|Add/i }).click();
-	await page.reload({ waitUntil: 'domcontentloaded' });
 	await dismissOnboardingModalIfOpen(page);
-	await dismissPageHintIfOpen(page);
-	await dismissPostOnboardingShareIfOpen(page);
-	await page.goto(
-		`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`,
-		{ waitUntil: 'domcontentloaded' }
+	await dismissShoppingInkopOverlays(page);
+	const addForm = page.getByTestId('shopping-list-add-form');
+	await addForm.locator('#shopping-name').fill(itemName);
+
+	const addDone = page.waitForResponse(
+		(response) => response.request().method() === 'POST' && response.url().includes('/inkop'),
+		{ timeout: 30_000 }
 	);
-	await dismissOnboardingModalIfOpen(page);
-	await dismissPostOnboardingShareIfOpen(page);
+	await addForm
+		.getByRole('button', { name: /Lägg till|Add/i })
+		.evaluate((button) => (button as HTMLButtonElement).click());
+	await addDone;
+
+	await dismissShoppingInkopOverlays(page);
 	await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 20_000 });
 }
 
@@ -151,7 +158,6 @@ test.describe('Shopping list', () => {
 
 		const itemName = `E2E Inkop ${Date.now()}`;
 
-		await loginAsAdmin(page);
 		await openLegacyShoppingGrid(page);
 		await addLegacyShoppingItem(page, itemName);
 
@@ -186,7 +192,6 @@ test.describe('Shopping list', () => {
 
 		const itemName = `E2E Grid Filter ${Date.now()}`;
 
-		await loginAsAdmin(page);
 		await openLegacyShoppingGrid(page);
 		await addLegacyShoppingItem(page, itemName);
 
@@ -211,7 +216,6 @@ test.describe('Shopping list', () => {
 
 
 
-		await loginAsAdmin(page);
 		await openLegacyShoppingGrid(page);
 		await addLegacyShoppingItem(page, itemName);
 

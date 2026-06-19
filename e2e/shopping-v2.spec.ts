@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { dismissOnboardingModalIfOpen, dismissPageHintIfOpen, loginAsAdmin } from './helpers/auth';
+import {
+	dismissOnboardingModalIfOpen,
+	dismissPageHintIfOpen,
+	dismissPostOnboardingShareIfOpen,
+	loginAsAdmin
+} from './helpers/auth';
 
 test.describe('Shopping UX v2', () => {
 	test.setTimeout(90_000);
@@ -13,6 +18,7 @@ test.describe('Shopping UX v2', () => {
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
 		await dismissPageHintIfOpen(page);
+		await dismissPostOnboardingShareIfOpen(page);
 
 		await expect(page.getByTestId('shopping-v2-page')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible();
@@ -52,6 +58,7 @@ test.describe('Shopping UX v2', () => {
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
 		await dismissPageHintIfOpen(page);
+		await dismissPostOnboardingShareIfOpen(page);
 
 		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
 		await page.getByRole('button', { name: /Lägg till vara|Add item/i }).click();
