@@ -1,5 +1,5 @@
 import { canEditInventory, type HouseholdRole } from '$lib/domain/household';
-import type { CreateShoppingListItemInput } from '$lib/domain/shopping-list-item';
+import type { CreateShoppingListItemInput, ShoppingListItem } from '$lib/domain/shopping-list-item';
 import { generateId } from '$lib/infrastructure/auth/id';
 import type { IShoppingListRepository } from '$lib/infrastructure/repositories/shopping-list.repository';
 
@@ -91,6 +91,28 @@ export class ShoppingListService {
 		const u = await this.repository.setChecked(householdId, id, !e.checked);
 		if (!u) throw new ShoppingListNotFoundError();
 		return u;
+	}
+
+	async toggleCheckedMany(
+		householdId: string,
+		role: HouseholdRole,
+		ids: string[],
+		checked: boolean
+	): Promise<ShoppingListItem[]> {
+		if (!canEditInventory(role)) throw new ShoppingListReadOnlyError();
+
+		const updated: ShoppingListItem[] = [];
+		for (const id of ids) {
+			const existing = await this.repository.findById(householdId, id);
+			if (!existing || existing.checked === checked) {
+				continue;
+			}
+			const row = await this.repository.setChecked(householdId, id, checked);
+			if (row) {
+				updated.push(row);
+			}
+		}
+		return updated;
 	}
 
 	async removeItem(householdId: string, role: HouseholdRole, id: string) {

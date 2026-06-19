@@ -178,6 +178,31 @@ export const actions: Actions = {
 
 		return { success: true };
 	},
+	bulkToggleChecked: async (event) => {
+		requireInventoryWriteAccess(event.locals.householdRole);
+		const householdId = event.locals.householdId;
+		if (!householdId) error(400, translate(event.locals.locale, 'errors.household.noHousehold'));
+
+		const formData = await event.request.formData();
+		const ids = formData
+			.getAll('ids')
+			.filter((value): value is string => typeof value === 'string' && value.length > 0);
+		if (ids.length === 0) {
+			return fail(400, { message: translate(event.locals.locale, 'errors.shopping.missingRowId') });
+		}
+
+		try {
+			const updated = await event.locals.shoppingListService.toggleCheckedMany(
+				householdId,
+				event.locals.householdRole!,
+				ids,
+				true
+			);
+			return { success: true, checkedCount: updated.length };
+		} catch (err) {
+			return handleServiceError(err);
+		}
+	},
 	addToPantry: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);
 		const householdId = event.locals.householdId;
