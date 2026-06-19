@@ -684,6 +684,44 @@ export class InventoryService {
 		return confirmed;
 	}
 
+	async consumeItemsMany(
+		householdId: string,
+		itemIds: string[],
+		userId: string,
+		actorRole: HouseholdRole
+	): Promise<number> {
+		assertInventoryConsumable(actorRole);
+		let consumed = 0;
+		for (const id of itemIds) {
+			try {
+				await this.consumeItem(householdId, id, userId, actorRole, { preset: 'all' });
+				consumed += 1;
+			} catch {
+				// skip missing or invalid rows
+			}
+		}
+		return consumed;
+	}
+
+	async deleteItemsMany(
+		householdId: string,
+		itemIds: string[],
+		userId: string,
+		actorRole: HouseholdRole
+	): Promise<number> {
+		assertInventoryWritable(actorRole);
+		let deleted = 0;
+		for (const id of itemIds) {
+			try {
+				await this.deleteItem(householdId, id, userId, actorRole);
+				deleted += 1;
+			} catch {
+				// skip missing rows
+			}
+		}
+		return deleted;
+	}
+
 	async findMergeCandidates(
 		householdId: string,
 		lines: Array<{ name: string; location: StorageLocation }>

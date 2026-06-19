@@ -10,6 +10,15 @@ export const DEFAULT_INVENTORY_SORT: InventorySortKey = 'name';
 export const DEFAULT_INVENTORY_SORT_DIRECTION: InventorySortDirection = 'asc';
 export const INVENTORY_EXPIRY_FILTER_PARAM = 'filter';
 const INVENTORY_EXPIRY_FILTERS = new Set<InventoryExpiryFilter>(['all', 'expiring', 'dated', 'noExpiry']);
+const INVENTORY_SORT_KEYS = new Set<InventorySortKey>(['name', 'expiry', 'quantity']);
+
+export function parseInventorySortKey(value: string | null): InventorySortKey {
+	if (value && INVENTORY_SORT_KEYS.has(value as InventorySortKey)) {
+		return value as InventorySortKey;
+	}
+	return DEFAULT_INVENTORY_SORT;
+}
+
 export function parseInventoryExpiryFilter(value: string | null): InventoryExpiryFilter {
 	if (value && INVENTORY_EXPIRY_FILTERS.has(value as InventoryExpiryFilter)) return value as InventoryExpiryFilter;
 	return 'all';
@@ -77,6 +86,20 @@ export function compareInventoryItems(
 
 	return direction === 'asc' ? cmp : -cmp;
 }
+
+export function matchesInventorySearch(item: InventoryItem, q: string): boolean {
+	const normalized = q.trim().toLowerCase();
+	if (!normalized) {
+		return true;
+	}
+	return item.name.toLowerCase().includes(normalized);
+}
+
+export const pantryLocationGridAdapters = {
+	matchesFacet: matchesInventoryExpiryFilter,
+	matchesSearch: matchesInventorySearch,
+	compare: compareInventoryItems
+};
 
 export function filterAndSortInventoryItems(
 	items: InventoryItem[],

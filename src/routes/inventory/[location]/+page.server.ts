@@ -15,6 +15,12 @@ import { appendActionToast } from '$lib/utils/action-toast';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
+function parseItemIds(formData: FormData): string[] {
+	return formData
+		.getAll('itemIds')
+		.filter((id): id is string => typeof id === 'string' && id.trim().length > 0);
+}
+
 export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!isStorageLocation(params.location)) {
 		error(404, 'Unknown storage location');
@@ -170,5 +176,39 @@ export const actions: Actions = {
 				String(activeRemaining)
 			)
 		);
+	},
+	bulkConsumeItems: async ({ request, locals }) => {
+		requireInventoryConsumeAccess(locals.householdRole);
+
+		const itemIds = parseItemIds(await request.formData());
+		if (itemIds.length === 0) {
+			return fail(400, { message: 'missing_item_ids' });
+		}
+
+		const count = await locals.inventoryService.consumeItemsMany(
+			locals.householdId!,
+			itemIds,
+			locals.user!.id,
+			locals.householdRole!
+		);
+
+		return { success: true, count };
+	},
+	bulkDeleteItems: async ({ request, locals }) => {
+		requireInventoryWriteAccess(locals.householdRole);
+
+		const itemIds = parseItemIds(await request.formData());
+		if (itemIds.length === 0) {
+			return fail(400, { message: 'missing_item_ids' });
+		}
+
+		const count = await locals.inventoryService.deleteItemsMany(
+			locals.householdId!,
+			itemIds,
+			locals.user!.id,
+			locals.householdRole!
+		);
+
+		return { success: true, count };
 	}
 };

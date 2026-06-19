@@ -496,7 +496,13 @@
 			"quantity": "Antal"
 		},
 		"backToPantry": "Tillbaka till skafferiet",
-		"backToPlan": "Tillbaka till Plan"
+		"backToPlan": "Tillbaka till Plan",
+		"bulkConsume": "Förbruka valda",
+		"bulkDelete": "Ta bort valda",
+		"bulkCheckOff": "Bocka av valda",
+		"bulkCheckOffSuccess": "{count} varor avbockade",
+		"selectRow": "Markera {name}",
+		"checkOffRow": "Bocka av {name}"
 	},
 	"location": {
 		"fridge": "Kylskåp",

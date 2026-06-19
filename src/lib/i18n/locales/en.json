@@ -505,7 +505,13 @@
 			"quantity": "Quantity"
 		},
 		"backToPantry": "Back to pantry",
-		"backToPlan": "Back to Plan"
+		"backToPlan": "Back to Plan",
+		"bulkConsume": "Consume selected",
+		"bulkDelete": "Delete selected",
+		"bulkCheckOff": "Check off selected",
+		"bulkCheckOffSuccess": "{count} items checked off",
+		"selectRow": "Select {name}",
+		"checkOffRow": "Check off {name}"
 	},
 	"location": {
 		"fridge": "Fridge",

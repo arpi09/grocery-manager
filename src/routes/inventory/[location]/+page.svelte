@@ -8,7 +8,7 @@
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 
 	import InventoryAddSheet from '$lib/components/molecules/InventoryAddSheet.svelte';
-	import InventoryList from '$lib/components/organisms/InventoryList.svelte';
+	import PantryLocationDataGrid from '$lib/components/organisms/PantryLocationDataGrid.svelte';
 	import { trackPantryItemOpened } from '$lib/client/pantry-v2-telemetry';
 
 	import { getLocale, t } from '$lib/i18n';
@@ -40,8 +40,10 @@
 	const totalCount = $derived(data.activeTotal + data.autoExpiredTotal + data.finishedTotal);
 
 	const hasInventory = $derived(totalCount > 0);
-	const initialShowAutoExpired = $derived(page.url.searchParams.get('autoExpired') === '1');
 	const initialExpiryFilter = $derived(parseInventoryExpiryFilter(page.url.searchParams.get('filter')));
+
+	const backHref = $derived(page.data.pantryUxV2Enabled ? '/inventory' : undefined);
+	const backLabel = $derived(page.data.pantryUxV2Enabled ? t('dataGrid.backToPantry') : undefined);
 
 	function handlePantryItemNavigate(itemId: string) {
 		if (!page.data.pantryUxV2Enabled) {
@@ -75,6 +77,10 @@
 
 		subtitle={headerSubtitle}
 
+		{backHref}
+
+		{backLabel}
+
 	/>
 
 
@@ -102,17 +108,11 @@
 
 
 
-			<InventoryList
+			<PantryLocationDataGrid
 
 				items={data.items}
 
 				activeTotal={data.activeTotal}
-
-				autoExpiredTotal={data.autoExpiredTotal}
-
-				finishedTotal={data.finishedTotal}
-
-				autoExpiredGraceDays={data.autoExpiredGraceDays}
 
 				location={data.location}
 
@@ -120,8 +120,6 @@
 				canConsume={data.canConsume}
 
 				{hasInventory}
-				{initialShowAutoExpired}
-				initialExpiryFilter={initialExpiryFilter}
 				onAddClick={data.canWrite ? () => (addSheetOpen = true) : undefined}
 				onItemNavigate={handlePantryItemNavigate}
 
