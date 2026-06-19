@@ -31,6 +31,16 @@ async function addLegacyShoppingItem(page: Page, itemName: string) {
 	await dismissPostOnboardingShareIfOpen(page);
 	await page.locator('#shopping-name').fill(itemName);
 	await page.locator('form.add-form').getByRole('button', { name: /L.gg till|Add/i }).click();
+	await page.reload({ waitUntil: 'domcontentloaded' });
+	await dismissOnboardingModalIfOpen(page);
+	await dismissPageHintIfOpen(page);
+	await dismissPostOnboardingShareIfOpen(page);
+	await page.goto(
+		`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`,
+		{ waitUntil: 'domcontentloaded' }
+	);
+	await dismissOnboardingModalIfOpen(page);
+	await dismissPostOnboardingShareIfOpen(page);
 	await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 20_000 });
 }
 
