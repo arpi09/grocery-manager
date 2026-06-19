@@ -48,21 +48,13 @@ async function addLegacyShoppingItem(page: Page, itemName: string) {
 	const addResult = (await addResponse.json()) as { type?: string };
 	expect(addResult.type).toBe('success');
 
-	await page.reload({ waitUntil: 'load' });
-	await dismissOnboardingModalIfOpen(page);
+	await page.goto(
+		`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`,
+		{ waitUntil: 'domcontentloaded' }
+	);
 	await dismissShoppingInkopOverlays(page);
-
-	const row = uncheckedShoppingRow(page, itemName);
-	if (!(await row.isVisible().catch(() => false))) {
-		await page.getByTestId('data-grid-filter-button').click({ force: true });
-		const filterSheet = page.getByTestId('data-grid-filter-sheet');
-		await expect(filterSheet).toBeVisible({ timeout: 10_000 });
-		await filterSheet.getByRole('textbox').fill(itemName);
-		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click({ force: true });
-		await dismissShoppingInkopOverlays(page);
-	}
-
-	await expect(row).toBeVisible({ timeout: 30_000 });
+	await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 15_000 });
+	await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 30_000 });
 }
 
 
