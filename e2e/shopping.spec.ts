@@ -48,13 +48,13 @@ async function addLegacyShoppingItem(page: Page, itemName: string) {
 	const addResult = (await addResponse.json()) as { type?: string };
 	expect(addResult.type).toBe('success');
 
+	await page.reload({ waitUntil: 'load' });
+	await dismissOnboardingModalIfOpen(page);
 	await dismissShoppingInkopOverlays(page);
 
 	const row = uncheckedShoppingRow(page, itemName);
 	if (!(await row.isVisible().catch(() => false))) {
-		await page.getByTestId('shopping-checklist-grid').getByTestId('data-grid-filter-button').click({
-			force: true
-		});
+		await page.getByTestId('data-grid-filter-button').click({ force: true });
 		const filterSheet = page.getByTestId('data-grid-filter-sheet');
 		await expect(filterSheet).toBeVisible({ timeout: 10_000 });
 		await filterSheet.getByRole('textbox').fill(itemName);
