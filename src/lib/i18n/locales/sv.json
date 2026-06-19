@@ -469,6 +469,35 @@
 		"scan": "Skanna",
 		"addItem": "Lägg till vara"
 	},
+	"dataGrid": {
+		"paginationAria": "Tabellpaginering",
+		"rowsPerPage": "Rader per sida",
+		"range": "{start}–{end} av {total}",
+		"previousPage": "Föregående sida",
+		"nextPage": "Nästa sida",
+		"openFilter": "Öppna filter",
+		"filterSheetTitle": "Filter och sortering",
+		"filterApply": "Visa resultat",
+		"searchLabel": "Sök",
+		"searchPlaceholder": "Sök i listan…",
+		"filterLegend": "Visa",
+		"sortLegend": "Sortera efter",
+		"selectAll": "Markera alla rader på sidan",
+		"selectedCount": "{count} valda",
+		"facet": {
+			"unchecked": "Kvar att handla",
+			"checked": "Avbockade",
+			"all": "Alla"
+		},
+		"sort": {
+			"name": "Namn",
+			"added": "Tillagd",
+			"expiry": "Bäst före",
+			"quantity": "Antal"
+		},
+		"backToPantry": "Tillbaka till skafferiet",
+		"backToPlan": "Tillbaka till Plan"
+	},
 	"location": {
 		"fridge": "Kylskåp",
 		"freezer": "Frys",

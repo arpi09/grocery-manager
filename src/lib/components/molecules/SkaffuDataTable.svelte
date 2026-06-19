@@ -48,6 +48,13 @@
 		border-collapse: collapse;
 	}
 
+	.skaffu-table :global(.col-checkbox) {
+		width: 1%;
+		padding-inline: var(--space-sm);
+		text-align: center;
+		vertical-align: middle;
+	}
+
 	.skaffu-table :global(.col-name) {
 		width: auto;
 	}

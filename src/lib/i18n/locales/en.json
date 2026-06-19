@@ -478,6 +478,35 @@
 		"scan": "Scan",
 		"addItem": "Add item"
 	},
+	"dataGrid": {
+		"paginationAria": "Table pagination",
+		"rowsPerPage": "Rows per page",
+		"range": "{start}–{end} of {total}",
+		"previousPage": "Previous page",
+		"nextPage": "Next page",
+		"openFilter": "Open filters",
+		"filterSheetTitle": "Filter and sort",
+		"filterApply": "Show results",
+		"searchLabel": "Search",
+		"searchPlaceholder": "Search the list…",
+		"filterLegend": "Show",
+		"sortLegend": "Sort by",
+		"selectAll": "Select all rows on this page",
+		"selectedCount": "{count} selected",
+		"facet": {
+			"unchecked": "Still to buy",
+			"checked": "Checked off",
+			"all": "All"
+		},
+		"sort": {
+			"name": "Name",
+			"added": "Added",
+			"expiry": "Best before",
+			"quantity": "Quantity"
+		},
+		"backToPantry": "Back to pantry",
+		"backToPlan": "Back to Plan"
+	},
 	"location": {
 		"fridge": "Fridge",
 		"freezer": "Freezer",
