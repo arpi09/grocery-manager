@@ -47,16 +47,17 @@ async function addLegacyShoppingItem(page: Page, itemName: string) {
 		.evaluate((button) => (button as HTMLButtonElement).click());
 	await addDone;
 
+	// Let SvelteKit enhance finish before asserting or opening the filter sheet.
+	await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => undefined);
 	await dismissShoppingInkopOverlays(page);
 
 	const row = uncheckedShoppingRow(page, itemName);
-	const rowVisible = await row.isVisible().catch(() => false);
-	if (!rowVisible) {
-		await page.goto(
-			`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`,
-			{ waitUntil: 'domcontentloaded' }
-		);
-		await dismissOnboardingModalIfOpen(page);
+	if (!(await row.isVisible().catch(() => false))) {
+		await page.getByTestId('data-grid-filter-button').click({ force: true });
+		const filterSheet = page.getByTestId('data-grid-filter-sheet');
+		await expect(filterSheet).toBeVisible({ timeout: 10_000 });
+		await filterSheet.getByRole('textbox').fill(itemName);
+		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click({ force: true });
 		await dismissShoppingInkopOverlays(page);
 	}
 

@@ -24,9 +24,7 @@
 		() => {
 			showClientToast(t('actionToast.shoppingAdded'));
 			recordShoppingListItemActivation(page.data.user?.id);
-		},
-		undefined,
-		{ invalidateAll: true }
+		}
 	)}
 	class="add-form"
 	class:add-form--empty={variant === 'empty'}
