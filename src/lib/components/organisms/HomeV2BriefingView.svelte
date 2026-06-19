@@ -1,7 +1,7 @@
 <script lang="ts">
 	import SceneIllustration from '$lib/components/atoms/SceneIllustration.svelte';
 	import HomeBriefingChips from '$lib/components/molecules/HomeBriefingChips.svelte';
-	import HomeBriefingForYouCard from '$lib/components/molecules/HomeBriefingForYouCard.svelte';
+	import HomeBriefingForYouCardView from '$lib/components/molecules/HomeBriefingForYouCard.svelte';
 	import HomeBriefingGreeting from '$lib/components/molecules/HomeBriefingGreeting.svelte';
 	import { trackForYouCtaTapped, trackHomeChipTapped } from '$lib/client/home-v2-telemetry';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
@@ -144,7 +144,7 @@
 
 	{#if forYou && forYouPresentation}
 		<p class="section-label">{t('home.v6.forYou.sectionLabel')}</p>
-		<HomeBriefingForYouCard
+		<HomeBriefingForYouCardView
 			card={forYou}
 			title={forYouPresentation.title}
 			body={forYouPresentation.body}

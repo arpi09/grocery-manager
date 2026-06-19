@@ -129,7 +129,10 @@
 				return;
 			}
 			if (feedback.tone !== 'success') {
-				showClientToast(feedback.message, { variant: feedback.tone });
+				showClientToast(feedback.message, {
+					variant:
+						feedback.tone === 'error' ? 'error' : feedback.tone === 'warning' ? 'info' : 'success'
+				});
 			}
 		}
 
