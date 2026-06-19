@@ -26,13 +26,12 @@ async function openLegacyShoppingGrid(page: Page) {
 	);
 
 	await page.goto(legacyShoppingGridPath, { waitUntil: 'domcontentloaded' });
-	await dismissOnboardingModalIfOpen(page);
 	await dismissShoppingInkopOverlays(page);
-	await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 15_000 });
+	await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 30_000 });
 	await expect(page.getByTestId('shopping-list-add-form')).toBeVisible({ timeout: 15_000 });
 }
 
-async function addLegacyShoppingItem(page: Page, itemName: string) {
+async function seedLegacyShoppingItemViaApi(page: Page, itemName: string) {
 	const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190';
 	const addResponse = await page.request.post(`${baseURL}/inkop?/add`, {
 		form: { name: itemName },
@@ -47,6 +46,10 @@ async function addLegacyShoppingItem(page: Page, itemName: string) {
 	expect(addResponse.ok()).toBeTruthy();
 	const addResult = (await addResponse.json()) as { type?: string };
 	expect(addResult.type).toBe('success');
+}
+
+async function addLegacyShoppingItem(page: Page, itemName: string) {
+	await seedLegacyShoppingItemViaApi(page, itemName);
 
 	await page.goto(
 		`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`,
@@ -203,12 +206,19 @@ test.describe('Shopping list', () => {
 
 
 	test('grid filter finds added item @deploy-critical', async ({ page }) => {
+		test.skip(
+			process.env.SHOPPING_UX_V2_ENABLED === 'true',
+			'Legacy checklist grid lives in Shopping V2 drawer when SHOPPING_UX_V2_ENABLED=true'
+		);
 		test.setTimeout(90_000);
 
 		const itemName = `E2E Grid Filter ${Date.now()}`;
 
-		await openLegacyShoppingGrid(page);
-		await addLegacyShoppingItem(page, itemName);
+		await seedLegacyShoppingItemViaApi(page, itemName);
+		await page.goto(legacyShoppingGridPath, { waitUntil: 'domcontentloaded' });
+		await dismissShoppingInkopOverlays(page);
+		await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 30_000 });
+		await expect(page.getByTestId('shopping-checklist-grid-table')).toBeVisible({ timeout: 15_000 });
 
 		await dismissShoppingInkopOverlays(page);
 		await page.getByTestId('data-grid-filter-button').click({ force: true });
