@@ -376,7 +376,6 @@
 						type="button"
 						class="sort-header-btn"
 						class:sort-header-btn--active={gridState.sort === 'name'}
-						aria-sort={gridState.sort === 'name' ? (gridState.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
 						aria-label={sortHint('name')}
 						onclick={() => handleHeaderSort('name')}
 					>
@@ -391,7 +390,6 @@
 						type="button"
 						class="sort-header-btn"
 						class:sort-header-btn--active={gridState.sort === 'quantity'}
-						aria-sort={gridState.sort === 'quantity' ? (gridState.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
 						aria-label={sortHint('quantity')}
 						onclick={() => handleHeaderSort('quantity')}
 					>
@@ -406,7 +404,6 @@
 						type="button"
 						class="sort-header-btn"
 						class:sort-header-btn--active={gridState.sort === 'expiry'}
-						aria-sort={gridState.sort === 'expiry' ? (gridState.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
 						aria-label={sortHint('expiry')}
 						onclick={() => handleHeaderSort('expiry')}
 					>

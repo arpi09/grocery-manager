@@ -156,6 +156,17 @@ export async function dismissCookieConsentIfOpen(page: Page) {
 	}
 }
 
+export async function dismissPostOnboardingShareIfOpen(page: Page) {
+	const skip = page.getByTestId('post-onboarding-share-skip');
+	if (await skip.isVisible().catch(() => false)) {
+		await skip.click({ force: true });
+		await page
+			.locator('.post-onboarding-share-panel')
+			.waitFor({ state: 'hidden', timeout: 10_000 })
+			.catch(() => {});
+	}
+}
+
 export async function dismissPageHintIfOpen(page: Page) {
 	const dismiss = page.getByTestId('page-hint-dismiss');
 	if (await dismiss.isVisible().catch(() => false)) {
@@ -182,13 +193,15 @@ export async function dismissPostOnboardingSurveyIfOpen(page: Page) {
 export async function dismissOnboardingModalIfOpen(page: Page) {
 	await dismissCookieConsentIfOpen(page);
 	await dismissPostOnboardingSurveyIfOpen(page);
+	await dismissPostOnboardingShareIfOpen(page);
 
 	const modal = page.locator('.modal-root').first();
 	const pageHintDismiss = page.getByTestId('page-hint-dismiss');
 	const hasBlockingOverlay = async () =>
 		(await modal.isVisible().catch(() => false)) ||
 		(await pageHintDismiss.isVisible().catch(() => false)) ||
-		(await page.getByTestId('post-onboarding-survey-skip').isVisible().catch(() => false));
+		(await page.getByTestId('post-onboarding-survey-skip').isVisible().catch(() => false)) ||
+		(await page.getByTestId('post-onboarding-share-skip').isVisible().catch(() => false));
 
 	if (!(await hasBlockingOverlay())) {
 		await expect
@@ -203,6 +216,7 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 	const deadline = Date.now() + 8_000;
 	while (Date.now() < deadline) {
 		await dismissPageHintIfOpen(page);
+		await dismissPostOnboardingShareIfOpen(page);
 
 		if (!(await modal.isVisible().catch(() => false))) {
 			if (!(await hasBlockingOverlay())) {
