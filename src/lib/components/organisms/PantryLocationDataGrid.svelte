@@ -533,8 +533,9 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-xs);
+		min-width: var(--touch-target-min);
 		min-height: var(--touch-target-min);
-		padding: 0;
+		padding: 0 var(--space-xs);
 		border: none;
 		background: transparent;
 		font: inherit;

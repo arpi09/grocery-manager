@@ -29,6 +29,13 @@ async function openLegacyShoppingGrid(page: Page) {
 async function addLegacyShoppingItem(page: Page, itemName: string) {
 	await page.locator('#shopping-name').fill(itemName);
 	await page.locator('form.add-form').getByRole('button', { name: /L.gg till|Add/i }).click();
+	await page.goto(
+		`/inkop?sort=added&dir=desc&q=${encodeURIComponent(itemName)}`,
+		{ waitUntil: 'commit' }
+	);
+	await dismissOnboardingModalIfOpen(page);
+	await dismissPageHintIfOpen(page);
+	await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 15_000 });
 	await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 15_000 });
 }
 

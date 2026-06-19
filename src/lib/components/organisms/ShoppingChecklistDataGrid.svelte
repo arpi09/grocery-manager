@@ -547,9 +547,11 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.25rem;
+		min-width: var(--touch-target-min);
+		min-height: var(--touch-target-min);
 		border: none;
 		background: none;
-		padding: 0;
+		padding: 0 var(--space-xs);
 		font: inherit;
 		font-weight: 600;
 		color: inherit;

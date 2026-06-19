@@ -107,7 +107,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 
 		await loginAsAdmin(page);
 		await createFridgeItemViaAction(page, { name: itemName, expiresOn });
-		await page.goto('/inventory/fridge', { waitUntil: 'commit' });
+		await page.goto(`/inventory/fridge?q=${encodeURIComponent(itemName)}`, { waitUntil: 'commit' });
 		await dismissOnboardingModalIfOpen(page);
 		await expect(page.getByRole('link', { name: new RegExp(itemName) })).toBeVisible({
 			timeout: 15_000
