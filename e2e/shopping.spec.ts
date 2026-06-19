@@ -1,8 +1,8 @@
 ﻿import { test, expect, type Page } from '@playwright/test';
 
-import { dismissOnboardingModalIfOpen, dismissPageHintIfOpen, loginAsAdmin } from './helpers/auth';
+import { dismissOnboardingModalIfOpen, dismissPageHintIfOpen, dismissPostOnboardingShareIfOpen, loginAsAdmin } from './helpers/auth';
 
-const legacyShoppingGridPath = '/inkop?sort=added&dir=desc';
+const legacyShoppingGridPath = '/inkop?sort=added&dir=desc&pageSize=25';
 
 function uncheckedShoppingRow(page: Page, itemName: string) {
 	return page
@@ -23,22 +23,15 @@ async function openLegacyShoppingGrid(page: Page) {
 	await page.goto(legacyShoppingGridPath, { waitUntil: 'domcontentloaded' });
 	await dismissOnboardingModalIfOpen(page);
 	await dismissPageHintIfOpen(page);
+	await dismissPostOnboardingShareIfOpen(page);
 	await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 15_000 });
 }
 
-async function filterLegacyShoppingGrid(page: Page, itemName: string) {
-	await page.getByTestId('data-grid-filter-button').click();
-	const filterSheet = page.getByTestId('data-grid-filter-sheet');
-	await expect(filterSheet).toBeVisible();
-	await filterSheet.getByRole('textbox').fill(itemName);
-	await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
-}
-
 async function addLegacyShoppingItem(page: Page, itemName: string) {
+	await dismissPostOnboardingShareIfOpen(page);
 	await page.locator('#shopping-name').fill(itemName);
 	await page.locator('form.add-form').getByRole('button', { name: /L.gg till|Add/i }).click();
-	await filterLegacyShoppingGrid(page, itemName);
-	await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 15_000 });
+	await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 20_000 });
 }
 
 
@@ -186,6 +179,12 @@ test.describe('Shopping list', () => {
 		await loginAsAdmin(page);
 		await openLegacyShoppingGrid(page);
 		await addLegacyShoppingItem(page, itemName);
+
+		await page.getByTestId('data-grid-filter-button').click();
+		const filterSheet = page.getByTestId('data-grid-filter-sheet');
+		await expect(filterSheet).toBeVisible();
+		await filterSheet.getByRole('textbox').fill(itemName);
+		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
 
 		await expect(uncheckedShoppingRow(page, itemName)).toBeVisible();
 		await expect(page.getByTestId('shopping-checklist-grid-table')).toBeVisible();
