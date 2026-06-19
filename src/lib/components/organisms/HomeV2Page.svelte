@@ -10,7 +10,11 @@
 		trackForYouCtaTapped,
 		trackHomeBriefingOpened
 	} from '$lib/client/home-v2-telemetry';
-	import type { HomeBriefingForYouCard, HomeBriefingFunFact } from '$lib/domain/home-briefing';
+	import type {
+		HomeBriefingForYouCard,
+		HomeBriefingFunFact,
+		HomeBriefingRecipeCard
+	} from '$lib/domain/home-briefing';
 	import { homeBriefingRecipeCtaDestination } from '$lib/domain/home-briefing-recipe';
 	import {
 		selectHomeBriefingForYouCard,

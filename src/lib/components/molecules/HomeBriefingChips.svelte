@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type {
 		HomeBriefingChipId,
-		HomeBriefingChipPresentation
+		HomeBriefingChipPresentation,
+		HomeBriefingMessagePresentation
 	} from '$lib/domain/home-briefing-presenter';
 	import { LOCATIONS, LOCATION_COLORS } from '$lib/domain/location';
 	import { t } from '$lib/i18n';
@@ -46,7 +47,8 @@
 		if ('kind' in chip.hint && chip.hint.kind === 'recipeTitle') {
 			return chip.hint.title;
 		}
-		return t(chip.hint.key, chip.hint.params);
+		const messageHint = chip.hint as HomeBriefingMessagePresentation;
+		return t(messageHint.key, messageHint.params);
 	}
 </script>
 
