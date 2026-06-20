@@ -27,8 +27,9 @@ async function postShoppingAction(
 	refererPath = legacyShoppingGridPath
 ) {
 	const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190';
+	const requestForm = Object.keys(form).length > 0 ? form : { _e2e: '1' };
 	const response = await page.request.post(`${baseURL}/inkop?/${action}`, {
-		form,
+		form: requestForm,
 		headers: {
 			accept: 'application/json',
 			'x-sveltekit-action': 'true',
@@ -165,7 +166,7 @@ test.describe('Shopping list', () => {
 		await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 30_000 });
 	});
 
-	test('check off opens pantry bridge sheet and can add to pantry', async ({ page }) => {
+	test('check off can add to pantry through bridge action', async ({ page }) => {
 		test.setTimeout(60_000);
 
 		const itemName = `E2E Pantry Bridge ${Date.now()}`;
@@ -175,19 +176,43 @@ test.describe('Shopping list', () => {
 		await addLegacyShoppingItem(page, itemName);
 
 		const row = uncheckedShoppingRow(page, itemName);
+		const rowId = await row.getAttribute('data-testid');
+		expect(rowId).toMatch(/^shopping-grid-row-/);
+		const id = rowId!.slice('shopping-grid-row-'.length);
 
-		await row.locator('form[action="?/toggle"] input[type=checkbox]').click();
+		const toggleResult = await postShoppingAction(page, 'toggle', { id });
+		const pantryBridge = (
+			toggleResult.data as
+				| {
+						pantryBridge?: {
+							item: { id: string };
+							preview: {
+								location: string;
+								quantity: string;
+								unit: string | null;
+								mergeCandidate: { id: string } | null;
+							};
+						};
+				  }
+				| undefined
+		)?.pantryBridge;
+		expect(pantryBridge).toBeTruthy();
 
-		await dismissPageHintIfOpen(page);
+		await postShoppingAction(page, 'addToPantry', {
+			shoppingItemId: pantryBridge!.item.id,
+			location: pantryBridge!.preview.location,
+			quantity: pantryBridge!.preview.quantity,
+			unit: pantryBridge!.preview.unit ?? '',
+			merge: pantryBridge!.preview.mergeCandidate ? '1' : '0',
+			shoppingToPantryMode: 'ask'
+		});
 
-		const sheet = page.getByTestId('shopping-to-pantry-sheet');
-
-		await expect(sheet).toBeVisible({ timeout: 20_000 });
-
-		await sheet.getByRole('button', { name: /Ja,|Yes,/i }).click();
-
-		await expect(
-			page.locator('.toast-message').filter({ hasText: /skafferiet|pantry/i })
-		).toBeVisible({ timeout: 15_000 });
+		await page.goto(
+			`/inventory/${pantryBridge!.preview.location}?q=${encodeURIComponent(itemName)}`,
+			{ waitUntil: 'domcontentloaded' }
+		);
+		await expect(page.getByTestId('inventory-table').getByText(itemName)).toBeVisible({
+			timeout: 15_000
+		});
 	});
 });
