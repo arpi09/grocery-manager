@@ -30,7 +30,7 @@ const svg = readFileSync(svgPath);
 for (const { name, size } of sizes) {
 	const outPath = join(outDir, name);
 	await sharp(svg, { density: 300 })
-		.resize(size, size, { fit: 'contain', background: '#3d6b4f' })
+		.resize(size, size, { fit: 'contain', background: '#2c4a3e' })
 		.png({ compressionLevel: 9 })
 		.toFile(outPath);
 	console.log(`Wrote ${outPath} (${size}x${size})`);

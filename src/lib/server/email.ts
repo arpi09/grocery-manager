@@ -182,9 +182,9 @@ const EMAIL = {
 	border: '#dde5d8',
 	text: '#1f2a24',
 	textMuted: '#5c6b62',
-	primary: '#3d6b4f',
-	primaryHover: '#325a42',
-	accent: '#c8a96e'
+	primary: '#2c4a3e',
+	primaryHover: '#243d32',
+	accent: '#d4a853'
 } as const;
 
 export function buildHouseholdInviteEmailContent(options: {

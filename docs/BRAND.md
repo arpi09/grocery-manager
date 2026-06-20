@@ -17,8 +17,8 @@ Design reference for UI, copy tone, and component styling. Tokens live in `src/a
 
 ## Visual system — five rules
 
-1. **Primary green `#3d6b4f`** — ONLY primary CTA buttons, active nav/tab states, and the single main action on empty states. Not for decorative text, borders, or secondary links.
-2. **Accent gold `#c8a96e`** — sparingly: badges (e.g. NY), focus rings, expiry/warning surfaces, calendar “idea” dots. Never default buttons or nav chrome.
+1. **Primary green `#2c4a3e`** — ONLY primary CTA buttons, active nav/tab states, and the single main action on empty states. Not for decorative text, borders, or secondary links.
+2. **Accent gold `#d4a853`** — sparingly: badges (e.g. NY), focus rings, expiry/warning surfaces, calendar “idea” dots. Never default buttons or nav chrome.
 3. **Typography scale** — display (page titles), body (copy), label (section caps like KONTO / KONTO & HUSHÅLL). Use `.label-caps` for section labels.
 4. **Empty states** — icon (SVG) + one headline + one supporting line + one green primary CTA. Optional ghost secondary link below.
 5. **Icons vs emoji** — simple stroke icons in nav, scan, settings, inventory chrome. Emojis avoided in toolbar/chrome; empty states use `FeatureIcon`, not emoji.
@@ -27,9 +27,9 @@ Design reference for UI, copy tone, and component styling. Tokens live in `src/a
 
 | Token | Light | Usage |
 |-------|-------|--------|
-| `--color-primary` | `#3d6b4f` | Primary CTA, active nav |
-| `--color-primary-hover` | `#325a42` | Primary hover |
-| `--color-accent` | `#c8a96e` | Badges, focus ring, warnings |
+| `--color-primary` | `#2c4a3e` | Primary CTA, active nav |
+| `--color-primary-hover` | `#243d32` | Primary hover |
+| `--color-accent` | `#d4a853` | Badges, focus ring, warnings |
 | `--color-bg` | `#f7f5f0` | Page background |
 | `--color-surface` | `#ffffff` | Cards, panels |
 | `--color-surface-muted` | `#eef2eb` | Secondary surfaces |
@@ -42,6 +42,21 @@ Design reference for UI, copy tone, and component styling. Tokens live in `src/a
 | `--focus-ring-color` | accent | `:focus-visible` outlines |
 
 Location hues (`--color-fridge`, `--color-freezer`, `--color-cupboard`) are semantic only — inventory location cards and badges, not global chrome.
+
+## Dark theme (`html[data-theme='dark']`)
+
+Applied via `src/app.css` when the user selects dark mode. Same usage rules as light — primary for CTAs/active nav, accent sparingly.
+
+| Token | Dark | Usage |
+|-------|------|--------|
+| `--color-bg` | `#141a17` | Page background |
+| `--color-surface` | `#1e2820` | Cards, panels |
+| `--color-surface-muted` | `#243028` | Secondary surfaces |
+| `--color-border` | `#2a3d30` | Borders |
+| `--color-text` | `#a0b0a8` | Body text |
+| `--color-text-muted` | `#4a5e55` | Secondary text |
+| `--color-primary` | `#4d8f68` | Primary CTA, active nav (lightened for contrast) |
+| `--color-accent` | `#d4a853` | Badges, focus ring, warnings |
 
 ## Button variants (`Button.svelte`)
 
@@ -70,7 +85,7 @@ Do not pair a filled green button with an outlined green button on the same row 
 
 ## Intentional exceptions
 
-- **Dark theme** — primary lightens to `#4d8f68` for contrast; same usage rules apply.
+- **Dark theme** — see [Dark theme](#dark-theme-htmldata-themedark) above; primary lightens to `#4d8f68` for contrast.
 - **Location colors** — fridge/freezer/cupboard keep distinct hues for at-a-glance scanning in inventory.
 - **Warning/expiry badges** — may use accent-tinted backgrounds (not full gold fills).
 - **Login landing showcase** — decorative mock UI may use accent strips; not a product surface.
@@ -83,4 +98,5 @@ Do not pair a filled green button with an outlined green button on the same row 
 - `src/lib/components/molecules/EmptyState.svelte`, `FeedbackBanner.svelte`
 - Nav: `MainNavDesktop.svelte`, `MainNavMobile.svelte`, `ProfileMenu.svelte`, `NavMoreSheet.svelte`
 - High-traffic: `HomeDashboard.svelte`, inventory/scan routes, `ScanModeHub.svelte`, `ScanModeTabs.svelte`
+- `static/favicon.svg` — Skaffu mark (primary `#2c4a3e`, accent `#d4a853`)
 - `src/lib/server/email.ts` — invite template header/CTA

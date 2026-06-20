@@ -5,10 +5,10 @@
 	--color-border: #dde5d8;
 	--color-text: #1f2a24;
 	--color-text-muted: #4a5850;
-	--color-primary: #3d6b4f;
-	--color-primary-hover: #325a42;
+	--color-primary: #2c4a3e;
+	--color-primary-hover: #243d32;
 	--color-on-primary: #ffffff;
-	--color-accent: #c8a96e;
+	--color-accent: #d4a853;
 	--color-danger: #b54a4a;
 	--color-warning: #9a6700;
 	--color-fridge: #4a8fb8;
@@ -79,15 +79,15 @@
 html[data-theme='dark'] {
 	color-scheme: dark;
 	--color-bg: #141a17;
-	--color-surface: #1e2621;
-	--color-surface-muted: #273029;
-	--color-border: #3a4540;
-	--color-text: #e8eee9;
-	--color-text-muted: #a3b0a8;
+	--color-surface: #1e2820;
+	--color-surface-muted: #243028;
+	--color-border: #2a3d30;
+	--color-text: #a0b0a8;
+	--color-text-muted: #4a5e55;
 	--color-primary: #4d8f68;
 	--color-primary-hover: #5aa076;
 	--color-on-primary: #ffffff;
-	--color-accent: #d4b57a;
+	--color-accent: #d4a853;
 	--color-danger: #e07a7a;
 	--color-warning: #e8a317;
 	--color-fridge: #6eb0d4;

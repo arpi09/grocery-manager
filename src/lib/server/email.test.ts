@@ -91,7 +91,7 @@ describe('buildHouseholdInviteEmailContent', () => {
 		expect(content.text).toContain('Du är inbjuden till Mitt hushåll');
 		expect(content.html).toContain('Du är inbjuden till Mitt hushåll');
 		expect(content.html).toContain('Acceptera inbjudan');
-		expect(content.html).toContain('#3d6b4f');
+		expect(content.html).toContain('#2c4a3e');
 		expect(content.html).not.toContain('<script');
 	});
 
