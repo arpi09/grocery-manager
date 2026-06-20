@@ -36,6 +36,7 @@ const PUBLIC_EVENT_TYPES = new Set<ProductEventType>([
 const AUTH_EVENT_TYPES = new Set<ProductEventType>([
 	'pwa_banner_dismiss',
 	'pwa_banner_install_click',
+	'receipt_share_install_nudge_shown',
 	'onboarding_skipped',
 	'onboarding_quickstart',
 	'onboarding_started',
@@ -125,7 +126,10 @@ const AUTH_EVENT_TYPES = new Set<ProductEventType>([
 	'store_chain_selected',
 	'store_compare_ica_enabled',
 	'store_recommendation_interest_shown',
-	'store_recommendation_completed'
+	'store_recommendation_completed',
+	'planer_viewed',
+	'ata_recipe_opened',
+	'ata_week_view_toggled'
 ]);
 
 function isAllowedEventType(value: unknown): value is ProductEventType {

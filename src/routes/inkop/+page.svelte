@@ -23,6 +23,8 @@
 	import ShoppingV2Page from '$lib/components/organisms/ShoppingV2Page.svelte';
 	import InkopHouseholdInviteBanner from '$lib/components/organisms/InkopHouseholdInviteBanner.svelte';
 
+	import { receiptOneTapHref } from '$lib/utils/scan-nav';
+
 	import { trackProductEvent } from '$lib/client/product-events';
 
 	let { data, form } = $props();
@@ -151,6 +153,14 @@
 					{listHasItems}
 				/>
 
+				{#if data.canEdit}
+					<div class="receipt-one-tap" data-testid="inkop-receipt-one-tap-legacy">
+						<a class="btn btn-secondary btn-full" href={receiptOneTapHref('/inkop')}>
+							{t('receiptAutomation.oneTapCta')}
+						</a>
+					</div>
+				{/if}
+
 				{#if data.canEdit && (hasSuggestions || !listHasItems)}
 					{#if showReceiptImportLead}
 						<p class="receipt-import-lead" role="status">{t('shopping.receiptImportLead')}</p>
@@ -248,6 +258,10 @@
 		font-weight: 600;
 		color: var(--color-primary);
 		white-space: pre-line;
+	}
+
+	.receipt-one-tap {
+		margin-bottom: var(--space-md);
 	}
 
 	.suggestions-fold {

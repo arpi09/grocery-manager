@@ -4,7 +4,7 @@
 
 | F?lt | V?rde |
 |------|--------|
-| **Uppdaterad** | 2026-06-19 |
+| **Uppdaterad** | 2026-06-20 |
 | **Prod SHA** | `ab46f3c49` @ [27809543691](https://github.com/arpi09/grocery-manager/actions/runs/27809543691) (full E2E x3, Home V2 canary). Prior `0b999e153` @ [27790521211](https://github.com/arpi09/grocery-manager/actions/runs/27790521211). |
 | **Master SHA** | `ab46f3c49` — Home V2 canary (`HOME_UX_V2_ENABLED` + Shopping + Pantry V2 live) |
 | **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
@@ -31,6 +31,7 @@ Utg?ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenis
 | Skafferi (Pantry V2) | `/inventory` | Shelf view (zones + use-soon) live (`PANTRY_UX_V2_ENABLED` canary); unified data grid at `/inventory/[location]` |
 | Scan hub | `/scan` | 3-card choice hub; **ScanModeTabs desktop only** |
 | Inköp (Shopping V2) | `/inkop` | Plan + Shop modes live (`SHOPPING_UX_V2_ENABLED` canary); checklist data grid in overflow drawer (flag-off: inline grid) |
+| Äta (meal plan) | `/planer` | Nav/header **Äta**; veckokalender + idépanel; veckoförslag på `/planer/vecka` ([ATA_PAGE.md](./ATA_PAGE.md)) |
 | Memory Explorer | `/settings/memory` | Vad Skaffu vet ? household rules (learning gate) |
 | Post-register wedge | `/hem?welcome=1` | Ny registrering/OAuth ? guided start on hem ([#46](https://github.com/arpi09/grocery-manager/pull/46)) |
 | Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie; **Acquisition Loops V1** branding + telemetry ([ACQUISITION_LOOPS_V1.md](./ACQUISITION_LOOPS_V1.md)) |
@@ -67,7 +68,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 ## Tier snapshot
 
 - **A:** inkop, household, checkoff-bridge, eat-first, replenishment, onboarding?inkop
-- **B:** receipt import, barcode/photo add, price memory, Brain V1 (flags on), Memory Explorer — foundation audit: [PRICE_INTELLIGENCE_AUDIT.md](./PRICE_INTELLIGENCE_AUDIT.md)
+- **B:** receipt import, barcode/photo add, price memory, Brain V1 (flags on), Memory Explorer — foundation audit: [PRICE_INTELLIGENCE_AUDIT.md](./PRICE_INTELLIGENCE_AUDIT.md). **Receipt automation V1 (2026-06-20):** one-tap import (hem/inköp), PWA Android `share_target`, funnel telemetry `source`, quick confirm all, install nudge — see [RECEIPT_IMPORT_AUTOMATION_SPIKE.md](./RECEIPT_IMPORT_AUTOMATION_SPIKE.md)
 - **C:** grannskafferiet gate, onboarding v2, landing copy, design system doc (R12?R16 on master)
 
 ## K?nda drift (fixa n?r du ser dem)

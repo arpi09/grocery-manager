@@ -9,7 +9,7 @@ import { receiptLineToInventoryAmount } from '$lib/server/receipt-parse';
 import { receiptLineToPurchaseRecord } from '$lib/server/receipt-import-purchase';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { buildScanReturnUrl, type ScanToastKind } from '$lib/utils/scan-toast';
-import { parseScanMode, parseScanReturnTo, isActivationOnboardingContext } from '$lib/utils/scan-nav';
+import { parseScanMode, parseScanReturnTo, isActivationOnboardingContext, parseReceiptImportSourceFromParams } from '$lib/utils/scan-nav';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { recordProductEvent } from '$lib/server/product-events';
 import { recordReceiptPriceCapturedEvent } from '$lib/server/receipt-import';
@@ -42,6 +42,10 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		locationParam && isStorageLocation(locationParam) ? locationParam : null;
 	const returnTo = parseScanReturnTo(fromParam);
 	const isTopLevelEntry = !defaultLocation && returnTo === APP_HOME_PATH;
+	const importSource = parseReceiptImportSourceFromParams(url.searchParams);
+	const autopick = url.searchParams.get('autopick') === '1';
+	const shareKey = url.searchParams.get('shareKey');
+	const shareError = url.searchParams.get('shareError');
 
 	return {
 		defaultLocation,
@@ -50,7 +54,11 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		scanMode,
 		isTopLevelEntry,
 		shelfLifeEstimatesInReceipt: isShelfLifeEstimatesInReceiptEnabled(),
-		isActivationOnboarding: isActivationOnboardingContext(url.searchParams)
+		isActivationOnboarding: isActivationOnboardingContext(url.searchParams),
+		importSource,
+		autopick,
+		shareKey,
+		shareError
 	};
 };
 

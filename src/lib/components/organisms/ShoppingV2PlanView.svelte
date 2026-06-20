@@ -6,6 +6,7 @@
 	import { sortUncheckedItems } from '$lib/domain/shopping-trip';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { t } from '$lib/i18n';
+	import { receiptOneTapHref } from '$lib/utils/scan-nav';
 
 	interface Props {
 		items: ShoppingListItem[];
@@ -79,6 +80,14 @@
 		<p class="receipt-lead" role="status">{t('shopping.v2.receiptLead')}</p>
 	{/if}
 
+	{#if canEdit}
+		<div class="receipt-import-cta" data-testid="inkop-receipt-one-tap">
+			<a class="btn btn-secondary btn-full" href={receiptOneTapHref('/inkop')}>
+				{t('receiptAutomation.oneTapCta')}
+			</a>
+		</div>
+	{/if}
+
 	<MemorySuggestionList
 		{suggestions}
 		{items}
@@ -145,6 +154,12 @@
 		font-weight: 600;
 		color: var(--color-primary);
 		white-space: pre-line;
+	}
+
+	.receipt-import-cta {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
 	}
 
 	.legacy-link {

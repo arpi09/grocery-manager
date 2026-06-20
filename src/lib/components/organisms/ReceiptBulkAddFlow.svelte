@@ -18,7 +18,8 @@
 		ReceiptFileError
 	} from '$lib/utils/receipt-file';
 	import ScanFlowFooter from '$lib/components/molecules/ScanFlowFooter.svelte';
-	import type { ReceiptLine, ReceiptLocationPrediction, ReceiptShelfLifePrediction } from '$lib/domain/receipt-line';
+	import type { ReceiptLine, ReceiptLocationPrediction, ReceiptParseResult, ReceiptShelfLifePrediction } from '$lib/domain/receipt-line';
+	import type { ReceiptImportSource } from '$lib/domain/receipt-import-source';
 	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
@@ -47,6 +48,14 @@
 		/** Keep digital receipt guide expanded (e.g. onboarding first receipt path). */
 		prominentGuide?: boolean;
 		shelfLifeEstimatesInReceipt?: boolean;
+		importSource?: ReceiptImportSource;
+		/** Pre-parsed result (e.g. PWA share) — skip upload step. */
+		initialParseResult?: ReceiptParseResult | null;
+		/** Open file picker on mount (one-tap entry). */
+		autopick?: boolean;
+		/** Pending share-target file key from POST /scan/share. */
+		shareKey?: string | null;
+		shareError?: string | null;
 	}
 
 	let {
@@ -56,7 +65,12 @@
 		onItemSaved,
 		onCancel,
 		prominentGuide = false,
-		shelfLifeEstimatesInReceipt = false
+		shelfLifeEstimatesInReceipt = false,
+		importSource = 'scan_hub',
+		initialParseResult = null,
+		autopick = false,
+		shareKey = null,
+		shareError = null
 	}: Props = $props();
 
 	const bulkFormAction = $derived(formAction ?? '?/bulkCreate');
@@ -78,6 +92,7 @@
 	let shelfLifePredictions = $state<Array<ReceiptShelfLifePrediction | null>>([]);
 	let locationPredictions = $state<Array<ReceiptLocationPrediction | null>>([]);
 	let lineExpiresOn = $state<Record<number, string>>({});
+	let quickConfirmUsed = $state(false);
 
 	function receiptFileErrorMessage(error: ReceiptFileError): string {
 		if (error.code === 'too_large') {
@@ -125,6 +140,40 @@
 		}
 	}
 
+	function receiptTelemetryMetadata(extra: Record<string, unknown> = {}) {
+		return { source: importSource, ...extra };
+	}
+
+	function applyParseResult(data: ReceiptParseResult) {
+		if (!data.lines?.length) {
+			parseError = t('errors.api.receiptNoItems');
+			return;
+		}
+
+		lines = data.lines;
+		parsedStoreLabel = data.storeLabel ?? null;
+		parsedPurchasedAt = data.purchasedAt ?? null;
+		shelfLifePredictions = data.shelfLifePredictions ?? [];
+		locationPredictions = data.locationPredictions ?? [];
+		lineExpiresOn = Object.fromEntries(
+			data.lines.map((line, index) => [
+				index,
+				data.shelfLifePredictions?.[index]?.expiresOn ?? ''
+			])
+		);
+		selected = Object.fromEntries(data.lines.map((_, i) => [i, true]));
+		lineLocations = Object.fromEntries(
+			data.lines.map((line, i) => [
+				i,
+				data.locationPredictions?.[i]?.location ?? line.location
+			])
+		);
+		bulkLocation = modeLocation(data.lines.map((l) => l.location)) ?? data.lines[0]?.location ?? 'cupboard';
+		locationOverrides = new Set();
+		step = 'review';
+		void loadMergeCandidates();
+	}
+
 	async function handleReceiptFile(file: File) {
 		parsing = true;
 		parseError = null;
@@ -141,10 +190,10 @@
 			return;
 		}
 
-		void trackProductEvent('receipt_uploaded', {
+		void trackProductEvent('receipt_uploaded', receiptTelemetryMetadata({
 			fileType: uploadFile.type || 'unknown',
 			fileSize: uploadFile.size
-		});
+		}));
 
 		try {
 			const formData = new FormData();
@@ -162,28 +211,7 @@
 				return;
 			}
 
-			lines = data.lines;
-			parsedStoreLabel = data.storeLabel ?? null;
-			parsedPurchasedAt = data.purchasedAt ?? null;
-			shelfLifePredictions = data.shelfLifePredictions ?? [];
-			locationPredictions = data.locationPredictions ?? [];
-			lineExpiresOn = Object.fromEntries(
-				data.lines.map((line, index) => [
-					index,
-					data.shelfLifePredictions?.[index]?.expiresOn ?? ''
-				])
-			);
-			selected = Object.fromEntries(data.lines.map((_, i) => [i, true]));
-			lineLocations = Object.fromEntries(
-				data.lines.map((line, i) => [
-					i,
-					data.locationPredictions?.[i]?.location ?? line.location
-				])
-			);
-			bulkLocation = modeLocation(data.lines.map((l) => l.location)) ?? data.lines[0]?.location ?? 'cupboard';
-			locationOverrides = new Set();
-			step = 'review';
-			void loadMergeCandidates();
+			applyParseResult(data as ReceiptParseResult);
 		} catch {
 			parseError = t('receipt.networkError');
 		} finally {
@@ -283,6 +311,60 @@
 		return `${line.lineTotal} ${currency}`;
 	}
 
+	function trackReviewCompleted() {
+		void trackProductEvent('receipt_review_completed', receiptTelemetryMetadata({
+			selectedCount,
+			totalLines: lines.length,
+			lineCount: lines.length,
+			quickConfirm: quickConfirmUsed
+		}));
+	}
+
+	async function loadSharePending(key: string) {
+		parsing = true;
+		parseError = null;
+		try {
+			const response = await fetch(`/api/receipt/share-pending?key=${encodeURIComponent(key)}`);
+			if (!response.ok) {
+				parseError = t('receiptAutomation.sharePendingMissing');
+				return;
+			}
+			const blob = await response.blob();
+			const disposition = response.headers.get('content-disposition') ?? '';
+			const match = disposition.match(/filename="([^"]+)"/);
+			const fileName = match?.[1] ?? 'receipt';
+			const file = new File([blob], fileName, { type: blob.type || 'application/octet-stream' });
+			await handleReceiptFile(file);
+		} catch {
+			parseError = t('receipt.networkError');
+		} finally {
+			parsing = false;
+		}
+	}
+
+	function triggerAutopick() {
+		requestAnimationFrame(() => {
+			document.querySelector<HTMLInputElement>('[data-testid="receipt-file-input"]')?.click();
+		});
+	}
+
+	function handleQuickConfirm(event: MouseEvent) {
+		quickConfirmUsed = true;
+		toggleAll(true);
+		const form = (event.currentTarget as HTMLButtonElement).closest('form');
+		form?.requestSubmit();
+	}
+
+	function shareErrorMessage(code: string | null): string | null {
+		if (!code) return null;
+		if (code === 'too_large') return t('receipt.formats.tooLarge');
+		if (code === 'unsupported') return t('receipt.formats.unsupported');
+		if (code === 'no_file') return t('receiptAutomation.shareNoFile');
+		return t('receiptAutomation.shareFailed');
+	}
+
+	const resolvedShareError = $derived(shareErrorMessage(shareError));
+
 	function requestNewImage() {
 		if (lines.length > 0) {
 			discardReviewOpen = true;
@@ -315,12 +397,21 @@
 
 	onMount(() => {
 		saveLastScanMode('receipt');
-		void trackProductEvent('receipt_import_started');
+		void trackProductEvent('receipt_import_started', receiptTelemetryMetadata());
 		if (!browser) return;
 		const stored = readReceiptBulkLocation();
 		if (stored) {
 			bulkLocation = stored;
 		}
+
+		if (initialParseResult?.lines?.length) {
+			applyParseResult(initialParseResult);
+		} else if (shareKey) {
+			void loadSharePending(shareKey);
+		} else if (autopick) {
+			triggerAutopick();
+		}
+
 		if (!import.meta.env.DEV) return;
 		(
 			window as Window & { __hpE2eReceiptUpload?: (file: File) => Promise<void> }
@@ -357,6 +448,12 @@
 		{/if}
 
 		<p class="hint">{t('receipt.formats.hint')}</p>
+
+		{#if resolvedShareError}
+			<div data-testid="receipt-share-error">
+				<FeedbackBanner tone="error" message={resolvedShareError} />
+			</div>
+		{/if}
 
 		{#if parseError}
 			<div data-testid="receipt-parse-error">
@@ -414,25 +511,20 @@
 								scanToastMessage(getLocale(), 'added', t('receiptBulk.savedLabel', { count: selectedCount })),
 								{ variant: 'success' }
 							);
-							void trackProductEvent('receipt_review_completed', {
-								selectedCount,
-								totalLines: lines.length
-							});
+							trackReviewCompleted();
 							onItemSaved?.();
 						}
 					)
 				: bindSubmittingWithRedirect(
 						(v) => (bulkSubmitting = v),
 						async () => {
-							void trackProductEvent('receipt_review_completed', {
-								selectedCount,
-								totalLines: lines.length
-							});
+							trackReviewCompleted();
 							markReceiptImportCompleted(
 								selectedCount,
 								buildReceiptImportSummary(),
 								aggregateReceiptLocationCounts(buildReceiptLineContexts()),
-								countSelectedLinesWithPrice()
+								countSelectedLinesWithPrice(),
+								importSource
 							);
 							recordReceiptActivation(page.data.user?.id);
 						}
@@ -596,12 +688,24 @@
 			</ul>
 
 			<div class="actions">
+				<Button
+					type="button"
+					variant="primary"
+					data-testid="receipt-quick-confirm"
+					disabled={lines.length === 0 || bulkSubmitting}
+					loading={bulkSubmitting && quickConfirmUsed}
+					loadingLabel={t('receipt.saving')}
+					onclick={handleQuickConfirm}
+				>
+					{t('receiptAutomation.quickConfirmAll')}
+				</Button>
 				<Button type="button" variant="secondary" onclick={requestNewImage}>{t('common.newImage')}</Button>
 				<Button
 					type="submit"
+					variant="secondary"
 					data-testid="receipt-bulk-submit"
 					disabled={selectedCount === 0}
-					loading={bulkSubmitting}
+					loading={bulkSubmitting && !quickConfirmUsed}
 					loadingLabel={t('receipt.saving')}
 				>
 					{t('receiptBulk.addCount', { count: selectedCount })}
@@ -770,6 +874,7 @@
 
 	.actions {
 		display: flex;
+		flex-direction: column;
 		gap: var(--space-sm);
 	}
 

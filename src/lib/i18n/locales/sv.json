@@ -1510,14 +1510,23 @@
 		"scanHint": "Slå ihop dubletter i skanningsflödet →"
 	},
 	"planer": {
-		"title": "Planer",
-		"subtitle": "Planera veckan kring det som går ut — samma lager som på hem",
+		"title": "Äta",
+		"subtitle": "Planera veckans middagar — se kalender, recept och vad som saknas",
 		"eatHubTitle": "Vad ska vi äta?",
-		"eatHubLead": "Generera maträtt från det som finns i lagret — eller planera veckan i kalendern nedan.",
+		"eatHubLead": "Förslag från lagret finns till höger — planera veckan i kalendern nedan.",
 		"generateMeal": "Generera maträtt",
 		"ideasAria": "Receptidéer",
-		"ideasIntro": "Genererade idéer från ditt lager. Välj datum och lägg till i kalendern.",
-		"ideasEmpty": "Inga genererade idéer ännu. Använd knappen Receptidéer först.",
+		"ideasIntro": "Utifrån det du har hemma. Välj datum och lägg till i kalendern.",
+		"ideasEmpty": "Inga förslag ännu. Generera idéer eller skapa ett veckoförslag.",
+		"ideasEmptyCtaIdeas": "Generera idéer",
+		"ideasEmptyCtaWeekly": "Generera veckoförslag",
+		"viewRecipe": "Visa recept",
+		"cookRecipe": "Laga",
+		"showAllMeals": "Visa alla ({count})",
+		"viewWeek": "Vecka",
+		"viewMonth": "Månad",
+		"viewToggleAria": "Byt kalendervy",
+		"weekCalendarAria": "Veckokalender",
 		"usesLabel": "Använd:",
 		"addToCalendar": "Lägg till i kalender",
 		"calendarSummary": "Kalender ({count} planerade)",
@@ -1536,20 +1545,21 @@
 		"mealTitle": "Måltidstitel",
 		"removeMeal": "Ta bort måltid {title}",
 		"recipeIdeasAria": "Öppna receptidéer – generera måltidsförslag från ditt lager",
-		"ideasTitle": "ChatGPT-receptidéer",
+		"ideasTitle": "Förslag från lagret",
 		"missingLabel": "Saknas:",
 		"scheduleDate": "Planera datum",
 		"dismissNotInterested": "Inte intresserad",
 		"dismissFailed": "Kunde inte avfärda idén",
 		"prevMonthShort": "Förra",
 		"emptyDay": "Inga måltider planerade denna dag.",
-		"contextTitle": "Planera kring utgående varor",
-		"contextLead": "Kalendern kopplas till skafferiet och Ät först på hem.",
+		"contextTitle": "Veckoplanering från lagret",
+		"contextLead": "Se vad som är planerat, lägg till middagar och fyll inköpslistan med det som saknas.",
 		"contextExpiring": "{count} varor går ut inom {days} dagar",
 		"contextNoExpiring": "Inget brådskande som går ut inom {days} dagar.",
 		"contextPlanned": "{count} måltider i denna kalendervy",
-		"contextWeeklyLink": "Veckan fixad — planera hela veckan",
-		"contextHomeLink": "Gå till hem och Ät först"
+		"contextWeeklyLink": "Generera veckoförslag (AI)",
+		"contextHomeLink": "Utgår snart på Hem",
+		"contextWeekViewLink": "Veckovy"
 	},
 	"stats": {
 		"title": "Ditt skafferi i siffror",
@@ -2349,6 +2359,21 @@
 		"estimatesHint": "Utgångsdatum är uppskattningar — justera vid behov innan du sparar.",
 		"savedLabel": "{count} {count, plural, one {vara} other {varor}}"
 	},
+	"receiptAutomation": {
+		"oneTapCta": "Importera kvitto",
+		"oneTapLead": "Ladda upp digitalt kvitto (PDF) från Kivra, ICA eller din butik.",
+		"quickConfirmAll": "Godkänn alla och lägg i skafferi",
+		"shareNoFile": "Ingen fil mottogs. Prova att dela PDF eller bild igen.",
+		"shareFailed": "Kunde inte ta emot filen. Öppna Skaffu och välj fil manuellt.",
+		"sharePendingMissing": "Delad fil hittades inte. Prova att dela kvittot igen.",
+		"installNudge": {
+			"aria": "Tips om delning av kvitton",
+			"title": "Dela kvitton direkt från Kivra",
+			"body": "Lägg Skaffu på hemskärmen — då kan du dela PDF-kvitton hit utan att öppna appen först.",
+			"cta": "Lägg till på hemskärmen",
+			"dismiss": "Inte nu"
+		}
+	},
 	"priceMemory": {
 		"lastPaid": "Senast betalt {price} ({date})",
 		"lastPaidWithStore": "Senast betalt {price} ({date}, {store})",
@@ -2646,8 +2671,8 @@
 			"body": "Lägg till det som saknas hemma. Listan hänger ihop med skafferiet så du slipper dubbelhandla."
 		},
 		"planer": {
-			"title": "Matplan",
-			"body": "Planera veckans middagar utifrån det du har hemma — och fyll listan med det som saknas."
+			"title": "Äta",
+			"body": "Planera veckans middagar i kalendern — se recept och lägg saknade varor på inköpslistan."
 		},
 		"statistik": {
 			"title": "Din statistik",
@@ -2780,8 +2805,8 @@
 		"shareCardFailed": "Kunde inte skapa delningsbild. Försök igen."
 	},
 	"weeklyRitual": {
-		"pageTitle": "Veckan fixad",
-		"pageSubtitle": "Utgående varor → AI-måltider → ett klick till plan och inköpslista",
+		"pageTitle": "Veckoförslag",
+		"pageSubtitle": "Generera middagsförslag för hela veckan — godkänn och fyll inköpslistan",
 		"heroTitle": "Veckan fixad",
 		"heroBadge": "Måndagsritual",
 		"heroSubtitleDefault": "Planera veckans middagar utifrån lagret — ett klick till matplan och inköpslista.",

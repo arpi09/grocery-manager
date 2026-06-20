@@ -1,3 +1,4 @@
+import type { ReceiptImportSource } from '$lib/domain/receipt-import-source';
 import type { Locale } from '$lib/i18n/locale';
 import { translate } from '$lib/i18n/messages';
 import { dismissClientToast } from '$lib/utils/client-toast.svelte';
@@ -29,6 +30,7 @@ export interface ReceiptImportSessionFlag {
 	estimatedExpiryCount: number;
 	dominantLocation?: StorageLocation;
 	linesWithPrice?: number;
+	importSource?: ReceiptImportSource;
 }
 
 export interface ReceiptImportLineContext {
@@ -146,7 +148,8 @@ export function markReceiptImportCompleted(
 	itemsAdded: number,
 	summary: ReceiptImportSummary = { estimatedDates: 0, locationCorrections: 0, rulesImproved: 0 },
 	locationCounts: ReceiptLocationCounts = EMPTY_LOCATION_COUNTS,
-	linesWithPrice = 0
+	linesWithPrice = 0,
+	importSource?: ReceiptImportSource
 ): void {
 	if (typeof sessionStorage === 'undefined') return;
 
@@ -159,7 +162,8 @@ export function markReceiptImportCompleted(
 		locationCounts,
 		estimatedExpiryCount: summary.estimatedDates,
 		dominantLocation: dominantStorageLocation(locationCounts),
-		...(linesWithPrice > 0 ? { linesWithPrice } : {})
+		...(linesWithPrice > 0 ? { linesWithPrice } : {}),
+		...(importSource ? { importSource } : {})
 	};
 	sessionStorage.setItem(RECEIPT_IMPORT_JUST_COMPLETED_KEY, JSON.stringify(payload));
 	sessionStorage.setItem(RECEIPT_IMPORT_TOAST_PENDING_KEY, '1');
@@ -210,6 +214,12 @@ export function readReceiptImportCompleted(): ReceiptImportSessionFlag | null {
 					: dominantStorageLocation(locationCounts),
 			...(typeof parsed.linesWithPrice === 'number' && parsed.linesWithPrice > 0
 				? { linesWithPrice: parsed.linesWithPrice }
+				: {}),
+			...(parsed.importSource === 'one_tap' ||
+			parsed.importSource === 'share_target' ||
+			parsed.importSource === 'scan_hub' ||
+			parsed.importSource === 'onboarding'
+				? { importSource: parsed.importSource }
 				: {})
 		};
 	} catch {

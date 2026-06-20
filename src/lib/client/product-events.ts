@@ -14,6 +14,7 @@ const CLIENT_EVENT_TYPES = [
 	'onboarding_completed',
 	'pwa_banner_dismiss',
 	'pwa_banner_install_click',
+	'receipt_share_install_nudge_shown',
 	'shopping_list_export',
 	'receipt_import_started',
 	'receipt_uploaded',
@@ -85,7 +86,10 @@ const CLIENT_EVENT_TYPES = [
 	'store_chain_selected',
 	'store_compare_ica_enabled',
 	'store_recommendation_interest_shown',
-	'store_recommendation_completed'
+	'store_recommendation_completed',
+	'planer_viewed',
+	'ata_recipe_opened',
+	'ata_week_view_toggled'
 ] as const;
 
 export const PUBLIC_ACQUISITION_EVENT_TYPES = [

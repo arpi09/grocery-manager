@@ -121,3 +121,24 @@ export function dismissInstallBanner(): void {
 	}
 	localStorage.setItem(INSTALL_BANNER_DISMISSED_KEY, String(Date.now()));
 }
+
+/** localStorage key — dismissible receipt share install nudge (Android). */
+export const RECEIPT_SHARE_INSTALL_NUDGE_DISMISSED_KEY =
+	'home-pantry-receipt-share-install-nudge-dismissed';
+
+export function isReceiptShareInstallNudgeDismissed(): boolean {
+	if (typeof localStorage === 'undefined') {
+		return false;
+	}
+	return localStorage.getItem(RECEIPT_SHARE_INSTALL_NUDGE_DISMISSED_KEY) === '1';
+}
+
+export function dismissReceiptShareInstallNudge(): void {
+	if (typeof localStorage === 'undefined') {
+		return;
+	}
+	localStorage.setItem(RECEIPT_SHARE_INSTALL_NUDGE_DISMISSED_KEY, '1');
+}
+
+/** Alias for install prompt trigger (Android Chrome beforeinstallprompt). */
+export const promptInstallApp = triggerInstallPrompt;

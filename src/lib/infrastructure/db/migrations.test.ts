@@ -96,7 +96,6 @@ describe('drizzle migrations', () => {
 	'0059_store_recommendation_telemetry.sql',
 	'0060_acquisition_loops_telemetry.sql',
 	'0061_price_intelligence_phase1.sql',
-	'0062_receipt_share_install_nudge_event.sql',
 	'0063_ata_page_telemetry.sql'
 		];
 		expect(pgliteFiles).toEqual(sqlFiles);

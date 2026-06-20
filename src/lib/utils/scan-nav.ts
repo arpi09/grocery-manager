@@ -1,4 +1,8 @@
 import type { StorageLocation } from '$lib/domain/location';
+import {
+	parseReceiptImportSource,
+	type ReceiptImportSource
+} from '$lib/domain/receipt-import-source';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 
 export type ScanMode = 'hub' | 'barcode' | 'receipt' | 'photo';
@@ -77,4 +81,24 @@ export function activationScanHref(returnTo: string = APP_HOME_PATH): string {
 
 export function isActivationOnboardingContext(searchParams: URLSearchParams): boolean {
 	return searchParams.get('onboarding') === 'activation';
+}
+
+export function parseReceiptImportSourceFromParams(
+	searchParams: URLSearchParams
+): ReceiptImportSource {
+	if (isActivationOnboardingContext(searchParams)) {
+		return 'onboarding';
+	}
+	return parseReceiptImportSource(searchParams.get('source'));
+}
+
+/** One-tap receipt import — opens file picker on mount (no scan hub). */
+export function receiptOneTapHref(returnTo: string = APP_HOME_PATH): string {
+	const params = new URLSearchParams({
+		from: returnTo,
+		mode: 'receipt',
+		source: 'one_tap',
+		autopick: '1'
+	});
+	return `/scan?${params}`;
 }

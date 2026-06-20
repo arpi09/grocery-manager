@@ -1541,21 +1541,31 @@
 		"scanHint": "Merge duplicates in the scan flow →"
 	},
 	"planer": {
-		"title": "Plans",
-		"subtitle": "Plan the week around what expires — same pantry as home",
+		"title": "Eat",
+		"subtitle": "Plan the week's dinners — see calendar, recipes and what's missing",
 		"eatHubTitle": "What should we eat?",
-		"eatHubLead": "Generate a meal from what's in your pantry — or plan the week in the calendar below.",
+		"eatHubLead": "Suggestions from your pantry are on the right — plan the week in the calendar below.",
 		"generateMeal": "Generate meal idea",
-		"contextTitle": "Plan around expiring items",
-		"contextLead": "The calendar ties to your pantry and Eat First on home.",
+		"contextTitle": "Weekly meal planning from your pantry",
+		"contextLead": "See what's planned, add dinners and fill the shopping list with what's missing.",
 		"contextExpiring": "{count} items expiring within {days} days",
 		"contextNoExpiring": "Nothing urgent expiring within {days} days.",
 		"contextPlanned": "{count} meals in this calendar view",
-		"contextWeeklyLink": "Week sorted — plan the full week",
-		"contextHomeLink": "Go to home & Eat First",
+		"contextWeeklyLink": "Generate week suggestions (AI)",
+		"contextHomeLink": "Expiring soon on Home",
+		"contextWeekViewLink": "Week view",
 		"ideasAria": "Recipe ideas",
-		"ideasIntro": "Ideas from your stock, prioritising what expires. Pick a date and add to the calendar.",
-		"ideasEmpty": "No generated ideas yet. Use the Recipe ideas button first.",
+		"ideasIntro": "From what you have at home. Pick a date and add to the calendar.",
+		"ideasEmpty": "No suggestions yet. Generate ideas or create a week plan.",
+		"ideasEmptyCtaIdeas": "Generate ideas",
+		"ideasEmptyCtaWeekly": "Generate week suggestions",
+		"viewRecipe": "View recipe",
+		"cookRecipe": "Cook",
+		"showAllMeals": "Show all ({count})",
+		"viewWeek": "Week",
+		"viewMonth": "Month",
+		"viewToggleAria": "Switch calendar view",
+		"weekCalendarAria": "Week calendar",
 		"usesLabel": "Use:",
 		"addToCalendar": "Add to calendar",
 		"calendarSummary": "Calendar ({count} planned)",
@@ -1574,7 +1584,7 @@
 		"mealTitle": "Meal title",
 		"removeMeal": "Remove meal {title}",
 		"recipeIdeasAria": "Open recipe ideas — generate meal suggestions from your stock",
-		"ideasTitle": "ChatGPT recipe ideas",
+		"ideasTitle": "Suggestions from your pantry",
 		"missingLabel": "Missing:",
 		"scheduleDate": "Schedule date",
 		"dismissNotInterested": "Not interested",
@@ -2380,6 +2390,21 @@
 		"apiKeyHint": "Requires OPENAI_API_KEY in server .env.",
 		"savedLabel": "{count} {count, plural, one {item} other {items}}"
 	},
+	"receiptAutomation": {
+		"oneTapCta": "Import receipt",
+		"oneTapLead": "Upload a digital receipt (PDF) from Kivra, ICA, or your store.",
+		"quickConfirmAll": "Approve all and add to pantry",
+		"shareNoFile": "No file was received. Try sharing the PDF or image again.",
+		"shareFailed": "Could not receive the file. Open Skaffu and choose a file manually.",
+		"sharePendingMissing": "Shared file not found. Try sharing the receipt again.",
+		"installNudge": {
+			"aria": "Receipt sharing tip",
+			"title": "Share receipts directly from Kivra",
+			"body": "Add Skaffu to your home screen — then you can share PDF receipts here without opening the app first.",
+			"cta": "Add to home screen",
+			"dismiss": "Not now"
+		}
+	},
 	"priceMemory": {
 		"lastPaid": "Last paid {price} ({date})",
 		"lastPaidWithStore": "Last paid {price} ({date}, {store})",
@@ -2677,8 +2702,8 @@
 			"body": "Add what's missing at home. The list stays connected to your pantry so you don't double-buy."
 		},
 		"planer": {
-			"title": "Meal plan",
-			"body": "Plan the week's dinners from what you have at home — and fill the list with what's missing."
+			"title": "Eat",
+			"body": "Plan the week's dinners in the calendar — see recipes and add missing items to your shopping list."
 		},
 		"statistik": {
 			"title": "Your stats",
@@ -2811,8 +2836,8 @@
 		"shareCardFailed": "Could not create share image. Try again."
 	},
 	"weeklyRitual": {
-		"pageTitle": "Week sorted",
-		"pageSubtitle": "Expiring items → AI meals → one click to plan and shopping list",
+		"pageTitle": "Week suggestions",
+		"pageSubtitle": "Generate dinner ideas for the whole week — approve and fill the shopping list",
 		"heroTitle": "Week sorted",
 		"heroBadge": "Monday ritual",
 		"heroSubtitleDefault": "Plan the week's dinners from your pantry — one click to meal plan and shopping list.",

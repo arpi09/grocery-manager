@@ -5,6 +5,7 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ReceiptImportSuccessStats from '$lib/components/molecules/ReceiptImportSuccessStats.svelte';
+	import ReceiptShareInstallNudge from '$lib/components/molecules/ReceiptShareInstallNudge.svelte';
 	import ReceiptPantrySuccessIllustration from '$lib/components/organisms/illustrations/ReceiptPantrySuccessIllustration.svelte';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import { t } from '$lib/i18n';
@@ -143,6 +144,7 @@
 			{#if (session.linesWithPrice ?? 0) > 0}
 				<p class="expiry-line">{t('receiptImport.toastPricesSaved')}</p>
 			{/if}
+			<ReceiptShareInstallNudge importSource={session.importSource} />
 			<div class="action-block">
 				<Button type="button" fullWidth variant="primary" data-testid="receipt-success-cta-primary" onclick={handlePrimaryCta}>{t('receiptImport.success.ctaPrimary')}</Button>
 				<Button

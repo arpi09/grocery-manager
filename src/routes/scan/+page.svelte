@@ -91,6 +91,10 @@
 			<ReceiptBulkAddFlow
 				returnTo={data.returnTo}
 				shelfLifeEstimatesInReceipt={data.shelfLifeEstimatesInReceipt}
+				importSource={data.importSource}
+				autopick={data.autopick}
+				shareKey={data.shareKey}
+				shareError={data.shareError}
 			/>
 		{:else if isPhotoMode}
 			<PhotoRoundFlow returnTo={data.returnTo} initialLocation={data.defaultLocation} />

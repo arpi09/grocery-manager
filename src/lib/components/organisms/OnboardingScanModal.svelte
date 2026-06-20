@@ -232,6 +232,7 @@
 			{returnTo}
 			embedded
 			prominentGuide
+			importSource="onboarding"
 			formAction="/scan?/bulkCreate"
 			shelfLifeEstimatesInReceipt={shelfLifeEstimatesInReceipt}
 			onItemSaved={handleReceiptSaved}
