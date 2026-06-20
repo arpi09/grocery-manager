@@ -37,6 +37,7 @@ const expiringItem: InventoryItem = {
 	expiresOn: '2026-06-20',
 	expiresOnSource: null,
 	notes: null,
+	barcode: null,
 	lastConfirmedAt: new Date('2026-06-01'),
 	createdAt: new Date('2026-06-01'),
 	updatedAt: new Date('2026-06-01')

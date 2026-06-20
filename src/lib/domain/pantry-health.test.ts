@@ -13,6 +13,7 @@ function item(overrides: Partial<InventoryItem> & Pick<InventoryItem, 'name'>): 
 		expiresOn: overrides.expiresOn ?? null,
 		expiresOnSource: overrides.expiresOnSource ?? null,
 		notes: overrides.notes ?? null,
+		barcode: overrides.barcode ?? null,
 		lastConfirmedAt: overrides.lastConfirmedAt ?? new Date('2026-01-01T12:00:00Z'),
 		createdAt: overrides.createdAt ?? new Date('2026-01-01T12:00:00Z'),
 		updatedAt: overrides.updatedAt ?? new Date('2026-01-01T12:00:00Z'),

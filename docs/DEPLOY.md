@@ -88,12 +88,22 @@ Se [CI_CD.md](./CI_CD.md) för G0–G5 gate-tabell, deploy-SLO och incident-lär
 
 ## Inputs (Deploy to production)
 
+```bash
+gh workflow run deploy.yml --ref master -f deploy_tier=auto
+# eller explicit SHA (kräver grön pr-gate på samma SHA):
+gh workflow run deploy.yml --ref master -f sha=7fd38e8ee -f deploy_tier=auto
+```
+
 | Input | Standard | Syfte |
 |-------|----------|-------|
 | `ref` | `master` | Branch eller tag att bygga och deploya |
 | `sha` | *(tom)* | Specifik commit — överstyr `ref` om satt |
-| `skip_e2e` | `false` | HOTFIX ONLY — hoppa över E2E (kräver `hotfix_confirm`) |
-| `hotfix_confirm` | *(tom)* | Skriv exakt `hotfix` när `skip_e2e=true` |
+| `deploy_tier` | `auto` | `auto` \| `fast` \| `full` \| `hotfix` — E2E-djup (`auto` = path-tier på SHA) |
+| `hotfix_reason` | *(tom)* | Krävs när `deploy_tier=hotfix` (audit trail) |
+
+**Gate `guide_only=true` på manuell deploy är förväntat** — `workflow_dispatch` sätter alltid `guide_only=true` så att full release-pipeline (E2E + deploy + verify-release) körs. Det betyder *inte* att endast guide-innehåll deployas.
+
+**Deploy kräver grön `pr-gate / pr-gate` på samma SHA** (G1b i `resolve-artifact`). Vänta på grön CI på `master` innan manuell deploy — annars failar `resolve CI artifact` med "No successful CI pr-gate check-run".
 
 ---
 

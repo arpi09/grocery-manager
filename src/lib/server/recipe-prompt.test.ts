@@ -31,6 +31,7 @@ function makeItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
 		expiresOn: '2026-06-01',
 		expiresOnSource: null,
 		notes: null,
+		barcode: null,
 		lastConfirmedAt: new Date(),
 		createdAt: new Date(),
 		updatedAt: new Date(),

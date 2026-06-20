@@ -25,6 +25,7 @@ function item(
 		expiresOn: null,
 		expiresOnSource: null,
 		notes: null,
+		barcode: null,
 		lastConfirmedAt: today,
 		createdAt: today,
 		updatedAt: today,

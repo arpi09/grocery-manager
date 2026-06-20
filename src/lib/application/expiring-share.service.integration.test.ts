@@ -25,6 +25,7 @@ function expiringItem(name: string): InventoryItem {
 		expiresOn: expiresOn.toISOString().slice(0, 10),
 		expiresOnSource: null,
 		notes: null,
+		barcode: null,
 		lastConfirmedAt: now,
 		createdAt: now,
 		updatedAt: now

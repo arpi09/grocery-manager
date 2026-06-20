@@ -12,6 +12,7 @@ function item(overrides: Partial<InventoryItem> & Pick<InventoryItem, 'id' | 'na
 		expiresOn: null,
 		expiresOnSource: null,
 		notes: null,
+		barcode: null,
 		lastConfirmedAt: new Date(),
 		createdAt: new Date(),
 		updatedAt: new Date(),

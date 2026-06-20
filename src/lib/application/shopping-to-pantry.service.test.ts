@@ -48,6 +48,7 @@ describe('ShoppingToPantryService', () => {
 				expiresOn: null,
 				expiresOnSource: null,
 				notes: null,
+				barcode: null,
 				lastConfirmedAt: new Date('2026-06-01'),
 				createdAt: new Date('2026-01-01'),
 				updatedAt: new Date('2026-06-01')
@@ -74,6 +75,7 @@ describe('ShoppingToPantryService', () => {
 			expiresOn: null,
 			expiresOnSource: null,
 			notes: null,
+			barcode: null,
 			lastConfirmedAt: new Date(),
 			createdAt: new Date(),
 			updatedAt: new Date()
@@ -109,6 +111,7 @@ describe('ShoppingToPantryService', () => {
 			expiresOn: '2026-07-01',
 			expiresOnSource: 'ai_inferred' as const,
 			notes: null,
+			barcode: null,
 			lastConfirmedAt: new Date(),
 			createdAt: new Date(),
 			updatedAt: new Date()
