@@ -1,5 +1,5 @@
 ﻿import { test, expect, type Page } from '@playwright/test';
-import { deserialize } from '$app/forms';
+import * as devalue from 'devalue';
 
 import {
 	dismissOnboardingModalIfOpen,
@@ -40,7 +40,10 @@ async function postShoppingAction(
 		timeout: 30_000
 	});
 	expect(response.ok()).toBeTruthy();
-	const result = deserialize(await response.text()) as { type?: string; data?: unknown };
+	const result = JSON.parse(await response.text()) as { type?: string; data?: string | unknown };
+	if (typeof result.data === 'string') {
+		result.data = devalue.parse(result.data);
+	}
 	expect(result.type).toBe('success');
 	return result;
 }
