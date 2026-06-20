@@ -4,6 +4,7 @@ import {
 	dismissOnboardingModalIfOpen,
 	loginAsAdmin
 } from './helpers/auth';
+import { createFridgeItemViaApi } from './helpers/inventory';
 import { expectNoHorizontalScroll, expectSampledTouchTargets } from './helpers/mobile';
 
 test.describe.configure({ mode: 'serial' });
@@ -32,27 +33,6 @@ const MOBILE_P1_ROUTES = [
 	{ path: '/statistik/wrapped', name: 'Pantry wrapped' }
 ] as const;
 
-async function createFridgeItem(page: Page, name: string) {
-	const response = await page.request.post('/item/new?/create', {
-		form: {
-			name,
-			location: 'fridge',
-			quantity: '1',
-			unit: '',
-			expiresOn: '',
-			notes: '',
-			returnTo: '/inventory/fridge'
-		},
-		headers: {
-			accept: 'application/json',
-			'x-sveltekit-action': 'true'
-		},
-		maxRedirects: 0
-	});
-
-	expect([200, 302, 303]).toContain(response.status());
-}
-
 async function gotoAuthedRoute(
 	page: Page,
 	path: string,
@@ -74,15 +54,35 @@ async function gotoAuthedRoute(
 	await expect(page.locator('.app')).toBeVisible({ timeout: 15_000 });
 }
 
+async function filterGridToItem(page: Page, itemName: string) {
+	await page.getByTestId('data-grid-filter-button').click();
+	const filterSheet = page.getByTestId('data-grid-filter-sheet');
+	await expect(filterSheet).toBeVisible({ timeout: 10_000 });
+	await filterSheet.locator('#data-grid-filter-search').fill(itemName);
+	await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
+	await expect(filterSheet).not.toBeVisible({ timeout: 10_000 });
+}
+
 async function resolveEditItemPath(page: Page): Promise<string> {
 	const itemName = `E2E Mobile Edit ${Date.now()}`;
-	await createFridgeItem(page, itemName);
+	await createFridgeItemViaApi(page, itemName);
 	await page.goto('/inventory/fridge', { waitUntil: 'commit' });
 	await dismissOnboardingModalIfOpen(page);
-	const editLink = page.getByRole('link', { name: itemName });
-	const href = await editLink.getAttribute('href');
-	expect(href, 'Expected inventory item link to edit form').toBeTruthy();
-	return href!;
+
+	const grid = page.getByTestId('pantry-location-grid');
+	await expect(grid).toBeVisible({ timeout: 15_000 });
+	await filterGridToItem(page, itemName);
+
+	const row = page
+		.getByTestId('inventory-table')
+		.getByTestId(/inventory-row-/)
+		.filter({ hasText: itemName });
+	await expect(row).toBeVisible({ timeout: 15_000 });
+
+	const rowTestId = await row.getAttribute('data-testid');
+	expect(rowTestId, 'Expected inventory row test id').toBeTruthy();
+	const itemId = rowTestId!.replace('inventory-row-', '');
+	return `/item/${itemId}/edit`;
 }
 
 async function resolveRecipeDetailPath(page: Page): Promise<string> {
