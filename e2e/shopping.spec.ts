@@ -1,4 +1,5 @@
 ﻿import { test, expect, type Page } from '@playwright/test';
+import { deserialize } from '$app/forms';
 
 import {
 	dismissOnboardingModalIfOpen,
@@ -39,7 +40,7 @@ async function postShoppingAction(
 		timeout: 30_000
 	});
 	expect(response.ok()).toBeTruthy();
-	const result = (await response.json()) as { type?: string; data?: unknown };
+	const result = deserialize(await response.text()) as { type?: string; data?: unknown };
 	expect(result.type).toBe('success');
 	return result;
 }
@@ -83,7 +84,6 @@ test.describe('Shopping list', () => {
 
 		await dismissPageHintIfOpen(page);
 
-		await postShoppingAction(page, 'clearChecked');
 		await postShoppingAction(page, 'fillFromPantry', {
 			preferences: '',
 			householdSize: '2'
