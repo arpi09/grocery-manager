@@ -1,37 +1,22 @@
 <script lang="ts">
-
-	import { onMount } from 'svelte';
-
+	import { getContext, onMount } from 'svelte';
 	import { page } from '$app/state';
-
 	import Button from '$lib/components/atoms/Button.svelte';
-
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
-
+	import { trackAtaRecipeOpened } from '$lib/client/ata-telemetry';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
-
 	import { fetchMealPlanIdeas, dismissMealPlanIdea } from '$lib/client/planer-data';
-
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
-
 	import { normalizeRecipeIdeas, type RecipeIdeaLoad } from '$lib/utils/meal-plan-ideas';
-
 	import { canEditInventory } from '$lib/domain/household';
-
+	import { OPEN_RECIPE_IDEAS } from '$lib/navigation/app-layout-context';
 	import { getLocale, t } from '$lib/i18n';
-
 	import {
-
 		addMissingIngredientsToList,
-
 		dedupeMissingIngredients,
-
 		presentAddMissingFeedback,
-
 		type AddMissingFeedbackTone
-
 	} from '$lib/utils/recipe-add-missing';
-
 
 
 	interface Props {
@@ -48,6 +33,7 @@
 
 	let { month, initialIdeas = [], onIdeasChange }: Props = $props();
 
+	const openRecipeIdeas = getContext<(() => void) | undefined>(OPEN_RECIPE_IDEAS);
 
 
 	const canEdit = $derived(
@@ -113,15 +99,15 @@
 
 
 	function showAddMissingResult(result: Awaited<ReturnType<typeof addMissingIngredientsToList>>) {
-
 		const presented = presentAddMissingFeedback(getLocale(), result);
-
-		showClientToast(presented.message, { variant: 'success' });
-
+		const variant =
+			presented.tone === 'error' ? 'error' : presented.tone === 'warning' ? 'info' : 'success';
+		const toastMessage = presented.showListLink
+			? `${presented.message} ${t('weeklyRitual.linkInkop')}`
+			: presented.message;
+		showClientToast(toastMessage, { variant });
 		feedbackBanner = presented;
-
 	}
-
 
 
 	async function addAllMissing() {
@@ -235,10 +221,13 @@
 		<p class="empty">{t('common.errorGeneric')}</p>
 
 	{:else if ideas.length === 0}
-
 		<p class="empty">{t('planer.ideasEmpty')}</p>
-
-	{:else}
+		<div class="empty-actions">
+			{#if openRecipeIdeas}
+				<Button type="button" onclick={openRecipeIdeas}>{t('planer.ideasEmptyCtaIdeas')}</Button>
+			{/if}
+			<a class="weekly-empty-link" href="/planer/vecka">{t('planer.ideasEmptyCtaWeekly')}</a>
+		</div>	{:else}
 
 		{#if feedbackBanner}
 
@@ -279,15 +268,21 @@
 				<article class="idea-item">
 
 					<div class="idea-header">
-
-						<a href="/recept/{idea.id}" class="idea-link">
-
+						<a
+							href="/recept/{idea.id}"
+							class="idea-link"
+							onclick={() => trackAtaRecipeOpened('ideas', idea.id)}
+						>
 							<span class="idea-title">{idea.title}</span>
-
 							<span class="idea-meta">{idea.whyItFits}</span>
-
 						</a>
-
+						<a
+							href="/recept/{idea.id}/laga"
+							class="cook-link"
+							onclick={() => trackAtaRecipeOpened('ideas', idea.id)}
+						>
+							{t('planer.cookRecipe')}
+						</a>
 						{#if canEdit && idea.missingIngredients.length > 0}
 
 							<Button
@@ -415,15 +410,47 @@
 
 
 	.empty {
-
 		margin: 0;
-
 		color: var(--color-text-muted);
-
 		font-size: 0.9rem;
-
 	}
 
+	.empty-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
+		margin-top: var(--space-sm);
+		align-items: center;
+	}
+
+	.weekly-empty-link {
+		font-size: 0.875rem;
+		font-weight: 700;
+		color: var(--color-primary);
+		text-decoration: none;
+		min-height: 2.75rem;
+		display: inline-flex;
+		align-items: center;
+	}
+
+	.weekly-empty-link:hover {
+		text-decoration: underline;
+	}
+
+	.cook-link {
+		flex-shrink: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2rem;
+		padding: 0.35rem 0.55rem;
+		border-radius: var(--radius-sm);
+		background: var(--color-primary);
+		color: var(--color-on-primary);
+		font-size: 0.78rem;
+		font-weight: 700;
+		text-decoration: none;
+	}
 
 
 	.batch-action {

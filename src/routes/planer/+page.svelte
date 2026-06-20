@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { t } from '$lib/i18n';
+	import { trackPlanerViewed } from '$lib/client/ata-telemetry';
 	import { canEditInventory } from '$lib/domain/household';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
 	import { ideasByIdFromList } from '$lib/utils/meal-plan-ideas';
@@ -20,7 +22,11 @@
 	);
 
 	let ideasById = $state<Record<string, RecipeIdea>>(ideasByIdFromList(data.recipeIdeas));
-	let calendarOpen = $state(data.plannedMealCount > 0);
+	let calendarOpen = $state(true);
+
+	onMount(() => {
+		trackPlanerViewed();
+	});
 
 	function handleIdeasChange(ideas: RecipeIdea[]) {
 		ideasById = ideasByIdFromList(ideas);
@@ -37,7 +43,7 @@
 			plannedMealCount={data.plannedMealCount}
 		/>
 		<section class="planner-grid">
-			<details class="calendar-fold" bind:open={calendarOpen}>
+			<details id="ata-calendar" class="calendar-fold" bind:open={calendarOpen}>
 				<summary>
 					{data.plannedMealCount > 0
 						? t('planer.calendarSummary', { count: data.plannedMealCount })

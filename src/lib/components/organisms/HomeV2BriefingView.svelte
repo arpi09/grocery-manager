@@ -28,7 +28,7 @@
 	import { getLocale, t } from '$lib/i18n';
 	import { PANTRY_SHELF_PATH } from '$lib/navigation/nav-config';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
-	import { scanModeHref } from '$lib/utils/scan-nav';
+	import { scanModeHref, receiptOneTapHref } from '$lib/utils/scan-nav';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	
 	interface Props {
@@ -146,7 +146,7 @@
 			case 'photoRound':
 				return scanModeHref('photo', APP_HOME_PATH);
 			case 'planMeal':
-				return '/recept';
+				return '/planer';
 			case 'openShopping':
 				return '/inkop';
 			case 'seeStats':
@@ -229,6 +229,15 @@
 		recipeHref={recipeChipHref}
 		onChipTap={trackHomeChipTapped}
 	/>
+
+	{#if canWrite}
+		<div class="receipt-import-cta" data-testid="home-receipt-one-tap">
+			<p class="receipt-import-lead">{t('receiptAutomation.oneTapLead')}</p>
+			<a class="btn btn-primary btn-full" href={receiptOneTapHref(APP_HOME_PATH)}>
+				{t('receiptAutomation.oneTapCta')}
+			</a>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -246,5 +255,19 @@
 		letter-spacing: var(--letter-spacing-label, 0.06em);
 		text-transform: uppercase;
 		color: var(--color-text-muted);
+	}
+
+	.receipt-import-cta {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		margin-top: var(--space-sm);
+	}
+
+	.receipt-import-lead {
+		margin: 0;
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		line-height: 1.45;
 	}
 </style>

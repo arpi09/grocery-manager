@@ -8,6 +8,7 @@ import {
 	importReceiptLines,
 	recordReceiptPriceCapturedEvent
 } from './receipt-import';
+import { parseOptionalPriceField } from './receipt-import-purchase';
 
 const recordProductEvent = vi.fn();
 
@@ -112,5 +113,17 @@ describe('importReceiptLines', () => {
 				metadata: { linesWithPrice: 1, totalLines: 2, source: 'manual' }
 			})
 		);
+	});
+});
+
+describe('parseOptionalPriceField', () => {
+	it('strips Swedish currency suffix before parsing', () => {
+		expect(parseOptionalPriceField('12,90 kr')).toBe('12.90');
+		expect(parseOptionalPriceField('8.50 SEK')).toBe('8.50');
+		expect(parseOptionalPriceField('19:-')).toBe('19.00');
+	});
+
+	it('returns null for non-numeric strings', () => {
+		expect(parseOptionalPriceField('gratis')).toBeNull();
 	});
 });

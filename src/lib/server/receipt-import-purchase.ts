@@ -18,7 +18,11 @@ export function parseOptionalPriceField(value: unknown): string | null {
 		return value.toFixed(2);
 	}
 	if (typeof value !== 'string') return null;
-	const normalized = value.trim().replace(',', '.');
+	const normalized = value
+		.trim()
+		.replace(/\s*(kr|sek|:-)$/i, '')
+		.trim()
+		.replace(',', '.');
 	if (!normalized) return null;
 	const parsed = Number(normalized);
 	return Number.isFinite(parsed) ? parsed.toFixed(2) : null;

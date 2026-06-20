@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { t } from '$lib/i18n';
-	import type { PlannedMeal } from '$lib/domain/meal-plan';
+	import { trackAtaRecipeOpened } from '$lib/client/ata-telemetry';
+	import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
 	import { mealSourceVariant, splitVisibleMeals } from '$lib/domain/calendar-display';
 
 	interface DayData {
@@ -14,19 +16,43 @@
 		day: DayData;
 		todayIso: string;
 		visibleLimit: number;
+		weekView?: boolean;
+		ideasById?: Record<string, RecipeIdea>;
 		onOpen: (day: DayData) => void;
 	}
 
-	let { day, todayIso, visibleLimit, onOpen }: Props = $props();
+	let {
+		day,
+		todayIso,
+		visibleLimit,
+		weekView = false,
+		ideasById = {},
+		onOpen
+	}: Props = $props();
 
 	const { visible, hiddenCount } = $derived(splitVisibleMeals(day.meals, visibleLimit));
 	const isToday = $derived(day.date === todayIso);
+
+	function openRecipe(meal: PlannedMeal, event: MouseEvent) {
+		event.stopPropagation();
+		if (!meal.ideaId) {
+			onOpen(day);
+			return;
+		}
+		trackAtaRecipeOpened('calendar', meal.ideaId);
+		void goto(`/recept/${meal.ideaId}`);
+	}
+
+	function mealHasRecipe(meal: PlannedMeal): boolean {
+		return Boolean(meal.ideaId && ideasById[meal.ideaId]);
+	}
 </script>
 
 <div
 	class="day"
 	class:outside={!day.isCurrentMonth}
 	class:today={isToday}
+	class:week-view={weekView}
 	role="group"
 	aria-label="{day.dayOfMonth} {day.isCurrentMonth ? '' : t('planer.otherMonth')}"
 >
@@ -43,17 +69,21 @@
 				type="button"
 				class="meal-chip"
 				class:meal-chip-idea={mealSourceVariant(meal.ideaId) === 'idea'}
-				onclick={() => onOpen(day)}
+				class:meal-chip-recipe={mealHasRecipe(meal)}
+				onclick={(event) => openRecipe(meal, event)}
 				title={meal.title}
 			>
 				<span class="meal-chip-text">{meal.title}</span>
+				{#if mealHasRecipe(meal)}
+					<span class="meal-chip-action" aria-hidden="true">→</span>
+				{/if}
 			</button>
 		{/each}
 	</div>
 
 	{#if hiddenCount > 0}
 		<button type="button" class="show-all" onclick={() => onOpen(day)}>
-			Visa alla ({day.meals.length})
+			{t('planer.showAllMeals', { count: day.meals.length })}
 		</button>
 	{:else if day.meals.length === 0}
 		<button type="button" class="add-hint" onclick={() => onOpen(day)} aria-label={t('planer.addMeal')}>
@@ -83,6 +113,18 @@
 			min-height: 9.5rem;
 			padding: var(--space-sm);
 			gap: var(--space-xs);
+		}
+	}
+
+	.day.week-view .meal-chip {
+		min-height: 2.5rem;
+		font-size: 0.8rem;
+	}
+
+	@media (min-width: 768px) {
+		.day.week-view .meal-chip {
+			min-height: 2.35rem;
+			font-size: 0.85rem;
 		}
 	}
 
@@ -151,6 +193,7 @@
 	.meal-chip {
 		display: flex;
 		align-items: center;
+		gap: 0.25rem;
 		min-height: 2.75rem;
 		width: 100%;
 		padding: 0.35rem 0.45rem;
@@ -177,11 +220,22 @@
 		background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface-muted));
 	}
 
+	.meal-chip-recipe {
+		border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+	}
+
 	.meal-chip-text {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		min-width: 0;
+		flex: 1;
+	}
+
+	.meal-chip-action {
+		flex-shrink: 0;
+		color: var(--color-primary);
+		font-weight: 700;
 	}
 
 	.show-all,

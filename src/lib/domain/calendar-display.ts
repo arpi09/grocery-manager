@@ -1,6 +1,7 @@
 export const CALENDAR_VISIBLE_MEALS = {
 	mobile: 2,
-	desktop: 3
+	desktop: 3,
+	week: 8
 } as const;
 
 export type MealSourceVariant = 'idea' | 'manual';
@@ -30,3 +31,30 @@ export function formatCalendarDayLabel(isoDate: string, locale = 'sv-SE'): strin
 }
 
 export const CALENDAR_WEEKDAY_LABELS = ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'] as const;
+
+export type CalendarViewMode = 'week' | 'month';
+
+interface CalendarDayLike {
+	date: string;
+	isCurrentMonth: boolean;
+}
+
+/** Return the week row containing `dateIso`, or the first in-month week as fallback. */
+export function findWeekForDate<T extends CalendarDayLike>(
+	weeks: T[][],
+	dateIso: string
+): T[] {
+	for (const week of weeks) {
+		if (week.some((day) => day.date === dateIso)) {
+			return week;
+		}
+	}
+
+	for (const week of weeks) {
+		if (week.some((day) => day.isCurrentMonth)) {
+			return week;
+		}
+	}
+
+	return weeks[0] ?? [];
+}

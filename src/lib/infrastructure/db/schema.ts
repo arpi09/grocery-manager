@@ -366,6 +366,7 @@ export const productEventTable = pgTable(
 				'first_scan',
 				'pwa_banner_dismiss',
 				'pwa_banner_install_click',
+				'receipt_share_install_nudge_shown',
 				'receipt_autopilot_accepted',
 				'weekly_ritual_approved',
 				'eat_first_week_viewed',
@@ -471,7 +472,10 @@ export const productEventTable = pgTable(
 				'store_chain_selected',
 				'store_compare_ica_enabled',
 				'store_recommendation_interest_shown',
-				'store_recommendation_completed'
+				'store_recommendation_completed',
+				'planer_viewed',
+				'ata_recipe_opened',
+				'ata_week_view_toggled'
 			]
 		}).notNull(),
 		metadata: text('metadata'),

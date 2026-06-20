@@ -1,0 +1,3 @@
+-- Äta /planer UX product_event types (application enum in schema.ts):
+-- planer_viewed, ata_recipe_opened, ata_week_view_toggled
+-- No DDL required: product_event.event_type is unconstrained text.

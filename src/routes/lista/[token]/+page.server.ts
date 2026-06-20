@@ -12,22 +12,27 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 	}
 
 	if (locals?.user) {
-		const targetHouseholdId = await shoppingListShareService.resolveHouseholdIdForToken(
-			params.token
-		);
-		if (targetHouseholdId) {
-			const outcome = await locals.householdService.joinSharedListHousehold(
-				targetHouseholdId,
-				locals.user.id
+		try {
+			const targetHouseholdId = await shoppingListShareService.resolveHouseholdIdForToken(
+				params.token
 			);
-			if (outcome === 'joined') {
-				recordProductEvent(locals.pmfService, {
-					userId: locals.user.id,
-					householdId: targetHouseholdId,
-					eventType: 'partner_joined',
-					metadata: { context: 'lista' }
-				});
+			if (targetHouseholdId) {
+				const outcome = await locals.householdService.joinSharedListHousehold(
+					targetHouseholdId,
+					locals.user.id
+				);
+				if (outcome === 'joined') {
+					recordProductEvent(locals.pmfService, {
+						userId: locals.user.id,
+						householdId: targetHouseholdId,
+						eventType: 'partner_joined',
+						metadata: { context: 'lista' }
+					});
+				}
 			}
+		} catch (joinErr) {
+			const message = joinErr instanceof Error ? joinErr.message : String(joinErr);
+			console.warn(`[lista] logged-in join failed for token ${params.token}: ${message}`);
 		}
 
 		redirect(302, APP_HOME_PATH);

@@ -5,6 +5,7 @@
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
+	import { trackAtaRecipeOpened } from '$lib/client/ata-telemetry';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { formatCalendarDayLabel, mealSourceVariant } from '$lib/domain/calendar-display';
 	import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
@@ -71,7 +72,10 @@
 		const presented = presentAddMissingFeedback(getLocale(), result);
 		const variant =
 			presented.tone === 'error' ? 'error' : presented.tone === 'warning' ? 'info' : 'success';
-		showClientToast(presented.message, { variant });
+		const toastMessage = presented.showListLink
+			? `${presented.message} ${t('weeklyRitual.linkInkop')}`
+			: presented.message;
+		showClientToast(toastMessage, { variant });
 		feedbackBanner = presented;
 	}
 
@@ -154,43 +158,50 @@
 					{@const idea = linkedIdea(meal)}
 					<li class="meal-card" class:expanded={expandedMealId === meal.id}>
 						<div class="meal-summary-row">
-							<button
-								type="button"
-								class="meal-summary"
-								aria-expanded={expandedMealId === meal.id}
-								onclick={() => toggleMeal(meal.id)}
-							>
+							<div class="meal-heading">
 								<span
 									class="source-dot"
 									class:source-dot-idea={mealSourceVariant(meal.ideaId) === 'idea'}
 									aria-hidden="true"
 								></span>
 								<span class="meal-title">{meal.title}</span>
-								<span class="chevron" aria-hidden="true">{expandedMealId === meal.id ? '−' : '+'}</span>
-							</button>
-							{#if canEdit && idea && idea.missingIngredients.length > 0}
-								<Button
+							</div>
+							<div class="meal-actions">
+								{#if idea}
+									<a
+										href="/recept/{idea.id}"
+										class="recipe-link"
+										onclick={() => trackAtaRecipeOpened('day_sheet', idea.id)}
+									>
+										{t('planer.viewRecipe')}
+									</a>
+								{/if}
+								{#if canEdit && idea && idea.missingIngredients.length > 0}
+									<Button
+										type="button"
+										variant="secondary"
+										class="summary-add-btn"
+										loading={addingMissingKey === meal.id}
+										loadingLabel={t('common.loading')}
+										onclick={(event) => addMissingFromMeal(meal, event)}
+									>
+										{t('recipe.addMissingBtnShort', { count: idea.missingIngredients.length })}
+									</Button>
+								{/if}
+								<button
 									type="button"
-									variant="secondary"
-									class="summary-add-btn"
-									loading={addingMissingKey === meal.id}
-									loadingLabel={t('common.loading')}
-									onclick={(event) => addMissingFromMeal(meal, event)}
+									class="expand-btn"
+									aria-expanded={expandedMealId === meal.id}
+									aria-label={expandedMealId === meal.id ? t('common.close') : t('common.more')}
+									onclick={() => toggleMeal(meal.id)}
 								>
-									{t('recipe.addMissingBtnShort', { count: idea.missingIngredients.length })}
-								</Button>
-							{/if}
+									<span aria-hidden="true">{expandedMealId === meal.id ? '−' : '+'}</span>
+								</button>
+							</div>
 						</div>
 
 						{#if expandedMealId === meal.id}
 							<div class="meal-detail">
-								{#if idea}
-									<div class="idea-ingredients">
-										<a href="/recept/{idea.id}" class="view-recipe-link">
-											{t('recipe.detail.viewRecipe')}
-										</a>
-									</div>
-								{/if}
 								<form method="POST" action="?/update" class="edit-form">
 									<input type="hidden" name="month" value={month} />
 									<input type="hidden" name="id" value={meal.id} />
@@ -298,32 +309,64 @@
 
 	.meal-summary-row {
 		display: flex;
-		align-items: center;
-		gap: var(--space-xs);
-		padding-right: var(--space-sm);
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--space-sm);
+		padding: var(--space-sm) var(--space-md);
 	}
 
-	.meal-summary {
+	.meal-heading {
 		display: flex;
 		align-items: center;
 		gap: var(--space-sm);
 		flex: 1;
 		min-width: 0;
 		min-height: 2.75rem;
-		padding: var(--space-sm) var(--space-md);
-		border: none;
-		background: transparent;
-		cursor: pointer;
-		text-align: left;
-		color: inherit;
-		font-weight: 600;
 	}
 
+	.meal-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: flex-end;
+		gap: var(--space-xs);
+		flex-shrink: 0;
+	}
+
+	.meal-summary-row :global(.recipe-btn),
+	.recipe-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.78rem;
+		padding: 0.35rem 0.55rem;
+		min-height: 2rem;
+		border-radius: var(--radius-sm);
+		background: var(--color-primary);
+		color: var(--color-on-primary);
+		font-weight: 700;
+		text-decoration: none;
+	}
 	.meal-summary-row :global(.summary-add-btn) {
 		flex-shrink: 0;
 		font-size: 0.75rem;
 		padding: 0.35rem 0.5rem;
 		min-height: 2rem;
+	}
+
+	.expand-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 2rem;
+		min-height: 2rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		color: var(--color-text-muted);
+		cursor: pointer;
+		font-size: 1.1rem;
+		line-height: 1;
 	}
 
 	.source-dot {
@@ -344,12 +387,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-	}
-
-	.chevron {
-		color: var(--color-text-muted);
-		font-size: 1.1rem;
-		line-height: 1;
+		font-weight: 600;
 	}
 
 	.meal-detail {
@@ -358,27 +396,6 @@
 		flex-direction: column;
 		gap: var(--space-sm);
 		border-top: 1px solid var(--color-border);
-	}
-
-	.idea-ingredients {
-		padding-top: var(--space-sm);
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-xs);
-	}
-
-	.view-recipe-link {
-		display: inline-flex;
-		align-items: center;
-		min-height: 2.75rem;
-		font-size: 0.875rem;
-		font-weight: 700;
-		color: var(--color-primary);
-		text-decoration: none;
-	}
-
-	.view-recipe-link:hover {
-		text-decoration: underline;
 	}
 
 	.edit-form {

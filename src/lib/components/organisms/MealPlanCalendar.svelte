@@ -1,10 +1,14 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { t } from '$lib/i18n';
+	import { trackAtaWeekViewToggled } from '$lib/client/ata-telemetry';
 	import CalendarDayCell from '$lib/components/molecules/CalendarDayCell.svelte';
 	import CalendarDaySheet from '$lib/components/molecules/CalendarDaySheet.svelte';
 	import {
 		CALENDAR_VISIBLE_MEALS,
-		CALENDAR_WEEKDAY_LABELS
+		CALENDAR_WEEKDAY_LABELS,
+		findWeekForDate,
+		type CalendarViewMode
 	} from '$lib/domain/calendar-display';
 	import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
 
@@ -41,8 +45,9 @@
 	let sheetOpen = $state(false);
 	let isDesktop = $state(false);
 	let touchStartX = $state(0);
+	let viewMode = $state<CalendarViewMode>('week');
 
-	$effect(() => {
+	onMount(() => {
 		const query = window.matchMedia('(min-width: 768px)');
 		const sync = () => {
 			isDesktop = query.matches;
@@ -53,7 +58,19 @@
 	});
 
 	const visibleLimit = $derived(
-		isDesktop ? CALENDAR_VISIBLE_MEALS.desktop : CALENDAR_VISIBLE_MEALS.mobile
+		viewMode === 'week'
+			? CALENDAR_VISIBLE_MEALS.week
+			: isDesktop
+				? CALENDAR_VISIBLE_MEALS.desktop
+				: CALENDAR_VISIBLE_MEALS.mobile
+	);
+
+	const displayWeeks = $derived(
+		viewMode === 'month' ? weeks : [findWeekForDate(weeks, todayIso)]
+	);
+
+	const calendarLabel = $derived(
+		viewMode === 'week' ? t('planer.weekCalendarAria') : t('planer.calendarAria')
 	);
 
 	function openDay(day: DayData) {
@@ -65,11 +82,18 @@
 		sheetOpen = false;
 	}
 
+	function setViewMode(next: CalendarViewMode) {
+		if (viewMode === next) return;
+		viewMode = next;
+		trackAtaWeekViewToggled(next);
+	}
+
 	function onTouchStart(event: TouchEvent) {
 		touchStartX = event.changedTouches[0]?.clientX ?? 0;
 	}
 
 	function onTouchEnd(event: TouchEvent) {
+		if (viewMode !== 'month') return;
 		const endX = event.changedTouches[0]?.clientX ?? 0;
 		const delta = endX - touchStartX;
 		if (Math.abs(delta) < 72) return;
@@ -81,12 +105,14 @@
 	}
 </script>
 
-<section class="calendar-shell" aria-label={t('planer.calendarAria')}>
+<section class="calendar-shell" aria-label={calendarLabel}>
 	<header class="month-nav">
 		<a
 			href="/planer?month={previousMonth}"
 			class="nav-btn"
+			class:nav-btn-hidden={viewMode === 'week'}
 			aria-label={t('planer.prevMonth')}
+			tabindex={viewMode === 'week' ? -1 : undefined}
 		>
 			<span class="nav-icon" aria-hidden="true">←</span>
 			<span class="nav-text">{t('planer.prevMonthShort')}</span>
@@ -94,10 +120,38 @@
 
 		<div class="month-title-wrap">
 			<h2>{monthLabel}</h2>
-			<a href="/planer" class="today-link">{t('common.today')}</a>
+			<div class="title-actions">
+				<div class="view-toggle" role="group" aria-label={t('planer.viewToggleAria')}>
+					<button
+						type="button"
+						class="view-toggle-btn"
+						class:active={viewMode === 'week'}
+						aria-pressed={viewMode === 'week'}
+						onclick={() => setViewMode('week')}
+					>
+						{t('planer.viewWeek')}
+					</button>
+					<button
+						type="button"
+						class="view-toggle-btn"
+						class:active={viewMode === 'month'}
+						aria-pressed={viewMode === 'month'}
+						onclick={() => setViewMode('month')}
+					>
+						{t('planer.viewMonth')}
+					</button>
+				</div>
+				<a href="/planer" class="today-link">{t('common.today')}</a>
+			</div>
 		</div>
 
-		<a href="/planer?month={nextMonth}" class="nav-btn" aria-label={t('planer.nextMonth')}>
+		<a
+			href="/planer?month={nextMonth}"
+			class="nav-btn"
+			class:nav-btn-hidden={viewMode === 'week'}
+			aria-label={t('planer.nextMonth')}
+			tabindex={viewMode === 'week' ? -1 : undefined}
+		>
 			<span class="nav-text">{t('common.next')}</span>
 			<span class="nav-icon" aria-hidden="true">→</span>
 		</a>
@@ -105,6 +159,7 @@
 
 	<div
 		class="calendar-card"
+		class:calendar-card-week={viewMode === 'week'}
 		role="region"
 		aria-label={t('planer.gridAria')}
 		ontouchstart={onTouchStart}
@@ -117,9 +172,16 @@
 		</div>
 
 		<div class="weeks">
-			{#each weeks as week}
+			{#each displayWeeks as week}
 				{#each week as day (day.date)}
-					<CalendarDayCell {day} {todayIso} {visibleLimit} onOpen={openDay} />
+					<CalendarDayCell
+						{day}
+						{todayIso}
+						{visibleLimit}
+						weekView={viewMode === 'week'}
+						{ideasById}
+						onOpen={openDay}
+					/>
 				{/each}
 			{/each}
 		</div>
@@ -171,12 +233,44 @@
 		text-overflow: ellipsis;
 	}
 
+	.title-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-xs);
+		margin-top: 0.25rem;
+	}
+
+	.view-toggle {
+		display: inline-flex;
+		border: 1px solid var(--color-border);
+		border-radius: 999px;
+		overflow: hidden;
+		background: var(--color-surface);
+	}
+
+	.view-toggle-btn {
+		min-height: 2rem;
+		padding: 0.2rem 0.65rem;
+		border: none;
+		background: transparent;
+		color: var(--color-text-muted);
+		font-size: 0.75rem;
+		font-weight: 700;
+		cursor: pointer;
+	}
+
+	.view-toggle-btn.active {
+		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+		color: var(--color-primary);
+	}
+
 	.today-link {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 2.75rem;
-		margin-top: 0.1rem;
+		min-height: 2rem;
 		padding: 0.2rem 0.65rem;
 		border-radius: 999px;
 		font-size: 0.78rem;
@@ -208,6 +302,11 @@
 		white-space: nowrap;
 	}
 
+	.nav-btn-hidden {
+		visibility: hidden;
+		pointer-events: none;
+	}
+
 	.nav-btn:hover {
 		background: var(--color-surface-muted);
 		text-decoration: none;
@@ -232,9 +331,17 @@
 		box-shadow: var(--shadow-sm);
 	}
 
+	.calendar-card-week :global(.day) {
+		min-height: 7.5rem;
+	}
+
 	@media (min-width: 768px) {
 		.calendar-card {
 			padding: var(--space-md);
+		}
+
+		.calendar-card-week :global(.day) {
+			min-height: 11rem;
 		}
 	}
 

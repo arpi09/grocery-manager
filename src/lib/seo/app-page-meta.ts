@@ -32,7 +32,7 @@ export function resolveAppPageTitle(pathname: string, locale: Locale): string {
 		return translate(locale, 'inventory.title') + suffix();
 	}
 	if (pathname.startsWith('/planer')) {
-		return translate(locale, 'planer.title') + suffix();
+		return translate(locale, 'nav.eat') + suffix();
 	}
 	if (pathname.startsWith('/statistik')) {
 		return translate(locale, 'stats.title') + suffix();
