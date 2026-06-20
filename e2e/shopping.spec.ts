@@ -27,7 +27,7 @@ async function postShoppingAction(
 	form: Record<string, string> = {},
 	refererPath = legacyShoppingGridPath
 ) {
-	const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190';
+	const baseURL = new URL(page.url()).origin;
 	const requestForm = Object.keys(form).length > 0 ? form : { _e2e: '1' };
 	const response = await page.request.post(`${baseURL}/inkop?/${action}`, {
 		form: requestForm,
