@@ -52,7 +52,7 @@ describe('POST /scan/share', () => {
 	});
 
 	it('redirects with error for unsupported file', async () => {
-		const file = new File([new Uint8Array([1, 2, 3])], 'notes.txt', { type: 'text/plain' });
+		const file = new File([Buffer.from([1, 2, 3])], 'notes.txt', { type: 'text/plain' });
 
 		await expect(
 			POST({
