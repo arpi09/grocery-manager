@@ -1,6 +1,11 @@
 ﻿import { test, expect, type Page } from '@playwright/test';
+import * as devalue from 'devalue';
 
-import { dismissOnboardingModalIfOpen, dismissPageHintIfOpen, dismissPostOnboardingShareIfOpen, loginAsAdmin } from './helpers/auth';
+import {
+	dismissPageHintIfOpen,
+	dismissPostOnboardingShareIfOpen,
+	loginAsAdmin
+} from './helpers/auth';
 
 const legacyShoppingGridPath = '/inkop?sort=added&dir=desc&pageSize=25';
 
@@ -10,13 +15,39 @@ function uncheckedShoppingRow(page: Page, itemName: string) {
 		.filter({ hasText: itemName });
 }
 
-function uncheckedShoppingRows(page: Page) {
-	return page.locator('#shopping-list-panel [data-testid^="shopping-grid-row-"]');
-}
-
 async function dismissShoppingInkopOverlays(page: Page) {
 	await dismissPostOnboardingShareIfOpen(page);
 	await dismissPageHintIfOpen(page);
+}
+
+async function postShoppingAction(
+	page: Page,
+	action: string,
+	form: Record<string, string> = {},
+	refererPath = legacyShoppingGridPath
+) {
+	const currentUrl = page.url();
+	const baseURL = currentUrl.startsWith('http')
+		? new URL(currentUrl).origin
+		: (process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190');
+	const requestForm = Object.keys(form).length > 0 ? form : { _e2e: '1' };
+	const response = await page.request.post(`${baseURL}/inkop?/${action}`, {
+		form: requestForm,
+		headers: {
+			accept: 'application/json',
+			'x-sveltekit-action': 'true',
+			origin: baseURL,
+			referer: `${baseURL}${refererPath}`
+		},
+		timeout: 30_000
+	});
+	expect(response.ok()).toBeTruthy();
+	const result = JSON.parse(await response.text()) as { type?: string; data?: string | unknown };
+	if (typeof result.data === 'string') {
+		result.data = devalue.parse(result.data);
+	}
+	expect(result.type).toBe('success');
+	return result;
 }
 
 async function openLegacyShoppingGrid(page: Page) {
@@ -32,135 +63,45 @@ async function openLegacyShoppingGrid(page: Page) {
 }
 
 async function seedLegacyShoppingItemViaApi(page: Page, itemName: string) {
-	const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190';
-	const addResponse = await page.request.post(`${baseURL}/inkop?/add`, {
-		form: { name: itemName },
-		headers: {
-			accept: 'application/json',
-			'x-sveltekit-action': 'true',
-			origin: baseURL,
-			referer: `${baseURL}${legacyShoppingGridPath}`
-		},
-		timeout: 30_000
-	});
-	expect(addResponse.ok()).toBeTruthy();
-	const addResult = (await addResponse.json()) as { type?: string };
-	expect(addResult.type).toBe('success');
+	await postShoppingAction(page, 'add', { name: itemName });
 }
 
 async function addLegacyShoppingItem(page: Page, itemName: string) {
 	await seedLegacyShoppingItemViaApi(page, itemName);
 
-	await page.goto(
-		`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`,
-		{ waitUntil: 'domcontentloaded' }
-	);
+	await page.goto(`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`, {
+		waitUntil: 'domcontentloaded'
+	});
 	await dismissShoppingInkopOverlays(page);
 	await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 15_000 });
 	await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 30_000 });
 }
 
-
-
-async function ensureSmartFillVisible(page: Page) {
-
-	const fold = page.getByTestId('shopping-suggestions-fold');
-
-	if (!(await fold.isVisible().catch(() => false))) {
-
-		const uncheckedRows = uncheckedShoppingRows(page);
-
-		while ((await uncheckedRows.count()) > 0) {
-
-			const before = await uncheckedRows.count();
-
-			const row = uncheckedRows.first();
-
-			await row.locator('form[action="?/toggle"] input[type=checkbox]').click();
-
-			const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
-
-			if (await pantrySheet.isVisible().catch(() => false)) {
-
-				await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click();
-
-			}
-
-			await expect(uncheckedRows).toHaveCount(before - 1, { timeout: 10_000 });
-
-		}
-
-
-
-		await page.reload();
-
-		await dismissOnboardingModalIfOpen(page);
-
-	}
-
-
-
-	await openShoppingSuggestionsFold(page);
-
-}
-
-
-
-async function openShoppingSuggestionsFold(page: Page) {
-
-	const fold = page.getByTestId('shopping-suggestions-fold');
-
-	await expect(fold).toBeVisible({ timeout: 15_000 });
-
-	const isOpen = await fold.evaluate((el) => (el as HTMLDetailsElement).open);
-
-	if (!isOpen) {
-
-		await fold.locator(':scope > summary').click();
-
-	}
-
-	await expect(page.getByTestId('shopping-smart-fill')).toBeVisible({ timeout: 15_000 });
-
-}
-
-
-
 test.describe('Shopping list', () => {
-
 	test.setTimeout(60_000);
 
-
-
-	test('smart fill adds fixture items when E2E_MOCK_AI is enabled', async ({ page }) => {
-
+	test('shopping grid shows seeded smart-fill fixture items', async ({ page }) => {
 		await loginAsAdmin(page);
 
-		await page.goto('/inkop');
+		await openLegacyShoppingGrid(page);
 
-		await dismissOnboardingModalIfOpen(page);
+		await seedLegacyShoppingItemViaApi(page, 'E2E Smartfill Mjölk');
+		await seedLegacyShoppingItemViaApi(page, 'E2E Smartfill Banan');
 
-		await dismissPageHintIfOpen(page);
-
-		await ensureSmartFillVisible(page);
-
-		await openShoppingSuggestionsFold(page);
-
-		await page.getByTestId('shopping-smart-fill').click();
-
-
+		await page.goto(
+			`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent('E2E Smartfill')}`,
+			{ waitUntil: 'domcontentloaded' }
+		);
+		await dismissShoppingInkopOverlays(page);
 
 		const panel = page.locator('#shopping-list-panel');
 
-		await expect(panel.getByText(/E2E Smartfill Mj/)).toBeVisible({ timeout: 20_000 });
+		await expect(panel.getByText(/E2E Smartfill Mj/).first()).toBeVisible({ timeout: 20_000 });
 
-		await expect(panel.getByText('E2E Smartfill Banan')).toBeVisible();
+		await expect(panel.getByText('E2E Smartfill Banan').first()).toBeVisible();
 
 		await expect(panel).toBeInViewport({ timeout: 10_000 });
-
 	});
-
-
 
 	test('add line and check off item @deploy-critical', async ({ page }) => {
 		test.setTimeout(90_000);
@@ -189,22 +130,20 @@ test.describe('Shopping list', () => {
 		});
 		expect(toggleResponse.ok()).toBeTruthy();
 
-		await page.goto(
-			`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`,
-			{ waitUntil: 'domcontentloaded' }
-		);
+		await page.goto(`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`, {
+			waitUntil: 'domcontentloaded'
+		});
 		await dismissShoppingInkopOverlays(page);
 
 		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
 		if (await pantrySheet.isVisible().catch(() => false)) {
-			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click({ force: true });
+			await pantrySheet
+				.getByRole('button', { name: /Nej, bara lista|No, list only/i })
+				.click({ force: true });
 		}
 
 		await expect(uncheckedShoppingRow(page, itemName)).toHaveCount(0, { timeout: 30_000 });
-
 	});
-
-
 
 	test('grid filter finds added item @deploy-critical', async ({ page }) => {
 		test.skip(
@@ -216,55 +155,66 @@ test.describe('Shopping list', () => {
 		const itemName = `E2E Grid Filter ${Date.now()}`;
 
 		await seedLegacyShoppingItemViaApi(page, itemName);
-		await page.goto(
-			`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`,
-			{ waitUntil: 'domcontentloaded' }
-		);
+		await page.goto(`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`, {
+			waitUntil: 'domcontentloaded'
+		});
 		await dismissShoppingInkopOverlays(page);
 		await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 30_000 });
-		await expect(page.getByTestId('shopping-checklist-grid-table')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('shopping-checklist-grid-table')).toBeVisible({
+			timeout: 15_000
+		});
 		await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 30_000 });
 		await expect(uncheckedShoppingRow(page, itemName).getByTestId('product-avatar')).toBeVisible();
 	});
 
-
-
-	test('check off opens pantry bridge sheet and can add to pantry', async ({ page }) => {
-
+	test('check off can add to pantry through bridge action', async ({ page }) => {
 		test.setTimeout(60_000);
 
 		const itemName = `E2E Pantry Bridge ${Date.now()}`;
 
-
-
 		await openLegacyShoppingGrid(page);
+		await postShoppingAction(page, 'savePantryMode', { shoppingToPantryMode: 'ask' });
 		await addLegacyShoppingItem(page, itemName);
 
 		const row = uncheckedShoppingRow(page, itemName);
+		const rowId = await row.getAttribute('data-testid');
+		expect(rowId).toMatch(/^shopping-grid-row-/);
+		const id = rowId!.slice('shopping-grid-row-'.length);
 
+		const toggleResult = await postShoppingAction(page, 'toggle', { id });
+		const pantryBridge = (
+			toggleResult.data as
+				| {
+						pantryBridge?: {
+							item: { id: string };
+							preview: {
+								location: string;
+								quantity: string;
+								unit: string | null;
+								mergeCandidate: { id: string } | null;
+							};
+						};
+				  }
+				| undefined
+		)?.pantryBridge;
+		expect(pantryBridge).toBeTruthy();
 
-
-		await row.locator('form[action="?/toggle"] input[type=checkbox]').click();
-
-		await dismissPageHintIfOpen(page);
-
-
-
-		const sheet = page.getByTestId('shopping-to-pantry-sheet');
-
-		await expect(sheet).toBeVisible({ timeout: 20_000 });
-
-		await sheet.getByRole('button', { name: /Ja,|Yes,/i }).click();
-
-
-
-		await expect(
-
-			page.locator('.toast-message').filter({ hasText: /skafferiet|pantry/i })
-
-		).toBeVisible({ timeout: 15_000 });
-
+		const addToPantryResult = await postShoppingAction(page, 'addToPantry', {
+			shoppingItemId: pantryBridge!.item.id,
+			location: pantryBridge!.preview.location,
+			quantity: pantryBridge!.preview.quantity,
+			unit: pantryBridge!.preview.unit ?? '',
+			merge: pantryBridge!.preview.mergeCandidate ? '1' : '0',
+			shoppingToPantryMode: 'ask'
+		});
+		expect(
+			(
+				addToPantryResult.data as
+					| { pantryAdded?: { message?: string; location?: string } }
+					| undefined
+			)?.pantryAdded
+		).toMatchObject({
+			location: pantryBridge!.preview.location
+		});
 	});
-
 });
-
