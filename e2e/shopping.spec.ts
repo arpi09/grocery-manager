@@ -26,7 +26,10 @@ async function postShoppingAction(
 	form: Record<string, string> = {},
 	refererPath = legacyShoppingGridPath
 ) {
-	const baseURL = new URL(page.url()).origin;
+	const currentUrl = page.url();
+	const baseURL = currentUrl.startsWith('http')
+		? new URL(currentUrl).origin
+		: (process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190');
 	const requestForm = Object.keys(form).length > 0 ? form : { _e2e: '1' };
 	const response = await page.request.post(`${baseURL}/inkop?/${action}`, {
 		form: requestForm,
@@ -93,9 +96,9 @@ test.describe('Shopping list', () => {
 
 		const panel = page.locator('#shopping-list-panel');
 
-		await expect(panel.getByText(/E2E Smartfill Mj/)).toBeVisible({ timeout: 20_000 });
+		await expect(panel.getByText(/E2E Smartfill Mj/).first()).toBeVisible({ timeout: 20_000 });
 
-		await expect(panel.getByText('E2E Smartfill Banan')).toBeVisible();
+		await expect(panel.getByText('E2E Smartfill Banan').first()).toBeVisible();
 
 		await expect(panel).toBeInViewport({ timeout: 10_000 });
 	});
