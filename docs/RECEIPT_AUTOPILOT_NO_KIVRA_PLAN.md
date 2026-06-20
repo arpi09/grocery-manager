@@ -44,10 +44,13 @@ Officiell API skulle senare möjliggöra: OAuth/koppling, automatisk pull av kvi
 
 **User journey:**
 
-1. Registrera → onboarding erbjuder “Ladda upp digitalt kvitto” (inte “Koppla Kivra”)
-2. `/scan?mode=receipt` → PDF från Kivra-app (export/forward till sig själv) eller ICA e-post
-3. Parse → **review rader + plats** → “Lägg till i skafferi”
-4. Celebration + “Vill du automatisera framöver? Vidarebefordra kvitto-e-post” (optional beta)
+1. Registrera → onboarding erbjuder “Ladda upp digitalt kvitto” (inte “Koppla Kivra”) — telemetry `source=onboarding`
+2. **One-tap:** “Importera kvitto” på `/hem` eller `/inkop` → `/scan?mode=receipt&source=one_tap&autopick=1` → filväljare direkt
+3. **Android PWA share:** Installera PWA → dela PDF från Kivra/Filer → Skaffu (`share_target` → POST `/scan/share` → review)
+4. **Scan hub fallback:** `/scan?mode=receipt` (`source=scan_hub`)
+5. Parse → **review rader + plats** → “Godkänn alla” (V1.1) eller rad-för-rad → lager
+6. Celebration + optional Android install-nudge (“Dela kvitton direkt från Kivra”)
+7. Replenishment på `/inkop` efter import
 
 **Sekundär (beta, ej blocker):** Resend-forward med **samma review-kö** eller tydlig “importerade automatiskt — granska i lager” — inte tyst auto-import till prod-wide utan opt-in.
 
