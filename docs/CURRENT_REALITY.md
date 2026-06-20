@@ -5,8 +5,8 @@
 | F?lt | V?rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-20 |
-| **Prod SHA** | `ab46f3c49` @ [27809543691](https://github.com/arpi09/grocery-manager/actions/runs/27809543691) (full E2E x3, Home V2 canary). Prior `0b999e153` @ [27790521211](https://github.com/arpi09/grocery-manager/actions/runs/27790521211). |
-| **Master SHA** | `ab46f3c49` — Home V2 canary (`HOME_UX_V2_ENABLED` + Shopping + Pantry V2 live) |
+| **Prod SHA** | `f049e3cb0` @ [27883692872](https://github.com/arpi09/grocery-manager/actions/runs/27883692872) (fast E2E critical). Price Intel Phase 1 (`receipt_price_captured` + discovery) @ `28934586d`. Prior `ab46f3c49` @ [27809543691](https://github.com/arpi09/grocery-manager/actions/runs/27809543691). |
+| **Master SHA** | `f049e3cb0` — Price Intel Phase 1 + nightly error export guardrails |
 | **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
@@ -81,6 +81,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 - [x] **SMUI + Reality Audit + Settings hub** ? prod **`c267c172c`** @ [27608398776](https://github.com/arpi09/grocery-manager/actions/runs/27608398776) (fast E2E). PRs #96?#100 merged 2026-06-16.
 - [x] **Mobile UX Recovery** ? prior prod **`d585cbd5`** @ [27570192623](https://github.com/arpi09/grocery-manager/actions/runs/27570192623)
 - [x] **PR #95** CI/CD v2 merged 2026-06-15
+- [x] **Price Intelligence Phase 1** — prod **`f049e3cb0`** @ [27883692872](https://github.com/arpi09/grocery-manager/actions/runs/27883692872) (fast E2E critical). `receipt_price_captured` telemetry + Price Memory discovery (chip tooltip/link, import hint).
 
 ## Acquisition (V1)
 
