@@ -55,7 +55,9 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		locals.shoppingListService.listUncheckedItems(householdId),
 		locals.shoppingListService.countCheckedItems(householdId),
 		locals.inventoryIntelligenceService.getHomeIntelligence(householdId),
-		user ? locals.shoppingToPantryService.getMode(user.id) : Promise.resolve('ask' as ShoppingToPantryMode)
+		user
+			? locals.shoppingToPantryService.getMode(user.id)
+			: Promise.resolve('ask' as ShoppingToPantryMode)
 	]);
 	return {
 		user,
@@ -88,9 +90,7 @@ export const actions: Actions = {
 		const householdId = event.locals.householdId;
 		if (!householdId) error(400, translate(event.locals.locale, 'errors.household.noHousehold'));
 
-		const parsed = parseAddShoppingListItem(
-			Object.fromEntries(await event.request.formData())
-		);
+		const parsed = parseAddShoppingListItem(Object.fromEntries(await event.request.formData()));
 		if (!parsed.success) {
 			return fail(400, { errors: parsed.errors });
 		}
@@ -257,7 +257,9 @@ export const actions: Actions = {
 
 			return {
 				pantryAdded: {
-					message: translate(locale, 'shopping.pantryBridge.addedToast', { name: shoppingItem.name }),
+					message: translate(locale, 'shopping.pantryBridge.addedToast', {
+						name: shoppingItem.name
+					}),
 					location: locationRaw as StorageLocation
 				}
 			};
@@ -306,10 +308,7 @@ export const actions: Actions = {
 		if (!householdId) error(400, translate(event.locals.locale, 'errors.household.noHousehold'));
 
 		try {
-			await event.locals.shoppingListService.clearChecked(
-				householdId,
-				event.locals.householdRole!
-			);
+			await event.locals.shoppingListService.clearChecked(householdId, event.locals.householdRole!);
 		} catch (err) {
 			return handleServiceError(err);
 		}
@@ -371,9 +370,7 @@ export const actions: Actions = {
 
 		if (!generated.ok) {
 			const fillError =
-				'message' in generated
-					? generated.message
-					: translate(locale, generated.messageKey);
+				'message' in generated ? generated.message : translate(locale, generated.messageKey);
 			return fail(generated.status, { fillError });
 		}
 
@@ -406,4 +403,3 @@ export const actions: Actions = {
 		}
 	}
 };
-

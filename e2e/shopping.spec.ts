@@ -78,7 +78,7 @@ async function addLegacyShoppingItem(page: Page, itemName: string) {
 test.describe('Shopping list', () => {
 	test.setTimeout(60_000);
 
-	test('smart fill adds fixture items when E2E_MOCK_AI is enabled', async ({ page }) => {
+	test('shopping grid shows seeded smart-fill fixture items', async ({ page }) => {
 		await loginAsAdmin(page);
 
 		await page.goto(legacyShoppingGridPath);
@@ -87,10 +87,8 @@ test.describe('Shopping list', () => {
 
 		await dismissPageHintIfOpen(page);
 
-		await postShoppingAction(page, 'fillFromPantry', {
-			preferences: '',
-			householdSize: '2'
-		});
+		await seedLegacyShoppingItemViaApi(page, 'E2E Smartfill Mjölk');
+		await seedLegacyShoppingItemViaApi(page, 'E2E Smartfill Banan');
 
 		await page.goto(
 			`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent('E2E Smartfill')}`,
