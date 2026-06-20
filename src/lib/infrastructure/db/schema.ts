@@ -339,6 +339,7 @@ export const productEventTable = pgTable(
 				'receipt_import_started',
 				'receipt_uploaded',
 				'receipt_parsed',
+				'receipt_price_captured',
 				'receipt_review_completed',
 				'receipt_import_success_viewed',
 				'receipt_import_success_dismissed',

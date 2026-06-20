@@ -37,6 +37,41 @@ export interface ImportReceiptLinesInput {
 export interface ImportReceiptLinesResult {
 	itemsAdded: number;
 	importBatchId: string;
+	linesWithPrice: number;
+	totalLines: number;
+}
+
+export function countLinesWithPrice(lines: Pick<ReceiptLine, 'unitPrice'>[]): {
+	linesWithPrice: number;
+	totalLines: number;
+} {
+	const totalLines = lines.length;
+	const linesWithPrice = lines.filter((line) => Boolean(line.unitPrice?.trim())).length;
+	return { linesWithPrice, totalLines };
+}
+
+export function recordReceiptPriceCapturedEvent(
+	pmfService: PmfService,
+	params: {
+		userId: string;
+		householdId: string;
+		linesWithPrice: number;
+		totalLines: number;
+		source?: string;
+	}
+): void {
+	if (params.totalLines <= 0) return;
+
+	recordProductEvent(pmfService, {
+		userId: params.userId,
+		householdId: params.householdId,
+		eventType: 'receipt_price_captured',
+		metadata: {
+			linesWithPrice: params.linesWithPrice,
+			totalLines: params.totalLines,
+			...(params.source ? { source: params.source } : {})
+		}
+	});
 }
 
 function normalizePurchasedAt(purchasedAt: string | Date | null | undefined): string | null {
@@ -184,6 +219,8 @@ export async function importReceiptLines(
 		await input.purchasePatternService.recordReceiptImport(purchaseLines);
 	}
 
+	const { linesWithPrice, totalLines } = countLinesWithPrice(input.lines);
+
 	recordProductEvent(input.pmfService, {
 		userId: input.userId,
 		householdId: input.householdId,
@@ -196,5 +233,13 @@ export async function importReceiptLines(
 		}
 	});
 
-	return { itemsAdded, importBatchId };
+	recordReceiptPriceCapturedEvent(input.pmfService, {
+		userId: input.userId,
+		householdId: input.householdId,
+		linesWithPrice,
+		totalLines,
+		source: input.source
+	});
+
+	return { itemsAdded, importBatchId, linesWithPrice, totalLines };
 }

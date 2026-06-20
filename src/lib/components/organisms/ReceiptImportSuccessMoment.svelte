@@ -140,6 +140,9 @@
 			{#if session.estimatedExpiryCount > 0}
 				<p class="expiry-line">{t('receiptImport.success.estimatedExpiry', { count: session.estimatedExpiryCount })}</p>
 			{/if}
+			{#if (session.linesWithPrice ?? 0) > 0}
+				<p class="expiry-line">{t('receiptImport.toastPricesSaved')}</p>
+			{/if}
 			<div class="action-block">
 				<Button type="button" fullWidth variant="primary" data-testid="receipt-success-cta-primary" onclick={handlePrimaryCta}>{t('receiptImport.success.ctaPrimary')}</Button>
 				<Button

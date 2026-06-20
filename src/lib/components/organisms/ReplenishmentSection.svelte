@@ -421,6 +421,7 @@
 							<PriceMemoryChip
 								normalizedKey={suggestion.normalizedKey}
 								surface="replenishment"
+								linkHref="/settings/price-memory"
 							/>
 							{#if inlineAckByKey[suggestion.normalizedKey]}
 								<p class="inline-ack" role="status">

@@ -3,6 +3,7 @@ export const PRODUCT_EVENT_TYPES = [
 	'receipt_import_started',
 	'receipt_uploaded',
 	'receipt_parsed',
+	'receipt_price_captured',
 	'receipt_review_completed',
 	'receipt_import_success_viewed',
 	'receipt_import_success_dismissed',

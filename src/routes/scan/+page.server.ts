@@ -12,6 +12,7 @@ import { buildScanReturnUrl, type ScanToastKind } from '$lib/utils/scan-toast';
 import { parseScanMode, parseScanReturnTo, isActivationOnboardingContext } from '$lib/utils/scan-nav';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { recordProductEvent } from '$lib/server/product-events';
+import { recordReceiptPriceCapturedEvent } from '$lib/server/receipt-import';
 import { trackInventoryWrite } from '$lib/server/sync-analytics';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { isShelfLifeEstimatesInReceiptEnabled } from '$lib/server/shelf-life-learning-flag';
@@ -188,6 +189,7 @@ async function bulkCreateFromForm(
 	}
 
 	let created = 0;
+	let linesWithPrice = 0;
 	const importBatchId = recordPurchases ? generateId() : null;
 	const purchaseLines: ReturnType<typeof receiptLineToPurchaseRecord>[] = [];
 	const storeLabelRaw = formData.get('storeLabel');
@@ -254,6 +256,9 @@ async function bulkCreateFromForm(
 		const unitPriceRaw = formData.get(`unitPrice_${index}`);
 		const lineTotalRaw = formData.get(`lineTotal_${index}`);
 		const currencyRaw = formData.get(`currency_${index}`);
+		if (typeof unitPriceRaw === 'string' && unitPriceRaw.trim()) {
+			linesWithPrice += 1;
+		}
 
 		await recordLineShelfLifeFeedback({
 			learningEngine: event.locals.learningEngineService,
@@ -346,6 +351,13 @@ async function bulkCreateFromForm(
 	});
 
 	if (recordPurchases) {
+		recordReceiptPriceCapturedEvent(event.locals.pmfService, {
+			userId: event.locals.user!.id,
+			householdId: event.locals.householdId!,
+			linesWithPrice,
+			totalLines: selected.length,
+			source: 'manual'
+		});
 		redirect(302, APP_HOME_PATH);
 		return;
 	}

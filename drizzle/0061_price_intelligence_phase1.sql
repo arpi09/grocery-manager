@@ -1,0 +1,3 @@
+-- Price Intelligence Phase 1 product_event type (application enum in schema.ts):
+-- receipt_price_captured (linesWithPrice, totalLines metadata on receipt import)
+-- No DDL required: product_event.event_type is unconstrained text.

@@ -2319,6 +2319,7 @@
 		"toastEstimatedDates": "{count, plural, one {# datum uppskattat} other {# datum uppskattade}}",
 		"toastLocationCorrections": "{count, plural, one {# plats justerad} other {# platser justerade}}",
 		"toastRulesImproved": "{count, plural, one {# minnesregel förbättrad} other {# minnesregler förbättrade}}",
+		"toastPricesSaved": "Priser sparas i prishistorik",
 		"success": {
 			"title": "Välkommen till ditt skafferi",
 			"body": "Vi hittade {count} produkter och ordnade dem automatiskt.",
@@ -2351,6 +2352,8 @@
 	"priceMemory": {
 		"lastPaid": "Senast betalt {price} ({date})",
 		"lastPaidWithStore": "Senast betalt {price} ({date}, {store})",
+		"tooltip": "Från dina importerade kvitton (senaste 12 månaderna)",
+		"chipAriaDescription": "Prishistorik från importerade kvitton",
 		"navTitle": "Prishistorik",
 		"page": {
 			"title": "Prishistorik",

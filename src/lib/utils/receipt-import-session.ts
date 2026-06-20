@@ -28,6 +28,7 @@ export interface ReceiptImportSessionFlag {
 	locationCounts: ReceiptLocationCounts;
 	estimatedExpiryCount: number;
 	dominantLocation?: StorageLocation;
+	linesWithPrice?: number;
 }
 
 export interface ReceiptImportLineContext {
@@ -111,7 +112,8 @@ export function aggregateReceiptImportSummary(lines: ReceiptImportLineContext[])
 export function receiptImportToastMessage(
 	locale: Locale,
 	itemsAdded: number,
-	summary: ReceiptImportSummary
+	summary: ReceiptImportSummary,
+	linesWithPrice = 0
 ): string {
 	const headline = translate(locale, 'receiptImport.toastAdded', { count: itemsAdded });
 	const detailParts: string[] = [];
@@ -133,6 +135,9 @@ export function receiptImportToastMessage(
 			translate(locale, 'receiptImport.toastRulesImproved', { count: summary.rulesImproved })
 		);
 	}
+	if (linesWithPrice > 0) {
+		detailParts.push(translate(locale, 'receiptImport.toastPricesSaved'));
+	}
 
 	return detailParts.length === 0 ? headline : `${headline} ${detailParts.join(' · ')}`;
 }
@@ -140,7 +145,8 @@ export function receiptImportToastMessage(
 export function markReceiptImportCompleted(
 	itemsAdded: number,
 	summary: ReceiptImportSummary = { estimatedDates: 0, locationCorrections: 0, rulesImproved: 0 },
-	locationCounts: ReceiptLocationCounts = EMPTY_LOCATION_COUNTS
+	locationCounts: ReceiptLocationCounts = EMPTY_LOCATION_COUNTS,
+	linesWithPrice = 0
 ): void {
 	if (typeof sessionStorage === 'undefined') return;
 
@@ -152,7 +158,8 @@ export function markReceiptImportCompleted(
 		rulesImproved: summary.rulesImproved,
 		locationCounts,
 		estimatedExpiryCount: summary.estimatedDates,
-		dominantLocation: dominantStorageLocation(locationCounts)
+		dominantLocation: dominantStorageLocation(locationCounts),
+		...(linesWithPrice > 0 ? { linesWithPrice } : {})
 	};
 	sessionStorage.setItem(RECEIPT_IMPORT_JUST_COMPLETED_KEY, JSON.stringify(payload));
 	sessionStorage.setItem(RECEIPT_IMPORT_TOAST_PENDING_KEY, '1');
@@ -200,7 +207,10 @@ export function readReceiptImportCompleted(): ReceiptImportSessionFlag | null {
 			dominantLocation:
 				parsed.dominantLocation && LOCATIONS.includes(parsed.dominantLocation)
 					? parsed.dominantLocation
-					: dominantStorageLocation(locationCounts)
+					: dominantStorageLocation(locationCounts),
+			...(typeof parsed.linesWithPrice === 'number' && parsed.linesWithPrice > 0
+				? { linesWithPrice: parsed.linesWithPrice }
+				: {})
 		};
 	} catch {
 		return null;

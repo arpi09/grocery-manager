@@ -9,10 +9,14 @@
 	interface Props {
 		normalizedKey: string;
 		surface?: string;
+		linkHref?: string;
 	}
 
-	let { normalizedKey, surface }: Props = $props();
+	let { normalizedKey, surface, linkHref }: Props = $props();
 	let label = $state<string | null>(null);
+
+	const tooltip = $derived(t('priceMemory.tooltip'));
+	const ariaDescription = $derived(t('priceMemory.chipAriaDescription'));
 
 	onMount(() => {
 		void (async () => {
@@ -35,5 +39,25 @@
 </script>
 
 {#if label}
-	<Badge tone="default">{label}</Badge>
+	{#if linkHref}
+		<a
+			class="chip-link"
+			href={linkHref}
+			title={tooltip}
+			aria-label="{label}. {ariaDescription}"
+		>
+			<Badge tone="default">{label}</Badge>
+		</a>
+	{:else}
+		<span title={tooltip} aria-label="{label}. {ariaDescription}">
+			<Badge tone="default">{label}</Badge>
+		</span>
+	{/if}
 {/if}
+
+<style>
+	.chip-link {
+		color: inherit;
+		text-decoration: none;
+	}
+</style>

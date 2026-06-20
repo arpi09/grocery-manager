@@ -8,6 +8,7 @@ import {
 	isReceiptImportToastPending,
 	markReceiptImportCompleted,
 	readReceiptImportCompleted,
+	receiptImportToastMessage,
 	RECEIPT_IMPORT_JUST_COMPLETED_KEY,
 	type ReceiptImportLineContext
 } from './receipt-import-session';
@@ -50,6 +51,17 @@ describe('dominantStorageLocation', () => {
 	});
 });
 
+describe('receiptImportToastMessage', () => {
+	it('appends price history line when linesWithPrice > 0', () => {
+		const message = receiptImportToastMessage('sv', 2, {
+			estimatedDates: 0,
+			locationCorrections: 0,
+			rulesImproved: 0
+		}, 3);
+		expect(message).toContain('Priser sparas i prishistorik');
+	});
+});
+
 describe('markReceiptImportCompleted', () => {
 	it('stores location counts and toast pending flag', () => {
 		const storage = new Map<string, string>();
@@ -62,9 +74,11 @@ describe('markReceiptImportCompleted', () => {
 		markReceiptImportCompleted(
 			2,
 			{ estimatedDates: 1, locationCorrections: 0, rulesImproved: 0 },
-			{ cupboard: 1, fridge: 1, freezer: 0 }
+			{ cupboard: 1, fridge: 1, freezer: 0 },
+			2
 		);
 
+		expect(storage.get(RECEIPT_IMPORT_JUST_COMPLETED_KEY)).toContain('"linesWithPrice":2');
 		expect(storage.get(RECEIPT_IMPORT_JUST_COMPLETED_KEY)).toContain('"dominantLocation":"fridge"');
 		expect(isReceiptImportToastPending()).toBe(true);
 		expect(readReceiptImportCompleted()?.locationCounts).toEqual({

@@ -105,6 +105,8 @@ describe('importReceiptLines integration', () => {
 
 		expect(result.itemsAdded).toBe(2);
 		expect(result.importBatchId).toBeTruthy();
+		expect(result.linesWithPrice).toBe(0);
+		expect(result.totalLines).toBe(2);
 
 		const fridgeItems = await inventoryService.listByLocation(householdId, 'fridge');
 		expect(fridgeItems.map((item) => item.name).sort()).toEqual([
@@ -139,12 +141,45 @@ describe('importReceiptLines integration', () => {
 				.select()
 				.from(productEventTable)
 				.where(eq(productEventTable.householdId, householdId));
-			expect(events).toHaveLength(1);
-			expect(events[0]?.eventType).toBe('receipt_parsed');
-			expect(JSON.parse(events[0]?.metadata ?? '{}')).toMatchObject({
+			expect(events).toHaveLength(2);
+			const parsed = events.find((event) => event.eventType === 'receipt_parsed');
+			expect(parsed).toBeTruthy();
+			expect(JSON.parse(parsed?.metadata ?? '{}')).toMatchObject({
 				itemsAdded: 1,
 				lineCount: 1,
 				stage: 'import',
+				source: 'manual'
+			});
+		});
+	});
+
+	it('records receipt_price_captured when lines include unitPrice', async () => {
+		await importReceiptLines({
+			householdId,
+			userId: 'user-import',
+			role: 'owner',
+			lines: [
+				{ name: 'Mjölk', location: 'fridge', unitPrice: '14.90' },
+				{ name: 'Bröd', location: 'cupboard' }
+			],
+			inventoryService,
+			purchasePatternService,
+			pmfService,
+			learningEngineService,
+			eventType: 'receipt_parsed',
+			source: 'manual'
+		});
+
+		await vi.waitFor(async () => {
+			const events = await integrationDb.db
+				.select()
+				.from(productEventTable)
+				.where(eq(productEventTable.householdId, householdId));
+			const captured = events.find((event) => event.eventType === 'receipt_price_captured');
+			expect(captured).toBeTruthy();
+			expect(JSON.parse(captured?.metadata ?? '{}')).toMatchObject({
+				linesWithPrice: 1,
+				totalLines: 2,
 				source: 'manual'
 			});
 		});

@@ -2350,6 +2350,7 @@
 		"toastEstimatedDates": "{count, plural, one {# date estimated} other {# dates estimated}}",
 		"toastLocationCorrections": "{count, plural, one {# location adjusted} other {# locations adjusted}}",
 		"toastRulesImproved": "{count, plural, one {# memory rule improved} other {# memory rules improved}}",
+		"toastPricesSaved": "Prices saved to price history",
 		"success": {
 			"title": "Welcome to your pantry",
 			"body": "We found {count} products and organized them automatically.",
@@ -2382,6 +2383,8 @@
 	"priceMemory": {
 		"lastPaid": "Last paid {price} ({date})",
 		"lastPaidWithStore": "Last paid {price} ({date}, {store})",
+		"tooltip": "From your imported receipts (last 12 months)",
+		"chipAriaDescription": "Price history from imported receipts",
 		"navTitle": "Price history",
 		"page": {
 			"title": "Price history",

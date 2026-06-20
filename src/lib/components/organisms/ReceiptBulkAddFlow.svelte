@@ -245,6 +245,10 @@
 	const selectedCount = $derived(lines.filter((_, i) => selected[i]).length);
 	const hasLocationPredictions = $derived(locationPredictions.some((prediction) => prediction != null));
 
+	function countSelectedLinesWithPrice(): number {
+		return lines.filter((line, index) => selected[index] && line.unitPrice?.trim()).length;
+	}
+
 	function buildReceiptImportSummary() {
 		return aggregateReceiptImportSummary(buildReceiptLineContexts());
 	}
@@ -427,7 +431,8 @@
 							markReceiptImportCompleted(
 								selectedCount,
 								buildReceiptImportSummary(),
-								aggregateReceiptLocationCounts(buildReceiptLineContexts())
+								aggregateReceiptLocationCounts(buildReceiptLineContexts()),
+								countSelectedLinesWithPrice()
 							);
 							recordReceiptActivation(page.data.user?.id);
 						}

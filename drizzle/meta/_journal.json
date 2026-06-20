@@ -421,6 +421,13 @@
 			"when": 1753459200000,
 			"tag": "0060_acquisition_loops_telemetry",
 			"breakpoints": true
+		},
+		{
+			"idx": 60,
+			"version": "7",
+			"when": 1753545600000,
+			"tag": "0061_price_intelligence_phase1",
+			"breakpoints": true
 		}
 	]
 }
