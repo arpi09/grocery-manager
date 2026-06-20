@@ -45,7 +45,8 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			brainFeedbackV1Enabled,
 			shoppingUxV2Enabled,
 			pantryUxV2Enabled,
-			homeUxV2Enabled,
+			homeUxV2Enabled,
+
 		};
 	}
 
@@ -121,6 +122,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		brainFeedbackV1Enabled,
 		shoppingUxV2Enabled,
 		pantryUxV2Enabled,
-		homeUxV2Enabled,
+		homeUxV2Enabled,
+
 	};
 };

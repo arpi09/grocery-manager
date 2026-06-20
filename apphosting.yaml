@@ -229,7 +229,7 @@ env:
     availability:
       - RUNTIME
   - variable: STORE_RECOMMENDATION_V0_ENABLED
-    value: "false"
+    value: "true"
     availability:
       - RUNTIME
   # Optional demo household member (omit or override in console)
