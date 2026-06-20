@@ -6,7 +6,11 @@
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { t } from '$lib/i18n';
 	import { buildAcquisitionRegisterUrl } from '$lib/marketing/acquisition-attribution';
-	import { recordShoppingListExport } from '$lib/utils/household-invite-prompt';
+	import {
+		dismissValueMomentInvite,
+		recordShoppingListExport,
+		shouldShowValueMomentInvite
+	} from '$lib/utils/household-invite-prompt';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import {
 		appendShoppingListExportFooter,
@@ -118,6 +122,19 @@
 			}
 
 			await copyShareLink(body.url);
+
+			if (
+				memberCount === 1 &&
+				page.data.user?.id &&
+				shouldShowValueMomentInvite({
+					context: 'list_shared',
+					userId: page.data.user.id,
+					memberCount
+				})
+			) {
+				showClientToast(t('householdInvite.listSharedToast'), { variant: 'info' });
+				dismissValueMomentInvite('list_shared', page.data.user.id);
+			}
 
 			if (navigator.share && navigator.canShare?.({ url: body.url })) {
 				try {

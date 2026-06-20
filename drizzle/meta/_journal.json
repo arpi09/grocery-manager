@@ -414,6 +414,13 @@
 			"when": 1753372800000,
 			"tag": "0059_store_recommendation_telemetry",
 			"breakpoints": true
+		},
+		{
+			"idx": 59,
+			"version": "7",
+			"when": 1753459200000,
+			"tag": "0060_acquisition_loops_telemetry",
+			"breakpoints": true
 		}
 	]
 }

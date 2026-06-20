@@ -2,13 +2,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
 	dismissHouseholdInvitePrompt,
 	dismissInkopHouseholdInvitePrompt,
+	dismissValueMomentInvite,
 	getGlobalHouseholdInvitePromptContext,
 	hasShoppingListEngagement,
 	recordInkopHouseholdInviteShown,
 	recordPeakInventoryCount,
 	recordShoppingListExport,
+	recordValueMomentInviteShown,
 	shouldShowHouseholdInvitePrompt,
-	shouldShowInkopHouseholdInvitePrompt
+	shouldShowInkopHouseholdInvitePrompt,
+	shouldShowValueMomentInvite
 } from './household-invite-prompt';
 
 const TEST_USER = 'user-inkop-invite';
@@ -210,5 +213,72 @@ describe('inkop household invite prompt', () => {
 		expect(
 			hasShoppingListEngagement(TEST_USER, { uncheckedCount: 1, checkedCount: 0 })
 		).toBe(true);
+	});
+});
+
+describe('value moment invite prompts', () => {
+	let storage: Record<string, string>;
+
+	beforeEach(() => {
+		storage = {};
+		vi.stubGlobal('localStorage', {
+			getItem: (key: string) => storage[key] ?? null,
+			setItem: (key: string, value: string) => {
+				storage[key] = value;
+			},
+			removeItem: (key: string) => {
+				delete storage[key];
+			}
+		});
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	const soloOptions = {
+		userId: 'solo-user',
+		memberCount: 1
+	};
+
+	it('shows receipt_success once for solo household', () => {
+		expect(shouldShowValueMomentInvite({ ...soloOptions, context: 'receipt_success' })).toBe(
+			true
+		);
+		dismissValueMomentInvite('receipt_success', soloOptions.userId);
+		expect(shouldShowValueMomentInvite({ ...soloOptions, context: 'receipt_success' })).toBe(
+			false
+		);
+	});
+
+	it('rate limits trip_completed to once per seven days', () => {
+		const now = Date.UTC(2026, 5, 20);
+		recordValueMomentInviteShown('trip_completed', soloOptions.userId, now);
+
+		expect(
+			shouldShowValueMomentInvite({
+				...soloOptions,
+				context: 'trip_completed',
+				now: now + SEVEN_DAYS_MS - 1
+			})
+		).toBe(false);
+
+		expect(
+			shouldShowValueMomentInvite({
+				...soloOptions,
+				context: 'trip_completed',
+				now: now + SEVEN_DAYS_MS
+			})
+		).toBe(true);
+	});
+
+	it('hides value moment prompts for multi-member households', () => {
+		expect(
+			shouldShowValueMomentInvite({
+				userId: 'solo-user',
+				memberCount: 2,
+				context: 'list_shared'
+			})
+		).toBe(false);
 	});
 });

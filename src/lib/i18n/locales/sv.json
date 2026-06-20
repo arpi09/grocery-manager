@@ -2328,6 +2328,7 @@
 			"estimatedExpiry": "{count} varor med uppskattat utgångsdatum",
 			"ctaPrimary": "Visa mitt skafferi",
 			"ctaSecondary": "Lägg till fler varor",
+			"ctaInvitePartner": "Bjud in partner",
 			"ctaContinueSetup": "Fortsätt uppstarten",
 			"ariaLabel": "Kvittoimport klar"
 		}
@@ -2878,7 +2879,12 @@
 		"listaBannerAria": "Bjud in till gemensam inköpslista",
 		"listaBannerBody": "Vill du att listan uppdateras när ni handlar? Bjud in partner — samma lista, uppdateras när ni handlar.",
 		"listaBannerCta": "Bjud in partner",
-		"listaBannerDismiss": "Inte nu"
+		"listaBannerDismiss": "Inte nu",
+		"tripCompletedBannerAria": "Bjud in till nästa handling",
+		"tripCompletedBannerBody": "Handla ihop nästa gång? Bjud in partner — samma lista, uppdateras när ni handlar.",
+		"tripCompletedBannerCta": "Bjud in partner",
+		"tripCompletedBannerDismiss": "Inte nu",
+		"listSharedToast": "Vill partner se listan live? Bjud in under Inställningar → Hushåll."
 	},
 	"calendar": {
 		"mon": "Mån",
@@ -3291,23 +3297,25 @@
 		"publicLead": "Från någons skafferi — inte butik. Lista med utgång, ingen adress.",
 		"publicExpires": "Länken gäller till {date}.",
 		"publicGdprNote": "Listan visar bara varunamn och utgångsdatum — inga adresser eller kontaktuppgifter. Länken slutar gälla automatiskt.",
-		"publicSignupTitle": "Skapa din egen utgående-lista",
-		"publicSignupLead": "Få påminnelser innan mat blir dålig",
-		"publicSignupBtn": "Starta ditt Skaffu-skafferi"
+		"publicSignupTitle": "Skapa ditt eget skafferi",
+		"publicSignupLead": "Få påminnelser innan mat blir dålig — och dela utgående varor med grannar.",
+		"publicSignupBtn": "Skapa konto gratis",
+		"publicLoginLink": "Logga in"
 	},
 	"shoppingListShare": {
 		"noItems": "Inget att dela — listan är tom.",
 		"publicEyebrow": "Delad inköpslista",
 		"publicTitle": "Inköpslista",
-		"publicLead": "En read-only-snapshot — avbockade rader syns men kan inte ändras här.",
+		"publicLead": "Någon delade sin inköpslista med dig.",
+		"publicSnapshotHonesty": "Listan speglar hur den såg ut när länken skapades — inte live. Avbockade rader syns men kan inte ändras här.",
 		"publicExpires": "Länken gäller till {date}.",
-		"publicSnapshotAt": "Snapshot tagen {date}.",
+		"publicSnapshotAt": "Ögonblicksbild tagen {date}.",
 		"publicGdprNote": "Listan visar bara varunamn och mängd — inga hushållsnamn, adresser eller kontaktuppgifter. Länken slutar gälla automatiskt.",
-		"publicSignupTitle": "Handla tillsammans med den som delade listan?",
-		"publicSignupLead": "Skapa konto för en gemensam inköpslista som uppdateras när ni handlar — bjud in partner eller familj efter registrering.",
-		"publicSignupBtn": "Skapa konto och handla tillsammans",
+		"publicSignupTitle": "Vill du ha en egen inköpslista?",
+		"publicSignupLead": "Skapa konto och få en gemensam lista som uppdateras när ni handlar — bjud in partner efter registrering.",
+		"publicSignupBtn": "Skapa egen inköpslista",
 		"publicSignupHint": "Efter registrering: bjud in den som delade listan under Inställningar → Hushåll.",
-		"publicLoginLink": "Har du redan konto? Logga in",
+		"publicLoginLink": "Logga in",
 		"emptyList": "Listan var tom när länken skapades.",
 		"checkedBadge": "Avbockad",
 		"shareLink": "Dela länk",

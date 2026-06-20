@@ -65,7 +65,7 @@ describe('recordSignupCompleteEvent', () => {
 
 		await Promise.resolve();
 
-		expect(repository.recordEvent).toHaveBeenCalledTimes(2);
+		expect(repository.recordEvent).toHaveBeenCalledTimes(3);
 		expect(repository.recordEvent).toHaveBeenNthCalledWith(2, {
 			userId: 'user-w1',
 			householdId: null,
@@ -73,6 +73,35 @@ describe('recordSignupCompleteEvent', () => {
 			metadata: expect.objectContaining({
 				variant: 'a',
 				utm_content: 'shopping_share'
+			})
+		});
+		expect(repository.recordEvent).toHaveBeenNthCalledWith(3, {
+			userId: 'user-w1',
+			householdId: null,
+			eventType: 'shared_list_signup_completed',
+			metadata: expect.objectContaining({
+				acquisition_source: 'shopping_share'
+			})
+		});
+	});
+
+	it('records shared_list_signup_completed for lista_join cookie intent', async () => {
+		const repository = mockPmfRepository();
+		const service = new PmfService(repository);
+
+		recordSignupCompleteEvent(service, 'user-lista', 'a', {
+			listaJoinPending: true
+		});
+
+		await Promise.resolve();
+
+		expect(repository.recordEvent).toHaveBeenCalledTimes(2);
+		expect(repository.recordEvent).toHaveBeenNthCalledWith(2, {
+			userId: 'user-lista',
+			householdId: null,
+			eventType: 'shared_list_signup_completed',
+			metadata: expect.objectContaining({
+				acquisition_source: 'lista_join'
 			})
 		});
 	});

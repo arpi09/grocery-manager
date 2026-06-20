@@ -1,6 +1,7 @@
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { resolveAppOrigin } from './app-url';
 import { appendSearchParamsToAppPath } from './utm-params';
+import type { SignupUtm } from '$lib/domain/signup-utm';
 
 export const LISTA_JOIN_COOKIE = 'lista_join_token';
 
@@ -13,6 +14,8 @@ export const ACQUISITION_SOURCES = [
 ] as const;
 
 export type AcquisitionSource = (typeof ACQUISITION_SOURCES)[number];
+
+export type SharedListSignupSource = 'shopping_share' | 'lista_join';
 
 const ACQUISITION_UTM = {
 	utm_source: 'skaffu',
@@ -36,6 +39,39 @@ function buildAcquisitionSearchParams(source: AcquisitionSource): URLSearchParam
 
 function isSameOriginRequest(requestOrigin: string | undefined, resolvedOrigin: string): boolean {
 	return !!requestOrigin && resolvedOrigin === trimOrigin(requestOrigin);
+}
+
+/** Non-reversible token prefix for public-surface telemetry bucketing. */
+export function tokenTelemetryPrefix(token: string): string {
+	let hash = 0;
+	for (let i = 0; i < token.length; i++) {
+		hash = (hash * 31 + token.charCodeAt(i)) | 0;
+	}
+	return Math.abs(hash).toString(36).slice(0, 8);
+}
+
+export function isShoppingShareSignupUtm(signupUtm: SignupUtm | null | undefined): boolean {
+	return signupUtm?.content?.trim() === 'shopping_share';
+}
+
+export function resolveSharedListSignupSource(options: {
+	signupUtm?: SignupUtm | null;
+	listaJoinPending?: boolean;
+}): SharedListSignupSource | null {
+	if (options.listaJoinPending) {
+		return 'lista_join';
+	}
+	if (isShoppingShareSignupUtm(options.signupUtm)) {
+		return 'shopping_share';
+	}
+	return null;
+}
+
+export function shouldRecordSharedListSignupCompleted(options: {
+	signupUtm?: SignupUtm | null;
+	listaJoinPending?: boolean;
+}): boolean {
+	return resolveSharedListSignupSource(options) !== null;
 }
 
 /** Register URL with acquisition wedge UTM params for signup attribution. */

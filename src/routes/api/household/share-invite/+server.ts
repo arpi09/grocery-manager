@@ -3,7 +3,7 @@ import { HouseholdForbiddenError } from '$lib/application/household.service';
 import { translate } from '$lib/i18n/messages';
 import { requireHousehold } from '$lib/server/api-guards';
 import { getAppOrigin } from '$lib/server/origin';
-import { recordProductEvent } from '$lib/server/product-events';
+import { recordHouseholdInviteSent } from '$lib/server/household-invite-events';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals, url }) => {
@@ -23,11 +23,11 @@ export const POST: RequestHandler = async ({ request, locals, url }) => {
 		);
 		const inviteUrl = `${getAppOrigin(url.origin)}/invite/${token}`;
 
-		recordProductEvent(locals.pmfService, {
+		recordHouseholdInviteSent(locals.pmfService, {
 			userId: auth.user.id,
 			householdId: auth.householdId,
-			eventType: 'household_invite_created',
-			metadata: { context }
+			context,
+			channel: 'share_api'
 		});
 
 		return json({ ok: true, inviteUrl });

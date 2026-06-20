@@ -5,6 +5,10 @@ import { hasAnalyticsConsent } from '$lib/cookie-consent';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import type { SignupUtm } from '$lib/domain/signup-utm';
 import type { LandingHeroVariant, ReceiptHeroVariant } from '$lib/marketing/landing-variants';
+import {
+	resolveSharedListSignupSource,
+	shouldRecordSharedListSignupCompleted
+} from '$lib/marketing/acquisition-attribution';
 import { signupUtmToEventMetadata } from '$lib/marketing/signup-utm';
 import { getOrSetAnalyticsVisitorId } from '$lib/server/analytics-visitor';
 import { recordProductEvent } from '$lib/server/product-events';
@@ -61,6 +65,7 @@ export function recordMarketingEvent(options: RecordMarketingEventOptions): void
 export interface RecordSignupCompleteEventOptions {
 	visitorId?: string | null;
 	signupUtm?: SignupUtm | null;
+	listaJoinPending?: boolean;
 }
 
 export interface RecordGuideViewEventOptions {
@@ -146,6 +151,27 @@ export function recordSignupCompleteEvent(
 			householdId: null,
 			eventType: wedgeEvent,
 			metadata: baseMetadata
+		});
+	}
+
+	if (
+		shouldRecordSharedListSignupCompleted({
+			signupUtm: options?.signupUtm,
+			listaJoinPending: options?.listaJoinPending
+		})
+	) {
+		const acquisitionSource = resolveSharedListSignupSource({
+			signupUtm: options?.signupUtm,
+			listaJoinPending: options?.listaJoinPending
+		});
+		recordProductEvent(pmfService, {
+			userId,
+			householdId: null,
+			eventType: 'shared_list_signup_completed',
+			metadata: {
+				...baseMetadata,
+				acquisition_source: acquisitionSource
+			}
 		});
 	}
 }

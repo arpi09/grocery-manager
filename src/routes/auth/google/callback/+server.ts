@@ -15,6 +15,7 @@ import { env as publicEnv } from '$env/dynamic/public';
 import { hasAnalyticsConsent } from '$lib/cookie-consent';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { getOrSetAnalyticsVisitorId } from '$lib/server/analytics-visitor';
+import { LISTA_JOIN_COOKIE } from '$lib/marketing/acquisition-attribution';
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -71,7 +72,8 @@ export const GET: RequestHandler = async (event) => {
 			});
 			recordSignupCompleteEvent(locals.pmfService, result.userId, variant, {
 				visitorId: analyticsAllowed ? getOrSetAnalyticsVisitorId(cookies) : null,
-				signupUtm
+				signupUtm,
+				listaJoinPending: Boolean(cookies.get(LISTA_JOIN_COOKIE))
 			});
 			clearSignupUtmCookie(cookies);
 		}

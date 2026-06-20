@@ -2359,6 +2359,7 @@
 			"estimatedExpiry": "{count} items with estimated expiry dates",
 			"ctaPrimary": "View my pantry",
 			"ctaSecondary": "Add more items",
+			"ctaInvitePartner": "Invite partner",
 			"ctaContinueSetup": "Continue setup",
 			"ariaLabel": "Receipt import complete"
 		}
@@ -2909,7 +2910,12 @@
 		"listaBannerAria": "Invite to shared shopping list",
 		"listaBannerBody": "Want the list to update as you shop? Invite your partner — same list, updates as you shop.",
 		"listaBannerCta": "Invite partner",
-		"listaBannerDismiss": "Not now"
+		"listaBannerDismiss": "Not now",
+		"tripCompletedBannerAria": "Invite for next shop",
+		"tripCompletedBannerBody": "Shop together next time? Invite your partner — same list, updates as you shop.",
+		"tripCompletedBannerCta": "Invite partner",
+		"tripCompletedBannerDismiss": "Not now",
+		"listSharedToast": "Want your partner to see the list live? Invite them under Settings → Household."
 	},
 	"calendar": {
 		"mon": "Mon",
@@ -3291,23 +3297,25 @@
 		"publicLead": "From someone's pantry — not a shop. Expiry list, no address.",
 		"publicExpires": "Link valid until {date}.",
 		"publicGdprNote": "The list shows item names and expiry dates only — no addresses or contact details. The link expires automatically.",
-		"publicSignupTitle": "Create your own expiring-items list",
-		"publicSignupLead": "Get reminders before food goes bad",
-		"publicSignupBtn": "Start your Skaffu pantry"
+		"publicSignupTitle": "Create your own pantry",
+		"publicSignupLead": "Get reminders before food goes bad — and share expiring items with neighbours.",
+		"publicSignupBtn": "Create free account",
+		"publicLoginLink": "Log in"
 	},
 	"shoppingListShare": {
 		"noItems": "Nothing to share — the list is empty.",
 		"publicEyebrow": "Shared shopping list",
 		"publicTitle": "Shopping list",
-		"publicLead": "A read-only snapshot — checked items are shown but cannot be changed here.",
+		"publicLead": "Someone shared their shopping list with you.",
+		"publicSnapshotHonesty": "The list reflects how it looked when the link was created — not live. Checked items are shown but cannot be changed here.",
 		"publicExpires": "Link valid until {date}.",
 		"publicSnapshotAt": "Snapshot taken {date}.",
 		"publicGdprNote": "The list shows item names and quantities only — no household names, addresses, or contact details. The link expires automatically.",
-		"publicSignupTitle": "Shop together with whoever shared this list?",
-		"publicSignupLead": "Create an account for a shared shopping list that updates as you shop — invite your partner or family after signing up.",
-		"publicSignupBtn": "Create account and shop together",
+		"publicSignupTitle": "Want your own shopping list?",
+		"publicSignupLead": "Create an account for a shared list that updates as you shop — invite your partner after signing up.",
+		"publicSignupBtn": "Create your shopping list",
 		"publicSignupHint": "After signing up: invite whoever shared this list under Settings → Household.",
-		"publicLoginLink": "Already have an account? Log in",
+		"publicLoginLink": "Log in",
 		"emptyList": "The list was empty when the link was created.",
 		"checkedBadge": "Checked",
 		"shareLink": "Share link",

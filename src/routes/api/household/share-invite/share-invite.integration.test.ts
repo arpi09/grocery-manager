@@ -152,7 +152,13 @@ describe('POST /api/household/share-invite', () => {
 		expect(recordEvent).toHaveBeenCalledWith(
 			expect.objectContaining({
 				eventType: 'household_invite_created',
-				metadata: { context: 'export_prompt' }
+				metadata: { context: 'export_prompt', channel: 'share_api' }
+			})
+		);
+		expect(recordEvent).toHaveBeenCalledWith(
+			expect.objectContaining({
+				eventType: 'household_invite_sent',
+				metadata: { context: 'export_prompt', channel: 'share_api' }
 			})
 		);
 	});
@@ -178,7 +184,13 @@ describe('POST /api/household/share-invite', () => {
 		expect(recordEvent).toHaveBeenCalledWith(
 			expect.objectContaining({
 				eventType: 'household_invite_created',
-				metadata: { context: 'lista' }
+				metadata: { context: 'lista', channel: 'share_api' }
+			})
+		);
+		expect(recordEvent).toHaveBeenCalledWith(
+			expect.objectContaining({
+				eventType: 'household_invite_sent',
+				metadata: { context: 'lista', channel: 'share_api' }
 			})
 		);
 	});

@@ -58,6 +58,7 @@ const CLIENT_EVENT_TYPES = [
 	'household_invite_prompt_clicked',
 	'household_invite_prompt_dismissed',
 	'household_invite_created',
+	'household_invite_sent',
 	'shopping_list_share_clicked',
 	'replenishment_fold_opened',
 	'brain_feedback_positive',
@@ -90,6 +91,10 @@ const CLIENT_EVENT_TYPES = [
 export const PUBLIC_ACQUISITION_EVENT_TYPES = [
 	'shopping_list_share_viewed',
 	'shopping_list_share_cta_clicked',
+	'shared_list_opened',
+	'shared_list_signup_clicked',
+	'public_surface_viewed',
+	'public_surface_signup_clicked',
 	'public_city_feed_viewed',
 	'public_city_feed_item_clicked',
 	'public_city_feed_signup_clicked',

@@ -93,7 +93,8 @@ describe('drizzle migrations', () => {
 	'0056_home_ux_v2_telemetry.sql',
 	'0057_product_catalog.sql',
 	'0058_moment_cta_telemetry.sql',
-	'0059_store_recommendation_telemetry.sql'
+	'0059_store_recommendation_telemetry.sql',
+	'0060_acquisition_loops_telemetry.sql'
 		];
 		expect(pgliteFiles).toEqual(sqlFiles);
 	});

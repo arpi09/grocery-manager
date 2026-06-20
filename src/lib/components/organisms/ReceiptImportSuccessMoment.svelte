@@ -28,6 +28,8 @@
 	let session = $state<ReceiptImportSessionFlag | null>(null);
 
 	const userId = $derived(page.data.user?.id ?? null);
+	const memberCount = $derived(page.data.householdMemberCount ?? 0);
+	const showInvitePartnerCta = $derived(memberCount === 1);
 	const pathname = $derived(page.url.pathname);
 	const showContinueSetup = $derived(
 		Boolean(userId && shouldShowOnboarding(userId) && !isActivationOnboardingFlowComplete(userId))
@@ -85,7 +87,28 @@
 
 	async function handleSecondaryCta() {
 		if (!session) return;
+		if (showInvitePartnerCta) {
+			void trackProductEvent('receipt_import_success_secondary_cta', {
+				...eventMetadata(session),
+				context: 'receipt_success'
+			});
+			markOnboardingSuccessIfNeeded();
+			dismissMoment(false);
+			await goto('/settings#household');
+			return;
+		}
 		void trackProductEvent('receipt_import_success_secondary_cta', eventMetadata(session));
+		markOnboardingSuccessIfNeeded();
+		dismissMoment(false);
+		await goto('/scan');
+	}
+
+	async function handleAddMoreCta() {
+		if (!session) return;
+		void trackProductEvent('receipt_import_success_secondary_cta', {
+			...eventMetadata(session),
+			context: 'add_more'
+		});
 		markOnboardingSuccessIfNeeded();
 		dismissMoment(false);
 		await goto('/scan');
@@ -119,7 +142,18 @@
 			{/if}
 			<div class="action-block">
 				<Button type="button" fullWidth variant="primary" data-testid="receipt-success-cta-primary" onclick={handlePrimaryCta}>{t('receiptImport.success.ctaPrimary')}</Button>
-				<Button type="button" fullWidth variant="ghost" data-testid="receipt-success-cta-secondary" onclick={handleSecondaryCta}>{t('receiptImport.success.ctaSecondary')}</Button>
+				<Button
+					type="button"
+					fullWidth
+					variant="ghost"
+					data-testid={showInvitePartnerCta ? 'receipt-success-cta-invite' : 'receipt-success-cta-secondary'}
+					onclick={handleSecondaryCta}
+				>
+					{showInvitePartnerCta ? t('receiptImport.success.ctaInvitePartner') : t('receiptImport.success.ctaSecondary')}
+				</Button>
+				{#if showInvitePartnerCta}
+					<button type="button" class="continue-setup" data-testid="receipt-success-cta-secondary" onclick={handleAddMoreCta}>{t('receiptImport.success.ctaSecondary')}</button>
+				{/if}
 				{#if showContinueSetup}
 					<button type="button" class="continue-setup" data-testid="receipt-success-cta-continue-setup" onclick={handleContinueSetup}>{t('receiptImport.success.ctaContinueSetup')}</button>
 				{/if}

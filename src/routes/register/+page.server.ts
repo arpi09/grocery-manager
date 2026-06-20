@@ -20,6 +20,7 @@ import {
 	clearSignupUtmCookie,
 	resolveSignupUtmFromRequest
 } from '$lib/server/signup-utm';
+import { LISTA_JOIN_COOKIE } from '$lib/marketing/acquisition-attribution';
 import { registerSchema } from '$lib/validation/auth.schemas';
 import { POST_REGISTER_APP_HOME_PATH, POST_REGISTER_SCAN_PATH } from '$lib/navigation/post-register';
 import { consumeRateLimit } from '$lib/server/auth-rate-limit';
@@ -91,7 +92,8 @@ export const actions: Actions = {
 			});
 			recordSignupCompleteEvent(event.locals.pmfService, user.id, variant, {
 				visitorId: analyticsAllowed ? getOrSetAnalyticsVisitorId(event.cookies) : null,
-				signupUtm
+				signupUtm,
+				listaJoinPending: Boolean(event.cookies.get(LISTA_JOIN_COOKIE))
 			});
 			clearSignupUtmCookie(event.cookies);
 			await createSession(event, user.id);

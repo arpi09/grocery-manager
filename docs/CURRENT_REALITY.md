@@ -33,7 +33,8 @@ Utg?ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenis
 | Inköp (Shopping V2) | `/inkop` | Plan + Shop modes live (`SHOPPING_UX_V2_ENABLED` canary); checklist data grid in overflow drawer (flag-off: inline grid) |
 | Memory Explorer | `/settings/memory` | Vad Skaffu vet ? household rules (learning gate) |
 | Post-register wedge | `/hem?welcome=1` | Ny registrering/OAuth ? guided start on hem ([#46](https://github.com/arpi09/grocery-manager/pull/46)) |
-| Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie |
+| Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie; **Acquisition Loops V1** branding + telemetry ([ACQUISITION_LOOPS_V1.md](./ACQUISITION_LOOPS_V1.md)) |
+| Delad utgående W3 | `/dela/[token]` | Conversion pass aligned with lista (V1) |
 | Onboarding | modal | **3 steg / ~15s** ? lista ? minne ? kvitto; finish ? `/inkop?quick=1` |
 | Grannskafferiet (R16) | hidden | Ej i Mer unless `PUBLIC_CITY_FEED_ENABLED` |
 
@@ -79,6 +80,14 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 - [x] **SMUI + Reality Audit + Settings hub** ? prod **`c267c172c`** @ [27608398776](https://github.com/arpi09/grocery-manager/actions/runs/27608398776) (fast E2E). PRs #96?#100 merged 2026-06-16.
 - [x] **Mobile UX Recovery** ? prior prod **`d585cbd5`** @ [27570192623](https://github.com/arpi09/grocery-manager/actions/runs/27570192623)
 - [x] **PR #95** CI/CD v2 merged 2026-06-15
+
+## Acquisition (V1)
+
+- **W1** `/lista/[token]` — shared list growth surface; events `shared_list_*`, `public_surface_*`
+- **W3** `/dela/[token]` — expiring share conversion pass
+- **W4** Invite value moments — receipt success, trip completed, post-list-share (solo household)
+- **V2 backlog:** store comparison public share (no price engine in V1)
+- Spec: [ACQUISITION_LOOPS_V1.md](./ACQUISITION_LOOPS_V1.md)
 
 ## Branches in flight (manuell)
 

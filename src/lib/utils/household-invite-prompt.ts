@@ -1,4 +1,16 @@
-export type HouseholdInvitePromptContext = 'settings' | 'export_prompt' | 'inkop' | 'lista';
+export type HouseholdInvitePromptContext =
+	| 'settings'
+	| 'export_prompt'
+	| 'inkop'
+	| 'lista'
+	| 'receipt_success'
+	| 'trip_completed'
+	| 'list_shared';
+
+export type ValueMomentInviteContext = Extract<
+	HouseholdInvitePromptContext,
+	'receipt_success' | 'trip_completed' | 'list_shared'
+>;
 
 const DISMISSED_SUFFIX = 'household-invite-dismissed';
 const INKOP_DISMISSED_SUFFIX = 'household-invite-dismissed-inkop';
@@ -6,9 +18,18 @@ const INKOP_LAST_SHOWN_SUFFIX = 'household-invite-last-shown-inkop';
 const PEAK_ITEMS_SUFFIX = 'peak-inventory-items';
 const SHOPPING_EXPORT_SUFFIX = 'shopping-list-exported';
 const INKOP_RATE_LIMIT_MS = 7 * 24 * 60 * 60 * 1000;
+const VALUE_MOMENT_RATE_LIMIT_MS = 7 * 24 * 60 * 60 * 1000;
 
 function storageKey(suffix: string, userId: string): string {
 	return `home-pantry-${suffix}:${userId}`;
+}
+
+function valueMomentDismissSuffix(context: ValueMomentInviteContext): string {
+	return `household-invite-dismissed-${context}`;
+}
+
+function valueMomentLastShownSuffix(context: ValueMomentInviteContext): string {
+	return `household-invite-last-shown-${context}`;
 }
 
 export function recordPeakInventoryCount(count: number, userId?: string | null): void {
@@ -161,6 +182,74 @@ export function shouldShowInkopHouseholdInvitePrompt(options: {
 	const lastShown = getInkopHouseholdInviteLastShown(userId);
 	if (lastShown !== null && now - lastShown < INKOP_RATE_LIMIT_MS) {
 		return false;
+	}
+
+	return true;
+}
+
+export function dismissValueMomentInvite(
+	context: ValueMomentInviteContext,
+	userId?: string | null
+): void {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	localStorage.setItem(storageKey(valueMomentDismissSuffix(context), userId), '1');
+}
+
+export function recordValueMomentInviteShown(
+	context: ValueMomentInviteContext,
+	userId?: string | null,
+	now = Date.now()
+): void {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	localStorage.setItem(storageKey(valueMomentLastShownSuffix(context), userId), String(now));
+}
+
+function getValueMomentInviteLastShown(
+	context: ValueMomentInviteContext,
+	userId: string
+): number | null {
+	const raw = localStorage.getItem(storageKey(valueMomentLastShownSuffix(context), userId));
+	if (!raw) {
+		return null;
+	}
+
+	const parsed = Number(raw);
+	return Number.isFinite(parsed) ? parsed : null;
+}
+
+export function shouldShowValueMomentInvite(options: {
+	context: ValueMomentInviteContext;
+	userId?: string | null;
+	memberCount: number;
+	now?: number;
+	rateLimitMs?: number;
+}): boolean {
+	const { context, userId, memberCount, now = Date.now(), rateLimitMs = VALUE_MOMENT_RATE_LIMIT_MS } =
+		options;
+
+	if (typeof localStorage === 'undefined' || !userId) {
+		return false;
+	}
+
+	if (memberCount !== 1) {
+		return false;
+	}
+
+	if (localStorage.getItem(storageKey(valueMomentDismissSuffix(context), userId)) === '1') {
+		return false;
+	}
+
+	if (context === 'trip_completed') {
+		const lastShown = getValueMomentInviteLastShown(context, userId);
+		if (lastShown !== null && now - lastShown < rateLimitMs) {
+			return false;
+		}
 	}
 
 	return true;

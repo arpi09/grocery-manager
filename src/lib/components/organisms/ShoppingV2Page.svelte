@@ -7,6 +7,7 @@
 	import ModeToggle from '$lib/components/molecules/ModeToggle.svelte';
 	import ShoppingToPantrySheet from '$lib/components/molecules/ShoppingToPantrySheet.svelte';
 	import InkopHouseholdInviteBanner from '$lib/components/organisms/InkopHouseholdInviteBanner.svelte';
+	import TripCompletedInviteBanner from '$lib/components/organisms/TripCompletedInviteBanner.svelte';
 	import ShoppingLegacyDrawer from '$lib/components/organisms/ShoppingLegacyDrawer.svelte';
 	import ShoppingV2PlanView from '$lib/components/organisms/ShoppingV2PlanView.svelte';
 	import ShoppingV2ShopView from '$lib/components/organisms/ShoppingV2ShopView.svelte';
@@ -71,6 +72,7 @@
 	let pantryBridgePreview = $state<PantryBridgePreview | null>(null);
 	let pantryBridgeMode = $state<ShoppingToPantryMode>(shoppingToPantryMode);
 	let pantrySheetOpen = $state(false);
+	let tripCompletedTrigger = $state(0);
 
 	const unchecked = $derived(sortUncheckedItems(items));
 	const listHasItems = $derived(items.length > 0 || checkedCount > 0);
@@ -313,6 +315,7 @@
 					total: session.tripTotal,
 					durationMs: session.tripStartedAt ? Date.now() - session.tripStartedAt : undefined
 				});
+				tripCompletedTrigger += 1;
 			}
 
 			if (result.data?.pantryAdded?.message) {
@@ -357,6 +360,8 @@
 		checkedCount={checkedCount}
 		{listHasItems}
 	/>
+
+	<TripCompletedInviteBanner memberCount={memberCount} trigger={tripCompletedTrigger} />
 
 	{#if session.mode === 'plan'}
 		<ShoppingV2PlanView

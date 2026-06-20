@@ -15,6 +15,10 @@ import {
 	ACQUISITION_SOURCES,
 	buildAcquisitionLandingUrl,
 	buildAcquisitionRegisterUrl,
+	isShoppingShareSignupUtm,
+	resolveSharedListSignupSource,
+	shouldRecordSharedListSignupCompleted,
+	tokenTelemetryPrefix,
 	type AcquisitionSource
 } from './acquisition-attribution';
 
@@ -70,5 +74,58 @@ describe('buildAcquisitionLandingUrl', () => {
 		expect(buildAcquisitionLandingUrl('city_feed', 'https://homepantry.com')).toBe(
 			`https://app.example/?${EXPECTED_QUERY}city_feed`
 		);
+	});
+});
+
+describe('tokenTelemetryPrefix', () => {
+	it('returns stable prefix for same token', () => {
+		expect(tokenTelemetryPrefix('abc123')).toBe(tokenTelemetryPrefix('abc123'));
+		expect(tokenTelemetryPrefix('abc123').length).toBeLessThanOrEqual(8);
+	});
+
+	it('differs for different tokens', () => {
+		expect(tokenTelemetryPrefix('token-a')).not.toBe(tokenTelemetryPrefix('token-b'));
+	});
+});
+
+describe('shared list signup attribution', () => {
+	it('detects shopping_share UTM', () => {
+		expect(
+			isShoppingShareSignupUtm({
+				source: 'skaffu',
+				medium: 'product',
+				campaign: 'acquisition_wedge',
+				content: 'shopping_share'
+			})
+		).toBe(true);
+	});
+
+	it('prefers lista_join when cookie intent is pending', () => {
+		expect(
+			resolveSharedListSignupSource({
+				listaJoinPending: true,
+				signupUtm: {
+					source: 'skaffu',
+					medium: 'product',
+					campaign: 'acquisition_wedge',
+					content: 'shopping_share'
+				}
+			})
+		).toBe('lista_join');
+	});
+
+	it('records shared list signup for shopping_share or lista_join', () => {
+		expect(
+			shouldRecordSharedListSignupCompleted({
+				signupUtm: {
+					source: 'skaffu',
+					medium: 'product',
+					campaign: 'acquisition_wedge',
+					content: 'shopping_share'
+				}
+			})
+		).toBe(true);
+		expect(shouldRecordSharedListSignupCompleted({ listaJoinPending: true })).toBe(true);
+		expect(shouldRecordSharedListSignupCompleted({})).toBe(false);
 	});
 });

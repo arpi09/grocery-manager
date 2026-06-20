@@ -1,0 +1,4 @@
+-- Acquisition Loops V1 product_event types (application enum in schema.ts):
+-- shared_list_opened, shared_list_signup_clicked, shared_list_signup_completed,
+-- public_surface_viewed, public_surface_signup_clicked, household_invite_sent
+-- No DDL required: product_event.event_type is unconstrained text.
