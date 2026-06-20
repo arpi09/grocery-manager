@@ -2,7 +2,6 @@
 import * as devalue from 'devalue';
 
 import {
-	dismissOnboardingModalIfOpen,
 	dismissPageHintIfOpen,
 	dismissPostOnboardingShareIfOpen,
 	loginAsAdmin
@@ -81,11 +80,7 @@ test.describe('Shopping list', () => {
 	test('shopping grid shows seeded smart-fill fixture items', async ({ page }) => {
 		await loginAsAdmin(page);
 
-		await page.goto(legacyShoppingGridPath);
-
-		await dismissOnboardingModalIfOpen(page);
-
-		await dismissPageHintIfOpen(page);
+		await openLegacyShoppingGrid(page);
 
 		await seedLegacyShoppingItemViaApi(page, 'E2E Smartfill Mjölk');
 		await seedLegacyShoppingItemViaApi(page, 'E2E Smartfill Banan');
