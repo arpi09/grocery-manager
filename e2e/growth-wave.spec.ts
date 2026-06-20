@@ -156,12 +156,18 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		);
 		await expect(page.getByText(itemName)).toBeVisible();
 		await expect(page.getByRole('note')).toContainText(/inga adresser|no addresses/i);
-		await expect(
-			page.getByRole('link', { name: /Starta ditt Skaffu-skafferi|Start your Skaffu pantry/i })
-		).toHaveAttribute(
-			'href',
-			'/register?utm_source=skaffu&utm_medium=product&utm_campaign=acquisition_wedge&utm_content=expiring_share'
-		);
+		const signupLink = page.getByRole('link', {
+			name: /Skapa konto gratis|Create free account/i
+		});
+		await expect(signupLink).toBeVisible();
+		const signupHref = await signupLink.getAttribute('href');
+		expect(signupHref).toBeTruthy();
+		const signupUrl = new URL(signupHref!, page.url());
+		expect(signupUrl.pathname).toBe('/register');
+		expect(signupUrl.searchParams.get('utm_source')).toBe('skaffu');
+		expect(signupUrl.searchParams.get('utm_medium')).toBe('product');
+		expect(signupUrl.searchParams.get('utm_campaign')).toBe('acquisition_wedge');
+		expect(signupUrl.searchParams.get('utm_content')).toBe('expiring_share');
 	});
 
 	test('grannskafferiet discovery page loads for logged-in user', async ({ page }) => {
