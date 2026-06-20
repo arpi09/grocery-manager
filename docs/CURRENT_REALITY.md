@@ -67,7 +67,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 ## Tier snapshot
 
 - **A:** inkop, household, checkoff-bridge, eat-first, replenishment, onboarding?inkop
-- **B:** receipt import, barcode/photo add, price memory, Brain V1 (flags on), Memory Explorer
+- **B:** receipt import, barcode/photo add, price memory, Brain V1 (flags on), Memory Explorer — foundation audit: [PRICE_INTELLIGENCE_AUDIT.md](./PRICE_INTELLIGENCE_AUDIT.md)
 - **C:** grannskafferiet gate, onboarding v2, landing copy, design system doc (R12?R16 on master)
 
 ## K?nda drift (fixa n?r du ser dem)
