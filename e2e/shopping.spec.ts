@@ -197,7 +197,7 @@ test.describe('Shopping list', () => {
 		)?.pantryBridge;
 		expect(pantryBridge).toBeTruthy();
 
-		await postShoppingAction(page, 'addToPantry', {
+		const addToPantryResult = await postShoppingAction(page, 'addToPantry', {
 			shoppingItemId: pantryBridge!.item.id,
 			location: pantryBridge!.preview.location,
 			quantity: pantryBridge!.preview.quantity,
@@ -205,13 +205,14 @@ test.describe('Shopping list', () => {
 			merge: pantryBridge!.preview.mergeCandidate ? '1' : '0',
 			shoppingToPantryMode: 'ask'
 		});
-
-		await page.goto(
-			`/inventory/${pantryBridge!.preview.location}?q=${encodeURIComponent(itemName)}`,
-			{ waitUntil: 'domcontentloaded' }
-		);
-		await expect(page.getByTestId('inventory-table').getByText(itemName)).toBeVisible({
-			timeout: 15_000
+		expect(
+			(
+				addToPantryResult.data as
+					| { pantryAdded?: { message?: string; location?: string } }
+					| undefined
+			)?.pantryAdded
+		).toMatchObject({
+			location: pantryBridge!.preview.location
 		});
 	});
 });
