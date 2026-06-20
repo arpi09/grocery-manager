@@ -83,7 +83,7 @@ test.describe('Shopping UX v2', () => {
 		const row = drawer.locator(`[data-testid^="shopping-grid-row-"]`).filter({ hasText: itemName });
 		await expect(row).toBeVisible();
 		await expect(row.getByTestId('product-avatar')).toBeVisible();
-		await row.locator('form[action="?/toggle"] input[type=checkbox]').click();
+		await row.getByTestId(/^shopping-grid-checkoff-/).click();
 
 		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
 		if (await pantrySheet.isVisible().catch(() => false)) {
@@ -93,5 +93,37 @@ test.describe('Shopping UX v2', () => {
 		await drawer.getByRole('button', { name: /Tillbaka till Plan|Back to Plan/i }).click();
 		await expect(drawer).not.toBeVisible();
 		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible();
+	});
+
+	test('checklist drawer accessible from shop mode @deploy-critical', async ({ page }) => {
+		test.skip(process.env.SHOPPING_UX_V2_ENABLED !== 'true', 'Requires SHOPPING_UX_V2_ENABLED=true');
+
+		const itemName = `E2E Shop Grid ${Date.now()}`;
+
+		await loginAsAdmin(page);
+		await page.goto('/inkop');
+		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
+		await dismissPostOnboardingShareIfOpen(page);
+
+		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
+		await page.getByRole('button', { name: /Lägg till vara|Add item/i }).click();
+		await page.getByTestId('shopping-v2-quick-add').locator('#shopping-v2-name').fill(itemName);
+		await page.getByTestId('shopping-v2-quick-add').getByRole('button', { name: /Lägg till|Add/i }).click();
+		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(itemName, {
+			timeout: 15_000
+		});
+
+		await page.getByTestId('shopping-v2-start-shop').click();
+		await expect(page.getByTestId('shopping-v2-shop')).toBeVisible();
+
+		await page.getByRole('button', { name: /Visa som checklista|Show as checklist/i }).click();
+		const drawer = page.getByTestId('shopping-v2-legacy-drawer');
+		await expect(drawer).toBeVisible({ timeout: 15_000 });
+		await expect(drawer.getByText(itemName)).toBeVisible();
+
+		await drawer.getByRole('button', { name: /Tillbaka till Handla|Back to Shop/i }).click();
+		await expect(drawer).not.toBeVisible();
+		await expect(page.getByTestId('shopping-v2-shop')).toBeVisible();
 	});
 });

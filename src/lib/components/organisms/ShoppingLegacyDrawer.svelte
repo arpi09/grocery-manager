@@ -20,6 +20,7 @@
 		shoppingToPantryMode: ShoppingToPantryMode;
 		memberCount: number;
 		onClose: () => void;
+		closeLabel?: string;
 	}
 
 	let {
@@ -30,7 +31,8 @@
 		shareLinkEnabled,
 		shoppingToPantryMode,
 		memberCount,
-		onClose
+		onClose,
+		closeLabel = t('dataGrid.backToPlan')
 	}: Props = $props();
 
 	let drawerEl = $state<HTMLElement | null>(null);
@@ -82,7 +84,7 @@
 	>
 		<header class="drawer-header">
 			<button type="button" class="back-link" onclick={onClose}>
-				{t('dataGrid.backToPlan')}
+				{closeLabel}
 			</button>
 			<div class="header-actions">
 				<ShoppingListShareMenu

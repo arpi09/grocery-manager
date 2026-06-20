@@ -1256,6 +1256,7 @@
 			"shop": {
 				"backToPlan": "Plan",
 				"backToPlanAria": "Back to planning",
+				"backToShop": "Back to Shop",
 				"progress": "{picked} of {total} picked",
 				"progressAria": "{picked} of {total} items picked",
 				"progressComplete": "All picked",

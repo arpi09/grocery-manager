@@ -24,6 +24,7 @@
 		onBackToPlan: () => void;
 		onCompletePantry: () => void;
 		onCompletePlan: () => void;
+		onOpenLegacy?: () => void;
 	}
 
 	let {
@@ -36,7 +37,8 @@
 		onPick,
 		onBackToPlan,
 		onCompletePantry,
-		onCompletePlan
+		onCompletePlan,
+		onOpenLegacy
 	}: Props = $props();
 
 	const progress = $derived<TripProgress>(getTripProgress(pickedCount, tripTotal));
@@ -51,6 +53,11 @@
 		<button type="button" class="back-link" onclick={onBackToPlan} aria-label={t('shopping.v2.shop.backToPlanAria')}>
 			{t('shopping.v2.shop.backToPlan')}
 		</button>
+		{#if onOpenLegacy}
+			<button type="button" class="legacy-link" onclick={onOpenLegacy}>
+				{t('shopping.v2.overflow.legacyList')}
+			</button>
+		{/if}
 	</div>
 
 	<TripProgressBar {progress} />
@@ -96,7 +103,28 @@
 
 	.shop-top {
 		display: flex;
-		justify-content: flex-start;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-sm);
+		min-width: 0;
+	}
+
+	.legacy-link {
+		border: none;
+		background: none;
+		padding: 0;
+		font: inherit;
+		font-weight: 600;
+		color: var(--color-primary);
+		cursor: pointer;
+		text-decoration: underline;
+		min-height: var(--touch-target-min);
+		flex-shrink: 0;
+	}
+
+	.legacy-link:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 
 	.back-link {

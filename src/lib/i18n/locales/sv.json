@@ -1225,6 +1225,7 @@
 			"shop": {
 				"backToPlan": "Planera",
 				"backToPlanAria": "Tillbaka till planering",
+				"backToShop": "Tillbaka till Handla",
 				"progress": "{picked} av {total} plockade",
 				"progressAria": "{picked} av {total} varor plockade",
 				"progressComplete": "Allt plockat",

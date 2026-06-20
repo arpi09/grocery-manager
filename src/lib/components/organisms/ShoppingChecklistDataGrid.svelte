@@ -453,7 +453,6 @@
 		dataTestId="shopping-checklist-grid"
 	>
 		{#snippet tableHead()}
-			<Cell class="col-checkoff" />
 			<Cell class="col-thumb" />
 			<Cell class="col-name" aria-sort={sortAria('name')}>
 				<button type="button" class="sort-header" onclick={() => toggleSort('name')}>
@@ -461,6 +460,7 @@
 				</button>
 			</Cell>
 			<Cell class="col-qty">{t('inventory.columnQuantity')}</Cell>
+			<Cell class="col-checkoff" />
 		{/snippet}
 
 		{#snippet tableBody()}
@@ -489,23 +489,6 @@
 								{/if}
 							</Cell>
 						{/if}
-						<Cell class="col-checkoff">
-							{#if canEdit}
-								<form method="POST" action="?/toggle" use:enhance={createToggleEnhance(item)}>
-									<input type="hidden" name="id" value={item.id} />
-									<label class="checkoff-label">
-										<input
-											type="checkbox"
-											checked={item.checked}
-											aria-label={t('dataGrid.checkOffRow', { name: item.name })}
-											onchange={(event) => event.currentTarget.form?.requestSubmit()}
-										/>
-									</label>
-								</form>
-							{:else}
-								<input type="checkbox" checked={item.checked} disabled aria-label={item.name} />
-							{/if}
-						</Cell>
 						<Cell class="col-thumb">
 							<ProductAvatar
 								name={item.name}
@@ -523,6 +506,24 @@
 							</div>
 						</Cell>
 						<Cell class="col-qty{item.checked ? ' done' : ''}">{formatQty(item) || '—'}</Cell>
+						<Cell class="col-checkoff">
+							{#if canEdit}
+								<form method="POST" action="?/toggle" use:enhance={createToggleEnhance(item)} class="checkoff-form">
+									<input type="hidden" name="id" value={item.id} />
+									<button
+										type="submit"
+										class="checkoff-btn"
+										class:checked={item.checked}
+										aria-label={t('dataGrid.checkOffRow', { name: item.name })}
+										data-testid="shopping-grid-checkoff-{item.id}"
+									>
+										<span class="checkoff-icon" aria-hidden="true">✓</span>
+									</button>
+								</form>
+							{:else if item.checked}
+								<span class="checkoff-done" aria-label={item.name}>✓</span>
+							{/if}
+						</Cell>
 					</Row>
 				{/each}
 			{/if}
@@ -575,18 +576,72 @@
 		cursor: pointer;
 	}
 
-	.row-select,
-	.checkoff-label {
+	.row-select {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		min-height: var(--touch-target-min);
 	}
 
-	.row-select input,
-	.checkoff-label input {
+	.row-select input {
 		width: 1.125rem;
 		height: 1.125rem;
+	}
+
+	.checkoff-form {
+		display: flex;
+		justify-content: flex-end;
+		margin: 0;
+	}
+
+	.checkoff-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: var(--touch-target-min);
+		min-height: var(--touch-target-min);
+		padding: 0;
+		border: 2px solid var(--color-primary);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		color: var(--color-primary);
+		cursor: pointer;
+		transition:
+			background 0.15s,
+			color 0.15s,
+			border-color 0.15s;
+	}
+
+	.checkoff-btn:hover:not(.checked) {
+		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+	}
+
+	.checkoff-btn:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+
+	.checkoff-btn.checked {
+		border-color: var(--color-primary);
+		background: var(--color-primary);
+		color: var(--color-on-primary, #fff);
+	}
+
+	.checkoff-icon {
+		font-size: 1rem;
+		font-weight: 700;
+		line-height: 1;
+	}
+
+	.checkoff-done {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: var(--touch-target-min);
+		min-height: var(--touch-target-min);
+		color: var(--color-primary);
+		font-size: 1rem;
+		font-weight: 700;
 	}
 
 	:global(.done) {

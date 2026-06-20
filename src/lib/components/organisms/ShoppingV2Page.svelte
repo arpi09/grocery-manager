@@ -404,6 +404,9 @@
 			onBackToPlan={handleBackToPlan}
 			onCompletePantry={handleCompletePantry}
 			onCompletePlan={handleCompletePlan}
+			onOpenLegacy={() => {
+				legacyOpen = true;
+			}}
 		/>
 	{/if}
 
@@ -415,6 +418,7 @@
 		{shareLinkEnabled}
 		{shoppingToPantryMode}
 		memberCount={memberCount}
+		closeLabel={session.mode === 'shop' ? t('shopping.v2.shop.backToShop') : t('dataGrid.backToPlan')}
 		onClose={() => {
 			legacyOpen = false;
 		}}
