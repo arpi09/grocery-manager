@@ -82,6 +82,7 @@ test.describe('Shopping UX v2', () => {
 
 		const row = drawer.locator(`[data-testid^="shopping-grid-row-"]`).filter({ hasText: itemName });
 		await expect(row).toBeVisible();
+		await expect(row.getByTestId('product-avatar')).toBeVisible();
 		await row.locator('form[action="?/toggle"] input[type=checkbox]').click();
 
 		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');

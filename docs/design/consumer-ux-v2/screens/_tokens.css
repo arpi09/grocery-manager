@@ -1,0 +1,48 @@
+/* Skaffu design tokens — sourced from src/app.css */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+:root {
+	--color-bg: #f7f5f0;
+	--color-surface: #ffffff;
+	--color-surface-muted: #eef2eb;
+	--color-border: #dde5d8;
+	--color-text: #1f2a24;
+	--color-text-muted: #4a5850;
+	--color-primary: #3d6b4f;
+	--color-primary-hover: #325a42;
+	--color-on-primary: #ffffff;
+	--color-accent: #c8a96e;
+	--color-danger: #b54a4a;
+	--color-warning: #9a6700;
+	--color-fridge: #4a8fb8;
+	--color-freezer: #6b7fd4;
+	--color-cupboard: #c17f4a;
+	--radius-sm: 8px;
+	--radius-md: 12px;
+	--radius-lg: 16px;
+	--shadow-sm: 0 1px 3px rgba(31, 42, 36, 0.08);
+	--shadow-md: 0 4px 16px rgba(31, 42, 36, 0.1);
+	--font: 'DM Sans', system-ui, sans-serif;
+	--font-size-display: 1.5rem;
+	--font-size-body: 1rem;
+	--font-size-body-sm: 0.875rem;
+	--font-size-label: 0.75rem;
+	--font-weight-display: 700;
+	--font-weight-label: 600;
+	--letter-spacing-label: 0.04em;
+	--line-height-body: 1.5;
+	--space-xs: 0.25rem;
+	--space-sm: 0.5rem;
+	--space-md: 1rem;
+	--space-lg: 1.5rem;
+	--space-xl: 2rem;
+	--page-padding-x: var(--space-md);
+	--page-section-gap: var(--space-lg);
+	--touch-target-min: 2.75rem;
+	--mobile-bottom-nav-height: 4.25rem;
+	--nav-surface: var(--color-surface);
+	--nav-border: var(--color-border);
+	--nav-active-bg: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface-muted));
+	--nav-bottom-shadow: 0 -4px 24px rgba(31, 42, 36, 0.06);
+	--content-bottom-safe: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0) + var(--space-md));
+}

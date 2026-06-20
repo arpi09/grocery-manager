@@ -4,6 +4,7 @@ import type { ReplenishmentSuggestion } from './replenishment';
 import {
 	isShoppingListReady,
 	selectHomeBriefingForYouCard,
+	selectHomeBriefingMomentCard,
 	selectHomeBriefingStatus,
 	type HomeBriefingRecipeCard
 } from './home-briefing';
@@ -202,5 +203,64 @@ describe('selectHomeBriefingForYouCard', () => {
 				expiringSoon: []
 			})
 		).toBeNull();
+	});
+});
+
+const quietInput = {
+	totalItems: 12,
+	useSoonCount: 0,
+	shoppingListCount: 0,
+	shoppingCadence: null,
+	intelligence: { replenishment: [] },
+	expiringSoon: [],
+	today: new Date('2026-06-19')
+};
+
+describe('selectHomeBriefingMomentCard', () => {
+	it('returns null when for-you card is shown', () => {
+		expect(
+			selectHomeBriefingMomentCard({
+				...quietInput,
+				intelligence: { replenishment: [suggestion] }
+			})
+		).toBeNull();
+	});
+
+	it('returns emptyPantry when there are no items', () => {
+		expect(
+			selectHomeBriefingMomentCard({
+				...quietInput,
+				totalItems: 0
+			})
+		).toEqual({ kind: 'emptyPantry' });
+	});
+
+	it('prefers openShopping when list has items without cadence', () => {
+		expect(
+			selectHomeBriefingMomentCard({
+				...quietInput,
+				shoppingListCount: 3
+			})
+		).toEqual({ kind: 'openShopping' });
+	});
+
+	it('rotates calm tips deterministically by calendar day', () => {
+		const dayA = selectHomeBriefingMomentCard({
+			...quietInput,
+			today: new Date('2026-06-19')
+		});
+		const dayASame = selectHomeBriefingMomentCard({
+			...quietInput,
+			today: new Date('2026-06-19T23:59:59')
+		});
+		const dayB = selectHomeBriefingMomentCard({
+			...quietInput,
+			today: new Date('2026-06-20')
+		});
+
+		expect(dayA).toEqual(dayASame);
+		expect(dayA?.kind).not.toBe('emptyPantry');
+		expect(dayA?.kind).not.toBe('openShopping');
+		expect(dayB?.kind).not.toBe(dayA?.kind);
 	});
 });

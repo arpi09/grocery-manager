@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ProductAvatar from '$lib/components/atoms/ProductAvatar.svelte';
 	import {
 		buildPantryTileDetailPresentation,
 		formatPantryTileQuantityLine
@@ -40,8 +41,6 @@
 		}
 		return tile.name;
 	});
-
-	const initial = $derived(tile.name.trim().charAt(0).toLocaleUpperCase() || '?');
 </script>
 
 <a
@@ -56,7 +55,7 @@
 	{#if variant === 'overflow'}
 		<span class="tile-mark" aria-hidden="true">+</span>
 	{:else}
-		<span class="tile-mark" aria-hidden="true">{initial}</span>
+		<ProductAvatar name={tile.name} warn={tile.warn} size="sm" decorative />
 	{/if}
 	<span class="tile-name">{tile.name}</span>
 	{#if detailLine}
@@ -95,14 +94,7 @@
 	}
 
 	.product-tile.warn::after {
-		content: '';
-		position: absolute;
-		top: 6px;
-		right: 6px;
-		width: 8px;
-		height: 8px;
-		border-radius: 50%;
-		background: var(--color-warning);
+		content: none;
 	}
 
 	.product-tile.overflow {
@@ -120,6 +112,10 @@
 		font-size: 0.875rem;
 		font-weight: 700;
 		line-height: 1;
+	}
+
+	.product-tile :global(.product-avatar) {
+		margin-bottom: 0;
 	}
 
 	.tile-name {

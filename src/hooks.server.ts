@@ -9,6 +9,7 @@ import {
 	profileService,
 	householdService,
 	inventoryService,
+	productCatalogService,
 	statistikService,
 	gamificationService,
 	wrappedService,
@@ -161,6 +162,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.householdRole = null;
 	event.locals.planTier = DEFAULT_PLAN_TIER;
 	event.locals.inventoryService = inventoryService;
+	event.locals.productCatalogService = productCatalogService;
 	event.locals.statistikService = statistikService;
 	event.locals.gamificationService = gamificationService;
 	event.locals.wrappedService = wrappedService;

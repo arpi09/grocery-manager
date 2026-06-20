@@ -42,6 +42,7 @@
 
 				shoppingUxV2Enabled={Boolean(data.shoppingUxV2Enabled)}
 
+
 				loadFailed={Boolean(data.loadFailed)}
 
 			/>

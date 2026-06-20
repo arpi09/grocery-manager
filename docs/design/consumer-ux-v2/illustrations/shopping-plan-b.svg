@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none" aria-labelledby="title desc">
+  <title id="title">Shopping plan — variant B</title>
+  <desc id="desc">Top-view grid layout — structured visual order</desc>
+  <rect width="320" height="240" fill="#f7f5f0"/>
+  <rect x="48" y="36" width="224" height="168" fill="#edeae4" stroke="#8a857e" stroke-width="1.5"/>
+  <circle cx="88" cy="68" r="16" fill="#6b7d62" stroke="#8a857e" stroke-width="1"/>
+  <circle cx="88" cy="68" r="10" fill="none" stroke="#5a6b52" stroke-width="0.75"/>
+  <circle cx="136" cy="68" r="12" fill="#d4cfc4" stroke="#8a857e" stroke-width="1"/>
+  <circle cx="184" cy="68" r="16" fill="#8a7d6e" stroke="#8a857e" stroke-width="1"/>
+  <circle cx="232" cy="68" r="12" fill="#94a58c" stroke="#8a857e" stroke-width="1"/>
+  <rect x="68" y="92" width="36" height="18" fill="#8a7d6e" stroke="#8a857e" stroke-width="1"/>
+  <rect x="116" y="94" width="28" height="14" fill="#94a58c" stroke="#8a857e" stroke-width="1"/>
+  <rect x="160" y="96" width="14" height="14" fill="#6b7d62" stroke="#8a857e" stroke-width="1"/>
+  <rect x="200" y="94" width="20" height="16" fill="#d4cfc4" stroke="#8a857e" stroke-width="1"/>
+  <circle cx="88" cy="132" r="12" fill="#8a7d6e" stroke="#8a857e" stroke-width="1"/>
+  <rect x="112" y="126" width="36" height="14" fill="#d4cfc4" stroke="#8a857e" stroke-width="1"/>
+  <rect x="164" y="122" width="10" height="20" fill="#6b7d62" stroke="#8a857e" stroke-width="1"/>
+  <circle cx="232" cy="132" r="12" fill="#94a58c" stroke="#8a857e" stroke-width="1"/>
+  <rect x="56" y="156" width="48" height="20" fill="#6b7d62" stroke="#8a857e" stroke-width="1"/>
+  <line x1="60" y1="162" x2="100" y2="162" stroke="#5a6b52" stroke-width="0.75"/>
+  <line x1="60" y1="168" x2="100" y2="168" stroke="#5a6b52" stroke-width="0.75"/>
+  <rect x="116" y="160" width="32" height="12" fill="#d4cfc4" stroke="#8a857e" stroke-width="1"/>
+  <rect x="160" y="156" width="44" height="20" fill="#8a7d6e" stroke="#8a857e" stroke-width="1"/>
+  <rect x="216" y="162" width="20" height="10" fill="#d4cfc4" stroke="#8a857e" stroke-width="1"/>
+</svg>

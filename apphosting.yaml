@@ -228,6 +228,10 @@ env:
     value: "true"
     availability:
       - RUNTIME
+  - variable: STORE_RECOMMENDATION_V0_ENABLED
+    value: "false"
+    availability:
+      - RUNTIME
   # Optional demo household member (omit or override in console)
   # - variable: DEFAULT_MEMBER_EMAIL
   #   value: member@example.com

@@ -421,7 +421,9 @@ export async function loginWithCredentials(page: Page, email: string, password: 
 	await dismissCookieConsentIfOpen(page);
 	await dismissOnboardingModalIfOpen(page);
 	await dismissPostOnboardingSurveyIfOpen(page);
-	await expect(page.locator('.shopping-page, section.home, section.home-v5')).toBeVisible({
+	await expect(
+		page.locator('.shopping-page, section.home, section.home-v5, .home-v2-page')
+	).toBeVisible({
 		timeout: E2E_AUTH_NAV_TIMEOUT_MS
 	});
 	await expectHomeDashboardVisible(page);

@@ -53,6 +53,7 @@ export function mapInventoryRow(row: typeof inventoryItemTable.$inferSelect): In
 		expiresOn: row.expiresOn,
 		expiresOnSource: row.expiresOnSource as InventoryItem['expiresOnSource'],
 		notes: row.notes,
+		barcode: row.barcode,
 		lastConfirmedAt: row.lastConfirmedAt ?? row.createdAt,
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt

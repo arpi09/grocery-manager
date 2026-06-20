@@ -19,6 +19,13 @@ export async function expectHomeRedesignVisible(page: Page) {
 }
 
 export async function expectHomeDashboardVisible(page: Page) {
+	const homeV2 = page.locator('.home-v2-page');
+	if ((await homeV2.count()) > 0) {
+		await expect(homeV2).toBeVisible();
+		await expect(page.getByTestId('home-v2-briefing')).toBeVisible();
+		return;
+	}
+
 	const redesign = page.locator('.home-v5');
 	if ((await redesign.count()) > 0) {
 		await expectHomeRedesignVisible(page);

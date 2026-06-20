@@ -1,13 +1,15 @@
 import type { BarcodeProduct } from '$lib/domain/barcode-product';
+import { resolveOffImageUrl, type OffProductImageFields } from '$lib/domain/off-product-image';
 import { resolveOffProductName, type OffProductNameFields } from '$lib/domain/off-product-name';
 import { DEFAULT_LOCALE, type Locale } from '$lib/i18n/locale';
 
 interface OffProductResponse {
 	status: number;
-	product?: OffProductNameFields & {
-		brands?: string;
-		quantity?: string;
-	};
+	product?: OffProductNameFields &
+		OffProductImageFields & {
+			brands?: string;
+			quantity?: string;
+		};
 }
 
 const OFF_API = 'https://world.openfoodfacts.org/api/v2/product';
@@ -38,13 +40,15 @@ export async function fetchProductByBarcode(
 
 	const { quantity, unit } = parseQuantity(data.product.quantity);
 	const brandNote = data.product.brands?.trim();
+	const imageUrl = resolveOffImageUrl(data.product);
 
 	return {
 		barcode: normalized,
 		name,
 		quantity,
 		unit,
-		notes: brandNote ? `Brand: ${brandNote}` : null
+		notes: brandNote ? `Brand: ${brandNote}` : null,
+		imageUrl
 	};
 }
 

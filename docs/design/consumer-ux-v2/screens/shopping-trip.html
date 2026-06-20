@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=390, initial-scale=1">
+  <title>Inköp — Handla · Skaffu UX v2</title>
+  <link rel="stylesheet" href="_tokens.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e8e4dc;
+      font-family: var(--font);
+      padding: 24px;
+    }
+    .phone {
+      width: 390px;
+      height: 844px;
+      background: var(--color-bg);
+      border-radius: 40px;
+      box-shadow: 0 24px 64px rgba(31,42,36,0.18), inset 0 0 0 1px rgba(31,42,36,0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .draft-badge {
+      position: absolute; top: 12px; right: 16px; z-index: 10;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--color-warning);
+      background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+      padding: 4px 8px; border-radius: 4px;
+      border: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
+    }
+    .status-bar {
+      height: 44px; padding: 12px 24px 0;
+      display: flex; justify-content: space-between;
+      font-size: 12px; font-weight: 600; flex-shrink: 0;
+    }
+    .scroll {
+      flex: 1; overflow-y: auto;
+      padding: 0 var(--page-padding-x) var(--content-bottom-safe);
+      display: flex;
+      flex-direction: column;
+    }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-md) 0 var(--space-sm);
+    }
+    .back-link {
+      font-size: var(--font-size-body-sm);
+      font-weight: 600;
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+    .mode-toggle {
+      display: flex;
+      background: var(--color-surface-muted);
+      border-radius: var(--radius-md);
+      padding: 3px;
+      border: 1px solid var(--color-border);
+    }
+    .mode-toggle button {
+      padding: 6px 14px;
+      border: none;
+      border-radius: calc(var(--radius-md) - 2px);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      color: var(--color-text-muted);
+    }
+    .mode-toggle button.active {
+      background: var(--color-surface);
+      color: var(--color-primary);
+      box-shadow: var(--shadow-sm);
+    }
+    .progress-block { margin-bottom: var(--space-lg); }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: var(--space-sm);
+      font-size: var(--font-size-body-sm);
+      font-weight: 600;
+    }
+    .progress-meta .en {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+    }
+    .progress-track {
+      height: 8px;
+      background: var(--color-surface-muted);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+    .progress-fill {
+      height: 100%;
+      width: 44%;
+      background: linear-gradient(90deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 70%, var(--color-accent)));
+      border-radius: 999px;
+    }
+    .focus-zone {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--space-lg) 0;
+    }
+    .focus-illus {
+      width: 200px;
+      margin-bottom: var(--space-lg);
+      border-radius: var(--radius-lg);
+      background: var(--color-surface);
+      box-shadow: var(--shadow-md);
+      padding: var(--space-md);
+    }
+    .focus-illus object { width: 100%; display: block; }
+    .focus-item {
+      font-size: 1.75rem;
+      font-weight: var(--font-weight-display);
+      line-height: 1.15;
+      margin-bottom: var(--space-xs);
+    }
+    .focus-detail {
+      font-size: var(--font-size-body-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-xl);
+      line-height: 1.45;
+    }
+    .focus-detail .en { display: block; font-size: 11px; opacity: 0.75; margin-top: 4px; }
+    .btn-pick {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 320px;
+      min-height: 3.5rem;
+      padding: var(--space-md) var(--space-xl);
+      background: var(--color-primary);
+      color: var(--color-on-primary);
+      border: none;
+      border-radius: var(--radius-lg);
+      font-weight: 700;
+      font-size: 1.0625rem;
+      box-shadow: var(--shadow-md);
+      cursor: pointer;
+      margin-bottom: var(--space-lg);
+    }
+    .btn-pick .en {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+    .peek-section {
+      width: 100%;
+      margin-top: auto;
+      padding-top: var(--space-md);
+    }
+    .peek-label {
+      font-size: var(--font-size-label);
+      font-weight: var(--font-weight-label);
+      letter-spacing: var(--letter-spacing-label);
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-sm);
+      text-align: left;
+    }
+    .peek-label .en { font-weight: 500; opacity: 0.7; margin-left: 6px; text-transform: none; letter-spacing: 0; }
+    .peek-row {
+      display: flex;
+      gap: var(--space-sm);
+      overflow-x: auto;
+      padding-bottom: var(--space-sm);
+    }
+    .peek-card {
+      flex: 0 0 auto;
+      min-width: 120px;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-body-sm);
+      font-weight: 600;
+      opacity: 0.65;
+    }
+    .peek-card .en { display: block; font-size: 10px; font-weight: 500; color: var(--color-text-muted); }
+    .bottom-nav {
+      flex-shrink: 0;
+      border-top: 1px solid var(--nav-border);
+      background: var(--nav-surface);
+      box-shadow: var(--nav-bottom-shadow);
+      padding: 0.15rem var(--space-sm) calc(0.25rem + env(safe-area-inset-bottom, 0));
+    }
+    .bottom-nav ul { display: flex; list-style: none; margin: 0; padding: 0; min-height: var(--mobile-bottom-nav-height); }
+    .bottom-nav li { flex: 1; display: flex; }
+    .nav-tab {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.1rem; padding: 0.35rem 0.15rem 0.45rem;
+      color: var(--color-text-muted); font-size: 0.625rem; font-weight: 600;
+      text-decoration: none; position: relative; border-radius: var(--radius-md);
+    }
+    .nav-tab.active { color: var(--color-primary); background: var(--nav-active-bg); }
+    .nav-tab svg { width: 22px; height: 22px; }
+    .nav-tab .indicator {
+      position: absolute; bottom: 0.2rem; width: 18px; height: 3px;
+      border-radius: 999px; background: var(--color-primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <span class="draft-badge">DRAFT COPY</span>
+    <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+
+    <div class="scroll">
+      <div class="top-bar">
+        <a class="back-link" href="shopping-plan.html">← Plan</a>
+        <div class="mode-toggle">
+          <button type="button" onclick="location.href='shopping-plan.html'">Plan</button>
+          <button class="active" type="button">Handla</button>
+        </div>
+      </div>
+
+      <div class="progress-block">
+        <div class="progress-meta">
+          <span>4 av 9 plockade</span>
+          <span class="en">4 of 9 picked</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill"></div>
+        </div>
+      </div>
+
+      <div class="focus-zone">
+        <div class="focus-illus">
+          <object type="image/svg+xml" data="../illustrations/final/shopping-trip.svg" aria-label="Handla — isometrisk progression"></object>
+        </div>
+        <h1 class="focus-item">Mjölk 3%</h1>
+        <p class="focus-detail">
+          1,5 liter · mejeriavdelningen, hylla 2
+          <span class="en">1.5 L · dairy aisle, shelf 2</span>
+        </p>
+        <button class="btn-pick" type="button">
+          Jag har plockat
+          <span class="en">I've picked this</span>
+        </button>
+      </div>
+
+      <div class="peek-section">
+        <p class="peek-label">Nästa <span class="en">/ Up next</span></p>
+        <div class="peek-row">
+          <div class="peek-card">
+            Pasta
+            <span class="en">Pasta</span>
+          </div>
+          <div class="peek-card">
+            Fetaost
+            <span class="en">Feta</span>
+          </div>
+          <div class="peek-card">
+            Spenat
+            <span class="en">Spinach</span>
+          </div>
+          <div class="peek-card">
+            +5 till
+            <span class="en">+5 more</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Mobilnavigering">
+      <ul>
+        <li>
+          <a class="nav-tab" href="home.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 L12 4 L21 12 V20 H3Z"/></svg>
+            Hem
+          </a>
+        </li>
+        <li>
+          <a class="nav-tab active" href="shopping-trip.html" aria-current="page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6 H20 L18 14 H8 L6 6Z M8 18 A2 2 0 1 0 8 14 A2 2 0 0 0 8 18 M18 18 A2 2 0 1 0 18 14 A2 2 0 0 0 18 18"/></svg>
+            Inköp
+            <span class="indicator"></span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-tab" href="#">
+            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/></svg>
+            Mer
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</body>
+</html>

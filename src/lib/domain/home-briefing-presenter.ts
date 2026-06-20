@@ -5,9 +5,11 @@ import type { Locale } from '$lib/i18n/locale';
 import type { StorageLocation } from './location';
 import {
 	homeBriefingForYouMessagePrefix,
+	homeBriefingMomentMessagePrefix,
 	homeBriefingStatusMessageKey,
 	type HomeBriefingForYouCard,
 	type HomeBriefingFunFact,
+	type HomeBriefingMomentCard,
 	type HomeBriefingStatus
 } from './home-briefing';
 
@@ -142,6 +144,19 @@ export function buildHomeBriefingForYouPresentation(
 				cta: { key: msg(`${prefix}.cta`), params: {} }
 			};
 	}
+}
+
+export function buildHomeBriefingMomentPresentation(card: HomeBriefingMomentCard): {
+	title: HomeBriefingMessagePresentation;
+	body: HomeBriefingMessagePresentation;
+	cta: HomeBriefingMessagePresentation;
+} {
+	const prefix = homeBriefingMomentMessagePrefix(card.kind);
+	return {
+		title: { key: msg(`${prefix}.title`), params: {} },
+		body: { key: msg(`${prefix}.body`), params: {} },
+		cta: { key: msg(`${prefix}.cta`), params: {} }
+	};
 }
 
 export type HomeBriefingChipId = 'shopping' | 'storage' | 'eat' | 'funFact';

@@ -206,7 +206,8 @@ const INCREMENTAL_MIGRATIONS = [
 	'0053_memory_rule_events.sql',
 	'0054_shopping_ux_v2_telemetry.sql',
 	'0055_pantry_ux_v2_telemetry.sql',
-	'0056_home_ux_v2_telemetry.sql'
+	'0056_home_ux_v2_telemetry.sql',
+	'0057_product_catalog.sql'
 ];
 
 async function runPgliteBaseline(client: PGlite) {

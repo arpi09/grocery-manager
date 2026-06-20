@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none" aria-labelledby="title desc">
+  <title id="title">Pantry shelf — variant C</title>
+  <desc id="desc">Top-view grid as inventory map</desc>
+  <rect width="320" height="240" fill="#f7f5f0"/>
+  <rect x="40" y="32" width="240" height="176" fill="#edeae4" stroke="#8a857e" stroke-width="1.5"/>
+  <circle cx="76" cy="64" r="18" fill="#6b7d62" stroke="#8a857e" stroke-width="1"/>
+  <circle cx="76" cy="64" r="11" fill="none" stroke="#5a6b52" stroke-width="0.75"/>
+  <circle cx="120" cy="64" r="14" fill="#d4cfc4" stroke="#8a857e" stroke-width="1"/>
+  <circle cx="168" cy="64" r="18" fill="#8a7d6e" stroke="#8a857e" stroke-width="1"/>
+  <circle cx="216" cy="64" r="14" fill="#94a58c" stroke="#8a857e" stroke-width="1"/>
+  <circle cx="256" cy="64" r="12" fill="#d4cfc4" stroke="#8a857e" stroke-width="1"/>
+  <rect x="56" y="88" width="38" height="20" fill="#8a7d6e" stroke="#8a857e" stroke-width="1"/>
+  <rect x="104" y="90" width="30" height="16" fill="#94a58c" stroke="#8a857e" stroke-width="1"/>
+  <rect x="148" y="92" width="16" height="16" fill="#6b7d62" stroke="#8a857e" stroke-width="1"/>
+  <rect x="176" y="90" width="24" height="18" fill="#d4cfc4" stroke="#8a857e" stroke-width="1"/>
+  <rect x="212" y="92" width="20" height="14" fill="#8a7d6e" stroke="#8a857e" stroke-width="1"/>
+  <rect x="244" y="90" width="24" height="16" fill="#94a58c" stroke="#8a857e" stroke-width="1"/>
+  <circle cx="76" cy="128" r="14" fill="#8a7d6e" stroke="#8a857e" stroke-width="1"/>
+  <rect x="100" y="122" width="40" height="14" fill="#d4cfc4" stroke="#8a857e" stroke-width="1"/>
+  <rect x="152" y="118" width="12" height="22" fill="#6b7d62" stroke="#8a857e" stroke-width="1"/>
+  <circle cx="200" cy="128" r="14" fill="#94a58c" stroke="#8a857e" stroke-width="1"/>
+  <rect x="228" y="122" width="28" height="14" fill="#d4cfc4" stroke="#8a857e" stroke-width="1"/>
+  <rect x="48" y="152" width="56" height="22" fill="#6b7d62" stroke="#8a857e" stroke-width="1"/>
+  <line x1="52" y1="158" x2="100" y2="158" stroke="#5a6b52" stroke-width="0.75"/>
+  <line x1="52" y1="164" x2="100" y2="164" stroke="#5a6b52" stroke-width="0.75"/>
+  <rect x="116" y="156" width="36" height="14" fill="#d4cfc4" stroke="#8a857e" stroke-width="1"/>
+  <rect x="164" y="152" width="52" height="22" fill="#8a7d6e" stroke="#8a857e" stroke-width="1"/>
+  <line x1="168" y1="158" x2="212" y2="158" stroke="#726758" stroke-width="0.75"/>
+  <line x1="168" y1="164" x2="212" y2="164" stroke="#726758" stroke-width="0.75"/>
+  <rect x="228" y="158" width="24" height="12" fill="#d4cfc4" stroke="#8a857e" stroke-width="1"/>
+  <rect x="260" y="156" width="12" height="14" fill="#94a58c" stroke="#8a857e" stroke-width="1"/>
+</svg>

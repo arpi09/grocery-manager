@@ -48,15 +48,23 @@
 		border-collapse: collapse;
 	}
 
-	.skaffu-table :global(.col-checkbox) {
+	.skaffu-table :global(.col-checkbox),
+	.skaffu-table :global(.col-checkoff) {
 		width: 1%;
 		padding-inline: var(--space-sm);
 		text-align: center;
 		vertical-align: middle;
 	}
 
+	.skaffu-table :global(.col-thumb) {
+		width: 1%;
+		padding-inline: var(--space-sm);
+		vertical-align: middle;
+	}
+
 	.skaffu-table :global(.col-name) {
 		width: auto;
+		min-width: 0;
 	}
 
 	.skaffu-table :global(.col-qty),
@@ -89,5 +97,20 @@
 
 	.skaffu-table :global(.mdc-data-table__row:hover) {
 		background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+	}
+
+	@media (max-width: 640px) {
+		.skaffu-table :global(.mdc-data-table__table) {
+			table-layout: auto;
+		}
+
+		.skaffu-table :global(.col-qty),
+		.skaffu-table :global(.col-expiry) {
+			display: none;
+		}
+
+		.skaffu-table :global(.mdc-data-table__cell) {
+			padding-block: var(--space-sm);
+		}
 	}
 </style>

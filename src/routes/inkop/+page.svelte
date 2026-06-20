@@ -113,7 +113,7 @@
 					shareLinkEnabled={data.shareLinkEnabled}
 					memberCount={householdMemberCount}
 					showReceiptImportLead={showReceiptImportLead}
-				/>
+					/>
 			{:else}
 				<section
 					id="shopping-list-panel"
@@ -128,6 +128,8 @@
 						shareLinkEnabled={data.shareLinkEnabled}
 						memberCount={householdMemberCount}
 					/>
+
+
 					<ShoppingChecklistDataGrid
 						uncheckedItems={data.items}
 						checkedCount={data.checkedCount}
@@ -300,5 +302,11 @@
 		margin: 0;
 		font-size: 0.875rem;
 		color: var(--color-text-muted);
+	}
+
+
+	.compare-stores-link:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 </style>

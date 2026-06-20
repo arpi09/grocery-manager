@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none" aria-labelledby="title desc">
+  <title id="title">For you — variant C</title>
+  <desc id="desc">Isometric modular with one block emphasised</desc>
+  <rect width="320" height="240" fill="#f7f5f0"/>
+  <ellipse cx="160" cy="188" rx="90" ry="6" fill="#8a857e" opacity="0.1"/>
+  <polygon points="60,168 260,168 260,178 60,178" fill="#d4cfc4"/>
+  <polygon points="60,168 70,160 270,160 260,168" fill="#e8e4dc"/>
+  <polygon points="260,168 270,160 270,170 260,178" fill="#c8c0b0"/>
+  <!-- muted blocks -->
+  <polygon points="88,160 88,108 100,100 100,152" fill="#c8c0b0"/>
+  <polygon points="100,100 124,100 124,152 100,152" fill="#d4cfc4"/>
+  <polygon points="88,108 100,100 124,100 112,108" fill="#e8e4dc"/>
+  <!-- accent block -->
+  <polygon points="118,160 118,80 138,68 138,152" fill="#5a6b52"/>
+  <polygon points="138,68 178,68 178,152 138,152" fill="#6b7d62"/>
+  <polygon points="118,80 138,68 178,68 158,80" fill="#94a58c"/>
+  <polygon points="168,160 168,120 180,112 180,152" fill="#c8c0b0"/>
+  <polygon points="180,112 204,112 204,152 180,152" fill="#d4cfc4"/>
+  <polygon points="168,120 180,112 204,112 192,120" fill="#e8e4dc"/>
+  <polygon points="208,160 208,128 218,122 218,154" fill="#c8c0b0"/>
+  <polygon points="218,122 236,122 236,154 218,154" fill="#d4cfc4"/>
+  <polygon points="208,128 218,122 236,122 226,128" fill="#e8e4dc"/>
+</svg>

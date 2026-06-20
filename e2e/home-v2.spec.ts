@@ -107,4 +107,26 @@ test.describe('Home UX v2', () => {
 
 		await expectNoCriticalOrSeriousViolations(page, '/hem (home v2 briefing)');
 	});
+
+	test('moment card when nothing urgent @deploy-critical', async ({ page }) => {
+		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
+
+		await loginAsAdmin(page);
+		await createFridgeItemViaApi(page, `E2E Moment ${Date.now()}`, {
+			expiresOn: expiringSoonIso(90)
+		});
+		await openHomeV2Briefing(page);
+
+		const forYou = page.getByTestId('home-v2-for-you');
+		if (await forYou.isVisible().catch(() => false)) {
+			test.skip(true, 'For-you card surfaced instead of moment');
+		}
+
+		const moment = page.getByTestId('home-v2-moment');
+		await expect(moment).toBeVisible({ timeout: 15_000 });
+		await expect(moment).toHaveAttribute('data-moment-kind', /.+/);
+
+		await moment.getByRole('link').click();
+		await expect(page).toHaveURL(/\/(scan|recept|inkop|statistik)/, { timeout: 15_000 });
+	});
 });

@@ -9,6 +9,13 @@ function expiringSoonIso(daysFromNow: number): string {
 	return date.toISOString().slice(0, 10);
 }
 
+function inventoryRowFromTable(page: import('@playwright/test').Page, itemName: string) {
+	return page
+		.getByTestId('inventory-table')
+		.getByTestId(/inventory-row-/)
+		.filter({ hasText: itemName });
+}
+
 test.describe('Pantry UX v2', () => {
 	test.setTimeout(90_000);
 
@@ -49,6 +56,23 @@ test.describe('Pantry UX v2', () => {
 		await expect(page).toHaveURL(/\/inventory\/fridge/);
 		await expect(page.getByTestId('pantry-location-grid')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('inventory-table')).toBeVisible({ timeout: 15_000 });
+
+		await page.getByTestId('data-grid-filter-button').click();
+		const filterSheet = page.getByTestId('data-grid-filter-sheet');
+		await expect(filterSheet).toBeVisible();
+		await filterSheet.locator('#data-grid-filter-search').fill(expiringName);
+		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
+		await expect(filterSheet).not.toBeVisible({ timeout: 10_000 });
+
+		const expiringRow = inventoryRowFromTable(page, expiringName);
+		await expect(expiringRow).toBeVisible({ timeout: 15_000 });
+		await expect(expiringRow.getByTestId('inventory-list-meta')).toBeVisible();
+		await expect(expiringRow.getByTestId('inventory-list-meta')).toHaveText(/dag|day/i);
+
+		await page.getByTestId('data-grid-filter-button').click();
+		await expect(filterSheet).toBeVisible();
+		await filterSheet.locator('#data-grid-filter-search').fill(itemName);
+		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
 		await expect(page.getByTestId('inventory-table').getByText(itemName)).toBeVisible();
 		await expect(page.getByTestId('data-grid-filter-button')).toBeVisible();
 	});

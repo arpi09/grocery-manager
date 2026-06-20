@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none" aria-labelledby="title desc">
+  <title id="title">Reference v4  -  Isometric modular</title>
+  <desc id="desc">Isometric blocks on floating slab  -  Claude reference</desc>
+  <rect width="320" height="240" fill="#f7f5f0"/>
+  <!-- slab shadow -->
+  <ellipse cx="160" cy="188" rx="100" ry="6" fill="#8a857e" opacity="0.12"/>
+  <!-- floating slab -->
+  <polygon points="60,168 260,168 260,178 60,178" fill="#d4cfc4"/>
+  <polygon points="60,168 70,160 270,160 260,168" fill="#e8e4dc"/>
+  <polygon points="260,168 270,160 270,170 260,178" fill="#c8c0b0"/>
+  <!-- block 1  -  tall taupe -->
+  <polygon points="88,160 88,88 108,76 108,148" fill="#726758"/>
+  <polygon points="108,76 148,76 148,148 108,148" fill="#8a7d6e"/>
+  <polygon points="88,88 108,76 148,76 128,88" fill="#a09488"/>
+  <!-- block 2  -  sage green -->
+  <polygon points="118,160 118,108 130,100 130,152" fill="#5a6b52"/>
+  <polygon points="130,100 154,100 154,152 130,152" fill="#6b7d62"/>
+  <polygon points="118,108 130,100 154,100 142,108" fill="#94a58c"/>
+  <!-- block 3  -  short wide beige -->
+  <polygon points="148,160 148,132 168,120 168,148" fill="#b8b2a8"/>
+  <polygon points="168,120 208,120 208,148 168,148" fill="#d4cfc4"/>
+  <polygon points="148,132 168,120 208,120 188,132" fill="#e8e4dc"/>
+  <!-- block 4  -  tall grey -->
+  <polygon points="198,160 198,96 212,88 212,152" fill="#8a8580"/>
+  <polygon points="212,88 232,88 232,152 212,152" fill="#a09a94"/>
+  <polygon points="198,96 212,88 232,88 218,96" fill="#c8c0b0"/>
+  <!-- block 5  -  small sage -->
+  <polygon points="228,160 228,136 238,130 238,154" fill="#6b7d62"/>
+  <polygon points="238,130 254,130 254,154 238,154" fill="#94a58c"/>
+  <polygon points="228,136 238,130 254,130 244,136" fill="#b0bea8"/>
+</svg>

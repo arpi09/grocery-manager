@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Consumer UX v2 — Illustration Gallery</title>
+  <link rel="stylesheet" href="../screens/_tokens.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: var(--space-xl);
+      font-family: var(--font);
+      background: var(--color-bg);
+      color: var(--color-text);
+    }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: var(--font-weight-display);
+      margin: 0 0 var(--space-xs);
+    }
+    h2 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin: 0 0 var(--space-xs);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .subtitle {
+      color: var(--color-text-muted);
+      margin: 0 0 var(--space-sm);
+      font-size: var(--font-size-body-sm);
+    }
+    .direction-note {
+      color: var(--color-primary);
+      margin: 0 0 var(--space-xl);
+      font-size: var(--font-size-body-sm);
+      font-weight: 600;
+    }
+    .legend {
+      display: flex;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-xl);
+      flex-wrap: wrap;
+    }
+    .legend span {
+      font-size: var(--font-size-label);
+      font-weight: var(--font-weight-label);
+      letter-spacing: var(--letter-spacing-label);
+      text-transform: uppercase;
+    }
+    .legend .a { color: #6b7d62; }
+    .legend .b { color: #8a7d6e; }
+    .legend .c { color: #a09a94; }
+    .section {
+      margin-bottom: var(--space-xl);
+    }
+    .section .intro {
+      font-size: var(--font-size-body-sm);
+      color: var(--color-text-muted);
+      margin: 0 0 var(--space-md);
+    }
+    .scene {
+      margin-bottom: var(--space-xl);
+    }
+    .scene .mood {
+      font-size: var(--font-size-body-sm);
+      color: var(--color-text-muted);
+      margin: 0 0 var(--space-md);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-md);
+    }
+    .grid-refs {
+      grid-template-columns: repeat(5, 1fr);
+    }
+    .cell {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md);
+      box-shadow: var(--shadow-sm);
+    }
+    .cell .label {
+      display: block;
+      font-size: var(--font-size-label);
+      font-weight: var(--font-weight-label);
+      letter-spacing: var(--letter-spacing-label);
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-sm);
+    }
+    .cell.selected {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent), var(--shadow-sm);
+    }
+    .cell .selected-badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 8px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--color-on-primary);
+      background: var(--color-primary);
+      border-radius: 999px;
+      vertical-align: middle;
+    }
+    .locked-note {
+      margin: 0 0 var(--space-xl);
+      padding: var(--space-md) var(--space-lg);
+      background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+      border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-body-sm);
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+    .cell img,
+    .cell object {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: var(--radius-sm);
+      pointer-events: none;
+      aspect-ratio: 4 / 3;
+      background: #f7f5f0;
+    }
+    .back {
+      display: inline-block;
+      margin-bottom: var(--space-lg);
+      color: var(--color-primary);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .back:hover { text-decoration: underline; }
+    .ref-link {
+      display: inline-block;
+      margin-bottom: var(--space-md);
+      color: var(--color-primary);
+      font-size: var(--font-size-body-sm);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .ref-link:hover { text-decoration: underline; }
+    @media (max-width: 960px) {
+      .grid-refs { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: 1fr; }
+      .grid-refs { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <a class="back" href="../index.html">← Tillbaka till flödet</a>
+  <h1>Illustration Gallery</h1>
+  <p class="subtitle">Consumer UX v2 — 6 scener × 3 varianter (A/B/C)</p>
+  <p class="direction-note">Direction v4 — Claude reference · Variant A locked 2026-06-18</p>
+  <p class="locked-note">✓ All scenes locked to variant A — final assets in <code>illustrations/final/</code></p>
+  <div class="legend">
+    <span class="a">A — v4 isometric / v2 grid / v5 row / v1 shelf</span>
+    <span class="b">B — v5 object study / v2 grid / v3 elevation</span>
+    <span class="c">C — v3 elevation / v1 shelf / v4 modular</span>
+  </div>
+
+  <section class="section">
+    <h2>Claude Reference Originals</h2>
+    <p class="intro">Five approved PNG references — Montana/HAY geometric restraint, muted sage/taupe/grey on #f7f5f0</p>
+    <a class="ref-link" href="references/index.html">View references full size →</a>
+    <div class="grid grid-refs">
+      <div class="cell">
+        <span class="label">v1 — Shelf system</span>
+        <img src="references/v1-shelf-system.png" alt="Reference v1 shelf system">
+      </div>
+      <div class="cell">
+        <span class="label">v2 — Top view grid</span>
+        <img src="references/v2-top-view-grid.png" alt="Reference v2 top view grid">
+      </div>
+      <div class="cell">
+        <span class="label">v3 — Elevation section</span>
+        <img src="references/v3-elevation-section.png" alt="Reference v3 elevation section">
+      </div>
+      <div class="cell">
+        <span class="label">v4 — Isometric modular</span>
+        <img src="references/v4-isometric-modular.png" alt="Reference v4 isometric modular">
+      </div>
+      <div class="cell">
+        <span class="label">v5 — Object study</span>
+        <img src="references/v5-object-study.png" alt="Reference v5 object study">
+      </div>
+    </div>
+  </section>
+
+  <section class="scene">
+    <h2>Home Hero</h2>
+    <p class="mood">A: v4 isometric modular · B: v5 object study row · C: v3 elevation architectural</p>
+    <div class="grid">
+      <div class="cell selected"><span class="label">A — Isometric modular <span class="selected-badge">✓ SELECTED</span></span><object type="image/svg+xml" data="home-hero-a.svg" aria-label="Home hero A"></object></div>
+      <div class="cell"><span class="label">B — Object study row</span><object type="image/svg+xml" data="home-hero-b.svg" aria-label="Home hero B"></object></div>
+      <div class="cell"><span class="label">C — Elevation section</span><object type="image/svg+xml" data="home-hero-c.svg" aria-label="Home hero C"></object></div>
+    </div>
+  </section>
+
+  <section class="scene">
+    <h2>For You</h2>
+    <p class="mood">A: v2 grid one accent · B: v5 row one accent · C: v4 one block emphasised</p>
+    <div class="grid">
+      <div class="cell selected"><span class="label">A — Grid accent <span class="selected-badge">✓ SELECTED</span></span><object type="image/svg+xml" data="for-you-a.svg" aria-label="For you A"></object></div>
+      <div class="cell"><span class="label">B — Row accent</span><object type="image/svg+xml" data="for-you-b.svg" aria-label="For you B"></object></div>
+      <div class="cell"><span class="label">C — Block emphasised</span><object type="image/svg+xml" data="for-you-c.svg" aria-label="For you C"></object></div>
+    </div>
+  </section>
+
+  <section class="scene">
+    <h2>Shopping Plan</h2>
+    <p class="mood">A: v5 ordered modules · B: v2 grid layout · C: v1 sparse shelf</p>
+    <div class="grid">
+      <div class="cell selected"><span class="label">A — Ordered modules <span class="selected-badge">✓ SELECTED</span></span><object type="image/svg+xml" data="shopping-plan-a.svg" aria-label="Shopping plan A"></object></div>
+      <div class="cell"><span class="label">B — Grid layout</span><object type="image/svg+xml" data="shopping-plan-b.svg" aria-label="Shopping plan B"></object></div>
+      <div class="cell"><span class="label">C — Sparse shelf</span><object type="image/svg+xml" data="shopping-plan-c.svg" aria-label="Shopping plan C"></object></div>
+    </div>
+  </section>
+
+  <section class="scene">
+    <h2>Shopping Trip</h2>
+    <p class="mood">A: v4 forward progression · B: v5 leading accent · C: v1 checked-off shelf</p>
+    <div class="grid">
+      <div class="cell selected"><span class="label">A — Forward progression <span class="selected-badge">✓ SELECTED</span></span><object type="image/svg+xml" data="shopping-trip-a.svg" aria-label="Shopping trip A"></object></div>
+      <div class="cell"><span class="label">B — Leading accent</span><object type="image/svg+xml" data="shopping-trip-b.svg" aria-label="Shopping trip B"></object></div>
+      <div class="cell"><span class="label">C — Checked shelf</span><object type="image/svg+xml" data="shopping-trip-c.svg" aria-label="Shopping trip C"></object></div>
+    </div>
+  </section>
+
+  <section class="scene">
+    <h2>Pantry Shelf</h2>
+    <p class="mood">A: v1 shelf system (primary) · B: v3 elevation · C: v2 grid inventory</p>
+    <div class="grid">
+      <div class="cell selected"><span class="label">A — Shelf system <span class="selected-badge">✓ SELECTED</span></span><object type="image/svg+xml" data="pantry-shelf-a.svg" aria-label="Pantry shelf A"></object></div>
+      <div class="cell"><span class="label">B — Elevation cabinet</span><object type="image/svg+xml" data="pantry-shelf-b.svg" aria-label="Pantry shelf B"></object></div>
+      <div class="cell"><span class="label">C — Grid inventory</span><object type="image/svg+xml" data="pantry-shelf-c.svg" aria-label="Pantry shelf C"></object></div>
+    </div>
+  </section>
+
+  <section class="scene">
+    <h2>Household</h2>
+    <p class="mood">A: v2 connected grid · B: v4 overlapping modular · C: v1 + v5 combined</p>
+    <div class="grid">
+      <div class="cell selected"><span class="label">A — Connected grid <span class="selected-badge">✓ SELECTED</span></span><object type="image/svg+xml" data="household-a.svg" aria-label="Household A"></object></div>
+      <div class="cell"><span class="label">B — Overlapping modular</span><object type="image/svg+xml" data="household-b.svg" aria-label="Household B"></object></div>
+      <div class="cell"><span class="label">C — Shelf + objects</span><object type="image/svg+xml" data="household-c.svg" aria-label="Household C"></object></div>
+    </div>
+  </section>
+</body>
+</html>

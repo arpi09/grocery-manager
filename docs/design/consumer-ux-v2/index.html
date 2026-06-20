@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Consumer UX v2 — Design Gate</title>
+  <link rel="stylesheet" href="screens/_tokens.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: var(--line-height-body);
+    }
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: var(--space-xl) var(--page-padding-x);
+    }
+    header.hero {
+      text-align: center;
+      margin-bottom: var(--space-xl);
+    }
+    header.hero h1 {
+      font-size: 2rem;
+      font-weight: var(--font-weight-display);
+      margin: 0 0 var(--space-sm);
+      letter-spacing: -0.02em;
+    }
+    header.hero p {
+      color: var(--color-text-muted);
+      font-size: var(--font-size-body);
+      max-width: 36rem;
+      margin: 0 auto var(--space-md);
+    }
+    .locked-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 auto var(--space-md);
+      padding: 8px 16px;
+      background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+      border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-body-sm);
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+    .meta-links {
+      display: flex;
+      gap: var(--space-md);
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .meta-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: var(--font-size-body-sm);
+      color: var(--color-primary);
+      text-decoration: none;
+      box-shadow: var(--shadow-sm);
+    }
+    .meta-links a:hover {
+      background: var(--nav-active-bg);
+      text-decoration: none;
+    }
+    .journey {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xl);
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: var(--space-lg);
+      align-items: start;
+      padding: var(--space-lg);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+    .step-thumb {
+      display: block;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+      background: #e8e4dc;
+      text-decoration: none;
+      transition: box-shadow 0.2s;
+    }
+    .step-thumb:hover {
+      box-shadow: var(--shadow-md);
+    }
+    .step-thumb img {
+      width: 100%;
+      display: block;
+    }
+    .step-body h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0 0 var(--space-xs);
+    }
+    .step-body h2 a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .step-body h2 a:hover { color: var(--color-primary); }
+    .step-num {
+      font-size: var(--font-size-label);
+      font-weight: var(--font-weight-label);
+      letter-spacing: var(--letter-spacing-label);
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: var(--space-xs);
+    }
+    .annotations {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-md);
+      margin-top: var(--space-md);
+    }
+    .annotation {
+      padding: var(--space-sm) var(--space-md);
+      background: var(--color-surface-muted);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-body-sm);
+    }
+    .annotation strong {
+      display: block;
+      font-size: var(--font-size-label);
+      font-weight: var(--font-weight-label);
+      letter-spacing: var(--letter-spacing-label);
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-bottom: 4px;
+    }
+    .arrow {
+      text-align: center;
+      color: var(--color-accent);
+      font-size: 1.5rem;
+      margin: calc(-1 * var(--space-md)) 0;
+    }
+    .open-btn {
+      display: inline-flex;
+      margin-top: var(--space-md);
+      padding: 10px 18px;
+      background: var(--color-primary);
+      color: var(--color-on-primary);
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: var(--font-size-body-sm);
+      text-decoration: none;
+    }
+    .open-btn:hover { background: var(--color-primary-hover); text-decoration: none; }
+    footer {
+      margin-top: var(--space-xl);
+      padding-top: var(--space-lg);
+      border-top: 1px solid var(--color-border);
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: var(--font-size-body-sm);
+    }
+    @media (max-width: 640px) {
+      .step { grid-template-columns: 1fr; }
+      .annotations { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <h1>Skaffu Consumer UX v2</h1>
+      <p>Design Gate — klickbar resa från morgonbriefing till fylld hylla. Varje steg bygger på föregående utan att kännas som en ny app.</p>
+      <p class="locked-banner">✓ Illustrationer låsta till variant A · 2026-06-18</p>
+      <div class="meta-links">
+        <a href="illustrations/gallery.html">🎨 Illustration gallery (A locked)</a>
+        <a href="illustrations/final/">📁 Final assets (6 SVG)</a>
+        <a href="LOCK.md">🔒 LOCK.md</a>
+        <a href="screens/home.html">📱 Öppna Hem-skärm</a>
+      </div>
+    </header>
+
+    <div class="journey">
+      <article class="step">
+        <a class="step-thumb" href="screens/home.html">
+          <img src="illustrations/final/home-hero.svg" alt="Hem — Household Briefing">
+        </a>
+        <div class="step-body">
+          <p class="step-num">Steg 1</p>
+          <h2><a href="screens/home.html">Hem — Household Briefing</a></h2>
+          <div class="annotations">
+            <div class="annotation">
+              <strong>Ser</strong>
+              Personlig hälsning, hushållsstatus och en För dig-rekommendation — inte ett widget-rutnät.
+            </div>
+            <div class="annotation">
+              <strong>Lär</strong>
+              Skaffu vet vad som går ut och vad som saknas för veckans måltid.
+            </div>
+            <div class="annotation">
+              <strong>Gör</strong>
+              Trycker på rekommendationen eller chipset «Fredagshandling».
+            </div>
+            <div class="annotation">
+              <strong>Nästa känns naturligt</strong>
+              Rekommendationen har redan lagt till saknade varor — listan väntar i Inköp.
+            </div>
+          </div>
+          <a class="open-btn" href="screens/home.html">Öppna skärm →</a>
+        </div>
+      </article>
+
+      <div class="arrow">↓</div>
+
+      <article class="step">
+        <a class="step-thumb" href="screens/shopping-plan.html">
+          <img src="illustrations/final/shopping-plan.svg" alt="Rekommendation → Plan">
+        </a>
+        <div class="step-body">
+          <p class="step-num">Steg 2</p>
+          <h2><a href="screens/shopping-plan.html">Rekommendation → Inköpsplan</a></h2>
+          <div class="annotations">
+            <div class="annotation">
+              <strong>Ser</strong>
+              Plan-läge med minnesförslag (mjölk, pasta) — inga checkbox-rader.
+            </div>
+            <div class="annotation">
+              <strong>Lär</strong>
+              Skaffu minns vanor och kopplar recept till konkreta varor.
+            </div>
+            <div class="annotation">
+              <strong>Gör</strong>
+              Bekräftar förslag, ser listan som pills, trycker «Börja handla».
+            </div>
+            <div class="annotation">
+              <strong>Nästa känns naturligt</strong>
+              Samma skärm har Plan/Handla-växling — butiksläget är ett tryck bort.
+            </div>
+          </div>
+          <a class="open-btn" href="screens/shopping-plan.html">Öppna skärm →</a>
+        </div>
+      </article>
+
+      <div class="arrow">↓</div>
+
+      <article class="step">
+        <a class="step-thumb" href="screens/shopping-trip.html">
+          <img src="illustrations/final/shopping-trip.svg" alt="Handla i butik">
+        </a>
+        <div class="step-body">
+          <p class="step-num">Steg 3</p>
+          <h2><a href="screens/shopping-trip.html">Inköp — Handla i butik</a></h2>
+          <div class="annotations">
+            <div class="annotation">
+              <strong>Ser</strong>
+              Ett fokusobjekt i taget, progress bar och «Jag har plockat» — peek på nästa.
+            </div>
+            <div class="annotation">
+              <strong>Lär</strong>
+              Handeln är fokuserad, inte en lång checklista att scrolla i gången.
+            </div>
+            <div class="annotation">
+              <strong>Gör</strong>
+              Plockar vara för vara med stora touch-targets.
+            </div>
+            <div class="annotation">
+              <strong>Nästa känns naturligt</strong>
+              Efter sista varan landar varorna i skafferiet — loopen stängs.
+            </div>
+          </div>
+          <a class="open-btn" href="screens/shopping-trip.html">Öppna skärm →</a>
+        </div>
+      </article>
+
+      <div class="arrow">↓</div>
+
+      <article class="step">
+        <a class="step-thumb" href="screens/pantry.html">
+          <img src="illustrations/final/pantry-shelf.svg" alt="Skafferi — Shelf View">
+        </a>
+        <div class="step-body">
+          <p class="step-num">Steg 4</p>
+          <h2><a href="screens/pantry.html">Skafferi — Shelf View</a></h2>
+          <div class="annotations">
+            <div class="annotation">
+              <strong>Ser</strong>
+              Zonband (kyl, frys, skafferi), produktplattor och «Använd snart»-band överst.
+            </div>
+            <div class="annotation">
+              <strong>Lär</strong>
+              Det du handlade syns direkt; utgående varor är tydligt markerade.
+            </div>
+            <div class="annotation">
+              <strong>Gör</strong>
+              Scannar snabbt hyllan, vet vad som ska ätas först.
+            </div>
+            <div class="annotation">
+              <strong>Nästa känns naturligt</strong>
+              Nästa veckas För dig-kort på Hem bygger på detta lager — loopen börjar om.
+            </div>
+          </div>
+          <a class="open-btn" href="screens/pantry.html">Öppna skärm →</a>
+        </div>
+      </article>
+    </div>
+
+    <footer>
+      Skaffu Design Gate · Consumer UX v2 · Illustrations locked variant A · All screen copy marked DRAFT COPY
+    </footer>
+  </div>
+</body>
+</html>

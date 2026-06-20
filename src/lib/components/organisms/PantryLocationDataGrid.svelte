@@ -5,8 +5,10 @@
 	import { page } from '$app/state';
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import ProductAvatar from '$lib/components/atoms/ProductAvatar.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
+	import InventoryListMeta from '$lib/components/molecules/InventoryListMeta.svelte';
 	import LocationTab from '$lib/components/molecules/LocationTab.svelte';
 	import SkaffuDataGrid from '$lib/components/organisms/SkaffuDataGrid.svelte';
 	import {
@@ -18,6 +20,7 @@
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import type { StorageLocation } from '$lib/domain/location';
 	import { daysUntilExpiry, formatExpiryDate, EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
+	import { buildPantryTile } from '$lib/domain/pantry-shelf';
 	import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
@@ -371,6 +374,7 @@
 			dataTestId="inventory"
 		>
 			{#snippet tableHead()}
+				<Cell class="col-thumb" />
 				<Cell class="col-name">
 					<button
 						type="button"
@@ -435,8 +439,15 @@
 								</label>
 							</Cell>
 						{/if}
+						<Cell class="col-thumb">
+							{@const tile = buildPantryTile(item)}
+							<ProductAvatar name={item.name} warn={tile.warn} size="sm" />
+						</Cell>
 						<Cell class="col-name">
-							<span class="item-name">{item.name}</span>
+							<div class="name-stack">
+								<span class="item-name">{item.name}</span>
+								<InventoryListMeta {item} />
+							</div>
 						</Cell>
 						<Cell class="col-qty">
 							<span class="item-qty">{formatQuantityCell(item)}</span>
@@ -446,8 +457,6 @@
 								<Badge tone={expiryTone(item.expiresOn)}>
 									{formatExpiryDate(item.expiresOn, getLocale())}
 								</Badge>
-							{:else}
-								<span class="no-expiry">{t('inventory.missingExpiryDate')}</span>
 							{/if}
 						</Cell>
 					</Row>
@@ -573,15 +582,16 @@
 		color: var(--color-text);
 	}
 
+	.name-stack {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+		min-width: 0;
+	}
+
 	.item-qty {
 		font-size: 0.8125rem;
 		font-weight: 600;
-		color: var(--color-text-muted);
-		white-space: nowrap;
-	}
-
-	.no-expiry {
-		font-size: 0.75rem;
 		color: var(--color-text-muted);
 		white-space: nowrap;
 	}

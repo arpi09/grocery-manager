@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none" aria-labelledby="title desc">
+  <title id="title">Household — variant B</title>
+  <desc id="desc">Overlapping isometric modular blocks — shared layered space</desc>
+  <rect width="320" height="240" fill="#f7f5f0"/>
+  <ellipse cx="160" cy="196" rx="100" ry="7" fill="#8a857e" opacity="0.1"/>
+  <polygon points="48,176 272,176 272,184 48,184" fill="#d4cfc4"/>
+  <polygon points="48,176 58,168 282,168 272,176" fill="#e8e4dc"/>
+  <!-- back layer -->
+  <polygon points="72,168 72,108 88,98 88,158" fill="#c8c0b0"/>
+  <polygon points="88,98 128,98 128,158 88,158" fill="#d4cfc4"/>
+  <polygon points="72,108 88,98 128,98 112,108" fill="#e8e4dc"/>
+  <!-- middle overlapping -->
+  <polygon points="100,168 100,88 124,72 124,158" fill="#726758"/>
+  <polygon points="124,72 168,72 168,158 124,158" fill="#8a7d6e"/>
+  <polygon points="100,88 124,72 168,72 144,88" fill="#a09488"/>
+  <!-- front layer -->
+  <polygon points="148,168 148,112 164,102 164,158" fill="#5a6b52"/>
+  <polygon points="164,102 200,102 200,158 164,158" fill="#6b7d62"/>
+  <polygon points="148,112 164,102 200,102 184,112" fill="#94a58c"/>
+  <polygon points="196,168 196,128 208,120 208,158" fill="#6b7d62"/>
+  <polygon points="208,120 240,120 240,158 208,158" fill="#94a58c"/>
+  <polygon points="196,128 208,120 240,120 228,128" fill="#b0bea8"/>
+</svg>

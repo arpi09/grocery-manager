@@ -162,6 +162,60 @@ export function homeBriefingForYouMessagePrefix(kind: HomeBriefingForYouKind): `
 	return `home.v6.forYou.${kind}`;
 }
 
+export type HomeBriefingMomentKind =
+	| 'emptyPantry'
+	| 'scanReceipt'
+	| 'photoRound'
+	| 'planMeal'
+	| 'openShopping'
+	| 'seeStats';
+
+export interface HomeBriefingMomentCard {
+	kind: HomeBriefingMomentKind;
+}
+
+const QUIET_MOMENT_KINDS: HomeBriefingMomentKind[] = [
+	'scanReceipt',
+	'photoRound',
+	'planMeal',
+	'seeStats'
+];
+
+function calendarDayIndex(date: Date): number {
+	const start = new Date(date.getFullYear(), 0, 0);
+	const diff = date.getTime() - start.getTime();
+	return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+function pickQuietMomentKind(today: Date, shoppingListCount: number): HomeBriefingMomentCard {
+	if (shoppingListCount > 0) {
+		return { kind: 'openShopping' };
+	}
+	const index = calendarDayIndex(today) % QUIET_MOMENT_KINDS.length;
+	return { kind: QUIET_MOMENT_KINDS[index]! };
+}
+
+/** Pick a calm moment card when nothing urgent is surfaced in För dig. */
+export function selectHomeBriefingMomentCard(input: HomeBriefingInput): HomeBriefingMomentCard | null {
+	if (selectHomeBriefingForYouCard(input)) {
+		return null;
+	}
+
+	const today = input.today ?? new Date();
+
+	if (input.totalItems === 0) {
+		return { kind: 'emptyPantry' };
+	}
+
+	return pickQuietMomentKind(today, input.shoppingListCount);
+}
+
+export function homeBriefingMomentMessagePrefix(
+	kind: HomeBriefingMomentKind
+): `home.v6.moment.${HomeBriefingMomentKind}` {
+	return `home.v6.moment.${kind}`;
+}
+
 export type HomeBriefingFunFactKind = 'zeroWaste' | 'consumedThisWeek';
 
 export interface HomeBriefingFunFact {

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none" aria-labelledby="title desc">
+  <title id="title">Shopping trip — variant A</title>
+  <desc id="desc">Isometric blocks with forward progression left to right</desc>
+  <rect width="320" height="240" fill="#f7f5f0"/>
+  <ellipse cx="160" cy="192" rx="100" ry="6" fill="#8a857e" opacity="0.1"/>
+  <polygon points="32,172 288,172 288,180 32,180" fill="#d4cfc4"/>
+  <polygon points="32,172 42,164 298,164 288,172" fill="#e8e4dc"/>
+  <!-- small back block -->
+  <polygon points="48,164 48,138 56,132 56,158" fill="#c8c0b0"/>
+  <polygon points="56,132 72,132 72,158 56,158" fill="#d4cfc4"/>
+  <polygon points="48,138 56,132 72,132 64,138" fill="#e8e4dc"/>
+  <!-- medium -->
+  <polygon points="80,164 80,118 94,108 94,158" fill="#b8b2a8"/>
+  <polygon points="94,108 118,108 118,158 94,158" fill="#d4cfc4"/>
+  <polygon points="80,118 94,108 118,108 104,118" fill="#e8e4dc"/>
+  <!-- leading accent -->
+  <polygon points="128,164 128,72 152,56 152,158" fill="#5a6b52"/>
+  <polygon points="152,56 196,56 196,158 152,158" fill="#6b7d62"/>
+  <polygon points="128,72 152,56 196,56 172,72" fill="#94a58c"/>
+  <!-- trailing -->
+  <polygon points="208,164 208,128 220,120 220,158" fill="#c8c0b0"/>
+  <polygon points="220,120 244,120 244,158 220,158" fill="#d4cfc4"/>
+  <polygon points="208,128 220,120 244,120 232,128" fill="#e8e4dc"/>
+  <polygon points="252,164 252,140 260,134 260,158" fill="#c8c0b0"/>
+  <polygon points="260,134 276,134 276,158 260,158" fill="#d4cfc4"/>
+  <polygon points="252,140 260,134 276,134 268,140" fill="#e8e4dc"/>
+</svg>

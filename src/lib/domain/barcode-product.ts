@@ -7,6 +7,7 @@ export interface BarcodeProduct {
 	quantity: string;
 	unit: string | null;
 	notes: string | null;
+	imageUrl?: string | null;
 }
 
 export interface BarcodeLookupResult {

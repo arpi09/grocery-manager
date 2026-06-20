@@ -12,6 +12,9 @@ export interface InventoryItem {
 	expiresOn: string | null;
 	expiresOnSource: ExpiresOnSource | null;
 	notes: string | null;
+	barcode: string | null;
+	/** Enriched from product_catalog at read time when barcode is set. */
+	imageUrl?: string | null;
 	lastConfirmedAt: Date;
 	createdAt: Date;
 	updatedAt: Date;
@@ -26,6 +29,7 @@ export interface CreateInventoryItemInput {
 	expiresOnSource?: ExpiresOnSource | null;
 	inferExpiry?: boolean;
 	notes?: string | null;
+	barcode?: string | null;
 	/** When set, add quantity to this row instead of creating a new one. */
 	mergeIntoId?: string | null;
 	lastConfirmedAt?: Date;

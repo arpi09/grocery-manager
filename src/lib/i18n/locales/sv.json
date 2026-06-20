@@ -441,6 +441,38 @@
 					"cta": "Börja handla"
 				}
 			},
+			"moment": {
+				"emptyPantry": {
+					"title": "Bygg ert skafferi",
+					"body": "Skanna ett kvitto eller lägg till varor manuellt — så håller ni koll tillsammans.",
+					"cta": "Skanna kvitto"
+				},
+				"scanReceipt": {
+					"title": "Håll skafferiet uppdaterat",
+					"body": "En kvittoskanning håller skafferiet uppdaterat.",
+					"cta": "Skanna kvitto"
+				},
+				"photoRound": {
+					"title": "Snabb koll på kylen",
+					"body": "Ta en snabb bild av kylen.",
+					"cta": "Foto-runda"
+				},
+				"planMeal": {
+					"title": "Vad blir det till middag?",
+					"body": "Bläddra bland recept med det ni har hemma.",
+					"cta": "Bläddra recept"
+				},
+				"openShopping": {
+					"title": "Inköpslistan väntar",
+					"body": "Ni har varor på listan — perfekt till en snabb tur.",
+					"cta": "Öppna inköpslistan"
+				},
+				"seeStats": {
+					"title": "Se hur det går i köket",
+					"body": "Kolla statistik och roliga siffror från ert hushåll.",
+					"cta": "Öppna statistik"
+				}
+			},
 			"chips": {
 				"sectionLabel": "Snabbkoll",
 				"shoppingHint": "{count, plural, one {# vara} other {# varor}} · {weekday}",
@@ -1030,6 +1062,8 @@
 		"bulkExpiryBanner": "Några varor saknar datum — vi kan gissa utifrån varutyp.",
 		"bulkExpiryAction": "Gissa datum",
 		"quantityLeft": "{amount} kvar",
+		"listMetaExpiry": "Bäst före {date}",
+		"listMetaAria": "{meta}",
 		"expiryFilterNoExpiry": "Utan datum",
 		"filterEmptyTitle": "Inga varor matchar filtret",
 		"filterEmptyDescription": "Prova ett annat filter eller visa alla varor.",
@@ -3357,5 +3391,43 @@
 		"signupTitle": "Vill du också dela utgående varor?",
 		"signupLead": "Skaffa eget skafferi med utgång — skanna, få påminnelser och dela som grannarna här.",
 		"signupBtn": "Prova Skaffu gratis"
+	},
+	"storeRecommendation": {
+		"home": {
+			"title": "Var ska du handla?",
+			"body": "{count, plural, one {# vara på listan — vi hjälper dig välja butik.} other {# varor på listan — vi hjälper dig välja butik.}}",
+			"cta": "Jämför butiker"
+		},
+		"page": {
+			"title": "Jämför butiker"
+		},
+		"planLink": "Jämför butiker",
+		"survey": {
+			"lead": "{count, plural, one {Du har # vara på inköpslistan.} other {Du har # varor på inköpslistan.}}",
+			"q1": {
+				"title": "Vad är viktigast när du väljer butik?",
+				"lowestPrice": "Lägst totalpris",
+				"closest": "Närmaste butik",
+				"fewestStores": "Färrest antal butiker",
+				"sameChain": "Samma kedja som vanligt"
+			},
+			"q2": {
+				"title": "Vilka kedjor handlar du i?",
+				"chains": {
+					"ica": "ICA",
+					"coop": "Coop",
+					"willys": "Willys",
+					"lidl": "Lidl",
+					"hemkop": "Hemköp",
+					"citygross": "City Gross"
+				}
+			},
+			"q3": {
+				"title": "Vill du jämföra priser mot ICA?"
+			},
+			"comingSoonTitle": "Prisjämförelse kommer snart",
+			"comingSoonBody": "Vi bygger ett sätt att jämföra din lista mellan butiker. Dina svar hjälper oss prioritera rätt.",
+			"completeNote": "Tack — vi har sparat dina preferenser."
+		}
 	}
 }

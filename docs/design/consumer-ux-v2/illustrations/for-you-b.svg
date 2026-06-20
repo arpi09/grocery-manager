@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none" aria-labelledby="title desc">
+  <title id="title">For you — variant B</title>
+  <desc id="desc">Object study row with one accent form emphasised</desc>
+  <rect width="320" height="240" fill="#f7f5f0"/>
+  <rect x="40" y="80" width="16" height="88" rx="2" fill="#d4cfc4" stroke="#8a857e" stroke-width="1" opacity="0.5"/>
+  <rect x="72" y="96" width="24" height="72" rx="3" fill="#d4cfc4" stroke="#8a857e" stroke-width="1" opacity="0.5"/>
+  <!-- accent — tall box -->
+  <rect x="112" y="56" width="36" height="112" fill="#6b7d62" stroke="#5a6b52" stroke-width="2"/>
+  <rect x="110" y="48" width="40" height="10" fill="#5a6b52"/>
+  <line x1="114" y1="80" x2="146" y2="80" stroke="#4a5a44" stroke-width="0.75"/>
+  <line x1="114" y1="100" x2="146" y2="100" stroke="#4a5a44" stroke-width="0.75"/>
+  <line x1="114" y1="120" x2="146" y2="120" stroke="#4a5a44" stroke-width="0.75"/>
+  <line x1="114" y1="140" x2="146" y2="140" stroke="#4a5a44" stroke-width="0.75"/>
+  <rect x="168" y="120" width="32" height="48" fill="#d4cfc4" stroke="#8a857e" stroke-width="1" opacity="0.5"/>
+  <rect x="216" y="72" width="8" height="96" rx="2" fill="#d4cfc4" stroke="#8a857e" stroke-width="1" opacity="0.5"/>
+  <rect x="248" y="100" width="24" height="68" rx="2" fill="#d4cfc4" stroke="#8a857e" stroke-width="1" opacity="0.5"/>
+</svg>

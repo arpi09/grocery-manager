@@ -1,0 +1,3 @@
+-- Store recommendation V0 product_event types (application enum in schema.ts):
+-- store_recommendation_opened, store_preference_selected, store_chain_selected,
+-- store_compare_ica_enabled, store_recommendation_interest_shown, store_recommendation_completed

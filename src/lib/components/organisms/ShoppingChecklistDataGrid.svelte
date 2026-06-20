@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import ProductAvatar from '$lib/components/atoms/ProductAvatar.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import ShoppingToPantrySheet from '$lib/components/molecules/ShoppingToPantrySheet.svelte';
 	import SkaffuDataGrid from '$lib/components/organisms/SkaffuDataGrid.svelte';
@@ -121,7 +122,7 @@
 
 	const listEmpty = $derived(uncheckedItems.length === 0 && checkedCount === 0);
 	const gridEmpty = $derived(!listEmpty && pipeline.totalCount === 0 && !loadingChecked);
-	const columnCount = $derived((canEdit ? 1 : 0) + 3);
+	const columnCount = $derived((canEdit ? 1 : 0) + 4);
 
 	$effect.pre(() => {
 		void uncheckedItems.length;
@@ -453,6 +454,7 @@
 	>
 		{#snippet tableHead()}
 			<Cell class="col-checkoff" />
+			<Cell class="col-thumb" />
 			<Cell class="col-name" aria-sort={sortAria('name')}>
 				<button type="button" class="sort-header" onclick={() => toggleSort('name')}>
 					{t('inventory.columnName')}
@@ -504,7 +506,22 @@
 								<input type="checkbox" checked={item.checked} disabled aria-label={item.name} />
 							{/if}
 						</Cell>
-						<Cell class="col-name{item.checked ? ' done' : ''}">{item.name}</Cell>
+						<Cell class="col-thumb">
+							<ProductAvatar
+								name={item.name}
+								size="sm"
+								muted={item.checked}
+								ariaLabel={item.name}
+							/>
+						</Cell>
+						<Cell class="col-name">
+							<div class="name-stack" class:done={item.checked}>
+								<span class="item-name">{item.name}</span>
+								{#if formatQty(item)}
+									<span class="item-meta">{formatQty(item)}</span>
+								{/if}
+							</div>
+						</Cell>
 						<Cell class="col-qty{item.checked ? ' done' : ''}">{formatQty(item) || '—'}</Cell>
 					</Row>
 				{/each}
@@ -575,5 +592,23 @@
 	:global(.done) {
 		opacity: 0.65;
 		text-decoration: line-through;
+	}
+
+	.name-stack {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+		min-width: 0;
+	}
+
+	.item-name {
+		font-weight: 600;
+		font-size: 0.875rem;
+	}
+
+	.item-meta {
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
+		line-height: 1.3;
 	}
 </style>

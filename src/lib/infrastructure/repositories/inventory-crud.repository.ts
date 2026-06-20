@@ -31,6 +31,7 @@ export class InventoryCrudRepository {
 				expiresOn: input.expiresOn ?? null,
 				expiresOnSource: input.expiresOnSource ?? null,
 				notes: input.notes ?? null,
+				barcode: input.barcode ?? null,
 				lastConfirmedAt: input.lastConfirmedAt ?? now,
 				createdAt: now,
 				updatedAt: now

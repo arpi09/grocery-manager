@@ -18,6 +18,7 @@
 	import { homeBriefingRecipeCtaDestination } from '$lib/domain/home-briefing-recipe';
 	import {
 		selectHomeBriefingForYouCard,
+		selectHomeBriefingMomentCard,
 		selectHomeBriefingStatus,
 		type HomeBriefingInput
 	} from '$lib/domain/home-briefing';
@@ -75,13 +76,14 @@
 
 	const status = $derived(selectHomeBriefingStatus(briefingInput));
 	const forYouCard = $derived(selectHomeBriefingForYouCard(briefingInput));
+	const momentCard = $derived(selectHomeBriefingMomentCard(briefingInput));
 
 	onMount(() => {
 		if (!browser || briefingTracked || loadFailed) {
 			return;
 		}
 		briefingTracked = true;
-		trackHomeBriefingOpened(status.key, forYouCard?.kind ?? null);
+		trackHomeBriefingOpened(status.key, forYouCard?.kind ?? null, momentCard?.kind ?? null);
 	});
 
 	async function acceptReplenishment(

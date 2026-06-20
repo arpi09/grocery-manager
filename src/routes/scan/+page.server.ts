@@ -55,11 +55,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
 function parseItemForm(formData: FormData) {
 	const raw = Object.fromEntries(formData);
+	const barcodeRaw = typeof raw.barcode === 'string' ? raw.barcode.replace(/\D/g, '') : '';
 	return itemSchema.safeParse({
 		...raw,
 		unit: raw.unit || undefined,
 		expiresOn: raw.expiresOn || undefined,
-		notes: raw.notes || undefined
+		notes: raw.notes || undefined,
+		barcode: barcodeRaw.length >= 8 ? barcodeRaw : undefined
 	});
 }
 
@@ -371,7 +373,8 @@ export const actions: Actions = {
 				quantity: parsed.data.quantity,
 				unit: parsed.data.unit || null,
 				expiresOn: parsed.data.expiresOn || null,
-				notes: parsed.data.notes || null
+				notes: parsed.data.notes || null,
+				barcode: parsed.data.barcode || null
 			},
 			event.locals.householdRole!
 		);

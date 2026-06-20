@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=390, initial-scale=1">
+  <title>Inköp — Plan · Skaffu UX v2</title>
+  <link rel="stylesheet" href="_tokens.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e8e4dc;
+      font-family: var(--font);
+      padding: 24px;
+    }
+    .phone {
+      width: 390px;
+      height: 844px;
+      background: var(--color-bg);
+      border-radius: 40px;
+      box-shadow: 0 24px 64px rgba(31,42,36,0.18), inset 0 0 0 1px rgba(31,42,36,0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .draft-badge {
+      position: absolute; top: 12px; right: 16px; z-index: 10;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--color-warning);
+      background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+      padding: 4px 8px; border-radius: 4px;
+      border: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
+    }
+    .status-bar {
+      height: 44px; padding: 12px 24px 0;
+      display: flex; justify-content: space-between;
+      font-size: 12px; font-weight: 600; flex-shrink: 0;
+    }
+    .scroll {
+      flex: 1; overflow-y: auto;
+      padding: 0 var(--page-padding-x) var(--content-bottom-safe);
+    }
+    .page-header {
+      padding: var(--space-md) 0 var(--space-sm);
+    }
+    .page-header h1 {
+      font-size: var(--font-size-display);
+      font-weight: var(--font-weight-display);
+      line-height: 1.15;
+    }
+    .page-header .en {
+      display: block;
+      font-size: var(--font-size-label);
+      font-weight: 500;
+      color: var(--color-text-muted);
+      margin-top: 4px;
+    }
+    .page-header p {
+      margin-top: var(--space-sm);
+      font-size: var(--font-size-body-sm);
+      color: var(--color-text-muted);
+      line-height: 1.45;
+    }
+    .mode-toggle {
+      display: flex;
+      background: var(--color-surface-muted);
+      border-radius: var(--radius-md);
+      padding: 3px;
+      margin: var(--space-md) 0 var(--page-section-gap);
+      border: 1px solid var(--color-border);
+    }
+    .mode-toggle button {
+      flex: 1;
+      min-height: 2.5rem;
+      border: none;
+      border-radius: calc(var(--radius-md) - 2px);
+      font-family: var(--font);
+      font-size: var(--font-size-body-sm);
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      color: var(--color-text-muted);
+    }
+    .mode-toggle button.active {
+      background: var(--color-surface);
+      color: var(--color-primary);
+      box-shadow: var(--shadow-sm);
+    }
+    .mode-toggle button .en {
+      display: block;
+      font-size: 10px;
+      font-weight: 500;
+      opacity: 0.7;
+    }
+    .illus-banner {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: var(--page-section-gap);
+      background: var(--color-surface);
+      box-shadow: var(--shadow-sm);
+    }
+    .illus-banner object { width: 100%; display: block; aspect-ratio: 4/3; }
+    .section-label {
+      font-size: var(--font-size-label);
+      font-weight: var(--font-weight-label);
+      letter-spacing: var(--letter-spacing-label);
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-sm);
+    }
+    .section-label .en { font-weight: 500; opacity: 0.7; margin-left: 6px; text-transform: none; letter-spacing: 0; }
+    .memory-list { display: flex; flex-direction: column; gap: var(--space-sm); margin-bottom: var(--page-section-gap); }
+    .memory-card {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      text-decoration: none;
+      color: inherit;
+    }
+    .memory-card .icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-md);
+      background: color-mix(in srgb, var(--color-accent) 20%, var(--color-surface-muted));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .memory-card .body { flex: 1; min-width: 0; }
+    .memory-card h3 {
+      font-size: var(--font-size-body-sm);
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .memory-card p {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      line-height: 1.4;
+    }
+    .memory-card .en { font-size: 10px; opacity: 0.7; }
+    .memory-card .action {
+      font-size: var(--font-size-label);
+      font-weight: 700;
+      color: var(--color-primary);
+      white-space: nowrap;
+    }
+    .trip-summary {
+      background: var(--color-surface-muted);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md);
+      border: 1px solid var(--color-border);
+    }
+    .trip-summary h3 {
+      font-size: var(--font-size-body-sm);
+      font-weight: 700;
+      margin-bottom: var(--space-sm);
+    }
+    .trip-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill {
+      padding: 6px 12px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .pill.primary {
+      background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+      border-color: color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
+      color: var(--color-primary);
+    }
+    .cta-row { margin-top: var(--space-lg); }
+    .btn-primary {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; min-height: var(--touch-target-min);
+      background: var(--color-primary); color: var(--color-on-primary);
+      border: none; border-radius: var(--radius-md);
+      font-weight: 600; font-size: var(--font-size-body-sm);
+      text-decoration: none; box-shadow: var(--shadow-sm);
+    }
+    .bottom-nav {
+      flex-shrink: 0;
+      border-top: 1px solid var(--nav-border);
+      background: var(--nav-surface);
+      box-shadow: var(--nav-bottom-shadow);
+      padding: 0.15rem var(--space-sm) calc(0.25rem + env(safe-area-inset-bottom, 0));
+    }
+    .bottom-nav ul { display: flex; list-style: none; margin: 0; padding: 0; min-height: var(--mobile-bottom-nav-height); }
+    .bottom-nav li { flex: 1; display: flex; }
+    .nav-tab {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.1rem; padding: 0.35rem 0.15rem 0.45rem;
+      color: var(--color-text-muted); font-size: 0.625rem; font-weight: 600;
+      text-decoration: none; position: relative; border-radius: var(--radius-md);
+    }
+    .nav-tab.active { color: var(--color-primary); background: var(--nav-active-bg); }
+    .nav-tab svg { width: 22px; height: 22px; }
+    .nav-tab .indicator {
+      position: absolute; bottom: 0.2rem; width: 18px; height: 3px;
+      border-radius: 999px; background: var(--color-primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <span class="draft-badge">DRAFT COPY</span>
+    <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+
+    <div class="scroll">
+      <header class="page-header">
+        <h1>Fredagshandling
+          <span class="en">Friday shop</span>
+        </h1>
+        <p>9 varor · ICA Supermarket · minns vad ni brukar köpa
+          <br><span style="font-size:11px;opacity:0.75">9 items · remembers your usual picks</span>
+        </p>
+      </header>
+
+      <div class="mode-toggle" role="tablist">
+        <button class="active" type="button">
+          Planera
+          <span class="en">Plan</span>
+        </button>
+        <button type="button" onclick="location.href='shopping-trip.html'">
+          Handla
+          <span class="en">Shop</span>
+        </button>
+      </div>
+
+      <div class="illus-banner">
+        <object type="image/svg+xml" data="../illustrations/final/shopping-plan.svg" aria-label="Inköpsplan — objektstudie"></object>
+      </div>
+
+      <p class="section-label">Skaffu minns <span class="en">/ Memory suggestions</span></p>
+      <div class="memory-list">
+        <a class="memory-card" href="#">
+          <span class="icon">🥛</span>
+          <div class="body">
+            <h3>Mjölk 3%</h3>
+            <p>Var 5:e dag · senast tisdag</p>
+            <span class="en">Every 5 days · last Tuesday</span>
+          </div>
+          <span class="action">+ Lägg till</span>
+        </a>
+        <a class="memory-card" href="#">
+          <span class="icon">🍝</span>
+          <div class="body">
+            <h3>Pasta (fullkorn)</h3>
+            <p>Från pastasalladen · 2 paket brukar räcka</p>
+            <span class="en">From pasta salad · 2 packs usual</span>
+          </div>
+          <span class="action">+ Lägg till</span>
+        </a>
+        <a class="memory-card" href="#">
+          <span class="icon">🧀</span>
+          <div class="body">
+            <h3>Fetaost</h3>
+            <p>Redan på listan via För dig-receptet</p>
+            <span class="en">Already on list via For you recipe</span>
+          </div>
+          <span class="action" style="color:var(--color-text-muted)">På listan</span>
+        </a>
+      </div>
+
+      <div class="trip-summary">
+        <h3>Din lista just nu <span style="font-weight:500;font-size:11px;color:var(--color-text-muted)">/ Your list</span></h3>
+        <div class="trip-pills">
+          <span class="pill primary">9 varor</span>
+          <span class="pill">Mjölk</span>
+          <span class="pill">Pasta</span>
+          <span class="pill">Fetaost</span>
+          <span class="pill">+6 till</span>
+        </div>
+        <div class="cta-row">
+          <a class="btn-primary" href="shopping-trip.html">Börja handla →</a>
+        </div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Mobilnavigering">
+      <ul>
+        <li>
+          <a class="nav-tab" href="home.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 L12 4 L21 12 V20 H3Z"/></svg>
+            Hem
+          </a>
+        </li>
+        <li>
+          <a class="nav-tab active" href="shopping-plan.html" aria-current="page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6 H20 L18 14 H8 L6 6Z M8 18 A2 2 0 1 0 8 14 A2 2 0 0 0 8 18 M18 18 A2 2 0 1 0 18 14 A2 2 0 0 0 18 18"/></svg>
+            Inköp
+            <span class="indicator"></span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-tab" href="#">
+            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/></svg>
+            Mer
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</body>
+</html>

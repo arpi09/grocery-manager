@@ -7,13 +7,19 @@ vi.mock('$lib/infrastructure/barcode/open-food-facts.client', () => ({
 import { fetchProductByBarcode } from '$lib/infrastructure/barcode/open-food-facts.client';
 import { BarcodeLookupService, BarcodeNotFoundError } from './barcode-lookup.service';
 import { unknownBarcodeProductName } from '$lib/domain/barcode-product';
+import type { ProductCatalogService } from './product-catalog.service';
 
 describe('BarcodeLookupService', () => {
 	let service: BarcodeLookupService;
+	let productCatalogService: ProductCatalogService;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		service = new BarcodeLookupService();
+		productCatalogService = {
+			upsertFromBarcodeProduct: vi.fn().mockResolvedValue(undefined),
+			enrichInventoryItems: vi.fn()
+		} as unknown as ProductCatalogService;
+		service = new BarcodeLookupService(productCatalogService);
 	});
 
 	it('returns product when barcode is found', async () => {
@@ -22,7 +28,8 @@ describe('BarcodeLookupService', () => {
 			name: 'Organic Milk',
 			quantity: '1',
 			unit: 'L',
-			notes: 'Brand: Test Dairy'
+			notes: 'Brand: Test Dairy',
+			imageUrl: 'https://images.openfoodfacts.org/small.jpg'
 		};
 		vi.mocked(fetchProductByBarcode).mockResolvedValue(product);
 
@@ -30,6 +37,7 @@ describe('BarcodeLookupService', () => {
 
 		expect(result).toEqual(product);
 		expect(fetchProductByBarcode).toHaveBeenCalledWith('7310862000003', 'sv');
+		expect(productCatalogService.upsertFromBarcodeProduct).toHaveBeenCalledWith(product);
 	});
 
 	it('lookupWithFallback returns found:true when product exists', async () => {

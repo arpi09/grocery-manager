@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=390, initial-scale=1">
+  <title>Hem — Household Briefing · Skaffu UX v2</title>
+  <link rel="stylesheet" href="_tokens.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e8e4dc;
+      font-family: var(--font);
+      padding: 24px;
+    }
+    .phone {
+      width: 390px;
+      height: 844px;
+      background: var(--color-bg);
+      border-radius: 40px;
+      box-shadow: 0 24px 64px rgba(31,42,36,0.18), inset 0 0 0 1px rgba(31,42,36,0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .draft-badge {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      z-index: 10;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-warning);
+      background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent);
+    }
+    .status-bar {
+      height: 44px;
+      padding: 12px 24px 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text);
+      flex-shrink: 0;
+    }
+    .scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 var(--page-padding-x) var(--content-bottom-safe);
+    }
+    .header {
+      padding: var(--space-xs) 0 var(--space-sm);
+    }
+    .brand-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 2.75rem;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--color-text);
+      text-decoration: none;
+    }
+    .logo {
+      width: 28px;
+      height: 28px;
+      background: var(--color-primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo svg { width: 16px; height: 16px; }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--color-surface-muted);
+      border: 1.5px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-primary);
+    }
+    .household-switcher {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: var(--space-xs) 0;
+      margin-top: 2px;
+      border-top: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+      font-size: var(--font-size-body-sm);
+      font-weight: 600;
+      color: var(--color-text);
+    }
+    .household-switcher svg { width: 14px; height: 14px; color: var(--color-text-muted); }
+    .hero-illus {
+      margin: var(--space-sm) 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--color-surface);
+      box-shadow: var(--shadow-sm);
+    }
+    .hero-illus object { width: 100%; display: block; aspect-ratio: 16/9; max-height: 120px; object-fit: cover; }
+    .greeting {
+      font-size: var(--font-size-display);
+      font-weight: var(--font-weight-display);
+      line-height: 1.2;
+      margin-bottom: 2px;
+    }
+    .greeting .en {
+      display: block;
+      font-size: var(--font-size-label);
+      font-weight: 500;
+      color: var(--color-text-muted);
+      letter-spacing: 0.02em;
+      margin-top: 2px;
+    }
+    .status-line {
+      font-size: var(--font-size-body-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-md);
+      line-height: 1.45;
+    }
+    .status-line .en {
+      display: block;
+      font-size: 11px;
+      opacity: 0.75;
+      margin-top: 2px;
+    }
+    .section-label {
+      font-size: var(--font-size-label);
+      font-weight: var(--font-weight-label);
+      letter-spacing: var(--letter-spacing-label);
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-sm);
+    }
+    .section-label .en { font-weight: 500; opacity: 0.7; margin-left: 6px; text-transform: none; letter-spacing: 0; }
+    .for-you-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-sm) var(--space-md) var(--space-md);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: var(--space-md);
+    }
+    .for-you-card .illus {
+      width: 100%;
+      height: 72px;
+      display: block;
+      margin-bottom: var(--space-sm);
+      border-radius: var(--radius-sm);
+      background: var(--color-surface-muted);
+    }
+    .for-you-card h3 {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .for-you-card p {
+      font-size: var(--font-size-body-sm);
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-md);
+      line-height: 1.45;
+    }
+    .for-you-card .en-note {
+      font-size: 11px;
+      color: var(--color-text-muted);
+      opacity: 0.7;
+      margin-bottom: var(--space-md);
+    }
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: var(--touch-target-min);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--color-primary);
+      color: var(--color-on-primary);
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: var(--font-size-body-sm);
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+    .chip {
+      display: inline-flex;
+      flex-direction: column;
+      padding: 10px 14px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      font-size: var(--font-size-body-sm);
+      font-weight: 600;
+      color: var(--color-text);
+      text-decoration: none;
+      min-width: 0;
+    }
+    .chip .en {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--color-text-muted);
+      margin-top: 2px;
+    }
+    .chip.accent {
+      background: color-mix(in srgb, var(--color-accent) 15%, var(--color-surface));
+      border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+    }
+    .bottom-nav {
+      flex-shrink: 0;
+      border-top: 1px solid var(--nav-border);
+      background: var(--nav-surface);
+      box-shadow: var(--nav-bottom-shadow);
+      padding: 0.15rem var(--space-sm) calc(0.25rem + env(safe-area-inset-bottom, 0));
+    }
+    .bottom-nav ul {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      min-height: var(--mobile-bottom-nav-height);
+    }
+    .bottom-nav li { flex: 1; display: flex; }
+    .nav-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.1rem;
+      padding: 0.35rem 0.15rem 0.45rem;
+      color: var(--color-text-muted);
+      font-size: 0.625rem;
+      font-weight: 600;
+      text-decoration: none;
+      position: relative;
+      border-radius: var(--radius-md);
+    }
+    .nav-tab.active {
+      color: var(--color-primary);
+      background: var(--nav-active-bg);
+    }
+    .nav-tab svg { width: 22px; height: 22px; }
+    .nav-tab .indicator {
+      position: absolute;
+      bottom: 0.2rem;
+      width: 18px;
+      height: 3px;
+      border-radius: 999px;
+      background: var(--color-primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <span class="draft-badge">DRAFT COPY</span>
+    <div class="status-bar">
+      <span>9:41</span>
+      <span>●●●</span>
+    </div>
+
+    <div class="scroll">
+      <header class="header">
+        <div class="brand-row">
+          <a class="brand" href="#">
+            <span class="logo">
+              <svg viewBox="0 0 16 16" fill="none"><path d="M3 8 L8 3 L13 8 V13 H3Z" stroke="#fff" stroke-width="1.5" fill="none"/></svg>
+            </span>
+            Skaffu
+          </a>
+          <div class="avatar">A</div>
+        </div>
+        <div class="household-switcher">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 6 L8 3 L12 6 V12 H4Z"/></svg>
+          Pilhall · 2 medlemmar
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 6 L8 10 L12 6"/></svg>
+        </div>
+      </header>
+
+      <div class="hero-illus">
+        <object class="illus" type="image/svg+xml" data="../illustrations/final/home-hero.svg" aria-label="Hem — isometrisk modulär"></object>
+      </div>
+
+      <h1 class="greeting">
+        Hej Anna
+        <span class="en">Hi Anna</span>
+      </h1>
+      <p class="status-line">
+        4 saker att använda snart · listan är klar till fredag
+        <span class="en">4 items to use soon · list ready for Friday</span>
+      </p>
+
+      <p class="section-label">För dig <span class="en">/ For you</span></p>
+      <article class="for-you-card">
+        <object class="illus" type="image/svg+xml" data="../illustrations/final/for-you.svg" aria-label="För dig — rutnät med accent"></object>
+        <h3>Pastasallad med det du har hemma</h3>
+        <p>Du har pasta, feta och spenat som går ut i helgen. Ett snabbt kvällsmål för två.</p>
+        <p class="en-note">Pasta salad with what you have at home — quick dinner for two</p>
+        <a class="btn-primary" href="shopping-plan.html">Lägg till 2 saknade · Handla fredag</a>
+      </article>
+
+      <p class="section-label">Snabbkoll <span class="en">/ Quick glance</span></p>
+      <div class="chips">
+        <a class="chip accent" href="pantry.html">
+          4 att använda snart
+          <span class="en">Use soon</span>
+        </a>
+        <a class="chip" href="shopping-plan.html">
+          Fredagshandling
+          <span class="en">Friday shop</span>
+        </a>
+        <a class="chip" href="#">
+          Hushållet synkat
+          <span class="en">Household synced</span>
+        </a>
+      </div>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Mobilnavigering">
+      <ul>
+        <li>
+          <a class="nav-tab active" href="home.html" aria-current="page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12 L12 4 L21 12 V20 H3Z"/></svg>
+            Hem
+            <span class="indicator"></span>
+          </a>
+        </li>
+        <li>
+          <a class="nav-tab" href="shopping-plan.html">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6 H20 L18 14 H8 L6 6Z M8 18 A2 2 0 1 0 8 14 A2 2 0 0 0 8 18 M18 18 A2 2 0 1 0 18 14 A2 2 0 0 0 18 18"/></svg>
+            Inköp
+          </a>
+        </li>
+        <li>
+          <a class="nav-tab" href="#">
+            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18" cy="12" r="1.5"/></svg>
+            Mer
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</body>
+</html>

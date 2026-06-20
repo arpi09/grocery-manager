@@ -9,6 +9,7 @@ import type { HouseholdService } from '$lib/application/household.service';
 import type { ShoppingListService } from '$lib/application/shopping-list.service';
 import type { ShoppingToPantryService } from '$lib/application/shopping-to-pantry.service';
 import type { InventoryService } from '$lib/application/inventory.service';
+import type { ProductCatalogService } from '$lib/application/product-catalog.service';
 import type { StatistikService } from '$lib/application/statistik.service';
 import type { GamificationService } from '$lib/application/gamification.service';
 import type { WrappedService } from '$lib/application/wrapped.service';
@@ -60,6 +61,7 @@ declare global {
 			adminService: AdminService;
 			householdService: HouseholdService;
 			inventoryService: InventoryService;
+			productCatalogService: ProductCatalogService;
 			statistikService: StatistikService;
 			gamificationService: GamificationService;
 			wrappedService: WrappedService;

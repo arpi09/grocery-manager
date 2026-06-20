@@ -1,0 +1,3 @@
+-- Home moment card product_event type (application enum in schema.ts):
+-- moment_cta_tapped
+-- No DDL required: product_event.event_type is unconstrained text.

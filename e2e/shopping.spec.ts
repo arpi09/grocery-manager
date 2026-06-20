@@ -173,6 +173,7 @@ test.describe('Shopping list', () => {
 		const row = uncheckedShoppingRow(page, itemName);
 		const rowId = await row.getAttribute('data-testid');
 		expect(rowId).toMatch(/^shopping-grid-row-/);
+		await expect(row.getByTestId('product-avatar')).toBeVisible();
 		const id = rowId!.slice('shopping-grid-row-'.length);
 
 		const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190';
@@ -223,6 +224,7 @@ test.describe('Shopping list', () => {
 		await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 30_000 });
 		await expect(page.getByTestId('shopping-checklist-grid-table')).toBeVisible({ timeout: 15_000 });
 		await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 30_000 });
+		await expect(uncheckedShoppingRow(page, itemName).getByTestId('product-avatar')).toBeVisible();
 	});
 
 

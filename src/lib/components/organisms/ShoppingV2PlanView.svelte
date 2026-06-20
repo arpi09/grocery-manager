@@ -34,7 +34,7 @@
 		onDismissSuggestion,
 		onStartShop,
 		onAddItem,
-		onOpenLegacy
+		onOpenLegacy,
 	}: Props = $props();
 
 	const header = $derived(buildPlanHeaderTitle(tripLabel));
@@ -158,6 +158,12 @@
 		cursor: pointer;
 		text-decoration: underline;
 		min-height: var(--touch-target-min);
+	}
+
+
+	.compare-stores-link:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 
 	.legacy-link:focus-visible {

@@ -1,30 +1,36 @@
 <script lang="ts">
 	import HomeBriefingChips from '$lib/components/molecules/HomeBriefingChips.svelte';
-	import HomeBriefingForYouCardView from '$lib/components/molecules/HomeBriefingForYouCard.svelte';
+	import HomeBriefingSuggestionCard from '$lib/components/molecules/HomeBriefingSuggestionCard.svelte';
 	import HomeBriefingGreeting from '$lib/components/molecules/HomeBriefingGreeting.svelte';
-	import { trackForYouCtaTapped, trackHomeChipTapped } from '$lib/client/home-v2-telemetry';
+	import { trackForYouCtaTapped, trackHomeChipTapped, trackMomentCtaTapped } from '$lib/client/home-v2-telemetry';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 	import {
 		buildHomeBriefingChipsPresentation,
 		buildHomeBriefingForYouPresentation,
 		buildHomeBriefingGreetingPresentation,
+		buildHomeBriefingMomentPresentation,
 		buildHomeBriefingStatusPresentation
 	} from '$lib/domain/home-briefing-presenter';
 	import {
 		isShoppingListReady,
 		selectHomeBriefingForYouCard,
+		selectHomeBriefingMomentCard,
 		selectHomeBriefingStatus,
 		type HomeBriefingForYouCard,
 		type HomeBriefingFunFact,
+		type HomeBriefingMomentCard,
+		type HomeBriefingMomentKind,
 		type HomeBriefingRecipeCard
 	} from '$lib/domain/home-briefing';
 	import type { HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { getLocale, t } from '$lib/i18n';
 	import { PANTRY_SHELF_PATH } from '$lib/navigation/nav-config';
+	import { APP_HOME_PATH } from '$lib/navigation/app-home';
+	import { scanModeHref } from '$lib/utils/scan-nav';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
-
+	
 	interface Props {
 		summary: DashboardSummary;
 		intelligence: HomeIntelligenceSnapshot;
@@ -60,6 +66,7 @@
 		onAcceptReplenishment,
 		onRecipeCta
 	}: Props = $props();
+
 
 	const locale = $derived(getLocale());
 	const useSoonCount = $derived(summary.expiringSoon.length);
@@ -98,10 +105,15 @@
 		return counts;
 	});
 
+	const moment = $derived(selectHomeBriefingMomentCard(briefingInput));
+
 	const greeting = $derived(buildHomeBriefingGreetingPresentation(displayName));
 	const statusPresentation = $derived(buildHomeBriefingStatusPresentation(status, locale));
 	const forYouPresentation = $derived(
 		forYou ? buildHomeBriefingForYouPresentation(forYou, locale) : null
+	);
+	const momentPresentation = $derived(
+		moment ? buildHomeBriefingMomentPresentation(moment) : null
 	);
 	const chipsPresentation = $derived(
 		buildHomeBriefingChipsPresentation({
@@ -126,6 +138,24 @@
 		briefingRecipeChip ? `/recept/${briefingRecipeChip.id}/laga` : null
 	);
 
+	function momentCtaHref(kind: HomeBriefingMomentKind): string {
+		switch (kind) {
+			case 'emptyPantry':
+			case 'scanReceipt':
+				return scanModeHref('receipt', APP_HOME_PATH);
+			case 'photoRound':
+				return scanModeHref('photo', APP_HOME_PATH);
+			case 'planMeal':
+				return '/recept';
+			case 'openShopping':
+				return '/inkop';
+			case 'seeStats':
+				return '/statistik';
+		}
+	}
+
+	const momentHref = $derived(moment ? momentCtaHref(moment.kind) : null);
+
 	const forYouCtaHref = $derived.by(() => {
 		if (!forYou) return null;
 		switch (forYou.kind) {
@@ -145,6 +175,10 @@
 	function trackForYouLinkTap(kind: HomeBriefingForYouCard['kind'], destination: string) {
 		trackForYouCtaTapped(kind, destination);
 	}
+
+	function trackMomentLinkTap(kind: HomeBriefingMomentCard['kind'], destination: string) {
+		trackMomentCtaTapped(kind, destination);
+	}
 </script>
 
 <div class="home-v2-briefing" data-testid="home-v2-briefing">
@@ -152,14 +186,17 @@
 
 	{#if forYou && forYouPresentation}
 		<p class="section-label">{t('home.v6.forYou.sectionLabel')}</p>
-		<HomeBriefingForYouCardView
-			card={forYou}
+		<HomeBriefingSuggestionCard
+			variant="forYou"
+			kind={forYou.kind}
 			title={forYouPresentation.title}
 			body={forYouPresentation.body}
 			cta={forYouPresentation.cta}
 			{canWrite}
 			ctaHref={forYouCtaHref}
 			ctaLoading={acceptingReplenishment}
+			showActionButton={forYou.kind === 'replenishment' ||
+				(forYou.kind === 'recipe' && forYou.missingCount > 0)}
 			onCta={
 				forYou.kind === 'replenishment' && onAcceptReplenishment
 					? () => onAcceptReplenishment(forYou)
@@ -170,7 +207,20 @@
 							: undefined
 			}
 		/>
+	{:else if moment && momentPresentation}
+		<p class="section-label">{t('home.v6.forYou.sectionLabel')}</p>
+		<HomeBriefingSuggestionCard
+			variant="moment"
+			kind={moment.kind}
+			title={momentPresentation.title}
+			body={momentPresentation.body}
+			cta={momentPresentation.cta}
+			ctaHref={momentHref}
+			showPantryIllustration={moment.kind === 'emptyPantry'}
+			onCta={momentHref ? () => trackMomentLinkTap(moment.kind, momentHref!) : undefined}
+		/>
 	{/if}
+
 
 	<HomeBriefingChips
 		chips={chipsPresentation}

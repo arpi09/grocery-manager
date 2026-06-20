@@ -212,6 +212,7 @@ export const inventoryItemTable = pgTable(
 			enum: ['user_set', 'ai_inferred', 'default_heuristic', 'household_learned', 'heuristic']
 		}),
 		notes: text('notes'),
+		barcode: text('barcode'),
 		lastConfirmedAt: timestamp('last_confirmed_at', { withTimezone: true, mode: 'date' })
 			.notNull()
 			.defaultNow(),
@@ -221,9 +222,20 @@ export const inventoryItemTable = pgTable(
 	(table) => [
 		index('inventory_household_location_idx').on(table.householdId, table.location),
 		index('inventory_household_expires_idx').on(table.householdId, table.expiresOn),
-		index('inventory_household_last_confirmed_idx').on(table.householdId, table.lastConfirmedAt)
+		index('inventory_household_last_confirmed_idx').on(table.householdId, table.lastConfirmedAt),
+		index('inventory_household_barcode_idx').on(table.householdId, table.barcode)
 	]
 );
+
+export const productCatalogTable = pgTable('product_catalog', {
+	barcode: text('barcode').primaryKey(),
+	name: text('name').notNull(),
+	imageUrl: text('image_url'),
+	source: text('source', { enum: ['open_food_facts'] })
+		.notNull()
+		.default('open_food_facts'),
+	updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+});
 
 export const recipeIdeaTable = pgTable(
 	'recipe_ideas',
@@ -416,6 +428,7 @@ export const productEventTable = pgTable(
 				'home_briefing_viewed',
 				'home_briefing_opened',
 				'for_you_cta_tapped',
+				'moment_cta_tapped',
 				'home_chip_tapped',
 				'home_viewed',
 				'recommendation_viewed',
@@ -445,7 +458,13 @@ export const productEventTable = pgTable(
 				'pantry_shelf_opened',
 				'pantry_zone_opened',
 				'pantry_item_opened',
-				'pantry_use_soon_tapped'
+				'pantry_use_soon_tapped',
+				'store_recommendation_opened',
+				'store_preference_selected',
+				'store_chain_selected',
+				'store_compare_ica_enabled',
+				'store_recommendation_interest_shown',
+				'store_recommendation_completed'
 			]
 		}).notNull(),
 		metadata: text('metadata'),

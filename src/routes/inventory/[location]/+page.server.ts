@@ -43,8 +43,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			locals.inventoryService.getAutoExpiredGraceDays(householdId)
 		]);
 
+	const itemsWithImages = await locals.productCatalogService.enrichInventoryItems(items);
+
 	return {
-		items,
+		items: itemsWithImages,
 		finishedItems: [],
 		activeTotal,
 		finishedTotal,

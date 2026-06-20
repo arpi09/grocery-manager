@@ -1,48 +1,66 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
-	import type { HomeBriefingForYouCard } from '$lib/domain/home-briefing';
+	import SceneIllustration from '$lib/components/atoms/SceneIllustration.svelte';
+	import HomeBriefingMomentScene from '$lib/components/molecules/HomeBriefingMomentScene.svelte';
 	import type { HomeBriefingMessagePresentation } from '$lib/domain/home-briefing-presenter';
 	import { t } from '$lib/i18n';
 
 	interface Props {
-		card: HomeBriefingForYouCard;
+		kind: string;
+		variant?: 'forYou' | 'moment';
 		title: HomeBriefingMessagePresentation;
 		body: HomeBriefingMessagePresentation;
 		cta: HomeBriefingMessagePresentation;
 		canWrite?: boolean;
 		ctaHref?: string | null;
 		ctaLoading?: boolean;
+		showActionButton?: boolean;
+		showPantryIllustration?: boolean;
 		onCta?: () => void | Promise<void>;
 	}
 
 	let {
-		card,
+		kind,
+		variant = 'forYou',
 		title,
 		body,
 		cta,
 		canWrite = false,
 		ctaHref = null,
 		ctaLoading = false,
+		showActionButton = false,
+		showPantryIllustration = false,
 		onCta
 	}: Props = $props();
 
 	const ctaLabel = $derived(t(cta.key, cta.params));
-	const showButton = $derived(
-		canWrite &&
-			onCta &&
-			(card.kind === 'replenishment' || (card.kind === 'recipe' && card.missingCount > 0))
-	);
+	const testId = $derived(variant === 'moment' ? 'home-v2-moment' : 'home-v2-for-you');
+	const showButton = $derived(canWrite && showActionButton && onCta);
 	const showLink = $derived(Boolean(ctaHref) && !showButton);
 </script>
 
-<article class="for-you-card" data-testid="home-v2-for-you" data-for-you-kind={card.kind}>
-	<div class="for-you-accent" aria-hidden="true">
-		<span class="accent-bar"></span>
-		<span class="accent-shape shape-a"></span>
-		<span class="accent-shape shape-b"></span>
-	</div>
-	<h2 class="for-you-title">{t(title.key, title.params)}</h2>
-	<p class="for-you-body">{t(body.key, body.params)}</p>
+<article
+	class="suggestion-card"
+	data-testid={testId}
+	data-for-you-kind={variant === 'forYou' ? kind : undefined}
+	data-moment-kind={variant === 'moment' ? kind : undefined}
+>
+	{#if variant === 'moment' && showPantryIllustration}
+		<div class="pantry-illus">
+			<SceneIllustration src="/illustrations/v2/pantry-shelf.svg" decorative width={200} height={150} />
+		</div>
+	{:else if variant === 'moment'}
+		<HomeBriefingMomentScene />
+	{:else}
+		<div class="suggestion-accent" aria-hidden="true">
+			<span class="accent-bar"></span>
+			<span class="accent-shape shape-a"></span>
+			<span class="accent-shape shape-b"></span>
+		</div>
+	{/if}
+
+	<h2 class="suggestion-title">{t(title.key, title.params)}</h2>
+	<p class="suggestion-body">{t(body.key, body.params)}</p>
 
 	{#if showButton}
 		<Button type="button" fullWidth loading={ctaLoading} onclick={() => void onCta?.()}>
@@ -56,7 +74,7 @@
 </article>
 
 <style>
-	.for-you-card {
+	.suggestion-card {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
@@ -68,7 +86,13 @@
 		overflow: hidden;
 	}
 
-	.for-you-accent {
+	.pantry-illus {
+		margin: calc(-1 * var(--space-sm)) calc(-1 * var(--space-md)) 0;
+		padding: var(--space-sm) var(--space-md) 0;
+		background: color-mix(in srgb, var(--color-accent, #8a9a7b) 6%, var(--color-surface));
+	}
+
+	.suggestion-accent {
 		position: relative;
 		height: 40px;
 		margin: calc(-1 * var(--space-sm)) calc(-1 * var(--space-md)) 0;
@@ -137,14 +161,21 @@
 		}
 	}
 
-	.for-you-title {
+	@media (prefers-reduced-motion: reduce) {
+		.accent-bar,
+		.accent-shape {
+			animation: none;
+		}
+	}
+
+	.suggestion-title {
 		margin: 0;
 		font-size: 1.0625rem;
 		font-weight: 700;
 		line-height: 1.25;
 	}
 
-	.for-you-body {
+	.suggestion-body {
 		margin: 0 0 var(--space-xs);
 		font-size: var(--font-size-body-sm, 0.875rem);
 		color: var(--color-text-muted);

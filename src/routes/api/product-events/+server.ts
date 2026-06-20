@@ -78,6 +78,7 @@ const AUTH_EVENT_TYPES = new Set<ProductEventType>([
 	'home_briefing_viewed',
 	'home_briefing_opened',
 	'for_you_cta_tapped',
+	'moment_cta_tapped',
 	'home_chip_tapped',
 	'home_viewed',
 	'recommendation_viewed',
@@ -113,7 +114,13 @@ const AUTH_EVENT_TYPES = new Set<ProductEventType>([
 	'pantry_shelf_opened',
 	'pantry_zone_opened',
 	'pantry_item_opened',
-	'pantry_use_soon_tapped'
+	'pantry_use_soon_tapped',
+	'store_recommendation_opened',
+	'store_preference_selected',
+	'store_chain_selected',
+	'store_compare_ica_enabled',
+	'store_recommendation_interest_shown',
+	'store_recommendation_completed'
 ]);
 
 function isAllowedEventType(value: unknown): value is ProductEventType {

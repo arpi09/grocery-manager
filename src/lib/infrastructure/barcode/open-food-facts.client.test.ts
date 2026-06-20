@@ -54,7 +54,30 @@ describe('fetchProductByBarcode', () => {
 			name: 'Organic Milk',
 			quantity: '1',
 			unit: 'L',
-			notes: 'Brand: Test Dairy'
+			notes: 'Brand: Test Dairy',
+			imageUrl: null
 		});
+	});
+
+	it('maps Open Food Facts image URLs', async () => {
+		vi.stubGlobal(
+			'fetch',
+			vi.fn().mockResolvedValue({
+				ok: true,
+				json: async () => ({
+					status: 1,
+					product: {
+						product_name: 'Organic Milk',
+						brands: 'Test Dairy',
+						quantity: '1 L',
+						image_front_small_url: 'https://images.openfoodfacts.org/small.jpg',
+						image_front_url: 'https://images.openfoodfacts.org/full.jpg'
+					}
+				})
+			})
+		);
+
+		const result = await fetchProductByBarcode('7310862000003');
+		expect(result?.imageUrl).toBe('https://images.openfoodfacts.org/small.jpg');
 	});
 });

@@ -53,7 +53,7 @@
 		shoppingToPantryMode,
 		shareLinkEnabled,
 		memberCount,
-		showReceiptImportLead = false
+		showReceiptImportLead = false,
 	}: Props = $props();
 
 	let session = $state<ShoppingTripSession>(defaultShoppingTripSession());

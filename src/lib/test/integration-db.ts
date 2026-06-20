@@ -73,7 +73,9 @@ const SQL_MIGRATION_FILES = [
 	'0052_home_redesign_telemetry.sql',
 	'0053_memory_rule_events.sql',
 	'0054_shopping_ux_v2_telemetry.sql',
-	'0055_pantry_ux_v2_telemetry.sql'
+	'0055_pantry_ux_v2_telemetry.sql',
+	'0056_home_ux_v2_telemetry.sql',
+	'0057_product_catalog.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
@@ -101,6 +103,7 @@ TRUNCATE TABLE
 	"household_location_rule",
 	"learning_feedback",
 	"shopping_list_item",
+	"product_catalog",
 	"inventory_items",
 	"meal_plans",
 	"recipe_ideas",

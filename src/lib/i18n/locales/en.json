@@ -450,6 +450,38 @@
 					"cta": "Start shopping"
 				}
 			},
+			"moment": {
+				"emptyPantry": {
+					"title": "Build your pantry",
+					"body": "Scan a receipt or add items manually — then stay in sync together.",
+					"cta": "Scan receipt"
+				},
+				"scanReceipt": {
+					"title": "Keep the pantry updated",
+					"body": "A quick receipt scan keeps your pantry up to date.",
+					"cta": "Scan receipt"
+				},
+				"photoRound": {
+					"title": "Quick fridge check",
+					"body": "Snap a quick photo of the fridge.",
+					"cta": "Photo round"
+				},
+				"planMeal": {
+					"title": "What's for dinner?",
+					"body": "Browse recipes with what you have at home.",
+					"cta": "Browse recipes"
+				},
+				"openShopping": {
+					"title": "Shopping list is waiting",
+					"body": "You have items on the list — great for a quick trip.",
+					"cta": "Open shopping list"
+				},
+				"seeStats": {
+					"title": "See how the kitchen is doing",
+					"body": "Check stats and fun numbers from your household.",
+					"cta": "Open stats"
+				}
+			},
 			"chips": {
 				"sectionLabel": "Quick glance",
 				"shoppingHint": "{count, plural, one {# item} other {# items}} · {weekday}",
@@ -1038,6 +1070,8 @@
 		"itemActionsNamed": "Actions for {name}",
 		"editItem": "Edit",
 		"quantityLeft": "{amount} left",
+		"listMetaExpiry": "Best before {date}",
+		"listMetaAria": "{meta}",
 		"expiryFilterNoExpiry": "No date",
 		"filterEmptyTitle": "No items match this filter",
 		"filterEmptyDescription": "Try another filter or show all items.",
@@ -3357,5 +3391,43 @@
 		"signupTitle": "Want to share expiring food too?",
 		"signupLead": "Get your own pantry with expiry tracking — scan, get reminders, and share like neighbours here.",
 		"signupBtn": "Try Skaffu free"
+	},
+	"storeRecommendation": {
+		"home": {
+			"title": "Where should you shop?",
+			"body": "{count, plural, one {# item on your list — we'll help you pick a store.} other {# items on your list — we'll help you pick a store.}}",
+			"cta": "Compare stores"
+		},
+		"page": {
+			"title": "Compare stores"
+		},
+		"planLink": "Compare stores",
+		"survey": {
+			"lead": "{count, plural, one {You have # item on your shopping list.} other {You have # items on your shopping list.}}",
+			"q1": {
+				"title": "What matters most when choosing a store?",
+				"lowestPrice": "Lowest total price",
+				"closest": "Closest store",
+				"fewestStores": "Fewest stores to visit",
+				"sameChain": "Same chain as usual"
+			},
+			"q2": {
+				"title": "Which chains do you shop at?",
+				"chains": {
+					"ica": "ICA",
+					"coop": "Coop",
+					"willys": "Willys",
+					"lidl": "Lidl",
+					"hemkop": "Hemköp",
+					"citygross": "City Gross"
+				}
+			},
+			"q3": {
+				"title": "Would you like to compare prices with ICA?"
+			},
+			"comingSoonTitle": "Price comparison coming soon",
+			"comingSoonBody": "We're building a way to compare your list across stores. Your answers help us prioritize what to build next.",
+			"completeNote": "Thanks — we've saved your preferences."
+		}
 	}
 }
