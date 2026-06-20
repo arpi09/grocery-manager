@@ -1,0 +1,56 @@
+---
+description: Nightly prod error guard — fix one recurring prod error on master, never auto-deploy
+alwaysApply: false
+---
+
+# Nightly prod error guard (Cursor Automation)
+
+When this rule applies (nightly Cursor Automation or coordinator delegated nightly fix), the agent **only** triages and fixes **one recurring production error cluster** on `master`. It does **not** release to production.
+
+## Scope
+
+| In scope | Out of scope |
+|----------|--------------|
+| Fetch prod errors via `GET $PRODUCTION_URL/api/cron/error-export` | **Deploy to production** (`deploy.yml`) |
+| Group by `path` + normalized `message` prefix | Large refactors, new features |
+| **One** root-cause fix per run | Multiple unrelated fixes same night |
+| `npm run check:fast` + relevant `test:unit` | Full E2E (unless failure is in a specific spec) |
+| Commit + **push `master`** | PR (unless branch protection requires it) |
+| Compare `createdAt` with last green deploy (`gh run list --workflow=deploy.yml`) | Ask human to reproduce when logs suffice |
+
+## Flow
+
+1. **Fetch:** `curl -sS -H "Authorization: Bearer $CRON_SECRET" "$PRODUCTION_URL/api/cron/error-export?hours=24&limit=25"`
+2. **Empty (`count == 0`):** Reply briefly: "inga nya fel — ingen push."
+3. **Prioritize:** Most repeats first; server 500 before `CLIENT` noise; errors after latest deploy SHA first.
+4. **Fix:** Checkout `master`, pull, minimal diff for **one** cluster. Skip duplicates already fixed in recent commits on `master`.
+5. **Test:** `npm run check:fast` and relevant unit tests for touched code.
+6. **Push:** Commit on `master`, `git push origin master`. Do **not** open a PR.
+7. **Report:** Error cluster, fix summary, commit SHA. No deploy claim.
+
+## Forbidden (hard)
+
+- `gh workflow run deploy.yml` or any production deploy trigger
+- `firebase deploy`, `npm run deploy:firebase`, or claiming "deployed" / "prod is live"
+- Instructing the human to deploy or test production as homework
+- Fixing more than one unrelated error cluster per run
+- Adding DB cursor / autofix fingerprint table (v1 uses 24h window only)
+
+## Commands (reference)
+
+```bash
+curl -sS -H "Authorization: Bearer $CRON_SECRET" "$PRODUCTION_URL/api/cron/error-export?hours=24&limit=25"
+gh run list --workflow=deploy.yml --branch=master --limit=3 --json databaseId,conclusion,headSha,createdAt,url
+git fetch origin master && git checkout master && git pull --ff-only origin master
+npm run check:fast
+npm run test:unit -- <relevant-spec>
+git push origin master
+```
+
+## Related
+
+- [docs/ERROR_MONITORING.md](../../docs/ERROR_MONITORING.md) — capture, alert, export API
+- [docs/NIGHTLY_PROD_ERROR_AUTOFIX.md](../../docs/NIGHTLY_PROD_ERROR_AUTOFIX.md) — runbook
+- [nightly-e2e-guard.mdc](./nightly-e2e-guard.mdc) — parallel pattern (E2E, not errors)
+- [delivery-done.mdc](./delivery-done.mdc) — no deploy claims without Deploy workflow + smoke
+- [deploy-safety.mdc](./deploy-safety.mdc) — deploy gate and coordinator deploy rules

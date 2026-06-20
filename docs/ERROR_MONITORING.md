@@ -75,3 +75,35 @@ curl -X POST -H "Authorization: Bearer $CRON_SECRET" "$PRODUCTION_URL/api/cron/e
 ```
 
 Expected: `{"ok":true,"sent":false,"skipped":"no new errors"}` when logs are clean.
+
+---
+
+## Machine-readable export (nightly autofix)
+
+**Route:** `GET /api/cron/error-export` — same `Authorization: Bearer $CRON_SECRET` as other cron routes.
+
+| Query | Default | Max |
+|-------|---------|-----|
+| `hours` | 24 | 168 |
+| `limit` | 25 | 100 (`ERROR_LOG_ADMIN_LIST_MAX`) |
+
+Response includes full `stack` per error (admin UI loads stack on demand). Used by the nightly Cursor Automation — see [`.cursor/rules/nightly-prod-error-guard.mdc`](../.cursor/rules/nightly-prod-error-guard.mdc) and [`NIGHTLY_PROD_ERROR_AUTOFIX.md`](./NIGHTLY_PROD_ERROR_AUTOFIX.md).
+
+```bash
+curl -sS -H "Authorization: Bearer $CRON_SECRET" "$PRODUCTION_URL/api/cron/error-export?hours=24&limit=25"
+```
+
+**v1:** No autofix cursor in DB — automation uses 24h window and fixes **one** error cluster per run.
+
+---
+
+## Nightly automation (owner)
+
+| Item | Detail |
+|------|--------|
+| Schedule | 04:00 UTC (`0 4 * * *`) — after nightly E2E (03:00 UTC) |
+| Branch | `master` (direct push, no PR) |
+| Secrets | `CRON_SECRET`, `PRODUCTION_URL` in Cursor Cloud Agents dashboard |
+| Deploy | Automation never runs `deploy.yml` — coordinator deploys separately |
+
+Runbook: [`NIGHTLY_PROD_ERROR_AUTOFIX.md`](./NIGHTLY_PROD_ERROR_AUTOFIX.md).

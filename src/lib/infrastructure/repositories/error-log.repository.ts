@@ -12,6 +12,7 @@ export interface IErrorLogRepository {
 	listRecent(limit: number): Promise<AppErrorEntry[]>;
 	listRecentSummaries(limit: number): Promise<AppErrorSummary[]>;
 	listSummariesSince(since: Date, limit: number): Promise<AppErrorSummary[]>;
+	listFullSince(since: Date, limit: number): Promise<AppErrorEntry[]>;
 	getStack(id: string): Promise<string | null>;
 	enforceRetention(): Promise<void>;
 }
@@ -86,6 +87,25 @@ export class DrizzleErrorLogRepository implements IErrorLogRepository {
 		return rows.map(({ stack, ...row }) => ({
 			...row,
 			hasStack: stack !== null
+		}));
+	}
+
+	async listFullSince(since: Date, limit: number): Promise<AppErrorEntry[]> {
+		const rows = await db
+			.select()
+			.from(appErrorTable)
+			.where(gte(appErrorTable.createdAt, since))
+			.orderBy(desc(appErrorTable.createdAt))
+			.limit(limit);
+
+		return rows.map((row) => ({
+			id: row.id,
+			message: row.message,
+			stack: row.stack,
+			path: row.path,
+			userId: row.userId,
+			statusCode: row.statusCode,
+			createdAt: row.createdAt
 		}));
 	}
 
