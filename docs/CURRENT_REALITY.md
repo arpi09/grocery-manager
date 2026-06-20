@@ -5,8 +5,8 @@
 | F?lt | V?rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-20 |
-| **Prod SHA** | `f049e3cb0` @ [27883692872](https://github.com/arpi09/grocery-manager/actions/runs/27883692872) (fast E2E critical). Price Intel Phase 1 (`receipt_price_captured` + discovery) @ `28934586d`. Prior `ab46f3c49` @ [27809543691](https://github.com/arpi09/grocery-manager/actions/runs/27809543691). |
-| **Master SHA** | `f049e3cb0` â€” Price Intel Phase 1 + nightly error export guardrails |
+| **Prod SHA** | `e0e9a5b34` @ [27884126416](https://github.com/arpi09/grocery-manager/actions/runs/27884126416) (auto tier, E2E critical). Prior `f049e3cb0` @ [27883692872](https://github.com/arpi09/grocery-manager/actions/runs/27883692872). |
+| **Master SHA** | `e0e9a5b34` — Äta planer UX, receipt one-tap/share V1, nightly error export |
 | **CI/CD model** | **v2 on master** â€” tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
