@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+﻿import { existsSync, readFileSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
 
 function loadDotEnv(path = '.env') {
@@ -37,7 +37,7 @@ process.env.ADMIN_PASSWORD = e2eAdminPassword;
 const adminStorageState = 'e2e/.auth/admin.json';
 const freshUserSpecs = [/critical-flows\.spec\.ts/, /growth-wave\.spec\.ts/];
 
-/** iPhone 14 viewport (390×844) in Chromium — avoids WebKit dependency in CI. */
+/** iPhone 14 viewport (390Ã—844) in Chromium â€” avoids WebKit dependency in CI. */
 const mobileChrome = {
 	...devices['Desktop Chrome'],
 	viewport: { width: 390, height: 844 },
@@ -110,7 +110,8 @@ export default defineConfig({
 			SHOPPING_UX_V2_ENABLED: process.env.SHOPPING_UX_V2_ENABLED ?? 'false',
 			PANTRY_UX_V2_ENABLED: process.env.PANTRY_UX_V2_ENABLED ?? 'false',
 			HOME_UX_V2_ENABLED: process.env.HOME_UX_V2_ENABLED ?? 'false',
-			STORE_RECOMMENDATION_V0_ENABLED: process.env.STORE_RECOMMENDATION_V0_ENABLED ?? 'false'
+			STORE_RECOMMENDATION_V0_ENABLED: process.env.STORE_RECOMMENDATION_V0_ENABLED ?? 'false',
+			PUBLIC_SHOPPING_LIST_SHARE_ENABLED: process.env.PUBLIC_SHOPPING_LIST_SHARE_ENABLED ?? 'true'
 		}
 	}
 });
