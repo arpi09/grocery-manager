@@ -116,12 +116,12 @@ Script: [`scripts/generate-linkedin-covers.mjs`](../scripts/generate-linkedin-co
 
 | # | Huvudtext | Undertext |
 |---|-----------|-----------|
-| hero | **Skaffu** | Skafferiet du har koll på |
-| 1 | **Skaffu** | Skafferiet du har koll på |
-| 2 | **Skanna det du har hemma** | Streckkod, kvitto eller foto |
-| 3 | **Maträtt på knapptryck** | Recept från ditt lager |
-| 4 | **Ät det som går ut** | Mindre matsvinn |
-| 5 | **Gratis att prova** | skaffu.com |
+| hero | **Skaffu** | Handla ihop med koll på skafferiet |
+| 1 | **Skaffu** | Handla ihop med koll på skafferiet |
+| 2 | **Delad lista i realtid** | Bjud in partner, checka av i butiken |
+| 3 | **Koll på skafferiet** | Se vad som finns hemma innan ni handlar |
+| 4 | **Se vad som går ut snart** | Mindre matsvinn hemma |
+| 5 | **Kom igång gratis** | skaffu.com |
 
 Design: ljus gradient (`#f7f5f0` → `#e8f0ea`), primär `#3d6b4f`, text centrerad i säker zon. `skaffu.com`-pill på hero, slide 1 och 5. Ingen vänster accent-stripe (undviker kantartefakter).
 

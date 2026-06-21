@@ -1,4 +1,8 @@
-/** Shared brand tokens for social asset generators (LinkedIn, Facebook). */
+/** Shared brand tokens for social asset generators (LinkedIn, Facebook, OG). */
+
+import { wrapSvgWithFonts } from './social-fonts.mjs';
+
+export { wrapSvgWithFonts };
 
 export const PRIMARY = '#2c4a3e';
 
@@ -6,12 +10,56 @@ export const COLORS = {
 	bgStart: '#f7f5f0',
 	bgEnd: '#e8f0ea',
 	primary: PRIMARY,
-	title: '#1a2e22',
-	subtitle: '#4a5c52',
+	title: '#1f2a24',
+	subtitle: '#4a5850',
 	white: '#ffffff'
 };
 
-export const FONT = 'DM Sans, system-ui, -apple-system, sans-serif';
+/** Exact family name for SVG text — must match @font-face in social-fonts.mjs */
+export const FONT = 'DM Sans';
+
+export const TITLE_WEIGHT = 700;
+export const SUBTITLE_WEIGHT = 600;
+export const BODY_WEIGHT = 400;
+/** Wordmark letter-spacing — matches marketing hero */
+export const TITLE_LETTER_SPACING = '-0.02em';
+
+/** Cover/share slide copy — synced with src/lib/marketing/content.ts landing */
+export const COVER_SLIDES = [
+	{
+		fileSuffix: 'hero',
+		title: 'Skaffu',
+		subtitle: 'Handla ihop med koll på skafferiet',
+		showPill: true
+	},
+	{
+		fileSuffix: '01-brand',
+		title: 'Skaffu',
+		subtitle: 'Handla ihop med koll på skafferiet',
+		showPill: true
+	},
+	{
+		fileSuffix: '02-scan',
+		title: 'Delad lista i realtid',
+		subtitle: 'Bjud in partner, checka av i butiken'
+	},
+	{
+		fileSuffix: '03-meal',
+		title: 'Koll på skafferiet',
+		subtitle: 'Se vad som finns hemma innan ni handlar'
+	},
+	{
+		fileSuffix: '04-waste',
+		title: 'Se vad som går ut snart',
+		subtitle: 'Mindre matsvinn hemma'
+	},
+	{
+		fileSuffix: '05-cta',
+		title: 'Kom igång gratis',
+		subtitle: 'skaffu.com',
+		showPill: true
+	}
+];
 
 /** @param {string} text */
 export function escapeXml(text) {
@@ -20,4 +68,58 @@ export function escapeXml(text) {
 		.replace(/</g, '&lt;')
 		.replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;');
+}
+
+/** @param {string} title */
+export function titleLetterSpacingAttr(title) {
+	return title === 'Skaffu' ? ` letter-spacing="${TITLE_LETTER_SPACING}"` : '';
+}
+
+/**
+ * OG / share-hero layout body (1200×630).
+ * @param {{ title?: string; subtitle?: string; tagline?: string; showPill?: boolean }} [opts]
+ */
+export function buildOgSvgBody(opts = {}) {
+	const title = opts.title ?? 'Skaffu';
+	const subtitle = opts.subtitle ?? 'Handla ihop med koll på skafferiet';
+	const tagline = opts.tagline ?? 'Delad lista · utgångsdatum · mindre matsvinn';
+	const showPill = opts.showPill ?? true;
+
+	const titleSize = 88;
+	const titleY = 280;
+	const subtitleY = 360;
+	const subtitleSize = 42;
+	const taglineY = 430;
+	const taglineSize = 32;
+	const pillY = 480;
+
+	const pill =
+		showPill ?
+			`<rect x="96" y="${pillY}" width="280" height="56" rx="12" fill="${COLORS.primary}"/>
+  <text x="236" y="${pillY + 36}" fill="${COLORS.white}" font-family="${FONT}" font-size="24" font-weight="${SUBTITLE_WEIGHT}" text-anchor="middle">skaffu.com</text>`
+		:	'';
+
+	return `<defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${COLORS.bgStart}"/>
+      <stop offset="100%" stop-color="${COLORS.bgEnd}"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="980" cy="120" r="180" fill="${COLORS.primary}" opacity="0.08"/>
+  <circle cx="180" cy="520" r="220" fill="${COLORS.primary}" opacity="0.06"/>
+  <text x="96" y="${titleY}" fill="${COLORS.title}" font-family="${FONT}" font-size="${titleSize}" font-weight="${TITLE_WEIGHT}"${titleLetterSpacingAttr(title)}>${escapeXml(title)}</text>
+  <text x="96" y="${subtitleY}" fill="${COLORS.primary}" font-family="${FONT}" font-size="${subtitleSize}" font-weight="${SUBTITLE_WEIGHT}">${escapeXml(subtitle)}</text>
+  <text x="96" y="${taglineY}" fill="${COLORS.subtitle}" font-family="${FONT}" font-size="${taglineSize}" font-weight="${BODY_WEIGHT}">${escapeXml(tagline)}</text>
+  ${pill}`;
+}
+
+/** @param {{ title?: string; subtitle?: string; tagline?: string; showPill?: boolean }} [opts] */
+export function buildOgSvg(opts = {}) {
+	return wrapSvgWithFonts(
+		buildOgSvgBody(opts),
+		1200,
+		630,
+		'role="img" aria-label="Skaffu — handla ihop med koll på skafferiet"'
+	);
 }

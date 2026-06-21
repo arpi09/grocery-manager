@@ -115,12 +115,12 @@ Script: [`scripts/generate-facebook-covers.mjs`](../scripts/generate-facebook-co
 
 | # | Huvudtext | Undertext |
 |---|-----------|-----------|
-| hero | **Skaffu** | Skafferiet du har koll på |
-| 1 | **Skaffu** | Skafferiet du har koll på |
-| 2 | **Skanna det du har hemma** | Streckkod, kvitto eller foto |
-| 3 | **Maträtt på knapptryck** | Recept från ditt lager |
-| 4 | **Ät det som går ut** | Mindre matsvinn |
-| 5 | **Gratis att prova** | skaffu.com |
+| hero | **Skaffu** | Handla ihop med koll på skafferiet |
+| 1 | **Skaffu** | Handla ihop med koll på skafferiet |
+| 2 | **Delad lista i realtid** | Bjud in partner, checka av i butiken |
+| 3 | **Koll på skafferiet** | Se vad som finns hemma innan ni handlar |
+| 4 | **Se vad som går ut snart** | Mindre matsvinn hemma |
+| 5 | **Kom igång gratis** | skaffu.com |
 
 ### Uppladdning
 
@@ -165,11 +165,12 @@ Skaffu hjälper hushåll skanna in lager, följa utgångsdatum och generera matr
 
 ## Delad brand-modul
 
-[`scripts/social-brand.mjs`](../scripts/social-brand.mjs) — `COLORS`, `FONT`, `PRIMARY`, `escapeXml` delas med LinkedIn-generators.
+[`scripts/social-brand.mjs`](../scripts/social-brand.mjs) — `COLORS`, `FONT`, `PRIMARY`, `COVER_SLIDES`, `escapeXml`. [`scripts/social-fonts.mjs`](../scripts/social-fonts.mjs) bäddar in DM Sans som base64 `@font-face`; [`scripts/social-render.mjs`](../scripts/social-render.mjs) rasteriserar via **resvg** (Sharp ignorerar inbäddade typsnitt).
 
-Efter brand-ändringar:
+Efter brand- eller copy-ändringar:
 
 ```bash
+npm run generate:og-image
 npm run generate:social
 ```
 

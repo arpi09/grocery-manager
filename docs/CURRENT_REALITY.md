@@ -1,13 +1,13 @@
-ï»¿# CURRENT_REALITY
+# CURRENT_REALITY
 
 > **Uppdatera denna fil** n?r prod deployas eller nav/flags ?ndras. K?r: `.cursor/scripts/refresh-current-reality.sh`
 
 | F?lt | V?rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-21 |
-| **Prod SHA** | `720155de9` @ [27898668700](https://github.com/arpi09/grocery-manager/actions/runs/27898668700) (auto tier, critical E2E). Prior `6e28b4956` @ [27897856697](https://github.com/arpi09/grocery-manager/actions/runs/27897856697). |
-| **Master SHA** | `720155de9` â€” inventory shelf header title Lager (nav-aligned) |
-| **CI/CD model** | **v2 on master** â€” tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
+| **Prod SHA** | `720155de9` @ [27898668700](https://github.com/arpi09/grocery-manager/actions/runs/27898668700) (live). Deploy blocked 2026-06-21: [27903794160](https://github.com/arpi09/grocery-manager/actions/runs/27903794160) (pre-deploy auth smoke webServer exit 13). Target master `20fb51521`. |
+| **Master SHA** | `20fb51521` - statistik spend guard `a5866e25d` + follow-up fixes; CI green @ [27903514745](https://github.com/arpi09/grocery-manager/actions/runs/27903514745). |
+| **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
 | **Reality audit** | [REALITY_AUDIT_2026-06.md](./REALITY_AUDIT_2026-06.md) |
@@ -27,15 +27,15 @@ Utg?ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenis
 | Settings | `/settings` | **iOS hub** ? grouped rows + drill-down (`/settings/account`, `/notifications`, `/household`, `/plan`, `/app`, `/feedback`, `/suggestions`) ([#100](https://github.com/arpi09/grocery-manager/pull/100)) |
 | Primary tabs (desktop) | Hem, Lager, Ink?p, Skanna, Mer | Lager + scan in top row |
 | Primary tabs (mobile) | Hem, Ink?p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
-| Inventory add | `/inventory/[location]` | EN **LÃ¤gg till** ? sheet (kvitto/foto/streckkod/manuellt) |
+| Inventory add | `/inventory/[location]` | EN **Lägg till** ? sheet (kvitto/foto/streckkod/manuellt) |
 | Skafferi (Pantry V2) | `/inventory` | Shelf view (zones + use-soon) live (`PANTRY_UX_V2_ENABLED` canary); unified data grid at `/inventory/[location]` |
 | Scan hub | `/scan` | 3-card choice hub; **ScanModeTabs desktop only** |
-| InkÃ¶p (Shopping V2) | `/inkop` | Plan + Shop modes live (`SHOPPING_UX_V2_ENABLED` canary); checklist data grid in overflow drawer (flag-off: inline grid) |
-| Ã„ta (meal plan) | `/planer` | Nav/header **Ã„ta**; veckokalender + idÃ©panel; veckofÃ¶rslag pÃ¥ `/planer/vecka` ([ATA_PAGE.md](./ATA_PAGE.md)) |
+| Inköp (Shopping V2) | `/inkop` | Plan + Shop modes live (`SHOPPING_UX_V2_ENABLED` canary); checklist data grid in overflow drawer (flag-off: inline grid) |
+| Äta (meal plan) | `/planer` | Nav/header **Äta**; veckokalender + idépanel; veckoförslag på `/planer/vecka` ([ATA_PAGE.md](./ATA_PAGE.md)) |
 | Memory Explorer | `/settings/memory` | Vad Skaffu vet ? household rules (learning gate) |
 | Post-register wedge | `/hem?welcome=1` | Ny registrering/OAuth ? guided start on hem ([#46](https://github.com/arpi09/grocery-manager/pull/46)) |
 | Delad lista W1 | `/lista/[token]` | Guest join + `lista_join_token` cookie; **Acquisition Loops V1** branding + telemetry ([ACQUISITION_LOOPS_V1.md](./ACQUISITION_LOOPS_V1.md)) |
-| Delad utgÃ¥ende W3 | `/dela/[token]` | Conversion pass aligned with lista (V1) |
+| Delad utgående W3 | `/dela/[token]` | Conversion pass aligned with lista (V1) |
 | Onboarding | modal | **3 steg / ~15s** ? lista ? minne ? kvitto; finish ? `/inkop?quick=1` |
 | Grannskafferiet (R16) | hidden | Ej i Mer unless `PUBLIC_CITY_FEED_ENABLED` |
 
@@ -68,27 +68,27 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 ## Tier snapshot
 
 - **A:** inkop, household, checkoff-bridge, eat-first, replenishment, onboarding?inkop
-- **B:** receipt import, barcode/photo add, price memory, Brain V1 (flags on), Memory Explorer â€” foundation audit: [PRICE_INTELLIGENCE_AUDIT.md](./PRICE_INTELLIGENCE_AUDIT.md). **Receipt automation V1 (2026-06-20):** one-tap import (hem/inkÃ¶p), PWA Android `share_target`, funnel telemetry `source`, quick confirm all, install nudge â€” see [RECEIPT_IMPORT_AUTOMATION_SPIKE.md](./RECEIPT_IMPORT_AUTOMATION_SPIKE.md)
+- **B:** receipt import, barcode/photo add, price memory, Brain V1 (flags on), Memory Explorer — foundation audit: [PRICE_INTELLIGENCE_AUDIT.md](./PRICE_INTELLIGENCE_AUDIT.md). **Receipt automation V1 (2026-06-20):** one-tap import (hem/inköp), PWA Android `share_target`, funnel telemetry `source`, quick confirm all, install nudge — see [RECEIPT_IMPORT_AUTOMATION_SPIKE.md](./RECEIPT_IMPORT_AUTOMATION_SPIKE.md)
 - **C:** grannskafferiet gate, onboarding v2, landing copy, design system doc (R12?R16 on master)
 
 ## K?nda drift (fixa n?r du ser dem)
 
 - [x] Prod DB migrations `0047`?`0048` ? applied 2026-06-14
 - [x] **UI living polish** ? prod **`72b02f49b`** @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) (fast E2E). PR #101 merged 2026-06-16.
-- [x] **Prod feature flags + hem redesign** â€” prod **`92d4915`** @ [27701442233](https://github.com/arpi09/grocery-manager/actions/runs/27701442233) (full E2E). PR #113 merged 2026-06-17.
-- [x] **Home redesign remaining + Brain feedback gaps** â€” prod **`73c7c5493`** @ [27713747492](https://github.com/arpi09/grocery-manager/actions/runs/27713747492) (full E2E). PRs #114, #115, #117 merged 2026-06-17.
+- [x] **Prod feature flags + hem redesign** — prod **`92d4915`** @ [27701442233](https://github.com/arpi09/grocery-manager/actions/runs/27701442233) (full E2E). PR #113 merged 2026-06-17.
+- [x] **Home redesign remaining + Brain feedback gaps** — prod **`73c7c5493`** @ [27713747492](https://github.com/arpi09/grocery-manager/actions/runs/27713747492) (full E2E). PRs #114, #115, #117 merged 2026-06-17.
 - [x] **Shopping V2 + Pantry V2 canary** - prod **`0b999e153`** @ [27790521211](https://github.com/arpi09/grocery-manager/actions/runs/27790521211). `SHOPPING_UX_V2_ENABLED` + `PANTRY_UX_V2_ENABLED` live.
 - [x] **SMUI + Reality Audit + Settings hub** ? prod **`c267c172c`** @ [27608398776](https://github.com/arpi09/grocery-manager/actions/runs/27608398776) (fast E2E). PRs #96?#100 merged 2026-06-16.
 - [x] **Mobile UX Recovery** ? prior prod **`d585cbd5`** @ [27570192623](https://github.com/arpi09/grocery-manager/actions/runs/27570192623)
 - [x] **PR #95** CI/CD v2 merged 2026-06-15
-- [x] **Price Intelligence Phase 1** â€” prod **`f049e3cb0`** @ [27883692872](https://github.com/arpi09/grocery-manager/actions/runs/27883692872) (fast E2E critical). `receipt_price_captured` telemetry + Price Memory discovery (chip tooltip/link, import hint).
-- [x] **Onboarding + statistik + account deletion + Capacitor spike** â€” prod **`6e28b4956`** @ [27897856697](https://github.com/arpi09/grocery-manager/actions/runs/27897856697) (auto tier, full E2E).
+- [x] **Price Intelligence Phase 1** — prod **`f049e3cb0`** @ [27883692872](https://github.com/arpi09/grocery-manager/actions/runs/27883692872) (fast E2E critical). `receipt_price_captured` telemetry + Price Memory discovery (chip tooltip/link, import hint).
+- [x] **Onboarding + statistik + account deletion + Capacitor spike** — prod **`6e28b4956`** @ [27897856697](https://github.com/arpi09/grocery-manager/actions/runs/27897856697) (auto tier, full E2E).
 
 ## Acquisition (V1)
 
-- **W1** `/lista/[token]` â€” shared list growth surface; events `shared_list_*`, `public_surface_*`
-- **W3** `/dela/[token]` â€” expiring share conversion pass
-- **W4** Invite value moments â€” receipt success, trip completed, post-list-share (solo household)
+- **W1** `/lista/[token]` — shared list growth surface; events `shared_list_*`, `public_surface_*`
+- **W3** `/dela/[token]` — expiring share conversion pass
+- **W4** Invite value moments — receipt success, trip completed, post-list-share (solo household)
 - **V2 backlog:** store comparison public share (no price engine in V1)
 - Spec: [ACQUISITION_LOOPS_V1.md](./ACQUISITION_LOOPS_V1.md)
 
@@ -102,4 +102,4 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 | `feat/smui-*` / `feat/marketing-*` | SMUI tables + home + marketing | **Merged** (#97?#99) |
 | `feat/pantry-ux-v2` | Pantry shelf UX V2 | **Merged + canary live** @ `0b999e153` |
 | `feature/home-ux-v2` | Home briefing UX V2 (PR1-PR5) | **Merged + canary live** @ `ab46f3c49` |
-| `feature/unified-data-grid` | Unified MUI-style data grid (pantry location + shopping checklist) | **In flight** â€” PR4 cleanup |
+| `feature/unified-data-grid` | Unified MUI-style data grid (pantry location + shopping checklist) | **In flight** — PR4 cleanup |

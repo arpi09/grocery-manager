@@ -1,12 +1,23 @@
 /**
  * Generate Facebook link/post share images (1200×630).
- * Same visual language as static/og-skaffu.svg — themed variants for manual posts.
+ * Same visual language as OG — themed variants for manual posts.
  * Run: npm run generate:facebook-share
  */
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { COLORS, FONT, escapeXml } from './social-brand.mjs';
+import {
+	COLORS,
+	COVER_SLIDES,
+	FONT,
+	SUBTITLE_WEIGHT,
+	TITLE_WEIGHT,
+	buildOgSvgBody,
+	escapeXml,
+	titleLetterSpacingAttr,
+	wrapSvgWithFonts
+} from './social-brand.mjs';
+import { writeSvgAsPng } from './social-render.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = join(root, 'static/facebook');
@@ -19,37 +30,16 @@ const slides = [
 	{
 		file: 'share-hero.png',
 		title: 'Skaffu',
-		subtitle: 'Skafferi-app för hela hushållet',
-		tagline: 'Skanna · följ utgångsdatum · minska matsvinn',
+		subtitle: 'Handla ihop med koll på skafferiet',
+		tagline: 'Delad lista · utgångsdatum · mindre matsvinn',
 		showPill: true
 	},
-	{
-		file: 'share-01-brand.png',
-		title: 'Skaffu',
-		subtitle: 'Skafferiet du har koll på',
-		showPill: true
-	},
-	{
-		file: 'share-02-scan.png',
-		title: 'Skanna det du har hemma',
-		subtitle: 'Streckkod, kvitto eller foto'
-	},
-	{
-		file: 'share-03-meal.png',
-		title: 'Maträtt på knapptryck',
-		subtitle: 'Recept från ditt lager'
-	},
-	{
-		file: 'share-04-waste.png',
-		title: 'Ät det som går ut',
-		subtitle: 'Mindre matsvinn'
-	},
-	{
-		file: 'share-05-cta.png',
-		title: 'Gratis att prova',
-		subtitle: 'skaffu.com',
-		showPill: true
-	}
+	...COVER_SLIDES.filter((slide) => slide.fileSuffix !== 'hero').map((slide) => ({
+		file: `share-${slide.fileSuffix}.png`,
+		title: slide.title,
+		subtitle: slide.subtitle,
+		showPill: slide.showPill
+	}))
 ];
 
 /**
@@ -59,28 +49,28 @@ const slides = [
  * @param {boolean} showPill
  */
 function buildSvg(title, subtitle, tagline, showPill) {
-	const titleSize = title === 'Skaffu' ? 88 : title.length > 24 ? 56 : title.length > 18 ? 64 : 72;
-	const titleY = tagline ? 280 : 260;
-	const subtitleY = tagline ? 360 : 340;
-	const subtitleSize = tagline ? 42 : 36;
-	const taglineY = 430;
-	const taglineSize = 32;
-	const pillY = tagline ? 480 : 460;
+	if (tagline) {
+		return wrapSvgWithFonts(
+			buildOgSvgBody({ title, subtitle, tagline, showPill }),
+			width,
+			height,
+			`role="img" aria-label="${escapeXml(title)}"`
+		);
+	}
 
-	const taglineEl =
-		tagline ?
-			`<text x="96" y="${taglineY}" fill="${COLORS.subtitle}" font-family="${FONT}" font-size="${taglineSize}" font-weight="400">${escapeXml(tagline)}</text>`
-		:	'';
+	const titleSize = title === 'Skaffu' ? 88 : title.length > 24 ? 56 : title.length > 18 ? 64 : 72;
+	const titleY = 260;
+	const subtitleY = 340;
+	const subtitleSize = 36;
+	const pillY = 460;
 
 	const pill =
 		showPill ?
 			`<rect x="96" y="${pillY}" width="280" height="56" rx="12" fill="${COLORS.primary}"/>
-  <text x="236" y="${pillY + 36}" fill="${COLORS.white}" font-family="${FONT}" font-size="24" font-weight="600" text-anchor="middle">skaffu.com</text>`
+  <text x="236" y="${pillY + 36}" fill="${COLORS.white}" font-family="${FONT}" font-size="24" font-weight="${SUBTITLE_WEIGHT}" text-anchor="middle">skaffu.com</text>`
 		:	'';
 
-	return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeXml(title)}">
-  <defs>
+	const body = `<defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="${COLORS.bgStart}"/>
       <stop offset="100%" stop-color="${COLORS.bgEnd}"/>
@@ -89,19 +79,11 @@ function buildSvg(title, subtitle, tagline, showPill) {
   <rect width="${width}" height="${height}" fill="url(#bg)"/>
   <circle cx="980" cy="120" r="180" fill="${COLORS.primary}" opacity="0.08"/>
   <circle cx="180" cy="520" r="220" fill="${COLORS.primary}" opacity="0.06"/>
-  <text x="96" y="${titleY}" fill="${COLORS.title}" font-family="${FONT}" font-size="${titleSize}" font-weight="700">${escapeXml(title)}</text>
-  <text x="96" y="${subtitleY}" fill="${COLORS.primary}" font-family="${FONT}" font-size="${subtitleSize}" font-weight="600">${escapeXml(subtitle)}</text>
-  ${taglineEl}
-  ${pill}
-</svg>`;
-}
+  <text x="96" y="${titleY}" fill="${COLORS.title}" font-family="${FONT}" font-size="${titleSize}" font-weight="${TITLE_WEIGHT}"${titleLetterSpacingAttr(title)}>${escapeXml(title)}</text>
+  <text x="96" y="${subtitleY}" fill="${COLORS.subtitle}" font-family="${FONT}" font-size="${subtitleSize}" font-weight="${SUBTITLE_WEIGHT}">${escapeXml(subtitle)}</text>
+  ${pill}`;
 
-let sharp;
-try {
-	sharp = (await import('sharp')).default;
-} catch {
-	console.error('Install sharp first: npm install -D sharp');
-	process.exit(1);
+	return wrapSvgWithFonts(body, width, height, `role="img" aria-label="${escapeXml(title)}"`);
 }
 
 mkdirSync(outDir, { recursive: true });
@@ -112,7 +94,7 @@ for (const slide of slides) {
 	const svg = buildSvg(slide.title, slide.subtitle, slide.tagline, slide.showPill ?? false);
 	const outPath = join(outDir, slide.file);
 
-	await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile(outPath);
+	writeSvgAsPng(svg, width, height, outPath);
 
 	generated.push(outPath);
 	console.log(`Wrote ${outPath} (${width}x${height})`);

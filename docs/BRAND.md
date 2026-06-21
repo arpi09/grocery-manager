@@ -100,4 +100,18 @@ Do not pair a filled green button with an outlined green button on the same row 
 - High-traffic: `HomeDashboard.svelte`, inventory/scan routes, `ScanModeHub.svelte`, `ScanModeTabs.svelte`
 - `src/lib/design/brand-colors.ts` — hex constants for manifest, emails, build (non-CSS)
 - `static/favicon.svg` — Skaffu mark (primary `#2c4a3e`, accent `#d4a853`)
+- `scripts/social-brand.mjs`, `scripts/social-fonts.mjs`, `scripts/social-render.mjs` — social/OG PNG generators (embedded DM Sans + resvg)
 - `src/lib/server/email.ts` — invite template header/CTA
+
+## Social & OG assets
+
+LinkedIn/Facebook covers, share images, and `/og-skaffu.png` are generated from SVG with **embedded DM Sans** (`@fontsource/dm-sans` via `scripts/social-fonts.mjs`). PNG export uses **resvg** (`scripts/social-render.mjs`) — Sharp/librsvg ignores embedded `@font-face` and falls back to serif.
+
+After copy or color token changes:
+
+```bash
+npm run generate:og-image
+npm run generate:social
+```
+
+See [FACEBOOK_PAGE.md](./FACEBOOK_PAGE.md) and [LINKEDIN_COMPANY_PAGE.md](./LINKEDIN_COMPANY_PAGE.md) for upload specs.

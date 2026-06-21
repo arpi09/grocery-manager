@@ -6,7 +6,17 @@
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { COLORS, FONT, escapeXml } from './social-brand.mjs';
+import {
+	COLORS,
+	COVER_SLIDES,
+	FONT,
+	SUBTITLE_WEIGHT,
+	TITLE_WEIGHT,
+	escapeXml,
+	titleLetterSpacingAttr,
+	wrapSvgWithFonts
+} from './social-brand.mjs';
+import { writeSvgAsPng } from './social-render.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = join(root, 'static/facebook');
@@ -17,43 +27,6 @@ const height = 360 * SCALE;
 
 /** Text centered in 640×312 safe zone (middle of canvas). */
 const textX = width / 2;
-
-/** @type {{ file: string; title: string; subtitle: string; showPill?: boolean }[]} */
-const slides = [
-	{
-		file: 'cover-hero.png',
-		title: 'Skaffu',
-		subtitle: 'Skafferiet du har koll på',
-		showPill: true
-	},
-	{
-		file: 'cover-01-brand.png',
-		title: 'Skaffu',
-		subtitle: 'Skafferiet du har koll på',
-		showPill: true
-	},
-	{
-		file: 'cover-02-scan.png',
-		title: 'Skanna det du har hemma',
-		subtitle: 'Streckkod, kvitto eller foto'
-	},
-	{
-		file: 'cover-03-meal.png',
-		title: 'Maträtt på knapptryck',
-		subtitle: 'Recept från ditt lager'
-	},
-	{
-		file: 'cover-04-waste.png',
-		title: 'Ät det som går ut',
-		subtitle: 'Mindre matsvinn'
-	},
-	{
-		file: 'cover-05-cta.png',
-		title: 'Gratis att prova',
-		subtitle: 'skaffu.com',
-		showPill: true
-	}
-];
 
 /**
  * @param {string} title
@@ -74,12 +47,10 @@ function buildSvg(title, subtitle, showPill) {
 	const pill =
 		showPill ?
 			`<rect x="${textX - pillW / 2}" y="${pillY}" width="${pillW}" height="${pillH}" rx="${8 * s}" fill="${COLORS.primary}"/>
-  <text x="${textX}" y="${pillY + 24 * s}" fill="${COLORS.white}" font-family="${FONT}" font-size="${16 * s}" font-weight="600" text-anchor="middle">skaffu.com</text>`
+  <text x="${textX}" y="${pillY + 24 * s}" fill="${COLORS.white}" font-family="${FONT}" font-size="${16 * s}" font-weight="${SUBTITLE_WEIGHT}" text-anchor="middle">skaffu.com</text>`
 		:	'';
 
-	return `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeXml(title)}">
-  <defs>
+	const body = `<defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="${COLORS.bgStart}"/>
       <stop offset="100%" stop-color="${COLORS.bgEnd}"/>
@@ -88,29 +59,22 @@ function buildSvg(title, subtitle, showPill) {
   <rect width="${width}" height="${height}" fill="url(#bg)"/>
   <circle cx="${980 * s}" cy="${80 * s}" r="${72 * s}" fill="${COLORS.primary}" opacity="0.08"/>
   <circle cx="${width - 88 * s}" cy="${height - 60 * s}" r="${72 * s}" fill="${COLORS.primary}" opacity="0.06"/>
-  <text x="${textX}" y="${titleY}" fill="${COLORS.title}" font-family="${FONT}" font-size="${titleSize}" font-weight="700" text-anchor="middle">${escapeXml(title)}</text>
-  <text x="${textX}" y="${subtitleY}" fill="${COLORS.subtitle}" font-family="${FONT}" font-size="${subtitleSize}" font-weight="400" text-anchor="middle">${escapeXml(subtitle)}</text>
-  ${pill}
-</svg>`;
-}
+  <text x="${textX}" y="${titleY}" fill="${COLORS.title}" font-family="${FONT}" font-size="${titleSize}" font-weight="${TITLE_WEIGHT}"${titleLetterSpacingAttr(title)} text-anchor="middle">${escapeXml(title)}</text>
+  <text x="${textX}" y="${subtitleY}" fill="${COLORS.subtitle}" font-family="${FONT}" font-size="${subtitleSize}" font-weight="${SUBTITLE_WEIGHT}" text-anchor="middle">${escapeXml(subtitle)}</text>
+  ${pill}`;
 
-let sharp;
-try {
-	sharp = (await import('sharp')).default;
-} catch {
-	console.error('Install sharp first: npm install -D sharp');
-	process.exit(1);
+	return wrapSvgWithFonts(body, width, height, `role="img" aria-label="${escapeXml(title)}"`);
 }
 
 mkdirSync(outDir, { recursive: true });
 
 const generated = [];
 
-for (const slide of slides) {
+for (const slide of COVER_SLIDES) {
 	const svg = buildSvg(slide.title, slide.subtitle, slide.showPill ?? false);
-	const outPath = join(outDir, slide.file);
+	const outPath = join(outDir, `cover-${slide.fileSuffix}.png`);
 
-	await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile(outPath);
+	writeSvgAsPng(svg, width, height, outPath);
 
 	generated.push(outPath);
 	console.log(`Wrote ${outPath} (${width}x${height})`);

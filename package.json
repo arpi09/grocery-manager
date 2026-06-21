@@ -84,7 +84,9 @@
 	"devDependencies": {
 		"@axe-core/playwright": "^4.11.3",
 		"@eslint/js": "^10.0.0",
+		"@fontsource/dm-sans": "^5.2.8",
 		"@playwright/test": "^1.52.0",
+		"@resvg/resvg-js": "^2.6.2",
 		"@smui/card": "^9.0.1",
 		"@smui/common": "^9.0.1",
 		"@smui/data-table": "^9.0.1",
