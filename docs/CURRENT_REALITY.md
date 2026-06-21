@@ -4,9 +4,9 @@
 
 | F?lt | V?rde |
 |------|--------|
-| **Uppdaterad** | 2026-06-20 |
-| **Prod SHA** | `e0e9a5b34` @ [27884126416](https://github.com/arpi09/grocery-manager/actions/runs/27884126416) (auto tier, E2E critical). Prior `f049e3cb0` @ [27883692872](https://github.com/arpi09/grocery-manager/actions/runs/27883692872). |
-| **Master SHA** | `8a1b4cd9e` — Äta planer UX, receipt one-tap/share V1, prod error fixes; prod tree `e0e9a5b34` |
+| **Uppdaterad** | 2026-06-21 |
+| **Prod SHA** | `93d30529` @ [27896182936](https://github.com/arpi09/grocery-manager/actions/runs/27896182936) (auto tier, full E2E). Prior `e0e9a5b34` @ [27884126416](https://github.com/arpi09/grocery-manager/actions/runs/27884126416). |
+| **Master SHA** | `93d30529` — contextual CTA redirect audit (planer pantry link, recipe back, lista→inkop); prod tree `93d30529` |
 | **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
