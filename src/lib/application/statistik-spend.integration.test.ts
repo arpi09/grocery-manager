@@ -39,7 +39,7 @@ describe('Statistik spend integration', () => {
 			consumptionRepository,
 			householdRepository,
 			new DrizzlePriceMemoryRepository(integrationDb.db),
-			new DrizzleMealPlanRepository(integrationDb.db)
+			new DrizzleMealPlanRepository()
 		);
 	});
 

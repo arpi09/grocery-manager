@@ -31,6 +31,7 @@ function mockPmfRepository(overrides: Partial<IPmfRepository> = {}): IPmfReposit
 		listRecentHouseholdSyncEvents: vi.fn().mockResolvedValue([]),
 		getSyncFunnelCounts: vi.fn(),
 		countDistinctHouseholdsWithEventSince: vi.fn(),
+		getAcquisitionMetrics: vi.fn(),
 		...overrides
 	};
 }
