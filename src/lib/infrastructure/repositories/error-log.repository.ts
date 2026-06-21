@@ -1,17 +1,20 @@
-import { desc, eq, gte, inArray, lt } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, lt } from 'drizzle-orm';
 import { db } from '$lib/infrastructure/db';
 import { appErrorTable } from '$lib/infrastructure/db/schema';
-import type { AppErrorEntry, AppErrorSummary, RecordAppErrorInput } from '$lib/domain/error-log';
-import {
-	ERROR_LOG_MAX_ENTRIES,
-	ERROR_LOG_RETENTION_MS
+import type {
+	AppErrorEntry,
+	AppErrorPathCount,
+	AppErrorSummary,
+	RecordAppErrorInput
 } from '$lib/domain/error-log';
+import { ERROR_LOG_MAX_ENTRIES, ERROR_LOG_RETENTION_MS } from '$lib/domain/error-log';
 
 export interface IErrorLogRepository {
 	insert(entry: RecordAppErrorInput & { id: string }): Promise<void>;
 	listRecent(limit: number): Promise<AppErrorEntry[]>;
 	listRecentSummaries(limit: number): Promise<AppErrorSummary[]>;
-	listSummariesSince(since: Date, limit: number): Promise<AppErrorSummary[]>;
+	listSummariesSince(since: Date, limit: number, path?: string | null): Promise<AppErrorSummary[]>;
+	countByPathSince(since: Date, limit: number): Promise<AppErrorPathCount[]>;
 	listFullSince(since: Date, limit: number): Promise<AppErrorEntry[]>;
 	getStack(id: string): Promise<string | null>;
 	enforceRetention(): Promise<void>;
@@ -68,7 +71,11 @@ export class DrizzleErrorLogRepository implements IErrorLogRepository {
 		}));
 	}
 
-	async listSummariesSince(since: Date, limit: number): Promise<AppErrorSummary[]> {
+	async listSummariesSince(
+		since: Date,
+		limit: number,
+		path?: string | null
+	): Promise<AppErrorSummary[]> {
 		const rows = await db
 			.select({
 				id: appErrorTable.id,
@@ -80,7 +87,11 @@ export class DrizzleErrorLogRepository implements IErrorLogRepository {
 				createdAt: appErrorTable.createdAt
 			})
 			.from(appErrorTable)
-			.where(gte(appErrorTable.createdAt, since))
+			.where(
+				path
+					? and(gte(appErrorTable.createdAt, since), eq(appErrorTable.path, path))
+					: gte(appErrorTable.createdAt, since)
+			)
 			.orderBy(desc(appErrorTable.createdAt))
 			.limit(limit);
 
@@ -88,6 +99,18 @@ export class DrizzleErrorLogRepository implements IErrorLogRepository {
 			...row,
 			hasStack: stack !== null
 		}));
+	}
+
+	async countByPathSince(since: Date, limit: number): Promise<AppErrorPathCount[]> {
+		const rows = await db
+			.select({ path: appErrorTable.path, count: count() })
+			.from(appErrorTable)
+			.where(gte(appErrorTable.createdAt, since))
+			.groupBy(appErrorTable.path)
+			.orderBy(desc(count()))
+			.limit(limit);
+
+		return rows.map((row) => ({ path: row.path, count: Number(row.count) }));
 	}
 
 	async listFullSince(since: Date, limit: number): Promise<AppErrorEntry[]> {

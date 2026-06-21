@@ -1,7 +1,7 @@
 import { count, desc, eq, gt, gte, inArray, sql } from 'drizzle-orm';
 import { latestLastSeenAt } from '$lib/domain/admin-stats';
 import { ERROR_LOG_RETENTION_MS } from '$lib/domain/error-log';
-import type { AppErrorEntry, AppErrorSummary } from '$lib/domain/error-log';
+import type { AppErrorEntry, AppErrorPathCount, AppErrorSummary } from '$lib/domain/error-log';
 import { isUserActiveNow } from '$lib/domain/presence';
 import type { UserRole } from '$lib/domain/user';
 import { db, getDatabaseBackend, type DatabaseBackend } from '$lib/infrastructure/db';
@@ -50,6 +50,12 @@ export interface IAdminRepository {
 	listUsers(limit: number, offset: number): Promise<{ users: AdminUserSummary[]; total: number }>;
 	listRecentErrors(limit: number): Promise<AppErrorEntry[]>;
 	listRecentErrorSummaries(limit: number): Promise<AppErrorSummary[]>;
+	listErrorSummariesByPath(
+		since: Date,
+		limit: number,
+		path?: string | null
+	): Promise<AppErrorSummary[]>;
+	listErrorPathCountsSince(since: Date, limit: number): Promise<AppErrorPathCount[]>;
 	getErrorStack(id: string): Promise<string | null>;
 	setUserRole(userId: string, role: UserRole): Promise<void>;
 	setUserPetsEnabled(userId: string, enabled: boolean): Promise<void>;
@@ -139,6 +145,18 @@ export class DrizzleAdminRepository implements IAdminRepository {
 
 	listRecentErrorSummaries(limit: number): Promise<AppErrorSummary[]> {
 		return this.errorLog.listRecentSummaries(limit);
+	}
+
+	listErrorSummariesByPath(
+		since: Date,
+		limit: number,
+		path?: string | null
+	): Promise<AppErrorSummary[]> {
+		return this.errorLog.listSummariesSince(since, limit, path);
+	}
+
+	listErrorPathCountsSince(since: Date, limit: number): Promise<AppErrorPathCount[]> {
+		return this.errorLog.countByPathSince(since, limit);
 	}
 
 	getErrorStack(id: string): Promise<string | null> {

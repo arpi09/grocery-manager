@@ -2,7 +2,10 @@ import { json } from '@sveltejs/kit';
 import { ADMIN_USER_LIST_DEFAULT, ADMIN_USER_LIST_MAX } from '$lib/domain/admin-users';
 import {
 	ERROR_LOG_ADMIN_LIST_DEFAULT,
-	ERROR_LOG_ADMIN_LIST_MAX
+	ERROR_LOG_ADMIN_LIST_MAX,
+	ERROR_LOG_PATH_STATS_DEFAULT,
+	ERROR_LOG_PATH_STATS_MAX,
+	ERROR_LOG_PATH_STATS_WINDOW_MS
 } from '$lib/domain/error-log';
 import {
 	PRODUCT_FEEDBACK_LIST_DEFAULT,
@@ -36,6 +39,7 @@ const SECTIONS = [
 	'launch-cohort',
 	'users',
 	'errors',
+	'errorPathStats',
 	'errorStack',
 	'feedback',
 	'waitlist',
@@ -210,10 +214,32 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 				ERROR_LOG_ADMIN_LIST_DEFAULT,
 				ERROR_LOG_ADMIN_LIST_MAX
 			);
-			const errors = await locals.adminService.listRecentErrorSummaries(limit);
+			const path = url.searchParams.get('path')?.trim() || null;
+			const errors = path
+				? await locals.adminService.listErrorSummariesByPath(
+						new Date(Date.now() - ERROR_LOG_PATH_STATS_WINDOW_MS),
+						limit,
+						path
+					)
+				: await locals.adminService.listRecentErrorSummaries(limit);
 			return json({
 				errors: serializeRows(errors),
-				limit
+				limit,
+				path
+			});
+		}
+		case 'errorPathStats': {
+			const limit = parseLimit(
+				url.searchParams.get('limit'),
+				ERROR_LOG_PATH_STATS_DEFAULT,
+				ERROR_LOG_PATH_STATS_MAX
+			);
+			const since = new Date(Date.now() - ERROR_LOG_PATH_STATS_WINDOW_MS);
+			const paths = await locals.adminService.listErrorPathCountsSince(since, limit);
+			return json({
+				paths,
+				limit,
+				windowHours: ERROR_LOG_PATH_STATS_WINDOW_MS / (60 * 60 * 1000)
 			});
 		}
 		case 'errorStack': {
