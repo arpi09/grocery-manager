@@ -4,6 +4,7 @@
 	import MainNavMobile from '$lib/components/organisms/MainNavMobile.svelte';
 	import {
 		NAV_ITEMS,
+		appendMarketV01NavItems,
 		applyNavFeatureFlags,
 		filterNavItems,
 		splitNavItems,
@@ -30,7 +31,12 @@
 	const navFlags = $derived({
 		pantryUxV2Enabled: Boolean(page.data.pantryUxV2Enabled)
 	});
-	const visibleItems = $derived(applyNavFeatureFlags(filterNavItems(NAV_ITEMS, user), navFlags));
+	const visibleItems = $derived(
+		appendMarketV01NavItems(
+			applyNavFeatureFlags(filterNavItems(NAV_ITEMS, user), navFlags),
+			user
+		)
+	);
 	const { primary, mobileTabs, headerUtility, secondary, mobileSecondary } = $derived(
 		splitNavItems(visibleItems)
 	);

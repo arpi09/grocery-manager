@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { isCronAuthorized } from '$lib/server/cron-auth';
-import { expiryReminderService } from '$lib/server/di';
+import { expiryReminderService, marketListingService } from '$lib/server/di';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -8,6 +8,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json({ ok: false, error: 'Unauthorized' }, { status: 401 });
 	}
 
-	const result = await expiryReminderService.runWeeklyReminders();
-	return json({ ok: true, ...result });
+	const [reminders, autoListings] = await Promise.all([
+		expiryReminderService.runWeeklyReminders(),
+		marketListingService.runAutoListingRefreshBatch()
+	]);
+	return json({ ok: true, reminders, autoListings });
 };

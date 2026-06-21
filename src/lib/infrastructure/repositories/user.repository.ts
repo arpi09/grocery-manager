@@ -44,6 +44,9 @@ export interface IUserRepository {
 		mode: ShoppingToPantryMode
 	): Promise<ShoppingToPantryMode | null>;
 	deleteUser(id: string): Promise<boolean>;
+	getAutoNearbyListingEnabled(userId: string): Promise<boolean>;
+	updateAutoNearbyListingEnabled(userId: string, enabled: boolean): Promise<boolean>;
+	listUsersWithAutoNearbyListingEnabled(): Promise<Array<{ id: string }>>;
 }
 
 function mapProfile(row: {
@@ -203,5 +206,32 @@ export class DrizzleUserRepository implements IUserRepository {
 	async deleteUser(id: string) {
 		const rows = await this.db.delete(userTable).where(eq(userTable.id, id)).returning();
 		return rows.length > 0;
+	}
+
+	async getAutoNearbyListingEnabled(userId: string): Promise<boolean> {
+		const [row] = await this.db
+			.select({ enabled: userTable.autoNearbyListingEnabled })
+			.from(userTable)
+			.where(eq(userTable.id, userId))
+			.limit(1);
+
+		return row?.enabled ?? false;
+	}
+
+	async updateAutoNearbyListingEnabled(userId: string, enabled: boolean): Promise<boolean> {
+		const rows = await this.db
+			.update(userTable)
+			.set({ autoNearbyListingEnabled: enabled })
+			.where(eq(userTable.id, userId))
+			.returning();
+
+		return rows.length > 0;
+	}
+
+	async listUsersWithAutoNearbyListingEnabled(): Promise<Array<{ id: string }>> {
+		return this.db
+			.select({ id: userTable.id })
+			.from(userTable)
+			.where(eq(userTable.autoNearbyListingEnabled, true));
 	}
 }

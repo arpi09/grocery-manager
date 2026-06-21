@@ -435,6 +435,13 @@
 			"when": 1753632000000,
 			"tag": "0063_ata_page_telemetry",
 			"breakpoints": true
+		},
+		{
+			"idx": 62,
+			"version": "7",
+			"when": 1753718400000,
+			"tag": "0064_market_v01",
+			"breakpoints": true
 		}
 	]
 }

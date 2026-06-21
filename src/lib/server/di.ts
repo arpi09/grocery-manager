@@ -10,6 +10,8 @@ import { ShoppingToPantryService } from '$lib/application/shopping-to-pantry.ser
 import { InventoryService } from '$lib/application/inventory.service';
 import { ProductCatalogService } from '$lib/application/product-catalog.service';
 import { BarcodeLookupService } from '$lib/application/barcode-lookup.service';
+import { MarketChatService } from '$lib/application/market-chat.service';
+import { MarketListingService } from '$lib/application/market-listing.service';
 import { MealPlanService } from '$lib/application/meal-plan.service';
 import { WeeklyRitualService } from '$lib/application/weekly-ritual.service';
 import { PetFoodService } from '$lib/application/pet-food.service';
@@ -65,6 +67,7 @@ import { DrizzlePurchasePatternRepository } from '$lib/infrastructure/repositori
 import { DrizzlePriceMemoryRepository } from '$lib/infrastructure/repositories/price-memory.repository';
 import { PriceMemoryService } from '$lib/application/price-memory.service';
 import { DrizzleExpiringShareRepository } from '$lib/infrastructure/repositories/expiring-share.repository';
+import { DrizzleMarketChatRepository } from '$lib/infrastructure/repositories/market-chat.repository';
 import { DrizzleShoppingListShareRepository } from '$lib/infrastructure/repositories/shopping-list-share.repository';
 import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
 import { InventoryIntelligenceService } from '$lib/application/inventory-intelligence.service';
@@ -227,6 +230,22 @@ export const skaffurapportService = new SkaffurapportService(
 	appSettingsRepository
 );
 export const expiringShareService = new ExpiringShareService(expiringShareRepository);
+const marketChatRepository = new DrizzleMarketChatRepository();
+export const marketChatService = new MarketChatService(
+	marketChatRepository,
+	expiringShareRepository,
+	householdRepository,
+	pmfService
+);
+export const marketListingService = new MarketListingService(
+	expiringShareService,
+	expiringShareRepository,
+	inventoryService,
+	userRepository,
+	householdService,
+	billingService,
+	pmfService
+);
 export const shoppingListShareService = new ShoppingListShareService(shoppingListShareRepository);
 export const publicCityFeedService = new PublicCityFeedService(expiringShareRepository);
 const kivraForwardSecret = getKivraForwardSecret() ?? 'dev-kivra-forward-secret';

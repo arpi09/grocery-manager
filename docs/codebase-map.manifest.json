@@ -5,7 +5,9 @@
 		{
 			"id": "hem",
 			"label": "Hem dashboard (Home UX v2)",
-			"routes": ["/hem"],
+			"routes": [
+				"/hem"
+			],
 			"paths": [
 				"src/routes/(app)/hem/+page.svelte",
 				"src/routes/(app)/hem/+page.server.ts",
@@ -18,7 +20,9 @@
 		{
 			"id": "inkop",
 			"label": "Inköp (Shopping V2)",
-			"routes": ["/inkop"],
+			"routes": [
+				"/inkop"
+			],
 			"apiOnlyRoutes": [
 				"/api/shopping/data",
 				"/api/shopping-suggestions",
@@ -76,7 +80,9 @@
 		{
 			"id": "scan-receipt",
 			"label": "Scan hub & kvitto",
-			"routes": ["/scan"],
+			"routes": [
+				"/scan"
+			],
 			"apiOnlyRoutes": [
 				"/scan/kvitto",
 				"/scan/foto",
@@ -103,7 +109,12 @@
 		{
 			"id": "ata",
 			"label": "Äta / måltidsplan",
-			"routes": ["/planer", "/planer/vecka", "/recept/[id]", "/recept/[id]/laga"],
+			"routes": [
+				"/planer",
+				"/planer/vecka",
+				"/recept/[id]",
+				"/recept/[id]/laga"
+			],
 			"apiOnlyRoutes": [
 				"/api/planer/ideas",
 				"/api/planer/ideas/dismiss",
@@ -123,7 +134,9 @@
 		{
 			"id": "onboarding",
 			"label": "Activation onboarding",
-			"routes": ["/install-app"],
+			"routes": [
+				"/install-app"
+			],
 			"paths": [
 				"src/lib/components/organisms/ActivationOnboardingFlow.svelte",
 				"src/lib/utils/activation-onboarding-state.ts",
@@ -135,8 +148,13 @@
 		{
 			"id": "statistik",
 			"label": "Statistik & wrapped",
-			"routes": ["/statistik", "/statistik/wrapped"],
-			"apiOnlyRoutes": ["/api/statistik/analytics"],
+			"routes": [
+				"/statistik",
+				"/statistik/wrapped"
+			],
+			"apiOnlyRoutes": [
+				"/api/statistik/analytics"
+			],
 			"paths": [
 				"src/routes/statistik/+page.svelte",
 				"src/lib/components/organisms/StatistikDashboard.svelte",
@@ -219,7 +237,11 @@
 				"/verify-email/[token]",
 				"/profile"
 			],
-			"apiOnlyRoutes": ["/logout", "/auth/google", "/auth/google/callback"],
+			"apiOnlyRoutes": [
+				"/logout",
+				"/auth/google",
+				"/auth/google/callback"
+			],
 			"paths": [
 				"src/routes/login/+page.svelte",
 				"src/lib/application/auth.service.ts",
@@ -254,7 +276,10 @@
 		{
 			"id": "admin",
 			"label": "Admin & PMF",
-			"routes": ["/admin", "/admin/guide-preview/[id]"],
+			"routes": [
+				"/admin",
+				"/admin/guide-preview/[id]"
+			],
 			"apiOnlyRoutes": [
 				"/api/admin/data",
 				"/api/admin/marketing-campaigns",
@@ -263,13 +288,37 @@
 				"/api/linkedin/authorize",
 				"/api/linkedin/callback"
 			],
-			"paths": ["src/routes/admin/+page.svelte", "src/lib/application/pmf-dashboard.service.ts"]
+			"paths": [
+				"src/routes/admin/+page.svelte",
+				"src/lib/application/pmf-dashboard.service.ts"
+			]
 		},
 		{
 			"id": "grannskafferiet",
 			"label": "Grannskafferiet (Tier C)",
-			"routes": ["/grannskafferiet", "/grannskafferiet/share/[id]"],
-			"paths": ["src/routes/grannskafferiet/+page.svelte"]
+			"routes": [
+				"/grannskafferiet",
+				"/grannskafferiet/share/[id]",
+				"/grannskafferiet/marknad",
+				"/grannskafferiet/marknad/chatt/[threadId]",
+				"/grannskafferiet/marknad/share/[id]"
+			],
+			"paths": [
+				"src/routes/grannskafferiet/+page.svelte",
+				"src/routes/grannskafferiet/marknad/+page.svelte",
+				"src/lib/application/market-listing.service.ts",
+				"src/lib/application/market-chat.service.ts"
+			],
+			"apiOnlyRoutes": [
+				"/api/market/auto-listing-settings",
+				"/api/market/chat",
+				"/api/market/chat/[threadId]",
+				"/api/market/chat/[threadId]/close",
+				"/api/market/chat/[threadId]/messages",
+				"/api/market/chat/[threadId]/rate",
+				"/api/market/chats",
+				"/api/admin/market/sync-auto-listing"
+			]
 		},
 		{
 			"id": "api-cron",
@@ -284,7 +333,10 @@
 				"/api/cron/shopping-push",
 				"/api/cron/skaffurapport"
 			],
-			"paths": ["src/hooks.server.ts", "apphosting.yaml"]
+			"paths": [
+				"src/hooks.server.ts",
+				"apphosting.yaml"
+			]
 		},
 		{
 			"id": "api-stripe-kivra",
@@ -295,7 +347,9 @@
 				"/api/stripe/webhook",
 				"/api/inbound/kivra"
 			],
-			"paths": ["src/routes/api/stripe/checkout/+server.ts"]
+			"paths": [
+				"src/routes/api/stripe/checkout/+server.ts"
+			]
 		},
 		{
 			"id": "email-templates",
@@ -312,7 +366,10 @@
 		{
 			"id": "platform",
 			"label": "Platform & telemetry",
-			"routes": ["/husdjur", "/nyheter"],
+			"routes": [
+				"/husdjur",
+				"/nyheter"
+			],
 			"apiOnlyRoutes": [
 				"/news",
 				"/robots.txt",
@@ -325,7 +382,10 @@
 				"/api/health/ai",
 				"/api/health/db"
 			],
-			"paths": ["src/hooks.server.ts", "src/routes/+layout.svelte"]
+			"paths": [
+				"src/hooks.server.ts",
+				"src/routes/+layout.svelte"
+			]
 		}
 	]
 }

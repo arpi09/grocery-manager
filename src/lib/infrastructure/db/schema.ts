@@ -11,6 +11,7 @@ import {
 	uniqueIndex,
 	jsonb
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 export const userTable = pgTable('user', {
 	id: text('id').primaryKey(),
@@ -45,6 +46,8 @@ export const userTable = pgTable('user', {
 		withTimezone: true,
 		mode: 'date'
 	}),
+	autoNearbyListingEnabled: boolean('auto_nearby_listing_enabled').notNull().default(false),
+	marketFirstName: text('market_first_name'),
 	themePreference: text('theme_preference', { enum: ['light', 'dark', 'system'] }).notNull().default('system'),
 	shoppingToPantryMode: text('shopping_to_pantry_mode', {
 		enum: ['always', 'ask', 'never']
@@ -477,6 +480,12 @@ export const productEventTable = pgTable(
 				'planer_idea_dismissed',
 				'ata_recipe_opened',
 				'ata_week_view_toggled',
+				'market_auto_listing_published',
+				'market_auto_listing_cleared',
+				'market_listing_viewed',
+				'market_chat_started',
+				'market_chat_message_sent',
+				'market_exchange_rated',
 				'capacitor_app_opened',
 				'capacitor_share_received'
 			]
@@ -762,12 +771,16 @@ export const expiringShareLinkTable = pgTable(
 		expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
 		latitude: numeric('latitude', { precision: 9, scale: 6 }),
 		longitude: numeric('longitude', { precision: 9, scale: 6 }),
+		source: text('source', { enum: ['manual', 'auto_nearby'] }).notNull().default('manual'),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 	},
 	(table) => [
 		index('expiring_share_link_token_hash_idx').on(table.tokenHash),
 		index('expiring_share_link_household_idx').on(table.householdId),
-		index('expiring_share_link_geo_idx').on(table.latitude, table.longitude)
+		index('expiring_share_link_geo_idx').on(table.latitude, table.longitude),
+		uniqueIndex('expiring_share_link_household_auto_nearby_uidx')
+			.on(table.householdId)
+			.where(sql`${table.source} = 'auto_nearby'`)
 	]
 );
 
@@ -803,6 +816,72 @@ export const expiringShareBlockTable = pgTable(
 	},
 	(table) => [
 		index('expiring_share_block_reporter_idx').on(table.reporterUserId)
+	]
+);
+
+export const marketChatThreadTable = pgTable(
+	'market_chat_thread',
+	{
+		id: text('id').primaryKey(),
+		shareId: text('share_id')
+			.notNull()
+			.references(() => expiringShareLinkTable.id, { onDelete: 'cascade' }),
+		seekerUserId: text('seeker_user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		sharerUserId: text('sharer_user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		householdId: text('household_id')
+			.notNull()
+			.references(() => householdTable.id, { onDelete: 'cascade' }),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+		closedAt: timestamp('closed_at', { withTimezone: true, mode: 'date' })
+	},
+	(table) => [
+		index('market_chat_thread_share_idx').on(table.shareId),
+		index('market_chat_thread_seeker_idx').on(table.seekerUserId),
+		index('market_chat_thread_sharer_idx').on(table.sharerUserId)
+	]
+);
+
+export const marketChatMessageTable = pgTable(
+	'market_chat_message',
+	{
+		id: text('id').primaryKey(),
+		threadId: text('thread_id')
+			.notNull()
+			.references(() => marketChatThreadTable.id, { onDelete: 'cascade' }),
+		authorUserId: text('author_user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		body: text('body').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('market_chat_message_thread_created_idx').on(table.threadId, table.createdAt)
+	]
+);
+
+export const marketExchangeRatingTable = pgTable(
+	'market_exchange_rating',
+	{
+		id: text('id').primaryKey(),
+		threadId: text('thread_id')
+			.notNull()
+			.references(() => marketChatThreadTable.id, { onDelete: 'cascade' }),
+		raterUserId: text('rater_user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		ratedUserId: text('rated_user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		stars: integer('stars').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		uniqueIndex('market_exchange_rating_thread_rater_uidx').on(table.threadId, table.raterUserId),
+		index('market_exchange_rating_rated_user_idx').on(table.ratedUserId)
 	]
 );
 

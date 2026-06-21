@@ -1,9 +1,11 @@
 import { and, desc, eq, gt, isNotNull, ne, sql } from 'drizzle-orm';
+import type { ExpiringShareSource } from '$lib/domain/market-v01';
 import type {
 	ExpiringSharePreview,
 	ExpiringShareSnapshot,
 	NearbySharingSettings
 } from '$lib/domain/expiring-share';
+import { hashSecureToken } from '$lib/infrastructure/auth/secure-token';
 import { db as defaultDb, type AppDatabase } from '$lib/infrastructure/db';
 import {
 	expiringShareBlockTable,
@@ -21,6 +23,22 @@ export interface CreateExpiringShareInput {
 	expiresAt: Date;
 	latitude?: number | null;
 	longitude?: number | null;
+	source?: ExpiringShareSource;
+}
+
+export interface UpsertAutoNearbyListingInput {
+	householdId: string;
+	createdByUserId: string;
+	snapshot: ExpiringShareSnapshot;
+	expiresAt: Date;
+	latitude: number;
+	longitude: number;
+}
+
+export interface AutoNearbyListingRow {
+	id: string;
+	householdId: string;
+	expiresAt: Date;
 }
 
 export interface NearbyShareRow {
@@ -108,6 +126,9 @@ export interface IExpiringShareRepository {
 	findPreviewById(shareId: string): Promise<ExpiringSharePreview | null>;
 	findShareForNearbyPush(shareId: string): Promise<ExpiringShareForNearbyPush | null>;
 	listReports(limit: number): Promise<ExpiringShareReportRow[]>;
+	upsertAutoNearbyListing(input: UpsertAutoNearbyListingInput): Promise<{ id: string }>;
+	clearAutoNearbyListing(householdId: string): Promise<boolean>;
+	findActiveAutoNearbyListing(householdId: string): Promise<AutoNearbyListingRow | null>;
 }
 
 function parseNumeric(value: string | null): number | null {
@@ -131,8 +152,89 @@ export class DrizzleExpiringShareRepository implements IExpiringShareRepository 
 			expiresAt: input.expiresAt,
 			latitude: input.latitude != null ? String(input.latitude) : null,
 			longitude: input.longitude != null ? String(input.longitude) : null,
+			source: input.source ?? 'manual',
 			createdAt: new Date()
 		});
+	}
+
+	async upsertAutoNearbyListing(input: UpsertAutoNearbyListingInput): Promise<{ id: string }> {
+		const existing = await this.findAutoNearbyListingRow(input.householdId);
+		const snapshotJson = JSON.stringify(input.snapshot);
+		const latitude = String(input.latitude);
+		const longitude = String(input.longitude);
+
+		if (existing) {
+			await this.database
+				.update(expiringShareLinkTable)
+				.set({
+					createdByUserId: input.createdByUserId,
+					snapshotJson,
+					expiresAt: input.expiresAt,
+					latitude,
+					longitude
+				})
+				.where(eq(expiringShareLinkTable.id, existing.id));
+
+			return { id: existing.id };
+		}
+
+		const id = crypto.randomUUID();
+		await this.database.insert(expiringShareLinkTable).values({
+			id,
+			householdId: input.householdId,
+			createdByUserId: input.createdByUserId,
+			tokenHash: hashSecureToken(`auto_nearby:${input.householdId}`),
+			snapshotJson,
+			expiresAt: input.expiresAt,
+			latitude,
+			longitude,
+			source: 'auto_nearby',
+			createdAt: new Date()
+		});
+
+		return { id };
+	}
+
+	async clearAutoNearbyListing(householdId: string): Promise<boolean> {
+		const existing = await this.findActiveAutoNearbyListing(householdId);
+		if (!existing) {
+			return false;
+		}
+
+		await this.database
+			.update(expiringShareLinkTable)
+			.set({ expiresAt: new Date() })
+			.where(eq(expiringShareLinkTable.id, existing.id));
+
+		return true;
+	}
+
+	async findActiveAutoNearbyListing(householdId: string): Promise<AutoNearbyListingRow | null> {
+		const row = await this.findAutoNearbyListingRow(householdId);
+		if (!row || row.expiresAt.getTime() <= Date.now()) {
+			return null;
+		}
+
+		return row;
+	}
+
+	private async findAutoNearbyListingRow(householdId: string): Promise<AutoNearbyListingRow | null> {
+		const rows = await this.database
+			.select({
+				id: expiringShareLinkTable.id,
+				householdId: expiringShareLinkTable.householdId,
+				expiresAt: expiringShareLinkTable.expiresAt
+			})
+			.from(expiringShareLinkTable)
+			.where(
+				and(
+					eq(expiringShareLinkTable.householdId, householdId),
+					eq(expiringShareLinkTable.source, 'auto_nearby')
+				)
+			)
+			.limit(1);
+
+		return rows[0] ?? null;
 	}
 
 	async findByTokenHash(tokenHash: string): Promise<ExpiringSharePreview | null> {

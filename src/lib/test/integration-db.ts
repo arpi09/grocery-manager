@@ -75,7 +75,13 @@ const SQL_MIGRATION_FILES = [
 	'0054_shopping_ux_v2_telemetry.sql',
 	'0055_pantry_ux_v2_telemetry.sql',
 	'0056_home_ux_v2_telemetry.sql',
-	'0057_product_catalog.sql'
+	'0057_product_catalog.sql',
+	'0058_moment_cta_telemetry.sql',
+	'0059_store_recommendation_telemetry.sql',
+	'0060_acquisition_loops_telemetry.sql',
+	'0061_price_intelligence_phase1.sql',
+	'0063_ata_page_telemetry.sql',
+	'0064_market_v01.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE
@@ -86,6 +92,9 @@ TRUNCATE TABLE
 	"pmf_survey_response",
 	"product_feedback",
 	"product_event",
+	"market_exchange_rating",
+	"market_chat_message",
+	"market_chat_thread",
 	"expiring_share_block",
 	"expiring_share_report",
 	"expiring_share_link",

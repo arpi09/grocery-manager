@@ -32,6 +32,7 @@ function mockPmfRepository(overrides: Partial<IPmfRepository> = {}): IPmfReposit
 		getSyncFunnelCounts: vi.fn(),
 		countDistinctHouseholdsWithEventSince: vi.fn(),
 		getAcquisitionMetrics: vi.fn(),
+		getMarketV01Metrics: vi.fn(),
 		...overrides
 	};
 }

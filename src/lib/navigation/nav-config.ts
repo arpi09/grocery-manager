@@ -5,6 +5,8 @@ import { preferredScanHref } from '$lib/utils/scan-nav';
 import { isPublicCityFeedEnabled } from '$lib/utils/public-city-feed-flag';
 import { HEM_PATH, INKOP_PATH } from './app-home';
 
+import { showMarketV01InNav, MARKET_V01_PATH } from '$lib/domain/market-v01';
+
 export type NavIconId =
 	| 'home'
 	| 'inventory'
@@ -33,6 +35,7 @@ export type NavLabelKey = Extract<
 	| 'nav.stats'
 	| 'nav.news'
 	| 'nav.grannskafferiet'
+	| 'nav.marketV01'
 	| 'nav.pets'
 	| 'nav.admin'
 	| 'nav.more'
@@ -142,6 +145,25 @@ export const NAV_ITEMS: NavItem[] = [
 	{ href: '/admin', labelKey: 'nav.admin', icon: 'shield', roles: ['admin'], match: 'prefix' }
 ];
 
+export function appendMarketV01NavItems(
+	items: NavItem[],
+	user: NavUser | null | undefined
+): NavItem[] {
+	if (!showMarketV01InNav(user)) {
+		return items;
+	}
+
+	return [
+		...items,
+		{
+			href: MARKET_V01_PATH,
+			labelKey: 'nav.marketV01',
+			icon: 'mapPin',
+			match: 'prefix'
+		}
+	];
+}
+
 export function isNavItemVisible(item: NavItem, user: NavUser | null | undefined): boolean {
 	if (item.roles?.length) {
 		if (!user?.role || !item.roles.includes(user.role as NavRole)) {
@@ -207,6 +229,10 @@ export function navItemTestId(item: NavItem): string | undefined {
 
 	if (item.href === '/planer' && item.labelKey === 'nav.eat') {
 		return 'nav-eat';
+	}
+
+	if (item.href === MARKET_V01_PATH) {
+		return 'nav-market-v01';
 	}
 
 	return undefined;

@@ -1,4 +1,5 @@
 import { initDatabase } from '$lib/infrastructure/db';
+import '$lib/server/market-v01-env';
 import { shouldRedirectUnverifiedUser } from '$lib/server/email-verification-enforcement';
 import {
 	accountService,

@@ -51,7 +51,10 @@ describe('EmailVerificationService', () => {
 			markEmailVerified: vi.fn(),
 			getShoppingToPantryMode: vi.fn(),
 			updateShoppingToPantryMode: vi.fn(),
-			deleteUser: vi.fn()
+			deleteUser: vi.fn(),
+			getAutoNearbyListingEnabled: vi.fn(),
+			updateAutoNearbyListingEnabled: vi.fn(),
+			listUsersWithAutoNearbyListingEnabled: vi.fn()
 		};
 		tokens = {
 			createToken: vi.fn(),

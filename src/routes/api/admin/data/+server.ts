@@ -23,7 +23,7 @@ import { parsePmfFunnelPeriodDays } from '$lib/domain/pmf-funnel';
 import { WAITLIST_LIST_DEFAULT, WAITLIST_LIST_MAX } from '$lib/domain/waitlist';
 import { translate } from '$lib/i18n/messages';
 import { requireAdmin } from '$lib/server/api-guards';
-import { expiringShareService } from '$lib/server/di';
+import { expiringShareService, pmfService } from '$lib/server/di';
 import type { RequestHandler } from './$types';
 
 const SECTIONS = [
@@ -303,9 +303,13 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 		}
 		case 'grannskafferiet-reports': {
 			const limit = parseLimit(url.searchParams.get('limit'), 50, 200);
-			const reports = await expiringShareService.listExpiringShareReports(limit);
+			const [reports, marketMetrics] = await Promise.all([
+				expiringShareService.listExpiringShareReports(limit),
+				pmfService.getMarketV01Metrics()
+			]);
 			return json({
 				reports: serializeRows(reports),
+				marketMetrics: serializeRow(marketMetrics),
 				limit
 			});
 		}

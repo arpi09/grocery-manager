@@ -129,7 +129,9 @@ const AUTH_EVENT_TYPES = new Set<ProductEventType>([
 	'store_recommendation_completed',
 	'planer_viewed',
 	'ata_recipe_opened',
-	'ata_week_view_toggled'
+	'ata_week_view_toggled',
+	'market_auto_listing_published',
+	'market_auto_listing_cleared'
 ]);
 
 function isAllowedEventType(value: unknown): value is ProductEventType {

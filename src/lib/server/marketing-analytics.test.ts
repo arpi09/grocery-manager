@@ -15,7 +15,8 @@ function mockPmfRepository() {
 		listRecentHouseholdSyncEvents: vi.fn().mockResolvedValue([]),
 		getSyncFunnelCounts: vi.fn(),
 		countDistinctHouseholdsWithEventSince: vi.fn(),
-		getAcquisitionMetrics: vi.fn()
+		getAcquisitionMetrics: vi.fn(),
+		getMarketV01Metrics: vi.fn()
 	};
 }
 

@@ -141,6 +141,12 @@ export const PRODUCT_EVENT_TYPES = [
 	'planer_idea_dismissed',
 	'ata_recipe_opened',
 	'ata_week_view_toggled',
+	'market_auto_listing_published',
+	'market_auto_listing_cleared',
+	'market_listing_viewed',
+	'market_chat_started',
+	'market_chat_message_sent',
+	'market_exchange_rated',
 	'capacitor_app_opened',
 	'capacitor_share_received'
 ] as const;

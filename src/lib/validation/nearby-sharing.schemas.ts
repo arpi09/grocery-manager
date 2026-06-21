@@ -14,6 +14,10 @@ export const createExpiringShareWithGeoSchema = z.object({
 	longitude: coordinateSchema.optional()
 });
 
+export const updateAutoListingSettingsSchema = z.object({
+	enabled: z.boolean()
+});
+
 export const expiringShareReportSchema = z
 	.object({
 		shareId: z.string().trim().min(1).optional(),

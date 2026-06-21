@@ -38,16 +38,23 @@ import {
 	type AcquisitionEventCounts,
 	type AcquisitionMetricsSnapshot
 } from '$lib/domain/acquisition-metrics';
+import {
+	buildMarketV01MetricsSnapshot,
+	emptyMarketV01EventCounts,
+	MARKET_V01_METRIC_EVENT_TYPES,
+	type MarketV01MetricsSnapshot
+} from '$lib/domain/market-v01-metrics';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { db } from '$lib/infrastructure/db';
 import {
+	expiringShareLinkTable,
 	householdMemberTable,
 	householdTable,
 	inventoryItemTable,
 	productEventTable,
 	userTable
 } from '$lib/infrastructure/db/schema';
-import { and, desc, eq, gte, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, gt, inArray, sql } from 'drizzle-orm';
 
 export interface RecordProductEventInput {
 	userId: string | null;
@@ -72,6 +79,7 @@ export interface IPmfRepository {
 	listRecentHouseholdSyncEvents(householdId: string, limit: number): Promise<HouseholdActivityEvent[]>;
 	getSyncFunnelCounts(now?: Date): Promise<SyncFunnelCounts>;
 	getAcquisitionMetrics(now?: Date): Promise<AcquisitionMetricsSnapshot>;
+	getMarketV01Metrics(now?: Date): Promise<MarketV01MetricsSnapshot>;
 	countDistinctHouseholdsWithEventSince(eventType: ProductEventType, since: Date): Promise<number>;
 }
 
@@ -617,5 +625,55 @@ export class DrizzlePmfRepository implements IPmfRepository {
 		}
 
 		return buildAcquisitionMetricsSnapshot(counts, periodStart, periodEnd, periodDays);
+	}
+
+	async getMarketV01Metrics(now = new Date()): Promise<MarketV01MetricsSnapshot> {
+		const periodDays = 7;
+		const periodMs = periodDays * 24 * 60 * 60 * 1000;
+		const periodEnd = now;
+		const periodStart = new Date(now.getTime() - periodMs);
+
+		const [eventRows, activeAutoRows] = await Promise.all([
+			db
+				.select({
+					eventType: productEventTable.eventType,
+					count: sql<number>`count(*)::int`
+				})
+				.from(productEventTable)
+				.where(
+					and(
+						inArray(productEventTable.eventType, [...MARKET_V01_METRIC_EVENT_TYPES]),
+						gte(productEventTable.createdAt, periodStart)
+					)
+				)
+				.groupBy(productEventTable.eventType),
+			db
+				.select({
+					count: sql<number>`count(*)::int`
+				})
+				.from(expiringShareLinkTable)
+				.where(
+					and(
+						eq(expiringShareLinkTable.source, 'auto_nearby'),
+						gt(expiringShareLinkTable.expiresAt, now)
+					)
+				)
+		]);
+
+		const counts = emptyMarketV01EventCounts();
+		for (const row of eventRows) {
+			const key = row.eventType as keyof typeof counts;
+			if (key in counts) {
+				counts[key] = row.count ?? 0;
+			}
+		}
+
+		return buildMarketV01MetricsSnapshot({
+			counts,
+			activeAutoListings: activeAutoRows[0]?.count ?? 0,
+			periodStart,
+			periodEnd,
+			periodDays
+		});
 	}
 }

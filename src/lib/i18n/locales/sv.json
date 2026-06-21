@@ -98,7 +98,8 @@
 		"brandName": "Skaffu",
 		"proBadgeAria": "Pro-prenumeration aktiv",
 		"morePages": "Fler sidor",
-		"language": "Språk"
+		"language": "Språk",
+		"marketV01": "Grannmarknad"
 	},
 	"auth": {
 		"email": "E-post",
@@ -1892,7 +1893,20 @@
 			"empty": "Inga rapporter ännu.",
 			"date": "Datum",
 			"shareId": "Delning",
-			"reason": "Anledning"
+			"reason": "Anledning",
+			"marketLink": "Öppna grannmarknad (v0.1)",
+			"syncAutoListing": "Synka auto-listning nu",
+			"syncAutoListingNote": "Kör daglig uppdatering av auto-listning för alla hushåll med opt-in.",
+			"syncAutoListingSuccess": "Synkade {published} publicerade, {cleared} rensade ({processed} hushåll).",
+			"syncAutoListingFailed": "Synk misslyckades — försök igen.",
+			"syncing": "Synkar…",
+			"marketMetricsTitle": "Grannmarknad v0.1 — senaste 7 dagarna",
+			"activeAutoListings": "Aktiva auto-listningar",
+			"chatsStarted": "Chattar startade",
+			"messagesSent": "Meddelanden skickade",
+			"ratingsGiven": "Betyg givna",
+			"listingViews": "Visningar av listningar",
+			"listingToChatConversion": "Listning → chatt: {rate}"
 		},
 		"analytics": {
 			"exportCsv": "Exportera CSV ({days} dagar)"
@@ -3654,5 +3668,47 @@
 			"comingSoonBody": "Vi bygger ett sätt att jämföra din lista mellan butiker. Dina svar hjälper oss prioritera rätt.",
 			"completeNote": "Tack — vi har sparat dina preferenser."
 		}
+	},
+	"marketV01": {
+		"pageTitle": "Grannmarknad",
+		"pageLead": "Se närliggande listningar, chatta med grannar och dela utgående varor automatiskt.",
+		"nearbyOptInPrompt": "Aktivera närdelning innan du använder marknaden.",
+		"nearbyOptInLink": "Öppna inställningar för närdelning",
+		"autoListingTitle": "Auto-delning",
+		"autoListingDescription": "Publicera din äta-först-lista på grannmarknaden när varor går ut inom 7 dagar.",
+		"autoListingEnableTitle": "Dela utgående varor automatiskt",
+		"autoListingEnableNote": "Uppdateras dagligen från skafferiet — ingen ny länk varje gång.",
+		"autoListingEnableLabel": "Auto-dela utgående varor",
+		"autoListingRequiresNearby": "Slå på närdelning i inställningar först.",
+		"autoListingPrivacyNote": "Bara hushåll med Grannskafferiet opt-in ser listningar. Exakt adress visas aldrig.",
+		"autoListingSaveFailed": "Kunde inte spara inställningen för auto-delning.",
+		"adminNearbyBypass": "Admin-förhandsvisning — närdelning krävs inte.",
+		"myChatsTitle": "Mina chattar",
+		"myChatsEmpty": "Inga chattar än — öppna en listning och starta en.",
+		"chatClosedBadge": "Stängd",
+		"discoveryEmptyLead": "Slå på auto-delning eller vänta tills grannar publicerar listningar.",
+		"openListingBtn": "Öppna listning",
+		"listingTitle": "Grannlistning",
+		"startChatBtn": "Starta chatt",
+		"startChatFailed": "Kunde inte starta chatt.",
+		"backToMarketBtn": "Tillbaka till marknaden",
+		"avatarGateLead": "Lägg till profilbild innan du chattar så grannar vet vem de pratar med.",
+		"avatarGateCta": "Öppna profilinställningar",
+		"chatTitle": "Chatt med {name}",
+		"ratingSummary": "{stars} ★ ({count})",
+		"ratingNewHere": "Ny här",
+		"exchangeClosedTitle": "Utbyte klart",
+		"ratePrompt": "Hur var utbytet? Betygsätt din granne.",
+		"rateAria": "Stjärnbetyg",
+		"submitRatingBtn": "Skicka betyg",
+		"ratingAlreadySubmitted": "Du betygsatte utbytet {stars} stjärnor.",
+		"rateSuccess": "Tack för ditt betyg.",
+		"rateFailed": "Kunde inte skicka betyg.",
+		"messageInputLabel": "Meddelande",
+		"messageInputPlaceholder": "Skriv ett meddelande…",
+		"sendMessageBtn": "Skicka",
+		"sendMessageFailed": "Kunde inte skicka meddelande.",
+		"closeThreadBtn": "Utbyte klart",
+		"closeThreadFailed": "Kunde inte stänga chatt."
 	}
 }
