@@ -24,6 +24,8 @@
 		canEdit: boolean;
 		shareLinkEnabled?: boolean;
 		memberCount?: number;
+		/** Prominent share CTA instead of overflow-only menu */
+		shareFirst?: boolean;
 	}
 
 	let {
@@ -31,7 +33,8 @@
 		checkedCount,
 		canEdit,
 		shareLinkEnabled = false,
-		memberCount = 0
+		memberCount = 0,
+		shareFirst = false
 	}: Props = $props();
 
 	let exportCopiedFormat = $state<ShoppingListExportFormat | null>(null);
@@ -40,6 +43,7 @@
 	let shareMenuOpen = $state(false);
 
 	const hasShareableItems = $derived(uncheckedItems.length > 0 || checkedCount > 0);
+	const showShareFirst = $derived(shareFirst && shareLinkEnabled);
 
 	function closeShareMenu() {
 		shareMenuOpen = false;
@@ -102,6 +106,21 @@
 		}, 2000);
 	}
 
+	function showListSharedToast() {
+		if (
+			memberCount === 1 &&
+			page.data.user?.id &&
+			shouldShowValueMomentInvite({
+				context: 'list_shared',
+				userId: page.data.user.id,
+				memberCount
+			})
+		) {
+			showClientToast(t('householdInvite.listSharedToast'), { variant: 'info' });
+			dismissValueMomentInvite('list_shared', page.data.user.id);
+		}
+	}
+
 	async function shareListLink() {
 		if (!browser || shareLinkSubmitting || !hasShareableItems) {
 			return;
@@ -122,19 +141,7 @@
 			}
 
 			await copyShareLink(body.url);
-
-			if (
-				memberCount === 1 &&
-				page.data.user?.id &&
-				shouldShowValueMomentInvite({
-					context: 'list_shared',
-					userId: page.data.user.id,
-					memberCount
-				})
-			) {
-				showClientToast(t('householdInvite.listSharedToast'), { variant: 'info' });
-				dismissValueMomentInvite('list_shared', page.data.user.id);
-			}
+			showListSharedToast();
 
 			if (navigator.share && navigator.canShare?.({ url: body.url })) {
 				try {
@@ -185,22 +192,40 @@
 </script>
 
 {#if canEdit && hasShareableItems}
-	<div class="share-menu-row">
+	<div class="share-menu-row" class:share-menu-row--first={showShareFirst}>
+		{#if showShareFirst}
+			<button
+				type="button"
+				class="share-primary-btn"
+				disabled={shareLinkSubmitting}
+				aria-label={t('shoppingListShare.shareLinkAria')}
+				data-testid="shopping-share-link-primary"
+				onclick={shareListLink}
+			>
+				{shareLinkSubmitting
+					? t('common.loading')
+					: shareLinkCopied
+						? t('common.copied')
+						: t('shoppingListShare.shareLinkPrimary')}
+			</button>
+		{/if}
+
 		<div class="share-menu-wrap">
 			<button
 				type="button"
 				class="overflow-trigger"
+				class:overflow-trigger--compact={showShareFirst}
 				aria-expanded={shareMenuOpen}
 				aria-haspopup="menu"
 				aria-label={t('shopping.duoActionBar.aria')}
 				data-testid="shopping-share-menu-trigger"
 				onclick={() => (shareMenuOpen = !shareMenuOpen)}
 			>
-				⋯
+				{showShareFirst ? t('shoppingListShare.exportMenuTrigger') : '⋯'}
 			</button>
 			{#if shareMenuOpen}
 				<div class="share-menu-panel" role="menu">
-					{#if shareLinkEnabled}
+					{#if shareLinkEnabled && !showShareFirst}
 						<button
 							type="button"
 							class="share-menu-item"
@@ -241,8 +266,42 @@
 		justify-content: flex-end;
 	}
 
+	.share-menu-row--first {
+		justify-content: stretch;
+		align-items: center;
+		gap: var(--space-sm);
+	}
+
+	.share-primary-btn {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: var(--touch-target-min);
+		padding: 0.65rem 1rem;
+		border: 1px solid var(--color-primary);
+		border-radius: var(--radius-sm);
+		background: var(--color-primary);
+		color: #fff;
+		font: inherit;
+		font-size: 0.9375rem;
+		font-weight: 650;
+		cursor: pointer;
+		text-align: center;
+	}
+
+	.share-primary-btn:disabled {
+		opacity: 0.7;
+		cursor: not-allowed;
+	}
+
+	.share-primary-btn:active:not(:disabled) {
+		background: color-mix(in srgb, var(--color-primary) 88%, #000);
+	}
+
 	.share-menu-wrap {
 		position: relative;
+		flex-shrink: 0;
 	}
 
 	.overflow-trigger {
@@ -258,6 +317,14 @@
 		line-height: 1;
 		cursor: pointer;
 		color: var(--color-text-muted);
+	}
+
+	.overflow-trigger--compact {
+		min-width: auto;
+		padding: 0.5rem 0.75rem;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--color-text);
 	}
 
 	.share-menu-panel {

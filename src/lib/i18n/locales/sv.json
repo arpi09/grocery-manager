@@ -2647,8 +2647,8 @@
 		"celebrateInventoryBody": "Bra start — ert skafferi växer!",
 		"encouragePathGuide": "Nästa steg — öppna det sätt som passar er.",
 		"encourageCelebrate": "Bra — du är igång!",
-		"sharePromptTitle": "Dela med partner?",
-		"sharePromptBody": "Skapa inköpslista och dela länk — samma lista, uppdateras när ni handlar.",
+		"sharePromptTitle": "Skicka till den som handlar",
+		"sharePromptBody": "Dela länken — partner ser listan utan app och kan skapa eget konto om de vill.",
 		"sharePromptListaCta": "Dela länk till lista",
 		"sharePromptInviteCta": "Bjud in partner",
 		"sharePromptInkopCta": "Gå till inköpslistan",
@@ -2976,7 +2976,7 @@
 		"tripCompletedBannerBody": "Handla ihop nästa gång? Bjud in partner — samma lista, uppdateras när ni handlar.",
 		"tripCompletedBannerCta": "Bjud in partner",
 		"tripCompletedBannerDismiss": "Inte nu",
-		"listSharedToast": "Vill partner se listan live? Bjud in under Inställningar → Hushåll."
+		"listSharedToast": "Skicka till den som handlar — länken är kopierad."
 	},
 	"calendar": {
 		"mon": "Mån",
@@ -3460,13 +3460,13 @@
 		"noItems": "Inget att dela — listan är tom.",
 		"publicEyebrow": "Delad inköpslista",
 		"publicTitle": "Inköpslista",
-		"publicLead": "Någon delade sin inköpslista med er.",
-		"publicSnapshotHonesty": "Listan speglar hur den såg ut när länken skapades — inte live. Avbockade rader syns men kan inte ändras här.",
+		"publicLead": "Någon delade sin inköpslista — öppna listan och handla utan att installera appen.",
+		"publicSnapshotHonesty": "Ögonblicksbild från när länken skapades. Avbockade rader syns men kan inte ändras här.",
 		"publicExpires": "Länken gäller till {date}.",
 		"publicSnapshotAt": "Ögonblicksbild tagen {date}.",
 		"publicGdprNote": "Listan visar bara varunamn och mängd — inga hushållsnamn, adresser eller kontaktuppgifter. Länken slutar gälla automatiskt.",
-		"publicSignupTitle": "Vill du ha en egen inköpslista?",
-		"publicSignupLead": "Skapa konto och få en gemensam lista som uppdateras när ni handlar — bjud in partner efter registrering.",
+		"publicSignupTitle": "Skapa egen inköpslista",
+		"publicSignupLead": "Gemensam lista som uppdateras när ni handlar — bjud in den som delade länken efter registrering.",
 		"publicSignupBtn": "Skapa egen inköpslista",
 		"publicSignupHint": "Efter registrering: bjud in den som delade listan under Inställningar → Hushåll.",
 		"publicLoginLink": "Logga in",
@@ -3476,7 +3476,12 @@
 		"shareLinkAria": "Skapa och dela en read-only-länk till inköpslistan",
 		"shareLinkTitle": "Inköpslista från Skaffu",
 		"shareLinkNote": "Gemensam inköpslista — read-only via länk.",
-		"shareLinkError": "Kunde inte skapa delningslänk. Försök igen."
+		"shareLinkError": "Kunde inte skapa delningslänk. Försök igen.",
+		"publicSignupAboveFold": "Vill du ha en egen gemensam lista? Skapa konto gratis — partner ser samma lista när ni handlar.",
+		"publicPreviewAria": "Inköpslistans varor",
+		"publicPreviewMore": "+ {count} fler på listan",
+		"shareLinkPrimary": "Dela länk till listan",
+		"exportMenuTrigger": "Exportera"
 	},
 	"nearbySharing": {
 		"settingsTitle": "Grannskafferiet i närheten",

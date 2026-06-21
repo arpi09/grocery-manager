@@ -1,5 +1,9 @@
 import type { InventoryAnalytics, InventoryService } from '$lib/application/inventory.service';
 import {
+	buildHouseholdInsights,
+	type HouseholdInsight
+} from '$lib/domain/household-insights';
+import {
 	buildLastNWeekBars,
 	capZeroWasteStreak,
 	computeWeekOverWeek,
@@ -13,13 +17,15 @@ import {
 	type ReceiptSpendReport
 } from '$lib/domain/receipt-spend';
 import { buildSavingsReport, type SavingsReport } from '$lib/domain/savings-estimate';
+import { getWeekDateRange } from '$lib/domain/weekly-ritual';
 import type { IConsumptionRepository } from '$lib/infrastructure/repositories/consumption.repository';
 import type { IHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
 import type { IInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
+import type { IMealPlanRepository } from '$lib/infrastructure/repositories/meal-plan.repository';
 import type { IPriceMemoryRepository } from '$lib/infrastructure/repositories/price-memory.repository';
 
 const SPEND_LOOKBACK_DAYS = 90;
-
+const INSIGHT_LOOKBACK_DAYS = 90;
 const TREND_WEEKS = 4;
 
 export interface ImpactStats {
@@ -43,6 +49,7 @@ export interface StatistikDashboard {
 	impact: ImpactStats;
 	savings: SavingsReport;
 	spend: ReceiptSpendReport;
+	highlights: HouseholdInsight[];
 }
 
 export class StatistikService {
@@ -51,7 +58,8 @@ export class StatistikService {
 		private readonly inventoryRepository: IInventoryRepository,
 		private readonly consumptionRepository: IConsumptionRepository,
 		private readonly householdRepository: IHouseholdRepository,
-		private readonly priceMemoryRepository: IPriceMemoryRepository
+		private readonly priceMemoryRepository: IPriceMemoryRepository,
+		private readonly mealPlanRepository: IMealPlanRepository
 	) {}
 
 	/** Lighter than getDashboard — used by /hem engagement strip. */
@@ -92,24 +100,35 @@ export class StatistikService {
 		return this.buildImpactStats(householdId, consumedCounts, wasteCounts, referenceDate);
 	}
 
-	async getDashboard(householdId: string): Promise<StatistikDashboard> {
+	async getDashboard(householdId: string, userId?: string): Promise<StatistikDashboard> {
 		const referenceDate = new Date();
-		const [analytics, addedCounts, consumedCounts, wasteCounts] = await Promise.all([
-			this.inventoryService.getAnalytics(householdId),
-			this.inventoryRepository.weeklyAddedCounts(householdId, TREND_WEEKS, referenceDate),
-			this.consumptionRepository.weeklyCountsByEventType(
-				householdId,
-				['consumed'],
-				TREND_WEEKS,
-				referenceDate
-			),
-			this.consumptionRepository.weeklyCountsByEventType(
-				householdId,
-				['discarded', 'expired'],
-				TREND_WEEKS,
-				referenceDate
-			)
-		]);
+		const weekRange = getWeekDateRange(referenceDate);
+		const insightSince = new Date(referenceDate);
+		insightSince.setUTCDate(insightSince.getUTCDate() - INSIGHT_LOOKBACK_DAYS);
+
+		const [analytics, addedCounts, consumedCounts, wasteCounts, purchaseLines, plannedMealsThisWeek] =
+			await Promise.all([
+				this.inventoryService.getAnalytics(householdId),
+				this.inventoryRepository.weeklyAddedCounts(householdId, TREND_WEEKS, referenceDate),
+				this.consumptionRepository.weeklyCountsByEventType(
+					householdId,
+					['consumed'],
+					TREND_WEEKS,
+					referenceDate
+				),
+				this.consumptionRepository.weeklyCountsByEventType(
+					householdId,
+					['discarded', 'expired'],
+					TREND_WEEKS,
+					referenceDate
+				),
+				this.listPurchaseInsightLines(householdId, insightSince),
+				userId
+					? this.mealPlanRepository
+							.listPlannedMealsByRange(userId, weekRange.from, weekRange.to)
+							.then((meals) => meals.length)
+					: Promise.resolve(0)
+			]);
 
 		const addedTrend = buildLastNWeekBars(addedCounts, TREND_WEEKS, referenceDate);
 		const [impact, savings, spend] = await Promise.all([
@@ -118,14 +137,33 @@ export class StatistikService {
 			this.getSpendReport(householdId)
 		]);
 
+		const highlights = buildHouseholdInsights({
+			purchaseLines,
+			spend,
+			impact,
+			savings,
+			analytics,
+			plannedMealsThisWeek
+		});
+
 		return {
 			analytics,
 			addedTrend,
 			addedWeekOverWeek: computeWeekOverWeek(addedTrend),
 			impact,
 			savings,
-			spend
+			spend,
+			highlights
 		};
+	}
+
+	private async listPurchaseInsightLines(householdId: string, since: Date) {
+		try {
+			return await this.priceMemoryRepository.listPurchaseInsightLinesSince(householdId, since);
+		} catch (error) {
+			console.warn('[statistik] listPurchaseInsightLines degraded:', error);
+			return [];
+		}
 	}
 
 	private async buildImpactStats(

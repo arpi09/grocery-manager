@@ -2,13 +2,13 @@
 	import { onMount } from 'svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import { trackProductEvent } from '$lib/client/product-events';
-	import { isNonScanHubReceiptSource, type ReceiptImportSource } from '$lib/domain/receipt-import-source';
+	import type { ReceiptImportSource } from '$lib/domain/receipt-import-source';
 	import { t } from '$lib/i18n';
 	import {
 		canTriggerInstallPrompt,
 		dismissReceiptShareInstallNudge,
-		isAndroidDevice,
 		isReceiptShareInstallNudgeDismissed,
+		isMobileDevice,
 		isStandaloneDisplay,
 		promptInstallApp
 	} from '$lib/utils/pwa';
@@ -24,8 +24,7 @@
 
 	onMount(() => {
 		visible =
-			Boolean(importSource && isNonScanHubReceiptSource(importSource)) &&
-			isAndroidDevice() &&
+			isMobileDevice() &&
 			!isStandaloneDisplay() &&
 			!isReceiptShareInstallNudgeDismissed();
 	});

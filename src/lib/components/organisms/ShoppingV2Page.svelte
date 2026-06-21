@@ -6,6 +6,7 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import ModeToggle from '$lib/components/molecules/ModeToggle.svelte';
 	import ShoppingToPantrySheet from '$lib/components/molecules/ShoppingToPantrySheet.svelte';
+	import ShoppingListShareMenu from '$lib/components/molecules/ShoppingListShareMenu.svelte';
 	import InkopHouseholdInviteBanner from '$lib/components/organisms/InkopHouseholdInviteBanner.svelte';
 	import TripCompletedInviteBanner from '$lib/components/organisms/TripCompletedInviteBanner.svelte';
 	import ShoppingLegacyDrawer from '$lib/components/organisms/ShoppingLegacyDrawer.svelte';
@@ -354,6 +355,17 @@
 		disabled={!canEdit}
 		onchange={(next) => switchMode(next, 'toggle')}
 	/>
+
+	{#if canEdit && shareLinkEnabled && listHasItems}
+		<ShoppingListShareMenu
+			uncheckedItems={items}
+			checkedCount={checkedCount}
+			{canEdit}
+			{shareLinkEnabled}
+			memberCount={memberCount}
+			shareFirst={true}
+		/>
+	{/if}
 
 	<InkopHouseholdInviteBanner
 		memberCount={memberCount}

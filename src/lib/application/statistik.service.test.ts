@@ -4,6 +4,7 @@ import type { InventoryService, InventoryAnalytics } from './inventory.service';
 import type { IInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
 import type { IConsumptionRepository } from '$lib/infrastructure/repositories/consumption.repository';
 import type { IHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
+import type { IMealPlanRepository } from '$lib/infrastructure/repositories/meal-plan.repository';
 import type { IPriceMemoryRepository } from '$lib/infrastructure/repositories/price-memory.repository';
 import { startOfWeek, toIsoDate } from '$lib/domain/statistik';
 
@@ -20,6 +21,7 @@ describe('StatistikService', () => {
 	let consumptionRepository: IConsumptionRepository;
 	let householdRepository: IHouseholdRepository;
 	let priceMemoryRepository: IPriceMemoryRepository;
+	let mealPlanRepository: IMealPlanRepository;
 
 	beforeEach(() => {
 		vi.useFakeTimers();
@@ -57,24 +59,44 @@ describe('StatistikService', () => {
 					storeLabel: 'ICA',
 					importBatchId: 'batch-1'
 				}
+			]),
+			listPurchaseInsightLinesSince: vi.fn().mockResolvedValue([
+				{
+					productName: 'Mjölk',
+					normalizedKey: 'mjolk',
+					purchasedAt: new Date('2026-06-01T10:00:00Z'),
+					importBatchId: 'batch-1'
+				},
+				{
+					productName: 'Mjölk',
+					normalizedKey: 'mjolk',
+					purchasedAt: new Date('2026-06-08T10:00:00Z'),
+					importBatchId: 'batch-2'
+				}
 			])
 		} as unknown as IPriceMemoryRepository;
+		mealPlanRepository = {
+			listPlannedMealsByRange: vi.fn().mockResolvedValue([{ id: 'meal-1' }])
+		} as unknown as IMealPlanRepository;
 		service = new StatistikService(
 			{ getAnalytics: vi.fn().mockResolvedValue(analyticsFixture) } as unknown as InventoryService,
 			{ weeklyAddedCounts: vi.fn().mockResolvedValue([{ weekStart: previousWeek, count: 1 }, { weekStart: currentWeek, count: 4 }]) } as unknown as IInventoryRepository,
 			consumptionRepository,
 			householdRepository,
-			priceMemoryRepository
+			priceMemoryRepository,
+			mealPlanRepository
 		);
 	});
 	afterEach(() => vi.useRealTimers());
 
-	it('combines analytics with trends and impact', async () => {
-		const dashboard = await service.getDashboard('household-1');
+	it('combines analytics with trends, impact, and highlights', async () => {
+		const dashboard = await service.getDashboard('household-1', 'user-1');
 		expect(dashboard.analytics.totalItems).toBe(12);
 		expect(dashboard.impact.consumedThisWeek).toBe(2);
 		expect(dashboard.spend.hasData).toBe(true);
 		expect(dashboard.spend.thisMonthSek).toBe(100);
+		expect(dashboard.highlights.some((insight) => insight.kind === 'top_product')).toBe(true);
+		expect(dashboard.highlights.some((insight) => insight.kind === 'expiring_soon')).toBe(true);
 	});
 
 	it('builds spend report from receipt lines', async () => {

@@ -93,6 +93,7 @@
 					{canEdit}
 					{shareLinkEnabled}
 					{memberCount}
+					shareFirst={shareLinkEnabled}
 				/>
 				<button type="button" class="close" onclick={onClose} aria-label={t('common.close')}>
 					×

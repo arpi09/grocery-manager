@@ -129,6 +129,7 @@
 						canEdit={data.canEdit}
 						shareLinkEnabled={data.shareLinkEnabled}
 						memberCount={householdMemberCount}
+						shareFirst={data.shareLinkEnabled}
 					/>
 
 

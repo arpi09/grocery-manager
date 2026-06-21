@@ -12,6 +12,8 @@
 
 	import StatistikSpendTrend from '$lib/components/molecules/StatistikSpendTrend.svelte';
 
+	import StatistikInsightCards from '$lib/components/molecules/StatistikInsightCards.svelte';
+
 	import { EMPTY_RECEIPT_SPEND_REPORT } from '$lib/domain/receipt-spend';
 
 	import type { StatistikDashboard, StatistikRapportLink } from '$lib/application/statistik.service';
@@ -64,6 +66,7 @@
 	const impact = $derived(dashboard.impact);
 	const savings = $derived(dashboard.savings);
 	const spend = $derived(dashboard.spend ?? EMPTY_RECEIPT_SPEND_REPORT);
+	const highlights = $derived(dashboard.highlights ?? []);
 
 	const isEmpty = $derived(analytics.totalItems === 0);
 
@@ -225,7 +228,7 @@
 
 				<StatistikSpendHero {spend} />
 
-
+				<StatistikInsightCards {highlights} />
 
 				<div class="compact-grid" aria-label={t('stats.heroLabel')}>
 
@@ -253,8 +256,7 @@
 
 
 
-				{#if impact.hasConsumptionData}
-
+				{#if impact.hasConsumptionData || spend.hasData}
 					<Card href="/statistik/wrapped" interactive class="wrapped-entry">
 
 						<h2 class="section-title">{t('stats.wrappedCta')}</h2>

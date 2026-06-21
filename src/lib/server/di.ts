@@ -239,7 +239,8 @@ export const statistikService = new StatistikService(
 	inventoryRepository,
 	consumptionRepository,
 	householdRepository,
-	priceMemoryRepository
+	priceMemoryRepository,
+	mealPlanRepository
 );
 export const gamificationService = new GamificationService(
 	statistikService,

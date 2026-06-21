@@ -124,8 +124,10 @@ describe('Lista guest join integration', () => {
 		await integrationDb.close();
 	});
 
-	async function createShareToken() {
-		await shoppingListService.addItem('household-a', 'owner', { name: 'Mjölk' });
+	async function createShareToken(itemNames: string[] = ['Mjölk']) {
+		for (const name of itemNames) {
+			await shoppingListService.addItem('household-a', 'owner', { name });
+		}
 		const created = await diState.shareService!.createShareLink(
 			'household-a',
 			'owner-a',
@@ -153,10 +155,46 @@ describe('Lista guest join integration', () => {
 		expect(cookies.get(LISTA_JOIN_COOKIE)).toBe(token);
 	});
 
-	it('exposes guest CTA URLs with shopping_share attribution', async () => {
+	it('returns full item snapshot for guest preview (acquisition surface)', async () => {
+		const token = await createShareToken([
+			'Mjölk',
+			'Bröd',
+			'Ägg',
+			'Smör',
+			'Tomat',
+			'Paprika'
+		]);
+		const cookies = createCookieJar();
+
+		const result = (await loadListaPage({
+			params: { token },
+			locals: { user: null, householdService, pmfService },
+			cookies
+		} as unknown as Parameters<typeof loadListaPage>[0])) as {
+			preview: { items: Array<{ name: string }> };
+		};
+
+		expect(result.preview.items).toHaveLength(6);
+		expect(result.preview.items.map((item) => item.name)).toEqual([
+			'Mjölk',
+			'Bröd',
+			'Ägg',
+			'Smör',
+			'Tomat',
+			'Paprika'
+		]);
+	});
+
+	it('signup URL uses shopping_share acquisition attribution for lista wedge', async () => {
+		const signupUrl = buildListaSignupUrl('https://skaffu.com');
+
+		expect(signupUrl).toContain('utm_content=shopping_share');
+		expect(signupUrl).toContain('utm_campaign=acquisition_wedge');
+	});
+
+	it('exposes guest login URL that returns guest to lista after auth', async () => {
 		const token = await createShareToken();
 
-		expect(buildListaSignupUrl('https://skaffu.com')).toContain('utm_content=shopping_share');
 		expect(buildListaSignupUrl('https://skaffu.com')).toContain(
 			`redirect=${encodeURIComponent(APP_HOME_PATH)}`
 		);

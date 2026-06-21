@@ -1,4 +1,5 @@
 import { and, desc, eq, gte, ilike, isNotNull, isNull, or, sql } from 'drizzle-orm';
+import type { PurchaseInsightLine } from '$lib/domain/household-insights';
 import type { ReceiptSpendLine } from '$lib/domain/receipt-spend';
 import { mapReceiptPurchaseRowToSpendLine } from '$lib/domain/receipt-spend';
 import type {
@@ -38,6 +39,7 @@ export interface IPriceMemoryRepository {
 	): Promise<PurchaseMemoryTimelineEntry[]>;
 	search(householdId: string, query: string, limit?: number): Promise<PurchaseMemorySearchResult[]>;
 	listSpendLinesSince(householdId: string, since: Date): Promise<ReceiptSpendLine[]>;
+	listPurchaseInsightLinesSince(householdId: string, since: Date): Promise<PurchaseInsightLine[]>;
 }
 
 function sinceDate(): Date {
@@ -303,5 +305,35 @@ export class DrizzlePriceMemoryRepository implements IPriceMemoryRepository {
 				)
 			);
 		return rows.map((row) => mapReceiptPurchaseRowToSpendLine(row));
+	}
+
+	async listPurchaseInsightLinesSince(
+		householdId: string,
+		since: Date
+	): Promise<PurchaseInsightLine[]> {
+		const rows = await this.database
+			.select({
+				productName: receiptPurchaseLineTable.productName,
+				normalizedKey: receiptPurchaseLineTable.normalizedKey,
+				purchasedAt: receiptPurchaseLineTable.purchasedAt,
+				createdAt: receiptPurchaseLineTable.createdAt,
+				importBatchId: receiptPurchaseLineTable.importBatchId
+			})
+			.from(receiptPurchaseLineTable)
+			.where(
+				and(
+					eq(receiptPurchaseLineTable.householdId, householdId),
+					or(
+						gte(receiptPurchaseLineTable.createdAt, since),
+						gte(receiptPurchaseLineTable.purchasedAt, since)
+					)
+				)
+			);
+		return rows.map((row) => ({
+			productName: row.productName,
+			normalizedKey: row.normalizedKey,
+			purchasedAt: row.purchasedAt ?? row.createdAt,
+			importBatchId: row.importBatchId
+		}));
 	}
 }
