@@ -856,7 +856,8 @@
 			"celebrationActivatingBody": "Bekräftar din betalning…",
 			"celebrationActivatingHint": "Det tar vanligtvis några sekunder.",
 			"celebrationCta": "Utforska Pro",
-			"celebrationDismiss": "Fortsätt till inställningar"
+			"celebrationDismiss": "Fortsätt till inställningar",
+			"seeAllPlansNoteExpanding": "Gratis idag — fler planer när betalning öppnar"
 		},
 		"feedback": {
 			"title": "Ge feedback",
@@ -1645,7 +1646,10 @@
 		"priceHistoryLink": "Se prishistorik",
 		"trendSekAria": "{sek} kronor",
 		"rapportLinkTitle": "Skaffurapporten {month}",
-		"rapportLinkLead": "Anonymiserad månadsstatistik från svenska Skaffu-hushåll — se vad andra sparar."
+		"rapportLinkLead": "Anonymiserad månadsstatistik från svenska Skaffu-hushåll — se vad andra sparar.",
+		"expansionBadge": "Växer",
+		"expansionTitle": "Fler hushåll varje vecka",
+		"expansionLead": "Skaffu blir bättre ju fler som handlar smart tillsammans."
 	},
 	"wrapped": {
 		"pageTitle": "Er kylskåps-årstid",
