@@ -32,13 +32,13 @@ test.describe('Weekly ritual — vecka', () => {
 		const generateBtn = page.getByRole('button', { name: /Generera veckoförslag/i });
 		await expect(generateBtn).toBeVisible({ timeout: 15_000 });
 
-		const eatFirstResponse = page.waitForResponse(
-			(res) => res.url().includes('/api/eat-first') && res.request().method() === 'POST',
+		const generateResponse = page.waitForResponse(
+			(res) => res.url().includes('/planer/vecka') && res.request().method() === 'POST',
 			{ timeout: 30_000 }
 		);
 		await generateBtn.scrollIntoViewIfNeeded();
 		await generateBtn.click({ force: true });
-		const response = await eatFirstResponse;
+		const response = await generateResponse;
 		expect(response.ok()).toBeTruthy();
 
 		await expect(page.getByRole('heading', { name: 'E2E Testpasta', level: 3 })).toBeVisible({

@@ -5,7 +5,7 @@
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import WeeklyRitualFlow from '$lib/components/organisms/WeeklyRitualFlow.svelte';
 
-	let { data } = $props();
+	let { data, form } = $props();
 </script>
 
 <AppLayout user={data.user}>
@@ -22,6 +22,8 @@
 			householdId={data.activeHousehold?.id ?? null}
 			inboundSource={data.inboundSource}
 			expiringCount={data.expiringCount}
+			hasInventory={data.hasInventory}
+			{form}
 		/>
 	</PageContainer>
 </AppLayout>

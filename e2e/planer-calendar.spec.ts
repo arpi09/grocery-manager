@@ -26,6 +26,26 @@ test.describe('Planer calendar week navigation', () => {
 		expect(afterNext).not.toBe(initialRange);
 	});
 
+	test('week navigation preserves scroll position', async ({ page }) => {
+		await loginAsAdmin(page);
+		await page.goto('/planer?week=2026-06-01', { waitUntil: 'commit', timeout: 60_000 });
+		await dismissOnboardingModalIfOpen(page);
+
+		await page.evaluate(() => window.scrollTo(0, 420));
+		const scrollBefore = await page.evaluate(() => window.scrollY);
+		expect(scrollBefore).toBeGreaterThan(200);
+
+		await page.getByTestId('ata-calendar-next-week').click();
+		await expect(page).toHaveURL(/[?&]week=2026-06-08/);
+
+		await expect
+			.poll(async () => page.evaluate(() => window.scrollY))
+			.toBeGreaterThan(scrollBefore - 24);
+		await expect
+			.poll(async () => page.evaluate(() => window.scrollY))
+			.toBeLessThan(scrollBefore + 24);
+	});
+
 	test('today link resets week to current week', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/planer?week=2026-01-05', { waitUntil: 'commit', timeout: 60_000 });

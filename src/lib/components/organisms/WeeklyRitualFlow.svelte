@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
@@ -21,7 +22,8 @@
 	import type { GamificationCelebrationKind } from '$lib/domain/gamification';
 	import { getCelebrationRegistryEntry } from '$lib/domain/gamification.registry';
 	import { presentCelebration } from '$lib/utils/present-celebration.svelte';
-	import { aiServiceErrorMessage } from '$lib/utils/ai-service-error';
+	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
+	import type { ActionData } from '../../../routes/planer/vecka/$types';
 
 	interface PlannedMealPreview {
 		id: string;
@@ -39,6 +41,8 @@
 		householdId?: string | null;
 		inboundSource?: EatFirstWeekInboundSource | null;
 		expiringCount?: number;
+		hasInventory?: boolean;
+		form?: ActionData | null;
 	}
 
 	let {
@@ -50,10 +54,12 @@
 		canEdit = false,
 		householdId = null,
 		inboundSource = null,
-		expiringCount = 0
+		expiringCount = 0,
+		hasInventory = false,
+		form = null
 	}: Props = $props();
 
-	let loading = $state(false);
+	let generating = $state(false);
 	let approving = $state(false);
 	let mealIntent = $state<MealIntent>(DEFAULT_MEAL_INTENT);
 	let suggestions = $state<RecipeIdea[]>([]);
@@ -62,6 +68,8 @@
 	let note = $state<string | null>(null);
 	let approved = $state(false);
 	let listAddedCount = $state(0);
+	let lastHandledGenerateKey = $state<string | null>(null);
+	let lastHandledApproveKey = $state<string | null>(null);
 
 	const previewItems = $derived(expiringItems.slice(0, 6));
 	const overflowCount = $derived(Math.max(0, expiringItems.length - previewItems.length));
@@ -79,6 +87,9 @@
 			? t('weeklyRitual.inboundEmailLead', { count: expiringCount })
 			: t('weeklyRitual.inboundPushLead', { count: expiringCount })
 	);
+	const showPreGenerateHint = $derived(
+		hasInventory && canEdit && !approved && !hasSuggestions && !generating
+	);
 
 	function assignDefaultDates(ideas: RecipeIdea[]) {
 		const dates = distributeMealDates(ideas.length);
@@ -90,128 +101,127 @@
 		scheduleDates = next;
 	}
 
-	async function generateSuggestions() {
-		loading = true;
-		errorMessage = null;
-		note = null;
-		approved = false;
-
-		try {
-			const response = await fetch('/api/eat-first', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ mealIntent, scope: 'week' })
-			});
-
-			const data = (await response.json()) as {
-				error?: string;
-				note?: string;
-				suggestions?: RecipeIdea[];
-			};
-
-			if (!response.ok) {
-				errorMessage = aiServiceErrorMessage(response.status, data.error, 'weeklyRitual.generateFailed');
-				suggestions = [];
-				return;
-			}
-
-			suggestions = data.suggestions ?? [];
-			note = data.note ?? null;
-			assignDefaultDates(suggestions);
-
-			if (suggestions.length === 0 && !note) {
-				errorMessage = t('weeklyRitual.noneGenerated');
-			}
-		} catch {
-			errorMessage = t('weeklyRitual.networkError');
-			suggestions = [];
-		} finally {
-			loading = false;
-		}
-	}
-
 	function updateScheduleDate(ideaId: string, event: Event) {
 		const target = event.currentTarget as HTMLInputElement;
 		scheduleDates = { ...scheduleDates, [ideaId]: target.value };
 	}
 
-	async function approveWeek() {
-		if (!canEdit || suggestions.length === 0) {
-			return;
-		}
-
-		const assignments = suggestions
+	function buildAssignments() {
+		return suggestions
 			.map((idea) => ({
 				ideaId: idea.id,
 				plannedDate: scheduleDates[idea.id]
 			}))
 			.filter((entry) => Boolean(entry.plannedDate));
+	}
 
-		if (assignments.length === 0) {
-			errorMessage = t('weeklyRitual.approveFailed');
-			return;
+	const generateEnhance = bindSubmitting((value) => {
+		generating = value;
+		if (value) {
+			errorMessage = null;
+			note = null;
+			approved = false;
 		}
+	});
 
-		const hasPastDate = assignments.some(
-			(entry) => entry.plannedDate != null && entry.plannedDate < todayIso
-		);
-		if (hasPastDate) {
-			errorMessage = t('weeklyRitual.approveFailed');
-			return;
+	const approveEnhance = bindSubmitting(
+		(value) => {
+			approving = value;
+			if (value) {
+				errorMessage = null;
+			}
+		},
+		(formData) => {
+			formData.set('assignments', JSON.stringify(buildAssignments()));
+			formData.set('addMissingToList', 'true');
 		}
+	);
 
-		approving = true;
-		errorMessage = null;
+	$effect(() => {
+		if (!form) return;
 
-		try {
-			const response = await fetch('/api/planer/weekly-ritual/approve', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ assignments, addMissingToList: true })
-			});
+		if ('generateSuggestions' in form || 'generateNote' in form || 'generateError' in form) {
+			const generateError =
+				'generateError' in form && typeof form.generateError === 'string'
+					? form.generateError
+					: null;
+			const generateNote =
+				'generateNote' in form && typeof form.generateNote === 'string' ? form.generateNote : null;
+			const generateSuggestions =
+				'generateSuggestions' in form && Array.isArray(form.generateSuggestions)
+					? (form.generateSuggestions as RecipeIdea[])
+					: null;
+			const key = `${generateError ?? ''}:${generateSuggestions?.length ?? 'x'}:${generateNote ?? ''}`;
+			if (key === lastHandledGenerateKey) return;
+			lastHandledGenerateKey = key;
 
-			const data = (await response.json()) as {
-				error?: string;
-				ok?: boolean;
-				mealsScheduled?: number;
-				listAdded?: number;
-				celebration?: GamificationCelebrationKind;
-			};
-
-			if (!response.ok) {
-				errorMessage = data.error ?? t('weeklyRitual.approveFailed');
+			if (generateError) {
+				errorMessage = generateError;
+				suggestions = [];
+				note = null;
 				return;
 			}
 
-			showClientToast(
-				t('weeklyRitual.approveSuccess', {
-					count: data.mealsScheduled ?? assignments.length,
-					listAdded: data.listAdded ?? 0
-				}),
-				{ variant: 'success' }
-			);
-
-			if (data.celebration && householdId) {
-				const entry = getCelebrationRegistryEntry(data.celebration);
-				presentCelebration({
-					kind: data.celebration,
-					surface: entry?.defaultSurface ?? 'moment',
-					householdId,
-					metadata:
-						data.celebration === 'weeklyRitualFirst'
-							? { milestoneId: 'weeklyRitualFirst' }
-							: undefined
-				});
+			if (generateSuggestions) {
+				suggestions = generateSuggestions;
+				note = generateNote;
+				assignDefaultDates(suggestions);
+				errorMessage =
+					suggestions.length === 0 && !note ? t('weeklyRitual.noneGenerated') : null;
+				approved = false;
 			}
-			approved = true;
-			listAddedCount = data.listAdded ?? 0;
-			suggestions = [];
-		} catch {
-			errorMessage = t('weeklyRitual.approveFailed');
-		} finally {
-			approving = false;
 		}
-	}
+
+		if ('approveSuccess' in form || 'approveError' in form) {
+			const approveError =
+				'approveError' in form && typeof form.approveError === 'string' ? form.approveError : null;
+			const approveSuccess =
+				'approveSuccess' in form &&
+				form.approveSuccess &&
+				typeof form.approveSuccess === 'object'
+					? (form.approveSuccess as {
+							mealsScheduled: number;
+							listAdded: number;
+							celebration?: GamificationCelebrationKind | null;
+						})
+					: null;
+			const key = `${approveError ?? ''}:${approveSuccess?.mealsScheduled ?? 'x'}:${approveSuccess?.listAdded ?? 'x'}`;
+			if (key === lastHandledApproveKey) return;
+			lastHandledApproveKey = key;
+
+			if (approveError) {
+				errorMessage = approveError;
+				return;
+			}
+
+			if (approveSuccess) {
+				showClientToast(
+					t('weeklyRitual.approveSuccess', {
+						count: approveSuccess.mealsScheduled,
+						listAdded: approveSuccess.listAdded
+					}),
+					{ variant: 'success' }
+				);
+
+				if (approveSuccess.celebration && householdId) {
+					const entry = getCelebrationRegistryEntry(approveSuccess.celebration);
+					presentCelebration({
+						kind: approveSuccess.celebration,
+						surface: entry?.defaultSurface ?? 'moment',
+						householdId,
+						metadata:
+							approveSuccess.celebration === 'weeklyRitualFirst'
+								? { milestoneId: 'weeklyRitualFirst' }
+								: undefined
+					});
+				}
+
+				approved = true;
+				listAddedCount = approveSuccess.listAdded;
+				suggestions = [];
+			}
+		}
+	});
 </script>
 
 <section class="weekly-ritual" aria-labelledby="weekly-ritual-heading">
@@ -241,7 +251,15 @@
 		</p>
 	{/if}
 
-	{#if previewItems.length > 0}
+	{#if !hasInventory}
+		<section class="empty-pantry" aria-labelledby="weekly-ritual-empty-pantry">
+			<h3 id="weekly-ritual-empty-pantry">{t('weeklyRitual.emptyPantryTitle')}</h3>
+			<p class="empty-pantry-lead">{t('weeklyRitual.emptyPantryLead')}</p>
+			<a class="empty-pantry-cta" href="/scan" data-analytics-id="weekly_ritual.empty_pantry_scan">
+				{t('weeklyRitual.emptyPantryCta')}
+			</a>
+		</section>
+	{:else if previewItems.length > 0}
 		<ul class="expiring-chips" aria-label={t('eatFirst.expiringLabel')}>
 			{#each previewItems as item (item.id)}
 				{@const daysLeft = item.expiresOn ? daysUntilExpiry(item.expiresOn) : null}
@@ -278,14 +296,24 @@
 			</a>
 			<a class="next-step-secondary" href="/planer">{t('weeklyRitual.linkPlaner')}</a>
 		</section>
-	{:else if canEdit}
-		<div class="actions">
-			<Button type="button" loading={loading} disabled={approving} data-analytics-id="weekly_ritual.generate" onclick={generateSuggestions}>
+	{:else if canEdit && hasInventory}
+		{#if showPreGenerateHint}
+			<p class="pre-generate-hint">{t('weeklyRitual.preGenerateHint')}</p>
+		{/if}
+
+		<form method="POST" action="?/generate" class="actions" use:enhance={generateEnhance}>
+			<input type="hidden" name="mealIntent" value={mealIntent} />
+			<Button
+				type="submit"
+				loading={generating}
+				disabled={approving}
+				data-analytics-id="weekly_ritual.generate"
+			>
 				{t('weeklyRitual.generateBtn')}
 			</Button>
-		</div>
+		</form>
 
-		{#if loading}
+		{#if generating}
 			<AiLoadingSkeleton messageKey="ai.loadingWeekly" />
 		{/if}
 
@@ -320,12 +348,19 @@
 				{/each}
 			</ul>
 
-			<div class="approve-wrap">
-			<Button type="button" loading={approving} disabled={loading} data-analytics-id="weekly_ritual.approve" onclick={approveWeek}>
-				{t('weeklyRitual.approveBtn')}
-			</Button>
-			</div>
+			<form method="POST" action="?/approve" class="approve-wrap" use:enhance={approveEnhance}>
+				<Button
+					type="submit"
+					loading={approving}
+					disabled={generating}
+					data-analytics-id="weekly_ritual.approve"
+				>
+					{t('weeklyRitual.approveBtn')}
+				</Button>
+			</form>
 		{/if}
+	{:else if !hasInventory}
+		<!-- empty pantry state above replaces generate flow -->
 	{:else}
 		<p class="readonly-hint">{t('weeklyRitual.readonlyHint')}</p>
 	{/if}
@@ -383,7 +418,9 @@
 	.no-expiring,
 	.note,
 	.readonly-hint,
-	.expiring-overflow {
+	.expiring-overflow,
+	.pre-generate-hint,
+	.empty-pantry-lead {
 		margin: 0;
 		color: var(--color-text-muted);
 		font-size: 0.9375rem;
@@ -403,6 +440,41 @@
 		background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface));
 		font-weight: 600;
 		color: var(--color-text);
+	}
+
+	.empty-pantry {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		padding: var(--space-lg);
+		border-radius: var(--radius-lg);
+		border: 1px dashed var(--color-border);
+		background: var(--color-surface-muted);
+	}
+
+	.empty-pantry h3 {
+		margin: 0;
+		font-size: 1.1rem;
+	}
+
+	.empty-pantry-cta {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		align-self: flex-start;
+		min-height: var(--touch-target-min);
+		padding: 0.65rem 1.1rem;
+		border-radius: var(--radius-md);
+		background: var(--color-primary);
+		color: var(--color-on-primary);
+		font-weight: 700;
+		font-size: 0.9375rem;
+		text-decoration: none;
+	}
+
+	.empty-pantry-cta:hover {
+		background: var(--color-primary-hover);
+		text-decoration: none;
 	}
 
 	.expiring-chips {
@@ -546,12 +618,19 @@
 			align-items: stretch;
 		}
 
-		.approve-wrap {
+		.approve-wrap,
+		.actions,
+		.empty-pantry-cta {
 			align-self: stretch;
 		}
 
-		.approve-wrap :global(.btn) {
+		.approve-wrap :global(.btn),
+		.actions :global(.btn) {
 			width: 100%;
+		}
+
+		.empty-pantry-cta {
+			justify-content: center;
 		}
 	}
 </style>

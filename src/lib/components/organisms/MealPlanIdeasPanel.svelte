@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getContext, onMount } from 'svelte';
+	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
@@ -12,6 +13,7 @@
 	import { OPEN_RECIPE_IDEAS } from '$lib/navigation/app-layout-context';
 	import { getLocale, t } from '$lib/i18n';
 	import { recipeDetailHref } from '$lib/utils/recipe-assistant-nav';
+	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
 	import {
 		addMissingIngredientsToList,
 		dedupeMissingIngredients,
@@ -55,7 +57,19 @@
 
 	let dismissingKey = $state<string | null>(null);
 
+	let scheduleSubmitting = $state<string | null>(null);
+
 	let feedbackBanner = $state<{ message: string; tone: AddMissingFeedbackTone } | null>(null);
+
+	const scheduleEnhance = bindSubmittingWithRedirect(
+		(v) => {
+			if (!v) scheduleSubmitting = null;
+		},
+		async () => {},
+		(formData) => {
+			scheduleSubmitting = String(formData.get('ideaId') ?? '');
+		}
+	);
 
 
 
@@ -301,7 +315,7 @@
 						{/if}
 					</div>
 
-					<form method="POST" action="?/scheduleIdea" class="schedule-form">
+					<form method="POST" action="?/scheduleIdea" class="schedule-form" use:enhance={scheduleEnhance}>
 
 						<input type="hidden" name="month" value={month} />
 
@@ -317,7 +331,14 @@
 
 						</label>
 
-						<button type="submit">{t('planer.addToCalendar')}</button>
+						<Button
+							type="submit"
+							fullWidth
+							loading={scheduleSubmitting === idea.id}
+							loadingLabel={t('common.loading')}
+						>
+							{t('planer.addToCalendar')}
+						</Button>
 
 					</form>
 
@@ -567,26 +588,24 @@
 
 	}
 
+	@media (max-width: 600px) {
+		.empty-actions :global(.btn),
+		.idea-actions :global(.btn),
+		.batch-action :global(.btn),
+		.schedule-form :global(.btn) {
+			width: 100%;
+		}
 
+		.empty-actions,
+		.idea-actions {
+			flex-direction: column;
+			align-items: stretch;
+		}
 
-	.schedule-form button {
-
-		min-height: 2.75rem;
-
-		border: none;
-
-		border-radius: var(--radius-sm);
-
-		background: var(--color-primary);
-
-		color: #fff;
-
-		font-weight: 700;
-
-		padding: 0.55rem 0.75rem;
-
-		cursor: pointer;
-
+		.cook-link {
+			width: 100%;
+			justify-content: center;
+		}
 	}
 
 </style>
