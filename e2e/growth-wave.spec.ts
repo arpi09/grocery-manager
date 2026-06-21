@@ -280,7 +280,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		const listaPath = new URL(sharePayload.url!).pathname;
 		await page.goto(listaPath, { waitUntil: 'commit' });
 		await dismissCookieConsentIfOpen(page);
-		const signupLink = page.locator('a.signup-cta-btn').first();
+		const signupLink = page.getByTestId('lista-signup-cta-primary');
 		await expect(signupLink).toBeVisible({ timeout: 15_000 });
 		const signupHref = await signupLink.getAttribute('href');
 		expect(signupHref).toBeTruthy();
