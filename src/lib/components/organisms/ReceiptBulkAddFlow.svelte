@@ -411,11 +411,17 @@
 	}
 
 	async function handleQuickConfirm(event: MouseEvent) {
+		event.preventDefault();
 		quickConfirmUsed = true;
 		toggleAll(true);
 		await tick();
-		const form = (event.currentTarget as HTMLButtonElement).closest('form');
-		form?.requestSubmit();
+		await loadMergeCandidates();
+		await tick();
+		const form = (event.currentTarget as HTMLElement).closest('form');
+		const submit = form?.querySelector<HTMLButtonElement>('[data-testid="receipt-bulk-submit"]');
+		if (submit && !submit.disabled) {
+			submit.click();
+		}
 	}
 
 	function shareErrorMessage(code: string | null): string | null {
