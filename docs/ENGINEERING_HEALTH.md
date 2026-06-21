@@ -1,6 +1,6 @@
-# Engineering Health — snapshot
+﻿# Engineering Health â€” snapshot
 
-**Baseline:** 2026-06-21 · Node 24 · `npm audit --omit=dev` → 0 runtime CVEs · ~260 unit · 44 integration · CI quality ~15 min cap · [DEPENDENCY_HEALTH.md](./DEPENDENCY_HEALTH.md).
+**Baseline:** 2026-06-21 Â· Node 24 Â· `npm audit --omit=dev` â†’ 0 runtime CVEs Â· ~260 unit Â· 44 integration Â· CI quality ~15 min cap Â· [DEPENDENCY_HEALTH.md](./DEPENDENCY_HEALTH.md).
 
 Branch strategy: work on `feat/engineering-health-*`; cherry-pick isolated commits after prod is green. Do not merge during active deploy lockdown.
 
@@ -10,15 +10,15 @@ Branch strategy: work on `feat/engineering-health-*`; cherry-pick isolated commi
 
 | Area | Grade | Note |
 |------|-------|------|
-| Dependencies | Good | Patch drift only; no runtime CVEs; Dependabot weekly — [DEPENDENCY_HEALTH.md](./DEPENDENCY_HEALTH.md) |
-| Code quality | Mixed | Low TODO noise; several 700–1000 line UI organisms |
+| Dependencies | Good | Patch drift only; no runtime CVEs; Dependabot weekly â€” [DEPENDENCY_HEALTH.md](./DEPENDENCY_HEALTH.md) |
+| Code quality | Mixed | Low TODO noise; several 700â€“1000 line UI organisms |
 | Test coverage | Mixed | Strong domain/unit; weak wedge flows (`/inkop`, `lista` guest) |
 | Test efficiency | Needs work | Integration serial; monolithic `quality:ci` |
 | CI/CD | Good design | Reusable quality + artifact reuse; G1b SHA-gate blocks deploy |
 | Architecture | Good V1 | Learning engine ports/adapters; flag sprawl |
 | Agent efficiency | Good | `quick:*` + `gate:fast`; G0 = `quick:dev` only |
 
-**Current deploy blocker:** no green `quality / quality` on target SHA (G1b) — not a flake. Fix: green `quality:ci` on commit, then manual deploy.
+**Current deploy blocker:** no green `quality / quality` on target SHA (G1b) â€” not a flake. Fix: green `quality:ci` on commit, then manual deploy.
 
 ---
 
@@ -26,18 +26,18 @@ Branch strategy: work on `feat/engineering-health-*`; cherry-pick isolated commi
 
 | Script | Blocks deploy? | Notes |
 |--------|----------------|-------|
-| `quick:lint` | No | TS/JS-only edits (~30–60 s) |
-| `quick:check` | No | sync + svelte-check (~1–2 min) |
+| `quick:lint` | No | TS/JS-only edits (~30â€“60 s) |
+| `quick:check` | No | sync + svelte-check (~1â€“2 min) |
 | `quick:unit` | No | vitest only |
 | `quick:types` | No | svelte-check without sync |
-| `quick:dev` | No — **agent default G0** | lint + locales + server-imports + unit |
+| `quick:dev` | No â€” **agent default G0** | lint + locales + server-imports + unit |
 | `quick:marketing` | No | quick:dev + landing variants |
-| `gate:fast` | No | optional pre-merge (~5–7 min) |
+| `gate:fast` | No | optional pre-merge (~5â€“7 min) |
 | `quality:integration` | Yes (subset) | server/DB touches |
-| `pr:gate` / `quality:ci` | Yes | CI mirror — not pre-push |
+| `pr:gate` / `quality:ci` | Yes | CI mirror â€” not pre-push |
 | `nightly` | No (audit warn-only) | |
 
-Cloud agents (paused): [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md) — use coordinator + local agents instead.
+Cloud agents (paused): [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md) â€” use coordinator + local agents instead.
 
 ---
 
@@ -49,9 +49,9 @@ Cloud agents (paused): [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md) — use co
 | 1b | Split `quick:lint/check/unit` + `gate:fast` | **Done** |
 | 2 | Create dependency tracking doc ([DEPENDENCY_HEALTH.md](./DEPENDENCY_HEALTH.md)) | **Done** |
 | 3 | Integration test parallelism pilot | **Done** (PGlite per-file; `fileParallelism: true`) |
-| 4 | `lista/[token]` guest join integration test | Pending |
-| 5 | `receipt-import.ts` focused integration test | Pending |
-| 6 | Duo wedge product-events test coverage | Pending |
+| 4 | `lista/[token]` guest join integration test | **Done** (11 tests in `lista-guest.integration.test.ts`) |
+| 5 | `receipt-import.ts` focused integration test | **Done** (`receipt-import.integration.test.ts` + purchase mapper unit tests) |
+| 6 | Duo wedge product-events test coverage | **Done** (`product-events.test.ts` allowlist + lista acquisition) |
 | 7 | Patch dependency bump PR | **Done** (this branch) |
 | 8 | CI: parallel fast + integration jobs + path-tier | **Done** |
 | 9 | Split `LearningEngineService` | Delay until Brain on prod |
@@ -59,23 +59,23 @@ Cloud agents (paused): [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md) — use co
 
 **Do not start during deploy:** ShoppingListPanel / ReceiptBulkAddFlow splits (high wedge merge conflict).
 
-**Owner (not code):** Add Turnstile hostnames `skaffu.com` + `www.skaffu.com` before custom-domain traffic — [CAPTCHA.md](./CAPTCHA.md#owner-checklist--skaffucom-hostnames-user_local).
+**Owner (not code):** Add Turnstile hostnames `skaffu.com` + `www.skaffu.com` before custom-domain traffic â€” [CAPTCHA.md](./CAPTCHA.md#owner-checklist--skaffucom-hostnames-user_local).
 
 ---
 
-## Batch 3 — owner field-test driven
+## Batch 3 â€” owner field-test driven
 
-After Batch 1–2 deploy, pick **1–2 friction points** from your own use (not roadmap):
+After Batch 1â€“2 deploy, pick **1â€“2 friction points** from your own use (not roadmap):
 
-| If you notice… | Track |
+| If you noticeâ€¦ | Track |
 |----------------|-------|
-| Inköp/lista friction | Shopping V2 polish, checkoff-bridge |
+| InkÃ¶p/lista friction | Shopping V2 polish, checkoff-bridge |
 | Kvitto/PDF issues | Receipt fixtures + import UX |
 | Onboarding drop-off | Startguide/activation steps |
 | Hem feels noisy | Home UX v2 micro-polish (not redesign) |
 | Brain/memory unclear | Memory Explorer + expiry copy |
 
-No feature code in this section — update when owner testing surfaces the next wedge.
+No feature code in this section â€” update when owner testing surfaces the next wedge.
 
 ---
 

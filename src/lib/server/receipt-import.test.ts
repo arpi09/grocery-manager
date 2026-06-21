@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+﻿import { describe, expect, it, vi } from 'vitest';
 import type { PmfService } from '$lib/application/pmf.service';
 import type { InventoryService } from '$lib/application/inventory.service';
 import type { PurchasePatternService } from '$lib/application/purchase-pattern.service';
@@ -94,8 +94,8 @@ describe('importReceiptLines', () => {
 			userId: 'user-1',
 			role: 'owner',
 			lines: [
-				{ name: 'Mjölk', location: 'fridge', unitPrice: '15.90' },
-				{ name: 'Bröd', location: 'cupboard' }
+				{ name: 'MjÃ¶lk', location: 'fridge', unitPrice: '15.90' },
+				{ name: 'BrÃ¶d', location: 'cupboard' }
 			],
 			inventoryService,
 			purchasePatternService,
@@ -115,6 +115,44 @@ describe('importReceiptLines', () => {
 		);
 	});
 });
+
+	it('maps receipt lines into purchase import records', async () => {
+		recordProductEvent.mockClear();
+		const pmfService = {} as PmfService;
+		const inventoryService = createInventoryService();
+		const recordReceiptImport = vi.fn(async () => undefined);
+		const purchasePatternService = {
+			recordReceiptImport
+		} as unknown as PurchasePatternService;
+
+		await importReceiptLines({
+			householdId: 'household-1',
+			userId: 'user-1',
+			role: 'owner',
+			lines: [{ name: 'Mjolk', location: 'fridge', unitPrice: '15.90', currency: 'SEK' }],
+			inventoryService,
+			purchasePatternService,
+			pmfService,
+			learningEngineService: {} as LearningEngineService,
+			eventType: 'receipt_parsed',
+			source: 'manual',
+			storeLabel: 'ICA',
+			purchasedAt: '2026-06-02'
+		});
+
+		expect(recordReceiptImport).toHaveBeenCalledWith([
+			expect.objectContaining({
+				productName: 'Mjolk',
+				location: 'fridge',
+				unitPrice: '15.90',
+				currency: 'SEK',
+				storeLabel: 'ICA',
+				importSource: 'receipt_scan',
+				matchSource: 'inventory_item',
+				inventoryItemId: 'item-1'
+			})
+		]);
+	});
 
 describe('parseOptionalPriceField', () => {
 	it('strips Swedish currency suffix before parsing', () => {

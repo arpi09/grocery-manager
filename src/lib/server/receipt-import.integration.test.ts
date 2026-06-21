@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+﻿import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { eq } from 'drizzle-orm';
 import type { AppDatabase } from '$lib/infrastructure/db';
 import { productEventTable, receiptPurchaseLineTable } from '$lib/infrastructure/db/schema';
@@ -91,7 +91,7 @@ describe('importReceiptLines integration', () => {
 			userId: 'user-import',
 			role: 'owner',
 			lines: [
-				{ name: 'Arla Mjölk 1L', location: 'fridge', quantity: '1', unit: 'L' },
+				{ name: 'Arla MjÃ¶lk 1L', location: 'fridge', quantity: '1', unit: 'L' },
 				{ name: 'Kavli Creme Fraiche', location: 'fridge', quantity: '2', unit: 'st' }
 			],
 			inventoryService,
@@ -110,7 +110,7 @@ describe('importReceiptLines integration', () => {
 
 		const fridgeItems = await inventoryService.listByLocation(householdId, 'fridge');
 		expect(fridgeItems.map((item) => item.name).sort()).toEqual([
-			'Arla Mjölk 1L',
+			'Arla MjÃ¶lk 1L',
 			'Kavli Creme Fraiche'
 		]);
 
@@ -127,7 +127,7 @@ describe('importReceiptLines integration', () => {
 			householdId,
 			userId: 'user-import',
 			role: 'owner',
-			lines: [{ name: 'Bröd', location: 'cupboard', quantity: '1', unit: 'st' }],
+			lines: [{ name: 'BrÃ¶d', location: 'cupboard', quantity: '1', unit: 'st' }],
 			inventoryService,
 			purchasePatternService,
 			pmfService,
@@ -159,8 +159,8 @@ describe('importReceiptLines integration', () => {
 			userId: 'user-import',
 			role: 'owner',
 			lines: [
-				{ name: 'Mjölk', location: 'fridge', unitPrice: '14.90' },
-				{ name: 'Bröd', location: 'cupboard' }
+				{ name: 'MjÃ¶lk', location: 'fridge', unitPrice: '14.90' },
+				{ name: 'BrÃ¶d', location: 'cupboard' }
 			],
 			inventoryService,
 			purchasePatternService,
@@ -221,5 +221,37 @@ describe('importReceiptLines integration', () => {
 				eventType: 'receipt_parsed'
 			})
 		).rejects.toThrow('No valid receipt lines to import');
+	});
+
+	it('persists purchase line price and store label from receipt import', async () => {
+		const result = await importReceiptLines({
+			householdId,
+			userId: 'user-import',
+			role: 'owner',
+			lines: [{ name: 'Ost', location: 'fridge', unitPrice: '49.90', currency: 'SEK' }],
+			inventoryService,
+			purchasePatternService,
+			pmfService,
+			learningEngineService,
+			eventType: 'receipt_parsed',
+			storeLabel: 'Willys',
+			purchasedAt: '2026-06-15'
+		});
+
+		expect(result.linesWithPrice).toBe(1);
+
+		const purchaseLines = await integrationDb.db
+			.select()
+			.from(receiptPurchaseLineTable)
+			.where(eq(receiptPurchaseLineTable.householdId, householdId));
+		expect(purchaseLines).toHaveLength(1);
+		expect(purchaseLines[0]).toMatchObject({
+			productName: 'Ost',
+			unitPrice: '49.90',
+			currency: 'SEK',
+			storeLabel: 'Willys',
+			importBatchId: result.importBatchId
+		});
+		expect(purchaseLines[0]?.purchasedAt).toBeTruthy();
 	});
 });
