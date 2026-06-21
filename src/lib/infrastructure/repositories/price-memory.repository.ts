@@ -295,9 +295,10 @@ export class DrizzlePriceMemoryRepository implements IPriceMemoryRepository {
 			.where(
 				and(
 					eq(receiptPurchaseLineTable.householdId, householdId),
-					gte(
-						sql`COALESCE(${receiptPurchaseLineTable.purchasedAt}, ${receiptPurchaseLineTable.createdAt})`,
-						since
+					// Include recent imports even when receipt purchasedAt is older than the lookback.
+					or(
+						gte(receiptPurchaseLineTable.createdAt, since),
+						gte(receiptPurchaseLineTable.purchasedAt, since)
 					)
 				)
 			);

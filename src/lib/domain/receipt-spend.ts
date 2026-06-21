@@ -80,7 +80,7 @@ export function buildReceiptSpendReport(
 	since.setUTCDate(since.getUTCDate() - LOOKBACK_DAYS);
 
 	const windowLines = lines.filter((line) => line.purchasedAt >= since);
-	const hasData = windowLines.length > 0;
+	const hasData = lines.length > 0;
 
 	if (!hasData) {
 		return {

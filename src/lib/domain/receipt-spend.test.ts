@@ -138,6 +138,21 @@ describe('buildReceiptSpendReport', () => {
 		const report = buildReceiptSpendReport(lines, referenceDate);
 		expect(report.pricedLineRatio).toBe(0.5);
 	});
+
+	it('treats imported receipt lines as data even when purchasedAt is outside lookback', () => {
+		const lines = [
+			line({
+				purchasedAt: new Date('2025-12-01T10:00:00Z'),
+				lineTotalSek: 250,
+				importBatchId: 'old-receipt'
+			})
+		];
+
+		const report = buildReceiptSpendReport(lines, referenceDate);
+		expect(report.hasData).toBe(true);
+		expect(report.thisMonthSek).toBe(0);
+		expect(report.tripCountThisMonth).toBe(0);
+	});
 });
 
 describe('roundSekForDisplay', () => {
