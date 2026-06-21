@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import LocationColorDot from '$lib/components/atoms/LocationColorDot.svelte';
 	import ProductAvatar from '$lib/components/atoms/ProductAvatar.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
@@ -40,18 +41,20 @@
 	interface Props {
 		items: InventoryItem[];
 		activeTotal: number;
-		location: StorageLocation;
+		location?: StorageLocation;
+		allLocations?: boolean;
 		canWrite?: boolean;
 		canConsume?: boolean;
 		hasInventory?: boolean;
 		onAddClick?: () => void;
-		onItemNavigate?: (itemId: string) => void;
+		onItemNavigate?: (itemId: string, location?: StorageLocation) => void;
 	}
 
 	let {
 		items,
 		activeTotal,
 		location,
+		allLocations = false,
 		canWrite = false,
 		canConsume = false,
 		hasInventory = true,
@@ -60,8 +63,10 @@
 	}: Props = $props();
 
 	const canConsumeItems = $derived(canWrite || canConsume);
-	const inventoryPath = $derived(`/inventory/${location}`);
-	const locationName = $derived(locationLabel(getLocale(), location).toLowerCase());
+	const inventoryPath = $derived(allLocations ? '/inventory/all' : `/inventory/${location}`);
+	const locationName = $derived(
+		location ? locationLabel(getLocale(), location).toLowerCase() : ''
+	);
 
 	const gridDefaults = {
 		filter: 'all' as InventoryExpiryFilter,
@@ -110,7 +115,7 @@
 	$effect(() => {
 		const trimmed = debouncedQuery.trim();
 		const loc = location;
-		if (!browser || trimmed.length < 2) {
+		if (!browser || allLocations || trimmed.length < 2 || !loc) {
 			searchResults = [];
 			searching = false;
 			return;
@@ -131,7 +136,7 @@
 		};
 	});
 
-	const isServerSearch = $derived(debouncedQuery.trim().length >= 2);
+	const isServerSearch = $derived(!allLocations && debouncedQuery.trim().length >= 2);
 	const sourceRows = $derived(isServerSearch ? searchResults : loadedItems);
 
 	const pipeline = $derived(
@@ -147,7 +152,7 @@
 		pageRowIds.some((id) => selectedIds.has(id)) && !selectAllChecked
 	);
 
-	const hasMoreActive = $derived(!isServerSearch && loadedItems.length < activeTotal);
+	const hasMoreActive = $derived(!allLocations && !isServerSearch && loadedItems.length < activeTotal);
 
 	const trimmedQuery = $derived(query.trim());
 	const isSearchEmpty = $derived(trimmedQuery.length > 0 && !searching && pipeline.totalCount === 0);
@@ -160,7 +165,9 @@
 			? t('inventory.noResults')
 			: isFilterEmpty
 				? t('inventory.filterEmptyTitle')
-				: t('inventory.emptyTitle', { location: locationName })
+				: allLocations
+					? t('inventory.allEmptyTitle')
+					: t('inventory.emptyTitle', { location: locationName })
 	);
 
 	const emptyDescription = $derived(
@@ -168,9 +175,13 @@
 			? t('inventory.tryOtherSearch')
 			: isFilterEmpty
 				? t('inventory.filterEmptyDescription')
-				: canWrite
-					? t('inventory.emptyCanWriteShort', { location: locationName })
-					: t('inventory.emptyReadonly', { location: locationName })
+				: allLocations
+					? canWrite
+						? t('inventory.allEmptyCanWriteShort')
+						: t('inventory.allEmptyReadonly')
+					: canWrite
+						? t('inventory.emptyCanWriteShort', { location: locationName })
+						: t('inventory.emptyReadonly', { location: locationName })
 	);
 
 	const locationIcons: Record<StorageLocation, FeatureIconId> = {
@@ -300,13 +311,13 @@
 		return days >= 0 && days <= EXPIRING_SOON_DAYS ? 'warning' : 'default';
 	}
 
-	function navigateToItem(itemId: string) {
-		onItemNavigate?.(itemId);
+	function navigateToItem(itemId: string, itemLocation?: StorageLocation) {
+		onItemNavigate?.(itemId, itemLocation);
 		void goto(`/item/${itemId}/edit`);
 	}
 
 	async function loadMoreActive() {
-		if (!browser || loadingMore || !hasMoreActive) return;
+		if (!browser || allLocations || !location || loadingMore || !hasMoreActive) return;
 		loadingMore = true;
 		try {
 			const nextPage = await fetchInventoryActivePage(location, loadedItems.length);
@@ -333,21 +344,23 @@
 </script>
 
 <div class="pantry-location-grid" data-testid="pantry-location-grid">
-	<div class="location-band">
-		<LocationTab active={location} />
-		{#if canWrite && onAddClick}
-			<div class="add-row">
-				<Button type="button" variant="primary" data-testid="inventory-add-goods" onclick={onAddClick}>
-					{t('inventory.add')}
-				</Button>
-			</div>
-		{/if}
-	</div>
+	{#if !allLocations && location}
+		<div class="location-band">
+			<LocationTab active={location} />
+			{#if canWrite && onAddClick}
+				<div class="add-row">
+					<Button type="button" variant="primary" data-testid="inventory-add-goods" onclick={onAddClick}>
+						{t('inventory.add')}
+					</Button>
+				</div>
+			{/if}
+		</div>
+	{/if}
 
 	{#if hasInventory}
 		<SkaffuDataGrid
-			title={locationLabel(getLocale(), location)}
-			tableAriaLabel={t('inventory.listAria')}
+			title={allLocations ? t('inventory.allTitle') : locationLabel(getLocale(), location!)}
+			tableAriaLabel={allLocations ? t('inventory.allListAria') : t('inventory.listAria')}
 			bind:query
 			filter={gridState.filter}
 			sortKey={gridState.sort}
@@ -374,6 +387,11 @@
 			dataTestId="inventory"
 		>
 			{#snippet tableHead()}
+				{#if allLocations}
+					<Cell class="col-location">
+						<span class="sr-only">{t('inventory.columnLocation')}</span>
+					</Cell>
+				{/if}
 				<Cell class="col-thumb" />
 				<Cell class="col-name">
 					<button
@@ -424,7 +442,7 @@
 					<Row
 						class="pantry-row"
 						data-testid="inventory-row-{item.id}"
-						onclick={() => navigateToItem(item.id)}
+						onclick={() => navigateToItem(item.id, item.location)}
 					>
 						{#if canConsumeItems}
 							<Cell class="col-checkbox">
@@ -437,6 +455,11 @@
 											toggleRowSelection(item.id, event.currentTarget.checked)}
 									/>
 								</label>
+							</Cell>
+						{/if}
+						{#if allLocations}
+							<Cell class="col-location">
+								<LocationColorDot location={item.location} itemId={item.id} />
 							</Cell>
 						{/if}
 						<Cell class="col-thumb">
@@ -503,7 +526,7 @@
 		<EmptyState
 			title={emptyTitle}
 			description={emptyDescription}
-			iconId={locationIcons[location]}
+			iconId={allLocations ? 'cupboard' : locationIcons[location!]}
 		/>
 		{#if canWrite && onAddClick}
 			<div class="empty-add-row">
@@ -594,5 +617,22 @@
 		font-weight: 600;
 		color: var(--color-text-muted);
 		white-space: nowrap;
+	}
+
+	:global(.col-location) {
+		width: 1.5rem;
+		padding-inline: var(--space-xs) !important;
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 </style>

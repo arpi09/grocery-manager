@@ -14,11 +14,7 @@
 
 	let { shelf }: Props = $props();
 
-	const useSoonHref = $derived.by(() => {
-		const primaryZone =
-			shelf.zones.find((zone) => zone.tiles.some((tile) => tile.warn))?.location ?? 'fridge';
-		return `/inventory/${primaryZone}?filter=expiring`;
-	});
+	const useSoonHref = '/inventory/all?filter=expiring';
 
 	function handleUseSoonTap() {
 		trackPantryUseSoonTapped(shelf.useSoon.length);

@@ -1077,6 +1077,12 @@
 		"filterEmptyTitle": "Inga varor matchar filtret",
 		"filterEmptyDescription": "Prova ett annat filter eller visa alla varor.",
 		"filterClear": "Visa alla varor",
+		"allTitle": "Alla platser",
+		"allListAria": "Alla varor i lagret",
+		"allEmptyTitle": "Tomt i lagret",
+		"allEmptyCanWriteShort": "Lägg till din första vara för att komma igång.",
+		"allEmptyReadonly": "Det finns inga varor i lagret ännu.",
+		"columnLocation": "Plats",
 		"addSheet": {
 			"title": "Lägg till",
 			"receipt": "Kvitto — hel handling",

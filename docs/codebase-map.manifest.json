@@ -44,6 +44,7 @@
 			"routes": [
 				"/inventory",
 				"/inventory/[location]",
+				"/inventory/all",
 				"/inventory/merge",
 				"/inventory/synk",
 				"/item/new",
@@ -63,6 +64,7 @@
 			"paths": [
 				"src/routes/inventory/+page.svelte",
 				"src/routes/inventory/[location]/+page.svelte",
+				"src/routes/inventory/all/+page.svelte",
 				"src/lib/components/organisms/PantryV2Page.svelte",
 				"src/lib/components/organisms/PantryV2ShelfView.svelte",
 				"src/lib/components/organisms/PantryLocationDataGrid.svelte",

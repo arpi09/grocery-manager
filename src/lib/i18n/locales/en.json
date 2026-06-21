@@ -1133,6 +1133,12 @@
 		"filterEmptyTitle": "No items match this filter",
 		"filterEmptyDescription": "Try another filter or show all items.",
 		"filterClear": "Show all items",
+		"allTitle": "All locations",
+		"allListAria": "All items in inventory",
+		"allEmptyTitle": "Inventory is empty",
+		"allEmptyCanWriteShort": "Add your first item to get started.",
+		"allEmptyReadonly": "There are no items in inventory yet.",
+		"columnLocation": "Location",
 		"missingExpiryDate": "No date",
 		"addSheet": {
 			"title": "Add",
