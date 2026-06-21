@@ -2595,7 +2595,7 @@
 		"addMissingBtn": "Add missing to shopping list",
 		"addMissingBtnShort": "Add to list ({count})",
 		"addMissingBtnCount": "Add {count} missing to shopping list",
-		"addAllMissingBtn": "Shop missing ({count})",
+		"addAllMissingBtn": "Buy missing items ({count})",
 		"addAllMissingBtnTitle": "Adds all missing ingredients to the shopping list",
 		"addMissingSuccess": "{count} {count, plural, one {item added} other {items added}} to the shopping list.",
 		"addMissingPartial": "Added {added}, {skipped} were already on the list.",

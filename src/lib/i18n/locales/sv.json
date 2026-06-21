@@ -2510,7 +2510,7 @@
 		"addMissingBtn": "Lägg saknade på inköpslista",
 		"addMissingBtnShort": "Lägg på lista ({count})",
 		"addMissingBtnCount": "Lägg {count} saknade på inköpslista",
-		"addAllMissingBtn": "Köp saknade ({count})",
+		"addAllMissingBtn": "Köp saknade varor ({count})",
 		"addAllMissingBtnTitle": "Lägger alla saknade ingredienser på inköpslistan",
 		"addMissingSuccess": "{count} {count, plural, one {vara lades} other {varor lades}} till på inköpslistan.",
 		"addMissingPartial": "{added} lades till, {skipped} fanns redan på listan.",
