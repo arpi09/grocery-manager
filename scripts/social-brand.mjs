@@ -1,6 +1,6 @@
 /** Shared brand tokens for social asset generators (LinkedIn, Facebook). */
 
-export const PRIMARY = '#3d6b4f';
+export const PRIMARY = '#2c4a3e';
 
 export const COLORS = {
 	bgStart: '#f7f5f0',
