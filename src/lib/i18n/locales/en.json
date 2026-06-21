@@ -1735,6 +1735,20 @@
 		"expansionLead": "You will get more insights as you fill the pantry. Pro and full statistics arrive when checkout opens — we will tell you before anything is charged.",
 		"rapportLinkTitle": "Skaffu report {month}",
 		"rapportLinkLead": "Anonymised monthly stats from Swedish Skaffu households — see what others save."
+,
+		"insights": {
+			"sectionTitle": "Fun facts from your pantry",
+			"sectionLead": "Pulled from receipts, pantry, and how you use food.",
+			"empty": "Import a receipt or add items — insights appear as data builds up.",
+			"topProduct": { "title": "Most bought", "detail": "Purchased {count} times recently" },
+			"shoppingRhythm": { "title": "Shopping rhythm", "value": "Every {days} days", "detail": "Based on {count} receipts" },
+			"favoriteStore": { "title": "Favourite store", "detail": "{percent}% of tracked spending" },
+			"expiringSoon": { "title": "Use soon", "value": "{count} items", "detail": "Expiring within the next few days" },
+			"zeroWaste": { "title": "Zero-waste streak", "value": "{weeks} weeks", "detail": "No food marked as wasted" },
+			"plannedMeals": { "title": "Meals planned", "value": "{count} this week", "detail": "On your weekly meal plan" },
+			"savedValue": { "title": "Food saved", "value": "about {sek} kr", "detail": "From {count} items used in time" },
+			"pantryVariety": { "title": "Pantry variety", "value": "{count} products", "detail": "Different items in stock right now" }
+		}
 	},
 	"wrapped": {
 		"pageTitle": "Your pantry wrapped",
