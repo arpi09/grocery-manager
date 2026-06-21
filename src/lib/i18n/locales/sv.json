@@ -1643,7 +1643,9 @@
 		"topStoresTitle": "Topp-butiker",
 		"tripCount": "{count} kvitton denna månad",
 		"priceHistoryLink": "Se prishistorik",
-		"trendSekAria": "{sek} kronor"
+		"trendSekAria": "{sek} kronor",
+		"rapportLinkTitle": "Skaffurapporten {month}",
+		"rapportLinkLead": "Anonymiserad månadsstatistik från svenska Skaffu-hushåll — se vad andra sparar."
 	},
 	"wrapped": {
 		"pageTitle": "Er kylskåps-årstid",
@@ -2901,10 +2903,6 @@
 		"inboundEmailLead": "{count} varor går ut snart — öppna veckoförslagen och lägg dem i plan och inköpslista.",
 		"plannedThisWeek": "{count} måltider redan planerade denna vecka",
 		"readonlyHint": "Ni har läsbehörighet — be en administratör planera veckan.",
-		"emptyPantryTitle": "Bygg lagret först",
-		"emptyPantryLead": "Veckoförslag bygger på det ni har hemma — skanna kvitto eller lägg till varor för att komma igång.",
-		"emptyPantryCta": "Skanna kvitto",
-		"preGenerateHint": "Upp till fem middagar utifrån lagret och varor som går ut snart.",
 		"savingsFootnote": "Hittills sparat ca {sek} kr · {kg} kg genom att använda maten i tid."
 	},
 	"skafferapport": {

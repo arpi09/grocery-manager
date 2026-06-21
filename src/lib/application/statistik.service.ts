@@ -31,6 +31,11 @@ export interface ImpactStats {
 	zeroWasteWeeks: number | null;
 }
 
+export interface StatistikRapportLink {
+	month: string;
+	href: string;
+}
+
 export interface StatistikDashboard {
 	analytics: InventoryAnalytics;
 	addedTrend: WeeklyBar[];

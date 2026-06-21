@@ -1726,7 +1726,9 @@
 		"trendSekAria": "{sek} kronor",
 		"expansionBadge": "Expanding",
 		"expansionTitle": "More statistics coming",
-		"expansionLead": "You will get more insights as you fill the pantry. Pro and full statistics arrive when checkout opens — we will tell you before anything is charged."
+		"expansionLead": "You will get more insights as you fill the pantry. Pro and full statistics arrive when checkout opens — we will tell you before anything is charged.",
+		"rapportLinkTitle": "Skaffu report {month}",
+		"rapportLinkLead": "Anonymised monthly stats from Swedish Skaffu households — see what others save."
 	},
 	"wrapped": {
 		"pageTitle": "Your pantry wrapped",

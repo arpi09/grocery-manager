@@ -14,7 +14,7 @@
 
 	import { EMPTY_RECEIPT_SPEND_REPORT } from '$lib/domain/receipt-spend';
 
-	import type { StatistikDashboard } from '$lib/application/statistik.service';
+	import type { StatistikDashboard, StatistikRapportLink } from '$lib/application/statistik.service';
 
 	import { ZERO_WASTE_STREAK_CELEBRATION, type MilestoneState } from '$lib/domain/gamification';
 
