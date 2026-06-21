@@ -24,7 +24,7 @@
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import {
@@ -295,6 +295,68 @@
 		}));
 	}
 
+	function clearReceiptLineFormFields(formData: FormData, index: number) {
+		const key = String(index);
+		formData.delete(`name_${key}`);
+		formData.delete(`quantity_${key}`);
+		formData.delete(`unit_${key}`);
+		formData.delete(`unitPrice_${key}`);
+		formData.delete(`lineTotal_${key}`);
+		formData.delete(`currency_${key}`);
+		formData.delete(`location_${key}`);
+		formData.delete(`expiresOn_${key}`);
+		formData.delete(`notes_${key}`);
+		formData.delete(`predictedExpiresOn_${key}`);
+		formData.delete(`predictedTypicalDays_${key}`);
+		formData.delete(`predictedModelVersion_${key}`);
+		formData.delete(`predictedExpiresOnSource_${key}`);
+		formData.delete(`predictedLocation_${key}`);
+		formData.delete(`predictedLocationModelVersion_${key}`);
+		formData.delete(`merge_${key}`);
+	}
+
+	function syncReceiptBulkFormData(formData: FormData) {
+		formData.delete('selected');
+		for (let index = 0; index < lines.length; index++) {
+			clearReceiptLineFormFields(formData, index);
+			if (!selected[index]) continue;
+
+			const line = lines[index];
+			const key = String(index);
+			formData.append('selected', key);
+			formData.set(`name_${key}`, line.name);
+			formData.set(`quantity_${key}`, line.quantity ?? '1');
+			formData.set(`unit_${key}`, line.unit ?? '');
+			formData.set(`unitPrice_${key}`, line.unitPrice ?? '');
+			formData.set(`lineTotal_${key}`, line.lineTotal ?? '');
+			formData.set(`currency_${key}`, line.currency ?? '');
+			formData.set(`location_${key}`, lineLocations[index] ?? line.location);
+
+			const expiresOn = lineExpiresOn[index];
+			if (expiresOn) {
+				formData.set(`expiresOn_${key}`, expiresOn);
+			}
+
+			const shelfPrediction = shelfLifePredictions[index];
+			if (shelfPrediction) {
+				formData.set(`predictedExpiresOn_${key}`, shelfPrediction.expiresOn);
+				formData.set(`predictedTypicalDays_${key}`, String(shelfPrediction.typicalDays));
+				formData.set(`predictedModelVersion_${key}`, shelfPrediction.modelVersion);
+				formData.set(`predictedExpiresOnSource_${key}`, shelfPrediction.expiresOnSource);
+			}
+
+			const locationPrediction = locationPredictions[index];
+			if (locationPrediction) {
+				formData.set(`predictedLocation_${key}`, locationPrediction.location);
+				formData.set(`predictedLocationModelVersion_${key}`, locationPrediction.modelVersion);
+			}
+
+			if (mergeSelected[index] && mergeCandidates[index]) {
+				formData.set(`merge_${key}`, mergeCandidates[index]!.id);
+			}
+		}
+	}
+
 	function formatLineAmount(line: ReceiptLine): string {
 		if (!line.quantity && !line.unit) return '';
 		if (line.quantity && line.unit) return `${line.quantity} ${line.unit}`;
@@ -348,9 +410,10 @@
 		});
 	}
 
-	function handleQuickConfirm(event: MouseEvent) {
+	async function handleQuickConfirm(event: MouseEvent) {
 		quickConfirmUsed = true;
 		toggleAll(true);
+		await tick();
 		const form = (event.currentTarget as HTMLButtonElement).closest('form');
 		form?.requestSubmit();
 	}
@@ -513,7 +576,8 @@
 							);
 							trackReviewCompleted();
 							onItemSaved?.();
-						}
+						},
+						syncReceiptBulkFormData
 					)
 				: bindSubmittingWithRedirect(
 						(v) => (bulkSubmitting = v),
@@ -527,7 +591,8 @@
 								importSource
 							);
 							recordReceiptActivation(page.data.user?.id);
-						}
+						},
+						syncReceiptBulkFormData
 					)}
 		>
 			<input type="hidden" name="bulkFlow" value="receipt" />

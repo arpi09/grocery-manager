@@ -85,4 +85,37 @@ test.describe('Receipt flow', () => {
 		await page.getByTestId('receipt-success-cta-primary').click();
 		await expect(page).toHaveURL(/\/inventory\/fridge/, { timeout: 10_000 });
 	});
+
+	test('JPEG quick confirm saves receipt import @deploy-critical', async ({ page }) => {
+		await mockReceiptParse(page, {
+			body: {
+				lines: [
+					{
+						name: 'E2E Kamera vara',
+						quantity: '1',
+						unit: '',
+						location: 'fridge',
+						unitPrice: '29.90',
+						lineTotal: '29.90',
+						currency: 'SEK'
+					}
+				],
+				storeLabel: 'ICA',
+				purchasedAt: '2026-06-20T12:00:00.000Z'
+			}
+		});
+
+		await loginAsAdmin(page);
+		await page.goto('/scan/kvitto?from=/hem');
+		await dismissOnboardingModalIfOpen(page);
+
+		await uploadReceiptFile(page, FIXTURE_JPEG);
+
+		await expect(page.getByTestId('receipt-line-0')).toBeVisible({ timeout: 15_000 });
+		await dismissOnboardingModalIfOpen(page);
+		await page.getByTestId('receipt-quick-confirm').click();
+
+		await expect(page).toHaveURL(/\/hem(\?|$)/, { timeout: 15_000 });
+		await expect(page.getByTestId('receipt-import-success')).toBeVisible({ timeout: 10_000 });
+	});
 });

@@ -28,8 +28,9 @@ import {
 	readLineLocationPrediction,
 	recordLineLocationFeedback
 } from '$lib/server/location-feedback-recording';
-import { error, fail, redirect } from '@sveltejs/kit';
+import { error, fail, isHttpError, isRedirect, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import { InventoryNotFoundError } from '$lib/application/inventory.service';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
 	const canWrite = locals.householdRole ? canEditInventory(locals.householdRole) : false;
@@ -177,6 +178,122 @@ async function resolveLineLocationPrediction(
 	return predictionForm;
 }
 
+async function createBulkInventoryItem(
+	event: import('@sveltejs/kit').RequestEvent,
+	input: {
+		name: string;
+		location: StorageLocation;
+		quantity: string;
+		unit: string | null;
+		expiresOn: string | null;
+		expiresOnSource: ExpiresOnSource | null;
+		notes: string | null;
+		mergeIntoId: string | null;
+	}
+) {
+	const createPayload = {
+		name: input.name,
+		location: input.location,
+		quantity: input.quantity,
+		unit: input.unit,
+		expiresOn: input.expiresOn,
+		expiresOnSource: input.expiresOnSource,
+		notes: input.notes,
+		inferExpiry: false as const,
+		mergeIntoId: input.mergeIntoId
+	};
+
+	try {
+		return await event.locals.inventoryService.createItem(
+			event.locals.householdId!,
+			event.locals.user!.id,
+			createPayload,
+			event.locals.householdRole!
+		);
+	} catch (err) {
+		if (input.mergeIntoId && err instanceof InventoryNotFoundError) {
+			console.warn('[bulkCreate] merge target missing, creating new item', {
+				householdId: event.locals.householdId,
+				mergeIntoId: input.mergeIntoId,
+				name: input.name
+			});
+			return event.locals.inventoryService.createItem(
+				event.locals.householdId!,
+				event.locals.user!.id,
+				{ ...createPayload, mergeIntoId: null },
+				event.locals.householdRole!
+			);
+		}
+		throw err;
+	}
+}
+
+async function recordBulkLineFeedback(
+	event: import('@sveltejs/kit').RequestEvent,
+	params: {
+		name: string;
+		location: StorageLocation;
+		index: number;
+		formData: FormData;
+		purchasedAt: string | null;
+		importBatchId: string | null;
+		storeLabel: string | null;
+		expiry: Awaited<ReturnType<typeof resolveLineExpiry>>;
+		quantityRaw: FormDataEntryValue | null;
+		unitRaw: FormDataEntryValue | null;
+		unitPriceRaw: FormDataEntryValue | null;
+	}
+): Promise<void> {
+	try {
+		await recordLineShelfLifeFeedback({
+			learningEngine: event.locals.learningEngineService,
+			householdId: event.locals.householdId!,
+			userId: event.locals.user!.id,
+			productName: params.name,
+			location: params.location,
+			purchasedAt: params.purchasedAt,
+			importBatchId: params.importBatchId,
+			storeLabel: params.storeLabel,
+			feedbackSource: 'receipt_scan',
+			prediction: params.expiry.predictionForm,
+			actualExpiresOn: params.expiry.expiresOn,
+			userProvidedExpiresOn: params.expiry.userProvidedExpiresOn,
+			quantity: typeof params.quantityRaw === 'string' ? params.quantityRaw : null,
+			unit: typeof params.unitRaw === 'string' ? params.unitRaw : null,
+			unitPrice: typeof params.unitPriceRaw === 'string' ? params.unitPriceRaw : null
+		});
+	} catch (feedbackError) {
+		console.warn('[bulkCreate] shelf-life feedback skipped', {
+			householdId: event.locals.householdId,
+			name: params.name,
+			message: feedbackError instanceof Error ? feedbackError.message : String(feedbackError)
+		});
+	}
+
+	try {
+		const locationPrediction = await resolveLineLocationPrediction(event, {
+			name: params.name,
+			index: params.index,
+			formData: params.formData
+		});
+		await recordLineLocationFeedback({
+			learningEngine: event.locals.learningEngineService,
+			householdId: event.locals.householdId!,
+			userId: event.locals.user!.id,
+			productName: params.name,
+			storeLabel: params.storeLabel,
+			prediction: locationPrediction,
+			actualLocation: params.location
+		});
+	} catch (feedbackError) {
+		console.warn('[bulkCreate] location feedback skipped', {
+			householdId: event.locals.householdId,
+			name: params.name,
+			message: feedbackError instanceof Error ? feedbackError.message : String(feedbackError)
+		});
+	}
+}
+
 async function bulkCreateFromForm(
 	event: import('@sveltejs/kit').RequestEvent,
 	formData: FormData,
@@ -244,22 +361,16 @@ async function bulkCreateFromForm(
 		const notes =
 			typeof notesRaw === 'string' && notesRaw.trim() ? notesRaw.trim() : null;
 
-		const createdItem = await event.locals.inventoryService.createItem(
-			event.locals.householdId!,
-			event.locals.user!.id,
-			{
-				name: name.trim(),
-				location,
-				quantity,
-				unit,
-				expiresOn: expiry.expiresOn,
-				expiresOnSource: expiry.expiresOnSource,
-				notes,
-				inferExpiry: false,
-				mergeIntoId
-			},
-			event.locals.householdRole!
-		);
+		const createdItem = await createBulkInventoryItem(event, {
+			name: name.trim(),
+			location,
+			quantity,
+			unit,
+			expiresOn: expiry.expiresOn,
+			expiresOnSource: expiry.expiresOnSource,
+			notes,
+			mergeIntoId
+		});
 
 		const unitPriceRaw = formData.get(`unitPrice_${index}`);
 		const lineTotalRaw = formData.get(`lineTotal_${index}`);
@@ -268,37 +379,18 @@ async function bulkCreateFromForm(
 			linesWithPrice += 1;
 		}
 
-		await recordLineShelfLifeFeedback({
-			learningEngine: event.locals.learningEngineService,
-			householdId: event.locals.householdId!,
-			userId: event.locals.user!.id,
-			productName: name.trim(),
+		await recordBulkLineFeedback(event, {
+			name: name.trim(),
 			location,
+			index,
+			formData,
 			purchasedAt,
 			importBatchId,
 			storeLabel,
-			feedbackSource: 'receipt_scan',
-			prediction: expiry.predictionForm,
-			actualExpiresOn: expiry.expiresOn,
-			userProvidedExpiresOn: expiry.userProvidedExpiresOn,
-			quantity: typeof quantityRaw === 'string' ? quantityRaw : null,
-			unit: typeof unitRaw === 'string' ? unitRaw : null,
-			unitPrice: typeof unitPriceRaw === 'string' ? unitPriceRaw : null
-		});
-
-		const locationPrediction = await resolveLineLocationPrediction(event, {
-			name: name.trim(),
-			index,
-			formData
-		});
-		await recordLineLocationFeedback({
-			learningEngine: event.locals.learningEngineService,
-			householdId: event.locals.householdId!,
-			userId: event.locals.user!.id,
-			productName: name.trim(),
-			storeLabel,
-			prediction: locationPrediction,
-			actualLocation: location
+			expiry,
+			quantityRaw,
+			unitRaw,
+			unitPriceRaw
 		});
 
 		if (recordPurchases && importBatchId) {
@@ -449,10 +541,25 @@ export const actions: Actions = {
 	bulkCreate: async (event) => {
 		const formData = await event.request.formData();
 		const bulkFlow = formData.get('bulkFlow');
-		if (bulkFlow === 'photo') {
-			await bulkCreateFromForm(event, formData, 'photo_round_parsed', false);
-			return;
+		const selectedCount = formData.getAll('selected').length;
+		try {
+			if (bulkFlow === 'photo') {
+				await bulkCreateFromForm(event, formData, 'photo_round_parsed', false);
+				return;
+			}
+			await bulkCreateFromForm(event, formData, 'receipt_parsed', true);
+		} catch (err) {
+			if (isRedirect(err) || (isHttpError(err) && err.status < 500)) {
+				throw err;
+			}
+			console.error('[bulkCreate] unhandled error', {
+				path: event.url.pathname,
+				bulkFlow: typeof bulkFlow === 'string' ? bulkFlow : null,
+				householdId: event.locals.householdId,
+				selectedCount,
+				message: err instanceof Error ? err.message : String(err)
+			});
+			throw err;
 		}
-		await bulkCreateFromForm(event, formData, 'receipt_parsed', true);
 	}
 };

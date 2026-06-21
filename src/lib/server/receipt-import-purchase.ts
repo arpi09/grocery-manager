@@ -28,6 +28,18 @@ export function parseOptionalPriceField(value: unknown): string | null {
 	return Number.isFinite(parsed) ? parsed.toFixed(2) : null;
 }
 
+/** Coerce receipt quantity strings to a Postgres-safe numeric string, or null. */
+export function parseOptionalQuantity(value: unknown): string | null {
+	if (typeof value === 'number' && Number.isFinite(value)) {
+		return value.toFixed(2).replace(/\.?0+$/, '') || '0';
+	}
+	if (typeof value !== 'string') return null;
+	const normalized = value.trim().replace(',', '.');
+	if (!normalized) return null;
+	const parsed = Number(normalized);
+	return Number.isFinite(parsed) ? parsed.toFixed(2).replace(/\.?0+$/, '') || '0' : null;
+}
+
 export function receiptLineToPurchaseRecord(input: {
 	householdId: string;
 	userId: string;
@@ -56,7 +68,7 @@ export function receiptLineToPurchaseRecord(input: {
 		importBatchId: input.importBatchId,
 		productName,
 		location: input.location,
-		quantity: input.quantity,
+		quantity: parseOptionalQuantity(input.quantity),
 		unit: input.unit,
 		unitPrice: parseOptionalPriceField(input.line.unitPrice),
 		currency: input.line.currency?.trim().toUpperCase() || 'SEK',

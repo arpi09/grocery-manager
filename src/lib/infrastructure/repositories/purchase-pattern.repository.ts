@@ -7,6 +7,10 @@ import {
 	type RecordReceiptPurchaseLineInput,
 	type ReceiptPurchaseLineRecord
 } from '$lib/domain/purchase-pattern';
+import {
+	parseOptionalPriceField,
+	parseOptionalQuantity
+} from '$lib/server/receipt-import-purchase';
 import { db, type AppDatabase } from '$lib/infrastructure/db';
 import {
 	householdPurchaseConceptTable,
@@ -76,11 +80,11 @@ export class DrizzlePurchasePatternRepository implements IPurchasePatternReposit
 						normalizedKey,
 						barcode: line.barcode ?? null,
 						location: line.location,
-						quantity: line.quantity ?? null,
+						quantity: parseOptionalQuantity(line.quantity),
 						unit: line.unit ?? null,
-						unitPrice: line.unitPrice ?? null,
+						unitPrice: parseOptionalPriceField(line.unitPrice),
 						currency: line.currency ?? 'SEK',
-						lineTotal: line.lineTotal ?? null,
+						lineTotal: parseOptionalPriceField(line.lineTotal),
 						storeLabel: line.storeLabel ?? null,
 						purchasedAt: line.purchasedAt ?? null,
 						inventoryItemId: line.inventoryItemId ?? null,
