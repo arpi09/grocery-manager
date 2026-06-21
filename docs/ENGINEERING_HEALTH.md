@@ -63,6 +63,22 @@ Cloud agents (paused): [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md) — use co
 
 ---
 
+## Batch 3 — owner field-test driven
+
+After Batch 1–2 deploy, pick **1–2 friction points** from your own use (not roadmap):
+
+| If you notice… | Track |
+|----------------|-------|
+| Inköp/lista friction | Shopping V2 polish, checkoff-bridge |
+| Kvitto/PDF issues | Receipt fixtures + import UX |
+| Onboarding drop-off | Startguide/activation steps |
+| Hem feels noisy | Home UX v2 micro-polish (not redesign) |
+| Brain/memory unclear | Memory Explorer + expiry copy |
+
+No feature code in this section — update when owner testing surfaces the next wedge.
+
+---
+
 ## Feature flags registry
 
 Central readers: [`src/lib/server/feature-flags.ts`](../src/lib/server/feature-flags.ts). Domain modules (`*-flag.ts`) re-export for backward-compatible imports. Prod vs yaml values: [CURRENT_REALITY.md](./CURRENT_REALITY.md#feature-flags-prod-vs-master-yaml).
