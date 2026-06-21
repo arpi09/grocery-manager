@@ -56,6 +56,11 @@
 						monthLabel={data.monthLabel}
 						previousMonth={data.previousMonth}
 						nextMonth={data.nextMonth}
+						focusedWeekStart={data.focusedWeekStart}
+						previousWeek={data.previousWeek}
+						nextWeek={data.nextWeek}
+						weekRangeLabel={data.weekRangeLabel}
+						todayWeekStart={data.todayWeekStart}
 						{todayIso}
 						{ideasById}
 						{canEdit}

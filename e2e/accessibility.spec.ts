@@ -17,7 +17,8 @@ const P0_ROUTES = [
 	{ path: '/inventory/fridge', auth: true, name: 'Inventory fridge' },
 	{ path: '/inventory/synk', auth: true, name: 'Inventory synk' },
 	{ path: '/scan', auth: true, name: 'Scan hub' },
-	{ path: '/inkop', auth: true, name: 'Shopping' }
+	{ path: '/inkop', auth: true, name: 'Shopping' },
+	{ path: '/planer', auth: true, name: 'Planer' }
 ] as const;
 
 test.describe('Accessibility — P0 routes (WCAG 2.2 AA)', () => {

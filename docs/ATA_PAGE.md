@@ -51,8 +51,10 @@ flowchart LR
 
 - Öppen by default på `/planer`
 - Växla **Vecka / Månad** i kalenderhuvudet
-- Veckovy: 7 dagar med större måltidschips
-- Deep link: `#ata-calendar`
+- Veckovy: 7 dagar med större måltidschips (desktop) eller vertikal daglista (mobil)
+- Veckonavigation: synliga prev/next, svep vänster/höger, `aria-live` veckointervall
+- Deep links: `#ata-calendar`, `?week=YYYY-MM-DD` (måndag normaliseras), `?month=YYYY-MM`
+- Måltidschips: **Förslag** (idé) vs **Egen** (manuell) — inte bara färg
 
 ## Telemetry
 

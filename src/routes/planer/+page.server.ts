@@ -1,4 +1,11 @@
 import { fail, redirect } from '@sveltejs/kit';
+import {
+	formatWeekRangeLabel,
+	parseWeekParam,
+	shiftWeek,
+	startOfWeekMonday,
+	toIsoDate
+} from '$lib/domain/calendar-display';
 import { MEAL_PLAN_IDEAS_MAX } from '$lib/domain/meal-plan-display';
 import { appendActionToast } from '$lib/utils/action-toast';
 import {
@@ -21,13 +28,6 @@ function parseMonthParam(month: string | null): Date {
 		return new Date();
 	}
 	return new Date(year, monthIndex, 1);
-}
-
-function toIsoDate(date: Date): string {
-	const y = date.getFullYear();
-	const m = `${date.getMonth() + 1}`.padStart(2, '0');
-	const d = `${date.getDate()}`.padStart(2, '0');
-	return `${y}-${m}-${d}`;
 }
 
 function toMonthKey(date: Date): string {
@@ -53,11 +53,15 @@ function endOfCalendarGrid(monthEnd: Date): Date {
 }
 
 export const load: PageServerLoad = async ({ url, locals }) => {
-	const baseMonth = parseMonthParam(url.searchParams.get('month'));
+	const todayIso = toIsoDate(new Date());
+	const focusedWeekStart = parseWeekParam(url.searchParams.get('week'), todayIso);
+	const baseMonth = parseMonthParam(url.searchParams.get('month') ?? focusedWeekStart.slice(0, 7));
 	const monthStart = new Date(baseMonth.getFullYear(), baseMonth.getMonth(), 1);
 	const monthEnd = new Date(baseMonth.getFullYear(), baseMonth.getMonth() + 1, 0);
-	const gridStart = startOfCalendarGrid(monthStart);
-	const gridEnd = endOfCalendarGrid(monthEnd);
+	let gridStart = startOfCalendarGrid(monthStart);
+	let gridEnd = endOfCalendarGrid(monthEnd);
+	gridStart = shiftDays(gridStart, -7);
+	gridEnd = shiftDays(gridEnd, 7);
 
 	const userId = locals.user!.id;
 	const householdId = locals.householdId!;
@@ -107,6 +111,11 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		monthLabel: monthStart.toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' }),
 		previousMonth,
 		nextMonth,
+		focusedWeekStart,
+		previousWeek: shiftWeek(focusedWeekStart, -1),
+		nextWeek: shiftWeek(focusedWeekStart, 1),
+		weekRangeLabel: formatWeekRangeLabel(focusedWeekStart),
+		todayWeekStart: startOfWeekMonday(todayIso),
 		weeks,
 		expiringSoon: dashboard.expiringSoon,
 		plannedMealCount: meals.length,

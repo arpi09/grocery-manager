@@ -3,8 +3,12 @@ import {
 	CALENDAR_VISIBLE_MEALS,
 	formatCalendarDayLabel,
 	findWeekForDate,
+	formatWeekRangeLabel,
 	mealSourceVariant,
-	splitVisibleMeals
+	parseWeekParam,
+	shiftWeek,
+	splitVisibleMeals,
+	startOfWeekMonday
 } from './calendar-display';
 
 describe('calendar-display', () => {
@@ -29,6 +33,28 @@ describe('calendar-display', () => {
 	it('formats day labels in Swedish', () => {
 		expect(formatCalendarDayLabel('2026-05-29')).toMatch(/29/);
 		expect(formatCalendarDayLabel('2026-05-29')).toMatch(/maj/i);
+	});
+
+	it('normalizes to Monday for startOfWeekMonday', () => {
+		expect(startOfWeekMonday('2026-06-04')).toBe('2026-06-01');
+		expect(startOfWeekMonday('2026-06-01')).toBe('2026-06-01');
+		expect(startOfWeekMonday('2026-06-07')).toBe('2026-06-01');
+	});
+
+	it('shifts by whole weeks', () => {
+		expect(shiftWeek('2026-06-01', 1)).toBe('2026-06-08');
+		expect(shiftWeek('2026-06-01', -1)).toBe('2026-05-25');
+	});
+
+	it('parses week param with fallback', () => {
+		expect(parseWeekParam('2026-06-04', '2026-01-01')).toBe('2026-06-01');
+		expect(parseWeekParam(null, '2026-06-04')).toBe('2026-06-01');
+		expect(parseWeekParam('invalid', '2026-06-04')).toBe('2026-06-01');
+	});
+
+	it('formats week range labels in Swedish', () => {
+		expect(formatWeekRangeLabel('2026-06-01')).toMatch(/1.*7.*juni.*2026/i);
+		expect(formatWeekRangeLabel('2026-05-26')).toMatch(/26.*1.*juni.*2026/i);
 	});
 
 	it('finds the week containing a date', () => {

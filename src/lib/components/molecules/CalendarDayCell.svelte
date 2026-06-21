@@ -47,6 +47,12 @@
 	function mealHasRecipe(meal: PlannedMeal): boolean {
 		return Boolean(meal.ideaId && ideasById[meal.ideaId]);
 	}
+
+	function mealSourceLabel(meal: PlannedMeal): string {
+		return mealSourceVariant(meal.ideaId) === 'idea'
+			? t('planer.mealSourceIdea')
+			: t('planer.mealSourceManual');
+	}
 </script>
 
 <div
@@ -73,7 +79,9 @@
 				class:meal-chip-recipe={mealHasRecipe(meal)}
 				onclick={(event) => openRecipe(meal, event)}
 				title={meal.title}
+				aria-label="{mealSourceLabel(meal)}: {meal.title}"
 			>
+				<span class="meal-source-label">{mealSourceLabel(meal)}</span>
 				<span class="meal-chip-text">{meal.title}</span>
 				{#if mealHasRecipe(meal)}
 					<span class="meal-chip-action" aria-hidden="true">→</span>
@@ -161,6 +169,14 @@
 		background: var(--color-surface-muted);
 	}
 
+	.day-head:focus-visible,
+	.show-all:focus-visible,
+	.add-hint:focus-visible,
+	.meal-chip:focus-visible {
+		outline: var(--focus-ring-width) solid var(--focus-ring-color);
+		outline-offset: var(--focus-ring-offset);
+	}
+
 	.day-number {
 		font-weight: 700;
 		font-size: 0.95rem;
@@ -189,6 +205,7 @@
 		gap: 0.2rem;
 		min-width: 0;
 		flex: 1;
+		min-height: 0;
 	}
 
 	.meal-chip {
@@ -225,6 +242,21 @@
 		border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
 	}
 
+	.meal-source-label {
+		flex-shrink: 0;
+		font-size: 0.58rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+		color: var(--color-text-muted);
+	}
+
+	@media (min-width: 768px) {
+		.meal-source-label {
+			font-size: 0.62rem;
+		}
+	}
+
 	.meal-chip-text {
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -241,7 +273,8 @@
 
 	.show-all,
 	.add-hint {
-		min-height: 2.75rem;
+		margin-top: auto;
+		min-height: var(--touch-target-min);
 		padding: 0.35rem 0.45rem;
 		border: 1px dashed color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
 		border-radius: var(--radius-sm);

@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { t } from '$lib/i18n';
 	import { trackAtaWeekViewToggled } from '$lib/client/ata-telemetry';
 	import CalendarDayCell from '$lib/components/molecules/CalendarDayCell.svelte';
 	import CalendarDaySheet from '$lib/components/molecules/CalendarDaySheet.svelte';
+	import CalendarWeekDayList from '$lib/components/molecules/CalendarWeekDayList.svelte';
 	import {
 		CALENDAR_VISIBLE_MEALS,
 		CALENDAR_WEEKDAY_LABELS,
@@ -25,6 +27,11 @@
 		monthLabel: string;
 		previousMonth: string;
 		nextMonth: string;
+		focusedWeekStart: string;
+		previousWeek: string;
+		nextWeek: string;
+		weekRangeLabel: string;
+		todayWeekStart: string;
 		todayIso: string;
 		ideasById?: Record<string, RecipeIdea>;
 		canEdit?: boolean;
@@ -36,6 +43,11 @@
 		monthLabel,
 		previousMonth,
 		nextMonth,
+		focusedWeekStart,
+		previousWeek,
+		nextWeek,
+		weekRangeLabel,
+		todayWeekStart,
 		todayIso,
 		ideasById = {},
 		canEdit = false
@@ -65,12 +77,22 @@
 				: CALENDAR_VISIBLE_MEALS.mobile
 	);
 
-	const displayWeeks = $derived(
-		viewMode === 'month' ? weeks : [findWeekForDate(weeks, todayIso)]
-	);
+	const displayWeek = $derived(findWeekForDate(weeks, focusedWeekStart));
+
+	const displayWeeks = $derived(viewMode === 'month' ? weeks : [displayWeek]);
 
 	const calendarLabel = $derived(
 		viewMode === 'week' ? t('planer.weekCalendarAria') : t('planer.calendarAria')
+	);
+
+	const gridSwipeHint = $derived(
+		viewMode === 'week' ? t('planer.gridSwipeWeekAria') : t('planer.gridSwipeMonthAria')
+	);
+
+	const todayHref = $derived(
+		viewMode === 'week'
+			? `/planer?week=${encodeURIComponent(todayWeekStart)}`
+			: '/planer'
 	);
 
 	function openDay(day: DayData) {
@@ -88,45 +110,81 @@
 		trackAtaWeekViewToggled(next);
 	}
 
+	function navigateWeek(deltaWeeks: -1 | 1) {
+		const target = deltaWeeks === -1 ? previousWeek : nextWeek;
+		void goto(`/planer?week=${encodeURIComponent(target)}`, {
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true
+		});
+	}
+
+	function navigateMonth(deltaMonths: -1 | 1) {
+		const target = deltaMonths === -1 ? previousMonth : nextMonth;
+		void goto(`/planer?month=${encodeURIComponent(target)}`, {
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true
+		});
+	}
+
 	function onTouchStart(event: TouchEvent) {
 		touchStartX = event.changedTouches[0]?.clientX ?? 0;
 	}
 
 	function onTouchEnd(event: TouchEvent) {
-		if (viewMode !== 'month') return;
 		const endX = event.changedTouches[0]?.clientX ?? 0;
 		const delta = endX - touchStartX;
 		if (Math.abs(delta) < 72) return;
-		if (delta > 0) {
-			window.location.href = `/planer?month=${encodeURIComponent(previousMonth)}`;
-		} else {
-			window.location.href = `/planer?month=${encodeURIComponent(nextMonth)}`;
+
+		if (viewMode === 'week') {
+			navigateWeek(delta > 0 ? -1 : 1);
+			return;
 		}
+
+		navigateMonth(delta > 0 ? -1 : 1);
 	}
 </script>
 
 <section class="calendar-shell" aria-label={calendarLabel}>
 	<header class="month-nav">
-		<a
-			href="/planer?month={previousMonth}"
-			class="nav-btn"
-			class:nav-btn-hidden={viewMode === 'week'}
-			aria-label={t('planer.prevMonth')}
-			tabindex={viewMode === 'week' ? -1 : undefined}
-		>
-			<span class="nav-icon" aria-hidden="true">←</span>
-			<span class="nav-text">{t('planer.prevMonthShort')}</span>
-		</a>
+		{#if viewMode === 'week'}
+			<a
+				href="/planer?week={encodeURIComponent(previousWeek)}"
+				class="nav-btn"
+				data-testid="ata-calendar-prev-week"
+				aria-label={t('planer.prevWeek')}
+			>
+				<span class="nav-icon" aria-hidden="true">←</span>
+				<span class="nav-text">{t('planer.prevWeekShort')}</span>
+			</a>
+		{:else}
+			<a
+				href="/planer?month={encodeURIComponent(previousMonth)}"
+				class="nav-btn"
+				data-testid="ata-calendar-prev-month"
+				aria-label={t('planer.prevMonth')}
+			>
+				<span class="nav-icon" aria-hidden="true">←</span>
+				<span class="nav-text">{t('planer.prevMonthShort')}</span>
+			</a>
+		{/if}
 
 		<div class="month-title-wrap">
-			<h2>{monthLabel}</h2>
+			{#if viewMode === 'week'}
+				<h2 data-testid="ata-calendar-week-range" aria-live="polite">{weekRangeLabel}</h2>
+			{:else}
+				<h2 aria-live="polite">{monthLabel}</h2>
+			{/if}
 			<div class="title-actions">
-				<div class="view-toggle" role="group" aria-label={t('planer.viewToggleAria')}>
+				<div class="view-toggle" role="tablist" aria-label={t('planer.viewToggleAria')}>
 					<button
 						type="button"
 						class="view-toggle-btn"
+						role="tab"
 						class:active={viewMode === 'week'}
-						aria-pressed={viewMode === 'week'}
+						aria-selected={viewMode === 'week'}
+						data-testid="ata-calendar-view-week"
 						onclick={() => setViewMode('week')}
 					>
 						{t('planer.viewWeek')}
@@ -134,57 +192,81 @@
 					<button
 						type="button"
 						class="view-toggle-btn"
+						role="tab"
 						class:active={viewMode === 'month'}
-						aria-pressed={viewMode === 'month'}
+						aria-selected={viewMode === 'month'}
+						data-testid="ata-calendar-view-month"
 						onclick={() => setViewMode('month')}
 					>
 						{t('planer.viewMonth')}
 					</button>
 				</div>
-				<a href="/planer" class="today-link">{t('common.today')}</a>
+				<a href={todayHref} class="today-link" data-testid="ata-calendar-today">{t('common.today')}</a>
 			</div>
 		</div>
 
-		<a
-			href="/planer?month={nextMonth}"
-			class="nav-btn"
-			class:nav-btn-hidden={viewMode === 'week'}
-			aria-label={t('planer.nextMonth')}
-			tabindex={viewMode === 'week' ? -1 : undefined}
-		>
-			<span class="nav-text">{t('common.next')}</span>
-			<span class="nav-icon" aria-hidden="true">→</span>
-		</a>
+		{#if viewMode === 'week'}
+			<a
+				href="/planer?week={encodeURIComponent(nextWeek)}"
+				class="nav-btn"
+				data-testid="ata-calendar-next-week"
+				aria-label={t('planer.nextWeek')}
+			>
+				<span class="nav-text">{t('common.next')}</span>
+				<span class="nav-icon" aria-hidden="true">→</span>
+			</a>
+		{:else}
+			<a
+				href="/planer?month={encodeURIComponent(nextMonth)}"
+				class="nav-btn"
+				data-testid="ata-calendar-next-month"
+				aria-label={t('planer.nextMonth')}
+			>
+				<span class="nav-text">{t('common.next')}</span>
+				<span class="nav-icon" aria-hidden="true">→</span>
+			</a>
+		{/if}
 	</header>
 
 	<div
 		class="calendar-card"
 		class:calendar-card-week={viewMode === 'week'}
+		class:calendar-card-mobile-week={viewMode === 'week' && !isDesktop}
 		role="region"
-		aria-label={t('planer.gridAria')}
+		aria-label={gridSwipeHint}
 		ontouchstart={onTouchStart}
 		ontouchend={onTouchEnd}
 	>
-		<div class="weekday-row" aria-hidden="true">
-			{#each CALENDAR_WEEKDAY_LABELS as name}
-				<div>{name}</div>
-			{/each}
-		</div>
-
-		<div class="weeks">
-			{#each displayWeeks as week}
-				{#each week as day (day.date)}
-					<CalendarDayCell
-						{day}
-						{todayIso}
-						{visibleLimit}
-						weekView={viewMode === 'week'}
-						{ideasById}
-						onOpen={openDay}
-					/>
+		{#if viewMode === 'week' && !isDesktop}
+			<CalendarWeekDayList
+				week={displayWeek}
+				{todayIso}
+				{visibleLimit}
+				{ideasById}
+				onOpen={openDay}
+			/>
+		{:else}
+			<div class="weekday-row" aria-hidden="true">
+				{#each CALENDAR_WEEKDAY_LABELS as name}
+					<div>{name}</div>
 				{/each}
-			{/each}
-		</div>
+			</div>
+
+			<div class="weeks">
+				{#each displayWeeks as week}
+					{#each week as day (day.date)}
+						<CalendarDayCell
+							{day}
+							{todayIso}
+							{visibleLimit}
+							weekView={viewMode === 'week'}
+							{ideasById}
+							onOpen={openDay}
+						/>
+					{/each}
+				{/each}
+			</div>
+		{/if}
 	</div>
 </section>
 
@@ -207,7 +289,7 @@
 		top: 0;
 		z-index: 5;
 		display: grid;
-		grid-template-columns: minmax(2.75rem, auto) 1fr minmax(2.75rem, auto);
+		grid-template-columns: minmax(var(--touch-target-min), auto) 1fr minmax(var(--touch-target-min), auto);
 		align-items: center;
 		gap: var(--space-sm);
 		margin-bottom: var(--space-md);
@@ -251,12 +333,12 @@
 	}
 
 	.view-toggle-btn {
-		min-height: 2rem;
-		padding: 0.2rem 0.65rem;
+		min-height: var(--touch-target-min);
+		padding: 0.35rem 0.75rem;
 		border: none;
 		background: transparent;
 		color: var(--color-text-muted);
-		font-size: 0.75rem;
+		font-size: 0.78rem;
 		font-weight: 700;
 		cursor: pointer;
 	}
@@ -266,12 +348,19 @@
 		color: var(--color-primary);
 	}
 
+	.view-toggle-btn:focus-visible,
+	.today-link:focus-visible,
+	.nav-btn:focus-visible {
+		outline: var(--focus-ring-width) solid var(--focus-ring-color);
+		outline-offset: var(--focus-ring-offset);
+	}
+
 	.today-link {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 2rem;
-		padding: 0.2rem 0.65rem;
+		min-height: var(--touch-target-min);
+		padding: 0.35rem 0.75rem;
 		border-radius: 999px;
 		font-size: 0.78rem;
 		font-weight: 700;
@@ -289,8 +378,8 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.25rem;
-		min-width: 2.75rem;
-		min-height: 2.75rem;
+		min-width: var(--touch-target-min);
+		min-height: var(--touch-target-min);
 		padding: 0.35rem 0.55rem;
 		border-radius: 999px;
 		border: 1px solid var(--color-border);
@@ -300,11 +389,6 @@
 		font-size: 0.82rem;
 		text-decoration: none;
 		white-space: nowrap;
-	}
-
-	.nav-btn-hidden {
-		visibility: hidden;
-		pointer-events: none;
 	}
 
 	.nav-btn:hover {
@@ -322,6 +406,29 @@
 		}
 	}
 
+	@media (max-width: 767px) {
+		.month-nav {
+			grid-template-columns: 1fr;
+			grid-template-rows: auto auto;
+			row-gap: var(--space-xs);
+		}
+
+		.month-nav > .nav-btn:first-child {
+			grid-row: 2;
+			justify-self: start;
+		}
+
+		.month-nav > .month-title-wrap {
+			grid-row: 1;
+			grid-column: 1 / -1;
+		}
+
+		.month-nav > .nav-btn:last-child {
+			grid-row: 2;
+			justify-self: end;
+		}
+	}
+
 	.calendar-card {
 		min-width: 0;
 		background: var(--color-surface);
@@ -333,6 +440,10 @@
 
 	.calendar-card-week :global(.day) {
 		min-height: 7.5rem;
+	}
+
+	.calendar-card-mobile-week {
+		padding: var(--space-sm);
 	}
 
 	@media (min-width: 768px) {
