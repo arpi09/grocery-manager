@@ -5,8 +5,8 @@
 | F?lt | V?rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-21 |
-| **Prod SHA** | `d844d9b8b` @ [27908613441](https://github.com/arpi09/grocery-manager/actions/runs/27908613441) (live). |
-| **Master SHA** | `d844d9b8b` — receipt bulkCreate + adapter-node + DM Sans social assets; CI green @ [27908516931](https://github.com/arpi09/grocery-manager/actions/runs/27908516931). |
+| **Prod SHA** | `a629f892a` @ [27915091760](https://github.com/arpi09/grocery-manager/actions/runs/27915091760) (live, deploy_tier=fast). |
+| **Master SHA** | `a629f892a` — acquisition/statistik/inventory + engineering-health hardening; CI green @ [27914996732](https://github.com/arpi09/grocery-manager/actions/runs/27914996732). |
 | **CI/CD model** | **v2 on master** � tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
