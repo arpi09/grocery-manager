@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { expectNoCriticalOrSeriousViolations } from './helpers/axe';
 import {
 	dismissOnboardingModalIfOpen,
-	loginAsAdmin
+	prepareE2eBrowserState
 } from './helpers/auth';
 import { createFridgeItemViaApi } from './helpers/inventory';
 import { expectNoHorizontalScroll, expectSampledTouchTargets } from './helpers/mobile';
@@ -100,7 +100,7 @@ async function resolveRecipeDetailPath(page: Page): Promise<string> {
 test.describe('Mobile visual — P0 routes (390×844)', () => {
 	for (const route of MOBILE_P0_ROUTES) {
 		test(`${route.path} — layout, touch targets, axe`, async ({ page }) => {
-			await loginAsAdmin(page);
+			await prepareE2eBrowserState(page);
 
 			await gotoAuthedRoute(page, route.path, 'expectUrl' in route ? { expectUrl: route.expectUrl } : undefined);
 
@@ -111,7 +111,7 @@ test.describe('Mobile visual — P0 routes (390×844)', () => {
 	}
 
 	test('/item/[id]/edit — layout, touch targets, axe', async ({ page }) => {
-		await loginAsAdmin(page);
+		await prepareE2eBrowserState(page);
 
 		const editItemPath = await resolveEditItemPath(page);
 		await gotoAuthedRoute(page, editItemPath);
@@ -122,7 +122,7 @@ test.describe('Mobile visual — P0 routes (390×844)', () => {
 	});
 
 	test('/item/[id]/edit — save vs log consumption labels', async ({ page }) => {
-		await loginAsAdmin(page);
+		await prepareE2eBrowserState(page);
 
 		const editItemPath = await resolveEditItemPath(page);
 		await gotoAuthedRoute(page, editItemPath);
@@ -137,7 +137,7 @@ test.describe('Mobile visual — P0 routes (390×844)', () => {
 	});
 
 	test('/item/[id]/edit — log consumption stays on edit page', async ({ page }) => {
-		await loginAsAdmin(page);
+		await prepareE2eBrowserState(page);
 
 		const editItemPath = await resolveEditItemPath(page);
 		await gotoAuthedRoute(page, editItemPath);
@@ -156,7 +156,7 @@ test.describe('Mobile visual — P0 routes (390×844)', () => {
 test.describe('Mobile visual — P1 axe routes (390×844)', () => {
 	for (const route of MOBILE_P1_ROUTES) {
 		test(`${route.path} — axe`, async ({ page }) => {
-			await loginAsAdmin(page);
+			await prepareE2eBrowserState(page);
 
 			await gotoAuthedRoute(page, route.path);
 			await expectNoCriticalOrSeriousViolations(page, route.path);
@@ -164,7 +164,7 @@ test.describe('Mobile visual — P1 axe routes (390×844)', () => {
 	}
 
 	test('/recept/[id] — axe', async ({ page }) => {
-		await loginAsAdmin(page);
+		await prepareE2eBrowserState(page);
 
 		const recipePath = await resolveRecipeDetailPath(page);
 		await gotoAuthedRoute(page, recipePath);
