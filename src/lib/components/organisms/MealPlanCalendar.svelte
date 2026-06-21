@@ -128,6 +128,14 @@
 		});
 	}
 
+	function navigateToday() {
+		void goto(todayHref, {
+			replaceState: true,
+			noScroll: true,
+			keepFocus: true
+		});
+	}
+
 	function onTouchStart(event: TouchEvent) {
 		touchStartX = event.changedTouches[0]?.clientX ?? 0;
 	}
@@ -149,25 +157,27 @@
 <section class="calendar-shell" aria-label={calendarLabel}>
 	<header class="month-nav">
 		{#if viewMode === 'week'}
-			<a
-				href="/planer?week={encodeURIComponent(previousWeek)}"
+			<button
+				type="button"
 				class="nav-btn"
 				data-testid="ata-calendar-prev-week"
 				aria-label={t('planer.prevWeek')}
+				onclick={() => navigateWeek(-1)}
 			>
 				<span class="nav-icon" aria-hidden="true">←</span>
 				<span class="nav-text">{t('planer.prevWeekShort')}</span>
-			</a>
+			</button>
 		{:else}
-			<a
-				href="/planer?month={encodeURIComponent(previousMonth)}"
+			<button
+				type="button"
 				class="nav-btn"
 				data-testid="ata-calendar-prev-month"
 				aria-label={t('planer.prevMonth')}
+				onclick={() => navigateMonth(-1)}
 			>
 				<span class="nav-icon" aria-hidden="true">←</span>
 				<span class="nav-text">{t('planer.prevMonthShort')}</span>
-			</a>
+			</button>
 		{/if}
 
 		<div class="month-title-wrap">
@@ -201,30 +211,34 @@
 						{t('planer.viewMonth')}
 					</button>
 				</div>
-				<a href={todayHref} class="today-link" data-testid="ata-calendar-today">{t('common.today')}</a>
+				<button type="button" class="today-link" data-testid="ata-calendar-today" onclick={navigateToday}>
+					{t('common.today')}
+				</button>
 			</div>
 		</div>
 
 		{#if viewMode === 'week'}
-			<a
-				href="/planer?week={encodeURIComponent(nextWeek)}"
+			<button
+				type="button"
 				class="nav-btn"
 				data-testid="ata-calendar-next-week"
 				aria-label={t('planer.nextWeek')}
+				onclick={() => navigateWeek(1)}
 			>
 				<span class="nav-text">{t('common.next')}</span>
 				<span class="nav-icon" aria-hidden="true">→</span>
-			</a>
+			</button>
 		{:else}
-			<a
-				href="/planer?month={encodeURIComponent(nextMonth)}"
+			<button
+				type="button"
 				class="nav-btn"
 				data-testid="ata-calendar-next-month"
 				aria-label={t('planer.nextMonth')}
+				onclick={() => navigateMonth(1)}
 			>
 				<span class="nav-text">{t('common.next')}</span>
 				<span class="nav-icon" aria-hidden="true">→</span>
-			</a>
+			</button>
 		{/if}
 	</header>
 
@@ -361,16 +375,17 @@
 		justify-content: center;
 		min-height: var(--touch-target-min);
 		padding: 0.35rem 0.75rem;
+		border: none;
 		border-radius: 999px;
 		font-size: 0.78rem;
 		font-weight: 700;
 		color: var(--color-primary);
-		text-decoration: none;
+		background: transparent;
+		cursor: pointer;
 	}
 
 	.today-link:hover {
 		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
-		text-decoration: none;
 	}
 
 	.nav-btn {
@@ -387,13 +402,12 @@
 		color: var(--color-text-muted);
 		font-weight: 700;
 		font-size: 0.82rem;
-		text-decoration: none;
 		white-space: nowrap;
+		cursor: pointer;
 	}
 
 	.nav-btn:hover {
 		background: var(--color-surface-muted);
-		text-decoration: none;
 	}
 
 	.nav-text {

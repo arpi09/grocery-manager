@@ -1,10 +1,30 @@
 ﻿# Email (Resend)
 
-Home Pantry sends transactional email via [Resend](https://resend.com):
+Skaffu sends transactional email via [Resend](https://resend.com):
 
 - **Household invites** when an owner invites someone by email
+- **Email verification** for new accounts
+- **Password reset** links
 - **Expiry reminders** (weekly cron + session-scoped hook) for users who opt in under Settings
 - **PMF weekly digest** (Monday cron) to owner — see [PMF_WEEKLY.md](./PMF_WEEKLY.md#automation)
+- **Prod error alerts** (cron) to owner when new errors appear in admin logs
+
+## Templates & layout
+
+| Mejl | Builder | Layout |
+|------|---------|--------|
+| Hushållsinbjudan | `buildHouseholdInviteEmailContent` | Branded (`email-layout.ts`) |
+| E-postverifiering | `buildEmailVerificationEmailContent` | Branded |
+| Lösenordsåterställning | `buildPasswordResetEmailContent` | Branded |
+| Utgångspåminnelse | `buildExpiryReminderEmailContent` | Branded |
+| PMF veckodigest | `buildPmfDigestEmailContent` (`pmf-digest.ts`) | Owner shell + tabell |
+| Prod error alert | `buildErrorAlertEmailContent` (`error-alert.ts`) | Owner shell |
+
+Shared branded HTML: [`src/lib/server/email-layout.ts`](src/lib/server/email-layout.ts) (`buildBrandedEmailHtml`, Skaffu header, `#2c4a3e`).
+
+User-facing copy: [`src/lib/server/email.ts`](src/lib/server/email.ts) via `translate()` → `email.templates.*` in [`sv.json`](src/lib/i18n/locales/sv.json) / [`en.json`](src/lib/i18n/locales/en.json).
+
+Expiry reminder CTA links to `/planer/vecka?from=email` (veckoförslag — not legacy “Ät det först” wording).
 
 ## Global kill switch (default: off)
 
@@ -13,7 +33,7 @@ Outbound email is **disabled by default**. Nothing is sent via Resend until an a
 | Layer | Control | Default |
 |-------|---------|---------|
 | Admin UI | `/admin` → **Email sending** toggle | Off |
-| Environment | `EMAIL_SENDING_DISABLED=true` | Set in `apphosting.yaml` until domain is verified |
+| Environment | `EMAIL_SENDING_DISABLED=true` | Optional extra safety in local `.env` |
 
 Both must allow sending: admin toggle **on** and `EMAIL_SENDING_DISABLED` **not** set to `true`.
 
@@ -28,13 +48,7 @@ When disabled, `sendEmail` returns early (warn log only). Invites still work —
 
 See [EMAIL_DEDUP_AUDIT.md](./EMAIL_DEDUP_AUDIT.md) for the duplicate-email investigation.
 
-**Exception:** `sendOwnerPmfDigest()` (PMF weekly cron) bypasses the kill switch when `PMF_DIGEST_TO` is set — owner digest only, not user invites. Requires `RESEND_API_KEY` and verified `RESEND_FROM` (`hello@skaffu.com`).
-
-After verifying a custom domain in Resend:
-
-1. Update `RESEND_FROM` in Firebase App Hosting (or `.env` locally).
-2. Remove or set `EMAIL_SENDING_DISABLED=false` in App Hosting.
-3. Enable **Email sending** on `/admin`.
+**Exception:** `sendOwnerPmfDigest()` and `sendOwnerErrorAlert()` bypass the kill switch when `PMF_DIGEST_TO` / `ERROR_ALERT_TO` is set — owner-only, not user invites. Requires `RESEND_API_KEY` and verified `RESEND_FROM` (`hello@skaffu.com`).
 
 ## Local development
 
@@ -44,8 +58,8 @@ After verifying a custom domain in Resend:
 
 ```bash
 RESEND_API_KEY=re_...
-RESEND_FROM=Home Pantry <onboarding@resend.dev>
-# Optional extra safety (matches production default):
+RESEND_FROM=Skaffu <onboarding@resend.dev>
+# Optional extra safety:
 EMAIL_SENDING_DISABLED=true
 ```
 
@@ -65,19 +79,19 @@ npx firebase apphosting:secrets:grantaccess RESEND_API_KEY --backend home-pantry
 
 **Windows helper (both Resend + Turnstile server secret):** `powershell -File scripts/setup-resend-turnstile-secrets.ps1` — see [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md#resend-and-turnstile-secrets-helper-script).
 
-`apphosting.yaml` references `RESEND_API_KEY` (secret), `RESEND_FROM`, and `EMAIL_SENDING_DISABLED=true` by default.
+`apphosting.yaml` references `RESEND_API_KEY` (secret), `RESEND_FROM`, and `EMAIL_SENDING_DISABLED` (default allows sending when admin toggle is on).
 
-## Custom domain (later)
+## Custom domain
 
 1. Resend → **Domains** → add your domain and add DNS records.
 2. Update `RESEND_FROM` to use that domain.
 3. Clear `EMAIL_SENDING_DISABLED` and enable sending in `/admin`.
 
-## skaffu.com (prod live — mejl fortfarande av)
+## skaffu.com (prod live)
 
-**Status jun 2026:** `https://skaffu.com` är **Connected** (Firebase + SSL). `PUBLIC_ORIGIN` / `ORIGIN` pekar på skaffu.com. **Resend-domän skaffu.com är Verified** (DKIM ok). `RESEND_FROM` är `Skaffu <hello@skaffu.com>`. **`EMAIL_SENDING_DISABLED=false` i prod** — utskick tillåts när admin-reglaget **Email sending** är på i `/admin`.
+**Status jun 2026:** `https://skaffu.com` is **Connected** (Firebase + SSL). `PUBLIC_ORIGIN` / `ORIGIN` point to skaffu.com. **Resend domain skaffu.com is Verified** (DKIM ok). `RESEND_FROM` is `Skaffu <hello@skaffu.com>`. **`EMAIL_SENDING_DISABLED=false` in prod** — outbound allowed when admin **Email sending** is on in `/admin`.
 
-### Ägare — checklista innan enable
+### Owner checklist before enable
 
 | # | Steg | Var | Klar? |
 |---|------|-----|-------|
@@ -88,47 +102,29 @@ npx firebase apphosting:secrets:grantaccess RESEND_API_KEY --backend home-pantry
 | 5 | `EMAIL_SENDING_DISABLED=false` | `apphosting.yaml` (deploy) + `/admin` toggle | ☑ |
 | 6 | Testinbjudan | Inställningar → bjud in → länk `https://skaffu.com/invite/...` | efter deploy + toggle |
 
-### 1. Verifiera domän i Resend
-
-1. [Resend → Domains](https://resend.com/domains) → **Add domain** → `skaffu.com`.
-2. Resend visar DNS-poster (SPF, DKIM, ev. DMARC). Lägg in dem i **Cloudflare DNS** (samma konto som domänen).
-3. Vänta tills status **Verified** (ofta 15 min–några timmar).
-
-`www.skaffu.com` behövs normalt **inte** för avsändare om `RESEND_FROM` använder apex (`@skaffu.com`). Lägg till subdomän i Resend bara om du vill skicka från t.ex. `hello@www.skaffu.com`.
-
-### 2. Välj avsändaradress
+### Sender address
 
 | Adress | Användning |
 |--------|------------|
 | `Skaffu <hello@skaffu.com>` | Transaktionellt (inbjudan, utgångspåminnelser) — **rekommenderat** |
 | `Skaffu <onboarding@skaffu.com>` | Alternativ om `hello@` redan används |
-| `Home Pantry <hello@skaffu.com>` | Behåll varumärke Home Pantry i visningsnamn |
 
 Exempel efter verifiering:
 
 ```bash
-# Firebase Secret Manager / App Hosting env (inte förrän domän Verified)
 RESEND_FROM=Skaffu <hello@skaffu.com>
 ```
 
 Lokal `.env` — se kommenterade rader i `.env.example`.
 
-### 3. Uppdatera prod (efter Resend Verified)
-
-Ordning:
-
-1. ~~`PUBLIC_ORIGIN` + `ORIGIN` → `https://skaffu.com`~~ **Klart** ([SKAFFU_DOMAIN_MIGRATION.md](./SKAFFU_DOMAIN_MIGRATION.md)).
-2. ~~Uppdatera `RESEND_FROM` i Firebase App Hosting till `Skaffu <hello@skaffu.com>`~~ **Klart** (jun 2026).
-3. ~~Lämna `EMAIL_SENDING_DISABLED=true` tills du medvetet slår på mejl.~~ **Klart** — `EMAIL_SENDING_DISABLED=false` i `apphosting.yaml`.
-4. Efter deploy: slå på **Email sending** i `/admin` och verifiera en testinbjudan.
-
-### 4. Test efter enable
+### Test after enable
 
 | Steg | Kontroll |
 |------|----------|
-| Kill switch | Default off — ingen Resend-trafik |
+| Kill switch | Default off in `/admin` — no Resend traffic until toggled |
 | Invite | Inställningar → bjud in → mejl till valfri mottagare (kräver verified domain) |
-| Länkar | Invite-URL ska peka på `https://skaffu.com/invite/...` (kräver steg 3.1) |
+| Länkar | Invite-URL ska peka på `https://skaffu.com/invite/...` |
+| Expiry CTA | Utgångsmail → `https://skaffu.com/planer/vecka?from=email` |
 
 Se även [SKAFFU_DOMAIN_MIGRATION.md §7](./SKAFFU_DOMAIN_MIGRATION.md) och [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md).
 
@@ -140,6 +136,7 @@ Se även [SKAFFU_DOMAIN_MIGRATION.md §7](./SKAFFU_DOMAIN_MIGRATION.md) och [FIR
 | Missing key | Omit `RESEND_API_KEY` — invite still created; UI shows invite email warning |
 | Dev send | Enable in `/admin`, set `EMAIL_SENDING_DISABLED=false`, Settings → invite → submit. Check [Resend → Emails](https://resend.com/emails). |
 | Invite link | Email and settings UI both show `/invite/{token}` using `ORIGIN` / `PUBLIC_ORIGIN`. |
+| Unit tests | `src/lib/server/email.test.ts` — no `HP` in HTML, expiry CTA/url |
 
 ## Related docs
 

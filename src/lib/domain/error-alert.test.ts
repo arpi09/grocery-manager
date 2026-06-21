@@ -26,6 +26,8 @@ describe('buildErrorAlertEmailContent', () => {
 		expect(content.text).toContain('process is not defined');
 		expect(content.text).toContain('https://skaffu.com/admin');
 		expect(content.html).toContain('CLIENT /guider/minska-matsvinn-hemma-app');
+		expect(content.html).toContain('Skaffu');
+		expect(content.html).toContain('#2c4a3e');
 	});
 
 	it('uses singular subject for one error', () => {

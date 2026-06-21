@@ -296,6 +296,18 @@
 			"paths": ["src/routes/api/stripe/checkout/+server.ts"]
 		},
 		{
+			"id": "email-templates",
+			"label": "Transactional email templates",
+			"paths": [
+				"src/lib/server/email.ts",
+				"src/lib/server/email-layout.ts",
+				"src/lib/domain/pmf-digest.ts",
+				"src/lib/domain/error-alert.ts",
+				"docs/EMAIL.md"
+			],
+			"doc": "docs/EMAIL.md"
+		},
+		{
 			"id": "platform",
 			"label": "Platform & telemetry",
 			"routes": ["/husdjur", "/nyheter"],

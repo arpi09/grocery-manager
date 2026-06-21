@@ -25,7 +25,7 @@ Svenska hushåll kastar fortfarande betydande mängder ätbar mat varje år. De 
 
 Lösningen är inte att bli perfekt planerare över en natt. Det är att sänka friktionen: se lager, få varningar och handla utifrån verkligheten.
 
-## Steg 1: Gör kyl, frys och skafferi till en sanningskälla
+## Steg 1: Få koll på kyl, frys och skafferi
 
 Börja med att registrera det du redan har. Tre snabba ingångar fungerar för de flesta:
 
@@ -33,7 +33,7 @@ Börja med att registrera det du redan har. Tre snabba ingångar fungerar för d
 2. **Kvitto-PDF** från Kivra, ICA-appen eller Willys — ladda upp och granska raderna.
 3. **Foto** av hyllan om streckkod saknas.
 
-När lager speglar verkligheten blir inköpslistan en spegel av *gap*, inte gissningar. Det är kärnan i att [minska matsvinn med Skaffu](/minska-matsvinn): du ser utgångsdatum, prioriterar det som går ut snart och slipper köpa det du redan har.
+När skafferiet speglar verkligheten blir inköpslistan en spegel av *gap*, inte gissningar. Det är kärnan i att [minska matsvinn med Skaffu](/minska-matsvinn): du ser utgångsdatum, prioriterar det som går ut snart och slipper köpa det du redan har. Läs mer om [Skaffus funktioner](/funktioner) eller [kom igång gratis](/).
 
 ## Steg 2: Prioritera det som går ut — innan det blir svinn
 
@@ -59,9 +59,9 @@ Läs mer om [butiksneutral skafferi-app för hela hushållet](/skafferi-app) om 
 
 ## Kvitto-PDF från Kivra — snabb start utan manuell admin
 
-Digitala kvitton är en underskattad genväg. Spara PDF från Kivra eller butiksappen, ladda upp i Skaffu och granska raderna innan de hamnar i lagret. Du behöver inte skriva ut eller fotografera om textlagret är läsbart.
+Digitala kvitton är en underskattad genväg. Spara PDF från Kivra eller butiksappen, ladda upp i Skaffu och granska raderna innan de hamnar i skafferiet. Du behöver inte skriva ut eller fotografera om textlagret är läsbart.
 
-Steg-för-steg för Kivra och andra butiker finns i vår guide om [kvitto-PDF och Kivra](/kvitto-pdf-kivra). Kom ihåg: AI tolkar raderna — du granskar alltid innan sparande, och vi lagrar inte hela kvittot som arkiv.
+Steg-för-steg för Kivra och andra butiker finns i vår guide om [kvitto-PDF och Kivra](/kvitto-pdf-kivra). Raderna tolkas automatiskt — du granskar alltid innan sparande, och vi lagrar inte hela kvittot som arkiv.
 
 ## Vanliga misstag (och hur du undviker dem)
 

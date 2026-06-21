@@ -62,12 +62,21 @@ const sv: PrivacyContent = {
 			]
 		},
 		{
+			id: 'account-deletion',
+			title: 'Radera konto (i appen)',
+			paragraphs: [
+				'Du kan när som helst radera ditt konto själv i appen — utan att maila support.',
+				'Gå till Inställningar → Konto → Radera mitt konto. Bekräfta med ordet RADERA. Ditt konto, sessioner och personliga preferenser tas bort permanent. Hushåll där du är ensam medlem raderas tillsammans med inventering och inköpslistor.',
+				'Hushållsägare kan alternativt ta bort hela hushållet (och tillhörande data) under Inställningar → Hushåll utan att radera sitt eget konto.'
+			]
+		},
+		{
 			id: 'gdpr',
 			title: 'Rättslig grund & dina rättigheter (GDPR)',
 			paragraphs: [
 				'Vi behandlar personuppgifter för att tillhandahålla tjänsten (avtal), för säker drift och felsökning (berättigat intresse), och i vissa fall utifrån ditt samtycke (t.ex. när du aktivt laddar upp kvitto eller foto för AI-tolkning).',
 				'Du har rätt att få tillgång till, rätta och i vissa fall begränsa behandlingen av dina uppgifter. Kontakta oss på hello@skaffu.com om du vill utöva dina rättigheter.',
-				'Hushållsägare kan ta bort hela hushållet och tillhörande data under Inställningar → Hushåll. Du kan radera hela ditt konto och kopplad data under Inställningar → Konto → Radera mitt konto.',
+				'Kontoradering i appen (Inställningar → Konto → Radera mitt konto) uppfyller din rätt till radering enligt GDPR för data kopplad till ditt konto.',
 				'Vi säljer inte dina personuppgifter och delar dem inte med annonsörer.'
 			]
 		},
@@ -162,12 +171,21 @@ const en: PrivacyContent = {
 			]
 		},
 		{
+			id: 'account-deletion',
+			title: 'Delete account (in the app)',
+			paragraphs: [
+				'You can delete your account yourself at any time in the app — no need to email support.',
+				'Go to Settings → Account → Delete my account. Confirm with the word DELETE. Your account, sessions and personal preferences are permanently removed. Households where you are the only member are deleted along with inventory and shopping lists.',
+				'Household owners can alternatively delete the whole household (and related data) under Settings → Household without deleting their own account.'
+			]
+		},
+		{
 			id: 'gdpr',
 			title: 'Legal basis & your rights (GDPR)',
 			paragraphs: [
 				'We process personal data to provide the service (contract), for secure operation and debugging (legitimate interest), and sometimes with your consent (e.g. when you upload a receipt or photo for AI parsing).',
 				'You may access, rectify or restrict processing where applicable. Contact hello@skaffu.com to exercise your rights.',
-				'Household owners can delete the household and related data under Settings → Household. You can delete your entire account and linked data under Settings → Account → Delete my account.',
+				'In-app account deletion (Settings → Account → Delete my account) fulfils your right to erasure under GDPR for data linked to your account.',
 				'We do not sell your personal data or share it with advertisers.'
 			]
 		},

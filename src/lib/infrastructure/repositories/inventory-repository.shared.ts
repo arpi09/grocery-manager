@@ -1,4 +1,4 @@
-import { and, gt, lte, sql } from 'drizzle-orm';
+import { and, gt, isNull, lt, lte, sql } from 'drizzle-orm';
 import { autoExpiredCutoffDate } from '$lib/domain/auto-expired';
 import { stalenessCutoffDate } from '$lib/domain/inventory-staleness';
 import type { StorageLocation } from '$lib/domain/location';
@@ -29,15 +29,18 @@ export function activeNotAutoExpiredFilter(context: InventoryListContext) {
 
 export function isMissingLastConfirmedColumn(error: unknown): boolean {
 	const message = error instanceof Error ? error.message : String(error);
-	return /last_confirmed_at|column .* does not exist/i.test(message);
+	const cause =
+		error instanceof Error && error.cause instanceof Error ? error.cause.message : '';
+	const combined = `${message} ${cause}`;
+	return /column .*last_confirmed_at.* does not exist/i.test(combined);
 }
 
 export function staleUndatedFilter(referenceDate = new Date()) {
 	const cutoff = stalenessCutoffDate(undefined, referenceDate);
 	return and(
 		activeQuantityFilter(),
-		sql`${inventoryItemTable.expiresOn} is null`,
-		sql`${inventoryItemTable.lastConfirmedAt} < ${cutoff}`
+		isNull(inventoryItemTable.expiresOn),
+		lt(inventoryItemTable.lastConfirmedAt, cutoff)
 	);
 }
 

@@ -199,6 +199,24 @@ När du vill skicka från t.ex. `hello@skaffu.com`:
 
 ---
 
+## USER_LOCAL — Google Search Console & www (efter apex live)
+
+Steg som **inte** görs i repo men är kritiska för att `skaffu.com` ska ranka som enda canonical. Kör parallellt med kod-301 från legacy host + www.
+
+| # | Uppgift | Var |
+|---|---------|-----|
+| 1 | **www → apex** | Slutför Firebase TXT för `www.skaffu.com` *eller* Cloudflare Redirect Rule: `www.skaffu.com/*` → `https://skaffu.com/$1` (301). Verifiera: `curl -I https://www.skaffu.com/` → `Location: https://skaffu.com/`. |
+| 2 | **Google Search Console** | Lägg property `https://skaffu.com`, verifiera via DNS TXT i Cloudflare. |
+| 3 | **Submit sitemap** | `https://skaffu.com/sitemap.xml` i GSC. |
+| 4 | **URL-inspection** | Begär indexering av `/`, `/funktioner`, `/skafferi-app`. |
+| 5 | **Legacy hosted.app** | Efter 301-deploy: GSC → legacy `*.hosted.app`-property → “Remove outdated URLs” eller vänta på re-crawl. |
+| 6 | **Turnstile** | Lägg `skaffu.com` (+ `www`) i widget hostnames — se steg 6 ovan och [`CAPTCHA.md`](./CAPTCHA.md). |
+| 7 | **Social** | LinkedIn/Facebook-profiler länkar till `https://skaffu.com` (stärker brand entity i Google). |
+
+Varumärkessök på “skaffu” tar ofta **2–6 veckor** efter domänbyte även med korrekt SEO — 301 + GSC accelererar. Se även [`MARKETING_SITE.md`](./MARKETING_SITE.md) SEO-sektion.
+
+---
+
 ## Rollback vid problem
 
 | Problem | Åtgärd |

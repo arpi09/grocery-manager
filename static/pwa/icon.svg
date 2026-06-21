@@ -1,11 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <rect width="512" height="512" rx="108" fill="#2c4a3e"/>
-  <g transform="translate(128 120) scale(8.5)">
-    <path
-      fill="#ffffff"
-      d="M16 8.5 9.5 13.2V22a1.2 1.2 0 0 0 1.2 1.2h3.1v-4.2h4.4v4.2h3.1A1.2 1.2 0 0 0 22.5 22v-8.8L16 8.5Z"
-    />
-    <path d="M11.8 17.2h8.4" stroke="#e8f0ea" stroke-width="1.35" stroke-linecap="round" fill="none"/>
-    <rect x="20.8" y="10.8" width="4.2" height="4.2" rx="1" fill="#d4a853"/>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect width="32" height="32" rx="8" fill="#2c4a3e"/>
+  <path
+    fill="#ffffff"
+    d="M16 8.5 9.5 13.2V22a1.2 1.2 0 0 0 1.2 1.2h3.1v-4.2h4.4v4.2h3.1A1.2 1.2 0 0 0 22.5 22v-8.8L16 8.5Z"
+  />
+  <path d="M11.8 17.2h8.4" stroke="#e8f0ea" stroke-width="1.35" stroke-linecap="round" fill="none"/>
+  <rect x="20.8" y="10.8" width="4.2" height="4.2" rx="1" fill="#d4a853"/>
 </svg>

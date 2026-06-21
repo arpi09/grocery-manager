@@ -30,6 +30,9 @@ vi.mock('resend', () => ({
 
 import {
 	buildHouseholdInviteEmailContent,
+	buildExpiryReminderEmailContent,
+	buildEmailVerificationEmailContent,
+	buildPasswordResetEmailContent,
 	getEmailFrom,
 	getResendApiKey,
 	householdInviteEmailWarning,
@@ -92,6 +95,8 @@ describe('buildHouseholdInviteEmailContent', () => {
 		expect(content.html).toContain('Du är inbjuden till Mitt hushåll');
 		expect(content.html).toContain('Acceptera inbjudan');
 		expect(content.html).toContain('#2c4a3e');
+		expect(content.html).toContain('Skaffu');
+		expect(content.html).not.toContain('>HP<');
 		expect(content.html).not.toContain('<script');
 	});
 
@@ -107,6 +112,103 @@ describe('buildHouseholdInviteEmailContent', () => {
 		expect(content.subject).toContain('invited you');
 		expect(content.text).toContain('You are invited to Home');
 		expect(content.html).toContain('Accept invitation');
+		expect(content.html).not.toContain('>HP<');
+	});
+});
+
+describe('buildExpiryReminderEmailContent', () => {
+	const sections = [
+		{
+			householdName: 'Mitt hushåll',
+			items: [
+				{
+					name: 'Mjölk',
+					locationLabel: 'Kyl',
+					expiresOnLabel: '24 jun',
+					daysLeftLabel: '2 dagar kvar'
+				}
+			]
+		}
+	];
+
+	it('builds Swedish expiry copy with aligned CTA and week URL', () => {
+		const url = 'https://skaffu.com/planer/vecka?from=email';
+		const content = buildExpiryReminderEmailContent({
+			recipientName: 'Arvid',
+			days: 7,
+			inventoryUrl: url,
+			sections,
+			locale: 'sv'
+		});
+
+		expect(content.subject).toBe('1 vara går snart ut — Skaffu');
+		expect(content.text).toContain('öppna veckoförslagen');
+		expect(content.text).toContain(url);
+		expect(content.text).not.toContain('Ät det först');
+		expect(content.html).toContain('Öppna veckoförslag');
+		expect(content.html).toContain(url);
+		expect(content.html).not.toContain('Fixa veckan');
+		expect(content.html).not.toContain('>HP<');
+		expect(content.html).toContain('Skaffu');
+	});
+
+	it('builds English expiry copy when locale is en', () => {
+		const content = buildExpiryReminderEmailContent({
+			recipientName: 'Alex',
+			days: 7,
+			inventoryUrl: 'https://skaffu.com/planer/vecka?from=email',
+			sections: [
+				{
+					householdName: 'Home',
+					items: [
+						{
+							name: 'Milk',
+							locationLabel: 'Fridge',
+							expiresOnLabel: 'Jun 24',
+							daysLeftLabel: '2 days left'
+						},
+						{
+							name: 'Yogurt',
+							locationLabel: 'Fridge',
+							expiresOnLabel: 'Jun 25',
+							daysLeftLabel: '3 days left'
+						}
+					]
+				}
+			],
+			locale: 'en'
+		});
+
+		expect(content.subject).toBe('2 items expiring soon — Skaffu');
+		expect(content.html).toContain('Open week suggestions');
+	});
+});
+
+describe('buildEmailVerificationEmailContent', () => {
+	it('uses branded layout without legacy HP mark', () => {
+		const content = buildEmailVerificationEmailContent({
+			verifyUrl: 'https://skaffu.com/verify-email/abc',
+			locale: 'sv'
+		});
+
+		expect(content.subject).toContain('Bekräfta din e-post');
+		expect(content.html).toContain('Bekräfta e-post');
+		expect(content.html).toContain('Skaffu');
+		expect(content.html).not.toContain('>HP<');
+	});
+});
+
+describe('buildPasswordResetEmailContent', () => {
+	it('uses branded layout without legacy HP mark', () => {
+		const content = buildPasswordResetEmailContent({
+			resetUrl: 'https://skaffu.com/reset/abc',
+			locale: 'en'
+		});
+
+		expect(content.subject).toContain('Reset your password');
+		expect(content.html).toContain('Choose a new password');
+		expect(content.html).toContain('Skaffu');
+		expect(content.html).not.toContain('>HP<');
 	});
 });
 

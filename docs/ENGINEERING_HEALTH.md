@@ -1,6 +1,6 @@
 # Engineering Health — snapshot
 
-**Baseline:** 2026-05-28 · Node 24 · `npm audit --omit=dev` → 0 runtime CVEs · ~260 unit · 44 integration · CI quality ~15 min cap.
+**Baseline:** 2026-06-21 · Node 24 · `npm audit --omit=dev` → 0 runtime CVEs · ~260 unit · 44 integration · CI quality ~15 min cap · [DEPENDENCY_HEALTH.md](./DEPENDENCY_HEALTH.md).
 
 Branch strategy: work on `feat/engineering-health-*`; cherry-pick isolated commits after prod is green. Do not merge during active deploy lockdown.
 
@@ -10,7 +10,7 @@ Branch strategy: work on `feat/engineering-health-*`; cherry-pick isolated commi
 
 | Area | Grade | Note |
 |------|-------|------|
-| Dependencies | Good | Patch drift only; no runtime CVEs |
+| Dependencies | Good | Patch drift only; no runtime CVEs; Dependabot weekly — [DEPENDENCY_HEALTH.md](./DEPENDENCY_HEALTH.md) |
 | Code quality | Mixed | Low TODO noise; several 700–1000 line UI organisms |
 | Test coverage | Mixed | Strong domain/unit; weak wedge flows (`/inkop`, `lista` guest) |
 | Test efficiency | Needs work | Integration serial; monolithic `quality:ci` |
@@ -47,7 +47,7 @@ Cloud agents (paused): [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md) — use co
 |---|------|--------|
 | 1 | Add `quick:dev` npm script | **Done** |
 | 1b | Split `quick:lint/check/unit` + `gate:fast` | **Done** |
-| 2 | Create `private/DEPENDENCY_HEALTH.md` | Pending |
+| 2 | Create dependency tracking doc ([DEPENDENCY_HEALTH.md](./DEPENDENCY_HEALTH.md)) | **Done** |
 | 3 | Integration test parallelism pilot | **Done** (PGlite per-file; `fileParallelism: true`) |
 | 4 | `lista/[token]` guest join integration test | Pending |
 | 5 | `receipt-import.ts` focused integration test | Pending |
@@ -58,6 +58,8 @@ Cloud agents (paused): [CLOUD_AGENT_SETUP.md](./CLOUD_AGENT_SETUP.md) — use co
 | 10 | Feature flags registry + CURRENT_REALITY sync | **Done** (this branch) |
 
 **Do not start during deploy:** ShoppingListPanel / ReceiptBulkAddFlow splits (high wedge merge conflict).
+
+**Owner (not code):** Add Turnstile hostnames `skaffu.com` + `www.skaffu.com` before custom-domain traffic — [CAPTCHA.md](./CAPTCHA.md#owner-checklist--skaffucom-hostnames-user_local).
 
 ---
 

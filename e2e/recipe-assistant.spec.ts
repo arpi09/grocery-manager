@@ -193,7 +193,7 @@ test.describe('Recipe assistant mobile', () => {
 
 
 
-		const addMissing = dialog.getByRole('button', { name: /Lägg på lista|Lägg alla saknade/i });
+		const addMissing = dialog.getByRole('button', { name: /Lägg på lista|Köp saknade|Shop missing/i });
 
 		await expect(addMissing.first()).toBeVisible();
 

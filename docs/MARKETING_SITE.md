@@ -1,6 +1,6 @@
 # Marketing site (v1)
 
-Public information pages for Home Pantry, served from the same SvelteKit app as the product. Visitors see marketing content without logging in; CTAs link to `/login` (or the configured app URL).
+Public information pages for **Skaffu**, served from the same SvelteKit app as the product. Visitors see marketing content without logging in; CTAs link to `/login` (or the configured app URL).
 
 ## Architecture
 
@@ -83,34 +83,34 @@ npm run deploy:firebase   # or CI deploy job
 
 Marketing and app share one Firebase App Hosting deploy:
 
-**`https://home-pantry--home-pantry-4bee5.europe-west4.hosted.app`**
+**`https://skaffu.com`** (canonical; legacy `*.hosted.app` redirects after deploy)
 
 - `/` → marketing landing  
 - `/login`, `/hem`, `/scan`, … → app  
-- Set `PUBLIC_ORIGIN` and `ORIGIN` to the URL above (already in `apphosting.yaml`).  
+- Set `PUBLIC_ORIGIN` and `ORIGIN` to `https://skaffu.com` (in `apphosting.yaml`).  
 - Leave `PUBLIC_APP_URL` unset so CTAs use relative `/login`.  
-- Marketing `canonical` / `og:url` meta tags use `PUBLIC_ORIGIN` via `src/lib/marketing/app-url.ts` (fallback: hosted.app constant in code).
+- Marketing `canonical` / `og:url` meta tags use `PUBLIC_ORIGIN` via `src/lib/marketing/app-url.ts`.
 
-## Custom domain: homepantry.com (future, optional)
+## Custom domain: skaffu.com
 
-> **Domän ej kopplad än.** Brand name *homepantry.com* appears in copy and vision docs; live traffic uses `*.hosted.app` until DNS is attached.
+> **Live (jun 2026).** Brand and canonical URL: **`https://skaffu.com`**. See [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md) for DNS, www redirect and post-cutover checks.
 
-**Full setup guide (when you own the domain):** [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md) — DNS, SSL, env vars, and post-cutover checks.
+**Full setup guide:** [`CUSTOM_DOMAIN.md`](./CUSTOM_DOMAIN.md) · [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md)
 
-### A. Single domain (recommended when custom domain goes live)
+### A. Single domain (current)
 
-Point **homepantry.com** (and `www`) to Firebase App Hosting backend **home-pantry** — same path layout as today on hosted.app.
+**skaffu.com** (and `www` → apex redirect) points to Firebase App Hosting backend **home-pantry** — same path layout as today.
 
-After the domain is connected, set in production:
+Production env:
 
 ```bash
-PUBLIC_ORIGIN=https://homepantry.com
-ORIGIN=https://homepantry.com
+PUBLIC_ORIGIN=https://skaffu.com
+ORIGIN=https://skaffu.com
 ```
 
 Leave `PUBLIC_APP_URL` unset so CTAs use relative `/login`.
 
-### B. Split domains (marketing vs app)
+### B. Split domains (marketing vs app) — not used today
 
 | Domain | Serves |
 |--------|--------|
@@ -130,7 +130,7 @@ Hero copy has two variants for lightweight testing:
 
 | Variant | Angle | How to preview |
 |---------|--------|----------------|
-| **a** (default) | “Skanna först — slipp gissa vad som finns hemma” | `http://localhost:5173/` |
+| **a** (default) | “Skaffu — handla ihop med koll på skafferiet” | `http://localhost:5173/` |
 | **b** | “Butiksneutralt skafferi för hela hushållet” | `http://localhost:5173/?hero=b` |
 
 **Resolution order:** `?hero=a|b` (also writes cookie `landing_variant` for 90 days) → cookie → `PUBLIC_LANDING_VARIANT` → `a`.
@@ -317,6 +317,22 @@ Keywords in Swedish copy include **skafferi-app** and **minska matsvinn**. Engli
 OG image: `/og-skaffu.png` (1200×630; regenerate from SVG with `npm run generate:og-image`). Absolute URL via `PUBLIC_ORIGIN`, with `?v=` cache-bust (`OG_IMAGE_VERSION` in `src/lib/seo/seo.ts`). Use PNG — LinkedIn does not preview SVG `og:image`. After deploy, refresh LinkedIn cache via [Post Inspector](https://www.linkedin.com/post-inspector/) (see [LINKEDIN_LAUNCH.md](./LINKEDIN_LAUNCH.md)).
 
 PWA manifest (`static/manifest.webmanifest`): name/description aligned with Skaffu brand.
+
+### USER_LOCAL — Google Search Console & www (product owner)
+
+These steps are **not in repo** but critical after domain cutover and 301 redirect deploy. Track in [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md).
+
+| Step | Action |
+|------|--------|
+| 1 | **www → apex:** Finish Firebase TXT for `www.skaffu.com` or Cloudflare Redirect Rule (301 to `https://skaffu.com`). |
+| 2 | **Google Search Console:** Add property `https://skaffu.com`, verify via DNS TXT in Cloudflare. |
+| 3 | **Submit sitemap:** `https://skaffu.com/sitemap.xml`. |
+| 4 | **URL inspection:** Request indexing of `/`, `/funktioner`, `/skafferi-app`. |
+| 5 | **Legacy hosted.app:** After 301 deploy, in GSC → legacy property → remove outdated URLs or wait for re-crawl. |
+| 6 | **Turnstile:** Add `skaffu.com` (+ `www`) to widget hostnames ([`CAPTCHA.md`](./CAPTCHA.md)). |
+| 7 | **Social:** LinkedIn/Facebook profiles link to `https://skaffu.com` (strengthens brand entity). |
+
+Brand search for “skaffu” often takes **2–6 weeks** after domain change even with correct SEO — 301 + GSC accelerates.
 
 ### App routes (noindex)
 

@@ -1,4 +1,5 @@
 import type { AppErrorSummary } from '$lib/domain/error-log';
+import { BRAND_BG, BRAND_PRIMARY } from '$lib/design/brand-colors';
 
 export const APP_SETTING_ERROR_ALERT_CURSOR = 'error_alert_cursor';
 
@@ -52,12 +53,33 @@ export function buildErrorAlertEmailContent(options: {
 
 	const html = `<!DOCTYPE html>
 <html lang="sv">
-<head><meta charset="utf-8" /><title>${escapeHtml(subject)}</title></head>
-<body style="font-family:system-ui,sans-serif;line-height:1.5;color:#1f2a24;">
-  <h1 style="font-size:20px;">${count} nya prod-fel</h1>
-  <p>Granska i admin innan användare behöver rapportera manuellt.</p>
-  <ul>${listHtml}</ul>
-  <p><a href="${escapeHtml(adminUrl)}">Öppna admin → Error logs</a></p>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(subject)}</title>
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; color: #1f2a24; background: ${BRAND_BG}; margin: 0; padding: 24px 16px; }
+    .card { max-width: 640px; margin: 0 auto; background: #fff; border: 1px solid #dde5d8; border-radius: 16px; overflow: hidden; }
+    .header { background: ${BRAND_PRIMARY}; color: #fff; padding: 24px 28px; }
+    .header-brand { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.85; }
+    .header h1 { margin: 0; font-size: 20px; }
+    .body { padding: 28px; line-height: 1.5; }
+    ul { padding-left: 20px; }
+    a { color: ${BRAND_PRIMARY}; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <p class="header-brand">Skaffu</p>
+      <h1>${count} nya prod-fel</h1>
+    </div>
+    <div class="body">
+      <p>Granska i admin innan användare behöver rapportera manuellt.</p>
+      <ul>${listHtml}</ul>
+      <p><a href="${escapeHtml(adminUrl)}">Öppna admin → Error logs</a></p>
+    </div>
+  </div>
 </body>
 </html>`;
 

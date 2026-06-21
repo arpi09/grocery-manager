@@ -22,7 +22,7 @@
 				<tr>
 					<th scope="row" class="col-app">{row.competitor}</th>
 					<td>{row.theirStrength}</td>
-					<td>{row.homePantry}</td>
+					<td>{row.skaffu}</td>
 				</tr>
 			{/each}
 		</tbody>

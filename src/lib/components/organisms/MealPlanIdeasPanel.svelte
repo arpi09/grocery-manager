@@ -239,25 +239,16 @@
 		{#if canEdit && allMissingIngredients.length > 0}
 
 			<div class="batch-action">
-
 				<Button
-
 					type="button"
-
 					fullWidth
-
 					loading={addingMissingKey === '__all__'}
-
 					loadingLabel={t('common.loading')}
-
+					title={t('recipe.addAllMissingBtnTitle')}
 					onclick={addAllMissing}
-
 				>
-
 					{t('recipe.addAllMissingBtn', { count: allMissingIngredients.length })}
-
 				</Button>
-
 			</div>
 
 		{/if}
@@ -267,16 +258,16 @@
 			{#each ideas as idea (idea.id)}
 
 				<article class="idea-item">
+					<a
+						href={recipeDetailHref(idea.id, 'planer')}
+						class="idea-link"
+						onclick={() => trackAtaRecipeOpened('ideas', idea.id)}
+					>
+						<span class="idea-title">{idea.title}</span>
+						<span class="idea-meta">{idea.whyItFits}</span>
+					</a>
 
-					<div class="idea-header">
-						<a
-							href={recipeDetailHref(idea.id, 'planer')}
-							class="idea-link"
-							onclick={() => trackAtaRecipeOpened('ideas', idea.id)}
-						>
-							<span class="idea-title">{idea.title}</span>
-							<span class="idea-meta">{idea.whyItFits}</span>
-						</a>
+					<div class="idea-actions">
 						<a
 							href="/recept/{idea.id}/laga"
 							class="cook-link"
@@ -285,53 +276,29 @@
 							{t('planer.cookRecipe')}
 						</a>
 						{#if canEdit && idea.missingIngredients.length > 0}
-
 							<Button
-
 								type="button"
-
 								variant="secondary"
-
 								class="summary-add-btn"
-
 								loading={addingMissingKey === idea.id}
-
 								loadingLabel={t('common.loading')}
-
 								onclick={(event) => addMissingFromIdea(idea, event)}
-
 							>
-
 								{t('recipe.addMissingBtnShort', { count: idea.missingIngredients.length })}
-
 							</Button>
-
 						{/if}
-
 						{#if canEdit}
-
 							<Button
-
 								type="button"
-
 								variant="ghost"
-
 								class="dismiss-btn"
-
 								loading={dismissingKey === idea.id}
-
 								loadingLabel={t('common.loading')}
-
 								onclick={(event) => dismissIdea(idea, event)}
-
 							>
-
 								{t('planer.dismissNotInterested')}
-
 							</Button>
-
 						{/if}
-
 					</div>
 
 					<form method="POST" action="?/scheduleIdea" class="schedule-form">
@@ -488,38 +455,12 @@
 
 
 
-	.idea-header {
-
-		display: flex;
-
-		align-items: flex-start;
-
-		gap: var(--space-sm);
-
-	}
-
-
-
 	.idea-link {
-
-		flex: 1;
-
+		display: block;
 		min-width: 0;
-
-		min-height: 2.75rem;
-
-		display: flex;
-
-		flex-direction: column;
-
-		justify-content: center;
-
-		gap: 0.15rem;
-
+		padding-bottom: var(--space-xs);
 		text-decoration: none;
-
 		color: inherit;
-
 	}
 
 
@@ -533,57 +474,43 @@
 
 
 	.idea-title {
-
+		display: block;
 		font-weight: 700;
-
 		font-size: 0.92rem;
-
+		line-height: 1.35;
+		word-break: break-word;
 	}
-
-
 
 	.idea-meta {
-
+		display: block;
+		margin-top: 0.15rem;
 		font-size: 0.78rem;
-
 		color: var(--color-text-muted);
-
+		line-height: 1.35;
 		overflow: hidden;
-
 		text-overflow: ellipsis;
-
 		white-space: nowrap;
-
 	}
 
+	.idea-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-xs);
+	}
 
-
-	.idea-header :global(.summary-add-btn) {
-
+	.idea-actions :global(.summary-add-btn) {
 		flex-shrink: 0;
-
 		font-size: 0.78rem;
-
 		padding: 0.35rem 0.55rem;
-
 		min-height: 2rem;
-
 	}
 
-
-
-	.idea-header :global(.dismiss-btn) {
-
+	.idea-actions :global(.dismiss-btn) {
 		flex-shrink: 0;
-
 		font-size: 0.75rem;
-
 		padding: 0.35rem 0.55rem;
-
 		min-height: 2rem;
-
-		white-space: nowrap;
-
 	}
 
 

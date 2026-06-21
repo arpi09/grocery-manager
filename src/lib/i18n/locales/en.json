@@ -107,6 +107,54 @@
 			"missingApiKey": "RESEND_API_KEY is missing. Add it to your .env (see .env.example).",
 			"sandbox": "Invitation created but the email could not be sent. In test mode (onboarding@resend.dev) Resend can only send to the email on your Resend account. Try that address locally, or verify your own domain in Resend. More info: {docsUrl}",
 			"apiKey": "Invitation created but the email could not be sent. The Resend API key is invalid or not allowed. Check RESEND_API_KEY in .env."
+		},
+		"templates": {
+			"common": {
+				"signOff": "Best regards,"
+			},
+			"invite": {
+				"subject": "{inviterName} invited you to {householdName} on Skaffu",
+				"headline": "You are invited to {householdName}",
+				"preheader": "{inviterName} invited you to Skaffu — shop together and waste less food.",
+				"invitedBody": "invited you to the household",
+				"productLead": "Skaffu helps you shop together, track pantry and expiry dates — with less waste.",
+				"rolePrefix": "Your role:",
+				"cta": "Accept invitation",
+				"linkHelp": "Button not working? Copy and paste this link into your browser:",
+				"expiryNote": "The link is valid for 7 days. If you did not expect this, you can ignore this email.",
+				"textGreeting": "Hi!",
+				"textInvited": "{inviterName} invited you to the household \"{householdName}\" on Skaffu.",
+				"textRole": "Your role: {roleLabel}.",
+				"textAccept": "Accept the invitation:"
+			},
+			"expiry": {
+				"subjectOne": "1 item expiring soon — Skaffu",
+				"subjectMany": "{count} items expiring soon — Skaffu",
+				"headlineOne": "1 item expiring soon",
+				"headlineMany": "{count} items expiring soon",
+				"preheader": "Hi {name}! {headline} — open week suggestions and plan your week.",
+				"intro": "Hi {name}! Here are items expiring within {days} days.",
+				"textGreeting": "Hi {name}!",
+				"textLead": "These items in your household expire within {days} days:",
+				"cta": "Open week suggestions",
+				"footer": "You receive this email because you enabled expiry reminders in Skaffu. Turn them off in Settings."
+			},
+			"verify": {
+				"subject": "Confirm your email · Skaffu",
+				"headline": "Confirm your email address",
+				"preheader": "This link is valid for 24 hours.",
+				"body": "Welcome to Skaffu! Click the link below to confirm your email and get started.",
+				"cta": "Confirm email",
+				"footer": "The link is valid for 24 hours. If you did not create an account, you can ignore this email."
+			},
+			"reset": {
+				"subject": "Reset your password · Skaffu",
+				"headline": "Reset your password",
+				"preheader": "This link is valid for 1 hour and can only be used once.",
+				"body": "We received a request to reset the password for your Skaffu account. If you did not request this, you can ignore this email.",
+				"cta": "Choose a new password",
+				"footer": "The link is valid for 1 hour. After you set a new password it cannot be used again."
+			}
 		}
 	},
 	"auth": {
@@ -1559,9 +1607,10 @@
 		"contextExpiring": "{count} items expiring within {days} days",
 		"contextNoExpiring": "Nothing urgent expiring within {days} days.",
 		"contextPlanned": "{count} meals in this calendar view",
-		"contextWeeklyLink": "Generate week suggestions (AI)",
-		"contextHomeLink": "Expiring soon in pantry",
+		"contextWeeklyLink": "Week suggestions (AI)",
+		"contextHomeLink": "Expiring soon",
 		"contextWeekViewLink": "Week view",
+		"contextActionsAria": "Weekly planning actions",
 		"ideasAria": "Recipe ideas",
 		"ideasIntro": "From what you have at home. Pick a date and add to the calendar.",
 		"ideasEmpty": "No suggestions yet. Generate ideas or create a week plan.",
@@ -2536,7 +2585,8 @@
 		"addMissingBtn": "Add missing to shopping list",
 		"addMissingBtnShort": "Add to list ({count})",
 		"addMissingBtnCount": "Add {count} missing to shopping list",
-		"addAllMissingBtn": "Add all missing to shopping list ({count})",
+		"addAllMissingBtn": "Shop missing ({count})",
+		"addAllMissingBtnTitle": "Adds all missing ingredients to the shopping list",
 		"addMissingSuccess": "{count} {count, plural, one {item added} other {items added}} to the shopping list.",
 		"addMissingPartial": "Added {added}, {skipped} were already on the list.",
 		"addMissingNone": "All missing items were already on the shopping list.",
@@ -3329,8 +3379,8 @@
 		"cardLead": "Uncapped AI, receipt PDF and more people in your household."
 	},
 	"rapport": {
-		"metaTitle": "Skaffu Report {month}",
-		"metaDescription": "Anonymised monthly food waste insights from Swedish Skaffu households.",
+		"metaTitle": "Skaffu Report {month} | Skaffu",
+		"metaDescription": "Anonymised monthly food waste insights from Swedish Skaffu households — aggregated app data.",
 		"eyebrow": "Skaffu Report",
 		"title": "How Swedish households waste food — {month}",
 		"lead": "Aggregated, anonymised data from Skaffu households marking expired and discarded items.",

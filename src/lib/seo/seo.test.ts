@@ -108,6 +108,16 @@ describe('buildLandingJsonLd', () => {
 		expect(schemas[1]['@type']).toBe('Organization');
 		expect(schemas[2]['@type']).toBe('WebSite');
 	});
+
+	it('includes Organization sameAs and alternateName for brand entity', () => {
+		const schemas = buildLandingJsonLd('https://skaffu.com', 'Skafferi-app');
+		const org = schemas[1] as Record<string, unknown>;
+		expect(org.sameAs).toEqual([
+			'https://www.linkedin.com/company/skaffu',
+			'https://www.facebook.com/profile.php?id=100066978903320'
+		]);
+		expect(org.alternateName).toEqual(['Skaffu app', 'Skafferi-app']);
+	});
 });
 
 describe('buildFaqPageJsonLd', () => {

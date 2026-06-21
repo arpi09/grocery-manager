@@ -78,11 +78,14 @@ These steps require physical accounts, devices, and consoles — not Cursor.
 
 ### Store metadata (both platforms)
 
+Copy-paste templates, privacy checklists, and screenshot specs: **[STORE_METADATA.md](./STORE_METADATA.md)**.
+
 - Privacy policy: [https://skaffu.com/privacy](https://skaffu.com/privacy)
-- Support: support email / URL on marketing site
-- **Account deletion** in-app — store blocker until shipped (see privacy text)
+- Support: [https://skaffu.com/faq](https://skaffu.com/faq) · hello@skaffu.com
+- **Account deletion:** in-app **Inställningar → Konto → Radera mitt konto** (shipped in prod)
 - Age rating / content rating (IARC on Play)
-- Data safety form (Play) — align with [`privacy-content.ts`](../src/lib/marketing/privacy-content.ts)
+- Data safety form (Play) + App Privacy labels (Apple) — checklists in [STORE_METADATA.md](./STORE_METADATA.md)
+- **Turnstile:** add `skaffu.com` + `www.skaffu.com` to widget hostnames before beta registration — [CAPTCHA.md](./CAPTCHA.md)
 
 ### Assets
 
@@ -92,9 +95,39 @@ npm run generate:store-icons
 
 | Asset | Path / spec |
 |-------|-------------|
-| App Store icon | `static/store/icon-1024.png` — 1024×1024 PNG, no alpha |
-| Android adaptive | `static/store/adaptive-foreground-432.png` — import in Android Studio |
-| Screenshots | SV-first; 6.7" + 6.5" iPhone, Android phone — see [BRAND_REFRESH_BRIEF.md](./BRAND_REFRESH_BRIEF.md) |
+| App Store icon | `static/store/icon-1024.png` — 1024×1024 PNG, no alpha (**committed in repo**) |
+| Android adaptive | `static/store/adaptive-foreground-432.png` — import in Android Studio (**committed in repo**) |
+| Screenshots | SV-first; 6.7" + 6.5" iPhone, Android phone — **USER_LOCAL**; see [STORE_METADATA.md § Screenshots](./STORE_METADATA.md#screenshots-user_local--capture-on-device-or-simulator) |
+
+---
+
+## Repo prep complete (vs USER_LOCAL)
+
+Use this before opening App Store Connect / Play Console.
+
+### Done in repo
+
+| Item | Status |
+|------|--------|
+| Capacitor shell (`com.skaffu.app`, WebView → skaffu.com) | ✅ |
+| In-app account deletion (Settings → Account) | ✅ prod |
+| Store icons (`npm run generate:store-icons` → `static/store/`) | ✅ regenerate after icon.svg changes |
+| [STORE_METADATA.md](./STORE_METADATA.md) — SV copy, privacy/data-safety checklists | ✅ |
+| Privacy policy mentions account deletion path | ✅ [`privacy-content.ts`](../src/lib/marketing/privacy-content.ts) |
+| Version bump locations documented | ✅ [STORE_METADATA.md § Capacitor version](./STORE_METADATA.md#capacitor-version-traceability) |
+| Turnstile hostname reminder | ✅ [CAPTCHA.md](./CAPTCHA.md) + STORE_METADATA |
+
+### USER_LOCAL (owner — blocks first upload)
+
+| Item | Notes |
+|------|-------|
+| Apple Developer + Google Play accounts | ~99 USD/yr + ~25 USD one-time |
+| Mac + Xcode / Android Studio + signing | Distribution cert, keystore (never in git) |
+| Screenshots (SV) | iPhone 6.7" + Android phone |
+| Paste metadata from STORE_METADATA.md | Data safety + App Privacy questionnaires |
+| Turnstile hostnames | Add `skaffu.com`, `www.skaffu.com` in Cloudflare |
+| Archive (iOS) / signed AAB (Android) | Bump versions per STORE_METADATA, then smoke on device |
+| TestFlight internal + Play internal testers | Email lists, no public review |
 
 ---
 
@@ -178,7 +211,7 @@ Derived from [DAY_90_DECISION.md](./DAY_90_DECISION.md):
 
 | Gate | Status |
 |------|--------|
-| **Self-service account deletion** | Required — UI + API + email confirmation |
+| **Self-service account deletion** | ✅ Shipped — Inställningar → Konto → Radera mitt konto |
 | **Receipt PDF quality** | Test pack ≥ 15/20 real PDFs acceptable |
 | **Login + scan + session** | Verified on physical iOS + Android (Capacitor spike) |
 
@@ -206,7 +239,7 @@ capacitor.config.ts
 www/index.html          # placeholder for cap sync (WebView loads server.url)
 ios/                    # Xcode project — committed
 android/                # Gradle project — committed
-static/store/           # generated store icons (gitignore optional — regenerate via script)
+static/store/           # store icons (committed; regenerate via npm run generate:store-icons)
 ```
 
 Build artifacts (`DerivedData`, `android/app/build/`, etc.) are in [`.gitignore`](../.gitignore).
@@ -215,6 +248,8 @@ Build artifacts (`DerivedData`, `android/app/build/`, etc.) are in [`.gitignore`
 
 ## References
 
+- [STORE_METADATA.md](./STORE_METADATA.md) — copy-paste listing text, privacy checklists, screenshots
+- [CAPTCHA.md](./CAPTCHA.md) — Turnstile hostnames for skaffu.com registration
 - [PWA.md](./PWA.md) — store app vs PWA
 - [DAY_90_DECISION.md](./DAY_90_DECISION.md) — PMF gates
 - [ROADMAP.md](./ROADMAP.md) — Capacitor timeline

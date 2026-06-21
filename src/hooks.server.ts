@@ -65,6 +65,7 @@ import {
 } from '$lib/marketing/routes';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { VERIFY_EMAIL_PATH } from '$lib/navigation/email-verification';
+import { resolveCanonicalHostRedirect } from '$lib/server/canonical-host-redirect';
 import { applySecurityHeaders } from '$lib/server/security-headers';
 import { persistSignupUtmCookie } from '$lib/server/signup-utm';
 import { redirect, json, type Handle, type HandleServerError, type ServerInit } from '@sveltejs/kit';
@@ -150,6 +151,11 @@ function isPublicPath(pathname: string): boolean {
 }
 
 export const handle: Handle = async ({ event, resolve }) => {
+	const canonicalRedirect = resolveCanonicalHostRedirect(event.url);
+	if (canonicalRedirect) {
+		redirect(301, canonicalRedirect);
+	}
+
 	await initDatabase();
 
 	event.locals.accountService = accountService;

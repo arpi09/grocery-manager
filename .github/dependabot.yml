@@ -1,0 +1,27 @@
+# Dependabot — npm weekly updates (runtime + dev).
+# CI still gates deploy: npm audit --omit=dev --audit-level=high (reusable-quality.yml).
+# See docs/DEPENDENCY_HEALTH.md for manual refresh cadence.
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Stockholm
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: chore(deps)
+    groups:
+      npm-production-minor-patch:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      npm-development-minor-patch:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch

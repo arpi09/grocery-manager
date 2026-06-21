@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { enhance } from '$app/forms';
 	import { t, getLocale } from '$lib/i18n';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
@@ -8,6 +9,7 @@
 	import { trackAtaRecipeOpened } from '$lib/client/ata-telemetry';
 	import { recipeDetailHref } from '$lib/utils/recipe-assistant-nav';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
 	import { formatCalendarDayLabel, mealSourceVariant } from '$lib/domain/calendar-display';
 	import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
 	import {
@@ -37,6 +39,22 @@
 	let expandedMealId = $state<string | null>(null);
 	let addingMissingKey = $state<string | null>(null);
 	let feedbackBanner = $state<{ message: string; tone: AddMissingFeedbackTone } | null>(null);
+	let createSubmitting = $state(false);
+	let updateSubmitting = $state(false);
+	let deleteSubmitting = $state(false);
+
+	const mealFormEnhance = bindSubmittingWithRedirect(
+		(v) => (createSubmitting = v),
+		async () => {}
+	);
+	const updateFormEnhance = bindSubmittingWithRedirect(
+		(v) => (updateSubmitting = v),
+		async () => {}
+	);
+	const deleteFormEnhance = bindSubmittingWithRedirect(
+		(v) => (deleteSubmitting = v),
+		async () => {}
+	);
 
 	$effect(() => {
 		if (!open) {
@@ -119,7 +137,7 @@
 
 		<section class="add-section" aria-label={t('planer.addMeal')}>
 			<h3>{t('planer.addMeal')}</h3>
-			<form method="POST" action="?/create" class="create-form">
+			<form method="POST" action="?/create" class="create-form" use:enhance={mealFormEnhance}>
 				<input type="hidden" name="month" value={month} />
 				<input type="hidden" name="plannedDate" value={day.date} />
 				<input type="hidden" name="notes" value="" />
@@ -131,7 +149,9 @@
 					placeholder={t('planer.mealTitle')}
 					required
 				/>
-				<Button type="submit" fullWidth>{t('shopping.addLabel')}</Button>
+				<Button type="submit" fullWidth loading={createSubmitting} loadingLabel={t('common.loading')}>
+					{t('shopping.addLabel')}
+				</Button>
 			</form>
 		</section>
 
@@ -148,6 +168,7 @@
 						fullWidth
 						loading={addingMissingKey === '__all__'}
 						loadingLabel={t('common.loading')}
+						title={t('recipe.addAllMissingBtnTitle')}
 						onclick={addAllMissingForDay}
 					>
 						{t('recipe.addAllMissingBtn', { count: dayMissingIngredients.length })}
@@ -203,7 +224,7 @@
 
 						{#if expandedMealId === meal.id}
 							<div class="meal-detail">
-								<form method="POST" action="?/update" class="edit-form">
+								<form method="POST" action="?/update" class="edit-form" use:enhance={updateFormEnhance}>
 									<input type="hidden" name="month" value={month} />
 									<input type="hidden" name="id" value={meal.id} />
 									<label>
@@ -218,7 +239,14 @@
 										{t('common.notes')}
 										<textarea name="notes" rows="2">{meal.notes ?? ''}</textarea>
 									</label>
-									<Button type="submit" fullWidth>{t('common.save')}</Button>
+									<Button
+										type="submit"
+										fullWidth
+										loading={updateSubmitting}
+										loadingLabel={t('common.loading')}
+									>
+										{t('common.save')}
+									</Button>
 								</form>
 								<DeleteConfirmButton
 									tier={2}
@@ -229,6 +257,8 @@
 									label={t('common.delete')}
 									ariaLabel={t('planer.removeMeal', { title: meal.title })}
 									class="delete-form"
+									submitEnhance={deleteFormEnhance}
+									confirmLoading={deleteSubmitting}
 								>
 									<input type="hidden" name="month" value={month} />
 									<input type="hidden" name="id" value={meal.id} />

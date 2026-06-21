@@ -545,6 +545,7 @@
 						onclick={addAllMissing}
 
 						fullWidth
+						title={t('recipe.addAllMissingBtnTitle')}
 
 					>
 

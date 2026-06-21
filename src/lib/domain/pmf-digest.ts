@@ -284,6 +284,7 @@ export function buildPmfDigestEmailContent(input: PmfDigestInput): PmfDigestEmai
 <body>
   <div class="card">
     <div class="header">
+      <p style="margin:0 0 8px;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;opacity:0.85;">Skaffu</p>
       <h1>PMF veckosammanfattning</h1>
       <p>Vecka till ${escapeHtml(weekEnd)} · ${review.onTargetCount}/${review.totalTracked} mätetal på mål</p>
     </div>

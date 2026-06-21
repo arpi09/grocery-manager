@@ -1,5 +1,5 @@
 /**
- * App Store + Play Store icon assets from static/pwa/icon.svg.
+ * App Store + Play Store icon assets from static/favicon.svg.
  * Run: node scripts/generate-store-icons.mjs
  * Requires: sharp (devDependency)
  *
@@ -12,7 +12,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const svgPath = join(root, 'static/pwa/icon.svg');
+const svgPath = join(root, 'static/favicon.svg');
 const outDir = join(root, 'static/store');
 
 const outputs = [

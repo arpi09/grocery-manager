@@ -1573,9 +1573,10 @@
 		"contextExpiring": "{count} varor går ut inom {days} dagar",
 		"contextNoExpiring": "Inget brådskande som går ut inom {days} dagar.",
 		"contextPlanned": "{count} måltider i denna kalendervy",
-		"contextWeeklyLink": "Generera veckoförslag (AI)",
-		"contextHomeLink": "Utgår snart i skafferiet",
-		"contextWeekViewLink": "Veckovy"
+		"contextWeeklyLink": "Veckoförslag (AI)",
+		"contextHomeLink": "Utgår snart",
+		"contextWeekViewLink": "Veckovy",
+		"contextActionsAria": "Åtgärder för veckoplanering"
 	},
 	"stats": {
 		"title": "Ert skafferi i siffror",
@@ -2499,7 +2500,8 @@
 		"addMissingBtn": "Lägg saknade på inköpslista",
 		"addMissingBtnShort": "Lägg på lista ({count})",
 		"addMissingBtnCount": "Lägg {count} saknade på inköpslista",
-		"addAllMissingBtn": "Lägg alla saknade på inköpslista ({count})",
+		"addAllMissingBtn": "Köp saknade ({count})",
+		"addAllMissingBtnTitle": "Lägger alla saknade ingredienser på inköpslistan",
 		"addMissingSuccess": "{count} {count, plural, one {vara lades} other {varor lades}} till på inköpslistan.",
 		"addMissingPartial": "{added} lades till, {skipped} fanns redan på listan.",
 		"addMissingNone": "Alla saknade varor fanns redan på inköpslistan.",
@@ -2732,9 +2734,9 @@
 		"createNew": "Skapa nytt hushåll",
 		"namePlaceholder": "t.ex. Sommarstuga",
 		"v2": {
-			"pageTitle": "Skafferi · Skaffu",
+			"pageTitle": "Lager · Skaffu",
 			"metaDescription": "Se vad finns hemma — kyl, frys och skafferi i en överblick.",
-			"title": "Skafferi",
+			"title": "Lager",
 			"heroAria": "Skafferi — hyllsystem",
 			"useSoon": {
 				"title": "Använd snart — {count, plural, one {# vara} other {# varor}}",
@@ -3326,11 +3328,59 @@
 			"missingApiKey": "RESEND_API_KEY saknas. Lägg till den i din .env (se .env.example).",
 			"sandbox": "Inbjudan skapad men e-post kunde inte skickas. I testläge (onboarding@resend.dev) kan Resend bara skicka till e-postadressen kopplad till ditt Resend-konto. Testa med den adressen lokalt, eller verifiera en egen domän i Resend. Mer info: {docsUrl}",
 			"apiKey": "Inbjudan skapad men e-post kunde inte skickas. Resend API-nyckeln är ogiltig eller otillåten. Kontrollera RESEND_API_KEY i .env."
+		},
+		"templates": {
+			"common": {
+				"signOff": "Vänliga hälsningar,"
+			},
+			"invite": {
+				"subject": "{inviterName} bjöd in dig till {householdName} i Skaffu",
+				"headline": "Du är inbjuden till {householdName}",
+				"preheader": "{inviterName} bjöd in dig till Skaffu — handla ihop och minska svinn.",
+				"invitedBody": "har bjudit in dig till hushållet",
+				"productLead": "Skaffu hjälper er handla ihop, hålla koll på skafferi och utgångsdatum — med mindre svinn.",
+				"rolePrefix": "Din roll:",
+				"cta": "Acceptera inbjudan",
+				"linkHelp": "Fungerar inte knappen? Kopiera och klistra in länken i webbläsaren:",
+				"expiryNote": "Länken gäller i 7 dagar. Om du inte förväntade dig detta kan du ignorera mejlet.",
+				"textGreeting": "Hej!",
+				"textInvited": "{inviterName} har bjudit in dig till hushållet \"{householdName}\" i Skaffu.",
+				"textRole": "Du får rollen {roleLabel}.",
+				"textAccept": "Acceptera inbjudan:"
+			},
+			"expiry": {
+				"subjectOne": "1 vara går snart ut — Skaffu",
+				"subjectMany": "{count} varor går snart ut — Skaffu",
+				"headlineOne": "1 vara går snart ut",
+				"headlineMany": "{count} varor går snart ut",
+				"preheader": "Hej {name}! {headline} — öppna veckoförslagen och planera veckan.",
+				"intro": "Hej {name}! Här är varor som går ut inom {days} dagar.",
+				"textGreeting": "Hej {name}!",
+				"textLead": "Följande varor i ditt hushåll går ut inom {days} dagar:",
+				"cta": "Öppna veckoförslag",
+				"footer": "Du får det här mejlet eftersom du aktiverat utgångspåminnelser i Skaffu. Stäng av dem under Inställningar."
+			},
+			"verify": {
+				"subject": "Bekräfta din e-post · Skaffu",
+				"headline": "Bekräfta din e-postadress",
+				"preheader": "Länken gäller i 24 timmar.",
+				"body": "Välkommen till Skaffu! Klicka på länken nedan för att bekräfta din e-post och komma igång.",
+				"cta": "Bekräfta e-post",
+				"footer": "Länken gäller i 24 timmar. Om du inte skapade ett konto kan du ignorera mejlet."
+			},
+			"reset": {
+				"subject": "Återställ lösenord · Skaffu",
+				"headline": "Återställ ditt lösenord",
+				"preheader": "Länken gäller i 1 timme och kan bara användas en gång.",
+				"body": "Vi fick en begäran om att återställa lösenordet för ditt Skaffu-konto. Om du inte begärde detta kan du ignorera mejlet.",
+				"cta": "Välj nytt lösenord",
+				"footer": "Länken gäller i 1 timme. Efter att du valt nytt lösenord kan den inte användas igen."
+			}
 		}
 	},
 	"rapport": {
-		"metaTitle": "Skaffurapporten {month}",
-		"metaDescription": "Anonymiserad månadsrapport om matsvinn i svenska Skaffu-hushåll.",
+		"metaTitle": "Skaffurapporten {month} | Skaffu",
+		"metaDescription": "Anonymiserad månadsrapport om matsvinn i svenska Skaffu-hushåll — aggregerad data från appen.",
 		"eyebrow": "Skaffurapporten",
 		"title": "Så kastar svenska hushåll mat — {month}",
 		"lead": "Aggregerad och anonymiserad data från Skaffu-hushåll som markerar utgångna och kasserade varor.",

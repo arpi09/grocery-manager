@@ -143,7 +143,16 @@ export interface OrganizationJsonLd {
 	logo: string;
 	email: string;
 	description: string;
+	alternateName: string[];
+	sameAs: string[];
 }
+
+const ORGANIZATION_SAME_AS = [
+	'https://www.linkedin.com/company/skaffu',
+	'https://www.facebook.com/profile.php?id=100066978903320'
+] as const;
+
+const ORGANIZATION_ALTERNATE_NAMES = ['Skaffu app', 'Skafferi-app'] as const;
 
 export function buildLandingJsonLd(
 	origin: string,
@@ -171,7 +180,9 @@ export function buildLandingJsonLd(
 			url: origin,
 			logo: marketingOgImageUrl(origin),
 			email: 'hello@skaffu.com',
-			description
+			description,
+			alternateName: [...ORGANIZATION_ALTERNATE_NAMES],
+			sameAs: [...ORGANIZATION_SAME_AS]
 		},
 		{
 			'@context': 'https://schema.org',

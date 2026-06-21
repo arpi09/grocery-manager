@@ -49,7 +49,7 @@ export interface MarketingFaqItem {
 export interface MarketingComparisonRow {
 	competitor: string;
 	theirStrength: string;
-	homePantry: string;
+	skaffu: string;
 }
 
 export interface MarketingComparison {
@@ -238,12 +238,12 @@ const sv: MarketingContent = {
 	siteName: 'Skaffu',
 	tagline: 'Gemensam veckohandel med matkoll — handla ihop, släng mindre.',
 	meta: {
-		title: 'Skaffu — skafferi-app & inköpslista för hela hushållet | handla ihop',
+		title: 'Skaffu — skafferi-app och inköpslista för hela hushållet',
 		description:
-			'Skafferi-app och delad inköpslista för hela hushållet. Handla ihop med koll på kyl, frys och skafferi — butiksneutralt, gratis att börja på skaffu.com.',
+			'Skaffu är skafferi-appen för hela hushållet: delad inköpslista, kvitto-PDF och koll på utgångsdatum. Handla ihop butiksneutralt — gratis att börja.',
 		ogTitle: 'Skaffu — skafferi-app med gemensam inköpslista',
 		ogDescription:
-			'Handla ihop med koll på skafferiet. Delad lista, utgångsdatum och smarta förslag — webb först, butiksneutralt.'
+			'Delad lista, utgångsdatum och veckoförslag från Skaffu. Handla ihop i butiken — webb först, butiksneutralt.'
 	},
 	nav: [
 		{ href: '/funktioner', label: 'Produkt' },
@@ -267,11 +267,12 @@ const sv: MarketingContent = {
 		badge: 'Pro är live',
 		title: 'Mer plats när hela hushållet är med',
 		lead:
-			'Pro ger plats för fler i hushållet och smartare listförslag från hushållets minne. Gratisplanen finns kvar om du vill prova i lugn och ro.',
+			'Pro ger plats för fler i hushållet, full statistik på handeln och obegränsad kvitto-PDF. Gratisplanen finns kvar om du vill prova i lugn och ro.',
 		bullets: [
-			'Smarta listförslag från hushållets minne',
-			'Full statistik och insikter för hushållet',
+			'Full statistik — följ handeln och kvitton per hushåll',
+			'Obegränsad kvitto-PDF — ladda upp och granska utan tak',
 			'Upp till 6 hushållsmedlemmar',
+			'Smarta veckoförslag och listfyllning',
 			'Från cirka 39 kr/mån — uppgradera när du är redo'
 		],
 		priceFrom: 'från 39 kr/mån',
@@ -280,17 +281,17 @@ const sv: MarketingContent = {
 	},
 	landing: {
 		heroDomainSuffix: '· skaffu.com',
-		heroEyebrow: 'Skafferi-app · handla ihop · skaffu.com',
-		heroTitle: 'Handla ihop med koll på skafferiet.',
+		heroEyebrow: 'Skafferi-app för hela hushållet',
+		heroTitle: 'Skaffu — handla ihop med koll på skafferiet.',
 		heroLead:
 			'Delad inköpslista och skafferi för hela hushållet — bjud in partner, checka av i butiken och se vad som finns hemma innan ni handlar.',
 		heroSecondary:
-			'Kvitton och checkoffs bygger hushållets minne. Butiksneutralt — ICA, Willys eller Coop.',
+			'Kvitton och checkoffs hjälper Skaffu föreslå veckans lista. Butiksneutralt — ICA, Willys eller Coop.',
 		heroHighlightsAria: 'Det viktigaste',
 		heroHighlights: {
 			list: 'Delad lista i realtid',
 			partner: 'Bjud in partner',
-			eatFirst: 'Lär sig vad ni brukar köpa'
+			eatFirst: 'Se vad som går ut snart'
 		},
 		statsAria: 'Skaffu i siffror',
 		seeAllFeatures: 'Se alla funktioner',
@@ -299,31 +300,31 @@ const sv: MarketingContent = {
 		comparisonKicker: 'Jämfört med Bring & ICA',
 		readHowItWorks: 'Se hur det fungerar',
 		stats: [
-			{ value: '1', label: 'gemensam lista — synkad i realtid för hela hushållet' },
-			{ value: '2+', label: 'i hushållet — bjud in partner och handla ihop' },
-			{ value: '↓', label: 'mindre dubbelköp och matsvinn med Ät det först' }
+			{ value: '1', label: 'gemensam lista — slipp dubbelköp när ni handlar ihop' },
+			{ value: '↓', label: 'mindre svinn — se vad som går ut innan det blir dåligt' },
+			{ value: 'kr', label: 'följ handeln i statistik — kvitton och vanor samlade' }
 		],
 		differentiatorsTitle: 'Byggt för hushåll som handlar ihop',
 		differentiatorsLead:
-			'En delad veckolista som lär sig era vanor — från kvitton och checkoffs till smarta förslag, inte bara en tom lista.',
+			'En delad veckolista som lär sig era vanor — från kvitton och checkoffs till veckoförslag, inte bara en tom lista.',
 		differentiators: [
 			{
 				tag: 'Veckolista',
 				title: 'Lista tillsammans',
 				description:
-					'Delad inköpslista i realtid — bjud in partner, checka av i butiken och håll koll på veckans handel.'
+					'Delad inköpslista i realtid — bjud in partner, checka av i butiken och slipp dubbelköp.'
 			},
 			{
-				tag: 'Hushållsminne',
-				title: 'Lär sig vad ni brukar köpa',
+				tag: 'Veckoförslag',
+				title: 'Skaffu föreslår',
 				description:
-					'Kvitton och checkoffs bygger hushållets minne — Skaffu föreslår vad ni brukar behöva nästa vecka.'
+					'Kvitton och checkoffs ger veckoförslag på vad ni brukar behöva — mindre gissning inför handeln.'
 			},
 			{
 				tag: 'Ät det först',
 				title: 'Mindre svinn hemma',
 				description:
-					'Varningar och prioritering så ni använder det som går ut snart — innan det hamnar i soporna.'
+					'Se vad som går ut snart och prioritera det i veckoplanen — innan maten hamnar i soporna.'
 			},
 			{
 				tag: 'Butiksneutral',
@@ -336,11 +337,11 @@ const sv: MarketingContent = {
 		featuresLead: 'Från gemensam lista till matkoll — snabbt, tydligt och utan krångel.',
 		wasteReductionTitle: 'Mindre svinn när listan vet vad som finns',
 		wasteReductionLead:
-			'När hushållets minne känner era vanor blir det lättare att handla rätt mängd, använda det som går ut snart och slippa dubbelköp.',
+			'När Skaffu känner era vanor blir det lättare att handla rätt mängd, använda det som går ut snart och minska matsvinn hemma.',
 		wasteReductionPoints: [
 			'Utgångsdatum och varningar innan varor hinner bli dåliga.',
-			'Recept och inköpslista utifrån det som faktiskt finns hemma.',
-			'Checkoffs och kvitton bygger minnet — så nästa veckas lista träffar rätt.'
+			'Veckoförslag och recept utifrån det som faktiskt finns hemma.',
+			'Kvitto-PDF och checkoffs — så nästa veckas lista träffar rätt.'
 		],
 		stepsTitle: 'Veckohandel på tre steg',
 		stepsLead: 'Från gemensam lista till mindre svinn — utan krånglig setup.',
@@ -392,12 +393,12 @@ const sv: MarketingContent = {
 		title: 'Funktioner',
 		lead: 'Byggt för vardagen i köket — snabbt, tydligt och utan onödig friktion.',
 		meta: {
-			title: 'Funktioner — skanning, kvitto-PDF & smart inköpslista',
+			title: 'Funktioner — kvitto-PDF, statistik & smart inköpslista | Skaffu',
 			description:
-				'Streckkod, kvitto-PDF, utgångsdatum, måltidsplan och hushållssync — butiksneutralt skafferi som kompletterar Bring och Matdags.',
-			ogTitle: 'Skaffu funktioner — lager som sanningskälla',
+				'Streckkod, kvitto-PDF, utgångsdatum, veckoförslag och statistik på handeln — butiksneutral skafferi-app som kompletterar Bring och Matdags.',
+			ogTitle: 'Skaffu funktioner — skafferi, lista och kvitto-PDF',
 			ogDescription:
-				'PDF-kvitto, AI-skannar och inköpslista kopplad till lager. Webb först, utan spelifiering.'
+				'PDF-kvitto med granskning, veckoförslag och inköpslista kopplad till skafferiet. Webb först, utan spelifiering.'
 		},
 		items: [
 			{
@@ -410,13 +411,25 @@ const sv: MarketingContent = {
 				icon: 'sparkle',
 				title: 'Smart inköpslista',
 				description:
-					'Gemensam veckolista med förslag från hushållets minne — checka av tillsammans och slipp dubbelköp.'
+					'Gemensam veckolista med veckoförslag — checka av tillsammans och slipp dubbelköp.'
 			},
 			{
 				icon: 'sparkle',
-				title: 'Skaffu föreslår',
+				title: 'Veckoförslag',
 				description:
-					'Hushållets minne från kvitton och mönster — förslag på vad ni brukar behöva nästa vecka.'
+					'Skaffu föreslår vad ni brukar behöva nästa vecka — utifrån kvitton, checkoffs och vanor.'
+			},
+			{
+				icon: 'receipt',
+				title: 'Kvitto-PDF',
+				description:
+					'Ladda upp digitalt kvitto från Kivra, ICA eller Willys. Du granskar raderna innan de sparas i skafferiet.'
+			},
+			{
+				icon: 'users',
+				title: 'Statistik',
+				description:
+					'Följ handeln och kvitton per hushåll — se mönster i vad ni köper och när ni handlar.'
 			},
 			{
 				icon: 'box',
@@ -431,16 +444,10 @@ const sv: MarketingContent = {
 					'Skanna varor på sekunder. Appen fyller i namn och plats så du slipper skriva allt för hand.'
 			},
 			{
-				icon: 'receipt',
-				title: 'Kvitto & foto',
-				description:
-					'Fotografera kvitto eller hyllan — AI hjälper till att tolka och lägga till flera varor på en gång.'
-			},
-			{
 				icon: 'users',
-				title: 'Måltidsplan & recept',
+				title: 'Veckoplan & recept',
 				description:
-					'Planera veckans mat och få receptidéer utifrån det som redan finns hemma.'
+					'Planera veckans mat under Planer och få receptidéer under Äta — utifrån det som redan finns hemma.'
 			}
 		]
 	},
@@ -448,7 +455,7 @@ const sv: MarketingContent = {
 		title: 'Jämfört med andra appar du redan känner',
 		lead: 'Ärlig bild — vi vill inte sälja in något du redan har löst bra. Här är när Skaffu kompletterar eller skiljer sig.',
 		disclaimer:
-			'Bring!, ICA och Matdags är starka produkter i sina nischer. Vi fokuserar på gemensam veckolista och hushållets minne — butiksneutralt — inte på stammisrabatter eller gamification.',
+			'Bring!, ICA och Matdags är starka produkter i sina nischer. Vi fokuserar på gemensam veckolista och skafferi i samma app — butiksneutralt — inte på stammisrabatter eller gamification.',
 		themColumn: 'Det de gör bra',
 		usColumn: 'Det Skaffu lägger till',
 		rows: [
@@ -456,22 +463,22 @@ const sv: MarketingContent = {
 				competitor: 'Bring!',
 				theirStrength:
 					'Marknadsledande delad inköpslista och sync mellan familjemedlemmar — enkelt och välkänt i Norden.',
-				homePantry:
-					'Samma delade lista — plus skafferi, utgångsdatum och Ät det först så listan speglar vad som faktiskt finns hemma, inte bara vad ni tänkt köpa.'
+				skaffu:
+					'Samma delade lista — plus skafferi, utgångsdatum och Ät det först så ni handlar utifrån vad som faktiskt finns hemma.'
 			},
 			{
 				competitor: 'ICA-appen',
 				theirStrength:
 					'Gratis för stammisar, erbjudanden, butikskarta och inköpslista kopplad till ICA-handel.',
-				homePantry:
-					'Ett skafferi för hela hushållet, butiksneutralt — samma lager oavsett kedja, utan att lista och skafferi lever i olika världar.'
+				skaffu:
+					'Ett skafferi för hela hushållet, butiksneutralt — samma överblick oavsett kedja, utan att lista och skafferi lever i olika världar.'
 			},
 			{
 				competitor: 'Matdags',
 				theirStrength:
 					'Liknande löfte i Sverige: foto, kvitto, streckkod, påminnelser och recept från det du har hemma.',
-				homePantry:
-					'Webb först, PDF-kvitto, måltidsplan kopplad till lager och hushållssync — utan krav på spelifiering eller att byta till native-app dag ett.'
+				skaffu:
+					'Webb först, kvitto-PDF med granskning, veckoplan kopplad till skafferiet och hushållssync — utan krav på native-app dag ett.'
 			}
 		],
 		ctaTitle: 'Prova butiksneutralt skafferi',
@@ -479,39 +486,39 @@ const sv: MarketingContent = {
 	},
 	howItWorks: {
 		title: 'Så fungerar det',
-		lead: 'Tre enkla steg från kaos i skåpen till full överblick.',
+		lead: 'Från konto till veckoförslag — samma flöde som onboarding i appen.',
 		meta: {
 			title: 'Så fungerar Skaffu — skafferi-app i tre steg',
 			description:
-				'Skanna varor, följ utgångsdatum och handla smart. Så kommer du igång med Skaffu — skafferi-appen som hjälper dig minska matsvinn.',
-			ogTitle: 'Så fungerar Skaffu — från skanning till smart inköp',
+				'Skapa konto, bjud in partner och bygg skafferi med kvitto eller lista. Så kommer du igång med Skaffu — skafferi-appen som hjälper dig minska matsvinn.',
+			ogTitle: 'Så fungerar Skaffu — från konto till veckoförslag',
 			ogDescription:
-				'Streckkod, kvitto eller foto → lager per plats → inköpslista. Tre steg till bättre koll på skafferiet.'
+				'Konto → bjud in → lista och kvitto → handla ihop. Tre steg till bättre koll på skafferiet.'
 		},
 		steps: [
 			{
 				step: 1,
-				title: 'Skapa gemensam lista',
+				title: 'Skapa konto och bjud in',
 				description:
-					'Lägg till veckans varor och bjud in partner — alla ser samma inköpslista i realtid.'
+					'Skapa konto, sätt upp hushållet och bjud in partner — alla ser samma inköpslista i realtid.'
 			},
 			{
 				step: 2,
-				title: 'Handla ihop',
+				title: 'Bygg lista och skafferi',
 				description:
-					'Checka av i butiken medan partnern lägger till saker hemma. Dela länk om någon handlar själv.'
+					'Lägg till veckans varor, ladda upp kvitto-PDF eller skanna streckkod. Du granskar alltid innan det sparas.'
 			},
 			{
 				step: 3,
-				title: 'Nästa vecka — Skaffu föreslår',
+				title: 'Handla ihop — nästa vecka föreslår Skaffu',
 				description:
-					'Hushållets minne från kvitton och checkoffs ger förslag på veckans lista — ät det som går ut och handla bara det som saknas.'
+					'Checka av i butiken medan partnern lägger till saker hemma. Nästa vecka får ni veckoförslag utifrån vanor och utgående varor.'
 			}
 		]
 	},
 	faq: {
 		title: 'Vanliga frågor',
-		lead: 'Svar på det vi oftast får höra. Mer hjälp kommer här framöver.',
+		lead: 'Svar på det vi oftast får höra om Skaffu, priser och integritet.',
 		meta: {
 			title: 'FAQ — Skaffu skafferi-app',
 			description:
@@ -524,22 +531,27 @@ const sv: MarketingContent = {
 			{
 				question: 'Hur hjälper Skaffu mig minska matsvinn?',
 				answer:
-					'Skaffu är en skafferi-app byggd kring lager som sanningskälla: du ser utgångsdatum, får varningar innan varor går ut och kan låta recept och inköpslista utgå från det som redan finns hemma — så mindre mat kastas och färre dubbelköp.'
+					'Skaffu är en skafferi-app där ni ser vad som finns hemma: utgångsdatum, varningar innan varor går ut och veckoförslag utifrån det ni redan har. Recept och inköpslista kan byggas på samma skafferi — så mindre mat kastas och färre dubbelköp.'
 			},
 			{
 				question: 'Kostar Skaffu något?',
 				answer:
-					'Du kan skapa konto och använda appen gratis med en generös kärnplan (lager, manuell lista, två hushållsmedlemmar). Pro (~39 kr/mån) ger obegränsad AI, kvitto-PDF och fler hushållsmedlemmar — uppgradera under Inställningar när du vill. Läs mer på /priser.'
+					'Du kan skapa konto och använda appen gratis med en generös kärnplan (skafferi, manuell lista, två hushållsmedlemmar). Pro (~39 kr/mån) ger obegränsad AI, kvitto-PDF, statistik och fler hushållsmedlemmar — uppgradera under Inställningar när du vill. Läs mer på /priser.'
 			},
 			{
 				question: 'Fungerar det utan streckkod?',
 				answer:
-					'Ja. Du kan lägga till varor manuellt, skanna kvitto eller ta foto om streckkoden saknas.'
+					'Ja. Du kan lägga till varor manuellt, ladda upp kvitto-PDF eller ta foto om streckkoden saknas.'
 			},
 			{
 				question: 'Kan flera i hushållet använda samma skafferi?',
 				answer:
-					'Ja. Bjud in medlemmar till ditt hushåll så delar ni lager, inköpslista och måltidsplan.'
+					'Ja. Bjud in medlemmar till ditt hushåll så delar ni skafferi, inköpslista och veckoplan.'
+			},
+			{
+				question: 'Vad visar statistik i Skaffu?',
+				answer:
+					'Under Statistik ser hushållet aggregerad handel och kvittomönster — vad ni köper ofta, hur mycket som går ut och trender över tid. Pro ger full tillgång; gratisplanen har grundläggande insikter.'
 			},
 			{
 				question: 'Var lagras min data?',
@@ -549,17 +561,22 @@ const sv: MarketingContent = {
 			{
 				question: 'Hur används AI i appen?',
 				answer:
-					'AI (OpenAI) hjälper till att tolka kvitto, föreslå varor och ge inköps- och receptidéer. Vi skickar bara det som behövs för funktionen och använder API på ett sätt som inte tränar OpenAI:s modeller. Se integritetspolicyn för detaljer.'
+					'AI (OpenAI) hjälper till att tolka kvitto-PDF, föreslå varor och ge inköps- och receptidéer. Vi skickar bara det som behövs för funktionen och använder API på ett sätt som inte tränar OpenAI:s modeller. Se integritetspolicyn för detaljer.'
 			},
 			{
 				question: 'Kan jag dela utgående varor med grannar?',
 				answer:
-					'Ja, som beta kan du skapa en tidsbegränsad länk (48 timmar) med varor som går ut snart — utan adress eller geo. Mottagaren ser bara varunamn och utgångsdatum. Läs mer i docs/GRANNSKAFFERIET_V0.md.'
+					'Ja — grannskafferiet (beta) låter dig skapa en tidsbegränsad länk (48 timmar) med varor som går ut snart, utan adress eller geo. Mottagaren ser bara varunamn och utgångsdatum. Prova under /grannskafferiet i appen.'
 			},
 			{
 				question: 'Kan jag lägga till Skaffu på hemskärmen?',
 				answer:
 					'Ja. Öppna appen i Safari (iPhone) eller Chrome (Android) och välj Lägg till på hemskärmen / Installera app. I appen under Inställningar → Lägg till på hemskärmen finns steg-för-steg-guide. På dator fungerar appen i webbläsaren.'
+			},
+			{
+				question: 'Hur raderar jag mitt konto?',
+				answer:
+					'Gå till Inställningar → Konto → Radera mitt konto. Hushållsägare kan även ta bort hela hushållet under Inställningar → Hushåll. Raderingen är permanent — se integritetspolicyn för detaljer om datalagring.'
 			}
 		],
 		pricingLinkLabel: 'Priser & planer',
@@ -611,10 +628,10 @@ const sv: MarketingContent = {
 		lead:
 			'När du ser vad som finns i kyl, frys och skafferi — och vad som går ut snart — blir det lättare att handla rätt och äta upp innan maten kastas.',
 		meta: {
-			title: 'Minska matsvinn — skafferi-app med utgångsdatum & Ät det först',
+			title: 'Minska matsvinn — skafferi-app med utgångsdatum & Ät det först | Skaffu',
 			description:
-				'Skaffu hjälper hushållet minska matsvinn: lager som sanningskälla, varningar innan varor går ut och veckoplan från det som redan finns hemma. Prova gratis.',
-			ogTitle: 'Minska matsvinn med Skaffu — lager, utgång & smart inköp',
+				'Skaffu hjälper hushållet minska matsvinn: utgångsdatum, varningar innan varor går ut och veckoplan från det som redan finns hemma. Prova gratis.',
+			ogTitle: 'Minska matsvinn med Skaffu — utgångsdatum och smart inköp',
 			ogDescription:
 				'Butiksneutral skafferi-app: se utgångsdatum, prioritera det som går ut och slipp dubbelköp som leder till svinn.'
 		},
@@ -630,14 +647,14 @@ const sv: MarketingContent = {
 	pantryApp: {
 		title: 'Skafferi-app för hela hushållet',
 		lead:
-			'Skaffu är en butiksneutral skafferi-app: ett lager för kyl, frys och skåp som hela familjen delar — oavsett om ni handlar på ICA, Willys eller Coop.',
+			'Skaffu är en butiksneutral skafferi-app: kyl, frys och skåp som hela familjen delar — oavsett om ni handlar på ICA, Willys eller Coop.',
 		meta: {
-			title: 'Skafferi-app — lager, kvitto-PDF & inköpslista | Skaffu',
+			title: 'Skafferi-app — kvitto-PDF, lista & utgångsdatum | Skaffu',
 			description:
 				'Skafferi-app med streckkod, kvitto från Kivra, utgångsdatum och hushållssync. Webb först, gratis att börja — utan kedjelåsning.',
-			ogTitle: 'Skaffu — skafferi-app med lager som sanningskälla',
+			ogTitle: 'Skaffu — skafferi-app med delad inköpslista',
 			ogDescription:
-				'Från skanning till inköpslista: ett skafferi som speglar vad som faktiskt finns hemma. Jämför med Bring och Matdags.'
+				'Från kvitto-PDF till inköpslista: ett skafferi som speglar vad som faktiskt finns hemma. Jämför med Bring och Matdags.'
 		},
 		points: [
 			'Streckkod, kvitto-PDF och foto — tre sätt att fylla skafferiet snabbt.',
@@ -651,14 +668,14 @@ const sv: MarketingContent = {
 	receiptGuide: {
 		title: 'Digitalt kvitto (PDF) till skafferi',
 		lead:
-			'Ladda upp digitalt kvitto från Kivra, ICA, Willys eller e-post — AI hjälper till att fylla skafferiet. Du granskar alltid raderna innan de sparas.',
+			'Ladda upp digitalt kvitto från Kivra, ICA, Willys eller e-post — Skaffu tolkar raderna och du granskar alltid innan de sparas.',
 		meta: {
-			title: 'Digitalt kvitto (PDF) — guide till kvitto-autopilot i Skaffu',
+			title: 'Digitalt kvitto (PDF) — ladda upp från Kivra & ICA | Skaffu',
 			description:
 				'Så sparar du kvitto som PDF från Kivra, ICA-appen eller e-post och laddar upp i Skaffu. Butiksneutral skafferi-app — ingen officiell Kivra-integration.',
-			ogTitle: 'Digitalt kvitto som PDF — fyll skafferiet med review',
+			ogTitle: 'Digitalt kvitto som PDF — fyll skafferiet med granskning',
 			ogDescription:
-				'Steg-för-steg: exportera digitalt kvitto, ladda upp PDF i Skaffu och granska varor innan de hamnar i lagret.'
+				'Steg-för-steg: exportera digitalt kvitto, ladda upp PDF i Skaffu och granska varor innan de hamnar i skafferiet.'
 		},
 		points: [
 			'Fungerar med text-PDF från Kivra, ICA, Willys, Coop och fler.',
@@ -710,19 +727,19 @@ const sv: MarketingContent = {
 		kicker: 'Guider',
 		title: 'Guider för skafferi, matsvinn och smart inköp',
 		lead:
-			'Long-tail guider för svenska hushåll — lager som sanningskälla, utgångsdatum, kvitto-PDF och butiksneutral inköpslista.',
+			'Praktiska guider för svenska hushåll — utgångsdatum, kvitto-PDF, butiksneutral inköpslista och mindre matsvinn.',
 		empty: 'Nya guider publiceras snart.',
 		readMore: 'Läs mer',
 		backToList: 'Alla guider',
 		ctaTitle: 'Prova Skaffu efter guiden',
 		ctaLead: 'Skapa konto gratis och testa med kvitto eller streckkod — webb först.',
 		meta: {
-			title: 'Guider — skafferi, matsvinn & kvitto-PDF',
+			title: 'Guider — skafferi, matsvinn & kvitto-PDF | Skaffu',
 			description:
 				'Praktiska guider om skafferi-app, minska matsvinn, Kivra-kvitto och inköpslista kopplad till kyl och skafferi. Skaffu — butiksneutralt för hela hushållet.',
 			ogTitle: 'Skaffu guider — skafferi, matsvinn och smart inköp',
 			ogDescription:
-				'SEO-guider för svenska hushåll: utgångsdatum, kvitto-PDF, butiksneutral inköpslista och mindre matsvinn.'
+				'Guider för svenska hushåll: utgångsdatum, kvitto-PDF, butiksneutral inköpslista och mindre matsvinn.'
 		}
 	}
 };
@@ -731,12 +748,12 @@ const en: MarketingContent = {
 	...sv,
 	tagline: 'Shared weekly shopping with food awareness — shop together, waste less.',
 	meta: {
-		title: 'Skaffu — pantry app & shopping list for the whole household | shop together',
+		title: 'Skaffu — pantry app and shopping list for the whole household',
 		description:
-			'Pantry app and shared shopping list for the whole household. Shop together with fridge, freezer and cupboard in sync — store-neutral, free to start at skaffu.com.',
+			'Skaffu is the pantry app for the whole household: shared shopping list, receipt PDF and expiry tracking. Shop together store-neutral — free to start.',
 		ogTitle: 'Skaffu — pantry app with shared shopping list',
 		ogDescription:
-			'Shop together with pantry awareness. Shared list, expiry dates and smart suggestions — web-first, store-neutral.'
+			'Shared list, expiry dates and weekly suggestions from Skaffu. Shop together in the store — web-first, store-neutral.'
 	},
 	nav: [
 		{ href: '/funktioner', label: 'Product' },
@@ -760,11 +777,12 @@ const en: MarketingContent = {
 		badge: 'Pro is live',
 		title: 'More room when the whole household joins',
 		lead:
-			'Pro adds room for more household members, unlimited receipt PDFs and smarter list fill. The free plan is still there if you want to try at your own pace.',
+			'Pro adds room for more household members, full shopping statistics and unlimited receipt PDF. The free plan is still there if you want to try at your own pace.',
 		bullets: [
-			'Smart list suggestions from household memory',
-			'Full statistics and insights for the household',
+			'Full statistics — track shopping and receipts for the household',
+			'Unlimited receipt PDF — upload and review without caps',
 			'Up to 6 household members',
+			'Smart weekly suggestions and list fill',
 			'From about 39 SEK/month — upgrade when you are ready'
 		],
 		priceFrom: 'from 39 SEK/month',
@@ -775,7 +793,7 @@ const en: MarketingContent = {
 		title: 'Compared to apps you may already use',
 		lead: 'An honest view — we are not here to replace what already works for you. Here is when Skaffu complements or differs.',
 		disclaimer:
-			'Dedicated list apps and pantry trackers are strong in their niches. We focus on a store-neutral pantry with inventory as source of truth — not loyalty programs or gamification.',
+			'Dedicated list apps and pantry trackers are strong in their niches. We focus on a store-neutral pantry and shopping list in one app — not loyalty programs or gamification.',
 		themColumn: 'What they do well',
 		usColumn: 'What Skaffu adds',
 		rows: [
@@ -783,21 +801,21 @@ const en: MarketingContent = {
 				competitor: 'List apps (AnyList, OurGroceries)',
 				theirStrength:
 					'Fast shared shopping lists and household sync — the default for many families who already live in a list app.',
-				homePantry:
-					'Same shared list — plus pantry inventory, expiry dates and Eat First so the list reflects what is actually at home, not just planned buys.'
+				skaffu:
+					'Same shared list — plus pantry inventory, expiry dates and Eat First so you shop based on what is actually at home.'
 			},
 			{
 				competitor: 'Pantry trackers (NoWaste, etc.)',
 				theirStrength:
 					'Large barcode databases, expiry tracking and native apps built around reducing food waste.',
-				homePantry:
-					'Receipt PDF, meal plan tied to inventory, household sync and store-neutral shopping — web-first without switching apps on day one.'
+				skaffu:
+					'Receipt PDF with review, meal plan tied to pantry, household sync and store-neutral shopping — web-first without switching apps on day one.'
 			},
 			{
 				competitor: 'Meal planners (Mealime, etc.)',
 				theirStrength:
 					'Recipe ideas and weekly menus with polished native experiences and curated meal libraries.',
-				homePantry:
+				skaffu:
 					'Plans built from your actual pantry and expiry dates — one click to shopping list, without a separate inventory world.'
 			}
 		],
@@ -806,17 +824,17 @@ const en: MarketingContent = {
 	},
 	landing: {
 		heroDomainSuffix: '· skaffu.com',
-		heroEyebrow: 'Pantry app · shop together · skaffu.com',
-		heroTitle: 'Shop together with pantry awareness.',
+		heroEyebrow: 'Pantry app for the whole household',
+		heroTitle: 'Skaffu — shop together with pantry awareness.',
 		heroLead:
 			'Shared shopping list and pantry for the whole household — invite your partner, check off in the store and see what is at home before you shop.',
 		heroSecondary:
-			'Receipts and checkoffs build household memory. Store-neutral — ICA, Willys or Coop.',
+			'Receipts and checkoffs help Skaffu suggest the weekly list. Store-neutral — ICA, Willys or Coop.',
 		heroHighlightsAria: 'Highlights',
 		heroHighlights: {
 			list: 'Shared list in real time',
 			partner: 'Invite your partner',
-			eatFirst: 'Learns what you usually buy'
+			eatFirst: 'See what expires soon'
 		},
 		statsAria: 'Skaffu in numbers',
 		seeAllFeatures: 'See all features',
@@ -825,30 +843,30 @@ const en: MarketingContent = {
 		comparisonKicker: 'Compared to list & pantry apps',
 		readHowItWorks: 'See how it works',
 		stats: [
-			{ value: '1', label: 'shared list — synced in real time for the whole household' },
-			{ value: '2+', label: 'in the household — invite your partner and shop together' },
-			{ value: '↓', label: 'less duplicate buys and food waste with Eat First' }
+			{ value: '1', label: 'shared list — avoid duplicate buys when you shop together' },
+			{ value: '↓', label: 'less waste — see what expires before it goes bad' },
+			{ value: 'kr', label: 'track shopping in statistics — receipts and habits in one place' }
 		],
 		differentiatorsTitle: 'Built for households that shop together',
 		differentiatorsLead:
-			'A shared weekly list that learns your habits — from receipts and checkoffs to smart suggestions, not just an empty list.',
+			'A shared weekly list that learns your habits — from receipts and checkoffs to weekly suggestions, not just an empty list.',
 		differentiators: [
 			{
 				tag: 'Weekly list',
 				title: 'Shop from one list',
 				description:
-					'Shared shopping list in real time — invite your partner, check off in the store and keep track of the week.'
+					'Shared shopping list in real time — invite your partner, check off in the store and avoid duplicate buys.'
 			},
 			{
-				tag: 'Household memory',
-				title: 'Learns what you usually buy',
+				tag: 'Weekly suggestions',
+				title: 'Skaffu suggests',
 				description:
-					'Receipts and checkoffs build household memory — Skaffu suggests what you usually need next week.'
+					'Receipts and checkoffs feed weekly suggestions for what you usually need — less guesswork before shopping.'
 			},
 			{
 				tag: 'Eat first',
 				title: 'Less waste at home',
-				description: 'Warnings and prioritisation so you use items before they go bad.'
+				description: 'See what expires soon and prioritise it in the meal plan — before food ends up in the bin.'
 			},
 			{
 				tag: 'Store-neutral',
@@ -857,14 +875,14 @@ const en: MarketingContent = {
 			}
 		],
 		featuresTitle: 'Everything you need in the kitchen',
-		featuresLead: 'From scanning to shopping — fast, clear and low friction.',
+		featuresLead: 'From shared list to food awareness — fast, clear and low friction.',
 		wasteReductionTitle: 'Less waste when the list knows what you have',
 		wasteReductionLead:
-			'When household memory knows your habits it is easier to buy the right amount, use items before they expire and avoid duplicate purchases.',
+			'When Skaffu knows your habits it is easier to buy the right amount, use items before they expire and reduce food waste at home.',
 		wasteReductionPoints: [
 			'Expiry dates and warnings before food goes bad.',
-			'Recipes and shopping list based on what you actually have at home.',
-			'Receipt PDF and scanning — quick start without manually filling the whole pantry.'
+			'Weekly suggestions and recipes based on what you actually have at home.',
+			'Receipt PDF and checkoffs — so next week\'s list hits the mark.'
 		],
 		stepsTitle: 'Weekly shopping in three steps',
 		stepsLead: 'From shared list to less waste — no complicated setup.',
@@ -916,12 +934,12 @@ const en: MarketingContent = {
 		title: 'Features',
 		lead: 'Built for everyday kitchen use — fast, clear and low friction.',
 		meta: {
-			title: 'Features — scanning, receipt PDF & smart shopping list',
+			title: 'Features — receipt PDF, statistics & smart shopping list | Skaffu',
 			description:
-				'Barcode, receipt PDF, expiry dates, meal plan and household sync — store-neutral pantry that complements list apps and pantry trackers.',
-			ogTitle: 'Skaffu features — inventory as source of truth',
+				'Barcode, receipt PDF, expiry dates, weekly suggestions and shopping statistics — store-neutral pantry app that complements list apps and pantry trackers.',
+			ogTitle: 'Skaffu features — pantry, list and receipt PDF',
 			ogDescription:
-				'PDF receipts, AI scans and shopping list tied to inventory. Web-first, without gamification.'
+				'PDF receipts with review, weekly suggestions and shopping list tied to your pantry. Web-first, without gamification.'
 		},
 		items: [
 			{
@@ -934,13 +952,25 @@ const en: MarketingContent = {
 				icon: 'sparkle',
 				title: 'Smart shopping list',
 				description:
-					'Shared weekly list with suggestions from household memory — check off together and avoid duplicate buys.'
+					'Shared weekly list with weekly suggestions — check off together and avoid duplicate buys.'
 			},
 			{
 				icon: 'sparkle',
-				title: 'Skaffu suggests',
+				title: 'Weekly suggestions',
 				description:
-					'Household memory from receipts and patterns — suggestions for what you usually need next week.'
+					'Skaffu suggests what you usually need next week — from receipts, checkoffs and habits.'
+			},
+			{
+				icon: 'receipt',
+				title: 'Receipt PDF',
+				description:
+					'Upload a digital receipt from Kivra, ICA or Willys. You review lines before they are saved to the pantry.'
+			},
+			{
+				icon: 'users',
+				title: 'Statistics',
+				description:
+					'Track shopping and receipts for the household — see patterns in what you buy and when you shop.'
 			},
 			{
 				icon: 'box',
@@ -954,52 +984,48 @@ const en: MarketingContent = {
 				description: 'Scan items in seconds. The app fills in name and location so you type less.'
 			},
 			{
-				icon: 'receipt',
-				title: 'Receipt & photo',
-				description: 'Photograph a receipt or shelf — AI helps parse and add multiple items at once.'
-			},
-			{
 				icon: 'users',
 				title: 'Meal plan & recipes',
-				description: 'Plan the week and get recipe ideas from what is already at home.'
+				description:
+					'Plan the week under Meal plan and get recipe ideas under Eat — from what is already at home.'
 			}
 		]
 	},
 	howItWorks: {
 		title: 'How it works',
-		lead: 'Three simple steps from messy cupboards to full overview.',
+		lead: 'From account to weekly suggestions — the same flow as onboarding in the app.',
 		meta: {
 			title: 'How Skaffu works — pantry app in three steps',
 			description:
-				'Scan items, track expiry dates and shop smart. Get started with Skaffu — the pantry app that helps reduce food waste.',
-			ogTitle: 'How Skaffu works — from scanning to smart shopping',
+				'Create an account, invite your partner and build the pantry with receipts or a list. Get started with Skaffu — the pantry app that helps reduce food waste.',
+			ogTitle: 'How Skaffu works — from account to weekly suggestions',
 			ogDescription:
-				'Barcode, receipt or photo → inventory by location → shopping list. Three steps to a better pantry.'
+				'Account → invite → list and receipt → shop together. Three steps to a better pantry.'
 		},
 		steps: [
 			{
 				step: 1,
-				title: 'Create a shared list',
+				title: 'Create account and invite',
 				description:
-					'Add this week\'s items and invite your partner — everyone sees the same shopping list in real time.'
+					'Create an account, set up your household and invite your partner — everyone sees the same shopping list in real time.'
 			},
 			{
 				step: 2,
-				title: 'Shop together',
+				title: 'Build list and pantry',
 				description:
-					'Check off in the store while your partner adds items at home. Share a link if someone shops alone.'
+					'Add this week\'s items, upload a receipt PDF or scan barcodes. You always review before saving.'
 			},
 			{
 				step: 3,
-				title: 'Next week — Skaffu suggests',
+				title: 'Shop together — Skaffu suggests next week',
 				description:
-					'Household memory from receipts and checkoffs suggests items for the weekly list — eat what expires and only shop what is missing.'
+					'Check off in the store while your partner adds items at home. Next week you get suggestions based on habits and expiring items.'
 			}
 		]
 	},
 	faq: {
 		title: 'Frequently asked questions',
-		lead: 'Answers to what we hear most often. More help will appear here over time.',
+		lead: 'Answers to what we hear most often about Skaffu, pricing and privacy.',
 		meta: {
 			title: 'FAQ — Skaffu pantry app',
 			description:
@@ -1012,20 +1038,25 @@ const en: MarketingContent = {
 			{
 				question: 'How does Skaffu help me reduce food waste?',
 				answer:
-					'Skaffu is a pantry app built around inventory as source of truth: you see expiry dates, get warnings before items go bad, and can base recipes and shopping lists on what is already at home — so less food is thrown away and fewer duplicate buys.'
+					'Skaffu is a pantry app where you see what is at home: expiry dates, warnings before items go bad and weekly suggestions from what you already have. Recipes and shopping lists can build on the same pantry — so less food is thrown away and fewer duplicate buys.'
 			},
 			{
 				question: 'Does Skaffu cost anything?',
 				answer:
-					'You can create an account and use the app free on a generous core plan (inventory, manual list, two household members). Pro (~39 SEK/month) adds unlimited AI, receipt PDF and more household members — upgrade in Settings when you want. See /priser for more.'
+					'You can create an account and use the app free on a generous core plan (pantry, manual list, two household members). Pro (~39 SEK/month) adds unlimited AI, receipt PDF, statistics and more household members — upgrade in Settings when you want. See /priser for more.'
 			},
 			{
 				question: 'Does it work without a barcode?',
-				answer: 'Yes. Add items manually, scan a receipt or take a photo when the barcode is missing.'
+				answer: 'Yes. Add items manually, upload a receipt PDF or take a photo when the barcode is missing.'
 			},
 			{
 				question: 'Can several people in the household share one pantry?',
-				answer: 'Yes. Invite members to your household to share inventory, shopping list and meal plan.'
+				answer: 'Yes. Invite members to your household to share pantry, shopping list and meal plan.'
+			},
+			{
+				question: 'What does statistics show in Skaffu?',
+				answer:
+					'Under Statistics the household sees aggregated shopping and receipt patterns — what you buy often, how much expires and trends over time. Pro gives full access; the free plan has basic insights.'
 			},
 			{
 				question: 'Where is my data stored?',
@@ -1035,17 +1066,22 @@ const en: MarketingContent = {
 			{
 				question: 'How is AI used in the app?',
 				answer:
-					'AI (OpenAI) helps parse receipts, suggest items and give shopping and recipe ideas. We only send what is needed for the feature and use the API in a way that does not train OpenAI models. See the privacy policy for details.'
+					'AI (OpenAI) helps parse receipt PDFs, suggest items and give shopping and recipe ideas. We only send what is needed for the feature and use the API in a way that does not train OpenAI models. See the privacy policy for details.'
 			},
 			{
 				question: 'Can I share expiring items with neighbours?',
 				answer:
-					'Yes — as a beta you can create a time-limited link (48 hours) with items expiring soon, with no address or geo. Recipients only see item names and expiry dates. See docs/GRANNSKAFFERIET_V0.md for details.'
+					'Yes — Neighbour pantry (beta) lets you create a time-limited link (48 hours) with items expiring soon, with no address or geo. Recipients only see item names and expiry dates. Try it under /grannskafferiet in the app.'
 			},
 			{
 				question: 'Can I add Skaffu to my home screen?',
 				answer:
 					'Yes. Open the app in Safari (iPhone) or Chrome (Android) and choose Add to Home Screen / Install app. In the app, go to Settings → Add to home screen for step-by-step instructions. On desktop, use the app in your browser.'
+			},
+			{
+				question: 'How do I delete my account?',
+				answer:
+					'Go to Settings → Account → Delete my account. Household owners can also delete the whole household under Settings → Household. Deletion is permanent — see the privacy policy for data retention details.'
 			}
 		],
 		pricingLinkLabel: 'Pricing & plans',
@@ -1097,9 +1133,9 @@ const en: MarketingContent = {
 		lead:
 			'When you see what is in the fridge, freezer and cupboard — and what expires soon — it is easier to shop the right amount and eat up before food is thrown away.',
 		meta: {
-			title: 'Reduce food waste — pantry app with expiry dates',
+			title: 'Reduce food waste — pantry app with expiry dates | Skaffu',
 			description:
-				'Skaffu helps households cut food waste: inventory as source of truth, warnings before items go bad and weekly plans from what you already have. Free to start.',
+				'Skaffu helps households cut food waste: expiry dates, warnings before items go bad and weekly plans from what you already have. Free to start.',
 			ogTitle: 'Reduce food waste with Skaffu — expiry-aware pantry',
 			ogDescription:
 				'Store-neutral pantry app: see expiry dates, prioritise what goes out soon and avoid duplicate buys that lead to waste.'
@@ -1116,14 +1152,14 @@ const en: MarketingContent = {
 	pantryApp: {
 		title: 'Pantry app for the whole household',
 		lead:
-			'Skaffu is a store-neutral pantry app: one inventory for fridge, freezer and cupboards that the whole family shares — whether you shop at ICA, Willys or Coop.',
+			'Skaffu is a store-neutral pantry app: fridge, freezer and cupboards that the whole family shares — whether you shop at ICA, Willys or Coop.',
 		meta: {
-			title: 'Pantry app — inventory, receipt PDF & shopping list | Skaffu',
+			title: 'Pantry app — receipt PDF, list & expiry dates | Skaffu',
 			description:
 				'Pantry app with barcode scan, Kivra receipt PDF, expiry dates and household sync. Web-first, free to start — no chain lock-in.',
-			ogTitle: 'Skaffu — pantry app with inventory as source of truth',
+			ogTitle: 'Skaffu — pantry app with shared shopping list',
 			ogDescription:
-				'From scanning to shopping list: a pantry that reflects what is actually at home. Compare with list-only apps.'
+				'From receipt PDF to shopping list: a pantry that reflects what is actually at home. Compare with list-only apps.'
 		},
 		points: [
 			'Barcode, receipt PDF and photo — three ways to fill the pantry fast.',
@@ -1137,14 +1173,14 @@ const en: MarketingContent = {
 	receiptGuide: {
 		title: 'Digital receipt (PDF) to pantry',
 		lead:
-			'Upload a digital receipt from Kivra, ICA, Willys or email — AI helps fill the pantry. You always review lines before they are saved.',
+			'Upload a digital receipt from Kivra, ICA, Willys or email — Skaffu parses the lines and you always review before they are saved.',
 		meta: {
-			title: 'Digital receipt (PDF) — receipt autopilot guide in Skaffu',
+			title: 'Digital receipt (PDF) — upload from Kivra & ICA | Skaffu',
 			description:
 				'How to save receipts as PDF from Kivra, the ICA app or email and upload in Skaffu. Store-neutral pantry app — not an official Kivra integration.',
 			ogTitle: 'Digital receipt as PDF — fill the pantry with review',
 			ogDescription:
-				'Step by step: export a digital receipt, upload the PDF in Skaffu and review lines before they enter inventory.'
+				'Step by step: export a digital receipt, upload the PDF in Skaffu and review lines before they enter the pantry.'
 		},
 		points: [
 			'Works with text PDFs from Kivra, ICA, Willys, Coop and more.',
@@ -1196,19 +1232,19 @@ const en: MarketingContent = {
 		kicker: 'Guides',
 		title: 'Guides for pantry, food waste and smart shopping',
 		lead:
-			'Long-tail guides for households — inventory as source of truth, expiry dates, receipt PDF and store-neutral shopping lists.',
+			'Practical guides for households — expiry dates, receipt PDF, store-neutral shopping lists and less food waste.',
 		empty: 'New guides coming soon.',
 		readMore: 'Read more',
 		backToList: 'All guides',
 		ctaTitle: 'Try Skaffu after the guide',
 		ctaLead: 'Create a free account and test with a receipt or barcode — web-first.',
 		meta: {
-			title: 'Guides — pantry, food waste & receipt PDF',
+			title: 'Guides — pantry, food waste & receipt PDF | Skaffu',
 			description:
 				'Practical guides on pantry apps, reducing food waste, Kivra receipts and shopping lists tied to fridge and cupboard. Skaffu — store-neutral for the whole household.',
 			ogTitle: 'Skaffu guides — pantry, food waste and smart shopping',
 			ogDescription:
-				'SEO guides for households: expiry dates, receipt PDF, store-neutral shopping and less food waste.'
+				'Guides for households: expiry dates, receipt PDF, store-neutral shopping and less food waste.'
 		}
 	}
 };

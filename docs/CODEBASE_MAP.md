@@ -43,6 +43,7 @@
 | Ämne | Filer |
 |------|-------|
 | **i18n** | [`src/lib/i18n/locales/sv.json`](../src/lib/i18n/locales/sv.json), [`en.json`](../src/lib/i18n/locales/en.json) |
+| **Email (Resend)** | [`email.ts`](../src/lib/server/email.ts), [`email-layout.ts`](../src/lib/server/email-layout.ts) — see [EMAIL.md](./EMAIL.md) |
 | **Flags** | `apphosting.yaml` + [CURRENT_REALITY.md](./CURRENT_REALITY.md) |
 | **DI / wiring** | [`src/lib/server/di.ts`](../src/lib/server/di.ts) |
 | **Auth hook** | [`src/hooks.server.ts`](../src/hooks.server.ts) |

@@ -2,6 +2,20 @@
 
 Home Pantry uses [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile/) on **user registration** only. Turnstile is free for normal site usage, privacy-friendly, and usually invisible or low-friction for real users.
 
+## Owner checklist — skaffu.com hostnames (USER_LOCAL)
+
+> **Action required (product owner, not code):** Before routing production traffic to `skaffu.com`, add both custom domains to the **same** Turnstile widget that holds your production site/secret keys. Missing hostnames cause error **110200** and block registration.
+
+| Step | Action |
+|------|--------|
+| 1 | Cloudflare dashboard → **Turnstile** → select the production widget |
+| 2 | **Settings** → **Hostname Management** → **Add Hostnames** |
+| 3 | Add **`skaffu.com`** and **`www.skaffu.com`** (exact hostnames — no `https://`, no path) |
+| 4 | **Save** — allow ~1 minute, then hard-refresh `/register` on each hostname |
+| 5 | Keep **`home-pantry--home-pantry-4bee5.europe-west4.hosted.app`** during transition ([`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md)) |
+
+Verify: widget renders on `https://skaffu.com/register` and `https://www.skaffu.com/register`; no `[turnstile] Widget error: 110200` in the browser console.
+
 ## Create keys (free)
 
 1. Sign in to the [Cloudflare dashboard](https://dash.cloudflare.com/).
@@ -17,7 +31,7 @@ Home Pantry uses [Cloudflare Turnstile](https://www.cloudflare.com/products/turn
 
    Common mistake: adding only `hosted.app` (partial) instead of the **full** hostname above — Turnstile matches the exact host only.
 
-   **Future (after skaffu.com is Connected):** add `skaffu.com` and `www.skaffu.com` to the same widget — see [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md). Keep hosted.app hostname during transition.
+   **Custom domain:** also add `skaffu.com` and `www.skaffu.com` — see [Owner checklist — skaffu.com hostnames](#owner-checklist--skaffucom-hostnames-user_local) above and [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md). Keep hosted.app hostname during transition.
 4. Copy the **Site key** and **Secret key** (pair must belong to the same widget).
 
 If a hostname is missing, Turnstile returns error **110200** (invalid domain): the widget label appears, a red *Captcha kunde inte laddas för den här webbadressen* message shows, and submit is disabled. Browser console: `[turnstile] Widget error: 110200`. Inspect `data-turnstile-error-code="110200"` on the error line.

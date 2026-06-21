@@ -1,5 +1,5 @@
 /**
- * Rasterize static/pwa/icon.svg to PNG sizes for PWA + iOS home screen.
+ * Rasterize static/favicon.svg to PNG sizes for PWA + iOS home screen.
  * Run: node scripts/generate-pwa-icons.mjs
  * Requires: npm install -D sharp
  */
@@ -8,7 +8,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const svgPath = join(root, 'static/pwa/icon.svg');
+const svgPath = join(root, 'static/favicon.svg');
 const outDir = join(root, 'static/pwa');
 
 const sizes = [

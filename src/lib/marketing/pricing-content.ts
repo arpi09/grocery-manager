@@ -41,7 +41,6 @@ export interface PricingContent {
 	stripeNoteBody: string;
 	faqHref: string;
 	faqLinkLabel: string;
-	fullDocHint: string;
 }
 
 const proFeatureLabelsSv: Record<ProFeatureKey, string> = {
@@ -55,9 +54,9 @@ const proFeatureLabelsSv: Record<ProFeatureKey, string> = {
 
 const sv: PricingContent = {
 	title: 'Priser & planer',
-	lead: 'Skaffu är gratis att komma igång. När du vill ha mer kraft kan du uppgradera till Pro — utan att tappa gratisplanen.',
+	lead: 'Börja gratis med delad lista och skafferi. När hela hushållet är med och ni vill ha statistik och obegränsad kvitto-PDF kan ni uppgradera till Pro — utan att tappa gratisplanen.',
 	proLiveNote:
-		'Pro är live. Uppgradera i appen när du är redo; gratisplanen finns kvar för dig som vill prova i lugn och ro.',
+		'Pro är live. Uppgradera i appen när ni är redo; gratisplanen finns kvar för er som vill prova i lugn och ro.',
 	meta: {
 		title: 'Priser — Skaffu skafferi-app (Gratis & Pro)',
 		description:
@@ -109,20 +108,19 @@ const sv: PricingContent = {
 		}
 	],
 	proBullets: Object.values(proFeatureLabelsSv),
-	aiNoteTitle: 'Varför gränser?',
-	aiNoteBody: `AI-funktioner kostar per anrop (modell ${AI_UNIT_ECONOMICS.model}). En typisk kvitto-PDF kostar ungefär ${AI_UNIT_ECONOMICS.receiptParseSekLow}–${AI_UNIT_ECONOMICS.receiptParseSekHigh} kr i API-avgift — därför begränsar vi AI i gratisplanen och finansierar obegränsat via Pro.`,
+	aiNoteTitle: 'Varför gränser på AI?',
+	aiNoteBody: `Kvitto-PDF tolkas automatiskt — du granskar alltid innan spar. AI-anrop kostar per gång (modell ${AI_UNIT_ECONOMICS.model}), ungefär ${AI_UNIT_ECONOMICS.receiptParseSekLow}–${AI_UNIT_ECONOMICS.receiptParseSekHigh} kr per kvitto. Därför begränsar vi AI i gratisplanen och finansierar obegränsat via Pro.`,
 	stripeNoteTitle: 'Betalning & villkor',
 	stripeNoteBody:
 		'Betalning sker via Stripe. Som hushållsägare kan du hantera prenumeration, byta mellan månad och år eller avsluta under Inställningar → Plan. Konsumentvillkor från Stripe gäller vid köp.',
 	faqHref: '/faq',
-	faqLinkLabel: 'Vanliga frågor',
-	fullDocHint: 'Intern produktdokumentation: docs/PRICING.md'
+	faqLinkLabel: 'Vanliga frågor'
 };
 
 const en: PricingContent = {
 	...sv,
 	title: 'Pricing & plans',
-	lead: 'Skaffu is free to get started. Upgrade to Pro when you want more power — without losing the free tier.',
+	lead: 'Start free with a shared list and pantry. When the whole household is on board and you want statistics and unlimited receipt PDF, upgrade to Pro — without losing the free tier.',
 	proLiveNote:
 		'Pro is live. Upgrade in the app when you are ready; the free plan stays available if you want to take it slow.',
 	meta: {
@@ -166,13 +164,12 @@ const en: PricingContent = {
 		`Up to ${PRO_LIMITS.maxHouseholdMembers} household members`,
 		`Neighbour pantry: search within ${NEARBY_RADIUS_M.pro / 1000} km (free ${NEARBY_RADIUS_M.free} m)`
 	],
-	aiNoteTitle: 'Why limits?',
-	aiNoteBody: `AI features cost per API call (${AI_UNIT_ECONOMICS.model}). A typical receipt PDF costs about ${AI_UNIT_ECONOMICS.receiptParseSekLow}–${AI_UNIT_ECONOMICS.receiptParseSekHigh} SEK — so Free tier caps AI usage and Pro funds unlimited use.`,
+	aiNoteTitle: 'Why AI limits?',
+	aiNoteBody: `Receipt PDF is parsed automatically — you always review before saving. AI calls cost per use (${AI_UNIT_ECONOMICS.model}), about ${AI_UNIT_ECONOMICS.receiptParseSekLow}–${AI_UNIT_ECONOMICS.receiptParseSekHigh} SEK per receipt. Free tier caps AI usage; Pro funds unlimited use.`,
 	stripeNoteTitle: 'Billing & terms',
 	stripeNoteBody:
 		'Payments go through Stripe. As household owner you can manage your subscription, switch monthly/yearly or cancel under Settings → Plan. Stripe consumer terms apply at checkout.',
-	faqLinkLabel: 'FAQ',
-	fullDocHint: 'Internal product doc: docs/PRICING.md'
+	faqLinkLabel: 'FAQ'
 };
 
 const byLocale: Record<MarketingLocale, PricingContent> = { sv, en };

@@ -53,19 +53,20 @@ describe('getLandingHeroCopy', () => {
 		const a = getLandingHeroCopy('a', 'sv');
 		const b = getLandingHeroCopy('b', 'sv');
 		expect(a.heroTitle).not.toBe(b.heroTitle);
-		expect(a.heroTitle.toLowerCase()).toContain('skafferiet');
+		expect(a.heroTitle).toContain('Skaffu');
 		expect(b.heroTitle).toContain('Butiksneutralt');
 	});
 
-	it('uses household memory framing for variant a secondary', () => {
+	it('uses Skaffu product framing for variant a secondary', () => {
 		const a = getLandingHeroCopy('a', 'sv');
-		expect(a.heroSecondary).toContain('hushållets minne');
-		expect(a.heroSecondary.toLowerCase()).not.toContain('fyller skafferiet');
+		expect(a.heroSecondary).toContain('Skaffu föresl');
+		expect(a.heroSecondary.toLowerCase()).not.toContain('autopilot');
 	});
 
 	it('does not promise Kivra integration in variant b secondary', () => {
 		const b = getLandingHeroCopy('b', 'sv');
 		expect(b.heroSecondary.toLowerCase()).not.toContain('från kivra');
+		expect(b.heroSecondary.toLowerCase()).not.toContain('autopilot');
 	});
 });
 
@@ -77,5 +78,12 @@ describe('getReceiptHeroCopy', () => {
 		expect(a.heroTitle).not.toBe(b.heroTitle);
 		expect(b.heroTitle).not.toBe(c.heroTitle);
 		expect(a.heroTitle).toContain('digitalt kvitto');
+	});
+
+	it('avoids autopilot jargon in receipt hero copy', () => {
+		for (const variant of ['a', 'b', 'c'] as const) {
+			const copy = getReceiptHeroCopy(variant, 'sv');
+			expect(copy.heroSecondary.toLowerCase()).not.toContain('autopilot');
+		}
 	});
 });

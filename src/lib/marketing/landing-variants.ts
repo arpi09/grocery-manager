@@ -17,34 +17,34 @@ export interface LandingHeroCopy {
 const heroByVariant: Record<MarketingLocale, Record<LandingHeroVariant, LandingHeroCopy>> = {
 	sv: {
 		a: {
-			heroTitle: 'Handla ihop med koll på skafferiet.',
+			heroTitle: 'Skaffu — handla ihop med koll på skafferiet.',
 			heroLead:
 				'Delad inköpslista och skafferi för hela hushållet — bjud in partner, checka av i butiken och se vad som finns hemma innan ni handlar.',
 			heroSecondary:
-				'Kvitton och checkoffs bygger hushållets minne. Butiksneutralt — ICA, Willys eller Coop.'
+				'Kvitton och checkoffs hjälper Skaffu föreslå veckans lista. Butiksneutralt — ICA, Willys eller Coop.'
 		},
 		b: {
 			heroTitle: 'Butiksneutralt skafferi för hela hushållet.',
 			heroLead:
-				'Oavsett ICA, Willys, Coop eller Lidl — ett gemensamt lager, utgångsdatum och inköpslista som speglar vad som faktiskt finns hemma.',
+				'Oavsett ICA, Willys, Coop eller Lidl — ett gemensamt skafferi, utgångsdatum och inköpslista som speglar vad som faktiskt finns hemma.',
 			heroSecondary:
-				'Kvitto-autopilot från digitala PDF:er, Ät det först och webb först — utan stammiskonto eller matkedja som låser in dig.'
+				'Kvitto-PDF med granskning, Ät det först och webb först — utan stammiskonto eller matkedja som låser in dig.'
 		}
 	},
 	en: {
 		a: {
-			heroTitle: 'Shop together with pantry awareness.',
+			heroTitle: 'Skaffu — shop together with pantry awareness.',
 			heroLead:
 				'Shared shopping list and pantry for the whole household — invite your partner, check off in the store and see what is at home before you shop.',
 			heroSecondary:
-				'Receipts and checkoffs build household memory. Store-neutral — ICA, Willys or Coop.'
+				'Receipts and checkoffs help Skaffu suggest the weekly list. Store-neutral — ICA, Willys or Coop.'
 		},
 		b: {
 			heroTitle: 'Store-neutral pantry for the whole household.',
 			heroLead:
-				'Whether ICA, Willys, Coop or Lidl — one shared inventory, expiry dates and shopping list based on what is actually at home.',
+				'Whether ICA, Willys, Coop or Lidl — one shared pantry, expiry dates and shopping list based on what is actually at home.',
 			heroSecondary:
-				'Receipt autopilot from digital PDFs, Eat First and web-first — no loyalty account or retailer lock-in.'
+				'Receipt PDF with review, Eat First and web-first — no loyalty account or retailer lock-in.'
 		}
 	}
 };
@@ -54,12 +54,12 @@ const receiptHeroByVariant: Record<MarketingLocale, Record<ReceiptHeroVariant, L
 		a: {
 			heroTitle: 'Ladda upp ett digitalt kvitto — Skaffu fyller skafferiet',
 			heroLead:
-				'Spara PDF från Kivra, ICA eller e-post och ladda upp i Skaffu. AI läser raderna — du granskar innan de hamnar i lagret.',
+				'Spara PDF från Kivra, ICA eller e-post och ladda upp i Skaffu. Raderna tolkas automatiskt — du granskar innan de sparas.',
 			heroSecondary:
-				'Receipt autopilot utan manuell inmatning. Butiksneutralt skafferi för hela hushållet.'
+				'Snabbare än att skriva in varje vara. Butiksneutralt skafferi för hela hushållet.'
 		},
 		b: {
-			heroTitle: 'Gör kvitton till skafferi automatiskt',
+			heroTitle: 'Gör kvitton till skafferi — med granskning',
 			heroLead:
 				'Digitalt kvitto → granskning → kyl, frys och skafferi uppdateras. Ingen officiell butiksintegration — bara din PDF.',
 			heroSecondary:
@@ -70,19 +70,19 @@ const receiptHeroByVariant: Record<MarketingLocale, Record<ReceiptHeroVariant, L
 			heroLead:
 				'Ladda upp digitalt kvitto (PDF), granska raderna och spara valda varor — snabbare än att mata in varje produkt.',
 			heroSecondary:
-				'Fungerar med text-PDF från Kivra, ICA, Willys och fler. Du behåller kontrollen med review-steg.'
+				'Fungerar med text-PDF från Kivra, ICA, Willys och fler. Du behåller kontrollen i granskningssteget.'
 		}
 	},
 	en: {
 		a: {
 			heroTitle: 'Upload a digital receipt — Skaffu fills the pantry',
 			heroLead:
-				'Save a PDF from Kivra, ICA or email and upload in Skaffu. AI reads the lines — you review before they enter inventory.',
+				'Save a PDF from Kivra, ICA or email and upload in Skaffu. Lines are parsed automatically — you review before saving.',
 			heroSecondary:
-				'Receipt autopilot without manual entry. Store-neutral pantry for the whole household.'
+				'Faster than typing every item. Store-neutral pantry for the whole household.'
 		},
 		b: {
-			heroTitle: 'Turn receipts into pantry automatically',
+			heroTitle: 'Turn receipts into pantry — with review',
 			heroLead:
 				'Digital receipt → review → fridge, freezer and cupboard updated. No official store integration — just your PDF.',
 			heroSecondary:
