@@ -1939,6 +1939,20 @@
 			"review7d": "Households with review (7d)",
 			"conversion": "Write→review conversion"
 		},
+		"acquisition": {
+			"title": "Acquisition (7 days)",
+			"subtitle": "Shared list and public surface loops — copy to PMF_METRICS_LOG.md each Monday.",
+			"periodRange": "{start} – {end} ({days}d rolling)",
+			"sharedListOpened": "shared_list_opened",
+			"sharedListSignupCompleted": "shared_list_signup_completed",
+			"sharedListSignupClicked": "shared_list_signup_clicked",
+			"publicSurfaceViewed": "public_surface_viewed",
+			"publicSurfaceSignupClicked": "public_surface_signup_clicked",
+			"signupConversion": "Signup conversion: {rate}",
+			"signupCtr": "Signup CTR: {rate} (target {target})",
+			"publicSurfaceCtr": "Public signup CTR: {rate}",
+			"footnote": "Kill criteria (30d): shared_list_opened < 50 total or signup CTR < 2% → pause W1 marketing. See docs/ACQUISITION_LOOPS_V1.md."
+		},
 		"sessionManagement": "Session management",
 		"logoutAllNote": "Log out everyone ends every active session, including your own. Users must log in again.",
 		"confirmYes": "Type {yes} to confirm",

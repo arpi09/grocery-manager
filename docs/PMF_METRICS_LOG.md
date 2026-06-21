@@ -22,6 +22,20 @@ Veckovis logg för **Spår B3**: måndags-PMF enligt [`PMF_WEEKLY.md`](./PMF_WEE
 
 **Launch startdatum (vecka 1 post):** _______________
 
+### Acquisition baseline (7 d) — `/admin` → Analys → Acquisition
+
+*Fyll från prod admin efter första distribution. Placeholders tills data finns.*
+
+| Event | Värde | Signup-CTR / konvertering |
+|-------|-------|---------------------------|
+| `shared_list_opened` | *(fyll)* | |
+| `shared_list_signup_clicked` | *(fyll)* | CTR: *(fyll)* / mål >8% |
+| `shared_list_signup_completed` | *(fyll)* | Konvertering: *(fyll)* |
+| `public_surface_viewed` | *(fyll)* | |
+| `public_surface_signup_clicked` | *(fyll)* | CTR: *(fyll)* |
+
+**Owner distribution:** se [`OWNER_ACQUISITION_WEEK1.md`](./OWNER_ACQUISITION_WEEK1.md)
+
 ---
 
 ## Vecka 1 — måndag ___________
@@ -60,6 +74,18 @@ Veckovis logg för **Spår B3**: måndags-PMF enligt [`PMF_WEEKLY.md`](./PMF_WEE
 | Varav UTM `facebook` | |
 | Aktiverade inom 24 h (launch-kohort) | |
 | Nya feedback-poster (`/admin#feedback`) | |
+
+### Acquisition (7 d) — `/admin` → Analys → Acquisition
+
+| Event | Antal | Rate |
+|-------|-------|------|
+| `shared_list_opened` | | |
+| `shared_list_signup_clicked` | | CTR: *(mål >8%)* |
+| `shared_list_signup_completed` | | Konvertering: |
+| `public_surface_viewed` | | |
+| `public_surface_signup_clicked` | | CTR: |
+
+**Owner denna vecka:** ☐ Lista-länkar delade · ☐ Dela-screenshot postad · UTM: ___________
 
 ### En åtgärd denna vecka
 
@@ -257,6 +283,7 @@ Veckovis logg för **Spår B3**: måndags-PMF enligt [`PMF_WEEKLY.md`](./PMF_WEE
 
 | Metric | Definition | `/admin`-panel |
 |--------|------------|----------------|
+| Acquisition events | Delad lista + publika ytor (7 d) | Analys → Acquisition |
 | Aktivering | ≥10 varor eller kvittoparse inom 24 h | PMF → Aktivering |
 | Första scan | Median registrering → scan/kvitto | PMF → Första scan |
 | Veckoscan | WAU med scan/kvitto denna vecka | PMF → Veckoscan |
