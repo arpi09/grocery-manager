@@ -15,6 +15,7 @@ const DUO_WEDGE_EVENT_TYPES = [
 ] as const satisfies readonly ProductEventType[];
 
 const DUO_WEDGE_PUBLIC_EVENT_TYPES = ['list_link_opened', 'list_join_cta_clicked'] as const;
+const LISTA_ACQUISITION_PUBLIC_EVENT_TYPES = ['list_link_opened', 'list_join_cta_clicked'] as const;
 const DUO_WEDGE_AUTH_EVENT_TYPES = ['list_link_shared', 'partner_joined', 'shared_checkoff'] as const;
 
 function mockPmfRepository(overrides: Partial<IPmfRepository> = {}): IPmfRepository {
@@ -229,5 +230,67 @@ describe('POST /api/product-events duo wedge allowlist', () => {
 		expect(response.status).toBe(200);
 		await expect(response.json()).resolves.toEqual({ ok: true, skipped: true });
 		expect(repository.recordEvent).not.toHaveBeenCalled();
+	});
+});
+
+describe('POST /api/product-events lista acquisition allowlist', () => {
+	it.each(LISTA_ACQUISITION_PUBLIC_EVENT_TYPES)(
+		'accepts lista acquisition event %s when analytics consent is granted',
+		async (eventType) => {
+			const { request, locals, cookies, repository } = createProductEventRequest(eventType, {
+				consent: 'all',
+				metadata: {
+					acquisition_source: 'shopping_share',
+					surface: 'lista',
+					tokenPrefix: 'abc123'
+				}
+			});
+
+			const response = await postProductEvent({
+				request,
+				locals,
+				cookies
+			} as unknown as Parameters<typeof postProductEvent>[0]);
+
+			expect(response.status).toBe(200);
+			await expect(response.json()).resolves.toEqual({ ok: true });
+			expect(repository.recordEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					userId: null,
+					eventType,
+					metadata: expect.objectContaining({
+						acquisition_source: 'shopping_share',
+						surface: 'lista'
+					})
+				})
+			);
+		}
+	);
+
+	it('accepts register_click with lista shopping_share metadata', async () => {
+		const { request, locals, cookies, repository } = createProductEventRequest('register_click', {
+			consent: 'all',
+			metadata: { acquisition_source: 'shopping_share', surface: 'lista' }
+		});
+
+		const response = await postProductEvent({
+			request,
+			locals,
+			cookies
+		} as unknown as Parameters<typeof postProductEvent>[0]);
+
+		expect(response.status).toBe(200);
+		await expect(response.json()).resolves.toEqual({ ok: true });
+		expect(repository.recordEvent).toHaveBeenCalledWith(
+			expect.objectContaining({
+				userId: null,
+				householdId: null,
+				eventType: 'register_click',
+				metadata: expect.objectContaining({
+					acquisition_source: 'shopping_share',
+					surface: 'lista'
+				})
+			})
+		);
 	});
 });

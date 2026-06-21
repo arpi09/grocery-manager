@@ -29,6 +29,7 @@
 			milestones={data.milestones}
 			householdId={data.activeHousehold?.id ?? null}
 			isPro={data.isPro}
+			rapportLink={data.rapportLink}
 		/>
 
 	</PageContainer>

@@ -44,11 +44,19 @@
 
 		isPro?: boolean;
 
+		rapportLink?: StatistikRapportLink | null;
+
 	}
 
 
 
-	let { dashboard, milestones = [], householdId = null, isPro = false }: Props = $props();
+	let {
+		dashboard,
+		milestones = [],
+		householdId = null,
+		isPro = false,
+		rapportLink = null
+	}: Props = $props();
 
 	const analytics = $derived(dashboard.analytics);
 	const addedTrend = $derived(dashboard.addedTrend);
@@ -261,9 +269,16 @@
 
 		{:else if activeTab === 'money'}
 
-			<div role="tabpanel" class="tab-panel motion-fade-in" data-testid="statistik-panel-money">
+			<div role="tabpanel" class="tab-panel tab-panel-money motion-fade-in" data-testid="statistik-panel-money">
 
 				<StatistikSpendTrend {spend} />
+
+				{#if rapportLink}
+					<Card href={rapportLink.href} interactive class="rapport-link-card">
+						<h2 class="section-title">{t('stats.rapportLinkTitle', { month: rapportLink.month })}</h2>
+						<p class="section-lead">{t('stats.rapportLinkLead')}</p>
+					</Card>
+				{/if}
 
 			</div>
 
@@ -634,6 +649,32 @@
 		flex-direction: column;
 
 		gap: var(--page-section-gap);
+
+	}
+
+
+
+	.tab-panel-money {
+
+		gap: var(--space-md);
+
+	}
+
+
+
+	:global(.rapport-link-card) {
+
+		background: linear-gradient(
+
+			155deg,
+
+			color-mix(in srgb, var(--color-primary) 8%, var(--color-surface)),
+
+			var(--color-surface)
+
+		);
+
+		border-color: color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
 
 	}
 

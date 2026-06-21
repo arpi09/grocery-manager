@@ -50,7 +50,7 @@
 			<a class="action-btn action-btn-primary" href="/planer/vecka">
 				{t('planer.contextWeeklyLink')}
 			</a>
-			<a class="action-btn" href={homeHref}>{t('planer.contextHomeLink')}</a>
+			<a class="action-btn home-link" href={homeHref}>{t('planer.contextHomeLink')}</a>
 			<a class="action-btn" href="#ata-calendar">{t('planer.contextWeekViewLink')}</a>
 		</div>
 	</Card>

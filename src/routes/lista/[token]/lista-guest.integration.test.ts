@@ -16,7 +16,7 @@ import {
 	LISTA_JOIN_COOKIE
 } from '$lib/marketing/acquisition-attribution';
 import { APP_HOME_PATH, INKOP_PATH } from '$lib/navigation/app-home';
-import { recordProductEvent } from '$lib/server/product-events';
+import { consumeListaJoinCookie } from '$lib/server/lista-join-cookie';
 import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integration-db';
 
 const { dbState, shareFlag, diState } = vi.hoisted(() => ({
@@ -69,7 +69,7 @@ function createCookieJar() {
 		set: (name: string, value: string) => {
 			jar.set(name, value);
 		},
-		delete: (name: string) => {
+		delete: (name: string, _options?: { path?: string }) => {
 			jar.delete(name);
 		}
 	};
@@ -89,39 +89,6 @@ async function expectRedirectTo(
 		return error as { location: string };
 	}
 	throw new Error('Expected redirect');
-}
-
-/** Mirrors hooks.server.ts lista_join_token consumption for post-auth household join. */
-async function consumeListaJoinCookie(
-	userId: string,
-	cookies: ReturnType<typeof createCookieJar>,
-	services: {
-		shareService: ShoppingListShareService;
-		householdService: HouseholdService;
-		pmfService: PmfService;
-	}
-) {
-	const listaJoinToken = cookies.get(LISTA_JOIN_COOKIE);
-	if (!listaJoinToken) return null;
-
-	cookies.delete(LISTA_JOIN_COOKIE);
-	const targetHouseholdId = await services.shareService.resolveHouseholdIdForToken(listaJoinToken);
-	if (!targetHouseholdId) return null;
-
-	const outcome = await services.householdService.joinSharedListHousehold(
-		targetHouseholdId,
-		userId
-	);
-	if (outcome === 'joined') {
-		recordProductEvent(services.pmfService, {
-			userId,
-			householdId: targetHouseholdId,
-			eventType: 'partner_joined',
-			metadata: { context: 'lista' }
-		});
-	}
-
-	return { targetHouseholdId, outcome };
 }
 
 describe('Lista guest join integration', () => {
@@ -196,6 +163,32 @@ describe('Lista guest join integration', () => {
 		expect(buildListaLoginUrl(token)).toBe(
 			`/login?redirect=${encodeURIComponent(`/lista/${token}`)}`
 		);
+	});
+
+	it('returns 404 for unknown share token', async () => {
+		const cookies = createCookieJar();
+
+		await expect(
+			loadListaPage({
+				params: { token: 'unknown-token' },
+				locals: { user: null, householdService, pmfService },
+				cookies
+			} as unknown as Parameters<typeof loadListaPage>[0])
+		).rejects.toMatchObject({ status: 404 });
+	});
+
+	it('returns 404 when shopping list share flag is disabled', async () => {
+		shareFlag.enabled = false;
+		const token = await createShareToken();
+		const cookies = createCookieJar();
+
+		await expect(
+			loadListaPage({
+				params: { token },
+				locals: { user: null, householdService, pmfService },
+				cookies
+			} as unknown as Parameters<typeof loadListaPage>[0])
+		).rejects.toMatchObject({ status: 404 });
 	});
 
 	it('redirects authenticated visitor to inkop and joins shared household', async () => {
@@ -289,5 +282,41 @@ describe('Lista guest join integration', () => {
 				.where(eq(productEventTable.userId, 'guest-d'));
 			expect(events.some((event) => (event.eventType as string) === 'partner_joined')).toBe(true);
 		});
+	});
+
+	it('clears invalid lista_join_token cookie without joining', async () => {
+		await integrationDb.seedUser({ id: 'guest-e', email: 'guest-e@example.com' });
+		const cookies = createCookieJar();
+		cookies.set(LISTA_JOIN_COOKIE, 'invalid-token');
+
+		const result = await consumeListaJoinCookie('guest-e', cookies, {
+			shareService: diState.shareService!,
+			householdService,
+			pmfService
+		});
+
+		expect(result).toBeNull();
+		expect(cookies.get(LISTA_JOIN_COOKIE)).toBeUndefined();
+	});
+
+	it('returns already_member when cookie join repeats for existing member', async () => {
+		const token = await createShareToken();
+		const cookies = createCookieJar();
+		cookies.set(LISTA_JOIN_COOKIE, token);
+
+		const result = await consumeListaJoinCookie('owner-a', cookies, {
+			shareService: diState.shareService!,
+			householdService,
+			pmfService
+		});
+
+		expect(result).toEqual({ targetHouseholdId: 'household-a', outcome: 'already_member' });
+		expect(cookies.get(LISTA_JOIN_COOKIE)).toBeUndefined();
+
+		const events = await integrationDb.db
+			.select()
+			.from(productEventTable)
+			.where(eq(productEventTable.userId, 'owner-a'));
+		expect(events.some((event) => (event.eventType as string) === 'partner_joined')).toBe(false);
 	});
 });

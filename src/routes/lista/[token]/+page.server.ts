@@ -3,9 +3,14 @@ import { LISTA_JOIN_COOKIE } from '$lib/marketing/acquisition-attribution';
 import { INKOP_PATH } from '$lib/navigation/app-home';
 import { recordProductEvent } from '$lib/server/product-events';
 import { shoppingListShareService } from '$lib/server/di';
+import { isShoppingListShareEnabled } from '$lib/server/shopping-list-share-flag';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals, cookies }) => {
+	if (!isShoppingListShareEnabled()) {
+		error(404, 'Not found');
+	}
+
 	const preview = await shoppingListShareService.getSharePreview(params.token);
 	if (!preview) {
 		error(404, 'Not found');
