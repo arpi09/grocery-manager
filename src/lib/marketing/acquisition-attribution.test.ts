@@ -15,6 +15,8 @@ import {
 	ACQUISITION_SOURCES,
 	buildAcquisitionLandingUrl,
 	buildAcquisitionRegisterUrl,
+	buildDelaSignupUrl,
+	DELA_SIGNUP_UTM_CONTENT,
 	isShoppingShareSignupUtm,
 	resolveSharedListSignupSource,
 	shouldRecordSharedListSignupCompleted,
@@ -127,5 +129,18 @@ describe('shared list signup attribution', () => {
 		).toBe(true);
 		expect(shouldRecordSharedListSignupCompleted({ listaJoinPending: true })).toBe(true);
 		expect(shouldRecordSharedListSignupCompleted({})).toBe(false);
+	});
+});
+
+describe('buildDelaSignupUrl', () => {
+	beforeEach(() => {
+		mockPublicEnv.PUBLIC_APP_URL = undefined;
+		mockPublicEnv.PUBLIC_ORIGIN = undefined;
+	});
+
+	it('uses grannskafferiet utm_content for dela wedge signup', () => {
+		expect(buildDelaSignupUrl('https://homepantry.com')).toBe(
+			`/register?${EXPECTED_QUERY}${DELA_SIGNUP_UTM_CONTENT}`
+		);
 	});
 });

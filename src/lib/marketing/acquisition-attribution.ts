@@ -115,3 +115,29 @@ export function buildListaSignupUrl(requestOrigin?: string): string {
 	const separator = base.includes('?') ? '&' : '?';
 	return `${base}${separator}redirect=${encodeURIComponent(APP_HOME_PATH)}`;
 }
+
+/** UTM content for /dela signup — aligns with community posts (GRANNSKAFFERIET_V0). */
+export const DELA_SIGNUP_UTM_CONTENT = 'grannskafferiet';
+
+function buildDelaSignupSearchParams(): URLSearchParams {
+	const params = buildAcquisitionSearchParams('expiring_share');
+	params.set('utm_content', DELA_SIGNUP_UTM_CONTENT);
+	return params;
+}
+
+/** Signup URL for /dela guest with grannskafferiet UTM and expiring-share wedge attribution. */
+export function buildDelaSignupUrl(requestOrigin?: string): string {
+	const origin = resolveAppOrigin(requestOrigin);
+	const path = appendSearchParamsToAppPath('/register', buildDelaSignupSearchParams());
+
+	if (isSameOriginRequest(requestOrigin, origin)) {
+		return path;
+	}
+
+	return `${origin}${path}`;
+}
+
+/** Login URL that returns guest to the shared dela page after auth. */
+export function buildDelaLoginUrl(token: string): string {
+	return `/login?redirect=${encodeURIComponent(`/dela/${token}`)}`;
+}

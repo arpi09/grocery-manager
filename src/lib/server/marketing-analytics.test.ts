@@ -133,6 +133,33 @@ describe('recordSignupCompleteEvent', () => {
 		});
 	});
 
+	it('records signup_from_expiring_share when utm_content is grannskafferiet', async () => {
+		const repository = mockPmfRepository();
+		const service = new PmfService(repository);
+
+		recordSignupCompleteEvent(service, 'user-w3b', 'b', {
+			signupUtm: {
+				source: 'skaffu',
+				medium: 'product',
+				campaign: 'acquisition_wedge',
+				content: 'grannskafferiet'
+			}
+		});
+
+		await Promise.resolve();
+
+		expect(repository.recordEvent).toHaveBeenCalledTimes(2);
+		expect(repository.recordEvent).toHaveBeenNthCalledWith(2, {
+			userId: 'user-w3b',
+			householdId: null,
+			eventType: 'signup_from_expiring_share',
+			metadata: expect.objectContaining({
+				variant: 'b',
+				utm_content: 'grannskafferiet'
+			})
+		});
+	});
+
 	it('omits utm keys when attribution is missing', async () => {
 		const repository = mockPmfRepository();
 		const service = new PmfService(repository);

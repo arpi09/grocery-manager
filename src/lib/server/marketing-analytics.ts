@@ -110,7 +110,8 @@ export function recordGuideViewEvent(options: RecordGuideViewEventOptions): void
 
 const SIGNUP_FROM_WEDGE_EVENTS = {
 	shopping_share: 'signup_from_shopping_share',
-	expiring_share: 'signup_from_expiring_share'
+	expiring_share: 'signup_from_expiring_share',
+	grannskafferiet: 'signup_from_expiring_share'
 } as const satisfies Record<string, ProductEventType>;
 
 function resolveSignupFromWedgeEvent(

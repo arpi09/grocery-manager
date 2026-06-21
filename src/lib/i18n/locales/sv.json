@@ -1655,7 +1655,50 @@
 		"rapportLinkLead": "Anonymiserad månadsstatistik från svenska Skaffu-hushåll — se vad andra sparar.",
 		"expansionBadge": "Växer",
 		"expansionTitle": "Fler hushåll varje vecka",
-		"expansionLead": "Skaffu blir bättre ju fler som handlar smart tillsammans."
+		"expansionLead": "Skaffu blir bättre ju fler som handlar smart tillsammans.",
+		"insights": {
+			"sectionTitle": "Kul fakta från ert skafferi",
+			"sectionLead": "Hämtat från kvitton, lagret och hur ni använder maten.",
+			"empty": "Importera kvitto eller lägg till varor — insikter dyker upp när datat växer.",
+			"topProduct": {
+				"title": "Mest köpt",
+				"detail": "Köpt {count} gånger nyligen"
+			},
+			"shoppingRhythm": {
+				"title": "Handelsrytm",
+				"value": "Var {days}:e dag",
+				"detail": "Baserat på {count} kvitton"
+			},
+			"favoriteStore": {
+				"title": "Favoritbutik",
+				"detail": "{percent}% av spårad handel"
+			},
+			"expiringSoon": {
+				"title": "Använd snart",
+				"value": "{count} varor",
+				"detail": "Går ut inom de närmaste dagarna"
+			},
+			"zeroWaste": {
+				"title": "Svinnfri streak",
+				"value": "{weeks} veckor",
+				"detail": "Ingen mat markerad som bortkastad"
+			},
+			"plannedMeals": {
+				"title": "Planerade måltider",
+				"value": "{count} denna vecka",
+				"detail": "I er veckoplan"
+			},
+			"savedValue": {
+				"title": "Mat räddad",
+				"value": "ca {sek} kr",
+				"detail": "Från {count} varor ni hann använda"
+			},
+			"pantryVariety": {
+				"title": "Skafferiets bredd",
+				"value": "{count} produkter",
+				"detail": "Olika varor i lager just nu"
+			}
+		}
 	},
 	"wrapped": {
 		"pageTitle": "Er kylskåps-årstid",
@@ -2156,6 +2199,20 @@
 			"insightsTitle": "AI-insikter",
 			"insightsCached": "Cachad sammanfattning (1 h).",
 			"insightsError": "Kunde inte generera AI-insikter just nu."
+		},
+		"acquisition": {
+			"title": "Acquisition (7 dagar)",
+			"subtitle": "Delad lista och publika ytor — kopiera till PMF_METRICS_LOG.md varje måndag.",
+			"periodRange": "{start} – {end} ({days}d rullande)",
+			"sharedListOpened": "shared_list_opened",
+			"sharedListSignupCompleted": "shared_list_signup_completed",
+			"sharedListSignupClicked": "shared_list_signup_clicked",
+			"publicSurfaceViewed": "public_surface_viewed",
+			"publicSurfaceSignupClicked": "public_surface_signup_clicked",
+			"signupConversion": "Signup-konvertering: {rate}",
+			"signupCtr": "Signup-CTR: {rate} (mål {target})",
+			"publicSurfaceCtr": "Publik signup-CTR: {rate}",
+			"footnote": "Kill criteria (30d): shared_list_opened < 50 totalt eller signup-CTR < 2% → pausa W1-marknadsföring. Se docs/ACQUISITION_LOOPS_V1.md."
 		}
 	},
 	"pmf": {

@@ -189,6 +189,7 @@
 			if (attachNearby) {
 				void loadNearbyShares();
 			}
+			await shareExpiringCard('share', data.url);
 		} catch {
 			errorMessage = t('eatFirst.shareFailed');
 		} finally {
@@ -196,7 +197,7 @@
 		}
 	}
 
-	async function shareExpiringCard(method: 'share' | 'download') {
+	async function shareExpiringCard(method: 'share' | 'download', shareUrl?: string) {
 		if (!canEdit || expiringItems.length === 0) {
 			return;
 		}
@@ -210,6 +211,9 @@
 				expiringItems.map((item) => ({ name: item.name, expiresOn: item.expiresOn })),
 				locale
 			);
+			const shareText = shareUrl
+				? t('eatFirst.shareCardTextWithLink', { count: expiringItems.length, url: shareUrl })
+				: t('eatFirst.shareCardText', { count: expiringItems.length });
 			const labels = {
 				brand: t('nav.brandName'),
 				badge: t('eatFirst.badge'),
@@ -230,20 +234,30 @@
 			) {
 				await navigator.share({
 					title: t('eatFirst.shareCardTitle'),
-					text: t('eatFirst.shareCardText', { count: expiringItems.length }),
+					text: shareText,
 					files: [file]
 				});
-				showClientToast(t('eatFirst.shareCardSuccess'), { variant: 'success' });
+				showClientToast(
+					shareUrl
+						? `${t('eatFirst.shareCardSuccess')} ${t('eatFirst.shareCardCommunityHint')}`
+						: t('eatFirst.shareCardSuccess'),
+					{ variant: 'success' }
+				);
 			} else if (method === 'share' && navigator.share) {
 				await navigator.share({
 					title: t('eatFirst.shareCardTitle'),
-					text: t('eatFirst.shareCardText', { count: expiringItems.length }),
-					url: window.location.origin
+					text: shareText,
+					url: shareUrl ?? window.location.origin
 				});
 				showClientToast(t('eatFirst.shareCardSuccess'), { variant: 'success' });
 			} else {
 				downloadBlob(blob, filename);
-				showClientToast(t('eatFirst.shareCardDownloaded'), { variant: 'success' });
+				showClientToast(
+					shareUrl
+						? `${t('eatFirst.shareCardDownloaded')} ${t('eatFirst.shareCardCommunityHint')}`
+						: t('eatFirst.shareCardDownloaded'),
+					{ variant: 'success' }
+				);
 			}
 		} catch (error) {
 			if (error instanceof DOMException && error.name === 'AbortError') {

@@ -157,7 +157,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		await expect(page.getByText(itemName)).toBeVisible();
 		await expect(page.getByRole('note')).toContainText(/inga adresser|no addresses/i);
 		const signupLink = page.getByRole('link', {
-			name: /Skapa konto gratis|Create free account/i
+			name: /Skapa egen utgående-lista|Create your expiring list/i
 		});
 		await expect(signupLink).toBeVisible();
 		const signupHref = await signupLink.getAttribute('href');
@@ -167,7 +167,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		expect(signupUrl.searchParams.get('utm_source')).toBe('skaffu');
 		expect(signupUrl.searchParams.get('utm_medium')).toBe('product');
 		expect(signupUrl.searchParams.get('utm_campaign')).toBe('acquisition_wedge');
-		expect(signupUrl.searchParams.get('utm_content')).toBe('expiring_share');
+		expect(signupUrl.searchParams.get('utm_content')).toBe('grannskafferiet');
 	});
 
 	test('grannskafferiet discovery page loads for logged-in user', async ({ page }) => {
