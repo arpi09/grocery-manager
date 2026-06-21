@@ -69,7 +69,7 @@ function createCookieJar() {
 		set: (name: string, value: string) => {
 			jar.set(name, value);
 		},
-		delete: (name: string, _options?: { path?: string }) => {
+		delete: (name: string) => {
 			jar.delete(name);
 		}
 	};
