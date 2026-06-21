@@ -41,6 +41,40 @@ test.describe('Critical flows', () => {
 		await expect(page.getByTestId('activation-onboarding')).toBeHidden();
 	});
 
+	test('activation onboarding primary CTA visible without scroll on mobile @deploy-critical', async ({
+		page
+	}) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await registerNewUser(page);
+		await expectOnboardingGuideVisible(page);
+
+		const cta = page.getByTestId('activation-cta-primary');
+		await expect(cta).toBeVisible();
+
+		const box = await cta.boundingBox();
+		expect(box).not.toBeNull();
+		if (box) {
+			expect(box.y + box.height).toBeLessThanOrEqual(844);
+		}
+	});
+
+	test('activation onboarding preview revisits completed step @deploy-critical', async ({
+		page
+	}) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await registerNewUser(page);
+		await expectOnboardingGuideVisible(page);
+		await page.getByTestId('activation-cta-primary').click();
+		await expectActivationScreenHeading(page, /Start with one thing|Börja med en sak/i);
+
+		await page.getByTestId('activation-progress-welcome').click();
+		await expectActivationScreenHeading(page, /Welcome to Skaffu|Välkommen till Skaffu/i);
+		await expect(page.getByTestId('activation-cta-secondary')).toHaveCount(0);
+
+		await page.getByTestId('activation-cta-primary').click();
+		await expectActivationScreenHeading(page, /Start with one thing|Börja med en sak/i);
+	});
+
 	test('activation onboarding scan-first happy path @deploy-critical', async ({ page }) => {
 		await registerNewUser(page);
 		await expectOnboardingGuideVisible(page);

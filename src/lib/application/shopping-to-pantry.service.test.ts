@@ -30,7 +30,8 @@ describe('ShoppingToPantryService', () => {
 		} as unknown as InventoryService;
 		users = {
 			getShoppingToPantryMode: vi.fn(),
-			updateShoppingToPantryMode: vi.fn()
+			updateShoppingToPantryMode: vi.fn(),
+			deleteUser: vi.fn()
 		} as unknown as IUserRepository;
 		service = new ShoppingToPantryService(inventoryService, users);
 	});

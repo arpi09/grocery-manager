@@ -675,7 +675,13 @@
 			"description": "Your logged-in account and profile",
 			"loggedInEmail": "Logged-in email",
 			"editProfile": "Edit profile",
-			"editProfileNote": "Name, photo and theme"
+			"editProfileNote": "Name, photo and theme",
+			"dangerZone": "Danger zone",
+			"deleteAccount": "Delete my account",
+			"deleteWarning": "This permanently deletes your account. All personal data linked to you is removed and you will be logged out.",
+			"deleteSoleHouseholds": "{count, plural, one {# household where you are the only member} other {# households where you are the only member}} will be deleted along with inventory and shopping lists.",
+			"deleteSharedHouseholds": "You will leave {count, plural, one {# shared household} other {# shared households}}. If you are the only owner, another member becomes owner.",
+			"deletingAccount": "Deleting account…"
 		},
 		"legal": {
 			"privacyLink": "Privacy & AI",
@@ -971,11 +977,11 @@
 	"pwa": {
 		"page": {
 			"title": "Add to home screen",
-			"subtitle": "Quick shortcut to your pantry — like an app, without the App Store."
+			"subtitle": "Quick shortcut to your pantry — like an app, no download required. App Store coming after beta."
 		},
 		"guide": {
 			"title": "Install Skaffu",
-			"lead": "Add a home screen shortcut to open your pantry in one tap — camera and offline work better in the installed view.",
+			"lead": "Add a home screen shortcut to open your pantry in one tap — camera and offline work better in the installed view. A native App Store app is in preparation; home screen install works today.",
 			"alreadyInstalled": "You are already using the installed app. Nice!",
 			"iosTitle": "iPhone (Safari)",
 			"iosStep1": "Open {hostname} in Safari (not an in-app browser from other apps).",
@@ -1645,7 +1651,29 @@
 		"proLead": "Unlimited AI, receipt PDF, and full statistics — upgrade under Settings → Plan when you are ready.",
 		"footnoteMissingExpiry": "{count} items have no expiry date — add dates for better expiry alerts.",
 		"wrappedCta": "Your pantry wrapped",
-		"wrappedLead": "Monthly summary to share — savings, streak, and milestones."
+		"wrappedLead": "Monthly summary to share — savings, streak, and milestones.",
+		"tabs": {
+			"overview": "Overview",
+			"money": "Money",
+			"more": "More"
+		},
+		"tabsAria": "Statistics views",
+		"spendHeroTitle": "Spent this month",
+		"spendHeroPrefix": "about",
+		"spendHeroAmount": "about {sek} kr",
+		"spendHeroDeltaMore": "about {delta} kr more than last month",
+		"spendHeroDeltaLess": "about {delta} kr less than last month",
+		"spendHeroDeltaSame": "same as last month",
+		"spendFootnote": "Amounts from receipts you imported. Lines without prices are not counted.",
+		"spendEmptyTitle": "No spending yet",
+		"spendEmptyBody": "Import a receipt to see roughly how much you spent — week by week.",
+		"spendEmptyCta": "Import receipt",
+		"spendWeeklyTitle": "Spending per week",
+		"spendWeeklyLead": "Last four weeks from receipts",
+		"topStoresTitle": "Top stores",
+		"tripCount": "{count} receipts this month",
+		"priceHistoryLink": "View price history",
+		"trendSekAria": "{sek} kronor"
 	},
 	"wrapped": {
 		"pageTitle": "Your pantry wrapped",
@@ -3016,6 +3044,14 @@
 			"typedHint": "Type {name} or DELETE to confirm.",
 			"typedHintGeneric": "Type the household name or DELETE to confirm."
 		},
+		"account": {
+			"title": "Delete my account",
+			"description": "This cannot be undone. Your account, sessions and personal preferences are deleted. Households where you are the only member are removed entirely.",
+			"sharedHouseholds": "You will leave {count} {count, plural, one {shared household} other {shared households}}. If you are the only owner, another member becomes owner.",
+			"confirm": "Delete my account",
+			"confirmWord": "DELETE",
+			"typedHint": "Type {word} to confirm."
+		},
 		"invite": {
 			"title": "Revoke invitation?",
 			"description": "Invitation to {name} will be removed. The link will stop working.",
@@ -3070,6 +3106,10 @@
 		"plan": {
 			"inventoryLimit": "You've reached the maximum pantry items on the Free plan. Upgrade to Pro or remove items.",
 			"membersLimit": "The Free plan allows up to two household members. Upgrade to Pro for more."
+		},
+		"account": {
+			"deleteConfirm": "Confirmation does not match. Type DELETE to confirm.",
+			"notFound": "Account not found."
 		},
 		"household": {
 			"forbidden": "Only owners can perform this action.",

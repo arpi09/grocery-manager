@@ -1,0 +1,14 @@
+---
+description: Kodnavigering — läs CODEBASE_MAP före bred sökning
+alwaysApply: true
+---
+
+# Kodnavigering
+
+Innan du söker brett i kodbasen:
+
+1. Läs [AGENTS.md](../../AGENTS.md) och [docs/CODEBASE_MAP.md](../../docs/CODEBASE_MAP.md).
+2. Vid feature-arbete: öppna motsvarande [docs/features/](../../docs/features/) (t.ex. `inkop.md`, `scan-receipt.md`).
+3. Prod/nav/flags: [docs/CURRENT_REALITY.md](../../docs/CURRENT_REALITY.md) — inte duplicera här.
+4. Ny route: uppdatera `docs/codebase-map.manifest.json` + CODEBASE_MAP; kör `npm run check:codebase-map`.
+5. Tier C / frozen: [skaffu-frozen-zones.mdc](./skaffu-frozen-zones.mdc) + [skaffu-core-loop.mdc](./skaffu-core-loop.mdc).

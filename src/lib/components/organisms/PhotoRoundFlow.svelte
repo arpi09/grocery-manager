@@ -922,7 +922,7 @@ import {
 	@media (max-width: 899px) {
 		.actions {
 			position: sticky;
-			bottom: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0));
+			bottom: calc(var(--mobile-bottom-nav-height) + var(--safe-area-bottom));
 			z-index: 1;
 			margin-bottom: 0;
 			padding-top: var(--space-sm);

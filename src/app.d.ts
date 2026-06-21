@@ -1,4 +1,5 @@
 import type { User, Session } from 'lucia';
+import type { AccountService } from '$lib/application/account.service';
 import type { AdminService } from '$lib/application/admin.service';
 import type { AuthService } from '$lib/application/auth.service';
 import type { PasswordResetService } from '$lib/application/password-reset.service';
@@ -53,6 +54,7 @@ declare global {
 			householdId: string | null;
 			householdRole: HouseholdRole | null;
 			planTier: PlanTier;
+			accountService: AccountService;
 			authService: AuthService;
 			passwordResetService: PasswordResetService;
 			emailVerificationService: EmailVerificationService;

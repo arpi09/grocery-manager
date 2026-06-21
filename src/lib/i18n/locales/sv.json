@@ -640,7 +640,13 @@
 			"description": "Ditt inloggade konto och profil",
 			"loggedInEmail": "Inloggad e-post",
 			"editProfile": "Redigera profil",
-			"editProfileNote": "Namn, bild och tema"
+			"editProfileNote": "Namn, bild och tema",
+			"dangerZone": "Farozon",
+			"deleteAccount": "Radera mitt konto",
+			"deleteWarning": "Detta raderar ditt konto permanent. All personlig data kopplad till dig tas bort och du loggas ut.",
+			"deleteSoleHouseholds": "{count, plural, one {# hushåll där du är ensam medlem} other {# hushåll där du är ensam medlem}} raderas tillsammans med inventering och inköpslistor.",
+			"deleteSharedHouseholds": "Du lämnar {count, plural, one {# delat hushåll} other {# delade hushåll}}. Om du är ensam ägare blir en annan medlem ägare.",
+			"deletingAccount": "Raderar konto…"
 		},
 		"legal": {
 			"privacyLink": "Integritet & AI",
@@ -962,11 +968,11 @@
 	"pwa": {
 		"page": {
 			"title": "Lägg till på hemskärmen",
-			"subtitle": "Snabb genväg till skafferiet — som en app, utan App Store."
+			"subtitle": "Snabb genväg till skafferiet — som en app, utan nedladdning. App Store kommer efter beta."
 		},
 		"guide": {
 			"title": "Installera Skaffu",
-			"lead": "Lägg till en genväg på hemskärmen så öppnar du skafferiet med ett tryck — kameran och offline-läge fungerar bättre i den installerade vyn.",
+			"lead": "Lägg till en genväg på hemskärmen så öppnar du skafferiet med ett tryck — kameran och offline-läge fungerar bättre i den installerade vyn. Native app i App Store förbereds; hemskärmsinstall fungerar redan idag.",
 			"alreadyInstalled": "Du använder redan den installerade appen. Bra jobbat!",
 			"iosTitle": "iPhone (Safari)",
 			"iosStep1": "Öppna {hostname} i Safari (inte inbyggd webbläsare i andra appar).",
@@ -1614,7 +1620,29 @@
 		"proLead": "Obegränsad AI, kvitto-PDF och full statistik — uppgradera under Inställningar → Plan när ni vill.",
 		"footnoteMissingExpiry": "{count} varor saknar utgångsdatum — lägg till datum för bättre utgångsvarningar.",
 		"wrappedCta": "Er kylskåps-årstid",
-		"wrappedLead": "Månadssammanfattning att dela — sparade kronor, streak och milstolpar."
+		"wrappedLead": "Månadssammanfattning att dela — sparade kronor, streak och milstolpar.",
+		"tabs": {
+			"overview": "Översikt",
+			"money": "Pengar",
+			"more": "Mer"
+		},
+		"tabsAria": "Statistikvyer",
+		"spendHeroTitle": "Handlat denna månad",
+		"spendHeroPrefix": "ca",
+		"spendHeroAmount": "ca {sek} kr",
+		"spendHeroDeltaMore": "ca {delta} kr mer än förra månaden",
+		"spendHeroDeltaLess": "ca {delta} kr mindre än förra månaden",
+		"spendHeroDeltaSame": "samma som förra månaden",
+		"spendFootnote": "Belopp från kvitton ni importerat. Rader utan pris räknas inte.",
+		"spendEmptyTitle": "Ingen handel ännu",
+		"spendEmptyBody": "Importera ett kvitto så ser ni ungefär hur mycket ni handlat — vecka för vecka.",
+		"spendEmptyCta": "Importera kvitto",
+		"spendWeeklyTitle": "Handel per vecka",
+		"spendWeeklyLead": "Senaste fyra veckorna från kvitton",
+		"topStoresTitle": "Topp-butiker",
+		"tripCount": "{count} kvitton denna månad",
+		"priceHistoryLink": "Se prishistorik",
+		"trendSekAria": "{sek} kronor"
 	},
 	"wrapped": {
 		"pageTitle": "Er kylskåps-årstid",
@@ -2979,6 +3007,14 @@
 			"typedHint": "Skriv {name} eller TA BORT för att bekräfta.",
 			"typedHintGeneric": "Skriv hushållets namn eller TA BORT för att bekräfta."
 		},
+		"account": {
+			"title": "Radera mitt konto",
+			"description": "Detta går inte att ångra. Ditt konto, sessioner och personliga preferenser raderas. Hushåll där du är ensam medlem tas bort helt.",
+			"sharedHouseholds": "Du lämnar {count} {count, plural, one {delat hushåll} other {delade hushåll}}. Om du är ensam ägare blir en annan medlem ägare.",
+			"confirm": "Radera mitt konto",
+			"confirmWord": "RADERA",
+			"typedHint": "Skriv {word} för att bekräfta."
+		},
 		"invite": {
 			"title": "Återkalla inbjudan?",
 			"description": "Inbjudan till {name} tas bort. Länken slutar fungera.",
@@ -3039,6 +3075,10 @@
 		"plan": {
 			"inventoryLimit": "Ni har nått max antal lagerrader på Gratis-planen. Uppgradera till Pro eller ta bort varor.",
 			"membersLimit": "Gratis-planen tillåter max två hushållsmedlemmar. Uppgradera till Pro för fler."
+		},
+		"account": {
+			"deleteConfirm": "Bekräftelsen matchar inte. Skriv RADERA för att bekräfta.",
+			"notFound": "Kontot hittades inte."
 		},
 		"household": {
 			"forbidden": "Endast ägare kan utföra denna åtgärd.",

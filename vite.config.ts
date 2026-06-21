@@ -2,7 +2,9 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import { defineConfig } from 'vitest/config';
-import { BRAND_BG, BRAND_PRIMARY } from './src/lib/design/brand-colors';
+import { BRAND_BG, BRAND_PRIMARY, PWA_ICON_VERSION } from './src/lib/design/brand-colors';
+
+const pwaIcon = (path: string) => `${path}?v=${PWA_ICON_VERSION}`;
 
 const useHttps = process.env.HTTPS === 'true';
 
@@ -34,19 +36,19 @@ export default defineConfig({
 				lang: 'sv',
 				icons: [
 					{
-						src: '/pwa/icon-192.png',
+						src: pwaIcon('/pwa/icon-192.png'),
 						sizes: '192x192',
 						type: 'image/png',
 						purpose: 'any'
 					},
 					{
-						src: '/pwa/icon-512.png',
+						src: pwaIcon('/pwa/icon-512.png'),
 						sizes: '512x512',
 						type: 'image/png',
 						purpose: 'any'
 					},
 					{
-						src: '/pwa/icon-512.png',
+						src: pwaIcon('/pwa/icon-512.png'),
 						sizes: '512x512',
 						type: 'image/png',
 						purpose: 'maskable'

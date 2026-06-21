@@ -50,3 +50,16 @@ docs/COMPLEXITY_REPORT.md
 docs/DEPENDENCY_HEALTH.md
 docs/DELIVERY_METRICS.md
 private/
+
+# Capacitor native build artifacts (ios/ and android/ project dirs are committed)
+ios/App/build/
+ios/App/DerivedData/
+ios/App/Pods/
+ios/.xcode.env.local
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/.idea/
+android/captures/
+android/.cxx/

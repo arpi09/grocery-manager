@@ -43,6 +43,7 @@ export interface IUserRepository {
 		id: string,
 		mode: ShoppingToPantryMode
 	): Promise<ShoppingToPantryMode | null>;
+	deleteUser(id: string): Promise<boolean>;
 }
 
 function mapProfile(row: {
@@ -197,5 +198,10 @@ export class DrizzleUserRepository implements IUserRepository {
 			.returning();
 
 		return row?.shoppingToPantryMode ?? null;
+	}
+
+	async deleteUser(id: string) {
+		const rows = await this.db.delete(userTable).where(eq(userTable.id, id)).returning();
+		return rows.length > 0;
 	}
 }

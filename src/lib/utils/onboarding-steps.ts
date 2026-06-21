@@ -30,13 +30,37 @@ export const ACTIVATION_PROGRESS_KEYS = [
 	'shopping'
 ] as const satisfies readonly ActivationProgressKey[];
 
+const SCREEN_TO_PROGRESS: Partial<Record<ActivationScreenId, ActivationProgressKey>> = {
+	welcome: 'welcome',
+	scan: 'firstScan',
+	success: 'pantryCreated',
+	brain: 'brain',
+	shopping: 'shopping'
+};
+
+const PROGRESS_TO_SCREEN: Record<ActivationProgressKey, ActivationScreenId> = {
+	welcome: 'welcome',
+	firstScan: 'scan',
+	pantryCreated: 'success',
+	brain: 'brain',
+	shopping: 'shopping'
+};
+
 export function progressKeyForScreen(screen: ActivationScreenId): ActivationProgressKey | null {
-	const map: Partial<Record<ActivationScreenId, ActivationProgressKey>> = {
-		welcome: 'welcome',
-		scan: 'firstScan',
-		success: 'pantryCreated',
-		brain: 'brain',
-		shopping: 'shopping'
-	};
-	return map[screen] ?? null;
+	return SCREEN_TO_PROGRESS[screen] ?? null;
+}
+
+export function screenForProgressKey(key: ActivationProgressKey): ActivationScreenId {
+	return PROGRESS_TO_SCREEN[key];
+}
+
+export function canSelectProgressKey(
+	key: ActivationProgressKey,
+	checklist: Record<ActivationProgressKey, boolean>,
+	currentKey: ActivationProgressKey | null
+): boolean {
+	if (currentKey === key) {
+		return true;
+	}
+	return checklist[key] === true;
 }

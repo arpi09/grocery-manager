@@ -2,6 +2,8 @@
 
 > **Syfte:** Veckovy för att planera middagar utifrån lagret — se vad som är planerat, lägg till från förslag, öppna recept och fyll inköpslistan.
 
+**Agent feature-doc:** [features/ata.md](./features/ata.md)
+
 ## Namn och routes
 
 | Yta | Route | UI-namn |

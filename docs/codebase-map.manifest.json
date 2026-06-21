@@ -1,0 +1,317 @@
+{
+	"version": 1,
+	"description": "Machine-readable feature→route map for CI (check:codebase-map). Human view: docs/CODEBASE_MAP.md",
+	"features": [
+		{
+			"id": "hem",
+			"label": "Hem dashboard (Home UX v2)",
+			"routes": ["/hem"],
+			"paths": [
+				"src/routes/(app)/hem/+page.svelte",
+				"src/routes/(app)/hem/+page.server.ts",
+				"src/lib/components/organisms/HomeV2Page.svelte",
+				"src/lib/components/organisms/HomeV2BriefingView.svelte",
+				"src/lib/domain/home-briefing-presenter.ts"
+			],
+			"doc": "docs/features/hem.md"
+		},
+		{
+			"id": "inkop",
+			"label": "Inköp (Shopping V2)",
+			"routes": ["/inkop"],
+			"apiOnlyRoutes": [
+				"/api/shopping/data",
+				"/api/shopping-suggestions",
+				"/api/shopping-list/share",
+				"/api/replenishment/accept",
+				"/api/replenishment/dismiss"
+			],
+			"paths": [
+				"src/routes/inkop/+page.svelte",
+				"src/routes/inkop/+page.server.ts",
+				"src/lib/components/organisms/ShoppingV2Page.svelte",
+				"src/lib/application/shopping-list.service.ts",
+				"src/lib/application/shopping-to-pantry.service.ts",
+				"src/lib/application/shopping-list-share.service.ts",
+				"e2e/shopping-v2.spec.ts",
+				"e2e/shopping.spec.ts"
+			],
+			"doc": "docs/features/inkop.md"
+		},
+		{
+			"id": "inventory",
+			"label": "Skafferi / Pantry V2",
+			"routes": [
+				"/inventory",
+				"/inventory/[location]",
+				"/inventory/merge",
+				"/inventory/synk",
+				"/item/new",
+				"/item/[id]/edit"
+			],
+			"apiOnlyRoutes": [
+				"/inventory/foto",
+				"/api/inventory/data",
+				"/api/inventory/merge-candidates",
+				"/api/inventory/photo-scan",
+				"/api/inventory/staleness",
+				"/api/inventory-insights",
+				"/api/eat-first",
+				"/api/barcode/[code]",
+				"/api/product-from-image"
+			],
+			"paths": [
+				"src/routes/inventory/+page.svelte",
+				"src/routes/inventory/[location]/+page.svelte",
+				"src/lib/components/organisms/PantryV2Page.svelte",
+				"src/lib/components/organisms/PantryV2ShelfView.svelte",
+				"src/lib/components/organisms/PantryLocationDataGrid.svelte",
+				"src/lib/application/inventory.service.ts",
+				"src/lib/infrastructure/repositories/inventory.repository.ts"
+			],
+			"doc": "docs/features/inventory.md"
+		},
+		{
+			"id": "scan-receipt",
+			"label": "Scan hub & kvitto",
+			"routes": ["/scan"],
+			"apiOnlyRoutes": [
+				"/scan/kvitto",
+				"/scan/foto",
+				"/scan/snabbstart",
+				"/scan/share",
+				"/api/receipt/parse",
+				"/api/receipt/share-pending",
+				"/api/receipt-autopilot/accept",
+				"/api/receipt-autopilot/dismiss",
+				"/api/receipt-autopilot/finish",
+				"/api/receipt-autopilot/finish-dismiss"
+			],
+			"paths": [
+				"src/routes/scan/+page.svelte",
+				"src/routes/scan/+page.server.ts",
+				"src/lib/components/organisms/PhotoRoundFlow.svelte",
+				"src/lib/components/organisms/ReceiptBulkAddFlow.svelte",
+				"src/lib/server/receipt-parse.ts",
+				"src/lib/server/receipt-import.ts",
+				"src/lib/utils/scan-nav.ts"
+			],
+			"doc": "docs/features/scan-receipt.md"
+		},
+		{
+			"id": "ata",
+			"label": "Äta / måltidsplan",
+			"routes": ["/planer", "/planer/vecka", "/recept/[id]", "/recept/[id]/laga"],
+			"apiOnlyRoutes": [
+				"/api/planer/ideas",
+				"/api/planer/ideas/dismiss",
+				"/api/planer/schedule-idea",
+				"/api/planer/weekly-ritual/approve",
+				"/api/recipes",
+				"/api/recipes/add-missing"
+			],
+			"paths": [
+				"src/routes/planer/+page.svelte",
+				"src/routes/planer/vecka/+page.svelte",
+				"src/lib/components/organisms/WeeklyRitualFlow.svelte",
+				"src/lib/application/weekly-ritual.service.ts"
+			],
+			"doc": "docs/features/ata.md"
+		},
+		{
+			"id": "onboarding",
+			"label": "Activation onboarding",
+			"routes": ["/install-app"],
+			"paths": [
+				"src/lib/components/organisms/ActivationOnboardingFlow.svelte",
+				"src/lib/utils/activation-onboarding-state.ts",
+				"src/lib/utils/onboarding.ts",
+				"src/lib/components/molecules/ActivationProgressChecklist.svelte"
+			],
+			"doc": "docs/features/onboarding.md"
+		},
+		{
+			"id": "statistik",
+			"label": "Statistik & wrapped",
+			"routes": ["/statistik", "/statistik/wrapped"],
+			"apiOnlyRoutes": ["/api/statistik/analytics"],
+			"paths": [
+				"src/routes/statistik/+page.svelte",
+				"src/lib/components/organisms/StatistikDashboard.svelte",
+				"src/lib/application/statistik.service.ts",
+				"src/lib/domain/receipt-spend.ts"
+			],
+			"doc": "docs/features/statistik.md"
+		},
+		{
+			"id": "settings",
+			"label": "Settings hub",
+			"routes": [
+				"/settings",
+				"/settings/account",
+				"/settings/app",
+				"/settings/feedback",
+				"/settings/kivra",
+				"/settings/memory",
+				"/settings/nearby",
+				"/settings/notifications",
+				"/settings/plan",
+				"/settings/price-memory",
+				"/settings/suggestions"
+			],
+			"apiOnlyRoutes": [
+				"/api/price-memory/last",
+				"/api/price-memory/search",
+				"/api/price-memory/summary",
+				"/api/price-memory/timeline",
+				"/api/brain/feedback",
+				"/api/brain/feedback/restore",
+				"/api/push/disable",
+				"/api/push/subscribe",
+				"/api/push/unsubscribe",
+				"/api/push/vapid-public-key"
+			],
+			"paths": [
+				"src/routes/settings/+page.svelte",
+				"src/lib/components/organisms/AccountSettingsPanel.svelte",
+				"src/lib/application/account.service.ts",
+				"src/lib/application/profile.service.ts"
+			],
+			"doc": "docs/features/settings.md"
+		},
+		{
+			"id": "household",
+			"label": "Household & delad lista",
+			"routes": [
+				"/settings/household",
+				"/invite/[token]",
+				"/lista/[token]",
+				"/dela/[token]",
+				"/delningar"
+			],
+			"apiOnlyRoutes": [
+				"/api/household/share-invite",
+				"/api/expiring-share",
+				"/api/expiring-share/nearby",
+				"/api/expiring-share/nearby-push-settings",
+				"/api/expiring-share/nearby-settings",
+				"/api/expiring-share/report"
+			],
+			"paths": [
+				"src/routes/settings/household/+page.svelte",
+				"src/routes/lista/[token]/+page.svelte",
+				"src/lib/application/household.service.ts",
+				"docs/ACQUISITION_LOOPS_V1.md"
+			],
+			"doc": "docs/features/household.md"
+		},
+		{
+			"id": "auth",
+			"label": "Auth & profil",
+			"routes": [
+				"/login",
+				"/register",
+				"/forgot-password",
+				"/reset-password/[token]",
+				"/verify-email",
+				"/verify-email/[token]",
+				"/profile"
+			],
+			"apiOnlyRoutes": ["/logout", "/auth/google", "/auth/google/callback"],
+			"paths": [
+				"src/routes/login/+page.svelte",
+				"src/lib/application/auth.service.ts",
+				"src/lib/infrastructure/lucia.ts",
+				"src/hooks.server.ts"
+			],
+			"doc": "docs/features/auth.md"
+		},
+		{
+			"id": "marketing",
+			"label": "Marketing site",
+			"routes": [
+				"/",
+				"/faq",
+				"/funktioner",
+				"/guider",
+				"/guider/[slug]",
+				"/kvitto-pdf-kivra",
+				"/minska-matsvinn",
+				"/priser",
+				"/privacy",
+				"/rapport/[month]",
+				"/sa-fungerar-det",
+				"/skafferi-app"
+			],
+			"paths": [
+				"src/routes/(marketing)/+page.svelte",
+				"src/lib/marketing/landing-variants.ts",
+				"docs/MARKETING_SITE.md"
+			]
+		},
+		{
+			"id": "admin",
+			"label": "Admin & PMF",
+			"routes": ["/admin", "/admin/guide-preview/[id]"],
+			"apiOnlyRoutes": [
+				"/api/admin/data",
+				"/api/admin/marketing-campaigns",
+				"/api/admin/marketing-campaigns/generate",
+				"/api/admin/social-posts",
+				"/api/linkedin/authorize",
+				"/api/linkedin/callback"
+			],
+			"paths": ["src/routes/admin/+page.svelte", "src/lib/application/pmf-dashboard.service.ts"]
+		},
+		{
+			"id": "grannskafferiet",
+			"label": "Grannskafferiet (Tier C)",
+			"routes": ["/grannskafferiet", "/grannskafferiet/share/[id]"],
+			"paths": ["src/routes/grannskafferiet/+page.svelte"]
+		},
+		{
+			"id": "api-cron",
+			"label": "Cron jobs",
+			"apiOnlyRoutes": [
+				"/api/cron/analytics-rollup",
+				"/api/cron/error-alert",
+				"/api/cron/error-export",
+				"/api/cron/expiry-reminders",
+				"/api/cron/pmf-weekly",
+				"/api/cron/reset-demo",
+				"/api/cron/shopping-push",
+				"/api/cron/skaffurapport"
+			],
+			"paths": ["src/hooks.server.ts", "apphosting.yaml"]
+		},
+		{
+			"id": "api-stripe-kivra",
+			"label": "Stripe & Kivra (Tier C)",
+			"apiOnlyRoutes": [
+				"/api/stripe/checkout",
+				"/api/stripe/portal",
+				"/api/stripe/webhook",
+				"/api/inbound/kivra"
+			],
+			"paths": ["src/routes/api/stripe/checkout/+server.ts"]
+		},
+		{
+			"id": "platform",
+			"label": "Platform & telemetry",
+			"routes": ["/husdjur", "/nyheter"],
+			"apiOnlyRoutes": [
+				"/news",
+				"/robots.txt",
+				"/sitemap.xml",
+				"/api/analytics/beacon",
+				"/api/client-errors",
+				"/api/cookie-consent",
+				"/api/pmf-survey",
+				"/api/product-events",
+				"/api/health/ai",
+				"/api/health/db"
+			],
+			"paths": ["src/hooks.server.ts", "src/routes/+layout.svelte"]
+		}
+	]
+}

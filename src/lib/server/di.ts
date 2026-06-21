@@ -1,4 +1,5 @@
 import { AdminService } from '$lib/application/admin.service';
+import { AccountService } from '$lib/application/account.service';
 import { AuthService } from '$lib/application/auth.service';
 import { PasswordResetService } from '$lib/application/password-reset.service';
 import { EmailVerificationService } from '$lib/application/email-verification.service';
@@ -148,6 +149,11 @@ export const pushSubscriptionRepository = new DrizzlePushSubscriptionRepository(
 const analyticsBehaviorRepository = new DrizzleAnalyticsBehaviorRepository();
 
 export const authService = new AuthService(userRepository);
+export const accountService = new AccountService(
+	userRepository,
+	householdRepository,
+	adminRepository
+);
 export const passwordResetService = new PasswordResetService(
 	userRepository,
 	passwordResetRepository,
@@ -232,7 +238,8 @@ export const statistikService = new StatistikService(
 	inventoryService,
 	inventoryRepository,
 	consumptionRepository,
-	householdRepository
+	householdRepository,
+	priceMemoryRepository
 );
 export const gamificationService = new GamificationService(
 	statistikService,

@@ -4,6 +4,8 @@
 
 | Läs först | Fil |
 |-----------|-----|
+| Agent entry (Cursor standard) | [AGENTS.md](../AGENTS.md) |
+| Feature → routes → filer | [CODEBASE_MAP.md](./CODEBASE_MAP.md) |
 | Prod SHA, nav, tier, kill switches | [CURRENT_REALITY.md](./CURRENT_REALITY.md) |
 | Release policy (master=truth, deploy=publish) | [RELEASE_MODEL.md](./RELEASE_MODEL.md) |
 | Kärnloopen | `.cursor/rules/skaffu-core-loop.mdc` |

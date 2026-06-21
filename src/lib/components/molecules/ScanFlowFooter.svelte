@@ -35,7 +35,7 @@
 		position: sticky;
 		bottom: 0;
 		margin-top: var(--space-lg);
-		padding: var(--space-md) 0 calc(var(--space-md) + env(safe-area-inset-bottom, 0px));
+		padding: var(--space-md) 0 calc(var(--space-md) + var(--safe-area-bottom));
 		background: linear-gradient(transparent, var(--color-bg) 30%);
 		text-align: center;
 	}
@@ -49,7 +49,7 @@
 
 	@media (max-width: 899px) {
 		.flow-footer {
-			bottom: calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0));
+			bottom: calc(var(--mobile-bottom-nav-height) + var(--safe-area-bottom));
 		}
 	}
 

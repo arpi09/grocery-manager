@@ -69,6 +69,9 @@ Trunk-flöde: push till `master` triggar GitHub Actions ([CI_CD.md](./CI_CD.md))
 
 ## Mer läsning
 
+- [AGENTS.md](../AGENTS.md) — agent entry + "jag ska fixa X"
+- [CODEBASE_MAP.md](./CODEBASE_MAP.md) — feature → routes → filer
+- [features/](./features/) — djupdyk per produktyta
 - [README.md](../README.md) — funktioner, hushåll, streckkod, AI
 - [ARCHITECTURE.md](../ARCHITECTURE.md) — lager och struktur
 

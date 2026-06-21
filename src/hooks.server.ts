@@ -1,6 +1,7 @@
 import { initDatabase } from '$lib/infrastructure/db';
 import { shouldRedirectUnverifiedUser } from '$lib/server/email-verification-enforcement';
 import {
+	accountService,
 	adminService,
 	authService,
 	passwordResetService,
@@ -151,6 +152,7 @@ function isPublicPath(pathname: string): boolean {
 export const handle: Handle = async ({ event, resolve }) => {
 	await initDatabase();
 
+	event.locals.accountService = accountService;
 	event.locals.authService = authService;
 	event.locals.passwordResetService = passwordResetService;
 	event.locals.emailVerificationService = emailVerificationService;

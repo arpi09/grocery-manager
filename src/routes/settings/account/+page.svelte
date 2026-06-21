@@ -3,7 +3,7 @@
 	import AccountSettingsPanel from '$lib/components/organisms/AccountSettingsPanel.svelte';
 	import { t } from '$lib/i18n';
 
-	let { data } = $props();
+	let { data, form } = $props();
 </script>
 
 <SettingsDrilldownLayout
@@ -11,5 +11,9 @@
 	title={t('settings.account.title')}
 	subtitle={t('settings.account.description')}
 >
-	<AccountSettingsPanel email={data.user?.email ?? ''} />
+	<AccountSettingsPanel
+		email={data.user?.email ?? ''}
+		deletionImpact={data.deletionImpact}
+		accountError={form?.accountError}
+	/>
 </SettingsDrilldownLayout>

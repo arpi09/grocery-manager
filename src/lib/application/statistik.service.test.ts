@@ -4,6 +4,7 @@ import type { InventoryService, InventoryAnalytics } from './inventory.service';
 import type { IInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
 import type { IConsumptionRepository } from '$lib/infrastructure/repositories/consumption.repository';
 import type { IHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
+import type { IPriceMemoryRepository } from '$lib/infrastructure/repositories/price-memory.repository';
 import { startOfWeek, toIsoDate } from '$lib/domain/statistik';
 
 const analyticsFixture: InventoryAnalytics = {
@@ -18,6 +19,7 @@ describe('StatistikService', () => {
 	let service: StatistikService;
 	let consumptionRepository: IConsumptionRepository;
 	let householdRepository: IHouseholdRepository;
+	let priceMemoryRepository: IPriceMemoryRepository;
 
 	beforeEach(() => {
 		vi.useFakeTimers();
@@ -45,11 +47,24 @@ describe('StatistikService', () => {
 				members: []
 			})
 		} as unknown as IHouseholdRepository;
+		priceMemoryRepository = {
+			listSpendLinesSince: vi.fn().mockResolvedValue([
+				{
+					purchasedAt: new Date('2026-06-10T10:00:00Z'),
+					lineTotalSek: 100,
+					unitPriceSek: null,
+					quantity: null,
+					storeLabel: 'ICA',
+					importBatchId: 'batch-1'
+				}
+			])
+		} as unknown as IPriceMemoryRepository;
 		service = new StatistikService(
 			{ getAnalytics: vi.fn().mockResolvedValue(analyticsFixture) } as unknown as InventoryService,
 			{ weeklyAddedCounts: vi.fn().mockResolvedValue([{ weekStart: previousWeek, count: 1 }, { weekStart: currentWeek, count: 4 }]) } as unknown as IInventoryRepository,
 			consumptionRepository,
-			householdRepository
+			householdRepository,
+			priceMemoryRepository
 		);
 	});
 	afterEach(() => vi.useRealTimers());
@@ -58,6 +73,18 @@ describe('StatistikService', () => {
 		const dashboard = await service.getDashboard('household-1');
 		expect(dashboard.analytics.totalItems).toBe(12);
 		expect(dashboard.impact.consumedThisWeek).toBe(2);
+		expect(dashboard.spend.hasData).toBe(true);
+		expect(dashboard.spend.thisMonthSek).toBe(100);
+	});
+
+	it('builds spend report from receipt lines', async () => {
+		const spend = await service.getSpendReport('household-1');
+		expect(spend.hasData).toBe(true);
+		expect(spend.thisMonthSek).toBe(100);
+		expect(priceMemoryRepository.listSpendLinesSince).toHaveBeenCalledWith(
+			'household-1',
+			expect.any(Date)
+		);
 	});
 
 	it('returns null impact without consumption history', async () => {

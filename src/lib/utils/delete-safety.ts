@@ -15,6 +15,7 @@ export type DeleteSafetyContext =
 	| 'inventoryAutoExpiredBulk'
 	| 'householdMember'
 	| 'householdDelete'
+	| 'accountDelete'
 	| 'inviteRevoke'
 	| 'pet'
 	| 'petFood'
@@ -155,6 +156,24 @@ export function getDeleteCopy(
 					? translate(locale, 'delete.household.typedHint', { name: confirmationTarget })
 					: translate(locale, 'delete.household.typedHintGeneric'),
 				typedConfirmationPlaceholder: confirmationTarget
+			};
+		}
+
+		case 'accountDelete': {
+			const sharedWarning =
+				otherMemberCount > 0
+					? translate(locale, 'delete.account.sharedHouseholds', { count: otherMemberCount })
+					: undefined;
+			const confirmWord = translate(locale, 'delete.account.confirmWord');
+			return {
+				title: translate(locale, 'delete.account.title'),
+				description: translate(locale, 'delete.account.description'),
+				consequence: sharedWarning,
+				confirmLabel: translate(locale, 'delete.account.confirm'),
+				cancelLabel,
+				typedConfirmationLabel: confirmLabel,
+				typedConfirmationHint: translate(locale, 'delete.account.typedHint', { word: confirmWord }),
+				typedConfirmationPlaceholder: confirmWord
 			};
 		}
 

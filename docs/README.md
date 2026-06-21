@@ -1,6 +1,6 @@
 # Dokumentation (publik)
 
-**Agent start:** [INDEX.md](./INDEX.md) · **Prod snapshot:** [CURRENT_REALITY.md](./CURRENT_REALITY.md)
+**Agent start:** [AGENTS.md](../AGENTS.md) · [INDEX.md](./INDEX.md) · **Kodkarta:** [CODEBASE_MAP.md](./CODEBASE_MAP.md) · **Prod snapshot:** [CURRENT_REALITY.md](./CURRENT_REALITY.md)
 
 Filer i `docs/` är avsedda för produkt, deploy och utveckling i det publika repot.
 
@@ -48,6 +48,9 @@ Komplettera med `private/NEW_CURSOR_AGENT_START.md` lokalt (miljö, första prom
 
 | Dokument | Innehåll |
 |----------|----------|
+| [CODEBASE_MAP.md](./CODEBASE_MAP.md) | Feature → routes → nyckelfiler (kurerad) |
+| [features/](./features/) | Djupdyk per yta (hem, inkop, scan, …) |
+| [generated/route-index.md](./generated/route-index.md) | Auto-genererad route-lista |
 | [BRAND.md](./BRAND.md) | Ton, färger, UI |
 | [I18N.md](./I18N.md) | sv/en |
 | [MODAL_CONTRACT.md](./MODAL_CONTRACT.md) | Modal-komponent API |

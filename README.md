@@ -4,6 +4,7 @@
 
 [skaffu.com](https://skaffu.com) — live produkt för svenska hushåll: delat lager i kyl, frys och skafferi, kvitto-AI, smart inköpslista och veckoplan. Intern repo heter fortfarande `home-pantry`.
 
+> **Agents / Cursor:** Start at [`AGENTS.md`](AGENTS.md) → [`docs/CODEBASE_MAP.md`](docs/CODEBASE_MAP.md) → [`docs/CURRENT_REALITY.md`](docs/CURRENT_REALITY.md).  
 > **Portfolio / intervju:** Case study med arkitektur, beslut och ärliga metrics — [`docs/CASE_STUDY_SKAFFU.md`](docs/CASE_STUDY_SKAFFU.md).  
 > Byggt som solo-produkt med PMF-disciplin (Head of Dev: prioritering, metrics, launch) och senior fullstack-leverans (hexagonal arkitektur, ~690 tester, deploy E2E-gate).
 

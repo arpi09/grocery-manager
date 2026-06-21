@@ -1,4 +1,6 @@
 import { and, desc, eq, gte, ilike, isNotNull, isNull, or, sql } from 'drizzle-orm';
+import type { ReceiptSpendLine } from '$lib/domain/receipt-spend';
+import { mapReceiptPurchaseRowToSpendLine } from '$lib/domain/receipt-spend';
 import type {
 	LastPaidPrice,
 	MatchedLevel,
@@ -35,6 +37,7 @@ export interface IPriceMemoryRepository {
 		conceptKey: string
 	): Promise<PurchaseMemoryTimelineEntry[]>;
 	search(householdId: string, query: string, limit?: number): Promise<PurchaseMemorySearchResult[]>;
+	listSpendLinesSince(householdId: string, since: Date): Promise<ReceiptSpendLine[]>;
 }
 
 function sinceDate(): Date {
@@ -283,5 +286,21 @@ export class DrizzlePriceMemoryRepository implements IPriceMemoryRepository {
 			if (results.length >= limit) break;
 		}
 		return results.slice(0, limit);
+	}
+
+	async listSpendLinesSince(householdId: string, since: Date): Promise<ReceiptSpendLine[]> {
+		const rows = await this.database
+			.select()
+			.from(receiptPurchaseLineTable)
+			.where(
+				and(
+					eq(receiptPurchaseLineTable.householdId, householdId),
+					gte(
+						sql`COALESCE(${receiptPurchaseLineTable.purchasedAt}, ${receiptPurchaseLineTable.createdAt})`,
+						since
+					)
+				)
+			);
+		return rows.map((row) => mapReceiptPurchaseRowToSpendLine(row));
 	}
 }

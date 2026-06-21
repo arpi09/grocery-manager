@@ -23,6 +23,12 @@ describe('getDeleteCopy', () => {
 		expect(copy.consequence).toContain('2 andra medlemmar');
 	});
 
+	it('returns tier-4 typed confirmation hints for account delete', () => {
+		const copy = getDeleteCopy(4, 'accountDelete', { otherMemberCount: 1 });
+		expect(copy.typedConfirmationHint).toContain('RADERA');
+		expect(copy.consequence).toContain('1 delat hushåll');
+	});
+
 	it('includes undo message for shopping list items', () => {
 		const copy = getDeleteCopy(1, 'shoppingListItem', { itemName: 'Ägg' });
 		expect(copy.undoToastMessage).toContain('Ägg');

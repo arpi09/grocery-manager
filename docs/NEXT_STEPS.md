@@ -16,7 +16,9 @@
 
 ## Produkt (vänta tills beta givit signal)
 
-**Inte nu:** nya stora features (Fas 5b batch-bridge, toast-unify-epic, stor `/hem`-redesign), Stripe live ([PRICING.md](./PRICING.md)), App Store/Capacitor, community-launch ([LAUNCH_PLAYBOOK.md](./LAUNCH_PLAYBOOK.md)).
+**Inte nu:** nya stora features (Fas 5b batch-bridge, toast-unify-epic, stor `/hem`-redesign), Stripe live ([PRICING.md](./PRICING.md)), community-launch ([LAUNCH_PLAYBOOK.md](./LAUNCH_PLAYBOOK.md)).
+
+**Pågår (spike):** Capacitor + App Store-förberedelse — se [APP_STORE.md](./APP_STORE.md). TestFlight/Play internal före publik listing; PWA förblir parallell kanal ([PWA.md](./PWA.md)).
 
 **Efter deploy + beta:** prioritera utifrån friktion i feedback — se [ROADMAP.md](./ROADMAP.md).
 

@@ -8,10 +8,17 @@ import {
 	weeksSinceHouseholdCreated,
 	type WeeklyBar
 } from '$lib/domain/statistik';
+import {
+	buildReceiptSpendReport,
+	type ReceiptSpendReport
+} from '$lib/domain/receipt-spend';
 import { buildSavingsReport, type SavingsReport } from '$lib/domain/savings-estimate';
 import type { IConsumptionRepository } from '$lib/infrastructure/repositories/consumption.repository';
 import type { IHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
 import type { IInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
+import type { IPriceMemoryRepository } from '$lib/infrastructure/repositories/price-memory.repository';
+
+const SPEND_LOOKBACK_DAYS = 90;
 
 const TREND_WEEKS = 4;
 
@@ -30,6 +37,7 @@ export interface StatistikDashboard {
 	addedWeekOverWeek: ReturnType<typeof computeWeekOverWeek>;
 	impact: ImpactStats;
 	savings: SavingsReport;
+	spend: ReceiptSpendReport;
 }
 
 export class StatistikService {
@@ -37,13 +45,22 @@ export class StatistikService {
 		private readonly inventoryService: InventoryService,
 		private readonly inventoryRepository: IInventoryRepository,
 		private readonly consumptionRepository: IConsumptionRepository,
-		private readonly householdRepository: IHouseholdRepository
+		private readonly householdRepository: IHouseholdRepository,
+		private readonly priceMemoryRepository: IPriceMemoryRepository
 	) {}
 
 	/** Lighter than getDashboard — used by /hem engagement strip. */
 	async getSavingsReport(householdId: string): Promise<SavingsReport> {
 		const events = await this.consumptionRepository.listEventsForSavings(householdId);
 		return buildSavingsReport(events);
+	}
+
+	async getSpendReport(householdId: string): Promise<ReceiptSpendReport> {
+		const referenceDate = new Date();
+		const since = new Date(referenceDate);
+		since.setUTCDate(since.getUTCDate() - SPEND_LOOKBACK_DAYS);
+		const lines = await this.priceMemoryRepository.listSpendLinesSince(householdId, since);
+		return buildReceiptSpendReport(lines, referenceDate);
 	}
 
 	async getImpact(householdId: string): Promise<ImpactStats> {
@@ -85,9 +102,10 @@ export class StatistikService {
 		]);
 
 		const addedTrend = buildLastNWeekBars(addedCounts, TREND_WEEKS, referenceDate);
-		const [impact, savings] = await Promise.all([
+		const [impact, savings, spend] = await Promise.all([
 			this.buildImpactStats(householdId, consumedCounts, wasteCounts, referenceDate),
-			this.getSavingsReport(householdId)
+			this.getSavingsReport(householdId),
+			this.getSpendReport(householdId)
 		]);
 
 		return {
@@ -95,7 +113,8 @@ export class StatistikService {
 			addedTrend,
 			addedWeekOverWeek: computeWeekOverWeek(addedTrend),
 			impact,
-			savings
+			savings,
+			spend
 		};
 	}
 

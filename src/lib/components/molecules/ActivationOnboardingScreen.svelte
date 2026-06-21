@@ -6,10 +6,9 @@
 		body: string;
 		illustration: Snippet;
 		extra?: Snippet;
-		actions: Snippet;
 	}
 
-	let { title, body, illustration, extra, actions }: Props = $props();
+	let { title, body, illustration, extra }: Props = $props();
 </script>
 
 <div class="activation-screen motion-enter">
@@ -18,17 +17,13 @@
 	</div>
 
 	<div class="copy-block">
-		<h2 class="screen-title">{title}</h2>
-		<p class="screen-body">{body}</p>
+		<h2 class="screen-title motion-stagger">{title}</h2>
+		<p class="screen-body motion-stagger">{body}</p>
 		{#if extra}
-			<div class="screen-extra">
+			<div class="screen-extra motion-stagger">
 				{@render extra()}
 			</div>
 		{/if}
-	</div>
-
-	<div class="action-block">
-		{@render actions()}
 	</div>
 </div>
 
@@ -36,7 +31,7 @@
 	.activation-screen {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-lg);
+		gap: var(--space-md);
 		flex: 1;
 		min-height: 0;
 	}
@@ -45,8 +40,16 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 9rem;
-		padding-block: var(--space-sm);
+		min-height: 6rem;
+		padding-block: var(--space-xs);
+		flex-shrink: 0;
+	}
+
+	@media (min-width: 768px) {
+		.illus-slot {
+			min-height: 7rem;
+			padding-block: var(--space-sm);
+		}
 	}
 
 	.copy-block {
@@ -78,22 +81,30 @@
 		text-align: left;
 	}
 
-	.action-block {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-		margin-top: auto;
-		padding-top: var(--space-md);
-	}
-
 	.motion-enter {
 		animation: activation-enter 320ms cubic-bezier(0.33, 1, 0.68, 1) both;
+	}
+
+	.motion-stagger {
+		animation: activation-enter 320ms cubic-bezier(0.33, 1, 0.68, 1) both;
+	}
+
+	.screen-title.motion-stagger {
+		animation-delay: 40ms;
+	}
+
+	.screen-body.motion-stagger {
+		animation-delay: 80ms;
+	}
+
+	.screen-extra.motion-stagger {
+		animation-delay: 120ms;
 	}
 
 	@keyframes activation-enter {
 		from {
 			opacity: 0;
-			transform: translateY(8px);
+			transform: translateY(10px);
 		}
 		to {
 			opacity: 1;
@@ -102,7 +113,8 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.motion-enter {
+		.motion-enter,
+		.motion-stagger {
 			animation: none;
 		}
 	}

@@ -13,6 +13,13 @@ const LEGACY_HOSTED_APP_ORIGIN =
 
 const PRODUCTION_ORIGIN = process.env.ORIGIN ?? 'https://skaffu.com';
 
+/**
+ * Capacitor WebView origins for local dev against adapter-node.
+ * Production WebView loads https://skaffu.com — already in PRODUCTION_ORIGIN.
+ * @see docs/APP_STORE.md
+ */
+const CAPACITOR_DEV_ORIGINS = ['capacitor://localhost', 'http://localhost', 'https://localhost'];
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	preprocess: vitePreprocess(),
@@ -22,7 +29,7 @@ const config = {
 			register: false
 		},
 		csrf: {
-			trustedOrigins: [PRODUCTION_ORIGIN, LEGACY_HOSTED_APP_ORIGIN]
+			trustedOrigins: [PRODUCTION_ORIGIN, LEGACY_HOSTED_APP_ORIGIN, ...CAPACITOR_DEV_ORIGINS]
 		}
 	}
 };

@@ -35,7 +35,12 @@
 		shouldShowOnboarding,
 		type ActivationScreen
 	} from '$lib/utils/onboarding';
-	import { progressKeyForScreen } from '$lib/utils/onboarding-steps';
+	import {
+		canSelectProgressKey,
+		progressKeyForScreen,
+		screenForProgressKey
+	} from '$lib/utils/onboarding-steps';
+	import type { ActivationProgressKey } from '$lib/utils/onboarding-steps';
 	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
 	import { activationScanHref } from '$lib/utils/scan-nav';
 	import {
@@ -48,6 +53,7 @@
 	let lastViewedStep = $state<string | null>(null);
 	let registrationWelcomeDone = $state(false);
 	let onboardingProgressTick = $state(0);
+	let previewScreen = $state<ActivationScreen | null>(null);
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
@@ -63,7 +69,7 @@
 		return userId ? isActivationOnboardingFlowComplete(userId) : false;
 	});
 	const skipActivationSuccess = $derived(isReceiptImportRecentlyCompleted());
-	const screen = $derived.by((): ActivationScreen | 'complete' => {
+	const derivedScreen = $derived.by((): ActivationScreen | 'complete' => {
 		if (!flags) {
 			return 'welcome';
 		}
@@ -71,11 +77,21 @@
 			skipSuccessScreen: skipActivationSuccess
 		});
 	});
+	const displayScreen = $derived.by((): ActivationScreen | 'complete' => {
+		if (derivedScreen === 'complete') {
+			return 'complete';
+		}
+		return previewScreen ?? derivedScreen;
+	});
+	const isPreview = $derived(previewScreen !== null);
 	const checklist = $derived(
 		flags ? getActivationProgressChecklist(flags, inventoryCount) : null
 	);
 	const currentProgress = $derived(
-		screen !== 'complete' ? progressKeyForScreen(screen) : null
+		derivedScreen !== 'complete' ? progressKeyForScreen(derivedScreen) : null
+	);
+	const previewProgress = $derived(
+		previewScreen ? progressKeyForScreen(previewScreen) : null
 	);
 	const successItems = $derived(userId ? getActivationSuccessSnapshot(userId) : []);
 
@@ -110,6 +126,28 @@
 		}
 	};
 
+	function clearPreview() {
+		previewScreen = null;
+	}
+
+	function canSelectKey(key: ActivationProgressKey): boolean {
+		if (!checklist || !currentProgress) {
+			return false;
+		}
+		return canSelectProgressKey(key, checklist, currentProgress);
+	}
+
+	function handleProgressSelect(key: ActivationProgressKey) {
+		if (!canSelectKey(key)) {
+			return;
+		}
+		if (currentProgress === key) {
+			clearPreview();
+			return;
+		}
+		previewScreen = screenForProgressKey(key);
+	}
+
 	function tryOpenFlow() {
 		if (
 			!browser ||
@@ -136,6 +174,7 @@
 
 	function closeFlow() {
 		open = false;
+		clearPreview();
 	}
 
 	function skipFlow() {
@@ -165,6 +204,7 @@
 		if (!userId) {
 			return;
 		}
+		clearPreview();
 		markActivationWelcomeSeen(userId);
 	}
 
@@ -172,6 +212,7 @@
 		if (!userId) {
 			return;
 		}
+		clearPreview();
 		markActivationScanStarted(userId);
 		void trackProductEvent('onboarding_scan_started');
 		closeFlow();
@@ -182,6 +223,7 @@
 		if (!userId) {
 			return;
 		}
+		clearPreview();
 		markActivationScanDeferred(userId);
 	}
 
@@ -189,6 +231,7 @@
 		if (!userId) {
 			return;
 		}
+		clearPreview();
 		markActivationSuccessSeen(userId);
 	}
 
@@ -196,6 +239,7 @@
 		if (!userId) {
 			return;
 		}
+		clearPreview();
 		markActivationBrainSeen(userId);
 	}
 
@@ -203,10 +247,15 @@
 		if (!userId) {
 			return;
 		}
+		clearPreview();
 		markActivationShoppingSeen(userId);
 		void trackProductEvent('onboarding_completed');
 		closeFlow();
 		await goto('/inkop?quick=1');
+	}
+
+	function handlePreviewContinue() {
+		clearPreview();
 	}
 
 	$effect(() => {
@@ -229,6 +278,7 @@
 			}
 			startedTracked = false;
 			lastViewedStep = null;
+			clearPreview();
 			open = true;
 		};
 		window.addEventListener(ONBOARDING_REPLAY_EVENT, onReplay);
@@ -271,14 +321,19 @@
 	});
 
 	$effect(() => {
-		if (!open || screen === 'complete') {
+		void derivedScreen;
+		clearPreview();
+	});
+
+	$effect(() => {
+		if (!open || derivedScreen === 'complete' || isPreview) {
 			return;
 		}
 		if (!startedTracked) {
 			startedTracked = true;
 			void trackProductEvent('onboarding_started');
 		}
-		trackStepView(screen);
+		trackStepView(derivedScreen);
 	});
 
 	$effect(() => {
@@ -289,7 +344,7 @@
 	});
 </script>
 
-{#if open && screen !== 'complete' && checklist}
+{#if open && displayScreen !== 'complete' && checklist}
 	<Modal
 		open={true}
 		onClose={skipFlow}
@@ -312,105 +367,130 @@
 		{/snippet}
 
 		<div class="flow-shell">
-			<ActivationProgressChecklist checklist={checklist} current={currentProgress} />
+			<ActivationProgressChecklist
+				{checklist}
+				current={currentProgress}
+				preview={previewProgress}
+				onSelect={handleProgressSelect}
+				canSelect={canSelectKey}
+			/>
 
-			{#key screen}
-				<ActivationOnboardingScreen
-					title={t(screenCopy[screen].titleKey)}
-					body={t(screenCopy[screen].bodyKey)}
-				>
-					{#snippet illustration()}
-						{#if screen === 'welcome'}
-							<OnboardingWelcomeIllustration />
-						{:else if screen === 'scan'}
-							<OnboardingScanIllustration />
-						{:else if screen === 'success'}
-							<OnboardingSuccessIllustration />
-						{:else if screen === 'brain'}
-							<OnboardingBrainIllustration />
-						{:else}
-							<OnboardingShoppingIllustration />
-						{/if}
-					{/snippet}
+			<div class="flow-content">
+				{#key displayScreen}
+					<ActivationOnboardingScreen
+						title={t(screenCopy[displayScreen].titleKey)}
+						body={t(screenCopy[displayScreen].bodyKey)}
+					>
+						{#snippet illustration()}
+							{#if displayScreen === 'welcome'}
+								<OnboardingWelcomeIllustration />
+							{:else if displayScreen === 'scan'}
+								<OnboardingScanIllustration />
+							{:else if displayScreen === 'success'}
+								<OnboardingSuccessIllustration />
+							{:else if displayScreen === 'brain'}
+								<OnboardingBrainIllustration />
+							{:else}
+								<OnboardingShoppingIllustration />
+							{/if}
+						{/snippet}
 
-					{#snippet extra()}
-						{#if screen === 'success' && successItems.length > 0}
-							<ul class="success-items" aria-label={t('onboarding.activation.success.itemsAria')}>
-								{#each successItems as item (item.name + item.locationLabel)}
-									<li>
-										<span class="item-name">{item.name}</span>
-										<span class="item-meta">{item.locationLabel}</span>
-									</li>
-								{/each}
-							</ul>
-						{/if}
-					{/snippet}
-
-					{#snippet actions()}
-						{#if screen === 'welcome'}
-							<Button
-								type="button"
-								fullWidth
-								variant="primary"
-								data-testid="activation-cta-primary"
-								onclick={handleWelcomeContinue}
-							>
-								{t(screenCopy.welcome.ctaKey)}
-							</Button>
-						{:else if screen === 'scan'}
-							<Button
-								type="button"
-								fullWidth
-								variant="primary"
-								data-testid="activation-cta-primary"
-								onclick={handleOpenScanner}
-							>
-								{t('onboarding.activation.scan.ctaPrimary')}
-							</Button>
-							<Button
-								type="button"
-								fullWidth
-								variant="ghost"
-								data-testid="activation-cta-secondary"
-								onclick={handleScanDeferred}
-							>
-								{t('onboarding.activation.scan.ctaSecondary')}
-							</Button>
-						{:else if screen === 'success'}
-							<Button
-								type="button"
-								fullWidth
-								variant="primary"
-								data-testid="activation-cta-primary"
-								onclick={handleSuccessContinue}
-							>
-								{t(screenCopy.success.ctaKey)}
-							</Button>
-						{:else if screen === 'brain'}
-							<Button
-								type="button"
-								fullWidth
-								variant="primary"
-								data-testid="activation-cta-primary"
-								onclick={handleBrainContinue}
-							>
-								{t(screenCopy.brain.ctaKey)}
-							</Button>
-						{:else}
-							<Button
-								type="button"
-								fullWidth
-								variant="primary"
-								data-testid="activation-cta-primary"
-								onclick={handleShoppingContinue}
-							>
-								{t(screenCopy.shopping.ctaKey)}
-							</Button>
-						{/if}
-					{/snippet}
-				</ActivationOnboardingScreen>
-			{/key}
+						{#snippet extra()}
+							{#if displayScreen === 'success' && successItems.length > 0}
+								<ul
+									class="success-items"
+									aria-label={t('onboarding.activation.success.itemsAria')}
+								>
+									{#each successItems as item (item.name + item.locationLabel)}
+										<li>
+											<span class="item-name">{item.name}</span>
+											<span class="item-meta">{item.locationLabel}</span>
+										</li>
+									{/each}
+								</ul>
+							{/if}
+						{/snippet}
+					</ActivationOnboardingScreen>
+				{/key}
+			</div>
 		</div>
+
+		{#snippet footer()}
+			{#key `${displayScreen}-${isPreview}`}
+				<div class="flow-footer">
+					{#if isPreview}
+						<Button
+							type="button"
+							fullWidth
+							variant="primary"
+							data-testid="activation-cta-primary"
+							onclick={handlePreviewContinue}
+						>
+							{t('onboarding.activation.continueStep')}
+						</Button>
+					{:else if displayScreen === 'welcome'}
+						<Button
+							type="button"
+							fullWidth
+							variant="primary"
+							data-testid="activation-cta-primary"
+							onclick={handleWelcomeContinue}
+						>
+							{t(screenCopy.welcome.ctaKey)}
+						</Button>
+					{:else if displayScreen === 'scan'}
+						<Button
+							type="button"
+							fullWidth
+							variant="primary"
+							data-testid="activation-cta-primary"
+							onclick={handleOpenScanner}
+						>
+							{t('onboarding.activation.scan.ctaPrimary')}
+						</Button>
+						<Button
+							type="button"
+							fullWidth
+							variant="ghost"
+							data-testid="activation-cta-secondary"
+							onclick={handleScanDeferred}
+						>
+							{t('onboarding.activation.scan.ctaSecondary')}
+						</Button>
+					{:else if displayScreen === 'success'}
+						<Button
+							type="button"
+							fullWidth
+							variant="primary"
+							data-testid="activation-cta-primary"
+							onclick={handleSuccessContinue}
+						>
+							{t(screenCopy.success.ctaKey)}
+						</Button>
+					{:else if displayScreen === 'brain'}
+						<Button
+							type="button"
+							fullWidth
+							variant="primary"
+							data-testid="activation-cta-primary"
+							onclick={handleBrainContinue}
+						>
+							{t(screenCopy.brain.ctaKey)}
+						</Button>
+					{:else}
+						<Button
+							type="button"
+							fullWidth
+							variant="primary"
+							data-testid="activation-cta-primary"
+							onclick={handleShoppingContinue}
+						>
+							{t(screenCopy.shopping.ctaKey)}
+						</Button>
+					{/if}
+				</div>
+			{/key}
+		{/snippet}
 	</Modal>
 {/if}
 
@@ -437,16 +517,25 @@
 			flex: 1;
 			display: flex;
 			flex-direction: column;
+			min-height: 0;
 		}
 	}
 
 	:global(.activation-onboarding-body) {
-		padding: var(--space-md) var(--space-lg) calc(var(--space-lg) + env(safe-area-inset-bottom, 0));
+		padding: var(--space-md) var(--space-lg) var(--space-md);
 		flex: 1;
 		min-height: 0;
-		overflow-y: auto;
+		overflow: hidden;
 		display: flex;
 		flex-direction: column;
+	}
+
+	:global(.activation-onboarding-panel .modal-footer) {
+		flex-shrink: 0;
+		padding: var(--space-md) var(--space-lg);
+		padding-bottom: calc(var(--space-md) + env(safe-area-inset-bottom, 0));
+		border-top: 1px solid var(--color-border);
+		background: var(--color-surface);
 	}
 
 	.skip-link {
@@ -463,9 +552,42 @@
 	.flow-shell {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-lg);
+		gap: var(--space-md);
 		flex: 1;
 		min-height: 0;
+	}
+
+	.flow-content {
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.flow-footer {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+		animation: footer-enter 280ms cubic-bezier(0.33, 1, 0.68, 1) both;
+	}
+
+	@keyframes footer-enter {
+		from {
+			opacity: 0;
+			transform: translateY(4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.flow-footer {
+			animation: none;
+		}
 	}
 
 	.success-items {
@@ -475,6 +597,8 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
+		max-height: 8rem;
+		overflow-y: auto;
 	}
 
 	.success-items li {

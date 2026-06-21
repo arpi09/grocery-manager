@@ -67,7 +67,7 @@ const sv: PrivacyContent = {
 			paragraphs: [
 				'Vi behandlar personuppgifter för att tillhandahålla tjänsten (avtal), för säker drift och felsökning (berättigat intresse), och i vissa fall utifrån ditt samtycke (t.ex. när du aktivt laddar upp kvitto eller foto för AI-tolkning).',
 				'Du har rätt att få tillgång till, rätta och i vissa fall begränsa behandlingen av dina uppgifter. Kontakta oss på hello@skaffu.com om du vill utöva dina rättigheter.',
-				'Hushållsägare kan ta bort hela hushållet och tillhörande data under Inställningar → Hushåll. Självbetjäning för att radera hela kontot kommer — tills dess, maila oss så hjälper vi dig radera kontot och kopplad data.',
+				'Hushållsägare kan ta bort hela hushållet och tillhörande data under Inställningar → Hushåll. Du kan radera hela ditt konto och kopplad data under Inställningar → Konto → Radera mitt konto.',
 				'Vi säljer inte dina personuppgifter och delar dem inte med annonsörer.'
 			]
 		},
@@ -167,7 +167,7 @@ const en: PrivacyContent = {
 			paragraphs: [
 				'We process personal data to provide the service (contract), for secure operation and debugging (legitimate interest), and sometimes with your consent (e.g. when you upload a receipt or photo for AI parsing).',
 				'You may access, rectify or restrict processing where applicable. Contact hello@skaffu.com to exercise your rights.',
-				'Household owners can delete the household and related data under Settings → Household. Self-service full account deletion is coming — until then, email us and we will help remove your account and data.',
+				'Household owners can delete the household and related data under Settings → Household. You can delete your entire account and linked data under Settings → Account → Delete my account.',
 				'We do not sell your personal data or share it with advertisers.'
 			]
 		},

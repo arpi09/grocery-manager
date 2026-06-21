@@ -41,8 +41,11 @@
 	--page-padding-x: var(--space-md);
 	--page-section-gap: var(--space-lg);
 	--touch-target-min: 2.75rem;
+	/* Browser tab: 0 — Safari already clears the home indicator. Standalone PWA: env() below. */
+	--safe-area-top: 0px;
+	--safe-area-bottom: 0px;
 	--content-bottom-safe: calc(
-		var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom, 0) + var(--space-md)
+		var(--mobile-bottom-nav-height) + var(--safe-area-bottom) + var(--space-md)
 	);
 	/* Mobile: full width; desktop header/content share centered max width */
 	--page-max-width: none;
@@ -61,8 +64,8 @@
 	/* Nav flyouts: dim page only — no blur (dropdown ≠ modal) */
 	--nav-dropdown-scrim: color-mix(in srgb, var(--color-text) 20%, transparent);
 	/* App navigation surfaces */
-	--nav-height: calc(3.25rem + env(safe-area-inset-top, 0));
-	--sticky-below-header: calc(var(--nav-height) + env(safe-area-inset-top, 0));
+	--nav-height: calc(3.25rem + var(--safe-area-top));
+	--sticky-below-header: calc(var(--nav-height) + var(--safe-area-top));
 	--header-height-desktop: 4rem;
 	--mobile-bottom-nav-height: 4.25rem;
 	--nav-surface: var(--color-surface);
@@ -74,6 +77,14 @@
 	--z-nav-header: 60;
 	--z-nav-bottom: 70;
 	--z-nav-flyout: 86;
+}
+
+/* Installed PWA / home screen: lift chrome above iOS home indicator. Browser tab keeps 0 insets. */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+	:root {
+		--safe-area-top: env(safe-area-inset-top, 0px);
+		--safe-area-bottom: env(safe-area-inset-bottom, 0px);
+	}
 }
 
 html[data-theme='dark'] {
@@ -162,7 +173,7 @@ textarea {
 .skip-to-main {
 	position: absolute;
 	left: var(--space-md);
-	top: calc(var(--space-sm) + env(safe-area-inset-top, 0));
+	top: calc(var(--space-sm) + var(--safe-area-top));
 	z-index: 10001;
 	padding: var(--space-sm) var(--space-md);
 	background: var(--color-surface);
