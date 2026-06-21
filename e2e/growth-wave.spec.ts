@@ -1,4 +1,4 @@
-﻿import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import {
 	dismissCookieConsentIfOpen,
 	dismissOnboardingModalIfOpen,
@@ -44,25 +44,26 @@ async function addShoppingListItemViaAction(page: Page, name: string): Promise<v
 	const baseURL = currentUrl.startsWith('http')
 		? new URL(currentUrl).origin
 		: (process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190');
-	const response = await page.request.post(`${baseURL}/inkop?/add`, {
+	const response = await page.request.post(baseURL + '/inkop?/add', {
 		form: { name },
 		headers: {
 			accept: 'application/json',
 			'x-sveltekit-action': 'true',
 			origin: baseURL,
-			referer: `${baseURL}/inkop`
+			referer: baseURL + '/inkop'
 		}
 	});
 	expect(response.ok()).toBeTruthy();
 }
-test.describe('Growth wave â€” wrapped, rapport, dela', () => {
+
+test.describe('Growth wave — wrapped, rapport, dela', () => {
 	test.use({ actionTimeout: 45_000 });
 
 	test('public rapport page loads for valid month', async ({ page }) => {
 		await page.goto('/rapport/2025-06', { waitUntil: 'commit' });
 		await dismissCookieConsentIfOpen(page);
 
-		await expect(page.getByRole('heading', { level: 1 })).toContainText(/2025-06|SÃ¥ kastar svenska/i);
+		await expect(page.getByRole('heading', { level: 1 })).toContainText(/2025-06|Så kastar svenska/i);
 		await expect(page.getByText(/Skaffurapporten|Skaffu report/i).first()).toBeVisible();
 		await expect(
 			page.getByText(/publicerar detaljerade insikter|publish detailed insights|Beta-kohort|Beta cohort/i).first()
@@ -79,17 +80,17 @@ test.describe('Growth wave â€” wrapped, rapport, dela', () => {
 		const flow = page.getByTestId('wrapped-flow');
 		await expect(flow).toBeVisible({ timeout: 20_000 });
 		await expect(page.getByTestId('wrapped-slide-title')).toHaveText(
-			/Er fÃ¶rsta mÃ¥nad med Skaffu|Your first month with Skaffu/i
+			/Er första månad med Skaffu|Your first month with Skaffu/i
 		);
-		await expect(flow).toContainText(/hÃ¤r vÃ¤xer er berÃ¤ttelse|your story grows/i);
+		await expect(flow).toContainText(/här växer er berättelse|your story grows/i);
 
-		await flow.getByRole('button', { name: /^NÃ¤sta$|^Next$/i }).click();
+		await flow.getByRole('button', { name: /^Nästa$|^Next$/i }).click();
 		await expect(page.getByRole('button', { name: /Ladda ner|Download/i })).toBeVisible({
 			timeout: 10_000
 		});
 	});
 
-	test('wrapped streak regression â€” new household never shows inflated copy', async ({ page }) => {
+	test('wrapped streak regression — new household never shows inflated copy', async ({ page }) => {
 		test.setTimeout(120_000);
 		await registerNewUser(page);
 		await page.goto('/statistik/wrapped', { waitUntil: 'commit' });
@@ -99,11 +100,11 @@ test.describe('Growth wave â€” wrapped, rapport, dela', () => {
 		const flow = page.getByTestId('wrapped-flow');
 		await expect(flow).toBeVisible({ timeout: 20_000 });
 		await expect(page.getByTestId('wrapped-slide-title')).toHaveText(
-			/Er fÃ¶rsta mÃ¥nad med Skaffu|Your first month with Skaffu/i
+			/Er första månad med Skaffu|Your first month with Skaffu/i
 		);
 
 		const inflatedStreak = /[2-9]\d*\s*veckors?\s+zero-waste|[2-9]\d*-week zero-waste/i;
-		const nextBtn = flow.getByRole('button', { name: /^NÃ¤sta$|^Next$/i });
+		const nextBtn = flow.getByRole('button', { name: /^Nästa$|^Next$/i });
 		for (let step = 0; step < 8; step += 1) {
 			const title = page.getByTestId('wrapped-slide-title');
 			if (await title.isVisible()) {
@@ -138,7 +139,7 @@ test.describe('Growth wave â€” wrapped, rapport, dela', () => {
 		if ((await redesign.count()) > 0) {
 			await expect(page.getByTestId('home-hero')).toBeVisible({ timeout: 15_000 });
 			await expect(page.getByTestId('home-expiring-card')).toBeVisible();
-			test.skip(true, 'Home redesign v1 â€” share button moved off Home');
+			test.skip(true, 'Home redesign v1 — share button moved off Home');
 		}
 
 		await expect(page.getByTestId('home-welcome')).toBeVisible({ timeout: 15_000 });
@@ -169,12 +170,12 @@ test.describe('Growth wave â€” wrapped, rapport, dela', () => {
 		const shareUrl = new URL(sharePayload.url!);
 		await page.goto(shareUrl.pathname, { waitUntil: 'commit' });
 		await expect(page.getByRole('heading', { level: 1 })).toContainText(
-			/UtgÃ¥ende varor|Expiring items/i
+			/Utgående varor|Expiring items/i
 		);
 		await expect(page.getByText(itemName)).toBeVisible();
 		await expect(page.getByRole('note')).toContainText(/inga adresser|no addresses/i);
 		const signupLink = page.getByRole('link', {
-			name: /Skapa egen utgÃ¥ende-lista|Create your expiring list/i
+			name: /Skapa egen utgående-lista|Create your expiring list/i
 		});
 		await expect(signupLink).toBeVisible();
 		const signupHref = await signupLink.getAttribute('href');
@@ -268,17 +269,17 @@ test.describe('Growth wave â€” wrapped, rapport, dela', () => {
 		const itemName = `E2E Lista Share ${Date.now()}`;
 		await loginAsAdmin(page);
 		await addShoppingListItemViaAction(page, itemName);
-
-		const shareResponse = await page.request.post('/api/shopping-list/share', { method: 'POST' });
+		const baseURL = new URL(page.url()).origin;
+		const shareResponse = await page.request.post(baseURL + '/api/shopping-list/share', {
+			method: 'POST'
+		});
 		expect(shareResponse.ok()).toBeTruthy();
 		const sharePayload = (await shareResponse.json()) as { ok?: boolean; url?: string };
 		expect(sharePayload.ok).toBe(true);
 		expect(sharePayload.url).toBeTruthy();
-
 		const listaPath = new URL(sharePayload.url!).pathname;
 		await page.goto(listaPath, { waitUntil: 'commit' });
 		await dismissCookieConsentIfOpen(page);
-
 		const signupLink = page.locator('a.signup-cta-btn').first();
 		await expect(signupLink).toBeVisible({ timeout: 15_000 });
 		const signupHref = await signupLink.getAttribute('href');
