@@ -23,7 +23,10 @@ export function resolveAppPageTitle(pathname: string, locale: Locale): string {
 	if (pathname === '/hem') {
 		return translate(locale, 'home.title') + suffix();
 	}
-	if (pathname.startsWith('/inventory/')) {
+	if (pathname === '/inventory' || pathname.startsWith('/inventory/')) {
+		if (pathname === '/inventory') {
+			return translate(locale, 'nav.inventory') + suffix();
+		}
 		const segment = pathname.split('/')[2];
 		if (segment && isStorageLocation(segment)) {
 			const label = LOCATION_LABELS[segment]?.[locale] ?? segment;

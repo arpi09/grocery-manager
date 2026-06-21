@@ -9,7 +9,7 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title={t('pantry.v2.title')} />
+	<AppHeader title={t('nav.inventory')} />
 
 	<PageContainer>
 		<PantryV2Page items={data.items} canWrite={data.canWrite} loadFailed={data.loadFailed} />
