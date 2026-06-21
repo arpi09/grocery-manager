@@ -1,7 +1,8 @@
 <script lang="ts">
+	import AdminAcquisitionPanel from '$lib/components/organisms/admin/AdminAcquisitionPanel.svelte';
 	import AdminLaunchCohortPanel from '$lib/components/organisms/admin/AdminLaunchCohortPanel.svelte';
 	import AdminPmfFunnelPanel from '$lib/components/organisms/admin/AdminPmfFunnelPanel.svelte';
-import AdminSyncFunnelPanel from '$lib/components/organisms/admin/AdminSyncFunnelPanel.svelte';
+	import AdminSyncFunnelPanel from '$lib/components/organisms/admin/AdminSyncFunnelPanel.svelte';
 	import PmfDashboard from '$lib/components/organisms/PmfDashboard.svelte';
 	import { fetchAdminData, parseIsoDate } from '$lib/client/admin-data';
 	import {
@@ -12,12 +13,14 @@ import AdminSyncFunnelPanel from '$lib/components/organisms/admin/AdminSyncFunne
 	import { ANALYTICS_BEHAVIOR_PERIOD_DAYS } from '$lib/domain/analytics-behavior';
 	import { t } from '$lib/i18n';
 	import type { PmfWeeklyReview } from '$lib/domain/pmf';
-import type { SyncFunnelSnapshot } from '$lib/domain/sync-funnel-admin';
+	import type { AcquisitionMetricsSnapshot } from '$lib/domain/acquisition-metrics';
+	import type { SyncFunnelSnapshot } from '$lib/domain/sync-funnel-admin';
 
 	interface AnalyticsPayload {
 		pmfWeeklyReview: PmfWeeklyReview;
 		pmfFunnel: PmfFunnelSnapshot;
-	syncFunnel: SyncFunnelSnapshot;
+		syncFunnel: SyncFunnelSnapshot;
+		acquisition: AcquisitionMetricsSnapshot;
 	}
 
 	interface Props {
@@ -31,6 +34,7 @@ import type { SyncFunnelSnapshot } from '$lib/domain/sync-funnel-admin';
 	let pmfWeeklyReview = $state<PmfWeeklyReview | null>(null);
 	let pmfFunnel = $state<PmfFunnelSnapshot | null>(null);
 	let syncFunnel = $state<SyncFunnelSnapshot | null>(null);
+	let acquisition = $state<AcquisitionMetricsSnapshot | null>(null);
 	let funnelDays = $state<PmfFunnelPeriodDays>(PMF_FUNNEL_PERIOD_DAYS);
 	let loadedFunnelDays: PmfFunnelPeriodDays | null = $state(null);
 
@@ -52,6 +56,14 @@ import type { SyncFunnelSnapshot } from '$lib/domain/sync-funnel-admin';
 		};
 	}
 
+	function parseAcquisitionSnapshot(raw: AcquisitionMetricsSnapshot): AcquisitionMetricsSnapshot {
+		return {
+			...raw,
+			periodStart: parseIsoDate(raw.periodStart as unknown as string),
+			periodEnd: parseIsoDate(raw.periodEnd as unknown as string)
+		};
+	}
+
 	async function load(days: PmfFunnelPeriodDays) {
 		loading = true;
 		error = null;
@@ -64,12 +76,14 @@ import type { SyncFunnelSnapshot } from '$lib/domain/sync-funnel-admin';
 			};
 			pmfFunnel = parseFunnelSnapshot(payload.pmfFunnel);
 			syncFunnel = payload.syncFunnel;
+			acquisition = parseAcquisitionSnapshot(payload.acquisition);
 			loadedFunnelDays = days;
 		} catch {
 			error = t('admin.loadError');
 			pmfWeeklyReview = null;
 			pmfFunnel = null;
 			syncFunnel = null;
+			acquisition = null;
 			loadedFunnelDays = null;
 		} finally {
 			loading = false;
@@ -92,7 +106,7 @@ import type { SyncFunnelSnapshot } from '$lib/domain/sync-funnel-admin';
 	<p class="panel-status">{t('admin.loading')}</p>
 {:else if error}
 	<p class="panel-status panel-error" role="alert">{error}</p>
-{:else if pmfFunnel && pmfWeeklyReview && syncFunnel}
+{:else if pmfFunnel && pmfWeeklyReview && syncFunnel && acquisition}
 	<div class="panel-actions">
 		{#each ANALYTICS_BEHAVIOR_PERIOD_DAYS as days}
 			<a class="export-link" href={exportDataUrl(days)} download>
@@ -100,6 +114,7 @@ import type { SyncFunnelSnapshot } from '$lib/domain/sync-funnel-admin';
 			</a>
 		{/each}
 	</div>
+	<AdminAcquisitionPanel snapshot={acquisition} />
 	<AdminPmfFunnelPanel
 		snapshot={pmfFunnel}
 		periodDays={funnelDays}

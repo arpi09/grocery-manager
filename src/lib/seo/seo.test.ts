@@ -183,6 +183,20 @@ describe('buildPricingJsonLd', () => {
 		expect(schemas[1]['@type']).toBe('Product');
 		expect((schemas[1].offers as unknown[]).length).toBe(3);
 	});
+
+	it('marks Pro offers as PreOrder when checkout is disabled', () => {
+		const schemas = buildPricingJsonLd('https://skaffu.com', {
+			freeDescription: 'Gratisplan',
+			proDescription: 'Pro med AI',
+			proMonthlyPrice: 39,
+			proYearlyPrice: 390,
+			proCheckoutEnabled: false
+		});
+		const offers = schemas[1].offers as Array<{ availability: string }>;
+		expect(offers[0].availability).toBe('https://schema.org/InStock');
+		expect(offers[1].availability).toBe('https://schema.org/PreOrder');
+		expect(offers[2].availability).toBe('https://schema.org/PreOrder');
+	});
 });
 
 describe('marketing SEO keywords (sv)', () => {

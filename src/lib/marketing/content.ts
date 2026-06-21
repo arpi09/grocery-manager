@@ -234,6 +234,88 @@ export interface MarketingSeoPage {
 	relatedLabel?: string;
 }
 
+const FAQ_COST_QUESTIONS = new Set(['Kostar Skaffu något?', 'Does Skaffu cost anything?']);
+
+const proLaunchLiveSv: MarketingProLaunch = {
+	badge: 'Pro är live',
+	title: 'Mer plats när hela hushållet är med',
+	lead:
+		'Pro ger plats för fler i hushållet, full statistik på handeln och obegränsad kvitto-PDF. Gratisplanen finns kvar om du vill prova i lugn och ro.',
+	bullets: [
+		'Full statistik — följ handeln och kvitton per hushåll',
+		'Obegränsad kvitto-PDF — ladda upp och granska utan tak',
+		'Upp till 6 hushållsmedlemmar',
+		'Smarta veckoförslag och listfyllning',
+		'Från cirka 39 kr/mån — uppgradera när du är redo'
+	],
+	priceFrom: 'från 39 kr/mån',
+	ctaPricing: 'Se Pro & priser',
+	ctaFree: 'Kom igång gratis'
+};
+
+const proLaunchComingSoonSv: MarketingProLaunch = {
+	badge: 'Pro på väg',
+	title: 'Mer plats när hela hushållet är med',
+	lead:
+		'Pro kommer snart med plats för fler i hushållet, full statistik och obegränsad kvitto-PDF. Gratisplanen finns redan — prova i lugn och ro medan vi finslipar betalning.',
+	bullets: [
+		'Full statistik — följ handeln och kvitton per hushåll',
+		'Obegränsad kvitto-PDF — ladda upp och granska utan tak',
+		'Upp till 6 hushållsmedlemmar',
+		'Smarta veckoförslag och listfyllning',
+		'Planerat från cirka 39 kr/mån — ingen betalning ännu'
+	],
+	priceFrom: 'planeras från 39 kr/mån',
+	ctaPricing: 'Se vad Pro inkluderar',
+	ctaFree: 'Kom igång gratis'
+};
+
+const proLaunchLiveEn: MarketingProLaunch = {
+	badge: 'Pro is live',
+	title: 'More room when the whole household joins',
+	lead:
+		'Pro adds room for more household members, full shopping statistics and unlimited receipt PDF. The free plan is still there if you want to try at your own pace.',
+	bullets: [
+		'Full statistics — track shopping and receipts for the household',
+		'Unlimited receipt PDF — upload and review without caps',
+		'Up to 6 household members',
+		'Smart weekly suggestions and list fill',
+		'From about 39 SEK/month — upgrade when you are ready'
+	],
+	priceFrom: 'from 39 SEK/month',
+	ctaPricing: 'See Pro & pricing',
+	ctaFree: 'Get started free'
+};
+
+const proLaunchComingSoonEn: MarketingProLaunch = {
+	badge: 'Pro coming soon',
+	title: 'More room when the whole household joins',
+	lead:
+		'Pro is on the way with room for more household members, full statistics and unlimited receipt PDF. The free plan is already here — try at your own pace while we finish billing.',
+	bullets: [
+		'Full statistics — track shopping and receipts for the household',
+		'Unlimited receipt PDF — upload and review without caps',
+		'Up to 6 household members',
+		'Smart weekly suggestions and list fill',
+		'Planned from about 39 SEK/month — no billing yet'
+	],
+	priceFrom: 'planned from 39 SEK/month',
+	ctaPricing: 'See what Pro includes',
+	ctaFree: 'Get started free'
+};
+
+const faqCostAnswerLiveSv =
+	'Du kan skapa konto och använda appen gratis med en generös kärnplan (skafferi, manuell lista, två hushållsmedlemmar). Pro (~39 kr/mån) ger obegränsad AI, kvitto-PDF, statistik och fler hushållsmedlemmar — uppgradera under Inställningar när du vill. Läs mer på /priser.';
+
+const faqCostAnswerComingSoonSv =
+	'Du kan skapa konto och använda appen gratis med en generös kärnplan (skafferi, manuell lista, två hushållsmedlemmar). Pro (~39 kr/mån) är på väg med obegränsad AI, kvitto-PDF, statistik och fler hushållsmedlemmar — betalning aktiveras senare. Läs mer på /priser.';
+
+const faqCostAnswerLiveEn =
+	'You can create an account and use the app free on a generous core plan (pantry, manual list, two household members). Pro (~39 SEK/month) adds unlimited AI, receipt PDF, statistics and more household members — upgrade in Settings when you want. See /priser for more.';
+
+const faqCostAnswerComingSoonEn =
+	'You can create an account and use the app free on a generous core plan (pantry, manual list, two household members). Pro (~39 SEK/month) is on the way with unlimited AI, receipt PDF, statistics and more household members — billing is not enabled yet. See /priser for more.';
+
 const sv: MarketingContent = {
 	siteName: 'Skaffu',
 	tagline: 'Gemensam veckohandel med matkoll — handla ihop, släng mindre.',
@@ -263,22 +345,7 @@ const sv: MarketingContent = {
 		tryFree: 'Kom igång gratis',
 		createWeeklyList: 'Skapa veckans lista'
 	},
-	proLaunch: {
-		badge: 'Pro är live',
-		title: 'Mer plats när hela hushållet är med',
-		lead:
-			'Pro ger plats för fler i hushållet, full statistik på handeln och obegränsad kvitto-PDF. Gratisplanen finns kvar om du vill prova i lugn och ro.',
-		bullets: [
-			'Full statistik — följ handeln och kvitton per hushåll',
-			'Obegränsad kvitto-PDF — ladda upp och granska utan tak',
-			'Upp till 6 hushållsmedlemmar',
-			'Smarta veckoförslag och listfyllning',
-			'Från cirka 39 kr/mån — uppgradera när du är redo'
-		],
-		priceFrom: 'från 39 kr/mån',
-		ctaPricing: 'Se Pro & priser',
-		ctaFree: 'Kom igång gratis'
-	},
+	proLaunch: proLaunchLiveSv,
 	landing: {
 		heroDomainSuffix: '· skaffu.com',
 		heroEyebrow: 'Skafferi-app för hela hushållet',
@@ -773,22 +840,7 @@ const en: MarketingContent = {
 		tryFree: 'Get started free',
 		createWeeklyList: "Create this week's list"
 	},
-	proLaunch: {
-		badge: 'Pro is live',
-		title: 'More room when the whole household joins',
-		lead:
-			'Pro adds room for more household members, full shopping statistics and unlimited receipt PDF. The free plan is still there if you want to try at your own pace.',
-		bullets: [
-			'Full statistics — track shopping and receipts for the household',
-			'Unlimited receipt PDF — upload and review without caps',
-			'Up to 6 household members',
-			'Smart weekly suggestions and list fill',
-			'From about 39 SEK/month — upgrade when you are ready'
-		],
-		priceFrom: 'from 39 SEK/month',
-		ctaPricing: 'See Pro & pricing',
-		ctaFree: 'Get started free'
-	},
+	proLaunch: proLaunchLiveEn,
 	comparison: {
 		title: 'Compared to apps you may already use',
 		lead: 'An honest view — we are not here to replace what already works for you. Here is when Skaffu complements or differs.',
@@ -1251,6 +1303,50 @@ const en: MarketingContent = {
 
 const contentByLocale: Record<MarketingLocale, MarketingContent> = { sv, en };
 
-export function getMarketingContent(locale: MarketingLocale = 'sv'): MarketingContent {
-	return contentByLocale[locale];
+const proLaunchByLocale: Record<
+	MarketingLocale,
+	{ live: MarketingProLaunch; comingSoon: MarketingProLaunch }
+> = {
+	sv: { live: proLaunchLiveSv, comingSoon: proLaunchComingSoonSv },
+	en: { live: proLaunchLiveEn, comingSoon: proLaunchComingSoonEn }
+};
+
+const faqCostAnswerByLocale: Record<
+	MarketingLocale,
+	{ live: string; comingSoon: string }
+> = {
+	sv: { live: faqCostAnswerLiveSv, comingSoon: faqCostAnswerComingSoonSv },
+	en: { live: faqCostAnswerLiveEn, comingSoon: faqCostAnswerComingSoonEn }
+};
+
+function applyStripeCheckoutMarketingMode(
+	content: MarketingContent,
+	locale: MarketingLocale,
+	stripeCheckoutEnabled: boolean
+): MarketingContent {
+	const proLaunch = stripeCheckoutEnabled
+		? proLaunchByLocale[locale].live
+		: proLaunchByLocale[locale].comingSoon;
+	const faqCostAnswer = stripeCheckoutEnabled
+		? faqCostAnswerByLocale[locale].live
+		: faqCostAnswerByLocale[locale].comingSoon;
+
+	return {
+		...content,
+		proLaunch,
+		faq: {
+			...content.faq,
+			items: content.faq.items.map((item) =>
+				FAQ_COST_QUESTIONS.has(item.question) ? { ...item, answer: faqCostAnswer } : item
+			)
+		}
+	};
+}
+
+export function getMarketingContent(
+	locale: MarketingLocale = 'sv',
+	stripeCheckoutEnabled = false
+): MarketingContent {
+	const content = contentByLocale[locale] ?? contentByLocale.sv;
+	return applyStripeCheckoutMarketingMode(content, locale, stripeCheckoutEnabled);
 }

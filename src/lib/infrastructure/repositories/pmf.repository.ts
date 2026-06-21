@@ -30,6 +30,14 @@ import {
 import { SYNC_ANALYTICS_EVENTS } from '$lib/domain/sync-analytics';
 import { parseInventoryWriteMetadata, type HouseholdActivityEvent } from '$lib/domain/household-activity';
 import type { SyncFunnelCounts } from '$lib/domain/sync-funnel-admin';
+import {
+	ACQUISITION_CTR_EVENT_TYPE,
+	ACQUISITION_WEEKLY_EVENT_TYPES,
+	buildAcquisitionMetricsSnapshot,
+	emptyAcquisitionEventCounts,
+	type AcquisitionEventCounts,
+	type AcquisitionMetricsSnapshot
+} from '$lib/domain/acquisition-metrics';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { db } from '$lib/infrastructure/db';
 import {
@@ -63,6 +71,7 @@ export interface IPmfRepository {
 	getUserCreatedAt(userId: string): Promise<Date | null>;
 	listRecentHouseholdSyncEvents(householdId: string, limit: number): Promise<HouseholdActivityEvent[]>;
 	getSyncFunnelCounts(now?: Date): Promise<SyncFunnelCounts>;
+	getAcquisitionMetrics(now?: Date): Promise<AcquisitionMetricsSnapshot>;
 	countDistinctHouseholdsWithEventSince(eventType: ProductEventType, since: Date): Promise<number>;
 }
 
@@ -576,5 +585,37 @@ export class DrizzlePmfRepository implements IPmfRepository {
 			householdsWithBatchReview7d,
 			householdsWithWrite30d
 		};
+	}
+
+	async getAcquisitionMetrics(now = new Date()): Promise<AcquisitionMetricsSnapshot> {
+		const periodDays = 7;
+		const periodMs = periodDays * 24 * 60 * 60 * 1000;
+		const periodEnd = now;
+		const periodStart = new Date(now.getTime() - periodMs);
+		const eventTypes = [...ACQUISITION_WEEKLY_EVENT_TYPES, ACQUISITION_CTR_EVENT_TYPE];
+
+		const rows = await db
+			.select({
+				eventType: productEventTable.eventType,
+				count: sql<number>`count(*)::int`
+			})
+			.from(productEventTable)
+			.where(
+				and(
+					inArray(productEventTable.eventType, [...eventTypes]),
+					gte(productEventTable.createdAt, periodStart)
+				)
+			)
+			.groupBy(productEventTable.eventType);
+
+		const counts = emptyAcquisitionEventCounts();
+		for (const row of rows) {
+			const key = row.eventType as keyof AcquisitionEventCounts;
+			if (key in counts) {
+				counts[key] = row.count ?? 0;
+			}
+		}
+
+		return buildAcquisitionMetricsSnapshot(counts, periodStart, periodEnd, periodDays);
 	}
 }

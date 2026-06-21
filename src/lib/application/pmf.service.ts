@@ -14,6 +14,7 @@ import {
 	buildSyncFunnelSnapshot,
 	type SyncFunnelSnapshot
 } from '$lib/domain/sync-funnel-admin';
+import type { AcquisitionMetricsSnapshot } from '$lib/domain/acquisition-metrics';
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -74,5 +75,9 @@ export class PmfService {
 	async getSyncFunnelSnapshot(now = new Date()): Promise<SyncFunnelSnapshot> {
 		const counts = await this.repository.getSyncFunnelCounts(now);
 		return buildSyncFunnelSnapshot(counts);
+	}
+
+	getAcquisitionMetrics(now = new Date()): Promise<AcquisitionMetricsSnapshot> {
+		return this.repository.getAcquisitionMetrics(now);
 	}
 }

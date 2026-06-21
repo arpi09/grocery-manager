@@ -4,6 +4,7 @@
 	import MarketingButtonLink from '$lib/components/marketing/MarketingButtonLink.svelte';
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
 	import MarketingDashboardCard from '$lib/components/marketing/MarketingDashboardCard.svelte';
+	import MarketingProLaunchBanner from '$lib/components/marketing/MarketingProLaunchBanner.svelte';
 	import MarketingScrollReveal from '$lib/components/marketing/MarketingScrollReveal.svelte';
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
 	import { page } from '$app/state';
@@ -98,6 +99,14 @@
 		</div>
 	</div>
 </section>
+
+<MarketingScrollReveal immediate variant="fade">
+	<MarketingProLaunchBanner
+		proLaunch={content.proLaunch}
+		registerUrl={registerUrl}
+		onRegisterClick={trackRegisterClick}
+	/>
+</MarketingScrollReveal>
 
 <MarketingScrollReveal immediate variant="fade">
 	<section class="scan-cta-section">

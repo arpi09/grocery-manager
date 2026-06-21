@@ -101,12 +101,18 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 	switch (sectionParam) {
 		case 'analytics': {
 			const funnelDays = parsePmfFunnelPeriodDays(url.searchParams.get('funnelDays'));
-			const [pmfWeeklyReview, pmfFunnel, syncFunnel] = await Promise.all([
+			const [pmfWeeklyReview, pmfFunnel, syncFunnel, acquisition] = await Promise.all([
 				locals.pmfService.getWeeklyReview(),
 				locals.pmfService.getFunnelMetrics(funnelDays),
-				locals.pmfService.getSyncFunnelSnapshot()
+				locals.pmfService.getSyncFunnelSnapshot(),
+				locals.pmfService.getAcquisitionMetrics()
 			]);
-			return json({ pmfWeeklyReview, pmfFunnel, syncFunnel });
+			return json({
+				pmfWeeklyReview,
+				pmfFunnel,
+				syncFunnel,
+				acquisition: serializeRow(acquisition)
+			});
 		}
 		case 'ai-usage': {
 			const periodDays = parseAdminAiUsagePeriodDays(url.searchParams.get('days'));

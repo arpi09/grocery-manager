@@ -271,9 +271,13 @@ export function buildPricingJsonLd(
 		proDescription: string;
 		proMonthlyPrice: number;
 		proYearlyPrice: number;
+		proCheckoutEnabled?: boolean;
 	}
 ): Record<string, unknown>[] {
 	const pricingUrl = marketingCanonicalUrl('/priser', siteOrigin);
+	const proAvailability = options.proCheckoutEnabled
+		? 'https://schema.org/InStock'
+		: 'https://schema.org/PreOrder';
 	return [
 		buildMarketingWebPageJsonLd(siteOrigin, '/priser', 'Priser & planer', options.freeDescription),
 		{
@@ -298,7 +302,7 @@ export function buildPricingJsonLd(
 					price: String(options.proMonthlyPrice),
 					priceCurrency: 'SEK',
 					url: pricingUrl,
-					availability: 'https://schema.org/InStock'
+					availability: proAvailability
 				},
 				{
 					'@type': 'Offer',
@@ -306,7 +310,7 @@ export function buildPricingJsonLd(
 					price: String(options.proYearlyPrice),
 					priceCurrency: 'SEK',
 					url: pricingUrl,
-					availability: 'https://schema.org/InStock'
+					availability: proAvailability
 				}
 			]
 		}

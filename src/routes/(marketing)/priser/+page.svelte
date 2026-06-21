@@ -11,16 +11,22 @@
 
 	let { data } = $props();
 
-	const pricing = getPricingContent(data.marketingLocale as MarketingLocale);
+	const pricing = $derived(
+		getPricingContent(data.marketingLocale as MarketingLocale, data.stripeCheckoutEnabled)
+	);
 	const { marketing: content, loginUrl, registerUrl, canonicalUrl, marketingLocale } = data;
 	const upgradeUrl = '/settings#plan-upgrade';
+	const registerCtaUrl = $derived(pricing.checkoutEnabled ? upgradeUrl : registerUrl);
 	const siteOrigin = new URL(canonicalUrl).origin;
-	const jsonLd = buildPricingJsonLd(siteOrigin, {
-		freeDescription: pricing.meta.description,
-		proDescription: pricing.proBullets.join(' '),
-		proMonthlyPrice: PRICE_HYPOTHESIS_SEK.monthly,
-		proYearlyPrice: PRICE_HYPOTHESIS_SEK.yearly
-	});
+	const jsonLd = $derived(
+		buildPricingJsonLd(siteOrigin, {
+			freeDescription: pricing.meta.description,
+			proDescription: pricing.proBullets.join(' '),
+			proMonthlyPrice: PRICE_HYPOTHESIS_SEK.monthly,
+			proYearlyPrice: PRICE_HYPOTHESIS_SEK.yearly,
+			proCheckoutEnabled: pricing.checkoutEnabled
+		})
+	);
 </script>
 
 <MarketingSeoHead
@@ -36,7 +42,7 @@
 <MarketingPageHero>
 	<h1>{pricing.title}</h1>
 	<p>{pricing.lead}</p>
-	<p class="note pro-live">{pricing.proLiveNote}</p>
+	<p class="note pro-status" class:pro-live={pricing.checkoutEnabled}>{pricing.proStatusNote}</p>
 </MarketingPageHero>
 
 <MarketingScrollReveal variant="scale">
@@ -79,10 +85,12 @@
 				<h2 id="pro-cta-title">{pricing.proCtaTitle}</h2>
 				<p>{pricing.proCtaLead}</p>
 				<div class="pro-cta-actions">
-					<MarketingButtonLink href={upgradeUrl}>{pricing.proCtaUpgradeLabel}</MarketingButtonLink>
-					<MarketingButtonLink href={registerUrl} variant="secondary">
-						{pricing.proCtaRegisterLabel}
-					</MarketingButtonLink>
+					<MarketingButtonLink href={registerCtaUrl}>{pricing.proCtaUpgradeLabel}</MarketingButtonLink>
+					{#if pricing.checkoutEnabled}
+						<MarketingButtonLink href={registerUrl} variant="secondary">
+							{pricing.proCtaRegisterLabel}
+						</MarketingButtonLink>
+					{/if}
 				</div>
 			</section>
 		</div>
@@ -127,7 +135,13 @@
 		border: 1px solid var(--color-border);
 	}
 
-	.note.pro-live {
+	.note.pro-status {
+		background: color-mix(in srgb, var(--color-surface-muted) 55%, var(--color-surface));
+		border-color: var(--color-border);
+		color: var(--color-text-muted);
+	}
+
+	.note.pro-status.pro-live {
 		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
 		border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
 		color: var(--color-text);

@@ -17,7 +17,7 @@ export interface PricingTierRow {
 export interface PricingContent {
 	title: string;
 	lead: string;
-	proLiveNote: string;
+	proStatusNote: string;
 	meta: {
 		title: string;
 		description: string;
@@ -41,6 +41,7 @@ export interface PricingContent {
 	stripeNoteBody: string;
 	faqHref: string;
 	faqLinkLabel: string;
+	checkoutEnabled: boolean;
 }
 
 const proFeatureLabelsSv: Record<ProFeatureKey, string> = {
@@ -52,10 +53,10 @@ const proFeatureLabelsSv: Record<ProFeatureKey, string> = {
 	nearbyRadius: `Grannskafferiet: sök inom ${NEARBY_RADIUS_M.pro / 1000} km (gratis ${NEARBY_RADIUS_M.free} m)`
 };
 
-const sv: PricingContent = {
+const pricingLiveSv: Omit<PricingContent, 'checkoutEnabled'> = {
 	title: 'Priser & planer',
 	lead: 'Börja gratis med delad lista och skafferi. När hela hushållet är med och ni vill ha statistik och obegränsad kvitto-PDF kan ni uppgradera till Pro — utan att tappa gratisplanen.',
-	proLiveNote:
+	proStatusNote:
 		'Pro är live. Uppgradera i appen när ni är redo; gratisplanen finns kvar för er som vill prova i lugn och ro.',
 	meta: {
 		title: 'Priser — Skaffu skafferi-app (Gratis & Pro)',
@@ -117,11 +118,34 @@ const sv: PricingContent = {
 	faqLinkLabel: 'Vanliga frågor'
 };
 
-const en: PricingContent = {
-	...sv,
+const pricingComingSoonSv: Omit<PricingContent, 'checkoutEnabled'> = {
+	...pricingLiveSv,
+	lead:
+		'Börja gratis med delad lista och skafferi. Pro med statistik och obegränsad kvitto-PDF är på väg — gratisplanen finns redan medan vi finslipar betalning.',
+	proStatusNote:
+		'Pro är på väg. Betalning är inte aktiverad ännu — du får veta innan något debiteras. Skapa konto gratis och följ med under Inställningar → Plan.',
+	meta: {
+		...pricingLiveSv.meta,
+		description:
+			'Generös gratisplan med lager och inköpslista. Pro planeras från cirka 39 kr/mån — betalning aktiveras senare.',
+		ogDescription:
+			'Jämför Free vs Pro: lager, AI-skannar och kvitto-PDF. Pro är på väg — ingen betalning ännu.'
+	},
+	proCtaTitle: 'Pro kommer snart',
+	proCtaLead:
+		'Skapa konto gratis idag. Som hushållsägare kan du lämna din e-post under Inställningar → Plan så hör vi av innan Pro går live.',
+	proCtaUpgradeLabel: 'Skapa konto gratis',
+	proCtaRegisterLabel: 'Kom igång gratis',
+	stripeNoteTitle: 'Betalning senare',
+	stripeNoteBody:
+		'Betalning via Stripe aktiveras när Pro lanseras. Ingen debitering startar utan att vi meddelat dig i förväg.'
+};
+
+const pricingLiveEn: Omit<PricingContent, 'checkoutEnabled'> = {
+	...pricingLiveSv,
 	title: 'Pricing & plans',
 	lead: 'Start free with a shared list and pantry. When the whole household is on board and you want statistics and unlimited receipt PDF, upgrade to Pro — without losing the free tier.',
-	proLiveNote:
+	proStatusNote:
 		'Pro is live. Upgrade in the app when you are ready; the free plan stays available if you want to take it slow.',
 	meta: {
 		title: 'Pricing — Skaffu (Free & Pro)',
@@ -141,7 +165,7 @@ const en: PricingContent = {
 	proPriceLabel: `from ${PRICE_HYPOTHESIS_SEK.monthly} SEK/month or ${PRICE_HYPOTHESIS_SEK.yearly} SEK/year`,
 	priceHypothesisTitle: 'Pro pricing',
 	priceHypothesisBody: `${PRICE_HYPOTHESIS_SEK.monthly} SEK/month or ${PRICE_HYPOTHESIS_SEK.yearly} SEK/year — in line with Swedish competitors.`,
-	comparisonRows: sv.comparisonRows.map((row) => ({
+	comparisonRows: pricingLiveSv.comparisonRows.map((row) => ({
 		...row,
 		label:
 			row.label === 'Lagerrader'
@@ -153,8 +177,8 @@ const en: PricingContent = {
 						: row.label === 'Kvitto-PDF / månad'
 							? 'Receipt PDF / month'
 							: row.label === 'Grannskafferiet-radie'
-							? 'Neighbour pantry radius'
-							: 'Smart fill / week'
+								? 'Neighbour pantry radius'
+								: 'Smart fill / week'
 	})),
 	proBullets: [
 		'Unlimited AI scanning (barcode, photo)',
@@ -172,8 +196,42 @@ const en: PricingContent = {
 	faqLinkLabel: 'FAQ'
 };
 
-const byLocale: Record<MarketingLocale, PricingContent> = { sv, en };
+const pricingComingSoonEn: Omit<PricingContent, 'checkoutEnabled'> = {
+	...pricingLiveEn,
+	lead:
+		'Start free with a shared list and pantry. Pro with statistics and unlimited receipt PDF is on the way — the free tier is already here while we finish billing.',
+	proStatusNote:
+		'Pro is on the way. Billing is not enabled yet — we will tell you before anything is charged. Create a free account and follow along under Settings → Plan.',
+	meta: {
+		...pricingLiveEn.meta,
+		description:
+			'Generous free tier with pantry and shopping list. Pro is planned from about 39 SEK/month — billing will be enabled later.',
+		ogDescription:
+			'Compare Free vs Pro: inventory, AI scans and receipt PDF. Pro is on the way — no billing yet.'
+	},
+	proCtaTitle: 'Pro coming soon',
+	proCtaLead:
+		'Create a free account today. As household owner you can leave your email under Settings → Plan and we will reach out before Pro goes live.',
+	proCtaUpgradeLabel: 'Create a free account',
+	proCtaRegisterLabel: 'Get started free',
+	stripeNoteTitle: 'Billing later',
+	stripeNoteBody:
+		'Stripe billing will be enabled when Pro launches. Nothing is charged until we have told you in advance.'
+};
 
-export function getPricingContent(locale: MarketingLocale): PricingContent {
-	return byLocale[locale] ?? sv;
+const byLocale: Record<
+	MarketingLocale,
+	{ live: Omit<PricingContent, 'checkoutEnabled'>; comingSoon: Omit<PricingContent, 'checkoutEnabled'> }
+> = {
+	sv: { live: pricingLiveSv, comingSoon: pricingComingSoonSv },
+	en: { live: pricingLiveEn, comingSoon: pricingComingSoonEn }
+};
+
+export function getPricingContent(
+	locale: MarketingLocale,
+	stripeCheckoutEnabled = false
+): PricingContent {
+	const pack = byLocale[locale] ?? byLocale.sv;
+	const content = stripeCheckoutEnabled ? pack.live : pack.comingSoon;
+	return { ...content, checkoutEnabled: stripeCheckoutEnabled };
 }
