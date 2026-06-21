@@ -5,8 +5,8 @@
 | F?lt | V?rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-21 |
-| **Prod SHA** | `6e28b4956` @ [27897856697](https://github.com/arpi09/grocery-manager/actions/runs/27897856697) (auto tier, full E2E). Prior `d6eed0e4f` @ [27897126503](https://github.com/arpi09/grocery-manager/actions/runs/27897126503). |
-| **Master SHA** | `6e28b4956` — onboarding polish, statistik spend tabs, account deletion, PWA safe-area, Capacitor shell spike, agent codebase map |
+| **Prod SHA** | `720155de9` @ [27898668700](https://github.com/arpi09/grocery-manager/actions/runs/27898668700) (auto tier, critical E2E). Prior `6e28b4956` @ [27897856697](https://github.com/arpi09/grocery-manager/actions/runs/27897856697). |
+| **Master SHA** | `720155de9` — inventory shelf header title Lager (nav-aligned) |
 | **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
