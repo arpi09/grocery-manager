@@ -11,6 +11,7 @@
 	import { canEditInventory } from '$lib/domain/household';
 	import { OPEN_RECIPE_IDEAS } from '$lib/navigation/app-layout-context';
 	import { getLocale, t } from '$lib/i18n';
+	import { recipeDetailHref } from '$lib/utils/recipe-assistant-nav';
 	import {
 		addMissingIngredientsToList,
 		dedupeMissingIngredients,
@@ -269,7 +270,7 @@
 
 					<div class="idea-header">
 						<a
-							href="/recept/{idea.id}"
+							href={recipeDetailHref(idea.id, 'planer')}
 							class="idea-link"
 							onclick={() => trackAtaRecipeOpened('ideas', idea.id)}
 						>

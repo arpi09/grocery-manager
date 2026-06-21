@@ -27,6 +27,7 @@
 		type ShoppingTripMode
 	} from '$lib/domain/shopping-trip';
 	import { memorySuggestionId } from '$lib/domain/shopping-v2-presenter';
+	import { PANTRY_SHELF_PATH } from '$lib/navigation/nav-config';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import type { ShoppingToPantryMode } from '$lib/domain/shopping-to-pantry';
 	import { t } from '$lib/i18n';
@@ -174,7 +175,7 @@
 	}
 
 	function handleCompletePantry() {
-		void goto('/skafferi');
+		void goto(PANTRY_SHELF_PATH);
 	}
 
 	async function acceptSuggestion(suggestion: ReplenishmentSuggestion) {

@@ -11,11 +11,7 @@
 	import { formatCalendarDayLabel } from '$lib/domain/calendar-display';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
 	import { getLocale, t } from '$lib/i18n';
-	import { APP_HOME_PATH } from '$lib/navigation/app-home';
-	import {
-		isFromRecipeAssistant,
-		recipeAssistantReturnHref
-	} from '$lib/utils/recipe-assistant-nav';
+	import { recipeBackHref } from '$lib/utils/recipe-assistant-nav';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import {
 		addMissingIngredientsToList,
@@ -52,9 +48,7 @@
 	const missingCount = $derived(idea.missingIngredients.length);
 	const estimatedMinutes = $derived(totalMinutes(idea.steps));
 	const backHref = $derived(
-		isFromRecipeAssistant(page.url.searchParams.get('from'))
-			? recipeAssistantReturnHref()
-			: APP_HOME_PATH
+		recipeBackHref(page.url.searchParams.get('from'))
 	);
 
 	function startCooking() {

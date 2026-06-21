@@ -3,8 +3,7 @@
 	import Card from '$lib/components/atoms/Card.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
-	import { APP_HOME_PATH } from '$lib/navigation/app-home';
-	import { PANTRY_SHELF_PATH } from '$lib/navigation/nav-config';
+	import { expiringItemsHref } from '$lib/navigation/context-hrefs';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -23,11 +22,7 @@
 	);
 
 	const homeHref = $derived(
-		page.data.homeUxV2Enabled
-			? APP_HOME_PATH
-			: page.data.pantryUxV2Enabled
-				? `${PANTRY_SHELF_PATH}?filter=expiring`
-				: APP_HOME_PATH
+		expiringItemsHref({ pantryUxV2Enabled: page.data.pantryUxV2Enabled })
 	);
 </script>
 

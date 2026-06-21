@@ -1552,7 +1552,7 @@
 		"contextNoExpiring": "Nothing urgent expiring within {days} days.",
 		"contextPlanned": "{count} meals in this calendar view",
 		"contextWeeklyLink": "Generate week suggestions (AI)",
-		"contextHomeLink": "Expiring soon on Home",
+		"contextHomeLink": "Expiring soon in pantry",
 		"contextWeekViewLink": "Week view",
 		"ideasAria": "Recipe ideas",
 		"ideasIntro": "From what you have at home. Pick a date and add to the calendar.",

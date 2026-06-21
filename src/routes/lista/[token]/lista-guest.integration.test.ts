@@ -15,7 +15,7 @@ import {
 	buildListaSignupUrl,
 	LISTA_JOIN_COOKIE
 } from '$lib/marketing/acquisition-attribution';
-import { APP_HOME_PATH } from '$lib/navigation/app-home';
+import { APP_HOME_PATH, INKOP_PATH } from '$lib/navigation/app-home';
 import { recordProductEvent } from '$lib/server/product-events';
 import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integration-db';
 
@@ -219,7 +219,7 @@ describe('Lista guest join integration', () => {
 					cookies
 				} as unknown as Parameters<typeof loadListaPage>[0])
 			),
-			APP_HOME_PATH
+			INKOP_PATH
 		);
 
 		const role = await householdService.getRoleForUser('household-a', 'guest-b');
@@ -247,7 +247,7 @@ describe('Lista guest join integration', () => {
 					cookies
 				} as unknown as Parameters<typeof loadListaPage>[0])
 			),
-			APP_HOME_PATH
+			INKOP_PATH
 		);
 
 		await vi.waitFor(async () => {

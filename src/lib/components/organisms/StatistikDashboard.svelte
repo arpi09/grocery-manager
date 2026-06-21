@@ -5,7 +5,7 @@
 	import MilestonesSection from '$lib/components/molecules/MilestonesSection.svelte';
 	import type { StatistikDashboard } from '$lib/application/statistik.service';
 	import { ZERO_WASTE_STREAK_CELEBRATION, type MilestoneState } from '$lib/domain/gamification';
-	import { APP_HOME_PATH } from '$lib/navigation/app-home';
+	import { eatFirstWeekHref } from '$lib/navigation/context-hrefs';
 
 	import { LOCATION_COLORS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
@@ -164,7 +164,7 @@
 		</Card>
 
 		<div class="actions">
-			<Card href="{APP_HOME_PATH}#eat-first" interactive class="action-card"><FeatureIcon id="home" size={22} /><div><h2>{t('stats.eatFirstCta')}</h2><p>{t('stats.eatFirstLead')}</p></div></Card>
+			<Card href={eatFirstWeekHref('stats')} interactive class="action-card"><FeatureIcon id="home" size={22} /><div><h2>{t('stats.eatFirstCta')}</h2><p>{t('stats.eatFirstLead')}</p></div></Card>
 			<Card href="/scan?mode=photo&from=/statistik" interactive class="action-card"><FeatureIcon id="photo" size={22} /><div><h2>{t('stats.scanCta')}</h2><p>{t('stats.scanLead')}</p></div></Card>
 		</div>
 

@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { t } from '$lib/i18n';
 	import { trackAtaRecipeOpened } from '$lib/client/ata-telemetry';
+	import { recipeDetailHref } from '$lib/utils/recipe-assistant-nav';
 	import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
 	import { mealSourceVariant, splitVisibleMeals } from '$lib/domain/calendar-display';
 
@@ -40,7 +41,7 @@
 			return;
 		}
 		trackAtaRecipeOpened('calendar', meal.ideaId);
-		void goto(`/recept/${meal.ideaId}`);
+		void goto(recipeDetailHref(meal.ideaId, 'planer'));
 	}
 
 	function mealHasRecipe(meal: PlannedMeal): boolean {

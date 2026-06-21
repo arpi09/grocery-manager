@@ -1,6 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import { LISTA_JOIN_COOKIE } from '$lib/marketing/acquisition-attribution';
-import { APP_HOME_PATH } from '$lib/navigation/app-home';
+import { INKOP_PATH } from '$lib/navigation/app-home';
 import { recordProductEvent } from '$lib/server/product-events';
 import { shoppingListShareService } from '$lib/server/di';
 import type { PageServerLoad } from './$types';
@@ -35,7 +35,7 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 			console.warn(`[lista] logged-in join failed for token ${params.token}: ${message}`);
 		}
 
-		redirect(302, APP_HOME_PATH);
+		redirect(302, INKOP_PATH);
 	}
 
 	cookies?.set(LISTA_JOIN_COOKIE, params.token, {

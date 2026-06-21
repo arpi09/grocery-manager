@@ -1558,7 +1558,7 @@
 		"contextNoExpiring": "Inget brådskande som går ut inom {days} dagar.",
 		"contextPlanned": "{count} måltider i denna kalendervy",
 		"contextWeeklyLink": "Generera veckoförslag (AI)",
-		"contextHomeLink": "Utgår snart på Hem",
+		"contextHomeLink": "Utgår snart i skafferiet",
 		"contextWeekViewLink": "Veckovy"
 	},
 	"stats": {

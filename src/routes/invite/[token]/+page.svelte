@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getLocale, t } from '$lib/i18n';
 	import { inviteRoleLabel } from '$lib/domain/household';
+	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
@@ -22,7 +23,7 @@
 	<Card>
 		{#if !data.preview}
 			<p class="message error">{t('invite.notFound')}</p>
-			<a class="login-link" href="/">{t('invite.goHome')}</a>
+			<a class="login-link" href={APP_HOME_PATH}>{t('invite.goHome')}</a>
 		{:else}
 			<h2 class="title">{t('invite.invitedTo', { name: data.preview.householdName })}</h2>
 			<p class="detail">
@@ -38,7 +39,7 @@
 
 			{#if data.preview.status === 'accepted'}
 				<p class="message info">{t('invite.alreadyAccepted')}</p>
-				<a class="login-link" href="/hem">{t('invite.goHome')}</a>
+				<a class="login-link" href={APP_HOME_PATH}>{t('invite.goHome')}</a>
 			{:else if data.preview.status === 'revoked'}
 				<p class="message error">{t('invite.revoked')}</p>
 			{:else if data.preview.expired}

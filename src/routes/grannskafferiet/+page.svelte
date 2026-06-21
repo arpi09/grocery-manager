@@ -10,6 +10,7 @@
 	import NearbyShareReportButton from '$lib/components/molecules/NearbyShareReportButton.svelte';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
 	import { getLocale, t } from '$lib/i18n';
+	import { eatFirstWeekHref } from '$lib/navigation/context-hrefs';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 
 	let { data } = $props();
@@ -157,7 +158,7 @@
 					<h2>{t('nearbySharing.discoveryEmptyTitle')}</h2>
 					<p>{t('nearbySharing.discoveryEmptyLead')}</p>
 					<div class="empty-actions">
-						<a class="cta-link" href="/hem#eat-first">{t('nearbySharing.discoveryEmptyShareCta')}</a>
+						<a class="cta-link" href={eatFirstWeekHref()}>{t('nearbySharing.discoveryEmptyShareCta')}</a>
 						<a class="cta-link secondary" href="/settings/nearby">
 							{t('nearbySharing.discoveryEmptySettingsCta')}
 						</a>

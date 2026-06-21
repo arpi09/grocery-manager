@@ -6,6 +6,7 @@
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import { trackAtaRecipeOpened } from '$lib/client/ata-telemetry';
+	import { recipeDetailHref } from '$lib/utils/recipe-assistant-nav';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { formatCalendarDayLabel, mealSourceVariant } from '$lib/domain/calendar-display';
 	import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
@@ -169,7 +170,7 @@
 							<div class="meal-actions">
 								{#if idea}
 									<a
-										href="/recept/{idea.id}"
+										href={recipeDetailHref(idea.id, 'planer')}
 										class="recipe-link"
 										onclick={() => trackAtaRecipeOpened('day_sheet', idea.id)}
 									>
