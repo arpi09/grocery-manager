@@ -113,7 +113,10 @@ test.describe('Receipt flow', () => {
 
 		await expect(page.getByTestId('receipt-line-0')).toBeVisible({ timeout: 15_000 });
 		await dismissOnboardingModalIfOpen(page);
-		await page.getByTestId('receipt-quick-confirm').click();
+		await Promise.all([
+			page.waitForURL(/\/hem(\?|$)/, { timeout: 15_000 }),
+			page.getByTestId('receipt-quick-confirm').click()
+		]);
 
 		await expect(page).toHaveURL(/\/hem(\?|$)/, { timeout: 15_000 });
 		await expect(page.getByTestId('receipt-import-success')).toBeVisible({ timeout: 10_000 });

@@ -24,7 +24,7 @@
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import {
@@ -410,13 +410,10 @@
 		});
 	}
 
-	async function handleQuickConfirm(event: MouseEvent) {
+	function handleQuickConfirm(event: MouseEvent) {
 		event.preventDefault();
 		quickConfirmUsed = true;
 		toggleAll(true);
-		await tick();
-		await loadMergeCandidates();
-		await tick();
 		const form = (event.currentTarget as HTMLElement).closest('form');
 		const submit = form?.querySelector<HTMLButtonElement>('[data-testid="receipt-bulk-submit"]');
 		if (submit && !submit.disabled) {
