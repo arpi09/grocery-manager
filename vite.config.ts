@@ -2,6 +2,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import { defineConfig } from 'vitest/config';
+import { BRAND_BG, BRAND_PRIMARY } from './src/lib/design/brand-colors';
 
 const useHttps = process.env.HTTPS === 'true';
 
@@ -25,8 +26,8 @@ export default defineConfig({
 				short_name: 'Skaffu',
 				description:
 					'Skanna, lagra och handla smart — kyl, frys och skafferi i en app.',
-				theme_color: '#3d6b4f',
-				background_color: '#f7f5f0',
+				theme_color: BRAND_PRIMARY,
+				background_color: BRAND_BG,
 				display: 'standalone',
 				start_url: '/hem',
 				scope: '/',

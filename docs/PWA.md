@@ -4,7 +4,7 @@
 
 - **`@vite-pwa/sveltekit`** — service worker + web manifest at build time
 - **`static/manifest.webmanifest`** — static fallback for hosts/CDN; production manifest is also emitted by the plugin
-- **Brand colours:** `theme_color` `#3d6b4f`, `background_color` `#f7f5f0` (see `src/app.css` / BRAND)
+- **Brand colours:** `theme_color` `#2c4a3e`, `background_color` `#f7f5f0` (see `src/app.css` / BRAND)
 - **Icons:** `static/pwa/icon.svg` (source) → PNG via `npm run generate:pwa-icons` — `icon-192.png`, `icon-512.png`, `apple-touch-icon.png` (180×180 for iOS). Browser tab uses `static/favicon.svg` (same Skaffu mark).
 
 ## Dev vs production

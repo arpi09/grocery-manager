@@ -1,8 +1,10 @@
 /** Skaffu ↔ SMUI token bridge — keep in sync with src/theme/_variables.scss and src/app.css */
 
+import { BRAND_PRIMARY, BRAND_PRIMARY_DARK } from '$lib/design/brand-colors';
+
 export const skaffuSmuiTokens = {
 	light: {
-		primary: '#3d6b4f',
+		primary: BRAND_PRIMARY,
 		primaryHover: '#325a42',
 		surface: '#ffffff',
 		surfaceMuted: '#eef2eb',
@@ -17,7 +19,7 @@ export const skaffuSmuiTokens = {
 		fontFamily: "'DM Sans', system-ui, sans-serif"
 	},
 	dark: {
-		primary: '#4d8f68',
+		primary: BRAND_PRIMARY_DARK,
 		primaryHover: '#5aa076',
 		surface: '#1e2621',
 		surfaceMuted: '#273029',

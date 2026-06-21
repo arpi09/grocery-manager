@@ -17,7 +17,7 @@ Design reference for UI, copy tone, and component styling. Tokens live in `src/a
 
 ## Visual system — five rules
 
-1. **Primary green `#2c4a3e`** — ONLY primary CTA buttons, active nav/tab states, and the single main action on empty states. Not for decorative text, borders, or secondary links.
+1. **Primary green `#2c4a3e`** — ONLY primary CTA buttons, active nav/tab states, and the single main action on empty states. Not for decorative text, borders, or secondary links. PWA `theme_color` (manifest, `app.html`, Safari chrome) uses the same hex in light mode; dark PWA chrome uses `#4d8f68`.
 2. **Accent gold `#d4a853`** — sparingly: badges (e.g. NY), focus rings, expiry/warning surfaces, calendar “idea” dots. Never default buttons or nav chrome.
 3. **Typography scale** — display (page titles), body (copy), label (section caps like KONTO / KONTO & HUSHÅLL). Use `.label-caps` for section labels.
 4. **Empty states** — icon (SVG) + one headline + one supporting line + one green primary CTA. Optional ghost secondary link below.
@@ -98,5 +98,6 @@ Do not pair a filled green button with an outlined green button on the same row 
 - `src/lib/components/molecules/EmptyState.svelte`, `FeedbackBanner.svelte`
 - Nav: `MainNavDesktop.svelte`, `MainNavMobile.svelte`, `ProfileMenu.svelte`, `NavMoreSheet.svelte`
 - High-traffic: `HomeDashboard.svelte`, inventory/scan routes, `ScanModeHub.svelte`, `ScanModeTabs.svelte`
+- `src/lib/design/brand-colors.ts` — hex constants for manifest, emails, build (non-CSS)
 - `static/favicon.svg` — Skaffu mark (primary `#2c4a3e`, accent `#d4a853`)
 - `src/lib/server/email.ts` — invite template header/CTA

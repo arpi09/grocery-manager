@@ -6,6 +6,7 @@ import {
 	type PmfWeeklyReview
 } from '$lib/domain/pmf';
 import type { AdminDashboardStats } from '$lib/infrastructure/repositories/admin.repository';
+import { BRAND_BG, BRAND_PRIMARY } from '$lib/design/brand-colors';
 
 const PRO_WAITLIST_TARGET = 50;
 
@@ -260,9 +261,9 @@ export function buildPmfDigestEmailContent(input: PmfDigestInput): PmfDigestEmai
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${escapeHtml(subject)}</title>
   <style>
-    body { font-family: 'Segoe UI', system-ui, sans-serif; color: #1f2a24; background: #f7f5f0; margin: 0; padding: 24px 16px; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; color: #1f2a24; background: ${BRAND_BG}; margin: 0; padding: 24px 16px; }
     .card { max-width: 640px; margin: 0 auto; background: #fff; border: 1px solid #dde5d8; border-radius: 16px; overflow: hidden; }
-    .header { background: #3d6b4f; color: #fff; padding: 24px 28px; }
+    .header { background: ${BRAND_PRIMARY}; color: #fff; padding: 24px 28px; }
     .header h1 { margin: 0 0 8px; font-size: 22px; }
     .header p { margin: 0; opacity: 0.9; font-size: 14px; }
     .body { padding: 28px; }
@@ -276,7 +277,7 @@ export function buildPmfDigestEmailContent(input: PmfDigestInput): PmfDigestEmai
     .detail { font-size: 12px; color: #5c6b62; }
     .action { background: #eef2eb; border: 1px solid #dde5d8; border-radius: 12px; padding: 16px; margin-top: 8px; line-height: 1.55; }
     .events { font-size: 13px; color: #5c6b62; margin-top: 8px; }
-    .cta { display: inline-block; margin-top: 24px; padding: 12px 24px; background: #3d6b4f; color: #fff !important; text-decoration: none; border-radius: 10px; font-weight: 600; }
+    .cta { display: inline-block; margin-top: 24px; padding: 12px 24px; background: ${BRAND_PRIMARY}; color: #fff !important; text-decoration: none; border-radius: 10px; font-weight: 600; }
     .footer { padding: 16px 28px 24px; font-size: 12px; color: #5c6b62; border-top: 1px solid #dde5d8; }
   </style>
 </head>
