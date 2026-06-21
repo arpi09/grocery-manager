@@ -1,8 +1,10 @@
-﻿import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { InventoryService } from '$lib/application/inventory.service';
 import { PmfService } from '$lib/application/pmf.service';
-import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
+import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
+
+import { LearningEngineService } from '$lib/application/learning/learning-engine.service';
 import { ShoppingListService } from '$lib/application/shopping-list.service';
 import { DrizzleInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
 import { DrizzleShoppingListRepository } from '$lib/infrastructure/repositories/shopping-list.repository';
@@ -23,9 +25,7 @@ let integrationDb: IntegrationDbContext;
 let inventoryService: InventoryService;
 let pmfService: PmfService;
 let purchasePatternService: PurchasePatternService;
-let learningEngineService: Awaited<
-	ReturnType<typeof import('$lib/server/di')>
->['learningEngineService'];
+let learningEngineService: LearningEngineService;
 
 vi.mock('$lib/infrastructure/db/init', () => ({
 	getDb: () => integrationDb.db
@@ -109,7 +109,7 @@ describe('Scan bulkCreate integration', () => {
 			bulkFlow: 'photo',
 			returnTo: '/hem',
 			selected: ['0'],
-			name_0: 'E2E MjÃ¶lk foto',
+			name_0: 'E2E Mjölk foto',
 			quantity_0: '2',
 			unit_0: 'st',
 			location_0: 'fridge'
@@ -122,7 +122,7 @@ describe('Scan bulkCreate integration', () => {
 		expect(redirect.location).toContain('scan=added');
 
 		const listed = await inventoryService.listByLocation(householdId, 'fridge');
-		const created = listed.find((item) => item.name === 'E2E MjÃ¶lk foto');
+		const created = listed.find((item) => item.name === 'E2E Mjölk foto');
 		expect(created).toBeDefined();
 		expect(created!.expiresOn).not.toBeNull();
 		expect(created!.expiresOnSource).toBe('ai_inferred');
@@ -139,7 +139,7 @@ describe('Scan bulkCreate integration', () => {
 			bulkFlow: 'photo',
 			returnTo: '/hem',
 			selected: ['0'],
-			name_0: 'E2E MjÃ¶lk',
+			name_0: 'E2E Mjölk',
 			quantity_0: '1',
 			unit_0: 'l',
 			location_0: 'fridge',
@@ -153,7 +153,7 @@ describe('Scan bulkCreate integration', () => {
 		);
 
 		const listed = await inventoryService.listByLocation(householdId, 'fridge');
-		const created = listed.find((item) => item.name === 'E2E MjÃ¶lk');
+		const created = listed.find((item) => item.name === 'E2E Mjölk');
 		expect(created).toMatchObject({
 			expiresOn: '2026-08-01',
 			expiresOnSource: 'user_set',
@@ -200,7 +200,7 @@ describe('Scan bulkCreate integration', () => {
 			storeLabel: 'ICA Maxi',
 			purchasedAt: '2026-06-20T14:30:00.000Z',
 			selected: ['0', '1'],
-			name_0: 'Mjölk 3%',
+			name_0: 'Mj�lk 3%',
 			quantity_0: '1,5',
 			unit_0: 'l',
 			unitPrice_0: '19,90',
@@ -237,7 +237,7 @@ describe('Scan bulkCreate integration', () => {
 		expect(purchaseRows).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
-					productName: 'Mjölk 3%',
+					productName: 'Mj�lk 3%',
 					quantity: '1.5',
 					unitPrice: '19.90',
 					lineTotal: '29.85',
