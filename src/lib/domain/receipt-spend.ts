@@ -185,3 +185,6 @@ export function mapReceiptPurchaseRowToSpendLine(row: {
 		importBatchId: row.importBatchId
 	};
 }
+
+/** Safe fallback when spend data is missing or failed to load. */
+export const EMPTY_RECEIPT_SPEND_REPORT: ReceiptSpendReport = buildReceiptSpendReport([]);

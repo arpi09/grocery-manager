@@ -57,10 +57,15 @@ export class StatistikService {
 
 	async getSpendReport(householdId: string): Promise<ReceiptSpendReport> {
 		const referenceDate = new Date();
-		const since = new Date(referenceDate);
-		since.setUTCDate(since.getUTCDate() - SPEND_LOOKBACK_DAYS);
-		const lines = await this.priceMemoryRepository.listSpendLinesSince(householdId, since);
-		return buildReceiptSpendReport(lines, referenceDate);
+		try {
+			const since = new Date(referenceDate);
+			since.setUTCDate(since.getUTCDate() - SPEND_LOOKBACK_DAYS);
+			const lines = await this.priceMemoryRepository.listSpendLinesSince(householdId, since);
+			return buildReceiptSpendReport(lines, referenceDate);
+		} catch (error) {
+			console.warn('[statistik] getSpendReport degraded:', error);
+			return buildReceiptSpendReport([], referenceDate);
+		}
 	}
 
 	async getImpact(householdId: string): Promise<ImpactStats> {

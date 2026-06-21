@@ -87,6 +87,15 @@ describe('StatistikService', () => {
 		);
 	});
 
+	it('returns empty spend report when price memory lookup fails', async () => {
+		vi.mocked(priceMemoryRepository.listSpendLinesSince).mockRejectedValue(
+			new Error('receipt_purchase_line missing')
+		);
+		const spend = await service.getSpendReport('household-1');
+		expect(spend.hasData).toBe(false);
+		expect(spend.thisMonthSek).toBe(0);
+	});
+
 	it('returns null impact without consumption history', async () => {
 		vi.mocked(consumptionRepository.weeklyCountsByEventType).mockResolvedValue([]);
 		const dashboard = await service.getDashboard('household-1');
