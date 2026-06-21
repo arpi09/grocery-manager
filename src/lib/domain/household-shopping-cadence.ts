@@ -1,6 +1,14 @@
 import type { ReceiptPurchaseLineRecord } from './purchase-pattern';
 
 export const HOUSEHOLD_CADENCE_MIN_TRIPS = 2;
+/** Minimum receipt trips before we show weekday hints in home status/chips. */
+export const HOUSEHOLD_CADENCE_DISPLAY_MIN_TRIPS = 3;
+
+export function shouldShowCadenceWeekday(
+	cadence: HouseholdShoppingCadence | null | undefined
+): boolean {
+	return cadence != null && cadence.tripCount >= HOUSEHOLD_CADENCE_DISPLAY_MIN_TRIPS;
+}
 
 export interface HouseholdShoppingCadence {
 	weekday: number;

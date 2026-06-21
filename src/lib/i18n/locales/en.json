@@ -233,10 +233,10 @@
 		"recipeHintDescription": "Based on what you have at home",
 		"readonlyHint": "You have read-only access — ask an admin to add items.",
 		"readonlyEmpty": "The pantry is empty. Ask an admin to add items.",
-		"greetingMorning": "Good morning, {name}",
-		"greetingDay": "Good afternoon, {name}",
-		"greetingEvening": "Good evening, {name}",
-		"greetingNight": "Good night, {name}",
+		"greetingMorning": "Good morning, {name} ☀️",
+		"greetingDay": "Good afternoon, {name} 🌤️",
+		"greetingEvening": "Good evening, {name} 🌙",
+		"greetingNight": "Good night, {name} ✨",
 		"taglineEngaged": "Shared weekly shopping · household memory",
 		"weeklyShopCta": "Shop this week",
 		"eatFirstSummary": "Eat first ({count})",
@@ -323,10 +323,10 @@
 			"moreLink": "View all"
 		},
 		"dashboard": {
-			"greetingMorningOnly": "Good morning",
-			"greetingDayOnly": "Good afternoon",
-			"greetingEveningOnly": "Good evening",
-			"greetingNightOnly": "Good night",
+			"greetingMorningOnly": "Good morning ☀️",
+			"greetingDayOnly": "Good afternoon 🌤️",
+			"greetingEveningOnly": "Good evening 🌙",
+			"greetingNightOnly": "Good night ✨",
 			"sublineCold": "Fresh start — fill your pantry when it suits you",
 			"sublineSteady": "{count, plural, one {# item · calm start} other {# items · calm start}}",
 			"sublineLista": "{count, plural, one {# item on the list} other {# items on the list}}",
@@ -347,26 +347,26 @@
 		},
 		"v5": {
 			"hero": {
-				"defaultBody": "Here's what deserves your attention today.",
-				"cta": "See what's next",
+				"defaultBody": "Worth a look today.",
+				"cta": "See what's waiting",
 				"scanLink": "Add items",
 				"morning": {
-					"title": "Good morning 👋"
+					"title": "Good morning"
 				},
 				"midday": {
-					"title": "Good day 👋"
+					"title": "Good day"
 				},
 				"evening": {
-					"title": "Good evening 👋"
+					"title": "Good evening"
 				},
 				"night": {
-					"title": "Welcome back 👋"
+					"title": "Welcome back"
 				},
 				"status": {
 					"healthy": "Everything looks good today.",
 					"expiring": "Something is worth using soon.",
 					"shopping": "A few things are starting to run low.",
-					"empty": "Let's start building your pantry."
+					"empty": "Empty pantry — start with a receipt scan or photo round."
 				}
 			},
 			"forYou": {
@@ -417,20 +417,21 @@
 			"greeting": "Hi {name}",
 			"greetingFallback": "Hi",
 			"status": {
-				"useSoonAndList": "{useSoonCount, plural, one {# thing to use soon} other {# things to use soon}} · shopping list ready to shop on {weekday}",
+				"useSoonAndList": "{useSoonCount, plural, one {# thing to use soon} other {# things to use soon}} · {count, plural, one {# item} other {# items}} on the list — you usually shop on {weekday}",
+				"useSoonAndListNoCadence": "{useSoonCount, plural, one {# thing to use soon} other {# things to use soon}} · {count, plural, one {# item} other {# items}} on the list",
 				"useSoonOnly": "{count, plural, one {# thing to use soon} other {# things to use soon}}",
-				"listReady": "Shopping list ready to shop on {weekday}",
-				"listItems": "Shopping list has {count, plural, one {# item} other {# items}}",
-				"allGood": "Pantry looks good. Nothing urgent.",
-				"emptyPantry": "Let's start building your pantry."
+				"listReady": "{count, plural, one {# item} other {# items}} on the list — you usually shop on {weekday}",
+				"listItems": "{count, plural, one {# item} other {# items}} on the shopping list",
+				"allGood": "Pantry looks good — nothing urgent right now.",
+				"emptyPantry": "Empty pantry — start with a receipt scan or photo round."
 			},
 			"forYou": {
 				"sectionLabel": "For you",
-				"illustrationAria": "For you — next natural step",
+				"illustrationAria": "For you — next step",
 				"recipe": {
 					"title": "{mealName} with what you have at home",
-					"body": "You have {items} expiring {when}. A quick meal for {servings}.",
-					"ctaAddAndShop": "Add {missingCount} missing · Shop {weekday}",
+					"body": "You have {items} expiring {when}. Enough for {servings, plural, one {# serving} other {# servings}}.",
+					"ctaAddAndShop": "Add {missingCount} missing · You usually shop {weekday}",
 					"ctaAdd": "Add {missingCount} to the list",
 					"ctaShop": "Open shopping list"
 				},
@@ -446,8 +447,9 @@
 				},
 				"shopReady": {
 					"title": "Ready to shop",
-					"body": "{count, plural, one {# item} other {# items}} waiting. Perfect for {weekday}.",
-					"cta": "Start shopping"
+					"body": "{count, plural, one {# item} other {# items}} on the list — you usually shop on {weekday}.",
+					"bodyNoCadence": "{count, plural, one {# item} other {# items}} waiting on the list.",
+					"cta": "Open shopping list"
 				}
 			},
 			"moment": {
@@ -484,7 +486,7 @@
 			},
 			"chips": {
 				"sectionLabel": "Quick glance",
-				"shoppingHint": "{count, plural, one {# item} other {# items}} · {weekday}",
+				"shoppingHint": "{count, plural, one {# item} other {# items}} · you usually shop {weekday}",
 				"shoppingHintNoCadence": "{count, plural, one {# item} other {# items}}",
 				"shoppingAria": "Open shopping list",
 				"storageAria": "Open storage",
@@ -1145,7 +1147,7 @@
 	},
 	"shopping": {
 		"title": "Shopping",
-		"subtitle": "Shared shopping list with smart suggestions from your pantry",
+		"subtitle": "Your shared shopping list from your pantry",
 		"listAria": "Shopping list",
 		"quantityPlaceholder": "Qty",
 		"unitPlaceholder": "Unit",
@@ -1164,7 +1166,7 @@
 		"clearCheckedAria": "Clear all checked rows",
 		"fillFromPantry": "Fill from pantry",
 		"fillLoading": "Filling your list from the pantry…",
-		"smartFillIntro": "AI suggests items based on stock, expiry dates and meal plans — and adds them straight to your list.",
+		"smartFillIntro": "Skaffu suggests items based on stock, expiry dates and meal plans — and adds them straight to your list.",
 		"smartFillAria": "Smart fill from pantry",
 		"advancedPreferences": "Preferences (optional)",
 		"preferences": "Preferences",
@@ -1189,7 +1191,7 @@
 			"invitePartner": "Invite partner",
 			"invitePartnerAria": "Copy household invite link"
 		},
-		"receiptImportLead": "Receipt imported.\n\nSkaffu updated your pantry.\n\nAnything missing for the next shop?",
+		"receiptImportLead": "Receipt imported. Skaffu updated your pantry. Anything missing for the next shop?",
 		"suggestionsTitle": "Suggestions",
 		"v2": {
 			"pageTitle": "Shopping · Skaffu",
@@ -1199,7 +1201,7 @@
 				"titleTrip": "{name}",
 				"subtitle": "{count, plural, one {# item} other {# items}} · {store}",
 				"subtitleMemory": "remembers your usual picks",
-				"subtitleEmpty": "Empty list — add what's missing",
+				"subtitleEmpty": "Empty list — add what you're missing",
 				"illustrationAria": "Shopping plan overview"
 			},
 			"mode": {
@@ -2329,7 +2331,7 @@
 	"photoScan": {
 		"title": "Photograph product",
 		"subtitle": "AI reads the label and fills in details",
-		"pickFile": "📁 Choose image from files",
+		"pickFile": "Choose image from files",
 		"reading": "Reading product…",
 		"readFailed": "Could not read the product from the image. Try a clearer photo.",
 		"networkError": "Network error while analysing the image.",
@@ -2341,7 +2343,7 @@
 		"pickHint": "Take a clear photo of the product label and we'll fill in name, quantity, unit and best-before when visible."
 	},
 	"receipt": {
-		"pickFile": "📁 Choose receipt (PDF or image)",
+		"pickFile": "Choose receipt (PDF or image)",
 		"pickSourceAria": "Choose receipt or image source",
 		"reading": "Reading receipt…",
 		"readingStatus": "Reading receipt… this usually takes a few seconds.",
@@ -2652,29 +2654,29 @@
 			"progressAria": "Onboarding progress",
 			"welcome": {
 				"title": "Welcome to Skaffu",
-				"body": "Let's start with something simple.\n\nScan a few things from your kitchen and we'll help you keep track of what you already have at home.\n\nLess guessing. Less waste. Fewer duplicate purchases.",
-				"cta": "Let's get started"
+				"body": "start with something simple. Scan a few things from your kitchen and we'll help you keep track of what you already have at home. Less guessing. Less waste. Fewer duplicate purchases.",
+				"cta": "get started"
 			},
 			"scan": {
 				"title": "Start with one thing",
-				"body": "Look around.\n\nA carton of milk. A bag of pasta. Your coffee.\n\nOne scan is all it takes to begin building your pantry.",
+				"body": "Look around. A carton of milk. A bag of pasta. Your coffee. One scan is all it takes to begin building your pantry.",
 				"ctaPrimary": "Open scanner",
 				"ctaSecondary": "Maybe later"
 			},
 			"success": {
 				"title": "Looking good",
-				"body": "Your pantry is already coming together.\n\nEverything you add helps Skaffu give better suggestions and keep your household in sync.",
+				"body": "Your pantry is already coming together. Everything you add helps Skaffu give better suggestions and keep your household in sync.",
 				"cta": "Show my pantry",
 				"itemsAria": "Items you added"
 			},
 			"brain": {
 				"title": "Skaffu remembers the small things",
-				"body": "Scans, receipts and shopping activity help Skaffu understand your household over time.\n\nThat means smarter shopping suggestions, better reminders and less manual work.",
+				"body": "Scans, receipts and shopping activity help Skaffu understand your household over time. That means smarter shopping suggestions, better reminders and less manual work.",
 				"cta": "Sounds good"
 			},
 			"shopping": {
 				"title": "Shopping works better together",
-				"body": "When something runs low, add it to your shopping list and check it off as you shop.\n\nYou can invite your partner whenever you're ready.",
+				"body": "When something runs low, add it to your shopping list and check it off as you shop. You can invite your partner whenever you're ready.",
 				"cta": "Open shopping list"
 			},
 			"progress": {

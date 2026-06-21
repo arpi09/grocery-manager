@@ -60,11 +60,25 @@ describe('home-briefing-presenter', () => {
 	it('builds status params for combined use-soon and list ready', () => {
 		const presentation = buildHomeBriefingStatusPresentation(
 			{ key: 'useSoonAndList', useSoonCount: 4, weekday: 5 },
-			'sv'
+			'sv',
+			{ weekday: 5, storeLabel: 'ICA', tripCount: 4 },
+			6
 		);
 		expect(presentation.key).toBe('home.v6.status.useSoonAndList');
 		expect(presentation.params.useSoonCount).toBe(4);
 		expect(presentation.params.weekday).toBeTruthy();
+	});
+
+	it('hides weekday in status when cadence is weak', () => {
+		const presentation = buildHomeBriefingStatusPresentation(
+			{ key: 'listReady', weekday: 5 },
+			'sv',
+			{ weekday: 5, storeLabel: 'ICA', tripCount: 2 },
+			3
+		);
+		expect(presentation.key).toBe('home.v6.status.listItems');
+		expect(presentation.params.count).toBe(3);
+		expect(presentation.params.weekday).toBeUndefined();
 	});
 
 	it('builds replenishment card copy', () => {
@@ -82,7 +96,8 @@ describe('home-briefing-presenter', () => {
 	it('builds shop-ready card copy with weekday', () => {
 		const copy = buildHomeBriefingForYouPresentation(
 			{ kind: 'shopReady', itemCount: 3, weekday: 5 },
-			'en'
+			'en',
+			{ weekday: 5, storeLabel: 'ICA', tripCount: 4 }
 		);
 		expect(copy.body.key).toBe('home.v6.forYou.shopReady.body');
 		expect(copy.body.params.count).toBe(3);
@@ -99,6 +114,16 @@ describe('home-briefing-presenter', () => {
 		expect(hint.params.count).toBe(3);
 		expect(hint.params.weekday).toBeTruthy();
 		expect(JSON.stringify(hint.params)).not.toContain('ICA');
+	});
+
+	it('builds shopping chip hint without weekday when cadence is weak', () => {
+		const hint = buildShoppingChipHint(
+			3,
+			{ weekday: 5, storeLabel: 'ICA', tripCount: 2 },
+			'sv'
+		);
+		expect(hint.key).toBe('home.v6.chips.shoppingHintNoCadence');
+		expect(hint.params.count).toBe(3);
 	});
 
 	it('builds four briefing chips in order, skipping eat without recipe', () => {

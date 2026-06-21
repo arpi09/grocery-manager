@@ -4,7 +4,7 @@
 	import HomeDashboardCard, {
 		type HomeDashboardCardSize
 	} from '$lib/components/molecules/HomeDashboardCard.svelte';
-	import { formatCadenceWeekday, type HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
+	import { formatCadenceWeekday, shouldShowCadenceWeekday, type HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
 	import { getLocale, t } from '$lib/i18n';
 
 	interface Props {
@@ -24,7 +24,7 @@
 	);
 
 	const cadenceLine = $derived.by(() => {
-		if (!shoppingCadence) return null;
+		if (!shoppingCadence || !shouldShowCadenceWeekday(shoppingCadence)) return null;
 		const weekday = formatCadenceWeekday(shoppingCadence.weekday, locale);
 		return shoppingCadence.storeLabel
 			? t('home.cadenceLineStore', { weekday, store: shoppingCadence.storeLabel })

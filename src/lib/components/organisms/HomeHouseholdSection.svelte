@@ -10,7 +10,7 @@
 	} from '$lib/domain/household-briefing';
 	import { page } from '$app/state';
 	import type { HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
-	import { formatCadenceWeekday } from '$lib/domain/household-shopping-cadence';
+	import { formatCadenceWeekday, shouldShowCadenceWeekday } from '$lib/domain/household-shopping-cadence';
 	import type { PantryHealthInsight } from '$lib/domain/pantry-health';
 	import { isLocale, type Locale } from '$lib/i18n/locale';
 	import { t } from '$lib/i18n';
@@ -40,7 +40,7 @@
 	const locale = $derived((isLocale(page.data.locale) ? page.data.locale : 'sv') as Locale);
 
 	const cadenceLine = $derived.by(() => {
-		if (!shoppingCadence) return null;
+		if (!shoppingCadence || !shouldShowCadenceWeekday(shoppingCadence)) return null;
 		const weekday = formatCadenceWeekday(shoppingCadence.weekday, locale);
 		if (shoppingCadence.storeLabel) {
 			return t('home.cadenceLineStore', { weekday, store: shoppingCadence.storeLabel });

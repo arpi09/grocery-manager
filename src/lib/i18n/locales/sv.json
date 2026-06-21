@@ -201,13 +201,13 @@
 		"emptyAction": "Fota in varor",
 		"expiringMore": "+{count} till går ut snart",
 		"recipeHint": "Receptidéer",
-		"recipeHintDescription": "Baserat på det du har hemma",
-		"readonlyHint": "Du har läsbehörighet — be en administratör lägga till varor.",
+		"recipeHintDescription": "Baserat på det ni har hemma",
+		"readonlyHint": "Ni har läsbehörighet — be en administratör lägga till varor.",
 		"readonlyEmpty": "Skafferiet är tomt. Be en administratör lägga till varor.",
-		"greetingMorning": "God morgon, {name}",
-		"greetingDay": "God eftermiddag, {name}",
-		"greetingEvening": "God kväll, {name}",
-		"greetingNight": "God natt, {name}",
+		"greetingMorning": "God morgon, {name} ☀️",
+		"greetingDay": "God eftermiddag, {name} 🌤️",
+		"greetingEvening": "God kväll, {name} 🌙",
+		"greetingNight": "God natt, {name} ✨",
 		"taglineEngaged": "Gemensam veckohandel · hushållsminne",
 		"weeklyShopCta": "Handla denna vecka",
 		"mealSuggestionsTitle": "Vad blir det idag?",
@@ -215,7 +215,7 @@
 		"shoppingTeaser": "{count} saker på listan",
 		"shoppingTeaserEmpty": "Inköpslistan är tom — lägg till det ni behöver",
 		"mealHintBreakfast": "Starta dagen med något från kylen — vi föreslår frukost utifrån lagret.",
-		"mealHintLunch": "Dags för lunch? Se vad som passar med det du har hemma.",
+		"mealHintLunch": "Dags för lunch? Se vad som passar med det ni har hemma.",
 		"mealHintDinner": "Middagsdags — recept som använder lagret och minskar svinn.",
 		"mealHintEvening": "En enkel kvällsrätt eller mellanmål från det som finns hemma.",
 		"mealSlot": {
@@ -314,10 +314,10 @@
 			"moreLink": "Visa alla"
 		},
 		"dashboard": {
-			"greetingMorningOnly": "God morgon",
-			"greetingDayOnly": "God eftermiddag",
-			"greetingEveningOnly": "God kväll",
-			"greetingNightOnly": "God natt",
+			"greetingMorningOnly": "God morgon ☀️",
+			"greetingDayOnly": "God eftermiddag 🌤️",
+			"greetingEveningOnly": "God kväll 🌙",
+			"greetingNightOnly": "God natt ✨",
 			"sublineCold": "Tom start — fyll skafferiet när det passar",
 			"sublineSteady": "{count, plural, one {# vara · lugn start} other {# varor · lugn start}}",
 			"sublineLista": "{count, plural, one {# sak på listan} other {# saker på listan}}",
@@ -338,32 +338,32 @@
 		},
 		"v5": {
 			"hero": {
-				"defaultBody": "Här är det som förtjänar din uppmärksamhet idag.",
-				"cta": "Se vad som är näst",
+				"defaultBody": "Det här kan vara värt en koll idag.",
+				"cta": "Se vad som väntar",
 				"scanLink": "Lägg till varor",
 				"morning": {
-					"title": "God morgon 👋"
+					"title": "God morgon"
 				},
 				"midday": {
-					"title": "God dag 👋"
+					"title": "God dag"
 				},
 				"evening": {
-					"title": "God kväll 👋"
+					"title": "God kväll"
 				},
 				"night": {
-					"title": "Välkommen tillbaka 👋"
+					"title": "Välkommen tillbaka"
 				},
 				"status": {
 					"healthy": "Allt ser bra ut idag.",
 					"expiring": "Något är värt att använda snart.",
 					"shopping": "En del börjar ta slut.",
-					"empty": "Låt oss börja bygga ert skafferi."
+					"empty": "Tomt skafferi — börja med kvitto eller fotorunda."
 				}
 			},
 			"forYou": {
-				"title": "För dig",
+				"title": "För er",
 				"replenishment": {
-					"body": "Du brukar köpa {name}.",
+					"body": "Ni brukar köpa {name}.",
 					"cta": "Lägg på inköpslistan"
 				},
 				"expiring": {
@@ -408,26 +408,27 @@
 			"greeting": "Hej {name}",
 			"greetingFallback": "Hej",
 			"status": {
-				"useSoonAndList": "{useSoonCount, plural, one {# sak att använda snart} other {# saker att använda snart}} · inköpslistan redo att handlas på {weekday}",
+				"useSoonAndList": "{useSoonCount, plural, one {# sak att använda snart} other {# saker att använda snart}} · {count, plural, one {# vara} other {# varor}} på listan — ni brukar handla på {weekday}",
+				"useSoonAndListNoCadence": "{useSoonCount, plural, one {# sak att använda snart} other {# saker att använda snart}} · {count, plural, one {# vara} other {# varor}} på listan",
 				"useSoonOnly": "{count, plural, one {# sak att använda snart} other {# saker att använda snart}}",
-				"listReady": "Inköpslistan är redo att handlas på {weekday}",
-				"listItems": "Inköpslistan har {count, plural, one {# vara} other {# varor}}",
-				"allGood": "Skafferiet ser bra ut. Inget bråttom.",
-				"emptyPantry": "Låt oss börja bygga ert skafferi."
+				"listReady": "{count, plural, one {# vara} other {# varor}} på listan — ni brukar handla på {weekday}",
+				"listItems": "{count, plural, one {# vara} other {# varor}} på inköpslistan",
+				"allGood": "Skafferiet ser bra ut — inget bråttom just nu.",
+				"emptyPantry": "Tomt skafferi — börja med kvitto eller fotorunda."
 			},
 			"forYou": {
-				"sectionLabel": "För dig",
-				"illustrationAria": "För dig — nästa naturliga steg",
+				"sectionLabel": "För er",
+				"illustrationAria": "För er — nästa steg",
 				"recipe": {
-					"title": "{mealName} med det du har hemma",
-					"body": "Du har {items} som går ut {when}. Ett snabbt mål för {servings}.",
-					"ctaAddAndShop": "Lägg till {missingCount} saknade · Handla {weekday}",
+					"title": "{mealName} med det ni har hemma",
+					"body": "Ni har {items} som går ut {when}. Räcker till {servings, plural, one {# portion} other {# portioner}}.",
+					"ctaAddAndShop": "Lägg till {missingCount} saknade · Ni brukar handla {weekday}",
 					"ctaAdd": "Lägg till {missingCount} på listan",
 					"ctaShop": "Öppna inköpslistan"
 				},
 				"replenishment": {
 					"title": "Dags för {name}?",
-					"body": "Du brukar köpa det ungefär var {interval} dagar.",
+					"body": "Ni brukar köpa det ungefär var {interval}:e dag.",
 					"cta": "Lägg på inköpslistan"
 				},
 				"expiring": {
@@ -437,8 +438,9 @@
 				},
 				"shopReady": {
 					"title": "Redo att handla",
-					"body": "{count, plural, one {# vara} other {# varor}} väntar. Perfekt till {weekday}.",
-					"cta": "Börja handla"
+					"body": "{count, plural, one {# vara} other {# varor}} på listan — ni brukar handla på {weekday}.",
+					"bodyNoCadence": "{count, plural, one {# vara} other {# varor}} väntar på listan.",
+					"cta": "Öppna inköpslistan"
 				}
 			},
 			"moment": {
@@ -464,7 +466,7 @@
 				},
 				"openShopping": {
 					"title": "Inköpslistan väntar",
-					"body": "Ni har varor på listan — perfekt till en snabb tur.",
+					"body": "Ni har varor på listan — bra till en snabb tur i butiken.",
 					"cta": "Öppna inköpslistan"
 				},
 				"seeStats": {
@@ -475,7 +477,7 @@
 			},
 			"chips": {
 				"sectionLabel": "Snabbkoll",
-				"shoppingHint": "{count, plural, one {# vara} other {# varor}} · {weekday}",
+				"shoppingHint": "{count, plural, one {# vara} other {# varor}} · ni brukar handla {weekday}",
 				"shoppingHintNoCadence": "{count, plural, one {# vara} other {# varor}}",
 				"shoppingAria": "Öppna inköpslistan",
 				"storageAria": "Öppna lagret",
@@ -550,7 +552,7 @@
 		"barcodeTitle": "Streckkod",
 		"barcodeSubtitle": "Rikta kameran mot streckkoden på förpackningen",
 		"allModes": "Alla skanningslägen",
-		"readonly": "Du har endast läsbehörighet i detta hushåll och kan inte lägga till varor.",
+		"readonly": "Ni har endast läsbehörighet i detta hushåll och kan inte lägga till varor.",
 		"cancelBack": "Avbryt och gå tillbaka",
 		"cancel": "Avbryt",
 		"hubAria": "Skanningslägen",
@@ -582,13 +584,13 @@
 		"photoPage": {
 			"title": "Fota produkt",
 			"subtitle": "AI läser etiketten och fyller i uppgifter",
-			"readonly": "Du har endast läsbehörighet i detta hushåll och kan inte lägga till varor.",
+			"readonly": "Ni har endast läsbehörighet i detta hushåll och kan inte lägga till varor.",
 			"continue": "Fortsätt och granska"
 		},
 		"receiptPage": {
 			"title": "Skanna kvitto",
 			"subtitle": "Lägg till flera varor på en gång",
-			"readonly": "Du har endast läsbehörighet och kan inte lägga till varor från kvitto."
+			"readonly": "Ni har endast läsbehörighet och kan inte lägga till varor från kvitto."
 		},
 		"receiptGuide": {
 			"title": "Har du kvittot digitalt?",
@@ -992,7 +994,7 @@
 		}
 	},
 	"inventory": {
-		"title": "Ditt skafferi",
+		"title": "Ert skafferi",
 		"subtitle": "Vad ni har hemma — uppdaterat efter veckohandeln.",
 		"itemCountSubtitle": "{count} {count, plural, one {aktiv vara} other {aktiva varor}}",
 		"emptyTitle": "Tomt i {location}",
@@ -1012,7 +1014,7 @@
 		"otherWaysBarcode": "Streckkod",
 		"otherWaysReceipt": "Kvitto",
 		"backHome": "Tillbaka till hem",
-		"readonly": "Du har endast läsbehörighet i detta hushåll.",
+		"readonly": "Ni har endast läsbehörighet i detta hushåll.",
 		"rowSingular": "rad i skafferiet",
 		"rowPlural": "rader i skafferiet",
 		"showFinished": "Visa slut",
@@ -1097,7 +1099,7 @@
 		"scanInsteadLink": "Skanna istället →",
 		"photoTab": "Foto",
 		"bestBefore": "Bäst före (valfritt)",
-		"expiryPrompt": "Vill du gissa bäst-före-datum? Det hjälper oss påminna dig — inget krav.",
+		"expiryPrompt": "Vill du gissa bäst-före-datum? Det hjälper oss påminna er — inget krav.",
 		"expiryPromptGuess": "Gissa datum",
 		"expiryPromptSkip": "Hoppa över",
 		"expiryNudgeToast": "{name} är tillagd — vill du lägga bäst-före?",
@@ -1114,7 +1116,7 @@
 	},
 	"shopping": {
 		"title": "Inköp",
-		"subtitle": "Gemensam inköpslista med smarta förslag från skafferiet",
+		"subtitle": "Er gemensamma inköpslista från skafferiet",
 		"listAria": "Inköpslista",
 		"quantityPlaceholder": "Antal",
 		"unitPlaceholder": "Enhet",
@@ -1133,14 +1135,14 @@
 		"clearCheckedAria": "Rensa alla avbockade rader",
 		"fillFromPantry": "Fyll på från skafferiet",
 		"fillLoading": "Fyller på listan från skafferiet…",
-		"smartFillIntro": "AI föreslår varor utifrån lager, utgångsdatum och måltidsplan — och lägger dem direkt på listan.",
+		"smartFillIntro": "Skaffu föreslår varor utifrån lager, utgångsdatum och måltidsplan — och lägger dem direkt på listan.",
 		"smartFillAria": "Smart påfyllning från skafferiet",
 		"advancedPreferences": "Preferenser (valfritt)",
 		"preferences": "Preferenser",
 		"preferencesPlaceholder": "T.ex. vegetariskt, budget, glutenfritt, barnfamilj",
 		"householdSizeLabel": "Antal personer i hushållet",
 		"fillSuccess": "{count} {count, plural, one {vara lades} other {varor lades}} till på listan.",
-		"fillCelebrationBig": "Bra jobbat — {count} varor på listan!",
+		"fillCelebrationBig": "Snyggt — {count} varor på listan!",
 		"fillPartialSuccess": "{added} {added, plural, one {vara lades} other {varor lades}} till. {skipped} fanns redan på listan.",
 		"fillAllDuplicates": "Alla {count} förslag fanns redan på listan.",
 		"exportList": "Kopiera lista",
@@ -1158,7 +1160,7 @@
 			"invitePartner": "Bjud in partner",
 			"invitePartnerAria": "Kopiera inbjudningslänk till hushållet"
 		},
-		"receiptImportLead": "Kvitto importerat.\n\nSkaffu har uppdaterat skafferiet.\n\nSaknas något inför nästa handling?",
+		"receiptImportLead": "Kvitto importerat. Skaffu har uppdaterat skafferiet. Saknas något inför nästa handling?",
 		"suggestionsTitle": "Förslag",
 		"v2": {
 			"pageTitle": "Inköp · Skaffu",
@@ -1168,7 +1170,7 @@
 				"titleTrip": "{name}",
 				"subtitle": "{count, plural, one {# vara} other {# varor}} · {store}",
 				"subtitleMemory": "minns vad ni brukar köpa",
-				"subtitleEmpty": "Tom lista — lägg till det som saknas",
+				"subtitleEmpty": "Tom lista — lägg till det ni saknar",
 				"illustrationAria": "Inköpsplan — översikt"
 			},
 			"mode": {
@@ -1191,7 +1193,7 @@
 				"cadenceEveryDays": "Var {interval} dagar",
 				"lastPurchase": "senast {weekday}",
 				"lastPurchaseDate": "senast {date}",
-				"fromRecipe": "Redan på listan via För dig",
+				"fromRecipe": "Redan på listan via För er",
 				"fromMeal": "Från {mealName}",
 				"usualAmount": "{amount} brukar räcka",
 				"acceptSuccess": "{name} lades till",
@@ -1264,7 +1266,7 @@
 				"loadFailed": "Inköpslistan kunde inte laddas. Försök igen.",
 				"toggleFailed": "Kunde inte uppdatera varan. Försök igen."
 			},
-			"readonly": "Du har endast läsbehörighet i detta hushåll.",
+			"readonly": "Ni har endast läsbehörighet i detta hushåll.",
 			"receiptLead": "Kvitto importerat. Kolla om något saknas på listan."
 		},
 		"pantryBridge": {
@@ -1295,7 +1297,7 @@
 		"ariaLabel": "Skafferihälsoinsikter",
 		"stale": "{count, plural, one {# vara utan utgångsdatum verkar glömd} other {# varor utan utgångsdatum verkar glömda}}",
 		"duplicate": "{count} rader heter {name} — granska dubletter",
-		"overstock": "Du har {count} av {name} — kolla lagret"
+		"overstock": "Ni har {count} av {name} — kolla lagret"
 	},
 	"wastePrevention": {
 		"ariaLabel": "Använd innan utgång",
@@ -1306,7 +1308,7 @@
 	"replenishment": {
 		"title": "Dags att köpa igen?",
 		"ariaLabel": "Köp-igen-förslag",
-		"intro": "Varor du brukar handla men som inte finns i skafferiet just nu.",
+		"intro": "Varor ni brukar handla men som inte finns i skafferiet just nu.",
 		"addToList": "Lägg på listan",
 		"dismiss": "Inte nu",
 		"acceptSuccess": "{name} lades till på listan",
@@ -1317,7 +1319,7 @@
 		"notFound": "Förslaget är inte längre tillgängligt.",
 		"invalidKey": "Ogiltigt förslag.",
 		"emptyTitle": "Inga köp-igen-förslag än",
-		"emptyDescription": "Importera kvitto för köp-igen-förslag baserat på vad du brukar handla.",
+		"emptyDescription": "Importera kvitto för köp-igen-förslag baserat på vad ni brukar handla.",
 		"emptyAction": "Skanna kvitto",
 		"reason": {
 			"recurringNotInPantry": "Köpt {count} gånger senaste 3 månaderna",
@@ -1333,13 +1335,13 @@
 		"feedback": {
 			"whyExpand": "Varför ser jag detta?",
 			"belief": {
-				"recurringNotInPantry": "Du brukar köpa {name}.",
+				"recurringNotInPantry": "Ni brukar köpa {name}.",
 				"cadenceOverdue": "Det verkar börja ta slut på {name}.",
-				"recurringAndCadence": "Du brukar köpa {name} — och det var ett tag sedan."
+				"recurringAndCadence": "Ni brukar köpa {name} — och det var ett tag sedan."
 			},
 			"why": {
 				"recentPurchases": "Eftersom du köpt {name} {count, plural, one {# gång} other {# gånger}} nyligen.",
-				"cadenceInterval": "Eftersom du brukar köpa ungefär var {interval}:e dag.",
+				"cadenceInterval": "Eftersom ni brukar köpa ungefär var {interval}:e dag.",
 				"daysSinceLast": "Senast köpt {days, plural, one {# dag} other {# dagar}} sedan.",
 				"recurringAndInterval": "Köpt {count, plural, one {# gång} other {# gånger}} nyligen · brukar var {interval}:e dag",
 				"recurringAndDays": "Köpt {count, plural, one {# gång} other {# gånger}} nyligen · senast {days} dagar sedan"
@@ -1516,7 +1518,7 @@
 		"eatHubLead": "Förslag från lagret finns till höger — planera veckan i kalendern nedan.",
 		"generateMeal": "Generera maträtt",
 		"ideasAria": "Receptidéer",
-		"ideasIntro": "Utifrån det du har hemma. Välj datum och lägg till i kalendern.",
+		"ideasIntro": "Utifrån det ni har hemma. Välj datum och lägg till i kalendern.",
 		"ideasEmpty": "Inga förslag ännu. Generera idéer eller skapa ett veckoförslag.",
 		"ideasEmptyCtaIdeas": "Generera idéer",
 		"ideasEmptyCtaWeekly": "Generera veckoförslag",
@@ -1562,7 +1564,7 @@
 		"contextWeekViewLink": "Veckovy"
 	},
 	"stats": {
-		"title": "Ditt skafferi i siffror",
+		"title": "Ert skafferi i siffror",
 		"subtitle": "Överblick, trender och hur ni minskar matsvinn",
 		"overviewHeading": "Statistiköversikt",
 		"heroLabel": "Nyckeltal",
@@ -1580,7 +1582,7 @@
 		"byLocation": "Per förvaringsplats",
 		"empty": "Inget inlagt än — börja på startsidan så fylls statistiken på.",
 		"emptyTitle": "Ingen statistik ännu",
-		"emptyDescription": "Scanna eller fota ditt skafferi så får du en tydlig bild av lagret och utgående varor.",
+		"emptyDescription": "Scanna eller fota ert skafferi så får ni en tydlig bild av lagret och utgående varor.",
 		"emptyActionScan": "Scanna första varan",
 		"emptyActionPhoto": "Fota skafferiet",
 		"impactTitle": "Minska matsvinn",
@@ -1601,7 +1603,7 @@
 		"scanLead": "Håll lagret uppdaterat med scan eller foto.",
 		"proBadge": "Pro",
 		"proTitle": "Djupare insikter med Pro",
-		"proLead": "Obegränsad AI, kvitto-PDF och full statistik — uppgradera under Inställningar → Plan när du vill.",
+		"proLead": "Obegränsad AI, kvitto-PDF och full statistik — uppgradera under Inställningar → Plan när ni vill.",
 		"footnoteMissingExpiry": "{count} varor saknar utgångsdatum — lägg till datum för bättre utgångsvarningar.",
 		"wrappedCta": "Er kylskåps-årstid",
 		"wrappedLead": "Månadssammanfattning att dela — sparade kronor, streak och milstolpar."
@@ -1690,7 +1692,7 @@
 	"household": {
 		"members": "Medlemmar",
 		"invite": "Bjud in",
-		"inviteNote": "Skicka en inbjudan via e-post. Du kan också kopiera länken manuellt nedan.",
+		"inviteNote": "Skicka en inbjudan via e-post. Ni kan också kopiera länken manuellt nedan.",
 		"inviteSent": "Inbjudan skickad — kolla inkorgen!",
 		"sendInvite": "Skicka inbjudan",
 		"sendingInvite": "Skickar inbjudan…",
@@ -2243,8 +2245,8 @@
 	},
 	"starter": {
 		"title": "Snabbstart",
-		"subtitle": "Markera det du har hemma",
-		"readonly": "Du har endast läsbehörighet.",
+		"subtitle": "Markera det ni har hemma",
+		"readonly": "Ni har endast läsbehörighet.",
 		"lead": "Vill du fylla i snabbare? Markera det du redan har — eller skanna kvitto/streckkod direkt.",
 		"defaultLocation": "Standardplats för valda:",
 		"allCategory": "Alla {label}",
@@ -2298,7 +2300,7 @@
 	"photoScan": {
 		"title": "Fota produkt",
 		"subtitle": "AI läser etiketten och fyller i uppgifter",
-		"pickFile": "📁 Välj bild från filer",
+		"pickFile": "Välj bild från filer",
 		"reading": "Läser produkten…",
 		"readFailed": "Kunde inte läsa produkten från bilden. Försök med en tydligare bild.",
 		"networkError": "Nätverksfel vid analys av bilden.",
@@ -2307,10 +2309,10 @@
 		"confidenceMedium": "medel",
 		"filledFromPhoto": "Fyllde i uppgifter från fotot (säkerhet: {confidence}). Kontrollera innan du sparar.",
 		"continueReview": "Fortsätt och granska",
-		"pickHint": "Ta en tydlig bild av produktetiketten så fyller vi i namn, mängd och enhet åt dig."
+		"pickHint": "Ta en tydlig bild av produktetiketten så fyller vi i namn, mängd och enhet åt er."
 	},
 	"receipt": {
-		"pickFile": "📁 Välj kvitto (PDF eller bild)",
+		"pickFile": "Välj kvitto (PDF eller bild)",
 		"pickSourceAria": "Välj kvitto eller bildkälla",
 		"reading": "Läser kvitto…",
 		"readingStatus": "Läser kvittot… det tar oftast några sekunder.",
@@ -2331,7 +2333,7 @@
 		"toastRulesImproved": "{count, plural, one {# minnesregel förbättrad} other {# minnesregler förbättrade}}",
 		"toastPricesSaved": "Priser sparas i prishistorik",
 		"success": {
-			"title": "Välkommen till ditt skafferi",
+			"title": "Välkommen till ert skafferi",
 			"body": "Vi hittade {count} produkter och ordnade dem automatiskt.",
 			"statCupboard": "{count} skafferi",
 			"statFridge": "{count} kyl",
@@ -2424,7 +2426,7 @@
 		"manualAddFallback": "Lägg till vara manuellt i stället",
 		"addModalTitle": "Lägg till vara",
 		"toastAdded": "Klart! \"{label}\" ligger nu i skafferiet.",
-		"toastAddedUnknown": "Bra jobbat — \"{label}\" finns nu i skafferiet (okänd streckkod).",
+		"toastAddedUnknown": "Snyggt — \"{label}\" finns nu i skafferiet (okänd streckkod).",
 		"invalidBarcodeManual": "Hoppsan — ange en giltig streckkod (minst 8 siffror).",
 		"productNotFoundBanner": "Produkten hittades inte i databasen. Kontrollera namnet innan du sparar.",
 		"barcodeLabel": "Streckkod: {barcode}",
@@ -2515,17 +2517,17 @@
 		"welcome": "Välkommen till Skaffu",
 		"stepOf": "Steg {current} av {total}",
 		"welcomeBodyShort": "Bygg en veckolista — tre varor räcker för att komma igång.",
-		"welcomeBodyShoppingList": "Det här är er gemensamma inköpslista. Lägg till det ni brukar handla — bjud in partner när du vill.",
+		"welcomeBodyShoppingList": "Det här är er gemensamma inköpslista. Lägg till det ni brukar handla — bjud in partner när ni vill.",
 		"brainLearnLine": "Veckolistan styr handeln — Skaffu uppskattar bäst-före när ni fyller lagret.",
 		"fillPantrySecondary": "Fyll skafferi",
 		"quickStart": "Snabbstart",
 		"quickPointsAria": "Det här kan du göra direkt",
 		"quickPointScan": "Fota in varor — eller skanna streckkod och kvitto",
 		"quickPointExpiry": "Se vad som går ut snart på startsidan",
-		"quickPointMeals": "Planera middagar när du vill",
+		"quickPointMeals": "Planera middagar när ni vill",
 		"ctaPhotoFirst": "Fota in dina första varor",
 		"ctaBarcodeFirst": "Skanna din första vara",
-		"welcomeBody": "Skaffu hjälper dig hålla koll på mat hemma — så du handlar smartare, minskar svinn och lagar mat utifrån det du redan har.",
+		"welcomeBody": "Skaffu hjälper er hålla koll på mat hemma — så du handlar smartare, minskar svinn och lagar mat utifrån det du redan har.",
 		"ctaReceipt": "Skanna kvitto",
 		"ctaBarcode": "Skanna 5 varor",
 		"barcodeProgress": "{count} av {goal} streckkoder",
@@ -2536,13 +2538,13 @@
 		"celebrateCtaShopping": "Öppna inköpslistan",
 		"celebrateDismiss": "Gå till startsidan",
 		"scanTitle": "Lägg till din första vara",
-		"scanBody": "Fota kyl, frys eller skafferi — eller skanna streckkod och kvitto. Fem varor räcker för att komma igång — du behöver inte fylla hela skafferiet på en gång.",
+		"scanBody": "Fota kyl, frys eller skafferi — eller skanna streckkod och kvitto. Fem varor räcker för att komma igång — ni behöver inte fylla hela skafferiet på en gång.",
 		"locationsTitle": "Tre platser",
 		"locationsBody": "Dela upp lagret efter var varorna står. Tryck på en plats på startsidan för att se och redigera innehållet.",
 		"shareTitle": "Dela hushåll",
-		"shareBody": "Bjud in familj eller sambo under Inställningar. Byt mellan hushåll via menyn högst upp om du har flera skafferier.",
-		"readyTitle": "Nu är du redo!",
-		"readyBody": "Välj hur du vill börja fylla skafferiet.",
+		"shareBody": "Bjud in familj eller sambo under Inställningar. Byt mellan hushåll via menyn högst upp om ni har flera skafferier.",
+		"readyTitle": "Nu är ni redo!",
+		"readyBody": "Välj hur ni vill börja fylla skafferiet.",
 		"locationsAria": "Lagringsplatser",
 		"fridgeShort": "Kyl",
 		"freezerShort": "Frys",
@@ -2554,13 +2556,13 @@
 		"landingExpiring": "Utgår snart",
 		"landingHeadline": "Er gemensamma veckolista",
 		"landingExpiringCount": "{count} snart",
-		"scanHint": "Tips: tryck på Skanna-fliken längst ner när du vill lägga till fler varor.",
+		"scanHint": "Tips: tryck på Skanna-fliken längst ner när ni vill lägga till fler varor.",
 		"scanTabHint": "Du hittar alltid Skanna-fliken längst ner — foto, streckkod och kvitto.",
 		"expiryTitle": "Utgångsdatum och ät det först",
 		"expiryBody": "Sätt utgångsdatum när du lägger till varor. På startsidan visar vi vad som går ut snart och föreslår måltider så du hinner använda maten i tid.",
 		"mealsTitle": "Matplan och inköpslista",
-		"mealsBody": "Planera veckans middagar och fyll inköpslistan med det som saknas — listan hänger ihop med det du har hemma.",
-		"addItemsTitle": "Bygg din inköpslista",
+		"mealsBody": "Planera veckans middagar och fyll inköpslistan med det som saknas — listan hänger ihop med det ni har hemma.",
+		"addItemsTitle": "Bygg er inköpslistan",
 		"addItemsBody": "Lägg till tre saker ni handlar varje vecka. Bjud in partner när listan känns användbar.",
 		"addFirstItem": "Lägg till vara",
 		"addItemsBodyBinary": "Lägg till tre vanliga varor — mjölk, bröd, kaffe. Skanna skafferiet senare via Mer.",
@@ -2572,7 +2574,7 @@
 		"shoppingListInviteHint": "Bjud in partner när listan känns användbar — att handla tillsammans bygger vanan.",
 		"chooseReceipt": "Ladda upp digitalt kvitto",
 		"chooseBarcode": "Skanna 3 varor",
-		"celebrateReceiptBody": "Du har {count} varor i lagret — bra start!",
+		"celebrateReceiptBody": "Ni har {count} varor i lagret — bra start!",
 		"startUsingApp": "Börja använda appen",
 		"celebrateStartedBody": "Listan är redo — handla tillsammans och håll den uppdaterad.",
 		"welcomeBodyInventory": "Hur får du in varor? Välj foto, streckkod eller kvitto — eller börja med inköpslistan.",
@@ -2580,7 +2582,7 @@
 		"pathGuidePhotoBody": "Fota kyl, frys eller skafferi — granska innan du sparar.",
 		"pathGuideBarcodeBody": "Skanna streckkod på förpackningen — snabbt för enstaka varor.",
 		"pathGuideReceiptBody": "Ladda upp kvitto — vi fyller lagret och lär oss vad ni handlar.",
-		"pathGuideManualBody": "Lägg till manuellt om du vill skriva in varor själv.",
+		"pathGuideManualBody": "Lägg till manuellt om ni vill skriva in varor själv.",
 		"pathGuideShoppingBody": "Bygg veckans inköpslista — tre varor räcker för att komma igång.",
 		"pathChoosePhoto": "Fotorunda",
 		"pathChooseBarcode": "Streckkod",
@@ -2588,9 +2590,9 @@
 		"pathChooseManual": "Manuellt",
 		"pathChooseShopping": "Inköpslista",
 		"ctaManual": "Lägg till manuellt",
-		"celebrateInventoryBody": "Bra start — ditt skafferi växer!",
-		"encouragePathGuide": "Nästa steg — öppna det sätt som passar dig.",
-		"encourageCelebrate": "Hurra — du är igång!",
+		"celebrateInventoryBody": "Bra start — ert skafferi växer!",
+		"encouragePathGuide": "Nästa steg — öppna det sätt som passar er.",
+		"encourageCelebrate": "Bra — du är igång!",
 		"sharePromptTitle": "Dela med partner?",
 		"sharePromptBody": "Skapa inköpslista och dela länk — samma lista, uppdateras när ni handlar.",
 		"sharePromptListaCta": "Dela länk till lista",
@@ -2599,7 +2601,7 @@
 		"sharePromptSkip": "Hoppa över",
 		"sharePromptAria": "Dela inköpslistan med partner",
 		"scanModalTitle": "Hur vill du lägga till?",
-		"scanModalBody": "Välj det sätt som passar dig bäst. Guiden stannar kvar medan du skannar.",
+		"scanModalBody": "Välj det sätt som passar er bäst. Guiden stannar kvar medan du skannar.",
 		"scanModalAria": "Lägg till vara under introduktionen",
 		"backToGuide": "Tillbaka till guiden",
 		"backToPicker": "Tillbaka till val",
@@ -2610,7 +2612,7 @@
 		"getStarted": "Kom igång",
 		"skip": "Hoppa över",
 		"dialogAria": "Introduktion till Skaffu",
-		"celebrateWoohoo": "Du har kommit igång med appen — woohoo!",
+		"celebrateWoohoo": "Ni har kommit igång med appen — woohoo!",
 		"beatWhatTitle": "Det här är er gemensamma inköpslista",
 		"beatLoopTitle": "Checka av när ni handlar",
 		"beatHowTitle": "Kvitton bygger minnet",
@@ -2621,36 +2623,36 @@
 			"progressAria": "Framsteg i introduktionen",
 			"welcome": {
 				"title": "Välkommen till Skaffu",
-				"body": "Vi börjar enkelt.\n\nSkanna några saker från ditt kök så hjälper Skaffu dig att hålla koll på det du redan har hemma.\n\nMindre gissande. Mindre svinn. Färre dubbelköp.",
+				"body": "Vi börjar enkelt. Skanna några saker från ditt kök så hjälper Skaffu er att hålla koll på det du redan har hemma. Mindre gissande. Mindre svinn. Färre dubbelköp.",
 				"cta": "Kom igång"
 			},
 			"scan": {
 				"title": "Börja med en sak",
-				"body": "Titta dig omkring.\n\nEtt mjölkpaket. Ett paket pasta. Kaffet på hyllan.\n\nEn enda skanning räcker för att komma igång.",
+				"body": "Titta er omkring. Ett mjölkpaket. Ett paket pasta. Kaffet på hyllan. En enda skanning räcker för att komma igång.",
 				"ctaPrimary": "Öppna skannern",
 				"ctaSecondary": "Kanske senare"
 			},
 			"success": {
 				"title": "Det här ser bra ut",
-				"body": "Ditt skafferi börjar redan ta form.\n\nJu mer du lägger till, desto bättre kan Skaffu hjälpa dig och ditt hushåll.",
+				"body": "Ert skafferi börjar redan ta form. Ju mer du lägger till, desto bättre kan Skaffu hjälpa er och ditt hushåll.",
 				"cta": "Visa mitt skafferi",
 				"itemsAria": "Varor du lagt till"
 			},
 			"brain": {
 				"title": "Skaffu kommer ihåg de små sakerna",
-				"body": "Skanningar, kvitton och inköpsvanor hjälper Skaffu att förstå ditt hushåll över tid.\n\nDet betyder smartare inköpsförslag, bättre påminnelser och mindre manuellt arbete.",
+				"body": "Skanningar, kvitton och inköpsvanor hjälper Skaffu att förstå ditt hushåll över tid. Det betyder smartare inköpsförslag, bättre påminnelser och mindre manuellt arbete.",
 				"cta": "Låter bra"
 			},
 			"shopping": {
 				"title": "Inköp fungerar bättre tillsammans",
-				"body": "När något börjar ta slut kan du lägga till det i inköpslistan och bocka av det medan du handlar.\n\nDu kan bjuda in din partner när du vill.",
+				"body": "När något börjar ta slut kan du lägga till det i inköpslistan och bocka av det medan du handlar. Du kan bjuda in din partner när ni vill.",
 				"cta": "Öppna inköpslistan"
 			},
 			"progress": {
 				"welcome": "Välkommen",
 				"firstScan": "Första skanningen",
 				"pantryCreated": "Skafferi skapat",
-				"brain": "Lär dig hur Skaffu hjälper",
+				"brain": "Lär er hur Skaffu hjälper",
 				"shopping": "Inköpslista"
 			}
 		}
@@ -2753,7 +2755,7 @@
 		"celebrateSavings500": "Ni har sparat ca {sek} kr genom att använda maten i tid.",
 		"celebrateStreak5": "{count} veckor utan svinn — imponerande streak.",
 		"syncWeek": "Synk-vecka",
-		"celebrateSyncWeek": "Du höll skafferiet levande denna vecka — bra jobbat.",
+		"celebrateSyncWeek": "Ni höll skafferiet levande denna vecka — bra jobbat.",
 		"syncWeekWrites": "Lagret uppdaterat",
 		"bridgeCelebration": "Brygga x5",
 		"bridgeProgress": "{count} brygg-avbockningar",
@@ -2850,7 +2852,7 @@
 		"inboundPushLead": "{count} varor går ut — här är veckans förslag. Generera och godkänn på ett klick.",
 		"inboundEmailLead": "{count} varor går ut snart — öppna veckoförslagen och lägg dem i plan och inköpslista.",
 		"plannedThisWeek": "{count} måltider redan planerade denna vecka",
-		"readonlyHint": "Du har läsbehörighet — be en administratör planera veckan.",
+		"readonlyHint": "Ni har läsbehörighet — be en administratör planera veckan.",
 		"savingsFootnote": "Hittills sparat ca {sek} kr · {kg} kg genom att använda maten i tid."
 	},
 	"skafferapport": {
@@ -2890,7 +2892,7 @@
 		"movingSoonBody": "{name} — {days, plural, one {# dag} other {# dagar}} kvar. Fortfarande bra?"
 	},
 	"ai": {
-		"loadingPantry": "Tänker utifrån ditt skafferi…",
+		"loadingPantry": "Tänker utifrån ert skafferi…",
 		"loadingWeekly": "Planerar veckan utifrån lagret…"
 	},
 	"householdInvite": {
@@ -3025,7 +3027,7 @@
 			"portalUnavailable": "Ingen Stripe-kund för hushållet. Använd kostnadsfri Pro eller slutför checkout först."
 		},
 		"plan": {
-			"inventoryLimit": "Du har nått max antal lagerrader på Gratis-planen. Uppgradera till Pro eller ta bort varor.",
+			"inventoryLimit": "Ni har nått max antal lagerrader på Gratis-planen. Uppgradera till Pro eller ta bort varor.",
 			"membersLimit": "Gratis-planen tillåter max två hushållsmedlemmar. Uppgradera till Pro för fler."
 		},
 		"household": {
@@ -3068,7 +3070,7 @@
 			"invalidRequest": "Ogiltig begäran.",
 			"missingId": "Saknar id.",
 			"invalidEventType": "Ogiltig händelsetyp.",
-			"openAiNotConfigured": "AI-tjänsten är inte tillgänglig just nu. Försök igen senare.",
+			"openAiNotConfigured": "AI-tjänsten är inte tillgänglig just nu. Prova igen om en stund.",
 			"openAiUnauthorized": "AI-tjänsten är tillfälligt otillgänglig. Försök igen om en stund.",
 			"openAiRateLimit": "AI-tjänsten är upptagen just nu. Vänta en stund och försök igen.",
 			"openAiMonthlyBudget": "AI-tjänsten har nått månadstaket. Försök igen nästa månad eller kontakta support.",
@@ -3082,7 +3084,7 @@
 			"productImageTooLarge": "Bilden är för stor (max 6 MB).",
 			"productImageUnexpected": "Kunde inte läsa produkten från bilden. Försök igen.",
 			"suggestionsFailed": "Kunde inte skapa inköpsförslag från AI-svaret. Försök igen.",
-			"insightsEmpty": "Du har inga varor registrerade ännu.",
+			"insightsEmpty": "Ni har inga varor registrerade ännu.",
 			"insightsSummary": "Här är dina senaste inventarietips.",
 			"insightsParse": "Kunde inte tolka AI-svaret. Försök igen om en stund.",
 			"insightsAddItems": "Lägg till varor i kyl, frys eller skafferi för att få smarta tips.",
@@ -3101,9 +3103,9 @@
 			"receiptAiFailed": "Kunde inte tolka svaret från AI.",
 			"receiptNoItems": "Inga varor hittades på kvittot. Prova en skarpare bild, annan PDF eller annan vinkel.",
 			"missingRowId": "Saknar rad-id",
-			"aiRateLimitAiScan": "Du har använt alla {limit} AI-skannar den här månaden på Gratis-planen. Uppgradera till Pro eller vänta till nästa månad.",
-			"aiRateLimitReceiptPdf": "Du har använt alla {limit} kvitto-PDF den här månaden på Gratis-planen. Uppgradera till Pro eller vänta till nästa månad.",
-			"aiRateLimitSmartFill": "Du har använt alla {limit} smart fill den här veckan på Gratis-planen. Uppgradera till Pro eller vänta till nästa vecka.",
+			"aiRateLimitAiScan": "Ni har använt alla {limit} AI-skannar den här månaden på Gratis-planen. Uppgradera till Pro eller vänta till nästa månad.",
+			"aiRateLimitReceiptPdf": "Ni har använt alla {limit} kvitto-PDF den här månaden på Gratis-planen. Uppgradera till Pro eller vänta till nästa månad.",
+			"aiRateLimitSmartFill": "Ni har använt alla {limit} smart fill den här veckan på Gratis-planen. Uppgradera till Pro eller vänta till nästa vecka.",
 			"barcodeNotFound": "Ogiltig streckkod.",
 			"invalidLocation": "Ogiltig förvaringsplats."
 		},
@@ -3334,7 +3336,7 @@
 		"noItems": "Inget att dela — listan är tom.",
 		"publicEyebrow": "Delad inköpslista",
 		"publicTitle": "Inköpslista",
-		"publicLead": "Någon delade sin inköpslista med dig.",
+		"publicLead": "Någon delade sin inköpslista med er.",
 		"publicSnapshotHonesty": "Listan speglar hur den såg ut när länken skapades — inte live. Avbockade rader syns men kan inte ändras här.",
 		"publicExpires": "Länken gäller till {date}.",
 		"publicSnapshotAt": "Ögonblicksbild tagen {date}.",
@@ -3377,7 +3379,7 @@
 		"panelTitle": "Grannskafferiet i närheten",
 		"panelLead": "Aktiva delningar inom cirka 500 m — utan adress.",
 		"panelEmpty": "Inga aktiva delningar i närheten just nu.",
-		"panelOptInHint": "Vill du se listor nära dig?",
+		"panelOptInHint": "Vill du se listor nära er?",
 		"panelOptInLink": "Aktivera under Inställningar",
 		"approxDistance": "ca {metres} m bort",
 		"radiusFree": "Söker inom ca {metres} m",
@@ -3388,12 +3390,12 @@
 		"openMapLink": "Öppna karta",
 		"openShareBtn": "Öppna lista",
 		"reportBtn": "Rapportera",
-		"reportSuccess": "Tack — delningen döljs för dig.",
+		"reportSuccess": "Tack — delningen döljs för er.",
 		"reportFailed": "Kunde inte rapportera. Försök igen.",
 		"reportNotFound": "Delningen hittades inte.",
 		"reportLoginRequired": "Logga in för att rapportera en delning.",
 		"loadFailed": "Kunde inte ladda närliggande delningar.",
-		"trustNote": "Dela bara med folk du litar på. Rapportera olämpligt innehåll så döljer vi det för dig.",
+		"trustNote": "Dela bara med folk du litar på. Rapportera olämpligt innehåll så döljer vi det för er.",
 		"discoveryTitle": "Grannskafferiet",
 		"discoveryLead": "Se aktiva delningar på karta och lista — utan adress.",
 		"discoveryOptInHint": "Aktivera Grannskafferiet i närheten under Inställningar för att se kartan.",
@@ -3419,7 +3421,7 @@
 		"lead": "Aktiva delningar från riktiga skafferier — ingen adress, inget konto krävs för att titta.",
 		"cityNavAria": "Välj stad",
 		"softLandingTitle": "Vi startar i {city} — skapa din lista",
-		"softLandingLead": "När fler grannar delar utgående varor dyker listan upp här. Skapa ditt skafferi och var med från början.",
+		"softLandingLead": "När fler grannar delar utgående varor dyker listan upp här. Skapa ert skafferi och var med från början.",
 		"itemCount": "{count, plural, one {# vara} other {# varor}}",
 		"moreItems": "+{count} till",
 		"expand": "Visa lista",

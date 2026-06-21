@@ -108,9 +108,11 @@
 	const moment = $derived(selectHomeBriefingMomentCard(briefingInput));
 
 	const greeting = $derived(buildHomeBriefingGreetingPresentation(displayName));
-	const statusPresentation = $derived(buildHomeBriefingStatusPresentation(status, locale));
+	const statusPresentation = $derived(
+		buildHomeBriefingStatusPresentation(status, locale, shoppingCadence, shoppingListCount)
+	);
 	const forYouPresentation = $derived(
-		forYou ? buildHomeBriefingForYouPresentation(forYou, locale) : null
+		forYou ? buildHomeBriefingForYouPresentation(forYou, locale, shoppingCadence) : null
 	);
 	const momentPresentation = $derived(
 		moment ? buildHomeBriefingMomentPresentation(moment) : null

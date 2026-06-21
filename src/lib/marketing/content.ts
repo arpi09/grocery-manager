@@ -332,8 +332,8 @@ const sv: MarketingContent = {
 					'ICA, Willys, Coop eller Lidl — ett hushåll, en lista. Ingen kedja låser in er data.'
 			}
 		],
-		featuresTitle: 'Allt du behöver i köket',
-		featuresLead: 'Från gemensam lista till matkoll — snabbt, tydligt och utan onödig friktion.',
+		featuresTitle: 'Det ni behöver i köket',
+		featuresLead: 'Från gemensam lista till matkoll — snabbt, tydligt och utan krångel.',
 		wasteReductionTitle: 'Mindre svinn när listan vet vad som finns',
 		wasteReductionLead:
 			'När hushållets minne känner era vanor blir det lättare att handla rätt mängd, använda det som går ut snart och slippa dubbelköp.',

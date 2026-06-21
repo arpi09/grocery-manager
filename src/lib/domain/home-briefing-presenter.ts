@@ -1,4 +1,8 @@
-import { formatCadenceWeekday, type HouseholdShoppingCadence } from './household-shopping-cadence';
+import {
+	formatCadenceWeekday,
+	shouldShowCadenceWeekday,
+	type HouseholdShoppingCadence
+} from './household-shopping-cadence';
 import { getTimeOfDay, timeOfDayGreetingKey, type TimeOfDay } from './meal-slot';
 import type { MessageKey } from '$lib/i18n/messages';
 import type { Locale } from '$lib/i18n/locale';
@@ -43,29 +47,53 @@ export function buildHomeBriefingGreetingPresentation(
 
 export function buildHomeBriefingStatusPresentation(
 	status: HomeBriefingStatus,
-	locale: Locale
+	locale: Locale,
+	shoppingCadence?: HouseholdShoppingCadence | null,
+	shoppingListCount = 0
 ): HomeBriefingMessagePresentation {
-	const key = homeBriefingStatusMessageKey(status);
+	const showWeekday = shouldShowCadenceWeekday(shoppingCadence);
 
 	switch (status.key) {
 		case 'useSoonAndList':
+			if (showWeekday) {
+				return {
+					key: 'home.v6.status.useSoonAndList',
+					params: {
+						useSoonCount: status.useSoonCount ?? 0,
+						count: shoppingListCount,
+						weekday: formatCadenceWeekday(status.weekday ?? 0, locale)
+					}
+				};
+			}
 			return {
-				key,
+				key: 'home.v6.status.useSoonAndListNoCadence',
 				params: {
 					useSoonCount: status.useSoonCount ?? 0,
-					weekday: formatCadenceWeekday(status.weekday ?? 0, locale)
+					count: shoppingListCount
 				}
 			};
 		case 'listReady':
+			if (showWeekday) {
+				return {
+					key: 'home.v6.status.listReady',
+					params: {
+						count: shoppingListCount,
+						weekday: formatCadenceWeekday(status.weekday ?? 0, locale)
+					}
+				};
+			}
 			return {
-				key,
-				params: { weekday: formatCadenceWeekday(status.weekday ?? 0, locale) }
+				key: 'home.v6.status.listItems',
+				params: { count: shoppingListCount }
 			};
 		case 'useSoonOnly':
 		case 'listItems':
-			return { key, params: { count: status.count ?? 0 } };
+			return {
+				key: homeBriefingStatusMessageKey(status),
+				params: { count: status.count ?? shoppingListCount }
+			};
 		default:
-			return { key, params: {} };
+			return { key: homeBriefingStatusMessageKey(status), params: {} };
 	}
 }
 
@@ -76,7 +104,8 @@ function formatWeekday(weekday: number | null | undefined, locale: Locale): stri
 
 export function buildHomeBriefingForYouPresentation(
 	card: HomeBriefingForYouCard,
-	locale: Locale
+	locale: Locale,
+	shoppingCadence?: HouseholdShoppingCadence | null
 ): {
 	title: HomeBriefingMessagePresentation;
 	body: HomeBriefingMessagePresentation;
@@ -86,9 +115,11 @@ export function buildHomeBriefingForYouPresentation(
 
 	switch (card.kind) {
 		case 'recipe': {
-			const weekday = formatWeekday(card.shopWeekday, locale);
+			const showWeekday =
+				card.shopWeekday != null && shouldShowCadenceWeekday(shoppingCadence);
+			const weekday = showWeekday ? formatWeekday(card.shopWeekday, locale) : '';
 			const ctaKey =
-				card.missingCount > 0 && weekday
+				card.missingCount > 0 && showWeekday
 					? `${prefix}.ctaAddAndShop`
 					: card.missingCount > 0
 						? `${prefix}.ctaAdd`
@@ -131,18 +162,22 @@ export function buildHomeBriefingForYouPresentation(
 				},
 				cta: { key: msg(`${prefix}.cta`), params: {} }
 			};
-		case 'shopReady':
+		case 'shopReady': {
+			const showWeekday = shouldShowCadenceWeekday(shoppingCadence);
 			return {
 				title: { key: msg(`${prefix}.title`), params: {} },
 				body: {
-					key: msg(`${prefix}.body`),
-					params: {
-						count: card.itemCount,
-						weekday: formatCadenceWeekday(card.weekday, locale)
-					}
+					key: msg(showWeekday ? `${prefix}.body` : `${prefix}.bodyNoCadence`),
+					params: showWeekday
+						? {
+								count: card.itemCount,
+								weekday: formatCadenceWeekday(card.weekday, locale)
+							}
+						: { count: card.itemCount }
 				},
 				cta: { key: msg(`${prefix}.cta`), params: {} }
 			};
+		}
 	}
 }
 
@@ -174,7 +209,7 @@ export function buildShoppingChipHint(
 	locale: Locale
 ): HomeBriefingMessagePresentation {
 	const weekday = shoppingCadence?.weekday;
-	if (weekday != null) {
+	if (weekday != null && shouldShowCadenceWeekday(shoppingCadence)) {
 		return {
 			key: 'home.v6.chips.shoppingHint',
 			params: {
