@@ -474,8 +474,11 @@ export const productEventTable = pgTable(
 				'store_recommendation_interest_shown',
 				'store_recommendation_completed',
 				'planer_viewed',
+				'planer_idea_dismissed',
 				'ata_recipe_opened',
-				'ata_week_view_toggled'
+				'ata_week_view_toggled',
+				'capacitor_app_opened',
+				'capacitor_share_received'
 			]
 		}).notNull(),
 		metadata: text('metadata'),
