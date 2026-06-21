@@ -5,8 +5,8 @@
 | F?lt | V?rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-21 |
-| **Prod SHA** | `67b5b485f` @ [27896777489](https://github.com/arpi09/grocery-manager/actions/runs/27896777489) (auto tier, critical E2E). Prior `6fc825633` @ [27896332627](https://github.com/arpi09/grocery-manager/actions/runs/27896332627). |
-| **Master SHA** | `67b5b485f` — brand primary `#2c4a3e` sync (PWA/SMUI/emails) + i18n copy deploy docs; prod tree `67b5b485f` |
+| **Prod SHA** | `d6eed0e4f` @ [27897126503](https://github.com/arpi09/grocery-manager/actions/runs/27897126503) (auto tier, critical E2E). Prior `67b5b485f` @ [27896777489](https://github.com/arpi09/grocery-manager/actions/runs/27896777489). |
+| **Master SHA** | `d6eed0e4f` — Äta kalender veckonavigation + mobil UX (`?week=`, daglista, WCAG); includes `31357c386` calendar slice |
 | **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
