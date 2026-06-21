@@ -5,8 +5,8 @@
 | F?lt | V?rde |
 |------|--------|
 | **Uppdaterad** | 2026-06-21 |
-| **Prod SHA** | `d6eed0e4f` @ [27897126503](https://github.com/arpi09/grocery-manager/actions/runs/27897126503) (auto tier, critical E2E). Prior `67b5b485f` @ [27896777489](https://github.com/arpi09/grocery-manager/actions/runs/27896777489). |
-| **Master SHA** | `d6eed0e4f` — Äta kalender veckonavigation + mobil UX (`?week=`, daglista, WCAG); includes `31357c386` calendar slice |
+| **Prod SHA** | `6e28b4956` @ [27897856697](https://github.com/arpi09/grocery-manager/actions/runs/27897856697) (auto tier, full E2E). Prior `d6eed0e4f` @ [27897126503](https://github.com/arpi09/grocery-manager/actions/runs/27897126503). |
+| **Master SHA** | `6e28b4956` — onboarding polish, statistik spend tabs, account deletion, PWA safe-area, Capacitor shell spike, agent codebase map |
 | **CI/CD model** | **v2 on master** — tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
@@ -82,6 +82,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 - [x] **Mobile UX Recovery** ? prior prod **`d585cbd5`** @ [27570192623](https://github.com/arpi09/grocery-manager/actions/runs/27570192623)
 - [x] **PR #95** CI/CD v2 merged 2026-06-15
 - [x] **Price Intelligence Phase 1** — prod **`f049e3cb0`** @ [27883692872](https://github.com/arpi09/grocery-manager/actions/runs/27883692872) (fast E2E critical). `receipt_price_captured` telemetry + Price Memory discovery (chip tooltip/link, import hint).
+- [x] **Onboarding + statistik + account deletion + Capacitor spike** — prod **`6e28b4956`** @ [27897856697](https://github.com/arpi09/grocery-manager/actions/runs/27897856697) (auto tier, full E2E).
 
 ## Acquisition (V1)
 
