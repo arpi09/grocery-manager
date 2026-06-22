@@ -74,7 +74,7 @@
 		"pr:gate": "npm run gate:fast && npm run test:receipt-fixtures && npx cross-env USE_PGLITE=true npm run test:integration && npx cross-env DATABASE_URL=postgresql://pantry:pantry@localhost:5432/pantry USE_PGLITE=true PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA npm run build && npm run check:client-bundle",
 		"ci:path-tier": "node scripts/ci-path-tier.mjs",
 		"test:e2e:critical": "svelte-kit sync && playwright test -c playwright.critical.config.ts",
-		"test:e2e:full": "npm run test:e2e",
+		"test:e2e:full": "svelte-kit sync && playwright test",
 		"deploy:fast": "npm run pr:gate && npm run test:e2e:critical && npm run smoke:pre-deploy",
 		"quality:integration": "npx cross-env USE_PGLITE=true vitest run --config vitest.integration.config.ts",
 		"release:gate": "npm run quality:ci",
