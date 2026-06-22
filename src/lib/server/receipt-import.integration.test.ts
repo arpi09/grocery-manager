@@ -100,7 +100,7 @@ describe('importReceiptLines integration', () => {
 			learningEngineService,
 			eventType: 'receipt_parsed',
 			storeLabel: 'ICA',
-			purchasedAt: '2026-06-01'
+			purchasedAt: '2026-06-22'
 		});
 
 		expect(result.itemsAdded).toBe(2);

@@ -150,7 +150,6 @@ export function buildPantryTile(item: InventoryItem, today = new Date()): Pantry
 		name: item.name,
 		quantity: item.quantity,
 		unit: item.unit,
-		expiresOn: item.expiresOn,
 		...detail
 	};
 }
