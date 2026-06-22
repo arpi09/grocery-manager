@@ -29,7 +29,7 @@ test.describe('Market v0.1 access', () => {
 		await page.goto('/grannskafferiet/marknad', { waitUntil: 'commit' });
 		await expect(page.getByTestId('market-v01-page')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByRole('heading', { level: 1 })).toContainText(
-			/Grannskafferiet marknad|Neighbour market/i
+			/Grannmarknad|Grannskafferiet marknad|Neighbour market/i
 		);
 	});
 
