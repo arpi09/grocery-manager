@@ -1,6 +1,6 @@
 import { isAdminRole } from '$lib/domain/user';
 
-export const EXPIRING_SHARE_SOURCES = ['manual', 'auto_nearby'] as const;
+export const EXPIRING_SHARE_SOURCES = ['manual', 'auto_nearby', 'demo_market'] as const;
 export type ExpiringShareSource = (typeof EXPIRING_SHARE_SOURCES)[number];
 
 export const MARKET_V01_PATH = '/grannskafferiet/marknad';

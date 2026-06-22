@@ -1906,7 +1906,17 @@
 			"messagesSent": "Meddelanden skickade",
 			"ratingsGiven": "Betyg givna",
 			"listingViews": "Visningar av listningar",
-			"listingToChatConversion": "Listning → chatt: {rate}"
+			"listingToChatConversion": "Listning → chatt: {rate}",
+			"seedMarketDemo": "Skapa marknadsdemodata",
+			"seedMarketDemoNote": "Skapar 3 fejkade grannlistningar (source=demo_market) inom 500 m från din plats. Aktiverar närdelning om den är av. Rensas med knappen nedan.",
+			"seedMarketDemoSuccess": "Skapade {count} demolistningar nära {lat}, {lng}.",
+			"seedMarketDemoFailed": "Kunde inte skapa demodata — försök igen.",
+			"clearMarketDemo": "Rensa marknadsdemodata",
+			"clearMarketDemoNote": "Tar bort alla rader med id-prefix market-demo-* och source=demo_market (inkl. chattar via cascade).",
+			"clearMarketDemoSuccess": "Rensade {shares} listningar, {households} hushåll, {users} användare.",
+			"clearMarketDemoFailed": "Kunde inte rensa demodata — försök igen.",
+			"seedingDemo": "Skapar demodata…",
+			"clearingDemo": "Rensar demodata…"
 		},
 		"analytics": {
 			"exportCsv": "Exportera CSV ({days} dagar)"

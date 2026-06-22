@@ -771,7 +771,7 @@ export const expiringShareLinkTable = pgTable(
 		expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
 		latitude: numeric('latitude', { precision: 9, scale: 6 }),
 		longitude: numeric('longitude', { precision: 9, scale: 6 }),
-		source: text('source', { enum: ['manual', 'auto_nearby'] }).notNull().default('manual'),
+		source: text('source', { enum: ['manual', 'auto_nearby', 'demo_market'] }).notNull().default('manual'),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 	},
 	(table) => [
