@@ -9,6 +9,7 @@
 	import ProductAvatar from '$lib/components/atoms/ProductAvatar.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
+	import MissingExpiryFilterChip from '$lib/components/molecules/MissingExpiryFilterChip.svelte';
 	import InventoryListMeta from '$lib/components/molecules/InventoryListMeta.svelte';
 	import LocationTab from '$lib/components/molecules/LocationTab.svelte';
 	import SkaffuDataGrid from '$lib/components/organisms/SkaffuDataGrid.svelte';
@@ -21,7 +22,7 @@
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import type { StorageLocation } from '$lib/domain/location';
 	import { daysUntilExpiry, formatExpiryDate, EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
-	import { buildPantryTile } from '$lib/domain/pantry-shelf';
+	import { buildPantryTile, countMissingExpiry } from '$lib/domain/pantry-shelf';
 	import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
@@ -153,6 +154,10 @@
 	);
 
 	const hasMoreActive = $derived(!allLocations && !isServerSearch && loadedItems.length < activeTotal);
+	const missingExpiryCount = $derived(countMissingExpiry(loadedItems));
+	const missingExpiryHref = $derived(
+		allLocations ? '/inventory/all?filter=noExpiry' : `${inventoryPath}?filter=noExpiry`
+	);
 
 	const trimmedQuery = $derived(query.trim());
 	const isSearchEmpty = $derived(trimmedQuery.length > 0 && !searching && pipeline.totalCount === 0);
@@ -358,6 +363,15 @@
 	{/if}
 
 	{#if hasInventory}
+		{#if missingExpiryCount > 0}
+			<MissingExpiryFilterChip
+				count={missingExpiryCount}
+				href={missingExpiryHref}
+				active={gridState.filter === 'noExpiry'}
+				onSelect={() => handleFilterChange('noExpiry')}
+			/>
+		{/if}
+
 		<SkaffuDataGrid
 			title={allLocations ? t('inventory.allTitle') : locationLabel(getLocale(), location!)}
 			tableAriaLabel={allLocations ? t('inventory.allListAria') : t('inventory.listAria')}
@@ -441,6 +455,7 @@
 				{#each pipeline.pageRows as item (item.id)}
 					<Row
 						class="pantry-row"
+						data-missing-expiry={!item.expiresOn ? 'true' : undefined}
 						data-testid="inventory-row-{item.id}"
 						onclick={() => navigateToItem(item.id, item.location)}
 					>
@@ -480,6 +495,10 @@
 								<Badge tone={expiryTone(item.expiresOn)}>
 									{formatExpiryDate(item.expiresOn, getLocale())}
 								</Badge>
+							{:else}
+								<span class="missing-expiry-badge">
+									<Badge tone="default">{t('inventory.missingExpiryDate')}</Badge>
+								</span>
 							{/if}
 						</Cell>
 					</Row>
@@ -585,6 +604,15 @@
 
 	:global(.pantry-row) {
 		cursor: pointer;
+	}
+
+	:global(.pantry-row[data-missing-expiry='true']) {
+		background: color-mix(in srgb, var(--color-text-muted) 4%, var(--color-surface));
+	}
+
+	:global(.missing-expiry-badge .badge) {
+		color: var(--color-text-muted);
+		border-color: color-mix(in srgb, var(--color-text-muted) 25%, var(--color-border));
 	}
 
 	.row-select {

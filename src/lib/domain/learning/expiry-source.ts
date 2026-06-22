@@ -4,6 +4,7 @@ export function isEstimatedExpirySource(source: ExpiresOnSource | null | undefin
 	return (
 		source === 'heuristic' ||
 		source === 'household_learned' ||
-		source === 'ai_inferred'
+		source === 'ai_inferred' ||
+		source === 'default_heuristic'
 	);
 }

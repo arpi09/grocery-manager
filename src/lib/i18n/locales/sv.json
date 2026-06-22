@@ -1078,6 +1078,7 @@
 		"listMetaExpiry": "Bäst före {date}",
 		"listMetaAria": "{meta}",
 		"expiryFilterNoExpiry": "Utan datum",
+		"noExpiryFilterChip": "Saknar datum ({count})",
 		"filterEmptyTitle": "Inga varor matchar filtret",
 		"filterEmptyDescription": "Prova ett annat filter eller visa alla varor.",
 		"filterClear": "Visa alla varor",
@@ -2489,13 +2490,13 @@
 		"toastRulesImproved": "{count, plural, one {# minnesregel förbättrad} other {# minnesregler förbättrade}}",
 		"toastPricesSaved": "Priser sparas i prishistorik",
 		"success": {
-			"title": "Välkommen till ert skafferi",
+			"title": "Lagret uppdaterat",
 			"body": "Vi hittade {count} produkter och ordnade dem automatiskt.",
 			"statCupboard": "{count} skafferi",
 			"statFridge": "{count} kyl",
 			"statFreezer": "{count} frys",
 			"estimatedExpiry": "{count} varor med uppskattat utgångsdatum",
-			"ctaPrimary": "Visa mitt skafferi",
+			"ctaPrimary": "Gå till lagret",
 			"ctaSecondary": "Lägg till fler varor",
 			"ctaInvitePartner": "Bjud in partner",
 			"ctaContinueSetup": "Fortsätt uppstarten",
@@ -2515,12 +2516,17 @@
 		"suggestedLocation": "Föreslagen plats",
 		"locationSuggestionsHint": "Platser är förslag från Skaffu — ändra vid behov innan du sparar.",
 		"estimatesHint": "Utgångsdatum är uppskattningar — justera vid behov innan du sparar.",
-		"savedLabel": "{count} {count, plural, one {vara} other {varor}}"
+		"savedLabel": "{count} {count, plural, one {vara} other {varor}}",
+		"receiptMeta": "{store} · {date}",
+		"purchasedOn": "Inköpt {date}",
+		"mergedAwaySummary": "{count, plural, one {# dubblettrad slogs ihop} other {# dubblettrader slogs ihop}}",
+		"showGroupedLines": "Visa {count} sammanslagna rader",
+		"hideGroupedLines": "Dölj sammanslagna rader"
 	},
 	"receiptAutomation": {
 		"oneTapCta": "Importera kvitto",
 		"oneTapLead": "Ladda upp digitalt kvitto (PDF) från Kivra, ICA eller din butik.",
-		"quickConfirmAll": "Godkänn alla och lägg i skafferi",
+		"quickConfirmAll": "Godkänn alla och lägg i lagret",
 		"shareNoFile": "Ingen fil mottogs. Prova att dela PDF eller bild igen.",
 		"shareFailed": "Kunde inte ta emot filen. Öppna Skaffu och välj fil manuellt.",
 		"sharePendingMissing": "Delad fil hittades inte. Prova att dela kvittot igen.",
@@ -2875,6 +2881,7 @@
 			"tile": {
 				"expiresDays": "{days, plural, one {# dag} other {# dagar}}",
 				"expiresToday": "Idag",
+				"missingExpiry": "Saknar datum",
 				"frozen": "fryst",
 				"opened": "nyöppnad",
 				"half": "halv",
@@ -3360,8 +3367,11 @@
 	},
 	"learning": {
 		"estimatedExpiry": "Uppskattat",
+		"lowConfidence": "Osäker uppskattning",
 		"sourceHousehold": "Inlärt av ert hushåll",
 		"sourceDefault": "Standarduppskattning",
+		"sourceLocationDefault": "Gissning utifrån plats",
+		"sourceAiGuess": "AI-gissning",
 		"explain": {
 			"title": "Varför detta förslag?",
 			"settingsLink": "Hantera vad Skaffu vet",

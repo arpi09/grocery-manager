@@ -13,6 +13,7 @@ function tile(overrides: Partial<PantryTilePresentation>): PantryTilePresentatio
 		warn: false,
 		detailKind: 'none',
 		expiresInDays: null,
+		expiresOn: null,
 		quantity: '',
 		unit: null,
 		...overrides
@@ -43,6 +44,11 @@ describe('pantry-shelf-presenter', () => {
 			key: 'pantry.v2.tile.frozen',
 			params: {}
 		});
+		expect(buildPantryTileDetailPresentation(tile({ detailKind: 'missing_expiry' }))).toEqual({
+			key: 'pantry.v2.tile.missingExpiry',
+			params: {}
+		});
+		expect(buildPantryTileDetailPresentation(tile({ detailKind: 'expires_date', expiresOn: '2026-07-01' }))).toBeNull();
 		expect(buildPantryTileDetailPresentation(tile({ detailKind: 'quantity' }))).toBeNull();
 	});
 

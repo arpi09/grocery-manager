@@ -26,9 +26,23 @@ export const RECEIPT_LINES_SCHEMA = {
 					location: { type: 'string', enum: ['fridge', 'freezer', 'cupboard'] },
 					unitPrice: { type: ['string', 'null'] },
 					lineTotal: { type: ['string', 'null'] },
-					currency: { type: ['string', 'null'] }
+					currency: { type: ['string', 'null'] },
+					brand: { type: ['string', 'null'] },
+					packageSize: { type: ['string', 'null'] },
+					categoryHint: { type: ['string', 'null'] }
 				},
-				required: ['name', 'quantity', 'unit', 'location', 'unitPrice', 'lineTotal', 'currency'],
+				required: [
+					'name',
+					'quantity',
+					'unit',
+					'location',
+					'unitPrice',
+					'lineTotal',
+					'currency',
+					'brand',
+					'packageSize',
+					'categoryHint'
+				],
 				additionalProperties: false
 			}
 		}
@@ -39,9 +53,12 @@ export const RECEIPT_LINES_SCHEMA = {
 
 export const RECEIPT_SYSTEM_PROMPT = [
 	'Du läser svenska butikskvitton (ICA, Maxi, Kivra, Willys m.fl.) och extraherar livsmedelsrader.',
-	'Returnera JSON: {"lines":[{"name":"","quantity":"","unit":"","location":""}]}',
+	'Returnera JSON: {"lines":[{"name":"","quantity":"","unit":"","location":"","brand":null,"packageSize":null,"categoryHint":null}]}',
 	'Regler:',
 	'- name: kort produktnamn utan storlek/vikt (t.ex. "Coca-Cola", inte "Coca-Cola 1,5L")',
+	'- brand: varumärke om synligt (Arla, ICA, Garant), annars null',
+	'- packageSize: förpackningsstorlek som text (t.ex. "500 g", "1,5 l") när den syns, annars null',
+	'- categoryHint: grov kategori (mejeri, kött, grönsak, torrvara, dryck, färdigrätt), annars null',
 	'- quantity: numerisk mängd som sträng med punkt som decimal (t.ex. "1", "1.5", "0.45")',
 	'- unitPrice/lineTotal: pris som sträng med punkt som decimal (Svenska kommatecken normaliseras), annars null',
 	'- currency: ISO-kod (oftast "SEK"), annars null',
@@ -119,6 +136,16 @@ export function coerceReceiptPrice(value: unknown): string | undefined {
 	return undefined;
 }
 
+function coerceReceiptOptionalString(value: unknown): string | undefined {
+	if (typeof value !== 'string') return undefined;
+	const trimmed = value.trim();
+	return trimmed ? trimmed : undefined;
+}
+
+function coerceReceiptNullableString(value: unknown): string | null {
+	return coerceReceiptOptionalString(value) ?? null;
+}
+
 function coerceReceiptCurrency(value: unknown): string | undefined {
 	if (typeof value !== 'string') return undefined;
 	const trimmed = value.trim().toUpperCase();
@@ -176,6 +203,9 @@ export function normalizeReceiptAiPayload(raw: unknown): unknown {
 			normalized.unitPrice = coerceReceiptPrice(row.unitPrice) ?? null;
 			normalized.lineTotal = coerceReceiptPrice(row.lineTotal) ?? null;
 			normalized.currency = coerceReceiptCurrency(row.currency) ?? null;
+			normalized.brand = coerceReceiptNullableString(row.brand);
+			normalized.packageSize = coerceReceiptNullableString(row.packageSize);
+			normalized.categoryHint = coerceReceiptNullableString(row.categoryHint);
 			return normalized;
 		})
 	};
@@ -202,6 +232,9 @@ export function parseReceiptLines(raw: unknown): ReceiptLine[] {
 		const unitPrice = coerceReceiptPrice(row.unitPrice);
 		const lineTotal = coerceReceiptPrice(row.lineTotal);
 		const currency = coerceReceiptCurrency(row.currency);
+		const brand = coerceReceiptOptionalString(row.brand);
+		const packageSize = coerceReceiptOptionalString(row.packageSize);
+		const categoryHint = coerceReceiptOptionalString(row.categoryHint);
 		if (!name) continue;
 		const line: ReceiptLine = {
 			name,
@@ -212,6 +245,9 @@ export function parseReceiptLines(raw: unknown): ReceiptLine[] {
 		if (unitPrice) line.unitPrice = unitPrice;
 		if (lineTotal) line.lineTotal = lineTotal;
 		if (currency) line.currency = currency;
+		if (brand) line.brand = brand;
+		if (packageSize) line.packageSize = packageSize;
+		if (categoryHint) line.categoryHint = categoryHint;
 		result.push(line);
 	}
 

@@ -2,12 +2,15 @@ import { describe, expect, it } from 'vitest';
 import type { InventoryItem } from './inventory-item';
 import {
 	buildPantryShelfView,
+	buildPantryTile,
 	buildZoneShelf,
+	countMissingExpiry,
 	filterInventoryBySearch,
 	getActiveInventoryItems,
 	groupItemsByZone,
 	isUseSoonItem,
 	MAX_TILES_PER_ZONE,
+	resolveTileDetail,
 	sortZoneItemsForTiles,
 	USE_SOON_DAYS
 } from './pantry-shelf';
@@ -80,6 +83,35 @@ describe('pantry-shelf', () => {
 		expect(shelf.tiles).toHaveLength(MAX_TILES_PER_ZONE);
 		expect(shelf.overflowCount).toBe(2);
 		expect(shelf.totalCount).toBe(MAX_TILES_PER_ZONE + 2);
+	});
+
+	it('resolves tile detail for expiry ladder and missing dates', () => {
+		expect(resolveTileDetail(item({ id: '1', name: 'Spinach', location: 'fridge', expiresOn: '2026-06-19' }), today)).toMatchObject({
+			detailKind: 'expires_days',
+			warn: true,
+			expiresOn: '2026-06-19'
+		});
+		expect(resolveTileDetail(item({ id: '2', name: 'Butter', location: 'fridge', expiresOn: '2026-07-01' }), today)).toMatchObject({
+			detailKind: 'expires_date',
+			warn: false,
+			expiresOn: '2026-07-01'
+		});
+		expect(resolveTileDetail(item({ id: '3', name: 'Rice', location: 'cupboard' }), today)).toMatchObject({
+			detailKind: 'missing_expiry',
+			expiresOn: null
+		});
+		expect(buildPantryTile(item({ id: '4', name: 'Peas', location: 'freezer' }), today).detailKind).toBe(
+			'missing_expiry'
+		);
+	});
+
+	it('counts active items without expiry dates', () => {
+		const items = [
+			item({ id: '1', name: 'Milk', location: 'fridge' }),
+			item({ id: '2', name: 'Cheese', location: 'fridge', expiresOn: '2026-07-01' }),
+			item({ id: '3', name: 'Pasta', location: 'cupboard', quantity: '0' })
+		];
+		expect(countMissingExpiry(items)).toBe(1);
 	});
 
 	it('builds shelf view with use-soon names and empty state', () => {

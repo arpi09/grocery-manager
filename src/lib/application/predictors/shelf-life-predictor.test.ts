@@ -87,19 +87,42 @@ describe('ShelfLifePredictor', () => {
 		});
 	});
 
-	it('returns null for unknown products without heuristic match', async () => {
+	it('returns location default for unknown products without heuristic match', async () => {
 		const predictor = new ShelfLifePredictor(createHouseholdPort(), {
 			learningEnabled: () => false,
 			todayIso: () => '2026-06-01'
 		});
 
-		const result = await predictor.predict(ctx, {
-			productName: 'Mystery gadget',
-			normalizedKey: 'mystery gadget',
+		const fridge = await predictor.predict(ctx, {
+			productName: 'Xyzzq unknown product',
+			normalizedKey: 'xyzzq unknown product',
+			location: 'fridge',
+			purchasedAt: '2026-06-01'
+		});
+		const freezer = await predictor.predict(ctx, {
+			productName: 'Xyzzq unknown product',
+			normalizedKey: 'xyzzq unknown product',
+			location: 'freezer',
+			purchasedAt: '2026-06-01'
+		});
+		const cupboard = await predictor.predict(ctx, {
+			productName: 'Xyzzq unknown product',
+			normalizedKey: 'xyzzq unknown product',
 			location: 'cupboard',
-			purchasedAt: null
+			purchasedAt: '2026-06-01'
 		});
 
-		expect(result).toBeNull();
+		expect(fridge).toMatchObject({
+			source: 'location_default',
+			value: { typicalDays: 5, expiresOn: '2026-06-06' }
+		});
+		expect(freezer).toMatchObject({
+			source: 'location_default',
+			value: { typicalDays: 90, expiresOn: '2026-08-30' }
+		});
+		expect(cupboard).toMatchObject({
+			source: 'location_default',
+			value: { typicalDays: 60, expiresOn: '2026-07-31' }
+		});
 	});
 });

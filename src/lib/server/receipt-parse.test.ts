@@ -190,7 +190,10 @@ describe('normalizeReceiptAiPayload', () => {
 					location: '',
 					unitPrice: null,
 					lineTotal: null,
-					currency: null
+					currency: null,
+					brand: null,
+					packageSize: null,
+					categoryHint: null
 				}
 			]
 		});

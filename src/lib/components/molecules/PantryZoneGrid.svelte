@@ -40,6 +40,7 @@
 						warn: false,
 						detailKind: 'none',
 						expiresInDays: null,
+						expiresOn: null,
 						quantity: '',
 						unit: null
 					}}

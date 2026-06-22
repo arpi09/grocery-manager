@@ -7,6 +7,8 @@ import { isItemFinished } from '$lib/domain/inventory-item';
 import type { StorageLocation } from '$lib/domain/location';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 
+export const MERGE_FUZZY_JACCARD_THRESHOLD = 0.7;
+
 export function normalizeInventoryItemName(name: string): string {
 	return normalizeReceiptProductName(name);
 }
@@ -21,22 +23,74 @@ export function inventoryItemsMatch(
 	);
 }
 
+function tokenizeForMerge(name: string): Set<string> {
+	const normalized = normalizeInventoryItemName(name);
+	return new Set(
+		normalized
+			.split(' ')
+			.map((token) => token.trim())
+			.filter((token) => token.length > 1)
+	);
+}
+
+export function mergeTokenJaccardScore(a: string, b: string): number {
+	const left = tokenizeForMerge(a);
+	const right = tokenizeForMerge(b);
+	if (left.size === 0 && right.size === 0) {
+		return normalizeInventoryItemName(a) === normalizeInventoryItemName(b) ? 1 : 0;
+	}
+	const intersection = [...left].filter((token) => right.has(token)).length;
+	const union = new Set([...left, ...right]).size;
+	return union === 0 ? 0 : intersection / union;
+}
+
+function pickLatestMatch(matches: InventoryItem[]): InventoryItem {
+	return matches.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0];
+}
+
+export interface FindMergeCandidateOptions {
+	/** Known purchase concept key when inventory rows lack explicit concept metadata. */
+	conceptKey?: string | null;
+}
+
 export function findMergeCandidate(
 	items: InventoryItem[],
 	name: string,
-	location: StorageLocation
+	location: StorageLocation,
+	options: FindMergeCandidateOptions = {}
 ): InventoryItem | null {
 	const normalized = normalizeInventoryItemName(name);
-	const matches = items.filter(
-		(item) =>
-			!isItemFinished(item) &&
-			item.location === location &&
-			normalizeInventoryItemName(item.name) === normalized
+	const activeInLocation = items.filter(
+		(item) => !isItemFinished(item) && item.location === location
 	);
-	if (matches.length === 0) {
-		return null;
+
+	const exactMatches = activeInLocation.filter(
+		(item) => normalizeInventoryItemName(item.name) === normalized
+	);
+	if (exactMatches.length > 0) {
+		return pickLatestMatch(exactMatches);
 	}
-	return matches.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0];
+
+	const conceptKey = options.conceptKey?.trim() || normalized;
+	if (conceptKey) {
+		const conceptMatches = activeInLocation.filter(
+			(item) => normalizeInventoryItemName(item.name) === conceptKey
+		);
+		if (conceptMatches.length > 0) {
+			return pickLatestMatch(conceptMatches);
+		}
+	}
+
+	let best: { item: InventoryItem; score: number } | null = null;
+	for (const item of activeInLocation) {
+		const score = mergeTokenJaccardScore(name, item.name);
+		if (score < MERGE_FUZZY_JACCARD_THRESHOLD) continue;
+		if (!best || score > best.score) {
+			best = { item, score };
+		}
+	}
+
+	return best?.item ?? null;
 }
 
 export function findLastActiveByNormalizedName(
@@ -50,7 +104,7 @@ export function findLastActiveByNormalizedName(
 	if (matches.length === 0) {
 		return null;
 	}
-	return matches.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0];
+	return pickLatestMatch(matches);
 }
 
 export interface DuplicateNameGroup {

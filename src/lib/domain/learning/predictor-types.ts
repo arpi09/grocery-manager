@@ -3,7 +3,7 @@ import type { PredictionExplanation } from '$lib/domain/learning/prediction-trus
 
 export type PredictorId = 'shelf_life' | 'location' | 'replenishment';
 
-export type PredictionSource = 'household_rule' | 'heuristic' | 'external_model';
+export type PredictionSource = 'household_rule' | 'heuristic' | 'external_model' | 'location_default';
 
 export type LearningFeedbackType = 'accepted' | 'corrected' | 'rejected' | 'ignored';
 

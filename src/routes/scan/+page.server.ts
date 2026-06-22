@@ -91,9 +91,19 @@ async function resolveLineExpiry(
 	userProvidedExpiresOn: boolean;
 }> {
 	const expiresOnRaw = params.formData.get(`expiresOn_${params.index}`);
+	const expiresOnDeclined = params.formData.get(`expiresOnDeclined_${params.index}`);
 	const userProvidedExpiresOn =
 		typeof expiresOnRaw === 'string' && expiresOnRaw.trim().length > 0;
 	const predictionForm = readLineShelfLifePrediction(params.formData, params.index);
+
+	if (expiresOnDeclined === '1') {
+		return {
+			expiresOn: null,
+			expiresOnSource: null,
+			predictionForm,
+			userProvidedExpiresOn: false
+		};
+	}
 
 	if (userProvidedExpiresOn) {
 		return {
@@ -111,6 +121,7 @@ async function resolveLineExpiry(
 			(sourceRaw === 'heuristic' ||
 				sourceRaw === 'household_learned' ||
 				sourceRaw === 'ai_inferred' ||
+				sourceRaw === 'default_heuristic' ||
 				sourceRaw === 'user_set')
 				? sourceRaw
 				: 'heuristic';

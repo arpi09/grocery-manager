@@ -1134,6 +1134,7 @@
 		"listMetaExpiry": "Best before {date}",
 		"listMetaAria": "{meta}",
 		"expiryFilterNoExpiry": "No date",
+		"noExpiryFilterChip": "No date ({count})",
 		"filterEmptyTitle": "No items match this filter",
 		"filterEmptyDescription": "Try another filter or show all items.",
 		"filterClear": "Show all items",
@@ -2568,13 +2569,13 @@
 		"toastRulesImproved": "{count, plural, one {# memory rule improved} other {# memory rules improved}}",
 		"toastPricesSaved": "Prices saved to price history",
 		"success": {
-			"title": "Welcome to your pantry",
+			"title": "Inventory updated",
 			"body": "We found {count} products and organized them automatically.",
 			"statCupboard": "{count} pantry items",
 			"statFridge": "{count} fridge items",
 			"statFreezer": "{count} freezer items",
 			"estimatedExpiry": "{count} items with estimated expiry dates",
-			"ctaPrimary": "View my pantry",
+			"ctaPrimary": "Go to inventory",
 			"ctaSecondary": "Add more items",
 			"ctaInvitePartner": "Invite partner",
 			"ctaContinueSetup": "Continue setup",
@@ -2594,12 +2595,17 @@
 		"estimatesHint": "Expiry dates are estimates — adjust if needed before saving.",
 		"addCount": "Add {count} {count, plural, one {item} other {items}}",
 		"apiKeyHint": "Requires OPENAI_API_KEY in server .env.",
-		"savedLabel": "{count} {count, plural, one {item} other {items}}"
+		"savedLabel": "{count} {count, plural, one {item} other {items}}",
+		"receiptMeta": "{store} · {date}",
+		"purchasedOn": "Purchased {date}",
+		"mergedAwaySummary": "{count, plural, one {# duplicate row merged} other {# duplicate rows merged}}",
+		"showGroupedLines": "Show {count} merged rows",
+		"hideGroupedLines": "Hide merged rows"
 	},
 	"receiptAutomation": {
 		"oneTapCta": "Import receipt",
 		"oneTapLead": "Upload a digital receipt (PDF) from Kivra, ICA, or your store.",
-		"quickConfirmAll": "Approve all and add to pantry",
+		"quickConfirmAll": "Approve all and add to inventory",
 		"shareNoFile": "No file was received. Try sharing the PDF or image again.",
 		"shareFailed": "Could not receive the file. Open Skaffu and choose a file manually.",
 		"sharePendingMissing": "Shared file not found. Try sharing the receipt again.",
@@ -2954,6 +2960,7 @@
 			"tile": {
 				"expiresDays": "{days, plural, one {# day} other {# days}}",
 				"expiresToday": "Today",
+				"missingExpiry": "No date",
 				"frozen": "frozen",
 				"opened": "newly opened",
 				"half": "half",
@@ -3439,8 +3446,11 @@
 	},
 	"learning": {
 		"estimatedExpiry": "Estimated",
+		"lowConfidence": "Uncertain estimate",
 		"sourceHousehold": "Learned by your household",
 		"sourceDefault": "Default estimate",
+		"sourceLocationDefault": "Estimate from storage location",
+		"sourceAiGuess": "AI guess",
 		"explain": {
 			"title": "Why this suggestion?",
 			"settingsLink": "Manage what Skaffu knows",

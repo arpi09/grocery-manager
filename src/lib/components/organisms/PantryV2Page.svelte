@@ -2,11 +2,12 @@
 	import { browser } from '$app/environment';
 	import { invalidateAll } from '$app/navigation';
 	import PantryShelfActions from '$lib/components/molecules/PantryShelfActions.svelte';
+	import MissingExpiryFilterChip from '$lib/components/molecules/MissingExpiryFilterChip.svelte';
 	import PantryV2EmptyState from '$lib/components/organisms/PantryV2EmptyState.svelte';
 	import PantryV2ShelfView from '$lib/components/organisms/PantryV2ShelfView.svelte';
 	import { trackPantryShelfOpened } from '$lib/client/pantry-v2-telemetry';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
-	import { buildPantryShelfView, filterInventoryBySearch } from '$lib/domain/pantry-shelf';
+	import { buildPantryShelfView, countMissingExpiry, filterInventoryBySearch } from '$lib/domain/pantry-shelf';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -28,6 +29,8 @@
 	const showHouseholdEmpty = $derived(
 		!loadFailed && !showSearchEmpty && unfilteredShelf.isEmpty && searchQuery.trim().length === 0
 	);
+	const missingExpiryCount = $derived(countMissingExpiry(items));
+	const missingExpiryHref = '/inventory/all?filter=noExpiry';
 
 	$effect(() => {
 		if (!browser) {
@@ -56,6 +59,10 @@
 <div class="pantry-v2-page" data-testid="pantry-v2-page">
 	<PantryShelfActions bind:query={searchQuery} {canWrite} returnTo="/inventory" />
 
+	{#if !loadFailed && !showHouseholdEmpty && missingExpiryCount > 0}
+		<MissingExpiryFilterChip count={missingExpiryCount} href={missingExpiryHref} />
+	{/if}
+
 	{#if loadFailed}
 		<button
 			type="button"
@@ -82,6 +89,7 @@
 		display: flex;
 		flex-direction: column;
 		min-width: 0;
+		gap: var(--space-sm);
 	}
 
 	.search-empty {

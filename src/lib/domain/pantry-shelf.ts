@@ -10,6 +10,8 @@ export const USE_SOON_DAYS = EXPIRING_SOON_DAYS;
 export type PantryTileDetailKind =
 	| 'expires_today'
 	| 'expires_days'
+	| 'expires_date'
+	| 'missing_expiry'
 	| 'frozen'
 	| 'quantity'
 	| 'none';
@@ -20,6 +22,7 @@ export interface PantryTilePresentation {
 	warn: boolean;
 	detailKind: PantryTileDetailKind;
 	expiresInDays: number | null;
+	expiresOn: string | null;
 	quantity: string;
 	unit: string | null;
 }
@@ -41,6 +44,10 @@ export interface PantryShelfViewModel {
 
 export function getActiveInventoryItems(items: InventoryItem[]): InventoryItem[] {
 	return items.filter((item) => !isItemFinished(item));
+}
+
+export function countMissingExpiry(items: InventoryItem[]): number {
+	return getActiveInventoryItems(items).filter((item) => !item.expiresOn).length;
 }
 
 export function filterInventoryBySearch(items: InventoryItem[], query: string): InventoryItem[] {
@@ -107,39 +114,31 @@ export function sortZoneItemsForTiles(items: InventoryItem[], today = new Date()
 export function resolveTileDetail(
 	item: InventoryItem,
 	today = new Date()
-): Pick<PantryTilePresentation, 'detailKind' | 'warn' | 'expiresInDays'> {
+): Pick<PantryTilePresentation, 'detailKind' | 'warn' | 'expiresInDays' | 'expiresOn'> {
 	if (item.expiresOn) {
 		const daysLeft = daysUntilExpiry(item.expiresOn, today);
 		if (daysLeft >= 0 && daysLeft <= USE_SOON_DAYS) {
 			return {
 				detailKind: daysLeft === 0 ? 'expires_today' : 'expires_days',
 				warn: true,
-				expiresInDays: daysLeft
+				expiresInDays: daysLeft,
+				expiresOn: item.expiresOn
 			};
 		}
-	}
 
-	if (item.location === 'freezer') {
 		return {
-			detailKind: 'frozen',
+			detailKind: 'expires_date',
 			warn: false,
-			expiresInDays: null
-		};
-	}
-
-	const quantity = item.quantity.trim();
-	if (quantity.length > 0) {
-		return {
-			detailKind: 'quantity',
-			warn: false,
-			expiresInDays: null
+			expiresInDays: daysLeft,
+			expiresOn: item.expiresOn
 		};
 	}
 
 	return {
-		detailKind: 'none',
+		detailKind: 'missing_expiry',
 		warn: false,
-		expiresInDays: null
+		expiresInDays: null,
+		expiresOn: null
 	};
 }
 
@@ -151,6 +150,7 @@ export function buildPantryTile(item: InventoryItem, today = new Date()): Pantry
 		name: item.name,
 		quantity: item.quantity,
 		unit: item.unit,
+		expiresOn: item.expiresOn,
 		...detail
 	};
 }

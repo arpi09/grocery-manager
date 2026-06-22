@@ -32,6 +32,40 @@ test.describe('Receipt flow', () => {
 		}
 	});
 
+
+	test('unknown receipt line gets prefilled expiry and estimated badge', async ({ page }) => {
+		await mockReceiptParse(page, {
+			body: {
+				lines: [
+					{
+						name: 'E2E Okand vara XYZ',
+						quantity: '1',
+						unit: '',
+						location: 'fridge'
+					}
+				],
+				shelfLifePredictions: [
+					{
+						expiresOn: '2026-07-15',
+						typicalDays: 5,
+						expiresOnSource: 'heuristic',
+					confidence: 0.5,
+						modelVersion: 'receipt-v1-e2e'
+					}
+				]
+			}
+		});
+
+		await loginAsAdmin(page);
+		await page.goto('/scan/kvitto');
+		await dismissOnboardingModalIfOpen(page);
+
+		await uploadReceiptPdf(page, FIXTURE_PDF);
+
+		await expect(page.getByTestId('receipt-line-0')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('receipt-line-expiry-0')).toHaveValue('2026-07-15');
+		await expect(page.getByTestId('receipt-line-0').getByText(/Osäker uppskattning|Uppskattat/i)).toBeVisible();
+	});
 	test('image upload shows mocked parse lines', async ({ page }) => {
 		await mockReceiptParse(page);
 		await loginAsAdmin(page);

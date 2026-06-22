@@ -42,6 +42,7 @@ describe('shelf-life-learning', () => {
 	it('maps prediction source to expiresOnSource', () => {
 		expect(predictionSourceToExpiresOnSource('household_rule')).toBe('household_learned');
 		expect(predictionSourceToExpiresOnSource('heuristic')).toBe('heuristic');
+		expect(predictionSourceToExpiresOnSource('location_default')).toBe('default_heuristic');
 	});
 
 	it('formats today as ISO date', () => {

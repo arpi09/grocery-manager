@@ -7,6 +7,7 @@ export interface ReceiptShelfLifePrediction {
 	expiresOn: string;
 	typicalDays: number;
 	expiresOnSource: ExpiresOnSource;
+	confidence?: number;
 	modelVersion: string;
 	explanation?: PredictionExplanation;
 }
@@ -32,12 +33,24 @@ export interface ReceiptLine {
 	lineTotal?: string | null;
 	/** ISO currency code, typically SEK. */
 	currency?: string | null;
+	/** Brand when visible on receipt, e.g. Arla, ICA. */
+	brand?: string | null;
+	/** Package size separate from purchased quantity, e.g. "500 g". */
+	packageSize?: string | null;
+	/** Food category hint from parse, e.g. mejeri, grönsak. */
+	categoryHint?: string | null;
+	/** Original lines merged into this row (same normalized key + location). */
+	groupedFrom?: ReceiptLine[];
+	/** Number of receipt rows merged (1 = not grouped). */
+	groupedCount?: number;
 }
 
 export interface ReceiptParseResult {
 	lines: ReceiptLine[];
 	storeLabel?: string;
 	purchasedAt?: string;
+	/** How many duplicate receipt rows were collapsed before review. */
+	mergedAwayCount?: number;
 	shelfLifePredictions?: (ReceiptShelfLifePrediction | null)[];
 	locationPredictions?: (ReceiptLocationPrediction | null)[];
 }

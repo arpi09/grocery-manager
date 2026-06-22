@@ -5,7 +5,8 @@
 		formatPantryTileQuantityLine
 	} from '$lib/domain/pantry-shelf-presenter';
 	import type { PantryTilePresentation } from '$lib/domain/pantry-shelf';
-	import { t } from '$lib/i18n';
+	import { formatExpiryDate } from '$lib/domain/expiry';
+	import { getLocale, t } from '$lib/i18n';
 
 	interface Props {
 		tile: PantryTilePresentation;
@@ -22,6 +23,9 @@
 	const detailLine = $derived.by(() => {
 		if (variant === 'overflow' && overflowLabel) {
 			return overflowLabel;
+		}
+		if (tile.detailKind === 'expires_date' && tile.expiresOn) {
+			return formatExpiryDate(tile.expiresOn, getLocale());
 		}
 		if (detailPresentation) {
 			return t(detailPresentation.key, detailPresentation.params);
@@ -59,7 +63,7 @@
 	{/if}
 	<span class="tile-name">{tile.name}</span>
 	{#if detailLine}
-		<span class="tile-detail">{detailLine}</span>
+		<span class="tile-detail" class:missing-expiry-detail={tile.detailKind === 'missing_expiry'}>{detailLine}</span>
 	{/if}
 </a>
 
@@ -137,5 +141,9 @@
 	.product-tile.warn .tile-detail {
 		color: color-mix(in srgb, var(--color-warning) 35%, var(--color-text));
 		font-weight: 600;
+	}
+
+	.product-tile:not(.warn) .tile-detail.missing-expiry-detail {
+		color: var(--color-text-muted);
 	}
 </style>

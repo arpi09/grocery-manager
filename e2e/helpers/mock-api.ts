@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+﻿import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Page, Route } from '@playwright/test';
@@ -9,7 +9,15 @@ export function loadFixture<T>(filename: string): T {
 	return JSON.parse(readFileSync(join(FIXTURES_DIR, filename), 'utf8')) as T;
 }
 
-export type ReceiptParseFixture = { lines: Array<{ name: string; quantity?: string }> };
+export type ReceiptParseFixture = {
+	lines: Array<{ name: string; quantity?: string; unit?: string; location?: string }>;
+	shelfLifePredictions?: Array<{
+		expiresOn: string;
+		typicalDays: number;
+		expiresOnSource: string;
+		modelVersion: string;
+	} | null>;
+};
 
 export async function mockReceiptParse(
 	page: Page,

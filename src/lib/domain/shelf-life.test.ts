@@ -27,6 +27,6 @@ describe('guessShelfLife', () => {
 	});
 
 	it('returns null for unknown products', () => {
-		expect(guessShelfLife('Mystery gadget', 'cupboard')).toBeNull();
+		expect(guessShelfLife('Xyzzq unknown product', 'cupboard')).toBeNull();
 	});
 });

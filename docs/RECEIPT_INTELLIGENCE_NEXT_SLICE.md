@@ -1,5 +1,43 @@
 # Receipt Intelligence — Next Slice
 
+---
+
+## Implemented v1 — Receipt expiry intelligence
+
+**Status:** **Merged on master** (Receipt Intelligence v1, Spår A/B/C). The sections below remain decision support for *post-v1* slices (household memory, replenishment chips).
+
+**Scope:** Nearly every receipt line gets a prefilled best-before at review; uncertainty is visible (`EstimatedBadge`, including **Osäker uppskattning** for `default_heuristic`); duplicate lines collapse in `groupReceiptLines`; fuzzy pantry merge via `findMergeCandidate`; CTAs say **lager**; Pantry V2 shows BBF or **Saknar datum**.
+
+### Expiry estimate ladder (`resolveShelfLifeEstimate`)
+
+| Step | Source | `expiresOnSource` | Notes |
+|------|--------|-------------------|--------|
+| 1 | Household learning rules | `household_learned` | Highest confidence |
+| 2 | Swedish keyword heuristics | `heuristic` | Token + location bonus |
+| 3 | Location default (fridge ~5d, freezer ~90d, pantry ~60d from `purchasedAt`) | `default_heuristic` | Low confidence; fills when nothing else matches |
+| 4 | Optional AI batch (remaining lines, max ~40) | `ai_inferred` | When OpenAI key present |
+
+**Wiring:** `shelf-life-predictor.ts`, `receipt-shelf-life-predictions.ts`, `receipt-import.ts`, `scan/+page.server.ts`, `ReceiptBulkAddFlow` (`lineExpiresOn`; user-cleared dates are not forced back).
+
+**Flags:** `SHELF_LIFE_LEARNING_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT` (`apphosting.yaml`, Playwright E2E defaults).
+
+### Grouping & merge
+
+- `groupReceiptLines` (`receipt-line-grouping.ts`) — same normalized key + location; quantity sum; grouped UI.
+- `normalizeReceiptProductName` — store/brand prefix strip for keys.
+- `findMergeCandidate` (`inventory-merge.ts`) — exact name, token Jaccard (~0.7), `conceptKey`.
+
+**Parse enrichment:** optional `brand`, `packageSize`, `categoryHint` on receipt AI schema (`receipt-parse.ts`).
+
+### Inventory & copy (Spår C)
+
+- Pantry v2: `expires_date`, `missing_expiry`, `MissingExpiryFilterChip`.
+- i18n: receipt success / bulk CTAs → **lagret**.
+
+**Tests:** `shelf-life-predictor.test.ts`, `receipt-line-grouping.test.ts`, `inventory-merge.test.ts`, `shelf-life.test.ts`, `receipt-parse.test.ts`, `shelf-life-learning.test.ts`; E2E `receipt.spec.ts` — mocked unknown line → prefilled expiry + estimate badge.
+
+**Baseline (pre-v1 doc):** `master` @ `aa784b50e`. **Prod before this deploy:** `a629f892a` ([CURRENT_REALITY.md](./CURRENT_REALITY.md)).
+
 **Baseline:** `master` @ `de7f4b6b` (#46–#47 merged; Brain V1 wired, learning flags on in apphosting). **Prod:** `e26408a2` — pending deploy for #46–#47.
 
 **Purpose:** Decision support for receipt-signal work — no new predictors, migrations, or AI models in this wave. Fold into [`chore/brain-capability-audit-v1`](https://github.com/arpi09/grocery-manager/pull/51) (Workstream C).

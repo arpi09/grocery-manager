@@ -113,11 +113,56 @@ export interface RecordReceiptPurchaseLineInput {
 	lineIndex?: number;
 }
 
+const RECEIPT_BRAND_PREFIXES = [
+	'ica',
+	'arla',
+	'garant',
+	'eldorado',
+	'coop',
+	'willys',
+	'hemköp',
+	'hemkop',
+	'fazer',
+	'valio',
+	'pågen',
+	'pagen',
+	'barilla',
+	'felix',
+	'kungsörnen',
+	'kungsornen',
+	'axa',
+	'findus',
+	'olw',
+	'estrella'
+] as const;
+
+const RECEIPT_MERGE_STRIP_PREFIXES = ['fryst', 'färsk', 'farsk', 'eko', 'ekologisk'] as const;
+
+function stripLeadingPrefixTokens(
+	normalized: string,
+	prefixes: readonly string[]
+): string {
+	let result = normalized;
+	let changed = true;
+	while (changed) {
+		changed = false;
+		for (const prefix of prefixes) {
+			if (result.startsWith(`${prefix} `)) {
+				result = result.slice(prefix.length + 1).trim();
+				changed = true;
+			}
+		}
+	}
+	return result;
+}
+
 /** Normalize receipt product names for recurring-purchase matching. */
 export function normalizeReceiptProductName(name: string): string {
 	let normalized = name.trim().toLowerCase();
 	normalized = normalized.replace(/[^\p{L}\p{N}\s]/gu, ' ');
 	normalized = normalized.replace(/\s+/g, ' ').trim();
+	normalized = stripLeadingPrefixTokens(normalized, RECEIPT_MERGE_STRIP_PREFIXES);
+	normalized = stripLeadingPrefixTokens(normalized, RECEIPT_BRAND_PREFIXES);
 	// Strip trailing pack-size tokens common on Swedish receipts.
 	normalized = normalized.replace(/\b\d+([,.]\d+)?\s*(g|kg|ml|l|cl|dl|st|pack|pkt)\b$/u, '').trim();
 	return normalized;

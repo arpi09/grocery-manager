@@ -62,8 +62,103 @@ const HEURISTIC_DAYS: Record<string, number> = {
 	hummus: 7,
 	tofu: 7,
 	soja: 7,
-	soy: 7
+	soy: 7,
+	korv: 7,
+	falukorv: 14,
+	skinka: 10,
+	bacon: 7,
+	leverpastej: 21,
+	röra: 5,
+	rora: 5,
+	sås: 14,
+	sas: 14,
+	bär: 5,
+	bar: 5,
+	jordgubb: 4,
+	blåbär: 7,
+	blabar: 7,
+	hallon: 4,
+	spenat: 4,
+	broccoli: 5,
+	morot: 14,
+	morötter: 14,
+	morotter: 14,
+	potatis: 21,
+	lök: 21,
+	lok: 21,
+	avokado: 4,
+	druvor: 5,
+	cola: 90,
+	pepsi: 90,
+	fanta: 90,
+	sprite: 90,
+	vatten: 180,
+	öl: 120,
+	ol: 120,
+	vin: 365,
+	filmjölk: 10,
+	filmjolk: 10,
+	kvarg: 10,
+	crème: 10,
+	creme: 10,
+	färskost: 14,
+	farskost: 14,
+	pizza: 3,
+	lasagne: 3,
+	bolognese: 3,
+	wok: 4,
+	soppa: 5,
+	glass: 90,
+	paj: 3,
+	tacos: 3,
+	lingon: 90,
+	lingonsylt: 90,
+	ketchup: 90,
+	mayonnaise: 60,
+	majonnäs: 60,
+	majonnas: 60,
+	senap: 180,
+	müslibar: 120,
+	muslibar: 120,
+	nötter: 90,
+	notter: 90,
+	mandel: 90,
+	olivolja: 365,
+	rapsolja: 365,
+	farin: 365,
+	mjöl: 180,
+	mjol: 180,
+	socker: 730,
+	honung: 365,
+	te: 730,
+	kaffe: 180,
+	kakao: 365,
+	choklad: 180,
+	chips: 60,
+	kex: 90,
+	granola: 90,
+	tortilla: 14,
+	wrap: 14,
+	naan: 5,
+	pitabröd: 5,
+	pitabrod: 5
 };
+
+const TOKEN_STOP_WORDS = new Set([
+	'ica',
+	'arla',
+	'garant',
+	'eldorado',
+	'fryst',
+	'färsk',
+	'farsk',
+	'eko',
+	'ekologisk',
+	'klass',
+	'original',
+	'light',
+	'laktosfri'
+]);
 
 function addDaysIso(from: Date, days: number): string {
 	const date = new Date(from);
@@ -71,14 +166,45 @@ function addDaysIso(from: Date, days: number): string {
 	return date.toISOString().slice(0, 10);
 }
 
+function locationBonus(location: StorageLocation): number {
+	if (location === 'freezer') return 90;
+	if (location === 'cupboard') return 30;
+	return 0;
+}
+
+function firstSignificantToken(name: string): string | null {
+	const tokens = name
+		.toLowerCase()
+		.replace(/[^\p{L}\p{N}\s]/gu, ' ')
+		.split(/\s+/)
+		.filter((token) => token.length > 2 && !TOKEN_STOP_WORDS.has(token));
+	return tokens[0] ?? null;
+}
+
+function keywordMatches(normalized: string, keyword: string): boolean {
+	const tokens = normalized.split(/\s+/);
+	if (keyword.length >= 4) {
+		return normalized.includes(keyword);
+	}
+	return tokens.some(
+		(token) =>
+			token === keyword ||
+			token.startsWith(keyword) ||
+			(keyword.length >= 3 && token.endsWith(keyword) && token.length > keyword.length)
+	);
+}
+
 function heuristicTypicalDays(name: string, location: StorageLocation): number | null {
 	const normalized = name.toLowerCase();
-	const freezerBonus = location === 'freezer' ? 90 : 0;
-	const cupboardBonus = location === 'cupboard' ? 30 : 0;
+	const bonus = locationBonus(location);
 	for (const [keyword, days] of Object.entries(HEURISTIC_DAYS)) {
-		if (normalized.includes(keyword)) {
-			return days + freezerBonus + cupboardBonus;
+		if (keywordMatches(normalized, keyword)) {
+			return days + bonus;
 		}
+	}
+	const firstToken = firstSignificantToken(name);
+	if (firstToken && firstToken in HEURISTIC_DAYS) {
+		return HEURISTIC_DAYS[firstToken] + bonus;
 	}
 	return null;
 }

@@ -14,6 +14,8 @@ export function modelVersionForPredictionSource(source: PredictionSource): strin
 			return 'household-v1';
 		case 'heuristic':
 			return 'heuristic-v1';
+		case 'location_default':
+			return 'location-default-v1';
 		case 'external_model':
 			return 'external-v1';
 	}

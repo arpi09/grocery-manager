@@ -22,6 +22,10 @@ export function buildPantryTileDetailPresentation(
 				key: 'pantry.v2.tile.expiresDays',
 				params: { days: tile.expiresInDays ?? 0 }
 			};
+		case 'expires_date':
+			return null;
+		case 'missing_expiry':
+			return { key: 'pantry.v2.tile.missingExpiry', params: {} };
 		case 'frozen':
 			return { key: 'pantry.v2.tile.frozen', params: {} };
 		case 'quantity':

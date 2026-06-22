@@ -42,6 +42,10 @@
 
 		interactive?: boolean;
 
+		/** Use softer copy when estimate confidence is low. */
+
+		lowConfidence?: boolean;
+
 	}
 
 
@@ -51,12 +55,15 @@
 		explanation = null,
 		showSettingsLink = false,
 		label,
-		interactive = true
+		interactive = true,
+		lowConfidence = false
 	}: Props = $props();
 
 
 
-	const badgeLabel = $derived(label ?? t('learning.estimatedExpiry'));
+	const badgeLabel = $derived(
+		label ?? (lowConfidence ? t('learning.lowConfidence') : t('learning.estimatedExpiry'))
+	);
 
 
 
@@ -74,11 +81,21 @@
 
 		}
 
+		if (source === 'location_default' || source === 'default_heuristic') {
+
+			return t('learning.sourceLocationDefault');
+
+		}
+
+		if (source === 'ai_inferred') {
+
+			return t('learning.sourceAiGuess');
+
+		}
+
 		if (
 
 			source === 'heuristic' ||
-
-			source === 'ai_inferred' ||
 
 			source === 'external_model'
 

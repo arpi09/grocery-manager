@@ -15,6 +15,10 @@ import type {
 } from '$lib/domain/learning/predictor-types';
 import { predictHeuristicShelfLife } from '$lib/infrastructure/adapters/heuristic-shelf-life.adapter';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
+import {
+	resolveLocationDefaultShelfLife,
+	shelfLifeEstimateConfidence
+} from '$lib/domain/shelf-life-estimate';
 
 export class ShelfLifePredictor implements Predictor<ShelfLifePredictionInput, ShelfLifePredictionValue> {
 	readonly id = 'shelf_life' as const;
@@ -93,6 +97,29 @@ export class ShelfLifePredictor implements Predictor<ShelfLifePredictionInput, S
 			};
 		}
 
-		return null;
+		const locationDefault = resolveLocationDefaultShelfLife({
+			location: subject.location,
+			purchasedAt: subject.purchasedAt,
+			todayIso
+		});
+		const locationExplanation = buildShelfLifeExplanation({
+			templateId: 'shelf_life.heuristic',
+			normalizedKey: subject.normalizedKey,
+			displayName: subject.productName,
+			location: subject.location,
+			purchasedAt: subject.purchasedAt,
+			typicalDays: locationDefault.typicalDays
+		});
+		return {
+			value: {
+				expiresOn: locationDefault.expiresOn,
+				typicalDays: locationDefault.typicalDays
+			},
+			source: 'location_default',
+			confidence: shelfLifeEstimateConfidence('location_default'),
+			modelVersion: 'location-default-v1',
+			explain: locationExplanation.primary,
+			explanation: locationExplanation
+		};
 	}
 }

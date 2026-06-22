@@ -1,5 +1,6 @@
 import { Buffer } from 'node:buffer';
 import type { ReceiptParseResult } from '$lib/domain/receipt-line';
+import { groupReceiptLines } from '$lib/domain/receipt-line-grouping';
 import {
 	extractPurchasedAtFromReceiptText,
 	extractStoreFromReceiptText
@@ -107,8 +108,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		);
 	}
 
-	const lines = parseReceiptLines(aiResult.data);
-	if (lines.length === 0) {
+	const parsedLines = parseReceiptLines(aiResult.data);
+	if (parsedLines.length === 0) {
 		console.error(
 			'[receipt] Parsed zero lines from AI payload:',
 			JSON.stringify(aiResult.data).slice(0, 800)
@@ -119,6 +120,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		);
 	}
 
+	const { lines, mergedAwayCount } = groupReceiptLines(parsedLines);
+
 	const storeLabel = receiptTextForStoreHeuristic
 		? extractStoreFromReceiptText(receiptTextForStoreHeuristic)
 		: undefined;
@@ -126,12 +129,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		? extractPurchasedAtFromReceiptText(receiptTextForStoreHeuristic)
 		: undefined;
 	const purchasedAtIso = purchasedAt?.toISOString() ?? null;
-	const result: ReceiptParseResult = { lines };
+	const result: ReceiptParseResult = { lines, mergedAwayCount };
 	recordProductEvent(locals.pmfService, {
 		userId: auth.user.id,
 		householdId: locals.householdId,
 		eventType: 'receipt_parsed',
-		metadata: { lineCount: lines.length, stage: 'parse' }
+		metadata: { lineCount: lines.length, mergedAwayCount, stage: 'parse' }
 	});
 
 	if (isShelfLifeEstimatesInReceiptEnabled() && locals.householdId) {
@@ -139,7 +142,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			locals.householdId,
 			lines,
 			purchasedAtIso,
-			locals.learningEngineService
+			locals.learningEngineService,
+			{ apiKey }
 		);
 	}
 

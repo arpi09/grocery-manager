@@ -12,7 +12,6 @@ import { generateId } from '$lib/infrastructure/auth/id';
 import { receiptLineToInventoryAmount } from '$lib/server/receipt-parse';
 import { receiptLineToPurchaseRecord } from '$lib/server/receipt-import-purchase';
 import { recordProductEvent } from '$lib/server/product-events';
-import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { inferLineShelfLife } from '$lib/server/shelf-life-line-inference';
 import { recordLineShelfLifeFeedback } from '$lib/server/shelf-life-feedback-recording';
 import { inferLineLocation } from '$lib/server/location-line-inference';
@@ -126,23 +125,21 @@ export async function importReceiptLines(
 			modelVersion: null as string | null
 		};
 
-		if (isShelfLifeLearningEnabled()) {
-			const inferred = await inferLineShelfLife(
-				input.learningEngineService,
-				input.householdId,
-				name,
-				location,
-				purchasedAt
-			);
-			if (inferred) {
-				expiresOn = inferred.expiresOn;
-				expiresOnSource = inferred.expiresOnSource;
-				predictionForm = {
-					predictedExpiresOn: inferred.expiresOn,
-					predictedTypicalDays: inferred.typicalDays,
-					modelVersion: inferred.modelVersion
-				};
-			}
+		const inferred = await inferLineShelfLife(
+			input.learningEngineService,
+			input.householdId,
+			name,
+			location,
+			purchasedAt
+		);
+		if (inferred) {
+			expiresOn = inferred.expiresOn;
+			expiresOnSource = inferred.expiresOnSource;
+			predictionForm = {
+				predictedExpiresOn: inferred.expiresOn,
+				predictedTypicalDays: inferred.typicalDays,
+				modelVersion: inferred.modelVersion
+			};
 		}
 
 		const createdItem = await input.inventoryService.createItem(

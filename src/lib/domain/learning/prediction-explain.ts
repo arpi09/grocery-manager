@@ -35,7 +35,13 @@ function isHouseholdSource(source: ExpiresOnSource | PredictionSource): boolean 
 }
 
 function isHeuristicSource(source: ExpiresOnSource | PredictionSource): boolean {
-	return source === 'heuristic' || source === 'ai_inferred' || source === 'external_model';
+	return (
+		source === 'heuristic' ||
+		source === 'ai_inferred' ||
+		source === 'external_model' ||
+		source === 'default_heuristic' ||
+		source === 'location_default'
+	);
 }
 
 function shelfLifeTemplateId(

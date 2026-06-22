@@ -39,8 +39,13 @@ function line(
 }
 
 describe('normalizeReceiptProductName', () => {
-	it('lowercases and strips punctuation', () => {
-		expect(normalizeReceiptProductName(`  Arla ${MJOLK}!  `)).toBe(`arla ${MJOLK.toLowerCase()}`);
+	it('lowercases, strips punctuation and brand prefixes', () => {
+		expect(normalizeReceiptProductName(`  Arla ${MJOLK}!  `)).toBe(MJOLK.toLowerCase());
+	});
+
+	it('strips fryst/färsk/eko prefixes for merge', () => {
+		expect(normalizeReceiptProductName('Fryst kycklingfilé')).toBe('kycklingfilé');
+		expect(normalizeReceiptProductName('Eko bananer')).toBe('bananer');
 	});
 
 	it('removes trailing pack size tokens', () => {

@@ -74,6 +74,7 @@
 	}: Props = $props();
 
 	const bulkFormAction = $derived(formAction ?? '?/bulkCreate');
+	const LOW_CONFIDENCE_THRESHOLD = 0.4;
 
 	let parsing = $state(false);
 	let parseError = $state<string | null>(null);
@@ -92,6 +93,9 @@
 	let shelfLifePredictions = $state<Array<ReceiptShelfLifePrediction | null>>([]);
 	let locationPredictions = $state<Array<ReceiptLocationPrediction | null>>([]);
 	let lineExpiresOn = $state<Record<number, string>>({});
+	let mergedAwayCount = $state(0);
+	let expandedGrouped = $state<Set<number>>(new Set());
+	let expiryClearedByUser = $state<Set<number>>(new Set());
 	let quickConfirmUsed = $state(false);
 
 	function receiptFileErrorMessage(error: ReceiptFileError): string {
@@ -119,6 +123,7 @@
 		error?: string;
 		storeLabel?: string;
 		purchasedAt?: string;
+		mergedAwayCount?: number;
 		shelfLifePredictions?: Array<ReceiptShelfLifePrediction | null>;
 		locationPredictions?: Array<ReceiptLocationPrediction | null>;
 	}> {
@@ -132,6 +137,7 @@
 				error?: string;
 				storeLabel?: string;
 				purchasedAt?: string;
+				mergedAwayCount?: number;
 				shelfLifePredictions?: Array<ReceiptShelfLifePrediction | null>;
 				locationPredictions?: Array<ReceiptLocationPrediction | null>;
 			};
@@ -153,10 +159,13 @@
 		lines = data.lines;
 		parsedStoreLabel = data.storeLabel ?? null;
 		parsedPurchasedAt = data.purchasedAt ?? null;
+		mergedAwayCount = data.mergedAwayCount ?? 0;
 		shelfLifePredictions = data.shelfLifePredictions ?? [];
 		locationPredictions = data.locationPredictions ?? [];
+		expiryClearedByUser = new Set();
+		expandedGrouped = new Set();
 		lineExpiresOn = Object.fromEntries(
-			data.lines.map((line, index) => [
+			data.lines.map((_, index) => [
 				index,
 				data.shelfLifePredictions?.[index]?.expiresOn ?? ''
 			])
@@ -313,6 +322,7 @@
 		formData.delete(`predictedLocation_${key}`);
 		formData.delete(`predictedLocationModelVersion_${key}`);
 		formData.delete(`merge_${key}`);
+		formData.delete(`expiresOnDeclined_${key}`);
 	}
 
 	function syncReceiptBulkFormData(formData: FormData) {
@@ -335,9 +345,13 @@
 			const expiresOn = lineExpiresOn[index];
 			if (expiresOn) {
 				formData.set(`expiresOn_${key}`, expiresOn);
+			} else if (expiryClearedByUser.has(index)) {
+				formData.set(`expiresOnDeclined_${key}`, '1');
 			}
 
-			const shelfPrediction = shelfLifePredictions[index];
+			const shelfPrediction = expiryClearedByUser.has(index)
+				? null
+				: shelfLifePredictions[index];
 			if (shelfPrediction) {
 				formData.set(`predictedExpiresOn_${key}`, shelfPrediction.expiresOn);
 				formData.set(`predictedTypicalDays_${key}`, String(shelfPrediction.typicalDays));
@@ -371,6 +385,51 @@
 		}
 		if (line.unitPrice) return `${line.unitPrice} ${currency}`;
 		return `${line.lineTotal} ${currency}`;
+	}
+
+	function formatReceiptMetaDate(iso: string): string {
+		const [year, month, day] = iso.split('-').map(Number);
+		if (!year || !month || !day) return iso;
+		const date = new Date(year, month - 1, day);
+		const locale = getLocale() === 'en' ? 'en-GB' : 'sv-SE';
+		return date.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
+	}
+
+	function formatLineMeta(line: ReceiptLine): string {
+		const parts: string[] = [];
+		if (line.brand?.trim()) parts.push(line.brand.trim());
+		if (line.packageSize?.trim()) parts.push(line.packageSize.trim());
+		if (line.categoryHint?.trim()) parts.push(line.categoryHint.trim());
+		return parts.join(' · ');
+	}
+
+	function isLowConfidence(prediction: ReceiptShelfLifePrediction | null | undefined): boolean {
+		if (!prediction) return false;
+		if (prediction.confidence != null) {
+			return prediction.confidence < LOW_CONFIDENCE_THRESHOLD;
+		}
+		return prediction.expiresOnSource === 'default_heuristic';
+	}
+
+	function handleExpiryChange(index: number, value: string) {
+		lineExpiresOn[index] = value;
+		const next = new Set(expiryClearedByUser);
+		if (!value.trim()) {
+			next.add(index);
+		} else {
+			next.delete(index);
+		}
+		expiryClearedByUser = next;
+	}
+
+	function toggleGroupedExpanded(index: number) {
+		const next = new Set(expandedGrouped);
+		if (next.has(index)) {
+			next.delete(index);
+		} else {
+			next.add(index);
+		}
+		expandedGrouped = next;
 	}
 
 	function trackReviewCompleted() {
@@ -452,6 +511,9 @@
 		shelfLifePredictions = [];
 		locationPredictions = [];
 		lineExpiresOn = {};
+		mergedAwayCount = 0;
+		expiryClearedByUser = new Set();
+		expandedGrouped = new Set();
 		step = 'upload';
 		parseError = null;
 	}
@@ -535,6 +597,25 @@
 {:else}
 	<section data-testid="receipt-review">
 		<h2 class="title">{t('receiptBulk.selectItems', { selected: selectedCount, total: lines.length })}</h2>
+		{#if parsedStoreLabel || parsedPurchasedAt}
+			<p class="receipt-meta" data-testid="receipt-review-meta">
+				{#if parsedStoreLabel && parsedPurchasedAt}
+					{t('receiptBulk.receiptMeta', {
+						store: parsedStoreLabel,
+						date: formatReceiptMetaDate(parsedPurchasedAt)
+					})}
+				{:else if parsedStoreLabel}
+					{parsedStoreLabel}
+				{:else if parsedPurchasedAt}
+					{t('receiptBulk.purchasedOn', { date: formatReceiptMetaDate(parsedPurchasedAt) })}
+				{/if}
+			</p>
+		{/if}
+		{#if mergedAwayCount > 0}
+			<p class="hint" data-testid="receipt-merged-away">
+				{t('receiptBulk.mergedAwaySummary', { count: mergedAwayCount })}
+			</p>
+		{/if}
 		{#if shelfLifeEstimatesInReceipt}
 			<p class="hint">{t('receiptBulk.estimatesHint')}</p>
 		{/if}
@@ -657,6 +738,37 @@
 								</select>
 							</label>
 						</div>
+						{#if formatLineMeta(line)}
+							<p class="line-meta">{formatLineMeta(line)}</p>
+						{/if}
+						{#if (line.groupedCount ?? 1) > 1 && line.groupedFrom}
+							<button
+								type="button"
+								class="link-btn grouped-toggle"
+								data-testid="receipt-line-grouped-toggle-{index}"
+								aria-expanded={expandedGrouped.has(index)}
+								onclick={() => toggleGroupedExpanded(index)}
+							>
+								{expandedGrouped.has(index)
+									? t('receiptBulk.hideGroupedLines')
+									: t('receiptBulk.showGroupedLines', { count: line.groupedCount ?? 1 })}
+							</button>
+							{#if expandedGrouped.has(index)}
+								<ul class="grouped-from-list" data-testid="receipt-line-grouped-{index}">
+									{#each line.groupedFrom as sourceLine, sourceIndex (sourceIndex)}
+										<li>
+											<span>{sourceLine.name}</span>
+											{#if formatLineAmount(sourceLine)}
+												<span class="line-qty">{formatLineAmount(sourceLine)}</span>
+											{/if}
+											{#if formatLinePrice(sourceLine)}
+												<span class="line-price">{formatLinePrice(sourceLine)}</span>
+											{/if}
+										</li>
+									{/each}
+								</ul>
+							{/if}
+						{/if}
 						{#if mergeCandidates[index]}
 							<label class="merge-hint">
 								<input
@@ -679,10 +791,11 @@
 							<div class="line-expiry">
 								<label class="line-expiry-label" for="expiresOn-{index}">
 									{t('scanFlow.expiresOptional')}
-									{#if shelfLifePredictions[index]}
+									{#if shelfLifePredictions[index] && !expiryClearedByUser.has(index)}
 										<EstimatedBadge
 											source={shelfLifePredictions[index]!.expiresOnSource}
 											explanation={shelfLifePredictions[index]!.explanation}
+											lowConfidence={isLowConfidence(shelfLifePredictions[index])}
 											showSettingsLink
 										/>
 									{/if}
@@ -693,7 +806,10 @@
 									data-testid="receipt-line-expiry-{index}"
 									value={lineExpiresOn[index] ?? ''}
 									onchange={(e) => {
-										lineExpiresOn[index] = (e.currentTarget as HTMLInputElement).value;
+										handleExpiryChange(
+											index,
+											(e.currentTarget as HTMLInputElement).value
+										);
 									}}
 								/>
 							</div>
@@ -712,8 +828,10 @@
 							/>
 							{#if lineExpiresOn[index]}
 								<input type="hidden" name={`expiresOn_${index}`} value={lineExpiresOn[index]} />
+							{:else if expiryClearedByUser.has(index)}
+								<input type="hidden" name={`expiresOnDeclined_${index}`} value="1" />
 							{/if}
-							{#if shelfLifePredictions[index]}
+							{#if shelfLifePredictions[index] && !expiryClearedByUser.has(index)}
 								<input
 									type="hidden"
 									name={`predictedExpiresOn_${index}`}
@@ -815,6 +933,45 @@
 	.title {
 		margin: 0 0 var(--space-md);
 		font-size: 1.1rem;
+	}
+
+	.receipt-meta {
+		margin: 0 0 var(--space-sm);
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+	}
+
+	.line-meta {
+		margin: var(--space-xs) 0 0;
+		font-size: 0.78rem;
+		color: var(--color-text-muted);
+	}
+
+	.grouped-toggle {
+		margin-top: var(--space-xs);
+		min-height: auto;
+		font-size: 0.8125rem;
+	}
+
+	.grouped-from-list {
+		list-style: none;
+		margin: var(--space-xs) 0 0;
+		padding: var(--space-xs) 0 0 var(--space-md);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
+		border-left: 2px solid var(--color-border);
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+	}
+
+	.grouped-from-list li {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-sm);
+		padding: 0;
+		border: none;
 	}
 
 	.merge-hint {

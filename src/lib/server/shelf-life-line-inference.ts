@@ -1,7 +1,11 @@
 import type { LearningEngineService } from '$lib/application/learning/learning-engine.service';
 import type { ExpiresOnSource } from '$lib/domain/auto-expired';
 import type { StorageLocation } from '$lib/domain/location';
-import { guessShelfLife } from '$lib/domain/shelf-life';
+import { predictHeuristicShelfLife } from '$lib/infrastructure/adapters/heuristic-shelf-life.adapter';
+import {
+	resolveLocationDefaultShelfLife,
+	shelfLifeEstimateToExpiresOnSource
+} from '$lib/domain/shelf-life-estimate';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 
@@ -19,32 +23,45 @@ export async function inferLineShelfLife(
 	location: StorageLocation,
 	purchasedAt: string | null
 ): Promise<InferredLineShelfLife | null> {
-	if (!isShelfLifeLearningEnabled()) {
-		const inferred = guessShelfLife(name, location);
-		if (!inferred) return null;
-		return {
-			expiresOn: inferred.expiresOn,
-			expiresOnSource: 'ai_inferred',
-			typicalDays: null,
-			modelVersion: 'heuristic-legacy'
-		};
-	}
-
 	const normalizedKey = normalizeReceiptProductName(name);
 	if (!normalizedKey) return null;
 
-	const prediction = await learningEngine.predictShelfLife(householdId, {
+	if (isShelfLifeLearningEnabled()) {
+		const prediction = await learningEngine.predictShelfLife(householdId, {
+			productName: name,
+			normalizedKey,
+			location,
+			purchasedAt
+		});
+		if (!prediction) return null;
+
+		return {
+			expiresOn: prediction.expiresOn,
+			expiresOnSource: prediction.expiresOnSource,
+			typicalDays: prediction.typicalDays,
+			modelVersion: prediction.modelVersion
+		};
+	}
+
+	const heuristic = predictHeuristicShelfLife({
 		productName: name,
-		normalizedKey,
 		location,
 		purchasedAt
 	});
-	if (!prediction) return null;
+	if (heuristic) {
+		return {
+			expiresOn: heuristic.expiresOn,
+			expiresOnSource: heuristic.source,
+			typicalDays: heuristic.typicalDays,
+			modelVersion: 'heuristic-v1'
+		};
+	}
 
+	const locationDefault = resolveLocationDefaultShelfLife({ location, purchasedAt });
 	return {
-		expiresOn: prediction.expiresOn,
-		expiresOnSource: prediction.expiresOnSource,
-		typicalDays: prediction.typicalDays,
-		modelVersion: prediction.modelVersion
+		expiresOn: locationDefault.expiresOn,
+		expiresOnSource: shelfLifeEstimateToExpiresOnSource(locationDefault.source),
+		typicalDays: locationDefault.typicalDays,
+		modelVersion: 'location-default-v1'
 	};
 }

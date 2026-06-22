@@ -66,6 +66,8 @@ export function predictionSourceToExpiresOnSource(source: PredictionSource): Exp
 			return 'household_learned';
 		case 'heuristic':
 			return 'heuristic';
+		case 'location_default':
+			return 'default_heuristic';
 		case 'external_model':
 			return 'heuristic';
 	}
@@ -77,6 +79,8 @@ export function predictionSourceConfidence(source: PredictionSource): number {
 			return 0.85;
 		case 'heuristic':
 			return 0.55;
+		case 'location_default':
+			return 0.25;
 		case 'external_model':
 			return 0.7;
 	}
