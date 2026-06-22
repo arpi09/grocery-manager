@@ -63,6 +63,7 @@ export interface MarketProfileRow {
 export interface MarketChatLatestMessageRow {
 	threadId: string;
 	authorUserId: string;
+	body: string;
 	createdAt: Date;
 }
 
@@ -274,6 +275,7 @@ export class DrizzleMarketChatRepository implements IMarketChatRepository {
 			.selectDistinctOn([marketChatMessageTable.threadId], {
 				threadId: marketChatMessageTable.threadId,
 				authorUserId: marketChatMessageTable.authorUserId,
+				body: marketChatMessageTable.body,
 				createdAt: marketChatMessageTable.createdAt
 			})
 			.from(marketChatMessageTable)

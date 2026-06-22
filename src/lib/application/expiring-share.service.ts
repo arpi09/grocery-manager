@@ -21,6 +21,11 @@ import {
 	type GeoCoordinate
 } from '$lib/domain/geo';
 import type { InventoryItem } from '$lib/domain/inventory-item';
+import {
+	applyPricingToItemSnapshot,
+	type MarketItemPricingInput,
+	resolveMarketItemPricing
+} from '$lib/domain/market-pricing';
 import { getNearbyRadiusM, isProTier, resolveEffectivePlanTier, type PlanTier } from '$lib/domain/plan';
 import { generateSecureToken, hashSecureToken } from '$lib/infrastructure/auth/secure-token';
 import type { IExpiringShareRepository } from '$lib/infrastructure/repositories/expiring-share.repository';
@@ -28,15 +33,33 @@ import type { IExpiringShareRepository } from '$lib/infrastructure/repositories/
 export class ExpiringShareService {
 	constructor(private readonly repository: IExpiringShareRepository) {}
 
-	buildSnapshot(items: InventoryItem[]): ExpiringShareSnapshot {
+	buildSnapshot(
+		items: InventoryItem[],
+		options?: {
+			itemPricing?: Record<string, MarketItemPricingInput | undefined>;
+		}
+	): ExpiringShareSnapshot {
 		const expiringItems = filterItemsExpiringWithinDays(items, EXPIRING_SOON_DAYS);
-		const snapshots: ExpiringShareItemSnapshot[] = expiringItems.map((item) => ({
-			name: item.name,
-			expiresOn: item.expiresOn,
-			location: item.location,
-			quantity: item.quantity,
-			unit: item.unit
-		}));
+		const snapshots: ExpiringShareItemSnapshot[] = expiringItems.map((item) => {
+			const base: ExpiringShareItemSnapshot = {
+				name: item.name,
+				expiresOn: item.expiresOn,
+				location: item.location,
+				quantity: item.quantity,
+				unit: item.unit
+			};
+			const pricingInput = options?.itemPricing?.[item.id];
+			if (!pricingInput) {
+				return base;
+			}
+			return applyPricingToItemSnapshot(
+				base,
+				resolveMarketItemPricing({
+					...pricingInput,
+					quantity: pricingInput.quantity ?? item.quantity
+				})
+			);
+		});
 
 		return {
 			items: snapshots,
@@ -212,7 +235,12 @@ export class ExpiringShareService {
 				itemCount: snapshot.items.length,
 				previewItems: snapshot.items.slice(0, 3).map((item) => ({
 					name: item.name,
-					expiresOn: item.expiresOn
+					expiresOn: item.expiresOn,
+					quantity: item.quantity,
+					unit: item.unit,
+					portionPercent: item.portionPercent,
+					askingPriceSek: item.askingPriceSek,
+					pricingMode: item.pricingMode
 				})),
 				approximateDistanceM: approximateDistanceMetres(distanceM),
 				mapLat: jittered.latitude,

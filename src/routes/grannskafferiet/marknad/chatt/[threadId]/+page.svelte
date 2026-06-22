@@ -1,21 +1,22 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
-	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
-	import Card from '$lib/components/atoms/Card.svelte';
+	import MarketChatBubble from '$lib/components/molecules/MarketChatBubble.svelte';
+	import MarketChatListingCard from '$lib/components/molecules/MarketChatListingCard.svelte';
 	import MarketChatOverflowMenu from '$lib/components/molecules/MarketChatOverflowMenu.svelte';
 	import MarketChatStepper from '$lib/components/molecules/MarketChatStepper.svelte';
+	import MarketPickupPaymentCard from '$lib/components/molecules/MarketPickupPaymentCard.svelte';
 	import MarketRatingSheet from '$lib/components/molecules/MarketRatingSheet.svelte';
 	import type { MarketItemsAsDescribed, MarketLifecycleStatus } from '$lib/domain/market-lifecycle';
-	import { getLocale, t } from '$lib/i18n';
+	import { t } from '$lib/i18n';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 
 	let { data } = $props();
 
-	const locale = getLocale();
 	const POLL_MS = 5_000;
+	const OPTIMISTIC_PREFIX = 'optimistic-';
 
 	type ChatMessage = {
 		id: string;
@@ -47,6 +48,22 @@
 	);
 	let myMarkedComplete = $state(data.myMarkedComplete);
 	let counterpartMarkedComplete = $state(data.counterpartMarkedComplete);
+	type PaymentContext = {
+		askingPriceSek: number;
+		sharerSwishNumber: string | null;
+		isSeeker: boolean;
+		sharerFirstName: string;
+	};
+	let paymentContext = $state<PaymentContext | null>(
+		data.paymentContext
+			? {
+					askingPriceSek: data.paymentContext.askingPriceSek,
+					sharerSwishNumber: data.paymentContext.sharerSwishNumber,
+					isSeeker: data.paymentContext.isSeeker,
+					sharerFirstName: data.paymentContext.sharerFirstName
+				}
+			: null
+	);
 	let draft = $state('');
 	let sending = $state(false);
 	let lifecycleAction = $state<'pickup' | 'agree' | 'handover' | null>(null);
@@ -55,6 +72,7 @@
 	let myRating = $state(data.myRating);
 	let counterpartRating = $state(data.counterpartRating);
 	let pollTimer: ReturnType<typeof setInterval> | null = null;
+	let messagesEl: HTMLDivElement | undefined = $state();
 
 	const showRatingSheet = $derived(
 		threadClosed && lifecycleStatus === 'completed' && !myRating && ratingSheetOpen
@@ -79,13 +97,46 @@
 				lifecycleStatus === 'awaiting_handover')
 	);
 	const showComposer = $derived(!threadClosed);
+	const showPaymentCard = $derived(Boolean(paymentContext));
+	const showLifecycleChips = $derived(
+		showComposer &&
+			(showPickupActions || showHandoverAction) &&
+			!(showHandoverAction && myMarkedComplete && !counterpartMarkedComplete)
+	);
+	const showHandoverStatus = $derived(
+		showHandoverAction &&
+			(myMarkedComplete || counterpartMarkedComplete || lifecycleStatus === 'awaiting_handover')
+	);
 
-	function formatMessageTime(value: string | Date): string {
-		const date = value instanceof Date ? value : new Date(value);
-		return new Intl.DateTimeFormat(locale === 'sv' ? 'sv-SE' : 'en-GB', {
-			dateStyle: 'short',
-			timeStyle: 'short'
-		}).format(date);
+	function isOptimisticMessage(message: ChatMessage): boolean {
+		return message.id.startsWith(OPTIMISTIC_PREFIX);
+	}
+
+	function mergeMessages(serverMessages: ChatMessage[]): ChatMessage[] {
+		const pending = messages.filter(isOptimisticMessage);
+		if (pending.length === 0) {
+			return serverMessages;
+		}
+
+		const merged = [...serverMessages];
+		for (const optimistic of pending) {
+			const alreadyConfirmed = serverMessages.some(
+				(message) =>
+					message.authorUserId === optimistic.authorUserId &&
+					message.body === optimistic.body
+			);
+			if (!alreadyConfirmed) {
+				merged.push(optimistic);
+			}
+		}
+		return merged;
+	}
+
+	async function scrollMessagesToBottom() {
+		await tick();
+		if (messagesEl) {
+			messagesEl.scrollTop = messagesEl.scrollHeight;
+		}
 	}
 
 	function applyThreadSnapshot(thread: ThreadSnapshot | undefined) {
@@ -119,12 +170,17 @@
 				ok?: boolean;
 				thread?: ThreadSnapshot;
 				messages?: ChatMessage[];
+				paymentContext?: PaymentContext | null;
 			};
 			if (!response.ok || !payload.ok) {
 				return;
 			}
-			messages = payload.messages ?? messages;
+			messages = mergeMessages(payload.messages ?? messages);
 			applyThreadSnapshot(payload.thread);
+			if (payload.paymentContext !== undefined) {
+				paymentContext = payload.paymentContext;
+			}
+			void scrollMessagesToBottom();
 		} catch {
 			// polling is best-effort
 		}
@@ -136,6 +192,19 @@
 			return;
 		}
 
+		const optimisticId = `${OPTIMISTIC_PREFIX}${crypto.randomUUID()}`;
+		messages = [
+			...messages,
+			{
+				id: optimisticId,
+				authorUserId: data.user.id,
+				body,
+				createdAt: new Date()
+			}
+		];
+		draft = '';
+		void scrollMessagesToBottom();
+
 		sending = true;
 		try {
 			const response = await fetch(`/api/market/chat/${data.thread.id}/messages`, {
@@ -144,12 +213,15 @@
 				body: JSON.stringify({ body })
 			});
 			if (!response.ok) {
+				messages = messages.filter((message) => message.id !== optimisticId);
+				draft = body;
 				showClientToast(t('marketV01.sendMessageFailed'), { variant: 'error' });
 				return;
 			}
-			draft = '';
 			await refreshThread();
 		} catch {
+			messages = messages.filter((message) => message.id !== optimisticId);
+			draft = body;
 			showClientToast(t('marketV01.sendMessageFailed'), { variant: 'error' });
 		} finally {
 			sending = false;
@@ -270,7 +342,7 @@
 
 	function skipRating() {
 		ratingSheetOpen = false;
-		void goto('/grannskafferiet/marknad');
+		void goto('/grannskafferiet/marknad/meddelanden');
 	}
 
 	function closeRatingSheet() {
@@ -278,12 +350,11 @@
 	}
 
 	onMount(() => {
-		if (
-			data.thread.lifecycleStatus === 'completed' &&
-			!data.myRating
-		) {
+		if (data.thread.lifecycleStatus === 'completed' && !data.myRating) {
 			ratingSheetOpen = true;
 		}
+
+		void scrollMessagesToBottom();
 
 		pollTimer = setInterval(() => {
 			void refreshThread();
@@ -303,8 +374,26 @@
 </svelte:head>
 
 <AppLayout user={data.user}>
-	<PageContainer>
-		<header class="chat-header" data-testid="market-chat-thread">
+	<div class="chat-screen" data-testid="market-chat-thread">
+		<header class="chat-header">
+			<div class="header-top">
+				<button
+					type="button"
+					class="back-btn"
+					aria-label={t('marketV05.backToInboxAria')}
+					onclick={() => goto('/grannskafferiet/marknad/meddelanden')}
+				>
+					<span aria-hidden="true">←</span>
+					<span class="back-label">{t('marketV05.backToInbox')}</span>
+				</button>
+				{#if !threadClosed}
+					<MarketChatOverflowMenu
+						threadId={data.thread.id}
+						onThreadClosed={() => void refreshThread()}
+					/>
+				{/if}
+			</div>
+
 			<div class="participant">
 				{#if data.counterpart.avatarUrl}
 					<img class="avatar" src={data.counterpart.avatarUrl} alt="" />
@@ -313,159 +402,197 @@
 						{data.counterpart.firstName.slice(0, 1).toUpperCase()}
 					</span>
 				{/if}
-				<div>
+				<div class="participant-text">
 					<h1>{data.counterpart.firstName}</h1>
 					<p class="rating">{ratingLabel}</p>
 				</div>
 			</div>
-			<Button type="button" variant="secondary" onclick={() => goto('/grannskafferiet/marknad')}>
-				{t('marketV01.backToMarketBtn')}
-			</Button>
-			{#if !threadClosed}
-				<MarketChatOverflowMenu
-					threadId={data.thread.id}
-					onThreadClosed={() => void refreshThread()}
-				/>
-			{/if}
+
+			<MarketChatStepper status={lifecycleStatus} compact />
 		</header>
 
-		<MarketChatStepper status={lifecycleStatus} />
+		{#if data.listingContext}
+			<div class="listing-pin">
+				<MarketChatListingCard
+					shareId={data.listingContext.shareId}
+					items={data.listingContext.items}
+				/>
+			</div>
+		{/if}
 
-		<ul class="message-list" aria-live="polite">
-			{#each messages as message (message.id)}
-				<li class:mine={message.authorUserId === data.user.id}>
-					<Card class="message-card">
-						<p class="body">{message.body}</p>
-						<time datetime={String(message.createdAt)}>{formatMessageTime(message.createdAt)}</time>
-					</Card>
-				</li>
-			{/each}
-		</ul>
+		<div class="messages-scroll" bind:this={messagesEl} aria-live="polite">
+			<div class="messages-list">
+				{#each messages as message (message.id)}
+					<MarketChatBubble
+						body={message.body}
+						createdAt={message.createdAt}
+						mine={message.authorUserId === data.user.id}
+					/>
+				{/each}
+			</div>
 
-		{#if threadClosed && lifecycleStatus === 'completed'}
-			<section class="closed-panel" aria-labelledby="market-closed-heading">
-				<h2 id="market-closed-heading">{t('marketV03.handoverCompleteTitle')}</h2>
-				{#if myRating}
-					<p>{t('marketV01.ratingAlreadySubmitted', { stars: myRating.stars })}</p>
-					{#if counterpartRating}
-						<div class="counterpart-rating" data-testid="market-counterpart-rating">
-							<p class="counterpart-rating-label">
-								{t('marketV03.counterpartRatingLabel', { name: data.counterpart.firstName })}
+			{#if threadClosed && lifecycleStatus === 'completed'}
+				<section class="closed-panel" aria-labelledby="market-closed-heading">
+					<h2 id="market-closed-heading">{t('marketV03.handoverCompleteTitle')}</h2>
+					{#if myRating}
+						<p>{t('marketV01.ratingAlreadySubmitted', { stars: myRating.stars })}</p>
+						{#if counterpartRating}
+							<div class="counterpart-rating" data-testid="market-counterpart-rating">
+								<p class="counterpart-rating-label">
+									{t('marketV03.counterpartRatingLabel', { name: data.counterpart.firstName })}
+								</p>
+								<p
+									class="counterpart-rating-stars"
+									aria-label={t('marketV03.reviewStarsAria', { stars: counterpartRating.stars })}
+								>
+									{'★'.repeat(counterpartRating.stars)}{'☆'.repeat(5 - counterpartRating.stars)}
+								</p>
+								{#if counterpartRating.comment}
+									<p class="counterpart-rating-comment">{counterpartRating.comment}</p>
+								{/if}
+							</div>
+						{:else}
+							<p class="blind-wait">
+								{t('marketV03.counterpartRatingPending', { name: data.counterpart.firstName })}
 							</p>
-							<p
-								class="counterpart-rating-stars"
-								aria-label={t('marketV03.reviewStarsAria', { stars: counterpartRating.stars })}
-							>
-								{'★'.repeat(counterpartRating.stars)}{'☆'.repeat(5 - counterpartRating.stars)}
-							</p>
-							{#if counterpartRating.comment}
-								<p class="counterpart-rating-comment">{counterpartRating.comment}</p>
-							{/if}
-						</div>
-					{:else}
-						<p class="blind-wait">
-							{t('marketV03.counterpartRatingPending', { name: data.counterpart.firstName })}
-						</p>
-					{/if}
-					<Button type="button" variant="secondary" onclick={() => goto('/grannskafferiet/marknad')}>
-						{t('marketV01.backToMarketBtn')}
-					</Button>
-				{:else}
-					<p>{t('marketV01.ratePrompt')}</p>
-					<Button type="button" onclick={() => (ratingSheetOpen = true)}>
-						{t('marketV03.openRatingSheetBtn')}
-					</Button>
-				{/if}
-			</section>
-		{:else if threadClosed && lifecycleStatus === 'cancelled'}
-			<section class="closed-panel" aria-labelledby="market-cancelled-heading">
-				<h2 id="market-cancelled-heading">{t('marketV03.threadCancelledTitle')}</h2>
-				<p>{t('marketV03.threadCancelledLead')}</p>
-			</section>
-		{:else if threadClosed && lifecycleStatus === 'reported'}
-			<section class="closed-panel" aria-labelledby="market-reported-heading">
-				<h2 id="market-reported-heading">{t('marketV03.threadReportedTitle')}</h2>
-				<p>{t('marketV03.threadReportedLead')}</p>
-			</section>
-		{:else if showComposer}
-			{#if showHandoverAction && (myMarkedComplete || counterpartMarkedComplete || lifecycleStatus === 'awaiting_handover')}
-				<section class="handover-panel" aria-labelledby="market-handover-heading">
-					<h2 id="market-handover-heading">{t('marketV03.handoverPrompt')}</h2>
-					<ul class="handover-status">
-						<li class:done={myMarkedComplete}>
-							<span aria-hidden="true">{myMarkedComplete ? '✓' : '○'}</span>
-							{t('marketV03.handoverYouConfirmed')}
-						</li>
-						<li class:done={counterpartMarkedComplete}>
-							<span aria-hidden="true">{counterpartMarkedComplete ? '✓' : '○'}</span>
-							{counterpartMarkedComplete
-								? t('marketV03.handoverCounterpartConfirmed', { name: data.counterpart.firstName })
-								: t('marketV03.handoverCounterpartWaiting', { name: data.counterpart.firstName })}
-						</li>
-					</ul>
-					{#if myMarkedComplete && !counterpartMarkedComplete}
-						<p class="exchange-status">
-							{t('marketV03.handoverWaitingCounterpart', { name: data.counterpart.firstName })}
-						</p>
-					{/if}
-				</section>
-			{/if}
-
-			<form
-				class="composer"
-				onsubmit={(event) => {
-					event.preventDefault();
-					void sendMessage();
-				}}
-			>
-				<label class="sr-only" for="market-chat-input">{t('marketV01.messageInputLabel')}</label>
-				<textarea
-					id="market-chat-input"
-					rows="3"
-					bind:value={draft}
-					placeholder={t('marketV01.messageInputPlaceholder')}
-					disabled={sending}
-				></textarea>
-				<div class="composer-actions">
-					<Button type="submit" disabled={sending || !draft.trim()}>{t('marketV01.sendMessageBtn')}</Button>
-					{#if showPickupActions}
-						{#if lifecycleStatus === 'chatting'}
-							<Button
-								type="button"
-								variant="secondary"
-								disabled={lifecycleAction != null}
-								onclick={() => void proposePickup()}
-							>
-								{lifecycleAction === 'pickup' ? t('common.loading') : t('marketV03.proposePickupBtn')}
-							</Button>
 						{/if}
 						<Button
 							type="button"
 							variant="secondary"
-							disabled={lifecycleAction != null}
-							onclick={() => void confirmPickupAgreement()}
+							onclick={() => goto('/grannskafferiet/marknad/meddelanden')}
 						>
-							{lifecycleAction === 'agree' ? t('common.loading') : t('marketV03.confirmPickupBtn')}
+							{t('marketV05.backToInbox')}
+						</Button>
+					{:else}
+						<p>{t('marketV01.ratePrompt')}</p>
+						<Button type="button" onclick={() => (ratingSheetOpen = true)}>
+							{t('marketV03.openRatingSheetBtn')}
 						</Button>
 					{/if}
-					{#if showHandoverAction}
-						<Button
-							type="button"
-							variant="secondary"
-							disabled={lifecycleAction != null || myMarkedComplete}
-							onclick={() => void confirmHandover()}
+				</section>
+			{:else if threadClosed && lifecycleStatus === 'cancelled'}
+				<section class="closed-panel" aria-labelledby="market-cancelled-heading">
+					<h2 id="market-cancelled-heading">{t('marketV03.threadCancelledTitle')}</h2>
+					<p>{t('marketV03.threadCancelledLead')}</p>
+				</section>
+			{:else if threadClosed && lifecycleStatus === 'reported'}
+				<section class="closed-panel" aria-labelledby="market-reported-heading">
+					<h2 id="market-reported-heading">{t('marketV03.threadReportedTitle')}</h2>
+					<p>{t('marketV03.threadReportedLead')}</p>
+				</section>
+			{/if}
+		</div>
+
+		{#if showComposer}
+			<footer class="chat-footer">
+				{#if showHandoverStatus}
+					<section class="handover-compact" aria-label={t('marketV05.handoverStatusCompact')}>
+						<ul class="handover-status">
+							<li class:done={myMarkedComplete}>
+								<span aria-hidden="true">{myMarkedComplete ? '✓' : '○'}</span>
+								{t('marketV03.handoverYouConfirmed')}
+							</li>
+							<li class:done={counterpartMarkedComplete}>
+								<span aria-hidden="true">{counterpartMarkedComplete ? '✓' : '○'}</span>
+								{counterpartMarkedComplete
+									? t('marketV03.handoverCounterpartConfirmed', { name: data.counterpart.firstName })
+									: t('marketV03.handoverCounterpartWaiting', { name: data.counterpart.firstName })}
+							</li>
+						</ul>
+						{#if myMarkedComplete && !counterpartMarkedComplete}
+							<p class="exchange-status">
+								{t('marketV03.handoverWaitingCounterpart', { name: data.counterpart.firstName })}
+							</p>
+						{/if}
+					</section>
+				{/if}
+
+				{#if showLifecycleChips}
+					<div class="lifecycle-chips" role="group" aria-label={t('marketV05.lifecycleActionsAria')}>
+						{#if showPickupActions}
+							{#if lifecycleStatus === 'chatting'}
+								<button
+									type="button"
+									class="chip"
+									disabled={lifecycleAction != null}
+									onclick={() => void proposePickup()}
+								>
+									{lifecycleAction === 'pickup' ? t('common.loading') : t('marketV03.proposePickupBtn')}
+								</button>
+							{/if}
+							<button
+								type="button"
+								class="chip"
+								disabled={lifecycleAction != null}
+								onclick={() => void confirmPickupAgreement()}
+							>
+								{lifecycleAction === 'agree' ? t('common.loading') : t('marketV03.confirmPickupBtn')}
+							</button>
+						{/if}
+						{#if showHandoverAction}
+							<button
+								type="button"
+								class="chip chip-primary"
+								disabled={lifecycleAction != null || myMarkedComplete}
+								onclick={() => void confirmHandover()}
+							>
+								{lifecycleAction === 'handover'
+									? t('common.loading')
+									: myMarkedComplete
+										? t('marketV03.handoverMarkedByYou')
+										: t('marketV03.confirmHandoverBtn')}
+							</button>
+						{/if}
+					</div>
+				{/if}
+
+				{#if showPaymentCard && paymentContext}
+					<div class="footer-payment">
+						<MarketPickupPaymentCard
+							askingPriceSek={paymentContext.askingPriceSek}
+							sharerSwishNumber={paymentContext.sharerSwishNumber}
+							sharerFirstName={paymentContext.sharerFirstName}
+							isSeeker={paymentContext.isSeeker}
+							threadId={data.thread.id}
+						/>
+					</div>
+				{/if}
+
+				<form
+					class="composer"
+					onsubmit={(event) => {
+						event.preventDefault();
+						void sendMessage();
+					}}
+				>
+					<label class="sr-only" for="market-chat-input">{t('marketV01.messageInputLabel')}</label>
+					<div class="composer-row">
+						<textarea
+							id="market-chat-input"
+							rows="1"
+							bind:value={draft}
+							placeholder={t('marketV01.messageInputPlaceholder')}
+							disabled={sending}
+							onkeydown={(event) => {
+								if (event.key === 'Enter' && !event.shiftKey) {
+									event.preventDefault();
+									void sendMessage();
+								}
+							}}
+						></textarea>
+						<button
+							type="submit"
+							class="send-btn"
+							disabled={sending || !draft.trim()}
+							aria-label={t('marketV01.sendMessageBtn')}
 						>
-							{lifecycleAction === 'handover'
-								? t('common.loading')
-								: myMarkedComplete
-									? t('marketV03.handoverMarkedByYou')
-									: t('marketV03.confirmHandoverBtn')}
-						</Button>
-					{/if}
-				</div>
-			</form>
+							{t('marketV01.sendMessageBtn')}
+						</button>
+					</div>
+				</form>
+			</footer>
 		{/if}
-	</PageContainer>
+	</div>
 </AppLayout>
 
 <MarketRatingSheet
@@ -478,13 +605,55 @@
 />
 
 <style>
-	.chat-header {
+	.chat-screen {
 		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-between;
+		flex-direction: column;
+		min-height: 100dvh;
+		max-height: 100dvh;
+		background: var(--color-surface);
+	}
+
+	.chat-header {
+		position: sticky;
+		top: 0;
+		z-index: 10;
+		flex-shrink: 0;
+		padding: var(--space-sm) var(--space-md) var(--space-md);
+		border-bottom: 1px solid var(--color-border);
+		background: var(--color-surface);
+		display: grid;
+		gap: var(--space-sm);
+	}
+
+	.header-top {
+		display: flex;
 		align-items: center;
-		gap: var(--space-md);
-		margin-bottom: var(--space-lg);
+		justify-content: space-between;
+		gap: var(--space-sm);
+	}
+
+	.back-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-xs);
+		padding: var(--space-xs) 0;
+		border: none;
+		background: transparent;
+		font: inherit;
+		font-size: 0.875rem;
+		color: var(--color-primary);
+		cursor: pointer;
+		min-height: var(--touch-target-min);
+	}
+
+	.back-label {
+		display: none;
+	}
+
+	@media (min-width: 480px) {
+		.back-label {
+			display: inline;
+		}
 	}
 
 	.participant {
@@ -493,22 +662,28 @@
 		gap: var(--space-md);
 	}
 
+	.participant-text {
+		min-width: 0;
+	}
+
 	h1 {
 		margin: 0;
-		font-size: 1.2rem;
+		font-size: 1.0625rem;
+		line-height: 1.2;
 	}
 
 	.rating {
 		margin: 0;
 		color: var(--color-text-muted);
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 	}
 
 	.avatar {
-		width: 3rem;
-		height: 3rem;
+		width: 2.5rem;
+		height: 2.5rem;
 		border-radius: 999px;
 		object-fit: cover;
+		flex-shrink: 0;
 	}
 
 	.avatar-fallback {
@@ -519,84 +694,43 @@
 		font-weight: 700;
 	}
 
-	.message-list {
-		margin: 0 0 var(--space-lg);
-		padding: 0;
-		list-style: none;
+	.listing-pin {
+		flex-shrink: 0;
+	}
+
+	.messages-scroll {
+		flex: 1;
+		overflow-y: auto;
+		min-height: 0;
+		padding: var(--space-md);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-md);
+	}
+
+	.messages-list {
+		display: grid;
+		gap: var(--space-sm);
+		margin-top: auto;
+	}
+
+	.chat-footer {
+		flex-shrink: 0;
+		border-top: 1px solid var(--color-border);
+		background: var(--color-surface);
+		padding: var(--space-sm) var(--space-md);
+		padding-bottom: max(var(--space-sm), env(safe-area-inset-bottom));
 		display: grid;
 		gap: var(--space-sm);
 	}
 
-	.message-list li {
-		display: flex;
-	}
-
-	.message-list li.mine {
-		justify-content: flex-end;
-	}
-
-	:global(.message-card) {
-		max-width: min(36rem, 100%);
+	.handover-compact {
 		display: grid;
 		gap: var(--space-2xs);
-	}
-
-	.body {
-		margin: 0;
-		white-space: pre-wrap;
-	}
-
-	time {
-		font-size: 0.75rem;
-		color: var(--color-text-muted);
-	}
-
-	.composer {
-		display: grid;
-		gap: var(--space-sm);
-	}
-
-	textarea {
-		width: 100%;
 		padding: var(--space-sm);
 		border-radius: var(--radius-md);
-		border: 1px solid var(--color-border);
-		font: inherit;
-		resize: vertical;
-	}
-
-	.composer-actions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-sm);
-	}
-
-	.exchange-status {
-		margin: 0 0 var(--space-sm);
-		color: var(--color-text-muted);
-		font-size: 0.875rem;
-	}
-
-	.handover-panel,
-	.closed-panel {
-		display: grid;
-		gap: var(--space-sm);
-		padding: var(--space-md);
-		border-radius: var(--radius-md);
-		border: 1px solid var(--color-border);
 		background: var(--color-surface-muted);
-		margin-bottom: var(--space-md);
-	}
-
-	.handover-panel h2,
-	.closed-panel h2 {
-		margin: 0;
-		font-size: 1rem;
-	}
-
-	.closed-panel p {
-		margin: 0;
-		color: var(--color-text-muted);
+		font-size: 0.8125rem;
 	}
 
 	.handover-status {
@@ -617,6 +751,120 @@
 	.handover-status li.done {
 		color: var(--color-text);
 		font-weight: 600;
+	}
+
+	.exchange-status {
+		margin: 0;
+		color: var(--color-text-muted);
+		font-size: 0.8125rem;
+	}
+
+	.lifecycle-chips {
+		display: flex;
+		flex-wrap: nowrap;
+		gap: var(--space-xs);
+		overflow-x: auto;
+		padding-bottom: var(--space-2xs);
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+	}
+
+	.lifecycle-chips::-webkit-scrollbar {
+		display: none;
+	}
+
+	.chip {
+		flex-shrink: 0;
+		padding: var(--space-xs) var(--space-md);
+		border-radius: 999px;
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		font: inherit;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		cursor: pointer;
+		white-space: nowrap;
+		min-height: var(--touch-target-min);
+	}
+
+	.chip:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.chip-primary {
+		border-color: var(--color-primary);
+		background: var(--color-primary);
+		color: var(--color-on-primary, #fff);
+	}
+
+	.footer-payment :global(.payment-card) {
+		margin-bottom: 0;
+	}
+
+	.footer-payment :global(.payment-card-inner) {
+		padding: var(--space-sm);
+	}
+
+	.footer-payment :global(h2) {
+		font-size: 0.9375rem;
+	}
+
+	.composer-row {
+		display: flex;
+		align-items: flex-end;
+		gap: var(--space-sm);
+	}
+
+	textarea {
+		flex: 1;
+		min-height: 2.5rem;
+		max-height: 6rem;
+		padding: var(--space-sm) var(--space-md);
+		border-radius: 1.25rem;
+		border: 1px solid var(--color-border);
+		font: inherit;
+		font-size: 0.9375rem;
+		resize: none;
+		line-height: 1.35;
+	}
+
+	.send-btn {
+		flex-shrink: 0;
+		padding: var(--space-sm) var(--space-md);
+		border-radius: 999px;
+		border: none;
+		background: var(--color-primary);
+		color: var(--color-on-primary, #fff);
+		font: inherit;
+		font-size: 0.875rem;
+		font-weight: 600;
+		cursor: pointer;
+		min-height: var(--touch-target-min);
+	}
+
+	.send-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.closed-panel {
+		display: grid;
+		gap: var(--space-sm);
+		padding: var(--space-md);
+		border-radius: var(--radius-md);
+		border: 1px solid var(--color-border);
+		background: var(--color-surface-muted);
+	}
+
+	.closed-panel h2 {
+		margin: 0;
+		font-size: 1rem;
+	}
+
+	.closed-panel p {
+		margin: 0;
+		color: var(--color-text-muted);
 	}
 
 	.counterpart-rating {

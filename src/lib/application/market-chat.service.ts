@@ -1,5 +1,6 @@
 import type { PmfService } from '$lib/application/pmf.service';
 import type { MarketChatPushService } from '$lib/application/market-chat-push.service';
+import type { ExpiringShareItemSnapshot } from '$lib/domain/expiring-share';
 import { canEditInventory } from '$lib/domain/household';
 import {
 	hasUserMarkedExchangeComplete,
@@ -22,6 +23,7 @@ import {
 	type MarketItemsAsDescribed,
 	type MarketLifecycleStatus
 } from '$lib/domain/market-lifecycle';
+import type { MarketInboxListingPreview } from '$lib/domain/market-inbox';
 import {
 	canStartMarketChat,
 	marketAvatarUrl,
@@ -30,6 +32,11 @@ import {
 	type MarketPublicReview,
 	type MarketRatingSummary
 } from '$lib/domain/market-profile';
+import {
+	hasPaidListingItems,
+	shouldShowPickupPaymentCard,
+	sumListingAskingPriceSek
+} from '$lib/domain/market-pricing';
 import type {
 	IMarketChatRepository,
 	MarketChatMessageRow,
@@ -37,8 +44,17 @@ import type {
 } from '$lib/infrastructure/repositories/market-chat.repository';
 import type { IExpiringShareRepository } from '$lib/infrastructure/repositories/expiring-share.repository';
 import type { IHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
+import type { IUserRepository } from '$lib/infrastructure/repositories/user.repository';
 import { consumeRateLimit } from '$lib/server/auth-rate-limit';
 import { recordProductEvent } from '$lib/server/product-events';
+
+export type MarketPickupPaymentContext = {
+	askingPriceSek: number;
+	items: ExpiringShareItemSnapshot[];
+	sharerSwishNumber: string | null;
+	isSeeker: boolean;
+	sharerFirstName: string;
+};
 
 export type MarketChatErrorCode =
 	| 'not_found'
@@ -76,6 +92,10 @@ export type MarketChatThreadSummary = MarketChatThreadRow & {
 	myMarkedComplete: boolean;
 	counterpartMarkedComplete: boolean;
 	counterpartFirstName: string;
+	counterpartAvatarUrl: string | null;
+	lastMessageBody: string | null;
+	lastMessageAt: Date;
+	listingPreview: MarketInboxListingPreview | null;
 };
 
 const MESSAGE_RATE_MAX = 30;
@@ -87,7 +107,8 @@ export class MarketChatService {
 		private readonly expiringShareRepository: IExpiringShareRepository,
 		private readonly householdRepository: IHouseholdRepository,
 		private readonly pmfService: PmfService,
-		private readonly pushService?: MarketChatPushService
+		private readonly pushService?: MarketChatPushService,
+		private readonly userRepository?: IUserRepository
 	) {}
 
 	async createOrGetThread(input: {
@@ -157,6 +178,7 @@ export class MarketChatService {
 		MarketChatResult<{
 			thread: MarketChatThreadRow;
 			messages: MarketChatMessageRow[];
+			paymentContext: MarketPickupPaymentContext | null;
 		}>
 	> {
 		const thread = await this.repository.findThreadById(threadId);
@@ -170,7 +192,14 @@ export class MarketChatService {
 
 		await this.markThreadRead(thread, userId);
 		const messages = await this.repository.listMessagesForThread(threadId);
-		return { ok: true, data: { thread, messages } };
+		const profiles = await this.repository.findMarketProfiles([thread.sharerUserId]);
+		const sharerProfile = profiles.find((profile) => profile.userId === thread.sharerUserId);
+		const paymentContext = await this.resolvePickupPaymentContext(
+			thread,
+			userId,
+			marketFirstName(sharerProfile ?? {})
+		);
+		return { ok: true, data: { thread, messages, paymentContext } };
 	}
 
 	async listThreads(userId: string): Promise<
@@ -188,18 +217,32 @@ export class MarketChatService {
 		const counterpartIds = threads.map((thread) =>
 			userId === thread.seekerUserId ? thread.sharerUserId : thread.seekerUserId
 		);
-		const profiles = await this.repository.findMarketProfiles([...new Set(counterpartIds)]);
+		const uniqueShareIds = [...new Set(threads.map((thread) => thread.shareId))];
+		const [profiles, sharePreviews] = await Promise.all([
+			this.repository.findMarketProfiles([...new Set(counterpartIds)]),
+			Promise.all(uniqueShareIds.map((shareId) => this.expiringShareRepository.findPreviewById(shareId)))
+		]);
 		const profileByUserId = new Map(profiles.map((profile) => [profile.userId, profile]));
+		const previewByShareId = new Map(
+			uniqueShareIds.map((shareId, index) => [shareId, sharePreviews[index] ?? null])
+		);
 
 		const summaries = threads.map((thread) => {
 			const counterpartUserId =
 				userId === thread.seekerUserId ? thread.sharerUserId : thread.seekerUserId;
 			const counterpartProfile = profileByUserId.get(counterpartUserId);
+			const latestMessage = latestByThread.get(thread.id) ?? null;
+			const listingPreview = this.toInboxListingPreview(previewByShareId.get(thread.shareId) ?? null);
 			return {
-				...this.toThreadSummary(thread, userId, latestByThread.get(thread.id) ?? null),
-				counterpartFirstName: marketFirstName(counterpartProfile ?? {})
+				...this.toThreadSummary(thread, userId, latestMessage),
+				counterpartFirstName: marketFirstName(counterpartProfile ?? {}),
+				counterpartAvatarUrl: marketAvatarUrl(counterpartProfile ?? {}),
+				lastMessageBody: latestMessage?.body ?? null,
+				lastMessageAt: latestMessage?.createdAt ?? thread.createdAt,
+				listingPreview
 			};
 		});
+		summaries.sort((left, right) => right.lastMessageAt.getTime() - left.lastMessageAt.getTime());
 		const unreadCount = summaries.filter((thread) => thread.unread).length;
 
 		return { ok: true, data: { threads: summaries, unreadCount } };
@@ -217,6 +260,7 @@ export class MarketChatService {
 			counterpartRating: MarketThreadRatingView | null;
 			myMarkedComplete: boolean;
 			counterpartMarkedComplete: boolean;
+			paymentContext: MarketPickupPaymentContext | null;
 		}>
 	> {
 		const result = await this.getThread(threadId, userId);
@@ -224,7 +268,7 @@ export class MarketChatService {
 			return result;
 		}
 
-		const { thread, messages } = result.data;
+		const { thread, messages, paymentContext } = result.data;
 		const counterpartUserId =
 			userId === thread.seekerUserId ? thread.sharerUserId : thread.seekerUserId;
 		const role = marketThreadRoleForUser(thread, userId);
@@ -274,8 +318,46 @@ export class MarketChatService {
 						? hasUserMarkedExchangeComplete(thread, 'sharer')
 						: role === 'sharer'
 							? hasUserMarkedExchangeComplete(thread, 'seeker')
-							: false
+							: false,
+				paymentContext
 			}
+		};
+	}
+
+	private async resolvePickupPaymentContext(
+		thread: MarketChatThreadRow,
+		userId: string,
+		sharerFirstName: string
+	): Promise<MarketPickupPaymentContext | null> {
+		if (!shouldShowPickupPaymentCard(thread.lifecycleStatus)) {
+			return null;
+		}
+
+		const share = await this.expiringShareRepository.findShareForNearbyPush(thread.shareId);
+		if (!share) {
+			return null;
+		}
+
+		const items = share.snapshot.items;
+		if (!hasPaidListingItems(items)) {
+			return null;
+		}
+
+		const askingPriceSek = sumListingAskingPriceSek(items);
+		if (askingPriceSek <= 0) {
+			return null;
+		}
+
+		const settings = this.userRepository
+			? await this.userRepository.getMarketListingSettings(thread.sharerUserId)
+			: { marketSwishNumber: null, marketDefaultPricePercent: null };
+
+		return {
+			askingPriceSek,
+			items,
+			sharerSwishNumber: settings.marketSwishNumber,
+			isSeeker: userId === thread.seekerUserId,
+			sharerFirstName
 		};
 	}
 
@@ -727,7 +809,14 @@ export class MarketChatService {
 		thread: MarketChatThreadRow,
 		userId: string,
 		latestMessage: { authorUserId: string; createdAt: Date } | null
-	): Omit<MarketChatThreadSummary, 'counterpartFirstName'> {
+	): Omit<
+		MarketChatThreadSummary,
+		| 'counterpartFirstName'
+		| 'counterpartAvatarUrl'
+		| 'lastMessageBody'
+		| 'lastMessageAt'
+		| 'listingPreview'
+	> {
 		const role = marketThreadRoleForUser(thread, userId);
 		return {
 			...thread,
@@ -739,6 +828,21 @@ export class MarketChatService {
 					: role === 'sharer'
 						? hasUserMarkedExchangeComplete(thread, 'seeker')
 						: false
+		};
+	}
+
+	private toInboxListingPreview(
+		preview: Awaited<ReturnType<IExpiringShareRepository['findPreviewById']>>
+	): MarketInboxListingPreview | null {
+		const item = preview?.items[0];
+		if (!item) {
+			return null;
+		}
+
+		return {
+			title: item.name,
+			pricingMode: item.pricingMode,
+			askingPriceSek: item.askingPriceSek
 		};
 	}
 

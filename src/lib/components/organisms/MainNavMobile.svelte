@@ -13,12 +13,16 @@
 	import { t } from '$lib/i18n';
 	import {
 		isNavActive,
+		isMarketV01NavItem,
 		navItemTestId,
 		resolveNavHref,
 		type NavItem,
 		type NavUser
 	} from '$lib/navigation/nav-config';
+	import { getMarketUnreadCount } from '$lib/stores/market-unread.svelte';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
+	import { MARKET_V01_PATH } from '$lib/domain/market-v01';
+	import { isMarketShellFullscreenRoute } from '$lib/domain/market-shell';
 	import { subscribeNarrowViewport } from '$lib/utils/use-narrow-viewport';
 
 	interface Props {
@@ -51,6 +55,9 @@
 
 	const pathname = $derived(page.url.pathname);
 	const isPro = $derived(Boolean(page.data.isPro));
+	const hideBottomNav = $derived(
+		pathname.startsWith(MARKET_V01_PATH) && !isMarketShellFullscreenRoute(pathname)
+	);
 
 	let isNarrowViewport = $state(false);
 
@@ -63,6 +70,9 @@
 	const moreActive = $derived(
 		mobileSecondary.some((item) => isNavActive(pathname, item)) ||
 			(moreOpen && mobileSecondary.length > 0)
+	);
+	const showMarketUnreadInMore = $derived(
+		mobileSecondary.some((item) => isMarketV01NavItem(item) && getMarketUnreadCount() > 0)
 	);
 
 	function navLinkClass(active: boolean): string {
@@ -110,7 +120,7 @@
 			/>
 		</Modal>
 	{/if}
-{:else}
+{:else if !hideBottomNav}
 	<nav
 		class="mobile-bottom"
 		use:portal={'body'}
@@ -165,6 +175,11 @@
 						<span class="tab-label">{t('nav.more')}</span>
 						{#if staleCount > 0 && canWrite}
 							<span class="stale-dot" aria-label={t('nav.staleBadge', { count: staleCount })}></span>
+						{:else if showMarketUnreadInMore}
+							<span
+								class="stale-dot"
+								aria-label={t('marketV01.unreadChatsBadge', { count: getMarketUnreadCount() })}
+							></span>
 						{/if}
 						{#if moreActive}
 							<span class="tab-indicator" aria-hidden="true"></span>

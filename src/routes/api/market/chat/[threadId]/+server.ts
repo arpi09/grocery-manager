@@ -29,6 +29,7 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 	return json({
 		ok: true,
 		thread: result.data.thread,
-		messages: result.data.messages
+		messages: result.data.messages,
+		paymentContext: result.data.paymentContext
 	});
 };

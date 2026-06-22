@@ -3,9 +3,11 @@ import type { ExpiringShareService } from '$lib/application/expiring-share.servi
 import type { HouseholdService } from '$lib/application/household.service';
 import type { InventoryService } from '$lib/application/inventory.service';
 import type { PmfService } from '$lib/application/pmf.service';
+import type { InventoryItem } from '$lib/domain/inventory-item';
 import {
 	EXPIRING_SHARE_PRO_TTL_MS,
-	EXPIRING_SHARE_TTL_MS
+	EXPIRING_SHARE_TTL_MS,
+	type ExpiringShareSnapshot
 } from '$lib/domain/expiring-share';
 import {
 	coarseGeoCoordinate,
@@ -13,9 +15,15 @@ import {
 	isValidLongitude
 } from '$lib/domain/geo';
 import { isMarketV01BackendEnabled } from '$lib/domain/market-v01';
+import {
+	applyPricingToItemSnapshot,
+	resolveAutoListingItemPricing,
+	type MarketItemPricingInput
+} from '$lib/domain/market-pricing';
 import { isProTier, resolveEffectivePlanTier } from '$lib/domain/plan';
 import type { ProductEventType } from '$lib/domain/pmf';
 import type { IExpiringShareRepository } from '$lib/infrastructure/repositories/expiring-share.repository';
+import type { IPriceMemoryRepository } from '$lib/infrastructure/repositories/price-memory.repository';
 import type { IUserRepository } from '$lib/infrastructure/repositories/user.repository';
 import { recordProductEvent } from '$lib/server/product-events';
 
@@ -39,7 +47,8 @@ export class MarketListingService {
 		private readonly userRepository: IUserRepository,
 		private readonly householdService: HouseholdService,
 		private readonly billingService: BillingService,
-		private readonly pmfService: PmfService
+		private readonly pmfService: PmfService,
+		private readonly priceMemoryRepository: IPriceMemoryRepository
 	) {}
 
 	async refreshAutoNearbyListing(
@@ -58,7 +67,14 @@ export class MarketListingService {
 
 		const hadActive = await this.expiringShareRepository.findActiveAutoNearbyListing(householdId);
 		const inventory = await this.inventoryService.listAll(householdId);
-		const snapshot = this.expiringShareService.buildSnapshot(inventory);
+		const listingSettings = await this.userRepository.getMarketListingSettings(userId);
+		const baseSnapshot = this.expiringShareService.buildSnapshot(inventory);
+		const snapshot = await this.enrichSnapshotWithPricing(
+			householdId,
+			inventory,
+			baseSnapshot,
+			listingSettings.marketDefaultPricePercent
+		);
 
 		if (snapshot.items.length === 0) {
 			if (hadActive) {
@@ -104,6 +120,12 @@ export class MarketListingService {
 				shareId,
 				itemCount: snapshot.items.length
 			});
+			if (snapshot.items.some((item) => item.pricingMode === 'percent_of_reference')) {
+				this.emitEvent(userId, householdId, 'market_listing_priced', {
+					shareId,
+					itemCount: snapshot.items.length
+				});
+			}
 		}
 
 		return { status: 'published', shareId, itemCount: snapshot.items.length };
@@ -137,6 +159,24 @@ export class MarketListingService {
 		}
 
 		return summary;
+	}
+
+	async buildListingSnapshot(
+		householdId: string,
+		userId: string,
+		options?: { itemPricing?: Record<string, MarketItemPricingInput | undefined> }
+	): Promise<ExpiringShareSnapshot> {
+		const inventory = await this.inventoryService.listAll(householdId);
+		const listingSettings = await this.userRepository.getMarketListingSettings(userId);
+		const baseSnapshot = this.expiringShareService.buildSnapshot(inventory, {
+			itemPricing: options?.itemPricing
+		});
+		return this.enrichSnapshotWithPricing(
+			householdId,
+			inventory,
+			baseSnapshot,
+			listingSettings.marketDefaultPricePercent
+		);
 	}
 
 	async clearAutoListingsForUser(userId: string): Promise<AutoListingBatchResult> {
@@ -188,6 +228,61 @@ export class MarketListingService {
 		}
 
 		return summary;
+	}
+
+	private async enrichSnapshotWithPricing(
+		householdId: string,
+		inventory: InventoryItem[],
+		snapshot: ExpiringShareSnapshot,
+		defaultPricePercent: number | null
+	): Promise<ExpiringShareSnapshot> {
+		const inventoryByName = new Map<string, InventoryItem[]>();
+		for (const item of inventory) {
+			const bucket = inventoryByName.get(item.name) ?? [];
+			bucket.push(item);
+			inventoryByName.set(item.name, bucket);
+		}
+
+		const pricedItems = await Promise.all(
+			snapshot.items.map(async (itemSnapshot) => {
+				if (itemSnapshot.pricingMode && itemSnapshot.pricingMode !== 'free') {
+					return itemSnapshot;
+				}
+
+				const candidates = inventoryByName.get(itemSnapshot.name) ?? [];
+				const inventoryItem =
+					candidates.find(
+						(candidate) =>
+							candidate.quantity === itemSnapshot.quantity &&
+							candidate.location === itemSnapshot.location
+					) ?? candidates[0];
+				if (!inventoryItem) {
+					return itemSnapshot;
+				}
+
+				const summary = await this.priceMemoryRepository.getSummaryByInventoryItemId(
+					householdId,
+					inventoryItem.id
+				);
+				const unitPrice = summary?.lastPaid?.unitPrice ?? null;
+				const pricing = resolveAutoListingItemPricing({
+					quantity: itemSnapshot.quantity,
+					unitPrice,
+					defaultPricePercent
+				});
+
+				if (pricing.pricingMode === 'free') {
+					return itemSnapshot;
+				}
+
+				return applyPricingToItemSnapshot(itemSnapshot, pricing);
+			})
+		);
+
+		return {
+			...snapshot,
+			items: pricedItems
+		};
 	}
 
 	private tallyBatchResult(summary: AutoListingBatchResult, result: AutoListingRefreshResult): void {

@@ -98,6 +98,7 @@ export class MarketDemoService {
 				role: 'user',
 				displayName: fixture.sharerFirstName,
 				marketFirstName: fixture.sharerFirstName,
+				marketSwishNumber: fixture.marketSwishNumber ?? null,
 				createdAt: now
 			});
 

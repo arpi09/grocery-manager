@@ -3,7 +3,7 @@
 	import { lifecycleStepIndex } from '$lib/domain/market-lifecycle';
 	import { t } from '$lib/i18n';
 
-	let { status }: { status: MarketLifecycleStatus } = $props();
+	let { status, compact = false }: { status: MarketLifecycleStatus; compact?: boolean } = $props();
 
 	const steps = $derived([
 		t('marketV03.stepTalking'),
@@ -15,7 +15,7 @@
 	const activeIndex = $derived(lifecycleStepIndex(status));
 </script>
 
-<nav class="stepper" aria-label={t('marketV03.stepperAria')}>
+<nav class="stepper" class:compact aria-label={t('marketV03.stepperAria')}>
 	<ol>
 		{#each steps as label, index}
 			<li
@@ -40,6 +40,27 @@
 <style>
 	.stepper {
 		margin-bottom: var(--space-md);
+	}
+
+	.stepper.compact {
+		margin-bottom: 0;
+	}
+
+	.compact ol {
+		margin-bottom: var(--space-2xs);
+	}
+
+	.compact .label {
+		font-size: 0.625rem;
+	}
+
+	.compact .dot {
+		width: 0.5rem;
+		height: 0.5rem;
+	}
+
+	.compact .track {
+		height: 0.125rem;
 	}
 
 	ol {

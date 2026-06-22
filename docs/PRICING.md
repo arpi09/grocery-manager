@@ -164,14 +164,88 @@ Konstanter: `STRIPE_READINESS_GATES` i `plan.ts`.
 
 ---
 
-## 9. Relaterade dokument
+## 9. Grannskafferiet — köparskydd (utkast v0.6)
+
+*Status: **hypotes / utkast**. Gäller **inte** v0.4 (offline Swish vid mötet) eller v0.5 (mobile shell). Se [GRANNSKAFFERIET_MARKET_V06_ESCROW.md](./GRANNSKAFFERIET_MARKET_V06_ESCROW.md) för teknisk design.*
+
+Om vi senare erbjuder **in-app escrow** (Stripe Connect, betalning före upphämtning) kan plattformen ta en **köparskyddsavgift** från köparen — liknande Vinted Buyer Protection, men anpassat för lokal mat med fysiskt möte.
+
+### 9.1 Principer
+
+| Princip | Beslut |
+|---------|--------|
+| **Vem betalar** | Köparen (transparent rad i checkout) |
+| **Säljare** | Får listat `askingPriceSek` vid release efter "Upp hämtat"; ingen plattformsavgift på säljare i v0.6.0 |
+| **Gratis listningar** | Ingen escrow — offline som v0.4 |
+| **Pro-prenumeration** | Separat produkt (§3); köparskydd är **inte** inkluderat i Pro |
+| **Stripe-kostnad** | Card processing (~1,4 % + 1,80 kr EU cards) äts av plattformen ur köparskyddsavgiften eller som separat rad — beslut vid implementation |
+
+### 9.2 Fee-modeller (jämförelse)
+
+| Modell | Exempel (35 kr vara) | Fördelar | Nackdelar |
+|--------|---------------------|----------|-----------|
+| **A — Fast avgift** | 5 kr köparskydd | Enkelt, förutsägbart | Hög % på billiga varor |
+| **B — Procent + minimum** | 5 %, min 3 kr, max 25 kr | Skalar med pris | Kräver tydlig max-cap copy |
+| **C — Steg** | 0–50 kr → 3 kr; 51–150 kr → 5 % | Balanserar små köp | Mer komplex UI |
+
+**Rekommendation (utkast): modell B** — **5 % av `askingPriceSek`, minimum 3 kr, maximum 25 kr**, avrundat uppåt till hel krona.
+
+Exempel:
+
+| `askingPriceSek` | Köparskydd | Köpare betalar totalt |
+|------------------|------------|------------------------|
+| 15 kr | 3 kr (min) | 18 kr |
+| 35 kr | 2 kr (5 % → **3 kr** min) | 38 kr |
+| 80 kr | 4 kr | 84 kr |
+| 200 kr | 10 kr | 210 kr |
+| 600 kr | 25 kr (cap) | 625 kr |
+
+*Notera: 5 % av 35 kr = 1,75 kr → minimum 3 kr gäller.*
+
+### 9.3 Vad köparskydd täcker (produktcopy — utkast)
+
+- Pengar hålls tills **båda** bekräftat upphämtat i appen (samma som v0.3 handover).
+- Vid utebliven leverans / avbruten affär **före** handover: återbetalning till köparen.
+- Vid allvarlig rapport (`unsafe`, `misleading` under review): escrow fryses; manuell prövning.
+- **Efter** lyckad handover: ingen automatisk återbetalning — kvalitet hanteras via betyg + support (som Vinted efter "Allt OK").
+
+FAQ-sats: *"Köparskyddet är en serviceavgift till Skaffu för reserverad betalning och medling vid avbrutna affärer före upphämtning. Skaffu säljer inte maten."*
+
+### 9.4 Enhetsekonomi (grovt)
+
+Antag modell B, 35 kr vara, 3 kr köparskydd:
+
+| Post | SEK |
+|------|-----|
+| Köparskyddsintäkt | 3,00 |
+| Stripe card (~1,4 % + 1,80 på 38 kr total) | ≈ −2,33 |
+| **Bruttomarginal per escrow-transaktion** | ≈ **0,67** |
+
+Låg marginal per transaktion — escrow är **trust / retention**, inte primär intäktsmotor. Volym eller högre cap behövs för meningsfull intäkt; alternativt lägre processing via debitering på totalbelopp med `application_fee_amount`.
+
+**Trigger för att låsa fee:** ≥ 200 escrow-transaktioner i admin-lab + dispute rate < 2 %.
+
+### 9.5 Teknisk mappning
+
+| Concept | Plats |
+|---------|--------|
+| Fee-beräkning | Ny domain `market-escrow-pricing.ts` (v0.6) |
+| Stripe `application_fee_amount` | `MarketEscrowService` vid PI create |
+| Visning i checkout | "Vara 35 kr + Köparskydd 3 kr = 38 kr" |
+| Befintlig Pro-Stripe | [`src/lib/server/stripe.ts`](../src/lib/server/stripe.ts) — endast prenumeration idag |
+
+---
+
+## 10. Relaterade dokument
 
 - [COMPETITIVE_ANALYSIS.md](./COMPETITIVE_ANALYSIS.md) — §12 Monetisering, §15 punkt 6  
 - [ROADMAP.md](./ROADMAP.md) — Fas 1 Stripe / paywall
 - [90_DAY_ROADMAP.md](./90_DAY_ROADMAP.md) — checklista (fas 0)  
 - [BRAND.md](./BRAND.md) — ton vid paywall-copy  
+- [GRANNSKAFFERIET_MARKET_V05_SHELL.md](./GRANNSKAFFERIET_MARKET_V05_SHELL.md) — Mobile shell (shipped v0.5)
+- [GRANNSKAFFERIET_MARKET_V06_ESCROW.md](./GRANNSKAFFERIET_MARKET_V06_ESCROW.md) — Connect escrow design (v0.6)  
 - `src/lib/marketing/content.ts` — FAQ-svar om pris
 
 ---
 
-*Senast uppdaterad: jun 2026 (Grannskafferiet Pro-radie + push dokumenterade). Ändra denna fil när gränser eller prishypotes justeras — håll `plan.ts` i synk.*
+*Senast uppdaterad: jun 2026 (Grannskafferiet köparskydd utkast v0.6; v0.5 shell shipped). Ändra denna fil när gränser eller prishypotes justeras — håll `plan.ts` i synk.*

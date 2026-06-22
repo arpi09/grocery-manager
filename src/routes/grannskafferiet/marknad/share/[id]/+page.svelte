@@ -6,6 +6,8 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import NearbyShareReportButton from '$lib/components/molecules/NearbyShareReportButton.svelte';
+	import MarketListingPriceBadge from '$lib/components/molecules/MarketListingPriceBadge.svelte';
+	import MarketListingQuantityLabel from '$lib/components/molecules/MarketListingQuantityLabel.svelte';
 	import MarketSharerProfile from '$lib/components/molecules/MarketSharerProfile.svelte';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
 	import { getLocale, t } from '$lib/i18n';
@@ -81,11 +83,19 @@
 							<span class="item-location">{locationLabel(locale, item.location)}</span>
 						</div>
 						<div class="item-meta">
+							<MarketListingPriceBadge item={item} />
 							{#if item.expiresOn}
 								{@const daysLeft = daysUntilExpiry(item.expiresOn)}
 								<Badge tone="warning">{formatDaysLeft(daysLeft, locale)}</Badge>
 							{/if}
-							<span class="quantity">{item.quantity}{item.unit ? ` ${item.unit}` : ''}</span>
+							<MarketListingQuantityLabel
+								quantity={item.quantity}
+								unit={item.unit}
+								portionPercent={item.portionPercent}
+							/>
+							{#if item.portionNote}
+								<span class="portion-note">{item.portionNote}</span>
+							{/if}
 						</div>
 					</Card>
 				</li>
@@ -173,9 +183,15 @@
 	}
 
 	.item-location,
-	.quantity {
+	.quantity,
+	.portion-note {
 		font-size: var(--text-sm);
 		color: var(--color-text-muted);
+	}
+
+	.portion-note {
+		max-width: 16rem;
+		text-align: right;
 	}
 
 	.item-meta {

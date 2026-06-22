@@ -49,6 +49,8 @@ export const userTable = pgTable('user', {
 	marketChatPushEnabled: boolean('market_chat_push_enabled').notNull().default(false),
 	autoNearbyListingEnabled: boolean('auto_nearby_listing_enabled').notNull().default(false),
 	marketFirstName: text('market_first_name'),
+	marketSwishNumber: text('market_swish_number'),
+	marketDefaultPricePercent: integer('market_default_price_percent'),
 	themePreference: text('theme_preference', { enum: ['light', 'dark', 'system'] }).notNull().default('system'),
 	shoppingToPantryMode: text('shopping_to_pantry_mode', {
 		enum: ['always', 'ask', 'never']
@@ -483,10 +485,12 @@ export const productEventTable = pgTable(
 				'ata_week_view_toggled',
 				'market_auto_listing_published',
 				'market_auto_listing_cleared',
+				'market_listing_priced',
 				'market_listing_viewed',
 				'market_chat_started',
 				'market_chat_message_sent',
 				'market_exchange_rated',
+				'market_swish_link_opened',
 				'capacitor_app_opened',
 				'capacitor_share_received'
 			]

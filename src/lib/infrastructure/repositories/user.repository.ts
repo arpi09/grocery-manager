@@ -4,6 +4,7 @@ import { userTable } from '$lib/infrastructure/db/schema';
 import type { SignupUtm } from '$lib/domain/signup-utm';
 import type { ShoppingToPantryMode } from '$lib/domain/shopping-to-pantry';
 import type { ThemePreference } from '$lib/domain/theme';
+import type { MarketListingSettings } from '$lib/domain/market-pricing';
 import type { UserProfile } from '$lib/domain/user';
 
 export interface UserAuthRow {
@@ -48,6 +49,14 @@ export interface IUserRepository {
 	getAutoNearbyListingEnabled(userId: string): Promise<boolean>;
 	updateAutoNearbyListingEnabled(userId: string, enabled: boolean): Promise<boolean>;
 	listUsersWithAutoNearbyListingEnabled(): Promise<Array<{ id: string }>>;
+	getMarketListingSettings(userId: string): Promise<MarketListingSettings>;
+	updateMarketListingSettings(
+		userId: string,
+		data: {
+			marketDefaultPricePercent?: number | null;
+			marketSwishNumber?: string | null;
+		}
+	): Promise<MarketListingSettings | null>;
 }
 
 function mapProfile(row: {
@@ -247,5 +256,57 @@ export class DrizzleUserRepository implements IUserRepository {
 			.select({ id: userTable.id })
 			.from(userTable)
 			.where(eq(userTable.autoNearbyListingEnabled, true));
+	}
+
+	async getMarketListingSettings(userId: string): Promise<MarketListingSettings> {
+		const [row] = await this.db
+			.select({
+				marketSwishNumber: userTable.marketSwishNumber,
+				marketDefaultPricePercent: userTable.marketDefaultPricePercent
+			})
+			.from(userTable)
+			.where(eq(userTable.id, userId))
+			.limit(1);
+
+		return {
+			marketSwishNumber: row?.marketSwishNumber ?? null,
+			marketDefaultPricePercent: row?.marketDefaultPricePercent ?? null
+		};
+	}
+
+	async updateMarketListingSettings(
+		userId: string,
+		data: {
+			marketDefaultPricePercent?: number | null;
+			marketSwishNumber?: string | null;
+		}
+	): Promise<MarketListingSettings | null> {
+		const patch: {
+			marketDefaultPricePercent?: number | null;
+			marketSwishNumber?: string | null;
+		} = {};
+
+		if (data.marketDefaultPricePercent !== undefined) {
+			patch.marketDefaultPricePercent = data.marketDefaultPricePercent;
+		}
+		if (data.marketSwishNumber !== undefined) {
+			patch.marketSwishNumber = data.marketSwishNumber;
+		}
+		if (Object.keys(patch).length === 0) {
+			return null;
+		}
+
+		const [row] = await this.db
+			.update(userTable)
+			.set(patch)
+			.where(eq(userTable.id, userId))
+			.returning();
+
+		return row
+			? {
+					marketSwishNumber: row.marketSwishNumber ?? null,
+					marketDefaultPricePercent: row.marketDefaultPricePercent ?? null
+				}
+			: null;
 	}
 }

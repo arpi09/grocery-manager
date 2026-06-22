@@ -11,11 +11,13 @@
 	import { t } from '$lib/i18n';
 	import {
 		isNavActive,
+		isMarketV01NavItem,
 		navItemTestId,
 		resolveNavHref,
 		type NavItem,
 		type NavUser
 	} from '$lib/navigation/nav-config';
+	import { getMarketUnreadCount } from '$lib/stores/market-unread.svelte';
 	import type { UserHouseholdSummary } from '$lib/domain/household';
 
 	interface Props {
@@ -56,6 +58,9 @@
 	const moreActive = $derived(
 		secondary.some((item) => isNavActive(pathname, item)) || (moreOpen && secondary.length > 0)
 	);
+	const showMarketUnreadInMore = $derived(
+		secondary.some((item) => showMarketUnreadDot(item)) && !moreOpen
+	);
 
 	function navLinkClass(active: boolean): string {
 		return ['nav-link', active ? 'active' : ''].filter(Boolean).join(' ');
@@ -63,6 +68,10 @@
 
 	function showBadge(item: NavItem): boolean {
 		return item.badge === 'stale' && showStaleBadge;
+	}
+
+	function showMarketUnreadDot(item: NavItem): boolean {
+		return isMarketV01NavItem(item) && getMarketUnreadCount() > 0;
 	}
 
 	function onWindowKeydown(event: KeyboardEvent) {
@@ -136,6 +145,12 @@
 						>
 							<NavIcon id="more" />
 							<span class="nav-link-label">{t('nav.more')}</span>
+							{#if showMarketUnreadInMore}
+								<span
+									class="market-unread-dot"
+									aria-label={t('marketV01.unreadChatsBadge', { count: getMarketUnreadCount() })}
+								></span>
+							{/if}
 						</button>
 						{#if moreOpen}
 							<button
@@ -164,7 +179,17 @@
 										data-testid={navItemTestId(item) ?? `nav-more-${item.icon}`}
 										onclick={onCloseMore}
 									>
-										<NavIcon id={item.icon} />
+										<span class="more-item-icon">
+											<NavIcon id={item.icon} />
+											{#if showMarketUnreadDot(item)}
+												<span
+													class="market-unread-dot"
+													aria-label={t('marketV01.unreadChatsBadge', {
+														count: getMarketUnreadCount()
+													})}
+												></span>
+											{/if}
+										</span>
 										<span>{t(item.labelKey)}</span>
 									</a>
 								{/each}
@@ -290,6 +315,29 @@
 	.more-wrap {
 		position: relative;
 		flex-shrink: 0;
+	}
+
+	.more-item-icon {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.market-unread-dot {
+		position: absolute;
+		top: -0.15rem;
+		right: -0.25rem;
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 999px;
+		background: var(--color-warning);
+		border: 2px solid var(--nav-surface);
+	}
+
+	.more-trigger {
+		position: relative;
 	}
 
 	.desktop-more-backdrop {

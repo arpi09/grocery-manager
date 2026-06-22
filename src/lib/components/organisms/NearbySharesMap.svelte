@@ -7,6 +7,9 @@
 		id: string;
 		mapLat: number;
 		mapLng: number;
+		pinLabel?: string | null;
+		hasActiveChat?: boolean;
+		chatUnread?: boolean;
 	}
 
 	interface Props {
@@ -130,6 +133,24 @@
 			if (share.id === selectedShareId) {
 				markerEl.classList.add('selected');
 			}
+			if (share.chatUnread) {
+				markerEl.classList.add('has-chat-unread');
+			} else if (share.hasActiveChat) {
+				markerEl.classList.add('has-chat');
+			}
+
+			const labelEl = document.createElement('span');
+			labelEl.className = 'nearby-map-marker-label';
+			labelEl.textContent = share.pinLabel?.trim() || '•';
+			markerEl.appendChild(labelEl);
+
+			if (share.chatUnread || share.hasActiveChat) {
+				const chatDot = document.createElement('span');
+				chatDot.className = 'nearby-map-marker-chat';
+				chatDot.setAttribute('aria-hidden', 'true');
+				markerEl.appendChild(chatDot);
+			}
+
 			markerEl.addEventListener('click', (event) => {
 				event.stopPropagation();
 				onSelectShare?.(share.id);
@@ -384,14 +405,41 @@
 	}
 
 	:global(.nearby-map-marker) {
-		width: 2.75rem;
-		height: 2.75rem;
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 2.75rem;
+		min-height: 2.75rem;
+		padding: 0.35rem 0.55rem;
 		border-radius: 999px;
 		border: 2px solid var(--color-surface);
 		background: var(--color-primary);
 		box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent);
 		cursor: pointer;
-		padding: 0;
+	}
+
+	:global(.nearby-map-marker-label) {
+		font-size: 0.6875rem;
+		font-weight: 700;
+		line-height: 1;
+		color: var(--color-surface);
+		white-space: nowrap;
+	}
+
+	:global(.nearby-map-marker-chat) {
+		position: absolute;
+		top: -0.1rem;
+		right: -0.1rem;
+		width: 0.625rem;
+		height: 0.625rem;
+		border-radius: 999px;
+		border: 2px solid var(--color-surface);
+		background: var(--color-text-muted);
+	}
+
+	:global(.nearby-map-marker.has-chat-unread .nearby-map-marker-chat) {
+		background: var(--color-warning, #d97706);
 	}
 
 	:global(.nearby-map-marker.selected) {

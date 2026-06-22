@@ -26,6 +26,7 @@ export interface MarketDemoListingFixture {
 	latitude: number;
 	longitude: number;
 	items: ExpiringShareItemSnapshot[];
+	marketSwishNumber?: string | null;
 }
 
 function expiresOnDaysFromNow(days: number): string {
@@ -50,6 +51,7 @@ export function marketDemoListingFixtures(center: GeoCoordinate): MarketDemoList
 		sharerFirstName: string;
 		offsetM: number;
 		bearingDeg: number;
+		marketSwishNumber?: string;
 		items: ExpiringShareItemSnapshot[];
 	}> = [
 		{
@@ -63,14 +65,21 @@ export function marketDemoListingFixtures(center: GeoCoordinate): MarketDemoList
 					expiresOn: expiresOnDaysFromNow(1),
 					location: 'fridge',
 					quantity: '2',
-					unit: 'dl'
+					unit: 'dl',
+					pricingMode: 'percent_of_reference',
+					referencePriceSek: 50,
+					referencePriceSource: 'price_memory',
+					portionPercent: 75,
+					pricePercent: 50,
+					askingPriceSek: 25
 				},
 				{
 					name: 'Färskost',
 					expiresOn: expiresOnDaysFromNow(2),
 					location: 'fridge',
 					quantity: '1',
-					unit: 'förp'
+					unit: 'förp',
+					pricingMode: 'free'
 				}
 			]
 		},
@@ -85,21 +94,25 @@ export function marketDemoListingFixtures(center: GeoCoordinate): MarketDemoList
 					expiresOn: expiresOnDaysFromNow(1),
 					location: 'cupboard',
 					quantity: '4',
-					unit: 'st'
+					unit: 'st',
+					pricingMode: 'free',
+					portionPercent: 100
 				},
 				{
 					name: 'Mjölk',
 					expiresOn: expiresOnDaysFromNow(2),
 					location: 'fridge',
 					quantity: '1',
-					unit: 'l'
+					unit: 'l',
+					pricingMode: 'free'
 				},
 				{
 					name: 'Yoghurt',
 					expiresOn: expiresOnDaysFromNow(3),
 					location: 'fridge',
 					quantity: '2',
-					unit: 'st'
+					unit: 'st',
+					pricingMode: 'free'
 				}
 			]
 		},
@@ -108,20 +121,28 @@ export function marketDemoListingFixtures(center: GeoCoordinate): MarketDemoList
 			sharerFirstName: 'Lisa',
 			offsetM: 350,
 			bearingDeg: 290,
+			marketSwishNumber: '0701234567',
 			items: [
 				{
 					name: 'Lasagne',
 					expiresOn: expiresOnDaysFromNow(2),
 					location: 'fridge',
 					quantity: '1',
-					unit: 'förp'
+					unit: 'förp',
+					pricingMode: 'percent_of_reference',
+					referencePriceSek: 30,
+					referencePriceSource: 'price_memory',
+					portionPercent: 50,
+					pricePercent: 100,
+					askingPriceSek: 15
 				},
 				{
 					name: 'Sallad',
 					expiresOn: expiresOnDaysFromNow(1),
 					location: 'fridge',
 					quantity: '1',
-					unit: 'påse'
+					unit: 'påse',
+					pricingMode: 'free'
 				}
 			]
 		},
@@ -161,7 +182,8 @@ export function marketDemoListingFixtures(center: GeoCoordinate): MarketDemoList
 			email: `market-demo-${idSuffix}@demo.skaffu.internal`,
 			latitude: coord.latitude,
 			longitude: coord.longitude,
-			items: template.items
+			items: template.items,
+			...(template.marketSwishNumber ? { marketSwishNumber: template.marketSwishNumber } : {})
 		};
 	});
 }
@@ -237,21 +259,12 @@ export function marketDemoChatFixtures(
 			shareId: lisa.shareId,
 			sharerUserId: lisa.userId,
 			householdId: lisa.householdId,
-			lifecycleStatus: 'completed',
+			lifecycleStatus: 'pickup_agreed',
 			messages: [
 				{ author: 'admin', body: 'Hej Lisa! Är lasagnen fortfarande kvar?', offsetMinutes: -240 },
-				{ author: 'sharer', body: 'Ja, den väntar i kylen!', offsetMinutes: -210 }
-			],
-			adminRating: {
-				stars: 5,
-				comment: 'Snabb och trevlig — lasagnen smakade utmärkt!',
-				itemsAsDescribed: 'yes'
-			},
-			sharerRating: {
-				stars: 4,
-				comment: 'Smidigt utbyte, tack!',
-				itemsAsDescribed: 'yes'
-			}
+				{ author: 'sharer', body: 'Ja — ca halva förpackningen kvar, 15 kr vid hämtning.', offsetMinutes: -210 },
+				{ author: 'admin', body: 'Toppen, vi ses i kväll!', offsetMinutes: -180 }
+			]
 		});
 	}
 

@@ -3,10 +3,12 @@
 	import { t } from '$lib/i18n';
 	import {
 		isNavActive,
+		isMarketV01NavItem,
 		navItemTestId,
 		resolveNavHref,
 		type NavItem
 	} from '$lib/navigation/nav-config';
+	import { getMarketUnreadCount } from '$lib/stores/market-unread.svelte';
 
 	interface Props {
 		pathname: string;
@@ -22,6 +24,10 @@
 
 	function showBadge(item: NavItem): boolean {
 		return item.badge === 'stale' && showStaleBadge;
+	}
+
+	function showMarketUnreadDot(item: NavItem): boolean {
+		return isMarketV01NavItem(item) && getMarketUnreadCount() > 0;
 	}
 </script>
 
@@ -44,6 +50,11 @@
 						<span class="stale-badge" aria-label={t('nav.staleBadge', { count: staleCount })}>
 							{staleCount}
 						</span>
+					{:else if showMarketUnreadDot(item)}
+						<span
+							class="unread-dot"
+							aria-label={t('marketV01.unreadChatsBadge', { count: getMarketUnreadCount() })}
+						></span>
 					{/if}
 				</span>
 				<span class="sheet-label">{t(item.labelKey)}</span>
@@ -119,6 +130,17 @@
 		font-weight: 700;
 		line-height: 1rem;
 		text-align: center;
+	}
+
+	.unread-dot {
+		position: absolute;
+		top: -0.05rem;
+		right: -0.2rem;
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 999px;
+		background: var(--color-warning);
+		border: 2px solid var(--color-surface-muted);
 	}
 
 	.sheet-link.active .sheet-icon-wrap {

@@ -42,8 +42,45 @@ test.describe('Market v0.1 access', () => {
 
 		await page.goto('/grannskafferiet/marknad', { waitUntil: 'commit' });
 		await expect(page.getByTestId('market-v01-page')).toBeVisible({ timeout: 15_000 });
-		await expect(page.getByRole('heading', { level: 1 })).toContainText(
-			/Grannmarknad|Grannskafferiet marknad|Neighbour market/i
-		);
+		await expect(page.getByTestId('market-shell')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('market-shell-tab-map')).toHaveAttribute('aria-current', 'page');
+	});
+});
+
+test.describe('Market v0.5 shell', () => {
+	test.use({ actionTimeout: 45_000 });
+
+	test('admin navigates tabs and chat returns to inbox', async ({ page }) => {
+		test.setTimeout(120_000);
+		await loginAsAdmin(page);
+		await dismissCookieConsentIfOpen(page);
+		await dismissOnboardingModalIfOpen(page);
+
+		const seedResponse = await page.request.post('/api/admin/market/seed-demo');
+		expect(seedResponse.ok()).toBeTruthy();
+
+		await page.goto('/grannskafferiet/marknad', { waitUntil: 'commit' });
+		await expect(page.getByTestId('market-shell')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('market-v01-page')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('market-shell-tab-map')).toHaveAttribute('aria-current', 'page');
+
+		await page.getByTestId('market-shell-tab-messages').click();
+		await expect(page).toHaveURL(/\/grannskafferiet\/marknad\/meddelanden/);
+		await expect(page.getByTestId('market-inbox')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('market-shell-tab-messages')).toHaveAttribute('aria-current', 'page');
+
+		await page.getByTestId('market-shell-tab-profile').click();
+		await expect(page).toHaveURL(/\/grannskafferiet\/marknad\/profil/);
+		await expect(page.getByTestId('market-profile-page')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('market-shell-tab-profile')).toHaveAttribute('aria-current', 'page');
+
+		await page.goto('/grannskafferiet/marknad/chatt/market-demo-thread-1', { waitUntil: 'commit' });
+		await expect(page.getByTestId('market-chat-thread')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('market-shell')).toHaveCount(0);
+
+		await page.getByRole('button', { name: /Tillbaka till meddelanden|Back to messages/i }).click();
+		await expect(page).toHaveURL(/\/grannskafferiet\/marknad\/meddelanden/);
+		await expect(page.getByTestId('market-inbox')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('market-shell-tab-messages')).toHaveAttribute('aria-current', 'page');
 	});
 });

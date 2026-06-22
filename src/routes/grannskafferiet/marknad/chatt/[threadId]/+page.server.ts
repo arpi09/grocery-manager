@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { marketChatService } from '$lib/server/di';
+import { expiringShareRepository, marketChatService } from '$lib/server/di';
 import { guardMarketV01PageLoad } from '$lib/server/market-v01-guard';
 import type { PageServerLoad } from './$types';
 
@@ -14,6 +14,14 @@ export const load: PageServerLoad = async (event) => {
 		error(403);
 	}
 
+	const share = await expiringShareRepository.findShareForNearbyPush(result.data.thread.shareId);
+	const listingContext = share
+		? {
+				shareId: share.id,
+				items: share.snapshot.items
+			}
+		: null;
+
 	return {
 		...base,
 		thread: result.data.thread,
@@ -22,6 +30,8 @@ export const load: PageServerLoad = async (event) => {
 		myRating: result.data.myRating,
 		counterpartRating: result.data.counterpartRating,
 		myMarkedComplete: result.data.myMarkedComplete,
-		counterpartMarkedComplete: result.data.counterpartMarkedComplete
+		counterpartMarkedComplete: result.data.counterpartMarkedComplete,
+		paymentContext: result.data.paymentContext,
+		listingContext
 	};
 };

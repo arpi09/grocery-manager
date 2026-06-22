@@ -300,17 +300,24 @@
 				"/grannskafferiet",
 				"/grannskafferiet/share/[id]",
 				"/grannskafferiet/marknad",
+				"/grannskafferiet/marknad/meddelanden",
+				"/grannskafferiet/marknad/profil",
 				"/grannskafferiet/marknad/chatt/[threadId]",
 				"/grannskafferiet/marknad/share/[id]"
 			],
 			"paths": [
 				"src/routes/grannskafferiet/+page.svelte",
+				"src/routes/grannskafferiet/marknad/+layout.svelte",
 				"src/routes/grannskafferiet/marknad/+page.svelte",
+				"src/routes/grannskafferiet/marknad/meddelanden/+page.svelte",
+				"src/routes/grannskafferiet/marknad/profil/+page.svelte",
+				"src/lib/components/templates/MarketShellLayout.svelte",
 				"src/lib/application/market-listing.service.ts",
 				"src/lib/application/market-chat.service.ts"
 			],
 			"apiOnlyRoutes": [
 				"/api/market/auto-listing-settings",
+				"/api/market/listing-settings",
 				"/api/market/chat",
 				"/api/market/chat/[threadId]",
 				"/api/market/chat/[threadId]/block",

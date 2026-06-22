@@ -24,7 +24,9 @@ describe('ProfileService', () => {
 			deleteUser: vi.fn(),
 			getAutoNearbyListingEnabled: vi.fn(),
 			updateAutoNearbyListingEnabled: vi.fn(),
-			listUsersWithAutoNearbyListingEnabled: vi.fn()
+			listUsersWithAutoNearbyListingEnabled: vi.fn(),
+			getMarketListingSettings: vi.fn(),
+			updateMarketListingSettings: vi.fn()
 		};
 		service = new ProfileService(users);
 	});

@@ -5,6 +5,7 @@ import { ExpiringShareService } from './expiring-share.service';
 import { InventoryService } from './inventory.service';
 import { DrizzleExpiringShareRepository } from '$lib/infrastructure/repositories/expiring-share.repository';
 import { DrizzleInventoryRepository } from '$lib/infrastructure/repositories/inventory.repository';
+import { DrizzlePriceMemoryRepository } from '$lib/infrastructure/repositories/price-memory.repository';
 import { DrizzleUserRepository } from '$lib/infrastructure/repositories/user.repository';
 import { DrizzleHouseholdRepository } from '$lib/infrastructure/repositories/household.repository';
 import { HouseholdService } from '$lib/application/household.service';
@@ -31,6 +32,7 @@ describe('MarketListingService — auto_nearby listing', () => {
 		const expiringShareService = new ExpiringShareService(expiringShareRepository);
 		const inventoryService = new InventoryService(new DrizzleInventoryRepository(integrationDb.db));
 		const userRepository = new DrizzleUserRepository(integrationDb.db);
+		const priceMemoryRepository = new DrizzlePriceMemoryRepository(integrationDb.db);
 		const householdService = new HouseholdService(new DrizzleHouseholdRepository(integrationDb.db));
 		const billingService = new BillingService(
 			new DrizzleBillingRepository(integrationDb.db),
@@ -47,7 +49,8 @@ describe('MarketListingService — auto_nearby listing', () => {
 			userRepository,
 			householdService,
 			billingService,
-			pmfService
+			pmfService,
+			priceMemoryRepository
 		);
 	});
 

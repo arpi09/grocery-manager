@@ -250,7 +250,8 @@ export const marketChatService = new MarketChatService(
 	expiringShareRepository,
 	householdRepository,
 	pmfService,
-	marketChatPushService
+	marketChatPushService,
+	userRepository
 );
 export const marketListingService = new MarketListingService(
 	expiringShareService,
@@ -259,7 +260,8 @@ export const marketListingService = new MarketListingService(
 	userRepository,
 	householdService,
 	billingService,
-	pmfService
+	pmfService,
+	priceMemoryRepository
 );
 export const marketDemoService = new MarketDemoService(
 	expiringShareRepository,

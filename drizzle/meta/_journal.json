@@ -470,6 +470,13 @@
 			"when": 1754064000000,
 			"tag": "0068_market_v03_trust",
 			"breakpoints": true
+		},
+		{
+			"idx": 67,
+			"version": "7",
+			"when": 1754150400000,
+			"tag": "0069_market_v04_pricing",
+			"breakpoints": true
 		}
 	]
 }

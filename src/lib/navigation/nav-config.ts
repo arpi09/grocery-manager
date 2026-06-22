@@ -166,6 +166,10 @@ export function appendMarketV01NavItems(
 	];
 }
 
+export function isMarketV01NavItem(item: NavItem): boolean {
+	return item.href === MARKET_V01_PATH;
+}
+
 export function isNavItemVisible(item: NavItem, user: NavUser | null | undefined): boolean {
 	if (item.roles?.length) {
 		if (!user?.role || !item.roles.includes(user.role as NavRole)) {
