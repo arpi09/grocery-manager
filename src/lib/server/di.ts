@@ -1,4 +1,5 @@
 import { AdminService } from '$lib/application/admin.service';
+import { env } from '$env/dynamic/private';
 import { AccountService } from '$lib/application/account.service';
 import { AuthService } from '$lib/application/auth.service';
 import { PasswordResetService } from '$lib/application/password-reset.service';
@@ -12,6 +13,7 @@ import { ProductCatalogService } from '$lib/application/product-catalog.service'
 import { BarcodeLookupService } from '$lib/application/barcode-lookup.service';
 import { MarketChatService } from '$lib/application/market-chat.service';
 import { MarketListingService } from '$lib/application/market-listing.service';
+import { MarketDemoService } from '$lib/application/market-demo.service';
 import { MealPlanService } from '$lib/application/meal-plan.service';
 import { WeeklyRitualService } from '$lib/application/weekly-ritual.service';
 import { PetFoodService } from '$lib/application/pet-food.service';
@@ -245,6 +247,11 @@ export const marketListingService = new MarketListingService(
 	householdService,
 	billingService,
 	pmfService
+);
+export const marketDemoService = new MarketDemoService(
+	expiringShareRepository,
+	undefined,
+	() => env.MARKET_DEMO_SEED_ENABLED
 );
 export const shoppingListShareService = new ShoppingListShareService(shoppingListShareRepository);
 export const publicCityFeedService = new PublicCityFeedService(expiringShareRepository);

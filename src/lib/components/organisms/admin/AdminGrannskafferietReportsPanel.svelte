@@ -50,6 +50,10 @@
 	let syncing = $state(false);
 	let syncMessage = $state<string | null>(null);
 	let syncError = $state<string | null>(null);
+	let seedingDemo = $state(false);
+	let clearingDemo = $state(false);
+	let demoMessage = $state<string | null>(null);
+	let demoError = $state<string | null>(null);
 	let marketMetrics = $state<ReportsPayload['marketMetrics'] | null>(null);
 
 	$effect(() => {
@@ -97,6 +101,61 @@
 			syncError = t('admin.grannskafferietReports.syncAutoListingFailed');
 		} finally {
 			syncing = false;
+		}
+	}
+
+	async function seedMarketDemo() {
+		seedingDemo = true;
+		demoMessage = null;
+		demoError = null;
+		try {
+			const response = await fetch('/api/admin/market/seed-demo', { method: 'POST' });
+			const payload = (await response.json()) as {
+				ok?: boolean;
+				listingCount?: number;
+				center?: { latitude: number; longitude: number };
+			};
+			if (!response.ok || !payload.ok) {
+				demoError = t('admin.grannskafferietReports.seedMarketDemoFailed');
+				return;
+			}
+			demoMessage = t('admin.grannskafferietReports.seedMarketDemoSuccess', {
+				count: payload.listingCount ?? 0,
+				lat: payload.center?.latitude?.toFixed(3) ?? '—',
+				lng: payload.center?.longitude?.toFixed(3) ?? '—'
+			});
+		} catch {
+			demoError = t('admin.grannskafferietReports.seedMarketDemoFailed');
+		} finally {
+			seedingDemo = false;
+		}
+	}
+
+	async function clearMarketDemo() {
+		clearingDemo = true;
+		demoMessage = null;
+		demoError = null;
+		try {
+			const response = await fetch('/api/admin/market/clear-demo', { method: 'POST' });
+			const payload = (await response.json()) as {
+				ok?: boolean;
+				deletedShares?: number;
+				deletedHouseholds?: number;
+				deletedUsers?: number;
+			};
+			if (!response.ok || !payload.ok) {
+				demoError = t('admin.grannskafferietReports.clearMarketDemoFailed');
+				return;
+			}
+			demoMessage = t('admin.grannskafferietReports.clearMarketDemoSuccess', {
+				shares: payload.deletedShares ?? 0,
+				households: payload.deletedHouseholds ?? 0,
+				users: payload.deletedUsers ?? 0
+			});
+		} catch {
+			demoError = t('admin.grannskafferietReports.clearMarketDemoFailed');
+		} finally {
+			clearingDemo = false;
 		}
 	}
 
@@ -165,6 +224,39 @@
 		{/if}
 		{#if syncError}
 			<p class="sync-error" role="alert">{syncError}</p>
+		{/if}
+	</div>
+
+	<div class="sync-row demo-row">
+		<div class="demo-actions">
+			<button
+				type="button"
+				class="sync-btn"
+				disabled={seedingDemo || clearingDemo}
+				onclick={() => void seedMarketDemo()}
+			>
+				{seedingDemo
+					? t('admin.grannskafferietReports.seedingDemo')
+					: t('admin.grannskafferietReports.seedMarketDemo')}
+			</button>
+			<button
+				type="button"
+				class="sync-btn sync-btn-danger"
+				disabled={seedingDemo || clearingDemo}
+				onclick={() => void clearMarketDemo()}
+			>
+				{clearingDemo
+					? t('admin.grannskafferietReports.clearingDemo')
+					: t('admin.grannskafferietReports.clearMarketDemo')}
+			</button>
+		</div>
+		<p class="note">{t('admin.grannskafferietReports.seedMarketDemoNote')}</p>
+		<p class="note">{t('admin.grannskafferietReports.clearMarketDemoNote')}</p>
+		{#if demoMessage}
+			<p class="sync-ok" role="status">{demoMessage}</p>
+		{/if}
+		{#if demoError}
+			<p class="sync-error" role="alert">{demoError}</p>
 		{/if}
 	</div>
 
@@ -283,6 +375,22 @@
 	.sync-btn:disabled {
 		opacity: 0.6;
 		cursor: not-allowed;
+	}
+
+	.demo-row {
+		padding-top: var(--space-sm);
+		border-top: 1px solid var(--color-border);
+	}
+
+	.demo-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm);
+	}
+
+	.sync-btn-danger {
+		border-color: color-mix(in srgb, var(--color-danger) 40%, var(--color-border));
+		color: var(--color-danger);
 	}
 
 	.sync-ok {
