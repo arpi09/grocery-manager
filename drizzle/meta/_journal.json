@@ -442,6 +442,34 @@
 			"when": 1753718400000,
 			"tag": "0064_market_v01",
 			"breakpoints": true
+		},
+		{
+			"idx": 63,
+			"version": "7",
+			"when": 1753804800000,
+			"tag": "0065_market_live",
+			"breakpoints": true
+		},
+		{
+			"idx": 64,
+			"version": "7",
+			"when": 1753891200000,
+			"tag": "0066_market_chat_report",
+			"breakpoints": true
+		},
+		{
+			"idx": 65,
+			"version": "7",
+			"when": 1753977600000,
+			"tag": "0067_market_v02_exchange",
+			"breakpoints": true
+		},
+		{
+			"idx": 66,
+			"version": "7",
+			"when": 1754064000000,
+			"tag": "0068_market_v03_trust",
+			"breakpoints": true
 		}
 	]
 }

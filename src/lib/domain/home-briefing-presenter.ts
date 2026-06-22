@@ -5,6 +5,7 @@ import {
 } from './household-shopping-cadence';
 import { getTimeOfDay, timeOfDayGreetingKey, type TimeOfDay } from './meal-slot';
 import type { MessageKey } from '$lib/i18n/messages';
+import { locationInLabel } from '$lib/i18n/domain-labels';
 import type { Locale } from '$lib/i18n/locale';
 import type { StorageLocation } from './location';
 import {
@@ -158,7 +159,10 @@ export function buildHomeBriefingForYouPresentation(
 				title: { key: msg(`${prefix}.title`), params: { name: card.item.name } },
 				body: {
 					key: msg(`${prefix}.body`),
-					params: { days: card.daysUntilExpiry, suggestion: card.suggestion }
+					params: {
+						days: card.daysUntilExpiry,
+						location: locationInLabel(locale, card.location)
+					}
 				},
 				cta: { key: msg(`${prefix}.cta`), params: {} }
 			};

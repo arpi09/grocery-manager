@@ -11,6 +11,7 @@ import { isShoppingUxV2Enabled } from '$lib/server/shopping-ux-v2-flag';
 import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { resolveThemeForRequest } from '$lib/server/theme-cookie';
+import { appSettingsService, expiringShareService } from '$lib/server/di';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
@@ -46,6 +47,8 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			shoppingUxV2Enabled,
 			pantryUxV2Enabled,
 			homeUxV2Enabled,
+			marketLiveEnabled: false,
+			nearbySharingEnabled: false
 
 		};
 	}
@@ -91,6 +94,9 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		}
 	}
 
+	const marketLiveStatus = await appSettingsService.getMarketLiveStatus();
+	const nearbySettings = await expiringShareService.getNearbySharingSettings(locals.user.id);
+
 	return {
 		locale,
 		cookieConsent,
@@ -123,6 +129,8 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		shoppingUxV2Enabled,
 		pantryUxV2Enabled,
 		homeUxV2Enabled,
+		marketLiveEnabled: marketLiveStatus.enabledInApp,
+		nearbySharingEnabled: nearbySettings.enabled
 
 	};
 };

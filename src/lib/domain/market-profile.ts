@@ -15,6 +15,13 @@ export interface MarketRatingSummary {
 	ratingCount: number;
 }
 
+export interface MarketPublicReview {
+	stars: number;
+	comment: string | null;
+	raterFirstName: string;
+	createdAt: Date | string;
+}
+
 export function marketFirstName(user: MarketProfileUser): string {
 	const explicit = user.marketFirstName?.trim();
 	if (explicit) {

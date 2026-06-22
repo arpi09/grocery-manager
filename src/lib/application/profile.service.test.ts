@@ -16,6 +16,7 @@ describe('ProfileService', () => {
 			setMustResetPassword: vi.fn(),
 			findProfileById: vi.fn(),
 			updateProfile: vi.fn(),
+			updateMarketProfile: vi.fn(),
 			updateThemePreference: vi.fn(),
 			markEmailVerified: vi.fn(),
 			getShoppingToPantryMode: vi.fn(),
@@ -33,7 +34,8 @@ describe('ProfileService', () => {
 			id: 'user-1',
 			email: 'test@example.com',
 			displayName: 'Test User',
-			avatarUrl: null
+			avatarUrl: null,
+			marketFirstName: null
 		};
 		vi.mocked(users.findProfileById).mockResolvedValue(profile);
 
@@ -51,7 +53,8 @@ describe('ProfileService', () => {
 			id: 'user-1',
 			email: 'test@example.com',
 			displayName: 'New Name',
-			avatarUrl: 'https://example.com/avatar.png'
+			avatarUrl: 'https://example.com/avatar.png',
+			marketFirstName: null
 		};
 		vi.mocked(users.updateProfile).mockResolvedValue(updated);
 

@@ -6,6 +6,7 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import NearbyShareReportButton from '$lib/components/molecules/NearbyShareReportButton.svelte';
+	import MarketSharerProfile from '$lib/components/molecules/MarketSharerProfile.svelte';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
@@ -61,6 +62,15 @@
 			<p class="pantry-note">{t('nearbySharing.sharePreviewPantryNote')}</p>
 			<p class="expires">{t('expiringShare.publicExpires', { date: expiresAtLabel })}</p>
 		</header>
+
+		{#if data.sharer}
+			<MarketSharerProfile
+				firstName={data.sharer.firstName}
+				avatarUrl={data.sharer.avatarUrl}
+				rating={data.sharer.rating}
+				reviews={data.sharer.reviews}
+			/>
+		{/if}
 
 		<ul class="item-list">
 			{#each data.preview.items as item, index (index)}

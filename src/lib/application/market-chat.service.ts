@@ -1,10 +1,33 @@
 import type { PmfService } from '$lib/application/pmf.service';
+import type { MarketChatPushService } from '$lib/application/market-chat-push.service';
 import { canEditInventory } from '$lib/domain/household';
+import {
+	hasUserMarkedExchangeComplete,
+	isExchangeReadyForRating,
+	isThreadUnreadForUser,
+	marketThreadRoleForUser,
+	type MarketExchangeStatus
+} from '$lib/domain/market-exchange';
+import {
+	canPerformLifecycleAction,
+	handoverCompletesExchange,
+	isCounterpartRatingVisible,
+	isThreadMessagingAllowed,
+	isValidItemsAsDescribed,
+	isValidRatingComment,
+	nextLifecycleStatus,
+	normalizeRatingComment,
+	shouldSetPickupAgreedAt,
+	type MarketChatReportReason,
+	type MarketItemsAsDescribed,
+	type MarketLifecycleStatus
+} from '$lib/domain/market-lifecycle';
 import {
 	canStartMarketChat,
 	marketAvatarUrl,
 	marketFirstName,
 	MARKET_CHAT_MESSAGE_MAX_LENGTH,
+	type MarketPublicReview,
 	type MarketRatingSummary
 } from '$lib/domain/market-profile';
 import type {
@@ -37,6 +60,24 @@ export type MarketThreadParticipant = {
 	rating: MarketRatingSummary;
 };
 
+export type MarketThreadRatingView = {
+	stars: number;
+	comment: string | null;
+	itemsAsDescribed: MarketItemsAsDescribed | null;
+};
+
+export type MarketThreadRatingResult = {
+	ratingId: string;
+	counterpartRating: MarketThreadRatingView | null;
+};
+
+export type MarketChatThreadSummary = MarketChatThreadRow & {
+	unread: boolean;
+	myMarkedComplete: boolean;
+	counterpartMarkedComplete: boolean;
+	counterpartFirstName: string;
+};
+
 const MESSAGE_RATE_MAX = 30;
 const MESSAGE_RATE_WINDOW_MS = 60_000;
 
@@ -45,7 +86,8 @@ export class MarketChatService {
 		private readonly repository: IMarketChatRepository,
 		private readonly expiringShareRepository: IExpiringShareRepository,
 		private readonly householdRepository: IHouseholdRepository,
-		private readonly pmfService: PmfService
+		private readonly pmfService: PmfService,
+		private readonly pushService?: MarketChatPushService
 	) {}
 
 	async createOrGetThread(input: {
@@ -126,13 +168,41 @@ export class MarketChatService {
 			return { ok: false, error: 'forbidden' };
 		}
 
+		await this.markThreadRead(thread, userId);
 		const messages = await this.repository.listMessagesForThread(threadId);
 		return { ok: true, data: { thread, messages } };
 	}
 
-	async listThreads(userId: string): Promise<MarketChatResult<{ threads: MarketChatThreadRow[] }>> {
+	async listThreads(userId: string): Promise<
+		MarketChatResult<{
+			threads: MarketChatThreadSummary[];
+			unreadCount: number;
+		}>
+	> {
 		const threads = await this.repository.listThreadsForUser(userId);
-		return { ok: true, data: { threads } };
+		const latestByThread = new Map(
+			(await this.repository.getLatestMessagesForThreads(threads.map((thread) => thread.id))).map(
+				(message) => [message.threadId, message]
+			)
+		);
+		const counterpartIds = threads.map((thread) =>
+			userId === thread.seekerUserId ? thread.sharerUserId : thread.seekerUserId
+		);
+		const profiles = await this.repository.findMarketProfiles([...new Set(counterpartIds)]);
+		const profileByUserId = new Map(profiles.map((profile) => [profile.userId, profile]));
+
+		const summaries = threads.map((thread) => {
+			const counterpartUserId =
+				userId === thread.seekerUserId ? thread.sharerUserId : thread.seekerUserId;
+			const counterpartProfile = profileByUserId.get(counterpartUserId);
+			return {
+				...this.toThreadSummary(thread, userId, latestByThread.get(thread.id) ?? null),
+				counterpartFirstName: marketFirstName(counterpartProfile ?? {})
+			};
+		});
+		const unreadCount = summaries.filter((thread) => thread.unread).length;
+
+		return { ok: true, data: { threads: summaries, unreadCount } };
 	}
 
 	async getThreadDetail(
@@ -143,7 +213,10 @@ export class MarketChatService {
 			thread: MarketChatThreadRow;
 			messages: MarketChatMessageRow[];
 			counterpart: MarketThreadParticipant;
-			myRating: { stars: number } | null;
+			myRating: MarketThreadRatingView | null;
+			counterpartRating: MarketThreadRatingView | null;
+			myMarkedComplete: boolean;
+			counterpartMarkedComplete: boolean;
 		}>
 	> {
 		const result = await this.getThread(threadId, userId);
@@ -154,14 +227,24 @@ export class MarketChatService {
 		const { thread, messages } = result.data;
 		const counterpartUserId =
 			userId === thread.seekerUserId ? thread.sharerUserId : thread.seekerUserId;
+		const role = marketThreadRoleForUser(thread, userId);
 
-		const [profiles, myRating, counterpartRating] = await Promise.all([
+		const [profiles, myRating, counterpartRatingOfMe, counterpartRating] = await Promise.all([
 			this.repository.findMarketProfiles([thread.seekerUserId, thread.sharerUserId]),
 			this.repository.findRatingForThreadAndRater(threadId, userId),
+			this.repository.findRatingForThreadAndRater(threadId, counterpartUserId),
 			this.repository.getRatingSummary(counterpartUserId)
 		]);
 
 		const counterpartProfile = profiles.find((profile) => profile.userId === counterpartUserId);
+		const visibleCounterpartRating =
+			isCounterpartRatingVisible(myRating, counterpartRatingOfMe) && counterpartRatingOfMe
+				? {
+						stars: counterpartRatingOfMe.stars,
+						comment: counterpartRatingOfMe.comment,
+						itemsAsDescribed: counterpartRatingOfMe.itemsAsDescribed
+					}
+				: null;
 
 		return {
 			ok: true,
@@ -177,8 +260,45 @@ export class MarketChatService {
 						ratingCount: counterpartRating.ratingCount
 					}
 				},
-				myRating: myRating ? { stars: myRating.stars } : null
+				myRating: myRating
+					? {
+							stars: myRating.stars,
+							comment: myRating.comment,
+							itemsAsDescribed: myRating.itemsAsDescribed
+						}
+					: null,
+				counterpartRating: visibleCounterpartRating,
+				myMarkedComplete: role ? hasUserMarkedExchangeComplete(thread, role) : false,
+				counterpartMarkedComplete:
+					role === 'seeker'
+						? hasUserMarkedExchangeComplete(thread, 'sharer')
+						: role === 'sharer'
+							? hasUserMarkedExchangeComplete(thread, 'seeker')
+							: false
 			}
+		};
+	}
+
+	async listRecentReviewsForUser(userId: string, limit = 3): Promise<MarketPublicReview[]> {
+		const rows = await this.repository.listRecentRatingsForUser(userId, limit);
+		return rows.map((row) => ({
+			stars: row.stars,
+			comment: row.comment,
+			raterFirstName: marketFirstName({
+				displayName: row.raterDisplayName,
+				marketFirstName: row.raterMarketFirstName
+			}),
+			createdAt: row.createdAt
+		}));
+	}
+
+	private toRatingView(
+		rating: NonNullable<Awaited<ReturnType<IMarketChatRepository['findRatingForThreadAndRater']>>>
+	): MarketThreadRatingView {
+		return {
+			stars: rating.stars,
+			comment: rating.comment,
+			itemsAsDescribed: rating.itemsAsDescribed
 		};
 	}
 
@@ -197,7 +317,11 @@ export class MarketChatService {
 			return { ok: false, error: 'forbidden' };
 		}
 
-		if (thread.closedAt) {
+		if (!isThreadMessagingAllowed(thread.lifecycleStatus)) {
+			return { ok: false, error: 'closed' };
+		}
+
+		if (thread.exchangeStatus === 'completed' || thread.closedAt) {
 			return { ok: false, error: 'closed' };
 		}
 
@@ -227,10 +351,112 @@ export class MarketChatService {
 			}
 		});
 
+		const recipientUserId =
+			input.userId === thread.seekerUserId ? thread.sharerUserId : thread.seekerUserId;
+		void this.pushService?.notifyNewMessage({
+			threadId: input.threadId,
+			senderUserId: input.userId,
+			recipientUserId,
+			bodyPreview: body
+		});
+
 		return { ok: true, data: { message } };
 	}
 
-	async closeThread(input: {
+	async proposePickup(input: {
+		threadId: string;
+		userId: string;
+		message?: string;
+		householdId: string | null;
+	}): Promise<
+		MarketChatResult<{ thread: MarketChatThreadRow; message: MarketChatMessageRow | null }>
+	> {
+		const thread = await this.repository.findThreadById(input.threadId);
+		if (!thread) {
+			return { ok: false, error: 'not_found' };
+		}
+
+		if (!(await this.canAccessThread(input.userId, thread))) {
+			return { ok: false, error: 'forbidden' };
+		}
+
+		if (!canPerformLifecycleAction(thread.lifecycleStatus, 'propose_pickup')) {
+			return { ok: false, error: 'closed' };
+		}
+
+		const nextStatus = nextLifecycleStatus(thread.lifecycleStatus, 'propose_pickup');
+		if (!nextStatus) {
+			return { ok: false, error: 'closed' };
+		}
+
+		const agreedAt = new Date();
+		const updated = await this.repository.markExchangeComplete(input.threadId, {
+			lifecycleStatus: nextStatus,
+			pickupAgreedAt: agreedAt
+		});
+
+		if (!updated) {
+			return { ok: false, error: 'not_found' };
+		}
+
+		const body = input.message?.trim();
+		let message: MarketChatMessageRow | null = null;
+		if (body) {
+			if (body.length > MARKET_CHAT_MESSAGE_MAX_LENGTH) {
+				return { ok: false, error: 'validation' };
+			}
+			message = await this.repository.addMessage({
+				id: crypto.randomUUID(),
+				threadId: input.threadId,
+				authorUserId: input.userId,
+				body
+			});
+		}
+
+		return { ok: true, data: { thread: updated, message } };
+	}
+
+	async confirmPickupAgreement(input: {
+		threadId: string;
+		userId: string;
+		householdId: string | null;
+	}): Promise<MarketChatResult<{ thread: MarketChatThreadRow }>> {
+		const thread = await this.repository.findThreadById(input.threadId);
+		if (!thread) {
+			return { ok: false, error: 'not_found' };
+		}
+
+		if (!(await this.canAccessThread(input.userId, thread))) {
+			return { ok: false, error: 'forbidden' };
+		}
+
+		if (!canPerformLifecycleAction(thread.lifecycleStatus, 'confirm_pickup_agreement')) {
+			return { ok: false, error: 'closed' };
+		}
+
+		const nextStatus = nextLifecycleStatus(thread.lifecycleStatus, 'confirm_pickup_agreement');
+		if (!nextStatus) {
+			return { ok: false, error: 'closed' };
+		}
+
+		const updateInput: {
+			lifecycleStatus: MarketLifecycleStatus;
+			pickupAgreedAt?: Date;
+		} = { lifecycleStatus: nextStatus };
+
+		if (shouldSetPickupAgreedAt(thread.lifecycleStatus, 'confirm_pickup_agreement')) {
+			updateInput.pickupAgreedAt = new Date();
+		}
+
+		const updated = await this.repository.markExchangeComplete(input.threadId, updateInput);
+		if (!updated) {
+			return { ok: false, error: 'not_found' };
+		}
+
+		return { ok: true, data: { thread: updated } };
+	}
+
+	async confirmHandover(input: {
 		threadId: string;
 		userId: string;
 	}): Promise<MarketChatResult<{ thread: MarketChatThreadRow }>> {
@@ -243,12 +469,37 @@ export class MarketChatService {
 			return { ok: false, error: 'forbidden' };
 		}
 
-		if (thread.closedAt) {
+		if (thread.lifecycleStatus === 'completed' || thread.closedAt) {
 			return { ok: true, data: { thread } };
 		}
 
-		const closedAt = new Date();
-		const updated = await this.repository.closeThread(input.threadId, closedAt);
+		if (!canPerformLifecycleAction(thread.lifecycleStatus, 'confirm_handover')) {
+			return { ok: false, error: 'closed' };
+		}
+
+		const role = marketThreadRoleForUser(thread, input.userId);
+		if (!role) {
+			return { ok: false, error: 'forbidden' };
+		}
+
+		if (hasUserMarkedExchangeComplete(thread, role)) {
+			return { ok: true, data: { thread } };
+		}
+
+		const markedAt = new Date();
+		const nextSeekerCompletedAt = role === 'seeker' ? markedAt : thread.seekerCompletedAt;
+		const nextSharerCompletedAt = role === 'sharer' ? markedAt : thread.sharerCompletedAt;
+		const bothComplete = handoverCompletesExchange(nextSeekerCompletedAt, nextSharerCompletedAt);
+		const lifecycleStatus: MarketLifecycleStatus = bothComplete ? 'completed' : 'awaiting_handover';
+
+		const updated = await this.repository.markExchangeComplete(input.threadId, {
+			...(role === 'seeker' ? { seekerCompletedAt: markedAt } : { sharerCompletedAt: markedAt }),
+			lifecycleStatus,
+			...(bothComplete
+				? { exchangeStatus: 'completed' as MarketExchangeStatus, closedAt: markedAt }
+				: {})
+		});
+
 		if (!updated) {
 			const latest = await this.repository.findThreadById(input.threadId);
 			if (!latest) {
@@ -257,20 +508,32 @@ export class MarketChatService {
 			return { ok: true, data: { thread: latest } };
 		}
 
-		return {
-			ok: true,
-			data: {
-				thread: { ...thread, closedAt }
-			}
-		};
+		return { ok: true, data: { thread: updated } };
+	}
+
+	async markExchangeComplete(input: {
+		threadId: string;
+		userId: string;
+	}): Promise<MarketChatResult<{ thread: MarketChatThreadRow }>> {
+		return this.confirmHandover(input);
+	}
+
+	/** @deprecated Use confirmHandover — kept for route alias. */
+	async closeThread(input: {
+		threadId: string;
+		userId: string;
+	}): Promise<MarketChatResult<{ thread: MarketChatThreadRow }>> {
+		return this.confirmHandover(input);
 	}
 
 	async rateThread(input: {
 		threadId: string;
 		userId: string;
 		stars: number;
+		comment?: string | null;
+		itemsAsDescribed?: MarketItemsAsDescribed | null;
 		householdId: string | null;
-	}): Promise<MarketChatResult<{ ratingId: string }>> {
+	}): Promise<MarketChatResult<MarketThreadRatingResult>> {
 		const thread = await this.repository.findThreadById(input.threadId);
 		if (!thread) {
 			return { ok: false, error: 'not_found' };
@@ -280,7 +543,20 @@ export class MarketChatService {
 			return { ok: false, error: 'forbidden' };
 		}
 
+		if (!isExchangeReadyForRating(thread)) {
+			return { ok: false, error: 'closed' };
+		}
+
 		if (!Number.isInteger(input.stars) || input.stars < 1 || input.stars > 5) {
+			return { ok: false, error: 'validation' };
+		}
+
+		const comment = normalizeRatingComment(input.comment);
+		if (!isValidRatingComment(comment)) {
+			return { ok: false, error: 'validation' };
+		}
+
+		if (!isValidItemsAsDescribed(input.itemsAsDescribed ?? null)) {
 			return { ok: false, error: 'validation' };
 		}
 
@@ -295,13 +571,28 @@ export class MarketChatService {
 		const ratedUserId =
 			input.userId === thread.seekerUserId ? thread.sharerUserId : thread.seekerUserId;
 
-		const rating = await this.repository.addRating({
-			id: crypto.randomUUID(),
+		const counterpartExisting = await this.repository.findRatingForThreadAndRater(
+			input.threadId,
+			ratedUserId
+		);
+
+		const ratingId = crypto.randomUUID();
+		await this.repository.addRating({
+			id: ratingId,
 			threadId: input.threadId,
 			raterUserId: input.userId,
 			ratedUserId,
-			stars: input.stars
+			stars: input.stars,
+			comment,
+			itemsAsDescribed: input.itemsAsDescribed ?? null
 		});
+
+		let counterpartRating: MarketThreadRatingView | null = null;
+		if (counterpartExisting) {
+			const revealedAt = new Date();
+			await this.repository.revealRatingsForThread(input.threadId, revealedAt);
+			counterpartRating = this.toRatingView(counterpartExisting);
+		}
 
 		recordProductEvent(this.pmfService, {
 			userId: input.userId,
@@ -310,11 +601,153 @@ export class MarketChatService {
 			metadata: {
 				threadId: input.threadId,
 				ratedUserId,
-				stars: input.stars
+				stars: input.stars,
+				hasComment: comment != null,
+				itemsAsDescribed: input.itemsAsDescribed ?? null,
+				revealed: counterpartExisting != null
 			}
 		});
 
-		return { ok: true, data: { ratingId: rating.id } };
+		return { ok: true, data: { ratingId, counterpartRating } };
+	}
+
+	async cancelThread(input: {
+		threadId: string;
+		userId: string;
+	}): Promise<MarketChatResult<{ thread: MarketChatThreadRow }>> {
+		const thread = await this.repository.findThreadById(input.threadId);
+		if (!thread) {
+			return { ok: false, error: 'not_found' };
+		}
+
+		if (!(await this.canAccessThread(input.userId, thread))) {
+			return { ok: false, error: 'forbidden' };
+		}
+
+		if (!canPerformLifecycleAction(thread.lifecycleStatus, 'cancel')) {
+			return { ok: false, error: 'closed' };
+		}
+
+		const nextStatus = nextLifecycleStatus(thread.lifecycleStatus, 'cancel');
+		if (!nextStatus) {
+			return { ok: false, error: 'closed' };
+		}
+
+		const closedAt = new Date();
+		const updated = await this.repository.markExchangeComplete(input.threadId, {
+			lifecycleStatus: nextStatus,
+			closedAt
+		});
+
+		if (!updated) {
+			return { ok: false, error: 'not_found' };
+		}
+
+		return { ok: true, data: { thread: updated } };
+	}
+
+	async blockThreadCounterpart(input: {
+		threadId: string;
+		userId: string;
+	}): Promise<MarketChatResult<{ blocked: true }>> {
+		const thread = await this.repository.findThreadById(input.threadId);
+		if (!thread) {
+			return { ok: false, error: 'not_found' };
+		}
+
+		if (!(await this.canAccessThread(input.userId, thread))) {
+			return { ok: false, error: 'forbidden' };
+		}
+
+		await this.blockCounterpartForReporter(input.userId, thread);
+		return { ok: true, data: { blocked: true } };
+	}
+
+	async reportThread(input: {
+		threadId: string;
+		reporterUserId: string;
+		reason: MarketChatReportReason;
+		blockCounterpart?: boolean;
+	}): Promise<MarketChatResult<{ reportId: string; thread: MarketChatThreadRow }>> {
+		const thread = await this.repository.findThreadById(input.threadId);
+		if (!thread) {
+			return { ok: false, error: 'not_found' };
+		}
+
+		if (!(await this.canAccessThread(input.reporterUserId, thread))) {
+			return { ok: false, error: 'forbidden' };
+		}
+
+		if (!canPerformLifecycleAction(thread.lifecycleStatus, 'report')) {
+			return { ok: false, error: 'closed' };
+		}
+
+		const nextStatus = nextLifecycleStatus(thread.lifecycleStatus, 'report');
+		if (!nextStatus) {
+			return { ok: false, error: 'closed' };
+		}
+
+		const report = await this.repository.createReport({
+			id: crypto.randomUUID(),
+			threadId: input.threadId,
+			reporterUserId: input.reporterUserId,
+			reason: input.reason
+		});
+
+		if (input.blockCounterpart) {
+			await this.blockCounterpartForReporter(input.reporterUserId, thread);
+		}
+
+		const closedAt = new Date();
+		const updated = await this.repository.markExchangeComplete(input.threadId, {
+			lifecycleStatus: nextStatus,
+			closedAt
+		});
+
+		if (!updated) {
+			return { ok: false, error: 'not_found' };
+		}
+
+		return { ok: true, data: { reportId: report.id, thread: updated } };
+	}
+
+	async listOpenChatReports(limit: number) {
+		return this.repository.listOpenReports(limit);
+	}
+
+	async dismissChatReport(reportId: string): Promise<MarketChatResult<{ dismissed: boolean }>> {
+		const dismissed = await this.repository.dismissReport(reportId, new Date());
+		if (!dismissed) {
+			return { ok: false, error: 'not_found' };
+		}
+		return { ok: true, data: { dismissed: true } };
+	}
+
+	private toThreadSummary(
+		thread: MarketChatThreadRow,
+		userId: string,
+		latestMessage: { authorUserId: string; createdAt: Date } | null
+	): Omit<MarketChatThreadSummary, 'counterpartFirstName'> {
+		const role = marketThreadRoleForUser(thread, userId);
+		return {
+			...thread,
+			unread: isThreadUnreadForUser(thread, userId, latestMessage),
+			myMarkedComplete: role ? hasUserMarkedExchangeComplete(thread, role) : false,
+			counterpartMarkedComplete:
+				role === 'seeker'
+					? hasUserMarkedExchangeComplete(thread, 'sharer')
+					: role === 'sharer'
+						? hasUserMarkedExchangeComplete(thread, 'seeker')
+						: false
+		};
+	}
+
+	private async markThreadRead(thread: MarketChatThreadRow, userId: string): Promise<void> {
+		const role = marketThreadRoleForUser(thread, userId);
+		if (!role) {
+			return;
+		}
+		await this.repository.markThreadRead(thread.id, role, new Date());
 	}
 
 	private async canAccessThread(userId: string, thread: MarketChatThreadRow): Promise<boolean> {
@@ -324,5 +757,21 @@ export class MarketChatService {
 
 		const role = await this.householdRepository.getMemberRole(thread.householdId, userId);
 		return role != null && canEditInventory(role);
+	}
+
+	private async blockCounterpartForReporter(
+		reporterUserId: string,
+		thread: MarketChatThreadRow
+	): Promise<void> {
+		await this.expiringShareRepository.blockShareForReporter({
+			id: crypto.randomUUID(),
+			reporterUserId,
+			shareId: thread.shareId
+		});
+		await this.expiringShareRepository.blockHouseholdForReporter({
+			id: crypto.randomUUID(),
+			reporterUserId,
+			householdId: thread.householdId
+		});
 	}
 }

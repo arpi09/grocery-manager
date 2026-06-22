@@ -24,7 +24,6 @@
 		type HomeBriefingRecipeCard
 	} from '$lib/domain/home-briefing';
 	import type { HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
-	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { getLocale, t } from '$lib/i18n';
 	import { PANTRY_SHELF_PATH } from '$lib/navigation/nav-config';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
@@ -82,17 +81,7 @@
 	});
 
 	const status = $derived(selectHomeBriefingStatus(briefingInput));
-	const forYou = $derived.by(() => {
-		const card = selectHomeBriefingForYouCard(briefingInput);
-		if (!card) return null;
-		if (card.kind === 'expiring') {
-			return {
-				...card,
-				suggestion: locationLabel(locale, card.item.location)
-			};
-		}
-		return card;
-	});
+	const forYou = $derived(selectHomeBriefingForYouCard(briefingInput));
 
 	const zoneCounts = $derived.by(() => {
 		const counts = Object.fromEntries(LOCATIONS.map((location) => [location, 0])) as Record<

@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
-import { hasMarketAvatar } from '$lib/domain/market-profile';
-import { expiringShareService, pmfService } from '$lib/server/di';
+import { hasMarketAvatar, marketFirstName } from '$lib/domain/market-profile';
+import { expiringShareService, marketChatRepository, marketChatService, expiringShareRepository, pmfService } from '$lib/server/di';
 import { guardMarketV01PageLoad } from '$lib/server/market-v01-guard';
 import { recordProductEvent } from '$lib/server/product-events';
 import type { PageServerLoad } from './$types';
@@ -37,10 +37,29 @@ export const load: PageServerLoad = async (event) => {
 		}
 	});
 
+	const shareMeta = await expiringShareRepository.findShareForNearbyPush(params.id);
+	const sharerUserId = shareMeta?.createdByUserId;
+	const [sharerProfiles, sharerRating, sharerReviews] = sharerUserId
+		? await Promise.all([
+				marketChatRepository.findMarketProfiles([sharerUserId]),
+				marketChatRepository.getRatingSummary(sharerUserId),
+				marketChatService.listRecentReviewsForUser(sharerUserId, 3)
+			])
+		: [[], { averageStars: null, ratingCount: 0 }, []];
+	const sharerProfile = sharerProfiles[0];
+
 	return {
 		...base,
 		preview,
 		shareId: params.id,
-		needsAvatarSetup: !hasMarketAvatar({ avatarUrl: base.user.avatarUrl })
+		needsAvatarSetup: !hasMarketAvatar({ avatarUrl: base.user.avatarUrl }),
+		sharer: sharerProfile
+			? {
+					firstName: marketFirstName(sharerProfile),
+					avatarUrl: sharerProfile.avatarUrl,
+					rating: sharerRating,
+					reviews: sharerReviews
+				}
+			: null
 	};
 };

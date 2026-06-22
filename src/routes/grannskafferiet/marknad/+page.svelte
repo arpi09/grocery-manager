@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
@@ -8,7 +8,10 @@
 	import Card from '$lib/components/atoms/Card.svelte';
 	import NearbySharesMap from '$lib/components/organisms/NearbySharesMap.svelte';
 	import MarketAutoListingPanel from '$lib/components/organisms/MarketAutoListingPanel.svelte';
+	import MarketChatPushPanel from '$lib/components/organisms/MarketChatPushPanel.svelte';
+	import MarketProfilePanel from '$lib/components/organisms/MarketProfilePanel.svelte';
 	import NearbyShareReportButton from '$lib/components/molecules/NearbyShareReportButton.svelte';
+	import { sortNearbySharesByExpiry } from '$lib/domain/market-feed';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
 	import { getLocale, t } from '$lib/i18n';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
@@ -16,6 +19,7 @@
 	let { data } = $props();
 
 	const locale = getLocale();
+	const CHATS_POLL_MS = 5_000;
 
 	type NearbyShare = {
 		id: string;
@@ -31,6 +35,11 @@
 		shareId: string;
 		createdAt: string;
 		closedAt: string | null;
+		exchangeStatus: 'ongoing' | 'completed';
+		unread: boolean;
+		myMarkedComplete: boolean;
+		counterpartMarkedComplete: boolean;
+		counterpartFirstName?: string;
 	};
 
 	let loading = $state(true);
@@ -40,9 +49,12 @@
 	let shares = $state<NearbyShare[]>([]);
 	let selectedShareId = $state<string | null>(null);
 	let chatThreads = $state<ChatThread[]>([]);
+	let unreadChatCount = $state(0);
 	let chatsLoading = $state(false);
+	let chatsPollTimer: ReturnType<typeof setInterval> | null = null;
 
 	const selectedShare = $derived(shares.find((share) => share.id === selectedShareId) ?? null);
+	const sortedShares = $derived(sortNearbySharesByExpiry(shares));
 	const radiusLabel = $derived(
 		data.isPro
 			? t('nearbySharing.radiusPro', { metres: radiusM })
@@ -58,13 +70,24 @@
 	}
 
 	async function loadChats() {
-		chatsLoading = true;
+		chatsLoading = chatThreads.length === 0;
 		try {
 			const response = await fetch('/api/market/chats');
-			const payload = (await response.json()) as { ok?: boolean; threads?: ChatThread[] };
-			chatThreads = response.ok && payload.ok ? (payload.threads ?? []) : [];
+			const payload = (await response.json()) as {
+				ok?: boolean;
+				threads?: ChatThread[];
+				unreadCount?: number;
+			};
+			if (response.ok && payload.ok) {
+				chatThreads = payload.threads ?? [];
+				unreadChatCount = payload.unreadCount ?? 0;
+			} else {
+				chatThreads = [];
+				unreadChatCount = 0;
+			}
 		} catch {
 			chatThreads = [];
+			unreadChatCount = 0;
 		} finally {
 			chatsLoading = false;
 		}
@@ -137,6 +160,15 @@
 		void loadShares();
 		if (data.nearbyOptedIn) {
 			void loadChats();
+			chatsPollTimer = setInterval(() => {
+				void loadChats();
+			}, CHATS_POLL_MS);
+		}
+	});
+
+	onDestroy(() => {
+		if (chatsPollTimer) {
+			clearInterval(chatsPollTimer);
 		}
 	});
 </script>
@@ -168,13 +200,26 @@
 				<a href="/settings#settings-nearby-sharing">{t('marketV01.nearbyOptInLink')}</a>
 			</p>
 		{:else}
+			<MarketProfilePanel
+				displayName={data.user.displayName}
+				email={data.user.email}
+				avatarUrl={data.user.avatarUrl}
+			/>
+
 			<MarketAutoListingPanel
 				autoNearbyListingEnabled={data.autoNearbyListingEnabled}
 				nearbySharingEnabled={data.nearbyOptedIn}
 			/>
 
+			<MarketChatPushPanel />
+
 			<section class="chats-section" aria-labelledby="market-chats-heading">
-				<h2 id="market-chats-heading">{t('marketV01.myChatsTitle')}</h2>
+				<div class="chats-heading-row">
+					<h2 id="market-chats-heading">{t('marketV01.myChatsTitle')}</h2>
+					{#if unreadChatCount > 0}
+						<Badge tone="warning">{t('marketV01.unreadChatsBadge', { count: unreadChatCount })}</Badge>
+					{/if}
+				</div>
 				{#if chatsLoading}
 					<p class="status">{t('common.loading')}</p>
 				{:else if chatThreads.length === 0}
@@ -184,10 +229,20 @@
 						{#each chatThreads as thread (thread.id)}
 							<li>
 								<Card class="chat-card" interactive onclick={() => goto(`/grannskafferiet/marknad/chatt/${thread.id}`)}>
-									<span class="chat-share-id">{thread.shareId.slice(0, 8)}…</span>
-									{#if thread.closedAt}
-										<Badge>{t('marketV01.chatClosedBadge')}</Badge>
-									{/if}
+									<div class="chat-card-main">
+										<span class="chat-name">{thread.counterpartFirstName ?? t('marketV01.ratingNewHere')}</span>
+										<span class="chat-share-id">{thread.shareId.slice(0, 8)}…</span>
+									</div>
+									<div class="chat-badges">
+										{#if thread.unread}
+											<Badge tone="warning">{t('marketV01.unreadChatsBadge', { count: 1 })}</Badge>
+										{/if}
+										{#if thread.closedAt}
+											<Badge>{t('marketV01.chatClosedBadge')}</Badge>
+										{:else if thread.exchangeStatus === 'ongoing'}
+											<Badge>{t('marketV01.exchangeOngoingBadge')}</Badge>
+										{/if}
+									</div>
 								</Card>
 							</li>
 						{/each}
@@ -208,14 +263,16 @@
 
 				{#if shares.length === 0}
 					<section class="empty-panel">
-						<h2>{t('nearbySharing.discoveryEmptyTitle')}</h2>
+						<h2>{t('marketV01.discoveryEmptyTitle')}</h2>
 						<p>{t('marketV01.discoveryEmptyLead')}</p>
+						<p class="note">{t('marketV01.discoveryEmptyHint')}</p>
 					</section>
 				{:else}
 					<section class="share-list" aria-labelledby="market-list-heading">
 						<h2 id="market-list-heading">{t('nearbySharing.discoveryListTitle')}</h2>
+						<p class="sort-note">{t('marketV01.feedSortNote')}</p>
 						<ul>
-							{#each shares as share (share.id)}
+							{#each sortedShares as share (share.id)}
 								<li>
 									<Card class="share-list-card" interactive onclick={() => selectShare(share.id)}>
 										<div class="share-list-main">
@@ -340,6 +397,19 @@
 		font-size: 1rem;
 	}
 
+	.chats-heading-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-sm);
+	}
+
+	.chat-badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-xs);
+	}
+
 	.chat-list,
 	.share-list ul {
 		margin: 0;
@@ -354,6 +424,22 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--space-sm);
+	}
+
+	.chat-card-main {
+		display: grid;
+		gap: var(--space-2xs);
+	}
+
+	.chat-name {
+		font-weight: 700;
+	}
+
+	.chat-card-badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2xs);
+		justify-content: flex-end;
 	}
 
 	.chat-share-id {
@@ -375,6 +461,12 @@
 		margin-top: var(--space-lg);
 		display: grid;
 		gap: var(--space-sm);
+	}
+
+	.sort-note {
+		margin: 0;
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
 	}
 
 	:global(.share-list-card) {

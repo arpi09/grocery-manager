@@ -70,6 +70,8 @@ import { DrizzlePriceMemoryRepository } from '$lib/infrastructure/repositories/p
 import { PriceMemoryService } from '$lib/application/price-memory.service';
 import { DrizzleExpiringShareRepository } from '$lib/infrastructure/repositories/expiring-share.repository';
 import { DrizzleMarketChatRepository } from '$lib/infrastructure/repositories/market-chat.repository';
+import { DrizzleMarketChatPushRepository } from '$lib/infrastructure/repositories/market-chat-push.repository';
+import { MarketChatPushService } from '$lib/application/market-chat-push.service';
 import { DrizzleShoppingListShareRepository } from '$lib/infrastructure/repositories/shopping-list-share.repository';
 import { PurchasePatternService } from '$lib/application/purchase-pattern.service';
 import { InventoryIntelligenceService } from '$lib/application/inventory-intelligence.service';
@@ -147,6 +149,7 @@ const purchasePatternRepository = new DrizzlePurchasePatternRepository();
 export { purchasePatternRepository };
 const priceMemoryRepository = new DrizzlePriceMemoryRepository();
 const expiringShareRepository = new DrizzleExpiringShareRepository();
+export { expiringShareRepository };
 const shoppingListShareRepository = new DrizzleShoppingListShareRepository();
 const receiptForwardRepository = new DrizzleReceiptForwardRepository();
 const billingRepository = new DrizzleBillingRepository();
@@ -233,11 +236,21 @@ export const skaffurapportService = new SkaffurapportService(
 );
 export const expiringShareService = new ExpiringShareService(expiringShareRepository);
 const marketChatRepository = new DrizzleMarketChatRepository();
+export { marketChatRepository };
+const marketChatPushRepository = new DrizzleMarketChatPushRepository();
+export const marketChatPushService = new MarketChatPushService(
+	marketChatPushRepository,
+	marketChatRepository,
+	pushSubscriptionRepository,
+	pushAdapter,
+	appOriginAdapter
+);
 export const marketChatService = new MarketChatService(
 	marketChatRepository,
 	expiringShareRepository,
 	householdRepository,
-	pmfService
+	pmfService,
+	marketChatPushService
 );
 export const marketListingService = new MarketListingService(
 	expiringShareService,

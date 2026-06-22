@@ -32,7 +32,7 @@ describe('MarketDemoService (integration)', () => {
 		await integrationDb.close();
 	});
 
-	it('seeds three nearby-visible listings and clears them idempotently', async () => {
+	it('seeds four nearby-visible listings and clears them idempotently', async () => {
 		await integrationDb.seedUser({ id: 'admin-demo', email: 'admin-demo@example.com' });
 		await integrationDb.seedHousehold({
 			id: 'admin-hh',
@@ -49,15 +49,17 @@ describe('MarketDemoService (integration)', () => {
 		if (!seed.ok) {
 			return;
 		}
-		expect(seed.listingCount).toBe(3);
+		expect(seed.listingCount).toBe(4);
+		expect(seed.chatThreadCount).toBe(4);
 
 		const nearby = await expiringShareService.listNearbyShares('admin-demo', 'admin-hh');
-		expect(nearby.shares.length).toBe(3);
+		expect(nearby.shares.length).toBe(4);
 
 		const cleared = await demoService.clear();
-		expect(cleared.deletedShares).toBe(3);
-		expect(cleared.deletedHouseholds).toBe(3);
-		expect(cleared.deletedUsers).toBe(3);
+		expect(cleared.deletedShares).toBe(4);
+		expect(cleared.deletedThreads).toBe(4);
+		expect(cleared.deletedHouseholds).toBe(4);
+		expect(cleared.deletedUsers).toBe(4);
 
 		const nearbyAfter = await expiringShareService.listNearbyShares('admin-demo', 'admin-hh');
 		expect(nearbyAfter.shares.length).toBe(0);
@@ -66,10 +68,10 @@ describe('MarketDemoService (integration)', () => {
 	it('uses stable demo id prefixes', async () => {
 		await integrationDb.seedUser({ id: 'admin-demo', email: 'admin-demo@example.com' });
 		await demoService.seedForAdmin('admin-demo');
-		expect(await demoService.countActiveDemoListings()).toBe(3);
+		expect(await demoService.countActiveDemoListings()).toBe(4);
 
 		const clear = await demoService.clear();
-		expect(clear.deletedShares).toBe(3);
+		expect(clear.deletedShares).toBe(4);
 		expect(`${MARKET_DEMO_USER_PREFIX}1`.startsWith(MARKET_DEMO_USER_PREFIX)).toBe(true);
 		expect(`${MARKET_DEMO_HOUSEHOLD_PREFIX}1`.startsWith(MARKET_DEMO_HOUSEHOLD_PREFIX)).toBe(true);
 		expect(`${MARKET_DEMO_SHARE_PREFIX}1`.startsWith(MARKET_DEMO_SHARE_PREFIX)).toBe(true);

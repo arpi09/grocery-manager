@@ -35,6 +35,17 @@ export class ProfileService {
 		return updated;
 	}
 
+	async updateMarketProfile(
+		userId: string,
+		marketFirstName: string | null
+	): Promise<UserProfile> {
+		const updated = await this.users.updateMarketProfile(userId, marketFirstName);
+		if (!updated) {
+			throw new ProfileNotFoundError();
+		}
+		return updated;
+	}
+
 	async setThemePreference(userId: string, themePreference: ThemePreference): Promise<ThemePreference> {
 		const updated = await this.users.updateThemePreference(userId, themePreference);
 		if (!updated) {

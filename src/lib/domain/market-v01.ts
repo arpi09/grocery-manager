@@ -29,11 +29,12 @@ export function isMarketV01BackendEnabled(): boolean {
 
 /**
  * UI access for unlisted `/grannskafferiet/marknad/*` routes.
- * Admin always (even without nearby opt-in). Users need nearby opt-in.
+ * Admin always (even without nearby opt-in or live flag). Users need live flag + nearby opt-in.
  */
 export function canAccessMarketV01Ui(
 	user: MarketV01AccessUser | null | undefined,
-	nearbyEnabled: boolean
+	nearbyEnabled: boolean,
+	marketLiveEnabled: boolean
 ): boolean {
 	if (!isMarketV01BackendEnabled() || !user) {
 		return false;
@@ -41,10 +42,20 @@ export function canAccessMarketV01Ui(
 	if (isAdminRole(user.role)) {
 		return true;
 	}
-	return nearbyEnabled;
+	return marketLiveEnabled && nearbyEnabled;
 }
 
-/** Admin-only nav discovery — never shown to role=user. */
-export function showMarketV01InNav(user: MarketV01AccessUser | null | undefined): boolean {
-	return isMarketV01BackendEnabled() && isAdminRole(user?.role);
+/** Nav discovery: admin always; users only when market is live + nearby opt-in. */
+export function showMarketV01InNav(
+	user: MarketV01AccessUser | null | undefined,
+	marketLiveEnabled: boolean,
+	nearbyEnabled = false
+): boolean {
+	if (!isMarketV01BackendEnabled()) {
+		return false;
+	}
+	if (isAdminRole(user?.role)) {
+		return true;
+	}
+	return Boolean(user) && marketLiveEnabled && nearbyEnabled;
 }

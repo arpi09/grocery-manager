@@ -1,10 +1,12 @@
-import { inArray, like } from 'drizzle-orm';
+import { eq, inArray, like } from 'drizzle-orm';
 import {
 	isMarketDemoSeedEnabled,
 	MARKET_DEMO_DEFAULT_CENTER,
 	MARKET_DEMO_HOUSEHOLD_PREFIX,
 	MARKET_DEMO_SOURCE,
+	MARKET_DEMO_THREAD_PREFIX,
 	MARKET_DEMO_USER_PREFIX,
+	marketDemoChatFixtures,
 	marketDemoListingFixtures,
 	marketDemoShareExpiresAt
 } from '$lib/domain/market-demo';
@@ -15,6 +17,10 @@ import {
 	expiringShareLinkTable,
 	householdMemberTable,
 	householdTable,
+	marketChatMessageTable,
+	marketChatReportTable,
+	marketChatThreadTable,
+	marketExchangeRatingTable,
 	userTable
 } from '$lib/infrastructure/db/schema';
 import type { IExpiringShareRepository } from '$lib/infrastructure/repositories/expiring-share.repository';
@@ -23,6 +29,7 @@ export type MarketDemoSeedResult =
 	| {
 			ok: true;
 			listingCount: number;
+			chatThreadCount: number;
 			center: { latitude: number; longitude: number };
 			enabledNearbyForAdmin: boolean;
 	  }
@@ -31,6 +38,7 @@ export type MarketDemoSeedResult =
 export type MarketDemoClearResult = {
 	ok: true;
 	deletedShares: number;
+	deletedThreads: number;
 	deletedHouseholds: number;
 	deletedUsers: number;
 };
@@ -121,15 +129,121 @@ export class MarketDemoService {
 			});
 		}
 
+		const chatFixtures = marketDemoChatFixtures(adminUserId, fixtures);
+		for (const chatFixture of chatFixtures) {
+			const threadCreatedAt = new Date(now.getTime() + chatFixture.messages[0]!.offsetMinutes * 60_000);
+			const lifecycleStatus = chatFixture.lifecycleStatus ?? 'chatting';
+			const isCompleted = lifecycleStatus === 'completed';
+			const isReported = lifecycleStatus === 'reported';
+			const closedAt =
+				isCompleted || isReported ? new Date(now.getTime() - 30 * 60_000) : null;
+
+			await this.database.insert(marketChatThreadTable).values({
+				id: chatFixture.threadId,
+				shareId: chatFixture.shareId,
+				seekerUserId: adminUserId,
+				sharerUserId: chatFixture.sharerUserId,
+				householdId: chatFixture.householdId,
+				lifecycleStatus,
+				...(chatFixture.lifecycleStatus === 'pickup_agreed'
+					? { pickupAgreedAt: new Date(now.getTime() - 60 * 60_000) }
+					: {}),
+				...(isCompleted
+					? {
+							exchangeStatus: 'completed' as const,
+							seekerCompletedAt: closedAt,
+							sharerCompletedAt: closedAt,
+							closedAt
+						}
+					: {}),
+				...(isReported ? { closedAt } : {}),
+				createdAt: threadCreatedAt
+			});
+
+			for (const [index, message] of chatFixture.messages.entries()) {
+				const createdAt = new Date(now.getTime() + message.offsetMinutes * 60_000);
+				const authorUserId = message.author === 'admin' ? adminUserId : chatFixture.sharerUserId;
+				await this.database.insert(marketChatMessageTable).values({
+					id: `${chatFixture.threadId}-msg-${index + 1}`,
+					threadId: chatFixture.threadId,
+					authorUserId,
+					body: message.body,
+					createdAt
+				});
+			}
+
+			if (chatFixture.reportReason) {
+				await this.database.insert(marketChatReportTable).values({
+					id: `${chatFixture.threadId}-report`,
+					threadId: chatFixture.threadId,
+					reporterUserId: adminUserId,
+					reason: chatFixture.reportReason,
+					createdAt: closedAt ?? now
+				});
+			}
+
+			if (chatFixture.adminRating) {
+				const completedAt = closedAt ?? new Date(now.getTime() - 30 * 60_000);
+				const revealedAt = chatFixture.sharerRating ? completedAt : null;
+
+				await this.database.insert(marketExchangeRatingTable).values({
+					id: `${chatFixture.threadId}-rating-admin`,
+					threadId: chatFixture.threadId,
+					raterUserId: adminUserId,
+					ratedUserId: chatFixture.sharerUserId,
+					stars: chatFixture.adminRating.stars,
+					comment: chatFixture.adminRating.comment ?? null,
+					itemsAsDescribed: chatFixture.adminRating.itemsAsDescribed ?? null,
+					revealedAt,
+					createdAt: completedAt
+				});
+			}
+
+			if (chatFixture.sharerRating) {
+				const completedAt = closedAt ?? new Date(now.getTime() - 30 * 60_000);
+				await this.database.insert(marketExchangeRatingTable).values({
+					id: `${chatFixture.threadId}-rating-sharer`,
+					threadId: chatFixture.threadId,
+					raterUserId: chatFixture.sharerUserId,
+					ratedUserId: adminUserId,
+					stars: chatFixture.sharerRating.stars,
+					comment: chatFixture.sharerRating.comment ?? null,
+					itemsAsDescribed: chatFixture.sharerRating.itemsAsDescribed ?? null,
+					revealedAt: completedAt,
+					createdAt: completedAt
+				});
+
+				if (chatFixture.adminRating) {
+					await this.database
+						.update(marketExchangeRatingTable)
+						.set({ revealedAt: completedAt })
+						.where(eq(marketExchangeRatingTable.threadId, chatFixture.threadId));
+				}
+			}
+		}
+
 		return {
 			ok: true,
 			listingCount: fixtures.length,
+			chatThreadCount: chatFixtures.length,
 			center,
 			enabledNearbyForAdmin
 		};
 	}
 
 	async clear(): Promise<MarketDemoClearResult> {
+		const demoThreadIds = await this.database
+			.select({ id: marketChatThreadTable.id })
+			.from(marketChatThreadTable)
+			.where(like(marketChatThreadTable.id, `${MARKET_DEMO_THREAD_PREFIX}%`));
+
+		const deletedThreads = demoThreadIds.length;
+		if (deletedThreads > 0) {
+			await this.database
+				.delete(marketChatThreadTable)
+				.where(inArray(marketChatThreadTable.id, demoThreadIds.map((row) => row.id)));
+		}
+
 		const demoShareIds = await this.database
 			.select({ id: expiringShareLinkTable.id })
 			.from(expiringShareLinkTable)
@@ -169,6 +283,7 @@ export class MarketDemoService {
 		return {
 			ok: true,
 			deletedShares,
+			deletedThreads,
 			deletedHouseholds,
 			deletedUsers
 		};

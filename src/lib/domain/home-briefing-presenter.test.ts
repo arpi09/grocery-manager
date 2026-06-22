@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { translate } from '$lib/i18n/messages';
 import type { InventoryItem } from './inventory-item';
 import type { ReplenishmentSuggestion } from './replenishment';
 import {
@@ -160,17 +161,34 @@ describe('home-briefing-presenter', () => {
 		);
 	});
 
-	it('builds expiring card copy', () => {
-		const copy = buildHomeBriefingForYouPresentation(
+	it('builds expiring card copy with storage location', () => {
+		const copySv = buildHomeBriefingForYouPresentation(
+			{
+				kind: 'expiring',
+				item: expiringItem,
+				daysUntilExpiry: 6,
+				location: 'fridge'
+			},
+			'sv'
+		);
+		expect(copySv.title.params.name).toBe('Yogurt');
+		expect(copySv.body.params.days).toBe(6);
+		expect(copySv.body.params.location).toBe('kylskåpet');
+		expect(translate('sv', copySv.body.key, copySv.body.params)).toBe(
+			'Går ut om 6 dagar — finns i kylskåpet.'
+		);
+
+		const copyEn = buildHomeBriefingForYouPresentation(
 			{
 				kind: 'expiring',
 				item: expiringItem,
 				daysUntilExpiry: 1,
-				suggestion: 'fridge'
+				location: 'fridge'
 			},
 			'en'
 		);
-		expect(copy.title.params.name).toBe('Yogurt');
-		expect(copy.body.params.days).toBe(1);
+		expect(translate('en', copyEn.body.key, copyEn.body.params)).toBe(
+			'Expires in 1 day — in the fridge.'
+		);
 	});
 });

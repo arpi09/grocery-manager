@@ -10,9 +10,7 @@ import {
 test.describe('Market v0.1 access', () => {
 	test.use({ actionTimeout: 45_000 });
 
-	test('regular user has no market nav link but direct URL works with nearby opt-in', async ({
-		page
-	}) => {
+	test('regular user gets 404 on market when live is off', async ({ page }) => {
 		test.setTimeout(90_000);
 		await registerNewUser(page);
 		await dismissCookieConsentIfOpen(page);
@@ -26,14 +24,14 @@ test.describe('Market v0.1 access', () => {
 		});
 		expect(optInResponse.ok()).toBeTruthy();
 
+		const marketResponse = await page.request.get('/grannskafferiet/marknad');
+		expect(marketResponse.status()).toBe(404);
+
 		await page.goto('/grannskafferiet/marknad', { waitUntil: 'commit' });
-		await expect(page.getByTestId('market-v01-page')).toBeVisible({ timeout: 15_000 });
-		await expect(page.getByRole('heading', { level: 1 })).toContainText(
-			/Grannmarknad|Grannskafferiet marknad|Neighbour market/i
-		);
+		await expect(page.getByTestId('market-v01-page')).toHaveCount(0);
 	});
 
-	test('admin sees market link in More menu', async ({ page }) => {
+	test('admin sees market link and page without live flag', async ({ page }) => {
 		test.setTimeout(90_000);
 		await loginAsAdmin(page);
 		await dismissCookieConsentIfOpen(page);
@@ -41,5 +39,11 @@ test.describe('Market v0.1 access', () => {
 
 		await openMoreNav(page);
 		await expect(page.getByTestId('nav-market-v01')).toBeVisible({ timeout: 15_000 });
+
+		await page.goto('/grannskafferiet/marknad', { waitUntil: 'commit' });
+		await expect(page.getByTestId('market-v01-page')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByRole('heading', { level: 1 })).toContainText(
+			/Grannmarknad|Grannskafferiet marknad|Neighbour market/i
+		);
 	});
 });

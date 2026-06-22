@@ -6,6 +6,7 @@ export interface UserProfile {
 	email: string;
 	displayName: string | null;
 	avatarUrl: string | null;
+	marketFirstName: string | null;
 }
 
 export function isAdminRole(role: string | undefined | null): role is 'admin' {

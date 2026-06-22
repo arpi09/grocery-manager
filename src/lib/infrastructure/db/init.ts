@@ -213,7 +213,11 @@ const INCREMENTAL_MIGRATIONS = [
 	'0060_acquisition_loops_telemetry.sql',
 	'0061_price_intelligence_phase1.sql',
 	'0063_ata_page_telemetry.sql',
-	'0064_market_v01.sql'
+	'0064_market_v01.sql',
+	'0065_market_live.sql',
+	'0066_market_chat_report.sql',
+	'0067_market_v02_exchange.sql',
+	'0068_market_v03_trust.sql'
 ];
 
 async function runPgliteBaseline(client: PGlite) {

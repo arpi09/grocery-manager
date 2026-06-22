@@ -147,9 +147,11 @@ export const NAV_ITEMS: NavItem[] = [
 
 export function appendMarketV01NavItems(
 	items: NavItem[],
-	user: NavUser | null | undefined
+	user: NavUser | null | undefined,
+	marketLiveEnabled: boolean,
+	nearbyEnabled = false
 ): NavItem[] {
-	if (!showMarketV01InNav(user)) {
+	if (!showMarketV01InNav(user, marketLiveEnabled, nearbyEnabled)) {
 		return items;
 	}
 

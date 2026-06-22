@@ -633,7 +633,7 @@ export class DrizzlePmfRepository implements IPmfRepository {
 		const periodEnd = now;
 		const periodStart = new Date(now.getTime() - periodMs);
 
-		const [eventRows, activeAutoRows] = await Promise.all([
+		const [eventRows, activeAutoRows, activeDemoRows] = await Promise.all([
 			db
 				.select({
 					eventType: productEventTable.eventType,
@@ -657,6 +657,17 @@ export class DrizzlePmfRepository implements IPmfRepository {
 						eq(expiringShareLinkTable.source, 'auto_nearby'),
 						gt(expiringShareLinkTable.expiresAt, now)
 					)
+				),
+			db
+				.select({
+					count: sql<number>`count(*)::int`
+				})
+				.from(expiringShareLinkTable)
+				.where(
+					and(
+						eq(expiringShareLinkTable.source, 'demo_market'),
+						gt(expiringShareLinkTable.expiresAt, now)
+					)
 				)
 		]);
 
@@ -671,6 +682,7 @@ export class DrizzlePmfRepository implements IPmfRepository {
 		return buildMarketV01MetricsSnapshot({
 			counts,
 			activeAutoListings: activeAutoRows[0]?.count ?? 0,
+			activeDemoListings: activeDemoRows[0]?.count ?? 0,
 			periodStart,
 			periodEnd,
 			periodDays

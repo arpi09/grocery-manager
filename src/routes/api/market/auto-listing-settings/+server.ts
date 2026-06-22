@@ -1,8 +1,8 @@
 import { json } from '@sveltejs/kit';
-import { canAccessMarketV01Ui } from '$lib/domain/market-v01';
-import { translate } from '$lib/i18n/messages';
 import { requireUser } from '$lib/server/api-guards';
 import { expiringShareService, marketListingService, userRepository } from '$lib/server/di';
+import { requireMarketV01UiAccessForApi } from '$lib/server/market-v01-guard';
+import { translate } from '$lib/i18n/messages';
 import { updateAutoListingSettingsSchema } from '$lib/validation/nearby-sharing.schemas';
 import type { RequestHandler } from './$types';
 
@@ -12,9 +12,9 @@ export const GET: RequestHandler = async ({ locals }) => {
 		return auth.response;
 	}
 
-	const nearby = await expiringShareService.getNearbySharingSettings(auth.user.id);
-	if (!canAccessMarketV01Ui(auth.user, nearby.enabled)) {
-		return json({ ok: false, error: translate(locals.locale, 'errors.api.unauthorized') }, { status: 403 });
+	const denied = await requireMarketV01UiAccessForApi(locals.locale, auth.user);
+	if (denied) {
+		return denied;
 	}
 
 	const enabled = await userRepository.getAutoNearbyListingEnabled(auth.user.id);
@@ -27,11 +27,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return auth.response;
 	}
 
-	const nearby = await expiringShareService.getNearbySharingSettings(auth.user.id);
-	if (!canAccessMarketV01Ui(auth.user, nearby.enabled)) {
-		return json({ ok: false, error: translate(locals.locale, 'errors.api.unauthorized') }, { status: 403 });
+	const denied = await requireMarketV01UiAccessForApi(locals.locale, auth.user);
+	if (denied) {
+		return denied;
 	}
 
+	const nearby = await expiringShareService.getNearbySharingSettings(auth.user.id);
 	const body = await request.json().catch(() => null);
 	const parsed = updateAutoListingSettingsSchema.safeParse(body);
 	if (!parsed.success) {

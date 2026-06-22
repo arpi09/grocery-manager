@@ -167,7 +167,31 @@ describe('MarketChatService — integration', () => {
 			stars: 5,
 			householdId: seekerHouseholdId
 		});
-		expect(first.ok).toBe(true);
+		expect(first.ok).toBe(false);
+		if (first.ok) {
+			return;
+		}
+		expect(first.error).toBe('closed');
+
+		const seekerComplete = await service.markExchangeComplete({
+			threadId: created.data.thread.id,
+			userId: seekerUserId
+		});
+		expect(seekerComplete.ok).toBe(true);
+
+		const sharerComplete = await service.markExchangeComplete({
+			threadId: created.data.thread.id,
+			userId: sharerUserId
+		});
+		expect(sharerComplete.ok).toBe(true);
+
+		const rated = await service.rateThread({
+			threadId: created.data.thread.id,
+			userId: seekerUserId,
+			stars: 5,
+			householdId: seekerHouseholdId
+		});
+		expect(rated.ok).toBe(true);
 
 		const second = await service.rateThread({
 			threadId: created.data.thread.id,
@@ -176,6 +200,155 @@ describe('MarketChatService — integration', () => {
 			householdId: seekerHouseholdId
 		});
 		expect(second).toEqual({ ok: false, error: 'conflict' });
+	});
+
+	it('reveals counterpart rating only after both parties rated', async () => {
+		await enableNearby(seekerUserId, seekerHouseholdId);
+		await enableNearby(sharerUserId, sharerHouseholdId);
+		const shareId = await seedShare();
+
+		const created = await service.createOrGetThread({
+			shareId,
+			seekerUserId,
+			seekerHouseholdId
+		});
+		expect(created.ok).toBe(true);
+		if (!created.ok) {
+			return;
+		}
+
+		const threadId = created.data.thread.id;
+		await service.markExchangeComplete({ threadId, userId: seekerUserId });
+		await service.markExchangeComplete({ threadId, userId: sharerUserId });
+
+		const sharerFirst = await service.rateThread({
+			threadId,
+			userId: sharerUserId,
+			stars: 4,
+			comment: 'Bra seeker',
+			itemsAsDescribed: 'yes',
+			householdId: sharerHouseholdId
+		});
+		expect(sharerFirst.ok).toBe(true);
+		if (!sharerFirst.ok) {
+			return;
+		}
+		expect(sharerFirst.data.counterpartRating).toBeNull();
+
+		const seekerBefore = await service.getThreadDetail(threadId, seekerUserId);
+		expect(seekerBefore.ok).toBe(true);
+		if (!seekerBefore.ok) {
+			return;
+		}
+		expect(seekerBefore.data.counterpartRating).toBeNull();
+
+		const seekerRated = await service.rateThread({
+			threadId,
+			userId: seekerUserId,
+			stars: 5,
+			comment: 'Trevlig utdelning',
+			itemsAsDescribed: 'partial',
+			householdId: seekerHouseholdId
+		});
+		expect(seekerRated.ok).toBe(true);
+		if (!seekerRated.ok) {
+			return;
+		}
+		expect(seekerRated.data.counterpartRating).toEqual({
+			stars: 4,
+			comment: 'Bra seeker',
+			itemsAsDescribed: 'yes'
+		});
+
+		const seekerAfter = await service.getThreadDetail(threadId, seekerUserId);
+		expect(seekerAfter.ok).toBe(true);
+		if (!seekerAfter.ok) {
+			return;
+		}
+		expect(seekerAfter.data.counterpartRating?.stars).toBe(4);
+
+		const reviews = await service.listRecentReviewsForUser(sharerUserId, 3);
+		expect(reviews).toHaveLength(1);
+		expect(reviews[0]?.stars).toBe(5);
+		expect(reviews[0]?.comment).toBe('Trevlig utdelning');
+	});
+
+	it('reports a thread with reason and sets lifecycle to reported', async () => {
+		await enableNearby(seekerUserId, seekerHouseholdId);
+		await enableNearby(sharerUserId, sharerHouseholdId);
+		const shareId = await seedShare();
+
+		const created = await service.createOrGetThread({
+			shareId,
+			seekerUserId,
+			seekerHouseholdId
+		});
+		expect(created.ok).toBe(true);
+		if (!created.ok) {
+			return;
+		}
+
+		const reported = await service.reportThread({
+			threadId: created.data.thread.id,
+			reporterUserId: seekerUserId,
+			reason: 'unsafe',
+			blockCounterpart: true
+		});
+		expect(reported.ok).toBe(true);
+		if (!reported.ok) {
+			return;
+		}
+
+		expect(reported.data.thread.lifecycleStatus).toBe('reported');
+		expect(reported.data.thread.closedAt).not.toBeNull();
+
+		const reports = await service.listOpenChatReports(10);
+		expect(reports.some((row) => row.id === reported.data.reportId && row.reason === 'unsafe')).toBe(
+			true
+		);
+
+		const blocked = await service.createOrGetThread({
+			shareId,
+			seekerUserId,
+			seekerHouseholdId
+		});
+		expect(blocked).toEqual({ ok: false, error: 'blocked' });
+	});
+
+	it('cancels a thread without blocking or rating', async () => {
+		await enableNearby(seekerUserId, seekerHouseholdId);
+		await enableNearby(sharerUserId, sharerHouseholdId);
+		const shareId = await seedShare();
+
+		const created = await service.createOrGetThread({
+			shareId,
+			seekerUserId,
+			seekerHouseholdId
+		});
+		expect(created.ok).toBe(true);
+		if (!created.ok) {
+			return;
+		}
+
+		const cancelled = await service.cancelThread({
+			threadId: created.data.thread.id,
+			userId: seekerUserId
+		});
+		expect(cancelled.ok).toBe(true);
+		if (!cancelled.ok) {
+			return;
+		}
+
+		expect(cancelled.data.thread.lifecycleStatus).toBe('cancelled');
+		expect(cancelled.data.thread.closedAt).not.toBeNull();
+
+		const message = await service.sendMessage({
+			threadId: created.data.thread.id,
+			userId: seekerUserId,
+			body: 'Hello after cancel',
+			householdId: seekerHouseholdId
+		});
+		expect(message).toEqual({ ok: false, error: 'closed' });
 	});
 
 	it('blocks thread creation when seeker blocked the share household', async () => {

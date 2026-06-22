@@ -31,10 +31,14 @@
 	const navFlags = $derived({
 		pantryUxV2Enabled: Boolean(page.data.pantryUxV2Enabled)
 	});
+	const marketLiveEnabled = $derived(Boolean(page.data.marketLiveEnabled));
+	const nearbySharingEnabled = $derived(Boolean(page.data.nearbySharingEnabled));
 	const visibleItems = $derived(
 		appendMarketV01NavItems(
 			applyNavFeatureFlags(filterNavItems(NAV_ITEMS, user), navFlags),
-			user
+			user,
+			marketLiveEnabled,
+			nearbySharingEnabled
 		)
 	);
 	const { primary, mobileTabs, headerUtility, secondary, mobileSecondary } = $derived(

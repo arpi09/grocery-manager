@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { translate, type MessageKey } from '$lib/i18n/messages';
 import { appendActionToast } from '$lib/utils/action-toast';
 import { updateProfileSchema, updateThemeSchema, saveAvatarSchema } from '$lib/validation/profile.schemas';
+import { updateMarketProfileSchema } from '$lib/validation/market-profile.schemas';
 import type { Actions, PageServerLoad } from './$types';
 
 function translateFieldErrors(
@@ -58,6 +59,25 @@ export const actions: Actions = {
 			displayName,
 			avatarUrl
 		});
+
+		redirect(302, appendActionToast('/profile', 'profileSaved'));
+	},
+	saveMarketProfile: async ({ request, locals }) => {
+		const formData = await request.formData();
+		const parsed = updateMarketProfileSchema.safeParse({
+			marketFirstName: formData.get('marketFirstName')
+		});
+
+		if (!parsed.success) {
+			return fail(400, {
+				marketProfileErrors: translateFieldErrors(locals.locale, parsed.error.flatten().fieldErrors)
+			});
+		}
+
+		await locals.profileService.updateMarketProfile(
+			locals.user!.id,
+			parsed.data.marketFirstName
+		);
 
 		redirect(302, appendActionToast('/profile', 'profileSaved'));
 	},

@@ -99,4 +99,24 @@ describe('App settings integration', () => {
 		expect(status.envDisabled).toBe(true);
 		expect(status.effective).toBe(false);
 	});
+
+	it('defaults market live to disabled when unset', async () => {
+		const status = await appSettingsService.getMarketLiveStatus();
+		expect(status.enabledInApp).toBe(false);
+		expect(status.effective).toBe(false);
+	});
+
+	it('persists admin market live toggle', async () => {
+		await appSettingsService.setMarketLiveEnabled(true);
+
+		const status = await appSettingsService.getMarketLiveStatus();
+		expect(status.enabledInApp).toBe(true);
+		expect(status.effective).toBe(true);
+
+		await appSettingsService.setMarketLiveEnabled(false);
+
+		const afterOff = await appSettingsService.getMarketLiveStatus();
+		expect(afterOff.enabledInApp).toBe(false);
+		expect(afterOff.effective).toBe(false);
+	});
 });

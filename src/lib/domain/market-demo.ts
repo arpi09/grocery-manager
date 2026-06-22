@@ -1,11 +1,12 @@
 import type { ExpiringShareItemSnapshot } from '$lib/domain/expiring-share';
 import { EXPIRING_SHARE_TTL_MS } from '$lib/domain/expiring-share';
 import { coarseGeoCoordinate, type GeoCoordinate } from '$lib/domain/geo';
-
+import type { MarketItemsAsDescribed } from '$lib/domain/market-lifecycle';
 /** Stable prefix — all demo rows use these ids for one-click cleanup. */
 export const MARKET_DEMO_USER_PREFIX = 'market-demo-user-';
 export const MARKET_DEMO_HOUSEHOLD_PREFIX = 'market-demo-hh-';
 export const MARKET_DEMO_SHARE_PREFIX = 'market-demo-share-';
+export const MARKET_DEMO_THREAD_PREFIX = 'market-demo-thread-';
 
 export const MARKET_DEMO_SOURCE = 'demo_market' as const;
 
@@ -104,7 +105,7 @@ export function marketDemoListingFixtures(center: GeoCoordinate): MarketDemoList
 		},
 		{
 			slot: 3,
-			sharerFirstName: 'Sara',
+			sharerFirstName: 'Lisa',
 			offsetM: 350,
 			bearingDeg: 290,
 			items: [
@@ -121,6 +122,28 @@ export function marketDemoListingFixtures(center: GeoCoordinate): MarketDemoList
 					location: 'fridge',
 					quantity: '1',
 					unit: 'påse'
+				}
+			]
+		},
+		{
+			slot: 4,
+			sharerFirstName: 'Sara',
+			offsetM: 420,
+			bearingDeg: 75,
+			items: [
+				{
+					name: 'Bröd',
+					expiresOn: expiresOnDaysFromNow(1),
+					location: 'cupboard',
+					quantity: '1',
+					unit: 'limpa'
+				},
+				{
+					name: 'Ost',
+					expiresOn: expiresOnDaysFromNow(3),
+					location: 'fridge',
+					quantity: '200',
+					unit: 'g'
 				}
 			]
 		}
@@ -145,6 +168,110 @@ export function marketDemoListingFixtures(center: GeoCoordinate): MarketDemoList
 
 export function marketDemoShareExpiresAt(): Date {
 	return new Date(Date.now() + EXPIRING_SHARE_TTL_MS);
+}
+
+export interface MarketDemoChatFixture {
+	threadId: string;
+	shareId: string;
+	sharerUserId: string;
+	householdId: string;
+	messages: Array<{ author: 'admin' | 'sharer'; body: string; offsetMinutes: number }>;
+	lifecycleStatus?: 'pickup_agreed' | 'completed' | 'reported';
+	reportReason?: 'inappropriate' | 'no_show' | 'misleading' | 'unsafe' | 'other';
+	adminRating?: {
+		stars: number;
+		comment?: string;
+		itemsAsDescribed?: MarketItemsAsDescribed;
+	};
+	sharerRating?: {
+		stars: number;
+		comment?: string;
+		itemsAsDescribed?: MarketItemsAsDescribed;
+	};
+}
+
+export function marketDemoChatFixtures(
+	adminUserId: string,
+	listings: MarketDemoListingFixture[]
+): MarketDemoChatFixture[] {
+	const anna = listings.find((listing) => listing.slot === 1);
+	const erik = listings.find((listing) => listing.slot === 2);
+	const lisa = listings.find((listing) => listing.slot === 3);
+	const sara = listings.find((listing) => listing.slot === 4);
+	if (!anna) {
+		return [];
+	}
+
+	const fixtures: MarketDemoChatFixture[] = [
+		{
+			threadId: `${MARKET_DEMO_THREAD_PREFIX}1`,
+			shareId: anna.shareId,
+			sharerUserId: anna.userId,
+			householdId: anna.householdId,
+			lifecycleStatus: 'pickup_agreed',
+			messages: [
+				{ author: 'admin', body: 'Hej! Är gräddfilen fortfarande tillgänglig?', offsetMinutes: -180 },
+				{ author: 'sharer', body: 'Hej! Ja, den står klar i kylen.', offsetMinutes: -150 },
+				{ author: 'admin', body: 'Perfekt — kan jag hämta i kväll?', offsetMinutes: -120 }
+			]
+		}
+	];
+
+	if (erik) {
+		fixtures.push({
+			threadId: `${MARKET_DEMO_THREAD_PREFIX}2`,
+			shareId: erik.shareId,
+			sharerUserId: erik.userId,
+			householdId: erik.householdId,
+			lifecycleStatus: 'completed',
+			messages: [
+				{ author: 'admin', body: 'Hej Erik! Intresserad av bananerna.', offsetMinutes: -90 },
+				{ author: 'sharer', body: 'Kul! Hör av dig när du är på väg.', offsetMinutes: -60 }
+			]
+		});
+	}
+
+	if (lisa) {
+		fixtures.push({
+			threadId: `${MARKET_DEMO_THREAD_PREFIX}3`,
+			shareId: lisa.shareId,
+			sharerUserId: lisa.userId,
+			householdId: lisa.householdId,
+			lifecycleStatus: 'completed',
+			messages: [
+				{ author: 'admin', body: 'Hej Lisa! Är lasagnen fortfarande kvar?', offsetMinutes: -240 },
+				{ author: 'sharer', body: 'Ja, den väntar i kylen!', offsetMinutes: -210 }
+			],
+			adminRating: {
+				stars: 5,
+				comment: 'Snabb och trevlig — lasagnen smakade utmärkt!',
+				itemsAsDescribed: 'yes'
+			},
+			sharerRating: {
+				stars: 4,
+				comment: 'Smidigt utbyte, tack!',
+				itemsAsDescribed: 'yes'
+			}
+		});
+	}
+
+	if (sara) {
+		fixtures.push({
+			threadId: `${MARKET_DEMO_THREAD_PREFIX}4`,
+			shareId: sara.shareId,
+			sharerUserId: sara.userId,
+			householdId: sara.householdId,
+			lifecycleStatus: 'reported',
+			reportReason: 'unsafe',
+			messages: [
+				{ author: 'admin', body: 'Hej Sara! Kan jag hämta brödet i kväll?', offsetMinutes: -300 },
+				{ author: 'sharer', body: 'Visst, kom förbi efter 18.', offsetMinutes: -270 },
+				{ author: 'admin', body: 'Tack, jag är på väg nu.', offsetMinutes: -60 }
+			]
+		});
+	}
+
+	return fixtures;
 }
 
 export function isMarketDemoSeedEnabled(readEnv: () => string | undefined = () => undefined): boolean {

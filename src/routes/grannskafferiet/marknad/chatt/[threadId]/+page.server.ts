@@ -19,6 +19,9 @@ export const load: PageServerLoad = async (event) => {
 		thread: result.data.thread,
 		messages: result.data.messages,
 		counterpart: result.data.counterpart,
-		myRating: result.data.myRating
+		myRating: result.data.myRating,
+		counterpartRating: result.data.counterpartRating,
+		myMarkedComplete: result.data.myMarkedComplete,
+		counterpartMarkedComplete: result.data.counterpartMarkedComplete
 	};
 };

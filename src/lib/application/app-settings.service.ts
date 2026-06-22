@@ -2,6 +2,7 @@ import { env } from '$env/dynamic/private';
 import type { LinkedInOAuthTokens } from '$lib/domain/app-settings';
 import type { IAppSettingsRepository } from '$lib/infrastructure/repositories/app-settings.repository';
 import { isLinkedInApiConfigured } from '$lib/server/linkedin-oauth';
+import { isMarketV01DisabledByEnv } from '$lib/domain/market-v01';
 import { isStripeCheckoutConfigured, resolveStripeCheckoutEnabled } from '$lib/server/stripe';
 
 export const EMAIL_SENDING_DISABLED_REASON = 'Email sending is disabled';
@@ -38,6 +39,15 @@ export interface StripeCheckoutStatus {
 export function isStripeCheckoutDisabledByEnv(): boolean {
 	const value = env.STRIPE_CHECKOUT_DISABLED?.trim().toLowerCase();
 	return value === 'true' || value === '1';
+}
+
+export interface MarketLiveStatus {
+	/** Admin toggle in database (default false when unset). */
+	enabledInApp: boolean;
+	/** Hard kill switch from MARKET_V01_DISABLED env var. */
+	envDisabled: boolean;
+	/** Whether regular users may access market UI (admin always when backend on). */
+	effective: boolean;
 }
 
 export class AppSettingsService {
@@ -81,6 +91,25 @@ export class AppSettingsService {
 
 	setStripeCheckoutEnabled(enabled: boolean): Promise<void> {
 		return this.settings.setStripeCheckoutEnabled(enabled);
+	}
+
+	async getMarketLiveStatus(): Promise<MarketLiveStatus> {
+		const enabledInApp = await this.settings.getMarketLiveEnabled();
+		const envDisabled = isMarketV01DisabledByEnv();
+		return {
+			enabledInApp,
+			envDisabled,
+			effective: enabledInApp && !envDisabled
+		};
+	}
+
+	async isMarketLiveEnabled(): Promise<boolean> {
+		const status = await this.getMarketLiveStatus();
+		return status.effective;
+	}
+
+	setMarketLiveEnabled(enabled: boolean): Promise<void> {
+		return this.settings.setMarketLiveEnabled(enabled);
 	}
 
 	async getLinkedInOAuth(): Promise<LinkedInOAuthTokens | null> {

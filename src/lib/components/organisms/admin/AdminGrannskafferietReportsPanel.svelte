@@ -1,7 +1,9 @@
 <script lang="ts">
 	import Card from '$lib/components/atoms/Card.svelte';
+	import Toggle from '$lib/components/atoms/Toggle.svelte';
 	import { fetchAdminData, parseIsoDate } from '$lib/client/admin-data';
 	import { getLocale, t } from '$lib/i18n';
+	import { marketChatReportReasonLabel } from '$lib/i18n/domain-labels';
 
 	interface ReportRow {
 		id: string;
@@ -11,13 +13,27 @@
 		createdAt: Date;
 	}
 
+	interface MarketLiveStatus {
+		enabledInApp: boolean;
+		envDisabled: boolean;
+		effective: boolean;
+	}
+
 	interface ReportsPayload {
 		reports: Array<Omit<ReportRow, 'createdAt'> & { createdAt: string }>;
+		chatReports?: Array<{
+			id: string;
+			threadId: string;
+			reporterUserId: string;
+			reason: string | null;
+			createdAt: string;
+		}>;
 		marketMetrics?: {
 			periodDays: number;
 			periodStart: string;
 			periodEnd: string;
 			activeAutoListings: number;
+			activeDemoListings?: number;
 			counts: {
 				market_auto_listing_published: number;
 				market_listing_viewed: number;
@@ -26,7 +42,9 @@
 				market_exchange_rated: number;
 			};
 			listingToChatConversion: number | null;
+			chatToRatedConversion: number | null;
 		};
+		marketLive?: MarketLiveStatus;
 		limit: number;
 	}
 
@@ -46,6 +64,7 @@
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let reports = $state<ReportRow[]>([]);
+	let chatReports = $state<Array<{ id: string; threadId: string; reporterUserId: string; reason: string | null; createdAt: Date }>>([]);
 	let loaded = $state(false);
 	let syncing = $state(false);
 	let syncMessage = $state<string | null>(null);
@@ -55,6 +74,10 @@
 	let demoMessage = $state<string | null>(null);
 	let demoError = $state<string | null>(null);
 	let marketMetrics = $state<ReportsPayload['marketMetrics'] | null>(null);
+	let marketLive = $state<MarketLiveStatus | null>(null);
+	let marketLiveSaving = $state(false);
+	let marketLiveError = $state<string | null>(null);
+	let dismissingChatReportId = $state<string | null>(null);
 
 	$effect(() => {
 		if (!active) {
@@ -72,7 +95,12 @@
 				...row,
 				createdAt: parseIsoDate(row.createdAt)
 			}));
+			chatReports = (payload.chatReports ?? []).map((row) => ({
+				...row,
+				createdAt: parseIsoDate(row.createdAt)
+			}));
 			marketMetrics = payload.marketMetrics ?? null;
+			marketLive = payload.marketLive ?? null;
 			loaded = true;
 		} catch {
 			error = t('admin.loadError');
@@ -159,6 +187,57 @@
 		}
 	}
 
+	async function setMarketLiveEnabled(enabled: boolean) {
+		marketLiveSaving = true;
+		marketLiveError = null;
+		try {
+			const response = await fetch('/api/admin/market/set-live-enabled', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ enabled })
+			});
+			const payload = (await response.json()) as {
+				ok?: boolean;
+				marketLive?: MarketLiveStatus;
+			};
+			if (!response.ok || !payload.ok || !payload.marketLive) {
+				marketLiveError = t('admin.grannskafferietReports.marketLiveSaveFailed');
+				return;
+			}
+			marketLive = payload.marketLive;
+		} catch {
+			marketLiveError = t('admin.grannskafferietReports.marketLiveSaveFailed');
+		} finally {
+			marketLiveSaving = false;
+		}
+	}
+
+	async function dismissChatReport(reportId: string) {
+		dismissingChatReportId = reportId;
+		try {
+			const response = await fetch('/api/admin/market/dismiss-chat-report', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ reportId })
+			});
+			if (!response.ok) {
+				return;
+			}
+			chatReports = chatReports.filter((report) => report.id !== reportId);
+		} finally {
+			dismissingChatReportId = null;
+		}
+	}
+
+	function formatLiveState(status: MarketLiveStatus | null): string {
+		if (!status) {
+			return t('pmf.noData');
+		}
+		return status.enabledInApp
+			? t('admin.grannskafferietReports.marketLiveOn')
+			: t('admin.grannskafferietReports.marketLiveOff');
+	}
+
 	function formatDate(value: Date) {
 		const tag = getLocale() === 'sv' ? 'sv-SE' : 'en-GB';
 		return new Intl.DateTimeFormat(tag, { dateStyle: 'medium', timeStyle: 'short' }).format(value);
@@ -182,6 +261,31 @@
 		<a class="market-link" href="/grannskafferiet/marknad">{t('admin.grannskafferietReports.marketLink')}</a>
 	</p>
 
+	<section class="live-row" aria-labelledby="market-live-heading">
+		<h3 id="market-live-heading">{t('admin.grannskafferietReports.marketLiveTitle')}</h3>
+		<p class="note live-warning">{t('admin.grannskafferietReports.marketLiveWarning')}</p>
+		{#if marketLive?.envDisabled}
+			<p class="sync-error" role="status">{t('admin.grannskafferietReports.marketLiveEnvDisabled')}</p>
+		{/if}
+		<Toggle
+			checked={Boolean(marketLive?.enabledInApp)}
+			disabled={marketLiveSaving || Boolean(marketLive?.envDisabled)}
+			label={t('admin.grannskafferietReports.marketLiveEnable')}
+			toggleNotify={(enabled) => void setMarketLiveEnabled(enabled)}
+		/>
+		<p class="note" role="status">
+			{t('admin.grannskafferietReports.marketLiveStatus', {
+				state: formatLiveState(marketLive)
+			})}
+			{#if marketLiveSaving}
+				{' '}{t('admin.grannskafferietReports.marketLiveSaving')}
+			{/if}
+		</p>
+		{#if marketLiveError}
+			<p class="sync-error" role="alert">{marketLiveError}</p>
+		{/if}
+	</section>
+
 	{#if marketMetrics}
 		<section class="metrics-grid" aria-labelledby="market-metrics-heading">
 			<h3 id="market-metrics-heading">{t('admin.grannskafferietReports.marketMetricsTitle')}</h3>
@@ -189,10 +293,21 @@
 				<Card>
 					<p class="stat-label">{t('admin.grannskafferietReports.activeAutoListings')}</p>
 					<p class="stat-value">{marketMetrics.activeAutoListings}</p>
+					<p class="stat-context">{t('admin.grannskafferietReports.activeRealListingsNote')}</p>
+				</Card>
+				<Card>
+					<p class="stat-label">{t('admin.grannskafferietReports.activeDemoListings')}</p>
+					<p class="stat-value">{marketMetrics.activeDemoListings ?? 0}</p>
+					<p class="stat-context">{t('admin.grannskafferietReports.activeDemoListingsNote')}</p>
 				</Card>
 				<Card>
 					<p class="stat-label">{t('admin.grannskafferietReports.chatsStarted')}</p>
 					<p class="stat-value">{marketMetrics.counts.market_chat_started}</p>
+					<p class="stat-context">
+						{t('admin.grannskafferietReports.chatToRatedConversion', {
+							rate: formatPercent(marketMetrics.chatToRatedConversion)
+						})}
+					</p>
 				</Card>
 				<Card>
 					<p class="stat-label">{t('admin.grannskafferietReports.messagesSent')}</p>
@@ -264,9 +379,52 @@
 		<p>{t('common.loading')}</p>
 	{:else if error}
 		<p role="alert">{error}</p>
-	{:else if reports.length === 0}
-		<p>{t('admin.grannskafferietReports.empty')}</p>
 	{:else}
+		{#if chatReports.length > 0}
+			<section aria-labelledby="chat-reports-heading">
+				<h3 id="chat-reports-heading">{t('admin.grannskafferietReports.chatReportsTitle')}</h3>
+				<p class="note">{t('admin.grannskafferietReports.chatReportsNote')}</p>
+				<Card class="reports-table-card">
+					<div class="table-scroll">
+						<table>
+							<thead>
+								<tr>
+									<th scope="col">{t('admin.grannskafferietReports.date')}</th>
+									<th scope="col">{t('admin.grannskafferietReports.threadId')}</th>
+									<th scope="col">{t('admin.grannskafferietReports.reason')}</th>
+									<th scope="col">{t('admin.grannskafferietReports.actionsCol')}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each chatReports as report (report.id)}
+									<tr>
+										<td>{formatDate(report.createdAt)}</td>
+										<td><code>{report.threadId.slice(0, 8)}…</code></td>
+										<td>{marketChatReportReasonLabel(getLocale(), report.reason)}</td>
+										<td>
+											<button
+												type="button"
+												class="sync-btn"
+												disabled={dismissingChatReportId === report.id}
+												onclick={() => void dismissChatReport(report.id)}
+											>
+												{dismissingChatReportId === report.id
+													? t('admin.grannskafferietReports.dismissingChatReport')
+													: t('admin.grannskafferietReports.dismissChatReport')}
+											</button>
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+				</Card>
+			</section>
+		{/if}
+
+		{#if reports.length === 0}
+			<p>{t('admin.grannskafferietReports.empty')}</p>
+		{:else}
 		<Card class="reports-table-card">
 			<div class="table-scroll">
 				<table>
@@ -289,6 +447,7 @@
 				</table>
 			</div>
 		</Card>
+		{/if}
 	{/if}
 </section>
 
@@ -355,6 +514,17 @@
 
 	.market-link:hover {
 		text-decoration: underline;
+	}
+
+	.live-row {
+		display: grid;
+		gap: var(--space-xs);
+		padding: var(--space-sm) 0;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.live-warning {
+		color: var(--color-danger);
 	}
 
 	.sync-row {

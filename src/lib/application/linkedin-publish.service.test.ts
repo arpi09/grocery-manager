@@ -71,6 +71,8 @@ describe('LinkedInPublishService', () => {
 			setEmailSendingEnabled: vi.fn(),
 			getStripeCheckoutEnabled: vi.fn(),
 			setStripeCheckoutEnabled: vi.fn(),
+			getMarketLiveEnabled: vi.fn(),
+			setMarketLiveEnabled: vi.fn(),
 			getLinkedInOAuth: vi.fn().mockResolvedValue({
 				refreshToken: 'refresh',
 				accessToken: 'access',

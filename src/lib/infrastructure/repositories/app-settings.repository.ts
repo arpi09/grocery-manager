@@ -1,6 +1,7 @@
 import {
 	APP_SETTING_EMAIL_SENDING_ENABLED,
 	APP_SETTING_LINKEDIN_OAUTH,
+	APP_SETTING_MARKET_LIVE_ENABLED,
 	APP_SETTING_STRIPE_CHECKOUT_ENABLED,
 	type LinkedInOAuthTokens
 } from '$lib/domain/app-settings';
@@ -17,6 +18,8 @@ export interface IAppSettingsRepository {
 	setEmailSendingEnabled(enabled: boolean): Promise<void>;
 	getStripeCheckoutEnabled(): Promise<boolean>;
 	setStripeCheckoutEnabled(enabled: boolean): Promise<void>;
+	getMarketLiveEnabled(): Promise<boolean>;
+	setMarketLiveEnabled(enabled: boolean): Promise<void>;
 	getLinkedInOAuth(): Promise<LinkedInOAuthTokens | null>;
 	setLinkedInOAuth(tokens: LinkedInOAuthTokens | null): Promise<void>;
 }
@@ -106,6 +109,14 @@ export class DrizzleAppSettingsRepository implements IAppSettingsRepository {
 
 	async setStripeCheckoutEnabled(enabled: boolean): Promise<void> {
 		await this.setBoolean(APP_SETTING_STRIPE_CHECKOUT_ENABLED, enabled);
+	}
+
+	async getMarketLiveEnabled(): Promise<boolean> {
+		return (await this.getBoolean(APP_SETTING_MARKET_LIVE_ENABLED)) ?? false;
+	}
+
+	async setMarketLiveEnabled(enabled: boolean): Promise<void> {
+		await this.setBoolean(APP_SETTING_MARKET_LIVE_ENABLED, enabled);
 	}
 
 	async getLinkedInOAuth(): Promise<LinkedInOAuthTokens | null> {

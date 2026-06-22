@@ -37,6 +37,7 @@ export interface IUserRepository {
 		id: string,
 		data: { displayName: string | null; avatarUrl: string | null }
 	): Promise<UserProfile | null>;
+	updateMarketProfile(id: string, marketFirstName: string | null): Promise<UserProfile | null>;
 	updateThemePreference(id: string, themePreference: ThemePreference): Promise<ThemePreference | null>;
 	getShoppingToPantryMode(id: string): Promise<ShoppingToPantryMode | null>;
 	updateShoppingToPantryMode(
@@ -54,12 +55,14 @@ function mapProfile(row: {
 	email: string;
 	displayName: string | null;
 	avatarUrl: string | null;
+	marketFirstName?: string | null;
 }): UserProfile {
 	return {
 		id: row.id,
 		email: row.email,
 		displayName: row.displayName,
-		avatarUrl: row.avatarUrl
+		avatarUrl: row.avatarUrl,
+		marketFirstName: row.marketFirstName ?? null
 	};
 }
 
@@ -151,7 +154,8 @@ export class DrizzleUserRepository implements IUserRepository {
 				id: userTable.id,
 				email: userTable.email,
 				displayName: userTable.displayName,
-				avatarUrl: userTable.avatarUrl
+				avatarUrl: userTable.avatarUrl,
+				marketFirstName: userTable.marketFirstName
 			})
 			.from(userTable)
 			.where(eq(userTable.id, id))
@@ -167,6 +171,16 @@ export class DrizzleUserRepository implements IUserRepository {
 				displayName: data.displayName,
 				avatarUrl: data.avatarUrl
 			})
+			.where(eq(userTable.id, id))
+			.returning();
+
+		return row ? mapProfile(row) : null;
+	}
+
+	async updateMarketProfile(id: string, marketFirstName: string | null) {
+		const [row] = await this.db
+			.update(userTable)
+			.set({ marketFirstName })
 			.where(eq(userTable.id, id))
 			.returning();
 

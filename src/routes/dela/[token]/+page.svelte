@@ -116,6 +116,14 @@
 
 		<p class="gdpr-note" role="note">{t('expiringShare.publicGdprNote')}</p>
 
+		{#if data.showMarketCta}
+			<section class="market-cta" data-testid="dela-market-cta">
+				<h2>{t('marketV01.delaCtaTitle')}</h2>
+				<p>{t('marketV01.delaCtaLead')}</p>
+				<a class="market-cta-btn" href={data.marketPath}>{t('marketV01.delaCtaBtn')}</a>
+			</section>
+		{/if}
+
 		{#if $page.data.user}
 			<div class="report-row">
 				<p>{t('nearbySharing.trustNote')}</p>
@@ -303,6 +311,42 @@
 		color: var(--color-text-muted);
 		background: color-mix(in srgb, var(--lista-brand) 6%, var(--color-surface));
 		border: 1px solid color-mix(in srgb, var(--lista-brand) 18%, var(--color-border));
+	}
+
+	.market-cta {
+		display: grid;
+		gap: var(--space-sm);
+		padding: var(--space-lg);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		border: 1px solid color-mix(in srgb, var(--lista-brand) 18%, var(--color-border));
+	}
+
+	.market-cta h2 {
+		margin: 0;
+		font-size: 1.125rem;
+		color: var(--lista-brand);
+	}
+
+	.market-cta p {
+		margin: 0;
+		color: var(--color-text-muted);
+		font-size: var(--text-sm);
+	}
+
+	.market-cta-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 2.75rem;
+		padding: 0.75rem 1.25rem;
+		border-radius: var(--radius-sm);
+		background: var(--lista-brand);
+		border: 1px solid var(--lista-brand);
+		color: #fff;
+		font-weight: 600;
+		text-decoration: none;
+		justify-self: start;
 	}
 
 	.item-list {

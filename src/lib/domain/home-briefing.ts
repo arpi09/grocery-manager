@@ -3,6 +3,7 @@ import { daysUntilExpiry } from '$lib/domain/expiry';
 import type { MessageKey } from '$lib/i18n/messages';
 import type { HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
 import type { InventoryItem } from '$lib/domain/inventory-item';
+import type { StorageLocation } from '$lib/domain/location';
 import type { ReplenishmentSuggestion } from '$lib/domain/replenishment';
 
 export type HomeBriefingStatusKey =
@@ -43,7 +44,7 @@ export interface HomeBriefingExpiringCard {
 	kind: 'expiring';
 	item: InventoryItem;
 	daysUntilExpiry: number;
-	suggestion: string;
+	location: StorageLocation;
 }
 
 export interface HomeBriefingShopReadyCard {
@@ -114,10 +115,6 @@ export function selectHomeBriefingStatus(input: HomeBriefingInput): HomeBriefing
 	return { key: 'allGood' };
 }
 
-function defaultExpiringSuggestion(item: InventoryItem): string {
-	return item.location;
-}
-
 /** Pick exactly one primary För dig card — recipe → replenishment → expiring → shop ready. */
 export function selectHomeBriefingForYouCard(
 	input: HomeBriefingInput
@@ -139,7 +136,7 @@ export function selectHomeBriefingForYouCard(
 			kind: 'expiring',
 			item: expiringItem,
 			daysUntilExpiry: daysUntilExpiry(expiringItem.expiresOn, today),
-			suggestion: defaultExpiringSuggestion(expiringItem)
+			location: expiringItem.location
 		};
 	}
 

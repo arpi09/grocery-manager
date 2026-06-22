@@ -24,6 +24,7 @@ describe('AuthService', () => {
 			setMustResetPassword: vi.fn(),
 			findProfileById: vi.fn(),
 			updateProfile: vi.fn(),
+			updateMarketProfile: vi.fn(),
 			updateThemePreference: vi.fn(),
 			markEmailVerified: vi.fn(),
 			getShoppingToPantryMode: vi.fn(),

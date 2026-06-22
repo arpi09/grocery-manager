@@ -27,8 +27,10 @@ export interface MarketV01MetricsSnapshot {
 	periodStart: Date;
 	periodEnd: Date;
 	activeAutoListings: number;
+	activeDemoListings: number;
 	counts: MarketV01EventCounts;
 	listingToChatConversion: number | null;
+	chatToRatedConversion: number | null;
 }
 
 export function emptyMarketV01EventCounts(): MarketV01EventCounts {
@@ -45,19 +47,23 @@ export function emptyMarketV01EventCounts(): MarketV01EventCounts {
 export function buildMarketV01MetricsSnapshot(input: {
 	counts: MarketV01EventCounts;
 	activeAutoListings: number;
+	activeDemoListings?: number;
 	periodStart: Date;
 	periodEnd: Date;
 	periodDays?: number;
 }): MarketV01MetricsSnapshot {
 	const views = input.counts.market_listing_viewed;
 	const chats = input.counts.market_chat_started;
+	const rated = input.counts.market_exchange_rated;
 
 	return {
 		periodDays: input.periodDays ?? MARKET_V01_METRIC_PERIOD_DAYS,
 		periodStart: input.periodStart,
 		periodEnd: input.periodEnd,
 		activeAutoListings: input.activeAutoListings,
+		activeDemoListings: input.activeDemoListings ?? 0,
 		counts: input.counts,
-		listingToChatConversion: views > 0 ? chats / views : null
+		listingToChatConversion: views > 0 ? chats / views : null,
+		chatToRatedConversion: chats > 0 ? rated / chats : null
 	};
 }

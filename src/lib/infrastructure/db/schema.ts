@@ -46,6 +46,7 @@ export const userTable = pgTable('user', {
 		withTimezone: true,
 		mode: 'date'
 	}),
+	marketChatPushEnabled: boolean('market_chat_push_enabled').notNull().default(false),
 	autoNearbyListingEnabled: boolean('auto_nearby_listing_enabled').notNull().default(false),
 	marketFirstName: text('market_first_name'),
 	themePreference: text('theme_preference', { enum: ['light', 'dark', 'system'] }).notNull().default('system'),
@@ -836,7 +837,21 @@ export const marketChatThreadTable = pgTable(
 			.notNull()
 			.references(() => householdTable.id, { onDelete: 'cascade' }),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
-		closedAt: timestamp('closed_at', { withTimezone: true, mode: 'date' })
+		closedAt: timestamp('closed_at', { withTimezone: true, mode: 'date' }),
+		exchangeStatus: text('exchange_status', { enum: ['ongoing', 'completed'] })
+			.notNull()
+			.default('ongoing'),
+		lifecycleStatus: text('lifecycle_status', {
+			enum: ['chatting', 'pickup_agreed', 'awaiting_handover', 'completed', 'cancelled', 'reported']
+		})
+			.notNull()
+			.default('chatting'),
+		pickupAgreedAt: timestamp('pickup_agreed_at', { withTimezone: true, mode: 'date' }),
+		seekerCompletedAt: timestamp('seeker_completed_at', { withTimezone: true, mode: 'date' }),
+		sharerCompletedAt: timestamp('sharer_completed_at', { withTimezone: true, mode: 'date' }),
+		seekerLastReadAt: timestamp('seeker_last_read_at', { withTimezone: true, mode: 'date' }),
+		sharerLastReadAt: timestamp('sharer_last_read_at', { withTimezone: true, mode: 'date' }),
+		replyReminderSentAt: timestamp('reply_reminder_sent_at', { withTimezone: true, mode: 'date' })
 	},
 	(table) => [
 		index('market_chat_thread_share_idx').on(table.shareId),
@@ -863,6 +878,28 @@ export const marketChatMessageTable = pgTable(
 	]
 );
 
+export const marketChatReportTable = pgTable(
+	'market_chat_report',
+	{
+		id: text('id').primaryKey(),
+		threadId: text('thread_id')
+			.notNull()
+			.references(() => marketChatThreadTable.id, { onDelete: 'cascade' }),
+		reporterUserId: text('reporter_user_id')
+			.notNull()
+			.references(() => userTable.id, { onDelete: 'cascade' }),
+		reason: text('reason', {
+			enum: ['inappropriate', 'no_show', 'misleading', 'unsafe', 'other']
+		}),
+		dismissedAt: timestamp('dismissed_at', { withTimezone: true, mode: 'date' }),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('market_chat_report_thread_idx').on(table.threadId),
+		index('market_chat_report_reporter_idx').on(table.reporterUserId)
+	]
+);
+
 export const marketExchangeRatingTable = pgTable(
 	'market_exchange_rating',
 	{
@@ -877,6 +914,9 @@ export const marketExchangeRatingTable = pgTable(
 			.notNull()
 			.references(() => userTable.id, { onDelete: 'cascade' }),
 		stars: integer('stars').notNull(),
+		comment: text('comment'),
+		itemsAsDescribed: text('items_as_described', { enum: ['yes', 'partial', 'no'] }),
+		revealedAt: timestamp('revealed_at', { withTimezone: true, mode: 'date' }),
 		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 	},
 	(table) => [

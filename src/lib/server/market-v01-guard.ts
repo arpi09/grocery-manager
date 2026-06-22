@@ -1,6 +1,8 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error, json, redirect } from '@sveltejs/kit';
 import { canAccessMarketV01Ui, isMarketV01BackendEnabled } from '$lib/domain/market-v01';
-import { expiringShareService, userRepository } from '$lib/server/di';
+import type { Locale } from '$lib/i18n/locale';
+import { translate } from '$lib/i18n/messages';
+import { appSettingsService, expiringShareService, userRepository } from '$lib/server/di';
 import type { ServerLoadEvent } from '@sveltejs/kit';
 
 export async function guardMarketV01PageLoad(event: ServerLoadEvent) {
@@ -13,8 +15,12 @@ export async function guardMarketV01PageLoad(event: ServerLoadEvent) {
 		redirect(303, `/login?redirect=${encodeURIComponent(event.url.pathname)}`);
 	}
 
-	const nearby = await expiringShareService.getNearbySharingSettings(user.id);
-	if (!canAccessMarketV01Ui(user, nearby.enabled)) {
+	const [nearby, marketLive] = await Promise.all([
+		expiringShareService.getNearbySharingSettings(user.id),
+		appSettingsService.getMarketLiveStatus()
+	]);
+
+	if (!canAccessMarketV01Ui(user, nearby.enabled, marketLive.enabledInApp)) {
 		error(404);
 	}
 
@@ -23,6 +29,27 @@ export async function guardMarketV01PageLoad(event: ServerLoadEvent) {
 	return {
 		user,
 		nearbyOptedIn: nearby.enabled,
-		autoNearbyListingEnabled
+		autoNearbyListingEnabled,
+		marketLiveEnabled: marketLive.enabledInApp
 	};
+}
+
+export async function requireMarketV01UiAccessForApi(
+	locale: Locale,
+	user: { id: string; role?: string | null }
+): Promise<Response | null> {
+	if (!isMarketV01BackendEnabled()) {
+		return json({ ok: false, error: translate(locale, 'errors.api.invalidRequest') }, { status: 404 });
+	}
+
+	const [nearby, marketLive] = await Promise.all([
+		expiringShareService.getNearbySharingSettings(user.id),
+		appSettingsService.getMarketLiveStatus()
+	]);
+
+	if (!canAccessMarketV01Ui(user, nearby.enabled, marketLive.enabledInApp)) {
+		return json({ ok: false, error: translate(locale, 'errors.api.unauthorized') }, { status: 404 });
+	}
+
+	return null;
 }

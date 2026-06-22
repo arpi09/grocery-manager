@@ -90,6 +90,38 @@
 	</Card>
 
 	<Card>
+		<h2 class="section-title">{t('marketV01.profileTitle')}</h2>
+		<p class="section-lead">{t('marketV01.profileLead')}</p>
+		<form
+			method="POST"
+			action="?/saveMarketProfile"
+			class="profile-form"
+			use:enhance={() => {
+				profileSubmitting = true;
+				return async ({ update }) => {
+					try {
+						await update({ invalidateAll: true });
+					} finally {
+						profileSubmitting = false;
+					}
+				};
+			}}
+		>
+			<FormField
+				label={t('marketV01.profileFirstNameLabel')}
+				name="marketFirstName"
+				type="text"
+				autocomplete="given-name"
+				value={profile.marketFirstName ?? ''}
+				placeholder={t('marketV01.profileFirstNamePlaceholder')}
+			/>
+			<Button type="submit" loading={profileSubmitting} loadingLabel={t('common.saving')}>
+				{t('marketV01.profileSaveBtn')}
+			</Button>
+		</form>
+	</Card>
+
+	<Card>
 		<h2 class="section-title">{t('profile.themeTitle')}</h2>
 		<p class="section-lead">{t('profile.themeLead')}</p>
 
