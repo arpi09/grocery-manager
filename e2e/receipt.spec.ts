@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
 import { loadFixture, mockReceiptParse } from './helpers/mock-api';
 import { uploadReceiptFile, uploadReceiptPdf } from './helpers/receipt';
@@ -14,8 +14,21 @@ const FIXTURE_JPEG = {
 		'base64'
 	)
 };
-
 test.describe('Receipt flow', () => {
+	test.beforeEach(async ({ page }) => {
+		await page.route('**/api/inventory/merge-candidates', async (route) => {
+			if (route.request().method() !== 'POST') {
+				await route.continue();
+				return;
+			}
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ matches: [] })
+			});
+		});
+	});
+
 	test.setTimeout(60_000);
 	test('PDF upload shows parsed lines from mocked API @deploy-critical', async ({ page }) => {
 		await mockReceiptParse(page);
@@ -34,6 +47,7 @@ test.describe('Receipt flow', () => {
 
 
 	test('unknown receipt line gets prefilled expiry and estimated badge', async ({ page }) => {
+		test.skip(process.env.PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT !== 'true', 'requires receipt expiry UX flag');
 		await mockReceiptParse(page, {
 			body: {
 				lines: [
@@ -64,7 +78,7 @@ test.describe('Receipt flow', () => {
 
 		await expect(page.getByTestId('receipt-line-0')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('receipt-line-expiry-0')).toHaveValue('2026-07-15');
-		await expect(page.getByTestId('receipt-line-0').getByText(/Osäker uppskattning|Uppskattat/i)).toBeVisible();
+		await expect(page.getByTestId('receipt-line-0').getByText(/OsÃ¤ker uppskattning|Uppskattat/i)).toBeVisible();
 	});
 	test('image upload shows mocked parse lines', async ({ page }) => {
 		await mockReceiptParse(page);
@@ -81,7 +95,7 @@ test.describe('Receipt flow', () => {
 	test('mocked parse failure shows user-friendly error', async ({ page }) => {
 		await mockReceiptParse(page, {
 			status: 422,
-			error: 'Inga varor hittades på kvittot. Prova en skarpare bild, annan PDF eller annan vinkel.'
+			error: 'Inga varor hittades pÃ¥ kvittot. Prova en skarpare bild, annan PDF eller annan vinkel.'
 		});
 
 		await loginAsAdmin(page);
@@ -91,7 +105,7 @@ test.describe('Receipt flow', () => {
 		await uploadReceiptPdf(page, FIXTURE_PDF);
 
 		await expect(page.getByTestId('receipt-parse-error')).toContainText(
-			/Inga varor hittades på kvittot/i,
+			/Inga varor hittades pÃ¥ kvittot/i,
 			{ timeout: 15_000 }
 		);
 	});

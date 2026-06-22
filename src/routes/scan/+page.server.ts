@@ -1,4 +1,4 @@
-import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
+﻿import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
 import { canEditInventory } from '$lib/domain/household';
 import type { ExpiresOnSource } from '$lib/domain/auto-expired';
 import { isStorageLocation, type StorageLocation } from '$lib/domain/location';
@@ -128,6 +128,15 @@ async function resolveLineExpiry(
 		return {
 			expiresOn: predictionForm.predictedExpiresOn,
 			expiresOnSource,
+			predictionForm,
+			userProvidedExpiresOn: false
+		};
+	}
+
+	if (!isShelfLifeEstimatesInReceiptEnabled()) {
+		return {
+			expiresOn: null,
+			expiresOnSource: null,
 			predictionForm,
 			userProvidedExpiresOn: false
 		};
