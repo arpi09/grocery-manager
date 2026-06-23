@@ -21,7 +21,8 @@ describe('adminFreeTierRateLimits', () => {
 			{ kind: 'ai_scan', limit: 75, period: 'month' },
 			{ kind: 'receipt_pdf', limit: 25, period: 'month' },
 			{ kind: 'smart_fill', limit: 8, period: 'week' },
-			{ kind: 'admin_insights', limit: 40, period: 'week' }
+			{ kind: 'admin_insights', limit: 40, period: 'week' },
+			{ kind: 'weekly_plan', limit: 4, period: 'week' }
 		]);
 	});
 });
