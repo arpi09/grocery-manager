@@ -43,9 +43,13 @@ vi.mock('$lib/server/shelf-life-learning-flag', () => ({
 	isShelfLifeLearningEnabled: () => false
 }));
 
-vi.mock('$lib/server/location-learning-flag', () => ({
-	isLocationLearningEnabled: () => false
-}));
+vi.mock('$lib/server/feature-flags', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('$lib/server/feature-flags')>();
+	return {
+		...actual,
+		isLocationLearningEnabled: () => false
+	};
+});
 
 describe('importReceiptLines integration', () => {
 	let integrationDb: IntegrationDbContext;
