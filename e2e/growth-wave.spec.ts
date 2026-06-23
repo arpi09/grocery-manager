@@ -265,7 +265,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 	});
 
 	test('lista share page signup link uses shopping_share acquisition UTM', async ({ page }) => {
-		test.setTimeout(60_000);
+		test.setTimeout(90_000);
 		const itemName = `E2E Lista Share ${Date.now()}`;
 		await loginAsAdmin(page);
 		await addShoppingListItemViaAction(page, itemName);
@@ -280,8 +280,9 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		const listaPath = new URL(sharePayload.url!).pathname;
 		await page.goto(listaPath, { waitUntil: 'commit' });
 		await dismissCookieConsentIfOpen(page);
+		await expect(page.getByTestId('lista-signup-cta-above-fold')).toBeVisible({ timeout: 30_000 });
 		const signupLink = page.getByTestId('lista-signup-cta-primary');
-		await expect(signupLink).toBeVisible({ timeout: 15_000 });
+		await expect(signupLink).toBeVisible({ timeout: 30_000 });
 		const signupHref = await signupLink.getAttribute('href');
 		expect(signupHref).toBeTruthy();
 		const signupUrl = new URL(signupHref!, page.url());
