@@ -1,6 +1,7 @@
 <script lang="ts">
 	import MemorySuggestionList from '$lib/components/molecules/MemorySuggestionList.svelte';
 	import TripSummaryPills from '$lib/components/molecules/TripSummaryPills.svelte';
+	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import type { ReplenishmentSuggestion } from '$lib/domain/replenishment';
 	import { buildPlanHeaderTitle } from '$lib/domain/shopping-v2-presenter';
 	import { sortUncheckedItems } from '$lib/domain/shopping-trip';
@@ -65,15 +66,14 @@
 	</header>
 
 	{#if uncheckedCount === 0}
-		<div class="plan-illus" aria-label={t('shopping.v2.plan.illustrationAria')}>
-			<img
-				src="/illustrations/v2/shopping-plan.svg"
-				alt=""
-				width="280"
-				height="140"
-				aria-hidden="true"
-			/>
-		</div>
+		<EmptyState
+			title={t('shopping.v2.plan.emptyTitle')}
+			description={t('shopping.v2.plan.emptyBody')}
+			actionLabel={canEdit ? t('shopping.v2.plan.emptyCta') : undefined}
+			actionVariant="secondary"
+			onAction={canEdit ? onAddItem : undefined}
+			primaryAnalyticsId="shopping.v2.plan.empty_add"
+		/>
 	{/if}
 
 	{#if showReceiptLead}
@@ -132,16 +132,6 @@
 		font-size: 0.9375rem;
 		color: var(--color-text-muted);
 		line-height: 1.45;
-	}
-
-	.plan-illus {
-		display: flex;
-		justify-content: center;
-	}
-
-	.plan-illus img {
-		width: min(100%, 280px);
-		height: auto;
 	}
 
 	.receipt-lead {

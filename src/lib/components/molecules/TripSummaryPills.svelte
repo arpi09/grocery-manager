@@ -36,7 +36,7 @@
 	</div>
 
 	<div class="summary-actions">
-		{#if canEdit}
+		{#if canEdit && hasItems}
 			<Button
 				fullWidth
 				disabled={!hasItems}

@@ -7,6 +7,8 @@
 		iconId?: FeatureIconId;
 		actionLabel?: string;
 		actionHref?: string;
+		actionVariant?: 'primary' | 'secondary';
+		onAction?: () => void;
 		primaryAnalyticsId?: string;
 		secondaryActionLabel?: string;
 		secondaryActionHref?: string;
@@ -19,11 +21,15 @@
 		iconId,
 		actionLabel,
 		actionHref,
+		actionVariant = 'primary',
+		onAction,
 		primaryAnalyticsId,
 		secondaryActionLabel,
 		secondaryActionHref,
 		secondaryAnalyticsId
 	}: Props = $props();
+
+	const hasAction = $derived(Boolean(actionLabel && (actionHref || onAction)));
 </script>
 
 <div class="empty">
@@ -34,16 +40,31 @@
 	{/if}
 	<h2>{title}</h2>
 	<p>{description}</p>
-	{#if actionLabel && actionHref}
+	{#if hasAction}
 		<div class="actions">
-			<a
-				class="btn btn-primary btn-full action-link"
-				href={actionHref}
-				data-analytics-id={primaryAnalyticsId}
-			>{actionLabel}</a>
+			{#if onAction}
+				<button
+					type="button"
+					class="action-link"
+					class:action-link-secondary={actionVariant === 'secondary'}
+					class:action-link-primary={actionVariant === 'primary'}
+					data-analytics-id={primaryAnalyticsId}
+					onclick={onAction}
+				>
+					{actionLabel}
+				</button>
+			{:else if actionHref}
+				<a
+					class="action-link"
+					class:action-link-secondary={actionVariant === 'secondary'}
+					class:action-link-primary={actionVariant === 'primary'}
+					href={actionHref}
+					data-analytics-id={primaryAnalyticsId}
+				>{actionLabel}</a>
+			{/if}
 			{#if secondaryActionLabel && secondaryActionHref}
 				<a
-					class="btn btn-ghost action-link action-link-secondary"
+					class="action-link action-link-secondary"
 					href={secondaryActionHref}
 					data-analytics-id={secondaryAnalyticsId}
 				>{secondaryActionLabel}</a>
@@ -107,20 +128,35 @@
 		align-items: center;
 		justify-content: center;
 		padding: var(--space-sm) var(--space-lg);
+		font: inherit;
 		font-weight: 600;
 		border-radius: var(--radius-md);
 		text-decoration: none;
 		min-width: min(100%, 16rem);
+		cursor: pointer;
 	}
 
-	.action-link.btn-primary {
+	.action-link-primary {
 		background: var(--color-primary);
 		color: var(--color-on-primary);
+		border: none;
 	}
 
-	.action-link.btn-ghost {
+	.action-link-secondary {
 		font-size: var(--font-size-body-sm);
-		color: var(--color-text-muted);
-		background: transparent;
+		color: var(--color-primary);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.action-link-secondary:hover {
+		border-color: var(--color-primary);
+		text-decoration: none;
+	}
+
+	.action-link:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 </style>

@@ -1195,6 +1195,9 @@
 				"subtitle": "{count, plural, one {# vara} other {# varor}} · {store}",
 				"subtitleMemory": "minns vad ni brukar köpa",
 				"subtitleEmpty": "Tom lista — lägg till det ni saknar",
+				"emptyTitle": "Tom lista",
+				"emptyBody": "Lägg till det ni saknar inför nästa handling.",
+				"emptyCta": "Lägg till första varan",
 				"illustrationAria": "Inköpsplan — översikt"
 			},
 			"mode": {
@@ -2963,8 +2966,8 @@
 			"searchPlaceholder": "Sök i skafferiet…",
 			"empty": {
 				"title": "Tomt skafferi",
-				"body": "Skanna ett kvitto eller lägg till en vara — då fylls hyllorna här.",
-				"cta": "Skanna kvitto"
+				"body": "Lägg till varor manuellt eller skanna via knapparna ovan.",
+				"cta": "Lägg till vara"
 			},
 			"error": {
 				"loadFailed": "Skafferiet kunde inte laddas. Försök igen."

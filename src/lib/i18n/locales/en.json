@@ -1274,6 +1274,9 @@
 				"subtitle": "{count, plural, one {# item} other {# items}} · {store}",
 				"subtitleMemory": "remembers your usual picks",
 				"subtitleEmpty": "Empty list — add what you're missing",
+				"emptyTitle": "Empty list",
+				"emptyBody": "Add what you're missing before your next shop.",
+				"emptyCta": "Add first item",
 				"illustrationAria": "Shopping plan overview"
 			},
 			"mode": {
@@ -3042,8 +3045,8 @@
 			"searchPlaceholder": "Search pantry…",
 			"empty": {
 				"title": "Empty pantry",
-				"body": "Scan a receipt or add an item — the shelves will fill in here.",
-				"cta": "Scan receipt"
+				"body": "Add items manually or scan using the buttons above.",
+				"cta": "Add item"
 			},
 			"error": {
 				"loadFailed": "Pantry couldn't load. Try again."
