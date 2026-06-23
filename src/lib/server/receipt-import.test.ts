@@ -20,7 +20,7 @@ vi.mock('$lib/server/shelf-life-learning-flag', () => ({
 	isShelfLifeLearningEnabled: () => false
 }));
 
-vi.mock('$lib/server/location-learning-flag', () => ({
+vi.mock('$lib/server/feature-flags', () => ({
 	isLocationLearningEnabled: () => false
 }));
 

@@ -4,7 +4,7 @@ import { db } from '$lib/infrastructure/db';
 import { householdMemberTable, householdTable, inventoryItemTable, userTable } from '$lib/infrastructure/db/schema';
 import { subtractDaysIso } from '$lib/domain/auto-expired';
 import { isCronAuthorized } from '$lib/server/cron-auth';
-import { isAutoFinishEnabled } from '$lib/server/brain-feature-flags';
+import { isAutoFinishEnabled } from '$lib/server/feature-flags';
 import type { RequestHandler } from './$types';
 
 /** Optional auto-finish: zero quantity after grace + user-configured days in expired section. */

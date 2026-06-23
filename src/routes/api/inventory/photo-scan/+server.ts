@@ -7,7 +7,7 @@ import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { e2eMockPhotoRoundParse, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 import { translateOpenAiError, missingOpenAiKeyMessage } from '$lib/server/openai';
-import { isPhotoValidationEnabled } from '$lib/server/brain-feature-flags';
+import { isPhotoValidationEnabled } from '$lib/server/feature-flags';
 import { parsePhotoRoundFromImages, parsePhotoRoundZoneHint } from '$lib/server/photo-round-parse';
 import { loadShelfLifePromptFeedbackBlocks } from '$lib/server/receipt-parse-feedback';
 import { learningFeedbackRepository } from '$lib/server/di';

@@ -16,7 +16,7 @@ import { inferLineShelfLife } from '$lib/server/shelf-life-line-inference';
 import { recordLineShelfLifeFeedback } from '$lib/server/shelf-life-feedback-recording';
 import { inferLineLocation } from '$lib/server/location-line-inference';
 import { recordLineLocationFeedback } from '$lib/server/location-feedback-recording';
-import { isLocationLearningEnabled } from '$lib/server/location-learning-flag';
+import { isLocationLearningEnabled } from '$lib/server/feature-flags';
 
 export { loadReceiptParseFeedbackContext } from '$lib/server/receipt-parse-feedback';
 export type { ReceiptParseFeedbackContext } from '$lib/server/receipt-parse-feedback';

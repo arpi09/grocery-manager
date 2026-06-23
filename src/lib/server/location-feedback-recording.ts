@@ -2,7 +2,7 @@ import type { LearningEngineService } from '$lib/application/learning/learning-e
 import type { StorageLocation } from '$lib/domain/location';
 import type { LearningFeedbackType } from '$lib/domain/learning/predictor-types';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
-import { isLocationLearningEnabled } from '$lib/server/location-learning-flag';
+import { isLocationLearningEnabled } from '$lib/server/feature-flags';
 
 export interface LineLocationPredictionForm {
 	predictedLocation: StorageLocation | null;

@@ -14,7 +14,7 @@ import {
 	promptLocaleTag,
 	SHELF_LIFE_CATEGORY_ANCHORS
 } from '$lib/server/ai-prompt-shared';
-import { isReceiptAiBatchEnabled } from '$lib/server/brain-feature-flags';
+import { isReceiptAiBatchEnabled } from '$lib/server/feature-flags';
 import { isGlobalShelfLifeDbEnabled } from '$lib/server/feature-flags';
 import { predictHeuristicShelfLife } from '$lib/infrastructure/adapters/heuristic-shelf-life.adapter';
 import type { IHouseholdShelfLifeRuleRepository } from '$lib/infrastructure/repositories/household-shelf-life-rule.repository';
