@@ -80,7 +80,7 @@ describe('HouseholdSuggestionsService', () => {
 		expect(memory.hasRules).toBe(true);
 		expect(memory.memoryFacets).toHaveLength(2);
 		expect(memory.memoryFacets[0]?.displayName).toBe('Mjolk');
-		expect(memory.memoryFacets[0]?.confidenceTier).toBe('medium');
+		expect(memory.memoryFacets[0]?.confidenceTier).toBe('low');
 		expect(memory.memoryFacets[0]?.correctItemId).toBe('item-1');
 		expect(memory.memoryFacets[1]?.displayName).toBe('Yoghurt');
 		expect(memory.memoryFacets[1]?.confidenceTier).toBe('high');

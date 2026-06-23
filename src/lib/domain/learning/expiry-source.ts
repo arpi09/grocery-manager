@@ -8,3 +8,7 @@ export function isEstimatedExpirySource(source: ExpiresOnSource | null | undefin
 		source === 'default_heuristic'
 	);
 }
+
+export function isHighTrustExpirySource(source: ExpiresOnSource | null | undefined): boolean {
+	return source === 'user_set' || source === 'receipt_printed';
+}

@@ -24,6 +24,8 @@ import { json } from '@sveltejs/kit';
 import { translate } from '$lib/i18n/messages';
 import { recordProductEvent } from '$lib/server/product-events';
 import { openAiErrorLogDetail, translateOpenAiError } from '$lib/server/openai';
+import { buildReceiptImportQualityReport } from '$lib/domain/receipt-quality-report';
+import { logBrainMetrics, summarizeReceiptParseMetrics } from '$lib/server/brain-metrics';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -91,7 +93,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		receiptTextForStoreHeuristic = pdfText.text;
-		aiResult = await parseReceiptFromText(apiKey, pdfText.text);
+		const storeHint = extractStoreFromReceiptText(pdfText.text);
+		const purchasedAt = extractPurchasedAtFromReceiptText(pdfText.text);
+		aiResult = await parseReceiptFromText(apiKey, pdfText.text, storeHint, {
+			chain: storeHint ?? null,
+			storeName: storeHint ?? null,
+			purchasedAt: purchasedAt?.toISOString().slice(0, 10) ?? null
+		});
 	} else {
 		const base64 = Buffer.from(bytes).toString('base64');
 		const dataUrl = `data:${mimeType};base64,${base64}`;
@@ -130,12 +138,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		: undefined;
 	const purchasedAtIso = purchasedAt?.toISOString() ?? null;
 	const result: ReceiptParseResult = { lines, mergedAwayCount };
-	recordProductEvent(locals.pmfService, {
-		userId: auth.user.id,
-		householdId: locals.householdId,
-		eventType: 'receipt_parsed',
-		metadata: { lineCount: lines.length, mergedAwayCount, stage: 'parse' }
-	});
 
 	if (isShelfLifeEstimatesInReceiptEnabled() && locals.householdId) {
 		result.shelfLifePredictions = await predictReceiptLinesShelfLife(
@@ -143,9 +145,40 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			lines,
 			purchasedAtIso,
 			locals.learningEngineService,
-			{ apiKey }
+			{
+				apiKey,
+				storeLabel: storeLabel ?? null,
+				receiptText: receiptTextForStoreHeuristic ?? null,
+				clearCache: true
+			}
 		);
 	}
+
+	if (result.shelfLifePredictions) {
+		result.qualityReport = buildReceiptImportQualityReport(lines, result.shelfLifePredictions);
+		logBrainMetrics('receipt_parse', summarizeReceiptParseMetrics({
+			lineCount: lines.length,
+			bbfCoveragePercent: result.qualityReport.bbfCoveragePercent,
+			bbfMissing: result.qualityReport.missing
+		}));
+	}
+
+	recordProductEvent(locals.pmfService, {
+		userId: auth.user.id,
+		householdId: locals.householdId,
+		eventType: 'receipt_parsed',
+		metadata: {
+			lineCount: lines.length,
+			mergedAwayCount,
+			stage: 'parse',
+			...(result.qualityReport
+				? {
+						bbfCoveragePercent: result.qualityReport.bbfCoveragePercent,
+						bbfMissing: result.qualityReport.missing
+					}
+				: {})
+		}
+	});
 
 	if (isLocationLearningEnabled() && locals.householdId) {
 		result.locationPredictions = await predictReceiptLinesLocation(

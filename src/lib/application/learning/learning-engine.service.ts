@@ -74,6 +74,8 @@ export interface ShelfLifePrediction extends ShelfLifePredictionValue {
 
 	explanation?: PredictionExplanation;
 
+	sampleCount?: number;
+
 }
 
 
@@ -282,7 +284,9 @@ export class LearningEngineService {
 
 			explain: result.explain,
 
-			explanation: result.explanation
+			explanation: result.explanation,
+
+			sampleCount: result.sampleCount
 
 		};
 

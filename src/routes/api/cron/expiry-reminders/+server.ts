@@ -8,10 +8,11 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json({ ok: false, error: 'Unauthorized' }, { status: 401 });
 	}
 
-	const [reminders, autoListings, marketChatReminders] = await Promise.all([
+	const [reminders, movingSoon, autoListings, marketChatReminders] = await Promise.all([
 		expiryReminderService.runWeeklyReminders(),
+		expiryReminderService.runDailyMovingSoonReminders(),
 		marketListingService.runAutoListingRefreshBatch(),
 		marketChatPushService.runReplyReminders()
 	]);
-	return json({ ok: true, reminders, autoListings, marketChatReminders });
+	return json({ ok: true, reminders, movingSoon, autoListings, marketChatReminders });
 };

@@ -646,10 +646,32 @@ export class InventoryService {
 		actorRole: HouseholdRole
 	): Promise<number> {
 		assertInventoryWritable(actorRole);
+		return this.inferMissingExpiryForItems(householdId, location);
+	}
+
+	/** Cron/admin: infer BBF for active items missing expiresOn (max `limit` per call). */
+	async backfillMissingExpiryDates(householdId: string, limit = 40): Promise<number> {
+		if (!this.shelfLifeInference) return 0;
+		let inferredCount = 0;
+		for (const location of LOCATIONS) {
+			if (inferredCount >= limit) break;
+			const remaining = limit - inferredCount;
+			const batch = await this.inferMissingExpiryForItems(householdId, location, remaining);
+			inferredCount += batch;
+		}
+		return inferredCount;
+	}
+
+	private async inferMissingExpiryForItems(
+		householdId: string,
+		location: StorageLocation,
+		limit = 40
+	): Promise<number> {
 		if (!this.shelfLifeInference) return 0;
 		const items = await this.listByLocation(householdId, location);
 		let inferredCount = 0;
 		for (const item of items) {
+			if (inferredCount >= limit) break;
 			if (item.expiresOn) continue;
 			const inferred = await this.shelfLifeInference.inferShelfLife({
 				name: item.name,

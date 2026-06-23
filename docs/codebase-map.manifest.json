@@ -346,9 +346,11 @@
 				"/api/cron/analytics-rollup",
 				"/api/cron/error-alert",
 				"/api/cron/error-export",
+				"/api/cron/auto-expiry-sweep",
 				"/api/cron/expiry-reminders",
 				"/api/cron/pmf-weekly",
 				"/api/cron/reset-demo",
+				"/api/cron/shelf-life-backfill",
 				"/api/cron/shopping-push",
 				"/api/cron/skaffurapport"
 			],

@@ -41,7 +41,7 @@ describe('ShelfLifePredictor', () => {
 		expect(result?.explain).toBe('Typisk hållbarhet för liknande varor');
 	});
 
-	it('skips household tier when sample count is below threshold', async () => {
+	it('uses household rule with low confidence at one sample', async () => {
 		const predictor = new ShelfLifePredictor(
 			createHouseholdPort({ 'mjolk:fridge': { typicalDays: 5, sampleCount: 1 } }),
 			{
@@ -49,6 +49,23 @@ describe('ShelfLifePredictor', () => {
 				todayIso: () => '2026-06-01'
 			}
 		);
+
+		const result = await predictor.predict(ctx, {
+			productName: 'Mjölk',
+			normalizedKey: 'mjolk',
+			location: 'fridge',
+			purchasedAt: '2026-06-01'
+		});
+
+		expect(result?.source).toBe('household_rule');
+		expect(result?.confidence).toBe(0.55);
+	});
+
+	it('skips household tier when no rule exists', async () => {
+		const predictor = new ShelfLifePredictor(createHouseholdPort(), {
+			learningEnabled: () => true,
+			todayIso: () => '2026-06-01'
+		});
 
 		const result = await predictor.predict(ctx, {
 			productName: 'Mjölk',

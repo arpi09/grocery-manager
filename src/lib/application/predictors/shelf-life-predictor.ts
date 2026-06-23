@@ -46,6 +46,7 @@ export class ShelfLifePredictor implements Predictor<ShelfLifePredictionInput, S
 			);
 			if (rule && isHouseholdRuleReady(rule.sampleCount)) {
 				const expiresOn = computeExpiresOn(rule.typicalDays, subject.purchasedAt, todayIso);
+				const lowSample = rule.sampleCount < 3;
 				const explanation = buildShelfLifeExplanation({
 					templateId: 'shelf_life.household',
 					normalizedKey: subject.normalizedKey,
@@ -61,7 +62,7 @@ export class ShelfLifePredictor implements Predictor<ShelfLifePredictionInput, S
 						typicalDays: rule.typicalDays
 					},
 					source: 'household_rule',
-					confidence: predictionSourceConfidence('household_rule'),
+					confidence: lowSample ? 0.55 : predictionSourceConfidence('household_rule'),
 					modelVersion: 'household-v1',
 					explain: explanation.primary,
 					sampleCount: rule.sampleCount,

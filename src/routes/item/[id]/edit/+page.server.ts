@@ -8,6 +8,7 @@ import { consumeItemSchema } from '$lib/validation/consumption.schemas';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { recordInventoryEditLocationFeedback } from '$lib/server/location-feedback-recording';
 import { isLocationLearningEnabled } from '$lib/server/location-learning-flag';
+import { recordConsumptionShelfLifeFeedback } from '$lib/server/shelf-life-consumption-feedback';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { isPriceMemoryV1Enabled } from '$lib/server/price-memory-flag';
 import { emitPriceMemorySummaryViewed } from '$lib/server/price-memory-telemetry';
@@ -197,7 +198,12 @@ export const actions: Actions = {
 		let itemName = '';
 		let toastKind: 'itemFinished' | 'itemPartiallyConsumed' = 'itemFinished';
 		let remainingLabel: string | undefined;
+		let consumeFinished = false;
 		try {
+			const existing = await event.locals.inventoryService.getItem(
+				event.locals.householdId!,
+				event.params.id
+			);
 			const result = await event.locals.inventoryService.consumeItem(
 				event.locals.householdId!,
 				event.params.id,
@@ -206,6 +212,7 @@ export const actions: Actions = {
 				{ preset: parsed.data.preset, customAmount: parsed.data.customAmount }
 			);
 			itemName = result.item.name;
+			consumeFinished = result.finished;
 			if (!result.finished) {
 				toastKind = 'itemPartiallyConsumed';
 				const unitSuffix = result.item.unit ? ` ${result.item.unit}` : '';
@@ -221,6 +228,16 @@ export const actions: Actions = {
 				action: 'consume',
 				itemId: event.params.id
 			});
+
+			if (isShelfLifeLearningEnabled() && existing) {
+				await recordConsumptionShelfLifeFeedback({
+					learningEngine: event.locals.learningEngineService,
+					householdId: event.locals.householdId!,
+					userId: event.locals.user!.id,
+					item: existing,
+					finished: consumeFinished
+				});
+			}
 		} catch (e) {
 			if (e instanceof InventoryNotFoundError) error(404, 'Item not found');
 			if (e instanceof InvalidConsumptionAmountError) {

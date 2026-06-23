@@ -35,7 +35,8 @@ describe('shelf-life-learning', () => {
 	});
 
 	it('requires minimum samples for household rule readiness', () => {
-		expect(isHouseholdRuleReady(1)).toBe(false);
+		expect(isHouseholdRuleReady(0)).toBe(false);
+		expect(isHouseholdRuleReady(1)).toBe(true);
 		expect(isHouseholdRuleReady(2)).toBe(true);
 	});
 

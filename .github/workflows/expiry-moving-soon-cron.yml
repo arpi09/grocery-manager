@@ -1,0 +1,26 @@
+# Daily moving-soon expiry push (08:00 UTC) — complements weekly expiry-reminders
+name: Expiry moving-soon cron
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+jobs:
+  moving-soon:
+    name: expiry-moving-soon
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: POST /api/cron/expiry-reminders
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          set -euo pipefail
+          base="${PRODUCTION_URL%/}"
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Accept: application/json" \
+            "${base}/api/cron/expiry-reminders"
