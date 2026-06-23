@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Badge from '$lib/components/atoms/Badge.svelte';
+	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
+	import { isEstimatedExpirySource } from '$lib/domain/learning/expiry-source';
 	import ConsumeItemPanel from '$lib/components/molecules/ConsumeItemPanel.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
@@ -119,8 +121,8 @@
 					<Badge tone={autoExpired ? 'default' : expiryTone(item.expiresOn)}>
 						{formatExpiryDate(item.expiresOn, getLocale())}
 					</Badge>
-					{#if item.expiresOnSource === 'ai_inferred' && !autoExpired}
-						<Badge tone="default">{t('learning.estimatedExpiry')}</Badge>
+					{#if isEstimatedExpirySource(item.expiresOnSource) && !autoExpired}
+						<EstimatedBadge source={item.expiresOnSource} />
 					{/if}
 				{/if}
 			</div>

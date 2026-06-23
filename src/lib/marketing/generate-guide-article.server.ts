@@ -80,7 +80,8 @@ Krav:
 - Uppfinn inga fakta, citat, studier eller medicinska råd utanför skafferiområdet.
 - Svara ENDAST med komplett markdown-fil (frontmatter + artikel), inga kodblock runt hela svaret.
 
-Struktur: H1 i frontmatter title (inte i body), 5-7 H2-sektioner, punktlistor där det hjälper, avsluta med CTA-länk till /register.${newsBlock}`;
+Struktur: H1 i frontmatter title (inte i body), 5-7 H2-sektioner, punktlistor där det hjälper, avsluta med CTA-länk till /register.
+Inkludera ett avsnitt "Så här kan det se ut i vardagen" med 2–3 korta användarscenarier (par/hushåll med delad inköpslista, kvitto→skafferi, äta-först).${newsBlock}`;
 }
 
 export function parseGeneratedMarkdown(raw: string): {

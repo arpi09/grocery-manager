@@ -41,6 +41,7 @@
 						detailKind: 'none',
 						expiresInDays: null,
 						expiresOn: null,
+						expiresOnSource: null,
 						quantity: '',
 						unit: null
 					}}

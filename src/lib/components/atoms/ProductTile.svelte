@@ -6,6 +6,8 @@
 	} from '$lib/domain/pantry-shelf-presenter';
 	import type { PantryTilePresentation } from '$lib/domain/pantry-shelf';
 	import { formatExpiryDate } from '$lib/domain/expiry';
+	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
+	import { isEstimatedExpirySource } from '$lib/domain/learning/expiry-source';
 	import { getLocale, t } from '$lib/i18n';
 
 	interface Props {
@@ -62,6 +64,9 @@
 		<ProductAvatar name={tile.name} warn={tile.warn} size="sm" decorative />
 	{/if}
 	<span class="tile-name">{tile.name}</span>
+	{#if tile.expiresOnSource && isEstimatedExpirySource(tile.expiresOnSource)}
+		<EstimatedBadge source={tile.expiresOnSource} interactive={false} />
+	{/if}
 	{#if detailLine}
 		<span class="tile-detail" class:missing-expiry-detail={tile.detailKind === 'missing_expiry'}>{detailLine}</span>
 	{/if}

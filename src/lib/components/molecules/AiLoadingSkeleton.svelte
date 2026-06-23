@@ -2,7 +2,7 @@
 	import { t } from '$lib/i18n';
 
 	interface Props {
-		messageKey?: 'ai.loadingPantry' | 'ai.loadingWeekly';
+		messageKey?: 'ai.loadingPantry' | 'ai.loadingWeekly' | 'ai.loadingReceiptExtract' | 'ai.loadingReceiptBbf';
 	}
 
 	let { messageKey = 'ai.loadingPantry' }: Props = $props();

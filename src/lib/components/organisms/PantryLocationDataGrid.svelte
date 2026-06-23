@@ -4,6 +4,8 @@
 	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 	import Badge from '$lib/components/atoms/Badge.svelte';
+	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
+	import { isEstimatedExpirySource } from '$lib/domain/learning/expiry-source';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import LocationColorDot from '$lib/components/atoms/LocationColorDot.svelte';
 	import ProductAvatar from '$lib/components/atoms/ProductAvatar.svelte';
@@ -158,6 +160,7 @@
 	const missingExpiryHref = $derived(
 		allLocations ? '/inventory/all?filter=noExpiry' : `${inventoryPath}?filter=noExpiry`
 	);
+	const bulkExpiryHref = $derived(canWrite ? '/inventory/all?filter=noExpiry' : null);
 
 	const trimmedQuery = $derived(query.trim());
 	const isSearchEmpty = $derived(trimmedQuery.length > 0 && !searching && pipeline.totalCount === 0);
@@ -369,6 +372,8 @@
 				href={missingExpiryHref}
 				active={gridState.filter === 'noExpiry'}
 				onSelect={() => handleFilterChange('noExpiry')}
+				actionHref={bulkExpiryHref}
+				actionLabel={canWrite ? t('inventory.bulkExpiryAction') : null}
 			/>
 		{/if}
 
@@ -492,9 +497,14 @@
 						</Cell>
 						<Cell class="col-expiry">
 							{#if item.expiresOn}
+							<div class="expiry-cell">
 								<Badge tone={expiryTone(item.expiresOn)}>
 									{formatExpiryDate(item.expiresOn, getLocale())}
 								</Badge>
+								{#if isEstimatedExpirySource(item.expiresOnSource)}
+									<EstimatedBadge source={item.expiresOnSource} />
+								{/if}
+							</div>
 							{:else}
 								<span class="missing-expiry-badge">
 									<Badge tone="default">{t('inventory.missingExpiryDate')}</Badge>
@@ -608,6 +618,13 @@
 
 	:global(.pantry-row[data-missing-expiry='true']) {
 		background: color-mix(in srgb, var(--color-text-muted) 4%, var(--color-surface));
+	}
+
+	.expiry-cell {
+		display: inline-flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-xs);
 	}
 
 	:global(.missing-expiry-badge .badge) {

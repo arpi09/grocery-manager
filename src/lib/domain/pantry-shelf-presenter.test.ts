@@ -14,6 +14,7 @@ function tile(overrides: Partial<PantryTilePresentation>): PantryTilePresentatio
 		detailKind: 'none',
 		expiresInDays: null,
 		expiresOn: null,
+		expiresOnSource: null,
 		quantity: '',
 		unit: null,
 		...overrides

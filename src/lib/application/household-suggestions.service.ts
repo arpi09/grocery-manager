@@ -54,6 +54,7 @@ export interface MemoryFacetView {
 	suggestionKind?: 'buy_again' | 'shelf_life' | 'location';
 	avgIntervalDays?: number | null;
 	lineCount?: number;
+	learnedFromConsumption?: boolean;
 }
 
 export interface HouseholdMemorySnapshot {
@@ -155,6 +156,7 @@ export class HouseholdSuggestionsService {
 		];
 
 		const replenishmentFeedbackMap = new Map<string, { feedbackType: string; createdAt: Date }>();
+		const consumptionVelocityKeys = new Set<string>();
 		if (this.learningFeedbackRepository && feedbackKeys.length > 0) {
 			const latestReplenishment = await this.learningFeedbackRepository.latestBySubjectKeys(
 				householdId,
@@ -166,6 +168,18 @@ export class HouseholdSuggestionsService {
 					feedbackType: record.feedbackType,
 					createdAt: record.createdAt
 				});
+			}
+		}
+		if (this.learningFeedbackRepository) {
+			const velocityFeedback = await this.learningFeedbackRepository.listByHouseholdAndPredictor(
+				householdId,
+				'shelf_life',
+				{ since, limit: 250 }
+			);
+			for (const record of velocityFeedback) {
+				if (record.contextJson.source === 'consumption_velocity') {
+					consumptionVelocityKeys.add(record.subjectKey);
+				}
 			}
 		}
 
@@ -217,7 +231,8 @@ export class HouseholdSuggestionsService {
 				correctItemId: itemIdByKey.get(row.normalizedKey) ?? null,
 				feedbackStatus: feedback.status,
 				feedbackAt: feedback.at,
-				suggestionKind: 'shelf_life'
+				suggestionKind: 'shelf_life',
+				learnedFromConsumption: consumptionVelocityKeys.has(row.normalizedKey)
 			});
 		}
 

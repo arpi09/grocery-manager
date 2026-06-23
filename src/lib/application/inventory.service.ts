@@ -28,8 +28,10 @@ import { EXPIRING_SOON_DAYS, buildLocationBars, type LocationBar } from '$lib/do
 import {
 	addQuantities,
 	findDuplicateNameGroups,
-	findMergeCandidate
+	findMergeCandidate,
+	findMergeCandidateWithScore
 } from '$lib/domain/inventory-merge';
+import { confirmSameProductMerge } from '$lib/server/inventory-merge-ai';
 import { isMovingToAutoExpiredSoon } from '$lib/domain/auto-expired';
 import { computeSyncHealthLevel, type SyncHealthLevel } from '$lib/domain/sync-health';
 
@@ -746,21 +748,44 @@ export class InventoryService {
 
 	async findMergeCandidates(
 		householdId: string,
-		lines: Array<{ name: string; location: StorageLocation }>
+		lines: Array<{ name: string; location: StorageLocation; categoryHint?: string | null }>,
+		options: { apiKey?: string } = {}
 	) {
 		const items = await this.listAll(householdId);
-		return lines.map((line, index) => {
-			const candidate = findMergeCandidate(items, line.name, line.location);
-			return candidate
-				? {
-						index,
-						id: candidate.id,
-						name: candidate.name,
-						quantity: candidate.quantity,
-						unit: candidate.unit
+		const matches = [];
+		for (const [index, line] of lines.entries()) {
+			const candidate = findMergeCandidateWithScore(items, line.name, line.location);
+			if (!candidate) {
+				matches.push(null);
+				continue;
+			}
+			if (candidate.grayZone && options.apiKey) {
+				const confirmed = await confirmSameProductMerge(
+					options.apiKey,
+					line.name,
+					candidate.item.name,
+					{
+						location: line.location,
+						categoryHint: line.categoryHint ?? null
 					}
-				: null;
-		});
+				);
+				if (confirmed === false) {
+					matches.push(null);
+					continue;
+				}
+			} else if (candidate.grayZone) {
+				matches.push(null);
+				continue;
+			}
+			matches.push({
+				index,
+				id: candidate.item.id,
+				name: candidate.item.name,
+				quantity: candidate.item.quantity,
+				unit: candidate.item.unit
+			});
+		}
+		return matches;
 	}
 
 	async incrementQuantity(

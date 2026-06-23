@@ -3,11 +3,13 @@
 	import { invalidateAll } from '$app/navigation';
 	import PantryShelfActions from '$lib/components/molecules/PantryShelfActions.svelte';
 	import MissingExpiryFilterChip from '$lib/components/molecules/MissingExpiryFilterChip.svelte';
+	import InventoryInsightsPanel from '$lib/components/organisms/InventoryInsightsPanel.svelte';
 	import PantryV2EmptyState from '$lib/components/organisms/PantryV2EmptyState.svelte';
 	import PantryV2ShelfView from '$lib/components/organisms/PantryV2ShelfView.svelte';
 	import { trackPantryShelfOpened } from '$lib/client/pantry-v2-telemetry';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { buildPantryShelfView, countMissingExpiry, filterInventoryBySearch } from '$lib/domain/pantry-shelf';
+	import type { InventoryInsightsSnapshot } from '$lib/server/inventory-insights';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -19,6 +21,7 @@
 	let { items, canWrite = false, loadFailed = false }: Props = $props();
 
 	let searchQuery = $state('');
+	let insightsSnapshot = $state<InventoryInsightsSnapshot | null>(null);
 
 	const filteredItems = $derived(filterInventoryBySearch(items, searchQuery));
 	const shelf = $derived(buildPantryShelfView(filteredItems));
@@ -31,6 +34,7 @@
 	);
 	const missingExpiryCount = $derived(countMissingExpiry(items));
 	const missingExpiryHref = '/inventory/all?filter=noExpiry';
+	const bulkExpiryHref = canWrite ? '/inventory/all?filter=noExpiry' : null;
 
 	$effect(() => {
 		if (!browser) {
@@ -48,6 +52,20 @@
 	});
 
 	$effect(() => {
+		if (!browser || loadFailed) return;
+		void fetch('/api/inventory/insights')
+			.then((response) => (response.ok ? response.json() : null))
+			.then((payload) => {
+				if (payload?.insights) {
+					insightsSnapshot = payload.insights as InventoryInsightsSnapshot;
+				}
+			})
+			.catch(() => {
+				insightsSnapshot = null;
+			});
+	});
+
+	$effect(() => {
 		if (!browser || loadFailed) {
 			return;
 		}
@@ -59,8 +77,23 @@
 <div class="pantry-v2-page" data-testid="pantry-v2-page">
 	<PantryShelfActions bind:query={searchQuery} {canWrite} returnTo="/inventory" />
 
+	{#if insightsSnapshot}
+		<InventoryInsightsPanel
+			insights={insightsSnapshot.insights}
+			missingExpiryCount={insightsSnapshot.missingExpiryCount}
+			estimatedCount={insightsSnapshot.estimatedCount}
+			{canWrite}
+			{bulkExpiryHref}
+		/>
+	{/if}
+
 	{#if !loadFailed && !showHouseholdEmpty && missingExpiryCount > 0}
-		<MissingExpiryFilterChip count={missingExpiryCount} href={missingExpiryHref} />
+		<MissingExpiryFilterChip
+			count={missingExpiryCount}
+			href={missingExpiryHref}
+			actionHref={bulkExpiryHref}
+			actionLabel={canWrite ? t('inventory.bulkExpiryAction') : null}
+		/>
 	{/if}
 
 	{#if loadFailed}

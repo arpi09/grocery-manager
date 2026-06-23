@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { page } from '$app/state';
-	import Badge from '$lib/components/atoms/Badge.svelte';
+	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
+	import AiLoadingSkeleton from '$lib/components/molecules/AiLoadingSkeleton.svelte';
+	import BrainAiUsageFooter from '$lib/components/molecules/BrainAiUsageFooter.svelte';
+	import { aggregateBrainAiUsageFromPredictions } from '$lib/domain/brain-ai-usage';
+	import type { ExpiresOnSource } from '$lib/domain/auto-expired';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import DeleteSafetyModal from '$lib/components/molecules/DeleteSafetyModal.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
@@ -10,6 +14,7 @@
 	import { bindSubmittingWithRedirect } from '$lib/utils/form-submit-feedback';
 	import { bindEmbeddedScanSubmit } from '$lib/utils/scan-embedded-submit';
 	import type { PhotoRoundConfidence, PhotoRoundDetectedItem } from '$lib/domain/photo-round';
+	import type { ReceiptShelfLifePrediction } from '$lib/domain/receipt-line';
 	import { PHOTO_ROUND_MAX_IMAGES, PHOTO_ROUND_MAX_TOTAL_BYTES } from '$lib/domain/photo-round';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { guessShelfLife } from '$lib/domain/shelf-life';
@@ -58,6 +63,8 @@ import {
 	type ReviewLine = PhotoRoundDetectedItem & {
 		id: number;
 		expiresOnAiInferred: boolean;
+		expiresOnSource: ExpiresOnSource | null;
+		shelfLifeExplanation?: string | null;
 	};
 
 	let step = $state<Step>('capture');
@@ -77,6 +84,22 @@ import {
 	let mergeSelected = $state<Record<number, boolean>>({});
 	let sameAsLastTime = $state(Boolean(rememberedLocation && !initialLocation));
 	let showFewItemsHint = $state(false);
+
+	const photoRoundAiUsage = $derived.by(() => {
+		const shelf = lines
+			.filter((line) => line.expiresOnAiInferred)
+			.map((line) =>
+				line.expiresOn
+					? {
+							expiresOn: line.expiresOn,
+							typicalDays: 0,
+							expiresOnSource: 'ai_inferred' as const,
+							modelVersion: 'photo-round'
+						}
+					: null
+			);
+		return aggregateBrainAiUsageFromPredictions(shelf, []);
+	});
 
 	const manualAddLink = $derived(
 		manualAddHref(returnTo, initialLocation ? { location: initialLocation } : undefined)
@@ -154,6 +177,7 @@ import {
 		items?: PhotoRoundDetectedItem[];
 		detectedZone?: StorageLocation;
 		zoneConfidence?: PhotoRoundConfidence;
+		shelfLifePredictions?: (ReceiptShelfLifePrediction | null)[];
 		error?: string;
 	}> {
 		const contentType = response.headers.get('content-type') ?? '';
@@ -165,6 +189,7 @@ import {
 				items?: PhotoRoundDetectedItem[];
 				detectedZone?: StorageLocation;
 				zoneConfidence?: PhotoRoundConfidence;
+				shelfLifePredictions?: (ReceiptShelfLifePrediction | null)[];
 				error?: string;
 			};
 		} catch {
@@ -172,23 +197,36 @@ import {
 		}
 	}
 
-	function reviewLineFromDetected(item: PhotoRoundDetectedItem): ReviewLine {
+	function reviewLineFromDetected(
+		item: PhotoRoundDetectedItem,
+		prediction: ReceiptShelfLifePrediction | null | undefined
+	): ReviewLine {
 		const id = nextLineId++;
 		let expiresOn = item.expiresOn ?? '';
 		let expiresOnAiInferred = false;
-		if (!expiresOn) {
+		let expiresOnSource: ExpiresOnSource | null = item.expiresOn ? 'user_set' : null;
+
+		if (!expiresOn && prediction?.expiresOn) {
+			expiresOn = prediction.expiresOn;
+			expiresOnAiInferred = true;
+			expiresOnSource = prediction.expiresOnSource ?? 'ai_inferred';
+		} else if (!expiresOn) {
 			const inferred = guessShelfLife(item.name, item.location);
 			if (inferred) {
 				expiresOn = inferred.expiresOn;
 				expiresOnAiInferred = true;
+				expiresOnSource = 'ai_inferred';
 			}
 		}
+
 		return {
 			...item,
 			id,
 			expiresOn: expiresOn || null,
 			notes: item.notes ?? null,
-			expiresOnAiInferred
+			expiresOnAiInferred,
+			expiresOnSource,
+			shelfLifeExplanation: prediction?.explanation?.primary ?? null
 		};
 	}
 
@@ -256,7 +294,9 @@ import {
 
 			const photoCount = photos.length;
 			showFewItemsHint = photoCount === 1 && data.items.length < 5;
-			lines = data.items.map((item) => reviewLineFromDetected(item));
+			lines = data.items.map((item, index) =>
+				reviewLineFromDetected(item, data.shelfLifePredictions?.[index])
+			);
 			selected = Object.fromEntries(lines.map((line) => [line.id, true]));
 			revokePreviews();
 			photos = [];
@@ -380,7 +420,7 @@ import {
 		{/if}
 
 		{#if parsing}
-			<FeedbackBanner tone="info" message={t('photoRound.analyzing')} />
+			<AiLoadingSkeleton messageKey="ai.loadingReceiptExtract" />
 		{/if}
 
 		{#if canAddPhoto}
@@ -440,6 +480,10 @@ import {
 				{t('photoRound.analyze')}
 			</Button>
 		</div>
+
+		{#if parsing}
+			<AiLoadingSkeleton messageKey="ai.loadingReceiptExtract" />
+		{/if}
 
 		{#if parseError}
 			<div data-testid="photo-round-parse-error">
@@ -577,10 +621,16 @@ import {
 							<label>
 								<div class="expiry-label-row">
 									<span>{t('photoRound.fieldExpiresOn')}</span>
-									{#if line.expiresOnAiInferred && line.expiresOn}
-										<Badge tone="default">{t('learning.estimatedExpiry')}</Badge>
+									{#if line.expiresOnSource && line.expiresOn}
+										<EstimatedBadge
+											source={line.expiresOnSource}
+											lowConfidence={line.confidence === 'low'}
+										/>
 									{/if}
 								</div>
+								{#if line.shelfLifeExplanation}
+									<p class="shelf-life-hint">{line.shelfLifeExplanation}</p>
+								{/if}
 								<input
 									type="date"
 									data-testid="photo-round-line-expires-{index}"
@@ -655,6 +705,8 @@ import {
 					</li>
 				{/each}
 			</ul>
+
+			<BrainAiUsageFooter counts={photoRoundAiUsage} />
 
 			<div class="actions">
 				<Button type="button" variant="secondary" onclick={requestNewRound}>

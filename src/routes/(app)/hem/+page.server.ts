@@ -20,7 +20,9 @@ import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 
 import { buildReturnUrlWithExpiryNudge } from '$lib/utils/expiry-nudge';
 
+import { getSnapshot as getBrainScoreSnapshot, type BrainScoreSnapshot } from '$lib/domain/brain-score';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
+import { purchasePatternRepository } from '$lib/server/di';
 import { isHomeUxV2Enabled } from '$lib/server/home-ux-v2-flag';
 import {
 	buildHomeBriefingRecipeCard,
@@ -151,6 +153,24 @@ export const load: PageServerLoad = async ({ locals }) => {
 		briefingFunFact = await impactPromise;
 	}
 
+	let brainScore: BrainScoreSnapshot | null = null;
+	if (isShelfLifeLearningEnabled()) {
+		try {
+			const [suggestions, receiptLineCount] = await Promise.all([
+				locals.householdSuggestionsService.getSnapshot(householdId),
+				purchasePatternRepository.countReceiptLines(householdId)
+			]);
+			const ruleCount =
+				suggestions.shelfLifeRules.length + suggestions.locationRules.length;
+			const feedbackCount =
+				suggestions.shelfLifeRules.reduce((sum, rule) => sum + rule.sampleCount, 0) +
+				suggestions.locationRules.reduce((sum, rule) => sum + rule.sampleCount, 0);
+			brainScore = getBrainScoreSnapshot({ ruleCount, feedbackCount, receiptLineCount });
+		} catch (error) {
+			console.warn('[hem] brain score degraded:', error);
+		}
+	}
+
 	return {
 		locale,
 		pageTitle: translate(locale, homeUxV2Enabled ? 'home.v6.pageTitle' : 'home.title'),
@@ -167,7 +187,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		recipeSuggestion,
 		briefingRecipeChip,
 		briefingFunFact,
-		showMemoryExplorer: isShelfLifeLearningEnabled()
+		showMemoryExplorer: isShelfLifeLearningEnabled(),
+		brainScore
 	};
 };
 

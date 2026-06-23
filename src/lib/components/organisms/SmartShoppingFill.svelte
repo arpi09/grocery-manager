@@ -12,6 +12,11 @@
 			added: number;
 			skipped: number;
 			note?: string | null;
+			suggestions?: Array<{
+				name: string;
+				relatedMealDate?: string | null;
+				relatedRecipeTitle?: string | null;
+			}>;
 		};
 	}
 
@@ -149,6 +154,21 @@
 			{#if form?.fillSuccess?.note}
 				<p class="note">{form.fillSuccess.note}</p>
 			{/if}
+			{#if form?.fillSuccess?.suggestions?.length}
+				<ul class="fill-chips" data-testid="shopping-fill-chips">
+					{#each form.fillSuccess.suggestions as suggestion (suggestion.name)}
+						<li class="fill-chip">
+							<span>{suggestion.name}</span>
+							{#if suggestion.relatedMealDate}
+								<small>{suggestion.relatedMealDate}</small>
+							{/if}
+							{#if suggestion.relatedRecipeTitle}
+								<small>{suggestion.relatedRecipeTitle}</small>
+							{/if}
+						</li>
+					{/each}
+				</ul>
+			{/if}
 		{/if}
 	</section>
 {/if}
@@ -170,6 +190,30 @@
 		margin: 0;
 		color: var(--color-text-muted);
 		font-size: 0.9375rem;
+	}
+
+	.fill-chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-xs);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.fill-chip {
+		display: inline-flex;
+		flex-direction: column;
+		gap: 0.1rem;
+		padding: 0.35rem 0.6rem;
+		border-radius: var(--radius-full, 999px);
+		border: 1px solid var(--color-border);
+		font-size: 0.75rem;
+		background: var(--color-surface-muted);
+	}
+
+	.fill-chip small {
+		color: var(--color-text-muted);
 	}
 
 	.fill-status {

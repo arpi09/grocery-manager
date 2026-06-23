@@ -45,6 +45,10 @@
 			? t(`memory.facet.feedbackStatus.${facet.feedbackStatus}` as 'memory.facet.feedbackStatus.confirmed')
 			: null
 	);
+
+	const consumptionHint = $derived(
+		facet.learnedFromConsumption ? t('memory.facet.consumptionVelocity') : null
+	);
 </script>
 
 <button type="button" class="facet-card" data-testid="memory-facet-card" onclick={() => onSelect(facet)}>
@@ -54,6 +58,9 @@
 			<span class="title">{title}</span>
 		</div>
 		<p class="primary">{primary}</p>
+		{#if consumptionHint}
+			<p class="consumption-hint">{consumptionHint}</p>
+		{/if}
 		<p class="meta">
 			{t('memory.facet.sampleMeta', { count: facet.sampleCount })}
 			{#if statusLabel}

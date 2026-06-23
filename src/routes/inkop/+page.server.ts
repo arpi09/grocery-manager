@@ -363,9 +363,10 @@ export const actions: Actions = {
 							householdId,
 							userId: event.locals.user!.id,
 							inventoryService: event.locals.inventoryService,
-							mealPlanService: event.locals.mealPlanService
+							mealPlanService: event.locals.mealPlanService,
+							shoppingListService: event.locals.shoppingListService
 						},
-						{ preferences, householdSize }
+						{ preferences, householdSize, locale: event.locals.locale === 'en' ? 'en' : 'sv' }
 					);
 				})();
 
@@ -398,7 +399,12 @@ export const actions: Actions = {
 				fillSuccess: {
 					added: result.added,
 					skipped: result.skipped,
-					note: generated.note
+					note: generated.note,
+					suggestions: generated.items.slice(0, 8).map((item) => ({
+						name: item.name,
+						relatedMealDate: item.relatedMealDate ?? null,
+						relatedRecipeTitle: item.relatedRecipeTitle ?? null
+					}))
 				}
 			};
 		} catch (err) {

@@ -8,6 +8,7 @@ import type { StorageLocation } from '$lib/domain/location';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 
 export const MERGE_FUZZY_JACCARD_THRESHOLD = 0.7;
+export const MERGE_GRAY_ZONE_JACCARD_MIN = 0.5;
 
 export function normalizeInventoryItemName(name: string): string {
 	return normalizeReceiptProductName(name);
@@ -59,6 +60,15 @@ export function findMergeCandidate(
 	location: StorageLocation,
 	options: FindMergeCandidateOptions = {}
 ): InventoryItem | null {
+	return findMergeCandidateWithScore(items, name, location, options)?.item ?? null;
+}
+
+export function findMergeCandidateWithScore(
+	items: InventoryItem[],
+	name: string,
+	location: StorageLocation,
+	options: FindMergeCandidateOptions = {}
+): { item: InventoryItem; score: number; grayZone: boolean } | null {
 	const normalized = normalizeInventoryItemName(name);
 	const activeInLocation = items.filter(
 		(item) => !isItemFinished(item) && item.location === location
@@ -68,7 +78,7 @@ export function findMergeCandidate(
 		(item) => normalizeInventoryItemName(item.name) === normalized
 	);
 	if (exactMatches.length > 0) {
-		return pickLatestMatch(exactMatches);
+		return { item: pickLatestMatch(exactMatches), score: 1, grayZone: false };
 	}
 
 	const conceptKey = options.conceptKey?.trim() || normalized;
@@ -77,20 +87,25 @@ export function findMergeCandidate(
 			(item) => normalizeInventoryItemName(item.name) === conceptKey
 		);
 		if (conceptMatches.length > 0) {
-			return pickLatestMatch(conceptMatches);
+			return { item: pickLatestMatch(conceptMatches), score: 1, grayZone: false };
 		}
 	}
 
 	let best: { item: InventoryItem; score: number } | null = null;
 	for (const item of activeInLocation) {
 		const score = mergeTokenJaccardScore(name, item.name);
-		if (score < MERGE_FUZZY_JACCARD_THRESHOLD) continue;
+		if (score < MERGE_GRAY_ZONE_JACCARD_MIN) continue;
 		if (!best || score > best.score) {
 			best = { item, score };
 		}
 	}
 
-	return best?.item ?? null;
+	if (!best) return null;
+	return {
+		item: best.item,
+		score: best.score,
+		grayZone: best.score < MERGE_FUZZY_JACCARD_THRESHOLD
+	};
 }
 
 export function findLastActiveByNormalizedName(

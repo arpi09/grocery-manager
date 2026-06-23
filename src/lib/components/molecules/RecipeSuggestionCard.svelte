@@ -8,6 +8,7 @@
 	interface Props {
 		title: string;
 		whyItFits: string;
+		wastePreventedNote?: string | null;
 		ingredientsToUse: string[];
 		missingIngredients: string[];
 		steps: RecipeStep[];
@@ -20,6 +21,7 @@
 	let {
 		title,
 		whyItFits,
+		wastePreventedNote = null,
 		ingredientsToUse,
 		missingIngredients,
 		steps,
@@ -42,6 +44,9 @@
 		<div class="hero-copy">
 			<h3 class="recipe-title">{title}</h3>
 			<p class="recipe-lead">{whyItFits}</p>
+			{#if wastePreventedNote}
+				<p class="waste-note">{wastePreventedNote}</p>
+			{/if}
 			<div class="meta-row" aria-label={t('recipe.metaAria')}>
 				<Badge tone="default">{t('recipe.portionsBadge', { count: portions })}</Badge>
 				{#if estimatedMinutes}

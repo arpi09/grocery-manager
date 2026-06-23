@@ -56,7 +56,8 @@ describe('HouseholdSuggestionsService', () => {
 			}
 		]),
 		listShoppingListNormalizedNames: vi.fn(),
-		countReceiptLines: vi.fn(async () => 3)
+		countReceiptLines: vi.fn(async () => 3),
+		listTopPurchaseAliases: vi.fn(async () => [])
 	};
 
 	const service = new HouseholdSuggestionsService(

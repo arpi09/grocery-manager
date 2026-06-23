@@ -49,6 +49,7 @@
 	title={t('settings.suggestions.title')}
 	description={t('settings.suggestions.description')}
 >
+	<p class="hint memory-explainer">{t('settings.suggestions.memoryExplainer')}</p>
 	{#if showKivraHint}
 		<p class="hint">{t('settings.suggestions.kivraHint')}</p>
 	{/if}

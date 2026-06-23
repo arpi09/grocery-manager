@@ -1,8 +1,8 @@
-import { isStorageLocation, type StorageLocation } from '$lib/domain/location';
-import { error, json } from '@sveltejs/kit';
+import { isStorageLocation, type StorageLocation } from '$lib/domain/location';import { error, json } from '@sveltejs/kit';
+import { requireOpenAiKey } from '$lib/server/api-guards';
 import type { RequestHandler } from './$types';
 
-type MergeCandidateLine = { name: string; location: StorageLocation };
+type MergeCandidateLine = { name: string; location: StorageLocation; categoryHint?: string | null };
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.user || !locals.householdId) {
@@ -35,9 +35,21 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		if (!line.name.trim()) {
 			continue;
 		}
-		lines.push({ name: line.name.trim(), location: line.location });
+		lines.push({
+			name: line.name.trim(),
+			location: line.location,
+			categoryHint:
+				typeof line.categoryHint === 'string' && line.categoryHint.trim()
+					? line.categoryHint.trim()
+					: null
+		});
 	}
 
-	const matches = await locals.inventoryService.findMergeCandidates(locals.householdId, lines);
+	const apiKeyOrResponse = requireOpenAiKey(locals.locale, 'inventory merge', 503);
+	const apiKey = typeof apiKeyOrResponse === 'string' ? apiKeyOrResponse : undefined;
+
+	const matches = await locals.inventoryService.findMergeCandidates(locals.householdId, lines, {
+		apiKey
+	});
 	return json({ matches });
 };

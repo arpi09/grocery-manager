@@ -763,7 +763,8 @@
 			"sourceCorrections": "dina justeringar",
 			"sampleCount": "{count, plural, one {# observation} other {# observationer}}",
 			"reset": "Återställ",
-			"resetNamed": "Återställ regel för {name}"
+			"resetNamed": "Återställ regel för {name}",
+			"memoryExplainer": "Regler här kommer från kvitton och era ändringar. Återställ en regel om Skaffu missade."
 		},
 		"plan": {
 			"title": "Plan",
@@ -1491,6 +1492,7 @@
 			"buyAgainPrimary": "Brukar köpa ungefär var {interval}:e dag",
 			"buyAgainPrimaryNoCadence": "Köpt {count, plural, one {# gång} other {# gånger}} på kvitton",
 			"sampleMeta": "{count, plural, one {# observation} other {# observationer}}",
+			"consumptionVelocity": "Inlärning från förbrukningstakt",
 			"detailCta": "Detalj",
 			"feedbackStatus": {
 				"confirmed": "Du bekräftade detta",
@@ -1949,6 +1951,55 @@
 			"write7d": "Hushåll med skrivningar (7d)",
 			"review7d": "Hushåll med granskning (7d)",
 			"conversion": "Skrivning→granskning"
+		},
+		"brainMetrics": {
+			"title": "Brain v2-mätvärden",
+			"subtitle": "Kvitto-tratt, BBF-kvalitet och utgångsdatum-korrigeringar.",
+			"periodToggle": "Period för Brain-mätvärden",
+			"periodOption": "{days} dagar",
+			"periodRange": "{start} – {end} ({days}d rullande)",
+			"receiptParses": "Kvitto-tolkningar",
+			"avgBbfCoverage": "Snitt BBF-täckning",
+			"aiBatchUsed": "AI-batch-tolkningar",
+			"quickConfirmRate": "Snabbgodkänn-rate",
+			"medianTimeToReview": "Median import→granskning: {minutes} min",
+			"funnelTitle": "Kvittoimport-tratt",
+			"parseAggregatesTitle": "Aggregerade kvittotolkningar",
+			"correctionTitle": "Korrigeringsgrad per bäst-före-källa",
+			"topCorrectedTitle": "Mest korrigerade produkter",
+			"engagementTitle": "Brain-engagemang",
+			"totalParsedLines": "Totalt antal rader",
+			"avgHighConfidence": "Snitt hög säkerhet BBF",
+			"avgAiFallback": "Snitt AI-reserv BBF",
+			"lowLineConfidence": "Rader med låg säkerhet",
+			"noCorrections": "Ingen hållbarhets-feedback under perioden.",
+			"noTopCorrected": "Inga korrigerade produkter under perioden.",
+			"correctionSource": "Källa",
+			"correctionCorrected": "Korrigerade",
+			"correctionAccepted": "Accepterade",
+			"correctionRate": "Korrigeringsgrad",
+			"explanationViewed": "Förklaring visad",
+			"eatFirstWeekViewed": "Veckoplan visad",
+			"eatFirstPlanApplied": "Plan tillämpad",
+			"pantryUseSoonTapped": "Använd snart tryckt",
+			"funnel": {
+				"importStarted": "Import startad",
+				"uploaded": "Uppladdad",
+				"parsed": "Tolkad",
+				"reviewCompleted": "Granskning klar",
+				"uploadToParse": "Uppladdning → tolkning: {rate}",
+				"parseToReview": "Tolkning → granskning: {rate}",
+				"importToReview": "Import → granskning: {rate}"
+			},
+			"source": {
+				"unknown": "Okänd",
+				"heuristic": "Heuristik",
+				"default_heuristic": "Standard-heuristik",
+				"ai_inferred": "AI-uppskattad",
+				"household_learned": "Hushållslärd",
+				"receipt_printed": "Kvittotryckt",
+				"user_set": "Användar satt"
+			}
 		},
 		"sessionManagement": "Sessionshantering",
 		"logoutAllNote": "Logga ut alla avslutar varje aktiv session, inklusive din egen. Användare måste logga in igen.",
@@ -2500,7 +2551,8 @@
 			"ctaSecondary": "Lägg till fler varor",
 			"ctaInvitePartner": "Bjud in partner",
 			"ctaContinueSetup": "Fortsätt uppstarten",
-			"ariaLabel": "Kvittoimport klar"
+			"ariaLabel": "Kvittoimport klar",
+			"brainStats": "Skaffu uppskattade {estimated} datum och föreslog {location} platser."
 		}
 	},
 	"receiptBulk": {
@@ -2516,6 +2568,7 @@
 		"suggestedLocation": "Föreslagen plats",
 		"locationSuggestionsHint": "Platser är förslag från Skaffu — ändra vid behov innan du sparar.",
 		"estimatesHint": "Utgångsdatum är uppskattningar — justera vid behov innan du sparar.",
+		"aiDegradedBanner": "AI-batch för hållbarhet är avstängd — vi använder heuristik tills vidare.",
 		"savedLabel": "{count} {count, plural, one {vara} other {varor}}",
 		"receiptMeta": "{store} · {date}",
 		"purchasedOn": "Inköpt {date}",
@@ -3068,7 +3121,9 @@
 	},
 	"ai": {
 		"loadingPantry": "Tänker utifrån ert skafferi…",
-		"loadingWeekly": "Planerar veckan utifrån lagret…"
+		"loadingWeekly": "Planerar veckan utifrån lagret…",
+		"loadingReceiptExtract": "Läser kvittorader…",
+		"loadingReceiptBbf": "Uppskattar bäst-före-datum…"
 	},
 	"householdInvite": {
 		"promptTitle": "Handla ihop?",
@@ -3404,7 +3459,9 @@
 				"primary": "Förslag: {location}",
 				"fact": "Baserat på varutyp och vanliga vanor"
 			}
-		}
+		},
+		"confidenceSure": "Troligen rätt",
+		"sourceReceipt": "Från kvittot"
 	},
 	"consume": {
 		"sectionTitle": "Logga förbrukning",
@@ -3945,5 +4002,43 @@
 		"openSwishBtn": "Öppna Swish",
 		"swishMessage": "Grannskafferiet {name}",
 		"paymentDisclaimer": "Skaffu hanterar inte betalningar. Swish eller kontant sker direkt mellan er vid hämtning."
+	},
+	"brain": {
+		"score": {
+			"new": "Kom igång",
+			"growing": "Lär känna ert hushåll",
+			"strong": "Känner ert skafferi"
+		},
+		"homeCard": {
+			"score": "Hushållsminne · {score}%",
+			"scoreAria": "Hushållsminne {score} procent",
+			"body": "Skaffu lär sig av kvitton och era korrigeringar."
+		},
+		"insights": {
+			"title": "Skafferikoll",
+			"missingExpiry": "Varor utan datum",
+			"estimatedCount": "Uppskattade datum",
+			"actionEatFirst": "Ät först",
+			"actionAddExpiry": "Lägg till datum",
+			"actionPlanRecipe": "Planera recept",
+			"actionReviewEstimated": "Granska uppskattningar",
+			"daysUntil": "Om {count} dagar"
+		},
+		"receiptQuality": {
+			"lead": "{percent}% av raderna fick bäst-före-datum",
+			"highConfidence": "{count} hög säkerhet",
+			"estimated": "{count} uppskattade",
+			"missing": "{count} saknas"
+		},
+		"aiUsage": {
+			"footer": "AI hjälpte med {shelfLife} datum och {location} platser ({low} osäkra)."
+		},
+		"parseStep": {
+			"aria": "Kvittoanalys",
+			"extract": "Extrahera",
+			"classify": "Klassificera",
+			"predict": "Förutsäg"
+		},
+		"uncertainWarning": "Vissa uppskattningar är osäkra — granska datum innan du sparar."
 	}
 }

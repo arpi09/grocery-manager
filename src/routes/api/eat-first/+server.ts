@@ -9,7 +9,9 @@ import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { openAiErrorLogDetail, translateOpenAiError } from '$lib/server/openai';
 import { clampRecipePortions } from '$lib/server/recipe-prompt';
-import { generateRecipesWithRefinement } from '$lib/server/recipe-generation';
+import { generateRecipesWithRefinement, selectVelocityHints } from '$lib/server/recipe-generation';
+import { upcomingDateRange } from '$lib/server/inventory-context';
+import { normalizePromptLocale } from '$lib/server/ai-prompt-shared';
 import { translate } from '$lib/i18n/messages';
 import { e2eMockRecipeSuggestions, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 
@@ -43,8 +45,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	const expiringItems = filterItemsExpiringWithinDays(inventory, EXPIRING_SOON_DAYS);
-	const expiringItemNames = expiringItems
-		.filter((item) => !isExcludedFromRecipes(item.name, item.notes))
+	const recipeExpiringItems = expiringItems.filter(
+		(item) => !isExcludedFromRecipes(item.name, item.notes)
+	);
+	const expiringItemNames = recipeExpiringItems
 		.map((item) => item.name.trim())
 		.filter(Boolean);
 
@@ -79,14 +83,31 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const maxRecipes =
 		scope === 'week' ? resolveEatFirstWeekMealCount(expiringItems.length) : 5;
 
+	const { fromDate, toDate } = upcomingDateRange(10);
+	const householdId = locals.householdId;
+	const [plannedMeals, recipeIdeas, householdSnapshot] = await Promise.all([
+		locals.mealPlanService.listPlannedMealsByRange(auth.user.id, fromDate, toDate),
+		locals.mealPlanService.listRecipeIdeas(auth.user.id, 8),
+		householdId
+			? locals.householdSuggestionsService.getSnapshot(householdId)
+			: Promise.resolve(null)
+	]);
+
 	const generated = await generateRecipesWithRefinement({
 		apiKey,
 		inventory,
 		portions,
 		mode: 'eat_first',
 		expiringItemNames,
+		expiringItems: recipeExpiringItems,
 		maxRecipes,
-		mealIntent
+		mealIntent,
+		locale: normalizePromptLocale(locale),
+		plannedMeals,
+		recipeIdeas,
+		velocityHints: householdSnapshot
+			? selectVelocityHints(householdSnapshot.shelfLifeRules)
+			: []
 	});
 
 	if (!generated.ok) {

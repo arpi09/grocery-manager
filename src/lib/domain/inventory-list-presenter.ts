@@ -38,6 +38,7 @@ function soonExpiryTile(expiresOn: string, today = new Date()): PantryTilePresen
 		expiresOn,
 		detailKind: days === 0 ? 'expires_today' : 'expires_days',
 		expiresInDays: days,
+		expiresOnSource: null,
 		quantity: '',
 		unit: null
 	};

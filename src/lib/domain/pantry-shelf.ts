@@ -1,3 +1,4 @@
+import type { ExpiresOnSource } from '$lib/domain/auto-expired';
 import { EXPIRING_SOON_DAYS, daysUntilExpiry } from '$lib/domain/expiry';
 import { filterItemsExpiringWithinDays } from '$lib/domain/expiry-reminder';
 import { isItemFinished, type InventoryItem } from '$lib/domain/inventory-item';
@@ -23,6 +24,7 @@ export interface PantryTilePresentation {
 	detailKind: PantryTileDetailKind;
 	expiresInDays: number | null;
 	expiresOn: string | null;
+	expiresOnSource: ExpiresOnSource | null;
 	quantity: string;
 	unit: string | null;
 }
@@ -150,6 +152,7 @@ export function buildPantryTile(item: InventoryItem, today = new Date()): Pantry
 		name: item.name,
 		quantity: item.quantity,
 		unit: item.unit,
+		expiresOnSource: item.expiresOnSource,
 		...detail
 	};
 }

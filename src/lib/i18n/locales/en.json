@@ -853,7 +853,8 @@
 			"sourceCorrections": "your adjustments",
 			"sampleCount": "{count, plural, one {# observation} other {# observations}}",
 			"reset": "Reset",
-			"resetNamed": "Reset rule for {name}"
+			"resetNamed": "Reset rule for {name}",
+			"memoryExplainer": "Rules here come from receipts and your edits. Reset a rule if Skaffu got it wrong."
 		},
 		"plan": {
 			"compareSummary": "Compare Free and Pro",
@@ -1570,6 +1571,7 @@
 			"buyAgainPrimary": "Usually buy about every {interval} days",
 			"buyAgainPrimaryNoCadence": "Bought {count, plural, one {# time} other {# times}} on receipts",
 			"sampleMeta": "{count, plural, one {# observation} other {# observations}}",
+			"consumptionVelocity": "Learned from consumption pace",
 			"detailCta": "Details",
 			"feedbackStatus": {
 				"confirmed": "You confirmed this",
@@ -2028,6 +2030,55 @@
 			"write7d": "Households with writes (7d)",
 			"review7d": "Households with review (7d)",
 			"conversion": "Write→review conversion"
+		},
+		"brainMetrics": {
+			"title": "Brain v2 metrics",
+			"subtitle": "Receipt intelligence funnel, BBF quality, and expiry corrections.",
+			"periodToggle": "Brain metrics period",
+			"periodOption": "{days} days",
+			"periodRange": "{start} – {end} ({days}d rolling)",
+			"receiptParses": "Receipt parses",
+			"avgBbfCoverage": "Avg BBF coverage",
+			"aiBatchUsed": "AI batch used",
+			"quickConfirmRate": "Quick-confirm rate",
+			"medianTimeToReview": "Median import→review: {minutes} min",
+			"funnelTitle": "Receipt import funnel",
+			"parseAggregatesTitle": "Receipt parse aggregates",
+			"correctionTitle": "Expiry correction rate by source",
+			"topCorrectedTitle": "Top corrected products",
+			"engagementTitle": "Brain engagement",
+			"totalParsedLines": "Total parsed lines",
+			"avgHighConfidence": "Avg high-confidence BBF",
+			"avgAiFallback": "Avg AI fallback BBF",
+			"lowLineConfidence": "Low-confidence lines",
+			"noCorrections": "No shelf-life feedback in this period.",
+			"noTopCorrected": "No corrected products in this period.",
+			"correctionSource": "Source",
+			"correctionCorrected": "Corrected",
+			"correctionAccepted": "Accepted",
+			"correctionRate": "Correction rate",
+			"explanationViewed": "Explanation views",
+			"eatFirstWeekViewed": "Eat-first week views",
+			"eatFirstPlanApplied": "Eat-first plans applied",
+			"pantryUseSoonTapped": "Use-soon taps",
+			"funnel": {
+				"importStarted": "Import started",
+				"uploaded": "Uploaded",
+				"parsed": "Parsed",
+				"reviewCompleted": "Review completed",
+				"uploadToParse": "Upload → parse: {rate}",
+				"parseToReview": "Parse → review: {rate}",
+				"importToReview": "Import → review: {rate}"
+			},
+			"source": {
+				"unknown": "Unknown",
+				"heuristic": "Heuristic",
+				"default_heuristic": "Default heuristic",
+				"ai_inferred": "AI inferred",
+				"household_learned": "Household learned",
+				"receipt_printed": "Receipt printed",
+				"user_set": "User set"
+			}
 		},
 		"acquisition": {
 			"title": "Acquisition (7 days)",
@@ -2579,7 +2630,8 @@
 			"ctaSecondary": "Add more items",
 			"ctaInvitePartner": "Invite partner",
 			"ctaContinueSetup": "Continue setup",
-			"ariaLabel": "Receipt import complete"
+			"ariaLabel": "Receipt import complete",
+			"brainStats": "Skaffu estimated {estimated} dates and suggested {location} locations."
 		}
 	},
 	"receiptBulk": {
@@ -2593,6 +2645,7 @@
 		"suggestedLocation": "Suggested location",
 		"locationSuggestionsHint": "Locations are suggestions from Skaffu — change if needed before saving.",
 		"estimatesHint": "Expiry dates are estimates — adjust if needed before saving.",
+		"aiDegradedBanner": "AI shelf-life batch is off — using heuristics for now.",
 		"addCount": "Add {count} {count, plural, one {item} other {items}}",
 		"apiKeyHint": "Requires OPENAI_API_KEY in server .env.",
 		"savedLabel": "{count} {count, plural, one {item} other {items}}",
@@ -3147,7 +3200,9 @@
 	},
 	"ai": {
 		"loadingPantry": "Thinking from your pantry…",
-		"loadingWeekly": "Planning the week from your pantry…"
+		"loadingWeekly": "Planning the week from your pantry…",
+		"loadingReceiptExtract": "Reading receipt lines…",
+		"loadingReceiptBbf": "Estimating best-before dates…"
 	},
 	"householdInvite": {
 		"promptTitle": "Shop together?",
@@ -3483,7 +3538,9 @@
 				"primary": "Suggestion: {location}",
 				"fact": "Based on product type and common habits"
 			}
-		}
+		},
+		"confidenceSure": "Likely accurate",
+		"sourceReceipt": "From your receipt"
 	},
 	"news": {
 		"title": "News",
@@ -3945,5 +4002,43 @@
 		"openSwishBtn": "Open Swish",
 		"swishMessage": "Grannskafferiet {name}",
 		"paymentDisclaimer": "Skaffu does not handle payments. Swish or cash happens directly between you at pickup."
+	},
+	"brain": {
+		"score": {
+			"new": "Getting started",
+			"growing": "Learning your household",
+			"strong": "Knows your pantry well"
+		},
+		"homeCard": {
+			"score": "Household memory · {score}%",
+			"scoreAria": "Household memory score {score} percent",
+			"body": "Skaffu learns from receipts and your corrections."
+		},
+		"insights": {
+			"title": "Pantry insights",
+			"missingExpiry": "Items without a date",
+			"estimatedCount": "Estimated dates",
+			"actionEatFirst": "Eat first",
+			"actionAddExpiry": "Add expiry dates",
+			"actionPlanRecipe": "Plan a recipe",
+			"actionReviewEstimated": "Review estimates",
+			"daysUntil": "In {count} days"
+		},
+		"receiptQuality": {
+			"lead": "{percent}% of lines got a best-before date",
+			"highConfidence": "{count} high confidence",
+			"estimated": "{count} estimated",
+			"missing": "{count} missing"
+		},
+		"aiUsage": {
+			"footer": "AI helped with {shelfLife} dates and {location} locations ({low} uncertain)."
+		},
+		"parseStep": {
+			"aria": "Receipt parsing progress",
+			"extract": "Extract",
+			"classify": "Classify",
+			"predict": "Predict"
+		},
+		"uncertainWarning": "Some estimates are uncertain — review dates before saving."
 	}
 }

@@ -6,9 +6,11 @@
 		href: string;
 		active?: boolean;
 		onSelect?: () => void;
+		actionHref?: string | null;
+		actionLabel?: string | null;
 	}
 
-	let { count, href, active = false, onSelect }: Props = $props();
+	let { count, href, active = false, onSelect, actionHref = null, actionLabel = null }: Props = $props();
 
 	function handleClick(event: MouseEvent) {
 		if (onSelect) {
@@ -19,19 +21,34 @@
 </script>
 
 {#if count > 0}
-	<a
-		class="missing-expiry-chip"
-		class:missing-expiry-chip--active={active}
-		{href}
-		data-testid="inventory-no-expiry-chip"
-		aria-current={active ? 'true' : undefined}
-		onclick={handleClick}
-	>
-		{t('inventory.noExpiryFilterChip', { count })}
-	</a>
+	<div class="missing-expiry-wrap">
+		<a
+			class="missing-expiry-chip"
+			class:missing-expiry-chip--active={active}
+			{href}
+			data-testid="inventory-no-expiry-chip"
+			aria-current={active ? 'true' : undefined}
+			onclick={handleClick}
+		>
+			{t('inventory.noExpiryFilterChip', { count })}
+		</a>
+		{#if actionHref && actionLabel}
+			<a class="missing-expiry-action" href={actionHref} data-testid="inventory-no-expiry-bulk-link">
+				{actionLabel}
+			</a>
+		{/if}
+	</div>
 {/if}
 
 <style>
+	.missing-expiry-wrap {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-sm);
+		margin-bottom: var(--space-sm);
+	}
+
 	.missing-expiry-chip {
 		display: inline-flex;
 		align-items: center;
@@ -48,13 +65,19 @@
 		white-space: nowrap;
 	}
 
+	.missing-expiry-action {
+		font-size: 0.8125rem;
+		font-weight: 600;
+	}
+
 	.missing-expiry-chip--active {
 		border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
 		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
 		color: var(--color-primary);
 	}
 
-	.missing-expiry-chip:focus-visible {
+	.missing-expiry-chip:focus-visible,
+	.missing-expiry-action:focus-visible {
 		outline: 2px solid var(--color-primary);
 		outline-offset: 2px;
 	}

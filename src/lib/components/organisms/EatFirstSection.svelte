@@ -409,7 +409,10 @@
 							<Badge tone="warning">{formatDaysLeft(daysLeft, getLocale())}</Badge>
 						{/if}
 						{#if isEstimatedExpirySource(item.expiresOnSource)}
-							<EstimatedBadge source={item.expiresOnSource} />
+							<EstimatedBadge
+							source={item.expiresOnSource}
+							lowConfidence={item.expiresOnSource === 'ai_inferred'}
+						/>
 						{/if}
 					</Card>
 				</li>

@@ -44,7 +44,8 @@
 
 
 				loadFailed={Boolean(data.loadFailed)}
-
+				brainScore={data.brainScore}
+				brainFeedbackV1={Boolean(data.brainFeedbackV1Enabled)}
 			/>
 
 		{:else}
