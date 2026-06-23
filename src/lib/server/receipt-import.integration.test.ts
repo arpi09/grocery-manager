@@ -43,6 +43,10 @@ vi.mock('$lib/server/shelf-life-learning-flag', () => ({
 	isShelfLifeLearningEnabled: () => false
 }));
 
+vi.mock('$lib/server/location-learning-flag', () => ({
+	isLocationLearningEnabled: () => false
+}));
+
 describe('importReceiptLines integration', () => {
 	let integrationDb: IntegrationDbContext;
 	let inventoryService: InventoryService;
