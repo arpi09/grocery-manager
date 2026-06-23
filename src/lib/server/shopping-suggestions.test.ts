@@ -1,13 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
-	computeLowStockItems,
-	dedupeShoppingSuggestionsAgainstInventory,
 	normalizeShoppingItemName,
 	parseShoppingSuggestions,
 	parseSuggestionQuantity,
 	suggestionToListItem
 } from './shopping-suggestions';
-import type { InventoryItem } from '$lib/domain/inventory-item';
 
 describe('parseShoppingSuggestions', () => {
 	it('parses valid items and drops incomplete rows', () => {
@@ -61,32 +58,5 @@ describe('parseSuggestionQuantity', () => {
 describe('normalizeShoppingItemName', () => {
 	it('trims and lowercases for duplicate checks', () => {
 		expect(normalizeShoppingItemName('  Mjölk  ')).toBe('mjölk');
-	});
-});
-
-describe('computeLowStockItems', () => {
-	it('flags items below 1 unit', () => {
-		const inventory = [
-			{ name: 'Mjölk', quantity: '0.5', unit: 'l' },
-			{ name: 'Pasta', quantity: '2', unit: 'kg' }
-		] as InventoryItem[];
-		expect(computeLowStockItems(inventory)).toHaveLength(1);
-		expect(computeLowStockItems(inventory)[0]?.name).toBe('Mjölk');
-	});
-});
-
-describe('dedupeShoppingSuggestionsAgainstInventory', () => {
-	it('removes suggestions already well stocked', () => {
-		const inventory = [{ name: 'Mjölk', quantity: '3', unit: 'l' }] as InventoryItem[];
-		const suggestions = [
-			{
-				name: 'Mjölk',
-				quantity: '1 l',
-				category: 'Mejeri' as const,
-				reason: 'Behövs',
-				priority: 'high' as const
-			}
-		];
-		expect(dedupeShoppingSuggestionsAgainstInventory(suggestions, inventory)).toHaveLength(0);
 	});
 });

@@ -5,6 +5,7 @@ import { translate } from '$lib/i18n/messages';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
 export const OPENAI_MODEL = 'gpt-4.1-mini';
+export const OPENAI_MODEL_NANO = env.OPENAI_MODEL_NANO?.trim() || 'gpt-4.1-nano';
 
 export const OPENAI_NOT_CONFIGURED_KEY = 'errors.api.openAiNotConfigured' satisfies MessageKey;
 export const OPENAI_UNAUTHORIZED_KEY = 'errors.api.openAiUnauthorized' satisfies MessageKey;
@@ -113,10 +114,12 @@ interface StructuredResponseOptions {
 	schemaName: string;
 	schema: Record<string, unknown>;
 	strict?: boolean;
+	model?: string;
 }
 
 interface StructuredImageResponseOptions extends StructuredResponseOptions {
 	imageDataUrl: string;
+	imageDetail?: ImageDetailLevel;
 }
 
 export type ImageDetailLevel = 'low' | 'high' | 'auto';
@@ -132,7 +135,8 @@ async function postOpenAiStructured(
 	input: unknown[],
 	schemaName: string,
 	schema: Record<string, unknown>,
-	strict = true
+	strict = true,
+	model = OPENAI_MODEL
 ): Promise<StructuredJsonResult> {
 	let response: Response;
 	try {
@@ -143,7 +147,7 @@ async function postOpenAiStructured(
 				Authorization: `Bearer ${apiKey}`
 			},
 			body: JSON.stringify({
-				model: OPENAI_MODEL,
+				model,
 				input,
 				text: {
 					format: {
@@ -225,7 +229,8 @@ export async function requestStructuredJson(
 		],
 		options.schemaName,
 		options.schema,
-		options.strict ?? true
+		options.strict ?? true,
+		options.model
 	);
 }
 
@@ -234,8 +239,13 @@ export async function requestStructuredJsonFromImage(
 	options: StructuredImageResponseOptions
 ): Promise<StructuredJsonResult> {
 	return requestStructuredJsonFromImages(apiKey, {
-		...options,
-		imageDataUrls: [options.imageDataUrl]
+		systemPrompt: options.systemPrompt,
+		userPrompt: options.userPrompt,
+		schemaName: options.schemaName,
+		schema: options.schema,
+		strict: options.strict,
+		imageDataUrls: [options.imageDataUrl],
+		imageDetail: options.imageDetail
 	});
 }
 
@@ -263,7 +273,8 @@ export async function requestStructuredJsonFromImages(
 		],
 		options.schemaName,
 		options.schema,
-		options.strict ?? true
+		options.strict ?? true,
+		options.model
 	);
 }
 

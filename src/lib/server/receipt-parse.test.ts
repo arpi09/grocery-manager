@@ -193,7 +193,8 @@ describe('normalizeReceiptAiPayload', () => {
 					currency: null,
 					brand: null,
 					packageSize: null,
-					categoryHint: null
+					categoryHint: null,
+					confidence: null
 				}
 			]
 		});
