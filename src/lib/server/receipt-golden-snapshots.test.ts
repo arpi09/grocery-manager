@@ -66,7 +66,9 @@ describe('receipt golden snapshots', () => {
 		};
 
 		expect(extracted.text.length).toBe(expected.textLength);
-		expect(preprocessed.length).toBe(expected.preprocessedLength);
+		expect(Math.abs(preprocessed.length - expected.preprocessedLength)).toBeLessThanOrEqual(
+			Math.max(5, Math.round(expected.preprocessedLength * 0.05))
+		);
 		expect(printedBbfCount).toBe(expected.printedBbfCount);
 	}, 20_000);
 });

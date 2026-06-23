@@ -39,6 +39,10 @@ export interface ReceiptLine {
 	packageSize?: string | null;
 	/** Food category hint from parse, e.g. mejeri, grönsak. */
 	categoryHint?: string | null;
+	/** Printed best-before date from receipt line (YYYY-MM-DD) when visible. */
+	printedExpiresOn?: string | null;
+	/** AI-suggested merge key for multi-line products (weight×price splits). */
+	mergeGroupKey?: string | null;
 	/** Parser confidence 0–1 when available. */
 	confidence?: number | null;
 	/** Original lines merged into this row (same normalized key + location). */

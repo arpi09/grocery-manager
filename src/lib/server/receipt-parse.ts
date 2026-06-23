@@ -2,19 +2,25 @@ import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
 import type { ReceiptLine } from '$lib/domain/receipt-line';
 import { isStorageLocation } from '$lib/domain/location';
 import {
+	buildStandardJsonUserBlock,
 	LOCATION_RULES,
+	PROMPT_INVENTORY_ROW_CAP,
+	PROMPT_VERSION_RECEIPT_PARSE,
 	storeChainHintBlock,
 	SWEDISH_GROCERY_CONTEXT,
 	UNIT_RULES
 } from '$lib/server/ai-prompt-shared';
+import { buildReceiptHouseholdMemoryBlock, type HouseholdMemoryAlias } from '$lib/server/receipt-household-memory';
 import {
 	openAiErrorLogDetail,
 	OPENAI_EMPTY_RESPONSE_KEY,
 	OPENAI_INVALID_JSON_KEY,
+	OPENAI_MODEL,
 	requestStructuredJson,
 	requestStructuredJsonFromImage,
 	type OpenAiFailureResult
 } from '$lib/server/openai';
+import { logBrainSchemaRetry } from '$lib/server/brain-metrics';
 import type { MessageKey } from '$lib/i18n/messages';
 import { parseSuggestionQuantity } from '$lib/server/shopping-suggestions';
 
@@ -44,6 +50,8 @@ export const RECEIPT_LINES_SCHEMA = {
 					brand: { type: ['string', 'null'] },
 					packageSize: { type: ['string', 'null'] },
 					categoryHint: { type: ['string', 'null'] },
+					printedExpiresOn: { type: ['string', 'null'] },
+					mergeGroupKey: { type: ['string', 'null'] },
 					lineConfidence: { type: 'string', enum: ['high', 'medium', 'low'] },
 					rawLineText: { type: ['string', 'null'] },
 					confidence: { type: ['number', 'null'] }
@@ -59,6 +67,8 @@ export const RECEIPT_LINES_SCHEMA = {
 					'brand',
 					'packageSize',
 					'categoryHint',
+					'printedExpiresOn',
+					'mergeGroupKey',
 					'lineConfidence',
 					'rawLineText',
 					'confidence'
@@ -71,6 +81,18 @@ export const RECEIPT_LINES_SCHEMA = {
 	additionalProperties: false
 } as const;
 
+export const RECEIPT_FOOD_LINE_NUMBERS_SCHEMA = {
+	type: 'object',
+	properties: {
+		foodLineNumbers: {
+			type: 'array',
+			items: { type: 'number' }
+		}
+	},
+	required: ['foodLineNumbers'],
+	additionalProperties: false
+} as const;
+
 export const RECEIPT_SYSTEM_PROMPT = [
 	'Du läser svenska butikskvitton och extraherar livsmedelsrader som JSON enligt schema.',
 	SWEDISH_GROCERY_CONTEXT,
@@ -79,6 +101,8 @@ export const RECEIPT_SYSTEM_PROMPT = [
 	'- brand: varumärke om synligt (Arla, ICA, Garant), annars null',
 	'- packageSize: förpackningsstorlek (t.ex. "500 g", "1,5 l") när den syns, annars null',
 	'- categoryHint: grov kategori (mejeri, kött, grönsak, torrvara, dryck, färdigrätt), annars null',
+	'- printedExpiresOn: YYYY-MM-DD om bäst-före syns på raden, annars null',
+	'- mergeGroupKey: samma nyckel för rader som hör till samma produkt (t.ex. vikt×pris-rad), annars null',
 	'- lineConfidence: high|medium|low — hur säker du är på raden',
 	'- rawLineText: originalrad från kvittot om tillgänglig, annars null',
 	'- unitPrice/lineTotal: pris med punkt som decimal, annars null',
@@ -86,8 +110,16 @@ export const RECEIPT_SYSTEM_PROMPT = [
 	UNIT_RULES,
 	LOCATION_RULES,
 	'- hoppa över icke-mat, pant, erbjudanden och butiksinfo',
-	'- max 40 rader'
+	'Negativa exempel (returnera INTE som matrader):',
+	'- pant / pantburk / flaskpant',
+	'- diskmedel, toalettpapper, städ och hygien',
+	'- totalsumma, moms, betalning, kvittorad utan produkt',
+	`- max ${PROMPT_INVENTORY_ROW_CAP} rader`,
+	`promptVersion: ${PROMPT_VERSION_RECEIPT_PARSE}`
 ].join('\n');
+
+const RECEIPT_TEXT_CHUNK_LINES = 35;
+const RECEIPT_TWO_PASS_LINE_THRESHOLD = 30;
 
 /** Receipt footer/header tokens stripped before text-based OpenAI parse. */
 const RECEIPT_TEXT_NOISE_PATTERNS = [
@@ -114,25 +146,20 @@ function preprocessIcaStoreLayout(text: string, storeHint?: string | null): stri
 	let t = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 	const hint = (storeHint ?? text).toLowerCase();
 
-	// Strip long EAN / artikelnummer runs (12–14 digits) common on ICA lines
 	t = t.replace(/\b\d{12,14}\b/g, ' ');
 
-	// Gunnesbo / Toftanäs Maxi: product lines often split before price column
 	if (hint.includes('gunnesbo') || hint.includes('toftan')) {
 		t = t.replace(/(\d+[.,]\d{2})\s*(?:kr|sek)?\s*(?=[A-ZÅÄÖ])/gi, '$1\n');
 	}
 
-	// Värnhem Supermarket: compact header — ensure product boundaries
 	if (hint.includes('varnhem') || hint.includes('supermarket')) {
 		t = t.replace(/(\d+[.,]\d{2})\s+/g, '$1\n');
 	}
 
-	// Strömstad Kvantum: pant/deposit lines inline
 	if (hint.includes('stromstad') || hint.includes('strömstad') || hint.includes('kvantum')) {
 		t = t.replace(/\bpant\s*\d+[.,]?\d*/gi, ' ');
 	}
 
-	// Kivra-style export: collapse duplicate store headers at line start only
 	if (hint.includes('kivra')) {
 		t = t.replace(
 			/^(?:maxi\s+ica|ica\s+supermarket|ica\s+kvantum)[^\n]{0,80}\n/gim,
@@ -193,6 +220,12 @@ function coerceReceiptOptionalString(value: unknown): string | undefined {
 
 function coerceReceiptNullableString(value: unknown): string | null {
 	return coerceReceiptOptionalString(value) ?? null;
+}
+
+function coercePrintedExpiresOn(value: unknown): string | null {
+	const raw = coerceReceiptOptionalString(value);
+	if (!raw || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return null;
+	return raw;
 }
 
 function coerceReceiptCurrency(value: unknown): string | undefined {
@@ -280,6 +313,8 @@ export function normalizeReceiptAiPayload(raw: unknown): unknown {
 			normalized.brand = coerceReceiptNullableString(row.brand);
 			normalized.packageSize = coerceReceiptNullableString(row.packageSize);
 			normalized.categoryHint = coerceReceiptNullableString(row.categoryHint);
+			normalized.printedExpiresOn = coercePrintedExpiresOn(row.printedExpiresOn);
+			normalized.mergeGroupKey = coerceReceiptNullableString(row.mergeGroupKey);
 			normalized.lineConfidence = coerceLineConfidence(row.lineConfidence) ?? 'medium';
 			if (!('lineConfidence' in row)) {
 				delete normalized.lineConfidence;
@@ -319,6 +354,8 @@ export function parseReceiptLines(raw: unknown): ReceiptLine[] {
 		const brand = coerceReceiptOptionalString(row.brand);
 		const packageSize = coerceReceiptOptionalString(row.packageSize);
 		const categoryHint = coerceReceiptOptionalString(row.categoryHint);
+		const printedExpiresOn = coercePrintedExpiresOn(row.printedExpiresOn);
+		const mergeGroupKey = coerceReceiptOptionalString(row.mergeGroupKey);
 		const lineConfidence = coerceLineConfidence(row.lineConfidence);
 		const confidence =
 			coerceReceiptConfidence(row.confidence) ??
@@ -336,6 +373,8 @@ export function parseReceiptLines(raw: unknown): ReceiptLine[] {
 		if (brand) line.brand = brand;
 		if (packageSize) line.packageSize = packageSize;
 		if (categoryHint) line.categoryHint = categoryHint;
+		if (printedExpiresOn) line.printedExpiresOn = printedExpiresOn;
+		if (mergeGroupKey) line.mergeGroupKey = mergeGroupKey;
 		if (confidence != null) line.confidence = confidence;
 		result.push(line);
 	}
@@ -383,6 +422,52 @@ export function formatNumberedReceiptText(cleaned: string): string {
 	return lines.map((line, index) => `${index + 1}. ${line}`).join('\n');
 }
 
+function splitNumberedReceiptChunks(numbered: string): string[] {
+	const lines = numbered.split('\n').filter(Boolean);
+	if (lines.length <= RECEIPT_TEXT_CHUNK_LINES) {
+		return [numbered];
+	}
+	const chunks: string[] = [];
+	for (let index = 0; index < lines.length; index += RECEIPT_TEXT_CHUNK_LINES) {
+		chunks.push(lines.slice(index, index + RECEIPT_TEXT_CHUNK_LINES).join('\n'));
+	}
+	return chunks;
+}
+
+function filterNumberedLinesByFoodPass(numbered: string, foodLineNumbers: number[]): string {
+	if (foodLineNumbers.length === 0) return numbered;
+	const allowed = new Set(foodLineNumbers);
+	const lines = numbered.split('\n').filter(Boolean);
+	const filtered = lines.filter((line) => {
+		const match = line.match(/^(\d+)\.\s/);
+		if (!match) return true;
+		return allowed.has(Number(match[1]));
+	});
+	return filtered.length > 0 ? filtered.join('\n') : numbered;
+}
+
+function buildReceiptUserPrompt(params: {
+	instruction: string;
+	metadata?: ReceiptParseMetadata;
+	householdMemoryBlock?: string;
+	receiptBody?: string;
+}): string {
+	return buildStandardJsonUserBlock(
+		{
+			version: PROMPT_VERSION_RECEIPT_PARSE,
+			locale: 'sv',
+			chain: params.metadata?.chain ?? null,
+			purchasedAt: params.metadata?.purchasedAt ?? null
+		},
+		{
+			instruction: params.instruction,
+			metadata: buildReceiptMetadataBlock(params.metadata),
+			householdMemory: params.householdMemoryBlock ?? null,
+			receiptText: params.receiptBody ?? null
+		}
+	);
+}
+
 async function requestReceiptStructuredJson(
 	apiKey: string,
 	options: ReceiptStructuredOptions
@@ -391,7 +476,8 @@ async function requestReceiptStructuredJson(
 		systemPrompt: options.systemPrompt,
 		userPrompt: options.userPrompt,
 		schemaName: 'receipt_lines',
-		schema: RECEIPT_LINES_SCHEMA
+		schema: RECEIPT_LINES_SCHEMA,
+		model: OPENAI_MODEL
 	};
 
 	const strictResult = options.imageDataUrl
@@ -410,6 +496,7 @@ async function requestReceiptStructuredJson(
 		'[receipt] Strict JSON schema failed; retrying with non-strict mode:',
 		openAiErrorLogDetail(strictResult).slice(0, 300)
 	);
+	logBrainSchemaRetry('receipt_parse', openAiErrorLogDetail(strictResult).slice(0, 300));
 
 	return options.imageDataUrl
 		? await requestStructuredJsonFromImage(apiKey, {
@@ -421,15 +508,87 @@ async function requestReceiptStructuredJson(
 		: await requestStructuredJson(apiKey, { ...base, strict: false });
 }
 
+async function classifyFoodLineNumbers(
+	apiKey: string,
+	numbered: string,
+	metadata?: ReceiptParseMetadata,
+	householdMemoryBlock?: string
+): Promise<number[]> {
+	const result = await requestStructuredJson(apiKey, {
+		model: OPENAI_MODEL,
+		systemPrompt: [
+			'Du klassificerar numrerade kvittorader som mat/dryck eller icke-mat.',
+			'Returnera JSON: {"foodLineNumbers":[1,2,5]} med radnummer för livsmedel och drycker.',
+			'Hoppa pant, totalsummor, betalning och städ/hygien.'
+		].join('\n'),
+		userPrompt: buildReceiptUserPrompt({
+			instruction: 'Lista radnummer som är mat- eller drycksrader.',
+			metadata,
+			householdMemoryBlock,
+			receiptBody: numbered
+		}),
+		schemaName: 'receipt_food_line_numbers',
+		schema: RECEIPT_FOOD_LINE_NUMBERS_SCHEMA
+	});
+
+	if (!result.ok) return [];
+
+	const numbers = (result.data as { foodLineNumbers?: unknown }).foodLineNumbers;
+	if (!Array.isArray(numbers)) return [];
+	return numbers.filter((value): value is number => typeof value === 'number' && value > 0);
+}
+
+async function parseReceiptTextChunks(
+	apiKey: string,
+	chunks: string[],
+	mergedMetadata: ReceiptParseMetadata,
+	householdMemoryBlock: string,
+	instruction: string
+): Promise<Awaited<ReturnType<typeof requestReceiptStructuredJson>>> {
+	const chunkResults = await Promise.all(
+		chunks.map((chunk) =>
+			requestReceiptStructuredJson(apiKey, {
+				systemPrompt: RECEIPT_SYSTEM_PROMPT,
+				userPrompt: buildReceiptUserPrompt({
+					instruction,
+					metadata: mergedMetadata,
+					householdMemoryBlock: householdMemoryBlock || undefined,
+					receiptBody: chunk
+				})
+			})
+		)
+	);
+
+	const mergedLines: unknown[] = [];
+	for (const chunkResult of chunkResults) {
+		if (!chunkResult.ok) {
+			return chunkResult;
+		}
+		const payload = chunkResult.data as { lines?: unknown[] };
+		if (Array.isArray(payload.lines)) {
+			mergedLines.push(...payload.lines);
+		}
+	}
+
+	return { ok: true as const, data: { lines: mergedLines } };
+}
+
 export async function parseReceiptFromImage(
 	apiKey: string,
 	imageDataUrl: string,
-	metadata?: ReceiptParseMetadata
+	metadata?: ReceiptParseMetadata,
+	householdAliases: HouseholdMemoryAlias[] = [],
+	householdMemoryBlockOverride?: string
 ) {
-	const metaBlock = buildReceiptMetadataBlock(metadata);
+	const householdMemoryBlock =
+		householdMemoryBlockOverride ?? buildReceiptHouseholdMemoryBlock(householdAliases);
 	return requestReceiptStructuredJson(apiKey, {
 		systemPrompt: RECEIPT_SYSTEM_PROMPT,
-		userPrompt: ['Lista matvaror från detta kvitto.', metaBlock].filter(Boolean).join('\n\n'),
+		userPrompt: buildReceiptUserPrompt({
+			instruction: 'Lista matvaror från detta kvitto (bild).',
+			metadata,
+			householdMemoryBlock: householdMemoryBlock || undefined
+		}),
 		imageDataUrl
 	});
 }
@@ -438,7 +597,9 @@ export async function parseReceiptFromText(
 	apiKey: string,
 	receiptText: string,
 	storeHint?: string | null,
-	metadata?: ReceiptParseMetadata
+	metadata?: ReceiptParseMetadata,
+	householdAliases: HouseholdMemoryAlias[] = [],
+	householdMemoryBlockOverride?: string
 ) {
 	const cleaned = preprocessReceiptText(receiptText, storeHint);
 	const mergedMetadata: ReceiptParseMetadata = {
@@ -446,17 +607,46 @@ export async function parseReceiptFromText(
 		storeName: metadata?.storeName ?? storeHint ?? null,
 		purchasedAt: metadata?.purchasedAt ?? null
 	};
-	const metaBlock = buildReceiptMetadataBlock(mergedMetadata);
-	const numbered = formatNumberedReceiptText(cleaned.slice(0, 12_000));
-	return requestReceiptStructuredJson(apiKey, {
-		systemPrompt: RECEIPT_SYSTEM_PROMPT,
-		userPrompt: [
-			'Lista matvaror från detta kvitto.',
-			metaBlock,
-			'Kvittoinnehåll (radnummer):',
-			numbered
-		]
-			.filter(Boolean)
-			.join('\n\n')
-	});
+	const householdMemoryBlock =
+		householdMemoryBlockOverride ?? buildReceiptHouseholdMemoryBlock(householdAliases);
+	let numbered = formatNumberedReceiptText(cleaned.slice(0, 12_000));
+	const rawLineCount = numbered.split('\n').filter(Boolean).length;
+
+	if (rawLineCount > RECEIPT_TWO_PASS_LINE_THRESHOLD) {
+		const foodLineNumbers = await classifyFoodLineNumbers(
+			apiKey,
+			numbered,
+			mergedMetadata,
+			householdMemoryBlock
+		);
+		if (foodLineNumbers.length > 0) {
+			numbered = filterNumberedLinesByFoodPass(numbered, foodLineNumbers);
+		}
+	}
+
+	const chunks = splitNumberedReceiptChunks(numbered);
+	const instruction =
+		chunks.length > 1
+			? 'Lista matvaror från detta kvitto (del av långt kvitto).'
+			: 'Lista matvaror från detta kvitto.';
+
+	if (chunks.length === 1) {
+		return requestReceiptStructuredJson(apiKey, {
+			systemPrompt: RECEIPT_SYSTEM_PROMPT,
+			userPrompt: buildReceiptUserPrompt({
+				instruction,
+				metadata: mergedMetadata,
+				householdMemoryBlock: householdMemoryBlock || undefined,
+				receiptBody: chunks[0]
+			})
+		});
+	}
+
+	return parseReceiptTextChunks(
+		apiKey,
+		chunks,
+		mergedMetadata,
+		householdMemoryBlock,
+		instruction
+	);
 }

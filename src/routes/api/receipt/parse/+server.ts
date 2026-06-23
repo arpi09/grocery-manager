@@ -25,7 +25,15 @@ import { translate } from '$lib/i18n/messages';
 import { recordProductEvent } from '$lib/server/product-events';
 import { openAiErrorLogDetail, translateOpenAiError } from '$lib/server/openai';
 import { buildReceiptImportQualityReport } from '$lib/domain/receipt-quality-report';
+import { PROMPT_VERSION_RECEIPT_PARSE } from '$lib/server/ai-prompt-shared';
+import { isReceiptAiBatchEnabled } from '$lib/server/brain-feature-flags';
 import { logBrainMetrics, summarizeReceiptParseMetrics } from '$lib/server/brain-metrics';
+import { buildReceiptHouseholdMemorySection } from '$lib/server/receipt-household-memory';
+import {
+	householdLocationRuleRepository,
+	householdShelfLifeRuleRepository,
+	purchasePatternRepository
+} from '$lib/server/di';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -78,6 +86,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 	const apiKey = apiKeyOrResponse;
 
+	const householdMemoryBlock =
+		locals.householdId != null
+			? await buildReceiptHouseholdMemorySection(purchasePatternRepository, locals.householdId, {
+					shelfLifeRules: householdShelfLifeRuleRepository,
+					locationRules: householdLocationRuleRepository
+				})
+			: '';
+
 	let aiResult;
 	let receiptTextForStoreHeuristic: string | undefined;
 
@@ -95,15 +111,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		receiptTextForStoreHeuristic = pdfText.text;
 		const storeHint = extractStoreFromReceiptText(pdfText.text);
 		const purchasedAt = extractPurchasedAtFromReceiptText(pdfText.text);
-		aiResult = await parseReceiptFromText(apiKey, pdfText.text, storeHint, {
-			chain: storeHint ?? null,
-			storeName: storeHint ?? null,
-			purchasedAt: purchasedAt?.toISOString().slice(0, 10) ?? null
-		});
+		aiResult = await parseReceiptFromText(
+			apiKey,
+			pdfText.text,
+			storeHint,
+			{
+				chain: storeHint ?? null,
+				storeName: storeHint ?? null,
+				purchasedAt: purchasedAt?.toISOString().slice(0, 10) ?? null
+			},
+			[],
+			householdMemoryBlock
+		);
 	} else {
 		const base64 = Buffer.from(bytes).toString('base64');
 		const dataUrl = `data:${mimeType};base64,${base64}`;
-		aiResult = await parseReceiptFromImage(apiKey, dataUrl);
+		aiResult = await parseReceiptFromImage(apiKey, dataUrl, undefined, [], householdMemoryBlock);
 	}
 
 	if (!aiResult.ok) {
@@ -156,10 +179,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	if (result.shelfLifePredictions) {
 		result.qualityReport = buildReceiptImportQualityReport(lines, result.shelfLifePredictions);
+		const aiBatchUsed = isReceiptAiBatchEnabled();
 		logBrainMetrics('receipt_parse', summarizeReceiptParseMetrics({
 			lineCount: lines.length,
 			bbfCoveragePercent: result.qualityReport.bbfCoveragePercent,
-			bbfMissing: result.qualityReport.missing
+			bbfMissing: result.qualityReport.missing,
+			highConfidencePercent: result.qualityReport.highConfidencePercent,
+			aiFallbackPercent: result.qualityReport.aiFallbackPercent,
+			lowLineConfidenceCount: result.qualityReport.lowLineConfidenceCount,
+			aiBatchUsed,
+			promptVersion: PROMPT_VERSION_RECEIPT_PARSE
 		}));
 	}
 
@@ -174,7 +203,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			...(result.qualityReport
 				? {
 						bbfCoveragePercent: result.qualityReport.bbfCoveragePercent,
-						bbfMissing: result.qualityReport.missing
+						bbfMissing: result.qualityReport.missing,
+						highConfidencePercent: result.qualityReport.highConfidencePercent,
+						aiFallbackPercent: result.qualityReport.aiFallbackPercent,
+						lowLineConfidenceCount: result.qualityReport.lowLineConfidenceCount,
+						aiBatchUsed: isReceiptAiBatchEnabled()
 					}
 				: {})
 		}
@@ -190,6 +223,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	return json({
 		...result,
+		aiDegradedMode: !isReceiptAiBatchEnabled(),
 		...(storeLabel ? { storeLabel } : {}),
 		...(purchasedAt ? { purchasedAt: purchasedAtIso } : {})
 	});

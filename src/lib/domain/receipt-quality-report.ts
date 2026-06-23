@@ -9,6 +9,12 @@ export interface ReceiptImportQualityReport {
 	missing: number;
 	/** Percent 0–100 with one decimal. */
 	bbfCoveragePercent: number;
+	/** Share of lines with receipt_printed / household_learned / user_set BBF. */
+	highConfidencePercent: number;
+	/** Share of lines where BBF came from ai_inferred. */
+	aiFallbackPercent: number;
+	/** Lines with parser confidence below 0.5 when confidence is set. */
+	lowLineConfidenceCount: number;
 }
 
 function isHighConfidenceSource(source: ExpiresOnSource | undefined): boolean {
@@ -32,8 +38,14 @@ export function buildReceiptImportQualityReport(
 	let highConfidence = 0;
 	let estimated = 0;
 	let missing = 0;
+	let aiFallback = 0;
+	let lowLineConfidenceCount = 0;
 
 	for (let i = 0; i < totalLines; i++) {
+		const line = lines[i];
+		if (line.confidence != null && line.confidence < 0.5) {
+			lowLineConfidenceCount++;
+		}
 		const prediction = shelfLifePredictions?.[i];
 		if (!prediction?.expiresOn) {
 			missing++;
@@ -41,6 +53,9 @@ export function buildReceiptImportQualityReport(
 		}
 		withBbf++;
 		const source = prediction.expiresOnSource;
+		if (source === 'ai_inferred') {
+			aiFallback++;
+		}
 		if (isHighConfidenceSource(source)) {
 			highConfidence++;
 		} else if (isEstimatedSource(source)) {
@@ -50,8 +65,8 @@ export function buildReceiptImportQualityReport(
 		}
 	}
 
-	const bbfCoveragePercent =
-		totalLines > 0 ? Math.round((withBbf / totalLines) * 1000) / 10 : 0;
+	const percent = (count: number) =>
+		totalLines > 0 ? Math.round((count / totalLines) * 1000) / 10 : 0;
 
 	return {
 		totalLines,
@@ -59,6 +74,9 @@ export function buildReceiptImportQualityReport(
 		highConfidence,
 		estimated,
 		missing,
-		bbfCoveragePercent
+		bbfCoveragePercent: percent(withBbf),
+		highConfidencePercent: percent(highConfidence),
+		aiFallbackPercent: percent(aiFallback),
+		lowLineConfidenceCount
 	};
 }

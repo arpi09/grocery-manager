@@ -3,10 +3,20 @@ import type { Locale } from '$lib/i18n/locale';
 import { translate } from '$lib/i18n/messages';
 import { dismissClientToast } from '$lib/utils/client-toast.svelte';
 import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
+import type { ReceiptImportQualityReport } from '$lib/domain/receipt-quality-report';
+import type { BrainAiUsageCounts } from '$lib/domain/brain-ai-usage';
+import { aggregateBrainAiUsageFromPredictions } from '$lib/domain/brain-ai-usage';
 import type { ReceiptLine, ReceiptLocationPrediction, ReceiptShelfLifePrediction } from '$lib/domain/receipt-line';
 
 export const RECEIPT_IMPORT_JUST_COMPLETED_KEY = 'receipt-import-just-completed';
 export const RECEIPT_IMPORT_TOAST_PENDING_KEY = 'receipt-import-toast-pending';
+
+export interface ReceiptImportBrainStats {
+	estimatedDates: number;
+	locationSuggestions: number;
+	aiUsage: BrainAiUsageCounts;
+	qualityReport?: ReceiptImportQualityReport;
+}
 
 export interface ReceiptImportSummary {
 	estimatedDates: number;
@@ -31,6 +41,7 @@ export interface ReceiptImportSessionFlag {
 	dominantLocation?: StorageLocation;
 	linesWithPrice?: number;
 	importSource?: ReceiptImportSource;
+	brainStats?: ReceiptImportBrainStats;
 }
 
 export interface ReceiptImportLineContext {
@@ -77,7 +88,6 @@ export function dominantStorageLocation(counts: ReceiptLocationCounts): StorageL
 
 	return best;
 }
-
 export function aggregateReceiptImportSummary(lines: ReceiptImportLineContext[]): ReceiptImportSummary {
 	let estimatedDates = 0;
 	let locationCorrections = 0;
@@ -109,6 +119,23 @@ export function aggregateReceiptImportSummary(lines: ReceiptImportLineContext[])
 	}
 
 	return { estimatedDates, locationCorrections, rulesImproved };
+}
+
+export function aggregateReceiptBrainStats(
+	lines: ReceiptImportLineContext[],
+	qualityReport?: ReceiptImportQualityReport
+): ReceiptImportBrainStats {
+	const summary = aggregateReceiptImportSummary(lines);
+	const shelfLifePredictions = lines.map((entry) => entry.shelfLifePrediction);
+	const locationPredictions = lines.map((entry) => entry.locationPrediction);
+	const aiUsage = aggregateBrainAiUsageFromPredictions(shelfLifePredictions, locationPredictions);
+
+	return {
+		estimatedDates: summary.estimatedDates,
+		locationSuggestions: aiUsage.locationSuggestions,
+		aiUsage,
+		...(qualityReport ? { qualityReport } : {})
+	};
 }
 
 export function receiptImportToastMessage(
@@ -149,7 +176,8 @@ export function markReceiptImportCompleted(
 	summary: ReceiptImportSummary = { estimatedDates: 0, locationCorrections: 0, rulesImproved: 0 },
 	locationCounts: ReceiptLocationCounts = EMPTY_LOCATION_COUNTS,
 	linesWithPrice = 0,
-	importSource?: ReceiptImportSource
+	importSource?: ReceiptImportSource,
+	brainStats?: ReceiptImportBrainStats
 ): void {
 	if (typeof sessionStorage === 'undefined') return;
 
@@ -163,7 +191,8 @@ export function markReceiptImportCompleted(
 		estimatedExpiryCount: summary.estimatedDates,
 		dominantLocation: dominantStorageLocation(locationCounts),
 		...(linesWithPrice > 0 ? { linesWithPrice } : {}),
-		...(importSource ? { importSource } : {})
+		...(importSource ? { importSource } : {}),
+		...(brainStats ? { brainStats } : {})
 	};
 	sessionStorage.setItem(RECEIPT_IMPORT_JUST_COMPLETED_KEY, JSON.stringify(payload));
 	sessionStorage.setItem(RECEIPT_IMPORT_TOAST_PENDING_KEY, '1');
@@ -220,7 +249,8 @@ export function readReceiptImportCompleted(): ReceiptImportSessionFlag | null {
 			parsed.importSource === 'scan_hub' ||
 			parsed.importSource === 'onboarding'
 				? { importSource: parsed.importSource }
-				: {})
+				: {}),
+			...(parsed.brainStats ? { brainStats: parsed.brainStats } : {})
 		};
 	} catch {
 		return null;

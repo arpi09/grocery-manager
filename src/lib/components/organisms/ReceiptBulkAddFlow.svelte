@@ -21,6 +21,14 @@
 	import type { ReceiptLine, ReceiptLocationPrediction, ReceiptParseResult, ReceiptShelfLifePrediction } from '$lib/domain/receipt-line';
 	import type { ReceiptImportSource } from '$lib/domain/receipt-import-source';
 	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
+	import AiLoadingSkeleton from '$lib/components/molecules/AiLoadingSkeleton.svelte';
+	import BrainAiUsageFooter from '$lib/components/molecules/BrainAiUsageFooter.svelte';
+	import ReceiptParseStepIndicator from '$lib/components/molecules/ReceiptParseStepIndicator.svelte';
+	import ReceiptQualityMeter from '$lib/components/molecules/ReceiptQualityMeter.svelte';
+	import { buildReceiptImportQualityReport } from '$lib/domain/receipt-quality-report';
+	import {
+		aggregateBrainAiUsageFromPredictions
+	} from '$lib/domain/brain-ai-usage';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
@@ -28,6 +36,7 @@
 	import { browser } from '$app/environment';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import {
+		aggregateReceiptBrainStats,
 		aggregateReceiptImportSummary,
 		aggregateReceiptLocationCounts,
 		markReceiptImportCompleted
@@ -78,6 +87,7 @@
 
 	let parsing = $state(false);
 	let parseError = $state<string | null>(null);
+	let aiDegradedMode = $state(false);
 	let lines = $state<ReceiptLine[]>([]);
 	let selected = $state<Record<number, boolean>>({});
 	let lineLocations = $state<Record<number, StorageLocation>>({});
@@ -97,6 +107,8 @@
 	let expandedGrouped = $state<Set<number>>(new Set());
 	let expiryClearedByUser = $state<Set<number>>(new Set());
 	let quickConfirmUsed = $state(false);
+	let qualityReport = $state<import('$lib/domain/receipt-quality-report').ReceiptImportQualityReport | null>(null);
+	let parseStep = $state<'extract' | 'classify' | 'predict'>('extract');
 
 	function receiptFileErrorMessage(error: ReceiptFileError): string {
 		if (error.code === 'too_large') {
@@ -162,6 +174,8 @@
 		mergedAwayCount = data.mergedAwayCount ?? 0;
 		shelfLifePredictions = data.shelfLifePredictions ?? [];
 		locationPredictions = data.locationPredictions ?? [];
+		qualityReport = buildReceiptImportQualityReport(data.lines, data.shelfLifePredictions);
+		aiDegradedMode = Boolean((data as { aiDegradedMode?: boolean }).aiDegradedMode);
 		expiryClearedByUser = new Set();
 		expandedGrouped = new Set();
 		lineExpiresOn = Object.fromEntries(
@@ -186,6 +200,7 @@
 	async function handleReceiptFile(file: File) {
 		parsing = true;
 		parseError = null;
+		parseStep = 'extract';
 
 		let uploadFile: File;
 		try {
@@ -208,7 +223,9 @@
 			const formData = new FormData();
 			formData.append('image', uploadFile);
 
+			parseStep = 'classify';
 			const response = await fetch('/api/receipt/parse', { method: 'POST', body: formData });
+			parseStep = 'predict';
 			const data = await readReceiptParseResponse(response);
 
 			if (!response.ok || !data.lines?.length) {
@@ -281,6 +298,10 @@
 
 	const selectedCount = $derived(lines.filter((_, i) => selected[i]).length);
 	const hasLocationPredictions = $derived(locationPredictions.some((prediction) => prediction != null));
+	const receiptAiUsage = $derived(
+		aggregateBrainAiUsageFromPredictions(shelfLifePredictions, locationPredictions)
+	);
+	const hasUncertainEstimates = $derived(receiptAiUsage.lowConfidence > 0);
 
 	function countSelectedLinesWithPrice(): number {
 		return lines.filter((line, index) => selected[index] && line.unitPrice?.trim()).length;
@@ -569,10 +590,8 @@
 		<DigitalReceiptGuide prominent={prominentGuide} />
 
 		{#if parsing}
-			<FeedbackBanner
-				tone="info"
-				message={t('receipt.readingStatus')}
-			/>
+			<ReceiptParseStepIndicator step={parseStep} />
+			<AiLoadingSkeleton messageKey={parseStep === 'predict' ? 'ai.loadingReceiptBbf' : 'ai.loadingReceiptExtract'} />
 		{/if}
 
 		<p class="hint">{t('receipt.formats.hint')}</p>
@@ -619,8 +638,17 @@
 		{#if shelfLifeEstimatesInReceipt}
 			<p class="hint">{t('receiptBulk.estimatesHint')}</p>
 		{/if}
+		{#if aiDegradedMode && shelfLifeEstimatesInReceipt}
+			<FeedbackBanner tone="info" message={t('receiptBulk.aiDegradedBanner')} />
+		{/if}
 		{#if hasLocationPredictions}
 			<p class="hint">{t('receiptBulk.locationSuggestionsHint')}</p>
+		{/if}
+		{#if qualityReport && shelfLifeEstimatesInReceipt}
+			<ReceiptQualityMeter report={qualityReport} />
+		{/if}
+		{#if hasUncertainEstimates}
+			<p class="hint uncertain-hint">{t('brain.uncertainWarning')}</p>
 		{/if}
 
 		<div class="bulk-location">
@@ -672,7 +700,8 @@
 								buildReceiptImportSummary(),
 								aggregateReceiptLocationCounts(buildReceiptLineContexts()),
 								countSelectedLinesWithPrice(),
-								importSource
+								importSource,
+								aggregateReceiptBrainStats(buildReceiptLineContexts(), qualityReport ?? undefined)
 							);
 							recordReceiptActivation(page.data.user?.id);
 						},
@@ -716,6 +745,7 @@
 										<EstimatedBadge
 											source={locationPredictions[index]!.source}
 											label={t('receiptBulk.suggestedLocation')}
+											explanation={locationPredictions[index]!.explanation}
 										/>
 									{/if}
 									{#if locationOverrides.has(index)}
@@ -788,7 +818,7 @@
 							</label>
 						{/if}
 						{#if shelfLifeEstimatesInReceipt && selected[index]}
-							<div class="line-expiry">
+							<div class="line-expiry" style="animation-delay: {(index % 5) * 60}ms">
 								<label class="line-expiry-label" for="expiresOn-{index}">
 									{t('scanFlow.expiresOptional')}
 									{#if shelfLifePredictions[index] && !expiryClearedByUser.has(index)}
@@ -796,6 +826,7 @@
 											source={shelfLifePredictions[index]!.expiresOnSource}
 											explanation={shelfLifePredictions[index]!.explanation}
 											lowConfidence={isLowConfidence(shelfLifePredictions[index])}
+											lineConfidence={shelfLifePredictions[index]!.confidence ?? null}
 											showSettingsLink
 										/>
 									{/if}
@@ -872,6 +903,8 @@
 					</li>
 				{/each}
 			</ul>
+
+			<BrainAiUsageFooter counts={receiptAiUsage} />
 
 			<div class="actions">
 				<Button
@@ -1113,6 +1146,24 @@
 		flex-direction: column;
 		gap: var(--space-xs);
 		margin-top: var(--space-xs);
+		animation: line-expiry-in 0.35s ease both;
+	}
+
+	@keyframes line-expiry-in {
+		from {
+			opacity: 0;
+			transform: translateY(4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.line-expiry {
+			animation: none;
+		}
 	}
 
 	.line-expiry-label {

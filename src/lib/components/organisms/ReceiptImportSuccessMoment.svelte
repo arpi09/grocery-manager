@@ -141,6 +141,12 @@
 			{#if session.estimatedExpiryCount > 0}
 				<p class="expiry-line">{t('receiptImport.success.estimatedExpiry', { count: session.estimatedExpiryCount })}</p>
 			{/if}
+			{#if session.brainStats && (session.brainStats.estimatedDates > 0 || session.brainStats.locationSuggestions > 0)}
+				<p class="expiry-line">{t('receiptImport.success.brainStats', {
+					estimated: session.brainStats.estimatedDates,
+					location: session.brainStats.locationSuggestions
+				})}</p>
+			{/if}
 			{#if (session.linesWithPrice ?? 0) > 0}
 				<p class="expiry-line">{t('receiptImport.toastPricesSaved')}</p>
 			{/if}

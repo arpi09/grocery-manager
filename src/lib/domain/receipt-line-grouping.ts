@@ -16,6 +16,10 @@ export interface GroupReceiptLinesResult {
 }
 
 function receiptLineGroupKey(line: ReceiptLine): string {
+	const groupKey = line.mergeGroupKey?.trim();
+	if (groupKey) {
+		return `${line.location}:${groupKey.toLowerCase()}`;
+	}
 	const normalized = normalizeReceiptProductName(line.name);
 	return `${line.location}:${normalized}`;
 }

@@ -13,6 +13,7 @@ import {
 	deletePushSubscriptionById,
 	type IPushSubscriptionRepository
 } from '$lib/infrastructure/repositories/push-subscription.repository';
+import { buildExpiryPushUserPrompt } from '$lib/server/expiry-push-prompt';
 import { translate } from '$lib/i18n/messages';
 import type {
 	ExpiryReminderUser,
@@ -258,6 +259,16 @@ export class ExpiryReminderService {
 		const pushUrl = firstEntry
 			? `${this.appOrigin.getOrigin() || ''}/item/${firstEntry.item.id}/edit?from=push-moving-soon`
 			: `${this.appOrigin.getOrigin() || ''}${buildEatFirstWeekUrl('push')}`;
+		const miniPrompt = buildExpiryPushUserPrompt(
+			sections.flatMap((section) =>
+				section.items.map((item) => ({
+					name: item.name,
+					daysUntil: item.expiresOn ? daysUntilExpiry(item.expiresOn) : days
+				}))
+			),
+			locale
+		);
+		void miniPrompt;
 		const pushBody = firstEntry
 			? isMovingSoon
 				? translate(locale, 'pushNotifications.movingSoonBody', {

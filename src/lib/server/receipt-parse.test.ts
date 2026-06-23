@@ -194,6 +194,8 @@ describe('normalizeReceiptAiPayload', () => {
 					brand: null,
 					packageSize: null,
 					categoryHint: null,
+					printedExpiresOn: null,
+					mergeGroupKey: null,
 					confidence: null
 				}
 			]

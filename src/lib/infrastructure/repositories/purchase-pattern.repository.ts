@@ -1,4 +1,4 @@
-import { and, eq, gt, gte } from 'drizzle-orm';
+import { and, desc, eq, gt, gte, sql } from 'drizzle-orm';
 import type { StorageLocation } from '$lib/domain/location';
 import {
 	normalizeReceiptProductName,
@@ -24,6 +24,17 @@ import { generateId } from '$lib/infrastructure/auth/id';
 export interface IPurchasePatternRepository {
 	insertLines(lines: RecordReceiptPurchaseLineInput[]): Promise<void>;
 	listRecentLines(householdId: string, since: Date): Promise<ReceiptPurchaseLineRecord[]>;
+	listTopPurchaseAliases(
+		householdId: string,
+		limit?: number
+	): Promise<
+		Array<{
+			normalizedKey: string;
+			displayName: string;
+			location: StorageLocation;
+			purchaseCount: number;
+		}>
+	>;
 	listDismissedKeys(householdId: string): Promise<Set<string>>;
 	dismissPattern(householdId: string, normalizedKey: string): Promise<void>;
 	restoreDismissal(householdId: string, normalizedKey: string): Promise<boolean>;
@@ -131,6 +142,28 @@ export class DrizzlePurchasePatternRepository implements IPurchasePatternReposit
 			);
 
 		return rows.map(mapLine);
+	}
+
+	async listTopPurchaseAliases(householdId: string, limit = 20) {
+		const rows = await this.database
+			.select({
+				normalizedKey: receiptPurchaseLineTable.normalizedKey,
+				displayName: sql<string>`max(${receiptPurchaseLineTable.productName})`.as('display_name'),
+				location: receiptPurchaseLineTable.location,
+				purchaseCount: sql<number>`count(*)`.mapWith(Number).as('purchase_count')
+			})
+			.from(receiptPurchaseLineTable)
+			.where(eq(receiptPurchaseLineTable.householdId, householdId))
+			.groupBy(receiptPurchaseLineTable.normalizedKey, receiptPurchaseLineTable.location)
+			.orderBy(desc(sql`count(*)`))
+			.limit(limit);
+
+		return rows.map((row) => ({
+			normalizedKey: row.normalizedKey,
+			displayName: row.displayName,
+			location: row.location as StorageLocation,
+			purchaseCount: row.purchaseCount
+		}));
 	}
 
 	async listDismissedKeys(householdId: string): Promise<Set<string>> {
