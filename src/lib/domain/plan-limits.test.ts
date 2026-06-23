@@ -18,7 +18,8 @@ describe('plan-limits', () => {
 			maxHouseholdMembers: 1,
 			aiScansPerMonth: 75,
 			receiptPdfParsesPerMonth: 0,
-			smartFillPerWeek: 0
+			smartFillPerWeek: 0,
+			weeklyPlanPerWeek: 0
 		});
 		expect(snapshot.blockedKeys).toEqual(['maxInventoryItems', 'aiScansPerMonth']);
 	});

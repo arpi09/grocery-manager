@@ -2,9 +2,9 @@ import { json } from '@sveltejs/kit';
 import { canEditInventory } from '$lib/domain/household';
 import { requireUser } from '$lib/server/api-guards';
 import {
-	missingIngredientToListItem,
 	parseMissingIngredientsPayload
 } from '$lib/server/recipe-prompt';
+import { addRecipeMissingToShoppingWithDedupe } from '$lib/server/recipe-to-shopping';
 import { translate } from '$lib/i18n/messages';
 import type { RequestHandler } from './$types';
 
@@ -30,14 +30,29 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: translate(locale, 'recipe.noMissingToAdd') }, { status: 400 });
 	}
 
-	const result = await locals.shoppingListService.addSuggestedItems(
+	const autopilotSkip =
+		body && typeof body === 'object' && (body as { autopilotSkip?: unknown }).autopilotSkip === false
+			? false
+			: true;
+
+	const result = await addRecipeMissingToShoppingWithDedupe({
 		householdId,
-		locals.householdRole!,
-		ingredients.map(missingIngredientToListItem)
-	);
+		role: locals.householdRole,
+		ingredients,
+		inventoryService: locals.inventoryService,
+		shoppingListService: locals.shoppingListService,
+		purchasePatternService: locals.purchasePatternService,
+		autopilotSkip
+	});
 
 	return json({
 		added: result.added,
-		skipped: result.skipped
+		skipped: result.skipped,
+		dedupe: result.dedupe.map((entry) => ({
+			name: entry.name,
+			normalizedKey: entry.normalizedKey,
+			warnings: entry.warnings,
+			skipped: entry.skipped
+		}))
 	});
 };

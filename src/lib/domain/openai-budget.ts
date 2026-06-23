@@ -5,7 +5,8 @@ export const OPENAI_ESTIMATED_USD_PER_KIND: Record<AiUsageKind, number> = {
 	ai_scan: 0.015,
 	receipt_pdf: 0.02,
 	smart_fill: 0.008,
-	admin_insights: 0.01
+	admin_insights: 0.01,
+	weekly_plan: 0.025
 };
 
 export const OPENAI_BUDGET_WARN_RATIO = 0.8;

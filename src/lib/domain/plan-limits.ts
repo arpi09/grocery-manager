@@ -13,7 +13,8 @@ export const PLAN_LIMIT_KEYS = [
 	'maxHouseholdMembers',
 	'aiScansPerMonth',
 	'receiptPdfParsesPerMonth',
-	'smartFillPerWeek'
+	'smartFillPerWeek',
+	'weeklyPlanPerWeek'
 ] as const;
 
 export type PlanLimitKey = (typeof PLAN_LIMIT_KEYS)[number];
@@ -24,6 +25,7 @@ export interface PlanLimitUsage {
 	aiScansPerMonth: number;
 	receiptPdfParsesPerMonth: number;
 	smartFillPerWeek: number;
+	weeklyPlanPerWeek: number;
 }
 
 export interface PlanLimitStatus {
@@ -72,7 +74,8 @@ export function planLimitKeyForAiUsageKind(kind: AiUsageKind): PlanLimitKey {
 		ai_scan: 'aiScansPerMonth',
 		receipt_pdf: 'receiptPdfParsesPerMonth',
 		smart_fill: 'smartFillPerWeek',
-		admin_insights: 'smartFillPerWeek'
+		admin_insights: 'smartFillPerWeek',
+		weekly_plan: 'weeklyPlanPerWeek'
 	};
 	return map[kind];
 }
@@ -82,7 +85,8 @@ export function aiUsageKindForPlanLimit(key: PlanLimitKey): AiUsageKind | null {
 	const map: Partial<Record<PlanLimitKey, AiUsageKind>> = {
 		aiScansPerMonth: 'ai_scan',
 		receiptPdfParsesPerMonth: 'receipt_pdf',
-		smartFillPerWeek: 'smart_fill'
+		smartFillPerWeek: 'smart_fill',
+		weeklyPlanPerWeek: 'weekly_plan'
 	};
 	return map[key] ?? null;
 }
@@ -95,7 +99,8 @@ export function planLimitErrorKey(key: PlanLimitKey): MessageKey {
 			ai_scan: 'errors.api.aiRateLimitAiScan',
 			receipt_pdf: 'errors.api.aiRateLimitReceiptPdf',
 			smart_fill: 'errors.api.aiRateLimitSmartFill',
-			admin_insights: 'errors.api.openAiRateLimit'
+			admin_insights: 'errors.api.openAiRateLimit',
+			weekly_plan: 'errors.api.aiRateLimitWeeklyPlan'
 		};
 		return map[aiKind];
 	}
@@ -103,7 +108,13 @@ export function planLimitErrorKey(key: PlanLimitKey): MessageKey {
 		maxInventoryItems: 'errors.plan.inventoryLimit',
 		maxHouseholdMembers: 'errors.plan.membersLimit'
 	} as const satisfies Record<
-		Exclude<PlanLimitKey, 'aiScansPerMonth' | 'receiptPdfParsesPerMonth' | 'smartFillPerWeek'>,
+		Exclude<
+			PlanLimitKey,
+			| 'aiScansPerMonth'
+			| 'receiptPdfParsesPerMonth'
+			| 'smartFillPerWeek'
+			| 'weeklyPlanPerWeek'
+		>,
 		MessageKey
 	>;
 	return map[key as keyof typeof map];
@@ -116,7 +127,8 @@ export function planLimitUsageLabelKey(key: PlanLimitKey): MessageKey {
 		maxHouseholdMembers: 'settings.plan.usage.members',
 		aiScansPerMonth: 'settings.plan.usage.aiScans',
 		receiptPdfParsesPerMonth: 'settings.plan.usage.receipts',
-		smartFillPerWeek: 'settings.plan.usage.smartFill'
+		smartFillPerWeek: 'settings.plan.usage.smartFill',
+		weeklyPlanPerWeek: 'settings.plan.usage.weeklyPlan'
 	} as const satisfies Record<PlanLimitKey, MessageKey>;
 	return map[key];
 }
@@ -128,7 +140,8 @@ export function planLimitBannerDetailKey(key: PlanLimitKey): MessageKey {
 		maxHouseholdMembers: 'settings.plan.limitDetail.members',
 		aiScansPerMonth: 'settings.plan.limitDetail.aiScans',
 		receiptPdfParsesPerMonth: 'settings.plan.limitDetail.receipts',
-		smartFillPerWeek: 'settings.plan.limitDetail.smartFill'
+		smartFillPerWeek: 'settings.plan.limitDetail.smartFill',
+		weeklyPlanPerWeek: 'settings.plan.limitDetail.weeklyPlan'
 	} as const satisfies Record<PlanLimitKey, MessageKey>;
 	return map[key];
 }

@@ -13,6 +13,7 @@ describe('ai-usage', () => {
 		expect(aiUsagePeriodForKind('ai_scan')).toBe('month');
 		expect(aiUsagePeriodForKind('receipt_pdf')).toBe('month');
 		expect(aiUsagePeriodForKind('smart_fill')).toBe('week');
+		expect(aiUsagePeriodForKind('weekly_plan')).toBe('week');
 	});
 
 	it('builds stable month keys in UTC', () => {

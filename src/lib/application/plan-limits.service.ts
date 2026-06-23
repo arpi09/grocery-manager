@@ -48,8 +48,8 @@ export class PlanLimitsService {
 		now?: Date;
 	}): Promise<PlanLimitUsage> {
 		const nonAi = await this.repository.getNonAiUsage(input.householdId);
-		const [aiScan, receiptPdf, smartFill] = await Promise.all(
-			(['ai_scan', 'receipt_pdf', 'smart_fill'] as const).map((kind) =>
+		const [aiScan, receiptPdf, smartFill, weeklyPlan] = await Promise.all(
+			(['ai_scan', 'receipt_pdf', 'smart_fill', 'weekly_plan'] as const).map((kind) =>
 				this.aiRateLimitService.getUsageSnapshot({
 					householdId: input.householdId,
 					userId: input.userId,
@@ -64,7 +64,8 @@ export class PlanLimitsService {
 			...nonAi,
 			aiScansPerMonth: aiScan.used,
 			receiptPdfParsesPerMonth: receiptPdf.used,
-			smartFillPerWeek: smartFill.used
+			smartFillPerWeek: smartFill.used,
+			weeklyPlanPerWeek: weeklyPlan.used
 		};
 	}
 
