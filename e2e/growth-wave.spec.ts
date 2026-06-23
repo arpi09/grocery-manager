@@ -279,6 +279,9 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		expect(sharePayload.ok).toBe(true);
 		expect(sharePayload.url).toBeTruthy();
 		const listaPath = new URL(sharePayload.url!).pathname;
+		// Anonymous visitor must see public signup CTA (logged-in users redirect to /inkop).
+		await page.context().clearCookies();
+		await prepareE2eBrowserState(page);
 		await page.goto(listaPath, { waitUntil: 'commit' });
 		await dismissCookieConsentIfOpen(page);
 		await expect(page.getByTestId('lista-signup-cta-above-fold')).toBeVisible({ timeout: 30_000 });
