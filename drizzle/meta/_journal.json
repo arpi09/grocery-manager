@@ -1,489 +1,496 @@
 {
-	"version": "7",
-	"dialect": "postgresql",
-	"entries": [
-		{
-			"idx": 0,
-			"version": "7",
-			"when": 1748352000000,
-			"tag": "0000_init",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "7",
-			"when": 1748438400000,
-			"tag": "0001_user_role",
-			"breakpoints": true
-		},
-		{
-			"idx": 2,
-			"version": "7",
-			"when": 1748524800000,
-			"tag": "0002_user_last_seen",
-			"breakpoints": true
-		},
-		{
-			"idx": 3,
-			"version": "7",
-			"when": 1748611200000,
-			"tag": "0003_household",
-			"breakpoints": true
-		},
-		{
-			"idx": 4,
-			"version": "7",
-			"when": 1748697600000,
-			"tag": "0004_user_profile",
-			"breakpoints": true
-		},
-		{
-			"idx": 5,
-			"version": "7",
-			"when": 1748784000000,
-			"tag": "0005_app_error",
-			"breakpoints": true
-		},
-		{
-			"idx": 6,
-			"version": "7",
-			"when": 1748870400000,
-			"tag": "0006_user_theme_preference",
-			"breakpoints": true
-		},
-		{
-			"idx": 7,
-			"version": "7",
-			"when": 1748956800000,
-			"tag": "0007_household_invites_roles",
-			"breakpoints": true
-		},
-		{
-			"idx": 8,
-			"version": "7",
-			"when": 1749043200000,
-			"tag": "0008_shopping_list",
-			"breakpoints": true
-		},
-		{
-			"idx": 9,
-			"version": "7",
-			"when": 1749129600000,
-			"tag": "0010_active_household",
-			"breakpoints": true
-		},
-		{
-			"idx": 10,
-			"version": "7",
-			"when": 1749216000000,
-			"tag": "0011_consumption_event",
-			"breakpoints": true
-		},
-		{
-			"idx": 11,
-			"version": "7",
-			"when": 1749302400000,
-			"tag": "0012_product_event",
-			"breakpoints": true
-		},
-		{
-			"idx": 12,
-			"version": "7",
-			"when": 1749388800000,
-			"tag": "0013_expiry_reminders",
-			"breakpoints": true
-		},
-		{
-			"idx": 13,
-			"version": "7",
-			"when": 1749475200000,
-			"tag": "0014_product_feedback",
-			"breakpoints": true
-		},
-		{
-			"idx": 14,
-			"version": "7",
-			"when": 1749561600000,
-			"tag": "0015_ai_usage",
-			"breakpoints": true
-		},
-		{
-			"idx": 15,
-			"version": "7",
-			"when": 1749648000000,
-			"tag": "0016_waitlist_email",
-			"breakpoints": true
-		},
-		{
-			"idx": 16,
-			"version": "7",
-			"when": 1749734400000,
-			"tag": "0017_push_subscriptions",
-			"breakpoints": true
-		},
-		{
-			"idx": 17,
-			"version": "7",
-			"when": 1749820800000,
-			"tag": "0018_user_signup_utm",
-			"breakpoints": true
-		},
-		{
-			"idx": 18,
-			"version": "7",
-			"when": 1749907200000,
-			"tag": "0019_app_settings",
-			"breakpoints": true
-		},
-		{
-			"idx": 19,
-			"version": "7",
-			"when": 1749993600000,
-			"tag": "0020_product_event_anonymous",
-			"breakpoints": true
-		},
-		{
-			"idx": 20,
-			"version": "7",
-			"when": 1750080000000,
-			"tag": "0021_shopping_push",
-			"breakpoints": true
-		},
-		{
-			"idx": 21,
-			"version": "7",
-			"when": 1750166400000,
-			"tag": "0022_user_is_demo",
-			"breakpoints": true
-		},
-		{
-			"idx": 22,
-			"version": "7",
-			"when": 1750252800000,
-			"tag": "0023_auth_password_reset_oauth",
-			"breakpoints": true
-		},
-		{
-			"idx": 23,
-			"version": "7",
-			"when": 1750339200000,
-			"tag": "0024_auto_expired_grace",
-			"breakpoints": true
-		},
-		{
-			"idx": 24,
-			"version": "7",
-			"when": 1750425600000,
-			"tag": "0025_receipt_purchase_pattern",
-			"breakpoints": true
-		},
-		{
-			"idx": 25,
-			"version": "7",
-			"when": 1750512000000,
-			"tag": "0026_household_stripe",
-			"breakpoints": true
-		},
-		{
-			"idx": 26,
-			"version": "7",
-			"when": 1750598400000,
-			"tag": "0027_email_verification",
-			"breakpoints": true
-		},
-		{
-			"idx": 27,
-			"version": "7",
-			"when": 1750684800000,
-			"tag": "0028_backfill_email_verified_at",
-			"breakpoints": true
-		},
-		{
-			"idx": 28,
-			"version": "7",
-			"when": 1750771200000,
-			"tag": "0029_pmf_survey_response",
-			"breakpoints": true
-		},
-		{
-			"idx": 29,
-			"version": "7",
-			"when": 1750857600000,
-			"tag": "0030_expiring_share_link",
-			"breakpoints": true
-		},
-		{
-			"idx": 30,
-			"version": "7",
-			"when": 1750944000000,
-			"tag": "0031_household_receipt_forward_token",
-			"breakpoints": true
-		},
-		{
-			"idx": 31,
-			"version": "7",
-			"when": 1751030400000,
-			"tag": "0032_analytics_behavior",
-			"breakpoints": true
-		},
-		{
-			"idx": 32,
-			"version": "7",
-			"when": 1751116800000,
-			"tag": "0033_shopping_to_pantry_mode",
-			"breakpoints": true
-		},
-		{
-			"idx": 33,
-			"version": "7",
-			"when": 1751203200000,
-			"tag": "0034_inventory_last_confirmed_at",
-			"breakpoints": true
-		},
-		{
-			"idx": 34,
-			"version": "7",
-			"when": 1751289600000,
-			"tag": "0035_staleness_reminders",
-			"breakpoints": true
-		},
-		{
-			"idx": 35,
-			"version": "7",
-			"when": 1751376000000,
-			"tag": "0036_social_post",
-			"breakpoints": true
-		},
-		{
-			"idx": 36,
-			"version": "7",
-			"when": 1751462400000,
-			"tag": "0037_guide_article",
-			"breakpoints": true
-		},
-		{
-			"idx": 37,
-			"version": "7",
-			"when": 1751548800000,
-			"tag": "0038_nearby_expiring_share",
-			"breakpoints": true
-		},
-		{
-			"idx": 38,
-			"version": "7",
-			"when": 1751635200000,
-			"tag": "0039_expiring_share_report_block",
-			"breakpoints": true
-		},
-		{
-			"idx": 39,
-			"version": "7",
-			"when": 1751721600000,
-			"tag": "0040_nearby_push",
-			"breakpoints": true
-		},
-		{
-			"idx": 40,
-			"version": "7",
-			"when": 1751808000000,
-			"tag": "0041_receipt_import_funnel_events",
-			"breakpoints": true
-		},
-		{
-			"idx": 41,
-			"version": "7",
-			"when": 1751894400000,
-			"tag": "0042_acquisition_wedge_events",
-			"breakpoints": true
-		},
-		{
-			"idx": 42,
-			"version": "7",
-			"when": 1751980800000,
-			"tag": "0043_shopping_list_share_link",
-			"breakpoints": true
-		},
-		{
-			"idx": 43,
-			"version": "7",
-			"when": 1752067200000,
-			"tag": "0044_receipt_price_memory",
-			"breakpoints": true
-		},
-		{
-			"idx": 44,
-			"version": "7",
-			"when": 1752153600000,
-			"tag": "0045_inventory_intelligence_events",
-			"breakpoints": true
-		},
-		{
-			"idx": 45,
-			"version": "7",
-			"when": 1752240000000,
-			"tag": "0046_household_os_events",
-			"breakpoints": true
-		},
-		{
-			"idx": 46,
-			"version": "7",
-			"when": 1752326400000,
-			"tag": "0047_learning_engine_v1",
-			"breakpoints": true
-		},
-		{
-			"idx": 47,
-			"version": "7",
-			"when": 1752412800000,
-			"tag": "0048_household_location_rule",
-			"breakpoints": true
-		},
-		{
-			"idx": 48,
-			"version": "7",
-			"when": 1752508800000,
-			"tag": "0049_receipt_import_success_events",
-			"breakpoints": true
-		},
-		{
-			"idx": 49,
-			"version": "7",
-			"when": 1752595200000,
-			"tag": "0050_brain_feedback_v1",
-			"breakpoints": true
-		},
-		{
-			"idx": 50,
-			"version": "7",
-			"when": 1752681600000,
-			"tag": "0051_price_memory_phase1",
-			"breakpoints": true
-		},
-		{
-			"idx": 51,
-			"version": "7",
-			"when": 1752768000000,
-			"tag": "0052_home_redesign_telemetry",
-			"breakpoints": true
-		},
-		{
-			"idx": 52,
-			"version": "7",
-			"when": 1752854400000,
-			"tag": "0053_memory_rule_events",
-			"breakpoints": true
-		},
-		{
-			"idx": 53,
-			"version": "7",
-			"when": 1752940800000,
-			"tag": "0054_shopping_ux_v2_telemetry",
-			"breakpoints": true
-		},
-		{
-			"idx": 54,
-			"version": "7",
-			"when": 1753027200000,
-			"tag": "0055_pantry_ux_v2_telemetry",
-			"breakpoints": true
-		},
-		{
-			"idx": 55,
-			"version": "7",
-			"when": 1753113600000,
-			"tag": "0056_home_ux_v2_telemetry",
-			"breakpoints": true
-		},
-		{
-			"idx": 56,
-			"version": "7",
-			"when": 1753200000000,
-			"tag": "0057_product_catalog",
-			"breakpoints": true
-		},
-		{
-			"idx": 57,
-			"version": "7",
-			"when": 1753286400000,
-			"tag": "0058_moment_cta_telemetry",
-			"breakpoints": true
-		},
-		{
-			"idx": 58,
-			"version": "7",
-			"when": 1753372800000,
-			"tag": "0059_store_recommendation_telemetry",
-			"breakpoints": true
-		},
-		{
-			"idx": 59,
-			"version": "7",
-			"when": 1753459200000,
-			"tag": "0060_acquisition_loops_telemetry",
-			"breakpoints": true
-		},
-		{
-			"idx": 60,
-			"version": "7",
-			"when": 1753545600000,
-			"tag": "0061_price_intelligence_phase1",
-			"breakpoints": true
-		},
-		{
-			"idx": 61,
-			"version": "7",
-			"when": 1753632000000,
-			"tag": "0063_ata_page_telemetry",
-			"breakpoints": true
-		},
-		{
-			"idx": 62,
-			"version": "7",
-			"when": 1753718400000,
-			"tag": "0064_market_v01",
-			"breakpoints": true
-		},
-		{
-			"idx": 63,
-			"version": "7",
-			"when": 1753804800000,
-			"tag": "0065_market_live",
-			"breakpoints": true
-		},
-		{
-			"idx": 64,
-			"version": "7",
-			"when": 1753891200000,
-			"tag": "0066_market_chat_report",
-			"breakpoints": true
-		},
-		{
-			"idx": 65,
-			"version": "7",
-			"when": 1753977600000,
-			"tag": "0067_market_v02_exchange",
-			"breakpoints": true
-		},
-		{
-			"idx": 66,
-			"version": "7",
-			"when": 1754064000000,
-			"tag": "0068_market_v03_trust",
-			"breakpoints": true
-		},
-		{
-			"idx": 67,
-			"version": "7",
-			"when": 1754150400000,
-			"tag": "0069_market_v04_pricing",
-			"breakpoints": true
-		},
-		{
-			"idx": 68,
-			"version": "7",
-			"when": 1754236800000,
-			"tag": "0070_brain_v2",
-			"breakpoints": true
-		}
-	]
+    "version":  "7",
+    "dialect":  "postgresql",
+    "entries":  [
+                    {
+                        "idx":  0,
+                        "version":  "7",
+                        "when":  1748352000000,
+                        "tag":  "0000_init",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  1,
+                        "version":  "7",
+                        "when":  1748438400000,
+                        "tag":  "0001_user_role",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  2,
+                        "version":  "7",
+                        "when":  1748524800000,
+                        "tag":  "0002_user_last_seen",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  3,
+                        "version":  "7",
+                        "when":  1748611200000,
+                        "tag":  "0003_household",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  4,
+                        "version":  "7",
+                        "when":  1748697600000,
+                        "tag":  "0004_user_profile",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  5,
+                        "version":  "7",
+                        "when":  1748784000000,
+                        "tag":  "0005_app_error",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  6,
+                        "version":  "7",
+                        "when":  1748870400000,
+                        "tag":  "0006_user_theme_preference",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  7,
+                        "version":  "7",
+                        "when":  1748956800000,
+                        "tag":  "0007_household_invites_roles",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  8,
+                        "version":  "7",
+                        "when":  1749043200000,
+                        "tag":  "0008_shopping_list",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  9,
+                        "version":  "7",
+                        "when":  1749129600000,
+                        "tag":  "0010_active_household",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  10,
+                        "version":  "7",
+                        "when":  1749216000000,
+                        "tag":  "0011_consumption_event",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  11,
+                        "version":  "7",
+                        "when":  1749302400000,
+                        "tag":  "0012_product_event",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  12,
+                        "version":  "7",
+                        "when":  1749388800000,
+                        "tag":  "0013_expiry_reminders",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  13,
+                        "version":  "7",
+                        "when":  1749475200000,
+                        "tag":  "0014_product_feedback",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  14,
+                        "version":  "7",
+                        "when":  1749561600000,
+                        "tag":  "0015_ai_usage",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  15,
+                        "version":  "7",
+                        "when":  1749648000000,
+                        "tag":  "0016_waitlist_email",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  16,
+                        "version":  "7",
+                        "when":  1749734400000,
+                        "tag":  "0017_push_subscriptions",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  17,
+                        "version":  "7",
+                        "when":  1749820800000,
+                        "tag":  "0018_user_signup_utm",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  18,
+                        "version":  "7",
+                        "when":  1749907200000,
+                        "tag":  "0019_app_settings",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  19,
+                        "version":  "7",
+                        "when":  1749993600000,
+                        "tag":  "0020_product_event_anonymous",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  20,
+                        "version":  "7",
+                        "when":  1750080000000,
+                        "tag":  "0021_shopping_push",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  21,
+                        "version":  "7",
+                        "when":  1750166400000,
+                        "tag":  "0022_user_is_demo",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  22,
+                        "version":  "7",
+                        "when":  1750252800000,
+                        "tag":  "0023_auth_password_reset_oauth",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  23,
+                        "version":  "7",
+                        "when":  1750339200000,
+                        "tag":  "0024_auto_expired_grace",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  24,
+                        "version":  "7",
+                        "when":  1750425600000,
+                        "tag":  "0025_receipt_purchase_pattern",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  25,
+                        "version":  "7",
+                        "when":  1750512000000,
+                        "tag":  "0026_household_stripe",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  26,
+                        "version":  "7",
+                        "when":  1750598400000,
+                        "tag":  "0027_email_verification",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  27,
+                        "version":  "7",
+                        "when":  1750684800000,
+                        "tag":  "0028_backfill_email_verified_at",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  28,
+                        "version":  "7",
+                        "when":  1750771200000,
+                        "tag":  "0029_pmf_survey_response",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  29,
+                        "version":  "7",
+                        "when":  1750857600000,
+                        "tag":  "0030_expiring_share_link",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  30,
+                        "version":  "7",
+                        "when":  1750944000000,
+                        "tag":  "0031_household_receipt_forward_token",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  31,
+                        "version":  "7",
+                        "when":  1751030400000,
+                        "tag":  "0032_analytics_behavior",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  32,
+                        "version":  "7",
+                        "when":  1751116800000,
+                        "tag":  "0033_shopping_to_pantry_mode",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  33,
+                        "version":  "7",
+                        "when":  1751203200000,
+                        "tag":  "0034_inventory_last_confirmed_at",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  34,
+                        "version":  "7",
+                        "when":  1751289600000,
+                        "tag":  "0035_staleness_reminders",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  35,
+                        "version":  "7",
+                        "when":  1751376000000,
+                        "tag":  "0036_social_post",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  36,
+                        "version":  "7",
+                        "when":  1751462400000,
+                        "tag":  "0037_guide_article",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  37,
+                        "version":  "7",
+                        "when":  1751548800000,
+                        "tag":  "0038_nearby_expiring_share",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  38,
+                        "version":  "7",
+                        "when":  1751635200000,
+                        "tag":  "0039_expiring_share_report_block",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  39,
+                        "version":  "7",
+                        "when":  1751721600000,
+                        "tag":  "0040_nearby_push",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  40,
+                        "version":  "7",
+                        "when":  1751808000000,
+                        "tag":  "0041_receipt_import_funnel_events",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  41,
+                        "version":  "7",
+                        "when":  1751894400000,
+                        "tag":  "0042_acquisition_wedge_events",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  42,
+                        "version":  "7",
+                        "when":  1751980800000,
+                        "tag":  "0043_shopping_list_share_link",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  43,
+                        "version":  "7",
+                        "when":  1752067200000,
+                        "tag":  "0044_receipt_price_memory",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  44,
+                        "version":  "7",
+                        "when":  1752153600000,
+                        "tag":  "0045_inventory_intelligence_events",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  45,
+                        "version":  "7",
+                        "when":  1752240000000,
+                        "tag":  "0046_household_os_events",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  46,
+                        "version":  "7",
+                        "when":  1752326400000,
+                        "tag":  "0047_learning_engine_v1",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  47,
+                        "version":  "7",
+                        "when":  1752412800000,
+                        "tag":  "0048_household_location_rule",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  48,
+                        "version":  "7",
+                        "when":  1752508800000,
+                        "tag":  "0049_receipt_import_success_events",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  49,
+                        "version":  "7",
+                        "when":  1752595200000,
+                        "tag":  "0050_brain_feedback_v1",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  50,
+                        "version":  "7",
+                        "when":  1752681600000,
+                        "tag":  "0051_price_memory_phase1",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  51,
+                        "version":  "7",
+                        "when":  1752768000000,
+                        "tag":  "0052_home_redesign_telemetry",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  52,
+                        "version":  "7",
+                        "when":  1752854400000,
+                        "tag":  "0053_memory_rule_events",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  53,
+                        "version":  "7",
+                        "when":  1752940800000,
+                        "tag":  "0054_shopping_ux_v2_telemetry",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  54,
+                        "version":  "7",
+                        "when":  1753027200000,
+                        "tag":  "0055_pantry_ux_v2_telemetry",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  55,
+                        "version":  "7",
+                        "when":  1753113600000,
+                        "tag":  "0056_home_ux_v2_telemetry",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  56,
+                        "version":  "7",
+                        "when":  1753200000000,
+                        "tag":  "0057_product_catalog",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  57,
+                        "version":  "7",
+                        "when":  1753286400000,
+                        "tag":  "0058_moment_cta_telemetry",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  58,
+                        "version":  "7",
+                        "when":  1753372800000,
+                        "tag":  "0059_store_recommendation_telemetry",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  59,
+                        "version":  "7",
+                        "when":  1753459200000,
+                        "tag":  "0060_acquisition_loops_telemetry",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  60,
+                        "breakpoints":  true,
+                        "when":  1753545600000,
+                        "version":  "7",
+                        "tag":  "0061_openai_schema_retry_telemetry"
+                    },
+                    {
+                        "idx":  61,
+                        "version":  "7",
+                        "when":  1753545600000,
+                        "tag":  "0061_price_intelligence_phase1",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  62,
+                        "version":  "7",
+                        "when":  1753632000000,
+                        "tag":  "0063_ata_page_telemetry",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  63,
+                        "version":  "7",
+                        "when":  1753718400000,
+                        "tag":  "0064_market_v01",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  64,
+                        "version":  "7",
+                        "when":  1753804800000,
+                        "tag":  "0065_market_live",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  65,
+                        "version":  "7",
+                        "when":  1753891200000,
+                        "tag":  "0066_market_chat_report",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  66,
+                        "version":  "7",
+                        "when":  1753977600000,
+                        "tag":  "0067_market_v02_exchange",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  67,
+                        "version":  "7",
+                        "when":  1754064000000,
+                        "tag":  "0068_market_v03_trust",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  68,
+                        "version":  "7",
+                        "when":  1754150400000,
+                        "tag":  "0069_market_v04_pricing",
+                        "breakpoints":  true
+                    },
+                    {
+                        "idx":  69,
+                        "version":  "7",
+                        "when":  1754236800000,
+                        "tag":  "0070_brain_v2",
+                        "breakpoints":  true
+                    }
+                ]
 }

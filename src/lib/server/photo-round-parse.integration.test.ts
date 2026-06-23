@@ -48,7 +48,7 @@ describe('parsePhotoRoundFromImages integration (mocked OpenAI)', () => {
 		vi.unstubAllGlobals();
 	});
 
-	it('returns parsed fridge items with detected zone from vision + validation calls', async () => {
+	it('returns parsed fridge items with detected zone from single vision call when all items high confidence', async () => {
 		const items = [FULL_ITEM];
 		vi.stubGlobal(
 			'fetch',
@@ -73,7 +73,7 @@ describe('parsePhotoRoundFromImages integration (mocked OpenAI)', () => {
 			detectedZone: 'fridge',
 			zoneConfidence: 'high'
 		});
-		expect(vi.mocked(fetch)).toHaveBeenCalledTimes(2);
+		expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
 	});
 
 	it('honours zone hint with forced high confidence', async () => {
