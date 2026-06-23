@@ -2,6 +2,8 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import ShoppingFocusItem from '$lib/components/molecules/ShoppingFocusItem.svelte';
 	import TripProgressBar from '$lib/components/molecules/TripProgressBar.svelte';
+	import type { DedupeWarning } from '$lib/domain/dedupe-autopilot';
+	import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 	import {
 		getFocusItem,
 		getPeekOverflowCount,
@@ -20,6 +22,7 @@
 		pickedCount: number;
 		canEdit: boolean;
 		picking?: boolean;
+		storeDedupeByKey?: Record<string, DedupeWarning[]>;
 		onPick: (item: ShoppingListItem) => void;
 		onBackToPlan: () => void;
 		onCompletePantry: () => void;
@@ -34,6 +37,7 @@
 		pickedCount,
 		canEdit,
 		picking = false,
+		storeDedupeByKey = {},
 		onPick,
 		onBackToPlan,
 		onCompletePantry,
@@ -46,6 +50,11 @@
 	const peekQueue = $derived(getPeekQueue(items, focusIndex));
 	const peekOverflow = $derived(getPeekOverflowCount(items, focusIndex));
 	const complete = $derived(isTripComplete(pickedCount, tripTotal));
+	const focusDedupeWarnings = $derived.by(() => {
+		if (!focusItem) return [] as DedupeWarning[];
+		const key = normalizeReceiptProductName(focusItem.name);
+		return storeDedupeByKey[key] ?? [];
+	});
 </script>
 
 <div class="shop-view" data-testid="shopping-v2-shop">
@@ -74,7 +83,13 @@
 			</div>
 		</section>
 	{:else if focusItem}
-		<ShoppingFocusItem item={focusItem} {canEdit} {picking} onPick={() => onPick(focusItem)} />
+		<ShoppingFocusItem
+			item={focusItem}
+			{canEdit}
+			{picking}
+			dedupeWarnings={focusDedupeWarnings}
+			onPick={() => onPick(focusItem)}
+		/>
 
 		<section class="peek" aria-label={t('shopping.v2.shop.peekAria')}>
 			<p class="peek-label">{t('shopping.v2.shop.peekLabel')}</p>

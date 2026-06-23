@@ -1,0 +1,223 @@
+import { json } from '@sveltejs/kit';
+import {
+	extractPurchasedAtFromReceiptText,
+	extractStoreFromReceiptText
+} from '$lib/domain/receipt-store';
+import {
+	isAllowedKivraForwardSender,
+	parseForwardTokenFromRecipients
+} from '$lib/domain/kivra-forward';
+import type { ReceiptLine } from '$lib/domain/receipt-line';
+import { getOpenAiApiKey } from '$lib/server/openai';
+import { extractPdfText } from '$lib/server/receipt-pdf';
+import { parseReceiptFromText, parseReceiptLines } from '$lib/server/receipt-parse';
+import { importReceiptLines } from '$lib/server/receipt-import';
+import { loadReceiptParseFeedbackContext } from '$lib/server/receipt-parse-feedback';
+import { isKivraForwardEnabled } from '$lib/server/kivra-forward';
+import {
+	downloadAttachmentBytes,
+	listInboundPdfAttachments,
+	verifyResendWebhook,
+	type ResendEmailReceivedEvent
+} from '$lib/server/resend-inbound';
+import {
+	householdLocationRuleRepository,
+	householdShelfLifeRuleRepository,
+	householdService,
+	inventoryService,
+	learningEngineService,
+	learningFeedbackRepository,
+	pmfService,
+	purchasePatternRepository,
+	purchasePatternService,
+	receiptForwardService
+} from '$lib/server/di';
+import { recordAppError } from '$lib/server/error-log/record';
+import type { RequestHandler } from './$types';
+
+/** Broader than Kivra-only — any Swedish grocery receipt PDF forward. */
+const GENERIC_RECEIPT_SENDER_ALLOWLIST = [
+	'kivra.se',
+	'ica.se',
+	'willys.se',
+	'coop.se',
+	'hemkop.se',
+	'lidl.se',
+	'citygross.se',
+	'mathem.se',
+	'mat.se',
+	'foodora.com',
+	'wolt.com'
+] as const;
+
+function isEmailReceivedEvent(event: unknown): event is ResendEmailReceivedEvent {
+	if (!event || typeof event !== 'object') return false;
+	const typed = event as ResendEmailReceivedEvent;
+	return typed.type === 'email.received' && typeof typed.data?.email_id === 'string';
+}
+
+function isAllowedGenericReceiptSender(from: string): boolean {
+	const address = from.trim().toLowerCase();
+	const bracketMatch = address.match(/<([^>]+)>/);
+	const candidate = (bracketMatch?.[1] ?? address).trim();
+	const at = candidate.lastIndexOf('@');
+	if (at <= 0) return false;
+	const domain = candidate.slice(at + 1);
+	return GENERIC_RECEIPT_SENDER_ALLOWLIST.some(
+		(allowed) => domain === allowed || domain.endsWith(`.${allowed}`)
+	);
+}
+
+export const POST: RequestHandler = async ({ request }) => {
+	if (!isKivraForwardEnabled()) {
+		return json({ ok: false, error: 'Receipt forward is disabled' }, { status: 404 });
+	}
+
+	const payload = await request.text();
+	const verified = verifyResendWebhook(payload, {
+		svixId: request.headers.get('svix-id'),
+		svixTimestamp: request.headers.get('svix-timestamp'),
+		svixSignature: request.headers.get('svix-signature')
+	});
+
+	if ('error' in verified) {
+		console.warn(`[receipt-forward] webhook rejected: ${verified.error}`);
+		return json({ ok: false, error: 'Invalid webhook signature' }, { status: 401 });
+	}
+
+	if (!isEmailReceivedEvent(verified)) {
+		return json({ ok: true, skipped: true });
+	}
+
+	const data = verified.data as ResendEmailReceivedEvent['data'] & {
+		cc?: string[];
+		bcc?: string[];
+	};
+	const recipients = [...(data.to ?? []), ...(data.cc ?? []), ...(data.bcc ?? [])];
+	const token = parseForwardTokenFromRecipients(recipients);
+	if (!token) {
+		console.warn('[receipt-forward] no kvitto+ token in recipients');
+		return json({ ok: false, error: 'Unknown recipient' }, { status: 422 });
+	}
+
+	const senderAllowed =
+		isAllowedGenericReceiptSender(verified.data.from) || isAllowedKivraForwardSender(verified.data.from);
+	if (!senderAllowed) {
+		console.warn(`[receipt-forward] sender not allowlisted: ${verified.data.from}`);
+		return json({ ok: false, error: 'Sender not allowed' }, { status: 403 });
+	}
+
+	const householdId = await receiptForwardService.resolveHouseholdId(token);
+	if (!householdId) {
+		console.warn('[receipt-forward] token did not match a household');
+		return json({ ok: false, error: 'Unknown household token' }, { status: 404 });
+	}
+
+	const ownerUserId = await householdService.findPrimaryOwnerUserId(householdId);
+	if (!ownerUserId) {
+		console.error(`[receipt-forward] household ${householdId} has no owner`);
+		return json({ ok: false, error: 'Household not ready' }, { status: 422 });
+	}
+
+	try {
+		const attachments = await listInboundPdfAttachments(verified.data.email_id);
+		if (attachments.length === 0) {
+			console.warn(`[receipt-forward] no PDF attachment for email ${verified.data.email_id}`);
+			return json({ ok: false, error: 'No PDF attachment' }, { status: 422 });
+		}
+
+		const apiKey = getOpenAiApiKey();
+		if (!apiKey) {
+			return json({ ok: false, error: 'AI not configured' }, { status: 503 });
+		}
+
+		const parseFeedback = await loadReceiptParseFeedbackContext(
+			learningFeedbackRepository,
+			householdId,
+			purchasePatternRepository,
+			{
+				shelfLifeRules: householdShelfLifeRuleRepository,
+				locationRules: householdLocationRuleRepository
+			}
+		);
+
+		let parsedLines: ReceiptLine[] = [];
+		let parsedStoreLabel: string | undefined;
+		let parsedPurchasedAt: Date | undefined;
+		for (const attachment of attachments) {
+			const bytes = await downloadAttachmentBytes(attachment.downloadUrl);
+			const pdfText = await extractPdfText(bytes);
+			if (!pdfText.ok) {
+				continue;
+			}
+			parsedStoreLabel = extractStoreFromReceiptText(pdfText.text);
+			parsedPurchasedAt = extractPurchasedAtFromReceiptText(pdfText.text);
+
+			const storeHint = extractStoreFromReceiptText(pdfText.text);
+			const purchasedAt = extractPurchasedAtFromReceiptText(pdfText.text);
+			const aiResult = await parseReceiptFromText(
+				apiKey,
+				pdfText.text,
+				storeHint,
+				{
+					chain: storeHint ?? null,
+					storeName: storeHint ?? null,
+					purchasedAt: purchasedAt?.toISOString().slice(0, 10) ?? null
+				},
+				[],
+				parseFeedback
+			);
+			if (!aiResult.ok) {
+				continue;
+			}
+
+			const lines = parseReceiptLines(aiResult.data);
+			if (lines.length > 0) {
+				parsedLines = lines;
+				break;
+			}
+		}
+
+		if (parsedLines.length === 0) {
+			await recordAppError({
+				error: new Error('Could not parse forwarded receipt PDF'),
+				path: '/api/inbound/receipt',
+				statusCode: 422
+			});
+			return json({ ok: false, error: 'Could not parse receipt' }, { status: 422 });
+		}
+
+		const result = await importReceiptLines({
+			householdId,
+			userId: ownerUserId,
+			role: 'owner',
+			lines: parsedLines,
+			inventoryService,
+			purchasePatternService,
+			pmfService,
+			learningEngineService,
+			eventType: 'kivra_forward_received',
+			source: 'kivra_forward',
+			storeLabel: parsedStoreLabel ?? null,
+			purchasedAt: parsedPurchasedAt ?? null
+		});
+
+		console.info(
+			`[receipt-forward] imported ${result.itemsAdded} items for household ${householdId}`
+		);
+
+		return json({
+			ok: true,
+			itemsAdded: result.itemsAdded,
+			importBatchId: result.importBatchId
+		});
+	} catch (error) {
+		console.error('[receipt-forward] import failed:', error);
+		await recordAppError({
+			error: error instanceof Error ? error : new Error('Receipt forward import failed'),
+			path: '/api/inbound/receipt',
+			statusCode: 500
+		});
+		return json({ ok: false, error: 'Import failed' }, { status: 500 });
+	}
+};

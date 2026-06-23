@@ -792,7 +792,8 @@
 				"members": "Hushållsmedlemmar",
 				"aiScans": "AI-skannar (månad)",
 				"receipts": "Kvitto-PDF (månad)",
-				"smartFill": "Smart fill (vecka)"
+				"smartFill": "Smart fill (vecka)",
+				"weeklyPlan": "Vecko-autopilot (vecka)"
 			},
 			"limitBanner": {
 				"body": "Du har nått en gräns på Gratis-planen: {detail}",
@@ -806,7 +807,8 @@
 				"members": "max antal hushållsmedlemmar",
 				"aiScans": "AI-skannar den här månaden",
 				"receipts": "kvitto-PDF den här månaden",
-				"smartFill": "smart fill den här veckan"
+				"smartFill": "smart fill den här veckan",
+				"weeklyPlan": "vecko-autopilot den här veckan"
 			},
 			"waitlistTitle": "Meddela mig när Pro lanseras",
 			"waitlistDescription": "Ingen betalning aktiveras förrän vi meddelat dig. Lämna din e-post så hör vi av oss innan Pro går live.",
@@ -1161,6 +1163,9 @@
 		"preferencesPlaceholder": "T.ex. vegetariskt, budget, glutenfritt, barnfamilj",
 		"householdSizeLabel": "Antal personer i hushållet",
 		"fillSuccess": "{count} {count, plural, one {vara lades} other {varor lades}} till på listan.",
+		"autoFillPending": "Förslag väntar — {count} varor redo att läggas på listan",
+		"autoFillAccept": "Lägg till förslagen",
+		"autoFillExpired": "Förslagen har gått ut — försök igen med Smart fill.",
 		"fillCelebrationBig": "Snyggt — {count} varor på listan!",
 		"fillPartialSuccess": "{added} {added, plural, one {vara lades} other {varor lades}} till. {skipped} fanns redan på listan.",
 		"fillAllDuplicates": "Alla {count} förslag fanns redan på listan.",
@@ -1267,7 +1272,12 @@
 				"completePantryCta": "Uppdatera skafferiet",
 				"completePlanCta": "Tillbaka till planering",
 				"completeHomeCta": "Till hem",
-				"pickedLive": "{name} plockad"
+				"pickedLive": "{name} plockad",
+				"dedupe": {
+					"overstock": "Ni har redan gott om hemma",
+					"recent_purchase": "Ni köpte detta nyligen",
+					"on_list": "Finns redan på listan"
+				}
 			},
 			"pantryBridge": {
 				"title": "Lägg till i skafferiet?",
@@ -2181,7 +2191,8 @@
 				"ai_scan": "AI-skannar",
 				"receipt_pdf": "Kvitto-PDF",
 				"smart_fill": "Smart fill",
-				"admin_insights": "Admin-insikter"
+				"admin_insights": "Admin-insikter",
+				"weekly_plan": "Vecko-autopilot"
 			}
 		},
 		"launchCohort": {
@@ -2726,8 +2737,13 @@
 			"next": "Nästa",
 			"done": "Klart",
 			"exit": "Avsluta",
-			"progress": "Steg {current} av {total}"
+			"progress": "Steg {current} av {total}",
+			"missingPayload": "Recepttitel och ingredienser krävs för cook mode."
 		}
+	},
+	"mealPlan": {
+		"missingMealId": "Måltids-id saknas.",
+		"mealNotFound": "Måltiden hittades inte."
 	},
 	"onboarding": {
 		"welcome": "Välkommen till Skaffu",
@@ -3117,7 +3133,16 @@
 		"movingSoonBody": "{name} — {days, plural, one {# dag} other {# dagar}} kvar. Fortfarande bra?",
 		"marketChatTitle": "Nytt meddelande från {name}",
 		"marketChatReminderTitle": "Svara i marknadschatt",
-		"marketChatReminderBody": "En granne väntar på ditt svar."
+		"marketChatReminderBody": "En granne väntar på ditt svar.",
+		"weeklyBriefingTitle": "Veckobriefing",
+		"weeklyBriefingFallback": "{expiring} saker går ut — {count} varor på listan",
+		"preShopTitle": "Dags att förbereda handlingen?",
+		"preShopBody": "Ni handlar oftast på {weekday} — {count} varor på listan",
+		"kivraImportTitle": "Kvitto importerat",
+		"kivraImportBody": "{count} varor inlagda från Kivra",
+		"partnerCheckoffTitle": "{name} handlade klart",
+		"partnerCheckoffBody": "{name} checkade av {item} — tillagt i skafferiet",
+		"partnerFallback": "Någon i hushållet"
 	},
 	"ai": {
 		"loadingPantry": "Tänker utifrån ert skafferi…",
@@ -3348,6 +3373,7 @@
 			"aiRateLimitAiScan": "Ni har använt alla {limit} AI-skannar den här månaden på Gratis-planen. Uppgradera till Pro eller vänta till nästa månad.",
 			"aiRateLimitReceiptPdf": "Ni har använt alla {limit} kvitto-PDF den här månaden på Gratis-planen. Uppgradera till Pro eller vänta till nästa månad.",
 			"aiRateLimitSmartFill": "Ni har använt alla {limit} smart fill den här veckan på Gratis-planen. Uppgradera till Pro eller vänta till nästa vecka.",
+			"aiRateLimitWeeklyPlan": "Ni har använt alla {limit} vecko-autopilot den här veckan på Gratis-planen. Uppgradera till Pro eller vänta till nästa vecka.",
 			"barcodeNotFound": "Ogiltig streckkod.",
 			"invalidLocation": "Ogiltig förvaringsplats."
 		},
@@ -3437,8 +3463,8 @@
 		},
 		"shelfLife": {
 			"household": {
-				"primary": "Ca {days} dagars hållbarhet baserat på ert hushåll",
-				"factCount": "Baserat på {count, plural, one {# observation} other {# observationer}} i {location}",
+				"primary": "Ca {days} dagars hållbarhet",
+				"factCount": "Baserat på era {count, plural, one {# senaste köp} other {# senaste köp}}",
 				"factUpdated": "Senast uppdaterad {date}"
 			},
 			"heuristic": {
@@ -4012,7 +4038,24 @@
 		"homeCard": {
 			"score": "Hushållsminne · {score}%",
 			"scoreAria": "Hushållsminne {score} procent",
-			"body": "Skaffu lär sig av kvitton och era korrigeringar."
+			"body": "Skaffu lär sig av kvitton och era korrigeringar.",
+			"unlockCta": "Skanna ett kvitto för att låsa upp smartare förslag"
+		},
+		"timeline": {
+			"title": "Vad Skaffu lärt sig",
+			"shelfLifeLearned": "{whenLabel} lärde Skaffu att er {product} håller ca {days} dagar",
+			"locationLearned": "{whenLabel} lärde Skaffu att {product} hör hemma i {location}",
+			"receiptAutopilot": "{whenLabel} lade Skaffu till {product} från kvittomönster",
+			"receiptImport": "{whenLabel} importerade Skaffu {count} varor från kvitto",
+			"when": {
+				"today": "Idag",
+				"yesterday": "Igår",
+				"earlier": "Nyligen"
+			}
+		},
+		"wastePrevented": {
+			"amount": "Ni räddade ~{amount} kr i {month}",
+			"body": "Baserat på {count} varor ni hann äta upp"
 		},
 		"insights": {
 			"title": "Skafferikoll",
@@ -4022,7 +4065,10 @@
 			"actionAddExpiry": "Lägg till datum",
 			"actionPlanRecipe": "Planera recept",
 			"actionReviewEstimated": "Granska uppskattningar",
-			"daysUntil": "Om {count} dagar"
+			"daysUntil": "Om {count} dagar",
+			"deepen": "Fördjupa med AI",
+			"deepening": "Fördjupar…",
+			"deepenError": "Kunde inte fördjupa insikterna just nu."
 		},
 		"receiptQuality": {
 			"lead": "{percent}% av raderna fick bäst-före-datum",

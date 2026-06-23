@@ -17,7 +17,8 @@ function mockPmfRepository() {
 		countDistinctHouseholdsWithEventSince: vi.fn(),
 		getAcquisitionMetrics: vi.fn(),
 		getMarketV01Metrics: vi.fn(),
-		getBrainMetricsSince: vi.fn()
+		getBrainMetricsSince: vi.fn(),
+		listBrainTimelineEvents: vi.fn().mockResolvedValue([])
 	};
 }
 

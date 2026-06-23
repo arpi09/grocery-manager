@@ -1,16 +1,19 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
+	import type { DedupeWarning } from '$lib/domain/dedupe-autopilot';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { t } from '$lib/i18n';
+	import type { MessageKey } from '$lib/i18n/messages';
 
 	interface Props {
 		item: ShoppingListItem;
 		canEdit: boolean;
 		picking?: boolean;
+		dedupeWarnings?: DedupeWarning[];
 		onPick: () => void;
 	}
 
-	let { item, canEdit, picking = false, onPick }: Props = $props();
+	let { item, canEdit, picking = false, dedupeWarnings = [], onPick }: Props = $props();
 
 	const detail = $derived.by(() => {
 		const parts: string[] = [];
@@ -33,6 +36,12 @@
 	<p class="focus-name">{item.name}</p>
 	{#if detail}
 		<p class="focus-detail">{detail}</p>
+	{/if}
+
+	{#if dedupeWarnings.length > 0}
+		<p class="dedupe-hint" data-testid="shopping-v2-dedupe-hint">
+			{t(`shopping.v2.shop.dedupe.${dedupeWarnings[0].kind}` as MessageKey)}
+		</p>
 	{/if}
 
 	{#if canEdit}
@@ -80,6 +89,18 @@
 		margin: 0;
 		font-size: 1rem;
 		color: var(--color-text-muted);
+	}
+
+	.dedupe-hint {
+		margin: 0;
+		padding: 0.5rem 0.75rem;
+		border-radius: var(--radius-md);
+		background: color-mix(in srgb, #b45309 12%, transparent);
+		color: var(--color-text);
+		font-size: 0.8125rem;
+		font-weight: 600;
+		line-height: 1.35;
+		max-width: 22rem;
 	}
 
 	:global(.pick-cta) {

@@ -12,6 +12,8 @@ import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { resolveThemeForRequest } from '$lib/server/theme-cookie';
 import { appSettingsService, expiringShareService } from '$lib/server/di';
+import { takeKivraImportPending } from '$lib/server/kivra-import-pending';
+import { translate } from '$lib/i18n/messages';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
@@ -97,6 +99,16 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 	const marketLiveStatus = await appSettingsService.getMarketLiveStatus();
 	const nearbySettings = await expiringShareService.getNearbySharingSettings(locals.user.id);
 
+	let kivraImportToast: string | null = null;
+	if (locals.householdId) {
+		const pending = takeKivraImportPending(locals.householdId);
+		if (pending) {
+			kivraImportToast = translate(locale, 'pushNotifications.kivraImportBody', {
+				count: pending.itemsAdded
+			});
+		}
+	}
+
 	return {
 		locale,
 		cookieConsent,
@@ -130,7 +142,8 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		pantryUxV2Enabled,
 		homeUxV2Enabled,
 		marketLiveEnabled: marketLiveStatus.enabledInApp,
-		nearbySharingEnabled: nearbySettings.enabled
+		nearbySharingEnabled: nearbySettings.enabled,
+		kivraImportToast
 
 	};
 };

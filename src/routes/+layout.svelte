@@ -10,6 +10,7 @@
 	import { pwaInfo } from 'virtual:pwa-info';
 	import { initPwaInstallListeners } from '$lib/utils/pwa';
 	import { initClientErrorReporting } from '$lib/client/error-reporting';
+	import { showClientToast } from '$lib/utils/client-toast.svelte';
 
 	let { children, data } = $props();
 
@@ -66,6 +67,11 @@
 		const onChange = () => applyResolvedTheme('system');
 		media.addEventListener('change', onChange);
 		return () => media.removeEventListener('change', onChange);
+	});
+
+	$effect(() => {
+		if (!browser || !data.kivraImportToast) return;
+		showClientToast(data.kivraImportToast, { variant: 'success' });
 	});
 </script>
 

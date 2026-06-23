@@ -4,6 +4,7 @@
 	import type { BrainScoreSnapshot } from '$lib/domain/brain-score';
 	import { t } from '$lib/i18n';
 	import type { MessageKey } from '$lib/i18n/messages';
+	import { receiptOneTapHref } from '$lib/utils/scan-nav';
 
 	interface Props {
 		snapshot: BrainScoreSnapshot;
@@ -11,9 +12,12 @@
 	}
 
 	let { snapshot, href = '/settings/memory' }: Props = $props();
+
+	const showUnlockCta = $derived(snapshot.score < 50);
+	const cardHref = $derived(showUnlockCta ? receiptOneTapHref('/hem') : href);
 </script>
 
-<Card {href} interactive class="brain-home-card" data-testid="brain-home-card">
+<Card href={cardHref} interactive class="brain-home-card" data-testid="brain-home-card">
 	<div class="brain-card-inner">
 		<span class="brain-icon" aria-hidden="true"><FeatureIcon id="sparkle" size={22} /></span>
 		<div class="brain-copy">
@@ -21,7 +25,11 @@
 				{t('brain.homeCard.score', { score: snapshot.score })}
 			</p>
 			<p class="brain-label">{t(snapshot.labelKey as MessageKey)}</p>
-			<p class="brain-body">{t('brain.homeCard.body')}</p>
+			{#if showUnlockCta}
+				<p class="brain-cta">{t('brain.homeCard.unlockCta')}</p>
+			{:else}
+				<p class="brain-body">{t('brain.homeCard.body')}</p>
+			{/if}
 		</div>
 	</div>
 </Card>
@@ -64,6 +72,14 @@
 		margin: 0.35rem 0 0;
 		font-size: 0.8125rem;
 		color: var(--color-text-muted);
+		line-height: 1.35;
+	}
+
+	.brain-cta {
+		margin: 0.35rem 0 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-primary);
 		line-height: 1.35;
 	}
 </style>

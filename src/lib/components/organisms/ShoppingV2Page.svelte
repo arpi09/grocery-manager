@@ -22,6 +22,7 @@
 	import { trackProductEvent } from '$lib/client/product-events';
 	import type { PantryBridgePreview } from '$lib/application/shopping-to-pantry.service';
 	import type { ReplenishmentSuggestion } from '$lib/domain/replenishment';
+	import type { DedupeWarning } from '$lib/domain/dedupe-autopilot';
 	import {
 		clampFocusIndex,
 		sortUncheckedItems,
@@ -45,6 +46,7 @@
 		shareLinkEnabled: boolean;
 		memberCount: number;
 		showReceiptImportLead?: boolean;
+		storeDedupeByKey?: Record<string, DedupeWarning[]>;
 	}
 
 	let {
@@ -57,6 +59,7 @@
 		shareLinkEnabled,
 		memberCount,
 		showReceiptImportLead = false,
+		storeDedupeByKey = {}
 	}: Props = $props();
 
 	let session = $state<ShoppingTripSession>(defaultShoppingTripSession());
@@ -418,6 +421,7 @@
 			pickedCount={session.pickedCount}
 			{canEdit}
 			{picking}
+			{storeDedupeByKey}
 			onPick={handlePick}
 			onBackToPlan={handleBackToPlan}
 			onCompletePantry={handleCompletePantry}

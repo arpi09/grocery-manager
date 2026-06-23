@@ -34,6 +34,7 @@ function mockPmfRepository(overrides: Partial<IPmfRepository> = {}): IPmfReposit
 		getAcquisitionMetrics: vi.fn(),
 		getMarketV01Metrics: vi.fn(),
 		getBrainMetricsSince: vi.fn(),
+		listBrainTimelineEvents: vi.fn().mockResolvedValue([]),
 		...overrides
 	};
 }

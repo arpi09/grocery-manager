@@ -22,6 +22,29 @@
 
 	let searchQuery = $state('');
 	let insightsSnapshot = $state<InventoryInsightsSnapshot | null>(null);
+	let insightsDeepening = $state(false);
+	let insightsDeepenError = $state<string | null>(null);
+
+	async function deepenInsights() {
+		insightsDeepening = true;
+		insightsDeepenError = null;
+		try {
+			const response = await fetch('/api/inventory-insights', { method: 'POST' });
+			const payload = await response.json().catch(() => null);
+			if (!response.ok) {
+				insightsDeepenError =
+					typeof payload?.error === 'string' ? payload.error : t('brain.insights.deepenError');
+				return;
+			}
+			if (payload?.insights) {
+				insightsSnapshot = payload.insights as InventoryInsightsSnapshot;
+			}
+		} catch {
+			insightsDeepenError = t('brain.insights.deepenError');
+		} finally {
+			insightsDeepening = false;
+		}
+	}
 
 	const filteredItems = $derived(filterInventoryBySearch(items, searchQuery));
 	const shelf = $derived(buildPantryShelfView(filteredItems));
@@ -84,6 +107,9 @@
 			estimatedCount={insightsSnapshot.estimatedCount}
 			{canWrite}
 			{bulkExpiryHref}
+			onDeepen={deepenInsights}
+			deepening={insightsDeepening}
+			deepenError={insightsDeepenError}
 		/>
 	{/if}
 

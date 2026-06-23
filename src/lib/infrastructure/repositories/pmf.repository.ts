@@ -93,6 +93,18 @@ export interface IPmfRepository {
 	getMarketV01Metrics(now?: Date): Promise<MarketV01MetricsSnapshot>;
 	countDistinctHouseholdsWithEventSince(eventType: ProductEventType, since: Date): Promise<number>;
 	getBrainMetricsSince(since: Date, now?: Date): Promise<BrainMetricsRawCounts>;
+	listBrainTimelineEvents(
+		householdId: string,
+		since: Date,
+		limit: number
+	): Promise<
+		Array<{
+			id: string;
+			eventType: string;
+			createdAt: Date;
+			metadata: Record<string, unknown> | null;
+		}>
+	>;
 }
 
 function userIdsFromEventRows(rows: Array<{ userId: string | null }>): Set<string> {
@@ -920,5 +932,36 @@ export class DrizzlePmfRepository implements IPmfRepository {
 			})),
 			schemaRetryCount: eventCounts.openai_schema_retry
 		};
+	}
+
+	async listBrainTimelineEvents(householdId: string, since: Date, limit: number) {
+		const rows = await db
+			.select({
+				id: productEventTable.id,
+				eventType: productEventTable.eventType,
+				createdAt: productEventTable.createdAt,
+				metadata: productEventTable.metadata
+			})
+			.from(productEventTable)
+			.where(
+				and(
+					eq(productEventTable.householdId, householdId),
+					gte(productEventTable.createdAt, since),
+					inArray(productEventTable.eventType, [
+						'receipt_autopilot_accepted',
+						'receipt_parsed',
+						'kivra_forward_received'
+					])
+				)
+			)
+			.orderBy(desc(productEventTable.createdAt))
+			.limit(limit);
+
+		return rows.map((row) => ({
+			id: row.id,
+			eventType: row.eventType,
+			createdAt: row.createdAt,
+			metadata: row.metadata ? (JSON.parse(row.metadata) as Record<string, unknown>) : null
+		}));
 	}
 }

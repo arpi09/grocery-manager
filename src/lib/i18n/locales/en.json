@@ -930,7 +930,8 @@
 				"members": "Household members",
 				"aiScans": "AI scans (month)",
 				"receipts": "Receipt PDF (month)",
-				"smartFill": "Smart fill (week)"
+				"smartFill": "Smart fill (week)",
+				"weeklyPlan": "Weekly autopilot (week)"
 			},
 			"limitBanner": {
 				"body": "You've hit a limit on the Free plan: {detail}",
@@ -944,7 +945,8 @@
 				"members": "maximum household members",
 				"aiScans": "AI scans this month",
 				"receipts": "receipt PDF parses this month",
-				"smartFill": "smart fill runs this week"
+				"smartFill": "smart fill runs this week",
+				"weeklyPlan": "weekly autopilot runs this week"
 			},
 			"waitlistTitle": "Notify me when Pro launches",
 			"waitlistDescription": "Billing will not start until we tell you. Leave your email and we will reach out before Pro goes live.",
@@ -1240,6 +1242,9 @@
 		"preferencesPlaceholder": "E.g. vegetarian, budget, gluten-free, family with kids",
 		"householdSizeLabel": "People in household",
 		"fillSuccess": "{count} {count, plural, one {item added} other {items added}} to the list.",
+		"autoFillPending": "Suggestions waiting — {count} items ready to add",
+		"autoFillAccept": "Add suggestions",
+		"autoFillExpired": "Suggestions expired — try Smart fill again.",
 		"fillCelebrationBig": "Nice — {count} items on your list!",
 		"fillPartialSuccess": "{added} {added, plural, one {item added} other {items added}}. {skipped} already on the list.",
 		"fillAllDuplicates": "All {count} suggestions were already on the list.",
@@ -1346,7 +1351,12 @@
 				"completePantryCta": "Update pantry",
 				"completePlanCta": "Back to planning",
 				"completeHomeCta": "Go to home",
-				"pickedLive": "{name} picked"
+				"pickedLive": "{name} picked",
+				"dedupe": {
+					"overstock": "You already have plenty at home",
+					"recent_purchase": "You bought this recently",
+					"on_list": "Already on your list"
+				}
 			},
 			"pantryBridge": {
 				"title": "Add to pantry?",
@@ -2281,7 +2291,8 @@
 				"ai_scan": "AI scans",
 				"receipt_pdf": "Receipt PDF",
 				"smart_fill": "Smart fill",
-				"admin_insights": "Admin insights"
+				"admin_insights": "Admin insights",
+				"weekly_plan": "Weekly autopilot"
 			}
 		},
 		"launchCohort": {
@@ -2805,8 +2816,13 @@
 			"next": "Next",
 			"done": "Done",
 			"exit": "Exit",
-			"progress": "Step {current} of {total}"
+			"progress": "Step {current} of {total}",
+			"missingPayload": "Recipe title and ingredients are required for cook mode."
 		}
+	},
+	"mealPlan": {
+		"missingMealId": "Meal id is required.",
+		"mealNotFound": "Planned meal not found."
 	},
 	"onboarding": {
 		"welcome": "Welcome to Skaffu",
@@ -3195,6 +3211,15 @@
 		"marketChatTitle": "New message from {name}",
 		"marketChatReminderTitle": "Reply in market chat",
 		"marketChatReminderBody": "A neighbour is waiting for your reply.",
+		"weeklyBriefingTitle": "Weekly briefing",
+		"weeklyBriefingFallback": "{expiring} items expiring — {count} items on your list",
+		"preShopTitle": "Time to prep for shopping?",
+		"preShopBody": "You usually shop on {weekday} — {count} items on your list",
+		"kivraImportTitle": "Receipt imported",
+		"kivraImportBody": "{count} items added from Kivra",
+		"partnerCheckoffTitle": "{name} finished shopping",
+		"partnerCheckoffBody": "{name} checked off {item} — added to pantry",
+		"partnerFallback": "Someone in your household",
 		"movingSoonTitle": "{name} moving to review soon",
 		"movingSoonBody": "{name} — {days, plural, one {# day} other {# days}} left. Still good?"
 	},
@@ -3427,6 +3452,7 @@
 			"aiRateLimitAiScan": "You've used all {limit} AI scans this month on the Free plan. Upgrade to Pro or wait until next month.",
 			"aiRateLimitReceiptPdf": "You've used all {limit} receipt PDF parses this month on the Free plan. Upgrade to Pro or wait until next month.",
 			"aiRateLimitSmartFill": "You've used all {limit} smart fill runs this week on the Free plan. Upgrade to Pro or wait until next week.",
+			"aiRateLimitWeeklyPlan": "You've used all {limit} weekly autopilot runs this week on the Free plan. Upgrade to Pro or wait until next week.",
 			"barcodeNotFound": "Invalid barcode.",
 			"invalidLocation": "Invalid storage location."
 		},
@@ -3516,8 +3542,8 @@
 		},
 		"shelfLife": {
 			"household": {
-				"primary": "About {days} days shelf life based on your household",
-				"factCount": "Based on {count, plural, one {# observation} other {# observations}} in {location}",
+				"primary": "About {days} days shelf life",
+				"factCount": "Based on your last {count, plural, one {# purchase} other {# purchases}}",
 				"factUpdated": "Last updated {date}"
 			},
 			"heuristic": {
@@ -4012,7 +4038,24 @@
 		"homeCard": {
 			"score": "Household memory · {score}%",
 			"scoreAria": "Household memory score {score} percent",
-			"body": "Skaffu learns from receipts and your corrections."
+			"body": "Skaffu learns from receipts and your corrections.",
+			"unlockCta": "Scan a receipt to unlock smarter suggestions"
+		},
+		"timeline": {
+			"title": "What Skaffu has learned",
+			"shelfLifeLearned": "{whenLabel} Skaffu learned your {product} keeps for about {days} days",
+			"locationLearned": "{whenLabel} Skaffu learned {product} belongs in {location}",
+			"receiptAutopilot": "{whenLabel} Skaffu added {product} from a receipt pattern",
+			"receiptImport": "{whenLabel} Skaffu imported {count} items from a receipt",
+			"when": {
+				"today": "Today",
+				"yesterday": "Yesterday",
+				"earlier": "Recently"
+			}
+		},
+		"wastePrevented": {
+			"amount": "You saved ~{amount} SEK in {month}",
+			"body": "Based on {count} items you ate in time"
 		},
 		"insights": {
 			"title": "Pantry insights",
@@ -4022,7 +4065,10 @@
 			"actionAddExpiry": "Add expiry dates",
 			"actionPlanRecipe": "Plan a recipe",
 			"actionReviewEstimated": "Review estimates",
-			"daysUntil": "In {count} days"
+			"daysUntil": "In {count} days",
+			"deepen": "Deepen with AI",
+			"deepening": "Deepening…",
+			"deepenError": "Could not deepen insights right now."
 		},
 		"receiptQuality": {
 			"lead": "{percent}% of lines got a best-before date",

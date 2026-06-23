@@ -16,6 +16,8 @@ import {
 } from '$lib/server/ai-prompt-shared';
 import { OPENAI_MODEL_NANO, requestStructuredJson } from '$lib/server/openai';
 import { logBrainMetrics } from '$lib/server/brain-metrics';
+import { loadReplenishmentFeedbackBlock } from '$lib/server/brain-feedback-context';
+import type { ILearningFeedbackRepository } from '$lib/infrastructure/repositories/learning-feedback.repository';
 import type { InventoryService } from '$lib/application/inventory.service';
 import type { MealPlanService } from '$lib/application/meal-plan.service';
 import type { ShoppingListService } from '$lib/application/shopping-list.service';
@@ -182,6 +184,7 @@ export interface GenerateShoppingSuggestionsDeps {
 	inventoryService: InventoryService;
 	mealPlanService: MealPlanService;
 	shoppingListService: ShoppingListService;
+	learningFeedbackRepository?: ILearningFeedbackRepository;
 }
 
 export type GenerateShoppingSuggestionsResult =
@@ -203,7 +206,12 @@ export async function generateShoppingSuggestions(
 
 	const locale = normalizePromptLocale(input.locale ?? 'sv');
 
-	const inventory = await deps.inventoryService.listAll(deps.householdId);
+	const [inventory, replenishmentFeedbackBlock] = await Promise.all([
+		deps.inventoryService.listAll(deps.householdId),
+		deps.learningFeedbackRepository
+			? loadReplenishmentFeedbackBlock(deps.learningFeedbackRepository, deps.householdId, locale)
+			: Promise.resolve('')
+	]);
 	const { fromDate, toDate } = upcomingDateRange(10);
 	const [plannedMeals, recipeIdeas, shoppingList] = await Promise.all([
 		deps.mealPlanService.listPlannedMealsByRange(deps.userId, fromDate, toDate),
@@ -261,6 +269,7 @@ export async function generateShoppingSuggestions(
 			? 'You build a practical Swedish home shopping list based on pantry inventory.'
 			: 'Du bygger en praktisk svensk inköpslista utifrån skafferilager.',
 		promptLocaleInstruction(locale),
+		replenishmentFeedbackBlock,
 		'Product names must be common Swedish grocery terms (brand optional, realistic sizes).',
 		'Suggest items that are missing, running low, needed for planned meals, or common staples worth restocking.',
 		'Do not duplicate what the user clearly already has in sufficient quantity or on the shopping list.',
@@ -279,7 +288,9 @@ export async function generateShoppingSuggestions(
 		`- promptVersion: ${PROMPT_VERSION_SHOPPING}`,
 		'- quantity examples: "1 st", "500 g", "2 förpackningar"',
 		'- no markdown code fences'
-	].join('\n');
+	]
+		.filter(Boolean)
+		.join('\n');
 
 	const result = await requestStructuredJson(deps.apiKey, {
 		model: OPENAI_MODEL_NANO,

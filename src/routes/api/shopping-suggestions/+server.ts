@@ -4,6 +4,7 @@ import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { e2eMockShoppingSuggestions, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 import { generateShoppingSuggestions } from '$lib/server/shopping-suggestions';
+import { learningFeedbackRepository } from '$lib/server/di';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -37,7 +38,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 						userId: auth.user.id,
 						inventoryService: locals.inventoryService,
 						mealPlanService: locals.mealPlanService,
-						shoppingListService: locals.shoppingListService
+						shoppingListService: locals.shoppingListService,
+						learningFeedbackRepository
 					},
 					{
 						preferences: typeof body.preferences === 'string' ? body.preferences : undefined,

@@ -21,7 +21,8 @@ describe('PmfService', () => {
 			getAcquisitionMetrics: vi.fn(),
 			getMarketV01Metrics: vi.fn(),
 			countDistinctHouseholdsWithEventSince: vi.fn(),
-			getBrainMetricsSince: vi.fn()
+			getBrainMetricsSince: vi.fn(),
+			listBrainTimelineEvents: vi.fn().mockResolvedValue([])
 		};
 		service = new PmfService(repository);
 	});

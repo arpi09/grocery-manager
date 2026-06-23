@@ -4,9 +4,13 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import BrainHomeCard from '$lib/components/molecules/BrainHomeCard.svelte';
+	import BrainTimelineCard from '$lib/components/molecules/BrainTimelineCard.svelte';
+	import WastePreventedCard from '$lib/components/molecules/WastePreventedCard.svelte';
 	import ReplenishmentSection from '$lib/components/organisms/ReplenishmentSection.svelte';
 	import HomeV2BriefingView from '$lib/components/organisms/HomeV2BriefingView.svelte';
 	import type { BrainScoreSnapshot } from '$lib/domain/brain-score';
+	import type { BrainTimelineEntry } from '$lib/domain/brain-timeline';
+	import type { WastePreventedSnapshot } from '$lib/domain/waste-prevented';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 	import {
@@ -43,12 +47,15 @@
 		recipeSuggestion?: HomeBriefingRecipeCard | null;
 		briefingRecipeChip?: { id: string; title: string } | null;
 		briefingFunFact?: HomeBriefingFunFact | null;
+		briefingOneLiner?: string | null;
 		canWrite?: boolean;
 		pantryUxV2Enabled?: boolean;
 		shoppingUxV2Enabled?: boolean;
 		loadFailed?: boolean;
 		brainScore?: BrainScoreSnapshot | null;
 		brainFeedbackV1?: boolean;
+		brainTimeline?: BrainTimelineEntry[];
+		wastePrevented?: WastePreventedSnapshot | null;
 	}
 
 	let {
@@ -60,12 +67,15 @@
 		recipeSuggestion = null,
 		briefingRecipeChip = null,
 		briefingFunFact = null,
+		briefingOneLiner = null,
 		canWrite = false,
 		pantryUxV2Enabled = false,
 		shoppingUxV2Enabled = false,
 		loadFailed = false,
 		brainScore = null,
-		brainFeedbackV1 = false
+		brainFeedbackV1 = false,
+		brainTimeline = [],
+		wastePrevented = null
 	}: Props = $props();
 
 	let acceptingReplenishment = $state(false);
@@ -172,6 +182,12 @@
 		{#if brainScore && brainScore.score > 0}
 			<BrainHomeCard snapshot={brainScore} />
 		{/if}
+		{#if wastePrevented}
+			<WastePreventedCard snapshot={wastePrevented} />
+		{/if}
+		{#if brainTimeline && brainTimeline.length > 0}
+			<BrainTimelineCard entries={brainTimeline} />
+		{/if}
 		{#if intelligence.replenishment.length > 1}
 			<ReplenishmentSection
 				suggestions={intelligence.replenishment.slice(1)}
@@ -191,6 +207,7 @@
 			{recipeSuggestion}
 			{briefingRecipeChip}
 			{briefingFunFact}
+			{briefingOneLiner}
 			{canWrite}
 			{pantryUxV2Enabled}
 			{shoppingUxV2Enabled}
