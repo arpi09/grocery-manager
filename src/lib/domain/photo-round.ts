@@ -10,6 +10,9 @@ export interface PhotoRoundDetectedItem {
 	location: StorageLocation;
 	expiresOn: string | null;
 	notes: string | null;
+	brand?: string | null;
+	packageSize?: string | null;
+	categoryHint?: string | null;
 }
 
 import type { ReceiptShelfLifePrediction } from '$lib/domain/receipt-line';

@@ -39,6 +39,7 @@
 		recipeSuggestion?: HomeBriefingRecipeCard | null;
 		briefingRecipeChip?: { id: string; title: string } | null;
 		briefingFunFact?: HomeBriefingFunFact | null;
+		briefingOneLiner?: string | null;
 		canWrite?: boolean;
 		pantryUxV2Enabled?: boolean;
 		shoppingUxV2Enabled?: boolean;
@@ -58,6 +59,7 @@
 		recipeSuggestion = null,
 		briefingRecipeChip = null,
 		briefingFunFact = null,
+		briefingOneLiner = null,
 		canWrite = false,
 		pantryUxV2Enabled = false,
 		shoppingUxV2Enabled = false,
@@ -173,7 +175,7 @@
 </script>
 
 <div class="home-v2-briefing" data-testid="home-v2-briefing">
-	<HomeBriefingGreeting greeting={greeting} status={statusPresentation} />
+	<HomeBriefingGreeting greeting={greeting} status={statusPresentation} statusOverride={briefingOneLiner} />
 
 	{#if forYou && forYouPresentation}
 		<p class="section-label">{t('home.v6.forYou.sectionLabel')}</p>

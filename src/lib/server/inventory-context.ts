@@ -25,6 +25,8 @@ export interface StructuredInventoryRow {
 	daysUntilExpiry: number | null;
 	expiresOn: string | null;
 	expiresOnSource: string | null;
+	purchasedAt: string | null;
+	daysSincePurchase: number | null;
 	typicalPortionUse: number | null;
 	notes: string | null;
 }
@@ -69,6 +71,12 @@ export function sortInventoryByUrgency(items: InventoryItem[]): InventoryItem[] 
 	return [...items].sort((a, b) => inventoryUrgencyScore(a) - inventoryUrgencyScore(b));
 }
 
+function daysSinceIsoDate(isoDate: string, today = new Date()): number {
+	const start = new Date(`${isoDate.slice(0, 10)}T12:00:00`);
+	const end = new Date(`${today.toISOString().slice(0, 10)}T12:00:00`);
+	return Math.max(0, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+}
+
 function toStructuredRow(
 	item: InventoryItem,
 	locale: PromptLocale,
@@ -76,6 +84,7 @@ function toStructuredRow(
 ): StructuredInventoryRow {
 	const stock = parseNumericQuantity(item.quantity);
 	const unit = item.unit;
+	const purchasedAt = item.createdAt.toISOString().slice(0, 10);
 	return {
 		id: item.id,
 		name: item.name,
@@ -85,6 +94,8 @@ function toStructuredRow(
 		daysUntilExpiry: item.expiresOn ? daysUntilExpiry(item.expiresOn) : null,
 		expiresOn: item.expiresOn,
 		expiresOnSource: item.expiresOnSource,
+		purchasedAt,
+		daysSincePurchase: daysSinceIsoDate(purchasedAt),
 		typicalPortionUse: stock !== null ? typicalPortionUse(stock, portions) : null,
 		notes: item.notes
 	};

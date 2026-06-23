@@ -21,9 +21,19 @@ import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { buildReturnUrlWithExpiryNudge } from '$lib/utils/expiry-nudge';
 
 import { getSnapshot as getBrainScoreSnapshot, type BrainScoreSnapshot } from '$lib/domain/brain-score';
+import type { BrainTimelineEntry } from '$lib/domain/brain-timeline';
+import { buildWastePreventedSnapshot, startOfCalendarMonth, type WastePreventedSnapshot } from '$lib/domain/waste-prevented';
+import { loadBrainTimeline } from '$lib/server/brain-timeline';
+import { consumptionRepository } from '$lib/server/di';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { purchasePatternRepository } from '$lib/server/di';
 import { isHomeUxV2Enabled } from '$lib/server/home-ux-v2-flag';
+import { isHomeBriefingAiEnabled, isReplenishmentRankEnabled } from '$lib/server/brain-feature-flags';
+import { generateHomeBriefingOneLiner } from '$lib/server/home-briefing-one-liner';
+import { getOpenAiApiKey } from '$lib/server/openai';
+import { rankReplenishmentSuggestions } from '$lib/server/replenishment-rank';
+import { loadReplenishmentFeedbackBlock } from '$lib/server/brain-feedback-context';
+import { learningFeedbackRepository } from '$lib/server/di';
 import {
 	buildHomeBriefingRecipeCard,
 	pickBriefingRecipeIdea
@@ -69,6 +79,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	};
 
 	let loadFailed = false;
+	const locale: Locale = isLocale(locals.locale) ? locals.locale : DEFAULT_LOCALE;
 
 	const summaryPromise = locals.inventoryService.getDashboard(householdId).catch((error) => {
 		if (homeUxV2Enabled) {
@@ -85,6 +96,22 @@ export const load: PageServerLoad = async ({ locals }) => {
 			}
 			return degrade('inventory intelligence', emptyIntelligence)(error);
 		});
+
+	const rankReplenishmentIfEnabled = async (
+		replenishment: HomeIntelligenceSnapshot['replenishment']
+	) => {
+		if (!isReplenishmentRankEnabled()) return replenishment;
+		const apiKey = getOpenAiApiKey();
+		if (!apiKey || replenishment.length <= 3) return replenishment;
+		const replenishmentFeedbackBlock = await loadReplenishmentFeedbackBlock(
+			learningFeedbackRepository,
+			householdId,
+			locale
+		);
+		return rankReplenishmentSuggestions(apiKey, replenishment, locale, {
+			replenishmentFeedbackBlock
+		});
+	};
 
 	const [
 		summary,
@@ -115,8 +142,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 			.catch(degrade('shopping cadence', null))
 	]);
 
-	const locale: Locale = isLocale(locals.locale) ? locals.locale : DEFAULT_LOCALE;
+	intelligence.replenishment = await rankReplenishmentIfEnabled(intelligence.replenishment);
 
+	let briefingOneLiner: string | null = null;
 	let recipeSuggestion: HomeBriefingRecipeCard | null = null;
 	let briefingRecipeChip: { id: string; title: string } | null = null;
 	let briefingFunFact: HomeBriefingFunFact | null = null;
@@ -129,6 +157,23 @@ export const load: PageServerLoad = async ({ locals }) => {
 				console.warn('[hem] fun fact degraded:', error);
 				return null;
 			});
+
+		if (isHomeBriefingAiEnabled()) {
+			const apiKey = getOpenAiApiKey();
+			if (apiKey) {
+				try {
+					briefingOneLiner = await generateHomeBriefingOneLiner(
+						apiKey,
+						summary,
+						intelligence,
+						locale,
+						shoppingListCount
+					);
+				} catch (error) {
+					console.warn('[hem] briefing one-liner degraded:', error);
+				}
+			}
+		}
 
 		if (locals.user) {
 			try {
@@ -154,6 +199,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 
 	let brainScore: BrainScoreSnapshot | null = null;
+	let brainTimeline: BrainTimelineEntry[] = [];
+	let wastePrevented: WastePreventedSnapshot | null = null;
 	if (isShelfLifeLearningEnabled()) {
 		try {
 			const [suggestions, receiptLineCount] = await Promise.all([
@@ -168,6 +215,24 @@ export const load: PageServerLoad = async ({ locals }) => {
 			brainScore = getBrainScoreSnapshot({ ruleCount, feedbackCount, receiptLineCount });
 		} catch (error) {
 			console.warn('[hem] brain score degraded:', error);
+		}
+
+		try {
+			brainTimeline = await loadBrainTimeline(householdId);
+		} catch (error) {
+			console.warn('[hem] brain timeline degraded:', error);
+		}
+
+		try {
+			const monthStart = startOfCalendarMonth();
+			const events = await consumptionRepository.listEventsForSavingsInPeriod(
+				householdId,
+				monthStart,
+				new Date()
+			);
+			wastePrevented = buildWastePreventedSnapshot(events, locale);
+		} catch (error) {
+			console.warn('[hem] waste prevented degraded:', error);
 		}
 	}
 
@@ -187,8 +252,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 		recipeSuggestion,
 		briefingRecipeChip,
 		briefingFunFact,
+		briefingOneLiner,
 		showMemoryExplorer: isShelfLifeLearningEnabled(),
-		brainScore
+		brainScore,
+		brainTimeline,
+		wastePrevented
 	};
 };
 

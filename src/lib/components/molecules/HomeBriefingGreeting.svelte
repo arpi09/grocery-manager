@@ -5,14 +5,17 @@
 	interface Props {
 		greeting: HomeBriefingMessagePresentation;
 		status: HomeBriefingMessagePresentation;
+		statusOverride?: string | null;
 	}
 
-	let { greeting, status }: Props = $props();
+	let { greeting, status, statusOverride = null }: Props = $props();
 </script>
 
 <div class="home-briefing-greeting" data-testid="home-briefing-greeting">
 	<h1 class="greeting">{t(greeting.key, greeting.params)}</h1>
-	<p class="status-line" data-testid="home-v2-status">{t(status.key, status.params)}</p>
+	<p class="status-line" data-testid="home-v2-status">
+		{statusOverride?.trim() ? statusOverride : t(status.key, status.params)}
+	</p>
 </div>
 
 <style>

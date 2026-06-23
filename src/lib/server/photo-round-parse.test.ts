@@ -7,6 +7,7 @@ import {
 	parsePhotoRoundZoneHint,
 	PHOTO_ROUND_ITEMS_SCHEMA,
 	PHOTO_ROUND_VALIDATION_PROMPT,
+	buildPhotoRoundUserPrompt,
 	photoRoundSystemPrompt
 } from './photo-round-parse';
 
@@ -42,12 +43,15 @@ describe('PHOTO_ROUND_ITEMS_SCHEMA', () => {
 		assertStrictOpenAiSchema(PHOTO_ROUND_ITEMS_SCHEMA);
 	});
 
-	it('includes expiresOn and notes on each item', () => {
+	it('includes expiresOn, notes, brand and categoryHint on each item', () => {
 		const itemSchema = PHOTO_ROUND_ITEMS_SCHEMA.properties.items.items as unknown as {
 			required: readonly string[];
 		};
 		expect(itemSchema.required).toContain('expiresOn');
 		expect(itemSchema.required).toContain('notes');
+		expect(itemSchema.required).toContain('brand');
+		expect(itemSchema.required).toContain('packageSize');
+		expect(itemSchema.required).toContain('categoryHint');
 	});
 });
 
@@ -70,7 +74,22 @@ describe('photoRoundSystemPrompt', () => {
 		expect(prompt).toContain('netto');
 		expect(prompt).toContain('expiresOn');
 		expect(prompt).toContain('INTE st');
-		expect(prompt).toContain('photo-round-v2');
+		expect(prompt).toContain('photo-round-v3');
+	});
+
+	it('includes brand, packageSize and categoryHint rules', () => {
+		const prompt = photoRoundSystemPrompt('fridge');
+		expect(prompt).toContain('brand');
+		expect(prompt).toContain('packageSize');
+		expect(prompt).toContain('categoryHint');
+	});
+});
+
+describe('buildPhotoRoundUserPrompt', () => {
+	it('includes multi-photo JSON context', () => {
+		const prompt = buildPhotoRoundUserPrompt('fridge', 3);
+		expect(prompt).toContain('"photoIndex":1');
+		expect(prompt).toContain('"totalPhotos":3');
 	});
 });
 
@@ -139,7 +158,10 @@ describe('parsePhotoRoundItems', () => {
 				confidence: 'high',
 				location: 'fridge',
 				expiresOn: '2026-06-15',
-				notes: 'Arla 3%'
+				notes: 'Arla 3%',
+				brand: null,
+				packageSize: null,
+				categoryHint: null
 			},
 			{
 				name: 'Pasta',
@@ -148,7 +170,10 @@ describe('parsePhotoRoundItems', () => {
 				confidence: 'medium',
 				location: 'cupboard',
 				expiresOn: null,
-				notes: null
+				notes: null,
+				brand: null,
+				packageSize: null,
+				categoryHint: null
 			}
 		]);
 	});
@@ -238,7 +263,10 @@ describe('parsePhotoRoundItems', () => {
 				confidence: 'medium',
 				location: 'fridge',
 				expiresOn: null,
-				notes: null
+				notes: null,
+				brand: null,
+				packageSize: null,
+				categoryHint: null
 			}
 		]);
 	});
@@ -317,7 +345,10 @@ describe('parsePhotoRoundResponse', () => {
 					confidence: 'high',
 					location: 'fridge',
 					expiresOn: '2026-06-01',
-					notes: null
+					notes: null,
+					brand: null,
+					packageSize: null,
+					categoryHint: null
 				}
 			]
 		});
@@ -352,7 +383,10 @@ describe('normalizePhotoRoundPayload', () => {
 					confidence: 'low',
 					location: 'fridge',
 					expiresOn: '',
-					notes: ''
+					notes: '',
+					brand: '',
+					packageSize: '',
+					categoryHint: ''
 				}
 			]
 		});

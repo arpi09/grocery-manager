@@ -3,55 +3,16 @@ import { json } from '@sveltejs/kit';
 import { translate } from '$lib/i18n/messages';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
-import {
-	normalizePromptLocale,
-	PROMPT_VERSION_PRODUCT_FROM_IMAGE,
-	promptLocaleInstruction,
-	promptLocaleTag
-} from '$lib/server/ai-prompt-shared';
 import { OPENAI_MODEL_NANO, requestStructuredJsonFromImage, translateOpenAiError } from '$lib/server/openai';
+import {
+	PRODUCT_FROM_IMAGE_SCHEMA,
+	buildProductFromImageSystemPrompt,
+	buildProductFromImageUserPrompt,
+	parseProductFromImageLocationHint
+} from '$lib/server/product-from-image-prompt';
+import { loadShelfLifePromptFeedbackBlocks } from '$lib/server/receipt-parse-feedback';
+import { learningFeedbackRepository } from '$lib/server/di';
 import type { RequestHandler } from './$types';
-
-const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
-
-const IMAGE_PRODUCT_SCHEMA = {
-	type: 'object',
-	properties: {
-		name: { type: 'string' },
-		quantity: { type: 'string' },
-		unit: { type: 'string' },
-		expiresOn: { type: 'string' },
-		notes: { type: 'string' },
-		confidence: { type: 'string', enum: ['high', 'medium', 'low'] }
-	},
-	required: ['name', 'quantity', 'unit', 'expiresOn', 'notes', 'confidence'],
-	additionalProperties: false
-} as const;
-
-function buildProductFromImageSystemPrompt(locale: string): string {
-	const promptLocale = normalizePromptLocale(locale);
-	const nameRule =
-		promptLocale === 'en'
-			? '- name: short product name in English'
-			: '- name: kort svenskt produktnamn';
-	return [
-		promptLocale === 'en'
-			? 'You extract grocery product data from a photo label.'
-			: 'Du extraherar livsmedelsdata från en produktetikett.',
-		promptLocaleInstruction(promptLocale),
-		'Output JSON only with:',
-		'{"name":"","quantity":"","unit":"","expiresOn":"","notes":"","confidence":"high|medium|low"}',
-		'Rules:',
-		nameRule,
-		'- quantity: numeric-like string (fallback "1")',
-		'- unit: common short unit (st, g, kg, l, ml, förp, pack) or empty string',
-		'- expiresOn: best-before / use-by date as YYYY-MM-DD when visible on the label, otherwise empty string',
-		'- notes: short useful details (brand/flavor/size) or empty string',
-		'- confidence is high when label is very clear, medium when mostly clear, low when uncertain',
-		'- never output markdown code fences',
-		`promptVersion: ${PROMPT_VERSION_PRODUCT_FROM_IMAGE}`
-	].join('\n');
-}
 
 interface ImageProduct {
 	name: string;
@@ -60,7 +21,10 @@ interface ImageProduct {
 	expiresOn: string | null;
 	notes: string | null;
 	confidence: 'high' | 'medium' | 'low';
+	normalizedKey: string | null;
 }
+
+const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
 
 function parseExpiresOn(raw: unknown): string | null {
 	if (typeof raw !== 'string') return null;
@@ -94,6 +58,11 @@ function parseProduct(raw: unknown): ImageProduct | null {
 			? obj.confidence
 			: null;
 
+	const normalizedKey =
+		typeof obj.normalizedKey === 'string' && obj.normalizedKey.trim()
+			? obj.normalizedKey.trim().toLowerCase()
+			: null;
+
 	if (!name || !confidence) {
 		return null;
 	}
@@ -104,7 +73,8 @@ function parseProduct(raw: unknown): ImageProduct | null {
 		unit,
 		expiresOn,
 		notes,
-		confidence
+		confidence,
+		normalizedKey
 	};
 }
 
@@ -152,19 +122,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const bytes = await image.arrayBuffer();
 		const base64 = Buffer.from(bytes).toString('base64');
 		const dataUrl = `data:${image.type};base64,${base64}`;
-		const promptLocale = normalizePromptLocale(locals.locale);
+		const locationHint = parseProductFromImageLocationHint(formData.get('location'));
+		const shelfLifeFeedback =
+			locals.householdId != null
+				? await loadShelfLifePromptFeedbackBlocks(learningFeedbackRepository, locals.householdId)
+				: { priorCorrectionsBlock: '', globalFewShotBlock: '' };
 
 		const result = await requestStructuredJsonFromImage(apiKey, {
 			model: OPENAI_MODEL_NANO,
-			systemPrompt: buildProductFromImageSystemPrompt(locals.locale),
-			userPrompt: JSON.stringify({
-				promptVersion: PROMPT_VERSION_PRODUCT_FROM_IMAGE,
-				locale: promptLocaleTag(promptLocale),
-				instruction: 'Extract product fields from this image.'
-			}),
+			systemPrompt: buildProductFromImageSystemPrompt(locals.locale, shelfLifeFeedback),
+			userPrompt: buildProductFromImageUserPrompt(locals.locale, locationHint),
 			imageDataUrl: dataUrl,
 			schemaName: 'image_product',
-			schema: IMAGE_PRODUCT_SCHEMA
+			schema: PRODUCT_FROM_IMAGE_SCHEMA
 		});
 
 		if (!result.ok) {

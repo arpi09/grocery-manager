@@ -2,6 +2,7 @@ import { env } from '$env/dynamic/private';
 import type { Locale } from '$lib/i18n/locale';
 import type { MessageKey } from '$lib/i18n/messages';
 import { translate } from '$lib/i18n/messages';
+import { recordOpenAiFailure, recordOpenAiSuccess } from '$lib/server/openai-circuit-breaker';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
 export const OPENAI_MODEL = 'gpt-4.1-mini';
@@ -211,26 +212,37 @@ async function postOpenAiStructured(
 	return { ok: true, data };
 }
 
+function trackOpenAiResult(result: StructuredJsonResult): StructuredJsonResult {
+	if (result.ok) {
+		recordOpenAiSuccess();
+	} else {
+		recordOpenAiFailure();
+	}
+	return result;
+}
+
 export async function requestStructuredJson(
 	apiKey: string,
 	options: StructuredResponseOptions
 ): Promise<StructuredJsonResult> {
-	return postOpenAiStructured(
-		apiKey,
-		[
-			{
-				role: 'system',
-				content: [{ type: 'input_text', text: options.systemPrompt }]
-			},
-			{
-				role: 'user',
-				content: [{ type: 'input_text', text: options.userPrompt }]
-			}
-		],
-		options.schemaName,
-		options.schema,
-		options.strict ?? true,
-		options.model
+	return trackOpenAiResult(
+		await postOpenAiStructured(
+			apiKey,
+			[
+				{
+					role: 'system',
+					content: [{ type: 'input_text', text: options.systemPrompt }]
+				},
+				{
+					role: 'user',
+					content: [{ type: 'input_text', text: options.userPrompt }]
+				}
+			],
+			options.schemaName,
+			options.schema,
+			options.strict ?? true,
+			options.model
+		)
 	);
 }
 
@@ -259,22 +271,24 @@ export async function requestStructuredJsonFromImages(
 		...(options.imageDetail ? { detail: options.imageDetail } : {})
 	}));
 
-	return postOpenAiStructured(
-		apiKey,
-		[
-			{
-				role: 'system',
-				content: [{ type: 'input_text', text: options.systemPrompt }]
-			},
-			{
-				role: 'user',
-				content: [{ type: 'input_text', text: options.userPrompt }, ...imageParts]
-			}
-		],
-		options.schemaName,
-		options.schema,
-		options.strict ?? true,
-		options.model
+	return trackOpenAiResult(
+		await postOpenAiStructured(
+			apiKey,
+			[
+				{
+					role: 'system',
+					content: [{ type: 'input_text', text: options.systemPrompt }]
+				},
+				{
+					role: 'user',
+					content: [{ type: 'input_text', text: options.userPrompt }, ...imageParts]
+				}
+			],
+			options.schemaName,
+			options.schema,
+			options.strict ?? true,
+			options.model
+		)
 	);
 }
 

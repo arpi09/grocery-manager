@@ -8,7 +8,10 @@ export function photoRoundItemsToReceiptLines(items: PhotoRoundDetectedItem[]): 
 		name: item.name,
 		quantity: item.quantity,
 		unit: item.unit,
-		location: item.location
+		location: item.location,
+		brand: item.brand ?? null,
+		packageSize: item.packageSize ?? null,
+		categoryHint: item.categoryHint ?? null
 	}));
 }
 

@@ -15,6 +15,7 @@ import {
 	type StructuredJsonResult
 } from '$lib/server/openai';
 import { PROMPT_VERSION_PHOTO_ROUND } from '$lib/server/ai-prompt-shared';
+import { pantryDeltaSystemPromptBlock } from '$lib/server/pantry-delta-prompt';
 
 const LOCATION_ENUM = ['fridge', 'freezer', 'cupboard'] as const;
 
@@ -25,7 +26,10 @@ const ITEM_PROPERTIES = {
 	confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
 	location: { type: 'string', enum: LOCATION_ENUM },
 	expiresOn: { type: 'string' },
-	notes: { type: 'string' }
+	notes: { type: 'string' },
+	brand: { type: 'string' },
+	packageSize: { type: 'string' },
+	categoryHint: { type: 'string' }
 } as const;
 
 export const PHOTO_ROUND_ITEMS_SCHEMA = {
@@ -45,7 +49,10 @@ export const PHOTO_ROUND_ITEMS_SCHEMA = {
 					'confidence',
 					'location',
 					'expiresOn',
-					'notes'
+					'notes',
+					'brand',
+					'packageSize',
+					'categoryHint'
 				],
 				additionalProperties: false
 			}
@@ -56,7 +63,7 @@ export const PHOTO_ROUND_ITEMS_SCHEMA = {
 } as const;
 
 const ITEM_JSON_TEMPLATE =
-	'{"name":"","quantity":"","unit":"","confidence":"high|medium|low","location":"fridge|freezer|cupboard","expiresOn":"","notes":""}';
+	'{"name":"","quantity":"","unit":"","confidence":"high|medium|low","location":"fridge|freezer|cupboard","expiresOn":"","notes":"","brand":"","packageSize":"","categoryHint":""}';
 
 const ZONE_CONTEXT: Record<StorageLocation, string> = {
 	fridge: 'kylskåp (kyl)',
@@ -86,7 +93,11 @@ const WHOLE_FRIDGE_RULES = [
 	'- medium confidence om etikett delvis dold; hoppa över oidentifierbara förpackningar.'
 ].join('\n');
 
-export function photoRoundSystemPrompt(zoneHint: StorageLocation | null): string {
+export function photoRoundSystemPrompt(
+	zoneHint: StorageLocation | null,
+	feedback?: { priorCorrectionsBlock?: string; globalFewShotBlock?: string },
+	options?: { pantryDelta?: boolean }
+): string {
 	const zoneLines = zoneHint
 		? [
 				`Förslag från användaren: ${ZONE_CONTEXT[zoneHint]}.`,
@@ -100,6 +111,9 @@ export function photoRoundSystemPrompt(zoneHint: StorageLocation | null): string
 	return [
 		'Du inventerar ett svenskt hushålls skafferi från foton.',
 		...zoneLines,
+		options?.pantryDelta ? pantryDeltaSystemPromptBlock([]) : '',
+		feedback?.priorCorrectionsBlock?.trim(),
+		feedback?.globalFewShotBlock?.trim(),
 		`Returnera JSON: {"detectedZone":"fridge|freezer|cupboard","zoneConfidence":"high|medium|low","items":[${ITEM_JSON_TEMPLATE}]}`,
 		'Strikta regler (anti-hallucination):',
 		'- Lista ENDAST livsmedel och drycker som är tydligt synliga i bilderna',
@@ -109,14 +123,19 @@ export function photoRoundSystemPrompt(zoneHint: StorageLocation | null): string
 		'- quantity: numerisk mängd som sträng (standard "1")',
 		UNIT_VOLUME_RULES,
 		EXPIRY_RULES,
-		'- notes: varumärke, smak, storlek — tom sträng om inget extra syns',
+		'- brand: varumärke om synligt på etikett — tom sträng annars',
+		'- packageSize: förpackningsstorlek (t.ex. "500 g", "1,5 l") — tom sträng om okänd',
+		'- categoryHint: livsmedelskategori (mejeri, grönsak, chark, torrvara, fisk, bröd) — tom om osäker',
+		'- notes: smak, extra detaljer — tom sträng om inget extra syns (inte varumärke/storlek)',
 		'- confidence: high = tydligt läsbar etikett/hel förpackning, medium = delvis synlig, low = osäker',
 		LOCATION_RULES,
 		WHOLE_FRIDGE_RULES,
 		'- Slå ihop dubbletter av samma vara till en rad med summerad quantity om möjligt',
 		'- max 30 rader',
 		`promptVersion: ${PROMPT_VERSION_PHOTO_ROUND}`
-	].join('\n');
+	]
+		.filter(Boolean)
+		.join('\n');
 }
 
 export const PHOTO_ROUND_VALIDATION_PROMPT = [
@@ -130,13 +149,24 @@ export const PHOTO_ROUND_VALIDATION_PROMPT = [
 	`promptVersion: ${PROMPT_VERSION_PHOTO_ROUND}`
 ].join('\n');
 
+function coerceOptionalString(value: unknown): string | null {
+	if (typeof value !== 'string') return null;
+	const trimmed = value.trim();
+	return trimmed ? trimmed : null;
+}
+
 function buildPhotoRoundContextBlock(
 	zoneHint: StorageLocation | null,
-	alreadyDetected: PhotoRoundDetectedItem[]
+	alreadyDetected: PhotoRoundDetectedItem[],
+	options: { photoIndex?: number; totalPhotos?: number } = {}
 ): string {
 	const context: Record<string, unknown> = {};
 	if (zoneHint) {
 		context.zoneHint = zoneHint;
+	}
+	if (options.totalPhotos != null && options.totalPhotos > 1) {
+		context.photoIndex = options.photoIndex ?? 1;
+		context.totalPhotos = options.totalPhotos;
 	}
 	if (alreadyDetected.length > 0) {
 		context.alreadyDetected = alreadyDetected.map((item) => item.name);
@@ -263,7 +293,10 @@ export function normalizePhotoRoundPayload(raw: unknown): unknown {
 				confidence: coerceConfidence(row.confidence) ?? 'low',
 				location: coerceLocation(row.location) ?? '',
 				expiresOn: coerceExpiresOn(row.expiresOn) ?? '',
-				notes: coerceNotes(row.notes) ?? ''
+				notes: coerceNotes(row.notes) ?? '',
+				brand: coerceOptionalString(row.brand) ?? '',
+				packageSize: coerceOptionalString(row.packageSize) ?? '',
+				categoryHint: coerceOptionalString(row.categoryHint) ?? ''
 			};
 		})
 	};
@@ -311,7 +344,10 @@ export function parsePhotoRoundItems(
 			confidence,
 			location: resolveReceiptLineLocation(name, row.location || fallbackZone),
 			expiresOn: coerceExpiresOn(row.expiresOn),
-			notes: coerceNotes(row.notes)
+			notes: coerceNotes(row.notes),
+			brand: coerceOptionalString(row.brand),
+			packageSize: coerceOptionalString(row.packageSize),
+			categoryHint: coerceOptionalString(row.categoryHint)
 		});
 	}
 
@@ -387,28 +423,61 @@ async function requestPhotoRoundStructured(
 		: await requestStructuredJson(apiKey, { ...base, strict: false });
 }
 
+export function buildPhotoRoundUserPrompt(
+	zoneHint: StorageLocation | null,
+	imageCount: number,
+	alreadyDetected: PhotoRoundDetectedItem[] = [],
+	deltaContext?: string
+): string {
+	const contextBlock = buildPhotoRoundContextBlock(zoneHint, alreadyDetected, {
+		photoIndex: 1,
+		totalPhotos: imageCount
+	});
+
+	return [
+		zoneHint
+			? `Inventera varorna i ${ZONE_CONTEXT[zoneHint]} från ${imageCount} foto.`
+			: `Inventera varorna och identifiera zonen från ${imageCount} foto.`,
+		imageCount > 1
+			? 'Flera foton skickades — slå ihop synliga varor utan dubbletter.'
+			: '',
+		deltaContext?.trim(),
+		contextBlock ? `Kontext: ${contextBlock}` : ''
+	]
+		.filter(Boolean)
+		.join('\n');
+}
+
 export async function parsePhotoRoundFromImages(
 	apiKey: string,
 	zoneHint: StorageLocation | null,
 	imageDataUrls: string[],
-	options?: { validate?: boolean; alreadyDetected?: PhotoRoundDetectedItem[] }
+	options?: {
+		validate?: boolean;
+		alreadyDetected?: PhotoRoundDetectedItem[];
+		priorCorrectionsBlock?: string;
+		globalFewShotBlock?: string;
+		pantryDelta?: boolean;
+		deltaContext?: string;
+	}
 ): Promise<
 	| ({ ok: true } & PhotoRoundParseResult)
 	| ({ ok: false } & OpenAiFailureResult)
 > {
 	const alreadyDetected = options?.alreadyDetected ?? [];
-	const contextBlock = buildPhotoRoundContextBlock(zoneHint, alreadyDetected);
+	const userPrompt = buildPhotoRoundUserPrompt(
+		zoneHint,
+		imageDataUrls.length,
+		alreadyDetected,
+		options?.deltaContext
+	);
 
 	const initial = await requestPhotoRoundStructured(apiKey, {
-		systemPrompt: photoRoundSystemPrompt(zoneHint),
-		userPrompt: [
-			zoneHint
-				? `Inventera varorna i ${ZONE_CONTEXT[zoneHint]} från ${imageDataUrls.length} foto.`
-				: `Inventera varorna och identifiera zonen från ${imageDataUrls.length} foto.`,
-			contextBlock ? `Kontext: ${contextBlock}` : ''
-		]
-			.filter(Boolean)
-			.join('\n'),
+		systemPrompt: photoRoundSystemPrompt(zoneHint, {
+			priorCorrectionsBlock: options?.priorCorrectionsBlock,
+			globalFewShotBlock: options?.globalFewShotBlock
+		}, { pantryDelta: options?.pantryDelta }),
+		userPrompt,
 		imageDataUrls
 	});
 

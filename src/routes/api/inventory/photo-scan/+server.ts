@@ -7,7 +7,11 @@ import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { e2eMockPhotoRoundParse, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 import { translateOpenAiError, missingOpenAiKeyMessage } from '$lib/server/openai';
+import { isPhotoValidationEnabled } from '$lib/server/brain-feature-flags';
 import { parsePhotoRoundFromImages, parsePhotoRoundZoneHint } from '$lib/server/photo-round-parse';
+import { loadShelfLifePromptFeedbackBlocks } from '$lib/server/receipt-parse-feedback';
+import { learningFeedbackRepository } from '$lib/server/di';
+import { buildPantryDeltaUserContext } from '$lib/server/pantry-delta-prompt';
 import { enrichPhotoRoundShelfLife } from '$lib/server/photo-round-shelf-life';
 import { isShelfLifeEstimatesInReceiptEnabled } from '$lib/server/shelf-life-learning-flag';
 import { recordProductEvent } from '$lib/server/product-events';
@@ -93,7 +97,25 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		imageDataUrls.push(`data:${file.type};base64,${base64}`);
 	}
 
-	const aiResult = await parsePhotoRoundFromImages(apiKey, zoneHint, imageDataUrls);
+	const shelfLifeFeedback =
+		locals.householdId != null
+			? await loadShelfLifePromptFeedbackBlocks(learningFeedbackRepository, locals.householdId)
+			: { priorCorrectionsBlock: '', globalFewShotBlock: '' };
+
+	const pantryDelta = formData.get('delta') === '1' || formData.get('delta') === 'true';
+	let deltaContext: string | undefined;
+	if (pantryDelta && locals.householdId) {
+		const inventoryItems = await locals.inventoryService.listAll(locals.householdId);
+		deltaContext = buildPantryDeltaUserContext(inventoryItems, zoneHint, uploads.length);
+	}
+
+	const aiResult = await parsePhotoRoundFromImages(apiKey, zoneHint, imageDataUrls, {
+		validate: isPhotoValidationEnabled(),
+		priorCorrectionsBlock: shelfLifeFeedback.priorCorrectionsBlock,
+		globalFewShotBlock: shelfLifeFeedback.globalFewShotBlock,
+		pantryDelta,
+		deltaContext
+	});
 	if (!aiResult.ok) {
 		return json({ error: translateOpenAiError(locals.locale, aiResult) }, { status: aiResult.status });
 	}
@@ -117,7 +139,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			zone: aiResult.detectedZone,
 			zoneConfidence: aiResult.zoneConfidence,
 			zoneHint: zoneHint ?? undefined,
-			imageCount: uploads.length
+			imageCount: uploads.length,
+			...(pantryDelta ? { pantryDelta: true } : {})
 		}
 	});
 
@@ -125,6 +148,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		items: aiResult.items,
 		detectedZone: aiResult.detectedZone,
 		zoneConfidence: aiResult.zoneConfidence,
+		...(pantryDelta ? { pantryDelta: true } : {}),
 		...(shelfLifePredictions ? { shelfLifePredictions } : {})
-	} satisfies PhotoRoundParseResult);
+	} satisfies PhotoRoundParseResult & { pantryDelta?: boolean });
 };
