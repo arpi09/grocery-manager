@@ -178,6 +178,20 @@ Coordinator kan anropa begränsade typer, t.ex. `explore`, `shell`, `generalPurp
 
 **Survival mode (WIP=1):** vid mycket tight budget — max 1 feature-branch + dev-runtime; inga parallella swarms. Aktiveras i coordinator-session, inte i denna fils detaljer.
 
+### Under cost pressure
+
+When spending-limit or personal cost mode is active ([`.cursor/rules/personal-cost-always.mdc`](../.cursor/rules/personal-cost-always.mdc)):
+
+| Default | Under cost pressure |
+|---------|---------------------|
+| WIP 3, coordinator may spawn | **Max 1 implementation-agent** per user request |
+| Multitask / parallel builds | **Off** unless user explicitly says "parallel" |
+| `pr:gate` in agent loop | **`npm run quick:dev` only** during iteration |
+| Explore subagents for codebase | **grep/read in main agent** via `AGENTS.md` + `CODEBASE_MAP` |
+| Long multi-feature threads | **New chat** per feature area |
+
+Full policy: [coordinator-personal-cost-mode.mdc](../.cursor/rules/coordinator-personal-cost-mode.mdc) · [coordinator-spawn-budget.mdc](../.cursor/rules/coordinator-spawn-budget.mdc). Prompt templates and lean-week checklist: [`AGENTS.md`](../AGENTS.md#cost-conscious-agent).
+
 ---
 
 ## Merge queue (branch → master → deploy)
@@ -266,6 +280,7 @@ Starta alltid med [`private/NEW_CURSOR_AGENT_START.md`](../private/NEW_CURSOR_AG
 
 Aktivera eller referera vid behov:
 
+- `.cursor/rules/personal-cost-always.mdc` (alwaysApply — cost defaults)
 - `.cursor/rules/coordinator-planning.mdc`
 - `.cursor/rules/coordinator-v2.mdc`
 - `.cursor/rules/coordinator-personal-cost-mode.mdc`

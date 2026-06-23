@@ -22,3 +22,9 @@ Copy this file to `private/README.md` locally. Everything under `private/` excep
 - No API keys, passwords, or `.env` contents in this folder.
 - Agents refresh these files locally; they are **not** source of truth for prod.
 - For onboarding: use `npm run setup:agent` and [`AGENTS.md`](../AGENTS.md).
+
+## Suggested Cursor User Rule (cost pressure)
+
+Add in Cursor **Settings → Rules → User Rules** to reinforce repo defaults ([`personal-cost-always.mdc`](../.cursor/rules/personal-cost-always.mdc)):
+
+> Personal cost mode: max 1 subagent per request. No Multitask unless I say parallel. Default `quick:dev` not `pr:gate`. New chat for new features. No explore subagents — use grep/read in main agent.
