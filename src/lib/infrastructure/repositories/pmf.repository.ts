@@ -44,6 +44,16 @@ import {
 	MARKET_V01_METRIC_EVENT_TYPES,
 	type MarketV01MetricsSnapshot
 } from '$lib/domain/market-v01-metrics';
+import {
+	BRAIN_METRIC_EVENT_TYPES,
+	computeTimeToReviewMinutes,
+	emptyBrainMetricEventCounts,
+	emptyBrainReceiptFunnelCounts,
+	modelVersionToExpiresOnSource,
+	type BrainMetricEventType,
+	type BrainMetricsRawCounts,
+	type BrainMetricExpiresOnSource
+} from '$lib/domain/brain-metrics-admin';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { db } from '$lib/infrastructure/db';
 import {
@@ -51,6 +61,7 @@ import {
 	householdMemberTable,
 	householdTable,
 	inventoryItemTable,
+	learningFeedbackTable,
 	productEventTable,
 	userTable
 } from '$lib/infrastructure/db/schema';
@@ -81,6 +92,7 @@ export interface IPmfRepository {
 	getAcquisitionMetrics(now?: Date): Promise<AcquisitionMetricsSnapshot>;
 	getMarketV01Metrics(now?: Date): Promise<MarketV01MetricsSnapshot>;
 	countDistinctHouseholdsWithEventSince(eventType: ProductEventType, since: Date): Promise<number>;
+	getBrainMetricsSince(since: Date, now?: Date): Promise<BrainMetricsRawCounts>;
 }
 
 function userIdsFromEventRows(rows: Array<{ userId: string | null }>): Set<string> {
@@ -687,5 +699,226 @@ export class DrizzlePmfRepository implements IPmfRepository {
 			periodEnd,
 			periodDays
 		});
+	}
+
+	async getBrainMetricsSince(since: Date, now = new Date()): Promise<BrainMetricsRawCounts> {
+		const reviewEventTypes = ['receipt_import_started', 'receipt_review_completed'] as const;
+		const queryableBrainEventTypes = BRAIN_METRIC_EVENT_TYPES.filter(
+			(eventType) => eventType !== 'openai_schema_retry'
+		);
+
+		const [
+			parseRows,
+			eventCountRows,
+			reviewTimingRows,
+			reviewMetadataRows,
+			feedbackRows,
+			topCorrectedRows
+		] = await Promise.all([
+			db
+				.select({ metadata: productEventTable.metadata })
+				.from(productEventTable)
+				.where(
+					and(eq(productEventTable.eventType, 'receipt_parsed'), gte(productEventTable.createdAt, since))
+				),
+			db
+				.select({
+					eventType: productEventTable.eventType,
+					count: sql<number>`count(*)::int`
+				})
+				.from(productEventTable)
+				.where(
+					and(
+						inArray(productEventTable.eventType, [...queryableBrainEventTypes]),
+						gte(productEventTable.createdAt, since)
+					)
+				)
+				.groupBy(productEventTable.eventType),
+			db
+				.select({
+					userId: productEventTable.userId,
+					eventType: productEventTable.eventType,
+					createdAt: productEventTable.createdAt
+				})
+				.from(productEventTable)
+				.where(
+					and(
+						inArray(productEventTable.eventType, [...reviewEventTypes]),
+						gte(productEventTable.createdAt, since),
+						sql`${productEventTable.userId} is not null`
+					)
+				),
+			db
+				.select({ metadata: productEventTable.metadata })
+				.from(productEventTable)
+				.where(
+					and(
+						eq(productEventTable.eventType, 'receipt_review_completed'),
+						gte(productEventTable.createdAt, since)
+					)
+				),
+			db
+				.select({
+					modelVersion: learningFeedbackTable.modelVersion,
+					feedbackType: learningFeedbackTable.feedbackType,
+					count: sql<number>`count(*)::int`
+				})
+				.from(learningFeedbackTable)
+				.where(
+					and(
+						eq(learningFeedbackTable.predictorId, 'shelf_life'),
+						inArray(learningFeedbackTable.feedbackType, ['corrected', 'accepted']),
+						gte(learningFeedbackTable.createdAt, since)
+					)
+				)
+				.groupBy(learningFeedbackTable.modelVersion, learningFeedbackTable.feedbackType),
+			db
+				.select({
+					subjectKey: learningFeedbackTable.subjectKey,
+					productName: sql<string | null>`max(${learningFeedbackTable.contextJson}->>'productName')`,
+					correctionCount: sql<number>`count(*)::int`
+				})
+				.from(learningFeedbackTable)
+				.where(
+					and(
+						eq(learningFeedbackTable.predictorId, 'shelf_life'),
+						eq(learningFeedbackTable.feedbackType, 'corrected'),
+						gte(learningFeedbackTable.createdAt, since)
+					)
+				)
+				.groupBy(learningFeedbackTable.subjectKey)
+				.orderBy(desc(sql`count(*)`))
+				.limit(10)
+		]);
+
+		let bbfSum = 0;
+		let bbfCount = 0;
+		let aiBatchUsedCount = 0;
+		let highConfidenceSum = 0;
+		let highConfidenceCount = 0;
+		let aiFallbackSum = 0;
+		let aiFallbackCount = 0;
+		let totalParsedLines = 0;
+		let totalLowLineConfidenceCount = 0;
+
+		for (const row of parseRows) {
+			if (!row.metadata) continue;
+			try {
+				const metadata = JSON.parse(row.metadata) as {
+					bbfCoveragePercent?: number;
+					aiBatchUsed?: boolean;
+					highConfidencePercent?: number;
+					aiFallbackPercent?: number;
+					lineCount?: number;
+					lowLineConfidenceCount?: number;
+				};
+				if (typeof metadata.bbfCoveragePercent === 'number') {
+					bbfSum += metadata.bbfCoveragePercent;
+					bbfCount += 1;
+				}
+				if (metadata.aiBatchUsed) {
+					aiBatchUsedCount += 1;
+				}
+				if (typeof metadata.highConfidencePercent === 'number') {
+					highConfidenceSum += metadata.highConfidencePercent;
+					highConfidenceCount += 1;
+				}
+				if (typeof metadata.aiFallbackPercent === 'number') {
+					aiFallbackSum += metadata.aiFallbackPercent;
+					aiFallbackCount += 1;
+				}
+				if (typeof metadata.lineCount === 'number') {
+					totalParsedLines += metadata.lineCount;
+				}
+				if (typeof metadata.lowLineConfidenceCount === 'number') {
+					totalLowLineConfidenceCount += metadata.lowLineConfidenceCount;
+				}
+			} catch {
+				// skip malformed metadata
+			}
+		}
+
+		const eventCounts = emptyBrainMetricEventCounts();
+		for (const row of eventCountRows) {
+			const key = row.eventType as BrainMetricEventType;
+			if (key in eventCounts) {
+				eventCounts[key] = row.count ?? 0;
+			}
+		}
+
+		const funnelCounts = emptyBrainReceiptFunnelCounts();
+		funnelCounts.receipt_import_started = eventCounts.receipt_import_started;
+		funnelCounts.receipt_uploaded = eventCounts.receipt_uploaded;
+		funnelCounts.receipt_parsed = eventCounts.receipt_parsed;
+		funnelCounts.receipt_review_completed = eventCounts.receipt_review_completed;
+
+		let quickConfirmCount = 0;
+		for (const row of reviewMetadataRows) {
+			if (!row.metadata) continue;
+			try {
+				const metadata = JSON.parse(row.metadata) as { quickConfirm?: boolean };
+				if (metadata.quickConfirm) quickConfirmCount += 1;
+			} catch {
+				// skip malformed metadata
+			}
+		}
+
+		const correctionMap = new Map<
+			BrainMetricExpiresOnSource,
+			{ corrected: number; accepted: number }
+		>();
+		for (const row of feedbackRows) {
+			const source = modelVersionToExpiresOnSource(row.modelVersion);
+			const current = correctionMap.get(source) ?? { corrected: 0, accepted: 0 };
+			if (row.feedbackType === 'corrected') {
+				current.corrected += row.count ?? 0;
+			} else if (row.feedbackType === 'accepted') {
+				current.accepted += row.count ?? 0;
+			}
+			correctionMap.set(source, current);
+		}
+
+		const timingEvents = reviewTimingRows
+			.filter((row): row is typeof row & { userId: string } => row.userId != null)
+			.map((row) => ({
+				userId: row.userId,
+				eventType: row.eventType,
+				createdAt: row.createdAt
+			}));
+
+		return {
+			periodStart: since,
+			periodEnd: now,
+			receiptParseCount: parseRows.length,
+			avgBbfCoveragePercent: bbfCount > 0 ? Math.round(bbfSum / bbfCount) : 0,
+			aiBatchUsedCount,
+			receiptParsedAggregates: {
+				totalParsedLines,
+				avgHighConfidencePercent:
+					highConfidenceCount > 0 ? Math.round(highConfidenceSum / highConfidenceCount) : 0,
+				avgAiFallbackPercent: aiFallbackCount > 0 ? Math.round(aiFallbackSum / aiFallbackCount) : 0,
+				totalLowLineConfidenceCount
+			},
+			funnelCounts,
+			quickConfirmCount,
+			reviewCompletedCount: funnelCounts.receipt_review_completed,
+			timeToReviewMinutes: computeTimeToReviewMinutes(timingEvents),
+			brainExplanationViewed: eventCounts.brain_explanation_viewed,
+			eatFirst: {
+				eatFirstWeekViewed: eventCounts.eat_first_week_viewed,
+				eatFirstPlanApplied: eventCounts.eat_first_plan_applied,
+				pantryUseSoonTapped: eventCounts.pantry_use_soon_tapped
+			},
+			correctionBySource: [...correctionMap.entries()].map(([source, counts]) => ({
+				source,
+				...counts
+			})),
+			topCorrectedProducts: topCorrectedRows.map((row) => ({
+				subjectKey: row.subjectKey,
+				productName: row.productName,
+				correctionCount: row.correctionCount ?? 0
+			})),
+			schemaRetryCount: eventCounts.openai_schema_retry
+		};
 	}
 }

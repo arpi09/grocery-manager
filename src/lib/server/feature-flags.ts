@@ -17,7 +17,8 @@ export const FEATURE_FLAG_ENV = {
 	RECEIPT_AI_BATCH: 'RECEIPT_AI_BATCH_ENABLED',
 	AUTO_FINISH: 'AUTO_FINISH_ENABLED',
 	GLOBAL_SHELF_LIFE_DB: 'GLOBAL_SHELF_LIFE_DB_ENABLED',
-	STORE_RECOMMENDATION_V0: 'STORE_RECOMMENDATION_V0_ENABLED'
+	STORE_RECOMMENDATION_V0: 'STORE_RECOMMENDATION_V0_ENABLED',
+	RECIPE_REFINEMENT: 'RECIPE_REFINEMENT_ENABLED'
 } as const;
 
 function isEnvTrue(key: string): boolean {
@@ -92,4 +93,9 @@ export function isAutoFinishEnabled(): boolean {
 /** Server flag: expanded global shelf-life keyword DB (default on). */
 export function isGlobalShelfLifeDbEnabled(): boolean {
 	return process.env[FEATURE_FLAG_ENV.GLOBAL_SHELF_LIFE_DB] !== 'false';
+}
+
+/** Server flag: second LLM refinement pass for recipe generation (default on). */
+export function isRecipeRefinementEnabled(): boolean {
+	return process.env[FEATURE_FLAG_ENV.RECIPE_REFINEMENT] !== 'false';
 }

@@ -211,6 +211,7 @@ const INCREMENTAL_MIGRATIONS = [
 	'0058_moment_cta_telemetry.sql',
 	'0059_store_recommendation_telemetry.sql',
 	'0060_acquisition_loops_telemetry.sql',
+	'0061_openai_schema_retry_telemetry.sql',
 	'0061_price_intelligence_phase1.sql',
 	'0063_ata_page_telemetry.sql',
 	'0064_market_v01.sql',

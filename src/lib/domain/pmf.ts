@@ -118,6 +118,7 @@ export const PRODUCT_EVENT_TYPES = [
 	'brain_feedback_negative',
 	'brain_feedback_dismissed',
 	'brain_explanation_viewed',
+	'openai_schema_retry',
 	'memory_rule_created',
 	'memory_rule_updated',
 	'memory_rule_rejected',

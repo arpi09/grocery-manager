@@ -4,5 +4,6 @@
 export {
 	isReceiptAiBatchEnabled,
 	isAutoFinishEnabled,
-	isGlobalShelfLifeDbEnabled
+	isGlobalShelfLifeDbEnabled,
+	isRecipeRefinementEnabled
 } from './feature-flags';

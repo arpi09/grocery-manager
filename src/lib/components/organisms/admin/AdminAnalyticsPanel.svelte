@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AdminAcquisitionPanel from '$lib/components/organisms/admin/AdminAcquisitionPanel.svelte';
+	import AdminBrainMetricsPanel from '$lib/components/organisms/admin/AdminBrainMetricsPanel.svelte';
 	import AdminLaunchCohortPanel from '$lib/components/organisms/admin/AdminLaunchCohortPanel.svelte';
 	import AdminPmfFunnelPanel from '$lib/components/organisms/admin/AdminPmfFunnelPanel.svelte';
 	import AdminSyncFunnelPanel from '$lib/components/organisms/admin/AdminSyncFunnelPanel.svelte';
@@ -115,6 +116,7 @@
 		{/each}
 	</div>
 	<AdminAcquisitionPanel snapshot={acquisition} />
+	<AdminBrainMetricsPanel active={active} />
 	<AdminPmfFunnelPanel
 		snapshot={pmfFunnel}
 		periodDays={funnelDays}

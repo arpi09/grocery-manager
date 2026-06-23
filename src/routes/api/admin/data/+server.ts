@@ -20,6 +20,7 @@ import {
 	parseAdminExportPeriodDays
 } from '$lib/domain/admin-export';
 import { parsePmfFunnelPeriodDays } from '$lib/domain/pmf-funnel';
+import { parseBrainMetricsPeriodDays } from '$lib/domain/brain-metrics-admin';
 import { WAITLIST_LIST_DEFAULT, WAITLIST_LIST_MAX } from '$lib/domain/waitlist';
 import { translate } from '$lib/i18n/messages';
 import { requireAdmin } from '$lib/server/api-guards';
@@ -45,6 +46,7 @@ const SECTIONS = [
 	'waitlist',
 	'pmf-survey',
 	'export',
+	'brain-metrics',
 	'grannskafferiet-reports'
 ] as const;
 type AdminSection = (typeof SECTIONS)[number];
@@ -316,6 +318,11 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 				marketLive: serializeRow(marketLive),
 				limit
 			});
+		}
+		case 'brain-metrics': {
+			const periodDays = parseBrainMetricsPeriodDays(url.searchParams.get('periodDays'));
+			const brainMetrics = await locals.pmfService.getBrainMetrics(periodDays);
+			return json({ brainMetrics: serializeRow(brainMetrics) });
 		}
 		case 'export': {
 			const periodDays = parseAdminExportPeriodDays(url.searchParams.get('period'));

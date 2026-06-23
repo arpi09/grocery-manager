@@ -1,0 +1,3 @@
+-- Brain metrics admin product_event type (application enum in schema.ts):
+-- openai_schema_retry
+-- No DDL required when product_event.event_type is unconstrained text.

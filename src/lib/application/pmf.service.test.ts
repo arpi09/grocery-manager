@@ -20,7 +20,8 @@ describe('PmfService', () => {
 			getSyncFunnelCounts: vi.fn(),
 			getAcquisitionMetrics: vi.fn(),
 			getMarketV01Metrics: vi.fn(),
-			countDistinctHouseholdsWithEventSince: vi.fn()
+			countDistinctHouseholdsWithEventSince: vi.fn(),
+			getBrainMetricsSince: vi.fn()
 		};
 		service = new PmfService(repository);
 	});
@@ -133,5 +134,51 @@ describe('PmfService', () => {
 		expect(review.current).toEqual(metrics);
 		expect(review.previous).toEqual(previous);
 		expect(review.metrics).toHaveLength(11);
+	});
+
+	it('returns brain metrics snapshot for period', async () => {
+		const now = new Date('2026-06-08T12:00:00Z');
+		const raw = {
+			periodStart: new Date('2026-06-01T12:00:00Z'),
+			periodEnd: now,
+			receiptParseCount: 3,
+			avgBbfCoveragePercent: 75,
+			aiBatchUsedCount: 1,
+			receiptParsedAggregates: {
+				totalParsedLines: 24,
+				avgHighConfidencePercent: 60,
+				avgAiFallbackPercent: 15,
+				totalLowLineConfidenceCount: 2
+			},
+			funnelCounts: {
+				receipt_import_started: 4,
+				receipt_uploaded: 3,
+				receipt_parsed: 3,
+				receipt_review_completed: 2
+			},
+			quickConfirmCount: 1,
+			reviewCompletedCount: 2,
+			timeToReviewMinutes: [4],
+			brainExplanationViewed: 5,
+			eatFirst: {
+				eatFirstWeekViewed: 2,
+				eatFirstPlanApplied: 1,
+				pantryUseSoonTapped: 1
+			},
+			correctionBySource: [{ source: 'heuristic' as const, corrected: 1, accepted: 2 }],
+			topCorrectedProducts: [],
+			schemaRetryCount: 0
+		};
+		vi.mocked(repository.getBrainMetricsSince).mockResolvedValue(raw);
+
+		const result = await service.getBrainMetrics(7, now);
+
+		expect(repository.getBrainMetricsSince).toHaveBeenCalledWith(
+			new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+			now
+		);
+		expect(result.periodDays).toBe(7);
+		expect(result.quickConfirmRate).toBe(0.5);
+		expect(result.medianTimeToReviewMinutes).toBe(4);
 	});
 });

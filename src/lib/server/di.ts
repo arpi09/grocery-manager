@@ -42,6 +42,8 @@ import { DrizzleShoppingPushRepository } from '$lib/infrastructure/repositories/
 import { DrizzleNearbyPushRepository } from '$lib/infrastructure/repositories/nearby-push.repository';
 import { PmfService } from '$lib/application/pmf.service';
 import { emitMemoryRuleEvent } from '$lib/server/memory-rule-telemetry';
+import { registerBrainSchemaRetryLogger } from '$lib/server/brain-metrics';
+import { recordProductEvent } from '$lib/server/product-events';
 import { ExpiryReminderService } from '$lib/application/expiry-reminder.service';
 import { ShoppingPushService } from '$lib/application/shopping-push.service';
 import { NearbyPushService } from '$lib/application/nearby-push.service';
@@ -195,6 +197,7 @@ export const householdService = new HouseholdService(householdRepository);
 
 const householdShelfLifeRuleRepository = new DrizzleHouseholdShelfLifeRuleRepository();
 const householdLocationRuleRepository = new DrizzleHouseholdLocationRuleRepository();
+export { householdShelfLifeRuleRepository, householdLocationRuleRepository };
 const learningFeedbackRepository = new DrizzleLearningFeedbackRepository();
 export { learningFeedbackRepository };
 const householdLearningAdapter = new HouseholdLearningAdapter(
@@ -204,6 +207,15 @@ const householdLearningAdapter = new HouseholdLearningAdapter(
 const learningFeedbackAdapter = new LearningFeedbackAdapter(learningFeedbackRepository);
 const pmfService = new PmfService(pmfRepository);
 export { pmfService };
+
+registerBrainSchemaRetryLogger((detail) => {
+	void recordProductEvent(pmfService, {
+		userId: null,
+		householdId: null,
+		eventType: 'openai_schema_retry',
+		metadata: { detail: detail.slice(0, 200), feature: 'receipt_parse' }
+	});
+});
 
 export const learningEngineService = new LearningEngineService(
 	householdLearningAdapter,
