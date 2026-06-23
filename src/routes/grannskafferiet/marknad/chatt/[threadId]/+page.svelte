@@ -377,15 +377,15 @@
 	<div class="chat-screen" data-testid="market-chat-thread">
 		<header class="chat-header">
 			<div class="header-top">
-				<button
-					type="button"
-					class="back-btn"
-					aria-label={t('marketV05.backToInboxAria')}
-					onclick={() => goto('/grannskafferiet/marknad/meddelanden')}
-				>
+				<a
+				class="back-btn"
+				href="/grannskafferiet/marknad/meddelanden"
+				data-testid="market-chat-back"
+				aria-label={t('marketV05.backToInboxAria')}
+			>
 					<span aria-hidden="true">←</span>
 					<span class="back-label">{t('marketV05.backToInbox')}</span>
-				</button>
+				</a>
 				{#if !threadClosed}
 					<MarketChatOverflowMenu
 						threadId={data.thread.id}

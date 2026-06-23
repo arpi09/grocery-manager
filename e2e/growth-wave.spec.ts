@@ -114,6 +114,7 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 			if (!(await nextBtn.isVisible())) {
 				break;
 			}
+			await dismissCookieConsentIfOpen(page);
 			await nextBtn.click();
 		}
 	});
