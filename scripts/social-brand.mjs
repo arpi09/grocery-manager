@@ -34,12 +34,6 @@ export const COVER_SLIDES = [
 		showPill: true
 	},
 	{
-		fileSuffix: '01-brand',
-		title: 'Skaffu',
-		subtitle: 'Handla ihop med koll på skafferiet',
-		showPill: true
-	},
-	{
 		fileSuffix: '02-scan',
 		title: 'Delad lista i realtid',
 		subtitle: 'Bjud in partner, checka av i butiken'

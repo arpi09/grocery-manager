@@ -8,14 +8,13 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
 	COLORS,
-	COVER_SLIDES,
 	FONT,
 	SUBTITLE_WEIGHT,
 	escapeXml,
 	renderTitleElement,
 	wrapSvgWithFonts
 } from './social-brand.mjs';
-import { writeSvgAsPng } from './social-render.mjs';
+import { generateSocialCovers } from './social-cover.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = join(root, 'static/facebook');
@@ -76,18 +75,10 @@ function buildSvg(title, subtitle, showPill) {
 	return wrapSvgWithFonts(body, width, height, `role="img" aria-label="${escapeXml(title)}"`);
 }
 
-mkdirSync(outDir, { recursive: true });
-
-const generated = [];
-
-for (const slide of COVER_SLIDES) {
-	const svg = buildSvg(slide.title, slide.subtitle, slide.showPill ?? false);
-	const outPath = join(outDir, `cover-${slide.fileSuffix}.png`);
-
-	writeSvgAsPng(svg, width, height, outPath);
-
-	generated.push(outPath);
-	console.log(`Wrote ${outPath} (${width}x${height})`);
-}
-
-console.log(`\nGenerated ${generated.length} covers in static/facebook/`);
+generateSocialCovers({
+	outDir,
+	width,
+	height,
+	buildSvg,
+	platformLabel: 'Facebook'
+});
