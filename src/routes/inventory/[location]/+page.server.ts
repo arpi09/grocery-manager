@@ -12,6 +12,9 @@ import {
 import { trackOneTapConsume } from '$lib/server/sync-analytics';
 import { consumeItemSchema } from '$lib/validation/consumption.schemas';
 import { appendActionToast } from '$lib/utils/action-toast';
+import { bulkInferMissingExpiryForLocation } from '$lib/server/bulk-infer-missing-expiry';
+import { learningFeedbackRepository } from '$lib/server/di';
+import { getOpenAiApiKey } from '$lib/server/openai';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -114,10 +117,13 @@ export const actions: Actions = {
 		if (!isStorageLocation(params.location)) {
 			error(404, 'Unknown storage location');
 		}
-		const inferred = await locals.inventoryService.bulkInferExpiryForLocation(
+		const inferred = await bulkInferMissingExpiryForLocation(
 			locals.householdId!,
 			params.location,
-			locals.householdRole!
+			locals.inventoryService,
+			getOpenAiApiKey(),
+			locals.householdRole!,
+			learningFeedbackRepository
 		);
 		redirect(
 			302,

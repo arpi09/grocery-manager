@@ -18,26 +18,34 @@ export const FEATURE_FLAG_ENV = {
 	AUTO_FINISH: 'AUTO_FINISH_ENABLED',
 	GLOBAL_SHELF_LIFE_DB: 'GLOBAL_SHELF_LIFE_DB_ENABLED',
 	STORE_RECOMMENDATION_V0: 'STORE_RECOMMENDATION_V0_ENABLED',
-	RECIPE_REFINEMENT: 'RECIPE_REFINEMENT_ENABLED'
+	RECIPE_REFINEMENT: 'RECIPE_REFINEMENT_ENABLED',
+	PHOTO_VALIDATION: 'PHOTO_VALIDATION_ENABLED',
+	HOME_BRIEFING_AI: 'HOME_BRIEFING_AI_ENABLED',
+	REPLENISHMENT_RANK: 'REPLENISHMENT_RANK_ENABLED',
+	BRAIN_PROACTIVE: 'BRAIN_PROACTIVE_ENABLED'
 } as const;
 
 function isEnvTrue(key: string): boolean {
 	return process.env[key] === 'true';
 }
 
-/** Server flag: household shelf-life learning (default off). */
+function isEnvEnabledDefaultOn(key: string): boolean {
+	return process.env[key] !== 'false';
+}
+
+/** Server flag: household shelf-life learning (default on). */
 export function isShelfLifeLearningEnabled(): boolean {
-	return isEnvTrue(FEATURE_FLAG_ENV.SHELF_LIFE_LEARNING);
+	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.SHELF_LIFE_LEARNING);
 }
 
-/** Server flag: household location learning (default off). */
+/** Server flag: household location learning (default on). */
 export function isLocationLearningEnabled(): boolean {
-	return isEnvTrue(FEATURE_FLAG_ENV.LOCATION_LEARNING);
+	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.LOCATION_LEARNING);
 }
 
-/** Server flag: replenishment accept/dismiss feedback log (default off). */
+/** Server flag: replenishment accept/dismiss feedback log (default on). */
 export function isReplenishmentLearningEnabled(): boolean {
-	return isEnvTrue(FEATURE_FLAG_ENV.REPLENISHMENT_LEARNING);
+	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.REPLENISHMENT_LEARNING);
 }
 
 /** Server flag: Home premium redesign v5 layout (default off). */
@@ -45,9 +53,9 @@ export function isHomeRedesignV1Enabled(): boolean {
 	return isEnvTrue(FEATURE_FLAG_ENV.HOME_REDESIGN_V1);
 }
 
-/** Server flag: Brain Feedback V1 UI (belief line, teaching chips, inline ack). */
+/** Server flag: Brain Feedback V1 UI (belief line, teaching chips, inline ack). Default on. */
 export function isBrainFeedbackV1Enabled(): boolean {
-	return isEnvTrue(FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1);
+	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1);
 }
 
 /** Kill switch for W1 public shopping list share (create UI + API). */
@@ -70,9 +78,9 @@ export function isPantryUxV2Enabled(): boolean {
 	return isEnvTrue(FEATURE_FLAG_ENV.PANTRY_UX_V2);
 }
 
-/** Server flag: Home UX v2 — Household Briefing on `/hem` (default off). */
+/** Server flag: Home UX v2 — Household Briefing on `/hem` (default on). */
 export function isHomeUxV2Enabled(): boolean {
-	return isEnvTrue(FEATURE_FLAG_ENV.HOME_UX_V2);
+	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.HOME_UX_V2);
 }
 
 /** Server flag: Store recommendation V0 learning experiment (default off). */
@@ -98,4 +106,24 @@ export function isGlobalShelfLifeDbEnabled(): boolean {
 /** Server flag: second LLM refinement pass for recipe generation (default on). */
 export function isRecipeRefinementEnabled(): boolean {
 	return process.env[FEATURE_FLAG_ENV.RECIPE_REFINEMENT] !== 'false';
+}
+
+/** Server flag: second-pass photo-round validation LLM (default on). */
+export function isPhotoValidationEnabled(): boolean {
+	return process.env[FEATURE_FLAG_ENV.PHOTO_VALIDATION] !== 'false';
+}
+
+/** Server flag: nano home briefing one-liner on `/hem` (default on). */
+export function isHomeBriefingAiEnabled(): boolean {
+	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.HOME_BRIEFING_AI);
+}
+
+/** Server flag: nano rank top replenishment suggestions (default on). */
+export function isReplenishmentRankEnabled(): boolean {
+	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.REPLENISHMENT_RANK);
+}
+
+/** Server flag: proactive brain automation — briefing/pre-shop/partner/Kivra (default on). */
+export function isBrainProactiveEnabled(): boolean {
+	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.BRAIN_PROACTIVE);
 }

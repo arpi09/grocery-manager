@@ -12,9 +12,9 @@ describe('replenishment-learning-flag', () => {
 		}
 	});
 
-	it('defaults learning flag to false', () => {
+	it('defaults learning flag to true', () => {
 		delete process.env.REPLENISHMENT_LEARNING_ENABLED;
-		expect(isReplenishmentLearningEnabled()).toBe(false);
+		expect(isReplenishmentLearningEnabled()).toBe(true);
 	});
 
 	it('enables learning when env is true', () => {

@@ -30,6 +30,7 @@ export type PurchaseLineImportSource =
 	| 'receipt_scan'
 	| 'photo_round'
 	| 'kivra_forward'
+	| 'shopping_checkoff'
 	| 'manual'
 	| 'unknown';
 

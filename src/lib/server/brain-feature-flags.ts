@@ -5,5 +5,8 @@ export {
 	isReceiptAiBatchEnabled,
 	isAutoFinishEnabled,
 	isGlobalShelfLifeDbEnabled,
-	isRecipeRefinementEnabled
+	isRecipeRefinementEnabled,
+	isPhotoValidationEnabled,
+	isHomeBriefingAiEnabled,
+	isReplenishmentRankEnabled
 } from './feature-flags';

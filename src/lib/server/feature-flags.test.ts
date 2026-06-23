@@ -11,6 +11,8 @@ import {
 	isShoppingUxV2Enabled,
 	isPantryUxV2Enabled,
 	isHomeUxV2Enabled,
+	isHomeBriefingAiEnabled,
+	isReplenishmentRankEnabled,
 	isStoreRecommendationV0Enabled
 } from './feature-flags';
 
@@ -49,21 +51,30 @@ describe('feature-flags registry', () => {
 		expect(FEATURE_FLAG_ENV.STORE_RECOMMENDATION_V0).toBe('STORE_RECOMMENDATION_V0_ENABLED');
 	});
 
-	it('defaults all flags to false when unset', () => {
-		expect(isShelfLifeLearningEnabled()).toBe(false);
-		expect(isLocationLearningEnabled()).toBe(false);
-		expect(isReplenishmentLearningEnabled()).toBe(false);
+	it('defaults brain learning flags on when unset; other flags off', () => {
+		expect(isShelfLifeLearningEnabled()).toBe(true);
+		expect(isLocationLearningEnabled()).toBe(true);
+		expect(isReplenishmentLearningEnabled()).toBe(true);
+		expect(isBrainFeedbackV1Enabled()).toBe(true);
+		expect(isHomeUxV2Enabled()).toBe(true);
+		expect(isHomeBriefingAiEnabled()).toBe(true);
+		expect(isReplenishmentRankEnabled()).toBe(true);
 		expect(isPriceMemoryV1Enabled()).toBe(false);
-		expect(isBrainFeedbackV1Enabled()).toBe(false);
 		expect(isShoppingListShareEnabled()).toBe(false);
 		expect(isHomeRedesignV1Enabled()).toBe(false);
 		expect(isShoppingUxV2Enabled()).toBe(false);
 		expect(isPantryUxV2Enabled()).toBe(false);
-		expect(isHomeUxV2Enabled()).toBe(false);
 		expect(isStoreRecommendationV0Enabled()).toBe(false);
 	});
 
-	it('enables flags only when env is exactly true', () => {
+	it('disables default-on brain flags when env is false', () => {
+		process.env[FEATURE_FLAG_ENV.SHELF_LIFE_LEARNING] = 'false';
+		process.env[FEATURE_FLAG_ENV.HOME_UX_V2] = 'false';
+		expect(isShelfLifeLearningEnabled()).toBe(false);
+		expect(isHomeUxV2Enabled()).toBe(false);
+	});
+
+	it('enables opt-in flags only when env is exactly true', () => {
 		process.env[FEATURE_FLAG_ENV.SHELF_LIFE_LEARNING] = 'true';
 		process.env[FEATURE_FLAG_ENV.LOCATION_LEARNING] = 'true';
 		process.env[FEATURE_FLAG_ENV.REPLENISHMENT_LEARNING] = 'true';

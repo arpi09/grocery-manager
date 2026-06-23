@@ -228,6 +228,18 @@ env:
     value: "true"
     availability:
       - RUNTIME
+  - variable: HOME_BRIEFING_AI_ENABLED
+    value: "true"
+    availability:
+      - RUNTIME
+  - variable: REPLENISHMENT_RANK_ENABLED
+    value: "true"
+    availability:
+      - RUNTIME
+  - variable: BRAIN_PROACTIVE_ENABLED
+    value: "true"
+    availability:
+      - RUNTIME
   - variable: STORE_RECOMMENDATION_V0_ENABLED
     value: "true"
     availability:

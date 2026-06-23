@@ -18,6 +18,9 @@ import { inferLineLocation } from '$lib/server/location-line-inference';
 import { recordLineLocationFeedback } from '$lib/server/location-feedback-recording';
 import { isLocationLearningEnabled } from '$lib/server/location-learning-flag';
 
+export { loadReceiptParseFeedbackContext } from '$lib/server/receipt-parse-feedback';
+export type { ReceiptParseFeedbackContext } from '$lib/server/receipt-parse-feedback';
+
 export interface ImportReceiptLinesInput {
 	householdId: string;
 	userId: string;

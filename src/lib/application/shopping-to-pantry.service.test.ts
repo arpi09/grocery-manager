@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { ShoppingToPantryService } from './shopping-to-pantry.service';
 import type { InventoryService } from './inventory.service';
+import type { PurchasePatternService } from './purchase-pattern.service';
 import type { IUserRepository } from '$lib/infrastructure/repositories/user.repository';
 import type { InventoryItem } from '$lib/domain/inventory-item';
 import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
@@ -20,6 +21,7 @@ const shoppingItem: ShoppingListItem = {
 describe('ShoppingToPantryService', () => {
 	let inventoryService: InventoryService;
 	let users: IUserRepository;
+	let purchasePatternService: PurchasePatternService;
 	let service: ShoppingToPantryService;
 
 	beforeEach(() => {
@@ -33,7 +35,10 @@ describe('ShoppingToPantryService', () => {
 			updateShoppingToPantryMode: vi.fn(),
 			deleteUser: vi.fn()
 		} as unknown as IUserRepository;
-		service = new ShoppingToPantryService(inventoryService, users);
+		purchasePatternService = {
+			recordCheckoffPurchaseLine: vi.fn().mockResolvedValue(undefined)
+		} as unknown as PurchasePatternService;
+		service = new ShoppingToPantryService(inventoryService, users, purchasePatternService);
 	});
 
 	it('previews defaults from last matching inventory item', async () => {
@@ -98,6 +103,14 @@ describe('ShoppingToPantryService', () => {
 			'2',
 			'owner'
 		);
+		expect(purchasePatternService.recordCheckoffPurchaseLine).toHaveBeenCalledWith(
+			expect.objectContaining({
+				householdId: 'hh-1',
+				userId: 'user-1',
+				productName: 'Mjölk',
+				inventoryItemId: 'inv-1'
+			})
+		);
 	});
 
 	it('creates a new row when merge is disabled', async () => {
@@ -127,5 +140,11 @@ describe('ShoppingToPantryService', () => {
 
 		expect(result.action).toBe('created');
 		expect(inventoryService.createItem).toHaveBeenCalled();
+		expect(purchasePatternService.recordCheckoffPurchaseLine).toHaveBeenCalledWith(
+			expect.objectContaining({
+				inventoryItemId: 'inv-2',
+				productName: 'Mjölk'
+			})
+		);
 	});
 });

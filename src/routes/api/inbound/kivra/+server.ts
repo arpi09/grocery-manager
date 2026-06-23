@@ -12,6 +12,7 @@ import { getOpenAiApiKey } from '$lib/server/openai';
 import { extractPdfText } from '$lib/server/receipt-pdf';
 import { parseReceiptFromText, parseReceiptLines } from '$lib/server/receipt-parse';
 import { importReceiptLines } from '$lib/server/receipt-import';
+import { loadReceiptParseFeedbackContext } from '$lib/server/receipt-parse-feedback';
 import { isKivraForwardEnabled } from '$lib/server/kivra-forward';
 import {
 	downloadAttachmentBytes,
@@ -20,12 +21,17 @@ import {
 	type ResendEmailReceivedEvent
 } from '$lib/server/resend-inbound';
 import {
+	householdLocationRuleRepository,
+	householdShelfLifeRuleRepository,
 	householdService,
 	inventoryService,
 	learningEngineService,
+	learningFeedbackRepository,
 	pmfService,
+	purchasePatternRepository,
 	purchasePatternService,
-	receiptForwardService
+	receiptForwardService,
+	brainProactivePushService
 } from '$lib/server/di';
 import { recordAppError } from '$lib/server/error-log/record';
 import type { RequestHandler } from './$types';
@@ -97,6 +103,16 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ ok: false, error: 'AI not configured' }, { status: 503 });
 		}
 
+		const parseFeedback = await loadReceiptParseFeedbackContext(
+			learningFeedbackRepository,
+			householdId,
+			purchasePatternRepository,
+			{
+				shelfLifeRules: householdShelfLifeRuleRepository,
+				locationRules: householdLocationRuleRepository
+			}
+		);
+
 		let parsedLines: ReceiptLine[] = [];
 		let parsedStoreLabel: string | undefined;
 		let parsedPurchasedAt: Date | undefined;
@@ -109,7 +125,20 @@ export const POST: RequestHandler = async ({ request }) => {
 			parsedStoreLabel = extractStoreFromReceiptText(pdfText.text);
 			parsedPurchasedAt = extractPurchasedAtFromReceiptText(pdfText.text);
 
-			const aiResult = await parseReceiptFromText(apiKey, pdfText.text);
+			const storeHint = extractStoreFromReceiptText(pdfText.text);
+			const purchasedAt = extractPurchasedAtFromReceiptText(pdfText.text);
+			const aiResult = await parseReceiptFromText(
+				apiKey,
+				pdfText.text,
+				storeHint,
+				{
+					chain: storeHint ?? null,
+					storeName: storeHint ?? null,
+					purchasedAt: purchasedAt?.toISOString().slice(0, 10) ?? null
+				},
+				[],
+				parseFeedback
+			);
 			if (!aiResult.ok) {
 				continue;
 			}
@@ -149,7 +178,13 @@ export const POST: RequestHandler = async ({ request }) => {
 			`[kivra-forward] imported ${result.itemsAdded} items for household ${householdId}`
 		);
 
-		return json({ ok: true, itemsAdded: result.itemsAdded });
+		void brainProactivePushService
+			.notifyKivraImport({ householdId, itemsAdded: result.itemsAdded })
+			.catch((error) => {
+				console.warn('[kivra-forward] proactive notify degraded:', error);
+			});
+
+		return json({ ok: true, itemsAdded: result.itemsAdded, confirmMode: true });
 	} catch (error) {
 		const message = error instanceof Error ? error.message : 'Inbound processing failed';
 		console.error(`[kivra-forward] processing failed: ${message}`);

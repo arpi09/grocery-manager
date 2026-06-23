@@ -1,4 +1,5 @@
 import { BarcodeLookupService, BarcodeNotFoundError } from '$lib/application/barcode-lookup.service';
+import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 import { barcodeLookupService } from '$lib/server/di';
 import { getSwedishProductOverride } from '$lib/infrastructure/barcode/swedish-product-overrides';
 import { json } from '@sveltejs/kit';
@@ -32,7 +33,10 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			});
 		}
 
-		return json(result);
+		return json({
+			...result,
+			normalizedKey: normalizeReceiptProductName(result.product.name)
+		});
 	} catch (e) {
 		if (e instanceof BarcodeNotFoundError) {
 			return json(

@@ -748,7 +748,12 @@ export class InventoryService {
 
 	async findMergeCandidates(
 		householdId: string,
-		lines: Array<{ name: string; location: StorageLocation; categoryHint?: string | null }>,
+		lines: Array<{
+			name: string;
+			location: StorageLocation;
+			categoryHint?: string | null;
+			expiresOnSource?: string | null;
+		}>,
 		options: { apiKey?: string } = {}
 	) {
 		const items = await this.listAll(householdId);
@@ -766,7 +771,10 @@ export class InventoryService {
 					candidate.item.name,
 					{
 						location: line.location,
-						categoryHint: line.categoryHint ?? null
+						categoryHint: line.categoryHint ?? null,
+						expiresOnSource: line.expiresOnSource ?? null,
+						candidateExpiresOnSource: candidate.item.expiresOnSource ?? null,
+						candidateCategoryHint: null
 					}
 				);
 				if (confirmed === false) {

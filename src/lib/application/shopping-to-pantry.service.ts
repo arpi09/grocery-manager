@@ -11,6 +11,8 @@ import {
 	type ShoppingToPantryMode
 } from '$lib/domain/shopping-to-pantry';
 import type { InventoryService } from './inventory.service';
+import type { PurchasePatternService } from './purchase-pattern.service';
+import type { BrainProactivePushService } from './brain-proactive-push.service';
 import type { IUserRepository } from '$lib/infrastructure/repositories/user.repository';
 
 export class ShoppingToPantryReadOnlyError extends Error {
@@ -42,7 +44,9 @@ export interface AddToPantryFromShoppingInput {
 export class ShoppingToPantryService {
 	constructor(
 		private readonly inventoryService: InventoryService,
-		private readonly users: IUserRepository
+		private readonly users: IUserRepository,
+		private readonly purchasePatternService?: PurchasePatternService,
+		private readonly brainProactivePushService?: BrainProactivePushService
 	) {}
 
 	async getMode(userId: string): Promise<ShoppingToPantryMode> {
@@ -103,6 +107,16 @@ export class ShoppingToPantryService {
 					quantity,
 					role
 				);
+				await this.recordCheckoffPurchaseLine({
+					householdId,
+					userId,
+					item,
+					location,
+					quantity,
+					unit,
+					inventoryItemId: merged.id
+				});
+				void this.notifyPartnerActivity(householdId, userId, item.name);
 				return { action: 'merged' as const, item: merged };
 			}
 		}
@@ -120,6 +134,46 @@ export class ShoppingToPantryService {
 			},
 			role
 		);
+		await this.recordCheckoffPurchaseLine({
+			householdId,
+			userId,
+			item,
+			location,
+			quantity,
+			unit,
+			inventoryItemId: created.id
+		});
+		void this.notifyPartnerActivity(householdId, userId, item.name);
 		return { action: 'created' as const, item: created };
+	}
+
+	private async recordCheckoffPurchaseLine(input: {
+		householdId: string;
+		userId: string;
+		item: ShoppingListItem;
+		location: StorageLocation;
+		quantity: string;
+		unit: string | null;
+		inventoryItemId: string;
+	}): Promise<void> {
+		if (!this.purchasePatternService) return;
+		await this.purchasePatternService.recordCheckoffPurchaseLine({
+			householdId: input.householdId,
+			userId: input.userId,
+			productName: input.item.name,
+			location: input.location,
+			quantity: input.quantity,
+			unit: input.unit,
+			inventoryItemId: input.inventoryItemId
+		});
+	}
+
+	private notifyPartnerActivity(householdId: string, actorUserId: string, itemName: string): void {
+		if (!this.brainProactivePushService) return;
+		void this.brainProactivePushService
+			.notifyPartnerCheckoff({ householdId, actorUserId, itemName })
+			.catch((error) => {
+				console.warn('[shopping-to-pantry] partner push degraded:', error);
+			});
 	}
 }

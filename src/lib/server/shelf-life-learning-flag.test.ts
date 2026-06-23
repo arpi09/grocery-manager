@@ -21,8 +21,13 @@ describe('shelf-life-learning-flag', () => {
 		}
 	});
 
-	it('defaults learning flag to false', () => {
+	it('defaults learning flag to true when unset', () => {
 		delete process.env.SHELF_LIFE_LEARNING_ENABLED;
+		expect(isShelfLifeLearningEnabled()).toBe(true);
+	});
+
+	it('disables learning when env is false', () => {
+		process.env.SHELF_LIFE_LEARNING_ENABLED = 'false';
 		expect(isShelfLifeLearningEnabled()).toBe(false);
 	});
 
@@ -34,10 +39,10 @@ describe('shelf-life-learning-flag', () => {
 	it('defaults receipt estimates to learning flag when PUBLIC unset', () => {
 		delete process.env.PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT;
 		delete process.env.SHELF_LIFE_LEARNING_ENABLED;
-		expect(isShelfLifeEstimatesInReceiptEnabled()).toBe(false);
-
-		process.env.SHELF_LIFE_LEARNING_ENABLED = 'true';
 		expect(isShelfLifeEstimatesInReceiptEnabled()).toBe(true);
+
+		process.env.SHELF_LIFE_LEARNING_ENABLED = 'false';
+		expect(isShelfLifeEstimatesInReceiptEnabled()).toBe(false);
 	});
 
 	it('respects explicit PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT', () => {

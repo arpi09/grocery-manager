@@ -96,7 +96,7 @@ describe('ShelfLifePredictor', () => {
 		expect(result).toMatchObject({
 			source: 'household_rule',
 			modelVersion: 'household-v1',
-			explain: 'Ca 9 dagars hållbarhet baserat på ert hushåll',
+			explain: 'Ca 9 dagars hållbarhet',
 			value: {
 				typicalDays: 9,
 				expiresOn: '2026-06-10'

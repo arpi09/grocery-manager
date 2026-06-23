@@ -22,6 +22,8 @@ import {
 	type IPurchasePatternRepository,
 	purchasePatternLookbackDate
 } from '$lib/infrastructure/repositories/purchase-pattern.repository';
+import type { StorageLocation } from '$lib/domain/location';
+import { generateId } from '$lib/infrastructure/auth/id';
 
 export class PurchasePatternReadOnlyError extends Error {
 	constructor() {
@@ -46,6 +48,38 @@ export class PurchasePatternService {
 
 	async recordReceiptImport(lines: RecordReceiptPurchaseLineInput[]): Promise<void> {
 		await this.repository.insertLines(lines);
+	}
+
+	async recordCheckoffPurchaseLine(input: {
+		householdId: string;
+		userId: string;
+		productName: string;
+		location: StorageLocation;
+		quantity: string | null;
+		unit: string | null;
+		inventoryItemId: string;
+	}): Promise<void> {
+		const productName = input.productName.trim();
+		if (!productName) return;
+
+		const normalizedKey = normalizeReceiptProductName(productName);
+		await this.repository.insertLines([
+			{
+				householdId: input.householdId,
+				userId: input.userId,
+				importBatchId: generateId(),
+				productName,
+				location: input.location,
+				quantity: input.quantity,
+				unit: input.unit,
+				purchasedAt: new Date(),
+				lineIndex: 0,
+				importSource: 'shopping_checkoff',
+				inventoryItemId: input.inventoryItemId,
+				matchSource: 'inventory_item',
+				conceptKey: normalizedKey
+			}
+		]);
 	}
 
 	async getReplenishmentSuggestions(householdId: string): Promise<ReplenishmentSuggestion[]> {

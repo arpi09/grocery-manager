@@ -12,10 +12,10 @@ describe('location-learning-flag', () => {
 		vi.unstubAllEnvs();
 	});
 
-	it('defaults location learning flags to off', () => {
+	it('defaults location learning flags to on', () => {
 		vi.stubEnv('LOCATION_LEARNING_ENABLED', '');
-		expect(isLocationLearningEnabled()).toBe(false);
-		expect(isLocationPredictionsInReceiptEnabled()).toBe(false);
+		expect(isLocationLearningEnabled()).toBe(true);
+		expect(isLocationPredictionsInReceiptEnabled()).toBe(true);
 	});
 
 	it('enables receipt location predictions when learning flag is on', () => {

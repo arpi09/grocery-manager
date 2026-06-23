@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, lt, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, lt, sql } from 'drizzle-orm';
 import type { InventoryItem } from '$lib/domain/inventory-item';
 import type { WeeklyCount } from '$lib/domain/statistik';
 import { startOfWeek } from '$lib/domain/statistik';
@@ -48,6 +48,7 @@ export interface IConsumptionRepository {
 		start: Date,
 		end: Date
 	): Promise<Array<{ productName: string; createdAt: Date; householdId: string }>>;
+	listRecentConsumedProductNames(householdId: string, since: Date, limit?: number): Promise<string[]>;
 }
 
 export class DrizzleConsumptionRepository implements IConsumptionRepository {
@@ -216,5 +217,40 @@ export class DrizzleConsumptionRepository implements IConsumptionRepository {
 			);
 
 		return rows;
+	}
+
+	async listRecentConsumedProductNames(
+		householdId: string,
+		since: Date,
+		limit = 10
+	): Promise<string[]> {
+		const rows = await this.database
+			.select({
+				productName: consumptionEventTable.productName,
+				createdAt: consumptionEventTable.createdAt
+			})
+			.from(consumptionEventTable)
+			.where(
+				and(
+					eq(consumptionEventTable.householdId, householdId),
+					eq(consumptionEventTable.eventType, 'consumed'),
+					gte(consumptionEventTable.createdAt, since)
+				)
+			)
+			.orderBy(desc(consumptionEventTable.createdAt))
+			.limit(limit * 3);
+
+		const seen = new Set<string>();
+		const names: string[] = [];
+		for (const row of rows) {
+			const name = row.productName.trim();
+			if (!name) continue;
+			const key = name.toLowerCase();
+			if (seen.has(key)) continue;
+			seen.add(key);
+			names.push(name);
+			if (names.length >= limit) break;
+		}
+		return names;
 	}
 }
