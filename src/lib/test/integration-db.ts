@@ -86,7 +86,8 @@ const SQL_MIGRATION_FILES = [
 	'0066_market_chat_report.sql',
 	'0067_market_v02_exchange.sql',
 	'0068_market_v03_trust.sql',
-	'0069_market_v04_pricing.sql'
+	'0069_market_v04_pricing.sql',
+	'0070_brain_v2.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE

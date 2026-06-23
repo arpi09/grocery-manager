@@ -81,6 +81,79 @@ export class ExpiryReminderService {
 		return summary;
 	}
 
+	/** Daily push for items moving to expired review in 2–3 days (push-enabled users). */
+	async runDailyMovingSoonReminders(): Promise<ExpiryReminderBatchResult> {
+		const users = await this.repository.listOptedInUsers();
+		const summary: ExpiryReminderBatchResult = {
+			processed: users.length,
+			sent: 0,
+			skipped: 0,
+			failed: 0
+		};
+
+		for (const user of users) {
+			if (!user.pushNotificationsEnabled) {
+				summary.skipped += 1;
+				continue;
+			}
+			const result = await this.processUserMovingSoonPush(user);
+			if (result.status === 'sent') {
+				summary.sent += 1;
+			} else if (result.status === 'failed') {
+				summary.failed += 1;
+			} else {
+				summary.skipped += 1;
+			}
+		}
+
+		return summary;
+	}
+
+	private async processUserMovingSoonPush(
+		user: ExpiryReminderUser
+	): Promise<ExpiryReminderRunResult> {
+		const sections = await this.buildMovingSoonOnlySections(user.id);
+		const itemCount = sections.reduce((sum, section) => sum + section.items.length, 0);
+		if (itemCount === 0) {
+			return { status: 'skipped', reason: 'no_items' };
+		}
+
+		const claim = await this.repository.tryClaimMovingSoonSend(user.id);
+		if (!claim.claimed) {
+			return { status: 'skipped', reason: 'recent' };
+		}
+
+		const pushResult = await this.sendExpiryPush(user.id, itemCount, user.settings.days, sections);
+		if (pushResult.ok) {
+			return { status: 'sent', itemCount };
+		}
+
+		await this.repository.revertMovingSoonSendClaim(user.id, claim.previousLastSentAt);
+		return { status: 'failed', reason: pushResult.reason };
+	}
+
+	private async buildMovingSoonOnlySections(
+		userId: string
+	): Promise<ExpiryReminderHouseholdSection[]> {
+		const households = await this.householdService.listHouseholdsForUser(userId);
+		const sections: ExpiryReminderHouseholdSection[] = [];
+
+		for (const household of households) {
+			const graceDays = await this.inventoryService.getAutoExpiredGraceDays(household.id);
+			const movingSoonItems = await this.inventoryService.listMovingToAutoExpiredSoon(household.id);
+			if (movingSoonItems.length === 0) continue;
+			sections.push({
+				householdId: household.id,
+				householdName: household.name,
+				items: movingSoonItems,
+				movingSoonIds: new Set(movingSoonItems.map((item) => item.id)),
+				graceDays
+			});
+		}
+
+		return sections;
+	}
+
 	async maybeSendReminderForUser(userId: string): Promise<ExpiryReminderRunResult> {
 		const user = await this.repository.findUserById(userId);
 		if (!user) {

@@ -2,7 +2,7 @@ import { addDaysIso } from '$lib/domain/auto-expired';
 import type { ExpiresOnSource } from '$lib/domain/auto-expired';
 import type { PredictionSource } from '$lib/domain/learning/predictor-types';
 
-export const HOUSEHOLD_SHELF_LIFE_MIN_SAMPLES = 2;
+export const HOUSEHOLD_SHELF_LIFE_MIN_SAMPLES = 1;
 
 export function formatTodayIso(today = new Date()): string {
 	const y = today.getFullYear();

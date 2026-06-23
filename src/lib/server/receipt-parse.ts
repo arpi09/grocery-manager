@@ -2,6 +2,12 @@ import { resolveReceiptLineLocation } from '$lib/domain/guess-storage-location';
 import type { ReceiptLine } from '$lib/domain/receipt-line';
 import { isStorageLocation } from '$lib/domain/location';
 import {
+	LOCATION_RULES,
+	storeChainHintBlock,
+	SWEDISH_GROCERY_CONTEXT,
+	UNIT_RULES
+} from '$lib/server/ai-prompt-shared';
+import {
 	openAiErrorLogDetail,
 	OPENAI_EMPTY_RESPONSE_KEY,
 	OPENAI_INVALID_JSON_KEY,
@@ -11,6 +17,14 @@ import {
 } from '$lib/server/openai';
 import type { MessageKey } from '$lib/i18n/messages';
 import { parseSuggestionQuantity } from '$lib/server/shopping-suggestions';
+
+export type ReceiptLineConfidence = 'high' | 'medium' | 'low';
+
+export interface ReceiptParseMetadata {
+	chain?: string | null;
+	storeName?: string | null;
+	purchasedAt?: string | null;
+}
 
 export const RECEIPT_LINES_SCHEMA = {
 	type: 'object',
@@ -29,7 +43,10 @@ export const RECEIPT_LINES_SCHEMA = {
 					currency: { type: ['string', 'null'] },
 					brand: { type: ['string', 'null'] },
 					packageSize: { type: ['string', 'null'] },
-					categoryHint: { type: ['string', 'null'] }
+					categoryHint: { type: ['string', 'null'] },
+					lineConfidence: { type: 'string', enum: ['high', 'medium', 'low'] },
+					rawLineText: { type: ['string', 'null'] },
+					confidence: { type: ['number', 'null'] }
 				},
 				required: [
 					'name',
@@ -41,7 +58,10 @@ export const RECEIPT_LINES_SCHEMA = {
 					'currency',
 					'brand',
 					'packageSize',
-					'categoryHint'
+					'categoryHint',
+					'lineConfidence',
+					'rawLineText',
+					'confidence'
 				],
 				additionalProperties: false
 			}
@@ -52,25 +72,19 @@ export const RECEIPT_LINES_SCHEMA = {
 } as const;
 
 export const RECEIPT_SYSTEM_PROMPT = [
-	'Du läser svenska butikskvitton (ICA, Maxi, Kivra, Willys m.fl.) och extraherar livsmedelsrader.',
-	'Returnera JSON: {"lines":[{"name":"","quantity":"","unit":"","location":"","brand":null,"packageSize":null,"categoryHint":null}]}',
+	'Du läser svenska butikskvitton och extraherar livsmedelsrader som JSON enligt schema.',
+	SWEDISH_GROCERY_CONTEXT,
 	'Regler:',
 	'- name: kort produktnamn utan storlek/vikt (t.ex. "Coca-Cola", inte "Coca-Cola 1,5L")',
 	'- brand: varumärke om synligt (Arla, ICA, Garant), annars null',
-	'- packageSize: förpackningsstorlek som text (t.ex. "500 g", "1,5 l") när den syns, annars null',
+	'- packageSize: förpackningsstorlek (t.ex. "500 g", "1,5 l") när den syns, annars null',
 	'- categoryHint: grov kategori (mejeri, kött, grönsak, torrvara, dryck, färdigrätt), annars null',
-	'- quantity: numerisk mängd som sträng med punkt som decimal (t.ex. "1", "1.5", "0.45")',
-	'- unitPrice/lineTotal: pris som sträng med punkt som decimal (Svenska kommatecken normaliseras), annars null',
+	'- lineConfidence: high|medium|low — hur säker du är på raden',
+	'- rawLineText: originalrad från kvittot om tillgänglig, annars null',
+	'- unitPrice/lineTotal: pris med punkt som decimal, annars null',
 	'- currency: ISO-kod (oftast "SEK"), annars null',
-	'  - Synlig förpackning på raden (1,5L, 500 g, 1 kg): sätt quantity till storleken, unit till enheten',
-	'  - Flera stycken utan tydlig storlek: antal köpta (t.ex. "2") och unit "st" eller tom',
-	'  - Lösvikt: vikten i quantity, unit "kg"',
-	'  - En vara utan storlek: quantity "1", unit tom',
-	'- unit: l, ml, kg, g, st, pack — tom sträng om okänd',
-	'- location: fridge | freezer | cupboard (förvaring hemma)',
-	'  - fridge: mejeri, kött, fisk, chark, färdigrätter (t.ex. pasta bolognese), färska grönsaker, ägg, mat som ska kylas',
-	'  - freezer: frysta varor, glass, djupfryst',
-	'  - cupboard: torrvaror (ris, pasta torr, mjöl), konserver, kryddor, kaffe, te, drycker som inte kräver kyl',
+	UNIT_RULES,
+	LOCATION_RULES,
 	'- hoppa över icke-mat, pant, erbjudanden och butiksinfo',
 	'- max 40 rader'
 ].join('\n');
@@ -86,12 +100,47 @@ const RECEIPT_TEXT_NOISE_PATTERNS = [
 ];
 
 /** Removes totals, payment lines and common non-food rows from extracted PDF text. */
-export function preprocessReceiptText(raw: string): string {
+export function preprocessReceiptText(raw: string, storeHint?: string | null): string {
 	let cleaned = raw;
 	for (const pattern of RECEIPT_TEXT_NOISE_PATTERNS) {
 		cleaned = cleaned.replace(pattern, ' ');
 	}
+	cleaned = preprocessIcaStoreLayout(cleaned, storeHint);
 	return cleaned.replace(/\s+/g, ' ').trim();
+}
+
+/** ICA Maxi / Supermarket / Kvantum — normalize line breaks and EAN noise. */
+function preprocessIcaStoreLayout(text: string, storeHint?: string | null): string {
+	let t = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+	const hint = (storeHint ?? text).toLowerCase();
+
+	// Strip long EAN / artikelnummer runs (12–14 digits) common on ICA lines
+	t = t.replace(/\b\d{12,14}\b/g, ' ');
+
+	// Gunnesbo / Toftanäs Maxi: product lines often split before price column
+	if (hint.includes('gunnesbo') || hint.includes('toftan')) {
+		t = t.replace(/(\d+[.,]\d{2})\s*(?:kr|sek)?\s*(?=[A-ZÅÄÖ])/gi, '$1\n');
+	}
+
+	// Värnhem Supermarket: compact header — ensure product boundaries
+	if (hint.includes('varnhem') || hint.includes('supermarket')) {
+		t = t.replace(/(\d+[.,]\d{2})\s+/g, '$1\n');
+	}
+
+	// Strömstad Kvantum: pant/deposit lines inline
+	if (hint.includes('stromstad') || hint.includes('strömstad') || hint.includes('kvantum')) {
+		t = t.replace(/\bpant\s*\d+[.,]?\d*/gi, ' ');
+	}
+
+	// Kivra-style export: collapse duplicate store headers at line start only
+	if (hint.includes('kivra')) {
+		t = t.replace(
+			/^(?:maxi\s+ica|ica\s+supermarket|ica\s+kvantum)[^\n]{0,80}\n/gim,
+			''
+		);
+	}
+
+	return t.replace(/\n+/g, '\n');
 }
 
 function coerceReceiptName(value: unknown): string {
@@ -152,6 +201,31 @@ function coerceReceiptCurrency(value: unknown): string | undefined {
 	return trimmed ? trimmed : undefined;
 }
 
+function coerceReceiptConfidence(value: unknown): number | undefined {
+	if (typeof value === 'number' && Number.isFinite(value)) {
+		return Math.min(1, Math.max(0, value));
+	}
+	return undefined;
+}
+
+function coerceLineConfidence(value: unknown): ReceiptLineConfidence | undefined {
+	if (value === 'high' || value === 'medium' || value === 'low') {
+		return value;
+	}
+	return undefined;
+}
+
+function lineConfidenceToNumeric(confidence: ReceiptLineConfidence): number {
+	switch (confidence) {
+		case 'high':
+			return 0.9;
+		case 'medium':
+			return 0.6;
+		default:
+			return 0.35;
+	}
+}
+
 function coerceReceiptLocation(value: unknown): string | undefined {
 	if (typeof value === 'string') {
 		const trimmed = value.trim().toLowerCase();
@@ -206,6 +280,16 @@ export function normalizeReceiptAiPayload(raw: unknown): unknown {
 			normalized.brand = coerceReceiptNullableString(row.brand);
 			normalized.packageSize = coerceReceiptNullableString(row.packageSize);
 			normalized.categoryHint = coerceReceiptNullableString(row.categoryHint);
+			normalized.lineConfidence = coerceLineConfidence(row.lineConfidence) ?? 'medium';
+			if (!('lineConfidence' in row)) {
+				delete normalized.lineConfidence;
+			}
+			normalized.rawLineText = coerceReceiptNullableString(row.rawLineText);
+			if (!('rawLineText' in row)) {
+				delete normalized.rawLineText;
+			}
+			normalized.confidence =
+				typeof row.confidence === 'number' ? row.confidence : (row.confidence ?? null);
 			return normalized;
 		})
 	};
@@ -235,6 +319,10 @@ export function parseReceiptLines(raw: unknown): ReceiptLine[] {
 		const brand = coerceReceiptOptionalString(row.brand);
 		const packageSize = coerceReceiptOptionalString(row.packageSize);
 		const categoryHint = coerceReceiptOptionalString(row.categoryHint);
+		const lineConfidence = coerceLineConfidence(row.lineConfidence);
+		const confidence =
+			coerceReceiptConfidence(row.confidence) ??
+			(lineConfidence ? lineConfidenceToNumeric(lineConfidence) : undefined);
 		if (!name) continue;
 		const line: ReceiptLine = {
 			name,
@@ -248,6 +336,7 @@ export function parseReceiptLines(raw: unknown): ReceiptLine[] {
 		if (brand) line.brand = brand;
 		if (packageSize) line.packageSize = packageSize;
 		if (categoryHint) line.categoryHint = categoryHint;
+		if (confidence != null) line.confidence = confidence;
 		result.push(line);
 	}
 
@@ -273,7 +362,26 @@ type ReceiptStructuredOptions = {
 	systemPrompt: string;
 	userPrompt: string;
 	imageDataUrl?: string;
+	imageDetail?: 'auto' | 'high' | 'low';
 };
+
+function buildReceiptMetadataBlock(metadata?: ReceiptParseMetadata): string {
+	if (!metadata) return '';
+	const parts: string[] = [];
+	if (metadata.chain) parts.push(`Kedja: ${metadata.chain}`);
+	if (metadata.storeName) parts.push(`Butik: ${metadata.storeName}`);
+	if (metadata.purchasedAt) parts.push(`Inköpsdatum: ${metadata.purchasedAt}`);
+	const chainHint = storeChainHintBlock(metadata.chain);
+	if (chainHint) parts.push(chainHint);
+	return parts.length > 0 ? parts.join('\n') : '';
+}
+
+/** Formats preprocessed receipt text with line numbers for text-based parse. */
+export function formatNumberedReceiptText(cleaned: string): string {
+	const lines = cleaned.split('\n').map((line) => line.trim()).filter(Boolean);
+	if (lines.length === 0) return cleaned;
+	return lines.map((line, index) => `${index + 1}. ${line}`).join('\n');
+}
 
 async function requestReceiptStructuredJson(
 	apiKey: string,
@@ -287,7 +395,11 @@ async function requestReceiptStructuredJson(
 	};
 
 	const strictResult = options.imageDataUrl
-		? await requestStructuredJsonFromImage(apiKey, { ...base, imageDataUrl: options.imageDataUrl })
+		? await requestStructuredJsonFromImage(apiKey, {
+				...base,
+				imageDataUrl: options.imageDataUrl,
+				imageDetail: options.imageDetail ?? 'auto'
+			})
 		: await requestStructuredJson(apiKey, base);
 
 	if (strictResult.ok || !isOpenAiSchemaFailure(strictResult)) {
@@ -303,27 +415,48 @@ async function requestReceiptStructuredJson(
 		? await requestStructuredJsonFromImage(apiKey, {
 				...base,
 				imageDataUrl: options.imageDataUrl,
+				imageDetail: options.imageDetail ?? 'auto',
 				strict: false
 			})
 		: await requestStructuredJson(apiKey, { ...base, strict: false });
 }
 
-export async function parseReceiptFromImage(apiKey: string, imageDataUrl: string) {
+export async function parseReceiptFromImage(
+	apiKey: string,
+	imageDataUrl: string,
+	metadata?: ReceiptParseMetadata
+) {
+	const metaBlock = buildReceiptMetadataBlock(metadata);
 	return requestReceiptStructuredJson(apiKey, {
 		systemPrompt: RECEIPT_SYSTEM_PROMPT,
-		userPrompt: 'Lista matvaror från detta kvitto.',
+		userPrompt: ['Lista matvaror från detta kvitto.', metaBlock].filter(Boolean).join('\n\n'),
 		imageDataUrl
 	});
 }
 
-export async function parseReceiptFromText(apiKey: string, receiptText: string) {
-	const cleaned = preprocessReceiptText(receiptText);
+export async function parseReceiptFromText(
+	apiKey: string,
+	receiptText: string,
+	storeHint?: string | null,
+	metadata?: ReceiptParseMetadata
+) {
+	const cleaned = preprocessReceiptText(receiptText, storeHint);
+	const mergedMetadata: ReceiptParseMetadata = {
+		chain: metadata?.chain ?? storeHint ?? null,
+		storeName: metadata?.storeName ?? storeHint ?? null,
+		purchasedAt: metadata?.purchasedAt ?? null
+	};
+	const metaBlock = buildReceiptMetadataBlock(mergedMetadata);
+	const numbered = formatNumberedReceiptText(cleaned.slice(0, 12_000));
 	return requestReceiptStructuredJson(apiKey, {
 		systemPrompt: RECEIPT_SYSTEM_PROMPT,
 		userPrompt: [
 			'Lista matvaror från detta kvitto.',
-			'Kvittoinnehåll:',
-			cleaned.slice(0, 12_000)
-		].join('\n\n')
+			metaBlock,
+			'Kvittoinnehåll (radnummer):',
+			numbered
+		]
+			.filter(Boolean)
+			.join('\n\n')
 	});
 }

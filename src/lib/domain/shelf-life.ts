@@ -1,5 +1,9 @@
 import type { ExpiresOnSource } from '$lib/domain/auto-expired';
 import type { StorageLocation } from '$lib/domain/location';
+import {
+	GLOBAL_SHELF_LIFE_KEYWORDS,
+	guessDaysFromCategoryHint
+} from '$lib/domain/shelf-life-global-categories';
 
 const HEURISTIC_DAYS: Record<string, number> = {
 	mjölk: 7,
@@ -141,7 +145,8 @@ const HEURISTIC_DAYS: Record<string, number> = {
 	wrap: 14,
 	naan: 5,
 	pitabröd: 5,
-	pitabrod: 5
+	pitabrod: 5,
+	...GLOBAL_SHELF_LIFE_KEYWORDS
 };
 
 const TOKEN_STOP_WORDS = new Set([
@@ -209,7 +214,13 @@ function heuristicTypicalDays(name: string, location: StorageLocation): number |
 	return null;
 }
 
-export function guessShelfLifeTypicalDays(name: string, location: StorageLocation): number | null {
+export function guessShelfLifeTypicalDays(
+	name: string,
+	location: StorageLocation,
+	categoryHint?: string | null
+): number | null {
+	const fromHint = guessDaysFromCategoryHint(categoryHint, location);
+	if (fromHint != null) return fromHint;
 	return heuristicTypicalDays(name, location);
 }
 

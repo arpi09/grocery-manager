@@ -8,6 +8,7 @@ export type AutoExpiredGraceDays = (typeof AUTO_EXPIRED_GRACE_DAY_OPTIONS)[numbe
 export const DEFAULT_AUTO_EXPIRED_GRACE_DAYS: AutoExpiredGraceDays = 7;
 export type ExpiresOnSource =
 	| 'user_set'
+	| 'receipt_printed'
 	| 'ai_inferred'
 	| 'default_heuristic'
 	| 'household_learned'

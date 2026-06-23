@@ -39,6 +39,8 @@ export interface ReceiptLine {
 	packageSize?: string | null;
 	/** Food category hint from parse, e.g. mejeri, grönsak. */
 	categoryHint?: string | null;
+	/** Parser confidence 0–1 when available. */
+	confidence?: number | null;
 	/** Original lines merged into this row (same normalized key + location). */
 	groupedFrom?: ReceiptLine[];
 	/** Number of receipt rows merged (1 = not grouped). */
@@ -53,4 +55,5 @@ export interface ReceiptParseResult {
 	mergedAwayCount?: number;
 	shelfLifePredictions?: (ReceiptShelfLifePrediction | null)[];
 	locationPredictions?: (ReceiptLocationPrediction | null)[];
+	qualityReport?: import('./receipt-quality-report').ReceiptImportQualityReport;
 }

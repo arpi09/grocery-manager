@@ -14,6 +14,9 @@ export const FEATURE_FLAG_ENV = {
 	SHOPPING_UX_V2: 'SHOPPING_UX_V2_ENABLED',
 	PANTRY_UX_V2: 'PANTRY_UX_V2_ENABLED',
 	HOME_UX_V2: 'HOME_UX_V2_ENABLED',
+	RECEIPT_AI_BATCH: 'RECEIPT_AI_BATCH_ENABLED',
+	AUTO_FINISH: 'AUTO_FINISH_ENABLED',
+	GLOBAL_SHELF_LIFE_DB: 'GLOBAL_SHELF_LIFE_DB_ENABLED',
 	STORE_RECOMMENDATION_V0: 'STORE_RECOMMENDATION_V0_ENABLED'
 } as const;
 
@@ -74,4 +77,19 @@ export function isHomeUxV2Enabled(): boolean {
 /** Server flag: Store recommendation V0 learning experiment (default off). */
 export function isStoreRecommendationV0Enabled(): boolean {
 	return isEnvTrue(FEATURE_FLAG_ENV.STORE_RECOMMENDATION_V0);
+}
+
+/** Server flag: OpenAI shelf-life batch fallback on receipt parse (default on). */
+export function isReceiptAiBatchEnabled(): boolean {
+	return process.env[FEATURE_FLAG_ENV.RECEIPT_AI_BATCH] !== 'false';
+}
+
+/** Server flag: auto-finish items in expired section after grace (default off). */
+export function isAutoFinishEnabled(): boolean {
+	return isEnvTrue(FEATURE_FLAG_ENV.AUTO_FINISH);
+}
+
+/** Server flag: expanded global shelf-life keyword DB (default on). */
+export function isGlobalShelfLifeDbEnabled(): boolean {
+	return process.env[FEATURE_FLAG_ENV.GLOBAL_SHELF_LIFE_DB] !== 'false';
 }

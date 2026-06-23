@@ -28,6 +28,12 @@ export const userTable = pgTable('user', {
 		withTimezone: true,
 		mode: 'date'
 	}),
+	expiryMovingSoonLastSentAt: timestamp('expiry_moving_soon_last_sent_at', {
+		withTimezone: true,
+		mode: 'date'
+	}),
+	autoFinishExpiredEnabled: boolean('auto_finish_expired_enabled').notNull().default(false),
+	autoFinishExpiredDays: integer('auto_finish_expired_days').notNull().default(30),
 	pushNotificationsEnabled: boolean('push_notifications_enabled').notNull().default(false),
 	nearbySharingEnabled: boolean('nearby_sharing_enabled').notNull().default(false),
 	nearbySharingLat: numeric('nearby_sharing_lat', { precision: 9, scale: 6 }),
@@ -215,7 +221,14 @@ export const inventoryItemTable = pgTable(
 		unit: text('unit'),
 		expiresOn: date('expires_on', { mode: 'string' }),
 		expiresOnSource: text('expires_on_source', {
-			enum: ['user_set', 'ai_inferred', 'default_heuristic', 'household_learned', 'heuristic']
+			enum: [
+				'user_set',
+				'receipt_printed',
+				'ai_inferred',
+				'default_heuristic',
+				'household_learned',
+				'heuristic'
+			]
 		}),
 		notes: text('notes'),
 		barcode: text('barcode'),

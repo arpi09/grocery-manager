@@ -40,6 +40,8 @@ export interface IExpiryReminderRepository {
 		intervalDays?: number
 	): Promise<ReminderSendClaimResult>;
 	revertReminderSendClaim(userId: string, previousLastSentAt: Date | null): Promise<void>;
+	tryClaimMovingSoonSend(userId: string, sentAt?: Date): Promise<ReminderSendClaimResult>;
+	revertMovingSoonSendClaim(userId: string, previousLastSentAt: Date | null): Promise<void>;
 }
 
 function mapSettings(row: {
@@ -191,6 +193,43 @@ export class DrizzleExpiryReminderRepository implements IExpiryReminderRepositor
 		await db
 			.update(userTable)
 			.set({ expiryReminderLastSentAt: previousLastSentAt })
+			.where(eq(userTable.id, userId));
+	}
+
+	async tryClaimMovingSoonSend(userId: string, sentAt = new Date()): Promise<ReminderSendClaimResult> {
+		const [current] = await db
+			.select({ expiryMovingSoonLastSentAt: userTable.expiryMovingSoonLastSentAt })
+			.from(userTable)
+			.where(eq(userTable.id, userId))
+			.limit(1);
+
+		const previousLastSentAt = current?.expiryMovingSoonLastSentAt ?? null;
+		const cutoff = expiryReminderClaimCutoff(sentAt, 1);
+
+		const updated = await db
+			.update(userTable)
+			.set({ expiryMovingSoonLastSentAt: sentAt })
+			.where(
+				and(
+					eq(userTable.id, userId),
+					or(
+						isNull(userTable.expiryMovingSoonLastSentAt),
+						sql`date_trunc('day', ${userTable.expiryMovingSoonLastSentAt}) <= ${cutoff}`
+					)
+				)
+			)
+			.returning();
+
+		return {
+			claimed: updated.length > 0,
+			previousLastSentAt
+		};
+	}
+
+	async revertMovingSoonSendClaim(userId: string, previousLastSentAt: Date | null): Promise<void> {
+		await db
+			.update(userTable)
+			.set({ expiryMovingSoonLastSentAt: previousLastSentAt })
 			.where(eq(userTable.id, userId));
 	}
 }
