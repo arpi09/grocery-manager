@@ -103,6 +103,8 @@ export interface RecipeUserPromptContext {
 	mealIntent: MealIntent;
 	inventoryPayload: StructuredInventoryPayload;
 	preferences?: string;
+	householdSize?: number;
+	recentlyFinished?: string[];
 	plannedMeals?: Array<{ date: string; title: string }>;
 	avoidTitles?: string[];
 	expiringFocus?: ExpiringFocusRow[];
@@ -140,6 +142,12 @@ export function buildRecipeContextPayload(context: RecipeUserPromptContext): Rec
 			sampleCount: hint.sampleCount
 		}));
 	}
+	if (typeof context.householdSize === 'number') {
+		payload.householdSize = context.householdSize;
+	}
+	if (context.recentlyFinished && context.recentlyFinished.length > 0) {
+		payload.recentlyFinished = context.recentlyFinished;
+	}
 	if (context.inventoryPayload.truncated) {
 		payload.truncated = context.inventoryPayload.truncated;
 	}
@@ -147,12 +155,43 @@ export function buildRecipeContextPayload(context: RecipeUserPromptContext): Rec
 	return payload;
 }
 
-export function buildRecipeSystemPrompt(portions: number, locale = 'sv'): string {
+export interface RecipeSystemPromptOptions {
+	requireExpiringFocus?: boolean;
+	draftOnly?: boolean;
+}
+
+export function buildRecipeSystemPrompt(
+	portions: number,
+	locale = 'sv',
+	options: RecipeSystemPromptOptions = {}
+): string {
 	const lang = normalizePromptLocale(locale);
 	const languageRule =
 		lang === 'en'
 			? 'All text must be in English (en-GB): title, whyItFits, wastePreventedNote, ingredientsToUse, missingIngredients, steps.'
 			: 'All text ska vara på svenska (sv-SE): title, whyItFits, wastePreventedNote, ingredientsToUse, missingIngredients, steps.';
+	const draftOnlyRules =
+		options.draftOnly
+			? [
+					lang === 'en'
+						? 'Single-pass mode: output must be publication-ready — no placeholders, no vague steps.'
+						: 'En-pass-läge: utdata ska vara redo att visa — inga platshållare, inga vaga steg.',
+					lang === 'en'
+						? 'Double-check every ingredientsToUse name against inventory before returning JSON.'
+						: 'Dubbelkolla varje ingredientsToUse-namn mot inventory innan du returnerar JSON.',
+					lang === 'en'
+						? 'ingredientIds must list inventory ids for every ingredientsToUse entry.'
+						: 'ingredientIds ska lista inventory-id för varje ingredientsToUse-rad.'
+				]
+			: [];
+	const eatFirstRule =
+		options.requireExpiringFocus
+			? [
+					lang === 'en'
+						? 'Eat-first: each recipe MUST include at least one expiringFocus.id in ingredientIds when expiringFocus is non-empty.'
+						: 'Ät-först: varje recept MÅSTE innehålla minst ett expiringFocus.id i ingredientIds när expiringFocus finns.'
+				]
+			: [];
 	return [
 		lang === 'en'
 			? 'You are a practical home cooking assistant.'
@@ -161,10 +200,14 @@ export function buildRecipeSystemPrompt(portions: number, locale = 'sv'): string
 		'Lagerlistan (inventory[].name med id) är den ENDA tillåtna källan för huvudingredienser.',
 		'Hitta ALDRIG på varor, varumärken eller ingredienser som inte finns i inventory.',
 		'Fältet ingredientsToUse får bara innehålla exakta varunamn från inventory (kopiera name tecken för tecken, utan id).',
+		'ingredientIds: array med inventory-id för varje huvudingrediens — måste matcha ingredientsToUse.',
 		'Om en ingrediens inte finns i lagret: lägg den INTE i ingredientsToUse — använd missingIngredients eller utelämna.',
 		'missingIngredients är endast för små tillbehör som inte finns i lagret (kryddor, olja, citron osv.) — aldrig huvudingredienser som redan finns i lagret.',
 		'Vid osäkerhet om exakt varunamn: välj närmaste listade namn eller utelämna — gissa inte och skriv inte "okänd" i ingredientsToUse.',
 		'Om avoidTitles finns: generera inte recept med samma eller nästan identiska titlar.',
+		'Om recentlyFinished finns: undvik att föreslå samma rätt igen.',
+		...eatFirstRule,
+		...draftOnlyRules,
 		`Skala alla mängder i steps linjärt för exakt ${portions} portioner (inga fasta "4 portioner" om portions skiljer sig).`,
 		'Prioritera varor med lågt daysUntilExpiry och minska matsvinn.',
 		'Använd realistiska delmängder från lagret — recept ska inte förbruka hela förpackningen om kvantiteten räcker till flera måltider.',
@@ -177,6 +220,7 @@ export function buildRecipeSystemPrompt(portions: number, locale = 'sv'): string
 		'- whyItFits (en kort mening om varför receptet passar lagret)',
 		'- wastePreventedNote: kort mening om vilka utgående varor som räddas, annars null',
 		'- ingredientsToUse (array med exakta lagernamn)',
+		'- ingredientIds (array med inventory-id, samma ordning som ingredientsToUse)',
 		'- missingIngredients (array, tom om inget saknas)',
 		'- totalMinutes: uppskattad total tid (summa av steps.minutes, eller null)',
 		'- difficulty: easy | medium | hard',
@@ -191,7 +235,7 @@ export function buildRecipeSystemPrompt(portions: number, locale = 'sv'): string
 		'- Max ~220 tecken per instruction — inga väggar av text',
 		'- Upprepa inte samma information mellan steg',
 		'Returnera endast giltig JSON i denna form:',
-		'{"recipes":[{"title":"","whyItFits":"","wastePreventedNote":null,"ingredientsToUse":[],"missingIngredients":[],"totalMinutes":30,"difficulty":"easy","steps":[{"instruction":"","minutes":5}]}]}',
+		'{"recipes":[{"title":"","whyItFits":"","wastePreventedNote":null,"ingredientsToUse":[],"ingredientIds":[],"missingIngredients":[],"totalMinutes":30,"difficulty":"easy","steps":[{"instruction":"","minutes":5}]}]}',
 		`promptVersion: ${PROMPT_VERSION_RECIPE}`,
 		'Inga markdown-kodblock eller förklaringar utanför JSON.'
 	].join('\n');
@@ -230,7 +274,7 @@ export function buildRecipeRefinementSystemPrompt(portions: number, locale = 'sv
 			? 'You are an editor reviewing AI-generated recipes against household inventory.'
 			: 'Du är en svensk matredaktör som granskar AI-genererade recept mot ett hushålls lager.',
 		`Mål: förbättra ett utkast till exakt ${portions} portioner utan att hitta på nya varor.`,
-		'Validera ingredientsToUse mot inventory — ta bort hallucinerade eller felstavade varor.',
+		'Validera ingredientsToUse och ingredientIds mot inventory — ta bort hallucinerade eller felstavade varor.',
 		'Korrigera till exakta lagernamn (tecken för tecken som i inventory[].name).',
 		'Flytta varor som inte finns i lagret till missingIngredients (aldrig i ingredientsToUse).',
 		lang === 'en'
@@ -247,7 +291,7 @@ export function buildRecipeRefinementSystemPrompt(portions: number, locale = 'sv
 		'Ta bort eller skriv om recept med orealistiska kombinationer (t.ex. "baguette med blåbärssylt" som middagsrätt när lagret räcker till vanlig matlagning).',
 		'Se till att titel, steg och ingredienser hör ihop som frukost, fika, lunch eller middag.',
 		'Returnera samma JSON-struktur som utkastet, med samma antal recept (eller färre om ett utkast är omöjligt).',
-		'{"recipes":[{"title":"","whyItFits":"","wastePreventedNote":null,"ingredientsToUse":[],"missingIngredients":[],"totalMinutes":30,"difficulty":"easy","steps":[{"instruction":"","minutes":5}]}]}',
+		'{"recipes":[{"title":"","whyItFits":"","wastePreventedNote":null,"ingredientsToUse":[],"ingredientIds":[],"missingIngredients":[],"totalMinutes":30,"difficulty":"easy","steps":[{"instruction":"","minutes":5}]}]}',
 		'Inga markdown-kodblock eller förklaringar utanför JSON.'
 	].join('\n');
 }
@@ -257,18 +301,27 @@ export function buildRecipeRefinementUserPrompt(
 	context: RecipeUserPromptContext,
 	extraContext?: string
 ): string {
-	const parts = [
-		recipeContextInstruction(context.locale),
-		mealIntentGuidance(context.mealIntent),
-		'Utkast att granska och förbättra:',
-		draftJson,
-		'Household context (inventory is authoritative):',
-		JSON.stringify(buildRecipeContextPayload(context), null, 2)
-	];
-	if (extraContext?.trim()) {
-		parts.push(extraContext.trim());
-	}
-	return parts.join('\n\n');
+	const locale = normalizePromptLocale(context.locale);
+	const mealIntentLine =
+		locale === 'en'
+			? `Meal intent: ${mealIntentGuidanceEn(context.mealIntent)}`
+			: mealIntentGuidance(context.mealIntent);
+
+	return buildStandardJsonUserBlock(
+		{ version: PROMPT_VERSION_RECIPE, locale: promptLocaleTag(context.locale) },
+		{
+			instruction: [
+				recipeContextInstruction(context.locale),
+				mealIntentLine,
+				'Utkast att granska och förbättra:',
+				draftJson,
+				extraContext?.trim()
+			]
+				.filter(Boolean)
+				.join('\n\n'),
+			metadata: JSON.stringify(buildRecipeContextPayload(context), null, 2)
+		}
+	);
 }
 
 export function ingredientMatchesInventory(ingredient: string, inventoryNames: string[]): boolean {
@@ -312,7 +365,8 @@ function recipeContentIsExcluded(recipe: RecipeSuggestion): boolean {
 
 export function sanitizeRecipeAgainstInventory(
 	recipe: RecipeSuggestion,
-	inventoryNames: string[]
+	inventoryNames: string[],
+	inventoryIds?: Map<string, string>
 ): RecipeSuggestion | null {
 	if (recipeContentIsExcluded(recipe)) {
 		return null;
@@ -349,6 +403,16 @@ export function sanitizeRecipeAgainstInventory(
 		}
 	}
 
+	if (recipe.ingredientIds && recipe.ingredientIds.length > 0 && inventoryIds) {
+		for (const id of recipe.ingredientIds) {
+			const name = inventoryIds.get(id);
+			if (!name || isExcludedFromRecipes(name)) continue;
+			if (!ingredientsToUse.includes(name)) {
+				ingredientsToUse.push(name);
+			}
+		}
+	}
+
 	const missingIngredients = [...missingSet].filter(
 		(ing) => !ingredientMatchesInventory(ing, inventoryNames)
 	);
@@ -366,10 +430,14 @@ export function sanitizeRecipeAgainstInventory(
 
 export function sanitizeRecipesAgainstInventory(
 	recipes: RecipeSuggestion[],
-	inventoryNames: string[]
+	inventoryNames: string[],
+	inventoryItems?: InventoryItem[]
 ): RecipeSuggestion[] {
+	const idMap = inventoryItems
+		? new Map(inventoryItems.map((item) => [item.id, item.name.trim()]))
+		: undefined;
 	return recipes
-		.map((recipe) => sanitizeRecipeAgainstInventory(recipe, inventoryNames))
+		.map((recipe) => sanitizeRecipeAgainstInventory(recipe, inventoryNames, idMap))
 		.filter((recipe): recipe is RecipeSuggestion => recipe !== null)
 		.slice(0, 4);
 }

@@ -8,6 +8,7 @@ import { clampRecipePortions } from '$lib/server/recipe-prompt';
 import { generateRecipesWithRefinement, selectVelocityHints } from '$lib/server/recipe-generation';
 import { upcomingDateRange } from '$lib/server/inventory-context';
 import { normalizePromptLocale } from '$lib/server/ai-prompt-shared';
+import { consumptionRepository } from '$lib/server/di';
 import { translate } from '$lib/i18n/messages';
 import { e2eMockRecipeSuggestions, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 
@@ -92,22 +93,35 @@ async function loadRecipeEnrichment(
 	plannedMeals: Awaited<ReturnType<typeof locals.mealPlanService.listPlannedMealsByRange>>;
 	recipeIdeas: Awaited<ReturnType<typeof locals.mealPlanService.listRecipeIdeas>>;
 	velocityHints: ReturnType<typeof selectVelocityHints>;
+	householdSize: number;
+	recentlyFinished: string[];
 }> {
 	const { fromDate, toDate } = upcomingDateRange(10);
 	const householdId = locals.householdId;
-	const [plannedMeals, recipeIdeas, householdSnapshot] = await Promise.all([
-		locals.mealPlanService.listPlannedMealsByRange(userId, fromDate, toDate),
-		locals.mealPlanService.listRecipeIdeas(userId, 8),
-		householdId
-			? locals.householdSuggestionsService.getSnapshot(householdId)
-			: Promise.resolve(null)
-	]);
+	const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+	const [plannedMeals, recipeIdeas, householdSnapshot, recentlyFinished, household] =
+		await Promise.all([
+			locals.mealPlanService.listPlannedMealsByRange(userId, fromDate, toDate),
+			locals.mealPlanService.listRecipeIdeas(userId, 8),
+			householdId
+				? locals.householdSuggestionsService.getSnapshot(householdId)
+				: Promise.resolve(null),
+			householdId
+				? consumptionRepository.listRecentConsumedProductNames(householdId, since, 10)
+				: Promise.resolve([]),
+			locals.householdService.getHouseholdForUser(userId)
+		]);
+
+	const memberCount = household?.members.length ?? 0;
+	const householdSize = memberCount >= 1 && memberCount <= 8 ? memberCount : 2;
 
 	return {
 		plannedMeals,
 		recipeIdeas,
 		velocityHints: householdSnapshot
 			? selectVelocityHints(householdSnapshot.shelfLifeRules)
-			: []
+			: [],
+		householdSize,
+		recentlyFinished
 	};
 }

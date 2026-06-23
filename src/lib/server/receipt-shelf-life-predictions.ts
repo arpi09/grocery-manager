@@ -15,7 +15,9 @@ import {
 	SHELF_LIFE_CATEGORY_ANCHORS
 } from '$lib/server/ai-prompt-shared';
 import { isReceiptAiBatchEnabled } from '$lib/server/brain-feature-flags';
+import { isGlobalShelfLifeDbEnabled } from '$lib/server/feature-flags';
 import { predictHeuristicShelfLife } from '$lib/infrastructure/adapters/heuristic-shelf-life.adapter';
+import type { IHouseholdShelfLifeRuleRepository } from '$lib/infrastructure/repositories/household-shelf-life-rule.repository';
 import { OPENAI_MODEL_NANO, requestStructuredJson } from '$lib/server/openai';
 import { RECEIPT_BBF_FEW_SHOT_BLOCK } from '$lib/server/receipt-bbf-few-shot';
 import { logBrainMetrics } from '$lib/server/brain-metrics';
@@ -55,6 +57,8 @@ export const SHELF_LIFE_BATCH_SYSTEM_PROMPT = [
 	'- confidence: 0.2–0.9 (lägre när osäker)',
 	'- fridge: kortare, freezer: längre, cupboard: medellång',
 	'- Använd brand, packageSize, categoryHint, quantity, unit och storeLabel när de finns',
+	'- householdRule: hushållsspecifik inlärning — justera bara vid låg confidence',
+	'- globalHint: global kategoridata — använd som ankare, inte som hårt krav',
 	SHELF_LIFE_CATEGORY_ANCHORS,
 	RECEIPT_BBF_FEW_SHOT_BLOCK,
 	`- promptVersion: ${PROMPT_VERSION_SHELF_LIFE_BATCH}`,
@@ -66,6 +70,7 @@ export interface PredictReceiptLinesShelfLifeOptions {
 	todayIso?: string;
 	storeLabel?: string | null;
 	receiptText?: string | null;
+	shelfLifeRules?: IHouseholdShelfLifeRuleRepository;
 	/** Clear session AI cache (e.g. new upload). */
 	clearCache?: boolean;
 }
@@ -210,7 +215,9 @@ async function predictShelfLifeAiBatch(
 	purchasedAt: string | null,
 	storeLabel: string | null,
 	todayIso: string,
-	alreadyResolved: Array<{ index: number; expiresOn: string; source: string }>
+	alreadyResolved: Array<{ index: number; expiresOn: string; source: string }>,
+	householdId: string,
+	shelfLifeRules?: IHouseholdShelfLifeRuleRepository
 ): Promise<Map<number, { estimatedDays: number; confidence: number }>> {
 	const result = new Map<number, { estimatedDays: number; confidence: number }>();
 	if (indices.length === 0) return result;
@@ -248,22 +255,37 @@ async function predictShelfLifeAiBatch(
 
 	if (uncachedIndices.length === 0) return result;
 
-	const payload = uncachedIndices.map((index) => {
-		const line = lines[index];
-		return {
-			index,
-			name: line.name,
-			location: line.location,
-			brand: line.brand ?? null,
-			packageSize: line.packageSize ?? null,
-			categoryHint: line.categoryHint ?? null,
-			quantity: line.quantity ?? null,
-			unit: line.unit ?? null,
-			opened: false,
-			storageTemp: line.location,
-			storeLabel
-		};
-	});
+	const payload = await Promise.all(
+		uncachedIndices.map(async (index) => {
+			const line = lines[index];
+			const normalizedKey = normalizeReceiptProductName(line.name);
+			const householdRule = shelfLifeRules
+				? await shelfLifeRules.findByKey(householdId, normalizedKey, line.location)
+				: null;
+			const globalHint =
+				isGlobalShelfLifeDbEnabled() && line.categoryHint
+					? guessDaysFromCategoryHint(line.categoryHint, line.location)
+					: null;
+
+			return {
+				index,
+				name: line.name,
+				location: line.location,
+				brand: line.brand ?? null,
+				packageSize: line.packageSize ?? null,
+				categoryHint: line.categoryHint ?? null,
+				quantity: line.quantity ?? null,
+				unit: line.unit ?? null,
+				opened: false,
+				storageTemp: line.location,
+				storeLabel,
+				householdRule: householdRule
+					? { typicalDays: householdRule.typicalDays, sampleCount: householdRule.sampleCount }
+					: null,
+				globalHint
+			};
+		})
+	);
 
 	const userPrompt = buildStandardJsonUserBlock(
 		{
@@ -462,7 +484,9 @@ export async function predictReceiptLinesShelfLife(
 		purchasedAt,
 		storeLabel,
 		todayIso,
-		alreadyResolved
+		alreadyResolved,
+		householdId,
+		options.shelfLifeRules
 	);
 
 	return heuristicFilled.map((prediction, index) => {

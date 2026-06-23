@@ -5,6 +5,7 @@ export interface RecipeSuggestion {
 	whyItFits: string;
 	wastePreventedNote?: string | null;
 	ingredientsToUse: string[];
+	ingredientIds?: string[];
 	missingIngredients: string[];
 	steps: RecipeStep[];
 	totalMinutes?: number | null;
@@ -16,6 +17,7 @@ const RECIPE_OBJECT_KEYS = new Set([
 	'whyItFits',
 	'wastePreventedNote',
 	'ingredientsToUse',
+	'ingredientIds',
 	'missingIngredients',
 	'steps',
 	'totalMinutes',
@@ -34,6 +36,10 @@ export const RECIPE_SUGGESTIONS_SCHEMA = {
 					whyItFits: { type: 'string' },
 					wastePreventedNote: { type: ['string', 'null'] },
 					ingredientsToUse: {
+						type: 'array',
+						items: { type: 'string' }
+					},
+					ingredientIds: {
 						type: 'array',
 						items: { type: 'string' }
 					},
@@ -61,6 +67,7 @@ export const RECIPE_SUGGESTIONS_SCHEMA = {
 					'whyItFits',
 					'wastePreventedNote',
 					'ingredientsToUse',
+					'ingredientIds',
 					'missingIngredients',
 					'totalMinutes',
 					'difficulty',
@@ -104,6 +111,9 @@ export function parseRecipeSuggestions(input: unknown): RecipeSuggestion[] {
 			const ingredientsToUse = Array.isArray(candidate.ingredientsToUse)
 				? candidate.ingredientsToUse.filter((v): v is string => typeof v === 'string')
 				: [];
+			const ingredientIds = Array.isArray(candidate.ingredientIds)
+				? candidate.ingredientIds.filter((v): v is string => typeof v === 'string')
+				: [];
 			const missingIngredients = Array.isArray(candidate.missingIngredients)
 				? candidate.missingIngredients.filter((v): v is string => typeof v === 'string')
 				: [];
@@ -129,6 +139,7 @@ export function parseRecipeSuggestions(input: unknown): RecipeSuggestion[] {
 				whyItFits,
 				wastePreventedNote,
 				ingredientsToUse,
+				ingredientIds: ingredientIds.length > 0 ? ingredientIds : undefined,
 				missingIngredients,
 				steps,
 				totalMinutes,

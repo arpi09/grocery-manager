@@ -9,6 +9,9 @@
 		estimatedCount: number;
 		canWrite?: boolean;
 		bulkExpiryHref?: string | null;
+		onDeepen?: () => Promise<void>;
+		deepening?: boolean;
+		deepenError?: string | null;
 	}
 
 	let {
@@ -16,7 +19,10 @@
 		missingExpiryCount,
 		estimatedCount,
 		canWrite = false,
-		bulkExpiryHref = null
+		bulkExpiryHref = null,
+		onDeepen,
+		deepening = false,
+		deepenError = null
 	}: Props = $props();
 
 	const visible = $derived(insights.length > 0 || missingExpiryCount > 0 || estimatedCount > 0);
@@ -37,7 +43,23 @@
 
 {#if visible}
 	<section class="insights-panel" aria-labelledby="inventory-insights-heading" data-testid="inventory-insights">
-		<h2 id="inventory-insights-heading" class="insights-title">{t('brain.insights.title')}</h2>
+		<div class="insights-header">
+			<h2 id="inventory-insights-heading" class="insights-title">{t('brain.insights.title')}</h2>
+			{#if onDeepen}
+				<button
+					type="button"
+					class="insight-deepen"
+					disabled={deepening}
+					onclick={() => void onDeepen()}
+					data-testid="inventory-insights-deepen"
+				>
+					{deepening ? t('brain.insights.deepening') : t('brain.insights.deepen')}
+				</button>
+			{/if}
+		</div>
+		{#if deepenError}
+			<p class="insight-error" role="alert">{deepenError}</p>
+		{/if}
 		<div class="insights-grid">
 			{#if missingExpiryCount > 0}
 				<Card class="insight-card">
@@ -74,10 +96,39 @@
 		margin-bottom: var(--space-lg);
 	}
 
+	.insights-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-sm);
+		margin-bottom: var(--space-sm);
+	}
+
 	.insights-title {
-		margin: 0 0 var(--space-sm);
+		margin: 0;
 		font-size: 0.9375rem;
 		font-weight: 700;
+	}
+
+	.insight-deepen {
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		padding: 0.35rem 0.65rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.insight-deepen:disabled {
+		opacity: 0.6;
+		cursor: wait;
+	}
+
+	.insight-error {
+		margin: 0 0 var(--space-sm);
+		font-size: 0.8125rem;
+		color: var(--color-danger, #b42318);
 	}
 
 	.insights-grid {

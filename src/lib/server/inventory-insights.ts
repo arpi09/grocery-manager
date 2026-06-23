@@ -6,7 +6,8 @@ import { isEstimatedExpirySource } from '$lib/domain/learning/expiry-source';
 import {
 	normalizePromptLocale,
 	PROMPT_VERSION_INSIGHTS,
-	promptLocaleInstruction
+	promptLocaleInstruction,
+	estimateInputTokens
 } from '$lib/server/ai-prompt-shared';
 import {
 	formatStructuredInventoryPayload,
@@ -27,6 +28,13 @@ export interface InventoryInsightsSnapshot {
 	missingExpiryCount: number;
 	estimatedCount: number;
 	insights: InventoryInsight[];
+}
+
+export const INSIGHTS_LLM_MAX_INPUT_TOKENS = 8000;
+
+/** Skip LLM insights when prompt would exceed token budget — use heuristic snapshot instead. */
+export function shouldFallbackInsightsHeuristic(userPrompt: string, itemCount: number): boolean {
+	return estimateInputTokens(userPrompt, itemCount) > INSIGHTS_LLM_MAX_INPUT_TOKENS;
 }
 
 export const INVENTORY_INSIGHTS_LLM_SCHEMA = {

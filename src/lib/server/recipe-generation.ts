@@ -43,6 +43,8 @@ export interface GenerateRecipesInput {
 	maxRecipes?: number;
 	mealIntent?: MealIntent;
 	locale?: string;
+	householdSize?: number;
+	recentlyFinished?: string[];
 	plannedMeals?: PlannedMeal[];
 	recipeIdeas?: RecipeIdea[];
 	velocityHints?: VelocityHintRow[];
@@ -171,6 +173,8 @@ function buildPromptContext(input: {
 	plannedMeals?: PlannedMeal[];
 	recipeIdeas?: RecipeIdea[];
 	velocityHints?: VelocityHintRow[];
+	householdSize?: number;
+	recentlyFinished?: string[];
 }): RecipeUserPromptContext {
 	const locale = normalizePromptLocale(input.locale);
 	const expiringFocus =
@@ -195,7 +199,9 @@ function buildPromptContext(input: {
 		})),
 		avoidTitles: input.recipeIdeas?.map((idea) => idea.title).filter(Boolean),
 		expiringFocus,
-		velocityHints: input.velocityHints
+		velocityHints: input.velocityHints,
+		householdSize: input.householdSize,
+		recentlyFinished: input.recentlyFinished
 	};
 }
 
@@ -236,7 +242,9 @@ export async function generateRecipesWithRefinement(
 		locale = 'sv',
 		plannedMeals,
 		recipeIdeas,
-		velocityHints
+		velocityHints,
+		householdSize = 2,
+		recentlyFinished = []
 	} = input;
 
 	const recipeInventory = filterInventoryForRecipes(inventory);
@@ -256,16 +264,23 @@ export async function generateRecipesWithRefinement(
 		expiringItemNames,
 		plannedMeals,
 		recipeIdeas,
-		velocityHints
+		velocityHints,
+		householdSize,
+		recentlyFinished
 	});
 	const inventoryNames = inventoryNameList(recipeInventory);
 	const skipRefinement =
 		!isRecipeRefinementEnabled() || shouldSkipRefinement(mealIntent, recipeInventory.length);
+	const systemPromptOptions = {
+		requireExpiringFocus:
+			mode === 'eat_first' && (promptContext.expiringFocus?.length ?? 0) > 0,
+		draftOnly: skipRefinement
+	};
 
 	const draftResult = await runRecipePass(
 		requestJson,
 		apiKey,
-		buildRecipeSystemPrompt(portions, promptLocale),
+		buildRecipeSystemPrompt(portions, promptLocale, systemPromptOptions),
 		buildRecipeUserPrompt(promptContext)
 	);
 
@@ -279,7 +294,11 @@ export async function generateRecipesWithRefinement(
 	}
 
 	if (skipRefinement) {
-		const recipes = sanitizeRecipesAgainstInventory(draftRecipes, inventoryNames).slice(0, maxRecipes);
+		const recipes = sanitizeRecipesAgainstInventory(
+			draftRecipes,
+			inventoryNames,
+			recipeInventory
+		).slice(0, maxRecipes);
 		if (recipes.length === 0) {
 			return { ok: true, recipes: [], noteKey: 'recipe.noSuitableInventoryNote' };
 		}
@@ -302,10 +321,11 @@ export async function generateRecipesWithRefinement(
 	);
 
 	if (!refineResult.ok) {
-		const sanitizedDraft = sanitizeRecipesAgainstInventory(draftRecipes, inventoryNames).slice(
-			0,
-			maxRecipes
-		);
+		const sanitizedDraft = sanitizeRecipesAgainstInventory(
+			draftRecipes,
+			inventoryNames,
+			recipeInventory
+		).slice(0, maxRecipes);
 		if (sanitizedDraft.length > 0) {
 			return { ok: true, recipes: sanitizedDraft };
 		}
@@ -315,7 +335,8 @@ export async function generateRecipesWithRefinement(
 	const refined = parseRecipeSuggestions(refineResult.data);
 	const recipes = sanitizeRecipesAgainstInventory(
 		refined.length > 0 ? refined : draftRecipes,
-		inventoryNames
+		inventoryNames,
+		recipeInventory
 	).slice(0, maxRecipes);
 
 	if (recipes.length === 0) {

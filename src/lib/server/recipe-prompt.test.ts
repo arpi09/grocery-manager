@@ -80,6 +80,8 @@ describe('formatStructuredInventoryPayload', () => {
 			expiresOnSource: 'household_learned'
 		});
 		expect(payload.inventory[0]?.daysUntilExpiry).toBeTypeOf('number');
+		expect(payload.inventory[0]?.purchasedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+		expect(payload.inventory[0]?.daysSincePurchase).toBeTypeOf('number');
 	});
 
 	it('sorts by urgency and caps with truncated suffix', () => {
@@ -149,7 +151,34 @@ describe('buildRecipe prompts', () => {
 		expect(refine).toContain('frukost, fika, lunch eller middag');
 	});
 
-	it('builds recipe-v3 JSON user prompt with inventory and preferences', () => {
+	it('includes ingredientIds and household context in system prompt', () => {
+		const prompt = buildRecipeSystemPrompt(4);
+		expect(prompt).toContain('ingredientIds');
+		expect(prompt).toContain(PROMPT_VERSION_RECIPE);
+	});
+
+	it('uses stronger draft-only rules when requested', () => {
+		const prompt = buildRecipeSystemPrompt(4, 'sv', { draftOnly: true });
+		expect(prompt).toContain('En-pass-läge');
+	});
+
+	it('requires expiring focus ids in eat-first mode', () => {
+		const prompt = buildRecipeSystemPrompt(4, 'en', { requireExpiringFocus: true });
+		expect(prompt).toContain('expiringFocus.id');
+	});
+
+	it('includes householdSize and recentlyFinished in context payload', () => {
+		const payload = buildRecipeContextPayload(
+			makePromptContext([makeItem()], {
+				householdSize: 3,
+				recentlyFinished: ['Pasta carbonara']
+			})
+		);
+		expect(payload.householdSize).toBe(3);
+		expect(payload.recentlyFinished).toEqual(['Pasta carbonara']);
+	});
+
+	it('builds recipe-v4 JSON user prompt with inventory and preferences', () => {
 		const items = [
 			makeItem({ id: 'inv-falukorv', name: 'Falukorv', quantity: '400', unit: 'g' }),
 			makeItem({ id: 'inv-creme', name: 'Crème fraîche 15%', quantity: '2', unit: 'dl' })
@@ -182,11 +211,13 @@ describe('buildRecipe prompts', () => {
 
 		const refine = buildRecipeRefinementUserPrompt(
 			'{}',
-			makePromptContext([makeItem()], { mealIntent: 'meal_prep' }),
-			'Prioritera utgående varor'
+			makePromptContext([makeItem()], { mealIntent: 'meal_prep', locale: 'en' }),
+			'Prioritize expiring items'
 		);
-		expect(refine).toContain('matlådor');
-		expect(refine).toContain('Prioritera utgående varor');
+		expect(refine).toContain('meal prep');
+		expect(refine).toContain('locale: en-GB');
+		expect(refine).toContain('Prioritize expiring items');
+		expect(refine).toContain('"inventory"');
 	});
 
 	it('includes human-food-only rules in culinary realism', () => {

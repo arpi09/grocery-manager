@@ -60,15 +60,18 @@ export const SHELF_LIFE_CATEGORY_ANCHORS = [
 	'- bröd: 3–7 d'
 ].join('\n');
 
-export const PROMPT_VERSION_RECEIPT_PARSE = 'receipt-parse-v3';
-export const PROMPT_VERSION_SHELF_LIFE_BATCH = 'shelf-life-batch-v3';
-export const PROMPT_VERSION_PHOTO_ROUND = 'photo-round-v2';
+export const PROMPT_VERSION_RECEIPT_PARSE = 'receipt-parse-v4';
+export const PROMPT_VERSION_SHELF_LIFE_BATCH = 'shelf-life-batch-v4';
+export const PROMPT_VERSION_PHOTO_ROUND = 'photo-round-v3';
+export const PROMPT_VERSION_PANTRY_DELTA = 'pantry-delta-v1';
 export const PROMPT_VERSION_PRODUCT_FROM_IMAGE = 'product-from-image-v1';
-export const PROMPT_VERSION_RECIPE = 'recipe-v3';
+export const PROMPT_VERSION_RECIPE = 'recipe-v4';
 export const PROMPT_VERSION_INSIGHTS = 'inventory-insights-v3';
 export const PROMPT_VERSION_SHOPPING = 'shopping-v3';
 export const PROMPT_VERSION_MERGE = 'inventory-merge-v2';
 export const PROMPT_VERSION_EXPIRY_PUSH = 'expiry-push-v2';
+export const PROMPT_VERSION_RECIPE_COOK = 'recipe-cook-v1';
+export const PROMPT_VERSION_WEEKLY_PLAN = 'weekly-plan-v1';
 export const PROMPT_INVENTORY_ROW_CAP = 40;
 
 export interface StandardJsonUserBlockMeta {
@@ -82,6 +85,8 @@ export interface StandardJsonUserBlockContent {
 	instruction: string;
 	metadata?: string;
 	householdMemory?: string | null;
+	priorCorrections?: string | null;
+	globalFewShot?: string | null;
 	receiptText?: string | null;
 }
 
@@ -100,6 +105,12 @@ export function buildStandardJsonUserBlock(
 	}
 	if (content.householdMemory?.trim()) {
 		parts.push(content.householdMemory.trim());
+	}
+	if (content.priorCorrections?.trim()) {
+		parts.push(content.priorCorrections.trim());
+	}
+	if (content.globalFewShot?.trim()) {
+		parts.push(content.globalFewShot.trim());
 	}
 	if (content.receiptText?.trim()) {
 		parts.push('Kvitto (numrerade rader):', content.receiptText.trim());

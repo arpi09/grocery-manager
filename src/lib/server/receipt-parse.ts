@@ -118,6 +118,24 @@ export const RECEIPT_SYSTEM_PROMPT = [
 	`promptVersion: ${PROMPT_VERSION_RECEIPT_PARSE}`
 ].join('\n');
 
+export const RECEIPT_STRICT_SYSTEM_PROMPT = [
+	RECEIPT_SYSTEM_PROMPT,
+	'Strikt läge:',
+	'- Sätt lineConfidence till low om raden är tvetydig — gissa inte.',
+	'- Hoppa över rader du inte kan läsa tydligt.',
+	'- name måste matcha synlig produkttext exakt (ingen gissning).',
+	'- Returnera färre rader hellre än osäkra rader.'
+].join('\n');
+
+const RECEIPT_OCR_SCHEMA = {
+	type: 'object',
+	properties: {
+		receiptText: { type: 'string' }
+	},
+	required: ['receiptText'],
+	additionalProperties: false
+} as const;
+
 const RECEIPT_TEXT_CHUNK_LINES = 35;
 const RECEIPT_TWO_PASS_LINE_THRESHOLD = 30;
 
@@ -397,12 +415,53 @@ export function isOpenAiSchemaFailure(result: OpenAiFailureResult): boolean {
 	);
 }
 
+export interface ReceiptParseFeedbackBlocks {
+	priorCorrectionsBlock?: string;
+	globalFewShotBlock?: string;
+}
+
+export interface ReceiptParseOptions extends ReceiptParseFeedbackBlocks {
+	householdMemoryBlockOverride?: string;
+	strict?: boolean;
+}
+
 type ReceiptStructuredOptions = {
 	systemPrompt: string;
 	userPrompt: string;
 	imageDataUrl?: string;
 	imageDetail?: 'auto' | 'high' | 'low';
 };
+
+export function countLowLineConfidence(lines: ReceiptLine[]): number {
+	return lines.filter((line) => line.confidence != null && line.confidence < 0.5).length;
+}
+
+export function shouldReparsedForLowQuality(lines: ReceiptLine[]): boolean {
+	if (lines.length === 0) return false;
+	return countLowLineConfidence(lines) / lines.length > 0.3;
+}
+
+export async function extractReceiptTextFromImage(
+	apiKey: string,
+	imageDataUrl: string
+): Promise<string | null> {
+	const result = await requestStructuredJsonFromImage(apiKey, {
+		systemPrompt: [
+			'Du extraherar all synlig text från ett svenskt butikskvitto (foto).',
+			'Behåll radbrytningar och priser som de syns.',
+			'Returnera JSON: {"receiptText":"..."}'
+		].join('\n'),
+		userPrompt: 'Extrahera kvittotext rad för rad. Inkludera produktnamn, mängder, priser och bäst-före om synligt.',
+		schemaName: 'receipt_ocr_text',
+		schema: RECEIPT_OCR_SCHEMA as unknown as Record<string, unknown>,
+		imageDataUrl,
+		imageDetail: 'high'
+	});
+
+	if (!result.ok) return null;
+	const text = (result.data as { receiptText?: unknown }).receiptText;
+	return typeof text === 'string' && text.trim() ? text.trim() : null;
+}
 
 function buildReceiptMetadataBlock(metadata?: ReceiptParseMetadata): string {
 	if (!metadata) return '';
@@ -450,6 +509,8 @@ function buildReceiptUserPrompt(params: {
 	instruction: string;
 	metadata?: ReceiptParseMetadata;
 	householdMemoryBlock?: string;
+	priorCorrectionsBlock?: string;
+	globalFewShotBlock?: string;
 	receiptBody?: string;
 }): string {
 	return buildStandardJsonUserBlock(
@@ -463,6 +524,8 @@ function buildReceiptUserPrompt(params: {
 			instruction: params.instruction,
 			metadata: buildReceiptMetadataBlock(params.metadata),
 			householdMemory: params.householdMemoryBlock ?? null,
+			priorCorrections: params.priorCorrectionsBlock ?? null,
+			globalFewShot: params.globalFewShotBlock ?? null,
 			receiptText: params.receiptBody ?? null
 		}
 	);
@@ -512,6 +575,7 @@ async function classifyFoodLineNumbers(
 	apiKey: string,
 	numbered: string,
 	metadata?: ReceiptParseMetadata,
+	feedback?: ReceiptParseFeedbackBlocks,
 	householdMemoryBlock?: string
 ): Promise<number[]> {
 	const result = await requestStructuredJson(apiKey, {
@@ -525,6 +589,8 @@ async function classifyFoodLineNumbers(
 			instruction: 'Lista radnummer som är mat- eller drycksrader.',
 			metadata,
 			householdMemoryBlock,
+			priorCorrectionsBlock: feedback?.priorCorrectionsBlock,
+			globalFewShotBlock: feedback?.globalFewShotBlock,
 			receiptBody: numbered
 		}),
 		schemaName: 'receipt_food_line_numbers',
@@ -543,16 +609,21 @@ async function parseReceiptTextChunks(
 	chunks: string[],
 	mergedMetadata: ReceiptParseMetadata,
 	householdMemoryBlock: string,
-	instruction: string
+	instruction: string,
+	feedback?: ReceiptParseFeedbackBlocks,
+	strict = false
 ): Promise<Awaited<ReturnType<typeof requestReceiptStructuredJson>>> {
+	const systemPrompt = strict ? RECEIPT_STRICT_SYSTEM_PROMPT : RECEIPT_SYSTEM_PROMPT;
 	const chunkResults = await Promise.all(
 		chunks.map((chunk) =>
 			requestReceiptStructuredJson(apiKey, {
-				systemPrompt: RECEIPT_SYSTEM_PROMPT,
+				systemPrompt,
 				userPrompt: buildReceiptUserPrompt({
 					instruction,
 					metadata: mergedMetadata,
 					householdMemoryBlock: householdMemoryBlock || undefined,
+					priorCorrectionsBlock: feedback?.priorCorrectionsBlock,
+					globalFewShotBlock: feedback?.globalFewShotBlock,
 					receiptBody: chunk
 				})
 			})
@@ -578,16 +649,19 @@ export async function parseReceiptFromImage(
 	imageDataUrl: string,
 	metadata?: ReceiptParseMetadata,
 	householdAliases: HouseholdMemoryAlias[] = [],
-	householdMemoryBlockOverride?: string
+	options: ReceiptParseOptions = {}
 ) {
 	const householdMemoryBlock =
-		householdMemoryBlockOverride ?? buildReceiptHouseholdMemoryBlock(householdAliases);
+		options.householdMemoryBlockOverride ?? buildReceiptHouseholdMemoryBlock(householdAliases);
+	const systemPrompt = options.strict ? RECEIPT_STRICT_SYSTEM_PROMPT : RECEIPT_SYSTEM_PROMPT;
 	return requestReceiptStructuredJson(apiKey, {
-		systemPrompt: RECEIPT_SYSTEM_PROMPT,
+		systemPrompt,
 		userPrompt: buildReceiptUserPrompt({
 			instruction: 'Lista matvaror från detta kvitto (bild).',
 			metadata,
-			householdMemoryBlock: householdMemoryBlock || undefined
+			householdMemoryBlock: householdMemoryBlock || undefined,
+			priorCorrectionsBlock: options.priorCorrectionsBlock,
+			globalFewShotBlock: options.globalFewShotBlock
 		}),
 		imageDataUrl
 	});
@@ -599,7 +673,7 @@ export async function parseReceiptFromText(
 	storeHint?: string | null,
 	metadata?: ReceiptParseMetadata,
 	householdAliases: HouseholdMemoryAlias[] = [],
-	householdMemoryBlockOverride?: string
+	options: ReceiptParseOptions = {}
 ) {
 	const cleaned = preprocessReceiptText(receiptText, storeHint);
 	const mergedMetadata: ReceiptParseMetadata = {
@@ -608,15 +682,20 @@ export async function parseReceiptFromText(
 		purchasedAt: metadata?.purchasedAt ?? null
 	};
 	const householdMemoryBlock =
-		householdMemoryBlockOverride ?? buildReceiptHouseholdMemoryBlock(householdAliases);
+		options.householdMemoryBlockOverride ?? buildReceiptHouseholdMemoryBlock(householdAliases);
 	let numbered = formatNumberedReceiptText(cleaned.slice(0, 12_000));
 	const rawLineCount = numbered.split('\n').filter(Boolean).length;
+	const feedback: ReceiptParseFeedbackBlocks = {
+		priorCorrectionsBlock: options.priorCorrectionsBlock,
+		globalFewShotBlock: options.globalFewShotBlock
+	};
 
 	if (rawLineCount > RECEIPT_TWO_PASS_LINE_THRESHOLD) {
 		const foodLineNumbers = await classifyFoodLineNumbers(
 			apiKey,
 			numbered,
 			mergedMetadata,
+			feedback,
 			householdMemoryBlock
 		);
 		if (foodLineNumbers.length > 0) {
@@ -629,14 +708,17 @@ export async function parseReceiptFromText(
 		chunks.length > 1
 			? 'Lista matvaror från detta kvitto (del av långt kvitto).'
 			: 'Lista matvaror från detta kvitto.';
+	const systemPrompt = options.strict ? RECEIPT_STRICT_SYSTEM_PROMPT : RECEIPT_SYSTEM_PROMPT;
 
 	if (chunks.length === 1) {
 		return requestReceiptStructuredJson(apiKey, {
-			systemPrompt: RECEIPT_SYSTEM_PROMPT,
+			systemPrompt,
 			userPrompt: buildReceiptUserPrompt({
 				instruction,
 				metadata: mergedMetadata,
 				householdMemoryBlock: householdMemoryBlock || undefined,
+				priorCorrectionsBlock: options.priorCorrectionsBlock,
+				globalFewShotBlock: options.globalFewShotBlock,
 				receiptBody: chunks[0]
 			})
 		});
@@ -647,6 +729,8 @@ export async function parseReceiptFromText(
 		chunks,
 		mergedMetadata,
 		householdMemoryBlock,
-		instruction
+		instruction,
+		feedback,
+		options.strict
 	);
 }
