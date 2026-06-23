@@ -1,8 +1,9 @@
 import type { HouseholdRole } from '$lib/domain/household';
 import { resolveEatFirstWeekMealCount } from '$lib/domain/eat-first-week';
-import { EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
-import { filterItemsExpiringWithinDays } from '$lib/domain/expiry-reminder';
-import { isExcludedFromRecipes } from '$lib/domain/recipe-inventory-filter';
+import {
+	getRecipeExpiringContext,
+	mapExpiringItemsPayload
+} from '$lib/domain/recipe-expiring-context';
 import { DEFAULT_RECIPE_PORTIONS, parseMealIntent, type MealIntent } from '$lib/domain/recipe';
 import type { RecipeIdea } from '$lib/domain/meal-plan';
 import { distributeMealDates } from '$lib/domain/weekly-ritual';
@@ -12,14 +13,15 @@ import type { ShoppingListService } from '$lib/application/shopping-list.service
 import type { ILearningFeedbackRepository } from '$lib/infrastructure/repositories/learning-feedback.repository';
 import { PROMPT_VERSION_WEEKLY_PLAN } from '$lib/server/ai-prompt-shared';
 import { logBrainMetrics } from '$lib/server/brain-metrics';
-import { upcomingDateRange } from '$lib/server/inventory-context';
-import { generateRecipesWithRefinement, selectVelocityHints } from '$lib/server/recipe-generation';
+import {
+	generateRecipesWithRefinement,
+	loadRecipeGenerationContext
+} from '$lib/server/recipe-generation';
 import {
 	generateShoppingSuggestions,
 	suggestionToListItem,
 	type ShoppingSuggestion
 } from '$lib/server/shopping-suggestions';
-import { consumptionRepository } from '$lib/server/di';
 import type { HouseholdSuggestionsService } from '$lib/application/household-suggestions.service';
 import type { HouseholdService } from '$lib/application/household.service';
 import { clampRecipePortions } from '$lib/server/recipe-prompt';
@@ -81,34 +83,19 @@ export async function runWeeklyPlanOrchestrator(
 		return { ok: false, stage: 'empty', messageKey: 'recipe.noInventoryNote' };
 	}
 
-	const expiringItems = filterItemsExpiringWithinDays(inventory, EXPIRING_SOON_DAYS);
-	const recipeExpiringItems = expiringItems.filter(
-		(item) => !isExcludedFromRecipes(item.name, item.notes)
-	);
-	const expiringItemNames = recipeExpiringItems
-		.map((item) => item.name.trim())
-		.filter(Boolean);
+	const { expiringItems, recipeExpiringItems, expiringItemNames } =
+		getRecipeExpiringContext(inventory);
 
 	const maxRecipes = resolveEatFirstWeekMealCount(expiringItems.length);
-	const { fromDate, toDate } = upcomingDateRange(10);
-	const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-	const [plannedMeals, recipeIdeas, householdSnapshot, recentlyFinished, household] =
-		await Promise.all([
-			input.mealPlanService.listPlannedMealsByRange(input.userId, fromDate, toDate),
-			input.mealPlanService.listRecipeIdeas(input.userId, 8),
-			input.householdSuggestionsService.getSnapshot(input.householdId),
-			consumptionRepository.listRecentConsumedProductNames(input.householdId, since, 10),
-			input.householdService.getHouseholdForUser(input.userId)
-		]);
-
-	const memberCount = household?.members.length ?? 0;
-	const householdSize =
-		typeof input.householdSize === 'number' && input.householdSize >= 1 && input.householdSize <= 8
-			? Math.round(input.householdSize)
-			: memberCount >= 1 && memberCount <= 8
-				? memberCount
-				: 2;
+	const recipeContext = await loadRecipeGenerationContext({
+		userId: input.userId,
+		householdId: input.householdId,
+		householdSizeOverride: input.householdSize,
+		mealPlanService: input.mealPlanService,
+		householdSuggestionsService: input.householdSuggestionsService,
+		householdService: input.householdService
+	});
 
 	const generated = await generateRecipesWithRefinement({
 		apiKey: input.apiKey,
@@ -120,13 +107,7 @@ export async function runWeeklyPlanOrchestrator(
 		maxRecipes,
 		mealIntent,
 		locale,
-		plannedMeals,
-		recipeIdeas,
-		velocityHints: householdSnapshot
-			? selectVelocityHints(householdSnapshot.shelfLifeRules)
-			: [],
-		householdSize,
-		recentlyFinished
+		...recipeContext
 	});
 
 	if (!generated.ok) {
@@ -157,7 +138,7 @@ export async function runWeeklyPlanOrchestrator(
 		},
 		{
 			preferences: input.preferences,
-			householdSize,
+			householdSize: recipeContext.householdSize,
 			locale
 		}
 	);
@@ -180,12 +161,7 @@ export async function runWeeklyPlanOrchestrator(
 			mealSlots,
 			shoppingItems: shopping.items,
 			shoppingNote: shopping.note,
-			expiringItems: expiringItems.map((item) => ({
-				id: item.id,
-				name: item.name,
-				expiresOn: item.expiresOn,
-				location: item.location
-			})),
+			expiringItems: mapExpiringItemsPayload(expiringItems),
 			portions
 		}
 	};

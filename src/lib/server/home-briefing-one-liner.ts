@@ -1,8 +1,7 @@
 import type { DashboardSummary } from '$lib/application/inventory.service';
 import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 import {
-	normalizePromptLocale,
-	promptLocaleInstruction,
+	buildNanoSystemPrompt,
 	PROMPT_VERSION_INSIGHTS
 } from '$lib/server/ai-prompt-shared';
 import { OPENAI_MODEL_NANO, requestStructuredJson } from '$lib/server/openai';
@@ -18,18 +17,18 @@ const ONE_LINER_SCHEMA = {
 } as const;
 
 function buildOneLinerSystemPrompt(locale: string): string {
-	const promptLocale = normalizePromptLocale(locale);
-	return [
-		promptLocale === 'en'
-			? 'You write one actionable home briefing sentence for a Swedish pantry app.'
-			: 'Du skriver en kort handlingsrad för hem-briefing i en svensk skafferapp.',
-		promptLocaleInstruction(locale),
-		`promptVersion: ${PROMPT_VERSION_INSIGHTS}-briefing-one-liner`,
-		'Return JSON: {"oneLiner":""}',
-		'- Max 120 characters, no markdown',
-		'- Prioritize expiring items, then replenishment, then list readiness',
-		'- Friendly, concrete, no exclamation spam'
-	].join('\n');
+	return buildNanoSystemPrompt({
+		locale,
+		promptVersion: `${PROMPT_VERSION_INSIGHTS}-briefing-one-liner`,
+		roleEn: 'You write one actionable home briefing sentence for a Swedish pantry app.',
+		roleSv: 'Du skriver en kort handlingsrad för hem-briefing i en svensk skafferapp.',
+		rules: [
+			'Return JSON: {"oneLiner":""}',
+			'- Max 120 characters, no markdown',
+			'- Prioritize expiring items, then replenishment, then list readiness',
+			'- Friendly, concrete, no exclamation spam'
+		]
+	});
 }
 
 function buildOneLinerUserPrompt(

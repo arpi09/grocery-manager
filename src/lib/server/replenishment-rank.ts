@@ -1,10 +1,13 @@
 import type { ReplenishmentSuggestion } from '$lib/domain/replenishment';
+import type { ILearningFeedbackRepository } from '$lib/infrastructure/repositories/learning-feedback.repository';
 import {
+	buildNanoSystemPrompt,
 	normalizePromptLocale,
-	promptLocaleInstruction,
 	PROMPT_VERSION_SHOPPING
 } from '$lib/server/ai-prompt-shared';
-import { OPENAI_MODEL_NANO, requestStructuredJson } from '$lib/server/openai';
+import { loadReplenishmentFeedbackBlock } from '$lib/server/brain-feedback-context';
+import { isReplenishmentRankEnabled } from '$lib/server/feature-flags';
+import { getOpenAiApiKey, OPENAI_MODEL_NANO, requestStructuredJson } from '$lib/server/openai';
 import { isOpenAiDegradedMode } from '$lib/server/openai-circuit-breaker';
 
 const REPLENISHMENT_RANK_SCHEMA = {
@@ -34,18 +37,18 @@ export interface RankedReplenishmentSuggestion extends ReplenishmentSuggestion {
 }
 
 function buildRankSystemPrompt(locale: string): string {
-	const promptLocale = normalizePromptLocale(locale);
-	return [
-		promptLocale === 'en'
-			? 'You rank buy-again suggestions for a Swedish household shopping list.'
-			: 'Du rankar köp-igen-förslag för en svensk inköpslista.',
-		promptLocaleInstruction(locale),
-		`promptVersion: ${PROMPT_VERSION_SHOPPING}-replenishment-rank`,
-		`Pick the best ${REPLENISHMENT_RANK_MAX} suggestions from the list — prioritize urgency and shopping usefulness.`,
-		'Return JSON: {"rankedKeys":[{"normalizedKey":"","reason":""}]}',
-		'- reason: one short sentence in the user locale',
-		'- only use normalizedKey values from the input list'
-	].join('\n');
+	return buildNanoSystemPrompt({
+		locale,
+		promptVersion: `${PROMPT_VERSION_SHOPPING}-replenishment-rank`,
+		roleEn: 'You rank buy-again suggestions for a Swedish household shopping list.',
+		roleSv: 'Du rankar köp-igen-förslag för en svensk inköpslista.',
+		rules: [
+			`Pick the best ${REPLENISHMENT_RANK_MAX} suggestions from the list — prioritize urgency and shopping usefulness.`,
+			'Return JSON: {"rankedKeys":[{"normalizedKey":"","reason":""}]}',
+			'- reason: one short sentence in the user locale',
+			'- only use normalizedKey values from the input list'
+		]
+	});
 }
 
 function buildRankUserPrompt(suggestions: ReplenishmentSuggestion[]): string {
@@ -115,4 +118,34 @@ export async function rankReplenishmentSuggestions(
 	}
 
 	return ranked;
+}
+
+/** Rank replenishment when flag + API key allow; otherwise return input unchanged. */
+export async function rankReplenishmentWithFeedback(
+	suggestions: ReplenishmentSuggestion[],
+	options: {
+		householdId: string;
+		locale: string;
+		learningFeedbackRepository: ILearningFeedbackRepository;
+		apiKey?: string | null;
+	}
+): Promise<RankedReplenishmentSuggestion[]> {
+	if (!isReplenishmentRankEnabled()) {
+		return suggestions;
+	}
+
+	const apiKey = options.apiKey ?? getOpenAiApiKey();
+	if (!apiKey || suggestions.length <= REPLENISHMENT_RANK_MAX) {
+		return suggestions;
+	}
+
+	const replenishmentFeedbackBlock = await loadReplenishmentFeedbackBlock(
+		options.learningFeedbackRepository,
+		options.householdId,
+		normalizePromptLocale(options.locale)
+	);
+
+	return rankReplenishmentSuggestions(apiKey, suggestions, options.locale, {
+		replenishmentFeedbackBlock
+	});
 }

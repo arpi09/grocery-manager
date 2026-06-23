@@ -115,10 +115,6 @@ export async function loadGlobalCorrectedFewShotBlock(): Promise<string> {
 	return block;
 }
 
-export function clearGlobalCorrectedFewShotCache(): void {
-	globalFewShotCache = null;
-}
-
 export interface ShelfLifePromptFeedbackBlocks {
 	priorCorrectionsBlock: string;
 	globalFewShotBlock: string;

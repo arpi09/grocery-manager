@@ -13,8 +13,7 @@ import {
 import { ShoppingToPantryReadOnlyError } from '$lib/application/shopping-to-pantry.service';
 import { parseAddShoppingListItem } from '$lib/validation/shopping-list.schemas';
 import { translate, type MessageKey } from '$lib/i18n/messages';
-import { rankReplenishmentSuggestions } from '$lib/server/replenishment-rank';
-import { loadReplenishmentFeedbackBlock } from '$lib/server/brain-feedback-context';
+import { rankReplenishmentWithFeedback } from '$lib/server/replenishment-rank';
 import { learningFeedbackRepository } from '$lib/server/di';
 import { loadAutoFillPendingForInkop } from '$lib/server/auto-smart-fill';
 import { takeAutoFillPending } from '$lib/server/auto-fill-pending';
@@ -28,7 +27,6 @@ import {
 } from '$lib/server/shopping-suggestions';
 import { recordProductEvent } from '$lib/server/product-events';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
-import { isReplenishmentRankEnabled } from '$lib/server/brain-feature-flags';
 import { isShoppingUxV2Enabled } from '$lib/server/shopping-ux-v2-flag';
 import { detectDedupeWarningsForKeys } from '$lib/domain/dedupe-autopilot';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
@@ -67,23 +65,12 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		user ? locals.shoppingToPantryService.getMode(user.id) : Promise.resolve('ask' as ShoppingToPantryMode)
 	]);
 
-	let replenishmentSuggestions = intelligence.replenishment;
-	if (isReplenishmentRankEnabled()) {
-		const apiKey = getOpenAiApiKey();
-		if (apiKey && replenishmentSuggestions.length > 3) {
-			const replenishmentFeedbackBlock = await loadReplenishmentFeedbackBlock(
-				learningFeedbackRepository,
-				householdId,
-				locals.locale
-			);
-			replenishmentSuggestions = await rankReplenishmentSuggestions(
-				apiKey,
-				replenishmentSuggestions,
-				locals.locale,
-				{ replenishmentFeedbackBlock }
-			);
-		}
-	}
+	const replenishmentSuggestions = await rankReplenishmentWithFeedback(intelligence.replenishment, {
+		householdId,
+		locale: locals.locale,
+		learningFeedbackRepository,
+		apiKey: getOpenAiApiKey()
+	});
 
 	let autoFillPending: Awaited<ReturnType<typeof loadAutoFillPendingForInkop>> = null;
 	if (user && locals.householdRole) {
