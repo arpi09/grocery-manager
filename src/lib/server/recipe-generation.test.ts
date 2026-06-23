@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { InventoryItem } from '$lib/domain/inventory-item';
-import { generateRecipesWithRefinement } from './recipe-generation';
+import { OPENAI_MODEL_NANO } from './openai';
+import { generateRecipesWithRefinement, selectVelocityHints } from './recipe-generation';
 import type { StructuredJsonResult } from './openai';
 
 const API_KEY = 'test-key';
@@ -30,8 +31,11 @@ const draftPayload = {
 		{
 			title: 'Pannkaka',
 			whyItFits: 'Använder mjölk',
+			wastePreventedNote: null,
 			ingredientsToUse: ['Mjölk', 'Basilika'],
 			missingIngredients: ['Mjöl'],
+			totalMinutes: 15,
+			difficulty: 'easy',
 			steps: [{ instruction: 'Blanda och stek', minutes: 8 }]
 		}
 	]
@@ -42,8 +46,11 @@ const refinedPayload = {
 		{
 			title: 'Svenska pannkakor',
 			whyItFits: 'Passar mjölken som går ut snart',
+			wastePreventedNote: 'Räddar mjölken',
 			ingredientsToUse: ['Mjölk'],
 			missingIngredients: ['Basilika', 'Ägg'],
+			totalMinutes: 20,
+			difficulty: 'easy',
 			steps: [
 				{ instruction: 'Vispa 2 dl mjölk med mjöl', minutes: 3 },
 				{ instruction: 'Stek tunna pannkakor', minutes: 10 }
@@ -51,6 +58,18 @@ const refinedPayload = {
 		}
 	]
 };
+
+describe('selectVelocityHints', () => {
+	it('keeps rules with enough samples sorted by sample count', () => {
+		const hints = selectVelocityHints([
+			{ displayName: 'Mjölk', location: 'fridge', typicalDays: 5, sampleCount: 2 },
+			{ displayName: 'Falukorv', location: 'fridge', typicalDays: 7, sampleCount: 5 },
+			{ displayName: 'Pasta', location: 'cupboard', typicalDays: 90, sampleCount: 4 }
+		]);
+		expect(hints).toHaveLength(2);
+		expect(hints[0]?.displayName).toBe('Falukorv');
+	});
+});
 
 describe('generateRecipesWithRefinement', () => {
 	it('runs draft then refinement and sanitizes against inventory', async () => {
@@ -63,7 +82,8 @@ describe('generateRecipesWithRefinement', () => {
 			{
 				apiKey: API_KEY,
 				inventory: [makeItem()],
-				portions: 4
+				portions: 4,
+				mealIntent: 'friday'
 			},
 			requestJson
 		);
@@ -82,6 +102,30 @@ describe('generateRecipesWithRefinement', () => {
 		const refineCall = requestJson.mock.calls[1]?.[1];
 		expect(refineCall?.systemPrompt).toContain('matredaktör');
 		expect(refineCall?.userPrompt).toContain('Utkast att granska');
+		expect(refineCall?.model).toBe(OPENAI_MODEL_NANO);
+	});
+
+	it('skips refinement for quick intent with small inventory', async () => {
+		const requestJson = vi
+			.fn()
+			.mockResolvedValueOnce({ ok: true, data: draftPayload } satisfies StructuredJsonResult);
+
+		const inventory = Array.from({ length: 10 }, (_, index) =>
+			makeItem({ id: String(index + 1), name: `Vara ${index + 1}` })
+		);
+
+		const result = await generateRecipesWithRefinement(
+			{
+				apiKey: API_KEY,
+				inventory,
+				portions: 4,
+				mealIntent: 'quick'
+			},
+			requestJson
+		);
+
+		expect(result.ok).toBe(true);
+		expect(requestJson).toHaveBeenCalledTimes(1);
 	});
 
 	it('falls back to sanitized draft when refinement fails', async () => {
@@ -98,7 +142,8 @@ describe('generateRecipesWithRefinement', () => {
 			{
 				apiKey: API_KEY,
 				inventory: [makeItem({ name: 'Mjölk' }), makeItem({ id: '2', name: 'Basilika' })],
-				portions: 4
+				portions: 4,
+				mealIntent: 'friday'
 			},
 			requestJson
 		);
@@ -110,7 +155,7 @@ describe('generateRecipesWithRefinement', () => {
 		expect(result.recipes[0]?.ingredientsToUse).toEqual(['Mjölk', 'Basilika']);
 	});
 
-	it('passes eat-first context to both passes', async () => {
+	it('passes eat-first structured context to draft and refinement', async () => {
 		const requestJson = vi
 			.fn()
 			.mockResolvedValueOnce({ ok: true, data: draftPayload } satisfies StructuredJsonResult)
@@ -119,24 +164,90 @@ describe('generateRecipesWithRefinement', () => {
 		await generateRecipesWithRefinement(
 			{
 				apiKey: API_KEY,
-				inventory: [makeItem({ name: 'Gräddfil' })],
+				inventory: [makeItem({ id: 'exp-1', name: 'Gräddfil', expiresOn: '2026-06-01' })],
 				portions: 2,
 				mode: 'eat_first',
-				expiringItemNames: ['Gräddfil']
+				expiringItemNames: ['Gräddfil'],
+				expiringItems: [makeItem({ id: 'exp-1', name: 'Gräddfil', expiresOn: '2026-06-01' })],
+				mealIntent: 'friday'
 			},
 			requestJson
 		);
 
 		const draftUser = requestJson.mock.calls[0]?.[1]?.userPrompt ?? '';
 		const refineUser = requestJson.mock.calls[1]?.[1]?.userPrompt ?? '';
-		const draftSystem = requestJson.mock.calls[0]?.[1]?.systemPrompt ?? '';
-		const refineSystem = requestJson.mock.calls[1]?.[1]?.systemPrompt ?? '';
 		expect(draftUser).toContain('Ät det först');
-		expect(draftUser).toContain('realistiska svenska vardagsrätter');
+		expect(draftUser).toContain('"expiringFocus"');
 		expect(refineUser).toContain('går ut snart');
-		expect(refineUser).toContain('naturligt i en trovärdig svensk rätt');
-		expect(draftSystem).toContain('baguette');
-		expect(refineSystem).toContain('orealistiska kombinationer');
+		expect(refineUser).toContain('[exp-1] Gräddfil');
+	});
+
+	it('passes locale en to system prompt', async () => {
+		const requestJson = vi
+			.fn()
+			.mockResolvedValueOnce({ ok: true, data: draftPayload } satisfies StructuredJsonResult);
+
+		await generateRecipesWithRefinement(
+			{
+				apiKey: API_KEY,
+				inventory: Array.from({ length: 10 }, (_, index) =>
+					makeItem({ id: String(index), name: `Item ${index}` })
+				),
+				portions: 4,
+				locale: 'en',
+				mealIntent: 'quick'
+			},
+			requestJson
+		);
+
+		expect(requestJson.mock.calls[0]?.[1]?.systemPrompt).toContain('4 portions');
+		expect(requestJson.mock.calls[0]?.[1]?.userPrompt).toContain('locale: en-GB');
+	});
+
+	it('includes planned meals and avoidTitles in user prompt', async () => {
+		const requestJson = vi
+			.fn()
+			.mockResolvedValueOnce({ ok: true, data: draftPayload } satisfies StructuredJsonResult);
+
+		await generateRecipesWithRefinement(
+			{
+				apiKey: API_KEY,
+				inventory: Array.from({ length: 10 }, (_, index) =>
+					makeItem({ id: String(index), name: `Item ${index}` })
+				),
+				portions: 4,
+				mealIntent: 'quick',
+				plannedMeals: [
+					{
+						id: 'm1',
+						userId: 'u1',
+						title: 'Pasta',
+						plannedDate: '2026-06-02',
+						notes: null,
+						ideaId: null,
+						createdAt: new Date(),
+						updatedAt: new Date()
+					}
+				],
+				recipeIdeas: [
+					{
+						id: 'r1',
+						userId: 'u1',
+						title: 'Kycklingwok',
+						whyItFits: 'x',
+						ingredientsToUse: ['Kyckling'],
+						missingIngredients: [],
+						steps: [{ instruction: 'Stek' }],
+						createdAt: new Date()
+					}
+				]
+			},
+			requestJson
+		);
+
+		const draftUser = requestJson.mock.calls[0]?.[1]?.userPrompt ?? '';
+		expect(draftUser).toContain('Pasta');
+		expect(draftUser).toContain('Kycklingwok');
 	});
 
 	it('returns friendly empty when inventory is only non-food', async () => {
@@ -188,7 +299,8 @@ describe('generateRecipesWithRefinement', () => {
 			{
 				apiKey: API_KEY,
 				inventory: [makeItem()],
-				portions: 4
+				portions: 4,
+				mealIntent: 'friday'
 			},
 			requestJson
 		);

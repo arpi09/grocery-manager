@@ -59,3 +59,74 @@ export const SHELF_LIFE_CATEGORY_ANCHORS = [
 	'- fryst: 90–365 d',
 	'- bröd: 3–7 d'
 ].join('\n');
+
+export const PROMPT_VERSION_RECEIPT_PARSE = 'receipt-parse-v3';
+export const PROMPT_VERSION_SHELF_LIFE_BATCH = 'shelf-life-batch-v3';
+export const PROMPT_VERSION_PHOTO_ROUND = 'photo-round-v2';
+export const PROMPT_VERSION_PRODUCT_FROM_IMAGE = 'product-from-image-v1';
+export const PROMPT_VERSION_RECIPE = 'recipe-v3';
+export const PROMPT_VERSION_INSIGHTS = 'inventory-insights-v3';
+export const PROMPT_VERSION_SHOPPING = 'shopping-v3';
+export const PROMPT_VERSION_MERGE = 'inventory-merge-v2';
+export const PROMPT_VERSION_EXPIRY_PUSH = 'expiry-push-v2';
+export const PROMPT_INVENTORY_ROW_CAP = 40;
+
+export interface StandardJsonUserBlockMeta {
+	version: string;
+	locale: string;
+	chain?: string | null;
+	purchasedAt?: string | null;
+}
+
+export interface StandardJsonUserBlockContent {
+	instruction: string;
+	metadata?: string;
+	householdMemory?: string | null;
+	receiptText?: string | null;
+}
+
+/** Shared user-prompt envelope for structured JSON AI calls. */
+export function buildStandardJsonUserBlock(
+	meta: StandardJsonUserBlockMeta,
+	content: StandardJsonUserBlockContent
+): string {
+	const parts = [
+		`promptVersion: ${meta.version}`,
+		`locale: ${meta.locale}`,
+		content.instruction
+	];
+	if (content.metadata?.trim()) {
+		parts.push(content.metadata.trim());
+	}
+	if (content.householdMemory?.trim()) {
+		parts.push(content.householdMemory.trim());
+	}
+	if (content.receiptText?.trim()) {
+		parts.push('Kvitto (numrerade rader):', content.receiptText.trim());
+	}
+	return parts.join('\n\n');
+}
+
+/** Normalize app locale to prompt language code. */
+export function normalizePromptLocale(locale: string): 'sv' | 'en' {
+	return locale === 'en' ? 'en' : 'sv';
+}
+
+/** BCP-47 tag for structured prompt payloads. */
+export function promptLocaleTag(locale: string): string {
+	return normalizePromptLocale(locale) === 'en' ? 'en-GB' : 'sv-SE';
+}
+
+/** Locale-aware instruction prefix for prompts that support sv/en. */
+export function promptLocaleInstruction(locale: string): string {
+	return normalizePromptLocale(locale) === 'en'
+		? 'Respond in English (en-GB) for all user-facing text fields.'
+		: 'Svara på svenska (sv-SE) i alla användartexter.';
+}
+
+/** Rough token estimate for prompt logging (chars / 4). */
+export function estimateInputTokens(text: string, rowCount?: number): number {
+	const charEstimate = Math.ceil(text.length / 4);
+	if (rowCount == null) return charEstimate;
+	return Math.max(charEstimate, rowCount * 12);
+}

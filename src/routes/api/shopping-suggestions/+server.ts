@@ -36,11 +36,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 						householdId: locals.householdId!,
 						userId: auth.user.id,
 						inventoryService: locals.inventoryService,
-						mealPlanService: locals.mealPlanService
+						mealPlanService: locals.mealPlanService,
+						shoppingListService: locals.shoppingListService
 					},
 					{
 						preferences: typeof body.preferences === 'string' ? body.preferences : undefined,
-						householdSize: typeof body.householdSize === 'number' ? body.householdSize : undefined
+						householdSize: typeof body.householdSize === 'number' ? body.householdSize : undefined,
+						locale: locals.locale === 'en' ? 'en' : 'sv'
 					}
 				);
 			})();

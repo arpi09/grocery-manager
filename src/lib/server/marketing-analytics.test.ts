@@ -16,7 +16,8 @@ function mockPmfRepository() {
 		getSyncFunnelCounts: vi.fn(),
 		countDistinctHouseholdsWithEventSince: vi.fn(),
 		getAcquisitionMetrics: vi.fn(),
-		getMarketV01Metrics: vi.fn()
+		getMarketV01Metrics: vi.fn(),
+		getBrainMetricsSince: vi.fn()
 	};
 }
 

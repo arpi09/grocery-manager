@@ -1,16 +1,24 @@
 import { filterInventoryForRecipes } from '$lib/domain/recipe-inventory-filter';
+import { daysUntilExpiry } from '$lib/domain/expiry';
 import type { InventoryItem } from '$lib/domain/inventory-item';
 import { DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
-import type { StructuredJsonResult } from '$lib/server/openai';
-import { requestStructuredJson } from '$lib/server/openai';
+import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
+import { isRecipeRefinementEnabled } from '$lib/server/brain-feature-flags';
+import { OPENAI_MODEL_NANO, requestStructuredJson, type StructuredJsonResult } from '$lib/server/openai';
+import {
+	formatStructuredInventoryPayload,
+	type VelocityHintRow
+} from '$lib/server/inventory-context';
+import { normalizePromptLocale } from '$lib/server/ai-prompt-shared';
 import {
 	buildRecipeRefinementSystemPrompt,
 	buildRecipeRefinementUserPrompt,
 	buildRecipeSystemPrompt,
 	buildRecipeUserPrompt,
-	formatRecipeInventoryLines,
 	inventoryNameList,
-	sanitizeRecipesAgainstInventory
+	sanitizeRecipesAgainstInventory,
+	type ExpiringFocusRow,
+	type RecipeUserPromptContext
 } from '$lib/server/recipe-prompt';
 import {
 	parseRecipeSuggestions,
@@ -20,6 +28,10 @@ import {
 
 export type RecipeGenerationMode = 'standard' | 'eat_first';
 
+const QUICK_REFINEMENT_SKIP_INVENTORY_MAX = 12;
+const VELOCITY_HINT_MIN_SAMPLES = 3;
+const VELOCITY_HINT_MAX = 8;
+
 export interface GenerateRecipesInput {
 	apiKey: string;
 	inventory: InventoryItem[];
@@ -27,8 +39,13 @@ export interface GenerateRecipesInput {
 	preferences?: string;
 	mode?: RecipeGenerationMode;
 	expiringItemNames?: string[];
+	expiringItems?: InventoryItem[];
 	maxRecipes?: number;
 	mealIntent?: MealIntent;
+	locale?: string;
+	plannedMeals?: PlannedMeal[];
+	recipeIdeas?: RecipeIdea[];
+	velocityHints?: VelocityHintRow[];
 }
 
 export type GenerateRecipesResult =
@@ -41,38 +58,161 @@ async function runRecipePass(
 	requestJson: RequestStructuredJsonFn,
 	apiKey: string,
 	systemPrompt: string,
-	userPrompt: string
+	userPrompt: string,
+	model?: string
 ): Promise<StructuredJsonResult> {
 	return requestJson(apiKey, {
 		systemPrompt,
 		userPrompt,
 		schemaName: 'recipe_suggestions',
-		schema: RECIPE_SUGGESTIONS_SCHEMA
+		schema: RECIPE_SUGGESTIONS_SCHEMA,
+		model
 	});
 }
 
-function eatFirstContext(expiringItemNames: string[]): string {
-	if (expiringItemNames.length === 0) {
+function buildExpiringFocus(
+	expiringItems: InventoryItem[],
+	expiringItemNames: string[],
+	inventory: InventoryItem[]
+): ExpiringFocusRow[] {
+	const byName = new Map(inventory.map((item) => [item.name.trim().toLowerCase(), item]));
+
+	if (expiringItems.length > 0) {
+		return expiringItems.map((item) => ({
+			id: item.id,
+			name: item.name,
+			daysUntilExpiry: item.expiresOn ? daysUntilExpiry(item.expiresOn) : null
+		}));
+	}
+
+	return expiringItemNames
+		.map((name) => {
+			const item = byName.get(name.trim().toLowerCase());
+			if (!item) {
+				return { id: '', name, daysUntilExpiry: null };
+			}
+			return {
+				id: item.id,
+				name: item.name,
+				daysUntilExpiry: item.expiresOn ? daysUntilExpiry(item.expiresOn) : null
+			};
+		})
+		.filter((row) => row.name.trim());
+}
+
+function eatFirstRefinementContext(
+	expiringFocus: ExpiringFocusRow[],
+	locale: string
+): string {
+	if (expiringFocus.length === 0) {
 		return '';
+	}
+	const lang = normalizePromptLocale(locale);
+	const lines = expiringFocus.map((row) => {
+		const days =
+			row.daysUntilExpiry === null
+				? ''
+				: lang === 'en'
+					? ` (${row.daysUntilExpiry}d)`
+					: ` (${row.daysUntilExpiry} d)`;
+		return `- [${row.id || '?'}] ${row.name}${days}`;
+	});
+	if (lang === 'en') {
+		return [
+			'Prioritize using these expiring items (at least one per recipe when possible):',
+			...lines,
+			'Each expiring item should fit naturally in a credible dish — do not combine randomly just because both expire soon.'
+		].join('\n');
 	}
 	return [
 		'Prioritera att använda dessa varor som går ut snart (minst en per recept om möjligt):',
-		expiringItemNames.map((name) => `- ${name}`).join('\n'),
-		'Varje utgående vara ska ingå naturligt i en trovärdig svensk rätt — kombinera inte utgående varor slumpmässigt bara för att båda går ut snart.'
+		...lines,
+		'Varje utgående vara ska ingå naturligt i en trovärdig rätt — kombinera inte utgående varor slumpmässigt bara för att båda går ut snart.'
 	].join('\n');
 }
 
-function eatFirstPreferences(preferences: string, expiringItemNames: string[]): string {
+function eatFirstPreferences(
+	preferences: string,
+	expiringFocus: ExpiringFocusRow[],
+	locale: string
+): string {
+	const lang = normalizePromptLocale(locale);
 	const parts: string[] = [];
-	if (expiringItemNames.length > 0) {
+	if (expiringFocus.length > 0) {
+		const names = expiringFocus
+			.slice(0, 8)
+			.map((row) => row.name)
+			.join(', ');
 		parts.push(
-			`Fokus "Ät det först": prioritera varor som går ut snart (${expiringItemNames.slice(0, 8).join(', ')}) i realistiska svenska vardagsrätter — inte konstiga påläggs- eller syltkombinationer som middag`
+			lang === 'en'
+				? `Eat-first focus: prioritize expiring items (${names}) in realistic everyday dishes`
+				: `Fokus "Ät det först": prioritera varor som går ut snart (${names}) i realistiska vardagsrätter`
 		);
 	}
 	if (preferences.trim()) {
 		parts.push(preferences.trim());
 	}
 	return parts.join('. ');
+}
+
+function shouldSkipRefinement(mealIntent: MealIntent, inventoryCount: number): boolean {
+	return mealIntent === 'quick' && inventoryCount <= QUICK_REFINEMENT_SKIP_INVENTORY_MAX;
+}
+
+function buildPromptContext(input: {
+	locale: string;
+	portions: number;
+	mealIntent: MealIntent;
+	recipeInventory: InventoryItem[];
+	preferences: string;
+	mode: RecipeGenerationMode;
+	expiringItems: InventoryItem[];
+	expiringItemNames: string[];
+	plannedMeals?: PlannedMeal[];
+	recipeIdeas?: RecipeIdea[];
+	velocityHints?: VelocityHintRow[];
+}): RecipeUserPromptContext {
+	const locale = normalizePromptLocale(input.locale);
+	const expiringFocus =
+		input.mode === 'eat_first'
+			? buildExpiringFocus(input.expiringItems, input.expiringItemNames, input.recipeInventory)
+			: undefined;
+
+	return {
+		locale,
+		portions: input.portions,
+		mealIntent: input.mealIntent,
+		inventoryPayload: formatStructuredInventoryPayload(input.recipeInventory, locale, {
+			portions: input.portions
+		}),
+		preferences:
+			input.mode === 'eat_first'
+				? eatFirstPreferences(input.preferences, expiringFocus ?? [], locale)
+				: input.preferences,
+		plannedMeals: input.plannedMeals?.map((meal) => ({
+			date: meal.plannedDate,
+			title: meal.title
+		})),
+		avoidTitles: input.recipeIdeas?.map((idea) => idea.title).filter(Boolean),
+		expiringFocus,
+		velocityHints: input.velocityHints
+	};
+}
+
+/** Pick shelf-life rules with enough samples for velocity hints. */
+export function selectVelocityHints(
+	rules: Array<{ displayName: string; location: InventoryItem['location']; typicalDays: number; sampleCount: number }>
+): VelocityHintRow[] {
+	return rules
+		.filter((rule) => rule.sampleCount >= VELOCITY_HINT_MIN_SAMPLES)
+		.sort((a, b) => b.sampleCount - a.sampleCount)
+		.slice(0, VELOCITY_HINT_MAX)
+		.map((rule) => ({
+			displayName: rule.displayName,
+			location: rule.location,
+			typicalDays: rule.typicalDays,
+			sampleCount: rule.sampleCount
+		}));
 }
 
 /**
@@ -90,8 +230,13 @@ export async function generateRecipesWithRefinement(
 		preferences = '',
 		mode = 'standard',
 		expiringItemNames = [],
+		expiringItems = [],
 		maxRecipes = mode === 'eat_first' ? 5 : 4,
-		mealIntent = DEFAULT_MEAL_INTENT
+		mealIntent = DEFAULT_MEAL_INTENT,
+		locale = 'sv',
+		plannedMeals,
+		recipeIdeas,
+		velocityHints
 	} = input;
 
 	const recipeInventory = filterInventoryForRecipes(inventory);
@@ -99,16 +244,29 @@ export async function generateRecipesWithRefinement(
 		return { ok: true, recipes: [], noteKey: 'recipe.noSuitableInventoryNote' };
 	}
 
-	const inventoryLines = formatRecipeInventoryLines(recipeInventory);
+	const promptLocale = normalizePromptLocale(locale);
+	const promptContext = buildPromptContext({
+		locale: promptLocale,
+		portions,
+		mealIntent,
+		recipeInventory,
+		preferences,
+		mode,
+		expiringItems,
+		expiringItemNames,
+		plannedMeals,
+		recipeIdeas,
+		velocityHints
+	});
 	const inventoryNames = inventoryNameList(recipeInventory);
-	const effectivePreferences =
-		mode === 'eat_first' ? eatFirstPreferences(preferences, expiringItemNames) : preferences;
+	const skipRefinement =
+		!isRecipeRefinementEnabled() || shouldSkipRefinement(mealIntent, recipeInventory.length);
 
 	const draftResult = await runRecipePass(
 		requestJson,
 		apiKey,
-		buildRecipeSystemPrompt(portions),
-		buildRecipeUserPrompt(inventoryLines, portions, effectivePreferences, mealIntent)
+		buildRecipeSystemPrompt(portions, promptLocale),
+		buildRecipeUserPrompt(promptContext)
 	);
 
 	if (!draftResult.ok) {
@@ -120,20 +278,27 @@ export async function generateRecipesWithRefinement(
 		return { ok: false, result: { ok: false, status: 422, messageKey: 'errors.api.openAiInvalidJson' } };
 	}
 
+	if (skipRefinement) {
+		const recipes = sanitizeRecipesAgainstInventory(draftRecipes, inventoryNames).slice(0, maxRecipes);
+		if (recipes.length === 0) {
+			return { ok: true, recipes: [], noteKey: 'recipe.noSuitableInventoryNote' };
+		}
+		return { ok: true, recipes };
+	}
+
 	const refinementContext =
-		mode === 'eat_first' ? eatFirstContext(expiringItemNames) : undefined;
+		mode === 'eat_first' ? eatFirstRefinementContext(promptContext.expiringFocus ?? [], promptLocale) : undefined;
 
 	const refineResult = await runRecipePass(
 		requestJson,
 		apiKey,
-		buildRecipeRefinementSystemPrompt(portions),
+		buildRecipeRefinementSystemPrompt(portions, promptLocale),
 		buildRecipeRefinementUserPrompt(
 			JSON.stringify({ recipes: draftRecipes }),
-			inventoryLines,
-			portions,
-			refinementContext,
-			mealIntent
-		)
+			promptContext,
+			refinementContext
+		),
+		OPENAI_MODEL_NANO
 	);
 
 	if (!refineResult.ok) {

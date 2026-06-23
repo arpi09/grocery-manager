@@ -70,6 +70,7 @@ describe('photoRoundSystemPrompt', () => {
 		expect(prompt).toContain('netto');
 		expect(prompt).toContain('expiresOn');
 		expect(prompt).toContain('INTE st');
+		expect(prompt).toContain('photo-round-v2');
 	});
 });
 

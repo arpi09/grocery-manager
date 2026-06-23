@@ -12,10 +12,13 @@ export interface PhotoRoundDetectedItem {
 	notes: string | null;
 }
 
+import type { ReceiptShelfLifePrediction } from '$lib/domain/receipt-line';
+
 export interface PhotoRoundParseResult {
 	items: PhotoRoundDetectedItem[];
 	detectedZone: StorageLocation;
 	zoneConfidence: PhotoRoundConfidence;
+	shelfLifePredictions?: (ReceiptShelfLifePrediction | null)[];
 }
 
 export const PHOTO_ROUND_MAX_IMAGES = 3;

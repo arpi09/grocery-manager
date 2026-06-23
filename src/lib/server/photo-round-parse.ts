@@ -14,6 +14,7 @@ import {
 	type OpenAiFailureResult,
 	type StructuredJsonResult
 } from '$lib/server/openai';
+import { PROMPT_VERSION_PHOTO_ROUND } from '$lib/server/ai-prompt-shared';
 
 const LOCATION_ENUM = ['fridge', 'freezer', 'cupboard'] as const;
 
@@ -113,7 +114,8 @@ export function photoRoundSystemPrompt(zoneHint: StorageLocation | null): string
 		LOCATION_RULES,
 		WHOLE_FRIDGE_RULES,
 		'- Slå ihop dubbletter av samma vara till en rad med summerad quantity om möjligt',
-		'- max 30 rader'
+		'- max 30 rader',
+		`promptVersion: ${PROMPT_VERSION_PHOTO_ROUND}`
 	].join('\n');
 }
 
@@ -124,8 +126,23 @@ export const PHOTO_ROUND_VALIDATION_PROMPT = [
 	'Lägg INTE till nya varor som inte fanns i den ursprungliga listan.',
 	'Behåll quantity/unit/confidence/location/expiresOn/notes oförändrat om du behåller raden.',
 	'Behåll detectedZone och zoneConfidence om de fortfarande stämmer med bilden.',
-	'Om listan är tom, returnera {"detectedZone":"cupboard","zoneConfidence":"low","items":[]}.'
+	'Om listan är tom, returnera {"detectedZone":"cupboard","zoneConfidence":"low","items":[]}.',
+	`promptVersion: ${PROMPT_VERSION_PHOTO_ROUND}`
 ].join('\n');
+
+function buildPhotoRoundContextBlock(
+	zoneHint: StorageLocation | null,
+	alreadyDetected: PhotoRoundDetectedItem[]
+): string {
+	const context: Record<string, unknown> = {};
+	if (zoneHint) {
+		context.zoneHint = zoneHint;
+	}
+	if (alreadyDetected.length > 0) {
+		context.alreadyDetected = alreadyDetected.map((item) => item.name);
+	}
+	return Object.keys(context).length > 0 ? JSON.stringify(context) : '';
+}
 
 export function coerceExpiresOn(value: unknown): string | null {
 	if (typeof value !== 'string') return null;
@@ -254,7 +271,8 @@ export function normalizePhotoRoundPayload(raw: unknown): unknown {
 
 export function parsePhotoRoundItems(
 	raw: unknown,
-	zoneHint: StorageLocation | null
+	zoneHint: StorageLocation | null,
+	alreadyDetected: PhotoRoundDetectedItem[] = []
 ): PhotoRoundDetectedItem[] {
 	const normalized = normalizePhotoRoundPayload(raw);
 	if (!normalized || typeof normalized !== 'object' || !('items' in normalized)) {
@@ -271,7 +289,9 @@ export function parsePhotoRoundItems(
 		'cupboard';
 
 	const result: PhotoRoundDetectedItem[] = [];
-	const seen = new Set<string>();
+	const seen = new Set(
+		alreadyDetected.map((item) => item.name.trim().toLocaleLowerCase('sv-SE'))
+	);
 
 	for (const entry of items) {
 		if (!entry || typeof entry !== 'object') continue;
@@ -300,7 +320,8 @@ export function parsePhotoRoundItems(
 
 export function parsePhotoRoundResponse(
 	raw: unknown,
-	zoneHint: StorageLocation | null
+	zoneHint: StorageLocation | null,
+	alreadyDetected: PhotoRoundDetectedItem[] = []
 ): PhotoRoundParseResult {
 	const normalized = normalizePhotoRoundPayload(raw);
 	const detectedZone =
@@ -317,7 +338,7 @@ export function parsePhotoRoundResponse(
 				: 'low';
 
 	return {
-		items: parsePhotoRoundItems(raw, zoneHint ?? detectedZone),
+		items: parsePhotoRoundItems(raw, zoneHint ?? detectedZone, alreadyDetected),
 		detectedZone,
 		zoneConfidence
 	};
@@ -370,16 +391,24 @@ export async function parsePhotoRoundFromImages(
 	apiKey: string,
 	zoneHint: StorageLocation | null,
 	imageDataUrls: string[],
-	options?: { validate?: boolean }
+	options?: { validate?: boolean; alreadyDetected?: PhotoRoundDetectedItem[] }
 ): Promise<
 	| ({ ok: true } & PhotoRoundParseResult)
 	| ({ ok: false } & OpenAiFailureResult)
 > {
+	const alreadyDetected = options?.alreadyDetected ?? [];
+	const contextBlock = buildPhotoRoundContextBlock(zoneHint, alreadyDetected);
+
 	const initial = await requestPhotoRoundStructured(apiKey, {
 		systemPrompt: photoRoundSystemPrompt(zoneHint),
-		userPrompt: zoneHint
-			? `Inventera varorna i ${ZONE_CONTEXT[zoneHint]} från ${imageDataUrls.length} foto.`
-			: `Inventera varorna och identifiera zonen från ${imageDataUrls.length} foto.`,
+		userPrompt: [
+			zoneHint
+				? `Inventera varorna i ${ZONE_CONTEXT[zoneHint]} från ${imageDataUrls.length} foto.`
+				: `Inventera varorna och identifiera zonen från ${imageDataUrls.length} foto.`,
+			contextBlock ? `Kontext: ${contextBlock}` : ''
+		]
+			.filter(Boolean)
+			.join('\n'),
 		imageDataUrls
 	});
 
@@ -387,28 +416,31 @@ export async function parsePhotoRoundFromImages(
 		return initial;
 	}
 
-	let parsed = parsePhotoRoundResponse(initial.data, zoneHint);
+	let parsed = parsePhotoRoundResponse(initial.data, zoneHint, alreadyDetected);
 	if (parsed.items.length === 0) {
 		return { ok: true, ...parsed };
 	}
 
 	if (options?.validate !== false && parsed.items.length > 0 && imageDataUrls.length > 0) {
-		const summary = parsed.items
-			.map((item) => {
-				const expiryPart = item.expiresOn ? `, bf ${item.expiresOn}` : '';
-				const notesPart = item.notes ? `, ${item.notes}` : '';
-				return `- ${item.name} (${item.quantity}${item.unit ? ` ${item.unit}` : ''}, ${item.location}${expiryPart}${notesPart})`;
-			})
-			.join('\n');
-		const validation = await requestPhotoRoundStructured(apiKey, {
-			systemPrompt: PHOTO_ROUND_VALIDATION_PROMPT,
-			userPrompt: `Zon: ${ZONE_CONTEXT[parsed.detectedZone]}.\nFöreslagna varor:\n${summary}`,
-			imageDataUrls
-		});
-		if (validation.ok) {
-			const validated = parsePhotoRoundResponse(validation.data, zoneHint);
-			if (validated.items.length > 0) {
-				parsed = validated;
+		const allHighConfidence = parsed.items.every((item) => item.confidence === 'high');
+		if (!allHighConfidence) {
+			const summary = parsed.items
+				.map((item) => {
+					const expiryPart = item.expiresOn ? `, bf ${item.expiresOn}` : '';
+					const notesPart = item.notes ? `, ${item.notes}` : '';
+					return `- ${item.name} (${item.quantity}${item.unit ? ` ${item.unit}` : ''}, ${item.location}${expiryPart}${notesPart})`;
+				})
+				.join('\n');
+			const validation = await requestPhotoRoundStructured(apiKey, {
+				systemPrompt: PHOTO_ROUND_VALIDATION_PROMPT,
+				userPrompt: `Zon: ${ZONE_CONTEXT[parsed.detectedZone]}.\nFöreslagna varor:\n${summary}`,
+				imageDataUrls
+			});
+			if (validation.ok) {
+				const validated = parsePhotoRoundResponse(validation.data, zoneHint, alreadyDetected);
+				if (validated.items.length > 0) {
+					parsed = validated;
+				}
 			}
 		}
 	}

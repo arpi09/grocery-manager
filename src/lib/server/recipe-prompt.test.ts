@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { InventoryItem } from '$lib/domain/inventory-item';
+import { PROMPT_VERSION_RECIPE } from '$lib/server/ai-prompt-shared';
+import { formatStructuredInventoryPayload } from '$lib/server/inventory-context';
 import {
+	buildRecipeContextPayload,
 	buildRecipeSystemPrompt,
 	buildRecipeUserPrompt,
 	buildRecipeRefinementSystemPrompt,
@@ -29,12 +32,24 @@ function makeItem(overrides: Partial<InventoryItem> = {}): InventoryItem {
 		quantity: '1',
 		unit: 'l',
 		expiresOn: '2026-06-01',
-		expiresOnSource: null,
+		expiresOnSource: 'household_learned',
 		notes: null,
 		barcode: null,
 		lastConfirmedAt: new Date(),
 		createdAt: new Date(),
 		updatedAt: new Date(),
+		...overrides
+	};
+}
+
+function makePromptContext(items: InventoryItem[], overrides: Record<string, unknown> = {}) {
+	const inventoryPayload = formatStructuredInventoryPayload(items, 'sv', { portions: 4 });
+	return {
+		locale: 'sv',
+		portions: 4,
+		mealIntent: 'quick' as const,
+		inventoryPayload,
+		preferences: '',
 		...overrides
 	};
 }
@@ -52,25 +67,43 @@ describe('clampRecipePortions', () => {
 	});
 });
 
+describe('formatStructuredInventoryPayload', () => {
+	it('includes id, daysUntilExpiry and expiresOnSource', () => {
+		const payload = formatStructuredInventoryPayload(
+			[makeItem({ id: 'inv-mjolk-1', expiresOn: '2026-06-01', expiresOnSource: 'household_learned' })],
+			'sv',
+			{ portions: 4 }
+		);
+		expect(payload.inventory[0]).toMatchObject({
+			id: 'inv-mjolk-1',
+			name: 'Mjölk',
+			expiresOnSource: 'household_learned'
+		});
+		expect(payload.inventory[0]?.daysUntilExpiry).toBeTypeOf('number');
+	});
+
+	it('sorts by urgency and caps with truncated suffix', () => {
+		const items = Array.from({ length: 42 }, (_, index) =>
+			makeItem({
+				id: `item-${index}`,
+				name: `Vara ${index}`,
+				expiresOn: `2026-07-${String((index % 28) + 1).padStart(2, '0')}`
+			})
+		);
+		const payload = formatStructuredInventoryPayload(items, 'sv', { cap: 40, portions: 4 });
+		expect(payload.inventory).toHaveLength(40);
+		expect(payload.truncated?.omittedCount).toBe(2);
+		expect(payload.truncated?.note).toContain('lägst urgency');
+	});
+});
+
 describe('formatRecipeInventoryLines', () => {
 	it('formats Swedish inventory lines with id and expiry', () => {
 		const lines = formatRecipeInventoryLines([makeItem({ id: 'inv-mjolk-1' })]);
 		expect(lines).toContain('[inv-mjolk-1] Mjölk: 1 l kvar i fridge');
 		expect(lines).toContain('typisk måltidsmängd');
 		expect(lines).toContain('utgår 2026-06-01');
-	});
-
-	it('includes realistic Swedish product names and ids in prompt context', () => {
-		const items = [
-			makeItem({ id: 'inv-falukorv', name: 'Falukorv', quantity: '400', unit: 'g' }),
-			makeItem({ id: 'inv-creme', name: 'Crème fraîche 15%', quantity: '2', unit: 'dl' })
-		];
-		const lines = formatRecipeInventoryLines(items);
-		const user = buildRecipeUserPrompt(lines, 4, '');
-		expect(lines).toContain('[inv-falukorv] Falukorv');
-		expect(lines).toContain('[inv-creme] Crème fraîche 15%');
-		expect(user).toContain('Falukorv');
-		expect(user).toContain('enda tillåtna källor');
+		expect(lines).toContain('källa: household_learned');
 	});
 
 	it('returns empty marker when no items', () => {
@@ -82,10 +115,17 @@ describe('buildRecipe prompts', () => {
 	it('includes portion count and strict inventory rules in system prompt', () => {
 		const prompt = buildRecipeSystemPrompt(6);
 		expect(prompt).toContain('6 portioner');
-		expect(prompt).toContain('ENDA tillåtna källan');
+		expect(prompt).toContain('inventory');
 		expect(prompt).toContain('Hitta ALDRIG på varor');
-		expect(prompt).toContain('exakta varunamn');
-		expect(prompt).toContain('linjärt');
+		expect(prompt).toContain('totalMinutes');
+		expect(prompt).toContain('difficulty');
+		expect(prompt).toContain(`promptVersion: ${PROMPT_VERSION_RECIPE}`);
+	});
+
+	it('uses English when locale is en', () => {
+		const prompt = buildRecipeSystemPrompt(4, 'en');
+		expect(prompt).toContain('4 portions');
+		expect(prompt).toContain('en-GB');
 	});
 
 	it('includes structured step rules in system prompt', () => {
@@ -109,21 +149,44 @@ describe('buildRecipe prompts', () => {
 		expect(refine).toContain('frukost, fika, lunch eller middag');
 	});
 
-	it('includes portions and preferences in user prompt', () => {
-		const user = buildRecipeUserPrompt('- Mjölk: 1 l i fridge', 2, 'vegetariskt');
-		expect(user).toContain('Antal portioner: 2');
-		expect(user).toContain('Mjölk');
+	it('builds recipe-v3 JSON user prompt with inventory and preferences', () => {
+		const items = [
+			makeItem({ id: 'inv-falukorv', name: 'Falukorv', quantity: '400', unit: 'g' }),
+			makeItem({ id: 'inv-creme', name: 'Crème fraîche 15%', quantity: '2', unit: 'dl' })
+		];
+		const context = makePromptContext(items, { preferences: 'vegetariskt' });
+		const user = buildRecipeUserPrompt(context);
+		expect(user).toContain(`promptVersion: ${PROMPT_VERSION_RECIPE}`);
+		expect(user).toContain('locale: sv-SE');
+		expect(user).toContain('Falukorv');
 		expect(user).toContain('vegetariskt');
+		expect(user).toContain('"inventory"');
+	});
+
+	it('includes planned meals and avoidTitles in context payload', () => {
+		const payload = buildRecipeContextPayload(
+			makePromptContext([makeItem()], {
+				plannedMeals: [{ date: '2026-06-02', title: 'Pasta' }],
+				avoidTitles: ['Kycklingwok']
+			})
+		);
+		expect(payload.plannedMeals).toEqual([{ date: '2026-06-02', title: 'Pasta' }]);
+		expect(payload.avoidTitles).toEqual(['Kycklingwok']);
 	});
 
 	it('includes meal intent guidance in user prompts', () => {
-		const quick = buildRecipeUserPrompt('- Mjölk: 1 l', 4, '', 'quick');
-		const friday = buildRecipeUserPrompt('- Mjölk: 1 l', 4, '', 'friday');
+		const quick = buildRecipeUserPrompt(makePromptContext([makeItem()], { mealIntent: 'quick' }));
+		const friday = buildRecipeUserPrompt(makePromptContext([makeItem()], { mealIntent: 'friday' }));
 		expect(quick).toContain(mealIntentGuidance('quick'));
 		expect(friday).toContain('fredagsmiddag');
 
-		const refine = buildRecipeRefinementUserPrompt('{}', '- Mjölk', 4, undefined, 'meal_prep');
+		const refine = buildRecipeRefinementUserPrompt(
+			'{}',
+			makePromptContext([makeItem()], { mealIntent: 'meal_prep' }),
+			'Prioritera utgående varor'
+		);
 		expect(refine).toContain('matlådor');
+		expect(refine).toContain('Prioritera utgående varor');
 	});
 
 	it('includes human-food-only rules in culinary realism', () => {
@@ -141,12 +204,12 @@ describe('buildRecipeRefinement prompts', () => {
 
 		const user = buildRecipeRefinementUserPrompt(
 			'{"recipes":[]}',
-			'- [id] Mjölk: 1 l',
-			4,
+			makePromptContext([makeItem()]),
 			'Prioritera utgående varor'
 		);
 		expect(user).toContain('Utkast att granska');
 		expect(user).toContain('Prioritera utgående varor');
+		expect(user).toContain('"inventory"');
 	});
 });
 

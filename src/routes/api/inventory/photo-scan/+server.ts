@@ -8,6 +8,8 @@ import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { e2eMockPhotoRoundParse, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 import { translateOpenAiError, missingOpenAiKeyMessage } from '$lib/server/openai';
 import { parsePhotoRoundFromImages, parsePhotoRoundZoneHint } from '$lib/server/photo-round-parse';
+import { enrichPhotoRoundShelfLife } from '$lib/server/photo-round-shelf-life';
+import { isShelfLifeEstimatesInReceiptEnabled } from '$lib/server/shelf-life-learning-flag';
 import { recordProductEvent } from '$lib/server/product-events';
 import type { RequestHandler } from './$types';
 
@@ -96,6 +98,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: translateOpenAiError(locals.locale, aiResult) }, { status: aiResult.status });
 	}
 
+	let shelfLifePredictions: Awaited<ReturnType<typeof enrichPhotoRoundShelfLife>> | undefined;
+	if (isShelfLifeEstimatesInReceiptEnabled() && locals.householdId) {
+		shelfLifePredictions = await enrichPhotoRoundShelfLife(
+			locals.householdId,
+			aiResult.items,
+			locals.learningEngineService,
+			{ apiKey }
+		);
+	}
+
 	recordProductEvent(locals.pmfService, {
 		userId: auth.user.id,
 		householdId: locals.householdId,
@@ -112,6 +124,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	return json({
 		items: aiResult.items,
 		detectedZone: aiResult.detectedZone,
-		zoneConfidence: aiResult.zoneConfidence
+		zoneConfidence: aiResult.zoneConfidence,
+		...(shelfLifePredictions ? { shelfLifePredictions } : {})
 	} satisfies PhotoRoundParseResult);
 };

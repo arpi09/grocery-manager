@@ -3,17 +3,23 @@ import { normalizeRecipeSteps, type RecipeStep } from '$lib/domain/recipe';
 export interface RecipeSuggestion {
 	title: string;
 	whyItFits: string;
+	wastePreventedNote?: string | null;
 	ingredientsToUse: string[];
 	missingIngredients: string[];
 	steps: RecipeStep[];
+	totalMinutes?: number | null;
+	difficulty?: 'easy' | 'medium' | 'hard' | null;
 }
 
 const RECIPE_OBJECT_KEYS = new Set([
 	'title',
 	'whyItFits',
+	'wastePreventedNote',
 	'ingredientsToUse',
 	'missingIngredients',
-	'steps'
+	'steps',
+	'totalMinutes',
+	'difficulty'
 ]);
 
 export const RECIPE_SUGGESTIONS_SCHEMA = {
@@ -26,6 +32,7 @@ export const RECIPE_SUGGESTIONS_SCHEMA = {
 				properties: {
 					title: { type: 'string' },
 					whyItFits: { type: 'string' },
+					wastePreventedNote: { type: ['string', 'null'] },
 					ingredientsToUse: {
 						type: 'array',
 						items: { type: 'string' }
@@ -34,6 +41,8 @@ export const RECIPE_SUGGESTIONS_SCHEMA = {
 						type: 'array',
 						items: { type: 'string' }
 					},
+					totalMinutes: { type: ['number', 'null'] },
+					difficulty: { type: ['string', 'null'] },
 					steps: {
 						type: 'array',
 						items: {
@@ -47,7 +56,16 @@ export const RECIPE_SUGGESTIONS_SCHEMA = {
 						}
 					}
 				},
-				required: ['title', 'whyItFits', 'ingredientsToUse', 'missingIngredients', 'steps'],
+				required: [
+					'title',
+					'whyItFits',
+					'wastePreventedNote',
+					'ingredientsToUse',
+					'missingIngredients',
+					'totalMinutes',
+					'difficulty',
+					'steps'
+				],
 				additionalProperties: false
 			}
 		}
@@ -79,6 +97,10 @@ export function parseRecipeSuggestions(input: unknown): RecipeSuggestion[] {
 			const title = typeof candidate.title === 'string' ? candidate.title.trim() : '';
 			const whyItFits =
 				typeof candidate.whyItFits === 'string' ? candidate.whyItFits.trim() : '';
+			const wastePreventedNote =
+				typeof candidate.wastePreventedNote === 'string'
+					? candidate.wastePreventedNote.trim() || null
+					: null;
 			const ingredientsToUse = Array.isArray(candidate.ingredientsToUse)
 				? candidate.ingredientsToUse.filter((v): v is string => typeof v === 'string')
 				: [];
@@ -87,17 +109,32 @@ export function parseRecipeSuggestions(input: unknown): RecipeSuggestion[] {
 				: [];
 			const steps = normalizeRecipeSteps(candidate.steps);
 
+			const totalMinutes =
+				typeof candidate.totalMinutes === 'number' && Number.isFinite(candidate.totalMinutes)
+					? Math.min(480, Math.max(1, Math.round(candidate.totalMinutes)))
+					: null;
+			const difficulty =
+				candidate.difficulty === 'easy' ||
+				candidate.difficulty === 'medium' ||
+				candidate.difficulty === 'hard'
+					? candidate.difficulty
+					: null;
+
 			if (!title || !whyItFits || ingredientsToUse.length === 0 || steps.length === 0) {
 				return null;
 			}
 
-			return {
+			const parsed: RecipeSuggestion = {
 				title,
 				whyItFits,
+				wastePreventedNote,
 				ingredientsToUse,
 				missingIngredients,
-				steps
+				steps,
+				totalMinutes,
+				difficulty
 			};
+			return parsed;
 		})
 		.filter((recipe): recipe is RecipeSuggestion => recipe !== null)
 		.slice(0, 4);

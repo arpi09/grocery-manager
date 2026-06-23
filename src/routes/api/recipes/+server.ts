@@ -5,7 +5,9 @@ import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { openAiErrorLogDetail, translateOpenAiError } from '$lib/server/openai';
 import { parseMealIntent } from '$lib/domain/recipe';
 import { clampRecipePortions } from '$lib/server/recipe-prompt';
-import { generateRecipesWithRefinement } from '$lib/server/recipe-generation';
+import { generateRecipesWithRefinement, selectVelocityHints } from '$lib/server/recipe-generation';
+import { upcomingDateRange } from '$lib/server/inventory-context';
+import { normalizePromptLocale } from '$lib/server/ai-prompt-shared';
 import { translate } from '$lib/i18n/messages';
 import { e2eMockRecipeSuggestions, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 
@@ -58,7 +60,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		inventory,
 		portions,
 		preferences,
-		mealIntent
+		mealIntent,
+		locale: normalizePromptLocale(locale),
+		...(await loadRecipeEnrichment(locals, auth.user.id))
 	});
 
 	if (!generated.ok) {
@@ -80,3 +84,30 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	return json({ recipes: savedIdeas, portions });
 };
+
+async function loadRecipeEnrichment(
+	locals: App.Locals,
+	userId: string
+): Promise<{
+	plannedMeals: Awaited<ReturnType<typeof locals.mealPlanService.listPlannedMealsByRange>>;
+	recipeIdeas: Awaited<ReturnType<typeof locals.mealPlanService.listRecipeIdeas>>;
+	velocityHints: ReturnType<typeof selectVelocityHints>;
+}> {
+	const { fromDate, toDate } = upcomingDateRange(10);
+	const householdId = locals.householdId;
+	const [plannedMeals, recipeIdeas, householdSnapshot] = await Promise.all([
+		locals.mealPlanService.listPlannedMealsByRange(userId, fromDate, toDate),
+		locals.mealPlanService.listRecipeIdeas(userId, 8),
+		householdId
+			? locals.householdSuggestionsService.getSnapshot(householdId)
+			: Promise.resolve(null)
+	]);
+
+	return {
+		plannedMeals,
+		recipeIdeas,
+		velocityHints: householdSnapshot
+			? selectVelocityHints(householdSnapshot.shelfLifeRules)
+			: []
+	};
+}

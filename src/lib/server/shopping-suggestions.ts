@@ -3,12 +3,22 @@ import {
 	formatInventoryLines,
 	formatPlannedMealLines,
 	formatRecipeIdeaLines,
+	formatShoppingListLines,
+	formatUrgentInventoryBlock,
 	upcomingDateRange
 } from '$lib/server/inventory-context';
 import type { MessageKey } from '$lib/i18n/messages';
-import { requestStructuredJson } from '$lib/server/openai';
+import {
+	estimateInputTokens,
+	normalizePromptLocale,
+	PROMPT_VERSION_SHOPPING,
+	promptLocaleInstruction
+} from '$lib/server/ai-prompt-shared';
+import { OPENAI_MODEL_NANO, requestStructuredJson } from '$lib/server/openai';
+import { logBrainMetrics } from '$lib/server/brain-metrics';
 import type { InventoryService } from '$lib/application/inventory.service';
 import type { MealPlanService } from '$lib/application/meal-plan.service';
+import type { ShoppingListService } from '$lib/application/shopping-list.service';
 
 export const SHOPPING_CATEGORIES = [
 	'Frukt & grönt',
@@ -30,6 +40,8 @@ export interface ShoppingSuggestion {
 	category: ShoppingCategory;
 	reason: string;
 	priority: 'high' | 'medium' | 'low';
+	relatedMealDate?: string | null;
+	relatedRecipeTitle?: string | null;
 }
 
 export const SHOPPING_SUGGESTIONS_SCHEMA = {
@@ -45,9 +57,11 @@ export const SHOPPING_SUGGESTIONS_SCHEMA = {
 					quantity: { type: 'string' },
 					category: { type: 'string', enum: [...SHOPPING_CATEGORIES] },
 					reason: { type: 'string' },
-					priority: { type: 'string', enum: ['high', 'medium', 'low'] }
+					priority: { type: 'string', enum: ['high', 'medium', 'low'] },
+					relatedMealDate: { type: ['string', 'null'] },
+					relatedRecipeTitle: { type: ['string', 'null'] }
 				},
-				required: ['name', 'quantity', 'category', 'reason', 'priority'],
+				required: ['name', 'quantity', 'category', 'reason', 'priority', 'relatedMealDate', 'relatedRecipeTitle'],
 				additionalProperties: false
 			}
 		}
@@ -82,8 +96,8 @@ export function parseShoppingSuggestions(input: unknown): ShoppingSuggestion[] {
 			const name = typeof candidate.name === 'string' ? candidate.name.trim() : '';
 			const quantity = typeof candidate.quantity === 'string' ? candidate.quantity.trim() : '';
 			const reason = typeof candidate.reason === 'string' ? candidate.reason.trim() : '';
-			const priority =
-				candidate.priority === 'high' || candidate.priority === 'low'
+			const priority: ShoppingSuggestion['priority'] =
+				candidate.priority === 'high' || candidate.priority === 'low' || candidate.priority === 'medium'
 					? candidate.priority
 					: 'medium';
 
@@ -91,13 +105,20 @@ export function parseShoppingSuggestions(input: unknown): ShoppingSuggestion[] {
 				return null;
 			}
 
-			return {
+			const parsed: ShoppingSuggestion = {
 				name,
 				quantity,
 				category: parseCategory(candidate.category),
 				reason,
-				priority
+				priority,
+				relatedMealDate:
+					typeof candidate.relatedMealDate === 'string' ? candidate.relatedMealDate.trim() || null : null,
+				relatedRecipeTitle:
+					typeof candidate.relatedRecipeTitle === 'string'
+						? candidate.relatedRecipeTitle.trim() || null
+						: null
 			};
+			return parsed;
 		})
 		.filter((item): item is ShoppingSuggestion => item !== null)
 		.slice(0, 24);
@@ -151,6 +172,7 @@ export function normalizeShoppingItemName(name: string): string {
 export interface GenerateShoppingSuggestionsInput {
 	preferences?: string;
 	householdSize?: number;
+	locale?: string;
 }
 
 export interface GenerateShoppingSuggestionsDeps {
@@ -159,6 +181,7 @@ export interface GenerateShoppingSuggestionsDeps {
 	userId: string;
 	inventoryService: InventoryService;
 	mealPlanService: MealPlanService;
+	shoppingListService: ShoppingListService;
 }
 
 export type GenerateShoppingSuggestionsResult =
@@ -178,45 +201,88 @@ export async function generateShoppingSuggestions(
 			? Math.round(input.householdSize)
 			: 2;
 
+	const locale = normalizePromptLocale(input.locale ?? 'sv');
+
 	const inventory = await deps.inventoryService.listAll(deps.householdId);
 	const { fromDate, toDate } = upcomingDateRange(10);
-	const [plannedMeals, recipeIdeas] = await Promise.all([
+	const [plannedMeals, recipeIdeas, shoppingList] = await Promise.all([
 		deps.mealPlanService.listPlannedMealsByRange(deps.userId, fromDate, toDate),
-		deps.mealPlanService.listRecipeIdeas(deps.userId, 8)
+		deps.mealPlanService.listRecipeIdeas(deps.userId, 8),
+		deps.shoppingListService.listUncheckedItems(deps.householdId)
 	]);
 
+	const inventoryLabel =
+		locale === 'en'
+			? 'Current inventory (do NOT suggest items already well stocked):'
+			: 'Aktuellt lager (föreslå INTE varor som redan finns i tillräcklig mängd):';
+	const urgentLabel =
+		locale === 'en'
+			? 'Expiring within 5 days (prioritize restocking related staples):'
+			: 'Går ut inom 5 dagar (prioritera kompletterande inköp):';
+	const shoppingListLabel =
+		locale === 'en'
+			? 'Current shopping list (do NOT duplicate):'
+			: 'Aktuell inköpslista (duplicera INTE):';
+	const mealsLabel =
+		locale === 'en'
+			? `Planned meals (${fromDate} to ${toDate}):`
+			: `Planerade måltider (${fromDate} till ${toDate}):`;
+	const ideasLabel =
+		locale === 'en'
+			? 'Recipe ideas (use missingIngredients heavily):'
+			: 'Receptidéer (prioritera missingIngredients):';
+	const householdLabel = locale === 'en' ? 'Household size' : 'Hushållsstorlek';
+	const preferencesLabel = locale === 'en' ? 'Shopping preferences' : 'Inköpspreferenser';
+
 	const userPrompt = [
-		'Current inventory (do NOT suggest items already well stocked):',
-		formatInventoryLines(inventory),
+		inventoryLabel,
+		formatInventoryLines(inventory, locale),
 		'',
-		`Planned meals (${fromDate} to ${toDate}):`,
-		formatPlannedMealLines(plannedMeals),
+		urgentLabel,
+		formatUrgentInventoryBlock(inventory, locale),
 		'',
-		'Recipe ideas (use missingIngredients heavily):',
-		formatRecipeIdeaLines(recipeIdeas),
+		shoppingListLabel,
+		formatShoppingListLines(shoppingList, locale),
 		'',
-		`Household size: ${householdSize} people`,
-		preferences ? `Shopping preferences: ${preferences}` : ''
-	].join('\n');
+		mealsLabel,
+		formatPlannedMealLines(plannedMeals, locale),
+		'',
+		ideasLabel,
+		formatRecipeIdeaLines(recipeIdeas, locale),
+		'',
+		`${householdLabel}: ${householdSize} ${locale === 'en' ? 'people' : 'personer'}`,
+		preferences ? `${preferencesLabel}: ${preferences}` : ''
+	]
+		.filter(Boolean)
+		.join('\n');
 
 	const systemPrompt = [
-		'You build a practical Swedish home shopping list based on pantry inventory.',
+		locale === 'en'
+			? 'You build a practical Swedish home shopping list based on pantry inventory.'
+			: 'Du bygger en praktisk svensk inköpslista utifrån skafferilager.',
+		promptLocaleInstruction(locale),
 		'Product names must be common Swedish grocery terms (brand optional, realistic sizes).',
 		'Suggest items that are missing, running low, needed for planned meals, or common staples worth restocking.',
-		'Do not duplicate what the user clearly already has in sufficient quantity.',
+		'Do not duplicate what the user clearly already has in sufficient quantity or on the shopping list.',
 		'Do NOT suggest restocking when inventory still shows a meaningful amount left after partial use.',
 		'Group mentally by grocery store departments.',
-		'Respond in Swedish for name, quantity, and reason.',
+		locale === 'en'
+			? 'Respond in English for name, quantity, and reason.'
+			: 'Respond in Swedish for name, quantity, and reason.',
 		'Return JSON only:',
-		'{"note":"","items":[{"name":"","quantity":"","category":"Frukt & grönt|Mejeri|Kött & chark|Fisk & skaldjur|Bröd & bakverk|Skafferi|Dryck|Fryst|Övrigt","reason":"","priority":"high|medium|low"}]}',
+		'{"note":"","items":[{"name":"","quantity":"","category":"Frukt & grönt|Mejeri|Kött & chark|Fisk & skaldjur|Bröd & bakverk|Skafferi|Dryck|Fryst|Övrigt","reason":"","priority":"high|medium|low","relatedMealDate":null,"relatedRecipeTitle":null}]}',
 		'Rules:',
 		'- 6 to 20 items, prioritized for one shopping trip',
+		'- relatedMealDate: YYYY-MM-DD when tied to a planned meal, else null',
+		'- relatedRecipeTitle: recipe title when tied to a recipe idea, else null',
 		'- note: optional short shopping tip (can be empty string)',
+		`- promptVersion: ${PROMPT_VERSION_SHOPPING}`,
 		'- quantity examples: "1 st", "500 g", "2 förpackningar"',
 		'- no markdown code fences'
 	].join('\n');
 
 	const result = await requestStructuredJson(deps.apiKey, {
+		model: OPENAI_MODEL_NANO,
 		systemPrompt,
 		userPrompt,
 		schemaName: 'shopping_suggestions',
@@ -226,6 +292,12 @@ export async function generateShoppingSuggestions(
 	if (!result.ok) {
 		return { ok: false, status: result.status, messageKey: result.messageKey };
 	}
+
+	logBrainMetrics('shopping_suggestions', {
+		source: 'shopping_suggestions',
+		promptVersion: PROMPT_VERSION_SHOPPING,
+		inputTokenEstimate: estimateInputTokens(userPrompt, inventory.length)
+	});
 
 	const items = parseShoppingSuggestions(result.data);
 	if (items.length === 0) {
