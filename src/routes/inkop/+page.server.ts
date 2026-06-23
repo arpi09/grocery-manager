@@ -13,6 +13,11 @@ import {
 import { ShoppingToPantryReadOnlyError } from '$lib/application/shopping-to-pantry.service';
 import { parseAddShoppingListItem } from '$lib/validation/shopping-list.schemas';
 import { translate, type MessageKey } from '$lib/i18n/messages';
+import { rankReplenishmentSuggestions } from '$lib/server/replenishment-rank';
+import { loadReplenishmentFeedbackBlock } from '$lib/server/brain-feedback-context';
+import { learningFeedbackRepository } from '$lib/server/di';
+import { loadAutoFillPendingForInkop } from '$lib/server/auto-smart-fill';
+import { takeAutoFillPending } from '$lib/server/auto-fill-pending';
 import { getOpenAiApiKey, OPENAI_NOT_CONFIGURED_KEY } from '$lib/server/openai';
 import { checkAiQuotaForAction } from '$lib/server/ai-rate-limit';
 import { e2eMockShoppingSuggestions, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
@@ -23,7 +28,11 @@ import {
 } from '$lib/server/shopping-suggestions';
 import { recordProductEvent } from '$lib/server/product-events';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
+import { isReplenishmentRankEnabled } from '$lib/server/brain-feature-flags';
 import { isShoppingUxV2Enabled } from '$lib/server/shopping-ux-v2-flag';
+import { detectDedupeWarningsForKeys } from '$lib/domain/dedupe-autopilot';
+import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
+import { isItemFinished } from '$lib/domain/inventory-item';
 import { trackShoppingCheckoffToPantry } from '$lib/server/sync-analytics';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
@@ -57,18 +66,77 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		locals.inventoryIntelligenceService.getHomeIntelligence(householdId),
 		user ? locals.shoppingToPantryService.getMode(user.id) : Promise.resolve('ask' as ShoppingToPantryMode)
 	]);
+
+	let replenishmentSuggestions = intelligence.replenishment;
+	if (isReplenishmentRankEnabled()) {
+		const apiKey = getOpenAiApiKey();
+		if (apiKey && replenishmentSuggestions.length > 3) {
+			const replenishmentFeedbackBlock = await loadReplenishmentFeedbackBlock(
+				learningFeedbackRepository,
+				householdId,
+				locals.locale
+			);
+			replenishmentSuggestions = await rankReplenishmentSuggestions(
+				apiKey,
+				replenishmentSuggestions,
+				locals.locale,
+				{ replenishmentFeedbackBlock }
+			);
+		}
+	}
+
+	let autoFillPending: Awaited<ReturnType<typeof loadAutoFillPendingForInkop>> = null;
+	if (user && locals.householdRole) {
+		try {
+			autoFillPending = await loadAutoFillPendingForInkop({
+				householdId,
+				userId: user.id,
+				role: locals.householdRole,
+				locale: locals.locale === 'en' ? 'en' : 'sv',
+				uncheckedCount: items.length,
+				inventoryIntelligenceService: locals.inventoryIntelligenceService,
+				inventoryService: locals.inventoryService,
+				mealPlanService: locals.mealPlanService,
+				shoppingListService: locals.shoppingListService,
+				learningFeedbackRepository
+			});
+		} catch (loadError) {
+			console.warn('[inkop] auto smart-fill degraded:', loadError);
+		}
+	}
+
+	const [inventoryItems, dedupeContext] = await Promise.all([
+		locals.inventoryService.listAll(householdId),
+		locals.purchasePatternService.getDedupeContext(householdId)
+	]);
+	const activeItems = inventoryItems.filter((item) => !isItemFinished(item));
+	const storeDedupeKeys = [
+		...new Set(
+			items
+				.map((item) => normalizeReceiptProductName(item.name))
+				.filter((key) => key.length > 0)
+		)
+	];
+	const storeDedupeByKey = detectDedupeWarningsForKeys(storeDedupeKeys, {
+		activeItems,
+		recentLines: dedupeContext.recentLines,
+		listNormalizedNames: dedupeContext.listNormalizedNames
+	});
+
 	return {
 		user,
 		items,
 		checkedCount,
 		canEdit: !!locals.householdRole && canEditInventory(locals.householdRole),
 		shareLinkEnabled: isShoppingListShareEnabled(),
-		replenishmentSuggestions: intelligence.replenishment,
+		replenishmentSuggestions,
 		dedupeByKey: intelligence.dedupeByKey,
+		storeDedupeByKey,
 		householdId,
 		shoppingToPantryMode,
 		showMemoryExplorer: isShelfLifeLearningEnabled(),
-		shoppingUxV2Enabled: isShoppingUxV2Enabled()
+		shoppingUxV2Enabled: isShoppingUxV2Enabled(),
+		autoFillPending
 	};
 };
 
@@ -316,6 +384,51 @@ export const actions: Actions = {
 
 		return { success: true };
 	},
+	acceptAutoFill: async (event) => {
+		requireInventoryWriteAccess(event.locals.householdRole);
+		const householdId = event.locals.householdId;
+		const locale = event.locals.locale;
+		if (!householdId) error(400, translate(locale, 'errors.household.noHousehold'));
+
+		const pending = takeAutoFillPending(householdId, event.locals.user!.id);
+		if (!pending || pending.items.length === 0) {
+			return fail(404, { message: translate(locale, 'shopping.autoFillExpired') });
+		}
+
+		try {
+			const result = await event.locals.shoppingListService.addSuggestedItems(
+				householdId,
+				event.locals.householdRole!,
+				pending.items.map(suggestionToListItem)
+			);
+
+			recordProductEvent(event.locals.pmfService, {
+				userId: event.locals.user!.id,
+				householdId,
+				eventType: 'fill_suggestions_added',
+				metadata: {
+					added: result.added,
+					skipped: result.skipped,
+					source: 'auto_fill_pending'
+				}
+			});
+
+			return {
+				fillSuccess: {
+					added: result.added,
+					skipped: result.skipped,
+					note: pending.note,
+					suggestions: pending.items.slice(0, 8).map((item) => ({
+						name: item.name,
+						relatedMealDate: item.relatedMealDate ?? null,
+						relatedRecipeTitle: item.relatedRecipeTitle ?? null
+					}))
+				}
+			};
+		} catch (err) {
+			return handleServiceError(err);
+		}
+	},
 	fillFromPantry: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);
 		const householdId = event.locals.householdId;
@@ -364,7 +477,8 @@ export const actions: Actions = {
 							userId: event.locals.user!.id,
 							inventoryService: event.locals.inventoryService,
 							mealPlanService: event.locals.mealPlanService,
-							shoppingListService: event.locals.shoppingListService
+							shoppingListService: event.locals.shoppingListService,
+							learningFeedbackRepository
 						},
 						{ preferences, householdSize, locale: event.locals.locale === 'en' ? 'en' : 'sv' }
 					);

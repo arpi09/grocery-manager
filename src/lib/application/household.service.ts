@@ -119,6 +119,11 @@ export class HouseholdService {
 		return this.repository.getHouseholdForUser(userId);
 	}
 
+	async getHouseholdMembers(householdId: string) {
+		const household = await this.repository.getHouseholdById(householdId);
+		return household?.members ?? null;
+	}
+
 	async listHouseholdsForUser(userId: string): Promise<UserHouseholdSummary[]> {
 		return this.repository.listHouseholdsForUser(userId);
 	}

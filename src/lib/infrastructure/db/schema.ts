@@ -53,6 +53,16 @@ export const userTable = pgTable('user', {
 		mode: 'date'
 	}),
 	marketChatPushEnabled: boolean('market_chat_push_enabled').notNull().default(false),
+	brainPushDailyCount: integer('brain_push_daily_count').notNull().default(0),
+	brainPushDailyDate: date('brain_push_daily_date'),
+	weeklyBriefingLastSentAt: timestamp('weekly_briefing_last_sent_at', {
+		withTimezone: true,
+		mode: 'date'
+	}),
+	preShopBriefingLastSentAt: timestamp('pre_shop_briefing_last_sent_at', {
+		withTimezone: true,
+		mode: 'date'
+	}),
 	autoNearbyListingEnabled: boolean('auto_nearby_listing_enabled').notNull().default(false),
 	marketFirstName: text('market_first_name'),
 	marketSwishNumber: text('market_swish_number'),
@@ -580,7 +590,9 @@ export const aiUsageTable = pgTable(
 		userId: text('user_id')
 			.notNull()
 			.references(() => userTable.id, { onDelete: 'cascade' }),
-		kind: text('kind', { enum: ['ai_scan', 'receipt_pdf', 'smart_fill', 'admin_insights'] }).notNull(),
+		kind: text('kind', {
+			enum: ['ai_scan', 'receipt_pdf', 'smart_fill', 'admin_insights', 'weekly_plan']
+		}).notNull(),
 		periodKey: text('period_key').notNull(),
 		count: integer('count').notNull().default(1),
 		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' })

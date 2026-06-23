@@ -1,0 +1,40 @@
+# Pre-shop push (Fri/Sat) from purchase-pattern cadence
+name: Pre-shop briefing cron
+
+on:
+  schedule:
+    # Friday + Saturday 07:00 UTC (~09:00 CET)
+    - cron: '0 7 * * 5,6'
+  workflow_dispatch:
+
+jobs:
+  pre-shop-briefing:
+    name: pre-shop-briefing
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: POST /api/cron/pre-shop-briefing
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "::error::GitHub secret CRON_SECRET is not set."
+            exit 1
+          fi
+          if [ -z "${PRODUCTION_URL:-}" ]; then
+            echo "::error::GitHub repository variable PRODUCTION_URL is not set (e.g. https://skaffu.com)."
+            exit 1
+          fi
+
+          base="${PRODUCTION_URL%/}"
+          url="${base}/api/cron/pre-shop-briefing"
+          echo "POST ${url}"
+
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Accept: application/json" \
+            "${url}"

@@ -39,6 +39,7 @@ import { DrizzleAdminActionRepository } from '$lib/infrastructure/repositories/a
 import { DrizzlePmfRepository } from '$lib/infrastructure/repositories/pmf.repository';
 import { DrizzleExpiryReminderRepository } from '$lib/infrastructure/repositories/expiry-reminder.repository';
 import { DrizzleShoppingPushRepository } from '$lib/infrastructure/repositories/shopping-push.repository';
+import { DrizzleBrainPushRepository } from '$lib/infrastructure/repositories/brain-push.repository';
 import { DrizzleNearbyPushRepository } from '$lib/infrastructure/repositories/nearby-push.repository';
 import { PmfService } from '$lib/application/pmf.service';
 import { emitMemoryRuleEvent } from '$lib/server/memory-rule-telemetry';
@@ -46,6 +47,7 @@ import { registerBrainSchemaRetryLogger } from '$lib/server/brain-metrics';
 import { recordProductEvent } from '$lib/server/product-events';
 import { ExpiryReminderService } from '$lib/application/expiry-reminder.service';
 import { ShoppingPushService } from '$lib/application/shopping-push.service';
+import { BrainProactivePushService } from '$lib/application/brain-proactive-push.service';
 import { NearbyPushService } from '$lib/application/nearby-push.service';
 import { DrizzleProductFeedbackRepository } from '$lib/infrastructure/repositories/product-feedback.repository';
 import { ProductFeedbackService } from '$lib/application/product-feedback.service';
@@ -127,9 +129,10 @@ const shoppingListRepository = new DrizzleShoppingListRepository();
 const mealPlanRepository = new DrizzleMealPlanRepository();
 const petRepository = new DrizzlePetRepository();
 const petFoodRepository = new DrizzlePetFoodRepository();
-const pmfRepository = new DrizzlePmfRepository();
+export const pmfRepository = new DrizzlePmfRepository();
 const expiryReminderRepository = new DrizzleExpiryReminderRepository();
 const shoppingPushRepository = new DrizzleShoppingPushRepository();
+const brainPushRepository = new DrizzleBrainPushRepository();
 const nearbyPushRepository = new DrizzleNearbyPushRepository();
 const productFeedbackRepository = new DrizzleProductFeedbackRepository();
 const pmfSurveyRepository = new DrizzlePmfSurveyRepository();
@@ -199,7 +202,7 @@ const householdShelfLifeRuleRepository = new DrizzleHouseholdShelfLifeRuleReposi
 const householdLocationRuleRepository = new DrizzleHouseholdLocationRuleRepository();
 export { householdShelfLifeRuleRepository, householdLocationRuleRepository };
 const learningFeedbackRepository = new DrizzleLearningFeedbackRepository();
-export { learningFeedbackRepository };
+export { learningFeedbackRepository, consumptionRepository };
 const householdLearningAdapter = new HouseholdLearningAdapter(
 	householdShelfLifeRuleRepository,
 	householdLocationRuleRepository
@@ -316,8 +319,26 @@ export const inventoryIntelligenceService = new InventoryIntelligenceService(
 	purchasePatternService,
 	inventoryService
 );
-export const shoppingToPantryService = new ShoppingToPantryService(inventoryService, userRepository);
 export const mealPlanService = new MealPlanService(mealPlanRepository);
+export const brainProactivePushService = new BrainProactivePushService(
+	brainPushRepository,
+	householdService,
+	inventoryService,
+	inventoryIntelligenceService,
+	shoppingListService,
+	purchasePatternService,
+	mealPlanService,
+	pushSubscriptionRepository,
+	pushAdapter,
+	appOriginAdapter,
+	learningFeedbackRepository
+);
+export const shoppingToPantryService = new ShoppingToPantryService(
+	inventoryService,
+	userRepository,
+	purchasePatternService,
+	brainProactivePushService
+);
 export const weeklyRitualService = new WeeklyRitualService(mealPlanService, shoppingListService);
 export const petService = new PetService(petRepository);
 export const petFoodService = new PetFoodService(petFoodRepository);

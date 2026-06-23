@@ -13,7 +13,8 @@ import {
 	deletePushSubscriptionById,
 	type IPushSubscriptionRepository
 } from '$lib/infrastructure/repositories/push-subscription.repository';
-import { buildExpiryPushUserPrompt } from '$lib/server/expiry-push-prompt';
+import { generateExpiryPushBody } from '$lib/server/expiry-push-prompt';
+import { getOpenAiApiKey } from '$lib/server/openai';
 import { translate } from '$lib/i18n/messages';
 import type {
 	ExpiryReminderUser,
@@ -259,29 +260,32 @@ export class ExpiryReminderService {
 		const pushUrl = firstEntry
 			? `${this.appOrigin.getOrigin() || ''}/item/${firstEntry.item.id}/edit?from=push-moving-soon`
 			: `${this.appOrigin.getOrigin() || ''}${buildEatFirstWeekUrl('push')}`;
-		const miniPrompt = buildExpiryPushUserPrompt(
-			sections.flatMap((section) =>
-				section.items.map((item) => ({
-					name: item.name,
-					daysUntil: item.expiresOn ? daysUntilExpiry(item.expiresOn) : days
-				}))
-			),
-			locale
+		const pushItems = sections.flatMap((section) =>
+			section.items.map((item) => ({
+				name: item.name,
+				daysUntil: item.expiresOn ? daysUntilExpiry(item.expiresOn) : days
+			}))
 		);
-		void miniPrompt;
-		const pushBody = firstEntry
-			? isMovingSoon
-				? translate(locale, 'pushNotifications.movingSoonBody', {
-						name: firstEntry.item.name,
-						days: firstEntry.item.expiresOn
-							? daysUntilAutoExpiredMove(
-									firstEntry.item.expiresOn,
-									firstEntry.section.graceDays
-								)
-							: 0
-					})
-				: `${firstEntry.item.name} ${translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days })}`
-			: translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days });
+		const apiKey = getOpenAiApiKey();
+		const llmBody =
+			apiKey && !isMovingSoon
+				? await generateExpiryPushBody(apiKey, pushItems, locale)
+				: null;
+		const pushBody = llmBody
+			? llmBody
+			: firstEntry
+				? isMovingSoon
+					? translate(locale, 'pushNotifications.movingSoonBody', {
+							name: firstEntry.item.name,
+							days: firstEntry.item.expiresOn
+								? daysUntilAutoExpiredMove(
+										firstEntry.item.expiresOn,
+										firstEntry.section.graceDays
+									)
+								: 0
+						})
+					: `${firstEntry.item.name} ${translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days })}`
+				: translate(locale, 'pushNotifications.expiryBody', { count: itemCount, days });
 		const payload = {
 			title: isMovingSoon
 				? translate(locale, 'pushNotifications.movingSoonTitle', { name: firstEntry!.item.name })
