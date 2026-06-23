@@ -1,0 +1,11 @@
+{
+	"name": "Skaffu",
+	"image": "mcr.microsoft.com/devcontainers/javascript-node:24",
+	"forwardPorts": [5173],
+	"postCreateCommand": "npm ci && npm run setup:agent",
+	"customizations": {
+		"vscode": {
+			"extensions": ["svelte.svelte-vscode", "dbaeumer.vscode-eslint"]
+		}
+	}
+}
