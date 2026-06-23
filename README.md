@@ -30,11 +30,21 @@
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) 20+
+- [Node.js](https://nodejs.org/) **24+** (match [`.nvmrc`](../.nvmrc))
 - [Docker](https://www.docker.com/) (for PostgreSQL and optional full-stack run)
 - Git (optional, for GitHub)
 
 ## Quick start (development)
+
+**Zero-config (recommended):**
+
+```bash
+npm ci && npm run setup:agent && npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173).
+
+**PostgreSQL via Docker** (optional — default dev uses PGlite, no Docker):
 
 1. Start the database:
 
@@ -166,7 +176,13 @@ Tests cover login redirect, admin sign-in, `/admin`, and navigation to Inköp / 
 
 | Command | Description |
 |---------|-------------|
+| `npm run setup:agent` | Copy `.env`, dev defaults (PGlite, Turnstile test keys), optional migrate |
 | `npm run dev` | Development server |
+| `npm run dev:watch` | Dev server with auto-restart (nodemon) |
+| `npm run dev:start:ai` | Start dev in main/AI worktree (Windows) |
+| `npm run quick:dev` | Lint + locales + server-imports + unit tests (~2–3 min) |
+| `npm run pr:gate` | Pre-merge CI parity (integration + build guards) |
+| `npm run gate:fast` | Lint, check, unit tests, codebase-map |
 | `npm run build` | Production build |
 | `npm run preview` | Preview production build |
 | `npm run check` | TypeScript / Svelte check |

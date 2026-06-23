@@ -1,6 +1,6 @@
 # E2E agent (Playwright)
 
-**Worktree:** `C:\Users\ArvidPilhall\Projects\home-pantry-e2e`  
+**Worktree:** `$SKAFFU_ROOT-tests` (sibling clone, e.g. `home-pantry-tests`)  
 **Branch:** `feat/e2e-playwright`
 
 ## Playwright is free
@@ -23,8 +23,8 @@ Do **not** change product features in `src/routes` except test hooks if absolute
 ## Setup (once per machine)
 
 ```powershell
-cd C:\Users\ArvidPilhall\Projects\home-pantry-e2e
-copy ..\\home-pantry\\.env .env   # or create .env with ADMIN_EMAIL + ADMIN_PASSWORD
+cd <path-to>/home-pantry-tests
+copy ..\\home-pantry\\.env .env   # or: npm run setup:agent
 npm ci
 npx playwright install chromium
 ```

@@ -24,10 +24,17 @@ Service-wiring: [`src/lib/server/di.ts`](src/lib/server/di.ts).
 ## G0 före push till master
 
 ```bash
-npm run check:locales && npm run check && npm test
+# Första gången
+npm ci && npm run setup:agent && npm run dev
+
+# Under arbete
+npm run quick:dev
+
+# Innan merge till master
+npm run pr:gate
 ```
 
-PR-gate (mer): `npm run gate:fast` — inkluderar `check:codebase-map`.
+PR-gate kör `gate:fast` + integration + build guards — samma som CI **`pr-gate / pr-gate`** (inte legacy `quality/quality`).
 
 ## Tier C / frozen
 

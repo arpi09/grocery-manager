@@ -4,7 +4,7 @@ Kort guide för att komma igång med **Home Pantry**. Koordinator-specifika file
 
 ## Förutsättningar
 
-- [Node.js](https://nodejs.org/) 20+
+- [Node.js](https://nodejs.org/) **24+**
 - Git + åtkomst till GitHub-repot
 - (Valfritt) Docker om du kör PostgreSQL lokalt istället för PGlite
 
@@ -13,24 +13,19 @@ Kort guide för att komma igång med **Home Pantry**. Koordinator-specifika file
 ```powershell
 git clone https://github.com/<din-org>/home-pantry.git
 cd home-pantry
-npm install
-copy .env.example .env
+npm ci
+npm run setup:agent
 ```
 
-Redigera `.env` med dina lokala hemligheter — **committa aldrig** `.env`.
+`setup:agent` kopierar `.env.example` → `.env`, sätter PGlite/Turnstile-dev-defaults och kör migrate. Redigera `.env` vid behov — **committa aldrig** `.env`.
 
 ## 2. Databas och dev-server
 
 ```powershell
-npm run db:migrate
 npm run dev:watch
 ```
 
-Eller AI-worktree (om `home-pantry-dev` finns enligt [scripts/dev-runtime/start-dev.ps1](../scripts/dev-runtime/start-dev.ps1)):
-
-```powershell
-npm run dev:start:ai
-```
+Sibling worktrees (valfritt): `home-pantry-dev`, `home-pantry-admin`, `home-pantry-tests` — se [`scripts/dev-runtime/start-dev.ps1`](../scripts/dev-runtime/start-dev.ps1) (`SKAFFU_ROOT` eller git root).
 
 Öppna [http://localhost:5173](http://localhost:5173). Hälsa: `npm run dev:health`.
 
@@ -55,9 +50,10 @@ Lokal utveckling använder ofta `USE_PGLITE=true` (inbyggd databas). Produktion 
 ## 5. Kvalitet innan push
 
 ```powershell
-npm run check
-npm test
+npm run quick:dev
 ```
+
+Före merge till `master`: `npm run pr:gate` (CI **`pr-gate / pr-gate`**).
 
 Trunk-flöde: push till `master` triggar GitHub Actions ([CI_CD.md](./CI_CD.md)).
 

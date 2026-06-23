@@ -7,8 +7,8 @@ description: Verifies Skaffu production deploy readiness and post-deploy smoke. 
 
 ## Pre-deploy (samma SHA)
 
-1. `gh run list --workflow=ci.yml --branch=master -L 3` — **quality / quality** success på target SHA.
-2. G0 lokalt om du pushat nytt: `npm run check:locales && npm run check && npm test`.
+1. `gh run list --workflow=ci.yml --branch=master -L 3` — **`pr-gate / pr-gate`** success på target SHA.
+2. G0 lokalt om du pushat nytt: `npm run quick:dev`.
 3. Security: `private/SECURITY_REPORT.md` om tillgänglig — blocked = stop.
 
 ## Trigger
