@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import NearbyShareReportButton from '$lib/components/molecules/NearbyShareReportButton.svelte';
@@ -80,7 +81,7 @@
 	<div class="share-shell">
 		<header class="share-header">
 			<div class="brand-row">
-				<img class="brand-mark" src="/favicon.svg" alt="" width="40" height="40" />
+				<AppLogo class="brand-mark" />
 				<div class="brand-copy">
 					<p class="eyebrow">{t('expiringShare.publicEyebrow')}</p>
 					<p class="brand-name">Skaffu</p>
@@ -181,6 +182,7 @@
 	}
 
 	.brand-mark {
+		--logo-mark-size: 2.5rem;
 		flex-shrink: 0;
 		border-radius: 0.625rem;
 	}

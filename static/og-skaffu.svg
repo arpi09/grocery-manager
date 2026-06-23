@@ -10,8 +10,14 @@
   <rect width="1200" height="630" fill="url(#bg)"/>
   <circle cx="980" cy="120" r="180" fill="#2c4a3e" opacity="0.08"/>
   <circle cx="180" cy="520" r="220" fill="#2c4a3e" opacity="0.06"/>
-  <text x="96" y="280" fill="#1f2a24" font-family="DM Sans" font-size="88" font-weight="700" letter-spacing="-0.02em">Skaffu</text>
-  <text x="96" y="360" fill="#2c4a3e" font-family="DM Sans" font-size="42" font-weight="600">Handla ihop med koll på skafferiet</text>
+  <g transform="translate(96, 172) scale(3.375)"><rect width="32" height="32" rx="8" fill="#2c4a3e"/>
+  <path
+    fill="#ffffff"
+    d="M16 8.5 9.5 13.2V22a1.2 1.2 0 0 0 1.2 1.2h3.1v-4.2h4.4v4.2h3.1A1.2 1.2 0 0 0 22.5 22v-8.8L16 8.5Z"
+  />
+  <path d="M11.8 17.2h8.4" stroke="#e8f0ea" stroke-width="1.35" stroke-linecap="round" fill="none"/>
+  <rect x="20.8" y="10.8" width="4.2" height="4.2" rx="1" fill="#d4a853"/></g>
+  <text x="96" y="380" fill="#2c4a3e" font-family="DM Sans" font-size="42" font-weight="600">Handla ihop med koll på skafferiet</text>
   <text x="96" y="430" fill="#4a5850" font-family="DM Sans" font-size="32" font-weight="400">Delad lista · utgångsdatum · mindre matsvinn</text>
   <rect x="96" y="480" width="280" height="56" rx="12" fill="#2c4a3e"/>
   <text x="236" y="516" fill="#ffffff" font-family="DM Sans" font-size="24" font-weight="600" text-anchor="middle">skaffu.com</text>

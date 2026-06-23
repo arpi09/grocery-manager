@@ -34,22 +34,19 @@
 			xmlns="http://www.w3.org/2000/svg"
 			aria-hidden="true"
 		>
-			<rect x="1" y="1" width="30" height="30" rx="8.5" class="mark-bg" />
+			<rect width="32" height="32" rx="8" fill="#2c4a3e" />
 			<path
-				class="mark-house"
+				fill="#ffffff"
 				d="M16 8.5 9.5 13.2V22a1.2 1.2 0 0 0 1.2 1.2h3.1v-4.2h4.4v4.2h3.1A1.2 1.2 0 0 0 22.5 22v-8.8L16 8.5Z"
 			/>
 			<path
-				class="mark-shelf"
 				d="M11.8 17.2h8.4"
+				stroke="#e8f0ea"
 				stroke-width="1.35"
 				stroke-linecap="round"
+				fill="none"
 			/>
-			<path
-				class="mark-leaf"
-				d="M21.2 11.2c1.6 0 2.6 1.1 2.4 2.6-.15 1.1-.95 2-2.15 2.35-.55.15-1.05.05-1.45-.2.55-.75.9-1.55.95-2.45.05-.85-.25-1.55-.75-2.25Z"
-			/>
-			<path class="mark-leaf-vein" d="M21.5 14.1c.7-.35 1.15-.9 1.25-1.55" stroke-width="0.9" />
+			<rect x="20.8" y="10.8" width="4.2" height="4.2" rx="1" fill="#d4a853" />
 		</svg>
 		{#if showWordmark}
 			<span class="wordmark" aria-hidden="true">{wordmark}</span>
@@ -95,29 +92,6 @@
 		width: var(--logo-mark-size, 2.25rem);
 		height: var(--logo-mark-size, 2.25rem);
 		flex-shrink: 0;
-	}
-
-	.mark-bg {
-		fill: var(--color-primary);
-	}
-
-	.mark-house {
-		fill: #fff;
-	}
-
-	.mark-shelf {
-		stroke: color-mix(in srgb, var(--color-primary) 33%, #fff);
-		fill: none;
-	}
-
-	.mark-leaf {
-		fill: var(--color-accent);
-	}
-
-	.mark-leaf-vein {
-		stroke: color-mix(in srgb, var(--color-accent) 55%, #fff);
-		fill: none;
-		stroke-linecap: round;
 	}
 
 	.wordmark {

@@ -1,5 +1,6 @@
 /** Shared brand tokens for social asset generators (LinkedIn, Facebook, OG). */
 
+import { buildMarkGroup } from './skaffu-mark.mjs';
 import { wrapSvgWithFonts } from './social-fonts.mjs';
 
 export { wrapSvgWithFonts };
@@ -75,6 +76,37 @@ export function titleLetterSpacingAttr(title) {
 	return title === 'Skaffu' ? ` letter-spacing="${TITLE_LETTER_SPACING}"` : '';
 }
 
+/** OG / share hero mark size (1200×630). */
+export const OG_MARK_SIZE = 108;
+
+/**
+ * Title as icon mark when title is "Skaffu", otherwise DM Sans text.
+ * @param {string} title
+ * @param {{
+ *   x: number;
+ *   y: number;
+ *   fontSize: number;
+ *   fill?: string;
+ *   textAnchor?: 'start' | 'middle' | 'end';
+ *   markSize?: number;
+ * }} opts — y is text baseline for text, or mark top-left when title is Skaffu
+ */
+export function renderTitleElement(title, opts) {
+	const { x, y, fontSize, fill = COLORS.title, textAnchor = 'start', markSize = OG_MARK_SIZE } = opts;
+
+	if (title === 'Skaffu') {
+		const markX =
+			textAnchor === 'middle' ? x - markSize / 2
+			: textAnchor === 'end' ? x - markSize
+			: x;
+		return buildMarkGroup({ x: markX, y, size: markSize });
+	}
+
+	const anchorAttr = textAnchor !== 'start' ? ` text-anchor="${textAnchor}"` : '';
+
+	return `<text x="${x}" y="${y}" fill="${fill}" font-family="${FONT}" font-size="${fontSize}" font-weight="${TITLE_WEIGHT}"${titleLetterSpacingAttr(title)}${anchorAttr}>${escapeXml(title)}</text>`;
+}
+
 /**
  * OG / share-hero layout body (1200×630).
  * @param {{ title?: string; subtitle?: string; tagline?: string; showPill?: boolean }} [opts]
@@ -87,11 +119,18 @@ export function buildOgSvgBody(opts = {}) {
 
 	const titleSize = 88;
 	const titleY = 280;
-	const subtitleY = 360;
+	const markY = titleY - OG_MARK_SIZE;
+	const subtitleY = title === 'Skaffu' ? 380 : 360;
 	const subtitleSize = 42;
 	const taglineY = 430;
 	const taglineSize = 32;
 	const pillY = 480;
+
+	const titleElement = renderTitleElement(title, {
+		x: 96,
+		y: title === 'Skaffu' ? markY : titleY,
+		fontSize: titleSize
+	});
 
 	const pill =
 		showPill ?
@@ -108,7 +147,7 @@ export function buildOgSvgBody(opts = {}) {
   <rect width="1200" height="630" fill="url(#bg)"/>
   <circle cx="980" cy="120" r="180" fill="${COLORS.primary}" opacity="0.08"/>
   <circle cx="180" cy="520" r="220" fill="${COLORS.primary}" opacity="0.06"/>
-  <text x="96" y="${titleY}" fill="${COLORS.title}" font-family="${FONT}" font-size="${titleSize}" font-weight="${TITLE_WEIGHT}"${titleLetterSpacingAttr(title)}>${escapeXml(title)}</text>
+  ${titleElement}
   <text x="96" y="${subtitleY}" fill="${COLORS.primary}" font-family="${FONT}" font-size="${subtitleSize}" font-weight="${SUBTITLE_WEIGHT}">${escapeXml(subtitle)}</text>
   <text x="96" y="${taglineY}" fill="${COLORS.subtitle}" font-family="${FONT}" font-size="${taglineSize}" font-weight="${BODY_WEIGHT}">${escapeXml(tagline)}</text>
   ${pill}`;

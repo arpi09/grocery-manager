@@ -11,9 +11,8 @@ import {
 	COVER_SLIDES,
 	FONT,
 	SUBTITLE_WEIGHT,
-	TITLE_WEIGHT,
 	escapeXml,
-	titleLetterSpacingAttr,
+	renderTitleElement,
 	wrapSvgWithFonts
 } from './social-brand.mjs';
 import { writeSvgAsPng } from './social-render.mjs';
@@ -35,14 +34,25 @@ const textX = width / 2;
  */
 function buildSvg(title, subtitle, showPill) {
 	const s = SCALE;
+	const markSize = 88 * s;
 	const titleSize =
 		title.length > 24 ? 34 * s : title.length > 18 ? 38 * s : title === 'Skaffu' ? 52 * s : 40 * s;
 	const titleY = showPill ? 280 * s : 300 * s;
-	const subtitleY = titleY + (title === 'Skaffu' ? 42 * s : 38 * s);
+	const markY = 200 * s;
+	const subtitleY =
+		title === 'Skaffu' ? markY + markSize + 16 * s : titleY + 38 * s;
 	const subtitleSize = 20 * s;
 	const pillW = 168 * s;
 	const pillH = 36 * s;
 	const pillY = 340 * s;
+
+	const titleElement = renderTitleElement(title, {
+		x: textX,
+		y: title === 'Skaffu' ? markY : titleY,
+		fontSize: titleSize,
+		textAnchor: 'middle',
+		markSize
+	});
 
 	const pill =
 		showPill ?
@@ -59,7 +69,7 @@ function buildSvg(title, subtitle, showPill) {
   <rect width="${width}" height="${height}" fill="url(#bg)"/>
   <circle cx="${980 * s}" cy="${80 * s}" r="${72 * s}" fill="${COLORS.primary}" opacity="0.08"/>
   <circle cx="${width - 88 * s}" cy="${height - 60 * s}" r="${72 * s}" fill="${COLORS.primary}" opacity="0.06"/>
-  <text x="${textX}" y="${titleY}" fill="${COLORS.title}" font-family="${FONT}" font-size="${titleSize}" font-weight="${TITLE_WEIGHT}"${titleLetterSpacingAttr(title)} text-anchor="middle">${escapeXml(title)}</text>
+  ${titleElement}
   <text x="${textX}" y="${subtitleY}" fill="${COLORS.subtitle}" font-family="${FONT}" font-size="${subtitleSize}" font-weight="${SUBTITLE_WEIGHT}" text-anchor="middle">${escapeXml(subtitle)}</text>
   ${pill}`;
 

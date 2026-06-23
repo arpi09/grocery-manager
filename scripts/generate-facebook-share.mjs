@@ -11,10 +11,10 @@ import {
 	COVER_SLIDES,
 	FONT,
 	SUBTITLE_WEIGHT,
-	TITLE_WEIGHT,
 	buildOgSvgBody,
 	escapeXml,
-	titleLetterSpacingAttr,
+	OG_MARK_SIZE,
+	renderTitleElement,
 	wrapSvgWithFonts
 } from './social-brand.mjs';
 import { writeSvgAsPng } from './social-render.mjs';
@@ -60,9 +60,16 @@ function buildSvg(title, subtitle, tagline, showPill) {
 
 	const titleSize = title === 'Skaffu' ? 88 : title.length > 24 ? 56 : title.length > 18 ? 64 : 72;
 	const titleY = 260;
-	const subtitleY = 340;
+	const markY = titleY - OG_MARK_SIZE;
+	const subtitleY = title === 'Skaffu' ? 360 : 340;
 	const subtitleSize = 36;
 	const pillY = 460;
+
+	const titleElement = renderTitleElement(title, {
+		x: 96,
+		y: title === 'Skaffu' ? markY : titleY,
+		fontSize: titleSize
+	});
 
 	const pill =
 		showPill ?
@@ -79,7 +86,7 @@ function buildSvg(title, subtitle, tagline, showPill) {
   <rect width="${width}" height="${height}" fill="url(#bg)"/>
   <circle cx="980" cy="120" r="180" fill="${COLORS.primary}" opacity="0.08"/>
   <circle cx="180" cy="520" r="220" fill="${COLORS.primary}" opacity="0.06"/>
-  <text x="96" y="${titleY}" fill="${COLORS.title}" font-family="${FONT}" font-size="${titleSize}" font-weight="${TITLE_WEIGHT}"${titleLetterSpacingAttr(title)}>${escapeXml(title)}</text>
+  ${titleElement}
   <text x="96" y="${subtitleY}" fill="${COLORS.subtitle}" font-family="${FONT}" font-size="${subtitleSize}" font-weight="${SUBTITLE_WEIGHT}">${escapeXml(subtitle)}</text>
   ${pill}`;
 
