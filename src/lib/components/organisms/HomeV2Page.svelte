@@ -3,12 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
-	import BrainHomeCard from '$lib/components/molecules/BrainHomeCard.svelte';
-	import WastePreventedCard from '$lib/components/molecules/WastePreventedCard.svelte';
-	import ReplenishmentSection from '$lib/components/organisms/ReplenishmentSection.svelte';
 	import HomeV2BriefingView from '$lib/components/organisms/HomeV2BriefingView.svelte';
-	import type { BrainScoreSnapshot } from '$lib/domain/brain-score';
-	import type { WastePreventedSnapshot } from '$lib/domain/waste-prevented';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 	import {
@@ -50,9 +45,6 @@
 		pantryUxV2Enabled?: boolean;
 		shoppingUxV2Enabled?: boolean;
 		loadFailed?: boolean;
-		brainScore?: BrainScoreSnapshot | null;
-		brainFeedbackV1?: boolean;
-		wastePrevented?: WastePreventedSnapshot | null;
 	}
 
 	let {
@@ -68,10 +60,7 @@
 		canWrite = false,
 		pantryUxV2Enabled = false,
 		shoppingUxV2Enabled = false,
-		loadFailed = false,
-		brainScore = null,
-		brainFeedbackV1 = false,
-		wastePrevented = null
+		loadFailed = false
 	}: Props = $props();
 
 	let acceptingReplenishment = $state(false);
@@ -175,22 +164,6 @@
 			{t('home.v6.error.loadFailed')}
 		</button>
 	{:else}
-		{#if brainScore && brainScore.score > 0}
-			<BrainHomeCard snapshot={brainScore} />
-		{/if}
-		{#if wastePrevented}
-			<WastePreventedCard snapshot={wastePrevented} />
-		{/if}
-		{#if intelligence.replenishment.length > 1}
-			<ReplenishmentSection
-				suggestions={intelligence.replenishment.slice(1)}
-				dedupeByKey={intelligence.dedupeByKey}
-				canEdit={canWrite}
-				surface="hem"
-				compact
-				brainFeedbackV1={brainFeedbackV1}
-			/>
-		{/if}
 		<HomeV2BriefingView
 			{summary}
 			{intelligence}
