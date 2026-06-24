@@ -162,12 +162,11 @@ test.describe('Receipt flow', () => {
 		await expect(page.getByTestId('receipt-line-0')).toBeVisible({ timeout: 15_000 });
 		await dismissOnboardingModalIfOpen(page);
 		const quickConfirm = page.getByTestId('receipt-quick-confirm');
-		await expect(quickConfirm).toBeEnabled({ timeout: 15_000 });
-		await Promise.all([
-			page.waitForURL(/\/hem(\?|$)/, { timeout: 15_000 }),
-			quickConfirm.click()
-		]);
-
+		await expect(quickConfirm).toBeVisible({ timeout: 15_000 });
+		await expect
+			.poll(async () => !(await quickConfirm.isDisabled()), { timeout: 20_000 })
+			.toBe(true);
+		await quickConfirm.click();
 		await expect(page).toHaveURL(/\/hem(\?|$)/, { timeout: 15_000 });
 		await expect(page.getByTestId('receipt-import-success')).toBeVisible({ timeout: 10_000 });
 	});

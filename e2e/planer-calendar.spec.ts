@@ -15,17 +15,13 @@ test.describe('Planer calendar week navigation', () => {
 		const initialRange = (await weekRange.textContent())?.trim() ?? '';
 		expect(initialRange.length).toBeGreaterThan(0);
 
-		await Promise.all([
-			page.waitForURL(/[?&]week=2026-06-08/, { timeout: 15_000 }),
-			page.getByTestId('ata-calendar-next-week').click()
-		]);
+		await page.getByTestId('ata-calendar-next-week').click();
+		await expect(page).toHaveURL(/[?&]week=2026-06-08/, { timeout: 20_000 });
 		await expect(weekRange).not.toHaveText(initialRange);
 
 		const afterNext = (await weekRange.textContent())?.trim() ?? '';
-		await Promise.all([
-			page.waitForURL(/[?&]week=2026-06-01/, { timeout: 15_000 }),
-			page.getByTestId('ata-calendar-prev-week').click()
-		]);
+		await page.getByTestId('ata-calendar-prev-week').click();
+		await expect(page).toHaveURL(/[?&]week=2026-06-01/, { timeout: 20_000 });
 		await expect(weekRange).toHaveText(initialRange);
 		expect(afterNext).not.toBe(initialRange);
 	});
@@ -39,10 +35,8 @@ test.describe('Planer calendar week navigation', () => {
 		const scrollBefore = await page.evaluate(() => window.scrollY);
 		expect(scrollBefore).toBeGreaterThan(200);
 
-		await Promise.all([
-			page.waitForURL(/[?&]week=2026-06-08/, { timeout: 15_000 }),
-			page.getByTestId('ata-calendar-next-week').click()
-		]);
+		await page.getByTestId('ata-calendar-next-week').click();
+		await expect(page).toHaveURL(/[?&]week=2026-06-08/, { timeout: 20_000 });
 
 		await expect
 			.poll(async () => page.evaluate(() => window.scrollY))

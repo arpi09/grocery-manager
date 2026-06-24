@@ -65,14 +65,14 @@ test.describe('Critical flows', () => {
 		await registerNewUser(page);
 		await expectOnboardingGuideVisible(page);
 		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Start with one thing|Börja med en sak/i);
+		await expectActivationScreenHeading(page, /Start with a receipt|Börja med ett kvitto/i);
 
 		await page.getByTestId('activation-progress-welcome').click();
 		await expectActivationScreenHeading(page, /Welcome to Skaffu|Välkommen till Skaffu/i);
 		await expect(page.getByTestId('activation-cta-secondary')).toHaveCount(0);
 
 		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Start with one thing|Börja med en sak/i);
+		await expectActivationScreenHeading(page, /Start with a receipt|Börja med ett kvitto/i);
 	});
 
 	test('activation onboarding scan-first happy path @deploy-critical', async ({ page }) => {
@@ -80,9 +80,9 @@ test.describe('Critical flows', () => {
 		await expectOnboardingGuideVisible(page);
 		await expectActivationScreenHeading(page, /Welcome to Skaffu|Välkommen till Skaffu/i);
 		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Start with one thing|Börja med en sak/i);
+		await expectActivationScreenHeading(page, /Start with a receipt|Börja med ett kvitto/i);
 		await page.getByTestId('activation-cta-primary').click();
-		await expect(page).toHaveURL(/\/scan(?:\?.*)?onboarding=activation/);
+		await expect(page).toHaveURL(/\/scan(?:\?.*)?mode=receipt/);
 		const itemName = `E2E activation ${Date.now()}`;
 		await createFridgeItemViaApi(page, itemName);
 		await page.goto('/hem');
