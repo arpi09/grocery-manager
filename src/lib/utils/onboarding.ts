@@ -185,7 +185,6 @@ export function completeOnboarding(userId?: string | null): void {
 
 	localStorage.setItem(storageKey(DISMISSED_SUFFIX, userId), '1');
 
-	markPostOnboardingSurveyPending(userId);
 	markPostOnboardingSharePending(userId);
 }
 
@@ -244,6 +243,7 @@ export function dismissPostOnboardingShare(userId?: string | null): void {
 
 	localStorage.removeItem(storageKey(POST_ONBOARDING_SHARE_PENDING_SUFFIX, userId));
 	localStorage.setItem(storageKey(POST_ONBOARDING_SHARE_DISMISSED_SUFFIX, userId), '1');
+	markPostOnboardingSurveyPending(userId);
 }
 
 /** Inkop-only — do not stack partner prompts on /hem with household briefing. */
@@ -279,10 +279,14 @@ export function clearPostOnboardingSurveyPending(userId?: string | null): void {
 	localStorage.removeItem(storageKey(POST_ONBOARDING_SURVEY_PENDING_SUFFIX, userId));
 }
 
-/** Skip or finish the tour — never show again for this version for this user on this device. */
-
+/** Skip the tour — never show again; do not queue survey/share prompts. */
 export function dismissOnboarding(userId?: string | null): void {
-	completeOnboarding(userId);
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	localStorage.setItem(storageKey(VERSION_SUFFIX, userId), String(ONBOARDING_VERSION));
+	localStorage.setItem(storageKey(DISMISSED_SUFFIX, userId), '1');
 }
 
 function clearUserOnboardingKeys(userId: string): void {

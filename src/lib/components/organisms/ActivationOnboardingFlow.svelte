@@ -340,7 +340,7 @@
 		if (!open) {
 			return;
 		}
-		return registerBlockingOverlay();
+		return registerBlockingOverlay('onboarding');
 	});
 </script>
 

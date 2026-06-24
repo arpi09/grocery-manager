@@ -60,24 +60,15 @@ export async function uploadReceiptFile(page: Page, file: UploadFile) {
 	await expect(page.getByTestId('receipt-file-input')).toBeAttached({ timeout: 15_000 });
 
 	const payload = toFilePayload(file);
-	const hookReady = page.waitForFunction(
+	const hasHook = await page.evaluate(
 		() =>
 			typeof (window as Window & { __hpE2eReceiptUpload?: unknown }).__hpE2eReceiptUpload ===
-			'function',
-		{ timeout: 15_000 }
+			'function'
 	);
 
 	const parseDone = page.waitForResponse(
 		(res) => res.url().includes('/api/receipt/parse') && res.request().method() === 'POST',
 		{ timeout: 25_000 }
-	);
-
-	await hookReady;
-
-	const hasHook = await page.evaluate(
-		() =>
-			typeof (window as Window & { __hpE2eReceiptUpload?: unknown }).__hpE2eReceiptUpload ===
-			'function'
 	);
 
 	if (hasHook) {

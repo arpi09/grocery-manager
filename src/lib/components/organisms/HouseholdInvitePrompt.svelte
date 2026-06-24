@@ -105,7 +105,7 @@
 			shownEventSent = false;
 			return;
 		}
-		return registerBlockingOverlay();
+		return registerBlockingOverlay('invite');
 	});
 
 	$effect(() => {

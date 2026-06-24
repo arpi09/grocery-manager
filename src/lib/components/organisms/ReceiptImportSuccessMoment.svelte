@@ -14,6 +14,7 @@
 		clearReceiptImportSuccessPending,
 		isReceiptImportToastPending,
 		readReceiptImportCompleted,
+		receiptImportToastMessage,
 		type ReceiptImportSessionFlag
 	} from '$lib/utils/receipt-import-session';
 	import {
@@ -22,12 +23,20 @@
 		ONBOARDING_PROGRESS_EVENT,
 		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
-	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
+	import {
+		canShowBlockingOverlay,
+		getBlockingOverlayCount,
+		OVERLAY_STACK_CHANGED_EVENT,
+		registerBlockingOverlay
+	} from '$lib/utils/overlay-stack';
+	import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import { getLocale } from '$lib/i18n';
 	import { SCAN_TOAST_NAME_PARAM, SCAN_TOAST_PARAM } from '$lib/utils/scan-toast';
 
 	let open = $state(false);
 	let viewedTracked = $state(false);
 	let session = $state<ReceiptImportSessionFlag | null>(null);
+	let overlayRevision = $state(0);
 
 	const userId = $derived(page.data.user?.id ?? null);
 	const memberCount = $derived(page.data.householdMemberCount ?? 0);
@@ -62,6 +71,36 @@
 			session = null;
 			return;
 		}
+
+		if (shouldShowOnboarding(userId) && !isActivationOnboardingFlowComplete(userId)) {
+			showClientToast(
+				receiptImportToastMessage(
+					getLocale(),
+					flag.itemsAdded,
+					{
+						estimatedDates: flag.estimatedDates,
+						locationCorrections: flag.locationCorrections,
+						rulesImproved: flag.rulesImproved
+					},
+					flag.linesWithPrice ?? 0
+				),
+				{ variant: 'success' }
+			);
+			clearReceiptImportSuccessPending();
+			if (browser) {
+				window.dispatchEvent(new Event(ONBOARDING_PROGRESS_EVENT));
+			}
+			open = false;
+			session = null;
+			return;
+		}
+
+		if (getBlockingOverlayCount() > 0 && !canShowBlockingOverlay('receipt-success')) {
+			session = flag;
+			open = false;
+			return;
+		}
+
 		session = flag;
 		open = true;
 		clearScanToastParams();
@@ -121,17 +160,27 @@
 		dismissMoment(false);
 	}
 
-	$effect(() => { if (browser) { void pathname; void userId; tryOpenMoment(); } });
+	$effect(() => { if (browser) { void pathname; void userId; void overlayRevision; tryOpenMoment(); } });
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+		const onOverlayChange = () => {
+			overlayRevision += 1;
+		};
+		window.addEventListener(OVERLAY_STACK_CHANGED_EVENT, onOverlayChange);
+		return () => window.removeEventListener(OVERLAY_STACK_CHANGED_EVENT, onOverlayChange);
+	});
 	$effect(() => {
 		if (!open || !session || viewedTracked) return;
 		viewedTracked = true;
 		void trackProductEvent('receipt_import_success_viewed', eventMetadata(session));
 	});
-	$effect(() => { if (!open) { viewedTracked = false; return; } return registerBlockingOverlay(); });
+	$effect(() => { if (!open) { viewedTracked = false; return; } return registerBlockingOverlay('receipt-success'); });
 </script>
 
 {#if open && session}
-	<Modal open={true} onClose={() => dismissMoment(true)} variant="sheet" dismissible={false} panelClass="receipt-import-success-panel" bodyClass="receipt-import-success-body" label={t('receiptImport.success.ariaLabel')} showSheetHandle={false} data-testid="receipt-import-success">
+	<Modal open={true} onClose={() => dismissMoment(true)} variant="sheet" dismissible={true} panelClass="receipt-import-success-panel" bodyClass="receipt-import-success-body" label={t('receiptImport.success.ariaLabel')} showSheetHandle={false} data-testid="receipt-import-success">
 		<div class="success-shell">
 			<div class="illus-slot"><ReceiptPantrySuccessIllustration counts={session.locationCounts} /></div>
 			<div class="copy-block">

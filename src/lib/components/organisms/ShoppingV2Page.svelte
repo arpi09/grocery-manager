@@ -65,6 +65,7 @@
 	let session = $state<ShoppingTripSession>(defaultShoppingTripSession());
 	let initializedHouseholdId = $state<string | null>(null);
 	let shopDeeplinkHandled = $state(false);
+	let quickParamHandled = $state(false);
 	let legacyOpen = $state(false);
 	let showQuickAdd = $state(false);
 	let acceptingKey = $state<string | null>(null);
@@ -108,6 +109,20 @@
 
 		const url = new URL(page.url);
 		url.searchParams.delete('mode');
+		const next = `${url.pathname}${url.search}${url.hash}`;
+		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
+	});
+
+	$effect(() => {
+		if (!browser || quickParamHandled || page.url.searchParams.get('quick') !== '1') {
+			return;
+		}
+
+		quickParamHandled = true;
+		showQuickAdd = true;
+
+		const url = new URL(page.url);
+		url.searchParams.delete('quick');
 		const next = `${url.pathname}${url.search}${url.hash}`;
 		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
 	});

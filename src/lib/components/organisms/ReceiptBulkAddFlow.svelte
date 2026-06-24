@@ -10,7 +10,8 @@
 	import { scanToastMessage } from '$lib/utils/scan-toast';
 	import { bindEmbeddedScanSubmit } from '$lib/utils/scan-embedded-submit';
 	import { page } from '$app/state';
-	import { recordReceiptActivation } from '$lib/utils/onboarding';
+	import { recordOnboardingScanSaveSync } from '$lib/utils/activation-scan-save';
+	import { recordReceiptActivation, shouldShowOnboarding } from '$lib/utils/onboarding';
 	import {
 		prepareReceiptFileForUpload,
 		RECEIPT_CAMERA_ACCEPT,
@@ -305,6 +306,27 @@
 
 	function countSelectedLinesWithPrice(): number {
 		return lines.filter((line, index) => selected[index] && line.unitPrice?.trim()).length;
+	}
+
+	function recordReceiptSaveActivation(userId: string | undefined) {
+		if (!userId) {
+			return;
+		}
+
+		if (shouldShowOnboarding(userId)) {
+			const items = buildReceiptLineContexts()
+				.filter((ctx) => ctx.selected)
+				.slice(0, 3)
+				.map((ctx) => ({
+					name: ctx.line.name,
+					location: ctx.lineLocation,
+					expiresOn: ctx.lineExpiresOn || null
+				}));
+			recordOnboardingScanSaveSync(userId, items);
+			return;
+		}
+
+		recordReceiptActivation(userId);
 	}
 
 	function buildReceiptImportSummary() {
@@ -703,7 +725,7 @@
 								importSource,
 								aggregateReceiptBrainStats(buildReceiptLineContexts(), qualityReport ?? undefined)
 							);
-							recordReceiptActivation(page.data.user?.id);
+							recordReceiptSaveActivation(page.data.user?.id);
 						},
 						syncReceiptBulkFormData
 					)}

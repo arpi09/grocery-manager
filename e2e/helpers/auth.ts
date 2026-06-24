@@ -156,6 +156,14 @@ export async function dismissCookieConsentIfOpen(page: Page) {
 	}
 }
 
+export async function dismissReceiptSuccessIfOpen(page: Page) {
+	const modal = page.getByTestId('receipt-import-success');
+	if (await modal.isVisible().catch(() => false)) {
+		await page.keyboard.press('Escape').catch(() => {});
+		await modal.waitFor({ state: 'hidden', timeout: 2_000 }).catch(() => {});
+	}
+}
+
 export async function dismissPostOnboardingShareIfOpen(page: Page) {
 	const skip = page.getByTestId('post-onboarding-share-skip');
 	if (await skip.isVisible().catch(() => false)) {
@@ -203,6 +211,7 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 	};
 	const hasBlockingOverlay = async () =>
 		(await modal.isVisible().catch(() => false)) ||
+		(await page.getByTestId('receipt-import-success').isVisible().catch(() => false)) ||
 		(await pageHintDismiss.isVisible().catch(() => false)) ||
 		(await page.getByTestId('post-onboarding-survey-skip').isVisible().catch(() => false)) ||
 		(await page.getByTestId('post-onboarding-share-skip').isVisible().catch(() => false)) ||
@@ -214,6 +223,7 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 		await clickIfVisible(pageHintDismiss);
 		await clickIfVisible(page.getByTestId('post-onboarding-share-skip'));
 		await clickIfVisible(page.getByTestId('post-onboarding-survey-skip'));
+		await dismissReceiptSuccessIfOpen(page);
 		await clickIfVisible(page.getByRole('button', { name: /^(Inte nu|Not now)$/i }));
 
 		if (await modal.isVisible().catch(() => false)) {

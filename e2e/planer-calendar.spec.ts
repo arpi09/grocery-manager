@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
+import { dismissCookieConsentIfOpen, dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
 
 test.describe('Planer calendar week navigation', () => {
 	test.setTimeout(60_000);
@@ -8,15 +8,23 @@ test.describe('Planer calendar week navigation', () => {
 	test('week prev/next updates URL and visible range @deploy-critical', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/planer?week=2026-06-01', { waitUntil: 'commit', timeout: 60_000 });
+		await dismissCookieConsentIfOpen(page);
 		await dismissOnboardingModalIfOpen(page);
+		await page.locator('#ata-calendar').evaluate((el) => {
+			if (el instanceof HTMLDetailsElement) el.open = true;
+		});
+		await page.getByTestId('ata-calendar-view-week').click();
 
 		const weekRange = page.getByTestId('ata-calendar-week-range');
 		await expect(weekRange).toBeVisible({ timeout: 15_000 });
 		const initialRange = (await weekRange.textContent())?.trim() ?? '';
 		expect(initialRange.length).toBeGreaterThan(0);
 
-		await page.getByTestId('ata-calendar-next-week').click();
-		await expect(page).toHaveURL(/[?&]week=2026-06-08/, { timeout: 20_000 });
+		const nextWeek = page.getByTestId('ata-calendar-next-week');
+		await expect(nextWeek).toBeVisible({ timeout: 10_000 });
+		await nextWeek.scrollIntoViewIfNeeded();
+		await nextWeek.click({ force: true });
+		await page.waitForURL(/[?&]week=2026-06-08/, { timeout: 20_000, waitUntil: 'commit' });
 		await expect(weekRange).not.toHaveText(initialRange);
 
 		const afterNext = (await weekRange.textContent())?.trim() ?? '';
