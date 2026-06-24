@@ -1,12 +1,13 @@
 <script lang="ts">
+	import type { Component } from 'svelte';
+	import type { IconProps } from '@lucide/svelte';
 	import {
 		BookOpen,
 		Check,
 		Home,
 		Package,
 		Receipt,
-		ShoppingCart,
-		type Icon
+		ShoppingCart
 	} from '@lucide/svelte';
 	import { ACTIVATION_PROGRESS_KEYS, ACTIVATION_SCREEN_COUNT } from '$lib/utils/onboarding-steps';
 	import type { ActivationProgressMilestone } from '$lib/utils/activation-onboarding-state';
@@ -36,7 +37,7 @@
 		shopping: 'onboarding.activation.progress.shopping'
 	};
 
-	const stepIcons: Record<ActivationProgressMilestone, Icon> = {
+	const stepIcons: Record<ActivationProgressMilestone, Component<IconProps>> = {
 		welcome: Home,
 		firstScan: Receipt,
 		pantryCreated: Package,
@@ -44,7 +45,7 @@
 		shopping: ShoppingCart
 	};
 
-	let activeNodeEl: HTMLButtonElement | null = $state(null);
+	const nodeRefs = $state<Partial<Record<ActivationProgressMilestone, HTMLButtonElement>>>({});
 
 	const activeKey = $derived(preview ?? current);
 	const activeStepIndex = $derived(
@@ -76,10 +77,11 @@
 
 	$effect(() => {
 		void activeKey;
-		if (!activeNodeEl) {
+		const el = activeKey ? nodeRefs[activeKey] : undefined;
+		if (!el) {
 			return;
 		}
-		activeNodeEl.scrollIntoView({
+		el.scrollIntoView({
 			behavior: 'smooth',
 			block: 'nearest',
 			inline: 'center'
@@ -129,7 +131,7 @@
 							? `${t(progressLabelKeys[key])} — ${t('onboarding.activation.progressStepDisabled')}`
 							: t(progressLabelKeys[key])}
 						data-testid={`activation-progress-${key}`}
-						bind:this={active ? activeNodeEl : undefined}
+						bind:this={nodeRefs[key]}
 						onclick={() => handleSelect(key)}
 					>
 						<span class="node-marker" aria-hidden="true">
