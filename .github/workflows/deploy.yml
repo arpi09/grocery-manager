@@ -701,6 +701,101 @@ jobs:
           fi
           echo "Webhook notify sent."
 
+  publish-github-release:
+    name: publish GitHub release
+    needs: [deploy, resolve-artifact]
+    if: >
+      always() &&
+      needs.deploy.result == 'success' &&
+      needs.resolve-artifact.result == 'success' &&
+      needs.deploy.outputs.skipped != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.resolve-artifact.outputs.deploy_sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Compute CalVer tag
+        id: calver
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag=$(node scripts/compute-calver.mjs)
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "CalVer tag: ${tag}"
+
+      - name: Generate release notes
+        id: notes
+        env:
+          DEPLOY_SHA: ${{ needs.resolve-artifact.outputs.deploy_sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          node scripts/generate-release-notes.mjs > release-notes.md
+          echo "notes_path=release-notes.md" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        env:
+          TAG: ${{ steps.calver.outputs.tag }}
+          DEPLOY_SHA: ${{ needs.resolve-artifact.outputs.deploy_sha }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "$TAG" \
+            --target "$DEPLOY_SHA" \
+            --title "$TAG" \
+            --notes-file release-notes.md
+          echo "Created release ${TAG} @ ${DEPLOY_SHA}"
+
+      - name: Update RELEASES.md on master
+        env:
+          CALVER_TAG: ${{ steps.calver.outputs.tag }}
+          DEPLOY_SHA: ${{ needs.resolve-artifact.outputs.deploy_sha }}
+          DEPLOY_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git fetch origin master
+          git checkout master
+          git pull --ff-only origin master
+          node scripts/releases-append-row.mjs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/RELEASES.md
+          if git diff --staged --quiet; then
+            echo "No RELEASES.md changes to commit."
+            exit 0
+          fi
+          git commit -m "docs(releases): ${CALVER_TAG} @ ${DEPLOY_SHA:0:8} [skip ci]"
+          git push origin master
+
+      - name: Release summary
+        if: always()
+        env:
+          TAG: ${{ steps.calver.outputs.tag }}
+          DEPLOY_SHA: ${{ needs.resolve-artifact.outputs.deploy_sha }}
+        run: |
+          echo "## GitHub Release" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **CalVer** | \`${TAG:-skipped}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **SHA** | \`${DEPLOY_SHA:0:8}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Index** | [docs/RELEASES.md](https://github.com/${{ github.repository }}/blob/master/docs/RELEASES.md) |" >> "$GITHUB_STEP_SUMMARY"
+
   verify-release:
     name: verify release completed
     needs: [gate, resolve-artifact, resolve-deploy-tier, quality-full, quality-reuse, e2e-critical, e2e-full, pre-deploy-verify, deploy]

@@ -1,0 +1,27 @@
+---
+description: PR-first workflow — branch, PR, merge; never direct push to master
+alwaysApply: true
+---
+
+# PR workflow (agents)
+
+**Alltid:** branch `feat/*` / `fix/*` → `gh pr create` → vänta grön `pr-gate / pr-gate` (+ E2E om core-loop) → merge.
+
+**Aldrig:** direkt push till `master` (undantag: dokumenterad hotfix med `hotfix_reason` i deploy).
+
+**Efter merge:** deploya inte — coordinator/användare kör deploy separat via Actions → **Deploy to production**.
+
+## Checklista
+
+1. `npm run quick:dev` lokalt (G0).
+2. Commit på feature/fix-branch.
+3. `gh pr create` mot `master` — fyll i PR-mallen (`.github/pull_request_template.md`).
+4. Vänta grön CI (`pr-gate / pr-gate`); core-loop paths kräver grön PR E2E.
+5. Merge PR — `changelog-on-merge` uppdaterar `docs/CHANGELOG.md` automatiskt.
+6. Deploy körs manuellt när det är dags — se [deploy-safety.mdc](./deploy-safety.mdc).
+
+## Relaterat
+
+- [docs/CI_CD.md](../../docs/CI_CD.md) — agent happy path
+- [docs/CHANGELOG.md](../../docs/CHANGELOG.md) — vad som mergats
+- [docs/RELEASES.md](../../docs/RELEASES.md) — CalVer efter deploy

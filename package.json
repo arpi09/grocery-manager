@@ -76,6 +76,7 @@
 		"gate:fast": "npm run lint && npm run check:locales && npm run check:server-imports && npm run check:codebase-map && npx cross-env PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA npm run check && npm test",
 		"pr:gate": "npm run gate:fast && npm run test:receipt-fixtures && npx cross-env USE_PGLITE=true npm run test:integration && npx cross-env DATABASE_URL=postgresql://pantry:pantry@localhost:5432/pantry USE_PGLITE=true PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA npm run build && npm run check:client-bundle",
 		"ci:path-tier": "node scripts/ci-path-tier.mjs",
+		"release:notes": "node scripts/generate-release-notes.mjs",
 		"test:e2e:critical": "svelte-kit sync && playwright test -c playwright.critical.config.ts",
 		"test:e2e:full": "svelte-kit sync && playwright test",
 		"deploy:fast": "npm run pr:gate && npm run test:e2e:critical && npm run smoke:pre-deploy",

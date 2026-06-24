@@ -1,0 +1,51 @@
+# Append merged PR to CHANGELOG on merge to master (~30s, docs-only)
+
+name: Changelog on merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [master, main]
+
+permissions:
+  contents: write
+
+jobs:
+  changelog:
+    name: update CHANGELOG
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Append PR to Unreleased
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: node scripts/changelog-append-pr.mjs
+
+      - name: Commit CHANGELOG
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/CHANGELOG.md
+          if git diff --staged --quiet; then
+            echo "No CHANGELOG changes to commit."
+            exit 0
+          fi
+          git commit -m "docs(changelog): PR #${PR_NUMBER} [skip ci]"
+          git push
