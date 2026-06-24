@@ -1,34 +1,13 @@
 @import './lib/design/brand-colors.generated.css';
+@import './lib/design/brand-tokens.generated.css';
 
 :root {
-	--radius-sm: 8px;
-	--radius-md: 12px;
-	--radius-lg: 16px;
-	--shadow-sm: 0 1px 3px rgba(31, 42, 36, 0.08);
-	--shadow-md: 0 4px 16px rgba(31, 42, 36, 0.1);
-	--font: 'DM Sans', system-ui, sans-serif;
-	/* Typography scale — see docs/BRAND.md */
-	--font-size-display: clamp(1.5rem, 4vw, 1.85rem);
-	--font-size-body: 1rem;
-	--font-size-body-md: 0.9375rem;
-	--font-size-body-sm: 0.875rem;
-	--font-size-label: 0.75rem;
-	--font-weight-display: 700;
-	--font-weight-label: 600;
-	--letter-spacing-label: 0.04em;
-	--line-height-body: 1.5;
 	--focus-ring-color: var(--color-accent);
 	--focus-ring-width: 2px;
 	--focus-ring-offset: 2px;
-	--space-xs: 0.25rem;
-	--space-sm: 0.5rem;
-	--space-md: 1rem;
-	--space-lg: 1.5rem;
-	--space-xl: 2rem;
 	/* Page rhythm — layout shell, headers, stacked sections */
 	--page-padding-x: var(--space-md);
 	--page-section-gap: var(--space-lg);
-	--touch-target-min: 2.75rem;
 	/* Browser tab: 0 — Safari already clears the home indicator. Standalone PWA: env() below. */
 	--safe-area-top: 0px;
 	--safe-area-bottom: 0px;
@@ -54,7 +33,6 @@
 	--nav-border: var(--color-border);
 	--nav-active-bg: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface-muted));
 	--nav-header-shadow: var(--shadow-sm);
-	--nav-bottom-shadow: 0 -4px 24px rgba(31, 42, 36, 0.06);
 	--z-sticky-chrome: 50;
 	--z-nav-header: 60;
 	--z-nav-bottom: 70;
@@ -71,9 +49,6 @@
 
 html[data-theme='dark'] {
 	color-scheme: dark;
-	--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
-	--shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-	--nav-bottom-shadow: 0 -4px 24px rgba(0, 0, 0, 0.28);
 }
 
 *,

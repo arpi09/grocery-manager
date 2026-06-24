@@ -1,5 +1,7 @@
-/** Skaffu ↔ SMUI token bridge — keep in sync with src/theme/_variables.scss and src/app.css */
+/** Skaffu ↔ SMUI token bridge — keep in sync with src/theme/_variables.scss and brand tokens */
 
+import { brandRadius } from '$lib/design/brand/layout';
+import { BRAND_FONT_STACK } from '$lib/design/brand/typography';
 import { DEFAULT_PALETTE_TRACK, LOCKED_LOGO_CORE, mergePalette } from '$lib/design/brand-colors';
 
 const activePalette = mergePalette(DEFAULT_PALETTE_TRACK);
@@ -15,10 +17,10 @@ export const skaffuSmuiTokens = {
 		onSurfaceMuted: activePalette.light.textMuted,
 		error: activePalette.light.danger,
 		border: activePalette.light.border,
-		radiusSm: '8px',
-		radiusMd: '12px',
-		radiusLg: '16px',
-		fontFamily: "'DM Sans', system-ui, sans-serif"
+		radiusSm: brandRadius.sm,
+		radiusMd: brandRadius.md,
+		radiusLg: brandRadius.lg,
+		fontFamily: BRAND_FONT_STACK
 	},
 	dark: {
 		primary: activePalette.dark.primary,
@@ -30,10 +32,10 @@ export const skaffuSmuiTokens = {
 		onSurfaceMuted: activePalette.dark.textMuted,
 		error: activePalette.dark.danger,
 		border: activePalette.dark.border,
-		radiusSm: '8px',
-		radiusMd: '12px',
-		radiusLg: '16px',
-		fontFamily: "'DM Sans', system-ui, sans-serif"
+		radiusSm: brandRadius.sm,
+		radiusMd: brandRadius.md,
+		radiusLg: brandRadius.lg,
+		fontFamily: BRAND_FONT_STACK
 	}
 } as const;
 

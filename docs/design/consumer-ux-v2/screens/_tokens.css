@@ -1,4 +1,4 @@
-/* Skaffu design tokens — sourced from src/app.css */
+/* DEPRECATED static snapshot — use npm run brand:css → src/lib/design/brand-tokens.generated.css */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
 
 :root {
@@ -9,14 +9,14 @@
 	--color-text: #1f2a24;
 	--color-text-muted: #4a5850;
 	--color-primary: #2c4a3e;
-	--color-primary-hover: #325a42;
+	--color-primary-hover: #243d32;
 	--color-on-primary: #ffffff;
-	--color-accent: #c8a96e;
-	--color-danger: #b54a4a;
-	--color-warning: #9a6700;
-	--color-fridge: #4a8fb8;
-	--color-freezer: #6b7fd4;
-	--color-cupboard: #c17f4a;
+	--color-accent: #d4a853;
+	--color-danger: #c44d4d;
+	--color-warning: #c9870a;
+	--color-fridge: #056B52;
+	--color-freezer: #3F4F63;
+	--color-cupboard: #A05228;
 	--radius-sm: 8px;
 	--radius-md: 12px;
 	--radius-lg: 16px;

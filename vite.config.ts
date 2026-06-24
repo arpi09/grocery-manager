@@ -2,15 +2,21 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import { defineConfig } from 'vitest/config';
+import { buildGoogleFontsCssUrl } from './src/lib/design/brand/typography';
 import { BRAND_BG, BRAND_PRIMARY, BRAND_PRIMARY_DARK, PWA_ICON_VERSION } from './src/lib/design/brand-colors';
+
+const GOOGLE_FONTS_URL_RE =
+	/href="https:\/\/fonts\.googleapis\.com\/css2\?family=DM\+Sans[^"]*"/;
 
 function brandThemeColorPlugin() {
 	return {
 		name: 'brand-theme-color',
 		transformIndexHtml(html: string) {
+			const fontsUrl = buildGoogleFontsCssUrl();
 			return html
 				.replace('#2c4a3e', BRAND_PRIMARY)
-				.replace('#4d8f68', BRAND_PRIMARY_DARK);
+				.replace('#4d8f68', BRAND_PRIMARY_DARK)
+				.replace(GOOGLE_FONTS_URL_RE, `href="${fontsUrl}"`);
 		}
 	};
 }

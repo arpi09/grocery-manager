@@ -217,7 +217,7 @@
 			),
 			var(--color-bg);
 		color: var(--color-text);
-		font-family: var(--font-sans, system-ui, sans-serif);
+		font-family: var(--font, system-ui, sans-serif);
 	}
 
 	.share-shell {

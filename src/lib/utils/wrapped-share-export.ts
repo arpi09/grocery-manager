@@ -1,3 +1,4 @@
+import { rgbaFromBrandText } from '$lib/design/brand/layout';
 import { DEFAULT_PALETTE_TRACK, mergePalette } from '$lib/design/brand-colors';
 
 const SHARE_PALETTE = mergePalette(DEFAULT_PALETTE_TRACK).light;
@@ -92,7 +93,7 @@ export async function renderWrappedShareCardPng(
 	ctx.roundRect(120, 1180, SHARE_WIDTH - 240, 420, 36);
 	ctx.stroke();
 
-	ctx.fillStyle = 'rgba(31, 42, 36, 0.7)';
+	ctx.fillStyle = rgbaFromBrandText(0.7);
 	ctx.font = '500 38px system-ui, -apple-system, Segoe UI, sans-serif';
 	const footerLines = wrapText(ctx, labels.footer, SHARE_WIDTH - 200);
 	footerLines.forEach((line, index) => {

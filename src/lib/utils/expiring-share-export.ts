@@ -1,5 +1,6 @@
 import { formatExpiryDate } from '$lib/domain/expiry';
 import type { Locale } from '$lib/i18n/locale';
+import { rgbaFromBrandText } from '$lib/design/brand/layout';
 import { DEFAULT_PALETTE_TRACK, mergePalette } from '$lib/design/brand-colors';
 
 const SHARE_PALETTE = mergePalette(DEFAULT_PALETTE_TRACK).light;
@@ -149,7 +150,7 @@ export async function renderExpiringShareCardPng(
 	for (const [index, item] of labels.items.entries()) {
 		const y = listTop + index * rowHeight;
 
-		ctx.fillStyle = 'rgba(31, 42, 36, 0.06)';
+		ctx.fillStyle = rgbaFromBrandText(0.06);
 		ctx.beginPath();
 		ctx.roundRect(100, y - 8, SHARE_WIDTH - 200, rowHeight - 16, 20);
 		ctx.fill();
@@ -168,7 +169,7 @@ export async function renderExpiringShareCardPng(
 	if (labels.overflowText) {
 		const overflowY = listTop + labels.items.length * rowHeight + 24;
 		ctx.textAlign = 'center';
-		ctx.fillStyle = 'rgba(31, 42, 36, 0.55)';
+		ctx.fillStyle = rgbaFromBrandText(0.55);
 		ctx.font = '500 36px system-ui, -apple-system, Segoe UI, sans-serif';
 		ctx.fillText(labels.overflowText, SHARE_WIDTH / 2, overflowY);
 	}
@@ -180,7 +181,7 @@ export async function renderExpiringShareCardPng(
 	ctx.stroke();
 
 	ctx.textAlign = 'center';
-	ctx.fillStyle = 'rgba(31, 42, 36, 0.7)';
+	ctx.fillStyle = rgbaFromBrandText(0.7);
 	ctx.font = '500 38px system-ui, -apple-system, Segoe UI, sans-serif';
 	const footerLines = wrapText(ctx, labels.footer, SHARE_WIDTH - 200);
 	footerLines.forEach((line, index) => {

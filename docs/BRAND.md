@@ -9,10 +9,13 @@ Design reference for UI, copy tone, and component styling. **Hex values live onl
 | Layer | Source |
 |-------|--------|
 | Hex source of truth | `brand-colors.ts` — `LOCKED_LOGO_CORE` + per-track semantics |
+| Typography & layout | `src/lib/design/brand/typography.ts`, `layout.ts` |
 | Active track | `BRAND_PALETTE` env (default **`fresh`**) → `npm run brand:css` |
-| App tokens | `@import brand-colors.generated.css` in `src/app.css` |
+| App color tokens | `@import brand-colors.generated.css` in `src/app.css` |
+| App typography/layout | `@import brand-tokens.generated.css` in `src/app.css` |
 | SMUI SCSS | `src/theme/brand-variables.generated.scss` (imported from `_variables.scss`) |
-| CI guard | `npm run check:brand-hex` — fails on hex outside allowed files |
+| Social scripts | `scripts/brand-tokens.generated.mjs` (from generator) |
+| CI guard | `check:brand-hex`, `check:brand-font` in `gate:fast` |
 
 ## Locked logo colors (all tracks)
 
@@ -70,6 +73,22 @@ Generated into `:root` / `html[data-theme='dark']`:
 | Location chips | `--color-fridge` / `--color-freezer` / `--color-cupboard` |
 | Learning / AI badge | `--color-learning-ai` + gradient |
 
+## Typography & layout
+
+Defined in `src/lib/design/brand/typography.ts` and `layout.ts`, generated to `brand-tokens.generated.css`.
+
+| Token | Value |
+|-------|-------|
+| `--font` | DM Sans stack |
+| `--font-size-display` | clamp 1.5–1.85rem |
+| `--font-size-body` | 1rem |
+| `--font-size-body-sm` | 0.875rem |
+| `--font-size-label` | 0.75rem |
+| `--radius-sm/md/lg` | 8 / 12 / 16px |
+| `--space-xs…xl` | 0.25–2rem scale |
+
+Email uses `BRAND_FONT_STACK_EMAIL` (Segoe UI fallback) from typography.ts.
+
 ## Voice & positioning
 
 **A. Hemma i köket** — warm surfaces, domestic utility. **B touches** — clearer typography hierarchy on dense screens.
@@ -83,10 +102,12 @@ See existing sections in this doc for `--font-size-*`, `Button` variants, modal 
 
 ## Files to touch for brand changes
 
-1. `src/lib/design/brand-colors.ts` — only place to edit hex
-2. `npm run brand:css` — regenerates CSS/SCSS + locked SVGs
-3. `docs/BRAND.md` (this file)
-4. `/brand` page for visual QA
+1. `src/lib/design/brand-colors.ts` — hex only
+2. `src/lib/design/brand/typography.ts` — fonts and scale
+3. `src/lib/design/brand/layout.ts` — radius, space, shadows
+4. `npm run brand:css` — regenerates CSS/SCSS, manifest, social mjs, locked SVGs
+5. `docs/BRAND.md` (this file)
+6. `/brand` page for visual QA
 
 ## Social & OG
 
