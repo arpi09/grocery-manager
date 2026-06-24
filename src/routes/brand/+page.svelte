@@ -4,12 +4,32 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import {
+		brandFontSizes,
+		brandFontWeights,
+		BRAND_FONT_FAMILY,
+		BRAND_FONT_STACK,
+	} from '$lib/design/brand/typography';
+	import { brandRadius, brandSpace } from '$lib/design/brand/layout';
+	import {
 		DEFAULT_PALETTE_TRACK,
 		getLearningAiGradientStops,
 		LOCKED_LOGO_CORE,
 		mergePalette,
+		PWA_ICON_VERSION,
 		type BrandColorMode
 	} from '$lib/design/brand-colors';
+
+	const typographyRows = [
+		{ label: 'display', token: '--font-size-display', value: brandFontSizes.display, sampleClass: 'type-display' },
+		{ label: 'body', token: '--font-size-body', value: brandFontSizes.body, sampleClass: 'type-body' },
+		{ label: 'body-sm', token: '--font-size-body-sm', value: brandFontSizes.bodySm, sampleClass: 'type-body-sm' },
+		{ label: 'label', token: '--font-size-label', value: brandFontSizes.label, sampleClass: 'type-label' }
+	];
+
+	const layoutRows = [
+		{ label: 'radius sm/md/lg', value: `${brandRadius.sm} / ${brandRadius.md} / ${brandRadius.lg}` },
+		{ label: 'space md/lg', value: `${brandSpace.md} / ${brandSpace.lg}` }
+	];
 
 	let mode = $state<BrandColorMode>('light');
 
@@ -118,6 +138,35 @@
 		<div class="learning-gradient" style={`background: linear-gradient(110deg, ${learningGradient})`}>
 			<span>learningAi gradient</span>
 		</div>
+	</section>
+
+	<section class="panel">
+		<h2>Typografi</h2>
+		<p class="hint">
+			Källa: <code>src/lib/design/brand/typography.ts</code> · {BRAND_FONT_FAMILY} · Google Fonts vikter
+			{brandFontWeights.body}/{brandFontWeights.medium}/{brandFontWeights.semibold}/{brandFontWeights.display}
+		</p>
+		<p class="meta-line"><code>{BRAND_FONT_STACK}</code></p>
+		<div class="type-samples">
+			{#each typographyRows as row (row.token)}
+				<div class="type-row">
+					<span class={row.sampleClass}>{row.label}</span>
+					<code>{row.token}</code>
+					<span class="meta">{row.value}</span>
+				</div>
+			{/each}
+		</div>
+	</section>
+
+	<section class="panel">
+		<h2>Layout</h2>
+		<p class="hint">Källa: <code>src/lib/design/brand/layout.ts</code> · PWA icon v{PWA_ICON_VERSION}</p>
+		<ul class="layout-list">
+			{#each layoutRows as row (row.label)}
+				<li><strong>{row.label}</strong> — {row.value}</li>
+			{/each}
+		</ul>
+		<p class="meta-line shadows">Shadow: <code>--shadow-sm</code> / <code>--shadow-md</code></p>
 	</section>
 
 	<section class="panel">
@@ -300,5 +349,55 @@
 	.cupboard {
 		background: color-mix(in srgb, var(--color-cupboard) 18%, var(--color-surface));
 		color: var(--color-cupboard);
+	}
+
+	.type-samples {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
+	}
+
+	.type-row {
+		display: grid;
+		grid-template-columns: 1fr auto auto;
+		gap: var(--space-sm);
+		align-items: baseline;
+	}
+
+	.type-display {
+		font-size: var(--font-size-display);
+		font-weight: var(--font-weight-display);
+	}
+
+	.type-body {
+		font-size: var(--font-size-body);
+	}
+
+	.type-body-sm {
+		font-size: var(--font-size-body-sm);
+	}
+
+	.type-label {
+		font-size: var(--font-size-label);
+		font-weight: var(--font-weight-label);
+		letter-spacing: var(--letter-spacing-label);
+		text-transform: uppercase;
+	}
+
+	.meta-line {
+		margin: 0 0 var(--space-sm);
+		font-size: var(--font-size-body-sm);
+		color: var(--color-text-muted);
+	}
+
+	.meta {
+		font-size: var(--font-size-body-sm);
+		color: var(--color-text-muted);
+	}
+
+	.layout-list {
+		margin: 0;
+		padding-left: 1.25rem;
+		font-size: var(--font-size-body-sm);
 	}
 </style>

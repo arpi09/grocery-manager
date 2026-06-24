@@ -1,5 +1,6 @@
 import type { Locale } from '$lib/i18n/locale';
 import { translate } from '$lib/i18n/messages';
+import { BRAND_FONT_STACK_EMAIL } from '$lib/design/brand/typography';
 import { LOCKED_LOGO_CORE } from '$lib/design/brand-colors';
 
 /** Brand tokens aligned with locked logo core (light) — inline for email client compatibility. */
@@ -117,7 +118,7 @@ export function buildBrandedEmailHtml(options: BuildBrandedEmailHtmlOptions): st
   </style>
   <![endif]-->
 </head>
-<body style="margin:0;padding:0;background-color:${EMAIL.bg};font-family:'Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+<body style="margin:0;padding:0;background-color:${EMAIL.bg};font-family:${BRAND_FONT_STACK_EMAIL};-webkit-font-smoothing:antialiased;">
   <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">${safePreheader}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</div>
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:${EMAIL.bg};">
     <tr>
@@ -162,7 +163,7 @@ export function buildOwnerEmailShellHtml(options: {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${safeTitle}</title>
   <style>
-    body { font-family: 'Segoe UI', system-ui, sans-serif; color: ${EMAIL.text}; background: ${EMAIL.bg}; margin: 0; padding: 24px 16px; }
+    body { font-family: ${BRAND_FONT_STACK_EMAIL}; color: ${EMAIL.text}; background: ${EMAIL.bg}; margin: 0; padding: 24px 16px; }
     .card { max-width: 640px; margin: 0 auto; background: ${EMAIL.surface}; border: 1px solid ${EMAIL.border}; border-radius: 16px; overflow: hidden; }
     .header { background: ${EMAIL.primary}; color: ${EMAIL.onPrimary}; padding: 24px 28px; }
     .header h1 { margin: 0 0 8px; font-size: 22px; }

@@ -37,7 +37,11 @@
 			"files": [
 				{
 					"name": "receipt",
-					"accept": ["application/pdf", "image/*", "application/pdf,.pdf"]
+					"accept": [
+						"application/pdf",
+						"image/*",
+						"application/pdf,.pdf"
+					]
 				}
 			]
 		}

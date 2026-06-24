@@ -1,4 +1,5 @@
 import type { AppErrorSummary } from '$lib/domain/error-log';
+import { BRAND_FONT_STACK_EMAIL } from '$lib/design/brand/typography';
 import { BRAND_BG, BRAND_PRIMARY, LOCKED_LOGO_CORE } from '$lib/design/brand-colors';
 
 const EMAIL = LOCKED_LOGO_CORE.light;
@@ -60,7 +61,7 @@ export function buildErrorAlertEmailContent(options: {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${escapeHtml(subject)}</title>
   <style>
-    body { font-family: 'Segoe UI', system-ui, sans-serif; color: ${EMAIL.text}; background: ${BRAND_BG}; margin: 0; padding: 24px 16px; }
+    body { font-family: ${BRAND_FONT_STACK_EMAIL}; color: ${EMAIL.text}; background: ${BRAND_BG}; margin: 0; padding: 24px 16px; }
     .card { max-width: 640px; margin: 0 auto; background: ${EMAIL.surface}; border: 1px solid ${EMAIL.border}; border-radius: 16px; overflow: hidden; }
     .header { background: ${BRAND_PRIMARY}; color: ${EMAIL.onPrimary}; padding: 24px 28px; }
     .header-brand { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.85; }

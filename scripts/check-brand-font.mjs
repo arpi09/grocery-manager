@@ -1,6 +1,6 @@
 /**
- * Fail if hex colors appear outside brand-colors.ts and generated brand artifacts.
- * Run: node scripts/check-brand-hex.mjs
+ * Fail if brand font family or Google Fonts URLs appear outside allowed brand files.
+ * Run: node scripts/check-brand-font.mjs
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, dirname, relative } from 'node:path';
@@ -8,41 +8,35 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-const HEX_RE = /#[0-9a-fA-F]{3,8}\b/g;
+const FONT_RE = /DM Sans|fonts\.googleapis\.com/g;
 
 const ALLOWED_FILES = new Set([
-	'src/lib/design/brand-colors.ts',
-	'src/lib/design/brand-colors.generated.css',
+	'src/lib/design/brand/typography.ts',
 	'src/lib/design/brand-tokens.generated.css',
-	'src/theme/brand-variables.generated.scss',
-	'src/theme/dark/brand-variables.generated.scss',
-	'local/brand-palette-preview.html',
 	'src/app.html',
-	'src/lib/components/molecules/GoogleSignInButton.svelte',
-	'static/favicon.svg',
+	'scripts/social-fonts.mjs',
+	'scripts/brand-tokens.generated.mjs',
+	'scripts/generate-brand-css.mts',
+	'scripts/check-brand-font.mjs',
+	'scripts/generate-og-image.mjs',
+	'src/lib/server/security-headers.ts',
 	'static/smui.css',
-	'static/smui-dark.css'
+	'static/smui-dark.css',
+	'docs/design/consumer-ux-v2/screens/_tokens.css'
 ]);
 
 const ALLOWED_PREFIXES = [
-	'static/pwa/',
 	'scripts/social-',
-	'src/lib/design/brand/',
 	'scripts/generate-brand-',
-	'scripts/generate-pwa-icons.mjs',
-	'scripts/generate-store-icons.mjs',
-	'scripts/skaffu-mark.mjs',
-	'scripts/migrate-brand-hex.mjs',
-	'scripts/brand-tokens.generated.mjs',
-	'scripts/releases-append-row.mjs'
+	'local/brand-palette-preview.html'
 ];
 
-const SCAN_EXTENSIONS = /\.(svelte|css|scss|ts|js|mjs|html|svg)$/;
+const SCAN_EXTENSIONS = /\.(svelte|css|scss|ts|js|mjs|html)$/;
 
 function isAllowed(relPath) {
 	const normalized = relPath.replace(/\\/g, '/');
 	if (ALLOWED_FILES.has(normalized)) return true;
-	if (ALLOWED_PREFIXES.some((p) => normalized.startsWith(p) || normalized.endsWith(p))) return true;
+	if (ALLOWED_PREFIXES.some((p) => normalized.startsWith(p))) return true;
 	if (normalized.includes('.test.') || normalized.includes('.integration.test.')) return true;
 	if (normalized.endsWith('.generated.css') || normalized.endsWith('.generated.scss')) return true;
 	return false;
@@ -71,18 +65,18 @@ for (const scanRoot of ['src', 'scripts', 'static', 'e2e']) {
 		if (isAllowed(rel)) continue;
 
 		const text = readFileSync(file, 'utf8');
-		const matches = [...text.matchAll(HEX_RE)];
-		if (matches.length === 0) continue;
+		if (!FONT_RE.test(text)) continue;
 
-		const unique = [...new Set(matches.map((m) => m[0]))];
-		errors.push(`${rel}: ${unique.length} hex value(s) — ${unique.slice(0, 5).join(', ')}${unique.length > 5 ? '…' : ''}`);
+		const hits = [...text.matchAll(FONT_RE)].map((m) => m[0]);
+		const unique = [...new Set(hits)];
+		errors.push(`${rel}: ${unique.join(', ')}`);
 	}
 }
 
 if (errors.length > 0) {
-	console.error('Brand hex check failed — hex must only live in brand-colors.ts (+ generated files):\n');
+	console.error('Brand font check failed — define fonts in src/lib/design/brand/typography.ts:\n');
 	for (const err of errors) console.error(`  ${err}`);
 	process.exit(1);
 }
 
-console.log('Brand hex check passed.');
+console.log('Brand font check passed.');

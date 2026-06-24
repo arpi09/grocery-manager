@@ -1,29 +1,18 @@
 /** Shared brand tokens for social asset generators (LinkedIn, Facebook, OG). */
 
+import {
+	COLORS,
+	FONT,
+	TITLE_LETTER_SPACING,
+	TITLE_WEIGHT,
+	SUBTITLE_WEIGHT,
+	BODY_WEIGHT,
+	PRIMARY
+} from './brand-tokens.generated.mjs';
 import { buildMarkGroup } from './skaffu-mark.mjs';
 import { wrapSvgWithFonts } from './social-fonts.mjs';
 
-export { wrapSvgWithFonts };
-
-export const PRIMARY = '#2c4a3e';
-
-export const COLORS = {
-	bgStart: '#f7f5f0',
-	bgEnd: '#e8f0ea',
-	primary: PRIMARY,
-	title: '#1f2a24',
-	subtitle: '#4a5850',
-	white: '#ffffff'
-};
-
-/** Exact family name for SVG text — must match @font-face in social-fonts.mjs */
-export const FONT = 'DM Sans';
-
-export const TITLE_WEIGHT = 700;
-export const SUBTITLE_WEIGHT = 600;
-export const BODY_WEIGHT = 400;
-/** Wordmark letter-spacing — matches marketing hero */
-export const TITLE_LETTER_SPACING = '-0.02em';
+export { wrapSvgWithFonts, FONT, TITLE_WEIGHT, SUBTITLE_WEIGHT, BODY_WEIGHT, TITLE_LETTER_SPACING, PRIMARY, COLORS };
 
 /** Cover/share slide copy — synced with src/lib/marketing/content.ts landing */
 export const COVER_SLIDES = [
