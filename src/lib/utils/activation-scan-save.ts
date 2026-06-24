@@ -29,6 +29,7 @@ export async function recordOnboardingScanSave(
 		.map((item) => ({
 			name: item.name.trim(),
 			locationLabel: locationLabel(locale, item.location),
+			location: item.location,
 			expiresOn: item.expiresOn ?? null
 		}));
 
@@ -56,6 +57,7 @@ export function recordOnboardingScanSaveSync(
 		.map((item) => ({
 			name: item.name.trim(),
 			locationLabel: locationLabel(locale, item.location),
+			location: item.location,
 			expiresOn: item.expiresOn ?? null
 		}));
 

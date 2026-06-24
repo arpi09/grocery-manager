@@ -105,7 +105,8 @@ describe('drizzle migrations', () => {
 	'0068_market_v03_trust.sql',
 	'0069_market_v04_pricing.sql',
 	'0070_brain_v2.sql',
-	'0071_brain_proactive_push.sql'
+	'0071_brain_proactive_push.sql',
+	'0072_onboarding_setup_telemetry.sql'
 		];
 		expect(pgliteFiles).toEqual(sqlFiles);
 	});

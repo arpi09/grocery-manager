@@ -393,6 +393,8 @@ export const productEventTable = pgTable(
 				'onboarding_inventory_created',
 				'onboarding_brain_viewed',
 				'onboarding_shopping_viewed',
+				'onboarding_notifications_prompted',
+				'onboarding_kivra_tapped',
 				'onboarding_completed',
 				'first_scan',
 				'pwa_banner_dismiss',

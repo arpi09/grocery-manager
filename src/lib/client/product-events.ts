@@ -11,6 +11,8 @@ const CLIENT_EVENT_TYPES = [
 	'onboarding_inventory_created',
 	'onboarding_brain_viewed',
 	'onboarding_shopping_viewed',
+	'onboarding_notifications_prompted',
+	'onboarding_kivra_tapped',
 	'onboarding_completed',
 	'pwa_banner_dismiss',
 	'pwa_banner_install_click',

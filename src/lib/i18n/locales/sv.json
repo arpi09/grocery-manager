@@ -2915,39 +2915,49 @@
 			"progressStepDisabled": "Inte tillgängligt än",
 			"welcome": {
 				"title": "Välkommen till Skaffu",
-				"body": "Vi börjar enkelt. Skanna några saker från ditt kök så hjälper Skaffu er att hålla koll på det du redan har hemma. Mindre gissande. Mindre svinn. Färre dubbelköp.",
+				"body": "Börja med ett kvitto eller några varor hemma. Resten av hushållet kan hänga på senare.",
 				"cta": "Kom igång"
 			},
 			"scan": {
-				"title": "Börja med ett kvitto",
-				"body": "Ladda upp PDF från Kivra, ICA eller din butik — eller fota papperskvitto. Ett kvitto fyller lagret på under två minuter.",
+				"title": "Importera ett kvitto",
+				"body": "PDF från Kivra eller butik — eller fota papperskvitto. Lagret fylls på på några minuter.",
 				"ctaPrimary": "Importera kvitto",
 				"ctaSecondary": "Kanske senare",
 				"kivraHint": "Vill du slippa ladda upp manuellt?",
 				"kivraLink": "Koppla Kivra-vidarebefordran"
 			},
 			"success": {
-				"title": "Det här ser bra ut",
-				"body": "Ert skafferi börjar redan ta form. Ju mer du lägger till, desto bättre kan Skaffu hjälpa er och ditt hushåll.",
+				"title": "Bra start",
+				"body": "Det här är vad ni har inlagt. Lägg till mer när det passar — listan och påminnelserna blir bättre.",
 				"cta": "Fortsätt",
 				"itemsAria": "Varor du lagt till"
 			},
 			"brain": {
-				"title": "Skaffu kommer ihåg de små sakerna",
-				"body": "Skanningar, kvitton och inköpsvanor hjälper Skaffu att förstå ditt hushåll över tid. Det betyder smartare inköpsförslag, bättre påminnelser och mindre manuellt arbete.",
-				"cta": "Låter bra"
+				"title": "Så bygger ert minne",
+				"body": "Kvitton och avbockade rader hjälper Skaffu föreslå vad som saknas — utan att ni behöver komma ihåg allt.",
+				"cta": "Fortsätt"
 			},
 			"shopping": {
-				"title": "Inköp fungerar bättre tillsammans",
-				"body": "När något börjar ta slut kan du lägga till det i inköpslistan och bocka av det medan du handlar. Du kan bjuda in din partner när ni vill.",
+				"title": "Inköp tillsammans",
+				"body": "Lägg till det som tar slut. Bocka av i butiken. Bjud in partner när ni vill.",
 				"cta": "Öppna inköpslistan"
+			},
+			"setup": {
+				"title": "Gör det enkelt framåt",
+				"notificationsTitle": "Påminnelser om utgående varor",
+				"notificationsBody": "Få en notis när något snart går ut — så ni hinner använda det.",
+				"notificationsCta": "Slå på påminnelser",
+				"notificationsLater": "Senare",
+				"kivraTitle": "Kvitton från Kivra",
+				"kivraBody": "Koppla vidarebefordran så hamnar PDF-kvitton i Skaffu automatiskt.",
+				"allNotificationsLink": "Alla notisinställningar"
 			},
 			"progress": {
 				"welcome": "Välkommen",
-				"firstScan": "Första skanningen",
-				"pantryCreated": "Skafferi skapat",
-				"brain": "Lär er hur Skaffu hjälper",
-				"shopping": "Inköpslista"
+				"firstScan": "Kvitto",
+				"pantryCreated": "Lagret",
+				"brain": "Minnet",
+				"shopping": "Inköp"
 			}
 		}
 	},

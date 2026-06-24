@@ -7,6 +7,8 @@
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import ActivationOnboardingScreen from '$lib/components/molecules/ActivationOnboardingScreen.svelte';
 	import ActivationProgressChecklist from '$lib/components/molecules/ActivationProgressChecklist.svelte';
+	import ActivationSetupCards from '$lib/components/molecules/ActivationSetupCards.svelte';
+	import LocationColorDot from '$lib/components/atoms/LocationColorDot.svelte';
 	import OnboardingWelcomeIllustration from '$lib/components/organisms/illustrations/OnboardingWelcomeIllustration.svelte';
 	import OnboardingScanIllustration from '$lib/components/organisms/illustrations/OnboardingScanIllustration.svelte';
 	import OnboardingSuccessIllustration from '$lib/components/organisms/illustrations/OnboardingSuccessIllustration.svelte';
@@ -254,6 +256,10 @@
 		await goto('/inkop?quick=1');
 	}
 
+	function handleKivraTap(surface: 'scan' | 'shopping_setup') {
+		void trackProductEvent('onboarding_kivra_tapped', { surface });
+	}
+
 	function handlePreviewContinue() {
 		clearPreview();
 	}
@@ -396,18 +402,39 @@
 						{/snippet}
 
 						{#snippet extra()}
-							{#if displayScreen === 'success' && successItems.length > 0}
+							{#if displayScreen === 'scan'}
+								<div class="kivra-card" data-testid="activation-kivra-card">
+									<p class="kivra-hint">{t('onboarding.activation.scan.kivraHint')}</p>
+									<a
+										class="kivra-link"
+										href="/settings/kivra"
+										data-testid="activation-kivra-link"
+										onclick={() => handleKivraTap('scan')}
+									>
+										{t('onboarding.activation.scan.kivraLink')}
+									</a>
+								</div>
+							{:else if displayScreen === 'success' && successItems.length > 0}
 								<ul
 									class="success-items"
 									aria-label={t('onboarding.activation.success.itemsAria')}
 								>
 									{#each successItems as item (item.name + item.locationLabel)}
 										<li>
-											<span class="item-name">{item.name}</span>
-											<span class="item-meta">{item.locationLabel}</span>
+											<div class="item-row">
+												{#if item.location}
+													<LocationColorDot location={item.location} />
+												{/if}
+												<div class="item-text">
+													<span class="item-name">{item.name}</span>
+													<span class="item-meta">{item.locationLabel}</span>
+												</div>
+											</div>
 										</li>
 									{/each}
 								</ul>
+							{:else if displayScreen === 'shopping'}
+								<ActivationSetupCards />
 							{/if}
 						{/snippet}
 					</ActivationOnboardingScreen>
@@ -590,16 +617,32 @@
 		}
 	}
 
-	.kivra-hint {
-		margin: 0;
-		font-size: 0.9rem;
-		color: var(--color-text-muted);
+	.kivra-card {
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
+		border: 1px solid var(--color-border);
 		text-align: center;
-		line-height: 1.5;
 	}
 
-	.kivra-hint a {
+	.kivra-hint {
+		margin: 0;
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		line-height: 1.45;
+	}
+
+	.kivra-link {
+		display: inline-block;
+		margin-top: var(--space-xs);
+		font-size: 0.875rem;
 		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: none;
+	}
+
+	.kivra-link:hover {
+		text-decoration: underline;
 	}
 
 	.success-items {
@@ -622,6 +665,19 @@
 		background: var(--color-surface-muted);
 	}
 
+	.item-row {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--space-sm);
+	}
+
+	.item-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+		min-width: 0;
+	}
+
 	.item-name {
 		font-weight: 600;
 	}
@@ -629,5 +685,17 @@
 	.item-meta {
 		font-size: 0.875rem;
 		color: var(--color-text-muted);
+	}
+
+	:global(.activation-onboarding-body .illus-slot) {
+		min-height: 4.5rem;
+		max-height: 5.5rem;
+	}
+
+	@media (min-width: 768px) {
+		:global(.activation-onboarding-body .illus-slot) {
+			min-height: 5.5rem;
+			max-height: 6.5rem;
+		}
 	}
 </style>

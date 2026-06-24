@@ -1,4 +1,5 @@
 import { isMarketingPath } from '$lib/marketing/routes';
+import { isStorageLocation } from '$lib/domain/location';
 
 import { markPmfSurveyEligible } from '$lib/utils/pmf-survey-storage';
 
@@ -562,7 +563,10 @@ export function getActivationSuccessSnapshot(
 					'name' in entry &&
 					typeof entry.name === 'string' &&
 					'locationLabel' in entry &&
-					typeof entry.locationLabel === 'string'
+					typeof entry.locationLabel === 'string' &&
+					(!('location' in entry) ||
+						entry.location === undefined ||
+						(typeof entry.location === 'string' && isStorageLocation(entry.location)))
 			)
 			.slice(0, 3);
 	} catch {
