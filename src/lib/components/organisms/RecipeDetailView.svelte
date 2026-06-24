@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import Badge from '$lib/components/atoms/Badge.svelte';
+	import BackLink from '$lib/components/atoms/BackLink.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
 	import RecipeIngredientChecklist from '$lib/components/molecules/RecipeIngredientChecklist.svelte';
@@ -47,7 +48,7 @@
 	const stepCount = $derived(idea.steps.length);
 	const missingCount = $derived(idea.missingIngredients.length);
 	const estimatedMinutes = $derived(totalMinutes(idea.steps));
-	const backHref = $derived(
+	const backFallback = $derived(
 		recipeBackHref(page.url.searchParams.get('from'))
 	);
 
@@ -137,7 +138,11 @@
 
 <article class="recipe-detail" data-testid="recipe-detail">
 	{#if showBackLink}
-		<a href={backHref} class="back-link" data-testid="recipe-detail-back">{t('recipe.detail.back')}</a>
+		<BackLink
+			fallbackHref={backFallback}
+			label={t('recipe.detail.back')}
+			testId="recipe-detail-back"
+		/>
 	{/if}
 
 	<header class="recipe-hero">
@@ -232,19 +237,9 @@
 		min-width: 0;
 	}
 
-	.back-link {
+	.recipe-detail :global(.back-link) {
 		align-self: flex-start;
-		min-height: 2.75rem;
-		display: inline-flex;
-		align-items: center;
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: var(--color-primary);
-		text-decoration: none;
-	}
-
-	.back-link:hover {
-		text-decoration: underline;
+		margin-bottom: 0;
 	}
 
 	.recipe-hero {

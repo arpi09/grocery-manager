@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import BackLink from '$lib/components/atoms/BackLink.svelte';
 	import GamificationIllustration from '$lib/components/atoms/GamificationIllustration.svelte';
 	import WrappedShareCard from '$lib/components/molecules/WrappedShareCard.svelte';
 	import { getMilestoneRegistryEntry } from '$lib/domain/gamification.registry';
@@ -275,7 +276,7 @@
 				{t('wrapped.next')}
 			</Button>
 		{:else}
-			<a class="back-link" href="/statistik">{t('wrapped.backToStats')}</a>
+			<BackLink fallbackHref="/statistik" label={t('wrapped.backToStats')} />
 		{/if}
 	</div>
 </section>
@@ -391,10 +392,11 @@
 		gap: var(--space-sm);
 	}
 
-	.back-link {
+	.nav-row :global(.back-link) {
 		display: inline-flex;
 		align-items: center;
 		min-height: var(--touch-target-min);
+		margin-bottom: 0;
 		padding: 0.35rem 0.5rem;
 		font-size: 0.875rem;
 		font-weight: 600;
@@ -403,8 +405,9 @@
 		text-underline-offset: 0.15em;
 	}
 
-	.back-link:hover {
+	.nav-row :global(.back-link:hover) {
 		color: var(--color-primary-hover);
+		opacity: 1;
 	}
 
 	@media (max-width: 480px) {

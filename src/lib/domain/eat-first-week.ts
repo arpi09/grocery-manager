@@ -1,3 +1,5 @@
+import { HEM_PATH } from '$lib/navigation/app-home';
+
 /** Meal suggestions shown in the eat-first week view (Mon–Fri planning). */
 export const EAT_FIRST_WEEK_MIN_MEALS = 3;
 export const EAT_FIRST_WEEK_MAX_MEALS = 5;
@@ -46,4 +48,12 @@ export function shouldShowEatFirstWeekInboundBanner(
 	source: EatFirstWeekInboundSource | null
 ): source is EatFirstWeekInboundSource {
 	return source === 'push' || source === 'email';
+}
+
+/** Context-aware back target for the weekly ritual drill-down. */
+export function eatFirstWeekBackHref(source: EatFirstWeekInboundSource | null): string {
+	if (source === 'hero' || source === 'push' || source === 'email') {
+		return HEM_PATH;
+	}
+	return '/planer';
 }

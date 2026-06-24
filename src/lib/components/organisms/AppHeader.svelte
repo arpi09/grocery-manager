@@ -1,17 +1,22 @@
 <script lang="ts">
+	import BackLink from '$lib/components/atoms/BackLink.svelte';
+
 	interface Props {
 		title: string;
 		subtitle?: string;
 		backHref?: string;
+		backFallback?: string;
 		backLabel?: string;
 	}
 
-	let { title, subtitle, backHref, backLabel = 'Tillbaka' }: Props = $props();
+	let { title, subtitle, backHref, backFallback, backLabel = 'Tillbaka' }: Props = $props();
 </script>
 
 <header class="page-header">
 	{#if backHref}
 		<a class="back-link" href={backHref}>← {backLabel}</a>
+	{:else if backFallback}
+		<BackLink fallbackHref={backFallback} label={backLabel} testId="app-header-back" />
 	{/if}
 	<h1>{title}</h1>
 	{#if subtitle}

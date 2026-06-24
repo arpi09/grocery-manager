@@ -17,14 +17,15 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title={t('admin.featureFlags.title')} subtitle={t('admin.featureFlags.subtitle')} />
+	<AppHeader
+		title={t('admin.featureFlags.title')}
+		subtitle={t('admin.featureFlags.subtitle')}
+		backFallback="/admin"
+		backLabel={t('admin.featureFlags.backToAdmin')}
+	/>
 
 	<PageContainer>
 		<p class="read-only-note">{t('admin.featureFlags.readOnlyNote')}</p>
-
-		<p class="back-link">
-			<a href="/admin">{t('admin.featureFlags.backToAdmin')}</a>
-		</p>
 
 		<section class="flag-section">
 			<h2>{t('admin.featureFlags.serverSection')}</h2>
@@ -132,11 +133,6 @@
 		border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
 		font-size: 0.9rem;
 		color: var(--color-text-muted);
-	}
-
-	.back-link {
-		margin: 0 0 var(--space-lg);
-		font-size: 0.9rem;
 	}
 
 	.flag-section {

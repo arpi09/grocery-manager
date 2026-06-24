@@ -17,7 +17,12 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title={t('wrapped.pageTitle')} subtitle={t('wrapped.pageSubtitle')} />
+	<AppHeader
+		title={t('wrapped.pageTitle')}
+		subtitle={t('wrapped.pageSubtitle')}
+		backFallback="/statistik"
+		backLabel={t('wrapped.backToStats')}
+	/>
 	<PageContainer>
 		<PantryWrappedFlow report={data.report} {monthLabel} />
 	</PageContainer>

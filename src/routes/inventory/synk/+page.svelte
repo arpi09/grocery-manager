@@ -9,7 +9,12 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title={t('staleness.pageTitle')} subtitle={t('staleness.pageSubtitle')} />
+	<AppHeader
+		title={t('staleness.pageTitle')}
+		subtitle={t('staleness.pageSubtitle')}
+		backFallback="/inventory"
+		backLabel={t('dataGrid.backToPantry')}
+	/>
 
 	<PageContainer>
 		<StalenessBatchReview
