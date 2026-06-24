@@ -66,6 +66,7 @@
 		/** Pending share-target file key from POST /scan/share. */
 		shareKey?: string | null;
 		shareError?: string | null;
+		bulkSaveError?: boolean;
 	}
 
 	let {
@@ -80,7 +81,8 @@
 		initialParseResult = null,
 		autopick = false,
 		shareKey = null,
-		shareError = null
+		shareError = null,
+		bulkSaveError = false
 	}: Props = $props();
 
 	const bulkFormAction = $derived(formAction ?? '?/bulkCreate');
@@ -637,6 +639,11 @@
 
 {:else}
 	<section data-testid="receipt-review">
+		{#if bulkSaveError}
+			<div data-testid="receipt-bulk-save-error">
+				<FeedbackBanner tone="error" message={t('receiptBulk.saveFailed')} />
+			</div>
+		{/if}
 		<h2 class="title">{t('receiptBulk.selectItems', { selected: selectedCount, total: lines.length })}</h2>
 		{#if parsedStoreLabel || parsedPurchasedAt}
 			<p class="receipt-meta" data-testid="receipt-review-meta">

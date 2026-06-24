@@ -7,6 +7,7 @@
 		insights: InventoryInsight[];
 		missingExpiryCount: number;
 		estimatedCount: number;
+		loading?: boolean;
 		canWrite?: boolean;
 		bulkExpiryHref?: string | null;
 		onDeepen?: () => Promise<void>;
@@ -18,6 +19,7 @@
 		insights,
 		missingExpiryCount,
 		estimatedCount,
+		loading = false,
 		canWrite = false,
 		bulkExpiryHref = null,
 		onDeepen,
@@ -41,7 +43,15 @@
 	}
 </script>
 
-{#if visible}
+{#if loading}
+	<section class="insights-panel insights-panel--loading" aria-busy="true" data-testid="inventory-insights-loading">
+		<div class="skeleton-title" aria-hidden="true"></div>
+		<div class="skeleton-grid" aria-hidden="true">
+			<div class="skeleton-card"></div>
+			<div class="skeleton-card"></div>
+		</div>
+	</section>
+{:else if visible}
 	<section class="insights-panel" aria-labelledby="inventory-insights-heading" data-testid="inventory-insights">
 		<div class="insights-header">
 			<h2 id="inventory-insights-heading" class="insights-title">{t('brain.insights.title')}</h2>
@@ -94,6 +104,48 @@
 <style>
 	.insights-panel {
 		margin-bottom: var(--space-lg);
+	}
+
+	.insights-panel--loading .skeleton-title {
+		height: 1rem;
+		width: 8rem;
+		border-radius: var(--radius-sm);
+		background: var(--color-surface-muted);
+		margin-bottom: var(--space-sm);
+	}
+
+	.skeleton-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-sm);
+	}
+
+	.skeleton-card {
+		height: 4.5rem;
+		border-radius: var(--radius-md);
+		background: linear-gradient(
+			90deg,
+			var(--color-surface-muted) 0%,
+			color-mix(in srgb, var(--color-surface-muted) 70%, var(--color-border)) 50%,
+			var(--color-surface-muted) 100%
+		);
+		background-size: 200% 100%;
+		animation: insight-skeleton 1.2s ease-in-out infinite;
+	}
+
+	@keyframes insight-skeleton {
+		0% {
+			background-position: 100% 0;
+		}
+		100% {
+			background-position: -100% 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.skeleton-card {
+			animation: none;
+		}
 	}
 
 	.insights-header {

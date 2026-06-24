@@ -37,6 +37,7 @@
 	let viewedTracked = $state(false);
 	let session = $state<ReceiptImportSessionFlag | null>(null);
 	let overlayRevision = $state(0);
+	let showMoreActions = $state(false);
 
 	const userId = $derived(page.data.user?.id ?? null);
 	const memberCount = $derived(page.data.householdMemberCount ?? 0);
@@ -45,6 +46,7 @@
 	const showContinueSetup = $derived(
 		Boolean(userId && shouldShowOnboarding(userId) && !isActivationOnboardingFlowComplete(userId))
 	);
+	const hasMoreMenu = $derived(showInvitePartnerCta || showContinueSetup);
 
 	function clearScanToastParams() {
 		if (!browser) return;
@@ -103,6 +105,7 @@
 
 		session = flag;
 		open = true;
+		showMoreActions = false;
 		clearScanToastParams();
 	}
 
@@ -213,11 +216,20 @@
 				>
 					{showInvitePartnerCta ? t('receiptImport.success.ctaInvitePartner') : t('receiptImport.success.ctaSecondary')}
 				</Button>
-				{#if showInvitePartnerCta}
-					<button type="button" class="continue-setup" data-testid="receipt-success-cta-secondary" onclick={handleAddMoreCta}>{t('receiptImport.success.ctaSecondary')}</button>
-				{/if}
-				{#if showContinueSetup}
-					<button type="button" class="continue-setup" data-testid="receipt-success-cta-continue-setup" onclick={handleContinueSetup}>{t('receiptImport.success.ctaContinueSetup')}</button>
+				{#if hasMoreMenu}
+					<button type="button" class="more-toggle" data-testid="receipt-success-more-toggle" onclick={() => (showMoreActions = !showMoreActions)}>
+						{t('receiptImport.success.moreActions')}
+					</button>
+					{#if showMoreActions}
+						<div class="more-actions">
+							{#if showInvitePartnerCta}
+								<button type="button" class="continue-setup" data-testid="receipt-success-cta-secondary" onclick={handleAddMoreCta}>{t('receiptImport.success.ctaSecondary')}</button>
+							{/if}
+							{#if showContinueSetup}
+								<button type="button" class="continue-setup" data-testid="receipt-success-cta-continue-setup" onclick={handleContinueSetup}>{t('receiptImport.success.ctaContinueSetup')}</button>
+							{/if}
+						</div>
+					{/if}
 				{/if}
 			</div>
 		</div>
@@ -239,5 +251,7 @@
 	.expiry-line { margin: 0; text-align: center; font-size: 0.9375rem; color: var(--color-text-muted); }
 	.action-block { display: flex; flex-direction: column; gap: var(--space-sm); margin-top: auto; padding-top: var(--space-md); }
 	.action-block :global(.btn) { min-height: var(--touch-target-min); }
+	.more-toggle { border: none; background: none; color: var(--color-text-muted); font-size: 0.9375rem; font-weight: 600; min-height: var(--touch-target-min); cursor: pointer; text-decoration: underline; padding: var(--space-xs); }
+	.more-actions { display: flex; flex-direction: column; gap: var(--space-xs); }
 	.continue-setup { border: none; background: none; color: var(--color-text-muted); font-size: 0.9375rem; font-weight: 600; min-height: var(--touch-target-min); cursor: pointer; text-decoration: underline; padding: var(--space-xs); }
 </style>

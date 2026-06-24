@@ -1259,6 +1259,7 @@
 				"progressAria": "{picked} av {total} varor plockade",
 				"progressComplete": "Allt plockat",
 				"progressEmpty": "Inget att handla — lägg till varor i Planera",
+				"tabDisabledEmpty": "Lägg till varor i Planera innan du handlar",
 				"illustrationAria": "Handla — en vara i fokus",
 				"focusQuantity": "{quantity} {unit}",
 				"focusLocation": "{location}",
@@ -2612,6 +2613,7 @@
 			"ctaSecondary": "Lägg till fler varor",
 			"ctaInvitePartner": "Bjud in partner",
 			"ctaContinueSetup": "Fortsätt uppstarten",
+			"moreActions": "Fler val",
 			"ariaLabel": "Kvittoimport klar",
 			"brainStats": "Skaffu uppskattade {estimated} datum och föreslog {location} platser."
 		},
@@ -2636,6 +2638,7 @@
 		"estimatesHint": "Utgångsdatum är uppskattningar — justera vid behov innan du sparar.",
 		"aiDegradedBanner": "AI-batch för hållbarhet är avstängd — vi använder heuristik tills vidare.",
 		"savedLabel": "{count} {count, plural, one {vara} other {varor}}",
+		"saveFailed": "Kunde inte spara varorna. Försök igen.",
 		"receiptMeta": "{store} · {date}",
 		"purchasedOn": "Inköpt {date}",
 		"mergedAwaySummary": "{count, plural, one {# dubblettrad slogs ihop} other {# dubblettrader slogs ihop}}",
@@ -2926,7 +2929,7 @@
 			"success": {
 				"title": "Det här ser bra ut",
 				"body": "Ert skafferi börjar redan ta form. Ju mer du lägger till, desto bättre kan Skaffu hjälpa er och ditt hushåll.",
-				"cta": "Visa mitt skafferi",
+				"cta": "Fortsätt",
 				"itemsAria": "Varor du lagt till"
 			},
 			"brain": {
@@ -3736,6 +3739,7 @@
 		"publicSignupAboveFold": "Vill du ha en egen gemensam lista? Skapa konto gratis — partner ser samma lista när ni handlar.",
 		"publicPreviewAria": "Inköpslistans varor",
 		"publicPreviewMore": "+ {count} fler på listan",
+		"listaJoinToast": "Du är med i hushållets inköpslista.",
 		"shareLinkPrimary": "Dela länk till listan",
 		"exportMenuTrigger": "Exportera"
 	},

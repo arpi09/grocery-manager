@@ -6,6 +6,7 @@ import {
 	adminCredentials,
 	dismissPageHintIfOpen,
 	dismissPostOnboardingShareIfOpen,
+	dismissMobileMoreNavIfOpen,
 	loginWithCredentials
 } from './helpers/auth';
 
@@ -25,5 +26,8 @@ setup('authenticate as admin', async ({ page }) => {
 	await dismissPostOnboardingShareIfOpen(page);
 	await dismissPageHintIfOpen(page);
 	await page.locator('#shopping-list-panel').waitFor({ state: 'visible', timeout: 30_000 }).catch(() => {});
+	await page.goto('/planer?week=2026-06-01', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+	await dismissPageHintIfOpen(page);
+	await dismissMobileMoreNavIfOpen(page);
 	await page.context().storageState({ path: authFile });
 });

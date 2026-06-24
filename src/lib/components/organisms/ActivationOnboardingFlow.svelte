@@ -396,12 +396,7 @@
 						{/snippet}
 
 						{#snippet extra()}
-							{#if displayScreen === 'scan'}
-								<p class="kivra-hint">
-									{t('onboarding.activation.scan.kivraHint')}
-									<a href="/settings/kivra">{t('onboarding.activation.scan.kivraLink')}</a>
-								</p>
-							{:else if displayScreen === 'success' && successItems.length > 0}
+							{#if displayScreen === 'success' && successItems.length > 0}
 								<ul
 									class="success-items"
 									aria-label={t('onboarding.activation.success.itemsAria')}

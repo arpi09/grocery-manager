@@ -95,6 +95,7 @@
 				autopick={data.autopick}
 				shareKey={data.shareKey}
 				shareError={data.shareError}
+				bulkSaveError={Boolean(form?.bulkSaveError)}
 			/>
 		{:else if isPhotoMode}
 			<PhotoRoundFlow returnTo={data.returnTo} initialLocation={data.defaultLocation} />

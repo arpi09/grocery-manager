@@ -22,6 +22,7 @@
 
 	let searchQuery = $state('');
 	let insightsSnapshot = $state<InventoryInsightsSnapshot | null>(null);
+	let insightsLoading = $state(true);
 	let insightsDeepening = $state(false);
 	let insightsDeepenError = $state<string | null>(null);
 
@@ -76,6 +77,7 @@
 
 	$effect(() => {
 		if (!browser || loadFailed) return;
+		insightsLoading = true;
 		void fetch('/api/inventory/insights')
 			.then((response) => (response.ok ? response.json() : null))
 			.then((payload) => {
@@ -85,6 +87,9 @@
 			})
 			.catch(() => {
 				insightsSnapshot = null;
+			})
+			.finally(() => {
+				insightsLoading = false;
 			});
 	});
 
@@ -100,7 +105,14 @@
 <div class="pantry-v2-page" data-testid="pantry-v2-page">
 	<PantryShelfActions bind:query={searchQuery} {canWrite} returnTo="/inventory" />
 
-	{#if insightsSnapshot}
+	{#if insightsLoading}
+		<InventoryInsightsPanel
+			loading
+			insights={[]}
+			missingExpiryCount={0}
+			estimatedCount={0}
+		/>
+	{:else if insightsSnapshot}
 		<InventoryInsightsPanel
 			insights={insightsSnapshot.insights}
 			missingExpiryCount={insightsSnapshot.missingExpiryCount}

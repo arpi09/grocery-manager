@@ -1338,6 +1338,7 @@
 				"progressAria": "{picked} of {total} items picked",
 				"progressComplete": "All picked",
 				"progressEmpty": "Nothing to shop — add items in Plan",
+				"tabDisabledEmpty": "Add items in Plan before shopping",
 				"illustrationAria": "Shopping — one item in focus",
 				"focusQuantity": "{quantity} {unit}",
 				"focusLocation": "{location}",
@@ -2691,6 +2692,7 @@
 			"ctaSecondary": "Add more items",
 			"ctaInvitePartner": "Invite partner",
 			"ctaContinueSetup": "Continue setup",
+			"moreActions": "More options",
 			"ariaLabel": "Receipt import complete",
 			"brainStats": "Skaffu estimated {estimated} dates and suggested {location} locations."
 		},
@@ -2715,6 +2717,7 @@
 		"addCount": "Add {count} {count, plural, one {item} other {items}}",
 		"apiKeyHint": "Requires OPENAI_API_KEY in server .env.",
 		"savedLabel": "{count} {count, plural, one {item} other {items}}",
+		"saveFailed": "Could not save items. Try again.",
 		"receiptMeta": "{store} · {date}",
 		"purchasedOn": "Purchased {date}",
 		"mergedAwaySummary": "{count, plural, one {# duplicate row merged} other {# duplicate rows merged}}",
@@ -3005,7 +3008,7 @@
 			"success": {
 				"title": "Looking good",
 				"body": "Your pantry is already coming together. Everything you add helps Skaffu give better suggestions and keep your household in sync.",
-				"cta": "Show my pantry",
+				"cta": "Continue",
 				"itemsAria": "Items you added"
 			},
 			"brain": {
@@ -3736,6 +3739,7 @@
 		"publicSignupAboveFold": "Want your own shared list? Create a free account — your partner sees the same list when you shop.",
 		"publicPreviewAria": "Shopping list items",
 		"publicPreviewMore": "+ {count} more on the list",
+		"listaJoinToast": "You joined the household shopping list.",
 		"shareLinkPrimary": "Share list link",
 		"exportMenuTrigger": "Export"
 	},

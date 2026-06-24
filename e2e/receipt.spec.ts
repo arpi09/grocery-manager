@@ -116,7 +116,7 @@ test.describe('Receipt flow', () => {
 		});
 
 		await loginAsAdmin(page);
-		await page.goto('/scan/kvitto?from=/hem');
+		await page.goto('/scan?from=/hem&mode=receipt');
 		await dismissOnboardingModalIfOpen(page);
 
 		await uploadReceiptPdf(page, FIXTURE_PDF);
@@ -154,14 +154,13 @@ test.describe('Receipt flow', () => {
 		});
 
 		await loginAsAdmin(page);
-		await page.goto('/scan/kvitto?from=/hem');
+		await page.goto('/scan?from=/hem&mode=receipt');
 		await dismissOnboardingModalIfOpen(page);
 
 		await uploadReceiptFile(page, FIXTURE_JPEG);
 
 		await expect(page.getByTestId('receipt-review')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('receipt-line-0')).toBeVisible({ timeout: 15_000 });
-		await dismissOnboardingModalIfOpen(page);
 		await page
 			.waitForResponse(
 				(res) =>
@@ -174,6 +173,7 @@ test.describe('Receipt flow', () => {
 		await expect(quickConfirm).toBeVisible({ timeout: 15_000 });
 		await expect(quickConfirm).toBeEnabled({ timeout: 30_000 });
 		await quickConfirm.click();
+		await dismissOnboardingModalIfOpen(page);
 		await expect(page).toHaveURL(/\/hem(\?|$)/, { timeout: 20_000 });
 		await expect(page.getByTestId('receipt-import-success')).toBeVisible({ timeout: 10_000 });
 	});

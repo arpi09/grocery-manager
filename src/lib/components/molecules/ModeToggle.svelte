@@ -5,13 +5,14 @@
 	interface Props {
 		mode: ShoppingTripMode;
 		disabled?: boolean;
+		shopDisabled?: boolean;
 		onchange: (mode: ShoppingTripMode) => void;
 	}
 
-	let { mode, disabled = false, onchange }: Props = $props();
+	let { mode, disabled = false, shopDisabled = false, onchange }: Props = $props();
 
 	function select(next: ShoppingTripMode) {
-		if (disabled || next === mode) {
+		if (disabled || (shopDisabled && next === 'shop') || next === mode) {
 			return;
 		}
 		onchange(next);
@@ -35,7 +36,8 @@
 		role="tab"
 		class:active={mode === 'shop'}
 		aria-selected={mode === 'shop'}
-		disabled={disabled}
+		disabled={disabled || shopDisabled}
+		title={shopDisabled ? t('shopping.v2.shop.tabDisabledEmpty') : undefined}
 		data-testid="shopping-v2-mode-shop"
 		onclick={() => select('shop')}
 	>

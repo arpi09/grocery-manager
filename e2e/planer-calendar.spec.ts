@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { dismissCookieConsentIfOpen, dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
+import { dismissCookieConsentIfOpen, dismissMobileMoreNavIfOpen, dismissOnboardingModalIfOpen, dismissPageHintIfOpen, loginAsAdmin } from './helpers/auth';
 
 test.describe('Planer calendar week navigation', () => {
 	test.setTimeout(60_000);
@@ -10,6 +10,8 @@ test.describe('Planer calendar week navigation', () => {
 		await page.goto('/planer?week=2026-06-01', { waitUntil: 'commit', timeout: 60_000 });
 		await dismissCookieConsentIfOpen(page);
 		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
+		await dismissMobileMoreNavIfOpen(page);
 		await page.locator('#ata-calendar').evaluate((el) => {
 			if (el instanceof HTMLDetailsElement) el.open = true;
 		});
@@ -22,6 +24,8 @@ test.describe('Planer calendar week navigation', () => {
 
 		const nextWeek = page.getByTestId('ata-calendar-next-week');
 		await expect(nextWeek).toBeVisible({ timeout: 10_000 });
+		await dismissPageHintIfOpen(page);
+		await dismissMobileMoreNavIfOpen(page);
 		await nextWeek.scrollIntoViewIfNeeded();
 		await nextWeek.click({ force: true });
 		await page.waitForURL(/[?&]week=2026-06-08/, { timeout: 20_000, waitUntil: 'commit' });

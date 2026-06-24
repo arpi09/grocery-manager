@@ -148,8 +148,8 @@ async function fillBoundInput(input: import('@playwright/test').Locator, value: 
 export async function dismissCookieConsentIfOpen(page: Page) {
 	const dialog = page.locator('[aria-labelledby="cookie-consent-title"]');
 	if (await dialog.isVisible().catch(() => false)) {
-		await page
-			.getByRole('button', { name: /Endast n\u00f6dv\u00e4ndiga|Godk\u00e4nn/i })
+		await dialog
+			.getByRole('button', { name: /^Godkänn$/i })
 			.first()
 			.click({ force: true });
 		await dialog.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
@@ -180,6 +180,20 @@ export async function dismissPageHintIfOpen(page: Page) {
 	if (await dismiss.isVisible().catch(() => false)) {
 		await dismiss.click({ force: true, timeout: 1_000 }).catch(() => {});
 		await page.locator('.page-hint-panel').waitFor({ state: 'hidden', timeout: 1_000 }).catch(() => {});
+		return;
+	}
+
+	const gotIt = page.getByRole('button', { name: /^Jag förstår$/i });
+	if (await gotIt.isVisible().catch(() => false)) {
+		await gotIt.click({ force: true, timeout: 1_000 }).catch(() => {});
+		await page.locator('.page-hint-panel').waitFor({ state: 'hidden', timeout: 1_000 }).catch(() => {});
+	}
+}
+
+export async function dismissMobileMoreNavIfOpen(page: Page) {
+	const close = page.getByRole('button', { name: /^Stäng$/i });
+	if (await close.isVisible().catch(() => false)) {
+		await close.click({ force: true, timeout: 1_000 }).catch(() => {});
 	}
 }
 
@@ -213,14 +227,17 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 		(await modal.isVisible().catch(() => false)) ||
 		(await page.getByTestId('receipt-import-success').isVisible().catch(() => false)) ||
 		(await pageHintDismiss.isVisible().catch(() => false)) ||
+		(await page.getByRole('button', { name: /^Jag förstår$/i }).isVisible().catch(() => false)) ||
 		(await page.getByTestId('post-onboarding-survey-skip').isVisible().catch(() => false)) ||
 		(await page.getByTestId('post-onboarding-share-skip').isVisible().catch(() => false)) ||
 		(await page.getByRole('button', { name: /^(Inte nu|Not now)$/i }).first().isVisible().catch(() => false));
 
 	const deadline = Date.now() + 5_000;
 	while (Date.now() < deadline) {
-		await clickIfVisible(page.getByRole('button', { name: /Endast n\u00f6dv\u00e4ndiga|Godk\u00e4nn/i }));
+		await dismissCookieConsentIfOpen(page);
 		await clickIfVisible(pageHintDismiss);
+		await clickIfVisible(page.getByRole('button', { name: /^Jag förstår$/i }));
+		await dismissMobileMoreNavIfOpen(page);
 		await clickIfVisible(page.getByTestId('post-onboarding-share-skip'));
 		await clickIfVisible(page.getByTestId('post-onboarding-survey-skip'));
 		await dismissReceiptSuccessIfOpen(page);
