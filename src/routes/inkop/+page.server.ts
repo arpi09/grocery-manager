@@ -58,22 +58,28 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		};
 	}
 
-	const [items, checkedCount, intelligence, shoppingToPantryMode] = await Promise.all([
+	const [items, checkedCount, shoppingToPantryMode] = await Promise.all([
 		locals.shoppingListService.listUncheckedItems(householdId),
 		locals.shoppingListService.countCheckedItems(householdId),
-		locals.inventoryIntelligenceService.getHomeIntelligence(householdId),
 		user ? locals.shoppingToPantryService.getMode(user.id) : Promise.resolve('ask' as ShoppingToPantryMode)
 	]);
 
-	const replenishmentSuggestions = await rankReplenishmentWithFeedback(intelligence.replenishment, {
-		householdId,
-		locale: locals.locale,
-		learningFeedbackRepository,
-		apiKey: getOpenAiApiKey()
-	});
+	const e2eMockAi = isE2eMockAiEnabled();
+	const intelligence = e2eMockAi
+		? { replenishment: [], dedupeByKey: {} }
+		: await locals.inventoryIntelligenceService.getHomeIntelligence(householdId);
+
+	const replenishmentSuggestions = e2eMockAi
+		? []
+		: await rankReplenishmentWithFeedback(intelligence.replenishment, {
+				householdId,
+				locale: locals.locale,
+				learningFeedbackRepository,
+				apiKey: getOpenAiApiKey()
+			});
 
 	let autoFillPending: Awaited<ReturnType<typeof loadAutoFillPendingForInkop>> = null;
-	if (user && locals.householdRole) {
+	if (!e2eMockAi && user && locals.householdRole) {
 		try {
 			autoFillPending = await loadAutoFillPendingForInkop({
 				householdId,
@@ -92,23 +98,26 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		}
 	}
 
-	const [inventoryItems, dedupeContext] = await Promise.all([
-		locals.inventoryService.listAll(householdId),
-		locals.purchasePatternService.getDedupeContext(householdId)
-	]);
-	const activeItems = inventoryItems.filter((item) => !isItemFinished(item));
-	const storeDedupeKeys = [
-		...new Set(
-			items
-				.map((item) => normalizeReceiptProductName(item.name))
-				.filter((key) => key.length > 0)
-		)
-	];
-	const storeDedupeByKey = detectDedupeWarningsForKeys(storeDedupeKeys, {
-		activeItems,
-		recentLines: dedupeContext.recentLines,
-		listNormalizedNames: dedupeContext.listNormalizedNames
-	});
+	let storeDedupeByKey: ReturnType<typeof detectDedupeWarningsForKeys> = {};
+	if (!e2eMockAi) {
+		const [inventoryItems, dedupeContext] = await Promise.all([
+			locals.inventoryService.listAll(householdId),
+			locals.purchasePatternService.getDedupeContext(householdId)
+		]);
+		const activeItems = inventoryItems.filter((item) => !isItemFinished(item));
+		const storeDedupeKeys = [
+			...new Set(
+				items
+					.map((item) => normalizeReceiptProductName(item.name))
+					.filter((key) => key.length > 0)
+			)
+		];
+		storeDedupeByKey = detectDedupeWarningsForKeys(storeDedupeKeys, {
+			activeItems,
+			recentLines: dedupeContext.recentLines,
+			listNormalizedNames: dedupeContext.listNormalizedNames
+		});
+	}
 
 	return {
 		user,
