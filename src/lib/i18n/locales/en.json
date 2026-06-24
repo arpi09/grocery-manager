@@ -3195,6 +3195,8 @@
 	"weeklyRitual": {
 		"pageTitle": "Week suggestions",
 		"pageSubtitle": "Generate dinner ideas for the whole week — approve and fill the shopping list",
+		"backToPlaner": "Back to Eat",
+		"backToHome": "Back to Home",
 		"heroTitle": "Week sorted",
 		"heroBadge": "Monday ritual",
 		"heroSubtitleDefault": "Plan the week's dinners from your pantry — one click to meal plan and shopping list.",

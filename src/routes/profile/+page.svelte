@@ -38,7 +38,12 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title={t('profile.title')} subtitle={t('profile.subtitle')} />
+	<AppHeader
+		title={t('profile.title')}
+		subtitle={t('profile.subtitle')}
+		backFallback="/settings"
+		backLabel={t('memory.backToSettings')}
+	/>
 	<PageContainer>
 	<Card>
 		{#if showAvatarSuccess}

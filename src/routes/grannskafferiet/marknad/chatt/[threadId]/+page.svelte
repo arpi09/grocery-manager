@@ -2,6 +2,7 @@
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
+	import BackLink from '$lib/components/atoms/BackLink.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import MarketChatBubble from '$lib/components/molecules/MarketChatBubble.svelte';
 	import MarketChatListingCard from '$lib/components/molecules/MarketChatListingCard.svelte';
@@ -377,15 +378,13 @@
 	<div class="chat-screen" data-testid="market-chat-thread">
 		<header class="chat-header">
 			<div class="header-top">
-				<a
-				class="back-btn"
-				href="/grannskafferiet/marknad/meddelanden"
-				data-testid="market-chat-back"
-				aria-label={t('marketV05.backToInboxAria')}
-			>
-					<span aria-hidden="true">←</span>
-					<span class="back-label">{t('marketV05.backToInbox')}</span>
-				</a>
+				<BackLink
+					fallbackHref="/grannskafferiet/marknad/meddelanden"
+					label={t('marketV05.backToInbox')}
+					testId="market-chat-back"
+					ariaLabel={t('marketV05.backToInboxAria')}
+					class="back-btn"
+				/>
 				{#if !threadClosed}
 					<MarketChatOverflowMenu
 						threadId={data.thread.id}
@@ -632,28 +631,18 @@
 		gap: var(--space-sm);
 	}
 
-	.back-btn {
+	.header-top :global(.back-btn.back-link) {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-xs);
+		margin-bottom: 0;
 		padding: var(--space-xs) 0;
-		border: none;
 		background: transparent;
 		font: inherit;
 		font-size: 0.875rem;
 		color: var(--color-primary);
 		cursor: pointer;
 		min-height: var(--touch-target-min);
-	}
-
-	.back-label {
-		display: none;
-	}
-
-	@media (min-width: 480px) {
-		.back-label {
-			display: inline;
-		}
 	}
 
 	.participant {

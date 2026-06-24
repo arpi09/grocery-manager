@@ -47,4 +47,16 @@ test.describe('Weekly ritual — vecka', () => {
 		await expect(page.getByText('Koka pastan enligt förpackningen.')).toBeVisible();
 		await expect(page.getByRole('button', { name: /Godkänn veckan/i })).toBeVisible();
 	});
+
+	test('back link navigates to planer', async ({ page }) => {
+		await page.goto('/planer');
+		await page.goto('/planer/vecka');
+
+		const backLink = page.locator('[data-testid="app-header-back"]');
+		await expect(backLink).toBeVisible({ timeout: 15_000 });
+		await expect(backLink).toContainText(/Tillbaka till Äta/i);
+
+		await backLink.click();
+		await page.waitForURL(/\/planer\/?$/, { timeout: 15_000 });
+	});
 });

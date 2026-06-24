@@ -37,7 +37,7 @@
 	<AppHeader
 		title={t('priceMemory.page.title')}
 		subtitle={t('priceMemory.page.subtitle')}
-		backHref="/settings"
+		backFallback="/settings"
 		backLabel={t('priceMemory.page.backToSettings')}
 	/>
 	<PageContainer>

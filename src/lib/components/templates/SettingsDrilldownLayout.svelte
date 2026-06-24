@@ -11,17 +11,25 @@
 		title: string;
 		subtitle?: string;
 		backLabel?: string;
+		backFallback?: string;
 		children: Snippet;
 	}
 
-	let { user, title, subtitle, backLabel, children }: Props = $props();
+	let {
+		user,
+		title,
+		subtitle,
+		backLabel,
+		backFallback = '/settings',
+		children
+	}: Props = $props();
 </script>
 
 <AppLayout {user}>
 	<AppHeader
 		{title}
 		{subtitle}
-		backHref="/settings"
+		{backFallback}
 		backLabel={backLabel ?? t('memory.backToSettings')}
 	/>
 	<PageContainer>
