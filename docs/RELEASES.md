@@ -4,4 +4,5 @@ GitHub Releases use **CalVer** (`YYYY.M.D` or `YYYY.M.D.N` for multiple deploys 
 
 | CalVer | Prod SHA | Deploy run | PRs |
 |--------|----------|------------|-----|
-| [2026.6.24](https://github.com/arpi09/grocery-manager/releases/tag/2026.6.24) | `a9ddaabca` | [28083527659](https://github.com/arpi09/grocery-manager/actions/runs/28083527659) | — |
+
+| [2026.6.24](https://github.com/arpi09/grocery-manager/releases/tag/2026.6.24) | `97849e41c` | [28094048682](https://github.com/arpi09/grocery-manager/actions/runs/28094048682) | — || [2026.6.24](https://github.com/arpi09/grocery-manager/releases/tag/2026.6.24) | `a9ddaabca` | [28083527659](https://github.com/arpi09/grocery-manager/actions/runs/28083527659) | — |
