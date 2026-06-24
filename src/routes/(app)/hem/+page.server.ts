@@ -20,11 +20,7 @@ import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 
 import { buildReturnUrlWithExpiryNudge } from '$lib/utils/expiry-nudge';
 
-import { getSnapshot as getBrainScoreSnapshot, type BrainScoreSnapshot } from '$lib/domain/brain-score';
-import { buildWastePreventedSnapshot, startOfCalendarMonth, type WastePreventedSnapshot } from '$lib/domain/waste-prevented';
-import { consumptionRepository } from '$lib/server/di';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
-import { purchasePatternRepository } from '$lib/server/di';
 import { isHomeUxV2Enabled } from '$lib/server/home-ux-v2-flag';
 import { isHomeBriefingAiEnabled } from '$lib/server/feature-flags';
 import { generateHomeBriefingOneLiner } from '$lib/server/home-briefing-one-liner';
@@ -184,37 +180,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		briefingFunFact = await impactPromise;
 	}
 
-	let brainScore: BrainScoreSnapshot | null = null;
-	let wastePrevented: WastePreventedSnapshot | null = null;
-	if (isShelfLifeLearningEnabled()) {
-		try {
-			const [suggestions, receiptLineCount] = await Promise.all([
-				locals.householdSuggestionsService.getSnapshot(householdId),
-				purchasePatternRepository.countReceiptLines(householdId)
-			]);
-			const ruleCount =
-				suggestions.shelfLifeRules.length + suggestions.locationRules.length;
-			const feedbackCount =
-				suggestions.shelfLifeRules.reduce((sum, rule) => sum + rule.sampleCount, 0) +
-				suggestions.locationRules.reduce((sum, rule) => sum + rule.sampleCount, 0);
-			brainScore = getBrainScoreSnapshot({ ruleCount, feedbackCount, receiptLineCount });
-		} catch (error) {
-			console.warn('[hem] brain score degraded:', error);
-		}
-
-		try {
-			const monthStart = startOfCalendarMonth();
-			const events = await consumptionRepository.listEventsForSavingsInPeriod(
-				householdId,
-				monthStart,
-				new Date()
-			);
-			wastePrevented = buildWastePreventedSnapshot(events, locale);
-		} catch (error) {
-			console.warn('[hem] waste prevented degraded:', error);
-		}
-	}
-
 	return {
 		locale,
 		pageTitle: translate(locale, homeUxV2Enabled ? 'home.v6.pageTitle' : 'home.title'),
@@ -232,9 +197,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		briefingRecipeChip,
 		briefingFunFact,
 		briefingOneLiner,
-		showMemoryExplorer: isShelfLifeLearningEnabled(),
-		brainScore,
-		wastePrevented
+		showMemoryExplorer: isShelfLifeLearningEnabled()
 	};
 };
 
