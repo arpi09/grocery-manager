@@ -10,6 +10,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 
 ### Added
 - feat(ci): PR-first workflow, CHANGELOG bot, CalVer releases ([#125](https://github.com/arpi09/grocery-manager/pull/125)) — Add PR template, agent rule (pr-workflow.mdc), and docs updates for PR-first shipping (not trunk-only).
+- feat(brand): palette tokens and local preview (Fas 1) ([#128](https://github.com/arpi09/grocery-manager/pull/128)) — Expand `brand-colors.ts` with locked logo core, four palette tracks (heritage/fresh/warm/crisp), and CSS var mapping helpers.
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
