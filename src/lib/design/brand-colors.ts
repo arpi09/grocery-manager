@@ -422,7 +422,7 @@ export function mergePalette(track: PaletteTrack): BrandPaletteByMode {
 
 
 
-const PALETTE_TO_CSS: Record<keyof BrandPalette, string> = {
+const PALETTE_TO_CSS: Record<Exclude<keyof BrandPalette, 'learningAiGradientStops'>, string> = {
 
 	primary: '--color-primary',
 
