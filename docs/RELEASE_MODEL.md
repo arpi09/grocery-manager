@@ -2,7 +2,17 @@
 
 *CI/CD test tiers, deploy lanes, and rollback policy.*
 
-**Relaterat:** [DEPLOY.md](./DEPLOY.md) · [CI_CD.md](./CI_CD.md) · [CURRENT_REALITY.md](./CURRENT_REALITY.md)
+**Relaterat:** [DEPLOY.md](./DEPLOY.md) · [CI_CD.md](./CI_CD.md) · [CURRENT_REALITY.md](./CURRENT_REALITY.md) · [CHANGELOG.md](./CHANGELOG.md) · [RELEASES.md](./RELEASES.md)
+
+---
+
+## PR-first shipping
+
+1. `feat/*` / `fix/*` branch → PR → grön `pr-gate` (+ PR E2E om core-loop).
+2. Merge — `docs/CHANGELOG.md` uppdateras automatiskt.
+3. Manuell deploy — CalVer GitHub Release (`YYYY.M.D`) skapas **efter** lyckad deploy, inte vid merge.
+
+Agent-regel: [`.cursor/rules/pr-workflow.mdc`](../.cursor/rules/pr-workflow.mdc).
 
 ---
 
@@ -37,13 +47,13 @@
 
 ## How to ship a small bugfix fast
 
-See **[HOTFIX_FAST_PATH.md](./HOTFIX_FAST_PATH.md)** for the full incident runbook (merge → deploy → smoke checklist).
+See **[HOTFIX_FAST_PATH.md](./HOTFIX_FAST_PATH.md)** for the full incident runbook (PR → merge → deploy → smoke checklist).
 
 1. `fix/*` branch, low-risk paths only.
 2. `npm run quick:dev` locally.
-3. Merge when `pr-gate` + PR critical E2E are green.
+3. Open PR; merge when `pr-gate` + PR critical E2E are green.
 4. Deploy with `deploy_tier: auto` or `fast`.
-5. Coordinator updates CURRENT_REALITY after smoke.
+5. Coordinator updates CURRENT_REALITY after smoke; GitHub Release tag appears after deploy.
 
 ---
 
@@ -73,3 +83,4 @@ See **[HOTFIX_FAST_PATH.md](./HOTFIX_FAST_PATH.md)** for the full incident runbo
 | `npm run deploy:fast` | pr:gate + critical E2E + pre-deploy smoke |
 | `npm run test:e2e:critical` | `@deploy-critical` tests only |
 | `npm run ci:path-tier` | Classify changed files |
+| `npm run release:notes` | Preview GitHub Release notes (`DEPLOY_SHA=…`) |

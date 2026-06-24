@@ -29,6 +29,11 @@ alwaysApply: true
 2. Never say "deployed" without green Deploy workflow + coordinator [PROD_SMOKE.md](../../docs/PROD_SMOKE.md).
 3. After deploy: browser check on `/` and a guide page — fail on `process is not defined`, `Internal Error`, or 500.
 
+## PR-first (before deploy)
+
+- **All agent changes:** branch `feat/*` / `fix/*` → PR → merge — never direct push to `master`. See [pr-workflow.mdc](./pr-workflow.mdc).
+- Merge documents in `docs/CHANGELOG.md`; CalVer GitHub Release only after successful deploy.
+
 ## Owner settings
 
 - Branch protection: require **`pr-gate / pr-gate`** (update from `quality / quality` after CI/CD v2 merge).
