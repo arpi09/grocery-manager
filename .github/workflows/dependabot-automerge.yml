@@ -1,0 +1,120 @@
+# Auto-merge grouped Dependabot minor/patch PRs when pr-gate is green.
+# Major updates get dependencies:major and require manual review.
+#
+# Repo setting (owner): Settings → General → Allow auto-merge must be enabled.
+
+name: Dependabot auto-merge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  check_suite:
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: dependabot-automerge-${{ github.event.pull_request.number || github.event.check_suite.head_sha }}
+  cancel-in-progress: true
+
+jobs:
+  dependabot:
+    name: dependabot metadata + auto-merge
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.user.login == 'dependabot[bot]'
+      || (
+        github.event_name == 'check_suite'
+        && github.event.check_suite.conclusion == 'success'
+      )
+
+    steps:
+      - name: Ensure dependency labels exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create dependencies --color 0366d6 --description "Dependabot dependency update" 2>/dev/null || true
+          gh label create "dependencies:production" --color 0E8A16 --description "Production deps (minor/patch group)" 2>/dev/null || true
+          gh label create "dependencies:development" --color C5DEF5 --description "Development deps (minor/patch group)" 2>/dev/null || true
+          gh label create "dependencies:major" --color B60205 --description "Major semver — manual review, no auto-merge" 2>/dev/null || true
+
+      - name: Resolve Dependabot PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          pr_json=$(gh pr list --state open --head "${{ github.event.check_suite.head_branch }}" --json number,author --jq '.[0] // empty')
+          if [ -z "$pr_json" ]; then
+            echo "No open PR for branch — skipping."
+            exit 0
+          fi
+          author=$(echo "$pr_json" | jq -r '.author.login')
+          if [ "$author" != "dependabot[bot]" ]; then
+            echo "PR author is not dependabot — skipping."
+            exit 0
+          fi
+          echo "number=$(echo "$pr_json" | jq -r '.number')" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v6
+        if: steps.pr.outputs.number != ''
+
+      - name: Fetch Dependabot metadata
+        if: steps.pr.outputs.number != '' && github.event_name == 'pull_request'
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Label major updates (no auto-merge)
+        if: >-
+          steps.pr.outputs.number != ''
+          && github.event_name == 'pull_request'
+          && steps.metadata.outputs.update-type == 'version-update:semver-major'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          gh pr edit "$PR_NUMBER" --add-label "dependencies:major"
+          gh pr comment "$PR_NUMBER" --body "Major dependency update — **no auto-merge**. Review manually before merge."
+
+      - name: Enable auto-merge for patch/minor
+        if: steps.pr.outputs.number != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type || '' }}
+        run: |
+          set -euo pipefail
+          labels=$(gh pr view "$PR_NUMBER" --json labels --jq '[.labels[].name] | join(",")')
+          if echo "$labels" | grep -q 'dependencies:major'; then
+            echo "PR has dependencies:major — skipping auto-merge."
+            exit 0
+          fi
+
+          should_merge=false
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            case "$UPDATE_TYPE" in
+              version-update:semver-patch|version-update:semver-minor) should_merge=true ;;
+            esac
+          else
+            if echo "$labels" | grep -Eq 'dependencies:(production|development)'; then
+              should_merge=true
+            fi
+          fi
+
+          if [ "$should_merge" != "true" ]; then
+            echo "Not a patch/minor grouped deps PR — skipping auto-merge."
+            exit 0
+          fi
+
+          gh pr merge "$PR_NUMBER" --auto --squash
+          echo "Auto-merge enabled (squash). Waits for required checks including pr-gate / pr-gate."
