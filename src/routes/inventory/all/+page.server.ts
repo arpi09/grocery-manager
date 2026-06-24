@@ -12,6 +12,10 @@ import { trackOneTapConsume } from '$lib/server/sync-analytics';
 import { consumeItemSchema } from '$lib/validation/consumption.schemas';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
+import { appendActionToast } from '$lib/utils/action-toast';
+import { bulkInferMissingExpiryAllLocations } from '$lib/server/bulk-infer-missing-expiry';
+import { learningFeedbackRepository } from '$lib/server/di';
+import { getOpenAiApiKey } from '$lib/server/openai';
 
 function parseItemIds(formData: FormData): string[] {
 	return formData
@@ -152,5 +156,22 @@ export const actions: Actions = {
 		);
 
 		return { success: true, count };
+	},
+	bulkInferExpiry: async ({ locals, url }) => {
+		requireInventoryWriteAccess(locals.householdRole);
+		const inferred = await bulkInferMissingExpiryAllLocations(
+			locals.householdId!,
+			locals.inventoryService,
+			getOpenAiApiKey(),
+			locals.householdRole!,
+			learningFeedbackRepository
+		);
+		const filter = url.searchParams.get('filter');
+		const redirectPath =
+			filter === 'noExpiry' ? '/inventory/all?filter=noExpiry' : '/inventory/all';
+		redirect(
+			302,
+			appendActionToast(redirectPath, 'bulkExpiryInferred', String(inferred))
+		);
 	}
 };

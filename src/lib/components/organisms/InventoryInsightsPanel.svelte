@@ -9,7 +9,7 @@
 		estimatedCount: number;
 		loading?: boolean;
 		canWrite?: boolean;
-		bulkExpiryHref?: string | null;
+		bulkInferAction?: string | null;
 		onDeepen?: () => Promise<void>;
 		deepening?: boolean;
 		deepenError?: string | null;
@@ -21,7 +21,7 @@
 		estimatedCount,
 		loading = false,
 		canWrite = false,
-		bulkExpiryHref = null,
+		bulkInferAction = null,
 		onDeepen,
 		deepening = false,
 		deepenError = null
@@ -75,8 +75,10 @@
 				<Card class="insight-card">
 					<p class="insight-stat">{missingExpiryCount}</p>
 					<p class="insight-label">{t('brain.insights.missingExpiry')}</p>
-					{#if canWrite && bulkExpiryHref}
-						<a class="insight-link" href={bulkExpiryHref}>{t('inventory.bulkExpiryAction')}</a>
+					{#if canWrite && bulkInferAction}
+						<form method="POST" action={bulkInferAction} class="insight-action-form">
+							<button type="submit" class="insight-link">{t('inventory.bulkExpiryAction')}</button>
+						</form>
 					{/if}
 				</Card>
 			{/if}
@@ -208,11 +210,24 @@
 		color: var(--color-text-muted);
 	}
 
+	.insight-action-form {
+		display: inline;
+		margin: 0;
+		padding: 0;
+	}
+
 	.insight-link {
 		display: inline-block;
 		margin-top: var(--space-sm);
+		border: none;
+		background: none;
+		padding: 0;
+		font: inherit;
 		font-size: 0.8125rem;
 		font-weight: 600;
+		color: var(--color-primary);
+		cursor: pointer;
+		text-decoration: underline;
 	}
 
 	.insight-actions {
