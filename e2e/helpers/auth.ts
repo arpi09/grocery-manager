@@ -191,65 +191,45 @@ export async function dismissPostOnboardingSurveyIfOpen(page: Page) {
 }
 
 export async function dismissOnboardingModalIfOpen(page: Page) {
-	await dismissCookieConsentIfOpen(page);
-	await dismissPostOnboardingSurveyIfOpen(page);
-	await dismissPostOnboardingShareIfOpen(page);
-
 	const modal = page.locator('.modal-root').first();
 	const pageHintDismiss = page.getByTestId('page-hint-dismiss');
+	const clickIfVisible = async (locator: ReturnType<Page['locator']>) => {
+		const target = locator.first();
+		if (await target.isVisible().catch(() => false)) {
+			await target.click({ force: true, timeout: 750 }).catch(() => {});
+			return true;
+		}
+		return false;
+	};
 	const hasBlockingOverlay = async () =>
 		(await modal.isVisible().catch(() => false)) ||
 		(await pageHintDismiss.isVisible().catch(() => false)) ||
 		(await page.getByTestId('post-onboarding-survey-skip').isVisible().catch(() => false)) ||
-		(await page.getByTestId('post-onboarding-share-skip').isVisible().catch(() => false));
-
-	if (!(await hasBlockingOverlay())) {
-		await expect
-			.poll(hasBlockingOverlay, { timeout: 500, intervals: [50, 100, 150] })
-			.toBe(true)
-			.catch(() => undefined);
-		if (!(await hasBlockingOverlay())) {
-			return;
-		}
-	}
+		(await page.getByTestId('post-onboarding-share-skip').isVisible().catch(() => false)) ||
+		(await page.getByRole('button', { name: /^(Inte nu|Not now)$/i }).first().isVisible().catch(() => false));
 
 	const deadline = Date.now() + 5_000;
 	while (Date.now() < deadline) {
-		await dismissPageHintIfOpen(page);
-		await dismissPostOnboardingShareIfOpen(page);
+		await clickIfVisible(page.getByRole('button', { name: /Endast n\u00f6dv\u00e4ndiga|Godk\u00e4nn/i }));
+		await clickIfVisible(pageHintDismiss);
+		await clickIfVisible(page.getByTestId('post-onboarding-share-skip'));
+		await clickIfVisible(page.getByTestId('post-onboarding-survey-skip'));
+		await clickIfVisible(page.getByRole('button', { name: /^(Inte nu|Not now)$/i }));
 
-		if (!(await modal.isVisible().catch(() => false))) {
-			if (!(await hasBlockingOverlay())) {
-				return;
-			}
-			await modal.waitFor({ state: 'visible', timeout: 250 }).catch(() => {});
-			continue;
-		}
-
-		if (await page.getByTestId('page-hint-dismiss').isVisible().catch(() => false)) {
-			await dismissPageHintIfOpen(page);
-		} else {
+		if (await modal.isVisible().catch(() => false)) {
 			const skipByTestId = page.getByTestId('activation-skip').or(page.getByTestId('onboarding-skip'));
-			if (await skipByTestId.isVisible().catch(() => false)) {
-				await skipByTestId.evaluate((button) => (button as HTMLButtonElement).click()).catch(() => {});
-			} else {
-				const postSurveySkip = page.getByRole('button', { name: /^(Inte nu|Not now)$/i });
-				if (await postSurveySkip.first().isVisible().catch(() => false)) {
-					await postSurveySkip.first().click({ force: true, timeout: 1_000 }).catch(() => {});
-				} else {
-					const skip = page.getByRole('button', {
-						name: /^(Hoppa Ã¶ver|Hoppa over|Jag gÃ¶r det senare|Skip)$/i
-					});
-					if (await skip.first().isVisible().catch(() => false)) {
-						await skip.first().click({ force: true, timeout: 1_000 }).catch(() => {});
-					} else {
-						await page.keyboard.press('Escape').catch(() => {});
-					}
-				}
+			const genericSkip = page.getByRole('button', {
+				name: /^(Hoppa Ã¶ver|Hoppa over|Jag gÃ¶r det senare|Skip)$/i
+			});
+			if (!(await clickIfVisible(skipByTestId)) && !(await clickIfVisible(genericSkip))) {
+				await page.keyboard.press('Escape').catch(() => {});
 			}
 		}
 
-		await modal.waitFor({ state: 'hidden', timeout: 1_000 }).catch(() => {});
+		if (!(await hasBlockingOverlay())) {
+			return;
+		}
+		await page.waitForTimeout(100);
 	}
 }
 
