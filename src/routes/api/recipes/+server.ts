@@ -5,10 +5,8 @@ import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { openAiErrorLogDetail, translateOpenAiError } from '$lib/server/openai';
 import { parseMealIntent } from '$lib/domain/recipe';
 import { clampRecipePortions } from '$lib/server/recipe-prompt';
-import { generateRecipesWithRefinement, selectVelocityHints } from '$lib/server/recipe-generation';
-import { upcomingDateRange } from '$lib/server/inventory-context';
+import { generateRecipesWithRefinement, loadRecipeGenerationContext } from '$lib/server/recipe-generation';
 import { normalizePromptLocale } from '$lib/server/ai-prompt-shared';
-import { consumptionRepository } from '$lib/server/di';
 import { translate } from '$lib/i18n/messages';
 import { e2eMockRecipeSuggestions, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 
@@ -25,11 +23,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		preferences?: unknown;
 		portions?: unknown;
 		mealIntent?: unknown;
+		maxRecipes?: unknown;
 	};
 
 	const preferences = typeof body.preferences === 'string' ? body.preferences.trim().slice(0, 300) : '';
 	const portions = clampRecipePortions(body.portions);
 	const mealIntent = parseMealIntent(body.mealIntent);
+	const maxRecipes =
+		typeof body.maxRecipes === 'number' && Number.isFinite(body.maxRecipes)
+			? Math.min(5, Math.max(1, Math.round(body.maxRecipes)))
+			: undefined;
 
 	if (isE2eMockAiEnabled()) {
 		const recipes = e2eMockRecipeSuggestions();
@@ -62,8 +65,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		portions,
 		preferences,
 		mealIntent,
+		...(maxRecipes !== undefined ? { maxRecipes } : {}),
 		locale: normalizePromptLocale(locale),
-		...(await loadRecipeEnrichment(locals, auth.user.id))
+		...(await loadRecipeGenerationContext({
+			userId: auth.user.id,
+			householdId: locals.householdId,
+			mealPlanService: locals.mealPlanService,
+			householdSuggestionsService: locals.householdSuggestionsService,
+			householdService: locals.householdService
+		}))
 	});
 
 	if (!generated.ok) {
@@ -85,43 +95,3 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	return json({ recipes: savedIdeas, portions });
 };
-
-async function loadRecipeEnrichment(
-	locals: App.Locals,
-	userId: string
-): Promise<{
-	plannedMeals: Awaited<ReturnType<typeof locals.mealPlanService.listPlannedMealsByRange>>;
-	recipeIdeas: Awaited<ReturnType<typeof locals.mealPlanService.listRecipeIdeas>>;
-	velocityHints: ReturnType<typeof selectVelocityHints>;
-	householdSize: number;
-	recentlyFinished: string[];
-}> {
-	const { fromDate, toDate } = upcomingDateRange(10);
-	const householdId = locals.householdId;
-	const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-	const [plannedMeals, recipeIdeas, householdSnapshot, recentlyFinished, household] =
-		await Promise.all([
-			locals.mealPlanService.listPlannedMealsByRange(userId, fromDate, toDate),
-			locals.mealPlanService.listRecipeIdeas(userId, 8),
-			householdId
-				? locals.householdSuggestionsService.getSnapshot(householdId)
-				: Promise.resolve(null),
-			householdId
-				? consumptionRepository.listRecentConsumedProductNames(householdId, since, 10)
-				: Promise.resolve([]),
-			locals.householdService.getHouseholdForUser(userId)
-		]);
-
-	const memberCount = household?.members.length ?? 0;
-	const householdSize = memberCount >= 1 && memberCount <= 8 ? memberCount : 2;
-
-	return {
-		plannedMeals,
-		recipeIdeas,
-		velocityHints: householdSnapshot
-			? selectVelocityHints(householdSnapshot.shelfLifeRules)
-			: [],
-		householdSize,
-		recentlyFinished
-	};
-}

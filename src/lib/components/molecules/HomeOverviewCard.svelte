@@ -88,7 +88,7 @@
 	}
 
 	.overview-card.tone-attention {
-		border-color: color-mix(in srgb, var(--color-warning, #c9870a) 35%, var(--color-border));
+		border-color: color-mix(in srgb, var(--color-warning) 35%, var(--color-border));
 	}
 
 	@media (min-width: 720px) and (prefers-reduced-motion: no-preference) {

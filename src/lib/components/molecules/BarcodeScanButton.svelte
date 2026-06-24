@@ -44,7 +44,7 @@
 		border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-border));
 		border-radius: var(--radius-sm);
 		font-size: 0.8rem;
-		color: color-mix(in srgb, var(--color-text) 70%, #6b4a12);
+		color: color-mix(in srgb, var(--color-text) 70%, var(--color-warning));
 		line-height: 1.4;
 	}
 

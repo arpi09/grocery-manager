@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { loginAsAdmin } from './helpers/auth';
-import { expectHomeSectionVisible } from './helpers/home';
+import { expectHomeDashboardVisible } from './helpers/home';
 
 function attachPageErrorGuard(page: import('@playwright/test').Page) {
 	const errors: string[] = [];
@@ -19,7 +19,7 @@ test.describe('Production auth smoke', () => {
 		const response = await page.goto('/hem', { waitUntil: 'domcontentloaded' });
 		expect(response?.status() ?? 0).toBeLessThan(500);
 
-		await expectHomeSectionVisible(page);
+		await expectHomeDashboardVisible(page);
 		await expect(page.locator('body')).not.toContainText('Internal Error', { timeout: 5_000 });
 
 		const errors = collectErrors();

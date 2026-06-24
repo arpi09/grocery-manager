@@ -65,6 +65,8 @@
 	let session = $state<ShoppingTripSession>(defaultShoppingTripSession());
 	let initializedHouseholdId = $state<string | null>(null);
 	let shopDeeplinkHandled = $state(false);
+	let quickParamHandled = $state(false);
+	let joinedParamHandled = $state(false);
 	let legacyOpen = $state(false);
 	let showQuickAdd = $state(false);
 	let acceptingKey = $state<string | null>(null);
@@ -108,6 +110,34 @@
 
 		const url = new URL(page.url);
 		url.searchParams.delete('mode');
+		const next = `${url.pathname}${url.search}${url.hash}`;
+		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
+	});
+
+	$effect(() => {
+		if (!browser || quickParamHandled || page.url.searchParams.get('quick') !== '1') {
+			return;
+		}
+
+		quickParamHandled = true;
+		showQuickAdd = true;
+
+		const url = new URL(page.url);
+		url.searchParams.delete('quick');
+		const next = `${url.pathname}${url.search}${url.hash}`;
+		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
+	});
+
+	$effect(() => {
+		if (!browser || joinedParamHandled || page.url.searchParams.get('joined') !== '1') {
+			return;
+		}
+
+		joinedParamHandled = true;
+		showClientToast(t('shoppingListShare.listaJoinToast'), { variant: 'success' });
+
+		const url = new URL(page.url);
+		url.searchParams.delete('joined');
 		const next = `${url.pathname}${url.search}${url.hash}`;
 		void goto(next, { replaceState: true, keepFocus: true, noScroll: true });
 	});
@@ -356,6 +386,7 @@
 	<ModeToggle
 		mode={session.mode}
 		disabled={!canEdit}
+		shopDisabled={!listHasItems}
 		onchange={(next) => switchMode(next, 'toggle')}
 	/>
 
@@ -374,7 +405,7 @@
 		memberCount={memberCount}
 		uncheckedCount={unchecked.length}
 		checkedCount={checkedCount}
-		{listHasItems}
+		listHasItems={listHasItems}
 	/>
 
 	<TripCompletedInviteBanner memberCount={memberCount} trigger={tripCompletedTrigger} />

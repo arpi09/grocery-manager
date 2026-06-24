@@ -174,15 +174,15 @@
 	}
 
 	.toast-success {
-		background: var(--color-primary);
+		background: var(--color-success);
 		color: var(--color-on-primary);
-		border-color: color-mix(in srgb, var(--color-primary) 80%, #000);
+		border-color: color-mix(in srgb, var(--color-success) 80%, var(--color-text));
 	}
 
 	.toast-error {
 		background: var(--color-danger);
 		color: var(--color-on-primary);
-		border-color: color-mix(in srgb, var(--color-danger) 75%, #000);
+		border-color: color-mix(in srgb, var(--color-danger) 75%, var(--color-text));
 	}
 
 	.toast-info {

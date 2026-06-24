@@ -20,7 +20,7 @@ import type { IBrainPushRepository } from '$lib/infrastructure/repositories/brai
 import type { ILearningFeedbackRepository } from '$lib/infrastructure/repositories/learning-feedback.repository';
 import { generateHomeBriefingOneLiner } from '$lib/server/home-briefing-one-liner';
 import { isBrainProactiveEnabled } from '$lib/server/brain-proactive-flag';
-import { isHomeBriefingAiEnabled } from '$lib/server/brain-feature-flags';
+import { isHomeBriefingAiEnabled } from '$lib/server/feature-flags';
 import { getOpenAiApiKey } from '$lib/server/openai';
 import {
 	generateShoppingSuggestions,

@@ -116,7 +116,7 @@ test.describe('Receipt flow', () => {
 		});
 
 		await loginAsAdmin(page);
-		await page.goto('/scan/kvitto?from=/hem');
+		await page.goto('/scan?from=/hem&mode=receipt');
 		await dismissOnboardingModalIfOpen(page);
 
 		await uploadReceiptPdf(page, FIXTURE_PDF);
@@ -154,19 +154,27 @@ test.describe('Receipt flow', () => {
 		});
 
 		await loginAsAdmin(page);
-		await page.goto('/scan/kvitto?from=/hem');
+		await page.goto('/scan?from=/hem&mode=receipt');
 		await dismissOnboardingModalIfOpen(page);
 
 		await uploadReceiptFile(page, FIXTURE_JPEG);
 
+		await expect(page.getByTestId('receipt-review')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('receipt-line-0')).toBeVisible({ timeout: 15_000 });
+		await page
+			.waitForResponse(
+				(res) =>
+					res.url().includes('/api/inventory/merge-candidates') &&
+					res.request().method() === 'POST',
+				{ timeout: 20_000 }
+			)
+			.catch(() => undefined);
+		const quickConfirm = page.getByTestId('receipt-quick-confirm');
+		await expect(quickConfirm).toBeVisible({ timeout: 15_000 });
+		await expect(quickConfirm).toBeEnabled({ timeout: 30_000 });
+		await quickConfirm.click();
 		await dismissOnboardingModalIfOpen(page);
-		await Promise.all([
-			page.waitForURL(/\/hem(\?|$)/, { timeout: 15_000 }),
-			page.getByTestId('receipt-quick-confirm').click()
-		]);
-
-		await expect(page).toHaveURL(/\/hem(\?|$)/, { timeout: 15_000 });
+		await expect(page).toHaveURL(/\/hem(\?|$)/, { timeout: 20_000 });
 		await expect(page.getByTestId('receipt-import-success')).toBeVisible({ timeout: 10_000 });
 	});
 });

@@ -1,0 +1,35 @@
+/**
+ * Shared social profile logo generator (LinkedIn, Facebook).
+ */
+import { mkdirSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { PRIMARY } from './social-brand.mjs';
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+/**
+ * @param {{ outDir: string; size: number; outFilename: string }} options
+ */
+export async function generateSocialLogo({ outDir, size, outFilename }) {
+	let sharp;
+	try {
+		sharp = (await import('sharp')).default;
+	} catch {
+		console.error('Install sharp first: npm install -D sharp');
+		process.exit(1);
+	}
+
+	mkdirSync(outDir, { recursive: true });
+
+	const faviconSvg = readFileSync(join(root, 'static/favicon.svg'));
+	const outPath = join(outDir, outFilename);
+
+	await sharp(faviconSvg, { density: 300 })
+		.resize(size, size, { fit: 'contain', background: PRIMARY })
+		.flatten({ background: PRIMARY })
+		.png({ compressionLevel: 9 })
+		.toFile(outPath);
+
+	console.log(`Wrote ${outPath} (${size}x${size}, background ${PRIMARY})`);
+}

@@ -463,7 +463,7 @@
 		border: 0;
 		border-radius: var(--radius-sm);
 		background: var(--color-primary);
-		color: #fff;
+		color: var(--color-on-primary);
 		font: inherit;
 		font-weight: 600;
 		cursor: pointer;

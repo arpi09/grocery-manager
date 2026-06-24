@@ -20,6 +20,7 @@ import {
 	parseAdminExportPeriodDays
 } from '$lib/domain/admin-export';
 import { parsePmfFunnelPeriodDays } from '$lib/domain/pmf-funnel';
+import { parseActivationFunnelPeriodDays } from '$lib/domain/activation-funnel';
 import { parseBrainMetricsPeriodDays } from '$lib/domain/brain-metrics-admin';
 import { WAITLIST_LIST_DEFAULT, WAITLIST_LIST_MAX } from '$lib/domain/waitlist';
 import { translate } from '$lib/i18n/messages';
@@ -103,13 +104,19 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 	switch (sectionParam) {
 		case 'analytics': {
 			const funnelDays = parsePmfFunnelPeriodDays(url.searchParams.get('funnelDays'));
-			const [pmfWeeklyReview, pmfFunnel, syncFunnel, acquisition] = await Promise.all([
-				locals.pmfService.getWeeklyReview(),
-				locals.pmfService.getFunnelMetrics(funnelDays),
-				locals.pmfService.getSyncFunnelSnapshot(),
-				locals.pmfService.getAcquisitionMetrics()
-			]);
+			const activationFunnelDays = parseActivationFunnelPeriodDays(
+				url.searchParams.get('activationFunnelDays')
+			);
+			const [activationFunnel, pmfWeeklyReview, pmfFunnel, syncFunnel, acquisition] =
+				await Promise.all([
+					locals.pmfService.getActivationFunnelMetrics(activationFunnelDays),
+					locals.pmfService.getWeeklyReview(),
+					locals.pmfService.getFunnelMetrics(funnelDays),
+					locals.pmfService.getSyncFunnelSnapshot(),
+					locals.pmfService.getAcquisitionMetrics()
+				]);
 			return json({
+				activationFunnel: serializeRow(activationFunnel),
 				pmfWeeklyReview,
 				pmfFunnel,
 				syncFunnel,

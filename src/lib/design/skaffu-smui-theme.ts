@@ -1,39 +1,46 @@
-/** Skaffu ↔ SMUI token bridge — keep in sync with src/theme/_variables.scss and src/app.css */
+/** Skaffu ↔ SMUI token bridge — keep in sync with src/theme/_variables.scss and brand tokens */
 
-import { BRAND_PRIMARY, BRAND_PRIMARY_DARK } from '$lib/design/brand-colors';
+import { brandRadius } from '$lib/design/brand/layout';
+import { BRAND_FONT_STACK } from '$lib/design/brand/typography';
+import { DEFAULT_PALETTE_TRACK, LOCKED_LOGO_CORE, mergePalette } from '$lib/design/brand-colors';
+
+const activePalette = mergePalette(DEFAULT_PALETTE_TRACK);
 
 export const skaffuSmuiTokens = {
 	light: {
-		primary: BRAND_PRIMARY,
-		primaryHover: '#325a42',
-		surface: '#ffffff',
-		surfaceMuted: '#eef2eb',
-		background: '#f7f5f0',
-		onSurface: '#1f2a24',
-		onSurfaceMuted: '#4a5850',
-		error: '#b54a4a',
-		border: '#dde5d8',
-		radiusSm: '8px',
-		radiusMd: '12px',
-		radiusLg: '16px',
-		fontFamily: "'DM Sans', system-ui, sans-serif"
+		primary: activePalette.light.primary,
+		primaryHover: activePalette.light.primaryHover,
+		surface: activePalette.light.surface,
+		surfaceMuted: activePalette.light.surfaceMuted,
+		background: activePalette.light.bg,
+		onSurface: activePalette.light.text,
+		onSurfaceMuted: activePalette.light.textMuted,
+		error: activePalette.light.danger,
+		border: activePalette.light.border,
+		radiusSm: brandRadius.sm,
+		radiusMd: brandRadius.md,
+		radiusLg: brandRadius.lg,
+		fontFamily: BRAND_FONT_STACK
 	},
 	dark: {
-		primary: BRAND_PRIMARY_DARK,
-		primaryHover: '#5aa076',
-		surface: '#1e2621',
-		surfaceMuted: '#273029',
-		background: '#141a17',
-		onSurface: '#e8eee9',
-		onSurfaceMuted: '#a3b0a8',
-		error: '#e07a7a',
-		border: '#3a4540',
-		radiusSm: '8px',
-		radiusMd: '12px',
-		radiusLg: '16px',
-		fontFamily: "'DM Sans', system-ui, sans-serif"
+		primary: activePalette.dark.primary,
+		primaryHover: activePalette.dark.primaryHover,
+		surface: activePalette.dark.surface,
+		surfaceMuted: activePalette.dark.surfaceMuted,
+		background: activePalette.dark.bg,
+		onSurface: activePalette.dark.text,
+		onSurfaceMuted: activePalette.dark.textMuted,
+		error: activePalette.dark.danger,
+		border: activePalette.dark.border,
+		radiusSm: brandRadius.sm,
+		radiusMd: brandRadius.md,
+		radiusLg: brandRadius.lg,
+		fontFamily: BRAND_FONT_STACK
 	}
 } as const;
+
+/** Locked logo core for contexts that must not vary by palette track. */
+export const skaffuLockedLogoCore = LOCKED_LOGO_CORE;
 
 export const skaffuSmuiClassNames = {
 	table: 'skaffu-table',

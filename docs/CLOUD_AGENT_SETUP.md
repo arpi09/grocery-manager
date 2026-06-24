@@ -1,6 +1,6 @@
 # Cloud agent setup — Skaffu
 
-> **PAUSED (2026-06-13):** Cursor Cloud is paused — use coordinator + local agents. See [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md#coordinator-planning).
+> **Active (2026-06):** Use `npm run setup:agent` + `npm run quick:dev` on Linux/cloud. Coordinator workflow: [CURSOR_COORDINATOR.md](./CURSOR_COORDINATOR.md).
 
 **Verdict: PARTIAL — usable for implementation agents, not for full-stack dev or deploy.**
 
@@ -16,31 +16,19 @@ Skaffu is cloud-ready for the same work CI proves on `ubuntu-latest`: lint, type
 
 ---
 
-## Bootstrap (archived — not active workflow)
+## Bootstrap
 
-`npm run cloud:bootstrap` and [`scripts/cloud-agent-bootstrap.sh`](../scripts/cloud-agent-bootstrap.sh) remain in the repo for possible reactivation. **Not** part of the active coordinator workflow while Cloud is paused.
+`npm run cloud:bootstrap` and `npm run setup:agent` both run [`scripts/setup-agent.mjs`](../scripts/setup-agent.mjs) (cross-platform).
 
 ```bash
 # Node 24 — match .nvmrc
-npm run cloud:bootstrap
-```
-
-Or manually:
-
-```bash
-cp .env.example .env   # skip if .env already exists
-# Ensure .env contains at minimum:
-# USE_PGLITE=true
-# PUBLIC_ORIGIN=http://localhost:5173
-# ADMIN_PASSWORD=cloud-agent-dev
-# EMAIL_SENDING_DISABLED=true
-
-npm ci
+npm ci && npm run setup:agent
+npm run dev
 ```
 
 PGlite applies migrations at runtime via `initDatabase()` — `npm run db:migrate` is optional for local PGlite dev.
 
-**Windows note:** `cloud:bootstrap` is a bash script. Cloud agents run Linux/bash. On Windows, use Git Bash or WSL for bootstrap; day-to-day quality gates work via `npm run quality:ci` in any shell.
+**Windows note:** `dev:start:*` is PowerShell-only. Linux/cloud agents use `npm run dev` / `dev:watch` directly.
 
 ---
 

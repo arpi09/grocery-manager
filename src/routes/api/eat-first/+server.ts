@@ -1,17 +1,19 @@
 import { json } from '@sveltejs/kit';
 
 import { resolveEatFirstWeekMealCount } from '$lib/domain/eat-first-week';
-import { EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
-import { filterItemsExpiringWithinDays } from '$lib/domain/expiry-reminder';
-import { isExcludedFromRecipes } from '$lib/domain/recipe-inventory-filter';
+import {
+	getRecipeExpiringContext,
+	mapExpiringItemsPayload
+} from '$lib/domain/recipe-expiring-context';
 import { DEFAULT_RECIPE_PORTIONS, parseMealIntent } from '$lib/domain/recipe';
 import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { openAiErrorLogDetail, translateOpenAiError } from '$lib/server/openai';
 import { clampRecipePortions } from '$lib/server/recipe-prompt';
-import { generateRecipesWithRefinement, selectVelocityHints } from '$lib/server/recipe-generation';
-import { upcomingDateRange } from '$lib/server/inventory-context';
-import { consumptionRepository } from '$lib/server/di';
+import {
+	generateRecipesWithRefinement,
+	loadRecipeGenerationContext
+} from '$lib/server/recipe-generation';
 import { normalizePromptLocale } from '$lib/server/ai-prompt-shared';
 import { translate } from '$lib/i18n/messages';
 import { e2eMockRecipeSuggestions, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
@@ -45,20 +47,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 	}
 
-	const expiringItems = filterItemsExpiringWithinDays(inventory, EXPIRING_SOON_DAYS);
-	const recipeExpiringItems = expiringItems.filter(
-		(item) => !isExcludedFromRecipes(item.name, item.notes)
-	);
-	const expiringItemNames = recipeExpiringItems
-		.map((item) => item.name.trim())
-		.filter(Boolean);
-
-	const expiringItemsPayload = expiringItems.map((item) => ({
-		id: item.id,
-		name: item.name,
-		expiresOn: item.expiresOn,
-		location: item.location
-	}));
+	const { expiringItems, recipeExpiringItems, expiringItemNames } =
+		getRecipeExpiringContext(inventory);
+	const expiringItemsPayload = mapExpiringItemsPayload(expiringItems);
 
 	if (isE2eMockAiEnabled()) {
 		const recipes = e2eMockRecipeSuggestions();
@@ -84,24 +75,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const maxRecipes =
 		scope === 'week' ? resolveEatFirstWeekMealCount(expiringItems.length) : 5;
 
-	const { fromDate, toDate } = upcomingDateRange(10);
-	const householdId = locals.householdId;
-	const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-	const [plannedMeals, recipeIdeas, householdSnapshot, recentlyFinished, household] =
-		await Promise.all([
-			locals.mealPlanService.listPlannedMealsByRange(auth.user.id, fromDate, toDate),
-			locals.mealPlanService.listRecipeIdeas(auth.user.id, 8),
-			householdId
-				? locals.householdSuggestionsService.getSnapshot(householdId)
-				: Promise.resolve(null),
-			householdId
-				? consumptionRepository.listRecentConsumedProductNames(householdId, since, 10)
-				: Promise.resolve([]),
-			locals.householdService.getHouseholdForUser(auth.user.id)
-		]);
-
-	const memberCount = household?.members.length ?? 0;
-	const householdSize = memberCount >= 1 && memberCount <= 8 ? memberCount : 2;
+	const recipeContext = await loadRecipeGenerationContext({
+		userId: auth.user.id,
+		householdId: locals.householdId,
+		mealPlanService: locals.mealPlanService,
+		householdSuggestionsService: locals.householdSuggestionsService,
+		householdService: locals.householdService
+	});
 
 	const generated = await generateRecipesWithRefinement({
 		apiKey,
@@ -113,13 +93,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		maxRecipes,
 		mealIntent,
 		locale: normalizePromptLocale(locale),
-		plannedMeals,
-		recipeIdeas,
-		velocityHints: householdSnapshot
-			? selectVelocityHints(householdSnapshot.shelfLifeRules)
-			: [],
-		householdSize,
-		recentlyFinished
+		...recipeContext
 	});
 
 	if (!generated.ok) {

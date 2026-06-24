@@ -10,7 +10,8 @@
 	import { scanToastMessage } from '$lib/utils/scan-toast';
 	import { bindEmbeddedScanSubmit } from '$lib/utils/scan-embedded-submit';
 	import { page } from '$app/state';
-	import { recordReceiptActivation } from '$lib/utils/onboarding';
+	import { recordOnboardingScanSaveSync } from '$lib/utils/activation-scan-save';
+	import { recordReceiptActivation, shouldShowOnboarding } from '$lib/utils/onboarding';
 	import {
 		prepareReceiptFileForUpload,
 		RECEIPT_CAMERA_ACCEPT,
@@ -65,6 +66,7 @@
 		/** Pending share-target file key from POST /scan/share. */
 		shareKey?: string | null;
 		shareError?: string | null;
+		bulkSaveError?: boolean;
 	}
 
 	let {
@@ -79,7 +81,8 @@
 		initialParseResult = null,
 		autopick = false,
 		shareKey = null,
-		shareError = null
+		shareError = null,
+		bulkSaveError = false
 	}: Props = $props();
 
 	const bulkFormAction = $derived(formAction ?? '?/bulkCreate');
@@ -305,6 +308,27 @@
 
 	function countSelectedLinesWithPrice(): number {
 		return lines.filter((line, index) => selected[index] && line.unitPrice?.trim()).length;
+	}
+
+	function recordReceiptSaveActivation(userId: string | undefined) {
+		if (!userId) {
+			return;
+		}
+
+		if (shouldShowOnboarding(userId)) {
+			const items = buildReceiptLineContexts()
+				.filter((ctx) => ctx.selected)
+				.slice(0, 3)
+				.map((ctx) => ({
+					name: ctx.line.name,
+					location: ctx.lineLocation,
+					expiresOn: ctx.lineExpiresOn || null
+				}));
+			recordOnboardingScanSaveSync(userId, items);
+			return;
+		}
+
+		recordReceiptActivation(userId);
 	}
 
 	function buildReceiptImportSummary() {
@@ -615,6 +639,11 @@
 
 {:else}
 	<section data-testid="receipt-review">
+		{#if bulkSaveError}
+			<div data-testid="receipt-bulk-save-error">
+				<FeedbackBanner tone="error" message={t('receiptBulk.saveFailed')} />
+			</div>
+		{/if}
 		<h2 class="title">{t('receiptBulk.selectItems', { selected: selectedCount, total: lines.length })}</h2>
 		{#if parsedStoreLabel || parsedPurchasedAt}
 			<p class="receipt-meta" data-testid="receipt-review-meta">
@@ -703,7 +732,7 @@
 								importSource,
 								aggregateReceiptBrainStats(buildReceiptLineContexts(), qualityReport ?? undefined)
 							);
-							recordReceiptActivation(page.data.user?.id);
+							recordReceiptSaveActivation(page.data.user?.id);
 						},
 						syncReceiptBulkFormData
 					)}

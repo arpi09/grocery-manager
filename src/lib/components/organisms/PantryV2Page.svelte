@@ -22,6 +22,7 @@
 
 	let searchQuery = $state('');
 	let insightsSnapshot = $state<InventoryInsightsSnapshot | null>(null);
+	let insightsLoading = $state(true);
 	let insightsDeepening = $state(false);
 	let insightsDeepenError = $state<string | null>(null);
 
@@ -57,7 +58,7 @@
 	);
 	const missingExpiryCount = $derived(countMissingExpiry(items));
 	const missingExpiryHref = '/inventory/all?filter=noExpiry';
-	const bulkExpiryHref = canWrite ? '/inventory/all?filter=noExpiry' : null;
+	const bulkInferAction = canWrite ? '/inventory/all?/bulkInferExpiry' : null;
 
 	$effect(() => {
 		if (!browser) {
@@ -76,6 +77,7 @@
 
 	$effect(() => {
 		if (!browser || loadFailed) return;
+		insightsLoading = true;
 		void fetch('/api/inventory/insights')
 			.then((response) => (response.ok ? response.json() : null))
 			.then((payload) => {
@@ -85,6 +87,9 @@
 			})
 			.catch(() => {
 				insightsSnapshot = null;
+			})
+			.finally(() => {
+				insightsLoading = false;
 			});
 	});
 
@@ -100,13 +105,20 @@
 <div class="pantry-v2-page" data-testid="pantry-v2-page">
 	<PantryShelfActions bind:query={searchQuery} {canWrite} returnTo="/inventory" />
 
-	{#if insightsSnapshot}
+	{#if insightsLoading}
+		<InventoryInsightsPanel
+			loading
+			insights={[]}
+			missingExpiryCount={0}
+			estimatedCount={0}
+		/>
+	{:else if insightsSnapshot}
 		<InventoryInsightsPanel
 			insights={insightsSnapshot.insights}
 			missingExpiryCount={insightsSnapshot.missingExpiryCount}
 			estimatedCount={insightsSnapshot.estimatedCount}
 			{canWrite}
-			{bulkExpiryHref}
+			{bulkInferAction}
 			onDeepen={deepenInsights}
 			deepening={insightsDeepening}
 			deepenError={insightsDeepenError}
@@ -117,7 +129,7 @@
 		<MissingExpiryFilterChip
 			count={missingExpiryCount}
 			href={missingExpiryHref}
-			actionHref={bulkExpiryHref}
+			bulkInferAction={bulkInferAction}
 			actionLabel={canWrite ? t('inventory.bulkExpiryAction') : null}
 		/>
 	{/if}
@@ -165,7 +177,7 @@
 		width: 100%;
 		border: 1px dashed var(--color-border);
 		border-radius: var(--radius-lg);
-		background: color-mix(in srgb, var(--color-danger, #c0392b) 8%, var(--color-surface));
+		background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
 		color: var(--color-text);
 		font: inherit;
 		font-size: 0.875rem;

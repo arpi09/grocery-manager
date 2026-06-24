@@ -1,6 +1,7 @@
 <script lang="ts">
 	import MemorySuggestionList from '$lib/components/molecules/MemorySuggestionList.svelte';
 	import TripSummaryPills from '$lib/components/molecules/TripSummaryPills.svelte';
+	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import type { ReplenishmentSuggestion } from '$lib/domain/replenishment';
 	import { buildPlanHeaderTitle } from '$lib/domain/shopping-v2-presenter';
 	import { sortUncheckedItems } from '$lib/domain/shopping-trip';
@@ -41,6 +42,7 @@
 	const header = $derived(buildPlanHeaderTitle(tripLabel));
 	const uncheckedCount = $derived(sortUncheckedItems(items).length);
 	const hasMemory = $derived(suggestions.length > 0);
+	const showEmptyExtras = $derived(uncheckedCount > 0 || hasMemory);
 
 	const subtitle = $derived.by(() => {
 		if (uncheckedCount === 0) {
@@ -65,38 +67,42 @@
 	</header>
 
 	{#if uncheckedCount === 0}
-		<div class="plan-illus" aria-label={t('shopping.v2.plan.illustrationAria')}>
-			<img
-				src="/illustrations/v2/shopping-plan.svg"
-				alt=""
-				width="280"
-				height="140"
-				aria-hidden="true"
-			/>
-		</div>
+		<EmptyState
+			title={t('shopping.v2.plan.emptyTitle')}
+			description={t('shopping.v2.plan.emptyBody')}
+			iconId="shopping"
+			actionLabel={canEdit ? t('shopping.v2.plan.emptyCta') : undefined}
+			actionVariant="primary"
+			onAction={canEdit ? onAddItem : undefined}
+			primaryAnalyticsId="shopping.v2.plan.empty_add"
+		/>
 	{/if}
 
-	{#if showReceiptLead}
+	{#if showReceiptLead && showEmptyExtras}
 		<p class="receipt-lead" role="status">{t('shopping.v2.receiptLead')}</p>
 	{/if}
 
-	{#if canEdit}
+	{#if canEdit && showEmptyExtras}
 		<div class="receipt-import-cta" data-testid="inkop-receipt-one-tap">
-			<a class="btn btn-secondary btn-full" href={receiptOneTapHref('/inkop')}>
+			<p class="receipt-import-lead">{t('receiptAutomation.oneTapLead')}</p>
+			<a class="btn btn-primary btn-full" href={receiptOneTapHref('/inkop')}>
 				{t('receiptAutomation.oneTapCta')}
 			</a>
 		</div>
 	{/if}
 
-	<MemorySuggestionList
-		{suggestions}
-		{items}
-		{canEdit}
-		{acceptingKey}
-		{dismissingKey}
-		onAccept={onAcceptSuggestion}
-		onDismiss={onDismissSuggestion}
-	/>
+	{#if showEmptyExtras}
+		<MemorySuggestionList
+			{suggestions}
+			{items}
+			{canEdit}
+			{acceptingKey}
+			{dismissingKey}
+			deemphasizeCadence={true}
+			onAccept={onAcceptSuggestion}
+			onDismiss={onDismissSuggestion}
+		/>
+	{/if}
 
 	<TripSummaryPills {items} {canEdit} {onStartShop} {onAddItem} />
 
@@ -132,16 +138,6 @@
 		font-size: 0.9375rem;
 		color: var(--color-text-muted);
 		line-height: 1.45;
-	}
-
-	.plan-illus {
-		display: flex;
-		justify-content: center;
-	}
-
-	.plan-illus img {
-		width: min(100%, 280px);
-		height: auto;
 	}
 
 	.receipt-lead {

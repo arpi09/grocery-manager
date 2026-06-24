@@ -3,14 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
-	import BrainHomeCard from '$lib/components/molecules/BrainHomeCard.svelte';
-	import BrainTimelineCard from '$lib/components/molecules/BrainTimelineCard.svelte';
-	import WastePreventedCard from '$lib/components/molecules/WastePreventedCard.svelte';
-	import ReplenishmentSection from '$lib/components/organisms/ReplenishmentSection.svelte';
 	import HomeV2BriefingView from '$lib/components/organisms/HomeV2BriefingView.svelte';
-	import type { BrainScoreSnapshot } from '$lib/domain/brain-score';
-	import type { BrainTimelineEntry } from '$lib/domain/brain-timeline';
-	import type { WastePreventedSnapshot } from '$lib/domain/waste-prevented';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 	import {
@@ -52,10 +45,6 @@
 		pantryUxV2Enabled?: boolean;
 		shoppingUxV2Enabled?: boolean;
 		loadFailed?: boolean;
-		brainScore?: BrainScoreSnapshot | null;
-		brainFeedbackV1?: boolean;
-		brainTimeline?: BrainTimelineEntry[];
-		wastePrevented?: WastePreventedSnapshot | null;
 	}
 
 	let {
@@ -71,11 +60,7 @@
 		canWrite = false,
 		pantryUxV2Enabled = false,
 		shoppingUxV2Enabled = false,
-		loadFailed = false,
-		brainScore = null,
-		brainFeedbackV1 = false,
-		brainTimeline = [],
-		wastePrevented = null
+		loadFailed = false
 	}: Props = $props();
 
 	let acceptingReplenishment = $state(false);
@@ -179,25 +164,6 @@
 			{t('home.v6.error.loadFailed')}
 		</button>
 	{:else}
-		{#if brainScore && brainScore.score > 0}
-			<BrainHomeCard snapshot={brainScore} />
-		{/if}
-		{#if wastePrevented}
-			<WastePreventedCard snapshot={wastePrevented} />
-		{/if}
-		{#if brainTimeline && brainTimeline.length > 0}
-			<BrainTimelineCard entries={brainTimeline} />
-		{/if}
-		{#if intelligence.replenishment.length > 1}
-			<ReplenishmentSection
-				suggestions={intelligence.replenishment.slice(1)}
-				dedupeByKey={intelligence.dedupeByKey}
-				canEdit={canWrite}
-				surface="hem"
-				compact
-				brainFeedbackV1={brainFeedbackV1}
-			/>
-		{/if}
 		<HomeV2BriefingView
 			{summary}
 			{intelligence}
@@ -231,7 +197,7 @@
 		width: 100%;
 		border: 1px dashed var(--color-border);
 		border-radius: var(--radius-lg);
-		background: color-mix(in srgb, var(--color-danger, #c0392b) 8%, var(--color-surface));
+		background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
 		color: var(--color-text);
 		font: inherit;
 		font-size: 0.875rem;

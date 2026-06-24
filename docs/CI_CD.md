@@ -1,8 +1,8 @@
-# CI/CD — trunk-baserad pipeline (home-pantry)
+# CI/CD — PR-first pipeline (home-pantry)
 
-**Merge till `master` = snabb CI (~3–5 min).** Produktion deployas **manuellt** via Actions → **Deploy to production**. Se [DEPLOY.md](./DEPLOY.md).
+**PR → merge till `master` = snabb CI (~3–5 min).** Produktion deployas **manuellt** via Actions → **Deploy to production**. Se [DEPLOY.md](./DEPLOY.md).
 
-**Relaterat:** [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md) · [DEPLOY.md](./DEPLOY.md)
+**Relaterat:** [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md) · [DEPLOY.md](./DEPLOY.md) · [CHANGELOG.md](./CHANGELOG.md) · [RELEASES.md](./RELEASES.md) · [PR workflow](../.cursor/rules/pr-workflow.mdc)
 
 ---
 
@@ -99,11 +99,13 @@ Regel för coordinator: [`.cursor/rules/nightly-e2e-guard.mdc`](../.cursor/rules
 | Steg | Kommando / åtgärd | Väntetid |
 |------|-------------------|----------|
 | **G0 lokalt** | `npm run quick:dev` — **aldrig** `pr:gate` före push | ~2–3 min |
+| **Branch** | `feat/*` eller `fix/*` — **aldrig** direkt till `master` | — |
 | **Svelte/typning only** | `npm run quick:check` eller `quick:types` | ~1–2 min |
 | **TS/JS only** | `npm run quick:lint` | ~30–60 s |
 | **Server/DB touched** | `npm run quality:integration` (eller valfritt `gate:fast` + integration) | ~5–10 min |
-| **Commit + push** | Merge till `master` | — |
-| **CI** | Vänta grön `pr-gate / pr-gate` (tiered) | ~2–5 min |
+| **Öppna PR** | `gh pr create` mot `master` (mall: `.github/pull_request_template.md`) | ~2 min |
+| **CI** | Vänta grön `pr-gate / pr-gate` (+ PR E2E om core-loop) | ~2–5 min |
+| **Merge** | Merge PR — `changelog-on-merge` uppdaterar `docs/CHANGELOG.md` | ~30 s |
 | **Deploy** | Coordinator: `gh workflow run deploy.yml` eller Actions UI | ~8–35 min |
 | **Prod claim** | Coordinator kör [PROD_SMOKE.md](./PROD_SMOKE.md) — inte användaren | — |
 
@@ -112,10 +114,11 @@ Regel för coordinator: [`.cursor/rules/nightly-e2e-guard.mdc`](../.cursor/rules
 När uppgiften är klar:
 
 1. **G0 lokalt:** `npm run quick:dev` (plus `npm run quality:integration` om server actions/DB rörts; E2E endast om tilldelad).
-2. **Commit + push/merge till `master`.**
+2. **Öppna PR** mot `master` från `feat/*` / `fix/*` — se [`.cursor/rules/pr-workflow.mdc`](../.cursor/rules/pr-workflow.mdc).
 3. **Vänta på grön CI** (~2–5 min tiered) — inte full E2E/deploy.
-4. **Deploy (coordinator):** Actions → **Deploy to production** (eller `gh workflow run deploy.yml`).
-5. **Efter grön deploy:** coordinator kör [PROD_SMOKE.md](./PROD_SMOKE.md) och uppdaterar CURRENT_REALITY från deploy summary — inte användaren.
+4. **Merge PR** — CHANGELOG uppdateras automatiskt (utom Dependabot — se [Dependabot](#dependabot-pr-metadata--changelog)).
+5. **Deploy (coordinator):** Actions → **Deploy to production** (eller `gh workflow run deploy.yml`) — CalVer GitHub Release skapas efter lyckad deploy.
+6. **Efter grön deploy:** coordinator kör [PROD_SMOKE.md](./PROD_SMOKE.md) och uppdaterar CURRENT_REALITY från deploy summary — inte användaren.
 
 ---
 
@@ -126,7 +129,11 @@ När uppgiften är klar:
 | [`.github/workflows/reusable-quality.yml`](../.github/workflows/reusable-quality.yml) | *(reusable)* | `workflow_call` från CI, E2E och deploy |
 | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | **CI** | `push` / `pull_request` → `master`/`main` |
 | [`.github/workflows/e2e.yml`](../.github/workflows/e2e.yml) | **E2E** | PR → `master`/`main`; `workflow_dispatch`; schedule 03:00 UTC |
-| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | **Deploy to production** | `workflow_dispatch`; `push` → `master` när **endast** `content/guides/**` ändrats |
+| [`.github/workflows/changelog-on-merge.yml`](../.github/workflows/changelog-on-merge.yml) | **Changelog on merge** | Merged PR → `master` — append `docs/CHANGELOG.md` |
+| [`.github/workflows/changelog-deps-monthly.yml`](../.github/workflows/changelog-deps-monthly.yml) | **Changelog deps monthly** | 1st of month + manual — rollup merged `dependencies` PRs |
+| [`.github/workflows/dependabot-automerge.yml`](../.github/workflows/dependabot-automerge.yml) | **Dependabot auto-merge** | Patch/minor grouped deps → auto-merge when `pr-gate` green |
+| [`.github/dependabot.yml`](../.github/dependabot.yml) | *(Dependabot)* | Weekly npm groups; labels + assignee |
+| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | **Deploy to production** | `workflow_dispatch`; `push` → `master` när **endast** `content/guides/**` ändrats; CalVer release efter lyckad deploy |
 
 Deploy-kedja: `gate` → `quality` (reusable + **CI SHA-gate**) → `e2e` (matrix 3 shards) → `deploy` → **`post-deploy smoke`** → **`verify-release`**. Varje shard laddar ner samma `sveltekit-build`-artifact från `quality`. Smoke curl:ar `/`, `/login`, `/guider` och failar på fel HTTP **eller** fel HTML (`Internal Error`, SvelteKit 500).
 
@@ -170,22 +177,42 @@ Dessa inställningar stoppar upprepning av incidenten. **Checklista för repo-ä
 
 | Åtgärd | Var | Varför |
 |--------|-----|--------|
-| **Branch protection** på `master` | GitHub → Settings → Branches | Kräv status check **`quality / quality`** (CI workflow via reusable-quality) före merge |
+| **Allow auto-merge** | GitHub → Settings → General | Krävs för Dependabot patch/minor auto-merge — se [Dependabot](#dependabot--pr-metadata--changelog) |
+| **Branch protection** på `master` | GitHub → Settings → Branches | Kräv status check **`pr-gate / pr-gate`** + **Require pull request** (0 approvals OK solo) |
 | **Stäng av Firebase Console auto-deploy** | Firebase → App Hosting → GitHub | En deploy-källa: Actions only |
 | **`FIREBASE_TOKEN` + `PRODUCTION_URL`** | GitHub Secrets/Variables | Deploy och smoke måste fungera |
 | **Required reviewers** (valfritt) | Branch protection | Mänskligt deploy-beslut för stora releases |
 
 Agentregel: [`.cursor/rules/deploy-safety.mdc`](../.cursor/rules/deploy-safety.mdc).
 
-## Branch protection (valfritt)
+## Branch protection (rekommenderat)
 
 | Inställning | Rekommendation solo | Varför |
 |-------------|---------------------|--------|
-| Require PR | Valfritt | Trunk-flöde fungerar med direkt push |
-| Require status check `quality / quality` (CI workflow) | **Rekommenderat** | Blockerar merge/deploy på trasig lint/test/build; krävs för G1b SHA-gate |
-| Require status check `e2e` | Valfritt | Långsammare — deploy-workflow kör E2E ändå |
+| Require pull request | **Ja** (0 approvals OK) | Reviewbar historik; agent-regel — se [pr-workflow.mdc](../.cursor/rules/pr-workflow.mdc) |
+| Require status check `pr-gate / pr-gate` | **Rekommenderat** | Blockerar merge/deploy på trasig lint/test/build; krävs för G1b SHA-gate |
+| Require status check `e2e` | **Nej** | Långsammare — deploy-workflow kör E2E ändå |
 | Require status check deploy `post-deploy smoke` | Ej möjligt solo | Smoke körs bara i deploy-workflow efter Firebase |
-| Do not allow bypassing | Av för solo | Du behöver kunna pusha direkt |
+| Do not allow bypass | Valfritt | Sätt av om du vill tvinga PR även för ägare |
+
+Valfritt script: [`scripts/github/apply-branch-protection.sh`](../scripts/github/apply-branch-protection.sh) (`gh api`).
+
+## Dependabot — PR metadata & CHANGELOG
+
+Weekly npm updates via [`.github/dependabot.yml`](../.github/dependabot.yml). Details: [DEPENDENCY_HEALTH.md](./DEPENDENCY_HEALTH.md).
+
+| Mechanism | Behavior |
+|-----------|----------|
+| **Labels** | `dependencies`, `dependencies:production`, `dependencies:development`, `dependencies:major` |
+| **Assignee** | `arpi09` on all Dependabot PRs |
+| **Auto-merge** | Grouped patch/minor when `pr-gate / pr-gate` green — [dependabot-automerge.yml](../.github/workflows/dependabot-automerge.yml) |
+| **Major** | Label `dependencies:major` — manual review, no auto-merge |
+| **CHANGELOG per PR** | Skipped for deps (`dependencies` label or `chore(deps)` title) |
+| **CHANGELOG monthly** | [changelog-deps-monthly.yml](../.github/workflows/changelog-deps-monthly.yml) — one rollup line under `[Unreleased]` |
+
+**Owner (engångs):** GitHub → Settings → General → **Allow auto-merge**. Without this, `gh pr merge --auto` is a no-op.
+
+Deps merge to `master` does **not** trigger prod deploy — same manual deploy discipline as feature PRs.
 
 ---
 
@@ -377,7 +404,16 @@ BASE_URL=https://skaffu.com bash scripts/smoke-prod-urls.sh
 | `.github/workflows/reusable-quality.yml` | Delad G1 — lint, guards, test, build, artifact |
 | `.github/workflows/ci.yml` | G1 — snabb CI vid push/PR |
 | `.github/workflows/e2e.yml` | G2 — E2E på PR, manuellt, nattligt |
-| `.github/workflows/deploy.yml` | G1b → G2 → G3 → G4 → G5 — prod-deploy |
+| `.github/workflows/deploy.yml` | G1b → G2 → G3 → G4 → G5 — prod-deploy + CalVer GitHub Release |
+| `.github/workflows/changelog-on-merge.yml` | Append CHANGELOG vid merged PR |
+| `.github/workflows/changelog-deps-monthly.yml` | Monthly deps rollup i CHANGELOG |
+| `.github/workflows/dependabot-automerge.yml` | Auto-merge grouped Dependabot patch/minor |
+| `.github/dependabot.yml` | Weekly npm Dependabot config |
+| `scripts/changelog-deps-monthly.mjs` | Merged `dependencies` PRs → en CHANGELOG-rad |
+| `scripts/generate-release-notes.mjs` | Release notes mellan taggar (lokal: `npm run release:notes`) |
+| `docs/CHANGELOG.md` | Rolling merge-logg |
+| `docs/RELEASES.md` | CalVer-index efter deploy |
+| `.cursor/rules/pr-workflow.mdc` | Agent — PR-first, aldrig direkt push master |
 | `scripts/check-client-bundle.mjs` | G2b — klientbundle efter build |
 | `scripts/check-server-imports.mjs` | G1 — statisk server-import guard |
 | `.cursor/rules/deploy-safety.mdc` | Agent — aldrig falskt "deployed" |

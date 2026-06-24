@@ -33,6 +33,12 @@ env:
       - BUILD
       - RUNTIME
 
+  # Active brand palette track — generates brand-colors.generated.css at build (Fas 2)
+  - variable: BRAND_PALETTE
+    value: fresh
+    availability:
+      - BUILD
+
   # Public URL of the deployed app (current production). PUBLIC_ORIGIN and ORIGIN must match
   # the canonical HTTPS origin users open in the browser.
   - variable: PUBLIC_ORIGIN
@@ -241,6 +247,27 @@ env:
     availability:
       - RUNTIME
   - variable: STORE_RECOMMENDATION_V0_ENABLED
+    value: "true"
+    availability:
+      - RUNTIME
+  # Brain backend — explicit on (code default-on when absent; listed for prod clarity)
+  - variable: RECEIPT_AI_BATCH_ENABLED
+    value: "true"
+    availability:
+      - RUNTIME
+  - variable: GLOBAL_SHELF_LIFE_DB_ENABLED
+    value: "true"
+    availability:
+      - RUNTIME
+  - variable: RECIPE_REFINEMENT_ENABLED
+    value: "true"
+    availability:
+      - RUNTIME
+  - variable: PHOTO_VALIDATION_ENABLED
+    value: "true"
+    availability:
+      - RUNTIME
+  - variable: AUTO_FINISH_ENABLED
     value: "true"
     availability:
       - RUNTIME

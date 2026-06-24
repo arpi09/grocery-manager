@@ -46,10 +46,6 @@
 
 
 				loadFailed={Boolean(data.loadFailed)}
-				brainScore={data.brainScore}
-				brainFeedbackV1={Boolean(data.brainFeedbackV1Enabled)}
-				brainTimeline={data.brainTimeline}
-				wastePrevented={data.wastePrevented}
 			/>
 
 		{:else}

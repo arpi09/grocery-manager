@@ -4,9 +4,9 @@
 
 | F?lt | V?rde |
 |------|--------|
-| **Uppdaterad** | 2026-06-21 |
-| **Prod SHA** | `a629f892a` @ [27915091760](https://github.com/arpi09/grocery-manager/actions/runs/27915091760) (live, deploy_tier=fast). |
-| **Master SHA** | `a629f892a` — acquisition/statistik/inventory + engineering-health hardening; CI green @ [27914996732](https://github.com/arpi09/grocery-manager/actions/runs/27914996732). |
+| **Uppdaterad** | 2026-06-24 |
+| **Prod SHA** | `a9ddaabca` @ [28083527659](https://github.com/arpi09/grocery-manager/actions/runs/28083527659) (live, deploy_tier=fast). |
+| **Master SHA** | `a9ddaabca` — Fas A activation funnel, receipt wow, overlay coordinator, deploy-critical E2E green. |
 | **CI/CD model** | **v2 on master** � tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
@@ -41,13 +41,13 @@ Utg?ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenis
 
 ## Kill switches & experiments
 
-Flags live in `apphosting.yaml` on **master** (source of truth). **Deploy = publish** ? no post-merge flag flip. See [RELEASE_MODEL.md](./RELEASE_MODEL.md).
+Flags live in `apphosting.yaml` on **master** (source of truth). **Deploy = publish** — no post-merge flag flip. See [RELEASE_MODEL.md](./RELEASE_MODEL.md).
+
+**Full flag matrix (env, code default, prod, layout booleans, UI/data gates):** [FEATURE_FLAGS.md](./FEATURE_FLAGS.md).
 
 Kill switches / Tier C (expect **off** unless noted): `EMAIL_SENDING_DISABLED`, `STRIPE_CHECKOUT_DISABLED`, `PUBLIC_CITY_FEED_ENABLED`, `KIVRA_FORWARD_ENABLED`.
 
-Product flags (Brain, W1 share, receipt estimates) follow master `apphosting.yaml`; merge ships the final value.
-
-**Prod product flags (on @ `ab46f3c49` / apphosting.yaml):** `HOME_REDESIGN_V1_ENABLED`, `PRICE_MEMORY_V1_ENABLED`, `BRAIN_FEEDBACK_V1_ENABLED`, `SHOPPING_UX_V2_ENABLED` (canary live), `PANTRY_UX_V2_ENABLED` (canary live), `HOME_UX_V2_ENABLED` (canary live), `SHELF_LIFE_LEARNING_ENABLED`, `LOCATION_LEARNING_ENABLED`, `REPLENISHMENT_LEARNING_ENABLED`, `PUBLIC_SHOPPING_LIST_SHARE_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT`. **Off:** `STORE_RECOMMENDATION_V0_ENABLED`, `STRIPE_CHECKOUT_DISABLED`, Tier C (`PUBLIC_CITY_FEED`, `KIVRA_FORWARD`).
+Product flags (Brain, UX v2, W1 share, receipt estimates) follow master `apphosting.yaml`; merge ships the final value. @ prod `7e9440304`: UX v2 + Brain learning/feedback/proactive **on**; `STRIPE_CHECKOUT_DISABLED` **on**; Tier C off. Backend-only flags (`RECEIPT_AI_BATCH`, `GLOBAL_SHELF_LIFE_DB`, …) effective **on** via code default when absent from yaml — see FEATURE_FLAGS.md.
 
 
 ## Brain capabilities today

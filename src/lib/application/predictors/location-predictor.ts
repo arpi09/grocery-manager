@@ -12,7 +12,7 @@ import type {
 	PredictionContext,
 	PredictionResult
 } from '$lib/domain/learning/predictor-types';
-import { isLocationLearningEnabled } from '$lib/server/location-learning-flag';
+import { isLocationLearningEnabled } from '$lib/server/feature-flags';
 
 export class LocationPredictor implements Predictor<LocationPredictionInput, LocationPredictionValue> {
 	readonly id = 'location' as const;

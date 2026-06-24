@@ -13,8 +13,7 @@ import {
 import { ShoppingToPantryReadOnlyError } from '$lib/application/shopping-to-pantry.service';
 import { parseAddShoppingListItem } from '$lib/validation/shopping-list.schemas';
 import { translate, type MessageKey } from '$lib/i18n/messages';
-import { rankReplenishmentSuggestions } from '$lib/server/replenishment-rank';
-import { loadReplenishmentFeedbackBlock } from '$lib/server/brain-feedback-context';
+import { rankReplenishmentWithFeedback } from '$lib/server/replenishment-rank';
 import { learningFeedbackRepository } from '$lib/server/di';
 import { loadAutoFillPendingForInkop } from '$lib/server/auto-smart-fill';
 import { takeAutoFillPending } from '$lib/server/auto-fill-pending';
@@ -28,7 +27,6 @@ import {
 } from '$lib/server/shopping-suggestions';
 import { recordProductEvent } from '$lib/server/product-events';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
-import { isReplenishmentRankEnabled } from '$lib/server/brain-feature-flags';
 import { isShoppingUxV2Enabled } from '$lib/server/shopping-ux-v2-flag';
 import { detectDedupeWarningsForKeys } from '$lib/domain/dedupe-autopilot';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
@@ -60,33 +58,28 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		};
 	}
 
-	const [items, checkedCount, intelligence, shoppingToPantryMode] = await Promise.all([
+	const [items, checkedCount, shoppingToPantryMode] = await Promise.all([
 		locals.shoppingListService.listUncheckedItems(householdId),
 		locals.shoppingListService.countCheckedItems(householdId),
-		locals.inventoryIntelligenceService.getHomeIntelligence(householdId),
 		user ? locals.shoppingToPantryService.getMode(user.id) : Promise.resolve('ask' as ShoppingToPantryMode)
 	]);
 
-	let replenishmentSuggestions = intelligence.replenishment;
-	if (isReplenishmentRankEnabled()) {
-		const apiKey = getOpenAiApiKey();
-		if (apiKey && replenishmentSuggestions.length > 3) {
-			const replenishmentFeedbackBlock = await loadReplenishmentFeedbackBlock(
-				learningFeedbackRepository,
+	const e2eMockAi = isE2eMockAiEnabled();
+	const intelligence = e2eMockAi
+		? { replenishment: [], dedupeByKey: {} }
+		: await locals.inventoryIntelligenceService.getHomeIntelligence(householdId);
+
+	const replenishmentSuggestions = e2eMockAi
+		? []
+		: await rankReplenishmentWithFeedback(intelligence.replenishment, {
 				householdId,
-				locals.locale
-			);
-			replenishmentSuggestions = await rankReplenishmentSuggestions(
-				apiKey,
-				replenishmentSuggestions,
-				locals.locale,
-				{ replenishmentFeedbackBlock }
-			);
-		}
-	}
+				locale: locals.locale,
+				learningFeedbackRepository,
+				apiKey: getOpenAiApiKey()
+			});
 
 	let autoFillPending: Awaited<ReturnType<typeof loadAutoFillPendingForInkop>> = null;
-	if (user && locals.householdRole) {
+	if (!e2eMockAi && user && locals.householdRole) {
 		try {
 			autoFillPending = await loadAutoFillPendingForInkop({
 				householdId,
@@ -105,23 +98,26 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		}
 	}
 
-	const [inventoryItems, dedupeContext] = await Promise.all([
-		locals.inventoryService.listAll(householdId),
-		locals.purchasePatternService.getDedupeContext(householdId)
-	]);
-	const activeItems = inventoryItems.filter((item) => !isItemFinished(item));
-	const storeDedupeKeys = [
-		...new Set(
-			items
-				.map((item) => normalizeReceiptProductName(item.name))
-				.filter((key) => key.length > 0)
-		)
-	];
-	const storeDedupeByKey = detectDedupeWarningsForKeys(storeDedupeKeys, {
-		activeItems,
-		recentLines: dedupeContext.recentLines,
-		listNormalizedNames: dedupeContext.listNormalizedNames
-	});
+	let storeDedupeByKey: ReturnType<typeof detectDedupeWarningsForKeys> = {};
+	if (!e2eMockAi) {
+		const [inventoryItems, dedupeContext] = await Promise.all([
+			locals.inventoryService.listAll(householdId),
+			locals.purchasePatternService.getDedupeContext(householdId)
+		]);
+		const activeItems = inventoryItems.filter((item) => !isItemFinished(item));
+		const storeDedupeKeys = [
+			...new Set(
+				items
+					.map((item) => normalizeReceiptProductName(item.name))
+					.filter((key) => key.length > 0)
+			)
+		];
+		storeDedupeByKey = detectDedupeWarningsForKeys(storeDedupeKeys, {
+			activeItems,
+			recentLines: dedupeContext.recentLines,
+			listNormalizedNames: dedupeContext.listNormalizedNames
+		});
+	}
 
 	return {
 		user,

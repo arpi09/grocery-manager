@@ -69,6 +69,14 @@
 		{#if activeTab === 'overview'}
 			<AdminHealthDashboard stats={data.stats} />
 
+			<section class="feature-flags-link">
+				<Card>
+					<h2>{t('admin.featureFlags.link')}</h2>
+					<p class="feature-flags-note">{t('admin.featureFlags.readOnlyNote')}</p>
+					<a class="btn btn-secondary" href="/admin/feature-flags">{t('admin.featureFlags.title')}</a>
+				</Card>
+			</section>
+
 			<section class="email-settings">
 				<Card>
 					<h2>{t('admin.emailSending.title')}</h2>
@@ -245,6 +253,16 @@
 
 	.email-settings {
 		margin-bottom: var(--space-lg);
+	}
+
+	.feature-flags-link {
+		margin-bottom: var(--space-lg);
+	}
+
+	.feature-flags-note {
+		margin: 0 0 var(--space-md);
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
 	}
 
 	.email-settings-note,

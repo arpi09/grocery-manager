@@ -131,10 +131,10 @@
 	}
 
 	.waitlist-status.success {
-		color: var(--color-success, #15803d);
+		color: var(--color-success);
 	}
 
 	.waitlist-status.error {
-		color: var(--color-danger, #b91c1c);
+		color: var(--color-danger);
 	}
 </style>

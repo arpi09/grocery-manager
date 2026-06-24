@@ -7,6 +7,7 @@ function mockPmfRepository() {
 		recordEvent: vi.fn().mockResolvedValue(undefined),
 		getGlobalMetrics: vi.fn(),
 		getFunnelMetrics: vi.fn(),
+		getActivationFunnelMetrics: vi.fn(),
 		getLaunchCohortSignups: vi.fn(),
 		hasHouseholdEvent: vi.fn(),
 		countHouseholdEventsSince: vi.fn(),

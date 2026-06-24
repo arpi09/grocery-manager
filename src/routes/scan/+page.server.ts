@@ -579,7 +579,7 @@ export const actions: Actions = {
 				selectedCount,
 				message: err instanceof Error ? err.message : String(err)
 			});
-			throw err;
+			return fail(500, { bulkSaveError: true });
 		}
 	}
 };

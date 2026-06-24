@@ -101,7 +101,7 @@
 		if (!open) {
 			return;
 		}
-		return registerBlockingOverlay();
+		return registerBlockingOverlay('celebration');
 	});
 </script>
 

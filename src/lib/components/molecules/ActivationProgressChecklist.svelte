@@ -1,5 +1,15 @@
 <script lang="ts">
-	import { ACTIVATION_PROGRESS_KEYS } from '$lib/utils/onboarding-steps';
+	import type { Component } from 'svelte';
+	import type { IconProps } from '@lucide/svelte';
+	import {
+		BookOpen,
+		Check,
+		Home,
+		Package,
+		Receipt,
+		ShoppingCart
+	} from '@lucide/svelte';
+	import { ACTIVATION_PROGRESS_KEYS, ACTIVATION_SCREEN_COUNT } from '$lib/utils/onboarding-steps';
 	import type { ActivationProgressMilestone } from '$lib/utils/activation-onboarding-state';
 	import { t, type MessageKey } from '$lib/i18n';
 
@@ -27,11 +37,35 @@
 		shopping: 'onboarding.activation.progress.shopping'
 	};
 
+	const stepIcons: Record<ActivationProgressMilestone, Component<IconProps>> = {
+		welcome: Home,
+		firstScan: Receipt,
+		pantryCreated: Package,
+		brain: BookOpen,
+		shopping: ShoppingCart
+	};
+
+	const nodeRefs = $state<Partial<Record<ActivationProgressMilestone, HTMLButtonElement>>>({});
+
+	const activeKey = $derived(preview ?? current);
+	const activeStepIndex = $derived(
+		activeKey ? ACTIVATION_PROGRESS_KEYS.indexOf(activeKey) : 0
+	);
+	const activeStepNumber = $derived(activeStepIndex + 1);
+
 	function isActive(key: ActivationProgressMilestone): boolean {
 		if (preview) {
 			return preview === key;
 		}
 		return current === key;
+	}
+
+	function isConnectorFilled(index: number): boolean {
+		if (index <= 0) {
+			return false;
+		}
+		const previousKey = ACTIVATION_PROGRESS_KEYS[index - 1];
+		return checklist[previousKey];
 	}
 
 	function handleSelect(key: ActivationProgressMilestone) {
@@ -40,154 +74,226 @@
 		}
 		onSelect(key);
 	}
+
+	$effect(() => {
+		void activeKey;
+		const el = activeKey ? nodeRefs[activeKey] : undefined;
+		if (!el) {
+			return;
+		}
+		el.scrollIntoView({
+			behavior: 'smooth',
+			block: 'nearest',
+			inline: 'center'
+		});
+	});
 </script>
 
-<ol class="progress-checklist" aria-label={t('onboarding.activation.progressAria')}>
-	{#each ACTIVATION_PROGRESS_KEYS as key, index (key)}
-		{@const selectable = canSelect(key)}
-		{@const done = checklist[key]}
-		{@const active = isActive(key)}
-		{@const future = !done && !active}
-		<li class="progress-item-wrap">
-			<button
-				type="button"
-				class="progress-item"
-				class:done
-				class:current={active}
-				class:future
-				class:selectable={selectable}
-				disabled={!selectable}
-				aria-disabled={!selectable}
-				aria-current={active ? 'step' : undefined}
-				aria-label={future
-					? `${t(progressLabelKeys[key])} — ${t('onboarding.activation.progressStepDisabled')}`
-					: t(progressLabelKeys[key])}
-				data-testid={`activation-progress-${key}`}
-				onclick={() => handleSelect(key)}
-			>
-				<span class="progress-marker" aria-hidden="true">
-					{#if done}
-						<svg class="check-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-							<path
-								d="M3 8.5 L6.5 12 L13 4"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg>
-					{:else}
-						<span class="step-number">{index + 1}</span>
-					{/if}
-				</span>
-				<span class="progress-label" class:label-hidden={future && !active}>
-					{t(progressLabelKeys[key])}
-				</span>
-			</button>
-		</li>
-	{/each}
-</ol>
+<div class="progress-path-shell">
+	<p class="step-counter" data-testid="activation-progress-counter">
+		{t('onboarding.stepOf', {
+			current: activeStepNumber,
+			total: ACTIVATION_SCREEN_COUNT
+		})}
+	</p>
+
+	<div class="progress-path-scroll">
+		<ol class="progress-path" aria-label={t('onboarding.activation.progressAria')}>
+			{#each ACTIVATION_PROGRESS_KEYS as key, index (key)}
+				{@const selectable = canSelect(key)}
+				{@const done = checklist[key]}
+				{@const active = isActive(key)}
+				{@const future = !done && !active}
+				{@const StepIcon = stepIcons[key]}
+				{#if index > 0}
+					<li
+						class="connector-wrap"
+						aria-hidden="true"
+						class:connector-filled={isConnectorFilled(index)}
+					>
+						<div class="connector">
+							<div class="connector-fill"></div>
+						</div>
+					</li>
+				{/if}
+				<li class="progress-step">
+					<button
+						type="button"
+						class="progress-node"
+						class:done
+						class:current={active}
+						class:future
+						class:selectable={selectable}
+						disabled={!selectable}
+						aria-disabled={!selectable}
+						aria-current={active ? 'step' : undefined}
+						aria-label={future
+							? `${t(progressLabelKeys[key])} — ${t('onboarding.activation.progressStepDisabled')}`
+							: t(progressLabelKeys[key])}
+						data-testid={`activation-progress-${key}`}
+						bind:this={nodeRefs[key]}
+						onclick={() => handleSelect(key)}
+					>
+						<span class="node-marker" aria-hidden="true">
+							{#if done}
+								<Check size={14} strokeWidth={2.5} class="check-icon" />
+							{:else}
+								<StepIcon size={14} strokeWidth={2.25} />
+							{/if}
+						</span>
+					</button>
+
+					<span
+						class="progress-label"
+						class:label-current={active}
+						class:label-done={done}
+						title={t(progressLabelKeys[key])}
+					>
+						{t(progressLabelKeys[key])}
+					</span>
+				</li>
+			{/each}
+		</ol>
+	</div>
+</div>
 
 <style>
-	.progress-checklist {
+	.progress-path-shell {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-xs);
-		margin: 0;
-		padding: 0;
-		list-style: none;
 		flex-shrink: 0;
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		padding-bottom: var(--space-xs);
+		background: var(--color-surface);
 	}
 
-	@media (max-width: 767px) {
-		.progress-checklist {
-			gap: 0.125rem;
-		}
-	}
-
-	.progress-item-wrap {
+	.step-counter {
 		margin: 0;
-		padding: 0;
-		list-style: none;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+		text-align: center;
 	}
 
-	.progress-item {
+	.progress-path-scroll {
+		overflow-x: auto;
+		scroll-snap-type: x proximity;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+	}
+
+	.progress-path-scroll::-webkit-scrollbar {
+		display: none;
+	}
+
+	.progress-path {
+		display: flex;
+		align-items: flex-start;
+		gap: 0;
+		margin: 0;
+		padding: 0 var(--space-xs);
+		list-style: none;
+		min-width: min(100%, 20rem);
+	}
+
+	.progress-step {
+		flex: 0 0 3.5rem;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+		scroll-snap-align: center;
+	}
+
+	.connector-wrap {
+		flex: 1 1 0.5rem;
+		min-width: 0.5rem;
 		display: flex;
 		align-items: center;
-		gap: var(--space-sm);
+		align-self: center;
+		margin-top: -1.125rem;
+		list-style: none;
+	}
+
+	.connector {
+		flex: 1;
+		height: 2px;
+		background: var(--color-border);
+		position: relative;
+	}
+
+	.connector-fill {
+		position: absolute;
+		left: 0;
+		top: 0;
+		height: 100%;
+		width: 0;
+		background: var(--color-primary);
+		transition: width 400ms cubic-bezier(0.33, 1, 0.68, 1);
+	}
+
+	.connector-filled .connector-fill {
 		width: 100%;
-		min-height: var(--touch-target-min);
-		padding: 0.125rem 0;
-		border: none;
-		background: transparent;
+	}
+
+	.progress-node {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2rem;
+		height: 2rem;
+		flex-shrink: 0;
+		margin-inline: auto;
+		padding: 0;
+		border: 2px solid var(--color-border);
+		border-radius: 999px;
+		background: var(--color-surface);
 		color: var(--color-text-muted);
-		font-size: 0.8125rem;
-		font-weight: 500;
-		text-align: left;
 		cursor: default;
-		border-radius: var(--radius-sm);
-		transition: color 180ms ease, background-color 180ms ease;
+		transition:
+			border-color 200ms ease,
+			background-color 200ms ease,
+			color 200ms ease,
+			transform 200ms ease;
 	}
 
-	@media (max-width: 767px) {
-		.progress-item {
-			min-height: 2rem;
-			font-size: 0.75rem;
-			gap: var(--space-xs);
-		}
-	}
-
-	.progress-item.selectable:not(:disabled) {
+	.progress-node.selectable:not(:disabled) {
 		cursor: pointer;
 	}
 
-	.progress-item.selectable:not(:disabled):hover {
+	.progress-node.selectable:not(:disabled):hover {
 		background: color-mix(in srgb, var(--color-primary) 6%, transparent);
 	}
 
-	.progress-item.selectable:not(:disabled):active {
-		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
-	}
-
-	.progress-item.selectable:not(:disabled):focus-visible {
+	.progress-node.selectable:not(:disabled):focus-visible {
 		outline: 2px solid var(--color-primary);
 		outline-offset: 2px;
 	}
 
-	.progress-item.done {
-		color: var(--color-text);
-	}
-
-	.progress-item.current {
+	.progress-node.done {
+		border-color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 12%, transparent);
 		color: var(--color-primary);
-		font-weight: 600;
 	}
 
-	.progress-item.future:not(.current) {
-		opacity: 0.55;
+	.progress-node.current {
+		border-color: var(--color-primary);
+		color: var(--color-primary);
+		transform: scale(1.06);
+		box-shadow: 0 0 0 1px var(--color-primary);
 	}
 
-	.progress-marker {
+	.progress-node.future:not(.current) {
+		opacity: 0.65;
+	}
+
+	.node-marker {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 1.25rem;
-		height: 1.25rem;
-		border-radius: 999px;
-		border: 2px solid var(--color-border);
-		flex-shrink: 0;
-		transition:
-			border-color 200ms ease,
-			background-color 200ms ease,
-			box-shadow 200ms ease;
-	}
-
-	.step-number {
-		font-size: 0.6875rem;
-		font-weight: 700;
-		line-height: 1;
-		color: var(--color-text-muted);
 	}
 
 	.check-icon {
@@ -205,37 +311,26 @@
 		}
 	}
 
-	.progress-item.done .progress-marker {
-		border-color: var(--color-primary);
-		background: color-mix(in srgb, var(--color-primary) 12%, transparent);
-		color: var(--color-primary);
-	}
-
-	.progress-item.current .progress-marker {
-		border-color: var(--color-primary);
-		animation: current-pulse 2s ease-in-out infinite;
-	}
-
-	@keyframes current-pulse {
-		0%,
-		100% {
-			box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 0%, transparent);
-		}
-		50% {
-			box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
-		}
-	}
-
-	.progress-label.label-hidden {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
+	.progress-label {
+		font-size: 0.65rem;
+		font-weight: 500;
+		line-height: 1.2;
+		color: var(--color-text-muted);
+		text-align: center;
+		max-width: 100%;
 		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
+		text-overflow: ellipsis;
 		white-space: nowrap;
-		border: 0;
+		padding-inline: 0.125rem;
+	}
+
+	.progress-label.label-done {
+		color: var(--color-text);
+	}
+
+	.progress-label.label-current {
+		color: var(--color-primary);
+		font-weight: 600;
 	}
 
 	@media (prefers-reduced-motion: reduce) {
@@ -243,15 +338,12 @@
 			animation: none;
 		}
 
-		.progress-item.current .progress-marker {
-			animation: none;
-		}
-
-		.progress-item {
+		.progress-node {
 			transition: none;
+			transform: none;
 		}
 
-		.progress-marker {
+		.connector-fill {
 			transition: none;
 		}
 	}

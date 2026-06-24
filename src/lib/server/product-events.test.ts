@@ -23,6 +23,7 @@ function mockPmfRepository(overrides: Partial<IPmfRepository> = {}): IPmfReposit
 		recordEvent: vi.fn(),
 		getGlobalMetrics: vi.fn(),
 		getFunnelMetrics: vi.fn(),
+		getActivationFunnelMetrics: vi.fn(),
 		getLaunchCohortSignups: vi.fn(),
 		hasHouseholdEvent: vi.fn(),
 		countHouseholdEventsSince: vi.fn(),
@@ -36,7 +37,7 @@ function mockPmfRepository(overrides: Partial<IPmfRepository> = {}): IPmfReposit
 		getBrainMetricsSince: vi.fn(),
 		listBrainTimelineEvents: vi.fn().mockResolvedValue([]),
 		...overrides
-	};
+	} as IPmfRepository;
 }
 
 function createCookieJar(initial: Record<string, string> = {}) {

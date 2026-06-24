@@ -411,7 +411,10 @@
 		.modal-panel--center,
 		.modal-panel--sheet {
 			animation: none;
-			transform: none;
+		}
+
+		.modal-panel--center {
+			transform: translate(-50%, -50%);
 		}
 	}
 </style>

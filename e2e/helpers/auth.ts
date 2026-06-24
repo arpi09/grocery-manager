@@ -148,21 +148,29 @@ async function fillBoundInput(input: import('@playwright/test').Locator, value: 
 export async function dismissCookieConsentIfOpen(page: Page) {
 	const dialog = page.locator('[aria-labelledby="cookie-consent-title"]');
 	if (await dialog.isVisible().catch(() => false)) {
-		await page
-			.getByRole('button', { name: /Endast n\u00f6dv\u00e4ndiga|Godk\u00e4nn/i })
+		await dialog
+			.getByRole('button', { name: /^Godkänn$/i })
 			.first()
 			.click({ force: true });
 		await dialog.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
 	}
 }
 
+export async function dismissReceiptSuccessIfOpen(page: Page) {
+	const modal = page.getByTestId('receipt-import-success');
+	if (await modal.isVisible().catch(() => false)) {
+		await page.keyboard.press('Escape').catch(() => {});
+		await modal.waitFor({ state: 'hidden', timeout: 2_000 }).catch(() => {});
+	}
+}
+
 export async function dismissPostOnboardingShareIfOpen(page: Page) {
 	const skip = page.getByTestId('post-onboarding-share-skip');
 	if (await skip.isVisible().catch(() => false)) {
-		await skip.click({ force: true });
+		await skip.click({ force: true, timeout: 1_000 }).catch(() => {});
 		await page
 			.locator('.post-onboarding-share-panel')
-			.waitFor({ state: 'hidden', timeout: 10_000 })
+			.waitFor({ state: 'hidden', timeout: 1_000 })
 			.catch(() => {});
 	}
 }
@@ -170,86 +178,85 @@ export async function dismissPostOnboardingShareIfOpen(page: Page) {
 export async function dismissPageHintIfOpen(page: Page) {
 	const dismiss = page.getByTestId('page-hint-dismiss');
 	if (await dismiss.isVisible().catch(() => false)) {
-		await dismiss.click({ force: true });
-		await page.locator('.page-hint-panel').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+		await dismiss.click({ force: true, timeout: 1_000 }).catch(() => {});
+		await page.locator('.page-hint-panel').waitFor({ state: 'hidden', timeout: 1_000 }).catch(() => {});
+		return;
+	}
+
+	const gotIt = page.getByRole('button', { name: /^Jag förstår$/i });
+	if (await gotIt.isVisible().catch(() => false)) {
+		await gotIt.click({ force: true, timeout: 1_000 }).catch(() => {});
+		await page.locator('.page-hint-panel').waitFor({ state: 'hidden', timeout: 1_000 }).catch(() => {});
+	}
+}
+
+export async function dismissMobileMoreNavIfOpen(page: Page) {
+	const close = page.getByRole('button', { name: /^Stäng$/i });
+	if (await close.isVisible().catch(() => false)) {
+		await close.click({ force: true, timeout: 1_000 }).catch(() => {});
 	}
 }
 
 export async function dismissPostOnboardingSurveyIfOpen(page: Page) {
 	const skipByTestId = page.getByTestId('post-onboarding-survey-skip');
 	if (await skipByTestId.isVisible().catch(() => false)) {
-		await skipByTestId.click({ force: true });
-		await page.locator('.post-onboarding-survey-panel').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+		await skipByTestId.click({ force: true, timeout: 1_000 }).catch(() => {});
+		await page.locator('.post-onboarding-survey-panel').waitFor({ state: 'hidden', timeout: 1_000 }).catch(() => {});
 		return;
 	}
 
 	const skip = page.getByRole('button', { name: /^(Inte nu|Not now)$/i });
 	if (await skip.first().isVisible().catch(() => false)) {
-		await skip.first().click({ force: true });
-		await page.locator('.post-onboarding-survey-panel').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+		await skip.first().click({ force: true, timeout: 1_000 }).catch(() => {});
+		await page.locator('.post-onboarding-survey-panel').waitFor({ state: 'hidden', timeout: 1_000 }).catch(() => {});
 	}
 }
 
 export async function dismissOnboardingModalIfOpen(page: Page) {
-	await dismissCookieConsentIfOpen(page);
-	await dismissPostOnboardingSurveyIfOpen(page);
-	await dismissPostOnboardingShareIfOpen(page);
-
 	const modal = page.locator('.modal-root').first();
 	const pageHintDismiss = page.getByTestId('page-hint-dismiss');
+	const clickIfVisible = async (locator: ReturnType<Page['locator']>) => {
+		const target = locator.first();
+		if (await target.isVisible().catch(() => false)) {
+			await target.click({ force: true, timeout: 750 }).catch(() => {});
+			return true;
+		}
+		return false;
+	};
 	const hasBlockingOverlay = async () =>
 		(await modal.isVisible().catch(() => false)) ||
+		(await page.getByTestId('receipt-import-success').isVisible().catch(() => false)) ||
 		(await pageHintDismiss.isVisible().catch(() => false)) ||
+		(await page.getByRole('button', { name: /^Jag förstår$/i }).isVisible().catch(() => false)) ||
 		(await page.getByTestId('post-onboarding-survey-skip').isVisible().catch(() => false)) ||
-		(await page.getByTestId('post-onboarding-share-skip').isVisible().catch(() => false));
+		(await page.getByTestId('post-onboarding-share-skip').isVisible().catch(() => false)) ||
+		(await page.getByRole('button', { name: /^(Inte nu|Not now)$/i }).first().isVisible().catch(() => false));
 
-	if (!(await hasBlockingOverlay())) {
-		await expect
-			.poll(hasBlockingOverlay, { timeout: 500, intervals: [50, 100, 150] })
-			.toBe(true)
-			.catch(() => undefined);
+	const deadline = Date.now() + 5_000;
+	while (Date.now() < deadline) {
+		await dismissCookieConsentIfOpen(page);
+		await clickIfVisible(pageHintDismiss);
+		await clickIfVisible(page.getByRole('button', { name: /^Jag förstår$/i }));
+		await dismissMobileMoreNavIfOpen(page);
+		await clickIfVisible(page.getByTestId('post-onboarding-share-skip'));
+		await clickIfVisible(page.getByTestId('post-onboarding-survey-skip'));
+		await dismissReceiptSuccessIfOpen(page);
+		await clickIfVisible(page.getByRole('button', { name: /^(Inte nu|Not now)$/i }));
+
+		if (await modal.isVisible().catch(() => false)) {
+			const skipByTestId = page.getByTestId('activation-skip').or(page.getByTestId('onboarding-skip'));
+			const genericSkip = page.getByRole('button', {
+				name: /^(Hoppa Ã¶ver|Hoppa over|Jag gÃ¶r det senare|Skip)$/i
+			});
+			if (!(await clickIfVisible(skipByTestId)) && !(await clickIfVisible(genericSkip))) {
+				await page.keyboard.press('Escape').catch(() => {});
+			}
+		}
+
 		if (!(await hasBlockingOverlay())) {
 			return;
 		}
-	}
-
-	const deadline = Date.now() + 8_000;
-	while (Date.now() < deadline) {
-		await dismissPageHintIfOpen(page);
-		await dismissPostOnboardingShareIfOpen(page);
-
-		if (!(await modal.isVisible().catch(() => false))) {
-			if (!(await hasBlockingOverlay())) {
-				return;
-			}
-			await modal.waitFor({ state: 'visible', timeout: 500 }).catch(() => {});
-			continue;
-		}
-
-		if (await page.getByTestId('page-hint-dismiss').isVisible().catch(() => false)) {
-			await dismissPageHintIfOpen(page);
-		} else {
-			const skipByTestId = page.getByTestId('activation-skip').or(page.getByTestId('onboarding-skip'));
-			if (await skipByTestId.isVisible().catch(() => false)) {
-				await skipByTestId.evaluate((button) => (button as HTMLButtonElement).click());
-			} else {
-				const postSurveySkip = page.getByRole('button', { name: /^(Inte nu|Not now)$/i });
-				if (await postSurveySkip.first().isVisible().catch(() => false)) {
-					await postSurveySkip.first().click({ force: true });
-				} else {
-					const skip = page.getByRole('button', {
-						name: /^(Hoppa Ã¶ver|Hoppa over|Jag gÃ¶r det senare|Skip)$/i
-					});
-					if (await skip.first().isVisible().catch(() => false)) {
-						await skip.first().click({ force: true });
-					} else {
-						await page.keyboard.press('Escape');
-					}
-				}
-			}
-		}
-
-		await modal.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+		await page.waitForTimeout(100);
 	}
 }
 

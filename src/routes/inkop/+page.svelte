@@ -47,9 +47,7 @@
 	let receiptSessionOpen = $state(false);
 	let showReceiptImportLead = $state(false);
 
-	const suggestionsOpen = $derived(
-		fromReceipt || receiptSessionOpen || hasSuggestions || !listHasItems
-	);
+	const suggestionsOpen = $derived(fromReceipt || receiptSessionOpen);
 
 	$effect(() => {
 		if (!browser) {
@@ -179,7 +177,8 @@
 
 				{#if data.canEdit}
 					<div class="receipt-one-tap" data-testid="inkop-receipt-one-tap-legacy">
-						<a class="btn btn-secondary btn-full" href={receiptOneTapHref('/inkop')}>
+						<p class="receipt-import-lead">{t('receiptAutomation.oneTapLead')}</p>
+						<a class="btn btn-primary btn-full" href={receiptOneTapHref('/inkop')}>
 							{t('receiptAutomation.oneTapCta')}
 						</a>
 					</div>
@@ -230,6 +229,13 @@
 									surface="inkop"
 									brainFeedbackV1={Boolean(data.brainFeedbackV1Enabled)}
 								/>
+							{:else}
+								<div class="replenishment-empty" data-testid="replenishment-empty-state">
+									<p>{t('shopping.v2.memory.empty')}</p>
+									<a class="btn btn-secondary" href={receiptOneTapHref('/inkop')}>
+										{t('shopping.emptyAction')}
+									</a>
+								</div>
 							{/if}
 						</div>
 					</details>
@@ -351,6 +357,20 @@
 		gap: var(--space-md);
 
 		padding: 0 0.85rem 0.85rem;
+	}
+
+	.replenishment-empty {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--space-sm);
+	}
+
+	.replenishment-empty p {
+		margin: 0;
+		font-size: 0.9375rem;
+		line-height: 1.45;
+		color: var(--color-text-muted);
 	}
 
 	.readonly {

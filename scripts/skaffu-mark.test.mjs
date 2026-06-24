@@ -20,7 +20,7 @@ describe('skaffu-mark', () => {
 		);
 		expect(appLogo).not.toContain('mark-leaf');
 		expect(appLogo).toContain('width="32" height="32" rx="8"');
-		expect(appLogo).toContain('fill="#d4a853"');
+		expect(appLogo).toContain('fill="var(--color-accent)"');
 	});
 
 	it('buildMarkGroup scales and positions the mark', () => {

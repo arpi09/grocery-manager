@@ -27,6 +27,7 @@
 				"/api/shopping/data",
 				"/api/shopping-suggestions",
 				"/api/shopping-list/share",
+				"/api/shopping/quick-add",
 				"/api/replenishment/accept",
 				"/api/replenishment/dismiss"
 			],
@@ -57,6 +58,7 @@
 			"apiOnlyRoutes": [
 				"/inventory/foto",
 				"/api/inventory/data",
+				"/api/inventory/insights",
 				"/api/inventory/merge-candidates",
 				"/api/inventory/photo-scan",
 				"/api/inventory/staleness",
@@ -89,7 +91,9 @@
 				"/scan/snabbstart",
 				"/scan/share",
 				"/api/receipt/parse",
+				"/api/receipt/autopilot-v2",
 				"/api/receipt/share-pending",
+				"/api/inbound/receipt",
 				"/api/receipt-autopilot/accept",
 				"/api/receipt-autopilot/dismiss",
 				"/api/receipt-autopilot/finish",
@@ -120,6 +124,10 @@
 				"/api/planer/ideas/dismiss",
 				"/api/planer/schedule-idea",
 				"/api/planer/weekly-ritual/approve",
+				"/api/brain/meal-skip",
+				"/api/brain/pantry-fix",
+				"/api/brain/recipe-cook",
+				"/api/brain/weekly-plan",
 				"/api/recipes",
 				"/api/recipes/add-missing"
 			],
@@ -278,6 +286,7 @@
 			"label": "Admin & PMF",
 			"routes": [
 				"/admin",
+				"/admin/feature-flags",
 				"/admin/guide-preview/[id]"
 			],
 			"apiOnlyRoutes": [
@@ -290,6 +299,7 @@
 			],
 			"paths": [
 				"src/routes/admin/+page.svelte",
+				"src/routes/admin/feature-flags/+page.svelte",
 				"src/lib/application/pmf-dashboard.service.ts"
 			]
 		},
@@ -349,10 +359,12 @@
 				"/api/cron/auto-expiry-sweep",
 				"/api/cron/expiry-reminders",
 				"/api/cron/pmf-weekly",
+				"/api/cron/pre-shop-briefing",
 				"/api/cron/reset-demo",
 				"/api/cron/shelf-life-backfill",
 				"/api/cron/shopping-push",
-				"/api/cron/skaffurapport"
+				"/api/cron/skaffurapport",
+				"/api/cron/weekly-household-briefing"
 			],
 			"paths": [
 				"src/hooks.server.ts",
@@ -383,6 +395,22 @@
 				"docs/EMAIL.md"
 			],
 			"doc": "docs/EMAIL.md"
+		},
+		{
+			"id": "brand",
+			"label": "Brand palette reference (Fas 2)",
+			"routes": [
+				"/brand"
+			],
+			"paths": [
+				"src/routes/brand/+page.svelte",
+				"src/routes/brand/+page.ts",
+				"src/lib/design/brand-colors.ts",
+				"src/lib/design/brand-colors.generated.css",
+				"scripts/generate-brand-css.mts",
+				"docs/BRAND.md"
+			],
+			"doc": "docs/BRAND.md"
 		},
 		{
 			"id": "platform",

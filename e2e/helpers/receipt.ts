@@ -40,19 +40,41 @@ async function uploadViaHook(page: Page, payload: FilePayload) {
 	}, payload);
 }
 
-async function uploadViaFileInput(page: Page, file: UploadFile) {
-	const input = page.getByTestId('receipt-file-input');
+async function uploadViaFileInput(page: Page, payload: FilePayload) {
 	const parseDone = page.waitForResponse(
 		(res) => res.url().includes('/api/receipt/parse') && res.request().method() === 'POST',
-		{ timeout: 20_000 }
+		{ timeout: 25_000 }
 	);
-	await input.setInputFiles(file);
-	await input.evaluate((el: HTMLInputElement) => {
-		el.dispatchEvent(new Event('input', { bubbles: true }));
-		el.dispatchEvent(new Event('change', { bubbles: true }));
-	});
+
+	await page.evaluate((filePayload) => {
+		const input = document.querySelector<HTMLInputElement>('[data-testid="receipt-file-input"]');
+		if (!input) {
+			throw new Error('receipt-file-input missing');
+		}
+		const bytes = Uint8Array.from(atob(filePayload.base64), (char) => char.charCodeAt(0));
+		const upload = new File([bytes], filePayload.name, { type: filePayload.mimeType });
+		const transfer = new DataTransfer();
+		transfer.items.add(upload);
+		input.files = transfer.files;
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+	}, payload);
+
 	const response = await parseDone;
 	expect(response.ok()).toBe(true);
+}
+
+async function waitForReceiptUploadHook(page: Page, timeoutMs = 20_000): Promise<boolean> {
+	try {
+		await page.waitForFunction(
+			() =>
+				typeof (window as Window & { __hpE2eReceiptUpload?: unknown }).__hpE2eReceiptUpload ===
+				'function',
+			{ timeout: timeoutMs }
+		);
+		return true;
+	} catch {
+		return false;
+	}
 }
 
 /** Upload receipt file; uses dev E2E hook when available. */
@@ -60,33 +82,18 @@ export async function uploadReceiptFile(page: Page, file: UploadFile) {
 	await expect(page.getByTestId('receipt-file-input')).toBeAttached({ timeout: 15_000 });
 
 	const payload = toFilePayload(file);
-	const hookReady = page.waitForFunction(
-		() =>
-			typeof (window as Window & { __hpE2eReceiptUpload?: unknown }).__hpE2eReceiptUpload ===
-			'function',
-		{ timeout: 15_000 }
-	);
-
 	const parseDone = page.waitForResponse(
 		(res) => res.url().includes('/api/receipt/parse') && res.request().method() === 'POST',
 		{ timeout: 25_000 }
 	);
 
-	await hookReady;
-
-	const hasHook = await page.evaluate(
-		() =>
-			typeof (window as Window & { __hpE2eReceiptUpload?: unknown }).__hpE2eReceiptUpload ===
-			'function'
-	);
-
-	if (hasHook) {
+	if (await waitForReceiptUploadHook(page)) {
 		await uploadViaHook(page, payload);
 		await parseDone;
 		return;
 	}
 
-	await uploadViaFileInput(page, file);
+	await uploadViaFileInput(page, payload);
 }
 
 export async function uploadReceiptPdf(page: Page, pdfPath: string) {

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
-	import SceneIllustration from '$lib/components/atoms/SceneIllustration.svelte';
 	import HomeBriefingMomentScene from '$lib/components/molecules/HomeBriefingMomentScene.svelte';
 	import type { HomeBriefingMessagePresentation } from '$lib/domain/home-briefing-presenter';
 	import { t } from '$lib/i18n';
@@ -15,7 +14,6 @@
 		ctaHref?: string | null;
 		ctaLoading?: boolean;
 		showActionButton?: boolean;
-		showPantryIllustration?: boolean;
 		onCta?: () => void | Promise<void>;
 	}
 
@@ -29,7 +27,6 @@
 		ctaHref = null,
 		ctaLoading = false,
 		showActionButton = false,
-		showPantryIllustration = false,
 		onCta
 	}: Props = $props();
 
@@ -45,18 +42,14 @@
 	data-for-you-kind={variant === 'forYou' ? kind : undefined}
 	data-moment-kind={variant === 'moment' ? kind : undefined}
 >
-	{#if variant === 'moment' && showPantryIllustration}
-		<div class="pantry-illus">
-			<SceneIllustration src="/illustrations/v2/pantry-shelf.svg" decorative width={200} height={150} />
-		</div>
-	{:else if variant === 'moment'}
-		<HomeBriefingMomentScene />
-	{:else}
+	{#if variant === 'forYou'}
 		<div class="suggestion-accent" aria-hidden="true">
 			<span class="accent-bar"></span>
 			<span class="accent-shape shape-a"></span>
 			<span class="accent-shape shape-b"></span>
 		</div>
+	{:else}
+		<HomeBriefingMomentScene />
 	{/if}
 
 	<h2 class="suggestion-title">{t(title.key, title.params)}</h2>
@@ -86,18 +79,12 @@
 		overflow: hidden;
 	}
 
-	.pantry-illus {
-		margin: calc(-1 * var(--space-sm)) calc(-1 * var(--space-md)) 0;
-		padding: var(--space-sm) var(--space-md) 0;
-		background: color-mix(in srgb, var(--color-accent, #8a9a7b) 6%, var(--color-surface));
-	}
-
 	.suggestion-accent {
 		position: relative;
 		height: 40px;
 		margin: calc(-1 * var(--space-sm)) calc(-1 * var(--space-md)) 0;
 		overflow: hidden;
-		background: color-mix(in srgb, var(--color-accent, #8a9a7b) 8%, var(--color-surface));
+		background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
 	}
 
 	.accent-bar {
@@ -105,10 +92,10 @@
 		inset: 0;
 		background: linear-gradient(
 			90deg,
-			color-mix(in srgb, var(--color-accent, #8a9a7b) 0%, transparent) 0%,
-			color-mix(in srgb, var(--color-accent, #8a9a7b) 35%, transparent) 35%,
-			color-mix(in srgb, var(--color-taupe, #c4b8a8) 30%, transparent) 65%,
-			color-mix(in srgb, var(--color-accent, #8a9a7b) 0%, transparent) 100%
+			color-mix(in srgb, var(--color-accent) 0%, transparent) 0%,
+			color-mix(in srgb, var(--color-accent) 35%, transparent) 35%,
+			color-mix(in srgb, var(--color-taupe) 30%, transparent) 65%,
+			color-mix(in srgb, var(--color-accent) 0%, transparent) 100%
 		);
 		background-size: 200% 100%;
 		animation: accent-shift 8s ease-in-out infinite;
@@ -126,7 +113,7 @@
 		right: 24%;
 		width: 28px;
 		height: 28px;
-		background: color-mix(in srgb, var(--color-accent, #8a9a7b) 40%, transparent);
+		background: color-mix(in srgb, var(--color-accent) 40%, transparent);
 		animation-delay: -2s;
 	}
 
@@ -135,7 +122,7 @@
 		left: 18%;
 		width: 18px;
 		height: 18px;
-		background: color-mix(in srgb, var(--color-taupe, #c4b8a8) 50%, transparent);
+		background: color-mix(in srgb, var(--color-taupe) 50%, transparent);
 		animation-delay: -4s;
 	}
 

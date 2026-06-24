@@ -96,6 +96,6 @@
 	.feedback-error {
 		margin: 0;
 		font-size: 0.82rem;
-		color: var(--color-danger, #b42318);
+		color: var(--color-danger);
 	}
 </style>

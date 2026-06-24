@@ -40,7 +40,7 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 			console.warn(`[lista] logged-in join failed for token ${params.token}: ${message}`);
 		}
 
-		redirect(302, INKOP_PATH);
+		redirect(302, `${INKOP_PATH}?joined=1`);
 	}
 
 	cookies?.set(LISTA_JOIN_COOKIE, params.token, {

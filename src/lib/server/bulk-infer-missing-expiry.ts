@@ -1,6 +1,6 @@
 import type { HouseholdRole } from '$lib/domain/household';
 import { isItemFinished } from '$lib/domain/inventory-item';
-import type { StorageLocation } from '$lib/domain/location';
+import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 import type { InventoryService } from '$lib/application/inventory.service';
 import { inferMissingExpiryBatch } from '$lib/server/missing-expiry-batch';
 import { loadShelfLifePromptFeedbackBlocks } from '$lib/server/receipt-parse-feedback';
@@ -45,4 +45,25 @@ export async function bulkInferMissingExpiryForLocation(
 	}
 
 	return inferredCount + (await inventoryService.bulkInferExpiryForLocation(householdId, location, actorRole));
+}
+
+export async function bulkInferMissingExpiryAllLocations(
+	householdId: string,
+	inventoryService: InventoryService,
+	apiKey: string | null,
+	actorRole: HouseholdRole,
+	learningFeedbackRepository?: ILearningFeedbackRepository
+): Promise<number> {
+	let total = 0;
+	for (const location of LOCATIONS) {
+		total += await bulkInferMissingExpiryForLocation(
+			householdId,
+			location,
+			inventoryService,
+			apiKey,
+			actorRole,
+			learningFeedbackRepository
+		);
+	}
+	return total;
 }

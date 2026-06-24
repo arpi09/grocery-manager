@@ -1,7 +1,7 @@
 import type { LearningEngineService } from '$lib/application/learning/learning-engine.service';
 import type { StorageLocation } from '$lib/domain/location';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
-import { isLocationLearningEnabled } from '$lib/server/location-learning-flag';
+import { isLocationLearningEnabled } from '$lib/server/feature-flags';
 
 export interface InferredLineLocation {
 	location: StorageLocation;

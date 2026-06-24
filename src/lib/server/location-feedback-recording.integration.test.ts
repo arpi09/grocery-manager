@@ -35,9 +35,13 @@ vi.mock('$lib/infrastructure/db', () => ({
 	getDatabaseBackend: () => 'pglite' as const
 }));
 
-vi.mock('$lib/server/location-learning-flag', () => ({
-	isLocationLearningEnabled: () => locationLearningEnabled.value
-}));
+vi.mock('$lib/server/feature-flags', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('$lib/server/feature-flags')>();
+	return {
+		...actual,
+		isLocationLearningEnabled: () => locationLearningEnabled.value
+	};
+});
 
 describe('location-feedback-recording integration', () => {
 	let integrationDb: IntegrationDbContext;

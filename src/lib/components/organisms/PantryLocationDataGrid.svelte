@@ -160,7 +160,9 @@
 	const missingExpiryHref = $derived(
 		allLocations ? '/inventory/all?filter=noExpiry' : `${inventoryPath}?filter=noExpiry`
 	);
-	const bulkExpiryHref = $derived(canWrite ? '/inventory/all?filter=noExpiry' : null);
+	const bulkInferAction = $derived(
+		canWrite ? (allLocations ? '?/bulkInferExpiry' : '/inventory/all?/bulkInferExpiry') : null
+	);
 
 	const trimmedQuery = $derived(query.trim());
 	const isSearchEmpty = $derived(trimmedQuery.length > 0 && !searching && pipeline.totalCount === 0);
@@ -372,7 +374,7 @@
 				href={missingExpiryHref}
 				active={gridState.filter === 'noExpiry'}
 				onSelect={() => handleFilterChange('noExpiry')}
-				actionHref={bulkExpiryHref}
+				bulkInferAction={bulkInferAction}
 				actionLabel={canWrite ? t('inventory.bulkExpiryAction') : null}
 			/>
 		{/if}

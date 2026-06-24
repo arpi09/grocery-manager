@@ -17,9 +17,8 @@ import {
 	shouldReparsedForLowQuality
 } from '$lib/server/receipt-parse';
 import {
-	buildPriorCorrectionsBlock,
 	loadGlobalCorrectedFewShotBlock,
-	loadPriorCorrections
+	loadReceiptParseFeedbackContext
 } from '$lib/server/receipt-parse-feedback';
 import { predictReceiptLinesLocation } from '$lib/server/receipt-location-predictions';
 import { predictReceiptLinesShelfLife } from '$lib/server/receipt-shelf-life-predictions';
@@ -37,9 +36,8 @@ import { recordProductEvent } from '$lib/server/product-events';
 import { openAiErrorLogDetail, translateOpenAiError } from '$lib/server/openai';
 import { buildReceiptImportQualityReport } from '$lib/domain/receipt-quality-report';
 import { PROMPT_VERSION_RECEIPT_PARSE } from '$lib/server/ai-prompt-shared';
-import { isReceiptAiBatchEnabled } from '$lib/server/brain-feature-flags';
+import { isReceiptAiBatchEnabled } from '$lib/server/feature-flags';
 import { logBrainMetrics, summarizeReceiptParseMetrics } from '$lib/server/brain-metrics';
-import { buildReceiptHouseholdMemorySection } from '$lib/server/receipt-household-memory';
 import {
 	householdLocationRuleRepository,
 	householdShelfLifeRuleRepository,
@@ -99,25 +97,21 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 	const apiKey = apiKeyOrResponse;
 
-	const householdMemoryBlock =
-		locals.householdId != null
-			? await buildReceiptHouseholdMemorySection(purchasePatternRepository, locals.householdId, {
+	const parseFeedback = locals.householdId
+		? await loadReceiptParseFeedbackContext(
+				learningFeedbackRepository,
+				locals.householdId,
+				purchasePatternRepository,
+				{
 					shelfLifeRules: householdShelfLifeRuleRepository,
 					locationRules: householdLocationRuleRepository
-				})
-			: '';
-
-	const [priorCorrections, globalFewShotBlock] = await Promise.all([
-		locals.householdId
-			? loadPriorCorrections(learningFeedbackRepository, locals.householdId)
-			: Promise.resolve([]),
-		loadGlobalCorrectedFewShotBlock()
-	]);
-	const parseFeedback = {
-		priorCorrectionsBlock: buildPriorCorrectionsBlock(priorCorrections),
-		globalFewShotBlock,
-		householdMemoryBlockOverride: householdMemoryBlock
-	};
+				}
+			)
+		: {
+				priorCorrectionsBlock: '',
+				globalFewShotBlock: await loadGlobalCorrectedFewShotBlock(),
+				householdMemoryBlockOverride: ''
+			};
 
 	let aiResult;
 	let receiptTextForStoreHeuristic: string | undefined;

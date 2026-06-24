@@ -444,7 +444,7 @@
 	}
 
 	.panel-error {
-		color: #8a1f1f;
+		color: var(--color-danger);
 	}
 
 	.decisions-toolbar {
@@ -485,7 +485,7 @@
 	.period-btn.active {
 		background: var(--color-primary);
 		border-color: var(--color-primary);
-		color: #fff;
+		color: var(--color-on-primary);
 	}
 
 	.decisions-section {
@@ -646,14 +646,14 @@
 	}
 
 	.legend-d1 {
-		background: #4f8cff;
+		background: var(--color-info);
 	}
 
 	.legend-d7 {
-		background: #2fbf71;
+		background: var(--color-success);
 	}
 
 	.legend-d30 {
-		background: #f0a500;
+		background: var(--color-warning);
 	}
 </style>

@@ -731,8 +731,8 @@
 		margin: 0 0 var(--space-sm);
 		padding: var(--space-sm);
 		border-radius: var(--radius-sm);
-		background: color-mix(in srgb, var(--color-warning, #b45309) 14%, var(--color-surface));
-		color: var(--color-warning, #b45309);
+		background: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));
+		color: var(--color-warning);
 		font-size: 0.85rem;
 	}
 
@@ -760,7 +760,7 @@
 		padding: 0.55rem 1rem;
 		border-radius: var(--radius-sm);
 		background: var(--color-primary);
-		color: #fff;
+		color: var(--color-on-primary);
 		font-weight: 600;
 		text-decoration: none;
 	}
@@ -769,8 +769,8 @@
 		margin: 0 0 var(--space-md);
 		padding: var(--space-sm);
 		border-radius: var(--radius-sm);
-		background: color-mix(in srgb, var(--color-warning, #b45309) 12%, var(--color-surface));
-		color: var(--color-warning, #b45309);
+		background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+		color: var(--color-warning);
 		font-size: 0.85rem;
 	}
 
@@ -783,7 +783,7 @@
 	.quality-warnings {
 		margin: 0;
 		padding-left: 1.25rem;
-		color: var(--color-warning, #b45309);
+		color: var(--color-warning);
 		font-size: 0.85rem;
 	}
 

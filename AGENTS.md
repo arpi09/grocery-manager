@@ -24,10 +24,17 @@ Service-wiring: [`src/lib/server/di.ts`](src/lib/server/di.ts).
 ## G0 före push till master
 
 ```bash
-npm run check:locales && npm run check && npm test
+# Första gången
+npm ci && npm run setup:agent && npm run dev
+
+# Under arbete
+npm run quick:dev
+
+# Innan merge till master
+npm run pr:gate
 ```
 
-PR-gate (mer): `npm run gate:fast` — inkluderar `check:codebase-map`.
+PR-gate kör `gate:fast` + integration + build guards — samma som CI **`pr-gate / pr-gate`** (inte legacy `quality/quality`).
 
 ## Tier C / frozen
 
@@ -60,3 +67,52 @@ Pausa utan explicit user request: grannskafferiet, Kivra forward, Stripe/Pro, me
 - Genererad route-lista: [`docs/generated/route-index.md`](docs/generated/route-index.md) (`npm run generate:route-index`)
 - CI manifest-check: `npm run check:codebase-map`
 - Regel: [`.cursor/rules/code-navigation.mdc`](.cursor/rules/code-navigation.mdc)
+
+## Cost-conscious agent
+
+Always-on regel: [`.cursor/rules/personal-cost-always.mdc`](.cursor/rules/personal-cost-always.mdc). Full policy: [coordinator-personal-cost-mode.mdc](.cursor/rules/coordinator-personal-cost-mode.mdc) · [coordinator-spawn-budget.mdc](.cursor/rules/coordinator-spawn-budget.mdc).
+
+### Dev startup (ingen agent efter första setup)
+
+```bash
+npm ci && npm run setup:agent && npm run dev
+```
+
+### Prompt-mallar
+
+**Liten fix:**
+> Ändra bara [fil/komponent]. Kör `npm run quick:dev`. Ingen subagent.
+
+**Större feature:**
+> Implementera endast steg 1–3 i plan X. Max 8 filer. Kör `quick:dev` — inte `pr:gate`. Ingen parallell delegation.
+
+**Deploy:**
+> Push master om CI grön. Kör deploy workflow. Fixa bara blocker om CI failar.
+
+### G0 vs pr:gate
+
+| När | Kommando |
+|-----|----------|
+| Under arbete, varje agent-turn | `npm run quick:dev` (~2–3 min) |
+| Innan merge till master | `npm run quick:dev` + `quality:integration` om DB/server |
+| Innan deploy / stor release | `npm run pr:gate` **en gång** |
+
+Agent ska **inte** köra full suite efter varje liten edit.
+
+### Lean week checklist
+
+1. Multitask off (default)
+2. User rule: max 1 subagent, `quick:dev` default
+3. Finish WIP — push/deploy committat arbete innan ny stor plan
+4. En agent per feature — inte hela området i en Build
+5. `pr:gate` en gång innan deploy, inte per subagent
+6. Ny chat för varje nytt featureområde
+7. Deploy själv med `gh workflow run` om agent redan committat
+8. Model: Fast/Auto för kod; thinking bara för plan
+9. Logga spawns i `private/SPAWN_BUDGET.md`
+
+### Optional User Rule (Cursor settings)
+
+Klistra in som Cursor User Rule under kostnadspress:
+
+> Personal cost mode: max 1 subagent per request. No Multitask unless I say parallel. Default `quick:dev` not `pr:gate`. New chat for new features. No explore subagents — use grep/read in main agent.

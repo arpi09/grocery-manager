@@ -93,9 +93,11 @@ describe('onboarding helpers', () => {
 		expect(getActivationProgress(TEST_USER_A).barcodeCount).toBe(0);
 	});
 
-	it('queues post-onboarding survey after completion', () => {
+	it('queues post-onboarding survey after share dismiss', () => {
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
 		completeOnboarding(TEST_USER_A);
+		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
+		dismissPostOnboardingShare(TEST_USER_A);
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(true);
 		dismissPostOnboardingSurvey(TEST_USER_A);
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);

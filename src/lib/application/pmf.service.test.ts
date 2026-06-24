@@ -11,6 +11,7 @@ describe('PmfService', () => {
 			recordEvent: vi.fn(),
 			getGlobalMetrics: vi.fn(),
 			getFunnelMetrics: vi.fn(),
+			getActivationFunnelMetrics: vi.fn(),
 			getLaunchCohortSignups: vi.fn(),
 			hasHouseholdEvent: vi.fn(),
 			countHouseholdEventsSince: vi.fn(),

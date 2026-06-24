@@ -18,12 +18,18 @@
 		shouldShowPostOnboardingShare,
 		shouldShowPostOnboardingSurvey
 	} from '$lib/utils/onboarding';
-	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
+	import {
+		canShowBlockingOverlay,
+		getBlockingOverlayCount,
+		OVERLAY_STACK_CHANGED_EVENT,
+		registerBlockingOverlay
+	} from '$lib/utils/overlay-stack';
 
 	let open = $state(false);
 	let submitting = $state(false);
 	let showMore = $state(false);
 	let moreMessage = $state('');
+	let overlayRevision = $state(0);
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
@@ -44,7 +50,8 @@
 			isOnboardingExcludedPath(pathname) ||
 			!isPostOnboardingSurveyPath(pathname) ||
 			shouldShowPostOnboardingShare(userId) ||
-			!shouldShowPostOnboardingSurvey(userId)
+			!shouldShowPostOnboardingSurvey(userId) ||
+			(getBlockingOverlayCount() > 0 && !canShowBlockingOverlay('survey'))
 		) {
 			open = false;
 			return;
@@ -112,14 +119,26 @@
 
 		void pathname;
 		void userId;
+		void overlayRevision;
 		tryOpenSurvey();
+	});
+
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+		const onOverlayChange = () => {
+			overlayRevision += 1;
+		};
+		window.addEventListener(OVERLAY_STACK_CHANGED_EVENT, onOverlayChange);
+		return () => window.removeEventListener(OVERLAY_STACK_CHANGED_EVENT, onOverlayChange);
 	});
 
 	$effect(() => {
 		if (!open) {
 			return;
 		}
-		return registerBlockingOverlay();
+		return registerBlockingOverlay('survey');
 	});
 </script>
 

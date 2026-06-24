@@ -17,6 +17,8 @@
 		onDismiss: (suggestion: ReplenishmentSuggestion) => void | Promise<void>;
 		acceptingKey?: string | null;
 		dismissingKey?: string | null;
+		/** Hide cadence / buy-again suggestions on inköp during activation focus. */
+		deemphasizeCadence?: boolean;
 	}
 
 	let {
@@ -26,10 +28,11 @@
 		onAccept,
 		onDismiss,
 		acceptingKey = null,
-		dismissingKey = null
+		dismissingKey = null,
+		deemphasizeCadence = false
 	}: Props = $props();
 
-	const visible = $derived(visibleMemorySuggestions(suggestions));
+	const visible = $derived(visibleMemorySuggestions(suggestions, { hideCadence: deemphasizeCadence }));
 </script>
 
 <section class="memory-section" aria-labelledby="shopping-v2-memory-heading">

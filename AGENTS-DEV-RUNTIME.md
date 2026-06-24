@@ -1,6 +1,6 @@
 # Dev runtime agent
 
-**Worktree:** `C:\Users\ArvidPilhall\Projects\home-pantry-dev`  
+**Worktree:** `$SKAFFU_ROOT-dev` (sibling of main repo; `ai` maps to main root)  
 **Branch:** `chore/dev-runtime`
 
 ## Purpose
@@ -23,25 +23,23 @@ Keep the local dev server running with automatic restarts. Do **not** implement 
 ## Default workflow
 
 1. `git fetch origin && git rebase origin/master`
-2. Start server in background for the worktree the user is testing (usually **ai**):
+2. Set `SKAFFU_ROOT` to your main clone if not using default git root detection.
+3. Start server in background for the worktree the user is testing (usually **ai** = main repo):
 
    ```powershell
    npm run dev:start:ai
    ```
 
-3. After other agents change env/hooks/DB, confirm restart via nodemon logs or:
+   Sibling worktrees: `home-pantry-dev`, `home-pantry-admin`, `home-pantry-tests`.
+
+4. After other agents change env/hooks/DB, confirm restart via nodemon logs or:
 
    ```powershell
    npm run dev:health
    ```
 
-4. If port 5173 is stuck, report once — do not ask the user to restart manually unless kill is required.
+5. If port 5173 is stuck, report once — do not ask the user to restart manually unless kill is required.
 
 ## Checks before done
 
-- `npm run dev:health` exits 0 while `dev:watch` is running
-- Scripts run on Windows PowerShell
-
-## Commits
-
-Small commits (scripts → package.json → docs). **No push** until: `Approved to push chore/dev-runtime`.
+- `npm run dev:health` returns OK for the target worktree URL.

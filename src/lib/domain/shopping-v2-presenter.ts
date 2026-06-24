@@ -15,9 +15,17 @@ export interface MemoryCadencePresentation {
 }
 
 export function visibleMemorySuggestions(
-	suggestions: ReplenishmentSuggestion[]
+	suggestions: ReplenishmentSuggestion[],
+	options?: { hideCadence?: boolean }
 ): ReplenishmentSuggestion[] {
-	return limitMemorySuggestions(suggestions);
+	const filtered = options?.hideCadence
+		? suggestions.filter(
+				(suggestion) =>
+					suggestion.reasonCode !== 'cadence_overdue' &&
+					suggestion.reasonCode !== 'recurring_and_cadence'
+			)
+		: suggestions;
+	return limitMemorySuggestions(filtered);
 }
 
 export function memorySuggestionId(suggestion: ReplenishmentSuggestion): string {

@@ -12,6 +12,7 @@
 		filterVisibleDedupeWarnings
 	} from '$lib/utils/dedupe-warning-dismiss';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
+	import { ThumbsDown, ThumbsUp } from '@lucide/svelte';
 	import { onMount } from 'svelte';
 	import { t } from '$lib/i18n';
 
@@ -465,7 +466,8 @@
 											disabled={feedbackKey === suggestion.normalizedKey}
 											onclick={() => sendFeedback(suggestion, 'positive')}
 										>
-											{labels.positive}
+											<ThumbsUp size={16} strokeWidth={2} aria-hidden="true" />
+											<span>{labels.positive}</span>
 										</button>
 										<button
 											type="button"
@@ -473,7 +475,8 @@
 											disabled={feedbackKey === suggestion.normalizedKey}
 											onclick={() => sendFeedback(suggestion, 'negative')}
 										>
-											{labels.negative}
+											<ThumbsDown size={16} strokeWidth={2} aria-hidden="true" />
+											<span>{labels.negative}</span>
 										</button>
 									</div>
 								{/if}
@@ -586,6 +589,9 @@
 	}
 
 	.feedback-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
 		border: 1px solid var(--color-border);
 		background: var(--color-surface-muted);
 		border-radius: var(--radius-md);

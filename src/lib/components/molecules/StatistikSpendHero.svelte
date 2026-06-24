@@ -152,7 +152,7 @@
 		margin-top: var(--space-xs);
 		border-radius: var(--radius-md);
 		background: var(--color-primary);
-		color: var(--color-on-primary, #fff);
+		color: var(--color-on-primary);
 		font-weight: 600;
 		font-size: 0.9375rem;
 		text-decoration: none;

@@ -14,6 +14,12 @@
 		shouldShowOnboarding,
 		shouldShowPostOnboardingShare
 	} from '$lib/utils/onboarding';
+	import {
+		canShowBlockingOverlay,
+		getBlockingOverlayCount,
+		OVERLAY_STACK_CHANGED_EVENT,
+		registerBlockingOverlay
+	} from '$lib/utils/overlay-stack';
 
 	interface Props {
 		memberCount?: number;
@@ -25,6 +31,7 @@
 	let open = $state(false);
 	let sharing = $state(false);
 	let copied = $state(false);
+	let overlayRevision = $state(0);
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
@@ -41,7 +48,8 @@
 			shouldShowOnboarding(userId) ||
 			isOnboardingExcludedPath(pathname) ||
 			!isPostOnboardingSharePath(pathname) ||
-			!shouldShowPostOnboardingShare(userId)
+			!shouldShowPostOnboardingShare(userId) ||
+			(getBlockingOverlayCount() > 0 && !canShowBlockingOverlay('share'))
 		) {
 			open = false;
 			return;
@@ -157,7 +165,26 @@
 		void userId;
 		void memberCount;
 		void shareLinkEnabled;
+		void overlayRevision;
 		tryOpenPrompt();
+	});
+
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+		const onOverlayChange = () => {
+			overlayRevision += 1;
+		};
+		window.addEventListener(OVERLAY_STACK_CHANGED_EVENT, onOverlayChange);
+		return () => window.removeEventListener(OVERLAY_STACK_CHANGED_EVENT, onOverlayChange);
+	});
+
+	$effect(() => {
+		if (!open) {
+			return;
+		}
+		return registerBlockingOverlay('share');
 	});
 </script>
 

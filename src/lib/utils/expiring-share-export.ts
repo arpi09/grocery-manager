@@ -1,5 +1,9 @@
 import { formatExpiryDate } from '$lib/domain/expiry';
 import type { Locale } from '$lib/i18n/locale';
+import { rgbaFromBrandText } from '$lib/design/brand/layout';
+import { DEFAULT_PALETTE_TRACK, mergePalette } from '$lib/design/brand-colors';
+
+const SHARE_PALETTE = mergePalette(DEFAULT_PALETTE_TRACK).light;
 
 const SHARE_WIDTH = 1080;
 const SHARE_HEIGHT = 1920;
@@ -98,9 +102,9 @@ export async function renderExpiringShareCardPng(
 	}
 
 	const gradient = ctx.createLinearGradient(0, 0, SHARE_WIDTH, SHARE_HEIGHT);
-	gradient.addColorStop(0, '#fdf8ef');
-	gradient.addColorStop(0.45, '#f5ebe0');
-	gradient.addColorStop(1, '#f0f5ee');
+	gradient.addColorStop(0, SHARE_PALETTE.bg);
+	gradient.addColorStop(0.45, SHARE_PALETTE.surfaceMuted);
+	gradient.addColorStop(1, SHARE_PALETTE.surface);
 	ctx.fillStyle = gradient;
 	ctx.fillRect(0, 0, SHARE_WIDTH, SHARE_HEIGHT);
 
@@ -114,7 +118,7 @@ export async function renderExpiringShareCardPng(
 	ctx.arc(SHARE_WIDTH * 0.18, SHARE_HEIGHT * 0.78, 240, 0, Math.PI * 2);
 	ctx.fill();
 
-	ctx.fillStyle = '#2f6b4f';
+	ctx.fillStyle = SHARE_PALETTE.success;
 	ctx.font = '700 52px system-ui, -apple-system, Segoe UI, sans-serif';
 	ctx.textAlign = 'center';
 	ctx.fillText(labels.brand, SHARE_WIDTH / 2, 160);
@@ -125,11 +129,11 @@ export async function renderExpiringShareCardPng(
 	ctx.roundRect(SHARE_WIDTH / 2 - badgeWidth / 2, 210, badgeWidth, 64, 32);
 	ctx.fill();
 
-	ctx.fillStyle = '#b45309';
+	ctx.fillStyle = SHARE_PALETTE.warning;
 	ctx.font = '700 34px system-ui, -apple-system, Segoe UI, sans-serif';
 	ctx.fillText(labels.badge, SHARE_WIDTH / 2, 254);
 
-	ctx.fillStyle = '#1f2a24';
+	ctx.fillStyle = SHARE_PALETTE.text;
 	ctx.font = '800 72px system-ui, -apple-system, Segoe UI, sans-serif';
 	const headlineLines = wrapText(ctx, labels.headline, SHARE_WIDTH - 160);
 	headlineLines.forEach((line, index) => {
@@ -146,17 +150,17 @@ export async function renderExpiringShareCardPng(
 	for (const [index, item] of labels.items.entries()) {
 		const y = listTop + index * rowHeight;
 
-		ctx.fillStyle = 'rgba(31, 42, 36, 0.06)';
+		ctx.fillStyle = rgbaFromBrandText(0.06);
 		ctx.beginPath();
 		ctx.roundRect(100, y - 8, SHARE_WIDTH - 200, rowHeight - 16, 20);
 		ctx.fill();
 
-		ctx.fillStyle = '#1f2a24';
+		ctx.fillStyle = SHARE_PALETTE.text;
 		ctx.font = '600 42px system-ui, -apple-system, Segoe UI, sans-serif';
 		ctx.fillText(truncateText(ctx, item.name, nameMaxWidth), nameX, y + 52);
 
 		ctx.textAlign = 'right';
-		ctx.fillStyle = '#b45309';
+		ctx.fillStyle = SHARE_PALETTE.warning;
 		ctx.font = '600 36px system-ui, -apple-system, Segoe UI, sans-serif';
 		ctx.fillText(item.dateLabel, dateX, y + 52);
 		ctx.textAlign = 'left';
@@ -165,7 +169,7 @@ export async function renderExpiringShareCardPng(
 	if (labels.overflowText) {
 		const overflowY = listTop + labels.items.length * rowHeight + 24;
 		ctx.textAlign = 'center';
-		ctx.fillStyle = 'rgba(31, 42, 36, 0.55)';
+		ctx.fillStyle = rgbaFromBrandText(0.55);
 		ctx.font = '500 36px system-ui, -apple-system, Segoe UI, sans-serif';
 		ctx.fillText(labels.overflowText, SHARE_WIDTH / 2, overflowY);
 	}
@@ -177,7 +181,7 @@ export async function renderExpiringShareCardPng(
 	ctx.stroke();
 
 	ctx.textAlign = 'center';
-	ctx.fillStyle = 'rgba(31, 42, 36, 0.7)';
+	ctx.fillStyle = rgbaFromBrandText(0.7);
 	ctx.font = '500 38px system-ui, -apple-system, Segoe UI, sans-serif';
 	const footerLines = wrapText(ctx, labels.footer, SHARE_WIDTH - 200);
 	footerLines.forEach((line, index) => {

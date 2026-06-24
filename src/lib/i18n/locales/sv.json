@@ -1195,6 +1195,9 @@
 				"subtitle": "{count, plural, one {# vara} other {# varor}} · {store}",
 				"subtitleMemory": "minns vad ni brukar köpa",
 				"subtitleEmpty": "Tom lista — lägg till det ni saknar",
+				"emptyTitle": "Tom lista",
+				"emptyBody": "Lägg till det ni saknar inför nästa handling.",
+				"emptyCta": "Lägg till första varan",
 				"illustrationAria": "Inköpsplan — översikt"
 			},
 			"mode": {
@@ -1256,6 +1259,7 @@
 				"progressAria": "{picked} av {total} varor plockade",
 				"progressComplete": "Allt plockat",
 				"progressEmpty": "Inget att handla — lägg till varor i Planera",
+				"tabDisabledEmpty": "Lägg till varor i Planera innan du handlar",
 				"illustrationAria": "Handla — en vara i fokus",
 				"focusQuantity": "{quantity} {unit}",
 				"focusLocation": "{location}",
@@ -1962,7 +1966,31 @@
 			"review7d": "Hushåll med granskning (7d)",
 			"conversion": "Skrivning→granskning"
 		},
+		"activationFunnel": {
+			"title": "Aktiveringstratt",
+			"subtitle": "Registrering → kvitto → lager → 3 rätter → D7 → delad lista. Ersätter tomma killer-metrics.",
+			"footnote": "Se docs/ACTIVATION_FUNNEL.md. Kill criteria: <10 aktiveringar på 4 veckor.",
+			"periodToggle": "Aktiveringsperiod",
+			"periodOption": "{days} dagar",
+			"periodRange": "{start} – {end} ({days}d kohort)",
+			"target": "Mål: {value}",
+			"ratio": "{numerator} / {denominator} ({percent})",
+			"ratioUnavailable": "{numerator} / {denominator} (—)",
+			"steps": {
+				"registrations": "Registreringar",
+				"registrationsDefinition": "Nya användare i perioden",
+				"onboardingStarted": "Onboarding startad",
+				"receiptParsed24h": "Kvitto inom 24h",
+				"inventoryFive": "Lager ≥5 inom 24h",
+				"recipesShown": "3-rätter visade",
+				"d7": "D7 återbesök",
+				"d7Detail": "{retained} av {eligible} berättigade",
+				"sharedList": "Delad lista öppnad",
+				"sharedListDefinition": "shared_list_opened i perioden (gäster räknas)"
+			}
+		},
 		"brainMetrics": {
+			"opsToggle": "Brain drift-metrics (utfäll)",
 			"title": "Brain v2-mätvärden",
 			"subtitle": "Kvitto-tratt, BBF-kvalitet och utgångsdatum-korrigeringar.",
 			"periodToggle": "Period för Brain-mätvärden",
@@ -2127,6 +2155,29 @@
 			"keysOk": "konfigurerade",
 			"keysMissing": "saknas",
 			"envDisabled": "STRIPE_CHECKOUT_DISABLED är satt i miljövariabler — checkout blockeras tills variabeln tas bort, även om reglaget är på."
+		},
+		"featureFlags": {
+			"title": "Feature flags",
+			"subtitle": "Effektiva runtime-värden (endast läsning)",
+			"readOnlyNote": "Skrivskyddad översikt av server-env-flaggor. Prod ändras via apphosting.yaml och deploy — inte här.",
+			"backToAdmin": "← Tillbaka till admin",
+			"serverSection": "Serverflaggor (feature-flags.ts)",
+			"layoutSection": "Layout client-booleans (+layout.server.ts)",
+			"layoutNote": "Värden som skickas till klienten vid varje sidladdning för UI-gating.",
+			"colFlag": "Flagga",
+			"colEnv": "Env-nyckel",
+			"colEffective": "Effektivt",
+			"colSource": "Källa",
+			"colDefault": "Kod-default",
+			"colClientProp": "Client-prop",
+			"sourceDefault": "Kod-default (env saknas)",
+			"sourceEnv": "env = {value}",
+			"pattern": {
+				"exactTrue": "På när env är exakt true",
+				"defaultOn": "På om env inte är false",
+				"notFalse": "På om env inte är false"
+			},
+			"link": "Feature flags"
 		},
 		"feedback": {
 			"title": "Användarfeedback",
@@ -2562,8 +2613,14 @@
 			"ctaSecondary": "Lägg till fler varor",
 			"ctaInvitePartner": "Bjud in partner",
 			"ctaContinueSetup": "Fortsätt uppstarten",
+			"moreActions": "Fler val",
 			"ariaLabel": "Kvittoimport klar",
 			"brainStats": "Skaffu uppskattade {estimated} datum och föreslog {location} platser."
+		},
+		"activationRecipes": {
+			"title": "Här är 3 rätter ni kan laga",
+			"lead": "Baserat på det ni just la in i lagret.",
+			"ctaPlaner": "Öppna veckoplaneraren"
 		}
 	},
 	"receiptBulk": {
@@ -2581,6 +2638,7 @@
 		"estimatesHint": "Utgångsdatum är uppskattningar — justera vid behov innan du sparar.",
 		"aiDegradedBanner": "AI-batch för hållbarhet är avstängd — vi använder heuristik tills vidare.",
 		"savedLabel": "{count} {count, plural, one {vara} other {varor}}",
+		"saveFailed": "Kunde inte spara varorna. Försök igen.",
 		"receiptMeta": "{store} · {date}",
 		"purchasedOn": "Inköpt {date}",
 		"mergedAwaySummary": "{count, plural, one {# dubblettrad slogs ihop} other {# dubblettrader slogs ihop}}",
@@ -2857,37 +2915,49 @@
 			"progressStepDisabled": "Inte tillgängligt än",
 			"welcome": {
 				"title": "Välkommen till Skaffu",
-				"body": "Vi börjar enkelt. Skanna några saker från ditt kök så hjälper Skaffu er att hålla koll på det du redan har hemma. Mindre gissande. Mindre svinn. Färre dubbelköp.",
+				"body": "Börja med ett kvitto eller några varor hemma. Resten av hushållet kan hänga på senare.",
 				"cta": "Kom igång"
 			},
 			"scan": {
-				"title": "Börja med en sak",
-				"body": "Titta er omkring. Ett mjölkpaket. Ett paket pasta. Kaffet på hyllan. En enda skanning räcker för att komma igång.",
-				"ctaPrimary": "Öppna skannern",
-				"ctaSecondary": "Kanske senare"
+				"title": "Importera ett kvitto",
+				"body": "PDF från Kivra eller butik — eller fota papperskvitto. Lagret fylls på på några minuter.",
+				"ctaPrimary": "Importera kvitto",
+				"ctaSecondary": "Kanske senare",
+				"kivraHint": "Vill du slippa ladda upp manuellt?",
+				"kivraLink": "Koppla Kivra-vidarebefordran"
 			},
 			"success": {
-				"title": "Det här ser bra ut",
-				"body": "Ert skafferi börjar redan ta form. Ju mer du lägger till, desto bättre kan Skaffu hjälpa er och ditt hushåll.",
-				"cta": "Visa mitt skafferi",
+				"title": "Bra start",
+				"body": "Det här är vad ni har inlagt. Lägg till mer när det passar — listan och påminnelserna blir bättre.",
+				"cta": "Fortsätt",
 				"itemsAria": "Varor du lagt till"
 			},
 			"brain": {
-				"title": "Skaffu kommer ihåg de små sakerna",
-				"body": "Skanningar, kvitton och inköpsvanor hjälper Skaffu att förstå ditt hushåll över tid. Det betyder smartare inköpsförslag, bättre påminnelser och mindre manuellt arbete.",
-				"cta": "Låter bra"
+				"title": "Så bygger ert minne",
+				"body": "Kvitton och avbockade rader hjälper Skaffu föreslå vad som saknas — utan att ni behöver komma ihåg allt.",
+				"cta": "Fortsätt"
 			},
 			"shopping": {
-				"title": "Inköp fungerar bättre tillsammans",
-				"body": "När något börjar ta slut kan du lägga till det i inköpslistan och bocka av det medan du handlar. Du kan bjuda in din partner när ni vill.",
+				"title": "Inköp tillsammans",
+				"body": "Lägg till det som tar slut. Bocka av i butiken. Bjud in partner när ni vill.",
 				"cta": "Öppna inköpslistan"
+			},
+			"setup": {
+				"title": "Gör det enkelt framåt",
+				"notificationsTitle": "Påminnelser om utgående varor",
+				"notificationsBody": "Få en notis när något snart går ut — så ni hinner använda det.",
+				"notificationsCta": "Slå på påminnelser",
+				"notificationsLater": "Senare",
+				"kivraTitle": "Kvitton från Kivra",
+				"kivraBody": "Koppla vidarebefordran så hamnar PDF-kvitton i Skaffu automatiskt.",
+				"allNotificationsLink": "Alla notisinställningar"
 			},
 			"progress": {
 				"welcome": "Välkommen",
-				"firstScan": "Första skanningen",
-				"pantryCreated": "Skafferi skapat",
-				"brain": "Lär er hur Skaffu hjälper",
-				"shopping": "Inköpslista"
+				"firstScan": "Kvitto",
+				"pantryCreated": "Lagret",
+				"brain": "Minnet",
+				"shopping": "Inköp"
 			}
 		}
 	},
@@ -2963,8 +3033,8 @@
 			"searchPlaceholder": "Sök i skafferiet…",
 			"empty": {
 				"title": "Tomt skafferi",
-				"body": "Skanna ett kvitto eller lägg till en vara — då fylls hyllorna här.",
-				"cta": "Skanna kvitto"
+				"body": "Lägg till varor manuellt eller skanna via knapparna ovan.",
+				"cta": "Lägg till vara"
 			},
 			"error": {
 				"loadFailed": "Skafferiet kunde inte laddas. Försök igen."
@@ -3659,7 +3729,7 @@
 		"noItems": "Inget att dela — listan är tom.",
 		"publicEyebrow": "Delad inköpslista",
 		"publicTitle": "Inköpslista",
-		"publicLead": "Någon delade sin inköpslista — öppna listan och handla utan att installera appen.",
+		"publicLead": "Någon delade sin inköpslista — öppna listan och handla utan att installera appen. Du behöver inget kvitto för att få värde här.",
 		"publicSnapshotHonesty": "Ögonblicksbild från när länken skapades. Avbockade rader syns men kan inte ändras här.",
 		"publicExpires": "Länken gäller till {date}.",
 		"publicSnapshotAt": "Ögonblicksbild tagen {date}.",
@@ -3679,6 +3749,7 @@
 		"publicSignupAboveFold": "Vill du ha en egen gemensam lista? Skapa konto gratis — partner ser samma lista när ni handlar.",
 		"publicPreviewAria": "Inköpslistans varor",
 		"publicPreviewMore": "+ {count} fler på listan",
+		"listaJoinToast": "Du är med i hushållets inköpslista.",
 		"shareLinkPrimary": "Dela länk till listan",
 		"exportMenuTrigger": "Exportera"
 	},

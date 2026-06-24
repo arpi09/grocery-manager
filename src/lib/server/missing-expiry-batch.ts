@@ -10,7 +10,7 @@ import {
 	promptLocaleTag,
 	SHELF_LIFE_CATEGORY_ANCHORS
 } from '$lib/server/ai-prompt-shared';
-import { isReceiptAiBatchEnabled } from '$lib/server/brain-feature-flags';
+import { isReceiptAiBatchEnabled } from '$lib/server/feature-flags';
 import { logBrainMetrics } from '$lib/server/brain-metrics';
 import { isOpenAiDegradedMode } from '$lib/server/openai-circuit-breaker';
 import { OPENAI_MODEL_NANO, requestStructuredJson } from '$lib/server/openai';

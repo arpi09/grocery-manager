@@ -135,6 +135,25 @@ export function promptLocaleInstruction(locale: string): string {
 		: 'Svara på svenska (sv-SE) i alla användartexter.';
 }
 
+export interface NanoSystemPromptOptions {
+	locale: string;
+	promptVersion: string;
+	roleEn: string;
+	roleSv: string;
+	rules: string[];
+}
+
+/** Shared system-prompt builder for nano structured-JSON calls (briefing, rank, insights). */
+export function buildNanoSystemPrompt(options: NanoSystemPromptOptions): string {
+	const promptLocale = normalizePromptLocale(options.locale);
+	return [
+		promptLocale === 'en' ? options.roleEn : options.roleSv,
+		promptLocaleInstruction(options.locale),
+		`promptVersion: ${options.promptVersion}`,
+		...options.rules
+	].join('\n');
+}
+
 /** Rough token estimate for prompt logging (chars / 4). */
 export function estimateInputTokens(text: string, rowCount?: number): number {
 	const charEstimate = Math.ceil(text.length / 4);

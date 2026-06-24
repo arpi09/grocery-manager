@@ -43,6 +43,12 @@ const FULL_ITEM = {
 	notes: 'Arla 3%'
 };
 
+const PARSED_MJOLK = {
+	...FULL_ITEM,
+	brand: null,
+	categoryHint: null,
+	packageSize: null
+};
 describe('parsePhotoRoundFromImages integration (mocked OpenAI)', () => {
 	afterEach(() => {
 		vi.unstubAllGlobals();
@@ -59,17 +65,7 @@ describe('parsePhotoRoundFromImages integration (mocked OpenAI)', () => {
 
 		expect(result).toEqual({
 			ok: true,
-			items: [
-				{
-					name: 'Mjölk',
-					quantity: '1',
-					unit: 'l',
-					confidence: 'high',
-					location: 'fridge',
-					expiresOn: '2026-06-15',
-					notes: 'Arla 3%'
-				}
-			],
+			items: [PARSED_MJOLK],
 			detectedZone: 'fridge',
 			zoneConfidence: 'high'
 		});
@@ -86,17 +82,7 @@ describe('parsePhotoRoundFromImages integration (mocked OpenAI)', () => {
 
 		expect(result).toEqual({
 			ok: true,
-			items: [
-				{
-					name: 'Mjölk',
-					quantity: '1',
-					unit: 'l',
-					confidence: 'high',
-					location: 'fridge',
-					expiresOn: '2026-06-15',
-					notes: 'Arla 3%'
-				}
-			],
+			items: [PARSED_MJOLK],
 			detectedZone: 'fridge',
 			zoneConfidence: 'high'
 		});

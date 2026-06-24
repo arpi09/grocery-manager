@@ -78,8 +78,8 @@ test.describe('Market v0.5 shell', () => {
 		await expect(page.getByTestId('market-chat-thread')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('market-shell')).toHaveCount(0);
 
-		await page.getByRole('button', { name: /Tillbaka till meddelanden|Back to messages/i }).click();
-		await expect(page).toHaveURL(/\/grannskafferiet\/marknad\/meddelanden/);
+		await page.getByTestId('market-chat-back').click();
+		await expect(page).toHaveURL(/\/grannskafferiet\/marknad\/meddelanden/, { timeout: 15_000 });
 		await expect(page.getByTestId('market-inbox')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('market-shell-tab-messages')).toHaveAttribute('aria-current', 'page');
 	});

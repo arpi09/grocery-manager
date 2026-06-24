@@ -20,19 +20,12 @@ import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 
 import { buildReturnUrlWithExpiryNudge } from '$lib/utils/expiry-nudge';
 
-import { getSnapshot as getBrainScoreSnapshot, type BrainScoreSnapshot } from '$lib/domain/brain-score';
-import type { BrainTimelineEntry } from '$lib/domain/brain-timeline';
-import { buildWastePreventedSnapshot, startOfCalendarMonth, type WastePreventedSnapshot } from '$lib/domain/waste-prevented';
-import { loadBrainTimeline } from '$lib/server/brain-timeline';
-import { consumptionRepository } from '$lib/server/di';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
-import { purchasePatternRepository } from '$lib/server/di';
 import { isHomeUxV2Enabled } from '$lib/server/home-ux-v2-flag';
-import { isHomeBriefingAiEnabled, isReplenishmentRankEnabled } from '$lib/server/brain-feature-flags';
+import { isHomeBriefingAiEnabled } from '$lib/server/feature-flags';
 import { generateHomeBriefingOneLiner } from '$lib/server/home-briefing-one-liner';
 import { getOpenAiApiKey } from '$lib/server/openai';
-import { rankReplenishmentSuggestions } from '$lib/server/replenishment-rank';
-import { loadReplenishmentFeedbackBlock } from '$lib/server/brain-feedback-context';
+import { rankReplenishmentWithFeedback } from '$lib/server/replenishment-rank';
 import { learningFeedbackRepository } from '$lib/server/di';
 import {
 	buildHomeBriefingRecipeCard,
@@ -97,22 +90,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 			return degrade('inventory intelligence', emptyIntelligence)(error);
 		});
 
-	const rankReplenishmentIfEnabled = async (
-		replenishment: HomeIntelligenceSnapshot['replenishment']
-	) => {
-		if (!isReplenishmentRankEnabled()) return replenishment;
-		const apiKey = getOpenAiApiKey();
-		if (!apiKey || replenishment.length <= 3) return replenishment;
-		const replenishmentFeedbackBlock = await loadReplenishmentFeedbackBlock(
-			learningFeedbackRepository,
-			householdId,
-			locale
-		);
-		return rankReplenishmentSuggestions(apiKey, replenishment, locale, {
-			replenishmentFeedbackBlock
-		});
-	};
-
 	const [
 		summary,
 		intelligence,
@@ -142,7 +119,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 			.catch(degrade('shopping cadence', null))
 	]);
 
-	intelligence.replenishment = await rankReplenishmentIfEnabled(intelligence.replenishment);
+	intelligence.replenishment = await rankReplenishmentWithFeedback(intelligence.replenishment, {
+		householdId,
+		locale,
+		learningFeedbackRepository,
+		apiKey: getOpenAiApiKey()
+	});
 
 	let briefingOneLiner: string | null = null;
 	let recipeSuggestion: HomeBriefingRecipeCard | null = null;
@@ -198,44 +180,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		briefingFunFact = await impactPromise;
 	}
 
-	let brainScore: BrainScoreSnapshot | null = null;
-	let brainTimeline: BrainTimelineEntry[] = [];
-	let wastePrevented: WastePreventedSnapshot | null = null;
-	if (isShelfLifeLearningEnabled()) {
-		try {
-			const [suggestions, receiptLineCount] = await Promise.all([
-				locals.householdSuggestionsService.getSnapshot(householdId),
-				purchasePatternRepository.countReceiptLines(householdId)
-			]);
-			const ruleCount =
-				suggestions.shelfLifeRules.length + suggestions.locationRules.length;
-			const feedbackCount =
-				suggestions.shelfLifeRules.reduce((sum, rule) => sum + rule.sampleCount, 0) +
-				suggestions.locationRules.reduce((sum, rule) => sum + rule.sampleCount, 0);
-			brainScore = getBrainScoreSnapshot({ ruleCount, feedbackCount, receiptLineCount });
-		} catch (error) {
-			console.warn('[hem] brain score degraded:', error);
-		}
-
-		try {
-			brainTimeline = await loadBrainTimeline(householdId);
-		} catch (error) {
-			console.warn('[hem] brain timeline degraded:', error);
-		}
-
-		try {
-			const monthStart = startOfCalendarMonth();
-			const events = await consumptionRepository.listEventsForSavingsInPeriod(
-				householdId,
-				monthStart,
-				new Date()
-			);
-			wastePrevented = buildWastePreventedSnapshot(events, locale);
-		} catch (error) {
-			console.warn('[hem] waste prevented degraded:', error);
-		}
-	}
-
 	return {
 		locale,
 		pageTitle: translate(locale, homeUxV2Enabled ? 'home.v6.pageTitle' : 'home.title'),
@@ -253,10 +197,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		briefingRecipeChip,
 		briefingFunFact,
 		briefingOneLiner,
-		showMemoryExplorer: isShelfLifeLearningEnabled(),
-		brainScore,
-		brainTimeline,
-		wastePrevented
+		showMemoryExplorer: isShelfLifeLearningEnabled()
 	};
 };
 

@@ -1,11 +1,17 @@
 <script lang="ts">
 	import AdminAcquisitionPanel from '$lib/components/organisms/admin/AdminAcquisitionPanel.svelte';
+	import AdminActivationFunnelPanel from '$lib/components/organisms/admin/AdminActivationFunnelPanel.svelte';
 	import AdminBrainMetricsPanel from '$lib/components/organisms/admin/AdminBrainMetricsPanel.svelte';
 	import AdminLaunchCohortPanel from '$lib/components/organisms/admin/AdminLaunchCohortPanel.svelte';
 	import AdminPmfFunnelPanel from '$lib/components/organisms/admin/AdminPmfFunnelPanel.svelte';
 	import AdminSyncFunnelPanel from '$lib/components/organisms/admin/AdminSyncFunnelPanel.svelte';
 	import PmfDashboard from '$lib/components/organisms/PmfDashboard.svelte';
 	import { fetchAdminData, parseIsoDate } from '$lib/client/admin-data';
+	import {
+		ACTIVATION_FUNNEL_PERIOD_DAYS,
+		type ActivationFunnelPeriodDays,
+		type ActivationFunnelSnapshot
+	} from '$lib/domain/activation-funnel';
 	import {
 		PMF_FUNNEL_PERIOD_DAYS,
 		type PmfFunnelPeriodDays,
@@ -18,6 +24,7 @@
 	import type { SyncFunnelSnapshot } from '$lib/domain/sync-funnel-admin';
 
 	interface AnalyticsPayload {
+		activationFunnel: ActivationFunnelSnapshot;
 		pmfWeeklyReview: PmfWeeklyReview;
 		pmfFunnel: PmfFunnelSnapshot;
 		syncFunnel: SyncFunnelSnapshot;
@@ -32,22 +39,36 @@
 
 	let loading = $state(false);
 	let error = $state<string | null>(null);
+	let activationFunnel = $state<ActivationFunnelSnapshot | null>(null);
 	let pmfWeeklyReview = $state<PmfWeeklyReview | null>(null);
 	let pmfFunnel = $state<PmfFunnelSnapshot | null>(null);
 	let syncFunnel = $state<SyncFunnelSnapshot | null>(null);
 	let acquisition = $state<AcquisitionMetricsSnapshot | null>(null);
 	let funnelDays = $state<PmfFunnelPeriodDays>(PMF_FUNNEL_PERIOD_DAYS);
+	let activationFunnelDays = $state<ActivationFunnelPeriodDays>(ACTIVATION_FUNNEL_PERIOD_DAYS);
 	let loadedFunnelDays: PmfFunnelPeriodDays | null = $state(null);
+	let loadedActivationDays: ActivationFunnelPeriodDays | null = $state(null);
 
 	$effect(() => {
 		if (!active) {
 			return;
 		}
-		if (loadedFunnelDays === funnelDays || loading) {
+		if (
+			(loadedFunnelDays === funnelDays && loadedActivationDays === activationFunnelDays) ||
+			loading
+		) {
 			return;
 		}
-		void load(funnelDays);
+		void load(funnelDays, activationFunnelDays);
 	});
+
+	function parseActivationSnapshot(raw: ActivationFunnelSnapshot): ActivationFunnelSnapshot {
+		return {
+			...raw,
+			periodStart: parseIsoDate(raw.periodStart as unknown as string),
+			periodEnd: parseIsoDate(raw.periodEnd as unknown as string)
+		};
+	}
 
 	function parseFunnelSnapshot(raw: PmfFunnelSnapshot): PmfFunnelSnapshot {
 		return {
@@ -65,11 +86,15 @@
 		};
 	}
 
-	async function load(days: PmfFunnelPeriodDays) {
+	async function load(days: PmfFunnelPeriodDays, activationDays: ActivationFunnelPeriodDays) {
 		loading = true;
 		error = null;
 		try {
-			const payload = await fetchAdminData<AnalyticsPayload>('analytics', { funnelDays: days });
+			const payload = await fetchAdminData<AnalyticsPayload>('analytics', {
+				funnelDays: days,
+				activationFunnelDays: activationDays
+			});
+			activationFunnel = parseActivationSnapshot(payload.activationFunnel);
 			pmfWeeklyReview = {
 				...payload.pmfWeeklyReview,
 				currentWeekEnd: parseIsoDate(payload.pmfWeeklyReview.currentWeekEnd as unknown as string),
@@ -79,13 +104,16 @@
 			syncFunnel = payload.syncFunnel;
 			acquisition = parseAcquisitionSnapshot(payload.acquisition);
 			loadedFunnelDays = days;
+			loadedActivationDays = activationDays;
 		} catch {
 			error = t('admin.loadError');
+			activationFunnel = null;
 			pmfWeeklyReview = null;
 			pmfFunnel = null;
 			syncFunnel = null;
 			acquisition = null;
 			loadedFunnelDays = null;
+			loadedActivationDays = null;
 		} finally {
 			loading = false;
 		}
@@ -98,16 +126,23 @@
 		funnelDays = days;
 	}
 
+	function selectActivationPeriod(days: ActivationFunnelPeriodDays) {
+		if (days === activationFunnelDays) {
+			return;
+		}
+		activationFunnelDays = days;
+	}
+
 	function exportDataUrl(days: (typeof ANALYTICS_BEHAVIOR_PERIOD_DAYS)[number]) {
 		return `/api/admin/data?section=export&period=${days}`;
 	}
 </script>
 
-{#if loading && !pmfFunnel}
+{#if loading && !activationFunnel}
 	<p class="panel-status">{t('admin.loading')}</p>
 {:else if error}
 	<p class="panel-status panel-error" role="alert">{error}</p>
-{:else if pmfFunnel && pmfWeeklyReview && syncFunnel && acquisition}
+{:else if activationFunnel && pmfFunnel && pmfWeeklyReview && syncFunnel && acquisition}
 	<div class="panel-actions">
 		{#each ANALYTICS_BEHAVIOR_PERIOD_DAYS as days}
 			<a class="export-link" href={exportDataUrl(days)} download>
@@ -115,8 +150,13 @@
 			</a>
 		{/each}
 	</div>
+	<AdminActivationFunnelPanel
+		snapshot={activationFunnel}
+		periodDays={activationFunnelDays}
+		loading={loading}
+		onPeriodChange={selectActivationPeriod}
+	/>
 	<AdminAcquisitionPanel snapshot={acquisition} />
-	<AdminBrainMetricsPanel active={active} />
 	<AdminPmfFunnelPanel
 		snapshot={pmfFunnel}
 		periodDays={funnelDays}
@@ -126,6 +166,10 @@
 	<AdminSyncFunnelPanel snapshot={syncFunnel} />
 	<AdminLaunchCohortPanel active={active} />
 	<PmfDashboard review={pmfWeeklyReview} />
+	<details class="ops-metrics">
+		<summary>{t('admin.brainMetrics.opsToggle')}</summary>
+		<AdminBrainMetricsPanel active={active} />
+	</details>
 {/if}
 
 <style>
@@ -135,7 +179,7 @@
 	}
 
 	.panel-error {
-		color: #8a1f1f;
+		color: var(--color-danger);
 	}
 
 	.panel-actions {
@@ -161,5 +205,15 @@
 
 	.export-link:hover {
 		background: var(--color-surface-muted);
+	}
+
+	.ops-metrics {
+		margin-top: var(--space-lg);
+	}
+
+	.ops-metrics summary {
+		cursor: pointer;
+		font-weight: 600;
+		margin-bottom: var(--space-md);
 	}
 </style>

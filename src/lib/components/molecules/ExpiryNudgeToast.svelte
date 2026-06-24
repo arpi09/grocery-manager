@@ -86,7 +86,7 @@
 		padding: 0 var(--space-md);
 		border-radius: var(--radius-md);
 		background: var(--color-primary);
-		color: #fff;
+		color: var(--color-on-primary);
 		font-weight: 700;
 		font-size: 0.875rem;
 		text-decoration: none;

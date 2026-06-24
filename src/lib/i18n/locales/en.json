@@ -1274,6 +1274,9 @@
 				"subtitle": "{count, plural, one {# item} other {# items}} · {store}",
 				"subtitleMemory": "remembers your usual picks",
 				"subtitleEmpty": "Empty list — add what you're missing",
+				"emptyTitle": "Empty list",
+				"emptyBody": "Add what you're missing before your next shop.",
+				"emptyCta": "Add first item",
 				"illustrationAria": "Shopping plan overview"
 			},
 			"mode": {
@@ -1335,6 +1338,7 @@
 				"progressAria": "{picked} of {total} items picked",
 				"progressComplete": "All picked",
 				"progressEmpty": "Nothing to shop — add items in Plan",
+				"tabDisabledEmpty": "Add items in Plan before shopping",
 				"illustrationAria": "Shopping — one item in focus",
 				"focusQuantity": "{quantity} {unit}",
 				"focusLocation": "{location}",
@@ -2041,7 +2045,31 @@
 			"review7d": "Households with review (7d)",
 			"conversion": "Write→review conversion"
 		},
+		"activationFunnel": {
+			"title": "Activation funnel",
+			"subtitle": "Registration → receipt → pantry → 3 recipes → D7 → shared list. Replaces empty killer-metrics.",
+			"footnote": "See docs/ACTIVATION_FUNNEL.md. Kill criteria: <10 activations in 4 weeks.",
+			"periodToggle": "Activation period",
+			"periodOption": "{days} days",
+			"periodRange": "{start} – {end} ({days}d cohort)",
+			"target": "Target: {value}",
+			"ratio": "{numerator} / {denominator} ({percent})",
+			"ratioUnavailable": "{numerator} / {denominator} (—)",
+			"steps": {
+				"registrations": "Registrations",
+				"registrationsDefinition": "New users in period",
+				"onboardingStarted": "Onboarding started",
+				"receiptParsed24h": "Receipt within 24h",
+				"inventoryFive": "Pantry ≥5 within 24h",
+				"recipesShown": "3-recipe wow shown",
+				"d7": "D7 return visit",
+				"d7Detail": "{retained} of {eligible} eligible",
+				"sharedList": "Shared list opened",
+				"sharedListDefinition": "shared_list_opened in period (guests count)"
+			}
+		},
 		"brainMetrics": {
+			"opsToggle": "Brain ops metrics (expand)",
 			"title": "Brain v2 metrics",
 			"subtitle": "Receipt intelligence funnel, BBF quality, and expiry corrections.",
 			"periodToggle": "Brain metrics period",
@@ -2227,6 +2255,29 @@
 			"keysOk": "configured",
 			"keysMissing": "missing",
 			"envDisabled": "STRIPE_CHECKOUT_DISABLED is set in environment variables — checkout stays blocked until removed, even when the toggle is on."
+		},
+		"featureFlags": {
+			"title": "Feature flags",
+			"subtitle": "Effective runtime values (read-only)",
+			"readOnlyNote": "Read-only snapshot of server env flags. Production changes go through apphosting.yaml and deploy — not this page.",
+			"backToAdmin": "← Back to admin",
+			"serverSection": "Server flags (feature-flags.ts)",
+			"layoutSection": "Layout client booleans (+layout.server.ts)",
+			"layoutNote": "Values sent to every authenticated page load for UI gating.",
+			"colFlag": "Flag",
+			"colEnv": "Env key",
+			"colEffective": "Effective",
+			"colSource": "Source",
+			"colDefault": "Code default",
+			"colClientProp": "Client prop",
+			"sourceDefault": "Code default (env unset)",
+			"sourceEnv": "env = {value}",
+			"pattern": {
+				"exactTrue": "On when env is exactly true",
+				"defaultOn": "On unless env is false",
+				"notFalse": "On unless env is false"
+			},
+			"link": "Feature flags"
 		},
 		"feedback": {
 			"title": "User feedback",
@@ -2641,8 +2692,14 @@
 			"ctaSecondary": "Add more items",
 			"ctaInvitePartner": "Invite partner",
 			"ctaContinueSetup": "Continue setup",
+			"moreActions": "More options",
 			"ariaLabel": "Receipt import complete",
 			"brainStats": "Skaffu estimated {estimated} dates and suggested {location} locations."
+		},
+		"activationRecipes": {
+			"title": "Here are 3 meals you can cook",
+			"lead": "Based on what you just added to your pantry.",
+			"ctaPlaner": "Open meal planner"
 		}
 	},
 	"receiptBulk": {
@@ -2660,6 +2717,7 @@
 		"addCount": "Add {count} {count, plural, one {item} other {items}}",
 		"apiKeyHint": "Requires OPENAI_API_KEY in server .env.",
 		"savedLabel": "{count} {count, plural, one {item} other {items}}",
+		"saveFailed": "Could not save items. Try again.",
 		"receiptMeta": "{store} · {date}",
 		"purchasedOn": "Purchased {date}",
 		"mergedAwaySummary": "{count, plural, one {# duplicate row merged} other {# duplicate rows merged}}",
@@ -2936,37 +2994,49 @@
 			"progressStepDisabled": "Not available yet",
 			"welcome": {
 				"title": "Welcome to Skaffu",
-				"body": "start with something simple. Scan a few things from your kitchen and we'll help you keep track of what you already have at home. Less guessing. Less waste. Fewer duplicate purchases.",
-				"cta": "get started"
+				"body": "Start with a receipt or a few items at home. The rest of the household can join later.",
+				"cta": "Get started"
 			},
 			"scan": {
-				"title": "Start with one thing",
-				"body": "Look around. A carton of milk. A bag of pasta. Your coffee. One scan is all it takes to begin building your pantry.",
-				"ctaPrimary": "Open scanner",
-				"ctaSecondary": "Maybe later"
+				"title": "Import a receipt",
+				"body": "PDF from Kivra or your store — or photograph a paper receipt. Your pantry fills up in a few minutes.",
+				"ctaPrimary": "Import receipt",
+				"ctaSecondary": "Maybe later",
+				"kivraHint": "Want to skip manual upload?",
+				"kivraLink": "Set up Kivra forwarding"
 			},
 			"success": {
-				"title": "Looking good",
-				"body": "Your pantry is already coming together. Everything you add helps Skaffu give better suggestions and keep your household in sync.",
-				"cta": "Show my pantry",
+				"title": "Good start",
+				"body": "This is what you've added so far. Add more when it suits you — the list and reminders get better.",
+				"cta": "Continue",
 				"itemsAria": "Items you added"
 			},
 			"brain": {
-				"title": "Skaffu remembers the small things",
-				"body": "Scans, receipts and shopping activity help Skaffu understand your household over time. That means smarter shopping suggestions, better reminders and less manual work.",
-				"cta": "Sounds good"
+				"title": "How your memory builds",
+				"body": "Receipts and checked-off items help Skaffu suggest what's missing — without you having to remember everything.",
+				"cta": "Continue"
 			},
 			"shopping": {
-				"title": "Shopping works better together",
-				"body": "When something runs low, add it to your shopping list and check it off as you shop. You can invite your partner whenever you're ready.",
+				"title": "Shop together",
+				"body": "Add what's running low. Check items off in the store. Invite your partner when you're ready.",
 				"cta": "Open shopping list"
+			},
+			"setup": {
+				"title": "Make it easy going forward",
+				"notificationsTitle": "Expiry reminders",
+				"notificationsBody": "Get a notification when something is about to expire — so you can use it first.",
+				"notificationsCta": "Turn on reminders",
+				"notificationsLater": "Later",
+				"kivraTitle": "Receipts from Kivra",
+				"kivraBody": "Connect forwarding so PDF receipts land in Skaffu automatically.",
+				"allNotificationsLink": "All notification settings"
 			},
 			"progress": {
 				"welcome": "Welcome",
-				"firstScan": "First scan",
-				"pantryCreated": "Pantry created",
-				"brain": "Learn how Skaffu helps",
-				"shopping": "Shopping list"
+				"firstScan": "Receipt",
+				"pantryCreated": "Pantry",
+				"brain": "Memory",
+				"shopping": "Shopping"
 			}
 		}
 	},
@@ -3042,8 +3112,8 @@
 			"searchPlaceholder": "Search pantry…",
 			"empty": {
 				"title": "Empty pantry",
-				"body": "Scan a receipt or add an item — the shelves will fill in here.",
-				"cta": "Scan receipt"
+				"body": "Add items manually or scan using the buttons above.",
+				"cta": "Add item"
 			},
 			"error": {
 				"loadFailed": "Pantry couldn't load. Try again."
@@ -3659,7 +3729,7 @@
 		"noItems": "Nothing to share — the list is empty.",
 		"publicEyebrow": "Shared shopping list",
 		"publicTitle": "Shopping list",
-		"publicLead": "Someone shared their shopping list — open it and shop without installing the app.",
+		"publicLead": "Someone shared their shopping list — open it and shop without installing the app. You don't need a receipt to get value here.",
 		"publicSnapshotHonesty": "Snapshot from when the link was created. Checked items are shown but cannot be changed here.",
 		"publicExpires": "Link valid until {date}.",
 		"publicSnapshotAt": "Snapshot taken {date}.",
@@ -3679,6 +3749,7 @@
 		"publicSignupAboveFold": "Want your own shared list? Create a free account — your partner sees the same list when you shop.",
 		"publicPreviewAria": "Shopping list items",
 		"publicPreviewMore": "+ {count} more on the list",
+		"listaJoinToast": "You joined the household shopping list.",
 		"shareLinkPrimary": "Share list link",
 		"exportMenuTrigger": "Export"
 	},

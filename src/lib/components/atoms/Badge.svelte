@@ -32,8 +32,8 @@
 	}
 
 	.badge-warning {
-		background: color-mix(in srgb, var(--color-accent) 18%, var(--color-surface));
-		border-color: color-mix(in srgb, var(--color-accent) 40%, var(--color-border));
-		color: color-mix(in srgb, var(--color-text) 70%, #6b4a12);
+		background: color-mix(in srgb, var(--color-warning) 18%, var(--color-surface));
+		border-color: color-mix(in srgb, var(--color-warning) 40%, var(--color-border));
+		color: var(--color-warning);
 	}
 </style>

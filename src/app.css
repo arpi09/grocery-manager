@@ -1,46 +1,13 @@
+@import './lib/design/brand-colors.generated.css';
+@import './lib/design/brand-tokens.generated.css';
+
 :root {
-	--color-bg: #f7f5f0;
-	--color-surface: #ffffff;
-	--color-surface-muted: #eef2eb;
-	--color-border: #dde5d8;
-	--color-text: #1f2a24;
-	--color-text-muted: #4a5850;
-	--color-primary: #2c4a3e;
-	--color-primary-hover: #243d32;
-	--color-on-primary: #ffffff;
-	--color-accent: #d4a853;
-	--color-danger: #b54a4a;
-	--color-warning: #9a6700;
-	--color-fridge: #4a8fb8;
-	--color-freezer: #6b7fd4;
-	--color-cupboard: #c17f4a;
-	--radius-sm: 8px;
-	--radius-md: 12px;
-	--radius-lg: 16px;
-	--shadow-sm: 0 1px 3px rgba(31, 42, 36, 0.08);
-	--shadow-md: 0 4px 16px rgba(31, 42, 36, 0.1);
-	--font: 'DM Sans', system-ui, sans-serif;
-	/* Typography scale — see docs/BRAND.md */
-	--font-size-display: clamp(1.5rem, 4vw, 1.85rem);
-	--font-size-body: 1rem;
-	--font-size-body-sm: 0.875rem;
-	--font-size-label: 0.75rem;
-	--font-weight-display: 700;
-	--font-weight-label: 600;
-	--letter-spacing-label: 0.04em;
-	--line-height-body: 1.5;
 	--focus-ring-color: var(--color-accent);
 	--focus-ring-width: 2px;
 	--focus-ring-offset: 2px;
-	--space-xs: 0.25rem;
-	--space-sm: 0.5rem;
-	--space-md: 1rem;
-	--space-lg: 1.5rem;
-	--space-xl: 2rem;
 	/* Page rhythm — layout shell, headers, stacked sections */
 	--page-padding-x: var(--space-md);
 	--page-section-gap: var(--space-lg);
-	--touch-target-min: 2.75rem;
 	/* Browser tab: 0 — Safari already clears the home indicator. Standalone PWA: env() below. */
 	--safe-area-top: 0px;
 	--safe-area-bottom: 0px;
@@ -53,12 +20,6 @@
 	--z-modal: 100;
 	--z-modal-nested: 110;
 	--z-toast: 120;
-	/* Toast — inverted surface for readable contrast in light + dark */
-	--toast-bg: #1f2a24;
-	--toast-fg: #ffffff;
-	--toast-fg-muted: rgba(255, 255, 255, 0.88);
-	--toast-dismiss-hover: rgba(255, 255, 255, 0.14);
-	--toast-icon-bg: rgba(255, 255, 255, 0.2);
 	--modal-scrim: color-mix(in srgb, var(--color-text) 42%, transparent);
 	--modal-scrim-blur: 8px;
 	/* Nav flyouts: dim page only — no blur (dropdown ≠ modal) */
@@ -72,7 +33,6 @@
 	--nav-border: var(--color-border);
 	--nav-active-bg: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface-muted));
 	--nav-header-shadow: var(--shadow-sm);
-	--nav-bottom-shadow: 0 -4px 24px rgba(31, 42, 36, 0.06);
 	--z-sticky-chrome: 50;
 	--z-nav-header: 60;
 	--z-nav-bottom: 70;
@@ -89,29 +49,6 @@
 
 html[data-theme='dark'] {
 	color-scheme: dark;
-	--color-bg: #141a17;
-	--color-surface: #1e2820;
-	--color-surface-muted: #243028;
-	--color-border: #2a3d30;
-	--color-text: #a0b0a8;
-	--color-text-muted: #4a5e55;
-	--color-primary: #4d8f68;
-	--color-primary-hover: #5aa076;
-	--color-on-primary: #ffffff;
-	--color-accent: #d4a853;
-	--color-danger: #e07a7a;
-	--color-warning: #e8a317;
-	--color-fridge: #6eb0d4;
-	--color-freezer: #8b9de8;
-	--color-cupboard: #d99a62;
-	--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
-	--shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-	--nav-bottom-shadow: 0 -4px 24px rgba(0, 0, 0, 0.28);
-	--toast-bg: #e8eee9;
-	--toast-fg: #141a17;
-	--toast-fg-muted: color-mix(in srgb, var(--toast-fg) 82%, transparent);
-	--toast-dismiss-hover: color-mix(in srgb, var(--toast-fg) 10%, transparent);
-	--toast-icon-bg: color-mix(in srgb, var(--toast-fg) 14%, transparent);
 }
 
 *,
@@ -129,6 +66,12 @@ body {
 	color: var(--color-text);
 	line-height: 1.5;
 	overflow-x: clip;
+}
+
+html {
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease;
 }
 
 @media (min-width: 900px) {
@@ -278,6 +221,55 @@ a:focus:not(:focus-visible) {
 	opacity: 0.55;
 	cursor: not-allowed;
 	text-decoration: none;
+}
+
+/* Global button links — match Button.svelte for <a class="btn"> usage */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-sm);
+	min-height: 2.75rem;
+	padding: 0.65rem 1.1rem;
+	border-radius: var(--radius-sm);
+	border: none;
+	font-weight: 600;
+	cursor: pointer;
+	text-decoration: none;
+	transition:
+		background 0.15s,
+		transform 0.1s;
+}
+
+.btn:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.btn-primary {
+	background: var(--color-primary);
+	color: var(--color-on-primary);
+}
+
+.btn-primary:hover:not(:disabled) {
+	background: var(--color-primary-hover);
+	color: var(--color-on-primary);
+	text-decoration: none;
+}
+
+.btn-secondary {
+	background: var(--color-surface-muted);
+	color: var(--color-text);
+	border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+	background: color-mix(in srgb, var(--color-surface-muted) 80%, var(--color-border));
+	text-decoration: none;
+}
+
+.btn-full {
+	width: 100%;
 }
 
 /* Motion utilities — CSS-only; respect prefers-reduced-motion */

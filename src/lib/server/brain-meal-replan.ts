@@ -1,14 +1,14 @@
 import { resolveEatFirstWeekMealCount } from '$lib/domain/eat-first-week';
-import { EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
-import { filterItemsExpiringWithinDays } from '$lib/domain/expiry-reminder';
-import { isExcludedFromRecipes } from '$lib/domain/recipe-inventory-filter';
+import { getRecipeExpiringContext } from '$lib/domain/recipe-expiring-context';
 import { DEFAULT_RECIPE_PORTIONS, parseMealIntent, type MealIntent } from '$lib/domain/recipe';
 import type { RecipeIdea } from '$lib/domain/meal-plan';
 import type { InventoryService } from '$lib/application/inventory.service';
 import type { MealPlanService } from '$lib/application/meal-plan.service';
-import { sortInventoryByUrgency, upcomingDateRange } from '$lib/server/inventory-context';
-import { generateRecipesWithRefinement, selectVelocityHints } from '$lib/server/recipe-generation';
-import { consumptionRepository } from '$lib/server/di';
+import { sortInventoryByUrgency } from '$lib/server/inventory-context';
+import {
+	generateRecipesWithRefinement,
+	loadRecipeGenerationContext
+} from '$lib/server/recipe-generation';
 import type { HouseholdSuggestionsService } from '$lib/application/household-suggestions.service';
 import type { HouseholdService } from '$lib/application/household.service';
 import { clampRecipePortions } from '$lib/server/recipe-prompt';
@@ -62,13 +62,8 @@ export async function runMealSkipReplan(
 
 	const inventory = await input.inventoryService.listAll(input.householdId);
 	const sorted = sortInventoryByUrgency(inventory.filter((item) => item.quantity !== '0'));
-	const expiringItems = filterItemsExpiringWithinDays(inventory, EXPIRING_SOON_DAYS);
-	const recipeExpiringItems = expiringItems.filter(
-		(item) => !isExcludedFromRecipes(item.name, item.notes)
-	);
-	const expiringItemNames = recipeExpiringItems
-		.map((item) => item.name.trim())
-		.filter(Boolean);
+	const { expiringItems, recipeExpiringItems, expiringItemNames } =
+		getRecipeExpiringContext(inventory);
 
 	const expiringPayload = sorted
 		.filter((item) => expiringItems.some((entry) => entry.id === item.id))
@@ -84,20 +79,14 @@ export async function runMealSkipReplan(
 
 	if (replan && recipeExpiringItems.length > 0) {
 		const maxRecipes = Math.min(3, resolveEatFirstWeekMealCount(expiringItems.length));
-		const { fromDate, toDate } = upcomingDateRange(10);
-		const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-		const [plannedMeals, recipeIdeas, householdSnapshot, recentlyFinished, household] =
-			await Promise.all([
-				input.mealPlanService.listPlannedMealsByRange(input.userId, fromDate, toDate),
-				input.mealPlanService.listRecipeIdeas(input.userId, 8),
-				input.householdSuggestionsService.getSnapshot(input.householdId),
-				consumptionRepository.listRecentConsumedProductNames(input.householdId, since, 10),
-				input.householdService.getHouseholdForUser(input.userId)
-			]);
-
-		const memberCount = household?.members.length ?? 0;
-		const householdSize = memberCount >= 1 && memberCount <= 8 ? memberCount : 2;
+		const recipeContext = await loadRecipeGenerationContext({
+			userId: input.userId,
+			householdId: input.householdId,
+			mealPlanService: input.mealPlanService,
+			householdSuggestionsService: input.householdSuggestionsService,
+			householdService: input.householdService
+		});
 
 		const generated = await generateRecipesWithRefinement({
 			apiKey: input.apiKey,
@@ -109,13 +98,7 @@ export async function runMealSkipReplan(
 			maxRecipes,
 			mealIntent,
 			locale,
-			plannedMeals,
-			recipeIdeas,
-			velocityHints: householdSnapshot
-				? selectVelocityHints(householdSnapshot.shelfLifeRules)
-				: [],
-			householdSize,
-			recentlyFinished
+			...recipeContext
 		});
 
 		if (!generated.ok) {

@@ -45,7 +45,7 @@
 	}
 
 	.particle:nth-child(5n) {
-		background: color-mix(in srgb, var(--color-primary) 70%, #fff);
+		background: color-mix(in srgb, var(--color-primary) 70%, var(--color-on-primary));
 		border-radius: 999px;
 	}
 

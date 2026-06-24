@@ -73,7 +73,7 @@
 		background:
 			radial-gradient(ellipse 120% 80% at 10% -10%, color-mix(in srgb, var(--color-primary) 18%, transparent), transparent 55%),
 			radial-gradient(ellipse 90% 60% at 100% 0%, color-mix(in srgb, var(--color-accent) 8%, transparent), transparent 50%),
-			linear-gradient(165deg, #1a221d 0%, var(--color-bg) 50%, #141a17 100%);
+			linear-gradient(165deg, color-mix(in srgb, var(--color-text) 25%, var(--color-bg)) 0%, var(--color-bg) 50%, var(--color-bg) 100%);
 	}
 
 	.lang-bar {

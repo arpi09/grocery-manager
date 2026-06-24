@@ -29,10 +29,6 @@
 </script>
 
 <section class="focus-item" data-testid="shopping-v2-focus-item">
-	<div class="illus-wrap" aria-hidden="true">
-		<img src="/illustrations/v2/shopping-trip.svg" alt="" width="160" height="120" />
-	</div>
-
 	<p class="focus-name">{item.name}</p>
 	{#if detail}
 		<p class="focus-detail">{detail}</p>
@@ -66,16 +62,9 @@
 		gap: var(--space-md);
 		padding: var(--space-lg) var(--space-md);
 		text-align: center;
-	}
-
-	.illus-wrap {
-		width: min(100%, 200px);
-	}
-
-	.illus-wrap img {
-		width: 100%;
-		height: auto;
-		display: block;
+		border: 1px dashed var(--color-border);
+		border-radius: var(--radius-lg);
+		background: var(--color-surface-muted);
 	}
 
 	.focus-name {
@@ -95,7 +84,7 @@
 		margin: 0;
 		padding: 0.5rem 0.75rem;
 		border-radius: var(--radius-md);
-		background: color-mix(in srgb, #b45309 12%, transparent);
+		background: color-mix(in srgb, var(--color-warning) 12%, transparent);
 		color: var(--color-text);
 		font-size: 0.8125rem;
 		font-weight: 600;

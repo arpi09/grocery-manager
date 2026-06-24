@@ -7,8 +7,9 @@
 		insights: InventoryInsight[];
 		missingExpiryCount: number;
 		estimatedCount: number;
+		loading?: boolean;
 		canWrite?: boolean;
-		bulkExpiryHref?: string | null;
+		bulkInferAction?: string | null;
 		onDeepen?: () => Promise<void>;
 		deepening?: boolean;
 		deepenError?: string | null;
@@ -18,8 +19,9 @@
 		insights,
 		missingExpiryCount,
 		estimatedCount,
+		loading = false,
 		canWrite = false,
-		bulkExpiryHref = null,
+		bulkInferAction = null,
 		onDeepen,
 		deepening = false,
 		deepenError = null
@@ -41,7 +43,15 @@
 	}
 </script>
 
-{#if visible}
+{#if loading}
+	<section class="insights-panel insights-panel--loading" aria-busy="true" data-testid="inventory-insights-loading">
+		<div class="skeleton-title" aria-hidden="true"></div>
+		<div class="skeleton-grid" aria-hidden="true">
+			<div class="skeleton-card"></div>
+			<div class="skeleton-card"></div>
+		</div>
+	</section>
+{:else if visible}
 	<section class="insights-panel" aria-labelledby="inventory-insights-heading" data-testid="inventory-insights">
 		<div class="insights-header">
 			<h2 id="inventory-insights-heading" class="insights-title">{t('brain.insights.title')}</h2>
@@ -65,8 +75,10 @@
 				<Card class="insight-card">
 					<p class="insight-stat">{missingExpiryCount}</p>
 					<p class="insight-label">{t('brain.insights.missingExpiry')}</p>
-					{#if canWrite && bulkExpiryHref}
-						<a class="insight-link" href={bulkExpiryHref}>{t('inventory.bulkExpiryAction')}</a>
+					{#if canWrite && bulkInferAction}
+						<form method="POST" action={bulkInferAction} class="insight-action-form">
+							<button type="submit" class="insight-link">{t('inventory.bulkExpiryAction')}</button>
+						</form>
 					{/if}
 				</Card>
 			{/if}
@@ -94,6 +106,48 @@
 <style>
 	.insights-panel {
 		margin-bottom: var(--space-lg);
+	}
+
+	.insights-panel--loading .skeleton-title {
+		height: 1rem;
+		width: 8rem;
+		border-radius: var(--radius-sm);
+		background: var(--color-surface-muted);
+		margin-bottom: var(--space-sm);
+	}
+
+	.skeleton-grid {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-sm);
+	}
+
+	.skeleton-card {
+		height: 4.5rem;
+		border-radius: var(--radius-md);
+		background: linear-gradient(
+			90deg,
+			var(--color-surface-muted) 0%,
+			color-mix(in srgb, var(--color-surface-muted) 70%, var(--color-border)) 50%,
+			var(--color-surface-muted) 100%
+		);
+		background-size: 200% 100%;
+		animation: insight-skeleton 1.2s ease-in-out infinite;
+	}
+
+	@keyframes insight-skeleton {
+		0% {
+			background-position: 100% 0;
+		}
+		100% {
+			background-position: -100% 0;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.skeleton-card {
+			animation: none;
+		}
 	}
 
 	.insights-header {
@@ -128,7 +182,7 @@
 	.insight-error {
 		margin: 0 0 var(--space-sm);
 		font-size: 0.8125rem;
-		color: var(--color-danger, #b42318);
+		color: var(--color-danger);
 	}
 
 	.insights-grid {
@@ -156,11 +210,24 @@
 		color: var(--color-text-muted);
 	}
 
+	.insight-action-form {
+		display: inline;
+		margin: 0;
+		padding: 0;
+	}
+
 	.insight-link {
 		display: inline-block;
 		margin-top: var(--space-sm);
+		border: none;
+		background: none;
+		padding: 0;
+		font: inherit;
 		font-size: 0.8125rem;
 		font-weight: 600;
+		color: var(--color-primary);
+		cursor: pointer;
+		text-decoration: underline;
 	}
 
 	.insight-actions {

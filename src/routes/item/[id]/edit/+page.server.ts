@@ -7,7 +7,7 @@ import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 import { consumeItemSchema } from '$lib/validation/consumption.schemas';
 import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { recordInventoryEditLocationFeedback } from '$lib/server/location-feedback-recording';
-import { isLocationLearningEnabled } from '$lib/server/location-learning-flag';
+import { isLocationLearningEnabled } from '$lib/server/feature-flags';
 import { recordConsumptionShelfLifeFeedback } from '$lib/server/shelf-life-consumption-feedback';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { isPriceMemoryV1Enabled } from '$lib/server/price-memory-flag';

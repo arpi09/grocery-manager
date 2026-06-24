@@ -287,7 +287,7 @@
 
 	.error-message {
 		margin: 0;
-		color: color-mix(in srgb, var(--color-danger) 65%, #3d1515);
+		color: color-mix(in srgb, var(--color-danger) 65%, var(--color-danger));
 		font-size: 0.875rem;
 		font-weight: 500;
 		line-height: 1.45;
@@ -322,7 +322,7 @@
 		position: relative;
 		width: 100%;
 		aspect-ratio: 4 / 3;
-		background: #111;
+		background: var(--color-text);
 		border-radius: var(--radius-md);
 		overflow: hidden;
 	}
@@ -354,13 +354,13 @@
 		border: 0;
 		border-radius: 999px;
 		background: rgba(0, 0, 0, 0.55);
-		color: #fff;
+		color: var(--color-on-primary);
 		font-size: 1.25rem;
 		cursor: pointer;
 	}
 
 	.flip-btn:focus-visible {
-		outline: 2px solid #fff;
+		outline: 2px solid var(--color-on-primary);
 		outline-offset: 2px;
 	}
 </style>

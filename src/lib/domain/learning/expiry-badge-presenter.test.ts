@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
+import { expirySourceColors } from '$lib/design/brand-colors';
 import { presentExpiryBadge } from './expiry-badge-presenter';
+
+const FRESH_COLORS = expirySourceColors('fresh', 'light');
 
 describe('presentExpiryBadge', () => {
 	it('uses confidenceSure for high household_learned', () => {
 		const result = presentExpiryBadge({ source: 'household_learned', confidence: 0.9 });
 		expect(result.labelKey).toBe('learning.confidenceSure');
 		expect(result.lowConfidence).toBe(false);
-		expect(result.color).toBe('#2d6a4f');
+		expect(result.color).toBe(FRESH_COLORS.household_learned);
 	});
 
 	it('uses lowConfidence label when tier is low', () => {
@@ -22,7 +25,9 @@ describe('presentExpiryBadge', () => {
 		);
 	});
 
-	it('assigns purple tone color for ai_inferred', () => {
-		expect(presentExpiryBadge({ source: 'ai_inferred', confidence: 0.6 }).color).toBe('#6b4c9a');
+	it('assigns learning-ai color for ai_inferred', () => {
+		expect(presentExpiryBadge({ source: 'ai_inferred', confidence: 0.6 }).color).toBe(
+			FRESH_COLORS.ai_inferred
+		);
 	});
 });

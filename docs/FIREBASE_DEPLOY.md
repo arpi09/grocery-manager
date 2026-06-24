@@ -210,7 +210,7 @@ Add every host you actually use to **Authorized redirect URIs**. Mismatch causes
 
 1. Create secrets and grant the App Hosting backend (commands in [Optional secrets](#optional-secrets-google-oauth-demo-account) above).
 2. Uncomment the `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` `env` blocks in `apphosting.yaml` (they stay commented until secrets exist  otherwise deploy fails at the preparer step).
-3. Redeploy (push to `main` or manual rollout). Confirm `PUBLIC_ORIGIN` / `ORIGIN` in `apphosting.yaml` match the redirect URI host.
+3. Redeploy via PR merge + manuell **Deploy to production** (eller `npm run deploy:firebase` lokalt). Confirm `PUBLIC_ORIGIN` / `ORIGIN` in `apphosting.yaml` match the redirect URI host.
 
 #### 4. Local development
 
@@ -324,18 +324,19 @@ https://home-pantry--home-pantry-4bee5.REGION.hosted.app
 
 ## Ongoing pipeline (GitHub Actions)
 
-Trunk-baserad CI/CD (ingen PR): **[`docs/CI_CD.md`](./CI_CD.md)**.
+PR-first CI/CD: **[`docs/CI_CD.md`](./CI_CD.md)** — merge via PR, deploy manuellt, CalVer release efter lyckad deploy.
 
 | Workflow | Gate | Trigger |
 |----------|------|---------|
-| [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | G1 `quality` | Push/PR → `master`/`main` |
+| [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | G1 `pr-gate` | Push/PR → `master`/`main` |
 | [`.github/workflows/e2e.yml`](../.github/workflows/e2e.yml) | G2 `e2e` | PR; `workflow_dispatch`; nattlig schedule |
-| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | G1 → G2 → G3 `deploy` �  G2 `e2e` �  G3 `deploy` | Push till `master`/`main`; `workflow_dispatch` (nödläge) |
+| [`.github/workflows/changelog-on-merge.yml`](../.github/workflows/changelog-on-merge.yml) | docs | Merged PR → `master` |
+| [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) | G1 → G2 → G3 → GitHub Release | `workflow_dispatch`; guide-only `push` → `master` |
 
 | Trigger | Behavior |
 |---------|----------|
-| Push to `master`/`main` | G1 �  G2 �  G3 automatiskt (deploy om `FIREBASE_TOKEN` finns) |
-| **Deploy to production** | quality → e2e → deploy; *Skip E2E* endast vid nödläge |
+| **Pull request → master** | `pr-gate` + tiered E2E; merge → CHANGELOG bot-commit |
+| **Deploy to production** | quality → e2e → deploy → CalVer GitHub Release (`continue-on-error`); hotfix via `deploy_tier=hotfix` |
 
 The deploy job uses the **`production`** GitHub Environment � optional required reviewers there (solo dev: lämna tomt för helt automatisk deploy).
 
@@ -355,10 +356,10 @@ Alternative (not wired in the default workflow): a Google Cloud **service accoun
 
 ### Enable CI deploys
 
-1. Merge this branch to `master`
+1. Merge via PR to `master`
 2. Add `FIREBASE_TOKEN` in GitHub repo secrets
-3. (Optional) Configure **Environments �  production** with required reviewers
-4. Push to `master` (Release workflow: quality �  e2e �  deploy) or run **Deploy to production** from Actions (see [`DEPLOY.md`](./DEPLOY.md))
+3. (Optional) Configure **Environments → production** with required reviewers
+4. Run **Deploy to production** from Actions after green CI (see [`DEPLOY.md`](./DEPLOY.md))
 
 App Hosting runtime secrets (`DATABASE_URL` **socket URL**, `ADMIN_PASSWORD`, etc.) stay in **Firebase Secret Manager**. GitHub also needs a separate **`DATABASE_URL` secret (public IP format)** so deploy can run migrations — see [CI_CD.md — DATABASE_URL](./CI_CD.md#database_url--ägare-manuellt).
 

@@ -7,7 +7,7 @@
 	$background: skaffu.$skaffu-background,
 	$error: skaffu.$skaffu-error,
 	$on-surface: skaffu.$skaffu-on-surface,
-	$on-primary: #ffffff
+	$on-primary: var(--color-surface)
 );
 
 @use '@smui/common/shape/index' as shape with (

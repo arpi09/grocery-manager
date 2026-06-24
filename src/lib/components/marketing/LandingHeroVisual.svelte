@@ -229,7 +229,7 @@
 		font-size: 0.65rem;
 		font-weight: 700;
 		background: var(--color-primary);
-		color: var(--color-on-primary, #fff);
+		color: var(--color-on-primary);
 	}
 
 	.check.empty {

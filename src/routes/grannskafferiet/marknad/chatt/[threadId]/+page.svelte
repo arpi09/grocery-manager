@@ -377,15 +377,15 @@
 	<div class="chat-screen" data-testid="market-chat-thread">
 		<header class="chat-header">
 			<div class="header-top">
-				<button
-					type="button"
-					class="back-btn"
-					aria-label={t('marketV05.backToInboxAria')}
-					onclick={() => goto('/grannskafferiet/marknad/meddelanden')}
-				>
+				<a
+				class="back-btn"
+				href="/grannskafferiet/marknad/meddelanden"
+				data-testid="market-chat-back"
+				aria-label={t('marketV05.backToInboxAria')}
+			>
 					<span aria-hidden="true">←</span>
 					<span class="back-label">{t('marketV05.backToInbox')}</span>
-				</button>
+				</a>
 				{#if !threadClosed}
 					<MarketChatOverflowMenu
 						threadId={data.thread.id}
@@ -795,7 +795,7 @@
 	.chip-primary {
 		border-color: var(--color-primary);
 		background: var(--color-primary);
-		color: var(--color-on-primary, #fff);
+		color: var(--color-on-primary);
 	}
 
 	.footer-payment :global(.payment-card) {
@@ -835,7 +835,7 @@
 		border-radius: 999px;
 		border: none;
 		background: var(--color-primary);
-		color: var(--color-on-primary, #fff);
+		color: var(--color-on-primary);
 		font: inherit;
 		font-size: 0.875rem;
 		font-weight: 600;
@@ -884,7 +884,7 @@
 
 	.counterpart-rating-stars {
 		margin: 0;
-		color: var(--color-warning, #d4a017);
+		color: var(--color-warning);
 		font-size: 1.25rem;
 	}
 

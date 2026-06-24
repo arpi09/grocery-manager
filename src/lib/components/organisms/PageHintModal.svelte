@@ -70,7 +70,7 @@
 		if (!open) {
 			return;
 		}
-		return registerBlockingOverlay();
+		return registerBlockingOverlay('hint');
 	});
 </script>
 

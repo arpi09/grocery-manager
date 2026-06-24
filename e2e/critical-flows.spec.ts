@@ -65,14 +65,15 @@ test.describe('Critical flows', () => {
 		await registerNewUser(page);
 		await expectOnboardingGuideVisible(page);
 		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Start with one thing|Börja med en sak/i);
+		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
 
 		await page.getByTestId('activation-progress-welcome').click();
 		await expectActivationScreenHeading(page, /Welcome to Skaffu|Välkommen till Skaffu/i);
 		await expect(page.getByTestId('activation-cta-secondary')).toHaveCount(0);
 
 		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Start with one thing|Börja med en sak/i);
+		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
+		await expect(page.getByTestId('activation-kivra-link')).toBeVisible();
 	});
 
 	test('activation onboarding scan-first happy path @deploy-critical', async ({ page }) => {
@@ -80,18 +81,19 @@ test.describe('Critical flows', () => {
 		await expectOnboardingGuideVisible(page);
 		await expectActivationScreenHeading(page, /Welcome to Skaffu|Välkommen till Skaffu/i);
 		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Start with one thing|Börja med en sak/i);
+		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
 		await page.getByTestId('activation-cta-primary').click();
-		await expect(page).toHaveURL(/\/scan(?:\?.*)?onboarding=activation/);
+		await expect(page).toHaveURL(/\/scan(?:\?.*)?mode=receipt/);
 		const itemName = `E2E activation ${Date.now()}`;
 		await createFridgeItemViaApi(page, itemName);
 		await page.goto('/hem');
 		await expect(page.getByTestId('activation-onboarding')).toBeVisible({ timeout: 20_000 });
-		await expectActivationScreenHeading(page, /Looking good|Det här ser bra ut/i);
+		await expectActivationScreenHeading(page, /Good start|Bra start/i);
 		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Skaffu remembers|kommer ihåg de små/i);
+		await expectActivationScreenHeading(page, /How your memory builds|Så bygger ert minne/i);
 		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Shopping works better|Inköp fungerar bättre/i);
+		await expectActivationScreenHeading(page, /Shop together|Inköp tillsammans/i);
+		await expect(page.getByTestId('activation-setup-cards')).toBeVisible();
 		await page.getByTestId('activation-cta-primary').click();
 		await expect(page).toHaveURL(/\/inkop(?:\?quick=1)?$/);
 	});

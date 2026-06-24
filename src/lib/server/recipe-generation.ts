@@ -3,10 +3,11 @@ import { daysUntilExpiry } from '$lib/domain/expiry';
 import type { InventoryItem } from '$lib/domain/inventory-item';
 import { DEFAULT_MEAL_INTENT, type MealIntent } from '$lib/domain/recipe';
 import type { PlannedMeal, RecipeIdea } from '$lib/domain/meal-plan';
-import { isRecipeRefinementEnabled } from '$lib/server/brain-feature-flags';
+import { isRecipeRefinementEnabled } from '$lib/server/feature-flags';
 import { OPENAI_MODEL_NANO, requestStructuredJson, type StructuredJsonResult } from '$lib/server/openai';
 import {
 	formatStructuredInventoryPayload,
+	upcomingDateRange,
 	type VelocityHintRow
 } from '$lib/server/inventory-context';
 import { normalizePromptLocale } from '$lib/server/ai-prompt-shared';
@@ -25,6 +26,7 @@ import {
 	RECIPE_SUGGESTIONS_SCHEMA,
 	type RecipeSuggestion
 } from '$lib/server/recipe-suggestions';
+import { consumptionRepository } from '$lib/server/di';
 
 export type RecipeGenerationMode = 'standard' | 'eat_first';
 
@@ -55,6 +57,83 @@ export type GenerateRecipesResult =
 	| { ok: false; result: Extract<StructuredJsonResult, { ok: false }> };
 
 export type RequestStructuredJsonFn = typeof requestStructuredJson;
+
+export interface RecipeGenerationContext {
+	plannedMeals: PlannedMeal[];
+	recipeIdeas: RecipeIdea[];
+	velocityHints: VelocityHintRow[];
+	householdSize: number;
+	recentlyFinished: string[];
+}
+
+export interface LoadRecipeGenerationContextInput {
+	userId: string;
+	householdId: string | null;
+	householdSizeOverride?: number;
+	mealPlanService: {
+		listPlannedMealsByRange(
+			userId: string,
+			fromDate: string,
+			toDate: string
+		): Promise<PlannedMeal[]>;
+		listRecipeIdeas(userId: string, limit: number): Promise<RecipeIdea[]>;
+	};
+	householdSuggestionsService: {
+		getSnapshot(householdId: string): Promise<{
+			shelfLifeRules: Array<{
+				displayName: string;
+				location: InventoryItem['location'];
+				typicalDays: number;
+				sampleCount: number;
+			}>;
+		} | null>;
+	};
+	householdService: {
+		getHouseholdForUser(userId: string): Promise<{ members: { length: number } } | null>;
+	};
+}
+
+/** Shared enrichment for recipe generation (planned meals, velocity hints, household size). */
+export async function loadRecipeGenerationContext(
+	input: LoadRecipeGenerationContextInput
+): Promise<RecipeGenerationContext> {
+	const { fromDate, toDate } = upcomingDateRange(10);
+	const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+	const householdId = input.householdId;
+
+	const [plannedMeals, recipeIdeas, householdSnapshot, recentlyFinished, household] =
+		await Promise.all([
+			input.mealPlanService.listPlannedMealsByRange(input.userId, fromDate, toDate),
+			input.mealPlanService.listRecipeIdeas(input.userId, 8),
+			householdId
+				? input.householdSuggestionsService.getSnapshot(householdId)
+				: Promise.resolve(null),
+			householdId
+				? consumptionRepository.listRecentConsumedProductNames(householdId, since, 10)
+				: Promise.resolve([]),
+			input.householdService.getHouseholdForUser(input.userId)
+		]);
+
+	const memberCount = household?.members.length ?? 0;
+	const householdSize =
+		typeof input.householdSizeOverride === 'number' &&
+		input.householdSizeOverride >= 1 &&
+		input.householdSizeOverride <= 8
+			? Math.round(input.householdSizeOverride)
+			: memberCount >= 1 && memberCount <= 8
+				? memberCount
+				: 2;
+
+	return {
+		plannedMeals,
+		recipeIdeas,
+		velocityHints: householdSnapshot
+			? selectVelocityHints(householdSnapshot.shelfLifeRules)
+			: [],
+		householdSize,
+		recentlyFinished
+	};
+}
 
 async function runRecipePass(
 	requestJson: RequestStructuredJsonFn,

@@ -118,7 +118,7 @@
 		padding: 0.75rem 1rem;
 		border-radius: var(--radius-sm);
 		background: var(--color-primary);
-		color: #fff;
+		color: var(--color-on-primary);
 		text-decoration: none;
 		font-weight: 600;
 	}

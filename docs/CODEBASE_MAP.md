@@ -24,6 +24,7 @@
 | Feature | Routes | Notering |
 |---------|--------|----------|
 | **Marketing** | `/`, `/guider`, `/priser`, … | `(marketing)` route group — se [MARKETING_SITE.md](./MARKETING_SITE.md) |
+| **Brand** | `/brand` | Public noindex palette swatches — [BRAND.md](./BRAND.md) |
 | **Admin** | `/admin` | PMF-dashboard, intern |
 | **Grannskafferiet** | `/grannskafferiet` | **Tier C** — pausa utan explicit request |
 | **Platform** | `/husdjur`, `/nyheter`, `/robots.txt` | Övrigt + telemetry |

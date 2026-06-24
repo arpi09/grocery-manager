@@ -59,7 +59,7 @@
 	}
 
 	.star {
-		fill: color-mix(in srgb, var(--color-warning, #f59e0b) 75%, var(--color-primary));
+		fill: color-mix(in srgb, var(--color-warning) 75%, var(--color-primary));
 		opacity: 0;
 		transform-origin: center;
 	}
@@ -91,7 +91,7 @@
 	}
 
 	.c3 {
-		fill: color-mix(in srgb, var(--color-warning, #f59e0b) 70%, var(--color-primary));
+		fill: color-mix(in srgb, var(--color-warning) 70%, var(--color-primary));
 		animation: confetti-rise 1.55s 0.65s ease-out infinite;
 	}
 
