@@ -12,7 +12,7 @@
 	<AppHeader
 		title={t('memory.title')}
 		subtitle={t('memory.subtitle')}
-		backHref="/settings"
+		backFallback="/settings"
 		backLabel={t('memory.backToSettings')}
 	/>
 	<PageContainer>

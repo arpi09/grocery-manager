@@ -9,7 +9,12 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title={t('pwa.page.title')} subtitle={t('pwa.page.subtitle')} />
+	<AppHeader
+		title={t('pwa.page.title')}
+		subtitle={t('pwa.page.subtitle')}
+		backFallback="/settings"
+		backLabel={t('memory.backToSettings')}
+	/>
 	<PageContainer>
 		<InstallAppGuide />
 	</PageContainer>

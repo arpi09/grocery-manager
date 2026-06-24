@@ -14,7 +14,12 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title={t('merge.pageTitle')} subtitle={t('merge.pageSubtitle')} />
+	<AppHeader
+		title={t('merge.pageTitle')}
+		subtitle={t('merge.pageSubtitle')}
+		backFallback="/inventory"
+		backLabel={t('dataGrid.backToPantry')}
+	/>
 
 	<PageContainer>
 		{#if data.duplicateGroups.length === 0}

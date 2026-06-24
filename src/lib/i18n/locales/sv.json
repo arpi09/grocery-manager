@@ -3116,6 +3116,8 @@
 	"weeklyRitual": {
 		"pageTitle": "Veckoförslag",
 		"pageSubtitle": "Generera middagsförslag för hela veckan — godkänn och fyll inköpslistan",
+		"backToPlaner": "Tillbaka till Äta",
+		"backToHome": "Tillbaka till Hem",
 		"heroTitle": "Veckan fixad",
 		"heroBadge": "Måndagsritual",
 		"heroSubtitleDefault": "Planera veckans middagar utifrån lagret — ett klick till matplan och inköpslista.",

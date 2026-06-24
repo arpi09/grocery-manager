@@ -228,11 +228,10 @@
 	<div class="hero-card">
 		<div class="hero-copy">
 			<span class="hero-badge">{t('weeklyRitual.heroBadge')}</span>
-			<h2 id="weekly-ritual-heading">{t('weeklyRitual.heroTitle')}</h2>
-			<p class="hero-sub">{t('weeklyRitual.flowLead')}</p>
 			{#if weekLabel}
-				<p class="week-range">{weekLabel}</p>
+				<h2 id="weekly-ritual-heading">{weekLabel}</h2>
 			{/if}
+			<p class="hero-sub">{t('weeklyRitual.flowLead')}</p>
 		</div>
 		<span class="hero-icon" aria-hidden="true">
 			<FeatureIcon id="sparkle" size={28} />
