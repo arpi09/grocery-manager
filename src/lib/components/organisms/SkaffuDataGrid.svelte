@@ -87,8 +87,13 @@
 
 	let filterSheetOpen = $state(false);
 	let selectAllInput = $state<HTMLInputElement | null>(null);
+	let lastSyncedQuery = $state(query);
 
 	$effect(() => {
+		if (query === lastSyncedQuery) {
+			return;
+		}
+		lastSyncedQuery = query;
 		onQueryChange(query);
 	});
 
