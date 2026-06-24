@@ -156,9 +156,9 @@ const HERITAGE_SEMANTIC: SemanticByMode = {
 
 		info: '#3d6b8c',
 
-		fridge: '#056E7C',
+		fridge: '#064E3B',
 
-		freezer: '#2E4A78',
+		freezer: '#475569',
 
 		cupboard: '#9E5528',
 
@@ -182,9 +182,9 @@ const HERITAGE_SEMANTIC: SemanticByMode = {
 
 		info: '#6eb0d4',
 
-		fridge: '#3CD0E0',
+		fridge: '#6EE7B7',
 
-		freezer: '#A0B8F0',
+		freezer: '#CBD5E1',
 
 		cupboard: '#E09858',
 
@@ -214,9 +214,9 @@ const FRESH_SEMANTIC: SemanticByMode = {
 
 		info: '#4a8fb8',
 
-		fridge: '#056E7C',
+		fridge: '#056B52',
 
-		freezer: '#4A6B9A',
+		freezer: '#3F4F63',
 
 		cupboard: '#A05228',
 
@@ -240,9 +240,9 @@ const FRESH_SEMANTIC: SemanticByMode = {
 
 		info: '#7ec4e8',
 
-		fridge: '#40D8F0',
+		fridge: '#34D399',
 
-		freezer: '#A8C0F8',
+		freezer: '#D1D5DB',
 
 		cupboard: '#E8A060',
 
@@ -272,9 +272,9 @@ const WARM_SEMANTIC: SemanticByMode = {
 
 		info: '#5a7f96',
 
-		fridge: '#056E7C',
+		fridge: '#065F46',
 
-		freezer: '#3D5280',
+		freezer: '#57534E',
 
 		cupboard: '#A05228',
 
@@ -298,9 +298,9 @@ const WARM_SEMANTIC: SemanticByMode = {
 
 		info: '#8ab4c8',
 
-		fridge: '#48D0DC',
+		fridge: '#4ADE80',
 
-		freezer: '#A0B0E8',
+		freezer: '#E7E5E4',
 
 		cupboard: '#E0A068',
 
@@ -330,9 +330,9 @@ const CRISP_SEMANTIC: SemanticByMode = {
 
 		info: '#0f766e',
 
-		fridge: '#056E7C',
+		fridge: '#065F46',
 
-		freezer: '#284878',
+		freezer: '#334155',
 
 		cupboard: '#9E5528',
 
@@ -356,9 +356,9 @@ const CRISP_SEMANTIC: SemanticByMode = {
 
 		info: '#4ec9b8',
 
-		fridge: '#38C8E8',
+		fridge: '#4ADE80',
 
-		freezer: '#98B0E8',
+		freezer: '#B0BEC9',
 
 		cupboard: '#D89050',
 

@@ -496,7 +496,7 @@ ${trackThemesDark.split('\n').map((l) => '      ' + l).join('\n')}
     <div>
       <h1>Skaffu palett-preview</h1>
       <p>Fas 1 — jämför Heritage / Fresh / Warm / Crisp lokalt</p>
-      <p class="legend">WCAG: <span class="wcag-aa">aa</span> ≥4.5:1 · <span class="wcag-large">large</span> ≥3:1 · <span class="wcag-fail">fail</span> &lt;3:1 — surf = text on surface, tint = label on ${TINT_PERCENT}% tint chip</p>
+      <p class="legend">Kyl = grön smaragd (~160°) · Frys = frostgrå (neutral) — aldrig två blå nyanser. WCAG: <span class="wcag-aa">aa</span> ≥4.5:1 · <span class="wcag-large">large</span> ≥3:1 · <span class="wcag-fail">fail</span> &lt;3:1 — surf = text on surface, tint = label on ${TINT_PERCENT}% tint chip</p>
     </div>
     <div class="mode-toggle" role="group" aria-label="Ljus eller mörk">
       <button type="button" data-mode="light" aria-pressed="true">Ljus</button>
