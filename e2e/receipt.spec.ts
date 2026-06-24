@@ -161,9 +161,11 @@ test.describe('Receipt flow', () => {
 
 		await expect(page.getByTestId('receipt-line-0')).toBeVisible({ timeout: 15_000 });
 		await dismissOnboardingModalIfOpen(page);
+		const quickConfirm = page.getByTestId('receipt-quick-confirm');
+		await expect(quickConfirm).toBeEnabled({ timeout: 15_000 });
 		await Promise.all([
 			page.waitForURL(/\/hem(\?|$)/, { timeout: 15_000 }),
-			page.getByTestId('receipt-quick-confirm').click()
+			quickConfirm.click()
 		]);
 
 		await expect(page).toHaveURL(/\/hem(\?|$)/, { timeout: 15_000 });

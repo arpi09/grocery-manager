@@ -1965,7 +1965,31 @@
 			"review7d": "Hushåll med granskning (7d)",
 			"conversion": "Skrivning→granskning"
 		},
+		"activationFunnel": {
+			"title": "Aktiveringstratt",
+			"subtitle": "Registrering → kvitto → lager → 3 rätter → D7 → delad lista. Ersätter tomma killer-metrics.",
+			"footnote": "Se docs/ACTIVATION_FUNNEL.md. Kill criteria: <10 aktiveringar på 4 veckor.",
+			"periodToggle": "Aktiveringsperiod",
+			"periodOption": "{days} dagar",
+			"periodRange": "{start} – {end} ({days}d kohort)",
+			"target": "Mål: {value}",
+			"ratio": "{numerator} / {denominator} ({percent})",
+			"ratioUnavailable": "{numerator} / {denominator} (—)",
+			"steps": {
+				"registrations": "Registreringar",
+				"registrationsDefinition": "Nya användare i perioden",
+				"onboardingStarted": "Onboarding startad",
+				"receiptParsed24h": "Kvitto inom 24h",
+				"inventoryFive": "Lager ≥5 inom 24h",
+				"recipesShown": "3-rätter visade",
+				"d7": "D7 återbesök",
+				"d7Detail": "{retained} av {eligible} berättigade",
+				"sharedList": "Delad lista öppnad",
+				"sharedListDefinition": "shared_list_opened i perioden (gäster räknas)"
+			}
+		},
 		"brainMetrics": {
+			"opsToggle": "Brain drift-metrics (utfäll)",
 			"title": "Brain v2-mätvärden",
 			"subtitle": "Kvitto-tratt, BBF-kvalitet och utgångsdatum-korrigeringar.",
 			"periodToggle": "Period för Brain-mätvärden",
@@ -2590,6 +2614,11 @@
 			"ctaContinueSetup": "Fortsätt uppstarten",
 			"ariaLabel": "Kvittoimport klar",
 			"brainStats": "Skaffu uppskattade {estimated} datum och föreslog {location} platser."
+		},
+		"activationRecipes": {
+			"title": "Här är 3 rätter ni kan laga",
+			"lead": "Baserat på det ni just la in i lagret.",
+			"ctaPlaner": "Öppna veckoplaneraren"
 		}
 	},
 	"receiptBulk": {
@@ -2887,10 +2916,12 @@
 				"cta": "Kom igång"
 			},
 			"scan": {
-				"title": "Börja med en sak",
-				"body": "Titta er omkring. Ett mjölkpaket. Ett paket pasta. Kaffet på hyllan. En enda skanning räcker för att komma igång.",
-				"ctaPrimary": "Öppna skannern",
-				"ctaSecondary": "Kanske senare"
+				"title": "Börja med ett kvitto",
+				"body": "Ladda upp PDF från Kivra, ICA eller din butik — eller fota papperskvitto. Ett kvitto fyller lagret på under två minuter.",
+				"ctaPrimary": "Importera kvitto",
+				"ctaSecondary": "Kanske senare",
+				"kivraHint": "Vill du slippa ladda upp manuellt?",
+				"kivraLink": "Koppla Kivra-vidarebefordran"
 			},
 			"success": {
 				"title": "Det här ser bra ut",
@@ -3685,7 +3716,7 @@
 		"noItems": "Inget att dela — listan är tom.",
 		"publicEyebrow": "Delad inköpslista",
 		"publicTitle": "Inköpslista",
-		"publicLead": "Någon delade sin inköpslista — öppna listan och handla utan att installera appen.",
+		"publicLead": "Någon delade sin inköpslista — öppna listan och handla utan att installera appen. Du behöver inget kvitto för att få värde här.",
 		"publicSnapshotHonesty": "Ögonblicksbild från när länken skapades. Avbockade rader syns men kan inte ändras här.",
 		"publicExpires": "Länken gäller till {date}.",
 		"publicSnapshotAt": "Ögonblicksbild tagen {date}.",

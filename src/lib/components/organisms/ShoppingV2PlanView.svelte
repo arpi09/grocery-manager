@@ -82,7 +82,8 @@
 
 	{#if canEdit}
 		<div class="receipt-import-cta" data-testid="inkop-receipt-one-tap">
-			<a class="btn btn-secondary btn-full" href={receiptOneTapHref('/inkop')}>
+			<p class="receipt-import-lead">{t('receiptAutomation.oneTapLead')}</p>
+			<a class="btn btn-primary btn-full" href={receiptOneTapHref('/inkop')}>
 				{t('receiptAutomation.oneTapCta')}
 			</a>
 		</div>
@@ -94,6 +95,7 @@
 		{canEdit}
 		{acceptingKey}
 		{dismissingKey}
+		deemphasizeCadence={true}
 		onAccept={onAcceptSuggestion}
 		onDismiss={onDismissSuggestion}
 	/>

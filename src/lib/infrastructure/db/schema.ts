@@ -374,6 +374,8 @@ export const productEventTable = pgTable(
 				'receipt_import_success_dismissed',
 				'receipt_import_success_primary_cta',
 				'receipt_import_success_secondary_cta',
+				'activation_recipes_shown',
+				'activation_recipe_clicked',
 				'photo_round_parsed',
 				'fill_suggestions_added',
 				'landing_view',

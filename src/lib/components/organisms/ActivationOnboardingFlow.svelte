@@ -42,7 +42,7 @@
 	} from '$lib/utils/onboarding-steps';
 	import type { ActivationProgressKey } from '$lib/utils/onboarding-steps';
 	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
-	import { activationScanHref } from '$lib/utils/scan-nav';
+	import { receiptOneTapHref } from '$lib/utils/scan-nav';
 	import {
 		isReceiptImportRecentlyCompleted,
 		isReceiptImportToastPending
@@ -216,7 +216,7 @@
 		markActivationScanStarted(userId);
 		void trackProductEvent('onboarding_scan_started');
 		closeFlow();
-		await goto(activationScanHref(APP_HOME_PATH));
+		await goto(receiptOneTapHref(APP_HOME_PATH));
 	}
 
 	function handleScanDeferred() {
@@ -396,7 +396,12 @@
 						{/snippet}
 
 						{#snippet extra()}
-							{#if displayScreen === 'success' && successItems.length > 0}
+							{#if displayScreen === 'scan'}
+								<p class="kivra-hint">
+									{t('onboarding.activation.scan.kivraHint')}
+									<a href="/settings/kivra">{t('onboarding.activation.scan.kivraLink')}</a>
+								</p>
+							{:else if displayScreen === 'success' && successItems.length > 0}
 								<ul
 									class="success-items"
 									aria-label={t('onboarding.activation.success.itemsAria')}
@@ -588,6 +593,18 @@
 		.flow-footer {
 			animation: none;
 		}
+	}
+
+	.kivra-hint {
+		margin: 0;
+		font-size: 0.9rem;
+		color: var(--color-text-muted);
+		text-align: center;
+		line-height: 1.5;
+	}
+
+	.kivra-hint a {
+		font-weight: 600;
 	}
 
 	.success-items {

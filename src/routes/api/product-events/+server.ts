@@ -64,6 +64,8 @@ const AUTH_EVENT_TYPES = new Set<ProductEventType>([
 	'receipt_import_success_dismissed',
 	'receipt_import_success_primary_cta',
 	'receipt_import_success_secondary_cta',
+	'activation_recipes_shown',
+	'activation_recipe_clicked',
 	'price_memory_viewed',
 	'price_memory_search',
 	'price_memory_product_opened',

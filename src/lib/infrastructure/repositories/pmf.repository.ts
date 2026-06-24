@@ -1,4 +1,9 @@
 import {
+	buildActivationFunnelSnapshot,
+	type ActivationFunnelPeriodDays,
+	type ActivationFunnelSnapshot
+} from '$lib/domain/activation-funnel';
+import {
 	buildPmfFunnelSnapshot,
 	FUNNEL_ACTIVITY_EVENT_TYPES,
 	FUNNEL_FIRST_SCAN_EVENT_TYPES,
@@ -78,6 +83,10 @@ export interface IPmfRepository {
 	recordEvent(input: RecordProductEventInput): Promise<void>;
 	getGlobalMetrics(now?: Date): Promise<PmfMetricSnapshot>;
 	getFunnelMetrics(periodDays: PmfFunnelPeriodDays, now?: Date): Promise<PmfFunnelSnapshot>;
+	getActivationFunnelMetrics(
+		periodDays: ActivationFunnelPeriodDays,
+		now?: Date
+	): Promise<ActivationFunnelSnapshot>;
 	getLaunchCohortSignups(periodDays: PmfFunnelPeriodDays, now?: Date): Promise<LaunchCohortSnapshot>;
 	hasHouseholdEvent(householdId: string, eventType: ProductEventType): Promise<boolean>;
 	countHouseholdEventsSince(
@@ -461,6 +470,128 @@ export class DrizzlePmfRepository implements IPmfRepository {
 			firstScans,
 			users: cohortUsers.map((user) => ({ userId: user.id, registeredAt: user.createdAt })),
 			activityRows: activity
+		});
+	}
+
+	async getActivationFunnelMetrics(
+		periodDays: ActivationFunnelPeriodDays,
+		now = new Date()
+	): Promise<ActivationFunnelSnapshot> {
+		const periodMs = periodDays * 24 * 60 * 60 * 1000;
+		const periodStart = new Date(now.getTime() - periodMs);
+
+		const [
+			cohortUsers,
+			onboardingRows,
+			receiptParsed24hRows,
+			inventoryFiveRows,
+			activationRecipesRows,
+			sharedListRow
+		] = await Promise.all([
+			db
+				.select({
+					id: userTable.id,
+					createdAt: userTable.createdAt,
+					lastSeenAt: userTable.lastSeenAt
+				})
+				.from(userTable)
+				.where(gte(userTable.createdAt, periodStart)),
+			db
+				.selectDistinct({ userId: productEventTable.userId })
+				.from(productEventTable)
+				.innerJoin(userTable, eq(productEventTable.userId, userTable.id))
+				.where(
+					and(
+						gte(userTable.createdAt, periodStart),
+						eq(productEventTable.eventType, 'onboarding_started')
+					)
+				),
+			db
+				.selectDistinct({ userId: productEventTable.userId })
+				.from(productEventTable)
+				.innerJoin(userTable, eq(productEventTable.userId, userTable.id))
+				.where(
+					and(
+						gte(userTable.createdAt, periodStart),
+						eq(productEventTable.eventType, 'receipt_parsed'),
+						sql`${productEventTable.createdAt} <= ${userTable.createdAt} + interval '24 hours'`
+					)
+				),
+			db
+				.select({ userId: inventoryItemTable.userId })
+				.from(inventoryItemTable)
+				.innerJoin(userTable, eq(inventoryItemTable.userId, userTable.id))
+				.where(
+					and(
+						gte(userTable.createdAt, periodStart),
+						sql`${inventoryItemTable.createdAt} <= ${userTable.createdAt} + interval '24 hours'`
+					)
+				)
+				.groupBy(inventoryItemTable.userId)
+				.having(sql`count(*)::int >= 5`),
+			db
+				.selectDistinct({ userId: productEventTable.userId })
+				.from(productEventTable)
+				.innerJoin(userTable, eq(productEventTable.userId, userTable.id))
+				.where(
+					and(
+						gte(userTable.createdAt, periodStart),
+						eq(productEventTable.eventType, 'activation_recipes_shown')
+					)
+				),
+			db
+				.select({ count: sql<number>`count(*)::int` })
+				.from(productEventTable)
+				.where(
+					and(
+						eq(productEventTable.eventType, 'shared_list_opened'),
+						gte(productEventTable.createdAt, periodStart)
+					)
+				)
+		]);
+
+		const onboardingStartedUserIds = userIdsFromEventRows(onboardingRows);
+		const receiptParsed24hUserIds = userIdsFromEventRows(receiptParsed24hRows);
+		const inventoryFivePlus24hUserIds = new Set(
+			inventoryFiveRows
+				.map((row) => row.userId)
+				.filter((id): id is string => id != null)
+		);
+		const activationRecipesShownUserIds = userIdsFromEventRows(activationRecipesRows);
+
+		const d7 = computeRetentionRate(cohortUsers, 7, now);
+		let d7Retained = 0;
+		if (d7.eligibleUsers > 0) {
+			const retentionMs = 7 * 24 * 60 * 60 * 1000;
+			for (const user of cohortUsers) {
+				if (now.getTime() - user.createdAt.getTime() < retentionMs) {
+					continue;
+				}
+				if (
+					user.lastSeenAt &&
+					user.lastSeenAt.getTime() - user.createdAt.getTime() >= retentionMs
+				) {
+					d7Retained++;
+				}
+			}
+		}
+
+		return buildActivationFunnelSnapshot({
+			periodDays,
+			periodStart,
+			periodEnd: now,
+			cohortUsers: cohortUsers.map((user) => ({
+				userId: user.id,
+				registeredAt: user.createdAt,
+				lastSeenAt: user.lastSeenAt
+			})),
+			onboardingStartedUserIds,
+			receiptParsed24hUserIds,
+			inventoryFivePlus24hUserIds,
+			activationRecipesShownUserIds,
+			d7Retained,
+			d7Eligible: d7.eligibleUsers,
+			sharedListOpened: sharedListRow[0]?.count ?? 0
 		});
 	}
 

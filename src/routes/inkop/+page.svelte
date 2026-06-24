@@ -47,9 +47,7 @@
 	let receiptSessionOpen = $state(false);
 	let showReceiptImportLead = $state(false);
 
-	const suggestionsOpen = $derived(
-		fromReceipt || receiptSessionOpen || hasSuggestions || !listHasItems
-	);
+	const suggestionsOpen = $derived(fromReceipt || receiptSessionOpen);
 
 	$effect(() => {
 		if (!browser) {
@@ -179,7 +177,8 @@
 
 				{#if data.canEdit}
 					<div class="receipt-one-tap" data-testid="inkop-receipt-one-tap-legacy">
-						<a class="btn btn-secondary btn-full" href={receiptOneTapHref('/inkop')}>
+						<p class="receipt-import-lead">{t('receiptAutomation.oneTapLead')}</p>
+						<a class="btn btn-primary btn-full" href={receiptOneTapHref('/inkop')}>
 							{t('receiptAutomation.oneTapCta')}
 						</a>
 					</div>

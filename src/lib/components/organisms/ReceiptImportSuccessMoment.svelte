@@ -5,6 +5,7 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ReceiptImportSuccessStats from '$lib/components/molecules/ReceiptImportSuccessStats.svelte';
+	import ActivationRecipesCard from '$lib/components/molecules/ActivationRecipesCard.svelte';
 	import ReceiptShareInstallNudge from '$lib/components/molecules/ReceiptShareInstallNudge.svelte';
 	import ReceiptPantrySuccessIllustration from '$lib/components/organisms/illustrations/ReceiptPantrySuccessIllustration.svelte';
 	import { trackProductEvent } from '$lib/client/product-events';
@@ -138,6 +139,7 @@
 				<p class="success-body">{t('receiptImport.success.body', { count: session.itemsAdded })}</p>
 			</div>
 			<ReceiptImportSuccessStats counts={session.locationCounts} />
+			<ActivationRecipesCard active={open} itemsAdded={session.itemsAdded} />
 			{#if session.estimatedExpiryCount > 0}
 				<p class="expiry-line">{t('receiptImport.success.estimatedExpiry', { count: session.estimatedExpiryCount })}</p>
 			{/if}

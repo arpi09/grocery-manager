@@ -23,11 +23,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		preferences?: unknown;
 		portions?: unknown;
 		mealIntent?: unknown;
+		maxRecipes?: unknown;
 	};
 
 	const preferences = typeof body.preferences === 'string' ? body.preferences.trim().slice(0, 300) : '';
 	const portions = clampRecipePortions(body.portions);
 	const mealIntent = parseMealIntent(body.mealIntent);
+	const maxRecipes =
+		typeof body.maxRecipes === 'number' && Number.isFinite(body.maxRecipes)
+			? Math.min(5, Math.max(1, Math.round(body.maxRecipes)))
+			: undefined;
 
 	if (isE2eMockAiEnabled()) {
 		const recipes = e2eMockRecipeSuggestions();
@@ -60,6 +65,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		portions,
 		preferences,
 		mealIntent,
+		...(maxRecipes !== undefined ? { maxRecipes } : {}),
 		locale: normalizePromptLocale(locale),
 		...(await loadRecipeGenerationContext({
 			userId: auth.user.id,

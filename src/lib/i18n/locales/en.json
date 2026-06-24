@@ -2044,7 +2044,31 @@
 			"review7d": "Households with review (7d)",
 			"conversion": "Write→review conversion"
 		},
+		"activationFunnel": {
+			"title": "Activation funnel",
+			"subtitle": "Registration → receipt → pantry → 3 recipes → D7 → shared list. Replaces empty killer-metrics.",
+			"footnote": "See docs/ACTIVATION_FUNNEL.md. Kill criteria: <10 activations in 4 weeks.",
+			"periodToggle": "Activation period",
+			"periodOption": "{days} days",
+			"periodRange": "{start} – {end} ({days}d cohort)",
+			"target": "Target: {value}",
+			"ratio": "{numerator} / {denominator} ({percent})",
+			"ratioUnavailable": "{numerator} / {denominator} (—)",
+			"steps": {
+				"registrations": "Registrations",
+				"registrationsDefinition": "New users in period",
+				"onboardingStarted": "Onboarding started",
+				"receiptParsed24h": "Receipt within 24h",
+				"inventoryFive": "Pantry ≥5 within 24h",
+				"recipesShown": "3-recipe wow shown",
+				"d7": "D7 return visit",
+				"d7Detail": "{retained} of {eligible} eligible",
+				"sharedList": "Shared list opened",
+				"sharedListDefinition": "shared_list_opened in period (guests count)"
+			}
+		},
 		"brainMetrics": {
+			"opsToggle": "Brain ops metrics (expand)",
 			"title": "Brain v2 metrics",
 			"subtitle": "Receipt intelligence funnel, BBF quality, and expiry corrections.",
 			"periodToggle": "Brain metrics period",
@@ -2669,6 +2693,11 @@
 			"ctaContinueSetup": "Continue setup",
 			"ariaLabel": "Receipt import complete",
 			"brainStats": "Skaffu estimated {estimated} dates and suggested {location} locations."
+		},
+		"activationRecipes": {
+			"title": "Here are 3 meals you can cook",
+			"lead": "Based on what you just added to your pantry.",
+			"ctaPlaner": "Open meal planner"
 		}
 	},
 	"receiptBulk": {
@@ -2966,10 +2995,12 @@
 				"cta": "get started"
 			},
 			"scan": {
-				"title": "Start with one thing",
-				"body": "Look around. A carton of milk. A bag of pasta. Your coffee. One scan is all it takes to begin building your pantry.",
-				"ctaPrimary": "Open scanner",
-				"ctaSecondary": "Maybe later"
+				"title": "Start with a receipt",
+				"body": "Upload a PDF from Kivra, ICA or your store — or photograph a paper receipt. One receipt fills your pantry in under two minutes.",
+				"ctaPrimary": "Import receipt",
+				"ctaSecondary": "Maybe later",
+				"kivraHint": "Want to skip manual upload?",
+				"kivraLink": "Set up Kivra forwarding"
 			},
 			"success": {
 				"title": "Looking good",
@@ -3685,7 +3716,7 @@
 		"noItems": "Nothing to share — the list is empty.",
 		"publicEyebrow": "Shared shopping list",
 		"publicTitle": "Shopping list",
-		"publicLead": "Someone shared their shopping list — open it and shop without installing the app.",
+		"publicLead": "Someone shared their shopping list — open it and shop without installing the app. You don't need a receipt to get value here.",
 		"publicSnapshotHonesty": "Snapshot from when the link was created. Checked items are shown but cannot be changed here.",
 		"publicExpires": "Link valid until {date}.",
 		"publicSnapshotAt": "Snapshot taken {date}.",
