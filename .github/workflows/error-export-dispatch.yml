@@ -1,0 +1,22 @@
+# Temporary workflow_dispatch helper for agents to read prod error logs via CRON_SECRET.
+name: Error export (dispatch)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: GET /api/cron/error-export
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          set -euo pipefail
+          base="${PRODUCTION_URL%/}"
+          curl --fail-with-body -sS \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Accept: application/json" \
+            "${base}/api/cron/error-export?hours=48&limit=25"
