@@ -85,7 +85,7 @@ Mejlet innehåller:
 | Variabel | Syfte |
 |----------|--------|
 | `CRON_SECRET` | Secret — samma som expiry-cron |
-| `PMF_DIGEST_TO` | Mottagare (t.ex. `arvid.pilhall@me.com`) |
+| `PMF_DIGEST_TO` | Mottagare (t.ex. `owner@example.com`) |
 | `RESEND_API_KEY` | Secret — redan satt |
 | `RESEND_FROM` | `Skaffu <hello@skaffu.com>` — redan satt |
 
