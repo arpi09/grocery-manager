@@ -258,7 +258,7 @@
 		padding: 0.35rem 0.55rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
-		background: var(--color-surface, #fff);
+		background: var(--color-surface);
 		cursor: pointer;
 		font: inherit;
 	}
@@ -279,7 +279,7 @@
 	}
 
 	.panel-error {
-		color: #8a1f1f;
+		color: var(--color-danger);
 	}
 
 	.error-list {
@@ -311,7 +311,7 @@
 
 	.error-status {
 		font-weight: 700;
-		color: #8a1f1f;
+		color: var(--color-danger);
 	}
 
 	.error-path {
@@ -336,7 +336,7 @@
 		padding: var(--space-sm);
 		overflow-x: auto;
 		font-size: 0.75rem;
-		background: #f5f5f5;
+		background: var(--color-surface-muted);
 		border-radius: var(--radius-sm);
 	}
 

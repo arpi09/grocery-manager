@@ -84,7 +84,7 @@
 		margin: 0;
 		padding: 0.5rem 0.75rem;
 		border-radius: var(--radius-md);
-		background: color-mix(in srgb, #b45309 12%, transparent);
+		background: color-mix(in srgb, var(--color-warning) 12%, transparent);
 		color: var(--color-text);
 		font-size: 0.8125rem;
 		font-weight: 600;

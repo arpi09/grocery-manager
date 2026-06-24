@@ -624,7 +624,7 @@
 	.checkoff-btn.checked {
 		border-color: var(--color-primary);
 		background: var(--color-primary);
-		color: var(--color-on-primary, #fff);
+		color: var(--color-on-primary);
 	}
 
 	.checkoff-icon {

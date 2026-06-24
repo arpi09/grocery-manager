@@ -2,7 +2,18 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import { defineConfig } from 'vitest/config';
-import { BRAND_BG, BRAND_PRIMARY, PWA_ICON_VERSION } from './src/lib/design/brand-colors';
+import { BRAND_BG, BRAND_PRIMARY, BRAND_PRIMARY_DARK, PWA_ICON_VERSION } from './src/lib/design/brand-colors';
+
+function brandThemeColorPlugin() {
+	return {
+		name: 'brand-theme-color',
+		transformIndexHtml(html: string) {
+			return html
+				.replace('#2c4a3e', BRAND_PRIMARY)
+				.replace('#4d8f68', BRAND_PRIMARY_DARK);
+		}
+	};
+}
 
 const pwaIcon = (path: string) => `${path}?v=${PWA_ICON_VERSION}`;
 
@@ -10,6 +21,7 @@ const useHttps = process.env.HTTPS === 'true';
 
 export default defineConfig({
 	plugins: [
+		brandThemeColorPlugin(),
 		sveltekit(),
 		SvelteKitPWA({
 			registerType: 'autoUpdate',

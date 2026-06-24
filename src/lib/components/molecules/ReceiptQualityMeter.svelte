@@ -47,7 +47,7 @@
 	.quality-fill {
 		display: block;
 		height: 100%;
-		background: color-mix(in srgb, var(--color-primary) 70%, #2d6a4f);
+		background: color-mix(in srgb, var(--color-primary) 70%, var(--color-success));
 		border-radius: inherit;
 	}
 

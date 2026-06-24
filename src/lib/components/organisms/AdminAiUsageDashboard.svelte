@@ -128,13 +128,13 @@
 	}
 
 	.budget-warn {
-		border-color: color-mix(in srgb, var(--color-warning, #c9a227) 50%, var(--color-border));
-		background: color-mix(in srgb, var(--color-warning, #c9a227) 8%, var(--color-surface-muted));
+		border-color: color-mix(in srgb, var(--color-warning) 50%, var(--color-border));
+		background: color-mix(in srgb, var(--color-warning) 8%, var(--color-surface-muted));
 	}
 
 	.budget-over {
-		border-color: color-mix(in srgb, var(--color-danger, #c44) 45%, var(--color-border));
-		background: color-mix(in srgb, var(--color-danger, #c44) 10%, var(--color-surface-muted));
+		border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-border));
+		background: color-mix(in srgb, var(--color-danger) 10%, var(--color-surface-muted));
 		font-weight: 600;
 	}
 

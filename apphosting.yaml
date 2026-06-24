@@ -33,6 +33,12 @@ env:
       - BUILD
       - RUNTIME
 
+  # Active brand palette track — generates brand-colors.generated.css at build (Fas 2)
+  - variable: BRAND_PALETTE
+    value: fresh
+    availability:
+      - BUILD
+
   # Public URL of the deployed app (current production). PUBLIC_ORIGIN and ORIGIN must match
   # the canonical HTTPS origin users open in the browser.
   - variable: PUBLIC_ORIGIN

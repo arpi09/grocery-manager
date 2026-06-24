@@ -84,7 +84,7 @@
 		height: 40px;
 		margin: calc(-1 * var(--space-sm)) calc(-1 * var(--space-md)) 0;
 		overflow: hidden;
-		background: color-mix(in srgb, var(--color-accent, #8a9a7b) 8%, var(--color-surface));
+		background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
 	}
 
 	.accent-bar {
@@ -92,10 +92,10 @@
 		inset: 0;
 		background: linear-gradient(
 			90deg,
-			color-mix(in srgb, var(--color-accent, #8a9a7b) 0%, transparent) 0%,
-			color-mix(in srgb, var(--color-accent, #8a9a7b) 35%, transparent) 35%,
-			color-mix(in srgb, var(--color-taupe, #c4b8a8) 30%, transparent) 65%,
-			color-mix(in srgb, var(--color-accent, #8a9a7b) 0%, transparent) 100%
+			color-mix(in srgb, var(--color-accent) 0%, transparent) 0%,
+			color-mix(in srgb, var(--color-accent) 35%, transparent) 35%,
+			color-mix(in srgb, var(--color-taupe) 30%, transparent) 65%,
+			color-mix(in srgb, var(--color-accent) 0%, transparent) 100%
 		);
 		background-size: 200% 100%;
 		animation: accent-shift 8s ease-in-out infinite;
@@ -113,7 +113,7 @@
 		right: 24%;
 		width: 28px;
 		height: 28px;
-		background: color-mix(in srgb, var(--color-accent, #8a9a7b) 40%, transparent);
+		background: color-mix(in srgb, var(--color-accent) 40%, transparent);
 		animation-delay: -2s;
 	}
 
@@ -122,7 +122,7 @@
 		left: 18%;
 		width: 18px;
 		height: 18px;
-		background: color-mix(in srgb, var(--color-taupe, #c4b8a8) 50%, transparent);
+		background: color-mix(in srgb, var(--color-taupe) 50%, transparent);
 		animation-delay: -4s;
 	}
 

@@ -373,7 +373,7 @@
 		width: 0.5rem;
 		height: 0.5rem;
 		border-radius: 999px;
-		background: var(--color-warning, #d97706);
+		background: var(--color-warning);
 		border: 2px solid var(--nav-surface);
 		pointer-events: none;
 	}

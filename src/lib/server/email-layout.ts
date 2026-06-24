@@ -1,17 +1,19 @@
 import type { Locale } from '$lib/i18n/locale';
 import { translate } from '$lib/i18n/messages';
+import { LOCKED_LOGO_CORE } from '$lib/design/brand-colors';
 
-/** Brand tokens aligned with src/app.css (light theme) — inline for email client compatibility. */
+/** Brand tokens aligned with locked logo core (light) — inline for email client compatibility. */
 export const EMAIL = {
-	bg: '#f7f5f0',
-	surface: '#ffffff',
-	surfaceMuted: '#eef2eb',
-	border: '#dde5d8',
-	text: '#1f2a24',
-	textMuted: '#5c6b62',
-	primary: '#2c4a3e',
-	primaryHover: '#243d32',
-	accent: '#d4a853'
+	bg: LOCKED_LOGO_CORE.light.bg,
+	surface: LOCKED_LOGO_CORE.light.surface,
+	surfaceMuted: LOCKED_LOGO_CORE.light.surfaceMuted,
+	border: LOCKED_LOGO_CORE.light.border,
+	text: LOCKED_LOGO_CORE.light.text,
+	textMuted: LOCKED_LOGO_CORE.light.textMuted,
+	primary: LOCKED_LOGO_CORE.light.primary,
+	primaryHover: LOCKED_LOGO_CORE.light.primaryHover,
+	accent: LOCKED_LOGO_CORE.light.accent,
+	onPrimary: LOCKED_LOGO_CORE.light.onPrimary
 } as const;
 
 export function escapeEmailHtml(value: string): string {
@@ -27,7 +29,7 @@ function brandedHeaderHtml(): string {
             <td style="background-color:${EMAIL.primary};padding:28px 32px 24px;text-align:center;">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 12px;">
                 <tr>
-                  <td style="width:44px;height:44px;background-color:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.35);border-radius:12px;text-align:center;vertical-align:middle;font-size:20px;font-weight:700;color:#ffffff;line-height:44px;">S</td>
+                  <td style="width:44px;height:44px;background-color:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.35);border-radius:12px;text-align:center;vertical-align:middle;font-size:20px;font-weight:700;color:${EMAIL.onPrimary};line-height:44px;">S</td>
                 </tr>
               </table>
               <p style="margin:0;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.85);">Skaffu</p>
@@ -82,7 +84,7 @@ export function buildBrandedEmailHtml(options: BuildBrandedEmailHtmlOptions): st
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="center" style="border-radius:10px;background-color:${EMAIL.primary};">
-                    <a href="${escapeEmailHtml(cta.href)}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:16px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;background-color:${EMAIL.primary};border:1px solid ${EMAIL.primaryHover};">${escapeEmailHtml(cta.label)}</a>
+                    <a href="${escapeEmailHtml(cta.href)}" target="_blank" style="display:inline-block;padding:14px 32px;font-size:16px;font-weight:600;color:${EMAIL.onPrimary};text-decoration:none;border-radius:10px;background-color:${EMAIL.primary};border:1px solid ${EMAIL.primaryHover};">${escapeEmailHtml(cta.label)}</a>
                   </td>
                 </tr>
               </table>
@@ -162,7 +164,7 @@ export function buildOwnerEmailShellHtml(options: {
   <style>
     body { font-family: 'Segoe UI', system-ui, sans-serif; color: ${EMAIL.text}; background: ${EMAIL.bg}; margin: 0; padding: 24px 16px; }
     .card { max-width: 640px; margin: 0 auto; background: ${EMAIL.surface}; border: 1px solid ${EMAIL.border}; border-radius: 16px; overflow: hidden; }
-    .header { background: ${EMAIL.primary}; color: #fff; padding: 24px 28px; }
+    .header { background: ${EMAIL.primary}; color: ${EMAIL.onPrimary}; padding: 24px 28px; }
     .header h1 { margin: 0 0 8px; font-size: 22px; }
     .body { padding: 28px; }
   </style>

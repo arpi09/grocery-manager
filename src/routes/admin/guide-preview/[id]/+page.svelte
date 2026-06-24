@@ -45,8 +45,8 @@
 		margin: 0 0 var(--space-lg);
 		padding: var(--space-sm) var(--space-md);
 		border-radius: var(--radius-sm);
-		background: color-mix(in srgb, var(--color-warning, #b45309) 14%, var(--color-surface));
-		color: var(--color-warning, #b45309);
+		background: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface));
+		color: var(--color-warning);
 		font-size: 0.9rem;
 	}
 

@@ -100,8 +100,8 @@
 		display: inline-block;
 		padding: 0.25rem 0.65rem;
 		border-radius: 999px;
-		background: #eceff1;
-		color: #37474f;
+		background: var(--color-surface-muted);
+		color: var(--color-text-muted);
 		font-size: 0.75rem;
 		font-weight: 600;
 		letter-spacing: 0.02em;

@@ -2,6 +2,9 @@
 	import { onDestroy, onMount } from 'svelte';
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import { t } from '$lib/i18n';
+	import { DEFAULT_PALETTE_TRACK, mergePalette } from '$lib/design/brand-colors';
+
+	const MAP_PALETTE = mergePalette(DEFAULT_PALETTE_TRACK).light;
 
 	export interface NearbyMapShare {
 		id: string;
@@ -178,14 +181,21 @@
 
 	function mapColors() {
 		if (typeof document === 'undefined') {
-			return { primary: '#2563eb', warning: '#d97706', surface: '#ffffff', text: '#111827' };
+			return {
+				primary: MAP_PALETTE.primary,
+				warning: MAP_PALETTE.warning,
+				surface: MAP_PALETTE.surface,
+				text: MAP_PALETTE.text,
+				onPrimary: MAP_PALETTE.onPrimary
+			};
 		}
 		const styles = getComputedStyle(document.documentElement);
 		return {
-			primary: styles.getPropertyValue('--color-primary').trim() || '#2563eb',
-			warning: styles.getPropertyValue('--color-warning').trim() || '#d97706',
-			surface: styles.getPropertyValue('--color-surface').trim() || '#ffffff',
-			text: styles.getPropertyValue('--color-text').trim() || '#111827'
+			primary: styles.getPropertyValue('--color-primary').trim() || MAP_PALETTE.primary,
+			warning: styles.getPropertyValue('--color-warning').trim() || MAP_PALETTE.warning,
+			surface: styles.getPropertyValue('--color-surface').trim() || MAP_PALETTE.surface,
+			text: styles.getPropertyValue('--color-text').trim() || MAP_PALETTE.text,
+			onPrimary: styles.getPropertyValue('--color-on-primary').trim() || MAP_PALETTE.onPrimary
 		};
 	}
 
@@ -231,7 +241,7 @@
 				'text-size': 12
 			},
 			paint: {
-				'text-color': '#fff'
+				'text-color': colors.onPrimary
 			}
 		});
 
@@ -439,7 +449,7 @@
 	}
 
 	:global(.nearby-map-marker.has-chat-unread .nearby-map-marker-chat) {
-		background: var(--color-warning, #d97706);
+		background: var(--color-warning);
 	}
 
 	:global(.nearby-map-marker.selected) {

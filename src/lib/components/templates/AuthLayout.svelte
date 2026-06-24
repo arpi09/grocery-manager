@@ -32,11 +32,11 @@
 		align-items: center;
 		justify-content: center;
 		padding: var(--space-lg);
-		background: linear-gradient(160deg, #eef2eb 0%, var(--color-bg) 50%, #f0ebe3 100%);
+		background: linear-gradient(160deg, var(--color-surface-muted) 0%, var(--color-bg) 50%, color-mix(in srgb, var(--color-taupe) 35%, var(--color-bg)) 100%);
 	}
 
 	html[data-theme='dark'] .auth {
-		background: linear-gradient(160deg, #1a221d 0%, var(--color-bg) 50%, #161c19 100%);
+		background: linear-gradient(160deg, color-mix(in srgb, var(--color-text) 25%, var(--color-bg)) 0%, var(--color-bg) 50%, color-mix(in srgb, var(--color-text) 15%, var(--color-bg)) 100%);
 	}
 
 	.panel {

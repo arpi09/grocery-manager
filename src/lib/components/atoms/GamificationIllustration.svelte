@@ -85,7 +85,7 @@
 	}
 
 	.flame {
-		fill: color-mix(in srgb, var(--color-primary) 75%, var(--color-warning, #f59e0b));
+		fill: color-mix(in srgb, var(--color-primary) 75%, var(--color-warning));
 		animation: flame-rise 0.6s 0.2s ease-out both;
 	}
 

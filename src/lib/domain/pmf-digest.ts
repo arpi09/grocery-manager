@@ -6,7 +6,11 @@ import {
 	type PmfWeeklyReview
 } from '$lib/domain/pmf';
 import type { AdminDashboardStats } from '$lib/infrastructure/repositories/admin.repository';
-import { BRAND_BG, BRAND_PRIMARY } from '$lib/design/brand-colors';
+import { BRAND_BG, BRAND_PRIMARY, LOCKED_LOGO_CORE, mergePalette, DEFAULT_PALETTE_TRACK } from '$lib/design/brand-colors';
+
+const EMAIL_TEXT_MUTED = LOCKED_LOGO_CORE.light.textMuted;
+const EMAIL_WARNING = mergePalette(DEFAULT_PALETTE_TRACK).light.warning;
+const EMAIL = LOCKED_LOGO_CORE.light;
 
 const PRO_WAITLIST_TARGET = 50;
 
@@ -261,9 +265,9 @@ export function buildPmfDigestEmailContent(input: PmfDigestInput): PmfDigestEmai
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${escapeHtml(subject)}</title>
   <style>
-    body { font-family: 'Segoe UI', system-ui, sans-serif; color: #1f2a24; background: ${BRAND_BG}; margin: 0; padding: 24px 16px; }
-    .card { max-width: 640px; margin: 0 auto; background: #fff; border: 1px solid #dde5d8; border-radius: 16px; overflow: hidden; }
-    .header { background: ${BRAND_PRIMARY}; color: #fff; padding: 24px 28px; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; color: ${EMAIL.text}; background: ${BRAND_BG}; margin: 0; padding: 24px 16px; }
+    .card { max-width: 640px; margin: 0 auto; background: ${EMAIL.surface}; border: 1px solid ${EMAIL.border}; border-radius: 16px; overflow: hidden; }
+    .header { background: ${BRAND_PRIMARY}; color: ${EMAIL.onPrimary}; padding: 24px 28px; }
     .header h1 { margin: 0 0 8px; font-size: 22px; }
     .header p { margin: 0; opacity: 0.9; font-size: 14px; }
     .body { padding: 28px; }
@@ -271,14 +275,14 @@ export function buildPmfDigestEmailContent(input: PmfDigestInput): PmfDigestEmai
     h2:first-child { margin-top: 0; }
     .stats { margin: 0; padding-left: 20px; line-height: 1.7; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { padding: 10px 8px; border-bottom: 1px solid #dde5d8; text-align: left; vertical-align: top; }
-    th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #5c6b62; }
-    tr.below-target td:first-child { color: #9a3412; }
-    .detail { font-size: 12px; color: #5c6b62; }
-    .action { background: #eef2eb; border: 1px solid #dde5d8; border-radius: 12px; padding: 16px; margin-top: 8px; line-height: 1.55; }
-    .events { font-size: 13px; color: #5c6b62; margin-top: 8px; }
-    .cta { display: inline-block; margin-top: 24px; padding: 12px 24px; background: ${BRAND_PRIMARY}; color: #fff !important; text-decoration: none; border-radius: 10px; font-weight: 600; }
-    .footer { padding: 16px 28px 24px; font-size: 12px; color: #5c6b62; border-top: 1px solid #dde5d8; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid ${EMAIL.border}; text-align: left; vertical-align: top; }
+    th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: ${EMAIL_TEXT_MUTED}; }
+    tr.below-target td:first-child { color: ${EMAIL_WARNING}; }
+    .detail { font-size: 12px; color: ${EMAIL_TEXT_MUTED}; }
+    .action { background: ${EMAIL.surfaceMuted}; border: 1px solid ${EMAIL.border}; border-radius: 12px; padding: 16px; margin-top: 8px; line-height: 1.55; }
+    .events { font-size: 13px; color: ${EMAIL_TEXT_MUTED}; margin-top: 8px; }
+    .cta { display: inline-block; margin-top: 24px; padding: 12px 24px; background: ${BRAND_PRIMARY}; color: ${EMAIL.onPrimary} !important; text-decoration: none; border-radius: 10px; font-weight: 600; }
+    .footer { padding: 16px 28px 24px; font-size: 12px; color: ${EMAIL_TEXT_MUTED}; border-top: 1px solid ${EMAIL.border}; }
   </style>
 </head>
 <body>

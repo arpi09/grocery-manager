@@ -211,7 +211,7 @@
 
 	.theme-error {
 		margin: calc(-1 * var(--space-sm)) 0 var(--space-md);
-		color: var(--color-danger, #b42318);
+		color: var(--color-danger);
 		font-size: 0.9rem;
 	}
 

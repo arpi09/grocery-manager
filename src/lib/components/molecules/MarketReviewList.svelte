@@ -85,7 +85,7 @@
 	}
 
 	.review-stars {
-		color: var(--color-warning, #d4a017);
+		color: var(--color-warning);
 		letter-spacing: 0.05em;
 	}
 

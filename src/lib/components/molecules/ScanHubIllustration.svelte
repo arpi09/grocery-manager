@@ -96,7 +96,7 @@
 	}
 
 	.flash {
-		fill: color-mix(in srgb, var(--color-warning, #f59e0b) 60%, var(--color-primary));
+		fill: color-mix(in srgb, var(--color-warning) 60%, var(--color-primary));
 		opacity: 0.85;
 	}
 

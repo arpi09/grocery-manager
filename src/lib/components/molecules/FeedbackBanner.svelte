@@ -28,20 +28,20 @@
 	}
 
 	.feedback-success {
-		background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface));
-		color: var(--color-primary);
-		border: 1px solid color-mix(in srgb, var(--color-primary) 28%, var(--color-border));
+		background: color-mix(in srgb, var(--color-success) 14%, var(--color-surface));
+		color: var(--color-success);
+		border: 1px solid color-mix(in srgb, var(--color-success) 28%, var(--color-border));
 	}
 
 	.feedback-warning {
-		background: color-mix(in srgb, var(--color-accent) 22%, var(--color-surface));
-		color: color-mix(in srgb, var(--color-text) 75%, #8a5a12);
-		border: 1px solid color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+		background: color-mix(in srgb, var(--color-warning) 22%, var(--color-surface));
+		color: var(--color-warning);
+		border: 1px solid color-mix(in srgb, var(--color-warning) 45%, var(--color-border));
 	}
 
 	.feedback-error {
 		background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface));
-		color: color-mix(in srgb, var(--color-danger) 65%, #3d1515);
+		color: var(--color-danger);
 		border: 1px solid color-mix(in srgb, var(--color-danger) 25%, var(--color-border));
 	}
 

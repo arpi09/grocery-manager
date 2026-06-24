@@ -388,6 +388,31 @@ export const PALETTE_TRACKS: Record<PaletteTrack, SemanticByMode> = {
 
 export const PALETTE_TRACK_LIST: PaletteTrack[] = ['heritage', 'fresh', 'warm', 'crisp'];
 
+/** Active production palette track — set via BRAND_PALETTE env at build time. */
+export const DEFAULT_PALETTE_TRACK: PaletteTrack = 'fresh';
+
+/** Expiry badge source → palette color (active track, light mode). */
+export function expirySourceColors(
+	track: PaletteTrack = DEFAULT_PALETTE_TRACK,
+	mode: BrandColorMode = 'light'
+): Record<string, string> {
+	const p = mergePalette(track)[mode];
+	return {
+		household_learned: p.success,
+		household_rule: p.success,
+		receipt_printed: p.info,
+		evidence: p.info,
+		ai_inferred: p.learningAi,
+		external_model: p.learningAi,
+		llm: p.learningAi,
+		heuristic: p.textMuted,
+		default_heuristic: p.textMuted,
+		default: p.textMuted,
+		location_default: p.info,
+		catalog: p.secondary
+	};
+}
+
 
 
 /** Per-track AI gradient stops (light mode canonical). Falls back to solid learningAi. */

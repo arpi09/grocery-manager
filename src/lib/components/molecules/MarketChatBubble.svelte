@@ -51,7 +51,7 @@
 		border-radius: 1.125rem 1.125rem var(--space-2xs) 1.125rem;
 		background: var(--color-primary);
 		border-color: var(--color-primary);
-		color: var(--color-on-primary, #fff);
+		color: var(--color-on-primary);
 	}
 
 	.body {
