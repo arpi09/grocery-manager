@@ -32,7 +32,7 @@
 	const hasAction = $derived(Boolean(actionLabel && (actionHref || onAction)));
 </script>
 
-<div class="empty">
+<div class="empty motion-fade-in">
 	{#if iconId}
 		<span class="icon-wrap" aria-hidden="true">
 			<FeatureIcon id={iconId} size={28} />

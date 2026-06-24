@@ -42,6 +42,7 @@
 	const header = $derived(buildPlanHeaderTitle(tripLabel));
 	const uncheckedCount = $derived(sortUncheckedItems(items).length);
 	const hasMemory = $derived(suggestions.length > 0);
+	const showEmptyExtras = $derived(uncheckedCount > 0 || hasMemory);
 
 	const subtitle = $derived.by(() => {
 		if (uncheckedCount === 0) {
@@ -69,18 +70,19 @@
 		<EmptyState
 			title={t('shopping.v2.plan.emptyTitle')}
 			description={t('shopping.v2.plan.emptyBody')}
+			iconId="shopping"
 			actionLabel={canEdit ? t('shopping.v2.plan.emptyCta') : undefined}
-			actionVariant="secondary"
+			actionVariant="primary"
 			onAction={canEdit ? onAddItem : undefined}
 			primaryAnalyticsId="shopping.v2.plan.empty_add"
 		/>
 	{/if}
 
-	{#if showReceiptLead}
+	{#if showReceiptLead && showEmptyExtras}
 		<p class="receipt-lead" role="status">{t('shopping.v2.receiptLead')}</p>
 	{/if}
 
-	{#if canEdit}
+	{#if canEdit && showEmptyExtras}
 		<div class="receipt-import-cta" data-testid="inkop-receipt-one-tap">
 			<p class="receipt-import-lead">{t('receiptAutomation.oneTapLead')}</p>
 			<a class="btn btn-primary btn-full" href={receiptOneTapHref('/inkop')}>
@@ -89,16 +91,18 @@
 		</div>
 	{/if}
 
-	<MemorySuggestionList
-		{suggestions}
-		{items}
-		{canEdit}
-		{acceptingKey}
-		{dismissingKey}
-		deemphasizeCadence={true}
-		onAccept={onAcceptSuggestion}
-		onDismiss={onDismissSuggestion}
-	/>
+	{#if showEmptyExtras}
+		<MemorySuggestionList
+			{suggestions}
+			{items}
+			{canEdit}
+			{acceptingKey}
+			{dismissingKey}
+			deemphasizeCadence={true}
+			onAccept={onAcceptSuggestion}
+			onDismiss={onDismissSuggestion}
+		/>
+	{/if}
 
 	<TripSummaryPills {items} {canEdit} {onStartShop} {onAddItem} />
 

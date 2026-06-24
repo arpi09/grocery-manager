@@ -389,7 +389,7 @@
 		memberCount={memberCount}
 		uncheckedCount={unchecked.length}
 		checkedCount={checkedCount}
-		{listHasItems}
+		listHasItems={listHasItems}
 	/>
 
 	<TripCompletedInviteBanner memberCount={memberCount} trigger={tripCompletedTrigger} />

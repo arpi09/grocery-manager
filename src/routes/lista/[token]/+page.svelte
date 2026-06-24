@@ -197,22 +197,6 @@
 		{/if}
 
 		<p class="gdpr-note" role="note">{t('shoppingListShare.publicGdprNote')}</p>
-
-		<div class="signup-cta">
-			<h2>{t('shoppingListShare.publicSignupTitle')}</h2>
-
-			<p>{t('shoppingListShare.publicSignupLead')}</p>
-
-			<a class="signup-cta-btn signup-cta-btn--primary" href={signupUrl} onclick={handleSignupClick}>
-				{t('shoppingListShare.publicSignupBtn')}
-			</a>
-
-			<p class="signup-hint">{t('shoppingListShare.publicSignupHint')}</p>
-
-			<a class="signup-login-link" href={loginUrl} onclick={handleLoginClick}>
-				{t('shoppingListShare.publicLoginLink')}
-			</a>
-		</div>
 	</div>
 </main>
 

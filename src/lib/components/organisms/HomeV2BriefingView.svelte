@@ -148,6 +148,9 @@
 	}
 
 	const momentHref = $derived(moment ? momentCtaHref(moment.kind) : null);
+	const hideReceiptOneTap = $derived(
+		moment?.kind === 'emptyPantry' || moment?.kind === 'scanReceipt'
+	);
 
 	const forYouCtaHref = $derived.by(() => {
 		if (!forYou) return null;
@@ -222,7 +225,7 @@
 		onChipTap={trackHomeChipTapped}
 	/>
 
-	{#if canWrite}
+	{#if canWrite && !hideReceiptOneTap}
 		<div class="receipt-import-cta" data-testid="home-receipt-one-tap">
 			<p class="receipt-import-lead">{t('receiptAutomation.oneTapLead')}</p>
 			<a class="btn btn-primary btn-full" href={receiptOneTapHref(APP_HOME_PATH)}>
