@@ -9,6 +9,7 @@
 	--color-primary-hover: #243d32;
 	--color-on-primary: #ffffff;
 	--color-accent: #d4a853;
+	--color-taupe: #c4b8a8;
 	--color-danger: #b54a4a;
 	--color-warning: #9a6700;
 	--color-fridge: #4a8fb8;
@@ -23,6 +24,7 @@
 	/* Typography scale — see docs/BRAND.md */
 	--font-size-display: clamp(1.5rem, 4vw, 1.85rem);
 	--font-size-body: 1rem;
+	--font-size-body-md: 0.9375rem;
 	--font-size-body-sm: 0.875rem;
 	--font-size-label: 0.75rem;
 	--font-weight-display: 700;
@@ -94,7 +96,7 @@ html[data-theme='dark'] {
 	--color-surface-muted: #243028;
 	--color-border: #2a3d30;
 	--color-text: #a0b0a8;
-	--color-text-muted: #4a5e55;
+	--color-text-muted: #7a8f85;
 	--color-primary: #4d8f68;
 	--color-primary-hover: #5aa076;
 	--color-on-primary: #ffffff;
@@ -129,6 +131,12 @@ body {
 	color: var(--color-text);
 	line-height: 1.5;
 	overflow-x: clip;
+}
+
+html {
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease;
 }
 
 @media (min-width: 900px) {
@@ -278,6 +286,55 @@ a:focus:not(:focus-visible) {
 	opacity: 0.55;
 	cursor: not-allowed;
 	text-decoration: none;
+}
+
+/* Global button links — match Button.svelte for <a class="btn"> usage */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-sm);
+	min-height: 2.75rem;
+	padding: 0.65rem 1.1rem;
+	border-radius: var(--radius-sm);
+	border: none;
+	font-weight: 600;
+	cursor: pointer;
+	text-decoration: none;
+	transition:
+		background 0.15s,
+		transform 0.1s;
+}
+
+.btn:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.btn-primary {
+	background: var(--color-primary);
+	color: var(--color-on-primary);
+}
+
+.btn-primary:hover:not(:disabled) {
+	background: var(--color-primary-hover);
+	color: var(--color-on-primary);
+	text-decoration: none;
+}
+
+.btn-secondary {
+	background: var(--color-surface-muted);
+	color: var(--color-text);
+	border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+	background: color-mix(in srgb, var(--color-surface-muted) 80%, var(--color-border));
+	text-decoration: none;
+}
+
+.btn-full {
+	width: 100%;
 }
 
 /* Motion utilities — CSS-only; respect prefers-reduced-motion */

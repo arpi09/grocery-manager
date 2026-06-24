@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
+	import HomeBriefingMomentScene from '$lib/components/molecules/HomeBriefingMomentScene.svelte';
 	import type { HomeBriefingMessagePresentation } from '$lib/domain/home-briefing-presenter';
 	import { t } from '$lib/i18n';
 
@@ -47,6 +48,8 @@
 			<span class="accent-shape shape-a"></span>
 			<span class="accent-shape shape-b"></span>
 		</div>
+	{:else}
+		<HomeBriefingMomentScene />
 	{/if}
 
 	<h2 class="suggestion-title">{t(title.key, title.params)}</h2>
