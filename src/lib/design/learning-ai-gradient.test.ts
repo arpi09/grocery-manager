@@ -26,7 +26,7 @@ describe('learning AI gradient tokens', () => {
 		const dark = getLearningAiGradientStops('fresh', 'dark');
 		expect(light).not.toEqual(dark);
 		expect(light[0]).toBe('#3E5288');
-		expect(dark[0]).toBe('#7088D0');
+		expect(dark[0]).toBe('#384E78');
 	});
 
 	it('meets 4.5:1 contrast for white text on gradient mid-stop', () => {

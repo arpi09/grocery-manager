@@ -1,4 +1,4 @@
-/**
+﻿/**
 
  * Single source of truth for brand hex values.
 
@@ -78,7 +78,7 @@ export type BrandPaletteByMode = Record<BrandColorMode, BrandPalette>;
 
 
 
-/** Logo / brand core — immutable across palette tracks. */
+/** Logo / brand core â€” immutable across palette tracks. */
 
 export const LOCKED_LOGO_CORE: Record<BrandColorMode, BrandCoreTokens> = {
 
@@ -248,7 +248,7 @@ const FRESH_SEMANTIC: SemanticByMode = {
 
 		learningAi: '#8A9EE8',
 
-		learningAiGradientStops: ['#7088D0', '#8A9EE8', '#9AB0F0', '#8A9EE8']
+		learningAiGradientStops: ['#384E78', '#455A90', '#5A72B8', '#455A90']
 
 	}
 
@@ -388,10 +388,10 @@ export const PALETTE_TRACKS: Record<PaletteTrack, SemanticByMode> = {
 
 export const PALETTE_TRACK_LIST: PaletteTrack[] = ['heritage', 'fresh', 'warm', 'crisp'];
 
-/** Active production palette track — set via BRAND_PALETTE env at build time. */
+/** Active production palette track â€” set via BRAND_PALETTE env at build time. */
 export const DEFAULT_PALETTE_TRACK: PaletteTrack = 'fresh';
 
-/** Expiry badge source → palette color (active track, light mode). */
+/** Expiry badge source â†’ palette color (active track, light mode). */
 export function expirySourceColors(
 	track: PaletteTrack = DEFAULT_PALETTE_TRACK,
 	mode: BrandColorMode = 'light'
@@ -549,7 +549,7 @@ export const BRAND_PRIMARY_DARK = LOCKED_LOGO_CORE.dark.primary;
 
 
 
-/** Bump when regenerating static/pwa/*.png — busts iOS home-screen icon cache (also set in src/app.html). */
+/** Bump when regenerating static/pwa/*.png â€” busts iOS home-screen icon cache (also set in src/app.html). */
 
 export const PWA_ICON_VERSION = '5';
 
