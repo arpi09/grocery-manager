@@ -1,17 +1,30 @@
 import { describe, expect, it } from 'vitest';
 import {
 	ACTIVATION_PROGRESS_KEYS,
-	ACTIVATION_SCREEN_COUNT,
 	ACTIVATION_SCREEN_IDS,
+	canNavigateToScreen,
 	canSelectProgressKey,
+	nextScreen,
+	previousScreen,
 	progressKeyForScreen,
 	screenForProgressKey
 } from './onboarding-steps';
+import type { ActivationOnboardingFlags } from './activation-onboarding-state';
 import type { ActivationProgressKey } from './onboarding-steps';
+
+const baseFlags = (): ActivationOnboardingFlags => ({
+	welcomeSeen: false,
+	scanStarted: false,
+	scanDeferred: false,
+	firstScanDone: false,
+	inventoryCreated: false,
+	successSeen: false,
+	brainSeen: false,
+	shoppingSeen: false
+});
 
 describe('activation onboarding steps', () => {
 	it('defines five activation screens in order', () => {
-		expect(ACTIVATION_SCREEN_COUNT).toBe(5);
 		expect(ACTIVATION_SCREEN_IDS).toEqual(['welcome', 'scan', 'success', 'brain', 'shopping']);
 	});
 
@@ -41,7 +54,7 @@ describe('activation onboarding steps', () => {
 		]);
 	});
 
-	it('canSelectProgressKey allows done and current steps only', () => {
+	it('canSelectProgressKey allows current and earlier steps', () => {
 		const checklist: Record<ActivationProgressKey, boolean> = {
 			welcome: true,
 			firstScan: true,
@@ -54,5 +67,26 @@ describe('activation onboarding steps', () => {
 		expect(canSelectProgressKey('firstScan', checklist, 'firstScan')).toBe(true);
 		expect(canSelectProgressKey('pantryCreated', checklist, 'firstScan')).toBe(false);
 		expect(canSelectProgressKey('brain', checklist, 'firstScan')).toBe(false);
+	});
+
+	it('previousScreen and nextScreen walk the activation order', () => {
+		expect(previousScreen('welcome')).toBeNull();
+		expect(nextScreen('welcome')).toBe('scan');
+		expect(previousScreen('shopping')).toBe('brain');
+		expect(nextScreen('shopping')).toBeNull();
+	});
+
+	it('canNavigateToScreen allows backward preview and blocks skipping ahead', () => {
+		const flags = { ...baseFlags(), welcomeSeen: true };
+
+		expect(canNavigateToScreen('welcome', flags, 0)).toBe(true);
+		expect(canNavigateToScreen('scan', flags, 0)).toBe(true);
+		expect(canNavigateToScreen('success', flags, 0)).toBe(false);
+	});
+
+	it('canNavigateToScreen allows success when inventory exists', () => {
+		const flags = { ...baseFlags(), welcomeSeen: true, firstScanDone: true };
+
+		expect(canNavigateToScreen('success', flags, 1)).toBe(true);
 	});
 });

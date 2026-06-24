@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Sparkles } from '@lucide/svelte';
+	import LearningAiBadge from '$lib/components/atoms/LearningAiBadge.svelte';
 	import { t } from '$lib/i18n';
 	interface Props {
 		onclick?: () => void;
@@ -30,7 +31,7 @@
 				<Sparkles size={18} strokeWidth={2} />
 			</span>
 			<span class="label">{t('recipe.label')}</span>
-			<span class="badge">{t('recipe.newBadge')}</span>
+			<LearningAiBadge variant="soft" testId="recipe-ideas-ai-badge" />
 		</span>
 	{/if}
 </button>
@@ -70,20 +71,6 @@
 		display: inline-flex;
 		flex-shrink: 0;
 		color: var(--color-primary);
-	}
-
-	.badge {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.1rem 0.4rem;
-		border-radius: 999px;
-		background: var(--color-primary-hover);
-		color: var(--color-on-primary);
-		font-size: 0.625rem;
-		font-weight: 800;
-		line-height: 1.2;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
 	}
 
 	.compact .inner {

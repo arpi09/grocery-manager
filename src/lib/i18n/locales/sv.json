@@ -2912,6 +2912,8 @@
 			"dialogAria": "Introduktion till Skaffu",
 			"progressAria": "Framsteg i introduktionen",
 			"continueStep": "Fortsätt",
+			"navBack": "Tillbaka",
+			"navForward": "Nästa",
 			"progressStepDisabled": "Inte tillgängligt än",
 			"welcome": {
 				"title": "Välkommen till Skaffu",
@@ -2930,7 +2932,8 @@
 				"title": "Bra start",
 				"body": "Det här är vad ni har inlagt. Lägg till mer när det passar — listan och påminnelserna blir bättre.",
 				"cta": "Fortsätt",
-				"itemsAria": "Varor du lagt till"
+				"itemsAria": "Varor du lagt till",
+				"moreItems": "+{count} till"
 			},
 			"brain": {
 				"title": "Så bygger ert minne",
@@ -3519,6 +3522,7 @@
 		"invalidPayload": "Ogiltig streckkod eller varunamn"
 	},
 	"learning": {
+		"aiBadge": "AI",
 		"estimatedExpiry": "Uppskattat",
 		"lowConfidence": "Osäker uppskattning",
 		"sourceHousehold": "Inlärt av ert hushåll",

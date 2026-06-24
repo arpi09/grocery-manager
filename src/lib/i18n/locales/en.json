@@ -2991,6 +2991,8 @@
 			"dialogAria": "Introduction to Skaffu",
 			"progressAria": "Onboarding progress",
 			"continueStep": "Continue",
+			"navBack": "Back",
+			"navForward": "Next",
 			"progressStepDisabled": "Not available yet",
 			"welcome": {
 				"title": "Welcome to Skaffu",
@@ -3009,7 +3011,8 @@
 				"title": "Good start",
 				"body": "This is what you've added so far. Add more when it suits you — the list and reminders get better.",
 				"cta": "Continue",
-				"itemsAria": "Items you added"
+				"itemsAria": "Items you added",
+				"moreItems": "+{count} more"
 			},
 			"brain": {
 				"title": "How your memory builds",
@@ -3598,6 +3601,7 @@
 		"invalidPayload": "Invalid barcode or product name"
 	},
 	"learning": {
+		"aiBadge": "AI",
 		"estimatedExpiry": "Estimated",
 		"lowConfidence": "Uncertain estimate",
 		"sourceHousehold": "Learned by your household",

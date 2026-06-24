@@ -38,7 +38,10 @@
 		type ActivationScreen
 	} from '$lib/utils/onboarding';
 	import {
+		canNavigateToScreen,
 		canSelectProgressKey,
+		nextScreen,
+		previousScreen,
 		progressKeyForScreen,
 		screenForProgressKey
 	} from '$lib/utils/onboarding-steps';
@@ -96,6 +99,8 @@
 		previewScreen ? progressKeyForScreen(previewScreen) : null
 	);
 	const successItems = $derived(userId ? getActivationSuccessSnapshot(userId) : []);
+	const visibleSuccessItems = $derived(successItems.slice(0, 3));
+	const hiddenSuccessCount = $derived(Math.max(0, successItems.length - visibleSuccessItems.length));
 
 	const screenCopy: Record<
 		ActivationScreen,
@@ -137,6 +142,67 @@
 			return false;
 		}
 		return canSelectProgressKey(key, checklist, currentProgress);
+	}
+
+	function canNavigateTo(target: ActivationScreen): boolean {
+		if (!flags) {
+			return false;
+		}
+		return canNavigateToScreen(target, flags, inventoryCount, {
+			skipSuccessScreen: skipActivationSuccess,
+			flowComplete: flowComplete
+		});
+	}
+
+	const canNavBack = $derived.by(() => {
+		if (displayScreen === 'complete') {
+			return false;
+		}
+		if (isPreview) {
+			return true;
+		}
+		return previousScreen(displayScreen) !== null;
+	});
+
+	const canNavForward = $derived.by(() => {
+		if (displayScreen === 'complete') {
+			return false;
+		}
+		if (isPreview) {
+			return true;
+		}
+		const next = nextScreen(displayScreen);
+		return next !== null && canNavigateTo(next);
+	});
+
+	function handleNavBack() {
+		if (displayScreen === 'complete') {
+			return;
+		}
+		if (isPreview) {
+			clearPreview();
+			return;
+		}
+		const prev = previousScreen(displayScreen);
+		if (!prev) {
+			return;
+		}
+		previewScreen = prev;
+	}
+
+	function handleNavForward() {
+		if (displayScreen === 'complete') {
+			return;
+		}
+		if (isPreview) {
+			handlePreviewContinue();
+			return;
+		}
+		const next = nextScreen(displayScreen);
+		if (!next || !canNavigateTo(next)) {
+			return;
+		}
+		previewScreen = next;
 	}
 
 	function handleProgressSelect(key: ActivationProgressKey) {
@@ -419,7 +485,7 @@
 									class="success-items"
 									aria-label={t('onboarding.activation.success.itemsAria')}
 								>
-									{#each successItems as item (item.name + item.locationLabel)}
+									{#each visibleSuccessItems as item (item.name + item.locationLabel)}
 										<li>
 											<div class="item-row">
 												{#if item.location}
@@ -433,6 +499,11 @@
 										</li>
 									{/each}
 								</ul>
+								{#if hiddenSuccessCount > 0}
+									<p class="success-more">
+										{t('onboarding.activation.success.moreItems', { count: hiddenSuccessCount })}
+									</p>
+								{/if}
 							{:else if displayScreen === 'shopping'}
 								<ActivationSetupCards />
 							{/if}
@@ -445,6 +516,26 @@
 		{#snippet footer()}
 			{#key `${displayScreen}-${isPreview}`}
 				<div class="flow-footer">
+					<div class="flow-nav-row">
+						<Button
+							type="button"
+							variant="ghost"
+							disabled={!canNavBack}
+							data-testid="activation-nav-back"
+							onclick={handleNavBack}
+						>
+							{t('onboarding.activation.navBack')}
+						</Button>
+						<Button
+							type="button"
+							variant="ghost"
+							disabled={!canNavForward}
+							data-testid="activation-nav-forward"
+							onclick={handleNavForward}
+						>
+							{t('onboarding.activation.navForward')}
+						</Button>
+					</div>
 					{#if isPreview}
 						<Button
 							type="button"
@@ -587,10 +678,19 @@
 	.flow-content {
 		flex: 1;
 		min-height: 0;
-		overflow-y: auto;
+		overflow: hidden;
 		display: flex;
 		flex-direction: column;
-		-webkit-overflow-scrolling: touch;
+	}
+
+	.flow-nav-row {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--space-sm);
+	}
+
+	.flow-nav-row :global(.btn) {
+		flex: 1;
 	}
 
 	.flow-footer {
@@ -618,10 +718,10 @@
 	}
 
 	.kivra-card {
-		padding: var(--space-sm) var(--space-md);
+		padding: var(--space-xs) var(--space-sm);
 		border-radius: var(--radius-md);
-		background: var(--color-surface-muted);
-		border: 1px solid var(--color-border);
+		background: color-mix(in srgb, var(--color-secondary) 8%, var(--color-surface));
+		border: 1px solid color-mix(in srgb, var(--color-taupe) 22%, var(--color-border));
 		text-align: center;
 	}
 
@@ -651,16 +751,21 @@
 		list-style: none;
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-sm);
-		max-height: 8rem;
-		overflow-y: auto;
+		gap: var(--space-xs);
+	}
+
+	.success-more {
+		margin: var(--space-xs) 0 0;
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+		text-align: center;
 	}
 
 	.success-items li {
 		display: flex;
 		flex-direction: column;
 		gap: 0.125rem;
-		padding: var(--space-sm) var(--space-md);
+		padding: var(--space-xs) var(--space-sm);
 		border-radius: var(--radius-md);
 		background: var(--color-surface-muted);
 	}
@@ -683,19 +788,8 @@
 	}
 
 	.item-meta {
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
 		color: var(--color-text-muted);
 	}
 
-	:global(.activation-onboarding-body .illus-slot) {
-		min-height: 4.5rem;
-		max-height: 5.5rem;
-	}
-
-	@media (min-width: 768px) {
-		:global(.activation-onboarding-body .illus-slot) {
-			min-height: 5.5rem;
-			max-height: 6.5rem;
-		}
-	}
 </style>

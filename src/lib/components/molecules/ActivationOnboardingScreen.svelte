@@ -40,22 +40,35 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 6rem;
+		min-height: 3.5rem;
+		max-height: 4.5rem;
 		padding-block: var(--space-xs);
 		flex-shrink: 0;
+		overflow: hidden;
+	}
+
+	.illus-slot :global(svg) {
+		max-height: 4.5rem;
+		width: auto;
+		height: auto;
 	}
 
 	@media (min-width: 768px) {
 		.illus-slot {
-			min-height: 7rem;
+			min-height: 5rem;
+			max-height: 6.5rem;
 			padding-block: var(--space-sm);
+		}
+
+		.illus-slot :global(svg) {
+			max-height: 6.5rem;
 		}
 	}
 
 	.copy-block {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-md);
+		gap: var(--space-sm);
 		text-align: center;
 		max-width: 22rem;
 		margin-inline: auto;
@@ -63,7 +76,7 @@
 
 	.screen-title {
 		margin: 0;
-		font-size: clamp(1.5rem, 5vw, 1.75rem);
+		font-size: clamp(1.25rem, 4.5vw, 1.75rem);
 		line-height: 1.2;
 		font-weight: 700;
 		letter-spacing: -0.02em;
@@ -71,7 +84,7 @@
 
 	.screen-body {
 		margin: 0;
-		font-size: 1.0625rem;
+		font-size: 0.9375rem;
 		line-height: 1.6;
 		color: var(--color-text-muted);
 		white-space: pre-line;

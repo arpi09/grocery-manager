@@ -48,6 +48,10 @@ test.describe('Critical flows', () => {
 		await registerNewUser(page);
 		await expectOnboardingGuideVisible(page);
 
+		const modal = page.getByTestId('activation-onboarding');
+		const fitsWelcome = await modal.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
+		expect(fitsWelcome).toBe(true);
+
 		const cta = page.getByTestId('activation-cta-primary');
 		await expect(cta).toBeVisible();
 
@@ -56,6 +60,11 @@ test.describe('Critical flows', () => {
 		if (box) {
 			expect(box.y + box.height).toBeLessThanOrEqual(844);
 		}
+
+		await page.getByTestId('activation-nav-forward').click();
+		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
+		const fitsScan = await modal.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
+		expect(fitsScan).toBe(true);
 	});
 
 	test('activation onboarding preview revisits completed step @deploy-critical', async ({
@@ -94,6 +103,9 @@ test.describe('Critical flows', () => {
 		await page.getByTestId('activation-cta-primary').click();
 		await expectActivationScreenHeading(page, /Shop together|Inköp tillsammans/i);
 		await expect(page.getByTestId('activation-setup-cards')).toBeVisible();
+		const modal = page.getByTestId('activation-onboarding');
+		const fitsShopping = await modal.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
+		expect(fitsShopping).toBe(true);
 		await page.getByTestId('activation-cta-primary').click();
 		await expect(page).toHaveURL(/\/inkop(?:\?quick=1)?$/);
 	});
