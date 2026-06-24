@@ -6,6 +6,7 @@ import {
 	PROMPT_VERSION_SHOPPING
 } from '$lib/server/ai-prompt-shared';
 import { loadReplenishmentFeedbackBlock } from '$lib/server/brain-feedback-context';
+import { isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 import { isReplenishmentRankEnabled } from '$lib/server/feature-flags';
 import { getOpenAiApiKey, OPENAI_MODEL_NANO, requestStructuredJson } from '$lib/server/openai';
 import { isOpenAiDegradedMode } from '$lib/server/openai-circuit-breaker';
@@ -131,6 +132,9 @@ export async function rankReplenishmentWithFeedback(
 	}
 ): Promise<RankedReplenishmentSuggestion[]> {
 	if (!isReplenishmentRankEnabled()) {
+		return suggestions;
+	}
+	if (isE2eMockAiEnabled()) {
 		return suggestions;
 	}
 

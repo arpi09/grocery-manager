@@ -7,6 +7,7 @@ import type { ShoppingListService } from '$lib/application/shopping-list.service
 import type { ILearningFeedbackRepository } from '$lib/infrastructure/repositories/learning-feedback.repository';
 import { peekAutoFillPending, storeAutoFillPending } from '$lib/server/auto-fill-pending';
 import { isBrainProactiveEnabled } from '$lib/server/brain-proactive-flag';
+import { isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
 import { getOpenAiApiKey } from '$lib/server/openai';
 import { generateShoppingSuggestions } from '$lib/server/shopping-suggestions';
 
@@ -32,6 +33,7 @@ export async function loadAutoFillPendingForInkop(params: {
 	learningFeedbackRepository: ILearningFeedbackRepository;
 }): Promise<AutoFillPendingView | null> {
 	if (!isBrainProactiveEnabled()) return null;
+	if (isE2eMockAiEnabled()) return null;
 	if (!params.role || !canEditInventory(params.role as never)) return null;
 	if (params.uncheckedCount >= AUTO_FILL_MAX_LIST_ITEMS) return null;
 
