@@ -13,6 +13,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
+- fix(inventory): POST bulk infer expiry on /inventory/all ([#127](https://github.com/arpi09/grocery-manager/pull/127)) — Add `bulkInferMissingExpiryAllLocations` server helper and `bulkInferExpiry` POST action on `/inventory/all`.
 
 ### Changed
 
