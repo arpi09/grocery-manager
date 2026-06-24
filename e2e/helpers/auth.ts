@@ -159,10 +159,10 @@ export async function dismissCookieConsentIfOpen(page: Page) {
 export async function dismissPostOnboardingShareIfOpen(page: Page) {
 	const skip = page.getByTestId('post-onboarding-share-skip');
 	if (await skip.isVisible().catch(() => false)) {
-		await skip.click({ force: true });
+		await skip.click({ force: true, timeout: 1_000 }).catch(() => {});
 		await page
 			.locator('.post-onboarding-share-panel')
-			.waitFor({ state: 'hidden', timeout: 10_000 })
+			.waitFor({ state: 'hidden', timeout: 1_000 })
 			.catch(() => {});
 	}
 }
@@ -170,23 +170,23 @@ export async function dismissPostOnboardingShareIfOpen(page: Page) {
 export async function dismissPageHintIfOpen(page: Page) {
 	const dismiss = page.getByTestId('page-hint-dismiss');
 	if (await dismiss.isVisible().catch(() => false)) {
-		await dismiss.click({ force: true });
-		await page.locator('.page-hint-panel').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+		await dismiss.click({ force: true, timeout: 1_000 }).catch(() => {});
+		await page.locator('.page-hint-panel').waitFor({ state: 'hidden', timeout: 1_000 }).catch(() => {});
 	}
 }
 
 export async function dismissPostOnboardingSurveyIfOpen(page: Page) {
 	const skipByTestId = page.getByTestId('post-onboarding-survey-skip');
 	if (await skipByTestId.isVisible().catch(() => false)) {
-		await skipByTestId.click({ force: true });
-		await page.locator('.post-onboarding-survey-panel').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+		await skipByTestId.click({ force: true, timeout: 1_000 }).catch(() => {});
+		await page.locator('.post-onboarding-survey-panel').waitFor({ state: 'hidden', timeout: 1_000 }).catch(() => {});
 		return;
 	}
 
 	const skip = page.getByRole('button', { name: /^(Inte nu|Not now)$/i });
 	if (await skip.first().isVisible().catch(() => false)) {
-		await skip.first().click({ force: true });
-		await page.locator('.post-onboarding-survey-panel').waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+		await skip.first().click({ force: true, timeout: 1_000 }).catch(() => {});
+		await page.locator('.post-onboarding-survey-panel').waitFor({ state: 'hidden', timeout: 1_000 }).catch(() => {});
 	}
 }
 
@@ -213,7 +213,7 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 		}
 	}
 
-	const deadline = Date.now() + 8_000;
+	const deadline = Date.now() + 5_000;
 	while (Date.now() < deadline) {
 		await dismissPageHintIfOpen(page);
 		await dismissPostOnboardingShareIfOpen(page);
@@ -222,7 +222,7 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 			if (!(await hasBlockingOverlay())) {
 				return;
 			}
-			await modal.waitFor({ state: 'visible', timeout: 500 }).catch(() => {});
+			await modal.waitFor({ state: 'visible', timeout: 250 }).catch(() => {});
 			continue;
 		}
 
@@ -231,25 +231,25 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 		} else {
 			const skipByTestId = page.getByTestId('activation-skip').or(page.getByTestId('onboarding-skip'));
 			if (await skipByTestId.isVisible().catch(() => false)) {
-				await skipByTestId.evaluate((button) => (button as HTMLButtonElement).click());
+				await skipByTestId.evaluate((button) => (button as HTMLButtonElement).click()).catch(() => {});
 			} else {
 				const postSurveySkip = page.getByRole('button', { name: /^(Inte nu|Not now)$/i });
 				if (await postSurveySkip.first().isVisible().catch(() => false)) {
-					await postSurveySkip.first().click({ force: true });
+					await postSurveySkip.first().click({ force: true, timeout: 1_000 }).catch(() => {});
 				} else {
 					const skip = page.getByRole('button', {
 						name: /^(Hoppa Ã¶ver|Hoppa over|Jag gÃ¶r det senare|Skip)$/i
 					});
 					if (await skip.first().isVisible().catch(() => false)) {
-						await skip.first().click({ force: true });
+						await skip.first().click({ force: true, timeout: 1_000 }).catch(() => {});
 					} else {
-						await page.keyboard.press('Escape');
+						await page.keyboard.press('Escape').catch(() => {});
 					}
 				}
 			}
 		}
 
-		await modal.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+		await modal.waitFor({ state: 'hidden', timeout: 1_000 }).catch(() => {});
 	}
 }
 
