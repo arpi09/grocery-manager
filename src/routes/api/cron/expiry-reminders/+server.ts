@@ -12,7 +12,11 @@ export const POST: RequestHandler = async ({ request }) => {
 		expiryReminderService.runWeeklyReminders(),
 		expiryReminderService.runDailyMovingSoonReminders(),
 		marketListingService.runAutoListingRefreshBatch(),
-		marketChatPushService.runReplyReminders()
+		marketChatPushService.runReplyReminders().catch((error) => {
+			const message = error instanceof Error ? error.message : String(error);
+			console.error(`[cron/expiry-reminders] market chat reply reminders failed: ${message}`);
+			return { checked: 0, sent: 0, skipped: 0, failed: 0, error: message };
+		})
 	]);
 	return json({ ok: true, reminders, movingSoon, autoListings, marketChatReminders });
 };

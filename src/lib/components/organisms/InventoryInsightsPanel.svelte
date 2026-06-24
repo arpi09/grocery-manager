@@ -90,7 +90,7 @@
 			{/if}
 		</div>
 		<ul class="insight-actions">
-			{#each insights as insight (insight.suggestedAction + insight.actionDate)}
+			{#each insights as insight, index (`${insight.suggestedAction}:${insight.actionDate}:${index}`)}
 				<li class="insight-row">
 					<strong>{actionLabel(insight.suggestedAction)}</strong>
 					<span>{insight.relatedItemNames.join(', ')}</span>

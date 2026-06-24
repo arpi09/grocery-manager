@@ -176,6 +176,9 @@
 	});
 
 	function handleNavBack() {
+		if (displayScreen === 'complete') {
+			return;
+		}
 		if (isPreview) {
 			clearPreview();
 			return;
@@ -188,6 +191,9 @@
 	}
 
 	function handleNavForward() {
+		if (displayScreen === 'complete') {
+			return;
+		}
 		if (isPreview) {
 			handlePreviewContinue();
 			return;
