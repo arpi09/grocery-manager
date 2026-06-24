@@ -52,6 +52,9 @@ docs/DELIVERY_METRICS.md
 private/
 !private/README.example.md
 
+# Local brand palette preview (Fas 1 generator output)
+local/
+
 # Capacitor native build artifacts (ios/ and android/ project dirs are committed)
 ios/App/build/
 ios/App/DerivedData/
