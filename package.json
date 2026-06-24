@@ -33,6 +33,7 @@
 		"check:server-imports": "node scripts/check-server-imports.mjs",
 		"check:codebase-map": "node scripts/check-codebase-map.mjs",
 		"generate:route-index": "node scripts/generate-route-index.mjs",
+		"brand:preview": "node --import tsx scripts/generate-brand-preview.mts",
 		"lint": "eslint .",
 		"format": "prettier --write .",
 		"test": "vitest run",
