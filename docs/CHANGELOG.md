@@ -9,6 +9,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 ## [Unreleased]
 
 ### Added
+- feat(ci): PR-first workflow, CHANGELOG bot, CalVer releases ([#125](https://github.com/arpi09/grocery-manager/pull/125)) — Add PR template, agent rule (pr-workflow.mdc), and docs updates for PR-first shipping (not trunk-only).
 
 ### Fixed
 
