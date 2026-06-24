@@ -2,9 +2,11 @@
 
 **Agent start:** [AGENTS.md](../AGENTS.md) · [INDEX.md](./INDEX.md) · **Kodkarta:** [CODEBASE_MAP.md](./CODEBASE_MAP.md) · **Prod snapshot:** [CURRENT_REALITY.md](./CURRENT_REALITY.md)
 
-Filer i `docs/` är avsedda för produkt, deploy och utveckling i det publika repot.
+Filer i `docs/` är avsedda för produkt, deploy och utveckling i det publika repot. Rot-[README.md](../README.md) är den publika ingången; denna fil är index för djupare docs.
 
-**Intern styrning ligger inte här.** Koordinatorinstruktioner, agentkartor, säkerhetsrapporter och engineering intelligence finns i gitignorerad mappen [`private/`](../private/) (lokal kopia — committas aldrig). Mall i git: [`private/README.example.md`](../private/README.example.md). Se [`ONBOARDING_DEVELOPER.md`](./ONBOARDING_DEVELOPER.md) för ny utvecklare; vid Cursor-kontobyte: `private/CURSOR_MIGRATION.md` lokalt.
+**Publik vs intern:** allt under `docs/` och `AGENTS.md` är avsett att läsas i repot. Koordinatorinstruktioner, agentkartor, säkerhetsrapporter och engineering intelligence ligger i gitignorerad [`private/`](../private/) (lokal kopia — committas aldrig). Mall i git: [`private/README.example.md`](../private/README.example.md). Se [`ONBOARDING_DEVELOPER.md`](./ONBOARDING_DEVELOPER.md) för ny utvecklare; vid Cursor-kontobyte: `private/CURSOR_MIGRATION.md` lokalt.
+
+**CI & deploy:** PR-checkar körs via **`pr-gate / pr-gate`** ([CI_CD.md](./CI_CD.md)); produktion deployas manuellt med [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) — se [FIREBASE_DEPLOY.md](./FIREBASE_DEPLOY.md).
 
 ## Cursor & AI-koordinator
 
