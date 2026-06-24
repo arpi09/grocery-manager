@@ -12,6 +12,7 @@ const prNumber = process.env.PR_NUMBER;
 const prTitle = process.env.PR_TITLE ?? '';
 const prUrl = process.env.PR_URL ?? '';
 const prBody = process.env.PR_BODY ?? '';
+const prLabelsRaw = process.env.PR_LABELS ?? '';
 
 if (!prNumber || !prTitle) {
 	console.error('PR_NUMBER and PR_TITLE are required');
@@ -19,6 +20,18 @@ if (!prNumber || !prTitle) {
 }
 
 const normalized = prTitle.trim();
+const prLabels = prLabelsRaw
+	.split(',')
+	.map((label) => label.trim())
+	.filter(Boolean);
+const isDepsPr =
+	prLabels.includes('dependencies') ||
+	/^chore\(deps\)/i.test(normalized);
+
+if (isDepsPr) {
+	console.log('Dependency PR — skipping per-PR CHANGELOG (monthly rollup applies).');
+	process.exit(0);
+}
 const lower = normalized.toLowerCase();
 /** @type {'Added' | 'Fixed' | 'Changed'} */
 let section = 'Changed';

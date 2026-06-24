@@ -1,0 +1,50 @@
+# Monthly rollup of merged Dependabot PRs into docs/CHANGELOG.md.
+# Individual deps PRs are skipped by changelog-on-merge (label dependencies / chore(deps) title).
+
+name: Changelog deps monthly
+
+on:
+  schedule:
+    # 1st of each month, 09:00 Stockholm (~07:00 UTC winter)
+    - cron: '0 7 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: changelog-deps-monthly
+  cancel-in-progress: false
+
+jobs:
+  rollup:
+    name: append deps rollup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Append monthly dependencies line
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/changelog-deps-monthly.mjs
+
+      - name: Commit CHANGELOG
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/CHANGELOG.md
+          if git diff --staged --quiet; then
+            echo "No CHANGELOG changes to commit."
+            exit 0
+          fi
+          git commit -m "docs(changelog): monthly dependency rollup [skip ci]"
+          git push
