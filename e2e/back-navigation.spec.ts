@@ -15,13 +15,16 @@ test.describe('Back navigation smoke', () => {
 	});
 
 	test('inventory merge shows back to pantry', async ({ page }) => {
-		await page.goto('/inventory');
 		await page.goto('/inventory/merge');
 		const backLink = page.locator('[data-testid="app-header-back"]');
 		await expect(backLink).toBeVisible({ timeout: 15_000 });
 		await expect(backLink).toContainText(/Tillbaka till skafferiet/i);
+		await expect(backLink).toHaveAttribute('href', '/inventory');
 		await backLink.click();
-		await page.waitForURL(/\/inventory\/?$/, { timeout: 15_000 });
+		await page.waitForURL(
+			(url) => url.pathname.startsWith('/inventory') && !url.pathname.includes('/merge'),
+			{ timeout: 15_000 }
+		);
 	});
 
 	test('statistik wrapped shows back to stats', async ({ page }) => {
