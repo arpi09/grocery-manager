@@ -2994,39 +2994,49 @@
 			"progressStepDisabled": "Not available yet",
 			"welcome": {
 				"title": "Welcome to Skaffu",
-				"body": "start with something simple. Scan a few things from your kitchen and we'll help you keep track of what you already have at home. Less guessing. Less waste. Fewer duplicate purchases.",
-				"cta": "get started"
+				"body": "Start with a receipt or a few items at home. The rest of the household can join later.",
+				"cta": "Get started"
 			},
 			"scan": {
-				"title": "Start with a receipt",
-				"body": "Upload a PDF from Kivra, ICA or your store — or photograph a paper receipt. One receipt fills your pantry in under two minutes.",
+				"title": "Import a receipt",
+				"body": "PDF from Kivra or your store — or photograph a paper receipt. Your pantry fills up in a few minutes.",
 				"ctaPrimary": "Import receipt",
 				"ctaSecondary": "Maybe later",
 				"kivraHint": "Want to skip manual upload?",
 				"kivraLink": "Set up Kivra forwarding"
 			},
 			"success": {
-				"title": "Looking good",
-				"body": "Your pantry is already coming together. Everything you add helps Skaffu give better suggestions and keep your household in sync.",
+				"title": "Good start",
+				"body": "This is what you've added so far. Add more when it suits you — the list and reminders get better.",
 				"cta": "Continue",
 				"itemsAria": "Items you added"
 			},
 			"brain": {
-				"title": "Skaffu remembers the small things",
-				"body": "Scans, receipts and shopping activity help Skaffu understand your household over time. That means smarter shopping suggestions, better reminders and less manual work.",
-				"cta": "Sounds good"
+				"title": "How your memory builds",
+				"body": "Receipts and checked-off items help Skaffu suggest what's missing — without you having to remember everything.",
+				"cta": "Continue"
 			},
 			"shopping": {
-				"title": "Shopping works better together",
-				"body": "When something runs low, add it to your shopping list and check it off as you shop. You can invite your partner whenever you're ready.",
+				"title": "Shop together",
+				"body": "Add what's running low. Check items off in the store. Invite your partner when you're ready.",
 				"cta": "Open shopping list"
+			},
+			"setup": {
+				"title": "Make it easy going forward",
+				"notificationsTitle": "Expiry reminders",
+				"notificationsBody": "Get a notification when something is about to expire — so you can use it first.",
+				"notificationsCta": "Turn on reminders",
+				"notificationsLater": "Later",
+				"kivraTitle": "Receipts from Kivra",
+				"kivraBody": "Connect forwarding so PDF receipts land in Skaffu automatically.",
+				"allNotificationsLink": "All notification settings"
 			},
 			"progress": {
 				"welcome": "Welcome",
-				"firstScan": "First scan",
-				"pantryCreated": "Pantry created",
-				"brain": "Learn how Skaffu helps",
-				"shopping": "Shopping list"
+				"firstScan": "Receipt",
+				"pantryCreated": "Pantry",
+				"brain": "Memory",
+				"shopping": "Shopping"
 			}
 		}
 	},

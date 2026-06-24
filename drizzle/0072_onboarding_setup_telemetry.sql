@@ -1,0 +1,4 @@
+-- Onboarding setup product_event types (application enum in schema.ts):
+-- onboarding_notifications_prompted
+-- onboarding_kivra_tapped
+-- No DDL required: product_event.event_type is unconstrained text.

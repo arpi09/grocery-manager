@@ -20,9 +20,12 @@ export interface ActivationOnboardingFlags {
 	shoppingSeen: boolean;
 }
 
+import type { StorageLocation } from '$lib/domain/location';
+
 export interface ActivationSuccessItemSnapshot {
 	name: string;
 	locationLabel: string;
+	location?: StorageLocation;
 	expiresOn?: string | null;
 }
 
