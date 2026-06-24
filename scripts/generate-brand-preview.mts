@@ -113,16 +113,22 @@ function buildLearningAiCss(track: PaletteTrack): string {
   }`;
 }
 
+function paletteHex(
+	palette: ReturnType<typeof mergePalette>[BrandColorMode],
+	label: string
+): string {
+	if (label === 'learning') return palette.learningAi;
+	return palette[label as keyof typeof palette] as string;
+}
+
 function buildSwatchGrid(track: PaletteTrack, mode: BrandColorMode): string {
 	const palette = mergePalette(track)[mode];
 	const surface = palette.surface;
 
 	const cells = SWATCH_KEYS.map(({ key, label, wcag }) => {
+		const hex = paletteHex(palette, label);
+
 		if (LOCATION_KEYS.includes(label as (typeof LOCATION_KEYS)[number]) || label === 'learning') {
-			const hex =
-				label === 'learning'
-					? palette.learningAi
-					: palette[label as 'fridge' | 'freezer' | 'cupboard'];
 			const onSurface = contrastRatio(hex, surface);
 			const tint = mixHex(hex, surface, TINT_PERCENT);
 			const onTint = contrastRatio(hex, tint);
@@ -133,7 +139,7 @@ function buildSwatchGrid(track: PaletteTrack, mode: BrandColorMode): string {
 				return `<div class="swatch swatch--location">
   <div class="swatch-pair">
     <span class="swatch-chip learning-ai-shimmer" title="gradient"></span>
-    <span class="swatch-chip swatch-chip--tint learning-ai-shimmer--subtle" style="color: var(--color-learning-ai)">AI</span>
+    <span class="swatch-chip swatch-chip--tint learning-ai-shimmer--subtle" style="color: ${hex}">AI</span>
   </div>
   <span class="swatch-label">${label}</span>
   <span class="wcag-note">surf ${formatRatio(onSurface)} <span class="wcag-${surfaceBadge}">${surfaceBadge}</span> · tint ${formatRatio(onTint)} <span class="wcag-${tintBadge}">${tintBadge}</span></span>
@@ -142,16 +148,20 @@ function buildSwatchGrid(track: PaletteTrack, mode: BrandColorMode): string {
 
 			return `<div class="swatch swatch--location">
   <div class="swatch-pair">
-    <span class="swatch-chip" style="background: var(${key})" title="solid"></span>
-    <span class="swatch-chip swatch-chip--tint" style="background: color-mix(in srgb, var(${key}) ${TINT_PERCENT}%, var(--color-surface)); color: var(${key})">${label}</span>
+    <span class="swatch-chip" style="background: ${hex}" title="solid"></span>
+    <span class="swatch-chip swatch-chip--tint" style="background: ${tint}; color: ${hex}">${label}</span>
   </div>
   <span class="swatch-label">${label}</span>
   <span class="wcag-note">surf ${formatRatio(onSurface)} <span class="wcag-${surfaceBadge}">${surfaceBadge}</span> · tint ${formatRatio(onTint)} <span class="wcag-${tintBadge}">${tintBadge}</span></span>
 </div>`;
 		}
 
-		const chipClass = 'swatch-chip';
-		return `<div class="swatch"><span class="${chipClass}" style="background: var(${key})"></span><span class="swatch-label">${label}</span></div>`;
+		return `<div class="swatch">
+  <div class="swatch-pair">
+    <span class="swatch-chip" style="background: ${hex}" title="${key}"></span>
+  </div>
+  <span class="swatch-label">${label}</span>
+</div>`;
 	}).join('');
 
 	return `<div class="swatch-grid">${cells}</div>`;
@@ -275,9 +285,15 @@ const GLOBAL_CSS = `
   .swatch-pair { display: flex; gap: 0.25rem; }
   .swatch-chip {
     flex: 1;
+    min-width: 0;
+    min-height: 2.5rem;
     height: 28px;
     border-radius: 6px;
     border: 1px solid var(--color-border);
+  }
+  .swatch-pair > .swatch-chip:only-child {
+    flex: 1 1 100%;
+    width: 100%;
   }
   .swatch-chip--tint {
     display: flex;
