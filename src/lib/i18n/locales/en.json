@@ -2231,6 +2231,29 @@
 			"keysMissing": "missing",
 			"envDisabled": "STRIPE_CHECKOUT_DISABLED is set in environment variables — checkout stays blocked until removed, even when the toggle is on."
 		},
+		"featureFlags": {
+			"title": "Feature flags",
+			"subtitle": "Effective runtime values (read-only)",
+			"readOnlyNote": "Read-only snapshot of server env flags. Production changes go through apphosting.yaml and deploy — not this page.",
+			"backToAdmin": "← Back to admin",
+			"serverSection": "Server flags (feature-flags.ts)",
+			"layoutSection": "Layout client booleans (+layout.server.ts)",
+			"layoutNote": "Values sent to every authenticated page load for UI gating.",
+			"colFlag": "Flag",
+			"colEnv": "Env key",
+			"colEffective": "Effective",
+			"colSource": "Source",
+			"colDefault": "Code default",
+			"colClientProp": "Client prop",
+			"sourceDefault": "Code default (env unset)",
+			"sourceEnv": "env = {value}",
+			"pattern": {
+				"exactTrue": "On when env is exactly true",
+				"defaultOn": "On unless env is false",
+				"notFalse": "On unless env is false"
+			},
+			"link": "Feature flags"
+		},
 		"feedback": {
 			"title": "User feedback",
 			"note": "Churn signals from settings and a short post-onboarding survey. Complements interviews — see docs/USER_INTERVIEWS.md.",

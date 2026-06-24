@@ -21,9 +21,7 @@ import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { buildReturnUrlWithExpiryNudge } from '$lib/utils/expiry-nudge';
 
 import { getSnapshot as getBrainScoreSnapshot, type BrainScoreSnapshot } from '$lib/domain/brain-score';
-import type { BrainTimelineEntry } from '$lib/domain/brain-timeline';
 import { buildWastePreventedSnapshot, startOfCalendarMonth, type WastePreventedSnapshot } from '$lib/domain/waste-prevented';
-import { loadBrainTimeline } from '$lib/server/brain-timeline';
 import { consumptionRepository } from '$lib/server/di';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { purchasePatternRepository } from '$lib/server/di';
@@ -187,7 +185,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 
 	let brainScore: BrainScoreSnapshot | null = null;
-	let brainTimeline: BrainTimelineEntry[] = [];
 	let wastePrevented: WastePreventedSnapshot | null = null;
 	if (isShelfLifeLearningEnabled()) {
 		try {
@@ -203,12 +200,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 			brainScore = getBrainScoreSnapshot({ ruleCount, feedbackCount, receiptLineCount });
 		} catch (error) {
 			console.warn('[hem] brain score degraded:', error);
-		}
-
-		try {
-			brainTimeline = await loadBrainTimeline(householdId);
-		} catch (error) {
-			console.warn('[hem] brain timeline degraded:', error);
 		}
 
 		try {
@@ -243,7 +234,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		briefingOneLiner,
 		showMemoryExplorer: isShelfLifeLearningEnabled(),
 		brainScore,
-		brainTimeline,
 		wastePrevented
 	};
 };

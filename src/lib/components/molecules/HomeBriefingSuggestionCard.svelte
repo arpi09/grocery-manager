@@ -1,7 +1,5 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
-	import SceneIllustration from '$lib/components/atoms/SceneIllustration.svelte';
-	import HomeBriefingMomentScene from '$lib/components/molecules/HomeBriefingMomentScene.svelte';
 	import type { HomeBriefingMessagePresentation } from '$lib/domain/home-briefing-presenter';
 	import { t } from '$lib/i18n';
 
@@ -15,7 +13,6 @@
 		ctaHref?: string | null;
 		ctaLoading?: boolean;
 		showActionButton?: boolean;
-		showPantryIllustration?: boolean;
 		onCta?: () => void | Promise<void>;
 	}
 
@@ -29,7 +26,6 @@
 		ctaHref = null,
 		ctaLoading = false,
 		showActionButton = false,
-		showPantryIllustration = false,
 		onCta
 	}: Props = $props();
 
@@ -45,13 +41,7 @@
 	data-for-you-kind={variant === 'forYou' ? kind : undefined}
 	data-moment-kind={variant === 'moment' ? kind : undefined}
 >
-	{#if variant === 'moment' && showPantryIllustration}
-		<div class="pantry-illus">
-			<SceneIllustration src="/illustrations/v2/pantry-shelf.svg" decorative width={200} height={150} />
-		</div>
-	{:else if variant === 'moment'}
-		<HomeBriefingMomentScene />
-	{:else}
+	{#if variant === 'forYou'}
 		<div class="suggestion-accent" aria-hidden="true">
 			<span class="accent-bar"></span>
 			<span class="accent-shape shape-a"></span>
@@ -84,12 +74,6 @@
 		background: var(--color-surface);
 		box-shadow: var(--shadow-sm);
 		overflow: hidden;
-	}
-
-	.pantry-illus {
-		margin: calc(-1 * var(--space-sm)) calc(-1 * var(--space-md)) 0;
-		padding: var(--space-sm) var(--space-md) 0;
-		background: color-mix(in srgb, var(--color-accent, #8a9a7b) 6%, var(--color-surface));
 	}
 
 	.suggestion-accent {

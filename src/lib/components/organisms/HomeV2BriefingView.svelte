@@ -209,7 +209,6 @@
 			body={momentPresentation.body}
 			cta={momentPresentation.cta}
 			ctaHref={momentHref}
-			showPantryIllustration={moment.kind === 'emptyPantry'}
 			onCta={momentHref ? () => trackMomentLinkTap(moment.kind, momentHref!) : undefined}
 		/>
 	{/if}

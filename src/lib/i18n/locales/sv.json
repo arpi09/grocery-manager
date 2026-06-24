@@ -2131,6 +2131,29 @@
 			"keysMissing": "saknas",
 			"envDisabled": "STRIPE_CHECKOUT_DISABLED är satt i miljövariabler — checkout blockeras tills variabeln tas bort, även om reglaget är på."
 		},
+		"featureFlags": {
+			"title": "Feature flags",
+			"subtitle": "Effektiva runtime-värden (endast läsning)",
+			"readOnlyNote": "Skrivskyddad översikt av server-env-flaggor. Prod ändras via apphosting.yaml och deploy — inte här.",
+			"backToAdmin": "← Tillbaka till admin",
+			"serverSection": "Serverflaggor (feature-flags.ts)",
+			"layoutSection": "Layout client-booleans (+layout.server.ts)",
+			"layoutNote": "Värden som skickas till klienten vid varje sidladdning för UI-gating.",
+			"colFlag": "Flagga",
+			"colEnv": "Env-nyckel",
+			"colEffective": "Effektivt",
+			"colSource": "Källa",
+			"colDefault": "Kod-default",
+			"colClientProp": "Client-prop",
+			"sourceDefault": "Kod-default (env saknas)",
+			"sourceEnv": "env = {value}",
+			"pattern": {
+				"exactTrue": "På när env är exakt true",
+				"defaultOn": "På om env inte är false",
+				"notFalse": "På om env inte är false"
+			},
+			"link": "Feature flags"
+		},
 		"feedback": {
 			"title": "Användarfeedback",
 			"note": "Churn-röster från inställningar och kort enkät efter introduktion. Kompletterar intervjuer — se docs/USER_INTERVIEWS.md.",

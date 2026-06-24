@@ -4,12 +4,10 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import BrainHomeCard from '$lib/components/molecules/BrainHomeCard.svelte';
-	import BrainTimelineCard from '$lib/components/molecules/BrainTimelineCard.svelte';
 	import WastePreventedCard from '$lib/components/molecules/WastePreventedCard.svelte';
 	import ReplenishmentSection from '$lib/components/organisms/ReplenishmentSection.svelte';
 	import HomeV2BriefingView from '$lib/components/organisms/HomeV2BriefingView.svelte';
 	import type { BrainScoreSnapshot } from '$lib/domain/brain-score';
-	import type { BrainTimelineEntry } from '$lib/domain/brain-timeline';
 	import type { WastePreventedSnapshot } from '$lib/domain/waste-prevented';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
@@ -54,7 +52,6 @@
 		loadFailed?: boolean;
 		brainScore?: BrainScoreSnapshot | null;
 		brainFeedbackV1?: boolean;
-		brainTimeline?: BrainTimelineEntry[];
 		wastePrevented?: WastePreventedSnapshot | null;
 	}
 
@@ -74,7 +71,6 @@
 		loadFailed = false,
 		brainScore = null,
 		brainFeedbackV1 = false,
-		brainTimeline = [],
 		wastePrevented = null
 	}: Props = $props();
 
@@ -184,9 +180,6 @@
 		{/if}
 		{#if wastePrevented}
 			<WastePreventedCard snapshot={wastePrevented} />
-		{/if}
-		{#if brainTimeline && brainTimeline.length > 0}
-			<BrainTimelineCard entries={brainTimeline} />
 		{/if}
 		{#if intelligence.replenishment.length > 1}
 			<ReplenishmentSection

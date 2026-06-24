@@ -244,6 +244,27 @@ env:
     value: "true"
     availability:
       - RUNTIME
+  # Brain backend — explicit on (code default-on when absent; listed for prod clarity)
+  - variable: RECEIPT_AI_BATCH_ENABLED
+    value: "true"
+    availability:
+      - RUNTIME
+  - variable: GLOBAL_SHELF_LIFE_DB_ENABLED
+    value: "true"
+    availability:
+      - RUNTIME
+  - variable: RECIPE_REFINEMENT_ENABLED
+    value: "true"
+    availability:
+      - RUNTIME
+  - variable: PHOTO_VALIDATION_ENABLED
+    value: "true"
+    availability:
+      - RUNTIME
+  - variable: AUTO_FINISH_ENABLED
+    value: "true"
+    availability:
+      - RUNTIME
   # Optional demo household member (omit or override in console)
   # - variable: DEFAULT_MEMBER_EMAIL
   #   value: member@example.com

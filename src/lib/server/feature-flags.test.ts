@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
 	FEATURE_FLAG_ENV,
+	getAllFeatureFlagSnapshot,
 	isBrainFeedbackV1Enabled,
 	isHomeRedesignV1Enabled,
 	isLocationLearningEnabled,
@@ -101,5 +102,21 @@ describe('feature-flags registry', () => {
 
 		process.env[FEATURE_FLAG_ENV.PRICE_MEMORY_V1] = 'false';
 		expect(isPriceMemoryV1Enabled()).toBe(false);
+	});
+
+	it('getAllFeatureFlagSnapshot lists every registry flag with source metadata', () => {
+		const snapshot = getAllFeatureFlagSnapshot();
+		expect(snapshot).toHaveLength(Object.keys(FEATURE_FLAG_ENV).length);
+		for (const entry of snapshot) {
+			expect(entry.envKey).toBeTruthy();
+			expect(typeof entry.effective).toBe('boolean');
+			expect(['env', 'default']).toContain(entry.source);
+		}
+
+		process.env[FEATURE_FLAG_ENV.SHOPPING_UX_V2] = 'true';
+		const shopping = getAllFeatureFlagSnapshot().find((entry) => entry.id === 'shoppingUxV2');
+		expect(shopping?.effective).toBe(true);
+		expect(shopping?.source).toBe('env');
+		expect(shopping?.envValue).toBe('true');
 	});
 });

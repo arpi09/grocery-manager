@@ -38,6 +38,15 @@ export function isShelfLifeLearningEnabled(): boolean {
 	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.SHELF_LIFE_LEARNING);
 }
 
+/** Client receipt UX — explicit PUBLIC_* or fallback to server learning flag. */
+export function isPublicShelfLifeEstimatesInReceiptEnabled(): boolean {
+	const explicit = process.env[FEATURE_FLAG_ENV.PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT];
+	if (explicit !== undefined && explicit !== '') {
+		return explicit === 'true';
+	}
+	return isShelfLifeLearningEnabled();
+}
+
 /** Server flag: household location learning (default on). */
 export function isLocationLearningEnabled(): boolean {
 	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.LOCATION_LEARNING);
@@ -126,4 +135,198 @@ export function isReplenishmentRankEnabled(): boolean {
 /** Server flag: proactive brain automation — briefing/pre-shop/partner/Kivra (default on). */
 export function isBrainProactiveEnabled(): boolean {
 	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.BRAIN_PROACTIVE);
+}
+
+export type FeatureFlagPattern = 'exactTrue' | 'defaultOn' | 'notFalse';
+
+export type FeatureFlagSource = 'env' | 'default';
+
+export type FeatureFlagSnapshotEntry = {
+	id: string;
+	envKey: string;
+	label: string;
+	pattern: FeatureFlagPattern;
+	codeDefault: boolean;
+	envValue: string | null;
+	source: FeatureFlagSource;
+	effective: boolean;
+};
+
+function codeDefaultForPattern(pattern: FeatureFlagPattern): boolean {
+	if (pattern === 'exactTrue') {
+		return false;
+	}
+	return true;
+}
+
+function readEnvSource(envKey: string): { envValue: string | null; source: FeatureFlagSource } {
+	const raw = process.env[envKey];
+	if (raw === undefined || raw === '') {
+		return { envValue: null, source: 'default' };
+	}
+	return { envValue: raw, source: 'env' };
+}
+
+/** Read-only snapshot of all server feature flags for admin diagnostics. */
+export function getAllFeatureFlagSnapshot(): FeatureFlagSnapshotEntry[] {
+	const registry: Array<{
+		id: string;
+		envKey: string;
+		label: string;
+		pattern: FeatureFlagPattern;
+		check: () => boolean;
+	}> = [
+		{
+			id: 'shelfLifeLearning',
+			envKey: FEATURE_FLAG_ENV.SHELF_LIFE_LEARNING,
+			label: 'Shelf life learning',
+			pattern: 'defaultOn',
+			check: isShelfLifeLearningEnabled
+		},
+		{
+			id: 'publicShelfLifeEstimatesInReceipt',
+			envKey: FEATURE_FLAG_ENV.PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT,
+			label: 'Public shelf-life estimates in receipt (PUBLIC or fallback)',
+			pattern: 'defaultOn',
+			check: isPublicShelfLifeEstimatesInReceiptEnabled
+		},
+		{
+			id: 'locationLearning',
+			envKey: FEATURE_FLAG_ENV.LOCATION_LEARNING,
+			label: 'Location learning',
+			pattern: 'defaultOn',
+			check: isLocationLearningEnabled
+		},
+		{
+			id: 'replenishmentLearning',
+			envKey: FEATURE_FLAG_ENV.REPLENISHMENT_LEARNING,
+			label: 'Replenishment learning',
+			pattern: 'defaultOn',
+			check: isReplenishmentLearningEnabled
+		},
+		{
+			id: 'homeRedesignV1',
+			envKey: FEATURE_FLAG_ENV.HOME_REDESIGN_V1,
+			label: 'Home redesign v1',
+			pattern: 'exactTrue',
+			check: isHomeRedesignV1Enabled
+		},
+		{
+			id: 'brainFeedbackV1',
+			envKey: FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1,
+			label: 'Brain feedback v1',
+			pattern: 'defaultOn',
+			check: isBrainFeedbackV1Enabled
+		},
+		{
+			id: 'shoppingListShare',
+			envKey: FEATURE_FLAG_ENV.SHOPPING_LIST_SHARE,
+			label: 'Public shopping list share',
+			pattern: 'exactTrue',
+			check: isShoppingListShareEnabled
+		},
+		{
+			id: 'priceMemoryV1',
+			envKey: FEATURE_FLAG_ENV.PRICE_MEMORY_V1,
+			label: 'Price memory v1',
+			pattern: 'exactTrue',
+			check: isPriceMemoryV1Enabled
+		},
+		{
+			id: 'shoppingUxV2',
+			envKey: FEATURE_FLAG_ENV.SHOPPING_UX_V2,
+			label: 'Shopping UX v2',
+			pattern: 'exactTrue',
+			check: isShoppingUxV2Enabled
+		},
+		{
+			id: 'pantryUxV2',
+			envKey: FEATURE_FLAG_ENV.PANTRY_UX_V2,
+			label: 'Pantry UX v2',
+			pattern: 'exactTrue',
+			check: isPantryUxV2Enabled
+		},
+		{
+			id: 'homeUxV2',
+			envKey: FEATURE_FLAG_ENV.HOME_UX_V2,
+			label: 'Home UX v2',
+			pattern: 'defaultOn',
+			check: isHomeUxV2Enabled
+		},
+		{
+			id: 'storeRecommendationV0',
+			envKey: FEATURE_FLAG_ENV.STORE_RECOMMENDATION_V0,
+			label: 'Store recommendation v0',
+			pattern: 'exactTrue',
+			check: isStoreRecommendationV0Enabled
+		},
+		{
+			id: 'receiptAiBatch',
+			envKey: FEATURE_FLAG_ENV.RECEIPT_AI_BATCH,
+			label: 'Receipt AI batch',
+			pattern: 'notFalse',
+			check: isReceiptAiBatchEnabled
+		},
+		{
+			id: 'autoFinish',
+			envKey: FEATURE_FLAG_ENV.AUTO_FINISH,
+			label: 'Auto finish expired',
+			pattern: 'exactTrue',
+			check: isAutoFinishEnabled
+		},
+		{
+			id: 'globalShelfLifeDb',
+			envKey: FEATURE_FLAG_ENV.GLOBAL_SHELF_LIFE_DB,
+			label: 'Global shelf-life DB',
+			pattern: 'notFalse',
+			check: isGlobalShelfLifeDbEnabled
+		},
+		{
+			id: 'recipeRefinement',
+			envKey: FEATURE_FLAG_ENV.RECIPE_REFINEMENT,
+			label: 'Recipe refinement',
+			pattern: 'notFalse',
+			check: isRecipeRefinementEnabled
+		},
+		{
+			id: 'photoValidation',
+			envKey: FEATURE_FLAG_ENV.PHOTO_VALIDATION,
+			label: 'Photo validation',
+			pattern: 'notFalse',
+			check: isPhotoValidationEnabled
+		},
+		{
+			id: 'homeBriefingAi',
+			envKey: FEATURE_FLAG_ENV.HOME_BRIEFING_AI,
+			label: 'Home briefing AI',
+			pattern: 'defaultOn',
+			check: isHomeBriefingAiEnabled
+		},
+		{
+			id: 'replenishmentRank',
+			envKey: FEATURE_FLAG_ENV.REPLENISHMENT_RANK,
+			label: 'Replenishment rank',
+			pattern: 'defaultOn',
+			check: isReplenishmentRankEnabled
+		},
+		{
+			id: 'brainProactive',
+			envKey: FEATURE_FLAG_ENV.BRAIN_PROACTIVE,
+			label: 'Brain proactive',
+			pattern: 'defaultOn',
+			check: isBrainProactiveEnabled
+		}
+	];
+
+	return registry.map(({ check, pattern, ...rest }) => {
+		const { envValue, source } = readEnvSource(rest.envKey);
+		return {
+			...rest,
+			pattern,
+			codeDefault: codeDefaultForPattern(pattern),
+			envValue,
+			source,
+			effective: check()
+		};
+	});
 }

@@ -278,6 +278,7 @@
 			"label": "Admin & PMF",
 			"routes": [
 				"/admin",
+				"/admin/feature-flags",
 				"/admin/guide-preview/[id]"
 			],
 			"apiOnlyRoutes": [
@@ -290,6 +291,7 @@
 			],
 			"paths": [
 				"src/routes/admin/+page.svelte",
+				"src/routes/admin/feature-flags/+page.svelte",
 				"src/lib/application/pmf-dashboard.service.ts"
 			]
 		},
