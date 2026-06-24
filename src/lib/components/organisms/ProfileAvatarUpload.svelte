@@ -274,7 +274,7 @@
 
 	.avatar-error {
 		margin: 0 0 var(--space-sm);
-		color: var(--color-danger, #b42318);
+		color: var(--color-danger);
 		font-size: 0.9rem;
 		text-align: center;
 	}

@@ -177,7 +177,7 @@
 		width: 100%;
 		border: 1px dashed var(--color-border);
 		border-radius: var(--radius-lg);
-		background: color-mix(in srgb, var(--color-danger, #c0392b) 8%, var(--color-surface));
+		background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
 		color: var(--color-text);
 		font: inherit;
 		font-size: 0.875rem;

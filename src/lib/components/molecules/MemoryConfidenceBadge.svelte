@@ -33,6 +33,6 @@
 	}
 
 	.badge[data-tier='high'] {
-		background: color-mix(in srgb, var(--color-success, #2e7d32) 14%, var(--color-surface));
+		background: color-mix(in srgb, var(--color-success) 14%, var(--color-surface));
 	}
 </style>

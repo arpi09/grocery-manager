@@ -418,7 +418,7 @@
 		width: 0.625rem;
 		height: 0.625rem;
 		border-radius: 999px;
-		background: var(--color-warning, #d97706);
+		background: var(--color-warning);
 		border: 2px solid var(--color-surface);
 	}
 

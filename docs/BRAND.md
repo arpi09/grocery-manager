@@ -1,117 +1,103 @@
-# Home Pantry — Brand guide
+# Skaffu — Brand guide
 
-Design reference for UI, copy tone, and component styling. Tokens live in `src/app.css`; this doc is the source of truth for *when* to use them.
+Design reference for UI, copy tone, and component styling. **Hex values live only in** [`src/lib/design/brand-colors.ts`](../src/lib/design/brand-colors.ts); the app consumes CSS custom properties from generated [`brand-colors.generated.css`](../src/lib/design/brand-colors.generated.css).
 
-## Positioning — Variant A + lite B
+**Live palette reference (noindex):** [`/brand`](/brand) — active track swatches + component gallery.
 
-**A. Hemma i köket** — warm, soft surfaces (`#f7f5f0` bg, muted green panels), domestic utility. Copy speaks directly to the person stocking the fridge: *"du fixar det här"*.
+## Architecture (Fas 2)
 
-**B touches** — clearer typography hierarchy (display / body / label), fewer emojis in settings/admin/chrome, sharper product clarity on dense screens (inventory, scan, settings).
+| Layer | Source |
+|-------|--------|
+| Hex source of truth | `brand-colors.ts` — `LOCKED_LOGO_CORE` + per-track semantics |
+| Active track | `BRAND_PALETTE` env (default **`fresh`**) → `npm run brand:css` |
+| App tokens | `@import brand-colors.generated.css` in `src/app.css` |
+| SMUI SCSS | `src/theme/brand-variables.generated.scss` (imported from `_variables.scss`) |
+| CI guard | `npm run check:brand-hex` — fails on hex outside allowed files |
 
-## Voice & tone
+## Locked logo colors (all tracks)
 
-- **Primary:** Swedish (SV). **Secondary:** English via i18n.
-- Warm, direct, encouraging — not corporate, not childish.
-- Prefer short sentences and verbs: *Skanna*, *Lägg till*, *Visa*.
-- Settings/admin: neutral and precise; skip playful emoji.
+Immutable — logo, PWA chrome, email header.
 
-## Visual system — five rules
+| Token | Light | Dark |
+|-------|-------|------|
+| `primary` | `#2c4a3e` | `#4d8f68` |
+| `primaryHover` | `#243d32` | `#5aa076` |
+| `onPrimary` | `#ffffff` | `#ffffff` |
+| `accent` | `#d4a853` | `#d4a853` |
+| `bg` | `#f7f5f0` | `#141a17` |
+| `surface` | `#ffffff` | `#1e2820` |
+| `surfaceMuted` | `#eef2eb` | `#243028` |
+| `border` | `#dde5d8` | `#2a3d30` |
+| `text` | `#1f2a24` | `#a0b0a8` |
+| `textMuted` | `#4a5850` | `#8fa399` |
 
-1. **Primary green `#2c4a3e`** — ONLY primary CTA buttons, active nav/tab states, and the single main action on empty states. Not for decorative text, borders, or secondary links. PWA `theme_color` (manifest, `app.html`, Safari chrome) uses the same hex in light mode; dark PWA chrome uses `#4d8f68`.
-2. **Accent gold `#d4a853`** — sparingly: badges (e.g. NY), focus rings, expiry/warning surfaces, calendar “idea” dots. Never default buttons or nav chrome.
-3. **Typography scale** — display (page titles), body (copy), label (section caps like KONTO / KONTO & HUSHÅLL). Use `.label-caps` for section labels.
-4. **Empty states** — icon (SVG) + one headline + one supporting line + one green primary CTA. Optional ghost secondary link below.
-5. **Icons vs emoji** — simple stroke icons in nav, scan, settings, inventory chrome. Emojis avoided in toolbar/chrome; empty states use `FeatureIcon`, not emoji.
+## Active track: Fresh — semantic tokens
 
-## Design tokens (`src/app.css`)
+Merged with locked core at build time.
 
-| Token | Light | Usage |
-|-------|-------|--------|
-| `--color-primary` | `#2c4a3e` | Primary CTA, active nav |
-| `--color-primary-hover` | `#243d32` | Primary hover |
-| `--color-accent` | `#d4a853` | Badges, focus ring, warnings |
-| `--color-bg` | `#f7f5f0` | Page background |
-| `--color-surface` | `#ffffff` | Cards, panels |
-| `--color-surface-muted` | `#eef2eb` | Secondary surfaces |
-| `--color-border` | `#dde5d8` | Borders |
-| `--color-text` / `--color-text-muted` | body / secondary text | |
-| `--color-danger` | `#b54a4a` | Destructive actions |
-| `--radius-sm/md/lg` | 8 / 12 / 16px | Corners |
-| `--shadow-sm/md` | soft elevation | Cards, FAB |
-| `--font-size-display/body/body-sm/label` | type scale | Headings, copy, caps |
-| `--focus-ring-color` | accent | `:focus-visible` outlines |
+| Token | Light | Dark | Usage |
+|-------|-------|------|--------|
+| `secondary` | `#8a9a7b` | `#9aad92` | Secondary chrome, catalog hints |
+| `taupe` | `#c4b8a8` | `#a89888` | Warm neutrals, decorative gradients |
+| `success` | `#3d8f5c` | `#6ecf96` | Saved, eat-first, positive toasts/banners |
+| `warning` | `#c9870a` | `#f0b429` | Expiry soon — **not** accent gold |
+| `danger` | `#c44d4d` | `#f09090` | Errors, destructive |
+| `info` | `#4a8fb8` | `#7ec4e8` | Tips, receipt/evidence badges |
+| `fridge` | `#056B52` | `#34D399` | Kyl — green emerald (~160°) |
+| `freezer` | `#3F4F63` | `#D1D5DB` | Frys — frost gray (never second blue) |
+| `cupboard` | `#A05228` | `#E8A060` | Skafferi |
+| `learningAi` | `#4A62A8` | `#8A9EE8` | AI / learning badges |
+| `learningAiGradient` | `#3E5288 → #5A72B8` | (same stops) | Shimmer gradients |
 
-Location hues (`--color-fridge`, `--color-freezer`, `--color-cupboard`) are semantic only — inventory location cards and badges, not global chrome.
+## CSS custom properties (app)
 
-## Dark theme (`html[data-theme='dark']`)
+Generated into `:root` / `html[data-theme='dark']`:
 
-Applied via `src/app.css` when the user selects dark mode. Same usage rules as light — primary for CTAs/active nav, accent sparingly.
+- Core: `--color-primary`, `--color-primary-hover`, `--color-on-primary`, `--color-accent`, `--color-bg`, `--color-surface`, `--color-surface-muted`, `--color-border`, `--color-text`, `--color-text-muted`
+- Semantic: `--color-secondary`, `--color-taupe`, `--color-success`, `--color-warning`, `--color-danger`, `--color-info`, `--color-fridge`, `--color-freezer`, `--color-cupboard`, `--color-learning-ai`, `--color-learning-ai-gradient`
+- Toast: `--toast-bg`, `--toast-fg`, …
 
-| Token | Dark | Usage |
-|-------|------|--------|
-| `--color-bg` | `#141a17` | Page background |
-| `--color-surface` | `#1e2820` | Cards, panels |
-| `--color-surface-muted` | `#243028` | Secondary surfaces |
-| `--color-border` | `#2a3d30` | Borders |
-| `--color-text` | `#a0b0a8` | Body text |
-| `--color-text-muted` | `#4a5e55` | Secondary text |
-| `--color-primary` | `#4d8f68` | Primary CTA, active nav (lightened for contrast) |
-| `--color-accent` | `#d4a853` | Badges, focus ring, warnings |
+**Rule:** components use `var(--color-*)` only — no inline hex.
 
-## Button variants (`Button.svelte`)
+## Semantic component mapping
 
-| Variant | When |
-|---------|------|
-| **primary** | One main action per view/modal footer (submit, confirm, scan CTA) |
-| **secondary** | Alternate path (cancel-adjacent, register link, toggle) |
-| **ghost** | Tertiary / inline (clear filter, back) |
-| **danger** | Irreversible delete (with `DeleteConfirmButton` tiers) |
+| Component | Correct token |
+|-----------|----------------|
+| Primary CTA / active nav | `--color-primary` |
+| Success banner / toast | `--color-success` (not primary) |
+| Warning banner / expiry badge | `--color-warning` (not accent) |
+| Focus ring | `--color-accent` (sparingly) |
+| Location chips | `--color-fridge` / `--color-freezer` / `--color-cupboard` |
+| Learning / AI badge | `--color-learning-ai` + gradient |
 
-Do not pair a filled green button with an outlined green button on the same row — use primary + secondary/ghost.
+## Voice & positioning
 
-## Component contract (aligned with `docs/MODAL_CONTRACT.md`)
+**A. Hemma i köket** — warm surfaces, domestic utility. **B touches** — clearer typography hierarchy on dense screens.
 
-| Context | Primary | Secondary | Notes |
-|---------|---------|-----------|--------|
-| Modal footer — confirm flow | `Button variant="primary"` | `Button variant="secondary"` or ghost close | One green button |
-| Modal footer — destructive | `Button variant="danger"` | `Button variant="secondary"` | |
-| `DeleteConfirmButton` | danger when confirmed | ghost until tier reached | |
-| `EmptyState` | green link `.action-primary` | `.action-secondary` ghost | Icon via `FeatureIcon` |
-| `FeedbackBanner` | — | — | success = green tint; warning = accent tint |
-| `ScanModeTabs` / `LocationTab` | active tab = primary fill | inactive = surface | |
-| `RecipeIdeasButton` | ghost/secondary shell | gold **badge only** (`NY`) | No gold gradients on button body |
-| Auth login | primary submit | secondary register CTA | No gold on register block |
-| Email (`email.ts`) | green header + primary CTA | muted body | Inline brand tokens |
+- Primary Swedish; warm, direct copy
+- Settings/admin: neutral, precise
 
-## Intentional exceptions
+## Typography & buttons
 
-- **Dark theme** — see [Dark theme](#dark-theme-htmldata-themedark) above; primary lightens to `#4d8f68` for contrast.
-- **Location colors** — fridge/freezer/cupboard keep distinct hues for at-a-glance scanning in inventory.
-- **Warning/expiry badges** — may use accent-tinted backgrounds (not full gold fills).
-- **Login landing showcase** — decorative mock UI may use accent strips; not a product surface.
-- **Calendar “recipe idea” dot** — accent gold dot distinguishes AI suggestions from planned meals.
+See existing sections in this doc for `--font-size-*`, `Button` variants, modal contract — unchanged.
 
-## Files to check when changing brand
+## Files to touch for brand changes
 
-- `src/app.css` — tokens, `.label-caps`
-- `src/lib/components/atoms/Button.svelte`, `FeatureIcon.svelte`
-- `src/lib/components/molecules/EmptyState.svelte`, `FeedbackBanner.svelte`
-- Nav: `MainNavDesktop.svelte`, `MainNavMobile.svelte`, `ProfileMenu.svelte`, `NavMoreSheet.svelte`
-- High-traffic: `HomeDashboard.svelte`, inventory/scan routes, `ScanModeHub.svelte`, `ScanModeTabs.svelte`
-- `src/lib/design/brand-colors.ts` — hex constants for manifest, emails, build (non-CSS)
-- `static/favicon.svg` — Skaffu mark (primary `#2c4a3e`, accent `#d4a853`)
-- `scripts/social-brand.mjs`, `scripts/social-fonts.mjs`, `scripts/social-render.mjs` — social/OG PNG generators (embedded DM Sans + resvg)
-- `src/lib/server/email.ts` — invite template header/CTA
+1. `src/lib/design/brand-colors.ts` — only place to edit hex
+2. `npm run brand:css` — regenerates CSS/SCSS + locked SVGs
+3. `docs/BRAND.md` (this file)
+4. `/brand` page for visual QA
 
-## Social & OG assets
+## Social & OG
 
-LinkedIn/Facebook covers, share images, and `/og-skaffu.png` are generated from SVG with **embedded DM Sans** (`@fontsource/dm-sans` via `scripts/social-fonts.mjs`). PNG export uses **resvg** (`scripts/social-render.mjs`) — Sharp/librsvg ignores embedded `@font-face` and falls back to serif.
+LinkedIn/Facebook/OG assets: `npm run generate:og-image` / `generate:social` — see [FACEBOOK_PAGE.md](./FACEBOOK_PAGE.md).
 
-After copy or color token changes:
+## Palette preview (local, Fas 1)
+
+Compare all four tracks before switching prod track:
 
 ```bash
-npm run generate:og-image
-npm run generate:social
+npm run brand:preview
 ```
 
-See [FACEBOOK_PAGE.md](./FACEBOOK_PAGE.md) and [LINKEDIN_COMPANY_PAGE.md](./LINKEDIN_COMPANY_PAGE.md) for upload specs.
+Output: `local/brand-palette-preview.html` (gitignored).

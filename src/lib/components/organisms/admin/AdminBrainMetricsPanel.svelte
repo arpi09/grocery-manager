@@ -312,7 +312,7 @@
 	}
 
 	.panel-error {
-		color: #8a1f1f;
+		color: var(--color-danger);
 	}
 
 	.period-toggle {
@@ -336,7 +336,7 @@
 	.period-btn.active {
 		background: var(--color-primary);
 		border-color: var(--color-primary);
-		color: #fff;
+		color: var(--color-on-primary);
 	}
 
 	.period-btn:disabled {

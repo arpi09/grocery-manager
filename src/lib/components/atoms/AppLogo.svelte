@@ -34,19 +34,19 @@
 			xmlns="http://www.w3.org/2000/svg"
 			aria-hidden="true"
 		>
-			<rect width="32" height="32" rx="8" fill="#2c4a3e" />
+			<rect width="32" height="32" rx="8" fill="var(--color-primary)" />
 			<path
-				fill="#ffffff"
+				fill="var(--color-on-primary)"
 				d="M16 8.5 9.5 13.2V22a1.2 1.2 0 0 0 1.2 1.2h3.1v-4.2h4.4v4.2h3.1A1.2 1.2 0 0 0 22.5 22v-8.8L16 8.5Z"
 			/>
 			<path
 				d="M11.8 17.2h8.4"
-				stroke="#e8f0ea"
+				stroke="color-mix(in srgb, var(--color-on-primary) 90%, var(--color-primary))"
 				stroke-width="1.35"
 				stroke-linecap="round"
 				fill="none"
 			/>
-			<rect x="20.8" y="10.8" width="4.2" height="4.2" rx="1" fill="#d4a853" />
+			<rect x="20.8" y="10.8" width="4.2" height="4.2" rx="1" fill="var(--color-accent)" />
 		</svg>
 		{#if showWordmark}
 			<span class="wordmark" aria-hidden="true">{wordmark}</span>

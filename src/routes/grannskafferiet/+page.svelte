@@ -436,7 +436,7 @@
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-primary);
 		background: var(--color-primary);
-		color: var(--color-on-primary, #fff);
+		color: var(--color-on-primary);
 		font-weight: 600;
 		text-decoration: none;
 	}

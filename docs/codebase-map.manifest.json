@@ -397,6 +397,22 @@
 			"doc": "docs/EMAIL.md"
 		},
 		{
+			"id": "brand",
+			"label": "Brand palette reference (Fas 2)",
+			"routes": [
+				"/brand"
+			],
+			"paths": [
+				"src/routes/brand/+page.svelte",
+				"src/routes/brand/+page.ts",
+				"src/lib/design/brand-colors.ts",
+				"src/lib/design/brand-colors.generated.css",
+				"scripts/generate-brand-css.mts",
+				"docs/BRAND.md"
+			],
+			"doc": "docs/BRAND.md"
+		},
+		{
 			"id": "platform",
 			"label": "Platform & telemetry",
 			"routes": [

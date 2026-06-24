@@ -2,24 +2,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none" aria-labelledby="title desc">
   <title id="title">Home hero — variant A</title>
   <desc id="desc">Isometric modular blocks on floating slab — architectural calm</desc>
-  <rect width="320" height="240" fill="#f7f5f0"/>
-  <ellipse cx="160" cy="196" rx="110" ry="7" fill="#8a857e" opacity="0.1"/>
-  <polygon points="40,176 280,176 280,186 40,186" fill="#d4cfc4"/>
-  <polygon points="40,176 52,166 292,166 280,176" fill="#e8e4dc"/>
-  <polygon points="280,176 292,166 292,176 280,186" fill="#c8c0b0"/>
-  <polygon points="72,166 72,72 96,58 96,154" fill="#726758"/>
-  <polygon points="96,58 140,58 140,154 96,154" fill="#8a7d6e"/>
-  <polygon points="72,72 96,58 140,58 116,72" fill="#a09488"/>
-  <polygon points="108,166 108,98 124,88 124,156" fill="#5a6b52"/>
-  <polygon points="124,88 158,88 158,156 124,156" fill="#6b7d62"/>
-  <polygon points="108,98 124,88 158,88 142,98" fill="#94a58c"/>
-  <polygon points="148,166 148,128 172,112 172,154" fill="#b8b2a8"/>
-  <polygon points="172,112 224,112 224,154 172,154" fill="#d4cfc4"/>
-  <polygon points="148,128 172,112 224,112 200,128" fill="#e8e4dc"/>
-  <polygon points="208,166 208,82 228,70 228,154" fill="#8a8580"/>
-  <polygon points="228,70 256,70 256,154 228,154" fill="#a09a94"/>
-  <polygon points="208,82 228,70 256,70 236,82" fill="#c8c0b0"/>
-  <polygon points="248,166 248,118 262,110 262,158" fill="#6b7d62"/>
-  <polygon points="262,110 284,110 284,158 262,158" fill="#94a58c"/>
-  <polygon points="248,118 262,110 284,110 270,118" fill="#b0bea8"/>
+  <rect width="320" height="240" fill="var(--color-bg)"/>
+  <ellipse cx="160" cy="196" rx="110" ry="7" fill="var(--color-text-muted)" opacity="0.1"/>
+  <polygon points="40,176 280,176 280,186 40,186" fill="var(--color-taupe)"/>
+  <polygon points="40,176 52,166 292,166 280,176" fill="var(--color-surface-muted)"/>
+  <polygon points="280,176 292,166 292,176 280,186" fill="var(--color-taupe)"/>
+  <polygon points="72,166 72,72 96,58 96,154" fill="var(--color-text-muted)"/>
+  <polygon points="96,58 140,58 140,154 96,154" fill="var(--color-secondary)"/>
+  <polygon points="72,72 96,58 140,58 116,72" fill="var(--color-taupe)"/>
+  <polygon points="108,166 108,98 124,88 124,156" fill="var(--color-secondary)"/>
+  <polygon points="124,88 158,88 158,156 124,156" fill="var(--color-secondary)"/>
+  <polygon points="108,98 124,88 158,88 142,98" fill="var(--color-secondary)"/>
+  <polygon points="148,166 148,128 172,112 172,154" fill="var(--color-taupe)"/>
+  <polygon points="172,112 224,112 224,154 172,154" fill="var(--color-taupe)"/>
+  <polygon points="148,128 172,112 224,112 200,128" fill="var(--color-surface-muted)"/>
+  <polygon points="208,166 208,82 228,70 228,154" fill="var(--color-text-muted)"/>
+  <polygon points="228,70 256,70 256,154 228,154" fill="var(--color-taupe)"/>
+  <polygon points="208,82 228,70 256,70 236,82" fill="var(--color-taupe)"/>
+  <polygon points="248,166 248,118 262,110 262,158" fill="var(--color-secondary)"/>
+  <polygon points="262,110 284,110 284,158 262,158" fill="var(--color-secondary)"/>
+  <polygon points="248,118 262,110 284,110 270,118" fill="var(--color-secondary)"/>
 </svg>

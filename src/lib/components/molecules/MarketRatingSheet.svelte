@@ -162,7 +162,7 @@
 	}
 
 	.star-btn.selected {
-		color: var(--color-warning, #d4a017);
+		color: var(--color-warning);
 	}
 
 	.field {

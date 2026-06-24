@@ -146,11 +146,11 @@
 		font-weight: 700;
 		letter-spacing: 0.05em;
 		text-transform: uppercase;
-		color: var(--color-on-primary, #fff);
+		color: var(--color-on-primary);
 		background: linear-gradient(
 			120deg,
 			var(--color-primary),
-			color-mix(in srgb, var(--color-primary) 65%, #6d28d9)
+			color-mix(in srgb, var(--color-primary) 65%, var(--color-learning-ai))
 		);
 	}
 

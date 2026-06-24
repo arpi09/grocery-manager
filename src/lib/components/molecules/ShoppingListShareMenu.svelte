@@ -282,7 +282,7 @@
 		border: 1px solid var(--color-primary);
 		border-radius: var(--radius-sm);
 		background: var(--color-primary);
-		color: #fff;
+		color: var(--color-on-primary);
 		font: inherit;
 		font-size: 0.9375rem;
 		font-weight: 650;
@@ -296,7 +296,7 @@
 	}
 
 	.share-primary-btn:active:not(:disabled) {
-		background: color-mix(in srgb, var(--color-primary) 88%, #000);
+		background: color-mix(in srgb, var(--color-primary) 88%, var(--color-text));
 	}
 
 	.share-menu-wrap {

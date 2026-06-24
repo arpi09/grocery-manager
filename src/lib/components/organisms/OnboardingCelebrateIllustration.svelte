@@ -152,7 +152,7 @@
 	}
 
 	.heavy .b3 {
-		fill: color-mix(in srgb, var(--color-warning, #f59e0b) 75%, var(--color-primary));
+		fill: color-mix(in srgb, var(--color-warning) 75%, var(--color-primary));
 		animation: heavy-burst 1.05s 0.44s ease-out infinite;
 	}
 
@@ -167,7 +167,7 @@
 	}
 
 	.heavy .b6 {
-		fill: color-mix(in srgb, var(--color-warning, #f59e0b) 70%, var(--color-primary));
+		fill: color-mix(in srgb, var(--color-warning) 70%, var(--color-primary));
 		animation: heavy-burst 1.18s 0.8s ease-out infinite;
 	}
 

@@ -18,18 +18,18 @@
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
 		line-height: 1.2;
-		color: var(--color-on-primary, #fff);
+		color: var(--color-on-primary);
 		background: linear-gradient(
 			120deg,
 			var(--color-primary),
-			color-mix(in srgb, var(--color-primary) 65%, #6d28d9)
+			color-mix(in srgb, var(--color-primary) 65%, var(--color-learning-ai))
 		);
 		box-shadow: 0 1px 2px color-mix(in srgb, var(--color-primary) 25%, transparent);
 	}
 
 	@media (prefers-color-scheme: dark) {
 		.pro-nav-badge {
-			box-shadow: 0 1px 3px color-mix(in srgb, #000 35%, transparent);
+			box-shadow: 0 1px 3px color-mix(in srgb, var(--color-text) 35%, transparent);
 		}
 	}
 </style>

@@ -1,16 +1,2 @@
-// Skaffu design tokens — synced with src/app.css (light)
-$skaffu-primary: #2c4a3e;
-$skaffu-primary-hover: #325a42;
-$skaffu-surface: #ffffff;
-$skaffu-surface-muted: #eef2eb;
-$skaffu-background: #f7f5f0;
-$skaffu-on-surface: #1f2a24;
-$skaffu-on-surface-muted: #4a5850;
-$skaffu-error: #b54a4a;
-$skaffu-border: #dde5d8;
-
-$skaffu-radius-sm: 8px;
-$skaffu-radius-md: 12px;
-$skaffu-radius-lg: 16px;
-
-$skaffu-font-family: 'DM Sans', system-ui, sans-serif;
+// Skaffu design tokens — generated from brand-colors.ts (active palette track)
+@import './brand-variables.generated';

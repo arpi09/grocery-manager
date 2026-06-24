@@ -766,7 +766,7 @@
 
 	.compact-value.alert {
 
-		color: var(--color-warning, #c27803);
+		color: var(--color-warning);
 
 	}
 

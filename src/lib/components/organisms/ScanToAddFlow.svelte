@@ -539,11 +539,11 @@
 	.unknown-banner {
 		margin: 0 0 var(--space-md);
 		padding: var(--space-sm) var(--space-md);
-		background: #fff8e6;
-		border: 1px solid #f0d2a8;
+		background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));
+		border: 1px solid color-mix(in srgb, var(--color-warning) 35%, var(--color-border));
 		border-radius: var(--radius-sm);
 		font-size: 0.875rem;
-		color: #8a5a12;
+		color: var(--color-warning);
 	}
 
 	.barcode-label {

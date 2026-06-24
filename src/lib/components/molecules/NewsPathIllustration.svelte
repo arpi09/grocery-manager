@@ -275,7 +275,7 @@
 	}
 
 	.illus-wrap.active .c3 {
-		fill: color-mix(in srgb, var(--color-warning, #f59e0b) 70%, var(--color-primary));
+		fill: color-mix(in srgb, var(--color-warning) 70%, var(--color-primary));
 		animation: illus-confetti 2.1s 0.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 	}
 

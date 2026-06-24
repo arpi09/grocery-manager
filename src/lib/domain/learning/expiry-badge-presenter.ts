@@ -4,6 +4,7 @@ import {
 	confidenceToTier,
 	type ConfidenceTier
 } from '$lib/domain/learning/prediction-trust';
+import { expirySourceColors } from '$lib/design/brand-colors';
 
 export type ExpiryBadgeSource = ExpiresOnSource | PredictionSource | null | undefined;
 
@@ -16,20 +17,7 @@ export interface ExpiryBadgePresentation {
 	confidenceTier: ConfidenceTier | null;
 }
 
-const SOURCE_COLORS: Partial<Record<string, string>> = {
-	household_learned: '#2d6a4f',
-	household_rule: '#2d6a4f',
-	receipt_printed: '#1d4ed8',
-	evidence: '#1d4ed8',
-	ai_inferred: '#6b4c9a',
-	external_model: '#6b4c9a',
-	llm: '#6b4c9a',
-	heuristic: '#6b7280',
-	default_heuristic: '#6b7280',
-	default: '#6b7280',
-	location_default: '#0f766e',
-	catalog: '#475569'
-};
+const SOURCE_COLORS: Partial<Record<string, string>> = expirySourceColors();
 
 function sourceHintKey(source: ExpiryBadgeSource): string | null {
 	if (!source) return null;

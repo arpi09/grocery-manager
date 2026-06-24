@@ -92,7 +92,7 @@
 	.load-error {
 		margin: calc(-1 * var(--space-sm)) 0 var(--space-md);
 		font-size: 0.875rem;
-		color: var(--color-danger, #b42318);
+		color: var(--color-danger);
 	}
 
 	.debug-code {

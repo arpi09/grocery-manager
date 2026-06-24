@@ -182,7 +182,7 @@
 	.insight-error {
 		margin: 0 0 var(--space-sm);
 		font-size: 0.8125rem;
-		color: var(--color-danger, #b42318);
+		color: var(--color-danger);
 	}
 
 	.insights-grid {

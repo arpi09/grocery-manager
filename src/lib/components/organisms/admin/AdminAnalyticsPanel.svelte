@@ -179,7 +179,7 @@
 	}
 
 	.panel-error {
-		color: #8a1f1f;
+		color: var(--color-danger);
 	}
 
 	.panel-actions {

@@ -1,3 +1,7 @@
+import { DEFAULT_PALETTE_TRACK, mergePalette } from '$lib/design/brand-colors';
+
+const SHARE_PALETTE = mergePalette(DEFAULT_PALETTE_TRACK).light;
+
 const SHARE_WIDTH = 1080;
 const SHARE_HEIGHT = 1920;
 
@@ -43,9 +47,9 @@ export async function renderWrappedShareCardPng(
 	}
 
 	const gradient = ctx.createLinearGradient(0, 0, SHARE_WIDTH, SHARE_HEIGHT);
-	gradient.addColorStop(0, '#f4f7f2');
-	gradient.addColorStop(0.45, '#e8f0e6');
-	gradient.addColorStop(1, '#f8f3ea');
+	gradient.addColorStop(0, SHARE_PALETTE.surfaceMuted);
+	gradient.addColorStop(0.45, SHARE_PALETTE.surface);
+	gradient.addColorStop(1, SHARE_PALETTE.bg);
 	ctx.fillStyle = gradient;
 	ctx.fillRect(0, 0, SHARE_WIDTH, SHARE_HEIGHT);
 
@@ -59,23 +63,23 @@ export async function renderWrappedShareCardPng(
 	ctx.arc(SHARE_WIDTH * 0.2, SHARE_HEIGHT * 0.72, 260, 0, Math.PI * 2);
 	ctx.fill();
 
-	ctx.fillStyle = '#2f6b4f';
+	ctx.fillStyle = SHARE_PALETTE.success;
 	ctx.font = '700 52px system-ui, -apple-system, Segoe UI, sans-serif';
 	ctx.textAlign = 'center';
 	ctx.fillText(labels.brand, SHARE_WIDTH / 2, 180);
 
-	ctx.fillStyle = 'rgba(31, 42, 36, 0.55)';
+	ctx.fillStyle = `${SHARE_PALETTE.text}8c`;
 	ctx.font = '600 40px system-ui, -apple-system, Segoe UI, sans-serif';
 	ctx.fillText(labels.monthLabel, SHARE_WIDTH / 2, 250);
 
-	ctx.fillStyle = '#1f2a24';
+	ctx.fillStyle = SHARE_PALETTE.text;
 	ctx.font = '800 88px system-ui, -apple-system, Segoe UI, sans-serif';
 	const headlineLines = wrapText(ctx, labels.headline, SHARE_WIDTH - 160);
 	headlineLines.forEach((line, index) => {
 		ctx.fillText(line, SHARE_WIDTH / 2, 520 + index * 100);
 	});
 
-	ctx.fillStyle = '#2f6b4f';
+	ctx.fillStyle = SHARE_PALETTE.success;
 	ctx.font = '700 56px system-ui, -apple-system, Segoe UI, sans-serif';
 	const statsLines = wrapText(ctx, labels.statsLine, SHARE_WIDTH - 140);
 	statsLines.forEach((line, index) => {

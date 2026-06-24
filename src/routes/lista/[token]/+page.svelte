@@ -202,8 +202,8 @@
 
 <style>
 	.share-page {
-		--lista-brand: #2c4a3e;
-		--lista-accent: #d4a853;
+		--lista-brand: var(--color-primary);
+		--lista-accent: var(--color-accent);
 
 		min-height: 100dvh;
 		padding: calc(var(--space-xl) + env(safe-area-inset-top, 0)) var(--page-padding-x)
@@ -349,11 +349,11 @@
 	.signup-cta-btn--primary {
 		background: var(--lista-brand);
 		border-color: var(--lista-brand);
-		color: #fff;
+		color: var(--color-on-primary);
 	}
 
 	.signup-cta-btn--primary:active {
-		background: color-mix(in srgb, var(--lista-brand) 88%, #000);
+		background: color-mix(in srgb, var(--lista-brand) 88%, var(--color-text));
 	}
 
 	.signup-hint {
