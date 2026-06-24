@@ -22,6 +22,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 ## [2026.6.24] - 2026-06-24
 
 Prod deploy @ `a9ddaabca` — Fas A.
+- chore(ci): Dependabot PR metadata, auto-merge, monthly deps CHANGELOG ([#131](https://github.com/arpi09/grocery-manager/pull/131)) — Extend `dependabot.yml` with labels, assignee (`arpi09`), and per-group labels for production/dev minor/patch groups
 
 ### Added
 
