@@ -23,6 +23,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 
 Prod deploy @ `a9ddaabca` — Fas A.
 - chore(ci): Dependabot PR metadata, auto-merge, monthly deps CHANGELOG ([#131](https://github.com/arpi09/grocery-manager/pull/131)) — Extend `dependabot.yml` with labels, assignee (`arpi09`), and per-group labels for production/dev minor/patch groups
+- docs: professional public README polish ([#134](https://github.com/arpi09/grocery-manager/pull/134)) — Rewrite `README.md` with Skaffu logo, public-facing structure, doc links instead of long feature walkthrough; remove `git init` section and personal emails
 
 ### Added
 
