@@ -58,7 +58,7 @@
 	);
 	const missingExpiryCount = $derived(countMissingExpiry(items));
 	const missingExpiryHref = '/inventory/all?filter=noExpiry';
-	const bulkExpiryHref = canWrite ? '/inventory/all?filter=noExpiry' : null;
+	const bulkInferAction = canWrite ? '/inventory/all?/bulkInferExpiry' : null;
 
 	$effect(() => {
 		if (!browser) {
@@ -118,7 +118,7 @@
 			missingExpiryCount={insightsSnapshot.missingExpiryCount}
 			estimatedCount={insightsSnapshot.estimatedCount}
 			{canWrite}
-			{bulkExpiryHref}
+			{bulkInferAction}
 			onDeepen={deepenInsights}
 			deepening={insightsDeepening}
 			deepenError={insightsDeepenError}
@@ -129,7 +129,7 @@
 		<MissingExpiryFilterChip
 			count={missingExpiryCount}
 			href={missingExpiryHref}
-			actionHref={bulkExpiryHref}
+			bulkInferAction={bulkInferAction}
 			actionLabel={canWrite ? t('inventory.bulkExpiryAction') : null}
 		/>
 	{/if}

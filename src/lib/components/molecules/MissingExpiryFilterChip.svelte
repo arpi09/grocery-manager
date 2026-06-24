@@ -6,11 +6,11 @@
 		href: string;
 		active?: boolean;
 		onSelect?: () => void;
-		actionHref?: string | null;
+		bulkInferAction?: string | null;
 		actionLabel?: string | null;
 	}
 
-	let { count, href, active = false, onSelect, actionHref = null, actionLabel = null }: Props = $props();
+	let { count, href, active = false, onSelect, bulkInferAction = null, actionLabel = null }: Props = $props();
 
 	function handleClick(event: MouseEvent) {
 		if (onSelect) {
@@ -32,10 +32,12 @@
 		>
 			{t('inventory.noExpiryFilterChip', { count })}
 		</a>
-		{#if actionHref && actionLabel}
-			<a class="missing-expiry-action" href={actionHref} data-testid="inventory-no-expiry-bulk-link">
-				{actionLabel}
-			</a>
+		{#if bulkInferAction && actionLabel}
+			<form method="POST" action={bulkInferAction} class="missing-expiry-action-form">
+				<button type="submit" class="missing-expiry-action" data-testid="inventory-no-expiry-bulk-action">
+					{actionLabel}
+				</button>
+			</form>
 		{/if}
 	</div>
 {/if}
@@ -65,9 +67,22 @@
 		white-space: nowrap;
 	}
 
+	.missing-expiry-action-form {
+		display: inline;
+		margin: 0;
+		padding: 0;
+	}
+
 	.missing-expiry-action {
+		border: none;
+		background: none;
+		padding: 0;
+		color: var(--color-primary);
+		font: inherit;
 		font-size: 0.8125rem;
 		font-weight: 600;
+		cursor: pointer;
+		text-decoration: underline;
 	}
 
 	.missing-expiry-chip--active {
