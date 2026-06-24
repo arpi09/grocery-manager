@@ -4,9 +4,9 @@
 
 | F?lt | V?rde |
 |------|--------|
-| **Uppdaterad** | 2026-06-23 |
-| **Prod SHA** | `7e9440304` @ [28031629578](https://github.com/arpi09/grocery-manager/actions/runs/28031629578) (live, deploy_tier=fast). |
-| **Master SHA** | `7e9440304` — e2e pre-deploy smoke accepts home UX v2 dashboard. |
+| **Uppdaterad** | 2026-06-24 |
+| **Prod SHA** | `a9ddaabca` @ [28083527659](https://github.com/arpi09/grocery-manager/actions/runs/28083527659) (live, deploy_tier=fast). |
+| **Master SHA** | `a9ddaabca` — Fas A activation funnel, receipt wow, overlay coordinator, deploy-critical E2E green. |
 | **CI/CD model** | **v2 on master** � tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
