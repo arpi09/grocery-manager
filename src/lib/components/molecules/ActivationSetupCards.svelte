@@ -148,10 +148,16 @@
 	}
 
 	.setup-card {
-		padding: var(--space-sm) var(--space-md);
+		padding: var(--space-xs) var(--space-sm);
 		border-radius: var(--radius-md);
 		background: var(--color-surface-muted);
 		border: 1px solid var(--color-border);
+	}
+
+	@media (max-width: 360px) {
+		.setup-card[data-testid='activation-setup-kivra'] {
+			display: none;
+		}
 	}
 
 	.setup-card-title {

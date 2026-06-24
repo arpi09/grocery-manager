@@ -33,11 +33,11 @@
 		gap: var(--space-md);
 		padding: var(--space-lg);
 		border-radius: var(--radius-lg);
-		border: 1px solid color-mix(in srgb, var(--color-primary) 28%, var(--color-border));
+		border: 1px solid color-mix(in srgb, var(--color-secondary) 28%, var(--color-border));
 		background: linear-gradient(
 			135deg,
-			color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)),
-			var(--color-surface)
+			color-mix(in srgb, var(--color-secondary) 10%, var(--color-surface)),
+			color-mix(in srgb, var(--color-taupe) 8%, var(--color-surface))
 		);
 		box-shadow: var(--shadow-sm);
 	}

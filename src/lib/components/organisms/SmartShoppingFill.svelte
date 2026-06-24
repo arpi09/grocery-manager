@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { enhance } from '$app/forms';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import LearningAiBadge from '$lib/components/atoms/LearningAiBadge.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import { t } from '$lib/i18n';
 	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
@@ -98,7 +99,10 @@
 				data-analytics-id="shopping.smart_fill"
 				data-testid="shopping-smart-fill"
 			>
-				{t('shopping.fillFromPantry')}
+				<span class="fill-btn-inner">
+					{t('shopping.fillFromPantry')}
+					<LearningAiBadge variant="soft" testId="shopping-smart-fill-ai-badge" />
+				</span>
 			</Button>
 
 			{#if loading}
@@ -226,6 +230,13 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-md);
+	}
+
+	.fill-btn-inner {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-sm);
 	}
 
 	.fill-success-banner {

@@ -48,8 +48,8 @@
 	.skeleton-card {
 		padding: var(--space-md);
 		border-radius: var(--radius-md);
-		border: 1px solid var(--color-border);
-		background: var(--color-surface);
+		border: 1px solid color-mix(in srgb, var(--color-info) 28%, var(--color-border));
+		background: color-mix(in srgb, var(--color-info) 6%, var(--color-surface));
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);

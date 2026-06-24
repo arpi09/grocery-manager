@@ -46,8 +46,8 @@
 	}
 
 	.feedback-info {
-		background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface-muted));
-		color: var(--color-text-muted);
-		border: 1px solid var(--color-border);
+		background: color-mix(in srgb, var(--color-info) 12%, var(--color-surface));
+		color: var(--color-info);
+		border: 1px solid color-mix(in srgb, var(--color-info) 28%, var(--color-border));
 	}
 </style>

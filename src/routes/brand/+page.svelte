@@ -2,6 +2,7 @@
 	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import LearningAiBadge from '$lib/components/atoms/LearningAiBadge.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import {
 		brandFontSizes,
@@ -62,7 +63,14 @@
 		{ label: 'learningAi', token: '--color-learning-ai', value: palette.learningAi }
 	]);
 
-	const learningGradient = $derived(getLearningAiGradientStops(track).join(', '));
+	const learningGradient = $derived(getLearningAiGradientStops(track, mode).join(', '));
+
+	const semanticUsage = [
+		{ token: 'info', usage: 'AiLoadingSkeleton — AI-loading tint' },
+		{ token: 'secondary / taupe', usage: 'ActivationOnboarding kivra-card, EatHubHero gradient' },
+		{ token: 'learning-ai', usage: 'LearningAiBadge — smart fill & recipe ideas' },
+		{ token: 'success / warning / danger', usage: 'Badge, FeedbackBanner' }
+	];
 
 	function setMode(next: BrandColorMode) {
 		mode = next;
@@ -136,8 +144,13 @@
 			{/each}
 		</div>
 		<div class="learning-gradient" style={`background: linear-gradient(110deg, ${learningGradient})`}>
-			<span>learningAi gradient</span>
+			<span class="learning-gradient-label">learningAi gradient</span>
 		</div>
+		<ul class="usage-list">
+			{#each semanticUsage as row (row.token)}
+				<li><strong>{row.token}</strong> — {row.usage}</li>
+			{/each}
+		</ul>
 	</section>
 
 	<section class="panel">
@@ -180,11 +193,8 @@
 			<div class="gallery-row badges">
 				<Badge tone="default">Neutral</Badge>
 				<Badge tone="warning">Snart</Badge>
-				<span
-					class="badge-learning"
-					style={`background: linear-gradient(110deg, ${learningGradient}); color: var(--color-learning-ai)`}
-					>AI</span
-				>
+				<LearningAiBadge variant="gradient" />
+				<LearningAiBadge variant="soft" />
 			</div>
 			<FeedbackBanner tone="success" message="Allt ser bra ut — inget ät-först just nu." />
 			<FeedbackBanner tone="warning" message="3 varor går ut inom 48 h." />
@@ -302,8 +312,18 @@
 		border-radius: var(--radius-md);
 		text-align: center;
 		font-weight: 600;
-		color: var(--color-learning-ai);
 		border: 1px solid var(--color-border);
+	}
+
+	.learning-gradient-label {
+		color: var(--color-on-primary);
+	}
+
+	.usage-list {
+		margin: var(--space-md) 0 0;
+		padding-left: 1.25rem;
+		font-size: var(--font-size-body-sm);
+		color: var(--color-text-muted);
 	}
 
 	.gallery {

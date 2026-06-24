@@ -56,5 +56,5 @@ html[data-theme='dark'] {
 	--toast-fg-muted: color-mix(in srgb, #141a17 82%, transparent);
 	--toast-dismiss-hover: color-mix(in srgb, #141a17 10%, transparent);
 	--toast-icon-bg: color-mix(in srgb, #141a17 14%, transparent);
-	--color-learning-ai-gradient: linear-gradient(110deg, #3E5288, #4A62A8, #5A72B8, #4A62A8);
+	--color-learning-ai-gradient: linear-gradient(110deg, #7088D0, #8A9EE8, #9AB0F0, #8A9EE8);
 }

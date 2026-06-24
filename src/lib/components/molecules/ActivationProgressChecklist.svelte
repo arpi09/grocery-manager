@@ -163,11 +163,7 @@
 		flex-direction: column;
 		gap: var(--space-xs);
 		flex-shrink: 0;
-		position: sticky;
-		top: 0;
-		z-index: 1;
 		padding-bottom: var(--space-xs);
-		background: var(--color-surface);
 	}
 
 	.step-counter {

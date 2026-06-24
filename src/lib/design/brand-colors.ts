@@ -415,16 +415,15 @@ export function expirySourceColors(
 
 
 
-/** Per-track AI gradient stops (light mode canonical). Falls back to solid learningAi. */
+/** Per-track AI gradient stops for a color mode. Falls back to solid learningAi. */
 
-export function getLearningAiGradientStops(track: PaletteTrack): readonly string[] {
-
-	const stops = PALETTE_TRACKS[track].light.learningAiGradientStops;
-
+export function getLearningAiGradientStops(
+	track: PaletteTrack,
+	mode: BrandColorMode = 'light'
+): readonly string[] {
+	const stops = PALETTE_TRACKS[track][mode].learningAiGradientStops;
 	if (stops?.length) return stops;
-
-	return [PALETTE_TRACKS[track].light.learningAi];
-
+	return [PALETTE_TRACKS[track][mode].learningAi];
 }
 
 
