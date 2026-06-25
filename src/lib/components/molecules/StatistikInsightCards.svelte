@@ -6,9 +6,17 @@
 
 	interface Props {
 		highlights: HouseholdInsight[];
+		maxVisible?: number;
 	}
+	
+	let { highlights, maxVisible }: Props = $props();
 
-	let { highlights }: Props = $props();
+	const visibleHighlights = $derived(
+		maxVisible != null && maxVisible > 0 ? highlights.slice(0, maxVisible) : highlights
+	);
+	const foldedHighlights = $derived(
+		maxVisible != null && maxVisible > 0 ? highlights.slice(maxVisible) : []
+	);
 
 	const iconByKind: Record<HouseholdInsight['kind'], FeatureIconId> = {
 		top_product: 'shopping',
@@ -97,7 +105,7 @@
 		</Card>
 	{:else}
 		<ul class="highlights-grid" data-testid="statistik-highlights">
-			{#each highlights as insight (insight.kind)}
+			{#each visibleHighlights as insight (insight.kind)}
 				<li>
 					<Card class="insight-card">
 						<div class="insight-icon" aria-hidden="true">
@@ -110,6 +118,25 @@
 				</li>
 			{/each}
 		</ul>
+		{#if foldedHighlights.length > 0}
+			<details class="more-insights">
+				<summary>{t('stats.insights.more')}</summary>
+				<ul class="highlights-grid highlights-grid--folded">
+					{#each foldedHighlights as insight (insight.kind)}
+						<li>
+							<Card class="insight-card">
+								<div class="insight-icon" aria-hidden="true">
+									<FeatureIcon id={iconByKind[insight.kind]} size={20} />
+								</div>
+								<p class="insight-label">{titleFor(insight)}</p>
+								<p class="insight-value">{valueFor(insight)}</p>
+								<p class="insight-detail">{detailFor(insight)}</p>
+							</Card>
+						</li>
+					{/each}
+				</ul>
+			</details>
+		{/if}
 	{/if}
 </section>
 
@@ -211,5 +238,31 @@
 		.highlights-grid {
 			grid-template-columns: 1fr;
 		}
+	}
+
+	.more-insights {
+		margin-top: var(--space-sm);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
+	}
+
+	.more-insights > summary {
+		display: flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		padding: var(--space-sm) var(--space-md);
+		font-size: 0.875rem;
+		font-weight: 600;
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.more-insights > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.highlights-grid--folded {
+		padding: 0 var(--space-md) var(--space-md);
 	}
 </style>

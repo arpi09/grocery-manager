@@ -1763,6 +1763,7 @@
 			"sectionTitle": "Fun facts from your pantry",
 			"sectionLead": "Pulled from receipts, pantry, and how you use food.",
 			"empty": "Import a receipt or add items — insights appear as data builds up.",
+			"more": "More insights",
 			"topProduct": {
 				"title": "Most bought",
 				"detail": "Purchased {count} times recently"

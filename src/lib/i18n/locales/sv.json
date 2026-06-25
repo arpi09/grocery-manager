@@ -1684,6 +1684,7 @@
 			"sectionTitle": "Kul fakta från ert skafferi",
 			"sectionLead": "Hämtat från kvitton, lagret och hur ni använder maten.",
 			"empty": "Importera kvitto eller lägg till varor — insikter dyker upp när datat växer.",
+			"more": "Fler insikter",
 			"topProduct": {
 				"title": "Mest köpt",
 				"detail": "Köpt {count} gånger nyligen"
