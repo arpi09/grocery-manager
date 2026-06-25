@@ -42,6 +42,7 @@
 	let createSubmitting = $state(false);
 	let updateSubmitting = $state(false);
 	let deleteSubmitting = $state(false);
+	let skipSubmitting = $state<string | null>(null);
 
 	const mealFormEnhance = bindSubmittingWithRedirect(
 		(v) => (createSubmitting = v),
@@ -123,6 +124,33 @@
 		addingMissingKey = null;
 	}
 
+	async function skipPlannedMeal(meal: PlannedMeal) {
+		if (!canEdit || skipSubmitting) return;
+		if (!confirm(t('planer.mealSkipConfirm', { title: meal.title }))) {
+			return;
+		}
+
+		skipSubmitting = meal.id;
+		try {
+			const response = await fetch('/api/brain/meal-skip', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ mealId: meal.id, replan: true })
+			});
+			const data = (await response.json()) as { error?: string };
+			if (!response.ok) {
+				showClientToast(data.error ?? t('planer.mealSkipFailed'), { variant: 'error' });
+				return;
+			}
+			showClientToast(t('planer.mealSkipSuccess'), { variant: 'success' });
+			onClose();
+			window.location.reload();
+		} catch {
+			showClientToast(t('planer.mealSkipFailed'), { variant: 'error' });
+		} finally {
+			skipSubmitting = null;
+		}
+	}
 </script>
 
 {#if day}
@@ -264,6 +292,17 @@
 									<input type="hidden" name="id" value={meal.id} />
 									<input type="hidden" name="title" value={meal.title} />
 								</DeleteConfirmButton>
+								<Button
+									type="button"
+									variant="secondary"
+									fullWidth
+									loading={skipSubmitting === meal.id}
+									loadingLabel={t('common.loading')}
+									onclick={() => void skipPlannedMeal(meal)}
+									data-testid="meal-skip-btn"
+								>
+									{t('planer.mealSkipBtn')}
+								</Button>
 							</div>
 						{/if}
 					</li>

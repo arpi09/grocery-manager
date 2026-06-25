@@ -16,13 +16,15 @@
 		userId: string | undefined;
 		petsEnabled: boolean;
 		pets: Pet[];
+		autoFinishExpiredEnabled?: boolean;
 	}
 
-	let { userId, petsEnabled, pets }: Props = $props();
+	let { userId, petsEnabled, pets, autoFinishExpiredEnabled = false }: Props = $props();
 
 	let petModalOpen = $state(false);
 	let petsToggleSubmitting = $state(false);
 	let addPetSubmitting = $state(false);
+	let autoFinishSubmitting = $state(false);
 
 	function replayOnboardingGuide() {
 		if (!userId) {
@@ -46,6 +48,28 @@
 		last={false}
 	>
 		<LanguageSwitcher />
+	</SettingsRow>
+
+	<SettingsRow
+		title={t('settings.autoFinish.title')}
+		note={t('settings.autoFinish.note')}
+		last={false}
+	>
+		<form
+			method="POST"
+			action="?/toggleAutoFinishExpired"
+			use:enhance={bindSubmitting((v) => (autoFinishSubmitting = v))}
+		>
+			<input type="hidden" name="enabled" value={autoFinishExpiredEnabled ? 'false' : 'true'} />
+			<Button
+				type="submit"
+				variant={autoFinishExpiredEnabled ? 'ghost' : 'primary'}
+				loading={autoFinishSubmitting}
+				loadingLabel={t('common.saving')}
+			>
+				{autoFinishExpiredEnabled ? t('settings.autoFinish.disable') : t('settings.autoFinish.enable')}
+			</Button>
+		</form>
 	</SettingsRow>
 
 	<details class="settings-disclosure">

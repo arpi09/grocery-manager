@@ -175,14 +175,14 @@ test.describe('Critical flows', () => {
 		);
 	});
 
-	test('scan from header nav opens last-used mode (default photo)', async ({ page }) => {
+	test('scan from header nav opens scan hub', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
 		await page.locator('.main-nav-desktop').getByTestId('nav-scan').click();
-		await expect(page).toHaveURL(/\/scan.*mode=photo/);
-		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 15_000 });
-		await expect(page.getByTestId('scan-mode-hub')).toHaveCount(0);
+		await expect(page).toHaveURL(/\/scan.*mode=hub/);
+		await expect(page.getByTestId('scan-mode-hub')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('scan-hub-photo')).toBeVisible();
 	});
 
 	test('onboarding replay opens activation checklist not carousel', async ({ page }) => {

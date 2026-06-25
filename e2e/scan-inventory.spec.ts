@@ -3,25 +3,40 @@ import { dismissOnboardingModalIfOpen } from './helpers/auth';
 import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
 
 test.describe('Scan and inventory', () => {
-	test('bare /scan opens last-used mode (default photo)', async ({ page }) => {
+	test('bare /scan opens scan hub with three modes', async ({ page }) => {
 		await page.goto('/scan');
 		await dismissOnboardingModalIfOpen(page);
 
-		await expect(page).toHaveURL(/mode=photo/);
-		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 15_000 });
+		await expect(page).toHaveURL(/mode=hub/);
+		const hub = page.getByTestId('scan-mode-hub');
+		await expect(hub).toBeVisible({ timeout: 15_000 });
+		await expect(hub.getByTestId('scan-hub-receipt')).toBeVisible();
+		await expect(hub.getByTestId('scan-hub-photo')).toBeVisible();
+		await expect(hub.getByTestId('scan-hub-barcode')).toBeVisible();
 	});
 
-	test('scan hub loads with featured mode and text links', async ({ page }) => {
+	test('scan hub loads three choice cards and manual link', async ({ page }) => {
 		await page.goto('/scan?mode=hub');
 		await dismissOnboardingModalIfOpen(page);
 
 		await expect(page).toHaveURL(/mode=hub/);
 		const hub = page.getByTestId('scan-mode-hub');
 		await expect(hub).toBeVisible({ timeout: 15_000 });
+		await expect(hub.getByTestId('scan-hub-receipt')).toBeVisible();
 		await expect(hub.getByTestId('scan-hub-photo')).toBeVisible();
-		await expect(hub.getByRole('navigation', { name: /Andra skanningslägen|Other scan modes/i })).toBeVisible();
+		await expect(hub.getByTestId('scan-hub-barcode')).toBeVisible();
 		await expect(hub.getByTestId('scan-hub-manual')).toBeVisible();
 		await expect(page.locator('.page-header .back-link')).toHaveCount(0);
+	});
+
+	test('scan sub-modes show mode tabs on mobile', async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto('/scan?mode=photo&from=/inventory/fridge&location=fridge');
+		await dismissOnboardingModalIfOpen(page);
+
+		await expect(page).toHaveURL(/mode=photo/);
+		const scanModes = page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i });
+		await expect(scanModes).toBeVisible();
 	});
 
 	test('scan sub-modes show mode tabs with receipt first', async ({ page }) => {

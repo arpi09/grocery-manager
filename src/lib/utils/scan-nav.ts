@@ -28,7 +28,7 @@ export function parseScanMode(value: string | null): ScanMode {
 		return value;
 	}
 	if (value === null) {
-		return getLastScanMode();
+		return 'hub';
 	}
 	return DEFAULT_SCAN_MODE;
 }

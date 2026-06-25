@@ -13,7 +13,7 @@ Skaffu Brain V1 replaces scattered `guessShelfLife` calls with a **modular predi
 1. **Household rule** — median `typical_days` per `(normalized_key, location)` when `sample_count >= 2`
 2. **Heuristic** — keyword table in `src/lib/domain/shelf-life.ts`
 3. **Location default** — low-confidence fallback (`default_heuristic`)
-4. **GPT refinement** — batch/single-call when `default_heuristic` or confidence &lt; 0.55 (`receipt-shelf-life-predictions.ts`, `brain-shelf-life-inference.adapter.ts`). Prompts: `receipt-parse-v5`, `shelf-life-batch-v5` in `ai-prompt-shared.ts` — **no brand lexicon in code**.
+4. **GPT refinement** — batch/single-call when `default_heuristic` or confidence &lt; 0.55 via shared `inferShelfLifeWithRefinement()` (scan bulk, receipt import, brain adapter). Prompts: `receipt-parse-v5`, `shelf-life-batch-v5` in `ai-prompt-shared.ts` — **no brand lexicon in code**.
 
 Every prediction is **observable and correctable**. User actions write to `learning_feedback` and update `household_shelf_life_rule`.
 
@@ -67,7 +67,7 @@ Per [RELEASE_MODEL.md](./RELEASE_MODEL.md), flags are kill switches — not a po
 
 | Flow | Entry | Feedback |
 |------|-------|----------|
-| Scan bulk | `scan/+page.server.ts` `bulkCreate` | `recordLineShelfLifeFeedback` |
+| Scan bulk | `scan/+page.server.ts` `bulkCreate` via `inferShelfLifeWithRefinement` | `recordLineShelfLifeFeedback` |
 | Parse API | `api/receipt/parse/+server.ts` | Predictions when `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT` |
 | Email/Kivra import | `receipt-import.ts` | Same when `SHELF_LIFE_LEARNING_ENABLED` |
 | Inventory create/infer | `inventory.service.ts` via brain inference adapter | — |
@@ -93,6 +93,6 @@ Per [RELEASE_MODEL.md](./RELEASE_MODEL.md): **master = truth**, **deploy = publi
 
 ## Tests
 
-- Unit: `learning-engine.service.test.ts`, `shelf-life-predictor.test.ts`, `receipt-parse-prompt.golden.test.ts`, `shelf-life-prompt.golden.test.ts`, `receipt-shelf-life-predictions.test.ts`
+- Unit: `learning-engine.service.test.ts`, `shelf-life-predictor.test.ts`, `receipt-parse-prompt.golden.test.ts`, `shelf-life-prompt.golden.test.ts`, `shelf-life-line-inference.golden.test.ts`, `receipt-shelf-life-predictions.test.ts`
 - Integration: `learning-engine.integration.test.ts`, `scan-bulk.integration.test.ts`, `receipt-import.integration.test.ts`
 - Repos: `household-shelf-life-rule.repository.test.ts`, `learning-feedback.repository.test.ts`

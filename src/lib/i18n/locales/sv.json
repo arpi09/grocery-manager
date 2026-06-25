@@ -678,6 +678,12 @@
 			"title": "App",
 			"description": "Funktioner och preferenser"
 		},
+		"autoFinish": {
+			"title": "Auto-avsluta utgångna varor",
+			"note": "Markerar varor som förbrukade efter bäst-före plus en proportional grace-period.",
+			"enable": "Slå på",
+			"disable": "Stäng av"
+		},
 		"pets": {
 			"title": "Husdjur",
 			"note": "Aktivera för att visa Husdjur i menyn och hantera dina husdjur.",
@@ -1189,6 +1195,11 @@
 		},
 		"receiptImportLead": "Kvitto importerat. Skaffu har uppdaterat skafferiet. Saknas något inför nästa handling?",
 		"suggestionsTitle": "Förslag",
+		"replenishmentTeaser": "Förslag: {name} (+{count} till)",
+		"listHints": {
+			"add": "Tänk på {name}",
+			"skip": "Ni avvisade nyligen {name}"
+		},
 		"v2": {
 			"pageTitle": "Inköp · Skaffu",
 			"metaDescription": "Planera veckans inköp och handla med fokus — en vara i taget. Delad lista för hushållet.",
@@ -1591,6 +1602,10 @@
 		"plannedCount": "{count} planerade måltider",
 		"mealTitle": "Måltidstitel",
 		"removeMeal": "Ta bort måltid {title}",
+		"mealSkipBtn": "Vi lagar inte detta",
+		"mealSkipConfirm": "Hoppa över \"{title}\" och få ett nytt förslag?",
+		"mealSkipSuccess": "Måltiden hoppades över och planen uppdaterades.",
+		"mealSkipFailed": "Kunde inte hoppa över måltiden just nu.",
 		"recipeIdeasAria": "Öppna receptidéer – generera måltidsförslag från ditt lager",
 		"ideasTitle": "Förslag från lagret",
 		"missingLabel": "Saknas:",
@@ -2800,7 +2815,14 @@
 			"done": "Klart",
 			"exit": "Avsluta",
 			"progress": "Steg {current} av {total}",
-			"missingPayload": "Recepttitel och ingredienser krävs för cook mode."
+			"missingPayload": "Recepttitel och ingredienser krävs för cook mode.",
+			"consumeTitle": "Markera det du använt",
+			"consumeLead": "Skaffu matchar ingredienser mot lagret. Granska innan du bekräftar.",
+			"consumeConfirm": "Markera som använt",
+			"consumeSkip": "Hoppa över",
+			"consumeFailed": "Kunde inte matcha ingredienser just nu.",
+			"consumeSuccess": "Markerade {count} varor som använda.",
+			"skippedAi": "AI"
 		}
 	},
 	"mealPlan": {
@@ -3175,6 +3197,8 @@
 		"inboundEmailLead": "{count} varor går ut snart — öppna veckoförslagen och lägg dem i plan och inköpslista.",
 		"plannedThisWeek": "{count} måltider redan planerade denna vecka",
 		"readonlyHint": "Ni har läsbehörighet — be en administratör planera veckan.",
+		"shoppingPreviewTitle": "Förslag till inköpslistan",
+		"addShoppingSuggestions": "Lägg till AI-förslagen på inköpslistan",
 		"savingsFootnote": "Hittills sparat ca {sek} kr · {kg} kg genom att använda maten i tid."
 	},
 	"skafferapport": {
@@ -4154,6 +4178,12 @@
 			"deepen": "Fördjupa med AI",
 			"deepening": "Fördjupar…",
 			"deepenError": "Kunde inte fördjupa insikterna just nu."
+		},
+		"pantryFix": {
+			"cta": "Städa skafferiet",
+			"confirm": "Skaffu föreslår datum och dubbletter. Fortsätt?",
+			"success": "Uppdaterade {inferred} datum. {merges} sammanslagningar att granska.",
+			"failed": "Kunde inte städa skafferiet just nu."
 		},
 		"receiptQuality": {
 			"lead": "{percent}% av raderna fick bäst-före-datum",

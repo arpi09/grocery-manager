@@ -10,5 +10,7 @@
 		recipeId={data.idea.id}
 		recipeTitle={data.idea.title}
 		steps={data.idea.steps}
+		ingredientsToUse={data.idea.ingredientsToUse}
+		canWrite={data.canWrite}
 	/>
 </AppLayout>

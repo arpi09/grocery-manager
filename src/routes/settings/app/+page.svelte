@@ -11,5 +11,10 @@
 	title={t('settings.app.title')}
 	subtitle={t('settings.app.description')}
 >
-	<AppSettingsPanel userId={data.user?.id} petsEnabled={data.petsEnabled} pets={data.pets} />
+	<AppSettingsPanel
+		userId={data.user?.id}
+		petsEnabled={data.petsEnabled}
+		pets={data.pets}
+		autoFinishExpiredEnabled={data.autoFinishExpiredEnabled}
+	/>
 </SettingsDrilldownLayout>
