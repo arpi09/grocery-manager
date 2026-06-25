@@ -1,5 +1,9 @@
-import { and, gt, isNull, lt, lte, sql } from 'drizzle-orm';
-import { autoExpiredCutoffDate } from '$lib/domain/auto-expired';
+import { and, gt, isNull, lt, lte, or, sql } from 'drizzle-orm';
+import {
+	autoExpiredCutoffDate,
+	normalizeAutoExpiredGraceDays,
+	resolveEffectiveAutoExpiredGraceDays
+} from '$lib/domain/auto-expired';
 import { stalenessCutoffDate } from '$lib/domain/inventory-staleness';
 import type { StorageLocation } from '$lib/domain/location';
 import type { InventoryItem } from '$lib/domain/inventory-item';
@@ -10,20 +14,75 @@ export function activeQuantityFilter() {
 	return gt(inventoryItemTable.quantity, '0');
 }
 
+function proportionalCutoffs(context: InventoryListContext) {
+	const base = normalizeAutoExpiredGraceDays(context.graceDays);
+	const sampleItem = (source: InventoryItem['expiresOnSource'], location: StorageLocation) => ({
+		expiresOnSource: source,
+		location
+	});
+	return {
+		base: autoExpiredCutoffDate(base),
+		defaultHeuristic: autoExpiredCutoffDate(
+			resolveEffectiveAutoExpiredGraceDays(base, sampleItem('default_heuristic', 'fridge'))
+		),
+		aiInferred: autoExpiredCutoffDate(
+			resolveEffectiveAutoExpiredGraceDays(base, sampleItem('ai_inferred', 'fridge'))
+		),
+		heuristic: autoExpiredCutoffDate(
+			resolveEffectiveAutoExpiredGraceDays(base, sampleItem('heuristic', 'fridge'))
+		)
+	};
+}
+
 export function autoExpiredFilter(context: InventoryListContext) {
-	const cutoff = autoExpiredCutoffDate(context.graceDays);
+	const cutoffs = proportionalCutoffs(context);
 	return and(
 		activeQuantityFilter(),
 		sql`${inventoryItemTable.expiresOn} is not null`,
-		lte(inventoryItemTable.expiresOn, cutoff)
+		or(
+			and(
+				sql`${inventoryItemTable.expiresOnSource} = 'default_heuristic'`,
+				lte(inventoryItemTable.expiresOn, cutoffs.defaultHeuristic)
+			),
+			and(
+				sql`${inventoryItemTable.expiresOnSource} = 'ai_inferred'`,
+				lte(inventoryItemTable.expiresOn, cutoffs.aiInferred)
+			),
+			and(
+				sql`${inventoryItemTable.expiresOnSource} = 'heuristic'`,
+				lte(inventoryItemTable.expiresOn, cutoffs.heuristic)
+			),
+			and(
+				sql`(${inventoryItemTable.expiresOnSource} is null or ${inventoryItemTable.expiresOnSource} in ('user_set', 'receipt_printed', 'household_learned'))`,
+				lte(inventoryItemTable.expiresOn, cutoffs.base)
+			)
+		)
 	);
 }
 
 export function activeNotAutoExpiredFilter(context: InventoryListContext) {
-	const cutoff = autoExpiredCutoffDate(context.graceDays);
+	const cutoffs = proportionalCutoffs(context);
 	return and(
 		activeQuantityFilter(),
-		sql`(${inventoryItemTable.expiresOn} is null or ${inventoryItemTable.expiresOn} > ${cutoff})`
+		sql`(
+			${inventoryItemTable.expiresOn} is null
+			or (
+				${inventoryItemTable.expiresOnSource} = 'default_heuristic'
+				and ${inventoryItemTable.expiresOn} > ${cutoffs.defaultHeuristic}
+			)
+			or (
+				${inventoryItemTable.expiresOnSource} = 'ai_inferred'
+				and ${inventoryItemTable.expiresOn} > ${cutoffs.aiInferred}
+			)
+			or (
+				${inventoryItemTable.expiresOnSource} = 'heuristic'
+				and ${inventoryItemTable.expiresOn} > ${cutoffs.heuristic}
+			)
+			or (
+				(${inventoryItemTable.expiresOnSource} is null or ${inventoryItemTable.expiresOnSource} in ('user_set', 'receipt_printed', 'household_learned'))
+				and ${inventoryItemTable.expiresOn} > ${cutoffs.base}
+			)
+		)`
 	);
 }
 
