@@ -1,8 +1,5 @@
 import { test, expect } from '@playwright/test';
-import {
-	dismissOnboardingModalIfOpen,
-	loginAsAdmin
-} from './helpers/auth';
+import { dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
 
 test.describe('Settings', () => {
 	test('settings page loads for authenticated user', async ({ page }) => {
@@ -29,16 +26,13 @@ test.describe('Settings', () => {
 
 		const expiryForm = page.locator('form.expiry-reminders-form').first();
 		await expirySwitch.click();
-		await expiryForm.evaluate((form: HTMLFormElement) => {
-			const enabled = form.querySelector('input[name="enabled"]') as HTMLInputElement | null;
-			if (enabled) {
-				enabled.value = enabled.value === 'true' ? 'false' : 'true';
-			}
-			form.requestSubmit();
-		});
+		await expect(expiryForm).toBeVisible();
 
 		await expect(
-			page.locator('.toast-message').filter({ hasText: /Inst\u00e4llningar sparade|Settings saved/i })
+			page
+				.locator('.toast-message')
+				.filter({ hasText: /Inst\u00e4llningar sparade|Settings saved/i })
+				.first()
 		).toBeVisible({ timeout: 15_000 });
 	});
 
@@ -111,7 +105,7 @@ test.describe('Settings', () => {
 		await shopSwitch.scrollIntoViewIfNeeded();
 		await expect(shopSwitch).toBeVisible({ timeout: 15_000 });
 
-		if (await pushSwitch.isChecked() || (await shopSwitch.isChecked())) {
+		if ((await pushSwitch.isChecked()) || (await shopSwitch.isChecked())) {
 			test.skip(true, 'Push or shop today enabled — requires-push hint not shown');
 		}
 
