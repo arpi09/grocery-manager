@@ -6,10 +6,17 @@
 	import { trackProductEvent } from '$lib/client/product-events';
 	import { t } from '$lib/i18n';
 	import { getSignupAt, isOnboardingExcludedPath } from '$lib/utils/onboarding';
-	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
+	import {
+		canClaimSessionOverlay,
+		canShowBlockingOverlay,
+		claimSessionOverlay,
+		getBlockingOverlayCount,
+		registerBlockingOverlay
+	} from '$lib/utils/overlay-stack';
 	import {
 		dismissHouseholdInvitePrompt,
 		getGlobalHouseholdInvitePromptContext,
+		recordGlobalHouseholdInviteShown,
 		shouldShowHouseholdInvitePrompt,
 		shouldShowInkopHouseholdInvitePrompt,
 		type HouseholdInvitePromptContext
@@ -72,11 +79,23 @@
 			return;
 		}
 
-		open = shouldShowHouseholdInvitePrompt({
+		const eligible = shouldShowHouseholdInvitePrompt({
 			userId,
 			memberCount,
 			signupAt: getSignupAt(userId)
 		});
+
+		if (
+			!eligible ||
+			!canClaimSessionOverlay('invite') ||
+			(getBlockingOverlayCount() > 0 && !canShowBlockingOverlay('invite'))
+		) {
+			open = false;
+			return;
+		}
+
+		claimSessionOverlay('invite');
+		open = true;
 	}
 
 	function dismiss() {
@@ -114,6 +133,7 @@
 		}
 
 		void trackProductEvent('household_invite_prompt_shown', { context: promptContext });
+		recordGlobalHouseholdInviteShown(userId);
 		shownEventSent = true;
 	});
 </script>

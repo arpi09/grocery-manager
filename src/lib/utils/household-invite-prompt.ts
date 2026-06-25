@@ -15,10 +15,13 @@ export type ValueMomentInviteContext = Extract<
 const DISMISSED_SUFFIX = 'household-invite-dismissed';
 const INKOP_DISMISSED_SUFFIX = 'household-invite-dismissed-inkop';
 const INKOP_LAST_SHOWN_SUFFIX = 'household-invite-last-shown-inkop';
+const GLOBAL_LAST_SHOWN_SUFFIX = 'household-invite-last-shown-global';
+const ANY_INVITE_LAST_SHOWN_SUFFIX = 'household-invite-last-shown-any';
 const PEAK_ITEMS_SUFFIX = 'peak-inventory-items';
 const SHOPPING_EXPORT_SUFFIX = 'shopping-list-exported';
 const INKOP_RATE_LIMIT_MS = 7 * 24 * 60 * 60 * 1000;
 const VALUE_MOMENT_RATE_LIMIT_MS = 7 * 24 * 60 * 60 * 1000;
+const INVITE_DEDUP_MS = 24 * 60 * 60 * 1000;
 
 function storageKey(suffix: string, userId: string): string {
 	return `home-pantry-${suffix}:${userId}`;
@@ -60,6 +63,55 @@ export function dismissHouseholdInvitePrompt(userId?: string | null): void {
 	localStorage.setItem(storageKey(DISMISSED_SUFFIX, userId), '1');
 }
 
+function getInviteLastShown(userId: string, suffix: string): number | null {
+	const raw = localStorage.getItem(storageKey(suffix, userId));
+	if (!raw) {
+		return null;
+	}
+
+	const parsed = Number(raw);
+	return Number.isFinite(parsed) ? parsed : null;
+}
+
+export function recordAnyHouseholdInviteShown(userId?: string | null, now = Date.now()): void {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	localStorage.setItem(storageKey(ANY_INVITE_LAST_SHOWN_SUFFIX, userId), String(now));
+}
+
+export function recordGlobalHouseholdInviteShown(userId?: string | null, now = Date.now()): void {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return;
+	}
+
+	recordAnyHouseholdInviteShown(userId, now);
+	localStorage.setItem(storageKey(GLOBAL_LAST_SHOWN_SUFFIX, userId), String(now));
+}
+
+export function wasAnyHouseholdInviteShownToday(
+	userId?: string | null,
+	now = Date.now()
+): boolean {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return false;
+	}
+
+	const lastShown = getInviteLastShown(userId, ANY_INVITE_LAST_SHOWN_SUFFIX);
+	return lastShown !== null && now - lastShown < INVITE_DEDUP_MS;
+}
+
+/** Global modal takes precedence over contextual inköp banner when still eligible. */
+export function shouldPreferGlobalHouseholdInvite(options: {
+	userId?: string | null;
+	memberCount: number;
+	signupAt: number | null;
+	now?: number;
+}): boolean {
+	return shouldShowHouseholdInvitePrompt(options);
+}
+
 export function shouldShowHouseholdInvitePrompt(options: {
 	userId?: string | null;
 	memberCount: number;
@@ -73,6 +125,10 @@ export function shouldShowHouseholdInvitePrompt(options: {
 	}
 
 	if (localStorage.getItem(storageKey(DISMISSED_SUFFIX, userId)) === '1') {
+		return false;
+	}
+
+	if (wasAnyHouseholdInviteShownToday(userId, now)) {
 		return false;
 	}
 
@@ -135,6 +191,7 @@ export function recordInkopHouseholdInviteShown(userId?: string | null, now = Da
 		return;
 	}
 
+	recordAnyHouseholdInviteShown(userId, now);
 	localStorage.setItem(storageKey(INKOP_LAST_SHOWN_SUFFIX, userId), String(now));
 }
 
@@ -154,12 +211,35 @@ export function shouldShowInkopHouseholdInvitePrompt(options: {
 	listHasItems: boolean;
 	uncheckedCount: number;
 	checkedCount: number;
+	signupAt?: number | null;
 	now?: number;
 }): boolean {
-	const { userId, memberCount, listHasItems, uncheckedCount, checkedCount, now = Date.now() } =
-		options;
+	const {
+		userId,
+		memberCount,
+		listHasItems,
+		uncheckedCount,
+		checkedCount,
+		signupAt = null,
+		now = Date.now()
+	} = options;
 
 	if (typeof localStorage === 'undefined' || !userId) {
+		return false;
+	}
+
+	if (
+		shouldPreferGlobalHouseholdInvite({
+			userId,
+			memberCount,
+			signupAt,
+			now
+		})
+	) {
+		return false;
+	}
+
+	if (wasAnyHouseholdInviteShownToday(userId, now)) {
 		return false;
 	}
 

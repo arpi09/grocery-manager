@@ -15,7 +15,9 @@
 		shouldShowPostOnboardingShare
 	} from '$lib/utils/onboarding';
 	import {
+		canClaimSessionOverlay,
 		canShowBlockingOverlay,
+		claimSessionOverlay,
 		getBlockingOverlayCount,
 		OVERLAY_STACK_CHANGED_EVENT,
 		registerBlockingOverlay
@@ -49,12 +51,14 @@
 			isOnboardingExcludedPath(pathname) ||
 			!isPostOnboardingSharePath(pathname) ||
 			!shouldShowPostOnboardingShare(userId) ||
+			!canClaimSessionOverlay('share') ||
 			(getBlockingOverlayCount() > 0 && !canShowBlockingOverlay('share'))
 		) {
 			open = false;
 			return;
 		}
 
+		claimSessionOverlay('share');
 		open = true;
 	}
 

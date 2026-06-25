@@ -15,7 +15,13 @@
 		shouldShowCelebration,
 		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
-	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
+	import {
+		canClaimSessionOverlay,
+		canShowBlockingOverlay,
+		claimSessionOverlay,
+		getBlockingOverlayCount,
+		registerBlockingOverlay
+	} from '$lib/utils/overlay-stack';
 
 	let open = $state(false);
 
@@ -39,12 +45,15 @@
 			isOnboardingExcludedPath(pathname) ||
 			shouldShowOnboarding(userId) ||
 			shouldShowCelebration(userId) ||
-			!shouldShowPageHint(currentHint, userId)
+			!shouldShowPageHint(currentHint, userId) ||
+			!canClaimSessionOverlay('hint') ||
+			(getBlockingOverlayCount() > 0 && !canShowBlockingOverlay('hint'))
 		) {
 			open = false;
 			return;
 		}
 		markPageHintShownInSession(currentHint, userId);
+		claimSessionOverlay('hint');
 		open = true;
 	}
 

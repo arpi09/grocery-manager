@@ -9,6 +9,11 @@ export type BlockingOverlayKind =
 	| 'hint'
 	| 'invite';
 
+/**
+ * Session overlay mutex (UX_GUIDELINES §12): at most one promotional overlay per tab session.
+ * Priority when multiple are eligible: onboarding → receipt-success → share → survey →
+ * celebration → hint → invite.
+ */
 const OVERLAY_PRIORITY: Record<BlockingOverlayKind, number> = {
 	onboarding: 100,
 	'receipt-success': 90,
@@ -18,6 +23,8 @@ const OVERLAY_PRIORITY: Record<BlockingOverlayKind, number> = {
 	hint: 40,
 	invite: 30
 };
+
+let sessionOverlayKind: BlockingOverlayKind | null = null;
 
 let blockingOverlayCount = 0;
 const registry = new Map<symbol, BlockingOverlayKind>();
@@ -60,6 +67,28 @@ export function canShowBlockingOverlay(kind: BlockingOverlayKind): boolean {
 	}
 
 	return OVERLAY_PRIORITY[kind] >= OVERLAY_PRIORITY[top];
+}
+
+/** True when this kind may claim the single session overlay slot. */
+export function canClaimSessionOverlay(kind: BlockingOverlayKind): boolean {
+	return sessionOverlayKind === null || sessionOverlayKind === kind;
+}
+
+/** Reserve the session overlay slot for this kind (first claim wins for the tab). */
+export function claimSessionOverlay(kind: BlockingOverlayKind): void {
+	if (sessionOverlayKind === null) {
+		sessionOverlayKind = kind;
+		notifyOverlayStackChanged();
+	}
+}
+
+export function getSessionOverlayKind(): BlockingOverlayKind | null {
+	return sessionOverlayKind;
+}
+
+/** @internal Test helper */
+export function resetSessionOverlayForTests(): void {
+	sessionOverlayKind = null;
 }
 
 /** Register while an overlay is open; cleanup runs when it closes. */

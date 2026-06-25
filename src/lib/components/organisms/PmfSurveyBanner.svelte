@@ -6,8 +6,11 @@
 	import type { PmfWouldMiss } from '$lib/domain/pmf-survey';
 	import { t, type MessageKey } from '$lib/i18n';
 	import {
+		canClaimSessionOverlay,
+		claimSessionOverlay,
 		getBlockingOverlayCount,
-		OVERLAY_STACK_CHANGED_EVENT
+		OVERLAY_STACK_CHANGED_EVENT,
+		registerBlockingOverlay
 	} from '$lib/utils/overlay-stack';
 	import {
 		dismissPmfSurvey,
@@ -40,11 +43,13 @@
 			publicEnv.PUBLIC_E2E_DISABLE_PMF_SURVEY === 'true' ||
 			!userId ||
 			getBlockingOverlayCount() > 0 ||
+			!canClaimSessionOverlay('survey') ||
 			!shouldShowPmfSurvey(userId, pathname)
 		) {
 			open = false;
 			return;
 		}
+		claimSessionOverlay('survey');
 		open = true;
 	}
 
@@ -110,6 +115,13 @@
 		void userId;
 		void overlayRevision;
 		tryOpenSurvey();
+	});
+
+	$effect(() => {
+		if (!open) {
+			return;
+		}
+		return registerBlockingOverlay('survey');
 	});
 </script>
 
