@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { expectNoCriticalOrSeriousViolations } from './helpers/axe';
 import {
 	dismissOnboardingModalIfOpen,
+	dismissPageHintIfOpen,
 	prepareE2eBrowserState
 } from './helpers/auth';
 import { createFridgeItemViaApi } from './helpers/inventory';
@@ -54,8 +55,17 @@ async function gotoAuthedRoute(
 	await expect(page.locator('.app')).toBeVisible({ timeout: 15_000 });
 }
 
+async function dismissBlockingOverlays(page: Page) {
+	await dismissOnboardingModalIfOpen(page);
+	await dismissPageHintIfOpen(page);
+	await page.getByTestId('page-hint-banner').waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
+}
+
 async function filterGridToItem(page: Page, itemName: string) {
-	await page.getByTestId('data-grid-filter-button').click();
+	const filterButton = page.getByTestId('data-grid-filter-button');
+	await filterButton.scrollIntoViewIfNeeded();
+	await expect(filterButton).toBeVisible({ timeout: 10_000 });
+	await filterButton.click();
 	const filterSheet = page.getByTestId('data-grid-filter-sheet');
 	await expect(filterSheet).toBeVisible({ timeout: 10_000 });
 	await filterSheet.locator('#data-grid-filter-search').fill(itemName);
@@ -67,10 +77,11 @@ async function resolveEditItemPath(page: Page): Promise<string> {
 	const itemName = `E2E Mobile Edit ${Date.now()}`;
 	await createFridgeItemViaApi(page, itemName);
 	await page.goto('/inventory/fridge', { waitUntil: 'commit' });
-	await dismissOnboardingModalIfOpen(page);
+	await dismissBlockingOverlays(page);
 
 	const grid = page.getByTestId('pantry-location-grid');
 	await expect(grid).toBeVisible({ timeout: 15_000 });
+	await expect(page.getByTestId('inventory-table')).toBeVisible({ timeout: 15_000 });
 	await filterGridToItem(page, itemName);
 
 	const row = page
