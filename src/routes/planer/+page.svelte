@@ -22,7 +22,7 @@
 	);
 
 	let ideasById = $state<Record<string, RecipeIdea>>(ideasByIdFromList(data.recipeIdeas));
-	let calendarOpen = $state(true);
+	let calendarOpen = $state(data.plannedMealCount > 0);
 
 	onMount(() => {
 		trackPlanerViewed();

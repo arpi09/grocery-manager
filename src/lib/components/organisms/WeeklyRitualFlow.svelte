@@ -7,7 +7,6 @@
 	import AiLoadingSkeleton from '$lib/components/molecules/AiLoadingSkeleton.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import RecipeSuggestionCard from '$lib/components/molecules/RecipeSuggestionCard.svelte';
-	import SkafferapportWidget from '$lib/components/molecules/SkafferapportWidget.svelte';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
@@ -294,6 +293,11 @@
 				{t('weeklyRitual.nextStepCta')}
 			</a>
 			<a class="next-step-secondary" href="/planer">{t('weeklyRitual.linkPlaner')}</a>
+			{#if savings.hasData}
+				<a class="next-step-tertiary" href="/statistik" data-analytics-id="weekly_ritual.next_step_statistik">
+					{t('weeklyRitual.linkStatistik')}
+				</a>
+			{/if}
 		</section>
 	{:else if canEdit && hasInventory}
 		{#if showPreGenerateHint}
@@ -362,10 +366,6 @@
 		<!-- empty pantry state above replaces generate flow -->
 	{:else}
 		<p class="readonly-hint">{t('weeklyRitual.readonlyHint')}</p>
-	{/if}
-
-	{#if savings.hasData}
-		<SkafferapportWidget {savings} />
 	{/if}
 </section>
 
@@ -607,6 +607,14 @@
 		font-size: 0.875rem;
 		font-weight: 600;
 		color: var(--color-primary);
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
+	}
+
+	.next-step-tertiary {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
 		text-decoration: underline;
 		text-underline-offset: 0.15em;
 	}
