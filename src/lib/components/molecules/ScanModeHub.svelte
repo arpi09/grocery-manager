@@ -5,6 +5,7 @@
 		getLastScanMode,
 		manualAddHref,
 		scanModeHref,
+		type DirectScanMode,
 		type ScanMode
 	} from '$lib/utils/scan-nav';
 	import type { StorageLocation } from '$lib/domain/location';
@@ -26,7 +27,7 @@
 
 	const featuredMode = $derived(getLastScanMode());
 
-	const modeLabels: Record<Exclude<ScanMode, 'hub'>, MessageKey> = {
+	const modeLabels: Record<DirectScanMode, MessageKey> = {
 		receipt: 'scan.choiceHub.receipt',
 		photo: 'scan.choiceHub.photo',
 		barcode: 'scan.choiceHub.barcode'
@@ -34,7 +35,7 @@
 
 	const featuredHref = $derived(scanModeHref(featuredMode, returnTo, locationOption));
 
-	const featuredLabel = $derived(t(modeLabels[featuredMode]));
+	const featuredLabel = $derived.by(() => t(modeLabels[getLastScanMode()]));
 
 	const featuredVariant = $derived(
 		featuredMode === 'receipt' ? 'receipt' : featuredMode === 'barcode' ? 'barcode' : 'photo'
