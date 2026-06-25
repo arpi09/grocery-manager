@@ -12,10 +12,9 @@ test.describe('Planer calendar week navigation', () => {
 		await dismissOnboardingModalIfOpen(page);
 		await dismissPageHintIfOpen(page);
 		await dismissMobileMoreNavIfOpen(page);
-		await page.locator('#ata-calendar').evaluate((el) => {
-			if (el instanceof HTMLDetailsElement) el.open = true;
-		});
-		await page.getByTestId('ata-calendar-view-week').click();
+		const calendar = page.locator('#ata-calendar');
+		await calendar.locator('summary').click();
+		await expect(calendar).toHaveAttribute('open');
 
 		const weekRange = page.getByTestId('ata-calendar-week-range');
 		await expect(weekRange).toBeVisible({ timeout: 15_000 });
@@ -42,6 +41,8 @@ test.describe('Planer calendar week navigation', () => {
 		await loginAsAdmin(page);
 		await page.goto('/planer?week=2026-06-01', { waitUntil: 'commit', timeout: 60_000 });
 		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
+		await page.locator('#ata-calendar summary').click();
 
 		await page.evaluate(() => window.scrollTo(0, 420));
 		const scrollBefore = await page.evaluate(() => window.scrollY);
@@ -62,6 +63,8 @@ test.describe('Planer calendar week navigation', () => {
 		await loginAsAdmin(page);
 		await page.goto('/planer?week=2026-01-05', { waitUntil: 'commit', timeout: 60_000 });
 		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
+		await page.locator('#ata-calendar summary').click();
 
 		await page.getByTestId('ata-calendar-today').click();
 		await expect(page).toHaveURL(/[?&]week=/);
