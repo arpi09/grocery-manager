@@ -15,6 +15,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - feat(nav): unified back navigation with smart fallback ([#136](https://github.com/arpi09/grocery-manager/pull/136)) — Add \BackLink\ atom and \
 - feat(onboarding): LearningAiBadge and fresh onboarding UX ([#137](https://github.com/arpi09/grocery-manager/pull/137)) — LearningAiBadge with learning-AI gradient on activation surfaces
 - feat(shelf-life): prompt-first quality — GPT refinement, UI transparency, proportional grace ([#139](https://github.com/arpi09/grocery-manager/pull/139)) — **AI / shelf-life:** Wire GPT refinement, shelf-life prompt v5, and golden tests so receipt/scan predictions are regression-guarded and iteratively improved.
+- feat(brain): full integration — scan hub, shelf-life parity, V2 surfaces ([#141](https://github.com/arpi09/grocery-manager/pull/141)) — Restore scan hub navigation and align shelf-life inference (`inferShelfLifeWithRefinement`) with golden tests and adapter parity
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
