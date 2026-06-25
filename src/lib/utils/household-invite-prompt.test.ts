@@ -165,13 +165,37 @@ describe('inkop household invite prompt', () => {
 		).toBe(true);
 	});
 
-	it('shows with one item after export', () => {
+	it('defers inkop banner when global invite is eligible after export', () => {
 		recordShoppingListExport(TEST_USER);
 		expect(
 			shouldShowInkopHouseholdInvitePrompt({
 				...baseOptions,
 				uncheckedCount: 1,
-				checkedCount: 0
+				checkedCount: 0,
+				signupAt: Date.UTC(2026, 5, 1)
+			})
+		).toBe(false);
+	});
+
+	it('shows with one item after export when global invite is not eligible', () => {
+		recordShoppingListExport(TEST_USER);
+		expect(
+			shouldShowInkopHouseholdInvitePrompt({
+				...baseOptions,
+				uncheckedCount: 1,
+				checkedCount: 0,
+				signupAt: Date.UTC(2026, 5, 20),
+				now: Date.UTC(2026, 5, 20)
+			})
+		).toBe(false);
+		dismissHouseholdInvitePrompt(TEST_USER);
+		expect(
+			shouldShowInkopHouseholdInvitePrompt({
+				...baseOptions,
+				uncheckedCount: 1,
+				checkedCount: 0,
+				signupAt: Date.UTC(2026, 5, 20),
+				now: Date.UTC(2026, 5, 20)
 			})
 		).toBe(true);
 	});
@@ -213,11 +237,12 @@ describe('inkop household invite prompt', () => {
 
 	it('dedupes global and inkop to one show per day', () => {
 		const now = Date.UTC(2026, 5, 15);
+		recordShoppingListExport(TEST_USER);
 		recordInkopHouseholdInviteShown(TEST_USER, now);
 		expect(wasAnyHouseholdInviteShownToday(TEST_USER, now + 1)).toBe(true);
 		expect(
 			shouldShowHouseholdInvitePrompt({
-				userId: TEST_GLOBAL_USER,
+				userId: TEST_USER,
 				memberCount: 1,
 				signupAt: Date.UTC(2026, 5, 1),
 				now: now + 1
