@@ -181,7 +181,7 @@ After the four-tab bottom nav (Hem · Skanna · Lager · Äta) + header cart, **
 
 ### Overlays
 
-12. **Max one modal overlay** at a time — onboarding guide, page hints, and activation celebration are mutually exclusive; embedded onboarding scan replaces the guide sheet (not stacked).
+12. **Max one modal overlay** at a time — onboarding guide, page hints, and activation celebration are mutually exclusive; embedded onboarding scan replaces the guide sheet (not stacked). **Session mutex:** at most one promotional overlay per tab (priority: onboarding → receipt-success → share → survey → celebration → hint → invite). Household invite: global modal **or** inköp banner per day, never both.
 
 See [`UX_AUDIT_2026-05.md`](./UX_AUDIT_2026-05.md) for route-by-route findings.
 
@@ -189,6 +189,7 @@ See [`UX_AUDIT_2026-05.md`](./UX_AUDIT_2026-05.md) for route-by-route findings.
 
 | Date | Change |
 |------|--------|
+| 2026-06-25 | CTA declutter pass: overlay session mutex, invite dedup, planer/hem/lager/scan hierarchy; Skafferapport home on `/statistik` |
 | 2026-06-08 | Post-unified-nav hem/planer/scan rules; UX audit reference |
 | 2026-06-02 | Initial guidelines + button hierarchy; audit of hem, inventory, inköp, settings, statistik |
 | 2026-06-02 | Partial consumption (lite/halv/egen mängd); Planer banner tied to hem/expiry |

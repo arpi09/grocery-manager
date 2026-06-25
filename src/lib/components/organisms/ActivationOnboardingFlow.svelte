@@ -46,7 +46,11 @@
 		screenForProgressKey
 	} from '$lib/utils/onboarding-steps';
 	import type { ActivationProgressKey } from '$lib/utils/onboarding-steps';
-	import { registerBlockingOverlay } from '$lib/utils/overlay-stack';
+	import {
+		canClaimSessionOverlay,
+		claimSessionOverlay,
+		registerBlockingOverlay
+	} from '$lib/utils/overlay-stack';
 	import { receiptOneTapHref } from '$lib/utils/scan-nav';
 	import {
 		isReceiptImportRecentlyCompleted,
@@ -237,6 +241,11 @@
 			open = false;
 			return;
 		}
+		if (!canClaimSessionOverlay('onboarding')) {
+			open = false;
+			return;
+		}
+		claimSessionOverlay('onboarding');
 		open = true;
 	}
 

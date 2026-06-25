@@ -50,8 +50,8 @@
 			<a class="action-btn action-btn-primary" href="/planer/vecka">
 				{t('planer.contextWeeklyLink')}
 			</a>
-			<a class="action-btn home-link" href={homeHref}>{t('planer.contextHomeLink')}</a>
-			<a class="action-btn" href="#ata-calendar">{t('planer.contextWeekViewLink')}</a>
+			<a class="text-action home-link" href={homeHref}>{t('planer.contextHomeLink')}</a>
+			<a class="text-action" href="#ata-calendar">{t('planer.contextWeekViewLink')}</a>
 		</div>
 	</Card>
 </section>
@@ -135,5 +135,21 @@
 		background: var(--color-primary-hover);
 		border-color: var(--color-primary-hover);
 		color: var(--color-on-primary);
+	}
+
+	.text-action {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		padding: 0.35rem 0.5rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
+	}
+
+	.text-action:hover {
+		color: var(--color-primary-hover);
 	}
 </style>

@@ -166,3 +166,17 @@ North star mental model: **Fyll på → Kolla → Laga → Handla** (four verbs,
 | Beta “förvirrande” | qualitative | ↓ after phase 1 |
 
 *Audit date: 2026-05 (documented 2026-06-08 implementation pass).*
+
+---
+
+## Resolved (2026-06-25 — `feat/ux-cta-declutter`)
+
+| Finding | Resolution |
+|---------|------------|
+| `/hem` P0 — too many equal CTAs | Home V2: max 3 blocks + `moreOnHome` details; receipt import tertiary |
+| `/scan` hub default before photo | Last-used mode default (photo); hub via `?mode=hub` |
+| `/inventory/[loc]` three equal add buttons | One primary photo + collapsed "Andra sätt" |
+| `/planer` duplicate recipe + open calendar | Recipe dedup on hem; calendar collapsed until meals planned; banner 1 primary |
+| Skafferapport on `/planer/vecka` | Moved to `/statistik` hero + tertiary link after weekly approve |
+| Onboarding + hints stack | Overlay session mutex in `overlay-stack.ts` |
+| Duplicate household invite surfaces | Global modal OR inköp banner per day (`household-invite-prompt.ts`) |

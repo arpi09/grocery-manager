@@ -13,6 +13,7 @@
 	import StatistikSpendTrend from '$lib/components/molecules/StatistikSpendTrend.svelte';
 
 	import StatistikInsightCards from '$lib/components/molecules/StatistikInsightCards.svelte';
+	import SkafferapportWidget from '$lib/components/molecules/SkafferapportWidget.svelte';
 
 	import { EMPTY_RECEIPT_SPEND_REPORT } from '$lib/domain/receipt-spend';
 
@@ -226,9 +227,15 @@
 
 			<div role="tabpanel" class="tab-panel motion-fade-in" data-testid="statistik-panel-overview">
 
+				{#if savings.hasData}
+					<div class="skafferapport-hero" data-testid="statistik-skafferapport-hero">
+						<SkafferapportWidget {savings} />
+					</div>
+				{/if}
+
 				<StatistikSpendHero {spend} />
 
-				<StatistikInsightCards {highlights} />
+				<StatistikInsightCards {highlights} maxVisible={2} />
 
 				<div class="compact-grid" aria-label={t('stats.heroLabel')}>
 
@@ -340,7 +347,7 @@
 
 				{#if savings.hasData}
 
-					<Card class="savings-note">
+					<Card class="savings-note savings-note--compact">
 
 						<p class="savings-line">
 

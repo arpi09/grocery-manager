@@ -19,7 +19,9 @@
 		shouldShowPostOnboardingSurvey
 	} from '$lib/utils/onboarding';
 	import {
+		canClaimSessionOverlay,
 		canShowBlockingOverlay,
+		claimSessionOverlay,
 		getBlockingOverlayCount,
 		OVERLAY_STACK_CHANGED_EVENT,
 		registerBlockingOverlay
@@ -51,11 +53,13 @@
 			!isPostOnboardingSurveyPath(pathname) ||
 			shouldShowPostOnboardingShare(userId) ||
 			!shouldShowPostOnboardingSurvey(userId) ||
+			!canClaimSessionOverlay('survey') ||
 			(getBlockingOverlayCount() > 0 && !canShowBlockingOverlay('survey'))
 		) {
 			open = false;
 			return;
 		}
+		claimSessionOverlay('survey');
 		open = true;
 	}
 

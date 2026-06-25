@@ -12,7 +12,7 @@
 	import { t } from '$lib/i18n';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import { markActivationScanStarted, shouldShowOnboarding } from '$lib/utils/onboarding';
-	import { type ScanMode } from '$lib/utils/scan-nav';
+	import { recordLastScanMode, type ScanMode } from '$lib/utils/scan-nav';
 
 	let { data, form } = $props();
 
@@ -58,6 +58,13 @@
 	const activeTab = $derived(
 		isBarcodeMode ? 'barcode' : isReceiptMode ? 'receipt' : isPhotoMode ? 'photoRound' : null
 	);
+
+	$effect(() => {
+		if (!browser || isHub) {
+			return;
+		}
+		recordLastScanMode(scanMode);
+	});
 </script>
 
 <AppLayout user={data.user}>

@@ -175,19 +175,14 @@ test.describe('Critical flows', () => {
 		);
 	});
 
-	test('scan from header nav is kvitto-first not photo', async ({ page }) => {
+	test('scan from header nav opens last-used mode (default photo)', async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
 		await page.locator('.main-nav-desktop').getByTestId('nav-scan').click();
-		await expect(page).toHaveURL(/\/scan(?:$|\?)/);
-		await expect(page.getByTestId('photo-round-capture')).toHaveCount(0);
-		const hub = page.getByTestId('scan-mode-hub');
-		await expect(hub).toBeVisible({ timeout: 15_000 });
-		await expect(hub.getByTestId('scan-hub-receipt')).toBeVisible();
-		await expect(page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i })).toHaveCount(0);
-		await expect(page.locator('.page-header .back-link')).toHaveCount(0);
-		await expect(page.getByText(/Avbryt och gå tillbaka|Cancel and go back/i)).toHaveCount(0);
+		await expect(page).toHaveURL(/\/scan.*mode=photo/);
+		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('scan-mode-hub')).toHaveCount(0);
 	});
 
 	test('onboarding replay opens activation checklist not carousel', async ({ page }) => {

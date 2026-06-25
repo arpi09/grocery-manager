@@ -20,7 +20,7 @@
 	import { t } from '$lib/i18n';
 	import { presentCelebration } from '$lib/utils/present-celebration.svelte';
 	import type { HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
-	import { preferredScanHref, scanHubHref } from '$lib/utils/scan-nav';
+	import { preferredScanHref } from '$lib/utils/scan-nav';
 	import { recordPeakInventoryCount } from '$lib/utils/household-invite-prompt';
 
 	interface Props {
@@ -53,7 +53,7 @@
 	}: Props = $props();
 
 	const returnTo = APP_HOME_PATH;
-	const scanHref = $derived(canWrite ? scanHubHref(returnTo) : preferredScanHref());
+	const scanHref = $derived(canWrite ? preferredScanHref(returnTo) : preferredScanHref());
 	const userId = $derived(page.data.user?.id ?? null);
 
 	const expiringCount = $derived(summary.expiringSoon.length);

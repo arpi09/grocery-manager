@@ -252,6 +252,7 @@
 		"chipManual": "Manual",
 		"moreAddWays": "More ways to add",
 		"moreOnHome": "More on home",
+		"receiptImportLink": "Import receipt",
 		"v3": {
 			"thisWeekTitle": "What should we shop this week?",
 			"recommendsTitle": "What does Skaffu recommend?",
@@ -683,7 +684,8 @@
 			"receipt": "Receipt — full shop",
 			"photo": "Photo fridge/pantry — multiple items",
 			"barcode": "Barcode — one item",
-			"manualLink": "Manual"
+			"manualLink": "Manual",
+			"otherModesAria": "Other scan modes"
 		}
 	},
 	"settings": {
@@ -1153,7 +1155,8 @@
 			"receipt": "Receipt — full shop",
 			"photo": "Photo fridge/pantry",
 			"barcode": "Barcode — one item",
-			"manual": "Manual"
+			"manual": "Manual",
+			"otherWays": "Other ways"
 		},
 		"filterSheet": {
 			"title": "Filter and sort",
@@ -1760,6 +1763,7 @@
 			"sectionTitle": "Fun facts from your pantry",
 			"sectionLead": "Pulled from receipts, pantry, and how you use food.",
 			"empty": "Import a receipt or add items — insights appear as data builds up.",
+			"more": "More insights",
 			"topProduct": {
 				"title": "Most bought",
 				"detail": "Purchased {count} times recently"
@@ -3113,6 +3117,7 @@
 			"addCta": "Add item",
 			"scanCta": "Scan",
 			"searchPlaceholder": "Search pantry…",
+			"insightsSummary": "Pantry insights",
 			"empty": {
 				"title": "Empty pantry",
 				"body": "Add items manually or scan using the buttons above.",
@@ -3239,6 +3244,7 @@
 		"approveFailed": "Could not approve the week. Try again.",
 		"successTitle": "Week sorted",
 		"linkPlaner": "View meal plan",
+		"linkStatistik": "View your pantry report",
 		"linkInkop": "Go to shopping list",
 		"nextStepBadge": "Next step",
 		"nextStepTitle": "Shopping list is ready",

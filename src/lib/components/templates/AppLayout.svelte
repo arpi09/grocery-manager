@@ -174,6 +174,7 @@
 	<GamificationToast />
 	<CelebrationMoment />
 	<ActivationOnboardingFlow />
+	<!-- Overlay priority (one per session): onboarding → receipt-success → share → survey → celebration → hint → invite -->
 	<PageHintModal />
 	<PostOnboardingSharePrompt memberCount={householdMemberCount} {shareLinkEnabled} />
 	<PostOnboardingSurvey />

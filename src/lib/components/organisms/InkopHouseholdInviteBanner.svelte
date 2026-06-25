@@ -4,7 +4,7 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import { t } from '$lib/i18n';
 	import { trackProductEvent } from '$lib/client/product-events';
-	import { shouldShowOnboarding } from '$lib/utils/onboarding';
+	import { getSignupAt } from '$lib/utils/onboarding';
 	import {
 		dismissInkopHouseholdInvitePrompt,
 		recordInkopHouseholdInviteShown,
@@ -33,15 +33,14 @@
 			return;
 		}
 
-		const onboardingVisible = shouldShowOnboarding(userId) && memberCount === 1 && listHasItems;
 		visible =
-			onboardingVisible ||
 			shouldShowInkopHouseholdInvitePrompt({
 				userId,
 				memberCount,
 				listHasItems,
 				uncheckedCount,
-				checkedCount
+				checkedCount,
+				signupAt: getSignupAt(userId)
 			});
 	}
 

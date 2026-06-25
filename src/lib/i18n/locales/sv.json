@@ -227,6 +227,7 @@
 		},
 		"moreAddWays": "Fler sätt att lägga till",
 		"moreOnHome": "Mer på hem",
+		"receiptImportLink": "Importera kvitto",
 		"v3": {
 			"thisWeekTitle": "Vad ska vi handla denna vecka?",
 			"recommendsTitle": "Vad rekommenderar Skaffu?",
@@ -626,7 +627,8 @@
 			"receipt": "Kvitto — hel handling",
 			"photo": "Fota kyl/skafferi — flera varor",
 			"barcode": "Streckkod — en vara",
-			"manualLink": "Manuellt"
+			"manualLink": "Manuellt",
+			"otherModesAria": "Andra skanningslägen"
 		}
 	},
 	"settings": {
@@ -1096,7 +1098,8 @@
 			"receipt": "Kvitto — hel handling",
 			"photo": "Fota kyl/skafferi",
 			"barcode": "Streckkod — en vara",
-			"manual": "Manuellt"
+			"manual": "Manuellt",
+			"otherWays": "Andra sätt"
 		},
 		"filterSheet": {
 			"title": "Filter och sortering",
@@ -1681,6 +1684,7 @@
 			"sectionTitle": "Kul fakta från ert skafferi",
 			"sectionLead": "Hämtat från kvitton, lagret och hur ni använder maten.",
 			"empty": "Importera kvitto eller lägg till varor — insikter dyker upp när datat växer.",
+			"more": "Fler insikter",
 			"topProduct": {
 				"title": "Mest köpt",
 				"detail": "Köpt {count} gånger nyligen"
@@ -3034,6 +3038,7 @@
 			"addCta": "Lägg till vara",
 			"scanCta": "Skanna",
 			"searchPlaceholder": "Sök i skafferiet…",
+			"insightsSummary": "Insikter om lagret",
 			"empty": {
 				"title": "Tomt skafferi",
 				"body": "Lägg till varor manuellt eller skanna via knapparna ovan.",
@@ -3160,6 +3165,7 @@
 		"approveFailed": "Kunde inte godkänna veckan. Försök igen.",
 		"successTitle": "Veckan är fixad",
 		"linkPlaner": "Se matplanen",
+		"linkStatistik": "Se din Skafferapport",
 		"linkInkop": "Gå till inköpslistan",
 		"nextStepBadge": "Nästa steg",
 		"nextStepTitle": "Inköpslistan är redo",

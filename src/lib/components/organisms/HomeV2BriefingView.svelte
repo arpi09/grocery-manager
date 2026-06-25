@@ -28,6 +28,7 @@
 	import { PANTRY_SHELF_PATH } from '$lib/navigation/nav-config';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { scanModeHref, receiptOneTapHref } from '$lib/utils/scan-nav';
+	import { isWithinActiveMealSlot } from '$lib/domain/meal-slot';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	
 	interface Props {
@@ -108,13 +109,21 @@
 	const momentPresentation = $derived(
 		moment ? buildHomeBriefingMomentPresentation(moment) : null
 	);
+
+	const showRecipeChip = $derived(
+		briefingRecipeChip != null &&
+			forYou?.kind !== 'recipe' &&
+			moment?.kind !== 'planMeal' &&
+			(useSoonCount > 0 || isWithinActiveMealSlot())
+	);
+
 	const chipsPresentation = $derived(
 		buildHomeBriefingChipsPresentation({
 			shoppingListCount,
 			shoppingCadence,
 			locale,
 			zoneCounts,
-			recipeChip: briefingRecipeChip,
+			recipeChip: showRecipeChip ? briefingRecipeChip : null,
 			funFact: briefingFunFact
 		})
 	);
@@ -221,18 +230,25 @@
 		chips={chipsPresentation}
 		{shoppingHref}
 		storageHref={storageHref}
-		recipeHref={recipeChipHref}
+		recipeHref={showRecipeChip ? recipeChipHref : null}
 		onChipTap={trackHomeChipTapped}
 	/>
 
-	{#if canWrite && !hideReceiptOneTap}
-		<div class="receipt-import-cta" data-testid="home-receipt-one-tap">
-			<p class="receipt-import-lead">{t('receiptAutomation.oneTapLead')}</p>
-			<a class="btn btn-primary btn-full" href={receiptOneTapHref(APP_HOME_PATH)}>
-				{t('receiptAutomation.oneTapCta')}
-			</a>
+	<details class="more-on-home" data-testid="home-more-on-home">
+		<summary>{t('home.moreOnHome')}</summary>
+		<div class="more-on-home-body">
+			{#if canWrite && !hideReceiptOneTap}
+				<a
+					class="text-action"
+					href={receiptOneTapHref(APP_HOME_PATH)}
+					data-testid="home-receipt-one-tap"
+				>
+					{t('home.receiptImportLink')}
+				</a>
+			{/if}
+			<a class="text-action" href="/statistik">{t('skafferapport.viewStats')}</a>
 		</div>
-	{/if}
+	</details>
 </div>
 
 <style>
@@ -252,17 +268,44 @@
 		color: var(--color-text-muted);
 	}
 
-	.receipt-import-cta {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
+	.more-on-home {
 		margin-top: var(--space-sm);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
 	}
 
-	.receipt-import-lead {
-		margin: 0;
+	.more-on-home > summary {
+		display: flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		padding: var(--space-sm) var(--space-md);
 		font-size: 0.875rem;
-		color: var(--color-text-muted);
-		line-height: 1.45;
+		font-weight: 600;
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.more-on-home > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.more-on-home-body {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
+		padding: 0 var(--space-md) var(--space-md);
+	}
+
+	.text-action {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		padding: 0.25rem 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
 	}
 </style>

@@ -5,13 +5,15 @@ import {
 	dismissValueMomentInvite,
 	getGlobalHouseholdInvitePromptContext,
 	hasShoppingListEngagement,
+	recordGlobalHouseholdInviteShown,
 	recordInkopHouseholdInviteShown,
 	recordPeakInventoryCount,
 	recordShoppingListExport,
 	recordValueMomentInviteShown,
 	shouldShowHouseholdInvitePrompt,
 	shouldShowInkopHouseholdInvitePrompt,
-	shouldShowValueMomentInvite
+	shouldShowValueMomentInvite,
+	wasAnyHouseholdInviteShownToday
 } from './household-invite-prompt';
 
 const TEST_USER = 'user-inkop-invite';
@@ -163,13 +165,37 @@ describe('inkop household invite prompt', () => {
 		).toBe(true);
 	});
 
-	it('shows with one item after export', () => {
+	it('defers inkop banner when global invite is eligible after export', () => {
 		recordShoppingListExport(TEST_USER);
 		expect(
 			shouldShowInkopHouseholdInvitePrompt({
 				...baseOptions,
 				uncheckedCount: 1,
-				checkedCount: 0
+				checkedCount: 0,
+				signupAt: Date.UTC(2026, 5, 1)
+			})
+		).toBe(false);
+	});
+
+	it('shows with one item after export when global invite is not eligible', () => {
+		recordShoppingListExport(TEST_USER);
+		expect(
+			shouldShowInkopHouseholdInvitePrompt({
+				...baseOptions,
+				uncheckedCount: 1,
+				checkedCount: 0,
+				signupAt: Date.UTC(2026, 5, 20),
+				now: Date.UTC(2026, 5, 20)
+			})
+		).toBe(false);
+		dismissHouseholdInvitePrompt(TEST_USER);
+		expect(
+			shouldShowInkopHouseholdInvitePrompt({
+				...baseOptions,
+				uncheckedCount: 1,
+				checkedCount: 0,
+				signupAt: Date.UTC(2026, 5, 20),
+				now: Date.UTC(2026, 5, 20)
 			})
 		).toBe(true);
 	});
@@ -196,6 +222,44 @@ describe('inkop household invite prompt', () => {
 				now: now + SEVEN_DAYS_MS
 			})
 		).toBe(true);
+	});
+
+	it('hides inkop banner when global invite is still eligible', () => {
+		recordShoppingListExport(TEST_USER);
+		expect(
+			shouldShowInkopHouseholdInvitePrompt({
+				...baseOptions,
+				userId: TEST_USER,
+				signupAt: Date.UTC(2026, 5, 1)
+			})
+		).toBe(false);
+	});
+
+	it('dedupes global and inkop to one show per day', () => {
+		const now = Date.UTC(2026, 5, 15);
+		recordShoppingListExport(TEST_USER);
+		recordInkopHouseholdInviteShown(TEST_USER, now);
+		expect(wasAnyHouseholdInviteShownToday(TEST_USER, now + 1)).toBe(true);
+		expect(
+			shouldShowHouseholdInvitePrompt({
+				userId: TEST_USER,
+				memberCount: 1,
+				signupAt: Date.UTC(2026, 5, 1),
+				now: now + 1
+			})
+		).toBe(false);
+	});
+
+	it('records global show and blocks inkop same day', () => {
+		const now = Date.UTC(2026, 5, 16);
+		recordGlobalHouseholdInviteShown(TEST_USER, now);
+		expect(
+			shouldShowInkopHouseholdInvitePrompt({
+				...baseOptions,
+				signupAt: null,
+				now: now + 1
+			})
+		).toBe(false);
 	});
 
 	it('detects shopping list engagement signals', () => {
