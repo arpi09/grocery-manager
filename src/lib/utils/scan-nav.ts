@@ -7,8 +7,10 @@ import { APP_HOME_PATH } from '$lib/navigation/app-home';
 
 export type ScanMode = 'hub' | 'barcode' | 'receipt' | 'photo';
 
+export type DirectScanMode = Exclude<ScanMode, 'hub'>;
+
 const LAST_SCAN_MODE_KEY = 'home-pantry-last-scan-mode';
-const DEFAULT_SCAN_MODE: ScanMode = 'photo';
+const DEFAULT_SCAN_MODE: DirectScanMode = 'photo';
 
 /** Safe in-app return path from a `from` query param. */
 export function parseScanReturnTo(fromParam: string | null): string {
@@ -31,7 +33,7 @@ export function parseScanMode(value: string | null): ScanMode {
 	return DEFAULT_SCAN_MODE;
 }
 
-export function getLastScanMode(): ScanMode {
+export function getLastScanMode(): DirectScanMode {
 	if (typeof localStorage === 'undefined') {
 		return DEFAULT_SCAN_MODE;
 	}
