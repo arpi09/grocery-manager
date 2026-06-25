@@ -28,6 +28,7 @@ const ALLOWED_FILES = new Set([
 const ALLOWED_PREFIXES = [
 	'scripts/social-',
 	'scripts/generate-brand-',
+	'scripts/design-kit/',
 	'local/brand-palette-preview.html'
 ];
 
