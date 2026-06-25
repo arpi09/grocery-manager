@@ -1,9 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { canEditInventory } from '$lib/domain/household';
-import { parseEatFirstWeekInboundSource, resolveEatFirstWeekMealCount } from '$lib/domain/eat-first-week';
-import { EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
-import { filterItemsExpiringWithinDays } from '$lib/domain/expiry-reminder';
-import { isExcludedFromRecipes } from '$lib/domain/recipe-inventory-filter';
+import { parseEatFirstWeekInboundSource } from '$lib/domain/eat-first-week';
 import { DEFAULT_RECIPE_PORTIONS, parseMealIntent } from '$lib/domain/recipe';
 import { MEAL_PLAN_IDEAS_MAX } from '$lib/domain/meal-plan-display';
 import { toIsoDate } from '$lib/domain/statistik';
@@ -17,7 +14,9 @@ import { e2eMockRecipeSuggestions, isE2eMockAiEnabled } from '$lib/server/e2e-mo
 import { requireOpenAiKey } from '$lib/server/api-guards';
 import { openAiErrorLogDetail, translateOpenAiError } from '$lib/server/openai';
 import { clampRecipePortions } from '$lib/server/recipe-prompt';
-import { generateRecipesWithRefinement } from '$lib/server/recipe-generation';
+import { runWeeklyPlanOrchestrator } from '$lib/server/brain-weekly-plan';
+import { learningFeedbackRepository } from '$lib/server/di';
+import { suggestionToListItem } from '$lib/server/shopping-suggestions';
 import { recordProductEvent } from '$lib/server/product-events';
 import { approveWeeklyRitualSchema } from '$lib/validation/meal-plan.schemas';
 import type { Actions, PageServerLoad } from './$types';
@@ -95,61 +94,66 @@ export const actions: Actions = {
 			};
 		}
 
-		const expiringItems = filterItemsExpiringWithinDays(inventory, EXPIRING_SOON_DAYS);
-		const expiringItemNames = expiringItems
-			.filter((item) => !isExcludedFromRecipes(item.name, item.notes))
-			.map((item) => item.name.trim())
-			.filter(Boolean);
-
 		if (isE2eMockAiEnabled()) {
 			const recipes = e2eMockRecipeSuggestions();
 			const savedIdeas = await locals.mealPlanService.storeGeneratedIdeas(userId, recipes);
 			return { generateSuggestions: savedIdeas };
 		}
 
-		const quotaResponse = await requireAiQuota(locals, 'ai_scan', userId);
+		const quotaResponse = await requireAiQuota(locals, 'weekly_plan', userId);
 		if (quotaResponse) {
 			return fail(503, {
 				generateError: translate(locale, 'weeklyRitual.generateFailed')
 			});
 		}
 
-		const apiKeyOrResponse = requireOpenAiKey(locale, 'eat-first suggestions', 503);
+		const apiKeyOrResponse = requireOpenAiKey(locale, 'weekly plan', 503);
 		if (typeof apiKeyOrResponse !== 'string') {
 			return fail(503, {
 				generateError: translate(locale, 'weeklyRitual.generateFailed')
 			});
 		}
 
-		const maxRecipes = resolveEatFirstWeekMealCount(expiringItems.length);
-		const generated = await generateRecipesWithRefinement({
+		const outcome = await runWeeklyPlanOrchestrator({
 			apiKey: apiKeyOrResponse,
-			inventory,
+			householdId,
+			userId,
+			locale: locale === 'en' ? 'en' : 'sv',
 			portions,
-			mode: 'eat_first',
-			expiringItemNames,
-			maxRecipes,
-			mealIntent
+			mealIntent,
+			inventoryService: locals.inventoryService,
+			mealPlanService: locals.mealPlanService,
+			shoppingListService: locals.shoppingListService,
+			householdSuggestionsService: locals.householdSuggestionsService,
+			householdService: locals.householdService,
+			learningFeedbackRepository
 		});
 
-		if (!generated.ok) {
+		if (!outcome.ok) {
+			if (outcome.stage === 'empty') {
+				return {
+					generateSuggestions: [],
+					generateNote: translate(locale, outcome.messageKey)
+				};
+			}
+			if (outcome.stage === 'shopping') {
+				return fail(outcome.result.status, {
+					generateError: translate(locale, outcome.result.messageKey)
+				});
+			}
 			console.warn(
-				`[planer/vecka generate] OpenAI failed (${generated.result.status}): ${openAiErrorLogDetail(generated.result).slice(0, 500)}`
+				`[planer/vecka generate] OpenAI failed (${outcome.result.status}): ${openAiErrorLogDetail(outcome.result).slice(0, 500)}`
 			);
-			return fail(generated.result.status, {
-				generateError: translateOpenAiError(locale, generated.result)
+			return fail(outcome.result.status, {
+				generateError: translateOpenAiError(locale, outcome.result)
 			});
 		}
 
-		if (generated.recipes.length === 0) {
-			return {
-				generateSuggestions: [],
-				generateNote: translate(locale, generated.noteKey ?? 'recipe.noSuitableInventoryNote')
-			};
-		}
-
-		const savedIdeas = await locals.mealPlanService.storeGeneratedIdeas(userId, generated.recipes);
-		return { generateSuggestions: savedIdeas };
+		return {
+			generateSuggestions: outcome.plan.recipes,
+			generateShoppingItems: outcome.plan.shoppingItems,
+			generateShoppingNote: outcome.plan.shoppingNote
+		};
 	},
 
 	approve: async ({ request, locals }) => {
@@ -180,6 +184,27 @@ export const actions: Actions = {
 
 		if (!parsed.success) {
 			return fail(400, { approveError: translate(locale, 'weeklyRitual.approveFailed') });
+		}
+
+		let shoppingAdded = 0;
+		const addShoppingSuggestions = formData.get('addShoppingSuggestions') === 'true';
+		if (addShoppingSuggestions) {
+			let shoppingItems: unknown;
+			try {
+				shoppingItems = JSON.parse(String(formData.get('shoppingItems') ?? '[]'));
+			} catch {
+				shoppingItems = [];
+			}
+			if (Array.isArray(shoppingItems) && shoppingItems.length > 0) {
+				const result = await locals.shoppingListService.addSuggestedItems(
+					householdId,
+					locals.householdRole!,
+					shoppingItems.map((item) =>
+						suggestionToListItem(item as Parameters<typeof suggestionToListItem>[0])
+					)
+				);
+				shoppingAdded = result.added;
+			}
 		}
 
 		const ideas = await locals.mealPlanService.listRecipeIdeas(userId, MEAL_PLAN_IDEAS_MAX);
@@ -224,7 +249,7 @@ export const actions: Actions = {
 			return {
 				approveSuccess: {
 					mealsScheduled: result.mealsScheduled,
-					listAdded: result.listAdded,
+					listAdded: result.listAdded + shoppingAdded,
 					celebration: weeklyRitualFirst ?? eatFirstRitual
 				}
 			};

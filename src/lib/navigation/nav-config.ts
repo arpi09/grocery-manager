@@ -1,9 +1,8 @@
 import type { MessageKey } from '$lib/i18n/messages';
 
-import { preferredScanHref } from '$lib/utils/scan-nav';
-
+import { scanHubHref } from '$lib/utils/scan-nav';
 import { isPublicCityFeedEnabled } from '$lib/utils/public-city-feed-flag';
-import { HEM_PATH, INKOP_PATH } from './app-home';
+import { APP_HOME_PATH, HEM_PATH, INKOP_PATH } from './app-home';
 
 import { showMarketV01InNav, MARKET_V01_PATH } from '$lib/domain/market-v01';
 
@@ -209,8 +208,8 @@ export function applyNavFeatureFlags(
 }
 
 export function resolveNavHref(item: NavItem, pathname: string): string {
-	if (item.dynamicHref === 'scan' && pathname) {
-		return preferredScanHref();
+	if (item.dynamicHref === 'scan') {
+		return scanHubHref(pathname || APP_HOME_PATH);
 	}
 
 	return item.href;

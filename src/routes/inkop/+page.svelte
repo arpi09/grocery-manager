@@ -27,6 +27,7 @@
 	import { receiptOneTapHref } from '$lib/utils/scan-nav';
 
 	import { trackProductEvent } from '$lib/client/product-events';
+	import { showClientToast } from '$lib/utils/client-toast.svelte';
 
 	let { data, form } = $props();
 
@@ -40,6 +41,8 @@
 	const dedupeByKey = $derived(data.dedupeByKey ?? {});
 
 	const hasSuggestions = $derived(replenishmentSuggestions.length > 0);
+	const listHints = $derived(data.listHints ?? []);
+	const topReplenishment = $derived(replenishmentSuggestions[0] ?? null);
 	const autoFillPending = $derived(data.autoFillPending);
 	const RECEIPT_REPLENISHMENT_SESSION_KEY = 'home-pantry-inkop-replenishment-open';
 
@@ -48,6 +51,24 @@
 	let showReceiptImportLead = $state(false);
 
 	const suggestionsOpen = $derived(fromReceipt || receiptSessionOpen);
+
+	async function acceptListHint(normalizedKey: string, displayName: string) {
+		const response = await fetch('/api/replenishment/accept', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ normalizedKey, surface: 'inkop' })
+		});
+		const payload = (await response.json()) as { error?: string; name?: string };
+		if (!response.ok) {
+			showClientToast(payload.error ?? t('shopping.v2.memory.acceptFailed'), { variant: 'error' });
+			return;
+		}
+		showClientToast(
+			t('shopping.v2.memory.acceptSuccess', { name: payload.name ?? displayName }),
+			{ variant: 'success' }
+		);
+		await goto('/inkop', { invalidateAll: true });
+	}
 
 	$effect(() => {
 		if (!browser) {
@@ -194,6 +215,36 @@
 							<a href="/settings/memory" data-analytics-id="inkop.memory_footnote">
 								{t('home.v3.memoryFootnote')}
 							</a>
+						</p>
+					{/if}
+
+					{#if listHints.length > 0}
+						<ul class="list-hints" data-testid="inkop-list-hints">
+							{#each listHints as hint (hint.id)}
+								<li>
+									{#if hint.textKey === 'add'}
+										<span>{t('shopping.listHints.add', { name: hint.displayName })}</span>
+										<button
+											type="button"
+											class="hint-link"
+											onclick={() => void acceptListHint(hint.normalizedKey, hint.displayName)}
+										>
+											{t('shopping.addLabel')}
+										</button>
+									{:else}
+										<span>{t('shopping.listHints.skip', { name: hint.displayName })}</span>
+									{/if}
+								</li>
+							{/each}
+						</ul>
+					{/if}
+
+					{#if topReplenishment}
+						<p class="replenishment-teaser" data-testid="replenishment-teaser">
+							{t('shopping.replenishmentTeaser', {
+								name: topReplenishment.displayName,
+								count: replenishmentSuggestions.length
+							})}
 						</p>
 					{/if}
 
@@ -357,6 +408,40 @@
 		gap: var(--space-md);
 
 		padding: 0 0.85rem 0.85rem;
+	}
+
+	.replenishment-teaser {
+		margin: 0 0 var(--space-sm);
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+	}
+
+	.list-hints {
+		margin: 0 0 var(--space-sm);
+		padding: 0;
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
+		font-size: 0.875rem;
+	}
+
+	.list-hints li {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-xs);
+	}
+
+	.hint-link {
+		border: none;
+		background: none;
+		padding: 0;
+		font: inherit;
+		font-weight: 600;
+		color: var(--color-primary);
+		cursor: pointer;
+		text-decoration: underline;
 	}
 
 	.replenishment-empty {

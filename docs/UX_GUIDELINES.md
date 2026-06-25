@@ -169,7 +169,7 @@ After the four-tab bottom nav (Hem · Skanna · Lager · Äta) + header cart, **
 
 ### Scan & inventory add
 
-6. **Default beats menu** — bottom **Skanna** → last-used scan mode (default photo), not the four-choice hub. Hub via **“Fler sätt”** / `?mode=hub` only.
+6. **Skanna-tab = valhub** — bottom **Skanna** → `/scan?mode=hub` with three equal modes (receipt, photo, barcode). Last-used mode only from **hem** speed CTAs (`preferredScanHref`), not the nav tab. `ScanModeTabs` visible on mobile and desktop in sub-modes.
 7. **Foto** — no forced location step; AI infers zone with optional override (`details`).
 8. **Inventory location** — one primary **Lägg till varor**; barcode and manual as text links / collapsed **Andra sätt**.
 

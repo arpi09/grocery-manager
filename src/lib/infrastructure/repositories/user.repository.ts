@@ -309,4 +309,24 @@ export class DrizzleUserRepository implements IUserRepository {
 				}
 			: null;
 	}
+
+	async getAutoFinishExpiredEnabled(userId: string): Promise<boolean> {
+		const [row] = await this.db
+			.select({ enabled: userTable.autoFinishExpiredEnabled })
+			.from(userTable)
+			.where(eq(userTable.id, userId))
+			.limit(1);
+
+		return row?.enabled ?? false;
+	}
+
+	async updateAutoFinishExpiredEnabled(userId: string, enabled: boolean): Promise<boolean> {
+		const rows = await this.db
+			.update(userTable)
+			.set({ autoFinishExpiredEnabled: enabled })
+			.where(eq(userTable.id, userId))
+			.returning();
+
+		return rows.length > 0;
+	}
 }

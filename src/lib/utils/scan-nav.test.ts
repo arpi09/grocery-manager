@@ -34,14 +34,14 @@ describe('scan-nav', () => {
 		expect(parseScanMode('barcode')).toBe('barcode');
 		expect(parseScanMode('receipt')).toBe('receipt');
 		expect(parseScanMode('photo')).toBe('photo');
-		expect(parseScanMode(null)).toBe('photo');
+		expect(parseScanMode('hub')).toBe('hub');
+		expect(parseScanMode(null)).toBe('hub');
 		expect(parseScanMode('nope')).toBe('photo');
 	});
 
-	it('defaults to last-used scan mode', () => {
+	it('defaults to last-used scan mode via preferredScanHref', () => {
 		recordLastScanMode('receipt');
 		expect(getLastScanMode()).toBe('receipt');
-		expect(parseScanMode(null)).toBe('receipt');
 		expect(preferredScanHref('/hem')).toBe('/scan?from=%2Fhem&mode=receipt');
 	});
 

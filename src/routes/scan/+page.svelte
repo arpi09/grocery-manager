@@ -71,7 +71,7 @@
 	<AppHeader {title} {subtitle} {backHref} {backLabel} />
 	<PageContainer>
 		{#if data.canWrite && !isHub}
-			<div class="scan-mode-tabs--desktop">
+			<div class="scan-mode-tabs">
 				<ScanModeTabs
 					active={activeTab}
 					returnTo={data.returnTo}
@@ -116,14 +116,8 @@
 </AppLayout>
 
 <style>
-	.scan-mode-tabs--desktop {
-		display: none;
-	}
-
-	@media (min-width: 768px) {
-		.scan-mode-tabs--desktop {
-			display: block;
-		}
+	.scan-mode-tabs {
+		margin-bottom: var(--space-md);
 	}
 
 	.readonly {

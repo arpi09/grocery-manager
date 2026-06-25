@@ -4,6 +4,10 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import HomeV2BriefingView from '$lib/components/organisms/HomeV2BriefingView.svelte';
+	import BrainHomeCard from '$lib/components/molecules/BrainHomeCard.svelte';
+	import BrainTimelineCard from '$lib/components/molecules/BrainTimelineCard.svelte';
+	import type { BrainScoreSnapshot } from '$lib/domain/brain-score';
+	import type { BrainTimelineEntry } from '$lib/domain/brain-timeline';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 	import {
@@ -45,6 +49,8 @@
 		pantryUxV2Enabled?: boolean;
 		shoppingUxV2Enabled?: boolean;
 		loadFailed?: boolean;
+		brainTimeline?: BrainTimelineEntry[];
+		brainScore?: BrainScoreSnapshot;
 	}
 
 	let {
@@ -60,7 +66,9 @@
 		canWrite = false,
 		pantryUxV2Enabled = false,
 		shoppingUxV2Enabled = false,
-		loadFailed = false
+		loadFailed = false,
+		brainTimeline = [],
+		brainScore = { score: 0, labelKey: 'brain.score.new', ruleCount: 0, feedbackCount: 0, receiptLineCount: 0 }
 	}: Props = $props();
 
 	let acceptingReplenishment = $state(false);
@@ -181,6 +189,10 @@
 			onAcceptReplenishment={acceptReplenishment}
 			onRecipeCta={handleRecipeCta}
 		/>
+		{#if brainScore.score > 0}
+			<BrainHomeCard snapshot={brainScore} />
+		{/if}
+		<BrainTimelineCard entries={brainTimeline} />
 	{/if}
 </div>
 

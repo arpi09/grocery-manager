@@ -127,7 +127,6 @@
 				"/api/brain/meal-skip",
 				"/api/brain/pantry-fix",
 				"/api/brain/recipe-cook",
-				"/api/brain/weekly-plan",
 				"/api/recipes",
 				"/api/recipes/add-missing"
 			],

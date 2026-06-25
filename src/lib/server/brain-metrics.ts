@@ -23,6 +23,7 @@ export interface BrainMetricsSnapshot {
 	inputTokenEstimate?: number;
 	source?: string;
 	wasGptInvoked?: boolean;
+	inferPath?: 'receipt_batch' | 'line_infer' | 'single_llm' | 'heuristic';
 }
 
 export function logBrainMetrics(event: string, metrics: BrainMetricsSnapshot): void {

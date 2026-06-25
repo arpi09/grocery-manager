@@ -761,6 +761,12 @@
 			"title": "App",
 			"description": "Features and preferences"
 		},
+		"autoFinish": {
+			"title": "Auto-finish expired items",
+			"note": "Marks items as consumed after best-before plus a proportional grace period.",
+			"enable": "Turn on",
+			"disable": "Turn off"
+		},
 		"pets": {
 			"title": "Pets",
 			"note": "Enable to show Pets in the menu and manage your pets.",
@@ -1268,6 +1274,11 @@
 		},
 		"receiptImportLead": "Receipt imported. Skaffu updated your pantry. Anything missing for the next shop?",
 		"suggestionsTitle": "Suggestions",
+		"replenishmentTeaser": "Suggestion: {name} (+{count} more)",
+		"listHints": {
+			"add": "Consider {name}",
+			"skip": "You recently dismissed {name}"
+		},
 		"v2": {
 			"pageTitle": "Shopping · Skaffu",
 			"metaDescription": "Plan the week's shop and pick items one at a time. Shared list for your household.",
@@ -1679,6 +1690,10 @@
 		"plannedCount": "{count} planned meals",
 		"mealTitle": "Meal title",
 		"removeMeal": "Remove meal {title}",
+		"mealSkipBtn": "We're not cooking this",
+		"mealSkipConfirm": "Skip \"{title}\" and get a new suggestion?",
+		"mealSkipSuccess": "Meal skipped and plan updated.",
+		"mealSkipFailed": "Could not skip the meal right now.",
 		"recipeIdeasAria": "Open recipe ideas — generate meal suggestions from your stock",
 		"ideasTitle": "Suggestions from your pantry",
 		"missingLabel": "Missing:",
@@ -2879,7 +2894,14 @@
 			"done": "Done",
 			"exit": "Exit",
 			"progress": "Step {current} of {total}",
-			"missingPayload": "Recipe title and ingredients are required for cook mode."
+			"missingPayload": "Recipe title and ingredients are required for cook mode.",
+			"consumeTitle": "Mark what you used",
+			"consumeLead": "Skaffu matches ingredients to your pantry. Review before confirming.",
+			"consumeConfirm": "Mark as used",
+			"consumeSkip": "Skip",
+			"consumeFailed": "Could not match ingredients right now.",
+			"consumeSuccess": "Marked {count} items as used.",
+			"skippedAi": "AI"
 		}
 	},
 	"mealPlan": {
@@ -3254,6 +3276,8 @@
 		"inboundEmailLead": "{count} items expiring soon — open week suggestions and add them to your plan and shopping list.",
 		"plannedThisWeek": "{count} meals already planned this week",
 		"readonlyHint": "You have read-only access — ask an admin to plan the week.",
+		"shoppingPreviewTitle": "Suggested for your shopping list",
+		"addShoppingSuggestions": "Add AI suggestions to the shopping list",
 		"savingsFootnote": "Estimated {sek} kr · {kg} kg saved so far by using food in time."
 	},
 	"skafferapport": {
@@ -4154,6 +4178,12 @@
 			"deepen": "Deepen with AI",
 			"deepening": "Deepening…",
 			"deepenError": "Could not deepen insights right now."
+		},
+		"pantryFix": {
+			"cta": "Tidy the pantry",
+			"confirm": "Skaffu will suggest dates and duplicates. Continue?",
+			"success": "Updated {inferred} dates. {merges} merges to review.",
+			"failed": "Could not tidy the pantry right now."
 		},
 		"receiptQuality": {
 			"lead": "{percent}% of lines got a best-before date",

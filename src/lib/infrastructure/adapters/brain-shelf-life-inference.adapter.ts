@@ -1,10 +1,7 @@
 import type { ShelfLifeInferencePort } from '$lib/application/ports/shelf-life-inference.port';
 import type { LearningEngineService } from '$lib/application/learning/learning-engine.service';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
-import { needsShelfLifeLlmRefinement } from '$lib/domain/shelf-life-confidence';
-import { isReceiptAiBatchEnabled } from '$lib/server/feature-flags';
-import { inferShelfLifeSingleLlm } from '$lib/server/receipt-shelf-life-predictions';
-import { getOpenAiApiKey } from '$lib/server/openai';
+import { inferShelfLifeWithRefinement } from '$lib/server/shelf-life-line-inference';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { inferShelfLifeHeuristic } from '$lib/server/shelf-life-inference';
 
@@ -20,39 +17,18 @@ export function createBrainShelfLifeInferenceAdapter(
 			const normalizedKey = normalizeReceiptProductName(input.name);
 			if (!normalizedKey) return inferShelfLifeHeuristic(input);
 
-			const prediction = await learningEngine.predictShelfLife(input.householdId, {
-				productName: input.name,
-				normalizedKey,
+			const inferred = await inferShelfLifeWithRefinement({
+				learningEngine,
+				householdId: input.householdId,
+				name: input.name,
 				location: input.location,
 				purchasedAt: input.purchasedAt ?? null
 			});
-			if (!prediction) return inferShelfLifeHeuristic(input);
-
-			if (
-				needsShelfLifeLlmRefinement({
-					expiresOnSource: prediction.expiresOnSource,
-					confidence: prediction.confidence
-				})
-			) {
-				const apiKey = getOpenAiApiKey();
-				if (apiKey && isReceiptAiBatchEnabled()) {
-					const llm = await inferShelfLifeSingleLlm(apiKey, {
-						name: input.name,
-						location: input.location,
-						purchasedAt: input.purchasedAt ?? null
-					});
-					if (llm) {
-						return {
-							expiresOn: llm.expiresOn,
-							source: 'ai_inferred'
-						};
-					}
-				}
-			}
+			if (!inferred) return inferShelfLifeHeuristic(input);
 
 			return {
-				expiresOn: prediction.expiresOn,
-				source: prediction.expiresOnSource
+				expiresOn: inferred.expiresOn,
+				source: inferred.expiresOnSource
 			};
 		}
 	};

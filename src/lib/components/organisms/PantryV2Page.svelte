@@ -6,6 +6,7 @@
 	import InventoryInsightsPanel from '$lib/components/organisms/InventoryInsightsPanel.svelte';
 	import PantryV2EmptyState from '$lib/components/organisms/PantryV2EmptyState.svelte';
 	import PantryV2ShelfView from '$lib/components/organisms/PantryV2ShelfView.svelte';
+	import Button from '$lib/components/atoms/Button.svelte';
 	import { trackPantryShelfOpened } from '$lib/client/pantry-v2-telemetry';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { buildPantryShelfView, countMissingExpiry, filterInventoryBySearch } from '$lib/domain/pantry-shelf';
@@ -25,6 +26,39 @@
 	let insightsLoading = $state(true);
 	let insightsDeepening = $state(false);
 	let insightsDeepenError = $state<string | null>(null);
+	let pantryFixLoading = $state(false);
+	let pantryFixMessage = $state<string | null>(null);
+
+	async function runPantryFix() {
+		if (!canWrite || pantryFixLoading) return;
+		if (!confirm(t('brain.pantryFix.confirm'))) return;
+
+		pantryFixLoading = true;
+		pantryFixMessage = null;
+		try {
+			const response = await fetch('/api/brain/pantry-fix', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ inferExpiry: true, suggestMerges: true })
+			});
+			const payload = (await response.json()) as {
+				error?: string;
+				fix?: { inferredExpiryCount?: number; mergeSuggestions?: unknown[] };
+			};
+			if (!response.ok) {
+				pantryFixMessage = payload.error ?? t('brain.pantryFix.failed');
+				return;
+			}
+			const inferred = payload.fix?.inferredExpiryCount ?? 0;
+			const merges = payload.fix?.mergeSuggestions?.length ?? 0;
+			pantryFixMessage = t('brain.pantryFix.success', { inferred, merges });
+			await invalidateAll();
+		} catch {
+			pantryFixMessage = t('brain.pantryFix.failed');
+		} finally {
+			pantryFixLoading = false;
+		}
+	}
 
 	async function deepenInsights() {
 		insightsDeepening = true;
@@ -107,6 +141,23 @@
 
 	<details class="insights-fold" data-testid="pantry-v2-insights-fold">
 		<summary>{t('pantry.v2.insightsSummary')}</summary>
+		{#if canWrite}
+			<div class="pantry-fix-action">
+				<Button
+					type="button"
+					variant="secondary"
+					loading={pantryFixLoading}
+					loadingLabel={t('common.loading')}
+					onclick={() => void runPantryFix()}
+					data-testid="pantry-fix-btn"
+				>
+					{t('brain.pantryFix.cta')}
+				</Button>
+				{#if pantryFixMessage}
+					<p class="pantry-fix-message" role="status">{pantryFixMessage}</p>
+				{/if}
+			</div>
+		{/if}
 		{#if insightsLoading}
 			<InventoryInsightsPanel
 				loading
@@ -189,6 +240,19 @@
 
 	.insights-fold :global(.inventory-insights-panel) {
 		padding: 0 var(--space-md) var(--space-md);
+	}
+
+	.pantry-fix-action {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
+		padding: 0 var(--space-md) var(--space-sm);
+	}
+
+	.pantry-fix-message {
+		margin: 0;
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
 	}
 
 	.search-empty {

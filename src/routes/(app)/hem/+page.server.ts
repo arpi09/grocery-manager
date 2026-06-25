@@ -27,6 +27,8 @@ import { generateHomeBriefingOneLiner } from '$lib/server/home-briefing-one-line
 import { getOpenAiApiKey } from '$lib/server/openai';
 import { rankReplenishmentWithFeedback } from '$lib/server/replenishment-rank';
 import { learningFeedbackRepository } from '$lib/server/di';
+import { loadBrainTimeline } from '$lib/server/brain-timeline';
+import { loadBrainScoreSnapshot } from '$lib/server/brain-score-loader';
 import {
 	buildHomeBriefingRecipeCard,
 	pickBriefingRecipeIdea
@@ -34,6 +36,7 @@ import {
 import type { HomeBriefingRecipeCard, HomeBriefingFunFact } from '$lib/domain/home-briefing';
 import { selectHomeBriefingFunFact } from '$lib/domain/home-briefing';
 import { isWithinActiveMealSlot } from '$lib/domain/meal-slot';
+import { getSnapshot } from '$lib/domain/brain-score';
 
 import { itemSchema } from '$lib/validation/inventory.schemas';
 
@@ -183,6 +186,13 @@ export const load: PageServerLoad = async ({ locals }) => {
 		briefingFunFact = await impactPromise;
 	}
 
+	const [brainTimeline, brainScore] = await Promise.all([
+		loadBrainTimeline(householdId).catch(() => []),
+		loadBrainScoreSnapshot(locals.householdSuggestionsService, householdId, locale).catch(() =>
+			getSnapshot({ ruleCount: 0, feedbackCount: 0, receiptLineCount: 0 })
+		)
+	]);
+
 	return {
 		locale,
 		pageTitle: translate(locale, homeUxV2Enabled ? 'home.v6.pageTitle' : 'home.title'),
@@ -200,7 +210,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		briefingRecipeChip,
 		briefingFunFact,
 		briefingOneLiner,
-		showMemoryExplorer: isShelfLifeLearningEnabled()
+		showMemoryExplorer: isShelfLifeLearningEnabled(),
+		brainTimeline,
+		brainScore
 	};
 };
 

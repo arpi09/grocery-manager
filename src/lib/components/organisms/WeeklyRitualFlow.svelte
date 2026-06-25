@@ -10,6 +10,7 @@
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import type { RecipeIdea } from '$lib/domain/meal-plan';
+	import type { ShoppingSuggestion } from '$lib/server/shopping-suggestions';
 	import type { SavingsReport } from '$lib/domain/savings-estimate';
 	import { formatCalendarDayLabel } from '$lib/domain/calendar-display';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
@@ -67,6 +68,9 @@
 	let note = $state<string | null>(null);
 	let approved = $state(false);
 	let listAddedCount = $state(0);
+	let shoppingItems = $state<ShoppingSuggestion[]>([]);
+	let shoppingNote = $state<string | null>(null);
+	let addShoppingSuggestions = $state(false);
 	let lastHandledGenerateKey = $state<string | null>(null);
 	let lastHandledApproveKey = $state<string | null>(null);
 
@@ -133,6 +137,10 @@
 		(formData) => {
 			formData.set('assignments', JSON.stringify(buildAssignments()));
 			formData.set('addMissingToList', 'true');
+			formData.set('addShoppingSuggestions', addShoppingSuggestions ? 'true' : 'false');
+			if (addShoppingSuggestions && shoppingItems.length > 0) {
+				formData.set('shoppingItems', JSON.stringify(shoppingItems));
+			}
 		}
 	);
 
@@ -150,7 +158,15 @@
 				'generateSuggestions' in form && Array.isArray(form.generateSuggestions)
 					? (form.generateSuggestions as RecipeIdea[])
 					: null;
-			const key = `${generateError ?? ''}:${generateSuggestions?.length ?? 'x'}:${generateNote ?? ''}`;
+			const generateShoppingItems =
+				'generateShoppingItems' in form && Array.isArray(form.generateShoppingItems)
+					? (form.generateShoppingItems as ShoppingSuggestion[])
+					: null;
+			const generateShoppingNote =
+				'generateShoppingNote' in form && typeof form.generateShoppingNote === 'string'
+					? form.generateShoppingNote
+					: null;
+			const key = `${generateError ?? ''}:${generateSuggestions?.length ?? 'x'}:${generateNote ?? ''}:${generateShoppingItems?.length ?? 'x'}`;
 			if (key === lastHandledGenerateKey) return;
 			lastHandledGenerateKey = key;
 
@@ -158,12 +174,17 @@
 				errorMessage = generateError;
 				suggestions = [];
 				note = null;
+				shoppingItems = [];
+				shoppingNote = null;
 				return;
 			}
 
 			if (generateSuggestions) {
 				suggestions = generateSuggestions;
 				note = generateNote;
+				shoppingItems = generateShoppingItems ?? [];
+				shoppingNote = generateShoppingNote;
+				addShoppingSuggestions = false;
 				assignDefaultDates(suggestions);
 				errorMessage =
 					suggestions.length === 0 && !note ? t('weeklyRitual.noneGenerated') : null;
@@ -350,6 +371,24 @@
 					</li>
 				{/each}
 			</ul>
+
+			{#if shoppingItems.length > 0}
+				<section class="shopping-preview" aria-labelledby="weekly-shopping-preview">
+					<h3 id="weekly-shopping-preview">{t('weeklyRitual.shoppingPreviewTitle')}</h3>
+					{#if shoppingNote}
+						<p class="shopping-note">{shoppingNote}</p>
+					{/if}
+					<ul class="shopping-preview-list">
+						{#each shoppingItems.slice(0, 8) as item (item.name)}
+							<li>{item.name}</li>
+						{/each}
+					</ul>
+					<label class="shopping-confirm">
+						<input type="checkbox" bind:checked={addShoppingSuggestions} />
+						<span>{t('weeklyRitual.addShoppingSuggestions')}</span>
+					</label>
+				</section>
+			{/if}
 
 			<form method="POST" action="?/approve" class="approve-wrap" use:enhance={approveEnhance}>
 				<Button
@@ -541,6 +580,38 @@
 
 	.approve-wrap {
 		align-self: flex-start;
+	}
+
+	.shopping-preview {
+		padding: var(--space-md);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
+	}
+
+	.shopping-preview h3 {
+		margin: 0 0 var(--space-xs);
+		font-size: 0.9375rem;
+	}
+
+	.shopping-note {
+		margin: 0 0 var(--space-sm);
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+	}
+
+	.shopping-preview-list {
+		margin: 0 0 var(--space-sm);
+		padding-left: 1.1rem;
+		font-size: 0.875rem;
+	}
+
+	.shopping-confirm {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--space-sm);
+		font-size: 0.875rem;
+		cursor: pointer;
 	}
 
 	.next-step-card {

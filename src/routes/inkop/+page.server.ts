@@ -29,6 +29,7 @@ import { recordProductEvent } from '$lib/server/product-events';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { isShoppingUxV2Enabled } from '$lib/server/shopping-ux-v2-flag';
 import { detectDedupeWarningsForKeys } from '$lib/domain/dedupe-autopilot';
+import { buildListIntelligenceHints } from '$lib/domain/brain/list-intelligence';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 import { isItemFinished } from '$lib/domain/inventory-item';
 import { trackShoppingCheckoffToPantry } from '$lib/server/sync-analytics';
@@ -119,6 +120,11 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		});
 	}
 
+	const listHints = buildListIntelligenceHints({
+		replenishment: replenishmentSuggestions,
+		maxHints: 2
+	});
+
 	return {
 		user,
 		items,
@@ -132,7 +138,8 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		shoppingToPantryMode,
 		showMemoryExplorer: isShelfLifeLearningEnabled(),
 		shoppingUxV2Enabled: isShoppingUxV2Enabled(),
-		autoFillPending
+		autoFillPending,
+		listHints
 	};
 };
 

@@ -1,13 +1,7 @@
 <script lang="ts">
 	import ScanHubIllustration from '$lib/components/molecules/ScanHubIllustration.svelte';
 	import { t, type MessageKey } from '$lib/i18n';
-	import {
-		getLastScanMode,
-		manualAddHref,
-		scanModeHref,
-		type DirectScanMode,
-		type ScanMode
-	} from '$lib/utils/scan-nav';
+	import { manualAddHref, scanModeHref, type DirectScanMode } from '$lib/utils/scan-nav';
 	import type { StorageLocation } from '$lib/domain/location';
 
 	interface Props {
@@ -25,7 +19,7 @@
 				: undefined
 	);
 
-	const featuredMode = $derived(getLastScanMode());
+	const scanModes: DirectScanMode[] = ['receipt', 'photo', 'barcode'];
 
 	const modeLabels: Record<DirectScanMode, MessageKey> = {
 		receipt: 'scan.choiceHub.receipt',
@@ -33,53 +27,50 @@
 		barcode: 'scan.choiceHub.barcode'
 	};
 
-	const featuredHref = $derived(scanModeHref(featuredMode, returnTo, locationOption));
-
-	const featuredLabel = $derived.by(() => t(modeLabels[getLastScanMode()]));
-
-	const featuredVariant = $derived(
-		featuredMode === 'receipt' ? 'receipt' : featuredMode === 'barcode' ? 'barcode' : 'photo'
-	);
-
-	const otherModes = $derived(
-		(['receipt', 'photo', 'barcode'] as const).filter((mode) => mode !== featuredMode)
-	);
+	const aiModes = new Set<DirectScanMode>(['receipt', 'photo']);
 
 	const manualHref = $derived(manualAddHref(returnTo, locationOption));
 
-	function hrefForMode(mode: Exclude<ScanMode, 'hub'>): string {
+	function hrefForMode(mode: DirectScanMode): string {
 		return scanModeHref(mode, returnTo, locationOption);
 	}
 
-	function testIdForMode(mode: Exclude<ScanMode, 'hub'>): string {
+	function testIdForMode(mode: DirectScanMode): string {
 		return `scan-hub-${mode === 'photo' ? 'photo' : mode}`;
+	}
+
+	function variantForMode(mode: DirectScanMode): 'receipt' | 'photo' | 'barcode' {
+		return mode === 'receipt' ? 'receipt' : mode === 'barcode' ? 'barcode' : 'photo';
 	}
 </script>
 
 <div class="hub" data-testid="scan-mode-hub">
 	<h2 class="hub-title">{t('scan.choiceHub.title')}</h2>
 
-	<a
-		class="choice-card choice-card--primary"
-		href={featuredHref}
-		data-testid={testIdForMode(featuredMode as Exclude<ScanMode, 'hub'>)}
-	>
-		<span class="icon-wrap" aria-hidden="true">
-			<ScanHubIllustration variant={featuredVariant} />
-		</span>
-		<span class="choice-label">{featuredLabel}</span>
-	</a>
-
-	<nav class="other-links" aria-label={t('scan.choiceHub.otherModesAria')}>
-		{#each otherModes as mode (mode)}
-			<a class="text-action" href={hrefForMode(mode)} data-testid={testIdForMode(mode)}>
-				{t(modeLabels[mode])}
+	<div class="choice-grid" role="list">
+		{#each scanModes as mode (mode)}
+			<a
+				class="choice-card"
+				href={hrefForMode(mode)}
+				data-testid={testIdForMode(mode)}
+				role="listitem"
+			>
+				<span class="icon-wrap" aria-hidden="true">
+					<ScanHubIllustration variant={variantForMode(mode)} />
+				</span>
+				<span class="choice-label">
+					{t(modeLabels[mode])}
+					{#if aiModes.has(mode)}
+						<span class="ai-badge">AI</span>
+					{/if}
+				</span>
 			</a>
 		{/each}
-		<a class="text-action" href={manualHref} data-testid="scan-hub-manual">
-			{t('scan.choiceHub.manualLink')}
-		</a>
-	</nav>
+	</div>
+
+	<a class="text-action manual-link" href={manualHref} data-testid="scan-hub-manual">
+		{t('scan.choiceHub.manualLink')}
+	</a>
 </div>
 
 <style>
@@ -94,6 +85,12 @@
 		font-size: 1.125rem;
 		font-weight: 650;
 		line-height: 1.25;
+	}
+
+	.choice-grid {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
 	}
 
 	.choice-card {
@@ -123,15 +120,30 @@
 	}
 
 	.choice-label {
+		display: inline-flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: var(--space-xs);
 		font-size: var(--font-size-body-sm);
 		font-weight: 600;
 		line-height: 1.35;
 	}
 
-	.other-links {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-sm) var(--space-md);
+	.ai-badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.1rem 0.35rem;
+		border-radius: var(--radius-sm);
+		font-size: 0.6875rem;
+		font-weight: 700;
+		letter-spacing: 0.02em;
+		color: var(--color-learning-ai);
+		background: color-mix(in srgb, var(--color-learning-ai) 12%, var(--color-surface));
+		border: 1px solid color-mix(in srgb, var(--color-learning-ai) 30%, var(--color-border));
+	}
+
+	.manual-link {
+		align-self: flex-start;
 	}
 
 	.text-action {

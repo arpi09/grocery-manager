@@ -44,6 +44,9 @@
 
 				shoppingUxV2Enabled={Boolean(data.shoppingUxV2Enabled)}
 
+				brainTimeline={data.brainTimeline}
+
+				brainScore={data.brainScore}
 
 				loadFailed={Boolean(data.loadFailed)}
 			/>
