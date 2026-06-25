@@ -29,6 +29,7 @@
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { scanModeHref, receiptOneTapHref } from '$lib/utils/scan-nav';
 	import { isWithinActiveMealSlot } from '$lib/domain/meal-slot';
+	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	
 	interface Props {
 		summary: DashboardSummary;

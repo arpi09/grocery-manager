@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ScanHubIllustration from '$lib/components/molecules/ScanHubIllustration.svelte';
-	import { t } from '$lib/i18n';
+	import { t, type MessageKey } from '$lib/i18n';
 	import {
 		getLastScanMode,
 		manualAddHref,
@@ -26,7 +26,7 @@
 
 	const featuredMode = $derived(getLastScanMode());
 
-	const modeLabels: Record<Exclude<ScanMode, 'hub'>, string> = {
+	const modeLabels: Record<Exclude<ScanMode, 'hub'>, MessageKey> = {
 		receipt: 'scan.choiceHub.receipt',
 		photo: 'scan.choiceHub.photo',
 		barcode: 'scan.choiceHub.barcode'
@@ -34,7 +34,7 @@
 
 	const featuredHref = $derived(scanModeHref(featuredMode, returnTo, locationOption));
 
-	const featuredLabel = $derived(t(modeLabels[featuredMode as Exclude<ScanMode, 'hub'>]));
+	const featuredLabel = $derived(t(modeLabels[featuredMode]));
 
 	const featuredVariant = $derived(
 		featuredMode === 'receipt' ? 'receipt' : featuredMode === 'barcode' ? 'barcode' : 'photo'
