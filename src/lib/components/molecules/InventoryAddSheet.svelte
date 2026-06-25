@@ -23,18 +23,28 @@
 	data-testid="inventory-add-sheet"
 >
 	<nav class="choices" aria-label={t('inventory.addSheet.title')}>
-		<a class="choice-card" href={receiptHref} data-testid="inventory-add-receipt" onclick={onClose}>
-			{t('inventory.addSheet.receipt')}
-		</a>
-		<a class="choice-card" href={photoHref} data-testid="inventory-add-photo" onclick={onClose}>
+		<a
+			class="choice-card choice-card--primary"
+			href={photoHref}
+			data-testid="inventory-add-photo"
+			onclick={onClose}
+		>
 			{t('inventory.addSheet.photo')}
 		</a>
-		<a class="choice-card" href={barcodeHref} data-testid="inventory-add-barcode" onclick={onClose}>
-			{t('inventory.addSheet.barcode')}
-		</a>
-		<a class="choice-card choice-card--ghost" href={manualHref} data-testid="inventory-add-manual" onclick={onClose}>
-			{t('inventory.addSheet.manual')}
-		</a>
+		<details class="other-ways">
+			<summary>{t('inventory.addSheet.otherWays')}</summary>
+			<div class="other-links">
+				<a class="text-action" href={receiptHref} data-testid="inventory-add-receipt" onclick={onClose}>
+					{t('inventory.addSheet.receipt')}
+				</a>
+				<a class="text-action" href={barcodeHref} data-testid="inventory-add-barcode" onclick={onClose}>
+					{t('inventory.addSheet.barcode')}
+				</a>
+				<a class="text-action" href={manualHref} data-testid="inventory-add-manual" onclick={onClose}>
+					{t('inventory.addSheet.manual')}
+				</a>
+			</div>
+		</details>
 	</nav>
 	<div class="sheet-footer">
 		<Button type="button" variant="ghost" fullWidth onclick={onClose}>{t('common.cancel')}</Button>
@@ -63,16 +73,50 @@
 		color: var(--color-text);
 	}
 
-	.choice-card:first-child {
+	.choice-card--primary {
 		background: var(--color-primary);
 		border-color: var(--color-primary);
 		color: var(--color-on-primary);
 	}
 
-	.choice-card--ghost {
-		background: transparent;
+	.other-ways {
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
+	}
+
+	.other-ways > summary {
+		display: flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		padding: var(--space-sm) var(--space-md);
+		font-size: var(--font-size-body-sm);
+		font-weight: 600;
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.other-ways > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.other-links {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
+		padding: 0 var(--space-md) var(--space-md);
+	}
+
+	.text-action {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		padding: 0.25rem 0;
+		font-size: var(--font-size-body-sm);
 		font-weight: 600;
 		color: var(--color-primary);
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
 	}
 
 	.sheet-footer {

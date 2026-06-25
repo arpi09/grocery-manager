@@ -252,6 +252,7 @@
 		"chipManual": "Manual",
 		"moreAddWays": "More ways to add",
 		"moreOnHome": "More on home",
+		"receiptImportLink": "Import receipt",
 		"v3": {
 			"thisWeekTitle": "What should we shop this week?",
 			"recommendsTitle": "What does Skaffu recommend?",
@@ -683,7 +684,8 @@
 			"receipt": "Receipt — full shop",
 			"photo": "Photo fridge/pantry — multiple items",
 			"barcode": "Barcode — one item",
-			"manualLink": "Manual"
+			"manualLink": "Manual",
+			"otherModesAria": "Other scan modes"
 		}
 	},
 	"settings": {
@@ -1153,7 +1155,8 @@
 			"receipt": "Receipt — full shop",
 			"photo": "Photo fridge/pantry",
 			"barcode": "Barcode — one item",
-			"manual": "Manual"
+			"manual": "Manual",
+			"otherWays": "Other ways"
 		},
 		"filterSheet": {
 			"title": "Filter and sort",
@@ -3113,6 +3116,7 @@
 			"addCta": "Add item",
 			"scanCta": "Scan",
 			"searchPlaceholder": "Search pantry…",
+			"insightsSummary": "Pantry insights",
 			"empty": {
 				"title": "Empty pantry",
 				"body": "Add items manually or scan using the buttons above.",

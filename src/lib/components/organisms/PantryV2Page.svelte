@@ -105,25 +105,28 @@
 <div class="pantry-v2-page" data-testid="pantry-v2-page">
 	<PantryShelfActions bind:query={searchQuery} {canWrite} returnTo="/inventory" />
 
-	{#if insightsLoading}
-		<InventoryInsightsPanel
-			loading
-			insights={[]}
-			missingExpiryCount={0}
-			estimatedCount={0}
-		/>
-	{:else if insightsSnapshot}
-		<InventoryInsightsPanel
-			insights={insightsSnapshot.insights}
-			missingExpiryCount={insightsSnapshot.missingExpiryCount}
-			estimatedCount={insightsSnapshot.estimatedCount}
-			{canWrite}
-			{bulkInferAction}
-			onDeepen={deepenInsights}
-			deepening={insightsDeepening}
-			deepenError={insightsDeepenError}
-		/>
-	{/if}
+	<details class="insights-fold" data-testid="pantry-v2-insights-fold">
+		<summary>{t('pantry.v2.insightsSummary')}</summary>
+		{#if insightsLoading}
+			<InventoryInsightsPanel
+				loading
+				insights={[]}
+				missingExpiryCount={0}
+				estimatedCount={0}
+			/>
+		{:else if insightsSnapshot}
+			<InventoryInsightsPanel
+				insights={insightsSnapshot.insights}
+				missingExpiryCount={insightsSnapshot.missingExpiryCount}
+				estimatedCount={insightsSnapshot.estimatedCount}
+				{canWrite}
+				{bulkInferAction}
+				onDeepen={deepenInsights}
+				deepening={insightsDeepening}
+				deepenError={insightsDeepenError}
+			/>
+		{/if}
+	</details>
 
 	{#if !loadFailed && !showHouseholdEmpty && missingExpiryCount > 0}
 		<MissingExpiryFilterChip
@@ -161,6 +164,31 @@
 		flex-direction: column;
 		min-width: 0;
 		gap: var(--space-sm);
+	}
+
+	.insights-fold {
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
+	}
+
+	.insights-fold > summary {
+		display: flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		padding: var(--space-sm) var(--space-md);
+		font-size: 0.875rem;
+		font-weight: 600;
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.insights-fold > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.insights-fold :global(.inventory-insights-panel) {
+		padding: 0 var(--space-md) var(--space-md);
 	}
 
 	.search-empty {

@@ -1,7 +1,12 @@
 <script lang="ts">
 	import ScanHubIllustration from '$lib/components/molecules/ScanHubIllustration.svelte';
 	import { t } from '$lib/i18n';
-	import { manualAddHref, scanModeHref } from '$lib/utils/scan-nav';
+	import {
+		getLastScanMode,
+		manualAddHref,
+		scanModeHref,
+		type ScanMode
+	} from '$lib/utils/scan-nav';
 	import type { StorageLocation } from '$lib/domain/location';
 
 	interface Props {
@@ -19,39 +24,61 @@
 				: undefined
 	);
 
-	const barcodeHref = $derived(scanModeHref('barcode', returnTo, locationOption));
-	const receiptHref = $derived(scanModeHref('receipt', returnTo));
-	const photoHref = $derived(scanModeHref('photo', returnTo, locationOption));
+	const featuredMode = $derived(getLastScanMode());
+
+	const modeLabels: Record<Exclude<ScanMode, 'hub'>, string> = {
+		receipt: 'scan.choiceHub.receipt',
+		photo: 'scan.choiceHub.photo',
+		barcode: 'scan.choiceHub.barcode'
+	};
+
+	const featuredHref = $derived(scanModeHref(featuredMode, returnTo, locationOption));
+
+	const featuredLabel = $derived(t(modeLabels[featuredMode as Exclude<ScanMode, 'hub'>]));
+
+	const featuredVariant = $derived(
+		featuredMode === 'receipt' ? 'receipt' : featuredMode === 'barcode' ? 'barcode' : 'photo'
+	);
+
+	const otherModes = $derived(
+		(['receipt', 'photo', 'barcode'] as const).filter((mode) => mode !== featuredMode)
+	);
+
 	const manualHref = $derived(manualAddHref(returnTo, locationOption));
+
+	function hrefForMode(mode: Exclude<ScanMode, 'hub'>): string {
+		return scanModeHref(mode, returnTo, locationOption);
+	}
+
+	function testIdForMode(mode: Exclude<ScanMode, 'hub'>): string {
+		return `scan-hub-${mode === 'photo' ? 'photo' : mode}`;
+	}
 </script>
 
 <div class="hub" data-testid="scan-mode-hub">
 	<h2 class="hub-title">{t('scan.choiceHub.title')}</h2>
 
-	<nav class="choice-grid" aria-label={t('scan.choiceHub.title')}>
-		<a class="choice-card choice-card--primary" href={receiptHref} data-testid="scan-hub-receipt">
-			<span class="icon-wrap" aria-hidden="true">
-				<ScanHubIllustration variant="receipt" />
-			</span>
-			<span class="choice-label">{t('scan.choiceHub.receipt')}</span>
-		</a>
+	<a
+		class="choice-card choice-card--primary"
+		href={featuredHref}
+		data-testid={testIdForMode(featuredMode as Exclude<ScanMode, 'hub'>)}
+	>
+		<span class="icon-wrap" aria-hidden="true">
+			<ScanHubIllustration variant={featuredVariant} />
+		</span>
+		<span class="choice-label">{featuredLabel}</span>
+	</a>
 
-		<a class="choice-card" href={photoHref} data-testid="scan-hub-photo">
-			<span class="icon-wrap" aria-hidden="true">
-				<ScanHubIllustration variant="photo" />
-			</span>
-			<span class="choice-label">{t('scan.choiceHub.photo')}</span>
-		</a>
-
-		<a class="choice-card" href={barcodeHref} data-testid="scan-hub-barcode">
-			<span class="icon-wrap" aria-hidden="true">
-				<ScanHubIllustration variant="barcode" />
-			</span>
-			<span class="choice-label">{t('scan.choiceHub.barcode')}</span>
+	<nav class="other-links" aria-label={t('scan.choiceHub.otherModesAria')}>
+		{#each otherModes as mode (mode)}
+			<a class="text-action" href={hrefForMode(mode)} data-testid={testIdForMode(mode)}>
+				{t(modeLabels[mode])}
+			</a>
+		{/each}
+		<a class="text-action" href={manualHref} data-testid="scan-hub-manual">
+			{t('scan.choiceHub.manualLink')}
 		</a>
 	</nav>
-
-	<a class="manual-link" href={manualHref} data-testid="scan-hub-manual">{t('scan.choiceHub.manualLink')}</a>
 </div>
 
 <style>
@@ -68,28 +95,17 @@
 		line-height: 1.25;
 	}
 
-	.choice-grid {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-	}
-
 	.choice-card {
 		display: flex;
 		align-items: center;
 		gap: var(--space-md);
 		min-height: var(--touch-target-min);
 		padding: var(--space-md);
-		border: 1px solid var(--color-border);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 28%, var(--color-border));
 		border-radius: var(--radius-md);
-		background: var(--color-surface);
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
 		text-decoration: none;
 		color: var(--color-text);
-	}
-
-	.choice-card--primary {
-		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
-		border-color: color-mix(in srgb, var(--color-primary) 28%, var(--color-border));
 	}
 
 	.icon-wrap {
@@ -111,15 +127,21 @@
 		line-height: 1.35;
 	}
 
-	.manual-link {
-		align-self: flex-start;
-		min-height: var(--touch-target-min);
+	.other-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-sm) var(--space-md);
+	}
+
+	.text-action {
 		display: inline-flex;
 		align-items: center;
-		padding: var(--space-xs) var(--space-sm);
+		min-height: var(--touch-target-min);
+		padding: 0.35rem 0.5rem;
 		font-size: var(--font-size-body-sm);
 		font-weight: 600;
 		color: var(--color-primary);
-		text-decoration: none;
+		text-decoration: underline;
+		text-underline-offset: 0.15em;
 	}
 </style>

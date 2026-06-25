@@ -227,6 +227,7 @@
 		},
 		"moreAddWays": "Fler sätt att lägga till",
 		"moreOnHome": "Mer på hem",
+		"receiptImportLink": "Importera kvitto",
 		"v3": {
 			"thisWeekTitle": "Vad ska vi handla denna vecka?",
 			"recommendsTitle": "Vad rekommenderar Skaffu?",
@@ -626,7 +627,8 @@
 			"receipt": "Kvitto — hel handling",
 			"photo": "Fota kyl/skafferi — flera varor",
 			"barcode": "Streckkod — en vara",
-			"manualLink": "Manuellt"
+			"manualLink": "Manuellt",
+			"otherModesAria": "Andra skanningslägen"
 		}
 	},
 	"settings": {
@@ -1096,7 +1098,8 @@
 			"receipt": "Kvitto — hel handling",
 			"photo": "Fota kyl/skafferi",
 			"barcode": "Streckkod — en vara",
-			"manual": "Manuellt"
+			"manual": "Manuellt",
+			"otherWays": "Andra sätt"
 		},
 		"filterSheet": {
 			"title": "Filter och sortering",
@@ -3034,6 +3037,7 @@
 			"addCta": "Lägg till vara",
 			"scanCta": "Skanna",
 			"searchPlaceholder": "Sök i skafferiet…",
+			"insightsSummary": "Insikter om lagret",
 			"empty": {
 				"title": "Tomt skafferi",
 				"body": "Lägg till varor manuellt eller skanna via knapparna ovan.",

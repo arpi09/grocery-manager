@@ -3,35 +3,25 @@ import { dismissOnboardingModalIfOpen } from './helpers/auth';
 import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
 
 test.describe('Scan and inventory', () => {
-	test('bare /scan stays on hub without auto redirect', async ({ page }) => {
+	test('bare /scan opens last-used mode (default photo)', async ({ page }) => {
 		await page.goto('/scan');
 		await dismissOnboardingModalIfOpen(page);
 
-		await expect(page.getByTestId('scan-mode-hub')).toBeVisible({ timeout: 15_000 });
-		await expect(page).not.toHaveURL(/mode=receipt/);
+		await expect(page).toHaveURL(/mode=photo/);
+		await expect(page.getByTestId('photo-round-capture')).toBeVisible({ timeout: 15_000 });
 	});
 
-	test('scan hub loads with receipt primary', async ({ page }) => {
+	test('scan hub loads with featured mode and text links', async ({ page }) => {
 		await page.goto('/scan?mode=hub');
 		await dismissOnboardingModalIfOpen(page);
 
 		await expect(page).toHaveURL(/mode=hub/);
 		const hub = page.getByTestId('scan-mode-hub');
 		await expect(hub).toBeVisible({ timeout: 15_000 });
-		await expect(hub.getByTestId('scan-hub-receipt')).toBeVisible();
-		await expect(hub.getByRole('heading', { name: /Vad vill du|What do you want/i })).toBeVisible();
-
-		await expect(page.getByRole('navigation', { name: /Skanningslägen|Scan modes/i })).toHaveCount(0);
-
 		await expect(hub.getByTestId('scan-hub-photo')).toBeVisible();
-		await expect(hub.getByTestId('scan-hub-barcode')).toBeVisible();
+		await expect(hub.getByRole('navigation', { name: /Andra skanningslägen|Other scan modes/i })).toBeVisible();
 		await expect(hub.getByTestId('scan-hub-manual')).toBeVisible();
-		await expect(hub.getByTestId('scan-hub-receipt')).toContainText(/Kvitto|Receipt/i);
-		await expect(hub.getByTestId('scan-hub-photo')).toContainText(/Fota|Photo/i);
-		await expect(hub.getByTestId('scan-hub-barcode')).toContainText(/Streckkod|Barcode/i);
-		await expect(hub.getByTestId('scan-hub-manual')).toContainText(/Manuellt|Manual/i);
 		await expect(page.locator('.page-header .back-link')).toHaveCount(0);
-		await expect(page.getByText(/Avbryt|Cancel/i)).toHaveCount(0);
 	});
 
 	test('scan sub-modes show mode tabs with receipt first', async ({ page }) => {
@@ -155,7 +145,7 @@ test.describe('Scan and inventory', () => {
 		});
 	});
 
-	test('inventory add button opens add sheet with four choices', async ({ page }) => {
+	test('inventory add button opens add sheet with primary photo', async ({ page }) => {
 		await page.goto('/inventory/fridge');
 		await dismissOnboardingModalIfOpen(page);
 
@@ -164,8 +154,9 @@ test.describe('Scan and inventory', () => {
 		await addButton.click();
 		const sheet = page.getByTestId('inventory-add-sheet');
 		await expect(sheet).toBeVisible({ timeout: 15_000 });
-		await expect(page.getByTestId('inventory-add-receipt')).toBeVisible();
 		await expect(page.getByTestId('inventory-add-photo')).toBeVisible();
+		await sheet.locator('summary').click();
+		await expect(page.getByTestId('inventory-add-receipt')).toBeVisible();
 		await expect(page.getByTestId('inventory-add-barcode')).toBeVisible();
 		await expect(page.getByTestId('inventory-add-manual')).toBeVisible();
 	});

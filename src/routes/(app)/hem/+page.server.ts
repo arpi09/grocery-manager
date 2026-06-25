@@ -33,6 +33,7 @@ import {
 } from '$lib/domain/home-briefing-recipe';
 import type { HomeBriefingRecipeCard, HomeBriefingFunFact } from '$lib/domain/home-briefing';
 import { selectHomeBriefingFunFact } from '$lib/domain/home-briefing';
+import { isWithinActiveMealSlot } from '$lib/domain/meal-slot';
 
 import { itemSchema } from '$lib/validation/inventory.schemas';
 
@@ -160,7 +161,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		if (locals.user) {
 			try {
 				const ideas = await locals.mealPlanService.listRecipeIdeas(locals.user.id, 6);
-				if (ideas.length > 0) {
+				const showRecipeOnHome =
+					summary.expiringSoon.length > 0 || isWithinActiveMealSlot();
+				if (ideas.length > 0 && showRecipeOnHome) {
 					briefingRecipeChip = { id: ideas[0].id, title: ideas[0].title };
 				}
 				const idea = pickBriefingRecipeIdea(ideas, summary.expiringSoon);

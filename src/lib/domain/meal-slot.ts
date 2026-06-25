@@ -12,6 +12,19 @@ const MEAL_SLOT_RANGES: Array<{ slot: MealSlot; start: number; end: number }> = 
 	{ slot: 'evening', start: 21, end: 23 }
 ];
 
+/** Returns true during breakfast, lunch, dinner, or evening meal windows. */
+export function isWithinActiveMealSlot(date = new Date()): boolean {
+	const hour = date.getHours();
+
+	for (const range of MEAL_SLOT_RANGES) {
+		if (hour >= range.start && hour <= range.end) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 /** Returns the active meal slot for recipe suggestions (defaults to dinner off-peak hours). */
 export function getCurrentMealSlot(date = new Date()): MealSlot {
 	const hour = date.getHours();

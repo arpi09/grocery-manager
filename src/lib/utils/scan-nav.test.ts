@@ -1,14 +1,48 @@
-import { describe, expect, it } from 'vitest';
-import { manualAddHref, parseScanMode, parseScanReturnTo, scanModeHref } from './scan-nav';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+	getLastScanMode,
+	manualAddHref,
+	parseScanMode,
+	parseScanReturnTo,
+	preferredScanHref,
+	recordLastScanMode,
+	scanModeHref
+} from './scan-nav';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 
 describe('scan-nav', () => {
+	let storage: Record<string, string>;
+
+	beforeEach(() => {
+		storage = {};
+		vi.stubGlobal('localStorage', {
+			getItem: (key: string) => storage[key] ?? null,
+			setItem: (key: string, value: string) => {
+				storage[key] = value;
+			},
+			removeItem: (key: string) => {
+				delete storage[key];
+			}
+		});
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
 	it('parseScanMode maps known modes', () => {
 		expect(parseScanMode('barcode')).toBe('barcode');
 		expect(parseScanMode('receipt')).toBe('receipt');
 		expect(parseScanMode('photo')).toBe('photo');
-		expect(parseScanMode(null)).toBe('hub');
+		expect(parseScanMode(null)).toBe('photo');
 		expect(parseScanMode('nope')).toBe('photo');
+	});
+
+	it('defaults to last-used scan mode', () => {
+		recordLastScanMode('receipt');
+		expect(getLastScanMode()).toBe('receipt');
+		expect(parseScanMode(null)).toBe('receipt');
+		expect(preferredScanHref('/hem')).toBe('/scan?from=%2Fhem&mode=receipt');
 	});
 
 	it('parseScanReturnTo falls back to app home', () => {
