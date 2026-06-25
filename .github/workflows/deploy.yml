@@ -545,7 +545,7 @@ jobs:
 
       - name: Deploy App Hosting backend
         if: steps.deploy-gate.outputs.skipped != 'true'
-        run: npx firebase-tools@latest deploy --only apphosting:home-pantry --non-interactive --project home-pantry-4bee5
+        run: bash scripts/firebase-deploy-apphosting.sh
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
