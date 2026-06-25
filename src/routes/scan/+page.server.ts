@@ -9,7 +9,13 @@ import { receiptLineToInventoryAmount } from '$lib/server/receipt-parse';
 import { receiptLineToPurchaseRecord } from '$lib/server/receipt-import-purchase';
 import { itemSchema } from '$lib/validation/inventory.schemas';
 import { buildScanReturnUrl, type ScanToastKind } from '$lib/utils/scan-toast';
-import { parseScanMode, parseScanReturnTo, isActivationOnboardingContext, parseReceiptImportSourceFromParams } from '$lib/utils/scan-nav';
+import {
+	parseScanMode,
+	parseScanReturnTo,
+	isActivationOnboardingContext,
+	parseReceiptImportSourceFromParams,
+	scanHubHref
+} from '$lib/utils/scan-nav';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
 import { recordProductEvent } from '$lib/server/product-events';
 import { recordReceiptPriceCapturedEvent } from '$lib/server/receipt-import';
@@ -38,10 +44,15 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	const locationParam = url.searchParams.get('location');
 	const fromParam = url.searchParams.get('from');
 	const modeParam = url.searchParams.get('mode');
+	const returnTo = parseScanReturnTo(fromParam);
+
+	if (modeParam === null && !isActivationOnboardingContext(url.searchParams)) {
+		redirect(302, scanHubHref(returnTo));
+	}
+
 	const scanMode = parseScanMode(modeParam);
 	const defaultLocation =
 		locationParam && isStorageLocation(locationParam) ? locationParam : null;
-	const returnTo = parseScanReturnTo(fromParam);
 	const isTopLevelEntry = !defaultLocation && returnTo === APP_HOME_PATH;
 	const importSource = parseReceiptImportSourceFromParams(url.searchParams);
 	const autopick = url.searchParams.get('autopick') === '1';

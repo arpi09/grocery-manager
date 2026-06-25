@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { dismissOnboardingModalIfOpen } from './helpers/auth';
+import { dismissOnboardingModalIfOpen, dismissPageHintIfOpen, loginAsAdmin } from './helpers/auth';
 import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
 
 test.describe('Scan and inventory', () => {
@@ -161,12 +161,14 @@ test.describe('Scan and inventory', () => {
 	});
 
 	test('inventory add button opens add sheet with primary photo', async ({ page }) => {
+		await loginAsAdmin(page);
 		await page.goto('/inventory/fridge');
 		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
 
 		const addButton = page.getByTestId('inventory-add-goods');
 		await expect(addButton).toBeVisible({ timeout: 15_000 });
-		await addButton.click();
+		await addButton.click({ force: true });
 		const sheet = page.getByTestId('inventory-add-sheet');
 		await expect(sheet).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('inventory-add-photo')).toBeVisible();

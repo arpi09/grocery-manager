@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none" aria-labelledby="title desc">
+  <title id="title">Shopping plan — variant A</title>
+  <desc id="desc">Object study ordered modules — grouped anticipation</desc>
+  <rect width="320" height="240" fill="var(--color-bg)"/>
+  <line x1="48" y1="168" x2="272" y2="168" stroke="var(--color-taupe)" stroke-width="1"/>
+  <rect x="48" y="120" width="14" height="48" rx="2" fill="var(--color-secondary)" stroke="var(--color-text-muted)" stroke-width="1"/>
+  <rect x="50" y="112" width="10" height="8" fill="var(--color-secondary)" stroke="var(--color-text-muted)" stroke-width="0.75"/>
+  <rect x="72" y="128" width="22" height="40" rx="3" fill="var(--color-taupe)" stroke="var(--color-text-muted)" stroke-width="1"/>
+  <rect x="104" y="108" width="24" height="60" fill="var(--color-secondary)" stroke="var(--color-text-muted)" stroke-width="1"/>
+  <rect x="102" y="102" width="28" height="6" fill="var(--color-text-muted)"/>
+  <rect x="140" y="132" width="28" height="36" fill="var(--color-secondary)" stroke="var(--color-text-muted)" stroke-width="1"/>
+  <rect x="138" y="126" width="32" height="6" fill="var(--color-secondary)"/>
+  <rect x="180" y="116" width="12" height="52" rx="2" fill="var(--color-secondary)" stroke="var(--color-text-muted)" stroke-width="1"/>
+  <rect x="178" y="108" width="16" height="8" fill="var(--color-secondary)"/>
+  <rect x="204" y="124" width="20" height="44" rx="2" fill="var(--color-taupe)" stroke="var(--color-text-muted)" stroke-width="1"/>
+  <rect x="234" y="112" width="26" height="56" fill="var(--color-secondary)" stroke="var(--color-text-muted)" stroke-width="1"/>
+  <rect x="232" y="106" width="30" height="6" fill="var(--color-text-muted)"/>
+</svg>

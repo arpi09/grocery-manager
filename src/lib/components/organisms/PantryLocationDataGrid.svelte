@@ -359,9 +359,14 @@
 			<LocationTab active={location} />
 			{#if canWrite && onAddClick}
 				<div class="add-row">
-					<Button type="button" variant="primary" data-testid="inventory-add-goods" onclick={onAddClick}>
+					<button
+						type="button"
+						class="btn btn-primary"
+						data-testid="inventory-add-goods"
+						onclick={onAddClick}
+					>
 						{t('inventory.add')}
-					</Button>
+					</button>
 				</div>
 			{/if}
 		</div>
@@ -561,7 +566,14 @@
 		/>
 		{#if canWrite && onAddClick}
 			<div class="empty-add-row">
-				<Button type="button" variant="primary" onclick={onAddClick}>{t('inventory.add')}</Button>
+				<button
+					type="button"
+					class="btn btn-primary"
+					data-testid="inventory-add-goods"
+					onclick={onAddClick}
+				>
+					{t('inventory.add')}
+				</button>
 			</div>
 		{/if}
 	{/if}

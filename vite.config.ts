@@ -97,7 +97,7 @@ export default defineConfig({
 					include: [
 						'src/**/*.{test,spec}.{js,ts}',
 						'tests/unit/**/*.{test,spec}.{js,ts}',
-						'scripts/**/*.{test,spec}.mjs'
+						'scripts/**/*.{test,spec}.{js,ts,mjs}'
 					],
 					exclude: ['**/*.integration.test.ts', 'src/lib/client/**/*.{test,spec}.{js,ts}']
 				}
