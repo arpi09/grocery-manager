@@ -22,6 +22,7 @@ export interface BrainMetricsSnapshot {
 	promptVersion?: string;
 	inputTokenEstimate?: number;
 	source?: string;
+	wasGptInvoked?: boolean;
 }
 
 export function logBrainMetrics(event: string, metrics: BrainMetricsSnapshot): void {

@@ -154,7 +154,6 @@ const TOKEN_STOP_WORDS = new Set([
 	'arla',
 	'garant',
 	'eldorado',
-	'fryst',
 	'färsk',
 	'farsk',
 	'eko',
@@ -229,6 +228,6 @@ export function guessShelfLife(name: string, location: StorageLocation) {
 	if (typicalDays == null) return null;
 	return {
 		expiresOn: addDaysIso(new Date(), typicalDays),
-		source: 'ai_inferred' as ExpiresOnSource
+		source: 'heuristic' as ExpiresOnSource
 	};
 }

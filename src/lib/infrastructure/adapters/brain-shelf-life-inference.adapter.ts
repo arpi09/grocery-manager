@@ -1,6 +1,10 @@
 import type { ShelfLifeInferencePort } from '$lib/application/ports/shelf-life-inference.port';
 import type { LearningEngineService } from '$lib/application/learning/learning-engine.service';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
+import { needsShelfLifeLlmRefinement } from '$lib/domain/shelf-life-confidence';
+import { isReceiptAiBatchEnabled } from '$lib/server/feature-flags';
+import { inferShelfLifeSingleLlm } from '$lib/server/receipt-shelf-life-predictions';
+import { getOpenAiApiKey } from '$lib/server/openai';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { inferShelfLifeHeuristic } from '$lib/server/shelf-life-inference';
 
@@ -23,6 +27,28 @@ export function createBrainShelfLifeInferenceAdapter(
 				purchasedAt: input.purchasedAt ?? null
 			});
 			if (!prediction) return inferShelfLifeHeuristic(input);
+
+			if (
+				needsShelfLifeLlmRefinement({
+					expiresOnSource: prediction.expiresOnSource,
+					confidence: prediction.confidence
+				})
+			) {
+				const apiKey = getOpenAiApiKey();
+				if (apiKey && isReceiptAiBatchEnabled()) {
+					const llm = await inferShelfLifeSingleLlm(apiKey, {
+						name: input.name,
+						location: input.location,
+						purchasedAt: input.purchasedAt ?? null
+					});
+					if (llm) {
+						return {
+							expiresOn: llm.expiresOn,
+							source: 'ai_inferred'
+						};
+					}
+				}
+			}
 
 			return {
 				expiresOn: prediction.expiresOn,
