@@ -14,6 +14,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - feat(brand): Fas 2 fresh palette rollout ([#129](https://github.com/arpi09/grocery-manager/pull/129)) — **CSS pipeline:** `generate-brand-css.mts` reads `BRAND_PALETTE` (default `fresh`), emits `brand-colors.generated.css` + SCSS; `predev`/`prebuild` hooks; `apphosting.yaml` sets `BRAND_PALETTE: fresh`.
 - feat(nav): unified back navigation with smart fallback ([#136](https://github.com/arpi09/grocery-manager/pull/136)) — Add \BackLink\ atom and \
 - feat(onboarding): LearningAiBadge and fresh onboarding UX ([#137](https://github.com/arpi09/grocery-manager/pull/137)) — LearningAiBadge with learning-AI gradient on activation surfaces
+- feat(shelf-life): prompt-first quality — GPT refinement, UI transparency, proportional grace ([#139](https://github.com/arpi09/grocery-manager/pull/139)) — **AI / shelf-life:** Wire GPT refinement, shelf-life prompt v5, and golden tests so receipt/scan predictions are regression-guarded and iteratively improved.
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
