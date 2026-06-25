@@ -851,15 +851,25 @@
 								<label class="line-expiry-label" for="expiresOn-{index}">
 									{t('scanFlow.expiresOptional')}
 									{#if shelfLifePredictions[index] && !expiryClearedByUser.has(index)}
-										<EstimatedBadge
-											source={shelfLifePredictions[index]!.expiresOnSource}
-											explanation={shelfLifePredictions[index]!.explanation}
-											lowConfidence={isLowConfidence(shelfLifePredictions[index])}
-											lineConfidence={shelfLifePredictions[index]!.confidence ?? null}
-											showSettingsLink
-										/>
+										<span class="line-expiry-meta">
+											<EstimatedBadge
+												source={shelfLifePredictions[index]!.expiresOnSource}
+												explanation={shelfLifePredictions[index]!.explanation}
+												lowConfidence={isLowConfidence(shelfLifePredictions[index])}
+												lineConfidence={shelfLifePredictions[index]!.confidence ?? null}
+												showSettingsLink
+											/>
+											<span class="typical-days">
+												{t('learning.estimatedDaysLabel', {
+													days: shelfLifePredictions[index]!.typicalDays
+												})}
+											</span>
+										</span>
 									{/if}
 								</label>
+								{#if isLowConfidence(shelfLifePredictions[index]) && !expiryClearedByUser.has(index)}
+									<p class="low-confidence-cta">{t('learning.confirmExpiryDate')}</p>
+								{/if}
 								<input
 									id="expiresOn-{index}"
 									type="date"
@@ -1201,5 +1211,23 @@
 		gap: var(--space-xs);
 		flex-wrap: wrap;
 		font-size: 0.85rem;
+	}
+
+	.line-expiry-meta {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-xs);
+		flex-wrap: wrap;
+	}
+
+	.typical-days {
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
+	}
+
+	.low-confidence-cta {
+		margin: 0;
+		font-size: 0.75rem;
+		color: var(--color-warning-text, var(--color-text-muted));
 	}
 </style>

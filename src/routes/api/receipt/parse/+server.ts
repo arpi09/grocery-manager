@@ -223,6 +223,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				storeLabel: storeLabel ?? null,
 				receiptText: receiptTextForStoreHeuristic ?? null,
 				shelfLifeRules: householdShelfLifeRuleRepository,
+				priorCorrectionsBlock: parseFeedback.priorCorrectionsBlock,
+				globalFewShotBlock: parseFeedback.globalFewShotBlock,
 				clearCache: true
 			}
 		);

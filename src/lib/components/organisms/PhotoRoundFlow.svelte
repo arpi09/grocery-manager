@@ -65,6 +65,8 @@ import {
 		expiresOnAiInferred: boolean;
 		expiresOnSource: ExpiresOnSource | null;
 		shelfLifeExplanation?: string | null;
+		shelfLifeTypicalDays?: number | null;
+		shelfLifeConfidence?: number | null;
 	};
 
 	let step = $state<Step>('capture');
@@ -215,7 +217,7 @@ import {
 			if (inferred) {
 				expiresOn = inferred.expiresOn;
 				expiresOnAiInferred = true;
-				expiresOnSource = 'ai_inferred';
+				expiresOnSource = inferred.source;
 			}
 		}
 
@@ -226,7 +228,9 @@ import {
 			notes: item.notes ?? null,
 			expiresOnAiInferred,
 			expiresOnSource,
-			shelfLifeExplanation: prediction?.explanation?.primary ?? null
+			shelfLifeExplanation: prediction?.explanation?.primary ?? null,
+			shelfLifeTypicalDays: prediction?.typicalDays ?? null,
+			shelfLifeConfidence: prediction?.confidence ?? null
 		};
 	}
 
@@ -622,12 +626,29 @@ import {
 								<div class="expiry-label-row">
 									<span>{t('photoRound.fieldExpiresOn')}</span>
 									{#if line.expiresOnSource && line.expiresOn}
-										<EstimatedBadge
-											source={line.expiresOnSource}
-											lowConfidence={line.confidence === 'low'}
-										/>
+										<span class="expiry-badge-row">
+											<EstimatedBadge
+												source={line.expiresOnSource}
+												lowConfidence={
+													line.shelfLifeConfidence != null
+														? line.shelfLifeConfidence < 0.4
+														: line.expiresOnSource === 'default_heuristic'
+												}
+												lineConfidence={line.shelfLifeConfidence ?? null}
+											/>
+											{#if line.shelfLifeTypicalDays}
+												<span class="typical-days">
+													{t('learning.estimatedDaysLabel', {
+														days: line.shelfLifeTypicalDays
+													})}
+												</span>
+											{/if}
+										</span>
 									{/if}
 								</div>
+								{#if line.shelfLifeConfidence != null && line.shelfLifeConfidence < 0.4}
+									<p class="low-confidence-cta">{t('learning.confirmExpiryDate')}</p>
+								{/if}
 								{#if line.shelfLifeExplanation}
 									<p class="shelf-life-hint">{line.shelfLifeExplanation}</p>
 								{/if}
@@ -937,6 +958,24 @@ import {
 		align-items: center;
 		gap: var(--space-xs);
 		flex-wrap: wrap;
+	}
+
+	.expiry-badge-row {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-xs);
+		flex-wrap: wrap;
+	}
+
+	.typical-days {
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
+	}
+
+	.low-confidence-cta {
+		margin: 0 0 0.25rem;
+		font-size: 0.75rem;
+		color: var(--color-warning-text, var(--color-text-muted));
 	}
 
 	.notes-details {

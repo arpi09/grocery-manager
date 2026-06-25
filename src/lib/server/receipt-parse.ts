@@ -3,14 +3,17 @@ import type { ReceiptLine } from '$lib/domain/receipt-line';
 import { isStorageLocation } from '$lib/domain/location';
 import {
 	buildStandardJsonUserBlock,
-	LOCATION_RULES,
+	BRAND_AND_PRODUCT_REASONING_RULES,
 	PROMPT_INVENTORY_ROW_CAP,
 	PROMPT_VERSION_RECEIPT_PARSE,
+	RECEIPT_CATEGORY_TAXONOMY,
 	storeChainHintBlock,
 	SWEDISH_GROCERY_CONTEXT,
-	UNIT_RULES
+	UNIT_RULES,
+	LOCATION_RULES
 } from '$lib/server/ai-prompt-shared';
 import { buildReceiptHouseholdMemoryBlock, type HouseholdMemoryAlias } from '$lib/server/receipt-household-memory';
+import { RECEIPT_PARSE_FEW_SHOT_BLOCK } from '$lib/server/receipt-parse-few-shot';
 import {
 	openAiErrorLogDetail,
 	OPENAI_EMPTY_RESPONSE_KEY,
@@ -100,7 +103,8 @@ export const RECEIPT_SYSTEM_PROMPT = [
 	'- name: kort produktnamn utan storlek/vikt (t.ex. "Coca-Cola", inte "Coca-Cola 1,5L")',
 	'- brand: varumärke om synligt (Arla, ICA, Garant), annars null',
 	'- packageSize: förpackningsstorlek (t.ex. "500 g", "1,5 l") när den syns, annars null',
-	'- categoryHint: grov kategori (mejeri, kött, grönsak, torrvara, dryck, färdigrätt), annars null',
+	RECEIPT_CATEGORY_TAXONOMY,
+	BRAND_AND_PRODUCT_REASONING_RULES,
 	'- printedExpiresOn: YYYY-MM-DD om bäst-före syns på raden, annars null',
 	'- mergeGroupKey: samma nyckel för rader som hör till samma produkt (t.ex. vikt×pris-rad), annars null',
 	'- lineConfidence: high|medium|low — hur säker du är på raden',
@@ -109,6 +113,7 @@ export const RECEIPT_SYSTEM_PROMPT = [
 	'- currency: ISO-kod (oftast "SEK"), annars null',
 	UNIT_RULES,
 	LOCATION_RULES,
+	RECEIPT_PARSE_FEW_SHOT_BLOCK,
 	'- hoppa över icke-mat, pant, erbjudanden och butiksinfo',
 	'Negativa exempel (returnera INTE som matrader):',
 	'- pant / pantburk / flaskpant',
