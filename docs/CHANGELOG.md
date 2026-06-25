@@ -22,6 +22,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(inventory): POST bulk infer expiry on /inventory/all ([#127](https://github.com/arpi09/grocery-manager/pull/127)) — Add `bulkInferMissingExpiryAllLocations` server helper and `bulkInferExpiry` POST action on `/inventory/all`.
 - fix(inventory): dedupe insights each keys and harden expiry cron ([#138](https://github.com/arpi09/grocery-manager/pull/138)) — Fix recurring prod client crash \https://svelte.dev/e/each_key_duplicate\ on \/inventory\ when multiple brain insights share the same action + date.
 - fix(ux): CTA declutter across hem, planer, scan, and statistik ([#140](https://github.com/arpi09/grocery-manager/pull/140)) — Reduce competing CTAs on hem (briefing hub), veckoplan/planer, inventory add, and scan hub (last-used scan mode as default).
+- fix(e2e): scan hub, planer calendar, inventory add sheet + design kit ([#142](https://github.com/arpi09/grocery-manager/pull/142)) — Redirect bare `/scan` to canonical hub URL with `mode=hub` so E2E and nav agree
 
 ### Changed
 
