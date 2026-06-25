@@ -5,6 +5,7 @@ import type { ReceiptLine, ReceiptShelfLifePrediction } from '$lib/domain/receip
 import { extractPrintedBbfForProductLine } from '$lib/domain/receipt-printed-bbf';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 import { guessDaysFromCategoryHint } from '$lib/domain/shelf-life-global-categories';
+import { needsShelfLifeLlmRefinement } from '$lib/domain/shelf-life-confidence';
 import { shelfLifeEstimateToExpiresOnSource } from '$lib/domain/shelf-life-estimate';
 import { DEFAULT_LOCALE } from '$lib/i18n/locale';
 import {
@@ -21,6 +22,7 @@ import type { IHouseholdShelfLifeRuleRepository } from '$lib/infrastructure/repo
 import { OPENAI_MODEL_NANO, requestStructuredJson } from '$lib/server/openai';
 import { RECEIPT_BBF_FEW_SHOT_BLOCK } from '$lib/server/receipt-bbf-few-shot';
 import { logBrainMetrics } from '$lib/server/brain-metrics';
+import type { StorageLocation } from '$lib/domain/location';
 
 const SHELF_LIFE_BATCH_MAX_LINES = 40;
 const HEURISTIC_AI_SKIP_TOLERANCE = 0.2;
@@ -55,6 +57,9 @@ export const SHELF_LIFE_BATCH_SYSTEM_PROMPT = [
 	'Regler:',
 	'- estimatedDays: heltal, antal dagar från inköpsdatum tills varan typiskt håller',
 	'- confidence: 0.2–0.9 (lägre när osäker)',
+	'- estimatedDays från inköp; freezer förlänger kraftigt för glass/fryst',
+	'- brand + categoryHint + packageSize är obligatoriska signaler när de finns',
+	'- Homogenisera inte — mjölk ≠ glass ≠ ris',
 	'- fridge: kortare, freezer: längre, cupboard: medellång',
 	'- Använd brand, packageSize, categoryHint, quantity, unit och storeLabel när de finns',
 	'- householdRule: hushållsspecifik inlärning — justera bara vid låg confidence',
@@ -71,8 +76,26 @@ export interface PredictReceiptLinesShelfLifeOptions {
 	storeLabel?: string | null;
 	receiptText?: string | null;
 	shelfLifeRules?: IHouseholdShelfLifeRuleRepository;
+	priorCorrectionsBlock?: string;
+	globalFewShotBlock?: string;
 	/** Clear session AI cache (e.g. new upload). */
 	clearCache?: boolean;
+}
+
+export interface ShelfLifeSingleLlmInput {
+	name: string;
+	location: StorageLocation;
+	brand?: string | null;
+	packageSize?: string | null;
+	categoryHint?: string | null;
+	purchasedAt?: string | null;
+	storeLabel?: string | null;
+}
+
+export interface ShelfLifeSingleLlmResult {
+	expiresOn: string;
+	typicalDays: number;
+	confidence: number;
 }
 
 function cacheKey(normalizedKey: string, location: string): string {
@@ -208,6 +231,11 @@ function shouldSkipAiForResolvedLine(line: ReceiptLine): boolean {
 	return Boolean(line.printedExpiresOn?.trim());
 }
 
+interface ShelfLifeAiBatchOptions {
+	priorCorrectionsBlock?: string;
+	globalFewShotBlock?: string;
+}
+
 async function predictShelfLifeAiBatch(
 	apiKey: string,
 	indices: number[],
@@ -217,7 +245,8 @@ async function predictShelfLifeAiBatch(
 	todayIso: string,
 	alreadyResolved: Array<{ index: number; expiresOn: string; source: string }>,
 	householdId: string,
-	shelfLifeRules?: IHouseholdShelfLifeRuleRepository
+	shelfLifeRules?: IHouseholdShelfLifeRuleRepository,
+	feedback?: ShelfLifeAiBatchOptions
 ): Promise<Map<number, { estimatedDays: number; confidence: number }>> {
 	const result = new Map<number, { estimatedDays: number; confidence: number }>();
 	if (indices.length === 0) return result;
@@ -294,13 +323,16 @@ async function predictShelfLifeAiBatch(
 			purchasedAt
 		},
 		{
-			instruction: 'Uppskatta hållbarhet (estimatedDays) för raderna i lines. alreadyResolved är redan lösta — räkna inte om dem.',
+			instruction:
+				'Uppskatta hållbarhet (estimatedDays) för raderna i lines. alreadyResolved är redan lösta — räkna inte om dem.',
 			metadata: JSON.stringify({
 				purchasedAt,
 				storeLabel,
 				lines: payload,
 				alreadyResolved
-			})
+			}),
+			priorCorrections: feedback?.priorCorrectionsBlock ?? null,
+			globalFewShot: feedback?.globalFewShotBlock ?? null
 		}
 	);
 
@@ -321,6 +353,7 @@ async function predictShelfLifeAiBatch(
 		source: 'receipt_shelf_life',
 		receiptParseLineCount: uncachedIndices.length,
 		aiBatchUsed: true,
+		wasGptInvoked: true,
 		promptVersion: PROMPT_VERSION_SHELF_LIFE_BATCH,
 		inputTokenEstimate: estimateInputTokens(userPrompt, uncachedIndices.length)
 	});
@@ -392,6 +425,43 @@ function buildPredictionFromAiEstimate(
 	};
 }
 
+/** Single-line GPT shelf-life inference (scan/add-item fallback). */
+export async function inferShelfLifeSingleLlm(
+	apiKey: string,
+	input: ShelfLifeSingleLlmInput,
+	options: { todayIso?: string; feedback?: ShelfLifeAiBatchOptions } = {}
+): Promise<ShelfLifeSingleLlmResult | null> {
+	const todayIso = options.todayIso ?? formatTodayIso();
+	const syntheticLine: ReceiptLine = {
+		name: input.name,
+		location: input.location,
+		brand: input.brand ?? null,
+		packageSize: input.packageSize ?? null,
+		categoryHint: input.categoryHint ?? null
+	};
+
+	const estimates = await predictShelfLifeAiBatch(
+		apiKey,
+		[0],
+		[syntheticLine],
+		input.purchasedAt ?? null,
+		input.storeLabel ?? null,
+		todayIso,
+		[],
+		'',
+		undefined,
+		options.feedback
+	);
+	const estimate = estimates.get(0);
+	if (!estimate) return null;
+
+	return {
+		expiresOn: computeExpiresOn(estimate.estimatedDays, input.purchasedAt ?? null, todayIso),
+		typicalDays: estimate.estimatedDays,
+		confidence: estimate.confidence
+	};
+}
+
 export async function predictReceiptLinesShelfLife(
 	householdId: string,
 	lines: ReceiptLine[],
@@ -406,6 +476,10 @@ export async function predictReceiptLinesShelfLife(
 	const todayIso = options.todayIso ?? formatTodayIso();
 	const receiptText = options.receiptText ?? null;
 	const storeLabel = options.storeLabel ?? null;
+	const feedback = {
+		priorCorrectionsBlock: options.priorCorrectionsBlock,
+		globalFewShotBlock: options.globalFewShotBlock
+	};
 
 	const predictions = await Promise.all(
 		lines.map(async (line) => {
@@ -446,29 +520,46 @@ export async function predictReceiptLinesShelfLife(
 		})
 	);
 
-	const missingIndices = predictions
-		.map((prediction, index) => (prediction ? null : index))
+	const refinementIndices = predictions
+		.map((prediction, index) => {
+			if (!prediction) return null;
+			if (
+				needsShelfLifeLlmRefinement({
+					expiresOnSource: prediction.expiresOnSource,
+					confidence: prediction.confidence
+				})
+			) {
+				return index;
+			}
+			return null;
+		})
 		.filter((index): index is number => index !== null);
 
-	const heuristicFilled = [...predictions];
+	const working = [...predictions];
 	const stillMissing: number[] = [];
-	for (const index of missingIndices) {
+	for (let index = 0; index < working.length; index++) {
+		if (working[index]) continue;
 		const heuristicPred = heuristicPredictionFromLine(lines[index], purchasedAt, todayIso);
 		if (heuristicPred) {
-			heuristicFilled[index] = heuristicPred;
+			working[index] = heuristicPred;
 		} else {
 			stillMissing.push(index);
 		}
 	}
 
+	const aiTargetIndices = [
+		...new Set([...refinementIndices, ...stillMissing])
+	];
+
 	const aiEnabled = isReceiptAiBatchEnabled();
-	if (stillMissing.length === 0 || !options.apiKey || !aiEnabled) {
-		return heuristicFilled;
+	if (aiTargetIndices.length === 0 || !options.apiKey || !aiEnabled) {
+		return working;
 	}
 
-	const alreadyResolved = heuristicFilled
+	const alreadyResolved = working
 		.map((prediction, index) => {
 			if (!prediction) return null;
+			if (aiTargetIndices.includes(index)) return null;
 			return {
 				index,
 				expiresOn: prediction.expiresOn,
@@ -479,20 +570,22 @@ export async function predictReceiptLinesShelfLife(
 
 	const aiEstimates = await predictShelfLifeAiBatch(
 		options.apiKey,
-		stillMissing,
+		aiTargetIndices,
 		lines,
 		purchasedAt,
 		storeLabel,
 		todayIso,
 		alreadyResolved,
 		householdId,
-		options.shelfLifeRules
+		options.shelfLifeRules,
+		feedback
 	);
 
-	return heuristicFilled.map((prediction, index) => {
-		if (prediction) return prediction;
+	return working.map((prediction, index) => {
 		const aiEstimate = aiEstimates.get(index);
-		if (!aiEstimate) return null;
-		return buildPredictionFromAiEstimate(lines[index], aiEstimate, purchasedAt, todayIso);
+		if (aiEstimate) {
+			return buildPredictionFromAiEstimate(lines[index], aiEstimate, purchasedAt, todayIso);
+		}
+		return prediction;
 	});
 }

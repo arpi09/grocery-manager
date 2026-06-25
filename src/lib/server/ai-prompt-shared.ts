@@ -55,13 +55,29 @@ export const SHELF_LIFE_CATEGORY_ANCHORS = [
 	'- färsk fisk: 1–2 d',
 	'- kött/chark kyl: 2–7 d',
 	'- grönsaker kyl: 5–10 d',
-	'- torrvara skafferi: 60–180 d',
+	'- torrvara skafferi: 180–365 d',
+	'- konserver skafferi: 365–730 d',
+	'- glass frys: 150–365 d',
 	'- fryst: 90–365 d',
-	'- bröd: 3–7 d'
+	'- bröd: 3–7 d',
+	'- färdigrätt kyl: 3–5 d'
 ].join('\n');
 
-export const PROMPT_VERSION_RECEIPT_PARSE = 'receipt-parse-v4';
-export const PROMPT_VERSION_SHELF_LIFE_BATCH = 'shelf-life-batch-v4';
+export const RECEIPT_CATEGORY_TAXONOMY = [
+	'Giltiga categoryHint (välj en eller null):',
+	'mejeri, kött, chark, fisk, grönsak, frukt, torrvara, dryck, glass, fryst, konserver, bröd, färdigrätt, snacks, bakverk, krydda'
+].join('\n');
+
+export const BRAND_AND_PRODUCT_REASONING_RULES = [
+	'Varumärkes- och produkttolkning:',
+	'- Använd världskunskap om svenska dagligvaror och varumärken',
+	'- Produktnamn utan kategoriord (t.ex. Ben & Jerry\'s) → inferera kategori från varumärke',
+	'- Butiksmärken (Garant, Eldorado) → kategori från produkttyp i namnet',
+	'- Osäker → lägre confidence, inte generisk default'
+].join('\n');
+
+export const PROMPT_VERSION_RECEIPT_PARSE = 'receipt-parse-v5';
+export const PROMPT_VERSION_SHELF_LIFE_BATCH = 'shelf-life-batch-v5';
 export const PROMPT_VERSION_PHOTO_ROUND = 'photo-round-v3';
 export const PROMPT_VERSION_PANTRY_DELTA = 'pantry-delta-v1';
 export const PROMPT_VERSION_PRODUCT_FROM_IMAGE = 'product-from-image-v1';

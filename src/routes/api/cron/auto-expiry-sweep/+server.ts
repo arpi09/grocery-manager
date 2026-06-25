@@ -1,8 +1,9 @@
 import { json } from '@sveltejs/kit';
-import { and, eq, isNotNull, lt, sql } from 'drizzle-orm';
+import { and, eq, isNotNull, sql } from 'drizzle-orm';
 import { db } from '$lib/infrastructure/db';
+import { canAutoFinishExpiredItem } from '$lib/domain/auto-expired';
 import { householdMemberTable, householdTable, inventoryItemTable, userTable } from '$lib/infrastructure/db/schema';
-import { subtractDaysIso } from '$lib/domain/auto-expired';
+import { mapInventoryRow } from '$lib/infrastructure/repositories/inventory-repository.shared';
 import { isCronAuthorized } from '$lib/server/cron-auth';
 import { isAutoFinishEnabled } from '$lib/server/feature-flags';
 import type { RequestHandler } from './$types';
@@ -23,7 +24,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		.where(eq(userTable.autoFinishExpiredEnabled, true));
 
 	let finished = 0;
-	const today = new Date().toISOString().slice(0, 10);
+	const today = new Date();
 
 	for (const user of optedIn) {
 		const memberships = await db
@@ -36,21 +37,35 @@ export const POST: RequestHandler = async ({ request }) => {
 			.where(eq(householdMemberTable.userId, user.id));
 
 		for (const membership of memberships) {
-			const totalGrace = membership.graceDays + user.extraDays;
-			const finishBefore = subtractDaysIso(today, totalGrace);
-			const rows = await db
-				.update(inventoryItemTable)
-				.set({ quantity: '0', updatedAt: new Date() })
+			const candidates = await db
+				.select()
+				.from(inventoryItemTable)
 				.where(
 					and(
 						eq(inventoryItemTable.householdId, membership.householdId),
 						isNotNull(inventoryItemTable.expiresOn),
-						lt(inventoryItemTable.expiresOn, finishBefore),
 						sql`${inventoryItemTable.quantity}::numeric > 0`
 					)
-				)
-				.returning();
-			finished += rows.length;
+				);
+
+			for (const row of candidates) {
+				const item = mapInventoryRow(row);
+				if (
+					!canAutoFinishExpiredItem(item, membership.graceDays, user.extraDays, today)
+				) {
+					continue;
+				}
+
+				const updated = await db
+					.update(inventoryItemTable)
+					.set({ quantity: '0', updatedAt: new Date() })
+					.where(eq(inventoryItemTable.id, item.id))
+					.returning();
+
+				if (updated.length > 0) {
+					finished += 1;
+				}
+			}
 		}
 	}
 

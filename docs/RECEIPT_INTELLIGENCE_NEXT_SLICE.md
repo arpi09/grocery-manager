@@ -14,10 +14,12 @@
 |------|--------|-------------------|--------|
 | 1 | Household learning rules | `household_learned` | Highest confidence |
 | 2 | Swedish keyword heuristics | `heuristic` | Token + location bonus |
-| 3 | Location default (fridge ~5d, freezer ~90d, pantry ~60d from `purchasedAt`) | `default_heuristic` | Low confidence; fills when nothing else matches |
-| 4 | Optional AI batch (remaining lines, max ~40) | `ai_inferred` | When OpenAI key present |
+| 3 | Location default (fridge ~5d, freezer ~90d, pantry ~60d from `purchasedAt`) | `default_heuristic` | Low confidence; **triggers GPT batch** when OpenAI key present |
+| 4 | GPT batch/single-call for `default_heuristic` or confidence &lt; 0.55 | `ai_inferred` | `receipt-shelf-life-predictions.ts`; prompts v5 in `ai-prompt-shared.ts` |
 
-**Wiring:** `shelf-life-predictor.ts`, `receipt-shelf-life-predictions.ts`, `receipt-import.ts`, `scan/+page.server.ts`, `ReceiptBulkAddFlow` (`lineExpiresOn`; user-cleared dates are not forced back).
+**Wiring:** `shelf-life-predictor.ts`, `receipt-shelf-life-predictions.ts`, `brain-shelf-life-inference.adapter.ts`, `receipt-import.ts`, `scan/+page.server.ts`, `ReceiptBulkAddFlow` + `PhotoRoundFlow` (`EstimatedBadge`, `~N dagar`, low-confidence CTA).
+
+**Grace:** proportional auto-expired grace by `expiresOnSource` + location (`auto-expired.ts`); stricter auto-finish for uncertain sources.
 
 **Flags:** `SHELF_LIFE_LEARNING_ENABLED`, `PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT` (`apphosting.yaml`, Playwright E2E defaults).
 
@@ -34,7 +36,7 @@
 - Pantry v2: `expires_date`, `missing_expiry`, `MissingExpiryFilterChip`.
 - i18n: receipt success / bulk CTAs → **lagret**.
 
-**Tests:** `shelf-life-predictor.test.ts`, `receipt-line-grouping.test.ts`, `inventory-merge.test.ts`, `shelf-life.test.ts`, `receipt-parse.test.ts`, `shelf-life-learning.test.ts`; E2E `receipt.spec.ts` — mocked unknown line → prefilled expiry + estimate badge.
+**Tests:** `shelf-life-predictor.test.ts`, `receipt-line-grouping.test.ts`, `inventory-merge.test.ts`, `shelf-life.test.ts`, `receipt-parse.test.ts`, `receipt-parse-prompt.golden.test.ts`, `shelf-life-prompt.golden.test.ts`, `receipt-shelf-life-predictions.test.ts`, `shelf-life-learning.test.ts`; E2E `receipt.spec.ts` — mocked unknown line → prefilled expiry + estimate badge.
 
 **Baseline (pre-v1 doc):** `master` @ `aa784b50e`. **Prod before this deploy:** `a629f892a` ([CURRENT_REALITY.md](./CURRENT_REALITY.md)).
 

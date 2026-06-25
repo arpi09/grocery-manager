@@ -3531,6 +3531,8 @@
 		"aiBadge": "AI",
 		"estimatedExpiry": "Uppskattat",
 		"lowConfidence": "Osäker uppskattning",
+		"confirmExpiryDate": "Osäker — bekräfta datum",
+		"estimatedDaysLabel": "~{days} dagar",
 		"sourceHousehold": "Inlärt av ert hushåll",
 		"sourceDefault": "Standarduppskattning",
 		"sourceLocationDefault": "Gissning utifrån plats",

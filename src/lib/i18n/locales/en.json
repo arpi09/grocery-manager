@@ -3610,6 +3610,8 @@
 		"aiBadge": "AI",
 		"estimatedExpiry": "Estimated",
 		"lowConfidence": "Uncertain estimate",
+		"confirmExpiryDate": "Uncertain — confirm date",
+		"estimatedDaysLabel": "~{days} days",
 		"sourceHousehold": "Learned by your household",
 		"sourceDefault": "Default estimate",
 		"sourceLocationDefault": "Estimate from storage location",

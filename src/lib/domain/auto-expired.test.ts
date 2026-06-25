@@ -27,14 +27,15 @@ describe('auto-expired domain', () => {
 	});
 
 	it('detects auto-expired active items', () => {
+		const base = { quantity: '1' as const, location: 'fridge' as const, expiresOnSource: 'user_set' as const };
 		expect(
-			isAutoExpired({ expiresOn: '2026-05-20', quantity: '1' }, 7, today)
+			isAutoExpired({ ...base, expiresOn: '2026-05-20' }, 7, today)
 		).toBe(true);
 		expect(
-			isAutoExpired({ expiresOn: '2026-06-01', quantity: '1' }, 7, today)
+			isAutoExpired({ ...base, expiresOn: '2026-06-01' }, 7, today)
 		).toBe(false);
-		expect(isAutoExpired({ expiresOn: null, quantity: '1' }, 7, today)).toBe(false);
-		expect(isAutoExpired({ expiresOn: '2026-05-20', quantity: '0' }, 7, today)).toBe(
+		expect(isAutoExpired({ ...base, expiresOn: null }, 7, today)).toBe(false);
+		expect(isAutoExpired({ ...base, expiresOn: '2026-05-20', quantity: '0' }, 7, today)).toBe(
 			false
 		);
 	});
@@ -49,17 +50,33 @@ describe('auto-expired domain', () => {
 	});
 
 	it('flags items moving to auto-expired within 2–3 days', () => {
+		const base = { quantity: '1' as const, location: 'fridge' as const, expiresOnSource: 'user_set' as const };
 		expect(
-			isMovingToAutoExpiredSoon({ expiresOn: '2026-05-28', quantity: '1' }, 7, today)
+			isMovingToAutoExpiredSoon({ ...base, expiresOn: '2026-05-28' }, 7, today)
 		).toBe(true);
 		expect(
-			isMovingToAutoExpiredSoon({ expiresOn: '2026-05-29', quantity: '1' }, 7, today)
+			isMovingToAutoExpiredSoon({ ...base, expiresOn: '2026-05-29' }, 7, today)
 		).toBe(true);
 		expect(
-			isMovingToAutoExpiredSoon({ expiresOn: '2026-06-01', quantity: '1' }, 7, today)
+			isMovingToAutoExpiredSoon({ ...base, expiresOn: '2026-06-01' }, 7, today)
 		).toBe(false);
 		expect(
-			isMovingToAutoExpiredSoon({ expiresOn: '2026-05-20', quantity: '1' }, 7, today)
+			isMovingToAutoExpiredSoon({ ...base, expiresOn: '2026-05-20' }, 7, today)
 		).toBe(false);
+	});
+
+	it('uses shorter grace for default_heuristic sources', () => {
+		const uncertain = {
+			expiresOn: '2026-05-27',
+			quantity: '1' as const,
+			location: 'fridge' as const,
+			expiresOnSource: 'default_heuristic' as const
+		};
+		const trusted = {
+			...uncertain,
+			expiresOnSource: 'user_set' as const
+		};
+		expect(isAutoExpired(uncertain, 7, today)).toBe(true);
+		expect(isAutoExpired(trusted, 7, today)).toBe(false);
 	});
 });

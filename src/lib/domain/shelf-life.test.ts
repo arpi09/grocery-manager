@@ -5,7 +5,7 @@ describe('guessShelfLife', () => {
 	it('guesses short shelf life for dairy', () => {
 		const result = guessShelfLife('Mjölk 3%', 'fridge');
 		expect(result).not.toBeNull();
-		expect(result?.source).toBe('ai_inferred');
+		expect(result?.source).toBe('heuristic');
 		expect(result?.expiresOn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 	});
 
