@@ -346,21 +346,21 @@ The deploy job uses the **`production`** GitHub Environment � optional requir
 
 | Secret | How to obtain |
 |--------|----------------|
-| `FIREBASE_SERVICE_ACCOUNT` | **Recommended.** GCP service account JSON with Firebase App Hosting deploy permissions — wired in [`deploy.yml`](../.github/workflows/deploy.yml) via `google-github-actions/auth`. Avoids transient IAM 409 from CI user tokens. Roles: Firebase App Hosting Admin + Service Account User (or Firebase Admin). |
-| `FIREBASE_TOKEN` | Fallback: run `npx firebase login:ci` locally and paste into **Settings → Secrets and variables → Actions** |
+| `FIREBASE_SERVICE_ACCOUNT` | **Required.** Run `bash scripts/setup-firebase-deploy-sa.sh`, then `gh secret set FIREBASE_SERVICE_ACCOUNT < ./github-deploy-sa-key.json`. Wired in [`deploy.yml`](../.github/workflows/deploy.yml) via `google-github-actions/auth` + ADC. Roles: Firebase App Hosting Admin + Service Account User. |
 | `DATABASE_URL` | **Public IP** Postgres URL for pre-deploy `npm run db:migrate` in Actions — `postgresql://pantry_app:PASSWORD@PUBLIC_IP:5432/pantry`. **Not** the socket URL in Firebase Secret Manager. Password: parse from Firebase `DATABASE_URL` secret or Cloud SQL user `pantry_app`. Cloud SQL **Authorized networks** must allow [GitHub Actions IPs](https://api.github.com/meta) (`actions` ranges). Full steps: [CI_CD.md — DATABASE_URL](./CI_CD.md#database_url--ägare-manuellt) |
 
 | DEPLOY_NOTIFY_WEBHOOK_URL (optional) | ntfy topic URL, Discord webhook, or Slack incoming webhook  push on deploy success; see [docs/CI_CD.md � Mobilnotis](./CI_CD.md#mobilnotis-vid-deploy) |
 | DEPLOY_TELEGRAM_BOT_TOKEN + DEPLOY_TELEGRAM_CHAT_ID (optional) | Telegram bot push instead of or in addition to webhook |
 
-`FIREBASE_SERVICE_ACCOUNT` is wired in [`deploy.yml`](../.github/workflows/deploy.yml) via `google-github-actions/auth` (preferred over `FIREBASE_TOKEN`).
+`FIREBASE_SERVICE_ACCOUNT` is **required** in [`deploy.yml`](../.github/workflows/deploy.yml) via `google-github-actions/auth`. `FIREBASE_TOKEN` is not used.
 
 ### Enable CI deploys
 
 1. Merge via PR to `master`
-2. Add **`FIREBASE_SERVICE_ACCOUNT`** (recommended) or **`FIREBASE_TOKEN`** in GitHub repo secrets
-3. (Optional) Configure **Environments → production** with required reviewers
-4. Run **Deploy to production** from Actions after green CI (see [`DEPLOY.md`](./DEPLOY.md))
+2. Run `bash scripts/setup-firebase-deploy-sa.sh` and add **`FIREBASE_SERVICE_ACCOUNT`** in GitHub repo secrets — see [`DEPLOY.md`](./DEPLOY.md#firebase-deploy-service-account)
+3. Remove legacy **`FIREBASE_TOKEN`** from GitHub secrets if present
+4. (Optional) Configure **Environments → production** with required reviewers
+5. Run **Deploy to production** from Actions after green CI (see [`DEPLOY.md`](./DEPLOY.md))
 
 App Hosting runtime secrets (`DATABASE_URL` **socket URL**, `ADMIN_PASSWORD`, etc.) stay in **Firebase Secret Manager**. GitHub also needs a separate **`DATABASE_URL` secret (public IP format)** so deploy can run migrations — see [CI_CD.md — DATABASE_URL](./CI_CD.md#database_url--ägare-manuellt).
 
@@ -394,8 +394,7 @@ Used by Cloud Build steps. Often has **Editor** on the project. Needs **Cloud SQ
 
 | Secret | Roles (typical) |
 |--------|-----------------|
-| `FIREBASE_SERVICE_ACCOUNT` | Firebase App Hosting Admin, Service Account User, (optional) Secret Manager Admin for bootstrap |
-| `FIREBASE_TOKEN` | User OAuth — works but more prone to IAM 409 under parallel deploys |
+| `FIREBASE_SERVICE_ACCOUNT` | Firebase App Hosting Admin, Service Account User — create via [`scripts/setup-firebase-deploy-sa.sh`](../scripts/setup-firebase-deploy-sa.sh) |
 
 Deploy credentials are **separate** from runtime `firebase-app-hosting-compute@`.
 

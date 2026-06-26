@@ -1,11 +1,32 @@
 #!/usr/bin/env bash
 # Deploy App Hosting with retry on transient IAM 409 (concurrent setIamPolicy).
+# CI: requires GOOGLE_APPLICATION_CREDENTIALS from google-github-actions/auth (FIREBASE_SERVICE_ACCOUNT secret).
+# Local: gcloud auth application-default login, or GOOGLE_APPLICATION_CREDENTIALS pointing at a SA key file.
 set -euo pipefail
 
 PROJECT="${1:-home-pantry-4bee5}"
 BACKEND="${2:-home-pantry}"
 MAX_ATTEMPTS="${FIREBASE_DEPLOY_MAX_ATTEMPTS:-8}"
 INITIAL_DELAY_SECONDS="${FIREBASE_DEPLOY_RETRY_DELAY_SECONDS:-45}"
+
+assert_ci_auth() {
+	if [ -z "${CI:-}" ]; then
+		return 0
+	fi
+	if [ -n "${FIREBASE_TOKEN:-}" ]; then
+		echo "::error::FIREBASE_TOKEN is not allowed in CI deploy. Remove the FIREBASE_TOKEN secret and use FIREBASE_SERVICE_ACCOUNT instead."
+		echo "See docs/DEPLOY.md#firebase-deploy-service-account"
+		exit 1
+	fi
+	if [ -z "${GOOGLE_APPLICATION_CREDENTIALS:-}" ]; then
+		echo "::error::CI deploy requires GOOGLE_APPLICATION_CREDENTIALS (set FIREBASE_SERVICE_ACCOUNT + google-github-actions/auth in deploy.yml)."
+		echo "See docs/DEPLOY.md#firebase-deploy-service-account"
+		exit 1
+	fi
+	echo "CI deploy auth: ADC (${GOOGLE_APPLICATION_CREDENTIALS})"
+}
+
+assert_ci_auth
 
 random_jitter() {
 	local base="$1"

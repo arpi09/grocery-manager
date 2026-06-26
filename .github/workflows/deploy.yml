@@ -1,6 +1,6 @@
 ﻿# Manual production deploy - pr-gate -> tiered e2e -> pre-deploy verify -> Firebase -> post-deploy sanity
 # Trigger: Actions -> "Deploy to production"
-# Required secret: FIREBASE_TOKEN (npx firebase login:ci)
+# Required secret: FIREBASE_SERVICE_ACCOUNT (GCP SA JSON — google-github-actions/auth + ADC)
 
 name: Deploy to production
 
@@ -528,40 +528,32 @@ jobs:
         with:
           ref: ${{ needs.resolve-artifact.outputs.deploy_sha }}
 
-      - name: Resolve Firebase deploy skip
+      - name: Require FIREBASE_SERVICE_ACCOUNT for deploy auth
         id: deploy-gate
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
-          if [ -n "${FIREBASE_SERVICE_ACCOUNT:-}" ]; then
-            echo "auth=service_account" >> "$GITHUB_OUTPUT"
-            echo "skipped=false" >> "$GITHUB_OUTPUT"
-            echo "Using FIREBASE_SERVICE_ACCOUNT for deploy auth."
-          elif [ -n "${FIREBASE_TOKEN:-}" ]; then
-            echo "auth=token" >> "$GITHUB_OUTPUT"
-            echo "skipped=false" >> "$GITHUB_OUTPUT"
-            echo "Using FIREBASE_TOKEN for deploy auth."
-          else
-            echo "auth=none" >> "$GITHUB_OUTPUT"
-            echo "skipped=true" >> "$GITHUB_OUTPUT"
-            echo "::notice::Neither FIREBASE_SERVICE_ACCOUNT nor FIREBASE_TOKEN is set - quality and E2E passed but deploy was skipped."
-            echo "Add FIREBASE_SERVICE_ACCOUNT (recommended) or FIREBASE_TOKEN under Settings -> Secrets and variables -> Actions,"
-            echo "or deploy locally: npm run deploy:firebase"
-            echo "See docs/DEPLOY.md and docs/FIREBASE_DEPLOY.md"
+          set -euo pipefail
+          if [ -z "${FIREBASE_SERVICE_ACCOUNT:-}" ]; then
+            echo "::error::FIREBASE_SERVICE_ACCOUNT is not set — CI deploy requires a GCP service account JSON secret."
+            echo "Create the deploy SA and set the secret:"
+            echo "  bash scripts/setup-firebase-deploy-sa.sh"
+            echo "  gh secret set FIREBASE_SERVICE_ACCOUNT < ./github-deploy-sa-key.json"
+            echo "Then remove the legacy FIREBASE_TOKEN secret: gh secret remove FIREBASE_TOKEN"
+            echo "See docs/DEPLOY.md#firebase-deploy-service-account"
+            exit 1
           fi
+          echo "skipped=false" >> "$GITHUB_OUTPUT"
+          echo "Using FIREBASE_SERVICE_ACCOUNT (ADC via google-github-actions/auth)."
 
       - name: Authenticate to Google Cloud (service account)
-        if: steps.deploy-gate.outputs.skipped != 'true' && steps.deploy-gate.outputs.auth == 'service_account'
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
       - name: Deploy App Hosting backend
-        if: steps.deploy-gate.outputs.skipped != 'true'
         run: bash scripts/firebase-deploy-apphosting.sh
         env:
-          FIREBASE_TOKEN: ${{ steps.deploy-gate.outputs.auth == 'token' && secrets.FIREBASE_TOKEN || '' }}
           FIREBASE_DEPLOY_MAX_ATTEMPTS: '8'
           FIREBASE_DEPLOY_RETRY_DELAY_SECONDS: '45'
 
