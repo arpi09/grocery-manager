@@ -24,6 +24,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(ux): CTA declutter across hem, planer, scan, and statistik ([#140](https://github.com/arpi09/grocery-manager/pull/140)) — Reduce competing CTAs on hem (briefing hub), veckoplan/planer, inventory add, and scan hub (last-used scan mode as default).
 - fix(e2e): scan hub, planer calendar, inventory add sheet + design kit ([#142](https://github.com/arpi09/grocery-manager/pull/142)) — Redirect bare `/scan` to canonical hub URL with `mode=hub` so E2E and nav agree
 - fix(deploy): retry Firebase IAM 409 and stabilize mobile filter E2E ([#143](https://github.com/arpi09/grocery-manager/pull/143)) — Add `scripts/firebase-deploy-apphosting.sh` with exponential backoff (up to 4 attempts) for transient Firebase IAM 409 / concurrent setIamPolicy errors during App Hosting deploy
+- fix(deploy): harden IAM 409 retries and add service account auth ([#144](https://github.com/arpi09/grocery-manager/pull/144)) — Increase Firebase deploy IAM 409 retries to 8 attempts with exponential backoff + jitter (45s base)
 
 ### Changed
 
