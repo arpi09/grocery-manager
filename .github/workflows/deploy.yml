@@ -518,7 +518,7 @@ jobs:
       ) &&
       needs.pre-deploy-verify.result == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     environment: production
     outputs:
       skipped: ${{ steps.deploy-gate.outputs.skipped }}
