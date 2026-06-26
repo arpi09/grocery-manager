@@ -346,7 +346,8 @@ The deploy job uses the **`production`** GitHub Environment � optional requir
 
 | Secret | How to obtain |
 |--------|----------------|
-| `FIREBASE_TOKEN` | Run `npx firebase login:ci` locally and paste the token into **Settings → Secrets and variables → Actions** |
+| `FIREBASE_SERVICE_ACCOUNT` | **Recommended.** GCP service account JSON with Firebase App Hosting deploy permissions — wired in [`deploy.yml`](../.github/workflows/deploy.yml) via `google-github-actions/auth`. Avoids transient IAM 409 from CI user tokens. Roles: Firebase App Hosting Admin + Service Account User (or Firebase Admin). |
+| `FIREBASE_TOKEN` | Fallback: run `npx firebase login:ci` locally and paste into **Settings → Secrets and variables → Actions** |
 | `DATABASE_URL` | **Public IP** Postgres URL for pre-deploy `npm run db:migrate` in Actions — `postgresql://pantry_app:PASSWORD@PUBLIC_IP:5432/pantry`. **Not** the socket URL in Firebase Secret Manager. Password: parse from Firebase `DATABASE_URL` secret or Cloud SQL user `pantry_app`. Cloud SQL **Authorized networks** must allow [GitHub Actions IPs](https://api.github.com/meta) (`actions` ranges). Full steps: [CI_CD.md — DATABASE_URL](./CI_CD.md#database_url--ägare-manuellt) |
 
 | DEPLOY_NOTIFY_WEBHOOK_URL (optional) | ntfy topic URL, Discord webhook, or Slack incoming webhook  push on deploy success; see [docs/CI_CD.md � Mobilnotis](./CI_CD.md#mobilnotis-vid-deploy) |

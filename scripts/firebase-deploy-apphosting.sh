@@ -4,8 +4,14 @@ set -euo pipefail
 
 PROJECT="${1:-home-pantry-4bee5}"
 BACKEND="${2:-home-pantry}"
-MAX_ATTEMPTS="${FIREBASE_DEPLOY_MAX_ATTEMPTS:-4}"
-DELAY_SECONDS="${FIREBASE_DEPLOY_RETRY_DELAY_SECONDS:-30}"
+MAX_ATTEMPTS="${FIREBASE_DEPLOY_MAX_ATTEMPTS:-8}"
+INITIAL_DELAY_SECONDS="${FIREBASE_DEPLOY_RETRY_DELAY_SECONDS:-45}"
+
+random_jitter() {
+	local base="$1"
+	local spread=$((base / 4 + 1))
+	echo $((base + RANDOM % spread))
+}
 
 deploy_once() {
 	npx firebase-tools@latest deploy \
@@ -16,10 +22,11 @@ deploy_once() {
 
 is_iam_409() {
 	local log_file="$1"
-	grep -qE 'HTTP Error: 409|concurrent policy changes' "$log_file"
+	grep -qE 'HTTP Error: 409|concurrent policy changes|setIamPolicy|ABORTED.*policy|There were concurrent policy changes' "$log_file"
 }
 
 attempt=1
+delay_seconds="$INITIAL_DELAY_SECONDS"
 while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
 	log_file="$(mktemp)"
 	set +e
@@ -33,10 +40,11 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
 	fi
 
 	if is_iam_409 "$log_file" && [ "$attempt" -lt "$MAX_ATTEMPTS" ]; then
-		echo "::warning::Firebase IAM 409 on attempt ${attempt}/${MAX_ATTEMPTS} — retrying in ${DELAY_SECONDS}s"
+		sleep_for="$(random_jitter "$delay_seconds")"
+		echo "::warning::Firebase IAM 409 on attempt ${attempt}/${MAX_ATTEMPTS} — retrying in ${sleep_for}s (base ${delay_seconds}s + jitter)"
 		rm -f "$log_file"
-		sleep "$DELAY_SECONDS"
-		DELAY_SECONDS=$((DELAY_SECONDS * 2))
+		sleep "$sleep_for"
+		delay_seconds=$((delay_seconds * 2))
 		attempt=$((attempt + 1))
 		continue
 	fi
