@@ -192,6 +192,70 @@ Loggraden från extern IP (t.ex. `186.236.240.56`) mot Cloud SQL **public IP** (
 
 ---
 
+## IAM during deploy
+
+Varje `firebase deploy --only apphosting:home-pantry` (via `scripts/firebase-deploy-apphosting.sh`) kan trigga **setIamPolicy** i GCP: Firebase CLI synkar roller för build/runtime service accounts, Secret Manager-access och Cloud Run. Det är **förväntat** — inte ett tecken på fel konfiguration i sig. Transient **409 concurrent policy changes** kan uppstå om två deploys eller Console auto-deploy körs samtidigt.
+
+### Vad repot gör automatiskt
+
+| Steg | Var | Syfte |
+|------|-----|--------|
+| `experiments:disable pintags` | `firebase-deploy-apphosting.sh` | Undviker Cloud Run revision-tag PUT som ger 409 / IAM-race |
+| IAM 409 retry (8×, backoff + jitter) | `firebase-deploy-apphosting.sh` | Transient policy-kollisioner |
+| `concurrency: deploy-production` + `cancel-in-progress: true` | `deploy.yml` | Max en deploy i taget |
+| **Ingen** `grantaccess` i CI | — | Secret IAM ändras bara vid engångs-setup (nedan), inte varje release |
+
+### Engångs — secrets (ägare)
+
+När du **skapar eller roterar** en runtime-secret:
+
+```bash
+npx firebase apphosting:secrets:set SECRET_NAME --project home-pantry-4bee5
+bash scripts/grant-apphosting-secrets.sh   # alla befintliga secrets; hoppar över saknade
+```
+
+Eller per secret: `npx firebase apphosting:secrets:grantaccess SECRET_NAME --backend home-pantry --project home-pantry-4bee5`.
+
+Kör **inte** `grantaccess` i deploy-loopen — det ökar IAM-churn utan att ändra appkod.
+
+### Engångs — Cloud SQL Client (ägare)
+
+Om App Hosting inte når Cloud SQL efter första deploy:
+
+```bash
+node scripts/grant-cloudsql-client.mjs   # kräver firebase login lokalt
+```
+
+Ger `roles/cloudsql.client` till default compute SA och Firebase App Hosting service agent.
+
+### Console-checklista (GCP → IAM)
+
+Verifiera att dessa **finns** (saknade roller ger runtime/build-fel, inte nödvändigtvis deploy-409):
+
+| Principal | Förväntade roller (minst) | Används till |
+|-----------|---------------------------|--------------|
+| `firebase-app-hosting-compute@home-pantry-4bee5.iam.gserviceaccount.com` | Firebase App Hosting Compute Runner, Storage Object Viewer, Secret Manager Secret Accessor (per secret), Developer Connect Read Token Accessor | Cloud Run runtime — läser secrets, artifacts, Cloud SQL socket |
+| `service-459524831747@gcp-sa-firebaseapphosting.iam.gserviceaccount.com` | Firebase App Hosting Service Agent (+ Cloud SQL Client om DB) | Backend provisioning, build pipeline |
+| `459524831747-compute@developer.gserviceaccount.com` | Editor (Cloud Build default), Cloud SQL Client | Cloud Build / legacy compute paths |
+| `firebase-adminsdk-*@home-pantry-4bee5.iam.gserviceaccount.com` | Firebase Admin SDK-relaterade roller | Admin API, ej App Hosting runtime |
+
+**Secret Manager:** varje secret i `apphosting.yaml` (`DATABASE_URL`, `ADMIN_PASSWORD`, `OPENAI_API_KEY`, …) ska ha **Secret Accessor** för compute-SA ovan. `grant-apphosting-secrets.sh` sätter detta via Firebase CLI.
+
+**Deploy-autentisering (GitHub):** `FIREBASE_SERVICE_ACCOUNT` (rekommenderat) eller `FIREBASE_TOKEN` — deploy-SA behöver **Firebase App Hosting Admin** + **Service Account User**; den behöver **inte** samma roller som runtime compute-SA.
+
+### När något saknas
+
+| Symptom | Trolig saknad IAM / config |
+|---------|----------------------------|
+| Build: `secretmanager.versions.get` denied | Secret finns inte eller `grantaccess` inte kört |
+| Runtime 503 på AI/e-post | Secret finns men compute-SA saknar accessor |
+| DB connection errors i prod | `cloudSqlInstances` fel, eller compute/App Hosting SA saknar `cloudsql.client` |
+| Deploy 409 trots retry | Parallell deploy (stäng Console auto-deploy) eller yttre policy-editor |
+
+Se även [FIREBASE_DEPLOY.md — IAM & secrets](./FIREBASE_DEPLOY.md#iam-during-deploy).
+
+---
+
 ## English summary
 
 - **Merge to `master`** → fast CI only (~3–5 min).
