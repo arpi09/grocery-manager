@@ -25,6 +25,8 @@ Thumbs.db
 firebase-debug.log
 firebase-debug.*.log
 .firebase/
+github-deploy-sa-key.json
+*-sa-key.json
 
 node_modules.broken*
 node_modules.bak*

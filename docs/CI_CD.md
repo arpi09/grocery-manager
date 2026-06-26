@@ -145,7 +145,7 @@ Deploy-kedja: `gate` → `quality` (reusable + **CI SHA-gate**) → `e2e` (matri
 | **G1b CI SHA** | `reusable-quality.yml` när `verify_ci_sha: true` | Ja | Sparar tid; stoppar deploy av commit som inte passerat CI |
 | **G2 E2E** | `deploy.yml` job `e2e` (3 shards) | Ja — **alltid** vid normal deploy | SSR + marketing hydration (`pageerror`) |
 | **G2b client bundle** | Efter build i reusable | Ja | `process.cwd` / `node:fs` i klient |
-| **G3 Firebase** | `deploy.yml` job `deploy` | Ja (utan `FIREBASE_TOKEN`: skip → `verify-release` röd) | Faktisk App Hosting-deploy |
+| **G3 Firebase** | `deploy.yml` job `deploy` | Ja (utan `FIREBASE_SERVICE_ACCOUNT`: deploy failar) | Faktisk App Hosting-deploy via ADC |
 | **G4 prod smoke** | `deploy.yml` job `post-deploy smoke` | Ja | HTML-body, inte bara HTTP 200 |
 | **G5 verify-release** | Sista jobbet i `deploy.yml` | Ja | Workflow **röd** om e2e/deploy/smoke skippades |
 
@@ -180,7 +180,7 @@ Dessa inställningar stoppar upprepning av incidenten. **Checklista för repo-ä
 | **Allow auto-merge** | GitHub → Settings → General | Krävs för Dependabot patch/minor auto-merge — se [Dependabot](#dependabot--pr-metadata--changelog) |
 | **Branch protection** på `master` | GitHub → Settings → Branches | Kräv status check **`pr-gate / pr-gate`** + **Require pull request** (0 approvals OK solo) |
 | **Stäng av Firebase Console auto-deploy** | Firebase → App Hosting → GitHub | En deploy-källa: Actions only |
-| **`FIREBASE_TOKEN` + `PRODUCTION_URL`** | GitHub Secrets/Variables | Deploy och smoke måste fungera |
+| **`FIREBASE_SERVICE_ACCOUNT` + `PRODUCTION_URL`** | GitHub Secrets/Variables | Deploy och smoke måste fungera |
 | **Required reviewers** (valfritt) | Branch protection | Mänskligt deploy-beslut för stora releases |
 
 Agentregel: [`.cursor/rules/deploy-safety.mdc`](../.cursor/rules/deploy-safety.mdc).
@@ -220,8 +220,7 @@ Deps merge to `master` does **not** trigger prod deploy — same manual deploy d
 
 | Plats | Namn | Syfte |
 |-------|------|--------|
-| GitHub Actions | `FIREBASE_SERVICE_ACCOUNT` | **Rekommenderat.** GCP SA JSON — deploy via `google-github-actions/auth`; färre IAM 409 än CI-token |
-| GitHub Actions | `FIREBASE_TOKEN` | Fallback: `firebase login:ci` — deploy från Actions |
+| GitHub Actions | `FIREBASE_SERVICE_ACCOUNT` | **Obligatorisk.** GCP SA JSON — deploy via `google-github-actions/auth` + ADC |
 | GitHub Actions (secret) | `DATABASE_URL` | Pre-deploy `npm run db:migrate` i `deploy.yml` — **public IP**-URL, inte Firebase socket-URL (se [DATABASE_URL — ägare](#database_url--ägare-manuellt)) |
 | GitHub Actions (secret) | `CRON_SECRET` | Bearer för schemalagda cron (`/api/cron/expiry-reminders`, `pmf-weekly`, `shopping-push`, `skaffurapport`, …) — måste matcha Firebase |
 | GitHub Actions (variable) | `PRODUCTION_URL` | Prod-appens bas-URL (samma som `PUBLIC_ORIGIN`, utan `/` på slutet). **`https://skaffu.com`** — se [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md). |
@@ -229,7 +228,7 @@ Deps merge to `master` does **not** trigger prod deploy — same manual deploy d
 | GitHub Actions (valfritt) | `DEPLOY_TELEGRAM_BOT_TOKEN` + `DEPLOY_TELEGRAM_CHAT_ID` | Telegram-push efter lyckad deploy (alternativ till webhook) |
 | Firebase Secret Manager | `DATABASE_URL` (socket-URL), `ADMIN_PASSWORD`, `OPENAI_API_KEY`, `CRON_SECRET`, … | Runtime i App Hosting — **inte** samma format som GitHub `DATABASE_URL` |
 
-Utan `FIREBASE_SERVICE_ACCOUNT` **eller** `FIREBASE_TOKEN` körs quality + E2E vid deploy ändå; deploy-jobbet **skippar** med tydlig loggrad.
+Utan `FIREBASE_SERVICE_ACCOUNT` failar deploy-jobbet efter quality + E2E med tydligt fel. Setup: `bash scripts/setup-firebase-deploy-sa.sh` → se [DEPLOY.md — Firebase deploy service account](./DEPLOY.md#firebase-deploy-service-account).
 
 **Firebase Console → App Hosting → GitHub auto-deploy:** stäng av om du använder Actions — undvik **dubbel deploy**. En källa: **Actions → Deploy to production**.
 
@@ -323,7 +322,7 @@ Du får notis när **Deploy to production** är klar (grön eller röd).
 
 ### Push-notis bara vid lyckad deploy (rekommenderat)
 
-Workflow-steg **Notify deploy success** i [`deploy.yml`](../.github/workflows/deploy.yml) körs **endast** när Firebase-deploy faktiskt lyckades (`FIREBASE_TOKEN` satt och deploy OK). Ingen secret = steget hoppar tyst över.
+Workflow-steg **Notify deploy success** i [`deploy.yml`](../.github/workflows/deploy.yml) körs **endast** när Firebase-deploy faktiskt lyckades (`FIREBASE_SERVICE_ACCOUNT` satt och deploy OK).
 
 #### A) ntfy.sh (enklast för mobil-push)
 
@@ -376,7 +375,7 @@ npm run pr:gate                # CI parity — not pre-push default
 # G2 (innan deploy om auth/UI rörts)
 USE_PGLITE=true npm run test:e2e
 
-# G3 (lokalt om FIREBASE_TOKEN saknas i Actions)
+# G3 (lokalt med gcloud ADC eller GOOGLE_APPLICATION_CREDENTIALS)
 npm run deploy:firebase
 
 # G4 (efter deploy)
