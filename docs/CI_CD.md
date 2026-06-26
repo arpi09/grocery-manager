@@ -220,7 +220,8 @@ Deps merge to `master` does **not** trigger prod deploy — same manual deploy d
 
 | Plats | Namn | Syfte |
 |-------|------|--------|
-| GitHub Actions | `FIREBASE_TOKEN` | `firebase login:ci` — deploy från Actions |
+| GitHub Actions | `FIREBASE_SERVICE_ACCOUNT` | **Rekommenderat.** GCP SA JSON — deploy via `google-github-actions/auth`; färre IAM 409 än CI-token |
+| GitHub Actions | `FIREBASE_TOKEN` | Fallback: `firebase login:ci` — deploy från Actions |
 | GitHub Actions (secret) | `DATABASE_URL` | Pre-deploy `npm run db:migrate` i `deploy.yml` — **public IP**-URL, inte Firebase socket-URL (se [DATABASE_URL — ägare](#database_url--ägare-manuellt)) |
 | GitHub Actions (secret) | `CRON_SECRET` | Bearer för schemalagda cron (`/api/cron/expiry-reminders`, `pmf-weekly`, `shopping-push`, `skaffurapport`, …) — måste matcha Firebase |
 | GitHub Actions (variable) | `PRODUCTION_URL` | Prod-appens bas-URL (samma som `PUBLIC_ORIGIN`, utan `/` på slutet). **`https://skaffu.com`** — se [`SKAFFU_DOMAIN_MIGRATION.md`](./SKAFFU_DOMAIN_MIGRATION.md). |
@@ -228,7 +229,7 @@ Deps merge to `master` does **not** trigger prod deploy — same manual deploy d
 | GitHub Actions (valfritt) | `DEPLOY_TELEGRAM_BOT_TOKEN` + `DEPLOY_TELEGRAM_CHAT_ID` | Telegram-push efter lyckad deploy (alternativ till webhook) |
 | Firebase Secret Manager | `DATABASE_URL` (socket-URL), `ADMIN_PASSWORD`, `OPENAI_API_KEY`, `CRON_SECRET`, … | Runtime i App Hosting — **inte** samma format som GitHub `DATABASE_URL` |
 
-Utan `FIREBASE_TOKEN` körs quality + E2E vid deploy ändå; deploy-jobbet **skippar** med tydlig loggrad.
+Utan `FIREBASE_SERVICE_ACCOUNT` **eller** `FIREBASE_TOKEN` körs quality + E2E vid deploy ändå; deploy-jobbet **skippar** med tydlig loggrad.
 
 **Firebase Console → App Hosting → GitHub auto-deploy:** stäng av om du använder Actions — undvik **dubbel deploy**. En källa: **Actions → Deploy to production**.
 

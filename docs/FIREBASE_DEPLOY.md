@@ -353,16 +353,70 @@ The deploy job uses the **`production`** GitHub Environment � optional requir
 | DEPLOY_NOTIFY_WEBHOOK_URL (optional) | ntfy topic URL, Discord webhook, or Slack incoming webhook  push on deploy success; see [docs/CI_CD.md � Mobilnotis](./CI_CD.md#mobilnotis-vid-deploy) |
 | DEPLOY_TELEGRAM_BOT_TOKEN + DEPLOY_TELEGRAM_CHAT_ID (optional) | Telegram bot push instead of or in addition to webhook |
 
-Alternative (not wired in the default workflow): a Google Cloud **service account JSON** with Firebase/App Hosting deploy permissions, stored as `FIREBASE_SERVICE_ACCOUNT` and passed to `google-github-actions/auth` � use if you prefer service accounts over CI tokens.
+`FIREBASE_SERVICE_ACCOUNT` is wired in [`deploy.yml`](../.github/workflows/deploy.yml) via `google-github-actions/auth` (preferred over `FIREBASE_TOKEN`).
 
 ### Enable CI deploys
 
 1. Merge via PR to `master`
-2. Add `FIREBASE_TOKEN` in GitHub repo secrets
+2. Add **`FIREBASE_SERVICE_ACCOUNT`** (recommended) or **`FIREBASE_TOKEN`** in GitHub repo secrets
 3. (Optional) Configure **Environments → production** with required reviewers
 4. Run **Deploy to production** from Actions after green CI (see [`DEPLOY.md`](./DEPLOY.md))
 
 App Hosting runtime secrets (`DATABASE_URL` **socket URL**, `ADMIN_PASSWORD`, etc.) stay in **Firebase Secret Manager**. GitHub also needs a separate **`DATABASE_URL` secret (public IP format)** so deploy can run migrations — see [CI_CD.md — DATABASE_URL](./CI_CD.md#database_url--ägare-manuellt).
+
+## IAM during deploy
+
+Each `firebase deploy --only apphosting:home-pantry` reconciles GCP IAM (build SAs, runtime compute SA, Secret Manager bindings, Artifact Registry, Cloud Run). That is normal Firebase App Hosting behavior. Transient **HTTP 409 / concurrent policy changes** usually means two deploys overlapped — not a missing secret value.
+
+| Layer | Repo behavior |
+|-------|----------------|
+| **Deploy script** | [`scripts/firebase-deploy-apphosting.sh`](../scripts/firebase-deploy-apphosting.sh) — disables `pintags` experiment, retries IAM 409 up to 8× |
+| **CI** | [`deploy.yml`](../.github/workflows/deploy.yml) — single-flight concurrency; **does not** run `grantaccess` per release |
+| **One-time secrets** | [`scripts/grant-apphosting-secrets.sh`](../scripts/grant-apphosting-secrets.sh) — run after `secrets:set` when adding secrets |
+| **One-time Cloud SQL** | [`scripts/grant-cloudsql-client.mjs`](../scripts/grant-cloudsql-client.mjs) — `roles/cloudsql.client` for compute + App Hosting SAs |
+
+### Runtime service account (`firebase-app-hosting-compute@…`)
+
+App Hosting runs your SSR app as this SA. It needs (managed by Firebase + `grantaccess`):
+
+- **Firebase App Hosting Compute Runner** — run the backend
+- **Storage Object Viewer** — build artifacts / staging
+- **Secret Manager Secret Accessor** — one binding per secret in `apphosting.yaml`
+- **Cloud SQL Client** — when using `cloudSqlInstances` (socket at `/cloudsql/…`)
+
+Optional in console: **Developer Connect Read Token Accessor**, **Firebase Admin SDK Administrator Service Agent** — Firebase may attach these during backend setup.
+
+### Default compute SA (`459524831747-compute@developer.gserviceaccount.com`)
+
+Used by Cloud Build steps. Often has **Editor** on the project. Needs **Cloud SQL Client** if build/migrate paths touch Cloud SQL — run `grant-cloudsql-client.mjs` if missing.
+
+### Deploy auth (GitHub Actions)
+
+| Secret | Roles (typical) |
+|--------|-----------------|
+| `FIREBASE_SERVICE_ACCOUNT` | Firebase App Hosting Admin, Service Account User, (optional) Secret Manager Admin for bootstrap |
+| `FIREBASE_TOKEN` | User OAuth — works but more prone to IAM 409 under parallel deploys |
+
+Deploy credentials are **separate** from runtime `firebase-app-hosting-compute@`.
+
+### Secrets checklist (`apphosting.yaml` RUNTIME)
+
+| Secret | Required for deploy | Notes |
+|--------|---------------------|-------|
+| `DATABASE_URL` | yes | Socket URL + `pantry_app` user — see [Database](#database) |
+| `ADMIN_PASSWORD` | yes | |
+| `OPENAI_API_KEY` | yes (prod features) | 503 if missing |
+| `RESEND_API_KEY` | yes (email) | |
+| `TURNSTILE_SECRET_KEY` | yes (prod auth) | |
+| `CRON_SECRET` | yes (cron) | Match GitHub `CRON_SECRET` |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | if Stripe enabled | Checkout currently kill-switched |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | if Google login | Bound in yaml — secret must exist |
+| `VAPID_PRIVATE_KEY` | if push enabled | |
+| `DEMO_ACCOUNT_PASSWORD` | optional | Commented out in yaml |
+
+**Do not** confuse Firebase `DATABASE_URL` (socket, `pantry_app`) with GitHub Actions `DATABASE_URL` (public IP for `db:migrate`). Wrong postgres user in logs (`"database"`) is almost always internet scanners — see [`DEPLOY.md` — Cloud SQL-logg](./DEPLOY.md#cloud-sql-logg-password-authentication-failed-for-user-database).
+
+Owner checklist: [`DEPLOY.md` — IAM during deploy](./DEPLOY.md#iam-during-deploy).
 
 ### Alternative: Firebase Console GitHub integration
 
@@ -410,7 +464,9 @@ Use the existing root `Dockerfile`. Map Cloud Run URL to `PUBLIC_ORIGIN`.
 | `firebase.json` | App Hosting backend id and deploy ignore list |
 | `.firebaserc` | Firebase project id |
 | `apphosting.yaml` | Cloud Run sizing, `cloudSqlInstances`, build/run commands, env + secrets |
-| `scripts/db-migrate-cloudsql.ps1` | Windows helper to run `db:migrate` from `.env` |
+| `scripts/firebase-deploy-apphosting.sh` | CI/local deploy with pintags off + IAM 409 retry |
+| `scripts/grant-apphosting-secrets.sh` | One-time `grantaccess` for all `apphosting.yaml` secrets |
+| `scripts/grant-cloudsql-client.mjs` | One-time `roles/cloudsql.client` for compute + App Hosting SAs |
 | `.apphosting/bundle.yaml` | SvelteKit adapter-node output hints for App Hosting |
 | `.github/workflows/ci.yml`, `e2e.yml`, `deploy.yml` | Tiered CI/CD (see `docs/CI_CD.md`) |
 | `Dockerfile` | Optional Cloud Run container build |

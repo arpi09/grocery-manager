@@ -18,7 +18,7 @@
 		"build": "vite build",
 		"build:firebase": "vite build",
 		"start": "node build",
-		"deploy:firebase": "npx firebase-tools@latest deploy --only apphosting:home-pantry",
+		"deploy:firebase": "bash scripts/firebase-deploy-apphosting.sh",
 		"deploy:firebase:dry": "npx firebase-tools@latest deploy --only apphosting:home-pantry --dry-run --non-interactive",
 		"preview": "vite preview",
 		"prepare": "(svelte-kit sync || true) && npm run brand:css && npm run smui-theme-light && npm run smui-theme-dark && husky",

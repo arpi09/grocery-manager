@@ -13,7 +13,16 @@ random_jitter() {
 	echo $((base + RANDOM % spread))
 }
 
+# pintags (default-on in firebase-tools) can trigger Cloud Run PUT / IAM churn and 409 conflicts.
+# Disable on every deploy — CI runners have no persistent firebase-tools config.
+disable_pintags() {
+	npx firebase-tools@latest experiments:disable pintags \
+		--project "$PROJECT" \
+		--non-interactive 2>/dev/null || true
+}
+
 deploy_once() {
+	disable_pintags
 	npx firebase-tools@latest deploy \
 		--only "apphosting:${BACKEND}" \
 		--non-interactive \
