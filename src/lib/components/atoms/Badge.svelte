@@ -34,6 +34,6 @@
 	.badge-warning {
 		background: color-mix(in srgb, var(--color-warning) 18%, var(--color-surface));
 		border-color: color-mix(in srgb, var(--color-warning) 40%, var(--color-border));
-		color: var(--color-warning);
+		color: var(--color-text);
 	}
 </style>

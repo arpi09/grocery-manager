@@ -287,7 +287,7 @@
 
 	.error-message {
 		margin: 0;
-		color: color-mix(in srgb, var(--color-danger) 65%, var(--color-danger));
+		color: color-mix(in srgb, var(--color-danger) 70%, var(--color-text));
 		font-size: 0.875rem;
 		font-weight: 500;
 		line-height: 1.45;

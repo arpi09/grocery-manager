@@ -142,6 +142,6 @@
 		font-size: 0.7rem;
 		font-weight: 700;
 		text-transform: uppercase;
-		color: var(--color-warning);
+		color: color-mix(in srgb, var(--color-warning) 65%, var(--color-text));
 	}
 </style>
