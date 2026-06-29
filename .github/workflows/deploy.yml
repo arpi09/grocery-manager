@@ -37,7 +37,9 @@ on:
 
 concurrency:
   group: deploy-production
-  cancel-in-progress: true
+  # Firebase App Hosting deploys can continue cloud-side after a runner is
+  # cancelled; queue deploys instead of interrupting them to avoid IAM races.
+  cancel-in-progress: false
 
 jobs:
   gate:

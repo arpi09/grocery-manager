@@ -191,7 +191,7 @@ Coordinator eller e2e-agent kör [PROD_SMOKE.md](./PROD_SMOKE.md) (5 punkter) n�
 
 **Fix i repo (automatiskt):**
 
-- Workflow har `concurrency: deploy-production` med `cancel-in-progress: true` — bara en deploy i taget.
+- Workflow har `concurrency: deploy-production` med `cancel-in-progress: false` — bara en deploy i taget, och nya deploy-försök köas i stället för att avbryta en App Hosting-deploy som redan kan ha startat molnoperationer.
 - `scripts/firebase-deploy-apphosting.sh` retryar IAM 409 upp till 8 gånger med exponential backoff + jitter (45s → 90s → …).
 
 **Ägare — engångs (rekommenderat):**
@@ -229,7 +229,7 @@ Varje `firebase deploy --only apphosting:home-pantry` (via `scripts/firebase-dep
 |------|-----|--------|
 | `experiments:disable pintags` | `firebase-deploy-apphosting.sh` | Undviker Cloud Run revision-tag PUT som ger 409 / IAM-race |
 | IAM 409 retry (8×, backoff + jitter) | `firebase-deploy-apphosting.sh` | Transient policy-kollisioner |
-| `concurrency: deploy-production` + `cancel-in-progress: true` | `deploy.yml` | Max en deploy i taget |
+| `concurrency: deploy-production` + `cancel-in-progress: false` | `deploy.yml` | Max en deploy i taget; köa nya försök i stället för att avbryta molnoperationer |
 | **Ingen** `grantaccess` i CI | — | Secret IAM ändras bara vid engångs-setup (nedan), inte varje release |
 
 ### Engångs — secrets (ägare)
