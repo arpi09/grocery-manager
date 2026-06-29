@@ -29,6 +29,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(deploy): require FIREBASE_SERVICE_ACCOUNT — remove FIREBASE_TOKEN fallback from deploy.yml; fail fast without GCP SA secret; add `scripts/setup-firebase-deploy-sa.sh`; CI deploy uses ADC only.
 - fix(deploy): require FIREBASE_SERVICE_ACCOUNT for CI deploy ([#146](https://github.com/arpi09/grocery-manager/pull/146)) — **Root cause:** PR #145 added SA-first auth with `FIREBASE_TOKEN` fallback, but `FIREBASE_SERVICE_ACCOUNT` was never added to GitHub Secrets — only `FIREBASE_TOKEN` exists — so deploy kept using the deprecated CI token (IAM 409 retries).
 - fix(deploy): extend deploy job timeout to 120m ([#147](https://github.com/arpi09/grocery-manager/pull/147)) — Raise deploy job `timeout-minutes` from 60 to 120 so Firebase IAM 409 retries can reach attempt 8 (backoff sum ~95min plus deploy attempts).
+- fix(deploy): correct IAM 409 detection, fail fast on 403 ([#150](https://github.com/arpi09/grocery-manager/pull/150)) — Fix \is_iam_409\: remove broad \setIamPolicy\ match that retried HTTP 403 as 409 for hours
 
 ### Changed
 
