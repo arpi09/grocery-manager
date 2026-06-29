@@ -43,7 +43,7 @@ export function createStripeClient(): Stripe | null {
 	}
 
 	return new Stripe(secretKey, {
-		apiVersion: '2026-05-27.dahlia',
+		apiVersion: '2026-06-24.dahlia',
 		typescript: true
 	});
 }
