@@ -50,9 +50,13 @@ deploy_once() {
 		--project "$PROJECT"
 }
 
+# Transient IAM 409 only — do NOT match bare "setIamPolicy" (appears in 403 errors too).
 is_iam_409() {
 	local log_file="$1"
-	grep -qE 'HTTP Error: 409|concurrent policy changes|setIamPolicy|ABORTED.*policy|There were concurrent policy changes' "$log_file"
+	if grep -qE 'HTTP Error: 403|Policy update access denied|Permission .* denied' "$log_file"; then
+		return 1
+	fi
+	grep -qE 'HTTP Error: 409|There were concurrent policy changes|concurrent policy changes' "$log_file"
 }
 
 attempt=1
@@ -71,7 +75,7 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
 
 	if is_iam_409 "$log_file" && [ "$attempt" -lt "$MAX_ATTEMPTS" ]; then
 		sleep_for="$(random_jitter "$delay_seconds")"
-		echo "::warning::Firebase IAM 409 on attempt ${attempt}/${MAX_ATTEMPTS} — retrying in ${sleep_for}s (base ${delay_seconds}s + jitter)"
+		echo "::warning::Transient IAM 409 (concurrent policy changes) on attempt ${attempt}/${MAX_ATTEMPTS} — retrying full deploy in ${sleep_for}s (base ${delay_seconds}s + jitter)"
 		rm -f "$log_file"
 		sleep "$sleep_for"
 		delay_seconds=$((delay_seconds * 2))
@@ -79,6 +83,9 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
 		continue
 	fi
 
+	if grep -qE 'HTTP Error: 403|Policy update access denied|Permission .* denied' "$log_file"; then
+		echo "::error::Deploy SA lacks IAM permission (403) — fix GCP roles on github-deploy@, do not retry. See docs/DEPLOY.md#firebase-deploy-service-account"
+	fi
 	rm -f "$log_file"
 	exit "$exit_code"
 done
