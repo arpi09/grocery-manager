@@ -21,9 +21,6 @@
 	<div class="brain-card-inner">
 		<span class="brain-icon" aria-hidden="true"><FeatureIcon id="sparkle" size={22} /></span>
 		<div class="brain-copy">
-			<p class="brain-score" aria-label={t('brain.homeCard.scoreAria', { score: snapshot.score })}>
-				{t('brain.homeCard.score', { score: snapshot.score })}
-			</p>
 			<p class="brain-label">{t(snapshot.labelKey as MessageKey)}</p>
 			{#if showUnlockCta}
 				<p class="brain-cta">{t('brain.homeCard.unlockCta')}</p>
@@ -35,10 +32,6 @@
 </Card>
 
 <style>
-	.brain-home-card {
-		margin-bottom: var(--space-md);
-	}
-
 	.brain-card-inner {
 		display: flex;
 		gap: var(--space-md);
@@ -54,15 +47,8 @@
 		min-width: 0;
 	}
 
-	.brain-score {
-		margin: 0;
-		font-size: 1.125rem;
-		font-weight: 700;
-		line-height: 1.2;
-	}
-
 	.brain-label {
-		margin: 0.15rem 0 0;
+		margin: 0;
 		font-size: 0.8125rem;
 		font-weight: 600;
 		color: var(--color-primary);

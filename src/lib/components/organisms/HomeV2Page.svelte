@@ -200,6 +200,7 @@
 	.home-v2-page {
 		display: flex;
 		flex-direction: column;
+		gap: var(--space-md);
 		min-width: 0;
 	}
 
