@@ -47,5 +47,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Skaffu behöver kameran för att skanna streckkoder och fota varor i skafferiet.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Skaffu behöver åtkomst till dina bilder för att importera kvitton och foton av varor.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Skaffu kan spara bilder i ditt fotoalbum när du väljer att exportera från appen.</string>
 </dict>
 </plist>

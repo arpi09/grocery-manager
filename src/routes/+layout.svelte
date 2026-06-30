@@ -10,6 +10,7 @@
 	import { pwaInfo } from 'virtual:pwa-info';
 	import { initPwaInstallListeners } from '$lib/utils/pwa';
 	import { initClientErrorReporting } from '$lib/client/error-reporting';
+	import { trackCapacitorAppOpened } from '$lib/client/capacitor-telemetry';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 
 	let { children, data } = $props();
@@ -20,6 +21,7 @@
 		initScrollOnNavigate();
 		initPwaInstallListeners();
 		initClientErrorReporting();
+		trackCapacitorAppOpened();
 
 		if (!pwaInfo) {
 			return;

@@ -93,7 +93,8 @@ const CLIENT_EVENT_TYPES = [
 	'store_recommendation_completed',
 	'planer_viewed',
 	'ata_recipe_opened',
-	'ata_week_view_toggled'
+	'ata_week_view_toggled',
+	'capacitor_app_opened'
 ] as const;
 
 export const PUBLIC_ACQUISITION_EVENT_TYPES = [
