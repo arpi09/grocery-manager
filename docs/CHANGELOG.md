@@ -33,6 +33,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(stripe): align API version with Stripe SDK types ([#152](https://github.com/arpi09/grocery-manager/pull/152)) — Update Stripe `apiVersion` to `2026-06-24.dahlia` so `svelte-check` passes on master and open PRs.
 - fix(hem): remove brain score percent and fix card spacing ([#151](https://github.com/arpi09/grocery-manager/pull/151)) — Remove Hushållsminne · X% from BrainHomeCard (rest of card unchanged)
 - fix(deploy): queue production deploy attempts ([#153](https://github.com/arpi09/grocery-manager/pull/153)) — Queue production deploy workflow runs instead of cancelling in-progress Firebase App Hosting deploys.
+- fix(deploy): fail fast on IAM 409 with capped retries ([#154](https://github.com/arpi09/grocery-manager/pull/154)) — Reduce Firebase deploy IAM 409 retries from 8× (~2h backoff) to 3× with 30s base delay and 5min total retry cap
 
 ### Changed
 
