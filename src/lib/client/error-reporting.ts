@@ -8,8 +8,32 @@ export interface ClientErrorReport {
 }
 
 const DEDUP_MS = 60_000;
+const CHUNK_RELOAD_KEY = 'skaffu-chunk-reload';
 let lastKey = '';
 let lastAt = 0;
+
+function isChunkLoadError(message: string): boolean {
+	return /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(
+		message
+	);
+}
+
+/** Reload once after deploy when a stale tab requests removed JS chunks. */
+function tryReloadOnChunkError(message: string): boolean {
+	if (!browser || !isChunkLoadError(message)) {
+		return false;
+	}
+	try {
+		if (sessionStorage.getItem(CHUNK_RELOAD_KEY) === '1') {
+			return false;
+		}
+		sessionStorage.setItem(CHUNK_RELOAD_KEY, '1');
+	} catch {
+		return false;
+	}
+	window.location.reload();
+	return true;
+}
 
 function shouldReport(message: string, url: string): boolean {
 	const key = `${message.slice(0, 120)}|${url}`;
@@ -40,6 +64,9 @@ export async function reportClientError(report: ClientErrorReport): Promise<void
 	}
 
 	const url = report.url?.trim() || currentUrl();
+	if (tryReloadOnChunkError(message)) {
+		return;
+	}
 	if (!shouldReport(message, url)) {
 		return;
 	}
