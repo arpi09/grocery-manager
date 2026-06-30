@@ -237,6 +237,7 @@ Transient **409 concurrent policy changes** uppstår om två aktörer skriver pr
 | Steg | Var | Syfte |
 |------|-----|--------|
 | `firebase-tools@14.9.0` (pin) | `firebase-deploy-apphosting.sh` | Undviker obligatorisk projekt-`setIamPolicy` varje deploy (regression i ≥14.10) |
+| Node **24.18.0** (`.nvmrc`) + `setup-node` före deploy | `deploy.yml` | Node 24.17.x bryter ADC/token exchange i firebase-tools 14.9.0 (`Failed to authenticate`) |
 | `experiments:disable pintags` | `firebase-deploy-apphosting.sh` | Undviker Cloud Run revision-tag PUT som ger 409 / IAM-race |
 | IAM 409 retry (3×, capped backoff) + rollout-success exit 0 | `firebase-deploy-apphosting.sh` | Transient policy-kollisioner utan timmar av redeploy |
 | `concurrency: deploy-production` + `cancel-in-progress: false` | `deploy.yml` | Max en deploy i taget; köa nya försök i stället för att avbryta molnoperationer |

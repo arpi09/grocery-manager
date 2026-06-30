@@ -548,6 +548,12 @@ jobs:
           echo "skipped=false" >> "$GITHUB_OUTPUT"
           echo "Using FIREBASE_SERVICE_ACCOUNT (ADC via google-github-actions/auth)."
 
+      # firebase-tools@14.9.0 ADC uses google-auth-library/node-fetch; Node 24.17.x keep-alive
+      # regression breaks token exchange ("Failed to authenticate, have you run firebase login?").
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+
       - name: Authenticate to Google Cloud (service account)
         uses: google-github-actions/auth@v2
         with:
