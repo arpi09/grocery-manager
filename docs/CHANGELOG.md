@@ -38,6 +38,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(ci): repair invalid UTF-8 in deploy workflow ([#155](https://github.com/arpi09/grocery-manager/pull/155)) — Replace three invalid UTF-8 bytes (0x9D) in `deploy.yml` that caused GitHub to reject the workflow (0 jobs, no `workflow_dispatch`).
 - fix(deploy): pin firebase-tools 14.9.0 to skip per-deploy project IAM ([#157](https://github.com/arpi09/grocery-manager/pull/157)) — Pin `firebase-tools@14.9.0` in deploy/grant scripts — versions >=14.10 call project `setIamPolicy` on every App Hosting deploy to reconcile `firebase-app-hosting-compute@` roles, causing early HTTP 409 before rollout (even after secret pre-grant).
 - fix(deploy): pin Node 24.18.0 for firebase-tools ADC auth ([#158](https://github.com/arpi09/grocery-manager/pull/158)) — Deploy job ran `npx firebase-tools@14.9.0` without `setup-node`, using runner default Node 24.17.x
+- fix(deploy): setup Node 24.18 before firebase ADC deploy ([#159](https://github.com/arpi09/grocery-manager/pull/159)) — Add `setup-node` with `.nvmrc` (24.18.0) before `google-github-actions/auth` in deploy job
 
 ### Changed
 
