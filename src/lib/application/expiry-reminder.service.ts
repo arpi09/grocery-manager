@@ -70,13 +70,19 @@ export class ExpiryReminderService {
 		};
 
 		for (const user of users) {
-			const result = await this.processUserReminder(user);
-			if (result.status === 'sent') {
-				summary.sent += 1;
-			} else if (result.status === 'failed') {
+			try {
+				const result = await this.processUserReminder(user);
+				if (result.status === 'sent') {
+					summary.sent += 1;
+				} else if (result.status === 'failed') {
+					summary.failed += 1;
+				} else {
+					summary.skipped += 1;
+				}
+			} catch (error) {
 				summary.failed += 1;
-			} else {
-				summary.skipped += 1;
+				const message = error instanceof Error ? error.message : String(error);
+				console.error(`[expiry-reminder] weekly reminder failed for user ${user.id}: ${message}`);
 			}
 		}
 
@@ -98,13 +104,21 @@ export class ExpiryReminderService {
 				summary.skipped += 1;
 				continue;
 			}
-			const result = await this.processUserMovingSoonPush(user);
-			if (result.status === 'sent') {
-				summary.sent += 1;
-			} else if (result.status === 'failed') {
+			try {
+				const result = await this.processUserMovingSoonPush(user);
+				if (result.status === 'sent') {
+					summary.sent += 1;
+				} else if (result.status === 'failed') {
+					summary.failed += 1;
+				} else {
+					summary.skipped += 1;
+				}
+			} catch (error) {
 				summary.failed += 1;
-			} else {
-				summary.skipped += 1;
+				const message = error instanceof Error ? error.message : String(error);
+				console.error(
+					`[expiry-reminder] moving-soon push failed for user ${user.id}: ${message}`
+				);
 			}
 		}
 
