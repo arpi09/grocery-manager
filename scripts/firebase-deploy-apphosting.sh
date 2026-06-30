@@ -6,6 +6,10 @@ set -euo pipefail
 
 PROJECT="${1:-home-pantry-4bee5}"
 BACKEND="${2:-home-pantry}"
+# firebase-tools >=14.10 always calls project setIamPolicy on every apphosting deploy
+# (ensureAppHostingComputeServiceAccount → provisionDefaultComputeServiceAccount).
+# 14.9.0 only writes IAM when the compute SA is missing or storage.objectViewer is absent.
+FIREBASE_TOOLS_VERSION="${FIREBASE_TOOLS_VERSION:-14.9.0}"
 MAX_ATTEMPTS="${FIREBASE_DEPLOY_MAX_ATTEMPTS:-3}"
 INITIAL_DELAY_SECONDS="${FIREBASE_DEPLOY_RETRY_DELAY_SECONDS:-30}"
 MAX_TOTAL_RETRY_SECONDS="${FIREBASE_DEPLOY_MAX_RETRY_SECONDS:-300}"
@@ -38,14 +42,14 @@ random_jitter() {
 # pintags (default-on in firebase-tools) can trigger Cloud Run PUT / IAM churn and 409 conflicts.
 # Disable on every deploy — CI runners have no persistent firebase-tools config.
 disable_pintags() {
-	npx firebase-tools@latest experiments:disable pintags \
+	npx "firebase-tools@${FIREBASE_TOOLS_VERSION}" experiments:disable pintags \
 		--project "$PROJECT" \
 		--non-interactive 2>/dev/null || true
 }
 
 deploy_once() {
 	disable_pintags
-	npx firebase-tools@latest deploy \
+	npx "firebase-tools@${FIREBASE_TOOLS_VERSION}" deploy \
 		--only "apphosting:${BACKEND}" \
 		--non-interactive \
 		--project "$PROJECT"
@@ -91,7 +95,7 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
 		sleep_for="$(random_jitter "$delay_seconds")"
 		if [ $((total_retry_seconds + sleep_for)) -gt "$MAX_TOTAL_RETRY_SECONDS" ]; then
 			echo "::error::IAM 409 retry budget exhausted (${total_retry_seconds}s slept, cap ${MAX_TOTAL_RETRY_SECONDS}s) after attempt ${attempt}/${MAX_ATTEMPTS}."
-			echo "::error::Do not start parallel deploys. Run \`bash scripts/grant-apphosting-secrets.sh\` once, then redeploy. See docs/DEPLOY.md#iam-during-deploy"
+			echo "::error::Do not start parallel deploys. Run \`bash scripts/grant-apphosting-compute-roles.sh\` + \`bash scripts/grant-apphosting-secrets.sh\` once, then redeploy. See docs/DEPLOY.md#iam-during-deploy"
 			rm -f "$log_file"
 			exit 1
 		fi
@@ -106,7 +110,7 @@ while [ "$attempt" -le "$MAX_ATTEMPTS" ]; do
 
 	if is_iam_409 "$log_file"; then
 		echo "::error::IAM 409 (concurrent policy changes) after ${attempt}/${MAX_ATTEMPTS} deploy attempts — failing fast (no more full redeploys)."
-		echo "::error::Pre-grant secrets once: \`bash scripts/grant-apphosting-secrets.sh\`. Ensure only one deploy runs (no Console auto-deploy + Actions). See docs/DEPLOY.md#iam-during-deploy"
+		echo "::error::Pre-grant once: \`bash scripts/grant-apphosting-compute-roles.sh\` + \`bash scripts/grant-apphosting-secrets.sh\`. Ensure only one deploy runs (no Console auto-deploy + Actions). See docs/DEPLOY.md#iam-during-deploy"
 	fi
 	if grep -qE 'HTTP Error: 403|Policy update access denied|Permission .* denied' "$log_file"; then
 		echo "::error::Deploy SA lacks IAM permission (403) — fix GCP roles on github-deploy@, do not retry. See docs/DEPLOY.md#firebase-deploy-service-account"
