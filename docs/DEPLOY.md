@@ -221,16 +221,36 @@ Loggraden från extern IP (t.ex. `186.236.240.56`) mot Cloud SQL **public IP** (
 
 ## IAM during deploy
 
-Varje `firebase deploy --only apphosting:home-pantry` (via `scripts/firebase-deploy-apphosting.sh`) kan trigga **setIamPolicy** i GCP: Firebase CLI synkar roller för build/runtime service accounts, Secret Manager-access och Cloud Run. Det är **förväntat** — inte ett tecken på fel konfiguration i sig. Transient **409 concurrent policy changes** kan uppstå om två deploys eller Console auto-deploy körs samtidigt.
+Varje `firebase deploy --only apphosting:home-pantry` (via `scripts/firebase-deploy-apphosting.sh`) kan trigga **setIamPolicy** i GCP. **Orsak till tidiga 409-fel (före rollout):** `firebase-tools` ≥14.10 kör `ensureAppHostingComputeServiceAccount` → `provisionDefaultComputeServiceAccount` → `addServiceAccountToRoles` på **projektnivå** vid **varje** deploy och skriver dessa fyra roller till `firebase-app-hosting-compute@…`:
+
+- `roles/firebaseapphosting.computeRunner`
+- `roles/firebase.sdkAdminServiceAgent`
+- `roles/developerconnect.readTokenAccessor`
+- `roles/storage.objectViewer`
+
+Repot pinnar **`firebase-tools@14.9.0`**, som bara skriver projekt-IAM om compute-SA saknas (404) eller `storage.objectViewer` saknas. Secret Manager-bindings hanteras separat via `grantaccess` (engångs).
+
+Transient **409 concurrent policy changes** uppstår om två aktörer skriver projekt-IAM samtidigt (parallella deploys, Console auto-deploy, eller `@latest`-CLI som alltid synkar roller).
 
 ### Vad repot gör automatiskt
 
 | Steg | Var | Syfte |
 |------|-----|--------|
+| `firebase-tools@14.9.0` (pin) | `firebase-deploy-apphosting.sh` | Undviker obligatorisk projekt-`setIamPolicy` varje deploy (regression i ≥14.10) |
 | `experiments:disable pintags` | `firebase-deploy-apphosting.sh` | Undviker Cloud Run revision-tag PUT som ger 409 / IAM-race |
 | IAM 409 retry (3×, capped backoff) + rollout-success exit 0 | `firebase-deploy-apphosting.sh` | Transient policy-kollisioner utan timmar av redeploy |
 | `concurrency: deploy-production` + `cancel-in-progress: false` | `deploy.yml` | Max en deploy i taget; köa nya försök i stället för att avbryta molnoperationer |
 | **Ingen** `grantaccess` i CI | — | Secret IAM ändras bara vid engångs-setup (nedan), inte varje release |
+
+### Engångs — compute SA project roles (ägare)
+
+Efter första backend-setup (eller om du uppgraderat från `@latest`-deploy):
+
+```bash
+bash scripts/grant-apphosting-compute-roles.sh
+```
+
+Ger projektroller till `firebase-app-hosting-compute@home-pantry-4bee5.iam.gserviceaccount.com`. Kräver `gcloud` med projektägar-/IAM-admin-behörighet.
 
 ### Engångs — secrets (ägare)
 

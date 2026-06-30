@@ -370,8 +370,9 @@ Each `firebase deploy --only apphosting:home-pantry` reconciles GCP IAM (build S
 
 | Layer | Repo behavior |
 |-------|----------------|
-| **Deploy script** | [`scripts/firebase-deploy-apphosting.sh`](../scripts/firebase-deploy-apphosting.sh) — disables `pintags` experiment, retries IAM 409 up to 8× |
+| **Deploy script** | [`scripts/firebase-deploy-apphosting.sh`](../scripts/firebase-deploy-apphosting.sh) — pins `firebase-tools@14.9.0`, disables `pintags`, retries IAM 409 up to 3× |
 | **CI** | [`deploy.yml`](../.github/workflows/deploy.yml) — single-flight concurrency; **does not** run `grantaccess` per release |
+| **One-time compute roles** | [`scripts/grant-apphosting-compute-roles.sh`](../scripts/grant-apphosting-compute-roles.sh) — project IAM for `firebase-app-hosting-compute@` |
 | **One-time secrets** | [`scripts/grant-apphosting-secrets.sh`](../scripts/grant-apphosting-secrets.sh) — run after `secrets:set` when adding secrets |
 | **One-time Cloud SQL** | [`scripts/grant-cloudsql-client.mjs`](../scripts/grant-cloudsql-client.mjs) — `roles/cloudsql.client` for compute + App Hosting SAs |
 

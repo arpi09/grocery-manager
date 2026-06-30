@@ -6,6 +6,7 @@ set -euo pipefail
 
 PROJECT="${1:-home-pantry-4bee5}"
 BACKEND="${2:-home-pantry}"
+FIREBASE_TOOLS_VERSION="${FIREBASE_TOOLS_VERSION:-14.9.0}"
 
 # Must match `secret:` entries in apphosting.yaml (RUNTIME bindings).
 SECRETS=(
@@ -24,14 +25,14 @@ SECRETS=(
 
 grant_one() {
 	local name="$1"
-	if ! npx firebase-tools@latest apphosting:secrets:describe "$name" \
+	if ! npx "firebase-tools@${FIREBASE_TOOLS_VERSION}" apphosting:secrets:describe "$name" \
 		--project "$PROJECT" \
 		--non-interactive >/dev/null 2>&1; then
 		echo "::notice::Skip $name — secret not created yet (run apphosting:secrets:set first)"
 		return 0
 	fi
 	echo "Granting backend '$BACKEND' access to $name..."
-	npx firebase-tools@latest apphosting:secrets:grantaccess "$name" \
+	npx "firebase-tools@${FIREBASE_TOOLS_VERSION}" apphosting:secrets:grantaccess "$name" \
 		--backend "$BACKEND" \
 		--project "$PROJECT" \
 		--non-interactive

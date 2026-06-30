@@ -556,6 +556,7 @@ jobs:
       - name: Deploy App Hosting backend
         run: bash scripts/firebase-deploy-apphosting.sh
         env:
+          FIREBASE_TOOLS_VERSION: '14.9.0'
           FIREBASE_DEPLOY_MAX_ATTEMPTS: '3'
           FIREBASE_DEPLOY_RETRY_DELAY_SECONDS: '30'
           FIREBASE_DEPLOY_MAX_RETRY_SECONDS: '300'
