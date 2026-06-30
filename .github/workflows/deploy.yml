@@ -1,6 +1,6 @@
 # Manual production deploy - pr-gate -> tiered e2e -> pre-deploy verify -> Firebase -> post-deploy sanity
 # Trigger: Actions -> "Deploy to production"
-# Required secret: FIREBASE_SERVICE_ACCOUNT (GCP SA JSON ó google-github-actions/auth + ADC)
+# Required secret: FIREBASE_SERVICE_ACCOUNT (GCP SA JSON ù google-github-actions/auth + ADC)
 
 name: Deploy to production
 
@@ -520,7 +520,7 @@ jobs:
       ) &&
       needs.pre-deploy-verify.result == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 45
     environment: production
     outputs:
       skipped: ${{ steps.deploy-gate.outputs.skipped }}
@@ -537,7 +537,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${FIREBASE_SERVICE_ACCOUNT:-}" ]; then
-            echo "::error::FIREBASE_SERVICE_ACCOUNT is not set ó CI deploy requires a GCP service account JSON secret."
+            echo "::error::FIREBASE_SERVICE_ACCOUNT is not set ù CI deploy requires a GCP service account JSON secret."
             echo "Create the deploy SA and set the secret:"
             echo "  bash scripts/setup-firebase-deploy-sa.sh"
             echo "  gh secret set FIREBASE_SERVICE_ACCOUNT < ./github-deploy-sa-key.json"
@@ -556,8 +556,9 @@ jobs:
       - name: Deploy App Hosting backend
         run: bash scripts/firebase-deploy-apphosting.sh
         env:
-          FIREBASE_DEPLOY_MAX_ATTEMPTS: '8'
-          FIREBASE_DEPLOY_RETRY_DELAY_SECONDS: '45'
+          FIREBASE_DEPLOY_MAX_ATTEMPTS: '3'
+          FIREBASE_DEPLOY_RETRY_DELAY_SECONDS: '30'
+          FIREBASE_DEPLOY_MAX_RETRY_SECONDS: '300'
 
       - name: Post-deploy sanity check
         if: steps.deploy-gate.outputs.skipped != 'true'
@@ -593,7 +594,7 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
           echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
-          echo "| **Prod SHA** | \`${short_sha}\` ó [run ${{ github.run_id }}](${run_url}) |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Prod SHA** | \`${short_sha}\` ù [run ${{ github.run_id }}](${run_url}) |" >> "$GITHUB_STEP_SUMMARY"
           echo "| **Prod URL** | ${PRODUCTION_URL%/} |" >> "$GITHUB_STEP_SUMMARY"
           echo "| **Updated** | $(date -u +%Y-%m-%d) |" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
