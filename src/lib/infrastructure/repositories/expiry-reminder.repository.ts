@@ -168,6 +168,7 @@ export class DrizzleExpiryReminderRepository implements IExpiryReminderRepositor
 
 		const previousLastSentAt = current?.expiryReminderLastSentAt ?? null;
 		const cutoff = expiryReminderClaimCutoff(sentAt, intervalDays);
+		const cutoffIso = cutoff.toISOString();
 
 		const updated = await db
 			.update(userTable)
@@ -177,7 +178,7 @@ export class DrizzleExpiryReminderRepository implements IExpiryReminderRepositor
 					eq(userTable.id, userId),
 					or(
 						isNull(userTable.expiryReminderLastSentAt),
-						sql`date_trunc('day', ${userTable.expiryReminderLastSentAt}) <= ${cutoff}`
+						sql`date_trunc('day', ${userTable.expiryReminderLastSentAt}) <= date_trunc('day', ${cutoffIso}::timestamptz)`
 					)
 				)
 			)
@@ -205,6 +206,7 @@ export class DrizzleExpiryReminderRepository implements IExpiryReminderRepositor
 
 		const previousLastSentAt = current?.expiryMovingSoonLastSentAt ?? null;
 		const cutoff = expiryReminderClaimCutoff(sentAt, 1);
+		const cutoffIso = cutoff.toISOString();
 
 		const updated = await db
 			.update(userTable)
@@ -214,7 +216,7 @@ export class DrizzleExpiryReminderRepository implements IExpiryReminderRepositor
 					eq(userTable.id, userId),
 					or(
 						isNull(userTable.expiryMovingSoonLastSentAt),
-						sql`date_trunc('day', ${userTable.expiryMovingSoonLastSentAt}) <= ${cutoff}`
+						sql`date_trunc('day', ${userTable.expiryMovingSoonLastSentAt}) <= date_trunc('day', ${cutoffIso}::timestamptz)`
 					)
 				)
 			)
