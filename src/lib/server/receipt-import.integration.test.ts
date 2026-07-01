@@ -107,8 +107,7 @@ describe('importReceiptLines integration', () => {
 			pmfService,
 			learningEngineService,
 			eventType: 'receipt_parsed',
-			storeLabel: 'ICA',
-			purchasedAt: '2026-06-22'
+			storeLabel: 'ICA'
 		});
 
 		expect(result.itemsAdded).toBe(2);
