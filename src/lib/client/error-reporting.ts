@@ -64,7 +64,8 @@ export async function reportClientError(report: ClientErrorReport): Promise<void
 	}
 
 	const url = report.url?.trim() || currentUrl();
-	if (tryReloadOnChunkError(message)) {
+	if (isChunkLoadError(message)) {
+		tryReloadOnChunkError(message);
 		return;
 	}
 	if (!shouldReport(message, url)) {
@@ -95,6 +96,16 @@ export function initClientErrorReporting(): void {
 		return;
 	}
 	initialized = true;
+
+	window.addEventListener('vite:preloadError', (event) => {
+		event.preventDefault();
+		const payload = (event as unknown as { payload?: Error }).payload;
+		const message =
+			payload instanceof Error
+				? payload.message
+				: 'Failed to fetch dynamically imported module';
+		void reportClientError({ message, url: currentUrl(), statusCode: 500 });
+	});
 
 	window.addEventListener('error', (event) => {
 		const target = event.error instanceof Error ? event.error : new Error(event.message || 'Script error');
