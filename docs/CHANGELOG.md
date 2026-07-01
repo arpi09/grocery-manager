@@ -41,6 +41,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(deploy): setup Node 24.18 before firebase ADC deploy ([#159](https://github.com/arpi09/grocery-manager/pull/159)) — Add `setup-node` with `.nvmrc` (24.18.0) before `google-github-actions/auth` in deploy job
 - fix(prod): reload stale chunks and isolate expiry cron user failures ([#160](https://github.com/arpi09/grocery-manager/pull/160)) — Auto-reload once when a stale tab hits a removed JS chunk after deploy (fixes CLIENT /inkop dynamic import 404s).
 - fix(prod): expiry cron date binding and chunk error noise ([#161](https://github.com/arpi09/grocery-manager/pull/161)) — Fix Postgres date comparison in expiry-reminder claim queries (Date was bound as JS toString, causing cron 500s for affected users)
+- fix(test): receipt-import integration stale purchasedAt filter ([#162](https://github.com/arpi09/grocery-manager/pull/162)) — Remove fixed purchasedAt from receipt-import integration test so shelf-life inference does not auto-expire items before list assertion
 
 ### Changed
 
