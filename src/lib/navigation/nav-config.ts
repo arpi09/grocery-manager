@@ -13,6 +13,7 @@ export type NavIconId =
 	| 'calendar'
 	| 'chart'
 	| 'news'
+	| 'profile'
 	| 'settings'
 	| 'paw'
 	| 'shield'
