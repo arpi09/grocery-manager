@@ -150,7 +150,7 @@
 					onclick={close}
 				>
 					<span class="sheet-icon-wrap">
-						<NavIcon id="settings" />
+						<NavIcon id="profile" />
 					</span>
 					<span>{t('nav.profile')}</span>
 				</a>
