@@ -43,6 +43,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(prod): expiry cron date binding and chunk error noise ([#161](https://github.com/arpi09/grocery-manager/pull/161)) — Fix Postgres date comparison in expiry-reminder claim queries (Date was bound as JS toString, causing cron 500s for affected users)
 - fix(test): receipt-import integration stale purchasedAt filter ([#162](https://github.com/arpi09/grocery-manager/pull/162)) — Remove fixed purchasedAt from receipt-import integration test so shelf-life inference does not auto-expire items before list assertion
 - fix(ci): create empty .env for guides generate cron ([#163](https://github.com/arpi09/grocery-manager/pull/163)) — Fix **Guides generate cron** failure (`node: .env: not found`, exit 9) by creating an empty `.env` before `npm run guides:publish-next`.
+- fix(nav): enable Pantry V2 flag in nav and dev defaults ([#164](https://github.com/arpi09/grocery-manager/pull/164)) — Apply `PANTRY_UX_V2` in More menu and desktop nav links to `/inventory`
 
 ### Changed
 
