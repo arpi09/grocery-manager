@@ -44,7 +44,7 @@ test.describe('Pantry UX v2', () => {
 		await expect(page.getByTestId('pantry-v2-use-soon')).toBeVisible();
 		await expect(page.getByTestId('pantry-v2-use-soon')).toContainText(expiringName);
 
-		await page.getByTestId('pantry-v2-use-soon').getByRole('link', { name: /Visa alla|Show all/i }).click();
+		await page.getByTestId('pantry-v2-use-soon').getByRole('link', { name: /Visa alla varor|View all items/i }).click();
 		await expect(page).toHaveURL(/\/inventory\/all\?filter=expiring/);
 		await expect(page.getByTestId('pantry-all-locations-page')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('inventory-table')).toBeVisible({ timeout: 15_000 });
@@ -105,7 +105,7 @@ test.describe('Pantry UX v2', () => {
 		await dismissPageHintIfOpen(page);
 
 		await expect(page.getByTestId('pantry-v2-use-soon')).toBeVisible({ timeout: 15_000 });
-		await page.getByTestId('pantry-v2-use-soon').getByRole('link', { name: /Visa alla|Show all/i }).click();
+		await page.getByTestId('pantry-v2-use-soon').getByRole('link', { name: /Visa alla varor|View all items/i }).click();
 		await expect(page).toHaveURL(/\/inventory\/all\?filter=expiring/);
 		await expect(page.getByTestId('pantry-all-locations-page')).toBeVisible({ timeout: 15_000 });
 

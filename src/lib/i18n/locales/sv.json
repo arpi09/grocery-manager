@@ -3035,7 +3035,7 @@
 				"title": "Använd snart — {count, plural, one {# vara} other {# varor}}",
 				"list": "{items}",
 				"aria": "Varor att använda snart",
-				"cta": "Visa alla"
+				"cta": "Visa alla varor"
 			},
 			"zone": {
 				"fridge": "Kylskåp",
@@ -3043,7 +3043,7 @@
 				"cupboard": "Skafferi",
 				"count": "{count}",
 				"empty": "Tomt här just nu",
-				"viewAll": "Visa alla",
+				"viewAll": "Visa alla varor",
 				"viewAllAria": "Visa alla varor i {zone}"
 			},
 			"tile": {
@@ -3055,7 +3055,11 @@
 				"half": "halv",
 				"moreInZone": "{count} till",
 				"aria": "{name}, {quantity}",
-				"warnAria": "{name} — använd snart"
+				"warnAria": "{name} — använd snart",
+				"use": "Använd",
+				"useAria": "Registrera användning av {name}",
+				"consumeSheetTitle": "Registrera användning — {name}",
+				"viewInZone": "Visa i {zone}"
 			},
 			"addCta": "Lägg till vara",
 			"scanCta": "Skanna",
@@ -4170,12 +4174,18 @@
 			"title": "Skafferikoll",
 			"missingExpiry": "Varor utan datum",
 			"estimatedCount": "Uppskattade datum",
+			"estimatedHint": "AI har gissat dessa datum — kontrollera att de stämmer",
 			"actionEatFirst": "Ät först",
 			"actionAddExpiry": "Lägg till datum",
 			"actionPlanRecipe": "Planera recept",
 			"actionReviewEstimated": "Granska uppskattningar",
+			"ctaExpiring": "Visa varor som går ut snart",
+			"ctaNoExpiry": "Visa varor utan datum",
+			"ctaEstimated": "Visa varor med uppskattat datum",
+			"ctaWeekPlan": "Öppna veckoplan",
 			"daysUntil": "Om {count} dagar",
-			"deepen": "Fördjupa med AI",
+			"deepen": "Uppdatera förslag",
+			"deepenTitle": "AI analyserar lagret och förbättrar förslagen nedan",
 			"deepening": "Fördjupar…",
 			"deepenError": "Kunde inte fördjupa insikterna just nu."
 		},

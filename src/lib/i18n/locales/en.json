@@ -3114,7 +3114,7 @@
 				"title": "Use soon — {count, plural, one {# item} other {# items}}",
 				"list": "{items}",
 				"aria": "Items to use soon",
-				"cta": "View all"
+				"cta": "View all items"
 			},
 			"zone": {
 				"fridge": "Fridge",
@@ -3122,7 +3122,7 @@
 				"cupboard": "Cupboard",
 				"count": "{count}",
 				"empty": "Empty here for now",
-				"viewAll": "View all",
+				"viewAll": "View all items",
 				"viewAllAria": "View all items in {zone}"
 			},
 			"tile": {
@@ -3134,7 +3134,11 @@
 				"half": "half",
 				"moreInZone": "{count} more",
 				"aria": "{name}, {quantity}",
-				"warnAria": "{name} — use soon"
+				"warnAria": "{name} — use soon",
+				"use": "Use",
+				"useAria": "Log usage for {name}",
+				"consumeSheetTitle": "Log usage — {name}",
+				"viewInZone": "View in {zone}"
 			},
 			"addCta": "Add item",
 			"scanCta": "Scan",
@@ -4170,12 +4174,18 @@
 			"title": "Pantry insights",
 			"missingExpiry": "Items without a date",
 			"estimatedCount": "Estimated dates",
+			"estimatedHint": "AI guessed these dates — check that they look right",
 			"actionEatFirst": "Eat first",
 			"actionAddExpiry": "Add expiry dates",
 			"actionPlanRecipe": "Plan a recipe",
 			"actionReviewEstimated": "Review estimates",
+			"ctaExpiring": "View items expiring soon",
+			"ctaNoExpiry": "View items without a date",
+			"ctaEstimated": "View items with estimated dates",
+			"ctaWeekPlan": "Open week plan",
 			"daysUntil": "In {count} days",
-			"deepen": "Deepen with AI",
+			"deepen": "Refresh suggestions",
+			"deepenTitle": "AI reviews your pantry and improves the suggestions below",
 			"deepening": "Deepening…",
 			"deepenError": "Could not deepen insights right now."
 		},

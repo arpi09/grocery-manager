@@ -13,6 +13,7 @@
 		formId?: string;
 		variant?: 'menu' | 'form';
 		onClose?: () => void;
+		onSuccess?: () => void;
 		consumeErrors?: Record<string, string[]>;
 	}
 
@@ -22,6 +23,7 @@
 		formId: formIdProp,
 		variant = 'menu',
 		onClose,
+		onSuccess,
 		consumeErrors = {}
 	}: Props = $props();
 
@@ -46,6 +48,7 @@
 		return async ({ result, update }) => {
 			await update();
 			if (result.type === 'success' || result.type === 'redirect') {
+				onSuccess?.();
 				onClose?.();
 			}
 		};
@@ -60,6 +63,7 @@
 	class:consume-panel--form={variant === 'form'}
 	use:enhance={submitConsume}
 >
+	<input type="hidden" name="itemId" value={item.id} />
 	<p class="lead">{t('consume.intro', { name: item.name, stock: stockLabel })}</p>
 
 	<div class="presets" role="group" aria-label={t('consume.presetsAria')}>
