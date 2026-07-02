@@ -505,14 +505,45 @@
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
 		background: var(--color-surface);
+		min-width: 0;
+		box-sizing: border-box;
 	}
 
 	.quick-add input {
+		width: 100%;
+		min-width: 0;
+		box-sizing: border-box;
 		min-height: var(--touch-target-min);
 		padding: 0.5rem 0.75rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
 		font: inherit;
+	}
+
+	@media (min-width: 480px) {
+		.quick-add {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			grid-template-areas:
+				'name name'
+				'qty unit'
+				'submit submit';
+		}
+
+		.quick-add input#shopping-v2-name {
+			grid-area: name;
+		}
+
+		.quick-add input[name='quantity'] {
+			grid-area: qty;
+		}
+
+		.quick-add input[name='unit'] {
+			grid-area: unit;
+		}
+
+		.quick-add :global(.btn) {
+			grid-area: submit;
+		}
 	}
 
 	.sr-live {

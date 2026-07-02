@@ -73,16 +73,19 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
+		min-width: 0;
 	}
 
 	.add-card {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
-		padding: var(--space-sm);
+		padding: var(--space-md);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
 		background: var(--color-surface-muted);
+		min-width: 0;
+		box-sizing: border-box;
 	}
 
 	.add-form--empty .add-card {
@@ -91,12 +94,16 @@
 
 	.add-primary {
 		display: grid;
-		grid-template-columns: 1fr auto;
+		grid-template-columns: minmax(0, 1fr) auto;
 		gap: var(--space-sm);
+		min-width: 0;
 	}
 
 	.add-primary input,
 	.qty-row input {
+		width: 100%;
+		min-width: 0;
+		box-sizing: border-box;
 		padding: 0.55rem 0.7rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
@@ -108,7 +115,8 @@
 
 	.qty-row {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 		gap: var(--space-sm);
+		min-width: 0;
 	}
 </style>

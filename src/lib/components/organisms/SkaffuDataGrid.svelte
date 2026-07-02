@@ -48,6 +48,7 @@
 		tableHead?: Snippet;
 		tableBody: Snippet;
 		bulkActions?: Snippet;
+		headerActions?: Snippet;
 		class?: string;
 		dataTestId?: string;
 	}
@@ -81,6 +82,7 @@
 		tableHead,
 		tableBody,
 		bulkActions,
+		headerActions,
 		class: className = '',
 		dataTestId = 'data-grid'
 	}: Props = $props();
@@ -115,15 +117,20 @@
 <section class="skaffu-data-grid {className}" data-testid={dataTestId}>
 	<header class="grid-header">
 		<h2 class="grid-title">{title}</h2>
-		<button
-			type="button"
-			class="filter-btn"
-			aria-label={t('dataGrid.openFilter')}
-			data-testid="data-grid-filter-button"
-			onclick={openFilterSheet}
-		>
-			<FilterListIcon />
-		</button>
+		<div class="grid-header-actions">
+			{#if headerActions}
+				{@render headerActions()}
+			{/if}
+			<button
+				type="button"
+				class="filter-btn"
+				aria-label={t('dataGrid.openFilter')}
+				data-testid="data-grid-filter-button"
+				onclick={openFilterSheet}
+			>
+				<FilterListIcon />
+			</button>
+		</div>
 	</header>
 
 	<DataGridBulkBar {selectedCount} actions={bulkActions} />
@@ -217,6 +224,13 @@
 		white-space: nowrap;
 	}
 
+	.grid-header-actions {
+		display: flex;
+		align-items: center;
+		gap: var(--space-xs);
+		flex-shrink: 0;
+	}
+
 	.filter-btn {
 		display: inline-flex;
 		align-items: center;
@@ -250,6 +264,13 @@
 	@media (max-width: 640px) {
 		.skaffu-data-grid {
 			padding: var(--space-sm);
+			border: none;
+			background: transparent;
+		}
+
+		.table-scroll {
+			overflow-x: clip;
+			overflow-y: visible;
 		}
 	}
 </style>

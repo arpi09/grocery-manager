@@ -165,21 +165,25 @@
 					tabindex={-1}
 					aria-label={t('shopping.listAria')}
 				>
-					<ShoppingListShareMenu
-						uncheckedItems={data.items}
-						checkedCount={data.checkedCount}
-						canEdit={data.canEdit}
-						shareLinkEnabled={data.shareLinkEnabled}
-						memberCount={householdMemberCount}
-						shareFirst={data.shareLinkEnabled}
-					/>
-
+					{#if data.canEdit && data.shareLinkEnabled && listHasItems}
+						<ShoppingListShareMenu
+							uncheckedItems={data.items}
+							checkedCount={data.checkedCount}
+							canEdit={data.canEdit}
+							shareLinkEnabled={data.shareLinkEnabled}
+							memberCount={householdMemberCount}
+							shareFirst={true}
+						/>
+					{/if}
 
 					<ShoppingChecklistDataGrid
 						uncheckedItems={data.items}
 						checkedCount={data.checkedCount}
 						canEdit={data.canEdit}
 						shoppingToPantryMode={data.shoppingToPantryMode}
+						shareLinkEnabled={data.shareLinkEnabled}
+						memberCount={householdMemberCount}
+						headerShareMenu={!data.shareLinkEnabled}
 					/>
 
 					{#if data.canEdit}
@@ -359,6 +363,9 @@
 	}
 
 	.receipt-one-tap {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-md);
 		margin-bottom: var(--space-md);
 	}
 
