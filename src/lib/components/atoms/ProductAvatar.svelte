@@ -2,6 +2,7 @@
 	interface Props {
 		name: string;
 		imageUrl?: string | null;
+		/** Expiring within USE_SOON_DAYS (7). Dot + tint for compact tiles; omit in list rows where expiry text exists. */
 		warn?: boolean;
 		size?: 'sm' | 'md';
 		muted?: boolean;

@@ -27,6 +27,12 @@
 		onPageSizeChange
 	}: Props = $props();
 
+	let selectedPageSize = $state(String(pageSize));
+
+	$effect(() => {
+		selectedPageSize = String(pageSize);
+	});
+
 	const prevDisabled = $derived(page <= 1);
 	const nextDisabled = $derived(page >= pageCount || totalCount === 0);
 </script>
@@ -36,12 +42,12 @@
 		<span class="page-size-label">{t('dataGrid.rowsPerPage')}</span>
 		<select
 			class="page-size-select"
-			value={String(pageSize)}
+			bind:value={selectedPageSize}
 			aria-label={t('dataGrid.rowsPerPage')}
-			onchange={(event) => onPageSizeChange(Number(event.currentTarget.value) as DataGridPageSize)}
+			onchange={() => onPageSizeChange(Number(selectedPageSize) as DataGridPageSize)}
 		>
 			{#each DATA_GRID_PAGE_SIZE_OPTIONS as option (option)}
-				<option value={option}>{option}</option>
+				<option value={String(option)}>{option}</option>
 			{/each}
 		</select>
 	</label>
