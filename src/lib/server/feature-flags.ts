@@ -82,9 +82,13 @@ export function isShoppingUxV2Enabled(): boolean {
 	return isEnvTrue(FEATURE_FLAG_ENV.SHOPPING_UX_V2);
 }
 
-/** Server flag: Pantry UX v2 — shelf view on `/inventory` (default off). */
+/** Server flag: Pantry UX v2 — shelf view on `/inventory` (default off prod; on in vite dev when unset). */
 export function isPantryUxV2Enabled(): boolean {
-	return isEnvTrue(FEATURE_FLAG_ENV.PANTRY_UX_V2);
+	const val = process.env[FEATURE_FLAG_ENV.PANTRY_UX_V2];
+	if (val !== undefined && val !== '') {
+		return val === 'true';
+	}
+	return process.env.NODE_ENV === 'development';
 }
 
 /** Server flag: Home UX v2 — Household Briefing on `/hem` (default on). */
