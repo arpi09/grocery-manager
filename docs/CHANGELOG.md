@@ -18,6 +18,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - feat(brain): full integration — scan hub, shelf-life parity, V2 surfaces ([#141](https://github.com/arpi09/grocery-manager/pull/141)) — Restore scan hub navigation and align shelf-life inference (`inferShelfLifeWithRefinement`) with golden tests and adapter parity
 - feat(mobile): store beta blockers for TestFlight/Play internal ([#156](https://github.com/arpi09/grocery-manager/pull/156)) — **iOS:** `NSCameraUsageDescription`, `NSPhotoLibraryUsageDescription`, `NSPhotoLibraryAddUsageDescription` (SV) for scan/receipt flows
 - feat(inventory): shelf tiles, consume sheet, and insights CTAs ([#165](https://github.com/arpi09/grocery-manager/pull/165)) — Dense ProductTile with Använd action and zone grid polish
+- feat(inventory): list row actions and mobile data grid polish ([#166](https://github.com/arpi09/grocery-manager/pull/166)) — InventoryListRowActions with Använd and row menu on location list grid
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
