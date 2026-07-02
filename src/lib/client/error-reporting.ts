@@ -99,10 +99,10 @@ export function initClientErrorReporting(): void {
 
 	window.addEventListener('vite:preloadError', (event) => {
 		event.preventDefault();
-		const detail = (event as CustomEvent<{ payload?: Error }>).detail;
+		const payload = (event as unknown as { payload?: Error }).payload;
 		const message =
-			detail?.payload instanceof Error
-				? detail.payload.message
+			payload instanceof Error
+				? payload.message
 				: 'Failed to fetch dynamically imported module';
 		void reportClientError({ message, url: currentUrl(), statusCode: 500 });
 	});
