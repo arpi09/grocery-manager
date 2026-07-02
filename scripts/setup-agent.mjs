@@ -18,7 +18,8 @@ const DEV_DEFAULTS = {
 	PUBLIC_TURNSTILE_SITE_KEY: '1x00000000000000000000AA',
 	TURNSTILE_SECRET_KEY: '1x0000000000000000000000000000000AA',
 	TURNSTILE_SKIP: 'true',
-	PUBLIC_ORIGIN: 'http://localhost:5173'
+	PUBLIC_ORIGIN: 'http://localhost:5173',
+	PANTRY_UX_V2_ENABLED: 'true'
 };
 
 function setOrAppendEnv(key, value) {
@@ -71,6 +72,9 @@ function runMigrate() {
 }
 
 ensureEnvFile();
+for (const [key, value] of Object.entries(DEV_DEFAULTS)) {
+	setOrAppendEnv(key, value);
+}
 runMigrate();
 
 console.log('\nReady. Start dev:');

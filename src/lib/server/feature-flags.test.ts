@@ -75,6 +75,15 @@ describe('feature-flags registry', () => {
 		expect(isHomeUxV2Enabled()).toBe(false);
 	});
 
+	it('defaults pantry v2 on in vite dev when env unset', () => {
+		const previousNodeEnv = process.env.NODE_ENV;
+		process.env.NODE_ENV = 'development';
+		expect(isPantryUxV2Enabled()).toBe(true);
+		process.env.NODE_ENV = 'production';
+		expect(isPantryUxV2Enabled()).toBe(false);
+		process.env.NODE_ENV = previousNodeEnv;
+	});
+
 	it('enables opt-in flags only when env is exactly true', () => {
 		process.env[FEATURE_FLAG_ENV.SHELF_LIFE_LEARNING] = 'true';
 		process.env[FEATURE_FLAG_ENV.LOCATION_LEARNING] = 'true';
