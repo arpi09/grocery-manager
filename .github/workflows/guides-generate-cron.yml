@@ -47,6 +47,9 @@ jobs:
             exit 1
           fi
 
+          # guides:publish-next uses node --env-file=.env; CI has no checked-in .env (OPENAI_API_KEY is in step env).
+          touch .env
+
           set +e
           output=$(npm run guides:publish-next 2>&1)
           exit_code=$?
