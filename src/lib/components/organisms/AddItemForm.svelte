@@ -210,14 +210,16 @@
 		text-underline-offset: 2px;
 	}
 
-	.field {
-		margin-bottom: var(--space-md);
-	}
-
 	.row {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 		gap: var(--space-md);
+		min-width: 0;
+	}
+
+	.field {
+		margin-bottom: var(--space-md);
+		min-width: 0;
 	}
 
 	.select,

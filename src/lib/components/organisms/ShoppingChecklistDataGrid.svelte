@@ -7,6 +7,7 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import ProductAvatar from '$lib/components/atoms/ProductAvatar.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
+	import ShoppingListShareMenu from '$lib/components/molecules/ShoppingListShareMenu.svelte';
 	import ShoppingToPantrySheet from '$lib/components/molecules/ShoppingToPantrySheet.svelte';
 	import SkaffuDataGrid from '$lib/components/organisms/SkaffuDataGrid.svelte';
 	import type { PantryBridgePreview } from '$lib/application/shopping-to-pantry.service';
@@ -52,9 +53,21 @@
 		checkedCount: number;
 		canEdit: boolean;
 		shoppingToPantryMode: ShoppingToPantryMode;
+		shareLinkEnabled?: boolean;
+		memberCount?: number;
+		/** Render export/share overflow in grid header (legacy inkop when share link is off). */
+		headerShareMenu?: boolean;
 	}
 
-	let { uncheckedItems, checkedCount, canEdit, shoppingToPantryMode }: Props = $props();
+	let {
+		uncheckedItems,
+		checkedCount,
+		canEdit,
+		shoppingToPantryMode,
+		shareLinkEnabled = false,
+		memberCount = 0,
+		headerShareMenu = false
+	}: Props = $props();
 
 	const GRID_DEFAULTS = {
 		filter: DEFAULT_SHOPPING_LIST_FACET,
@@ -123,6 +136,9 @@
 	const listEmpty = $derived(uncheckedItems.length === 0 && checkedCount === 0);
 	const gridEmpty = $derived(!listEmpty && pipeline.totalCount === 0 && !loadingChecked);
 	const columnCount = $derived((canEdit ? 1 : 0) + 4);
+	const showHeaderShareMenu = $derived(
+		headerShareMenu && canEdit && (uncheckedItems.length > 0 || checkedCount > 0)
+	);
 
 	$effect.pre(() => {
 		void uncheckedItems.length;
@@ -452,6 +468,17 @@
 		onSelectAllChange={handleSelectAllChange}
 		dataTestId="shopping-checklist-grid"
 	>
+		{#snippet headerActions()}
+			{#if showHeaderShareMenu}
+				<ShoppingListShareMenu
+					{uncheckedItems}
+					{checkedCount}
+					{canEdit}
+					{shareLinkEnabled}
+					{memberCount}
+				/>
+			{/if}
+		{/snippet}
 		{#snippet tableHead()}
 			<Cell class="col-thumb" />
 			<Cell class="col-name" aria-sort={sortAria('name')}>
