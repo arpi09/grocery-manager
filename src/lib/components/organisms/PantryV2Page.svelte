@@ -6,6 +6,7 @@
 	import InventoryInsightsPanel from '$lib/components/organisms/InventoryInsightsPanel.svelte';
 	import PantryV2EmptyState from '$lib/components/organisms/PantryV2EmptyState.svelte';
 	import PantryV2ShelfView from '$lib/components/organisms/PantryV2ShelfView.svelte';
+	import InventoryConsumeSheet from '$lib/components/molecules/InventoryConsumeSheet.svelte';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import { trackPantryShelfOpened } from '$lib/client/pantry-v2-telemetry';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
@@ -16,12 +17,14 @@
 	interface Props {
 		items: InventoryItem[];
 		canWrite?: boolean;
+		canConsume?: boolean;
 		loadFailed?: boolean;
 	}
 
-	let { items, canWrite = false, loadFailed = false }: Props = $props();
+	let { items, canWrite = false, canConsume = false, loadFailed = false }: Props = $props();
 
 	let searchQuery = $state('');
+	let consumeItem = $state<InventoryItem | null>(null);
 	let insightsSnapshot = $state<InventoryInsightsSnapshot | null>(null);
 	let insightsLoading = $state(true);
 	let insightsDeepening = $state(false);
@@ -93,6 +96,19 @@
 	const missingExpiryCount = $derived(countMissingExpiry(items));
 	const missingExpiryHref = '/inventory/all?filter=noExpiry';
 	const bulkInferAction = canWrite ? '/inventory/all?/bulkInferExpiry' : null;
+	const consumeSheetOpen = $derived(consumeItem !== null);
+
+	function openConsumeSheet(itemId: string) {
+		if (!canConsume) return;
+		const item = items.find((entry) => entry.id === itemId);
+		if (item) {
+			consumeItem = item;
+		}
+	}
+
+	function closeConsumeSheet() {
+		consumeItem = null;
+	}
 
 	$effect(() => {
 		if (!browser) {
@@ -205,8 +221,10 @@
 	{:else if showHouseholdEmpty}
 		<PantryV2EmptyState {canWrite} />
 	{:else}
-		<PantryV2ShelfView {shelf} />
+		<PantryV2ShelfView {shelf} {canConsume} onConsume={openConsumeSheet} />
 	{/if}
+
+	<InventoryConsumeSheet open={consumeSheetOpen} item={consumeItem} onClose={closeConsumeSheet} />
 </div>
 
 <style>

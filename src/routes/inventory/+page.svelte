@@ -12,6 +12,11 @@
 	<AppHeader title={t('nav.inventory')} />
 
 	<PageContainer>
-		<PantryV2Page items={data.items} canWrite={data.canWrite} loadFailed={data.loadFailed} />
+		<PantryV2Page
+			items={data.items}
+			canWrite={data.canWrite}
+			canConsume={data.canConsume}
+			loadFailed={data.loadFailed}
+		/>
 	</PageContainer>
 </AppLayout>

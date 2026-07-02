@@ -29,7 +29,7 @@ For shelf view (phase 2). Keys: `pantry.v2.*`
 | `pantry.v2.useSoon.title` | Använd snart — {count, plural, one {# vara} other {# varor}} |
 | `pantry.v2.useSoon.list` | {items} |
 | `pantry.v2.useSoon.aria` | Varor att använda snart |
-| `pantry.v2.useSoon.cta` | Visa alla |
+| `pantry.v2.useSoon.cta` | Visa alla varor |
 
 ---
 
@@ -57,6 +57,11 @@ For shelf view (phase 2). Keys: `pantry.v2.*`
 | `pantry.v2.tile.moreInZone` | {count} till |
 | `pantry.v2.tile.aria` | {name}, {quantity} |
 | `pantry.v2.tile.warnAria` | {name} — använd snart |
+| `pantry.v2.tile.use` | Använd |
+| `pantry.v2.tile.useAria` | Registrera användning av {name} |
+| `pantry.v2.tile.consumeSheetTitle` | Registrera användning — {name} |
+| `pantry.v2.tile.viewInZone` | Visa i {zone} |
+| `pantry.v2.zone.viewAll` | Visa alla varor |
 
 ---
 

@@ -10,9 +10,11 @@
 
 	interface Props {
 		shelf: PantryShelfViewModel;
+		canConsume?: boolean;
+		onConsume?: (itemId: string) => void;
 	}
 
-	let { shelf }: Props = $props();
+	let { shelf, canConsume = false, onConsume }: Props = $props();
 
 	const useSoonHref = '/inventory/all?filter=expiring';
 
@@ -35,7 +37,12 @@
 				count={zone.totalCount}
 				onViewAll={() => handleZoneOpen(zone.location, zone.totalCount)}
 			/>
-			<PantryZoneGrid {zone} onZoneOpen={() => handleZoneOpen(zone.location, zone.totalCount)} />
+			<PantryZoneGrid
+				{zone}
+				{canConsume}
+				{onConsume}
+				onZoneOpen={() => handleZoneOpen(zone.location, zone.totalCount)}
+			/>
 		</section>
 	{/each}
 </div>
