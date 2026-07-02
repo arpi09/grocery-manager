@@ -250,6 +250,13 @@
 	@media (max-width: 640px) {
 		.skaffu-data-grid {
 			padding: var(--space-sm);
+			border: none;
+			background: transparent;
+		}
+
+		.table-scroll {
+			overflow-x: clip;
+			overflow-y: visible;
 		}
 	}
 </style>

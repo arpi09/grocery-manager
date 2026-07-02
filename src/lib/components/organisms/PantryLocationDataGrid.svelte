@@ -12,7 +12,9 @@
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import MissingExpiryFilterChip from '$lib/components/molecules/MissingExpiryFilterChip.svelte';
+	import InventoryConsumeSheet from '$lib/components/molecules/InventoryConsumeSheet.svelte';
 	import InventoryListMeta from '$lib/components/molecules/InventoryListMeta.svelte';
+	import InventoryListRowActions from '$lib/components/molecules/InventoryListRowActions.svelte';
 	import LocationTab from '$lib/components/molecules/LocationTab.svelte';
 	import SkaffuDataGrid from '$lib/components/organisms/SkaffuDataGrid.svelte';
 	import {
@@ -24,7 +26,7 @@
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import type { StorageLocation } from '$lib/domain/location';
 	import { daysUntilExpiry, formatExpiryDate, EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
-	import { buildPantryTile, countMissingExpiry } from '$lib/domain/pantry-shelf';
+	import { countMissingExpiry } from '$lib/domain/pantry-shelf';
 	import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
@@ -65,7 +67,11 @@
 		onItemNavigate
 	}: Props = $props();
 
+	let consumeItem = $state<InventoryItem | null>(null);
+	let openMenuItemId = $state<string | null>(null);
+
 	const canConsumeItems = $derived(canWrite || canConsume);
+	const consumeSheetOpen = $derived(consumeItem !== null);
 	const inventoryPath = $derived(allLocations ? '/inventory/all' : `/inventory/${location}`);
 	const locationName = $derived(
 		location ? locationLabel(getLocale(), location).toLowerCase() : ''
@@ -100,6 +106,26 @@
 		loadedItems = items;
 		searchResults = [];
 		selectedIds = new Set();
+	});
+
+	$effect(() => {
+		if (!browser || !openMenuItemId) return;
+
+		function handlePointerDown(event: PointerEvent) {
+			const target = event.target;
+			if (!(target instanceof Element)) return;
+			if (target.closest('.row-menu-wrap')) return;
+			openMenuItemId = null;
+		}
+
+		const id = window.setTimeout(() => {
+			window.addEventListener('pointerdown', handlePointerDown);
+		}, 0);
+
+		return () => {
+			window.clearTimeout(id);
+			window.removeEventListener('pointerdown', handlePointerDown);
+		};
 	});
 
 	$effect(() => {
@@ -326,6 +352,20 @@
 		void goto(`/item/${itemId}/edit`);
 	}
 
+	function openConsumeSheet(item: InventoryItem) {
+		if (!canConsume) return;
+		openMenuItemId = null;
+		consumeItem = item;
+	}
+
+	function closeConsumeSheet() {
+		consumeItem = null;
+	}
+
+	function toggleRowMenu(itemId: string) {
+		openMenuItemId = openMenuItemId === itemId ? null : itemId;
+	}
+
 	async function loadMoreActive() {
 		if (!browser || allLocations || !location || loadingMore || !hasMoreActive) return;
 		loadingMore = true;
@@ -461,6 +501,9 @@
 						{/if}
 					</button>
 				</Cell>
+				<Cell class="col-actions">
+					<span class="sr-only">{t('inventory.columnActions')}</span>
+				</Cell>
 			{/snippet}
 
 			{#snippet tableBody()}
@@ -490,8 +533,7 @@
 							</Cell>
 						{/if}
 						<Cell class="col-thumb">
-							{@const tile = buildPantryTile(item)}
-							<ProductAvatar name={item.name} warn={tile.warn} size="sm" />
+							<ProductAvatar name={item.name} size="sm" decorative />
 						</Cell>
 						<Cell class="col-name">
 							<div class="name-stack">
@@ -517,6 +559,20 @@
 									<Badge tone="default">{t('inventory.missingExpiryDate')}</Badge>
 								</span>
 							{/if}
+						</Cell>
+						<Cell class="col-actions">
+							<InventoryListRowActions
+								itemId={item.id}
+								itemName={item.name}
+								editHref="/item/{item.id}/edit"
+								canConsume={canConsume}
+								itemLocation={item.location}
+								showViewInZone={allLocations}
+								menuOpen={openMenuItemId === item.id}
+								onConsume={() => openConsumeSheet(item)}
+								onMenuToggle={() => toggleRowMenu(item.id)}
+								onMenuClose={() => (openMenuItemId = null)}
+							/>
 						</Cell>
 					</Row>
 				{/each}
@@ -577,6 +633,13 @@
 			</div>
 		{/if}
 	{/if}
+
+	<InventoryConsumeSheet
+		open={consumeSheetOpen}
+		item={consumeItem}
+		onClose={closeConsumeSheet}
+		action="?/consumeItem"
+	/>
 </div>
 
 <style>
@@ -681,6 +744,18 @@
 	:global(.col-location) {
 		width: 1.5rem;
 		padding-inline: var(--space-xs) !important;
+	}
+
+	:global(.col-actions .row-actions) {
+		justify-content: flex-end;
+	}
+
+	@media (max-width: 640px) {
+		.item-name {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
 	}
 
 	.sr-only {
