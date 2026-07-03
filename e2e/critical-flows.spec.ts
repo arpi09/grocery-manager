@@ -61,7 +61,7 @@ test.describe('Critical flows', () => {
 			expect(box.y + box.height).toBeLessThanOrEqual(844);
 		}
 
-		await page.getByTestId('activation-nav-forward').click();
+		await page.getByTestId('activation-cta-primary').click();
 		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
 		const fitsScan = await modal.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
 		expect(fitsScan).toBe(true);

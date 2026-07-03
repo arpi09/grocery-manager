@@ -2944,8 +2944,6 @@
 			"dialogAria": "Introduktion till Skaffu",
 			"progressAria": "Framsteg i introduktionen",
 			"continueStep": "Fortsätt",
-			"navBack": "Tillbaka",
-			"navForward": "Nästa",
 			"progressStepDisabled": "Inte tillgängligt än",
 			"welcome": {
 				"title": "Välkommen till Skaffu",
@@ -2963,6 +2961,7 @@
 			"success": {
 				"title": "Bra start",
 				"body": "Det här är vad ni har inlagt. Lägg till mer när det passar — listan och påminnelserna blir bättre.",
+				"bodyEmpty": "Lagret är igång. Lägg till varor när det passar — listan och påminnelserna blir bättre.",
 				"cta": "Fortsätt",
 				"itemsAria": "Varor du lagt till",
 				"moreItems": "+{count} till"
