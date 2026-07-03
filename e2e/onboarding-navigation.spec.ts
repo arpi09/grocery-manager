@@ -19,17 +19,17 @@ async function expectNoModalScroll(page: import('@playwright/test').Page) {
 test.describe('Activation onboarding navigation', () => {
 	test.describe.configure({ mode: 'serial', timeout: 120_000 });
 
-	test('back and forward nav moves between steps without overlap @deploy-critical', async ({
+	test('primary CTA and progress path move between steps without overlap @deploy-critical', async ({
 		page
 	}) => {
 		await page.setViewportSize({ width: 390, height: 844 });
 		await registerNewUser(page);
 		await expectOnboardingGuideVisible(page);
 
-		await page.getByTestId('activation-nav-forward').click();
+		await page.getByTestId('activation-cta-primary').click();
 		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
 
-		await page.getByTestId('activation-nav-back').click();
+		await page.getByTestId('activation-progress-welcome').click();
 		await expectActivationScreenHeading(page, /Welcome to Skaffu|Välkommen till Skaffu/i);
 
 		const progressOverlap = await page.evaluate(() => {

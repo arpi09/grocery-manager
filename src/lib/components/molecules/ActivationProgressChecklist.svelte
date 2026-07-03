@@ -127,9 +127,9 @@
 						disabled={!selectable}
 						aria-disabled={!selectable}
 						aria-current={active ? 'step' : undefined}
-						aria-label={future
-							? `${t(progressLabelKeys[key])} — ${t('onboarding.activation.progressStepDisabled')}`
-							: t(progressLabelKeys[key])}
+						aria-label={selectable
+							? t(progressLabelKeys[key])
+							: `${t(progressLabelKeys[key])} — ${t('onboarding.activation.progressStepDisabled')}`}
 						data-testid={`activation-progress-${key}`}
 						bind:this={nodeRefs[key]}
 						onclick={() => handleSelect(key)}
@@ -192,11 +192,12 @@
 		margin: 0;
 		padding: 0 var(--space-xs);
 		list-style: none;
-		min-width: min(100%, 20rem);
+		width: 100%;
 	}
 
 	.progress-step {
-		flex: 0 0 3.5rem;
+		flex: 1 1 3.5rem;
+		min-width: 2rem;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -206,7 +207,7 @@
 
 	.connector-wrap {
 		flex: 1 1 0.5rem;
-		min-width: 0.5rem;
+		min-width: 0.375rem;
 		display: flex;
 		align-items: center;
 		align-self: center;

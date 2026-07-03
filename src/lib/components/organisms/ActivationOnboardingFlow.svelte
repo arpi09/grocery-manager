@@ -38,10 +38,7 @@
 		type ActivationScreen
 	} from '$lib/utils/onboarding';
 	import {
-		canNavigateToScreen,
 		canSelectProgressKey,
-		nextScreen,
-		previousScreen,
 		progressKeyForScreen,
 		screenForProgressKey
 	} from '$lib/utils/onboarding-steps';
@@ -105,6 +102,15 @@
 	const successItems = $derived(userId ? getActivationSuccessSnapshot(userId) : []);
 	const visibleSuccessItems = $derived(successItems.slice(0, 3));
 	const hiddenSuccessCount = $derived(Math.max(0, successItems.length - visibleSuccessItems.length));
+	const screenBody = $derived.by(() => {
+		if (displayScreen === 'complete') {
+			return '';
+		}
+		if (displayScreen === 'success' && successItems.length === 0) {
+			return t('onboarding.activation.success.bodyEmpty');
+		}
+		return t(screenCopy[displayScreen].bodyKey);
+	});
 
 	const screenCopy: Record<
 		ActivationScreen,
@@ -146,67 +152,6 @@
 			return false;
 		}
 		return canSelectProgressKey(key, checklist, currentProgress);
-	}
-
-	function canNavigateTo(target: ActivationScreen): boolean {
-		if (!flags) {
-			return false;
-		}
-		return canNavigateToScreen(target, flags, inventoryCount, {
-			skipSuccessScreen: skipActivationSuccess,
-			flowComplete: flowComplete
-		});
-	}
-
-	const canNavBack = $derived.by(() => {
-		if (displayScreen === 'complete') {
-			return false;
-		}
-		if (isPreview) {
-			return true;
-		}
-		return previousScreen(displayScreen) !== null;
-	});
-
-	const canNavForward = $derived.by(() => {
-		if (displayScreen === 'complete') {
-			return false;
-		}
-		if (isPreview) {
-			return true;
-		}
-		const next = nextScreen(displayScreen);
-		return next !== null && canNavigateTo(next);
-	});
-
-	function handleNavBack() {
-		if (displayScreen === 'complete') {
-			return;
-		}
-		if (isPreview) {
-			clearPreview();
-			return;
-		}
-		const prev = previousScreen(displayScreen);
-		if (!prev) {
-			return;
-		}
-		previewScreen = prev;
-	}
-
-	function handleNavForward() {
-		if (displayScreen === 'complete') {
-			return;
-		}
-		if (isPreview) {
-			handlePreviewContinue();
-			return;
-		}
-		const next = nextScreen(displayScreen);
-		if (!next || !canNavigateTo(next)) {
-			return;
-		}
-		previewScreen = next;
 	}
 
 	function handleProgressSelect(key: ActivationProgressKey) {
@@ -460,7 +405,7 @@
 				{#key displayScreen}
 					<ActivationOnboardingScreen
 						title={t(screenCopy[displayScreen].titleKey)}
-						body={t(screenCopy[displayScreen].bodyKey)}
+						body={screenBody}
 					>
 						{#snippet illustration()}
 							{#if displayScreen === 'welcome'}
@@ -525,26 +470,6 @@
 		{#snippet footer()}
 			{#key `${displayScreen}-${isPreview}`}
 				<div class="flow-footer">
-					<div class="flow-nav-row">
-						<Button
-							type="button"
-							variant="ghost"
-							disabled={!canNavBack}
-							data-testid="activation-nav-back"
-							onclick={handleNavBack}
-						>
-							{t('onboarding.activation.navBack')}
-						</Button>
-						<Button
-							type="button"
-							variant="ghost"
-							disabled={!canNavForward}
-							data-testid="activation-nav-forward"
-							onclick={handleNavForward}
-						>
-							{t('onboarding.activation.navForward')}
-						</Button>
-					</div>
 					{#if isPreview}
 						<Button
 							type="button"
@@ -690,16 +615,6 @@
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;
-	}
-
-	.flow-nav-row {
-		display: flex;
-		justify-content: space-between;
-		gap: var(--space-sm);
-	}
-
-	.flow-nav-row :global(.btn) {
-		flex: 1;
 	}
 
 	.flow-footer {

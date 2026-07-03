@@ -31,6 +31,7 @@
 	.activation-screen {
 		display: flex;
 		flex-direction: column;
+		justify-content: center;
 		gap: var(--space-md);
 		flex: 1;
 		min-height: 0;
