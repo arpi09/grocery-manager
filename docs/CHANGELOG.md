@@ -67,6 +67,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - chore(ai-tooling): sync pr-workflow rule to .claude/rules ([#173](https://github.com/arpi09/grocery-manager/pull/173)) — `scripts/sync-ai-tooling.mjs` — `pr-workflow.mdc` tillagd i `RULE_ALLOWLIST`
 - refactor(login): streamline login action and form ([#176](https://github.com/arpi09/grocery-manager/pull/176)) — Hoistar `redirectTo` så alla tre `fail`-grenar återanvänder ett enda `safeRedirect`-anrop (istället för att räkna om det).
 - docs(reality): prod SHA 046542052 (#178 email logo) post-deploy ([#179](https://github.com/arpi09/grocery-manager/pull/179)) — Post-deploy update: prod SHA `046542052` @ run 28665190055 (auto→fast, e2e critical, verify-release grön)
+- chore: add .gitattributes with deterministic LF line endings ([#180](https://github.com/arpi09/grocery-manager/pull/180)) — Add `.gitattributes`: `* text=auto eol=lf`, CRLF for Windows scripts, binary markers for assets
 
 ### Added
 
