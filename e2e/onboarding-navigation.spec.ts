@@ -62,7 +62,9 @@ test.describe('Activation onboarding navigation', () => {
 		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
 
 		await page.getByTestId('activation-kivra-link').click();
-		await expect(page).toHaveURL(/\/settings\/kivra/);
+		// /settings/kivra 302-redirects to /settings when KIVRA_FORWARD_ENABLED is off
+		// (the default in E2E and CI), so accept either landing URL.
+		await expect(page).toHaveURL(/\/settings(\/kivra)?(\?|$)/);
 		await expect(page.getByTestId('activation-onboarding')).toBeHidden();
 	});
 

@@ -56,7 +56,8 @@ test.describe('Pantry UX v2', () => {
 
 		const tile = page.getByTestId('pantry-v2-product-tile').filter({ hasText: itemName }).first();
 		await expect(tile).toBeVisible();
-		await tile.focus();
+		// The tile is a non-focusable <article>; keyboard activation targets the inner link.
+		await tile.getByTestId('pantry-v2-tile-body').focus();
 		await page.keyboard.press('Enter');
 		await expect(page).toHaveURL(/\/item\/[^/]+\/edit/, { timeout: 15_000 });
 
