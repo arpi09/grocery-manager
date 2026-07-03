@@ -64,6 +64,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - Dependencies: npm production + dev minor/patch bumps ([#120](https://github.com/arpi09/grocery-manager/pull/120), [#121](https://github.com/arpi09/grocery-manager/pull/121), [#122](https://github.com/arpi09/grocery-manager/pull/122), [#130](https://github.com/arpi09/grocery-manager/pull/130), [#148](https://github.com/arpi09/grocery-manager/pull/148), [#149](https://github.com/arpi09/grocery-manager/pull/149)) — see merged PRs
 - docs(design): add Stitch consumer UX v2 design pack ([#169](https://github.com/arpi09/grocery-manager/pull/169)) — Add design/v2 Stitch Skaffu consumer UX v2 documentation (review, audit, normalization plan, editorial home).
 - chore(ai-tooling): sync pr-workflow rule to .claude/rules ([#173](https://github.com/arpi09/grocery-manager/pull/173)) — `scripts/sync-ai-tooling.mjs` — `pr-workflow.mdc` tillagd i `RULE_ALLOWLIST`
+- refactor(login): streamline login action and form ([#176](https://github.com/arpi09/grocery-manager/pull/176)) — Hoistar `redirectTo` så alla tre `fail`-grenar återanvänder ett enda `safeRedirect`-anrop (istället för att räkna om det).
 
 ### Added
 
