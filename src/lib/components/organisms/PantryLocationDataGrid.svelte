@@ -10,6 +10,7 @@
 	import LocationColorDot from '$lib/components/atoms/LocationColorDot.svelte';
 	import ProductAvatar from '$lib/components/atoms/ProductAvatar.svelte';
 	import DeleteConfirmButton from '$lib/components/molecules/DeleteConfirmButton.svelte';
+	import DeleteSafetyModal from '$lib/components/molecules/DeleteSafetyModal.svelte';
 	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
 	import MissingExpiryFilterChip from '$lib/components/molecules/MissingExpiryFilterChip.svelte';
 	import InventoryConsumeSheet from '$lib/components/molecules/InventoryConsumeSheet.svelte';
@@ -68,7 +69,9 @@
 	}: Props = $props();
 
 	let consumeItem = $state<InventoryItem | null>(null);
+	let deleteItem = $state<InventoryItem | null>(null);
 	let openMenuItemId = $state<string | null>(null);
+	let rowDeleteSubmitting = $state(false);
 
 	const canConsumeItems = $derived(canWrite || canConsume);
 	const consumeSheetOpen = $derived(consumeItem !== null);
@@ -366,6 +369,26 @@
 		openMenuItemId = openMenuItemId === itemId ? null : itemId;
 	}
 
+	function openDeleteConfirm(item: InventoryItem) {
+		openMenuItemId = null;
+		deleteItem = item;
+	}
+
+	function closeDeleteConfirm() {
+		deleteItem = null;
+	}
+
+	const rowDeleteEnhance = () => {
+		rowDeleteSubmitting = true;
+		return async ({ result }: { result: { type: string } }) => {
+			rowDeleteSubmitting = false;
+			if (result.type === 'success') {
+				deleteItem = null;
+				await invalidateAll();
+			}
+		};
+	};
+
 	async function loadMoreActive() {
 		if (!browser || allLocations || !location || loadingMore || !hasMoreActive) return;
 		loadingMore = true;
@@ -566,10 +589,12 @@
 								itemName={item.name}
 								editHref="/item/{item.id}/edit"
 								canConsume={canConsume}
+								canDelete={canWrite}
 								itemLocation={item.location}
 								showViewInZone={allLocations}
 								menuOpen={openMenuItemId === item.id}
 								onConsume={() => openConsumeSheet(item)}
+								onDelete={() => openDeleteConfirm(item)}
 								onMenuToggle={() => toggleRowMenu(item.id)}
 								onMenuClose={() => (openMenuItemId = null)}
 							/>
@@ -640,6 +665,28 @@
 		onClose={closeConsumeSheet}
 		action="?/consumeItem"
 	/>
+
+	{#if deleteItem && canWrite}
+		<form
+			id="inventory-row-delete-form"
+			method="POST"
+			action="?/bulkDeleteItems"
+			use:enhance={rowDeleteEnhance}
+			hidden
+			aria-hidden="true"
+		>
+			<input type="hidden" name="itemIds" value={deleteItem.id} />
+		</form>
+		<DeleteSafetyModal
+			open={true}
+			onClose={closeDeleteConfirm}
+			tier={2}
+			context="inventoryItem"
+			copyOptions={{ itemName: deleteItem.name }}
+			formId="inventory-row-delete-form"
+			confirmLoading={rowDeleteSubmitting}
+		/>
+	{/if}
 </div>
 
 <style>

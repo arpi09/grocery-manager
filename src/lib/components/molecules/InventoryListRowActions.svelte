@@ -13,7 +13,9 @@
 		itemLocation?: StorageLocation;
 		showViewInZone?: boolean;
 		menuOpen?: boolean;
+		canDelete?: boolean;
 		onConsume?: () => void;
+		onDelete?: () => void;
 		onMenuToggle?: () => void;
 		onMenuClose?: () => void;
 	}
@@ -26,7 +28,9 @@
 		itemLocation,
 		showViewInZone = false,
 		menuOpen = false,
+		canDelete = false,
 		onConsume,
+		onDelete,
 		onMenuToggle,
 		onMenuClose
 	}: Props = $props();
@@ -113,6 +117,22 @@
 					<a class="menu-item" href={zoneHref} role="menuitem" onclick={() => onMenuClose?.()}>
 						{t('pantry.v2.tile.viewInZone', { zone: zoneTitle })}
 					</a>
+				{/if}
+				{#if canDelete && onDelete}
+					<button
+						type="button"
+						class="menu-item menu-action menu-item--danger"
+						role="menuitem"
+						aria-label={t('item.deleteItemNamed', { name: itemName })}
+						data-testid="inventory-row-delete-{itemId}"
+						onclick={(event) => {
+							event.stopPropagation();
+							onMenuClose?.();
+							onDelete();
+						}}
+					>
+						{t('item.deleteItem')}
+					</button>
 				{/if}
 			</div>
 		{/if}
@@ -235,5 +255,22 @@
 		background: var(--color-surface-muted);
 		color: var(--color-primary);
 		text-decoration: none;
+	}
+
+	.menu-action {
+		width: 100%;
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		font-family: inherit;
+		text-align: left;
+	}
+
+	.menu-item--danger {
+		color: var(--color-danger);
+	}
+
+	.menu-item--danger:hover {
+		color: var(--color-danger);
 	}
 </style>
