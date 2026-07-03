@@ -1,3 +1,12 @@
+<script lang="ts" module>
+	/**
+	 * Tab-session pause (module scope, same pattern as overlay-stack's session slot):
+	 * AppLayout is instantiated per page, so component state would reset on every
+	 * navigation and the flow would re-open right after "maybe later" / Kivra taps.
+	 */
+	let pausedThisSession = false;
+</script>
+
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
@@ -168,6 +177,7 @@
 	function tryOpenFlow() {
 		if (
 			!browser ||
+			pausedThisSession ||
 			!userId ||
 			isOnboardingExcludedPath(pathname) ||
 			!shouldShowOnboarding(userId) ||
@@ -247,6 +257,8 @@
 		}
 		clearPreview();
 		markActivationScanDeferred(userId);
+		pausedThisSession = true;
+		closeFlow();
 	}
 
 	function handleSuccessContinue() {
@@ -278,6 +290,12 @@
 
 	function handleKivraTap(surface: 'scan' | 'shopping_setup') {
 		void trackProductEvent('onboarding_kivra_tapped', { surface });
+		pausedThisSession = true;
+		closeFlow();
+		// Modal's panel stops click propagation, so SvelteKit's router never sees the
+		// anchor click and a full-page load would wipe pausedThisSession (re-opening
+		// the flow over the settings page). Navigate client-side instead.
+		void goto('/settings/kivra');
 	}
 
 	function handlePreviewContinue() {
@@ -302,6 +320,7 @@
 			if (!userId || isOnboardingExcludedPath(pathname)) {
 				return;
 			}
+			pausedThisSession = false;
 			startedTracked = false;
 			lastViewedStep = null;
 			clearPreview();
@@ -429,7 +448,10 @@
 										class="kivra-link"
 										href="/settings/kivra"
 										data-testid="activation-kivra-link"
-										onclick={() => handleKivraTap('scan')}
+										onclick={(event) => {
+											event.preventDefault();
+											handleKivraTap('scan');
+										}}
 									>
 										{t('onboarding.activation.scan.kivraLink')}
 									</a>

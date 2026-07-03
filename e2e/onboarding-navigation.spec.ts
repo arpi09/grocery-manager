@@ -43,6 +43,31 @@ test.describe('Activation onboarding navigation', () => {
 		expect(progressOverlap).toBe(false);
 	});
 
+	test('scan step "maybe later" closes the modal', async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await registerNewUser(page);
+		await expectOnboardingGuideVisible(page);
+		await page.getByTestId('activation-cta-primary').click();
+		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
+
+		await page.getByTestId('activation-cta-secondary').click();
+		await expect(page.getByTestId('activation-onboarding')).toBeHidden();
+	});
+
+	test('scan step Kivra link navigates and closes the modal', async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await registerNewUser(page);
+		await expectOnboardingGuideVisible(page);
+		await page.getByTestId('activation-cta-primary').click();
+		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
+
+		await page.getByTestId('activation-kivra-link').click();
+		// /settings/kivra 302-redirects to /settings when KIVRA_FORWARD_ENABLED is off
+		// (the default in E2E and CI), so accept either landing URL.
+		await expect(page).toHaveURL(/\/settings(\/kivra)?(\?|$)/);
+		await expect(page.getByTestId('activation-onboarding')).toBeHidden();
+	});
+
 	test('progress path selects earlier completed step @deploy-critical', async ({ page }) => {
 		await page.setViewportSize({ width: 390, height: 844 });
 		await registerNewUser(page);

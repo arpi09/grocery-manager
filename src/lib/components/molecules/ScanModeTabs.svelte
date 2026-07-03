@@ -65,10 +65,6 @@
 </nav>
 
 <style>
-	.mode-tabs {
-		margin-bottom: var(--space-md);
-	}
-
 	.mode-tabs-scroll {
 		display: flex;
 		gap: var(--space-xs);

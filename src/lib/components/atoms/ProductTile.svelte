@@ -205,8 +205,8 @@
 	}
 
 	.product-tile.warn {
-		border-color: color-mix(in srgb, var(--color-warning) 50%, var(--color-border));
-		background: color-mix(in srgb, var(--color-warning) 8%, var(--color-surface));
+		border-color: color-mix(in srgb, var(--color-warning) 35%, var(--color-border));
+		background: color-mix(in srgb, var(--color-warning) 6%, var(--color-surface));
 	}
 
 	.tile-body {
@@ -253,10 +253,19 @@
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
+		overflow-wrap: anywhere;
 		width: 100%;
 	}
 
+	.product-tile:not(.overflow) .tile-name {
+		min-height: calc(2 * 1.2em);
+	}
+
 	.tile-detail {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 		font-size: 0.625rem;
 		color: var(--color-text-muted);
 		line-height: 1.2;
@@ -275,7 +284,7 @@
 		display: flex;
 		align-items: stretch;
 		justify-content: center;
-		gap: 0.125rem;
+		gap: var(--space-xs);
 		width: 100%;
 		padding: 0 var(--space-xs) var(--space-xs);
 	}
@@ -286,7 +295,7 @@
 		align-items: center;
 		justify-content: center;
 		min-width: var(--touch-target-min);
-		min-height: 1.75rem;
+		min-height: 2rem;
 		padding: 0 0.25rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
@@ -308,7 +317,7 @@
 
 	.tile-menu {
 		flex-shrink: 0;
-		width: 1.75rem;
+		width: 2rem;
 		padding: 0;
 		color: var(--color-text-muted);
 		font-size: 0.875rem;

@@ -15,6 +15,7 @@ import {
 	type HomeBriefingForYouCard,
 	type HomeBriefingFunFact,
 	type HomeBriefingMomentCard,
+	type HomeBriefingPulse,
 	type HomeBriefingStatus
 } from './home-briefing';
 
@@ -198,6 +199,31 @@ export function buildHomeBriefingMomentPresentation(card: HomeBriefingMomentCard
 	};
 }
 
+export function buildHomeBriefingPulsePresentation(
+	pulse: HomeBriefingPulse
+): HomeBriefingMessagePresentation {
+	if (pulse.kind === 'replenishmentMemory') {
+		const { displayName, avgIntervalDays, daysSinceLast } = pulse.suggestion;
+		if (avgIntervalDays != null) {
+			return {
+				key: 'home.v6.pulse.memoryInterval',
+				params: { name: displayName, interval: avgIntervalDays }
+			};
+		}
+		return {
+			key: 'home.v6.pulse.memoryLast',
+			params: { name: displayName, days: daysSinceLast }
+		};
+	}
+	if (pulse.daysAgo === 0) {
+		return { key: 'home.v6.pulse.pantryUpdatedToday', params: {} };
+	}
+	if (pulse.daysAgo === 1) {
+		return { key: 'home.v6.pulse.pantryUpdatedYesterday', params: {} };
+	}
+	return { key: 'home.v6.pulse.pantryUpdatedDaysAgo', params: { days: pulse.daysAgo } };
+}
+
 export type HomeBriefingChipId = 'shopping' | 'storage' | 'eat' | 'funFact';
 
 export interface HomeBriefingChipPresentation {
@@ -205,6 +231,8 @@ export interface HomeBriefingChipPresentation {
 	titleKey: MessageKey;
 	hint?: HomeBriefingMessagePresentation | { kind: 'recipeTitle'; title: string };
 	zoneCounts?: Record<StorageLocation, number>;
+	/** Discreet visual emphasis when the chip carries live household data. */
+	accent?: boolean;
 }
 
 export function buildShoppingChipHint(
@@ -212,6 +240,9 @@ export function buildShoppingChipHint(
 	shoppingCadence: HouseholdShoppingCadence | null | undefined,
 	locale: Locale
 ): HomeBriefingMessagePresentation {
+	if (shoppingListCount === 0) {
+		return { key: 'home.v6.chips.shoppingHintEmpty', params: {} };
+	}
 	const weekday = shoppingCadence?.weekday;
 	if (weekday != null && shouldShowCadenceWeekday(shoppingCadence)) {
 		return {
@@ -258,7 +289,8 @@ export function buildHomeBriefingChipsPresentation(input: {
 		{
 			id: 'shopping',
 			titleKey: 'nav.shopping',
-			hint: buildShoppingChipHint(input.shoppingListCount, input.shoppingCadence, input.locale)
+			hint: buildShoppingChipHint(input.shoppingListCount, input.shoppingCadence, input.locale),
+			accent: input.shoppingListCount > 0
 		},
 		{
 			id: 'storage',
@@ -278,7 +310,8 @@ export function buildHomeBriefingChipsPresentation(input: {
 	chips.push({
 		id: 'funFact',
 		titleKey: 'home.v6.chips.funFactTitle',
-		hint: buildFunFactChipHint(input.funFact)
+		hint: buildFunFactChipHint(input.funFact),
+		accent: input.funFact != null
 	});
 
 	return chips;

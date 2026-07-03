@@ -7,6 +7,7 @@ import {
 	buildHomeBriefingChipsPresentation,
 	buildHomeBriefingForYouPresentation,
 	buildHomeBriefingGreetingPresentation,
+	buildHomeBriefingPulsePresentation,
 	buildHomeBriefingStatusPresentation,
 	buildShoppingChipHint
 } from './home-briefing-presenter';
@@ -125,6 +126,65 @@ describe('home-briefing-presenter', () => {
 		);
 		expect(hint.key).toBe('home.v6.chips.shoppingHintNoCadence');
 		expect(hint.params.count).toBe(3);
+	});
+
+	it('uses empty-list copy for the shopping chip when list is empty', () => {
+		const hint = buildShoppingChipHint(0, null, 'sv');
+		expect(hint).toEqual({ key: 'home.v6.chips.shoppingHintEmpty', params: {} });
+	});
+
+	it('accents shopping and fun fact chips only when they carry live data', () => {
+		const withData = buildHomeBriefingChipsPresentation({
+			shoppingListCount: 2,
+			shoppingCadence: null,
+			locale: 'sv',
+			zoneCounts: { fridge: 1, freezer: 0, cupboard: 0 },
+			recipeChip: null,
+			funFact: { kind: 'zeroWaste', value: 2 }
+		});
+		expect(withData.find((chip) => chip.id === 'shopping')?.accent).toBe(true);
+		expect(withData.find((chip) => chip.id === 'funFact')?.accent).toBe(true);
+		expect(withData.find((chip) => chip.id === 'storage')?.accent).toBeUndefined();
+
+		const withoutData = buildHomeBriefingChipsPresentation({
+			shoppingListCount: 0,
+			shoppingCadence: null,
+			locale: 'sv',
+			zoneCounts: { fridge: 1, freezer: 0, cupboard: 0 },
+			recipeChip: null,
+			funFact: null
+		});
+		expect(withoutData.find((chip) => chip.id === 'shopping')?.accent).toBe(false);
+		expect(withoutData.find((chip) => chip.id === 'funFact')?.accent).toBe(false);
+	});
+
+	it('builds pulse copy for replenishment memory and pantry updates', () => {
+		expect(
+			buildHomeBriefingPulsePresentation({ kind: 'replenishmentMemory', suggestion })
+		).toEqual({
+			key: 'home.v6.pulse.memoryInterval',
+			params: { name: 'Milk', interval: 7 }
+		});
+
+		expect(
+			buildHomeBriefingPulsePresentation({
+				kind: 'replenishmentMemory',
+				suggestion: { ...suggestion, avgIntervalDays: null }
+			})
+		).toEqual({
+			key: 'home.v6.pulse.memoryLast',
+			params: { name: 'Milk', days: 14 }
+		});
+
+		expect(buildHomeBriefingPulsePresentation({ kind: 'pantryUpdated', daysAgo: 0 }).key).toBe(
+			'home.v6.pulse.pantryUpdatedToday'
+		);
+		expect(buildHomeBriefingPulsePresentation({ kind: 'pantryUpdated', daysAgo: 1 }).key).toBe(
+			'home.v6.pulse.pantryUpdatedYesterday'
+		);
+		expect(
+			buildHomeBriefingPulsePresentation({ kind: 'pantryUpdated', daysAgo: 5 })
+		).toEqual({ key: 'home.v6.pulse.pantryUpdatedDaysAgo', params: { days: 5 } });
 	});
 
 	it('builds four briefing chips in order, skipping eat without recipe', () => {

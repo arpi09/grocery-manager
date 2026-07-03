@@ -126,7 +126,7 @@
 	});
 
 	$effect(() => {
-		if (!browser || loadFailed) return;
+		if (!browser || loadFailed || unfilteredShelf.isEmpty) return;
 		insightsLoading = true;
 		void fetch('/api/inventory/insights')
 			.then((response) => (response.ok ? response.json() : null))
@@ -155,6 +155,7 @@
 <div class="pantry-v2-page" data-testid="pantry-v2-page">
 	<PantryShelfActions bind:query={searchQuery} {canWrite} returnTo="/inventory" />
 
+	{#if !loadFailed && !unfilteredShelf.isEmpty}
 	<details class="insights-fold" data-testid="pantry-v2-insights-fold">
 		<summary>{t('pantry.v2.insightsSummary')}</summary>
 		{#if canWrite}
@@ -194,6 +195,7 @@
 			/>
 		{/if}
 	</details>
+	{/if}
 
 	{#if !loadFailed && !showHouseholdEmpty && missingExpiryCount > 0}
 		<MissingExpiryFilterChip

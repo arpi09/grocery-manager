@@ -228,8 +228,6 @@
 			"evening": "Kväll"
 		},
 		"moreAddWays": "Fler sätt att lägga till",
-		"moreOnHome": "Mer på hem",
-		"receiptImportLink": "Importera kvitto",
 		"v3": {
 			"thisWeekTitle": "Vad ska vi handla denna vecka?",
 			"recommendsTitle": "Vad rekommenderar Skaffu?",
@@ -483,14 +481,23 @@
 				"sectionLabel": "Snabbkoll",
 				"shoppingHint": "{count, plural, one {# vara} other {# varor}} · ni brukar handla {weekday}",
 				"shoppingHintNoCadence": "{count, plural, one {# vara} other {# varor}}",
+				"shoppingHintEmpty": "Listan är tom — lägg till veckans första vara",
 				"shoppingAria": "Öppna inköpslistan",
 				"storageAria": "Öppna lagret",
 				"eatAria": "Laga recept",
 				"funFactTitle": "Rolig info",
 				"funFactZeroWaste": "{count, plural, one {# vecka utan svinn} other {# veckor utan svinn}}",
 				"funFactConsumed": "{count, plural, one {# vara använd denna vecka} other {# varor använda denna vecka}}",
-				"funFactPlaceholder": "Se hur det går",
+				"funFactPlaceholder": "Er statistik växer för varje vecka — titta in",
 				"funFactAria": "Öppna statistik"
+			},
+			"pulse": {
+				"sectionLabel": "Ert hushåll",
+				"memoryInterval": "Ni brukar köpa {name} ungefär var {interval}:e dag",
+				"memoryLast": "{name} — {days, plural, one {# dag} other {# dagar}} sedan ni köpte det senast",
+				"pantryUpdatedToday": "Skafferiet uppdaterades senast idag",
+				"pantryUpdatedYesterday": "Skafferiet uppdaterades senast igår",
+				"pantryUpdatedDaysAgo": "Skafferiet uppdaterades för {days} dagar sedan"
 			},
 			"error": {
 				"loadFailed": "Hem kunde inte laddas. Försök igen."
@@ -2649,7 +2656,7 @@
 		}
 	},
 	"receiptBulk": {
-		"lead": "Har du kvittot i en appå Ladda upp PDF eller bild direkt — eller fota ett papperskvitto. Vi föreslår varor du kan lägga till.",
+		"lead": "Har du kvittot i en app? Ladda upp PDF eller bild direkt — eller fota ett papperskvitto. Vi föreslår varor du kan lägga till.",
 		"cameraPaper": "Fota papperskvitto",
 		"selectItems": "Välj varor ({selected} av {total})",
 		"locationForAll": "Sätt plats för alla valda:",
@@ -2987,7 +2994,7 @@
 				"allNotificationsLink": "Alla notisinställningar"
 			},
 			"progress": {
-				"welcome": "Välkommen",
+				"welcome": "Start",
 				"firstScan": "Kvitto",
 				"pantryCreated": "Lagret",
 				"brain": "Minnet",
@@ -3066,13 +3073,12 @@
 				"consumeSheetTitle": "Registrera användning — {name}",
 				"viewInZone": "Visa i {zone}"
 			},
-			"addCta": "Lägg till vara",
-			"scanCta": "Skanna",
+			"addCta": "Lägg till",
 			"searchPlaceholder": "Sök i skafferiet…",
-			"insightsSummary": "Insikter om lagret",
+			"insightsSummary": "Att se över i skafferiet",
 			"empty": {
 				"title": "Tomt skafferi",
-				"body": "Lägg till varor manuellt eller skanna via knapparna ovan.",
+				"body": "Kom igång genom att importera ett kvitto eller lägga till en vara manuellt.",
 				"cta": "Lägg till vara"
 			},
 			"error": {
@@ -4195,10 +4201,10 @@
 			"deepenError": "Kunde inte fördjupa insikterna just nu."
 		},
 		"pantryFix": {
-			"cta": "Städa skafferiet",
-			"confirm": "Skaffu föreslår datum och dubbletter. Fortsätt?",
+			"cta": "Fyll i datum och hitta dubbletter",
+			"confirm": "Skaffu fyller i saknade bäst före-datum och föreslår dubbletter att slå ihop. Fortsätt?",
 			"success": "Uppdaterade {inferred} datum. {merges} sammanslagningar att granska.",
-			"failed": "Kunde inte städa skafferiet just nu."
+			"failed": "Det gick inte att uppdatera skafferiet just nu."
 		},
 		"receiptQuality": {
 			"lead": "{percent}% av raderna fick bäst-före-datum",

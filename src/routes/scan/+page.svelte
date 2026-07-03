@@ -71,13 +71,11 @@
 	<AppHeader {title} {subtitle} {backHref} {backLabel} />
 	<PageContainer>
 		{#if data.canWrite && !isHub}
-			<div class="scan-mode-tabs">
-				<ScanModeTabs
-					active={activeTab}
-					returnTo={data.returnTo}
-					defaultLocation={data.defaultLocation ?? undefined}
-				/>
-			</div>
+			<ScanModeTabs
+				active={activeTab}
+				returnTo={data.returnTo}
+				defaultLocation={data.defaultLocation ?? undefined}
+			/>
 		{/if}
 		{#if !data.canWrite}
 			<p class="readonly" role="status">
@@ -116,10 +114,6 @@
 </AppLayout>
 
 <style>
-	.scan-mode-tabs {
-		margin-bottom: var(--space-md);
-	}
-
 	.readonly {
 		margin: 0;
 		padding: var(--space-md);

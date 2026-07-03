@@ -41,41 +41,46 @@
 <style>
 	.zone-header {
 		display: flex;
-		flex-direction: column;
-		gap: var(--space-xs);
+		flex-direction: row;
+		align-items: center;
+		gap: var(--space-sm);
 		margin-bottom: var(--space-sm);
 		padding-bottom: var(--space-xs);
-		border-bottom: 3px solid var(--zone-color);
+		border-bottom: 1px solid color-mix(in srgb, var(--zone-color) 40%, transparent);
 	}
 
 	.zone-title-row {
 		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
+		align-items: baseline;
+		gap: var(--space-xs);
+		min-width: 0;
 	}
 
 	h3 {
 		margin: 0;
 		font-size: var(--font-size-body-sm, 0.875rem);
 		font-weight: 700;
+		white-space: nowrap;
 	}
 
 	.zone-count {
-		margin-left: auto;
 		font-size: var(--font-size-label, 0.75rem);
 		font-weight: 600;
 		color: var(--color-text-muted);
+		white-space: nowrap;
 	}
 
 	.zone-view-all {
-		align-self: flex-start;
+		margin-left: auto;
 		display: inline-flex;
 		align-items: center;
 		min-height: var(--touch-target-min);
+		margin-block: calc((1.25rem - var(--touch-target-min)) / 2);
 		font-size: 0.8125rem;
 		font-weight: 600;
 		color: var(--color-primary);
 		text-decoration: underline;
+		white-space: nowrap;
 	}
 
 	.zone-view-all:focus-visible {
