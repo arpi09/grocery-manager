@@ -22,6 +22,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - feat(inkop): compact share menu and shopping layout polish ([#167](https://github.com/arpi09/grocery-manager/pull/167)) — ShoppingListShareMenu portal/compact header and overlap fixes
 - feat(planer): progressive disclosure on Eat page ([#171](https://github.com/arpi09/grocery-manager/pull/171)) — Add reusable \ExpandableCopy\ molecule with keyboard-accessible Read more / Läs mer toggles (\ria-expanded\, \ria-controls\)
 - feat(ai): Claude Code parity with Cursor agent setup ([#172](https://github.com/arpi09/grocery-manager/pull/172)) — Add \CLAUDE.md\ and \docs/AI_TOOLING.md\ for unified Cursor + Claude Code onboarding
+- feat(ai-tooling): governance dispatch roster for Claude Code ([#175](https://github.com/arpi09/grocery-manager/pull/175)) — Definierade i `.cursor/agents/` (source of truth) → genereras till `.claude/agents/` av `sync:ai-tooling`.
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
