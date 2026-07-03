@@ -53,6 +53,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(nav): add profile icon and refresh settings glyph ([#168](https://github.com/arpi09/grocery-manager/pull/168)) — Add `profile` to nav icon config
 - fix(inventory): portal row menu and add delete item action ([#170](https://github.com/arpi09/grocery-manager/pull/170)) — Fix invisible inventory row ⋮ menu by portaling the panel to `body` with `position: fixed` (same pattern as `RowOverflowMenu` / `ShoppingListShareMenu`)
 - fix(email): use canonical house mark in branded email header ([#178](https://github.com/arpi09/grocery-manager/pull/178)) — Replace the S monogram placeholder in the branded email header with the canonical Skaffu house mark (`pwa/icon-192.png`, absolute URL via `getAppOrigin()`)
+- fix(onboarding): remove duplicate nav row, empty-state copy, stepper fit ([#181](https://github.com/arpi09/grocery-manager/pull/181)) — Onboarding-dialogen (aktiveringsflödet) städas upp utifrån mobil-screenshot på steg 3 av 5:
 
 ### Changed
 
