@@ -155,7 +155,7 @@
 		align-items: center;
 		justify-content: center;
 		min-width: var(--touch-target-min);
-		min-height: 1.75rem;
+		min-height: var(--touch-target-min);
 		padding: 0 0.35rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
@@ -176,7 +176,7 @@
 
 	.row-menu {
 		flex-shrink: 0;
-		width: 1.75rem;
+		width: var(--touch-target-min);
 		padding: 0;
 		color: var(--color-text-muted);
 		font-size: 0.875rem;
@@ -195,13 +195,6 @@
 		outline-offset: 1px;
 	}
 
-	@media (max-width: 640px) {
-		.row-use,
-		.row-menu {
-			min-width: 1.75rem;
-			min-height: 1.75rem;
-		}
-	}
 
 	@media (max-width: 360px) {
 		.row-use-label {
