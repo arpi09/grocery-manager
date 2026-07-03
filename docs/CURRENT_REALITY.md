@@ -5,8 +5,8 @@
 | F?lt | V?rde |
 |------|--------|
 | **Uppdaterad** | 2026-07-03 |
-| **Prod SHA** | `046542052` @ [28665190055](https://github.com/arpi09/grocery-manager/actions/runs/28665190055) (live, deploy_tier=auto→fast, e2e critical). |
-| **Master SHA** | `046542052` — email logo canonical mark (#178). |
+| **Prod SHA** | `e918c64ee` @ [28682670848](https://github.com/arpi09/grocery-manager/actions/runs/28682670848) (live, deploy_tier=auto→full, e2e 3/3). |
+| **Master SHA** | `e918c64ee` — mobil-UX polish (#182). |
 | **CI/CD model** | **v2 on master** � tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
@@ -85,6 +85,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 - [x] **Onboarding + statistik + account deletion + Capacitor spike** � prod **`6e28b4956`** @ [27897856697](https://github.com/arpi09/grocery-manager/actions/runs/27897856697) (auto tier, full E2E).
 - [x] **Login flow cleanup** — prod **`fc51a307b`** @ [28661077873](https://github.com/arpi09/grocery-manager/actions/runs/28661077873) (auto→fast, e2e critical). PR #176 merged 2026-07-03; curl-smoke grön (4 URLs ×2, VAPID, /login).
 - [x] **Email logo canonical mark** — prod **`046542052`** @ [28665190055](https://github.com/arpi09/grocery-manager/actions/runs/28665190055) (auto→fast, e2e critical). PR #178 merged 2026-07-03; curl-smoke grön (/, /guider, /login). Sista logo-avvikaren (e-post "S"-monogram) ersatt med kanoniska hus-märket.
+- [x] **Mobil-UX polish + onboarding-fixar** — prod **`e918c64ee`** @ [28682670848](https://github.com/arpi09/grocery-manager/actions/runs/28682670848) (auto→full, e2e 3/3). PRs #181+#182 merged 2026-07-03; curl-smoke grön (/, /guider, /login). Onboarding: Kanske senare/Kivra-länk fungerar, stepper fit. Hem: "Mer på hem" ersatt med pulskort. Lager: en Lägg till-knapp, "Att se över i skafferiet", polerade zonsektioner. Scan: copy+spacing. OBS: pantry-v2/home-v2-e2e körs ej i CI (flagg-lucka) — uppföljningstask öppen.
 
 ## Acquisition (V1)
 
