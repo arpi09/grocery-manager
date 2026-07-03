@@ -1,6 +1,6 @@
-# Ny utvecklare / ny Cursor-installation
+# Ny utvecklare — Cursor eller Claude Code
 
-Kort guide för att komma igång med **Home Pantry**. Koordinator-specifika filer (agentkartor, säkerhetsrapporter, engineering intelligence) ligger i gitignorerad [`private/`](../private/) — se [`docs/README.md`](./README.md). Vid kontobyte: `private/CURSOR_MIGRATION.md` lokalt om du har backup.
+Kort guide för att komma igång med **Skaffu** (repo: `home-pantry`). Koordinator-specifika filer ligger i gitignorerad [`private/`](../private/) — se [`docs/README.md`](./README.md). AI-paritet: [`AI_TOOLING.md`](./AI_TOOLING.md).
 
 ## Förutsättningar
 
@@ -17,17 +17,25 @@ npm ci
 npm run setup:agent
 ```
 
-`setup:agent` kopierar `.env.example` → `.env`, sätter PGlite/Turnstile-dev-defaults och kör migrate. Redigera `.env` vid behov — **committa aldrig** `.env`.
+`setup:agent` kopierar `.env.example` → `.env`, sätter PGlite/Turnstile-dev-defaults, kör migrate och synkar `.cursor/` → `.claude/`. Redigera `.env` vid behov — **committa aldrig** `.env`.
+
+Verifiera AI-setup:
+
+```bash
+npm run verify:ai-tooling
+```
 
 ## 2. Databas och dev-server
 
-```powershell
-npm run dev:watch
+```bash
+npm run dev
 ```
 
-Sibling worktrees (valfritt): `home-pantry-dev`, `home-pantry-admin`, `home-pantry-tests` — se [`scripts/dev-runtime/start-dev.ps1`](../scripts/dev-runtime/start-dev.ps1) (`SKAFFU_ROOT` eller git root).
+Auto-restart: `npm run dev:watch`. Hälsa: `npm run dev:health`.
 
-Öppna [http://localhost:5173](http://localhost:5173). Hälsa: `npm run dev:health`.
+Sibling worktrees (valfritt, Windows): `npm run dev:start:ai` — se [`AI_TOOLING.md`](./AI_TOOLING.md) och [`scripts/dev-runtime/start-dev.ps1`](../scripts/dev-runtime/start-dev.ps1).
+
+Öppna [http://localhost:5173](http://localhost:5173).
 
 ## 3. Miljövariabler och integrationer
 
@@ -41,11 +49,16 @@ Sibling worktrees (valfritt): `home-pantry-dev`, `home-pantry-admin`, `home-pant
 
 Lokal utveckling använder ofta `USE_PGLITE=true` (inbyggd databas). Produktion använder Cloud SQL — se Firebase-guiden.
 
-## 4. Cursor Project Rules
+## 4. AI-agenter och regler
 
-Öppna repot som workspace-mapp. Regler laddas från `.cursor/rules/` (t.ex. dev-server utan manuell omstart, koordinator-trunk). Ingen extra installation krävs om mappen är korrekt öppnad.
+| Verktyg | Entry | Regler / agenter |
+|---------|-------|------------------|
+| **Cursor** | Öppna repo som workspace | `.cursor/rules/`, `.cursor/agents/` |
+| **Claude Code** | `claude` i reporoten | `CLAUDE.md`, `.claude/agents/`, `.claude/skills/` |
 
-**User Rules** (kontonivå) ingår inte i git — vid kontobyte, kopiera från lokal backup `private/CURSOR_USER_RULES_SNIPPET.md` om du har en.
+Efter `setup:agent` ska `npm run verify:ai-tooling` vara grön.
+
+**User Rules** (kontonivå): [`docs/templates/AI_USER_RULES_SNIPPET.md`](templates/AI_USER_RULES_SNIPPET.md) — klistra in i Cursor eller Claude user prefs.
 
 ## 5. Kvalitet innan push
 

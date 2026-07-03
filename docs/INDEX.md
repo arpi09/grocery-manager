@@ -4,7 +4,7 @@
 
 | Läs först | Fil |
 |-----------|-----|
-| Agent entry (Cursor standard) | [AGENTS.md](../AGENTS.md) |
+| Agent entry (Cursor + Claude Code) | [AGENTS.md](../AGENTS.md) · [CLAUDE.md](../CLAUDE.md) · [AI_TOOLING.md](./AI_TOOLING.md) |
 | Feature → routes → filer | [CODEBASE_MAP.md](./CODEBASE_MAP.md) |
 | Prod SHA, nav, tier, kill switches | [CURRENT_REALITY.md](./CURRENT_REALITY.md) |
 | Release policy (master=truth, deploy=publish) | [RELEASE_MODEL.md](./RELEASE_MODEL.md) |

@@ -77,7 +77,15 @@ for (const [key, value] of Object.entries(DEV_DEFAULTS)) {
 }
 runMigrate();
 
+console.log('\nSyncing AI tooling (Cursor → Claude)...');
+const syncScript = join(root, 'scripts', 'sync-ai-tooling.mjs');
+const syncResult = spawnSync(process.execPath, [syncScript], { cwd: root, stdio: 'inherit' });
+if (syncResult.status !== 0) {
+	console.warn('sync:ai-tooling failed — run manually: npm run sync:ai-tooling');
+}
+
 console.log('\nReady. Start dev:');
 console.log('  npm run dev');
 console.log('  → http://localhost:5173');
-console.log('\nBefore push: npm run quick:dev  |  npm run pr:gate');
+console.log('\nVerify AI setup: npm run verify:ai-tooling');
+console.log('Before push: npm run quick:dev  |  npm run pr:gate');
