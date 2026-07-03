@@ -114,7 +114,7 @@
 		function handlePointerDown(event: PointerEvent) {
 			const target = event.target;
 			if (!(target instanceof Element)) return;
-			if (target.closest('.row-menu-wrap')) return;
+			if (target.closest('[data-inventory-row-menu-root]')) return;
 			openMenuItemId = null;
 		}
 

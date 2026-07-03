@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { tick } from 'svelte';
+	import { portal } from '$lib/actions/portal';
 	import { pantryZoneTitleKey } from '$lib/domain/pantry-shelf-presenter';
 	import type { StorageLocation } from '$lib/domain/location';
 	import { t } from '$lib/i18n';
@@ -29,15 +31,41 @@
 		onMenuClose
 	}: Props = $props();
 
+	let triggerEl = $state<HTMLButtonElement | null>(null);
+	let panelStyle = $state('');
+
 	const zoneHref = $derived(
 		showViewInZone && itemLocation ? `/inventory/${itemLocation}` : null
 	);
 	const zoneTitle = $derived(
 		itemLocation ? t(pantryZoneTitleKey(itemLocation)) : ''
 	);
+
+	async function positionPanel() {
+		await tick();
+		if (!triggerEl) return;
+
+		const rect = triggerEl.getBoundingClientRect();
+		const panelWidth = 10 * 16;
+		const margin = 8;
+		let left = rect.right - panelWidth;
+		if (left < margin) left = margin;
+		if (left + panelWidth > window.innerWidth - margin) {
+			left = window.innerWidth - panelWidth - margin;
+		}
+
+		const top = Math.max(margin, rect.bottom + 4);
+		panelStyle = `top: ${top}px; left: ${left}px;`;
+	}
+
+	$effect(() => {
+		if (menuOpen) {
+			void positionPanel();
+		}
+	});
 </script>
 
-<div class="row-actions" onclick={(event) => event.stopPropagation()}>
+<div class="row-actions" data-inventory-row-menu-root onclick={(event) => event.stopPropagation()}>
 	{#if canConsume && onConsume}
 		<button
 			type="button"
@@ -53,14 +81,16 @@
 			<span class="row-use-label">{t('pantry.v2.tile.use')}</span>
 		</button>
 	{/if}
-	<div class="row-menu-wrap">
+	<div class="row-menu-wrap" data-inventory-row-menu-root>
 		<button
 			type="button"
 			class="row-menu"
+			bind:this={triggerEl}
 			aria-label={t('inventory.itemActionsNamed', { name: itemName })}
 			aria-expanded={menuOpen}
 			aria-haspopup="menu"
 			data-testid="inventory-row-menu-{itemId}"
+			data-inventory-row-menu-root
 			onclick={(event) => {
 				event.stopPropagation();
 				onMenuToggle?.();
@@ -69,7 +99,13 @@
 			<span aria-hidden="true">⋮</span>
 		</button>
 		{#if menuOpen}
-			<div class="menu-panel" role="menu">
+			<div
+				class="menu-panel"
+				role="menu"
+				style={panelStyle}
+				data-inventory-row-menu-root
+				use:portal={'body'}
+			>
 				<a class="menu-item" href={editHref} role="menuitem" onclick={() => onMenuClose?.()}>
 					{t('inventory.editItem')}
 				</a>
@@ -173,12 +209,11 @@
 	}
 
 	.menu-panel {
-		position: absolute;
-		bottom: calc(100% + 0.25rem);
-		right: 0;
-		z-index: 30;
+		position: fixed;
+		z-index: calc(var(--z-nav-bottom) + 12);
 		min-width: 10rem;
 		padding: var(--space-xs);
+		padding-bottom: calc(var(--space-xs) + env(safe-area-inset-bottom, 0));
 		background: var(--color-surface);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
