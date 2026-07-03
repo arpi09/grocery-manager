@@ -2,6 +2,7 @@
 	import { getContext } from 'svelte';
 	import { Sparkles } from '@lucide/svelte';
 	import { OPEN_RECIPE_IDEAS } from '$lib/navigation/app-layout-context';
+	import ExpandableCopy from '$lib/components/molecules/ExpandableCopy.svelte';
 	import { t } from '$lib/i18n';
 
 	const openRecipeIdeas = getContext<(() => void) | undefined>(OPEN_RECIPE_IDEAS);
@@ -9,20 +10,22 @@
 
 {#if openRecipeIdeas}
 	<section class="eat-hub-hero" aria-labelledby="eat-hub-heading">
-		<div class="copy">
+		<div class="header-row">
 			<h2 id="eat-hub-heading">{t('planer.eatHubTitle')}</h2>
-			<p>{t('planer.eatHubLead')}</p>
+			<button
+				type="button"
+				class="generate-btn"
+				data-testid="eat-hub-generate"
+				data-analytics-id="planer.generate_meal"
+				onclick={openRecipeIdeas}
+			>
+				<Sparkles size={20} strokeWidth={2} aria-hidden="true" />
+				<span>{t('planer.generateMeal')}</span>
+			</button>
 		</div>
-		<button
-			type="button"
-			class="generate-btn"
-			data-testid="eat-hub-generate"
-			data-analytics-id="planer.generate_meal"
-			onclick={openRecipeIdeas}
-		>
-			<Sparkles size={20} strokeWidth={2} aria-hidden="true" />
-			<span>{t('planer.generateMeal')}</span>
-		</button>
+		<ExpandableCopy preview={t('planer.eatHubLeadShort')} class="lead">
+			<p>{t('planer.eatHubLead')}</p>
+		</ExpandableCopy>
 	</section>
 {/if}
 
@@ -30,7 +33,7 @@
 	.eat-hub-hero {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-md);
+		gap: var(--space-sm);
 		padding: var(--space-lg);
 		border-radius: var(--radius-lg);
 		border: 1px solid color-mix(in srgb, var(--color-secondary) 28%, var(--color-border));
@@ -42,19 +45,21 @@
 		box-shadow: var(--shadow-sm);
 	}
 
-	.copy h2 {
+	.header-row {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-md);
+	}
+
+	.header-row h2 {
 		margin: 0;
 		font-size: 1.15rem;
 		font-weight: 700;
 		letter-spacing: -0.02em;
 	}
 
-	.copy p {
-		margin: var(--space-xs) 0 0;
-		color: var(--color-text-muted);
+	.lead {
 		font-size: 0.9375rem;
-		line-height: 1.45;
-		max-width: 42ch;
 	}
 
 	.generate-btn {
@@ -84,7 +89,7 @@
 	}
 
 	@media (min-width: 560px) {
-		.eat-hub-hero {
+		.header-row {
 			flex-direction: row;
 			align-items: center;
 			justify-content: space-between;

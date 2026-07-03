@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
+	import ExpandableCopy from '$lib/components/molecules/ExpandableCopy.svelte';
 	import { trackAtaRecipeOpened } from '$lib/client/ata-telemetry';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { fetchMealPlanIdeas, dismissMealPlanIdea } from '$lib/client/planer-data';
@@ -219,11 +220,9 @@
 
 	<h3>{t('planer.ideasTitle')}</h3>
 
-	<p class="ideas-sub">
-
-		{t('planer.ideasIntro')}
-
-	</p>
+	<ExpandableCopy preview={t('planer.ideasIntroShort')} class="ideas-sub">
+		<p>{t('planer.ideasIntro')}</p>
+	</ExpandableCopy>
 
 
 
