@@ -14,7 +14,8 @@ const RULE_ALLOWLIST = [
 	'personal-cost-always.mdc',
 	'skaffu-core-loop.mdc',
 	'skaffu-frozen-zones.mdc',
-	'deploy-safety.mdc'
+	'deploy-safety.mdc',
+	'pr-workflow.mdc'
 ];
 
 const DEV_RUNTIME_CLAUDE_BODY = `---
