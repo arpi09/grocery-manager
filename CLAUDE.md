@@ -34,7 +34,9 @@ Verifiera AI-setup: `npm run verify:ai-tooling`
 
 ## Skills (`.claude/skills/`)
 
-`/skaffu-deploy-verify` · `/skaffu-core-loop-change` · `/skaffu-release-model` · `/skaffu-prod-error-autofix`
+`/skaffu-deploy-verify` · `/skaffu-core-loop-change` · `/skaffu-release-model` · `/skaffu-prod-error-autofix` · `/skaffu-ship` · `/skaffu-coordinator`
+
+Coordinator-session: starta med `/skaffu-coordinator` (bootar roll + CURRENT_REALITY — ingen inklistrad rollprompt behövs). Leverans till master: `/skaffu-ship`.
 
 ## G0
 

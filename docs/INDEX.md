@@ -19,9 +19,12 @@
 
 | Skill | När |
 |-------|-----|
-| `skaffu-deploy-verify` | deploy, prod, release, rollback |
+| `skaffu-coordinator` | Sessionstart som coordinator — bootar roll + CURRENT_REALITY |
+| `skaffu-ship` | Leverans: branch → PR → grön pr-gate → squash-merge |
+| `skaffu-deploy-verify` | deploy, prod, release, rollback (pinnad full merge-SHA) |
 | `skaffu-core-loop-change` | hem, inkop, onboarding, nav, household |
 | `skaffu-release-model` | Kill switches, Tier C, infra env - see [RELEASE_MODEL.md](./RELEASE_MODEL.md) |
+| `skaffu-prod-error-autofix` | Nightly prod error autofix |
 
 ## Rör inte (Tier C) utan explicit request
 

@@ -40,7 +40,9 @@ const requiredSkills = [
 	'skaffu-deploy-verify',
 	'skaffu-core-loop-change',
 	'skaffu-release-model',
-	'skaffu-prod-error-autofix'
+	'skaffu-prod-error-autofix',
+	'skaffu-ship',
+	'skaffu-coordinator'
 ];
 for (const skill of requiredSkills) {
 	requirePath(`.claude/skills/${skill}/SKILL.md`, `skill ${skill}`);
