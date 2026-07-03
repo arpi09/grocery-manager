@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { tick } from 'svelte';
+	import { portal } from '$lib/actions/portal';
 	import { pantryZoneTitleKey } from '$lib/domain/pantry-shelf-presenter';
 	import type { StorageLocation } from '$lib/domain/location';
 	import { t } from '$lib/i18n';
@@ -11,7 +13,9 @@
 		itemLocation?: StorageLocation;
 		showViewInZone?: boolean;
 		menuOpen?: boolean;
+		canDelete?: boolean;
 		onConsume?: () => void;
+		onDelete?: () => void;
 		onMenuToggle?: () => void;
 		onMenuClose?: () => void;
 	}
@@ -24,10 +28,15 @@
 		itemLocation,
 		showViewInZone = false,
 		menuOpen = false,
+		canDelete = false,
 		onConsume,
+		onDelete,
 		onMenuToggle,
 		onMenuClose
 	}: Props = $props();
+
+	let triggerEl = $state<HTMLButtonElement | null>(null);
+	let panelStyle = $state('');
 
 	const zoneHref = $derived(
 		showViewInZone && itemLocation ? `/inventory/${itemLocation}` : null
@@ -35,9 +44,32 @@
 	const zoneTitle = $derived(
 		itemLocation ? t(pantryZoneTitleKey(itemLocation)) : ''
 	);
+
+	async function positionPanel() {
+		await tick();
+		if (!triggerEl) return;
+
+		const rect = triggerEl.getBoundingClientRect();
+		const panelWidth = 10 * 16;
+		const margin = 8;
+		let left = rect.right - panelWidth;
+		if (left < margin) left = margin;
+		if (left + panelWidth > window.innerWidth - margin) {
+			left = window.innerWidth - panelWidth - margin;
+		}
+
+		const top = Math.max(margin, rect.bottom + 4);
+		panelStyle = `top: ${top}px; left: ${left}px;`;
+	}
+
+	$effect(() => {
+		if (menuOpen) {
+			void positionPanel();
+		}
+	});
 </script>
 
-<div class="row-actions" onclick={(event) => event.stopPropagation()}>
+<div class="row-actions" data-inventory-row-menu-root onclick={(event) => event.stopPropagation()}>
 	{#if canConsume && onConsume}
 		<button
 			type="button"
@@ -53,14 +85,16 @@
 			<span class="row-use-label">{t('pantry.v2.tile.use')}</span>
 		</button>
 	{/if}
-	<div class="row-menu-wrap">
+	<div class="row-menu-wrap" data-inventory-row-menu-root>
 		<button
 			type="button"
 			class="row-menu"
+			bind:this={triggerEl}
 			aria-label={t('inventory.itemActionsNamed', { name: itemName })}
 			aria-expanded={menuOpen}
 			aria-haspopup="menu"
 			data-testid="inventory-row-menu-{itemId}"
+			data-inventory-row-menu-root
 			onclick={(event) => {
 				event.stopPropagation();
 				onMenuToggle?.();
@@ -69,7 +103,13 @@
 			<span aria-hidden="true">⋮</span>
 		</button>
 		{#if menuOpen}
-			<div class="menu-panel" role="menu">
+			<div
+				class="menu-panel"
+				role="menu"
+				style={panelStyle}
+				data-inventory-row-menu-root
+				use:portal={'body'}
+			>
 				<a class="menu-item" href={editHref} role="menuitem" onclick={() => onMenuClose?.()}>
 					{t('inventory.editItem')}
 				</a>
@@ -77,6 +117,22 @@
 					<a class="menu-item" href={zoneHref} role="menuitem" onclick={() => onMenuClose?.()}>
 						{t('pantry.v2.tile.viewInZone', { zone: zoneTitle })}
 					</a>
+				{/if}
+				{#if canDelete && onDelete}
+					<button
+						type="button"
+						class="menu-item menu-action menu-item--danger"
+						role="menuitem"
+						aria-label={t('item.deleteItemNamed', { name: itemName })}
+						data-testid="inventory-row-delete-{itemId}"
+						onclick={(event) => {
+							event.stopPropagation();
+							onMenuClose?.();
+							onDelete();
+						}}
+					>
+						{t('item.deleteItem')}
+					</button>
 				{/if}
 			</div>
 		{/if}
@@ -99,7 +155,7 @@
 		align-items: center;
 		justify-content: center;
 		min-width: var(--touch-target-min);
-		min-height: 1.75rem;
+		min-height: var(--touch-target-min);
 		padding: 0 0.35rem;
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
@@ -120,7 +176,7 @@
 
 	.row-menu {
 		flex-shrink: 0;
-		width: 1.75rem;
+		width: var(--touch-target-min);
 		padding: 0;
 		color: var(--color-text-muted);
 		font-size: 0.875rem;
@@ -139,13 +195,6 @@
 		outline-offset: 1px;
 	}
 
-	@media (max-width: 640px) {
-		.row-use,
-		.row-menu {
-			min-width: 1.75rem;
-			min-height: 1.75rem;
-		}
-	}
 
 	@media (max-width: 360px) {
 		.row-use-label {
@@ -173,12 +222,11 @@
 	}
 
 	.menu-panel {
-		position: absolute;
-		bottom: calc(100% + 0.25rem);
-		right: 0;
-		z-index: 30;
+		position: fixed;
+		z-index: calc(var(--z-nav-bottom) + 12);
 		min-width: 10rem;
 		padding: var(--space-xs);
+		padding-bottom: calc(var(--space-xs) + env(safe-area-inset-bottom, 0));
 		background: var(--color-surface);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
@@ -200,5 +248,22 @@
 		background: var(--color-surface-muted);
 		color: var(--color-primary);
 		text-decoration: none;
+	}
+
+	.menu-action {
+		width: 100%;
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		font-family: inherit;
+		text-align: left;
+	}
+
+	.menu-item--danger {
+		color: var(--color-danger);
+	}
+
+	.menu-item--danger:hover {
+		color: var(--color-danger);
 	}
 </style>
