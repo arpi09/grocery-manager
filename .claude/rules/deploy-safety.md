@@ -1,0 +1,35 @@
+# Deploy safety (agents)
+
+**A release failed** if E2E, Firebase deploy, post-deploy smoke, or `verify-release` did not all succeed.
+
+## Before triggering deploy
+
+1. Confirm **CI `pr-gate / pr-gate`** is green on the **same SHA** (`gh run list --workflow=ci.yml --branch=master`).
+2. Never `gh workflow run deploy.yml` without monitoring the full run to completion.
+
+## Deploy tiers
+
+| Tier | E2E |
+|------|-----|
+| **auto** | path-tier → fast or full |
+| **fast** | Critical `@deploy-critical` |
+| **full** | Full E2E × 3 shards |
+| **hotfix** | Critical + double prod URL smoke + `hotfix_reason` |
+
+**Deprecated:** `skip_e2e` — use `deploy_tier=hotfix` (critical E2E, not skip).
+
+## During and after deploy
+
+1. Never claim prod-ready unless **`e2e critical`** or **`e2e (1/3–3/3)`**, `deploy`, smoke, and **`verify release completed`** are all `success` for the chosen tier.
+2. Never say "deployed" without green Deploy workflow + coordinator [PROD_SMOKE.md](../../docs/PROD_SMOKE.md).
+3. After deploy: browser check on `/` and a guide page — fail on `process is not defined`, `Internal Error`, or 500.
+
+## PR-first (before deploy)
+
+- **All agent changes:** branch `feat/*` / `fix/*` → PR → merge — never direct push to `master`. See [pr-workflow.mdc](./pr-workflow.mdc).
+- Merge documents in `docs/CHANGELOG.md`; CalVer GitHub Release only after successful deploy.
+
+## Owner settings
+
+- Branch protection: require **`pr-gate / pr-gate`** (update from `quality / quality` after CI/CD v2 merge).
+- Firebase App Hosting auto-deploy off — Actions only ([docs/DEPLOY.md](../../docs/DEPLOY.md)).

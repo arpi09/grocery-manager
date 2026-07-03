@@ -1,6 +1,8 @@
 # AGENTS.md — Skaffu agent entry
 
-Cursor-standard startpunkt. Läs denna fil **före** bred kod-sökning.
+AI agent entry (Cursor + Claude Code). Läs denna fil **före** bred kod-sökning.
+
+Claude Code: start at [`CLAUDE.md`](CLAUDE.md). Tooling parity: [`docs/AI_TOOLING.md`](docs/AI_TOOLING.md).
 
 ## Läsordning
 
@@ -111,8 +113,6 @@ Agent ska **inte** köra full suite efter varje liten edit.
 8. Model: Fast/Auto för kod; thinking bara för plan
 9. Logga spawns i `private/SPAWN_BUDGET.md`
 
-### Optional User Rule (Cursor settings)
+### Optional User Rule (account-level)
 
-Klistra in som Cursor User Rule under kostnadspress:
-
-> Personal cost mode: max 1 subagent per request. No Multitask unless I say parallel. Default `quick:dev` not `pr:gate`. New chat for new features. No explore subagents — use grep/read in main agent.
+Klistra in som Cursor User Rule eller Claude Code user prefs — mall i [`docs/templates/AI_USER_RULES_SNIPPET.md`](docs/templates/AI_USER_RULES_SNIPPET.md).

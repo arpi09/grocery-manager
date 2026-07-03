@@ -51,7 +51,7 @@ npm run dev:watch
 
 **Delat hushåll (lokal dev):** kopiera `.env.example` till `.env`, sätt `ADMIN_PASSWORD` och `DEFAULT_MEMBER_PASSWORD`. Logga in med `ADMIN_EMAIL` / `DEFAULT_MEMBER_EMAIL` enligt `.env.example` (defaults: `admin@example.com` / `member@example.com`).
 
-**Utvecklare / Cursor:** starta i [`AGENTS.md`](AGENTS.md) → [`docs/CODEBASE_MAP.md`](docs/CODEBASE_MAP.md) → [`docs/CURRENT_REALITY.md`](docs/CURRENT_REALITY.md).
+**Utvecklare / AI:** Cursor → [`AGENTS.md`](AGENTS.md). Claude Code → [`CLAUDE.md`](CLAUDE.md). Paritet: [`docs/AI_TOOLING.md`](docs/AI_TOOLING.md) → [`docs/CODEBASE_MAP.md`](docs/CODEBASE_MAP.md) → [`docs/CURRENT_REALITY.md`](docs/CURRENT_REALITY.md).
 
 ## Test & kvalitet
 
