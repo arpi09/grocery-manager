@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+﻿import { test, expect } from '@playwright/test';
 
 import {
 	dismissOnboardingModalIfOpen,
@@ -63,10 +63,18 @@ test.describe('Inventory mobile UX', () => {
 
 		const table = page.getByTestId('inventory-table');
 		await expect(table).toBeVisible({ timeout: 15_000 });
-		await expect(table.getByRole('button', { name: /Namn|Name/i })).toBeVisible();
+		// Mobile list mode hides column headers; sort lives in the filter sheet.
+		await expect(table.getByRole('button', { name: /Namn|Name/i })).toHaveCount(0);
 		await expect(table.getByRole('button', { name: /Antal|Qty|Quantity/i })).toHaveCount(0);
 		await expect(table.getByRole('button', { name: /Bäst före|Expiry/i })).toHaveCount(0);
 		await expect(page.getByTestId('data-grid-filter-button')).toBeVisible();
+
+		await page.getByTestId('data-grid-filter-button').click();
+		const filterSheet = page.getByTestId('data-grid-filter-sheet');
+		await expect(filterSheet).toBeVisible({ timeout: 10_000 });
+		await expect(filterSheet.getByRole('button', { name: /Namn|Name/i })).toBeVisible();
+		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
+		await expect(filterSheet).not.toBeVisible({ timeout: 10_000 });
 
 		const row = inventoryRow(page, expiringName);
 		await expect(row).toBeVisible({ timeout: 15_000 });
