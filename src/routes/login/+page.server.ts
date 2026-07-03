@@ -33,6 +33,7 @@ export const load: PageServerLoad = async ({ url }) => ({
 export const actions: Actions = {
 	login: async (event) => {
 		const formData = Object.fromEntries(await event.request.formData());
+		const redirectTo = safeRedirect(String(formData.redirectTo ?? ''));
 		const parsed = loginSchema.safeParse(formData);
 
 		if (!parsed.success) {
@@ -40,11 +41,10 @@ export const actions: Actions = {
 				errors: parsed.error.flatten().fieldErrors,
 				message: translate(event.locals.locale, 'auth.login.fixErrorsBelow'),
 				email: String(formData.email ?? ''),
-				redirectTo: safeRedirect(String(formData.redirectTo ?? ''))
+				redirectTo
 			});
 		}
 
-		const redirectTo = safeRedirect(String(formData.redirectTo ?? ''));
 		const clientIp = event.getClientAddress();
 		const emailKey = `login:email:${parsed.data.email.trim().toLowerCase()}`;
 		const ipKey = `login:ip:${clientIp}`;
@@ -69,12 +69,10 @@ export const actions: Actions = {
 			if (!isUserEmailVerified({ emailVerifiedAt: user.emailVerifiedAt ?? null })) {
 				await event.locals.emailVerificationService.resendVerification(
 					user.id,
-					event.getClientAddress(),
+					clientIp,
 					event.locals.locale
 				);
 				destination = VERIFY_EMAIL_PATH;
-			} else {
-				destination = redirectTo ?? APP_HOME_PATH;
 			}
 		} catch (error) {
 			if (isAuthError(error)) {
