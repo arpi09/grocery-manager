@@ -253,8 +253,6 @@
 		"chipPhotoRound": "Add with photos",
 		"chipManual": "Manual",
 		"moreAddWays": "More ways to add",
-		"moreOnHome": "More on home",
-		"receiptImportLink": "Import receipt",
 		"v3": {
 			"thisWeekTitle": "What should we shop this week?",
 			"recommendsTitle": "What does Skaffu recommend?",
@@ -540,14 +538,23 @@
 				"sectionLabel": "Quick glance",
 				"shoppingHint": "{count, plural, one {# item} other {# items}} · you usually shop {weekday}",
 				"shoppingHintNoCadence": "{count, plural, one {# item} other {# items}}",
+				"shoppingHintEmpty": "List is empty — add this week's first item",
 				"shoppingAria": "Open shopping list",
 				"storageAria": "Open storage",
 				"eatAria": "Cook recipe",
 				"funFactTitle": "Fun fact",
 				"funFactZeroWaste": "{count, plural, one {# zero-waste week} other {# zero-waste weeks}}",
 				"funFactConsumed": "{count, plural, one {# item used this week} other {# items used this week}}",
-				"funFactPlaceholder": "See how you're doing",
+				"funFactPlaceholder": "Your stats grow every week — take a look",
 				"funFactAria": "Open statistics"
+			},
+			"pulse": {
+				"sectionLabel": "Your household",
+				"memoryInterval": "You usually buy {name} about every {interval} days",
+				"memoryLast": "{name} — {days, plural, one {# day} other {# days}} since you last bought it",
+				"pantryUpdatedToday": "Pantry last updated today",
+				"pantryUpdatedYesterday": "Pantry last updated yesterday",
+				"pantryUpdatedDaysAgo": "Pantry last updated {days} days ago"
 			},
 			"error": {
 				"loadFailed": "Home couldn't load. Try again."
@@ -3066,7 +3073,7 @@
 				"allNotificationsLink": "All notification settings"
 			},
 			"progress": {
-				"welcome": "Welcome",
+				"welcome": "Start",
 				"firstScan": "Receipt",
 				"pantryCreated": "Pantry",
 				"brain": "Memory",
@@ -3145,13 +3152,12 @@
 				"consumeSheetTitle": "Log usage — {name}",
 				"viewInZone": "View in {zone}"
 			},
-			"addCta": "Add item",
-			"scanCta": "Scan",
+			"addCta": "Add",
 			"searchPlaceholder": "Search pantry…",
-			"insightsSummary": "Pantry insights",
+			"insightsSummary": "Things to review in your pantry",
 			"empty": {
 				"title": "Empty pantry",
-				"body": "Add items manually or scan using the buttons above.",
+				"body": "Get started by importing a receipt or adding an item manually.",
 				"cta": "Add item"
 			},
 			"error": {
@@ -4195,10 +4201,10 @@
 			"deepenError": "Could not deepen insights right now."
 		},
 		"pantryFix": {
-			"cta": "Tidy the pantry",
-			"confirm": "Skaffu will suggest dates and duplicates. Continue?",
+			"cta": "Fill in dates and find duplicates",
+			"confirm": "Skaffu fills in missing best-before dates and suggests duplicates to merge. Continue?",
 			"success": "Updated {inferred} dates. {merges} merges to review.",
-			"failed": "Could not tidy the pantry right now."
+			"failed": "Couldn't update the pantry right now."
 		},
 		"receiptQuality": {
 			"lead": "{percent}% of lines got a best-before date",

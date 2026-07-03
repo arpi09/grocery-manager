@@ -10,12 +10,14 @@
 		buildHomeBriefingForYouPresentation,
 		buildHomeBriefingGreetingPresentation,
 		buildHomeBriefingMomentPresentation,
+		buildHomeBriefingPulsePresentation,
 		buildHomeBriefingStatusPresentation
 	} from '$lib/domain/home-briefing-presenter';
 	import {
 		isShoppingListReady,
 		selectHomeBriefingForYouCard,
 		selectHomeBriefingMomentCard,
+		selectHomeBriefingPulse,
 		selectHomeBriefingStatus,
 		type HomeBriefingForYouCard,
 		type HomeBriefingFunFact,
@@ -27,7 +29,7 @@
 	import { getLocale, t } from '$lib/i18n';
 	import { PANTRY_SHELF_PATH } from '$lib/navigation/nav-config';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
-	import { scanModeHref, receiptOneTapHref } from '$lib/utils/scan-nav';
+	import { scanModeHref } from '$lib/utils/scan-nav';
 	import { isWithinActiveMealSlot } from '$lib/domain/meal-slot';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
 	
@@ -157,9 +159,16 @@
 	}
 
 	const momentHref = $derived(moment ? momentCtaHref(moment.kind) : null);
-	const hideReceiptOneTap = $derived(
-		moment?.kind === 'emptyPantry' || moment?.kind === 'scanReceipt'
+
+	const pulse = $derived(
+		selectHomeBriefingPulse({
+			forYouKind: forYou?.kind ?? null,
+			replenishment: intelligence.replenishment,
+			lastUpdatedAt: summary.pantryStatus.lastUpdatedAt
+		})
 	);
+	const pulsePresentation = $derived(pulse ? buildHomeBriefingPulsePresentation(pulse) : null);
+	const pulseHref = $derived(pulse?.kind === 'replenishmentMemory' ? shoppingHref : storageHref);
 
 	const forYouCtaHref = $derived.by(() => {
 		if (!forYou) return null;
@@ -234,21 +243,17 @@
 		onChipTap={trackHomeChipTapped}
 	/>
 
-	<details class="more-on-home" data-testid="home-more-on-home">
-		<summary>{t('home.moreOnHome')}</summary>
-		<div class="more-on-home-body">
-			{#if canWrite && !hideReceiptOneTap}
-				<a
-					class="text-action"
-					href={receiptOneTapHref(APP_HOME_PATH)}
-					data-testid="home-receipt-one-tap"
-				>
-					{t('home.receiptImportLink')}
-				</a>
-			{/if}
-			<a class="text-action" href="/statistik">{t('skafferapport.viewStats')}</a>
-		</div>
-	</details>
+	{#if pulse && pulsePresentation}
+		<a
+			class="pulse-card"
+			href={pulseHref}
+			data-testid="home-v2-pulse"
+			data-pulse-kind={pulse.kind}
+		>
+			<span class="pulse-label">{t('home.v6.pulse.sectionLabel')}</span>
+			<span class="pulse-text">{t(pulsePresentation.key, pulsePresentation.params)}</span>
+		</a>
+	{/if}
 </div>
 
 <style>
@@ -268,44 +273,37 @@
 		color: var(--color-text-muted);
 	}
 
-	.more-on-home {
-		margin-top: var(--space-sm);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-md);
-		background: var(--color-surface-muted);
-	}
-
-	.more-on-home > summary {
-		display: flex;
-		align-items: center;
-		min-height: var(--touch-target-min);
-		padding: var(--space-sm) var(--space-md);
-		font-size: 0.875rem;
-		font-weight: 600;
-		cursor: pointer;
-		list-style: none;
-	}
-
-	.more-on-home > summary::-webkit-details-marker {
-		display: none;
-	}
-
-	.more-on-home-body {
+	.pulse-card {
 		display: flex;
 		flex-direction: column;
-		gap: var(--space-xs);
-		padding: 0 var(--space-md) var(--space-md);
+		gap: 4px;
+		margin-top: var(--space-sm);
+		min-height: var(--touch-target-min);
+		padding: 12px 14px;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		color: var(--color-text);
+		text-decoration: none;
+		box-shadow: var(--shadow-sm);
 	}
 
-	.text-action {
-		display: inline-flex;
-		align-items: center;
-		min-height: var(--touch-target-min);
-		padding: 0.25rem 0;
-		font-size: 0.875rem;
+	.pulse-label {
+		font-size: var(--font-size-label, 0.75rem);
+		font-weight: var(--font-weight-label, 700);
+		letter-spacing: var(--letter-spacing-label, 0.04em);
+		text-transform: uppercase;
+		color: var(--color-text-muted);
+	}
+
+	.pulse-text {
+		font-size: var(--font-size-body-sm, 0.875rem);
 		font-weight: 600;
-		color: var(--color-primary);
-		text-decoration: underline;
-		text-underline-offset: 0.15em;
+		line-height: 1.3;
+	}
+
+	.pulse-card:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 </style>

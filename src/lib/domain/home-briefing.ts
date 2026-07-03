@@ -213,6 +213,42 @@ export function homeBriefingMomentMessagePrefix(
 	return `home.v6.moment.${kind}`;
 }
 
+export type HomeBriefingPulse =
+	| { kind: 'replenishmentMemory'; suggestion: ReplenishmentSuggestion }
+	| { kind: 'pantryUpdated'; daysAgo: number };
+
+/**
+ * Pick one personal household line for the bottom of the briefing.
+ * Prefers the household's purchase memory (skipping the suggestion already
+ * surfaced in För er), falling back to when the pantry was last updated.
+ */
+export function selectHomeBriefingPulse(input: {
+	forYouKind: HomeBriefingForYouKind | null;
+	replenishment: ReplenishmentSuggestion[];
+	lastUpdatedAt: Date | string | null;
+	today?: Date;
+}): HomeBriefingPulse | null {
+	const memory =
+		input.forYouKind === 'replenishment' ? input.replenishment[1] : input.replenishment[0];
+	if (memory) {
+		return { kind: 'replenishmentMemory', suggestion: memory };
+	}
+
+	if (input.lastUpdatedAt != null) {
+		const updatedAt = new Date(input.lastUpdatedAt);
+		if (!Number.isNaN(updatedAt.getTime())) {
+			const today = input.today ?? new Date();
+			const daysAgo = Math.max(
+				0,
+				Math.floor((today.getTime() - updatedAt.getTime()) / (24 * 60 * 60 * 1000))
+			);
+			return { kind: 'pantryUpdated', daysAgo };
+		}
+	}
+
+	return null;
+}
+
 export type HomeBriefingFunFactKind = 'zeroWaste' | 'consumedThisWeek';
 
 export interface HomeBriefingFunFact {

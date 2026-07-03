@@ -83,7 +83,12 @@
 						{/each}
 					</span>
 				{:else if hintText(chip)}
-					<MarqueeText class="chip-hint" text={hintText(chip)} />
+					<span class="chip-hint-row" data-accent={chip.accent ? 'true' : undefined}>
+						{#if chip.accent}
+							<span class="accent-dot" aria-hidden="true"></span>
+						{/if}
+						<MarqueeText class="chip-hint" text={hintText(chip)} />
+					</span>
 				{/if}
 			</a>
 		{/each}
@@ -133,6 +138,31 @@
 		font-size: var(--font-size-body-sm, 0.875rem);
 		font-weight: 600;
 		line-height: 1.3;
+	}
+
+	.chip-hint-row {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		min-width: 0;
+	}
+
+	.chip-hint-row :global(.chip-hint) {
+		min-width: 0;
+		flex: 1;
+	}
+
+	.chip-hint-row[data-accent='true'] :global(.chip-hint) {
+		color: var(--color-primary);
+	}
+
+	.accent-dot {
+		display: inline-block;
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--color-primary);
+		flex-shrink: 0;
 	}
 
 	.chip-card:hover :global(.marquee-track.animate),

@@ -5,6 +5,7 @@ import {
 	isShoppingListReady,
 	selectHomeBriefingForYouCard,
 	selectHomeBriefingMomentCard,
+	selectHomeBriefingPulse,
 	selectHomeBriefingStatus,
 	type HomeBriefingRecipeCard
 } from './home-briefing';
@@ -263,5 +264,50 @@ describe('selectHomeBriefingMomentCard', () => {
 		expect(dayA?.kind).not.toBe('emptyPantry');
 		expect(dayA?.kind).not.toBe('openShopping');
 		expect(dayB?.kind).not.toBe(dayA?.kind);
+	});
+});
+
+describe('selectHomeBriefingPulse', () => {
+	it('skips the replenishment suggestion already shown in för er', () => {
+		const second: ReplenishmentSuggestion = {
+			...suggestion,
+			normalizedKey: 'brod',
+			displayName: 'Bread'
+		};
+
+		expect(
+			selectHomeBriefingPulse({
+				forYouKind: 'replenishment',
+				replenishment: [suggestion, second],
+				lastUpdatedAt: null
+			})
+		).toEqual({ kind: 'replenishmentMemory', suggestion: second });
+
+		expect(
+			selectHomeBriefingPulse({
+				forYouKind: 'expiring',
+				replenishment: [suggestion],
+				lastUpdatedAt: null
+			})
+		).toEqual({ kind: 'replenishmentMemory', suggestion });
+	});
+
+	it('falls back to pantry updated days and then null', () => {
+		expect(
+			selectHomeBriefingPulse({
+				forYouKind: 'replenishment',
+				replenishment: [suggestion],
+				lastUpdatedAt: new Date('2026-06-17T10:00:00'),
+				today: new Date('2026-06-19T10:00:00')
+			})
+		).toEqual({ kind: 'pantryUpdated', daysAgo: 2 });
+
+		expect(
+			selectHomeBriefingPulse({
+				forYouKind: null,
+				replenishment: [],
+				lastUpdatedAt: null
+			})
+		).toBeNull();
 	});
 });

@@ -55,6 +55,7 @@
 	} from '$lib/utils/receipt-import-session';
 
 	let open = $state(false);
+	let pausedThisSession = $state(false);
 	let startedTracked = $state(false);
 	let lastViewedStep = $state<string | null>(null);
 	let registrationWelcomeDone = $state(false);
@@ -168,6 +169,7 @@
 	function tryOpenFlow() {
 		if (
 			!browser ||
+			pausedThisSession ||
 			!userId ||
 			isOnboardingExcludedPath(pathname) ||
 			!shouldShowOnboarding(userId) ||
@@ -247,6 +249,8 @@
 		}
 		clearPreview();
 		markActivationScanDeferred(userId);
+		pausedThisSession = true;
+		closeFlow();
 	}
 
 	function handleSuccessContinue() {
@@ -278,6 +282,8 @@
 
 	function handleKivraTap(surface: 'scan' | 'shopping_setup') {
 		void trackProductEvent('onboarding_kivra_tapped', { surface });
+		pausedThisSession = true;
+		closeFlow();
 	}
 
 	function handlePreviewContinue() {
@@ -302,6 +308,7 @@
 			if (!userId || isOnboardingExcludedPath(pathname)) {
 				return;
 			}
+			pausedThisSession = false;
 			startedTracked = false;
 			lastViewedStep = null;
 			clearPreview();
