@@ -1,0 +1,24 @@
+# Deterministic line endings regardless of local core.autocrlf.
+# Index is already 100% LF; generators (brand:css, manifest, icons) write LF —
+# eol=lf keeps working copies matching so they never show as phantom-modified.
+* text=auto eol=lf
+
+# Windows scripts require CRLF
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.zip binary
+*.jar binary
