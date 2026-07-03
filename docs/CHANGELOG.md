@@ -48,6 +48,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(ci): create empty .env for guides generate cron ([#163](https://github.com/arpi09/grocery-manager/pull/163)) — Fix **Guides generate cron** failure (`node: .env: not found`, exit 9) by creating an empty `.env` before `npm run guides:publish-next`.
 - fix(nav): enable Pantry V2 flag in nav and dev defaults ([#164](https://github.com/arpi09/grocery-manager/pull/164)) — Apply `PANTRY_UX_V2` in More menu and desktop nav links to `/inventory`
 - fix(nav): add profile icon and refresh settings glyph ([#168](https://github.com/arpi09/grocery-manager/pull/168)) — Add `profile` to nav icon config
+- fix(inventory): portal row menu and add delete item action ([#170](https://github.com/arpi09/grocery-manager/pull/170)) — Fix invisible inventory row ⋮ menu by portaling the panel to `body` with `position: fixed` (same pattern as `RowOverflowMenu` / `ShoppingListShareMenu`)
 
 ### Changed
 
