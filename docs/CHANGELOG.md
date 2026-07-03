@@ -62,6 +62,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - chore(ci): error-export workflow_dispatch for prod logs ([#135](https://github.com/arpi09/grocery-manager/pull/135)) — Add manual workflow_dispatch for error-export so agents can pull prod error logs without ad-hoc scripts.
 - Dependencies: npm production + dev minor/patch bumps ([#120](https://github.com/arpi09/grocery-manager/pull/120), [#121](https://github.com/arpi09/grocery-manager/pull/121), [#122](https://github.com/arpi09/grocery-manager/pull/122), [#130](https://github.com/arpi09/grocery-manager/pull/130), [#148](https://github.com/arpi09/grocery-manager/pull/148), [#149](https://github.com/arpi09/grocery-manager/pull/149)) — see merged PRs
 - docs(design): add Stitch consumer UX v2 design pack ([#169](https://github.com/arpi09/grocery-manager/pull/169)) — Add design/v2 Stitch Skaffu consumer UX v2 documentation (review, audit, normalization plan, editorial home).
+- chore(ai-tooling): sync pr-workflow rule to .claude/rules ([#173](https://github.com/arpi09/grocery-manager/pull/173)) — `scripts/sync-ai-tooling.mjs` — `pr-workflow.mdc` tillagd i `RULE_ALLOWLIST`
 
 ### Added
 
