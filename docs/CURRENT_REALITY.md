@@ -5,8 +5,8 @@
 | F?lt | V?rde |
 |------|--------|
 | **Uppdaterad** | 2026-07-03 |
-| **Prod SHA** | `fc51a307b` @ [28661077873](https://github.com/arpi09/grocery-manager/actions/runs/28661077873) (live, deploy_tier=auto→fast, e2e critical). |
-| **Master SHA** | `fc51a307b` — login flow cleanup (#176). |
+| **Prod SHA** | `046542052` @ [28665190055](https://github.com/arpi09/grocery-manager/actions/runs/28665190055) (live, deploy_tier=auto→fast, e2e critical). |
+| **Master SHA** | `046542052` — email logo canonical mark (#178). |
 | **CI/CD model** | **v2 on master** � tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
@@ -84,6 +84,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 - [x] **Price Intelligence Phase 1** � prod **`f049e3cb0`** @ [27883692872](https://github.com/arpi09/grocery-manager/actions/runs/27883692872) (fast E2E critical). `receipt_price_captured` telemetry + Price Memory discovery (chip tooltip/link, import hint).
 - [x] **Onboarding + statistik + account deletion + Capacitor spike** � prod **`6e28b4956`** @ [27897856697](https://github.com/arpi09/grocery-manager/actions/runs/27897856697) (auto tier, full E2E).
 - [x] **Login flow cleanup** — prod **`fc51a307b`** @ [28661077873](https://github.com/arpi09/grocery-manager/actions/runs/28661077873) (auto→fast, e2e critical). PR #176 merged 2026-07-03; curl-smoke grön (4 URLs ×2, VAPID, /login).
+- [x] **Email logo canonical mark** — prod **`046542052`** @ [28665190055](https://github.com/arpi09/grocery-manager/actions/runs/28665190055) (auto→fast, e2e critical). PR #178 merged 2026-07-03; curl-smoke grön (/, /guider, /login). Sista logo-avvikaren (e-post "S"-monogram) ersatt med kanoniska hus-märket.
 
 ## Acquisition (V1)
 
