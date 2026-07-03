@@ -13,9 +13,21 @@ description: Verifies Skaffu production deploy readiness and post-deploy smoke. 
 
 ## Trigger
 
-`gh workflow run deploy.yml --ref master -f ref=master`
+Deploya alltid en **pinnad full merge-SHA** — aldrig `--ref master` blind:
+
+```bash
+FULL_SHA=$(gh pr view <nr> --json mergeCommit --jq .mergeCommit.oid)   # eller: git rev-parse <sha>
+gh workflow run deploy.yml --ref master -f ref=master -f sha=$FULL_SHA -f deploy_tier=auto
+```
+
+- **Varför inte `--ref master`:** `changelog-on-merge` pushar `docs(changelog): … [skip ci]` ovanpå varje merge → master HEAD saknar CI-artefakt → `resolve CI artifact` failar.
+- **Varför full SHA (40 tecken):** `actions/checkout` slår upp förkortade SHA som branch/tag-namn och failar.
 
 Följ tills **alla** success: quality, e2e 1–3, deploy, post-deploy smoke, verify release.
+
+### Känd flake: re2 i pre-deploy verify
+
+`npm ci` kan hänga på native-modulen `re2` (firebase-tools → superstatic) tills jobbet dödas av `timeout-minutes: 25` → run **cancelled**. Åtgärd: **trigga om samma SHA** — felsök inte koden.
 
 ## Post-deploy (obligatorisk)
 

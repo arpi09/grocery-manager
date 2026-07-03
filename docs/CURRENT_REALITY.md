@@ -4,9 +4,9 @@
 
 | F?lt | V?rde |
 |------|--------|
-| **Uppdaterad** | 2026-06-24 |
-| **Prod SHA** | `a9ddaabca` @ [28083527659](https://github.com/arpi09/grocery-manager/actions/runs/28083527659) (live, deploy_tier=fast). |
-| **Master SHA** | `a9ddaabca` — Fas A activation funnel, receipt wow, overlay coordinator, deploy-critical E2E green. |
+| **Uppdaterad** | 2026-07-03 |
+| **Prod SHA** | `fc51a307b` @ [28661077873](https://github.com/arpi09/grocery-manager/actions/runs/28661077873) (live, deploy_tier=auto→fast, e2e critical). |
+| **Master SHA** | `fc51a307b` — login flow cleanup (#176). |
 | **CI/CD model** | **v2 on master** � tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
@@ -83,6 +83,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 - [x] **PR #95** CI/CD v2 merged 2026-06-15
 - [x] **Price Intelligence Phase 1** � prod **`f049e3cb0`** @ [27883692872](https://github.com/arpi09/grocery-manager/actions/runs/27883692872) (fast E2E critical). `receipt_price_captured` telemetry + Price Memory discovery (chip tooltip/link, import hint).
 - [x] **Onboarding + statistik + account deletion + Capacitor spike** � prod **`6e28b4956`** @ [27897856697](https://github.com/arpi09/grocery-manager/actions/runs/27897856697) (auto tier, full E2E).
+- [x] **Login flow cleanup** — prod **`fc51a307b`** @ [28661077873](https://github.com/arpi09/grocery-manager/actions/runs/28661077873) (auto→fast, e2e critical). PR #176 merged 2026-07-03; curl-smoke grön (4 URLs ×2, VAPID, /login).
 
 ## Acquisition (V1)
 
