@@ -1,15 +1,18 @@
 <script lang="ts">
 	import BackLink from '$lib/components/atoms/BackLink.svelte';
+	import ExpandableCopy from '$lib/components/molecules/ExpandableCopy.svelte';
 
 	interface Props {
 		title: string;
 		subtitle?: string;
+		subtitlePreview?: string;
 		backHref?: string;
 		backFallback?: string;
 		backLabel?: string;
 	}
 
-	let { title, subtitle, backHref, backFallback, backLabel = 'Tillbaka' }: Props = $props();
+	let { title, subtitle, subtitlePreview, backHref, backFallback, backLabel = 'Tillbaka' }: Props =
+		$props();
 </script>
 
 <header class="page-header">
@@ -20,7 +23,13 @@
 	{/if}
 	<h1>{title}</h1>
 	{#if subtitle}
-		<p class="subtitle">{subtitle}</p>
+		{#if subtitlePreview}
+			<ExpandableCopy preview={subtitlePreview} class="subtitle">
+				<p>{subtitle}</p>
+			</ExpandableCopy>
+		{:else}
+			<p class="subtitle">{subtitle}</p>
+		{/if}
 	{/if}
 </header>
 
@@ -66,8 +75,12 @@
 
 	.subtitle {
 		margin: var(--space-xs) 0 0;
-		color: var(--color-text-muted);
 		font-size: 0.92rem;
+	}
+
+	:global(.subtitle.expandable-copy .body),
+	.subtitle {
+		color: var(--color-text-muted);
 		line-height: 1.45;
 		max-width: 42ch;
 	}

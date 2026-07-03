@@ -34,7 +34,11 @@
 </script>
 
 <AppLayout user={data.user}>
-	<AppHeader title={t('planer.title')} subtitle={t('planer.subtitle')} />
+	<AppHeader
+		title={t('planer.title')}
+		subtitle={t('planer.subtitle')}
+		subtitlePreview={t('planer.subtitleShort')}
+	/>
 
 	<PageContainer>
 		<EatHubHero />

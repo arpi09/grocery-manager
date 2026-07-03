@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import Card from '$lib/components/atoms/Card.svelte';
+	import ExpandableCopy from '$lib/components/molecules/ExpandableCopy.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
 	import { expiringItemsHref } from '$lib/navigation/context-hrefs';
@@ -29,22 +30,6 @@
 <section class="planer-context" aria-labelledby="planer-context-heading">
 	<Card>
 		<h2 id="planer-context-heading" class="heading">{t('planer.contextTitle')}</h2>
-		<p class="lead">{t('planer.contextLead', { days: EXPIRING_SOON_DAYS })}</p>
-
-		{#if expiringCount > 0}
-			<p class="expiring">
-				{t('planer.contextExpiring', { count: expiringCount, days: EXPIRING_SOON_DAYS })}
-				{#if previewNames}
-					<span class="names">— {previewNames}</span>
-				{/if}
-			</p>
-		{:else}
-			<p class="expiring muted">{t('planer.contextNoExpiring', { days: EXPIRING_SOON_DAYS })}</p>
-		{/if}
-
-		{#if plannedMealCount > 0}
-			<p class="planned">{t('planer.contextPlanned', { count: plannedMealCount })}</p>
-		{/if}
 
 		<div class="actions" role="group" aria-label={t('planer.contextActionsAria')}>
 			<a class="action-btn action-btn-primary" href="/planer/vecka">
@@ -53,6 +38,25 @@
 			<a class="text-action home-link" href={homeHref}>{t('planer.contextHomeLink')}</a>
 			<a class="text-action" href="#ata-calendar">{t('planer.contextWeekViewLink')}</a>
 		</div>
+
+		<ExpandableCopy preview={t('planer.contextLeadShort')} class="details">
+			<p class="lead">{t('planer.contextLead', { days: EXPIRING_SOON_DAYS })}</p>
+
+			{#if expiringCount > 0}
+				<p class="expiring">
+					{t('planer.contextExpiring', { count: expiringCount, days: EXPIRING_SOON_DAYS })}
+					{#if previewNames}
+						<span class="names">— {previewNames}</span>
+					{/if}
+				</p>
+			{:else}
+				<p class="expiring muted">{t('planer.contextNoExpiring', { days: EXPIRING_SOON_DAYS })}</p>
+			{/if}
+
+			{#if plannedMealCount > 0}
+				<p class="planned">{t('planer.contextPlanned', { count: plannedMealCount })}</p>
+			{/if}
+		</ExpandableCopy>
 	</Card>
 </section>
 
@@ -67,10 +71,13 @@
 		font-weight: 700;
 	}
 
+	.details {
+		margin-top: var(--space-sm);
+		font-size: 0.9rem;
+	}
+
 	.lead {
 		margin: 0;
-		font-size: 0.9rem;
-		color: var(--color-text-muted);
 		line-height: 1.45;
 	}
 
