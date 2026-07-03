@@ -2,6 +2,7 @@ import type { Locale } from '$lib/i18n/locale';
 import { translate } from '$lib/i18n/messages';
 import { BRAND_FONT_STACK_EMAIL } from '$lib/design/brand/typography';
 import { LOCKED_LOGO_CORE } from '$lib/design/brand-colors';
+import { getAppOrigin } from '$lib/server/origin';
 
 /** Brand tokens aligned with locked logo core (light) — inline for email client compatibility. */
 export const EMAIL = {
@@ -26,11 +27,14 @@ export function escapeEmailHtml(value: string): string {
 }
 
 function brandedHeaderHtml(): string {
+	const markUrl = `${getAppOrigin()}/pwa/icon-192.png`;
 	return `<tr>
             <td style="background-color:${EMAIL.primary};padding:28px 32px 24px;text-align:center;">
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 12px;">
                 <tr>
-                  <td style="width:44px;height:44px;background-color:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.35);border-radius:12px;text-align:center;vertical-align:middle;font-size:20px;font-weight:700;color:${EMAIL.onPrimary};line-height:44px;">S</td>
+                  <td style="width:44px;height:44px;border:2px solid rgba(255,255,255,0.35);border-radius:12px;text-align:center;vertical-align:middle;">
+                    <img src="${markUrl}" width="44" height="44" alt="Skaffu" style="display:block;border-radius:10px;color:${EMAIL.onPrimary};font-size:20px;font-weight:700;" />
+                  </td>
                 </tr>
               </table>
               <p style="margin:0;font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.85);">Skaffu</p>
