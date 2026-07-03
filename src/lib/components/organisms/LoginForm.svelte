@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-		import Button from '$lib/components/atoms/Button.svelte';
+	import Button from '$lib/components/atoms/Button.svelte';
 	import FeedbackBanner from '$lib/components/molecules/FeedbackBanner.svelte';
 	import FormField from '$lib/components/molecules/FormField.svelte';
 	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
@@ -44,7 +44,7 @@
 	use:enhance={bindSubmitting((v) => (submitting = v))}
 >
 	{#if message}
-		<FeedbackBanner tone={messageTone === 'info' ? 'info' : 'error'} message={message} />
+		<FeedbackBanner tone={messageTone} {message} />
 	{/if}
 
 	{#if redirectTo}
