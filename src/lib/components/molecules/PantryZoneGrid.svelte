@@ -67,8 +67,8 @@
 <style>
 	.zone-empty {
 		margin: 0;
-		padding: var(--space-md);
-		font-size: 0.875rem;
+		padding: var(--space-xs) 0;
+		font-size: 0.8125rem;
 		color: var(--color-text-muted);
 	}
 
@@ -76,6 +76,16 @@
 		display: grid;
 		grid-template-columns: repeat(4, minmax(0, 1fr));
 		gap: var(--space-xs);
+	}
+
+	.tile-grid > [role='listitem'] {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+
+	.tile-grid > [role='listitem'] > :global(.product-tile) {
+		flex: 1 1 auto;
 	}
 
 	@media (min-width: 480px) {
