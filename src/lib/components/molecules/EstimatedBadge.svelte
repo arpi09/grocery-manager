@@ -24,6 +24,10 @@
 		interactive?: boolean;
 		lowConfidence?: boolean;
 		lineConfidence?: number | null;
+		/** When set, the explain sheet offers a one-tap expiry correction for this item. */
+		correctionItemId?: string | null;
+		correctionExpiresOn?: string | null;
+		onCorrected?: () => void;
 	}
 
 	let {
@@ -33,7 +37,10 @@
 		label,
 		interactive = true,
 		lowConfidence = false,
-		lineConfidence = null
+		lineConfidence = null,
+		correctionItemId = null,
+		correctionExpiresOn = null,
+		onCorrected
 	}: Props = $props();
 
 	const presentation = $derived(
@@ -52,7 +59,10 @@
 
 	const hasExplanation = $derived(Boolean(explanation?.primary?.trim()));
 
-	function onBadgeClick() {
+	function onBadgeClick(event: MouseEvent) {
+		// Some hosts (e.g. the pantry data grid row) navigate on click — never let the
+		// "why" tap double as a row action.
+		event.stopPropagation();
 		if (hasExplanation) {
 			sheetOpen = true;
 			return;
@@ -92,6 +102,12 @@
 		open={sheetOpen}
 		{explanation}
 		showSettingsLink={showSettingsInSheet}
+		correctionItemId={correctionItemId}
+		correctionExpiresOn={correctionExpiresOn}
+		onCorrected={() => {
+			sheetOpen = false;
+			onCorrected?.();
+		}}
 		onClose={() => {
 			sheetOpen = false;
 		}}

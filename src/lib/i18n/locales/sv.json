@@ -310,6 +310,10 @@
 			},
 			"greeting": "Hej {name}",
 			"greetingFallback": "Hej",
+			"aiOneLiner": {
+				"hint": "Skaffu skrev den här hälsningen utifrån vad ni har hemma och er inköpslista — en tolkning, inte en exakt sanning.",
+				"aria": "Varför står det här? AI-genererad hälsning"
+			},
 			"status": {
 				"useSoonAndList": "{useSoonCount, plural, one {# sak att använda snart} other {# saker att använda snart}} · {count, plural, one {# vara} other {# varor}} på listan — ni brukar handla på {weekday}",
 				"useSoonAndListNoCadence": "{useSoonCount, plural, one {# sak att använda snart} other {# saker att använda snart}} · {count, plural, one {# vara} other {# varor}} på listan",
@@ -3433,7 +3437,9 @@
 			"aiRateLimitSmartFill": "Ni har använt alla {limit} smart fill den här veckan på Gratis-planen. Uppgradera till Pro eller vänta till nästa vecka.",
 			"aiRateLimitWeeklyPlan": "Ni har använt alla {limit} vecko-autopilot den här veckan på Gratis-planen. Uppgradera till Pro eller vänta till nästa vecka.",
 			"barcodeNotFound": "Ogiltig streckkod.",
-			"invalidLocation": "Ogiltig förvaringsplats."
+			"invalidLocation": "Ogiltig förvaringsplats.",
+			"invalidInput": "Ogiltig inmatning.",
+			"notFound": "Varan hittades inte."
 		},
 		"shopping": {
 			"missingRowId": "Saknar rad-id",
@@ -3519,6 +3525,18 @@
 			"title": "Varför detta förslag?",
 			"settingsLink": "Hantera vad Skaffu vet",
 			"productFallback": "varan",
+			"correctCta": "Rätta datumet",
+			"correctLabel": "Nytt utgångsdatum",
+			"correctSave": "Spara",
+			"correctCancel": "Avbryt",
+			"correctSuccess": "Tack — Skaffu lär sig av rättelsen",
+			"correctError": "Kunde inte spara — försök igen",
+			"pantry": {
+				"householdPrimary": "Det här datumet är inlärt av ert hushålls vanor.",
+				"aiPrimary": "Det här datumet är en AI-uppskattning — kontrollera vid behov.",
+				"heuristicPrimary": "Det här datumet är en uppskattning för liknande varor.",
+				"locationFact": "Förvaras i {location}."
+			},
 			"shelfLife": {
 				"householdFactPurchased": "Senast köpt {date}"
 			}
