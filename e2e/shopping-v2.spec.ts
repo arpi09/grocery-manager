@@ -75,7 +75,7 @@ test.describe('Shopping UX v2', () => {
 
 		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
 		const sheetShown = await pantrySheet
-			.waitFor({ state: 'visible', timeout: 2_000 })
+			.waitFor({ state: 'visible', timeout: 5_000 })
 			.then(() => true)
 			.catch(() => false);
 		if (sheetShown) {

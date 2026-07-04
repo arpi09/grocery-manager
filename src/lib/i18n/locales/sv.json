@@ -346,6 +346,42 @@
 					"cta": "Öppna inköpslistan"
 				}
 			},
+			"expiringCard": {
+				"addCta": "Lägg till {count} på inköpslistan",
+				"addCtaEmpty": "Välj varor att lägga till",
+				"addedCta": "✓ Tillagt på inköpslistan",
+				"addFailed": "Kunde inte lägga till varorna — försök igen",
+				"addPartial": "{added} av {total} varor lades till på listan",
+				"addSuccess": "{count, plural, one {# vara tillagd på inköpslistan} other {# varor tillagda på inköpslistan}}"
+			},
+			"pulseCard": {
+				"title": "Hushållspuls",
+				"expiringLabel": "Går ut snart",
+				"expiringEmpty": "Inga varor går ut snart 🎉",
+				"shoppingTitle": "Inköpslistan",
+				"shoppingCount": "{count, plural, one {# vara att handla} other {# varor att handla}}",
+				"shoppingEmpty": "Listan är tömd",
+				"openCta": "Öppna →",
+				"activityLabel": "Senaste aktivitet",
+				"activityEmpty": "Ingen aktivitet ännu",
+				"activity": {
+					"create": "la till",
+					"consume": "använde",
+					"confirm": "bekräftade",
+					"merge": "slog ihop",
+					"batchReview": "gick igenom kvittot",
+					"stalenessConfirmed": "såg över skafferiet",
+					"receiptFinishAccepted": "prickade av ett kvitto",
+					"generic": "uppdaterade skafferiet",
+					"someone": "Någon i hushållet"
+				},
+				"time": {
+					"justNow": "nyss",
+					"minutes": "{count} min",
+					"hours": "{count} tim",
+					"days": "{count, plural, one {# dag} other {# dagar}}"
+				}
+			},
 			"moment": {
 				"emptyPantry": {
 					"title": "Bygg ert skafferi",
@@ -1096,9 +1132,10 @@
 				"subtitle": "{count, plural, one {# vara} other {# varor}} · {store}",
 				"subtitleMemory": "minns vad ni brukar köpa",
 				"subtitleEmpty": "Tom lista — lägg till det ni saknar",
-				"emptyTitle": "Tom lista",
-				"emptyBody": "Lägg till det ni saknar inför nästa handling.",
-				"emptyCta": "Lägg till första varan",
+				"emptyTitle": "Listan är tom.\nDags att fylla den.",
+				"emptyBody": "Lägg till det ni behöver handla. Listan delas direkt med hela hushållet – så handlar ni aldrig dubbelt.",
+				"emptyCta": "Lägg till en vara",
+				"emptyHelper": "Varor som snart tar slut i skafferiet föreslås här",
 				"illustrationAria": "Inköpsplan — översikt"
 			},
 			"mode": {
@@ -2955,9 +2992,10 @@
 			"searchPlaceholder": "Sök i skafferiet…",
 			"insightsSummary": "Att se över i skafferiet",
 			"empty": {
-				"title": "Tomt skafferi",
-				"body": "Kom igång genom att importera ett kvitto eller lägga till en vara manuellt.",
-				"cta": "Lägg till vara"
+				"title": "Tomt så länge.\nSnart fullt av liv.",
+				"body": "Lägg till er första vara för att börja hålla koll på vad som finns hemma – och vad som snart tar slut.",
+				"cta": "Lägg till din första vara",
+				"helper": "Sorteras automatiskt i Kyl, Frys och Skafferi"
 			},
 			"error": {
 				"loadFailed": "Skafferiet kunde inte laddas. Försök igen."

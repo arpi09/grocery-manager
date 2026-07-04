@@ -403,6 +403,42 @@
 					"cta": "Open shopping list"
 				}
 			},
+			"expiringCard": {
+				"addCta": "Add {count} to shopping list",
+				"addCtaEmpty": "Select items to add",
+				"addedCta": "✓ Added to shopping list",
+				"addFailed": "Couldn't add the items — try again",
+				"addPartial": "{added} of {total} items were added to the list",
+				"addSuccess": "{count, plural, one {# item added to the shopping list} other {# items added to the shopping list}}"
+			},
+			"pulseCard": {
+				"title": "Household pulse",
+				"expiringLabel": "Expiring soon",
+				"expiringEmpty": "Nothing is expiring soon 🎉",
+				"shoppingTitle": "Shopping list",
+				"shoppingCount": "{count, plural, one {# item to buy} other {# items to buy}}",
+				"shoppingEmpty": "The list is empty",
+				"openCta": "Open →",
+				"activityLabel": "Latest activity",
+				"activityEmpty": "No activity yet",
+				"activity": {
+					"create": "added",
+					"consume": "used",
+					"confirm": "confirmed",
+					"merge": "merged",
+					"batchReview": "reviewed the receipt",
+					"stalenessConfirmed": "reviewed the pantry",
+					"receiptFinishAccepted": "checked off a receipt",
+					"generic": "updated the pantry",
+					"someone": "Someone in the household"
+				},
+				"time": {
+					"justNow": "just now",
+					"minutes": "{count} min",
+					"hours": "{count} hrs",
+					"days": "{count, plural, one {# day} other {# days}}"
+				}
+			},
 			"moment": {
 				"emptyPantry": {
 					"title": "Build your pantry",
@@ -1175,9 +1211,10 @@
 				"subtitle": "{count, plural, one {# item} other {# items}} · {store}",
 				"subtitleMemory": "remembers your usual picks",
 				"subtitleEmpty": "Empty list — add what you're missing",
-				"emptyTitle": "Empty list",
-				"emptyBody": "Add what you're missing before your next shop.",
-				"emptyCta": "Add first item",
+				"emptyTitle": "The list is empty.\nTime to fill it.",
+				"emptyBody": "Add what you need to buy. The list is shared instantly with the whole household – so you never buy double.",
+				"emptyCta": "Add an item",
+				"emptyHelper": "Items running low in your pantry are suggested here",
 				"illustrationAria": "Shopping plan overview"
 			},
 			"mode": {
@@ -3034,9 +3071,10 @@
 			"searchPlaceholder": "Search pantry…",
 			"insightsSummary": "Things to review in your pantry",
 			"empty": {
-				"title": "Empty pantry",
-				"body": "Get started by importing a receipt or adding an item manually.",
-				"cta": "Add item"
+				"title": "Empty for now.\nSoon full of life.",
+				"body": "Add your first item to start keeping track of what's at home – and what's about to run out.",
+				"cta": "Add your first item",
+				"helper": "Sorted automatically into Fridge, Freezer and Pantry"
 			},
 			"error": {
 				"loadFailed": "Pantry couldn't load. Try again."

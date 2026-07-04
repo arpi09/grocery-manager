@@ -40,6 +40,12 @@
 
 			brainScore={data.brainScore}
 
+			householdName={data.activeHousehold?.name ?? null}
+
+			pulseMembers={data.pulseMembers}
+
+			pulseLastActivity={data.pulseLastActivity}
+
 			loadFailed={Boolean(data.loadFailed)}
 		/>
 

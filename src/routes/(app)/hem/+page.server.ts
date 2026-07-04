@@ -32,6 +32,7 @@ import {
 } from '$lib/domain/home-briefing-recipe';
 import type { HomeBriefingRecipeCard, HomeBriefingFunFact } from '$lib/domain/home-briefing';
 import { selectHomeBriefingFunFact } from '$lib/domain/home-briefing';
+import type { HomePulseActivity, HomePulseMember } from '$lib/domain/household-pulse';
 import { isWithinActiveMealSlot } from '$lib/domain/meal-slot';
 import { getSnapshot } from '$lib/domain/brain-score';
 
@@ -122,8 +123,37 @@ export const load: PageServerLoad = async ({ locals }) => {
 	let recipeSuggestion: HomeBriefingRecipeCard | null = null;
 	let briefingRecipeChip: { id: string; title: string } | null = null;
 	let briefingFunFact: HomeBriefingFunFact | null = null;
+	let pulseMembers: HomePulseMember[] = [];
+	let pulseLastActivity: HomePulseActivity | null = null;
 
 	if (!loadFailed) {
+		try {
+			const members = (await locals.householdService.getHouseholdMembers(householdId)) ?? [];
+			pulseMembers = members.map((member) => ({
+				userId: member.userId,
+				name: member.displayName?.trim() || member.email
+			}));
+
+			const [event] = await locals.pmfService.listRecentHouseholdSyncEvents(householdId, 1);
+			if (event) {
+				const itemName = event.itemId
+					? await locals.inventoryService
+							.getItem(householdId, event.itemId)
+							.then((item) => item.name)
+							.catch(() => null)
+					: null;
+				pulseLastActivity = {
+					actorName: pulseMembers.find((member) => member.userId === event.userId)?.name ?? null,
+					eventType: event.eventType,
+					action: event.action,
+					itemName,
+					createdAt: event.createdAt
+				};
+			}
+		} catch (error) {
+			console.warn('[hem] household pulse degraded:', error);
+		}
+
 		const impactPromise = locals.statistikService
 			.getImpact(householdId)
 			.then((impact) => selectHomeBriefingFunFact(impact))
@@ -196,6 +226,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		briefingRecipeChip,
 		briefingFunFact,
 		briefingOneLiner,
+		pulseMembers,
+		pulseLastActivity,
 		showMemoryExplorer: isShelfLifeLearningEnabled(),
 		brainTimeline,
 		brainScore

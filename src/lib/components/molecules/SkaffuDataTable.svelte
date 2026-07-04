@@ -113,6 +113,13 @@
 		vertical-align: middle;
 	}
 
+	/* table-layout: fixed resolves 1% to ~10px; the 44px checkoff button then gets
+	   clipped by the cell's overflow:hidden (MDC) and its center lands in col-qty,
+	   which swallows pointer events. Reserve the full touch target + padding. */
+	.skaffu-table :global(.col-checkoff) {
+		width: calc(var(--touch-target-min) + 2 * var(--space-sm));
+	}
+
 	.skaffu-table :global(.col-thumb) {
 		width: 1%;
 		padding-inline: var(--space-sm);

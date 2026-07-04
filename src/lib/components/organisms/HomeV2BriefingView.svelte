@@ -2,6 +2,7 @@
 	import HomeBriefingChips from '$lib/components/molecules/HomeBriefingChips.svelte';
 	import HomeBriefingSuggestionCard from '$lib/components/molecules/HomeBriefingSuggestionCard.svelte';
 	import HomeBriefingGreeting from '$lib/components/molecules/HomeBriefingGreeting.svelte';
+	import HouseholdPulseCard from '$lib/components/molecules/HouseholdPulseCard.svelte';
 	import { trackForYouCtaTapped, trackHomeChipTapped, trackMomentCtaTapped } from '$lib/client/home-v2-telemetry';
 	import type { DashboardSummary } from '$lib/application/inventory.service';
 	import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
@@ -10,14 +11,12 @@
 		buildHomeBriefingForYouPresentation,
 		buildHomeBriefingGreetingPresentation,
 		buildHomeBriefingMomentPresentation,
-		buildHomeBriefingPulsePresentation,
 		buildHomeBriefingStatusPresentation
 	} from '$lib/domain/home-briefing-presenter';
 	import {
 		isShoppingListReady,
 		selectHomeBriefingForYouCard,
 		selectHomeBriefingMomentCard,
-		selectHomeBriefingPulse,
 		selectHomeBriefingStatus,
 		type HomeBriefingForYouCard,
 		type HomeBriefingFunFact,
@@ -26,6 +25,8 @@
 		type HomeBriefingRecipeCard
 	} from '$lib/domain/home-briefing';
 	import type { HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
+	import type { HomePulseActivity, HomePulseMember } from '$lib/domain/household-pulse';
+	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { getLocale, t } from '$lib/i18n';
 	import { PANTRY_SHELF_PATH } from '$lib/navigation/nav-config';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
@@ -44,11 +45,15 @@
 		briefingFunFact?: HomeBriefingFunFact | null;
 		briefingOneLiner?: string | null;
 		canWrite?: boolean;
+		householdName?: string | null;
+		pulseMembers?: HomePulseMember[];
+		pulseLastActivity?: HomePulseActivity | null;
 		acceptingReplenishment?: boolean;
 		onAcceptReplenishment?: (card: Extract<HomeBriefingForYouCard, { kind: 'replenishment' }>) =>
 			| void
 			| Promise<void>;
 		onRecipeCta?: (card: HomeBriefingRecipeCard) => void | Promise<void>;
+		onAddExpiringToList?: (items: InventoryItem[]) => Promise<boolean>;
 	}
 
 	let {
@@ -62,9 +67,13 @@
 		briefingFunFact = null,
 		briefingOneLiner = null,
 		canWrite = false,
+		householdName = null,
+		pulseMembers = [],
+		pulseLastActivity = null,
 		acceptingReplenishment = false,
 		onAcceptReplenishment,
-		onRecipeCta
+		onRecipeCta,
+		onAddExpiringToList
 	}: Props = $props();
 
 
@@ -154,16 +163,6 @@
 
 	const momentHref = $derived(moment ? momentCtaHref(moment.kind) : null);
 
-	const pulse = $derived(
-		selectHomeBriefingPulse({
-			forYouKind: forYou?.kind ?? null,
-			replenishment: intelligence.replenishment,
-			lastUpdatedAt: summary.pantryStatus.lastUpdatedAt
-		})
-	);
-	const pulsePresentation = $derived(pulse ? buildHomeBriefingPulsePresentation(pulse) : null);
-	const pulseHref = $derived(pulse?.kind === 'replenishmentMemory' ? shoppingHref : storageHref);
-
 	const forYouCtaHref = $derived.by(() => {
 		if (!forYou) return null;
 		switch (forYou.kind) {
@@ -190,7 +189,21 @@
 <div class="home-v2-briefing" data-testid="home-v2-briefing">
 	<HomeBriefingGreeting greeting={greeting} status={statusPresentation} statusOverride={briefingOneLiner} />
 
-	{#if forYou && forYouPresentation}
+	{#if onAddExpiringToList}
+		<HouseholdPulseCard
+			expiringSoon={summary.expiringSoon}
+			{shoppingListCount}
+			{shoppingHref}
+			moreHref={storageHref}
+			{householdName}
+			members={pulseMembers}
+			lastActivity={pulseLastActivity}
+			{canWrite}
+			onAddToList={onAddExpiringToList}
+		/>
+	{/if}
+
+	{#if forYou && forYou.kind !== 'expiring' && forYouPresentation}
 		<p class="section-label">{t('home.v6.forYou.sectionLabel')}</p>
 		<HomeBriefingSuggestionCard
 			variant="forYou"
@@ -234,18 +247,6 @@
 		recipeHref={showRecipeChip ? recipeChipHref : null}
 		onChipTap={trackHomeChipTapped}
 	/>
-
-	{#if pulse && pulsePresentation}
-		<a
-			class="pulse-card"
-			href={pulseHref}
-			data-testid="home-v2-pulse"
-			data-pulse-kind={pulse.kind}
-		>
-			<span class="pulse-label">{t('home.v6.pulse.sectionLabel')}</span>
-			<span class="pulse-text">{t(pulsePresentation.key, pulsePresentation.params)}</span>
-		</a>
-	{/if}
 </div>
 
 <style>
@@ -265,37 +266,4 @@
 		color: var(--color-text-muted);
 	}
 
-	.pulse-card {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		margin-top: var(--space-sm);
-		min-height: var(--touch-target-min);
-		padding: 12px 14px;
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-md);
-		background: var(--color-surface);
-		color: var(--color-text);
-		text-decoration: none;
-		box-shadow: var(--shadow-sm);
-	}
-
-	.pulse-label {
-		font-size: var(--font-size-label, 0.75rem);
-		font-weight: var(--font-weight-label, 700);
-		letter-spacing: var(--letter-spacing-label, 0.04em);
-		text-transform: uppercase;
-		color: var(--color-text-muted);
-	}
-
-	.pulse-text {
-		font-size: var(--font-size-body-sm, 0.875rem);
-		font-weight: 600;
-		line-height: 1.3;
-	}
-
-	.pulse-card:focus-visible {
-		outline: 2px solid var(--color-primary);
-		outline-offset: 2px;
-	}
 </style>

@@ -23,6 +23,8 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - feat(planer): progressive disclosure on Eat page ([#171](https://github.com/arpi09/grocery-manager/pull/171)) — Add reusable \ExpandableCopy\ molecule with keyboard-accessible Read more / Läs mer toggles (\ria-expanded\, \ria-controls\)
 - feat(ai): Claude Code parity with Cursor agent setup ([#172](https://github.com/arpi09/grocery-manager/pull/172)) — Add \CLAUDE.md\ and \docs/AI_TOOLING.md\ for unified Cursor + Claude Code onboarding
 - feat(ai-tooling): governance dispatch roster for Claude Code ([#175](https://github.com/arpi09/grocery-manager/pull/175)) — Definierade i `.cursor/agents/` (source of truth) → genereras till `.claude/agents/` av `sync:ai-tooling`.
+- feat(ux): first-run empty states for skafferi + inkopslista ([#191](https://github.com/arpi09/grocery-manager/pull/191)) — **Ny molekyl `FirstRunEmptyState`** — ikon-platta 60×60, tvåradig display-rubrik (2rem/1.12/−0.03em), brödtext (32ch), fullbredds-CTA (52px, primary, mjuk skugga, +-glyf `aria-hidden`), helper-rad med ↺-chip. Rise-in-animation, avstängd under `prefers-reduced-motion`. Fokusring 3px `--color-text`.
+- feat(hem): Hushållspuls-kort ersätter För dig-expiring + pulsraden ([#193](https://github.com/arpi09/grocery-manager/pull/193)) — Nytt konsoliderat **Hushållspuls**-kort högst upp i home v2-briefingen (design handoff variant 2a): Går ut snart (med quick-add till delade inköpslistan), Inköpslistan (antal + Öppna → /inkop), Senaste aktivitet samt medlemsavatarer.
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
@@ -58,6 +60,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(pantry): tile action buttons overflow card on mobile ([#184](https://github.com/arpi09/grocery-manager/pull/184))
 - fix(onboarding): hide Kivra hints when forward flag is off ([#185](https://github.com/arpi09/grocery-manager/pull/185))
 - fix(db): pass db handle explicitly to startup seeds — kills cold-start init race ([#186](https://github.com/arpi09/grocery-manager/pull/186)) — `ensureDefaultAdminUser(db)` / `ensureDefaultHousehold(db)` tar drizzle-handlen som parameter — ingen `getDb()`-import kvar i seed-filerna (cykeln bruten; endast type-import kvar).
+- fix(shopping): checklist checkoff button unclickable — col-checkoff collapsed to 10px ([#192](https://github.com/arpi09/grocery-manager/pull/192)) — `table-layout: fixed` + `width: 1%` collapses `.col-checkoff` to ~10px; MDC's `overflow: hidden` clips the 44px checkoff button so its center lands in `col-qty` → mouse clicks (and Playwright without force) hit the qty cell instead of the button. Give the column a real width: `calc(var(--touch-target-min) + 2 * var(--space-sm))` (60px). Mobile (<640px) unaffected (own flex layout).
 
 ### Changed
 
