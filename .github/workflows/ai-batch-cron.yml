@@ -1,0 +1,47 @@
+# OpenAI Batch API runner for latency-insensitive AI cron jobs (production only).
+# Twice daily: poll + apply in-flight batches, then submit fresh work per kind.
+# Off unless AI_BATCH_ENABLED=true in App Hosting env. See docs/AI_BATCH.md.
+#
+# GitHub: secret CRON_SECRET, variable PRODUCTION_URL (https://skaffu.com)
+
+name: AI batch cron
+
+on:
+  schedule:
+    # 04:30 UTC applies overnight batches (before 07:00 expiry reminders);
+    # 16:30 UTC submits the day's work (≥14h before next-morning sends).
+    - cron: '30 4 * * *'
+    - cron: '30 16 * * *'
+  workflow_dispatch:
+
+jobs:
+  ai-batch:
+    name: ai-batch
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: POST /api/cron/ai-batch
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "::error::GitHub secret CRON_SECRET is not set."
+            exit 1
+          fi
+          if [ -z "${PRODUCTION_URL:-}" ]; then
+            echo "::error::GitHub repository variable PRODUCTION_URL is not set (e.g. https://skaffu.com)."
+            exit 1
+          fi
+
+          base="${PRODUCTION_URL%/}"
+          url="${base}/api/cron/ai-batch"
+          echo "POST ${url}"
+
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            -H "Accept: application/json" \
+            "${url}"

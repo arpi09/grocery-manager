@@ -52,6 +52,45 @@ export async function expectItemOnShoppingList(page: Page, name: string): Promis
 }
 
 /**
+ * Remove a shopping list item by name. Looks up the row id in the checklist
+ * drawer, then removes via the form action. Tests that seed list items should
+ * clean up with this — the summary pills only show the three oldest unchecked
+ * items, so leftovers starve pill assertions in later specs on the shared
+ * admin household.
+ */
+export async function removeShoppingListItemByName(page: Page, name: string): Promise<void> {
+	await openChecklistDrawer(page);
+	const drawer = page.getByTestId('shopping-v2-legacy-drawer');
+	const row = drawer.locator('[data-testid^="shopping-grid-row-"]').filter({ hasText: name });
+
+	if (!(await row.isVisible().catch(() => false))) {
+		await drawer.getByTestId('data-grid-filter-button').click();
+		const filterSheet = page.getByTestId('data-grid-filter-sheet');
+		await expect(filterSheet).toBeVisible();
+		await filterSheet.getByRole('searchbox').fill(name);
+		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
+		await expect(filterSheet).not.toBeVisible();
+	}
+
+	await expect(row).toBeVisible({ timeout: 15_000 });
+	const rowTestId = await row.getAttribute('data-testid');
+	const id = rowTestId?.replace('shopping-grid-row-', '');
+	expect(id, `row testid should carry the item id (got ${rowTestId})`).toBeTruthy();
+
+	await page.keyboard.press('Escape');
+	await expect(drawer).not.toBeVisible({ timeout: 5_000 });
+
+	const response = await page.request.post('/inkop?/remove', {
+		form: { id: id as string },
+		headers: {
+			accept: 'application/json',
+			'x-sveltekit-action': 'true'
+		}
+	});
+	expect(response.ok()).toBe(true);
+}
+
+/**
  * In shop mode, pick items until the trip-complete card shows.
  *
  * The shared admin household can hold items from parallel tests or earlier

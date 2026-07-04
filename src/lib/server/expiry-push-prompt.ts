@@ -30,6 +30,22 @@ export interface ExpiryPushItem {
 	daysUntil: number;
 }
 
+export const EXPIRY_PUSH_SCHEMA_NAME = 'expiry_push_body';
+
+/**
+ * Stable cache key matching a pre-generated push body to its recipient + item
+ * set. Keyed on item names only (not day counts) so a 1-day drift between
+ * pre-generation and send-time still hits; a changed item set misses and falls
+ * back to synchronous generation.
+ */
+export function expiryPushBodyKey(userId: string, items: ExpiryPushItem[]): string {
+	const names = items
+		.slice(0, EXPIRY_PUSH_MAX_ITEMS)
+		.map((item) => item.name.trim().toLowerCase())
+		.sort();
+	return `${userId}::${names.join('|')}`;
+}
+
 export function buildExpiryPushUserPrompt(
 	items: ExpiryPushItem[],
 	locale = 'sv'

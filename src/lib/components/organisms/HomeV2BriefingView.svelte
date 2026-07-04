@@ -30,6 +30,7 @@
 	import { getLocale, t } from '$lib/i18n';
 	import { PANTRY_SHELF_PATH } from '$lib/navigation/nav-config';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
+	import { buildEatFirstWeekUrl } from '$lib/domain/eat-first-week';
 	import { scanModeHref } from '$lib/utils/scan-nav';
 	import { isWithinActiveMealSlot } from '$lib/domain/meal-slot';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
@@ -49,7 +50,11 @@
 		pulseMembers?: HomePulseMember[];
 		pulseLastActivity?: HomePulseActivity | null;
 		acceptingReplenishment?: boolean;
+		dismissingReplenishment?: boolean;
 		onAcceptReplenishment?: (card: Extract<HomeBriefingForYouCard, { kind: 'replenishment' }>) =>
+			| void
+			| Promise<void>;
+		onDismissReplenishment?: (card: Extract<HomeBriefingForYouCard, { kind: 'replenishment' }>) =>
 			| void
 			| Promise<void>;
 		onRecipeCta?: (card: HomeBriefingRecipeCard) => void | Promise<void>;
@@ -71,7 +76,9 @@
 		pulseMembers = [],
 		pulseLastActivity = null,
 		acceptingReplenishment = false,
+		dismissingReplenishment = false,
 		onAcceptReplenishment,
+		onDismissReplenishment,
 		onRecipeCta,
 		onAddExpiringToList
 	}: Props = $props();
@@ -153,7 +160,8 @@
 			case 'photoRound':
 				return scanModeHref('photo', APP_HOME_PATH);
 			case 'planMeal':
-				return '/planer';
+				/* Food is expiring → land directly in the eat-first week generator. */
+				return useSoonCount > 0 ? buildEatFirstWeekUrl('hem') : '/planer';
 			case 'openShopping':
 				return '/inkop';
 			case 'seeStats':
@@ -187,9 +195,15 @@
 </script>
 
 <div class="home-v2-briefing" data-testid="home-v2-briefing">
-	<HomeBriefingGreeting greeting={greeting} status={statusPresentation} statusOverride={briefingOneLiner} />
+	<HomeBriefingGreeting
+		greeting={greeting}
+		status={statusPresentation}
+		statusOverride={briefingOneLiner}
+		aiGenerated={Boolean(briefingOneLiner?.trim())}
+	/>
 
-	{#if onAddExpiringToList}
+	<!-- Cold start: no pulse card when there's nothing to pulse — the moment card guides setup. -->
+	{#if onAddExpiringToList && (summary.totalItems > 0 || shoppingListCount > 0)}
 		<HouseholdPulseCard
 			expiringSoon={summary.expiringSoon}
 			{shoppingListCount}
@@ -224,6 +238,15 @@
 						: forYouCtaHref
 							? () => trackForYouLinkTap(forYou.kind, forYouCtaHref!)
 							: undefined
+			}
+			secondaryLabel={forYou.kind === 'replenishment' && canWrite && onDismissReplenishment
+				? t('shopping.v2.memory.dismiss')
+				: null}
+			secondaryLoading={dismissingReplenishment}
+			onSecondary={
+				forYou.kind === 'replenishment' && onDismissReplenishment
+					? () => onDismissReplenishment(forYou)
+					: undefined
 			}
 		/>
 	{:else if moment && momentPresentation}

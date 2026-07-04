@@ -5,8 +5,8 @@ import { translate } from '$lib/i18n/messages';
 import { recordOpenAiFailure, recordOpenAiSuccess } from '$lib/server/openai-circuit-breaker';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
-export const OPENAI_MODEL = 'gpt-4.1-mini';
-export const OPENAI_MODEL_NANO = env.OPENAI_MODEL_NANO?.trim() || 'gpt-4.1-nano';
+export const OPENAI_MODEL = env.OPENAI_MODEL?.trim() || 'gpt-5.4-mini';
+export const OPENAI_MODEL_NANO = env.OPENAI_MODEL_NANO?.trim() || 'gpt-5.4-nano';
 
 export const OPENAI_NOT_CONFIGURED_KEY = 'errors.api.openAiNotConfigured' satisfies MessageKey;
 export const OPENAI_UNAUTHORIZED_KEY = 'errors.api.openAiUnauthorized' satisfies MessageKey;
@@ -131,6 +131,54 @@ interface StructuredImagesResponseOptions extends StructuredResponseOptions {
 	imageDetail?: ImageDetailLevel;
 }
 
+/** system+user message parts for a Responses API `input` array. */
+export function buildResponsesInput(systemPrompt: string, userPrompt: string): unknown[] {
+	return [
+		{ role: 'system', content: [{ type: 'input_text', text: systemPrompt }] },
+		{ role: 'user', content: [{ type: 'input_text', text: userPrompt }] }
+	];
+}
+
+/** `text.format` block enforcing a strict JSON schema on the response. */
+export function buildResponsesJsonFormat(
+	schemaName: string,
+	schema: Record<string, unknown>,
+	strict = true
+): { format: Record<string, unknown> } {
+	return { format: { type: 'json_schema', name: schemaName, strict, schema } };
+}
+
+/**
+ * Full `/v1/responses` request body for a strict-JSON structured call. Shared by
+ * the synchronous path and the Batch API client so both send identical requests.
+ */
+export function buildStructuredRequestBody(options: {
+	model?: string;
+	systemPrompt: string;
+	userPrompt: string;
+	schemaName: string;
+	schema: Record<string, unknown>;
+	strict?: boolean;
+}): Record<string, unknown> {
+	return {
+		model: options.model ?? OPENAI_MODEL,
+		input: buildResponsesInput(options.systemPrompt, options.userPrompt),
+		text: buildResponsesJsonFormat(options.schemaName, options.schema, options.strict ?? true)
+	};
+}
+
+/** Full `/v1/responses` request body for a freeform (no schema) text call. */
+export function buildFreeformRequestBody(options: {
+	model?: string;
+	systemPrompt: string;
+	userPrompt: string;
+}): Record<string, unknown> {
+	return {
+		model: options.model ?? OPENAI_MODEL,
+		input: buildResponsesInput(options.systemPrompt, options.userPrompt)
+	};
+}
+
 async function postOpenAiStructured(
 	apiKey: string,
 	input: unknown[],
@@ -150,14 +198,7 @@ async function postOpenAiStructured(
 			body: JSON.stringify({
 				model,
 				input,
-				text: {
-					format: {
-						type: 'json_schema',
-						name: schemaName,
-						strict,
-						schema
-					}
-				}
+				text: buildResponsesJsonFormat(schemaName, schema, strict)
 			})
 		});
 	} catch (error) {

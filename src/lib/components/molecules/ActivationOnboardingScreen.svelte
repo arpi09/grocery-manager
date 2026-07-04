@@ -6,13 +6,17 @@
 		body: string;
 		illustration: Snippet;
 		extra?: Snippet;
+		/** Compact: shrink the illustration stage when the extra block needs the space (fill chips). */
+		compact?: boolean;
 	}
 
-	let { title, body, illustration, extra }: Props = $props();
+	let { title, body, illustration, extra, compact = false }: Props = $props();
 </script>
 
-<div class="activation-screen motion-enter">
-	<div class="illus-slot">
+<div class="activation-screen" class:compact>
+	<div class="halo" aria-hidden="true"></div>
+
+	<div class="illus-stage motion-illus">
 		{@render illustration()}
 	</div>
 
@@ -29,55 +33,85 @@
 
 <style>
 	.activation-screen {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		gap: var(--space-md);
+		gap: var(--space-lg);
 		flex: 1;
 		min-height: 0;
 	}
 
-	.illus-slot {
+	.halo {
+		position: absolute;
+		inset: 0;
+		background: radial-gradient(
+			110% 70% at 50% 18%,
+			color-mix(in srgb, var(--color-primary) 9%, transparent),
+			transparent 62%
+		);
+		pointer-events: none;
+	}
+
+	.illus-stage {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 3.5rem;
-		max-height: 4.5rem;
+		flex: 1;
+		min-height: 9rem;
+		max-height: 14rem;
 		padding-block: var(--space-xs);
-		flex-shrink: 0;
 		overflow: hidden;
 	}
 
-	.illus-slot :global(svg) {
-		max-height: 4.5rem;
+	.illus-stage :global(svg) {
+		max-height: 100%;
 		width: auto;
-		height: auto;
+		height: 100%;
+	}
+
+	.compact .illus-stage {
+		flex: 0 0 auto;
+		min-height: 4.5rem;
+		max-height: 6rem;
+	}
+
+	.compact {
+		gap: var(--space-md);
+	}
+
+	.compact .copy-block {
+		flex: 1;
+		min-height: 0;
+	}
+
+	.compact .screen-extra {
+		min-height: 0;
+		overflow-y: auto;
 	}
 
 	@media (min-width: 768px) {
-		.illus-slot {
-			min-height: 5rem;
-			max-height: 6.5rem;
+		.illus-stage {
+			min-height: 11rem;
+			max-height: 16rem;
 			padding-block: var(--space-sm);
-		}
-
-		.illus-slot :global(svg) {
-			max-height: 6.5rem;
 		}
 	}
 
 	.copy-block {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
 		text-align: center;
 		max-width: 22rem;
 		margin-inline: auto;
+		width: 100%;
 	}
 
 	.screen-title {
 		margin: 0;
-		font-size: clamp(1.25rem, 4.5vw, 1.75rem);
+		font-size: clamp(1.375rem, 5vw, 1.875rem);
 		line-height: 1.2;
 		font-weight: 700;
 		letter-spacing: -0.02em;
@@ -95,8 +129,8 @@
 		text-align: left;
 	}
 
-	.motion-enter {
-		animation: activation-enter 320ms cubic-bezier(0.33, 1, 0.68, 1) both;
+	.motion-illus {
+		animation: activation-enter 320ms cubic-bezier(0.33, 1, 0.68, 1) 120ms both;
 	}
 
 	.motion-stagger {
@@ -104,15 +138,15 @@
 	}
 
 	.screen-title.motion-stagger {
-		animation-delay: 40ms;
+		animation-delay: 200ms;
 	}
 
 	.screen-body.motion-stagger {
-		animation-delay: 80ms;
+		animation-delay: 260ms;
 	}
 
 	.screen-extra.motion-stagger {
-		animation-delay: 120ms;
+		animation-delay: 320ms;
 	}
 
 	@keyframes activation-enter {
@@ -127,7 +161,7 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.motion-enter,
+		.motion-illus,
 		.motion-stagger {
 			animation: none;
 		}

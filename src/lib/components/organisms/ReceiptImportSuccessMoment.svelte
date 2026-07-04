@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -19,7 +19,6 @@
 	} from '$lib/utils/receipt-import-session';
 	import {
 		isActivationOnboardingFlowComplete,
-		markActivationSuccessSeen,
 		ONBOARDING_PROGRESS_EVENT,
 		shouldShowOnboarding
 	} from '$lib/utils/onboarding';
@@ -116,15 +115,10 @@
 		if (browser) window.dispatchEvent(new Event(ONBOARDING_PROGRESS_EVENT));
 	}
 
-	function markOnboardingSuccessIfNeeded() {
-		if (userId && shouldShowOnboarding(userId)) markActivationSuccessSeen(userId);
-	}
-
 	async function handlePrimaryCta() {
 		if (!session) return;
 		const destination = `/inventory/${session.dominantLocation ?? 'fridge'}`;
 		void trackProductEvent('receipt_import_success_primary_cta', { ...eventMetadata(session), destination });
-		markOnboardingSuccessIfNeeded();
 		dismissMoment(false);
 		await goto(destination);
 	}
@@ -136,13 +130,11 @@
 				...eventMetadata(session),
 				context: 'receipt_success'
 			});
-			markOnboardingSuccessIfNeeded();
 			dismissMoment(false);
 			await goto('/settings#household');
 			return;
 		}
 		void trackProductEvent('receipt_import_success_secondary_cta', eventMetadata(session));
-		markOnboardingSuccessIfNeeded();
 		dismissMoment(false);
 		await goto('/scan');
 	}
@@ -153,13 +145,11 @@
 			...eventMetadata(session),
 			context: 'add_more'
 		});
-		markOnboardingSuccessIfNeeded();
 		dismissMoment(false);
 		await goto('/scan');
 	}
 
 	function handleContinueSetup() {
-		markOnboardingSuccessIfNeeded();
 		dismissMoment(false);
 	}
 

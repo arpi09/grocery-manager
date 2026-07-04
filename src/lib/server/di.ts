@@ -54,6 +54,13 @@ import { ProductFeedbackService } from '$lib/application/product-feedback.servic
 import { PmfSurveyService } from '$lib/application/pmf-survey.service';
 import { DrizzlePmfSurveyRepository } from '$lib/infrastructure/repositories/pmf-survey.repository';
 import { DrizzleAiUsageRepository } from '$lib/infrastructure/repositories/ai-usage.repository';
+import { DrizzleAiBatchJobRepository } from '$lib/infrastructure/repositories/ai-batch-job.repository';
+import { missingExpiryBatchHandler } from '$lib/server/ai-batch/missing-expiry.handler';
+import {
+	createExpiryPushBatchHandler,
+	createPrebatchedPushBodyProvider
+} from '$lib/server/ai-batch/expiry-push.handler';
+import { createAdminDigestBatchHandler } from '$lib/server/ai-batch/admin-digest.handler';
 import { AiRateLimitService } from '$lib/application/ai-rate-limit.service';
 import { AiUsageAdminService } from '$lib/application/ai-usage-admin.service';
 import { PlanLimitsService } from '$lib/application/plan-limits.service';
@@ -140,6 +147,8 @@ const aiUsageRepository = new DrizzleAiUsageRepository();
 const planLimitsRepository = new DrizzlePlanLimitsRepository();
 const waitlistRepository = new DrizzleWaitlistRepository();
 const appSettingsRepository = new DrizzleAppSettingsRepository();
+export const aiBatchJobRepository = new DrizzleAiBatchJobRepository();
+const prebatchedPushBodyProvider = createPrebatchedPushBodyProvider(aiBatchJobRepository);
 const socialPostRepository = new DrizzleSocialPostRepository();
 const guideArticleRepository = new DrizzleGuideArticleRepository();
 export const appSettingsService = new AppSettingsService(appSettingsRepository);
@@ -349,7 +358,8 @@ export const expiryReminderService = new ExpiryReminderService(
 	pushSubscriptionRepository,
 	emailAdapter,
 	pushAdapter,
-	appOriginAdapter
+	appOriginAdapter,
+	prebatchedPushBodyProvider
 );
 export const shoppingPushService = new ShoppingPushService(
 	shoppingPushRepository,
@@ -378,8 +388,16 @@ export const adminInsightsService = new AdminInsightsService(
 	pmfService,
 	analyticsAdminService,
 	productFeedbackService,
-	aiRateLimitService
+	aiRateLimitService,
+	aiBatchJobRepository
 );
+
+/** Handlers for the OpenAI Batch API cron runner (/api/cron/ai-batch). */
+export const aiBatchHandlers = [
+	missingExpiryBatchHandler,
+	createExpiryPushBatchHandler({ expiryReminderService }),
+	createAdminDigestBatchHandler({ adminInsightsService })
+];
 export const pmfDigestService = new PmfDigestService(
 	pmfService,
 	adminService,

@@ -123,6 +123,11 @@ test.describe('Receipt flow', () => {
 
 		await expect(page.getByTestId('receipt-line-0')).toBeVisible({ timeout: 15_000 });
 		await dismissOnboardingModalIfOpen(page);
+		/* On retry the item may exist in the pantry already — the dedupe chip unchecks it. */
+		const lineCheckbox = page.getByTestId('receipt-line-checkbox-0');
+		if (!(await lineCheckbox.isChecked())) {
+			await lineCheckbox.check();
+		}
 		await page.getByTestId('receipt-bulk-submit').click();
 
 		await expect(page).toHaveURL(/\/hem(\?|$)/, { timeout: 15_000 });

@@ -206,7 +206,8 @@ const FRESH_SEMANTIC: SemanticByMode = {
 
 		taupe: HERITAGE_SEMANTIC.light.taupe,
 
-		success: '#3d8f5c',
+		/* ≥4.5:1 with white (toast/badge bg) and as text on bg/surface — WCAG 2.2 AA */
+		success: '#2e7a4c',
 
 		warning: '#c9870a',
 

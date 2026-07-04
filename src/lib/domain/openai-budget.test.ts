@@ -29,7 +29,7 @@ describe('estimateOpenAiSpendUsd', () => {
 				admin_insights: 0,
 				weekly_plan: 0
 			})
-		).toBeCloseTo(10 * 0.015 + 5 * 0.02 + 20 * 0.008, 5);
+		).toBeCloseTo(10 * 0.03 + 5 * 0.04 + 20 * 0.015, 5);
 	});
 });
 

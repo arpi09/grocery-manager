@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
 	import { isEstimatedExpirySource } from '$lib/domain/learning/expiry-source';
+	import { buildInventoryExpiryExplanation } from '$lib/domain/learning/prediction-explain';
 	import ConsumeItemPanel from '$lib/components/molecules/ConsumeItemPanel.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
@@ -16,6 +18,13 @@
 	}
 
 	let { item, canWrite = false, finished = false, autoExpired = false }: Props = $props();
+
+	const expiryExplanation = $derived(
+		buildInventoryExpiryExplanation(
+			{ source: item.expiresOnSource, location: item.location },
+			getLocale()
+		)
+	);
 
 	let menuOpen = $state(false);
 	let consumeOpen = $state(false);
@@ -122,7 +131,13 @@
 						{formatExpiryDate(item.expiresOn, getLocale())}
 					</Badge>
 					{#if isEstimatedExpirySource(item.expiresOnSource) && !autoExpired}
-						<EstimatedBadge source={item.expiresOnSource} />
+						<EstimatedBadge
+							source={item.expiresOnSource}
+							explanation={expiryExplanation}
+							correctionItemId={canWrite ? item.id : null}
+							correctionExpiresOn={item.expiresOn}
+							onCorrected={() => void invalidateAll()}
+						/>
 					{/if}
 				{/if}
 			</div>

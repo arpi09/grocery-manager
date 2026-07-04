@@ -9,7 +9,8 @@ import {
 } from '$lib/domain/learning/shelf-life-explanation';
 import type { Locale } from '$lib/i18n/locale';
 import { DEFAULT_LOCALE } from '$lib/i18n/locale';
-import { translate } from '$lib/i18n/messages';
+import { locationLabel } from '$lib/i18n/domain-labels';
+import { translate, type MessageKey } from '$lib/i18n/messages';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 
 export interface ShelfLifeExplainInput {
@@ -142,4 +143,46 @@ export function buildInventoryShelfLifeExplanation(
 		displayName: input.productName,
 		normalizedKey: normalizeReceiptProductName(input.productName)
 	});
+}
+
+/**
+ * Honest, source-accurate explanation for an estimated expiry date on a pantry item.
+ * Unlike the receipt-parse path we only have the item's source + location here (no
+ * sample counts or typical-days), so the copy states provenance without fabricating
+ * numbers. Returns null for non-estimated sources (user_set, receipt_printed).
+ */
+export function buildInventoryExpiryExplanation(
+	input: { source?: ExpiresOnSource | null; location?: StorageLocation },
+	locale: Locale = DEFAULT_LOCALE
+): PredictionExplanation | null {
+	const source = input.source;
+	if (!source) return null;
+
+	// `source` here is an ExpiresOnSource (pantry item provenance); it never carries the
+	// PredictionSource-only 'household_rule' value.
+	let primaryKey: MessageKey;
+	if (source === 'household_learned') {
+		primaryKey = 'learning.explain.pantry.householdPrimary';
+	} else if (source === 'ai_inferred') {
+		primaryKey = 'learning.explain.pantry.aiPrimary';
+	} else if (source === 'heuristic' || source === 'default_heuristic') {
+		primaryKey = 'learning.explain.pantry.heuristicPrimary';
+	} else {
+		return null;
+	}
+
+	const facts: string[] = [];
+	if (input.location) {
+		facts.push(
+			translate(locale, 'learning.explain.pantry.locationFact', {
+				location: locationLabel(locale, input.location)
+			})
+		);
+	}
+
+	return {
+		primary: translate(locale, primaryKey),
+		facts,
+		templateId: `pantry_expiry.${source}`
+	};
 }

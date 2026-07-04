@@ -5,10 +5,11 @@
 		count: number;
 		names: string[];
 		href: string;
+		cookHref?: string | null;
 		onTap?: () => void;
 	}
 
-	let { count, names, href, onTap }: Props = $props();
+	let { count, names, href, cookHref = null, onTap }: Props = $props();
 
 	const listText = $derived(names.join(', '));
 </script>
@@ -22,6 +23,11 @@
 				<p>{t('pantry.v2.useSoon.list', { items: listText })}</p>
 			{/if}
 			<a class="cta" {href} onclick={onTap}>{t('pantry.v2.useSoon.cta')}</a>
+			{#if cookHref}
+				<a class="cta cook-cta" href={cookHref} data-testid="pantry-use-soon-cook">
+					{t('pantry.v2.useSoon.cookCta')}
+				</a>
+			{/if}
 		</div>
 	</aside>
 {/if}
@@ -81,5 +87,9 @@
 	.cta:focus-visible {
 		outline: 2px solid var(--color-primary);
 		outline-offset: 2px;
+	}
+
+	.cook-cta {
+		margin-left: var(--space-md);
 	}
 </style>

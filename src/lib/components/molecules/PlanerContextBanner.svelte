@@ -28,13 +28,15 @@
 	<Card>
 		<h2 id="planer-context-heading" class="heading">{t('planer.contextTitle')}</h2>
 
+		<!-- Outline, not filled: the hero's "Generera maträtt" is the page's single primary CTA. -->
 		<div class="actions" role="group" aria-label={t('planer.contextActionsAria')}>
-			<a class="action-btn action-btn-primary" href="/planer/vecka">
+			<a class="action-btn" href="/planer/vecka">
 				{t('planer.contextWeeklyLink')}
 			</a>
 			<a class="text-action home-link" href={homeHref}>{t('planer.contextHomeLink')}</a>
 			<a class="text-action" href="#ata-calendar">{t('planer.contextWeekViewLink')}</a>
 		</div>
+		<p class="cta-hint">{t('planer.contextWeeklyHint')}</p>
 
 		<ExpandableCopy preview={t('planer.contextLeadShort')} class="details">
 			<p class="lead">{t('planer.contextLead', { days: EXPIRING_SOON_DAYS })}</p>
@@ -89,6 +91,13 @@
 		color: var(--color-text-muted);
 	}
 
+	.cta-hint {
+		margin: var(--space-xs) 0 0;
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+		line-height: 1.4;
+	}
+
 	.names {
 		color: var(--color-text-muted);
 	}
@@ -126,19 +135,6 @@
 	.action-btn:focus-visible {
 		outline: 2px solid var(--color-primary);
 		outline-offset: 2px;
-	}
-
-	.action-btn-primary {
-		border-color: var(--color-primary);
-		background: var(--color-primary);
-		color: var(--color-on-primary);
-		box-shadow: none;
-	}
-
-	.action-btn-primary:hover {
-		background: var(--color-primary-hover);
-		border-color: var(--color-primary-hover);
-		color: var(--color-on-primary);
 	}
 
 	.text-action {

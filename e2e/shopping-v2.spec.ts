@@ -42,6 +42,120 @@ test.describe('Shopping UX v2', () => {
 		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible();
 	});
 
+	test('trip complete unpack adds picked items to pantry', async ({ page }) => {
+		test.setTimeout(150_000);
+		const itemName = `E2E Unpack ${Date.now()}`;
+
+		await loginAsAdmin(page);
+		await page.goto('/inkop');
+		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
+		await dismissPostOnboardingShareIfOpen(page);
+
+		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
+		await addItemViaQuickAdd(page, itemName);
+
+		await page.getByTestId('shopping-v2-start-shop').click();
+		await expect(page.getByTestId('shopping-v2-shop')).toBeVisible();
+		await pickAllUntilTripComplete(page, { expectItemName: itemName });
+
+		/* "Har du kvittot?" → unpack without receipt. */
+		await page.getByTestId('shopping-v2-complete-unpack').click();
+		const sheet = page.getByTestId('shopping-unpack-sheet');
+		await expect(sheet).toBeVisible({ timeout: 10_000 });
+		await expect(sheet).toContainText(itemName);
+
+		await page.getByTestId('shopping-unpack-submit').click();
+		await expect(sheet).not.toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 10_000 });
+
+		await page.goto('/inventory/all');
+		await expect(page.getByText(itemName).first()).toBeVisible({ timeout: 15_000 });
+	});
+
+	test('clear list with undo restores items', async ({ page }) => {
+		test.setTimeout(120_000);
+		const itemName = `E2E Clear ${Date.now()}`;
+
+		await loginAsAdmin(page);
+		await page.goto('/inkop');
+		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
+		await dismissPostOnboardingShareIfOpen(page);
+
+		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
+		await addItemViaQuickAdd(page, itemName);
+		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(itemName, {
+			timeout: 10_000
+		});
+
+		await page.getByTestId('shopping-v2-clear-list').click();
+		const undo = page.getByTestId('shopping-v2-clear-undo');
+		await expect(undo).toBeVisible({ timeout: 10_000 });
+		await expect(page.getByTestId('shopping-v2-summary-pills')).not.toContainText(itemName, {
+			timeout: 10_000
+		});
+
+		await page.getByTestId('shopping-v2-clear-undo-btn').click();
+		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(itemName, {
+			timeout: 15_000
+		});
+	});
+
+	test('shop mode undo pick and not-in-store parking', async ({ page }) => {
+		test.setTimeout(150_000);
+		const itemA = `E2E Undo ${Date.now()}`;
+		const itemB = `E2E Slut ${Date.now()}`;
+
+		await loginAsAdmin(page);
+		await page.goto('/inkop');
+		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
+		await dismissPostOnboardingShareIfOpen(page);
+
+		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
+		await addItemViaQuickAdd(page, itemA);
+		await addItemViaQuickAdd(page, itemB);
+
+		await page.getByTestId('shopping-v2-start-shop').click();
+		await expect(page.getByTestId('shopping-v2-shop')).toBeVisible();
+
+		const focus = page.getByTestId('shopping-v2-focus-item');
+		const focusName = (await focus.locator('.focus-name').textContent())?.trim() ?? '';
+		expect(focusName.length).toBeGreaterThan(0);
+
+		/* Pick → undo puts the same item back in focus. */
+		await page.getByTestId('shopping-v2-pick-cta').click();
+		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
+		const sheetShown = await pantrySheet
+			.waitFor({ state: 'visible', timeout: 2_000 })
+			.then(() => true)
+			.catch(() => false);
+		if (sheetShown) {
+			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click();
+			await expect(pantrySheet).not.toBeVisible({ timeout: 5_000 });
+		}
+		await page.getByTestId('shopping-v2-undo-pick').click();
+		await expect(focus.locator('.focus-name')).toHaveText(focusName, { timeout: 10_000 });
+		await expect(page.getByTestId('shopping-v2-undo-pick')).toHaveCount(0);
+
+		/* Not in store → parked in its own group, excluded from the trip. */
+		await page.getByTestId('shopping-v2-unavailable-cta').click();
+		const parked = page.getByTestId('shopping-v2-unavailable-group');
+		await expect(parked).toBeVisible({ timeout: 10_000 });
+		await expect(parked).toContainText(focusName);
+
+		await pickAllUntilTripComplete(page);
+		await expect(page.getByTestId('shopping-v2-complete-unavailable')).toBeVisible();
+
+		/* Restore returns the item to the pick queue and reopens the trip. */
+		await parked.locator('.restore-link').click();
+		await expect(page.getByTestId('shopping-v2-focus-item')).toContainText(focusName, {
+			timeout: 10_000
+		});
+		await pickAllUntilTripComplete(page);
+	});
+
 	test('checklist drawer grid filter and back to plan @deploy-critical', async ({ page }) => {
 		const itemName = `E2E Grid ${Date.now()}`;
 

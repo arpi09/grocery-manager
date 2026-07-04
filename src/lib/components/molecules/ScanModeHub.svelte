@@ -27,6 +27,12 @@
 		barcode: 'scan.choiceHub.barcode'
 	};
 
+	const modeDescriptions: Record<DirectScanMode, MessageKey> = {
+		receipt: 'scan.choiceHub.receiptDesc',
+		photo: 'scan.choiceHub.photoDesc',
+		barcode: 'scan.choiceHub.barcodeDesc'
+	};
+
 	const aiModes = new Set<DirectScanMode>(['receipt', 'photo']);
 
 	const manualHref = $derived(manualAddHref(returnTo, locationOption));
@@ -58,11 +64,14 @@
 				<span class="icon-wrap" aria-hidden="true">
 					<ScanHubIllustration variant={variantForMode(mode)} />
 				</span>
-				<span class="choice-label">
-					{t(modeLabels[mode])}
-					{#if aiModes.has(mode)}
-						<span class="ai-badge">AI</span>
-					{/if}
+				<span class="choice-copy">
+					<span class="choice-label">
+						{t(modeLabels[mode])}
+						{#if aiModes.has(mode)}
+							<span class="ai-badge">AI</span>
+						{/if}
+					</span>
+					<span class="choice-desc">{t(modeDescriptions[mode])}</span>
 				</span>
 			</a>
 		{/each}
@@ -119,13 +128,26 @@
 		overflow: hidden;
 	}
 
+	.choice-copy {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+		min-width: 0;
+	}
+
 	.choice-label {
 		display: inline-flex;
 		align-items: center;
 		flex-wrap: wrap;
 		gap: var(--space-xs);
+		font-size: var(--font-size-body);
+		font-weight: 650;
+		line-height: 1.3;
+	}
+
+	.choice-desc {
 		font-size: var(--font-size-body-sm);
-		font-weight: 600;
+		color: var(--color-text-muted);
 		line-height: 1.35;
 	}
 

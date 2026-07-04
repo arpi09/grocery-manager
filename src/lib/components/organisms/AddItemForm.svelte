@@ -69,7 +69,8 @@
 	{#if !isEdit && returnTo}
 		<input type="hidden" name="returnTo" value={returnTo} />
 	{/if}
-	{#if !isEdit && returnTo}
+	{#if !isEdit}
+		<!-- Scan-first escape hatch — also on direct /item/new visits without returnTo. -->
 		<p class="scan-link-row">
 			<a href={scanInsteadHref} class="scan-instead-link" data-analytics-id="item.scan_instead_link">{t('item.scanInsteadLink')}</a>
 		</p>

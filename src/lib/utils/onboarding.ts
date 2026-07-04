@@ -23,7 +23,7 @@ export {
 
 /** Current onboarding tour version — bump to show the guide again for returning users. */
 
-export const ONBOARDING_VERSION = 7;
+export const ONBOARDING_VERSION = 8;
 
 export { ONBOARDING_STEP_COUNT } from '$lib/utils/onboarding-steps';
 
@@ -62,6 +62,14 @@ const ACTIVATION_SUCCESS_SEEN_SUFFIX = 'activation-success-seen';
 const ACTIVATION_BRAIN_SEEN_SUFFIX = 'activation-brain-seen';
 
 const ACTIVATION_SHOPPING_SEEN_SUFFIX = 'activation-shopping-seen';
+
+const ACTIVATION_STAPLES_ADDED_SUFFIX = 'activation-staples-added';
+
+const ACTIVATION_INVITE_SEEN_SUFFIX = 'activation-invite-seen';
+
+const ACTIVATION_FINISH_SEEN_SUFFIX = 'activation-finish-seen';
+
+const ACTIVATION_SEED_SOURCE_SUFFIX = 'activation-seed-source';
 
 const ACTIVATION_SUCCESS_SNAPSHOT_SUFFIX = 'activation-success-snapshot';
 
@@ -186,7 +194,8 @@ export function completeOnboarding(userId?: string | null): void {
 
 	localStorage.setItem(storageKey(DISMISSED_SUFFIX, userId), '1');
 
-	markPostOnboardingSharePending(userId);
+	// v8: invite lives inside the flow — queue the survey directly (share prompt retires).
+	markPostOnboardingSurveyPending(userId);
 }
 
 export function markPostOnboardingSurveyPending(userId?: string | null): void {
@@ -206,6 +215,8 @@ export function shouldShowPostOnboardingSurvey(userId?: string | null): boolean 
 		return false;
 	}
 
+	migrateLegacyShareState(userId);
+
 	if (localStorage.getItem(storageKey(POST_ONBOARDING_SURVEY_DISMISSED_SUFFIX, userId)) === '1') {
 		return false;
 	}
@@ -213,43 +224,26 @@ export function shouldShowPostOnboardingSurvey(userId?: string | null): boolean 
 	return localStorage.getItem(storageKey(POST_ONBOARDING_SURVEY_PENDING_SUFFIX, userId)) === '1';
 }
 
-export function markPostOnboardingSharePending(userId?: string | null): void {
+/**
+ * One-time migration (v8): the post-onboarding share prompt is gone — users with a
+ * queued share prompt get the survey instead. Deletes both legacy share keys.
+ */
+export function migrateLegacyShareState(userId?: string | null): void {
 	if (typeof localStorage === 'undefined' || !userId) {
 		return;
 	}
 
-	if (localStorage.getItem(storageKey(POST_ONBOARDING_SHARE_DISMISSED_SUFFIX, userId)) === '1') {
+	const pendingKey = storageKey(POST_ONBOARDING_SHARE_PENDING_SUFFIX, userId);
+
+	if (localStorage.getItem(pendingKey) === null) {
 		return;
 	}
 
-	localStorage.setItem(storageKey(POST_ONBOARDING_SHARE_PENDING_SUFFIX, userId), '1');
-}
-
-export function shouldShowPostOnboardingShare(userId?: string | null): boolean {
-	if (typeof localStorage === 'undefined' || !userId) {
-		return false;
-	}
-
-	if (localStorage.getItem(storageKey(POST_ONBOARDING_SHARE_DISMISSED_SUFFIX, userId)) === '1') {
-		return false;
-	}
-
-	return localStorage.getItem(storageKey(POST_ONBOARDING_SHARE_PENDING_SUFFIX, userId)) === '1';
-}
-
-export function dismissPostOnboardingShare(userId?: string | null): void {
-	if (typeof localStorage === 'undefined' || !userId) {
-		return;
-	}
-
-	localStorage.removeItem(storageKey(POST_ONBOARDING_SHARE_PENDING_SUFFIX, userId));
-	localStorage.setItem(storageKey(POST_ONBOARDING_SHARE_DISMISSED_SUFFIX, userId), '1');
+	// markPostOnboardingSurveyPending respects a prior survey dismissal.
 	markPostOnboardingSurveyPending(userId);
-}
 
-/** Inkop-only — do not stack partner prompts on /hem with household briefing. */
-export function isPostOnboardingSharePath(pathname: string): boolean {
-	return pathname === '/inkop' || pathname.startsWith('/inkop/');
+	localStorage.removeItem(pendingKey);
+	localStorage.removeItem(storageKey(POST_ONBOARDING_SHARE_DISMISSED_SUFFIX, userId));
 }
 
 /** Calm surfaces only — not during scan/login flows. */
@@ -323,6 +317,14 @@ function clearUserOnboardingKeys(userId: string): void {
 		ACTIVATION_BRAIN_SEEN_SUFFIX,
 
 		ACTIVATION_SHOPPING_SEEN_SUFFIX,
+
+		ACTIVATION_STAPLES_ADDED_SUFFIX,
+
+		ACTIVATION_INVITE_SEEN_SUFFIX,
+
+		ACTIVATION_FINISH_SEEN_SUFFIX,
+
+		ACTIVATION_SEED_SOURCE_SUFFIX,
 
 		ACTIVATION_SUCCESS_SNAPSHOT_SUFFIX,
 
@@ -452,15 +454,16 @@ export function getActivationProgress(userId?: string | null): ActivationProgres
 	);
 
 	const flags = getActivationOnboardingFlags(userId);
-	const usingV7Flow =
+	const usingActivationFlow =
 		flags.welcomeSeen ||
 		flags.scanStarted ||
 		flags.firstScanDone ||
-		flags.successSeen ||
-		flags.brainSeen ||
-		flags.shoppingSeen;
+		flags.staplesAdded ||
+		flags.inviteSeen ||
+		flags.finishSeen ||
+		localStorage.getItem(storageKey(ACTIVATION_SHOPPING_SEEN_SUFFIX, userId)) === '1';
 
-	const isComplete = usingV7Flow
+	const isComplete = usingActivationFlow
 		? isActivationOnboardingFlowComplete(userId)
 		: receiptDone ||
 			firstItemDone ||
@@ -504,15 +507,17 @@ export function getActivationOnboardingFlags(userId?: string | null): Activation
 	return {
 		welcomeSeen: localStorage.getItem(storageKey(ACTIVATION_WELCOME_SEEN_SUFFIX, userId)) === '1',
 		scanStarted: localStorage.getItem(storageKey(ACTIVATION_SCAN_STARTED_SUFFIX, userId)) === '1',
-		scanDeferred: localStorage.getItem(storageKey(ACTIVATION_SCAN_DEFERRED_SUFFIX, userId)) === '1',
+		// v8 reuses the v7 scan-deferred key: same semantics (pause seeding), free continuity.
+		fillDeferred:
+			localStorage.getItem(storageKey(ACTIVATION_SCAN_DEFERRED_SUFFIX, userId)) === '1',
 		firstScanDone:
 			localStorage.getItem(storageKey(ACTIVATION_FIRST_SCAN_DONE_SUFFIX, userId)) === '1',
 		inventoryCreated:
 			localStorage.getItem(storageKey(ACTIVATION_INVENTORY_CREATED_SUFFIX, userId)) === '1',
-		successSeen: localStorage.getItem(storageKey(ACTIVATION_SUCCESS_SEEN_SUFFIX, userId)) === '1',
-		brainSeen: localStorage.getItem(storageKey(ACTIVATION_BRAIN_SEEN_SUFFIX, userId)) === '1',
-		shoppingSeen:
-			localStorage.getItem(storageKey(ACTIVATION_SHOPPING_SEEN_SUFFIX, userId)) === '1'
+		staplesAdded:
+			localStorage.getItem(storageKey(ACTIVATION_STAPLES_ADDED_SUFFIX, userId)) === '1',
+		inviteSeen: Boolean(localStorage.getItem(storageKey(ACTIVATION_INVITE_SEEN_SUFFIX, userId))),
+		finishSeen: localStorage.getItem(storageKey(ACTIVATION_FINISH_SEEN_SUFFIX, userId)) === '1'
 	};
 }
 
@@ -520,12 +525,12 @@ function emptyActivationFlags(): ActivationOnboardingFlags {
 	return {
 		welcomeSeen: false,
 		scanStarted: false,
-		scanDeferred: false,
+		fillDeferred: false,
 		firstScanDone: false,
 		inventoryCreated: false,
-		successSeen: false,
-		brainSeen: false,
-		shoppingSeen: false
+		staplesAdded: false,
+		inviteSeen: false,
+		finishSeen: false
 	};
 }
 
@@ -534,7 +539,22 @@ export function isActivationOnboardingFlowComplete(userId?: string | null): bool
 		return false;
 	}
 
-	return localStorage.getItem(storageKey(ACTIVATION_SHOPPING_SEEN_SUFFIX, userId)) === '1';
+	// shopping-seen = v7 completion key — belt and braces for migrated users.
+	return (
+		localStorage.getItem(storageKey(ACTIVATION_FINISH_SEEN_SUFFIX, userId)) === '1' ||
+		localStorage.getItem(storageKey(ACTIVATION_SHOPPING_SEEN_SUFFIX, userId)) === '1'
+	);
+}
+
+export type ActivationSeedSource = 'staples' | 'receipt';
+
+export function getActivationSeedSource(userId?: string | null): ActivationSeedSource | null {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return null;
+	}
+
+	const raw = localStorage.getItem(storageKey(ACTIVATION_SEED_SOURCE_SUFFIX, userId));
+	return raw === 'staples' || raw === 'receipt' ? raw : null;
 }
 
 export function getActivationSuccessSnapshot(
@@ -607,7 +627,7 @@ export function markActivationScanStarted(userId?: string | null): void {
 	dispatchProgress();
 }
 
-export function markActivationScanDeferred(userId?: string | null): void {
+export function markActivationFillDeferred(userId?: string | null): void {
 	if (typeof localStorage === 'undefined' || !userId) {
 		return;
 	}
@@ -616,30 +636,49 @@ export function markActivationScanDeferred(userId?: string | null): void {
 	dispatchProgress();
 }
 
-export function markActivationSuccessSeen(userId?: string | null): void {
+export function markActivationStaplesAdded(userId?: string | null): void {
 	if (typeof localStorage === 'undefined' || !userId) {
 		return;
 	}
 
-	localStorage.setItem(storageKey(ACTIVATION_SUCCESS_SEEN_SUFFIX, userId), '1');
+	localStorage.setItem(storageKey(ACTIVATION_STAPLES_ADDED_SUFFIX, userId), '1');
+	localStorage.setItem(storageKey(ACTIVATION_INVENTORY_CREATED_SUFFIX, userId), '1');
+	localStorage.setItem(storageKey(ACTIVATION_FIRST_ITEM_DONE_SUFFIX, userId), '1');
+	localStorage.setItem(storageKey(ACTIVATION_SEED_SOURCE_SUFFIX, userId), 'staples');
 	dispatchProgress();
 }
 
-export function markActivationBrainSeen(userId?: string | null): void {
+export type ActivationInviteOutcome = 'shared' | 'skipped';
+
+export function markActivationInviteSeen(
+	userId?: string | null,
+	outcome: ActivationInviteOutcome = 'skipped'
+): void {
 	if (typeof localStorage === 'undefined' || !userId) {
 		return;
 	}
 
-	localStorage.setItem(storageKey(ACTIVATION_BRAIN_SEEN_SUFFIX, userId), '1');
+	localStorage.setItem(storageKey(ACTIVATION_INVITE_SEEN_SUFFIX, userId), outcome);
 	dispatchProgress();
 }
 
-export function markActivationShoppingSeen(userId?: string | null): void {
+export function getActivationInviteOutcome(
+	userId?: string | null
+): ActivationInviteOutcome | null {
+	if (typeof localStorage === 'undefined' || !userId) {
+		return null;
+	}
+
+	const raw = localStorage.getItem(storageKey(ACTIVATION_INVITE_SEEN_SUFFIX, userId));
+	return raw === 'shared' || raw === 'skipped' ? raw : raw ? 'skipped' : null;
+}
+
+export function markActivationFinishSeen(userId?: string | null): void {
 	if (typeof localStorage === 'undefined' || !userId) {
 		return;
 	}
 
-	localStorage.setItem(storageKey(ACTIVATION_SHOPPING_SEEN_SUFFIX, userId), '1');
+	localStorage.setItem(storageKey(ACTIVATION_FINISH_SEEN_SUFFIX, userId), '1');
 	completeOnboarding(userId);
 	dispatchProgress();
 }
@@ -718,6 +757,9 @@ export function recordActivationScanSave(
 	localStorage.setItem(storageKey(ACTIVATION_FIRST_SCAN_DONE_SUFFIX, userId), '1');
 	localStorage.setItem(storageKey(ACTIVATION_INVENTORY_CREATED_SUFFIX, userId), '1');
 	localStorage.setItem(storageKey(ACTIVATION_FIRST_ITEM_DONE_SUFFIX, userId), '1');
+	if (!localStorage.getItem(storageKey(ACTIVATION_SEED_SOURCE_SUFFIX, userId))) {
+		localStorage.setItem(storageKey(ACTIVATION_SEED_SOURCE_SUFFIX, userId), 'receipt');
+	}
 
 	if (items?.length) {
 		saveActivationSuccessSnapshot(userId, items);

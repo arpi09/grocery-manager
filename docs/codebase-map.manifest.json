@@ -58,6 +58,7 @@
 			"apiOnlyRoutes": [
 				"/inventory/foto",
 				"/api/inventory/data",
+				"/api/inventory/correct-expiry",
 				"/api/inventory/insights",
 				"/api/inventory/merge-candidates",
 				"/api/inventory/photo-scan",

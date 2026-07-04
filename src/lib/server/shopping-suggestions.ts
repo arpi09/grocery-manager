@@ -14,7 +14,7 @@ import {
 	PROMPT_VERSION_SHOPPING,
 	promptLocaleInstruction
 } from '$lib/server/ai-prompt-shared';
-import { OPENAI_MODEL_NANO, requestStructuredJson } from '$lib/server/openai';
+import { OPENAI_MODEL, requestStructuredJson } from '$lib/server/openai';
 import { logBrainMetrics } from '$lib/server/brain-metrics';
 import { loadReplenishmentFeedbackBlock } from '$lib/server/brain-feedback-context';
 import type { ILearningFeedbackRepository } from '$lib/infrastructure/repositories/learning-feedback.repository';
@@ -292,8 +292,10 @@ export async function generateShoppingSuggestions(
 		.filter(Boolean)
 		.join('\n');
 
+	/* Mini-tier (not nano): this output becomes user-visible list rows with reasons,
+	 * so per-row quality matters more than the marginal token cost. */
 	const result = await requestStructuredJson(deps.apiKey, {
-		model: OPENAI_MODEL_NANO,
+		model: OPENAI_MODEL,
 		systemPrompt,
 		userPrompt,
 		schemaName: 'shopping_suggestions',

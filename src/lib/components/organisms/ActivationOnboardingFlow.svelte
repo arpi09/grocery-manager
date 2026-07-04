@@ -2,66 +2,80 @@
 	/**
 	 * Tab-session pause (module scope, same pattern as overlay-stack's session slot):
 	 * AppLayout is instantiated per page, so component state would reset on every
-	 * navigation and the flow would re-open right after "maybe later" / Kivra taps.
+	 * navigation and the flow would re-open right after "maybe later" taps.
 	 */
 	let pausedThisSession = false;
 </script>
 
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { SubmitFunction } from '@sveltejs/kit';
 	import Button from '$lib/components/atoms/Button.svelte';
+	import CelebrationBurst from '$lib/components/atoms/CelebrationBurst.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import ActivationOnboardingScreen from '$lib/components/molecules/ActivationOnboardingScreen.svelte';
-	import ActivationProgressChecklist from '$lib/components/molecules/ActivationProgressChecklist.svelte';
-	import ActivationSetupCards from '$lib/components/molecules/ActivationSetupCards.svelte';
-	import LocationColorDot from '$lib/components/atoms/LocationColorDot.svelte';
-	import OnboardingWelcomeIllustration from '$lib/components/organisms/illustrations/OnboardingWelcomeIllustration.svelte';
+	import ActivationFillChips from '$lib/components/molecules/ActivationFillChips.svelte';
+	import ActivationFinishRecap from '$lib/components/molecules/ActivationFinishRecap.svelte';
+	import OnboardingStepStage from '$lib/components/molecules/OnboardingStepStage.svelte';
+	import OnboardingStepDots from '$lib/components/molecules/OnboardingStepDots.svelte';
+	import OnboardingCelebrateIllustration from '$lib/components/organisms/OnboardingCelebrateIllustration.svelte';
+	import OnboardingLoopIllustration from '$lib/components/organisms/illustrations/OnboardingLoopIllustration.svelte';
+	import OnboardingInviteIllustration from '$lib/components/organisms/illustrations/OnboardingInviteIllustration.svelte';
 	import OnboardingScanIllustration from '$lib/components/organisms/illustrations/OnboardingScanIllustration.svelte';
-	import OnboardingSuccessIllustration from '$lib/components/organisms/illustrations/OnboardingSuccessIllustration.svelte';
-	import OnboardingBrainIllustration from '$lib/components/organisms/illustrations/OnboardingBrainIllustration.svelte';
-	import OnboardingShoppingIllustration from '$lib/components/organisms/illustrations/OnboardingShoppingIllustration.svelte';
+	import OnboardingWelcomeIllustration from '$lib/components/organisms/illustrations/OnboardingWelcomeIllustration.svelte';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
-	import { t, type MessageKey } from '$lib/i18n';
+	import { t } from '$lib/i18n';
 	import {
 		deriveActivationScreen,
 		dismissOnboarding,
+		getActivationInviteOutcome,
 		getActivationOnboardingFlags,
 		getActivationProgressChecklist,
-		getActivationSuccessSnapshot,
+		getActivationSeedSource,
 		isActivationOnboardingFlowComplete,
 		isOnboardingExcludedPath,
-		markActivationBrainSeen,
-		markActivationScanDeferred,
+		markActivationFillDeferred,
+		markActivationFinishSeen,
+		markActivationInviteSeen,
 		markActivationScanStarted,
-		markActivationShoppingSeen,
-		markActivationSuccessSeen,
+		markActivationStaplesAdded,
 		markActivationWelcomeSeen,
 		ONBOARDING_PROGRESS_EVENT,
 		ONBOARDING_REPLAY_EVENT,
 		REGISTRATION_WELCOME_DONE_EVENT,
+		secondsSinceSignup,
 		shouldShowOnboarding,
 		type ActivationScreen
 	} from '$lib/utils/onboarding';
 	import {
+		ACTIVATION_SCREEN_IDS,
 		canSelectProgressKey,
-		progressKeyForScreen,
-		screenForProgressKey
+		screenIndex
 	} from '$lib/utils/onboarding-steps';
-	import type { ActivationProgressKey } from '$lib/utils/onboarding-steps';
 	import {
 		canClaimSessionOverlay,
 		claimSessionOverlay,
 		registerBlockingOverlay
 	} from '$lib/utils/overlay-stack';
-	import { receiptOneTapHref } from '$lib/utils/scan-nav';
+	import { createAndShareHouseholdInvite } from '$lib/utils/household-share-invite';
 	import {
-		isReceiptImportRecentlyCompleted,
-		isReceiptImportToastPending
-	} from '$lib/utils/receipt-import-session';
+		buildStarterPackFormData,
+		getOnboardingStaples,
+		isStaplePreselected
+	} from '$lib/utils/starter-pack-submit';
+	import {
+		getNotificationPermission,
+		isPushSupported,
+		subscribeToExpiryPush
+	} from '$lib/utils/push-notifications';
+	import { receiptOneTapHref } from '$lib/utils/scan-nav';
+	import { isReceiptImportToastPending } from '$lib/utils/receipt-import-session';
+	import { showClientToast } from '$lib/utils/client-toast.svelte';
 
 	let open = $state(false);
 	let startedTracked = $state(false);
@@ -69,11 +83,28 @@
 	let registrationWelcomeDone = $state(false);
 	let onboardingProgressTick = $state(0);
 	let previewScreen = $state<ActivationScreen | null>(null);
+	let exiting = $state(false);
+
+	const staples = getOnboardingStaples();
+	let selectedStaples = $state(
+		new Set(staples.filter((item) => isStaplePreselected(item.name)).map((item) => item.name))
+	);
+	let staplesSubmitting = $state(false);
+
+	let inviteSharing = $state(false);
+	let inviteCopied = $state(false);
+	let inviteError = $state(false);
+
+	let pushEnabled = $state(false);
+	let pushPromptTracked = $state(false);
 
 	const pathname = $derived(page.url.pathname);
 	const userId = $derived(page.data.user?.id ?? null);
 	const inventoryCount = $derived(
 		typeof page.data.activeInventoryCount === 'number' ? page.data.activeInventoryCount : 0
+	);
+	const memberCount = $derived(
+		typeof page.data.householdMemberCount === 'number' ? page.data.householdMemberCount : 1
 	);
 	const flags = $derived.by(() => {
 		void onboardingProgressTick;
@@ -83,15 +114,11 @@
 		void onboardingProgressTick;
 		return userId ? isActivationOnboardingFlowComplete(userId) : false;
 	});
-	const skipActivationSuccess = $derived(isReceiptImportRecentlyCompleted());
-	const kivraForwardEnabled = $derived(Boolean(page.data.kivraForwardEnabled));
 	const derivedScreen = $derived.by((): ActivationScreen | 'complete' => {
 		if (!flags) {
 			return 'welcome';
 		}
-		return deriveActivationScreen(flags, inventoryCount, flowComplete, {
-			skipSuccessScreen: skipActivationSuccess
-		});
+		return deriveActivationScreen(flags, inventoryCount, flowComplete, { memberCount });
 	});
 	const displayScreen = $derived.by((): ActivationScreen | 'complete' => {
 		if (derivedScreen === 'complete') {
@@ -103,76 +130,62 @@
 	const checklist = $derived(
 		flags ? getActivationProgressChecklist(flags, inventoryCount) : null
 	);
-	const currentProgress = $derived(
-		derivedScreen !== 'complete' ? progressKeyForScreen(derivedScreen) : null
+	const displayIndex = $derived(
+		displayScreen === 'complete' ? 0 : screenIndex(displayScreen)
 	);
-	const previewProgress = $derived(
-		previewScreen ? progressKeyForScreen(previewScreen) : null
-	);
-	const successItems = $derived(userId ? getActivationSuccessSnapshot(userId) : []);
-	const visibleSuccessItems = $derived(successItems.slice(0, 3));
-	const hiddenSuccessCount = $derived(Math.max(0, successItems.length - visibleSuccessItems.length));
-	const screenBody = $derived.by(() => {
-		if (displayScreen === 'complete') {
-			return '';
+
+	const seeded = $derived(Boolean(flags && (inventoryCount > 0 || flags.staplesAdded || flags.firstScanDone)));
+	const seedSource = $derived.by(() => {
+		void onboardingProgressTick;
+		return userId ? getActivationSeedSource(userId) : null;
+	});
+	const inviteState = $derived.by((): 'invited' | 'solo' | 'members' => {
+		void onboardingProgressTick;
+		if (memberCount > 1) {
+			return 'members';
 		}
-		if (displayScreen === 'success' && successItems.length === 0) {
-			return t('onboarding.activation.success.bodyEmpty');
-		}
-		return t(screenCopy[displayScreen].bodyKey);
+		return getActivationInviteOutcome(userId) === 'shared' ? 'invited' : 'solo';
 	});
 
-	const screenCopy: Record<
-		ActivationScreen,
-		{ titleKey: MessageKey; bodyKey: MessageKey; ctaKey: MessageKey }
-	> = {
-		welcome: {
-			titleKey: 'onboarding.activation.welcome.title',
-			bodyKey: 'onboarding.activation.welcome.body',
-			ctaKey: 'onboarding.activation.welcome.cta'
-		},
-		scan: {
-			titleKey: 'onboarding.activation.scan.title',
-			bodyKey: 'onboarding.activation.scan.body',
-			ctaKey: 'onboarding.activation.scan.ctaPrimary'
-		},
-		success: {
-			titleKey: 'onboarding.activation.success.title',
-			bodyKey: 'onboarding.activation.success.body',
-			ctaKey: 'onboarding.activation.success.cta'
-		},
-		brain: {
-			titleKey: 'onboarding.activation.brain.title',
-			bodyKey: 'onboarding.activation.brain.body',
-			ctaKey: 'onboarding.activation.brain.cta'
-		},
-		shopping: {
-			titleKey: 'onboarding.activation.shopping.title',
-			bodyKey: 'onboarding.activation.shopping.body',
-			ctaKey: 'onboarding.activation.shopping.cta'
+	const pushSupported = $derived(browser && isPushSupported());
+	const pushDenied = $derived(browser && getNotificationPermission() === 'denied');
+	const showPushBlock = $derived(pushSupported && !pushEnabled && !pushDenied);
+
+	const fillCtaLabel = $derived(
+		selectedStaples.size > 0
+			? t('onboarding.activation.fill.ctaAdd', { count: selectedStaples.size })
+			: t('onboarding.activation.fill.ctaEmpty')
+	);
+
+	$effect(() => {
+		if (!browser) {
+			return;
 		}
-	};
+		pushEnabled = getNotificationPermission() === 'granted';
+	});
 
 	function clearPreview() {
 		previewScreen = null;
 	}
 
-	function canSelectKey(key: ActivationProgressKey): boolean {
-		if (!checklist || !currentProgress) {
+	function canSelectDot(index: number): boolean {
+		if (!checklist || derivedScreen === 'complete') {
 			return false;
 		}
-		return canSelectProgressKey(key, checklist, currentProgress);
+		const key = ACTIVATION_SCREEN_IDS[index];
+		return canSelectProgressKey(key, checklist, derivedScreen);
 	}
 
-	function handleProgressSelect(key: ActivationProgressKey) {
-		if (!canSelectKey(key)) {
+	function handleDotSelect(index: number) {
+		if (!canSelectDot(index)) {
 			return;
 		}
-		if (currentProgress === key) {
+		const key = ACTIVATION_SCREEN_IDS[index];
+		if (key === derivedScreen) {
 			clearPreview();
 			return;
 		}
-		previewScreen = screenForProgressKey(key);
+		previewScreen = key;
 	}
 
 	function tryOpenFlow() {
@@ -216,7 +229,9 @@
 		}
 		dismissOnboarding(userId);
 		closeFlow();
-		void trackProductEvent('onboarding_skipped');
+		void trackProductEvent('onboarding_skipped', {
+			step: displayScreen === 'complete' ? 'finish' : displayScreen
+		});
 	}
 
 	function trackStepView(step: ActivationScreen) {
@@ -225,20 +240,69 @@
 		}
 		lastViewedStep = step;
 		void trackProductEvent('onboarding_step_viewed', { step });
-		if (step === 'brain') {
-			void trackProductEvent('onboarding_brain_viewed');
-		}
-		if (step === 'shopping') {
-			void trackProductEvent('onboarding_shopping_viewed');
-		}
 	}
 
-	async function handleWelcomeContinue() {
+	function handleWelcomeContinue() {
 		if (!userId) {
 			return;
 		}
 		clearPreview();
 		markActivationWelcomeSeen(userId);
+	}
+
+	function toggleStaple(name: string) {
+		const next = new Set(selectedStaples);
+		if (next.has(name)) {
+			next.delete(name);
+		} else {
+			next.add(name);
+		}
+		selectedStaples = next;
+	}
+
+	const enhanceStarter: SubmitFunction = ({ formData, cancel }) => {
+		if (!userId) {
+			cancel();
+			return;
+		}
+		if (selectedStaples.size === 0) {
+			cancel();
+			clearPreview();
+			markActivationFillDeferred(userId);
+			void trackProductEvent('onboarding_seed_choice', { choice: 'skip', via: 'empty_continue' });
+			return;
+		}
+		const items = staples.filter((item) => selectedStaples.has(item.name));
+		const built = buildStarterPackFormData(items, APP_HOME_PATH);
+		for (const [key, value] of built.entries()) {
+			formData.append(key, value);
+		}
+		staplesSubmitting = true;
+		return async ({ result }) => {
+			staplesSubmitting = false;
+			if (result.type === 'redirect') {
+				clearPreview();
+				markActivationStaplesAdded(userId);
+				void trackProductEvent('onboarding_seed_choice', {
+					choice: 'staples',
+					count: items.length
+				});
+				await invalidateAll();
+				return;
+			}
+			showClientToast(t('common.errorGeneric'), { variant: 'error' });
+		};
+	};
+
+	function handleFillDeferred() {
+		if (!userId) {
+			return;
+		}
+		clearPreview();
+		markActivationFillDeferred(userId);
+		void trackProductEvent('onboarding_seed_choice', { choice: 'skip', via: 'kanske_senare' });
+		pausedThisSession = true;
+		closeFlow();
 	}
 
 	async function handleOpenScanner() {
@@ -248,55 +312,91 @@
 		clearPreview();
 		markActivationScanStarted(userId);
 		void trackProductEvent('onboarding_scan_started');
+		void trackProductEvent('onboarding_seed_choice', { choice: 'receipt' });
 		closeFlow();
 		await goto(receiptOneTapHref(APP_HOME_PATH));
 	}
 
-	function handleScanDeferred() {
-		if (!userId) {
+	async function handleInviteShare() {
+		if (!userId || inviteSharing) {
 			return;
 		}
-		clearPreview();
-		markActivationScanDeferred(userId);
-		pausedThisSession = true;
-		closeFlow();
+		inviteSharing = true;
+		inviteError = false;
+		try {
+			const outcome = await createAndShareHouseholdInvite({
+				context: 'onboarding_v8',
+				title: t('household.shareInvite'),
+				text: t('household.shareInviteNote')
+			});
+			if (outcome.status === 'error') {
+				inviteError = true;
+				return;
+			}
+			if (outcome.status === 'aborted') {
+				return;
+			}
+			void trackProductEvent('household_invite_prompt_clicked', {
+				context: 'onboarding_v8',
+				method: outcome.status === 'copied' ? 'copy' : 'share'
+			});
+			if (outcome.status === 'copied') {
+				inviteCopied = true;
+			}
+			// Kort bekräftelse innan auto-advance så delningen hinner landa visuellt.
+			setTimeout(
+				() => {
+					clearPreview();
+					markActivationInviteSeen(userId, 'shared');
+				},
+				outcome.status === 'copied' ? 1200 : 800
+			);
+		} catch {
+			inviteError = true;
+		} finally {
+			inviteSharing = false;
+		}
 	}
 
-	function handleSuccessContinue() {
+	function handleInviteSkip() {
 		if (!userId) {
 			return;
 		}
 		clearPreview();
-		markActivationSuccessSeen(userId);
+		markActivationInviteSeen(userId, 'skipped');
+		void trackProductEvent('household_invite_prompt_dismissed', { context: 'onboarding_v8' });
 	}
 
-	function handleBrainContinue() {
+	async function finishFlow(enablePush: boolean) {
 		if (!userId) {
 			return;
 		}
 		clearPreview();
-		markActivationBrainSeen(userId);
-	}
-
-	async function handleShoppingContinue() {
-		if (!userId) {
-			return;
+		let pushOutcome = pushEnabled;
+		if (enablePush && !pushEnabled) {
+			try {
+				const result = await subscribeToExpiryPush();
+				pushOutcome = result.ok;
+				if (!result.ok) {
+					showClientToast(t('onboarding.activation.finish.pushOffToast'));
+				}
+			} catch {
+				pushOutcome = false;
+				showClientToast(t('onboarding.activation.finish.pushOffToast'));
+			}
 		}
-		clearPreview();
-		markActivationShoppingSeen(userId);
+		markActivationFinishSeen(userId);
 		void trackProductEvent('onboarding_completed');
+		void trackProductEvent('onboarding_finish_state', {
+			seeded,
+			invited: inviteState !== 'solo',
+			push: pushOutcome,
+			seconds_since_signup: secondsSinceSignup(userId)
+		});
+		exiting = true;
 		closeFlow();
 		await goto('/inkop?quick=1');
-	}
-
-	function handleKivraTap(surface: 'scan' | 'shopping_setup') {
-		void trackProductEvent('onboarding_kivra_tapped', { surface });
-		pausedThisSession = true;
-		closeFlow();
-		// Modal's panel stops click propagation, so SvelteKit's router never sees the
-		// anchor click and a full-page load would wipe pausedThisSession (re-opening
-		// the flow over the settings page). Navigate client-side instead.
-		void goto('/settings/kivra');
+		exiting = false;
 	}
 
 	function handlePreviewContinue() {
@@ -383,6 +483,14 @@
 	});
 
 	$effect(() => {
+		if (!open || displayScreen !== 'finish' || !showPushBlock || pushPromptTracked) {
+			return;
+		}
+		pushPromptTracked = true;
+		void trackProductEvent('onboarding_notifications_prompted');
+	});
+
+	$effect(() => {
 		if (!open) {
 			return;
 		}
@@ -396,7 +504,7 @@
 		onClose={skipFlow}
 		variant="sheet"
 		dismissible={false}
-		panelClass="activation-onboarding-panel"
+		panelClass={`activation-onboarding-panel${exiting ? ' activation-panel-exit' : ''}`}
 		bodyClass="activation-onboarding-body"
 		label={t('onboarding.activation.dialogAria')}
 		showSheetHandle={false}
@@ -413,80 +521,110 @@
 		{/snippet}
 
 		<div class="flow-shell">
-			<ActivationProgressChecklist
-				{checklist}
-				current={currentProgress}
-				preview={previewProgress}
-				onSelect={handleProgressSelect}
-				canSelect={canSelectKey}
+			<OnboardingStepDots
+				keys={ACTIVATION_SCREEN_IDS}
+				currentIndex={displayIndex}
+				srLabel={t('onboarding.activation.stepOf', {
+					current: displayIndex + 1,
+					total: ACTIVATION_SCREEN_IDS.length
+				})}
+				canSelect={canSelectDot}
+				onSelect={handleDotSelect}
 			/>
 
 			<div class="flow-content">
-				{#key displayScreen}
-					<ActivationOnboardingScreen
-						title={t(screenCopy[displayScreen].titleKey)}
-						body={screenBody}
-					>
-						{#snippet illustration()}
-							{#if displayScreen === 'welcome'}
-								<OnboardingWelcomeIllustration />
-							{:else if displayScreen === 'scan'}
-								<OnboardingScanIllustration />
-							{:else if displayScreen === 'success'}
-								<OnboardingSuccessIllustration />
-							{:else if displayScreen === 'brain'}
-								<OnboardingBrainIllustration />
-							{:else}
-								<OnboardingShoppingIllustration />
-							{/if}
-						{/snippet}
-
-						{#snippet extra()}
-							{#if displayScreen === 'scan' && kivraForwardEnabled}
-								<div class="kivra-card" data-testid="activation-kivra-card">
-									<p class="kivra-hint">{t('onboarding.activation.scan.kivraHint')}</p>
-									<a
-										class="kivra-link"
-										href="/settings/kivra"
-										data-testid="activation-kivra-link"
-										onclick={(event) => {
-											event.preventDefault();
-											handleKivraTap('scan');
-										}}
-									>
-										{t('onboarding.activation.scan.kivraLink')}
-									</a>
-								</div>
-							{:else if displayScreen === 'success' && successItems.length > 0}
-								<ul
-									class="success-items"
-									aria-label={t('onboarding.activation.success.itemsAria')}
-								>
-									{#each visibleSuccessItems as item (item.name + item.locationLabel)}
-										<li>
-											<div class="item-row">
-												{#if item.location}
-													<LocationColorDot location={item.location} />
-												{/if}
-												<div class="item-text">
-													<span class="item-name">{item.name}</span>
-													<span class="item-meta">{item.locationLabel}</span>
-												</div>
-											</div>
-										</li>
-									{/each}
-								</ul>
-								{#if hiddenSuccessCount > 0}
-									<p class="success-more">
-										{t('onboarding.activation.success.moreItems', { count: hiddenSuccessCount })}
-									</p>
+				<OnboardingStepStage stepIndex={displayIndex}>
+					{#if displayScreen === 'welcome'}
+						<ActivationOnboardingScreen
+							title={t('onboarding.activation.welcome.title')}
+							body={t('onboarding.activation.welcome.body')}
+						>
+							{#snippet illustration()}
+								<OnboardingLoopIllustration />
+							{/snippet}
+						</ActivationOnboardingScreen>
+					{:else if displayScreen === 'fill'}
+						<ActivationOnboardingScreen
+							title={t('onboarding.activation.fill.title')}
+							body={t('onboarding.activation.fill.body')}
+							compact
+						>
+							{#snippet illustration()}
+								{#if selectedStaples.size > 0}
+									<OnboardingWelcomeIllustration />
+								{:else}
+									<OnboardingScanIllustration />
 								{/if}
-							{:else if displayScreen === 'shopping'}
-								<ActivationSetupCards showKivra={kivraForwardEnabled} />
-							{/if}
-						{/snippet}
-					</ActivationOnboardingScreen>
-				{/key}
+							{/snippet}
+
+							{#snippet extra()}
+								<div class="fill-extra">
+									<ActivationFillChips
+										items={staples}
+										selected={selectedStaples}
+										onToggle={toggleStaple}
+									/>
+									<button
+										type="button"
+										class="receipt-link"
+										data-testid="activation-receipt-link"
+										onclick={handleOpenScanner}
+									>
+										{t('onboarding.activation.fill.receiptLink')}
+									</button>
+								</div>
+							{/snippet}
+						</ActivationOnboardingScreen>
+					{:else if displayScreen === 'invite'}
+						<ActivationOnboardingScreen
+							title={t('onboarding.activation.invite.title')}
+							body={t('onboarding.activation.invite.body')}
+						>
+							{#snippet illustration()}
+								<OnboardingInviteIllustration />
+							{/snippet}
+
+							{#snippet extra()}
+								{#if inviteError}
+									<p class="invite-error">{t('onboarding.activation.invite.shareError')}</p>
+								{/if}
+							{/snippet}
+						</ActivationOnboardingScreen>
+					{:else}
+						<ActivationOnboardingScreen
+							title={t('onboarding.activation.finish.title')}
+							body={t('onboarding.activation.finish.learningLine')}
+							compact
+						>
+							{#snippet illustration()}
+								<div class="finish-stage">
+									<div class="finish-burst">
+										<CelebrationBurst active={true} />
+									</div>
+									<OnboardingCelebrateIllustration heavy={true} />
+								</div>
+							{/snippet}
+
+							{#snippet extra()}
+								<div class="finish-extra">
+									<ActivationFinishRecap
+										{seeded}
+										{seedSource}
+										seedCount={inventoryCount}
+										{inviteState}
+										{memberCount}
+									/>
+									{#if showPushBlock}
+										<div class="push-block" data-testid="activation-push-block">
+											<p class="push-title">{t('onboarding.activation.finish.pushTitle')}</p>
+											<p class="push-body">{t('onboarding.activation.finish.pushBody')}</p>
+										</div>
+									{/if}
+								</div>
+							{/snippet}
+						</ActivationOnboardingScreen>
+					{/if}
+				</OnboardingStepStage>
 			</div>
 		</div>
 
@@ -511,46 +649,74 @@
 							data-testid="activation-cta-primary"
 							onclick={handleWelcomeContinue}
 						>
-							{t(screenCopy.welcome.ctaKey)}
+							{t('onboarding.activation.welcome.cta')}
 						</Button>
-					{:else if displayScreen === 'scan'}
+					{:else if displayScreen === 'fill'}
+						<form
+							method="POST"
+							action="/scan?/bulkCreate"
+							class="footer-form"
+							use:enhance={enhanceStarter}
+						>
+							<Button
+								type="submit"
+								fullWidth
+								variant="primary"
+								loading={staplesSubmitting}
+								data-testid="activation-cta-primary"
+							>
+								{fillCtaLabel}
+							</Button>
+						</form>
+						<Button
+							type="button"
+							fullWidth
+							variant="ghost"
+							data-testid="activation-cta-secondary"
+							onclick={handleFillDeferred}
+						>
+							{t('onboarding.activation.fill.ctaSkip')}
+						</Button>
+					{:else if displayScreen === 'invite'}
 						<Button
 							type="button"
 							fullWidth
 							variant="primary"
+							loading={inviteSharing}
 							data-testid="activation-cta-primary"
-							onclick={handleOpenScanner}
+							onclick={handleInviteShare}
 						>
-							{t('onboarding.activation.scan.ctaPrimary')}
+							{inviteCopied
+								? t('onboarding.activation.invite.copied')
+								: t('onboarding.activation.invite.ctaShare')}
 						</Button>
 						<Button
 							type="button"
 							fullWidth
 							variant="ghost"
 							data-testid="activation-cta-secondary"
-							onclick={handleScanDeferred}
+							onclick={handleInviteSkip}
 						>
-							{t('onboarding.activation.scan.ctaSecondary')}
+							{t('onboarding.activation.invite.ctaSkip')}
 						</Button>
-					{:else if displayScreen === 'success'}
+					{:else if showPushBlock}
 						<Button
 							type="button"
 							fullWidth
 							variant="primary"
 							data-testid="activation-cta-primary"
-							onclick={handleSuccessContinue}
+							onclick={() => finishFlow(true)}
 						>
-							{t(screenCopy.success.ctaKey)}
+							{t('onboarding.activation.finish.ctaEnable')}
 						</Button>
-					{:else if displayScreen === 'brain'}
 						<Button
 							type="button"
 							fullWidth
-							variant="primary"
-							data-testid="activation-cta-primary"
-							onclick={handleBrainContinue}
+							variant="ghost"
+							data-testid="activation-cta-secondary"
+							onclick={() => finishFlow(false)}
 						>
-							{t(screenCopy.brain.ctaKey)}
+							{t('onboarding.activation.finish.ctaSkip')}
 						</Button>
 					{:else}
 						<Button
@@ -558,9 +724,9 @@
 							fullWidth
 							variant="primary"
 							data-testid="activation-cta-primary"
-							onclick={handleShoppingContinue}
+							onclick={() => finishFlow(false)}
 						>
-							{t(screenCopy.shopping.ctaKey)}
+							{t('onboarding.activation.finish.ctaOpen')}
 						</Button>
 					{/if}
 				</div>
@@ -571,7 +737,19 @@
 
 <style>
 	:global(.activation-onboarding-panel) {
-		width: min(420px, calc(100vw - 2 * var(--space-md)));
+		width: min(480px, calc(100vw - 2 * var(--space-md)));
+		max-height: min(85vh, 720px);
+	}
+
+	:global(.activation-panel-exit) {
+		animation: activation-panel-exit 240ms cubic-bezier(0.33, 1, 0.68, 1) both;
+	}
+
+	@keyframes activation-panel-exit {
+		to {
+			opacity: 0;
+			transform: scale(0.98) translateY(8px);
+		}
 	}
 
 	@media (max-width: 767px) {
@@ -640,11 +818,20 @@
 		flex-direction: column;
 	}
 
+	.flow-content > :global(.step-stage) {
+		flex: 1;
+		min-height: 0;
+	}
+
 	.flow-footer {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
-		animation: footer-enter 280ms cubic-bezier(0.33, 1, 0.68, 1) both;
+		animation: footer-enter 240ms cubic-bezier(0.33, 1, 0.68, 1) 180ms both;
+	}
+
+	.footer-form {
+		display: contents;
 	}
 
 	@keyframes footer-enter {
@@ -662,81 +849,83 @@
 		.flow-footer {
 			animation: none;
 		}
+
+		:global(.activation-panel-exit) {
+			animation: none;
+		}
 	}
 
-	.kivra-card {
-		padding: var(--space-xs) var(--space-sm);
-		border-radius: var(--radius-md);
-		background: color-mix(in srgb, var(--color-secondary) 8%, var(--color-surface));
-		border: 1px solid color-mix(in srgb, var(--color-taupe) 22%, var(--color-border));
-		text-align: center;
+	.fill-extra {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-sm);
 	}
 
-	.kivra-hint {
-		margin: 0;
-		font-size: 0.875rem;
-		color: var(--color-text-muted);
-		line-height: 1.45;
-	}
-
-	.kivra-link {
-		display: inline-block;
-		margin-top: var(--space-xs);
+	.receipt-link {
+		border: none;
+		background: none;
+		padding: 0;
+		align-self: center;
 		font-size: 0.875rem;
 		font-weight: 600;
 		color: var(--color-primary);
 		text-decoration: none;
+		cursor: pointer;
+		min-height: var(--touch-target-min);
 	}
 
-	.kivra-link:hover {
+	.receipt-link:hover {
 		text-decoration: underline;
 	}
 
-	.success-items {
+	.invite-error {
 		margin: 0;
-		padding: 0;
-		list-style: none;
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-xs);
-	}
-
-	.success-more {
-		margin: var(--space-xs) 0 0;
-		font-size: 0.8125rem;
-		color: var(--color-text-muted);
+		font-size: 0.875rem;
+		color: var(--color-danger);
 		text-align: center;
 	}
 
-	.success-items li {
+	.finish-stage {
+		position: relative;
 		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-		padding: var(--space-xs) var(--space-sm);
-		border-radius: var(--radius-md);
-		background: var(--color-surface-muted);
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
 	}
 
-	.item-row {
+	.finish-burst {
+		position: absolute;
+		inset: 0;
 		display: flex;
-		align-items: flex-start;
+		align-items: center;
+		justify-content: center;
+		pointer-events: none;
+	}
+
+	.finish-extra {
+		display: flex;
+		flex-direction: column;
 		gap: var(--space-sm);
 	}
 
-	.item-text {
-		display: flex;
-		flex-direction: column;
-		gap: 0.125rem;
-		min-width: 0;
+	.push-block {
+		padding: var(--space-xs) var(--space-sm);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
+		border: 1px solid var(--color-border);
 	}
 
-	.item-name {
+	.push-title {
+		margin: 0;
+		font-size: 0.875rem;
 		font-weight: 600;
 	}
 
-	.item-meta {
+	.push-body {
+		margin: 0.25rem 0 0;
 		font-size: 0.8125rem;
+		line-height: 1.45;
 		color: var(--color-text-muted);
 	}
-
 </style>

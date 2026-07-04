@@ -124,6 +124,9 @@
 			<ProductAvatar name={tile.name} warn={tile.warn} size="sm" decorative />
 			<span class="tile-name">{tile.name}</span>
 			{#if tile.expiresOnSource && isEstimatedExpirySource(tile.expiresOnSource)}
+				<!-- Non-interactive: this badge lives inside the tile-body <a>. The "why" +
+				     one-tap correction are offered on the item list / data grid / edit page
+				     the tile navigates to. -->
 				<EstimatedBadge source={tile.expiresOnSource} interactive={false} />
 			{/if}
 			{#if detailLine}
@@ -291,6 +294,7 @@
 
 	.tile-use,
 	.tile-menu {
+		position: relative;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -306,6 +310,14 @@
 		font-size: 0.625rem;
 		font-weight: 700;
 		line-height: 1;
+	}
+
+	/* 44px effective tap target despite the compact 32px tile visual. */
+	.tile-use::after,
+	.tile-menu::after {
+		content: '';
+		position: absolute;
+		inset: -6px 0;
 	}
 
 	.tile-use {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/atoms/Button.svelte';
-	import { getSummaryNamePills, sortUncheckedItems } from '$lib/domain/shopping-trip';
+	import { sortUncheckedItems } from '$lib/domain/shopping-trip';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { t } from '$lib/i18n';
 
@@ -14,24 +14,39 @@
 	let { items, canEdit, onStartShop, onAddItem }: Props = $props();
 
 	const unchecked = $derived(sortUncheckedItems(items));
-	const summary = $derived(getSummaryNamePills(items));
 	const hasItems = $derived(unchecked.length > 0);
+
+	function amountLabel(item: ShoppingListItem): string {
+		if (!item.quantity && !item.unit) {
+			return '';
+		}
+		return `${item.quantity ?? ''}${item.unit ? ` ${item.unit}` : ''}`.trim();
+	}
 </script>
 
 <section class="summary" aria-labelledby="shopping-v2-summary-heading">
-	<h2 id="shopping-v2-summary-heading" class="summary-title">{t('shopping.v2.summary.title')}</h2>
-
-	<div class="pill-row" data-testid="shopping-v2-summary-pills">
+	<div class="summary-head">
+		<h2 id="shopping-v2-summary-heading" class="summary-title">{t('shopping.v2.summary.title')}</h2>
 		{#if hasItems}
-			<span class="pill pill-count">{t('shopping.v2.summary.countPill', { count: unchecked.length })}</span>
-			{#each summary.names as name (name)}
-				<span class="pill">{name}</span>
-			{/each}
-			{#if summary.overflow > 0}
-				<span class="pill pill-muted">{t('shopping.v2.summary.morePill', { count: summary.overflow })}</span>
-			{/if}
+			<span class="count-badge">{t('shopping.v2.summary.countPill', { count: unchecked.length })}</span>
+		{/if}
+	</div>
+
+	<!-- Whole list visible inline — no extra tap into a drawer just to see what's on it. -->
+	<div class="list-block" data-testid="shopping-v2-summary-pills">
+		{#if hasItems}
+			<ul class="item-rows">
+				{#each unchecked as item (item.id)}
+					<li class="item-row">
+						<span class="item-name">{item.name}</span>
+						{#if amountLabel(item)}
+							<span class="item-amount">{amountLabel(item)}</span>
+						{/if}
+					</li>
+				{/each}
+			</ul>
 		{:else}
-			<span class="pill pill-muted">{t('shopping.v2.summary.empty')}</span>
+			<p class="empty-line">{t('shopping.v2.summary.empty')}</p>
 		{/if}
 	</div>
 
@@ -60,42 +75,72 @@
 		gap: var(--space-md);
 	}
 
+	.summary-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-sm);
+	}
+
 	.summary-title {
 		margin: 0;
 		font-size: 1rem;
 		font-weight: 700;
 	}
 
-	.pill-row {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-xs);
-	}
-
-	.pill {
-		display: inline-flex;
-		align-items: center;
-		padding: 0.35rem 0.65rem;
+	.count-badge {
+		flex-shrink: 0;
+		padding: 0.2rem 0.55rem;
 		border-radius: 999px;
-		border: 1px solid var(--color-border);
-		background: var(--color-surface);
-		font-size: 0.8125rem;
-		font-weight: 600;
-		max-width: 100%;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-	}
-
-	.pill-count {
 		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
-		border-color: color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
+		border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
 		color: var(--color-primary);
+		font-size: 0.75rem;
+		font-weight: 700;
 	}
 
-	.pill-muted {
+	.list-block {
+		min-width: 0;
+	}
+
+	.item-rows {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.item-row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: var(--space-sm);
+		padding: 0.5rem 0;
+		border-bottom: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+	}
+
+	.item-row:last-child {
+		border-bottom: none;
+	}
+
+	.item-name {
+		min-width: 0;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		overflow-wrap: anywhere;
+	}
+
+	.item-amount {
+		flex-shrink: 0;
+		font-size: 0.8125rem;
 		color: var(--color-text-muted);
-		background: var(--color-surface-muted);
+	}
+
+	.empty-line {
+		margin: 0;
+		color: var(--color-text-muted);
+		font-size: 0.9375rem;
 	}
 
 	.summary-actions {

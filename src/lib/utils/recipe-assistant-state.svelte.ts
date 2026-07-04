@@ -5,6 +5,8 @@ import { DEFAULT_MEAL_INTENT, DEFAULT_RECIPE_PORTIONS, type MealIntent } from '$
 export const recipeAssistantStore = $state({
 	recipes: [] as RecipeIdea[],
 	preferences: '',
+	/** "Vad har ni hemma mer?" — items the app's pantry doesn't know about (60 % data). */
+	extraItems: [] as string[],
 	portions: DEFAULT_RECIPE_PORTIONS,
 	mealIntent: DEFAULT_MEAL_INTENT as MealIntent,
 	note: null as string | null

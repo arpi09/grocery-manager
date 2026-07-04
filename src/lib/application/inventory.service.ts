@@ -790,7 +790,14 @@ export class InventoryService {
 				id: candidate.item.id,
 				name: candidate.item.name,
 				quantity: candidate.item.quantity,
-				unit: candidate.item.unit
+				unit: candidate.item.unit,
+				recentAt: new Date(
+					Math.max(
+						candidate.item.createdAt.getTime(),
+						candidate.item.updatedAt.getTime(),
+						candidate.item.lastConfirmedAt.getTime()
+					)
+				).toISOString()
 			});
 		}
 		return matches;
