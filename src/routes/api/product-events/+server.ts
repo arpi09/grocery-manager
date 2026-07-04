@@ -50,6 +50,8 @@ const AUTH_EVENT_TYPES = new Set<ProductEventType>([
 	'onboarding_notifications_prompted',
 	'onboarding_kivra_tapped',
 	'onboarding_completed',
+	'onboarding_seed_choice',
+	'onboarding_finish_state',
 	'milestone_achieved',
 	'celebration_shown',
 	'streak_milestone_reached',

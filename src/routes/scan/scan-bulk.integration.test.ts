@@ -562,6 +562,44 @@ describe('Scan bulkCreate integration', () => {
 
 	});
 
+	it('starter bulkCreate seeds inventory without purchase rows', async () => {
+		await integrationDb.seedUser({ id: 'user-starter', email: 'starter@example.com' });
+		const householdId = await integrationDb.seedHousehold({
+			name: 'Starter household',
+			members: [{ userId: 'user-starter', role: 'owner' }]
+		});
+
+		const request = bulkCreateRequest({
+			bulkFlow: 'starter',
+			returnTo: '/hem',
+			selected: ['0', '1', '2'],
+			name_0: 'Mjölk',
+			location_0: 'fridge',
+			name_1: 'Pasta',
+			location_1: 'cupboard',
+			name_2: 'Frysta grönsaker',
+			location_2: 'freezer'
+		});
+
+		await expectRedirectTo(
+			invokeBulkCreate(scanEvent(request, { id: 'user-starter' }, householdId)),
+			'/hem'
+		);
+
+		const fridge = await inventoryService.listByLocation(householdId, 'fridge');
+		const cupboard = await inventoryService.listByLocation(householdId, 'cupboard');
+		const freezer = await inventoryService.listByLocation(householdId, 'freezer');
+		expect(fridge.some((item) => item.name === 'Mjölk')).toBe(true);
+		expect(cupboard.some((item) => item.name === 'Pasta')).toBe(true);
+		expect(freezer.some((item) => item.name === 'Frysta grönsaker')).toBe(true);
+
+		const purchaseRows = await integrationDb.db
+			.select()
+			.from(receiptPurchaseLineTable)
+			.where(eq(receiptPurchaseLineTable.householdId, householdId));
+		expect(purchaseRows).toHaveLength(0);
+	});
+
 });
 
 

@@ -396,6 +396,8 @@ export const productEventTable = pgTable(
 				'onboarding_notifications_prompted',
 				'onboarding_kivra_tapped',
 				'onboarding_completed',
+				'onboarding_seed_choice',
+				'onboarding_finish_state',
 				'first_scan',
 				'pwa_banner_dismiss',
 				'pwa_banner_install_click',
