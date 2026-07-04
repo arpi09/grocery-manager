@@ -8,6 +8,8 @@
 		accept?: string;
 		cameraAccept?: string;
 		disabled?: boolean;
+		/** Demote the camera button when another CTA owns the primary slot. */
+		cameraVariant?: 'primary' | 'secondary';
 		onSelect: (file: File) => void;
 	}
 
@@ -17,6 +19,7 @@
 		accept = 'image/*',
 		cameraAccept = 'image/*',
 		disabled = false,
+		cameraVariant = 'primary',
 		onSelect
 	}: Props = $props();
 
@@ -48,7 +51,7 @@
 <div class="picker" role="group" aria-label={t('receipt.pickSourceAria')}>
 	<Button
 		type="button"
-		variant="primary"
+		variant={cameraVariant}
 		fullWidth
 		class="picker-btn"
 		{disabled}

@@ -323,6 +323,9 @@
 	}
 
 	const selectedCount = $derived(lines.filter((_, i) => selected[i]).length);
+	/* Curated selection flips the CTA hierarchy: quick-confirm re-selects everything,
+	   so it must never look like the default once the user has deselected rows. */
+	const allSelected = $derived(lines.length > 0 && selectedCount === lines.length);
 	const hasLocationPredictions = $derived(locationPredictions.some((prediction) => prediction != null));
 	const receiptAiUsage = $derived(
 		aggregateBrainAiUsageFromPredictions(shelfLifePredictions, locationPredictions)
@@ -988,24 +991,28 @@
 			<div class="actions">
 				<Button
 					type="button"
-					variant="primary"
+					variant={allSelected ? 'primary' : 'secondary'}
 					data-testid="receipt-quick-confirm"
 					disabled={lines.length === 0 || bulkSubmitting}
 					loading={bulkSubmitting && quickConfirmUsed}
 					loadingLabel={t('receipt.saving')}
 					onclick={handleQuickConfirm}
 				>
-					{t('receiptAutomation.quickConfirmAll')}
+					{allSelected
+						? t('receiptAutomation.quickConfirmAll')
+						: t('receiptAutomation.selectAllAndAdd', { total: lines.length })}
 				</Button>
 				<Button
 					type="submit"
-					variant="secondary"
+					variant={allSelected ? 'secondary' : 'primary'}
 					data-testid="receipt-bulk-submit"
 					disabled={selectedCount === 0}
 					loading={bulkSubmitting && !quickConfirmUsed}
 					loadingLabel={t('receipt.saving')}
 				>
-					{t('receiptBulk.addCount', { count: selectedCount })}
+					{allSelected
+						? t('receiptBulk.addCount', { count: selectedCount })
+						: t('receiptBulk.addSelectedCount', { count: selectedCount })}
 				</Button>
 			</div>
 		</form>
@@ -1096,7 +1103,6 @@
 
 	.grouped-toggle {
 		margin-top: var(--space-xs);
-		min-height: auto;
 		font-size: 0.8125rem;
 	}
 
@@ -1263,6 +1269,21 @@
 	.actions :global(.btn) {
 		flex: 1;
 		min-height: 2.75rem;
+	}
+
+	@media (max-width: 899px) {
+		.actions {
+			position: sticky;
+			bottom: calc(var(--mobile-bottom-nav-height) + var(--safe-area-bottom));
+			z-index: 1;
+			padding-top: var(--space-sm);
+			padding-bottom: var(--space-sm);
+			background: linear-gradient(
+				to top,
+				var(--color-bg) 78%,
+				color-mix(in srgb, var(--color-bg) 0%, transparent)
+			);
+		}
 	}
 
 	.line-expiry {

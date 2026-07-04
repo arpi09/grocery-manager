@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { dismissOnboardingModalIfOpen, dismissPageHintIfOpen, loginAsAdmin } from './helpers/auth';
+import {
+	dismissCookieConsentIfOpen,
+	dismissOnboardingModalIfOpen,
+	dismissPageHintIfOpen,
+	loginAsAdmin
+} from './helpers/auth';
 import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
 
 test.describe('Scan and inventory', () => {
@@ -105,7 +110,16 @@ test.describe('Scan and inventory', () => {
 			await page.getByRole('button', { name: /^Sök$/i }).click();
 			await expect(page.locator('#scan-product-name')).toBeVisible({ timeout: 15_000 });
 			await page.locator('#scan-product-name').fill(itemName);
-			await page.locator('form.save-form').getByRole('button', { name: /^Spara$/i }).click();
+			await page
+				.locator('form.save-form')
+				.getByRole('button', { name: /^Spara och skanna nästa$/i })
+				.click();
+
+			// Save-and-scan-next: saving returns to the camera with a confirmation toast.
+			await expect(page).toHaveURL(/\/scan\?.*mode=barcode.*scan=added/, { timeout: 15_000 });
+			await expect(page.locator('.toast-message')).toContainText(itemName, { timeout: 10_000 });
+			await dismissCookieConsentIfOpen(page);
+			await page.getByTestId('scan-done-link').click();
 		} else {
 			await page.goto(`/item/new?location=fridge&from=/inventory/fridge`);
 			await page.locator('input[name="name"]').fill(itemName);
@@ -151,6 +165,7 @@ test.describe('Scan and inventory', () => {
 		test('manual add cancel returns to scan hub', async ({ page }) => {
 			await page.goto('/scan?mode=hub');
 			await dismissOnboardingModalIfOpen(page);
+			await dismissCookieConsentIfOpen(page);
 
 			await page.getByTestId('scan-hub-manual').click();
 			await expect(page).toHaveURL(/\/item\/new/, { timeout: 15_000 });
@@ -168,6 +183,8 @@ test.describe('Scan and inventory', () => {
 
 		const addButton = page.getByTestId('inventory-add-goods');
 		await expect(addButton).toBeVisible({ timeout: 15_000 });
+		await dismissCookieConsentIfOpen(page);
+		await dismissPageHintIfOpen(page);
 		await addButton.click({ force: true });
 		const sheet = page.getByTestId('inventory-add-sheet');
 		await expect(sheet).toBeVisible({ timeout: 15_000 });

@@ -26,6 +26,7 @@ test.describe('Photo round flow', () => {
 			/Byt zon för analys|Change zone for analysis/i,
 			{ timeout: 15_000 }
 		);
-		await expect(page.getByTestId('photo-round-analyze')).toBeDisabled();
+		// Analyze CTA appears first when at least one photo is added (no disabled primary).
+		await expect(page.getByTestId('photo-round-analyze')).toHaveCount(0);
 	});
 });
