@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
@@ -14,14 +13,10 @@
 	const totalCount = $derived(data.activeTotal);
 	const hasInventory = $derived(totalCount > 0);
 
-	const backHref = $derived(page.data.pantryUxV2Enabled ? '/inventory' : undefined);
-	const backLabel = $derived(page.data.pantryUxV2Enabled ? t('dataGrid.backToPantry') : undefined);
+	const backHref = '/inventory';
+	const backLabel = $derived(t('dataGrid.backToPantry'));
 
 	function handlePantryItemNavigate(itemId: string, itemLocation?: StorageLocation) {
-		if (!page.data.pantryUxV2Enabled) {
-			return;
-		}
-
 		trackPantryItemOpened(itemId, itemLocation ?? 'fridge', 'table');
 	}
 

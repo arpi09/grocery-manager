@@ -30,7 +30,6 @@ Same env key can behave differently depending on which helper reads it:
 | Env key | Label | Code default | Prod (`apphosting.yaml`) | Layout boolean | UI / backend effect | Data requirements |
 |---------|-------|--------------|--------------------------|----------------|---------------------|-------------------|
 | `HOME_UX_V2_ENABLED` | Home UX v2 — Household Briefing | **on** (`defaultOn`) | `true` | `homeUxV2Enabled` | `/hem` → `HomeV2Page` (timeline, waste cards, replenishment fold) instead of legacy dashboard | Replenishment / insights data for cards; empty state if no history |
-| `PANTRY_UX_V2_ENABLED` | Pantry UX v2 — shelf view | **off** (`exactTrue`) | `true` | `pantryUxV2Enabled` | `/inventory` shelf zones + use-soon; redirects when off | Active inventory items |
 
 ---
 
@@ -146,3 +145,4 @@ When adding a flag:
 | Env key | Retired | Outcome |
 |---------|---------|---------|
 | `SHOPPING_UX_V2_ENABLED` | 2026-07-04 | Plan + Shop modes on `/inkop` are now unconditional; legacy inline checklist grid deleted |
+| `PANTRY_UX_V2_ENABLED` | 2026-07-04 | `/inventory` shelf view is now unconditional; redirect fallback to `/inventory/fridge` deleted |

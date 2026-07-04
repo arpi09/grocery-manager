@@ -44,7 +44,6 @@
 		briefingFunFact?: HomeBriefingFunFact | null;
 		briefingOneLiner?: string | null;
 		canWrite?: boolean;
-		pantryUxV2Enabled?: boolean;
 		acceptingReplenishment?: boolean;
 		onAcceptReplenishment?: (card: Extract<HomeBriefingForYouCard, { kind: 'replenishment' }>) =>
 			| void
@@ -63,7 +62,6 @@
 		briefingFunFact = null,
 		briefingOneLiner = null,
 		canWrite = false,
-		pantryUxV2Enabled = false,
 		acceptingReplenishment = false,
 		onAcceptReplenishment,
 		onRecipeCta
@@ -128,7 +126,7 @@
 		})
 	);
 
-	const storageHref = $derived(pantryUxV2Enabled ? PANTRY_SHELF_PATH : '/inventory');
+	const storageHref = PANTRY_SHELF_PATH;
 
 	const shoppingHref = $derived(
 		isShoppingListReady(shoppingListCount, shoppingCadence) ? '/inkop?mode=shop' : '/inkop'
@@ -170,9 +168,7 @@
 		if (!forYou) return null;
 		switch (forYou.kind) {
 			case 'expiring':
-				return pantryUxV2Enabled
-					? `${PANTRY_SHELF_PATH}?filter=expiring`
-					: `/inventory/${forYou.item.location}?filter=expiring`;
+				return `${PANTRY_SHELF_PATH}?filter=expiring`;
 			case 'shopReady':
 				return '/inkop?mode=shop';
 			case 'recipe':

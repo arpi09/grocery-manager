@@ -90,12 +90,8 @@ export interface NavItem {
 	match?: NavMatch;
 }
 
-/** Shelf-first pantry entry when `PANTRY_UX_V2_ENABLED` is on. */
+/** Shelf-first pantry entry. */
 export const PANTRY_SHELF_PATH = '/inventory';
-
-export interface NavFeatureFlags {
-	pantryUxV2Enabled?: boolean;
-}
 
 /** Single source of truth for app navigation (account routes live in ProfileMenu only) */
 export const NAV_ITEMS: NavItem[] = [
@@ -108,7 +104,7 @@ export const NAV_ITEMS: NavItem[] = [
 		match: 'exact'
 	},
 	{
-		href: '/inventory/fridge',
+		href: PANTRY_SHELF_PATH,
 		labelKey: 'nav.inventory',
 		icon: 'inventory',
 		primary: true,
@@ -190,22 +186,6 @@ export function isNavItemVisible(item: NavItem, user: NavUser | null | undefined
 
 export function filterNavItems(items: NavItem[], user: NavUser | null | undefined): NavItem[] {
 	return items.filter((item) => isNavItemVisible(item, user));
-}
-
-export function applyNavFeatureFlags(
-	items: NavItem[],
-	flags: NavFeatureFlags = {}
-): NavItem[] {
-	if (!flags.pantryUxV2Enabled) {
-		return items;
-	}
-
-	return items.map((item) => {
-		if (item.badge === 'stale') {
-			return { ...item, href: PANTRY_SHELF_PATH };
-		}
-		return item;
-	});
 }
 
 export function resolveNavHref(item: NavItem, pathname: string): string {

@@ -2,7 +2,6 @@ import {
 	isBrainFeedbackV1Enabled,
 	isHomeRedesignV1Enabled,
 	isHomeUxV2Enabled,
-	isPantryUxV2Enabled,
 	isPriceMemoryV1Enabled,
 	isShoppingListShareEnabled
 } from './feature-flags';
@@ -57,12 +56,6 @@ export function getLayoutClientFlagSnapshot(): LayoutClientFlagSnapshotEntry[] {
 			envKey: 'BRAIN_FEEDBACK_V1_ENABLED',
 			...readPublicEnv('BRAIN_FEEDBACK_V1_ENABLED'),
 			effective: isBrainFeedbackV1Enabled()
-		},
-		{
-			propName: 'pantryUxV2Enabled',
-			envKey: 'PANTRY_UX_V2_ENABLED',
-			...readPublicEnv('PANTRY_UX_V2_ENABLED'),
-			effective: isPantryUxV2Enabled()
 		},
 		{
 			propName: 'homeUxV2Enabled',

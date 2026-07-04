@@ -3,7 +3,6 @@ import {
 	InventoryNotFoundError
 } from '$lib/application/inventory.service';
 import { canConsumeInventory, canEditInventory } from '$lib/domain/household';
-import { isPantryUxV2Enabled } from '$lib/server/pantry-ux-v2-flag';
 import {
 	requireInventoryConsumeAccess,
 	requireInventoryWriteAccess
@@ -23,13 +22,7 @@ function parseItemIds(formData: FormData): string[] {
 		.filter((id): id is string => typeof id === 'string' && id.trim().length > 0);
 }
 
-export const load: PageServerLoad = async ({ locals, url }) => {
-	if (!isPantryUxV2Enabled()) {
-		const filter = url.searchParams.get('filter');
-		const suffix = filter ? `?filter=${filter}` : '';
-		redirect(302, `/inventory/fridge${suffix}`);
-	}
-
+export const load: PageServerLoad = async ({ locals }) => {
 	const householdId = locals.householdId!;
 
 	const [items, activeTotal] = await Promise.all([

@@ -11,7 +11,6 @@ export const FEATURE_FLAG_ENV = {
 	PRICE_MEMORY_V1: 'PRICE_MEMORY_V1_ENABLED',
 	BRAIN_FEEDBACK_V1: 'BRAIN_FEEDBACK_V1_ENABLED',
 	SHOPPING_LIST_SHARE: 'PUBLIC_SHOPPING_LIST_SHARE_ENABLED',
-	PANTRY_UX_V2: 'PANTRY_UX_V2_ENABLED',
 	HOME_UX_V2: 'HOME_UX_V2_ENABLED',
 	RECEIPT_AI_BATCH: 'RECEIPT_AI_BATCH_ENABLED',
 	AUTO_FINISH: 'AUTO_FINISH_ENABLED',
@@ -74,15 +73,6 @@ export function isShoppingListShareEnabled(): boolean {
 /** Server flag: Price Memory V1 read surfaces (default off). */
 export function isPriceMemoryV1Enabled(): boolean {
 	return isEnvTrue(FEATURE_FLAG_ENV.PRICE_MEMORY_V1);
-}
-
-/** Server flag: Pantry UX v2 — shelf view on `/inventory` (default off prod; on in vite dev when unset). */
-export function isPantryUxV2Enabled(): boolean {
-	const val = process.env[FEATURE_FLAG_ENV.PANTRY_UX_V2];
-	if (val !== undefined && val !== '') {
-		return val === 'true';
-	}
-	return process.env.NODE_ENV === 'development';
 }
 
 /** Server flag: Home UX v2 — Household Briefing on `/hem` (default on). */
@@ -229,13 +219,6 @@ export function getAllFeatureFlagSnapshot(): FeatureFlagSnapshotEntry[] {
 			label: 'Price memory v1',
 			pattern: 'exactTrue',
 			check: isPriceMemoryV1Enabled
-		},
-		{
-			id: 'pantryUxV2',
-			envKey: FEATURE_FLAG_ENV.PANTRY_UX_V2,
-			label: 'Pantry UX v2',
-			pattern: 'exactTrue',
-			check: isPantryUxV2Enabled
 		},
 		{
 			id: 'homeUxV2',

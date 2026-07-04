@@ -42,14 +42,10 @@
 	const hasInventory = $derived(totalCount > 0);
 	const initialExpiryFilter = $derived(parseInventoryExpiryFilter(page.url.searchParams.get('filter')));
 
-	const backHref = $derived(page.data.pantryUxV2Enabled ? '/inventory' : undefined);
-	const backLabel = $derived(page.data.pantryUxV2Enabled ? t('dataGrid.backToPantry') : undefined);
+	const backHref = '/inventory';
+	const backLabel = $derived(t('dataGrid.backToPantry'));
 
 	function handlePantryItemNavigate(itemId: string) {
-		if (!page.data.pantryUxV2Enabled) {
-			return;
-		}
-
 		trackPantryItemOpened(itemId, data.location, 'table');
 	}
 

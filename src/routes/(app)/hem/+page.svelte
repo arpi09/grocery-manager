@@ -40,7 +40,6 @@
 
 				canWrite={data.canWrite}
 
-				pantryUxV2Enabled={Boolean(data.pantryUxV2Enabled)}
 
 				brainTimeline={data.brainTimeline}
 

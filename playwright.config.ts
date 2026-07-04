@@ -107,7 +107,6 @@ export default defineConfig({
 			E2E_MOCK_AI: process.env.E2E_MOCK_AI ?? 'true',
 			PUBLIC_E2E_DISABLE_POST_SURVEY: 'true',
 			HOME_REDESIGN_V1_ENABLED: process.env.HOME_REDESIGN_V1_ENABLED ?? 'true',
-			PANTRY_UX_V2_ENABLED: process.env.PANTRY_UX_V2_ENABLED ?? 'false',
 			HOME_UX_V2_ENABLED: process.env.HOME_UX_V2_ENABLED ?? 'false',
 			STORE_RECOMMENDATION_V0_ENABLED: process.env.STORE_RECOMMENDATION_V0_ENABLED ?? 'false',
 			PUBLIC_SHOPPING_LIST_SHARE_ENABLED: process.env.PUBLIC_SHOPPING_LIST_SHARE_ENABLED ?? 'true',

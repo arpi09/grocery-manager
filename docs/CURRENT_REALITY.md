@@ -28,7 +28,7 @@ Utg?ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenis
 | Primary tabs (desktop) | Hem, Lager, Ink?p, Skanna, Mer | Lager + scan in top row |
 | Primary tabs (mobile) | Hem, Ink?p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
 | Inventory add | `/inventory/[location]` | EN **L�gg till** ? sheet (kvitto/foto/streckkod/manuellt) |
-| Skafferi (Pantry V2) | `/inventory` | Shelf view (zones + use-soon) live (`PANTRY_UX_V2_ENABLED` canary); unified data grid at `/inventory/[location]` |
+| Skafferi (Pantry V2) | `/inventory` | Shelf view (zones + use-soon, flag retired — always on); unified data grid at `/inventory/[location]` |
 | Scan hub | `/scan` | 3-card choice hub; **ScanModeTabs desktop only** |
 | Ink�p (Shopping V2) | `/inkop` | Plan + Shop modes (flag retired — always on); checklist data grid in overflow drawer |
 | �ta (meal plan) | `/planer` | Nav/header **�ta**; veckokalender + id�panel; veckof�rslag p� `/planer/vecka` ([ATA_PAGE.md](./ATA_PAGE.md)) |

@@ -66,8 +66,6 @@ test.describe('Accessibility — Pantry V2 shelf (WCAG 2.2 AA)', () => {
 	test.setTimeout(120_000);
 
 	test('/inventory shelf has no critical or serious axe violations', async ({ page }) => {
-		test.skip(process.env.PANTRY_UX_V2_ENABLED !== 'true', 'Requires PANTRY_UX_V2_ENABLED=true');
-
 		await loginAsAdmin(page);
 		await ensureFridgeInventoryItem(page);
 		await page.goto('/inventory', { waitUntil: 'commit', timeout: 60_000 });

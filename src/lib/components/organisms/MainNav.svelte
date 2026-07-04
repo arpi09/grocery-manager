@@ -5,7 +5,6 @@
 	import {
 		NAV_ITEMS,
 		appendMarketV01NavItems,
-		applyNavFeatureFlags,
 		filterNavItems,
 		splitNavItems,
 		type NavUser
@@ -28,14 +27,11 @@
 		canWrite = false
 	}: Props = $props();
 
-	const navFlags = $derived({
-		pantryUxV2Enabled: Boolean(page.data.pantryUxV2Enabled)
-	});
 	const marketLiveEnabled = $derived(Boolean(page.data.marketLiveEnabled));
 	const nearbySharingEnabled = $derived(Boolean(page.data.nearbySharingEnabled));
 	const visibleItems = $derived(
 		appendMarketV01NavItems(
-			applyNavFeatureFlags(filterNavItems(NAV_ITEMS, user), navFlags),
+			filterNavItems(NAV_ITEMS, user),
 			user,
 			marketLiveEnabled,
 			nearbySharingEnabled
