@@ -37,14 +37,14 @@ export interface RankedReplenishmentSuggestion extends ReplenishmentSuggestion {
 	rankReason?: string;
 }
 
-function buildRankSystemPrompt(locale: string): string {
+function buildRankSystemPrompt(locale: string, maxItems: number): string {
 	return buildNanoSystemPrompt({
 		locale,
 		promptVersion: `${PROMPT_VERSION_SHOPPING}-replenishment-rank`,
 		roleEn: 'You rank buy-again suggestions for a Swedish household shopping list.',
 		roleSv: 'Du rankar köp-igen-förslag för en svensk inköpslista.',
 		rules: [
-			`Pick the best ${REPLENISHMENT_RANK_MAX} suggestions from the list — prioritize urgency and shopping usefulness.`,
+			`Pick the best ${maxItems} suggestions from the list — prioritize urgency and shopping usefulness.`,
 			'Return JSON: {"rankedKeys":[{"normalizedKey":"","reason":""}]}',
 			'- reason: one short sentence in the user locale',
 			'- only use normalizedKey values from the input list'
@@ -69,14 +69,15 @@ export async function rankReplenishmentSuggestions(
 	apiKey: string,
 	suggestions: ReplenishmentSuggestion[],
 	locale: string = 'sv',
-	options: { replenishmentFeedbackBlock?: string } = {}
+	options: { replenishmentFeedbackBlock?: string; maxItems?: number } = {}
 ): Promise<RankedReplenishmentSuggestion[]> {
-	if (suggestions.length <= REPLENISHMENT_RANK_MAX || isOpenAiDegradedMode()) {
-		return suggestions.slice(0, REPLENISHMENT_RANK_MAX);
+	const maxItems = options.maxItems ?? REPLENISHMENT_RANK_MAX;
+	if (suggestions.length <= maxItems || isOpenAiDegradedMode()) {
+		return suggestions.slice(0, maxItems);
 	}
 
 	const systemPrompt = [
-		buildRankSystemPrompt(locale),
+		buildRankSystemPrompt(locale, maxItems),
 		options.replenishmentFeedbackBlock?.trim() ?? ''
 	]
 		.filter(Boolean)
@@ -91,12 +92,12 @@ export async function rankReplenishmentSuggestions(
 	});
 
 	if (!result.ok) {
-		return suggestions.slice(0, REPLENISHMENT_RANK_MAX);
+		return suggestions.slice(0, maxItems);
 	}
 
 	const rankedKeys = (result.data as { rankedKeys?: unknown }).rankedKeys;
 	if (!Array.isArray(rankedKeys)) {
-		return suggestions.slice(0, REPLENISHMENT_RANK_MAX);
+		return suggestions.slice(0, maxItems);
 	}
 
 	const byKey = new Map(suggestions.map((entry) => [entry.normalizedKey, entry]));
@@ -111,11 +112,11 @@ export async function rankReplenishmentSuggestions(
 			...byKey.get(key)!,
 			rankReason: typeof reason === 'string' && reason.trim() ? reason.trim() : undefined
 		});
-		if (ranked.length >= REPLENISHMENT_RANK_MAX) break;
+		if (ranked.length >= maxItems) break;
 	}
 
 	if (ranked.length === 0) {
-		return suggestions.slice(0, REPLENISHMENT_RANK_MAX);
+		return suggestions.slice(0, maxItems);
 	}
 
 	return ranked;
@@ -129,8 +130,10 @@ export async function rankReplenishmentWithFeedback(
 		locale: string;
 		learningFeedbackRepository: ILearningFeedbackRepository;
 		apiKey?: string | null;
+		maxItems?: number;
 	}
 ): Promise<RankedReplenishmentSuggestion[]> {
+	const maxItems = options.maxItems ?? REPLENISHMENT_RANK_MAX;
 	if (!isReplenishmentRankEnabled()) {
 		return suggestions;
 	}
@@ -139,7 +142,7 @@ export async function rankReplenishmentWithFeedback(
 	}
 
 	const apiKey = options.apiKey ?? getOpenAiApiKey();
-	if (!apiKey || suggestions.length <= REPLENISHMENT_RANK_MAX) {
+	if (!apiKey || suggestions.length <= maxItems) {
 		return suggestions;
 	}
 
@@ -150,6 +153,7 @@ export async function rankReplenishmentWithFeedback(
 	);
 
 	return rankReplenishmentSuggestions(apiKey, suggestions, options.locale, {
-		replenishmentFeedbackBlock
+		replenishmentFeedbackBlock,
+		maxItems
 	});
 }

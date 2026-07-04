@@ -23,7 +23,7 @@
 	} from '$lib/client/shopping-trip-session';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import type { PantryBridgePreview } from '$lib/application/shopping-to-pantry.service';
-	import type { ReplenishmentSuggestion } from '$lib/domain/replenishment';
+	import type { SundaySuggestion } from '$lib/domain/sunday-suggestion';
 	import type { DedupeWarning } from '$lib/domain/dedupe-autopilot';
 	import {
 		clampFocusIndex,
@@ -32,7 +32,6 @@
 		splitTripItems,
 		type ShoppingTripMode
 	} from '$lib/domain/shopping-trip';
-	import { memorySuggestionId } from '$lib/domain/shopping-v2-presenter';
 	import type { UnpackRowInput } from '$lib/domain/shopping-unpack';
 	import { receiptOneTapHref } from '$lib/utils/scan-nav';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
@@ -46,7 +45,7 @@
 		checkedCount: number;
 		canEdit: boolean;
 		householdId: string;
-		replenishmentSuggestions: ReplenishmentSuggestion[];
+		sundayProposal: SundaySuggestion[];
 		shoppingToPantryMode: ShoppingToPantryMode;
 		shareLinkEnabled: boolean;
 		memberCount: number;
@@ -59,7 +58,7 @@
 		checkedCount,
 		canEdit,
 		householdId,
-		replenishmentSuggestions,
+		sundayProposal,
 		shoppingToPantryMode,
 		shareLinkEnabled,
 		memberCount,
@@ -74,7 +73,8 @@
 	let joinedParamHandled = $state(false);
 	let legacyOpen = $state(false);
 	let showQuickAdd = $state(false);
-	let acceptingKey = $state<string | null>(null);
+	let addingKey = $state<string | null>(null);
+	let addingAll = $state(false);
 	let dismissingKey = $state<string | null>(null);
 	let picking = $state(false);
 	let addingItem = $state(false);
@@ -294,53 +294,96 @@
 		void invalidateAll();
 	}
 
-	async function acceptSuggestion(suggestion: ReplenishmentSuggestion) {
-		if (!canEdit || acceptingKey) {
+	function sundayRowPayload(row: SundaySuggestion) {
+		return {
+			source: row.source,
+			name: row.name,
+			quantity: row.quantityLabel,
+			normalizedKey: row.normalizedKey,
+			relatedMealDate: row.relatedMealDate,
+			relatedRecipeTitle: row.relatedRecipeTitle
+		};
+	}
+
+	async function postSundayAdd(rows: SundaySuggestion[]): Promise<number | null> {
+		const formData = new FormData();
+		formData.set('rows', JSON.stringify(rows.map(sundayRowPayload)));
+
+		const response = await fetch('?/sundayAdd', {
+			method: 'POST',
+			body: formData,
+			headers: { accept: 'application/json', 'x-sveltekit-action': 'true' }
+		});
+		const result = deserialize(await response.text()) as {
+			type: string;
+			data?: { sundayAdded?: { added: number; skipped: number } };
+		};
+
+		if (result.type !== 'success' || !result.data?.sundayAdded) {
+			return null;
+		}
+		return result.data.sundayAdded.added;
+	}
+
+	async function sundayAdd(row: SundaySuggestion) {
+		if (!canEdit || addingKey || addingAll) {
 			return;
 		}
 
-		acceptingKey = suggestion.normalizedKey;
+		addingKey = row.key;
 		try {
-			const response = await fetch('/api/replenishment/accept', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ normalizedKey: suggestion.normalizedKey, surface: 'inkop' })
-			});
-			const data = (await response.json()) as { error?: string; name?: string };
-
-			if (!response.ok) {
-				showClientToast(data.error ?? t('shopping.v2.memory.acceptFailed'), { variant: 'error' });
+			const added = await postSundayAdd([row]);
+			if (added === null) {
+				showClientToast(t('shopping.sunday.addFailed'), { variant: 'error' });
 				return;
 			}
-
-			void trackProductEvent('memory_suggestion_added', {
-				suggestionId: memorySuggestionId(suggestion),
-				source: 'inkop',
-				itemName: data.name ?? suggestion.displayName
-			});
-
-			showClientToast(t('shopping.v2.memory.acceptSuccess', { name: data.name ?? suggestion.displayName }), {
-				variant: 'success'
-			});
+			showClientToast(t('shopping.sunday.addedOneToast', { name: row.name }), { variant: 'success' });
 			await invalidateAll();
 		} catch {
-			showClientToast(t('shopping.v2.memory.acceptFailed'), { variant: 'error' });
+			showClientToast(t('shopping.sunday.addFailed'), { variant: 'error' });
 		} finally {
-			acceptingKey = null;
+			addingKey = null;
 		}
 	}
 
-	async function dismissSuggestion(suggestion: ReplenishmentSuggestion) {
+	async function sundayAddAll(rows: SundaySuggestion[]) {
+		if (!canEdit || addingAll || addingKey || rows.length === 0) {
+			return;
+		}
+
+		addingAll = true;
+		try {
+			const added = await postSundayAdd(rows);
+			if (added === null) {
+				showClientToast(t('shopping.sunday.addFailed'), { variant: 'error' });
+				return;
+			}
+			showClientToast(t('shopping.sunday.addedToast', { count: added }), { variant: 'success' });
+			await invalidateAll();
+		} catch {
+			showClientToast(t('shopping.sunday.addFailed'), { variant: 'error' });
+		} finally {
+			addingAll = false;
+		}
+	}
+
+	async function sundayDismiss(row: SundaySuggestion) {
 		if (!canEdit || dismissingKey) {
 			return;
 		}
 
-		dismissingKey = suggestion.normalizedKey;
+		/* AI rows are hidden client-side by the panel — nothing to persist. Only replenishment
+		 * dismissals are recorded so the cadence suggestion stops resurfacing. */
+		if (row.source !== 'replenishment' || !row.normalizedKey) {
+			return;
+		}
+
+		dismissingKey = row.key;
 		try {
 			const response = await fetch('/api/replenishment/dismiss', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ normalizedKey: suggestion.normalizedKey })
+				body: JSON.stringify({ normalizedKey: row.normalizedKey })
 			});
 			const data = (await response.json()) as { error?: string };
 
@@ -350,9 +393,9 @@
 			}
 
 			void trackProductEvent('memory_suggestion_ignored', {
-				suggestionId: memorySuggestionId(suggestion),
-				source: 'inkop',
-				itemName: suggestion.displayName
+				suggestionId: row.normalizedKey,
+				source: 'inkop_sunday',
+				itemName: row.name
 			});
 
 			await invalidateAll();
@@ -580,13 +623,15 @@
 	{#if session.mode === 'plan'}
 		<ShoppingV2PlanView
 			{items}
-			suggestions={replenishmentSuggestions}
+			{sundayProposal}
 			{canEdit}
 			showReceiptLead={showReceiptImportLead}
-			{acceptingKey}
+			{addingKey}
+			{addingAll}
 			{dismissingKey}
-			onAcceptSuggestion={acceptSuggestion}
-			onDismissSuggestion={dismissSuggestion}
+			onSundayAdd={sundayAdd}
+			onSundayAddAll={sundayAddAll}
+			onSundayDismiss={sundayDismiss}
 			onStartShop={handleStartShop}
 			onAddItem={() => void openQuickAdd()}
 			onOpenLegacy={() => {

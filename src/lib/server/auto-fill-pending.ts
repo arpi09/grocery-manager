@@ -63,6 +63,17 @@ export function peekAutoFillPending(
 	};
 }
 
+/** Full cached AI items (no delete) — Söndagsförslaget fuses these into the proposal each load. */
+export function peekAutoFillItems(
+	householdId: string,
+	userId: string
+): { items: ShoppingSuggestion[]; note: string | null } | null {
+	purgeExpired();
+	const entry = pendingByKey.get(keyFor(householdId, userId));
+	if (!entry) return null;
+	return { items: entry.items, note: entry.note };
+}
+
 /** Test-only */
 export function clearAutoFillPendingStoreForTests(): void {
 	pendingByKey.clear();
