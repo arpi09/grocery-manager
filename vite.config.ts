@@ -106,6 +106,11 @@ export default defineConfig({
 	},
 	server: {
 		host: true,
-		port: 5173
+		port: 5173,
+		watch: {
+			/* Agent worktrees under .claude/worktrees carry their own .svelte-kit/tsconfig.json;
+			   without this ignore their file changes force full-reloads of every dev server mid-run. */
+			ignored: ['**/.claude/**']
+		}
 	}
 });
