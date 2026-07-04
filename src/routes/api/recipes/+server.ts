@@ -4,6 +4,10 @@ import { requireOpenAiKey, requireUser } from '$lib/server/api-guards';
 import { requireAiQuota } from '$lib/server/ai-rate-limit';
 import { openAiErrorLogDetail, translateOpenAiError } from '$lib/server/openai';
 import { parseMealIntent } from '$lib/domain/recipe';
+import {
+	buildPseudoInventoryForExtras,
+	parseRecipeExtraItems
+} from '$lib/domain/recipe-extras';
 import { clampRecipePortions } from '$lib/server/recipe-prompt';
 import { generateRecipesWithRefinement, loadRecipeGenerationContext } from '$lib/server/recipe-generation';
 import { normalizePromptLocale } from '$lib/server/ai-prompt-shared';
@@ -24,9 +28,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		portions?: unknown;
 		mealIntent?: unknown;
 		maxRecipes?: unknown;
+		extraItems?: unknown;
 	};
 
 	const preferences = typeof body.preferences === 'string' ? body.preferences.trim().slice(0, 300) : '';
+	const extraItems = parseRecipeExtraItems(body.extraItems);
 	const portions = clampRecipePortions(body.portions);
 	const mealIntent = parseMealIntent(body.mealIntent);
 	const maxRecipes =
@@ -51,8 +57,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 	const apiKey = apiKeyOrResponse;
 
+	/* 60 %-data principle: user-typed extras count as pantry — the app's inventory
+	   is a boost, never a gate. */
 	const inventory = await locals.inventoryService.listAll(locals.householdId!);
-	if (inventory.length === 0) {
+	const pseudoExtras = buildPseudoInventoryForExtras(extraItems, locals.householdId!, auth.user.id);
+	const combinedInventory = [...inventory, ...pseudoExtras];
+	if (combinedInventory.length === 0) {
 		return json({
 			recipes: [],
 			note: translate(locale, 'recipe.noInventoryNote')
@@ -61,7 +71,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	const generated = await generateRecipesWithRefinement({
 		apiKey,
-		inventory,
+		inventory: combinedInventory,
 		portions,
 		preferences,
 		mealIntent,

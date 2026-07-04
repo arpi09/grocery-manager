@@ -2713,8 +2713,17 @@
 		"reachFailed": "Kunde inte nå AI-tjänsten just nu. Försök igen om en stund.",
 		"parseFailed": "Kunde inte tolka receptförslagen. Försök igen om en stund.",
 		"parseFromAi": "Kunde inte tolka receptförslagen från AI. Försök igen om en stund.",
-		"noInventoryNote": "Inga varor i lagret ännu. Lägg till varor först, sedan kan du generera recept.",
+		"noInventoryNote": "Skafferiet är tomt i appen. Skriv vad ni har hemma under \"Vad har ni hemma mer?\" så föreslår vi ändå.",
 		"networkError": "Nätverksfel vid generering av recept. Kontrollera anslutningen och försök igen.",
+		"extras": {
+			"label": "Vad har ni hemma mer?",
+			"placeholder": "T.ex. kyckling, ris …",
+			"addBtn": "Lägg till",
+			"removeAria": "Ta bort {name}",
+			"basedOn": "Utgår från {count, plural, one {# vara} other {# varor}} appen känner till. Saknas något hemma? Lägg till här — utan att röra lagret.",
+			"emptyPantry": "Skafferiet är tomt i appen — skriv vad ni har hemma så föreslår vi ändå.",
+			"staleLink": "Snabbkoll: {count, plural, one {# vara} other {# varor}} kan vara inaktuella"
+		},
 		"intro": "Matidéer från det du faktiskt kan laga — inte hundmat, blommor eller städ. Välj stil nedan och lägg till önskemål om du vill.",
 		"preferences": "Önskemål (valfritt)",
 		"preferencesPlaceholder": "Exempel: under 30 minuter, utan mejeri",
