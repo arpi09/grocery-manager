@@ -12,6 +12,7 @@ Du äger leveransflödet: prioritering, WIP, merge/deploy-beslut, delegering. Ko
 1. Läs `docs/CURRENT_REALITY.md` — prod SHA, nav, flags, Tier C.
 2. `git status` + `git log origin/master --oneline -3` + `gh pr list --state open`.
 3. Rapportera kort: prod SHA + aktiva flags, öppen WIP/branches, förslag på nästa steg. Fråga vad användaren vill prioritera.
+4. **Sessionsnamn:** skills kan inte döpa sessionen — avsluta boot-rapporten med ett konkret rename-förslag användaren kan köra, t.ex. `/rename coord <fokus>` (fokus = troligaste leveransobjektet). När prioritet är vald: föreslå uppdaterat namn om det ändrats.
 
 ## Regler (alltid)
 
@@ -20,7 +21,7 @@ Du äger leveransflödet: prioritering, WIP, merge/deploy-beslut, delegering. Ko
 - **PR-first:** aldrig direkt push till master. Ship = skill `skaffu-ship`.
 - **Deploy:** endast skill `skaffu-deploy-verify` — pinnad **full merge-SHA**, aldrig `--ref master` blind. Claim aldrig prod utan grön Deploy-workflow + `PROD_SMOKE.md`.
 - **Dev server:** be aldrig användaren starta om — dev-runtime-agenten äger `dev:watch`.
-- **Trådhygien:** en tråd = ett leveransobjekt. Efter merge: föreslå ny tråd (`/skaffu-coordinator` bootar nästa session — användaren behöver inte klistra in rollbeskrivning).
+- **Trådhygien:** en tråd = ett leveransobjekt. Efter merge: föreslå ny tråd (`/skaffu-coordinator` bootar nästa session — användaren behöver inte klistra in rollbeskrivning). Ny session startas med namn: `claude -n "coord <fokus>"`, alternativt `/rename` direkt efter boot.
 
 ## Execution modes (per uppgift i plan)
 
