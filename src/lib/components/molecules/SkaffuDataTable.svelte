@@ -105,23 +105,25 @@
 		border-collapse: collapse;
 	}
 
+	/* table-layout: fixed resolves width: 1% to ~10px and MDC's overflow: hidden
+	   clips the cell content — narrow columns need real widths (content + padding). */
 	.skaffu-table :global(.col-checkbox),
 	.skaffu-table :global(.col-checkoff) {
-		width: 1%;
 		padding-inline: var(--space-sm);
 		text-align: center;
 		vertical-align: middle;
 	}
 
-	/* table-layout: fixed resolves 1% to ~10px; the 44px checkoff button then gets
-	   clipped by the cell's overflow:hidden (MDC) and its center lands in col-qty,
-	   which swallows pointer events. Reserve the full touch target + padding. */
+	.skaffu-table :global(.col-checkbox) {
+		width: calc(1.75rem + 2 * var(--space-sm));
+	}
+
 	.skaffu-table :global(.col-checkoff) {
 		width: calc(var(--touch-target-min) + 2 * var(--space-sm));
 	}
 
 	.skaffu-table :global(.col-thumb) {
-		width: 1%;
+		width: calc(1.75rem + 2 * var(--space-sm));
 		padding-inline: var(--space-sm);
 		vertical-align: middle;
 	}
@@ -131,14 +133,18 @@
 		min-width: 0;
 	}
 
-	.skaffu-table :global(.col-qty),
+	.skaffu-table :global(.col-qty) {
+		width: 8.5rem;
+		white-space: nowrap;
+	}
+
 	.skaffu-table :global(.col-expiry) {
-		width: 1%;
+		width: 8.5rem;
 		white-space: nowrap;
 	}
 
 	.skaffu-table :global(.col-actions) {
-		width: 1%;
+		width: 8.5rem;
 		padding-inline: var(--space-xs);
 		text-align: right;
 		vertical-align: middle;
