@@ -5,8 +5,8 @@ import { translate } from '$lib/i18n/messages';
 import { recordOpenAiFailure, recordOpenAiSuccess } from '$lib/server/openai-circuit-breaker';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
-export const OPENAI_MODEL = 'gpt-4.1-mini';
-export const OPENAI_MODEL_NANO = env.OPENAI_MODEL_NANO?.trim() || 'gpt-4.1-nano';
+export const OPENAI_MODEL = env.OPENAI_MODEL?.trim() || 'gpt-5.4-mini';
+export const OPENAI_MODEL_NANO = env.OPENAI_MODEL_NANO?.trim() || 'gpt-5.4-nano';
 
 export const OPENAI_NOT_CONFIGURED_KEY = 'errors.api.openAiNotConfigured' satisfies MessageKey;
 export const OPENAI_UNAUTHORIZED_KEY = 'errors.api.openAiUnauthorized' satisfies MessageKey;

@@ -350,6 +350,7 @@
 				"addCta": "Lägg till {count} på inköpslistan",
 				"addCtaEmpty": "Välj varor att lägga till",
 				"addedCta": "✓ Tillagt på inköpslistan",
+				"cookCta": "Laga något av detta",
 				"addFailed": "Kunde inte lägga till varorna — försök igen",
 				"addPartial": "{added} av {total} varor lades till på listan",
 				"addSuccess": "{count, plural, one {# vara tillagd på inköpslistan} other {# varor tillagda på inköpslistan}}"
@@ -1224,7 +1225,7 @@
 				"unavailableRestoreAria": "Ta tillbaka {name} till plockkön",
 				"completeUnavailable": "{count, plural, one {# vara} other {# varor}} fanns inte — ligger kvar på listan",
 				"completeTitle": "Klart för den här turen",
-				"completeBody": "{count, plural, one {# vara} other {# varor}} plockade. Uppdatera skafferiet när du packat hemma.",
+				"completeBody": "{count, plural, one {# vara} other {# varor}} plockade.",
 				"completePantryCta": "Uppdatera skafferiet",
 				"completePlanCta": "Tillbaka till planering",
 				"completeHomeCta": "Till hem",
@@ -1234,6 +1235,23 @@
 					"recent_purchase": "Ni köpte detta nyligen",
 					"on_list": "Finns redan på listan"
 				}
+			},
+			"unpack": {
+				"question": "Har du kvittot?",
+				"scanCta": "Skanna kvittot",
+				"openCta": "Packa upp utan kvitto",
+				"title": "Packa upp",
+				"subtitle": "{count, plural, one {# vara} other {# varor}} från rundan — plats är förifylld.",
+				"submit": "Lägg alla i skafferiet ({count})",
+				"skipRow": "Hoppa över",
+				"skipRowAria": "Hoppa över {name} — läggs inte i skafferiet",
+				"addMoreLabel": "Lägg till fler varor",
+				"addMorePlaceholder": "Köpte ni något mer?",
+				"addMoreCta": "Lägg till",
+				"empty": "Inget kvar att packa upp.",
+				"notNow": "Inte nu",
+				"doneToast": "{count, plural, one {# vara} other {# varor}} i skafferiet",
+				"loadFailed": "Kunde inte hämta rundans varor. Försök igen."
 			},
 			"pantryBridge": {
 				"title": "Lägg till i skafferiet?",
@@ -1562,6 +1580,7 @@
 		"contextNoExpiring": "Inget brådskande som går ut inom {days} dagar.",
 		"contextPlanned": "{count} måltider i denna kalendervy",
 		"contextWeeklyLink": "Veckoförslag (AI)",
+		"contextWeeklyHint": "Generera maträtt = en idé nu. Veckoförslag = planera hela veckan.",
 		"contextHomeLink": "Utgår snart",
 		"contextWeekViewLink": "Veckovy",
 		"contextActionsAria": "Åtgärder för veckoplanering"
@@ -2589,6 +2608,8 @@
 		"lead": "Har du kvittot i en app? Ladda upp PDF eller bild direkt — eller fota ett papperskvitto. Vi föreslår varor du kan lägga till.",
 		"cameraPaper": "Fota papperskvitto",
 		"selectItems": "Välj varor ({selected} av {total})",
+		"alreadyInPantry": "Redan i skafferiet — nyss tillagd",
+		"estimatesSummary": "Om skattningarna",
 		"locationForAll": "Sätt plats för alla valda:",
 		"locationPerItem": "Plats:",
 		"addCount": "Lägg till {count} {count, plural, one {vara} other {varor}}",
@@ -2597,7 +2618,8 @@
 		"locationBulkHint": "Gäller markerade rader. Ändra plats per vara nedan om en rad ska ligga någon annanstans.",
 		"locationOverride": "egen plats",
 		"suggestedLocation": "Föreslagen plats",
-		"suggestionsHint": "Datum och platser är förslag från Skaffu — justera vid behov innan du sparar.",
+		"locationSuggestionsHint": "Platser är förslag från Skaffu — ändra vid behov innan du sparar.",
+		"estimatesHint": "Utgångsdatum är uppskattningar — justera vid behov innan du sparar.",
 		"aiDegradedBanner": "AI-batch för hållbarhet är avstängd — vi använder heuristik tills vidare.",
 		"savedLabel": "{count} {count, plural, one {vara} other {varor}}",
 		"saveFailed": "Kunde inte spara varorna. Försök igen.",
@@ -2698,8 +2720,17 @@
 		"reachFailed": "Kunde inte nå AI-tjänsten just nu. Försök igen om en stund.",
 		"parseFailed": "Kunde inte tolka receptförslagen. Försök igen om en stund.",
 		"parseFromAi": "Kunde inte tolka receptförslagen från AI. Försök igen om en stund.",
-		"noInventoryNote": "Inga varor i lagret ännu. Lägg till varor först, sedan kan du generera recept.",
+		"noInventoryNote": "Skafferiet är tomt i appen. Skriv vad ni har hemma under \"Vad har ni hemma mer?\" så föreslår vi ändå.",
 		"networkError": "Nätverksfel vid generering av recept. Kontrollera anslutningen och försök igen.",
+		"extras": {
+			"label": "Vad har ni hemma mer?",
+			"placeholder": "T.ex. kyckling, ris …",
+			"addBtn": "Lägg till",
+			"removeAria": "Ta bort {name}",
+			"basedOn": "Utgår från {count, plural, one {# vara} other {# varor}} appen känner till. Saknas något hemma? Lägg till här — utan att röra lagret.",
+			"emptyPantry": "Skafferiet är tomt i appen — skriv vad ni har hemma så föreslår vi ändå.",
+			"staleLink": "Snabbkoll: {count, plural, one {# vara} other {# varor}} kan vara inaktuella"
+		},
 		"intro": "Matidéer från det du faktiskt kan laga — inte hundmat, blommor eller städ. Välj stil nedan och lägg till önskemål om du vill.",
 		"preferences": "Önskemål (valfritt)",
 		"preferencesPlaceholder": "Exempel: under 30 minuter, utan mejeri",
@@ -2978,6 +3009,7 @@
 				"title": "Använd snart — {count, plural, one {# vara} other {# varor}}",
 				"list": "{items}",
 				"aria": "Varor att använda snart",
+				"cookCta": "Gör middag av detta",
 				"cta": "Visa alla varor"
 			},
 			"zone": {
@@ -3009,8 +3041,10 @@
 			"insightsSummary": "Att se över i skafferiet",
 			"empty": {
 				"title": "Tomt så länge.\nSnart fullt av liv.",
-				"body": "Lägg till er första vara för att börja hålla koll på vad som finns hemma – och vad som snart tar slut.",
+				"body": "Skanna ett kvitto eller fota hyllan — snabbaste vägen till ett levande skafferi.",
 				"cta": "Lägg till din första vara",
+				"scanCta": "Skanna in mat",
+				"manualLink": "Eller lägg till manuellt",
 				"helper": "Sorteras automatiskt i Kyl, Frys och Skafferi"
 			},
 			"error": {
@@ -3411,7 +3445,8 @@
 			"invalidLocation": "Ogiltig förvaringsplats."
 		},
 		"shopping": {
-			"missingRowId": "Saknar rad-id"
+			"missingRowId": "Saknar rad-id",
+			"unpackFailed": "Kunde inte packa upp. Försök igen."
 		}
 	},
 	"actionToast": {
@@ -3697,6 +3732,12 @@
 		"publicTitle": "Inköpslista",
 		"publicLead": "Någon delade sin inköpslista — öppna listan och handla utan att installera appen. Du behöver inget kvitto för att få värde här.",
 		"publicSnapshotHonesty": "Ögonblicksbild från när länken skapades. Avbockade rader syns men kan inte ändras här.",
+		"guestLiveHint": "Listan är live — bocka av direkt medan ni handlar, utan konto.",
+		"guestPickAria": "Markera {name} som plockad",
+		"guestUnpickAria": "Ta tillbaka {name} till listan",
+		"guestCheckedHeading": "Plockade ({count})",
+		"guestToggleFailed": "Kunde inte uppdatera varan. Försök igen.",
+		"guestRateLimited": "Lite för snabbt — vänta en stund och försök igen.",
 		"publicExpires": "Länken gäller till {date}.",
 		"publicSnapshotAt": "Ögonblicksbild tagen {date}.",
 		"publicGdprNote": "Listan visar bara varunamn och mängd — inga hushållsnamn, adresser eller kontaktuppgifter. Länken slutar gälla automatiskt.",

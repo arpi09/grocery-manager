@@ -60,6 +60,39 @@
 
 	let isNarrowViewport = $state(false);
 
+	let extraDraft = $state('');
+
+	const pantryCount = $derived(
+		typeof page.data.activeInventoryCount === 'number' ? page.data.activeInventoryCount : 0
+	);
+
+	const pantryStaleCount = $derived(
+		typeof page.data.staleCount === 'number' ? page.data.staleCount : 0
+	);
+
+	function addExtraItem() {
+		const name = extraDraft.trim().slice(0, 40);
+		if (!name) {
+			return;
+		}
+		const key = name.toLowerCase();
+		if (recipeAssistantStore.extraItems.some((item) => item.toLowerCase() === key)) {
+			extraDraft = '';
+			return;
+		}
+		if (recipeAssistantStore.extraItems.length >= 12) {
+			return;
+		}
+		recipeAssistantStore.extraItems = [...recipeAssistantStore.extraItems, name];
+		extraDraft = '';
+	}
+
+	function removeExtraItem(name: string) {
+		recipeAssistantStore.extraItems = recipeAssistantStore.extraItems.filter(
+			(item) => item !== name
+		);
+	}
+
 	let loading = $state(false);
 
 	let errorMessage = $state<string | null>(null);
@@ -119,6 +152,8 @@
 				body: JSON.stringify({
 
 					preferences: recipeAssistantStore.preferences,
+
+					extraItems: recipeAssistantStore.extraItems,
 
 					portions: recipeAssistantStore.portions,
 
@@ -256,7 +291,53 @@
 
 </script>
 
-
+{#snippet pantryExtras()}
+	<div class="extras-section" data-testid="recipe-extras">
+		<p class="extras-honesty">
+			{pantryCount === 0
+				? t('recipe.extras.emptyPantry')
+				: t('recipe.extras.basedOn', { count: pantryCount })}
+		</p>
+		{#if pantryStaleCount > 0}
+			<a class="extras-stale-link" href="/inventory/synk">
+				{t('recipe.extras.staleLink', { count: pantryStaleCount })}
+			</a>
+		{/if}
+		{#if recipeAssistantStore.extraItems.length > 0}
+			<div class="extras-chips" role="group" aria-label={t('recipe.extras.label')}>
+				{#each recipeAssistantStore.extraItems as item (item)}
+					<button
+						type="button"
+						class="extras-chip"
+						onclick={() => removeExtraItem(item)}
+						aria-label={t('recipe.extras.removeAria', { name: item })}
+					>
+						{item}
+						<span aria-hidden="true">×</span>
+					</button>
+				{/each}
+			</div>
+		{/if}
+		<div class="extras-row">
+			<input
+				class="extras-input"
+				aria-label={t('recipe.extras.label')}
+				placeholder={t('recipe.extras.placeholder')}
+				maxlength="40"
+				bind:value={extraDraft}
+				onkeydown={(event) => {
+					if (event.key === 'Enter') {
+						event.preventDefault();
+						addExtraItem();
+					}
+				}}
+			/>
+			<button type="button" class="extras-add" onclick={addExtraItem}>
+				{t('recipe.extras.addBtn')}
+			</button>
+		</div>
+	</div>
+{/snippet}
 
 <Modal
 
@@ -370,7 +451,7 @@
 
 				></textarea>
 
-
+				{@render pantryExtras()}
 
 				<div class="actions">
 
@@ -484,7 +565,7 @@
 
 		></textarea>
 
-
+		{@render pantryExtras()}
 
 		<div class="actions">
 
@@ -1043,6 +1124,93 @@
 
 		color: var(--color-text-muted);
 
+	}
+
+	.extras-section {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs);
+		margin: var(--space-md) 0;
+		padding: var(--space-sm) var(--space-md);
+		border: 1px dashed var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface-muted);
+	}
+
+	.extras-honesty {
+		margin: 0;
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+		line-height: 1.4;
+	}
+
+	.extras-stale-link {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: underline;
+		min-height: var(--touch-target-min);
+		display: inline-flex;
+		align-items: center;
+	}
+
+	.extras-chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-xs);
+	}
+
+	.extras-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.3rem 0.65rem;
+		border: 1px solid var(--color-border);
+		border-radius: 999px;
+		background: var(--color-surface);
+		font: inherit;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		cursor: pointer;
+		min-height: 2.25rem;
+	}
+
+	.extras-chip:focus-visible,
+	.extras-add:focus-visible,
+	.extras-input:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+
+	.extras-row {
+		display: flex;
+		gap: var(--space-sm);
+	}
+
+	.extras-input {
+		flex: 1;
+		min-width: 0;
+		min-height: var(--touch-target-min);
+		padding: 0.45rem 0.7rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		font: inherit;
+		font-size: 0.9375rem;
+		background: var(--color-surface);
+	}
+
+	.extras-add {
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		padding: 0 var(--space-md);
+		font: inherit;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		cursor: pointer;
+		min-height: var(--touch-target-min);
+		flex-shrink: 0;
 	}
 
 </style>

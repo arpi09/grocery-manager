@@ -12,6 +12,7 @@ import {
 } from '$lib/application/shopping-list.service';
 import { ShoppingToPantryReadOnlyError } from '$lib/application/shopping-to-pantry.service';
 import { parseAddShoppingListItem } from '$lib/validation/shopping-list.schemas';
+import { parseUnpackRows } from '$lib/domain/shopping-unpack';
 import { translate } from '$lib/i18n/messages';
 import { rankReplenishmentWithFeedback } from '$lib/server/replenishment-rank';
 import { learningFeedbackRepository } from '$lib/server/di';
@@ -160,7 +161,10 @@ export const actions: Actions = {
 		requireInventoryWriteAccess(event.locals.householdRole);
 		const householdId = event.locals.householdId;
 		if (!householdId) error(400, translate(event.locals.locale, 'errors.household.noHousehold'));
-		const id = (await event.request.formData()).get('id');
+		const formData = await event.request.formData();
+		const id = formData.get('id');
+		/* Shop mode defers the pantry bridge to the trip-complete "Packa upp" moment. */
+		const deferBridge = formData.get('bridge') === 'defer';
 		if (!id || typeof id !== 'string')
 			return fail(400, { message: translate(event.locals.locale, 'errors.shopping.missingRowId') });
 
@@ -171,7 +175,7 @@ export const actions: Actions = {
 				id
 			);
 
-			if (updated.checked) {
+			if (updated.checked && !deferBridge) {
 				const mode = await event.locals.shoppingToPantryService.getMode(event.locals.user!.id);
 				const preview = await event.locals.shoppingToPantryService.previewAdd(householdId, updated);
 
@@ -335,6 +339,102 @@ export const actions: Actions = {
 			}
 			throw err;
 		}
+	},
+	unpackPreview: async (event) => {
+		requireInventoryWriteAccess(event.locals.householdRole);
+		const householdId = event.locals.householdId;
+		if (!householdId) error(400, translate(event.locals.locale, 'errors.household.noHousehold'));
+
+		const formData = await event.request.formData();
+		const sinceRaw = formData.get('since');
+		const since = typeof sinceRaw === 'string' ? Number(sinceRaw) : NaN;
+		if (!Number.isFinite(since)) {
+			return fail(400, { message: translate(event.locals.locale, 'errors.shopping.unpackFailed') });
+		}
+
+		const checkedItems = await event.locals.shoppingListService.listCheckedItems(householdId);
+		const tripItems = checkedItems.filter((item) => item.updatedAt.getTime() >= since);
+
+		const rows = [];
+		for (const item of tripItems) {
+			rows.push({
+				item,
+				preview: await event.locals.shoppingToPantryService.previewAdd(householdId, item)
+			});
+		}
+
+		return { unpack: { rows } };
+	},
+	unpackAll: async (event) => {
+		requireInventoryWriteAccess(event.locals.householdRole);
+		const householdId = event.locals.householdId;
+		const locale = event.locals.locale;
+		if (!householdId) error(400, translate(locale, 'errors.household.noHousehold'));
+
+		const formData = await event.request.formData();
+		const rows = parseUnpackRows(formData.get('rows'));
+		if (!rows) {
+			return fail(400, { message: translate(locale, 'errors.shopping.unpackFailed') });
+		}
+
+		const checkedItems = await event.locals.shoppingListService.listCheckedItems(householdId);
+		const byId = new Map(checkedItems.map((item) => [item.id, item]));
+
+		let added = 0;
+		let merged = 0;
+		try {
+			for (const row of rows) {
+				const listItem = row.shoppingItemId ? byId.get(row.shoppingItemId) : undefined;
+				const now = new Date();
+				const item = listItem ?? {
+					id: `unpack-extra-${added + merged}`,
+					householdId,
+					name: row.name,
+					quantity: row.quantity,
+					unit: row.unit,
+					checked: true,
+					unavailableAt: null,
+					sortOrder: 0,
+					createdAt: now,
+					updatedAt: now
+				};
+
+				const result = await event.locals.shoppingToPantryService.addFromShopping(
+					householdId,
+					event.locals.user!.id,
+					event.locals.householdRole!,
+					item,
+					{ location: row.location, quantity: row.quantity, unit: row.unit }
+				);
+				if (result.action === 'merged') {
+					merged += 1;
+				} else {
+					added += 1;
+				}
+
+				trackShoppingCheckoffToPantry(event.locals.pmfService, {
+					userId: event.locals.user!.id,
+					householdId,
+					added: true,
+					action: result.action,
+					mode: 'unpack_batch'
+				});
+			}
+		} catch (err) {
+			if (err instanceof ShoppingToPantryReadOnlyError) {
+				return fail(403, { message: err.message });
+			}
+			throw err;
+		}
+
+		return {
+			unpacked: {
+				count: added + merged,
+				added,
+				merged,
+				message: translate(locale, 'shopping.v2.unpack.doneToast', { count: added + merged })
+			}
+		};
 	},
 	savePantryMode: async (event) => {
 		const user = event.locals.user;

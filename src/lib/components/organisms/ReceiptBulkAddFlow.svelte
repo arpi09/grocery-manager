@@ -46,7 +46,11 @@
 		readReceiptBulkLocation,
 		writeReceiptBulkLocation
 	} from '$lib/utils/receipt-bulk-location';
-	import { fetchMergeCandidates, type MergeCandidateMatch } from '$lib/client/merge-candidates';
+	import {
+		fetchMergeCandidates,
+		isRecentMergeCandidate,
+		type MergeCandidateMatch
+	} from '$lib/client/merge-candidates';
 	import { saveLastScanMode } from '$lib/utils/last-scan-defaults';
 
 	interface Props {
@@ -101,6 +105,8 @@
 	let discardReviewOpen = $state(false);
 	let mergeCandidates = $state<Array<MergeCandidateMatch | null>>([]);
 	let mergeSelected = $state<Record<number, boolean>>({});
+	let recentlyAdded = $state<Record<number, boolean>>({});
+	let recentDedupeApplied = $state(false);
 	let parsedStoreLabel = $state<string | null>(null);
 	let parsedPurchasedAt = $state<string | null>(null);
 	let shelfLifePredictions = $state<Array<ReceiptShelfLifePrediction | null>>([]);
@@ -188,6 +194,8 @@
 			])
 		);
 		selected = Object.fromEntries(data.lines.map((_, i) => [i, true]));
+		recentlyAdded = {};
+		recentDedupeApplied = false;
 		lineLocations = Object.fromEntries(
 			data.lines.map((line, i) => [
 				i,
@@ -293,6 +301,21 @@
 		mergeSelected = Object.fromEntries(
 			mergeCandidates.map((match, index) => [index, Boolean(match)])
 		);
+
+		/* Trip safety net: lines matching a pantry item touched in the last 24h (e.g. just
+		   unpacked from the shopping list) start unchecked — only on the first load, so
+		   re-fetches after location changes never override the user's own choices. */
+		if (!recentDedupeApplied) {
+			recentDedupeApplied = true;
+			const flags: Record<number, boolean> = {};
+			for (const [index, match] of mergeCandidates.entries()) {
+				if (isRecentMergeCandidate(match)) {
+					flags[index] = true;
+					selected[index] = false;
+				}
+			}
+			recentlyAdded = flags;
+		}
 	}
 
 	function toggleAll(checked: boolean) {
@@ -648,6 +671,12 @@
 			</div>
 		{/if}
 		<h2 class="title">{t('receiptBulk.selectItems', { selected: selectedCount, total: lines.length })}</h2>
+		<!-- Discard action lives away from the save buttons — a mis-tap here costs the whole review. -->
+		<p class="new-image-row">
+			<button type="button" class="link-btn" data-testid="receipt-new-image" onclick={requestNewImage}>
+				{t('common.newImage')}
+			</button>
+		</p>
 		{#if parsedStoreLabel || parsedPurchasedAt}
 			<p class="receipt-meta" data-testid="receipt-review-meta">
 				{#if parsedStoreLabel && parsedPurchasedAt}
@@ -667,16 +696,26 @@
 				{t('receiptBulk.mergedAwaySummary', { count: mergedAwayCount })}
 			</p>
 		{/if}
-		{#if hasUncertainEstimates}
-			<p class="hint uncertain-hint">{t('brain.uncertainWarning')}</p>
-		{:else if shelfLifeEstimatesInReceipt || hasLocationPredictions}
-			<p class="hint">{t('receiptBulk.suggestionsHint')}</p>
-		{/if}
-		{#if aiDegradedMode && shelfLifeEstimatesInReceipt}
-			<FeedbackBanner tone="info" message={t('receiptBulk.aiDegradedBanner')} />
-		{/if}
-		{#if qualityReport && shelfLifeEstimatesInReceipt}
-			<ReceiptQualityMeter report={qualityReport} />
+		<!-- One collapsed block instead of a wall of hints — the rows are the point. -->
+		{#if shelfLifeEstimatesInReceipt || hasLocationPredictions || hasUncertainEstimates}
+			<details class="estimates-info" data-testid="receipt-estimates-info">
+				<summary>{t('receiptBulk.estimatesSummary')}</summary>
+				{#if shelfLifeEstimatesInReceipt}
+					<p class="hint">{t('receiptBulk.estimatesHint')}</p>
+				{/if}
+				{#if aiDegradedMode && shelfLifeEstimatesInReceipt}
+					<FeedbackBanner tone="info" message={t('receiptBulk.aiDegradedBanner')} />
+				{/if}
+				{#if hasLocationPredictions}
+					<p class="hint">{t('receiptBulk.locationSuggestionsHint')}</p>
+				{/if}
+				{#if qualityReport && shelfLifeEstimatesInReceipt}
+					<ReceiptQualityMeter report={qualityReport} />
+				{/if}
+				{#if hasUncertainEstimates}
+					<p class="hint uncertain-hint">{t('brain.uncertainWarning')}</p>
+				{/if}
+			</details>
 		{/if}
 
 		<div class="bulk-location">
@@ -759,6 +798,11 @@
 										}
 									}} />
 								<span class="line-name">{line.name}</span>
+								{#if recentlyAdded[index]}
+									<span class="already-chip" data-testid="receipt-line-already-{index}">
+										{t('receiptBulk.alreadyInPantry')}
+									</span>
+								{/if}
 								{#if formatLineAmount(line)}
 									<span class="line-qty">{formatLineAmount(line)}</span>
 								{/if}
@@ -970,9 +1014,6 @@
 						? t('receiptBulk.addCount', { count: selectedCount })
 						: t('receiptBulk.addSelectedCount', { count: selectedCount })}
 				</Button>
-				<button type="button" class="text-action new-image-link" onclick={requestNewImage}>
-					{t('common.newImage')}
-				</button>
 			</div>
 		</form>
 	</section>
@@ -1010,6 +1051,42 @@
 	.title {
 		margin: 0 0 var(--space-md);
 		font-size: 1.1rem;
+	}
+
+	.new-image-row {
+		margin: 0 0 var(--space-sm);
+	}
+
+	.new-image-row .link-btn {
+		text-decoration: underline;
+		font-size: 0.875rem;
+	}
+
+	.estimates-info {
+		margin: 0 0 var(--space-md);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		padding: var(--space-sm) var(--space-md);
+		background: var(--color-surface-muted);
+	}
+
+	.estimates-info summary {
+		cursor: pointer;
+		font-size: 0.875rem;
+		font-weight: 700;
+		color: var(--color-primary);
+		list-style: none;
+		min-height: var(--touch-target-min, 2.75rem);
+		display: flex;
+		align-items: center;
+	}
+
+	.estimates-info summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.estimates-info[open] summary {
+		margin-bottom: var(--space-sm);
 	}
 
 	.receipt-meta {
@@ -1127,6 +1204,16 @@
 		color: var(--color-text-muted);
 	}
 
+	.already-chip {
+		padding: 0.15rem 0.5rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+		font-size: 0.72rem;
+		font-weight: 600;
+		color: var(--color-text);
+		white-space: nowrap;
+	}
+
 	.line-price {
 		font-size: 0.78rem;
 		color: var(--color-text-muted);
@@ -1182,10 +1269,6 @@
 	.actions :global(.btn) {
 		flex: 1;
 		min-height: 2.75rem;
-	}
-
-	.new-image-link {
-		align-self: center;
 	}
 
 	@media (max-width: 899px) {

@@ -51,7 +51,7 @@ describe('AiUsageAdminService', () => {
 			topLimit: 10,
 			periodDays: 30
 		});
-		expect(summary.estimatedMonthlyUsd).toBeCloseTo(100 * 0.015 + 10 * 0.02, 5);
+		expect(summary.estimatedMonthlyUsd).toBeCloseTo(100 * 0.03 + 10 * 0.04, 5);
 		expect(summary.budgetUsd).toBe(1.5);
 		expect(summary.budgetExceeded).toBe(true);
 		expect(summary.budgetNearLimit).toBe(false);

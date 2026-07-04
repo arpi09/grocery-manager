@@ -40,7 +40,7 @@ test.describe('Navigation', () => {
 		await expect(expiringLink).not.toHaveAttribute('href', /\/hem/);
 	});
 
-	test('shopping trip complete pantry CTA goes to inventory', async ({ page }) => {
+	test('shopping trip complete scan CTA goes to receipt import', async ({ page }) => {
 		test.setTimeout(150_000);
 		const itemName = `Nav E2E ${Date.now()}`;
 
@@ -55,10 +55,11 @@ test.describe('Navigation', () => {
 		await expect(page.getByTestId('shopping-v2-shop')).toBeVisible();
 		await pickAllUntilTripComplete(page);
 
-		const pantryCta = page.getByRole('button', { name: /Uppdatera skafferiet|Update pantry/i });
-		await expect(pantryCta).toBeVisible();
-		await pantryCta.click();
-		await expect(page).toHaveURL(/\/inventory/, { timeout: 15_000 });
+		/* "Har du kvittot?" — receipt one-tap is the primary path into the pantry. */
+		const scanCta = page.getByTestId('shopping-v2-complete-scan');
+		await expect(scanCta).toBeVisible();
+		await scanCta.click();
+		await expect(page).toHaveURL(/\/scan\?.*mode=receipt/, { timeout: 15_000 });
 	});
 });
 

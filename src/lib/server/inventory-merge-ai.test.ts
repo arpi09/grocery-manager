@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { confirmSameProductMerge } from './inventory-merge-ai';
 
 vi.mock('./openai', () => ({
-	OPENAI_MODEL_NANO: 'gpt-4.1-nano',
+	OPENAI_MODEL_NANO: 'gpt-5.4-nano',
 	requestStructuredJson: vi.fn()
 }));
 

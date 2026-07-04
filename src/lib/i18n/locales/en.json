@@ -407,6 +407,7 @@
 				"addCta": "Add {count} to shopping list",
 				"addCtaEmpty": "Select items to add",
 				"addedCta": "✓ Added to shopping list",
+				"cookCta": "Cook something from these",
 				"addFailed": "Couldn't add the items — try again",
 				"addPartial": "{added} of {total} items were added to the list",
 				"addSuccess": "{count, plural, one {# item added to the shopping list} other {# items added to the shopping list}}"
@@ -1303,7 +1304,7 @@
 				"unavailableRestoreAria": "Return {name} to the pick queue",
 				"completeUnavailable": "{count, plural, one {# item} other {# items}} not in store — kept on the list",
 				"completeTitle": "Done for this trip",
-				"completeBody": "{count, plural, one {# item} other {# items}} picked. Update the pantry when you're home.",
+				"completeBody": "{count, plural, one {# item} other {# items}} picked.",
 				"completePantryCta": "Update pantry",
 				"completePlanCta": "Back to planning",
 				"completeHomeCta": "Go to home",
@@ -1313,6 +1314,23 @@
 					"recent_purchase": "You bought this recently",
 					"on_list": "Already on your list"
 				}
+			},
+			"unpack": {
+				"question": "Got the receipt?",
+				"scanCta": "Scan the receipt",
+				"openCta": "Unpack without receipt",
+				"title": "Unpack",
+				"subtitle": "{count, plural, one {# item} other {# items}} from the trip — locations prefilled.",
+				"submit": "Add all to pantry ({count})",
+				"skipRow": "Skip",
+				"skipRowAria": "Skip {name} — not added to the pantry",
+				"addMoreLabel": "Add more items",
+				"addMorePlaceholder": "Bought anything else?",
+				"addMoreCta": "Add",
+				"empty": "Nothing left to unpack.",
+				"notNow": "Not now",
+				"doneToast": "{count, plural, one {# item} other {# items}} added to the pantry",
+				"loadFailed": "Couldn't load the trip's items. Try again."
 			},
 			"pantryBridge": {
 				"title": "Add to pantry?",
@@ -1591,6 +1609,7 @@
 		"contextNoExpiring": "Nothing urgent expiring within {days} days.",
 		"contextPlanned": "{count} meals in this calendar view",
 		"contextWeeklyLink": "Week suggestions (AI)",
+		"contextWeeklyHint": "Generate a dish = one idea now. Week suggestions = plan the whole week.",
 		"contextHomeLink": "Expiring soon",
 		"contextWeekViewLink": "Week view",
 		"contextActionsAria": "Weekly planning actions",
@@ -2668,12 +2687,15 @@
 		"lead": "Have the receipt in an app? Upload the PDF or image directly — or photograph a paper receipt. We suggest items you can add.",
 		"cameraPaper": "Photograph paper receipt",
 		"selectItems": "Select items ({selected} of {total})",
+		"alreadyInPantry": "Already in the pantry — just added",
+		"estimatesSummary": "About the estimates",
 		"locationForAll": "Set location for all selected:",
 		"locationBulkHint": "Applies to checked rows. Change a row below if it should go somewhere else.",
 		"locationPerItem": "Location:",
 		"locationOverride": "custom",
 		"suggestedLocation": "Suggested location",
-		"suggestionsHint": "Dates and locations are suggestions from Skaffu — adjust if needed before saving.",
+		"locationSuggestionsHint": "Locations are suggestions from Skaffu — change if needed before saving.",
+		"estimatesHint": "Expiry dates are estimates — adjust if needed before saving.",
 		"aiDegradedBanner": "AI shelf-life batch is off — using heuristics for now.",
 		"addCount": "Add {count} {count, plural, one {item} other {items}}",
 		"addSelectedCount": "Add {count} selected",
@@ -2777,8 +2799,17 @@
 		"reachFailed": "Could not reach the AI service right now. Try again in a moment.",
 		"parseFailed": "Could not parse recipe suggestions. Try again in a moment.",
 		"parseFromAi": "Could not parse recipe suggestions from AI. Try again in a moment.",
-		"noInventoryNote": "No items in stock yet. Add items first, then you can generate recipes.",
+		"noInventoryNote": "The pantry is empty in the app. Type what you have at home under \"What else do you have?\" and we'll suggest anyway.",
 		"networkError": "Network error while generating recipes. Check your connection and try again.",
+		"extras": {
+			"label": "What else do you have at home?",
+			"placeholder": "E.g. chicken, rice …",
+			"addBtn": "Add",
+			"removeAria": "Remove {name}",
+			"basedOn": "Based on {count, plural, one {# item} other {# items}} the app knows about. Missing something at home? Add it here — without touching the pantry.",
+			"emptyPantry": "The pantry is empty in the app — type what you have at home and we'll suggest anyway.",
+			"staleLink": "Quick check: {count, plural, one {# item} other {# items}} may be out of date"
+		},
 		"intro": "Meal ideas from what you can actually cook — not pet food, flowers, or cleaning supplies. Pick a style below and add preferences if you like.",
 		"mealIntentLabel": "What are you cooking?",
 		"mealIntentAria": "Meal style",
@@ -3057,6 +3088,7 @@
 				"title": "Use soon — {count, plural, one {# item} other {# items}}",
 				"list": "{items}",
 				"aria": "Items to use soon",
+				"cookCta": "Cook dinner from these",
 				"cta": "View all items"
 			},
 			"zone": {
@@ -3088,8 +3120,10 @@
 			"insightsSummary": "Things to review in your pantry",
 			"empty": {
 				"title": "Empty for now.\nSoon full of life.",
-				"body": "Add your first item to start keeping track of what's at home – and what's about to run out.",
+				"body": "Scan a receipt or photograph a shelf — the fastest way to a living pantry.",
 				"cta": "Add your first item",
+				"scanCta": "Scan in food",
+				"manualLink": "Or add manually",
 				"helper": "Sorted automatically into Fridge, Freezer and Pantry"
 			},
 			"error": {
@@ -3490,7 +3524,8 @@
 			"invalidLocation": "Invalid storage location."
 		},
 		"shopping": {
-			"missingRowId": "Missing row id"
+			"missingRowId": "Missing row id",
+			"unpackFailed": "Couldn't unpack. Try again."
 		}
 	},
 	"actionToast": {
@@ -3697,6 +3732,12 @@
 		"publicTitle": "Shopping list",
 		"publicLead": "Someone shared their shopping list — open it and shop without installing the app. You don't need a receipt to get value here.",
 		"publicSnapshotHonesty": "Snapshot from when the link was created. Checked items are shown but cannot be changed here.",
+		"guestLiveHint": "The list is live — check items off while you shop, no account needed.",
+		"guestPickAria": "Mark {name} as picked",
+		"guestUnpickAria": "Put {name} back on the list",
+		"guestCheckedHeading": "Picked ({count})",
+		"guestToggleFailed": "Couldn't update the item. Try again.",
+		"guestRateLimited": "A bit too fast — wait a moment and try again.",
 		"publicExpires": "Link valid until {date}.",
 		"publicSnapshotAt": "Snapshot taken {date}.",
 		"publicGdprNote": "The list shows item names and quantities only — no household names, addresses, or contact details. The link expires automatically.",

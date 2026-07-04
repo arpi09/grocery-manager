@@ -36,6 +36,8 @@ describe('parseEatFirstWeekInboundSource', () => {
 		expect(parseEatFirstWeekInboundSource('push')).toBe('push');
 		expect(parseEatFirstWeekInboundSource('email')).toBe('email');
 		expect(parseEatFirstWeekInboundSource('hero')).toBe('hero');
+		expect(parseEatFirstWeekInboundSource('pantry')).toBe('pantry');
+		expect(parseEatFirstWeekInboundSource('hem')).toBe('hem');
 		expect(parseEatFirstWeekInboundSource('unknown')).toBeNull();
 		expect(parseEatFirstWeekInboundSource(null)).toBeNull();
 	});
@@ -60,5 +62,10 @@ describe('eatFirstWeekBackHref', () => {
 	it('returns planer for planer source and direct entry', () => {
 		expect(eatFirstWeekBackHref('planer')).toBe('/planer');
 		expect(eatFirstWeekBackHref(null)).toBe('/planer');
+	});
+
+	it('returns context-aware targets for the eat-bridge sources', () => {
+		expect(eatFirstWeekBackHref('hem')).toBe(HEM_PATH);
+		expect(eatFirstWeekBackHref('pantry')).toBe('/inventory');
 	});
 });

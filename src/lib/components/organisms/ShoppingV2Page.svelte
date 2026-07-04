@@ -7,6 +7,7 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import ModeToggle from '$lib/components/molecules/ModeToggle.svelte';
 	import ShoppingToPantrySheet from '$lib/components/molecules/ShoppingToPantrySheet.svelte';
+	import ShoppingUnpackSheet from '$lib/components/molecules/ShoppingUnpackSheet.svelte';
 	import ShoppingListShareMenu from '$lib/components/molecules/ShoppingListShareMenu.svelte';
 	import InkopHouseholdInviteBanner from '$lib/components/organisms/InkopHouseholdInviteBanner.svelte';
 	import TripCompletedInviteBanner from '$lib/components/organisms/TripCompletedInviteBanner.svelte';
@@ -32,7 +33,8 @@
 		type ShoppingTripMode
 	} from '$lib/domain/shopping-trip';
 	import { memorySuggestionId } from '$lib/domain/shopping-v2-presenter';
-	import { PANTRY_SHELF_PATH } from '$lib/navigation/nav-config';
+	import type { UnpackRowInput } from '$lib/domain/shopping-unpack';
+	import { receiptOneTapHref } from '$lib/utils/scan-nav';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import type { ShoppingToPantryMode } from '$lib/domain/shopping-to-pantry';
 	import { t } from '$lib/i18n';
@@ -80,6 +82,9 @@
 	let lastPicked = $state<ShoppingListItem | null>(null);
 	let undoingPick = $state(false);
 	let togglingUnavailable = $state(false);
+	let unpackOpen = $state(false);
+	let unpackLoading = $state(false);
+	let unpackRows = $state<UnpackRowInput[]>([]);
 
 	let pantryBridgeItem = $state<ShoppingListItem | null>(null);
 	let pantryBridgePreview = $state<PantryBridgePreview | null>(null);
@@ -229,8 +234,64 @@
 		});
 	}
 
-	function handleCompletePantry() {
-		void goto(PANTRY_SHELF_PATH);
+	function handleScanReceipt() {
+		void goto(receiptOneTapHref('/inkop'));
+	}
+
+	async function openUnpack() {
+		if (!canEdit || unpackLoading) {
+			return;
+		}
+
+		unpackLoading = true;
+		const formData = new FormData();
+		formData.set('since', String(session.tripStartedAt ?? 0));
+
+		try {
+			const response = await fetch('?/unpackPreview', {
+				method: 'POST',
+				body: formData,
+				headers: {
+					accept: 'application/json',
+					'x-sveltekit-action': 'true'
+				}
+			});
+			const result = deserialize(await response.text()) as {
+				type: string;
+				data?: {
+					unpack?: {
+						rows: Array<{ item: ShoppingListItem; preview: PantryBridgePreview }>;
+					};
+				};
+			};
+
+			if (result.type !== 'success' || !result.data?.unpack) {
+				showClientToast(t('shopping.v2.unpack.loadFailed'), { variant: 'error' });
+				return;
+			}
+
+			unpackRows = result.data.unpack.rows.map(({ item, preview }) => ({
+				shoppingItemId: item.id,
+				name: item.name,
+				location: preview.location,
+				quantity: preview.quantity,
+				unit: preview.unit
+			}));
+			unpackOpen = true;
+		} catch {
+			showClientToast(t('shopping.v2.unpack.loadFailed'), { variant: 'error' });
+		} finally {
+			unpackLoading = false;
+		}
+	}
+
+	function handleUnpacked(message: string) {
+		unpackOpen = false;
+		unpackRows = [];
+		showClientToast(message, { variant: 'success' });
+		/* Trip is packed away — reset to plan mode so the next week starts clean. */
+		handleCompletePlan();
+		void invalidateAll();
 	}
 
 	async function acceptSuggestion(suggestion: ReplenishmentSuggestion) {
@@ -321,6 +382,8 @@
 		picking = true;
 		const formData = new FormData();
 		formData.set('id', item.id);
+		/* No per-pick pantry modal in store — the bridge runs at trip complete ("Packa upp"). */
+		formData.set('bridge', 'defer');
 
 		try {
 			const response = await fetch('?/toggle', {
@@ -505,17 +568,6 @@
 		onchange={(next) => switchMode(next, 'toggle')}
 	/>
 
-	{#if canEdit && shareLinkEnabled && listHasItems}
-		<ShoppingListShareMenu
-			uncheckedItems={items}
-			checkedCount={checkedCount}
-			{canEdit}
-			{shareLinkEnabled}
-			memberCount={memberCount}
-			shareFirst={true}
-		/>
-	{/if}
-
 	<InkopHouseholdInviteBanner
 		memberCount={memberCount}
 		uncheckedCount={unchecked.length}
@@ -541,6 +593,18 @@
 				legacyOpen = true;
 			}}
 		/>
+
+		<!-- Share sits at the "Börja handla"-moment: co-shopping is decided right before the trip. -->
+		{#if canEdit && shareLinkEnabled && listHasItems}
+			<ShoppingListShareMenu
+				uncheckedItems={items}
+				checkedCount={checkedCount}
+				{canEdit}
+				{shareLinkEnabled}
+				memberCount={memberCount}
+				shareFirst={true}
+			/>
+		{/if}
 	{:else}
 		<ShoppingV2ShopView
 			items={tripSplit.available}
@@ -558,7 +622,9 @@
 			onRestoreUnavailable={(item) => void toggleUnavailable(item)}
 			onAddItem={() => void openQuickAdd()}
 			onBackToPlan={handleBackToPlan}
-			onCompletePantry={handleCompletePantry}
+			onScanReceipt={handleScanReceipt}
+			onUnpack={() => void openUnpack()}
+			{unpackLoading}
 			onCompletePlan={handleCompletePlan}
 			onOpenLegacy={() => {
 				legacyOpen = true;
@@ -607,6 +673,15 @@
 	onClose={closePantrySheet}
 	onSkip={closePantrySheet}
 	onAdded={handlePantryAdded}
+/>
+
+<ShoppingUnpackSheet
+	open={unpackOpen}
+	initialRows={unpackRows}
+	onClose={() => {
+		unpackOpen = false;
+	}}
+	onDone={handleUnpacked}
 />
 
 <style>

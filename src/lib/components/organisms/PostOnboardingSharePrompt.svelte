@@ -8,6 +8,10 @@
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import { t } from '$lib/i18n';
 	import {
+		createAndShareHouseholdInvite,
+		shareLinkWithFallback
+	} from '$lib/utils/household-share-invite';
+	import {
 		dismissPostOnboardingShare,
 		isOnboardingExcludedPath,
 		isPostOnboardingSharePath,
@@ -67,34 +71,11 @@
 		open = false;
 	}
 
-	async function copyLink(link: string) {
-		if (!browser) {
-			return;
-		}
-		await navigator.clipboard.writeText(link);
+	function markCopied() {
 		copied = true;
 		setTimeout(() => {
 			copied = false;
 		}, 2000);
-	}
-
-	async function shareLink(link: string, title: string, text: string) {
-		if (!browser) {
-			return;
-		}
-
-		if (navigator.share && navigator.canShare?.({ url: link })) {
-			try {
-				await navigator.share({ title, text, url: link });
-				return;
-			} catch (error) {
-				if (error instanceof DOMException && error.name === 'AbortError') {
-					return;
-				}
-			}
-		}
-
-		await copyLink(link);
 	}
 
 	async function shareListaLink() {
@@ -110,30 +91,30 @@
 			return false;
 		}
 
-		await shareLink(
+		const outcome = await shareLinkWithFallback(
 			body.url,
 			t('shoppingListShare.shareLinkTitle'),
 			t('shoppingListShare.shareLinkNote')
 		);
+		if (outcome === 'copied') {
+			markCopied();
+		}
 		return true;
 	}
 
 	async function shareHouseholdInvite() {
-		const response = await fetch('/api/household/share-invite', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ context: 'onboarding' })
+		const outcome = await createAndShareHouseholdInvite({
+			context: 'onboarding',
+			title: t('household.shareInvite'),
+			text: t('household.shareInviteNote')
 		});
-		const body = (await response.json().catch(() => ({}))) as {
-			ok?: boolean;
-			inviteUrl?: string;
-		};
 
-		if (!response.ok || !body.ok || !body.inviteUrl) {
+		if (outcome.status === 'error') {
 			return false;
 		}
-
-		await shareLink(body.inviteUrl, t('household.shareInvite'), t('household.shareInviteNote'));
+		if (outcome.status === 'copied') {
+			markCopied();
+		}
 		return true;
 	}
 
