@@ -2926,7 +2926,7 @@
 		},
 		"inventory": {
 			"title": "Ditt lager",
-			"body": "Allt du lagt in hamnar här, sorterat efter plats. Tryck på en vara för att redigera eller markera som förbrukad."
+			"body": "Allt du lagt in hamnar här, sorterat efter plats. Tryck på en vara för att redigera. Svep en rad åt vänster för att registrera att något använts."
 		},
 		"inkop": {
 			"title": "Inköpslistan",

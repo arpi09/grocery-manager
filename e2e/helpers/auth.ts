@@ -1,5 +1,9 @@
 ﻿import { expect, type Page } from '@playwright/test';
 import { LOCALE_COOKIE_NAME, LOCALE_STORAGE_KEY } from '../../src/lib/i18n/locale';
+import {
+	INVENTORY_SWIPE_HINT_MAX_VIEWS,
+	INVENTORY_SWIPE_HINT_STORAGE_PREFIX
+} from '../../src/lib/utils/inventory-swipe-hint';
 import { PAGE_HINT_IDS } from '../../src/lib/utils/page-hints';
 import { expectHomeDashboardVisible } from './home';
 
@@ -28,7 +32,15 @@ export async function prepareE2eBrowserState(page: Page) {
 	await applyE2eLocale(page);
 
 	await page.addInitScript(
-		({ version, activationReceiptKey, celebrationKey, pageHintIds, pageHintPrefix }) => {
+		({
+			version,
+			activationReceiptKey,
+			celebrationKey,
+			pageHintIds,
+			pageHintPrefix,
+			swipeHintPrefix,
+			swipeHintMaxViews
+		}) => {
 			// Only clear legacy (non user-scoped) keys â€” wiping per-user keys re-opens the guide on every navigation.
 			const legacyPrefixes = [
 				'home-pantry-onboarding-version',
@@ -54,6 +66,8 @@ export async function prepareE2eBrowserState(page: Page) {
 				for (const hintId of pageHintIds) {
 					localStorage.setItem(`${pageHintPrefix}:${hintId}:${userId}`, '1');
 				}
+				// Keep the inventory swipe auto-peek out of e2e runs (deterministic rows).
+				localStorage.setItem(`${swipeHintPrefix}:${userId}`, String(swipeHintMaxViews));
 			};
 
 			(window as Window & { __hpMarkOnboardingComplete?: (userId: string) => void }).__hpMarkOnboardingComplete =
@@ -64,7 +78,9 @@ export async function prepareE2eBrowserState(page: Page) {
 			activationReceiptKey: 'home-pantry-onboarding-activation-receipt-done',
 			celebrationKey: 'home-pantry-onboarding-celebration-pending',
 			pageHintIds: [...PAGE_HINT_IDS],
-			pageHintPrefix: PAGE_HINT_STORAGE_PREFIX
+			pageHintPrefix: PAGE_HINT_STORAGE_PREFIX,
+			swipeHintPrefix: INVENTORY_SWIPE_HINT_STORAGE_PREFIX,
+			swipeHintMaxViews: INVENTORY_SWIPE_HINT_MAX_VIEWS
 		}
 	);
 }

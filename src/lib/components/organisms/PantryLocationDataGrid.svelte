@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
@@ -27,11 +28,24 @@
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import type { StorageLocation } from '$lib/domain/location';
 	import { daysUntilExpiry, formatExpiryDate, EXPIRING_SOON_DAYS } from '$lib/domain/expiry';
+	import { formatInventoryListQuantity } from '$lib/domain/inventory-list-presenter';
 	import { countMissingExpiry } from '$lib/domain/pantry-shelf';
-	import { parseNumericQuantity } from '$lib/domain/consumption-quantity';
 	import { getLocale, t } from '$lib/i18n';
 	import { locationLabel } from '$lib/i18n/domain-labels';
 	import { buildDataGridUrl, parseDataGridStateFromSearchParams } from '$lib/utils/data-grid-url';
+	import {
+		consumeSwipeOffset,
+		resolveConsumeSwipeRelease,
+		resolveSwipeAxis,
+		CONSUME_SWIPE_PEEK_PX,
+		CONSUME_SWIPE_REVEAL_PX,
+		SWIPE_MAX_OFFSET_PX
+	} from '$lib/utils/row-swipe';
+	import {
+		markInventorySwipeDiscovered,
+		recordInventorySwipeHintShown,
+		shouldShowInventorySwipeHint
+	} from '$lib/utils/inventory-swipe-hint';
 	import {
 		DEFAULT_INVENTORY_SORT,
 		DEFAULT_INVENTORY_SORT_DIRECTION,
@@ -74,6 +88,7 @@
 	let rowDeleteSubmitting = $state(false);
 
 	const canConsumeItems = $derived(canWrite || canConsume);
+	const userId = $derived(page.data.user?.id ?? null);
 	const consumeSheetOpen = $derived(consumeItem !== null);
 	const inventoryPath = $derived(allLocations ? '/inventory/all' : `/inventory/${location}`);
 	const locationName = $derived(
@@ -336,13 +351,7 @@
 	}
 
 	function formatQuantityCell(item: InventoryItem): string {
-		const unitSuffix = item.unit ? ` ${item.unit}` : '';
-		const amount = `${item.quantity}${unitSuffix}`.trim();
-		const stock = parseNumericQuantity(item.quantity);
-		if (stock !== null && stock > 0) {
-			return t('inventory.quantityLeft', { amount });
-		}
-		return amount;
+		return formatInventoryListQuantity(item, getLocale());
 	}
 
 	function expiryTone(date: string) {
@@ -364,6 +373,222 @@
 	function closeConsumeSheet() {
 		consumeItem = null;
 	}
+
+	/* Swipe-to-consume: left swipe reveals a green "use" surface behind the row.
+	 * Touch-only — keyboard/screen-reader users reach the same action via the row menu. */
+
+	interface RowSwipeState {
+		itemId: string;
+		offset: number;
+		dragging: boolean;
+		open: boolean;
+	}
+
+	let rowSwipe = $state<RowSwipeState | null>(null);
+	let swipeTouch: {
+		itemId: string;
+		startX: number;
+		startY: number;
+		axis: 'x' | 'y' | null;
+		base: number;
+	} | null = null;
+	let swipeSettleTimer: number | null = null;
+	let suppressRowNav = false;
+	let peekAttempted = false;
+
+	function clearSwipeSettleTimer() {
+		if (swipeSettleTimer !== null) {
+			window.clearTimeout(swipeSettleTimer);
+			swipeSettleTimer = null;
+		}
+	}
+
+	function closeRowSwipe(instant = false) {
+		clearSwipeSettleTimer();
+		if (!rowSwipe) return;
+		if (instant) {
+			rowSwipe = null;
+			return;
+		}
+		// Keep the surface mounted while the spring-back transition plays out.
+		rowSwipe = { ...rowSwipe, offset: 0, dragging: false, open: false };
+		swipeSettleTimer = window.setTimeout(() => {
+			rowSwipe = null;
+			swipeSettleTimer = null;
+		}, 240);
+	}
+
+	function handleRowTouchStart(item: InventoryItem, event: TouchEvent) {
+		if (!canConsume) return;
+		const touch = event.touches[0];
+		if (!touch) return;
+		const base = rowSwipe?.itemId === item.id && rowSwipe.open ? rowSwipe.offset : 0;
+		if (rowSwipe && rowSwipe.itemId !== item.id) {
+			closeRowSwipe();
+		}
+		swipeTouch = {
+			itemId: item.id,
+			startX: touch.clientX,
+			startY: touch.clientY,
+			axis: null,
+			base
+		};
+	}
+
+	function handleRowTouchMove(item: InventoryItem, event: TouchEvent) {
+		if (!swipeTouch || swipeTouch.itemId !== item.id) return;
+		const touch = event.touches[0];
+		if (!touch) return;
+		const deltaX = touch.clientX - swipeTouch.startX;
+		const deltaY = touch.clientY - swipeTouch.startY;
+		if (swipeTouch.axis === null) {
+			swipeTouch.axis = resolveSwipeAxis(deltaX, deltaY);
+			if (swipeTouch.axis === 'y') {
+				// Vertical intent — hand the gesture back to native scrolling.
+				swipeTouch = null;
+				return;
+			}
+		}
+		if (swipeTouch.axis !== 'x') return;
+		clearSwipeSettleTimer();
+		rowSwipe = {
+			itemId: item.id,
+			offset: consumeSwipeOffset(deltaX, swipeTouch.base),
+			dragging: true,
+			open: false
+		};
+	}
+
+	function handleRowTouchEnd(item: InventoryItem) {
+		if (!swipeTouch || swipeTouch.itemId !== item.id) return;
+		const wasHorizontal = swipeTouch.axis === 'x';
+		swipeTouch = null;
+		if (!wasHorizontal || !rowSwipe || rowSwipe.itemId !== item.id) return;
+
+		suppressRowNav = true;
+		window.setTimeout(() => {
+			suppressRowNav = false;
+		}, 350);
+		markInventorySwipeDiscovered(userId);
+
+		const release = resolveConsumeSwipeRelease(rowSwipe.offset);
+		if (release === 'commit') {
+			closeRowSwipe();
+			openConsumeSheet(item);
+		} else if (release === 'open') {
+			rowSwipe = { itemId: item.id, offset: CONSUME_SWIPE_REVEAL_PX, dragging: false, open: true };
+		} else {
+			closeRowSwipe();
+		}
+	}
+
+	function handleRowTouchCancel(item: InventoryItem) {
+		if (swipeTouch?.itemId === item.id) {
+			swipeTouch = null;
+		}
+		if (rowSwipe?.itemId === item.id) {
+			closeRowSwipe();
+		}
+	}
+
+	function handleSwipeSurfaceTap(item: InventoryItem) {
+		markInventorySwipeDiscovered(userId);
+		closeRowSwipe();
+		openConsumeSheet(item);
+	}
+
+	function handleRowClick(item: InventoryItem) {
+		if (suppressRowNav) {
+			suppressRowNav = false;
+			return;
+		}
+		// A visible swipe surface makes the tap a "close" gesture, not navigation.
+		if (rowSwipe && (rowSwipe.open || rowSwipe.dragging || rowSwipe.offset > 0)) {
+			closeRowSwipe();
+			return;
+		}
+		navigateToItem(item.id, item.location);
+	}
+
+	function rowSwipeStyle(itemId: string): string | undefined {
+		if (rowSwipe?.itemId !== itemId) return undefined;
+		return `--row-swipe-offset: ${rowSwipe.offset}px; --row-swipe-max: ${SWIPE_MAX_OFFSET_PX}px;`;
+	}
+
+	function rowSwipeClasses(itemId: string): string {
+		const classes = ['pantry-row'];
+		if (canConsume) classes.push('pantry-row--swipeable');
+		if (rowSwipe?.itemId === itemId) {
+			classes.push('pantry-row--swiping');
+			if (!rowSwipe.dragging) classes.push('pantry-row--settle');
+		}
+		return classes.join(' ');
+	}
+
+	// Tap outside an open swipe surface springs the row back.
+	$effect(() => {
+		if (!browser || !rowSwipe?.open) return;
+		const openItemId = rowSwipe.itemId;
+
+		function handlePointerDown(event: PointerEvent) {
+			const target = event.target;
+			if (!(target instanceof Element)) return;
+			if (target.closest(`[data-testid="inventory-row-${openItemId}"]`)) return;
+			closeRowSwipe();
+		}
+
+		const id = window.setTimeout(() => {
+			window.addEventListener('pointerdown', handlePointerDown);
+		}, 0);
+
+		return () => {
+			window.clearTimeout(id);
+			window.removeEventListener('pointerdown', handlePointerDown);
+		};
+	});
+
+	// Discoverability: the top row auto-peeks the swipe surface (max twice per user).
+	onMount(() => {
+		const timers: number[] = [];
+
+		const tryPeek = () => {
+			if (peekAttempted || !canConsume) return;
+			const firstRow = pipeline.pageRows[0];
+			if (!firstRow) return;
+			peekAttempted = true;
+
+			if (!window.matchMedia('(pointer: coarse)').matches) return;
+			if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+			if (!shouldShowInventorySwipeHint(userId)) return;
+
+			timers.push(
+				window.setTimeout(() => {
+					if (rowSwipe || swipeTouch) return;
+					recordInventorySwipeHintShown(userId);
+					rowSwipe = {
+						itemId: firstRow.id,
+						offset: CONSUME_SWIPE_PEEK_PX,
+						dragging: false,
+						open: false
+					};
+					timers.push(
+						window.setTimeout(() => {
+							if (rowSwipe?.itemId === firstRow.id && !rowSwipe.dragging && !rowSwipe.open) {
+								closeRowSwipe();
+							}
+						}, 600)
+					);
+				}, 600)
+			);
+		};
+
+		tryPeek();
+
+		return () => {
+			for (const timer of timers) window.clearTimeout(timer);
+			clearSwipeSettleTimer();
+		};
+	});
 
 	function toggleRowMenu(itemId: string) {
 		openMenuItemId = openMenuItemId === itemId ? null : itemId;
@@ -532,10 +757,15 @@
 			{#snippet tableBody()}
 				{#each pipeline.pageRows as item (item.id)}
 					<Row
-						class="pantry-row"
+						class={rowSwipeClasses(item.id)}
+						style={rowSwipeStyle(item.id)}
 						data-missing-expiry={!item.expiresOn ? 'true' : undefined}
 						data-testid="inventory-row-{item.id}"
-						onclick={() => navigateToItem(item.id, item.location)}
+						onclick={() => handleRowClick(item)}
+						ontouchstart={(event: TouchEvent) => handleRowTouchStart(item, event)}
+						ontouchmove={(event: TouchEvent) => handleRowTouchMove(item, event)}
+						ontouchend={() => handleRowTouchEnd(item)}
+						ontouchcancel={() => handleRowTouchCancel(item)}
 					>
 						{#if canConsumeItems}
 							<Cell class="col-checkbox">
@@ -584,6 +814,21 @@
 							{/if}
 						</Cell>
 						<Cell class="col-actions">
+							{#if rowSwipe?.itemId === item.id}
+								<button
+									type="button"
+									class="row-swipe-use"
+									tabindex="-1"
+									aria-hidden="true"
+									data-testid="inventory-row-swipe-use-{item.id}"
+									onclick={(event) => {
+										event.stopPropagation();
+										handleSwipeSurfaceTap(item);
+									}}
+								>
+									{t('pantry.v2.tile.use')}
+								</button>
+							{/if}
 							<InventoryListRowActions
 								itemId={item.id}
 								itemName={item.name}
@@ -737,6 +982,45 @@
 	}
 
 	:global(.pantry-row) {
+		cursor: pointer;
+	}
+
+	/* Swipe-to-consume: vertical panning stays native; horizontal drags reveal the surface. */
+	:global(.pantry-row--swipeable) {
+		touch-action: pan-y;
+	}
+
+	:global(.pantry-row--swiping) {
+		transform: translateX(calc(-1 * var(--row-swipe-offset, 0px)));
+	}
+
+	:global(.pantry-row--settle) {
+		transition: transform 0.18s ease-out;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		:global(.pantry-row--settle) {
+			transition: none;
+		}
+	}
+
+	/* Green "use" surface glued to the row's outer right edge — revealed as the row slides left. */
+	.row-swipe-use {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 100%;
+		width: var(--row-swipe-max, 96px);
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		padding-inline: 0.9rem;
+		border: none;
+		background: var(--color-success);
+		color: #fff;
+		font-family: inherit;
+		font-size: 0.8125rem;
+		font-weight: 700;
 		cursor: pointer;
 	}
 
