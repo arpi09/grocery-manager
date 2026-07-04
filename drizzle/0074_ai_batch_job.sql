@@ -1,6 +1,7 @@
--- AI Batch API jobs: latency-insensitive cron work routed through OpenAI Batch
--- (50% discount). One row per submitted batch; payload carries the custom_id →
--- target mapping needed to apply results, result caches consumable output.
+-- AI Batch API jobs table (latency-insensitive cron work, 50 percent discount).
+-- payload holds the custom_id to target mapping, result caches consumable output.
+-- NOTE: init.ts splits migration files on the statement separator, so comments
+-- here must not contain that punctuation character.
 CREATE TABLE IF NOT EXISTS "ai_batch_job" (
 	"id" text PRIMARY KEY NOT NULL,
 	"kind" text NOT NULL,
