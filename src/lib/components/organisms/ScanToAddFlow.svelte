@@ -531,6 +531,10 @@
 		text-align: center;
 	}
 
+	.done-row a {
+		min-width: var(--touch-target-min);
+	}
+
 	.quick-picks {
 		margin-bottom: var(--space-md);
 	}
