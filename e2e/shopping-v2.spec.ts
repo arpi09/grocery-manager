@@ -77,7 +77,7 @@ test.describe('Shopping UX v2', () => {
 		await drawer.getByTestId('data-grid-filter-button').click();
 		const filterSheet = page.getByTestId('data-grid-filter-sheet');
 		await expect(filterSheet).toBeVisible();
-		await filterSheet.getByRole('textbox').fill(itemName);
+		await filterSheet.getByRole('searchbox').fill(itemName);
 		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
 
 		const row = drawer.locator(`[data-testid^="shopping-grid-row-"]`).filter({ hasText: itemName });
@@ -86,6 +86,7 @@ test.describe('Shopping UX v2', () => {
 		await row.getByTestId(/^shopping-grid-checkoff-/).click();
 
 		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
+		await pantrySheet.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
 		if (await pantrySheet.isVisible().catch(() => false)) {
 			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click();
 		}
