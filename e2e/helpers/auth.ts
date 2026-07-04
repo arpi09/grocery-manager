@@ -7,7 +7,8 @@ import {
 import { PAGE_HINT_IDS } from '../../src/lib/utils/page-hints';
 import { expectHomeDashboardVisible } from './home';
 
-const ONBOARDING_VERSION = '4';
+/** Keep in sync with ONBOARDING_VERSION in src/lib/utils/onboarding.ts (v8 flow). */
+const ONBOARDING_VERSION = '8';
 const PAGE_HINT_STORAGE_PREFIX = 'home-pantry-page-hint-dismissed';
 const E2E_LOCALE = 'sv';
 /** Locale only â€” onboarding and activation state stay fresh (new-user flows). */
@@ -35,6 +36,7 @@ export async function prepareE2eBrowserState(page: Page) {
 		({
 			version,
 			activationReceiptKey,
+			activationFinishKey,
 			celebrationKey,
 			pageHintIds,
 			pageHintPrefix,
@@ -60,6 +62,8 @@ export async function prepareE2eBrowserState(page: Page) {
 				localStorage.setItem(`home-pantry-onboarding-version:${userId}`, version);
 				localStorage.setItem(`home-pantry-onboarding-dismissed:${userId}`, '1');
 				localStorage.setItem(`${activationReceiptKey}:${userId}`, '1');
+				// v8: finish-seen marks the activation flow complete (isActivationOnboardingFlowComplete).
+				localStorage.setItem(`${activationFinishKey}:${userId}`, '1');
 				localStorage.removeItem(`${celebrationKey}:${userId}`);
 				localStorage.setItem(`home-pantry-post-onboarding-survey-dismissed:${userId}`, '1');
 				localStorage.removeItem(`home-pantry-post-onboarding-survey-pending:${userId}`);
@@ -76,6 +80,7 @@ export async function prepareE2eBrowserState(page: Page) {
 		{
 			version: ONBOARDING_VERSION,
 			activationReceiptKey: 'home-pantry-onboarding-activation-receipt-done',
+			activationFinishKey: 'home-pantry-onboarding-activation-finish-seen',
 			celebrationKey: 'home-pantry-onboarding-celebration-pending',
 			pageHintIds: [...PAGE_HINT_IDS],
 			pageHintPrefix: PAGE_HINT_STORAGE_PREFIX,
@@ -163,12 +168,20 @@ async function fillBoundInput(input: import('@playwright/test').Locator, value: 
 
 export async function dismissCookieConsentIfOpen(page: Page) {
 	const dialog = page.locator('[aria-labelledby="cookie-consent-title"]');
-	if (await dialog.isVisible().catch(() => false)) {
-		await dialog
-			.getByRole('button', { name: /^Godkänn$/i })
-			.first()
-			.click({ force: true });
-		await dialog.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
+	const accept = dialog.getByRole('button', { name: /^Godkänn$/i }).first();
+	// The banner is SSR-rendered — a click before hydration is swallowed silently, so retry.
+	for (let attempt = 0; attempt < 5; attempt += 1) {
+		if (!(await dialog.isVisible().catch(() => false))) {
+			return;
+		}
+		await accept.click({ force: true, timeout: 2_000 }).catch(() => {});
+		const hidden = await dialog
+			.waitFor({ state: 'hidden', timeout: 2_000 })
+			.then(() => true)
+			.catch(() => false);
+		if (hidden) {
+			return;
+		}
 	}
 }
 
@@ -317,6 +330,19 @@ export async function expectOnboardingGuideVisible(page: Page) {
 
 export async function expectActivationScreenHeading(page: Page, pattern: RegExp) {
 	await expect(page.getByRole('heading', { name: pattern })).toBeVisible({ timeout: 20_000 });
+}
+
+/**
+ * v8 finish screen: when the push block is visible the primary CTA requests
+ * notification permission (may hang headless) — take the deterministic no-push path.
+ */
+export async function completeActivationFinish(page: Page) {
+	const pushBlock = page.getByTestId('activation-push-block');
+	if (await pushBlock.isVisible().catch(() => false)) {
+		await page.getByTestId('activation-cta-secondary').click();
+	} else {
+		await page.getByTestId('activation-cta-primary').click();
+	}
 }
 
 async function markE2eOnboardingComplete(page: Page) {

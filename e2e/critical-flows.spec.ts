@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 import {
+	completeActivationFinish,
 	dismissOnboardingModalIfOpen,
 	expectActivationScreenHeading,
 	expectOnboardingGuideVisible,
@@ -9,6 +10,11 @@ import {
 	registerNewUser,
 	waitForWelcomeParamStripped
 } from './helpers/auth';
+
+const WELCOME_HEADING = /Welcome to Skaffu|Välkommen till Skaffu/i;
+const FILL_HEADING = /What do you have at home|Vad har ni hemma/i;
+const INVITE_HEADING = /Do you shop together|Handlar ni ihop/i;
+const FINISH_HEADING = /list is waiting|listan väntar/i;
 
 import { createFridgeItemViaApi } from './helpers/inventory';
 import { expectHomeDashboardVisible } from './helpers/home';
@@ -62,9 +68,9 @@ test.describe('Critical flows', () => {
 		}
 
 		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
-		const fitsScan = await modal.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
-		expect(fitsScan).toBe(true);
+		await expectActivationScreenHeading(page, FILL_HEADING);
+		const fitsFill = await modal.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
+		expect(fitsFill).toBe(true);
 	});
 
 	test('activation onboarding preview revisits completed step @deploy-critical', async ({
@@ -74,39 +80,53 @@ test.describe('Critical flows', () => {
 		await registerNewUser(page);
 		await expectOnboardingGuideVisible(page);
 		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
+		await expectActivationScreenHeading(page, FILL_HEADING);
 
 		await page.getByTestId('activation-progress-welcome').click();
-		await expectActivationScreenHeading(page, /Welcome to Skaffu|Välkommen till Skaffu/i);
+		await expectActivationScreenHeading(page, WELCOME_HEADING);
 		await expect(page.getByTestId('activation-cta-secondary')).toHaveCount(0);
 
 		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
-		await expect(page.getByTestId('activation-kivra-link')).toBeVisible();
+		await expectActivationScreenHeading(page, FILL_HEADING);
+		await expect(page.getByTestId('activation-receipt-link')).toBeVisible();
 	});
 
-	test('activation onboarding scan-first happy path @deploy-critical', async ({ page }) => {
+	test('activation onboarding receipt pivot resumes seeded and lands on inkop @deploy-critical', async ({
+		page
+	}) => {
+		// Mobile viewport: on short desktop viewports the receipt link at the bottom of the
+		// chips scroller is clipped under the modal footer and cannot be clicked.
+		await page.setViewportSize({ width: 390, height: 844 });
 		await registerNewUser(page);
 		await expectOnboardingGuideVisible(page);
-		await expectActivationScreenHeading(page, /Welcome to Skaffu|Välkommen till Skaffu/i);
+		await expectActivationScreenHeading(page, WELCOME_HEADING);
 		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
-		await page.getByTestId('activation-cta-primary').click();
-		await expect(page).toHaveURL(/\/scan(?:\?.*)?mode=receipt/);
+		await expectActivationScreenHeading(page, FILL_HEADING);
+
+		// Receipt pivot closes the modal and opens the scanner.
+		await page.getByTestId('activation-receipt-link').click();
+		await expect(page).toHaveURL(/\/scan\?.*mode=receipt/);
+		await expect(page.getByTestId('activation-onboarding')).toBeHidden();
+
 		const itemName = `E2E activation ${Date.now()}`;
 		await createFridgeItemViaApi(page, itemName);
+
+		// Single goto: the fresh-user init script wipes onboarding keys on full loads,
+		// so the flow restarts at welcome — but the seeded inventory makes derive skip fill.
 		await page.goto('/hem');
 		await expect(page.getByTestId('activation-onboarding')).toBeVisible({ timeout: 20_000 });
-		await expectActivationScreenHeading(page, /Good start|Bra start/i);
+		await expectActivationScreenHeading(page, WELCOME_HEADING);
 		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /How your memory builds|Så bygger ert minne/i);
-		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Shop together|Inköp tillsammans/i);
-		await expect(page.getByTestId('activation-setup-cards')).toBeVisible();
+		await expectActivationScreenHeading(page, INVITE_HEADING);
+
+		await page.getByTestId('activation-cta-secondary').click();
+		await expectActivationScreenHeading(page, FINISH_HEADING);
+		await expect(page.getByTestId('activation-recap-seed')).toBeVisible();
 		const modal = page.getByTestId('activation-onboarding');
-		const fitsShopping = await modal.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
-		expect(fitsShopping).toBe(true);
-		await page.getByTestId('activation-cta-primary').click();
+		const fitsFinish = await modal.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
+		expect(fitsFinish).toBe(true);
+
+		await completeActivationFinish(page);
 		await expect(page).toHaveURL(/\/inkop(?:\?quick=1)?$/);
 	});
 
@@ -135,7 +155,9 @@ test.describe('Critical flows', () => {
 		await dismissOnboardingModalIfOpen(page);
 		await page.getByRole('button', { name: /Starta guide|Start guide/i }).click({ force: true });
 		await expectOnboardingGuideVisible(page);
-		await expect(page.getByTestId('activation-progress-firstScan')).toBeVisible();
+		// v8 progress dots: welcome/fill/invite/finish — no legacy carousel controls.
+		await expect(page.getByTestId('activation-progress-fill')).toBeVisible();
+		await expect(page.getByTestId('activation-progress-finish')).toBeVisible();
 		await expect(page.getByTestId('onboarding-next')).toHaveCount(0);
 		await expect(page.getByTestId('onboarding-path-photo')).toHaveCount(0);
 	});
