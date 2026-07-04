@@ -25,6 +25,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - feat(ai-tooling): governance dispatch roster for Claude Code ([#175](https://github.com/arpi09/grocery-manager/pull/175)) — Definierade i `.cursor/agents/` (source of truth) → genereras till `.claude/agents/` av `sync:ai-tooling`.
 - feat(ux): first-run empty states for skafferi + inkopslista ([#191](https://github.com/arpi09/grocery-manager/pull/191)) — **Ny molekyl `FirstRunEmptyState`** — ikon-platta 60×60, tvåradig display-rubrik (2rem/1.12/−0.03em), brödtext (32ch), fullbredds-CTA (52px, primary, mjuk skugga, +-glyf `aria-hidden`), helper-rad med ↺-chip. Rise-in-animation, avstängd under `prefers-reduced-motion`. Fokusring 3px `--color-text`.
 - feat(hem): Hushållspuls-kort ersätter För dig-expiring + pulsraden ([#193](https://github.com/arpi09/grocery-manager/pull/193)) — Nytt konsoliderat **Hushållspuls**-kort högst upp i home v2-briefingen (design handoff variant 2a): Går ut snart (med quick-add till delade inköpslistan), Inköpslistan (antal + Öppna → /inkop), Senaste aktivitet samt medlemsavatarer.
+- feat(inventory): swipe-to-use rows with slim resting state ([#197](https://github.com/arpi09/grocery-manager/pull/197))
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
