@@ -31,7 +31,9 @@
 		onRestoreUnavailable?: (item: ShoppingListItem) => void;
 		onAddItem?: () => void;
 		onBackToPlan: () => void;
-		onCompletePantry: () => void;
+		onScanReceipt?: () => void;
+		onUnpack?: () => void;
+		unpackLoading?: boolean;
 		onCompletePlan: () => void;
 		onOpenLegacy?: () => void;
 	}
@@ -52,7 +54,9 @@
 		onRestoreUnavailable,
 		onAddItem,
 		onBackToPlan,
-		onCompletePantry,
+		onScanReceipt,
+		onUnpack,
+		unpackLoading = false,
 		onCompletePlan,
 		onOpenLegacy
 	}: Props = $props();
@@ -92,9 +96,27 @@
 					{t('shopping.v2.shop.completeUnavailable', { count: unavailableItems.length })}
 				</p>
 			{/if}
+			{#if canEdit && (onScanReceipt || onUnpack)}
+				<p class="unpack-question">{t('shopping.v2.unpack.question')}</p>
+			{/if}
 			<div class="complete-actions">
-				<Button fullWidth onclick={onCompletePantry}>{t('shopping.v2.shop.completePantryCta')}</Button>
-				<Button variant="secondary" fullWidth onclick={onCompletePlan}>
+				{#if canEdit && onScanReceipt}
+					<Button fullWidth data-testid="shopping-v2-complete-scan" onclick={onScanReceipt}>
+						{t('shopping.v2.unpack.scanCta')}
+					</Button>
+				{/if}
+				{#if canEdit && onUnpack}
+					<Button
+						variant="secondary"
+						fullWidth
+						loading={unpackLoading}
+						data-testid="shopping-v2-complete-unpack"
+						onclick={onUnpack}
+					>
+						{t('shopping.v2.unpack.openCta')}
+					</Button>
+				{/if}
+				<Button variant="ghost" fullWidth onclick={onCompletePlan}>
 					{t('shopping.v2.shop.completePlanCta')}
 				</Button>
 			</div>
@@ -352,6 +374,11 @@
 
 	.complete-unavailable {
 		font-size: 0.9375rem;
+	}
+
+	.unpack-question {
+		margin: 0;
+		font-weight: 700;
 	}
 
 	.complete-card {

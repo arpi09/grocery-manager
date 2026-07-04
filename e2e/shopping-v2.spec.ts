@@ -42,6 +42,37 @@ test.describe('Shopping UX v2', () => {
 		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible();
 	});
 
+	test('trip complete unpack adds picked items to pantry', async ({ page }) => {
+		test.setTimeout(150_000);
+		const itemName = `E2E Unpack ${Date.now()}`;
+
+		await loginAsAdmin(page);
+		await page.goto('/inkop');
+		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
+		await dismissPostOnboardingShareIfOpen(page);
+
+		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
+		await addItemViaQuickAdd(page, itemName);
+
+		await page.getByTestId('shopping-v2-start-shop').click();
+		await expect(page.getByTestId('shopping-v2-shop')).toBeVisible();
+		await pickAllUntilTripComplete(page, { expectItemName: itemName });
+
+		/* "Har du kvittot?" → unpack without receipt. */
+		await page.getByTestId('shopping-v2-complete-unpack').click();
+		const sheet = page.getByTestId('shopping-unpack-sheet');
+		await expect(sheet).toBeVisible({ timeout: 10_000 });
+		await expect(sheet).toContainText(itemName);
+
+		await page.getByTestId('shopping-unpack-submit').click();
+		await expect(sheet).not.toBeVisible({ timeout: 15_000 });
+		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 10_000 });
+
+		await page.goto('/inventory/all');
+		await expect(page.getByText(itemName).first()).toBeVisible({ timeout: 15_000 });
+	});
+
 	test('shop mode undo pick and not-in-store parking', async ({ page }) => {
 		test.setTimeout(150_000);
 		const itemA = `E2E Undo ${Date.now()}`;

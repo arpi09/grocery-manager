@@ -6,6 +6,25 @@ export interface MergeCandidateMatch {
 	name: string;
 	quantity: string;
 	unit: string | null;
+	/** Last time the matched pantry item was created/updated/confirmed (ISO). */
+	recentAt?: string | null;
+}
+
+export const RECENTLY_ADDED_DEDUPE_HOURS = 24;
+
+/** Matched pantry item was touched so recently it was likely just added from this trip. */
+export function isRecentMergeCandidate(
+	match: MergeCandidateMatch | null,
+	now: number = Date.now()
+): boolean {
+	if (!match?.recentAt) {
+		return false;
+	}
+	const touched = Date.parse(match.recentAt);
+	if (!Number.isFinite(touched)) {
+		return false;
+	}
+	return now - touched < RECENTLY_ADDED_DEDUPE_HOURS * 60 * 60 * 1000;
 }
 
 export async function fetchMergeCandidates(

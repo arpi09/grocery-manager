@@ -1221,7 +1221,7 @@
 				"unavailableRestoreAria": "Ta tillbaka {name} till plockkön",
 				"completeUnavailable": "{count, plural, one {# vara} other {# varor}} fanns inte — ligger kvar på listan",
 				"completeTitle": "Klart för den här turen",
-				"completeBody": "{count, plural, one {# vara} other {# varor}} plockade. Uppdatera skafferiet när du packat hemma.",
+				"completeBody": "{count, plural, one {# vara} other {# varor}} plockade.",
 				"completePantryCta": "Uppdatera skafferiet",
 				"completePlanCta": "Tillbaka till planering",
 				"completeHomeCta": "Till hem",
@@ -1231,6 +1231,23 @@
 					"recent_purchase": "Ni köpte detta nyligen",
 					"on_list": "Finns redan på listan"
 				}
+			},
+			"unpack": {
+				"question": "Har du kvittot?",
+				"scanCta": "Skanna kvittot",
+				"openCta": "Packa upp utan kvitto",
+				"title": "Packa upp",
+				"subtitle": "{count, plural, one {# vara} other {# varor}} från rundan — plats är förifylld.",
+				"submit": "Lägg alla i skafferiet ({count})",
+				"skipRow": "Hoppa över",
+				"skipRowAria": "Hoppa över {name} — läggs inte i skafferiet",
+				"addMoreLabel": "Lägg till fler varor",
+				"addMorePlaceholder": "Köpte ni något mer?",
+				"addMoreCta": "Lägg till",
+				"empty": "Inget kvar att packa upp.",
+				"notNow": "Inte nu",
+				"doneToast": "{count, plural, one {# vara} other {# varor}} i skafferiet",
+				"loadFailed": "Kunde inte hämta rundans varor. Försök igen."
 			},
 			"pantryBridge": {
 				"title": "Lägg till i skafferiet?",
@@ -2585,6 +2602,7 @@
 		"lead": "Har du kvittot i en app? Ladda upp PDF eller bild direkt — eller fota ett papperskvitto. Vi föreslår varor du kan lägga till.",
 		"cameraPaper": "Fota papperskvitto",
 		"selectItems": "Välj varor ({selected} av {total})",
+		"alreadyInPantry": "Redan i skafferiet — nyss tillagd",
 		"locationForAll": "Sätt plats för alla valda:",
 		"locationPerItem": "Plats:",
 		"addCount": "Lägg till {count} {count, plural, one {vara} other {varor}}",
@@ -3406,7 +3424,8 @@
 			"invalidLocation": "Ogiltig förvaringsplats."
 		},
 		"shopping": {
-			"missingRowId": "Saknar rad-id"
+			"missingRowId": "Saknar rad-id",
+			"unpackFailed": "Kunde inte packa upp. Försök igen."
 		}
 	},
 	"actionToast": {

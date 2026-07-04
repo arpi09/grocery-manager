@@ -46,7 +46,11 @@
 		readReceiptBulkLocation,
 		writeReceiptBulkLocation
 	} from '$lib/utils/receipt-bulk-location';
-	import { fetchMergeCandidates, type MergeCandidateMatch } from '$lib/client/merge-candidates';
+	import {
+		fetchMergeCandidates,
+		isRecentMergeCandidate,
+		type MergeCandidateMatch
+	} from '$lib/client/merge-candidates';
 	import { saveLastScanMode } from '$lib/utils/last-scan-defaults';
 
 	interface Props {
@@ -101,6 +105,8 @@
 	let discardReviewOpen = $state(false);
 	let mergeCandidates = $state<Array<MergeCandidateMatch | null>>([]);
 	let mergeSelected = $state<Record<number, boolean>>({});
+	let recentlyAdded = $state<Record<number, boolean>>({});
+	let recentDedupeApplied = $state(false);
 	let parsedStoreLabel = $state<string | null>(null);
 	let parsedPurchasedAt = $state<string | null>(null);
 	let shelfLifePredictions = $state<Array<ReceiptShelfLifePrediction | null>>([]);
@@ -188,6 +194,8 @@
 			])
 		);
 		selected = Object.fromEntries(data.lines.map((_, i) => [i, true]));
+		recentlyAdded = {};
+		recentDedupeApplied = false;
 		lineLocations = Object.fromEntries(
 			data.lines.map((line, i) => [
 				i,
@@ -293,6 +301,21 @@
 		mergeSelected = Object.fromEntries(
 			mergeCandidates.map((match, index) => [index, Boolean(match)])
 		);
+
+		/* Trip safety net: lines matching a pantry item touched in the last 24h (e.g. just
+		   unpacked from the shopping list) start unchecked — only on the first load, so
+		   re-fetches after location changes never override the user's own choices. */
+		if (!recentDedupeApplied) {
+			recentDedupeApplied = true;
+			const flags: Record<number, boolean> = {};
+			for (const [index, match] of mergeCandidates.entries()) {
+				if (isRecentMergeCandidate(match)) {
+					flags[index] = true;
+					selected[index] = false;
+				}
+			}
+			recentlyAdded = flags;
+		}
 	}
 
 	function toggleAll(checked: boolean) {
@@ -760,6 +783,11 @@
 										}
 									}} />
 								<span class="line-name">{line.name}</span>
+								{#if recentlyAdded[index]}
+									<span class="already-chip" data-testid="receipt-line-already-{index}">
+										{t('receiptBulk.alreadyInPantry')}
+									</span>
+								{/if}
 								{#if formatLineAmount(line)}
 									<span class="line-qty">{formatLineAmount(line)}</span>
 								{/if}
@@ -1121,6 +1149,16 @@
 	.line-qty {
 		font-size: 0.8rem;
 		color: var(--color-text-muted);
+	}
+
+	.already-chip {
+		padding: 0.15rem 0.5rem;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-warning) 14%, transparent);
+		font-size: 0.72rem;
+		font-weight: 600;
+		color: var(--color-text);
+		white-space: nowrap;
 	}
 
 	.line-price {
