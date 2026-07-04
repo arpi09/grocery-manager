@@ -54,6 +54,7 @@ const REPLACEMENTS = [
 	[/#e07a7a/g, 'var(--color-danger)'],
 	[/#2d6a4f/g, 'var(--color-success)'],
 	[/#3d8f5c/g, 'var(--color-success)'],
+	[/#2e7a4c/g, 'var(--color-success)'],
 	[/#5cb88a/g, 'var(--color-success)'],
 	[/#6ecf96/g, 'var(--color-success)'],
 	[/#9a6700/g, 'var(--color-warning)'],

@@ -46,7 +46,7 @@ Merged with locked core at build time.
 |-------|-------|------|--------|
 | `secondary` | `#8a9a7b` | `#9aad92` | Secondary chrome, catalog hints |
 | `taupe` | `#c4b8a8` | `#a89888` | Warm neutrals, decorative gradients |
-| `success` | `#3d8f5c` | `#6ecf96` | Saved, eat-first, positive toasts/banners |
+| `success` | `#2e7a4c` | `#6ecf96` | Saved, eat-first, positive toasts/banners — light hex ≥4.5:1 with white (WCAG AA) |
 | `warning` | `#c9870a` | `#f0b429` | Expiry soon — **not** accent gold |
 | `danger` | `#c44d4d` | `#f09090` | Errors, destructive |
 | `info` | `#4a8fb8` | `#7ec4e8` | Tips, receipt/evidence badges |
