@@ -20,6 +20,19 @@ import {
 	OPENAI_MODEL,
 	requestStructuredJson
 } from '$lib/server/openai';
+import type { IAiBatchJobRepository } from '$lib/infrastructure/repositories/ai-batch-job.repository';
+
+/** Owner weekly-digest paragraph prompt — shared by the sync and batch paths. */
+export const WEEKLY_DIGEST_SYSTEM_PROMPT =
+	'Skriv en kort svensk veckosammanfattning (1 stycke, max 80 ord) för Skaffus ägare baserat på aggregerad PMF- och beteendedata. Ton: rak, ägar-fokus. Inga personuppgifter.';
+
+/** Only reuse a batch-generated paragraph from the last few days (weekly cadence). */
+const WEEKLY_DIGEST_PREBATCH_LOOKBACK_MS = 3 * 24 * 60 * 60 * 1000;
+
+export interface WeeklyDigestBatchInput {
+	systemPrompt: string;
+	userPrompt: string;
+}
 
 export interface AdminInsightsInput {
 	pmfWeeklyReview: PmfWeeklyReview;
@@ -47,7 +60,8 @@ export class AdminInsightsService {
 		private readonly pmfService: PmfService,
 		private readonly analyticsAdminService: AnalyticsAdminService,
 		private readonly productFeedbackService: ProductFeedbackService,
-		private readonly aiRateLimitService: AiRateLimitService
+		private readonly aiRateLimitService: AiRateLimitService,
+		private readonly aiBatchJobRepository?: Pick<IAiBatchJobRepository, 'listRecentApplied'>
 	) {}
 
 	async getInsights(options: {
@@ -108,22 +122,57 @@ export class AdminInsightsService {
 		return result;
 	}
 
+	private async buildWeeklyDigestUserPrompt(): Promise<string> {
+		const [pmfWeeklyReview, behaviorOverview] = await Promise.all([
+			this.pmfService.getWeeklyReview(),
+			this.analyticsAdminService.getBehaviorOverview(7)
+		]);
+
+		return JSON.stringify({
+			onTarget: `${pmfWeeklyReview.onTargetCount}/${pmfWeeklyReview.totalTracked}`,
+			topRoutes: behaviorOverview.routes.slice(0, 5),
+			belowTarget: pmfWeeklyReview.belowTarget.map((m) => m.key)
+		});
+	}
+
+	/** Prompts for the owner weekly-digest paragraph as a Batch API request. */
+	async buildWeeklyDigestBatchInput(): Promise<WeeklyDigestBatchInput> {
+		return {
+			systemPrompt: WEEKLY_DIGEST_SYSTEM_PROMPT,
+			userPrompt: await this.buildWeeklyDigestUserPrompt()
+		};
+	}
+
+	/**
+	 * Prefer a paragraph pre-generated via Batch API (50% cheaper); fall back to a
+	 * synchronous generation when no recent batch result exists.
+	 */
+	async getWeeklyDigestParagraphPrebatchedFirst(): Promise<string | null> {
+		if (this.aiBatchJobRepository) {
+			try {
+				const since = new Date(Date.now() - WEEKLY_DIGEST_PREBATCH_LOOKBACK_MS);
+				const jobs = await this.aiBatchJobRepository.listRecentApplied('admin_digest', since);
+				for (const job of jobs) {
+					const paragraph = (job.result as { paragraph?: unknown } | null)?.paragraph;
+					if (typeof paragraph === 'string' && paragraph.trim()) {
+						return paragraph.trim();
+					}
+				}
+			} catch (error) {
+				const message = error instanceof Error ? error.message : String(error);
+				console.warn(`[admin-insights] prebatched digest lookup failed: ${message}`);
+			}
+		}
+		return this.getWeeklyDigestParagraph();
+	}
+
 	async getWeeklyDigestParagraph(): Promise<string | null> {
 		const apiKey = getOpenAiApiKey();
 		if (!apiKey) {
 			return null;
 		}
 
-		const [pmfWeeklyReview, behaviorOverview] = await Promise.all([
-			this.pmfService.getWeeklyReview(),
-			this.analyticsAdminService.getBehaviorOverview(7)
-		]);
-
-		const payload = {
-			onTarget: `${pmfWeeklyReview.onTargetCount}/${pmfWeeklyReview.totalTracked}`,
-			topRoutes: behaviorOverview.routes.slice(0, 5),
-			belowTarget: pmfWeeklyReview.belowTarget.map((m) => m.key)
-		};
+		const userPrompt = await this.buildWeeklyDigestUserPrompt();
 
 		try {
 			const response = await fetch('https://api.openai.com/v1/responses', {
@@ -135,15 +184,8 @@ export class AdminInsightsService {
 				body: JSON.stringify({
 					model: OPENAI_MODEL,
 					input: [
-						{
-							role: 'system',
-							content:
-								'Skriv en kort svensk veckosammanfattning (1 stycke, max 80 ord) för Skaffus ägare baserat på aggregerad PMF- och beteendedata. Ton: rak, ägar-fokus. Inga personuppgifter.'
-						},
-						{
-							role: 'user',
-							content: JSON.stringify(payload)
-						}
+						{ role: 'system', content: WEEKLY_DIGEST_SYSTEM_PROMPT },
+						{ role: 'user', content: userPrompt }
 					]
 				})
 			});
