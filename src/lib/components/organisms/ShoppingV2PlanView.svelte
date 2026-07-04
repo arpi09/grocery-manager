@@ -1,8 +1,8 @@
 <script lang="ts">
-	import MemorySuggestionList from '$lib/components/molecules/MemorySuggestionList.svelte';
+	import SundaySuggestionPanel from '$lib/components/molecules/SundaySuggestionPanel.svelte';
 	import TripSummaryPills from '$lib/components/molecules/TripSummaryPills.svelte';
 	import FirstRunEmptyState from '$lib/components/molecules/FirstRunEmptyState.svelte';
-	import type { ReplenishmentSuggestion } from '$lib/domain/replenishment';
+	import type { SundaySuggestion } from '$lib/domain/sunday-suggestion';
 	import { buildPlanHeaderTitle } from '$lib/domain/shopping-v2-presenter';
 	import { sortUncheckedItems } from '$lib/domain/shopping-trip';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
@@ -11,14 +11,16 @@
 
 	interface Props {
 		items: ShoppingListItem[];
-		suggestions: ReplenishmentSuggestion[];
+		sundayProposal: SundaySuggestion[];
 		canEdit: boolean;
 		tripLabel?: string | null;
 		showReceiptLead?: boolean;
-		acceptingKey?: string | null;
+		addingKey?: string | null;
+		addingAll?: boolean;
 		dismissingKey?: string | null;
-		onAcceptSuggestion: (suggestion: ReplenishmentSuggestion) => void | Promise<void>;
-		onDismissSuggestion: (suggestion: ReplenishmentSuggestion) => void | Promise<void>;
+		onSundayAdd: (row: SundaySuggestion) => void | Promise<void>;
+		onSundayAddAll: (rows: SundaySuggestion[]) => void | Promise<void>;
+		onSundayDismiss: (row: SundaySuggestion) => void | Promise<void>;
 		onStartShop: () => void;
 		onAddItem: () => void;
 		onOpenLegacy: () => void;
@@ -26,14 +28,16 @@
 
 	let {
 		items,
-		suggestions,
+		sundayProposal,
 		canEdit,
 		tripLabel = null,
 		showReceiptLead = false,
-		acceptingKey = null,
+		addingKey = null,
+		addingAll = false,
 		dismissingKey = null,
-		onAcceptSuggestion,
-		onDismissSuggestion,
+		onSundayAdd,
+		onSundayAddAll,
+		onSundayDismiss,
 		onStartShop,
 		onAddItem,
 		onOpenLegacy,
@@ -41,8 +45,8 @@
 
 	const header = $derived(buildPlanHeaderTitle(tripLabel));
 	const uncheckedCount = $derived(sortUncheckedItems(items).length);
-	const hasMemory = $derived(suggestions.length > 0);
-	const showEmptyExtras = $derived(uncheckedCount > 0 || hasMemory);
+	const hasProposal = $derived(sundayProposal.length > 0);
+	const showEmptyExtras = $derived(uncheckedCount > 0 || hasProposal);
 
 	const subtitle = $derived.by(() => {
 		if (uncheckedCount === 0) {
@@ -52,7 +56,7 @@
 			/\s·\s$/,
 			''
 		);
-		return hasMemory ? `${base} · ${t('shopping.v2.plan.subtitleMemory')}` : base;
+		return hasProposal ? `${base} · ${t('shopping.v2.plan.subtitleMemory')}` : base;
 	});
 </script>
 
@@ -94,18 +98,16 @@
 		</div>
 	{/if}
 
-	{#if showEmptyExtras}
-		<MemorySuggestionList
-			{suggestions}
-			{items}
-			{canEdit}
-			{acceptingKey}
-			{dismissingKey}
-			deemphasizeCadence={true}
-			onAccept={onAcceptSuggestion}
-			onDismiss={onDismissSuggestion}
-		/>
-	{/if}
+	<SundaySuggestionPanel
+		proposal={sundayProposal}
+		{canEdit}
+		{addingKey}
+		{addingAll}
+		{dismissingKey}
+		onAdd={onSundayAdd}
+		onAddAll={onSundayAddAll}
+		onDismiss={onSundayDismiss}
+	/>
 
 	<TripSummaryPills {items} {canEdit} {onStartShop} {onAddItem} />
 

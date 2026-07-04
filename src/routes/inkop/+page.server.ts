@@ -16,11 +16,17 @@ import { parseUnpackRows } from '$lib/domain/shopping-unpack';
 import { translate } from '$lib/i18n/messages';
 import { rankReplenishmentWithFeedback } from '$lib/server/replenishment-rank';
 import { learningFeedbackRepository } from '$lib/server/di';
-import { loadAutoFillPendingForInkop } from '$lib/server/auto-smart-fill';
-import { takeAutoFillPending } from '$lib/server/auto-fill-pending';
+import { loadSundayAiSuggestions } from '$lib/server/auto-smart-fill';
 import { getOpenAiApiKey } from '$lib/server/openai';
 import { isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
-import { suggestionToListItem } from '$lib/server/shopping-suggestions';
+import { parseSuggestionQuantity } from '$lib/server/shopping-suggestions';
+import { buildSundayProposal } from '$lib/domain/sunday-suggestion';
+import { parseSundayAddRows } from '$lib/domain/sunday-add';
+import type { CreateShoppingListItemInput } from '$lib/domain/shopping-list-item';
+import {
+	PurchasePatternNotFoundError,
+	PurchasePatternReadOnlyError
+} from '$lib/application/purchase-pattern.service';
 import { recordProductEvent } from '$lib/server/product-events';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
 import { detectDedupeWarningsForKeys } from '$lib/domain/dedupe-autopilot';
@@ -40,11 +46,16 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 			checkedCount: 0,
 			canEdit: false,
 			shareLinkEnabled: false,
-			replenishmentSuggestions: [],
+			sundayProposal: [],
+			sundayNote: null,
 			shoppingToPantryMode: 'ask' as ShoppingToPantryMode,
 			showMemoryExplorer: false
 		};
 	}
+
+	/* Replenishment leads the Söndagsförslag, so rank a few more than the home rail's 3
+	 * before the fusion caps the whole proposal at SUNDAY_SUGGESTION_MAX. */
+	const INKOP_REPLENISHMENT_MAX = 6;
 
 	const [items, checkedCount, shoppingToPantryMode] = await Promise.all([
 		locals.shoppingListService.listUncheckedItems(householdId),
@@ -63,13 +74,14 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 				householdId,
 				locale: locals.locale,
 				learningFeedbackRepository,
-				apiKey: getOpenAiApiKey()
+				apiKey: getOpenAiApiKey(),
+				maxItems: INKOP_REPLENISHMENT_MAX
 			});
 
-	let autoFillPending: Awaited<ReturnType<typeof loadAutoFillPendingForInkop>> = null;
+	let sundayAi: Awaited<ReturnType<typeof loadSundayAiSuggestions>> = null;
 	if (!e2eMockAi && user && locals.householdRole) {
 		try {
-			autoFillPending = await loadAutoFillPendingForInkop({
+			sundayAi = await loadSundayAiSuggestions({
 				householdId,
 				userId: user.id,
 				role: locals.householdRole,
@@ -82,9 +94,17 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 				learningFeedbackRepository
 			});
 		} catch (loadError) {
-			console.warn('[inkop] auto smart-fill degraded:', loadError);
+			console.warn('[inkop] söndagsförslag AI degraded:', loadError);
 		}
 	}
+
+	/* Fuse the deterministic replenishment cadence with the AI stream (expiring restocks +
+	 * planned meals + staples). Everything stays a proposal until the user taps a row in. */
+	const sundayProposal = buildSundayProposal({
+		replenishment: replenishmentSuggestions,
+		aiSuggestions: sundayAi?.items ?? [],
+		listItems: items
+	});
 
 	let storeDedupeByKey: ReturnType<typeof detectDedupeWarningsForKeys> = {};
 	if (!e2eMockAi) {
@@ -113,12 +133,12 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		checkedCount,
 		canEdit: !!locals.householdRole && canEditInventory(locals.householdRole),
 		shareLinkEnabled: isShoppingListShareEnabled(),
-		replenishmentSuggestions,
+		sundayProposal,
+		sundayNote: sundayAi?.note ?? null,
 		storeDedupeByKey,
 		householdId,
 		shoppingToPantryMode,
-		showMemoryExplorer: isShelfLifeLearningEnabled(),
-		autoFillPending
+		showMemoryExplorer: isShelfLifeLearningEnabled()
 	};
 };
 
@@ -484,50 +504,102 @@ export const actions: Actions = {
 
 		return { success: true };
 	},
-	acceptAutoFill: async (event) => {
+	/**
+	 * Söndagsförslaget accept — takes the exact rows the user saw (one row for a per-row tap,
+	 * all rows for "Lägg till alla") and adds them to the shared list. Replenishment rows go
+	 * through the learning-backed accept; AI rows are deduped-added. Nothing else is touched.
+	 */
+	sundayAdd: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);
 		const householdId = event.locals.householdId;
 		const locale = event.locals.locale;
 		if (!householdId) error(400, translate(locale, 'errors.household.noHousehold'));
 
-		const pending = takeAutoFillPending(householdId, event.locals.user!.id);
-		if (!pending || pending.items.length === 0) {
-			return fail(404, { message: translate(locale, 'shopping.autoFillExpired') });
+		const formData = await event.request.formData();
+		const rows = parseSundayAddRows(formData.get('rows'));
+		if (!rows) {
+			return fail(400, { message: translate(locale, 'shopping.sunday.addFailed') });
 		}
+
+		const userId = event.locals.user!.id;
+		const role = event.locals.householdRole!;
+
+		let added = 0;
+		let skipped = 0;
+		const aiInputs: CreateShoppingListItemInput[] = [];
 
 		try {
-			const result = await event.locals.shoppingListService.addSuggestedItems(
-				householdId,
-				event.locals.householdRole!,
-				pending.items.map(suggestionToListItem)
-			);
+			for (const row of rows) {
+				if (row.source === 'replenishment' && row.normalizedKey) {
+					try {
+						const result = await event.locals.purchasePatternService.acceptReplenishmentToList(
+							householdId,
+							role,
+							row.normalizedKey
+						);
+						added += 1;
 
-			recordProductEvent(event.locals.pmfService, {
-				userId: event.locals.user!.id,
-				householdId,
-				eventType: 'fill_suggestions_added',
-				metadata: {
-					added: result.added,
-					skipped: result.skipped,
-					source: 'auto_fill_pending'
-				}
-			});
+						await event.locals.learningEngineService.recordPredictorFeedback({
+							householdId,
+							userId,
+							predictorId: 'replenishment',
+							normalizedKey: row.normalizedKey,
+							feedbackType: 'accepted',
+							predictedValue: row.normalizedKey,
+							actualValue: result.name,
+							contextJson: { displayName: result.name, surface: 'inkop_sunday' }
+						});
 
-			return {
-				fillSuccess: {
-					added: result.added,
-					skipped: result.skipped,
-					note: pending.note,
-					suggestions: pending.items.slice(0, 8).map((item) => ({
-						name: item.name,
-						relatedMealDate: item.relatedMealDate ?? null,
-						relatedRecipeTitle: item.relatedRecipeTitle ?? null
-					}))
+						for (const eventType of [
+							'replenishment_suggestion_added',
+							'replenishment_suggestion_accepted',
+							'replenishment_actioned'
+						] as const) {
+							recordProductEvent(event.locals.pmfService, {
+								userId,
+								householdId,
+								eventType,
+								metadata: { normalizedKey: row.normalizedKey, name: result.name, surface: 'inkop_sunday' }
+							});
+						}
+					} catch (err) {
+						/* Stale key (partner already handled it) — skip this row, keep the rest. */
+						if (err instanceof PurchasePatternNotFoundError) {
+							skipped += 1;
+							continue;
+						}
+						throw err;
+					}
+				} else {
+					const { quantity, unit } = parseSuggestionQuantity(row.quantity);
+					aiInputs.push({ name: row.name, quantity, unit });
 				}
-			};
+			}
+
+			if (aiInputs.length > 0) {
+				const result = await event.locals.shoppingListService.addSuggestedItems(
+					householdId,
+					role,
+					aiInputs
+				);
+				added += result.added;
+				skipped += result.skipped;
+
+				recordProductEvent(event.locals.pmfService, {
+					userId,
+					householdId,
+					eventType: 'fill_suggestions_added',
+					metadata: { added: result.added, skipped: result.skipped, source: 'inkop_sunday' }
+				});
+			}
 		} catch (err) {
+			if (err instanceof PurchasePatternReadOnlyError) {
+				return fail(403, { message: err.message });
+			}
 			return handleServiceError(err);
 		}
+
+		return { sundayAdded: { added, skipped } };
 	}
 };
 
