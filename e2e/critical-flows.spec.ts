@@ -11,7 +11,11 @@ import {
 } from './helpers/auth';
 
 import { createFridgeItemViaApi, ensureFridgeInventoryItem } from './helpers/inventory';
-import { expectHomeDashboardVisible, expectHomeRedesignVisible } from './helpers/home';
+import {
+	expectHomeDashboardVisible,
+	expectHomeRedesignVisible,
+	homeSectionLocator
+} from './helpers/home';
 
 test.describe('Critical flows', () => {
 	test.describe.configure({ mode: 'serial', timeout: 120_000 });
@@ -114,7 +118,7 @@ test.describe('Critical flows', () => {
 		await loginAsAdmin(page);
 		await page.goto('/hem');
 		await dismissOnboardingModalIfOpen(page);
-		const home = page.locator('section.home-v5, section.home');
+		const home = homeSectionLocator(page);
 		await expect(home).toBeVisible();
 		const redesign = home.locator('.home-v5');
 		if ((await redesign.count()) > 0) {
@@ -127,6 +131,10 @@ test.describe('Critical flows', () => {
 	});
 
 	test('cold home shows shopping entry without empty section headings', async ({ page }) => {
+		test.skip(
+			process.env.HOME_UX_V2_ENABLED === 'true',
+			'v1-only cold-home layout — v2 briefing empty state covered by home-v2.spec'
+		);
 		await registerNewUser(page);
 		await dismissOnboardingModalIfOpen(page);
 		await page.goto('/hem');
@@ -145,6 +153,10 @@ test.describe('Critical flows', () => {
 	});
 
 	test('home minimal shows hero without legacy sections', async ({ page }) => {
+		test.skip(
+			process.env.HOME_UX_V2_ENABLED === 'true',
+			'v1-only hero layout — v2 briefing structure covered by home-v2.spec'
+		);
 		await loginAsAdmin(page);
 		await ensureFridgeInventoryItem(page);
 		await page.goto('/hem');

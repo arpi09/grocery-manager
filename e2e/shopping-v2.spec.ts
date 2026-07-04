@@ -5,6 +5,12 @@ import {
 	dismissPostOnboardingShareIfOpen,
 	loginAsAdmin
 } from './helpers/auth';
+import {
+	addItemViaQuickAdd,
+	clearShoppingList,
+	dismissPantrySheetIfOpen,
+	openChecklistDrawer
+} from './helpers/shopping';
 
 test.describe('Shopping UX v2', () => {
 	test.setTimeout(90_000);
@@ -15,6 +21,7 @@ test.describe('Shopping UX v2', () => {
 		const itemName = `E2E V2 ${Date.now()}`;
 
 		await loginAsAdmin(page);
+		await clearShoppingList(page);
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
 		await dismissPageHintIfOpen(page);
@@ -25,27 +32,35 @@ test.describe('Shopping UX v2', () => {
 		await expect(page.locator('#shopping-list-panel')).not.toBeVisible();
 
 		await page.getByTestId('shopping-v2-mode-plan').click();
-		await page.getByRole('button', { name: /Lägg till vara|Add item/i }).click();
-		await page.getByTestId('shopping-v2-quick-add').locator('#shopping-v2-name').fill(itemName);
-		await page.getByTestId('shopping-v2-quick-add').getByRole('button', { name: /Lägg till|Add/i }).click();
-		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(itemName, {
-			timeout: 15_000
-		});
+		await addItemViaQuickAdd(page, itemName);
 
 		await page.getByTestId('shopping-v2-start-shop').click();
 		await expect(page.getByTestId('shopping-v2-shop')).toBeVisible();
-		await expect(page.getByTestId('shopping-v2-focus-item')).toContainText(itemName);
+
+		/* Other specs may leave unchecked items in the shared admin list — pick those off
+		   until our item takes the focus slot, then complete the trip on it. */
+		const focusItem = page.getByTestId('shopping-v2-focus-item');
+		await expect(async () => {
+			await expect(focusItem).toBeVisible({ timeout: 5_000 });
+			if (!(await focusItem.innerText()).includes(itemName)) {
+				await page.getByTestId('shopping-v2-pick-cta').click();
+				await dismissPantrySheetIfOpen(page);
+				throw new Error('Leftover item in focus slot — picking it off');
+			}
+		}).toPass({ timeout: 45_000 });
 
 		await page.getByTestId('shopping-v2-pick-cta').click();
-
-		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
-		if (await pantrySheet.isVisible().catch(() => false)) {
-			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click();
-		}
+		await dismissPantrySheetIfOpen(page);
 
 		await expect(page.getByTestId('shopping-v2-trip-complete')).toBeVisible({ timeout: 20_000 });
 
-		await page.getByRole('button', { name: /Planera|Plan|Back to planning/i }).click();
+		await expect(async () => {
+			await dismissPantrySheetIfOpen(page, 1_000);
+			await page
+				.getByTestId('shopping-v2-trip-complete')
+				.getByRole('button', { name: /Tillbaka till planering|Back to planning/i })
+				.click({ timeout: 2_000 });
+		}).toPass({ timeout: 20_000 });
 		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible();
 	});
 
@@ -55,41 +70,37 @@ test.describe('Shopping UX v2', () => {
 		const itemName = `E2E Grid ${Date.now()}`;
 
 		await loginAsAdmin(page);
+		await clearShoppingList(page);
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
 		await dismissPageHintIfOpen(page);
 		await dismissPostOnboardingShareIfOpen(page);
 
 		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
-		await page.getByRole('button', { name: /Lägg till vara|Add item/i }).click();
-		await page.getByTestId('shopping-v2-quick-add').locator('#shopping-v2-name').fill(itemName);
-		await page.getByTestId('shopping-v2-quick-add').getByRole('button', { name: /Lägg till|Add/i }).click();
-		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(itemName, {
-			timeout: 15_000
-		});
+		await addItemViaQuickAdd(page, itemName);
 
-		await page.getByRole('button', { name: /Visa som checklista|Show as checklist/i }).click();
-		const drawer = page.getByTestId('shopping-v2-legacy-drawer');
-		await expect(drawer).toBeVisible({ timeout: 15_000 });
+		const drawer = await openChecklistDrawer(page);
 		await expect(page.getByTestId('shopping-checklist-grid-table')).toBeVisible();
 		await expect(drawer.getByText(itemName)).toBeVisible();
 
-		await drawer.getByTestId('data-grid-filter-button').click();
 		const filterSheet = page.getByTestId('data-grid-filter-sheet');
-		await expect(filterSheet).toBeVisible();
-		await filterSheet.getByRole('searchbox').fill(itemName);
+		/* The filter button can be clicked pre-hydration — retry until the sheet opens. */
+		await expect(async () => {
+			await drawer.getByTestId('data-grid-filter-button').click();
+			await expect(filterSheet).toBeVisible({ timeout: 2_000 });
+		}).toPass({ timeout: 15_000 });
+		await filterSheet.locator('#data-grid-filter-search').fill(itemName);
 		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
 
 		const row = drawer.locator(`[data-testid^="shopping-grid-row-"]`).filter({ hasText: itemName });
 		await expect(row).toBeVisible();
 		await expect(row.getByTestId('product-avatar')).toBeVisible();
-		await row.getByTestId(/^shopping-grid-checkoff-/).click();
+		/* Activate via keyboard — sturdier than pointer in the dense grid cell and
+		   exercises the a11y path. */
+		await row.getByTestId(/^shopping-grid-checkoff-/).focus();
+		await page.keyboard.press('Enter');
 
-		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
-		await pantrySheet.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-		if (await pantrySheet.isVisible().catch(() => false)) {
-			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click();
-		}
+		await dismissPantrySheetIfOpen(page);
 
 		await drawer.getByRole('button', { name: /Tillbaka till Plan|Back to Plan/i }).click();
 		await expect(drawer).not.toBeVisible();
@@ -102,25 +113,19 @@ test.describe('Shopping UX v2', () => {
 		const itemName = `E2E Shop Grid ${Date.now()}`;
 
 		await loginAsAdmin(page);
+		await clearShoppingList(page);
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
 		await dismissPageHintIfOpen(page);
 		await dismissPostOnboardingShareIfOpen(page);
 
 		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
-		await page.getByRole('button', { name: /Lägg till vara|Add item/i }).click();
-		await page.getByTestId('shopping-v2-quick-add').locator('#shopping-v2-name').fill(itemName);
-		await page.getByTestId('shopping-v2-quick-add').getByRole('button', { name: /Lägg till|Add/i }).click();
-		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(itemName, {
-			timeout: 15_000
-		});
+		await addItemViaQuickAdd(page, itemName);
 
 		await page.getByTestId('shopping-v2-start-shop').click();
 		await expect(page.getByTestId('shopping-v2-shop')).toBeVisible();
 
-		await page.getByRole('button', { name: /Visa som checklista|Show as checklist/i }).click();
-		const drawer = page.getByTestId('shopping-v2-legacy-drawer');
-		await expect(drawer).toBeVisible({ timeout: 15_000 });
+		const drawer = await openChecklistDrawer(page);
 		await expect(drawer.getByText(itemName)).toBeVisible();
 
 		await drawer.getByRole('button', { name: /Tillbaka till Handla|Back to Shop/i }).click();

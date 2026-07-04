@@ -18,6 +18,16 @@ function loadDotEnv(path = '.env') {
 
 loadDotEnv();
 
+/**
+ * Prod parity: Shopping/Pantry/Home UX V2 canaries are live in prod, so E2E runs
+ * with them on by default. Spec-level `test.skip` gates read these from process.env,
+ * which is why they are set here (worker-visible) and not only in webServer.env.
+ * Override per run with e.g. `SHOPPING_UX_V2_ENABLED=false npm run test:e2e`.
+ */
+process.env.SHOPPING_UX_V2_ENABLED ??= 'true';
+process.env.PANTRY_UX_V2_ENABLED ??= 'true';
+process.env.HOME_UX_V2_ENABLED ??= 'true';
+
 /** Dedicated port so E2E does not collide with a running `npm run dev` on 5173. */
 const port = process.env.PLAYWRIGHT_PORT ?? '5190';
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${port}`;
@@ -107,9 +117,9 @@ export default defineConfig({
 			E2E_MOCK_AI: process.env.E2E_MOCK_AI ?? 'true',
 			PUBLIC_E2E_DISABLE_POST_SURVEY: 'true',
 			HOME_REDESIGN_V1_ENABLED: process.env.HOME_REDESIGN_V1_ENABLED ?? 'true',
-			SHOPPING_UX_V2_ENABLED: process.env.SHOPPING_UX_V2_ENABLED ?? 'false',
-			PANTRY_UX_V2_ENABLED: process.env.PANTRY_UX_V2_ENABLED ?? 'false',
-			HOME_UX_V2_ENABLED: process.env.HOME_UX_V2_ENABLED ?? 'false',
+			SHOPPING_UX_V2_ENABLED: process.env.SHOPPING_UX_V2_ENABLED,
+			PANTRY_UX_V2_ENABLED: process.env.PANTRY_UX_V2_ENABLED,
+			HOME_UX_V2_ENABLED: process.env.HOME_UX_V2_ENABLED,
 			STORE_RECOMMENDATION_V0_ENABLED: process.env.STORE_RECOMMENDATION_V0_ENABLED ?? 'false',
 			PUBLIC_SHOPPING_LIST_SHARE_ENABLED: process.env.PUBLIC_SHOPPING_LIST_SHARE_ENABLED ?? 'true',
 			/* Kivra hint in onboarding is gated on this flag; keep on so the e2e link test exercises it. */

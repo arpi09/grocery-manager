@@ -6,6 +6,7 @@ import {
 } from './helpers/auth';
 import { expectNoCriticalOrSeriousViolations } from './helpers/axe';
 import { ensureFridgeInventoryItem } from './helpers/inventory';
+import { addItemViaQuickAdd, openChecklistDrawer } from './helpers/shopping';
 import { expectHomeDashboardVisible } from './helpers/home';
 
 /** Public routes first (warm server); auth routes share one login session. */
@@ -109,11 +110,16 @@ test.describe('Accessibility — Shopping checklist drawer (WCAG 2.2 AA)', () =>
 
 		await page.locator('main, [role="main"]').first().waitFor({ state: 'visible', timeout: 30_000 });
 		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
-		await page.getByRole('button', { name: /Visa som checklista|Show as checklist/i }).click();
-
-		const drawer = page.getByTestId('shopping-v2-legacy-drawer');
-		await expect(drawer).toBeVisible({ timeout: 15_000 });
+		/* Seed one row so the drawer grid is scanned in its populated shape. */
+		await addItemViaQuickAdd(page, `E2E A11y Grid ${Date.now()}`);
+		await openChecklistDrawer(page);
 		await expect(page.getByTestId('shopping-checklist-grid-table')).toBeVisible();
+		/* Let the quick-add toast expire — it has a known contrast gap (tracked separately)
+		   and this test targets the drawer grid, not transient toasts. */
+		await page
+			.locator('.toast-message')
+			.waitFor({ state: 'hidden', timeout: 10_000 })
+			.catch(() => undefined);
 
 		await expectNoCriticalOrSeriousViolations(page, '/inkop (shopping checklist drawer)');
 	});

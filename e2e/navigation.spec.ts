@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { clickNavHref, clickSecondaryNavHref, dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
 import { expectHomeSectionVisible } from './helpers/home';
+import { addItemViaQuickAdd, clearShoppingList, dismissPantrySheetIfOpen } from './helpers/shopping';
 
 test.describe('Navigation', () => {
 	test.setTimeout(60_000);
@@ -45,24 +46,17 @@ test.describe('Navigation', () => {
 		const itemName = `Nav E2E ${Date.now()}`;
 
 		await loginAsAdmin(page);
+		/* Start from an empty shared list — leftovers keep the trip from completing on one pick. */
+		await clearShoppingList(page);
 		await page.goto('/inkop');
 		await dismissOnboardingModalIfOpen(page);
 
 		await expect(page.getByTestId('shopping-v2-page')).toBeVisible({ timeout: 15_000 });
-		await page.getByRole('button', { name: /Lägg till vara|Add item/i }).click();
-		await page.getByTestId('shopping-v2-quick-add').locator('#shopping-v2-name').fill(itemName);
-		await page.getByTestId('shopping-v2-quick-add').getByRole('button', { name: /Lägg till|Add/i }).click();
-		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(itemName, {
-			timeout: 15_000
-		});
+		await addItemViaQuickAdd(page, itemName);
 
 		await page.getByTestId('shopping-v2-start-shop').click();
 		await page.getByTestId('shopping-v2-pick-cta').click();
-
-		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
-		if (await pantrySheet.isVisible().catch(() => false)) {
-			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click();
-		}
+		await dismissPantrySheetIfOpen(page);
 
 		await expect(page.getByTestId('shopping-v2-trip-complete')).toBeVisible({ timeout: 20_000 });
 

@@ -16,6 +16,23 @@ function inventoryRowFromTable(page: import('@playwright/test').Page, itemName: 
 		.filter({ hasText: itemName });
 }
 
+/**
+ * Search the data grid via the filter sheet. Accumulated household data paginates the
+ * grid, so row asserts must go through search rather than scan the first page. The open
+ * click retries because the button can be hit pre-hydration.
+ */
+async function searchInventoryGrid(page: import('@playwright/test').Page, query: string) {
+	const filterSheet = page.getByTestId('data-grid-filter-sheet');
+	await expect(async () => {
+		await dismissPageHintIfOpen(page);
+		await page.getByTestId('data-grid-filter-button').click();
+		await expect(filterSheet).toBeVisible({ timeout: 2_000 });
+	}).toPass({ timeout: 15_000 });
+	await filterSheet.locator('#data-grid-filter-search').fill(query);
+	await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
+	await expect(filterSheet).not.toBeVisible({ timeout: 10_000 });
+}
+
 test.describe('Pantry UX v2', () => {
 	test.setTimeout(90_000);
 
@@ -26,7 +43,9 @@ test.describe('Pantry UX v2', () => {
 		const expiringName = `E2E Use Soon ${Date.now()}`;
 
 		await loginAsAdmin(page);
-		await createFridgeItemViaApi(page, itemName);
+		/* Zones cap at MAX_TILES_PER_ZONE (6), use-soon-first — expire the tile-tap item today
+		   so it sorts to the front even when the shared household has accumulated items. */
+		await createFridgeItemViaApi(page, itemName, { expiresOn: expiringSoonIso(0) });
 		await createFridgeItemViaApi(page, expiringName, { expiresOn: expiringSoonIso(2) });
 
 		await page.goto('/inventory');
@@ -41,13 +60,15 @@ test.describe('Pantry UX v2', () => {
 		await expect(page.getByTestId('pantry-v2-zone-header-freezer')).toBeVisible();
 		await expect(page.getByTestId('pantry-v2-zone-header-cupboard')).toBeVisible();
 
+		/* The band names only the first few items ("+N till") — membership is asserted in the
+		   expiring-filtered table below instead, which survives accumulated household data. */
 		await expect(page.getByTestId('pantry-v2-use-soon')).toBeVisible();
-		await expect(page.getByTestId('pantry-v2-use-soon')).toContainText(expiringName);
 
 		await page.getByTestId('pantry-v2-use-soon').getByRole('link', { name: /Visa alla varor|View all items/i }).click();
 		await expect(page).toHaveURL(/\/inventory\/all\?filter=expiring/);
 		await expect(page.getByTestId('pantry-all-locations-page')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('inventory-table')).toBeVisible({ timeout: 15_000 });
+		await searchInventoryGrid(page, expiringName);
 		await expect(inventoryRowFromTable(page, expiringName)).toBeVisible({ timeout: 15_000 });
 
 		await page.goto('/inventory');
@@ -68,22 +89,14 @@ test.describe('Pantry UX v2', () => {
 		await expect(page.getByTestId('pantry-location-grid')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('inventory-table')).toBeVisible({ timeout: 15_000 });
 
-		await page.getByTestId('data-grid-filter-button').click();
-		const filterSheet = page.getByTestId('data-grid-filter-sheet');
-		await expect(filterSheet).toBeVisible();
-		await filterSheet.locator('#data-grid-filter-search').fill(expiringName);
-		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
-		await expect(filterSheet).not.toBeVisible({ timeout: 10_000 });
+		await searchInventoryGrid(page, expiringName);
 
 		const expiringRow = inventoryRowFromTable(page, expiringName);
 		await expect(expiringRow).toBeVisible({ timeout: 15_000 });
 		await expect(expiringRow.getByTestId('inventory-list-meta')).toBeVisible();
 		await expect(expiringRow.getByTestId('inventory-list-meta')).toHaveText(/dag|day/i);
 
-		await page.getByTestId('data-grid-filter-button').click();
-		await expect(filterSheet).toBeVisible();
-		await filterSheet.locator('#data-grid-filter-search').fill(itemName);
-		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
+		await searchInventoryGrid(page, itemName);
 		await expect(page.getByTestId('inventory-table').getByText(itemName)).toBeVisible();
 		await expect(page.getByTestId('data-grid-filter-button')).toBeVisible();
 	});
@@ -112,13 +125,14 @@ test.describe('Pantry UX v2', () => {
 
 		const fridgeRow = inventoryRowFromTable(page, fridgeExpiring);
 		const cupboardRow = inventoryRowFromTable(page, cupboardExpiring);
-		await expect(fridgeRow).toBeVisible({ timeout: 15_000 });
-		await expect(cupboardRow).toBeVisible({ timeout: 15_000 });
 
-		const fridgeDot = fridgeRow.locator('[data-testid^="location-color-dot-"]');
-		const cupboardDot = cupboardRow.locator('[data-testid^="location-color-dot-"]');
-		await expect(fridgeDot).toBeVisible();
-		await expect(cupboardDot).toBeVisible();
+		await searchInventoryGrid(page, fridgeExpiring);
+		await expect(fridgeRow).toBeVisible({ timeout: 15_000 });
+		await expect(fridgeRow.locator('[data-testid^="location-color-dot-"]')).toBeVisible();
+
+		await searchInventoryGrid(page, cupboardExpiring);
+		await expect(cupboardRow).toBeVisible({ timeout: 15_000 });
+		await expect(cupboardRow.locator('[data-testid^="location-color-dot-"]')).toBeVisible();
 	});
 
 	test('/inventory shelf has no critical axe violations @deploy-critical', async ({ page }) => {
