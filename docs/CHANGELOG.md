@@ -79,6 +79,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - chore: add .gitattributes with deterministic LF line endings ([#180](https://github.com/arpi09/grocery-manager/pull/180)) — Add `.gitattributes`: `* text=auto eol=lf`, CRLF for Windows scripts, binary markers for assets
 - docs(reality): prod SHA e918c64ee post-deploy ([#183](https://github.com/arpi09/grocery-manager/pull/183))
 - chore(design-sync): pin Skaffu Design System project ([#187](https://github.com/arpi09/grocery-manager/pull/187)) — Pins `projectId` `f06626f0-ce11-4687-bbf5-03ac70c38e44` in `.design-sync/config.json` so future `/design-sync` runs target the existing "Skaffu Design System" project instead of creating duplicates.
+- docs(skills): coordinator-boot föreslår sessionsnamn + rename-steg ([#195](https://github.com/arpi09/grocery-manager/pull/195)) — Räddar en okommitterad SKILL.md-förbättring från huvudcheckouten (sessionsnamn-steg i coordinator-booten + rename-tips vid ny tråd). Innehållet användes redan av coordinator-sessioner men fanns inte i git.
 
 ### Added
 
