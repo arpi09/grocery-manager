@@ -59,6 +59,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(pantry): tile action buttons overflow card on mobile ([#184](https://github.com/arpi09/grocery-manager/pull/184))
 - fix(onboarding): hide Kivra hints when forward flag is off ([#185](https://github.com/arpi09/grocery-manager/pull/185))
 - fix(db): pass db handle explicitly to startup seeds — kills cold-start init race ([#186](https://github.com/arpi09/grocery-manager/pull/186)) — `ensureDefaultAdminUser(db)` / `ensureDefaultHousehold(db)` tar drizzle-handlen som parameter — ingen `getDb()`-import kvar i seed-filerna (cykeln bruten; endast type-import kvar).
+- fix(shopping): checklist checkoff button unclickable — col-checkoff collapsed to 10px ([#192](https://github.com/arpi09/grocery-manager/pull/192)) — `table-layout: fixed` + `width: 1%` collapses `.col-checkoff` to ~10px; MDC's `overflow: hidden` clips the 44px checkoff button so its center lands in `col-qty` → mouse clicks (and Playwright without force) hit the qty cell instead of the button. Give the column a real width: `calc(var(--touch-target-min) + 2 * var(--space-sm))` (60px). Mobile (<640px) unaffected (own flex layout).
 
 ### Changed
 
