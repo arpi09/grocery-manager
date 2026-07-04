@@ -28,6 +28,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - feat(inventory): swipe-to-use rows with slim resting state ([#197](https://github.com/arpi09/grocery-manager/pull/197))
 - feat(inkop): butikssäkert Handla-läge — ångra, fanns inte, live-total, peek-plock ([#203](https://github.com/arpi09/grocery-manager/pull/203)) — **Ångra senaste plock** — textknapp under fokus-kortet och på klarkortet (i18n-nycklarna `undoCta/undoAria` fanns redan men renderades aldrig). Feltap i butik är inte längre permanent.
 - feat(inkop): Packa upp — batch-brygga checkoff→skafferi vid trip complete ([#205](https://github.com/arpi09/grocery-manager/pull/205)) — **Ingen modal per plock i butiken** — shop-läget skickar `bridge=defer` på toggle; ask-läget lever kvar endast i checklist-vyn. (Detta är den A-punkt som medvetet väntade på B för atomiskt byte.)
+- feat(lista): gäst-checkoff på delad lista — handla ihop utan konto ([#206](https://github.com/arpi09/grocery-manager/pull/206)) — **Live gästlista** — `/lista/[token]` visar hushållets faktiska lista (obockade rader med checkbox + "Plockade (N)"-sektion med strykning) i stället för den frusna snapshoten. Snapshot-vyn ligger kvar som fallback om live-upplösningen fallerar.
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
