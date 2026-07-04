@@ -1,8 +1,8 @@
 # Konkurrensanalys — Skaffu
 
-*Version: jun 2026 (senast reviderad 7 jun 2026). Baserad på kodbas (`docs/BRAND.md`, `docs/MARKETING_SITE.md`, `src/lib/marketing/content.ts`) och öppna källor om marknaden.*
+*Version: jul 2026 (senast reviderad 4 jul 2026). Baserad på kodbas (`docs/BRAND.md`, `docs/MARKETING_SITE.md`, `src/lib/marketing/content.ts`) och öppna källor om marknaden.*
 
-*Changelog jun 2026:* Utökad med internationella profiler (§3F, §4B), funktionsmatris (§4C), expat-gap (§6B), internationella lärdomar (§7B) och uppdaterad positioneringskarta. **10 jun 2026:** §3G geo/grann-delning (OLIO, TGTG, FoodieFinder), matrisrad grann-delning/karta, OLIO hotnivå 🟠 för Grannskafferiet-spåret — se [`GRANNSKAFFERIET_V1.md`](./GRANNSKAFFERIET_V1.md).
+*Changelog jun 2026:* Utökad med internationella profiler (§3F, §4B), funktionsmatris (§4C), expat-gap (§6B), internationella lärdomar (§7B) och uppdaterad positioneringskarta. **10 jun 2026:** §3G geo/grann-delning (OLIO, TGTG, FoodieFinder), matrisrad grann-delning/karta, OLIO hotnivå 🟠 för Grannskafferiet-spåret — se [`GRANNSKAFFERIET_V1.md`](./GRANNSKAFFERIET_V1.md). **4 jul 2026:** §3A ny aktör **Skafferi** (app.getskafferi.com) + kort namn-/SEO-riskbedömning.
 
 > **Produktroadmap:** [ROADMAP.md](./ROADMAP.md) · **Nästa 30 dagar (ägare):** [NEXT_STEPS.md](./NEXT_STEPS.md) · **Domän:** [skaffu.com](https://skaffu.com) — [DOMAIN_STRATEGY.md](./DOMAIN_STRATEGY.md)
 
@@ -146,6 +146,14 @@ Marknadswebben betonar: streckkod, kvitto & foto, kyl/frys/skafferi, smart inkö
 | **Pantrist** | Inventering + recept + lista, internationellt | 🟡 App Store-vana |
 | **NoWaste** | Global, kyl/frys/skafferi, Pro-barcode | 🟠 Ej SV-fokus |
 | **Pantry Check** | iOS-tung inventering | 🟡 Låg i SE |
+| **Skafferi** (app.getskafferi.com) | Foto på kyl/skafferi → AI-recept; webb, ingen paywall | 🟡 produkt / 🟠 namn-SEO |
+
+#### Skafferi (app.getskafferi.com) — ny aktör, tillagd 4 jul 2026
+
+- **Produkt:** foto på kyl/skafferi → AI-igenkänning av ingredienser → 3 nordiskt inspirerade receptförslag + lista på vad som saknas. Ingen paywall.
+- **Signaler på tidigt solo-projekt:** domänen registrerad **2026-04-27** (RDAP/Verisign); nameservrar pekar på **landingsite.ai** (AI-landningssidebyggare); ingen App Store/Google Play-närvaro; ingen synlig bolagsinfo.
+- **Överlapp med Skaffu:** namnkollision i sökutrymmet *"skafferi app"* samt "laga på det du har"-positionering. **Inte** överlapp i kärnloopen — ingen delad inköpslista, inget hushåll, ingen replenishment; engångsanalys av ett foto, inte lager som sanningskälla.
+- **Namn-/SEO-risk (kort bedömning):** 🟡 idag, 🟠 att bevaka. Appnamnet är exakt det generiska sökordet *skafferi* — de kan fånga exact-match-sök ("skafferi app") och öka förvirringen i ett sökutrymme där även Skafferikoll (§4.2) finns. Motvikt: domänen är under 3 månader gammal utan auktoritet, ingen app-butiksnärvaro, och landingsite.ai-stacken tyder på hobby-/soloprojekt. Generiskt ord ger dessutom svagt varumärkesskydd åt båda håll. Åtgärd: prioritera "skafferi app"-frågor i SEO-arbetet (§10) innan de hinner bygga auktoritet; ingen namnåtgärd motiverad nu. Ombedöm om de dyker upp i App Store/Play eller adderar lista/hushåll.
 
 ### B. Inköpslista / hushåll
 
