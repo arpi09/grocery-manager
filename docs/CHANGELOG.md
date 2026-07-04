@@ -107,6 +107,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - docs(reality): prod SHA 8d02a97a2 post-deploy ([#201](https://github.com/arpi09/grocery-manager/pull/201))
 - docs(competitive): lägg till Skafferi (app.getskafferi.com) i §3A + namn-/SEO-riskbedömning ([#204](https://github.com/arpi09/grocery-manager/pull/204)) — Ny aktör **Skafferi** (app.getskafferi.com) i §3A-tabellen (Skafferi/heminventering) med hotnivå 🟡 produkt / 🟠 namn-SEO
 - chore(onboarding): v8 cleanup — share-prompt bort, döda komponenter, i18n-prune ([#216](https://github.com/arpi09/grocery-manager/pull/216)) — Raderat: `PostOnboardingSharePrompt.svelte` (survey köas nu direkt av `completeOnboarding`; lazy engångsmigrering `migrateLegacyShareState` konverterar kvarvarande share-pending → survey-pending och respekterar survey-dismissed), `StarterPackFlow.svelte` (föräldralös), `ActivationSetupCards.svelte` (push-logiken bor nu i finish-skärmen), döda v7-illustrationer (`OnboardingSuccess/Brain/Shopping` — alla importörsfria, grep-verifierat)
+- docs(reality): prod SHA 86b9e061c — Stäng loopen-batch live ([#222](https://github.com/arpi09/grocery-manager/pull/222))
 
 ### Added
 
