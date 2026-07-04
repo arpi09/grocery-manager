@@ -56,23 +56,13 @@ test.describe('Home UX v2', () => {
 		await dismissOnboardingModalIfOpen(page);
 		await dismissPageHintIfOpen(page);
 
-		if (process.env.SHOPPING_UX_V2_ENABLED === 'true') {
-			await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(productName, {
-				timeout: 15_000
-			});
-		} else {
-			await expect(page.locator('#shopping-list-panel')).toContainText(productName, {
-				timeout: 15_000
-			});
-		}
+		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(productName, {
+			timeout: 15_000
+		});
 	});
 
 	test('shop-ready CTA opens shopping shop mode @deploy-critical', async ({ page }) => {
 		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
-		test.skip(
-			process.env.SHOPPING_UX_V2_ENABLED !== 'true',
-			'Requires SHOPPING_UX_V2_ENABLED=true for shop mode UI'
-		);
 
 		const listItem = `E2E Shop Ready ${Date.now()}`;
 

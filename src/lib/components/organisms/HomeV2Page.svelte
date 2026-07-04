@@ -47,7 +47,6 @@
 		briefingOneLiner?: string | null;
 		canWrite?: boolean;
 		pantryUxV2Enabled?: boolean;
-		shoppingUxV2Enabled?: boolean;
 		loadFailed?: boolean;
 		brainTimeline?: BrainTimelineEntry[];
 		brainScore?: BrainScoreSnapshot;
@@ -65,7 +64,6 @@
 		briefingOneLiner = null,
 		canWrite = false,
 		pantryUxV2Enabled = false,
-		shoppingUxV2Enabled = false,
 		loadFailed = false,
 		brainTimeline = [],
 		brainScore = { score: 0, labelKey: 'brain.score.new', ruleCount: 0, feedbackCount: 0, receiptLineCount: 0 }
@@ -184,7 +182,6 @@
 			{briefingOneLiner}
 			{canWrite}
 			{pantryUxV2Enabled}
-			{shoppingUxV2Enabled}
 			{acceptingReplenishment}
 			onAcceptReplenishment={acceptReplenishment}
 			onRecipeCta={handleRecipeCta}

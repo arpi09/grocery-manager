@@ -10,8 +10,6 @@ test.describe('Shopping UX v2', () => {
 	test.setTimeout(90_000);
 
 	test('plan to shop trip flow @deploy-critical', async ({ page }) => {
-		test.skip(process.env.SHOPPING_UX_V2_ENABLED !== 'true', 'Requires SHOPPING_UX_V2_ENABLED=true');
-
 		const itemName = `E2E V2 ${Date.now()}`;
 
 		await loginAsAdmin(page);
@@ -50,8 +48,6 @@ test.describe('Shopping UX v2', () => {
 	});
 
 	test('checklist drawer grid filter and back to plan @deploy-critical', async ({ page }) => {
-		test.skip(process.env.SHOPPING_UX_V2_ENABLED !== 'true', 'Requires SHOPPING_UX_V2_ENABLED=true');
-
 		const itemName = `E2E Grid ${Date.now()}`;
 
 		await loginAsAdmin(page);
@@ -96,8 +92,6 @@ test.describe('Shopping UX v2', () => {
 	});
 
 	test('checklist drawer accessible from shop mode @deploy-critical', async ({ page }) => {
-		test.skip(process.env.SHOPPING_UX_V2_ENABLED !== 'true', 'Requires SHOPPING_UX_V2_ENABLED=true');
-
 		const itemName = `E2E Shop Grid ${Date.now()}`;
 
 		await loginAsAdmin(page);

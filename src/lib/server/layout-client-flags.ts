@@ -4,8 +4,7 @@ import {
 	isHomeUxV2Enabled,
 	isPantryUxV2Enabled,
 	isPriceMemoryV1Enabled,
-	isShoppingListShareEnabled,
-	isShoppingUxV2Enabled
+	isShoppingListShareEnabled
 } from './feature-flags';
 import { isShelfLifeEstimatesInReceiptEnabled } from './shelf-life-learning-flag';
 
@@ -58,12 +57,6 @@ export function getLayoutClientFlagSnapshot(): LayoutClientFlagSnapshotEntry[] {
 			envKey: 'BRAIN_FEEDBACK_V1_ENABLED',
 			...readPublicEnv('BRAIN_FEEDBACK_V1_ENABLED'),
 			effective: isBrainFeedbackV1Enabled()
-		},
-		{
-			propName: 'shoppingUxV2Enabled',
-			envKey: 'SHOPPING_UX_V2_ENABLED',
-			...readPublicEnv('SHOPPING_UX_V2_ENABLED'),
-			effective: isShoppingUxV2Enabled()
 		},
 		{
 			propName: 'pantryUxV2Enabled',

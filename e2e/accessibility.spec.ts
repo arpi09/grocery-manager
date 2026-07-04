@@ -101,8 +101,6 @@ test.describe('Accessibility — Shopping checklist drawer (WCAG 2.2 AA)', () =>
 	test.setTimeout(120_000);
 
 	test('checklist drawer grid has no critical or serious axe violations', async ({ page }) => {
-		test.skip(process.env.SHOPPING_UX_V2_ENABLED !== 'true', 'Requires SHOPPING_UX_V2_ENABLED=true');
-
 		await loginAsAdmin(page);
 		await page.goto('/inkop', { waitUntil: 'commit', timeout: 60_000 });
 		await dismissOnboardingModalIfOpen(page);

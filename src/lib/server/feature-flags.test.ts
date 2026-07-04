@@ -9,7 +9,6 @@ import {
 	isReplenishmentLearningEnabled,
 	isShelfLifeLearningEnabled,
 	isShoppingListShareEnabled,
-	isShoppingUxV2Enabled,
 	isPantryUxV2Enabled,
 	isHomeUxV2Enabled,
 	isHomeBriefingAiEnabled,
@@ -46,7 +45,6 @@ describe('feature-flags registry', () => {
 		expect(FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1).toBe('BRAIN_FEEDBACK_V1_ENABLED');
 		expect(FEATURE_FLAG_ENV.SHOPPING_LIST_SHARE).toBe('PUBLIC_SHOPPING_LIST_SHARE_ENABLED');
 		expect(FEATURE_FLAG_ENV.HOME_REDESIGN_V1).toBe('HOME_REDESIGN_V1_ENABLED');
-		expect(FEATURE_FLAG_ENV.SHOPPING_UX_V2).toBe('SHOPPING_UX_V2_ENABLED');
 		expect(FEATURE_FLAG_ENV.PANTRY_UX_V2).toBe('PANTRY_UX_V2_ENABLED');
 		expect(FEATURE_FLAG_ENV.HOME_UX_V2).toBe('HOME_UX_V2_ENABLED');
 		expect(FEATURE_FLAG_ENV.STORE_RECOMMENDATION_V0).toBe('STORE_RECOMMENDATION_V0_ENABLED');
@@ -63,7 +61,6 @@ describe('feature-flags registry', () => {
 		expect(isPriceMemoryV1Enabled()).toBe(false);
 		expect(isShoppingListShareEnabled()).toBe(false);
 		expect(isHomeRedesignV1Enabled()).toBe(false);
-		expect(isShoppingUxV2Enabled()).toBe(false);
 		expect(isPantryUxV2Enabled()).toBe(false);
 		expect(isStoreRecommendationV0Enabled()).toBe(false);
 	});
@@ -92,7 +89,6 @@ describe('feature-flags registry', () => {
 		process.env[FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1] = 'true';
 		process.env[FEATURE_FLAG_ENV.SHOPPING_LIST_SHARE] = 'true';
 		process.env[FEATURE_FLAG_ENV.HOME_REDESIGN_V1] = 'true';
-		process.env[FEATURE_FLAG_ENV.SHOPPING_UX_V2] = 'true';
 		process.env[FEATURE_FLAG_ENV.PANTRY_UX_V2] = 'true';
 		process.env[FEATURE_FLAG_ENV.HOME_UX_V2] = 'true';
 		process.env[FEATURE_FLAG_ENV.STORE_RECOMMENDATION_V0] = 'true';
@@ -104,7 +100,6 @@ describe('feature-flags registry', () => {
 		expect(isBrainFeedbackV1Enabled()).toBe(true);
 		expect(isShoppingListShareEnabled()).toBe(true);
 		expect(isHomeRedesignV1Enabled()).toBe(true);
-		expect(isShoppingUxV2Enabled()).toBe(true);
 		expect(isPantryUxV2Enabled()).toBe(true);
 		expect(isHomeUxV2Enabled()).toBe(true);
 		expect(isStoreRecommendationV0Enabled()).toBe(true);
@@ -122,10 +117,10 @@ describe('feature-flags registry', () => {
 			expect(['env', 'default']).toContain(entry.source);
 		}
 
-		process.env[FEATURE_FLAG_ENV.SHOPPING_UX_V2] = 'true';
-		const shopping = getAllFeatureFlagSnapshot().find((entry) => entry.id === 'shoppingUxV2');
-		expect(shopping?.effective).toBe(true);
-		expect(shopping?.source).toBe('env');
-		expect(shopping?.envValue).toBe('true');
+		process.env[FEATURE_FLAG_ENV.PRICE_MEMORY_V1] = 'true';
+		const priceMemory = getAllFeatureFlagSnapshot().find((entry) => entry.id === 'priceMemoryV1');
+		expect(priceMemory?.effective).toBe(true);
+		expect(priceMemory?.source).toBe('env');
+		expect(priceMemory?.envValue).toBe('true');
 	});
 });

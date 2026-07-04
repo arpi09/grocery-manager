@@ -42,8 +42,6 @@
 
 				pantryUxV2Enabled={Boolean(data.pantryUxV2Enabled)}
 
-				shoppingUxV2Enabled={Boolean(data.shoppingUxV2Enabled)}
-
 				brainTimeline={data.brainTimeline}
 
 				brainScore={data.brainScore}

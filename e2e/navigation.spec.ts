@@ -40,8 +40,6 @@ test.describe('Navigation', () => {
 	});
 
 	test('shopping trip complete pantry CTA goes to inventory', async ({ page }) => {
-		test.skip(process.env.SHOPPING_UX_V2_ENABLED !== 'true', 'Requires SHOPPING_UX_V2_ENABLED=true');
-
 		const itemName = `Nav E2E ${Date.now()}`;
 
 		await loginAsAdmin(page);

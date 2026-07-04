@@ -11,7 +11,6 @@ export const FEATURE_FLAG_ENV = {
 	PRICE_MEMORY_V1: 'PRICE_MEMORY_V1_ENABLED',
 	BRAIN_FEEDBACK_V1: 'BRAIN_FEEDBACK_V1_ENABLED',
 	SHOPPING_LIST_SHARE: 'PUBLIC_SHOPPING_LIST_SHARE_ENABLED',
-	SHOPPING_UX_V2: 'SHOPPING_UX_V2_ENABLED',
 	PANTRY_UX_V2: 'PANTRY_UX_V2_ENABLED',
 	HOME_UX_V2: 'HOME_UX_V2_ENABLED',
 	RECEIPT_AI_BATCH: 'RECEIPT_AI_BATCH_ENABLED',
@@ -75,11 +74,6 @@ export function isShoppingListShareEnabled(): boolean {
 /** Server flag: Price Memory V1 read surfaces (default off). */
 export function isPriceMemoryV1Enabled(): boolean {
 	return isEnvTrue(FEATURE_FLAG_ENV.PRICE_MEMORY_V1);
-}
-
-/** Server flag: Shopping UX v2 — plan + shop modes on `/inkop` (default off). */
-export function isShoppingUxV2Enabled(): boolean {
-	return isEnvTrue(FEATURE_FLAG_ENV.SHOPPING_UX_V2);
 }
 
 /** Server flag: Pantry UX v2 — shelf view on `/inventory` (default off prod; on in vite dev when unset). */
@@ -235,13 +229,6 @@ export function getAllFeatureFlagSnapshot(): FeatureFlagSnapshotEntry[] {
 			label: 'Price memory v1',
 			pattern: 'exactTrue',
 			check: isPriceMemoryV1Enabled
-		},
-		{
-			id: 'shoppingUxV2',
-			envKey: FEATURE_FLAG_ENV.SHOPPING_UX_V2,
-			label: 'Shopping UX v2',
-			pattern: 'exactTrue',
-			check: isShoppingUxV2Enabled
 		},
 		{
 			id: 'pantryUxV2',
