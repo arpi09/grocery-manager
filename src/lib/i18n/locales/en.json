@@ -1300,7 +1300,7 @@
 				"unavailableRestoreAria": "Return {name} to the pick queue",
 				"completeUnavailable": "{count, plural, one {# item} other {# items}} not in store — kept on the list",
 				"completeTitle": "Done for this trip",
-				"completeBody": "{count, plural, one {# item} other {# items}} picked. Update the pantry when you're home.",
+				"completeBody": "{count, plural, one {# item} other {# items}} picked.",
 				"completePantryCta": "Update pantry",
 				"completePlanCta": "Back to planning",
 				"completeHomeCta": "Go to home",
@@ -1310,6 +1310,23 @@
 					"recent_purchase": "You bought this recently",
 					"on_list": "Already on your list"
 				}
+			},
+			"unpack": {
+				"question": "Got the receipt?",
+				"scanCta": "Scan the receipt",
+				"openCta": "Unpack without receipt",
+				"title": "Unpack",
+				"subtitle": "{count, plural, one {# item} other {# items}} from the trip — locations prefilled.",
+				"submit": "Add all to pantry ({count})",
+				"skipRow": "Skip",
+				"skipRowAria": "Skip {name} — not added to the pantry",
+				"addMoreLabel": "Add more items",
+				"addMorePlaceholder": "Bought anything else?",
+				"addMoreCta": "Add",
+				"empty": "Nothing left to unpack.",
+				"notNow": "Not now",
+				"doneToast": "{count, plural, one {# item} other {# items}} added to the pantry",
+				"loadFailed": "Couldn't load the trip's items. Try again."
 			},
 			"pantryBridge": {
 				"title": "Add to pantry?",
@@ -2664,6 +2681,7 @@
 		"lead": "Have the receipt in an app? Upload the PDF or image directly — or photograph a paper receipt. We suggest items you can add.",
 		"cameraPaper": "Photograph paper receipt",
 		"selectItems": "Select items ({selected} of {total})",
+		"alreadyInPantry": "Already in the pantry — just added",
 		"locationForAll": "Set location for all selected:",
 		"locationBulkHint": "Applies to checked rows. Change a row below if it should go somewhere else.",
 		"locationPerItem": "Location:",
@@ -3485,7 +3503,8 @@
 			"invalidLocation": "Invalid storage location."
 		},
 		"shopping": {
-			"missingRowId": "Missing row id"
+			"missingRowId": "Missing row id",
+			"unpackFailed": "Couldn't unpack. Try again."
 		}
 	},
 	"actionToast": {
