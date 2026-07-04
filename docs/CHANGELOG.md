@@ -57,6 +57,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(mobile-ux): onboarding defer/Kivra, scan polish, hem pulse, pantry cleanup ([#182](https://github.com/arpi09/grocery-manager/pull/182)) — "Kanske senare" gjorde ingenting (flaggan lästes aldrig) — pausar nu flödet för sessionen och stänger modalen.
 - fix(pantry): tile action buttons overflow card on mobile ([#184](https://github.com/arpi09/grocery-manager/pull/184))
 - fix(onboarding): hide Kivra hints when forward flag is off ([#185](https://github.com/arpi09/grocery-manager/pull/185))
+- fix(db): pass db handle explicitly to startup seeds — kills cold-start init race ([#186](https://github.com/arpi09/grocery-manager/pull/186)) — `ensureDefaultAdminUser(db)` / `ensureDefaultHousehold(db)` tar drizzle-handlen som parameter — ingen `getDb()`-import kvar i seed-filerna (cykeln bruten; endast type-import kvar).
 
 ### Changed
 
