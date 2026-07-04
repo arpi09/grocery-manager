@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { hashPassword } from '$lib/infrastructure/auth/password';
-import { getDb } from '$lib/infrastructure/db/init';
+import type { AppDatabase } from '$lib/infrastructure/db/init';
 import { userTable } from '$lib/infrastructure/db/schema';
 
 const DEFAULT_ADMIN_EMAIL = 'arvid.pilhall@me.com';
@@ -17,10 +17,10 @@ function adminPassword(): string | null {
 	return password || null;
 }
 
-export async function ensureDefaultAdminUser(): Promise<void> {
+// Takes the handle explicitly: runs inside initDatabase, before getDb() is safe to call.
+export async function ensureDefaultAdminUser(db: AppDatabase): Promise<void> {
 	const email = adminEmail();
 	const password = adminPassword();
-	const db = getDb();
 
 	const [existing] = await db
 		.select({
