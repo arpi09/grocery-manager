@@ -2605,6 +2605,7 @@
 		"cameraPaper": "Fota papperskvitto",
 		"selectItems": "Välj varor ({selected} av {total})",
 		"alreadyInPantry": "Redan i skafferiet — nyss tillagd",
+		"estimatesSummary": "Om skattningarna",
 		"locationForAll": "Sätt plats för alla valda:",
 		"locationPerItem": "Plats:",
 		"addCount": "Lägg till {count} {count, plural, one {vara} other {varor}}",
@@ -3034,8 +3035,10 @@
 			"insightsSummary": "Att se över i skafferiet",
 			"empty": {
 				"title": "Tomt så länge.\nSnart fullt av liv.",
-				"body": "Lägg till er första vara för att börja hålla koll på vad som finns hemma – och vad som snart tar slut.",
+				"body": "Skanna ett kvitto eller fota hyllan — snabbaste vägen till ett levande skafferi.",
 				"cta": "Lägg till din första vara",
+				"scanCta": "Skanna in mat",
+				"manualLink": "Eller lägg till manuellt",
 				"helper": "Sorteras automatiskt i Kyl, Frys och Skafferi"
 			},
 			"error": {

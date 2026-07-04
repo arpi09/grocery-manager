@@ -2684,6 +2684,7 @@
 		"cameraPaper": "Photograph paper receipt",
 		"selectItems": "Select items ({selected} of {total})",
 		"alreadyInPantry": "Already in the pantry — just added",
+		"estimatesSummary": "About the estimates",
 		"locationForAll": "Set location for all selected:",
 		"locationBulkHint": "Applies to checked rows. Change a row below if it should go somewhere else.",
 		"locationPerItem": "Location:",
@@ -3113,8 +3114,10 @@
 			"insightsSummary": "Things to review in your pantry",
 			"empty": {
 				"title": "Empty for now.\nSoon full of life.",
-				"body": "Add your first item to start keeping track of what's at home – and what's about to run out.",
+				"body": "Scan a receipt or photograph a shelf — the fastest way to a living pantry.",
 				"cta": "Add your first item",
+				"scanCta": "Scan in food",
+				"manualLink": "Or add manually",
 				"helper": "Sorted automatically into Fridge, Freezer and Pantry"
 			},
 			"error": {
