@@ -16,6 +16,11 @@ export interface IShoppingListRepository {
 		sortOrder: number
 	): Promise<ShoppingListItem>;
 	setChecked(householdId: string, id: string, checked: boolean): Promise<ShoppingListItem | null>;
+	setUnavailable(
+		householdId: string,
+		id: string,
+		unavailableAt: Date | null
+	): Promise<ShoppingListItem | null>;
 	delete(householdId: string, id: string): Promise<boolean>;
 	deleteChecked(householdId: string): Promise<number>;
 	nextSortOrder(householdId: string): Promise<number>;
@@ -29,6 +34,7 @@ function mapRow(row: typeof shoppingListItemTable.$inferSelect): ShoppingListIte
 		quantity: row.quantity,
 		unit: row.unit,
 		checked: Boolean(row.checked),
+		unavailableAt: row.unavailableAt ?? null,
 		sortOrder: row.sortOrder,
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt
@@ -130,6 +136,18 @@ export class DrizzleShoppingListRepository implements IShoppingListRepository {
 		const [row] = await this.database
 			.update(shoppingListItemTable)
 			.set({ checked, updatedAt: now })
+			.where(
+				and(eq(shoppingListItemTable.id, id), eq(shoppingListItemTable.householdId, householdId))
+			)
+			.returning();
+		return row ? mapRow(row) : null;
+	}
+
+	async setUnavailable(householdId: string, id: string, unavailableAt: Date | null) {
+		const now = new Date();
+		const [row] = await this.database
+			.update(shoppingListItemTable)
+			.set({ unavailableAt, updatedAt: now })
 			.where(
 				and(eq(shoppingListItemTable.id, id), eq(shoppingListItemTable.householdId, householdId))
 			)

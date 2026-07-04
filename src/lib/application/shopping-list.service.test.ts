@@ -15,6 +15,7 @@ describe('ShoppingListService', () => {
 			findById: vi.fn(),
 			create: vi.fn(),
 			setChecked: vi.fn(),
+			setUnavailable: vi.fn(),
 			delete: vi.fn(),
 			deleteChecked: vi.fn(),
 			nextSortOrder: vi.fn()
@@ -28,6 +29,60 @@ describe('ShoppingListService', () => {
 		);
 	});
 
+	it('marks an available item as unavailable', async () => {
+		const base = {
+			id: '1',
+			householdId: 'h1',
+			name: 'Dill',
+			quantity: null,
+			unit: null,
+			checked: false,
+			unavailableAt: null,
+			sortOrder: 0,
+			createdAt: new Date(),
+			updatedAt: new Date()
+		};
+		vi.mocked(repository.findById).mockResolvedValue(base);
+		vi.mocked(repository.setUnavailable).mockImplementation(async (_h, _id, at) => ({
+			...base,
+			unavailableAt: at
+		}));
+
+		const updated = await service.toggleUnavailable('h1', 'editor', '1');
+		expect(updated.unavailableAt).toBeInstanceOf(Date);
+		expect(vi.mocked(repository.setUnavailable).mock.calls[0][2]).toBeInstanceOf(Date);
+	});
+
+	it('clears the unavailable marker on second toggle', async () => {
+		const marked = {
+			id: '1',
+			householdId: 'h1',
+			name: 'Dill',
+			quantity: null,
+			unit: null,
+			checked: false,
+			unavailableAt: new Date('2026-07-04T10:00:00Z'),
+			sortOrder: 0,
+			createdAt: new Date(),
+			updatedAt: new Date()
+		};
+		vi.mocked(repository.findById).mockResolvedValue(marked);
+		vi.mocked(repository.setUnavailable).mockImplementation(async (_h, _id, at) => ({
+			...marked,
+			unavailableAt: at
+		}));
+
+		const updated = await service.toggleUnavailable('h1', 'editor', '1');
+		expect(updated.unavailableAt).toBeNull();
+		expect(vi.mocked(repository.setUnavailable).mock.calls[0][2]).toBeNull();
+	});
+
+	it('rejects viewers for unavailable toggles', async () => {
+		await expect(service.toggleUnavailable('h1', 'viewer', '1')).rejects.toBeInstanceOf(
+			ShoppingListReadOnlyError
+		);
+	});
+
 	it('skips duplicate names when adding suggestions', async () => {
 		vi.mocked(repository.listByHousehold).mockResolvedValue([
 			{
@@ -37,6 +92,7 @@ describe('ShoppingListService', () => {
 				quantity: null,
 				unit: null,
 				checked: false,
+				unavailableAt: null,
 				sortOrder: 0,
 				createdAt: new Date(),
 				updatedAt: new Date()
@@ -50,6 +106,7 @@ describe('ShoppingListService', () => {
 			quantity: input.quantity ?? null,
 			unit: input.unit ?? null,
 			checked: false,
+			unavailableAt: null,
 			sortOrder,
 			createdAt: new Date(),
 			updatedAt: new Date()

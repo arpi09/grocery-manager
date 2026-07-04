@@ -26,7 +26,9 @@
 	import type { DedupeWarning } from '$lib/domain/dedupe-autopilot';
 	import {
 		clampFocusIndex,
+		getLiveTripTotal,
 		sortUncheckedItems,
+		splitTripItems,
 		type ShoppingTripMode
 	} from '$lib/domain/shopping-trip';
 	import { memorySuggestionId } from '$lib/domain/shopping-v2-presenter';
@@ -75,6 +77,9 @@
 	let picking = $state(false);
 	let addingItem = $state(false);
 	let liveMessage = $state('');
+	let lastPicked = $state<ShoppingListItem | null>(null);
+	let undoingPick = $state(false);
+	let togglingUnavailable = $state(false);
 
 	let pantryBridgeItem = $state<ShoppingListItem | null>(null);
 	let pantryBridgePreview = $state<PantryBridgePreview | null>(null);
@@ -85,7 +90,13 @@
 	const unchecked = $derived(sortUncheckedItems(items));
 	const listHasItems = $derived(items.length > 0 || checkedCount > 0);
 	/* The add form stays visible on an empty list so the page's core function is always at hand. */
-	const showAddForm = $derived(showQuickAdd || unchecked.length === 0);
+	const showAddForm = $derived(showQuickAdd || (session.mode === 'plan' && unchecked.length === 0));
+
+	/* Trip queue excludes items marked "not in store" during this trip; they regroup below. */
+	const tripSplit = $derived(splitTripItems(items, session.tripStartedAt));
+	const tripUnchecked = $derived(sortUncheckedItems(tripSplit.available));
+	/* Total follows the live list so items a partner adds mid-trip count toward completion. */
+	const liveTripTotal = $derived(getLiveTripTotal(session.pickedCount, tripUnchecked.length));
 
 	async function openQuickAdd() {
 		showQuickAdd = true;
@@ -178,6 +189,7 @@
 		}
 
 		if (next === 'shop') {
+			lastPicked = null;
 			persistSession({
 				mode: 'shop',
 				focusIndex: 0,
@@ -337,7 +349,7 @@
 			}
 
 			const nextPicked = session.pickedCount + 1;
-			const nextUnchecked = Math.max(unchecked.length - 1, 0);
+			const nextUnchecked = Math.max(tripUnchecked.length - 1, 0);
 			const nextFocus = clampFocusIndex(session.focusIndex, nextUnchecked);
 
 			persistSession({
@@ -346,17 +358,18 @@
 				focusIndex: nextFocus
 			});
 
+			lastPicked = item;
 			liveMessage = t('shopping.v2.shop.pickedLive', { name: item.name });
 
 			void trackProductEvent('trip_item_checked', {
 				itemId: item.id,
 				position: session.focusIndex,
-				remaining: Math.max(session.tripTotal - nextPicked, 0)
+				remaining: nextUnchecked
 			});
 
-			if (nextPicked >= session.tripTotal) {
+			if (nextUnchecked === 0) {
 				void trackProductEvent('trip_completed', {
-					total: session.tripTotal,
+					total: getLiveTripTotal(nextPicked, 0),
 					durationMs: session.tripStartedAt ? Date.now() - session.tripStartedAt : undefined
 				});
 				tripCompletedTrigger += 1;
@@ -379,6 +392,99 @@
 		}
 	}
 
+	async function handleUndoPick() {
+		if (!canEdit || undoingPick || !lastPicked) {
+			return;
+		}
+
+		const target = lastPicked;
+		undoingPick = true;
+		const formData = new FormData();
+		formData.set('id', target.id);
+
+		try {
+			const response = await fetch('?/toggle', {
+				method: 'POST',
+				body: formData,
+				headers: {
+					accept: 'application/json',
+					'x-sveltekit-action': 'true'
+				}
+			});
+			const result = deserialize(await response.text()) as { type: string };
+
+			if (result.type !== 'success') {
+				showClientToast(t('shopping.v2.error.toggleFailed'), { variant: 'error' });
+				return;
+			}
+
+			persistSession({
+				...session,
+				pickedCount: Math.max(session.pickedCount - 1, 0)
+			});
+			lastPicked = null;
+			closePantrySheet();
+
+			const message = t('shopping.v2.shop.undoToast', { name: target.name });
+			liveMessage = message;
+			showClientToast(message, { variant: 'success' });
+			await invalidateAll();
+		} catch {
+			showClientToast(t('shopping.v2.error.toggleFailed'), { variant: 'error' });
+		} finally {
+			undoingPick = false;
+		}
+	}
+
+	async function toggleUnavailable(item: ShoppingListItem) {
+		if (!canEdit || togglingUnavailable) {
+			return;
+		}
+
+		togglingUnavailable = true;
+		const formData = new FormData();
+		formData.set('id', item.id);
+
+		try {
+			const response = await fetch('?/toggleUnavailable', {
+				method: 'POST',
+				body: formData,
+				headers: {
+					accept: 'application/json',
+					'x-sveltekit-action': 'true'
+				}
+			});
+			const result = deserialize(await response.text()) as {
+				type: string;
+				data?: { unavailable?: boolean };
+			};
+
+			if (result.type !== 'success') {
+				showClientToast(t('shopping.v2.error.toggleFailed'), { variant: 'error' });
+				return;
+			}
+
+			const nowUnavailable = result.data?.unavailable === true;
+			if (nowUnavailable) {
+				persistSession({
+					...session,
+					focusIndex: clampFocusIndex(session.focusIndex, Math.max(tripUnchecked.length - 1, 0))
+				});
+			}
+
+			const message = nowUnavailable
+				? t('shopping.v2.shop.unavailableToast', { name: item.name })
+				: t('shopping.v2.shop.unavailableRestoredToast', { name: item.name });
+			liveMessage = message;
+			showClientToast(message, { variant: 'success' });
+			await invalidateAll();
+		} catch {
+			showClientToast(t('shopping.v2.error.toggleFailed'), { variant: 'error' });
+		} finally {
+			togglingUnavailable = false;
+		}
+	}
+
 	const addEnhance = bindSubmittingWithToast(
 		(value) => {
 			addingItem = value;
@@ -392,9 +498,9 @@
 </script>
 
 <div class="shopping-v2-page" data-testid="shopping-v2-page">
+	<!-- Read-only members can still follow shop mode in store; edit actions stay hidden. -->
 	<ModeToggle
 		mode={session.mode}
-		disabled={!canEdit}
 		shopDisabled={!listHasItems}
 		onchange={(next) => switchMode(next, 'toggle')}
 	/>
@@ -435,32 +541,22 @@
 				legacyOpen = true;
 			}}
 		/>
-
-		{#if showAddForm && canEdit}
-			<form method="POST" action="?/add" use:enhance={addEnhance} class="quick-add" data-testid="shopping-v2-quick-add">
-				<label class="sr-only" for="shopping-v2-name">{t('shopping.v2.add.placeholder')}</label>
-				<input
-					id="shopping-v2-name"
-					name="name"
-					required
-					placeholder={t('shopping.v2.add.placeholder')}
-					autocomplete="off"
-				/>
-				<input name="quantity" placeholder={t('shopping.v2.add.quantityPlaceholder')} />
-				<input name="unit" placeholder={t('shopping.v2.add.unitPlaceholder')} />
-				<Button type="submit" loading={addingItem}>{t('shopping.v2.add.submit')}</Button>
-			</form>
-		{/if}
 	{:else}
 		<ShoppingV2ShopView
-			{items}
+			items={tripSplit.available}
+			unavailableItems={tripSplit.unavailable}
 			focusIndex={session.focusIndex}
-			tripTotal={session.tripTotal}
+			tripTotal={liveTripTotal}
 			pickedCount={session.pickedCount}
 			{canEdit}
 			{picking}
+			lastPickedName={lastPicked?.name ?? null}
 			{storeDedupeByKey}
 			onPick={handlePick}
+			onUndoPick={handleUndoPick}
+			onMarkUnavailable={(item) => void toggleUnavailable(item)}
+			onRestoreUnavailable={(item) => void toggleUnavailable(item)}
+			onAddItem={() => void openQuickAdd()}
 			onBackToPlan={handleBackToPlan}
 			onCompletePantry={handleCompletePantry}
 			onCompletePlan={handleCompletePlan}
@@ -468,6 +564,22 @@
 				legacyOpen = true;
 			}}
 		/>
+	{/if}
+
+	{#if showAddForm && canEdit}
+		<form method="POST" action="?/add" use:enhance={addEnhance} class="quick-add" data-testid="shopping-v2-quick-add">
+			<label class="sr-only" for="shopping-v2-name">{t('shopping.v2.add.placeholder')}</label>
+			<input
+				id="shopping-v2-name"
+				name="name"
+				required
+				placeholder={t('shopping.v2.add.placeholder')}
+				autocomplete="off"
+			/>
+			<input name="quantity" placeholder={t('shopping.v2.add.quantityPlaceholder')} />
+			<input name="unit" placeholder={t('shopping.v2.add.unitPlaceholder')} />
+			<Button type="submit" loading={addingItem}>{t('shopping.v2.add.submit')}</Button>
+		</form>
 	{/if}
 
 	<ShoppingLegacyDrawer

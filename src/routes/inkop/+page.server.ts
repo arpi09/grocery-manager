@@ -227,6 +227,25 @@ export const actions: Actions = {
 
 		return { success: true };
 	},
+	toggleUnavailable: async (event) => {
+		requireInventoryWriteAccess(event.locals.householdRole);
+		const householdId = event.locals.householdId;
+		if (!householdId) error(400, translate(event.locals.locale, 'errors.household.noHousehold'));
+		const id = (await event.request.formData()).get('id');
+		if (!id || typeof id !== 'string')
+			return fail(400, { message: translate(event.locals.locale, 'errors.shopping.missingRowId') });
+
+		try {
+			const updated = await event.locals.shoppingListService.toggleUnavailable(
+				householdId,
+				event.locals.householdRole!,
+				id
+			);
+			return { success: true, unavailable: updated.unavailableAt !== null };
+		} catch (err) {
+			return handleServiceError(err);
+		}
+	},
 	bulkToggleChecked: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);
 		const householdId = event.locals.householdId;

@@ -17,13 +17,19 @@
 
 	interface Props {
 		items: ShoppingListItem[];
+		unavailableItems?: ShoppingListItem[];
 		focusIndex: number;
 		tripTotal: number;
 		pickedCount: number;
 		canEdit: boolean;
 		picking?: boolean;
+		lastPickedName?: string | null;
 		storeDedupeByKey?: Record<string, DedupeWarning[]>;
 		onPick: (item: ShoppingListItem) => void;
+		onUndoPick?: () => void;
+		onMarkUnavailable?: (item: ShoppingListItem) => void;
+		onRestoreUnavailable?: (item: ShoppingListItem) => void;
+		onAddItem?: () => void;
 		onBackToPlan: () => void;
 		onCompletePantry: () => void;
 		onCompletePlan: () => void;
@@ -32,13 +38,19 @@
 
 	let {
 		items,
+		unavailableItems = [],
 		focusIndex,
 		tripTotal,
 		pickedCount,
 		canEdit,
 		picking = false,
+		lastPickedName = null,
 		storeDedupeByKey = {},
 		onPick,
+		onUndoPick,
+		onMarkUnavailable,
+		onRestoreUnavailable,
+		onAddItem,
 		onBackToPlan,
 		onCompletePantry,
 		onCompletePlan,
@@ -75,12 +87,28 @@
 		<section class="complete-card" data-testid="shopping-v2-trip-complete">
 			<h2>{t('shopping.v2.shop.completeTitle')}</h2>
 			<p>{t('shopping.v2.shop.completeBody', { count: tripTotal })}</p>
+			{#if unavailableItems.length > 0}
+				<p class="complete-unavailable" data-testid="shopping-v2-complete-unavailable">
+					{t('shopping.v2.shop.completeUnavailable', { count: unavailableItems.length })}
+				</p>
+			{/if}
 			<div class="complete-actions">
 				<Button fullWidth onclick={onCompletePantry}>{t('shopping.v2.shop.completePantryCta')}</Button>
 				<Button variant="secondary" fullWidth onclick={onCompletePlan}>
 					{t('shopping.v2.shop.completePlanCta')}
 				</Button>
 			</div>
+			{#if canEdit && lastPickedName && onUndoPick}
+				<button
+					type="button"
+					class="undo-link"
+					data-testid="shopping-v2-undo-pick"
+					onclick={onUndoPick}
+					aria-label={t('shopping.v2.shop.undoAria')}
+				>
+					{t('shopping.v2.shop.undoNamed', { name: lastPickedName })}
+				</button>
+			{/if}
 		</section>
 	{:else if focusItem}
 		<ShoppingFocusItem
@@ -89,13 +117,39 @@
 			{picking}
 			dedupeWarnings={focusDedupeWarnings}
 			onPick={() => onPick(focusItem)}
+			onUnavailable={onMarkUnavailable ? () => onMarkUnavailable(focusItem) : undefined}
 		/>
+
+		{#if canEdit && lastPickedName && onUndoPick}
+			<button
+				type="button"
+				class="undo-link"
+				data-testid="shopping-v2-undo-pick"
+				onclick={onUndoPick}
+				aria-label={t('shopping.v2.shop.undoAria')}
+			>
+				{t('shopping.v2.shop.undoNamed', { name: lastPickedName })}
+			</button>
+		{/if}
 
 		<section class="peek" aria-label={t('shopping.v2.shop.peekAria')}>
 			<p class="peek-label">{t('shopping.v2.shop.peekLabel')}</p>
 			<div class="peek-row">
 				{#each peekQueue as item (item.id)}
-					<span class="peek-pill">{item.name}</span>
+					{#if canEdit}
+						<button
+							type="button"
+							class="peek-pill peek-pill-button"
+							data-testid="shopping-v2-peek-pick"
+							disabled={picking}
+							onclick={() => onPick(item)}
+							aria-label={t('shopping.v2.shop.peekPickAria', { name: item.name })}
+						>
+							{item.name}
+						</button>
+					{:else}
+						<span class="peek-pill">{item.name}</span>
+					{/if}
 				{/each}
 				{#if peekOverflow > 0}
 					<span class="peek-pill peek-more">{t('shopping.v2.shop.peekMore', { count: peekOverflow })}</span>
@@ -104,6 +158,35 @@
 		</section>
 	{:else}
 		<p class="empty-shop">{t('shopping.v2.shop.progressEmpty')}</p>
+	{/if}
+
+	{#if canEdit && onAddItem}
+		<button type="button" class="add-link" data-testid="shopping-v2-shop-add" onclick={onAddItem}>
+			{t('shopping.v2.summary.addItemCta')}
+		</button>
+	{/if}
+
+	{#if unavailableItems.length > 0}
+		<section class="unavailable" data-testid="shopping-v2-unavailable-group">
+			<p class="peek-label">{t('shopping.v2.shop.unavailableGroupLabel')}</p>
+			<ul class="unavailable-list">
+				{#each unavailableItems as item (item.id)}
+					<li>
+						<span class="unavailable-name">{item.name}</span>
+						{#if canEdit && onRestoreUnavailable}
+							<button
+								type="button"
+								class="restore-link"
+								onclick={() => onRestoreUnavailable(item)}
+								aria-label={t('shopping.v2.shop.unavailableRestoreAria', { name: item.name })}
+							>
+								{t('shopping.v2.shop.unavailableRestore')}
+							</button>
+						{/if}
+					</li>
+				{/each}
+			</ul>
+		</section>
 	{/if}
 
 	<div class="live-region" aria-live="polite" aria-atomic="true"></div>
@@ -191,6 +274,84 @@
 
 	.peek-more {
 		background: var(--color-surface);
+	}
+
+	.peek-pill-button {
+		font: inherit;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		cursor: pointer;
+		min-height: var(--touch-target-min, 2.75rem);
+		color: var(--color-text);
+	}
+
+	.peek-pill-button:disabled {
+		opacity: 0.55;
+		cursor: not-allowed;
+	}
+
+	.peek-pill-button:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+
+	.undo-link,
+	.add-link,
+	.restore-link {
+		border: none;
+		background: none;
+		padding: 0;
+		font: inherit;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: underline;
+		cursor: pointer;
+		min-height: var(--touch-target-min, 2.75rem);
+	}
+
+	.undo-link {
+		align-self: center;
+	}
+
+	.add-link {
+		align-self: flex-start;
+	}
+
+	.undo-link:focus-visible,
+	.add-link:focus-visible,
+	.restore-link:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+
+	.unavailable-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.unavailable-list li {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-sm);
+		min-height: var(--touch-target-min, 2.75rem);
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.unavailable-list li:last-child {
+		border-bottom: none;
+	}
+
+	.unavailable-name {
+		color: var(--color-text-muted);
+	}
+
+	.complete-unavailable {
+		font-size: 0.9375rem;
 	}
 
 	.complete-card {

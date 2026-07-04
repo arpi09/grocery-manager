@@ -11,9 +11,10 @@
 		picking?: boolean;
 		dedupeWarnings?: DedupeWarning[];
 		onPick: () => void;
+		onUnavailable?: () => void;
 	}
 
-	let { item, canEdit, picking = false, dedupeWarnings = [], onPick }: Props = $props();
+	let { item, canEdit, picking = false, dedupeWarnings = [], onPick, onUnavailable }: Props = $props();
 
 	const detail = $derived.by(() => {
 		const parts: string[] = [];
@@ -51,6 +52,17 @@
 		>
 			{t('shopping.v2.shop.pickCta')}
 		</Button>
+		{#if onUnavailable}
+			<button
+				type="button"
+				class="unavailable-link"
+				data-testid="shopping-v2-unavailable-cta"
+				onclick={onUnavailable}
+				aria-label={t('shopping.v2.shop.unavailableAria', { name: item.name })}
+			>
+				{t('shopping.v2.shop.unavailableCta')}
+			</button>
+		{/if}
 	{/if}
 </section>
 
@@ -97,5 +109,23 @@
 		font-size: 1.0625rem;
 		width: 100%;
 		max-width: 24rem;
+	}
+
+	.unavailable-link {
+		border: none;
+		background: none;
+		padding: 0;
+		font: inherit;
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+		text-decoration: underline;
+		cursor: pointer;
+		min-height: var(--touch-target-min, 2.75rem);
+	}
+
+	.unavailable-link:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 </style>

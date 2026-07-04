@@ -89,3 +89,36 @@ export function getSummaryNamePills(
 export function isTripComplete(picked: number, total: number): boolean {
 	return total > 0 && picked >= total;
 }
+
+/** Marked "not in store" during the current trip (markers from earlier trips don't count). */
+export function isItemUnavailableForTrip(
+	item: ShoppingListItem,
+	tripStartedAt: number | null
+): boolean {
+	return (
+		item.unavailableAt !== null &&
+		tripStartedAt !== null &&
+		item.unavailableAt.getTime() >= tripStartedAt
+	);
+}
+
+export function splitTripItems(
+	items: ShoppingListItem[],
+	tripStartedAt: number | null
+): { available: ShoppingListItem[]; unavailable: ShoppingListItem[] } {
+	const available: ShoppingListItem[] = [];
+	const unavailable: ShoppingListItem[] = [];
+	for (const item of items) {
+		if (!item.checked && isItemUnavailableForTrip(item, tripStartedAt)) {
+			unavailable.push(item);
+		} else {
+			available.push(item);
+		}
+	}
+	return { available, unavailable };
+}
+
+/** Trip total that follows the live list: picked this trip + still unchecked (partner adds count). */
+export function getLiveTripTotal(pickedCount: number, uncheckedCount: number): number {
+	return Math.max(pickedCount, 0) + Math.max(uncheckedCount, 0);
+}

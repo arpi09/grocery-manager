@@ -20,6 +20,7 @@ function item(
 		quantity: null,
 		unit: null,
 		checked: false,
+		unavailableAt: null,
 		sortOrder: 0,
 		createdAt: new Date('2026-01-01T10:00:00Z'),
 		updatedAt: new Date('2026-01-01T10:00:00Z'),
