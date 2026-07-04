@@ -50,7 +50,11 @@
 		pulseMembers?: HomePulseMember[];
 		pulseLastActivity?: HomePulseActivity | null;
 		acceptingReplenishment?: boolean;
+		dismissingReplenishment?: boolean;
 		onAcceptReplenishment?: (card: Extract<HomeBriefingForYouCard, { kind: 'replenishment' }>) =>
+			| void
+			| Promise<void>;
+		onDismissReplenishment?: (card: Extract<HomeBriefingForYouCard, { kind: 'replenishment' }>) =>
 			| void
 			| Promise<void>;
 		onRecipeCta?: (card: HomeBriefingRecipeCard) => void | Promise<void>;
@@ -72,7 +76,9 @@
 		pulseMembers = [],
 		pulseLastActivity = null,
 		acceptingReplenishment = false,
+		dismissingReplenishment = false,
 		onAcceptReplenishment,
+		onDismissReplenishment,
 		onRecipeCta,
 		onAddExpiringToList
 	}: Props = $props();
@@ -189,7 +195,12 @@
 </script>
 
 <div class="home-v2-briefing" data-testid="home-v2-briefing">
-	<HomeBriefingGreeting greeting={greeting} status={statusPresentation} statusOverride={briefingOneLiner} />
+	<HomeBriefingGreeting
+		greeting={greeting}
+		status={statusPresentation}
+		statusOverride={briefingOneLiner}
+		aiGenerated={Boolean(briefingOneLiner?.trim())}
+	/>
 
 	<!-- Cold start: no pulse card when there's nothing to pulse — the moment card guides setup. -->
 	{#if onAddExpiringToList && (summary.totalItems > 0 || shoppingListCount > 0)}
@@ -227,6 +238,15 @@
 						: forYouCtaHref
 							? () => trackForYouLinkTap(forYou.kind, forYouCtaHref!)
 							: undefined
+			}
+			secondaryLabel={forYou.kind === 'replenishment' && canWrite && onDismissReplenishment
+				? t('shopping.v2.memory.dismiss')
+				: null}
+			secondaryLoading={dismissingReplenishment}
+			onSecondary={
+				forYou.kind === 'replenishment' && onDismissReplenishment
+					? () => onDismissReplenishment(forYou)
+					: undefined
 			}
 		/>
 	{:else if moment && momentPresentation}

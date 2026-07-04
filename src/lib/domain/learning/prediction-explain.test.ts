@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+	buildInventoryExpiryExplanation,
 	buildInventoryShelfLifeExplanation,
 	buildLocationExplanationFromSource,
 	buildShelfLifeExplanationFromSource,
@@ -69,6 +70,39 @@ describe('buildInventoryShelfLifeExplanation', () => {
 		});
 
 		expect(explanation?.templateId).toBe('shelf_life.heuristic');
+	});
+});
+
+describe('buildInventoryExpiryExplanation', () => {
+	it('builds an honest household explanation without fabricating a day count', () => {
+		const explanation = buildInventoryExpiryExplanation(
+			{ source: 'household_learned', location: 'fridge' },
+			'sv'
+		);
+
+		expect(explanation?.templateId).toBe('pantry_expiry.household_learned');
+		expect(explanation?.primary).not.toMatch(/\d/);
+		expect(explanation?.facts[0]).toMatch(/kyl/i);
+	});
+
+	it('labels an AI estimate distinctly from a heuristic one', () => {
+		const ai = buildInventoryExpiryExplanation({ source: 'ai_inferred' }, 'sv');
+		const heuristic = buildInventoryExpiryExplanation({ source: 'heuristic' }, 'sv');
+
+		expect(ai?.templateId).toBe('pantry_expiry.ai_inferred');
+		expect(heuristic?.templateId).toBe('pantry_expiry.heuristic');
+		expect(ai?.primary).not.toBe(heuristic?.primary);
+	});
+
+	it('omits the location fact when no location is known', () => {
+		const explanation = buildInventoryExpiryExplanation({ source: 'default_heuristic' }, 'sv');
+		expect(explanation?.facts).toEqual([]);
+	});
+
+	it('returns null for non-estimated sources', () => {
+		expect(buildInventoryExpiryExplanation({ source: 'user_set' }, 'sv')).toBeNull();
+		expect(buildInventoryExpiryExplanation({ source: 'receipt_printed' }, 'sv')).toBeNull();
+		expect(buildInventoryExpiryExplanation({ source: null }, 'sv')).toBeNull();
 	});
 });
 

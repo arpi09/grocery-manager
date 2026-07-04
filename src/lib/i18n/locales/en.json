@@ -368,6 +368,10 @@
 			},
 			"greeting": "Hi {name}",
 			"greetingFallback": "Hi",
+			"aiOneLiner": {
+				"hint": "Skaffu wrote this greeting from what you have at home and your shopping list — an interpretation, not an exact truth.",
+				"aria": "Why does this say this? AI-generated greeting"
+			},
 			"status": {
 				"useSoonAndList": "{useSoonCount, plural, one {# thing to use soon} other {# things to use soon}} · {count, plural, one {# item} other {# items}} on the list — you usually shop on {weekday}",
 				"useSoonAndListNoCadence": "{useSoonCount, plural, one {# thing to use soon} other {# things to use soon}} · {count, plural, one {# item} other {# items}} on the list",
@@ -3564,7 +3568,9 @@
 			"aiRateLimitSmartFill": "You've used all {limit} smart fill runs this week on the Free plan. Upgrade to Pro or wait until next week.",
 			"aiRateLimitWeeklyPlan": "You've used all {limit} weekly autopilot runs this week on the Free plan. Upgrade to Pro or wait until next week.",
 			"barcodeNotFound": "Invalid barcode.",
-			"invalidLocation": "Invalid storage location."
+			"invalidLocation": "Invalid storage location.",
+			"invalidInput": "Invalid input.",
+			"notFound": "Item not found."
 		},
 		"shopping": {
 			"missingRowId": "Missing row id",
@@ -3650,6 +3656,18 @@
 			"title": "Why this suggestion?",
 			"settingsLink": "Manage what Skaffu knows",
 			"productFallback": "the product",
+			"correctCta": "Correct the date",
+			"correctLabel": "New expiry date",
+			"correctSave": "Save",
+			"correctCancel": "Cancel",
+			"correctSuccess": "Thanks — Skaffu will learn from this",
+			"correctError": "Could not save — try again",
+			"pantry": {
+				"householdPrimary": "This date was learned from your household's habits.",
+				"aiPrimary": "This date is an AI estimate — double-check if needed.",
+				"heuristicPrimary": "This date is an estimate for similar items.",
+				"locationFact": "Stored in {location}."
+			},
 			"shelfLife": {
 				"householdFactPurchased": "Last purchased {date}"
 			}

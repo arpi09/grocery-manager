@@ -76,6 +76,7 @@
 	}: Props = $props();
 
 	let acceptingReplenishment = $state(false);
+	let dismissingReplenishment = $state(false);
 	let briefingTracked = $state(false);
 
 	const briefingInput = $derived<HomeBriefingInput>({
@@ -133,6 +134,35 @@
 			showClientToast(t('shopping.v2.memory.acceptFailed'), { variant: 'error' });
 		} finally {
 			acceptingReplenishment = false;
+		}
+	}
+
+	async function dismissReplenishment(
+		card: Extract<HomeBriefingForYouCard, { kind: 'replenishment' }>
+	) {
+		if (!canWrite || dismissingReplenishment) return;
+
+		trackForYouCtaTapped('replenishment', 'dismiss');
+
+		dismissingReplenishment = true;
+		try {
+			const response = await fetch('/api/replenishment/dismiss', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ normalizedKey: card.suggestion.normalizedKey })
+			});
+			const data = (await response.json().catch(() => null)) as { error?: string } | null;
+
+			if (!response.ok) {
+				showClientToast(data?.error ?? t('replenishment.dismissFailed'), { variant: 'error' });
+				return;
+			}
+
+			await invalidateAll();
+		} catch {
+			showClientToast(t('replenishment.dismissFailed'), { variant: 'error' });
+		} finally {
+			dismissingReplenishment = false;
 		}
 	}
 
@@ -237,7 +267,9 @@
 			{pulseMembers}
 			{pulseLastActivity}
 			{acceptingReplenishment}
+			{dismissingReplenishment}
 			onAcceptReplenishment={acceptReplenishment}
+			onDismissReplenishment={dismissReplenishment}
 			onRecipeCta={handleRecipeCta}
 			onAddExpiringToList={addExpiringToList}
 		/>
