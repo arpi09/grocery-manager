@@ -4,9 +4,9 @@
 
 | F?lt | V?rde |
 |------|--------|
-| **Uppdaterad** | 2026-07-03 |
-| **Prod SHA** | `e918c64ee` @ [28682670848](https://github.com/arpi09/grocery-manager/actions/runs/28682670848) (live, deploy_tier=auto→full, e2e 3/3). |
-| **Master SHA** | `e918c64ee` — mobil-UX polish (#182). |
+| **Uppdaterad** | 2026-07-04 |
+| **Prod SHA** | `8d02a97a2` @ [28705401202](https://github.com/arpi09/grocery-manager/actions/runs/28705401202) (live, deploy_tier=auto→full, e2e 3/3 efter rerun av flaky shard). |
+| **Master SHA** | `8d02a97a2` — NaN-expiry fix (#198); UX v2-flaggor PENSIONERADE (#188) — inga canary-flaggor kvar, ytorna är enda läget. |
 | **CI/CD model** | **v2 on master** � tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
@@ -86,6 +86,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 - [x] **Login flow cleanup** — prod **`fc51a307b`** @ [28661077873](https://github.com/arpi09/grocery-manager/actions/runs/28661077873) (auto→fast, e2e critical). PR #176 merged 2026-07-03; curl-smoke grön (4 URLs ×2, VAPID, /login).
 - [x] **Email logo canonical mark** — prod **`046542052`** @ [28665190055](https://github.com/arpi09/grocery-manager/actions/runs/28665190055) (auto→fast, e2e critical). PR #178 merged 2026-07-03; curl-smoke grön (/, /guider, /login). Sista logo-avvikaren (e-post "S"-monogram) ersatt med kanoniska hus-märket.
 - [x] **Mobil-UX polish + onboarding-fixar** — prod **`e918c64ee`** @ [28682670848](https://github.com/arpi09/grocery-manager/actions/runs/28682670848) (auto→full, e2e 3/3). PRs #181+#182 merged 2026-07-03; curl-smoke grön (/, /guider, /login). Onboarding: Kanske senare/Kivra-länk fungerar, stepper fit. Hem: "Mer på hem" ersatt med pulskort. Lager: en Lägg till-knapp, "Att se över i skafferiet", polerade zonsektioner. Scan: copy+spacing. OBS: pantry-v2/home-v2-e2e körs ej i CI (flagg-lucka) — uppföljningstask öppen.
+- [x] **Storpaket: flaggpensionering + svep + fixar** — prod **`8d02a97a2`** @ [28705401202](https://github.com/arpi09/grocery-manager/actions/runs/28705401202) (auto→full, e2e 3/3 efter rerun). Merged 2026-07-04; curl-smoke grön (/, /guider, /login). #188: UX v2-flaggorna (SHOPPING/PANTRY/HOME_UX_V2 + HOME_REDESIGN_V1) pensionerade, legacy-layouter raderade, e2e-skips borta — CI-flagg-luckan STÄNGD vid roten. #197: svep-Använd i lagerlistan (slimmad rad, peek-hint, kebab-fallback). #184/#185: tile-overflow + Kivra-dödlänk. #198: NaN-expiry-fix från kvittoimport (räddad ur #190). Plus parallella sessioners #186/#191/#192/#193/#196. Kända flaky nykomlingar i CI: kebab-konsumtionstestet (karantän, fixme) + pulse quick-add — stabiliseringstask öppen.
 
 ## Acquisition (V1)
 
