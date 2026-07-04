@@ -74,6 +74,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - docs(reality): prod SHA 046542052 (#178 email logo) post-deploy ([#179](https://github.com/arpi09/grocery-manager/pull/179)) — Post-deploy update: prod SHA `046542052` @ run 28665190055 (auto→fast, e2e critical, verify-release grön)
 - chore: add .gitattributes with deterministic LF line endings ([#180](https://github.com/arpi09/grocery-manager/pull/180)) — Add `.gitattributes`: `* text=auto eol=lf`, CRLF for Windows scripts, binary markers for assets
 - docs(reality): prod SHA e918c64ee post-deploy ([#183](https://github.com/arpi09/grocery-manager/pull/183))
+- chore(design-sync): pin Skaffu Design System project ([#187](https://github.com/arpi09/grocery-manager/pull/187)) — Pins `projectId` `f06626f0-ce11-4687-bbf5-03ac70c38e44` in `.design-sync/config.json` so future `/design-sync` runs target the existing "Skaffu Design System" project instead of creating duplicates.
 
 ### Added
 
