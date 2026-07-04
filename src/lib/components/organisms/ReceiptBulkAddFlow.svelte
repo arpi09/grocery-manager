@@ -668,6 +668,12 @@
 			</div>
 		{/if}
 		<h2 class="title">{t('receiptBulk.selectItems', { selected: selectedCount, total: lines.length })}</h2>
+		<!-- Discard action lives away from the save buttons — a mis-tap here costs the whole review. -->
+		<p class="new-image-row">
+			<button type="button" class="link-btn" data-testid="receipt-new-image" onclick={requestNewImage}>
+				{t('common.newImage')}
+			</button>
+		</p>
 		{#if parsedStoreLabel || parsedPurchasedAt}
 			<p class="receipt-meta" data-testid="receipt-review-meta">
 				{#if parsedStoreLabel && parsedPurchasedAt}
@@ -687,20 +693,26 @@
 				{t('receiptBulk.mergedAwaySummary', { count: mergedAwayCount })}
 			</p>
 		{/if}
-		{#if shelfLifeEstimatesInReceipt}
-			<p class="hint">{t('receiptBulk.estimatesHint')}</p>
-		{/if}
-		{#if aiDegradedMode && shelfLifeEstimatesInReceipt}
-			<FeedbackBanner tone="info" message={t('receiptBulk.aiDegradedBanner')} />
-		{/if}
-		{#if hasLocationPredictions}
-			<p class="hint">{t('receiptBulk.locationSuggestionsHint')}</p>
-		{/if}
-		{#if qualityReport && shelfLifeEstimatesInReceipt}
-			<ReceiptQualityMeter report={qualityReport} />
-		{/if}
-		{#if hasUncertainEstimates}
-			<p class="hint uncertain-hint">{t('brain.uncertainWarning')}</p>
+		<!-- One collapsed block instead of a wall of hints — the rows are the point. -->
+		{#if shelfLifeEstimatesInReceipt || hasLocationPredictions || hasUncertainEstimates}
+			<details class="estimates-info" data-testid="receipt-estimates-info">
+				<summary>{t('receiptBulk.estimatesSummary')}</summary>
+				{#if shelfLifeEstimatesInReceipt}
+					<p class="hint">{t('receiptBulk.estimatesHint')}</p>
+				{/if}
+				{#if aiDegradedMode && shelfLifeEstimatesInReceipt}
+					<FeedbackBanner tone="info" message={t('receiptBulk.aiDegradedBanner')} />
+				{/if}
+				{#if hasLocationPredictions}
+					<p class="hint">{t('receiptBulk.locationSuggestionsHint')}</p>
+				{/if}
+				{#if qualityReport && shelfLifeEstimatesInReceipt}
+					<ReceiptQualityMeter report={qualityReport} />
+				{/if}
+				{#if hasUncertainEstimates}
+					<p class="hint uncertain-hint">{t('brain.uncertainWarning')}</p>
+				{/if}
+			</details>
 		{/if}
 
 		<div class="bulk-location">
@@ -985,7 +997,6 @@
 				>
 					{t('receiptAutomation.quickConfirmAll')}
 				</Button>
-				<Button type="button" variant="secondary" onclick={requestNewImage}>{t('common.newImage')}</Button>
 				<Button
 					type="submit"
 					variant="secondary"
@@ -1033,6 +1044,42 @@
 	.title {
 		margin: 0 0 var(--space-md);
 		font-size: 1.1rem;
+	}
+
+	.new-image-row {
+		margin: 0 0 var(--space-sm);
+	}
+
+	.new-image-row .link-btn {
+		text-decoration: underline;
+		font-size: 0.875rem;
+	}
+
+	.estimates-info {
+		margin: 0 0 var(--space-md);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		padding: var(--space-sm) var(--space-md);
+		background: var(--color-surface-muted);
+	}
+
+	.estimates-info summary {
+		cursor: pointer;
+		font-size: 0.875rem;
+		font-weight: 700;
+		color: var(--color-primary);
+		list-style: none;
+		min-height: var(--touch-target-min, 2.75rem);
+		display: flex;
+		align-items: center;
+	}
+
+	.estimates-info summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.estimates-info[open] summary {
+		margin-bottom: var(--space-sm);
 	}
 
 	.receipt-meta {

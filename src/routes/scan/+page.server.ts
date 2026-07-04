@@ -489,7 +489,9 @@ async function bulkCreateFromForm(
 			totalLines: selected.length,
 			source: 'manual'
 		});
-		redirect(302, APP_HOME_PATH);
+		/* Success moment renders globally (AppLayout) — land where the user started.
+		   No scan=added toast here: the success modal is the single feedback. */
+		redirect(302, returnTo);
 		return;
 	}
 
