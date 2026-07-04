@@ -2898,9 +2898,48 @@
 			"progressStepDisabled": "Inte tillgängligt än",
 			"welcome": {
 				"title": "Välkommen till Skaffu",
-				"body": "Börja med ett kvitto eller några varor hemma. Resten av hushållet kan hänga på senare.",
-				"cta": "Kom igång"
+				"body": "Listan, skafferiet och påminnelserna hänger ihop — Skaffu lär sig vad ni brukar behöva.",
+				"cta": "Sätt igång"
 			},
+			"fill": {
+				"title": "Vad har ni hemma?",
+				"body": "Vi har kryssat för det vanligaste. Bocka ur det som inte stämmer — allt går att ändra senare.",
+				"ctaAdd": "Lägg till {count} varor",
+				"ctaEmpty": "Fortsätt utan varor",
+				"ctaSkip": "Kanske senare",
+				"receiptLink": "Har du ett digitalt kvitto? Importera det i stället",
+				"chipsAria": "Välj basvaror att lägga in",
+				"groupFridge": "Kyl",
+				"groupFreezer": "Frys",
+				"groupPantry": "Skafferi"
+			},
+			"invite": {
+				"title": "Handlar ni ihop?",
+				"body": "Skicka en länk så ser din partner samma lista i sin mobil. Länken gäller i 7 dagar.",
+				"ctaShare": "Dela inbjudan",
+				"ctaSkip": "Jag handlar själv",
+				"copied": "Länk kopierad",
+				"shareError": "Kunde inte skapa inbjudan — försök igen."
+			},
+			"finish": {
+				"title": "Klart — listan väntar",
+				"recapAria": "Det ni satt upp",
+				"recapItems": "{count} varor i lagret",
+				"recapItemsSuffix": "varor i lagret",
+				"recapReceipt": "Kvitto importerat — {count} varor",
+				"recapReceiptSuffix": "varor från kvittot",
+				"recapEmpty": "Lagret är tomt än — det fylls på när ni handlar",
+				"recapInvite": "Inbjudan skickad till din partner",
+				"recapMembers": "Ni är {count} i hushållet",
+				"learningLine": "Varje avbockat inköp lär Skaffu vad ni brukar behöva.",
+				"pushTitle": "Påminnelser",
+				"pushBody": "En notis när något snart går ut eller när det är dags att handla — inget mer.",
+				"ctaEnable": "Slå på och öppna listan",
+				"ctaSkip": "Öppna utan påminnelser",
+				"ctaOpen": "Öppna inköpslistan",
+				"pushOffToast": "Påminnelser är av — går att slå på under Inställningar."
+			},
+			"stepOf": "Steg {current} av {total}",
 			"scan": {
 				"title": "Importera ett kvitto",
 				"body": "PDF från Kivra eller butik — eller fota papperskvitto. Lagret fylls på på några minuter.",
@@ -2942,7 +2981,10 @@
 				"firstScan": "Kvitto",
 				"pantryCreated": "Lagret",
 				"brain": "Minnet",
-				"shopping": "Inköp"
+				"shopping": "Inköp",
+				"fill": "Fyll på",
+				"invite": "Bjud in",
+				"finish": "Klart"
 			}
 		}
 	},

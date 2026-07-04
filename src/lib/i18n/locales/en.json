@@ -2977,9 +2977,48 @@
 			"progressStepDisabled": "Not available yet",
 			"welcome": {
 				"title": "Welcome to Skaffu",
-				"body": "Start with a receipt or a few items at home. The rest of the household can join later.",
-				"cta": "Get started"
+				"body": "The list, the pantry and the reminders work together — Skaffu learns what you usually need.",
+				"cta": "Let's go"
 			},
+			"fill": {
+				"title": "What do you have at home?",
+				"body": "We've pre-checked the most common staples. Untick what doesn't fit — everything can be changed later.",
+				"ctaAdd": "Add {count} items",
+				"ctaEmpty": "Continue without items",
+				"ctaSkip": "Maybe later",
+				"receiptLink": "Have a digital receipt? Import it instead",
+				"chipsAria": "Choose staples to add",
+				"groupFridge": "Fridge",
+				"groupFreezer": "Freezer",
+				"groupPantry": "Pantry"
+			},
+			"invite": {
+				"title": "Do you shop together?",
+				"body": "Send a link and your partner sees the same list on their phone. The link is valid for 7 days.",
+				"ctaShare": "Share invite",
+				"ctaSkip": "I shop on my own",
+				"copied": "Link copied",
+				"shareError": "Couldn't create the invite — try again."
+			},
+			"finish": {
+				"title": "Done — your list is waiting",
+				"recapAria": "What you set up",
+				"recapItems": "{count} items in your pantry",
+				"recapItemsSuffix": "items in your pantry",
+				"recapReceipt": "Receipt imported — {count} items",
+				"recapReceiptSuffix": "items from your receipt",
+				"recapEmpty": "Your pantry is empty for now — it fills up as you shop",
+				"recapInvite": "Invite sent to your partner",
+				"recapMembers": "You are {count} in the household",
+				"learningLine": "Every checked-off purchase teaches Skaffu what you usually need.",
+				"pushTitle": "Reminders",
+				"pushBody": "A notification when something is about to expire or it's time to shop — nothing more.",
+				"ctaEnable": "Turn on and open the list",
+				"ctaSkip": "Open without reminders",
+				"ctaOpen": "Open shopping list",
+				"pushOffToast": "Reminders are off — you can enable them under Settings."
+			},
+			"stepOf": "Step {current} of {total}",
 			"scan": {
 				"title": "Import a receipt",
 				"body": "PDF from Kivra or your store — or photograph a paper receipt. Your pantry fills up in a few minutes.",
@@ -3021,7 +3060,10 @@
 				"firstScan": "Receipt",
 				"pantryCreated": "Pantry",
 				"brain": "Memory",
-				"shopping": "Shopping"
+				"shopping": "Shopping",
+				"fill": "Fill up",
+				"invite": "Invite",
+				"finish": "Done"
 			}
 		}
 	},

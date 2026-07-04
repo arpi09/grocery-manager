@@ -5,15 +5,23 @@ import {
 	ONBOARDING_VERSION,
 	clearCelebrationPending,
 	completeOnboarding,
+	getActivationInviteOutcome,
+	getActivationOnboardingFlags,
 	getActivationProgress,
+	getActivationSeedSource,
 	isActivationComplete,
+	isActivationOnboardingFlowComplete,
 	isOnboardingExcludedPath,
 	isOnboardingPrimaryPath,
 	isPostOnboardingSurveyPath,
 	isPostOnboardingSharePath,
 	markSignupAt,
+	markActivationFillDeferred,
+	markActivationFinishSeen,
+	markActivationInviteSeen,
+	markActivationStaplesAdded,
 	markActivationWelcomeSeen,
-	markActivationShoppingSeen,
+	markPostOnboardingSharePending,
 	recordActivationScanSave,
 	recordBarcodeActivation,
 	recordFirstItemActivation,
@@ -79,6 +87,31 @@ describe('onboarding helpers', () => {
 		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
 	});
 
+	it('does not resurface onboarding for v7-completed users under v8', () => {
+		storage[`home-pantry-onboarding-activation-shopping-seen:${TEST_USER_A}`] = '1';
+		storage[`home-pantry-onboarding-version:${TEST_USER_A}`] = '7';
+		storage[`home-pantry-onboarding-dismissed:${TEST_USER_A}`] = '1';
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
+	});
+
+	it('does not resurface onboarding for v7-dismissed users under v8', () => {
+		storage[`home-pantry-onboarding-version:${TEST_USER_A}`] = '7';
+		storage[`home-pantry-onboarding-dismissed:${TEST_USER_A}`] = '1';
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
+	});
+
+	it('re-shows onboarding for v7 mid-flow users without a version key', () => {
+		storage[`home-pantry-onboarding-activation-welcome-seen:${TEST_USER_A}`] = '1';
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(true);
+	});
+
+	it('accepts legacy shopping-seen as flow completion', () => {
+		expect(isActivationOnboardingFlowComplete(TEST_USER_A)).toBe(false);
+		storage[`home-pantry-onboarding-activation-shopping-seen:${TEST_USER_A}`] = '1';
+		expect(isActivationOnboardingFlowComplete(TEST_USER_A)).toBe(true);
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
+	});
+
 	it('keeps onboarding state scoped per user on the same device', () => {
 		completeOnboarding(TEST_USER_A);
 		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
@@ -93,22 +126,27 @@ describe('onboarding helpers', () => {
 		expect(getActivationProgress(TEST_USER_A).barcodeCount).toBe(0);
 	});
 
-	it('queues post-onboarding survey after share dismiss', () => {
+	it('queues post-onboarding survey directly on completion (no share prompt)', () => {
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
 		completeOnboarding(TEST_USER_A);
-		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
-		dismissPostOnboardingShare(TEST_USER_A);
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(true);
+		expect(shouldShowPostOnboardingShare(TEST_USER_A)).toBe(false);
 		dismissPostOnboardingSurvey(TEST_USER_A);
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
 	});
 
-	it('queues post-onboarding share prompt after completion', () => {
-		expect(shouldShowPostOnboardingShare(TEST_USER_A)).toBe(false);
+	it('respects a prior survey dismissal on completion', () => {
+		dismissPostOnboardingSurvey(TEST_USER_A);
 		completeOnboarding(TEST_USER_A);
+		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
+	});
+
+	it('share dismiss still clears the prompt and queues the survey', () => {
+		markPostOnboardingSharePending(TEST_USER_A);
 		expect(shouldShowPostOnboardingShare(TEST_USER_A)).toBe(true);
 		dismissPostOnboardingShare(TEST_USER_A);
 		expect(shouldShowPostOnboardingShare(TEST_USER_A)).toBe(false);
+		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(true);
 	});
 
 	it('limits post-onboarding survey to calm app surfaces', () => {
@@ -155,7 +193,88 @@ describe('onboarding helpers', () => {
 	});
 });
 
-describe('activation progress', () => {
+describe('activation flow marks (v8)', () => {
+	let storage: Record<string, string>;
+
+	beforeEach(() => {
+		storage = {};
+		vi.stubGlobal('localStorage', {
+			getItem: (key: string) => storage[key] ?? null,
+			setItem: (key: string, value: string) => {
+				storage[key] = value;
+			},
+			removeItem: (key: string) => {
+				delete storage[key];
+			}
+		});
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it('fill deferral reuses the legacy scan-deferred key', () => {
+		markActivationFillDeferred(TEST_USER_A);
+		expect(storage[`home-pantry-onboarding-activation-scan-deferred:${TEST_USER_A}`]).toBe('1');
+		expect(getActivationOnboardingFlags(TEST_USER_A).fillDeferred).toBe(true);
+	});
+
+	it('staples mark seeds inventory flags, first item and seed source', () => {
+		expect(getActivationSeedSource(TEST_USER_A)).toBeNull();
+		markActivationStaplesAdded(TEST_USER_A);
+
+		const flags = getActivationOnboardingFlags(TEST_USER_A);
+		expect(flags.staplesAdded).toBe(true);
+		expect(flags.inventoryCreated).toBe(true);
+		expect(getActivationSeedSource(TEST_USER_A)).toBe('staples');
+		expect(storage[`home-pantry-onboarding-activation-first-item-done:${TEST_USER_A}`]).toBe('1');
+	});
+
+	it('scan save sets receipt seed source only when no source exists', () => {
+		expect(recordActivationScanSave(TEST_USER_A)).toBe(true);
+		expect(getActivationSeedSource(TEST_USER_A)).toBe('receipt');
+		// Second save is a no-op.
+		expect(recordActivationScanSave(TEST_USER_A)).toBe(false);
+	});
+
+	it('scan save keeps staples seed source when staples came first', () => {
+		markActivationStaplesAdded(TEST_USER_A);
+		expect(recordActivationScanSave(TEST_USER_A)).toBe(true);
+		expect(getActivationSeedSource(TEST_USER_A)).toBe('staples');
+	});
+
+	it('records the invite outcome', () => {
+		expect(getActivationInviteOutcome(TEST_USER_A)).toBeNull();
+		markActivationInviteSeen(TEST_USER_A, 'shared');
+		expect(getActivationInviteOutcome(TEST_USER_A)).toBe('shared');
+		expect(getActivationOnboardingFlags(TEST_USER_A).inviteSeen).toBe(true);
+	});
+
+	it('defaults the invite outcome to skipped', () => {
+		markActivationInviteSeen(TEST_USER_A);
+		expect(getActivationInviteOutcome(TEST_USER_A)).toBe('skipped');
+	});
+
+	it('v8 activation completes only at the finish screen', () => {
+		markActivationWelcomeSeen(TEST_USER_A);
+		expect(
+			recordActivationScanSave(TEST_USER_A, [{ name: 'Milk', locationLabel: 'Fridge' }])
+		).toBe(true);
+		expect(isActivationComplete(TEST_USER_A)).toBe(false);
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(true);
+
+		markActivationInviteSeen(TEST_USER_A, 'skipped');
+		expect(isActivationComplete(TEST_USER_A)).toBe(false);
+
+		markActivationFinishSeen(TEST_USER_A);
+		expect(isActivationComplete(TEST_USER_A)).toBe(true);
+		expect(isActivationOnboardingFlowComplete(TEST_USER_A)).toBe(true);
+		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
+		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(true);
+	});
+});
+
+describe('activation progress (legacy counters)', () => {
 	let storage: Record<string, string>;
 
 	beforeEach(() => {
@@ -236,16 +355,6 @@ describe('activation progress', () => {
 		expect(recordFirstItemActivation(TEST_USER_A)).toBe(true);
 		expect(isActivationComplete(TEST_USER_A)).toBe(true);
 		expect(recordFirstItemActivation(TEST_USER_A)).toBe(false);
-	});
-
-	it('v7 activation completes only after shopping step', () => {
-		markActivationWelcomeSeen(TEST_USER_A);
-		expect(recordActivationScanSave(TEST_USER_A, [{ name: 'Milk', locationLabel: 'Fridge' }])).toBe(true);
-		expect(isActivationComplete(TEST_USER_A)).toBe(false);
-		expect(shouldShowOnboarding(TEST_USER_A)).toBe(true);
-		markActivationShoppingSeen(TEST_USER_A);
-		expect(isActivationComplete(TEST_USER_A)).toBe(true);
-		expect(shouldShowOnboarding(TEST_USER_A)).toBe(false);
 	});
 
 	it('does not increment barcode progress after activation is complete', () => {
