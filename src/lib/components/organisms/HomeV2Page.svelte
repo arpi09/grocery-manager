@@ -241,10 +241,16 @@
 			onRecipeCta={handleRecipeCta}
 			onAddExpiringToList={addExpiringToList}
 		/>
-		{#if brainScore.score > 0}
-			<BrainHomeCard snapshot={brainScore} />
+		<!-- Brain cards below the 3-section fold — progressive disclosure keeps home focused. -->
+		{#if brainScore.score > 0 || brainTimeline.length > 0}
+			<details class="brain-more">
+				<summary>{t('home.v6.moreOnHome')}</summary>
+				{#if brainScore.score > 0}
+					<BrainHomeCard snapshot={brainScore} />
+				{/if}
+				<BrainTimelineCard entries={brainTimeline} />
+			</details>
 		{/if}
-		<BrainTimelineCard entries={brainTimeline} />
 	{/if}
 </div>
 
@@ -254,6 +260,30 @@
 		flex-direction: column;
 		gap: var(--space-md);
 		min-width: 0;
+	}
+
+	.brain-more {
+		border-top: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+		padding-top: var(--space-md);
+	}
+
+	.brain-more > summary {
+		cursor: pointer;
+		font-size: 0.875rem;
+		font-weight: 700;
+		color: var(--color-primary);
+		list-style: none;
+		min-height: var(--touch-target-min, 2.75rem);
+		display: flex;
+		align-items: center;
+	}
+
+	.brain-more > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.brain-more[open] > summary {
+		margin-bottom: var(--space-md);
 	}
 
 	.load-error {

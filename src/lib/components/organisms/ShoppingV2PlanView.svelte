@@ -86,9 +86,9 @@
 	{/if}
 
 	{#if canEdit && showEmptyExtras}
+		<!-- Secondary: "Börja handla" is the plan view's single primary CTA. -->
 		<div class="receipt-import-cta" data-testid="inkop-receipt-one-tap">
-			<p class="receipt-import-lead">{t('receiptAutomation.oneTapLead')}</p>
-			<a class="btn btn-primary btn-full" href={receiptOneTapHref('/inkop')}>
+			<a class="receipt-import-link" href={receiptOneTapHref('/inkop')}>
 				{t('receiptAutomation.oneTapCta')}
 			</a>
 		</div>
@@ -155,22 +155,26 @@
 		white-space: pre-line;
 	}
 
-	.receipt-import-lead {
-		margin: 0;
-		padding: var(--space-sm) var(--space-md);
-		border-radius: var(--radius-sm);
-		border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
-		background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
-		font-size: 0.9375rem;
-		font-weight: 600;
-		color: var(--color-primary);
-		white-space: pre-line;
-	}
-
 	.receipt-import-cta {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-md);
+	}
+
+	.receipt-import-link {
+		align-self: flex-start;
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: underline;
+	}
+
+	.receipt-import-link:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 
 	.legacy-link {

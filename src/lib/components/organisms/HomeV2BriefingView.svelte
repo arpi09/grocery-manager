@@ -191,7 +191,8 @@
 <div class="home-v2-briefing" data-testid="home-v2-briefing">
 	<HomeBriefingGreeting greeting={greeting} status={statusPresentation} statusOverride={briefingOneLiner} />
 
-	{#if onAddExpiringToList}
+	<!-- Cold start: no pulse card when there's nothing to pulse — the moment card guides setup. -->
+	{#if onAddExpiringToList && (summary.totalItems > 0 || shoppingListCount > 0)}
 		<HouseholdPulseCard
 			expiringSoon={summary.expiringSoon}
 			{shoppingListCount}

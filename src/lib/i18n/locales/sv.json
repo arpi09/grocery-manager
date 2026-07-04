@@ -301,6 +301,7 @@
 		"v6": {
 			"pageTitle": "Hem · Skaffu",
 			"metaDescription": "Översikt för hushållet — vad att använda snart, inköp och skafferi.",
+			"moreOnHome": "Mer på hem",
 			"brandAria": "Skaffu – Hem",
 			"accountAria": "Konto",
 			"householdSwitcher": "{name} · {count, plural, one {# medlem} other {# medlemmar}}",

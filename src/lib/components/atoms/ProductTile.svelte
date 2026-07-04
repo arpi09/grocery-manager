@@ -291,6 +291,7 @@
 
 	.tile-use,
 	.tile-menu {
+		position: relative;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -306,6 +307,14 @@
 		font-size: 0.625rem;
 		font-weight: 700;
 		line-height: 1;
+	}
+
+	/* 44px effective tap target despite the compact 32px tile visual. */
+	.tile-use::after,
+	.tile-menu::after {
+		content: '';
+		position: absolute;
+		inset: -6px 0;
 	}
 
 	.tile-use {
