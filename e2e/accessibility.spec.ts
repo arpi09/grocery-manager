@@ -8,7 +8,11 @@ import { expectNoCriticalOrSeriousViolations } from './helpers/axe';
 import { ensureFridgeInventoryItem } from './helpers/inventory';
 import { expectHomeDashboardVisible } from './helpers/home';
 import { addShoppingListItemViaApi } from './helpers/home-v2';
-import { addItemViaQuickAdd, openChecklistDrawer } from './helpers/shopping-v2';
+import {
+	addItemViaQuickAdd,
+	openChecklistDrawer,
+	removeShoppingListItemByName
+} from './helpers/shopping-v2';
 
 /** Public routes first (warm server); auth routes share one login session. */
 const P0_ROUTES = [
@@ -110,13 +114,17 @@ test.describe('Accessibility — success toast (WCAG 2.2 AA)', () => {
 		await page.locator('main, [role="main"]').first().waitFor({ state: 'visible', timeout: 30_000 });
 		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
 
-		await addItemViaQuickAdd(page, `E2E A11y Toast ${Date.now()}`);
+		const itemName = `E2E A11y Toast ${Date.now()}`;
+		await addItemViaQuickAdd(page, itemName);
 		const toast = page.locator('.toast-success');
 		await expect(toast).toBeVisible({ timeout: 10_000 });
 		/* Hovering pauses the auto-dismiss timer so the toast stays up during the scan. */
 		await toast.hover();
 
 		await expectNoCriticalOrSeriousViolations(page, '/inkop (success toast visible)');
+
+		/* Leftovers starve the oldest-three summary pills asserted in home-v2.spec.ts. */
+		await removeShoppingListItemByName(page, itemName);
 	});
 });
 
@@ -126,7 +134,8 @@ test.describe('Accessibility — Shopping checklist drawer (WCAG 2.2 AA)', () =>
 	test('checklist drawer grid has no critical or serious axe violations', async ({ page }) => {
 		await loginAsAdmin(page);
 		/* The grid renders its empty state without the table, so seed one item. */
-		await addShoppingListItemViaApi(page, `E2E A11y Grid ${Date.now()}`);
+		const itemName = `E2E A11y Grid ${Date.now()}`;
+		await addShoppingListItemViaApi(page, itemName);
 		await page.goto('/inkop', { waitUntil: 'commit', timeout: 60_000 });
 		await dismissOnboardingModalIfOpen(page);
 
@@ -136,5 +145,8 @@ test.describe('Accessibility — Shopping checklist drawer (WCAG 2.2 AA)', () =>
 		await expect(page.getByTestId('shopping-checklist-grid-table')).toBeVisible();
 
 		await expectNoCriticalOrSeriousViolations(page, '/inkop (shopping checklist drawer)');
+
+		/* Leftovers starve the oldest-three summary pills asserted in home-v2.spec.ts. */
+		await removeShoppingListItemByName(page, itemName);
 	});
 });
