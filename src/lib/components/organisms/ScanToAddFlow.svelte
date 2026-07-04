@@ -20,7 +20,7 @@
 	import { addRecentScan } from '$lib/utils/recent-scans';
 	import { getScanQuickPicks, type ScanQuickPick } from '$lib/utils/scan-quick-picks';
 	import { isDesktopDevice } from '$lib/utils/device';
-	import { manualAddHref } from '$lib/utils/scan-nav';
+	import { manualAddHref, scanModeHref } from '$lib/utils/scan-nav';
 	import { getLastScanDefaults, saveLastScanDefaults, saveLastScanMode } from '$lib/utils/last-scan-defaults';
 
 	interface Props {
@@ -95,6 +95,11 @@
 	const manualAddLink = $derived(
 		manualAddHref(returnTo, { location: defaultLocation })
 	);
+
+	/* Save-and-scan-next: non-embedded saves round-trip back to the camera (the server
+	   redirect carries the toast params), so a whole bag of groceries is one flow.
+	   The original return path stays in `from`; the Klar link exits the loop. */
+	const saveReturnTo = $derived(embedded ? returnTo : scanModeHref('barcode', returnTo));
 
 	function handleCameraError() {
 		cameraBlocked = true;
@@ -270,33 +275,49 @@
 			<FeedbackBanner tone="error" message={lookupError} />
 		{/if}
 
+		{#snippet manualRow()}
+			<div class="manual-row">
+				<input
+					id="manual-barcode"
+					type="text"
+					inputmode="numeric"
+					aria-label={t('scanFlow.manualBarcode')}
+					bind:value={manualBarcode}
+					placeholder="7310862000003"
+				/>
+				<Button
+					type="button"
+					variant="secondary"
+					onclick={handleManualLookup}
+					loading={lookupLoading}
+					loadingLabel={t('common.searching')}
+				>
+					{t('common.search')}
+				</Button>
+			</div>
+		{/snippet}
+
 		{#if isDesktopDevice() || cameraBlocked}
 			<div class="manual">
 				<label for="manual-barcode">{t('scanFlow.manualBarcode')}</label>
-				<div class="manual-row">
-					<input
-						id="manual-barcode"
-						type="text"
-						inputmode="numeric"
-						bind:value={manualBarcode}
-						placeholder="7310862000003"
-					/>
-					<Button
-						type="button"
-						variant="secondary"
-						onclick={handleManualLookup}
-						loading={lookupLoading}
-						loadingLabel={t('common.searching')}
-					>
-						{t('common.search')}
-					</Button>
-				</div>
+				{@render manualRow()}
 			</div>
+		{:else}
+			<details class="manual-details">
+				<summary>{t('scanFlow.manualBarcode')}</summary>
+				{@render manualRow()}
+			</details>
 		{/if}
 
 		{#if cameraBlocked}
 			<p class="manual-add-fallback">
 				<a href={manualAddLink}>{t('scanFlow.manualAddFallback')}</a>
+			</p>
+		{/if}
+
+		{#if !embedded}
+			<p class="done-row">
+				<a class="text-action" href={returnTo} data-testid="scan-done-link">{t('scanFlow.doneLink')}</a>
 			</p>
 		{/if}
 
@@ -339,12 +360,15 @@
 								recordBarcodeActivation(uid);
 							}
 							saveLastScanDefaults({ location });
+							/* The redirect lands on this same route, so the component is not
+							   remounted — reset to the camera for the next item ourselves. */
+							resetToScan();
 						}
 					)}
 			class="save-form"
 		>
 			<input type="hidden" name="barcode" value={barcode} />
-			<input type="hidden" name="returnTo" value={returnTo} />
+			<input type="hidden" name="returnTo" value={saveReturnTo} />
 			<input type="hidden" name="productFound" value={productFound ? '1' : '0'} />
 
 			<div class="quick-edit">
@@ -388,7 +412,8 @@
 				{/if}
 			</fieldset>
 
-			{#if showMore}
+			<details class="more-details" bind:open={showMore}>
+				<summary>{t('scanFlow.moreOptions')}</summary>
 				<div class="more-fields">
 					<label>
 						{t('scanFlow.expiresOptional')}
@@ -399,31 +424,24 @@
 						<textarea name="notes" rows="2" bind:value={notes}></textarea>
 					</label>
 				</div>
-			{:else}
-				<input type="hidden" name="expiresOn" value="" />
-				<input type="hidden" name="notes" value={notes} />
-			{/if}
+			</details>
 
 			{#if errors.name}
 				<p class="error">{errors.name[0]}</p>
 			{/if}
 
 			<div class="actions">
-				{#if cancelHref && !embedded}
-					<a class="cancel-link" href={cancelHref}>{t('common.cancel')}</a>
-				{/if}
-				<Button type="button" variant="ghost" onclick={resetToScan}>{t('scanFlow.scanAgain')}</Button>
-				<Button type="button" variant="secondary" onclick={() => (showMore = !showMore)}>
-					{showMore ? t('scanFlow.hideDetails') : t('scanFlow.moreOptions')}
-				</Button>
 				<Button type="submit" fullWidth loading={saveSubmitting} loadingLabel={t('scanFlow.saving')}>
-					{t('common.save')}
+					{embedded ? t('common.save') : t('scanFlow.saveAndNext')}
 				</Button>
-				{#if !productFound}
-					<Button type="submit" variant="secondary" disabled={saveSubmitting}>
-						{t('scanFlow.oneTapAdd')}
-					</Button>
-				{/if}
+				<div class="secondary-actions">
+					<button type="button" class="text-action" onclick={resetToScan}>
+						{t('scanFlow.scanAgain')}
+					</button>
+					{#if cancelHref && !embedded}
+						<a class="text-action cancel-link" href={cancelHref}>{t('common.cancel')}</a>
+					{/if}
+				</div>
 			</div>
 		</form>
 	</section>
@@ -490,6 +508,29 @@
 		font-weight: 600;
 	}
 
+	.manual-details {
+		margin-top: var(--space-md);
+	}
+
+	.manual-details summary {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		cursor: pointer;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+	}
+
+	.manual-details[open] summary {
+		margin-bottom: var(--space-xs);
+	}
+
+	.done-row {
+		margin: var(--space-sm) 0 0;
+		text-align: center;
+	}
+
 	.quick-picks {
 		margin-bottom: var(--space-md);
 	}
@@ -514,7 +555,7 @@
 		max-width: min(14rem, 70vw);
 		display: inline-flex;
 		align-items: center;
-		min-height: 2.35rem;
+		min-height: var(--touch-target-min);
 		padding: 0.45rem 0.85rem;
 		border: 1px solid var(--color-border);
 		border-radius: 999px;
@@ -623,11 +664,28 @@
 		pointer-events: none;
 	}
 
+	.more-details {
+		margin-bottom: var(--space-md);
+	}
+
+	.more-details summary {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		cursor: pointer;
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+	}
+
+	.more-details[open] summary {
+		margin-bottom: var(--space-xs);
+	}
+
 	.more-fields {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-sm);
-		margin-bottom: var(--space-md);
 	}
 
 	.more-fields label {
@@ -657,18 +715,14 @@
 		gap: var(--space-sm);
 	}
 
-	.cancel-link {
-		display: inline-flex;
+	.secondary-actions {
+		display: flex;
 		align-items: center;
 		justify-content: center;
-		min-height: 2.75rem;
-		color: var(--color-text-muted);
-		font-weight: 600;
-		text-decoration: none;
+		gap: var(--space-lg);
 	}
 
-	.cancel-link:hover {
-		color: var(--color-text);
-		text-decoration: none;
+	.cancel-link {
+		color: var(--color-text-muted);
 	}
 </style>
