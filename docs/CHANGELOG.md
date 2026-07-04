@@ -27,6 +27,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - feat(hem): Hushållspuls-kort ersätter För dig-expiring + pulsraden ([#193](https://github.com/arpi09/grocery-manager/pull/193)) — Nytt konsoliderat **Hushållspuls**-kort högst upp i home v2-briefingen (design handoff variant 2a): Går ut snart (med quick-add till delade inköpslistan), Inköpslistan (antal + Öppna → /inkop), Senaste aktivitet samt medlemsavatarer.
 - feat(inventory): swipe-to-use rows with slim resting state ([#197](https://github.com/arpi09/grocery-manager/pull/197))
 - feat(inkop): butikssäkert Handla-läge — ångra, fanns inte, live-total, peek-plock ([#203](https://github.com/arpi09/grocery-manager/pull/203)) — **Ångra senaste plock** — textknapp under fokus-kortet och på klarkortet (i18n-nycklarna `undoCta/undoAria` fanns redan men renderades aldrig). Feltap i butik är inte längre permanent.
+- feat(inkop): Packa upp — batch-brygga checkoff→skafferi vid trip complete ([#205](https://github.com/arpi09/grocery-manager/pull/205)) — **Ingen modal per plock i butiken** — shop-läget skickar `bridge=defer` på toggle; ask-läget lever kvar endast i checklist-vyn. (Detta är den A-punkt som medvetet väntade på B för atomiskt byte.)
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
