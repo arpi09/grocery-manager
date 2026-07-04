@@ -50,7 +50,9 @@ export default ts.config(
 			'drizzle/',
 			'node_modules/',
 			'node_modules.*/',
-			'scripts/'
+			'scripts/',
+			// Agent worktrees (Claude Code isolation) have their own lint runs
+			'.claude/worktrees/'
 		]
 	}
 );

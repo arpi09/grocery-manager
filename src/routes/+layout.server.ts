@@ -13,6 +13,7 @@ import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { resolveThemeForRequest } from '$lib/server/theme-cookie';
 import { appSettingsService, expiringShareService } from '$lib/server/di';
 import { takeKivraImportPending } from '$lib/server/kivra-import-pending';
+import { isKivraForwardEnabled } from '$lib/server/kivra-forward';
 import { translate } from '$lib/i18n/messages';
 import type { LayoutServerLoad } from './$types';
 
@@ -27,6 +28,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 	const shoppingUxV2Enabled = isShoppingUxV2Enabled();
 	const pantryUxV2Enabled = isPantryUxV2Enabled();
 	const homeUxV2Enabled = isHomeUxV2Enabled();
+	const kivraForwardEnabled = isKivraForwardEnabled();
 
 	if (!locals.user) {
 		return {
@@ -49,6 +51,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			shoppingUxV2Enabled,
 			pantryUxV2Enabled,
 			homeUxV2Enabled,
+			kivraForwardEnabled,
 			marketLiveEnabled: false,
 			nearbySharingEnabled: false
 
@@ -141,6 +144,7 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		shoppingUxV2Enabled,
 		pantryUxV2Enabled,
 		homeUxV2Enabled,
+		kivraForwardEnabled,
 		marketLiveEnabled: marketLiveStatus.enabledInApp,
 		nearbySharingEnabled: nearbySettings.enabled,
 		kivraImportToast

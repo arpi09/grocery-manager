@@ -84,6 +84,7 @@
 		return userId ? isActivationOnboardingFlowComplete(userId) : false;
 	});
 	const skipActivationSuccess = $derived(isReceiptImportRecentlyCompleted());
+	const kivraForwardEnabled = $derived(Boolean(page.data.kivraForwardEnabled));
 	const derivedScreen = $derived.by((): ActivationScreen | 'complete' => {
 		if (!flags) {
 			return 'welcome';
@@ -441,7 +442,7 @@
 						{/snippet}
 
 						{#snippet extra()}
-							{#if displayScreen === 'scan'}
+							{#if displayScreen === 'scan' && kivraForwardEnabled}
 								<div class="kivra-card" data-testid="activation-kivra-card">
 									<p class="kivra-hint">{t('onboarding.activation.scan.kivraHint')}</p>
 									<a
@@ -481,7 +482,7 @@
 									</p>
 								{/if}
 							{:else if displayScreen === 'shopping'}
-								<ActivationSetupCards />
+								<ActivationSetupCards showKivra={kivraForwardEnabled} />
 							{/if}
 						{/snippet}
 					</ActivationOnboardingScreen>
