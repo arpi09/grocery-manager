@@ -76,7 +76,7 @@ Memory Explorer: `/settings/memory` when any learning flag effective + `showMemo
 
 | Env key | Label | Code default | Prod | Layout boolean | UI / backend effect | Data requirements |
 |---------|-------|--------------|------|----------------|---------------------|-------------------|
-| `PUBLIC_SHOPPING_LIST_SHARE_ENABLED` | W1 public shopping list share | **off** (`exactTrue`) | `true` (BUILD+RUNTIME) | `shareLinkEnabled` | `/lista/[token]` guest join; share menu on `/inkop`; post-onboarding share prompt | Household list + share API |
+| `PUBLIC_SHOPPING_LIST_SHARE_ENABLED` | W1 public shopping list share | **off** (`exactTrue`) | `true` (BUILD+RUNTIME) | `shareLinkEnabled` | `/lista/[token]` guest join; share menu on `/inkop` (post-onboarding share prompt removed in onboarding v8 — invite lives in the flow) | Household list + share API |
 
 ---
 

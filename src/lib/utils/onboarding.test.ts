@@ -14,14 +14,13 @@ import {
 	isOnboardingExcludedPath,
 	isOnboardingPrimaryPath,
 	isPostOnboardingSurveyPath,
-	isPostOnboardingSharePath,
 	markSignupAt,
 	markActivationFillDeferred,
 	markActivationFinishSeen,
 	markActivationInviteSeen,
 	markActivationStaplesAdded,
 	markActivationWelcomeSeen,
-	markPostOnboardingSharePending,
+	migrateLegacyShareState,
 	recordActivationScanSave,
 	recordBarcodeActivation,
 	recordFirstItemActivation,
@@ -32,9 +31,7 @@ import {
 	shouldShowCelebration,
 	shouldShowOnboarding,
 	shouldShowPostOnboardingSurvey,
-	dismissPostOnboardingSurvey,
-	shouldShowPostOnboardingShare,
-	dismissPostOnboardingShare
+	dismissPostOnboardingSurvey
 } from './onboarding';
 import { POST_REGISTER_SCAN_PATH } from '../navigation/post-register';
 import { APP_HOME_PATH } from '$lib/navigation/app-home';
@@ -130,7 +127,6 @@ describe('onboarding helpers', () => {
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
 		completeOnboarding(TEST_USER_A);
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(true);
-		expect(shouldShowPostOnboardingShare(TEST_USER_A)).toBe(false);
 		dismissPostOnboardingSurvey(TEST_USER_A);
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
 	});
@@ -141,12 +137,38 @@ describe('onboarding helpers', () => {
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
 	});
 
-	it('share dismiss still clears the prompt and queues the survey', () => {
-		markPostOnboardingSharePending(TEST_USER_A);
-		expect(shouldShowPostOnboardingShare(TEST_USER_A)).toBe(true);
-		dismissPostOnboardingShare(TEST_USER_A);
-		expect(shouldShowPostOnboardingShare(TEST_USER_A)).toBe(false);
+	it('migrates a queued v7 share prompt to a pending survey and deletes share keys', () => {
+		storage[`home-pantry-onboarding-post-onboarding-share-pending:${TEST_USER_A}`] = '1';
+		storage[`home-pantry-onboarding-post-onboarding-share-dismissed:${TEST_USER_A}`] = '1';
+
+		migrateLegacyShareState(TEST_USER_A);
+
 		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(true);
+		expect(storage[`home-pantry-onboarding-post-onboarding-share-pending:${TEST_USER_A}`]).toBeUndefined();
+		expect(storage[`home-pantry-onboarding-post-onboarding-share-dismissed:${TEST_USER_A}`]).toBeUndefined();
+	});
+
+	it('migration respects a prior survey dismissal', () => {
+		dismissPostOnboardingSurvey(TEST_USER_A);
+		storage[`home-pantry-onboarding-post-onboarding-share-pending:${TEST_USER_A}`] = '1';
+
+		migrateLegacyShareState(TEST_USER_A);
+
+		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
+		expect(storage[`home-pantry-onboarding-post-onboarding-survey-pending:${TEST_USER_A}`]).toBeUndefined();
+		expect(storage[`home-pantry-onboarding-post-onboarding-share-pending:${TEST_USER_A}`]).toBeUndefined();
+	});
+
+	it('migration is a no-op without a queued share prompt', () => {
+		migrateLegacyShareState(TEST_USER_A);
+		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(false);
+	});
+
+	it('runs the share migration lazily via shouldShowPostOnboardingSurvey', () => {
+		storage[`home-pantry-onboarding-post-onboarding-share-pending:${TEST_USER_A}`] = '1';
+
+		expect(shouldShowPostOnboardingSurvey(TEST_USER_A)).toBe(true);
+		expect(storage[`home-pantry-onboarding-post-onboarding-share-pending:${TEST_USER_A}`]).toBeUndefined();
 	});
 
 	it('limits post-onboarding survey to calm app surfaces', () => {
@@ -160,12 +182,6 @@ describe('onboarding helpers', () => {
 	it('uses inkop as the primary onboarding surface', () => {
 		expect(isOnboardingPrimaryPath('/inkop')).toBe(true);
 		expect(isOnboardingPrimaryPath('/hem')).toBe(false);
-	});
-
-	it('limits post-onboarding share prompt to inkop only', () => {
-		expect(isPostOnboardingSharePath('/inkop')).toBe(true);
-		expect(isPostOnboardingSharePath('/hem')).toBe(false);
-		expect(isPostOnboardingSharePath('/inventory/fridge')).toBe(false);
 	});
 
 	it('excludes admin and auth routes', () => {

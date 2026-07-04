@@ -2942,13 +2942,6 @@
 		"celebrateInventoryBody": "Great start — your pantry is growing!",
 		"encouragePathGuide": "Next — open the option that fits you.",
 		"encourageCelebrate": "Hooray — you're up and running!",
-		"sharePromptTitle": "Send to whoever shops",
-		"sharePromptBody": "Share the link — your partner sees the list without the app and can create their own account if they want.",
-		"sharePromptListaCta": "Share list link",
-		"sharePromptInviteCta": "Invite partner",
-		"sharePromptInkopCta": "Go to shopping list",
-		"sharePromptSkip": "Skip",
-		"sharePromptAria": "Share shopping list with partner",
 		"scanModalTitle": "How do you want to add?",
 		"scanModalBody": "Pick what works best for you. The guide stays open while you scan.",
 		"scanModalAria": "Add item during introduction",
@@ -3042,48 +3035,8 @@
 				"pushOffToast": "Reminders are off — you can enable them under Settings."
 			},
 			"stepOf": "Step {current} of {total}",
-			"scan": {
-				"title": "Import a receipt",
-				"body": "PDF from Kivra or your store — or photograph a paper receipt. Your pantry fills up in a few minutes.",
-				"ctaPrimary": "Import receipt",
-				"ctaSecondary": "Maybe later",
-				"kivraHint": "Want to skip manual upload?",
-				"kivraLink": "Set up Kivra forwarding"
-			},
-			"success": {
-				"title": "Good start",
-				"body": "This is what you've added so far. Add more when it suits you — the list and reminders get better.",
-				"bodyEmpty": "Your pantry is up and running. Add items when it suits you — the list and reminders get better.",
-				"cta": "Continue",
-				"itemsAria": "Items you added",
-				"moreItems": "+{count} more"
-			},
-			"brain": {
-				"title": "How your memory builds",
-				"body": "Receipts and checked-off items help Skaffu suggest what's missing — without you having to remember everything.",
-				"cta": "Continue"
-			},
-			"shopping": {
-				"title": "Shop together",
-				"body": "Add what's running low. Check items off in the store. Invite your partner when you're ready.",
-				"cta": "Open shopping list"
-			},
-			"setup": {
-				"title": "Make it easy going forward",
-				"notificationsTitle": "Expiry reminders",
-				"notificationsBody": "Get a notification when something is about to expire — so you can use it first.",
-				"notificationsCta": "Turn on reminders",
-				"notificationsLater": "Later",
-				"kivraTitle": "Receipts from Kivra",
-				"kivraBody": "Connect forwarding so PDF receipts land in Skaffu automatically.",
-				"allNotificationsLink": "All notification settings"
-			},
 			"progress": {
 				"welcome": "Start",
-				"firstScan": "Receipt",
-				"pantryCreated": "Pantry",
-				"brain": "Memory",
-				"shopping": "Shopping",
 				"fill": "Fill up",
 				"invite": "Invite",
 				"finish": "Done"

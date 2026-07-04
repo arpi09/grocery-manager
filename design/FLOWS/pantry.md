@@ -25,7 +25,7 @@ flowchart LR
 | 1 | Pantry overview | `/inventory` | [pantry](../SCREENSHOTS/pantry.png) | `src/lib/components/organisms/PantryV2Page.svelte` |
 | 2 | Location shelf | `/inventory/fridge` | — | `src/lib/components/organisms/PantryV2ShelfView.svelte` |
 | 3 | Empty pantry | `/inventory` | [empty-pantry](../SCREENSHOTS/empty-pantry.png) | `src/lib/components/organisms/PantryV2EmptyState.svelte` |
-| 4 | Eat-first on hem | `/hem` | — | `src/lib/components/organisms/HomeRedesignDashboard.svelte` |
+| 4 | Eat-first on hem | `/hem` | — | `src/lib/components/organisms/HomeV2Page.svelte` |
 
 ---
 
