@@ -240,12 +240,10 @@
 	},
 	"home": {
 		"title": "Home",
-		"ariaLabel": "Home page",
 		"greeting": "Hi, {name}",
 		"greetingNeutral": "Home",
 		"tagline": "Photograph your pantry to stay on top of things",
 		"taglineEmpty": "Create this week's list — three items is enough to start shared weekly shopping",
-		"scanCardTitle": "Add items",
 		"scanCardSubtitle": "Photo round — the fastest way to fill your pantry",
 		"chipReceipt": "Receipt",
 		"chipBarcode": "Barcode",
@@ -266,8 +264,6 @@
 		},
 		"nextActionSync": "{count, plural, one {Confirm # item} other {Confirm # items}}",
 		"nextActionExpiring": "{count, plural, one {Generate dinner with # item} other {Generate dinner with # items}}",
-		"nextActionPhoto": "Photo the fridge",
-		"nextActionPlaner": "{count, plural, one {Plan meal on Eat} other {Plan meals on Eat}}",
 		"locationsTitle": "Your locations",
 		"totalTracked": "{count} items total",
 		"emptyTitle": "Get started",
@@ -280,7 +276,6 @@
 		"expiringMore": "+{count} more expiring soon",
 		"recipeHint": "Recipe ideas",
 		"recipeHintDescription": "Based on what you have at home",
-		"readonlyHint": "You have read-only access — ask an admin to add items.",
 		"readonlyEmpty": "The pantry is empty. Ask an admin to add items.",
 		"greetingMorning": "Good morning, {name} ☀️",
 		"greetingDay": "Good afternoon, {name} 🌤️",
@@ -289,10 +284,7 @@
 		"taglineEngaged": "Shared weekly shopping · household memory",
 		"weeklyShopCta": "Shop this week",
 		"eatFirstSummary": "Eat first ({count})",
-		"pantryStatusTitle": "Pantry check-in",
-		"pantryStatusWithoutExpiry": "{count, plural, one {# item without expiry date — add dates for better tracking} other {# items without expiry dates — add dates for better tracking}}",
 		"pantryStatusStale": "{count, plural, one {# item maybe gone — confirm stock} other {# items maybe gone — confirm stock}}",
-		"pantryStatusAutoExpired": "{count, plural, one {# expired item awaiting review} other {# expired items awaiting review}}",
 		"pantryStatusLastUpdatedToday": "Last updated today",
 		"pantryStatusLastUpdatedYesterday": "Last updated yesterday",
 		"pantryStatusLastUpdatedDays": "Last updated {count} days ago",
@@ -303,10 +295,6 @@
 		"quickAddSubmit": "Add",
 		"quickAddBarcode": "Scan barcode",
 		"mergeDuplicatesLink": "Merge duplicate rows",
-		"syncHealth": {
-			"good": "Healthy sync",
-			"needs_love": "Needs sync"
-		},
 		"activity": {
 			"title": "Recent household activity",
 			"empty": "No sync activity yet.",
@@ -340,18 +328,8 @@
 			"dinner": "Dinner",
 			"evening": "Evening"
 		},
-		"v4": {
-			"coldTitle": "This week's list",
-			"coldAction": "Create this week's list",
-			"coldSecondary": "Fill pantry",
-			"listaReadyTitle": "Time to shop",
-			"listaReadyDescription": "{count, plural, one {# item on your list — shop together this week} other {# items on your list — shop together this week}}",
-			"listaReadyAction": "Open shopping list",
-			"expiryHeroLink": "Plan dinner on Eat"
-		},
 		"taglineListaReady": "Items on your list — shop together this week",
 		"taglineExpiry": "Something expires soon — eat first or plan dinner",
-		"nextActionLista": "Continue weekly shop",
 		"cadenceLine": "You usually shop on {weekday}",
 		"cadenceLineStore": "You usually shop on {weekday} · often at {store}",
 		"hero": {
@@ -375,83 +353,7 @@
 			"greetingMorningOnly": "Good morning ☀️",
 			"greetingDayOnly": "Good afternoon 🌤️",
 			"greetingEveningOnly": "Good evening 🌙",
-			"greetingNightOnly": "Good night ✨",
-			"sublineCold": "Fresh start — fill your pantry when it suits you",
-			"sublineSteady": "{count, plural, one {# item · calm start} other {# items · calm start}}",
-			"sublineLista": "{count, plural, one {# item on the list} other {# items on the list}}",
-			"sublineExpiry": "Something expires soon",
-			"pantryTitle": "Pantry",
-			"pantryCount": "{count, plural, one {# item} other {# items}}",
-			"pantryEmpty": "Empty pantry — start with a photo round or this week's list",
-			"pantryColdMeta": "Three items is enough to get started",
-			"pantryFooter": "Open pantry",
-			"shoppingTitle": "Shopping",
-			"shoppingCount": "{count, plural, one {# item on the list} other {# items on the list}}",
-			"shoppingFooter": "Open shopping list",
-			"expiringTitle": "Expiring soon",
-			"expiringEmpty": "Nothing expires in the next few days",
-			"expiringFooter": "View expiring",
-			"attentionTitle": "Needs a quick check",
-			"attentionFooter": "Go to sync"
-		},
-		"v5": {
-			"hero": {
-				"defaultBody": "Worth a look today.",
-				"cta": "See what's waiting",
-				"scanLink": "Add items",
-				"morning": {
-					"title": "Good morning"
-				},
-				"midday": {
-					"title": "Good day"
-				},
-				"evening": {
-					"title": "Good evening"
-				},
-				"night": {
-					"title": "Welcome back"
-				},
-				"status": {
-					"healthy": "Everything looks good today.",
-					"expiring": "Something is worth using soon.",
-					"shopping": "A few things are starting to run low.",
-					"empty": "Empty pantry — start with a receipt scan or photo round."
-				}
-			},
-			"forYou": {
-				"title": "For you",
-				"replenishment": {
-					"body": "You usually buy {name} around this time.",
-					"cta": "Add to shopping list"
-				},
-				"expiring": {
-					"body": "{name} is worth using soon.",
-					"cta": "View item"
-				}
-			},
-			"expiring": {
-				"title": "Use soon",
-				"body": "{count, plural, one {# item worth using soon} other {# items worth using soon}}",
-				"link": "View items"
-			},
-			"shopping": {
-				"title": "Shopping",
-				"body": "{count, plural, one {# item ready} other {# items ready}}",
-				"cadence": "Next trip: {weekday}",
-				"link": "Open shopping list"
-			},
-			"pantry": {
-				"title": "At home",
-				"body": "{count, plural, one {# item} other {# items}}",
-				"allGood": "All good",
-				"needsAttention": "Some items need attention",
-				"link": "Open pantry"
-			},
-			"household": {
-				"title": "Household",
-				"body": "Shared pantry and settings for your home.",
-				"link": "Household settings"
-			}
+			"greetingNightOnly": "Good night ✨"
 		},
 		"v6": {
 			"pageTitle": "Home · Skaffu",
@@ -3220,25 +3122,6 @@
 		"backToHome": "Back to Home",
 		"heroTitle": "Week sorted",
 		"heroBadge": "Monday ritual",
-		"heroSubtitleDefault": "Plan the week's dinners from your pantry — one click to meal plan and shopping list.",
-		"heroSubtitleExpiring": "{count} items expiring soon — plan the week before they become waste.",
-		"heroTitleSync": "Confirm stock",
-		"heroBadgeSync": "Confirm stock",
-		"heroSubtitleSyncDefault": "Photo round or confirm uncertain items — good enough accuracy in no time.",
-		"heroSubtitleStale": "{count} items maybe gone — confirm or mark finished.",
-		"heroCtaSync": "Confirm stock →",
-		"heroCtaPhoto": "Photo round →",
-		"heroCtaPlan": "Plan the week →",
-		"heroTitleDual": "Sync and plan",
-		"heroBadgeDual": "This week",
-		"heroSubtitleDual": "{stale} maybe finished · {expiring} expiring soon",
-		"heroCta": "Week sorted →",
-		"heroTitleSyncHub": "Tidy the pantry",
-		"heroBadgeSyncHub": "Weekly check",
-		"heroSubtitleSyncHub": "Photo round or confirm what's still in stock — then optionally plan the week.",
-		"heroSubtitleSyncHubEmpty": "Photo round or plan the week — nothing to confirm right now.",
-		"heroNothingToConfirm": "Nothing to confirm right now",
-		"heroCtaPlanOptional": "Plan the week (optional)",
 		"flowLead": "Generate up to five dinner ideas, adjust the days, and approve the whole week.",
 		"emptyPantryTitle": "Build your pantry first",
 		"emptyPantryLead": "Week suggestions use what's in your pantry — scan a receipt or add items to get started.",

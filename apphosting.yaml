@@ -210,10 +210,6 @@ env:
     value: "true"
     availability:
       - RUNTIME
-  - variable: HOME_REDESIGN_V1_ENABLED
-    value: "true"
-    availability:
-      - RUNTIME
   - variable: PRICE_MEMORY_V1_ENABLED
     value: "true"
     availability:

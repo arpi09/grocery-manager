@@ -1,6 +1,5 @@
 import {
 	isBrainFeedbackV1Enabled,
-	isHomeRedesignV1Enabled,
 	isPriceMemoryV1Enabled,
 	isShoppingListShareEnabled
 } from './feature-flags';
@@ -37,12 +36,6 @@ export function getLayoutClientFlagSnapshot(): LayoutClientFlagSnapshotEntry[] {
 			envValue: shelfLifePublic.envValue,
 			source: shelfLifePublic.source,
 			fallbackNote: 'SHELF_LIFE_LEARNING_ENABLED when PUBLIC unset'
-		},
-		{
-			propName: 'homeRedesignV1Enabled',
-			envKey: 'HOME_REDESIGN_V1_ENABLED',
-			...readPublicEnv('HOME_REDESIGN_V1_ENABLED'),
-			effective: isHomeRedesignV1Enabled()
 		},
 		{
 			propName: 'priceMemoryV1Enabled',

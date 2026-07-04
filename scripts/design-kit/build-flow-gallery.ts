@@ -100,7 +100,7 @@ const FLOWS: FlowDefinition[] = [
 			{ order: 1, title: 'Pantry overview', route: '/inventory', screen: 'pantry', source: 'src/lib/components/organisms/PantryV2Page.svelte' },
 			{ order: 2, title: 'Location shelf', route: '/inventory/fridge', source: 'src/lib/components/organisms/PantryV2ShelfView.svelte' },
 			{ order: 3, title: 'Empty pantry', route: '/inventory', screen: 'empty-pantry', source: 'src/lib/components/organisms/PantryV2EmptyState.svelte' },
-			{ order: 4, title: 'Eat-first on hem', route: '/hem', source: 'src/lib/components/organisms/HomeRedesignDashboard.svelte' }
+			{ order: 4, title: 'Eat-first on hem', route: '/hem', source: 'src/lib/components/organisms/HomeV2Page.svelte' }
 		]
 	},
 	{

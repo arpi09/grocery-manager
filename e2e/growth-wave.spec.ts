@@ -119,37 +119,6 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		}
 	});
 
-	test('expiring share card button visible on home when items expiring', async ({ page }) => {
-		test.setTimeout(60_000);
-		const itemName = `E2E ShareCard ${Date.now()}`;
-		const expiresOn = dateWithinExpiringSoonDays(2);
-
-		await loginAsAdmin(page);
-		await createFridgeItemViaAction(page, { name: itemName, expiresOn });
-		await page.goto(`/inventory/fridge?q=${encodeURIComponent(itemName)}`, { waitUntil: 'commit' });
-		await dismissOnboardingModalIfOpen(page);
-		await expect(page.getByTestId('inventory-table').getByText(itemName)).toBeVisible({
-			timeout: 15_000
-		});
-
-		await page.goto('/hem', { waitUntil: 'commit' });
-		await dismissCookieConsentIfOpen(page);
-		await dismissOnboardingModalIfOpen(page);
-
-		const redesign = page.locator('.home-v5');
-		if ((await redesign.count()) > 0) {
-			await expect(page.getByTestId('home-hero')).toBeVisible({ timeout: 15_000 });
-			await expect(page.getByTestId('home-expiring-card')).toBeVisible();
-			test.skip(true, 'Home redesign v1 — share button moved off Home');
-		}
-
-		await expect(page.getByTestId('home-welcome')).toBeVisible({ timeout: 15_000 });
-		await expect(page.getByTestId('home-card-expiring')).toBeVisible();
-		await expect(
-			page.getByRole('button', { name: /Dela som bild|Share as image/i }).first()
-		).toBeVisible({ timeout: 15_000 });
-	});
-
 	test('expiring share link opens public dela page', async ({ page }) => {
 		test.setTimeout(60_000);
 		const itemName = `E2E Dela ${Date.now()}`;

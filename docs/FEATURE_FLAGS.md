@@ -25,11 +25,10 @@ Same env key can behave differently depending on which helper reads it:
 
 ---
 
-## Home & legacy layout
+## Home
 
 | Env key | Label | Code default | Prod | Layout boolean | UI / backend effect | Data requirements |
 |---------|-------|--------------|------|----------------|---------------------|-------------------|
-| `HOME_REDESIGN_V1_ENABLED` | Home redesign v1 (legacy premium layout) | **off** (`exactTrue`) | `true` | `homeRedesignV1Enabled` | Fallback `/hem` layout when `HOME_UX_V2` off; v2 wins when both on | — |
 | `HOME_BRIEFING_AI_ENABLED` | Home briefing AI one-liner | **on** (`defaultOn`) | `true` | — (server-only) | Nano one-liner on `/hem` via `hem/+page.server.ts` | Briefing context from home load |
 | `PRICE_MEMORY_V1_ENABLED` | Price memory v1 read surfaces | **off** (`exactTrue`) | `true` | `priceMemoryV1Enabled` | Price chip/tooltip on item edit; settings discovery; import hints | `receipt_price_captured` / price history |
 
@@ -97,7 +96,7 @@ Not all of these live in `feature-flags.ts`, but they gate prod behaviour alongs
 
 ## Quick prod snapshot (@ master `apphosting.yaml`)
 
-**Explicitly on in yaml:** all UX v2 flags, brain feedback/rank/proactive, learning trio, home redesign, price memory, W1 share, receipt estimates, store recommendation v0, receipt AI batch, global shelf-life DB, recipe/photo LLM passes, auto-finish cron.
+**Explicitly on in yaml:** brain feedback/rank/proactive, learning trio, price memory, W1 share, receipt estimates, store recommendation v0, receipt AI batch, global shelf-life DB, recipe/photo LLM passes, auto-finish cron. (UX v2 + home redesign flags retired 2026-07-04 — surfaces are unconditional.)
 
 **On via code default only when absent from yaml:** none for Brain (all listed explicitly as of 2026-06-23).
 
@@ -138,3 +137,4 @@ When adding a flag:
 | `SHOPPING_UX_V2_ENABLED` | 2026-07-04 | Plan + Shop modes on `/inkop` are now unconditional; legacy inline checklist grid deleted |
 | `PANTRY_UX_V2_ENABLED` | 2026-07-04 | `/inventory` shelf view is now unconditional; redirect fallback to `/inventory/fridge` deleted |
 | `HOME_UX_V2_ENABLED` | 2026-07-04 | `/hem` Household Briefing (`HomeV2Page`) is now the only home layout |
+| `HOME_REDESIGN_V1_ENABLED` | 2026-07-04 | Legacy v1/v5 home layouts (`HomeDashboard`, `HomeRedesignDashboard`) deleted with `HOME_UX_V2` retirement |

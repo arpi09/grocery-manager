@@ -2,7 +2,6 @@ import { isThemePreference } from '$lib/domain/theme';
 import { isUserEmailVerified } from '$lib/server/email-verification-enforcement';
 import { isShoppingListShareEnabled } from '$lib/server/shopping-list-share-flag';
 import { isShelfLifeEstimatesInReceiptEnabled } from '$lib/server/shelf-life-learning-flag';
-import { isHomeRedesignV1Enabled } from '$lib/server/home-redesign-flag';
 import { isPriceMemoryV1Enabled } from '$lib/server/price-memory-flag';
 import { isBrainFeedbackV1Enabled } from '$lib/server/brain-feedback-flag';
 import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
@@ -19,7 +18,6 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 	const cookieConsent = readCookieConsent(cookies);
 
 	const shelfLifeEstimatesInReceipt = isShelfLifeEstimatesInReceiptEnabled();
-	const homeRedesignV1Enabled = isHomeRedesignV1Enabled();
 	const priceMemoryV1Enabled = isPriceMemoryV1Enabled();
 	const brainFeedbackV1Enabled = isBrainFeedbackV1Enabled();
 	const kivraForwardEnabled = isKivraForwardEnabled();
@@ -39,7 +37,6 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			activeInventoryCount: 0,
 			shareLinkEnabled: false,
 			shelfLifeEstimatesInReceipt,
-			homeRedesignV1Enabled,
 			priceMemoryV1Enabled,
 			brainFeedbackV1Enabled,
 			kivraForwardEnabled,
@@ -129,7 +126,6 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		activeInventoryCount,
 		shareLinkEnabled: isShoppingListShareEnabled(),
 		shelfLifeEstimatesInReceipt,
-		homeRedesignV1Enabled,
 		priceMemoryV1Enabled,
 		brainFeedbackV1Enabled,
 		kivraForwardEnabled,
