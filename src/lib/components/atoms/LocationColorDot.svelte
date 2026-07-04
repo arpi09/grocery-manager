@@ -18,6 +18,7 @@
 	class="location-dot"
 	style={`--location-color: ${LOCATION_COLORS[location]}`}
 	title={label}
+	role="img"
 	aria-label={label}
 	data-testid={testId}
 ></span>
