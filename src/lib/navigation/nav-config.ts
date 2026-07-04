@@ -108,6 +108,8 @@ export const NAV_ITEMS: NavItem[] = [
 		labelKey: 'nav.inventory',
 		icon: 'inventory',
 		primary: true,
+		/* A pantry app keeps the pantry one tap away — mobile matches desktop (5 tabs). */
+		mobileTab: true,
 		badge: 'stale',
 		match: 'prefix'
 	},
