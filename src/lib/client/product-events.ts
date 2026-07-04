@@ -14,6 +14,8 @@ const CLIENT_EVENT_TYPES = [
 	'onboarding_notifications_prompted',
 	'onboarding_kivra_tapped',
 	'onboarding_completed',
+	'onboarding_seed_choice',
+	'onboarding_finish_state',
 	'pwa_banner_dismiss',
 	'pwa_banner_install_click',
 	'receipt_share_install_nudge_shown',
