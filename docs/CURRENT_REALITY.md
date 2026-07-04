@@ -23,7 +23,7 @@ Utg?ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenis
 | Yta | Route | Notering |
 |-----|-------|----------|
 | Default home | `/hem` | `APP_HOME_PATH` ? dashboard default |
-| Hem dashboard | `/hem` | **Home UX v2 briefing** when `HOME_UX_V2_ENABLED` (wins over v1 redesign); v1 fallback when v2 off |
+| Hem dashboard | `/hem` | **Home UX v2 briefing** (flag retired — always on) |
 | Settings | `/settings` | **iOS hub** ? grouped rows + drill-down (`/settings/account`, `/notifications`, `/household`, `/plan`, `/app`, `/feedback`, `/suggestions`) ([#100](https://github.com/arpi09/grocery-manager/pull/100)) |
 | Primary tabs (desktop) | Hem, Lager, Ink?p, Skanna, Mer | Lager + scan in top row |
 | Primary tabs (mobile) | Hem, Ink?p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |

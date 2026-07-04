@@ -4,8 +4,6 @@
 
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 
-	import HomeDashboard from '$lib/components/organisms/HomeDashboard.svelte';
-
 	import HomeV2Page from '$lib/components/organisms/HomeV2Page.svelte';
 
 	let { data } = $props();
@@ -16,63 +14,34 @@
 
 	<PageContainer>
 
-		{#if data.homeUxV2Enabled}
+		<HomeV2Page
 
-			<HomeV2Page
+			summary={data.summary}
 
-				summary={data.summary}
+			intelligence={data.intelligence}
 
-				intelligence={data.intelligence}
+			displayName={data.user?.displayName}
 
-				displayName={data.user?.displayName}
+			shoppingListCount={data.shoppingListCount}
 
-				shoppingListCount={data.shoppingListCount}
+			shoppingCadence={data.shoppingCadence}
 
-				shoppingCadence={data.shoppingCadence}
+			recipeSuggestion={data.recipeSuggestion}
 
-				recipeSuggestion={data.recipeSuggestion}
+			briefingRecipeChip={data.briefingRecipeChip}
 
-				briefingRecipeChip={data.briefingRecipeChip}
+			briefingFunFact={data.briefingFunFact}
 
-				briefingFunFact={data.briefingFunFact}
+			briefingOneLiner={data.briefingOneLiner}
 
-				briefingOneLiner={data.briefingOneLiner}
+			canWrite={data.canWrite}
 
-				canWrite={data.canWrite}
+			brainTimeline={data.brainTimeline}
 
+			brainScore={data.brainScore}
 
-				brainTimeline={data.brainTimeline}
-
-				brainScore={data.brainScore}
-
-				loadFailed={Boolean(data.loadFailed)}
-			/>
-
-		{:else}
-
-			<HomeDashboard
-
-				summary={data.summary}
-
-				intelligence={data.intelligence}
-
-				celebration={data.celebration}
-
-				canWrite={data.canWrite}
-
-				displayName={data.user?.displayName}
-
-				householdId={data.activeHousehold?.id ?? null}
-
-				shoppingListCount={data.shoppingListCount}
-
-				shoppingCadence={data.shoppingCadence}
-
-				homeRedesignV1={Boolean(data.homeRedesignV1Enabled)}
-
-			/>
-
-		{/if}
+			loadFailed={Boolean(data.loadFailed)}
+		/>
 
 	</PageContainer>
 

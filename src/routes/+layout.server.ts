@@ -5,7 +5,6 @@ import { isShelfLifeEstimatesInReceiptEnabled } from '$lib/server/shelf-life-lea
 import { isHomeRedesignV1Enabled } from '$lib/server/home-redesign-flag';
 import { isPriceMemoryV1Enabled } from '$lib/server/price-memory-flag';
 import { isBrainFeedbackV1Enabled } from '$lib/server/brain-feedback-flag';
-import { isHomeUxV2Enabled } from '$lib/server/home-ux-v2-flag';
 import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { resolveThemeForRequest } from '$lib/server/theme-cookie';
@@ -23,7 +22,6 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 	const homeRedesignV1Enabled = isHomeRedesignV1Enabled();
 	const priceMemoryV1Enabled = isPriceMemoryV1Enabled();
 	const brainFeedbackV1Enabled = isBrainFeedbackV1Enabled();
-	const homeUxV2Enabled = isHomeUxV2Enabled();
 	const kivraForwardEnabled = isKivraForwardEnabled();
 
 	if (!locals.user) {
@@ -44,7 +42,6 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			homeRedesignV1Enabled,
 			priceMemoryV1Enabled,
 			brainFeedbackV1Enabled,
-			homeUxV2Enabled,
 			kivraForwardEnabled,
 			marketLiveEnabled: false,
 			nearbySharingEnabled: false
@@ -135,7 +132,6 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		homeRedesignV1Enabled,
 		priceMemoryV1Enabled,
 		brainFeedbackV1Enabled,
-		homeUxV2Enabled,
 		kivraForwardEnabled,
 		marketLiveEnabled: marketLiveStatus.enabledInApp,
 		nearbySharingEnabled: nearbySettings.enabled,

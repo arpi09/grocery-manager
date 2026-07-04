@@ -222,10 +222,6 @@ env:
     value: "true"
     availability:
       - RUNTIME
-  - variable: HOME_UX_V2_ENABLED
-    value: "true"
-    availability:
-      - RUNTIME
   - variable: HOME_BRIEFING_AI_ENABLED
     value: "true"
     availability:

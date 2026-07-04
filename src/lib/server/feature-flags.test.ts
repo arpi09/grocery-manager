@@ -9,7 +9,6 @@ import {
 	isReplenishmentLearningEnabled,
 	isShelfLifeLearningEnabled,
 	isShoppingListShareEnabled,
-	isHomeUxV2Enabled,
 	isHomeBriefingAiEnabled,
 	isReplenishmentRankEnabled,
 	isStoreRecommendationV0Enabled
@@ -44,7 +43,6 @@ describe('feature-flags registry', () => {
 		expect(FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1).toBe('BRAIN_FEEDBACK_V1_ENABLED');
 		expect(FEATURE_FLAG_ENV.SHOPPING_LIST_SHARE).toBe('PUBLIC_SHOPPING_LIST_SHARE_ENABLED');
 		expect(FEATURE_FLAG_ENV.HOME_REDESIGN_V1).toBe('HOME_REDESIGN_V1_ENABLED');
-		expect(FEATURE_FLAG_ENV.HOME_UX_V2).toBe('HOME_UX_V2_ENABLED');
 		expect(FEATURE_FLAG_ENV.STORE_RECOMMENDATION_V0).toBe('STORE_RECOMMENDATION_V0_ENABLED');
 	});
 
@@ -53,7 +51,6 @@ describe('feature-flags registry', () => {
 		expect(isLocationLearningEnabled()).toBe(true);
 		expect(isReplenishmentLearningEnabled()).toBe(true);
 		expect(isBrainFeedbackV1Enabled()).toBe(true);
-		expect(isHomeUxV2Enabled()).toBe(true);
 		expect(isHomeBriefingAiEnabled()).toBe(true);
 		expect(isReplenishmentRankEnabled()).toBe(true);
 		expect(isPriceMemoryV1Enabled()).toBe(false);
@@ -64,9 +61,7 @@ describe('feature-flags registry', () => {
 
 	it('disables default-on brain flags when env is false', () => {
 		process.env[FEATURE_FLAG_ENV.SHELF_LIFE_LEARNING] = 'false';
-		process.env[FEATURE_FLAG_ENV.HOME_UX_V2] = 'false';
 		expect(isShelfLifeLearningEnabled()).toBe(false);
-		expect(isHomeUxV2Enabled()).toBe(false);
 	});
 
 	it('enables opt-in flags only when env is exactly true', () => {
@@ -77,7 +72,6 @@ describe('feature-flags registry', () => {
 		process.env[FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1] = 'true';
 		process.env[FEATURE_FLAG_ENV.SHOPPING_LIST_SHARE] = 'true';
 		process.env[FEATURE_FLAG_ENV.HOME_REDESIGN_V1] = 'true';
-		process.env[FEATURE_FLAG_ENV.HOME_UX_V2] = 'true';
 		process.env[FEATURE_FLAG_ENV.STORE_RECOMMENDATION_V0] = 'true';
 
 		expect(isShelfLifeLearningEnabled()).toBe(true);
@@ -87,7 +81,6 @@ describe('feature-flags registry', () => {
 		expect(isBrainFeedbackV1Enabled()).toBe(true);
 		expect(isShoppingListShareEnabled()).toBe(true);
 		expect(isHomeRedesignV1Enabled()).toBe(true);
-		expect(isHomeUxV2Enabled()).toBe(true);
 		expect(isStoreRecommendationV0Enabled()).toBe(true);
 
 		process.env[FEATURE_FLAG_ENV.PRICE_MEMORY_V1] = 'false';

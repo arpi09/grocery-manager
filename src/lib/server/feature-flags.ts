@@ -11,7 +11,6 @@ export const FEATURE_FLAG_ENV = {
 	PRICE_MEMORY_V1: 'PRICE_MEMORY_V1_ENABLED',
 	BRAIN_FEEDBACK_V1: 'BRAIN_FEEDBACK_V1_ENABLED',
 	SHOPPING_LIST_SHARE: 'PUBLIC_SHOPPING_LIST_SHARE_ENABLED',
-	HOME_UX_V2: 'HOME_UX_V2_ENABLED',
 	RECEIPT_AI_BATCH: 'RECEIPT_AI_BATCH_ENABLED',
 	AUTO_FINISH: 'AUTO_FINISH_ENABLED',
 	GLOBAL_SHELF_LIFE_DB: 'GLOBAL_SHELF_LIFE_DB_ENABLED',
@@ -73,11 +72,6 @@ export function isShoppingListShareEnabled(): boolean {
 /** Server flag: Price Memory V1 read surfaces (default off). */
 export function isPriceMemoryV1Enabled(): boolean {
 	return isEnvTrue(FEATURE_FLAG_ENV.PRICE_MEMORY_V1);
-}
-
-/** Server flag: Home UX v2 — Household Briefing on `/hem` (default on). */
-export function isHomeUxV2Enabled(): boolean {
-	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.HOME_UX_V2);
 }
 
 /** Server flag: Store recommendation V0 learning experiment (default off). */
@@ -219,13 +213,6 @@ export function getAllFeatureFlagSnapshot(): FeatureFlagSnapshotEntry[] {
 			label: 'Price memory v1',
 			pattern: 'exactTrue',
 			check: isPriceMemoryV1Enabled
-		},
-		{
-			id: 'homeUxV2',
-			envKey: FEATURE_FLAG_ENV.HOME_UX_V2,
-			label: 'Home UX v2',
-			pattern: 'defaultOn',
-			check: isHomeUxV2Enabled
 		},
 		{
 			id: 'storeRecommendationV0',

@@ -13,8 +13,6 @@ test.describe('Home UX v2', () => {
 	test.setTimeout(120_000);
 
 	test('briefing greeting, for-you card, and chips @deploy-critical', async ({ page }) => {
-		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
-
 		const expiringName = `E2E Home V2 ${Date.now()}`;
 
 		await loginAsAdmin(page);
@@ -28,8 +26,6 @@ test.describe('Home UX v2', () => {
 	});
 
 	test('replenishment CTA adds item to shopping list @deploy-critical', async ({ page }) => {
-		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
-
 		const productName = `E2E Replenish ${Date.now()}`;
 
 		await loginAsAdmin(page);
@@ -62,8 +58,6 @@ test.describe('Home UX v2', () => {
 	});
 
 	test('shop-ready CTA opens shopping shop mode @deploy-critical', async ({ page }) => {
-		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
-
 		const listItem = `E2E Shop Ready ${Date.now()}`;
 
 		await loginAsAdmin(page);
@@ -89,8 +83,6 @@ test.describe('Home UX v2', () => {
 	});
 
 	test('/hem briefing has no critical axe violations @deploy-critical', async ({ page }) => {
-		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
-
 		await loginAsAdmin(page);
 		await createFridgeItemViaApi(page, `E2E Home A11y ${Date.now()}`);
 		await openHomeV2Briefing(page);
@@ -99,8 +91,6 @@ test.describe('Home UX v2', () => {
 	});
 
 	test('moment card when nothing urgent @deploy-critical', async ({ page }) => {
-		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
-
 		await loginAsAdmin(page);
 		await createFridgeItemViaApi(page, `E2E Moment ${Date.now()}`, {
 			expiresOn: expiringSoonIso(90)
