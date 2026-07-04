@@ -152,7 +152,7 @@
 						</span>
 						<span class="tab-label">{t(item.labelKey)}</span>
 						{#if item.badge === 'stale' && staleCount > 0 && canWrite}
-							<span class="stale-dot" aria-label={t('nav.staleBadge', { count: staleCount })}></span>
+							<span class="stale-dot" role="img" aria-label={t('nav.staleBadge', { count: staleCount })}></span>
 						{/if}
 						{#if active}
 							<span class="tab-indicator" aria-hidden="true"></span>
@@ -180,6 +180,7 @@
 						{#if showMarketUnreadInMore}
 							<span
 								class="stale-dot"
+								role="img"
 								aria-label={t('marketV01.unreadChatsBadge', { count: getMarketUnreadCount() })}
 							></span>
 						{/if}
