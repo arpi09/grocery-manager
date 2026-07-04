@@ -6,9 +6,16 @@ export const EAT_FIRST_WEEK_MAX_MEALS = 5;
 
 export const EAT_FIRST_WEEK_PATH = '/planer/vecka';
 
-export type EatFirstWeekInboundSource = 'push' | 'email' | 'hero' | 'planer';
+export type EatFirstWeekInboundSource = 'push' | 'email' | 'hero' | 'planer' | 'pantry' | 'hem';
 
-const INBOUND_SOURCES = new Set<EatFirstWeekInboundSource>(['push', 'email', 'hero', 'planer']);
+const INBOUND_SOURCES = new Set<EatFirstWeekInboundSource>([
+	'push',
+	'email',
+	'hero',
+	'planer',
+	'pantry',
+	'hem'
+]);
 
 /**
  * Scale AI meal count (3–5) with how urgent expiry is — more expiring items → more slots.
@@ -52,8 +59,11 @@ export function shouldShowEatFirstWeekInboundBanner(
 
 /** Context-aware back target for the weekly ritual drill-down. */
 export function eatFirstWeekBackHref(source: EatFirstWeekInboundSource | null): string {
-	if (source === 'hero' || source === 'push' || source === 'email') {
+	if (source === 'hero' || source === 'push' || source === 'email' || source === 'hem') {
 		return HEM_PATH;
+	}
+	if (source === 'pantry') {
+		return '/inventory';
 	}
 	return '/planer';
 }

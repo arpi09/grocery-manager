@@ -6,6 +6,7 @@
 	import type { HomePulseActivity, HomePulseMember } from '$lib/domain/household-pulse';
 	import { memberColorVar, memberInitial } from '$lib/domain/household-pulse';
 	import { daysUntilExpiry, formatDaysLeft } from '$lib/domain/expiry';
+	import { buildEatFirstWeekUrl } from '$lib/domain/eat-first-week';
 	import { getLocale, t } from '$lib/i18n';
 
 	const MAX_ROWS = 3;
@@ -177,6 +178,13 @@
 						: t('home.v6.expiringCard.addCta', { count: selectedCount })}
 				</Button>
 			{/if}
+			<a
+				class="more-link cook-link"
+				href={buildEatFirstWeekUrl('hem')}
+				data-testid="home-v2-pulse-cook"
+			>
+				{t('home.v6.expiringCard.cookCta')}
+			</a>
 			{#if expiringSoon.length > MAX_ROWS}
 				<a class="more-link" href={moreHref}>{t('home.expiring.moreLink')}</a>
 			{/if}

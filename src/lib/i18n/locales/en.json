@@ -407,6 +407,7 @@
 				"addCta": "Add {count} to shopping list",
 				"addCtaEmpty": "Select items to add",
 				"addedCta": "✓ Added to shopping list",
+				"cookCta": "Cook something from these",
 				"addFailed": "Couldn't add the items — try again",
 				"addPartial": "{added} of {total} items were added to the list",
 				"addSuccess": "{count, plural, one {# item added to the shopping list} other {# items added to the shopping list}}"
@@ -1605,6 +1606,7 @@
 		"contextNoExpiring": "Nothing urgent expiring within {days} days.",
 		"contextPlanned": "{count} meals in this calendar view",
 		"contextWeeklyLink": "Week suggestions (AI)",
+		"contextWeeklyHint": "Generate a dish = one idea now. Week suggestions = plan the whole week.",
 		"contextHomeLink": "Expiring soon",
 		"contextWeekViewLink": "Week view",
 		"contextActionsAria": "Weekly planning actions",
@@ -3070,6 +3072,7 @@
 				"title": "Use soon — {count, plural, one {# item} other {# items}}",
 				"list": "{items}",
 				"aria": "Items to use soon",
+				"cookCta": "Cook dinner from these",
 				"cta": "View all items"
 			},
 			"zone": {
