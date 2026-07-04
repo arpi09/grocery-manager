@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import { deserialize, enhance } from '$app/forms';
 	import { goto, invalidateAll } from '$app/navigation';
@@ -83,6 +84,14 @@
 
 	const unchecked = $derived(sortUncheckedItems(items));
 	const listHasItems = $derived(items.length > 0 || checkedCount > 0);
+	/* The add form stays visible on an empty list so the page's core function is always at hand. */
+	const showAddForm = $derived(showQuickAdd || unchecked.length === 0);
+
+	async function openQuickAdd() {
+		showQuickAdd = true;
+		await tick();
+		document.getElementById('shopping-v2-name')?.focus();
+	}
 
 	$effect(() => {
 		if (!browser || !householdId) {
@@ -421,15 +430,13 @@
 			onAcceptSuggestion={acceptSuggestion}
 			onDismissSuggestion={dismissSuggestion}
 			onStartShop={handleStartShop}
-			onAddItem={() => {
-				showQuickAdd = true;
-			}}
+			onAddItem={() => void openQuickAdd()}
 			onOpenLegacy={() => {
 				legacyOpen = true;
 			}}
 		/>
 
-		{#if showQuickAdd && canEdit}
+		{#if showAddForm && canEdit}
 			<form method="POST" action="?/add" use:enhance={addEnhance} class="quick-add" data-testid="shopping-v2-quick-add">
 				<label class="sr-only" for="shopping-v2-name">{t('shopping.v2.add.placeholder')}</label>
 				<input

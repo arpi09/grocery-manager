@@ -1218,9 +1218,10 @@
 				"subtitle": "{count, plural, one {# vara} other {# varor}} · {store}",
 				"subtitleMemory": "minns vad ni brukar köpa",
 				"subtitleEmpty": "Tom lista — lägg till det ni saknar",
-				"emptyTitle": "Tom lista",
-				"emptyBody": "Lägg till det ni saknar inför nästa handling.",
-				"emptyCta": "Lägg till första varan",
+				"emptyTitle": "Listan är tom.\nDags att fylla den.",
+				"emptyBody": "Lägg till det ni behöver handla. Listan delas direkt med hela hushållet – så handlar ni aldrig dubbelt.",
+				"emptyCta": "Lägg till en vara",
+				"emptyHelper": "Varor som snart tar slut i skafferiet föreslås här",
 				"illustrationAria": "Inköpsplan — översikt"
 			},
 			"mode": {
@@ -3077,9 +3078,10 @@
 			"searchPlaceholder": "Sök i skafferiet…",
 			"insightsSummary": "Att se över i skafferiet",
 			"empty": {
-				"title": "Tomt skafferi",
-				"body": "Kom igång genom att importera ett kvitto eller lägga till en vara manuellt.",
-				"cta": "Lägg till vara"
+				"title": "Tomt så länge.\nSnart fullt av liv.",
+				"body": "Lägg till er första vara för att börja hålla koll på vad som finns hemma – och vad som snart tar slut.",
+				"cta": "Lägg till din första vara",
+				"helper": "Sorteras automatiskt i Kyl, Frys och Skafferi"
 			},
 			"error": {
 				"loadFailed": "Skafferiet kunde inte laddas. Försök igen."

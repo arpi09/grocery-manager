@@ -1,7 +1,7 @@
 <script lang="ts">
 	import MemorySuggestionList from '$lib/components/molecules/MemorySuggestionList.svelte';
 	import TripSummaryPills from '$lib/components/molecules/TripSummaryPills.svelte';
-	import EmptyState from '$lib/components/molecules/EmptyState.svelte';
+	import FirstRunEmptyState from '$lib/components/molecules/FirstRunEmptyState.svelte';
 	import type { ReplenishmentSuggestion } from '$lib/domain/replenishment';
 	import { buildPlanHeaderTitle } from '$lib/domain/shopping-v2-presenter';
 	import { sortUncheckedItems } from '$lib/domain/shopping-trip';
@@ -63,18 +63,21 @@
 				{t('shopping.v2.plan.titleTrip', { name: header.tripLabel })}
 			</h2>
 		{/if}
-		<p class="plan-subtitle">{subtitle}</p>
+		{#if uncheckedCount > 0}
+			<p class="plan-subtitle">{subtitle}</p>
+		{/if}
 	</header>
 
 	{#if uncheckedCount === 0}
-		<EmptyState
+		<FirstRunEmptyState
+			icon="🛒"
 			title={t('shopping.v2.plan.emptyTitle')}
-			description={t('shopping.v2.plan.emptyBody')}
-			iconId="shopping"
-			actionLabel={canEdit ? t('shopping.v2.plan.emptyCta') : undefined}
-			actionVariant="primary"
-			onAction={canEdit ? onAddItem : undefined}
-			primaryAnalyticsId="shopping.v2.plan.empty_add"
+			body={t('shopping.v2.plan.emptyBody')}
+			ctaLabel={canEdit ? t('shopping.v2.plan.emptyCta') : undefined}
+			onCta={canEdit ? onAddItem : undefined}
+			helperText={t('shopping.v2.plan.emptyHelper')}
+			analyticsId="shopping.v2.plan.empty_add"
+			testid="shopping-v2-empty"
 		/>
 	{/if}
 
