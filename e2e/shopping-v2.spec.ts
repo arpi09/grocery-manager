@@ -73,6 +73,35 @@ test.describe('Shopping UX v2', () => {
 		await expect(page.getByText(itemName).first()).toBeVisible({ timeout: 15_000 });
 	});
 
+	test('clear list with undo restores items', async ({ page }) => {
+		test.setTimeout(120_000);
+		const itemName = `E2E Clear ${Date.now()}`;
+
+		await loginAsAdmin(page);
+		await page.goto('/inkop');
+		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
+		await dismissPostOnboardingShareIfOpen(page);
+
+		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
+		await addItemViaQuickAdd(page, itemName);
+		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(itemName, {
+			timeout: 10_000
+		});
+
+		await page.getByTestId('shopping-v2-clear-list').click();
+		const undo = page.getByTestId('shopping-v2-clear-undo');
+		await expect(undo).toBeVisible({ timeout: 10_000 });
+		await expect(page.getByTestId('shopping-v2-summary-pills')).not.toContainText(itemName, {
+			timeout: 10_000
+		});
+
+		await page.getByTestId('shopping-v2-clear-undo-btn').click();
+		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(itemName, {
+			timeout: 15_000
+		});
+	});
+
 	test('shop mode undo pick and not-in-store parking', async ({ page }) => {
 		test.setTimeout(150_000);
 		const itemA = `E2E Undo ${Date.now()}`;

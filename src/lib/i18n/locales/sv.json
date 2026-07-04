@@ -1208,6 +1208,14 @@
 				"legacyList": "Visa som checklista",
 				"title": "Mer för inköp"
 			},
+			"clear": {
+				"cta": "Rensa listan",
+				"done": "{count, plural, one {# vara} other {# varor}} rensad",
+				"undo": "Ångra",
+				"restored": "Listan är återställd",
+				"failed": "Kunde inte rensa listan. Försök igen.",
+				"restoreFailed": "Kunde inte återställa listan. Försök igen."
+			},
 			"shop": {
 				"backToPlan": "Planera",
 				"backToPlanAria": "Tillbaka till planering",

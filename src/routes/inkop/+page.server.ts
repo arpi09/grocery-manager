@@ -504,6 +504,66 @@ export const actions: Actions = {
 
 		return { success: true };
 	},
+	clearList: async (event) => {
+		requireInventoryWriteAccess(event.locals.householdRole);
+		const householdId = event.locals.householdId;
+		if (!householdId) error(400, translate(event.locals.locale, 'errors.household.noHousehold'));
+
+		try {
+			const removed = await event.locals.shoppingListService.clearUnchecked(
+				householdId,
+				event.locals.householdRole!
+			);
+			return { success: true, cleared: removed };
+		} catch (err) {
+			return handleServiceError(err);
+		}
+	},
+	restoreList: async (event) => {
+		requireInventoryWriteAccess(event.locals.householdRole);
+		const householdId = event.locals.householdId;
+		if (!householdId) error(400, translate(event.locals.locale, 'errors.household.noHousehold'));
+
+		const raw = (await event.request.formData()).get('items');
+		if (typeof raw !== 'string' || !raw) {
+			return fail(400, { message: translate(event.locals.locale, 'errors.shopping.missingRowId') });
+		}
+
+		let parsed: unknown;
+		try {
+			parsed = JSON.parse(raw);
+		} catch {
+			return fail(400, { message: translate(event.locals.locale, 'errors.shopping.missingRowId') });
+		}
+		if (!Array.isArray(parsed)) {
+			return fail(400, { message: translate(event.locals.locale, 'errors.shopping.missingRowId') });
+		}
+
+		const inputs = parsed
+			.filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === 'object')
+			.map((entry) => ({
+				name: typeof entry.name === 'string' ? entry.name.trim().slice(0, 120) : '',
+				quantity: typeof entry.quantity === 'string' ? entry.quantity : null,
+				unit: typeof entry.unit === 'string' ? entry.unit : null
+			}))
+			.filter((input) => input.name.length > 0)
+			.slice(0, 200);
+
+		if (inputs.length === 0) {
+			return { success: true, restored: 0 };
+		}
+
+		try {
+			const result = await event.locals.shoppingListService.addSuggestedItems(
+				householdId,
+				event.locals.householdRole!,
+				inputs
+			);
+			return { success: true, restored: result.added };
+		} catch (err) {
+			return handleServiceError(err);
+		}
+	},
 	/**
 	 * Söndagsförslaget accept — takes the exact rows the user saw (one row for a per-row tap,
 	 * all rows for "Lägg till alla") and adds them to the shared list. Replenishment rows go
