@@ -505,6 +505,13 @@
                         "when":  1754409600000,
                         "tag":  "0072_onboarding_setup_telemetry",
                         "breakpoints":  true
+                    },
+                    {
+                        "idx":  72,
+                        "version":  "7",
+                        "when":  1754496000000,
+                        "tag":  "0073_shopping_unavailable_at",
+                        "breakpoints":  true
                     }
                 ]
 }

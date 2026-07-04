@@ -20,6 +20,7 @@ function shoppingItem(
 		quantity: '1',
 		unit: null,
 		checked,
+		unavailableAt: null,
 		sortOrder: 0,
 		createdAt: now,
 		updatedAt: now,

@@ -93,6 +93,19 @@ export class ShoppingListService {
 		return u;
 	}
 
+	async toggleUnavailable(householdId: string, role: HouseholdRole, id: string) {
+		if (!canEditInventory(role)) throw new ShoppingListReadOnlyError();
+		const existing = await this.repository.findById(householdId, id);
+		if (!existing) throw new ShoppingListNotFoundError();
+		const updated = await this.repository.setUnavailable(
+			householdId,
+			id,
+			existing.unavailableAt ? null : new Date()
+		);
+		if (!updated) throw new ShoppingListNotFoundError();
+		return updated;
+	}
+
 	async toggleCheckedMany(
 		householdId: string,
 		role: HouseholdRole,

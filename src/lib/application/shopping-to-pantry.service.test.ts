@@ -13,6 +13,7 @@ const shoppingItem: ShoppingListItem = {
 	quantity: '2',
 	unit: 'L',
 	checked: true,
+	unavailableAt: null,
 	sortOrder: 1,
 	createdAt: new Date(),
 	updatedAt: new Date()

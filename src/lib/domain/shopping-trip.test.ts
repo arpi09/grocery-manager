@@ -3,13 +3,16 @@ import type { ShoppingListItem } from './shopping-list-item';
 import {
 	clampFocusIndex,
 	getFocusItem,
+	getLiveTripTotal,
 	getPeekOverflowCount,
 	getPeekQueue,
 	getSummaryNamePills,
 	getTripProgress,
+	isItemUnavailableForTrip,
 	isTripComplete,
 	limitMemorySuggestions,
-	sortUncheckedItems
+	sortUncheckedItems,
+	splitTripItems
 } from './shopping-trip';
 
 function item(
@@ -20,6 +23,7 @@ function item(
 		quantity: null,
 		unit: null,
 		checked: false,
+		unavailableAt: null,
 		createdAt: new Date('2026-01-01'),
 		updatedAt: new Date('2026-01-01'),
 		...overrides
@@ -81,5 +85,50 @@ describe('shopping-trip', () => {
 	it('clamps focus index to unchecked bounds', () => {
 		expect(clampFocusIndex(5, 3)).toBe(2);
 		expect(clampFocusIndex(-1, 3)).toBe(0);
+	});
+
+	it('treats unavailable markers as trip-scoped', () => {
+		const tripStartedAt = new Date('2026-07-04T10:00:00Z').getTime();
+		const markedThisTrip = item({
+			id: '1',
+			name: 'Dill',
+			sortOrder: 1,
+			unavailableAt: new Date('2026-07-04T10:05:00Z')
+		});
+		const markedLastWeek = item({
+			id: '2',
+			name: 'Persilja',
+			sortOrder: 2,
+			unavailableAt: new Date('2026-06-27T10:00:00Z')
+		});
+
+		expect(isItemUnavailableForTrip(markedThisTrip, tripStartedAt)).toBe(true);
+		expect(isItemUnavailableForTrip(markedLastWeek, tripStartedAt)).toBe(false);
+		expect(isItemUnavailableForTrip(markedThisTrip, null)).toBe(false);
+	});
+
+	it('splits trip items into available and unavailable', () => {
+		const tripStartedAt = new Date('2026-07-04T10:00:00Z').getTime();
+		const items = [
+			item({ id: '1', name: 'A', sortOrder: 1 }),
+			item({
+				id: '2',
+				name: 'B',
+				sortOrder: 2,
+				unavailableAt: new Date('2026-07-04T10:05:00Z')
+			}),
+			item({ id: '3', name: 'C', sortOrder: 3, checked: true })
+		];
+
+		const split = splitTripItems(items, tripStartedAt);
+		expect(split.available.map((entry) => entry.id)).toEqual(['1', '3']);
+		expect(split.unavailable.map((entry) => entry.id)).toEqual(['2']);
+	});
+
+	it('computes live trip total from picked + remaining', () => {
+		expect(getLiveTripTotal(2, 3)).toBe(5);
+		expect(getLiveTripTotal(0, 0)).toBe(0);
+		/* Partner adds two items mid-trip: total grows with the list. */
+		expect(getLiveTripTotal(2, 5)).toBe(7);
 	});
 });
