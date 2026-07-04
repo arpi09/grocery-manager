@@ -319,7 +319,18 @@ export async function expectActivationScreenHeading(page: Page, pattern: RegExp)
 	await expect(page.getByRole('heading', { name: pattern })).toBeVisible({ timeout: 20_000 });
 }
 
-async function markE2eOnboardingComplete(page: Page) {
+async function markE2eOnboardingComplete(page: Page, attempt = 0): Promise<void> {
+	try {
+		await runMarkE2eOnboardingComplete(page);
+	} catch (error) {
+		/* Vite dep re-optimization on first compile aborts in-flight fetches ("Failed to fetch") — settle and retry once. */
+		if (attempt >= 1) throw error;
+		await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => undefined);
+		await markE2eOnboardingComplete(page, attempt + 1);
+	}
+}
+
+async function runMarkE2eOnboardingComplete(page: Page) {
 	await page.evaluate(async () => {
 		const mark = (window as Window & { __hpMarkOnboardingComplete?: (userId: string) => void })
 			.__hpMarkOnboardingComplete;
