@@ -30,6 +30,7 @@
 	import { getLocale, t } from '$lib/i18n';
 	import { PANTRY_SHELF_PATH } from '$lib/navigation/nav-config';
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
+	import { buildEatFirstWeekUrl } from '$lib/domain/eat-first-week';
 	import { scanModeHref } from '$lib/utils/scan-nav';
 	import { isWithinActiveMealSlot } from '$lib/domain/meal-slot';
 	import { LOCATIONS, type StorageLocation } from '$lib/domain/location';
@@ -153,7 +154,8 @@
 			case 'photoRound':
 				return scanModeHref('photo', APP_HOME_PATH);
 			case 'planMeal':
-				return '/planer';
+				/* Food is expiring → land directly in the eat-first week generator. */
+				return useSoonCount > 0 ? buildEatFirstWeekUrl('hem') : '/planer';
 			case 'openShopping':
 				return '/inkop';
 			case 'seeStats':

@@ -350,6 +350,7 @@
 				"addCta": "Lägg till {count} på inköpslistan",
 				"addCtaEmpty": "Välj varor att lägga till",
 				"addedCta": "✓ Tillagt på inköpslistan",
+				"cookCta": "Laga något av detta",
 				"addFailed": "Kunde inte lägga till varorna — försök igen",
 				"addPartial": "{added} av {total} varor lades till på listan",
 				"addSuccess": "{count, plural, one {# vara tillagd på inköpslistan} other {# varor tillagda på inköpslistan}}"
@@ -1576,6 +1577,7 @@
 		"contextNoExpiring": "Inget brådskande som går ut inom {days} dagar.",
 		"contextPlanned": "{count} måltider i denna kalendervy",
 		"contextWeeklyLink": "Veckoförslag (AI)",
+		"contextWeeklyHint": "Generera maträtt = en idé nu. Veckoförslag = planera hela veckan.",
 		"contextHomeLink": "Utgår snart",
 		"contextWeekViewLink": "Veckovy",
 		"contextActionsAria": "Åtgärder för veckoplanering"
@@ -2991,6 +2993,7 @@
 				"title": "Använd snart — {count, plural, one {# vara} other {# varor}}",
 				"list": "{items}",
 				"aria": "Varor att använda snart",
+				"cookCta": "Gör middag av detta",
 				"cta": "Visa alla varor"
 			},
 			"zone": {
