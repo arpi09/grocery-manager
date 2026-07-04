@@ -358,6 +358,7 @@
 		"v6": {
 			"pageTitle": "Home · Skaffu",
 			"metaDescription": "Household overview — what to use soon, shopping, and pantry.",
+			"moreOnHome": "More on home",
 			"brandAria": "Skaffu – Home",
 			"accountAria": "Account",
 			"householdSwitcher": "{name} · {count, plural, one {# member} other {# members}}",
