@@ -445,6 +445,42 @@
 					"cta": "Öppna inköpslistan"
 				}
 			},
+			"expiringCard": {
+				"addCta": "Lägg till {count} på inköpslistan",
+				"addCtaEmpty": "Välj varor att lägga till",
+				"addedCta": "✓ Tillagt på inköpslistan",
+				"addFailed": "Kunde inte lägga till varorna — försök igen",
+				"addPartial": "{added} av {total} varor lades till på listan",
+				"addSuccess": "{count, plural, one {# vara tillagd på inköpslistan} other {# varor tillagda på inköpslistan}}"
+			},
+			"pulseCard": {
+				"title": "Hushållspuls",
+				"expiringLabel": "Går ut snart",
+				"expiringEmpty": "Inga varor går ut snart 🎉",
+				"shoppingTitle": "Inköpslistan",
+				"shoppingCount": "{count, plural, one {# vara att handla} other {# varor att handla}}",
+				"shoppingEmpty": "Listan är tömd",
+				"openCta": "Öppna →",
+				"activityLabel": "Senaste aktivitet",
+				"activityEmpty": "Ingen aktivitet ännu",
+				"activity": {
+					"create": "la till",
+					"consume": "använde",
+					"confirm": "bekräftade",
+					"merge": "slog ihop",
+					"batchReview": "gick igenom kvittot",
+					"stalenessConfirmed": "såg över skafferiet",
+					"receiptFinishAccepted": "prickade av ett kvitto",
+					"generic": "uppdaterade skafferiet",
+					"someone": "Någon i hushållet"
+				},
+				"time": {
+					"justNow": "nyss",
+					"minutes": "{count} min",
+					"hours": "{count} tim",
+					"days": "{count, plural, one {# dag} other {# dagar}}"
+				}
+			},
 			"moment": {
 				"emptyPantry": {
 					"title": "Bygg ert skafferi",

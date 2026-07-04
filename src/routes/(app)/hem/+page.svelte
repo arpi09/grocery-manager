@@ -44,6 +44,12 @@
 
 				shoppingUxV2Enabled={Boolean(data.shoppingUxV2Enabled)}
 
+				householdName={data.activeHousehold?.name ?? null}
+
+				pulseMembers={data.pulseMembers}
+
+				pulseLastActivity={data.pulseLastActivity}
+
 				brainTimeline={data.brainTimeline}
 
 				brainScore={data.brainScore}

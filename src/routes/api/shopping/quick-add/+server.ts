@@ -6,7 +6,12 @@ import { recordProductEvent } from '$lib/server/product-events';
 import { parseAddShoppingListItem } from '$lib/validation/shopping-list.schemas';
 import type { RequestHandler } from './$types';
 
-function parseQuickAddBody(body: unknown): { name: string; quantity?: string; unit?: string | null } | null {
+const QUICK_ADD_SOURCES = ['quick_add_api', 'home_expiring_card'] as const;
+type QuickAddSource = (typeof QUICK_ADD_SOURCES)[number];
+
+function parseQuickAddBody(
+	body: unknown
+): { name: string; quantity?: string; unit?: string | null; source: QuickAddSource } | null {
 	if (!body || typeof body !== 'object' || !('name' in body)) {
 		return null;
 	}
@@ -16,10 +21,14 @@ function parseQuickAddBody(body: unknown): { name: string; quantity?: string; un
 	}
 	const quantityRaw = (body as { quantity?: unknown }).quantity;
 	const unitRaw = (body as { unit?: unknown }).unit;
+	const sourceRaw = (body as { source?: unknown }).source;
 	return {
 		name: name.trim(),
 		quantity: typeof quantityRaw === 'string' && quantityRaw.trim() ? quantityRaw.trim() : undefined,
-		unit: typeof unitRaw === 'string' ? unitRaw.trim() || null : undefined
+		unit: typeof unitRaw === 'string' ? unitRaw.trim() || null : undefined,
+		source: QUICK_ADD_SOURCES.includes(sourceRaw as QuickAddSource)
+			? (sourceRaw as QuickAddSource)
+			: 'quick_add_api'
 	};
 }
 
@@ -59,7 +68,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		userId: auth.user.id,
 		householdId: auth.householdId,
 		eventType: 'fill_suggestions_added',
-		metadata: { name: item.name, source: 'quick_add_api', count: 1 }
+		metadata: { name: item.name, source: parsedBody.source, count: 1 }
 	});
 
 	return json({ ok: true, item });

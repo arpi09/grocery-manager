@@ -12,7 +12,7 @@ import {
 test.describe('Home UX v2', () => {
 	test.setTimeout(120_000);
 
-	test('briefing greeting, for-you card, and chips @deploy-critical', async ({ page }) => {
+	test('briefing greeting, pulse card, and chips @deploy-critical', async ({ page }) => {
 		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
 
 		const expiringName = `E2E Home V2 ${Date.now()}`;
@@ -23,8 +23,46 @@ test.describe('Home UX v2', () => {
 
 		await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 		await expect(page.getByTestId('home-v2-chips')).toBeVisible();
-		await expect(page.getByTestId('home-v2-for-you')).toBeVisible();
-		await expect(page.getByTestId('home-v2-for-you')).toHaveAttribute('data-for-you-kind', 'expiring');
+
+		const pulse = page.getByTestId('home-v2-pulse-card');
+		await expect(pulse).toBeVisible();
+		await expect(pulse.getByTestId('home-v2-pulse-open')).toBeVisible();
+		await expect(pulse.getByTestId('home-v2-expiring-row').first()).toBeVisible();
+	});
+
+	test('pulse card quick-add puts expiring items on the shopping list', async ({ page }) => {
+		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
+
+		const expiringName = `E2E Pulse Add ${Date.now()}`;
+
+		await loginAsAdmin(page);
+		await createFridgeItemViaApi(page, expiringName, { expiresOn: expiringSoonIso(1) });
+		await openHomeV2Briefing(page);
+
+		const pulse = page.getByTestId('home-v2-pulse-card');
+		await expect(pulse).toBeVisible();
+
+		const row = pulse.getByTestId('home-v2-expiring-row').filter({ hasText: expiringName });
+		if (!(await row.isVisible().catch(() => false))) {
+			test.skip(true, 'Seeded item not among top expiring rows for shared household');
+		}
+
+		await pulse.getByTestId('home-v2-pulse-add').click();
+		await expect(pulse.getByRole('status')).toBeVisible({ timeout: 15_000 });
+
+		await page.goto('/inkop');
+		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
+
+		if (process.env.SHOPPING_UX_V2_ENABLED === 'true') {
+			await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(expiringName, {
+				timeout: 15_000
+			});
+		} else {
+			await expect(page.locator('#shopping-list-panel')).toContainText(expiringName, {
+				timeout: 15_000
+			});
+		}
 	});
 
 	test('replenishment CTA adds item to shopping list @deploy-critical', async ({ page }) => {
@@ -120,6 +158,10 @@ test.describe('Home UX v2', () => {
 		const forYou = page.getByTestId('home-v2-for-you');
 		if (await forYou.isVisible().catch(() => false)) {
 			test.skip(true, 'For-you card surfaced instead of moment');
+		}
+
+		if ((await page.getByTestId('home-v2-expiring-row').count()) > 0) {
+			test.skip(true, 'Urgent expiring items present — pulse card owns the for-you slot');
 		}
 
 		const moment = page.getByTestId('home-v2-moment');
