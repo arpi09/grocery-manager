@@ -51,16 +51,47 @@
 		aria-label={ariaLabel}
 		data-testid="inventory-list-meta"
 	>
-		{metaLine}
+		{#if parts.quantity}
+			<span class="meta-quantity">{parts.quantity}</span>
+		{/if}
+		{#if parts.quantity && parts.expiry}
+			<span class="meta-separator" aria-hidden="true">·</span>
+		{/if}
+		{#if parts.expiry}
+			<span class="meta-expiry">{parts.expiry}</span>
+		{/if}
 	</span>
 {/if}
 
 <style>
 	.inventory-list-meta {
-		display: block;
+		display: flex;
+		align-items: baseline;
+		gap: 0.25rem;
+		min-width: 0;
+		max-width: 100%;
+		overflow: hidden;
 		font-size: 0.75rem;
 		line-height: 1.3;
 		color: var(--color-text-muted);
+	}
+
+	/* Quantity may truncate; the expiry date must never be clipped mid-date. */
+	.meta-quantity {
+		flex: 0 1 auto;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.meta-separator {
+		flex: 0 0 auto;
+	}
+
+	.meta-expiry {
+		flex: 0 0 auto;
+		white-space: nowrap;
 	}
 
 	.inventory-list-meta.warn {

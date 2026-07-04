@@ -89,4 +89,29 @@ test.describe('Inventory mobile UX', () => {
 		await row.click();
 		await expect(page).toHaveURL(/\/item\/[^/]+\/edit/, { timeout: 15_000 });
 	});
+
+	test('row menu logs consumption (use action first in kebab)', async ({ page }) => {
+		await openFridgeGrid(page);
+		await filterGridToItem(page, seededItemName);
+
+		const row = inventoryRow(page, seededItemName);
+		await expect(row).toBeVisible({ timeout: 15_000 });
+		const rowTestId = await row.getAttribute('data-testid');
+		expect(rowTestId, 'Expected inventory row test id').toBeTruthy();
+		const itemId = rowTestId!.replace('inventory-row-', '');
+
+		// Slim resting row: no inline use button — consume lives in the kebab menu.
+		await expect(row.getByTestId(`inventory-row-use-${itemId}`)).toHaveCount(0);
+
+		await row.getByTestId(`inventory-row-menu-${itemId}`).click();
+		const useMenuItem = page.getByTestId(`inventory-row-use-${itemId}`);
+		await expect(useMenuItem).toBeVisible({ timeout: 10_000 });
+		await useMenuItem.click();
+
+		const sheet = page.getByTestId('inventory-consume-sheet');
+		await expect(sheet).toBeVisible({ timeout: 10_000 });
+		await sheet.locator('input[name="consumptionPreset"][value="half"]').check({ force: true });
+		await sheet.getByRole('button', { name: /Logga förbrukning|Log usage/i }).click();
+		await expect(sheet).not.toBeVisible({ timeout: 15_000 });
+	});
 });

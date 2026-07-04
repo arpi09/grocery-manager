@@ -3090,7 +3090,7 @@
 		},
 		"inventory": {
 			"title": "Your inventory",
-			"body": "Everything you add lands here, sorted by location. Tap an item to edit or mark as used."
+			"body": "Everything you add lands here, sorted by location. Tap an item to edit. Swipe a row left to log that something was used."
 		},
 		"inkop": {
 			"title": "Shopping list",
