@@ -55,6 +55,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(email): use canonical house mark in branded email header ([#178](https://github.com/arpi09/grocery-manager/pull/178)) — Replace the S monogram placeholder in the branded email header with the canonical Skaffu house mark (`pwa/icon-192.png`, absolute URL via `getAppOrigin()`)
 - fix(onboarding): remove duplicate nav row, empty-state copy, stepper fit ([#181](https://github.com/arpi09/grocery-manager/pull/181)) — Onboarding-dialogen (aktiveringsflödet) städas upp utifrån mobil-screenshot på steg 3 av 5:
 - fix(mobile-ux): onboarding defer/Kivra, scan polish, hem pulse, pantry cleanup ([#182](https://github.com/arpi09/grocery-manager/pull/182)) — "Kanske senare" gjorde ingenting (flaggan lästes aldrig) — pausar nu flödet för sessionen och stänger modalen.
+- fix(pantry): tile action buttons overflow card on mobile ([#184](https://github.com/arpi09/grocery-manager/pull/184))
 
 ### Changed
 
