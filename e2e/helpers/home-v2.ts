@@ -71,8 +71,10 @@ export async function importReceiptLines(
 	await dismissActivationCelebrationIfOpen(page);
 	await dismissReceiptImportSuccessIfOpen(page);
 	await uploadReceiptPdf(page, FIXTURE_PDF);
-	await expect(page.getByTestId('receipt-bulk-submit')).toBeVisible({ timeout: 15_000 });
-	await page.getByTestId('receipt-bulk-submit').click();
+	/* Quick confirm re-checks every line first — the recently-added dedupe chip may have
+	   unchecked lines matching pantry items created by earlier specs in the same run. */
+	await expect(page.getByTestId('receipt-quick-confirm')).toBeVisible({ timeout: 15_000 });
+	await page.getByTestId('receipt-quick-confirm').click();
 	await dismissReceiptImportSuccessIfOpen(page);
 	await clearCelebrationPending(page);
 	await dismissActivationCelebrationIfOpen(page);
