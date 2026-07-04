@@ -34,7 +34,9 @@ export async function predictReceiptLinesLocation(
 
 				productName: line.name,
 
-				normalizedKey
+				normalizedKey,
+
+				categoryHint: line.categoryHint ?? null
 
 			});
 

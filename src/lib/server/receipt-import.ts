@@ -96,7 +96,8 @@ export async function importReceiptLines(
 		const name = line.name.trim();
 		if (!name) continue;
 
-		const heuristicLocation = line.location ?? resolveReceiptLineLocation(name, line.location);
+		const heuristicLocation =
+			line.location ?? resolveReceiptLineLocation(name, line.location, line.categoryHint);
 		let location = heuristicLocation;
 		let locationPredictionForm = {
 			predictedLocation: null as StorageLocation | null,
