@@ -131,6 +131,54 @@ interface StructuredImagesResponseOptions extends StructuredResponseOptions {
 	imageDetail?: ImageDetailLevel;
 }
 
+/** system+user message parts for a Responses API `input` array. */
+export function buildResponsesInput(systemPrompt: string, userPrompt: string): unknown[] {
+	return [
+		{ role: 'system', content: [{ type: 'input_text', text: systemPrompt }] },
+		{ role: 'user', content: [{ type: 'input_text', text: userPrompt }] }
+	];
+}
+
+/** `text.format` block enforcing a strict JSON schema on the response. */
+export function buildResponsesJsonFormat(
+	schemaName: string,
+	schema: Record<string, unknown>,
+	strict = true
+): { format: Record<string, unknown> } {
+	return { format: { type: 'json_schema', name: schemaName, strict, schema } };
+}
+
+/**
+ * Full `/v1/responses` request body for a strict-JSON structured call. Shared by
+ * the synchronous path and the Batch API client so both send identical requests.
+ */
+export function buildStructuredRequestBody(options: {
+	model?: string;
+	systemPrompt: string;
+	userPrompt: string;
+	schemaName: string;
+	schema: Record<string, unknown>;
+	strict?: boolean;
+}): Record<string, unknown> {
+	return {
+		model: options.model ?? OPENAI_MODEL,
+		input: buildResponsesInput(options.systemPrompt, options.userPrompt),
+		text: buildResponsesJsonFormat(options.schemaName, options.schema, options.strict ?? true)
+	};
+}
+
+/** Full `/v1/responses` request body for a freeform (no schema) text call. */
+export function buildFreeformRequestBody(options: {
+	model?: string;
+	systemPrompt: string;
+	userPrompt: string;
+}): Record<string, unknown> {
+	return {
+		model: options.model ?? OPENAI_MODEL,
+		input: buildResponsesInput(options.systemPrompt, options.userPrompt)
+	};
+}
+
 async function postOpenAiStructured(
 	apiKey: string,
 	input: unknown[],
@@ -150,14 +198,7 @@ async function postOpenAiStructured(
 			body: JSON.stringify({
 				model,
 				input,
-				text: {
-					format: {
-						type: 'json_schema',
-						name: schemaName,
-						strict,
-						schema
-					}
-				}
+				text: buildResponsesJsonFormat(schemaName, schema, strict)
 			})
 		});
 	} catch (error) {

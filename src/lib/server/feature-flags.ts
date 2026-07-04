@@ -18,7 +18,8 @@ export const FEATURE_FLAG_ENV = {
 	PHOTO_VALIDATION: 'PHOTO_VALIDATION_ENABLED',
 	HOME_BRIEFING_AI: 'HOME_BRIEFING_AI_ENABLED',
 	REPLENISHMENT_RANK: 'REPLENISHMENT_RANK_ENABLED',
-	BRAIN_PROACTIVE: 'BRAIN_PROACTIVE_ENABLED'
+	BRAIN_PROACTIVE: 'BRAIN_PROACTIVE_ENABLED',
+	AI_BATCH: 'AI_BATCH_ENABLED'
 } as const;
 
 function isEnvTrue(key: string): boolean {
@@ -111,6 +112,11 @@ export function isReplenishmentRankEnabled(): boolean {
 /** Server flag: proactive brain automation — briefing/pre-shop/partner/Kivra (default on). */
 export function isBrainProactiveEnabled(): boolean {
 	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.BRAIN_PROACTIVE);
+}
+
+/** Server flag: route latency-insensitive cron AI jobs through OpenAI Batch API (default off). */
+export function isAiBatchEnabled(): boolean {
+	return isEnvTrue(FEATURE_FLAG_ENV.AI_BATCH);
 }
 
 export type FeatureFlagPattern = 'exactTrue' | 'defaultOn' | 'notFalse';
@@ -263,6 +269,13 @@ export function getAllFeatureFlagSnapshot(): FeatureFlagSnapshotEntry[] {
 			label: 'Brain proactive',
 			pattern: 'defaultOn',
 			check: isBrainProactiveEnabled
+		},
+		{
+			id: 'aiBatch',
+			envKey: FEATURE_FLAG_ENV.AI_BATCH,
+			label: 'AI Batch API cron',
+			pattern: 'exactTrue',
+			check: isAiBatchEnabled
 		}
 	];
 

@@ -13,7 +13,11 @@ import {
 	deletePushSubscriptionById,
 	type IPushSubscriptionRepository
 } from '$lib/infrastructure/repositories/push-subscription.repository';
-import { generateExpiryPushBody } from '$lib/server/expiry-push-prompt';
+import {
+	expiryPushBodyKey,
+	generateExpiryPushBody,
+	type ExpiryPushItem
+} from '$lib/server/expiry-push-prompt';
 import { getOpenAiApiKey } from '$lib/server/openai';
 import { translate } from '$lib/i18n/messages';
 import type {
@@ -41,6 +45,18 @@ export interface ExpiryReminderBatchResult {
 	failed: number;
 }
 
+/** Supplies push bodies pre-generated via the OpenAI Batch API (cron). */
+export interface PrebatchedPushBodyProvider {
+	get(userId: string, items: ExpiryPushItem[]): Promise<string | null>;
+}
+
+/** One predicted weekly push, for pre-generating its body via Batch API. */
+export interface WeeklyPushPrediction {
+	userId: string;
+	key: string;
+	items: ExpiryPushItem[];
+}
+
 export class ExpiryReminderService {
 	constructor(
 		private readonly repository: IExpiryReminderRepository,
@@ -49,8 +65,46 @@ export class ExpiryReminderService {
 		private readonly pushRepository: IPushSubscriptionRepository,
 		private readonly email: EmailPort,
 		private readonly push: PushPort,
-		private readonly appOrigin: AppOriginPort
+		private readonly appOrigin: AppOriginPort,
+		private readonly pushBodyProvider?: PrebatchedPushBodyProvider
 	) {}
+
+	/**
+	 * Predict which push-enabled users will receive a weekly expiry reminder and
+	 * with which items, so their push bodies can be pre-generated via Batch API.
+	 * Keyed on item names only (see expiryPushBodyKey) — a changed set at send
+	 * time misses the cache and falls back to synchronous generation.
+	 */
+	async collectWeeklyPushPredictions(): Promise<WeeklyPushPrediction[]> {
+		const users = await this.repository.listOptedInUsers();
+		const predictions: WeeklyPushPrediction[] = [];
+
+		for (const user of users) {
+			if (!user.pushNotificationsEnabled) continue;
+			const sections = await this.buildHouseholdSections(user.id, user.settings.days);
+			const items = this.toPushItems(sections, user.settings.days);
+			if (items.length === 0) continue;
+			predictions.push({
+				userId: user.id,
+				key: expiryPushBodyKey(user.id, items),
+				items
+			});
+		}
+
+		return predictions;
+	}
+
+	private toPushItems(
+		sections: ExpiryReminderHouseholdSection[],
+		days: ExpiryReminderDays
+	): ExpiryPushItem[] {
+		return sections.flatMap((section) =>
+			section.items.map((item) => ({
+				name: item.name,
+				daysUntil: item.expiresOn ? daysUntilExpiry(item.expiresOn) : days
+			}))
+		);
+	}
 
 	async getSettings(userId: string) {
 		return this.repository.getSettings(userId);
@@ -274,17 +328,19 @@ export class ExpiryReminderService {
 		const pushUrl = firstEntry
 			? `${this.appOrigin.getOrigin() || ''}/item/${firstEntry.item.id}/edit?from=push-moving-soon`
 			: `${this.appOrigin.getOrigin() || ''}${buildEatFirstWeekUrl('push')}`;
-		const pushItems = sections.flatMap((section) =>
-			section.items.map((item) => ({
-				name: item.name,
-				daysUntil: item.expiresOn ? daysUntilExpiry(item.expiresOn) : days
-			}))
-		);
+		const pushItems = this.toPushItems(sections, days);
 		const apiKey = getOpenAiApiKey();
-		const llmBody =
-			apiKey && !isMovingSoon
-				? await generateExpiryPushBody(apiKey, pushItems, locale)
+		// Prefer a body pre-generated via Batch API (50% cheaper); fall back to a
+		// synchronous nano call, then to the static translated body below.
+		const prebatchedBody =
+			this.pushBodyProvider && !isMovingSoon
+				? await this.pushBodyProvider.get(userId, pushItems)
 				: null;
+		const llmBody =
+			prebatchedBody ??
+			(apiKey && !isMovingSoon
+				? await generateExpiryPushBody(apiKey, pushItems, locale)
+				: null);
 		const pushBody = llmBody
 			? llmBody
 			: firstEntry

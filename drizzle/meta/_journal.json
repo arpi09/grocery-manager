@@ -512,6 +512,13 @@
                         "when":  1754496000000,
                         "tag":  "0073_shopping_unavailable_at",
                         "breakpoints":  true
+                    },
+                    {
+                        "idx":  73,
+                        "version":  "7",
+                        "when":  1754582400000,
+                        "tag":  "0074_ai_batch_job",
+                        "breakpoints":  true
                     }
                 ]
 }
