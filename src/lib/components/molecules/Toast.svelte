@@ -185,6 +185,12 @@
 		border-color: color-mix(in srgb, var(--color-danger) 75%, var(--color-text));
 	}
 
+	/* Dark-mode success/danger are light tints — white text lands ~2:1, dark bg gives ≥7:1 */
+	html[data-theme='dark'] .toast-success,
+	html[data-theme='dark'] .toast-error {
+		color: var(--color-bg);
+	}
+
 	.toast-info {
 		background: var(--color-surface);
 		color: var(--color-text);
