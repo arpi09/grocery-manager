@@ -7,6 +7,7 @@ import {
 	dismissPostOnboardingShareIfOpen,
 	loginAsAdmin
 } from './helpers/auth';
+import { openChecklistDrawer } from './helpers/shopping-v2';
 
 async function dismissShoppingInkopOverlays(page: Page) {
 	await dismissOnboardingModalIfOpen(page);
@@ -80,13 +81,16 @@ test.describe('Shopping list', () => {
 
 		await page.goto('/inkop', { waitUntil: 'domcontentloaded' });
 		await dismissShoppingInkopOverlays(page);
-		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(itemName, {
-			timeout: 30_000
-		});
+		await expect(page.getByTestId('shopping-v2-page')).toBeVisible({ timeout: 30_000 });
 
-		await page.getByRole('button', { name: /Visa som checklista|Show as checklist/i }).click();
+		await openChecklistDrawer(page);
 		const drawer = page.getByTestId('shopping-v2-legacy-drawer');
-		await expect(drawer).toBeVisible({ timeout: 15_000 });
+		await drawer.getByTestId('data-grid-filter-button').click();
+		const filterSheet = page.getByTestId('data-grid-filter-sheet');
+		await expect(filterSheet).toBeVisible();
+		await filterSheet.getByRole('searchbox').fill(itemName);
+		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
+		await expect(filterSheet).not.toBeVisible();
 		const row = drawer
 			.locator('[data-testid^="shopping-grid-row-"]')
 			.filter({ hasText: itemName });

@@ -8,6 +8,7 @@ import {
 	importReceiptLines,
 	openHomeV2Briefing
 } from './helpers/home-v2';
+import { expectItemOnShoppingList } from './helpers/shopping-v2';
 
 test.describe('Home UX v2', () => {
 	test.setTimeout(120_000);
@@ -52,9 +53,8 @@ test.describe('Home UX v2', () => {
 		await dismissOnboardingModalIfOpen(page);
 		await dismissPageHintIfOpen(page);
 
-		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(productName, {
-			timeout: 15_000
-		});
+		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
+		await expectItemOnShoppingList(page, productName);
 	});
 
 	test('shop-ready CTA opens shopping shop mode @deploy-critical', async ({ page }) => {
