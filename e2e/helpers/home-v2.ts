@@ -25,10 +25,16 @@ export async function importReceiptLines(
 	await page.goto('/scan/kvitto');
 	await dismissOnboardingModalIfOpen(page);
 	await uploadReceiptPdf(page, FIXTURE_PDF);
-	await expect(page.getByTestId('receipt-bulk-submit')).toBeVisible({ timeout: 15_000 });
-	await page.getByTestId('receipt-bulk-submit').click();
 
+	/* Quick-confirm may open the success sheet on its own — it overlays bulk-submit,
+	   so only click submit when the sheet has not already appeared. */
 	const success = page.getByTestId('receipt-import-success');
+	const submit = page.getByTestId('receipt-bulk-submit');
+	await expect(success.or(submit).first()).toBeVisible({ timeout: 15_000 });
+	if (!(await success.isVisible().catch(() => false))) {
+		await submit.click();
+	}
+
 	if (await success.isVisible({ timeout: 5_000 }).catch(() => false)) {
 		await page.getByTestId('receipt-success-cta-secondary').click({ timeout: 5_000 }).catch(() => {});
 	}

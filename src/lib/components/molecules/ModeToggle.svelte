@@ -57,7 +57,8 @@
 
 	.mode-toggle button {
 		flex: 1;
-		min-height: 2.5rem;
+		/* 44px minimum touch target (mobile-visual e2e enforces this on /inkop). */
+		min-height: 2.75rem;
 		border: none;
 		border-radius: calc(var(--radius-md) - 2px);
 		background: transparent;
