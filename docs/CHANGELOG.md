@@ -88,6 +88,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - docs(skills): coordinator-boot föreslår sessionsnamn + rename-steg ([#195](https://github.com/arpi09/grocery-manager/pull/195)) — Räddar en okommitterad SKILL.md-förbättring från huvudcheckouten (sessionsnamn-steg i coordinator-booten + rename-tips vid ny tråd). Innehållet användes redan av coordinator-sessioner men fanns inte i git.
 - refactor(flags): retire UX v2 flags - shipped surfaces are the only mode ([#188](https://github.com/arpi09/grocery-manager/pull/188))
 - docs(reality): prod SHA 8d02a97a2 post-deploy ([#201](https://github.com/arpi09/grocery-manager/pull/201))
+- docs(competitive): lägg till Skafferi (app.getskafferi.com) i §3A + namn-/SEO-riskbedömning ([#204](https://github.com/arpi09/grocery-manager/pull/204)) — Ny aktör **Skafferi** (app.getskafferi.com) i §3A-tabellen (Skafferi/heminventering) med hotnivå 🟡 produkt / 🟠 namn-SEO
 
 ### Added
 
