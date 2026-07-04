@@ -23,6 +23,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - feat(planer): progressive disclosure on Eat page ([#171](https://github.com/arpi09/grocery-manager/pull/171)) — Add reusable \ExpandableCopy\ molecule with keyboard-accessible Read more / Läs mer toggles (\ria-expanded\, \ria-controls\)
 - feat(ai): Claude Code parity with Cursor agent setup ([#172](https://github.com/arpi09/grocery-manager/pull/172)) — Add \CLAUDE.md\ and \docs/AI_TOOLING.md\ for unified Cursor + Claude Code onboarding
 - feat(ai-tooling): governance dispatch roster for Claude Code ([#175](https://github.com/arpi09/grocery-manager/pull/175)) — Definierade i `.cursor/agents/` (source of truth) → genereras till `.claude/agents/` av `sync:ai-tooling`.
+- feat(ux): first-run empty states for skafferi + inkopslista ([#191](https://github.com/arpi09/grocery-manager/pull/191)) — **Ny molekyl `FirstRunEmptyState`** — ikon-platta 60×60, tvåradig display-rubrik (2rem/1.12/−0.03em), brödtext (32ch), fullbredds-CTA (52px, primary, mjuk skugga, +-glyf `aria-hidden`), helper-rad med ↺-chip. Rise-in-animation, avstängd under `prefers-reduced-motion`. Fokusring 3px `--color-text`.
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
