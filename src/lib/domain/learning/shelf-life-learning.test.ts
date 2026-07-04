@@ -20,6 +20,12 @@ describe('shelf-life-learning', () => {
 		expect(computeExpiresOn(7, null, '2026-06-01')).toBe('2026-06-08');
 	});
 
+	it('falls back to today when purchasedAt is empty and strips datetime suffixes', () => {
+		expect(computeExpiresOn(7, '', '2026-06-01')).toBe('2026-06-08');
+		expect(computeExpiresOn(7, '2026-06-20T12:00:00.000Z', '2026-06-01')).toBe('2026-06-27');
+		expect(computeExpiresOn(7, 'not-a-date', '2026-06-01')).toBe('2026-06-08');
+	});
+
 	it('computes typical days from reference and expiry', () => {
 		expect(computeTypicalDaysFromDates('2026-06-01', '2026-06-10')).toBe(9);
 	});

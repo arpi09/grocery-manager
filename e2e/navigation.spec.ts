@@ -49,7 +49,14 @@ test.describe('Navigation', () => {
 		await dismissOnboardingModalIfOpen(page);
 
 		await expect(page.getByTestId('shopping-v2-page')).toBeVisible({ timeout: 15_000 });
-		await page.getByRole('button', { name: /Lägg till vara|Add item/i }).click();
+		// Empty list renders "Lägg till första varan"; retry until the quick-add form mounts.
+		await expect(async () => {
+			await page
+				.getByRole('button', { name: /Lägg till (första )?vara|Add (first )?item/i })
+				.first()
+				.click();
+			await expect(page.getByTestId('shopping-v2-quick-add')).toBeVisible({ timeout: 2_000 });
+		}).toPass({ timeout: 20_000 });
 		await page.getByTestId('shopping-v2-quick-add').locator('#shopping-v2-name').fill(itemName);
 		await page.getByTestId('shopping-v2-quick-add').getByRole('button', { name: /Lägg till|Add/i }).click();
 		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(itemName, {
@@ -57,14 +64,32 @@ test.describe('Navigation', () => {
 		});
 
 		await page.getByTestId('shopping-v2-start-shop').click();
-		await page.getByTestId('shopping-v2-pick-cta').click();
 
-		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
-		if (await pantrySheet.isVisible().catch(() => false)) {
-			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click();
+		// The shared admin list can hold leftover items from other specs — pick until the trip
+		// completes. The pantry sheet can pop between picks, so dismiss before every click.
+		const pickCta = page.getByTestId('shopping-v2-pick-cta');
+		const tripComplete = page.getByTestId('shopping-v2-trip-complete');
+		const dismissPantrySheet = async () => {
+			const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
+			if (await pantrySheet.isVisible().catch(() => false)) {
+				await pantrySheet
+					.getByRole('button', { name: /Nej, bara lista|No, list only/i })
+					.click({ timeout: 2_000 })
+					.catch(() => {});
+			}
+		};
+		for (let i = 0; i < 60; i += 1) {
+			await dismissPantrySheet();
+			if (await tripComplete.isVisible().catch(() => false)) break;
+			if (!(await pickCta.isVisible().catch(() => false))) {
+				await page.waitForTimeout(250);
+				continue;
+			}
+			await pickCta.click({ timeout: 2_000 }).catch(() => {});
 		}
+		await dismissPantrySheet();
 
-		await expect(page.getByTestId('shopping-v2-trip-complete')).toBeVisible({ timeout: 20_000 });
+		await expect(tripComplete).toBeVisible({ timeout: 20_000 });
 
 		const pantryCta = page.getByRole('button', { name: /Uppdatera skafferiet|Update pantry/i });
 		await expect(pantryCta).toBeVisible();

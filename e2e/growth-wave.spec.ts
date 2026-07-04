@@ -120,6 +120,10 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 	});
 
 	test('expiring share card button visible on home when items expiring', async ({ page }) => {
+		test.skip(
+			process.env.HOME_UX_V2_ENABLED === 'true',
+			'Home V2 briefing has no share card — legacy home-welcome only'
+		);
 		test.setTimeout(60_000);
 		const itemName = `E2E ShareCard ${Date.now()}`;
 		const expiresOn = dateWithinExpiringSoonDays(2);

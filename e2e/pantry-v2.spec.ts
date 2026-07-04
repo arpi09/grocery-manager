@@ -26,7 +26,9 @@ test.describe('Pantry UX v2', () => {
 		const expiringName = `E2E Use Soon ${Date.now()}`;
 
 		await loginAsAdmin(page);
-		await createFridgeItemViaApi(page, itemName);
+		// Zone previews cap at MAX_TILES_PER_ZONE sorted by use-soon/expiry — an early expiry
+		// keeps the tile visible even when other suite tests fill the shared fridge.
+		await createFridgeItemViaApi(page, itemName, { expiresOn: expiringSoonIso(1) });
 		await createFridgeItemViaApi(page, expiringName, { expiresOn: expiringSoonIso(2) });
 
 		await page.goto('/inventory');
@@ -68,9 +70,11 @@ test.describe('Pantry UX v2', () => {
 		await expect(page.getByTestId('pantry-location-grid')).toBeVisible({ timeout: 15_000 });
 		await expect(page.getByTestId('inventory-table')).toBeVisible({ timeout: 15_000 });
 
-		await page.getByTestId('data-grid-filter-button').click();
 		const filterSheet = page.getByTestId('data-grid-filter-sheet');
-		await expect(filterSheet).toBeVisible();
+		await expect(async () => {
+			await page.getByTestId('data-grid-filter-button').click();
+			await expect(filterSheet).toBeVisible({ timeout: 2_000 });
+		}).toPass({ timeout: 15_000 });
 		await filterSheet.locator('#data-grid-filter-search').fill(expiringName);
 		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
 		await expect(filterSheet).not.toBeVisible({ timeout: 10_000 });
@@ -80,8 +84,10 @@ test.describe('Pantry UX v2', () => {
 		await expect(expiringRow.getByTestId('inventory-list-meta')).toBeVisible();
 		await expect(expiringRow.getByTestId('inventory-list-meta')).toHaveText(/dag|day/i);
 
-		await page.getByTestId('data-grid-filter-button').click();
-		await expect(filterSheet).toBeVisible();
+		await expect(async () => {
+			await page.getByTestId('data-grid-filter-button').click();
+			await expect(filterSheet).toBeVisible({ timeout: 2_000 });
+		}).toPass({ timeout: 15_000 });
 		await filterSheet.locator('#data-grid-filter-search').fill(itemName);
 		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
 		await expect(page.getByTestId('inventory-table').getByText(itemName)).toBeVisible();

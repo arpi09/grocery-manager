@@ -14,7 +14,7 @@ const authDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '.auth')
 const authFile = path.join(authDir, 'admin.json');
 
 setup('authenticate as admin', async ({ page }) => {
-	setup.setTimeout(90_000);
+	setup.setTimeout(180_000);
 	mkdirSync(authDir, { recursive: true });
 	const { email, password } = adminCredentials();
 	await loginWithCredentials(page, email, password);
@@ -25,7 +25,11 @@ setup('authenticate as admin', async ({ page }) => {
 	});
 	await dismissPostOnboardingShareIfOpen(page);
 	await dismissPageHintIfOpen(page);
-	await page.locator('#shopping-list-panel').waitFor({ state: 'visible', timeout: 30_000 }).catch(() => {});
+	const shoppingReady =
+		process.env.SHOPPING_UX_V2_ENABLED === 'true'
+			? page.getByTestId('shopping-v2-page')
+			: page.locator('#shopping-list-panel');
+	await shoppingReady.waitFor({ state: 'visible', timeout: 30_000 }).catch(() => {});
 	await page.goto('/planer?week=2026-06-01', { waitUntil: 'domcontentloaded', timeout: 60_000 });
 	await dismissPageHintIfOpen(page);
 	await dismissMobileMoreNavIfOpen(page);

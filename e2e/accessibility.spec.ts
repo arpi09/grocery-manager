@@ -5,6 +5,7 @@ import {
 	loginAsAdmin
 } from './helpers/auth';
 import { expectNoCriticalOrSeriousViolations } from './helpers/axe';
+import { addShoppingListItemViaApi } from './helpers/home-v2';
 import { ensureFridgeInventoryItem } from './helpers/inventory';
 import { expectHomeDashboardVisible } from './helpers/home';
 
@@ -104,15 +105,20 @@ test.describe('Accessibility — Shopping checklist drawer (WCAG 2.2 AA)', () =>
 		test.skip(process.env.SHOPPING_UX_V2_ENABLED !== 'true', 'Requires SHOPPING_UX_V2_ENABLED=true');
 
 		await loginAsAdmin(page);
+		// The checklist grid only renders when the list has items.
+		await addShoppingListItemViaApi(page, `E2E A11y Drawer ${Date.now()}`);
 		await page.goto('/inkop', { waitUntil: 'commit', timeout: 60_000 });
 		await dismissOnboardingModalIfOpen(page);
 
 		await page.locator('main, [role="main"]').first().waitFor({ state: 'visible', timeout: 30_000 });
 		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
-		await page.getByRole('button', { name: /Visa som checklista|Show as checklist/i }).click();
 
+		// Retry the drawer trigger until the drawer mounts — absorbs clicks lost to hydration.
 		const drawer = page.getByTestId('shopping-v2-legacy-drawer');
-		await expect(drawer).toBeVisible({ timeout: 15_000 });
+		await expect(async () => {
+			await page.getByRole('button', { name: /Visa som checklista|Show as checklist/i }).click();
+			await expect(drawer).toBeVisible({ timeout: 2_000 });
+		}).toPass({ timeout: 20_000 });
 		await expect(page.getByTestId('shopping-checklist-grid-table')).toBeVisible();
 
 		await expectNoCriticalOrSeriousViolations(page, '/inkop (shopping checklist drawer)');

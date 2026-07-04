@@ -457,11 +457,14 @@ export async function clickNavHref(page: Page, href: string) {
 
 export async function clickSecondaryNavHref(page: Page, href: string) {
 	await dismissOnboardingModalIfOpen(page);
-	await openMoreNav(page);
 	const link = page
 		.locator(`#nav-more-desktop a[href="${href}"], #nav-more-sheet a[href="${href}"]`)
 		.first();
-	await link.waitFor({ state: 'visible', timeout: 15_000 });
+	// The "Mer" toggle click can get lost to hydration — retry until the menu opens.
+	await expect(async () => {
+		await openMoreNav(page);
+		await link.waitFor({ state: 'visible', timeout: 2_000 });
+	}).toPass({ timeout: 20_000 });
 	await link.click();
 }
 

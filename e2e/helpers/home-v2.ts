@@ -26,11 +26,23 @@ export async function importReceiptLines(
 	await dismissOnboardingModalIfOpen(page);
 	await uploadReceiptPdf(page, FIXTURE_PDF);
 	await expect(page.getByTestId('receipt-bulk-submit')).toBeVisible({ timeout: 15_000 });
-	await page.getByTestId('receipt-bulk-submit').click();
+	// Activation/celebration modals ("Bra start!") can pop mid-flow for fresh accounts —
+	// dismiss and retry until the click lands.
+	await expect(async () => {
+		await dismissOnboardingModalIfOpen(page);
+		await page.getByTestId('receipt-bulk-submit').click({ timeout: 2_000 });
+	}).toPass({ timeout: 20_000 });
 
+	// The success moment is a blocking sheet that survives navigation — make sure it is
+	// gone before returning, or the next import's submit click gets intercepted.
 	const success = page.getByTestId('receipt-import-success');
-	if (await success.isVisible({ timeout: 5_000 }).catch(() => false)) {
+	await success.waitFor({ state: 'visible', timeout: 15_000 }).catch(() => {});
+	if (await success.isVisible().catch(() => false)) {
 		await page.getByTestId('receipt-success-cta-secondary').click({ timeout: 5_000 }).catch(() => {});
+		if (await success.isVisible().catch(() => false)) {
+			await page.keyboard.press('Escape').catch(() => {});
+		}
+		await success.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => {});
 	}
 }
 

@@ -111,6 +111,10 @@ test.describe('Critical flows', () => {
 	});
 
 	test('home has at most one primary CTA above the fold', async ({ page }) => {
+		test.skip(
+			process.env.HOME_UX_V2_ENABLED === 'true',
+			'Home V2 briefing replaces v1 home when HOME_UX_V2_ENABLED=true — covered by home-v2.spec.ts'
+		);
 		await loginAsAdmin(page);
 		await page.goto('/hem');
 		await dismissOnboardingModalIfOpen(page);
@@ -127,6 +131,10 @@ test.describe('Critical flows', () => {
 	});
 
 	test('cold home shows shopping entry without empty section headings', async ({ page }) => {
+		test.skip(
+			process.env.HOME_UX_V2_ENABLED === 'true',
+			'Home V2 briefing replaces v1 home when HOME_UX_V2_ENABLED=true — covered by home-v2.spec.ts'
+		);
 		await registerNewUser(page);
 		await dismissOnboardingModalIfOpen(page);
 		await page.goto('/hem');
@@ -145,6 +153,10 @@ test.describe('Critical flows', () => {
 	});
 
 	test('home minimal shows hero without legacy sections', async ({ page }) => {
+		test.skip(
+			process.env.HOME_UX_V2_ENABLED === 'true',
+			'Home V2 briefing replaces v1 home when HOME_UX_V2_ENABLED=true — covered by home-v2.spec.ts'
+		);
 		await loginAsAdmin(page);
 		await ensureFridgeInventoryItem(page);
 		await page.goto('/hem');
