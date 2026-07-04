@@ -80,13 +80,13 @@ Jämförelseband från marknaden: 29–49 kr/mån, 199–399 kr/år.
 
 ## 4. AI-enhetsekonomi (grovt)
 
-Modell i produktion: **gpt-4.1-mini** (se integritetspolicy).
+Modell i produktion: **gpt-5.4-mini** (se integritetspolicy). Nano-ytor (ranking, one-liners) kör **gpt-5.4-nano**. Båda kan överstyras via `OPENAI_MODEL` / `OPENAI_MODEL_NANO`.
 
 | Åtgärd | Uppskattad kostnad (SEK) | Anteckning |
 |--------|--------------------------|------------|
-| Kvitto-PDF parse | 0,15 – 0,80 | Beror på sidantal/tokens; ICA/Kivra-PDF varierar |
-| Foto → produkt (AI) | 0,05 – 0,25 | En bild + kort strukturerat svar |
-| Smart fill | 0,05 – 0,40 | Lager-sammanfattning + förslag |
+| Kvitto-PDF parse | 0,30 – 1,60 | Beror på sidantal/tokens; ICA/Kivra-PDF varierar |
+| Foto → produkt (AI) | 0,10 – 0,50 | En bild + kort strukturerat svar |
+| Smart fill | 0,10 – 0,80 | Lager-sammanfattning + förslag |
 | Receptidéer / insights | 0,05 – 0,30 | Kortare kontext |
 
 **Exempel — aktiv Free-användare per månad (worst reasonable):**

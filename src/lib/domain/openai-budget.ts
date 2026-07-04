@@ -1,12 +1,12 @@
 import { AI_USAGE_KINDS, type AiUsageKind } from '$lib/domain/ai-usage';
 
-/** Rough USD per successful OpenAI call (gpt-4.1-mini), for ops guardrails only. */
+/** Rough USD per successful OpenAI call (gpt-5.4-mini), for ops guardrails only. */
 export const OPENAI_ESTIMATED_USD_PER_KIND: Record<AiUsageKind, number> = {
-	ai_scan: 0.015,
-	receipt_pdf: 0.02,
-	smart_fill: 0.008,
-	admin_insights: 0.01,
-	weekly_plan: 0.025
+	ai_scan: 0.03,
+	receipt_pdf: 0.04,
+	smart_fill: 0.015,
+	admin_insights: 0.02,
+	weekly_plan: 0.05
 };
 
 export const OPENAI_BUDGET_WARN_RATIO = 0.8;

@@ -84,7 +84,7 @@ const sv: PrivacyContent = {
 			id: 'ai',
 			title: 'AI-policy',
 			paragraphs: [
-				'Vissa funktioner använder OpenAI:s API (modell gpt-4.1-mini) för att tolka kvitto, föreslå varor från foto, ge inköpsförslag, receptidéer och lagerinsikter.',
+				'Vissa funktioner använder OpenAI:s API (modell gpt-5.4-mini) för att tolka kvitto, föreslå varor från foto, ge inköpsförslag, receptidéer och lagerinsikter.',
 				'När du använder dessa funktioner skickas relevant innehåll till OpenAI — till exempel kvittotext, en sammanfattning av ditt lager eller en bild du laddat upp. Vi skickar inte ditt lösenord eller onödig kontodata.',
 				'Enligt OpenAI:s villkor för API-kunder används inte API-data för att träna deras modeller som standard. OpenAI kan tillfälligt lagra data enligt sin egen policy; se openai.com/policies för detaljer.',
 				'Vi sparar resultatet av AI-tolkning (t.ex. varor från kvitto) i din databas så att du kan granska och redigera. Råa AI-loggar sparas inte längre än nödvändigt för drift och felsökning.',
@@ -193,7 +193,7 @@ const en: PrivacyContent = {
 			id: 'ai',
 			title: 'AI policy',
 			paragraphs: [
-				'Some features use the OpenAI API (gpt-4.1-mini) to parse receipts, suggest products from photos, shopping ideas, recipes and inventory insights.',
+				'Some features use the OpenAI API (gpt-5.4-mini) to parse receipts, suggest products from photos, shopping ideas, recipes and inventory insights.',
 				'When you use these features, relevant content is sent to OpenAI — e.g. receipt text, a summary of your inventory, or an image you uploaded. We do not send your password or unnecessary account fields.',
 				'Under OpenAI API terms, API data is not used to train their models by default. OpenAI may retain data temporarily per their policy; see openai.com/policies.',
 				'We store AI results (e.g. parsed receipt lines) in your database so you can review and edit. Raw AI logs are not kept longer than needed for operations.',
