@@ -79,6 +79,8 @@ export interface ConsumptionVelocityFeedbackEvent {
 export interface LocationPredictionInput {
 	productName: string;
 	normalizedKey: string;
+	/** Parse category (e.g. "glass", "mejeri") — tie-breaker for the heuristic fallback. */
+	categoryHint?: string | null;
 }
 
 export interface LocationPredictionValue {

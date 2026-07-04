@@ -386,7 +386,7 @@ export function parseReceiptLines(raw: unknown): ReceiptLine[] {
 		if (!name) continue;
 		const line: ReceiptLine = {
 			name,
-			location: resolveReceiptLineLocation(name, row.location)
+			location: resolveReceiptLineLocation(name, row.location, categoryHint)
 		};
 		if (quantity) line.quantity = quantity;
 		if (unit) line.unit = unit;

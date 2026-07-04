@@ -17,6 +17,26 @@ describe('guessStorageLocation', () => {
 		expect(guessStorageLocation('Djupfryst kyckling')).toBe('freezer');
 	});
 
+	it('sends ice cream compounds to freezer', () => {
+		expect(guessStorageLocation('Gräddglass Vanilj')).toBe('freezer');
+		expect(guessStorageLocation('Tofta persikaglass')).toBe('freezer');
+		expect(guessStorageLocation('Toftagubbeglass')).toBe('freezer');
+		expect(guessStorageLocation('GB Glass')).toBe('freezer');
+		expect(guessStorageLocation('Sorbet hallon')).toBe('freezer');
+	});
+
+	it('uses the parse category as tie-breaker when the name says nothing', () => {
+		expect(guessStorageLocation('Tofta Gubbe', 'glass')).toBe('freezer');
+		expect(guessStorageLocation('Bregott', 'mejeri')).toBe('fridge');
+		expect(guessStorageLocation('Chilinötter', 'snacks')).toBe('cupboard');
+		expect(guessStorageLocation('Indian Tonic', 'dryck')).toBe('cupboard');
+	});
+
+	it('lets the name win over the category', () => {
+		expect(guessStorageLocation('Frysta ärtor', 'grönsaker')).toBe('freezer');
+		expect(guessStorageLocation('Kaffe', 'glass')).toBe('cupboard');
+	});
+
 	it('sends dairy to fridge', () => {
 		expect(guessStorageLocation('Mjölk 3%')).toBe('fridge');
 		expect(guessStorageLocation('Goudaost')).toBe('fridge');

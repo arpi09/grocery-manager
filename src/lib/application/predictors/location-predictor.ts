@@ -56,7 +56,7 @@ export class LocationPredictor implements Predictor<LocationPredictionInput, Loc
 			}
 		}
 
-		const heuristicLocation = guessStorageLocation(subject.productName);
+		const heuristicLocation = guessStorageLocation(subject.productName, subject.categoryHint);
 		const explanation = buildLocationExplanation({
 			templateId: 'location.heuristic',
 			normalizedKey: subject.normalizedKey,
