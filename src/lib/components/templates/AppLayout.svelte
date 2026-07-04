@@ -20,7 +20,6 @@
 	import ReceiptImportSuccessMoment from '$lib/components/organisms/ReceiptImportSuccessMoment.svelte';
 	import PageHintModal from '$lib/components/organisms/PageHintModal.svelte';
 	import PostOnboardingSurvey from '$lib/components/organisms/PostOnboardingSurvey.svelte';
-	import PostOnboardingSharePrompt from '$lib/components/organisms/PostOnboardingSharePrompt.svelte';
 	import PmfSurveyBanner from '$lib/components/organisms/PmfSurveyBanner.svelte';
 	import { canEditInventory } from '$lib/domain/household';
 	import DemoAccountBanner from '$lib/components/molecules/DemoAccountBanner.svelte';
@@ -59,7 +58,6 @@
 	const householdMemberCount = $derived(
 		typeof page.data.householdMemberCount === 'number' ? page.data.householdMemberCount : 0
 	);
-	const shareLinkEnabled = $derived(Boolean(page.data.shareLinkEnabled));
 
 	function openRecipeIdeas() {
 		recipeOpen = true;
@@ -174,9 +172,8 @@
 	<GamificationToast />
 	<CelebrationMoment />
 	<ActivationOnboardingFlow />
-	<!-- Overlay priority (one per session): onboarding → receipt-success → share → survey → celebration → hint → invite -->
+	<!-- Overlay priority (one per session): onboarding → receipt-success → survey → celebration → hint → invite -->
 	<PageHintModal />
-	<PostOnboardingSharePrompt memberCount={householdMemberCount} {shareLinkEnabled} />
 	<PostOnboardingSurvey />
 	<PmfSurveyBanner />
 	<ActivationCelebration />

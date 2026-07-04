@@ -2884,13 +2884,6 @@
 		"celebrateInventoryBody": "Bra start — ert skafferi växer!",
 		"encouragePathGuide": "Nästa steg — öppna det sätt som passar er.",
 		"encourageCelebrate": "Bra — du är igång!",
-		"sharePromptTitle": "Skicka till den som handlar",
-		"sharePromptBody": "Dela länken — partner ser listan utan app och kan skapa eget konto om de vill.",
-		"sharePromptListaCta": "Dela länk till lista",
-		"sharePromptInviteCta": "Bjud in partner",
-		"sharePromptInkopCta": "Gå till inköpslistan",
-		"sharePromptSkip": "Hoppa över",
-		"sharePromptAria": "Dela inköpslistan med partner",
 		"scanModalTitle": "Hur vill du lägga till?",
 		"scanModalBody": "Välj det sätt som passar er bäst. Guiden stannar kvar medan du skannar.",
 		"scanModalAria": "Lägg till vara under introduktionen",
@@ -2958,48 +2951,8 @@
 				"pushOffToast": "Påminnelser är av — går att slå på under Inställningar."
 			},
 			"stepOf": "Steg {current} av {total}",
-			"scan": {
-				"title": "Importera ett kvitto",
-				"body": "PDF från Kivra eller butik — eller fota papperskvitto. Lagret fylls på på några minuter.",
-				"ctaPrimary": "Importera kvitto",
-				"ctaSecondary": "Kanske senare",
-				"kivraHint": "Vill du slippa ladda upp manuellt?",
-				"kivraLink": "Koppla Kivra-vidarebefordran"
-			},
-			"success": {
-				"title": "Bra start",
-				"body": "Det här är vad ni har inlagt. Lägg till mer när det passar — listan och påminnelserna blir bättre.",
-				"bodyEmpty": "Lagret är igång. Lägg till varor när det passar — listan och påminnelserna blir bättre.",
-				"cta": "Fortsätt",
-				"itemsAria": "Varor du lagt till",
-				"moreItems": "+{count} till"
-			},
-			"brain": {
-				"title": "Så bygger ert minne",
-				"body": "Kvitton och avbockade rader hjälper Skaffu föreslå vad som saknas — utan att ni behöver komma ihåg allt.",
-				"cta": "Fortsätt"
-			},
-			"shopping": {
-				"title": "Inköp tillsammans",
-				"body": "Lägg till det som tar slut. Bocka av i butiken. Bjud in partner när ni vill.",
-				"cta": "Öppna inköpslistan"
-			},
-			"setup": {
-				"title": "Gör det enkelt framåt",
-				"notificationsTitle": "Påminnelser om utgående varor",
-				"notificationsBody": "Få en notis när något snart går ut — så ni hinner använda det.",
-				"notificationsCta": "Slå på påminnelser",
-				"notificationsLater": "Senare",
-				"kivraTitle": "Kvitton från Kivra",
-				"kivraBody": "Koppla vidarebefordran så hamnar PDF-kvitton i Skaffu automatiskt.",
-				"allNotificationsLink": "Alla notisinställningar"
-			},
 			"progress": {
 				"welcome": "Start",
-				"firstScan": "Kvitto",
-				"pantryCreated": "Lagret",
-				"brain": "Minnet",
-				"shopping": "Inköp",
 				"fill": "Fyll på",
 				"invite": "Bjud in",
 				"finish": "Klart"

@@ -215,6 +215,8 @@ export function shouldShowPostOnboardingSurvey(userId?: string | null): boolean 
 		return false;
 	}
 
+	migrateLegacyShareState(userId);
+
 	if (localStorage.getItem(storageKey(POST_ONBOARDING_SURVEY_DISMISSED_SUFFIX, userId)) === '1') {
 		return false;
 	}
@@ -222,43 +224,26 @@ export function shouldShowPostOnboardingSurvey(userId?: string | null): boolean 
 	return localStorage.getItem(storageKey(POST_ONBOARDING_SURVEY_PENDING_SUFFIX, userId)) === '1';
 }
 
-export function markPostOnboardingSharePending(userId?: string | null): void {
+/**
+ * One-time migration (v8): the post-onboarding share prompt is gone — users with a
+ * queued share prompt get the survey instead. Deletes both legacy share keys.
+ */
+export function migrateLegacyShareState(userId?: string | null): void {
 	if (typeof localStorage === 'undefined' || !userId) {
 		return;
 	}
 
-	if (localStorage.getItem(storageKey(POST_ONBOARDING_SHARE_DISMISSED_SUFFIX, userId)) === '1') {
+	const pendingKey = storageKey(POST_ONBOARDING_SHARE_PENDING_SUFFIX, userId);
+
+	if (localStorage.getItem(pendingKey) === null) {
 		return;
 	}
 
-	localStorage.setItem(storageKey(POST_ONBOARDING_SHARE_PENDING_SUFFIX, userId), '1');
-}
-
-export function shouldShowPostOnboardingShare(userId?: string | null): boolean {
-	if (typeof localStorage === 'undefined' || !userId) {
-		return false;
-	}
-
-	if (localStorage.getItem(storageKey(POST_ONBOARDING_SHARE_DISMISSED_SUFFIX, userId)) === '1') {
-		return false;
-	}
-
-	return localStorage.getItem(storageKey(POST_ONBOARDING_SHARE_PENDING_SUFFIX, userId)) === '1';
-}
-
-export function dismissPostOnboardingShare(userId?: string | null): void {
-	if (typeof localStorage === 'undefined' || !userId) {
-		return;
-	}
-
-	localStorage.removeItem(storageKey(POST_ONBOARDING_SHARE_PENDING_SUFFIX, userId));
-	localStorage.setItem(storageKey(POST_ONBOARDING_SHARE_DISMISSED_SUFFIX, userId), '1');
+	// markPostOnboardingSurveyPending respects a prior survey dismissal.
 	markPostOnboardingSurveyPending(userId);
-}
 
-/** Inkop-only — do not stack partner prompts on /hem with household briefing. */
-export function isPostOnboardingSharePath(pathname: string): boolean {
-	return pathname === '/inkop' || pathname.startsWith('/inkop/');
+	localStorage.removeItem(pendingKey);
+	localStorage.removeItem(storageKey(POST_ONBOARDING_SHARE_DISMISSED_SUFFIX, userId));
 }
 
 /** Calm surfaces only — not during scan/login flows. */

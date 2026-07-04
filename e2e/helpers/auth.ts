@@ -258,7 +258,6 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 		(await pageHintDismiss.isVisible().catch(() => false)) ||
 		(await page.getByRole('button', { name: /^Jag förstår$/i }).isVisible().catch(() => false)) ||
 		(await page.getByTestId('post-onboarding-survey-skip').isVisible().catch(() => false)) ||
-		(await page.getByTestId('post-onboarding-share-skip').isVisible().catch(() => false)) ||
 		(await page.getByRole('button', { name: /^(Inte nu|Not now)$/i }).first().isVisible().catch(() => false));
 
 	const deadline = Date.now() + 5_000;
@@ -267,7 +266,6 @@ export async function dismissOnboardingModalIfOpen(page: Page) {
 		await clickIfVisible(pageHintDismiss);
 		await clickIfVisible(page.getByRole('button', { name: /^Jag förstår$/i }));
 		await dismissMobileMoreNavIfOpen(page);
-		await clickIfVisible(page.getByTestId('post-onboarding-share-skip'));
 		await clickIfVisible(page.getByTestId('post-onboarding-survey-skip'));
 		await dismissReceiptSuccessIfOpen(page);
 		await clickIfVisible(page.getByRole('button', { name: /^(Inte nu|Not now)$/i }));
