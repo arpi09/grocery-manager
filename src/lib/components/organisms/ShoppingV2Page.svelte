@@ -568,17 +568,6 @@
 		onchange={(next) => switchMode(next, 'toggle')}
 	/>
 
-	{#if canEdit && shareLinkEnabled && listHasItems}
-		<ShoppingListShareMenu
-			uncheckedItems={items}
-			checkedCount={checkedCount}
-			{canEdit}
-			{shareLinkEnabled}
-			memberCount={memberCount}
-			shareFirst={true}
-		/>
-	{/if}
-
 	<InkopHouseholdInviteBanner
 		memberCount={memberCount}
 		uncheckedCount={unchecked.length}
@@ -604,6 +593,18 @@
 				legacyOpen = true;
 			}}
 		/>
+
+		<!-- Share sits at the "Börja handla"-moment: co-shopping is decided right before the trip. -->
+		{#if canEdit && shareLinkEnabled && listHasItems}
+			<ShoppingListShareMenu
+				uncheckedItems={items}
+				checkedCount={checkedCount}
+				{canEdit}
+				{shareLinkEnabled}
+				memberCount={memberCount}
+				shareFirst={true}
+			/>
+		{/if}
 	{:else}
 		<ShoppingV2ShopView
 			items={tripSplit.available}

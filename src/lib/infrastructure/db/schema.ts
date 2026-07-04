@@ -415,6 +415,7 @@ export const productEventTable = pgTable(
 				'shopping_list_share_viewed',
 				'shopping_list_share_cta_clicked',
 				'shared_list_opened',
+				'shared_list_item_toggled',
 				'shared_list_signup_clicked',
 				'shared_list_signup_completed',
 				'public_surface_viewed',
