@@ -68,8 +68,8 @@ describe('openAiFailureMessageKey', () => {
 });
 
 describe('OPENAI_MODEL', () => {
-	it('uses gpt-4.1-mini for structured Responses API calls', () => {
-		expect(OPENAI_MODEL).toBe('gpt-4.1-mini');
+	it('uses gpt-5.4-mini for structured Responses API calls', () => {
+		expect(OPENAI_MODEL).toBe('gpt-5.4-mini');
 	});
 });
 

@@ -36,15 +36,15 @@ export const PRO_LIMITS = {
 	weeklyPlanPerWeek: null
 } as const;
 
-/** Rough AI unit economics (gpt-4.1-mini, May 2026 estimates). */
+/** Rough AI unit economics (gpt-5.4-mini, July 2026 estimates). */
 export const AI_UNIT_ECONOMICS = {
 	/** Typical receipt PDF parse (structured output, ~2–8k tokens). */
-	receiptParseSekLow: 0.15,
-	receiptParseSekHigh: 0.8,
+	receiptParseSekLow: 0.3,
+	receiptParseSekHigh: 1.6,
 	/** Product-from-image or short smart-fill call. */
-	lightAiCallSekLow: 0.05,
-	lightAiCallSekHigh: 0.25,
-	model: 'gpt-4.1-mini'
+	lightAiCallSekLow: 0.1,
+	lightAiCallSekHigh: 0.5,
+	model: 'gpt-5.4-mini'
 } as const;
 
 /** When to implement Stripe Checkout (indicative gates). */
