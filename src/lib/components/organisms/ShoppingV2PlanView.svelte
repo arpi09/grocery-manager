@@ -23,6 +23,7 @@
 		onSundayDismiss: (row: SundaySuggestion) => void | Promise<void>;
 		onStartShop: () => void;
 		onAddItem: () => void;
+		onClearList?: () => void;
 		onOpenLegacy: () => void;
 	}
 
@@ -40,6 +41,7 @@
 		onSundayDismiss,
 		onStartShop,
 		onAddItem,
+		onClearList,
 		onOpenLegacy,
 	}: Props = $props();
 
@@ -112,9 +114,21 @@
 	<TripSummaryPills {items} {canEdit} {onStartShop} {onAddItem} />
 
 	{#if canEdit}
-		<button type="button" class="legacy-link" onclick={onOpenLegacy}>
-			{t('shopping.v2.overflow.legacyList')}
-		</button>
+		<div class="plan-footer-actions">
+			<button type="button" class="legacy-link" onclick={onOpenLegacy}>
+				{t('shopping.v2.overflow.legacyList')}
+			</button>
+			{#if onClearList && uncheckedCount > 0}
+				<button
+					type="button"
+					class="clear-link"
+					data-testid="shopping-v2-clear-list"
+					onclick={onClearList}
+				>
+					{t('shopping.v2.clear.cta')}
+				</button>
+			{/if}
+		</div>
 	{/if}
 </div>
 
@@ -179,6 +193,13 @@
 		outline-offset: 2px;
 	}
 
+	.plan-footer-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-lg);
+	}
+
 	.legacy-link {
 		align-self: flex-start;
 		border: none;
@@ -190,6 +211,27 @@
 		cursor: pointer;
 		text-decoration: underline;
 		min-height: var(--touch-target-min);
+	}
+
+	.clear-link {
+		border: none;
+		background: none;
+		padding: 0;
+		font: inherit;
+		font-weight: 600;
+		color: var(--color-text-muted);
+		cursor: pointer;
+		text-decoration: underline;
+		min-height: var(--touch-target-min);
+	}
+
+	.clear-link:hover {
+		color: var(--color-danger, #b3261e);
+	}
+
+	.clear-link:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 
 

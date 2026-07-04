@@ -18,6 +18,7 @@ describe('ShoppingListService', () => {
 			setUnavailable: vi.fn(),
 			delete: vi.fn(),
 			deleteChecked: vi.fn(),
+			deleteUnchecked: vi.fn(),
 			nextSortOrder: vi.fn()
 		};
 		service = new ShoppingListService(repository);
@@ -81,6 +82,20 @@ describe('ShoppingListService', () => {
 		await expect(service.toggleUnavailable('h1', 'viewer', '1')).rejects.toBeInstanceOf(
 			ShoppingListReadOnlyError
 		);
+	});
+
+	it('clears the unchecked list for editors', async () => {
+		vi.mocked(repository.deleteUnchecked).mockResolvedValue(3);
+		const removed = await service.clearUnchecked('h1', 'editor');
+		expect(removed).toBe(3);
+		expect(vi.mocked(repository.deleteUnchecked)).toHaveBeenCalledWith('h1');
+	});
+
+	it('rejects viewers clearing the list', async () => {
+		await expect(service.clearUnchecked('h1', 'viewer')).rejects.toBeInstanceOf(
+			ShoppingListReadOnlyError
+		);
+		expect(vi.mocked(repository.deleteUnchecked)).not.toHaveBeenCalled();
 	});
 
 	it('skips duplicate names when adding suggestions', async () => {

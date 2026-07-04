@@ -23,6 +23,7 @@ export interface IShoppingListRepository {
 	): Promise<ShoppingListItem | null>;
 	delete(householdId: string, id: string): Promise<boolean>;
 	deleteChecked(householdId: string): Promise<number>;
+	deleteUnchecked(householdId: string): Promise<number>;
 	nextSortOrder(householdId: string): Promise<number>;
 }
 
@@ -170,6 +171,16 @@ export class DrizzleShoppingListRepository implements IShoppingListRepository {
 			.delete(shoppingListItemTable)
 			.where(
 				and(eq(shoppingListItemTable.householdId, householdId), eq(shoppingListItemTable.checked, true))
+			)
+			.returning();
+		return deleted.length;
+	}
+
+	async deleteUnchecked(householdId: string) {
+		const deleted = await this.database
+			.delete(shoppingListItemTable)
+			.where(
+				and(eq(shoppingListItemTable.householdId, householdId), eq(shoppingListItemTable.checked, false))
 			)
 			.returning();
 		return deleted.length;

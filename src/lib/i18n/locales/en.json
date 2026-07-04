@@ -1287,6 +1287,14 @@
 				"legacyList": "Show as checklist",
 				"title": "More for shopping"
 			},
+			"clear": {
+				"cta": "Clear list",
+				"done": "{count, plural, one {# item} other {# items}} cleared",
+				"undo": "Undo",
+				"restored": "List restored",
+				"failed": "Couldn't clear the list. Try again.",
+				"restoreFailed": "Couldn't restore the list. Try again."
+			},
 			"shop": {
 				"backToPlan": "Plan",
 				"backToPlanAria": "Back to planning",
