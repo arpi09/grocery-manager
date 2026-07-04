@@ -2,6 +2,10 @@
 
 	import { onMount } from 'svelte';
 
+	import { enhance } from '$app/forms';
+
+	import { invalidateAll } from '$app/navigation';
+
 	import { page } from '$app/stores';
 
 	import AppLogo from '$lib/components/atoms/AppLogo.svelte';
@@ -53,6 +57,36 @@
 	);
 
 	const hasItems = $derived(data.preview.items.length > 0);
+
+	/* Live guest checkoff — falls back to the frozen snapshot when unavailable. */
+	const liveItems = $derived(data.live?.items ?? null);
+
+	const liveUnchecked = $derived((liveItems ?? []).filter((item) => !item.checked));
+
+	const liveChecked = $derived((liveItems ?? []).filter((item) => item.checked));
+
+	let togglingId = $state<string | null>(null);
+
+	let toggleError = $state<string | null>(null);
+
+	function toggleEnhance(itemId: string) {
+		return () => {
+			togglingId = itemId;
+			toggleError = null;
+			return async ({ result }: { result: { type: string; data?: { code?: string } } }) => {
+				togglingId = null;
+				if (result.type === 'success') {
+					/* Telemetry recorded server-side in the toggle action. */
+					await invalidateAll();
+					return;
+				}
+				toggleError =
+					result.data?.code === 'rate_limited'
+						? t('shoppingListShare.guestRateLimited')
+						: t('shoppingListShare.guestToggleFailed');
+			};
+		};
+	}
 
 	onMount(() => {
 		const surfaceMetadata = {
@@ -164,7 +198,65 @@
 			</a>
 		</div>
 
-		{#if !hasItems}
+		{#if liveItems}
+			<section class="preview-section" aria-label={t('shoppingListShare.publicPreviewAria')} data-testid="lista-live-list">
+				<p class="live-hint">{t('shoppingListShare.guestLiveHint')}</p>
+
+				{#if toggleError}
+					<p class="toggle-error" role="alert">{toggleError}</p>
+				{/if}
+
+				{#if liveUnchecked.length === 0 && liveChecked.length === 0}
+					<p class="empty-note">{t('shoppingListShare.emptyList')}</p>
+				{/if}
+
+				<ul class="item-list">
+					{#each liveUnchecked as item (item.id)}
+						<li>
+							<form method="POST" action="?/toggle" use:enhance={toggleEnhance(item.id)}>
+								<input type="hidden" name="id" value={item.id} />
+								<button
+									type="submit"
+									class="toggle-row"
+									disabled={togglingId === item.id}
+									data-testid="lista-guest-toggle"
+									aria-label={t('shoppingListShare.guestPickAria', { name: item.name })}
+								>
+									<span class="toggle-box" aria-hidden="true"></span>
+									<span class="item-name">{item.name}</span>
+									{#if formatQuantity(item)}
+										<span class="quantity">{formatQuantity(item)}</span>
+									{/if}
+								</button>
+							</form>
+						</li>
+					{/each}
+				</ul>
+
+				{#if liveChecked.length > 0}
+					<p class="picked-heading">{t('shoppingListShare.guestCheckedHeading', { count: liveChecked.length })}</p>
+					<ul class="item-list item-list--picked">
+						{#each liveChecked as item (item.id)}
+							<li class="checked">
+								<form method="POST" action="?/toggle" use:enhance={toggleEnhance(item.id)}>
+									<input type="hidden" name="id" value={item.id} />
+									<button
+										type="submit"
+										class="toggle-row toggle-row--picked"
+										disabled={togglingId === item.id}
+										data-testid="lista-guest-untoggle"
+										aria-label={t('shoppingListShare.guestUnpickAria', { name: item.name })}
+									>
+										<span class="toggle-box toggle-box--checked" aria-hidden="true">✓</span>
+										<span class="item-name">{item.name}</span>
+									</button>
+								</form>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+			</section>
+		{:else if !hasItems}
 			<p class="empty-note">{t('shoppingListShare.emptyList')}</p>
 		{:else}
 			<section class="preview-section" aria-label={t('shoppingListShare.publicPreviewAria')}>
@@ -461,6 +553,89 @@
 		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 		flex-shrink: 0;
+	}
+
+	.live-hint {
+		margin: 0;
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-sm);
+		background: color-mix(in srgb, var(--lista-brand) 10%, var(--color-surface));
+		border: 1px solid color-mix(in srgb, var(--lista-brand) 25%, var(--color-border));
+		font-size: var(--text-sm);
+		font-weight: 600;
+	}
+
+	.toggle-error {
+		margin: 0;
+		color: var(--color-danger, #b3261e);
+		font-size: var(--text-sm);
+		font-weight: 600;
+	}
+
+	.item-list form {
+		margin: 0;
+	}
+
+	.toggle-row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-md);
+		width: 100%;
+		min-height: var(--touch-target-min, 2.75rem);
+		padding: var(--space-sm) var(--space-md);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		font: inherit;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.toggle-row:disabled {
+		opacity: 0.6;
+		cursor: progress;
+	}
+
+	.toggle-row:focus-visible {
+		outline: 2px solid var(--lista-brand);
+		outline-offset: 2px;
+	}
+
+	.toggle-row .item-name {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.toggle-box {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		border: 2px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		flex-shrink: 0;
+		font-size: 0.9rem;
+		color: var(--color-surface);
+	}
+
+	.toggle-box--checked {
+		background: var(--lista-brand);
+		border-color: var(--lista-brand);
+	}
+
+	.toggle-row--picked .item-name {
+		text-decoration: line-through;
+		color: var(--color-text-muted);
+	}
+
+	.picked-heading {
+		margin: var(--space-md) 0 0;
+		font-size: 0.8125rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--color-text-muted);
 	}
 
 	@media (max-width: 480px) {

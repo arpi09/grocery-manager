@@ -93,6 +93,16 @@ export class ShoppingListService {
 		return u;
 	}
 
+	/** Guest checkoff on a shared list — possession of a valid share token IS the authorization,
+	 *  so no household role is required. Toggle only; guests can never add, edit or delete. */
+	async toggleCheckedViaShare(householdId: string, id: string) {
+		const existing = await this.repository.findById(householdId, id);
+		if (!existing) throw new ShoppingListNotFoundError();
+		const updated = await this.repository.setChecked(householdId, id, !existing.checked);
+		if (!updated) throw new ShoppingListNotFoundError();
+		return updated;
+	}
+
 	async toggleUnavailable(householdId: string, role: HouseholdRole, id: string) {
 		if (!canEditInventory(role)) throw new ShoppingListReadOnlyError();
 		const existing = await this.repository.findById(householdId, id);
