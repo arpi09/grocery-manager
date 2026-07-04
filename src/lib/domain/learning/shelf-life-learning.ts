@@ -24,7 +24,9 @@ export function computeExpiresOn(
 	purchasedAt: string | null,
 	todayIso = formatTodayIso()
 ): string {
-	const base = purchasedAt ?? todayIso;
+	// purchasedAt can arrive as '' (empty form field) or a full ISO datetime;
+	// addDaysIso needs a plain YYYY-MM-DD base or the result becomes 'NaN-NaN-NaN'.
+	const base = purchasedAt?.match(/^\d{4}-\d{2}-\d{2}/)?.[0] ?? todayIso;
 	return addDaysIso(base, typicalDays);
 }
 
