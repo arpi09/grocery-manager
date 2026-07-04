@@ -110,7 +110,8 @@ export default defineConfig({
 			PUBLIC_SHOPPING_LIST_SHARE_ENABLED: process.env.PUBLIC_SHOPPING_LIST_SHARE_ENABLED ?? 'true',
 			/* Kivra hint in onboarding is gated on this flag; keep on so the e2e link test exercises it. */
 			KIVRA_FORWARD_ENABLED: process.env.KIVRA_FORWARD_ENABLED ?? 'true',
-			PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT: process.env.PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT ?? 'false',
+			/* On in prod (apphosting.yaml) — keep on so the receipt expiry-estimate specs run instead of skip. */
+			PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT: process.env.PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT ?? 'true',
 			SHELF_LIFE_LEARNING_ENABLED: process.env.SHELF_LIFE_LEARNING_ENABLED ?? 'false'
 		}
 	}
