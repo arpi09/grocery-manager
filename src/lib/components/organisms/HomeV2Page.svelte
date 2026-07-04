@@ -27,6 +27,8 @@
 		type HomeBriefingInput
 	} from '$lib/domain/home-briefing';
 	import type { HouseholdShoppingCadence } from '$lib/domain/household-shopping-cadence';
+	import type { HomePulseActivity, HomePulseMember } from '$lib/domain/household-pulse';
+	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { t } from '$lib/i18n';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
 	import {
@@ -46,8 +48,9 @@
 		briefingFunFact?: HomeBriefingFunFact | null;
 		briefingOneLiner?: string | null;
 		canWrite?: boolean;
-		pantryUxV2Enabled?: boolean;
-		shoppingUxV2Enabled?: boolean;
+		householdName?: string | null;
+		pulseMembers?: HomePulseMember[];
+		pulseLastActivity?: HomePulseActivity | null;
 		loadFailed?: boolean;
 		brainTimeline?: BrainTimelineEntry[];
 		brainScore?: BrainScoreSnapshot;
@@ -64,8 +67,9 @@
 		briefingFunFact = null,
 		briefingOneLiner = null,
 		canWrite = false,
-		pantryUxV2Enabled = false,
-		shoppingUxV2Enabled = false,
+		householdName = null,
+		pulseMembers = [],
+		pulseLastActivity = null,
 		loadFailed = false,
 		brainTimeline = [],
 		brainScore = { score: 0, labelKey: 'brain.score.new', ruleCount: 0, feedbackCount: 0, receiptLineCount: 0 }
@@ -132,6 +136,52 @@
 		}
 	}
 
+	async function addExpiringToList(items: InventoryItem[]): Promise<boolean> {
+		if (!canWrite || items.length === 0) return false;
+
+		trackForYouCtaTapped('expiring', 'quick_add');
+
+		let addedCount = 0;
+		for (const item of items) {
+			try {
+				const response = await fetch('/api/shopping/quick-add', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						name: item.name,
+						quantity: item.quantity,
+						unit: item.unit ?? undefined,
+						source: 'home_expiring_card'
+					})
+				});
+				if (response.ok) {
+					addedCount += 1;
+				}
+			} catch {
+				// räknas som miss — hanteras nedan
+			}
+		}
+
+		if (addedCount === 0) {
+			showClientToast(t('home.v6.expiringCard.addFailed'), { variant: 'error' });
+			return false;
+		}
+
+		if (addedCount < items.length) {
+			showClientToast(
+				t('home.v6.expiringCard.addPartial', { added: addedCount, total: items.length }),
+				{ variant: 'info' }
+			);
+		} else {
+			showClientToast(t('home.v6.expiringCard.addSuccess', { count: addedCount }), {
+				variant: 'success'
+			});
+		}
+
+		await invalidateAll();
+		return true;
+	}
+
 	async function handleRecipeCta(card: HomeBriefingRecipeCard) {
 		if (!canWrite) {
 			await goto(homeBriefingRecipeCtaDestination(card));
@@ -183,11 +233,13 @@
 			{briefingFunFact}
 			{briefingOneLiner}
 			{canWrite}
-			{pantryUxV2Enabled}
-			{shoppingUxV2Enabled}
+			{householdName}
+			{pulseMembers}
+			{pulseLastActivity}
 			{acceptingReplenishment}
 			onAcceptReplenishment={acceptReplenishment}
 			onRecipeCta={handleRecipeCta}
+			onAddExpiringToList={addExpiringToList}
 		/>
 		{#if brainScore.score > 0}
 			<BrainHomeCard snapshot={brainScore} />

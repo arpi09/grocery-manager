@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockEnv, mockGetDb, mockHashPassword, mockGenerateId } = vi.hoisted(() => ({
+const { mockEnv, mockHashPassword, mockGenerateId } = vi.hoisted(() => ({
 	mockEnv: { ADMIN_EMAIL: undefined as string | undefined, ADMIN_PASSWORD: undefined as string | undefined },
-	mockGetDb: vi.fn(),
 	mockHashPassword: vi.fn().mockResolvedValue('hashed-from-env'),
 	mockGenerateId: vi.fn().mockReturnValue('new-admin-id')
 }));
@@ -19,16 +18,14 @@ vi.mock('$lib/infrastructure/auth/id', () => ({
 	generateId: mockGenerateId
 }));
 
-vi.mock('$lib/infrastructure/db/init', () => ({
-	getDb: mockGetDb
-}));
-
 import { ensureDefaultAdminUser } from './seed-admin';
+import type { AppDatabase } from './init';
 
 describe('ensureDefaultAdminUser', () => {
 	let selectResult: Array<{ id: string; role: string }>;
 	let insertValues: ReturnType<typeof vi.fn>;
 	let updateSet: ReturnType<typeof vi.fn>;
+	let db: AppDatabase;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -44,7 +41,7 @@ describe('ensureDefaultAdminUser', () => {
 			limit: vi.fn().mockImplementation(async () => selectResult)
 		};
 
-		mockGetDb.mockReturnValue({
+		db = {
 			select: vi.fn().mockReturnValue(selectChain),
 			insert: vi.fn().mockReturnValue({ values: insertValues }),
 			update: vi.fn().mockReturnValue({
@@ -52,14 +49,14 @@ describe('ensureDefaultAdminUser', () => {
 					where: updateSet
 				})
 			})
-		});
+		} as unknown as AppDatabase;
 	});
 
 	it('creates admin when missing and ADMIN_PASSWORD is set', async () => {
 		mockEnv.ADMIN_PASSWORD = 'secret-admin';
 		selectResult = [];
 
-		await ensureDefaultAdminUser();
+		await ensureDefaultAdminUser(db);
 
 		expect(mockHashPassword).toHaveBeenCalledWith('secret-admin');
 		expect(insertValues).toHaveBeenCalledWith(
@@ -77,7 +74,7 @@ describe('ensureDefaultAdminUser', () => {
 		mockEnv.ADMIN_PASSWORD = 'rotated-password';
 		selectResult = [{ id: 'admin-1', role: 'admin' }];
 
-		await ensureDefaultAdminUser();
+		await ensureDefaultAdminUser(db);
 
 		expect(mockHashPassword).toHaveBeenCalledWith('rotated-password');
 		expect(updateSet).toHaveBeenCalled();
@@ -86,7 +83,7 @@ describe('ensureDefaultAdminUser', () => {
 	it('skips create when missing user and ADMIN_PASSWORD is unset', async () => {
 		selectResult = [];
 
-		await ensureDefaultAdminUser();
+		await ensureDefaultAdminUser(db);
 
 		expect(insertValues).not.toHaveBeenCalled();
 		expect(mockHashPassword).not.toHaveBeenCalled();
@@ -97,7 +94,7 @@ describe('ensureDefaultAdminUser', () => {
 		mockEnv.ADMIN_PASSWORD = 'pw';
 		selectResult = [];
 
-		await ensureDefaultAdminUser();
+		await ensureDefaultAdminUser(db);
 
 		expect(insertValues).toHaveBeenCalledWith(
 			expect.objectContaining({ email: 'admin@example.com' })

@@ -2,17 +2,14 @@ import { isThemePreference } from '$lib/domain/theme';
 import { isUserEmailVerified } from '$lib/server/email-verification-enforcement';
 import { isShoppingListShareEnabled } from '$lib/server/shopping-list-share-flag';
 import { isShelfLifeEstimatesInReceiptEnabled } from '$lib/server/shelf-life-learning-flag';
-import { isHomeRedesignV1Enabled } from '$lib/server/home-redesign-flag';
 import { isPriceMemoryV1Enabled } from '$lib/server/price-memory-flag';
 import { isBrainFeedbackV1Enabled } from '$lib/server/brain-feedback-flag';
-import { isHomeUxV2Enabled } from '$lib/server/home-ux-v2-flag';
-import { isPantryUxV2Enabled } from '$lib/server/pantry-ux-v2-flag';
-import { isShoppingUxV2Enabled } from '$lib/server/shopping-ux-v2-flag';
 import { DEFAULT_PLAN_TIER, isProTier } from '$lib/domain/plan';
 import { readCookieConsent } from '$lib/infrastructure/cookie-consent-cookie';
 import { resolveThemeForRequest } from '$lib/server/theme-cookie';
 import { appSettingsService, expiringShareService } from '$lib/server/di';
 import { takeKivraImportPending } from '$lib/server/kivra-import-pending';
+import { isKivraForwardEnabled } from '$lib/server/kivra-forward';
 import { translate } from '$lib/i18n/messages';
 import type { LayoutServerLoad } from './$types';
 
@@ -21,12 +18,9 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 	const cookieConsent = readCookieConsent(cookies);
 
 	const shelfLifeEstimatesInReceipt = isShelfLifeEstimatesInReceiptEnabled();
-	const homeRedesignV1Enabled = isHomeRedesignV1Enabled();
 	const priceMemoryV1Enabled = isPriceMemoryV1Enabled();
 	const brainFeedbackV1Enabled = isBrainFeedbackV1Enabled();
-	const shoppingUxV2Enabled = isShoppingUxV2Enabled();
-	const pantryUxV2Enabled = isPantryUxV2Enabled();
-	const homeUxV2Enabled = isHomeUxV2Enabled();
+	const kivraForwardEnabled = isKivraForwardEnabled();
 
 	if (!locals.user) {
 		return {
@@ -43,12 +37,9 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 			activeInventoryCount: 0,
 			shareLinkEnabled: false,
 			shelfLifeEstimatesInReceipt,
-			homeRedesignV1Enabled,
 			priceMemoryV1Enabled,
 			brainFeedbackV1Enabled,
-			shoppingUxV2Enabled,
-			pantryUxV2Enabled,
-			homeUxV2Enabled,
+			kivraForwardEnabled,
 			marketLiveEnabled: false,
 			nearbySharingEnabled: false
 
@@ -135,12 +126,9 @@ export const load: LayoutServerLoad = async ({ locals, request, cookies }) => {
 		activeInventoryCount,
 		shareLinkEnabled: isShoppingListShareEnabled(),
 		shelfLifeEstimatesInReceipt,
-		homeRedesignV1Enabled,
 		priceMemoryV1Enabled,
 		brainFeedbackV1Enabled,
-		shoppingUxV2Enabled,
-		pantryUxV2Enabled,
-		homeUxV2Enabled,
+		kivraForwardEnabled,
 		marketLiveEnabled: marketLiveStatus.enabledInApp,
 		nearbySharingEnabled: nearbySettings.enabled,
 		kivraImportToast

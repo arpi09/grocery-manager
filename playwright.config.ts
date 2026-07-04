@@ -106,12 +106,10 @@ export default defineConfig({
 			EMAIL_VERIFICATION_SKIP: process.env.EMAIL_VERIFICATION_SKIP ?? 'true',
 			E2E_MOCK_AI: process.env.E2E_MOCK_AI ?? 'true',
 			PUBLIC_E2E_DISABLE_POST_SURVEY: 'true',
-			HOME_REDESIGN_V1_ENABLED: process.env.HOME_REDESIGN_V1_ENABLED ?? 'true',
-			SHOPPING_UX_V2_ENABLED: process.env.SHOPPING_UX_V2_ENABLED ?? 'false',
-			PANTRY_UX_V2_ENABLED: process.env.PANTRY_UX_V2_ENABLED ?? 'false',
-			HOME_UX_V2_ENABLED: process.env.HOME_UX_V2_ENABLED ?? 'false',
 			STORE_RECOMMENDATION_V0_ENABLED: process.env.STORE_RECOMMENDATION_V0_ENABLED ?? 'false',
 			PUBLIC_SHOPPING_LIST_SHARE_ENABLED: process.env.PUBLIC_SHOPPING_LIST_SHARE_ENABLED ?? 'true',
+			/* Kivra hint in onboarding is gated on this flag; keep on so the e2e link test exercises it. */
+			KIVRA_FORWARD_ENABLED: process.env.KIVRA_FORWARD_ENABLED ?? 'true',
 			PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT: process.env.PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT ?? 'false',
 			SHELF_LIFE_LEARNING_ENABLED: process.env.SHELF_LIFE_LEARNING_ENABLED ?? 'false'
 		}

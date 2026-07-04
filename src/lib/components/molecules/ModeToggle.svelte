@@ -57,7 +57,7 @@
 
 	.mode-toggle button {
 		flex: 1;
-		min-height: 2.5rem;
+		min-height: var(--touch-target-min, 2.75rem);
 		border: none;
 		border-radius: calc(var(--radius-md) - 2px);
 		background: transparent;

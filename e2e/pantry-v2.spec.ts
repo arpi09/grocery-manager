@@ -20,8 +20,6 @@ test.describe('Pantry UX v2', () => {
 	test.setTimeout(90_000);
 
 	test('shelf zones, tile tap, and location data grid @deploy-critical', async ({ page }) => {
-		test.skip(process.env.PANTRY_UX_V2_ENABLED !== 'true', 'Requires PANTRY_UX_V2_ENABLED=true');
-
 		const itemName = `E2E Pantry V2 ${Date.now()}`;
 		const expiringName = `E2E Use Soon ${Date.now()}`;
 
@@ -89,8 +87,6 @@ test.describe('Pantry UX v2', () => {
 	});
 
 	test('use-soon unified list shows items across locations @deploy-critical', async ({ page }) => {
-		test.skip(process.env.PANTRY_UX_V2_ENABLED !== 'true', 'Requires PANTRY_UX_V2_ENABLED=true');
-
 		const fridgeExpiring = `E2E Fridge Soon ${Date.now()}`;
 		const cupboardExpiring = `E2E Cupboard Soon ${Date.now()}`;
 
@@ -122,8 +118,6 @@ test.describe('Pantry UX v2', () => {
 	});
 
 	test('/inventory shelf has no critical axe violations @deploy-critical', async ({ page }) => {
-		test.skip(process.env.PANTRY_UX_V2_ENABLED !== 'true', 'Requires PANTRY_UX_V2_ENABLED=true');
-
 		await loginAsAdmin(page);
 		await createFridgeItemViaApi(page, `E2E Pantry A11y ${Date.now()}`);
 

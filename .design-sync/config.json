@@ -1,0 +1,11 @@
+{
+  "projectId": "f06626f0-ce11-4687-bbf5-03ac70c38e44",
+  "shape": "package",
+  "mode": "tokens-only",
+  "note": "Off-script styles-only sync. home-pantry is a SvelteKit app, not a bundlable component library and no Storybook, so no component bundle is produced. See .design-sync/NOTES.md.",
+  "readmeHeader": ".design-sync/conventions.md",
+  "tokenSources": [
+    "src/lib/design/brand-colors.generated.css",
+    "src/lib/design/brand-tokens.generated.css"
+  ]
+}

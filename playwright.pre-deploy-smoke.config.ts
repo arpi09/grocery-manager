@@ -62,8 +62,7 @@ export default defineConfig({
 			TURNSTILE_BYPASS: process.env.TURNSTILE_BYPASS ?? 'true',
 			EMAIL_VERIFICATION_SKIP: process.env.EMAIL_VERIFICATION_SKIP ?? 'true',
 			E2E_MOCK_AI: process.env.E2E_MOCK_AI ?? 'true',
-			PUBLIC_E2E_DISABLE_POST_SURVEY: 'true',
-			HOME_REDESIGN_V1_ENABLED: process.env.HOME_REDESIGN_V1_ENABLED ?? 'true'
+			PUBLIC_E2E_DISABLE_POST_SURVEY: 'true'
 		}
 	}
 });

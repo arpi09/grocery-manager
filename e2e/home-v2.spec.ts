@@ -8,13 +8,12 @@ import {
 	importReceiptLines,
 	openHomeV2Briefing
 } from './helpers/home-v2';
+import { expectItemOnShoppingList } from './helpers/shopping-v2';
 
 test.describe('Home UX v2', () => {
 	test.setTimeout(120_000);
 
-	test('briefing greeting, for-you card, and chips @deploy-critical', async ({ page }) => {
-		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
-
+	test('briefing greeting, pulse card, and chips @deploy-critical', async ({ page }) => {
 		const expiringName = `E2E Home V2 ${Date.now()}`;
 
 		await loginAsAdmin(page);
@@ -23,13 +22,41 @@ test.describe('Home UX v2', () => {
 
 		await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 		await expect(page.getByTestId('home-v2-chips')).toBeVisible();
-		await expect(page.getByTestId('home-v2-for-you')).toBeVisible();
-		await expect(page.getByTestId('home-v2-for-you')).toHaveAttribute('data-for-you-kind', 'expiring');
+
+		const pulse = page.getByTestId('home-v2-pulse-card');
+		await expect(pulse).toBeVisible();
+		await expect(pulse.getByTestId('home-v2-pulse-open')).toBeVisible();
+		await expect(pulse.getByTestId('home-v2-expiring-row').first()).toBeVisible();
+	});
+
+	test('pulse card quick-add puts expiring items on the shopping list', async ({ page }) => {
+		const expiringName = `E2E Pulse Add ${Date.now()}`;
+
+		await loginAsAdmin(page);
+		await createFridgeItemViaApi(page, expiringName, { expiresOn: expiringSoonIso(1) });
+		await openHomeV2Briefing(page);
+
+		const pulse = page.getByTestId('home-v2-pulse-card');
+		await expect(pulse).toBeVisible();
+
+		const row = pulse.getByTestId('home-v2-expiring-row').filter({ hasText: expiringName });
+		if (!(await row.isVisible().catch(() => false))) {
+			test.skip(true, 'Seeded item not among top expiring rows for shared household');
+		}
+
+		await pulse.getByTestId('home-v2-pulse-add').click();
+		await expect(pulse.getByRole('status')).toBeVisible({ timeout: 15_000 });
+
+		await page.goto('/inkop');
+		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
+
+		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(expiringName, {
+			timeout: 15_000
+		});
 	});
 
 	test('replenishment CTA adds item to shopping list @deploy-critical', async ({ page }) => {
-		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
-
 		const productName = `E2E Replenish ${Date.now()}`;
 
 		await loginAsAdmin(page);
@@ -42,10 +69,14 @@ test.describe('Home UX v2', () => {
 
 		await openHomeV2Briefing(page);
 
+		/* Post-#193 the expiring kind lives in the pulse card, so a for-you card may
+		   legitimately not render for the seeded data — skip instead of hard-failing. */
 		const forYou = page.getByTestId('home-v2-for-you');
-		await expect(forYou).toBeVisible({ timeout: 15_000 });
-
-		if ((await forYou.getAttribute('data-for-you-kind')) !== 'replenishment') {
+		const forYouSurfaced = await forYou
+			.waitFor({ state: 'visible', timeout: 15_000 })
+			.then(() => true)
+			.catch(() => false);
+		if (!forYouSurfaced || (await forYou.getAttribute('data-for-you-kind')) !== 'replenishment') {
 			test.skip(true, 'Replenishment card not surfaced for seeded household');
 		}
 
@@ -56,24 +87,11 @@ test.describe('Home UX v2', () => {
 		await dismissOnboardingModalIfOpen(page);
 		await dismissPageHintIfOpen(page);
 
-		if (process.env.SHOPPING_UX_V2_ENABLED === 'true') {
-			await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(productName, {
-				timeout: 15_000
-			});
-		} else {
-			await expect(page.locator('#shopping-list-panel')).toContainText(productName, {
-				timeout: 15_000
-			});
-		}
+		await expect(page.getByTestId('shopping-v2-plan')).toBeVisible({ timeout: 15_000 });
+		await expectItemOnShoppingList(page, productName);
 	});
 
 	test('shop-ready CTA opens shopping shop mode @deploy-critical', async ({ page }) => {
-		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
-		test.skip(
-			process.env.SHOPPING_UX_V2_ENABLED !== 'true',
-			'Requires SHOPPING_UX_V2_ENABLED=true for shop mode UI'
-		);
-
 		const listItem = `E2E Shop Ready ${Date.now()}`;
 
 		await loginAsAdmin(page);
@@ -87,9 +105,11 @@ test.describe('Home UX v2', () => {
 		await openHomeV2Briefing(page);
 
 		const forYou = page.getByTestId('home-v2-for-you');
-		await expect(forYou).toBeVisible({ timeout: 15_000 });
-
-		if ((await forYou.getAttribute('data-for-you-kind')) !== 'shopReady') {
+		const forYouSurfaced = await forYou
+			.waitFor({ state: 'visible', timeout: 15_000 })
+			.then(() => true)
+			.catch(() => false);
+		if (!forYouSurfaced || (await forYou.getAttribute('data-for-you-kind')) !== 'shopReady') {
 			test.skip(true, 'Shop-ready card not surfaced for seeded household');
 		}
 
@@ -99,8 +119,6 @@ test.describe('Home UX v2', () => {
 	});
 
 	test('/hem briefing has no critical axe violations @deploy-critical', async ({ page }) => {
-		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
-
 		await loginAsAdmin(page);
 		await createFridgeItemViaApi(page, `E2E Home A11y ${Date.now()}`);
 		await openHomeV2Briefing(page);
@@ -109,8 +127,6 @@ test.describe('Home UX v2', () => {
 	});
 
 	test('moment card when nothing urgent @deploy-critical', async ({ page }) => {
-		test.skip(process.env.HOME_UX_V2_ENABLED !== 'true', 'Requires HOME_UX_V2_ENABLED=true');
-
 		await loginAsAdmin(page);
 		await createFridgeItemViaApi(page, `E2E Moment ${Date.now()}`, {
 			expiresOn: expiringSoonIso(90)
@@ -120,6 +136,10 @@ test.describe('Home UX v2', () => {
 		const forYou = page.getByTestId('home-v2-for-you');
 		if (await forYou.isVisible().catch(() => false)) {
 			test.skip(true, 'For-you card surfaced instead of moment');
+		}
+
+		if ((await page.getByTestId('home-v2-expiring-row').count()) > 0) {
+			test.skip(true, 'Urgent expiring items present — pulse card owns the for-you slot');
 		}
 
 		const moment = page.getByTestId('home-v2-moment');

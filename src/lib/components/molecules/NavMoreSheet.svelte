@@ -1,9 +1,7 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import NavIcon from '$lib/components/atoms/NavIcon.svelte';
 	import { t } from '$lib/i18n';
 	import {
-		applyNavFeatureFlags,
 		isNavActive,
 		isMarketV01NavItem,
 		navItemTestId,
@@ -22,11 +20,7 @@
 
 	let { pathname, items, staleCount = 0, canWrite = false, onNavigate }: Props = $props();
 
-	const navItems = $derived(
-		applyNavFeatureFlags(items, {
-			pantryUxV2Enabled: Boolean(page.data.pantryUxV2Enabled)
-		})
-	);
+	const navItems = $derived(items);
 	const showStaleBadge = $derived(staleCount > 0 && canWrite);
 
 	function showBadge(item: NavItem): boolean {

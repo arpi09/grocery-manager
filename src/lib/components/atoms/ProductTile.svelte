@@ -104,7 +104,7 @@
 	>
 		<span class="tile-mark" aria-hidden="true">+</span>
 		<span class="tile-name">{tile.name}</span>
-		{#if detailLine}
+		{#if detailLine && detailLine !== tile.name}
 			<span class="tile-detail">{detailLine}</span>
 		{/if}
 	</a>

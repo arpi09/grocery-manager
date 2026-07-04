@@ -25,15 +25,18 @@ test.describe('Settings', () => {
 		await expect(expirySwitch).toBeVisible({ timeout: 15_000 });
 
 		const expiryForm = page.locator('form.expiry-reminders-form').first();
-		await expirySwitch.click();
 		await expect(expiryForm).toBeVisible();
 
-		await expect(
-			page
-				.locator('.toast-message')
-				.filter({ hasText: /Inst\u00e4llningar sparade|Settings saved/i })
-				.first()
-		).toBeVisible({ timeout: 15_000 });
+		/* Retry the toggle: a click before hydration attaches the submit handler is lost on slow CI runners. */
+		await expect(async () => {
+			await expirySwitch.click({ timeout: 2_000 });
+			await expect(
+				page
+					.locator('.toast-message')
+					.filter({ hasText: /Inst\u00e4llningar sparade|Settings saved/i })
+					.first()
+			).toBeVisible({ timeout: 5_000 });
+		}).toPass({ timeout: 30_000 });
 	});
 
 	test('push notifications denied state shows help and disables toggle', async ({ page }) => {

@@ -1,21 +1,16 @@
-﻿import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import * as devalue from 'devalue';
 
 import {
+	dismissOnboardingModalIfOpen,
 	dismissPageHintIfOpen,
 	dismissPostOnboardingShareIfOpen,
 	loginAsAdmin
 } from './helpers/auth';
-
-const legacyShoppingGridPath = '/inkop?sort=added&dir=desc&pageSize=25';
-
-function uncheckedShoppingRow(page: Page, itemName: string) {
-	return page
-		.locator('#shopping-list-panel [data-testid^="shopping-grid-row-"]')
-		.filter({ hasText: itemName });
-}
+import { openChecklistDrawer } from './helpers/shopping-v2';
 
 async function dismissShoppingInkopOverlays(page: Page) {
+	await dismissOnboardingModalIfOpen(page);
 	await dismissPostOnboardingShareIfOpen(page);
 	await dismissPageHintIfOpen(page);
 }
@@ -23,8 +18,7 @@ async function dismissShoppingInkopOverlays(page: Page) {
 async function postShoppingAction(
 	page: Page,
 	action: string,
-	form: Record<string, string> = {},
-	refererPath = legacyShoppingGridPath
+	form: Record<string, string> = {}
 ) {
 	const currentUrl = page.url();
 	const baseURL = currentUrl.startsWith('http')
@@ -37,7 +31,7 @@ async function postShoppingAction(
 			accept: 'application/json',
 			'x-sveltekit-action': 'true',
 			origin: baseURL,
-			referer: `${baseURL}${refererPath}`
+			referer: `${baseURL}/inkop`
 		},
 		timeout: 30_000
 	});
@@ -50,121 +44,26 @@ async function postShoppingAction(
 	return result;
 }
 
-async function openLegacyShoppingGrid(page: Page) {
-	test.skip(
-		process.env.SHOPPING_UX_V2_ENABLED === 'true',
-		'Legacy checklist grid lives in Shopping V2 drawer when SHOPPING_UX_V2_ENABLED=true'
-	);
-
-	await page.goto(legacyShoppingGridPath, { waitUntil: 'domcontentloaded' });
-	await dismissShoppingInkopOverlays(page);
-	await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 30_000 });
-	await expect(page.getByTestId('shopping-list-add-form')).toBeVisible({ timeout: 15_000 });
-}
-
-async function seedLegacyShoppingItemViaApi(page: Page, itemName: string) {
-	await postShoppingAction(page, 'add', { name: itemName });
-}
-
-async function addLegacyShoppingItem(page: Page, itemName: string) {
-	await seedLegacyShoppingItemViaApi(page, itemName);
-
-	await page.goto(`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`, {
-		waitUntil: 'domcontentloaded'
-	});
-	await dismissShoppingInkopOverlays(page);
-	await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 15_000 });
-	await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 30_000 });
-}
-
 test.describe('Shopping list', () => {
 	test.setTimeout(60_000);
 
-	test('shopping grid shows seeded smart-fill fixture items', async ({ page }) => {
-		await loginAsAdmin(page);
-
-		await openLegacyShoppingGrid(page);
-
-		await seedLegacyShoppingItemViaApi(page, 'E2E Smartfill Mjölk');
-		await seedLegacyShoppingItemViaApi(page, 'E2E Smartfill Banan');
-
-		await page.goto(
-			`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent('E2E Smartfill')}`,
-			{ waitUntil: 'domcontentloaded' }
-		);
-		await dismissShoppingInkopOverlays(page);
-
-		const panel = page.locator('#shopping-list-panel');
-
-		await expect(panel.getByText(/E2E Smartfill Mj/).first()).toBeVisible({ timeout: 20_000 });
-
-		await expect(panel.getByText('E2E Smartfill Banan').first()).toBeVisible();
-
-		await expect(panel).toBeInViewport({ timeout: 10_000 });
-	});
-
-	test('add line and check off item @deploy-critical', async ({ page }) => {
+	test('seeded items show in plan summary pills @deploy-critical', async ({ page }) => {
 		test.setTimeout(90_000);
 
 		const itemName = `E2E Inkop ${Date.now()}`;
 
-		await openLegacyShoppingGrid(page);
-		await addLegacyShoppingItem(page, itemName);
+		await loginAsAdmin(page);
+		await page.goto('/inkop', { waitUntil: 'domcontentloaded' });
+		await dismissShoppingInkopOverlays(page);
+		await expect(page.getByTestId('shopping-v2-page')).toBeVisible({ timeout: 30_000 });
 
-		const row = uncheckedShoppingRow(page, itemName);
-		const rowId = await row.getAttribute('data-testid');
-		expect(rowId).toMatch(/^shopping-grid-row-/);
-		await expect(row.getByTestId('product-avatar')).toBeVisible();
-		const id = rowId!.slice('shopping-grid-row-'.length);
+		await postShoppingAction(page, 'add', { name: itemName });
 
-		const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:5190';
-		const toggleResponse = await page.request.post(`${baseURL}/inkop?/toggle`, {
-			form: { id },
-			headers: {
-				accept: 'application/json',
-				'x-sveltekit-action': 'true',
-				origin: baseURL,
-				referer: `${baseURL}/inkop`
-			},
+		await page.goto('/inkop', { waitUntil: 'domcontentloaded' });
+		await dismissShoppingInkopOverlays(page);
+		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(itemName, {
 			timeout: 30_000
 		});
-		expect(toggleResponse.ok()).toBeTruthy();
-
-		await page.goto(`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`, {
-			waitUntil: 'domcontentloaded'
-		});
-		await dismissShoppingInkopOverlays(page);
-
-		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
-		if (await pantrySheet.isVisible().catch(() => false)) {
-			await pantrySheet
-				.getByRole('button', { name: /Nej, bara lista|No, list only/i })
-				.click({ force: true });
-		}
-
-		await expect(uncheckedShoppingRow(page, itemName)).toHaveCount(0, { timeout: 30_000 });
-	});
-
-	test('grid filter finds added item @deploy-critical', async ({ page }) => {
-		test.skip(
-			process.env.SHOPPING_UX_V2_ENABLED === 'true',
-			'Legacy checklist grid lives in Shopping V2 drawer when SHOPPING_UX_V2_ENABLED=true'
-		);
-		test.setTimeout(90_000);
-
-		const itemName = `E2E Grid Filter ${Date.now()}`;
-
-		await seedLegacyShoppingItemViaApi(page, itemName);
-		await page.goto(`/inkop?sort=added&dir=desc&pageSize=25&q=${encodeURIComponent(itemName)}`, {
-			waitUntil: 'domcontentloaded'
-		});
-		await dismissShoppingInkopOverlays(page);
-		await expect(page.locator('#shopping-list-panel')).toBeVisible({ timeout: 30_000 });
-		await expect(page.getByTestId('shopping-checklist-grid-table')).toBeVisible({
-			timeout: 15_000
-		});
-		await expect(uncheckedShoppingRow(page, itemName)).toBeVisible({ timeout: 30_000 });
-		await expect(uncheckedShoppingRow(page, itemName).getByTestId('product-avatar')).toBeVisible();
 	});
 
 	test('check off can add to pantry through bridge action', async ({ page }) => {
@@ -172,11 +71,30 @@ test.describe('Shopping list', () => {
 
 		const itemName = `E2E Pantry Bridge ${Date.now()}`;
 
-		await openLegacyShoppingGrid(page);
-		await postShoppingAction(page, 'savePantryMode', { shoppingToPantryMode: 'ask' });
-		await addLegacyShoppingItem(page, itemName);
+		await loginAsAdmin(page);
+		await page.goto('/inkop', { waitUntil: 'domcontentloaded' });
+		await dismissShoppingInkopOverlays(page);
+		await expect(page.getByTestId('shopping-v2-page')).toBeVisible({ timeout: 30_000 });
 
-		const row = uncheckedShoppingRow(page, itemName);
+		await postShoppingAction(page, 'savePantryMode', { shoppingToPantryMode: 'ask' });
+		await postShoppingAction(page, 'add', { name: itemName });
+
+		await page.goto('/inkop', { waitUntil: 'domcontentloaded' });
+		await dismissShoppingInkopOverlays(page);
+		await expect(page.getByTestId('shopping-v2-page')).toBeVisible({ timeout: 30_000 });
+
+		await openChecklistDrawer(page);
+		const drawer = page.getByTestId('shopping-v2-legacy-drawer');
+		await drawer.getByTestId('data-grid-filter-button').click();
+		const filterSheet = page.getByTestId('data-grid-filter-sheet');
+		await expect(filterSheet).toBeVisible();
+		await filterSheet.getByRole('searchbox').fill(itemName);
+		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
+		await expect(filterSheet).not.toBeVisible();
+		const row = drawer
+			.locator('[data-testid^="shopping-grid-row-"]')
+			.filter({ hasText: itemName });
+		await expect(row).toBeVisible({ timeout: 30_000 });
 		const rowId = await row.getAttribute('data-testid');
 		expect(rowId).toMatch(/^shopping-grid-row-/);
 		const id = rowId!.slice('shopping-grid-row-'.length);

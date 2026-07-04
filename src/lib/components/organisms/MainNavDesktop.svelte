@@ -10,7 +10,6 @@
 	import { APP_HOME_PATH } from '$lib/navigation/app-home';
 	import { t } from '$lib/i18n';
 	import {
-		applyNavFeatureFlags,
 		isNavActive,
 		isMarketV01NavItem,
 		navItemTestId,
@@ -55,11 +54,7 @@
 	const isPro = $derived(Boolean(page.data.isPro));
 	const showStaleBadge = $derived(staleCount > 0 && canWrite);
 	const desktopNavItems = $derived([...primary, ...headerUtility]);
-	const moreNavItems = $derived(
-		applyNavFeatureFlags(secondary, {
-			pantryUxV2Enabled: Boolean(page.data.pantryUxV2Enabled)
-		})
-	);
+	const moreNavItems = $derived(secondary);
 
 
 	const moreActive = $derived(

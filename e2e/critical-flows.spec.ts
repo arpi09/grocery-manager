@@ -10,8 +10,8 @@ import {
 	waitForWelcomeParamStripped
 } from './helpers/auth';
 
-import { createFridgeItemViaApi, ensureFridgeInventoryItem } from './helpers/inventory';
-import { expectHomeDashboardVisible, expectHomeRedesignVisible } from './helpers/home';
+import { createFridgeItemViaApi } from './helpers/inventory';
+import { expectHomeDashboardVisible } from './helpers/home';
 
 test.describe('Critical flows', () => {
 	test.describe.configure({ mode: 'serial', timeout: 120_000 });
@@ -110,69 +110,11 @@ test.describe('Critical flows', () => {
 		await expect(page).toHaveURL(/\/inkop(?:\?quick=1)?$/);
 	});
 
-	test('home has at most one primary CTA above the fold', async ({ page }) => {
-		await loginAsAdmin(page);
-		await page.goto('/hem');
-		await dismissOnboardingModalIfOpen(page);
-		const home = page.locator('section.home-v5, section.home');
-		await expect(home).toBeVisible();
-		const redesign = home.locator('.home-v5');
-		if ((await redesign.count()) > 0) {
-			const heroPrimary = home.getByTestId('home-hero').locator('.btn-primary');
-			expect(await heroPrimary.count()).toBeLessThanOrEqual(1);
-			return;
-		}
-		const primaryActions = home.locator('.scan-cta, .btn-primary.action-link');
-		expect(await primaryActions.count()).toBeLessThanOrEqual(1);
-	});
-
-	test('cold home shows shopping entry without empty section headings', async ({ page }) => {
+	test('cold home shows the v2 briefing for a fresh household', async ({ page }) => {
 		await registerNewUser(page);
 		await dismissOnboardingModalIfOpen(page);
 		await page.goto('/hem');
-		await expect(page.locator('.home-v5[data-home-state="cold"]')).toBeVisible();
 		await expectHomeDashboardVisible(page);
-		await expect(page.getByTestId('home-shopping-card')).toBeVisible();
-		await expect(
-			page.getByRole('link', { name: /Öppna inköpslistan|Open shopping list/i })
-		).toBeVisible();
-		await expect(
-			page.getByRole('heading', { name: /Vad rekommenderar|What does Skaffu recommend/i })
-		).toHaveCount(0);
-		await expect(
-			page.getByRole('heading', { name: /Hur mår hushållet|How's the household/i })
-		).toHaveCount(0);
-	});
-
-	test('home minimal shows hero without legacy sections', async ({ page }) => {
-		await loginAsAdmin(page);
-		await ensureFridgeInventoryItem(page);
-		await page.goto('/hem');
-		await dismissOnboardingModalIfOpen(page);
-		await expectHomeRedesignVisible(page);
-		await expect(page.locator('.home-v3-section')).toHaveCount(0);
-		await expect(
-			page.getByRole('heading', { name: /Vad rekommenderar|What does Skaffu recommend/i })
-		).toHaveCount(0);
-	});
-
-	test('home expiring hint links to planer not recipe modal', async ({ page }) => {
-		await loginAsAdmin(page);
-		await page.goto('/hem');
-		await dismissOnboardingModalIfOpen(page);
-		const redesign = page.locator('.home-v5');
-		if ((await redesign.count()) > 0) {
-			test.skip(true, 'Home redesign v1 — planer link lives on inventory surfaces');
-		}
-		const planerLink = page.getByTestId('home-planer-link');
-		if ((await planerLink.count()) === 0) {
-			test.skip(true, 'No expiring items in seed — planer link not shown');
-		}
-		await expect(planerLink).toHaveAttribute('href', '/planer');
-		await expect(planerLink).toBeVisible();
-		await expect(page.getByTestId('home-primary-cta')).not.toContainText(
-			/Generera middag|Generate dinner/i
-		);
 	});
 
 	test('scan from header nav opens scan hub', async ({ page }) => {

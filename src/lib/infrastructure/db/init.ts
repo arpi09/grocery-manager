@@ -340,9 +340,12 @@ export async function initDatabase(): Promise<void> {
 		initPromise = (async () => {
 			if (usePglite()) {
 				const client = await getPgliteClient();
-				dbInstance = drizzlePglite({ client, schema });
-				await ensureDefaultAdminUser();
-				await ensureDefaultHousehold();
+				const db = drizzlePglite({ client, schema });
+				// Seed via the local handle — getDb() is not safe until dbInstance is set,
+				// and dev-mode module duplication can make the seeds see a null dbInstance.
+				await ensureDefaultAdminUser(db);
+				await ensureDefaultHousehold(db);
+				dbInstance = db;
 				return;
 			}
 
@@ -358,10 +361,11 @@ export async function initDatabase(): Promise<void> {
 				postgresClient = sql;
 				await verifyPostgresConnection(sql);
 				await runPostgresIncrementalMigrations(sql);
-				dbInstance = drizzlePostgres(sql, { schema });
+				const db = drizzlePostgres(sql, { schema });
 
-				await ensureDefaultAdminUser();
-				await ensureDefaultHousehold();
+				await ensureDefaultAdminUser(db);
+				await ensureDefaultHousehold(db);
+				dbInstance = db;
 			} catch (error) {
 				dbInstance = null;
 				await resetPostgresClient();

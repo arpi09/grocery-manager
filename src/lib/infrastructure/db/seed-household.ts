@@ -2,7 +2,7 @@ import { eq, isNull, sql } from 'drizzle-orm';
 import { env } from '$env/dynamic/private';
 import { generateId } from '$lib/infrastructure/auth/id';
 import { hashPassword } from '$lib/infrastructure/auth/password';
-import { getDb } from '$lib/infrastructure/db/init';
+import type { AppDatabase } from '$lib/infrastructure/db/init';
 import {
 	householdMemberTable,
 	householdTable,
@@ -30,8 +30,7 @@ function memberPassword(): string | null {
 	return password || null;
 }
 
-async function findUserIdByEmail(email: string): Promise<string | null> {
-	const db = getDb();
+async function findUserIdByEmail(db: AppDatabase, email: string): Promise<string | null> {
 	const [row] = await db
 		.select({ id: userTable.id })
 		.from(userTable)
@@ -40,12 +39,11 @@ async function findUserIdByEmail(email: string): Promise<string | null> {
 	return row?.id ?? null;
 }
 
-async function ensureMemberUser(): Promise<string | null> {
+async function ensureMemberUser(db: AppDatabase): Promise<string | null> {
 	const email = memberEmail();
 	const password = memberPassword();
-	const db = getDb();
 
-	const existingId = await findUserIdByEmail(email);
+	const existingId = await findUserIdByEmail(db, email);
 	if (existingId) {
 		if (password) {
 			await db
@@ -74,8 +72,7 @@ async function ensureMemberUser(): Promise<string | null> {
 	return id;
 }
 
-async function ensureDefaultHouseholdRow() {
-	const db = getDb();
+async function ensureDefaultHouseholdRow(db: AppDatabase) {
 	const [existing] = await db
 		.select({ id: householdTable.id })
 		.from(householdTable)
@@ -90,8 +87,7 @@ async function ensureDefaultHouseholdRow() {
 	}
 }
 
-async function ensureMemberInHousehold(userId: string, role: 'owner' | 'editor') {
-	const db = getDb();
+async function ensureMemberInHousehold(db: AppDatabase, userId: string, role: 'owner' | 'editor') {
 	await db
 		.insert(householdMemberTable)
 		.values({
@@ -102,8 +98,7 @@ async function ensureMemberInHousehold(userId: string, role: 'owner' | 'editor')
 		.onConflictDoNothing();
 }
 
-async function backfillInventoryHouseholdIds() {
-	const db = getDb();
+async function backfillInventoryHouseholdIds(db: AppDatabase) {
 	await db.execute(sql`
 		UPDATE inventory_items AS i
 		SET household_id = hm.household_id
@@ -118,18 +113,19 @@ async function backfillInventoryHouseholdIds() {
 		.where(isNull(inventoryItemTable.householdId));
 }
 
-export async function ensureDefaultHousehold(): Promise<void> {
-	await ensureDefaultHouseholdRow();
+// Takes the handle explicitly: runs inside initDatabase, before getDb() is safe to call.
+export async function ensureDefaultHousehold(db: AppDatabase): Promise<void> {
+	await ensureDefaultHouseholdRow(db);
 
-	const adminId = await findUserIdByEmail(adminEmail());
-	const memberId = await ensureMemberUser();
+	const adminId = await findUserIdByEmail(db, adminEmail());
+	const memberId = await ensureMemberUser(db);
 
 	if (adminId) {
-		await ensureMemberInHousehold(adminId, 'owner');
+		await ensureMemberInHousehold(db, adminId, 'owner');
 	}
 	if (memberId) {
-		await ensureMemberInHousehold(memberId, 'editor');
+		await ensureMemberInHousehold(db, memberId, 'editor');
 	}
 
-	await backfillInventoryHouseholdIds();
+	await backfillInventoryHouseholdIds(db);
 }

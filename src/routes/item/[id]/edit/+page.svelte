@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import { t } from '$lib/i18n';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
@@ -9,9 +8,7 @@
 
 	let { data, form } = $props();
 
-	const backFallback = $derived(
-		page.data.pantryUxV2Enabled ? '/inventory' : `/inventory/${data.item.location}`
-	);
+	const backFallback = '/inventory';
 </script>
 
 <AppLayout user={data.user}>

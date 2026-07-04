@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { clickNavHref, clickSecondaryNavHref, dismissOnboardingModalIfOpen, loginAsAdmin } from './helpers/auth';
 import { expectHomeSectionVisible } from './helpers/home';
+import { addItemViaQuickAdd, pickAllUntilTripComplete } from './helpers/shopping-v2';
 
 test.describe('Navigation', () => {
 	test.setTimeout(60_000);
@@ -40,8 +41,7 @@ test.describe('Navigation', () => {
 	});
 
 	test('shopping trip complete pantry CTA goes to inventory', async ({ page }) => {
-		test.skip(process.env.SHOPPING_UX_V2_ENABLED !== 'true', 'Requires SHOPPING_UX_V2_ENABLED=true');
-
+		test.setTimeout(150_000);
 		const itemName = `Nav E2E ${Date.now()}`;
 
 		await loginAsAdmin(page);
@@ -49,22 +49,11 @@ test.describe('Navigation', () => {
 		await dismissOnboardingModalIfOpen(page);
 
 		await expect(page.getByTestId('shopping-v2-page')).toBeVisible({ timeout: 15_000 });
-		await page.getByRole('button', { name: /Lägg till vara|Add item/i }).click();
-		await page.getByTestId('shopping-v2-quick-add').locator('#shopping-v2-name').fill(itemName);
-		await page.getByTestId('shopping-v2-quick-add').getByRole('button', { name: /Lägg till|Add/i }).click();
-		await expect(page.getByTestId('shopping-v2-summary-pills')).toContainText(itemName, {
-			timeout: 15_000
-		});
+		await addItemViaQuickAdd(page, itemName);
 
 		await page.getByTestId('shopping-v2-start-shop').click();
-		await page.getByTestId('shopping-v2-pick-cta').click();
-
-		const pantrySheet = page.getByTestId('shopping-to-pantry-sheet');
-		if (await pantrySheet.isVisible().catch(() => false)) {
-			await pantrySheet.getByRole('button', { name: /Nej, bara lista|No, list only/i }).click();
-		}
-
-		await expect(page.getByTestId('shopping-v2-trip-complete')).toBeVisible({ timeout: 20_000 });
+		await expect(page.getByTestId('shopping-v2-shop')).toBeVisible();
+		await pickAllUntilTripComplete(page);
 
 		const pantryCta = page.getByRole('button', { name: /Uppdatera skafferiet|Update pantry/i });
 		await expect(pantryCta).toBeVisible();

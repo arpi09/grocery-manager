@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/state';
 	import Card from '$lib/components/atoms/Card.svelte';
 	import ExpandableCopy from '$lib/components/molecules/ExpandableCopy.svelte';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
@@ -22,9 +21,7 @@
 			.join(', ')
 	);
 
-	const homeHref = $derived(
-		expiringItemsHref({ pantryUxV2Enabled: page.data.pantryUxV2Enabled })
-	);
+	const homeHref = expiringItemsHref();
 </script>
 
 <section class="planer-context" aria-labelledby="planer-context-heading">
