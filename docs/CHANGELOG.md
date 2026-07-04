@@ -81,6 +81,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - docs(reality): prod SHA e918c64ee post-deploy ([#183](https://github.com/arpi09/grocery-manager/pull/183))
 - chore(design-sync): pin Skaffu Design System project ([#187](https://github.com/arpi09/grocery-manager/pull/187)) — Pins `projectId` `f06626f0-ce11-4687-bbf5-03ac70c38e44` in `.design-sync/config.json` so future `/design-sync` runs target the existing "Skaffu Design System" project instead of creating duplicates.
 - docs(skills): coordinator-boot föreslår sessionsnamn + rename-steg ([#195](https://github.com/arpi09/grocery-manager/pull/195)) — Räddar en okommitterad SKILL.md-förbättring från huvudcheckouten (sessionsnamn-steg i coordinator-booten + rename-tips vid ny tråd). Innehållet användes redan av coordinator-sessioner men fanns inte i git.
+- refactor(flags): retire UX v2 flags - shipped surfaces are the only mode ([#188](https://github.com/arpi09/grocery-manager/pull/188))
 
 ### Added
 
