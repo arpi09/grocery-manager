@@ -25,21 +25,10 @@ Same env key can behave differently depending on which helper reads it:
 
 ---
 
-## UX v2 surfaces
-
-| Env key | Label | Code default | Prod (`apphosting.yaml`) | Layout boolean | UI / backend effect | Data requirements |
-|---------|-------|--------------|--------------------------|----------------|---------------------|-------------------|
-| `HOME_UX_V2_ENABLED` | Home UX v2 — Household Briefing | **on** (`defaultOn`) | `true` | `homeUxV2Enabled` | `/hem` → `HomeV2Page` (timeline, waste cards, replenishment fold) instead of legacy dashboard | Replenishment / insights data for cards; empty state if no history |
-| `SHOPPING_UX_V2_ENABLED` | Shopping UX v2 — Plan + Shop | **off** (`exactTrue`) | `true` | `shoppingUxV2Enabled` | `/inkop` Plan/Shop modes; checklist in overflow drawer (flag-off: inline grid) | Shopping list items |
-| `PANTRY_UX_V2_ENABLED` | Pantry UX v2 — shelf view | **off** (`exactTrue`) | `true` | `pantryUxV2Enabled` | `/inventory` shelf zones + use-soon; redirects when off | Active inventory items |
-
----
-
-## Home & legacy layout
+## Home
 
 | Env key | Label | Code default | Prod | Layout boolean | UI / backend effect | Data requirements |
 |---------|-------|--------------|------|----------------|---------------------|-------------------|
-| `HOME_REDESIGN_V1_ENABLED` | Home redesign v1 (legacy premium layout) | **off** (`exactTrue`) | `true` | `homeRedesignV1Enabled` | Fallback `/hem` layout when `HOME_UX_V2` off; v2 wins when both on | — |
 | `HOME_BRIEFING_AI_ENABLED` | Home briefing AI one-liner | **on** (`defaultOn`) | `true` | — (server-only) | Nano one-liner on `/hem` via `hem/+page.server.ts` | Briefing context from home load |
 | `PRICE_MEMORY_V1_ENABLED` | Price memory v1 read surfaces | **off** (`exactTrue`) | `true` | `priceMemoryV1Enabled` | Price chip/tooltip on item edit; settings discovery; import hints | `receipt_price_captured` / price history |
 
@@ -107,7 +96,7 @@ Not all of these live in `feature-flags.ts`, but they gate prod behaviour alongs
 
 ## Quick prod snapshot (@ master `apphosting.yaml`)
 
-**Explicitly on in yaml:** all UX v2 flags, brain feedback/rank/proactive, learning trio, home redesign, price memory, W1 share, receipt estimates, store recommendation v0, receipt AI batch, global shelf-life DB, recipe/photo LLM passes, auto-finish cron.
+**Explicitly on in yaml:** brain feedback/rank/proactive, learning trio, price memory, W1 share, receipt estimates, store recommendation v0, receipt AI batch, global shelf-life DB, recipe/photo LLM passes, auto-finish cron. (UX v2 + home redesign flags retired 2026-07-04 — surfaces are unconditional.)
 
 **On via code default only when absent from yaml:** none for Brain (all listed explicitly as of 2026-06-23).
 
@@ -124,8 +113,6 @@ From [`.env.example`](../.env.example) — uncomment to **disable** locally:
 ```bash
 # SHELF_LIFE_LEARNING_ENABLED=false
 # BRAIN_FEEDBACK_V1_ENABLED=false
-# HOME_UX_V2_ENABLED=false
-# SHOPPING_UX_V2_ENABLED=true   # example: force on locally (needs exact true)
 ```
 
 Prod brain backend is largely **on**; missing UI is usually **data** (no receipt history → no replenishment → no feedback), not flags.
@@ -140,3 +127,14 @@ When adding a flag:
 2. Set prod value in `apphosting.yaml` on merge (deploy = publish).
 3. Pass to layout only if client components need it.
 4. Update this file in the same PR.
+
+---
+
+## Retired flags
+
+| Env key | Retired | Outcome |
+|---------|---------|---------|
+| `SHOPPING_UX_V2_ENABLED` | 2026-07-04 | Plan + Shop modes on `/inkop` are now unconditional; legacy inline checklist grid deleted |
+| `PANTRY_UX_V2_ENABLED` | 2026-07-04 | `/inventory` shelf view is now unconditional; redirect fallback to `/inventory/fridge` deleted |
+| `HOME_UX_V2_ENABLED` | 2026-07-04 | `/hem` Household Briefing (`HomeV2Page`) is now the only home layout |
+| `HOME_REDESIGN_V1_ENABLED` | 2026-07-04 | Legacy v1/v5 home layouts (`HomeDashboard`, `HomeRedesignDashboard`) deleted with `HOME_UX_V2` retirement |

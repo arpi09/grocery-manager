@@ -7,13 +7,9 @@ export const FEATURE_FLAG_ENV = {
 	PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT: 'PUBLIC_SHELF_LIFE_ESTIMATES_IN_RECEIPT',
 	LOCATION_LEARNING: 'LOCATION_LEARNING_ENABLED',
 	REPLENISHMENT_LEARNING: 'REPLENISHMENT_LEARNING_ENABLED',
-	HOME_REDESIGN_V1: 'HOME_REDESIGN_V1_ENABLED',
 	PRICE_MEMORY_V1: 'PRICE_MEMORY_V1_ENABLED',
 	BRAIN_FEEDBACK_V1: 'BRAIN_FEEDBACK_V1_ENABLED',
 	SHOPPING_LIST_SHARE: 'PUBLIC_SHOPPING_LIST_SHARE_ENABLED',
-	SHOPPING_UX_V2: 'SHOPPING_UX_V2_ENABLED',
-	PANTRY_UX_V2: 'PANTRY_UX_V2_ENABLED',
-	HOME_UX_V2: 'HOME_UX_V2_ENABLED',
 	RECEIPT_AI_BATCH: 'RECEIPT_AI_BATCH_ENABLED',
 	AUTO_FINISH: 'AUTO_FINISH_ENABLED',
 	GLOBAL_SHELF_LIFE_DB: 'GLOBAL_SHELF_LIFE_DB_ENABLED',
@@ -57,11 +53,6 @@ export function isReplenishmentLearningEnabled(): boolean {
 	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.REPLENISHMENT_LEARNING);
 }
 
-/** Server flag: Home premium redesign v5 layout (default off). */
-export function isHomeRedesignV1Enabled(): boolean {
-	return isEnvTrue(FEATURE_FLAG_ENV.HOME_REDESIGN_V1);
-}
-
 /** Server flag: Brain Feedback V1 UI (belief line, teaching chips, inline ack). Default on. */
 export function isBrainFeedbackV1Enabled(): boolean {
 	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1);
@@ -75,25 +66,6 @@ export function isShoppingListShareEnabled(): boolean {
 /** Server flag: Price Memory V1 read surfaces (default off). */
 export function isPriceMemoryV1Enabled(): boolean {
 	return isEnvTrue(FEATURE_FLAG_ENV.PRICE_MEMORY_V1);
-}
-
-/** Server flag: Shopping UX v2 — plan + shop modes on `/inkop` (default off). */
-export function isShoppingUxV2Enabled(): boolean {
-	return isEnvTrue(FEATURE_FLAG_ENV.SHOPPING_UX_V2);
-}
-
-/** Server flag: Pantry UX v2 — shelf view on `/inventory` (default off prod; on in vite dev when unset). */
-export function isPantryUxV2Enabled(): boolean {
-	const val = process.env[FEATURE_FLAG_ENV.PANTRY_UX_V2];
-	if (val !== undefined && val !== '') {
-		return val === 'true';
-	}
-	return process.env.NODE_ENV === 'development';
-}
-
-/** Server flag: Home UX v2 — Household Briefing on `/hem` (default on). */
-export function isHomeUxV2Enabled(): boolean {
-	return isEnvEnabledDefaultOn(FEATURE_FLAG_ENV.HOME_UX_V2);
 }
 
 /** Server flag: Store recommendation V0 learning experiment (default off). */
@@ -209,13 +181,6 @@ export function getAllFeatureFlagSnapshot(): FeatureFlagSnapshotEntry[] {
 			check: isReplenishmentLearningEnabled
 		},
 		{
-			id: 'homeRedesignV1',
-			envKey: FEATURE_FLAG_ENV.HOME_REDESIGN_V1,
-			label: 'Home redesign v1',
-			pattern: 'exactTrue',
-			check: isHomeRedesignV1Enabled
-		},
-		{
 			id: 'brainFeedbackV1',
 			envKey: FEATURE_FLAG_ENV.BRAIN_FEEDBACK_V1,
 			label: 'Brain feedback v1',
@@ -235,27 +200,6 @@ export function getAllFeatureFlagSnapshot(): FeatureFlagSnapshotEntry[] {
 			label: 'Price memory v1',
 			pattern: 'exactTrue',
 			check: isPriceMemoryV1Enabled
-		},
-		{
-			id: 'shoppingUxV2',
-			envKey: FEATURE_FLAG_ENV.SHOPPING_UX_V2,
-			label: 'Shopping UX v2',
-			pattern: 'exactTrue',
-			check: isShoppingUxV2Enabled
-		},
-		{
-			id: 'pantryUxV2',
-			envKey: FEATURE_FLAG_ENV.PANTRY_UX_V2,
-			label: 'Pantry UX v2',
-			pattern: 'exactTrue',
-			check: isPantryUxV2Enabled
-		},
-		{
-			id: 'homeUxV2',
-			envKey: FEATURE_FLAG_ENV.HOME_UX_V2,
-			label: 'Home UX v2',
-			pattern: 'defaultOn',
-			check: isHomeUxV2Enabled
 		},
 		{
 			id: 'storeRecommendationV0',

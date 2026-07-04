@@ -2,8 +2,6 @@ import type { DashboardSummary } from '$lib/application/inventory.service';
 import { canEditInventory } from '$lib/domain/household';
 import { isStorageLocation } from '$lib/domain/location';
 
-import type { GamificationCelebrationKind } from '$lib/domain/gamification';
-
 import type { HomeIntelligenceSnapshot } from '$lib/application/inventory-intelligence.service';
 
 import { DEFAULT_LOCALE, isLocale, type Locale } from '$lib/i18n/locale';
@@ -21,7 +19,6 @@ import { requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { buildReturnUrlWithExpiryNudge } from '$lib/utils/expiry-nudge';
 
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
-import { isHomeUxV2Enabled } from '$lib/server/home-ux-v2-flag';
 import { isHomeBriefingAiEnabled } from '$lib/server/feature-flags';
 import { generateHomeBriefingOneLiner } from '$lib/server/home-briefing-one-liner';
 import { getOpenAiApiKey } from '$lib/server/openai';
@@ -48,7 +45,6 @@ import type { Actions, PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ locals }) => {
 	const householdId = locals.householdId!;
 	const canWrite = locals.householdRole ? canEditInventory(locals.householdRole) : false;
-	const homeUxV2Enabled = isHomeUxV2Enabled();
 
 	const degrade = <T>(label: string, fallback: T) => (error: unknown) => {
 		console.warn(`[hem] ${label} degraded:`, error);
@@ -80,25 +76,20 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const locale: Locale = isLocale(locals.locale) ? locals.locale : DEFAULT_LOCALE;
 
 	const summaryPromise = locals.inventoryService.getDashboard(householdId).catch((error) => {
-		if (homeUxV2Enabled) {
-			loadFailed = true;
-		}
+		loadFailed = true;
 		return degrade('dashboard', emptySummary)(error);
 	});
 
 	const intelligencePromise = locals.inventoryIntelligenceService
 		.getHomeIntelligence(householdId)
 		.catch((error) => {
-			if (homeUxV2Enabled) {
-				loadFailed = true;
-			}
+			loadFailed = true;
 			return degrade('inventory intelligence', emptyIntelligence)(error);
 		});
 
 	const [
 		summary,
 		intelligence,
-		celebration,
 		receiptAutopilotSuggestions,
 		receiptFinishSuggestions,
 		shoppingListCount,
@@ -106,9 +97,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 	] = await Promise.all([
 		summaryPromise,
 		intelligencePromise,
-		locals.gamificationService
-			.detectHomeCelebration(householdId)
-			.catch(degrade('celebration', null)),
 		locals.purchasePatternService
 			.getSuggestions(householdId)
 			.catch(degrade('receipt autopilot', [])),
@@ -138,7 +126,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	let pulseMembers: HomePulseMember[] = [];
 	let pulseLastActivity: HomePulseActivity | null = null;
 
-	if (homeUxV2Enabled && !loadFailed) {
+	if (!loadFailed) {
 		try {
 			const members = (await locals.householdService.getHouseholdMembers(householdId)) ?? [];
 			pulseMembers = members.map((member) => ({
@@ -225,12 +213,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	return {
 		locale,
-		pageTitle: translate(locale, homeUxV2Enabled ? 'home.v6.pageTitle' : 'home.title'),
-		homeUxV2Enabled,
-		loadFailed: homeUxV2Enabled ? loadFailed : false,
+		pageTitle: translate(locale, 'home.v6.pageTitle'),
+		loadFailed,
 		summary,
 		intelligence,
-		celebration: celebration as GamificationCelebrationKind | null,
 		canWrite,
 		receiptAutopilotSuggestions,
 		receiptFinishSuggestions,

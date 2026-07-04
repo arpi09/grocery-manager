@@ -1,11 +1,7 @@
 import {
 	isBrainFeedbackV1Enabled,
-	isHomeRedesignV1Enabled,
-	isHomeUxV2Enabled,
-	isPantryUxV2Enabled,
 	isPriceMemoryV1Enabled,
-	isShoppingListShareEnabled,
-	isShoppingUxV2Enabled
+	isShoppingListShareEnabled
 } from './feature-flags';
 import { isShelfLifeEstimatesInReceiptEnabled } from './shelf-life-learning-flag';
 
@@ -42,12 +38,6 @@ export function getLayoutClientFlagSnapshot(): LayoutClientFlagSnapshotEntry[] {
 			fallbackNote: 'SHELF_LIFE_LEARNING_ENABLED when PUBLIC unset'
 		},
 		{
-			propName: 'homeRedesignV1Enabled',
-			envKey: 'HOME_REDESIGN_V1_ENABLED',
-			...readPublicEnv('HOME_REDESIGN_V1_ENABLED'),
-			effective: isHomeRedesignV1Enabled()
-		},
-		{
 			propName: 'priceMemoryV1Enabled',
 			envKey: 'PRICE_MEMORY_V1_ENABLED',
 			...readPublicEnv('PRICE_MEMORY_V1_ENABLED'),
@@ -58,24 +48,6 @@ export function getLayoutClientFlagSnapshot(): LayoutClientFlagSnapshotEntry[] {
 			envKey: 'BRAIN_FEEDBACK_V1_ENABLED',
 			...readPublicEnv('BRAIN_FEEDBACK_V1_ENABLED'),
 			effective: isBrainFeedbackV1Enabled()
-		},
-		{
-			propName: 'shoppingUxV2Enabled',
-			envKey: 'SHOPPING_UX_V2_ENABLED',
-			...readPublicEnv('SHOPPING_UX_V2_ENABLED'),
-			effective: isShoppingUxV2Enabled()
-		},
-		{
-			propName: 'pantryUxV2Enabled',
-			envKey: 'PANTRY_UX_V2_ENABLED',
-			...readPublicEnv('PANTRY_UX_V2_ENABLED'),
-			effective: isPantryUxV2Enabled()
-		},
-		{
-			propName: 'homeUxV2Enabled',
-			envKey: 'HOME_UX_V2_ENABLED',
-			...readPublicEnv('HOME_UX_V2_ENABLED'),
-			effective: isHomeUxV2Enabled()
 		},
 		{
 			propName: 'shareLinkEnabled',

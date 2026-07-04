@@ -3,23 +3,15 @@ import {
 	InventoryNotFoundError
 } from '$lib/application/inventory.service';
 import { canConsumeInventory, canEditInventory } from '$lib/domain/household';
-import { isPantryUxV2Enabled } from '$lib/server/pantry-ux-v2-flag';
 import { requireInventoryConsumeAccess } from '$lib/server/household-auth';
 import { trackOneTapConsume } from '$lib/server/sync-analytics';
 import { consumeItemSchema } from '$lib/validation/consumption.schemas';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	const pantryUxV2Enabled = isPantryUxV2Enabled();
-
-	if (!pantryUxV2Enabled) {
-		redirect(302, '/inventory/fridge');
-	}
-
 	if (!locals.householdId) {
 		return {
-			pantryUxV2Enabled: true,
 			items: [],
 			canWrite: false,
 			canConsume: false,
@@ -31,7 +23,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		const items = await locals.inventoryService.listAll(locals.householdId);
 
 		return {
-			pantryUxV2Enabled: true,
 			items,
 			canWrite: locals.householdRole ? canEditInventory(locals.householdRole) : false,
 			canConsume: locals.householdRole ? canConsumeInventory(locals.householdRole) : false,
@@ -39,7 +30,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		};
 	} catch {
 		return {
-			pantryUxV2Enabled: true,
 			items: [],
 			canWrite: locals.householdRole ? canEditInventory(locals.householdRole) : false,
 			canConsume: locals.householdRole ? canConsumeInventory(locals.householdRole) : false,

@@ -25,7 +25,7 @@ setup('authenticate as admin', async ({ page }) => {
 	});
 	await dismissPostOnboardingShareIfOpen(page);
 	await dismissPageHintIfOpen(page);
-	await page.locator('#shopping-list-panel').waitFor({ state: 'visible', timeout: 30_000 }).catch(() => {});
+	await page.getByTestId('shopping-v2-page').waitFor({ state: 'visible', timeout: 30_000 }).catch(() => {});
 	await page.goto('/planer?week=2026-06-01', { waitUntil: 'domcontentloaded', timeout: 60_000 });
 	await dismissPageHintIfOpen(page);
 	await dismissMobileMoreNavIfOpen(page);

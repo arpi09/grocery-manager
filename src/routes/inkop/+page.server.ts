@@ -12,34 +12,22 @@ import {
 } from '$lib/application/shopping-list.service';
 import { ShoppingToPantryReadOnlyError } from '$lib/application/shopping-to-pantry.service';
 import { parseAddShoppingListItem } from '$lib/validation/shopping-list.schemas';
-import { translate, type MessageKey } from '$lib/i18n/messages';
+import { translate } from '$lib/i18n/messages';
 import { rankReplenishmentWithFeedback } from '$lib/server/replenishment-rank';
 import { learningFeedbackRepository } from '$lib/server/di';
 import { loadAutoFillPendingForInkop } from '$lib/server/auto-smart-fill';
 import { takeAutoFillPending } from '$lib/server/auto-fill-pending';
-import { getOpenAiApiKey, OPENAI_NOT_CONFIGURED_KEY } from '$lib/server/openai';
-import { checkAiQuotaForAction } from '$lib/server/ai-rate-limit';
-import { e2eMockShoppingSuggestions, isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
-import {
-	generateShoppingSuggestions,
-	suggestionToListItem,
-	type ShoppingSuggestion
-} from '$lib/server/shopping-suggestions';
+import { getOpenAiApiKey } from '$lib/server/openai';
+import { isE2eMockAiEnabled } from '$lib/server/e2e-mocks';
+import { suggestionToListItem } from '$lib/server/shopping-suggestions';
 import { recordProductEvent } from '$lib/server/product-events';
 import { isShelfLifeLearningEnabled } from '$lib/server/shelf-life-learning-flag';
-import { isShoppingUxV2Enabled } from '$lib/server/shopping-ux-v2-flag';
 import { detectDedupeWarningsForKeys } from '$lib/domain/dedupe-autopilot';
-import { buildListIntelligenceHints } from '$lib/domain/brain/list-intelligence';
 import { normalizeReceiptProductName } from '$lib/domain/purchase-pattern';
 import { isItemFinished } from '$lib/domain/inventory-item';
 import { trackShoppingCheckoffToPantry } from '$lib/server/sync-analytics';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-
-type SmartFillResult =
-	| { ok: true; items: ShoppingSuggestion[]; note: string | null }
-	| { ok: false; status: number; message: string }
-	| { ok: false; status: number; messageKey: MessageKey };
 
 export const load: PageServerLoad = async ({ parent, locals }) => {
 	const { user } = await parent();
@@ -52,10 +40,8 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 			canEdit: false,
 			shareLinkEnabled: false,
 			replenishmentSuggestions: [],
-			dedupeByKey: {},
 			shoppingToPantryMode: 'ask' as ShoppingToPantryMode,
-			showMemoryExplorer: false,
-			shoppingUxV2Enabled: isShoppingUxV2Enabled()
+			showMemoryExplorer: false
 		};
 	}
 
@@ -120,11 +106,6 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		});
 	}
 
-	const listHints = buildListIntelligenceHints({
-		replenishment: replenishmentSuggestions,
-		maxHints: 2
-	});
-
 	return {
 		user,
 		items,
@@ -132,14 +113,11 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 		canEdit: !!locals.householdRole && canEditInventory(locals.householdRole),
 		shareLinkEnabled: isShoppingListShareEnabled(),
 		replenishmentSuggestions,
-		dedupeByKey: intelligence.dedupeByKey,
 		storeDedupeByKey,
 		householdId,
 		shoppingToPantryMode,
 		showMemoryExplorer: isShelfLifeLearningEnabled(),
-		shoppingUxV2Enabled: isShoppingUxV2Enabled(),
-		autoFillPending,
-		listHints
+		autoFillPending
 	};
 };
 
@@ -422,102 +400,6 @@ export const actions: Actions = {
 					skipped: result.skipped,
 					note: pending.note,
 					suggestions: pending.items.slice(0, 8).map((item) => ({
-						name: item.name,
-						relatedMealDate: item.relatedMealDate ?? null,
-						relatedRecipeTitle: item.relatedRecipeTitle ?? null
-					}))
-				}
-			};
-		} catch (err) {
-			return handleServiceError(err);
-		}
-	},
-	fillFromPantry: async (event) => {
-		requireInventoryWriteAccess(event.locals.householdRole);
-		const householdId = event.locals.householdId;
-		const locale = event.locals.locale;
-		if (!householdId) error(400, translate(locale, 'errors.household.noHousehold'));
-
-		const formData = await event.request.formData();
-
-		const generated: SmartFillResult = isE2eMockAiEnabled()
-			? e2eMockShoppingSuggestions()
-			: await (async () => {
-					const apiKey = getOpenAiApiKey();
-					if (!apiKey) {
-						return {
-							ok: false as const,
-							status: 503,
-							messageKey: OPENAI_NOT_CONFIGURED_KEY
-						};
-					}
-
-					const quota = await checkAiQuotaForAction(
-						event.locals,
-						'smart_fill',
-						event.locals.user!.id
-					);
-					if (quota.denied) {
-						return { ok: false as const, status: 429, message: quota.message };
-					}
-
-					const preferencesRaw = formData.get('preferences');
-					const householdSizeRaw = formData.get('householdSize');
-					const preferences =
-						typeof preferencesRaw === 'string' ? preferencesRaw.trim().slice(0, 300) : '';
-					const householdSizeParsed = Number(householdSizeRaw);
-					const householdSize =
-						Number.isFinite(householdSizeParsed) &&
-						householdSizeParsed >= 1 &&
-						householdSizeParsed <= 8
-							? Math.round(householdSizeParsed)
-							: 2;
-
-					return generateShoppingSuggestions(
-						{
-							apiKey,
-							householdId,
-							userId: event.locals.user!.id,
-							inventoryService: event.locals.inventoryService,
-							mealPlanService: event.locals.mealPlanService,
-							shoppingListService: event.locals.shoppingListService,
-							learningFeedbackRepository
-						},
-						{ preferences, householdSize, locale: event.locals.locale === 'en' ? 'en' : 'sv' }
-					);
-				})();
-
-		if (!generated.ok) {
-			const fillError =
-				'message' in generated
-					? generated.message
-					: translate(locale, generated.messageKey);
-			return fail(generated.status, { fillError });
-		}
-
-		try {
-			const result = await event.locals.shoppingListService.addSuggestedItems(
-				householdId,
-				event.locals.householdRole!,
-				generated.items.map(suggestionToListItem)
-			);
-
-			recordProductEvent(event.locals.pmfService, {
-				userId: event.locals.user!.id,
-				householdId,
-				eventType: 'fill_suggestions_added',
-				metadata: {
-					added: result.added,
-					skipped: result.skipped
-				}
-			});
-
-			return {
-				fillSuccess: {
-					added: result.added,
-					skipped: result.skipped,
-					note: generated.note,
-					suggestions: generated.items.slice(0, 8).map((item) => ({
 						name: item.name,
 						relatedMealDate: item.relatedMealDate ?? null,
 						relatedRecipeTitle: item.relatedRecipeTitle ?? null

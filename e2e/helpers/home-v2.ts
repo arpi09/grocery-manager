@@ -17,6 +17,49 @@ export async function addShoppingListItemViaApi(page: Page, name: string): Promi
 	expect(response.ok()).toBe(true);
 }
 
+/**
+ * Dismiss the receipt-import success moment if it is (or becomes) visible.
+ * Escape works regardless of household member count — the secondary CTA
+ * testid moves behind the "Fler val" toggle for single-member households.
+ * Dismissing also clears the session pending flag so the moment does not
+ * reopen on the next navigation and block later clicks.
+ */
+export async function dismissReceiptImportSuccessIfOpen(page: Page): Promise<void> {
+	const success = page.getByTestId('receipt-import-success');
+	const appeared = await success
+		.waitFor({ state: 'visible', timeout: 5_000 })
+		.then(() => true)
+		.catch(() => false);
+	if (!appeared) return;
+	await page.keyboard.press('Escape');
+	await expect(success).not.toBeVisible({ timeout: 5_000 });
+}
+
+/**
+ * A receipt import can complete the activation milestone, which queues the
+ * "Bra start!" celebration modal (ActivationCelebration) for the next
+ * navigation. Its dismiss paths all navigate away, so clear the pending flag
+ * instead to keep multi-import flows on the page they expect.
+ */
+async function clearCelebrationPending(page: Page): Promise<void> {
+	await page.evaluate(() => {
+		for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+			const key = localStorage.key(i);
+			if (key && key.includes('celebration-pending')) {
+				localStorage.removeItem(key);
+			}
+		}
+	});
+}
+
+async function dismissActivationCelebrationIfOpen(page: Page): Promise<void> {
+	const celebration = page.locator('.celebration-panel');
+	if (await celebration.isVisible().catch(() => false)) {
+		await page.keyboard.press('Escape');
+		await celebration.waitFor({ state: 'hidden', timeout: 5_000 }).catch(() => {});
+	}
+}
+
 export async function importReceiptLines(
 	page: Page,
 	lines: Array<{ name: string; quantity?: string; unit?: string; location?: string }>
@@ -24,14 +67,15 @@ export async function importReceiptLines(
 	await mockReceiptParse(page, { body: { lines } });
 	await page.goto('/scan/kvitto');
 	await dismissOnboardingModalIfOpen(page);
+	await clearCelebrationPending(page);
+	await dismissActivationCelebrationIfOpen(page);
+	await dismissReceiptImportSuccessIfOpen(page);
 	await uploadReceiptPdf(page, FIXTURE_PDF);
 	await expect(page.getByTestId('receipt-bulk-submit')).toBeVisible({ timeout: 15_000 });
 	await page.getByTestId('receipt-bulk-submit').click();
-
-	const success = page.getByTestId('receipt-import-success');
-	if (await success.isVisible({ timeout: 5_000 }).catch(() => false)) {
-		await page.getByTestId('receipt-success-cta-secondary').click({ timeout: 5_000 }).catch(() => {});
-	}
+	await dismissReceiptImportSuccessIfOpen(page);
+	await clearCelebrationPending(page);
+	await dismissActivationCelebrationIfOpen(page);
 }
 
 export function expiringSoonIso(daysFromNow: number): string {

@@ -48,8 +48,6 @@
 		briefingFunFact?: HomeBriefingFunFact | null;
 		briefingOneLiner?: string | null;
 		canWrite?: boolean;
-		pantryUxV2Enabled?: boolean;
-		shoppingUxV2Enabled?: boolean;
 		householdName?: string | null;
 		pulseMembers?: HomePulseMember[];
 		pulseLastActivity?: HomePulseActivity | null;
@@ -69,8 +67,6 @@
 		briefingFunFact = null,
 		briefingOneLiner = null,
 		canWrite = false,
-		pantryUxV2Enabled = false,
-		shoppingUxV2Enabled = false,
 		householdName = null,
 		pulseMembers = [],
 		pulseLastActivity = null,
@@ -237,8 +233,6 @@
 			{briefingFunFact}
 			{briefingOneLiner}
 			{canWrite}
-			{pantryUxV2Enabled}
-			{shoppingUxV2Enabled}
 			{householdName}
 			{pulseMembers}
 			{pulseLastActivity}
