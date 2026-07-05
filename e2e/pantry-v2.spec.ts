@@ -42,11 +42,10 @@ test.describe('Pantry UX v2', () => {
 		await expect(page.getByTestId('pantry-v2-use-soon')).toBeVisible();
 		await expect(page.getByTestId('pantry-v2-use-soon')).toContainText(expiringName);
 
-		await page.getByTestId('pantry-v2-use-soon').getByRole('link', { name: /Visa alla varor|View all items/i }).click();
-		await expect(page).toHaveURL(/\/inventory\/all\?filter=expiring/);
-		await expect(page.getByTestId('pantry-all-locations-page')).toBeVisible({ timeout: 15_000 });
-		await expect(page.getByTestId('inventory-table')).toBeVisible({ timeout: 15_000 });
-		await expect(inventoryRowFromTable(page, expiringName)).toBeVisible({ timeout: 15_000 });
+		// Use-soon band now carries a single primary action: cook from what's expiring.
+		const useSoonCook = page.getByTestId('pantry-use-soon-cook');
+		await expect(useSoonCook).toBeVisible();
+		await expect(useSoonCook).toHaveAttribute('href', /\/planer\/vecka/);
 
 		await page.goto('/inventory');
 		await dismissOnboardingModalIfOpen(page);
@@ -101,9 +100,10 @@ test.describe('Pantry UX v2', () => {
 		await dismissOnboardingModalIfOpen(page);
 		await dismissPageHintIfOpen(page);
 
+		// Band surfaces expiring items on the shelf; the unified cross-location expiring
+		// list lives at /inventory/all?filter=expiring (reached via insights or directly).
 		await expect(page.getByTestId('pantry-v2-use-soon')).toBeVisible({ timeout: 15_000 });
-		await page.getByTestId('pantry-v2-use-soon').getByRole('link', { name: /Visa alla varor|View all items/i }).click();
-		await expect(page).toHaveURL(/\/inventory\/all\?filter=expiring/);
+		await page.goto('/inventory/all?filter=expiring');
 		await expect(page.getByTestId('pantry-all-locations-page')).toBeVisible({ timeout: 15_000 });
 
 		const fridgeRow = inventoryRowFromTable(page, fridgeExpiring);
