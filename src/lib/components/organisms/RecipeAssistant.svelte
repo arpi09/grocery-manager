@@ -67,6 +67,7 @@
 
 	let loading = $state(false);
 	let errorMessage = $state<string | null>(null);
+	let noResults = $state(false);
 	let addingMissingKey = $state<string | null>(null);
 	let feedbackBanner = $state<{ message: string; tone: AddMissingFeedbackTone } | null>(null);
 
@@ -85,6 +86,7 @@
 	async function generateRecipes() {
 		loading = true;
 		errorMessage = null;
+		noResults = false;
 		feedbackBanner = null;
 
 		try {
@@ -121,7 +123,7 @@
 			}
 
 			if (nextRecipes.length === 0 && !recipeAssistantStore.note) {
-				errorMessage = t('recipe.noneGenerated');
+				noResults = true;
 			}
 		} catch {
 			errorMessage = t('recipe.networkError');
@@ -303,6 +305,10 @@
 		<FeedbackBanner tone="error" message={errorMessage} />
 	{/if}
 
+	{#if noResults}
+		<FeedbackBanner tone="info" message={t('recipe.noneGenerated')} />
+	{/if}
+
 	{#if recipeAssistantStore.note}
 		<p class="note">{recipeAssistantStore.note}</p>
 	{/if}
@@ -335,7 +341,12 @@
 						<p class="result-title">{recipe.title}</p>
 						<p class="result-lead">{recipe.whyItFits}</p>
 					</div>
-					<Button type="button" onclick={() => openRecipe(recipe)} data-testid="recipe-open-btn">
+					<Button
+						type="button"
+						variant="secondary"
+						onclick={() => openRecipe(recipe)}
+						data-testid="recipe-open-btn"
+					>
 						{t('recipe.detail.open')}
 					</Button>
 				</li>
@@ -452,6 +463,11 @@
 	.intent-preset:has(input:checked) {
 		border-color: var(--color-primary);
 		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+	}
+
+	.intent-preset:has(input:focus-visible) {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 
 	.intent-preset input {

@@ -2752,7 +2752,7 @@
 		"fromStock": "Från lagret:",
 		"portions": "Antal portioner",
 		"portionsHint": "Alla recept skalas till detta antal portioner.",
-		"generateBtn": "Generera recept",
+		"generateBtn": "Generera maträtt",
 		"addMissingBtn": "Lägg saknade på inköpslista",
 		"addMissingBtnShort": "Lägg på lista ({count})",
 		"addMissingBtnCount": "Lägg {count} saknade på inköpslista",
