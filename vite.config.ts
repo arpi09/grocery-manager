@@ -30,9 +30,9 @@ export default defineConfig({
 		brandThemeColorPlugin(),
 		sveltekit(),
 		SvelteKitPWA({
-			registerType: 'autoUpdate',
+			registerType: 'prompt', // client-owned reload, guarded in +layout — autoUpdate loops on a flaky iOS SW
 			workbox: {
-				importScripts: ['push-sw.js']
+				importScripts: ['push-sw.js'], cleanupOutdatedCaches: true // purge old precaches so a stale device self-heals
 			},
 			includeAssets: [
 				'favicon.svg',
@@ -106,6 +106,11 @@ export default defineConfig({
 	},
 	server: {
 		host: true,
-		port: 5173
+		port: 5173,
+		watch: {
+			/* Agent worktrees under .claude/worktrees carry their own .svelte-kit/tsconfig.json;
+			   without this ignore their file changes force full-reloads of every dev server mid-run. */
+			ignored: ['**/.claude/**']
+		}
 	}
 });

@@ -3,19 +3,19 @@
 
 # Flow: Onboarding
 
-Register → activation modal → scan → inköpslista
+Register → verify-email → modal (welcome/fill/invite/finish) → inköpslista
 
 ## Diagram
 
 ```mermaid
 flowchart LR
   Register[Register/OAuth]
-  Modal[ActivationOnboardingFlow]
-  Scan[/scan]
+  Verify[/verify-email]
+  Modal[ActivationOnboardingFlow v8: welcome → fill → invite → finish]
   Inkop[/inkop?quick=1]
-  Register --> Modal
-  Modal -->|"Scan step"| Scan
-  Modal -->|"Complete"| Inkop
+  Register --> Verify
+  Verify --> Modal
+  Modal -->|"Finish"| Inkop
 ```
 
 ## Steps
@@ -23,11 +23,10 @@ flowchart LR
 | # | Step | Route | Screenshot | Source |
 |---|------|-------|------------|--------|
 | 1 | Register or OAuth | `/register` | — | `src/routes/register/+page.svelte` |
-| 2 | Welcome on hem | `/hem?welcome=1` | — | `src/routes/hem/+page.svelte` |
-| 3 | Activation onboarding modal | `/hem` | [start-guide](../SCREENSHOTS/start-guide.png) | `src/lib/components/organisms/ActivationOnboardingFlow.svelte` |
-| 4 | Scan hub | `/scan` | — | `src/routes/scan/+page.svelte` |
-| 5 | First shopping list | `/inkop?quick=1` | — | `src/lib/components/organisms/ShoppingV2Page.svelte` |
-| 6 | PWA install wedge (optional) | `/install-app` | — | `src/routes/install-app/+page.svelte` |
+| 2 | Verify email | `/verify-email` | — | `src/routes/verify-email/+page.svelte` |
+| 3 | Onboarding modal — 4 screens (welcome/fill/invite/finish) | `/hem` | [start-guide](../SCREENSHOTS/start-guide.png) | `src/lib/components/organisms/ActivationOnboardingFlow.svelte` |
+| 4 | First shopping list | `/inkop?quick=1` | — | `src/lib/components/organisms/ShoppingV2Page.svelte` |
+| 5 | PWA install wedge (optional) | `/install-app` | — | `src/routes/install-app/+page.svelte` |
 
 ---
 

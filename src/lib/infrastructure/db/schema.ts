@@ -651,6 +651,30 @@ export const appSettingsTable = pgTable('app_settings', {
 	updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
 });
 
+export const aiBatchJobTable = pgTable(
+	'ai_batch_job',
+	{
+		id: text('id').primaryKey(),
+		kind: text('kind', { enum: ['missing_expiry', 'expiry_push', 'admin_digest'] }).notNull(),
+		status: text('status', {
+			enum: ['submitted', 'completed', 'applied', 'failed', 'expired']
+		}).notNull(),
+		openaiBatchId: text('openai_batch_id'),
+		inputFileId: text('input_file_id'),
+		outputFileId: text('output_file_id'),
+		requestCount: integer('request_count').notNull().default(0),
+		payload: jsonb('payload').$type<Record<string, unknown>>().notNull().default({}),
+		result: jsonb('result').$type<Record<string, unknown>>(),
+		error: text('error'),
+		createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow()
+	},
+	(table) => [
+		index('ai_batch_job_status_idx').on(table.status),
+		index('ai_batch_job_kind_created_idx').on(table.kind, table.createdAt)
+	]
+);
+
 export const receiptPurchaseLineTable = pgTable(
 	'receipt_purchase_line',
 	{

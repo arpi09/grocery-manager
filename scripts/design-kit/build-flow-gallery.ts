@@ -25,22 +25,21 @@ const FLOWS: FlowDefinition[] = [
 	{
 		id: 'onboarding',
 		title: 'Onboarding',
-		summary: 'Register → activation modal → scan → inköpslista',
+		summary: 'Register → verify-email → modal (welcome/fill/invite/finish) → inköpslista',
 		mermaid: `flowchart LR
   Register[Register/OAuth]
-  Modal[ActivationOnboardingFlow]
-  Scan[/scan]
+  Verify[/verify-email]
+  Modal[ActivationOnboardingFlow v8: welcome → fill → invite → finish]
   Inkop[/inkop?quick=1]
-  Register --> Modal
-  Modal -->|"Scan step"| Scan
-  Modal -->|"Complete"| Inkop`,
+  Register --> Verify
+  Verify --> Modal
+  Modal -->|"Finish"| Inkop`,
 		steps: [
 			{ order: 1, title: 'Register or OAuth', route: '/register', source: 'src/routes/register/+page.svelte' },
-			{ order: 2, title: 'Welcome on hem', route: '/hem?welcome=1', source: 'src/routes/hem/+page.svelte' },
-			{ order: 3, title: 'Activation onboarding modal', route: '/hem', screen: 'start-guide', source: 'src/lib/components/organisms/ActivationOnboardingFlow.svelte' },
-			{ order: 4, title: 'Scan hub', route: '/scan', source: 'src/routes/scan/+page.svelte' },
-			{ order: 5, title: 'First shopping list', route: '/inkop?quick=1', source: 'src/lib/components/organisms/ShoppingV2Page.svelte' },
-			{ order: 6, title: 'PWA install wedge (optional)', route: '/install-app', source: 'src/routes/install-app/+page.svelte' }
+			{ order: 2, title: 'Verify email', route: '/verify-email', source: 'src/routes/verify-email/+page.svelte' },
+			{ order: 3, title: 'Onboarding modal — 4 screens (welcome/fill/invite/finish)', route: '/hem', screen: 'start-guide', source: 'src/lib/components/organisms/ActivationOnboardingFlow.svelte' },
+			{ order: 4, title: 'First shopping list', route: '/inkop?quick=1', source: 'src/lib/components/organisms/ShoppingV2Page.svelte' },
+			{ order: 5, title: 'PWA install wedge (optional)', route: '/install-app', source: 'src/routes/install-app/+page.svelte' }
 		]
 	},
 	{

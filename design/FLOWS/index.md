@@ -7,7 +7,7 @@ Ordered user flows for AI design tools. Screenshots in [`../SCREENSHOTS/`](../SC
 
 | Flow | Summary |
 |------|---------|
-| [Onboarding](./onboarding.md) | Register → activation modal → scan → inköpslista |
+| [Onboarding](./onboarding.md) | Register → verify-email → modal (welcome/fill/invite/finish) → inköpslista |
 | [Receipt import](./receipt.md) | Scan hub → upload → review → success → pantry |
 | [Shopping](./shopping.md) | Plan → shop trip → checkoff → pantry replenishment |
 | [Pantry](./pantry.md) | Shelf view → consume → expiry → eat-first |

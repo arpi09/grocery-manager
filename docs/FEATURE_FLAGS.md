@@ -69,6 +69,7 @@ Memory Explorer: `/settings/memory` when any learning flag effective + `showMemo
 | `RECIPE_REFINEMENT_ENABLED` | Recipe generation 2nd LLM pass | **on** (`notFalse`) | `true` | — | Optional refinement in `recipe-generation.ts` | Meal intent + inventory |
 | `PHOTO_VALIDATION_ENABLED` | Photo-round 2nd validation LLM | **on** (`notFalse`) | `true` | — | Second pass on `/api/inventory/photo-scan` | Photo scan upload |
 | `AUTO_FINISH_ENABLED` | Auto-finish expired items (cron) | **off** (`exactTrue`) | `true` | — | `POST /api/cron/auto-expiry-sweep` — only users who opt in in settings | Expired inventory in grace window + user opt-in |
+| `AI_BATCH_ENABLED` | OpenAI Batch API cron (50% off) | **off** (`exactTrue`) | not set → **off** | — | `POST /api/cron/ai-batch` — pre-computes missing-expiry dates, weekly push bodies, PMF digest paragraph at 50% discount; sync path stays as fallback. See [AI_BATCH.md](./AI_BATCH.md) | `OPENAI_API_KEY` + `CRON_SECRET` |
 
 ---
 
@@ -76,7 +77,7 @@ Memory Explorer: `/settings/memory` when any learning flag effective + `showMemo
 
 | Env key | Label | Code default | Prod | Layout boolean | UI / backend effect | Data requirements |
 |---------|-------|--------------|------|----------------|---------------------|-------------------|
-| `PUBLIC_SHOPPING_LIST_SHARE_ENABLED` | W1 public shopping list share | **off** (`exactTrue`) | `true` (BUILD+RUNTIME) | `shareLinkEnabled` | `/lista/[token]` guest join; share menu on `/inkop`; post-onboarding share prompt | Household list + share API |
+| `PUBLIC_SHOPPING_LIST_SHARE_ENABLED` | W1 public shopping list share | **off** (`exactTrue`) | `true` (BUILD+RUNTIME) | `shareLinkEnabled` | `/lista/[token]` guest join; share menu on `/inkop` (post-onboarding share prompt removed in onboarding v8 — invite lives in the flow) | Household list + share API |
 
 ---
 

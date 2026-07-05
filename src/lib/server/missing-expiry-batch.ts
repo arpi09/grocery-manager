@@ -18,13 +18,30 @@ import { RECEIPT_SHELF_LIFE_BATCH_SCHEMA, SHELF_LIFE_BATCH_SYSTEM_PROMPT } from 
 
 export const MISSING_EXPIRY_BATCH_MAX = 40;
 
+export const MISSING_EXPIRY_SCHEMA_NAME = 'missing_expiry_batch';
+
+/** System prompt shared by the sync fallback and the OpenAI Batch path. */
+export const MISSING_EXPIRY_SYSTEM_PROMPT = [
+	SHELF_LIFE_BATCH_SYSTEM_PROMPT,
+	'Batch för varor utan expiresOn i skafferiet — var försiktig, lägre confidence vid osäkerhet.',
+	SHELF_LIFE_CATEGORY_ANCHORS
+].join('\n');
+
 export interface MissingExpiryBatchEstimate {
 	itemId: string;
 	expiresOn: string;
 	estimatedDays: number;
 }
 
-function buildMissingExpiryBatchUserPrompt(
+/** One item as prepared for a shelf-life request line. */
+export interface MissingExpiryBatchRow {
+	index: number;
+	itemId: string;
+	name: string;
+	location: StorageLocation;
+}
+
+export function buildMissingExpiryBatchUserPrompt(
 	items: Array<{ index: number; name: string; location: StorageLocation }>,
 	todayIso: string,
 	feedback?: { priorCorrectionsBlock?: string; globalFewShotBlock?: string }
@@ -52,59 +69,26 @@ function buildMissingExpiryBatchUserPrompt(
 	);
 }
 
-export async function inferMissingExpiryBatch(
-	apiKey: string,
-	items: InventoryItem[],
-	options: {
-		todayIso?: string;
-		priorCorrectionsBlock?: string;
-		globalFewShotBlock?: string;
-	} = {}
-): Promise<MissingExpiryBatchEstimate[]> {
-	if (!isReceiptAiBatchEnabled() || isOpenAiDegradedMode() || items.length === 0) {
-		return [];
-	}
-
-	const todayIso = options.todayIso ?? formatTodayIso();
-	const batch = items.slice(0, MISSING_EXPIRY_BATCH_MAX).map((item, index) => ({
+/** Prepare items into indexed rows (capped) for a single shelf-life request. */
+export function toMissingExpiryBatchRows(items: InventoryItem[]): MissingExpiryBatchRow[] {
+	return items.slice(0, MISSING_EXPIRY_BATCH_MAX).map((item, index) => ({
 		index,
 		itemId: item.id,
 		name: item.name,
 		location: item.location
 	}));
+}
 
-	const userPrompt = buildMissingExpiryBatchUserPrompt(batch, todayIso, {
-		priorCorrectionsBlock: options.priorCorrectionsBlock,
-		globalFewShotBlock: options.globalFewShotBlock
-	});
-	const result = await requestStructuredJson(apiKey, {
-		model: OPENAI_MODEL_NANO,
-		systemPrompt: [
-			SHELF_LIFE_BATCH_SYSTEM_PROMPT,
-			'Batch för varor utan expiresOn i skafferiet — var försiktig, lägre confidence vid osäkerhet.',
-			SHELF_LIFE_CATEGORY_ANCHORS
-		].join('\n'),
-		userPrompt,
-		schemaName: 'missing_expiry_batch',
-		schema: RECEIPT_SHELF_LIFE_BATCH_SCHEMA
-	});
-
-	if (!result.ok) {
-		return [];
-	}
-
-	logBrainMetrics('missing_expiry_batch', {
-		source: 'missing_expiry_batch',
-		receiptParseLineCount: batch.length,
-		aiBatchUsed: true,
-		promptVersion: `${PROMPT_VERSION_SHELF_LIFE_BATCH}-missing-expiry`,
-		inputTokenEstimate: estimateInputTokens(userPrompt, batch.length)
-	});
-
-	const estimates = (result.data as { estimates?: unknown }).estimates;
+/** Map a parsed `{ estimates: [...] }` payload back to per-item expiry dates. */
+export function parseMissingExpiryEstimates(
+	data: unknown,
+	rows: ReadonlyArray<{ index: number; itemId: string }>,
+	todayIso: string
+): MissingExpiryBatchEstimate[] {
+	const estimates = (data as { estimates?: unknown } | null)?.estimates;
 	if (!Array.isArray(estimates)) return [];
 
-	const byIndex = new Map(batch.map((row) => [row.index, row]));
+	const byIndex = new Map(rows.map((row) => [row.index, row]));
 	const output: MissingExpiryBatchEstimate[] = [];
 
 	for (const entry of estimates) {
@@ -126,6 +110,54 @@ export async function inferMissingExpiryBatch(
 	}
 
 	return output;
+}
+
+/**
+ * Synchronous shelf-life inference for items missing expiry. Used on interactive
+ * inventory surfaces and as the immediate fallback when the batch pre-fill hasn't
+ * run yet. The cron batch path reuses the exported prompt/parse helpers above.
+ */
+export async function inferMissingExpiryBatch(
+	apiKey: string,
+	items: InventoryItem[],
+	options: {
+		todayIso?: string;
+		priorCorrectionsBlock?: string;
+		globalFewShotBlock?: string;
+	} = {}
+): Promise<MissingExpiryBatchEstimate[]> {
+	if (!isReceiptAiBatchEnabled() || isOpenAiDegradedMode() || items.length === 0) {
+		return [];
+	}
+
+	const todayIso = options.todayIso ?? formatTodayIso();
+	const rows = toMissingExpiryBatchRows(items);
+
+	const userPrompt = buildMissingExpiryBatchUserPrompt(rows, todayIso, {
+		priorCorrectionsBlock: options.priorCorrectionsBlock,
+		globalFewShotBlock: options.globalFewShotBlock
+	});
+	const result = await requestStructuredJson(apiKey, {
+		model: OPENAI_MODEL_NANO,
+		systemPrompt: MISSING_EXPIRY_SYSTEM_PROMPT,
+		userPrompt,
+		schemaName: MISSING_EXPIRY_SCHEMA_NAME,
+		schema: RECEIPT_SHELF_LIFE_BATCH_SCHEMA
+	});
+
+	if (!result.ok) {
+		return [];
+	}
+
+	logBrainMetrics('missing_expiry_batch', {
+		source: 'missing_expiry_batch',
+		receiptParseLineCount: rows.length,
+		aiBatchUsed: true,
+		promptVersion: `${PROMPT_VERSION_SHELF_LIFE_BATCH}-missing-expiry`,
+		inputTokenEstimate: estimateInputTokens(userPrompt, rows.length)
+	});
+
+	return parseMissingExpiryEstimates(result.data, rows, todayIso);
 }
 
 export function missingExpiryBatchToUpdates(

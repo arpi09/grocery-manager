@@ -1,0 +1,23 @@
+{
+	"version": "0.0.1",
+	"configurations": [
+		{
+			"name": "dev-worktree",
+			"runtimeExecutable": "npx",
+			"runtimeArgs": [
+				"cross-env",
+				"TURNSTILE_SKIP=true",
+				"EMAIL_VERIFICATION_SKIP=true",
+				"USE_PGLITE=true",
+				"npm",
+				"run",
+				"dev",
+				"--",
+				"--port",
+				"5175",
+				"--strictPort"
+			],
+			"port": 5175
+		}
+	]
+}

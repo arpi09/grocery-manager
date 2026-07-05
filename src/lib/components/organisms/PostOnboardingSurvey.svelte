@@ -15,7 +15,6 @@
 		dismissPostOnboardingSurvey,
 		isOnboardingExcludedPath,
 		isPostOnboardingSurveyPath,
-		shouldShowPostOnboardingShare,
 		shouldShowPostOnboardingSurvey
 	} from '$lib/utils/onboarding';
 	import {
@@ -51,7 +50,6 @@
 			!userId ||
 			isOnboardingExcludedPath(pathname) ||
 			!isPostOnboardingSurveyPath(pathname) ||
-			shouldShowPostOnboardingShare(userId) ||
 			!shouldShowPostOnboardingSurvey(userId) ||
 			!canClaimSessionOverlay('survey') ||
 			(getBlockingOverlayCount() > 0 && !canShowBlockingOverlay('survey'))

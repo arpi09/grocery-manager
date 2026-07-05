@@ -39,9 +39,12 @@ test.describe('Inventory mobile UX', () => {
 	}
 
 	async function filterGridToItem(page: import('@playwright/test').Page, itemName: string) {
-		await page.getByTestId('data-grid-filter-button').click();
 		const filterSheet = page.getByTestId('data-grid-filter-sheet');
-		await expect(filterSheet).toBeVisible({ timeout: 10_000 });
+		/* The filter button can be clicked pre-hydration — retry until the sheet opens. */
+		await expect(async () => {
+			await page.getByTestId('data-grid-filter-button').click();
+			await expect(filterSheet).toBeVisible({ timeout: 2_000 });
+		}).toPass({ timeout: 15_000 });
 		await filterSheet.locator('#data-grid-filter-search').fill(itemName);
 		await filterSheet.getByRole('button', { name: /Visa resultat|Show results/i }).click();
 		await expect(filterSheet).not.toBeVisible({ timeout: 10_000 });

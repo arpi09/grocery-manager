@@ -358,6 +358,7 @@
 		"v6": {
 			"pageTitle": "Home · Skaffu",
 			"metaDescription": "Household overview — what to use soon, shopping, and pantry.",
+			"moreOnHome": "More on home",
 			"brandAria": "Skaffu – Home",
 			"accountAria": "Account",
 			"householdSwitcher": "{name} · {count, plural, one {# member} other {# members}}",
@@ -561,7 +562,7 @@
 	},
 	"scan": {
 		"title": "Scan",
-		"subtitle": "Receipt first — or another way",
+		"subtitle": "Add items — receipt, photo or barcode",
 		"barcodeTitle": "Barcode",
 		"barcodeSubtitle": "Point the camera at the barcode on the package",
 		"allModes": "All scan modes",
@@ -632,10 +633,13 @@
 		},
 		"choiceHub": {
 			"title": "What do you want to add?",
-			"receipt": "Receipt — full shop",
-			"photo": "Photo fridge/pantry — multiple items",
-			"barcode": "Barcode — one item",
-			"manualLink": "Manual",
+			"receipt": "Receipt",
+			"receiptDesc": "Your whole shopping trip at once",
+			"photo": "Photo round",
+			"photoDesc": "Snap your fridge, freezer or pantry — AI finds the items",
+			"barcode": "Barcode",
+			"barcodeDesc": "One item at a time, straight to your pantry",
+			"manualLink": "Add manually",
 			"otherModesAria": "Other scan modes"
 		}
 	},
@@ -1189,9 +1193,19 @@
 		"showChecked": "Show checked ({count})",
 		"hideChecked": "Hide checked",
 		"clearCheckedAria": "Clear all checked rows",
-		"autoFillPending": "Suggestions waiting — {count} items ready to add",
-		"autoFillAccept": "Add suggestions",
-		"autoFillExpired": "Suggestions expired — try Smart fill again.",
+		"sunday": {
+			"heading": "This week's picks",
+			"subtitle": "Built from what you usually buy, what's running out, and what you've planned. Nothing is added until you choose.",
+			"add": "Add",
+			"addAria": "Add {name} to the list",
+			"dismiss": "Not now",
+			"dismissAria": "Hide the {name} suggestion",
+			"addAll": "Add all",
+			"addAllAria": "Add all {count} suggestions to the list",
+			"addedToast": "{count, plural, one {# item added} other {# items added}}",
+			"addedOneToast": "{name} added",
+			"addFailed": "Couldn't add — try again"
+		},
 		"exportList": "Copy list",
 		"exportBring": "Copy for Bring",
 		"exportAnyList": "Copy for AnyList",
@@ -1272,6 +1286,14 @@
 				"share": "Share list",
 				"legacyList": "Show as checklist",
 				"title": "More for shopping"
+			},
+			"clear": {
+				"cta": "Clear list",
+				"done": "{count, plural, one {# item} other {# items}} cleared",
+				"undo": "Undo",
+				"restored": "List restored",
+				"failed": "Couldn't clear the list. Try again.",
+				"restoreFailed": "Couldn't restore the list. Try again."
 			},
 			"shop": {
 				"backToPlan": "Plan",
@@ -1600,20 +1622,11 @@
 		"subtitle": "Plan the week's dinners — see calendar, recipes and what's missing",
 		"subtitleShort": "Plan the week's dinners",
 		"eatHubTitle": "What should we eat?",
-		"eatHubLead": "Suggestions from your pantry are on the right — plan the week in the calendar below.",
-		"eatHubLeadShort": "Suggestions from your pantry",
+		"eatHubLead": "A dinner idea from what you have at home. Planned meals show in the calendar below.",
 		"generateMeal": "Generate meal idea",
-		"contextTitle": "Weekly meal planning from your pantry",
-		"contextLead": "See what's planned, add dinners and fill the shopping list with what's missing.",
-		"contextLeadShort": "See what's planned and what's missing",
-		"contextExpiring": "{count} items expiring within {days} days",
-		"contextNoExpiring": "Nothing urgent expiring within {days} days.",
 		"contextPlanned": "{count} meals in this calendar view",
 		"contextWeeklyLink": "Week suggestions (AI)",
-		"contextWeeklyHint": "Generate a dish = one idea now. Week suggestions = plan the whole week.",
 		"contextHomeLink": "Expiring soon",
-		"contextWeekViewLink": "Week view",
-		"contextActionsAria": "Weekly planning actions",
 		"ideasAria": "Recipe ideas",
 		"ideasIntro": "From what you have at home. Pick a date and add to the calendar.",
 		"ideasIntroShort": "From what you have at home",
@@ -1660,6 +1673,7 @@
 		"ideasTitle": "Suggestions from your pantry",
 		"missingLabel": "Missing:",
 		"scheduleDate": "Schedule date",
+		"scheduleToggle": "Pick a date to schedule",
 		"dismissNotInterested": "Not interested",
 		"dismissFailed": "Could not dismiss idea",
 		"prevMonthShort": "Prev",
@@ -2615,15 +2629,16 @@
 		"fieldLocation": "Location",
 		"fieldExpiresOn": "Best before",
 		"fieldNotes": "Notes",
-		"multiPhotoFridgeHint": "Full fridge? Add up to 3 photos — different shelf heights and the door — so labels and dates stay readable.",
-		"multiPhotoHint": "Add up to 3 photos from different angles to catch more items and readable labels.",
+		"multiPhotoFridgeHint": "Take up to 3 photos — different shelves and the door catch more.",
+		"multiPhotoHint": "Up to 3 photos from different angles catch more items.",
 		"imagePrepFailed": "Could not prepare a photo for upload. Try another image.",
 		"imageInvalidType": "Choose a JPEG, PNG or WebP image.",
 		"fewItemsHint": "Few items found? Add another photo from a different angle or shelf.",
 		"confidenceHigh": "high confidence",
 		"confidenceMedium": "medium confidence",
 		"confidenceLow": "low confidence",
-		"newRound": "Scan again",
+		"moreFields": "Quantity, unit and notes",
+		"newRound": "New photo round",
 		"saving": "Saving items…",
 		"addCount": "Add {count} {count, plural, one {item} other {items}}"
 	},
@@ -2688,6 +2703,7 @@
 		"cameraPaper": "Photograph paper receipt",
 		"selectItems": "Select items ({selected} of {total})",
 		"alreadyInPantry": "Already in the pantry — just added",
+		"estimatesSummary": "About the estimates",
 		"locationForAll": "Set location for all selected:",
 		"locationBulkHint": "Applies to checked rows. Change a row below if it should go somewhere else.",
 		"locationPerItem": "Location:",
@@ -2697,6 +2713,7 @@
 		"estimatesHint": "Expiry dates are estimates — adjust if needed before saving.",
 		"aiDegradedBanner": "AI shelf-life batch is off — using heuristics for now.",
 		"addCount": "Add {count} {count, plural, one {item} other {items}}",
+		"addSelectedCount": "Add {count} selected",
 		"apiKeyHint": "Requires OPENAI_API_KEY in server .env.",
 		"savedLabel": "{count} {count, plural, one {item} other {items}}",
 		"saveFailed": "Could not save items. Try again.",
@@ -2710,6 +2727,7 @@
 		"oneTapCta": "Import receipt",
 		"oneTapLead": "Upload a digital receipt (PDF) from Kivra, ICA, or your store.",
 		"quickConfirmAll": "Approve all and add to inventory",
+		"selectAllAndAdd": "Select and add all {total}",
 		"shareNoFile": "No file was received. Try sharing the PDF or image again.",
 		"shareFailed": "Could not receive the file. Open Skaffu and choose a file manually.",
 		"sharePendingMissing": "Shared file not found. Try sharing the receipt again.",
@@ -2758,7 +2776,6 @@
 	"scanFlow": {
 		"lookupProduct": "Looking up product",
 		"saving": "Saving to pantry…",
-		"hideDetails": "Hide details",
 		"lookupFailed": "Oops — could not look up the barcode. Try again or enter manually.",
 		"networkError": "Oops — network error. Check your connection and try again.",
 		"barcodeFab": "Scan barcode",
@@ -2780,12 +2797,13 @@
 		"scanAgain": "Scan again",
 		"expiresOptional": "Expires (optional)",
 		"recentScans": "Recent scans",
-		"quickPicks": "Scan again quickly",
+		"quickPicks": "Add again",
 		"editNameHint": "Adjust the name if needed",
 		"moreOptions": "Expiry date and notes",
-		"manualBarcode": "Or enter barcode manually",
+		"manualBarcode": "Enter the barcode manually",
 		"scannerHint": "Point the camera at the product barcode.",
-		"oneTapAdd": "One-tap add"
+		"saveAndNext": "Save and scan next",
+		"doneLink": "Done"
 	},
 	"recipe": {
 		"title": "Recipe suggestions",
@@ -2819,7 +2837,7 @@
 		"fromStock": "From stock:",
 		"portions": "Number of servings",
 		"portionsHint": "All recipes are scaled to this many servings.",
-		"generateBtn": "Generate recipes",
+		"generateBtn": "Generate meal idea",
 		"addMissingBtn": "Add missing to shopping list",
 		"addMissingBtnShort": "Add to list ({count})",
 		"addMissingBtnCount": "Add {count} missing to shopping list",
@@ -2841,6 +2859,7 @@
 		"portionsBadge": "{count, plural, one {# serving} other {# servings}}",
 		"missingBadge": "{count, plural, one {# missing} other {# missing}}",
 		"settingsToggle": "Change settings",
+		"advancedToggle": "Portions & preferences",
 		"ingredientsToggle": "Show ingredients",
 		"ingredientsAria": "Ingredients",
 		"metaAria": "Recipe summary",
@@ -2934,13 +2953,6 @@
 		"celebrateInventoryBody": "Great start — your pantry is growing!",
 		"encouragePathGuide": "Next — open the option that fits you.",
 		"encourageCelebrate": "Hooray — you're up and running!",
-		"sharePromptTitle": "Send to whoever shops",
-		"sharePromptBody": "Share the link — your partner sees the list without the app and can create their own account if they want.",
-		"sharePromptListaCta": "Share list link",
-		"sharePromptInviteCta": "Invite partner",
-		"sharePromptInkopCta": "Go to shopping list",
-		"sharePromptSkip": "Skip",
-		"sharePromptAria": "Share shopping list with partner",
 		"scanModalTitle": "How do you want to add?",
 		"scanModalBody": "Pick what works best for you. The guide stays open while you scan.",
 		"scanModalAria": "Add item during introduction",
@@ -2992,51 +3004,53 @@
 			"progressStepDisabled": "Not available yet",
 			"welcome": {
 				"title": "Welcome to Skaffu",
-				"body": "Start with a receipt or a few items at home. The rest of the household can join later.",
-				"cta": "Get started"
+				"body": "The list, the pantry and the reminders work together — Skaffu learns what you usually need.",
+				"cta": "Let's go"
 			},
-			"scan": {
-				"title": "Import a receipt",
-				"body": "PDF from Kivra or your store — or photograph a paper receipt. Your pantry fills up in a few minutes.",
-				"ctaPrimary": "Import receipt",
-				"ctaSecondary": "Maybe later",
-				"kivraHint": "Want to skip manual upload?",
-				"kivraLink": "Set up Kivra forwarding"
+			"fill": {
+				"title": "What do you have at home?",
+				"body": "We've pre-checked the most common staples. Untick what doesn't fit — everything can be changed later.",
+				"ctaAdd": "Add {count} items",
+				"ctaEmpty": "Continue without items",
+				"ctaSkip": "Maybe later",
+				"receiptLink": "Have a digital receipt? Import it instead",
+				"chipsAria": "Choose staples to add",
+				"groupFridge": "Fridge",
+				"groupFreezer": "Freezer",
+				"groupPantry": "Pantry"
 			},
-			"success": {
-				"title": "Good start",
-				"body": "This is what you've added so far. Add more when it suits you — the list and reminders get better.",
-				"bodyEmpty": "Your pantry is up and running. Add items when it suits you — the list and reminders get better.",
-				"cta": "Continue",
-				"itemsAria": "Items you added",
-				"moreItems": "+{count} more"
+			"invite": {
+				"title": "Do you shop together?",
+				"body": "Send a link and your partner sees the same list on their phone. The link is valid for 7 days.",
+				"ctaShare": "Share invite",
+				"ctaSkip": "I shop on my own",
+				"copied": "Link copied",
+				"shareError": "Couldn't create the invite — try again."
 			},
-			"brain": {
-				"title": "How your memory builds",
-				"body": "Receipts and checked-off items help Skaffu suggest what's missing — without you having to remember everything.",
-				"cta": "Continue"
+			"finish": {
+				"title": "Done — your list is waiting",
+				"recapAria": "What you set up",
+				"recapItems": "{count} items in your pantry",
+				"recapItemsSuffix": "items in your pantry",
+				"recapReceipt": "Receipt imported — {count} items",
+				"recapReceiptSuffix": "items from your receipt",
+				"recapEmpty": "Your pantry is empty for now — it fills up as you shop",
+				"recapInvite": "Invite sent to your partner",
+				"recapMembers": "You are {count} in the household",
+				"learningLine": "Every checked-off purchase teaches Skaffu what you usually need.",
+				"pushTitle": "Reminders",
+				"pushBody": "A notification when something is about to expire or it's time to shop — nothing more.",
+				"ctaEnable": "Turn on and open the list",
+				"ctaSkip": "Open without reminders",
+				"ctaOpen": "Open shopping list",
+				"pushOffToast": "Reminders are off — you can enable them under Settings."
 			},
-			"shopping": {
-				"title": "Shop together",
-				"body": "Add what's running low. Check items off in the store. Invite your partner when you're ready.",
-				"cta": "Open shopping list"
-			},
-			"setup": {
-				"title": "Make it easy going forward",
-				"notificationsTitle": "Expiry reminders",
-				"notificationsBody": "Get a notification when something is about to expire — so you can use it first.",
-				"notificationsCta": "Turn on reminders",
-				"notificationsLater": "Later",
-				"kivraTitle": "Receipts from Kivra",
-				"kivraBody": "Connect forwarding so PDF receipts land in Skaffu automatically.",
-				"allNotificationsLink": "All notification settings"
-			},
+			"stepOf": "Step {current} of {total}",
 			"progress": {
 				"welcome": "Start",
-				"firstScan": "Receipt",
-				"pantryCreated": "Pantry",
-				"brain": "Memory",
-				"shopping": "Shopping"
+				"fill": "Fill up",
+				"invite": "Invite",
+				"finish": "Done"
 			}
 		}
 	},
@@ -3117,8 +3131,10 @@
 			"insightsSummary": "Things to review in your pantry",
 			"empty": {
 				"title": "Empty for now.\nSoon full of life.",
-				"body": "Add your first item to start keeping track of what's at home – and what's about to run out.",
+				"body": "Scan a receipt or photograph a shelf — the fastest way to a living pantry.",
 				"cta": "Add your first item",
+				"scanCta": "Scan in food",
+				"manualLink": "Or add manually",
 				"helper": "Sorted automatically into Fridge, Freezer and Pantry"
 			},
 			"error": {

@@ -23,7 +23,7 @@
 	} from '$lib/client/shopping-trip-session';
 	import { trackProductEvent } from '$lib/client/product-events';
 	import type { PantryBridgePreview } from '$lib/application/shopping-to-pantry.service';
-	import type { ReplenishmentSuggestion } from '$lib/domain/replenishment';
+	import type { SundaySuggestion } from '$lib/domain/sunday-suggestion';
 	import type { DedupeWarning } from '$lib/domain/dedupe-autopilot';
 	import {
 		clampFocusIndex,
@@ -32,7 +32,6 @@
 		splitTripItems,
 		type ShoppingTripMode
 	} from '$lib/domain/shopping-trip';
-	import { memorySuggestionId } from '$lib/domain/shopping-v2-presenter';
 	import type { UnpackRowInput } from '$lib/domain/shopping-unpack';
 	import { receiptOneTapHref } from '$lib/utils/scan-nav';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
@@ -46,7 +45,7 @@
 		checkedCount: number;
 		canEdit: boolean;
 		householdId: string;
-		replenishmentSuggestions: ReplenishmentSuggestion[];
+		sundayProposal: SundaySuggestion[];
 		shoppingToPantryMode: ShoppingToPantryMode;
 		shareLinkEnabled: boolean;
 		memberCount: number;
@@ -59,7 +58,7 @@
 		checkedCount,
 		canEdit,
 		householdId,
-		replenishmentSuggestions,
+		sundayProposal,
 		shoppingToPantryMode,
 		shareLinkEnabled,
 		memberCount,
@@ -74,7 +73,8 @@
 	let joinedParamHandled = $state(false);
 	let legacyOpen = $state(false);
 	let showQuickAdd = $state(false);
-	let acceptingKey = $state<string | null>(null);
+	let addingKey = $state<string | null>(null);
+	let addingAll = $state(false);
 	let dismissingKey = $state<string | null>(null);
 	let picking = $state(false);
 	let addingItem = $state(false);
@@ -85,6 +85,10 @@
 	let unpackOpen = $state(false);
 	let unpackLoading = $state(false);
 	let unpackRows = $state<UnpackRowInput[]>([]);
+	/** Cleared list held for undo — "Börja om" is never a dead end. */
+	let lastClearedItems = $state<Array<{ name: string; quantity: string | null; unit: string | null }>>([]);
+	let clearingList = $state(false);
+	let restoringList = $state(false);
 
 	let pantryBridgeItem = $state<ShoppingListItem | null>(null);
 	let pantryBridgePreview = $state<PantryBridgePreview | null>(null);
@@ -294,53 +298,96 @@
 		void invalidateAll();
 	}
 
-	async function acceptSuggestion(suggestion: ReplenishmentSuggestion) {
-		if (!canEdit || acceptingKey) {
+	function sundayRowPayload(row: SundaySuggestion) {
+		return {
+			source: row.source,
+			name: row.name,
+			quantity: row.quantityLabel,
+			normalizedKey: row.normalizedKey,
+			relatedMealDate: row.relatedMealDate,
+			relatedRecipeTitle: row.relatedRecipeTitle
+		};
+	}
+
+	async function postSundayAdd(rows: SundaySuggestion[]): Promise<number | null> {
+		const formData = new FormData();
+		formData.set('rows', JSON.stringify(rows.map(sundayRowPayload)));
+
+		const response = await fetch('?/sundayAdd', {
+			method: 'POST',
+			body: formData,
+			headers: { accept: 'application/json', 'x-sveltekit-action': 'true' }
+		});
+		const result = deserialize(await response.text()) as {
+			type: string;
+			data?: { sundayAdded?: { added: number; skipped: number } };
+		};
+
+		if (result.type !== 'success' || !result.data?.sundayAdded) {
+			return null;
+		}
+		return result.data.sundayAdded.added;
+	}
+
+	async function sundayAdd(row: SundaySuggestion) {
+		if (!canEdit || addingKey || addingAll) {
 			return;
 		}
 
-		acceptingKey = suggestion.normalizedKey;
+		addingKey = row.key;
 		try {
-			const response = await fetch('/api/replenishment/accept', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ normalizedKey: suggestion.normalizedKey, surface: 'inkop' })
-			});
-			const data = (await response.json()) as { error?: string; name?: string };
-
-			if (!response.ok) {
-				showClientToast(data.error ?? t('shopping.v2.memory.acceptFailed'), { variant: 'error' });
+			const added = await postSundayAdd([row]);
+			if (added === null) {
+				showClientToast(t('shopping.sunday.addFailed'), { variant: 'error' });
 				return;
 			}
-
-			void trackProductEvent('memory_suggestion_added', {
-				suggestionId: memorySuggestionId(suggestion),
-				source: 'inkop',
-				itemName: data.name ?? suggestion.displayName
-			});
-
-			showClientToast(t('shopping.v2.memory.acceptSuccess', { name: data.name ?? suggestion.displayName }), {
-				variant: 'success'
-			});
+			showClientToast(t('shopping.sunday.addedOneToast', { name: row.name }), { variant: 'success' });
 			await invalidateAll();
 		} catch {
-			showClientToast(t('shopping.v2.memory.acceptFailed'), { variant: 'error' });
+			showClientToast(t('shopping.sunday.addFailed'), { variant: 'error' });
 		} finally {
-			acceptingKey = null;
+			addingKey = null;
 		}
 	}
 
-	async function dismissSuggestion(suggestion: ReplenishmentSuggestion) {
+	async function sundayAddAll(rows: SundaySuggestion[]) {
+		if (!canEdit || addingAll || addingKey || rows.length === 0) {
+			return;
+		}
+
+		addingAll = true;
+		try {
+			const added = await postSundayAdd(rows);
+			if (added === null) {
+				showClientToast(t('shopping.sunday.addFailed'), { variant: 'error' });
+				return;
+			}
+			showClientToast(t('shopping.sunday.addedToast', { count: added }), { variant: 'success' });
+			await invalidateAll();
+		} catch {
+			showClientToast(t('shopping.sunday.addFailed'), { variant: 'error' });
+		} finally {
+			addingAll = false;
+		}
+	}
+
+	async function sundayDismiss(row: SundaySuggestion) {
 		if (!canEdit || dismissingKey) {
 			return;
 		}
 
-		dismissingKey = suggestion.normalizedKey;
+		/* AI rows are hidden client-side by the panel — nothing to persist. Only replenishment
+		 * dismissals are recorded so the cadence suggestion stops resurfacing. */
+		if (row.source !== 'replenishment' || !row.normalizedKey) {
+			return;
+		}
+
+		dismissingKey = row.key;
 		try {
 			const response = await fetch('/api/replenishment/dismiss', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ normalizedKey: suggestion.normalizedKey })
+				body: JSON.stringify({ normalizedKey: row.normalizedKey })
 			});
 			const data = (await response.json()) as { error?: string };
 
@@ -350,9 +397,9 @@
 			}
 
 			void trackProductEvent('memory_suggestion_ignored', {
-				suggestionId: memorySuggestionId(suggestion),
-				source: 'inkop',
-				itemName: suggestion.displayName
+				suggestionId: row.normalizedKey,
+				source: 'inkop_sunday',
+				itemName: row.name
 			});
 
 			await invalidateAll();
@@ -548,6 +595,71 @@
 		}
 	}
 
+	async function handleClearList() {
+		if (!canEdit || clearingList || unchecked.length === 0) {
+			return;
+		}
+
+		const snapshot = unchecked.map((item) => ({
+			name: item.name,
+			quantity: item.quantity,
+			unit: item.unit
+		}));
+
+		clearingList = true;
+		try {
+			const response = await fetch('?/clearList', {
+				method: 'POST',
+				body: new FormData(),
+				headers: { accept: 'application/json', 'x-sveltekit-action': 'true' }
+			});
+			const result = deserialize(await response.text()) as { type: string };
+			if (result.type !== 'success') {
+				showClientToast(t('shopping.v2.clear.failed'), { variant: 'error' });
+				return;
+			}
+
+			lastClearedItems = snapshot;
+			showClientToast(t('shopping.v2.clear.done', { count: snapshot.length }), { variant: 'success' });
+			await invalidateAll();
+		} catch {
+			showClientToast(t('shopping.v2.clear.failed'), { variant: 'error' });
+		} finally {
+			clearingList = false;
+		}
+	}
+
+	async function handleRestoreList() {
+		if (!canEdit || restoringList || lastClearedItems.length === 0) {
+			return;
+		}
+
+		restoringList = true;
+		const formData = new FormData();
+		formData.set('items', JSON.stringify(lastClearedItems));
+
+		try {
+			const response = await fetch('?/restoreList', {
+				method: 'POST',
+				body: formData,
+				headers: { accept: 'application/json', 'x-sveltekit-action': 'true' }
+			});
+			const result = deserialize(await response.text()) as { type: string };
+			if (result.type !== 'success') {
+				showClientToast(t('shopping.v2.clear.restoreFailed'), { variant: 'error' });
+				return;
+			}
+
+			lastClearedItems = [];
+			showClientToast(t('shopping.v2.clear.restored'), { variant: 'success' });
+			await invalidateAll();
+		} catch {
+			showClientToast(t('shopping.v2.clear.restoreFailed'), { variant: 'error' });
+		} finally {
+			restoringList = false;
+		}
+	}
+
 	const addEnhance = bindSubmittingWithToast(
 		(value) => {
 			addingItem = value;
@@ -577,18 +689,36 @@
 
 	<TripCompletedInviteBanner memberCount={memberCount} trigger={tripCompletedTrigger} />
 
+	{#if lastClearedItems.length > 0}
+		<div class="clear-undo" role="status" data-testid="shopping-v2-clear-undo">
+			<span>{t('shopping.v2.clear.done', { count: lastClearedItems.length })}</span>
+			<button
+				type="button"
+				class="clear-undo-btn"
+				disabled={restoringList}
+				data-testid="shopping-v2-clear-undo-btn"
+				onclick={() => void handleRestoreList()}
+			>
+				{t('shopping.v2.clear.undo')}
+			</button>
+		</div>
+	{/if}
+
 	{#if session.mode === 'plan'}
 		<ShoppingV2PlanView
 			{items}
-			suggestions={replenishmentSuggestions}
+			{sundayProposal}
 			{canEdit}
 			showReceiptLead={showReceiptImportLead}
-			{acceptingKey}
+			{addingKey}
+			{addingAll}
 			{dismissingKey}
-			onAcceptSuggestion={acceptSuggestion}
-			onDismissSuggestion={dismissSuggestion}
+			onSundayAdd={sundayAdd}
+			onSundayAddAll={sundayAddAll}
+			onSundayDismiss={sundayDismiss}
 			onStartShop={handleStartShop}
 			onAddItem={() => void openQuickAdd()}
+			onClearList={handleClearList}
 			onOpenLegacy={() => {
 				legacyOpen = true;
 			}}
@@ -690,6 +820,41 @@
 		flex-direction: column;
 		gap: var(--space-lg);
 		min-width: 0;
+	}
+
+	.clear-undo {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-md);
+		padding: var(--space-sm) var(--space-md);
+		border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
+		border-radius: var(--radius-md);
+		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+		font-size: 0.9375rem;
+	}
+
+	.clear-undo-btn {
+		flex-shrink: 0;
+		border: none;
+		background: none;
+		padding: 0;
+		font: inherit;
+		font-weight: 700;
+		color: var(--color-primary);
+		text-decoration: underline;
+		cursor: pointer;
+		min-height: var(--touch-target-min);
+	}
+
+	.clear-undo-btn:disabled {
+		opacity: 0.55;
+		cursor: progress;
+	}
+
+	.clear-undo-btn:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 
 	.quick-add {

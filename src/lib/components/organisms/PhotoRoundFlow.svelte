@@ -408,7 +408,6 @@ import {
 		{:else if canAddPhoto && photos.length < PHOTO_ROUND_MAX_IMAGES}
 			<p class="hint" data-testid="photo-round-multi-photo-hint">{t('photoRound.multiPhotoHint')}</p>
 		{/if}
-		<p class="privacy">{t('photoRound.privacyNote')}</p>
 
 		{#if photos.length > 0}
 			<ul class="photo-list" data-testid="photo-round-thumbnails">
@@ -423,10 +422,6 @@ import {
 			</ul>
 		{/if}
 
-		{#if parsing}
-			<AiLoadingSkeleton messageKey="ai.loadingReceiptExtract" />
-		{/if}
-
 		{#if canAddPhoto}
 			<ImageSourcePicker
 				cameraLabel={parsing ? t('photoRound.analyzing') : t('photoRound.addPhoto')}
@@ -434,6 +429,7 @@ import {
 				accept="image/*"
 				cameraAccept="image/*"
 				disabled={parsing}
+				cameraVariant={photos.length === 0 ? 'primary' : 'secondary'}
 				onSelect={handlePhotoFile}
 			/>
 		{/if}
@@ -472,18 +468,20 @@ import {
 			</details>
 		{/if}
 
-		<div class="capture-actions">
-			<Button
-				type="button"
-				data-testid="photo-round-analyze"
-				disabled={photos.length === 0 || parsing}
-				loading={parsing}
-				loadingLabel={t('photoRound.analyzing')}
-				onclick={analyzePhotos}
-			>
-				{t('photoRound.analyze')}
-			</Button>
-		</div>
+		{#if photos.length > 0}
+			<div class="capture-actions">
+				<Button
+					type="button"
+					data-testid="photo-round-analyze"
+					disabled={parsing}
+					loading={parsing}
+					loadingLabel={t('photoRound.analyzing')}
+					onclick={analyzePhotos}
+				>
+					{t('photoRound.analyze')}
+				</Button>
+			</div>
+		{/if}
 
 		{#if parsing}
 			<AiLoadingSkeleton messageKey="ai.loadingReceiptExtract" />
@@ -494,6 +492,8 @@ import {
 				<FeedbackBanner tone="error" message={parseError} />
 			</div>
 		{/if}
+
+		<p class="privacy">{t('photoRound.privacyNote')}</p>
 	</section>
 {:else}
 	<section data-testid="photo-round-review">
@@ -552,62 +552,40 @@ import {
 				{#each lines as line, index (line.id)}
 					<li data-testid="photo-round-line-{index}">
 						<div class="line-top">
-							<label class="line-check">
-								<input
-									type="checkbox"
-									data-testid="photo-round-line-checkbox-{index}"
-									name="selected"
-									value={line.id}
-									checked={selected[line.id]}
-									onchange={(e) => {
-										selected[line.id] = (e.currentTarget as HTMLInputElement).checked;
-									}}
-								/>
-								<span class="confidence" data-confidence={line.confidence}>
-									{confidenceLabel(line.confidence)}
-								</span>
-							</label>
+							<input
+								type="checkbox"
+								class="line-checkbox"
+								data-testid="photo-round-line-checkbox-{index}"
+								name="selected"
+								value={line.id}
+								checked={selected[line.id]}
+								aria-label={line.name}
+								onchange={(e) => {
+									selected[line.id] = (e.currentTarget as HTMLInputElement).checked;
+								}}
+							/>
+							<input
+								type="text"
+								class="line-name-input"
+								data-testid="photo-round-line-name-{index}"
+								aria-label={t('photoRound.fieldName')}
+								value={line.name}
+								oninput={(e) =>
+									updateLine(line.id, {
+										name: (e.currentTarget as HTMLInputElement).value
+									})}
+							/>
 							<button type="button" class="link-btn" onclick={() => removeLine(line.id)}>
 								{t('common.delete')}
 							</button>
 						</div>
-						<div class="line-fields">
-							<label>
-								<span>{t('photoRound.fieldName')}</span>
-								<input
-									type="text"
-									data-testid="photo-round-line-name-{index}"
-									value={line.name}
-									oninput={(e) =>
-										updateLine(line.id, {
-											name: (e.currentTarget as HTMLInputElement).value
-										})}
-								/>
-							</label>
-							<label>
-								<span>{t('photoRound.fieldQuantity')}</span>
-								<input
-									type="text"
-									inputmode="decimal"
-									value={line.quantity}
-									oninput={(e) =>
-										updateLine(line.id, {
-											quantity: (e.currentTarget as HTMLInputElement).value
-										})}
-								/>
-							</label>
-							<label>
-								<span>{t('photoRound.fieldUnit')}</span>
-								<input
-									type="text"
-									value={line.unit ?? ''}
-									oninput={(e) =>
-										updateLine(line.id, {
-											unit: (e.currentTarget as HTMLInputElement).value || null
-										})}
-								/>
-							</label>
-							<label>
+						{#if line.confidence !== 'high'}
+							<p class="confidence" data-confidence={line.confidence}>
+								{confidenceLabel(line.confidence)}
+							</p>
+						{/if}
+						<div class="line-compact">
+							<label class="compact-field">
 								<span>{t('photoRound.fieldLocation')}</span>
 								<select
 									data-testid="photo-round-line-location-{index}"
@@ -622,36 +600,21 @@ import {
 									{/each}
 								</select>
 							</label>
-							<label>
-								<div class="expiry-label-row">
-									<span>{t('photoRound.fieldExpiresOn')}</span>
+							<label class="compact-field">
+								<span class="expiry-label-row">
+									{t('photoRound.fieldExpiresOn')}
 									{#if line.expiresOnSource && line.expiresOn}
-										<span class="expiry-badge-row">
-											<EstimatedBadge
-												source={line.expiresOnSource}
-												lowConfidence={
-													line.shelfLifeConfidence != null
-														? line.shelfLifeConfidence < 0.4
-														: line.expiresOnSource === 'default_heuristic'
-												}
-												lineConfidence={line.shelfLifeConfidence ?? null}
-											/>
-											{#if line.shelfLifeTypicalDays}
-												<span class="typical-days">
-													{t('learning.estimatedDaysLabel', {
-														days: line.shelfLifeTypicalDays
-													})}
-												</span>
-											{/if}
-										</span>
+										<EstimatedBadge
+											source={line.expiresOnSource}
+											lowConfidence={
+												line.shelfLifeConfidence != null
+													? line.shelfLifeConfidence < 0.4
+													: line.expiresOnSource === 'default_heuristic'
+											}
+											lineConfidence={line.shelfLifeConfidence ?? null}
+										/>
 									{/if}
-								</div>
-								{#if line.shelfLifeConfidence != null && line.shelfLifeConfidence < 0.4}
-									<p class="low-confidence-cta">{t('learning.confirmExpiryDate')}</p>
-								{/if}
-								{#if line.shelfLifeExplanation}
-									<p class="shelf-life-hint">{line.shelfLifeExplanation}</p>
-								{/if}
+								</span>
 								<input
 									type="date"
 									data-testid="photo-round-line-expires-{index}"
@@ -663,23 +626,39 @@ import {
 										})}
 								/>
 							</label>
-							{#if line.confidence === 'low'}
-								<details class="notes-details">
-									<summary>{t('photoRound.fieldNotes')}</summary>
-									<label>
-										<span class="sr-only">{t('photoRound.fieldNotes')}</span>
-										<input
-											type="text"
-											data-testid="photo-round-line-notes-{index}"
-											value={line.notes ?? ''}
-											oninput={(e) =>
-												updateLine(line.id, {
-													notes: (e.currentTarget as HTMLInputElement).value || null
-												})}
-										/>
-									</label>
-								</details>
-							{:else}
+						</div>
+						{#if line.shelfLifeConfidence != null && line.shelfLifeConfidence < 0.4}
+							<p class="low-confidence-cta">{t('learning.confirmExpiryDate')}</p>
+						{/if}
+						{#if line.shelfLifeExplanation}
+							<p class="shelf-life-hint">{line.shelfLifeExplanation}</p>
+						{/if}
+						<details class="line-details">
+							<summary>{t('photoRound.moreFields')}</summary>
+							<div class="line-fields">
+								<label>
+									<span>{t('photoRound.fieldQuantity')}</span>
+									<input
+										type="text"
+										inputmode="decimal"
+										value={line.quantity}
+										oninput={(e) =>
+											updateLine(line.id, {
+												quantity: (e.currentTarget as HTMLInputElement).value
+											})}
+									/>
+								</label>
+								<label>
+									<span>{t('photoRound.fieldUnit')}</span>
+									<input
+										type="text"
+										value={line.unit ?? ''}
+										oninput={(e) =>
+											updateLine(line.id, {
+												unit: (e.currentTarget as HTMLInputElement).value || null
+											})}
+									/>
+								</label>
 								<label>
 									<span>{t('photoRound.fieldNotes')}</span>
 									<input
@@ -692,8 +671,8 @@ import {
 											})}
 									/>
 								</label>
-							{/if}
-						</div>
+							</div>
+						</details>
 						{#if mergeCandidates[line.id]}
 							<label class="merge-hint">
 								<input
@@ -912,22 +891,70 @@ import {
 	.line-top {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
 		gap: var(--space-sm);
 		margin-bottom: var(--space-sm);
 	}
 
-	.line-check {
-		display: flex;
-		align-items: center;
-		gap: var(--space-sm);
+	.line-checkbox {
+		flex-shrink: 0;
+		width: 1.25rem;
+		height: 1.25rem;
+	}
+
+	.line-name-input {
+		flex: 1;
+		min-width: 0;
+		padding: 0.45rem 0.55rem;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		font-weight: 600;
 	}
 
 	.confidence {
+		margin: 0 0 var(--space-xs);
 		font-size: 0.75rem;
 		color: var(--color-text-muted);
 		text-transform: uppercase;
 		letter-spacing: 0.03em;
+	}
+
+	.line-compact {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-sm);
+	}
+
+	.compact-field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		font-size: 0.85rem;
+	}
+
+	.compact-field > span {
+		color: var(--color-text-muted);
+	}
+
+	.compact-field input,
+	.compact-field select {
+		padding: 0.45rem 0.55rem;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		min-width: 0;
+	}
+
+	.line-details {
+		margin-top: var(--space-xs);
+		font-size: 0.85rem;
+	}
+
+	.line-details summary {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		cursor: pointer;
+		font-weight: 600;
+		color: var(--color-text-muted);
 	}
 
 	.line-fields {
@@ -960,44 +987,16 @@ import {
 		flex-wrap: wrap;
 	}
 
-	.expiry-badge-row {
-		display: inline-flex;
-		align-items: center;
-		gap: var(--space-xs);
-		flex-wrap: wrap;
-	}
-
-	.typical-days {
-		font-size: 0.75rem;
-		color: var(--color-text-muted);
-	}
-
 	.low-confidence-cta {
-		margin: 0 0 0.25rem;
+		margin: var(--space-xs) 0 0;
 		font-size: 0.75rem;
 		color: var(--color-warning-text, var(--color-text-muted));
 	}
 
-	.notes-details {
-		font-size: 0.85rem;
-	}
-
-	.notes-details summary {
-		cursor: pointer;
+	.shelf-life-hint {
+		margin: var(--space-xs) 0 0;
+		font-size: 0.75rem;
 		color: var(--color-text-muted);
-		margin-bottom: 0.2rem;
-	}
-
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		white-space: nowrap;
-		border: 0;
 	}
 
 	.actions {

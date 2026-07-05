@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
@@ -20,8 +19,7 @@
 		typeof data.householdMemberCount === 'number' ? data.householdMemberCount : 0
 	);
 
-	const replenishmentSuggestions = $derived(data.replenishmentSuggestions ?? []);
-	const autoFillPending = $derived(data.autoFillPending);
+	const sundayProposal = $derived(data.sundayProposal ?? []);
 	const RECEIPT_REPLENISHMENT_SESSION_KEY = 'home-pantry-inkop-replenishment-open';
 
 	const fromReceipt = $derived(page.url.searchParams.get('from') === 'receipt');
@@ -59,28 +57,13 @@
 
 	<PageContainer>
 		<div class="shopping-page">
-			{#if autoFillPending && data.canEdit}
-				<form
-					method="POST"
-					action="?/acceptAutoFill"
-					use:enhance
-					class="auto-fill-pending"
-					data-testid="auto-fill-pending"
-				>
-					<p>{t('shopping.autoFillPending', { count: autoFillPending.count })}</p>
-					<button type="submit" class="btn btn-secondary">
-						{t('shopping.autoFillAccept')}
-					</button>
-				</form>
-			{/if}
-
 			{#if data.householdId}
 				<ShoppingV2Page
 					items={data.items}
 					checkedCount={data.checkedCount}
 					canEdit={data.canEdit}
 					householdId={data.householdId}
-					replenishmentSuggestions={replenishmentSuggestions}
+					sundayProposal={sundayProposal}
 					shoppingToPantryMode={data.shoppingToPantryMode}
 					shareLinkEnabled={data.shareLinkEnabled}
 					memberCount={householdMemberCount}
@@ -101,23 +84,6 @@
 		gap: var(--space-lg);
 		min-width: 0;
 		padding-bottom: calc(var(--content-bottom-safe) + var(--space-md));
-	}
-
-	.auto-fill-pending {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-sm);
-		padding: var(--space-md);
-		border-radius: var(--radius-md);
-		border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
-		background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
-	}
-
-	.auto-fill-pending p {
-		margin: 0;
-		font-size: 0.9375rem;
-		font-weight: 600;
-		color: var(--color-primary);
 	}
 
 	.readonly {

@@ -323,6 +323,9 @@
 	}
 
 	const selectedCount = $derived(lines.filter((_, i) => selected[i]).length);
+	/* Curated selection flips the CTA hierarchy: quick-confirm re-selects everything,
+	   so it must never look like the default once the user has deselected rows. */
+	const allSelected = $derived(lines.length > 0 && selectedCount === lines.length);
 	const hasLocationPredictions = $derived(locationPredictions.some((prediction) => prediction != null));
 	const receiptAiUsage = $derived(
 		aggregateBrainAiUsageFromPredictions(shelfLifePredictions, locationPredictions)
@@ -668,6 +671,12 @@
 			</div>
 		{/if}
 		<h2 class="title">{t('receiptBulk.selectItems', { selected: selectedCount, total: lines.length })}</h2>
+		<!-- Discard action lives away from the save buttons — a mis-tap here costs the whole review. -->
+		<p class="new-image-row">
+			<button type="button" class="link-btn" data-testid="receipt-new-image" onclick={requestNewImage}>
+				{t('common.newImage')}
+			</button>
+		</p>
 		{#if parsedStoreLabel || parsedPurchasedAt}
 			<p class="receipt-meta" data-testid="receipt-review-meta">
 				{#if parsedStoreLabel && parsedPurchasedAt}
@@ -687,20 +696,26 @@
 				{t('receiptBulk.mergedAwaySummary', { count: mergedAwayCount })}
 			</p>
 		{/if}
-		{#if shelfLifeEstimatesInReceipt}
-			<p class="hint">{t('receiptBulk.estimatesHint')}</p>
-		{/if}
-		{#if aiDegradedMode && shelfLifeEstimatesInReceipt}
-			<FeedbackBanner tone="info" message={t('receiptBulk.aiDegradedBanner')} />
-		{/if}
-		{#if hasLocationPredictions}
-			<p class="hint">{t('receiptBulk.locationSuggestionsHint')}</p>
-		{/if}
-		{#if qualityReport && shelfLifeEstimatesInReceipt}
-			<ReceiptQualityMeter report={qualityReport} />
-		{/if}
-		{#if hasUncertainEstimates}
-			<p class="hint uncertain-hint">{t('brain.uncertainWarning')}</p>
+		<!-- One collapsed block instead of a wall of hints — the rows are the point. -->
+		{#if shelfLifeEstimatesInReceipt || hasLocationPredictions || hasUncertainEstimates}
+			<details class="estimates-info" data-testid="receipt-estimates-info">
+				<summary>{t('receiptBulk.estimatesSummary')}</summary>
+				{#if shelfLifeEstimatesInReceipt}
+					<p class="hint">{t('receiptBulk.estimatesHint')}</p>
+				{/if}
+				{#if aiDegradedMode && shelfLifeEstimatesInReceipt}
+					<FeedbackBanner tone="info" message={t('receiptBulk.aiDegradedBanner')} />
+				{/if}
+				{#if hasLocationPredictions}
+					<p class="hint">{t('receiptBulk.locationSuggestionsHint')}</p>
+				{/if}
+				{#if qualityReport && shelfLifeEstimatesInReceipt}
+					<ReceiptQualityMeter report={qualityReport} />
+				{/if}
+				{#if hasUncertainEstimates}
+					<p class="hint uncertain-hint">{t('brain.uncertainWarning')}</p>
+				{/if}
+			</details>
 		{/if}
 
 		<div class="bulk-location">
@@ -976,25 +991,28 @@
 			<div class="actions">
 				<Button
 					type="button"
-					variant="primary"
+					variant={allSelected ? 'primary' : 'secondary'}
 					data-testid="receipt-quick-confirm"
 					disabled={lines.length === 0 || bulkSubmitting}
 					loading={bulkSubmitting && quickConfirmUsed}
 					loadingLabel={t('receipt.saving')}
 					onclick={handleQuickConfirm}
 				>
-					{t('receiptAutomation.quickConfirmAll')}
+					{allSelected
+						? t('receiptAutomation.quickConfirmAll')
+						: t('receiptAutomation.selectAllAndAdd', { total: lines.length })}
 				</Button>
-				<Button type="button" variant="secondary" onclick={requestNewImage}>{t('common.newImage')}</Button>
 				<Button
 					type="submit"
-					variant="secondary"
+					variant={allSelected ? 'secondary' : 'primary'}
 					data-testid="receipt-bulk-submit"
 					disabled={selectedCount === 0}
 					loading={bulkSubmitting && !quickConfirmUsed}
 					loadingLabel={t('receipt.saving')}
 				>
-					{t('receiptBulk.addCount', { count: selectedCount })}
+					{allSelected
+						? t('receiptBulk.addCount', { count: selectedCount })
+						: t('receiptBulk.addSelectedCount', { count: selectedCount })}
 				</Button>
 			</div>
 		</form>
@@ -1035,6 +1053,42 @@
 		font-size: 1.1rem;
 	}
 
+	.new-image-row {
+		margin: 0 0 var(--space-sm);
+	}
+
+	.new-image-row .link-btn {
+		text-decoration: underline;
+		font-size: 0.875rem;
+	}
+
+	.estimates-info {
+		margin: 0 0 var(--space-md);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		padding: var(--space-sm) var(--space-md);
+		background: var(--color-surface-muted);
+	}
+
+	.estimates-info summary {
+		cursor: pointer;
+		font-size: 0.875rem;
+		font-weight: 700;
+		color: var(--color-primary);
+		list-style: none;
+		min-height: var(--touch-target-min, 2.75rem);
+		display: flex;
+		align-items: center;
+	}
+
+	.estimates-info summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.estimates-info[open] summary {
+		margin-bottom: var(--space-sm);
+	}
+
 	.receipt-meta {
 		margin: 0 0 var(--space-sm);
 		font-size: 0.875rem;
@@ -1049,7 +1103,6 @@
 
 	.grouped-toggle {
 		margin-top: var(--space-xs);
-		min-height: auto;
 		font-size: 0.8125rem;
 	}
 
@@ -1216,6 +1269,21 @@
 	.actions :global(.btn) {
 		flex: 1;
 		min-height: 2.75rem;
+	}
+
+	@media (max-width: 899px) {
+		.actions {
+			position: sticky;
+			bottom: calc(var(--mobile-bottom-nav-height) + var(--safe-area-bottom));
+			z-index: 1;
+			padding-top: var(--space-sm);
+			padding-bottom: var(--space-sm);
+			background: linear-gradient(
+				to top,
+				var(--color-bg) 78%,
+				color-mix(in srgb, var(--color-bg) 0%, transparent)
+			);
+		}
 	}
 
 	.line-expiry {

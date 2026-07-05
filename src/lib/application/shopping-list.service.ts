@@ -147,4 +147,10 @@ export class ShoppingListService {
 		if (!canEditInventory(role)) throw new ShoppingListReadOnlyError();
 		return this.repository.deleteChecked(householdId);
 	}
+
+	/** "Börja om inför veckan" — clears the active (unchecked) list; undo re-adds via addSuggestedItems. */
+	async clearUnchecked(householdId: string, role: HouseholdRole) {
+		if (!canEditInventory(role)) throw new ShoppingListReadOnlyError();
+		return this.repository.deleteUnchecked(householdId);
+	}
 }

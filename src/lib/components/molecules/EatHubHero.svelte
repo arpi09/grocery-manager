@@ -2,10 +2,20 @@
 	import { getContext } from 'svelte';
 	import { Sparkles } from '@lucide/svelte';
 	import { OPEN_RECIPE_IDEAS } from '$lib/navigation/app-layout-context';
-	import ExpandableCopy from '$lib/components/molecules/ExpandableCopy.svelte';
+	import type { InventoryItem } from '$lib/domain/inventory-item';
+	import { expiringItemsHref } from '$lib/navigation/context-hrefs';
 	import { t } from '$lib/i18n';
 
+	interface Props {
+		expiringSoon: InventoryItem[];
+		plannedMealCount: number;
+	}
+
+	let { expiringSoon, plannedMealCount }: Props = $props();
+
 	const openRecipeIdeas = getContext<(() => void) | undefined>(OPEN_RECIPE_IDEAS);
+	const expiringCount = $derived(expiringSoon.length);
+	const homeHref = expiringItemsHref();
 </script>
 
 {#if openRecipeIdeas}
@@ -23,9 +33,18 @@
 				<span>{t('planer.generateMeal')}</span>
 			</button>
 		</div>
-		<ExpandableCopy preview={t('planer.eatHubLeadShort')} class="lead">
-			<p>{t('planer.eatHubLead')}</p>
-		</ExpandableCopy>
+
+		<p class="lead">{t('planer.eatHubLead')}</p>
+
+		<div class="hero-meta">
+			<a class="text-action" href="/planer/vecka">{t('planer.contextWeeklyLink')}</a>
+			<a class="text-action" href={homeHref} data-testid="planer-expiring-link">
+				{t('planer.contextHomeLink')}{#if expiringCount > 0} · {expiringCount}{/if}
+			</a>
+			{#if plannedMealCount > 0}
+				<span class="planned-count">{t('planer.contextPlanned', { count: plannedMealCount })}</span>
+			{/if}
+		</div>
 	</section>
 {/if}
 
@@ -59,7 +78,22 @@
 	}
 
 	.lead {
+		margin: 0;
 		font-size: 0.9375rem;
+		line-height: 1.45;
+		color: var(--color-text-muted);
+	}
+
+	.hero-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-xs) var(--space-md);
+	}
+
+	.planned-count {
+		font-size: var(--font-size-body-sm);
+		color: var(--color-text-muted);
 	}
 
 	.generate-btn {

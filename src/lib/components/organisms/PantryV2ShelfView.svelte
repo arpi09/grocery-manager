@@ -17,8 +17,6 @@
 
 	let { shelf, canConsume = false, onConsume }: Props = $props();
 
-	const useSoonHref = '/inventory/all?filter=expiring';
-
 	function handleUseSoonTap() {
 		trackPantryUseSoonTapped(shelf.useSoon.length);
 	}
@@ -32,7 +30,6 @@
 	<UseSoonBand
 		count={shelf.useSoon.length}
 		names={shelf.useSoonNames}
-		href={useSoonHref}
 		cookHref={buildEatFirstWeekUrl('pantry')}
 		onTap={handleUseSoonTap}
 	/>

@@ -1,6 +1,5 @@
 <script lang="ts">
 
-	import { page } from '$app/state';
 	import AppLayout from '$lib/components/templates/AppLayout.svelte';
 
 	import AppHeader from '$lib/components/organisms/AppHeader.svelte';
@@ -16,7 +15,6 @@
 	import { locationLabel } from '$lib/i18n/domain-labels';
 
 	import { manualAddHref, scanModeHref } from '$lib/utils/scan-nav';
-	import { parseInventoryExpiryFilter } from '$lib/utils/inventory-list-filters';
 
 
 
@@ -40,7 +38,6 @@
 	const totalCount = $derived(data.activeTotal + data.autoExpiredTotal + data.finishedTotal);
 
 	const hasInventory = $derived(totalCount > 0);
-	const initialExpiryFilter = $derived(parseInventoryExpiryFilter(page.url.searchParams.get('filter')));
 
 	const backHref = '/inventory';
 	const backLabel = $derived(t('dataGrid.backToPantry'));
@@ -95,15 +92,6 @@
 			/>
 			{/if}
 
-			{#if data.canWrite && initialExpiryFilter === 'noExpiry'}
-				<form method="POST" action="?/bulkInferExpiry" class="bulk-expiry-banner">
-					<p>{t('inventory.bulkExpiryBanner')}</p>
-					<button type="submit">{t('inventory.bulkExpiryAction')}</button>
-				</form>
-			{/if}
-
-
-
 			<PantryLocationDataGrid
 
 				items={data.items}
@@ -145,21 +133,6 @@
 
 
 
-	.bulk-expiry-banner {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-sm);
-		padding: var(--space-sm) var(--space-md);
-		border: 1px solid color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
-		border-radius: var(--radius-md);
-		background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
-	}
-
-	.bulk-expiry-banner p {
-		margin: 0;
-		font-size: 0.875rem;
-	}
 
 </style>
 

@@ -202,7 +202,8 @@
 		aiGenerated={Boolean(briefingOneLiner?.trim())}
 	/>
 
-	{#if onAddExpiringToList}
+	<!-- Cold start: no pulse card when there's nothing to pulse — the moment card guides setup. -->
+	{#if onAddExpiringToList && (summary.totalItems > 0 || shoppingListCount > 0)}
 		<HouseholdPulseCard
 			expiringSoon={summary.expiringSoon}
 			{shoppingListCount}
