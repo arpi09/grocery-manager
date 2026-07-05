@@ -38,11 +38,9 @@
 
 		<div class="hero-meta">
 			<a class="text-action" href="/planer/vecka">{t('planer.contextWeeklyLink')}</a>
-			{#if expiringCount > 0}
-				<a class="text-action" href={homeHref}
-					>{t('planer.contextHomeLink')} · {expiringCount}</a
-				>
-			{/if}
+			<a class="text-action" href={homeHref} data-testid="planer-expiring-link">
+				{t('planer.contextHomeLink')}{#if expiringCount > 0} · {expiringCount}{/if}
+			</a>
 			{#if plannedMealCount > 0}
 				<span class="planned-count">{t('planer.contextPlanned', { count: plannedMealCount })}</span>
 			{/if}

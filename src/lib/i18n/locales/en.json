@@ -2837,7 +2837,7 @@
 		"fromStock": "From stock:",
 		"portions": "Number of servings",
 		"portionsHint": "All recipes are scaled to this many servings.",
-		"generateBtn": "Generate recipes",
+		"generateBtn": "Generate meal idea",
 		"addMissingBtn": "Add missing to shopping list",
 		"addMissingBtnShort": "Add to list ({count})",
 		"addMissingBtnCount": "Add {count} missing to shopping list",

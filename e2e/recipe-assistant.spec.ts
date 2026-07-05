@@ -77,7 +77,7 @@ test.describe('Recipe assistant from header', () => {
 		await extras.getByRole('button', { name: /^Lägg till$/i }).click();
 		await expect(extras.getByRole('button', { name: /Ta bort Halloumi/i })).toBeVisible();
 
-		await dialog.getByRole('button', { name: 'Generera recept' }).click();
+		await dialog.getByRole('button', { name: 'Generera maträtt' }).click();
 		await expect(dialog.getByTestId('recipe-result-list')).toBeVisible({ timeout: 20_000 });
 	});
 
@@ -85,7 +85,7 @@ test.describe('Recipe assistant from header', () => {
 
 		const dialog = await openRecipeAssistant(page);
 
-		await dialog.getByRole('button', { name: 'Generera recept' }).click();
+		await dialog.getByRole('button', { name: 'Generera maträtt' }).click();
 
 		const openBtn = dialog.getByTestId('recipe-open-btn');
 
@@ -117,7 +117,7 @@ test.describe('Recipe assistant from header', () => {
 
 
 
-		const generateBtn = dialog.getByRole('button', { name: 'Generera recept' });
+		const generateBtn = dialog.getByRole('button', { name: 'Generera maträtt' });
 
 		await expect(generateBtn).toBeEnabled();
 
@@ -189,7 +189,7 @@ test.describe('Recipe assistant mobile', () => {
 
 		const dialog = await openRecipeAssistant(page);
 
-		const generateBtn = dialog.getByRole('button', { name: 'Generera recept' });
+		const generateBtn = dialog.getByRole('button', { name: 'Generera maträtt' });
 
 		await expect(generateBtn).toBeEnabled();
 
@@ -203,7 +203,7 @@ test.describe('Recipe assistant mobile', () => {
 
 		const dialog = await openRecipeAssistant(page);
 
-		const generateBtn = dialog.getByRole('button', { name: 'Generera recept' });
+		const generateBtn = dialog.getByRole('button', { name: 'Generera maträtt' });
 
 		await generateBtn.click();
 
@@ -231,7 +231,7 @@ test.describe('Recipe assistant mobile', () => {
 
 		const dialog = await openRecipeAssistant(page);
 
-		await dialog.getByRole('button', { name: 'Generera recept' }).click();
+		await dialog.getByRole('button', { name: 'Generera maträtt' }).click();
 
 		await dialog.getByTestId('recipe-open-btn').click({ timeout: 20_000 });
 
