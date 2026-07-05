@@ -314,32 +314,35 @@
 						{/if}
 					</div>
 
-					<form method="POST" action="?/scheduleIdea" class="schedule-form" use:enhance={scheduleEnhance}>
+					<details class="schedule-fold">
+						<summary>{t('planer.scheduleToggle')}</summary>
+						<form method="POST" action="?/scheduleIdea" class="schedule-form" use:enhance={scheduleEnhance}>
 
-						<input type="hidden" name="month" value={month} />
+							<input type="hidden" name="month" value={month} />
 
-						<input type="hidden" name="ideaId" value={idea.id} />
+							<input type="hidden" name="ideaId" value={idea.id} />
 
-						<input type="hidden" name="title" value={idea.title} />
+							<input type="hidden" name="title" value={idea.title} />
 
-						<label>
+							<label>
 
-							{t('planer.scheduleDate')}
+								{t('planer.scheduleDate')}
 
-							<input type="date" name="plannedDate" required />
+								<input type="date" name="plannedDate" required />
 
-						</label>
+							</label>
 
-						<Button
-							type="submit"
-							fullWidth
-							loading={scheduleSubmitting === idea.id}
-							loadingLabel={t('common.loading')}
-						>
-							{t('planer.addToCalendar')}
-						</Button>
+							<Button
+								type="submit"
+								fullWidth
+								loading={scheduleSubmitting === idea.id}
+								loadingLabel={t('common.loading')}
+							>
+								{t('planer.addToCalendar')}
+							</Button>
 
-					</form>
+						</form>
+					</details>
 
 				</article>
 
@@ -535,6 +538,43 @@
 
 
 
+	.schedule-fold {
+		margin-top: var(--space-sm);
+		padding-top: var(--space-sm);
+		border-top: 1px dashed var(--color-border);
+	}
+
+	.schedule-fold > summary {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-xs);
+		min-height: 2rem;
+		font-size: 0.78rem;
+		font-weight: 700;
+		color: var(--color-primary);
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.schedule-fold > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.schedule-fold > summary::after {
+		content: '▾';
+		color: var(--color-text-muted);
+		transition: transform 0.15s;
+	}
+
+	.schedule-fold[open] > summary::after {
+		transform: rotate(180deg);
+	}
+
+	.schedule-fold > summary:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+
 	.schedule-form {
 
 		display: flex;
@@ -544,10 +584,6 @@
 		gap: var(--space-xs);
 
 		margin-top: var(--space-sm);
-
-		padding-top: var(--space-sm);
-
-		border-top: 1px dashed var(--color-border);
 
 	}
 
