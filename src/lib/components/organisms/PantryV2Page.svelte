@@ -2,7 +2,6 @@
 	import { browser } from '$app/environment';
 	import { invalidateAll } from '$app/navigation';
 	import PantryShelfActions from '$lib/components/molecules/PantryShelfActions.svelte';
-	import MissingExpiryFilterChip from '$lib/components/molecules/MissingExpiryFilterChip.svelte';
 	import InventoryInsightsPanel from '$lib/components/organisms/InventoryInsightsPanel.svelte';
 	import PantryV2EmptyState from '$lib/components/organisms/PantryV2EmptyState.svelte';
 	import PantryV2ShelfView from '$lib/components/organisms/PantryV2ShelfView.svelte';
@@ -10,7 +9,7 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import { trackPantryShelfOpened } from '$lib/client/pantry-v2-telemetry';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
-	import { buildPantryShelfView, countMissingExpiry, filterInventoryBySearch } from '$lib/domain/pantry-shelf';
+	import { buildPantryShelfView, filterInventoryBySearch } from '$lib/domain/pantry-shelf';
 	import type { InventoryInsightsSnapshot } from '$lib/server/inventory-insights';
 	import { t } from '$lib/i18n';
 
@@ -27,8 +26,6 @@
 	let consumeItem = $state<InventoryItem | null>(null);
 	let insightsSnapshot = $state<InventoryInsightsSnapshot | null>(null);
 	let insightsLoading = $state(true);
-	let insightsDeepening = $state(false);
-	let insightsDeepenError = $state<string | null>(null);
 	let pantryFixLoading = $state(false);
 	let pantryFixMessage = $state<string | null>(null);
 
@@ -63,27 +60,6 @@
 		}
 	}
 
-	async function deepenInsights() {
-		insightsDeepening = true;
-		insightsDeepenError = null;
-		try {
-			const response = await fetch('/api/inventory-insights', { method: 'POST' });
-			const payload = await response.json().catch(() => null);
-			if (!response.ok) {
-				insightsDeepenError =
-					typeof payload?.error === 'string' ? payload.error : t('brain.insights.deepenError');
-				return;
-			}
-			if (payload?.insights) {
-				insightsSnapshot = payload.insights as InventoryInsightsSnapshot;
-			}
-		} catch {
-			insightsDeepenError = t('brain.insights.deepenError');
-		} finally {
-			insightsDeepening = false;
-		}
-	}
-
 	const filteredItems = $derived(filterInventoryBySearch(items, searchQuery));
 	const shelf = $derived(buildPantryShelfView(filteredItems));
 	const unfilteredShelf = $derived(buildPantryShelfView(items));
@@ -93,8 +69,6 @@
 	const showHouseholdEmpty = $derived(
 		!loadFailed && !showSearchEmpty && unfilteredShelf.isEmpty && searchQuery.trim().length === 0
 	);
-	const missingExpiryCount = $derived(countMissingExpiry(items));
-	const missingExpiryHref = '/inventory/all?filter=noExpiry';
 	const bulkInferAction = canWrite ? '/inventory/all?/bulkInferExpiry' : null;
 	const consumeSheetOpen = $derived(consumeItem !== null);
 
@@ -189,21 +163,9 @@
 				estimatedCount={insightsSnapshot.estimatedCount}
 				{canWrite}
 				{bulkInferAction}
-				onDeepen={deepenInsights}
-				deepening={insightsDeepening}
-				deepenError={insightsDeepenError}
 			/>
 		{/if}
 	</details>
-	{/if}
-
-	{#if !loadFailed && !showHouseholdEmpty && missingExpiryCount > 0}
-		<MissingExpiryFilterChip
-			count={missingExpiryCount}
-			href={missingExpiryHref}
-			bulkInferAction={bulkInferAction}
-			actionLabel={canWrite ? t('inventory.bulkExpiryAction') : null}
-		/>
 	{/if}
 
 	{#if loadFailed}
