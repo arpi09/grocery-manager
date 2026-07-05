@@ -2859,6 +2859,7 @@
 		"portionsBadge": "{count, plural, one {# serving} other {# servings}}",
 		"missingBadge": "{count, plural, one {# missing} other {# missing}}",
 		"settingsToggle": "Change settings",
+		"advancedToggle": "Portions & preferences",
 		"ingredientsToggle": "Show ingredients",
 		"ingredientsAria": "Ingredients",
 		"metaAria": "Recipe summary",
