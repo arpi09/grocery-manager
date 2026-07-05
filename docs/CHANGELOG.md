@@ -85,6 +85,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(a11y): success toast WCAG AA contrast (darken fresh success token) ([#202](https://github.com/arpi09/grocery-manager/pull/202)) — Success-toasten (`.toast-message` vit text på `--color-success`) hade 3.97:1 mot kravet 4.5:1 (axe serious, WCAG 2.2 AA color-contrast). Mörkar `fresh.light.success` `#3d8f5c` → `#2e7a4c` i `src/lib/design/brand-colors.ts` och regenererar brand-CSS/SCSS (`npm run brand:css`). Nya kontraster: 5.24:1 mot vit text, 4.81:1 som textfärg på `--color-bg`.
 - fix(e2e): harden local dev-server stability and pre-hydration click races ([#199](https://github.com/arpi09/grocery-manager/pull/199))
 - fix(a11y): role=img på nav stale-dot — löser aria-prohibited-attr (deploy-blockerare) ([#221](https://github.com/arpi09/grocery-manager/pull/221)) — `role="img"` på båda stale-dot-spans (Lager-tab + Mer market-unread). `role="img"` tillåter `aria-label`.
+- fix(lager): declutter skafferi — färre konkurrerande CTA:er per sektion ([#223](https://github.com/arpi09/grocery-manager/pull/223)) — **Hyllan (`PantryV2Page`):** tar bort det fristående "utan datum"-chippet — samma "sätt datum"-åtgärd finns redan inuti insikts-folden. Släpper "Fördjupa" så folden har **en** åtgärd ("Fixa skafferi") istället för två konkurrerande AI-knappar.
 
 ### Changed
 
