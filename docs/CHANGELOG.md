@@ -86,6 +86,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(e2e): harden local dev-server stability and pre-hydration click races ([#199](https://github.com/arpi09/grocery-manager/pull/199))
 - fix(a11y): role=img på nav stale-dot — löser aria-prohibited-attr (deploy-blockerare) ([#221](https://github.com/arpi09/grocery-manager/pull/221)) — `role="img"` på båda stale-dot-spans (Lager-tab + Mer market-unread). `role="img"` tillåter `aria-label`.
 - fix(lager): declutter skafferi — färre konkurrerande CTA:er per sektion ([#223](https://github.com/arpi09/grocery-manager/pull/223)) — **Hyllan (`PantryV2Page`):** tar bort det fristående "utan datum"-chippet — samma "sätt datum"-åtgärd finns redan inuti insikts-folden. Släpper "Fördjupa" så folden har **en** åtgärd ("Fixa skafferi") istället för två konkurrerande AI-knappar.
+- fix(ata): declutter /planer — en primär CTA/sektion, färre konkurrerande banners ([#224](https://github.com/arpi09/grocery-manager/pull/224)) — **Slår ihop tvillingbannrarna.** Sidan öppnade med två överlappande intro-kort (`EatHubHero` + `PlanerContextBanner`). `EatHubHero` blir enda topp-kortet och behåller den enda primära CTA:n **"Generera maträtt"** (`eat-hub-generate` testid orört). `PlanerContextBanner` borttagen (−155 rader) — dess användbara delar flyttade in som subordinerade text-länkar:
 
 ### Changed
 
