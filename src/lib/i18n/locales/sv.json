@@ -2780,6 +2780,7 @@
 		"portionsBadge": "{count, plural, one {# portion} other {# portioner}}",
 		"missingBadge": "{count, plural, one {# saknas} other {# saknas}}",
 		"settingsToggle": "Ändra inställningar",
+		"advancedToggle": "Portioner & önskemål",
 		"ingredientsToggle": "Visa ingredienser",
 		"ingredientsAria": "Ingredienser",
 		"metaAria": "Receptsammanfattning",
