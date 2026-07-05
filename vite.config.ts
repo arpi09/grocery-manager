@@ -30,9 +30,9 @@ export default defineConfig({
 		brandThemeColorPlugin(),
 		sveltekit(),
 		SvelteKitPWA({
-			registerType: 'autoUpdate',
+			registerType: 'prompt', // client-owned reload, guarded in +layout — autoUpdate loops on a flaky iOS SW
 			workbox: {
-				importScripts: ['push-sw.js']
+				importScripts: ['push-sw.js'], cleanupOutdatedCaches: true // purge old precaches so a stale device self-heals
 			},
 			includeAssets: [
 				'favicon.svg',
