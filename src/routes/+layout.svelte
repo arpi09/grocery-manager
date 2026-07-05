@@ -28,7 +28,23 @@
 		}
 
 		void import('virtual:pwa-register').then(({ registerSW }) => {
-			registerSW({ immediate: true });
+			const updateSW = registerSW({
+				immediate: true,
+				onNeedRefresh() {
+					// Apply the new service worker, but reload at most once per session. A device
+					// whose SW never reaches a stable controlling state would otherwise reload on
+					// every controllerchange → infinite loop (blank app + hot phone in iOS Safari).
+					// Mirrors the chunk-reload guard in $lib/client/error-reporting.ts.
+					try {
+						if (sessionStorage.getItem('skaffu-sw-refreshed') === '1') return;
+						sessionStorage.setItem('skaffu-sw-refreshed', '1');
+					} catch {
+						// Storage blocked (private mode) — skip auto-reload to avoid any loop risk.
+						return;
+					}
+					void updateSW(true);
+				}
+			});
 		});
 	});
 
