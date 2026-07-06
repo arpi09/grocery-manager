@@ -3014,6 +3014,7 @@
 				"ctaEmpty": "Continue without items",
 				"ctaSkip": "Maybe later",
 				"receiptLink": "Have a digital receipt? Import it instead",
+					"staplesAddedToast": "{count} items added to your pantry",
 				"chipsAria": "Choose staples to add",
 				"groupFridge": "Fridge",
 				"groupFreezer": "Freezer",

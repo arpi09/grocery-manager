@@ -2935,6 +2935,7 @@
 				"ctaEmpty": "Fortsätt utan varor",
 				"ctaSkip": "Kanske senare",
 				"receiptLink": "Har du ett digitalt kvitto? Importera det i stället",
+					"staplesAddedToast": "{count} varor tillagda i skafferiet",
 				"chipsAria": "Välj basvaror att lägga in",
 				"groupFridge": "Kyl",
 				"groupFreezer": "Frys",
