@@ -7,6 +7,7 @@ GitHub Releases use **CalVer** (`YYYY.M.D` or `YYYY.M.D.N` for multiple deploys 
 | CalVer | Prod SHA | Deploy run | PRs |
 |--------|----------|------------|-----|
 
+| [2026.7.6.2](https://github.com/arpi09/grocery-manager/releases/tag/2026.7.6.2) | `473f25f12` | [28798857449](https://github.com/arpi09/grocery-manager/actions/runs/28798857449) | — |
 | [2026.7.6](https://github.com/arpi09/grocery-manager/releases/tag/2026.7.6) | `cc7f2d676` | [28796113537](https://github.com/arpi09/grocery-manager/actions/runs/28796113537) | — |
 | [2026.7.5.2](https://github.com/arpi09/grocery-manager/releases/tag/2026.7.5.2) | `6ce2be61e` | [28739479233](https://github.com/arpi09/grocery-manager/actions/runs/28739479233) | — |
 | [2026.7.5](https://github.com/arpi09/grocery-manager/releases/tag/2026.7.5) | `8efc9d33c` | [28735052802](https://github.com/arpi09/grocery-manager/actions/runs/28735052802) | — |
