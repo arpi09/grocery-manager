@@ -215,6 +215,9 @@
 									aria-hidden="true"
 								></span>
 								<span class="meal-title">{meal.title}</span>
+								{#if !meal.ideaId}
+									<span class="meal-source-manual">{t('planer.mealSourceManual')}</span>
+								{/if}
 							</div>
 							<div class="meal-actions">
 								{#if idea}
@@ -449,6 +452,17 @@
 
 	.source-dot-idea {
 		background: var(--color-accent);
+	}
+
+	.meal-source-manual {
+		flex-shrink: 0;
+		padding: 0.05rem 0.4rem;
+		border-radius: 999px;
+		background: var(--color-surface-muted);
+		color: var(--color-text-muted);
+		font-size: var(--font-size-body-sm);
+		font-weight: 600;
+		line-height: 1.4;
 	}
 
 	.meal-title {
