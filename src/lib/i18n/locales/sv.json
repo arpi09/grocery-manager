@@ -2926,11 +2926,14 @@
 			"welcome": {
 				"title": "Välkommen till Skaffu",
 				"body": "Listan, skafferiet och påminnelserna hänger ihop — Skaffu lär sig vad ni brukar behöva.",
+				"outcomeLine": "Om ett par minuter har ni en delad lista som fyller på sig själv.",
 				"cta": "Sätt igång"
 			},
 			"fill": {
 				"title": "Vad har ni hemma?",
 				"body": "Vi har kryssat för det vanligaste. Bocka ur det som inte stämmer — allt går att ändra senare.",
+				"reflectSelected": "{count, plural, one {# vara} other {# varor}} markerade — de hamnar i skafferiet direkt.",
+				"reflectEmpty": "Inget markerat än — bocka i det ni har, eller fortsätt så fyller ni på senare.",
 				"ctaAdd": "Lägg till {count} varor",
 				"ctaEmpty": "Fortsätt utan varor",
 				"ctaSkip": "Kanske senare",
@@ -2944,6 +2947,8 @@
 			"invite": {
 				"title": "Handlar ni ihop?",
 				"body": "Skicka en länk så ser din partner samma lista i sin mobil. Länken gäller i 7 dagar.",
+				"reflectSeeded": "Ni har redan {count, plural, one {# vara} other {# varor}} på plats — dela så ser din partner samma sak.",
+				"reflectEmpty": "Dela listan så bygger ni den tillsammans från början.",
 				"ctaShare": "Dela inbjudan",
 				"ctaSkip": "Jag handlar själv",
 				"copied": "Länk kopierad",

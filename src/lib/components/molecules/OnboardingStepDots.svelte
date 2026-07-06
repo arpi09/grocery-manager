@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Spring, prefersReducedMotion } from 'svelte/motion';
 	import { t } from '$lib/i18n';
 
 	interface Props {
@@ -17,6 +18,30 @@
 		canSelect = (index) => index < currentIndex,
 		onSelect
 	}: Props = $props();
+
+	/* Spring-driven "fill frontier": a continuous position that glides across the
+	   dot row as the step advances. A touch of overshoot makes progress feel
+	   physical/satisfying without being bouncy. Reduced-motion snaps instantly. */
+	const frontier = new Spring(currentIndex, { stiffness: 0.16, damping: 0.72 });
+
+	$effect(() => {
+		if (prefersReducedMotion.current) {
+			frontier.set(currentIndex, { instant: true });
+		} else {
+			frontier.target = currentIndex;
+		}
+	});
+
+	/**
+	 * Fill amount for a given segment (0..1) derived from the spring frontier.
+	 * Segments fully behind the frontier are solid; the segment the frontier is
+	 * crossing fills partially; segments ahead stay empty. This makes the whole
+	 * row read as one advancing progress bar rather than independent dots.
+	 */
+	function fillFor(index: number, position: number): number {
+		const amount = position - index + 1;
+		return Math.max(0, Math.min(1, amount));
+	}
 </script>
 
 <div class="step-dots">
@@ -33,6 +58,7 @@
 
 	<div class="step-dots-row">
 		{#each keys as key, index (key)}
+			{@const fill = fillFor(index, frontier.current)}
 			<button
 				type="button"
 				class="dot-button"
@@ -45,9 +71,7 @@
 				onclick={() => onSelect?.(index)}
 			>
 				<span class="dot-segment" aria-hidden="true">
-					{#if index === currentIndex}
-						<span class="dot-fill"></span>
-					{/if}
+					<span class="dot-fill" style:transform={`scaleX(${fill})`}></span>
 				</span>
 			</button>
 		{/each}
@@ -95,32 +119,20 @@
 		overflow: hidden;
 	}
 
-	.dot-button.done .dot-segment {
-		background: var(--color-primary);
-	}
-
 	.dot-fill {
 		position: absolute;
 		inset: 0;
 		border-radius: 999px;
 		background: var(--color-primary);
 		transform-origin: left;
-		animation: segment-fill-in var(--motion-duration-slow) var(--motion-ease-out) both;
-	}
-
-	@keyframes segment-fill-in {
-		from {
-			transform: scaleX(0);
-		}
-		to {
-			transform: scaleX(1);
-		}
+		/* transform is driven inline by the spring; no CSS transition so the
+		   spring is the single source of motion truth (avoids double easing). */
+		will-change: transform;
 	}
 
 	@media (prefers-reduced-motion: reduce) {
 		.dot-fill {
-			animation: none;
-			transform: scaleX(1);
+			will-change: auto;
 		}
 	}
 </style>

@@ -14,7 +14,6 @@
 	import { page } from '$app/state';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import Button from '$lib/components/atoms/Button.svelte';
-	import CelebrationBurst from '$lib/components/atoms/CelebrationBurst.svelte';
 	import Modal from '$lib/components/molecules/Modal.svelte';
 	import ModalHeader from '$lib/components/molecules/ModalHeader.svelte';
 	import ActivationOnboardingScreen from '$lib/components/molecules/ActivationOnboardingScreen.svelte';
@@ -22,6 +21,7 @@
 	import ActivationFinishRecap from '$lib/components/molecules/ActivationFinishRecap.svelte';
 	import OnboardingStepStage from '$lib/components/molecules/OnboardingStepStage.svelte';
 	import OnboardingStepDots from '$lib/components/molecules/OnboardingStepDots.svelte';
+	import OnboardingLoopProgress from '$lib/components/molecules/OnboardingLoopProgress.svelte';
 	import OnboardingCelebrateIllustration from '$lib/components/organisms/OnboardingCelebrateIllustration.svelte';
 	import OnboardingLoopIllustration from '$lib/components/organisms/illustrations/OnboardingLoopIllustration.svelte';
 	import OnboardingInviteIllustration from '$lib/components/organisms/illustrations/OnboardingInviteIllustration.svelte';
@@ -155,6 +155,22 @@
 		selectedStaples.size > 0
 			? t('onboarding.activation.fill.ctaAdd', { count: selectedStaples.size })
 			: t('onboarding.activation.fill.ctaEmpty')
+	);
+
+	/* Reflective, data-aware sub-lines: mirror what the user just did/entered so
+	   the earlier steps feel as specific as the finish recap. */
+	const fillReflectLine = $derived(
+		selectedStaples.size > 0
+			? t('onboarding.activation.fill.reflectSelected', { count: selectedStaples.size })
+			: t('onboarding.activation.fill.reflectEmpty')
+	);
+	const inviteReflectLine = $derived(
+		seeded && inventoryCount > 0
+			? t('onboarding.activation.invite.reflectSeeded', { count: inventoryCount })
+			: t('onboarding.activation.invite.reflectEmpty')
+	);
+	const welcomeBody = $derived(
+		`${t('onboarding.activation.welcome.body')}\n${t('onboarding.activation.welcome.outcomeLine')}`
 	);
 
 	$effect(() => {
@@ -526,6 +542,12 @@
 		{/snippet}
 
 		<div class="flow-shell">
+			<OnboardingLoopProgress
+				stepIndex={displayIndex}
+				stepCount={ACTIVATION_SCREEN_IDS.length}
+				complete={displayScreen === 'finish'}
+			/>
+
 			<OnboardingStepDots
 				keys={ACTIVATION_SCREEN_IDS}
 				currentIndex={displayIndex}
@@ -542,7 +564,7 @@
 					{#if displayScreen === 'welcome'}
 						<ActivationOnboardingScreen
 							title={t('onboarding.activation.welcome.title')}
-							body={t('onboarding.activation.welcome.body')}
+							body={welcomeBody}
 						>
 							{#snippet illustration()}
 								<OnboardingLoopIllustration />
@@ -564,6 +586,9 @@
 
 							{#snippet extra()}
 								<div class="fill-extra">
+									<p class="reflect-line" aria-live="polite" data-testid="activation-fill-reflect">
+										{fillReflectLine}
+									</p>
 									<ActivationFillChips
 										items={staples}
 										selected={selectedStaples}
@@ -590,6 +615,9 @@
 							{/snippet}
 
 							{#snippet extra()}
+								<p class="reflect-line" data-testid="activation-invite-reflect">
+									{inviteReflectLine}
+								</p>
 								{#if inviteError}
 									<p class="invite-error">{t('onboarding.activation.invite.shareError')}</p>
 								{/if}
@@ -603,10 +631,7 @@
 						>
 							{#snippet illustration()}
 								<div class="finish-stage">
-									<div class="finish-burst">
-										<CelebrationBurst active={true} />
-									</div>
-									<OnboardingCelebrateIllustration heavy={true} />
+									<OnboardingCelebrateIllustration calm={true} />
 								</div>
 							{/snippet}
 
@@ -815,6 +840,12 @@
 		min-height: 0;
 	}
 
+	/* Loop mark sits tight above the step dots — one progress cluster, not two
+	   separate rows. */
+	.flow-shell :global(.loop-mark) {
+		margin-bottom: calc(-1 * var(--space-xs));
+	}
+
 	.flow-content {
 		flex: 1;
 		min-height: 0;
@@ -866,6 +897,15 @@
 		gap: var(--space-sm);
 	}
 
+	.reflect-line {
+		margin: 0;
+		font-size: 0.8125rem;
+		line-height: 1.45;
+		color: var(--color-primary);
+		font-weight: 600;
+		text-align: center;
+	}
+
 	.receipt-link {
 		border: none;
 		background: none;
@@ -897,15 +937,6 @@
 		justify-content: center;
 		width: 100%;
 		height: 100%;
-	}
-
-	.finish-burst {
-		position: absolute;
-		inset: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		pointer-events: none;
 	}
 
 	.finish-extra {

@@ -3005,11 +3005,14 @@
 			"welcome": {
 				"title": "Welcome to Skaffu",
 				"body": "The list, the pantry and the reminders work together — Skaffu learns what you usually need.",
+				"outcomeLine": "In a couple of minutes you'll have a shared list that fills itself.",
 				"cta": "Let's go"
 			},
 			"fill": {
 				"title": "What do you have at home?",
 				"body": "We've pre-checked the most common staples. Untick what doesn't fit — everything can be changed later.",
+				"reflectSelected": "{count, plural, one {# item} other {# items}} selected — they go straight into your pantry.",
+				"reflectEmpty": "Nothing selected yet — tick what you have, or continue and fill up later.",
 				"ctaAdd": "Add {count} items",
 				"ctaEmpty": "Continue without items",
 				"ctaSkip": "Maybe later",
@@ -3023,6 +3026,8 @@
 			"invite": {
 				"title": "Do you shop together?",
 				"body": "Send a link and your partner sees the same list on their phone. The link is valid for 7 days.",
+				"reflectSeeded": "You already have {count, plural, one {# item} other {# items}} in place — share so your partner sees the same.",
+				"reflectEmpty": "Share the list and build it together from the start.",
 				"ctaShare": "Share invite",
 				"ctaSkip": "I shop on my own",
 				"copied": "Link copied",
