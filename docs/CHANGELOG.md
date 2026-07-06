@@ -42,6 +42,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - feat(inkop): Söndagsförslaget — förhandsifylld veckolista som skriver sig själv ([#218](https://github.com/arpi09/grocery-manager/pull/218)) — **Replenishment** (köp-igen-kadens, deterministisk) → "Köpt 4 ggr senaste 3 mån", "brukar köpa var 7:e dag"
 - feat(ai): OpenAI Batch API för latensokänsliga cron-jobb (50% rabatt) ([#219](https://github.com/arpi09/grocery-manager/pull/219)) — Flyttar tre **latensokänsliga** AI-jobb till [OpenAI Batch API](https://platform.openai.com/docs/guides/batch) (50% rabatt på input+output). Interaktiva ytor (kvittoparse, smart fill, foto-scan, recept) behåller den **synkrona** Responses-vägen oförändrad.
 - feat(inkop): rensa listan med Ångra — trygg börja om inför veckan ([#220](https://github.com/arpi09/grocery-manager/pull/220)) — **"Rensa listan"-textlänk** i plan-vyns fot (bredvid "Visa som checklista", bara när listan har varor) → rensar alla obockade varor.
+- feat(ai): uppgradera OpenAI-modeller gpt-4.1 -> gpt-5.4-mini/nano + env-override ([#236](https://github.com/arpi09/grocery-manager/pull/236)) — Uppgraderar default OpenAI-modeller: `gpt-4.1-mini` -> **gpt-5.4-mini**, `gpt-4.1-nano` -> **gpt-5.4-nano**. gpt-4.1-familjen är avlistad från OpenAIs prissida; vi körde på en tidigare generations modell.
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
