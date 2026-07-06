@@ -93,6 +93,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - fix(pwa): guard service worker update reload against infinite loop ([#228](https://github.com/arpi09/grocery-manager/pull/228)) — **[vite.config.ts](vite.config.ts):** `registerType` `'autoUpdate'` → `'prompt'` så klienten äger post-update-reloaden och kan guarda den. `workbox.cleanupOutdatedCaches: true` så en gammal enhet självläker till senaste assets istället för att serva en trasig cachad shell.
 - fix(client): self-heal stale CSS-preload failures after deploy ([#230](https://github.com/arpi09/grocery-manager/pull/230)) — `src/lib/client/error-reporting.ts` — regex + exporterar `isChunkLoadError`
 - fix(trust): visa-varför + ett-taps-rättning för AI-satta lagerdatum ([#231](https://github.com/arpi09/grocery-manager/pull/231)) — **Skafferi (ItemRow, PantryLocationDataGrid):** `EstimatedBadge` får en ärlig, källkorrekt förklaring (`buildInventoryExpiryExplanation` — ingen påhittad dag-siffra) + ett-taps datumrättning i `PredictionExplainSheet` som når learning-feedback-repot via ny endpoint `/api/inventory/correct-expiry` (speglar edit-formulärets corrected-feedback). Badgen stoppar click-propagation så varför-tappen inte dubblar som rad-navigering i datagriden.
+- fix(ata): trust & consistency polish på Äta/planer-flödet ([#237](https://github.com/arpi09/grocery-manager/pull/237)) — [x] `npm run quick:dev` — lint + locales + server-imports + **1589 unit tests** grön
 
 ### Changed
 
