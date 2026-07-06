@@ -3,17 +3,26 @@
 
 	interface Props {
 		heavy?: boolean;
+		/**
+		 * Calm micro-reward: check-draw + one soft ripple, no party emoji/horns
+		 * and no infinite bursts. Tasteful finish payoff (founder taste = clean).
+		 */
+		calm?: boolean;
 	}
 
-	let { heavy = false }: Props = $props();
+	let { heavy = false, calm = false }: Props = $props();
 </script>
 
-<div class="celebrate-illus" class:heavy aria-hidden="true">
+<div class="celebrate-illus" class:heavy class:calm aria-hidden="true">
 	{#if heavy}
 		<span class="party-emoji" aria-hidden="true">🎉</span>
 	{/if}
 	<svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
 		<circle class="glow" class:glow-pulse={heavy} cx="60" cy="60" r="52" />
+		{#if calm}
+			<!-- one soft ripple that expands and fades a single time -->
+			<circle class="ripple" cx="60" cy="60" r="36" stroke-width="2" />
+		{/if}
 		<circle class="ring" cx="60" cy="60" r="36" stroke-width="3" />
 		<path
 			class="check"
@@ -22,7 +31,9 @@
 			stroke-linecap="round"
 			stroke-linejoin="round"
 		/>
-		{#if heavy}
+		{#if calm}
+			<!-- intentionally no bursts: the ripple + check are the whole reward -->
+		{:else if heavy}
 			<path
 				class="party-horn horn-left"
 				d="M18 42 L8 28 L22 34 Z M8 28 L4 18 L14 24 Z"
@@ -97,6 +108,29 @@
 		fill: none;
 		transform-origin: 60px 60px;
 		animation: ring-pop 0.55s 0.08s cubic-bezier(0.34, 1.25, 0.64, 1) both;
+	}
+
+	/* Calm mode: single expanding ripple, fires once then rests. */
+	.ripple {
+		stroke: color-mix(in srgb, var(--color-success) 45%, transparent);
+		fill: none;
+		transform-origin: 60px 60px;
+		opacity: 0;
+		animation: ripple-out 0.9s 0.3s var(--motion-ease-out, ease-out) both;
+	}
+
+	@keyframes ripple-out {
+		0% {
+			opacity: 0;
+			transform: scale(0.7);
+		}
+		30% {
+			opacity: 0.8;
+		}
+		100% {
+			opacity: 0;
+			transform: scale(1.45);
+		}
 	}
 
 	.check {
@@ -267,11 +301,17 @@
 		.ring,
 		.check,
 		.burst,
-		.party-horn {
+		.party-horn,
+		.ripple {
 			animation: none;
 			opacity: 1;
 			stroke-dashoffset: 0;
 			transform: none;
+		}
+
+		/* the ripple's resting state should be invisible, not a stuck ring */
+		.ripple {
+			opacity: 0;
 		}
 
 		.party-emoji {
