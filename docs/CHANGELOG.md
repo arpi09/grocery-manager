@@ -121,6 +121,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - docs(reality): prod SHA 6ce2be61e — PWA SW reload-loop-fix live (2026.7.5.2) ([#229](https://github.com/arpi09/grocery-manager/pull/229)) — Prod SHA + Master SHA-rader uppdaterade.
 - test(recept): e2e-vakt för Portioner & önskemål-disclosuren ([#235](https://github.com/arpi09/grocery-manager/pull/235)) — ESLint grönt lokalt.
 - perf(shell): lazy-load RecipeAssistant out of the app-shell bundle ([#239](https://github.com/arpi09/grocery-manager/pull/239)) — Beteende oförändrat: `bind:open` styr modalen som förut; stänger → `recipeOpen=false` → avmontas.
+- chore(dead-code): remove 53 verified-orphan files ([#238](https://github.com/arpi09/grocery-manager/pull/238)) — **Komponenter** (~38): `Skaffu{Card,FilterBar,ListPanel}`, `Home{QuickAdd,ExpiringList,BriefingHeader}`, `EngagementStrip`, `HouseholdActivityFeed`, `RowOverflowMenu`, `PantryHealthInsights`, `PriceMemoryChip`, `WastePrevented*`, `WrappedBanner`, `AnalyticsDashboard`, `EatFirstSection`, `ExpiringSoonSection`, `OnboardingScanModal`, `ReceiptAutopilotSection`, `AuthLayout`, `MetricBar`, `ProgressRing`, m.fl.
 
 ### Added
 
