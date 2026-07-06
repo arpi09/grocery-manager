@@ -81,6 +81,24 @@ test.describe('Recipe assistant from header', () => {
 		await expect(dialog.getByTestId('recipe-result-list')).toBeVisible({ timeout: 20_000 });
 	});
 
+	test('advanced settings disclosure: portions collapsed by default, expand and generate', async ({ page }) => {
+		const dialog = await openRecipeAssistant(page);
+
+		const portions = dialog.locator('#recipe-portions');
+		const advanced = dialog.locator('.advanced-disclosure');
+
+		/* Portions + preferences live behind the "Portioner & önskemål" disclosure — collapsed by default. */
+		await expect(portions).toBeHidden();
+
+		await advanced.locator('summary').click();
+		await expect(portions).toBeVisible();
+		await portions.fill('4');
+
+		/* Generate stays reachable and works after tuning advanced settings. */
+		await dialog.getByRole('button', { name: 'Generera maträtt' }).click();
+		await expect(dialog.getByTestId('recipe-result-list')).toBeVisible({ timeout: 20_000 });
+	});
+
 	test('back from recipe detail restores generated list in modal', async ({ page }) => {
 
 		const dialog = await openRecipeAssistant(page);
