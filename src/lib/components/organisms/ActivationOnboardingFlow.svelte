@@ -287,6 +287,11 @@
 					choice: 'staples',
 					count: items.length
 				});
+				// Trust over taps: the pantry write must be visible, never silent (locked principle).
+				showClientToast(
+					t('onboarding.activation.fill.staplesAddedToast', { count: items.length }),
+					{ variant: 'success' }
+				);
 				await invalidateAll();
 				return;
 			}

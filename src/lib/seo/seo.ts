@@ -20,7 +20,16 @@ export interface SitemapEntry {
 	path: string;
 	changefreq: 'weekly' | 'monthly';
 	priority: number;
+	/** Truthful last-modified date (YYYY-MM-DD). Guides carry their own; static pages fall back below. */
+	lastmod?: string;
 }
+
+/**
+ * Last date the static marketing copy meaningfully changed. Bump when landing/feature/FAQ copy
+ * is edited — NOT on every deploy. A stable, truthful lastmod beats "today on every crawl"
+ * (Google discounts sitemaps whose lastmod is always now).
+ */
+export const MARKETING_CONTENT_LASTMOD = '2026-07-06';
 
 /** Public indexable paths included in sitemap.xml. */
 export const SITEMAP_ENTRIES: SitemapEntry[] = [
