@@ -19,12 +19,12 @@
 	}
 </script>
 
-<div class="mode-toggle" role="tablist" aria-label={t('shopping.v2.mode.aria')}>
+<!-- Toggle buttons with aria-pressed — no roving-tabindex tablist without arrow-key nav. -->
+<div class="mode-toggle" role="group" aria-label={t('shopping.v2.mode.aria')}>
 	<button
 		type="button"
-		role="tab"
 		class:active={mode === 'plan'}
-		aria-selected={mode === 'plan'}
+		aria-pressed={mode === 'plan'}
 		disabled={disabled}
 		data-testid="shopping-v2-mode-plan"
 		onclick={() => select('plan')}
@@ -33,9 +33,8 @@
 	</button>
 	<button
 		type="button"
-		role="tab"
 		class:active={mode === 'shop'}
-		aria-selected={mode === 'shop'}
+		aria-pressed={mode === 'shop'}
 		disabled={disabled || shopDisabled}
 		title={shopDisabled ? t('shopping.v2.shop.tabDisabledEmpty') : undefined}
 		data-testid="shopping-v2-mode-shop"

@@ -7,6 +7,7 @@
 	import Badge from '$lib/components/atoms/Badge.svelte';
 	import EstimatedBadge from '$lib/components/molecules/EstimatedBadge.svelte';
 	import { isEstimatedExpirySource } from '$lib/domain/learning/expiry-source';
+	import { buildInventoryExpiryExplanation } from '$lib/domain/learning/prediction-explain';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import LocationColorDot from '$lib/components/atoms/LocationColorDot.svelte';
 	import ProductAvatar from '$lib/components/atoms/ProductAvatar.svelte';
@@ -804,7 +805,16 @@
 									{formatExpiryDate(item.expiresOn, getLocale())}
 								</Badge>
 								{#if isEstimatedExpirySource(item.expiresOnSource)}
-									<EstimatedBadge source={item.expiresOnSource} />
+									<EstimatedBadge
+										source={item.expiresOnSource}
+										explanation={buildInventoryExpiryExplanation(
+											{ source: item.expiresOnSource, location: item.location },
+											getLocale()
+										)}
+										correctionItemId={canWrite ? item.id : null}
+										correctionExpiresOn={item.expiresOn}
+										onCorrected={() => void invalidateAll()}
+									/>
 								{/if}
 							</div>
 							{:else}

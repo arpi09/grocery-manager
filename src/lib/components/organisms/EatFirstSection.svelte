@@ -409,10 +409,14 @@
 							<Badge tone="warning">{formatDaysLeft(daysLeft, getLocale())}</Badge>
 						{/if}
 						{#if isEstimatedExpirySource(item.expiresOnSource)}
+							<!-- Non-interactive inside the <a> chip: an interactive badge would nest a
+							     <button> in an <a> (invalid) and steal the navigation tap. The "why"
+							     + one-tap correction live on the destination edit page and the pantry. -->
 							<EstimatedBadge
-							source={item.expiresOnSource}
-							lowConfidence={item.expiresOnSource === 'ai_inferred'}
-						/>
+								source={item.expiresOnSource}
+								interactive={false}
+								lowConfidence={item.expiresOnSource === 'ai_inferred'}
+							/>
 						{/if}
 					</Card>
 				</li>

@@ -151,6 +151,9 @@
 							<NavIcon id={item.icon} />
 						</span>
 						<span class="tab-label">{t(item.labelKey)}</span>
+						{#if item.badge === 'stale' && staleCount > 0 && canWrite}
+							<span class="stale-dot" role="img" aria-label={t('nav.staleBadge', { count: staleCount })}></span>
+						{/if}
 						{#if active}
 							<span class="tab-indicator" aria-hidden="true"></span>
 						{/if}
@@ -173,11 +176,11 @@
 							<NavIcon id="more" />
 						</span>
 						<span class="tab-label">{t('nav.more')}</span>
-						{#if staleCount > 0 && canWrite}
-							<span class="stale-dot" aria-label={t('nav.staleBadge', { count: staleCount })}></span>
-						{:else if showMarketUnreadInMore}
+						<!-- Stale badge lives on the Lager tab now — Mer only signals market chat. -->
+						{#if showMarketUnreadInMore}
 							<span
 								class="stale-dot"
+								role="img"
 								aria-label={t('marketV01.unreadChatsBadge', { count: getMarketUnreadCount() })}
 							></span>
 						{/if}

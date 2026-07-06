@@ -34,7 +34,7 @@ test.describe('Navigation', () => {
 		await page.goto('/planer');
 		await dismissOnboardingModalIfOpen(page);
 
-		const expiringLink = page.locator('.planer-context .home-link');
+		const expiringLink = page.getByTestId('planer-expiring-link');
 		await expect(expiringLink).toBeVisible({ timeout: 15_000 });
 		await expect(expiringLink).toHaveAttribute('href', /\/inventory/);
 		await expect(expiringLink).not.toHaveAttribute('href', /\/hem/);

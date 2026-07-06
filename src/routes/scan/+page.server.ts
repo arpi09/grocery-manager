@@ -328,7 +328,7 @@ async function recordBulkLineFeedback(
 async function bulkCreateFromForm(
 	event: import('@sveltejs/kit').RequestEvent,
 	formData: FormData,
-	eventType: 'receipt_parsed' | 'photo_round_parsed',
+	eventType: 'receipt_parsed' | 'photo_round_parsed' | 'fill_suggestions_added',
 	recordPurchases: boolean
 ) {
 	requireInventoryWriteAccess(event.locals.householdRole);
@@ -489,7 +489,9 @@ async function bulkCreateFromForm(
 			totalLines: selected.length,
 			source: 'manual'
 		});
-		redirect(302, APP_HOME_PATH);
+		/* Success moment renders globally (AppLayout) — land where the user started.
+		   No scan=added toast here: the success modal is the single feedback. */
+		redirect(302, returnTo);
 		return;
 	}
 
@@ -576,6 +578,10 @@ export const actions: Actions = {
 		try {
 			if (bulkFlow === 'photo') {
 				await bulkCreateFromForm(event, formData, 'photo_round_parsed', false);
+				return;
+			}
+			if (bulkFlow === 'starter') {
+				await bulkCreateFromForm(event, formData, 'fill_suggestions_added', false);
 				return;
 			}
 			await bulkCreateFromForm(event, formData, 'receipt_parsed', true);

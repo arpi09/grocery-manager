@@ -1,99 +1,142 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 import {
+	completeActivationFinish,
 	expectActivationScreenHeading,
 	expectOnboardingGuideVisible,
 	registerNewUser
 } from './helpers/auth';
-import { createFridgeItemViaApi } from './helpers/inventory';
 import { AXE_WCAG_TAGS } from './helpers/axe';
 
-async function expectNoModalScroll(page: import('@playwright/test').Page) {
-	const modal = page.getByTestId('activation-onboarding');
-	await expect(modal).toBeVisible();
-	const fits = await modal.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
-	expect(fits).toBe(true);
+const WELCOME_HEADING = /Welcome to Skaffu|Välkommen till Skaffu/i;
+const FILL_HEADING = /What do you have at home|Vad har ni hemma/i;
+const INVITE_HEADING = /Do you shop together|Handlar ni ihop/i;
+const FINISH_HEADING = /list is waiting|listan väntar/i;
+
+/** welcome → fill. Fresh-user trap: no reload/goto — init script wipes onboarding keys. */
+async function advanceToFill(page: Page) {
+	await expectOnboardingGuideVisible(page);
+	await expectActivationScreenHeading(page, WELCOME_HEADING);
+	await page.getByTestId('activation-cta-primary').click();
+	await expectActivationScreenHeading(page, FILL_HEADING);
 }
 
-test.describe('Activation onboarding navigation', () => {
+/** fill → invite by submitting the preselected staples. */
+async function submitStaples(page: Page) {
+	await expect(page.getByTestId('activation-cta-primary')).toHaveText(
+		/Lägg till \d+ varor|Add \d+ items/i
+	);
+	await page.getByTestId('activation-cta-primary').click();
+	await expectActivationScreenHeading(page, INVITE_HEADING);
+}
+
+test.describe('Activation onboarding v8 navigation', () => {
 	test.describe.configure({ mode: 'serial', timeout: 120_000 });
 
-	test('primary CTA and progress path move between steps without overlap @deploy-critical', async ({
+	test('happy path: welcome → fill staples → invite skip → finish opens inkop quick-add @deploy-critical', async ({
 		page
 	}) => {
 		await page.setViewportSize({ width: 390, height: 844 });
 		await registerNewUser(page);
-		await expectOnboardingGuideVisible(page);
+		await advanceToFill(page);
 
-		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
+		await expect(page.getByTestId('activation-staple-chip').first()).toBeVisible();
+		await submitStaples(page);
 
-		await page.getByTestId('activation-progress-welcome').click();
-		await expectActivationScreenHeading(page, /Welcome to Skaffu|Välkommen till Skaffu/i);
+		// Solo household — "Jag handlar själv" advances directly to finish.
+		await page.getByTestId('activation-cta-secondary').click();
+		await expectActivationScreenHeading(page, FINISH_HEADING);
+		await expect(page.getByTestId('activation-recap-seed')).toBeVisible();
 
-		const progressOverlap = await page.evaluate(() => {
-			const progress = document.querySelector('[data-testid="activation-progress-counter"]');
-			const title = document.querySelector('.screen-title');
-			if (!progress || !title) return false;
-			const progressBox = progress.getBoundingClientRect();
-			const titleBox = title.getBoundingClientRect();
-			return progressBox.bottom > titleBox.top + 2;
-		});
-		expect(progressOverlap).toBe(false);
+		await completeActivationFinish(page);
+		await expect(page).toHaveURL(/\/inkop(?:\?quick=1)?$/, { timeout: 20_000 });
+		await expect(page.getByTestId('shopping-v2-quick-add')).toBeVisible({ timeout: 20_000 });
+		await expect(page.getByTestId('activation-onboarding')).toBeHidden();
 	});
 
-	test('scan step "maybe later" closes the modal', async ({ page }) => {
-		await page.setViewportSize({ width: 390, height: 844 });
+	test('fill "maybe later" closes the modal', async ({ page }) => {
 		await registerNewUser(page);
-		await expectOnboardingGuideVisible(page);
-		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
+		await advanceToFill(page);
 
 		await page.getByTestId('activation-cta-secondary').click();
 		await expect(page.getByTestId('activation-onboarding')).toBeHidden();
 	});
 
-	test('scan step Kivra link navigates and closes the modal', async ({ page }) => {
+	test('fill receipt link navigates to scan and closes the modal', async ({ page }) => {
+		// Mobile viewport: on short desktop viewports the bottom of the chips scroller
+		// (incl. the receipt link) is clipped under the modal footer — see PR notes.
 		await page.setViewportSize({ width: 390, height: 844 });
 		await registerNewUser(page);
-		await expectOnboardingGuideVisible(page);
-		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
+		await advanceToFill(page);
 
-		await page.getByTestId('activation-kivra-link').click();
-		// /settings/kivra 302-redirects to /settings when KIVRA_FORWARD_ENABLED is off
-		// (the default in E2E and CI), so accept either landing URL.
-		await expect(page).toHaveURL(/\/settings(\/kivra)?(\?|$)/);
+		await page.getByTestId('activation-receipt-link').click();
+		await expect(page).toHaveURL(/\/scan\?.*mode=receipt/);
 		await expect(page.getByTestId('activation-onboarding')).toBeHidden();
 	});
 
-	test('progress path selects earlier completed step @deploy-critical', async ({ page }) => {
-		await page.setViewportSize({ width: 390, height: 844 });
+	test('progress dot previews completed step and Continue returns @deploy-critical', async ({
+		page
+	}) => {
 		await registerNewUser(page);
-		await expectOnboardingGuideVisible(page);
-		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Import a receipt|Importera ett kvitto/i);
+		await advanceToFill(page);
 
 		await page.getByTestId('activation-progress-welcome').click();
-		await expectActivationScreenHeading(page, /Welcome to Skaffu|Välkommen till Skaffu/i);
-		await expect(page.getByTestId('activation-cta-primary')).toBeVisible();
+		await expectActivationScreenHeading(page, WELCOME_HEADING);
+
+		// Preview mode: single "Fortsätt" CTA, no secondary.
+		const continueCta = page.getByTestId('activation-cta-primary');
+		await expect(continueCta).toHaveText(/Fortsätt|Continue/i);
+		await expect(page.getByTestId('activation-cta-secondary')).toHaveCount(0);
+
+		await continueCta.click();
+		await expectActivationScreenHeading(page, FILL_HEADING);
 	});
 
-	test('shopping step fits viewport without scroll @deploy-critical', async ({ page }) => {
+	test('invite share falls back to clipboard copy and auto-advances', async ({
+		page,
+		context
+	}) => {
+		// Headless Chromium has no navigator.share — the flow copies the invite link instead.
+		await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+		await registerNewUser(page);
+		await advanceToFill(page);
+		await submitStaples(page);
+
+		await page.getByTestId('activation-cta-primary').click();
+		await expect(page.getByTestId('activation-cta-primary')).toHaveText(
+			/Länk kopierad|Link copied/i,
+			{ timeout: 10_000 }
+		);
+
+		// Auto-advance ~1.2s after the copy confirmation.
+		await expectActivationScreenHeading(page, FINISH_HEADING);
+		await expect(page.getByTestId('activation-recap-invite')).toBeVisible();
+
+		const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
+		expect(clipboardText).toContain('/invite/');
+	});
+
+	test('fill screen fits mobile viewport without modal-body scroll @deploy-critical', async ({
+		page
+	}) => {
 		await page.setViewportSize({ width: 390, height: 844 });
 		await registerNewUser(page);
-		await expectOnboardingGuideVisible(page);
-		await page.getByTestId('activation-cta-primary').click();
-		await page.getByTestId('activation-cta-primary').click();
-		await expect(page).toHaveURL(/\/scan(?:\?.*)?mode=receipt/);
-		await createFridgeItemViaApi(page, `E2E nav ${Date.now()}`);
-		await page.goto('/hem');
-		await expect(page.getByTestId('activation-onboarding')).toBeVisible({ timeout: 20_000 });
-		await page.getByTestId('activation-cta-primary').click();
-		await page.getByTestId('activation-cta-primary').click();
-		await expectActivationScreenHeading(page, /Shop together|Inköp tillsammans/i);
-		await expectNoModalScroll(page);
+		await advanceToFill(page);
+		await expect(page.getByTestId('activation-staple-chip').first()).toBeVisible();
+
+		// The chips area (.fill-extra) may scroll internally — the modal body itself must not.
+		const modalBody = page.locator('[data-testid="activation-onboarding"] .modal-body');
+		const bodyFits = await modalBody.evaluate((el) => el.scrollHeight <= el.clientHeight + 1);
+		expect(bodyFits).toBe(true);
+
+		const cta = page.getByTestId('activation-cta-primary');
+		await expect(cta).toBeVisible();
+		const box = await cta.boundingBox();
+		expect(box).not.toBeNull();
+		if (box) {
+			expect(box.y + box.height).toBeLessThanOrEqual(844);
+		}
 	});
 });
 

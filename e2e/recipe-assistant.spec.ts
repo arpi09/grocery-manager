@@ -57,11 +57,53 @@ test.describe('Recipe assistant from header', () => {
 
 
 
+	test('pantry extras: add chip and generate with 60% data', async ({ page }) => {
+		const dialog = await openRecipeAssistant(page);
+
+		/* "Vad har ni hemma mer?" — honesty line + extras input are always available. */
+		const extras = dialog.getByTestId('recipe-extras').first();
+		await expect(extras).toBeVisible();
+
+		const input = extras.getByPlaceholder(/kyckling/i);
+		await input.fill('Halloumi');
+		await input.press('Enter');
+		const chip = extras.getByRole('button', { name: /Ta bort Halloumi/i });
+		await expect(chip).toBeVisible();
+
+		/* Remove and re-add via the button path before generating (form collapses after). */
+		await chip.click();
+		await expect(chip).toHaveCount(0);
+		await input.fill('Halloumi');
+		await extras.getByRole('button', { name: /^Lägg till$/i }).click();
+		await expect(extras.getByRole('button', { name: /Ta bort Halloumi/i })).toBeVisible();
+
+		await dialog.getByRole('button', { name: 'Generera maträtt' }).click();
+		await expect(dialog.getByTestId('recipe-result-list')).toBeVisible({ timeout: 20_000 });
+	});
+
+	test('advanced settings disclosure: portions collapsed by default, expand and generate', async ({ page }) => {
+		const dialog = await openRecipeAssistant(page);
+
+		const portions = dialog.locator('#recipe-portions');
+		const advanced = dialog.locator('.advanced-disclosure');
+
+		/* Portions + preferences live behind the "Portioner & önskemål" disclosure — collapsed by default. */
+		await expect(portions).toBeHidden();
+
+		await advanced.locator('summary').click();
+		await expect(portions).toBeVisible();
+		await portions.fill('4');
+
+		/* Generate stays reachable and works after tuning advanced settings. */
+		await dialog.getByRole('button', { name: 'Generera maträtt' }).click();
+		await expect(dialog.getByTestId('recipe-result-list')).toBeVisible({ timeout: 20_000 });
+	});
+
 	test('back from recipe detail restores generated list in modal', async ({ page }) => {
 
 		const dialog = await openRecipeAssistant(page);
 
-		await dialog.getByRole('button', { name: 'Generera recept' }).click();
+		await dialog.getByRole('button', { name: 'Generera maträtt' }).click();
 
 		const openBtn = dialog.getByTestId('recipe-open-btn');
 
@@ -93,7 +135,7 @@ test.describe('Recipe assistant from header', () => {
 
 
 
-		const generateBtn = dialog.getByRole('button', { name: 'Generera recept' });
+		const generateBtn = dialog.getByRole('button', { name: 'Generera maträtt' });
 
 		await expect(generateBtn).toBeEnabled();
 
@@ -165,7 +207,7 @@ test.describe('Recipe assistant mobile', () => {
 
 		const dialog = await openRecipeAssistant(page);
 
-		const generateBtn = dialog.getByRole('button', { name: 'Generera recept' });
+		const generateBtn = dialog.getByRole('button', { name: 'Generera maträtt' });
 
 		await expect(generateBtn).toBeEnabled();
 
@@ -179,7 +221,7 @@ test.describe('Recipe assistant mobile', () => {
 
 		const dialog = await openRecipeAssistant(page);
 
-		const generateBtn = dialog.getByRole('button', { name: 'Generera recept' });
+		const generateBtn = dialog.getByRole('button', { name: 'Generera maträtt' });
 
 		await generateBtn.click();
 
@@ -207,7 +249,7 @@ test.describe('Recipe assistant mobile', () => {
 
 		const dialog = await openRecipeAssistant(page);
 
-		await dialog.getByRole('button', { name: 'Generera recept' }).click();
+		await dialog.getByRole('button', { name: 'Generera maträtt' }).click();
 
 		await dialog.getByTestId('recipe-open-btn').click({ timeout: 20_000 });
 

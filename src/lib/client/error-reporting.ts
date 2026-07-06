@@ -12,13 +12,13 @@ const CHUNK_RELOAD_KEY = 'skaffu-chunk-reload';
 let lastKey = '';
 let lastAt = 0;
 
-function isChunkLoadError(message: string): boolean {
-	return /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module/i.test(
+export function isChunkLoadError(message: string): boolean {
+	return /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Unable to preload CSS/i.test(
 		message
 	);
 }
 
-/** Reload once after deploy when a stale tab requests removed JS chunks. */
+/** Reload once after deploy when a stale tab requests removed JS chunks or CSS assets. */
 function tryReloadOnChunkError(message: string): boolean {
 	if (!browser || !isChunkLoadError(message)) {
 		return false;

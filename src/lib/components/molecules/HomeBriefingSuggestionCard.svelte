@@ -15,6 +15,10 @@
 		ctaLoading?: boolean;
 		showActionButton?: boolean;
 		onCta?: () => void | Promise<void>;
+		/** Optional secondary action (e.g. "Inte nu" dismiss on replenishment). */
+		secondaryLabel?: string | null;
+		secondaryLoading?: boolean;
+		onSecondary?: () => void | Promise<void>;
 	}
 
 	let {
@@ -27,13 +31,17 @@
 		ctaHref = null,
 		ctaLoading = false,
 		showActionButton = false,
-		onCta
+		onCta,
+		secondaryLabel = null,
+		secondaryLoading = false,
+		onSecondary
 	}: Props = $props();
 
 	const ctaLabel = $derived(t(cta.key, cta.params));
 	const testId = $derived(variant === 'moment' ? 'home-v2-moment' : 'home-v2-for-you');
 	const showButton = $derived(canWrite && showActionButton && onCta);
 	const showLink = $derived(Boolean(ctaHref) && !showButton);
+	const showSecondary = $derived(Boolean(secondaryLabel) && Boolean(onSecondary));
 </script>
 
 <article
@@ -63,6 +71,19 @@
 		<a class="btn btn-primary btn-full" href={ctaHref} onclick={() => void onCta?.()}>
 			{ctaLabel}
 		</a>
+	{/if}
+
+	{#if showSecondary}
+		<Button
+			variant="ghost"
+			type="button"
+			fullWidth
+			loading={secondaryLoading}
+			onclick={() => void onSecondary?.()}
+			data-testid="home-v2-for-you-secondary"
+		>
+			{secondaryLabel}
+		</Button>
 	{/if}
 </article>
 

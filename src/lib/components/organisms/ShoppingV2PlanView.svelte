@@ -1,8 +1,8 @@
 <script lang="ts">
-	import MemorySuggestionList from '$lib/components/molecules/MemorySuggestionList.svelte';
+	import SundaySuggestionPanel from '$lib/components/molecules/SundaySuggestionPanel.svelte';
 	import TripSummaryPills from '$lib/components/molecules/TripSummaryPills.svelte';
 	import FirstRunEmptyState from '$lib/components/molecules/FirstRunEmptyState.svelte';
-	import type { ReplenishmentSuggestion } from '$lib/domain/replenishment';
+	import type { SundaySuggestion } from '$lib/domain/sunday-suggestion';
 	import { buildPlanHeaderTitle } from '$lib/domain/shopping-v2-presenter';
 	import { sortUncheckedItems } from '$lib/domain/shopping-trip';
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
@@ -11,38 +11,44 @@
 
 	interface Props {
 		items: ShoppingListItem[];
-		suggestions: ReplenishmentSuggestion[];
+		sundayProposal: SundaySuggestion[];
 		canEdit: boolean;
 		tripLabel?: string | null;
 		showReceiptLead?: boolean;
-		acceptingKey?: string | null;
+		addingKey?: string | null;
+		addingAll?: boolean;
 		dismissingKey?: string | null;
-		onAcceptSuggestion: (suggestion: ReplenishmentSuggestion) => void | Promise<void>;
-		onDismissSuggestion: (suggestion: ReplenishmentSuggestion) => void | Promise<void>;
+		onSundayAdd: (row: SundaySuggestion) => void | Promise<void>;
+		onSundayAddAll: (rows: SundaySuggestion[]) => void | Promise<void>;
+		onSundayDismiss: (row: SundaySuggestion) => void | Promise<void>;
 		onStartShop: () => void;
 		onAddItem: () => void;
+		onClearList?: () => void;
 		onOpenLegacy: () => void;
 	}
 
 	let {
 		items,
-		suggestions,
+		sundayProposal,
 		canEdit,
 		tripLabel = null,
 		showReceiptLead = false,
-		acceptingKey = null,
+		addingKey = null,
+		addingAll = false,
 		dismissingKey = null,
-		onAcceptSuggestion,
-		onDismissSuggestion,
+		onSundayAdd,
+		onSundayAddAll,
+		onSundayDismiss,
 		onStartShop,
 		onAddItem,
+		onClearList,
 		onOpenLegacy,
 	}: Props = $props();
 
 	const header = $derived(buildPlanHeaderTitle(tripLabel));
 	const uncheckedCount = $derived(sortUncheckedItems(items).length);
-	const hasMemory = $derived(suggestions.length > 0);
-	const showEmptyExtras = $derived(uncheckedCount > 0 || hasMemory);
+	const hasProposal = $derived(sundayProposal.length > 0);
+	const showEmptyExtras = $derived(uncheckedCount > 0 || hasProposal);
 
 	const subtitle = $derived.by(() => {
 		if (uncheckedCount === 0) {
@@ -52,7 +58,7 @@
 			/\s·\s$/,
 			''
 		);
-		return hasMemory ? `${base} · ${t('shopping.v2.plan.subtitleMemory')}` : base;
+		return hasProposal ? `${base} · ${t('shopping.v2.plan.subtitleMemory')}` : base;
 	});
 </script>
 
@@ -86,33 +92,43 @@
 	{/if}
 
 	{#if canEdit && showEmptyExtras}
+		<!-- Secondary: "Börja handla" is the plan view's single primary CTA. -->
 		<div class="receipt-import-cta" data-testid="inkop-receipt-one-tap">
-			<p class="receipt-import-lead">{t('receiptAutomation.oneTapLead')}</p>
-			<a class="btn btn-primary btn-full" href={receiptOneTapHref('/inkop')}>
+			<a class="receipt-import-link" href={receiptOneTapHref('/inkop')}>
 				{t('receiptAutomation.oneTapCta')}
 			</a>
 		</div>
 	{/if}
 
-	{#if showEmptyExtras}
-		<MemorySuggestionList
-			{suggestions}
-			{items}
-			{canEdit}
-			{acceptingKey}
-			{dismissingKey}
-			deemphasizeCadence={true}
-			onAccept={onAcceptSuggestion}
-			onDismiss={onDismissSuggestion}
-		/>
-	{/if}
+	<SundaySuggestionPanel
+		proposal={sundayProposal}
+		{canEdit}
+		{addingKey}
+		{addingAll}
+		{dismissingKey}
+		onAdd={onSundayAdd}
+		onAddAll={onSundayAddAll}
+		onDismiss={onSundayDismiss}
+	/>
 
 	<TripSummaryPills {items} {canEdit} {onStartShop} {onAddItem} />
 
 	{#if canEdit}
-		<button type="button" class="legacy-link" onclick={onOpenLegacy}>
-			{t('shopping.v2.overflow.legacyList')}
-		</button>
+		<div class="plan-footer-actions">
+			<button type="button" class="legacy-link" onclick={onOpenLegacy}>
+				{t('shopping.v2.overflow.legacyList')}
+			</button>
+			{#if onClearList && uncheckedCount > 0}
+				<button
+					type="button"
+					class="clear-link"
+					data-testid="shopping-v2-clear-list"
+					onclick={onClearList}
+				>
+					{t('shopping.v2.clear.cta')}
+				</button>
+			{/if}
+		</div>
 	{/if}
 </div>
 
@@ -155,22 +171,33 @@
 		white-space: pre-line;
 	}
 
-	.receipt-import-lead {
-		margin: 0;
-		padding: var(--space-sm) var(--space-md);
-		border-radius: var(--radius-sm);
-		border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
-		background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
-		font-size: 0.9375rem;
-		font-weight: 600;
-		color: var(--color-primary);
-		white-space: pre-line;
-	}
-
 	.receipt-import-cta {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-md);
+	}
+
+	.receipt-import-link {
+		align-self: flex-start;
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: underline;
+	}
+
+	.receipt-import-link:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+
+	.plan-footer-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-lg);
 	}
 
 	.legacy-link {
@@ -184,6 +211,27 @@
 		cursor: pointer;
 		text-decoration: underline;
 		min-height: var(--touch-target-min);
+	}
+
+	.clear-link {
+		border: none;
+		background: none;
+		padding: 0;
+		font: inherit;
+		font-weight: 600;
+		color: var(--color-text-muted);
+		cursor: pointer;
+		text-decoration: underline;
+		min-height: var(--touch-target-min);
+	}
+
+	.clear-link:hover {
+		color: var(--color-danger, #b3261e);
+	}
+
+	.clear-link:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 
 

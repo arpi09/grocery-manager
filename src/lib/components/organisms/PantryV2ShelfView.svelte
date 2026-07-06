@@ -7,6 +7,7 @@
 		trackPantryZoneOpened
 	} from '$lib/client/pantry-v2-telemetry';
 	import type { PantryShelfViewModel } from '$lib/domain/pantry-shelf';
+	import { buildEatFirstWeekUrl } from '$lib/domain/eat-first-week';
 
 	interface Props {
 		shelf: PantryShelfViewModel;
@@ -15,8 +16,6 @@
 	}
 
 	let { shelf, canConsume = false, onConsume }: Props = $props();
-
-	const useSoonHref = '/inventory/all?filter=expiring';
 
 	function handleUseSoonTap() {
 		trackPantryUseSoonTapped(shelf.useSoon.length);
@@ -28,7 +27,12 @@
 </script>
 
 <div class="pantry-shelf-view" data-testid="pantry-v2-shelf">
-	<UseSoonBand count={shelf.useSoon.length} names={shelf.useSoonNames} href={useSoonHref} onTap={handleUseSoonTap} />
+	<UseSoonBand
+		count={shelf.useSoon.length}
+		names={shelf.useSoonNames}
+		cookHref={buildEatFirstWeekUrl('pantry')}
+		onTap={handleUseSoonTap}
+	/>
 
 	{#each shelf.zones as zone (zone.location)}
 		<section class="zone" aria-labelledby="pantry-zone-{zone.location}">

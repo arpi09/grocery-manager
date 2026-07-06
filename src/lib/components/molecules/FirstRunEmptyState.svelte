@@ -6,6 +6,9 @@
 		ctaLabel?: string;
 		ctaHref?: string;
 		onCta?: () => void;
+		/** Alternate path rendered as a text link — never a second filled button. */
+		secondaryLabel?: string;
+		secondaryHref?: string;
 		helperText?: string;
 		analyticsId?: string;
 		testid?: string;
@@ -18,6 +21,8 @@
 		ctaLabel,
 		ctaHref,
 		onCta,
+		secondaryLabel,
+		secondaryHref,
 		helperText,
 		analyticsId,
 		testid
@@ -52,6 +57,9 @@
 					<span class="cta-glyph" aria-hidden="true">+</span>{ctaLabel}
 				</a>
 			{/if}
+		{/if}
+		{#if secondaryLabel && secondaryHref}
+			<a class="secondary-link" href={secondaryHref}>{secondaryLabel}</a>
 		{/if}
 		{#if helperText}
 			<p class="helper">
@@ -176,6 +184,21 @@
 	.cta-glyph {
 		font-size: 20px;
 		line-height: 1;
+	}
+
+	.secondary-link {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min, 2.75rem);
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: underline;
+	}
+
+	.secondary-link:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 
 	.helper {

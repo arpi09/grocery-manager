@@ -17,6 +17,7 @@ import {
 } from '$lib/marketing/acquisition-attribution';
 import { APP_HOME_PATH, INKOP_PATH } from '$lib/navigation/app-home';
 import { consumeListaJoinCookie } from '$lib/server/lista-join-cookie';
+import { resetRateLimitsForTests } from '$lib/server/auth-rate-limit';
 import { createIntegrationDb, type IntegrationDbContext } from '$lib/test/integration-db';
 
 const { dbState, shareFlag, diState } = vi.hoisted(() => ({
@@ -59,7 +60,7 @@ vi.mock('$lib/server/di', () => ({
 	}
 }));
 
-import { load as loadListaPage } from './+page.server';
+import { actions as listaActions, load as loadListaPage } from './+page.server';
 
 function createCookieJar() {
 	const jar = new Map<string, string>();
@@ -111,6 +112,7 @@ describe('Lista guest join integration', () => {
 	beforeEach(async () => {
 		await integrationDb.reset();
 		shareFlag.enabled = true;
+		resetRateLimitsForTests();
 		await integrationDb.seedUser({ id: 'owner-a', email: 'owner@example.com' });
 		await integrationDb.seedHousehold({
 			id: 'household-a',
@@ -183,6 +185,80 @@ describe('Lista guest join integration', () => {
 			'Tomat',
 			'Paprika'
 		]);
+	});
+
+	it('exposes the live list for anonymous guests', async () => {
+		const token = await createShareToken(['Mjölk', 'Bröd']);
+		const cookies = createCookieJar();
+
+		const result = (await loadListaPage({
+			params: { token },
+			locals: { user: null, householdService, pmfService, shoppingListService },
+			cookies
+		} as unknown as Parameters<typeof loadListaPage>[0])) as {
+			live: { items: Array<{ id: string; name: string; checked: boolean }> } | null;
+		};
+
+		expect(result.live).not.toBeNull();
+		expect(result.live!.items.map((item) => item.name)).toEqual(['Mjölk', 'Bröd']);
+		expect(result.live!.items.every((item) => item.id.length > 0)).toBe(true);
+	});
+
+	it('lets a guest toggle an item via the share token', async () => {
+		const token = await createShareToken(['Mjölk']);
+		const [item] = await shoppingListService.listItems('household-a');
+
+		const formData = new FormData();
+		formData.set('id', item.id);
+
+		const result = (await listaActions.toggle({
+			params: { token },
+			request: new Request('http://localhost/lista', { method: 'POST', body: formData }),
+			locals: { user: null, shoppingListService, pmfService }
+		} as unknown as Parameters<typeof listaActions.toggle>[0])) as {
+			success?: boolean;
+			checked?: boolean;
+		};
+
+		expect(result).toMatchObject({ success: true, checked: true });
+		const [updated] = await shoppingListService.listItems('household-a');
+		expect(updated.checked).toBe(true);
+
+		/* Second toggle puts it back — guests can undo their own mistakes. */
+		const undoData = new FormData();
+		undoData.set('id', item.id);
+		const undone = (await listaActions.toggle({
+			params: { token },
+			request: new Request('http://localhost/lista', { method: 'POST', body: undoData }),
+			locals: { user: null, shoppingListService, pmfService }
+		} as unknown as Parameters<typeof listaActions.toggle>[0])) as { checked?: boolean };
+		expect(undone.checked).toBe(false);
+
+		await vi.waitFor(async () => {
+			const events = await integrationDb.db.select().from(productEventTable);
+			expect(
+				events.filter((event) => (event.eventType as string) === 'shared_list_item_toggled')
+			).toHaveLength(2);
+		});
+	});
+
+	it('rejects guest toggles for unknown or expired tokens', async () => {
+		await createShareToken(['Mjölk']);
+		const [item] = await shoppingListService.listItems('household-a');
+
+		const formData = new FormData();
+		formData.set('id', item.id);
+
+		await expect(
+			listaActions.toggle({
+				params: { token: 'unknown-token' },
+				request: new Request('http://localhost/lista', { method: 'POST', body: formData }),
+				locals: { user: null, shoppingListService, pmfService }
+			} as unknown as Parameters<typeof listaActions.toggle>[0])
+		).rejects.toMatchObject({ status: 404 });
+
+		const [unchanged] = await shoppingListService.listItems('household-a');
+		expect(unchanged.checked).toBe(false);
 	});
 
 	it('signup URL uses shopping_share acquisition attribution for lista wedge', async () => {

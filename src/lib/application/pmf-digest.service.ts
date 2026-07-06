@@ -36,7 +36,7 @@ export class PmfDigestService {
 			this.pmfService.getWeeklyReview(),
 			this.adminService.getDashboardStats(),
 			this.waitlistService.count(),
-			this.adminInsightsService.getWeeklyDigestParagraph()
+			this.adminInsightsService.getWeeklyDigestParagraphPrebatchedFirst()
 		]);
 
 		const content = buildPmfDigestEmailContent({

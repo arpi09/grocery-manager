@@ -11,7 +11,6 @@
 	import PageContainer from '$lib/components/molecules/PageContainer.svelte';
 	import MealPlanCalendar from '$lib/components/organisms/MealPlanCalendar.svelte';
 	import MealPlanIdeasPanel from '$lib/components/organisms/MealPlanIdeasPanel.svelte';
-	import PlanerContextBanner from '$lib/components/molecules/PlanerContextBanner.svelte';
 	import EatHubHero from '$lib/components/molecules/EatHubHero.svelte';
 
 	let { data } = $props();
@@ -41,11 +40,7 @@
 	/>
 
 	<PageContainer>
-		<EatHubHero />
-		<PlanerContextBanner
-			expiringSoon={data.expiringSoon}
-			plannedMealCount={data.plannedMealCount}
-		/>
+		<EatHubHero expiringSoon={data.expiringSoon} plannedMealCount={data.plannedMealCount} />
 		<section class="planner-grid">
 			<details id="ata-calendar" class="calendar-fold" bind:open={calendarOpen}>
 				<summary>
