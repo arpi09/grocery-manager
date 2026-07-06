@@ -6,6 +6,7 @@ import {
 	loginAsAdmin
 } from './helpers/auth';
 import { loadFixture, mockBarcodeLookup } from './helpers/mock-api';
+import { ensureFridgeInventoryItem } from './helpers/inventory';
 
 test.describe('Scan and inventory', () => {
 	test('bare /scan opens scan hub with three modes', async ({ page }) => {
@@ -143,13 +144,14 @@ test.describe('Scan and inventory', () => {
 	});
 
 	test('inventory list uses card stack with sort chips', async ({ page }) => {
+		/* Seed a fridge row so the list (not the empty state) always renders — the
+		   assertion is about the sort chips, which only exist once rows are present. */
+		await ensureFridgeInventoryItem(page, `E2E Sort ${Date.now()}`);
 		await page.goto('/inventory/fridge');
 		await dismissOnboardingModalIfOpen(page);
 
 		const table = page.getByTestId('inventory-table');
-		if (!(await table.isVisible({ timeout: 15_000 }).catch(() => false))) {
-			test.skip(true, 'No inventory rows in fridge — list hidden behind empty state');
-		}
+		await expect(table).toBeVisible({ timeout: 15_000 });
 		await expect(table.getByRole('button', { name: /Namn|Name/i })).toBeVisible();
 		await expect(table.getByRole('button', { name: /Antal|Qty|Quantity/i })).toBeVisible();
 		await expect(table.getByRole('button', { name: /Bäst före|Expiry/i })).toBeVisible();
