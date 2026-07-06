@@ -125,6 +125,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - perf(shell): lazy-load RecipeAssistant out of the app-shell bundle ([#239](https://github.com/arpi09/grocery-manager/pull/239)) — Beteende oförändrat: `bind:open` styr modalen som förut; stänger → `recipeOpen=false` → avmontas.
 - chore(dead-code): remove 53 verified-orphan files ([#238](https://github.com/arpi09/grocery-manager/pull/238)) — **Komponenter** (~38): `Skaffu{Card,FilterBar,ListPanel}`, `Home{QuickAdd,ExpiringList,BriefingHeader}`, `EngagementStrip`, `HouseholdActivityFeed`, `RowOverflowMenu`, `PantryHealthInsights`, `PriceMemoryChip`, `WastePrevented*`, `WrappedBanner`, `AnalyticsDashboard`, `EatFirstSection`, `ExpiringSoonSection`, `OnboardingScanModal`, `ReceiptAutopilotSection`, `AuthLayout`, `MetricBar`, `ProgressRing`, m.fl.
 - refactor(recept): extrahera delad add-missing toast/banner-presentation ([#241](https://github.com/arpi09/grocery-manager/pull/241)) — Panelerna (`MealPlanIdeasPanel`, `CalendarDaySheet`) skickar `listLinkLabel` (Visa inköpslistan) → länk-suffix när varor lades till.
+- chore(lint): cache eslint + lint only changed files in quick:dev loop ([#240](https://github.com/arpi09/grocery-manager/pull/240)) — `lint` kör nu med `--cache`/`--cache-location .eslintcache` → upprepade fulla körningar (inkl. CI `gate:fast`) hoppar över oförändrade filer.
 
 ### Added
 
