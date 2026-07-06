@@ -45,8 +45,7 @@
 	<meta name="description" content={description} />
 	<meta name="robots" content={robots} />
 	<link rel="canonical" href={canonicalUrl} />
-	<link rel="alternate" hreflang="sv" href={canonicalUrl} />
-	<link rel="alternate" hreflang="en" href={canonicalUrl} />
+	<!-- One URL serves both locales (cookie-based); only x-default is a truthful hreflang here. -->
 	<link rel="alternate" hreflang="x-default" href={canonicalUrl} />
 	<meta property="og:site_name" content={SITE_NAME} />
 	<meta property="og:title" content={ogTitle} />

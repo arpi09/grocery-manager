@@ -208,6 +208,28 @@ export function buildLandingJsonLd(
 	];
 }
 
+export interface BreadcrumbItem {
+	name: string;
+	path: string;
+}
+
+/** Breadcrumb rich result — e.g. Hem › Guider › [artikel] on guide pages. */
+export function buildBreadcrumbJsonLd(
+	siteOrigin: string,
+	items: BreadcrumbItem[]
+): Record<string, unknown> {
+	return {
+		'@context': 'https://schema.org',
+		'@type': 'BreadcrumbList',
+		itemListElement: items.map((item, index) => ({
+			'@type': 'ListItem',
+			position: index + 1,
+			name: item.name,
+			item: marketingCanonicalUrl(item.path, siteOrigin)
+		}))
+	};
+}
+
 export interface FaqJsonLdItem {
 	question: string;
 	answer: string;
