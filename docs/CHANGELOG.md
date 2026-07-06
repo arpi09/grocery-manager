@@ -120,6 +120,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - docs(reality): prod SHA 8efc9d33c — declutter-batch Lager+Äta live (2026.7.5) ([#225](https://github.com/arpi09/grocery-manager/pull/225)) — Prod SHA `86b9e061c` → **`8efc9d33c`** (release **2026.7.5**, deploy_tier=auto→fast, e2e critical grön).
 - docs(reality): prod SHA 6ce2be61e — PWA SW reload-loop-fix live (2026.7.5.2) ([#229](https://github.com/arpi09/grocery-manager/pull/229)) — Prod SHA + Master SHA-rader uppdaterade.
 - test(recept): e2e-vakt för Portioner & önskemål-disclosuren ([#235](https://github.com/arpi09/grocery-manager/pull/235)) — ESLint grönt lokalt.
+- perf(shell): lazy-load RecipeAssistant out of the app-shell bundle ([#239](https://github.com/arpi09/grocery-manager/pull/239)) — Beteende oförändrat: `bind:open` styr modalen som förut; stänger → `recipeOpen=false` → avmontas.
 
 ### Added
 
