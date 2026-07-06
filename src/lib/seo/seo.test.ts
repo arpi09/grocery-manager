@@ -67,7 +67,15 @@ describe('buildSitemapXml', () => {
 			expect(xml).toContain(`<loc>${loc}</loc>`);
 		}
 		expect(xml).toContain('<loc>https://skaffu.com/guider</loc>');
-		expect(xml).not.toContain('/hem');
+		/* Private app route must not be crawled — assert the exact URL, not a loose substring
+		   (the /kvitto/hemkop store page legitimately contains "/hem"). */
+		expect(xml).not.toContain('<loc>https://skaffu.com/hem</loc>');
+	});
+
+	it('includes programmatic store pages', async () => {
+		const xml = await buildSitemapXml('https://skaffu.com');
+		expect(xml).toContain('<loc>https://skaffu.com/kvitto/ica</loc>');
+		expect(xml).toContain('<loc>https://skaffu.com/kvitto/hemkop</loc>');
 	});
 
 	it('includes published guide slugs in sitemap', async () => {

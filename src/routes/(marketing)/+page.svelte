@@ -27,6 +27,7 @@
 	const isLoggedIn = $derived(Boolean(page.data.user?.id));
 	const landing = $derived(content.landing);
 	const comparison = $derived(content.comparison);
+	const weeklyTip = $derived(data.weeklyTip);
 	const jsonLd = $derived(buildLandingJsonLd(canonicalUrl, content.meta.description));
 
 	let heroReady = $state(false);
@@ -201,6 +202,18 @@
 		</ul>
 	</section>
 </MarketingScrollReveal>
+
+{#if weeklyTip}
+	<MarketingScrollReveal delay={30} variant="fade">
+		<section class="weekly-tip" aria-label={landing.weeklyTipAria}>
+			<div class="weekly-tip-inner">
+				<span class="weekly-tip-kicker label-caps">{landing.weeklyTipKicker}</span>
+				<p class="weekly-tip-text">{weeklyTip.tip}</p>
+				<p class="weekly-tip-detail">{weeklyTip.detail}</p>
+			</div>
+		</section>
+	</MarketingScrollReveal>
+{/if}
 
 {#if latestGuides.length > 0}
 	<MarketingScrollReveal delay={40}>
@@ -556,6 +569,38 @@
 	.stats-strip {
 		border-block: 1px solid var(--color-border);
 		background: color-mix(in srgb, var(--color-surface) 88%, var(--color-bg));
+	}
+
+	.weekly-tip {
+		padding: var(--space-lg);
+	}
+
+	.weekly-tip-inner {
+		max-width: 56rem;
+		margin: 0 auto;
+		padding: var(--space-lg) var(--space-xl);
+		border-radius: var(--radius-lg);
+		border: 1px solid color-mix(in srgb, var(--color-accent) 30%, var(--color-border));
+		background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+	}
+
+	.weekly-tip-kicker {
+		display: block;
+		margin-bottom: var(--space-sm);
+		color: var(--color-primary);
+	}
+
+	.weekly-tip-text {
+		margin: 0;
+		font-size: 1.15rem;
+		font-weight: 700;
+		line-height: 1.3;
+	}
+
+	.weekly-tip-detail {
+		margin: var(--space-sm) 0 0;
+		color: var(--color-text-muted);
+		line-height: var(--line-height-body);
 	}
 
 	.stats-list {

@@ -21,6 +21,11 @@ export function isRapportPath(pathname: string): boolean {
 	return /^\/rapport\/\d{4}-\d{2}$/.test(pathname);
 }
 
+/** Programmatic per-store kvitto pages: /kvitto/[store] (public, indexable SEO). */
+export function isStoreKvittoPath(pathname: string): boolean {
+	return /^\/kvitto\/[a-z0-9-]+$/.test(pathname);
+}
+
 export function isExpiringSharePath(pathname: string): boolean {
 	return pathname.startsWith('/dela/');
 }
@@ -37,6 +42,7 @@ export function isMarketingPath(pathname: string): boolean {
 	return (
 		(PUBLIC_MARKETING_PATHS as readonly string[]).includes(pathname) ||
 		isRapportPath(pathname) ||
-		isGuiderPath(pathname)
+		isGuiderPath(pathname) ||
+		isStoreKvittoPath(pathname)
 	);
 }

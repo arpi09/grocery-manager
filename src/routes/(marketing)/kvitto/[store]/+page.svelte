@@ -1,45 +1,58 @@
 <script lang="ts">
+	import { ArrowRight } from '@lucide/svelte';
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
 	import MarketingPageHero from '$lib/components/marketing/MarketingPageHero.svelte';
 	import MarketingScrollReveal from '$lib/components/marketing/MarketingScrollReveal.svelte';
 	import MarketingStepCard from '$lib/components/marketing/MarketingStepCard.svelte';
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
-	import { ArrowRight } from '@lucide/svelte';
-	import { buildFaqPageJsonLd, buildMarketingWebPageJsonLd } from '$lib/seo/seo';
+	import {
+		buildBreadcrumbJsonLd,
+		buildFaqPageJsonLd,
+		buildMarketingWebPageJsonLd
+	} from '$lib/seo/seo';
 	import { STORE_GUIDES } from '$lib/marketing/store-guides';
 
 	let { data } = $props();
 
-	const { marketing: content, loginUrl, registerUrl, canonicalUrl, marketingLocale } = data;
-	const page = content.receiptGuide;
+	const { marketing: content, storeGuide, loginUrl, registerUrl, canonicalUrl, marketingLocale } =
+		data;
 	const siteOrigin = new URL(canonicalUrl).origin;
-	const faqItems = page.faq ?? [];
+	const path = `/kvitto/${storeGuide.slug}`;
+
+	/* Cross-link the other chains so each page has real internal links, not a dead end. */
+	const otherStores = STORE_GUIDES.filter((s) => s.slug !== storeGuide.slug);
+
 	const jsonLd = [
-		buildMarketingWebPageJsonLd(siteOrigin, '/kvitto-pdf-kivra', page.meta.ogTitle, page.meta.description),
-		...(faqItems.length > 0 ? [buildFaqPageJsonLd(canonicalUrl, faqItems)] : [])
+		buildMarketingWebPageJsonLd(siteOrigin, path, storeGuide.meta.ogTitle, storeGuide.meta.description),
+		buildFaqPageJsonLd(canonicalUrl, storeGuide.faq),
+		buildBreadcrumbJsonLd(siteOrigin, [
+			{ name: content.siteName, path: '/' },
+			{ name: 'Kvitto-PDF', path: '/kvitto-pdf-kivra' },
+			{ name: storeGuide.storeName, path }
+		])
 	];
 </script>
 
 <MarketingSeoHead
-	title={`${page.meta.title} — ${content.siteName}`}
-	description={page.meta.description}
-	ogTitle={page.meta.ogTitle}
-	ogDescription={page.meta.ogDescription}
+	title={`${storeGuide.meta.title} — ${content.siteName}`}
+	description={storeGuide.meta.description}
+	ogTitle={storeGuide.meta.ogTitle}
+	ogDescription={storeGuide.meta.ogDescription}
 	{canonicalUrl}
 	locale={marketingLocale}
 	{jsonLd}
 />
 
 <MarketingPageHero>
-	<h1>{page.title}</h1>
-	<p>{page.lead}</p>
+	<h1>{storeGuide.h1}</h1>
+	<p>{storeGuide.lead}</p>
 </MarketingPageHero>
 
 <MarketingScrollReveal>
 	<section class="section">
 		<div class="inner">
 			<ul class="points">
-				{#each page.points as point (point)}
+				{#each storeGuide.points as point (point)}
 					<li>{point}</li>
 				{/each}
 			</ul>
@@ -47,51 +60,47 @@
 	</section>
 </MarketingScrollReveal>
 
-{#if page.steps && page.steps.length > 0}
-	<MarketingScrollReveal delay={40}>
-		<section class="section">
-			<div class="inner steps-grid">
-				{#each page.steps as step, i (step.step)}
-					<div class="step-reveal" style:--card-i={i}>
-						<MarketingStepCard {step} />
-					</div>
-				{/each}
-			</div>
-		</section>
-	</MarketingScrollReveal>
-{/if}
+<MarketingScrollReveal delay={40}>
+	<section class="section">
+		<div class="inner steps-grid">
+			{#each storeGuide.steps as step, i (step.step)}
+				<div class="step-reveal" style:--card-i={i}>
+					<MarketingStepCard {step} />
+				</div>
+			{/each}
+		</div>
+	</section>
+</MarketingScrollReveal>
 
-{#if faqItems.length > 0}
-	<MarketingScrollReveal delay={60}>
-		<section class="section">
-			<div class="inner faq-list">
-				{#each faqItems as item (item.question)}
-					<details class="faq-item">
-						<summary>{item.question}</summary>
-						<p>{item.answer}</p>
-					</details>
-				{/each}
-			</div>
-		</section>
-	</MarketingScrollReveal>
-{/if}
+<MarketingScrollReveal delay={60}>
+	<section class="section">
+		<div class="inner faq-list">
+			{#each storeGuide.faq as item (item.question)}
+				<details class="faq-item">
+					<summary>{item.question}</summary>
+					<p>{item.answer}</p>
+				</details>
+			{/each}
+		</div>
+	</section>
+</MarketingScrollReveal>
 
 <MarketingScrollReveal delay={80} variant="scale">
 	<MarketingCta
 		title={content.landing.finalCtaTitle}
 		lead={content.landing.finalCtaLead}
-		primaryLabel={content.cta.openApp}
-		primaryHref={loginUrl}
-		secondaryLabel={content.cta.register}
-		secondaryHref={registerUrl}
+		primaryLabel={content.cta.tryFree}
+		primaryHref={registerUrl}
+		secondaryLabel={content.cta.login}
+		secondaryHref={loginUrl}
 	/>
 </MarketingScrollReveal>
 
-<section class="section store-guides-section">
+<section class="section other-stores">
 	<div class="inner">
-		<h2>Kvitto per butik</h2>
+		<h2>Kvitto från andra butiker</h2>
 		<ul class="store-links">
-			{#each STORE_GUIDES as store (store.slug)}
+			{#each otherStores as store (store.slug)}
 				<li>
 					<a href="/kvitto/{store.slug}">
 						{store.storeName}
@@ -99,15 +108,15 @@
 					</a>
 				</li>
 			{/each}
+			<li>
+				<a href="/kvitto-pdf-kivra">
+					Så funkar kvitto-PDF
+					<ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
+				</a>
+			</li>
 		</ul>
 	</div>
 </section>
-
-{#if page.relatedHref && page.relatedLabel}
-	<p class="related-wrap">
-		<a href={page.relatedHref}>{page.relatedLabel}</a>
-	</p>
-{/if}
 
 <style>
 	.section {
@@ -191,7 +200,7 @@
 		line-height: var(--line-height-body);
 	}
 
-	.store-guides-section h2 {
+	.other-stores h2 {
 		font-size: 1.15rem;
 		margin: 0 0 var(--space-md);
 	}
@@ -215,22 +224,6 @@
 	}
 
 	.store-links a:hover {
-		text-decoration: underline;
-	}
-
-	.related-wrap {
-		text-align: center;
-		padding: 0 var(--space-lg) var(--space-xl);
-		font-size: var(--font-size-body-sm);
-	}
-
-	.related-wrap a {
-		color: var(--color-primary);
-		font-weight: 600;
-		text-decoration: none;
-	}
-
-	.related-wrap a:hover {
 		text-decoration: underline;
 	}
 

@@ -10,6 +10,7 @@ import {
 	resolveLandingVariant
 } from '$lib/marketing/landing-variants';
 import { getLatestPublishedGuides } from '$lib/marketing/guides.server';
+import { getWeeklyWasteTip } from '$lib/marketing/waste-tips';
 import { guideLoaderDepsFromService } from '$lib/marketing/guide-loader-deps';
 import { pmfService } from '$lib/server/di';
 import { recordMarketingEvent } from '$lib/server/marketing-analytics';
@@ -61,6 +62,7 @@ export const load: PageServerLoad = async ({ url, cookies, parent, locals }) => 
 		landingVariant: variant,
 		receiptHeroVariant: receiptHeroActive ? receiptHeroVariant : null,
 		hero,
+		weeklyTip: getWeeklyWasteTip(new Date()),
 		latestGuides: await getLatestPublishedGuides(3, guideLoaderDepsFromService(locals.guideArticleService))
 	};
 };
