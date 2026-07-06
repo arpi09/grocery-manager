@@ -128,6 +128,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - refactor(recept): extrahera delad add-missing toast/banner-presentation ([#241](https://github.com/arpi09/grocery-manager/pull/241)) — Panelerna (`MealPlanIdeasPanel`, `CalendarDaySheet`) skickar `listLinkLabel` (Visa inköpslistan) → länk-suffix när varor lades till.
 - chore(lint): cache eslint + lint only changed files in quick:dev loop ([#240](https://github.com/arpi09/grocery-manager/pull/240)) — `lint` kör nu med `--cache`/`--cache-location .eslintcache` → upprepade fulla körningar (inkl. CI `gate:fast`) hoppar över oförändrade filer.
 - docs(reality): prod SHA 473f25f12 — batch live (2026.7.6.2) ([#245](https://github.com/arpi09/grocery-manager/pull/245)) — [x] Docs-only
+- docs(readme): rewrite as English overview — product, architecture, run-locally ([#246](https://github.com/arpi09/grocery-manager/pull/246)) — English, factual tone (no marketing voice).
 
 ### Added
 
