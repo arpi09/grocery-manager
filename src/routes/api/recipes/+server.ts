@@ -41,6 +41,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			: undefined;
 
 	if (isE2eMockAiEnabled()) {
+		// Deterministic empty-state path for e2e: a sentinel extra item forces the
+		// "no suitable recipes" note (mirrors the real empty response) so the neutral
+		// empty UX can be asserted without a live model.
+		if (extraItems.some((item) => item.toLowerCase() === '__tomt__')) {
+			return json({ recipes: [], note: translate(locale, 'recipe.noSuitableInventoryNote') });
+		}
 		const recipes = e2eMockRecipeSuggestions();
 		const savedIdeas = await locals.mealPlanService.storeGeneratedIdeas(auth.user.id, recipes);
 		return json({ recipes: savedIdeas, portions });

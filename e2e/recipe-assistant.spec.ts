@@ -99,6 +99,23 @@ test.describe('Recipe assistant from header', () => {
 		await expect(dialog.getByTestId('recipe-result-list')).toBeVisible({ timeout: 20_000 });
 	});
 
+	test('empty result shows the neutral no-suitable note, not an error', async ({ page }) => {
+		const dialog = await openRecipeAssistant(page);
+
+		/* Sentinel extra item makes the mocked API return an empty result with a note. */
+		const extras = dialog.getByTestId('recipe-extras').first();
+		const input = extras.getByPlaceholder(/kyckling/i);
+		await input.fill('__tomt__');
+		await input.press('Enter');
+
+		await dialog.getByRole('button', { name: 'Generera maträtt' }).click();
+
+		/* U3: an empty result is a neutral note (info), not a result list and not a red error. */
+		await expect(dialog.locator('.note')).toBeVisible({ timeout: 20_000 });
+		await expect(dialog.getByTestId('recipe-result-list')).toHaveCount(0);
+		await expect(dialog.locator('.feedback-error')).toHaveCount(0);
+	});
+
 	test('back from recipe detail restores generated list in modal', async ({ page }) => {
 
 		const dialog = await openRecipeAssistant(page);
