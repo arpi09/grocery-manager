@@ -13,6 +13,7 @@ vi.mock('$env/dynamic/public', () => ({
 
 import {
 	buildArticleJsonLd,
+	buildBreadcrumbJsonLd,
 	buildFaqPageJsonLd,
 	buildLandingJsonLd,
 	buildMarketingWebPageJsonLd,
@@ -84,6 +85,25 @@ describe('buildSitemapXml', () => {
 			const staticBlock = xml.split('/guider/')[0];
 			expect(staticBlock).not.toContain(`<lastmod>${today}</lastmod>`);
 		}
+	});
+});
+
+describe('buildBreadcrumbJsonLd', () => {
+	it('builds an ordered BreadcrumbList with absolute item URLs', () => {
+		const json = buildBreadcrumbJsonLd('https://skaffu.com', [
+			{ name: 'Skaffu', path: '/' },
+			{ name: 'Guider', path: '/guider' },
+			{ name: 'Minska matsvinn', path: '/guider/minska-matsvinn' }
+		]);
+		expect(json['@type']).toBe('BreadcrumbList');
+		const items = json.itemListElement as Array<Record<string, unknown>>;
+		expect(items).toHaveLength(3);
+		expect(items[0]).toMatchObject({ position: 1, name: 'Skaffu', item: 'https://skaffu.com' });
+		expect(items[2]).toMatchObject({
+			position: 3,
+			name: 'Minska matsvinn',
+			item: 'https://skaffu.com/guider/minska-matsvinn'
+		});
 	});
 });
 

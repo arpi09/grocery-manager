@@ -5,20 +5,27 @@
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
 	import { guideRegisterUrl } from '$lib/marketing/guides';
 	import { trackProductEvent } from '$lib/client/product-events';
-	import { buildArticleJsonLd } from '$lib/seo/seo';
+	import { buildArticleJsonLd, buildBreadcrumbJsonLd } from '$lib/seo/seo';
 
 	let { data } = $props();
 
 	const { marketing: content, guide, loginUrl, registerUrl, canonicalUrl, marketingLocale } = data;
 	const siteOrigin = new URL(canonicalUrl).origin;
 	const guideRegister = guideRegisterUrl(guide.slug, registerUrl);
-	const jsonLd = buildArticleJsonLd(siteOrigin, {
-		slug: guide.slug,
-		title: guide.title,
-		description: guide.description,
-		date: guide.date,
-		keywords: guide.keywords
-	});
+	const jsonLd = [
+		buildArticleJsonLd(siteOrigin, {
+			slug: guide.slug,
+			title: guide.title,
+			description: guide.description,
+			date: guide.date,
+			keywords: guide.keywords
+		}),
+		buildBreadcrumbJsonLd(siteOrigin, [
+			{ name: content.siteName, path: '/' },
+			{ name: content.guidesHub.title, path: '/guider' },
+			{ name: guide.title, path: `/guider/${guide.slug}` }
+		])
+	];
 
 	function formatDate(isoDate: string): string {
 		const [year, month, day] = isoDate.split('-').map(Number);
