@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import Button from '$lib/components/atoms/Button.svelte';
 	import AddMissingFeedback from '$lib/components/molecules/AddMissingFeedback.svelte';
+	import AiLoadingSkeleton from '$lib/components/molecules/AiLoadingSkeleton.svelte';
 	import ExpandableCopy from '$lib/components/molecules/ExpandableCopy.svelte';
 	import { trackAtaRecipeOpened } from '$lib/client/ata-telemetry';
 	import { showClientToast } from '$lib/utils/client-toast.svelte';
@@ -228,7 +229,7 @@
 
 	{#if loading}
 
-		<p class="empty">{t('common.loading')}</p>
+		<AiLoadingSkeleton messageKey="ai.loadingPantry" />
 
 	{:else if loadError}
 

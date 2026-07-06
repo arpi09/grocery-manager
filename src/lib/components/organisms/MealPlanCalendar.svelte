@@ -300,7 +300,7 @@
 
 	.month-nav {
 		position: sticky;
-		top: 0;
+		top: var(--sticky-below-header);
 		z-index: 5;
 		display: grid;
 		grid-template-columns: minmax(var(--touch-target-min), auto) 1fr minmax(var(--touch-target-min), auto);

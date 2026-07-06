@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import { Sparkles } from '@lucide/svelte';
+	import { Sparkles, Clock } from '@lucide/svelte';
 	import { OPEN_RECIPE_IDEAS } from '$lib/navigation/app-layout-context';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
 	import { expiringItemsHref } from '$lib/navigation/context-hrefs';
@@ -38,7 +38,15 @@
 
 		<div class="hero-meta">
 			<a class="text-action" href="/planer/vecka">{t('planer.contextWeeklyLink')}</a>
-			<a class="text-action" href={homeHref} data-testid="planer-expiring-link">
+			<a
+				class="text-action"
+				class:expiring-chip={expiringCount > 0}
+				href={homeHref}
+				data-testid="planer-expiring-link"
+			>
+				{#if expiringCount > 0}
+					<Clock size={15} strokeWidth={2.5} aria-hidden="true" />
+				{/if}
 				{t('planer.contextHomeLink')}{#if expiringCount > 0} · {expiringCount}{/if}
 			</a>
 			{#if plannedMealCount > 0}
@@ -94,6 +102,20 @@
 	.planned-count {
 		font-size: var(--font-size-body-sm);
 		color: var(--color-text-muted);
+	}
+
+	/* Expiring items = eat-first entry point; give it a chip when there is something to act on. */
+	.expiring-chip {
+		gap: var(--space-xs);
+		padding: 0.3rem 0.7rem;
+		text-decoration: none;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface-muted));
+	}
+
+	.expiring-chip:hover:not(:disabled) {
+		background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface-muted));
+		color: var(--color-primary);
 	}
 
 	.generate-btn {
