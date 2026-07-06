@@ -2,45 +2,76 @@
   <img src="static/favicon.svg" width="72" height="72" alt="Skaffu" />
 </p>
 
-# Skaffu
+<h1 align="center">Skaffu</h1>
 
-**Gemensam veckohandel med matkoll** — [skaffu.com](https://skaffu.com)
+<p align="center">
+  Shared household grocery planning — plan the week, shop together on one list,
+  and keep a pantry that knows what's running out.
+</p>
 
-Skaffu hjälper svenska hushåll hålla koll på mat hemma: delad inköpslista, skafferi med utgångsdatum, kvitto-AI och veckoplan. Intern repo heter fortfarande `home-pantry`.
+<p align="center">
+  Production PWA · live at <a href="https://skaffu.com">skaffu.com</a> · internal repo name <code>home-pantry</code>
+</p>
 
-## Om produkten
+---
 
-- **Delad inköpslista** — gemensam veckohandel för hela hushållet
-- **Skafferi & utgång** — kyl, frys och skafferi med eat-first-prioritering
-- **Kvitto & scan** — AI-kvitto, streckkod och foto för snabb inmatning
+Skaffu is a full-stack TypeScript web app (installable PWA) for Swedish households. This README covers what it does, how it's built, and how to run it locally.
 
-Produkt- och feature-detaljer: [`docs/features/`](docs/features/) · [ONBOARDING_DEVELOPER.md](docs/ONBOARDING_DEVELOPER.md)
+## What it does
+
+- **Shared shopping list** — one weekly list the whole household shares, including guest check-off without an account.
+- **Pantry with expiry** — fridge/freezer/pantry inventory with eat-first prioritization so food gets used in time.
+- **Receipt & scan capture** — a receipt photo is parsed by AI vision into structured items you review before saving; barcode and photo add too.
+- **Weekly meal planning** — dinner ideas from what's already at home, one tap into the plan and onto the shopping list.
+
+More detail: [`docs/features/`](docs/features/) · [case study](docs/CASE_STUDY_SKAFFU.md).
 
 ## Tech stack
 
-| Lager | Teknik |
-|-------|--------|
-| **Frontend** | SvelteKit 2, Svelte 5, PWA (install + web push) |
-| **Backend** | SvelteKit server routes & actions, Lucia auth, Drizzle ORM |
-| **Database** | PostgreSQL (Neon/Supabase/Cloud SQL; PGlite lokalt) |
-| **AI** | OpenAI (vision + text), rate limits per plan |
-| **Infra** | Firebase App Hosting, Resend, GitHub Actions |
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | SvelteKit 2, Svelte 5 (runes), TypeScript, PWA (install + web push) |
+| **Backend** | SvelteKit server routes & form actions, Lucia auth (Argon2), Drizzle ORM |
+| **Database** | PostgreSQL (Cloud SQL / Neon / Supabase) · PGlite for local & tests |
+| **AI** | OpenAI (vision + text) for receipt parsing and suggestions |
+| **Native** | Capacitor (iOS / Android) |
+| **Infra** | Firebase App Hosting · Resend (email) · GitHub Actions |
+| **Quality** | Vitest · Playwright · ESLint · svelte-check · axe |
 
-Arkitektur: [ARCHITECTURE.md](ARCHITECTURE.md) — domain → application → infrastructure → routes.
+## Architecture
 
-## Kom igång
+Hexagonal / layered — business rules stay framework-agnostic; the database, AI provider, email, and billing sit behind ports.
 
-**Förutsättningar:** [Node.js](https://nodejs.org/) 24+ (match [`.nvmrc`](.nvmrc)), valfritt [Docker](https://www.docker.com/) för PostgreSQL.
-
-**Zero-config (rekommenderat):**
-
-```bash
-npm ci && npm run setup:agent && npm run dev
+```
+src/
+  routes/              SvelteKit routes — pages, server endpoints, form actions
+  lib/
+    domain/            Business rules & types (no framework, no I/O)
+    application/       Use-cases / services + ports (interfaces)
+    infrastructure/    Adapters — DB repositories, external providers
+    components/        UI, Atomic Design (atoms → molecules → organisms)
+    i18n/              sv / en localization
+e2e/                   Playwright end-to-end specs
+docs/                  Architecture, codebase map, feature docs
 ```
 
-Öppna [http://localhost:5173](http://localhost:5173).
+Full write-up: [ARCHITECTURE.md](ARCHITECTURE.md) · file-level map: [docs/CODEBASE_MAP.md](docs/CODEBASE_MAP.md).
 
-**PostgreSQL via Docker** (valfritt — standard dev använder PGlite):
+## Getting started
+
+**Prerequisites:** [Node.js](https://nodejs.org/) 24+ (matches [`.nvmrc`](.nvmrc)); [Docker](https://www.docker.com/) optional (only needed for a real PostgreSQL).
+
+**Quick start** — uses PGlite, so there's no database to set up:
+
+```bash
+npm ci
+npm run setup:agent   # one-time local config
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173).
+
+**With PostgreSQL (optional):**
 
 ```bash
 docker compose up db -d
@@ -49,37 +80,32 @@ npm install && npm run db:migrate
 npm run dev:watch
 ```
 
-**Delat hushåll (lokal dev):** kopiera `.env.example` till `.env`, sätt `ADMIN_PASSWORD` och `DEFAULT_MEMBER_PASSWORD`. Logga in med `ADMIN_EMAIL` / `DEFAULT_MEMBER_EMAIL` enligt `.env.example` (defaults: `admin@example.com` / `member@example.com`).
+**Logging in locally:** copy `.env.example` to `.env` and set the household passwords (`ADMIN_PASSWORD`, `DEFAULT_MEMBER_PASSWORD`), then sign in with the matching emails from `.env.example` (defaults `admin@example.com` / `member@example.com`). More setup notes: [docs/ONBOARDING_DEVELOPER.md](docs/ONBOARDING_DEVELOPER.md).
 
-**Utvecklare / AI:** Cursor → [`AGENTS.md`](AGENTS.md). Claude Code → [`CLAUDE.md`](CLAUDE.md). Paritet: [`docs/AI_TOOLING.md`](docs/AI_TOOLING.md) → [`docs/CODEBASE_MAP.md`](docs/CODEBASE_MAP.md) → [`docs/CURRENT_REALITY.md`](docs/CURRENT_REALITY.md).
+## Testing & quality
 
-## Test & kvalitet
+| Command | Purpose |
+|---------|---------|
+| `npm run quick:dev` | Fast local gate — lint, i18n, unit tests |
+| `npm run pr:gate` | Full pre-merge parity — integration + build guards |
+| `npm run test:e2e` | Playwright end-to-end suite |
 
-| Kommando | Syfte |
-|----------|--------|
-| `npm run quick:dev` | Snabb G0 — lint, locales, unit (~2–3 min) |
-| `npm run pr:gate` | Pre-merge CI-paritet (integration + build guards) |
-| `npm run test:e2e` | Playwright (kräver `ADMIN_*` i `.env`) |
+The project runs ~340 test files (1,500+ tests) on Vitest and 28 Playwright specs, all against PGlite so no external database is needed. Every pull request is gated on `pr-gate`, and core-loop changes additionally require a green E2E run. CI is path-aware — fast checks on each PR, then sharded E2E and post-deploy smoke before a release. See [docs/CI_CD.md](docs/CI_CD.md).
 
-CI: tiered **`pr-gate / pr-gate`** på PR — se [docs/CI_CD.md](docs/CI_CD.md). E2E-setup: [docs/E2E.md](docs/E2E.md).
+## Documentation
 
-## Dokumentation
-
-| Doc | Innehåll |
+| Doc | Contents |
 |-----|----------|
-| [docs/README.md](docs/README.md) | Dokumentationsindex |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Lager, SOLID, Atomic Design |
-| [docs/FIREBASE_DEPLOY.md](docs/FIREBASE_DEPLOY.md) | Prod-deploy, secrets |
-| [docs/CASE_STUDY_SKAFFU.md](docs/CASE_STUDY_SKAFFU.md) | Case study (strategi + arkitektur) |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Layers, ports & adapters, SOLID, Atomic Design |
+| [docs/CODEBASE_MAP.md](docs/CODEBASE_MAP.md) | Feature → routes → key files |
+| [docs/CASE_STUDY_SKAFFU.md](docs/CASE_STUDY_SKAFFU.md) | Product & architecture case study |
+| [docs/AI_TOOLING.md](docs/AI_TOOLING.md) | AI-assisted development workflow (Cursor / Claude Code) |
+| [docs/README.md](docs/README.md) | Full documentation index |
 
-## Säkerhet
+## Security
 
-Rapportera sårbarheter enligt [SECURITY.md](.github/SECURITY.md) — **publicera inte** issues med exploit-detaljer före svar.
+Responsible disclosure only — please follow [SECURITY.md](.github/SECURITY.md), and don't open public issues with exploit details before a response.
 
-## GitHub Social preview (valfritt)
+## License
 
-För repo-kort på GitHub: **Settings → General → Social preview** — ladda upp [`static/og-skaffu.png`](static/og-skaffu.png) (samma bild som LinkedIn/OG).
-
-## Copyright
-
-Copyright © 2026 Arvid Pilhall. All rights reserved. Se [LICENSE](LICENSE).
+Copyright © 2026 Arvid Pilhall. All rights reserved. See [LICENSE](LICENSE).
