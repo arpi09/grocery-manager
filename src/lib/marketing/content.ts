@@ -109,6 +109,8 @@ export interface MarketingContent {
 			eatFirst: string;
 		};
 		statsAria: string;
+		weeklyTipKicker: string;
+		weeklyTipAria: string;
 		seeAllFeatures: string;
 		wasteMeterLabel: string;
 		wasteMeterCaption: string;
@@ -361,6 +363,8 @@ const sv: MarketingContent = {
 			eatFirst: 'Se vad som går ut snart'
 		},
 		statsAria: 'Skaffu i siffror',
+		weeklyTipKicker: 'Veckans matsvinnstips',
+		weeklyTipAria: 'Veckans matsvinnstips',
 		seeAllFeatures: 'Se alla funktioner',
 		wasteMeterLabel: 'Mindre matsvinn',
 		wasteMeterCaption: 'Veckan fixad — utgående varor blir middag och inköpslista på ett klick.',
@@ -889,6 +893,8 @@ const en: MarketingContent = {
 			eatFirst: 'See what expires soon'
 		},
 		statsAria: 'Skaffu in numbers',
+		weeklyTipKicker: 'Tip of the week',
+		weeklyTipAria: 'Food waste tip of the week',
 		seeAllFeatures: 'See all features',
 		wasteMeterLabel: 'Less food waste',
 		wasteMeterCaption: 'Week sorted — expiring items become dinners and a shopping list in one click.',
