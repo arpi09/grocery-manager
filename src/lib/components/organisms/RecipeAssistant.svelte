@@ -20,9 +20,9 @@
 	import {
 		addMissingIngredientsToList,
 		dedupeMissingIngredients,
-		presentAddMissingFeedback,
 		type AddMissingFeedbackTone
 	} from '$lib/utils/recipe-add-missing';
+	import { toastAddMissingResult } from '$lib/utils/recipe-add-missing-toast';
 	import { aiServiceErrorMessage } from '$lib/utils/ai-service-error';
 
 	interface Props {
@@ -142,14 +142,10 @@
 		errorMessage = null;
 		feedbackBanner = null;
 
-		const presented = presentAddMissingFeedback(
+		feedbackBanner = toastAddMissingResult(
 			getLocale(),
 			await addMissingIngredientsToList(ingredients)
 		);
-		showClientToast(presented.message, {
-			variant: presented.tone === 'error' ? 'error' : presented.tone === 'warning' ? 'info' : 'success'
-		});
-		feedbackBanner = presented;
 		addingMissingKey = null;
 	}
 

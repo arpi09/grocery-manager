@@ -19,9 +19,9 @@
 	import {
 		addMissingIngredientsToList,
 		dedupeMissingIngredients,
-		presentAddMissingFeedback,
 		type AddMissingFeedbackTone
 	} from '$lib/utils/recipe-add-missing';
+	import { toastAddMissingResult } from '$lib/utils/recipe-add-missing-toast';
 
 
 	interface Props {
@@ -116,14 +116,9 @@
 
 
 	function showAddMissingResult(result: Awaited<ReturnType<typeof addMissingIngredientsToList>>) {
-		const presented = presentAddMissingFeedback(getLocale(), result);
-		const variant =
-			presented.tone === 'error' ? 'error' : presented.tone === 'warning' ? 'info' : 'success';
-		const toastMessage = presented.showListLink
-			? `${presented.message} ${t('weeklyRitual.linkInkop')}`
-			: presented.message;
-		showClientToast(toastMessage, { variant });
-		feedbackBanner = presented;
+		feedbackBanner = toastAddMissingResult(getLocale(), result, {
+			listLinkLabel: t('weeklyRitual.linkInkop')
+		});
 	}
 
 
