@@ -108,9 +108,13 @@ test.describe('Settings', () => {
 		await shopSwitch.scrollIntoViewIfNeeded();
 		await expect(shopSwitch).toBeVisible({ timeout: 15_000 });
 
-		if ((await pushSwitch.isChecked()) || (await shopSwitch.isChecked())) {
-			test.skip(true, 'Push or shop today enabled — requires-push hint not shown');
-		}
+		/* In E2E the browser never grants push, and shop-today cannot be enabled
+		   without a push subscription (the updateShoppingPush action rejects with
+		   push_required), so both switches are deterministically off — the
+		   requires-push hint always applies. Assert the precondition instead of
+		   self-skipping so a regression that flips either switch on is caught. */
+		await expect(pushSwitch).not.toBeChecked();
+		await expect(shopSwitch).not.toBeChecked();
 
 		const status = page.locator('.push-status');
 		const permissionDenied = await status
@@ -138,8 +142,13 @@ test.describe('Settings', () => {
 		await shopSwitch.scrollIntoViewIfNeeded();
 		await expect(shopSwitch).toBeVisible({ timeout: 15_000 });
 
+		/* TODO(e2e-seed): cannot deterministically seed shop-today ON. Enabling it
+		   (updateShoppingPush) requires a real push subscription — the action rejects
+		   with push_required otherwise — and headless Chromium grants no push. This
+		   stays a conditional skip until we can mock a push subscription for the
+		   seeded admin; it is a genuine environment gate, not a hidden seed hole. */
 		if (!(await shopSwitch.isChecked())) {
-			test.skip(true, 'Shop today not enabled in seed — cannot test turn-off');
+			test.skip(true, 'Shop today requires a push subscription — cannot seed ON in headless E2E');
 		}
 
 		await expect(shopSwitch).toBeEnabled();
