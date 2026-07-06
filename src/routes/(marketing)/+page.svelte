@@ -4,6 +4,7 @@
 	import MarketingButtonLink from '$lib/components/marketing/MarketingButtonLink.svelte';
 	import MarketingCta from '$lib/components/marketing/MarketingCta.svelte';
 	import MarketingDashboardCard from '$lib/components/marketing/MarketingDashboardCard.svelte';
+	import ComparisonTable from '$lib/components/marketing/ComparisonTable.svelte';
 	import MarketingProLaunchBanner from '$lib/components/marketing/MarketingProLaunchBanner.svelte';
 	import MarketingScrollReveal from '$lib/components/marketing/MarketingScrollReveal.svelte';
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
@@ -25,6 +26,7 @@
 	const latestGuides = $derived(data.latestGuides);
 	const isLoggedIn = $derived(Boolean(page.data.user?.id));
 	const landing = $derived(content.landing);
+	const comparison = $derived(content.comparison);
 	const jsonLd = $derived(buildLandingJsonLd(canonicalUrl, content.meta.description));
 
 	let heroReady = $state(false);
@@ -137,6 +139,40 @@
 					</div>
 				{/each}
 			</div>
+		</div>
+	</section>
+</MarketingScrollReveal>
+
+<MarketingScrollReveal>
+	<section class="section" id="varfor-skaffu">
+		<div class="section-inner">
+			<header class="section-header">
+				<h2>{landing.differentiatorsTitle}</h2>
+				<p>{landing.differentiatorsLead}</p>
+			</header>
+			<div class="diff-grid">
+				{#each landing.differentiators as diff (diff.title)}
+					<article class="diff-card">
+						<span class="diff-tag label-caps">{diff.tag}</span>
+						<h3>{diff.title}</h3>
+						<p>{diff.description}</p>
+					</article>
+				{/each}
+			</div>
+		</div>
+	</section>
+</MarketingScrollReveal>
+
+<MarketingScrollReveal>
+	<section class="section muted" id="jamforelse">
+		<div class="section-inner">
+			<header class="section-header">
+				<span class="section-kicker label-caps">{landing.comparisonKicker}</span>
+				<h2>{comparison.title}</h2>
+				<p>{comparison.lead}</p>
+			</header>
+			<ComparisonTable comparison={comparison} />
+			<p class="comparison-disclaimer">{comparison.disclaimer}</p>
 		</div>
 	</section>
 </MarketingScrollReveal>
@@ -421,6 +457,53 @@
 		display: grid;
 		gap: var(--space-md);
 		margin-top: var(--space-xl);
+	}
+
+	.diff-grid {
+		display: grid;
+		gap: var(--space-md);
+		margin-top: var(--space-xl);
+	}
+
+	@media (min-width: 768px) {
+		.diff-grid {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	.diff-card {
+		padding: var(--space-lg);
+		border-radius: var(--radius-lg);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.diff-tag {
+		display: inline-block;
+		margin-bottom: var(--space-sm);
+		color: var(--color-primary);
+	}
+
+	.diff-card h3 {
+		margin: 0;
+		font-size: 1.15rem;
+		line-height: 1.25;
+	}
+
+	.diff-card p {
+		margin: var(--space-sm) 0 0;
+		color: var(--color-text-muted);
+		font-size: var(--font-size-body-sm);
+		line-height: var(--line-height-body);
+	}
+
+	.comparison-disclaimer {
+		margin: var(--space-lg) 0 0;
+		font-size: var(--font-size-body-sm);
+		color: var(--color-text-muted);
+		line-height: var(--line-height-body);
+		max-width: 60ch;
 	}
 
 	@media (min-width: 768px) {

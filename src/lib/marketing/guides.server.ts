@@ -262,6 +262,8 @@ export async function getPublishedGuideSitemapEntries(deps?: GuideLoaderDeps): P
 	return guides.map((guide) => ({
 		path: `/guider/${guide.slug}`,
 		changefreq: 'monthly' as const,
-		priority: 0.75
+		priority: 0.75,
+		/* Real per-guide date so crawlers see genuine freshness when new guides publish. */
+		lastmod: guide.date
 	}));
 }

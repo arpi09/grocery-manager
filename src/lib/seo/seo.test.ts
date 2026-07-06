@@ -23,6 +23,7 @@ import {
 	OG_IMAGE_PATH,
 	robotsDirectiveForPath,
 	shouldIndexPath,
+	MARKETING_CONTENT_LASTMOD,
 	SITEMAP_ENTRIES
 } from './seo';
 import { buildSitemapXml } from './seo.server';
@@ -71,6 +72,18 @@ describe('buildSitemapXml', () => {
 	it('includes published guide slugs in sitemap', async () => {
 		const xml = await buildSitemapXml('https://skaffu.com');
 		expect(xml).toContain('<loc>https://skaffu.com/guider/minska-matsvinn-hemma-app</loc>');
+	});
+
+	it('uses a stable content lastmod for static pages, not today', async () => {
+		const xml = await buildSitemapXml('https://skaffu.com');
+		/* Static marketing pages carry the truthful content date — never "now" on every crawl. */
+		expect(xml).toContain(`<lastmod>${MARKETING_CONTENT_LASTMOD}</lastmod>`);
+		const today = new Date().toISOString().slice(0, 10);
+		if (today !== MARKETING_CONTENT_LASTMOD) {
+			/* Guarantees we stopped stamping every URL with the crawl date. */
+			const staticBlock = xml.split('/guider/')[0];
+			expect(staticBlock).not.toContain(`<lastmod>${today}</lastmod>`);
+		}
 	});
 });
 
