@@ -7,7 +7,6 @@
 	import AppSeoHead from '$lib/components/seo/AppSeoHead.svelte';
 	import { OPEN_RECIPE_IDEAS } from '$lib/navigation/app-layout-context';
 	import MainNav from '$lib/components/organisms/MainNav.svelte';
-	import RecipeAssistant from '$lib/components/organisms/RecipeAssistant.svelte';
 	import ActionToast from '$lib/components/molecules/ActionToast.svelte';
 	import ClientToast from '$lib/components/molecules/ClientToast.svelte';
 	import GamificationToast from '$lib/components/molecules/GamificationToast.svelte';
@@ -178,7 +177,15 @@
 	<PmfSurveyBanner />
 	<ActivationCelebration />
 	<HouseholdInvitePrompt memberCount={householdMemberCount} />
-	<RecipeAssistant bind:open={recipeOpen} canEdit={canWrite} />
+	{#if recipeOpen}
+		<!-- Lazy: the recipe generator (modal + generator + results) is a large chunk that only
+		     renders once the user opens it. AppLayout owns `recipeOpen`, so mounting on demand
+		     keeps it out of the app-shell bundle loaded on every page. -->
+		{#await import('$lib/components/organisms/RecipeAssistant.svelte') then recipeAssistantModule}
+			{@const RecipeAssistant = recipeAssistantModule.default}
+			<RecipeAssistant bind:open={recipeOpen} canEdit={canWrite} />
+		{/await}
+	{/if}
 </div>
 
 <style>
