@@ -85,7 +85,7 @@
 
 {#if show && message}
 	<div
-		use:portal={usePortal ? 'body' : undefined}
+		use:portal={usePortal ? 'body' : null}
 		class="toast motion-slide-up"
 		class:toast-inline={!usePortal}
 		class:toast-celebrate={celebrate}
