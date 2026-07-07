@@ -9,7 +9,6 @@ export type DeleteSafetyTier = 1 | 2 | 3 | 4;
 
 export type DeleteSafetyContext =
 	| 'shoppingListItem'
-	| 'shoppingListClearChecked'
 	| 'inventoryItem'
 	| 'inventoryItemFinished'
 	| 'inventoryAutoExpiredBulk'
@@ -83,20 +82,6 @@ export function getDeleteCopy(
 					: translate(locale, 'delete.shoppingItem.undo'),
 				undoActionLabel: undoLabel
 			};
-
-		case 'shoppingListClearChecked': {
-			const n = count ?? 0;
-			return {
-				title: translate(locale, 'delete.clearChecked.title'),
-				description:
-					n > 0
-						? translate(locale, 'delete.clearChecked.description', { count: n })
-						: translate(locale, 'delete.clearChecked.descriptionAll'),
-				consequence: translate(locale, 'delete.clearChecked.consequence'),
-				confirmLabel: translate(locale, 'delete.clearChecked.confirm'),
-				cancelLabel
-			};
-		}
 
 		case 'inventoryItem':
 			return {

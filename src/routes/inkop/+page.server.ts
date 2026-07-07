@@ -506,22 +506,6 @@ export const actions: Actions = {
 
 		return { success: true };
 	},
-	clearChecked: async (event) => {
-		requireInventoryWriteAccess(event.locals.householdRole);
-		const householdId = event.locals.householdId;
-		if (!householdId) error(400, translate(event.locals.locale, 'errors.household.noHousehold'));
-
-		try {
-			await event.locals.shoppingListService.clearChecked(
-				householdId,
-				event.locals.householdRole!
-			);
-		} catch (err) {
-			return handleServiceError(err);
-		}
-
-		return { success: true };
-	},
 	clearList: async (event) => {
 		requireInventoryWriteAccess(event.locals.householdRole);
 		const householdId = event.locals.householdId;
