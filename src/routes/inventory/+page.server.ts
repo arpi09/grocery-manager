@@ -3,7 +3,7 @@ import {
 	InventoryNotFoundError
 } from '$lib/application/inventory.service';
 import { canConsumeInventory, canEditInventory } from '$lib/domain/household';
-import { requireInventoryConsumeAccess } from '$lib/server/household-auth';
+import { requireInventoryConsumeAccess, requireInventoryWriteAccess } from '$lib/server/household-auth';
 import { trackOneTapConsume } from '$lib/server/sync-analytics';
 import { consumeItemSchema } from '$lib/validation/consumption.schemas';
 import { fail } from '@sveltejs/kit';
@@ -45,6 +45,31 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
+	undoConsume: async ({ request, locals }) => {
+		requireInventoryWriteAccess(locals.householdRole);
+
+		const formData = await request.formData();
+		const itemId = formData.get('itemId');
+		const quantity = formData.get('quantity');
+		if (!itemId || typeof itemId !== 'string' || !quantity || typeof quantity !== 'string') {
+			return fail(400, { message: 'missing_restore_fields' });
+		}
+
+		try {
+			await locals.inventoryService.updateItem(
+				locals.householdId!,
+				itemId,
+				{ quantity },
+				locals.householdRole!
+			);
+			return { success: true };
+		} catch (e) {
+			if (e instanceof InventoryNotFoundError) {
+				return fail(404, { message: 'not_found' });
+			}
+			throw e;
+		}
+	},
 	consumeItem: async ({ request, locals }) => {
 		requireInventoryConsumeAccess(locals.householdRole);
 

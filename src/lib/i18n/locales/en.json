@@ -549,7 +549,7 @@
 		},
 		"backToPantry": "Back to pantry",
 		"backToPlan": "Back to Plan",
-		"bulkConsume": "Consume selected",
+		"bulkConsume": "Use selected",
 		"bulkDelete": "Delete selected",
 		"bulkCheckOff": "Check off selected",
 		"bulkCheckOffSuccess": "{count} items checked off",
@@ -1133,14 +1133,8 @@
 		}
 	},
 	"consume": {
-		"sectionTitle": "Log usage",
+		"sectionTitle": "Register usage",
 		"sectionHelp": "Updates stock without changing name or location",
-		"finish": "Done",
-		"swipeFinish": "Done",
-		"swipePartial": "Partial",
-		"partial": "Partial…",
-		"finishNamed": "Mark {name} as done",
-		"logUsage": "Partial",
 		"intro": "How much of {name} did you use? ({stock} left)",
 		"presetsAria": "Quick amount",
 		"presetLite": "A little (~10%)",
@@ -1148,11 +1142,11 @@
 		"presetAll": "All",
 		"customLabel": "Custom amount",
 		"customPlaceholder": "e.g. 50",
-		"confirm": "Log usage",
+		"confirm": "Register usage",
 		"invalidAmount": "Enter a valid amount",
-		"finishFailed": "Could not mark as done — try again",
-		"undoToastNamed": "{name} marked as done",
-		"undoToast": "Item marked as done"
+		"consequence": "Reduces the stock balance — you can undo for 8 seconds.",
+		"undoToastNamed": "{name} used — stock updated",
+		"undoToast": "Item used — stock updated"
 	},
 	"item": {
 		"addTitle": "Add item",
