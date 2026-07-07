@@ -13,9 +13,19 @@
 		canEdit: boolean;
 		onStartShop: () => void;
 		onAddItem: () => void;
+		/** Per-row remove with undo receipt — trust contract: nothing leaves the list silently. */
+		onRemoveItem?: (item: SummaryItem) => void;
+		removingId?: string | null;
 	}
 
-	let { items, canEdit, onStartShop, onAddItem }: Props = $props();
+	let {
+		items,
+		canEdit,
+		onStartShop,
+		onAddItem,
+		onRemoveItem,
+		removingId = null
+	}: Props = $props();
 
 	const unchecked = $derived(sortUncheckedItems(items));
 	const hasItems = $derived(unchecked.length > 0);
@@ -52,6 +62,25 @@
 						</span>
 						{#if amountLabel(item)}
 							<span class="item-amount">{amountLabel(item)}</span>
+						{/if}
+						{#if canEdit && onRemoveItem}
+							<button
+								type="button"
+								class="item-remove"
+								disabled={removingId === item.id}
+								aria-label={t('shopping.v2.remove.aria', { name: item.name })}
+								data-testid="shopping-v2-remove-item"
+								onclick={() => onRemoveItem(item)}
+							>
+								<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+									<path
+										d="M4 4l8 8M12 4l-8 8"
+										stroke="currentColor"
+										stroke-width="1.75"
+										stroke-linecap="round"
+									/>
+								</svg>
+							</button>
 						{/if}
 					</li>
 				{/each}
@@ -124,11 +153,46 @@
 
 	.item-row {
 		display: flex;
-		align-items: baseline;
+		align-items: center;
 		justify-content: space-between;
 		gap: var(--space-sm);
-		padding: 0.5rem 0;
+		padding: 0.25rem 0;
 		border-bottom: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+	}
+
+	.item-remove {
+		flex-shrink: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: var(--touch-target-min, 2.75rem);
+		min-height: var(--touch-target-min, 2.75rem);
+		margin: 0;
+		padding: 0;
+		border: none;
+		background: none;
+		color: var(--color-text-muted);
+		cursor: pointer;
+		border-radius: var(--radius-sm);
+	}
+
+	.item-remove svg {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	.item-remove:hover {
+		color: var(--color-danger, #b3261e);
+	}
+
+	.item-remove:disabled {
+		opacity: 0.5;
+		cursor: default;
+	}
+
+	.item-remove:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 
 	.item-row:last-child {

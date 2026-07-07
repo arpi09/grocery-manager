@@ -1304,6 +1304,14 @@
 				"failed": "Couldn't clear the list. Try again.",
 				"restoreFailed": "Couldn't restore the list. Try again."
 			},
+			"remove": {
+				"aria": "Remove {name} from the list",
+				"done": "Removed {name}",
+				"undo": "Undo",
+				"restored": "{name} is back on the list",
+				"failed": "Couldn't remove the item. Try again.",
+				"restoreFailed": "Couldn't put the item back. Try again."
+			},
 			"shop": {
 				"backToPlan": "Plan",
 				"backToPlanAria": "Back to planning",
