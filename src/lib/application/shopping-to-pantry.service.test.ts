@@ -14,6 +14,7 @@ const shoppingItem: ShoppingListItem = {
 	unit: 'L',
 	checked: true,
 	unavailableAt: null,
+	addedByUserId: null,
 	sortOrder: 1,
 	createdAt: new Date(),
 	updatedAt: new Date()

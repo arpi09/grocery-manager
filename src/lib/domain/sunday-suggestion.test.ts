@@ -47,6 +47,7 @@ function listItem(overrides: Partial<ShoppingListItem> = {}): ShoppingListItem {
 		unit: null,
 		checked: false,
 		unavailableAt: null,
+		addedByUserId: null,
 		sortOrder: 0,
 		createdAt: now,
 		updatedAt: now,

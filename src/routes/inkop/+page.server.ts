@@ -57,11 +57,27 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 	 * before the fusion caps the whole proposal at SUNDAY_SUGGESTION_MAX. */
 	const INKOP_REPLENISHMENT_MAX = 6;
 
-	const [items, checkedCount, shoppingToPantryMode] = await Promise.all([
+	const [items, checkedCount, shoppingToPantryMode, members] = await Promise.all([
 		locals.shoppingListService.listUncheckedItems(householdId),
 		locals.shoppingListService.countCheckedItems(householdId),
-		user ? locals.shoppingToPantryService.getMode(user.id) : Promise.resolve('ask' as ShoppingToPantryMode)
+		user ? locals.shoppingToPantryService.getMode(user.id) : Promise.resolve('ask' as ShoppingToPantryMode),
+		locals.householdService.getHouseholdMembers(householdId)
 	]);
+
+	// Member provenance ("Tillagd av X") — only meaningful in a shared household,
+	// so skip solo households. Own rows read "Tillagd av dig".
+	const memberNameById = new Map((members ?? []).map((m) => [m.userId, m.displayName]));
+	const showProvenance = (members?.length ?? 0) >= 2;
+	const selfLabel = translate(locals.locale, 'shopping.v2.summary.you');
+	const itemsWithProvenance = items.map((item) => ({
+		...item,
+		addedByName:
+			showProvenance && item.addedByUserId
+				? item.addedByUserId === user?.id
+					? selfLabel
+					: (memberNameById.get(item.addedByUserId) ?? null)
+				: null
+	}));
 
 	const e2eMockAi = isE2eMockAiEnabled();
 	const intelligence = e2eMockAi
@@ -129,7 +145,7 @@ export const load: PageServerLoad = async ({ parent, locals }) => {
 
 	return {
 		user,
-		items,
+		items: itemsWithProvenance,
 		checkedCount,
 		canEdit: !!locals.householdRole && canEditInventory(locals.householdRole),
 		shareLinkEnabled: isShoppingListShareEnabled(),
@@ -169,7 +185,8 @@ export const actions: Actions = {
 			await event.locals.shoppingListService.addItem(
 				householdId,
 				event.locals.householdRole!,
-				parsed.data
+				parsed.data,
+				event.locals.user?.id ?? null
 			);
 		} catch (err) {
 			return handleServiceError(err);
@@ -414,6 +431,7 @@ export const actions: Actions = {
 					unit: row.unit,
 					checked: true,
 					unavailableAt: null,
+					addedByUserId: null,
 					sortOrder: 0,
 					createdAt: now,
 					updatedAt: now
@@ -557,7 +575,8 @@ export const actions: Actions = {
 			const result = await event.locals.shoppingListService.addSuggestedItems(
 				householdId,
 				event.locals.householdRole!,
-				inputs
+				inputs,
+				event.locals.user?.id ?? null
 			);
 			return { success: true, restored: result.added };
 		} catch (err) {
@@ -640,7 +659,8 @@ export const actions: Actions = {
 				const result = await event.locals.shoppingListService.addSuggestedItems(
 					householdId,
 					role,
-					aiInputs
+					aiInputs,
+					event.locals.user?.id ?? null
 				);
 				added += result.added;
 				skipped += result.skipped;

@@ -24,6 +24,7 @@ function item(
 		unit: null,
 		checked: false,
 		unavailableAt: null,
+		addedByUserId: null,
 		createdAt: new Date('2026-01-01'),
 		updatedAt: new Date('2026-01-01'),
 		...overrides

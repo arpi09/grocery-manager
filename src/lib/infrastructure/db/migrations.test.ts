@@ -108,7 +108,8 @@ describe('drizzle migrations', () => {
 	'0071_brain_proactive_push.sql',
 	'0072_onboarding_setup_telemetry.sql',
 	'0073_shopping_unavailable_at.sql',
-	'0074_ai_batch_job.sql'
+	'0074_ai_batch_job.sql',
+	'0075_shopping_added_by.sql'
 		];
 		expect(pgliteFiles).toEqual(sqlFiles);
 	});

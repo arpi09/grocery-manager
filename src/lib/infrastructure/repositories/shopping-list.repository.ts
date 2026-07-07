@@ -13,7 +13,8 @@ export interface IShoppingListRepository {
 		householdId: string,
 		id: string,
 		input: CreateShoppingListItemInput,
-		sortOrder: number
+		sortOrder: number,
+		addedByUserId?: string | null
 	): Promise<ShoppingListItem>;
 	setChecked(householdId: string, id: string, checked: boolean): Promise<ShoppingListItem | null>;
 	setUnavailable(
@@ -36,6 +37,7 @@ function mapRow(row: typeof shoppingListItemTable.$inferSelect): ShoppingListIte
 		unit: row.unit,
 		checked: Boolean(row.checked),
 		unavailableAt: row.unavailableAt ?? null,
+		addedByUserId: row.addedByUserId ?? null,
 		sortOrder: row.sortOrder,
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt
@@ -113,7 +115,13 @@ export class DrizzleShoppingListRepository implements IShoppingListRepository {
 		return Math.max(...items.map((item) => item.sortOrder)) + 1;
 	}
 
-	async create(householdId: string, id: string, input: CreateShoppingListItemInput, sortOrder: number) {
+	async create(
+		householdId: string,
+		id: string,
+		input: CreateShoppingListItemInput,
+		sortOrder: number,
+		addedByUserId: string | null = null
+	) {
 		const now = new Date();
 		const [row] = await this.database
 			.insert(shoppingListItemTable)
@@ -124,6 +132,7 @@ export class DrizzleShoppingListRepository implements IShoppingListRepository {
 				quantity: input.quantity,
 				unit: input.unit,
 				checked: false,
+				addedByUserId,
 				sortOrder,
 				createdAt: now,
 				updatedAt: now
