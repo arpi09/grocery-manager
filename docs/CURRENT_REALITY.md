@@ -4,9 +4,9 @@
 
 | F?lt | V?rde |
 |------|--------|
-| **Uppdaterad** | 2026-07-06 |
+| **Uppdaterad** | 2026-07-07 |
 | **Prod SHA** | `473f25f12` @ [28798857449](https://github.com/arpi09/grocery-manager/actions/runs/28798857449) (live, release 2026.7.6.2, deploy_tier=auto→fast, e2e critical grön efter flake-rerun; curl-smoke /, /guider, /login, /inkop = 200, rent). **Batch:** #230 CSS-preload self-heal + #238 dead-code (−53 orphan-filer) + #243 onboarding trust-toast (+ parallella #237/#242). |
-| **Master SHA** | `473f25f12` — batch: #230 stale-CSS-preload self-heal, #238 −53 oreferenserade filer, #243 onboarding fill-steg synlig pantry-write-toast. Föregående: PWA SW-loop-fix #228. |
+| **Master SHA** | `f5a25058f` — **odeployad batch framför prod** (deploy pinnad merge-SHA `c581c9e5b`): #248 programmatiska butiks-kvittosidor + veckoroterande matsvinnstips, #250 onboarding v8.1 delight (loop-motion, spring-dots), #251 member-proveniens ("Tillagd av X"/"Tillagd av dig" på inköpslistan; migration **0075** `shopping_list_item.added_by_user_id`, SET NULL). Sist deployat: #230/#238/#243 @ `473f25f12`. |
 | **CI/CD model** | **v2 on master** � tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
