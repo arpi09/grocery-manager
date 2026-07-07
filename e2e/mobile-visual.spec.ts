@@ -143,7 +143,7 @@ test.describe('Mobile visual — P0 routes (390×844)', () => {
 			page.getByRole('button', { name: /^Delvis$|^Partial$/i })
 		).toHaveCount(0);
 		await expect(
-			page.getByRole('button', { name: /Logga förbrukning|Log usage/i })
+			page.getByRole('button', { name: /Registrera användning|Register usage/i })
 		).toBeVisible();
 	});
 
@@ -156,7 +156,7 @@ test.describe('Mobile visual — P0 routes (390×844)', () => {
 		const consumeSection = page.locator('.consumption-section');
 		await consumeSection.scrollIntoViewIfNeeded();
 		await consumeSection.locator('input[name="consumptionPreset"][value="half"]').check({ force: true });
-		await consumeSection.getByRole('button', { name: /Logga förbrukning|Log usage/i }).click();
+		await consumeSection.getByRole('button', { name: /Registrera användning|Register usage/i }).click();
 
 		await expect(page).toHaveURL(new RegExp(`${editItemPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\?|$)`), {
 			timeout: 15_000

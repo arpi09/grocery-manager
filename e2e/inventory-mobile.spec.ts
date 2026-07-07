@@ -118,7 +118,7 @@ test.describe('Inventory mobile UX', () => {
 		const sheet = page.getByTestId('inventory-consume-sheet');
 		await expect(sheet).toBeVisible({ timeout: 10_000 });
 		await sheet.locator('input[name="consumptionPreset"][value="half"]').check({ force: true });
-		await sheet.getByRole('button', { name: /Logga förbrukning|Log usage/i }).click();
+		await sheet.getByRole('button', { name: /Registrera användning|Register usage/i }).click();
 		await expect(sheet).not.toBeVisible({ timeout: 15_000 });
 	});
 });
