@@ -78,13 +78,15 @@ describe('Shopping quick-add API integration', () => {
 		});
 	}
 
-	async function waitForProductEvent(): Promise<Array<{ metadata: string | null }>> {
+	async function waitForProductEvents(
+		expectedCount: number
+	): Promise<Array<{ eventType: string; metadata: string | null }>> {
 		for (let attempt = 0; attempt < 20; attempt += 1) {
 			const rows = await integrationDb.db
-				.select({ metadata: productEventTable.metadata })
+				.select({ eventType: productEventTable.eventType, metadata: productEventTable.metadata })
 				.from(productEventTable)
 				.where(eq(productEventTable.householdId, householdId));
-			if (rows.length > 0) return rows;
+			if (rows.length >= expectedCount) return rows;
 			await new Promise((resolve) => setTimeout(resolve, 50));
 		}
 		return [];
@@ -113,10 +115,13 @@ describe('Shopping quick-add API integration', () => {
 		expect(items[0].name).toBe('Yoghurt naturell');
 		expect(items[0].checked).toBe(false);
 
-		const events = await waitForProductEvent();
-		expect(events).toHaveLength(1);
-		const metadata = JSON.parse(events[0].metadata ?? '{}');
-		expect(metadata.source).toBe('home_expiring_card');
+		/* First row on an empty list also fires the loop-funnel event. */
+		const events = await waitForProductEvents(2);
+		expect(events).toHaveLength(2);
+		const fill = events.find((event) => event.eventType === 'fill_suggestions_added');
+		const first = events.find((event) => event.eventType === 'shopping_first_item_added');
+		expect(JSON.parse(fill?.metadata ?? '{}').source).toBe('home_expiring_card');
+		expect(JSON.parse(first?.metadata ?? '{}').surface).toBe('home_expiring_card');
 	});
 
 	it('falls back to quick_add_api for unknown sources', async () => {
@@ -127,10 +132,10 @@ describe('Shopping quick-add API integration', () => {
 
 		expect(response.status).toBe(200);
 
-		const events = await waitForProductEvent();
-		expect(events).toHaveLength(1);
-		const metadata = JSON.parse(events[0].metadata ?? '{}');
-		expect(metadata.source).toBe('quick_add_api');
+		const events = await waitForProductEvents(2);
+		expect(events).toHaveLength(2);
+		const fill = events.find((event) => event.eventType === 'fill_suggestions_added');
+		expect(JSON.parse(fill?.metadata ?? '{}').source).toBe('quick_add_api');
 	});
 
 	it('rejects viewers without write access', async () => {
