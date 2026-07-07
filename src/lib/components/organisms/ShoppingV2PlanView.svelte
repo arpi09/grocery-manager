@@ -24,6 +24,8 @@
 		onStartShop: () => void;
 		onAddItem: () => void;
 		onClearList?: () => void;
+		onRemoveItem?: (item: ShoppingListItem) => void;
+		removingId?: string | null;
 		onOpenLegacy: () => void;
 	}
 
@@ -42,6 +44,8 @@
 		onStartShop,
 		onAddItem,
 		onClearList,
+		onRemoveItem,
+		removingId = null,
 		onOpenLegacy,
 	}: Props = $props();
 
@@ -111,7 +115,7 @@
 		onDismiss={onSundayDismiss}
 	/>
 
-	<TripSummaryPills {items} {canEdit} {onStartShop} {onAddItem} />
+	<TripSummaryPills {items} {canEdit} {onStartShop} {onAddItem} {onRemoveItem} {removingId} />
 
 	{#if canEdit}
 		<div class="plan-footer-actions">

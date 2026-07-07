@@ -1225,6 +1225,14 @@
 				"failed": "Kunde inte rensa listan. Försök igen.",
 				"restoreFailed": "Kunde inte återställa listan. Försök igen."
 			},
+			"remove": {
+				"aria": "Ta bort {name} från listan",
+				"done": "Tog bort {name}",
+				"undo": "Ångra",
+				"restored": "{name} är tillbaka på listan",
+				"failed": "Kunde inte ta bort varan. Försök igen.",
+				"restoreFailed": "Kunde inte lägga tillbaka varan. Försök igen."
+			},
 			"shop": {
 				"backToPlan": "Planera",
 				"backToPlanAria": "Tillbaka till planering",

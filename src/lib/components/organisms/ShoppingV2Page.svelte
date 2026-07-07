@@ -89,6 +89,12 @@
 	let lastClearedItems = $state<Array<{ name: string; quantity: string | null; unit: string | null }>>([]);
 	let clearingList = $state(false);
 	let restoringList = $state(false);
+	/** Removed row held for undo — same trust contract as clearList: nothing leaves silently. */
+	let lastRemovedItem = $state<{ name: string; quantity: string | null; unit: string | null } | null>(
+		null
+	);
+	let removingItemId = $state<string | null>(null);
+	let restoringRemoved = $state(false);
 
 	let pantryBridgeItem = $state<ShoppingListItem | null>(null);
 	let pantryBridgePreview = $state<PantryBridgePreview | null>(null);
@@ -620,12 +626,82 @@
 			}
 
 			lastClearedItems = snapshot;
+			/* The whole-list undo supersedes any pending single-row undo. */
+			lastRemovedItem = null;
 			showClientToast(t('shopping.v2.clear.done', { count: snapshot.length }), { variant: 'success' });
 			await invalidateAll();
 		} catch {
 			showClientToast(t('shopping.v2.clear.failed'), { variant: 'error' });
 		} finally {
 			clearingList = false;
+		}
+	}
+
+	async function handleRemoveItem(item: ShoppingListItem) {
+		if (!canEdit || removingItemId) {
+			return;
+		}
+
+		const snapshot = { name: item.name, quantity: item.quantity, unit: item.unit };
+
+		removingItemId = item.id;
+		try {
+			const formData = new FormData();
+			formData.set('id', item.id);
+			const response = await fetch('?/remove', {
+				method: 'POST',
+				body: formData,
+				headers: { accept: 'application/json', 'x-sveltekit-action': 'true' }
+			});
+			const result = deserialize(await response.text()) as { type: string };
+			if (result.type !== 'success') {
+				showClientToast(t('shopping.v2.remove.failed'), { variant: 'error' });
+				return;
+			}
+
+			lastRemovedItem = snapshot;
+			const message = t('shopping.v2.remove.done', { name: snapshot.name });
+			liveMessage = message;
+			showClientToast(message, { variant: 'success' });
+			await invalidateAll();
+		} catch {
+			showClientToast(t('shopping.v2.remove.failed'), { variant: 'error' });
+		} finally {
+			removingItemId = null;
+		}
+	}
+
+	async function handleRestoreRemoved() {
+		if (!canEdit || restoringRemoved || !lastRemovedItem) {
+			return;
+		}
+
+		restoringRemoved = true;
+		const restored = lastRemovedItem;
+		const formData = new FormData();
+		formData.set('items', JSON.stringify([restored]));
+
+		try {
+			const response = await fetch('?/restoreList', {
+				method: 'POST',
+				body: formData,
+				headers: { accept: 'application/json', 'x-sveltekit-action': 'true' }
+			});
+			const result = deserialize(await response.text()) as { type: string };
+			if (result.type !== 'success') {
+				showClientToast(t('shopping.v2.remove.restoreFailed'), { variant: 'error' });
+				return;
+			}
+
+			lastRemovedItem = null;
+			const message = t('shopping.v2.remove.restored', { name: restored.name });
+			liveMessage = message;
+			showClientToast(message, { variant: 'success' });
+			await invalidateAll();
+		} catch {
+			showClientToast(t('shopping.v2.remove.restoreFailed'), { variant: 'error' });
+		} finally {
+			restoringRemoved = false;
 		}
 	}
 
@@ -702,6 +778,19 @@
 				{t('shopping.v2.clear.undo')}
 			</button>
 		</div>
+	{:else if lastRemovedItem}
+		<div class="clear-undo" role="status" data-testid="shopping-v2-remove-undo">
+			<span>{t('shopping.v2.remove.done', { name: lastRemovedItem.name })}</span>
+			<button
+				type="button"
+				class="clear-undo-btn"
+				disabled={restoringRemoved}
+				data-testid="shopping-v2-remove-undo-btn"
+				onclick={() => void handleRestoreRemoved()}
+			>
+				{t('shopping.v2.remove.undo')}
+			</button>
+		</div>
 	{/if}
 
 	{#if session.mode === 'plan'}
@@ -719,6 +808,8 @@
 			onStartShop={handleStartShop}
 			onAddItem={() => void openQuickAdd()}
 			onClearList={handleClearList}
+			onRemoveItem={(item) => void handleRemoveItem(item)}
+			removingId={removingItemId}
 			onOpenLegacy={() => {
 				legacyOpen = true;
 			}}
