@@ -69,6 +69,8 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 		const householdId = await shoppingListShareService.resolveHouseholdIdForToken(params.token);
 		if (householdId) {
 			const items = await locals.shoppingListService.listItems(householdId);
+			/* No addedBy/member names here — the public GDPR note promises the guest
+			 * surface never exposes household names. Provenance lives in /inkop post-join. */
 			live = {
 				items: items.map((item) => ({
 					id: item.id,

@@ -3776,6 +3776,8 @@
 		"guestCheckedHeading": "Picked ({count})",
 		"guestToggleFailed": "Couldn't update the item. Try again.",
 		"guestRateLimited": "A bit too fast — wait a moment and try again.",
+		"guestPickedReceipt": "{name} checked off",
+		"guestUnpickedReceipt": "{name} is back on the list",
 		"publicExpires": "Link valid until {date}.",
 		"publicSnapshotAt": "Snapshot taken {date}.",
 		"publicGdprNote": "The list shows item names and quantities only — no household names, addresses, or contact details. The link expires automatically.",
