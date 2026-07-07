@@ -3070,6 +3070,12 @@
 			},
 			"addCta": "Lägg till",
 			"searchPlaceholder": "Sök i skafferiet…",
+			"freshness": {
+				"updatedToday": "Senast uppdaterat idag",
+				"updatedYesterday": "Senast uppdaterat igår",
+				"updatedDaysAgo": "Senast uppdaterat för {days} dagar sedan",
+				"review": "{count, plural, one {# vara} other {# varor}} att se över"
+			},
 			"insightsSummary": "Att se över i skafferiet",
 			"empty": {
 				"title": "Tomt så länge.\nSnart fullt av liv.",

@@ -9,18 +9,45 @@
 	import Button from '$lib/components/atoms/Button.svelte';
 	import { trackPantryShelfOpened } from '$lib/client/pantry-v2-telemetry';
 	import type { InventoryItem } from '$lib/domain/inventory-item';
+	import { daysSinceLastConfirmed } from '$lib/domain/inventory-staleness';
 	import { buildPantryShelfView, filterInventoryBySearch } from '$lib/domain/pantry-shelf';
 	import type { InventoryInsightsSnapshot } from '$lib/server/inventory-insights';
 	import { t } from '$lib/i18n';
 
 	interface Props {
 		items: InventoryItem[];
+		/** Honest data-freshness for the shelf header — null when load degraded or no household. */
+		freshness?: { lastUpdatedAt: Date | string | null; staleCount: number } | null;
 		canWrite?: boolean;
 		canConsume?: boolean;
 		loadFailed?: boolean;
 	}
 
-	let { items, canWrite = false, canConsume = false, loadFailed = false }: Props = $props();
+	let {
+		items,
+		freshness = null,
+		canWrite = false,
+		canConsume = false,
+		loadFailed = false
+	}: Props = $props();
+
+	const freshnessLabel = $derived.by(() => {
+		if (!freshness?.lastUpdatedAt) {
+			return null;
+		}
+		const updatedAt = new Date(freshness.lastUpdatedAt);
+		if (Number.isNaN(updatedAt.getTime())) {
+			return null;
+		}
+		const days = daysSinceLastConfirmed(updatedAt);
+		if (days <= 0) {
+			return t('pantry.v2.freshness.updatedToday');
+		}
+		if (days === 1) {
+			return t('pantry.v2.freshness.updatedYesterday');
+		}
+		return t('pantry.v2.freshness.updatedDaysAgo', { days });
+	});
 
 	let searchQuery = $state('');
 	let consumeItem = $state<InventoryItem | null>(null);
@@ -129,6 +156,18 @@
 <div class="pantry-v2-page" data-testid="pantry-v2-page">
 	<PantryShelfActions bind:query={searchQuery} {canWrite} returnTo="/inventory" />
 
+	{#if !loadFailed && !unfilteredShelf.isEmpty && freshnessLabel}
+		<!-- Locked principle "usable at 60% data": say honestly how fresh the shelf is. -->
+		<p class="freshness-line" data-testid="pantry-freshness">
+			<span>{freshnessLabel}</span>
+			{#if freshness && freshness.staleCount > 0}
+				<a class="freshness-review" href="/inventory/synk">
+					{t('pantry.v2.freshness.review', { count: freshness.staleCount })}
+				</a>
+			{/if}
+		</p>
+	{/if}
+
 	{#if !loadFailed && !unfilteredShelf.isEmpty}
 	<details class="insights-fold" data-testid="pantry-v2-insights-fold">
 		<summary>{t('pantry.v2.insightsSummary')}</summary>
@@ -197,6 +236,30 @@
 		flex-direction: column;
 		min-width: 0;
 		gap: var(--space-sm);
+	}
+
+	.freshness-line {
+		margin: 0;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		column-gap: var(--space-sm);
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+	}
+
+	.freshness-review {
+		display: inline-flex;
+		align-items: center;
+		min-height: var(--touch-target-min);
+		font-weight: 600;
+		color: var(--color-primary);
+		text-decoration: underline;
+	}
+
+	.freshness-review:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
 	}
 
 	.insights-fold {

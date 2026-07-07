@@ -13,6 +13,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.householdId) {
 		return {
 			items: [],
+			freshness: null,
 			canWrite: false,
 			canConsume: false,
 			loadFailed: false
@@ -20,10 +21,14 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 
 	try {
-		const items = await locals.inventoryService.listAll(locals.householdId);
+		const [items, freshness] = await Promise.all([
+			locals.inventoryService.listAll(locals.householdId),
+			locals.inventoryService.getPantryFreshness(locals.householdId)
+		]);
 
 		return {
 			items,
+			freshness,
 			canWrite: locals.householdRole ? canEditInventory(locals.householdRole) : false,
 			canConsume: locals.householdRole ? canConsumeInventory(locals.householdRole) : false,
 			loadFailed: false
@@ -31,6 +36,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	} catch {
 		return {
 			items: [],
+			freshness: null,
 			canWrite: locals.householdRole ? canEditInventory(locals.householdRole) : false,
 			canConsume: locals.householdRole ? canConsumeInventory(locals.householdRole) : false,
 			loadFailed: true
