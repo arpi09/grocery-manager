@@ -4,6 +4,20 @@ North star for **0-user activation** — replaces empty Brain Impact killer rows
 
 ## Funnel steps
 
+### Loop-funnel (Skaffu 2.0 — primär)
+
+Kärnloopens aktiveringskedja; våg 3–5 i 2.0-planen optimerar mot dessa.
+
+| Step | Event / metric | Notering |
+|------|----------------|----------|
+| Landning | `public_surface_viewed` / marketing pageviews | inkl. gäst via `/lista/[token]` |
+| Registrering | `signup_complete` | Baseline |
+| Första varan på listan | `shopping_first_item_added` | metadata.surface = inkop_add / quick_add_api / home_expiring_card |
+| Partner ombord | `partner_joined` | metadata.context = lista / invite |
+| Stängd loop | `shopping_loop_closed` | ETT event per Packa upp-gest; metadata {count, added, merged} |
+
+### Legacy-funnel (kvitto-centrisk, pre-2.0)
+
 | Step | Event / metric | Early target |
 |------|----------------|--------------|
 | Registrering | `signup_complete` | Baseline |

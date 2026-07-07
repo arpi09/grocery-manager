@@ -58,6 +58,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Invalid item name' }, { status: 400 });
 	}
 
+	/* Loop-funnel telemetry: the household's very first list row is the activation moment. */
+	const existing = await locals.shoppingListService.listItems(auth.householdId);
+
 	const item = await locals.shoppingListService.addItem(
 		auth.householdId,
 		locals.householdRole!,
@@ -71,6 +74,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		eventType: 'fill_suggestions_added',
 		metadata: { name: item.name, source: parsedBody.source, count: 1 }
 	});
+
+	if (existing.length === 0) {
+		recordProductEvent(locals.pmfService, {
+			userId: auth.user.id,
+			householdId: auth.householdId,
+			eventType: 'shopping_first_item_added',
+			metadata: { surface: parsedBody.source }
+		});
+	}
 
 	return json({ ok: true, item });
 };

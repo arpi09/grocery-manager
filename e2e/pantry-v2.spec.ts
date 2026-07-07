@@ -19,6 +19,47 @@ function inventoryRowFromTable(page: import('@playwright/test').Page, itemName: 
 test.describe('Pantry UX v2', () => {
 	test.setTimeout(90_000);
 
+	test('consume from tile gives receipt with working undo', async ({ page }) => {
+		const itemName = `E2E Consume Undo ${Date.now()}`;
+
+		await loginAsAdmin(page);
+		await createFridgeItemViaApi(page, itemName);
+
+		await page.goto('/inventory');
+		await dismissOnboardingModalIfOpen(page);
+		await dismissPageHintIfOpen(page);
+		await expect(page.getByTestId('pantry-v2-page')).toBeVisible({ timeout: 15_000 });
+
+		/* Search pins the tile — immune to zone-cap overflow from accumulated test data. */
+		await page.getByPlaceholder(/Sök i skafferiet|Search pantry/i).fill(itemName);
+		const tile = page.getByTestId('pantry-v2-product-tile').filter({ hasText: itemName }).first();
+		await expect(tile).toBeVisible({ timeout: 10_000 });
+
+		/* toPass absorbs the hydration race — a click before Svelte attaches handlers is lost. */
+		const sheet = page.getByTestId('inventory-consume-sheet');
+		await expect(async () => {
+			await tile.getByRole('button', { name: /Registrera användning|Använd|Use/i }).click();
+			await expect(sheet).toBeVisible({ timeout: 2_000 });
+		}).toPass({ timeout: 20_000 });
+		/* The radio input is visually hidden (custom control) — click its label instead. */
+		await sheet.locator('label').filter({ hasText: 'Allt' }).or(sheet.locator('label').filter({ hasText: 'All' })).first().click();
+		await sheet.getByRole('button', { name: /Registrera användning|Register usage/i }).click();
+		await expect(sheet).not.toBeVisible({ timeout: 15_000 });
+
+		/* Trust contract: the mutation yields a visible receipt with working Ångra. */
+		const undoWrap = page.getByTestId('consume-undo');
+		await expect(undoWrap).toBeVisible({ timeout: 10_000 });
+		await expect(undoWrap).toContainText(itemName);
+
+		await page.getByTestId('consume-undo-btn').click();
+		await expect(undoWrap).not.toBeVisible({ timeout: 10_000 });
+
+		/* Quantity restored — the tile is back on the shelf. */
+		await expect(
+			page.getByTestId('pantry-v2-product-tile').filter({ hasText: itemName }).first()
+		).toBeVisible({ timeout: 15_000 });
+	});
+
 	test('shelf zones, tile tap, and location data grid @deploy-critical', async ({ page }) => {
 		const itemName = `E2E Pantry V2 ${Date.now()}`;
 		const expiringName = `E2E Use Soon ${Date.now()}`;

@@ -267,7 +267,7 @@
 			"receiptFinishAccepted": "Markerade äldre lager som slut",
 			"inventoryWrite": {
 				"create": "Lade till vara",
-				"consume": "Konsumerade vara",
+				"consume": "Använde en vara",
 				"confirm": "Bekräftade vara",
 				"merge": "Slog ihop dubletter"
 			}
@@ -492,7 +492,7 @@
 		},
 		"backToPantry": "Tillbaka till skafferiet",
 		"backToPlan": "Tillbaka till Plan",
-		"bulkConsume": "Förbruka valda",
+		"bulkConsume": "Använd valda",
 		"bulkDelete": "Ta bort valda",
 		"bulkCheckOff": "Bocka av valda",
 		"bulkCheckOffSuccess": "{count} varor avbockade",
@@ -3605,12 +3605,8 @@
 		"sourceReceipt": "Från kvittot"
 	},
 	"consume": {
-		"sectionTitle": "Logga förbrukning",
+		"sectionTitle": "Registrera användning",
 		"sectionHelp": "Uppdaterar lagersaldo utan att ändra namn eller plats",
-		"finish": "Ätit upp",
-		"partial": "Delvis…",
-		"finishNamed": "Markera {name} som ätit upp",
-		"logUsage": "Delvis",
 		"intro": "Hur mycket av {name} använde du? ({stock} kvar)",
 		"presetsAria": "Snabb mängd",
 		"presetLite": "Lite (~10 %)",
@@ -3618,13 +3614,11 @@
 		"presetAll": "Allt",
 		"customLabel": "Egen mängd",
 		"customPlaceholder": "t.ex. 50",
-		"confirm": "Logga förbrukning",
+		"confirm": "Registrera användning",
 		"invalidAmount": "Ange en giltig mängd",
-		"finishFailed": "Kunde inte markera som ätit upp — försök igen",
-		"undoToastNamed": "{name} markerad som ätit upp",
-		"undoToast": "Vara markerad som ätit upp",
-		"swipeFinish": "Klart",
-		"swipePartial": "Delvis"
+		"consequence": "Drar av från lagersaldot — går att ångra i 8 sekunder.",
+		"undoToastNamed": "{name} använd — lagersaldot uppdaterat",
+		"undoToast": "Vara använd — lagersaldot uppdaterat"
 	},
 	"news": {
 		"title": "Nyheter",

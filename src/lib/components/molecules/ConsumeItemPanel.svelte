@@ -107,6 +107,9 @@
 		</div>
 	{/if}
 
+	<!-- Locked principle "no silent side effects": say what happens before the tap. -->
+	<p class="consequence">{t('consume.consequence')}</p>
+
 	<div class="actions">
 		{#if onClose}
 			<Button type="button" variant="ghost" onclick={onClose}>{t('common.cancel')}</Button>
@@ -118,6 +121,12 @@
 </form>
 
 <style>
+	.consequence {
+		margin: 0;
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+	}
+
 	.consume-panel {
 		display: flex;
 		flex-direction: column;
