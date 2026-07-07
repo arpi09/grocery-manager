@@ -52,14 +52,16 @@
 	let submitting = $state(false);
 	let formEl: HTMLFormElement | undefined = $state();
 
-	/** After a failed submit: move focus to the first invalid field, else the banner. */
+	/** After a failed submit: move focus to the first invalid field, else the banner.
+	 * setTimeout (not rAF) so it lands after SvelteKit's post-action focus reset
+	 * and still fires when the tab is backgrounded (rAF is paused there). */
 	function focusFirstProblem() {
-		requestAnimationFrame(() => {
+		setTimeout(() => {
 			const target =
 				formEl?.querySelector<HTMLElement>('[aria-invalid="true"]') ??
 				formEl?.querySelector<HTMLElement>('[data-feedback-banner]');
 			target?.focus();
-		});
+		}, 0);
 	}
 
 	const submitLogin: SubmitFunction = (input) => {
@@ -73,7 +75,8 @@
 					// Private mode — fine without remembering.
 				}
 			}
-			await inner?.(opts);
+			const innerCallback = await inner;
+			await innerCallback?.(opts);
 			if (opts.result.type === 'failure') {
 				focusFirstProblem();
 			}
