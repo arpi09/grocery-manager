@@ -138,6 +138,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - test(recept): e2e-vakt för tomt receptresultat (neutral note, ej fel) ([#247](https://github.com/arpi09/grocery-manager/pull/247)) — **`/api/recipes` mock-branch:** sentinel-extra-item `__tomt__` tvingar ett tomt svar med `noSuitableInventoryNote` (speglar det *riktiga* tomma API-svaret). Bakom `isE2eMockAiEnabled()` → **dött i prod**, ingen user-facing effekt.
 - test(e2e): make core-loop seed deterministic, convert false-green skips ([#249](https://github.com/arpi09/grocery-manager/pull/249)) — `clearExpiringSoonItems` — deletes active items expiring within 7d across all locations
 - docs(reality): master framför prod — odeployad batch #248/#250/#251 ([#253](https://github.com/arpi09/grocery-manager/pull/253)) — [x] docs-only (quality-docs path, ingen e2e)
+- docs(reality): prod SHA d74fc01e6 — 2026.7.7-batchen live ([#256](https://github.com/arpi09/grocery-manager/pull/256)) — CURRENT_REALITY: prod SHA `d74fc01e6` @ [28854580035](https://github.com/arpi09/grocery-manager/actions/runs/28854580035), release 2026.7.7 — batch #244/#248/#250/#251/#252/#254 live.
 
 ### Added
 
