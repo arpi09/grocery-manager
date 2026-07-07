@@ -45,6 +45,36 @@ Before merge / release:
 - [ ] **WCAG 2.2 AA (axe)** — `npm run test:e2e -- e2e/accessibility.spec.ts` green for touched P0 routes; see [ACCESSIBILITY.md](./ACCESSIBILITY.md).
 - [ ] **Responsiveness** — tested at ~360px width; bottom nav safe area respected (`--content-bottom-safe`).
 
+## Data trust (LOCKED — founder principles)
+
+These two rules come from real founder churn (2026-07-03/04: data distrust + button fear) and are **blocking in review** — a PR that violates them does not merge. They apply to every surface, including guest/public pages. (Codified in Skaffu 2.0 våg 1.)
+
+### 1. No silent side effects
+
+- **Every mutation produces a visible receipt** — toast or `role="status"` live-region, named after the affected item ("Tog bort Mjölk", "Mjölk använd — lagersaldot uppdaterat").
+- **Everything destructive or data-moving has Ångra** — 8 s window (`TOAST_UNDO_DURATION_MS` in `src/lib/utils/action-toast.ts`), snapshot → restore action. Templates: clearList/restoreList (`src/routes/inkop/+page.server.ts`), per-row remove (`ShoppingV2Page`), consume undo (`InventoryConsumeSheet` + `?/undoConsume`).
+- **No new `?/action` merges without a wired toast + undo path.** A server action without a client caller is deleted, not left "for later" (precedent: PR #257).
+- Receipts are **batched per gesture** — "Packa upp" gives ONE receipt for 15 items, never 15 toasts.
+- Guest surfaces follow the same receipt contract (`/lista/[token]` checkoff) — but never expose household names (the public GDPR note governs).
+
+### 2. Usable at 60% data
+
+- No core surface may assume a complete pantry. Intelligence (suggestions, meal ideas, expiry predictions) declares its data basis or stays hidden until data exists — never AI theater on a cold start.
+- Data freshness is shown honestly where the data lives: `/inventory` freshness line ("Senast uppdaterat …" + "N varor att se över" → `/inventory/synk`).
+
+### Canonical vocabulary (one verb per action)
+
+| Action | Verb (sv) | Where |
+|--------|-----------|-------|
+| Add | **Lägg till** | every add affordance; scanning is an input mode inside "Lägg till", not its own verb |
+| Check off | **Bocka av** ("avbockad") | shop mode, guest `/lista/[token]` |
+| Consume | **Använd** / dialog "Registrera användning" | tile, row, swipe, bulk ("Använd valda"), activity ("Använde en vara") |
+| Remove from list | **Ta bort** | per-row remove |
+| Clear list | **Rensa listan** | plan view |
+| Undo | **Ångra** | every receipt |
+
+Deleted synonyms — do **not** reintroduce: "Ätit upp", "Klart" (as consume), "Konsumerade", "Logga förbrukning", "Förbruka".
+
 ## UX rules
 
 ### Empty states
