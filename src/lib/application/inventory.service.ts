@@ -374,6 +374,25 @@ export class InventoryService {
 
 	}
 
+	/** Lean freshness snapshot for the shelf header — the honest "usable at 60% data" line. */
+	async getPantryFreshness(
+		householdId: string
+	): Promise<{ lastUpdatedAt: Date | null; staleCount: number }> {
+		try {
+			const [staleCount, lastUpdate] = await Promise.all([
+				this.repository.countStaleUndated(householdId),
+				this.repository.getLastInventoryUpdate(householdId)
+			]);
+			return { lastUpdatedAt: lastUpdate?.updatedAt ?? null, staleCount };
+		} catch (error) {
+			if (!isMissingLastConfirmedColumn(error)) {
+				throw error;
+			}
+			console.warn('[inventory] pantry freshness degraded — last_confirmed_at missing');
+			return { lastUpdatedAt: null, staleCount: 0 };
+		}
+	}
+
 
 
 	async getAnalytics(householdId: string): Promise<InventoryAnalytics> {

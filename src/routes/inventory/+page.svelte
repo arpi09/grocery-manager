@@ -14,6 +14,7 @@
 	<PageContainer>
 		<PantryV2Page
 			items={data.items}
+			freshness={data.freshness}
 			canWrite={data.canWrite}
 			canConsume={data.canConsume}
 			loadFailed={data.loadFailed}

@@ -3149,6 +3149,12 @@
 			},
 			"addCta": "Add",
 			"searchPlaceholder": "Search pantry…",
+			"freshness": {
+				"updatedToday": "Last updated today",
+				"updatedYesterday": "Last updated yesterday",
+				"updatedDaysAgo": "Last updated {days} days ago",
+				"review": "{count, plural, one {# item} other {# items}} to review"
+			},
 			"insightsSummary": "Things to review in your pantry",
 			"empty": {
 				"title": "Empty for now.\nSoon full of life.",
