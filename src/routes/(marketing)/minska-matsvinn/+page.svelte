@@ -8,7 +8,7 @@
 
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
 
-	import { buildMarketingWebPageJsonLd } from '$lib/seo/seo';
+	import { buildBreadcrumbJsonLd, buildMarketingWebPageJsonLd } from '$lib/seo/seo';
 
 
 
@@ -22,12 +22,13 @@
 
 	const siteOrigin = new URL(canonicalUrl).origin;
 
-	const jsonLd = buildMarketingWebPageJsonLd(
-		siteOrigin,
-		'/minska-matsvinn',
-		page.meta.ogTitle,
-		page.meta.description
-	);
+	const jsonLd = [
+		buildMarketingWebPageJsonLd(siteOrigin, '/minska-matsvinn', page.meta.ogTitle, page.meta.description),
+		buildBreadcrumbJsonLd(siteOrigin, [
+			{ name: content.siteName, path: '/' },
+			{ name: page.title, path: '/minska-matsvinn' }
+		])
+	];
 
 </script>
 

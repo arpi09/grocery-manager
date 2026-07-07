@@ -74,6 +74,16 @@ export function marketingOgImageUrl(requestOrigin?: string): string {
 	return `${origin}${OG_IMAGE_PATH}?v=${OG_IMAGE_VERSION}`;
 }
 
+/**
+ * Square brand logo for schema.org Organization/publisher. Google requires a square
+ * logo ≥112×112 for brand display in search — the 1200×630 OG image does not qualify.
+ */
+export const SEO_LOGO_PATH = '/pwa/icon-512.png';
+
+export function marketingLogoUrl(requestOrigin?: string): string {
+	return `${resolveAppOrigin(requestOrigin)}${SEO_LOGO_PATH}`;
+}
+
 export function sitemapAbsoluteUrl(path: string, requestOrigin?: string): string {
 	return marketingCanonicalUrl(path, requestOrigin);
 }
@@ -110,7 +120,7 @@ export function buildArticleJsonLd(
 			name: SITE_NAME,
 			logo: {
 				'@type': 'ImageObject',
-				url: marketingOgImageUrl(siteOrigin)
+				url: marketingLogoUrl(siteOrigin)
 			}
 		},
 		mainEntityOfPage: {
@@ -187,7 +197,7 @@ export function buildLandingJsonLd(
 			'@type': 'Organization',
 			name: SITE_NAME,
 			url: origin,
-			logo: marketingOgImageUrl(origin),
+			logo: marketingLogoUrl(origin),
 			email: 'hello@skaffu.com',
 			description,
 			alternateName: [...ORGANIZATION_ALTERNATE_NAMES],
@@ -197,6 +207,8 @@ export function buildLandingJsonLd(
 			'@context': 'https://schema.org',
 			'@type': 'WebSite',
 			name: SITE_NAME,
+			/* Site-name signal — Google shows "skaffu.com" without a recognized alternate. */
+			alternateName: ['skaffu.com', 'Skaffu app'],
 			url: origin,
 			description,
 			publisher: {

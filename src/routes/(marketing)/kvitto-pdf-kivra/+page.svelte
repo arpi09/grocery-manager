@@ -5,7 +5,7 @@
 	import MarketingStepCard from '$lib/components/marketing/MarketingStepCard.svelte';
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
 	import { ArrowRight } from '@lucide/svelte';
-	import { buildFaqPageJsonLd, buildMarketingWebPageJsonLd } from '$lib/seo/seo';
+	import { buildBreadcrumbJsonLd, buildFaqPageJsonLd, buildMarketingWebPageJsonLd } from '$lib/seo/seo';
 	import { STORE_GUIDES } from '$lib/marketing/store-guides';
 
 	let { data } = $props();
@@ -16,7 +16,11 @@
 	const faqItems = page.faq ?? [];
 	const jsonLd = [
 		buildMarketingWebPageJsonLd(siteOrigin, '/kvitto-pdf-kivra', page.meta.ogTitle, page.meta.description),
-		...(faqItems.length > 0 ? [buildFaqPageJsonLd(canonicalUrl, faqItems)] : [])
+		...(faqItems.length > 0 ? [buildFaqPageJsonLd(canonicalUrl, faqItems)] : []),
+		buildBreadcrumbJsonLd(siteOrigin, [
+			{ name: content.siteName, path: '/' },
+			{ name: page.title, path: '/kvitto-pdf-kivra' }
+		])
 	];
 </script>
 

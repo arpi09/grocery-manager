@@ -20,8 +20,10 @@ import {
 	buildSoftwareApplicationJsonLd,
 	buildPricingJsonLd,
 	buildRobotsTxt,
+	marketingLogoUrl,
 	marketingOgImageUrl,
 	OG_IMAGE_PATH,
+	SEO_LOGO_PATH,
 	robotsDirectiveForPath,
 	shouldIndexPath,
 	MARKETING_CONTENT_LASTMOD,
@@ -128,6 +130,13 @@ describe('marketingOgImageUrl', () => {
 	});
 });
 
+describe('marketingLogoUrl', () => {
+	it('returns the square PWA icon — Google requires ≥112×112 square for brand logo', () => {
+		expect(SEO_LOGO_PATH).toBe('/pwa/icon-512.png');
+		expect(marketingLogoUrl('https://skaffu.com')).toBe('https://skaffu.com/pwa/icon-512.png');
+	});
+});
+
 describe('buildRobotsTxt', () => {
 	beforeEach(() => {
 		mockPublicEnv.PUBLIC_ORIGIN = 'https://skaffu.com';
@@ -158,6 +167,18 @@ describe('buildLandingJsonLd', () => {
 			'https://www.facebook.com/profile.php?id=100066978903320'
 		]);
 		expect(org.alternateName).toEqual(['Skaffu app', 'Skafferi-app']);
+	});
+
+	it('uses the square logo for Organization, not the 1200×630 OG image', () => {
+		const schemas = buildLandingJsonLd('https://skaffu.com', 'Skafferi-app');
+		const org = schemas[1] as Record<string, unknown>;
+		expect(org.logo).toBe('https://skaffu.com/pwa/icon-512.png');
+	});
+
+	it('gives WebSite an alternateName so Google shows "Skaffu" as site name', () => {
+		const schemas = buildLandingJsonLd('https://skaffu.com', 'Skafferi-app');
+		const site = schemas[2] as Record<string, unknown>;
+		expect(site.alternateName).toEqual(['skaffu.com', 'Skaffu app']);
 	});
 });
 
@@ -195,6 +216,18 @@ describe('buildArticleJsonLd', () => {
 		});
 		expect(schema['@type']).toBe('Article');
 		expect(schema.url).toBe('https://skaffu.com/guider/test-guide');
+	});
+
+	it('uses the square logo for publisher.logo', () => {
+		const schema = buildArticleJsonLd('https://skaffu.com', {
+			slug: 'test-guide',
+			title: 'Test guide',
+			description: 'Beskrivning',
+			date: '2026-06-01',
+			keywords: ['skafferi']
+		});
+		const publisher = schema.publisher as { logo: { url: string } };
+		expect(publisher.logo.url).toBe('https://skaffu.com/pwa/icon-512.png');
 	});
 });
 

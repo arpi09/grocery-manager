@@ -47,18 +47,6 @@
 	function trackRegisterClick() {
 		void trackProductEvent('register_click', { variant: data.landingVariant });
 	}
-
-	/* Visible guide dates keep "/" demonstrably fresh — for readers and crawlers alike. */
-	function formatGuideDate(isoDate: string): string {
-		const [year, month, day] = isoDate.split('-').map(Number);
-		if (!year || !month || !day) {
-			return '';
-		}
-		return new Date(year, month - 1, day).toLocaleDateString(
-			marketingLocale === 'en' ? 'en-GB' : 'sv-SE',
-			{ year: 'numeric', month: 'long', day: 'numeric' }
-		);
-	}
 </script>
 
 <MarketingSeoHead
@@ -229,10 +217,8 @@
 				</header>
 				<div class="guide-teaser-grid">
 					{#each latestGuides as guide (guide.slug)}
+						<!-- No visible dates on "/" — Google date-stamps the brand snippet from them. Dates live on /guider. -->
 						<article class="guide-teaser-card">
-							{#if formatGuideDate(guide.date)}
-								<time class="guide-teaser-date" datetime={guide.date}>{formatGuideDate(guide.date)}</time>
-							{/if}
 							<h3>
 								<a href="/guider/{guide.slug}">{guide.title}</a>
 							</h3>
@@ -726,16 +712,6 @@
 		background: var(--color-surface);
 		border: 1px solid var(--color-border);
 		box-shadow: var(--shadow-sm);
-	}
-
-	.guide-teaser-date {
-		display: block;
-		margin-bottom: var(--space-xs);
-		font-size: var(--font-size-label);
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: var(--color-text-muted);
 	}
 
 	.guide-teaser-card h3 {
