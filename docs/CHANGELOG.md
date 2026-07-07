@@ -48,6 +48,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - feat(marketing): programmatiska butiks-kvittosidor + veckoroterande matsvinnstips ([#248](https://github.com/arpi09/grocery-manager/pull/248)) — Varje sida har genuint, sanningsenligt innehåll (hämta digitalt kvitto → ladda upp → granska), 3 butiksspecifika FAQ, och korslänkar till de andra butikerna — inte en stad-namn-utbytt mall.
 - feat(onboarding): v8.1 delight — loop motion story, spring dots, calmer finish + personal copy ([#250](https://github.com/arpi09/grocery-manager/pull/250)) — **Loop mark:** `prefersReducedMotion.current` → dot placed instantly (no travel); close-glow + drop-shadow disabled via `@media (prefers-reduced-motion: reduce)`.
 - feat(inkop): member-proveniens — "Tillagd av X" på delade listrader ([#251](https://github.com/arpi09/grocery-manager/pull/251)) — Member-proveniens på inköpslistan: delade hushåll ser **"Tillagd av {namn}"** (egna rader: **"Tillagd av dig"**) på varje listrad i planvyn — stärker tilliten i delad-handling-loopen (trust over taps).
+- feat(auth): login-konverteringspass — lösenordstoggle, felfokus, loop-story-hero ([#252](https://github.com/arpi09/grocery-manager/pull/252)) — **Visa/dölj lösenord-toggle** i `FormField` (opt-in `revealable`, 44px touch target, `aria-pressed` + `aria-label`)
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
