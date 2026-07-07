@@ -16,12 +16,23 @@
 <div class="showcase" aria-hidden="true">
 	<p class="headline">{t('onboarding.landingHeadline')}</p>
 
-	<div class="mobile-strip">
-		<span class="strip-item" style="--strip: var(--color-fridge)">{t('onboarding.fridgeShort')}</span>
-		<span class="strip-item" style="--strip: var(--color-freezer)">{t('onboarding.freezerShort')}</span>
-		<span class="strip-item" style="--strip: var(--color-cupboard)">{t('onboarding.cupboardShort')}</span>
-		<span class="strip-item" style="--strip: var(--color-accent)">{t('common.dates')}</span>
-		<span class="strip-item" style="--strip: var(--color-primary)">{t('nav.shopping')}</span>
+	<!-- Core-loop story mark — same visual language as onboarding v8.1
+	     (OnboardingLoopProgress): closed loop, three nodes, traveling dot. -->
+	<div class="loop-story">
+		<svg viewBox="0 0 240 84" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<path
+				class="loop-track"
+				d="M40 16 H200 Q224 16 224 40 Q224 64 200 64 H40 Q16 64 16 40 Q16 16 40 16 Z"
+				stroke-width="2"
+			/>
+			<circle class="loop-node" cx="16" cy="40" r="4" />
+			<circle class="loop-node" cx="224" cy="40" r="4" />
+			<circle class="loop-node" cx="120" cy="64" r="4" />
+			<circle class="loop-dot" r="4.2" />
+			<text class="loop-label" x="16" y="26" text-anchor="middle">{t('auth.loop.list')}</text>
+			<text class="loop-label" x="224" y="26" text-anchor="middle">{t('auth.loop.shop')}</text>
+			<text class="loop-label" x="120" y="82" text-anchor="middle">{t('auth.loop.pantry')}</text>
+		</svg>
 	</div>
 
 	<div class="bento">
@@ -107,8 +118,66 @@
 		gap: var(--space-lg);
 	}
 
-	.mobile-strip {
-		display: none;
+	.loop-story {
+		display: flex;
+		justify-content: flex-start;
+	}
+
+	.loop-story svg {
+		width: clamp(11rem, 22vw, 15rem);
+		height: auto;
+		overflow: visible;
+		color: var(--color-primary);
+	}
+
+	.loop-track {
+		stroke: color-mix(in srgb, var(--color-primary) 30%, transparent);
+	}
+
+	.loop-node {
+		fill: color-mix(in srgb, var(--color-primary) 30%, var(--color-surface));
+		stroke: var(--color-primary);
+		stroke-width: 1.5;
+	}
+
+	.loop-dot {
+		fill: var(--color-primary);
+		offset-path: path('M40 16 H200 Q224 16 224 40 Q224 64 200 64 H40 Q16 64 16 40 Q16 16 40 16 Z');
+		offset-distance: 0%;
+		offset-rotate: 0deg;
+	}
+
+	.loop-label {
+		font-size: 11px;
+		font-weight: 600;
+		fill: var(--color-text-muted);
+	}
+
+	@supports not (offset-path: path('M0 0')) {
+		.loop-dot {
+			display: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.loop-dot {
+			animation: loop-travel 9s linear infinite;
+		}
+	}
+
+	@keyframes loop-travel {
+		from {
+			offset-distance: 0%;
+		}
+		to {
+			offset-distance: 100%;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.loop-dot {
+			animation: none;
+		}
 	}
 
 	@media (max-width: 899px) {
@@ -129,21 +198,12 @@
 			display: none;
 		}
 
-		.mobile-strip {
-			display: flex;
-			flex-wrap: wrap;
+		.loop-story {
 			justify-content: center;
-			gap: 0.35rem;
 		}
 
-		.strip-item {
-			font-size: 0.65rem;
-			font-weight: 600;
-			padding: 0.2rem 0.55rem;
-			border-radius: 999px;
-			color: var(--strip);
-			background: color-mix(in srgb, var(--strip) 12%, var(--color-surface));
-			border: 1px solid color-mix(in srgb, var(--strip) 28%, var(--color-border));
+		.loop-story svg {
+			width: 10rem;
 		}
 	}
 

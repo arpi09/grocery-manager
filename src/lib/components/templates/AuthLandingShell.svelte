@@ -150,16 +150,16 @@
 
 	.tagline {
 		margin: var(--space-sm) 0 0;
-		font-size: 0.8rem;
+		font-size: 0.9375rem;
 		color: var(--color-text-muted);
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
+		line-height: 1.45;
+		text-wrap: balance;
 	}
 
 	@media (max-width: 899px) {
 		.tagline {
 			margin-top: var(--space-xs);
-			font-size: 0.7rem;
+			font-size: 0.85rem;
 		}
 	}
 
