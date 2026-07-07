@@ -3776,6 +3776,8 @@
 		"guestCheckedHeading": "Plockade ({count})",
 		"guestToggleFailed": "Kunde inte uppdatera varan. Försök igen.",
 		"guestRateLimited": "Lite för snabbt — vänta en stund och försök igen.",
+		"guestPickedReceipt": "{name} avbockad",
+		"guestUnpickedReceipt": "{name} är tillbaka på listan",
 		"publicExpires": "Länken gäller till {date}.",
 		"publicSnapshotAt": "Ögonblicksbild tagen {date}.",
 		"publicGdprNote": "Listan visar bara varunamn och mängd — inga hushållsnamn, adresser eller kontaktuppgifter. Länken slutar gälla automatiskt.",

@@ -265,4 +265,45 @@ test.describe('Growth wave — wrapped, rapport, dela', () => {
 		expect(signupUrl.searchParams.get('utm_campaign')).toBe('acquisition_wedge');
 		expect(signupUrl.searchParams.get('utm_content')).toBe('shopping_share');
 	});
+
+	test('guest checkoff on lista shows a visible receipt', async ({ page }) => {
+		test.setTimeout(90_000);
+		const itemName = `E2E Guest Receipt ${Date.now()}`;
+		await loginAsAdmin(page);
+		await addShoppingListItemViaAction(page, itemName);
+		const baseURL = new URL(page.url()).origin;
+		const shareResponse = await page.request.post(baseURL + '/api/shopping-list/share', {
+			method: 'POST'
+		});
+		expect(shareResponse.ok()).toBeTruthy();
+		const sharePayload = (await shareResponse.json()) as { ok?: boolean; url?: string };
+		expect(sharePayload.url).toBeTruthy();
+		const listaPath = new URL(sharePayload.url!).pathname;
+
+		await page.context().clearCookies();
+		await prepareE2eBrowserState(page);
+		await page.goto(listaPath, { waitUntil: 'commit' });
+		await dismissCookieConsentIfOpen(page);
+
+		/* Trust contract: the guest's mutation must produce a visible receipt. */
+		const liveList = page.getByTestId('lista-live-list');
+		await expect(liveList).toBeVisible({ timeout: 30_000 });
+		await liveList
+			.getByRole('button', { name: new RegExp(itemName) })
+			.first()
+			.click();
+		const receipt = page.getByTestId('lista-guest-receipt');
+		await expect(receipt).toContainText(new RegExp(`${itemName} (avbockad|checked off)`), {
+			timeout: 10_000
+		});
+
+		/* Untoggle gives the mirrored receipt — guests can undo their own mistakes. */
+		await liveList
+			.getByTestId('lista-guest-untoggle')
+			.first()
+			.click();
+		await expect(receipt).toContainText(/tillbaka på listan|back on the list/, {
+			timeout: 10_000
+		});
+	});
 });

@@ -69,14 +69,37 @@
 
 	let toggleError = $state<string | null>(null);
 
-	function toggleEnhance(itemId: string) {
+	/* Receipt line for guest mutations — the guest gets the same visible
+	 * confirmation contract as a member: nothing changes silently. */
+	let toggleReceipt = $state<string | null>(null);
+
+	let receiptTimeout: ReturnType<typeof setTimeout> | undefined;
+
+	function showReceipt(message: string) {
+		toggleReceipt = message;
+		clearTimeout(receiptTimeout);
+		receiptTimeout = setTimeout(() => {
+			toggleReceipt = null;
+		}, 6_000);
+	}
+
+	function toggleEnhance(itemId: string, itemName: string) {
 		return () => {
 			togglingId = itemId;
 			toggleError = null;
-			return async ({ result }: { result: { type: string; data?: { code?: string } } }) => {
+			return async ({
+				result
+			}: {
+				result: { type: string; data?: { code?: string; checked?: boolean } };
+			}) => {
 				togglingId = null;
 				if (result.type === 'success') {
 					/* Telemetry recorded server-side in the toggle action. */
+					showReceipt(
+						result.data?.checked === true
+							? t('shoppingListShare.guestPickedReceipt', { name: itemName })
+							: t('shoppingListShare.guestUnpickedReceipt', { name: itemName })
+					);
 					await invalidateAll();
 					return;
 				}
@@ -206,6 +229,10 @@
 					<p class="toggle-error" role="alert">{toggleError}</p>
 				{/if}
 
+				<p class="toggle-receipt" class:toggle-receipt--visible={toggleReceipt} role="status" data-testid="lista-guest-receipt">
+					{toggleReceipt ?? ''}
+				</p>
+
 				{#if liveUnchecked.length === 0 && liveChecked.length === 0}
 					<p class="empty-note">{t('shoppingListShare.emptyList')}</p>
 				{/if}
@@ -213,7 +240,7 @@
 				<ul class="item-list">
 					{#each liveUnchecked as item (item.id)}
 						<li>
-							<form method="POST" action="?/toggle" use:enhance={toggleEnhance(item.id)}>
+							<form method="POST" action="?/toggle" use:enhance={toggleEnhance(item.id, item.name)}>
 								<input type="hidden" name="id" value={item.id} />
 								<button
 									type="submit"
@@ -238,7 +265,7 @@
 					<ul class="item-list item-list--picked">
 						{#each liveChecked as item (item.id)}
 							<li class="checked">
-								<form method="POST" action="?/toggle" use:enhance={toggleEnhance(item.id)}>
+								<form method="POST" action="?/toggle" use:enhance={toggleEnhance(item.id, item.name)}>
 									<input type="hidden" name="id" value={item.id} />
 									<button
 										type="submit"
@@ -563,6 +590,25 @@
 		border: 1px solid color-mix(in srgb, var(--lista-brand) 25%, var(--color-border));
 		font-size: var(--text-sm);
 		font-weight: 600;
+	}
+
+	.toggle-receipt {
+		margin: 0;
+		min-height: 0;
+		padding: 0;
+		border-radius: var(--radius-sm);
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-primary);
+		transition: opacity 150ms ease;
+		opacity: 0;
+	}
+
+	.toggle-receipt--visible {
+		padding: var(--space-xs) var(--space-sm);
+		background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+		border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
+		opacity: 1;
 	}
 
 	.toggle-error {
