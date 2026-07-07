@@ -5,8 +5,8 @@
 | F?lt | V?rde |
 |------|--------|
 | **Uppdaterad** | 2026-07-07 |
-| **Prod SHA** | `473f25f12` @ [28798857449](https://github.com/arpi09/grocery-manager/actions/runs/28798857449) (live, release 2026.7.6.2, deploy_tier=auto→fast, e2e critical grön efter flake-rerun; curl-smoke /, /guider, /login, /inkop = 200, rent). **Batch:** #230 CSS-preload self-heal + #238 dead-code (−53 orphan-filer) + #243 onboarding trust-toast (+ parallella #237/#242). |
-| **Master SHA** | `f5a25058f` — **odeployad batch framför prod** (deploy pinnad merge-SHA `c581c9e5b`): #248 programmatiska butiks-kvittosidor + veckoroterande matsvinnstips, #250 onboarding v8.1 delight (loop-motion, spring-dots), #251 member-proveniens ("Tillagd av X"/"Tillagd av dig" på inköpslistan; migration **0075** `shopping_list_item.added_by_user_id`, SET NULL). Sist deployat: #230/#238/#243 @ `473f25f12`. |
+| **Prod SHA** | `d74fc01e6` @ [28854580035](https://github.com/arpi09/grocery-manager/actions/runs/28854580035) (live, release 2026.7.7, deploy_tier=auto→fast, e2e critical grön — home-v2 replenishment-flaken passerade på retry; curl-smoke /, /guider, /login = 200, /inkop = 302→login, guide-sida ren). **Batch:** #244 guide-datum/breadcrumb/hreflang + #248 butiks-kvittosidor + #250 onboarding v8.1 delight + #251 member-proveniens (migration **0075** auto-applicerad) + #252 login-konverteringspass + #254 SERP-polish. Non-blocking: `smoke-prod-auth` creds-flake igen (app svarade korrekt 400, jfr #228-deployen). |
+| **Master SHA** | `ecc56a2ad` (changelog efter #254) — i synk med prod: allt t.o.m. `d74fc01e6` deployat. |
 | **CI/CD model** | **v2 on master** � tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
@@ -73,6 +73,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 
 ## K?nda drift (fixa n?r du ser dem)
 
+- [x] **Batch: SEO/SERP + onboarding delight + member-proveniens + login-pass** — prod **`d74fc01e6`** @ [28854580035](https://github.com/arpi09/grocery-manager/actions/runs/28854580035) (release 2026.7.7, deploy_tier=auto→fast, e2e critical grön; home-v2 replenishment-flaken grön på retry — samma test fällde gårdagens deploy-försök [28805948077](https://github.com/arpi09/grocery-manager/actions/runs/28805948077), stabiliseringstask fortsatt öppen). Merged/deployad 2026-07-07; curl-smoke grön. #244+#254: brand-SERP-fix — inga synliga datum på `/`, kvadratisk Organization-logga (`/pwa/icon-512.png`), breadcrumbs på alla marknadssidor, WebSite `alternateName`; **USER_LOCAL kvar: GSC → URL-inspektion på skaffu.com → Begär indexering** (gamla snippeten från ~19 juni byts först efter omcrawl). #251: migration 0075 (`added_by_user_id`) auto-applicerad. Non-blocking flake: `smoke-prod-auth` prod-test-creds (400 = korrekt appbeteende, jfr #228).
 - [x] Prod DB migrations `0047`?`0048` ? applied 2026-06-14
 - [x] **UI living polish** ? prod **`72b02f49b`** @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) (fast E2E). PR #101 merged 2026-06-16.
 - [x] **Prod feature flags + hem redesign** � prod **`92d4915`** @ [27701442233](https://github.com/arpi09/grocery-manager/actions/runs/27701442233) (full E2E). PR #113 merged 2026-06-17.
