@@ -6,6 +6,7 @@
 	import { bindSubmitting } from '$lib/utils/form-submit-feedback';
 	import GoogleSignInButton from '$lib/components/molecules/GoogleSignInButton.svelte';
 	import { t } from '$lib/i18n';
+	import type { SubmitFunction } from '@sveltejs/kit';
 
 	interface Props {
 		errors?: Record<string, string[]>;
@@ -29,22 +30,65 @@
 		redirectTo ? `/auth/google?redirectTo=${encodeURIComponent(redirectTo)}` : '/auth/google'
 	);
 
+	const LAST_EMAIL_KEY = 'skaffu:lastLoginEmail';
+
 	let emailField = $state(email);
 	$effect(() => {
 		emailField = email;
 	});
 
+	// Prefill last-used email for returning users (only when server gave none).
+	$effect(() => {
+		if (!emailField) {
+			try {
+				const saved = localStorage.getItem(LAST_EMAIL_KEY);
+				if (saved) emailField = saved;
+			} catch {
+				// localStorage unavailable (private mode) — skip prefill.
+			}
+		}
+	});
+
 	let submitting = $state(false);
+	let formEl: HTMLFormElement | undefined = $state();
+
+	/** After a failed submit: move focus to the first invalid field, else the banner.
+	 * setTimeout (not rAF) so it lands after SvelteKit's post-action focus reset
+	 * and still fires when the tab is backgrounded (rAF is paused there). */
+	function focusFirstProblem() {
+		setTimeout(() => {
+			const target =
+				formEl?.querySelector<HTMLElement>('[aria-invalid="true"]') ??
+				formEl?.querySelector<HTMLElement>('[data-feedback-banner]');
+			target?.focus();
+		}, 0);
+	}
+
+	const submitLogin: SubmitFunction = (input) => {
+		const submittedEmail = String(input.formData.get('email') ?? '');
+		const inner = bindSubmitting((v) => (submitting = v))(input);
+		return async (opts) => {
+			if (opts.result.type === 'redirect' && submittedEmail) {
+				try {
+					localStorage.setItem(LAST_EMAIL_KEY, submittedEmail);
+				} catch {
+					// Private mode — fine without remembering.
+				}
+			}
+			const innerCallback = await inner;
+			await innerCallback?.(opts);
+			if (opts.result.type === 'failure') {
+				focusFirstProblem();
+			}
+		};
+	};
 </script>
 
-<form
-	method="POST"
-	action="?/login"
-	class="form"
-	use:enhance={bindSubmitting((v) => (submitting = v))}
->
+<form method="POST" action="?/login" class="form" bind:this={formEl} use:enhance={submitLogin}>
 	{#if message}
-		<FeedbackBanner tone={messageTone} {message} />
+		<div data-feedback-banner tabindex="-1" class="banner-focus-wrap">
+			<FeedbackBanner tone={messageTone} {message} />
+		</div>
 	{/if}
 
 	{#if redirectTo}
@@ -64,6 +108,7 @@
 		name="password"
 		type="password"
 		autocomplete="current-password"
+		revealable
 		error={errors.password?.[0]}
 	/>
 
@@ -94,6 +139,10 @@
 <style>
 	.form {
 		width: 100%;
+	}
+
+	.banner-focus-wrap:focus {
+		outline: none;
 	}
 
 	.forgot-row {

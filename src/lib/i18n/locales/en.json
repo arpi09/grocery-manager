@@ -164,9 +164,16 @@
 		"email": "Email",
 		"password": "Password",
 		"confirmPassword": "Confirm password",
+		"showPassword": "Show password",
+		"hidePassword": "Hide password",
+		"loop": {
+			"list": "List",
+			"shop": "Shop",
+			"pantry": "Pantry"
+		},
 		"login": {
 			"title": "Log in",
-			"subtitle": "Shared weekly list — shop and update your pantry",
+			"subtitle": "Shop together. Stock the pantry. Waste less.",
 			"submit": "Log in",
 			"submitting": "Logging in…",
 			"pageTitle": "Log in · Skaffu",

@@ -107,9 +107,16 @@
 		"email": "E-post",
 		"password": "Lösenord",
 		"confirmPassword": "Bekräfta lösenord",
+		"showPassword": "Visa lösenord",
+		"hidePassword": "Dölj lösenord",
+		"loop": {
+			"list": "Lista",
+			"shop": "Handla",
+			"pantry": "Skafferi"
+		},
 		"login": {
 			"title": "Logga in",
-			"subtitle": "Gemensam veckolista — handla och fyll skafferiet",
+			"subtitle": "Handla tillsammans. Fyll skafferiet. Släng mindre.",
 			"submit": "Logga in",
 			"submitting": "Loggar in…",
 			"pageTitle": "Logga in · Skaffu",
