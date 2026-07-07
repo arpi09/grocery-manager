@@ -182,12 +182,22 @@ export const actions: Actions = {
 		}
 
 		try {
+			/* Loop-funnel telemetry: the household's very first list row is the activation moment. */
+			const existing = await event.locals.shoppingListService.listItems(householdId);
 			await event.locals.shoppingListService.addItem(
 				householdId,
 				event.locals.householdRole!,
 				parsed.data,
 				event.locals.user?.id ?? null
 			);
+			if (existing.length === 0) {
+				recordProductEvent(event.locals.pmfService, {
+					userId: event.locals.user?.id ?? null,
+					householdId,
+					eventType: 'shopping_first_item_added',
+					metadata: { surface: 'inkop_add' }
+				});
+			}
 		} catch (err) {
 			return handleServiceError(err);
 		}
@@ -463,6 +473,16 @@ export const actions: Actions = {
 				return fail(403, { message: err.message });
 			}
 			throw err;
+		}
+
+		/* Loop-funnel telemetry: ONE event per closed loop (gesture), not per item. */
+		if (added + merged > 0) {
+			recordProductEvent(event.locals.pmfService, {
+				userId: event.locals.user!.id,
+				householdId,
+				eventType: 'shopping_loop_closed',
+				metadata: { count: added + merged, added, merged }
+			});
 		}
 
 		return {

@@ -132,6 +132,8 @@ export const PRODUCT_EVENT_TYPES = [
 	'trip_started',
 	'trip_item_checked',
 	'trip_completed',
+	'shopping_first_item_added',
+	'shopping_loop_closed',
 	'shopping_mode_switched',
 	'memory_suggestion_added',
 	'memory_suggestion_ignored',
