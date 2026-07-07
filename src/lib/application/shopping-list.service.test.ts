@@ -17,7 +17,6 @@ describe('ShoppingListService', () => {
 			setChecked: vi.fn(),
 			setUnavailable: vi.fn(),
 			delete: vi.fn(),
-			deleteChecked: vi.fn(),
 			deleteUnchecked: vi.fn(),
 			nextSortOrder: vi.fn()
 		};

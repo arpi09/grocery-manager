@@ -1188,7 +1188,6 @@
 	"shopping": {
 		"title": "Shopping",
 		"listAria": "Shopping list",
-		"clearChecked": "Clear all checked rows",
 		"removeLine": "Remove {line}",
 		"intro": "Shared list for the household. Everyone with edit access can update it.",
 		"addLabel": "Add",
@@ -1199,7 +1198,6 @@
 		"checkedHeading": "Checked off",
 		"showChecked": "Show checked ({count})",
 		"hideChecked": "Hide checked",
-		"clearCheckedAria": "Clear all checked rows",
 		"sunday": {
 			"heading": "This week's picks",
 			"subtitle": "Built from what you usually buy, what's running out, and what you've planned. Nothing is added until you choose.",
@@ -3369,13 +3367,6 @@
 			"description": "Row {name} will be removed from the shopping list.",
 			"undoNamed": "{name} removed from list",
 			"undo": "Row removed from list"
-		},
-		"clearChecked": {
-			"title": "Clear checked?",
-			"description": "{count} checked {count, plural, one {row will} other {rows will}} be permanently removed.",
-			"descriptionAll": "All checked rows will be permanently removed.",
-			"consequence": "This cannot be undone.",
-			"confirm": "Clear checked"
 		},
 		"inventoryItem": {
 			"title": "Delete item?",

@@ -1109,7 +1109,6 @@
 	"shopping": {
 		"title": "Inköp",
 		"listAria": "Inköpslista",
-		"clearChecked": "Rensa alla avbockade rader",
 		"removeLine": "Ta bort {line}",
 		"intro": "Gemensam lista för hushållet. Alla med redigeringsbehörighet kan uppdatera den.",
 		"addLabel": "Lägg till",
@@ -1120,7 +1119,6 @@
 		"checkedHeading": "Avbockade",
 		"showChecked": "Visa avbockade ({count})",
 		"hideChecked": "Dölj avbockade",
-		"clearCheckedAria": "Rensa alla avbockade rader",
 		"sunday": {
 			"heading": "Förslag till veckan",
 			"subtitle": "Byggt av det ni brukar handla, det som snart tar slut och det ni planerat. Inget läggs till förrän du väljer.",
@@ -3290,13 +3288,6 @@
 			"description": "Raden {name} tas bort från inköpslistan.",
 			"undoNamed": "{name} borttagen från listan",
 			"undo": "Rad borttagen från listan"
-		},
-		"clearChecked": {
-			"title": "Rensa avbockade?",
-			"description": "{count} avbockade {count, plural, one {rad tas} other {rader tas}} bort permanent.",
-			"descriptionAll": "Alla avbockade rader tas bort permanent.",
-			"consequence": "Detta går inte att ångra.",
-			"confirm": "Rensa avbockade"
 		},
 		"inventoryItem": {
 			"title": "Ta bort vara?",
