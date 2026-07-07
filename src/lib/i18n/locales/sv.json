@@ -1191,7 +1191,9 @@
 				"startShopCta": "Börja handla",
 				"startShopCtaAria": "Börja handla {count, plural, one {# vara} other {# varor}}",
 				"addItemCta": "Lägg till vara",
-				"viewAllAria": "Visa hela listan"
+				"viewAllAria": "Visa hela listan",
+				"addedBy": "Tillagd av {name}",
+				"you": "dig"
 			},
 			"add": {
 				"toggle": "Lägg till vara",

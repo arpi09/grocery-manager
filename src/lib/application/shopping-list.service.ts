@@ -42,20 +42,27 @@ export class ShoppingListService {
 		return this.repository.countCheckedByHousehold(householdId);
 	}
 
-	async addItem(householdId: string, role: HouseholdRole, input: CreateShoppingListItemInput) {
+	async addItem(
+		householdId: string,
+		role: HouseholdRole,
+		input: CreateShoppingListItemInput,
+		addedByUserId: string | null = null
+	) {
 		if (!canEditInventory(role)) throw new ShoppingListReadOnlyError();
 		return this.repository.create(
 			householdId,
 			generateId(),
 			input,
-			await this.repository.nextSortOrder(householdId)
+			await this.repository.nextSortOrder(householdId),
+			addedByUserId
 		);
 	}
 
 	async addSuggestedItems(
 		householdId: string,
 		role: HouseholdRole,
-		inputs: CreateShoppingListItemInput[]
+		inputs: CreateShoppingListItemInput[],
+		addedByUserId: string | null = null
 	): Promise<AddSuggestedItemsResult> {
 		if (!canEditInventory(role)) throw new ShoppingListReadOnlyError();
 
@@ -76,7 +83,8 @@ export class ShoppingListService {
 				householdId,
 				generateId(),
 				input,
-				await this.repository.nextSortOrder(householdId)
+				await this.repository.nextSortOrder(householdId),
+				addedByUserId
 			);
 			added++;
 		}

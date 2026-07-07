@@ -16,6 +16,22 @@ describe('Household shopping list', () => {
     expect((await service.listItems(DEFAULT_HOUSEHOLD_ID))).toHaveLength(1);
   });
 
+  it('persists the adding member (provenance) through the column', async () => {
+    await integrationDb.seedUser({ id: 'user-1' });
+    await integrationDb.seedHousehold({ id: DEFAULT_HOUSEHOLD_ID, members: [{ userId: 'user-1', role: 'owner' }] });
+    await service.addItem(DEFAULT_HOUSEHOLD_ID, 'owner', { name: 'Ost' }, 'user-1');
+    const items = await service.listItems(DEFAULT_HOUSEHOLD_ID);
+    expect(items[0]?.addedByUserId).toBe('user-1');
+  });
+
+  it('leaves provenance null when no member is passed', async () => {
+    await integrationDb.seedUser({ id: 'user-1' });
+    await integrationDb.seedHousehold({ id: DEFAULT_HOUSEHOLD_ID, members: [{ userId: 'user-1', role: 'owner' }] });
+    await service.addItem(DEFAULT_HOUSEHOLD_ID, 'owner', { name: 'Mjölk' });
+    const items = await service.listItems(DEFAULT_HOUSEHOLD_ID);
+    expect(items[0]?.addedByUserId).toBeNull();
+  });
+
   it('stores manual items with combined quantity strings', async () => {
     await integrationDb.seedUser({ id: 'user-1' });
     await integrationDb.seedHousehold({ id: DEFAULT_HOUSEHOLD_ID, members: [{ userId: 'user-1', role: 'owner' }] });

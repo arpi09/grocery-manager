@@ -201,7 +201,8 @@ export const actions: Actions = {
 					locals.householdRole!,
 					shoppingItems.map((item) =>
 						suggestionToListItem(item as Parameters<typeof suggestionToListItem>[0])
-					)
+					),
+					locals.user?.id ?? null
 				);
 				shoppingAdded = result.added;
 			}

@@ -4,8 +4,12 @@
 	import type { ShoppingListItem } from '$lib/domain/shopping-list-item';
 	import { t } from '$lib/i18n';
 
+	// Resolved member name is a view concern layered on the domain item by the
+	// page load; optional so the plain domain array stays assignable here.
+	type SummaryItem = ShoppingListItem & { addedByName?: string | null };
+
 	interface Props {
-		items: ShoppingListItem[];
+		items: SummaryItem[];
 		canEdit: boolean;
 		onStartShop: () => void;
 		onAddItem: () => void;
@@ -38,7 +42,14 @@
 			<ul class="item-rows">
 				{#each unchecked as item (item.id)}
 					<li class="item-row">
-						<span class="item-name">{item.name}</span>
+						<span class="item-main">
+							<span class="item-name">{item.name}</span>
+							{#if item.addedByName}
+								<span class="item-provenance"
+									>{t('shopping.v2.summary.addedBy', { name: item.addedByName })}</span
+								>
+							{/if}
+						</span>
 						{#if amountLabel(item)}
 							<span class="item-amount">{amountLabel(item)}</span>
 						{/if}
@@ -124,10 +135,24 @@
 		border-bottom: none;
 	}
 
+	.item-main {
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.1rem;
+	}
+
 	.item-name {
 		min-width: 0;
 		font-size: 0.9375rem;
 		font-weight: 600;
+		overflow-wrap: anywhere;
+	}
+
+	.item-provenance {
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--color-text-muted);
 		overflow-wrap: anywhere;
 	}
 

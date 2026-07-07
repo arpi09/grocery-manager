@@ -89,7 +89,8 @@ const SQL_MIGRATION_FILES = [
 	'0069_market_v04_pricing.sql',
 	'0070_brain_v2.sql',
 	'0071_brain_proactive_push.sql',
-	'0073_shopping_unavailable_at.sql'
+	'0073_shopping_unavailable_at.sql',
+	'0075_shopping_added_by.sql'
 ];
 const SQL_TRUNCATE_ALL = `
 TRUNCATE TABLE

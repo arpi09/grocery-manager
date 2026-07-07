@@ -30,6 +30,30 @@ describe('ShoppingListService', () => {
 		);
 	});
 
+	it('stamps the adding member on create (provenance)', async () => {
+		vi.mocked(repository.nextSortOrder).mockResolvedValue(3);
+		vi.mocked(repository.create).mockResolvedValue({} as never);
+
+		await service.addItem('h1', 'editor', { name: 'Ost' }, 'user-amanda');
+
+		expect(vi.mocked(repository.create)).toHaveBeenCalledWith(
+			'h1',
+			expect.any(String),
+			{ name: 'Ost' },
+			3,
+			'user-amanda'
+		);
+	});
+
+	it('defaults provenance to null when no user is passed', async () => {
+		vi.mocked(repository.nextSortOrder).mockResolvedValue(0);
+		vi.mocked(repository.create).mockResolvedValue({} as never);
+
+		await service.addItem('h1', 'editor', { name: 'Ost' });
+
+		expect(vi.mocked(repository.create).mock.calls[0][4]).toBeNull();
+	});
+
 	it('marks an available item as unavailable', async () => {
 		const base = {
 			id: '1',
@@ -39,6 +63,7 @@ describe('ShoppingListService', () => {
 			unit: null,
 			checked: false,
 			unavailableAt: null,
+			addedByUserId: null,
 			sortOrder: 0,
 			createdAt: new Date(),
 			updatedAt: new Date()
@@ -63,6 +88,7 @@ describe('ShoppingListService', () => {
 			unit: null,
 			checked: false,
 			unavailableAt: new Date('2026-07-04T10:00:00Z'),
+			addedByUserId: null,
 			sortOrder: 0,
 			createdAt: new Date(),
 			updatedAt: new Date()
@@ -108,6 +134,7 @@ describe('ShoppingListService', () => {
 				unit: null,
 				checked: false,
 				unavailableAt: null,
+				addedByUserId: null,
 				sortOrder: 0,
 				createdAt: new Date(),
 				updatedAt: new Date()
@@ -122,6 +149,7 @@ describe('ShoppingListService', () => {
 			unit: input.unit ?? null,
 			checked: false,
 			unavailableAt: null,
+			addedByUserId: null,
 			sortOrder,
 			createdAt: new Date(),
 			updatedAt: new Date()

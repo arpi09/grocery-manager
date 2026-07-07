@@ -61,7 +61,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const item = await locals.shoppingListService.addItem(
 		auth.householdId,
 		locals.householdRole!,
-		parsed.data
+		parsed.data,
+		auth.user.id
 	);
 
 	recordProductEvent(locals.pmfService, {

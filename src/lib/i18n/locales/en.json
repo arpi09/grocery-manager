@@ -1270,7 +1270,9 @@
 				"startShopCta": "Start shopping",
 				"startShopCtaAria": "Start shopping {count, plural, one {# item} other {# items}}",
 				"addItemCta": "Add item",
-				"viewAllAria": "View full list"
+				"viewAllAria": "View full list",
+				"addedBy": "Added by {name}",
+				"you": "you"
 			},
 			"add": {
 				"toggle": "Add item",

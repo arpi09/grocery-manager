@@ -13,7 +13,7 @@ export interface TripProgress {
 	percent: number;
 }
 
-export function sortUncheckedItems(items: ShoppingListItem[]): ShoppingListItem[] {
+export function sortUncheckedItems<T extends ShoppingListItem>(items: T[]): T[] {
 	return items
 		.filter((item) => !item.checked)
 		.sort(
