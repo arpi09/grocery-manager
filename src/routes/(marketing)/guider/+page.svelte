@@ -3,19 +3,20 @@
 	import MarketingPageHero from '$lib/components/marketing/MarketingPageHero.svelte';
 	import MarketingScrollReveal from '$lib/components/marketing/MarketingScrollReveal.svelte';
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
-	import { buildMarketingWebPageJsonLd } from '$lib/seo/seo';
+	import { buildBreadcrumbJsonLd, buildMarketingWebPageJsonLd } from '$lib/seo/seo';
 
 	let { data } = $props();
 
 	const { marketing: content, guides, canonicalUrl, marketingLocale } = data;
 	const page = content.guidesHub;
 	const siteOrigin = new URL(canonicalUrl).origin;
-	const jsonLd = buildMarketingWebPageJsonLd(
-		siteOrigin,
-		'/guider',
-		page.meta.ogTitle,
-		page.meta.description
-	);
+	const jsonLd = [
+		buildMarketingWebPageJsonLd(siteOrigin, '/guider', page.meta.ogTitle, page.meta.description),
+		buildBreadcrumbJsonLd(siteOrigin, [
+			{ name: content.siteName, path: '/' },
+			{ name: page.title, path: '/guider' }
+		])
+	];
 
 	function formatDate(isoDate: string): string {
 		const [year, month, day] = isoDate.split('-').map(Number);

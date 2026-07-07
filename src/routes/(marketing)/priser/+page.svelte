@@ -7,7 +7,7 @@
 	import { PRICE_HYPOTHESIS_SEK } from '$lib/domain/plan';
 	import { getPricingContent } from '$lib/marketing/pricing-content';
 	import type { MarketingLocale } from '$lib/marketing/content';
-	import { buildPricingJsonLd } from '$lib/seo/seo';
+	import { buildBreadcrumbJsonLd, buildPricingJsonLd } from '$lib/seo/seo';
 
 	let { data } = $props();
 
@@ -18,15 +18,19 @@
 	const upgradeUrl = '/settings#plan-upgrade';
 	const registerCtaUrl = $derived(pricing.checkoutEnabled ? upgradeUrl : registerUrl);
 	const siteOrigin = new URL(canonicalUrl).origin;
-	const jsonLd = $derived(
-		buildPricingJsonLd(siteOrigin, {
+	const jsonLd = $derived([
+		...buildPricingJsonLd(siteOrigin, {
 			freeDescription: pricing.meta.description,
 			proDescription: pricing.proBullets.join(' '),
 			proMonthlyPrice: PRICE_HYPOTHESIS_SEK.monthly,
 			proYearlyPrice: PRICE_HYPOTHESIS_SEK.yearly,
 			proCheckoutEnabled: pricing.checkoutEnabled
-		})
-	);
+		}),
+		buildBreadcrumbJsonLd(siteOrigin, [
+			{ name: content.siteName, path: '/' },
+			{ name: pricing.title, path: '/priser' }
+		])
+	]);
 </script>
 
 <MarketingSeoHead

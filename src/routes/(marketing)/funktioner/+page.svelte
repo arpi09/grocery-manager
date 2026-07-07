@@ -7,18 +7,24 @@
 	import MarketingPageHero from '$lib/components/marketing/MarketingPageHero.svelte';
 	import MarketingScrollReveal from '$lib/components/marketing/MarketingScrollReveal.svelte';
 	import MarketingSeoHead from '$lib/components/seo/MarketingSeoHead.svelte';
-	import { buildMarketingWebPageJsonLd } from '$lib/seo/seo';
+	import { buildBreadcrumbJsonLd, buildMarketingWebPageJsonLd } from '$lib/seo/seo';
 
 	let { data } = $props();
 
 	const { marketing: content, loginUrl, registerUrl, canonicalUrl, marketingLocale } = data;
 	const siteOrigin = new URL(canonicalUrl).origin;
-	const jsonLd = buildMarketingWebPageJsonLd(
-		siteOrigin,
-		'/funktioner',
-		content.features.meta.ogTitle,
-		content.features.meta.description
-	);
+	const jsonLd = [
+		buildMarketingWebPageJsonLd(
+			siteOrigin,
+			'/funktioner',
+			content.features.meta.ogTitle,
+			content.features.meta.description
+		),
+		buildBreadcrumbJsonLd(siteOrigin, [
+			{ name: content.siteName, path: '/' },
+			{ name: content.features.title, path: '/funktioner' }
+		])
+	];
 </script>
 
 <MarketingSeoHead
