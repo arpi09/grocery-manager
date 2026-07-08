@@ -4,9 +4,9 @@
 
 | F?lt | V?rde |
 |------|--------|
-| **Uppdaterad** | 2026-07-07 |
-| **Prod SHA** | `d74fc01e6` @ [28854580035](https://github.com/arpi09/grocery-manager/actions/runs/28854580035) (live, release 2026.7.7, deploy_tier=auto→fast, e2e critical grön — home-v2 replenishment-flaken passerade på retry; curl-smoke /, /guider, /login = 200, /inkop = 302→login, guide-sida ren). **Batch:** #244 guide-datum/breadcrumb/hreflang + #248 butiks-kvittosidor + #250 onboarding v8.1 delight + #251 member-proveniens (migration **0075** auto-applicerad) + #252 login-konverteringspass + #254 SERP-polish. Non-blocking: `smoke-prod-auth` creds-flake igen (app svarade korrekt 400, jfr #228-deployen). |
-| **Master SHA** | `ecc56a2ad` (changelog efter #254) — i synk med prod: allt t.o.m. `d74fc01e6` deployat. |
+| **Uppdaterad** | 2026-07-08 |
+| **Prod SHA** | `b2bca83b6` @ [28922015598](https://github.com/arpi09/grocery-manager/actions/runs/28922015598) (live, release 2026.7.8, deploy_tier=auto→full, e2e 3/3 grön; curl-smoke /, /guider, /login = 200, /inkop = 302→login; browser-smoke / + guide-sida utan konsolfel). **Batch: Skaffu 2.0 Våg 1 — trust-kontraktet** (#255 per-rad Ta bort+Ångra på listan, #257 död clearChecked-kedja raderad, #258 gäst-checkoff-kvitto på /lista/[token], #259 datafärskhetsrad på hyllan, #260 konsumtions-Ångra + ett verb "Använd" + trust-gate i UX_GUIDELINES + loop-funnel-telemetri + **portal-fix**: `portal={false}` var tyst no-op i hela undo-toast-mönstret). Ingen migration. |
+| **Master SHA** | `c1f640f47` (releases-docs efter 2026.7.8) — i synk med prod: allt t.o.m. `b2bca83b6` deployat. |
 | **CI/CD model** | **v2 on master** � tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
@@ -26,7 +26,7 @@ Utg?ende ? `/inkop` (delad lista) ? handla ihop ? checkoff ? skafferi ? replenis
 | Hem dashboard | `/hem` | **Home UX v2 briefing** (flag retired — always on) |
 | Settings | `/settings` | **iOS hub** ? grouped rows + drill-down (`/settings/account`, `/notifications`, `/household`, `/plan`, `/app`, `/feedback`, `/suggestions`) ([#100](https://github.com/arpi09/grocery-manager/pull/100)) |
 | Primary tabs (desktop) | Hem, Lager, Ink?p, Skanna, Mer | Lager + scan in top row |
-| Primary tabs (mobile) | Hem, Ink?p, Skanna, Mer | Lager in Mer sheet (stale badge); scan in bottom bar |
+| Primary tabs (mobile) | Hem, Lager, Ink?p, Skanna, Mer | 5 tabbar sedan #214 — Lager egen tab med stale badge (`nav-config.ts`) |
 | Inventory add | `/inventory/[location]` | EN **L�gg till** ? sheet (kvitto/foto/streckkod/manuellt) |
 | Skafferi (Pantry V2) | `/inventory` | Shelf view (zones + use-soon, flag retired — always on); unified data grid at `/inventory/[location]` |
 | Scan hub | `/scan` | 3-card choice hub; **ScanModeTabs desktop only** |
@@ -74,6 +74,7 @@ Deferred (not V1): LLM predictor tier; household favorites (migration `0049`).
 ## K?nda drift (fixa n?r du ser dem)
 
 - [x] **Batch: SEO/SERP + onboarding delight + member-proveniens + login-pass** — prod **`d74fc01e6`** @ [28854580035](https://github.com/arpi09/grocery-manager/actions/runs/28854580035) (release 2026.7.7, deploy_tier=auto→fast, e2e critical grön; home-v2 replenishment-flaken grön på retry — samma test fällde gårdagens deploy-försök [28805948077](https://github.com/arpi09/grocery-manager/actions/runs/28805948077), stabiliseringstask fortsatt öppen). Merged/deployad 2026-07-07; curl-smoke grön. #244+#254: brand-SERP-fix — inga synliga datum på `/`, kvadratisk Organization-logga (`/pwa/icon-512.png`), breadcrumbs på alla marknadssidor, WebSite `alternateName`; **USER_LOCAL kvar: GSC → URL-inspektion på skaffu.com → Begär indexering** (gamla snippeten från ~19 juni byts först efter omcrawl). #251: migration 0075 (`added_by_user_id`) auto-applicerad. Non-blocking flake: `smoke-prod-auth` prod-test-creds (400 = korrekt appbeteende, jfr #228).
+- [x] **Skaffu 2.0 Våg 1: trust-kontraktet** — prod **`b2bca83b6`** @ [28922015598](https://github.com/arpi09/grocery-manager/actions/runs/28922015598) (release 2026.7.8, auto→full, e2e 3/3). Merged+deployad 2026-07-07/08. #255: per-rad Ta bort med Ångra-kvitto (clearList-mönstret). #257: död clearChecked-kedja raderad i fem lager. #258: gäst-checkoff-kvitto (proveniens medvetet struken — publika GDPR-noten lovar "inga hushållsnamn"; ägarbeslut öppet). #259: färskhetsrad "Senast uppdaterat …" + synk-länk på /inventory (hem-delen → våg 5.3; hem-pulsens freshness-presenter är död kod). #260: ett verb "Använd" överallt + konsumtions-Ångra (8s, alla grid-vägar via InventoryConsumeSheet) + "Data trust (LOCKED)"-gate i UX_GUIDELINES + loop-funnel-event (`shopping_first_item_added`, `shopping_loop_closed`) + **portal-fix** (`portal={false}` var tyst no-op — StalenessBatchReviews undo-toast visade aldrig kvittotexten). Deploy-lärdomar: e2e-flake på 5/5 PR (rerun-playbook höll; stabiliseringstask spawnad), pmf.ts+schema.ts dubbellista fällde quality-fast (enkälla → våg 2/6). Masterplan: `~/.claude/plans/vi-beh-ver-g-ra-en-shimmying-snowglobe.md`.
 - [x] Prod DB migrations `0047`?`0048` ? applied 2026-06-14
 - [x] **UI living polish** ? prod **`72b02f49b`** @ [27611180553](https://github.com/arpi09/grocery-manager/actions/runs/27611180553) (fast E2E). PR #101 merged 2026-06-16.
 - [x] **Prod feature flags + hem redesign** � prod **`92d4915`** @ [27701442233](https://github.com/arpi09/grocery-manager/actions/runs/27701442233) (full E2E). PR #113 merged 2026-06-17.
