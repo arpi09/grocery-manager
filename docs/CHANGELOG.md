@@ -143,6 +143,7 @@ Prod deploy @ `a9ddaabca` — Fas A.
 - docs(reality): master framför prod — odeployad batch #248/#250/#251 ([#253](https://github.com/arpi09/grocery-manager/pull/253)) — [x] docs-only (quality-docs path, ingen e2e)
 - docs(reality): prod SHA d74fc01e6 — 2026.7.7-batchen live ([#256](https://github.com/arpi09/grocery-manager/pull/256)) — CURRENT_REALITY: prod SHA `d74fc01e6` @ [28854580035](https://github.com/arpi09/grocery-manager/actions/runs/28854580035), release 2026.7.7 — batch #244/#248/#250/#251/#252/#254 live.
 - refactor(inkop): radera död clearChecked-kedja i fem lager ([#257](https://github.com/arpi09/grocery-manager/pull/257)) — `grep -rn "clearChecked|deleteChecked|shoppingListClearChecked"` över src+e2e = **0 träffar**
+- docs(reality): prod SHA b2bca83b6 — Skaffu 2.0 Våg 1 live (2026.7.8) ([#261](https://github.com/arpi09/grocery-manager/pull/261)) — **Prod SHA** `b2bca83b6` @ [run 28922015598](https://github.com/arpi09/grocery-manager/actions/runs/28922015598), release **2026.7.8**, tier auto→full, e2e 3/3 grön
 
 ### Added
 
