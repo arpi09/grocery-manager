@@ -75,30 +75,31 @@
 	<details class="settings-disclosure">
 		<summary class="settings-disclosure-summary">{t('settings.more.summary')}</summary>
 		<div class="settings-disclosure-body">
-			<SettingsRow title={t('settings.pets.title')} note={t('settings.pets.note')} last={false}>
-				<form
-					method="POST"
-					action="?/togglePets"
-					use:enhance={bindSubmitting((v) => (petsToggleSubmitting = v))}
-				>
-					<input type="hidden" name="enabled" value={petsEnabled ? 'false' : 'true'} />
-					<Button
-						type="submit"
-						variant={petsEnabled ? 'ghost' : 'primary'}
-						loading={petsToggleSubmitting}
-						loadingLabel={t('common.saving')}
+			<!-- Våg 2 rivning: husdjursmodulen dold ur settings. Enable-vägen borttagen så
+			     inga nya konton kan aktivera pets; befintliga pets-konton behåller hela
+			     hanteringen (göm först, radera sen — inga tysta sidoeffekter/strandad data). -->
+			{#if petsEnabled}
+				<SettingsRow title={t('settings.pets.title')} note={t('settings.pets.note')} last={false}>
+					<form
+						method="POST"
+						action="?/togglePets"
+						use:enhance={bindSubmitting((v) => (petsToggleSubmitting = v))}
 					>
-						{petsEnabled ? t('settings.pets.disable') : t('settings.pets.enable')}
-					</Button>
-				</form>
-				{#if petsEnabled}
+						<input type="hidden" name="enabled" value="false" />
+						<Button
+							type="submit"
+							variant="ghost"
+							loading={petsToggleSubmitting}
+							loadingLabel={t('common.saving')}
+						>
+							{t('settings.pets.disable')}
+						</Button>
+					</form>
 					<button type="button" class="text-action" onclick={() => (petModalOpen = true)}>
 						{t('settings.pets.add')}
 					</button>
-				{/if}
-			</SettingsRow>
+				</SettingsRow>
 
-			{#if petsEnabled}
 				<div class="pet-panel">
 					<h3 class="pet-heading">{t('settings.pets.heading')}</h3>
 					{#if pets.length === 0}
