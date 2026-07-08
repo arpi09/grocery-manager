@@ -55,6 +55,7 @@ CalVer GitHub Releases (`YYYY.M.D`) are created **after successful deploy**, not
 - feat(inventory): ärlig datafärskhetsrad på skafferihyllan ([#259](https://github.com/arpi09/grocery-manager/pull/259)) — `inventory.service.getPantryFreshness` — slimmad snapshot (countStaleUndated + getLastInventoryUpdate), samma missing-column-degradering som getDashboard
 - feat: Våg 1 komplett — konsumtions-Ångra, trust-gate, loop-funnel + portal-fix ([#260](https://github.com/arpi09/grocery-manager/pull/260)) — `quick:dev` grönt efter varje commit (1610 unit); locale-paritet verifierad
 - feat(nav): Våg 2 rivning — smalare nav + göm husdjur/grannskafferiet ([#262](https://github.com/arpi09/grocery-manager/pull/262)) — **2.1 (nav-del):** `statistik` + `nyheter` bort ur `NAV_ITEMS`; `/nyheter` + `/news` → 302 `/hem` (kopplingsfria routes, ingen e2e).
+- feat(settings): Våg 2 2.7 — content-gate memory/suggestions-sektionen ([#263](https://github.com/arpi09/grocery-manager/pull/263)) — Hub-raderna (`SettingsHub`) döljs vid tomt.
 
 ### Fixed
 - fix(hem): remove brain and waste cards above greeting ([#126](https://github.com/arpi09/grocery-manager/pull/126)) — Remove BrainHomeCard and WastePreventedCard from HomeV2 above the briefing greeting on `/hem`.
