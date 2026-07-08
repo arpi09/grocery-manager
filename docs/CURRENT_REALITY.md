@@ -5,8 +5,8 @@
 | F?lt | V?rde |
 |------|--------|
 | **Uppdaterad** | 2026-07-08 |
-| **Prod SHA** | `b2bca83b6` @ [28922015598](https://github.com/arpi09/grocery-manager/actions/runs/28922015598) (live, release 2026.7.8, deploy_tier=auto→full, e2e 3/3 grön; curl-smoke /, /guider, /login = 200, /inkop = 302→login; browser-smoke / + guide-sida utan konsolfel). **Batch: Skaffu 2.0 Våg 1 — trust-kontraktet** (#255 per-rad Ta bort+Ångra på listan, #257 död clearChecked-kedja raderad, #258 gäst-checkoff-kvitto på /lista/[token], #259 datafärskhetsrad på hyllan, #260 konsumtions-Ångra + ett verb "Använd" + trust-gate i UX_GUIDELINES + loop-funnel-telemetri + **portal-fix**: `portal={false}` var tyst no-op i hela undo-toast-mönstret). Ingen migration. |
-| **Master SHA** | `c1f640f47` (releases-docs efter 2026.7.8) — i synk med prod: allt t.o.m. `b2bca83b6` deployat. |
+| **Prod SHA** | `5a2f60319` @ [28942158138](https://github.com/arpi09/grocery-manager/actions/runs/28942158138) (live, release 2026.7.8.2, deploy_tier=auto→fast, e2e critical grön; curl-smoke /, /guider, /login = 200, /nyheter+/news+/statistik+/inkop = 302→login; 0 error-strängar på / + /guider). **Batch: Skaffu 2.0 Våg 2 (rivning)** — #262 nav-rivning (statistik/nyheter/grannskafferiet/husdjur ur nav; /nyheter+/news → 302 /hem; grannskafferiets nav-kodväg + special-case + oanvänd flag-import bort; pets gömd i settings bakom petsEnabled) + #263 settings-städ (content-gate memory/suggestions — tomma "Vad Skaffu vet"-paneler dolda tills verkligt innehåll). Ingen migration. |
+| **Master SHA** | `24d4a845c` (changelog efter #263) — i synk med prod: allt t.o.m. `5a2f60319` deployat. |
 | **CI/CD model** | **v2 on master** � tiered gates #95; prod validated @ `0b999e153` (full deploy tier, Pantry V2 canary) |
 | **Integration SHA** | `integrate/seed-and-share` @ `bd67d070` ? merged to master |
 | **Prod URL** | https://skaffu.com |
