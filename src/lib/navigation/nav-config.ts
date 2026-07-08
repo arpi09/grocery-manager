@@ -1,7 +1,6 @@
 import type { MessageKey } from '$lib/i18n/messages';
 
 import { scanHubHref } from '$lib/utils/scan-nav';
-import { isPublicCityFeedEnabled } from '$lib/utils/public-city-feed-flag';
 import { APP_HOME_PATH, HEM_PATH, INKOP_PATH } from './app-home';
 
 import { showMarketV01InNav, MARKET_V01_PATH } from '$lib/domain/market-v01';
@@ -131,15 +130,6 @@ export const NAV_ITEMS: NavItem[] = [
 		match: 'prefix'
 	},
 	{ href: '/planer', labelKey: 'nav.eat', icon: 'sparkle', match: 'prefix' },
-	{ href: '/statistik', labelKey: 'nav.stats', icon: 'chart', match: 'prefix' },
-	{ href: '/nyheter', labelKey: 'nav.news', icon: 'news', match: 'prefix' },
-	{
-		href: '/grannskafferiet',
-		labelKey: 'nav.grannskafferiet',
-		icon: 'mapPin',
-		match: 'prefix'
-	},
-	{ href: '/husdjur', labelKey: 'nav.pets', icon: 'paw', requiresPets: true, match: 'prefix' },
 	{ href: '/admin', labelKey: 'nav.admin', icon: 'shield', roles: ['admin'], match: 'prefix' }
 ];
 
@@ -176,10 +166,6 @@ export function isNavItemVisible(item: NavItem, user: NavUser | null | undefined
 	}
 
 	if (item.requiresPets && !user?.petsEnabled) {
-		return false;
-	}
-
-	if (item.href === '/grannskafferiet' && !isPublicCityFeedEnabled()) {
 		return false;
 	}
 
