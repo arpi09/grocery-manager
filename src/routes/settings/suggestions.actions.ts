@@ -58,5 +58,8 @@ export function shouldShowSuggestionsSection(
 	snapshot: { hasRules: boolean },
 	learningEnabled = isShelfLifeLearningEnabled()
 ): boolean {
-	return learningEnabled || snapshot.hasRules;
+	// Våg 2 settings-städ: visa memory/suggestions-ytorna först när de har
+	// verkligt innehåll — med learning-flaggan på (prod) räckte den ensam
+	// för att visa tomma "Vad Skaffu vet"-paneler för nya hushåll.
+	return learningEnabled && snapshot.hasRules;
 }
