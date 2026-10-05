@@ -107,7 +107,7 @@
 		"@smui/data-table": "^9.0.2",
 		"@smui/list": "^9.0.1",
 		"@sveltejs/adapter-node": "5.5.7",
-		"@sveltejs/kit": "^2.70.3",
+		"@sveltejs/kit": "^3.0.0",
 		"@sveltejs/vite-plugin-svelte": "^7.3.1",
 		"@types/node": "^26.6.2",
 		"@types/pdf-parse": "^1.1.5",
