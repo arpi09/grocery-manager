@@ -157,7 +157,7 @@
 		"maplibre-gl": "^5.24.0",
 		"marked": "^18.1.2",
 		"pdf-parse": "^2.4.5",
-		"postgres": "^3.4.5",
+		"postgres": "^4.1.0",
 		"resend": "^6.35.0",
 		"stripe": "^22.6.2",
 		"web-push": "^3.6.7",
